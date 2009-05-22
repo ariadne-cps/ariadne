@@ -117,6 +117,7 @@ class ExpressionPyWrap
     virtual TaylorModel evaluate(const Vector<TaylorModel>&) const { return this->get_override("evaluate")(); }
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >&) const { return this->get_override("evaluate")(); }
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >&) const { return this->get_override("evaluate")(); }
+    virtual ExpressionInterface* derivative(uint j) const { return this->get_override("derivative")(); }
     virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -190,6 +191,8 @@ class PythonExpression
         Differential<Interval> r;
         read(r,this->_pyf(x));
         return r; }
+    virtual PythonExpression* derivative (uint j) const {
+        ARIADNE_ASSERT_MSG(false,"Cannot differentiate a Python function"); return 0; }
     virtual std::ostream& write(std::ostream& os) const {
         os << "UserExpression( ";
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }

@@ -650,6 +650,12 @@ antiderivative(const TaylorFunction& f, uint k)
     return g;
 }
 
+TaylorExpression
+implicit(const ExpressionInterface& f, const TaylorFunction& g)
+{
+    return TaylorExpression(g.domain(),implicit(f,g.models()));
+}
+
 TaylorFunction
 implicit(const TaylorFunction& f)
 {
@@ -659,6 +665,17 @@ implicit(const TaylorFunction& f)
     Vector<Interval> hdom=project(f.domain(),range(0,has));
     Vector<Interval> hcodom=project(f.domain(),range(has,fas));
     return TaylorFunction(hdom,scale(implicit(f.models()),hcodom));
+}
+
+TaylorFunction
+flow(const FunctionInterface& vf, const Vector<Interval>& d, const Float& h, const uint o)
+{
+    TaylorFunction phi0=embed(TaylorFunction::identity(d),Vector<Interval>(1u,Interval(-h,+h)));
+    TaylorFunction phi=phi0;
+
+    for(uint i=0; i!=10; ++i) {
+        phi=antiderivative(compose(vf,phi),vf.result_size());
+    }
 }
 
 TaylorFunction

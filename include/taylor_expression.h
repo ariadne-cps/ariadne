@@ -45,6 +45,7 @@ template<class X> class Expansion;
 template<class X> class Polynomial;
 class TaylorModel;
 class TaylorExpression;
+class TaylorFunction;
 class ExpressionInterface;
 
 // Remove the error term
@@ -63,6 +64,9 @@ TaylorExpression intersection(const TaylorExpression& x1, const TaylorExpression
 // Evaluate an array of Taylor variables on a vector.
 Interval evaluate(const TaylorExpression& x, const Vector<Interval>& sy);
 
+// Compose with an expression.
+TaylorExpression compose(const ExpressionInterface& x, const Vector<TaylorExpression>& y);
+
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<TaylorExpression,TaylorExpression> split(const TaylorExpression& x, uint j);
 
@@ -75,10 +79,14 @@ TaylorExpression embed(const Vector<Interval>& d1, const TaylorExpression& tv2);
 TaylorExpression antiderivative(const TaylorExpression& x, uint k);
 TaylorExpression derivative(const TaylorExpression& x, uint k);
 
-// Implicit function solver
+// Implicit function solver; solves f(x,h(x))=0 on dom1(f)
 TaylorExpression implicit(const TaylorExpression& f);
+// Implicit function solver solves f(g(x),h(x))=0 on dom(g)
+TaylorExpression implicit(const ExpressionInterface& f, const TaylorFunction& g);
+// Implicit function solver solves f(x,h(x))=0 on d
+TaylorExpression implicit(const ExpressionInterface& f, const Vector<Interval>& d);
 
-
+TaylorExpression crossing_time(const ExpressionInterface& g, const FunctionInterface& f, const Vector<Interval>& d);
 
 
 /*! \brief A class representing a quantity depending on other quantities.

@@ -417,7 +417,7 @@ int main(int argc, const char* argv[])
     if(argc>=1) { evolver_verbosity=atoi(argv[0]); }
 
     //std::cerr<<"SKIPPED "; return 1;
-    TestHybridEvolution().test();
+    //TestHybridEvolution().test();
     TestHybridEvolver().test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;

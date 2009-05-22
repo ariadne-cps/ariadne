@@ -233,6 +233,8 @@ template<class T> class UserExpression
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
         Differential<Interval> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,_p); return r; }
 
+    virtual UserExpression<T>* derivative(uint j) { ARIADNE_ASSERT(false); }
+
     virtual Matrix<Float> gradient(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
@@ -261,6 +263,7 @@ class ConstantExpression
     virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const { return x[0]*0+_c; }
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return x[0]*0+midpoint(_c); }
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return x[0]*0+midpoint(_c); }
+    virtual ConstantExpression* derivative(uint j) const { return new ConstantExpression(_as,0.0); }
     virtual Vector<Float> gradient() const { return Vector<Float>::zero(_as); }
     virtual std::ostream& write(std::ostream& os) const {
         if(_c.lower()==_c.upper()) { os<<midpoint(_c); } else { os<<_c; } return os; }
@@ -284,6 +287,7 @@ class ProjectionExpression
     virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const { return x[_j]; }
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return x[_j]; }
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return x[_j]; }
+    virtual ConstantExpression* derivative(uint j) const { return new ConstantExpression(_as,0.0); }
     virtual Vector<Float> gradient() const { return Vector<Float>::unit(_as,_j); }
     virtual std::ostream& write(std::ostream& os) const { return os << "x["<<_j<<"]"; }
   private:
@@ -330,6 +334,7 @@ class AffineExpression
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
         Differential<Interval> r=x[0]*0+_c; for(uint j=0; j!=_g.size(); ++j) { r+=_g[j]*x[j]; } return r; };
 
+    virtual ConstantExpression* derivative(uint j) const { return new ConstantExpression(_g.size(),_g[j]); }
     virtual Vector<Interval> gradient() const { return this->_g; }
 
     virtual std::ostream& write(std::ostream& os) const { return os<<"AffineExpression( a="<<this->_g<<", b="<<this->_c<<" )"; }
@@ -388,9 +393,12 @@ class PolynomialExpression
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
         return Ariadne::evaluate(static_cast<const Polynomial<Interval>&>(*this),x); }
 
+    virtual PolynomialExpression* derivative(uint j) const {
+        return new PolynomialExpression(Ariadne::derivative(*this,j)); }
+
     virtual Vector<PolynomialExpression> gradient() const {
         Vector<PolynomialExpression> g(this->argument_size());
-        for(uint i=0; i!=g.size(); ++i) { g[i]=derivative(*this,i); }
+        for(uint i=0; i!=g.size(); ++i) { g[i]=Ariadne::derivative(*this,i); }
         return g; }
 
     virtual std::ostream& write(std::ostream& os) const { return os << static_cast<Polynomial<Interval>const&>(*this); }
@@ -675,6 +683,7 @@ class FunctionElement
     virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
         return this->_evaluate(x); }
 
+    virtual FunctionElement* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual std::ostream& write(std::ostream& os) const { ARIADNE_NOT_IMPLEMENTED; }
   private:
     template<class Y> inline Y _evaluate(const Vector<Y>& x) const {

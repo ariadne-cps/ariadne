@@ -369,8 +369,7 @@ void export_taylor_variable()
     def("embed",(TE(*)(const TE&,const Interval&)) &embed);
     def("embed",(TE(*)(const TE&,const IV&)) &embed);
     def("embed",(TE(*)(const IV&,const TE&)) &embed);
-    //def("/*compose*/",(TE(*)(const TE&,const TE&)) &compose);
-    //def("compose",(T(*)(const T&,const TE&)) &compose);
+
 
     def("max",(TE(*)(const TE&,const TE&))&max);
     def("min",(TE(*)(const TE&,const TE&))&min);
@@ -501,11 +500,13 @@ void export_taylor_function()
     def("compose",(TF(*)(const TF&,const TF&)) &compose);
     def("compose",(TE(*)(const E&,const TF&)) &compose);
     def("compose",(TF(*)(const F&,const TF&)) &compose);
+    def("implicit",(TE(*)(const E&,const IV&)) &implicit);
     def("implicit",(TE(*)(const TE&)) &implicit);
     def("implicit",(TF(*)(const TF&)) &implicit);
     def("antiderivative",(TF(*)(const TF&,N)) &antiderivative);
     def("flow",(TF(*)(const TF&,const IV&,const I&, N)) &flow);
     def("flow",(TF(*)(const TF&,const IV&,const R&, N)) &flow);
+    def("flow",(TF(*)(const F&,const IV&,const R&, N)) &flow);
 
     def("unchecked_compose",(TE(*)(const TE&,const TF&)) &unchecked_compose);
     def("unchecked_compose",(TF(*)(const TF&,const TF&)) &unchecked_compose);

@@ -34,6 +34,7 @@
 #include "differential.h"
 #include "taylor_model.h"
 #include "taylor_series.h"
+#include "expression_interface.h"
 #include "exceptions.h"
 
 namespace Ariadne {
@@ -3208,6 +3209,46 @@ implicit(const Vector<TaylorModel>& f)
         ARIADNE_ASSERT(h[0].argument_size()+f.size()==f[i].argument_size());
     }
 
+    return h;
+}
+
+
+
+
+TaylorModel
+implicit(const ExpressionInterface& f, const Vector<TaylorModel>& g)
+{
+
+    // Check that the arguments are suitable
+    ARIADNE_ASSERT(f.argument_size()==g.size()+1u);
+    ARIADNE_ASSERT(g.size()>=1);
+    for(uint i=1; i!=g.size(); ++i) {
+        ARIADNE_ASSERT(g[i].argument_size()==g[0].argument_size());
+    }
+
+    // Set some useful size constants
+    const uint rs=1u;
+    const uint fas=f.argument_size();
+    const uint gas=g[0].argument_size();
+    const uint grs=g.size();
+
+    shared_ptr<const ExpressionInterface> df_ptr(f.derivative(gas));
+    const ExpressionInterface& df=*df_ptr;
+
+    TaylorModel h0(gas);
+    Vector<TaylorModel> jgh=join(g,h0);
+    TaylorModel& h=jgh[grs];
+
+    // Perform proper Newton step improvements
+    for(uint i=0; i!=3; ++i) {
+        TaylorModel dfjgh=df.evaluate(jgh);
+        h.set_error(0.0);
+        TaylorModel fjgh=f.evaluate(jgh);
+
+        TaylorModel rdfjgh=rec(dfjgh);
+        TaylorModel dh=rdfjgh*fjgh;
+        h-=dh;
+    }
     return h;
 }
 

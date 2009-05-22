@@ -30,6 +30,7 @@
 #include <iosfwd>
 #include <iostream>
 #include "numeric.h"
+#include "pointer.h"
 
 namespace Ariadne {
 
@@ -69,6 +70,7 @@ class ExpressionInterface {
     //! \brief Evaluate the expression over a vector of interval differentials.
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
 
+    virtual ExpressionInterface* derivative(uint j) const = 0;
 /*
     //! \brief Compute an approximation to the gradient covector \f$(Df)_{j}=\partial f/\partial x_j\f$ of the expression at the point \a x.
     virtual Vector<Float> gradient(const Vector<Float>& x) const = 0;

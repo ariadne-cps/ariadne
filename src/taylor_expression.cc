@@ -34,6 +34,7 @@
 #include "differential.h"
 #include "taylor_model.h"
 #include "taylor_expression.h"
+#include "taylor_function.h"
 #include "expression_interface.h"
 #include "exceptions.h"
 
@@ -321,6 +322,22 @@ midpoint(const TaylorExpression& f)
 }
 
 
+TaylorExpression
+compose(const ExpressionInterface& f, const Vector<TaylorExpression>& g)
+{
+    ARIADNE_ASSERT(f.argument_size()==g.size());
+    for(uint i=0; i!=g.size(); ++i) {
+        ARIADNE_ASSERT(g[0].domain()==g[i].domain());
+    }
+
+    Vector<Interval> gdomain=g[0].domain();
+    Vector<TaylorModel> gmodels(g.size());
+    for(uint i=0; i!=g.size(); ++i) { gmodels[i]=g[i].model(); }
+
+    return TaylorExpression(gdomain,f.evaluate(gmodels));
+}
+
+
 Vector<TaylorExpression>
 implicit(const Vector<TaylorExpression>& f)
 {
@@ -373,6 +390,47 @@ TaylorExpression implicit(const TaylorExpression& f) {
     return TaylorExpression(h_domain,hrs_model);
 }
 
+
+TaylorExpression
+implicit(const ExpressionInterface& f, const Vector<TaylorExpression>& g)
+{
+    ARIADNE_ASSERT(f.argument_size()>g.size());
+    ARIADNE_ASSERT(g.size()>0);
+    for(uint i=1; i!=g.size(); ++i) {
+        ARIADNE_ASSERT(g[i].domain()==g[0].domain());
+    }
+
+    Vector<Interval> domain=g[0].domain();
+    Vector<TaylorModel> models(g.size());
+    for(uint i=0; i!=g.size(); ++i) {
+        models[i]=g[i].model();
+    }
+
+    return TaylorExpression(domain,implicit(f,models));
+}
+
+TaylorExpression
+implicit(const ExpressionInterface& f, const Vector<Interval>& d)
+{
+    ARIADNE_ASSERT(f.argument_size()>=1u);
+    ARIADNE_ASSERT(d.size()+1u==f.argument_size());
+
+    Vector<TaylorExpression> id=TaylorExpression::variables(d);
+    //for(uint i=0; i!=d.size(); ++i) { id[i].model().set_accuracy(a); }
+    return implicit(f,id);
+}
+
+
+TaylorExpression
+crossing_time(const ExpressionInterface& g, const TaylorFunction& phi)
+{
+    Vector<Interval> d=project(phi.domain(),range(0,phi.result_size()));
+    Interval h=phi.domain()[phi.result_size()];
+
+    TaylorExpression gphi(phi.domain(),g.evaluate(phi.models()));
+
+    return implicit(gphi);
+}
 
 
 std::ostream&

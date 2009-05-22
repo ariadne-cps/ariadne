@@ -60,8 +60,10 @@ TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction compose(const FunctionInterface&, const TaylorFunction&);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
 TaylorFunction implicit(const TaylorFunction&);
+TaylorExpression implicit(const ExpressionInterface&, const TaylorFunction&);
 TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
 TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
+TaylorFunction flow(const FunctionInterface& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 TaylorExpression unchecked_compose(const TaylorExpression&, const TaylorFunction&);
 TaylorFunction unchecked_compose(const TaylorFunction&, const TaylorFunction&);

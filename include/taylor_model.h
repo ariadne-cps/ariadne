@@ -44,6 +44,8 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Expansion;
 
+class ExpressionInterface;
+class FunctionInterface;
 class TaylorModel;
 class TaylorCalculus;
 
@@ -107,6 +109,9 @@ TaylorModel compose(const TaylorModel& x, const Vector<Interval>& bx, const Vect
 // Compute the implicit function f(x,h(x))=0
 TaylorModel implicit(const TaylorModel& f);
 TaylorModel implicit_step(const TaylorModel& f, const TaylorModel& h);
+
+// Compute the implicit function f(g(x),h(x))=0
+TaylorModel implicit(const ExpressionInterface& f, const Vector<TaylorModel>& g);
 
 // Solve the equation f(x)=0
 Interval solve(const TaylorModel& f);
@@ -594,6 +599,7 @@ TaylorModel acos(const TaylorModel& x);
 TaylorModel atan(const TaylorModel& x);
 
 std::ostream& operator<<(std::ostream&, const TaylorModel::Accuracy&);
+
 
 struct TaylorModel::Accuracy {
     friend class TaylorModel;

@@ -686,8 +686,8 @@ Interval trunc(Interval x, uint n)
 
 Interval rec(Interval i)
 {
-    const double& il=i.lower();
-    const double& iu=i.upper();
+    volatile double& il=const_cast<volatile double&>(i.lower());
+    volatile double& iu=const_cast<volatile double&>(i.upper());
     volatile double rl,ru;
     if(il>0 || iu<0) {
         rounding_mode_t rnd=get_rounding_mode();
@@ -705,10 +705,10 @@ Interval rec(Interval i)
 
 Interval mul(Interval i1, Interval i2)
 {
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
-    const double& i2l=i2.lower();
-    const double& i2u=i2.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& i2l=const_cast<volatile double&>(i2.lower());
+    volatile double& i2u=const_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
     if(i1l>=0) {
@@ -748,8 +748,8 @@ Interval mul(Interval i1, Interval i2)
 Interval mul(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
     volatile double rl,ru;
     if(x2>=0) {
         rl=_mul_down(i1l,x2); ru=_mul_up(i1u,x2);
@@ -764,10 +764,10 @@ Interval mul(Interval i1, Float x2)
 Interval div(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
-    const double& i2l=i2.lower();
-    const double& i2u=i2.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& i2l=const_cast<volatile double&>(i2.lower());
+    volatile double& i2u=const_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     if(i2l>=0) {
         if(i1l>=0) {
@@ -800,8 +800,8 @@ Interval div(Interval i1, Interval i2)
 Interval div(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
     volatile double rl,ru;
     if(x2>0) {
         rl=_div_down(i1l,x2); ru=_div_up(i1u,x2);
@@ -818,8 +818,8 @@ Interval div(Interval i1, Float x2)
 Interval div(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i2l=i2.lower();
-    const double& i2u=i2.upper();
+    volatile double& i2l=const_cast<volatile double&>(i2.lower());
+    volatile double& i2u=const_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
@@ -836,8 +836,8 @@ Interval div(Float x1, Interval i2)
 Interval sqr(Interval i)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& il=i.lower();
-    const double& iu=i.upper();
+    volatile double& il=const_cast<volatile double&>(i.lower());
+    volatile double& iu=const_cast<volatile double&>(i.upper());
     volatile double rl,ru;
     if(il>=0) {
         rl=_mul_down(il,il); ru=_mul_up(iu,iu);

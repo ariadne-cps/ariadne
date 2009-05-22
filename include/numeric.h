@@ -379,10 +379,10 @@ inline Interval neg(Interval i)
 inline Interval add(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
-    const double& i2l=i2.lower();
-    const double& i2u=i2.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& i2l=const_cast<volatile double&>(i2.lower());
+    volatile double& i2u=const_cast<volatile double&>(i2.upper());
     set_rounding_mode(downward);
     volatile double rl=i1l+i2l;
     set_rounding_mode(upward);
@@ -394,8 +394,8 @@ inline Interval add(Interval i1, Interval i2)
 inline Interval add(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
     volatile double& x2v=x2;
     set_rounding_mode(downward);
     volatile double rl=i1l+x2v;
@@ -421,10 +421,10 @@ inline Interval add_ivl(Float x1, Float x2)
 inline Interval sub(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
-    const double& i2l=i2.lower();
-    const double& i2u=i2.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& i2l=const_cast<volatile double&>(i2.lower());
+    volatile double& i2u=const_cast<volatile double&>(i2.upper());
     set_rounding_mode(downward);
     volatile double rl=i1l-i2u;
     set_rounding_mode(upward);
@@ -436,8 +436,8 @@ inline Interval sub(Interval i1, Interval i2)
 inline Interval sub(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    const double& i1l=i1.lower();
-    const double& i1u=i1.upper();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
     volatile double& x2v=x2;
     set_rounding_mode(downward);
     volatile double rl=i1l-x2v;
@@ -451,8 +451,8 @@ inline Interval sub(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
-    const double& i2l=i2.lower();
-    const double& i2u=i2.upper();
+    volatile double& i2l=const_cast<volatile double&>(i2.lower());
+    volatile double& i2u=const_cast<volatile double&>(i2.upper());
     set_rounding_mode(downward);
     volatile double rl=x1v-i2u;
     set_rounding_mode(upward);

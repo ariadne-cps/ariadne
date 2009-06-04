@@ -39,8 +39,8 @@ check_PROGRAMS = \
 	test_hybrid_set \
 	test_discrete_evolution \
 	test_continuous_evolution \
-	test_hybrid_evolution \
-	test_discretised_evolution \
+    test_hybrid_evolution \
+    test_discretised_evolution \
 	test_reachability_analysis \
 	test_serialization \
 	test_graphics \
@@ -58,6 +58,7 @@ profiles: $(bin_PROGRAMS)
 profile_arithmetic_SOURCES=profile_arithmetic.cc
 profile_taylor_model_SOURCES=profile_taylor_model.cc
 profile_taylor_calculus_SOURCES=profile_taylor_calculus.cc
+profile_taylor_set_SOURCES=	profile_taylor_set.cc
 
 # Explicitly list test sources
 test_float_SOURCES=test_float.cc
@@ -88,5 +89,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_hybrid_evolution
+XFAIL_TESTS = test_hybrid_evolution test_continuous_evolution
 testsubdir = ./

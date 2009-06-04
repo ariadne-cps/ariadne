@@ -50,11 +50,31 @@ using namespace Ariadne;
 using namespace std;
 using Models::Henon;
 
+/// This function diverges heavily
+struct FailOne : FunctionData<2,2,1> {
+    template<class R, class A, class P> static void 
+    compute(R& r, const A& x, const P& p) {
+	      r[0] = 1.0;
+          r[1] = -p[0] * x[1] + p[0];
+    }
+};
+
+/// This function diverges heavily
+struct FailTwo : FunctionData<2,2,1> {
+    template<class R, class A, class P> static void 
+    compute(R& r, const A& x, const P& p) {
+	      r[0] = 1.0;
+          r[1] = x[0] * x[1]/p[0];
+    }
+};
+
+
 class TestContinuousEvolution
 {
   public:
     void test() const;
     void simple_test() const;
+    void failure_test() const;
 };
 
 int main() 
@@ -62,6 +82,7 @@ int main()
     //std::cerr<<"SKIPPED "; return 1;
     TestContinuousEvolution().simple_test();
     TestContinuousEvolution().test();
+    TestContinuousEvolution().failure_test();
     return ARIADNE_TEST_FAILURES;
 }
 
@@ -165,3 +186,90 @@ void TestContinuousEvolution::test() const
     fig.write("test_continuous_evolution-vdp");
 
 }
+
+void TestContinuousEvolution::failure_test() const
+{
+    // cout << __PRETTY_FUNCTION__ << endl;
+
+    typedef TaylorSet EnclosureType;
+
+    // Set up the evolution parameters and grid
+    Float time(0.5);
+    Float step_size(0.01);
+    Float enclosure_radius(0.25);
+    
+    EvolutionParameters parameters;
+    parameters.maximum_enclosure_radius=enclosure_radius;
+    parameters.maximum_step_size=step_size;
+
+    // Set up the evaluators
+    VectorFieldEvolver evolver(parameters);
+  
+    // Define the initial box
+    Box initial_box(2, 0.0,0.0, 0.9,0.9 ); 
+
+    // cout << "initial_box=" << initial_box << endl;
+
+    // Set up the vector field for the first test
+    Vector<Float> p(1, 200.0);
+    UserFunction<FailOne> failone(p);
+    VectorField failone_vf(failone);
+    
+    EnclosureType initial_set(initial_box);
+    // cout << "initial_set=" << initial_set << endl << endl;
+  
+    Semantics semantics=UPPER_SEMANTICS;
+
+    // Compute the reachable sets
+    Orbit<EnclosureType> orbit = evolver.orbit(failone_vf,initial_set,time,semantics);
+
+    cout << "\norbit.final=\n" << orbit.final() << endl << endl;
+    cout << "final set radius="<< orbit.final()[0].radius() << endl;
+
+    ARIADNE_TEST_COMPARE(orbit.final()[0].radius(),<,0.5);
+
+    // Print the intial, evolve and reach sets
+    // cout << "Plotting sets" << endl;
+    // cout << "evolve_set=" << hybrid_evolve_set << endl;
+    // cout << "reach_set=" << hybrid_reach_set << endl;
+    std::cout << "Plotting...";
+    Figure fig;
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+    fig << fill_colour(magenta) << orbit.intermediate();
+    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(blue) << initial_set;
+    fig.write("test_continuous_evolution-failone");
+    
+    // Set up the vector field for the second test
+    p[0] = 0.5e-2;
+    UserFunction<FailTwo> failtwo(p);
+    VectorField failtwo_vf(failtwo);
+    
+    initial_box[0] = Interval(1.0, 1.0);
+    initial_box[1] = Interval(1.0, 1.0);
+    initial_set = EnclosureType(initial_box);
+
+    time = 1.5e-2;
+
+    // Compute the reachable sets
+    orbit = evolver.orbit(failtwo_vf,initial_set,time,semantics);
+
+    cout << "\norbit.final=\n" << orbit.final() << endl << endl;
+    cout << "final set radius="<< orbit.final()[0].radius() << endl;
+
+    ARIADNE_TEST_COMPARE(orbit.final()[0].radius(),<,1.0);
+
+    // Print the intial, evolve and reach sets
+    // cout << "Plotting sets" << endl;
+    // cout << "evolve_set=" << hybrid_evolve_set << endl;
+    // cout << "reach_set=" << hybrid_reach_set << endl;
+    std::cout << "Plotting...";
+    fig.clear();
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+    fig << fill_colour(magenta) << orbit.intermediate();
+    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(blue) << initial_set;
+    fig.write("test_continuous_evolution-failtwo");
+
+}
+

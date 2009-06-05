@@ -187,6 +187,17 @@ _evolution(EnclosureListType& final_sets,
                                   system,current_timed_set,maximum_time,
                                   semantics,reach);
         }
+
+        if(verbosity==1) {
+            ARIADNE_LOG(1,"\r"
+                        <<"#w="<<std::setw(4)<<working_sets.size()
+                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                        <<" t="<<std::setw(7)<<std::fixed<<current_time
+                        <<" r="<<std::setw(7)<<current_set_model.radius()
+                        <<" c="<<current_set_model.centre()
+                        <<"                      ");
+        }
+
     }
 
 }

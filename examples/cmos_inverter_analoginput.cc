@@ -178,8 +178,8 @@ int main()
 
     /// Constants
     float EVOL_TIME = 2.0/dp[10]; /// Evolution time
-    int EVOL_TRANS = 3; /// Evolution transitions
-    float MAX_ENCL_RADIUS = 5.0e-8; /// Maximum enclosure radius
+    int EVOL_TRANS = 8; /// Evolution transitions
+    float MAX_ENCL_RADIUS = 1.0e-4; /// Maximum enclosure radius
     float MAX_STEP_SIZE = 0.005; /// Maximum step size
 
     // std::cout << "Enter Maximum number of discrete transitions:";
@@ -357,7 +357,7 @@ int main()
     OrbitType orbit = evolver.orbit(inverter,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit.final="<<orbit.final()<<std::endl;
+    std::cout << "Orbit.final="<<orbit.final().size()<<std::endl;
 
     Box graphic_box_vo(2, 0.0, EVOL_TIME, 0.0, dp[4]);
     Box graphic_box_vi(2, 0.0, EVOL_TIME, -dp[4], dp[4]);

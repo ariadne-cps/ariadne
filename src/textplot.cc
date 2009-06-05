@@ -50,27 +50,47 @@ TextPlot::TextPlot()
 { 
 }
 
-TextPlot::TextPlot(const char* filename)
-    : _fstream(filename, ios::out | ios::trunc) 
+TextPlot::TextPlot(const char* cfilename)
 { 
+    std::string filename(cfilename);
+    if(filename.rfind(".") != std::string::npos) {
+    } else {
+        filename=filename+".txt";
+    }
+    this->_fstream.open(filename.c_str(), ios::out | ios::trunc);
 }
 
 
-TextPlot::TextPlot(const char* filename, ios_base::openmode mode)
-    : _fstream(filename, mode) 
+TextPlot::TextPlot(const char* cfilename, ios_base::openmode mode)
 { 
+    std::string filename(cfilename);
+    if(filename.rfind(".") != std::string::npos) {
+    } else {
+        filename=filename+".txt";
+    }
+    this->_fstream.open(filename.c_str(), mode);
 }
 
 
-void TextPlot::open(const char* filename) 
+void TextPlot::open(const char* cfilename) 
 {
-    this->_fstream.open(filename, ios::out | ios::trunc);
+    std::string filename(cfilename);
+    if(filename.rfind(".") != std::string::npos) {
+    } else {
+        filename=filename+".txt";
+    }
+    this->_fstream.open(filename.c_str(), ios::out | ios::trunc);
 }
 
 
-void TextPlot::open(const char* filename, ios_base::openmode mode) 
+void TextPlot::open(const char* cfilename, ios_base::openmode mode) 
 {
-    this->_fstream.open(filename, mode);
+    std::string filename(cfilename);
+    if(filename.rfind(".") != std::string::npos) {
+    } else {
+        filename=filename+".txt";
+    }
+    this->_fstream.open(filename.c_str(), mode);
 }
 
 

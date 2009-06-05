@@ -750,8 +750,10 @@ void grid_draw(GraphicsInterface& fig, const TaylorSet& ts)
 }
 
 void draw(GraphicsInterface& fig, const TaylorSet& ts) {
-    //boxes_draw(fig,ts);
-    zonotopes_draw(fig,ts);
+    boxes_draw(fig,ts);
+    //zonotopes_draw(fig,ts);
+    //affine_draw(fig, ts);
+    //curve_draw(fig, ts);
 /*
     static const double MAX_NEGLIGABLE_NORM=1e-10;
     if(ts.dimension()==2 && ts.generators_size()==2 && norm(error(ts))<MAX_NEGLIGABLE_NORM) {

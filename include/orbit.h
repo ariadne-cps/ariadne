@@ -37,6 +37,9 @@
 
 #include "numeric.h"
 #include "graphics_interface.h"
+#include "taylor_set.h"
+
+
 
 namespace Ariadne {
 
@@ -72,7 +75,7 @@ class HybridPoint;
 class HybridTime;
 
 typedef int DiscreteState;
-class TaylorSet;
+// class TaylorSet;
 typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 typedef ListSet<TaylorSet> TaylorSetList;
 typedef ListSet<HybridTaylorSet> HybridTaylorSetList;
@@ -243,7 +246,7 @@ template<>
 std::ostream& 
 operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
 
-template<class ES> void draw(GraphicsInterface& graphic, const Orbit<ES>& orbit);
+void draw(GraphicsInterface& graphic, const Orbit<TaylorSet>& orbit);
 
 void draw(GraphicsInterface& graphic, const Orbit<HybridPoint>& orbit);
 

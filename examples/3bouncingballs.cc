@@ -346,12 +346,22 @@ int main()
 
     std::cout << std::endl << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
 
+    std::cout << "Plotting result to text file..." << std::flush;
+    
+//    textplot("3balls_orbit.txt", orbit);
+    
+    std::cout << " done." << std::endl;
+
+    std::cout << "Plotting result to png files..." << std::flush;
+    
     plot("3balls-x1y1_orbit", 0, 1, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x2y2_orbit", 2, 3, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x3y3_orbit", 4, 5, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x1vx1_orbit", 0, 6, numVariables, bounding_box_speed, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x2vx2_orbit", 2, 8, numVariables, bounding_box_speed, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x3vx3_orbit", 4, 10, numVariables, bounding_box_speed, Colour(0.0,0.5,1.0), orbit, -1);
+
+    std::cout << " done." << std::endl;
 
 /*
     /// Creates a ReachabilityAnalyser object

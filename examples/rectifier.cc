@@ -21,8 +21,8 @@ struct offoff_df : FunctionData<3,3,5> {
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);	
-	//r[2] = -x[2]/(p[4]*p[3]);
-        r[2] = -x[2]/(p[4]*p[3]) - 2e-12/p[3];
+	    r[2] = -x[2]/(p[4]*p[3]);
+//        r[2] = -x[2]/(p[4]*p[3]) - 2e-12/p[3];
     }
 };
 
@@ -32,9 +32,9 @@ struct onoff_df : FunctionData<3,3,5> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
-	//r[2] = -x[2]/(p[4]*p[3]) + (x[1]-x[2])/(p[2]*p[3]);
-	r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035)-2);
+    r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
+	r[2] = -x[2]/(p[4]*p[3]) + (x[1]-x[2])/(p[2]*p[3]);
+	// r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035)-2);
     }
 };
 
@@ -44,9 +44,9 @@ struct offon_df : FunctionData<3,3,5> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
-	//r[2] = -x[2]/(p[4]*p[3]) - (x[1]+x[2])/(p[2]*p[3]);
-	r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((-x[1]-x[2])/0.035)-2);
+    r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
+	r[2] = -x[2]/(p[4]*p[3]) - (x[1]+x[2])/(p[2]*p[3]);
+	// r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((-x[1]-x[2])/0.035)-2);
     }
 };
 
@@ -56,9 +56,9 @@ struct onon_df : FunctionData<3,3,5> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
-	//r[2] = -x[2]/(p[4]*p[3]) -2*x[2]/(p[2]*p[3]);
-	r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035) + Ariadne::exp((-x[1]-x[2])/0.035)-2);
+    r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
+	r[2] = -x[2]/(p[4]*p[3]) -2*x[2]/(p[2]*p[3]);
+	//r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035) + Ariadne::exp((-x[1]-x[2])/0.035)-2);
     }
 };
 
@@ -124,12 +124,14 @@ int main()
 
     /// Introduces the global parameters
     float TIME_LIMIT = 2.0/dp[1];
+//    float TIME_LIMIT = 0.0042;
     float TRAN_LIMIT = 6;
-    float MAX_ENCL_RADIUS = 0.001/dp[1];
-    float MAX_STEP_SIZE = 0.001/dp[1];
+    float MAX_ENCL_RADIUS = 1.0e-6/dp[1];
+    float MAX_STEP_SIZE = 0.01/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];
     float MAX_GRID_DEPTH = 19;
     int VERBOSITY=1;
+    bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
   
@@ -219,6 +221,7 @@ int main()
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
+    evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;    
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -246,6 +249,8 @@ int main()
     Box graphic_box2(2,-dp[0],dp[0],2.0,dp[0]);
 
     std::cout << "Plotting results..." << std::flush;
+
+    textplot("rectifier_orbit.txt", orbit);
 
     plot("rectifier_orbit_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("rectifier_orbit_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);

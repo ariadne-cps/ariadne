@@ -78,7 +78,7 @@ flow_bounds(FunctionInterface const& vf,
     Vector<Interval> b,nb,df;
     Interval ih(0,h);
     while(!success) {
-        ARIADNE_ASSERT(h>hmin);
+        ARIADNE_ASSERT_MSG(h>hmin," h="<<h<<", hmin="<<hmin);
         b=d+INITIAL_MULTIPLIER*ih*vf.evaluate(d)+delta;
         for(uint i=0; i!=EXPANSION_STEPS; ++i) {
             df=vf.evaluate(b);

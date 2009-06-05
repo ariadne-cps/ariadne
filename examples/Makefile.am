@@ -10,7 +10,7 @@ bin_PROGRAMS=tutorial \
              watertank-nonlinear watertank-time \
              sinusoid-sin 3bouncingballs \
              rectifier springs cmos_inverter_analoginput \
-             rectifier_oneloc
+             rectifier_oneloc grid-refinement
 
 
 tutorial_SOURCES=tutorial.cc
@@ -26,6 +26,7 @@ rectifier_SOURCES=rectifier.cc
 springs_SOURCES=springs.cc
 cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc
 rectifier_oneloc_SOURCES=rectifier_oneloc.cc
+grid_refinement_SOURCES=grid-refinement.cc
 
 examples: $(bin_PROGRAMS)
 

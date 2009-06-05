@@ -405,7 +405,7 @@ operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb)
     return os;
 }
 
-template<class ES> void draw(GraphicsInterface& graphic, const Orbit<ES>& orbit) 
+void draw(GraphicsInterface& graphic, const Orbit<TaylorSet>& orbit) 
 {
     draw(graphic,orbit.reach()); 
     draw(graphic,orbit.initial());

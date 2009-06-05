@@ -233,7 +233,7 @@ class Interval {
     Interval(Float x) : l(x), u(x) { }
     Interval(const Interval& i) : l(i.l), u(i.u) { }
 
-    Interval(Float lower, Float upper) : l(lower), u(upper) { ARIADNE_ASSERT(lower<=upper); }
+    Interval(Float lower, Float upper) : l(lower), u(upper) { ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper); }
 #ifdef HAVE_GMPXX_H
     Interval(Rational q);
     Interval(Rational lower, Rational upper);

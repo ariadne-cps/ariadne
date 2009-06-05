@@ -32,7 +32,7 @@ int main()
     DiscreteEvent e1(1);
  
     /// Create the resets
-    AffineFunction reset(Matrix<Float>(2,2,0.0,0.0,0.0,0.0),Vector<Float>(2,0.0,0.0));
+    AffineFunction reset(Matrix<Float>(2,2,0.0,0.0,0.0,1.0),Vector<Float>(2,0.0,0.0));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.
@@ -59,7 +59,7 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.05;
+    evolver.parameters().maximum_enclosure_radius = 0.5;
     evolver.parameters().maximum_step_size = 0.05;
     std::cout <<  evolver.parameters() << std::endl;
     evolver.verbosity=1;
@@ -71,10 +71,10 @@ int main()
 
     std::cout << "Computing evolution starting from location l1, t = 0.0, x =0.0" << std::endl;
 
-    Box initial_box(2, -0.01,0.01,-0.01,0.01);
+    Box initial_box(2, 0.0,0.0,0.0,0.0);
     HybridEnclosureType initial_enclosure(l1,initial_box);
   
-    HybridTime evolution_time(3*pi<Float>(),2);
+    HybridTime evolution_time(6*pi<Float>(),4);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(sinusoid,initial_enclosure,evolution_time,LOWER_SEMANTICS);
@@ -91,7 +91,7 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;
     g.write("sinusoid_sin_orbit");
-
+/*
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.verbosity = 3;
@@ -155,5 +155,5 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << reach_set;
     g.write("sinusoid_sin_chain");
- 
+*/ 
 }

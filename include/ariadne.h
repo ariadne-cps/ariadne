@@ -47,6 +47,7 @@ using std::ofstream; using std::ifstream;
 #include "matrix.h"
 
 #include "function.h"
+#include "taylor_model.h"
 
 #include "function_set.h"
 #include "taylor_set.h"
@@ -63,6 +64,7 @@ using std::ofstream; using std::ifstream;
 
 #include "hybrid_automaton.h"
 
+#include "vector_field_evolver.h"
 #include "hybrid_evolver.h"
 #include "stable_hybrid_evolver.h"
 #include "discretiser.h"

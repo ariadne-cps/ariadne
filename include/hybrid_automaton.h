@@ -81,7 +81,7 @@ class DiscreteMode {
     // The discrete mode's invariants.
     std::map< DiscreteEvent, FunctionPtr > _invariants;
 
-    // The discrete mode's vector field.
+    // The discrete mode's grid for reachability analysis.
     boost::shared_ptr< const Grid > _grid;
   public:
     //! \brief The mode's discrete state.
@@ -402,6 +402,13 @@ class HybridAutomaton
 
     //! \brief Set the grid controlling relative scaling in the mode.
     void set_grid(DiscreteState location, const Grid& grid);
+
+    //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode.
+    void set_grid(const Grid& grid);
+
+    //! \brief Set the hybrid grid controlling relative scaling.
+    void set_grid(const HybridGrid& hgrid);
+
     //@}
 
     //@{

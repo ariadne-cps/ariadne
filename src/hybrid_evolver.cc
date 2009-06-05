@@ -77,7 +77,7 @@ void wait_for_keypress() {
 
 
 // Allow subdivisions in upper evolution
-const bool ENABLE_SUBDIVISIONS = false;
+// const bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const bool ENABLE_PREMATURE_TERMINATION = false;
 
@@ -225,6 +225,7 @@ _evolution(EnclosureListType& final_sets,
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
     const Float maximum_time=maximum_hybrid_time.continuous_time;
 
+    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
 
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
@@ -250,24 +251,30 @@ _evolution(EnclosureListType& final_sets,
     while(!working_sets.empty()) {
         HybridTimedSetType current_set=working_sets.back();
         working_sets.pop_back();
-        ARIADNE_LOG(3,"working_set="<<current_set);
         DiscreteState initial_location=current_set.first;
         EventListType initial_events=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
         RealType initial_set_radius=radius(initial_set_model.range());
         if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
+            ARIADNE_LOG(1,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if(semantics == UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions
                   && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
             // Subdivide
+            ARIADNE_LOG(1,"WARNING: computed set larger than maximum_enclosure_radius, subdividing.\n");
+            ARIADNE_LOG(3,"initial_set_radius*10000="<<initial_set_radius*10000<<"\n");
             uint nd=initial_set_model.dimension();
             SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
             array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
+                ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
                 SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
+                ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
+                ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
+                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");                
                 working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
             }
         } else if(semantics == LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {

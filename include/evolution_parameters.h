@@ -65,6 +65,9 @@ class ContinuousEvolutionParameters {
     //! \brief The maximum allowable radius of a basic set during integration. 
     //! Decreasing this value increases the accuracy of the computation of an over-approximation. 
     RealType maximum_enclosure_radius;
+    
+    //! \brief Enable subdivision of basic sets (false by default).
+    bool enable_subdivisions;
 };
 
 
@@ -195,7 +198,8 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       minimum_step_size(0.0),
       maximum_step_size(1.0),
       minimum_enclosure_radius(0.0),
-      maximum_enclosure_radius(0.5)
+      maximum_enclosure_radius(0.5),
+      enable_subdivisions(false)
 { }
 
 inline
@@ -222,6 +226,7 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << ",\n  maximum_step_size=" << p.maximum_step_size
        << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
        << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
+       << ",\n  enable_subdivisions=" << p.enable_subdivisions
        << "\n)\n";
     return os;
 }

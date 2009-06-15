@@ -26,8 +26,8 @@
  *  \brief Grid paving is used to represent sets, based on integer and dyadic coordinate cells, of a grid.
  */
 
-#ifndef GRID_SET_H
-#define GRID_SET_H
+#ifndef ARIADNE_GRID_SET_H
+#define ARIADNE_GRID_SET_H
 
 #include <iostream>
 #include <string>
@@ -40,7 +40,6 @@
 
 #include "binary_word.h"
 
-#include "grid_set.h"
 #include "exceptions.h"
 #include "box.h"
 #include "point.h"
@@ -50,6 +49,7 @@
 
 #include "set_interface.h"
 #include "vector.h"
+#include "grid.h"
 
 #include "graphics_interface.h"
 
@@ -124,84 +124,6 @@ class NotAllowedMoveException : public std::logic_error {
     NotAllowedMoveException(const std::string& str) : std::logic_error(str) { }
 };
 
-/*! \brief An infinite, uniform grid of rectangles in Euclidean space.
- *  
- *  \internal Maybe a Grid should be a type of Paving or Cover. 
- *  Then rather than having GridXXX classes, we can have classes such that cells of
- *  some type are mapped into concrete sets by a Paving or Cover.
- *  This should be more general, and will unify the concepts of Paving and Cover,
- *  as well as different types of covers.
- */
-class Grid {
-    typedef double dyadic_type;
-    typedef int integer_type;
-    typedef Float real_type;
-  private:
-    // Structure containing actual data values
-    struct Data;
-  public:
-    //! Destructor.
-    ~Grid();
-                
-    //! Default constructor constructs a grid from a null pointer. Needed for some iterators.
-    explicit Grid();
-                
-    //! Construct from a dimension and a spacing in each direction. 
-    explicit Grid(uint d);
-                
-    //! Construct from a dimension and a spacing in each direction. 
-    explicit Grid(uint d, Float l);
-                
-    //! Construct from a vector of offsets.
-    explicit Grid(const Vector<Float>& lengths);
-                
-    //! Construct from a centre point and a vector of offsets.
-    explicit Grid(const Vector<Float>& origin, const Vector<Float>& lengths);
-                
-    //! Copy constructor. Copies a reference to the grid data.
-    Grid(const Grid& g);
-                
-    //! The underlying dimension of the grid.
-    uint dimension() const;
-                
-    //! Tests equality of two grids. Tests equality of references first.
-    bool operator==(const Grid& g) const;
-                
-    //! Tests inequality of two grids.
-    bool operator!=(const Grid& g) const;
-                
-    //! The origin of the grid.
-    const Vector<Float>& origin() const;
-                
-    //! The strides between successive integer points.
-    const Vector<Float>& lengths() const;
-                
-    //! Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const Grid& g);
-
-    Float coordinate(uint d, dyadic_type x) const;
-    Float subdivision_coordinate(uint d, dyadic_type x) const;
-    Float subdivision_coordinate(uint d, integer_type n) const; 
-
-    int subdivision_index(uint d, const Float& x) const; 
-    int subdivision_lower_index(uint d, const Float& x) const; 
-    int subdivision_upper_index(uint d, const Float& x) const; 
-
-    array<double> index(const Vector<Float>& pt) const;
-    array<double> lower_index(const Vector<Interval>& bx) const;
-    array<double> upper_index(const Vector<Interval>& bx) const;
-
-    Vector<Float> point(const array<int>& a) const;
-    Vector<Float> point(const array<double>& a) const;
-    Vector<Interval> box(const array<double>& l, const array<double>& u) const;
-    Vector<Interval> box(const GridCell& cell) const;
-  private:
-    // Create new data
-    void _create(const Vector<Float>& o, const Vector<Float>& l);
-  private:
-    // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
-    boost::shared_ptr<Data> _data;
-};
 
 /*! \brief The binary tree node.
  *
@@ -2295,5 +2217,5 @@ void draw(GraphicsInterface& theGraphic, const CompactSetInterface& theSet);
 
 } // namespace Ariadne
 
-#endif /* GRID_SET */
+#endif /* ARIADNE_GRID_SET_H */
 

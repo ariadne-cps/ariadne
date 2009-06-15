@@ -32,6 +32,7 @@
 
 #include "function_interface.h"
 #include "set_interface.h"
+#include "grid.h"
 
 namespace Ariadne {  
 
@@ -52,6 +53,7 @@ class Map
     Map(const FunctionInterface& f) : _function_ptr(f.clone()) { }
     Map(const boost::shared_ptr<FunctionInterface>& fptr) : _function_ptr(fptr) { }
     const FunctionInterface& function() const { return *_function_ptr; }
+    Grid grid() const { return Grid(_function_ptr->argument_size()); }
   private:
     boost::shared_ptr<FunctionInterface> _function_ptr;
 };

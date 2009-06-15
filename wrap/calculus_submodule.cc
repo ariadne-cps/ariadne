@@ -314,6 +314,8 @@ void export_taylor_variable()
     taylor_expression_class.def(self>self);
     taylor_expression_class.def(self<self);
     //taylor_expression_class.def(self_ns::str(self));
+    taylor_expression_class.def("__mul__",&__mul__< TaylorFunction, TaylorExpression, Vector<Float> >);
+
     taylor_expression_class.def("__str__",(std::string(*)(const TE&)) &__str__);
     taylor_expression_class.def("__cstr__",(std::string(*)(const TE&)) &__cstr__);
     taylor_expression_class.def("__repr__",(std::string(*)(const TE&)) &__repr__);

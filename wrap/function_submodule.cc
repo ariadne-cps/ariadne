@@ -43,6 +43,20 @@ using namespace boost::python;
 
 namespace Ariadne {
 
+PolynomialFunction operator*(const PolynomialExpression& pe, const Vector<Float>& v) {
+    Vector< Polynomial<Interval> > pv(v.size());
+    for(uint i=0; i!=v.size();++i) {
+        pv[i]=static_cast<const Polynomial<Interval>&>(pe)*Interval(v[i]);
+    }
+    return PolynomialFunction(pv);
+}
+
+PolynomialExpression operator*(const PolynomialExpression& pe, const Float& s) {
+    Polynomial<Interval> r=static_cast<const Polynomial<Interval>&>(pe)*Interval(s);
+    return PolynomialExpression(r);
+}
+
+
 template<class X>
 array<X>
 extract_array(const boost::python::object& obj)
@@ -101,6 +115,17 @@ void read(Vector< Differential<X> >& dfv, const object& obj) {
     for(uint i=0; i!=dfv.size(); ++i) {
         read(dfv[i],elements[i]);
     }
+}
+
+boost::python::list
+make_polynomial_variables(uint n)
+{
+    boost::python::list result;
+    Vector<PolynomialExpression> expressions=PolynomialExpression::variables(n);
+    for(uint i=0; i!=expressions.size(); ++i) {
+        result.append(expressions[i]);
+    }
+    return result;
 }
 
 void read(TaylorModel& tm, const boost::python::object& obj);
@@ -292,6 +317,7 @@ void export_expression_interface()
     expression_interface_class.def("argument_size", pure_virtual(&ExpressionInterface::argument_size));
     expression_interface_class.def("smoothness", pure_virtual(&ExpressionInterface::smoothness));
     expression_interface_class.def("evaluate",pure_virtual((Interval(ExpressionInterface::*)(const IV&)const)&ExpressionInterface::evaluate));
+    expression_interface_class.def(self_ns::str(self));
 }
 
 void export_function_interface()
@@ -341,11 +367,42 @@ std::string __str__(const AffineExpression& f) {
     for(uint j=0; j!=f.argument_size(); ++j) {
         if(f.a()[j]!=0) {
             if(f.a()[j]>0) { ss<<"+"; } else { ss<<"-"; }
-            if(abs(f.a()[j])!=1) { ss<<abs(f.a()[j]); }
+            if(abs(f.a()[j])!=1) { ss<<abs(f.a()[j])<<"*"; }
             //ss<<char('x'+j);
             ss<<"x"<<j;
         }
     }
+    ss<<" )";
+    return ss.str();
+}
+
+std::string __str__(const PolynomialExpression& p) {
+    std::stringstream ss;
+    ss<<"PolynomialExpression( ";
+    bool first_term=true;
+    //bool first_factor=true;
+    Float r;
+    if(p.expansion().size()==0) {
+        r=0.0;
+        ss << "0";
+    } else {
+        r=radius(p.begin()->data());
+        for(Polynomial<Interval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+            MultiIndex a=iter->key();
+            Float v=midpoint(iter->data());
+            if(abs(v)<1e-15) { r+=abs(v); v=0; }
+            if(v!=0) {
+                if(v>0 && !first_term) { ss<<"+"; }
+                first_term=false;
+                if(v<0) { ss<<"-"; }
+                if(abs(v)!=1) { ss<<abs(v); }
+                for(uint j=0; j!=a.size(); ++j) {
+                    if(a[j]!=0) { ss<<"x"<<j; if(a[j]!=1) { ss<<"^"<<int(a[j]); } }
+                }
+            }
+        }
+    }
+    if(r>0) { ss<<"+/-"<<r; }
     ss<<" )";
     return ss.str();
 }
@@ -368,6 +425,7 @@ std::string __str__(const AffineFunction& f) {
     return ss.str();
 }
 
+
 void export_affine_expression()
 {
     typedef Float F;
@@ -387,6 +445,7 @@ void export_affine_expression()
     affine_expression_class.def("__call__",(I(AffineExpression::*)(const IV&)const)&AffineExpression::evaluate);
     affine_expression_class.def("__call__",(TE(*)(const AffineExpression&,const TFM&))&call_evaluate_expression<AffineExpression>);
     affine_expression_class.def("__add__",(AffineExpression(*)(const AffineExpression&,const AffineExpression&))&operator+);
+    affine_expression_class.def("__mul__",&__mul__<AffineExpression,AffineExpression,double>);
     affine_expression_class.def("__mul__",(AffineExpression(*)(const AffineExpression&,const Interval&))&operator*);
     affine_expression_class.def("evaluate",(F(AffineExpression::*)(const FV&)const)&AffineExpression::evaluate);
     affine_expression_class.def("evaluate",(I(AffineExpression::*)(const IV&)const)&AffineExpression::evaluate);
@@ -491,7 +550,10 @@ void export_polynomial_expression()
     polynomial_expression_class.def("constant", (PE(*)(uint,Interval)) &PE::constant);
     polynomial_expression_class.staticmethod("constant");
     polynomial_expression_class.def("variable", (PE(*)(uint,uint)) &PE::variable);
+    //polynomial_expression_class.def("variables", (PE(*)(uint)) &PE::variables);
+    polynomial_expression_class.def("variables",&make_polynomial_variables);
     polynomial_expression_class.staticmethod("variable");
+    polynomial_expression_class.staticmethod("variables");
 
     polynomial_expression_class.def("argument_size", &PE::argument_size);
 
@@ -542,14 +604,18 @@ void export_polynomial_expression()
     polynomial_expression_class.def(self*=ivl);
     polynomial_expression_class.def(self/=ivl);
 
-    polynomial_expression_class.def(self_ns::str(self));
+    polynomial_expression_class.def("__mul__",&__mul__< PolynomialFunction, PolynomialExpression, Vector<Float> >);
+   //polynomial_expression_class.def(self_ns::str(self));
+
+    polynomial_expression_class.def("__str__",(std::string(*)(const PolynomialExpression&))&__str__);
+    polynomial_expression_class.def("__repr__",(std::string(*)(const PolynomialExpression&))&__str__);
 
 }
 
 void function_submodule() {
     export_multi_index();
 
-    //export_polynomial<Float>();
+    export_polynomial<Float>();
     //export_polynomial<Interval>();
 
     export_expression_interface();

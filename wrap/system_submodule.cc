@@ -26,15 +26,129 @@
 
 #include "expression_interface.h"
 #include "function_interface.h"
+#include "formula.h"
 #include "hybrid_automaton.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 
+#include "utilities.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
 using namespace Ariadne;
+
+
+
+Space*
+make_space(const boost::python::object& obj)
+{
+    Space* spcptr=new Space();
+    boost::python::list elements=boost::python::extract<boost::python::list>(obj);
+    int m=boost::python::len(elements);
+    for(int i=0; i!=m; ++i) {
+        Variable v=boost::python::extract<Variable>(elements[i]);
+        *spcptr,v;
+    }
+    return spcptr;
+}
+
+Formula exp(Variable v) { return exp(Formula(v)); }
+Formula log(Variable v) { return log(Formula(v)); }
+Formula sin(Variable v) { return sin(Formula(v)); }
+Formula cos(Variable v) { return cos(Formula(v)); }
+Formula tan(Variable v) { return tan(Formula(v)); }
+
+// Need to wrap pure virtual function explicitly for some reason...
+ExpressionInterface* expression(const FormulaInterface& f, const Space& s) { return f.expression(s); }
+
+void export_formula()
+{
+    class_<Variable> variable_class("Variable", init<std::string>());
+    variable_class.def(init<Variable>());
+    variable_class.def("name", &Variable::name, return_value_policy<reference_existing_object>());
+    variable_class.def("expression", &Variable::expression, return_value_policy<manage_new_object>());
+    variable_class.def("__eq__", &Variable::operator==);
+    variable_class.def("__neq__", &Variable::operator!=);
+    variable_class.def("__add__", &__add__<Formula,Variable,Variable>);
+    variable_class.def("__sub__", &__sub__<Formula,Variable,Variable>);
+    variable_class.def("__mul__", &__mul__<Formula,Variable,Variable>);
+    variable_class.def("__div__", &__div__<Formula,Variable,Variable>);
+    variable_class.def("__add__", &__add__<Formula,Variable,double>);
+    variable_class.def("__sub__", &__sub__<Formula,Variable,double>);
+    variable_class.def("__mul__", &__mul__<Formula,Variable,double>);
+    variable_class.def("__div__", &__div__<Formula,Variable,double>);
+    variable_class.def("__add__", &__add__<Formula,Variable,Interval>);
+    variable_class.def("__sub__", &__sub__<Formula,Variable,Interval>);
+    variable_class.def("__mul__", &__mul__<Formula,Variable,Interval>);
+    variable_class.def("__div__", &__div__<Formula,Variable,Interval>);
+    variable_class.def("__radd__", &__radd__<Formula,Variable,double>);
+    variable_class.def("__rsub__", &__rsub__<Formula,Variable,double>);
+    variable_class.def("__rmul__", &__rmul__<Formula,Variable,double>);
+    variable_class.def("__rdiv__", &__rdiv__<Formula,Variable,double>);
+    variable_class.def("__radd__", &__radd__<Formula,Variable,Interval>);
+    variable_class.def("__rsub__", &__rsub__<Formula,Variable,Interval>);
+    variable_class.def("__rmul__", &__rmul__<Formula,Variable,Interval>);
+    variable_class.def("__rdiv__", &__rdiv__<Formula,Variable,Interval>);
+    variable_class.def(self_ns::str(self));
+
+    def("exp", (Formula(*)(Variable)) &exp);
+    def("log", (Formula(*)(Variable)) &log);
+    def("sin", (Formula(*)(Variable)) &sin);
+    def("cos", (Formula(*)(Variable)) &cos);
+    def("tan", (Formula(*)(Variable)) &tan);
+
+
+    class_<Space> space_class("Space");
+    space_class.def("__init__", make_constructor(&make_space) );
+    space_class.def("dimension", &Space::dimension);
+    space_class.def("variable", &Space::variable, return_value_policy<reference_existing_object>());
+    space_class.def("index", &Space::index);
+    space_class.def(self_ns::str(self));
+
+
+    class_<Formula> formula_class("Formula", no_init);
+    formula_class.def("expression", &Formula::expression, return_value_policy<manage_new_object>());
+    formula_class.def("__add__", &__add__<Formula,Formula,Formula>);
+    formula_class.def("__sub__", &__sub__<Formula,Formula,Formula>);
+    formula_class.def("__mul__", &__mul__<Formula,Formula,Formula>);
+    formula_class.def("__div__", &__div__<Formula,Formula,Formula>);
+    formula_class.def("__add__", &__add__<Formula,Formula,double>);
+    formula_class.def("__sub__", &__sub__<Formula,Formula,double>);
+    formula_class.def("__mul__", &__mul__<Formula,Formula,double>);
+    formula_class.def("__div__", &__div__<Formula,Formula,double>);
+    formula_class.def("__add__", &__add__<Formula,Formula,Interval>);
+    formula_class.def("__sub__", &__sub__<Formula,Formula,Interval>);
+    formula_class.def("__mul__", &__mul__<Formula,Formula,Interval>);
+    formula_class.def("__div__", &__div__<Formula,Formula,Interval>);
+    formula_class.def("__add__", &__add__<Formula,Formula,Variable>);
+    formula_class.def("__sub__", &__sub__<Formula,Formula,Variable>);
+    formula_class.def("__mul__", &__mul__<Formula,Formula,Variable>);
+    formula_class.def("__div__", &__div__<Formula,Formula,Variable>);
+    formula_class.def("__radd__", &__radd__<Formula,Formula,double>);
+    formula_class.def("__rsub__", &__rsub__<Formula,Formula,double>);
+    formula_class.def("__rmul__", &__rmul__<Formula,Formula,double>);
+    formula_class.def("__rdiv__", &__rdiv__<Formula,Formula,double>);
+    formula_class.def("__radd__", &__radd__<Formula,Formula,Interval>);
+    formula_class.def("__rsub__", &__rsub__<Formula,Formula,Interval>);
+    formula_class.def("__rmul__", &__rmul__<Formula,Formula,Interval>);
+    formula_class.def("__rdiv__", &__rdiv__<Formula,Formula,Interval>);
+    formula_class.def("__radd__", &__radd__<Formula,Formula,Variable>);
+    formula_class.def("__rsub__", &__rsub__<Formula,Formula,Variable>);
+    formula_class.def("__rmul__", &__rmul__<Formula,Formula,Variable>);
+    formula_class.def("__rdiv__", &__rdiv__<Formula,Formula,Variable>);
+    formula_class.def(self_ns::str(self));
+
+    def("exp", (Formula(*)(Formula)) &exp);
+    def("log", (Formula(*)(Formula)) &log);
+    def("sin", (Formula(*)(Formula)) &sin);
+    def("cos", (Formula(*)(Formula)) &cos);
+    def("tan", (Formula(*)(Formula)) &tan);
+
+    def("expression", &Formula::expression, return_value_policy<manage_new_object>());
+
+}
+
 
 
 void export_hybrid_automaton()
@@ -80,6 +194,7 @@ void export_hybrid_automaton()
 
 
 void system_submodule() {
+    export_formula();
     export_hybrid_automaton();
 }
 

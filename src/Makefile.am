@@ -19,6 +19,7 @@ SRC = \
 	differential.cc \
 	taylor_model.cc  \
 	taylor_expression.cc  \
+	formula.cc \
 	function.cc \
 	taylor_function.cc  \
 	simulation_toolbox.cc \

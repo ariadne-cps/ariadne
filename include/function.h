@@ -351,7 +351,7 @@ class AffineExpression
 };
 
 inline AffineExpression operator+(const AffineExpression& f1, const AffineExpression& f2) {
-    return AffineExpression(Vector<Interval>(f1._g+f2._g),f1._c*f2._c); }
+    return AffineExpression(Vector<Interval>(f1._g+f2._g),f1._c+f2._c); }
 inline AffineExpression operator*(const Interval& c, const AffineExpression& f) {
     return AffineExpression(Vector<Interval>(c*f._g),c*f._c); }
 inline AffineExpression operator*(const AffineExpression& f, const Interval& c) { return c*f; }
@@ -404,6 +404,69 @@ class PolynomialExpression
     virtual std::ostream& write(std::ostream& os) const { return os << static_cast<Polynomial<Interval>const&>(*this); }
 };
 
+
+typedef shared_ptr<const ExpressionInterface> ExpressionPointer;
+
+
+
+template<class Op> class UnaryExpression
+    : public ExpressionInterface
+{
+  public:
+    UnaryExpression(Op op, const ExpressionInterface* expr) : _op(op), _subexpr(expr) { }
+    UnaryExpression(Op op, ExpressionPointer expr) : _op(op), _subexpr(expr) { }
+    virtual UnaryExpression<Op>* clone() const { return new UnaryExpression<Op>(_op,_subexpr); }
+    virtual size_type argument_size() const { return _subexpr->argument_size(); }
+    virtual smoothness_type smoothness() const { return 255; }
+    virtual Float evaluate(const Vector<Float>& x) const { return _op(_subexpr->evaluate(x)); }
+    virtual Interval evaluate(const Vector<Interval>& x) const { return _op(_subexpr->evaluate(x)); }
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const { return _op(_subexpr->evaluate(x)); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return _op(_subexpr->evaluate(x)); }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return _op(_subexpr->evaluate(x)); }
+    virtual ExpressionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual Vector<Float> gradient() const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual std::ostream& write(std::ostream& os) const { return os << _op << "(" << *_subexpr << ")"; }
+  private: 
+    template<class R, class A> inline
+    void compute(R& r, const A& a) { Op _op; _op(r,_subexpr->evaluate(a)); }
+  private: 
+    Op _op;
+    shared_ptr<const ExpressionInterface> _subexpr;
+};
+
+
+template<class Op> class BinaryExpression
+    : public ExpressionInterface
+{
+  public:
+    BinaryExpression(Op op, const ExpressionInterface* expr1, const ExpressionInterface* expr2)
+        : _op(op), _subexpr1(expr1), _subexpr2(expr2) { }
+    BinaryExpression(Op op, ExpressionPointer expr1, ExpressionPointer expr2)
+        : _op(op), _subexpr1(expr1), _subexpr2(expr2)  { }
+    virtual BinaryExpression<Op>* clone() const { return new BinaryExpression<Op>(_op,_subexpr1,_subexpr2); }
+    virtual size_type argument_size() const { return _subexpr1->argument_size(); }
+    virtual smoothness_type smoothness() const { return 255; }
+    virtual Float evaluate(const Vector<Float>& x) const {
+        return _op(_subexpr1->evaluate(x),_subexpr2->evaluate(x)); }
+    virtual Interval evaluate(const Vector<Interval>& x) const {
+        return _op(_subexpr1->evaluate(x),_subexpr2->evaluate(x)); }
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
+        return _op(_subexpr1->evaluate(x),_subexpr2->evaluate(x)); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
+        return _op(_subexpr1->evaluate(x),_subexpr2->evaluate(x)); }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
+        return _op(_subexpr1->evaluate(x),_subexpr2->evaluate(x)); }
+    virtual ExpressionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << *_subexpr1 << _op << *_subexpr2; }
+  private: 
+    template<class R, class A> inline
+    void compute(R& r, const A& a) { r=Op()(_subexpr1->evaluate(a),_subexpr2->evaluate(a)); }
+  private: 
+    Op _op;
+    shared_ptr<const ExpressionInterface> _subexpr1;
+    shared_ptr<const ExpressionInterface> _subexpr2;
+};
 
 
 

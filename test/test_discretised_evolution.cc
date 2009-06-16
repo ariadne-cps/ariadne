@@ -84,11 +84,9 @@ void TestDiscretisedEvolution::test_discrete_time() const
     // Set up the evolution parameters and grid
     uint steps(6);
     Float maximum_step_size(0.125);
-    Float maximum_enclosure_radius(0.25);
     int depth=8;
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=maximum_enclosure_radius;
     parameters.maximum_step_size=maximum_step_size;
     Grid grid(2);
 
@@ -183,11 +181,9 @@ void TestDiscretisedEvolution::test_continuous_time() const
     // Set up the evolution parameters and grid
     Float time(1.0);
     Float maximum_step_size(0.125);
-    Float maximum_enclosure_radius(0.25);
     int depth=8;
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=maximum_enclosure_radius;
     parameters.maximum_step_size=maximum_step_size;
     Grid grid(2);
 
@@ -278,13 +274,11 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     Float time(1.0);
     uint steps(6);
     Float maximum_step_size(0.125);
-    Float maximum_enclosure_radius(0.25);
     int depth=8;
     DiscreteState location(1);
     DiscreteEvent event(1);
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=maximum_enclosure_radius;
     parameters.maximum_step_size=maximum_step_size;
     Grid grid(2);
 

@@ -750,7 +750,7 @@ void grid_draw(GraphicsInterface& fig, const TaylorSet& ts)
 }
 
 void draw(GraphicsInterface& fig, const TaylorSet& ts) {
-    boxes_draw(fig,ts);
+    box_draw(fig,ts);
     //zonotopes_draw(fig,ts);
     //affine_draw(fig, ts);
     //curve_draw(fig, ts);

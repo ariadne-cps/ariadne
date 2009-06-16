@@ -586,10 +586,10 @@ tribool
 TaylorCalculus::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    //ARIADNE_ASSERT_MSG(subset(set_model.range(),guard_model.domain()),
-    //    "\nset_model.range()="<<set_model.range()<<"\nguard_model="<<guard_model<<"\nset_model="<<set_model);
-    IntervalType range=Ariadne::unchecked_apply(guard_model,set_model).range();
-    return this->_tribool(range);
+    TimeModelType guard_set_model = apply(guard_model,set_model)[0];
+    Interval guard_range=guard_set_model.range();
+    tribool guard_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
+    return guard_active;    
 }
 
 

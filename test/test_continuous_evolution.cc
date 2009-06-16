@@ -40,6 +40,7 @@
 #include "vector_field_evolver.h"
 #include "orbit.h"
 #include "graphics.h"
+#include "textplot.h"
 #include "logging.h"
 
 #include "models.h"
@@ -60,11 +61,12 @@ struct FailOne : FunctionData<2,2,1> {
 };
 
 /// This function diverges heavily
-struct FailTwo : FunctionData<2,2,1> {
+struct FailTwo : FunctionData<3,3,1> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
 	      r[0] = 1.0;
-          r[1] = x[0] * x[1]/p[0];
+          r[1] = x[1] * x[2]/p[0];
+          r[2] = 0.0;
     }
 };
 
@@ -189,6 +191,8 @@ void TestContinuousEvolution::test() const
 
 void TestContinuousEvolution::failure_test() const
 {
+    // The systems in this test are stiff and are expected to fail.
+
     // cout << __PRETTY_FUNCTION__ << endl;
 
     typedef TaylorSet EnclosureType;
@@ -226,13 +230,13 @@ void TestContinuousEvolution::failure_test() const
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;
     cout << "final set radius="<< orbit.final()[0].radius() << endl;
 
-    ARIADNE_TEST_COMPARE(orbit.final()[0].radius(),<,0.5);
+    ARIADNE_TEST_COMPARE(orbit.final()[0].radius(),>,0.5);
 
     // Print the intial, evolve and reach sets
     // cout << "Plotting sets" << endl;
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
-    std::cout << "Plotting...";
+    std::cout << "Plotting..."<< std::flush;
     Figure fig;
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
@@ -241,15 +245,14 @@ void TestContinuousEvolution::failure_test() const
     fig.write("test_continuous_evolution-failone");
     
     // Set up the vector field for the second test
-    p[0] = 0.5e-2;
+    p[0] = 0.1;
     UserFunction<FailTwo> failtwo(p);
     VectorField failtwo_vf(failtwo);
     
-    initial_box[0] = Interval(1.0, 1.0);
-    initial_box[1] = Interval(1.0, 1.0);
-    initial_set = EnclosureType(initial_box);
+    Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);
+    initial_set = EnclosureType(initial_box2);
 
-    time = 1.5e-2;
+    time = 1.5;
 
     // Compute the reachable sets
     orbit = evolver.orbit(failtwo_vf,initial_set,time,semantics);
@@ -257,19 +260,20 @@ void TestContinuousEvolution::failure_test() const
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;
     cout << "final set radius="<< orbit.final()[0].radius() << endl;
 
-    ARIADNE_TEST_COMPARE(orbit.final()[0].radius(),<,1.0);
+    ARIADNE_TEST_COMPARE(orbit.final()[0].radius(),>,1.0);
 
     // Print the intial, evolve and reach sets
     // cout << "Plotting sets" << endl;
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
-    std::cout << "Plotting...";
+    std::cout << "Plotting..." << std::flush;
     fig.clear();
+    fig.set_projection_map(ProjectionFunction(2,3,0));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
-    fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
-    fig.write("test_continuous_evolution-failtwo");
+    fig.write("test_continuous_evolution-failtwo");    
+    std::cout << std::endl;
 
 }
 

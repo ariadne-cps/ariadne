@@ -150,8 +150,6 @@ class HybridEvolver
                                   Semantics semantics, bool reach) const;
 
   protected:
-    tribool active(FunctionPtr guard, const SetModelType& set) const;
-
     TimeModelType crossing_time(FunctionPtr guard, const FlowSetModelType& flow_set) const;
 
     Interval normal_derivative(FunctionPtr guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;

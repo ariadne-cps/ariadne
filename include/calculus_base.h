@@ -305,8 +305,11 @@ class CalculusBase
     tribool active(const ExpressionType& guard,  const SetModelType& set_model) const {
         return this->active(this->predicate_model(guard,set_model.range()),set_model); }
     tribool active(const FunctionType& guard,  const SetModelType& set_model) const {
-        return this->active(this->map_model(guard,set_model.range())[0],set_model); }
-
+        TimeModelType guard_set_model = apply(guard,set_model)[0];
+        Interval guard_range=guard_set_model.range();
+        tribool guard_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
+        return guard_active;    
+    }
 
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
     SetModelType reset_step(const FunctionType& map,

@@ -68,11 +68,6 @@ void append(V& v, const C& c)
 
 namespace Ariadne {
  
-// Allow subdivisions in upper evolution
-const bool ENABLE_SUBDIVISIONS = false;
-// Allow premature termination of lower evolution
-const bool ENABLE_PREMATURE_TERMINATION = false;
-
 static const int BLOCKING_EVENT = -2;
 using boost::shared_ptr;
 
@@ -240,7 +235,7 @@ _evolution(EnclosureListType& final_sets,
         RealType initial_set_radius=radius(initial_set_model.range());
         if(initial_time_model.range().lower()>=maximum_time || initial_steps>=maximum_steps) {
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if(semantics == UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions
                   && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
             // Subdivide
             uint nd=initial_set_model.dimension();
@@ -252,9 +247,11 @@ _evolution(EnclosureListType& final_sets,
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
                 working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }
-        } else if(semantics == LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
-            std::cerr << "WARNING: Terminating lower evolution at time " << initial_time_model
-                      << " and set " << initial_set_model << " due to maximum radius being exceeded.";
+        } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) && 
+                  this->_parameters->enable_premature_termination && 
+                  initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+            std::cerr << "\nWARNING: Terminating evolution at time " << initial_time_model.value()
+                      << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n";
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,
@@ -769,7 +766,7 @@ timed_evolution(const SystemType& system,
             Interval final_time(initial_time_model.range());
             EnclosureType final_enclosure(initial_location,this->_toolbox->enclosure(initial_set_model));
             result.push_back(TimedEnclosureType(final_time,final_enclosure));
-        } else if(semantics == UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions
                   && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
             // Subdivide
             uint nd=initial_set_model.dimension();
@@ -781,11 +778,13 @@ timed_evolution(const SystemType& system,
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
                 working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }
-        } else if(semantics == LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+        } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) && 
+                  this->_parameters->enable_premature_termination && 
+                  initial_set_radius>this->_parameters->maximum_enclosure_radius) {
             Interval final_time(initial_time_model.range());
             EnclosureType final_enclosure(initial_location,this->_toolbox->enclosure(initial_set_model));
             result.push_back(TimedEnclosureType(final_time,final_enclosure));
-            std::cerr << "WARNING: Terminating lower evolution at time " << initial_time_model
+            std::cerr << "WARNING: Terminating evolution at time " << initial_time_model
                       << " and set " << initial_set_model << " due to maximum radius being exceeded.";
         } else {
             // insert current working set into result

@@ -68,6 +68,9 @@ class ContinuousEvolutionParameters {
     
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
+
+    //! \brief Terminate evolution if basic sets became too large (true by default).
+    bool enable_premature_termination;
 };
 
 
@@ -198,8 +201,9 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       minimum_step_size(0.0),
       maximum_step_size(1.0),
       minimum_enclosure_radius(0.0),
-      maximum_enclosure_radius(0.5),
-      enable_subdivisions(false)
+      maximum_enclosure_radius(100.0),
+      enable_subdivisions(false),
+      enable_premature_termination(true)
 { }
 
 inline
@@ -227,6 +231,7 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
        << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
        << ",\n  enable_subdivisions=" << p.enable_subdivisions
+       << ",\n  enable_premature_termination=" << p.enable_premature_termination
        << "\n)\n";
     return os;
 }

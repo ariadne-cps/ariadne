@@ -53,8 +53,6 @@ class HybridGridCell;
 class HybridGridTreeSet;
 class HybridGridTreeSet;
 
-class TaylorSet;
-
 template<class ES> class HybridListSet;
 class HybridEvolver;
 template<class ES> class HybridDiscretiser;
@@ -115,57 +113,27 @@ class HybridReachabilityAnalyser
     virtual SetApproximationType lower_evolve(const SystemType& system,
                                             const OvertSetInterfaceType& initial_set, 
                                             const TimeType& time) const;
-
-    /*! \brief Compute a lower-approximation to the set obtained by evolving \a system for \a time starting in \a initial_set. The \a initial_set is not mapped to the grid at the beginning. */
-    virtual SetApproximationType lower_evolve(const SystemType& system,
-                                            const HybridEnclosureType& initial_set, 
-                                            const TimeType& time) const;
-
   
-    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time. The \a initial_set is mapped to the grid at the beginning. */
+    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time. */
     virtual SetApproximationType
     lower_reach(const SystemType& system, 
                 const OvertSetInterfaceType& initial_set, 
                 const TimeType& time) const;
-
-    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time. The \a initial_set is not mapped to the grid at the beginning. */
-    virtual SetApproximationType
-    lower_reach(const SystemType& system, 
-                const HybridEnclosureType& initial_set, 
-                const TimeType& time) const;
-
   
     /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. */
     virtual std::pair<SetApproximationType,SetApproximationType>
     lower_reach_evolve(const SystemType& system, 
                        const OvertSetInterfaceType& initial_set, 
                        const TimeType& time) const;
-
-    /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. The \a initial_set is not mapped to the grid at the beginning. */
-    virtual std::pair<SetApproximationType,SetApproximationType>
-    lower_reach_evolve(const SystemType& system, 
-                       const HybridEnclosureType& initial_set, 
-                       const TimeType& time) const;
-
   
     /*! \brief Compute an approximation to the set obtained by iterating \a time times \a system starting in \a initial_set. */
     virtual SetApproximationType upper_evolve(const SystemType& system,
                                             const CompactSetInterfaceType& initial_set, 
                                             const TimeType& time) const;
-
-    /*! \brief Compute an approximation to the set obtained by iterating \a time times \a system starting in \a initial_set. The \a initial_set is not mapped to the grid at the beginning.  */
-    virtual SetApproximationType upper_evolve(const SystemType& system,
-                                            const HybridEnclosureType& initial_set, 
-                                            const TimeType& time) const;
   
     /*! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a time times. */
     virtual SetApproximationType upper_reach(const SystemType& system,
                                            const CompactSetInterfaceType& initial_set, 
-                                           const TimeType& timeType) const;
-  
-    /*! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a time times. The \a initial_set is not mapped to the grid at the beginning.  */
-    virtual SetApproximationType upper_reach(const SystemType& system,
-                                           const HybridEnclosureType& initial_set, 
                                            const TimeType& timeType) const;
   
     /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. */
@@ -174,19 +142,9 @@ class HybridReachabilityAnalyser
                        const CompactSetInterfaceType& initial_set, 
                        const TimeType& time) const;
   
-    /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. The \a initial_set is not mapped to the grid at the beginning. */
-    virtual std::pair<SetApproximationType,SetApproximationType>
-    upper_reach_evolve(const SystemType& system, 
-                       const HybridEnclosureType& initial_set, 
-                       const TimeType& time) const;
-  
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const CompactSetInterfaceType& initial_set) const;
-  
-    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. The \a initial_set is not mapped to the grid at the beginning. */
-    virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const HybridEnclosureType& initial_set) const;
   
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
     virtual SetApproximationType chain_reach(const SystemType& system,
@@ -207,6 +165,7 @@ class HybridReachabilityAnalyser
     typedef HybridTime T;
     typedef HybridAutomaton Sys;
     typedef HybridListSet<Box> BxLS;
+    typedef HybridGrid Gr;
     typedef HybridGridCell GC;
     typedef HybridGridTreeSet GCLS;
     typedef HybridGridTreeSet GTS;

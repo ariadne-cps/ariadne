@@ -154,8 +154,9 @@ int main()
     typedef HybridEvolver::OrbitType OrbitType;
     typedef HybridEvolver::EnclosureListType EnclosureListType;
 
-    Box initial_box(2, 6.0,6.00, 1.0,1.00);
-    HybridEnclosureType initial_enclosure(l2,initial_box);
+    Box initial_continuous_box(2, 6.0,6.00, 1.0,1.00);
+    HybridImageSet initial_set;
+    initial_set[l2]=initial_continuous_box;
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
   
     /// Create a ReachabilityAnalyser object
@@ -186,7 +187,7 @@ int main()
     for(grid_depth = min_grid_depth; grid_depth <= max_grid_depth ; grid_depth+=2) {    
         std::cout << "Computing upper reach set with grid depth " << grid_depth <<" and cell size "<<eps<<"..." << std::flush;
         analyser.parameters().maximum_grid_depth=grid_depth;
-        HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_enclosure,reach_time);
+        HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);
         std::cout << "done." << std::endl;
         char filename[30];
         sprintf(filename, "watertank-upper_reach-%d", grid_depth);
@@ -213,7 +214,7 @@ int main()
             break;
         } else {
             std::cout << "Upper reach set is not safe, computing lower reach set... " << std::flush;
-            HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_enclosure,reach_time);
+            HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
             std::cout << "done." << std::endl;
             sprintf(filename, "watertank-lower_reach-%d", grid_depth);
             plot(filename,bounding_box, Colour(0.0,0.5,1.0), lower_reach_set);

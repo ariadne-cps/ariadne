@@ -43,10 +43,14 @@
 
 namespace Ariadne {
 
+class Enumeration;
 class Variable;
+class DottedVariable;
+class NextVariable;
 class Formula;
 class Assignment;
 class Comparison;
+class Predicate;
 
 struct GtrZero {}; struct LessZero {}; struct Gtr { }; struct Less { };
 
@@ -85,6 +89,8 @@ inline std::ostream& operator<<(std::ostream& os, const FormulaInterface& f) { r
 
 
 
+
+
 /*! \brief A named variable, suitable for use in formulae and in defining state spaces.
  *  Equality is performed using references by name, so different variables may have the same "name".
  *  \details \sa Space, Formula.
@@ -114,9 +120,40 @@ struct Variable
     shared_ptr<const std::string> _name_ptr;
 };
 
+struct RealVariable : public Variable {
+    RealVariable(std::string name) : Variable(name) { }
+};
+
 inline std::ostream& operator<<(std::ostream& os, const Variable& v) { return os << v.name(); }
 
+struct DottedVariable
+{
+  public:
+    friend DottedVariable dot(const Variable& v);
+    Variable base() const { return _base_variable; }
+  private:
+    DottedVariable(const Variable& v) : _base_variable(v) { }
+    Variable _base_variable;
+};
 
+inline DottedVariable dot(const Variable& v) {
+    return DottedVariable(v);
+}
+
+
+struct NextVariable
+{
+  public:
+    friend NextVariable next(const Variable& v);
+    Variable base() const { return _base_variable; }
+  private:
+    NextVariable(const Variable& v) : _base_variable(v) { }
+    Variable _base_variable;
+};
+
+inline NextVariable next(const Variable& v) {
+    return NextVariable(v);
+}
 
 /*! \brief A space defined as a list of named variables.
  *  \details \sa Variable
@@ -224,7 +261,7 @@ class Formula {
     FormulaPointer ptr;
 };
 
-std::ostream& operator<<(std::ostream& os, const Formula& e) { return e.ptr->write(os); }
+inline std::ostream& operator<<(std::ostream& os, const Formula& e) { return e.ptr->write(os); }
 
 
 class AffineFormula
@@ -312,16 +349,16 @@ inline std::ostream& operator<<(std::ostream& os, const AffineFormula& x) {
 }
 
 
-ExpressionInterface* Variable::expression(const Space& spc) const {
+inline ExpressionInterface* Variable::expression(const Space& spc) const {
     return new ProjectionExpression(spc.dimension(),spc.index(*this));
 }
 
 template<class C>
-ExpressionInterface* ConstantFormula<C>::expression(const Space& spc) const {
+inline ExpressionInterface* ConstantFormula<C>::expression(const Space& spc) const {
     return new ConstantExpression(spc.dimension(),Interval(this->_value));
 }
 
-ExpressionInterface* VariableFormula::expression(const Space& spc) const {
+inline ExpressionInterface* VariableFormula::expression(const Space& spc) const {
     return new ProjectionExpression(spc.dimension(),spc.index(this->_var));
 }
 
@@ -334,16 +371,16 @@ ExpressionInterface* BinaryFormula<Op>::expression(const Space& spc) const {
     return new BinaryExpression<Op>(op,arg1_ptr->expression(spc),arg2_ptr->expression(spc)); }
 
 
-FormulaPointer make_formula_pointer(const Float& c) { return FormulaPointer(new ConstantFormula<Float>(c)); }
-FormulaPointer make_formula_pointer(const Interval& c) { return FormulaPointer(new ConstantFormula<Interval>(c)); }
+inline FormulaPointer make_formula_pointer(const Float& c) { return FormulaPointer(new ConstantFormula<Float>(c)); }
+inline FormulaPointer make_formula_pointer(const Interval& c) { return FormulaPointer(new ConstantFormula<Interval>(c)); }
 
-Formula operator+(Formula e1, Formula e2) {
+inline Formula operator+(Formula e1, Formula e2) {
     return Formula(new BinaryFormula<Add>(Add(),e1.ptr,e2.ptr)); }
-Formula operator-(Formula e1, Formula e2) {
+inline Formula operator-(Formula e1, Formula e2) {
     return Formula(new BinaryFormula<Sub>(Sub(),e1.ptr,e2.ptr)); }
-Formula operator*(Formula e1, Formula e2) {
+inline Formula operator*(Formula e1, Formula e2) {
     return Formula(new BinaryFormula<Mul>(Mul(),e1.ptr,e2.ptr)); }
-Formula operator/(Formula e1, Formula e2) {
+inline Formula operator/(Formula e1, Formula e2) {
     return Formula(new BinaryFormula<Div>(Div(),e1.ptr,e2.ptr)); }
 
 
@@ -370,15 +407,15 @@ FormulaPointer operator/(Interval e1, FormulaPointer e2) { return make_formula_p
 */
 
 
-Formula exp(Formula e) {
+inline Formula exp(Formula e) {
     return Formula(new UnaryFormula<Exp>(Exp(),e.ptr)); }
-Formula log(Formula e) {
+inline Formula log(Formula e) {
     return Formula(new UnaryFormula<Log>(Log(),e.ptr)); }
-Formula sin(Formula e) {
+inline Formula sin(Formula e) {
     return Formula(new UnaryFormula<Sin>(Sin(),e.ptr)); }
-Formula cos(Formula e) {
+inline Formula cos(Formula e) {
     return Formula(new UnaryFormula<Cos>(Cos(),e.ptr)); }
-Formula tan(Formula e) {
+inline Formula tan(Formula e) {
     return Formula(new UnaryFormula<Tan>(Tan(),e.ptr)); }
 
 

@@ -38,6 +38,7 @@ SRC = \
 	hybrid_set.cc \
 	geometry.cc \
 	hybrid_automaton.cc \
+	hybrid_system.cc \
 	orbit.cc \
 	map_evolver.cc \
 	vector_field_evolver.cc \

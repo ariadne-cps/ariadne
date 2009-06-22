@@ -35,12 +35,13 @@ check_PROGRAMS = \
 	test_taylor_function \
 	test_taylor_set \
 	test_function \
+	test_hybrid_system \
 	test_grid_set \
 	test_hybrid_set \
 	test_discrete_evolution \
 	test_continuous_evolution \
-    test_hybrid_evolution \
-    test_discretised_evolution \
+	test_hybrid_evolution \
+	test_discretised_evolution \
 	test_reachability_analysis \
 	test_serialization \
 	test_graphics \
@@ -76,6 +77,7 @@ test_taylor_set_SOURCES=test_taylor_set.cc
 test_function_SOURCES=test_function.cc
 test_grid_set_SOURCES=test_grid_set.cc
 test_hybrid_set_SOURCES=test_hybrid_set.cc
+test_hybrid_system_SOURCES=test_hybrid_system.cc
 test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc

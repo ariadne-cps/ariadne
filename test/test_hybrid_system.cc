@@ -29,6 +29,7 @@
 #include "vector.h"
 #include "matrix.h"
 
+#include "discrete_automaton.h"
 #include "formula.h"
 #include "hybrid_system.h"
 
@@ -43,21 +44,37 @@ class TestHybridSystem {
     void test_build_hybrid_system();
 };
 
-void 
+void
 TestHybridSystem::test()
 {
     ARIADNE_TEST_CALL(test_build_hybrid_system());
 }
 
 
-void 
+void
 TestHybridSystem::test_build_hybrid_system()
 {
     HybridSystem system;
+    DiscreteEvent turn_on("turn_on");
+    DiscreteEvent turn_off("turn_off");
+    DiscreteEvent midnight("midnight");
+    DiscreteType swtch("Switch",(build_array,"on","off"));
+    DiscreteVariable heater("heater",swtch);
+    RealVariable T("Te");
+    RealVariable t("t");
+    RealVariable c("c");
 
-    DiscreteValue off("off");
-    DiscreteValue on("on");
-    DiscreteType swtch("switch",(ArrayBuilder(),on,off));
+    system.new_dynamic(heater=="on", dot(T)=20+cos(t));
+    system.new_dynamic(heater=="off", dot(T)=10+cos(t));
+    system.new_equation(true, c=t+0.5);
+    system.new_reset(turn_off,heater=="on",next(heater),DiscreteValue("off"));
+    system.new_reset(turn_on,heater=="off",next(heater),DiscreteValue("on"));
+    system.new_reset(midnight,DiscretePredicate(true),next(t)=RealFormula(0.0));
+    system.new_guard(midnight,DiscretePredicate(true),t>RealFormula(1.0));
+    system.new_invariant(DiscretePredicate(true),t<=RealFormula(1.0));
+
+    ARIADNE_TEST_PRINT(system);
+
     //system.new_invariant();
 }
 

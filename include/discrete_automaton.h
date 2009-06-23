@@ -44,15 +44,22 @@ namespace Ariadne {
 
 
 
+typedef std::string String;
 
-
-class DiscreteType;
+class EnumeratedType;
+class EnumeratedVariable;
 class DiscreteValue;
-class DiscreteVariable;
+class DiscreteAssignment;
+class DiscretePredicate;
 class DiscreteSpace;
 class DiscreteState;
 
+class ArrayBuilderTag {};
+static ArrayBuilderTag build_array;
 
+template<class T>
+inline std::vector<T> operator,(ArrayBuilderTag, const T& t) {
+    std::vector<T> v; v.push_back(t); return v; }
 template<class T>
 inline std::vector<T> operator,(const T& t1, const T& t2) {
     std::vector<T> v; v.push_back(t1); v.push_back(t2); return v; }
@@ -60,154 +67,199 @@ template<class T>
 inline std::vector<T> operator,(const std::vector<T>& v, const T& t) {
     std::vector<T> r(v); r.push_back(t); return r; }
 
+inline std::vector<std::string> operator,(const std::string& s1, const char* s2) {
+    std::vector<std::string> v; v.push_back(std::string(s1)); v.push_back(std::string(s2)); return v; }
+inline std::vector<std::string> operator,(const std::vector<std::string>& v1, const char* s2) {
+    std::vector<std::string> r(v1); r.push_back(std::string(s2)); return r; }
 
-//! \brief A value which can be taken by a discrete variable.
-//! \details \sa DiscreteType, DiscreteValue, DiscreteVariable, DiscreteSpace, DiscreteState, DiscretePredicate
-struct DiscreteValue {
-  public:
-    DiscreteValue() { }
-    DiscreteValue(const std::string& name);
 
-    const std::string& name() const { return this->_name; }
+inline std::vector<std::string> operator,(const ArrayBuilderTag& a, const char* s) {
+    std::vector<std::string> r; r.push_back(std::string(s)); return r; }
 
-    //! \brief .
-    bool operator==(const DiscreteValue& other) const;
-    //! \brief .
-    bool operator!=(const DiscreteValue& other) const { return !(*this==other); }
-    //! \brief .
-    bool operator<(const DiscreteValue& other) const { return this->_name < other._name; }
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteValue& self) {
-        return os<<self.name(); }
-  private:
-    std::string _name;
-};
+/*! \brief An ASCII string. */
+typedef std::string String;
 
 /*! \brief An internal enumerated type, suitable for use when a finite type is needed.
- *  \sa DiscreteType, DiscreteValue, DiscreteVariable, DiscreteSpace, DiscreteState, DiscretePredicate
+ *  \sa EnumeratedType, EnumeratedVariable, DiscretePredicate
  */
-struct DiscreteType {
+struct EnumeratedType {
   public:
-    DiscreteType(const std::string&, uint n, const std::string*);
-    DiscreteType(const std::string& nm, const std::vector<DiscreteValue>& ary) : _name(nm), _elements() {
-        for(uint i=0; i!=ary.size(); ++i) { _elements.push_back(ary[i].name()); } }
-    bool has_value(const std::string& str) {
-        for(uint i=0; i!=_elements.size(); ++i) { if(_elements[i]==str) { return true; } } return false; }
-    DiscreteValue value(uint i) {
-        return DiscreteValue(_elements.at(i)); }
-    int id(const std::string&) const;
-    bool operator==(const DiscreteType& other) const;
-    bool operator!=(const DiscreteType& other) const;
-    //! \brief .
+    //! \brief Create a new enumerated type with name \a name and values \a values.
+    EnumeratedType(const std::string& name, const std::vector<std::string>& values) : _name(name), _values(values) {
+        for(uint i=0; i!=this->_values.size(); ++i) {
+            assert(this->_values[i]!="");
+            for(uint j=i+1; j!=this->_values.size(); ++j) {
+                assert(this->_values[i]!=this->_values[j]); } } }
+    //! \brief The name of the type.
     const std::string& name() const { return this->_name; }
+    //! \brief The number of values the type can take.
+    uint size() const { return _values.size(); }
+    //! \brief Returns \c true  if \a str is a valid value for the type.
+    bool has_value(const std::string& str) const {
+        for(uint i=0; i!=_values.size(); ++i) { if(_values[i]==str) { return true; } } return false; }
+    //! \brief The \a i<sup>th</sup> value the type can take.
+    const std::string& value(uint i) const { return _values.at(i); }
+    int index(const std::string& str) const {
+        for(uint i=0; i!=_values.size(); ++i) { if(_values[i]==str) { return i; } } assert(false); }
+    //! \brief Test if two type variables describe the same type.
+    bool operator==(const EnumeratedType& other) const;
+    //! \brief Test if two types are different.
+    bool operator!=(const EnumeratedType& other) const;
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteType& self) {
+    friend std::ostream& operator<<(std::ostream& os, const EnumeratedType& self) {
         os << self.name() << "=";
-        for(uint i=0; i!=self._elements.size(); ++i) { os<<(i==0?'{':',')<<self._elements[i]; } return os << '}'; }
+        for(uint i=0; i!=self._values.size(); ++i) { os<<(i==0?'{':',')<<self._values[i]; } return os << '}'; }
   private:
     std::string _name;
-    std::vector<std::string> _elements;
+    std::vector<std::string> _values;
 
 };
 
 
-inline DiscreteValue::DiscreteValue(const std::string& name)
-    : _name(name) { }
-
-inline bool
-DiscreteValue::operator==(const DiscreteValue& other) const {
-   return this->_name == other._name;
-}
-
-/*
-inline DiscreteValue::DiscreteValue(const DiscreteType& tp, const std::string& name)
-    : _type_ptr(&tp), _value(tp.id(name)) { }
-
-inline bool
-DiscreteValue::operator==(const DiscreteValue& other) const {
-    ARIADNE_ASSERT_MSG(this->type()==other.type(),"Type mismatch: type of "<<this->name()<<" is "<<this->type().name()<<"; type of "<<other.name()<<" is "<<other.type().name()<<".");
-    return this->_value == other._value;
-}
-*/
-
-
-//! \brief A named variable which can take values of a given discrete type.
-//! \details \sa DiscreteType, DiscreteValue, DiscreteVariable, DiscreteSpace, DiscreteState, DiscretePredicate
-struct DiscreteVariable {
-    DiscreteVariable(std::string name, DiscreteType type) : _name(name), _type(type) { }
+//! \brief A named variable.
+struct Variable {
+  protected:
+    //! \brief Create an internal enumerated variable with the given \a name.
+    Variable(const String& name) : _name_ptr(new std::string(name)) { }
   public:
-    //! \brief .
-    const DiscreteType& type() const { return this->_type; }
-    //! \brief .
-    const std::string& name() const { return this->_name; }
-    //! \brief .
-    bool operator==(const DiscreteVariable& other) const { return this->_name==other._name; }
-    bool operator!=(const DiscreteVariable& other) const { return this->_name!=other._name; }
+    //! \brief The internal name of the variable.
+    const String& name() const { return *this->_name_ptr; }
+  private:
+    shared_ptr<std::string> _name_ptr;
+};
+
+
+//! \brief A named variable which can take values of a given enumerated type.
+//! \details \sa EnumeratedType, EnumeratedVariable, DiscretePredicate
+struct EnumeratedVariable : public Variable {
+  public:
+    //! \brief Create an internal enumerated variable with the given \a name and \a type.
+    EnumeratedVariable(const String& name, const EnumeratedType& type) : Variable(name), _type_ptr(&type) { }
+    //! \brief The internal name of the variable.
+    const String& name() const { return this->Variable::name(); }
+    //! \brief The internal type of the variable.
+    const EnumeratedType& type() const { return *this->_type_ptr; }
+    //! \brief Tests if two %EnumeratedVariable objects represent the same internal variable.
+    bool operator==(const EnumeratedVariable& other) const { return this->name()==other.name(); }
+    //! \brief Tests if two %EnumeratedVariable objects represent different internal variables.
+    bool operator!=(const EnumeratedVariable& other) const { return this->name()!=other.name(); }
+    //! \brief Makes a discrete assignment object.
+    DiscreteAssignment operator=(const DiscreteValue& val) const;
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteVariable& self) {
+    friend std::ostream& operator<<(std::ostream& os, const EnumeratedVariable& self) {
         return os << self.name() << ":" << self.type().name(); }
   private:
-    std::string _name;
-    DiscreteType _type;
+    const EnumeratedType* _type_ptr;
 };
 
-//! \brief A finite state space, consisting of valuations for a set of discrete variables..
-//! \details \sa DiscreteType, DiscreteValue, DiscreteVariable, DiscreteSpace, DiscreteState, DiscretePredicate
+
+struct NextEnumeratedVariable {
+    NextEnumeratedVariable(const EnumeratedVariable& v) : _base(v) { }
+    EnumeratedVariable base() const { return this->_base; }
+  private:
+    EnumeratedVariable _base;
+};
+
+NextEnumeratedVariable next(const EnumeratedVariable& v) {
+    return NextEnumeratedVariable(v);
+}
+
+
+typedef EnumeratedType DiscreteType;
+typedef EnumeratedVariable DiscreteVariable;
+typedef NextEnumeratedVariable NextDiscreteVariable;
+
+//! \brief A finite state space, consisting of a list of enumerated variables.
+//! \details \sa EnumeratedType, EnumeratedVariable, DiscreteSpace, DiscreteState, DiscretePredicate
 struct DiscreteSpace {
     friend class DiscreteState;
   public:
-    DiscreteSpace(const std::vector<DiscreteVariable>& variables) : _variables(variables) { }
+    //! \brief Create a space with named variables given by \a variables.
+    DiscreteSpace(const std::vector<EnumeratedVariable>& variables) : _variables(variables) {
+        for(uint i=0; i!=this->_variables.size(); ++i) {
+            for(uint j=i+1; j!=this->_variables.size(); ++j) {
+                assert(this->_variables[i].name()!=this->_variables[j].name()); } } }
+    //! \brief The number of variables needed to describe a state in the space.
+    uint size() const { return _variables.size(); }
+    //! \brief The \a i<sup>th</sup> variable.
+    const EnumeratedVariable& variable(uint i) const { return this->_variables.at(i); }
+    //! \brief The index of the variable with name \a str.
+    uint index(const String& str) const { for(uint i=0; i!=_variables.size(); ++i) {
+        if(_variables[i].name()==str) { return i; } }
+        assert(false);
+    }
+    //! \brief The index of the variable  \a var.
+    uint index(const EnumeratedVariable& var) const { return this->index(var.name()); }
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const DiscreteSpace& self) {
-        for(uint i=0; i!=self._variables.size(); ++i) { os << (i==0?'(':',') << self._variables[i].name(); } return os << ')'; };
+        for(uint i=0; i!=self._variables.size(); ++i) { os << (i==0?'(':',') << self._variables[i].name()<<":"<<self._variables[i].type().name(); } return os << ')'; }
   private:
-    std::vector<DiscreteVariable> _variables;
+    std::vector<EnumeratedVariable> _variables;
 };
 
 
 
-//! \brief A predicate over some discrete variables.
-//! \details \sa DiscreteType, DiscreteValue, DiscreteVariable, DiscreteSpace, DiscreteState, DiscretePredicate
-struct DiscreteState {
+//! \brief A valuation of the enumerated variables of some discrete space.
+//! \details \sa EnumeratedType, EnumeratedVariable, DiscreteSpace, DiscreteState, DiscretePredicate
+struct DiscreteValuation {
   public:
-    DiscreteState(const DiscreteSpace& spc) : _variables(spc._variables), _values(_variables.size()) { }
+    //! \brief Assign \a values to the variables in \a space.
+    DiscreteValuation(const DiscreteSpace& space, const std::vector<String>& values)
+        : _space_ptr(&space), _values(values.size()) {
+        assert(space.size()==values.size());
+        for(uint i=0; i!=values.size(); ++i) {
+            this->_values[i]=space.variable(i).type().index(values[i]); }
+    }
 
-    DiscreteSpace space() const { return reinterpret_cast<DiscreteSpace const&>(this->_variables); }
-    DiscreteValue operator[](const DiscreteVariable& var) const {
-        for(uint i=0; i!=this->_variables.size(); ++i) {
-            if(_variables[i]==var) { return this->_values[i]; } }
+    //! \brief The underlying discrete space.
+    const DiscreteSpace& space() const { return *this->_space_ptr; }
+    //! \brief The value of the \a i<sup>th</sup> variable.
+    String operator[](uint i) const {
+        return this->_space_ptr->variable(i).type().value(this->_values[i]); }
+    //! \brief The value of the internal named variable \a var.
+    String operator[](const EnumeratedVariable& var) const {
+        for(uint i=0; i!=this->_space_ptr->size(); ++i) {
+            if(this->_space_ptr->variable(i)==var) {
+                return (*this)[i]; } }
         ARIADNE_ASSERT_MSG(false,"Variable "<<var<<" is not a member of space "<<this->space()); }
-    DiscreteValue& operator[](const DiscreteVariable& var) {
-        for(uint i=0; i!=this->_variables.size(); ++i) {
-            if(_variables[i]==var) { return this->_values[i]; } }
-        ARIADNE_ASSERT_MSG(false,"Variable "<<var<<" is not a member of space "<<this->space()); }
-    bool operator==(const DiscreteState& other) const {
-        for(uint i=0; i!=_values.size(); ++i) { if(this->_values[i]!=other._values[i]) { return false; } } return true; }
-    bool operator!=(const DiscreteState& other) const {
+    //! \brief Test equality of two valuations on the same space.
+    bool operator==(const DiscreteValuation& other) const {
+        assert(this->_space_ptr==other._space_ptr);
+        for(uint i=0; i!=_values.size(); ++i) {
+            if(this->_values[i]!=other._values[i]) { return false; } }
+        return true; }
+    //! \brief Test inequality of two valuations on the same space.
+    bool operator!=(const DiscreteValuation& other) const {
         return  !(*this==other); }
-    bool operator<(const DiscreteState& other) const {
+    //! \brief Lexicographic ordering of valuations on the same space.
+    bool operator<(const DiscreteValuation& other) const {
+        assert(this->_space_ptr==other._space_ptr);
         for(uint i=0; i!=_values.size(); ++i) {
             if(this->_values[i]!=other._values[i]) { return this->_values[i]<other._values[i]; } }
         return false; }
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteState& self) {
-        for(uint i=0; i!=self._values.size(); ++i) { os << (i==0?'(':',') << self._values[i]; } return os << ')'; }
+    friend std::ostream& operator<<(std::ostream& os, const DiscreteValuation& self) {
+        for(uint i=0; i!=self._values.size(); ++i) { os << (i==0?'(':',') << self.space().variable(i).name()<<"="<<self[i]; } return os << ')'; }
   private:
-    std::vector<DiscreteVariable> _variables;
-    std::vector<DiscreteValue> _values;
+    const DiscreteSpace* _space_ptr;
+    std::vector<int> _values;
 };
 
+
 //! \brief A predicate over some discrete variables.
-//! \details \sa DiscreteValue, DiscreteVariable, DiscreteSpace, DiscreteState, DiscretePredicate
+//! \details \sa DiscreteValue, EnumeratedVariable, DiscreteSpace, DiscreteState, DiscretePredicate
 struct DiscretePredicate {
+    friend class DiscreteConstraint;
   public:
+    DiscretePredicate() { }
+    DiscretePredicate(bool val) { }
     //! \brief Evaluate the predicate at the given state.
-    bool operator() (const DiscreteState&) const;
+    bool operator() (const DiscreteValuation&) const;
 
     //! \brief .
-    friend DiscretePredicate operator==(const DiscreteVariable&, const DiscreteValue&);
+    friend DiscretePredicate operator==(const EnumeratedVariable&, const String&);
     //! \brief .
-    friend DiscretePredicate operator!=(const DiscreteVariable&, const DiscreteValue&);
+    friend DiscretePredicate operator!=(const EnumeratedVariable&, const String&);
     //! \brief .
     friend DiscretePredicate operator||(const DiscretePredicate&, const DiscretePredicate&);
     //! \brief .
@@ -218,11 +270,26 @@ struct DiscretePredicate {
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream&, const DiscretePredicate&);
   private:
-    std::vector< std::vector< std::pair<DiscreteVariable, DiscreteValue> > > _cnf;
+    std::vector< std::vector< std::pair<EnumeratedVariable, String> > > _cnf;
+};
+
+//! \brief A predicate over some discrete variables.
+//! \details \sa DiscreteValue, EnumeratedVariable, DiscreteSpace, DiscreteState, DiscretePredicate
+struct DiscreteValue {
+  public:
+    //! \brief Construct a discrete value based on the string \a str.
+    DiscreteValue(const std::string& str) : _value(str) { }
+    //! \brief The string representation of the value.
+    const std::string& str() const { return this->_value; }
+    //! \brief Write to an output stream.
+    friend std::ostream& operator<<(std::ostream& os, const DiscreteValue& self) {
+        return os << self._value; }
+  private:
+    std::string _value;
 };
 
 inline
-bool DiscretePredicate::operator() (const DiscreteState& state) const {
+bool DiscretePredicate::operator() (const DiscreteValuation& state) const {
     for(uint i=0; i!=_cnf.size(); ++i) {
         bool value=false;
         for(uint j=0; j!=_cnf[i].size(); ++j) {
@@ -237,13 +304,13 @@ bool DiscretePredicate::operator() (const DiscreteState& state) const {
 
 
 inline
-DiscretePredicate operator==(const DiscreteVariable& var, const DiscreteValue& val) {
-    std::vector< std::pair<DiscreteVariable, DiscreteValue> > clause(1u,std::make_pair(var,val));
+DiscretePredicate operator==(const EnumeratedVariable& var, const String& val) {
+    std::vector< std::pair<EnumeratedVariable, String> > clause(1u,std::make_pair(var,val));
     DiscretePredicate result; result._cnf.push_back(clause); return result;
 }
 
 inline
-DiscretePredicate operator!=(const DiscreteVariable&, const DiscreteValue&);
+DiscretePredicate operator!=(const EnumeratedVariable&, const String&);
 
 inline
 DiscretePredicate operator||(const DiscretePredicate& dp1, const DiscretePredicate& dp2) {
@@ -270,15 +337,106 @@ DiscretePredicate operator!(const DiscretePredicate&);
 inline
 std::ostream& operator<<(std::ostream& os, const DiscretePredicate& self)
 {
+    if(self._cnf.empty()) { return os<<"true"; }
     for(uint i=0; i!=self._cnf.size(); ++i) {
         if(i!=0) { os << " & "; }
         for(uint j=0; j!=self._cnf[i].size(); ++j) {
-            os << (j==0?"(":" | ") << self._cnf[i][j].first.name()<<"=="<<self._cnf[i][j].second.name();
+            os << (j==0?"(":" | ") << self._cnf[i][j].first.name()<<"=="<<self._cnf[i][j].second;
         }
         os << ")";
     }
     return os;
 }
+
+
+
+//! \brief A state in an integer lattice.
+//! \details \sa DiscreteConstraint
+struct DiscreteState {
+  public:
+    DiscreteState(const std::vector<int>& values) : _values(values) { }
+
+    uint size() const { return this->_values.size(); }
+    uint operator[](uint i) const { return this->_values[i]; }
+    bool operator==(const DiscreteState& other) const {
+        assert(this->size()==other.size());
+        for(uint i=0; i!=_values.size(); ++i) {
+            if(this->_values[i]!=other._values[i]) { return false; } }
+        return true; }
+    bool operator!=(const DiscreteState& other) const {
+        return  !(*this==other); }
+    bool operator<(const DiscreteState& other) const {
+        assert(this->size()==other.size());
+        for(uint i=0; i!=_values.size(); ++i) {
+            if(this->_values[i]!=other._values[i]) { return this->_values[i]<other._values[i]; } }
+        return false; }
+    //! \brief Write to an output stream.
+    friend std::ostream& operator<<(std::ostream& os, const DiscreteState& self) {
+        for(uint i=0; i!=self._values.size(); ++i) { os << (i==0?'(':',') << "q["<<i<<"]="<<self._values[i]; } return os << ')'; }
+  private:
+    std::vector<int> _values;
+};
+
+//! \brief A constraint over integer variables.
+//! \details \sa DiscreteState
+struct DiscreteConstraint {
+  public:
+    DiscreteConstraint(const DiscretePredicate& pred, const DiscreteSpace& spc);
+    //! \brief Evaluate the predicate at the given state.
+    bool operator() (const DiscreteState&) const;
+    //! \brief Write to an output stream.
+    friend std::ostream& operator<<(std::ostream&, const DiscreteConstraint&);
+  private:
+    std::vector< std::vector< std::pair<uint,uint> > > _cnf;
+};
+
+inline
+DiscreteConstraint::DiscreteConstraint(const DiscretePredicate& pred, const DiscreteSpace& spc) {
+    for(uint i=0; i!=pred._cnf.size(); ++i) {
+        _cnf.push_back(std::vector<std::pair<uint,uint> >());
+        for(uint j=0; j!=pred._cnf[i].size(); ++j) {
+            EnumeratedVariable const& var=pred._cnf[i][j].first;
+            String const& val=pred._cnf[i][j].second;
+            this->_cnf[i].push_back(std::pair<uint,uint>(spc.index(var),var.type().index(val)));
+        }
+    }
+}
+
+inline
+bool DiscreteConstraint::operator() (const DiscreteState& state) const {
+    for(uint i=0; i!=_cnf.size(); ++i) {
+        bool value=false;
+        for(uint j=0; j!=_cnf[i].size(); ++j) {
+            if(state[_cnf[i][j].first]==_cnf[i][j].second) {
+                value=true; break;
+            }
+        }
+        if(value==false) { return false; }
+    }
+    return true;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const DiscreteConstraint& self)
+{
+    for(uint i=0; i!=self._cnf.size(); ++i) {
+        if(i!=0) { os << " & "; }
+        for(uint j=0; j!=self._cnf[i].size(); ++j) {
+            os << (j==0?"(":" | ") << "q["<<self._cnf[i][j].first<<"]=="<<self._cnf[i][j].second;
+        }
+        os << ")";
+    }
+    return os;
+}
+
+
+struct DiscreteAssignment {
+    DiscreteVariable lhs;
+    DiscreteValue rhs;
+};
+
+DiscreteAssignment EnumeratedVariable::operator=(const DiscreteValue& val) const {
+    DiscreteAssignment a={*this,val}; return a; }
 
 
 //! \brief A discrete event.
@@ -291,6 +449,8 @@ struct DiscreteEvent {
     bool operator==(const DiscreteEvent& other) const { return this->id()==other.id(); }
     bool operator!=(const DiscreteEvent& other) const { return this->id()!=other.id(); }
     bool operator<(const DiscreteEvent& other) const { return this->id()<other.id(); }
+    //! \brief Write to an output stream.
+    friend std::ostream& operator<<(std::ostream& os, const DiscreteEvent& self) { return os << self.name(); }
   private:
     uint _id;
   private:

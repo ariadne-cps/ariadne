@@ -43,8 +43,7 @@
 
 namespace Ariadne {
 
-class Enumeration;
-class Variable;
+class RealVariable;
 class DottedVariable;
 class NextVariable;
 class Formula;
@@ -89,54 +88,56 @@ inline std::ostream& operator<<(std::ostream& os, const FormulaInterface& f) { r
 
 
 
-
+class Assignment;
+class Dynamic;
+class Update;
 
 /*! \brief A named variable, suitable for use in formulae and in defining state spaces.
  *  Equality is performed using references by name, so different variables may have the same "name".
  *  \details \sa Space, Formula.
  */
-struct Variable
+struct RealVariable
 {
   public:
     //! \brief Construct a new named variable with name \a name. If another variable has the same \c name,
     //! the two are \e not considered to be the same quantity.
-    Variable(std::string name) : _name_ptr(new std::string(name)) { }
+    RealVariable(std::string name) : _name_ptr(new std::string(name)) { }
     //! \brief Copy constructer. Returns a C++ variable representing the same named variable.
-    Variable(const Variable& v) : _name_ptr(v._name_ptr) { }
+    RealVariable(const RealVariable& v) : _name_ptr(v._name_ptr) { }
     //! \brief The name of the variable.
     const std::string& name() const { return *this->_name_ptr; }
     //! \brief A dynamically-allocated ProjectionExpression representing the variable.
     ExpressionInterface* expression(const Space& spc) const;
     //! \brief Equality operator. Note that variables with the same name might not be considered equal (the same).
-    bool operator==(const Variable& v) const { return this->_name_ptr==v._name_ptr; }
+    bool operator==(const RealVariable& v) const { return this->_name_ptr==v._name_ptr; }
     //! \brief Inequality operator. Note that variables with the same name might not be considered equal (the same).
-    bool operator!=(const Variable& v) const { return !(*this==v); }
+    bool operator!=(const RealVariable& v) const { return !(*this==v); }
 
-    bool operator<(const Variable& v) const { return *this->_name_ptr<*v._name_ptr; }
+    bool operator<(const RealVariable& v) const { return *this->_name_ptr<*v._name_ptr; }
 
+    Assignment operator=(const Formula& f) const;
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const Variable& v);
+    friend std::ostream& operator<<(std::ostream& os, const RealVariable& v);
   private:
     shared_ptr<const std::string> _name_ptr;
 };
 
-struct RealVariable : public Variable {
-    RealVariable(std::string name) : Variable(name) { }
-};
 
-inline std::ostream& operator<<(std::ostream& os, const Variable& v) { return os << v.name(); }
+inline std::ostream& operator<<(std::ostream& os, const RealVariable& v) { return os << v.name(); }
+
 
 struct DottedVariable
 {
   public:
-    friend DottedVariable dot(const Variable& v);
-    Variable base() const { return _base_variable; }
+    friend DottedVariable dot(const RealVariable& v);
+    Dynamic operator=(const Formula& f) const;
+    RealVariable base() const { return _base_variable; }
   private:
-    DottedVariable(const Variable& v) : _base_variable(v) { }
-    Variable _base_variable;
+    DottedVariable(const RealVariable& v) : _base_variable(v) { }
+    RealVariable _base_variable;
 };
 
-inline DottedVariable dot(const Variable& v) {
+inline DottedVariable dot(const RealVariable& v) {
     return DottedVariable(v);
 }
 
@@ -144,19 +145,20 @@ inline DottedVariable dot(const Variable& v) {
 struct NextVariable
 {
   public:
-    friend NextVariable next(const Variable& v);
-    Variable base() const { return _base_variable; }
+    friend NextVariable next(const RealVariable& v);
+    Update operator=(const Formula& f) const;
+    RealVariable base() const { return _base_variable; }
   private:
-    NextVariable(const Variable& v) : _base_variable(v) { }
-    Variable _base_variable;
+    NextVariable(const RealVariable& v) : _base_variable(v) { }
+    RealVariable _base_variable;
 };
 
-inline NextVariable next(const Variable& v) {
+inline NextVariable next(const RealVariable& v) {
     return NextVariable(v);
 }
 
 /*! \brief A space defined as a list of named variables.
- *  \details \sa Variable
+ *  \details \sa RealVariable
  */
 struct Space
 {
@@ -167,31 +169,31 @@ struct Space
     //! \brief The dimension of the space.
     unsigned int dimension() const { return _variables.size(); }
     //! \brief The \a i<sup>th</sup> named variable.
-    const Variable& operator[](unsigned int i) const { return _variables.at(i); }
-    const Variable& variable(unsigned int i) const { return _variables.at(i); }
+    const RealVariable& operator[](unsigned int i) const { return _variables.at(i); }
+    const RealVariable& variable(unsigned int i) const { return _variables.at(i); }
 
     //! \brief The index of the named variable \a v.
-    unsigned int index(const Variable& v) const {
+    unsigned int index(const RealVariable& v) const {
         for(uint i=0; i!=_variables.size(); ++i) {
             if(v==_variables[i]) { return i; } }
-        ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
+        ARIADNE_ASSERT_MSG(false,"RealVariable "<<v<<" is not in the Space "<<*this);
         return _variables.size(); }
     //! \brief Append the named variable \a v to the variables defining the space.
-    Space& operator,(const Variable& v) {
+    Space& operator,(const RealVariable& v) {
         for(uint i=0; i!=_variables.size(); ++i) {
-            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the Space "<<*this);
+            ARIADNE_ASSERT_MSG(_variables[i]!=v,"RealVariable "<<v<<" is already a variable of the Space "<<*this);
         }
         _variables.push_back(v); return *this; }
   public:
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream&, const Space&);
   private:
-    std::vector<Variable> _variables;
+    std::vector<RealVariable> _variables;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Space& spc) { return os << spc._variables; }
 
-inline Space operator,(const Variable& v1, const Variable& v2) {
+inline Space operator,(const RealVariable& v1, const RealVariable& v2) {
     Space r; r,v1,v2; return r; }
 
 
@@ -208,12 +210,12 @@ template<class C> struct ConstantFormula : public FormulaInterface {
 
 struct VariableFormula : public FormulaInterface {
   public:
-    VariableFormula(const Variable& var) : _var(var) { }
+    VariableFormula(const RealVariable& var) : _var(var) { }
     virtual VariableFormula* clone() const { return new VariableFormula(*this); }
     virtual ExpressionInterface* expression(const Space& spc) const;
     virtual std::ostream& write(std::ostream& os) const { return os<<_var; }
   private:
-    Variable _var;
+    RealVariable _var;
 };
 
 
@@ -241,7 +243,7 @@ template<class Op> struct BinaryFormula : public FormulaInterface {
  *  Secondly, formulae in different variables may be combined; the variables of the resulting formula
  *  are all variables occuring in all formulae.
  *  Thirdly, formulae may be manipulated symbolically, whereas expressions can only be manipulated numerically.
- *  \sa Variable, ExpressionInterface
+ *  \sa RealVariable, ExpressionInterface
  */
 class Formula {
   public:
@@ -249,7 +251,7 @@ class Formula {
     Formula(const double& c) : ptr(new ConstantFormula<double>(c)) { }
     Formula(const Interval& c) : ptr(new ConstantFormula<Interval>(c)) { }
     //! \brief The formula "v" in named variable \a v.
-    Formula(const Variable& v) : ptr(new VariableFormula(v)) { }
+    Formula(const RealVariable& v) : ptr(new VariableFormula(v)) { }
     Formula(FormulaInterface* p) : ptr(p) { }
     Formula(shared_ptr<FormulaInterface> p) : ptr(p) { }
     //! \brief Create an expression \f$\R^n\rightarrow\R\f$ by assigning the variables of the formula the numbers given by \a spc.
@@ -273,14 +275,14 @@ class AffineFormula
     explicit AffineFormula(const double& c) : _b(c), _a() { }
     explicit AffineFormula(const Interval& c) : _b(c), _a() { }
     //! \brief The formula "v" in named variable \a v.
-    explicit AffineFormula(const Variable& v) : _b(0.0), _a() { _a[v]=1.0; }
+    explicit AffineFormula(const RealVariable& v) : _b(0.0), _a() { _a[v]=1.0; }
 
     AffineFormula* clone() const { return new AffineFormula(*this); }
 
     //! \brief Create an expression \f$\R^n\rightarrow\R\f$ by assigning the variables of the formula the numbers given by \a spc.
     AffineExpression* expression(const Space& spc) const {
         Vector<Interval> a(spc.dimension());
-        for(std::map<Variable,Interval>::const_iterator iter=_a.begin(); iter!=_a.end(); ++iter) {
+        for(std::map<RealVariable,Interval>::const_iterator iter=_a.begin(); iter!=_a.end(); ++iter) {
             a[spc.index(iter->first)]+=iter->second;
         }
         return new AffineExpression(a,_b);
@@ -292,12 +294,12 @@ class AffineFormula
     friend std::ostream& operator<<(std::ostream& os, const AffineFormula& e);
   public:
     Interval _b;
-    std::map<Variable,Interval> _a;
+    std::map<RealVariable,Interval> _a;
 };
 
 inline AffineFormula& operator*=(AffineFormula& x, const Interval& c) {
     x._b*=c;
-    for(std::map<Variable,Interval>::iterator iter=x._a.begin(); iter!=x._a.end(); ++iter) {
+    for(std::map<RealVariable,Interval>::iterator iter=x._a.begin(); iter!=x._a.end(); ++iter) {
         iter->second*=c;
     }
     return x;
@@ -305,7 +307,7 @@ inline AffineFormula& operator*=(AffineFormula& x, const Interval& c) {
 
 inline AffineFormula& operator+=(AffineFormula& x, const AffineFormula& y) {
     x._b+=y._b;
-    for(std::map<Variable,Interval>::const_iterator iter=y._a.begin(); iter!=y._a.end(); ++iter) {
+    for(std::map<RealVariable,Interval>::const_iterator iter=y._a.begin(); iter!=y._a.end(); ++iter) {
         x._a[iter->first]+=iter->second;
     }
     return x;
@@ -313,7 +315,7 @@ inline AffineFormula& operator+=(AffineFormula& x, const AffineFormula& y) {
 
 inline AffineFormula& operator-=(AffineFormula& x, const AffineFormula& y) {
     x._b-=y._b;
-    for(std::map<Variable,Interval>::const_iterator iter=y._a.begin(); iter!=y._a.end(); ++iter) {
+    for(std::map<RealVariable,Interval>::const_iterator iter=y._a.begin(); iter!=y._a.end(); ++iter) {
         x._a[iter->first]-=iter->second;
     }
     return x;
@@ -339,7 +341,7 @@ inline AffineFormula operator/(const AffineFormula& x, const Interval& c) {
 
 inline std::ostream& operator<<(std::ostream& os, const AffineFormula& x) {
     if(x._b!=0) { os<<x._b; }
-    for(std::map<Variable,Interval>::const_iterator iter=x._a.begin(); iter!=x._a.end(); ++iter) {
+    for(std::map<RealVariable,Interval>::const_iterator iter=x._a.begin(); iter!=x._a.end(); ++iter) {
         if(iter->second!=0) {
             if(iter->second>0) { os << "+"; }
             os << iter->second << "*" << iter->first;
@@ -349,7 +351,7 @@ inline std::ostream& operator<<(std::ostream& os, const AffineFormula& x) {
 }
 
 
-inline ExpressionInterface* Variable::expression(const Space& spc) const {
+inline ExpressionInterface* RealVariable::expression(const Space& spc) const {
     return new ProjectionExpression(spc.dimension(),spc.index(*this));
 }
 
@@ -419,13 +421,12 @@ inline Formula tan(Formula e) {
     return Formula(new UnaryFormula<Tan>(Tan(),e.ptr)); }
 
 
-
 /*
 class Formula
 {
   public:
     Formula(const FormulaInterface* f_ptr) : _ptr(const_cast<FormulaInterface*>(f_ptr)) { }
-    Formula(const Variable& v) : _ptr(new VariableFormula(v)) { }
+    Formula(const RealVariable& v) : _ptr(new VariableFormula(v)) { }
     shared_ptr<const ExpressionInterface> expression(const Space& spc) {
         return shared_ptr<const ExpressionInterface>(_ptr->expression(spc)); }
   private:
@@ -451,7 +452,7 @@ inline Formula operator/(const Formula& x1, const Formula& x2) {
     return Formula(new BinaryFormula<Div>(Div(),x1._ptr,x2._ptr)); }
 
 inline ConstantFormula<Interval> formula(const Interval& c) { return ConstantFormula<Interval>(c); }
-inline VariableFormula<Interval> formula(const Variable& x) { return VariableFormula(c); }
+inline VariableFormula<Interval> formula(const RealVariable& x) { return VariableFormula(c); }
 inline FormulaInterface& formula(const FormulaInterface& e) { return e; }
 
 template<class Op> make_binary_formula(Op op, const FormulaInterface& x1, const FormulaInterface& x2) {
@@ -468,42 +469,42 @@ inline operator-(const FormulaInterface& x1, const FormulaInterface& x2) { retur
 inline operator*(const FormulaInterface& x1, const FormulaInterface& x2) { return formula(x1)*formula(x2); }
 inline operator/(const FormulaInterface& x1, const FormulaInterface& x2) { return formula(x1)/formula(x2); }
 
-inline BinaryFormula<Add> operator+(const Variable& x1, const Variable& x2) { return formula(x1)+formula(x2); }
-inline BinaryFormula<Sub> operator-(const Variable& x1, const Variable& x2) { return formula(x1)-formula(x2); }
-inline BinaryFormula<Mul> operator*(const Variable& x1, const Variable& x2) { return formula(x1)*formula(x2); }
-inline BinaryFormula<Div> operator/(const Variable& x1, const Variable& x2) { return formula(x1)/formula(x2); }
+inline BinaryFormula<Add> operator+(const RealVariable& x1, const RealVariable& x2) { return formula(x1)+formula(x2); }
+inline BinaryFormula<Sub> operator-(const RealVariable& x1, const RealVariable& x2) { return formula(x1)-formula(x2); }
+inline BinaryFormula<Mul> operator*(const RealVariable& x1, const RealVariable& x2) { return formula(x1)*formula(x2); }
+inline BinaryFormula<Div> operator/(const RealVariable& x1, const RealVariable& x2) { return formula(x1)/formula(x2); }
 
-inline operator+(const Interval& x1, const Variable& x2) { return formula(x1)+formula(x2); }
-inline operator-(const Interval& x1, const Variable& x2) { return formula(x1)-formula(x2); }
-inline operator*(const Interval& x1, const Variable& x2) { return formula(x1)*formula(x2); }
-inline operator/(const Interval& x1, const Variable& x2) { return formula(x1)/formula(x2); }
+inline operator+(const Interval& x1, const RealVariable& x2) { return formula(x1)+formula(x2); }
+inline operator-(const Interval& x1, const RealVariable& x2) { return formula(x1)-formula(x2); }
+inline operator*(const Interval& x1, const RealVariable& x2) { return formula(x1)*formula(x2); }
+inline operator/(const Interval& x1, const RealVariable& x2) { return formula(x1)/formula(x2); }
 
-inline operator+(const Variable& x1, const Interval& x2) { return formula(x1)+formula(x2); }
-inline operator-(const Variable& x1, const Interval& x2) { return formula(x1)-formula(x2); }
-inline operator*(const Variable& x1, const Interval& x2) { return formula(x1)*formula(x2); }
-inline operator/(const Variable& x1, const Interval& x2) { return formula(x1)/formula(x2); }
+inline operator+(const RealVariable& x1, const Interval& x2) { return formula(x1)+formula(x2); }
+inline operator-(const RealVariable& x1, const Interval& x2) { return formula(x1)-formula(x2); }
+inline operator*(const RealVariable& x1, const Interval& x2) { return formula(x1)*formula(x2); }
+inline operator/(const RealVariable& x1, const Interval& x2) { return formula(x1)/formula(x2); }
 
 inline operator+(const FormulaInterface& x1, const Interval& x2) { return formula(x1)+formula(x2); }
 inline operator-(const FormulaInterface& x1, const Interval& x2) { return formula(x1)-formula(x2); }
 inline operator*(const FormulaInterface& x1, const Interval& x2) { return formula(x1)*formula(x2); }
 inline operator/(const FormulaInterface& x1, const Interval& x2) { return formula(x1)/formula(x2); }
 
-inline operator+(const FormulaInterface& x1, const Variable& x2) { return formula(x1)+formula(x2); }
-inline operator-(const FormulaInterface& x1, const Variable& x2) { return formula(x1)-formula(x2); }
-inline operator*(const FormulaInterface& x1, const Variable& x2) { return formula(x1)*formula(x2); }
-inline operator/(const FormulaInterface& x1, const Variable& x2) { return formula(x1)/formula(x2); }
+inline operator+(const FormulaInterface& x1, const RealVariable& x2) { return formula(x1)+formula(x2); }
+inline operator-(const FormulaInterface& x1, const RealVariable& x2) { return formula(x1)-formula(x2); }
+inline operator*(const FormulaInterface& x1, const RealVariable& x2) { return formula(x1)*formula(x2); }
+inline operator/(const FormulaInterface& x1, const RealVariable& x2) { return formula(x1)/formula(x2); }
 
 inline operator+(const Interval& x1, const FormulaInterface& x2) { return formula(x1)+formula(x2); }
 inline operator-(const Interval& x1, const FormulaInterface& x2) { return formula(x1)-formula(x2); }
 inline operator*(const Interval& x1, const FormulaInterface& x2) { return formula(x1)*formula(x2); }
 inline operator/(const Interval& x1, const FormulaInterface& x2) { return formula(x1)/formula(x2); }
 
-inline operator+(const Variable& x1, const FormulaInterface& x2) { return formula(x1)+formula(x2); }
-inline operator-(const Variable& x1, const FormulaInterface& x2) { return formula(x1)-formula(x2); }
-inline operator*(const Variable& x1, const FormulaInterface& x2) { return formula(x1)*formula(x2); }
-inline operator/(const Variable& x1, const FormulaInterface& x2) { return formula(x1)/formula(x2); }
+inline operator+(const RealVariable& x1, const FormulaInterface& x2) { return formula(x1)+formula(x2); }
+inline operator-(const RealVariable& x1, const FormulaInterface& x2) { return formula(x1)-formula(x2); }
+inline operator*(const RealVariable& x1, const FormulaInterface& x2) { return formula(x1)*formula(x2); }
+inline operator/(const RealVariable& x1, const FormulaInterface& x2) { return formula(x1)/formula(x2); }
 
-inline UnaryFormula<Exp> exp(const Variable& x) {
+inline UnaryFormula<Exp> exp(const RealVariable& x) {
     return UnaryFormula<Exp>(Exp(),VariableFormula(x)); }
 inline UnaryFormula<Exp> exp(const FormulaInterface& x) {
     return UnaryFormula<Exp>(Exp(),x); }
@@ -560,7 +561,69 @@ inline std::ostream& operator<<(std::ostream& os, const Cos& op) { return os << 
 inline std::ostream& operator<<(std::ostream& os, const Tan& op) { return os << "tan"; }
 
 
+typedef Formula RealFormula;
 
+struct Assignment {
+    RealVariable lhs;
+    RealFormula rhs;
+};
+
+struct Dynamic {
+    RealVariable lhs;
+    RealFormula rhs;
+};
+
+struct Update {
+    RealVariable lhs;
+    RealFormula rhs;
+};
+
+
+
+
+inline Assignment RealVariable::operator=(const RealFormula& f) const {
+    Assignment a={*this,f}; return a;
+}
+
+inline Dynamic DottedVariable::operator=(const RealFormula& f) const {
+    Dynamic d={this->base(),f}; return d;
+}
+
+inline Update NextVariable::operator=(const RealFormula& f) const {
+    Update d={this->base(),f}; return d;
+}
+
+
+struct RealPredicate {
+    Formula lhs;
+    std::string cmp;
+    Formula rhs;
+};
+
+inline
+std::ostream& operator<<(std::ostream& os, const RealPredicate& pred) {
+    return os << pred.lhs << pred.cmp << pred.rhs;
+}
+
+inline
+RealPredicate operator<(const RealFormula& lhs, const RealFormula& rhs) {
+    RealPredicate p={lhs,"<",rhs}; return p;
+}
+
+inline
+RealPredicate operator<=(const RealFormula& lhs, const RealFormula& rhs) {
+    RealPredicate p={lhs,"<",rhs}; return p;
+}
+
+inline
+RealPredicate operator>(const RealFormula& lhs, const RealFormula& rhs) {
+    RealPredicate p={lhs,">",rhs}; return p;
+}
+
+inline
+RealPredicate operator>=(const RealFormula& lhs, const RealFormula& rhs) {
+    RealPredicate p={lhs,">=",rhs}; return p;
+}
 
 /*
 class Reset
@@ -575,6 +638,7 @@ class Reset
         _v[a.lhs.var.number()]=eval<Polynomial<Interval> >(argument_size(),a.rhs); return *this; }
 };
 
+
 class Dynamic
 {
   public:
@@ -587,6 +651,7 @@ class Dynamic
         assert(a.lhs.var.number()<result_size());
         _v[a.lhs.var.number()]=eval<Polynomial<Interval> >(argument_size(),a.rhs); return *this; }
 };
+
 
 class Guard
 {

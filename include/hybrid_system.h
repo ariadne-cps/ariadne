@@ -37,6 +37,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+#include "discrete_automaton.h"
 #include "formula.h"
 
 namespace Ariadne {
@@ -238,7 +239,6 @@ inline bool operator<(const DiscreteTransition& transition1, const DiscreteTrans
 
 
 
-
 /*! \brief A hybrid system, comprising continuous-time behaviour
  *  at each discrete mode, coupled by instantaneous discrete transitions.
  *  The state space is given by a hybrid set.
@@ -266,15 +266,25 @@ class HybridSystem
     typedef std::set< DiscreteMode >::const_iterator discrete_mode_const_iterator;
 */
   private:
+  public:
+
 
     //! \brief The list of the hybrid automaton's discrete modes.
     //std::set< DiscreteMode > _modes;
 
-    struct DifferentialEquation { DiscretePredicate loc; Variable lhs; Formula rhs; };
-    struct AlgebraicEquation { DiscretePredicate loc; Variable lhs; Formula rhs; };
+    struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
+    struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
+    struct DiscreteAssignment { DiscreteEvent e; DiscretePredicate loc; DiscreteVariable lhs; DiscreteValue rhs;  };
+    struct UpdateEquation { DiscreteEvent e; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
+    struct GuardPredicate { DiscreteEvent e; DiscretePredicate loc; RealPredicate pred; };
+    struct InvariantPredicate { DiscretePredicate loc; RealPredicate pred; };
 
     std::vector<DifferentialEquation> _differential_equations;
     std::vector<AlgebraicEquation> _algebraic_equations;
+    std::vector<DiscreteAssignment> _discrete_assignments;
+    std::vector<UpdateEquation> _update_equations;
+    std::vector<GuardPredicate> _guard_predicates;
+    std::vector<InvariantPredicate> _invariant_predicates;
 
   public:
     //@{
@@ -293,13 +303,27 @@ class HybridSystem
     //@{
     //! \name Methods for building the automaton.
 
-    void new_invariant(DiscretePredicate q, Variable d, Formula f) {
-        AlgebraicEquation e={q,d,f}; _algebraic_equations.push_back(e); }
+    void new_equation(DiscretePredicate q, Assignment a) {
+        AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
+    void new_dynamic(DiscretePredicate q, Dynamic d) {
+        DifferentialEquation eqn={q,d.lhs,d.rhs}; _differential_equations.push_back(eqn); };
+    void new_reset(DiscreteEvent e, DiscretePredicate q, Ariadne::DiscreteAssignment a) {
+        DiscreteAssignment eqn={e,q,a.lhs,a.rhs}; _discrete_assignments.push_back(eqn); }
+    void new_reset(DiscreteEvent e, DiscretePredicate q, Ariadne::Update a) {
+        UpdateEquation eqn={e,q,a.lhs,a.rhs}; _update_equations.push_back(eqn); }
 
-    void new_dynamic(DiscretePredicate q, DottedVariable d, Formula f) {
-        DifferentialEquation e={q,d.base(),f}; _differential_equations.push_back(e); };
-    void new_reset(DiscreteEvent e, DiscretePredicate q, DottedVariable d, Formula f);
-    void new_guard(DiscreteEvent e, DiscretePredicate q, Predicate f);
+    void new_equation(DiscretePredicate q, RealVariable d, RealFormula f) {
+        AlgebraicEquation eqn={q,d,f}; _algebraic_equations.push_back(eqn); }
+    void new_dynamic(DiscretePredicate q, DottedVariable d, RealFormula f) {
+        DifferentialEquation eqn={q,d.base(),f}; _differential_equations.push_back(eqn); };
+    void new_reset(DiscreteEvent e, DiscretePredicate q, NextDiscreteVariable n, DiscreteValue v) {
+        DiscreteAssignment eqn={e,q,n.base(),v}; _discrete_assignments.push_back(eqn); }
+    void new_reset(DiscreteEvent e, DiscretePredicate q, NextVariable n, RealFormula f) {
+        UpdateEquation eqn={e,q,n.base(),f}; _update_equations.push_back(eqn); }
+    void new_guard(DiscreteEvent e, DiscretePredicate q, RealPredicate p) {
+        GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
+    void new_invariant(DiscretePredicate q, RealPredicate p) {
+        InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
 
     Space state_variables(const DiscreteState& state);
     Space algebraic_variables(const DiscreteState& state);
@@ -380,7 +404,15 @@ class HybridSystem
     //@}
 };
 
-std::ostream& operator<<(std::ostream& os, const HybridAutomaton& ha);
+std::ostream& operator<<(std::ostream& os, const HybridSystem& hs);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::AlgebraicEquation& ae);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::DifferentialEquation& de);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteAssignment& da);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::UpdateEquation& re);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::GuardPredicate& g);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::InvariantPredicate& inv);
+
+
 
 
 } // namespace Ariadne

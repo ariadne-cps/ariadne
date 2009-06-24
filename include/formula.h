@@ -146,10 +146,11 @@ struct NextVariable
 {
   public:
     friend NextVariable next(const RealVariable& v);
+    Update operator=(const RealVariable& v) const;
     Update operator=(const Formula& f) const;
     RealVariable base() const { return _base_variable; }
   private:
-    NextVariable(const RealVariable& v) : _base_variable(v) { }
+    explicit NextVariable(const RealVariable& v) : _base_variable(v) { }
     RealVariable _base_variable;
 };
 
@@ -593,6 +594,10 @@ inline Update NextVariable::operator=(const RealFormula& f) const {
     Update d={this->base(),f}; return d;
 }
 
+inline Update NextVariable::operator=(const RealVariable& v) const {
+    Update d={this->base(),RealFormula(v)}; return d;
+}
+
 
 struct RealPredicate {
     Formula lhs;
@@ -612,7 +617,7 @@ RealPredicate operator<(const RealFormula& lhs, const RealFormula& rhs) {
 
 inline
 RealPredicate operator<=(const RealFormula& lhs, const RealFormula& rhs) {
-    RealPredicate p={lhs,"<",rhs}; return p;
+    RealPredicate p={lhs,"<=",rhs}; return p;
 }
 
 inline

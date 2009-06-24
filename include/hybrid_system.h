@@ -272,11 +272,12 @@ class HybridSystem
     //! \brief The list of the hybrid automaton's discrete modes.
     //std::set< DiscreteMode > _modes;
 
+    //struct DiscreteEquation { DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs; };
     struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
     struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
-    struct DiscreteAssignment { DiscreteEvent e; DiscretePredicate loc; DiscreteVariable lhs; DiscreteValue rhs;  };
-    struct UpdateEquation { DiscreteEvent e; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
-    struct GuardPredicate { DiscreteEvent e; DiscretePredicate loc; RealPredicate pred; };
+    struct DiscreteAssignment { DiscreteEventSet e; DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs;  };
+    struct UpdateEquation { DiscreteEventSet e; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
+    struct GuardPredicate { DiscreteEventSet e; DiscretePredicate loc; RealPredicate pred; };
     struct InvariantPredicate { DiscretePredicate loc; RealPredicate pred; };
 
     std::vector<DifferentialEquation> _differential_equations;
@@ -303,27 +304,31 @@ class HybridSystem
     //@{
     //! \name Methods for building the automaton.
 
+    // Methods for rules valid in certain modes
     void new_equation(DiscretePredicate q, Assignment a) {
         AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
     void new_dynamic(DiscretePredicate q, Dynamic d) {
         DifferentialEquation eqn={q,d.lhs,d.rhs}; _differential_equations.push_back(eqn); };
-    void new_reset(DiscreteEvent e, DiscretePredicate q, Ariadne::DiscreteAssignment a) {
+    void new_reset(DiscreteEventSet e, DiscretePredicate q, Ariadne::DiscreteUpdate a) {
         DiscreteAssignment eqn={e,q,a.lhs,a.rhs}; _discrete_assignments.push_back(eqn); }
-    void new_reset(DiscreteEvent e, DiscretePredicate q, Ariadne::Update a) {
+    void new_reset(DiscreteEventSet e, DiscretePredicate q, Ariadne::Update a) {
         UpdateEquation eqn={e,q,a.lhs,a.rhs}; _update_equations.push_back(eqn); }
-
-    void new_equation(DiscretePredicate q, RealVariable d, RealFormula f) {
-        AlgebraicEquation eqn={q,d,f}; _algebraic_equations.push_back(eqn); }
-    void new_dynamic(DiscretePredicate q, DottedVariable d, RealFormula f) {
-        DifferentialEquation eqn={q,d.base(),f}; _differential_equations.push_back(eqn); };
-    void new_reset(DiscreteEvent e, DiscretePredicate q, NextDiscreteVariable n, DiscreteValue v) {
-        DiscreteAssignment eqn={e,q,n.base(),v}; _discrete_assignments.push_back(eqn); }
-    void new_reset(DiscreteEvent e, DiscretePredicate q, NextVariable n, RealFormula f) {
-        UpdateEquation eqn={e,q,n.base(),f}; _update_equations.push_back(eqn); }
-    void new_guard(DiscreteEvent e, DiscretePredicate q, RealPredicate p) {
+    void new_guard(DiscreteEventSet e, DiscretePredicate q, RealPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
     void new_invariant(DiscretePredicate q, RealPredicate p) {
         InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
+
+    // Methods for rules valid in all modes.
+    void new_invariant(RealPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
+    void new_equation(Assignment a) { this->new_equation(DiscretePredicate(true),a); }
+    void new_dynamic(Dynamic d) { this->new_dynamic(DiscretePredicate(true),d); }
+    void new_reset(DiscreteEventSet e, Ariadne::DiscreteUpdate du) { this->new_reset(e,DiscretePredicate(true),du); }
+    void new_reset(DiscreteEventSet e, Ariadne::Update u) { this->new_reset(e,DiscretePredicate(true),u); }
+    void new_guard(DiscreteEventSet e, RealPredicate p) { this->new_guard(e,DiscretePredicate(true),p); }
+
+    // Methods for rules valid for all events.
+    void new_reset(Ariadne::DiscreteUpdate du) { this->new_reset(DiscreteEventSet::all(),DiscretePredicate(true),du); }
+    void new_reset(Ariadne::Update u) { this->new_reset(DiscreteEventSet::all(),DiscretePredicate(true),u); }
 
     Space state_variables(const DiscreteState& state);
     Space algebraic_variables(const DiscreteState& state);

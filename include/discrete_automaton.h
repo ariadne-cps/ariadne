@@ -50,6 +50,7 @@ class EnumeratedType;
 class EnumeratedVariable;
 class DiscreteValue;
 class DiscreteAssignment;
+class DiscreteUpdate;
 class DiscretePredicate;
 class DiscreteSpace;
 class DiscreteState;
@@ -72,9 +73,20 @@ inline std::vector<std::string> operator,(const std::string& s1, const char* s2)
 inline std::vector<std::string> operator,(const std::vector<std::string>& v1, const char* s2) {
     std::vector<std::string> r(v1); r.push_back(std::string(s2)); return r; }
 
-
 inline std::vector<std::string> operator,(const ArrayBuilderTag& a, const char* s) {
     std::vector<std::string> r; r.push_back(std::string(s)); return r; }
+
+
+class SetBuilderTag {};
+static SetBuilderTag build_set;
+template<class T>
+inline std::set<T> operator,(SetBuilderTag, const T& t) {
+    std::set<T> s; s.insert(t); return s; }
+template<class T>
+inline std::set<T> operator,(const std::set<T>& s, const T& t) {
+    std::set<T> r(s); r.insert(t); return r; }
+
+
 
 /*! \brief An ASCII string. */
 typedef std::string String;
@@ -154,7 +166,10 @@ struct EnumeratedVariable : public Variable {
 
 
 struct NextEnumeratedVariable {
-    NextEnumeratedVariable(const EnumeratedVariable& v) : _base(v) { }
+    explicit NextEnumeratedVariable(const EnumeratedVariable& v) : _base(v) { }
+    DiscreteUpdate operator=(const DiscreteValue& val) const;
+    DiscreteUpdate operator=(const EnumeratedVariable& var) const;
+    DiscreteUpdate operator=(const std::string& val) const;
     EnumeratedVariable base() const { return this->_base; }
   private:
     EnumeratedVariable _base;
@@ -349,6 +364,15 @@ std::ostream& operator<<(std::ostream& os, const DiscretePredicate& self)
 }
 
 
+struct DiscreteFormula {
+    DiscreteFormula(const DiscreteValue& val) : _str(val.str()) { }
+    DiscreteFormula(const DiscreteVariable& var) : _str(var.name()) { }
+    friend std::ostream& operator<<(std::ostream& os, const DiscreteFormula& self) {
+        return os << self._str; }
+  private:
+    std::string _str;
+};
+
 
 //! \brief A state in an integer lattice.
 //! \details \sa DiscreteConstraint
@@ -432,11 +456,25 @@ std::ostream& operator<<(std::ostream& os, const DiscreteConstraint& self)
 
 struct DiscreteAssignment {
     DiscreteVariable lhs;
-    DiscreteValue rhs;
+    DiscreteFormula rhs;
+};
+
+struct DiscreteUpdate {
+    DiscreteVariable lhs;
+    DiscreteFormula rhs;
 };
 
 DiscreteAssignment EnumeratedVariable::operator=(const DiscreteValue& val) const {
-    DiscreteAssignment a={*this,val}; return a; }
+    DiscreteAssignment a={*this,DiscreteFormula(val)}; return a; }
+
+DiscreteUpdate NextEnumeratedVariable::operator=(const DiscreteVariable& var) const {
+    DiscreteUpdate a={this->base(),DiscreteFormula(var)}; return a; }
+
+DiscreteUpdate NextEnumeratedVariable::operator=(const DiscreteValue& val) const {
+    DiscreteUpdate a={this->base(),DiscreteFormula(val)}; return a; }
+
+DiscreteUpdate NextEnumeratedVariable::operator=(const std::string& str) const {
+    DiscreteUpdate a={this->base(),DiscreteFormula(DiscreteValue(str))}; return a; }
 
 
 //! \brief A discrete event.
@@ -456,6 +494,35 @@ struct DiscreteEvent {
   private:
     static std::vector<std::string> _names;
 };
+
+//! \brief A finite or cofinite set of discrete events.
+struct DiscreteEventSet {
+  public:
+    DiscreteEventSet() : _events(), _is_complement(false) { }
+    DiscreteEventSet(const std::set<DiscreteEvent>& s) : _events(s), _is_complement(false) { }
+    DiscreteEventSet(const std::vector<DiscreteEvent>& v) : _events(v.begin(),v.end()), _is_complement(false) { }
+    DiscreteEventSet(const DiscreteEvent& e) : _events(), _is_complement(false) { this-> _events.insert(e); }
+
+    static DiscreteEventSet none() { DiscreteEventSet r; return r; }
+    static DiscreteEventSet all() { DiscreteEventSet r; r._is_complement=true; return r; }
+
+    friend DiscreteEventSet operator!(const DiscreteEvent& e);
+    friend DiscreteEventSet operator!(const DiscreteEventSet& s);
+
+    friend std::ostream& operator<<(std::ostream& os, const DiscreteEventSet& self) {
+        if(self._is_complement) { os<<"!"; } return os << self._events; }
+  private:
+    std::set<DiscreteEvent> _events;
+    bool _is_complement;
+};
+
+DiscreteEventSet operator!(const DiscreteEvent& e) {
+    return !(DiscreteEventSet(e)); }
+DiscreteEventSet operator!(const DiscreteEventSet& s) {
+    DiscreteEventSet r; r._events=s._events; r._is_complement=!s._is_complement; return r; }
+DiscreteEventSet operator!(const std::set<DiscreteEvent>& s) {
+    return !DiscreteEventSet(s); }
+
 
 
 } // namespace Ariadne

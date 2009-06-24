@@ -47,56 +47,56 @@ make_space(const boost::python::object& obj)
     boost::python::list elements=boost::python::extract<boost::python::list>(obj);
     int m=boost::python::len(elements);
     for(int i=0; i!=m; ++i) {
-        Variable v=boost::python::extract<Variable>(elements[i]);
+        RealVariable v=boost::python::extract<RealVariable>(elements[i]);
         *spcptr,v;
     }
     return spcptr;
 }
 
-Formula exp(Variable v) { return exp(Formula(v)); }
-Formula log(Variable v) { return log(Formula(v)); }
-Formula sin(Variable v) { return sin(Formula(v)); }
-Formula cos(Variable v) { return cos(Formula(v)); }
-Formula tan(Variable v) { return tan(Formula(v)); }
+Formula exp(RealVariable v) { return exp(Formula(v)); }
+Formula log(RealVariable v) { return log(Formula(v)); }
+Formula sin(RealVariable v) { return sin(Formula(v)); }
+Formula cos(RealVariable v) { return cos(Formula(v)); }
+Formula tan(RealVariable v) { return tan(Formula(v)); }
 
 // Need to wrap pure virtual function explicitly for some reason...
 ExpressionInterface* expression(const FormulaInterface& f, const Space& s) { return f.expression(s); }
 
 void export_formula()
 {
-    class_<Variable> variable_class("Variable", init<std::string>());
-    variable_class.def(init<Variable>());
-    variable_class.def("name", &Variable::name, return_value_policy<reference_existing_object>());
-    variable_class.def("expression", &Variable::expression, return_value_policy<manage_new_object>());
-    variable_class.def("__eq__", &Variable::operator==);
-    variable_class.def("__neq__", &Variable::operator!=);
-    variable_class.def("__add__", &__add__<Formula,Variable,Variable>);
-    variable_class.def("__sub__", &__sub__<Formula,Variable,Variable>);
-    variable_class.def("__mul__", &__mul__<Formula,Variable,Variable>);
-    variable_class.def("__div__", &__div__<Formula,Variable,Variable>);
-    variable_class.def("__add__", &__add__<Formula,Variable,double>);
-    variable_class.def("__sub__", &__sub__<Formula,Variable,double>);
-    variable_class.def("__mul__", &__mul__<Formula,Variable,double>);
-    variable_class.def("__div__", &__div__<Formula,Variable,double>);
-    variable_class.def("__add__", &__add__<Formula,Variable,Interval>);
-    variable_class.def("__sub__", &__sub__<Formula,Variable,Interval>);
-    variable_class.def("__mul__", &__mul__<Formula,Variable,Interval>);
-    variable_class.def("__div__", &__div__<Formula,Variable,Interval>);
-    variable_class.def("__radd__", &__radd__<Formula,Variable,double>);
-    variable_class.def("__rsub__", &__rsub__<Formula,Variable,double>);
-    variable_class.def("__rmul__", &__rmul__<Formula,Variable,double>);
-    variable_class.def("__rdiv__", &__rdiv__<Formula,Variable,double>);
-    variable_class.def("__radd__", &__radd__<Formula,Variable,Interval>);
-    variable_class.def("__rsub__", &__rsub__<Formula,Variable,Interval>);
-    variable_class.def("__rmul__", &__rmul__<Formula,Variable,Interval>);
-    variable_class.def("__rdiv__", &__rdiv__<Formula,Variable,Interval>);
+    class_<RealVariable> variable_class("RealVariable", init<std::string>());
+    variable_class.def(init<RealVariable>());
+    variable_class.def("name", &RealVariable::name, return_value_policy<reference_existing_object>());
+    variable_class.def("expression", &RealVariable::expression, return_value_policy<manage_new_object>());
+    variable_class.def("__eq__", &RealVariable::operator==);
+    variable_class.def("__neq__", &RealVariable::operator!=);
+    variable_class.def("__add__", &__add__<Formula,RealVariable,RealVariable>);
+    variable_class.def("__sub__", &__sub__<Formula,RealVariable,RealVariable>);
+    variable_class.def("__mul__", &__mul__<Formula,RealVariable,RealVariable>);
+    variable_class.def("__div__", &__div__<Formula,RealVariable,RealVariable>);
+    variable_class.def("__add__", &__add__<Formula,RealVariable,double>);
+    variable_class.def("__sub__", &__sub__<Formula,RealVariable,double>);
+    variable_class.def("__mul__", &__mul__<Formula,RealVariable,double>);
+    variable_class.def("__div__", &__div__<Formula,RealVariable,double>);
+    variable_class.def("__add__", &__add__<Formula,RealVariable,Interval>);
+    variable_class.def("__sub__", &__sub__<Formula,RealVariable,Interval>);
+    variable_class.def("__mul__", &__mul__<Formula,RealVariable,Interval>);
+    variable_class.def("__div__", &__div__<Formula,RealVariable,Interval>);
+    variable_class.def("__radd__", &__radd__<Formula,RealVariable,double>);
+    variable_class.def("__rsub__", &__rsub__<Formula,RealVariable,double>);
+    variable_class.def("__rmul__", &__rmul__<Formula,RealVariable,double>);
+    variable_class.def("__rdiv__", &__rdiv__<Formula,RealVariable,double>);
+    variable_class.def("__radd__", &__radd__<Formula,RealVariable,Interval>);
+    variable_class.def("__rsub__", &__rsub__<Formula,RealVariable,Interval>);
+    variable_class.def("__rmul__", &__rmul__<Formula,RealVariable,Interval>);
+    variable_class.def("__rdiv__", &__rdiv__<Formula,RealVariable,Interval>);
     variable_class.def(self_ns::str(self));
 
-    def("exp", (Formula(*)(Variable)) &exp);
-    def("log", (Formula(*)(Variable)) &log);
-    def("sin", (Formula(*)(Variable)) &sin);
-    def("cos", (Formula(*)(Variable)) &cos);
-    def("tan", (Formula(*)(Variable)) &tan);
+    def("exp", (Formula(*)(RealVariable)) &exp);
+    def("log", (Formula(*)(RealVariable)) &log);
+    def("sin", (Formula(*)(RealVariable)) &sin);
+    def("cos", (Formula(*)(RealVariable)) &cos);
+    def("tan", (Formula(*)(RealVariable)) &tan);
 
 
     class_<Space> space_class("Space");
@@ -121,10 +121,10 @@ void export_formula()
     formula_class.def("__sub__", &__sub__<Formula,Formula,Interval>);
     formula_class.def("__mul__", &__mul__<Formula,Formula,Interval>);
     formula_class.def("__div__", &__div__<Formula,Formula,Interval>);
-    formula_class.def("__add__", &__add__<Formula,Formula,Variable>);
-    formula_class.def("__sub__", &__sub__<Formula,Formula,Variable>);
-    formula_class.def("__mul__", &__mul__<Formula,Formula,Variable>);
-    formula_class.def("__div__", &__div__<Formula,Formula,Variable>);
+    formula_class.def("__add__", &__add__<Formula,Formula,RealVariable>);
+    formula_class.def("__sub__", &__sub__<Formula,Formula,RealVariable>);
+    formula_class.def("__mul__", &__mul__<Formula,Formula,RealVariable>);
+    formula_class.def("__div__", &__div__<Formula,Formula,RealVariable>);
     formula_class.def("__radd__", &__radd__<Formula,Formula,double>);
     formula_class.def("__rsub__", &__rsub__<Formula,Formula,double>);
     formula_class.def("__rmul__", &__rmul__<Formula,Formula,double>);
@@ -133,10 +133,10 @@ void export_formula()
     formula_class.def("__rsub__", &__rsub__<Formula,Formula,Interval>);
     formula_class.def("__rmul__", &__rmul__<Formula,Formula,Interval>);
     formula_class.def("__rdiv__", &__rdiv__<Formula,Formula,Interval>);
-    formula_class.def("__radd__", &__radd__<Formula,Formula,Variable>);
-    formula_class.def("__rsub__", &__rsub__<Formula,Formula,Variable>);
-    formula_class.def("__rmul__", &__rmul__<Formula,Formula,Variable>);
-    formula_class.def("__rdiv__", &__rdiv__<Formula,Formula,Variable>);
+    formula_class.def("__radd__", &__radd__<Formula,Formula,RealVariable>);
+    formula_class.def("__rsub__", &__rsub__<Formula,Formula,RealVariable>);
+    formula_class.def("__rmul__", &__rmul__<Formula,Formula,RealVariable>);
+    formula_class.def("__rdiv__", &__rdiv__<Formula,Formula,RealVariable>);
     formula_class.def(self_ns::str(self));
 
     def("exp", (Formula(*)(Formula)) &exp);
@@ -168,7 +168,7 @@ void export_hybrid_automaton()
     discrete_mode_class.def("location",&DiscreteMode::location);
     discrete_mode_class.def("dynamic",&DiscreteMode::dynamic_ptr);
     discrete_mode_class.def("invariants",&DiscreteMode::invariants,return_value_policy<reference_existing_object>());
-    
+
     class_<DiscreteTransition, shared_ptr<DiscreteTransition> > discrete_transition_class("DiscreteTransition",no_init);
     discrete_transition_class.def("event",&DiscreteTransition::event);
     discrete_transition_class.def("source",&DiscreteTransition::source,return_value_policy<reference_existing_object>());

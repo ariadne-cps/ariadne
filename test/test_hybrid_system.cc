@@ -54,28 +54,45 @@ TestHybridSystem::test()
 void
 TestHybridSystem::test_build_hybrid_system()
 {
+    // Declare the hyrbid system object
     HybridSystem system;
+
+    // Declare the events, types and variables
     DiscreteEvent turn_on("turn_on");
     DiscreteEvent turn_off("turn_off");
     DiscreteEvent midnight("midnight");
-    DiscreteType swtch("Switch",(build_array,"on","off"));
-    DiscreteVariable heater("heater",swtch);
-    RealVariable T("Te");
-    RealVariable t("t");
-    RealVariable c("c");
 
+    DiscreteType swtch("Switch",(build_array,"on","off"));
+
+    DiscreteVariable heater("heater",swtch);
+    RealVariable T("T");
+    RealVariable t("t");
+
+    // Define the continuous dynamics
     system.new_dynamic(heater=="on", dot(T)=20+cos(t));
     system.new_dynamic(heater=="off", dot(T)=10+cos(t));
-    system.new_equation(true, c=t+0.5);
-    system.new_reset(turn_off,heater=="on",next(heater),DiscreteValue("off"));
-    system.new_reset(turn_on,heater=="off",next(heater),DiscreteValue("on"));
-    system.new_reset(midnight,DiscretePredicate(true),next(t)=RealFormula(0.0));
-    system.new_guard(midnight,DiscretePredicate(true),t>RealFormula(1.0));
-    system.new_invariant(DiscretePredicate(true),t<=RealFormula(1.0));
+    system.new_dynamic(dot(t)=1);
+
+    // Define the nontrivial update rules
+    system.new_reset(turn_off,heater=="on",next(heater)="off");
+    system.new_reset(turn_on,next(heater)=DiscreteValue("on"));
+    system.new_reset(midnight,next(t)=0.0);
+
+    // Define the guard sets and invariants
+    system.new_guard(turn_on,T<=16.0);
+    system.new_guard(turn_off,T>=22.0);
+    system.new_guard(midnight,t>=1.0);
+
+    system.new_invariant(T>=16.0);
+    system.new_invariant(T<=22.0);
+    system.new_invariant(t<=1.0);
+
+    // Define the trivial resets for nonjumping variables.
+    system.new_reset(!midnight,next(t)=t);
+    system.new_reset(next(T)=T);
+    system.new_reset(!(turn_on,turn_off),next(heater)=heater);
 
     ARIADNE_TEST_PRINT(system);
-
-    //system.new_invariant();
 }
 
 

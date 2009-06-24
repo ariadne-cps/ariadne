@@ -29,8 +29,6 @@
 #include "vector.h"
 #include "matrix.h"
 
-#include "discrete_automaton.h"
-#include "formula.h"
 #include "hybrid_system.h"
 
 using namespace std;
@@ -58,13 +56,13 @@ TestHybridSystem::test_build_hybrid_system()
     HybridSystem system;
 
     // Declare the events, types and variables
-    DiscreteEvent turn_on("turn_on");
-    DiscreteEvent turn_off("turn_off");
-    DiscreteEvent midnight("midnight");
+    Event turn_on("turn_on");
+    Event turn_off("turn_off");
+    Event midnight("midnight");
 
-    DiscreteType swtch("Switch",(build_array,"on","off"));
+    EnumeratedType swtch("Switch",(build_array,"on","off"));
 
-    DiscreteVariable heater("heater",swtch);
+    EnumeratedVariable heater("heater",swtch);
     RealVariable T("T");
     RealVariable t("t");
 

@@ -33,7 +33,7 @@
 
 namespace Ariadne {
 
-std::vector<std::string> DiscreteEvent::_names=std::vector<std::string>();
+std::vector<std::string> Event::_names=std::vector<std::string>();
 
 HybridSystem::~HybridSystem()
 {

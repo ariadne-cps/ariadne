@@ -37,23 +37,20 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
-#include "discrete_automaton.h"
 #include "formula.h"
 
 namespace Ariadne {
 
 
-class DiscreteState;
-class DiscreteEvent;
+class Event;
+class EventSet;
 
 class HybridTime;
 class HybridSpace;
 class HybridSet;
 class HybridGrid;
 
-class DiscreteMode;
-class DiscreteTransition;
-class HybridAutomaton;
+class DiscreteState;
 
 class ExpressionInterface;
 class FunctionInterface;
@@ -70,6 +67,7 @@ class Grid;
  */
 class DiscreteMode {
     friend class HybridAutomaton;
+    typedef int DiscreteState;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
     typedef boost::shared_ptr<const FunctionInterface> ExpressionPtr;
   private:
@@ -80,7 +78,7 @@ class DiscreteMode {
     // The discrete mode's vector field.
     FunctionPtr _dynamic;
     // The discrete mode's invariants.
-    std::map< DiscreteEvent, FunctionPtr > _invariants;
+    std::map< Event, FunctionPtr > _invariants;
 
     // The discrete mode's grid for reachability analysis.
     boost::shared_ptr< const Grid > _grid;
@@ -98,7 +96,7 @@ class DiscreteMode {
         return this->_dynamic; }
 
     //! \brief The discrete mode's invariants.
-    const std::map< DiscreteEvent, FunctionPtr >& invariants() const {
+    const std::map< Event, FunctionPtr >& invariants() const {
         return this->_invariants; }
 
     //! \brief The discrete mode's default spacial grid.
@@ -151,7 +149,7 @@ class DiscreteTransition
     friend class HybridAutomaton;
   private:
     // \brief The discrete transition's identificator.
-    DiscreteEvent _event;
+    Event _event;
 
     // \brief The source of the discrete transition.
     const DiscreteMode* _source;
@@ -171,7 +169,7 @@ class DiscreteTransition
   public:
 
     //! \brief The discrete event associated with the discrete transition.
-    DiscreteEvent event() const {
+    Event event() const {
         return this->_event; }
 
     //! \brief The source mode of the discrete transition.
@@ -212,7 +210,7 @@ class DiscreteTransition
 
 
     // Construct from shared pointers (for internal use).
-    DiscreteTransition(DiscreteEvent event,
+    DiscreteTransition(Event event,
                        const DiscreteMode& source,
                        const DiscreteMode& target,
                        const FunctionInterface& reset,
@@ -220,7 +218,7 @@ class DiscreteTransition
                        bool forced=false);
 
     // Construct from shared pointers (for internal use). */
-    DiscreteTransition(DiscreteEvent event,
+    DiscreteTransition(Event event,
                        const DiscreteMode& source,
                        const DiscreteMode& target,
                        const boost::shared_ptr< FunctionInterface > reset,
@@ -261,7 +259,7 @@ class HybridSystem
 
 
 /*
-    typedef std::map< DiscreteEvent, boost::shared_ptr<const FunctionInterface> >::const_iterator invariant_const_iterator;
+    typedef std::map< Event, boost::shared_ptr<const FunctionInterface> >::const_iterator invariant_const_iterator;
     typedef std::set< DiscreteTransition >::const_iterator discrete_transition_const_iterator;
     typedef std::set< DiscreteMode >::const_iterator discrete_mode_const_iterator;
 */
@@ -275,9 +273,9 @@ class HybridSystem
     //struct DiscreteEquation { DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs; };
     struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
     struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
-    struct DiscreteAssignment { DiscreteEventSet e; DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs;  };
-    struct UpdateEquation { DiscreteEventSet e; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
-    struct GuardPredicate { DiscreteEventSet e; DiscretePredicate loc; RealPredicate pred; };
+    struct DiscreteAssignment { EventSet e; DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs;  };
+    struct UpdateEquation { EventSet e; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
+    struct GuardPredicate { EventSet e; DiscretePredicate loc; RealPredicate pred; };
     struct InvariantPredicate { DiscretePredicate loc; RealPredicate pred; };
 
     std::vector<DifferentialEquation> _differential_equations;
@@ -309,11 +307,11 @@ class HybridSystem
         AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
     void new_dynamic(DiscretePredicate q, Dynamic d) {
         DifferentialEquation eqn={q,d.lhs,d.rhs}; _differential_equations.push_back(eqn); };
-    void new_reset(DiscreteEventSet e, DiscretePredicate q, Ariadne::DiscreteUpdate a) {
+    void new_reset(EventSet e, DiscretePredicate q, Ariadne::DiscreteUpdate a) {
         DiscreteAssignment eqn={e,q,a.lhs,a.rhs}; _discrete_assignments.push_back(eqn); }
-    void new_reset(DiscreteEventSet e, DiscretePredicate q, Ariadne::Update a) {
+    void new_reset(EventSet e, DiscretePredicate q, Ariadne::Update a) {
         UpdateEquation eqn={e,q,a.lhs,a.rhs}; _update_equations.push_back(eqn); }
-    void new_guard(DiscreteEventSet e, DiscretePredicate q, RealPredicate p) {
+    void new_guard(EventSet e, DiscretePredicate q, RealPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
     void new_invariant(DiscretePredicate q, RealPredicate p) {
         InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
@@ -322,13 +320,13 @@ class HybridSystem
     void new_invariant(RealPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
     void new_equation(Assignment a) { this->new_equation(DiscretePredicate(true),a); }
     void new_dynamic(Dynamic d) { this->new_dynamic(DiscretePredicate(true),d); }
-    void new_reset(DiscreteEventSet e, Ariadne::DiscreteUpdate du) { this->new_reset(e,DiscretePredicate(true),du); }
-    void new_reset(DiscreteEventSet e, Ariadne::Update u) { this->new_reset(e,DiscretePredicate(true),u); }
-    void new_guard(DiscreteEventSet e, RealPredicate p) { this->new_guard(e,DiscretePredicate(true),p); }
+    void new_reset(EventSet e, Ariadne::DiscreteUpdate du) { this->new_reset(e,DiscretePredicate(true),du); }
+    void new_reset(EventSet e, Ariadne::Update u) { this->new_reset(e,DiscretePredicate(true),u); }
+    void new_guard(EventSet e, RealPredicate p) { this->new_guard(e,DiscretePredicate(true),p); }
 
     // Methods for rules valid for all events.
-    void new_reset(Ariadne::DiscreteUpdate du) { this->new_reset(DiscreteEventSet::all(),DiscretePredicate(true),du); }
-    void new_reset(Ariadne::Update u) { this->new_reset(DiscreteEventSet::all(),DiscretePredicate(true),u); }
+    void new_reset(Ariadne::DiscreteUpdate du) { this->new_reset(EventSet::all(),DiscretePredicate(true),du); }
+    void new_reset(Ariadne::Update u) { this->new_reset(EventSet::all(),DiscretePredicate(true),u); }
 
     Space state_variables(const DiscreteState& state);
     Space algebraic_variables(const DiscreteState& state);
@@ -363,13 +361,13 @@ class HybridSystem
     bool has_mode(DiscreteState state) const;
 
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
-    bool has_transition(DiscreteEvent event, DiscreteState source) const;
+    bool has_transition(Event event, DiscreteState source) const;
 
     //! \brief The discrete mode with given discrete state.
     const DiscreteMode& mode(DiscreteState state) const;
 
     //! \brief The discrete transition with given \a event and \a source location.
-    const DiscreteTransition& transition(DiscreteEvent event, DiscreteState source) const;
+    const DiscreteTransition& transition(Event event, DiscreteState source) const;
 
     //! \brief The set of discrete modes. (Not available in Python interface)
     const std::set< DiscreteMode >& modes() const;
@@ -381,10 +379,10 @@ class HybridSystem
     std::set< DiscreteTransition > transitions(DiscreteState source) const;
 
     //! \brief The blocking events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,FunctionPtr> blocking_guards(DiscreteState location) const;
+    std::map<Event,FunctionPtr> blocking_guards(DiscreteState location) const;
 
     //! \brief The permissive events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,FunctionPtr> permissive_guards(DiscreteState location) const;
+    std::map<Event,FunctionPtr> permissive_guards(DiscreteState location) const;
 
     //! \brief The state space of the system.
     HybridSpace state_space() const;

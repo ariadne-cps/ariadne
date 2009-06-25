@@ -56,32 +56,32 @@ std::ostream& operator<<(std::ostream& os, const HybridSystem& sys) {
 }
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem::DifferentialEquation& de) {
-    os << de.loc << " => dot("<<de.lhs<<")="<<de.rhs;
+    os << de.loc << " -> dot("<<de.lhs<<")="<<de.rhs;
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem::AlgebraicEquation& ae) {
-    os << ae.loc << " => "<<ae.lhs<<"="<<ae.rhs;
+    os << ae.loc << " -> "<<ae.lhs<<"="<<ae.rhs;
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteAssignment& da) {
-    os << da.e << ": " << da.loc << " => next("<<da.lhs.name()<<")="<<da.rhs;
+    os << da.e << ": " << da.loc << " -> next("<<da.lhs.name()<<")="<<da.rhs;
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem::UpdateEquation& da) {
-    os << da.e << ": " << da.loc << " => next("<<da.lhs.name()<<")="<<da.rhs;
+    os << da.e << ": " << da.loc << " -> next("<<da.lhs.name()<<")="<<da.rhs;
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem::GuardPredicate& g) {
-    os << g.e << ": " << g.loc << " => "<<g.pred;
+    os << g.e << ": " << g.loc << " -> "<<g.pred;
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem::InvariantPredicate& inv) {
-    os << inv.loc << " => "<<inv.pred;
+    os << inv.loc << " -> "<<inv.pred;
     return os;
 }
 

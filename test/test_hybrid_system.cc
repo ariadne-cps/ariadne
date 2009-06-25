@@ -73,7 +73,7 @@ TestHybridSystem::test_build_hybrid_system()
 
     // Define the nontrivial update rules
     system.new_reset(turn_off,heater=="on",next(heater)="off");
-    system.new_reset(turn_on,next(heater)=DiscreteValue("on"));
+    system.new_reset(turn_on,next(heater)=EnumeratedValue("on"));
     system.new_reset(midnight,next(t)=0.0);
 
     // Define the guard sets and invariants

@@ -37,27 +37,29 @@ class SimulationToolboxInterface;
 typedef int DiscreteState;
 class Point;
 class HybridPoint;
-class HybridAutomaton;
+class HybridSystem;
+
+template<class System> class Simulator;
+
+
 
 /*! \brief A class for computing the evolution of a hybrid system. 
- *
- * The actual evolution steps are performed by the HybridEvolver class.
  */
-class HybridSimulator
-    : public EvolverBase<HybridAutomaton, HybridPoint >
+class Simulator<HybridSystem>
+    : public EvolverBase<HybridSystem, HybridPoint >
     , public Loggable
 {
     typedef HybridPoint EnclosureType;
   public:
     
     //! \brief Default constructor.
-    HybridSimulator();
+    Simulator();
   
     //! \brief Construct from parameters using a default integrator.
-    HybridSimulator(const EvolutionParameters& parameters);
+    Simulator(const EvolutionParameters& parameters);
   
     /*! \brief Make a dynamically-allocated copy. */
-    HybridSimulator* clone() const;
+    Simulator<HybridSystem>* clone() const;
 
     //@{
     //! \name Parameters controlling the evolution.
@@ -83,7 +85,7 @@ class HybridSimulator
 };
 
 
-  
+
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_EVOLVER_H
+#endif // ARIADNE_HYBRID_SIMULATOR_H

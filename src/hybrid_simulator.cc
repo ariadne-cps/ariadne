@@ -37,7 +37,7 @@
 #include "logging.h"
 
 #include "hybrid_time.h"
-#include "hybrid_automaton.h"
+#include "hybrid_system.h"
 #include "hybrid_simulator.h"
 
 
@@ -48,21 +48,21 @@ namespace Ariadne {
 class DegenerateCrossingException { };
 
 
-HybridSimulator::HybridSimulator()
+Simulator<HybridAutomaton>::Simulator()
     : _parameters(new EvolutionParameters()),
       _toolbox(new SimulationToolbox())
 {
 }
 
 
-HybridSimulator*
-HybridSimulator::clone() const
+Simulator<HybridAutomaton>*
+HybridSimulator<HybridAutomaton>::clone() const
 { 
     return new HybridSimulator(*this); 
 }
 
 
-HybridSimulator::HybridSimulator(const EvolutionParameters& p)
+Simulator<HybridAutomaton>::Simulator(const EvolutionParameters& p)
     : _parameters(new EvolutionParameters(p)),
       _toolbox(new SimulationToolbox())
 {
@@ -70,7 +70,7 @@ HybridSimulator::HybridSimulator(const EvolutionParameters& p)
 
 
 Orbit<HybridPoint> 
-HybridSimulator::
+Simulator<HybridAutomaton>::
 orbit(const HybridAutomaton& system, 
       const HybridPoint& initial_point, 
       const HybridTime& maximum_time,

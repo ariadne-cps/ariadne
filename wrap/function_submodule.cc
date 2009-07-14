@@ -56,6 +56,28 @@ PolynomialExpression operator*(const PolynomialExpression& pe, const Float& s) {
     return PolynomialExpression(r);
 }
 
+PolynomialExpression derivative(const PolynomialExpression& pe, uint j) {
+    Polynomial<Interval> r=derivative(static_cast<const Polynomial<Interval>&>(pe),j);
+    return PolynomialExpression(r);
+}
+
+
+template<class X> X* make(const boost::python::object& obj);
+
+template<>
+Vector<ExpressionInterface>*
+make(const boost::python::object& obj) {
+    list elements=extract<list>(obj);
+    Vector<ExpressionInterface>* r=new Vector<ExpressionInterface>(len(elements));
+    for(uint i=0; i!=r->size(); ++i) {
+        //shared_ptr<ExpressionInterface> expression_ptr=boost::python::extract<shared_ptr<ExpressionInterface> >(elements[i]);
+        const ExpressionInterface& expression_ref=boost::python::extract<const ExpressionInterface&>(elements[i]);
+        shared_ptr<ExpressionInterface> expression_ptr(expression_ref.clone());
+        r->set(i,expression_ptr);
+    }
+    return r;
+}
+
 
 template<class X>
 array<X>
@@ -610,7 +632,35 @@ void export_polynomial_expression()
     polynomial_expression_class.def("__str__",(std::string(*)(const PolynomialExpression&))&__str__);
     polynomial_expression_class.def("__repr__",(std::string(*)(const PolynomialExpression&))&__str__);
 
+    def("derivative",(PolynomialExpression(*)(const PolynomialExpression&, uint))&derivative);
 }
+
+
+void export_vector_function()
+{
+    typedef ExpressionInterface EI;
+    typedef FunctionInterface FI;
+    typedef Vector<ExpressionInterface> VectorFunction;
+
+    class_<Vector<ExpressionInterface>, bases< FunctionInterface > > vector_function_class("VectorFunction",no_init);
+    vector_function_class.def("__init__", make_constructor(&make<VectorFunction>) );
+    vector_function_class.def("argument_size", &VectorFunction::argument_size);
+    vector_function_class.def("result_size", &VectorFunction::result_size);
+    vector_function_class.def("smoothness", &VectorFunction::smoothness);
+    vector_function_class.def("__getitem__",(ExpressionInterface const&(VectorFunction::*)(uint)const)&VectorFunction::operator[],return_value_policy<copy_const_reference>());
+    vector_function_class.def("__call__",(Vector<Float>(VectorFunction::*)(const Vector<Float>&)const)&VectorFunction::evaluate);
+    vector_function_class.def("__call__",(Vector<Interval>(VectorFunction::*)(const Vector<Interval>&)const)&VectorFunction::evaluate);
+    vector_function_class.def("__call__",(Vector<TaylorModel>(VectorFunction::*)(const Vector<TaylorModel>&)const)&VectorFunction::evaluate);
+    //vector_function_class.def("evaluate",(FV(VectorFunction::*)(const FV&)const)&VectorFunction::evaluate);
+    //vector_function_class.def("evaluate",(IV(VectorFunction::*)(const IV&)const)&VectorFunction::evaluate);
+    //vector_function_class.def("evaluate",(TFM(*)(const VectorFunction&, const TFM&))&call_evaluate<VectorFunction>);
+    //vector_function_class.def("jacobian",(FMx(VectorFunction::*)(const FV&)const)&VectorFunction::jacobian);
+    //vector_function_class.def("jacobian",(IMx(VectorFunction::*)(const IV&)const)&VectorFunction::jacobian);
+    vector_function_class.def(self_ns::str(self));
+    //vector_function_class.def("__str__",(std::string(*)(const VectorFunction&))&__str__);
+    //vector_function_class.def("__repr__",(std::string(*)(const VectorFunction&))&__str__);
+}
+
 
 void function_submodule() {
     export_multi_index();
@@ -624,7 +674,7 @@ void function_submodule() {
     export_python_expression();
 
     export_function_interface();
-    export_affine_function();
+    export_vector_function();
     export_python_function();
 }
 

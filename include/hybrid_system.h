@@ -51,10 +51,12 @@ class HybridSet;
 class HybridGrid;
 
 class DiscreteState;
+class DiscreteSpace;
 
 class ExpressionInterface;
 class FunctionInterface;
-class FormulaInterface;
+
+template<class R> class FormulaInterface;
 class Grid;
 
 /*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
@@ -255,7 +257,6 @@ class HybridSystem
 
     typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
-    typedef boost::shared_ptr<const FormulaInterface> FormulaPtr;
 
     
 /*
@@ -273,9 +274,10 @@ class HybridSystem
     //struct DiscreteEquation { DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs; };
     struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
     struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
-    struct DiscreteAssignment { EventSet e; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedFormula rhs;  };
-    struct UpdateEquation { EventSet e; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
-    struct GuardPredicate { EventSet e; DiscretePredicate loc; ContinuousPredicate pred; };
+    struct DiscreteAssignment { EventSet evnts; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedFormula rhs;  };
+    struct UpdateEquation { EventSet evnts; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
+    struct GuardPredicate { EventSet evnts; DiscretePredicate loc; ContinuousPredicate pred; };
+    struct DisabledEvents { EventSet evnts; DiscretePredicate loc; };
     struct InvariantPredicate { DiscretePredicate loc; ContinuousPredicate pred; };
 
     std::vector<DifferentialEquation> _differential_equations;
@@ -284,7 +286,14 @@ class HybridSystem
     std::vector<UpdateEquation> _update_equations;
     std::vector<GuardPredicate> _guard_predicates;
     std::vector<InvariantPredicate> _invariant_predicates;
+    std::vector<DisabledEvents> _disabled_events;
 
+    typedef std::vector<DifferentialEquation>::const_iterator dynamic_const_iterator;
+    typedef std::vector<AlgebraicEquation>::const_iterator relation_const_iterator;
+    typedef std::vector<UpdateEquation>::const_iterator update_const_iterator;
+    typedef std::vector<GuardPredicate>::const_iterator guard_const_iterator;
+    typedef std::vector<DiscreteAssignment>::const_iterator switch_const_iterator;
+    typedef std::vector<DisabledEvents>::const_iterator disabled_const_iterator;
   public:
     //@{
     //! \name Constructors and destructors
@@ -303,59 +312,87 @@ class HybridSystem
     //! \name Methods for building the automaton.
 
     // Methods for rules valid in certain modes
+    //! \brief Adds a algebraic equation to the system.
     void new_equation(DiscretePredicate q, RealAssignment a) {
         AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
+    //! \brief Adds a differential equation to the system.
     void new_dynamic(DiscretePredicate q, RealDynamic d) {
         DifferentialEquation eqn={q,d.lhs.base,d.rhs}; _differential_equations.push_back(eqn); };
+    //! \brief Adds a discrete reset to the system.
     void new_reset(EventSet e, DiscretePredicate q, EnumeratedUpdate a) {
         DiscreteAssignment eqn={e,q,a.lhs.base,a.rhs}; _discrete_assignments.push_back(eqn); }
+    //! \brief Adds a reset equation to the system.
     void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
         UpdateEquation eqn={e,q,a.lhs.base,a.rhs}; _update_equations.push_back(eqn); }
+    //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
+    //! \brief Adds a guard predicate to the system.
+    void new_guard(EventSet e, DiscretePredicate q, bool p) {
+        GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }
+    //! \brief Adds an invariant to the system.
     void new_invariant(DiscretePredicate q, ContinuousPredicate p) {
         InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
+    // //! \brief Disables events in a given set of locations.
+    //void new_disabled_events(EventSet e, DiscretePredicate q) {
+    //    DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
 
     // Methods for rules valid in all modes.
-    void new_invariant(ContinuousPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
+    //! \brief Adds a algebraic equation to the system, valid in all modes.
     void new_equation(RealAssignment a) { this->new_equation(DiscretePredicate(true),a); }
+    //! \brief Adds a differential equation to the system.
     void new_dynamic(RealDynamic d) { this->new_dynamic(DiscretePredicate(true),d); }
+    //! \brief Adds a discrete reset to the system, valid in all modes.
     void new_reset(EventSet e, EnumeratedUpdate du) { this->new_reset(e,DiscretePredicate(true),du); }
+    //! \brief Adds a reset equation to the system, valid in all modes.
     void new_reset(EventSet e, RealUpdate u) { this->new_reset(e,DiscretePredicate(true),u); }
+    //! \brief Adds a guard predicate to the system, valid in all modes.
     void new_guard(EventSet e, ContinuousPredicate p) { this->new_guard(e,DiscretePredicate(true),p); }
+    //! \brief Adds a guard predicate to the system, valid in all modes.
+    void new_guard(EventSet e, bool p) { this->new_guard(e,DiscretePredicate(true),ContinuousPredicate(tribool(p))); }
+    //! \brief Adds an invariant to the system, valid in all modes.
+    void new_invariant(ContinuousPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
 
     // Methods for rules valid for all events.
+    //! \brief Adds a discrete reset to the system, valid in all modes and for all events.
     void new_reset(EnumeratedUpdate du) { this->new_reset(EventSet::all(),DiscretePredicate(true),du); }
+    //! \brief Adds a reset equation to the system, valid in all modes and for all events.
     void new_reset(RealUpdate u) { this->new_reset(EventSet::all(),DiscretePredicate(true),u); }
-
-    Space state_variables(const DiscreteState& state);
-    Space algebraic_variables(const DiscreteState& state);
-    Space input_variables(const DiscreteState& state);
-
-    //! \brief Adds a discrete mode to the automaton.
-    //!
-    //!   \param state is the mode's discrete state.
-    //!   \param dynamic is the mode's vector field.
-    const DiscreteMode& new_mode(DiscreteState state,
-                                 const FunctionInterface& dynamic);
-
-
-    //! \brief Set the grid controlling relative scaling in the mode.
-    void set_grid(DiscreteState location, const Grid& grid);
-
-    //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode.
-    void set_grid(const Grid& grid);
-
-    //! \brief Set the hybrid grid controlling relative scaling.
-    void set_grid(const HybridGrid& hgrid);
 
     //@}
 
     //@{
     //! \name Data access and queries.
 
-    //! \brief Returns the hybrid automaton's name.
-    const std::string& name() const;
+    StateSpace discrete_variables() const;
+    EventSet events() const;
+    VariableSet result_variables(const Valuation& state) const;
+    VariableSet argument_variables(const Valuation& state) const;
+    VariableSet continuous_variables(const Valuation& state) const;
+    VariableSet state_variables(const Valuation& state) const;
+    VariableSet algebraic_variables(const Valuation& state) const;
+    VariableSet auxiliary_variables(const Valuation& state) const;
+    VariableSet input_variables(const Valuation& state) const;
+    VariableSet output_variables(const Valuation& state) const;
+
+    bool check_dynamic(const Valuation& location) const;
+    bool check_reset(const Event& event, const Valuation& source, const Valuation& target) const;
+    bool check_guards(const Valuation& location) const;
+
+
+    Valuation target(const Event& event, const Valuation& source) const;
+    std::set<RealAssignment> unordered_equations(const Valuation& state) const;
+
+    std::vector<RealAssignment> equations(const Valuation& state) const;
+    std::vector<RealDynamic> dynamic(const Valuation& state) const;
+    std::vector<RealUpdate> reset(const Event& event, const Valuation& state) const;
+    std::map<Event,ContinuousPredicate> guards(const Valuation& state) const;
+    ContinuousPredicate guard(const Event& event, const Valuation& state) const;
+
+    //@}
+
+    //@{
+    //! \name Old-style data access and queries.
 
     //! \brief Test if the hybrid automaton has a discrete mode with discrete state \a state.
     bool has_mode(DiscreteState state) const;

@@ -47,18 +47,37 @@ namespace Ariadne {
 
 
 
+class Enumeration;
+class Integer;
+class Real;
+
+//! \brief An ASCII string.
 typedef std::string String;
 
-class Variable;
-class Space;
+class StateSpace;
 
 class EnumeratedType;
-class EnumeratedVariable;
 class EnumeratedValue;
-class EnumeratedFormula;
 
-class RealVariable;
-class RealFormula;
+
+
+template<class T> class Quantity;
+template<class T> class Variable;
+template<class R> class Formula;
+
+typedef Variable<EnumeratedValue> EnumeratedVariable;
+typedef Variable<Integer> IntegerVariable;
+typedef Variable<Real> RealVariable;
+
+typedef Formula<EnumeratedValue> EnumeratedFormula;
+typedef Formula<Integer> IntegerFormula;
+typedef Formula<Real> RealFormula;
+
+typedef Formula<bool> DiscretePredicate;
+typedef Formula<tribool> ContinuousPredicate;
+
+
+
 
 // Functionality for building arrays or std::vector from comma-separated lists
 class ArrayBuilderTag {};
@@ -83,10 +102,98 @@ inline std::vector<std::string> operator,(ArrayBuilderTag, const char* s) {
     std::vector<std::string> v; v.push_back(std::string(s)); return v; }
 
 
+template<class T> inline bool contains(const std::set<T>& s, const T& t) {
+    return s.find(t)!=s.end(); }
+template<class T> inline bool subset(const std::set<T>& s1, const std::set<T>& s2) {
+    for(typename std::set<T>::iterator iter=s1.begin(); iter!=s1.end(); ++iter) {
+        if(!contains(s2,*iter)) { return false; } } return true; }
+template<class T> inline bool disjoint(const std::set<T>& s1, const std::set<T>& s2) {
+    for(typename std::set<T>::iterator iter=s1.begin(); iter!=s1.end(); ++iter) {
+        if(contains(s2,*iter)) { return false; } } return true; }
+template<class T> inline std::set<T>& insert(std::set<T>& r, const T& t) {
+    r.insert(t); return r; }
+template<class T> inline std::set<T>& adjoin(std::set<T>& r, const std::set<T>& s) {
+    for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) { r.insert(*iter); } return r; }
+template<class T> inline std::set<T>& remove(std::set<T>& r, const std::set<T>& s) {
+    typename std::set<T>::iterator iter=r.begin();
+    while(iter!=r.end()) { if(contains(s,*iter)) { r.erase(iter++); } else { ++iter; } }
+    return r; }
+template<class T> inline std::set<T>& restrict(std::set<T>& r, const std::set<T>& s) {
+    typename std::set<T>::iterator iter=r.begin();
+    while(iter!=r.end()) { if(!contains(s,*iter)) { r.erase(iter++); } else { ++iter; } }
+    return r; }
+template<class T> inline std::set<T> join(const std::set<T>& s1, const std::set<T>& s2) {
+    std::set<T> r(s1); adjoin(r,s2); return r; }
+template<class T> inline std::set<T> intersection(const std::set<T>& s1, const std::set<T>& s2) {
+    std::set<T> r(s1); restrict(r,s2); return r; }
+template<class T> inline std::set<T> difference(const std::set<T>& s1, const std::set<T>& s2) {
+    std::set<T> r(s1); remove(r,s2); return r; }
+template<class K,class V,class C> inline bool has_key(const std::map<K,V,C>& m, const K& k) {
+    return m.find(k)!=m.end(); }
 
 
-/*! \brief An ASCII string. */
-typedef std::string String;
+// Temporary home for useful auxiliary classes
+
+template<class T> class List
+    : public std::vector<T>
+{
+    List() : std::vector<T>() { }
+    List(const std::vector<T>& l) : std::vector<T>(l) { }
+    template<class I> List(const I& b, const I& e) : std::vector<T>(b,e) { }
+};
+
+
+template<class T> class Set
+    : public std::set<T>
+{
+  public:
+    Set() : std::set<T>() { }
+    Set(const std::set<T>& s) : std::set<T>(s) { }
+
+    bool contains(const T& t) {
+        return this->find(t)==this->end(); }
+    bool subset(const std::set<T>& s) {
+        for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
+            if(!this->contains(*iter)) { return false; } } return true; }
+    bool disjoint(const std::set<T>& s) {
+        for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
+            if(this->contains(*iter)) { return false; } } return true; }
+    Set<T>& adjoin(const std::set<T>& s) {
+        for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) { this->insert(*iter); } return *this; }
+    Set<T>& remove(const std::set<T>& s) {
+        typename std::set<T>::iterator iter=this->begin();
+        while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
+        return *this; }
+    Set<T>& restrict(const std::set<T>& s) {
+        typename std::set<T>::iterator iter=this->begin();
+        while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
+        return *this; }
+};
+
+template<class T> inline Set<T> join(const Set<T>& s1, const Set<T>& s2) {
+    Set<T> r(s1); adjoin(r,s2); return r; }
+
+template<class T> inline std::ostream& operator<<(std::ostream& os, const Set<T>& s) {
+    return os<<static_cast<const std::set<T>&>(s); }
+
+template<class K, class V, class C> class Map
+    : public std::map<K,V,C>
+{
+  public:
+    V& operator[](const K& k) {
+        return this->std::map<K,V,C>::operator[](k); }
+    const V& operator[](const K& k) const { typename std::map<K,V,C>::const_iterator p=this->find(k);
+        assert(k!=this->end()); return p->second; }
+    bool has_key(const K& k) const {
+        return this->find(k)!=this->end(); }
+    void insert(const K& k, const V& v) {
+        this->std::map<K,V,C>::insert(std::make_pair(k,v)); }
+};
+
+
+
+
+
 
 //! \brief A discrete event.
 struct Event {
@@ -106,6 +213,7 @@ struct Event {
     static std::vector<std::string> _names;
 };
 
+
 //! \brief A finite or cofinite set of discrete events.
 struct EventSet {
   public:
@@ -117,6 +225,39 @@ struct EventSet {
     static EventSet none() { EventSet r; return r; }
     static EventSet all() { EventSet r; r._is_complement=true; return r; }
 
+    bool operator==(const EventSet& other) const {
+        return this->_events==other._events && this->_is_complement==other._is_complement; }
+    bool empty() const { return !_is_complement && _events.empty(); }
+    bool finite() const { return !_is_complement; }
+    uint size() const { ARIADNE_ASSERT_MSG(this->finite(),"EventSet "<<*this<<" is infinite"); return _events.size(); }
+    const Event& front() const { ARIADNE_ASSERT_MSG(this->finite(),"EventSet "<<*this<<" is infinite"); return *this->_events.begin(); }
+
+    bool contains(const Event& e) const {
+        return Ariadne::contains(this->_events,e) xor this->_is_complement; }
+    EventSet& insert(const Event& e) {
+        if(_is_complement) { this->_events.erase(e); } else { this->_events.insert(e); } return *this; }
+    EventSet& erase(const Event& e) {
+        if(_is_complement) { this->_events.insert(e); } else { this->_events.erase(e); } return *this; }
+    EventSet& adjoin(const EventSet& s) { assert(!_is_complement && !s._is_complement);
+        Ariadne::adjoin(this->_events,s._events);
+        return *this; }
+    EventSet& restrict(const EventSet& s) { 
+        if(this->_is_complement) {
+            if(s._is_complement) { Ariadne::adjoin(this->_events,s._events); }
+            else { this->_events=difference(s._events,this->_events); this->_is_complement=false; }
+        } else {
+            if(s._is_complement) { Ariadne::restrict(this->_events,s._events); }
+            else { Ariadne::remove(this->_events,s._events); }
+        }
+        return *this; }
+    EventSet& remove(const EventSet& s) {
+        if(this->_is_complement) {
+            if(s._is_complement) { this->_events=difference(s._events,this->_events); this->_is_complement=false; }
+            else { Ariadne::adjoin(this->_events,s._events); }
+        } else {
+            if(s._is_complement) { Ariadne::remove(this->_events,s._events); }
+            else { Ariadne::restrict(this->_events,s._events); }
+        } return *this; }
     friend EventSet operator!(const Event& e);
     friend EventSet operator!(const EventSet& s);
     friend EventSet operator!(const std::set<Event>& s);
@@ -131,8 +272,15 @@ inline EventSet operator!(const Event& e) { return !(EventSet(e)); }
 inline EventSet operator!(const EventSet& s) { EventSet r; r._events=s._events; r._is_complement=!s._is_complement; return r; };
 inline EventSet operator!(const std::set<Event>& s) { return !EventSet(s); }
 
+inline EventSet join(const EventSet& s1, const EventSet& s2) { EventSet r(s1); r.adjoin(s2); return r; }
+inline EventSet intersection(const EventSet& s1, const EventSet& s2) { EventSet r(s1); r.restrict(s2); return r; }
+inline EventSet difference(const EventSet& s1, const EventSet& s2) { EventSet r(s1); r.remove(s2); return r; }
+
 inline std::ostream& operator<<(std::ostream& os, const EventSet& self) {
     if(self._is_complement) { os<<"!"; } return os << self._events; }
+
+
+
 
 template<class LHS, class RHS>
 struct Assignment
@@ -140,6 +288,15 @@ struct Assignment
     Assignment(const LHS& l, const RHS& r) : lhs(l), rhs(r) { }
     LHS lhs; RHS rhs;
 };
+
+template<class LHS, class RHS> bool operator<(const Assignment<LHS,RHS>& a1, const Assignment<LHS,RHS>& a2) {
+    return a1.lhs < a2.lhs;
+}
+
+template<class LHS, class RHS> inline std::ostream& operator<<(std::ostream& os, const Assignment<LHS,RHS>& a) {
+    return os<<a.lhs<<"="<<a.rhs;
+}
+
 
 
 /*! \brief An internal enumerated type, suitable for use when a finite type is needed.
@@ -175,95 +332,106 @@ struct EnumeratedType {
   private:
     std::string _name;
     std::vector<std::string> _values;
-
 };
 
 
+
 //! \brief A named variable.
-struct Variable {
-  protected:
-    //! \brief Create an internal enumerated variable with the given \a name.
-    Variable(const String& name) : _name_ptr(new std::string(name)) { }
+struct NamedVariable {
   public:
     //! \brief The internal name of the variable.
     const String& name() const { return *this->_name_ptr; }
     //! \brief Equality operator. Note that variables with the same name might not be considered equal (the same).
-    bool operator==(const Variable& v) const { return this->_name_ptr==v._name_ptr; }
+    bool operator==(const NamedVariable& v) const { return this->_name_ptr==v._name_ptr; }
     //! \brief Inequality operator. Note that variables with the same name might not be considered equal (the same).
-    bool operator!=(const Variable& v) const { return !(*this==v); }
+    bool operator!=(const NamedVariable& v) const { return !(*this==v); }
     //! \brief Less-than comparison orders %Variable objects lexicographically by name.
-    bool operator<(const Variable& v) const { return *this->_name_ptr<*v._name_ptr; }
+    bool operator<(const NamedVariable& v) const { return *this->_name_ptr<*v._name_ptr; }
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const Variable& v) {
+    friend std::ostream& operator<<(std::ostream& os, const NamedVariable& v) {
         return os << v.name(); }
+  protected:
+    //! \brief Create an internal enumerated variable with the given \a name.
+    NamedVariable(const String& name)
+        : _name_ptr(new std::string(name)) { }
+    NamedVariable(const String& name, const EnumeratedType& type)
+        : _name_ptr(new std::string(name)), _type_ptr(new EnumeratedType(type)) { }
+    //! \brief The internal type of the variable.
+    const EnumeratedType& type() const { return *this->_type_ptr; }
   private:
     shared_ptr<std::string> _name_ptr;
+    shared_ptr<EnumeratedType> _type_ptr;
+    
 };
 
 
 //! \brief A named discrete variable.
-struct DiscreteVariable : public Variable {
-    DiscreteVariable(const std::string& name) : Variable(name) { }
+struct DiscreteVariable : public NamedVariable {
+  protected:
+    DiscreteVariable(const std::string& name) : NamedVariable(name) { }
+    DiscreteVariable(const std::string& name, const EnumeratedType& type) : NamedVariable(name,type) { }
 };
 
 
 //! \brief A named variable which can take values of a given enumerated type.
 //! \details \sa EnumeratedType, EnumeratedVariable, DiscretePredicate
-struct EnumeratedVariable : public DiscreteVariable {
+template<> struct Variable<EnumeratedValue> : public DiscreteVariable {
   public:
     //! \brief Create an internal enumerated variable with the given \a name and \a type.
-    EnumeratedVariable(const String& name, const EnumeratedType& type) : DiscreteVariable(name), _type_ptr(&type) { }
+    Variable(const String& name, const EnumeratedType& type) : DiscreteVariable(name,type) { }
     //! \brief The internal type of the variable.
-    const EnumeratedType& type() const { return *this->_type_ptr; }
+    const EnumeratedType& type() const { return this->NamedVariable::type(); }
+    //! \brief Makes a discrete assignment object.
+    Assignment<EnumeratedVariable,EnumeratedFormula> operator=(const String& val) const;
     //! \brief Makes a discrete assignment object.
     Assignment<EnumeratedVariable,EnumeratedFormula> operator=(const EnumeratedValue& val) const;
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const EnumeratedVariable& v) {
         return os << v.name(); }
         //return os << v.name() << ":" << v.type().name(); }
-  private:
-    const EnumeratedType* _type_ptr;
 };
 
 
 //! \brief A named integer variable, suitable for use in formulae and in defining the discrete state.
 //! Equality is performed using references by name, so different variables may have the same "name".
-//! \details \sa Space, Formula.
-struct IntegerVariable : public DiscreteVariable
+//! \details \sa StateSpace, Formula.
+template<> struct Variable<Integer> : public DiscreteVariable
 {
   public:
     //! \brief Construct a new named integer variable with name \a name. If another variable has the same \c name,
     //! the two are \e not considered to be the same quantity.
-    IntegerVariable(std::string name) : DiscreteVariable(name) { }
+    Variable(std::string name) : DiscreteVariable(name) { }
     //! \brief Copy constructer. Returns a C++ variable representing the same named variable.
-    IntegerVariable(const IntegerVariable& v) : DiscreteVariable(v) { }
+    Variable(const IntegerVariable& v) : DiscreteVariable(v) { }
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const IntegerVariable& v) {
         return os << v.name(); }
         //return os << v.name() << ":Integer"; }
-  private:
-    shared_ptr<const std::string> _name_ptr;
 };
 
 //! \brief A named continuous variable.
-struct ContinuousVariable : public Variable {
-    ContinuousVariable(const std::string& name) : Variable(name) { }
+struct ContinuousVariable : public NamedVariable {
+    ContinuousVariable(const std::string& name) : NamedVariable(name) { }
 };
 
 
+template<> struct Quantity<Real> : public ContinuousVariable {
+    Quantity(const std::string& name) : ContinuousVariable(name) { }
+};
+
 //! \brief A named real variable, suitable for use in formulae and in defining state spaces.
 //! Equality is performed using references by name, so different variables may have the same "name".
-//! \details \sa Space, Formula.
-struct RealVariable : public ContinuousVariable
+//! \details \sa StateSpace, Formula.
+template<> struct Variable<Real> : public Quantity<Real>
 {
   public:
     //! \brief Construct a new named variable with name \a name. If another variable has the same \c name,
     //! the two are \e not considered to be the same quantity.
-    RealVariable(std::string name) : ContinuousVariable(name) { }
+    Variable(std::string name) : Quantity<Real>(name) { }
     //! \brief Copy constructer. Returns a C++ variable representing the same named variable.
-    RealVariable(const RealVariable& v) : ContinuousVariable(v) { }
+    Variable(const RealVariable& v) : Quantity<Real>(v) { }
     //! \brief A dynamically-allocated ProjectionExpression representing the variable.
-    ExpressionInterface* expression(const Space& spc) const;
+    ExpressionInterface* expression(const StateSpace& spc) const;
 
     //! \brief Create an assignment object representing the variable's defining equation.
     Assignment<RealVariable,RealFormula> operator=(const RealFormula& f) const;
@@ -271,16 +439,76 @@ struct RealVariable : public ContinuousVariable
     friend std::ostream& operator<<(std::ostream& os, const RealVariable& v) {
         return os << v.name(); }
         //return os << v.name() << ":Real"; }
-  private:
-    shared_ptr<const std::string> _name_ptr;
 };
+
+
+//! \brief A finite set of variables.
+typedef Set<NamedVariable> VariableSet;
+
+/*! \brief A space defined as a list of named variables.
+ *  \details \sa Variable
+ */
+struct StateSpace
+{
+  public:
+    //! \brief The trivial space \f$\R^0\f$.
+    StateSpace() : _variables() { }
+    StateSpace(const std::set<NamedVariable>& vs) : _variables(vs.begin(),vs.end()) { }
+    unsigned int size() const { return _variables.size(); }
+    //! \brief The dimension of the space.
+    unsigned int dimension() const { return _variables.size(); }
+    //! \brief The \a i<sup>th</sup> named variable.
+    const NamedVariable& operator[](unsigned int i) const { return _variables.at(i); }
+    const NamedVariable& variable(unsigned int i) const { return _variables.at(i); }
+
+    //! \brief The index of the named variable \a v.
+    unsigned int index(const NamedVariable& v) const {
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(v==_variables[i]) { return i; } }
+        ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the StateSpace "<<*this);
+        return _variables.size(); }
+    //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
+    StateSpace& insert(const NamedVariable& v) {
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(_variables[i]==v) { return *this; } }
+        _variables.push_back(v); return *this; }
+    //! \brief Adjoins the variables in \a spc.
+    StateSpace& adjoin(const StateSpace& spc) {
+        for(uint i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
+    //! \brief Append the named variable \a v to the variables defining the space.
+    StateSpace& append(const NamedVariable& v) {
+        for(uint i=0; i!=_variables.size(); ++i) {
+            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
+        }
+        _variables.push_back(v); return *this; }
+    //! \brief Append the named variable \a v to the variables defining the space.
+    StateSpace& operator,(const NamedVariable& v) { return this->append(v); }
+  public:
+    //! \brief The space containing the union of the variables.
+    friend StateSpace join(const StateSpace&, const StateSpace&);
+    //! \brief Write to an output stream.
+    friend std::ostream& operator<<(std::ostream&, const StateSpace&);
+  private:
+    std::vector<NamedVariable> _variables;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const StateSpace& spc) { return os << spc._variables; }
+
+inline StateSpace operator,(const NamedVariable& v1, const NamedVariable& v2) {
+    StateSpace r; r,v1,v2; return r; }
+
+inline StateSpace join(const StateSpace& spc1, const StateSpace& spc2) {
+    StateSpace r(spc1); r.adjoin(spc2); return r; }
+
 
 
 /*! \brief A space defined as a list of named variables.
  *  \details \sa Variable
  */
+template<class Var>
 struct Space
 {
+    typedef Var VariableType;
   public:
     //! \brief The trivial space \f$\R^0\f$.
     Space() : _variables() { }
@@ -288,32 +516,40 @@ struct Space
     //! \brief The dimension of the space.
     unsigned int dimension() const { return _variables.size(); }
     //! \brief The \a i<sup>th</sup> named variable.
-    const Variable& operator[](unsigned int i) const { return _variables.at(i); }
-    const Variable& variable(unsigned int i) const { return _variables.at(i); }
+    const VariableType& operator[](unsigned int i) const { return _variables.at(i); }
+    const VariableType& variable(unsigned int i) const { return _variables.at(i); }
 
     //! \brief The index of the named variable \a v.
-    unsigned int index(const Variable& v) const {
+    unsigned int index(const VariableType& v) const {
         for(uint i=0; i!=_variables.size(); ++i) {
             if(v==_variables[i]) { return i; } }
-        ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
+        ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the StateSpace "<<*this);
         return _variables.size(); }
+    //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
+    Space<VariableType>& insert(const EnumeratedVariable& v) {
+        for(uint i=0; i!=_variables.size(); ++i) { if(_variables[i]==v) { return *this; } } _variables.push_back(v); return *this; }
+    //! \brief Adjoins the variables in \a spc.
+    Space<VariableType>& adjoin(const Space<VariableType>& spc) {
+        for(uint i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
     //! \brief Append the named variable \a v to the variables defining the space.
-    Space& operator,(const Variable& v) {
+    Space<VariableType>& append(const VariableType& v) {
         for(uint i=0; i!=_variables.size(); ++i) {
-            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the Space "<<*this);
+            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
         }
         _variables.push_back(v); return *this; }
   public:
+    //! \brief The space containing the union of the variables.
+    friend Space<VariableType> join(const Space<VariableType>& spc1, const Space<VariableType>& spc2) {
+        Space<VariableType> r(spc1); r.adjoin(spc2); return r; };
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream&, const Space&);
+    friend std::ostream& operator<<(std::ostream& os, const Space<VariableType>& spc) { return os<<spc._variables; }
   private:
-    std::vector<Variable> _variables;
+    std::vector<VariableType> _variables;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Space& spc) { return os << spc._variables; }
 
-inline Space operator,(const Variable& v1, const Variable& v2) {
-    Space r; r,v1,v2; return r; }
+
+
 
 
 
@@ -325,6 +561,8 @@ struct EnumeratedValue {
     EnumeratedValue(const String& str) : _value(str) { }
     //! \brief The string representation of the value.
     operator const String& () const { return this->_value; }
+    //! \brief Equality operator.
+    bool operator==(const EnumeratedValue& s) const { return this->_value==s._value; }
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const EnumeratedValue& self) {
         return os << self._value; }
@@ -332,187 +570,54 @@ struct EnumeratedValue {
     std::string _value;
 };
 
-
-//! \brief A formula returning an EnumeratedVariable.
-struct EnumeratedFormula {
-    EnumeratedFormula(const EnumeratedValue& val) : _str(val) { }
-    EnumeratedFormula(const EnumeratedVariable& var) : _str(var.name()) { }
-    friend std::ostream& operator<<(std::ostream& os, const EnumeratedFormula& self) {
-        return os << self._str; }
+//! \brief
+struct Valuation {
+    void set(const Variable<EnumeratedValue>& v, const String& s) {
+        this->enumerated_values.insert(std::make_pair(v,EnumeratedValue(s))); }
+    //void set(const Variable<Integer>& v, const Integer& n) { this->integer_values[v]=n; }
+    void set(const Variable<Real>& v, const Interval& x) { this->real_values[v]=x; }
+    EnumeratedValue get(const Variable<EnumeratedValue>& v) const { return enumerated_values.find(v)->second; }
+    //Integer get(const Variable<Integer>& v) const { return integer_values.find(v)->second; }
+    Interval get(const Variable<Real>& v) const { return real_values.find(v)->second; }
   private:
-    std::string _str;
-};
-
-
-
-/*
-
-//! \brief A state in an integer lattice.
-//! \details \sa DiscreteConstraint
-struct DiscreteState {
   public:
-    DiscreteState(const std::vector<int>& values) : _values(values) { }
-
-    uint size() const { return this->_values.size(); }
-    uint operator[](uint i) const { return this->_values[i]; }
-    bool operator==(const DiscreteState& other) const {
-        assert(this->size()==other.size());
-        for(uint i=0; i!=_values.size(); ++i) {
-            if(this->_values[i]!=other._values[i]) { return false; } }
-        return true; }
-    bool operator!=(const DiscreteState& other) const {
-        return  !(*this==other); }
-    bool operator<(const DiscreteState& other) const {
-        assert(this->size()==other.size());
-        for(uint i=0; i!=_values.size(); ++i) {
-            if(this->_values[i]!=other._values[i]) { return this->_values[i]<other._values[i]; } }
-        return false; }
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteState& self) {
-        for(uint i=0; i!=self._values.size(); ++i) { os << (i==0?'(':',') << "q["<<i<<"]="<<self._values[i]; } return os << ')'; }
-  private:
-    std::vector<int> _values;
+    std::map<Variable<EnumeratedValue>,EnumeratedValue> enumerated_values;
+    //std::map<Variable<Integer>,Integer> integer_values;
+    std::map<Variable<Real>,Interval> real_values;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Valuation& v) {
+    return os<<v.enumerated_values<<v.real_values; }
 
-//! \brief A finite state space, consisting of a list of enumerated variables.
-//! \details \sa EnumeratedType, EnumeratedVariable, DiscreteSpace, DiscreteState, DiscretePredicate
-struct DiscreteSpace {
-    friend class DiscreteState;
-  public:
-    //! \brief Create a space with named variables given by \a variables.
-    DiscreteSpace(const std::vector<EnumeratedVariable>& variables) : _variables(variables) {
-        for(uint i=0; i!=this->_variables.size(); ++i) {
-            for(uint j=i+1; j!=this->_variables.size(); ++j) {
-                assert(this->_variables[i].name()!=this->_variables[j].name()); } } }
-    //! \brief The number of variables needed to describe a state in the space.
-    uint size() const { return _variables.size(); }
-    //! \brief The \a i<sup>th</sup> variable.
-    const EnumeratedVariable& variable(uint i) const { return this->_variables.at(i); }
-    //! \brief The index of the variable with name \a str.
-    uint index(const String& str) const { for(uint i=0; i!=_variables.size(); ++i) {
-        if(_variables[i].name()==str) { return i; } }
-        assert(false);
-    }
-    //! \brief The index of the variable  \a var.
-    uint index(const EnumeratedVariable& var) const { return this->index(var.name()); }
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteSpace& self) {
-        for(uint i=0; i!=self._variables.size(); ++i) { os << (i==0?'(':',') << self._variables[i].name()<<":"<<self._variables[i].type().name(); } return os << ')'; }
-  private:
-    std::vector<EnumeratedVariable> _variables;
+
+
+
+
+
+
+struct GtrZero {}; struct LessZero {};
+
+struct Gtr {
+    tribool operator()(const Float& x1, const Float& x2) const {
+        return (x1==x2) ? indeterminate : tribool(x1>x2); }
+    tribool operator()(const Interval& x1, const Interval& x2) const {
+        if(x1.lower()>x2.upper()) { return true; } else if(x1.upper()<x2.lower()) { return false; } else { return indeterminate; } }
 };
 
-
-
-//! \brief A valuation of the enumerated variables of some discrete space.
-//! \details \sa EnumeratedType, EnumeratedVariable, DiscreteSpace, DiscreteState, DiscretePredicate
-struct DiscreteValuation {
-  public:
-    //! \brief Assign \a values to the variables in \a space.
-    DiscreteValuation(const DiscreteSpace& space, const std::vector<String>& values)
-        : _space_ptr(&space), _values(values.size()) {
-        assert(space.size()==values.size());
-        for(uint i=0; i!=values.size(); ++i) {
-            this->_values[i]=space.variable(i).type().index(values[i]); }
-    }
-
-    //! \brief The underlying discrete space.
-    const DiscreteSpace& space() const { return *this->_space_ptr; }
-    //! \brief The value of the \a i<sup>th</sup> variable.
-    String operator[](uint i) const {
-        return this->_space_ptr->variable(i).type().value(this->_values[i]); }
-    //! \brief The value of the internal named variable \a var.
-    String operator[](const EnumeratedVariable& var) const {
-        for(uint i=0; i!=this->_space_ptr->size(); ++i) {
-            if(this->_space_ptr->variable(i)==var) {
-                return (*this)[i]; } }
-        ARIADNE_ASSERT_MSG(false,"Variable "<<var<<" is not a member of space "<<this->space()); }
-    //! \brief Test equality of two valuations on the same space.
-    bool operator==(const DiscreteValuation& other) const {
-        assert(this->_space_ptr==other._space_ptr);
-        for(uint i=0; i!=_values.size(); ++i) {
-            if(this->_values[i]!=other._values[i]) { return false; } }
-        return true; }
-    //! \brief Test inequality of two valuations on the same space.
-    bool operator!=(const DiscreteValuation& other) const {
-        return  !(*this==other); }
-    //! \brief Lexicographic ordering of valuations on the same space.
-    bool operator<(const DiscreteValuation& other) const {
-        assert(this->_space_ptr==other._space_ptr);
-        for(uint i=0; i!=_values.size(); ++i) {
-            if(this->_values[i]!=other._values[i]) { return this->_values[i]<other._values[i]; } }
-        return false; }
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteValuation& self) {
-        for(uint i=0; i!=self._values.size(); ++i) { os << (i==0?'(':',') << self.space().variable(i).name()<<"="<<self[i]; } return os << ')'; }
-  private:
-    const DiscreteSpace* _space_ptr;
-    std::vector<int> _values;
+struct Less {
+    tribool operator()(const Float& x1, const Float& x2) const { 
+        return (x1==x2) ? indeterminate : tribool(x1<x2); }
+    tribool operator()(const Interval& x1, const Interval& x2) const {
+        if(x1.lower()>x2.upper()) { return false; } else if(x1.upper()<x2.lower()) { return true; } else { return indeterminate; } }
 };
 
-//! \brief A constraint over integer variables.
-//! \details \sa DiscreteState
-struct DiscreteConstraint {
-  public:
-    DiscreteConstraint(const DiscretePredicate& pred, const DiscreteSpace& spc);
-    //! \brief Evaluate the predicate at the given state.
-    bool operator() (const DiscreteState&) const;
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream&, const DiscreteConstraint&);
-  private:
-    std::vector< std::vector< std::pair<uint,uint> > > _cnf;
+struct Equal {
+    template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 == a2; }
 };
-
-inline
-DiscreteConstraint::DiscreteConstraint(const DiscretePredicate& pred, const DiscreteSpace& spc) {
-    for(uint i=0; i!=pred._cnf.size(); ++i) {
-        _cnf.push_back(std::vector<std::pair<uint,uint> >());
-        for(uint j=0; j!=pred._cnf[i].size(); ++j) {
-            EnumeratedVariable const& var=pred._cnf[i][j].first;
-            String const& val=pred._cnf[i][j].second;
-            this->_cnf[i].push_back(std::pair<uint,uint>(spc.index(var),var.type().index(val)));
-        }
-    }
-}
-
-inline
-bool DiscreteConstraint::operator() (const DiscreteState& state) const {
-    for(uint i=0; i!=_cnf.size(); ++i) {
-        bool value=false;
-        for(uint j=0; j!=_cnf[i].size(); ++j) {
-            if(state[_cnf[i][j].first]==_cnf[i][j].second) {
-                value=true; break;
-            }
-        }
-        if(value==false) { return false; }
-    }
-    return true;
-}
-
-inline
-std::ostream& operator<<(std::ostream& os, const DiscreteConstraint& self)
-{
-    for(uint i=0; i!=self._cnf.size(); ++i) {
-        if(i!=0) { os << " & "; }
-        for(uint j=0; j!=self._cnf[i].size(); ++j) {
-            os << (j==0?"(":" | ") << "q["<<self._cnf[i][j].first<<"]=="<<self._cnf[i][j].second;
-        }
-        os << ")";
-    }
-    return os;
-}
-
-*/
-
-
-
-struct GtrZero {}; struct LessZero {}; struct Gtr { }; struct Less { }; struct Equal { };
 
 struct And { template<class T> T operator()(const T& a1, const T& a2) const { return a1 && a2; } };
 struct Or { template<class T> T operator()(const T& a1, const T& a2) const { return a1 || a2; } };
 struct Not { template<class T> T operator()(const T& a) const { return !a; } };
-
 
 struct Add { template<class T> T operator()(const T& a1, const T& a2) const { return a1+a2; } };
 struct Sub { template<class T> T operator()(const T& a1, const T& a2) const { return a1-a2; } };
@@ -531,63 +636,177 @@ struct Sin { template<class T> T operator()(const T& a) const { return Ariadne::
 struct Cos { template<class T> T operator()(const T& a) const { return Ariadne::cos(a); } };
 struct Tan { template<class T> T operator()(const T& a) const { return Ariadne::tan(a); } };
 
-class FormulaInterface;
 
-typedef shared_ptr<FormulaInterface> FormulaPointer;
+inline std::ostream& operator<<(std::ostream& os, const Less& v) { return os << "<="; }
+inline std::ostream& operator<<(std::ostream& os, const Gtr& v) { return os << ">="; }
+inline std::ostream& operator<<(std::ostream& os, const Equal& v) { return os << "=="; }
 
-struct FormulaInterface {
+inline std::ostream& operator<<(std::ostream& os, const And& v) { return os << "&&"; }
+inline std::ostream& operator<<(std::ostream& os, const Or& v) { return os << "||"; }
+inline std::ostream& operator<<(std::ostream& os, const Not& v) { return os << "!"; }
+
+inline std::ostream& operator<<(std::ostream& os, const Add& v) { return os << "+"; }
+inline std::ostream& operator<<(std::ostream& os, const Sub& v) { return os << "-"; }
+inline std::ostream& operator<<(std::ostream& os, const Mul& v) { return os << "*"; }
+inline std::ostream& operator<<(std::ostream& os, const Div& v) { return os << "/"; }
+
+inline std::ostream& operator<<(std::ostream& os, const Pow& op) { return os << "pow"; }
+inline std::ostream& operator<<(std::ostream& os, const Sqr& op) { return os << "sqr"; }
+inline std::ostream& operator<<(std::ostream& os, const Sqrt& op) { return os << "sqrt"; }
+
+inline std::ostream& operator<<(std::ostream& os, const Exp& op) { return os << "exp"; }
+inline std::ostream& operator<<(std::ostream& os, const Log& op) { return os << "log"; }
+inline std::ostream& operator<<(std::ostream& os, const Sin& op) { return os << "sin"; }
+inline std::ostream& operator<<(std::ostream& os, const Cos& op) { return os << "cos"; }
+inline std::ostream& operator<<(std::ostream& os, const Tan& op) { return os << "tan"; }
+
+
+template<class R> class FormulaInterface;
+template<class R> class VariableFormula;
+template<class R, class C=R> class ConstantFormula;
+template<class R, class O, class A=R> class UnaryFormula;
+template<class R, class O, class A1=R, class A2=R> class BinaryFormula;
+template<class R> class Formula;
+template<class R> std::ostream& operator<<(std::ostream&, const Formula<R>& f);
+
+template<class R> 
+class FormulaInterface {
+  public:
     virtual ~FormulaInterface() { }
-    virtual FormulaInterface* clone() const = 0;
-    virtual ExpressionInterface* expression(const Space& spc) const = 0;
-    template<class Res> Res evaluate() const;
+    virtual FormulaInterface<R>* clone() const = 0;
+    virtual VariableSet arguments() const = 0;
+    virtual R evaluate(const Valuation& x) const = 0;
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const FormulaInterface& f) { return f.write(os); }
+template<class R> 
+inline std::ostream& operator<<(std::ostream& os, const FormulaInterface<R>& f) { return f.write(os); }
 
-
-
-
-
-template<class C> struct ConstantFormula : public FormulaInterface {
-  public:
-    ConstantFormula(const C& c) : _value(c) { }
-    virtual ConstantFormula<C>* clone() const { return new ConstantFormula<C>(*this); }
-    virtual ExpressionInterface* expression(const Space& spc) const;
-    virtual std::ostream& write(std::ostream& os) const { return os<<_value; }
-  private:
-    C _value;
+template<class R> struct VariableFormula : public FormulaInterface<R> {
+    VariableFormula(const Variable<R>& v) : var(v) { }
+    virtual VariableFormula<R>* clone() const { return new VariableFormula<R>(*this); }
+    virtual VariableSet arguments() const { VariableSet spc; spc.insert(var); return spc; }
+    virtual R evaluate(const Valuation& x) const { return x.get(var); }
+    virtual std::ostream& write(std::ostream& os) const { return os<<var; }
+    Variable<R> var;
 };
 
-struct VariableFormula : public FormulaInterface {
+template<class R,class C> struct ConstantFormula : public FormulaInterface<R> {
+    ConstantFormula(const C& c) : val(c) { }
+    virtual ConstantFormula<R,C>* clone() const { return new ConstantFormula<R,C>(*this); }
+    virtual VariableSet arguments() const { return VariableSet(); }
+    virtual R evaluate(const Valuation& x) const { return R(val); }
+    virtual std::ostream& write(std::ostream& os) const { return os<<val; }
+    C val;
+};
+
+
+template<class R,class O,class A> struct UnaryFormula : public FormulaInterface<R> {
+    UnaryFormula(O o, shared_ptr< FormulaInterface<A> > a) : op(o), arg_ptr(a) { }
+    UnaryFormula(O o, const FormulaInterface<A>& a) : op(o), arg_ptr(a.clone()) { }
+    virtual UnaryFormula<R,O,A>* clone() const { return new UnaryFormula<R,O,A>(*this); }
+    virtual VariableSet arguments() const { return arg_ptr->arguments(); }
+    virtual R evaluate(const Valuation& x) const { return op(arg_ptr->evaluate(x)); }
+    virtual std::ostream& write(std::ostream& os) const { return os<<op<<"("<<*arg_ptr<<")"; }
+    O op; shared_ptr< FormulaInterface<A> > arg_ptr;
+};
+
+template<class R,class O,class A1,class A2> struct BinaryFormula : public FormulaInterface<R> {
+    BinaryFormula(O o, shared_ptr< FormulaInterface<A1> > a1, shared_ptr< FormulaInterface<A2> > a2)
+        : op(o), arg1_ptr(a1), arg2_ptr(a2) { }
+    BinaryFormula(O o, FormulaInterface<A1> const& a1, FormulaInterface<A2> const& a2)
+        : op(o), arg1_ptr(a1.clone()), arg2_ptr(a2.clone()) { }
+    BinaryFormula(O o, Formula<A1> a1, Formula<A2> a2)
+        : op(o), arg1_ptr(a1.ptr), arg2_ptr(a2.ptr) { }
+    virtual BinaryFormula<R,O,A1,A2>* clone() const { return new BinaryFormula<R,O,A1,A2>(*this); }
+    virtual VariableSet arguments() const { return join(arg1_ptr->arguments(),arg2_ptr->arguments()); }
+    virtual R evaluate(const Valuation& x) const { return op(arg1_ptr->evaluate(x),arg2_ptr->evaluate(x)); }
+    virtual std::ostream& write(std::ostream& os) const { return os<<*arg1_ptr<<op<<*arg2_ptr; }
+    O op; shared_ptr< FormulaInterface<A1> > arg1_ptr; shared_ptr< FormulaInterface<A2> > arg2_ptr;
+};
+
+//! \brief A formula taking values of type \a R.
+template<class R> class Formula {
   public:
-    VariableFormula(const RealVariable& var) : _var(var) { }
+    //! \brief The constant \a c.
+    Formula(const R& c) : ptr(new ConstantFormula<R>(c)) { }
+    //! \brief The formula "v" in named variable \a v.
+    Formula(const Variable<R>& v) : ptr(new VariableFormula<R>(v)) { }
+    Formula(const FormulaInterface<R>& e) : ptr(e.clone()) { }
+    explicit Formula(FormulaInterface<R>* p) : ptr(p) { }
+    Formula(shared_ptr<FormulaInterface<R> > p) : ptr(p) { }
+    //! \brief The variables used in the formula.
+    VariableSet arguments() const { return ptr->arguments(); }
+    //! \brief Evaluate the formula on the valuation of variables \a x.
+    R evaluate(const Valuation& x) const { return ptr->evaluate(x); }
+    //! \brief Write to an output stream.
+    friend std::ostream& operator<< <>(std::ostream&, const Formula<R>&);
+  public:
+    shared_ptr< FormulaInterface<R> > ptr;
+};
+
+template<class R> inline std::ostream& operator<<(std::ostream& os, const Formula<R>& f) { return f.ptr->write(os); }
+
+
+
+
+
+
+template<> 
+class FormulaInterface<Real> {
+  public:
+    virtual ~FormulaInterface() { }
+    virtual FormulaInterface<Real>* clone() const = 0;
+    virtual VariableSet arguments() const = 0;
+    virtual ExpressionInterface* expression(const StateSpace& spc) const = 0;
+    virtual Interval evaluate(const Valuation& x) const = 0;
+    virtual std::ostream& write(std::ostream& os) const = 0;
+};
+
+template<> struct VariableFormula<Real> : public FormulaInterface<Real> {
+    VariableFormula(const RealVariable& v) : var(v) { }
     virtual VariableFormula* clone() const { return new VariableFormula(*this); }
-    virtual ExpressionInterface* expression(const Space& spc) const;
-    virtual std::ostream& write(std::ostream& os) const { return os<<_var; }
-  private:
-    RealVariable _var;
+    virtual VariableSet arguments() const { VariableSet spc; spc.insert(var); return spc; }
+    virtual ExpressionInterface* expression(const StateSpace& spc) const;
+    virtual Interval evaluate(const Valuation& x) const { return x.get(var); }
+    virtual std::ostream& write(std::ostream& os) const { return os<<var; }
+    RealVariable var;
+};
+
+template<class C> struct ConstantFormula<Real,C> : public FormulaInterface<Real> {
+    ConstantFormula(const C& c) : val(c) { }
+    virtual ConstantFormula<Real,C>* clone() const { return new ConstantFormula<Real,C>(*this); }
+    virtual VariableSet arguments() const { return VariableSet(); }
+    virtual Interval evaluate(const Valuation& x) const { return Interval(val); }
+    virtual ExpressionInterface* expression(const StateSpace& spc) const;
+    virtual std::ostream& write(std::ostream& os) const { return os<<val; }
+    C val;
 };
 
 
-template<class Op> struct UnaryFormula : public FormulaInterface {
+template<class Op> struct UnaryFormula<Real,Op> : public FormulaInterface<Real> {
+    typedef shared_ptr<FormulaInterface<Real> > FormulaPointer;
     UnaryFormula(Op o, FormulaPointer a) : op(o), arg_ptr(a) { }
-    UnaryFormula(Op o, const FormulaInterface& a) : op(o), arg_ptr(a.clone()) { }
-    virtual UnaryFormula<Op>* clone() const { return new UnaryFormula<Op>(*this); }
-    virtual ExpressionInterface* expression(const Space& spc) const;
+    UnaryFormula(Op o, const FormulaInterface<Real>& a) : op(o), arg_ptr(a.clone()) { }
+    virtual UnaryFormula<Real,Op>* clone() const { return new UnaryFormula<Real,Op>(*this); }
+    virtual VariableSet arguments() const { return arg_ptr->arguments(); }
+    virtual Interval evaluate(const Valuation& x) const { return op(arg_ptr->evaluate(x)); }
+    virtual ExpressionInterface* expression(const StateSpace& spc) const;
     virtual std::ostream& write(std::ostream& os) const { return os<<op<<"("<<*arg_ptr<<")"; }
     //template<class Res> Res evaluate() const { return op(arg.evaluate<Res>()); }
     Op op; FormulaPointer arg_ptr;
 };
 
-template<class Op> struct BinaryFormula : public FormulaInterface {
+template<class Op> struct BinaryFormula<Real,Op> : public FormulaInterface<Real> {
+    typedef shared_ptr<FormulaInterface<Real> > FormulaPointer;
     BinaryFormula(Op o, FormulaPointer a1, FormulaPointer a2) : op(o), arg1_ptr(a1), arg2_ptr(a2) { }
-    virtual BinaryFormula<Op>* clone() const { return new BinaryFormula<Op>(*this); }
-    virtual ExpressionInterface* expression(const Space& spc) const;
+    virtual BinaryFormula<Real,Op>* clone() const { return new BinaryFormula<Real,Op>(*this); }
+    virtual VariableSet arguments() const { return join(arg1_ptr->arguments(),arg2_ptr->arguments()); }
+    virtual Interval evaluate(const Valuation& x) const { return op(arg1_ptr->evaluate(x),arg2_ptr->evaluate(x)); }
+    virtual ExpressionInterface* expression(const StateSpace& spc) const;
     virtual std::ostream& write(std::ostream& os) const { return os<<*arg1_ptr<<op<<*arg2_ptr; }
     Op op; FormulaPointer arg1_ptr; FormulaPointer arg2_ptr;
 };
-
 
 /*! \brief A simple formula in named variables.
  *  \details A %Formula differs from an Expression in three ways.
@@ -597,26 +816,30 @@ template<class Op> struct BinaryFormula : public FormulaInterface {
  *  Thirdly, formulae may be manipulated symbolically, whereas expressions can only be manipulated numerically.
  *  \sa RealVariable, ExpressionInterface
  */
-class RealFormula {
+template<> class Formula<Real> {
   public:
-    RealFormula(const int& c) : ptr(new ConstantFormula<int>(c)) { }
-    RealFormula(const double& c) : ptr(new ConstantFormula<double>(c)) { }
-    RealFormula(const Interval& c) : ptr(new ConstantFormula<Interval>(c)) { }
+    Formula(const int& c) : ptr(new ConstantFormula<Real,int>(c)) { }
+    Formula(const double& c) : ptr(new ConstantFormula<Real,double>(c)) { }
+    Formula(const Interval& c) : ptr(new ConstantFormula<Real,Interval>(c)) { }
     //! \brief The formula "v" in named variable \a v.
-    RealFormula(const RealVariable& v) : ptr(new VariableFormula(v)) { }
-    RealFormula(FormulaInterface* p) : ptr(p) { }
-    RealFormula(shared_ptr<FormulaInterface> p) : ptr(p) { }
+    Formula(const RealVariable& v) : ptr(new VariableFormula<Real>(v)) { }
+    Formula(const FormulaInterface<Real>& e) : ptr(e.clone()) { }
+    Formula(FormulaInterface<Real>* p) : ptr(p) { }
+    Formula(shared_ptr<FormulaInterface<Real> > p) : ptr(p) { }
     //! \brief Create an expression \f$\R^n\rightarrow\R\f$ by assigning the variables of the formula the numbers given by \a spc.
-    ExpressionInterface* expression(const Space& spc) { return ptr->expression(spc); }
+    VariableSet arguments() const { return ptr->arguments(); }
+    ExpressionInterface* expression(const StateSpace& spc) { return ptr->expression(spc); }
 
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const RealFormula& e);
+    friend std::ostream& operator<<(std::ostream& os, const Formula<Real>& f);
   public:
-    FormulaPointer ptr;
+    shared_ptr<FormulaInterface<Real> > ptr;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const RealFormula& e) { return e.ptr->write(os); }
+inline std::ostream& operator<<(std::ostream& os, const Formula<Real>& f) { return f.ptr->write(os); }
 
+inline Assignment<RealVariable,RealFormula> RealVariable::operator=(const RealFormula& f) const {
+    return Assignment<RealVariable,RealFormula>(*this,f); }
 
 class AffineFormula
 //    : public FormulaInterface
@@ -632,7 +855,7 @@ class AffineFormula
     AffineFormula* clone() const { return new AffineFormula(*this); }
 
     //! \brief Create an expression \f$\R^n\rightarrow\R\f$ by assigning the variables of the formula the numbers given by \a spc.
-    AffineExpression* expression(const Space& spc) const {
+    AffineExpression* expression(const StateSpace& spc) const {
         Vector<Interval> a(spc.dimension());
         for(std::map<RealVariable,Interval>::const_iterator iter=_a.begin(); iter!=_a.end(); ++iter) {
             a[spc.index(iter->first)]+=iter->second;
@@ -703,82 +926,103 @@ inline std::ostream& operator<<(std::ostream& os, const AffineFormula& x) {
 }
 
 
-inline ExpressionInterface* RealVariable::expression(const Space& spc) const {
+inline ExpressionInterface* RealVariable::expression(const StateSpace& spc) const {
     return new ProjectionExpression(spc.dimension(),spc.index(*this));
 }
 
 template<class C>
-inline ExpressionInterface* ConstantFormula<C>::expression(const Space& spc) const {
-    return new ConstantExpression(spc.dimension(),Interval(this->_value));
+inline ExpressionInterface* ConstantFormula<Real,C>::expression(const StateSpace& spc) const {
+    return new ConstantExpression(spc.dimension(),Interval(this->val));
 }
 
-inline ExpressionInterface* VariableFormula::expression(const Space& spc) const {
-    return new ProjectionExpression(spc.dimension(),spc.index(this->_var));
+inline ExpressionInterface* VariableFormula<Real>::expression(const StateSpace& spc) const {
+    return new ProjectionExpression(spc.dimension(),spc.index(this->var));
 }
 
 template<class Op>
-ExpressionInterface* UnaryFormula<Op>::expression(const Space& spc) const {
+ExpressionInterface* UnaryFormula<Real,Op>::expression(const StateSpace& spc) const {
     return new UnaryExpression<Op>(op,arg_ptr->expression(spc)); }
 
 template<class Op>
-ExpressionInterface* BinaryFormula<Op>::expression(const Space& spc) const {
+ExpressionInterface* BinaryFormula<Real,Op>::expression(const StateSpace& spc) const {
     return new BinaryExpression<Op>(op,arg1_ptr->expression(spc),arg2_ptr->expression(spc)); }
 
 
-inline FormulaPointer make_formula_pointer(const Float& c) { return FormulaPointer(new ConstantFormula<Float>(c)); }
-inline FormulaPointer make_formula_pointer(const Interval& c) { return FormulaPointer(new ConstantFormula<Interval>(c)); }
+
+
+//! \related Formula \brief .
+template<class T> inline Formula<T> operator&&(Formula<T> e1, Formula<T> e2) {
+    return Formula<T>(new BinaryFormula<T,And,T,T>(And(),e1.ptr,e2.ptr)); }
+//! \related Formula \brief .
+template<class T> inline Formula<T> operator||(Formula<T> e1, Formula<T> e2) {
+    return Formula<T>(new BinaryFormula<T,Or>(Or(),e1.ptr,e2.ptr)); }
+//! \related Formula \brief .
+template<class T> inline Formula<T> operator!(Formula<T> e) {
+    return Formula<T>(new UnaryFormula<T,Not>(Not(),e.ptr)); }
+
+//! \related EnumeratedVariable \brief .
+inline
+Formula<bool>
+operator==(const EnumeratedVariable& lhs, const EnumeratedValue& rhs) {
+    return Formula<bool>(new BinaryFormula<bool,Equal,EnumeratedValue,EnumeratedValue>(Equal(),VariableFormula<EnumeratedValue>(lhs),ConstantFormula<EnumeratedValue>(rhs)));
+}
+
+//! \related EnumeratedVariable \brief .
+inline
+Formula<bool>
+operator==(const EnumeratedVariable& lhs, const String& rhs) {
+    return lhs==EnumeratedValue(rhs);
+}
+
+//! \related RealFormula \brief .
+inline
+Formula<tribool>
+operator<=(const RealFormula& lhs, const RealFormula& rhs) {
+    return Formula<tribool>(new BinaryFormula<tribool,Less,Real,Real>(Less(),lhs,rhs));
+}
+
+//! \related RealFormula \brief .
+inline
+Formula<tribool>
+operator>=(const RealFormula& lhs, const RealFormula& rhs) {
+    return Formula<tribool>(new BinaryFormula<tribool,Gtr,Real,Real>(Gtr(),lhs,rhs));
+}
 
 //! \related RealFormula \brief .
 inline RealFormula operator+(RealFormula e1, RealFormula e2) {
-    return RealFormula(new BinaryFormula<Add>(Add(),e1.ptr,e2.ptr)); }
+    return RealFormula(new BinaryFormula<Real,Add>(Add(),e1.ptr,e2.ptr)); }
 //! \related RealFormula \brief .
 inline RealFormula operator-(RealFormula e1, RealFormula e2) {
-    return RealFormula(new BinaryFormula<Sub>(Sub(),e1.ptr,e2.ptr)); }
+    return RealFormula(new BinaryFormula<Real,Sub>(Sub(),e1.ptr,e2.ptr)); }
 //! \related RealFormula \brief .
 inline RealFormula operator*(RealFormula e1, RealFormula e2) {
-    return RealFormula(new BinaryFormula<Mul>(Mul(),e1.ptr,e2.ptr)); }
+    return RealFormula(new BinaryFormula<Real,Mul>(Mul(),e1.ptr,e2.ptr)); }
 //! \related RealFormula \brief .
 inline RealFormula operator/(RealFormula e1, RealFormula e2) {
-    return RealFormula(new BinaryFormula<Div>(Div(),e1.ptr,e2.ptr)); }
+    return RealFormula(new BinaryFormula<Real,Div>(Div(),e1.ptr,e2.ptr)); }
 
 
 //! \related RealFormula \brief .
 inline RealFormula exp(RealFormula e) {
-    return RealFormula(new UnaryFormula<Exp>(Exp(),e.ptr)); }
+    return RealFormula(new UnaryFormula<Real,Exp>(Exp(),e.ptr)); }
 //! \related RealFormula \brief .
 inline RealFormula log(RealFormula e) {
-    return RealFormula(new UnaryFormula<Log>(Log(),e.ptr)); }
+    return RealFormula(new UnaryFormula<Real,Log>(Log(),e.ptr)); }
 //! \related RealFormula \brief .
 inline RealFormula sin(RealFormula e) {
-    return RealFormula(new UnaryFormula<Sin>(Sin(),e.ptr)); }
+    return RealFormula(new UnaryFormula<Real,Sin>(Sin(),e.ptr)); }
 //! \related RealFormula \brief .
 inline RealFormula cos(RealFormula e) {
-    return RealFormula(new UnaryFormula<Cos>(Cos(),e.ptr)); }
+    return RealFormula(new UnaryFormula<Real,Cos>(Cos(),e.ptr)); }
 //! \related RealFormula \brief .
 inline RealFormula tan(RealFormula e) {
-    return RealFormula(new UnaryFormula<Tan>(Tan(),e.ptr)); }
+    return RealFormula(new UnaryFormula<Real,Tan>(Tan(),e.ptr)); }
 
 
-inline std::ostream& operator<<(std::ostream& os, const Less& v) { return os << "<="; }
-inline std::ostream& operator<<(std::ostream& os, const Gtr& v) { return os << ">="; }
-inline std::ostream& operator<<(std::ostream& os, const Equal& v) { return os << "=="; }
-
-inline std::ostream& operator<<(std::ostream& os, const Add& v) { return os << "+"; }
-inline std::ostream& operator<<(std::ostream& os, const Sub& v) { return os << "-"; }
-inline std::ostream& operator<<(std::ostream& os, const Mul& v) { return os << "*"; }
-inline std::ostream& operator<<(std::ostream& os, const Div& v) { return os << "/"; }
-
-inline std::ostream& operator<<(std::ostream& os, const Pow& op) { return os << "pow"; }
-inline std::ostream& operator<<(std::ostream& os, const Sqr& op) { return os << "sqr"; }
-inline std::ostream& operator<<(std::ostream& os, const Sqrt& op) { return os << "sqrt"; }
-
-inline std::ostream& operator<<(std::ostream& os, const Exp& op) { return os << "exp"; }
-inline std::ostream& operator<<(std::ostream& os, const Log& op) { return os << "log"; }
-inline std::ostream& operator<<(std::ostream& os, const Sin& op) { return os << "sin"; }
-inline std::ostream& operator<<(std::ostream& os, const Cos& op) { return os << "cos"; }
-inline std::ostream& operator<<(std::ostream& os, const Tan& op) { return os << "tan"; }
-
-
+inline bool operator==(const ContinuousPredicate& pred, bool truth) {
+    ConstantFormula<tribool> const* f=dynamic_cast<ConstantFormula<tribool> const*>(&*pred.ptr);
+    return (f && f->val==false);
+}
 
 
 template<class VAR> struct Next;
@@ -816,190 +1060,34 @@ struct Next<RealVariable>
 inline Next<EnumeratedVariable> next(const EnumeratedVariable& v) { return Next<EnumeratedVariable>(v); }
 inline Next<RealVariable> next(const RealVariable& v) { return Next<RealVariable>(v); }
 
-template<class CVAR>
-struct Dotted
+template<class T> class DottedVariable;
+
+template<class T>
+struct DottedVariable : public Quantity<T>
 {
-    CVAR base;
-    Assignment<Dotted<RealVariable>,RealFormula> operator=(const RealFormula& f) {
-        return Assignment<Dotted<RealVariable>,RealFormula>(*this,f); }
-    Assignment<Dotted<RealVariable>,RealFormula> operator=(const RealVariable& v) {
-        return Assignment<Dotted<RealVariable>,RealFormula>(*this,RealFormula(v)); }
-    friend Dotted<RealVariable> dot(const RealVariable& v);
-    friend std::ostream& operator<<(std::ostream& os, const Dotted<CVAR>& self) {
-        return os << "next(" << self.base.name() << ")"; }
-  private:
-    Dotted(const CVAR& v) : base(v) { }
+    Variable<T> base;
+    Assignment<DottedVariable<T>,Formula<T> > operator=(const Formula<T>& f) {
+        return Assignment<DottedVariable<T>,Formula<T> >(*this,f); }
+    Assignment<DottedVariable<T>,Formula<T> > operator=(const Variable<T>& v) {
+        return Assignment<DottedVariable<T>,Formula<T> >(*this,Formula<T>(v)); }
+    friend std::ostream& operator<<(std::ostream& os, const DottedVariable<T>& self) {
+        return os << "dot(" << self.base.name() << ")"; }
+    explicit DottedVariable(const Variable<T>& v) : Quantity<T>("dot("+v.name()+")"), base(v) { }
 };
 
-inline Dotted<RealVariable> dot(const RealVariable& v) { return Dotted<RealVariable>(v); }
+inline DottedVariable<Real> dot(const Variable<Real>& v) { return DottedVariable<Real>(v); }
 
 typedef Assignment<EnumeratedVariable,EnumeratedFormula> EnumeratedAssignment;
 typedef Assignment<Next<EnumeratedVariable>,EnumeratedFormula> EnumeratedUpdate;
 typedef Assignment<RealVariable,RealFormula> RealAssignment;
 typedef Assignment<Next<RealVariable>,RealFormula> RealUpdate;
-typedef Assignment<Dotted<RealVariable>,RealFormula> RealDynamic;
+typedef Assignment<DottedVariable<Real>,Formula<Real> > RealDynamic;
 
 
-template<class T> class PredicateInterface {
-  public:
-    virtual PredicateInterface<T>* clone() const = 0;
-    virtual std::ostream& write(std::ostream& os) const = 0;
-};
-
-template<class T> inline
-std::ostream& operator<<(std::ostream& os, const PredicateInterface<T>& pred) {
-    return pred.write(os);
-}
 
 
-template<class T> struct ConstantPredicate : public PredicateInterface<T> {
-  public:
-    ConstantPredicate(const T& c) : _value(c) { }
-    virtual ConstantPredicate<T>* clone() const { return new ConstantPredicate<T>(*this); }
-    virtual std::ostream& write(std::ostream& os) const { return os<<_value; }
-  private:
-    T _value;
-};
-
-template<class T, class LHS, class Cmp, class RHS> struct ComparisonPredicate : public PredicateInterface<T> {
-  public:
-    ComparisonPredicate(const LHS& l, const Cmp& c, const RHS& r) : lhs_ptr(new LHS(l)), cmp(c), rhs_ptr(new RHS(r)) { }
-    virtual ComparisonPredicate<T,LHS,Cmp,RHS>* clone() const { return new ComparisonPredicate<T,LHS,Cmp,RHS>(*this); }
-    virtual std::ostream& write(std::ostream& os) const { return os<<*lhs_ptr<<cmp<<*rhs_ptr; }
-  private:
-    shared_ptr<LHS> lhs_ptr; Cmp cmp; shared_ptr<RHS> rhs_ptr;
-};
 
 
-template<class T, class Op> struct UnaryPredicate : public PredicateInterface<T> {
-    typedef shared_ptr< PredicateInterface<T> > PredicatePointer;
-    UnaryPredicate(Op o, PredicatePointer a) : op(o), arg_ptr(a) { }
-    UnaryPredicate(Op o, const PredicateInterface<T>& a) : op(o), arg_ptr(a.clone()) { }
-    virtual UnaryPredicate<T,Op>* clone() const { return new UnaryFormula<Op>(*this); }
-    virtual std::ostream& write(std::ostream& os) const { return os<<op<<"("<<*arg_ptr<<")"; }
-    //template<class Res> Res evaluate() const { return op(arg.evaluate<Res>()); }
-    Op op; PredicatePointer arg_ptr;
-};
-
-template<class T, class Op> struct BinaryPredicate : public PredicateInterface<T> {
-    typedef shared_ptr< PredicateInterface<T> > PredicatePointer;
-    BinaryPredicate(Op o, PredicatePointer a1, PredicatePointer a2) : op(o), arg1_ptr(a1), arg2_ptr(a2) { }
-    virtual BinaryPredicate<T,Op>* clone() const { return new BinaryFormula<Op>(*this); }
-    virtual std::ostream& write(std::ostream& os) const { return os<<*arg1_ptr<<op<<*arg2_ptr; }
-    Op op; PredicatePointer arg1_ptr; PredicatePointer arg2_ptr;
-};
-
-template<class T> class Predicate;
-template<class T> std::ostream& operator<<(std::ostream&, const Predicate<T>&);
-
-//! \brief .
-template<class T> class Predicate {
-  public:
-    //! \brief .
-    Predicate<T>(const T& c) : _ptr(new ConstantPredicate<T>(c)) { }
-    //! \brief .
-    Predicate<T>(PredicateInterface<T>* p) : _ptr(p) { }
-    //! \brief .
-    Predicate<T>(shared_ptr< PredicateInterface<T> > p) : _ptr(p) { }
-
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<< <>(std::ostream& os, const Predicate<T>& self);
-  private:
-    shared_ptr< PredicateInterface<T> > _ptr;
-};
-
-//! \related Predicate<T> \brief .
-template<class T> inline Predicate<T> operator&&(Predicate<T> e1, Predicate<T> e2) {
-    return Predicate<T>(new BinaryPredicate<T,And>(And(),e1.ptr,e2.ptr)); }
-//! \related Predicate<T> \brief .
-template<class T> inline Predicate<T> operator||(Predicate<T> e1, Predicate<T> e2) {
-    return Predicate<T>(new BinaryPredicate<T,Or>(Or(),e1.ptr,e2.ptr)); }
-//! \related Predicate<T> \brief .
-template<class T> inline Predicate<T> operator!(Predicate<T> e) {
-    return Predicate<T>(new UnaryPredicate<T,Or>(Or(),e.ptr)); }
-
-template<class T> inline std::ostream& operator<<(std::ostream& os, const Predicate<T>& self) {
-    return os << *self._ptr; }
-
-//! \related EnumeratedVariable \brief .
-inline
-Predicate<bool>
-operator==(const EnumeratedVariable& lhs, const EnumeratedValue& rhs) {
-    return Predicate<bool>(new ComparisonPredicate<bool,EnumeratedVariable,Equal,EnumeratedValue>(lhs,Equal(),rhs));
-}
-
-//! \related EnumeratedVariable \brief .
-inline
-Predicate<bool>
-operator==(const EnumeratedVariable& lhs, const String& rhs) {
-    return Predicate<bool>(new ComparisonPredicate<bool,EnumeratedVariable,Equal,EnumeratedValue>(lhs,Equal(),EnumeratedValue(rhs)));
-}
-
-//! \related RealFormula \brief .
-inline
-Predicate<tribool>
-operator<=(const RealFormula& lhs, const RealFormula& rhs) {
-    return Predicate<tribool>(new ComparisonPredicate<tribool,RealFormula,Less,RealFormula>(lhs,Less(),rhs));
-}
-
-//! \related RealFormula \brief .
-inline
-Predicate<tribool>
-operator>=(const RealFormula& lhs, const RealFormula& rhs) {
-    return Predicate<tribool>(new ComparisonPredicate<tribool,RealFormula,Gtr,RealFormula>(rhs,Gtr(),lhs));
-}
-
-typedef Predicate<bool> DiscretePredicate;
-typedef Predicate<tribool> ContinuousPredicate;
-
-/*
-class Reset
-{
-  public:
-    std::vector<Polynomial<Interval> > _v;
-    Reset(int rs, int as) : _v(rs,Polynomial<Interval>(as)) { assert(rs>0); assert(as>=0); }
-    int result_size() const { return _v.size(); }
-    int argument_size() const { return _v[0].argument_size(); }
-    template<class F> Reset& operator,(Assignment<NextVariable,F> a) {
-        assert(a.lhs.var.number()<result_size());
-        _v[a.lhs.var.number()]=eval<Polynomial<Interval> >(argument_size(),a.rhs); return *this; }
-};
-
-
-class Dynamic
-{
-  public:
-    std::vector<Polynomial<Interval> > _v;
-    Dynamic(int s) : _v(s,Polynomial<Interval>(s)) { assert(s>0);}
-    int size() const { return _v.size(); }
-    int result_size() const { return _v.size(); }
-    int argument_size() const { return _v[0].argument_size(); }
-    template<class F> Dynamic& operator,(Assignment<DottedVariable,F> a) {
-        assert(a.lhs.var.number()<result_size());
-        _v[a.lhs.var.number()]=eval<Polynomial<Interval> >(argument_size(),a.rhs); return *this; }
-};
-
-
-class Guard
-{
-  public:
-    Polynomial<Interval> _v;
-    Guard(int as) : _v(Polynomial<Interval>(as)) { assert(as>0);}
-    int argument_size() const { return _v.argument_size(); }
-    template<class F1,class F2> Guard& operator,(Comparison<F1,Gtr,F2> c) {
-        _v=eval<Polynomial<Interval> >(argument_size(),c.lhs-c.rhs); return *this; }
-    template<class F1,class F2> Guard& operator,(Comparison<F1,Less,F2> c) {
-        _v=eval<Polynomial<Interval> >(argument_size(),c.rhs-c.lhs); return *this; }
-};
-
-
-std::ostream& operator<<(std::ostream& os, const Reset& r) { os<<"Reset("<<r.result_size()<<","<<r.argument_size()<<")";
-    for(unsigned int i=0; i!=r._v.size(); ++i) { os<<(i==0?"[":",")<<r._v[i]; } return os<<"]"; }
-std::ostream& operator<<(std::ostream& os, const Dynamic& d) { os<<"Dynamic("<<d.size()<<")";
-    for(unsigned int i=0; i!=d._v.size(); ++i) { os<<(i==0?"[":",")<<d._v[i]; } return os<<"]"; }
-std::ostream& operator<<(std::ostream& os, const Guard& g) { os<<"Guard("<<g.argument_size()<<")";
-    os<<"["<<g._v; return os<<"]"; }
-*/
 
 } // namespace Ariadne
 

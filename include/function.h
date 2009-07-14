@@ -778,7 +778,7 @@ class Vector<ExpressionInterface>
     virtual Vector<ExpressionInterface>* clone() const { return new Vector<ExpressionInterface>(*this); }
 
     virtual size_type result_size() const { return _expressions.size(); }
-    virtual size_type argument_size() const { return _expressions[0]->argument_size(); }
+    virtual size_type argument_size() const { if(_expressions[0]) { return _expressions[0]->argument_size(); } else { return 0; } }
     virtual smoothness_type smoothness() const {
         smoothness_type res=_expressions[0]->smoothness();
         for(uint i=1; i!=this->size(); ++i) {
@@ -795,6 +795,7 @@ class Vector<ExpressionInterface>
   private:
     array< boost::shared_ptr<const ExpressionInterface> > _expressions;
 };
+
 
 inline Vector<ExpressionInterface>
 join(uint n, const ExpressionInterface* e0, const ExpressionInterface* e1, ...) {

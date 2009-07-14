@@ -40,12 +40,16 @@ class TestHybridSystem {
     void test();
   private:
     void test_build_hybrid_system();
+    void test_static_analysis();
+  private:
+    HybridSystem _system;
 };
 
 void
 TestHybridSystem::test()
 {
     ARIADNE_TEST_CALL(test_build_hybrid_system());
+    ARIADNE_TEST_CALL(test_static_analysis());
 }
 
 
@@ -53,7 +57,7 @@ void
 TestHybridSystem::test_build_hybrid_system()
 {
     // Declare the hyrbid system object
-    HybridSystem system;
+    HybridSystem& system=this->_system;
 
     // Declare the events, types and variables
     Event turn_on("turn_on");
@@ -65,11 +69,15 @@ TestHybridSystem::test_build_hybrid_system()
     EnumeratedVariable heater("heater",swtch);
     RealVariable T("T");
     RealVariable t("t");
+    RealVariable u("u");
+    RealVariable y("y");
 
     // Define the continuous dynamics
-    system.new_dynamic(heater=="on", dot(T)=20+cos(t));
+    system.new_dynamic(heater=="on", dot(T)=20+cos(t)+u);
     system.new_dynamic(heater=="off", dot(T)=10+cos(t));
     system.new_dynamic(dot(t)=1);
+
+    //system.new_equation(y=RealFormula(T));
 
     // Define the nontrivial update rules
     system.new_reset(turn_off,heater=="on",next(heater)="off");
@@ -91,8 +99,71 @@ TestHybridSystem::test_build_hybrid_system()
     system.new_reset(!(turn_on,turn_off),next(heater)=heater);
 
     ARIADNE_TEST_PRINT(system);
+
+
+    // Temporary test code
+    ARIADNE_TEST_PRINT(_system.events());
+    ARIADNE_TEST_PRINT(_system.discrete_variables());
+
+    Valuation location;
+
+    location.set(heater,EnumeratedValue("on"));
+    ARIADNE_TEST_PRINT(location);
+    ARIADNE_TEST_PRINT(_system.state_variables(location));
+    ARIADNE_TEST_PRINT(_system.auxiliary_variables(location));
+    ARIADNE_TEST_PRINT(_system.input_variables(location));
+
+    location.set(heater,EnumeratedValue("off"));
+    ARIADNE_TEST_PRINT(location);
+    ARIADNE_TEST_PRINT(_system.state_variables(location));
+
+    RealVariable xa("xa"), xb("xb"), xc("xc"), xd("xd"), xe("xe"), xf("xf");
+    Event e1("e1"), e2("e2"), e3("e3");
+    EnumeratedVariable q1("q1",swtch);
+    EnumeratedVariable q2("q2",swtch);
+    HybridSystem sys;
+    sys.new_dynamic(dot(xa)=xc-xb+xd);
+    sys.new_equation(xc=xb+xd);
+    sys.new_equation(xd=xb+xe);
+    sys.new_dynamic(dot(xb)=xe+xb+xc);
+    sys.new_equation(xe=xa+xb);
+    Valuation loc;
+    loc.set(q1,"on");
+    loc.set(q2,"off");
+
+    sys.new_reset(EventSet(e1),next(q1)=q2);
+    sys.new_reset(e1,next(xa)=xc);
+    sys.new_reset(e1,next(xb)=xa+xe);
+
+    sys.new_guard(e1,xa<=0);
+    sys.new_guard(e1,xc<=0);
+    sys.new_guard(e2,xb<=0);
+    sys.new_guard(!((e1,e2)),false);
+    //sys.dynamic(loc);
+
+    Valuation src=loc;
+    Valuation trg=sys.target(e1,src);
+
+    ARIADNE_TEST_PRINT(sys.check_dynamic(loc));
+    ARIADNE_TEST_PRINT(sys.check_guards(src));
+    ARIADNE_TEST_PRINT(sys.check_reset(e1,src,trg));
+
+    ARIADNE_TEST_PRINT(sys.target(e1,loc));
+    ARIADNE_TEST_PRINT(sys.dynamic(loc));
+    ARIADNE_TEST_PRINT(sys.equations(loc));
+    ARIADNE_TEST_PRINT(sys.guards(loc));
 }
 
+
+
+void
+TestHybridSystem::test_static_analysis()
+{
+    ARIADNE_TEST_PRINT(_system.events());
+    ARIADNE_TEST_PRINT(_system.discrete_variables());
+
+    //ARIADNE_TEST_PRINT(_system.state_variables(location));
+}
 
 
 int main() {

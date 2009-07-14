@@ -248,6 +248,91 @@ PolynomialExpression polynomial(const TaylorExpression& te) {
 } // namespace Ariadne
 
 
+void export_taylor_model()
+{
+    typedef uint N;
+    typedef double D;
+    typedef Float R;
+    typedef Interval I;
+    typedef MultiIndex A;
+    typedef Vector<Float> RV;
+    typedef Vector<Interval> IV;
+    typedef Matrix<Float> RMx;
+    typedef TaylorModel TM;
+    typedef Vector<TaylorModel> TMV;
+    typedef TaylorFunction TF;
+    typedef Polynomial<Float> RP;
+    typedef Polynomial<Interval> IP;
+    typedef ExpressionInterface EI;
+
+
+    class_<TM> taylor_model_class("TaylorModel");
+    taylor_model_class.def( init< N >());
+    taylor_model_class.def("error", (const R&(TM::*)()const) &TM::error, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("argument_size", &TM::argument_size);
+    taylor_model_class.def("domain", &TM::domain);
+    taylor_model_class.def("range", &TM::range);
+    taylor_model_class.def("__getitem__", &get_item<TM,A,R>);
+    taylor_model_class.def("__setitem__",&set_item<TM,A,D>);
+    taylor_model_class.def(+self);
+    taylor_model_class.def(-self);
+    taylor_model_class.def(self+self);
+    taylor_model_class.def(self-self);
+    taylor_model_class.def(self*self);
+    taylor_model_class.def(self/self);
+    taylor_model_class.def(self+R());
+    taylor_model_class.def(self-R());
+    taylor_model_class.def(self*R());
+    taylor_model_class.def(self/R());
+    taylor_model_class.def(R()+self);
+    taylor_model_class.def(R()-self);
+    taylor_model_class.def(R()*self);
+    taylor_model_class.def(R()/self);
+    taylor_model_class.def(self+=R());
+    taylor_model_class.def(self-=R());
+    taylor_model_class.def(self*=R());
+    taylor_model_class.def(self/=R());
+    taylor_model_class.def(I()+self);
+    taylor_model_class.def(I()-self);
+    taylor_model_class.def(I()*self);
+    taylor_model_class.def(I()/self);
+    taylor_model_class.def(self+I());
+    taylor_model_class.def(self-I());
+    taylor_model_class.def(self*I());
+    taylor_model_class.def(self/I());
+    taylor_model_class.def(self+=I());
+    taylor_model_class.def(self-=I());
+    taylor_model_class.def(self*=I());
+    taylor_model_class.def(self/=I());
+    taylor_model_class.def(self+=self);
+    taylor_model_class.def(self-=self);
+    taylor_model_class.def(self>R());
+    taylor_model_class.def(self>self);
+    taylor_model_class.def(self<self);
+    taylor_model_class.def(self_ns::str(self));
+
+    def("max",(TM(*)(const TM&,const TM&))&max);
+    def("min",(TM(*)(const TM&,const TM&))&min);
+    def("abs",(TM(*)(const TM&))&abs);
+
+    def("neg",(TM(*)(const TM&))&neg);
+    def("rec",(TM(*)(const TM&))&rec);
+    def("sqr",(TM(*)(const TM&))&sqr);
+    def("pow",(TM(*)(const TM&, int))&pow);
+
+    def("sqrt", (TM(*)(const TM&))&sqrt);
+    def("exp", (TM(*)(const TM&))&exp);
+    def("log", (TM(*)(const TM&))&log);
+    def("sin", (TM(*)(const TM&))&sin);
+    def("cos", (TM(*)(const TM&))&cos);
+    def("tan", (TM(*)(const TM&))&tan);
+
+
+    class_< TMV > taylor_model_vector_class("TaylorModelVector");
+    taylor_model_vector_class.def("__getitem__", &get_item<TMV,int,TM>);
+    taylor_model_vector_class.def(self_ns::str(self));
+}
+
 void export_taylor_variable()
 {
     typedef uint N;
@@ -521,6 +606,7 @@ void export_taylor_function()
 
 void calculus_submodule()
 {
+    export_taylor_model();
     export_taylor_variable();
     export_taylor_function();
 }

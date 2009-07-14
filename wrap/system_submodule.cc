@@ -40,10 +40,10 @@ using namespace Ariadne;
 
 
 
-Space*
+StateSpace*
 make_space(const boost::python::object& obj)
 {
-    Space* spcptr=new Space();
+    StateSpace* spcptr=new StateSpace();
     boost::python::list elements=boost::python::extract<boost::python::list>(obj);
     int m=boost::python::len(elements);
     for(int i=0; i!=m; ++i) {
@@ -60,7 +60,7 @@ RealFormula cos(RealVariable v) { return cos(RealFormula(v)); }
 RealFormula tan(RealVariable v) { return tan(RealFormula(v)); }
 
 // Need to wrap pure virtual function explicitly for some reason...
-ExpressionInterface* expression(const FormulaInterface& f, const Space& s) { return f.expression(s); }
+ExpressionInterface* expression(const FormulaInterface<Real>& f, const StateSpace& s) { return f.expression(s); }
 
 void export_formula()
 {
@@ -99,11 +99,11 @@ void export_formula()
     def("tan", (RealFormula(*)(RealVariable)) &tan);
 
 
-    class_<Space> space_class("Space");
+    class_<StateSpace> space_class("StateSpace");
     space_class.def("__init__", make_constructor(&make_space) );
-    space_class.def("dimension", &Space::dimension);
-    space_class.def("variable", &Space::variable, return_value_policy<reference_existing_object>());
-    space_class.def("index", &Space::index);
+    space_class.def("dimension", &StateSpace::dimension);
+    space_class.def("variable", &StateSpace::variable, return_value_policy<reference_existing_object>());
+    space_class.def("index", &StateSpace::index);
     space_class.def(self_ns::str(self));
 
 

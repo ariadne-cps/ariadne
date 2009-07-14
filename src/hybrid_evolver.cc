@@ -687,15 +687,19 @@ void HybridEvolver::
 compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float& time_step,
                    FunctionPtr dynamic_ptr, const SetModelType& starting_set_model) const
 {
+    ARIADNE_LOG(3,"compute_flow_model(....)\n");
     const int MAXIMUM_BOUNDS_DIAMETER_FACTOR = 8;
     const Float maximum_step_size=this->_parameters->maximum_step_size;
     const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*MAXIMUM_BOUNDS_DIAMETER_FACTOR;
 
     BoxType starting_set_bounding_box=starting_set_model.range();
-
+    ARIADNE_LOG(3,"starting_set_bounding_box="<<starting_set_bounding_box<<"\n");
     make_lpair(time_step,flow_bounds)=this->_toolbox->flow_bounds(*dynamic_ptr,starting_set_bounding_box,maximum_step_size,maximum_bounds_diameter);
     // Compute the flow model
+    ARIADNE_LOG(3,"time_step="<<time_step<<"\n");
+    ARIADNE_LOG(3,"flow_bounds="<<flow_bounds<<"\n");
     FlowModelType flow_model=this->_toolbox->flow_model(*dynamic_ptr,starting_set_bounding_box,time_step,flow_bounds);
+    ARIADNE_LOG(3,"flow_model="<<flow_model<<"\n");
     TaylorExpression identity_time_expression=TaylorExpression::variable(BoxType(1u,Interval(-time_step,+time_step)),0u);
     flow_set_model=unchecked_apply(flow_model,combine(starting_set_model.models(),identity_time_expression.model()));
 }
@@ -715,6 +719,8 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
                         const std::map<DiscreteEvent,FunctionPtr>& guards,
                         const FlowSetModelType& flow_set_model) const
 {
+    ARIADNE_LOG(3,"Computing blocking events.\n");
+
     uint dimension=flow_set_model.result_size();
     const double SMALL_RELATIVE_TIME = 1./16;
     FlowSetModelType positive_flow_set_model(split(flow_set_model.models(),dimension,1));
@@ -726,6 +732,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
         const FunctionPtr guard_ptr=guard_iter->second;
         tribool active = this->_toolbox->active(*guard_ptr,positive_flow_set_model);
         if(possibly(active)) {
+            ARIADNE_LOG(3,"Event "<<event<<" possibly active.\n");
             TimeModelType crossing_time_model;
             Interval normal_derivative;
             try {
@@ -733,30 +740,42 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
                 normal_derivative=this->normal_derivative(guard_ptr,flow_set_model,crossing_time_model);
                 assert(normal_derivative.lower()>0 || normal_derivative.upper()<0);
                 if(normal_derivative.lower()>0) {
+                    ARIADNE_LOG(3,"Event "<<event<<" inserted into blocking times.\n");
                     event_blocking_times[event]=crossing_time_model;
                 }
             }
             catch(DegenerateCrossingException e) {
+                ARIADNE_LOG(3,"Degenerate Crossing exception catched.\n");
                 BoxType space_domain=project(flow_set_model.domain(),range(0,flow_set_model.argument_size()-1));
                 Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(*guard_ptr,flow_set_model);
                 TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
                 // Use 1.0 as upper bound above since flow set model has time interval normalised to [-1,+1]
+                ARIADNE_LOG(3,"touching_time_interval="<<touching_time_interval<<"\n");                
                 if(touching_time_interval.upper()>=0 && touching_time_interval.lower()<=1.0) {
                     SetModelType finishing_set_model=partial_evaluate(flow_set_model.models(),dimension,1.0);
                     tribool finishing_set_active=this->_toolbox->active(*guard_ptr,finishing_set_model);
                     if(definitely(finishing_set_active)) {
+                        ARIADNE_LOG(3,"Event is definitely finally active, inserting it into blocking times.\n");
                         event_blocking_times[event]=touching_time_model;
                     } else if(possibly(finishing_set_active)) {
+                        ARIADNE_LOG(3,"Event is possibly finally active.\n");                        
                         if(touching_time_interval.lower()>SMALL_RELATIVE_TIME) {
+                            ARIADNE_LOG(3,"lower touching time is greater than zero, inserting event into blocking times.\n");                        
                             TaylorModel lower_touching_time_model=
                                 this->_toolbox->time_model(touching_time_interval.lower(),space_domain);
                             event_blocking_times[finishing_event]=lower_touching_time_model;
                         } else {
+                            ARIADNE_LOG(3,"DANGER: we can't determine whether the crossing is completely finished or not..\n");                                                    
                             // FIXME: Here we are stuck, we can't determine whether the crossing is completely finished or not.
                             // Just put this in as a blocking event and hope for the best...
-                            event_blocking_times[event]=touching_time_model;
+                            // event_blocking_times[event]=touching_time_model;
+                            // DAVIDE: setting this as a blocking event is not correct, 
+                            //         because it causes continuous evolution to stop.
+                            //         I think it is better to put it into non-transverse-events.
+                            non_transverse_events.insert(event);                            
                         }
                     } else {
+                        ARIADNE_LOG(3,"After the flow step, the event is not active again, so the crossing was tangential.\n");                                                    
                         // After the flow step, the event is not active again, so the crossing was tangential
                         non_transverse_events.insert(event);
                     }

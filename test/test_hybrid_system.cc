@@ -85,12 +85,16 @@ TestHybridSystem::test_build_hybrid_system()
     system.new_reset(midnight,next(t)=0.0);
 
     // Define the guard sets and invariants
-    system.new_guard(turn_on,T<=16.0);
-    system.new_guard(turn_off,T>=22.0);
+    system.new_guard(turn_on,heater=="on",false);
+    system.new_guard(turn_on,heater=="off",T<=16.0);
+    system.new_guard(turn_off,heater=="off",false);
+    system.new_guard(turn_off,heater=="on",T>=22.0);
     system.new_guard(midnight,t>=1.0);
 
-    system.new_invariant(T>=16.0);
-    system.new_invariant(T<=22.0);
+    system.new_guard(!(turn_on,turn_off,midnight),false);
+
+    system.new_invariant(heater=="off",T>=16.0);
+    system.new_invariant(heater=="on",T<=22.0);
     system.new_invariant(t<=1.0);
 
     // Define the trivial resets for nonjumping variables.

@@ -241,7 +241,7 @@ struct EventSet {
     EventSet& adjoin(const EventSet& s) { assert(!_is_complement && !s._is_complement);
         Ariadne::adjoin(this->_events,s._events);
         return *this; }
-    EventSet& restrict(const EventSet& s) { 
+    EventSet& restrict(const EventSet& s) {
         if(this->_is_complement) {
             if(s._is_complement) { Ariadne::adjoin(this->_events,s._events); }
             else { this->_events=difference(s._events,this->_events); this->_is_complement=false; }
@@ -361,7 +361,7 @@ struct NamedVariable {
   private:
     shared_ptr<std::string> _name_ptr;
     shared_ptr<EnumeratedType> _type_ptr;
-    
+
 };
 
 
@@ -370,6 +370,23 @@ struct DiscreteVariable : public NamedVariable {
   protected:
     DiscreteVariable(const std::string& name) : NamedVariable(name) { }
     DiscreteVariable(const std::string& name, const EnumeratedType& type) : NamedVariable(name,type) { }
+};
+
+
+//! \brief A named integer variable, suitable for use in formulae and in defining the discrete state.
+//! Equality is performed using references by name, so different variables may have the same "name".
+//! \tparam T The type of mathematical object the variable represents; e.g. String, Integer, Real
+//! \sa Formula.
+template<class T> struct Variable : public NamedVariable
+{
+  public:
+    //! \brief Construct a new named variable with name \a name. If another variable has the same \c name,
+    //! the two are \e not considered to be the same quantity.
+    Variable(String name);
+    //! \brief Copy constructer. Returns a C++ variable representing the same named variable.
+    Variable(const Variable<T>& v);
+    //! \brief Makes an assignment object.
+    Assignment< Variable<T>, Formula<T> > operator=(const T& val) const;
 };
 
 
@@ -605,7 +622,7 @@ struct Gtr {
 };
 
 struct Less {
-    tribool operator()(const Float& x1, const Float& x2) const { 
+    tribool operator()(const Float& x1, const Float& x2) const {
         return (x1==x2) ? indeterminate : tribool(x1<x2); }
     tribool operator()(const Interval& x1, const Interval& x2) const {
         if(x1.lower()>x2.upper()) { return false; } else if(x1.upper()<x2.lower()) { return true; } else { return indeterminate; } }
@@ -669,7 +686,7 @@ template<class R, class O, class A1=R, class A2=R> class BinaryFormula;
 template<class R> class Formula;
 template<class R> std::ostream& operator<<(std::ostream&, const Formula<R>& f);
 
-template<class R> 
+template<class R>
 class FormulaInterface {
   public:
     virtual ~FormulaInterface() { }
@@ -679,7 +696,7 @@ class FormulaInterface {
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
-template<class R> 
+template<class R>
 inline std::ostream& operator<<(std::ostream& os, const FormulaInterface<R>& f) { return f.write(os); }
 
 template<class R> struct VariableFormula : public FormulaInterface<R> {
@@ -726,6 +743,8 @@ template<class R,class O,class A1,class A2> struct BinaryFormula : public Formul
 };
 
 //! \brief A formula taking values of type \a R.
+//! \tparam R The type of mathematical object the formula represents; e.g. String, Integer, Real
+//! \sa Variable
 template<class R> class Formula {
   public:
     //! \brief The constant \a c.
@@ -752,7 +771,7 @@ template<class R> inline std::ostream& operator<<(std::ostream& os, const Formul
 
 
 
-template<> 
+template<>
 class FormulaInterface<Real> {
   public:
     virtual ~FormulaInterface() { }

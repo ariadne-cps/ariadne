@@ -258,7 +258,7 @@ class HybridSystem
     typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
 
-    
+
 /*
     typedef std::map< Event, boost::shared_ptr<const FunctionInterface> >::const_iterator invariant_const_iterator;
     typedef std::set< DiscreteTransition >::const_iterator discrete_transition_const_iterator;
@@ -274,11 +274,11 @@ class HybridSystem
     //struct DiscreteEquation { DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs; };
     struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
     struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
+    struct InvariantPredicate { DiscretePredicate loc; ContinuousPredicate pred; };
     struct DiscreteAssignment { EventSet evnts; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedFormula rhs;  };
     struct UpdateEquation { EventSet evnts; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
     struct GuardPredicate { EventSet evnts; DiscretePredicate loc; ContinuousPredicate pred; };
     struct DisabledEvents { EventSet evnts; DiscretePredicate loc; };
-    struct InvariantPredicate { DiscretePredicate loc; ContinuousPredicate pred; };
 
     std::vector<DifferentialEquation> _differential_equations;
     std::vector<AlgebraicEquation> _algebraic_equations;
@@ -290,9 +290,10 @@ class HybridSystem
 
     typedef std::vector<DifferentialEquation>::const_iterator dynamic_const_iterator;
     typedef std::vector<AlgebraicEquation>::const_iterator relation_const_iterator;
-    typedef std::vector<UpdateEquation>::const_iterator update_const_iterator;
-    typedef std::vector<GuardPredicate>::const_iterator guard_const_iterator;
     typedef std::vector<DiscreteAssignment>::const_iterator switch_const_iterator;
+    typedef std::vector<UpdateEquation>::const_iterator update_const_iterator;
+    typedef std::vector<InvariantPredicate>::const_iterator invariant_const_iterator;
+    typedef std::vector<GuardPredicate>::const_iterator guard_const_iterator;
     typedef std::vector<DisabledEvents>::const_iterator disabled_const_iterator;
   public:
     //@{
@@ -333,9 +334,9 @@ class HybridSystem
     //! \brief Adds an invariant to the system.
     void new_invariant(DiscretePredicate q, ContinuousPredicate p) {
         InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
-    // //! \brief Disables events in a given set of locations.
-    //void new_disabled_events(EventSet e, DiscretePredicate q) {
-    //    DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
+    //! \brief Disables events in a given set of locations.
+    void new_disabled_events(EventSet e, DiscretePredicate q) {
+    DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
 
     // Methods for rules valid in all modes.
     //! \brief Adds a algebraic equation to the system, valid in all modes.
@@ -352,6 +353,9 @@ class HybridSystem
     void new_guard(EventSet e, bool p) { this->new_guard(e,DiscretePredicate(true),ContinuousPredicate(tribool(p))); }
     //! \brief Adds an invariant to the system, valid in all modes.
     void new_invariant(ContinuousPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
+    //! \brief Disables events in all locations.
+    void new_disabled_events(EventSet e) {
+    DisabledEvents dis={e,DiscretePredicate(true)}; _disabled_events.push_back(dis); }
 
     // Methods for rules valid for all events.
     //! \brief Adds a discrete reset to the system, valid in all modes and for all events.
@@ -364,29 +368,49 @@ class HybridSystem
     //@{
     //! \name Data access and queries.
 
-    StateSpace discrete_variables() const;
+    //! \brief .
     EventSet events() const;
+    //! \brief .
+    StateSpace discrete_variables() const;
+    //! \brief .
     VariableSet result_variables(const Valuation& state) const;
+    //! \brief .
     VariableSet argument_variables(const Valuation& state) const;
+    //! \brief .
     VariableSet continuous_variables(const Valuation& state) const;
+    //! \brief .
     VariableSet state_variables(const Valuation& state) const;
+    //! \brief .
     VariableSet algebraic_variables(const Valuation& state) const;
+    //! \brief .
     VariableSet auxiliary_variables(const Valuation& state) const;
+    //! \brief .
     VariableSet input_variables(const Valuation& state) const;
+    //! \brief .
     VariableSet output_variables(const Valuation& state) const;
 
+    //! \brief .
     bool check_dynamic(const Valuation& location) const;
-    bool check_reset(const Event& event, const Valuation& source, const Valuation& target) const;
+    //! \brief .
     bool check_guards(const Valuation& location) const;
+    //! \brief .
+    bool check_reset(const Event& event, const Valuation& source, const Valuation& target) const;
 
 
+    //! \brief .
     Valuation target(const Event& event, const Valuation& source) const;
+    //! \brief .
     std::set<RealAssignment> unordered_equations(const Valuation& state) const;
 
+    //! \brief .
     std::vector<RealAssignment> equations(const Valuation& state) const;
+    //! \brief .
     std::vector<RealDynamic> dynamic(const Valuation& state) const;
+    //! \brief .
     std::vector<RealUpdate> reset(const Event& event, const Valuation& state) const;
+    //! \brief .
     std::map<Event,ContinuousPredicate> guards(const Valuation& state) const;
+    //! \brief .
     ContinuousPredicate guard(const Event& event, const Valuation& state) const;
 
     //@}

@@ -793,7 +793,16 @@ class GridTreeSubset {
         
     //@{
     //! \name Properties
-            
+             
+    /*! \brief True if the set is empty. */
+    bool empty() const; 
+
+    /*! \brief The number of activated cells in the set. */
+    size_t size() const; 
+
+    /*! \brief The dimension of the set. */
+    dimension_type dimension() const;
+
     /*! \brief Returns a constant reference to the underlying grid. */
     const Grid& grid() const;
             
@@ -1079,20 +1088,7 @@ class GridTreeSet : public GridTreeSubset {
     /* GridTreeSubset referencing this %GridTreeSet becomes invalid. */
     virtual ~GridTreeSet();
             
-        
-    //@{
-    //! \name Properties
-            
-    /*! \brief True if the set is empty. */
-    bool empty() const; 
-
-    /*! \brief The number of activated cells in the set. */
-    size_t size() const; 
-
-    /*! \brief The dimension of the set. */
-    dimension_type dimension() const;
-
-    //@}
+       
             
     //@{
     //! \name Geometric Operations
@@ -1973,6 +1969,19 @@ inline uint GridTreeSubset::compute_number_subdiv( Float theWidth, const Float t
     return result;
 }
 
+inline bool GridTreeSubset::empty() const {
+    return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ) == 0; 
+}
+    
+inline size_t GridTreeSubset::size() const {
+    return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ); 
+}
+    
+inline dimension_type GridTreeSubset::dimension( ) const {
+    return grid().dimension();
+}
+
+
 inline const Grid& GridTreeSubset::grid() const {
     return this->_theGridCell.grid();
 }
@@ -1981,10 +1990,22 @@ inline GridCell GridTreeSubset::cell() const {
     return _theGridCell;
 }
     
-inline Box GridTreeSubset::bounding_box() const {
-    //The box corresponding to the root node of theSet,
-    //not the primary cell but theSet.binary_tree();
-    return _theGridCell.box();
+inline Box GridTreeSubset::bounding_box() const {    
+    if(this->empty()) return Box(this->dimension());
+    
+    GridTreeSet::const_iterator iter=this->begin();
+    Box bbox = iter->box();
+     
+    for( ; iter!=this->end(); ++iter) {
+        Box cell = iter->box();
+        for(uint i = 0; i < cell.dimension(); ++i) {
+            if(cell[i].lower() < bbox[i].lower()) bbox[i].set_lower(cell[i].lower());
+            if(cell[i].upper() > bbox[i].upper()) bbox[i].set_upper(cell[i].upper());
+        }
+    }
+    
+    return bbox;
+
 }
     
 inline void GridTreeSubset::mince( const uint theNewDepth ) {
@@ -2079,19 +2100,6 @@ inline GridTreeSubset& GridTreeSubset::operator=( const GridTreeSubset &otherSub
 
 /*********************************************GridTreeSet*********************************************/
     
-
-inline bool GridTreeSet::empty() const {
-    return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ) == 0; 
-}
-    
-inline size_t GridTreeSet::size() const {
-    return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ); 
-}
-    
-inline dimension_type GridTreeSet::dimension( ) const {
-    return grid().dimension();
-}
-
 inline void GridTreeSet::adjoin( const GridCell& theCell ) {
     ARIADNE_ASSERT( this->grid() == theCell.grid() );
         

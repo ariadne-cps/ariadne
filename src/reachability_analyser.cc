@@ -210,8 +210,9 @@ lower_reach(const SystemType& system,
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
         ARIADNE_LOG(3,".");
         GC cell=*bs_iter;
-        GTS cell_reach=this->_discretiser->reach(system,cell,time,grid,grid_depth,LOWER_SEMANTICS);
-        reach.adjoin(cell_reach);
+        Orbit<GC> orbit = this->_discretiser->evolution(system,cell,time,grid,grid_depth,LOWER_SEMANTICS);
+        reach.adjoin(orbit.reach());
+        reach.adjoin(orbit.final());
     }
     ARIADNE_LOG(3,"\n");
     return reach;
@@ -328,8 +329,11 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
-        reach.adjoin(this->_upper_reach(system,evolve,hybrid_remainder_time,grid_depth));
+        make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
+        reach.adjoin(found);
     }
+    // This last step is necessary to add the final set to the result.
+    reach.adjoin(evolve);
     reach.recombine();
     ARIADNE_LOG(4,"final_reach size = "<<reach.size()<<"\n");
     return reach;

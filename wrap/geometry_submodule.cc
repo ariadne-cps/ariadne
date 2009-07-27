@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include "geometry.h"
 #include "point.h"
 #include "box.h"
 #include "zonotope.h"
@@ -70,6 +71,14 @@ read(Zonotope& z, const boost::python::object& obj)
     read(c,tup[0]);
     read(GT,tup[1]);
     z=Zonotope(c,transpose(GT));
+}
+
+boost::python::tuple tuple_split(const Box& bx) {
+    std::pair<Box,Box> splt=split(bx);
+    boost::python::list lst;
+    lst.append(splt.first);
+    lst.append(splt.second);
+    return boost::python::tuple(lst);
 }
 
 
@@ -176,9 +185,20 @@ void export_point()
 
 void export_box()
 {
+    typedef Vector<Interval> IVector;
+
     class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval> > > box_class("Box",init<>());
+    box_class.def("separated", (tribool(Box::*)(const Box&)const) &Box::disjoint);
+    box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
+    box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
+    box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
     box_class.def("__init__", make_constructor(&make<Box>) );
     box_class.def("__str__",&__cstr__<Box>);
+
+    def("split", &tuple_split);
+    def("disjoint", (bool(*)(const IVector&,const IVector&)) &disjoint);
+    def("subset", (bool(*)(const IVector&,const IVector&)) &subset);
+
 }
 
 void export_zonotope()

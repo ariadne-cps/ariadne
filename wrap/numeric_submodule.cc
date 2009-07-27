@@ -146,6 +146,7 @@ void export_interval()
     class_< Interval > interval_class("Interval");
     interval_class.def(init<double,double>());
     interval_class.def(init<double>());
+    interval_class.def(init<Interval>());
 #ifdef HAVE_GMPXX_H
     interval_class.def(init<Rational>());
     interval_class.def(init<Rational,Rational>());

@@ -13,7 +13,7 @@ bin_PROGRAMS=tutorial \
              rectifier_oneloc grid-refinement
 
 
-tutorial_SOURCES=tutorial.cc
+tutorial_SOURCES = tutorial.cc verify.py
 boost_power_converter_SOURCES=boost_power_converter.cc
 watertank_SOURCES=watertank.cc
 bouncingball_SOURCES = bouncingball.cc

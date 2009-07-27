@@ -27,12 +27,8 @@
 #include "stlio.h"
 #include "vector.h"
 #include "point.h"
-#include "hybrid_set.h"
 #include "expression_interface.h"
 #include "function_interface.h"
-#include "orbit.h"
-#include "simulation_toolbox.h"
-#include "evolution_parameters.h"
 
 #include "logging.h"
 
@@ -44,89 +40,166 @@
 
 namespace Ariadne {
  
+template<class T> class Orbit;
+
+template<>
+class Orbit<HybridPoint>
+    : public std::map<HybridTime,HybridPoint>
+{
+};
+
+
 
 class DegenerateCrossingException { };
 
 
-Simulator<HybridAutomaton>::Simulator()
-    : _parameters(new EvolutionParameters()),
-      _toolbox(new SimulationToolbox())
+Simulator<HybridSystem>::Simulator()
 {
 }
 
 
-Simulator<HybridAutomaton>*
-HybridSimulator<HybridAutomaton>::clone() const
-{ 
-    return new HybridSimulator(*this); 
+Simulator<HybridSystem>*
+Simulator<HybridSystem>::clone() const
+{
+    return new Simulator<HybridSystem>(*this);
 }
 
 
-Simulator<HybridAutomaton>::Simulator(const EvolutionParameters& p)
-    : _parameters(new EvolutionParameters(p)),
-      _toolbox(new SimulationToolbox())
-{
+
+class HybridPoint : public Valuation { };
+
+class HybridVector : public std::map<NamedVariable,Interval> { };
+
+HybridPoint& operator+=(HybridPoint& hpt, const HybridVector& hv) {
+    std::map<NamedVariable,Interval>& ptmp=hpt.real_values;
+    const std::map<NamedVariable,Interval>& vmp=hv;
+    for(std::map<NamedVariable,Interval>::const_iterator iter=vmp.begin(); iter!=vmp.end(); ++iter) {
+        ptmp[iter->first]+=iter->second;
+    }
+    return hpt;
+}
+
+HybridVector& operator+=(HybridVector& hv1, const HybridVector& hv2) {
+    for(std::map<NamedVariable,Interval>::const_iterator iter=hv2.begin(); iter!=hv2.end(); ++iter) {
+        hv1[iter->first]+=iter->second;
+    }
+    return hv1;
+}
+
+HybridVector& operator*=(HybridVector& hv, const Float& s) {
+    std::map<NamedVariable,Interval>& vmp=hv;
+    for(std::map<NamedVariable,Interval>::iterator iter=vmp.begin(); iter!=vmp.end(); ++iter) {
+        iter->second*=s;
+    }
+    return hv;
+}
+
+HybridPoint operator+(const HybridPoint& hpt, const HybridVector& hv) {
+    HybridPoint r(hpt); r+=hv; return r;
+}
+
+HybridVector operator+(const HybridVector& hv1, const HybridVector& hv2) {
+    HybridVector r(hv1); r+=hv2; return r;
+}
+
+HybridVector operator*(const HybridVector& hv, const Float& s) {
+    HybridVector r(hv); r*=s; return r;
+}
+
+HybridVector operator*(const Float& s, const HybridVector& hv) {
+    HybridVector r(hv); r*=s; return r;
 }
 
 
-Orbit<HybridPoint> 
-Simulator<HybridAutomaton>::
-orbit(const HybridAutomaton& system, 
-      const HybridPoint& initial_point, 
-      const HybridTime& maximum_time,
-      Semantics semantics) const 
+
+
+HybridVector evaluate(const std::vector<RealDynamic>& dyn, const HybridPoint& pt) {
+    HybridVector r;
+    for(std::vector<RealDynamic>::const_iterator dyn_iter=dyn.begin(); dyn_iter!=dyn.end(); ++dyn_iter) {
+        r[dyn_iter->lhs.base]=dyn_iter->rhs.evaluate(pt);
+    }
+    return r;
+}
+
+void evaluate(const std::vector<RealAssignment>& alg, HybridPoint& pt) {
+    for(std::vector<RealAssignment>::const_iterator alg_iter=alg.begin(); alg_iter!=alg.end(); ++alg_iter) {
+        pt.real_values[alg_iter->lhs]=alg_iter->rhs.evaluate(pt);
+    }
+    return;
+}
+
+
+
+Orbit<HybridPoint>
+Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_pt, const HybridTime& tmax) const
 {
-    const SimulationToolboxInterface& toolbox=this->_toolbox;
+    HybridTime t(0.0,0);
+    Orbit<HybridPoint> orbit;
+    Float h;
 
-    Orbit<HybridPoint> result(initial_point);
+    HybridPoint pt(init_pt);
+    HybridPoint next_pt;
 
-    HybridTime time(0.0,0);
+    std::map<Event,ContinuousPredicate> guards=sys.guards(pt);
+    std::vector<RealAssignment> algebraic_assignments=sys.equations(pt);
+    std::vector<RealDynamic> differential_assignments=sys.dynamic(pt);
     
-    HybridPoint current_state=initial_state;
-    
-    ARIADNE_ASSERT(system.has_mode(initial_state.first));
+    while(t<tmax) {
 
-    while(time<maximum_time) {
-        const DiscreteMode& current_location=current_state.first;
-        const Point& current_point=current_state.second;
-        std::set<DiscreteTransition>& transitions=system.transitions(current_mode);
-        
-        // Check for discrete events at initial time
-        for(std::set<DiscreteTransition>::const_iterator transition_iter=transitions.begin();
-            transition_iter!=transitions.end(); ++transition_iter) 
-        {
-            if(toolbox.active(*transition_iter->activation_ptr(),current_point)) {
-                HybridPoint next_state(transition_iter->target(),toolbox.reset_step(transition_iter->reset(),current_point));
-                orbit.insert(current_time,next_state);
+        bool enabled=false;
+        Event event;
+        for(std::map<Event,ContinuousPredicate>::const_iterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
+            if(guard_iter->second.evaluate(pt)) {
+                enabled=true;
+                event=guard_iter->first;
                 break;
             }
         }
 
-        // Compute flow for given step size
-        Point flow_point=toolbox.integration_step(automaton.mode(current_location).dynamic(),current_point,this->parameters().step_size());
-        
-        // Check for discrete events at final time
-        std::map<DiscreteEvent,Float> active_urgent_events;
-        std::map<DiscreteEvent,Float> active_nonurgent_events;
-        for(std::set<DiscreteTransition>::const_iterator transition_iter=transitions.begin();
-            transition_iter!=transitions.end(); ++transition_iter) 
-        {
-            if(toolbox.active(*transition_iter->activation_ptr(),flow_point)) {
-                if(transition_iter->forced()) { active_urgent_events.insert(transition_iter->id()); }
-                ele 
+        if(enabled) {
+            std::vector<EnumeratedUpdate> switchings=sys.switching(event,pt);
+            for(std::vector<EnumeratedUpdate>::const_iterator iter=switchings.begin(); iter!=switchings.end(); ++iter) {
+                next_pt.set(iter->lhs.base,iter->rhs.evaluate(pt));
             }
+            std::vector<RealUpdate> real_updates=sys.reset(event,pt);
+            for(std::vector<RealUpdate>::const_iterator iter=real_updates.begin(); iter!=real_updates.end(); ++iter) {
+                next_pt.set(iter->lhs.base,iter->rhs.evaluate(pt));
+            }
+            algebraic_assignments=sys.equations(pt);
+            for(std::vector<RealAssignment>::const_iterator iter=algebraic_assignments.begin(); iter!=algebraic_assignments.end(); ++iter) {
+                next_pt.set(iter->lhs,iter->rhs.evaluate(next_pt));
+            }
+            differential_assignments=sys.dynamic(next_pt);
+            guards=sys.guards(next_pt);
+            t.discrete_time+=1;
+        } else {
+            HybridVector k1,k2,k3,k4;
+            HybridPoint pt1,pt2,pt3,pt4;
+            k1=evaluate(differential_assignments,pt);
+            pt1=pt+h*k1;
+            evaluate(algebraic_assignments,pt1);
+
+            k2=evaluate(differential_assignments,pt1);
+            pt2=pt1+(h/2)*k2;
+            evaluate(algebraic_assignments,pt2);
+            
+            k3=evaluate(differential_assignments,pt2);
+            pt3=pt1+(h/2)*k3;
+            evaluate(algebraic_assignments,pt3);
+            
+            k4=evaluate(differential_assignments,pt3);
+
+            next_pt=pt+(h/6)*(k1+2*(k2+k3)+k4);
+            t.continuous_time+=h;
         }
-        
-        
+        pt=next_pt;
+        orbit[t]=pt;
+    }
+
+    return orbit;
+
 }
 
-
-void 
-HybridSimulator::
-_evolution(EnclosureListType&,EnclosureListType&,EnclosureListType&,const SystemType& system, const EnclosureType& initial_point, const TimeType& time, Semantics semantics, bool) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
 
 }  // namespace Ariadne

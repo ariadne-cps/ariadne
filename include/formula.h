@@ -198,6 +198,7 @@ template<class K, class V, class C> class Map
 //! \brief A discrete event.
 struct Event {
   public:
+    Event() {  } // Constructs an invalid event.
     Event(const std::string& name) { _names.push_back(name); this->_id=_names.size()-1; }
     Event(int n) { std::stringstream ss; ss<<"e"<<n; _names.push_back(ss.str()); this->_id=_names.size()-1; ; }
     int id() const { return this->_id; }
@@ -596,17 +597,26 @@ struct Valuation {
     EnumeratedValue get(const Variable<EnumeratedValue>& v) const { return enumerated_values.find(v)->second; }
     //Integer get(const Variable<Integer>& v) const { return integer_values.find(v)->second; }
     Interval get(const Variable<Real>& v) const { return real_values.find(v)->second; }
+
+    template<class T> T get(const NamedVariable& v) const;
   private:
   public:
-    std::map<Variable<EnumeratedValue>,EnumeratedValue> enumerated_values;
+    std::map<NamedVariable,EnumeratedValue> enumerated_values;
     //std::map<Variable<Integer>,Integer> integer_values;
-    std::map<Variable<Real>,Interval> real_values;
+    std::map<NamedVariable,Interval> real_values;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Valuation& v) {
     return os<<v.enumerated_values<<v.real_values; }
 
 
+template<class T> inline T _get(const Valuation& p, const NamedVariable& v);
+template<> inline EnumeratedValue _get<EnumeratedValue>(const Valuation& p, const NamedVariable& v) {
+    return p.enumerated_values.find(v)->second; }
+template<> inline Interval _get<Interval>(const Valuation& p, const NamedVariable& v) {
+    return p.real_values.find(v)->second; }
+
+template<class T> inline T Valuation::get(const NamedVariable& v) const { return Ariadne::_get<T>(*this,v); }
 
 
 
@@ -747,6 +757,8 @@ template<class R,class O,class A1,class A2> struct BinaryFormula : public Formul
 //! \sa Variable
 template<class R> class Formula {
   public:
+    //! \brief The type returned by the formula.
+    typedef R result_type;
     //! \brief The constant \a c.
     Formula(const R& c) : ptr(new ConstantFormula<R>(c)) { }
     //! \brief The formula "v" in named variable \a v.
@@ -848,6 +860,7 @@ template<> class Formula<Real> {
     //! \brief Create an expression \f$\R^n\rightarrow\R\f$ by assigning the variables of the formula the numbers given by \a spc.
     VariableSet arguments() const { return ptr->arguments(); }
     ExpressionInterface* expression(const StateSpace& spc) { return ptr->expression(spc); }
+    Interval evaluate(const Valuation& x) const { return ptr->evaluate(x); }
 
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const Formula<Real>& f);
@@ -1055,6 +1068,7 @@ struct Next<EnumeratedVariable>
     EnumeratedAssignment operator=(const String& str) { return EnumeratedAssignment(*this,EnumeratedValue(str)); }
     EnumeratedAssignment operator=(const EnumeratedValue& val) { return EnumeratedAssignment(*this,val); }
     EnumeratedAssignment operator=(const EnumeratedVariable& var) { return EnumeratedAssignment(*this,var); }
+    EnumeratedAssignment operator=(const EnumeratedFormula& fn) { return EnumeratedAssignment(*this,fn); }
     friend std::ostream& operator<<(std::ostream& os, const Next<EnumeratedVariable>& self) {
         return os << "next(" << self.base.name() << ")"; }
   private:

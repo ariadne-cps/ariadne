@@ -28,26 +28,26 @@
 #ifndef ARIADNE_HYBRID_SIMULATOR_H
 #define ARIADNE_HYBRID_SIMULATOR_H
 
-#include "evolver_base.h"
+//#include "evolver_base.h"
 #include "logging.h"
 
 namespace Ariadne {
 
 class SimulationToolboxInterface;
-typedef int DiscreteState;
-class Point;
 class HybridPoint;
 class HybridSystem;
 
+template<class T> class Orbit;
 template<class System> class Simulator;
 
 
 
 /*! \brief A class for computing the evolution of a hybrid system. 
  */
+template<>
 class Simulator<HybridSystem>
-    : public EvolverBase<HybridSystem, HybridPoint >
-    , public Loggable
+//    : public EvolverBase<HybridSystem, HybridPoint>
+    : public Loggable
 {
     typedef HybridPoint EnclosureType;
   public:
@@ -55,33 +55,14 @@ class Simulator<HybridSystem>
     //! \brief Default constructor.
     Simulator();
   
-    //! \brief Construct from parameters using a default integrator.
-    Simulator(const EvolutionParameters& parameters);
-  
     /*! \brief Make a dynamically-allocated copy. */
     Simulator<HybridSystem>* clone() const;
 
-    //@{
-    //! \name Parameters controlling the evolution.
-    //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParameters& parameters() { return *this->_parameters; }
-    const EvolutionParameters& parameters() const { return *this->_parameters; }
-
-    //@}
-  
 
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics. 
-    Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_point, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
-
-  protected:
-    virtual void _evolution(EnclosureListType&,EnclosureListType&,EnclosureListType&,const SystemType& system, const EnclosureType& initial_point, const TimeType& time, Semantics semantics, bool) const;
-
-  private:
-    boost::shared_ptr< EvolutionParameters > _parameters;
-    boost::shared_ptr< SimulationToolboxInterface > _toolbox;
-    //boost::shared_ptr< EvolutionProfiler >  _profiler;
+    Orbit<HybridPoint> orbit(const HybridSystem& system, const HybridPoint& initial_point, const HybridTime& time) const;
 };
 
 

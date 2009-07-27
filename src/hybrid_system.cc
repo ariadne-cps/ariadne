@@ -159,7 +159,7 @@ flatten(std::map< T, std::set<T> >& dag)
 Valuation HybridSystem::target(const Event& event, const Valuation& source) const {
     std::cerr<<"\n";
     Valuation target;
-    for(switch_const_iterator iter=_discrete_assignments.begin(); iter!=this->_discrete_assignments.end(); ++iter) {
+    for(switch_const_iterator iter=_discrete_updates.begin(); iter!=this->_discrete_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {
             if(iter->loc.evaluate(source)) {
                 EnumeratedValue val=iter->rhs.evaluate(source);
@@ -236,7 +236,7 @@ bool HybridSystem::check_reset(const Event& event, const Valuation& source, cons
     std::set<NamedVariable> target_state_variables=this->state_variables(source);
     std::set<NamedVariable> updated_variables;
 
-    for(update_const_iterator iter=this->_update_equations.begin(); iter!=this->_update_equations.end(); ++iter) {
+    for(jump_const_iterator iter=this->_continuous_updates.begin(); iter!=this->_continuous_updates.end(); ++iter) {
         if(iter->evnts.contains(event) && iter->loc.evaluate(source)) {
             ARIADNE_ASSERT_MSG(subset(iter->rhs.arguments(),source_variables),"");
             updated_variables.insert(iter->lhs);
@@ -342,20 +342,36 @@ HybridSystem::dynamic(const Valuation& location) const
 }
 
 
+std::vector<EnumeratedUpdate>
+HybridSystem::switching(const Event& event, const Valuation& location) const
+{
+    std::vector<EnumeratedUpdate> switch_equations;
+
+    for(switch_const_iterator iter=this->_discrete_updates.begin(); iter!=this->_discrete_updates.end(); ++iter) {
+        if(iter->evnts.contains(event)) {
+            if(iter->loc.evaluate(location)) {
+                switch_equations.push_back(next(iter->lhs)=iter->rhs);
+            }
+        }
+    }
+    return switch_equations;
+}
+
+
 std::vector<RealUpdate>
 HybridSystem::reset(const Event& event, const Valuation& old_location) const
 {
-    std::vector<RealUpdate> update_equations;
+    std::vector<RealUpdate> continuous_updates;
 
-    for(update_const_iterator iter=this->_update_equations.begin(); iter!=this->_update_equations.end(); ++iter) {
+    for(jump_const_iterator iter=this->_continuous_updates.begin(); iter!=this->_continuous_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {
             if(iter->loc.evaluate(old_location)) {
-                update_equations.push_back(next(iter->lhs)=iter->rhs);
+                continuous_updates.push_back(next(iter->lhs)=iter->rhs);
             }
         }
     }
 
-    return update_equations;
+    return continuous_updates;
 }
 
 
@@ -395,8 +411,8 @@ std::ostream& operator<<(std::ostream& os, const HybridSystem& sys) {
     os << "HybridSystem(\n"
        << "  algebraic_equations=" << sys._algebraic_equations << ",\n"
        << "  differential_equations=" << sys._differential_equations << ",\n"
-       << "  discrete_resets=" << sys._discrete_assignments << ",\n"
-       << "  continuous_resets=" << sys._update_equations << ",\n"
+       << "  discrete_resets=" << sys._discrete_updates << ",\n"
+       << "  continuous_resets=" << sys._continuous_updates << ",\n"
        << "  guard_predicates=" << sys._guard_predicates << ",\n"
        << "  invariant_predicates=" << sys._invariant_predicates << "\n)\n";
     return os;
@@ -412,12 +428,12 @@ std::ostream& operator<<(std::ostream& os, const HybridSystem::AlgebraicEquation
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteAssignment& da) {
+std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteUpdate& da) {
     os << da.evnts << ": " << da.loc << " -> next("<<da.lhs.name()<<")="<<da.rhs;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::UpdateEquation& da) {
+std::ostream& operator<<(std::ostream& os, const HybridSystem::ContinuousUpdate& da) {
     os << da.evnts << ": " << da.loc << " -> next("<<da.lhs.name()<<")="<<da.rhs;
     return os;
 }

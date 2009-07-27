@@ -275,23 +275,23 @@ class HybridSystem
     struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
     struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
     struct InvariantPredicate { DiscretePredicate loc; ContinuousPredicate pred; };
-    struct DiscreteAssignment { EventSet evnts; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedFormula rhs;  };
-    struct UpdateEquation { EventSet evnts; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
+    struct DiscreteUpdate { EventSet evnts; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedFormula rhs;  };
+    struct ContinuousUpdate { EventSet evnts; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
     struct GuardPredicate { EventSet evnts; DiscretePredicate loc; ContinuousPredicate pred; };
     struct DisabledEvents { EventSet evnts; DiscretePredicate loc; };
 
     std::vector<DifferentialEquation> _differential_equations;
     std::vector<AlgebraicEquation> _algebraic_equations;
-    std::vector<DiscreteAssignment> _discrete_assignments;
-    std::vector<UpdateEquation> _update_equations;
+    std::vector<DiscreteUpdate> _discrete_updates;
+    std::vector<ContinuousUpdate> _continuous_updates;
     std::vector<GuardPredicate> _guard_predicates;
     std::vector<InvariantPredicate> _invariant_predicates;
     std::vector<DisabledEvents> _disabled_events;
 
     typedef std::vector<DifferentialEquation>::const_iterator dynamic_const_iterator;
     typedef std::vector<AlgebraicEquation>::const_iterator relation_const_iterator;
-    typedef std::vector<DiscreteAssignment>::const_iterator switch_const_iterator;
-    typedef std::vector<UpdateEquation>::const_iterator update_const_iterator;
+    typedef std::vector<DiscreteUpdate>::const_iterator switch_const_iterator;
+    typedef std::vector<ContinuousUpdate>::const_iterator jump_const_iterator;
     typedef std::vector<InvariantPredicate>::const_iterator invariant_const_iterator;
     typedef std::vector<GuardPredicate>::const_iterator guard_const_iterator;
     typedef std::vector<DisabledEvents>::const_iterator disabled_const_iterator;
@@ -321,10 +321,10 @@ class HybridSystem
         DifferentialEquation eqn={q,d.lhs.base,d.rhs}; _differential_equations.push_back(eqn); };
     //! \brief Adds a discrete reset to the system.
     void new_reset(EventSet e, DiscretePredicate q, EnumeratedUpdate a) {
-        DiscreteAssignment eqn={e,q,a.lhs.base,a.rhs}; _discrete_assignments.push_back(eqn); }
+        DiscreteUpdate eqn={e,q,a.lhs.base,a.rhs}; _discrete_updates.push_back(eqn); }
     //! \brief Adds a reset equation to the system.
     void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
-        UpdateEquation eqn={e,q,a.lhs.base,a.rhs}; _update_equations.push_back(eqn); }
+        ContinuousUpdate eqn={e,q,a.lhs.base,a.rhs}; _continuous_updates.push_back(eqn); }
     //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
@@ -407,6 +407,8 @@ class HybridSystem
     //! \brief .
     std::vector<RealDynamic> dynamic(const Valuation& state) const;
     //! \brief .
+    std::vector<EnumeratedUpdate> switching(const Event& event, const Valuation& state) const;
+    //! \brief .
     std::vector<RealUpdate> reset(const Event& event, const Valuation& state) const;
     //! \brief .
     std::map<Event,ContinuousPredicate> guards(const Valuation& state) const;
@@ -471,8 +473,8 @@ class HybridSystem
 std::ostream& operator<<(std::ostream& os, const HybridSystem& hs);
 std::ostream& operator<<(std::ostream& os, const HybridSystem::AlgebraicEquation& ae);
 std::ostream& operator<<(std::ostream& os, const HybridSystem::DifferentialEquation& de);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteAssignment& da);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::UpdateEquation& re);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteUpdate& da);
+std::ostream& operator<<(std::ostream& os, const HybridSystem::ContinuousUpdate& re);
 std::ostream& operator<<(std::ostream& os, const HybridSystem::GuardPredicate& g);
 std::ostream& operator<<(std::ostream& os, const HybridSystem::InvariantPredicate& inv);
 

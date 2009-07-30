@@ -364,6 +364,7 @@ class PolynomialExpression
 {
   public:
     PolynomialExpression() : Polynomial<Interval>() { }
+    explicit PolynomialExpression(uint n) : Polynomial<Interval>(Polynomial<Interval>::constant(n,Interval(0))) { }
     PolynomialExpression(uint n, uint j) : Polynomial<Interval>(Polynomial<Interval>::variable(n,j)) { }
     PolynomialExpression(const Polynomial<Float>& p) : Polynomial<Interval>(p) { }
     PolynomialExpression(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
@@ -426,10 +427,10 @@ template<class Op> class UnaryExpression
     virtual ExpressionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual Vector<Float> gradient() const { ARIADNE_NOT_IMPLEMENTED; }
     virtual std::ostream& write(std::ostream& os) const { return os << _op << "(" << *_subexpr << ")"; }
-  private: 
+  private:
     template<class R, class A> inline
     void compute(R& r, const A& a) { Op _op; _op(r,_subexpr->evaluate(a)); }
-  private: 
+  private:
     Op _op;
     shared_ptr<const ExpressionInterface> _subexpr;
 };
@@ -459,10 +460,10 @@ template<class Op> class BinaryExpression
     virtual ExpressionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual std::ostream& write(std::ostream& os) const {
         return os << *_subexpr1 << _op << *_subexpr2; }
-  private: 
+  private:
     template<class R, class A> inline
     void compute(R& r, const A& a) { r=Op()(_subexpr1->evaluate(a),_subexpr2->evaluate(a)); }
-  private: 
+  private:
     Op _op;
     shared_ptr<const ExpressionInterface> _subexpr1;
     shared_ptr<const ExpressionInterface> _subexpr2;
@@ -678,9 +679,11 @@ class PolynomialFunction
     : public FunctionInterface
 {
   public:
+    explicit PolynomialFunction(uint rs, uint as) : _p(rs,PolynomialExpression(as)) { }
+    explicit PolynomialFunction(const PolynomialExpression& p) : _p(1,p) { }
+
     PolynomialFunction(const Vector< Polynomial<Float> >& p) : _p(p) { }
     PolynomialFunction(const Vector< Polynomial<Interval> >& p) : _p(p) { }
-    PolynomialFunction(const PolynomialExpression& p) : _p(1,p) { }
 
     template<class E> PolynomialFunction(const ublas::vector_expression<E>& p)
         : _p(static_cast< Vector< Polynomial<Interval> > >(p)) { }

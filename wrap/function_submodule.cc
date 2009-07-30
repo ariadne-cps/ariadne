@@ -567,7 +567,7 @@ void export_polynomial_expression()
     Float flt;
     Interval ivl;
 
-    class_< PE, bases<ExpressionInterface> > polynomial_expression_class("PolynomialExpression", init<int,int>());
+    class_< PE, bases<ExpressionInterface> > polynomial_expression_class("PolynomialExpression", init<int>());
     polynomial_expression_class.def("constant", (PE(*)(uint,double)) &PE::constant);
     polynomial_expression_class.def("constant", (PE(*)(uint,Interval)) &PE::constant);
     polynomial_expression_class.staticmethod("constant");
@@ -636,7 +636,20 @@ void export_polynomial_expression()
 }
 
 
-void export_vector_function()
+void export_polynomial_function()
+{
+    typedef PolynomialFunction PF;
+
+    class_< PF, bases<FunctionInterface> > polynomial_function_class("PolynomialFunction", no_init);
+    polynomial_function_class.def(self_ns::str(self));
+
+    polynomial_function_class.def("result_size", &PF::result_size);
+    polynomial_function_class.def("argument_size", &PF::argument_size);
+}
+
+
+
+ void export_vector_function()
 {
     typedef ExpressionInterface EI;
     typedef FunctionInterface FI;
@@ -676,5 +689,7 @@ void function_submodule() {
     export_function_interface();
     export_vector_function();
     export_python_function();
+    export_affine_function();
+    export_polynomial_function();
 }
 

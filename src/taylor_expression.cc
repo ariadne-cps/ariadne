@@ -250,6 +250,25 @@ TaylorExpression::evaluate(const Vector<Interval>& x) const
     return Ariadne::evaluate(this->_model,sx);
 }
 
+TaylorExpression
+partial_evaluate(const TaylorExpression& te, uint k, const Interval& c)
+{
+    // Scale c to domain
+    const uint as=te.argument_size();
+    ARIADNE_ASSERT(k<as);
+    const Vector<Interval>& domain=te.domain();
+    const Interval& dk=domain[k];
+    Interval sc=(c-med_ivl(dk))/rad_ivl(dk);
+
+    Vector<Interval> new_domain(as-1);
+    for(uint i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
+    for(uint i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
+
+    TaylorModel new_model=partial_evaluate(te.model(),k,sc);
+
+    return TaylorExpression(new_domain,new_model);
+}
+
 
 
 TaylorExpression restrict(const TaylorExpression& tv, const Vector<Interval>& d) {

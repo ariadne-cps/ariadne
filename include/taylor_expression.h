@@ -64,6 +64,9 @@ TaylorExpression intersection(const TaylorExpression& x1, const TaylorExpression
 // Evaluate an array of Taylor variables on a vector.
 Interval evaluate(const TaylorExpression& x, const Vector<Interval>& sy);
 
+// Set the value of the \a kth variable to c
+TaylorExpression partial_evaluate(const TaylorExpression& x, uint k, const Interval& c);
+
 // Compose with an expression.
 TaylorExpression compose(const ExpressionInterface& x, const Vector<TaylorExpression>& y);
 

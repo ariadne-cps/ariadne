@@ -47,6 +47,8 @@ class TaylorExpression;
 class TaylorFunction;
 
 
+Vector<Interval> evaluate(const TaylorFunction& f, const Vector<Interval>& x);
+TaylorFunction partial_evaluate(const TaylorFunction& f, uint k, const Interval& c);
 TaylorFunction embed(const TaylorFunction& tv1, const Vector<Interval>& d2);
 TaylorFunction embed(const TaylorFunction& tv1, const Interval& d2);
 TaylorFunction embed(const Vector<Interval>& d1, const TaylorFunction& tv2);

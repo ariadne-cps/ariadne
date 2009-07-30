@@ -311,6 +311,17 @@ void export_taylor_model()
     taylor_model_class.def(self<self);
     taylor_model_class.def(self_ns::str(self));
 
+    taylor_model_class.def("constant",(TM(*)(N, const R&))&TM::constant);
+    taylor_model_class.def("constant",(TM(*)(N, const I&))&TM::constant);
+    taylor_model_class.def("variable",(TM(*)(N, N))&TM::variable);
+
+    taylor_model_class.staticmethod("constant");
+    taylor_model_class.staticmethod("variable");
+    //taylor_model_class.staticmethod("variables");
+
+    def("partial_evaluate",(TM(*)(const TM&,uint,Float))&partial_evaluate);
+    def("partial_evaluate",(TM(*)(const TM&,uint,Interval))&partial_evaluate);
+
     def("max",(TM(*)(const TM&,const TM&))&max);
     def("min",(TM(*)(const TM&,const TM&))&min);
     def("abs",(TM(*)(const TM&))&abs);
@@ -441,6 +452,9 @@ void export_taylor_variable()
     taylor_expression_class.staticmethod("constant");
     taylor_expression_class.staticmethod("variable");
     taylor_expression_class.staticmethod("variables");
+
+    def("evaluate",(Interval(*)(const TE&,const IV&)) &evaluate);
+    def("partial_evaluate",(TE(*)(const TE&,uint,const I&)) &partial_evaluate);
 
     def("midpoint",(TE(*)(const TE&)) &midpoint);
     def("evaluate",(I(*)(const TE&,const IV&)) &evaluate);
@@ -582,6 +596,7 @@ void export_taylor_function()
 
     def("evaluate",(IV(TF::*)(const RV&)const) &TF::evaluate);
     def("evaluate",(IV(TF::*)(const IV&)const) &TF::evaluate);
+    def("partial_evaluate",(TF(*)(const TF&,uint,const Interval&)) &partial_evaluate);
     //def("compose",(TE(*)(const RP&,const TF&)) &compose);
     def("compose",(TE(*)(const TE&,const TF&)) &compose);
     def("compose",(TF(*)(const TF&,const TF&)) &compose);

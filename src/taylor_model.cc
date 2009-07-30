@@ -2051,12 +2051,40 @@ evaluate(const Vector<TaylorModel>& tv, const Vector<Interval>& x)
 }
 
 
+template<class T> class Powers {
+  public:
+    explicit Powers(const T& t) { _values.push_back(t*0+1); _values.push_back(t); }
+    explicit Powers(const T& z, const T& t) { _values.push_back(z); _values.push_back(t); }
+    const T& operator[](uint i) const { while(_values.size()<=i) { _values.push_back(_values[1]*_values.back()); } return _values[i]; }
+  private:
+    mutable std::vector<T> _values;
+};
+
+template<> class Powers<Interval> {
+  public:
+    explicit Powers(const Interval& t) { _values.push_back(Interval(1)); _values.push_back(t); }
+    explicit Powers(const Interval& z, const Interval& t) { _values.push_back(z); _values.push_back(t); }
+    const Interval& operator[](uint i) const {
+        while(_values.size()<=i) {
+            if(_values.size()%2==0) { _values.push_back(sqr(_values[_values.size()/2])); }
+            else { _values.push_back(_values[1]*_values.back()); } }
+        return _values[i]; }
+  private:
+    mutable std::vector<Interval> _values;
+};
+
+
 
 TaylorModel
 partial_evaluate(const TaylorModel& x, uint k, Float c)
 {
-    ARIADNE_ASSERT(c==1 || c==0);
+    return partial_evaluate(x,k,Interval(c));
+}
 
+
+TaylorModel
+partial_evaluate(const TaylorModel& x, uint k, Interval c)
+{
     TaylorModel r(x.argument_size()-1,x.accuracy_ptr());
     MultiIndex ra(r.argument_size());
     if(c==0) {
@@ -2075,9 +2103,28 @@ partial_evaluate(const TaylorModel& x, uint k, Float c)
         TaylorModel s(x.argument_size()-1,x.accuracy_ptr());
         array<TaylorModel> p(x.degree()+1,TaylorModel(x.argument_size()-1,x.accuracy_ptr()));
 
-        array<Interval> cpowers(x.degree()+3);
-        cpowers[0]=1; cpowers[1]=c; cpowers[2]=sqr(cpowers[1]);
-        for(uint i=3; i!=cpowers.size(); ++i) { cpowers[i]=cpowers[i/2]*cpowers[(i+1)/2]; }
+        for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            const Float& xv=xiter->data();
+            MultiIndex::value_type xak=xa[k];
+            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            assert(ra.degree()+xak==xa.degree());
+            p[xak].expansion().append(ra,xv);
+        }
+
+        r=p[0];
+        r.set_error(x.error());
+        for(uint i=1; i!=p.size(); ++i) {
+            _add(s,r,p[i]);
+            r.swap(s);
+            s.clear();
+        }
+    } else {
+        TaylorModel s(x.argument_size()-1,x.accuracy_ptr());
+        array<TaylorModel> p(x.degree()+1,TaylorModel(x.argument_size()-1,x.accuracy_ptr()));
+
+        Powers<Interval> cpowers(c);
 
         for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
@@ -2106,6 +2153,16 @@ partial_evaluate(const TaylorModel& x, uint k, Float c)
 
 Vector<TaylorModel>
 partial_evaluate(const Vector<TaylorModel>& tv, uint k, Float c)
+{
+    Vector<TaylorModel> r(tv.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=partial_evaluate(tv[i],k,c);
+    }
+    return r;
+}
+
+Vector<TaylorModel>
+partial_evaluate(const Vector<TaylorModel>& tv, uint k, Interval c)
 {
     Vector<TaylorModel> r(tv.size());
     for(uint i=0; i!=r.size(); ++i) {

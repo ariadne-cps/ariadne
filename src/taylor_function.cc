@@ -594,6 +594,24 @@ operator*(const Matrix<Interval>& A, const TaylorFunction& f)
 
 
 
+TaylorFunction
+partial_evaluate(const TaylorFunction& tf, uint k, const Interval& c)
+{
+    // Scale c to domain
+    const uint as=tf.argument_size();
+    ARIADNE_ASSERT(k<as);
+    const Vector<Interval>& domain=tf.domain();
+    const Interval& dk=domain[k];
+    Interval sc=(c-med_ivl(dk))/rad_ivl(dk);
+
+    Vector<Interval> new_domain(as-1);
+    for(uint i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
+    for(uint i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
+
+    Vector<TaylorModel> new_models=partial_evaluate(tf.models(),k,sc);
+
+    return TaylorFunction(new_domain,new_models);
+}
 
 
 TaylorExpression
@@ -676,6 +694,8 @@ flow(const FunctionInterface& vf, const Vector<Interval>& d, const Float& h, con
     for(uint i=0; i!=10; ++i) {
         phi=antiderivative(compose(vf,phi),vf.result_size());
     }
+
+    return phi;
 }
 
 TaylorFunction

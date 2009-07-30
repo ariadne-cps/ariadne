@@ -75,6 +75,7 @@ TaylorModel rescale(const TaylorModel& x, const Interval& ivl1, const Interval& 
 Interval evaluate(const TaylorModel& x, const Vector<Interval>& sy);
 // Evaluate an array of Taylor variables on a vector.
 TaylorModel partial_evaluate(const TaylorModel& x, uint k, Float c);
+TaylorModel partial_evaluate(const TaylorModel& x, uint k, Interval c);
 // Substitute the TaylorModel y in the  kth variable of \a x.
 // Precondition: x.argument_size()==y.argument_size()+1
 TaylorModel substitute(const TaylorModel& x, uint k, const TaylorModel& y);
@@ -125,6 +126,7 @@ Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>
 Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
 Vector<TaylorModel> partial_evaluate(const Vector<TaylorModel>& x, uint k, Float sy);
+Vector<TaylorModel> partial_evaluate(const Vector<TaylorModel>& x, uint k, Interval sy);
 Vector<TaylorModel> substitute(const Vector<TaylorModel>& x, uint k, const TaylorModel& y);
 Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, uint k);
 Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);

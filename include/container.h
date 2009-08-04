@@ -100,6 +100,7 @@ template<class K,class V,class C> inline bool has_key(const std::map<K,V,C>& m, 
 template<class T1, class T2> class Pair
     : public std::pair<T1,T2>
 {
+  public:
     Pair() : std::pair<T1,T2>() { }
     template<class X> Pair(const X& x) : std::pair<T1,T2>(x) { }
     template<class X1, class X2> Pair(const X1& x1, const X2& x2) : std::pair<T1,T2>(x1,x2) { }
@@ -109,6 +110,7 @@ template<class T1, class T2> class Pair
 template<class T> class List
     : public std::vector<T>
 {
+  public:
     List() : std::vector<T>() { }
     List(const std::vector<T>& l) : std::vector<T>(l) { }
     template<class I> List(const I& b, const I& e) : std::vector<T>(b,e) { }

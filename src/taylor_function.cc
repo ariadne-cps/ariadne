@@ -726,6 +726,73 @@ flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, con
     return unchecked_flow(vf,d,h,o);
 }
 
+
+template<class X> inline Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
+    Vector<X> r(v1.size()+v2.size()+1u);
+    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
+    r[v1.size()+v2.size()]=s3;
+    return r;
+}
+
+
+TaylorFunction
+parameterised_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
+{
+    ARIADNE_ASSERT(vf.result_size()<=vf.argument_size());
+    ARIADNE_ASSERT(d.size()==vf.result_size());
+    ARIADNE_ASSERT(h>0.0);
+
+    uint np=vf.argument_size()-vf.result_size();
+    uint nx=vf.result_size();
+
+    Vector<Interval> const bp=project(vf.domain(),range(0,np)); // The bounding box of the parameters
+    Vector<Interval> const bx=project(vf.domain(),range(np,np+nx)); // The bounding box of the variables
+    Vector<Interval> const& dp=bp;  // The domain of the parameters
+    Vector<Interval> const& dx=d;  // The domain of the variables
+
+    std::cerr<<"dx="<<dx<<"\nbx="<<bx<<"\ndp="<<dp<<"\n";
+    ARIADNE_ASSERT(subset(dx,bx));
+    Vector<Interval> vf_range=vf.range();
+    Vector<Interval> euler_step=dx+Interval(0,+h)*vf_range;
+    if(!subset(euler_step,bx)) {
+        ARIADNE_THROW(FlowBoundsException,"parameterised_flow(TaylorFunction,Box,Float,Nat)",
+                      std::setprecision(20)<<"Euler step "<<euler_step<<" of vector field "<<vf<<
+                      " with range "<<vf_range<<" starting in domain "<<d<<
+                      " over time interval "<<h<<" does not remain in domain of vector field.");
+    }
+
+    // Sanity check that vector field domain has nonempty interior
+    for(uint i=0; i!=nx; ++i) { ARIADNE_ASSERT_MSG(bx[i].radius()>0.0,"Domain of vector field "<<bx<<" has non-empty interior."); }
+    for(uint i=0; i!=nx; ++i) { if(dx[i].radius()<=0) { std::cerr<<"Initial set "<<dx<<" has non-empty interior.\n";  } }
+    for(uint i=0; i!=np; ++i) { if(dp[i].radius()<=0) { std::cerr<<"Parameter set "<<dp<<" has non-empty interior.\n";  } }
+
+    // Scale multiply models by inverse reciprocal of radius
+    Vector<TaylorModel> unit_scaled_vf(nx);
+    for(uint i=0; i!=nx; ++i) { unit_scaled_vf[i]=vf.models()[i]*(h/rad_ivl(bx[i])); }
+    std::cerr<<"unit_scaled_vf="<<unit_scaled_vf<<std::endl;
+
+    Vector<TaylorModel> y0=embed(np,TaylorModel::scalings(d));
+    std::cerr<<"y0="<<y0<<std::endl;
+    Vector<TaylorModel> unit_scaled_y0=unscale(y0,bx);
+    std::cerr<<"unit_scaled_y0"<<unit_scaled_y0<<std::endl;
+
+    Vector<TaylorModel> unit_scaled_flow=parameterised_flow(unit_scaled_vf,unit_scaled_y0,o);
+    std::cerr<<"unit_scaled_flow="<<unit_scaled_flow<<std::endl;
+
+    Vector<TaylorModel> model_flow=scale(unit_scaled_flow,bx);
+    std::cerr<<"model_flow="<<model_flow<<std::endl;
+
+    // Check if flow is only positive
+    if(0.0==0) { model_flow=split(model_flow,np+nx,true); }
+    std::cerr<<"split_model_flow="<<model_flow<<std::endl;
+
+    TaylorFunction flow(join(dp,dx,Interval(0,+h)),model_flow);
+    std::cerr<<"\nflow="<<flow<<"\n"<<std::endl;
+
+    return flow;
+}
+
 // This method should be used if we know already that the flow over time h remains in
 // the domain of the vector field approximation, for example, if this has been
 // checked for the original flow

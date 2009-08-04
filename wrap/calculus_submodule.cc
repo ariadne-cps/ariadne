@@ -609,6 +609,7 @@ void export_taylor_function()
     def("flow",(TF(*)(const TF&,const IV&,const I&, N)) &flow);
     def("flow",(TF(*)(const TF&,const IV&,const R&, N)) &flow);
     def("flow",(TF(*)(const F&,const IV&,const R&, N)) &flow);
+    def("parameterised_flow",(TF(*)(const TF&,const IV&,const R&, N)) &parameterised_flow);
 
     def("unchecked_compose",(TE(*)(const TE&,const TF&)) &unchecked_compose);
     def("unchecked_compose",(TF(*)(const TF&,const TF&)) &unchecked_compose);

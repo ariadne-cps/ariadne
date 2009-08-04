@@ -3400,6 +3400,69 @@ flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& yz, uint o)
 
 
 
+
+// Compute the solution of the differential equation
+//    dot(phi)(a,x,t) = f(a,phi(a,x,t));  phi(a,x,0) = g(a,x)
+Vector<TaylorModel>
+parameterised_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0, uint o)
+{
+    ARIADNE_ASSERT(vf.size()>0);
+    ARIADNE_ASSERT(vf[0].argument_size()>=vf.size());
+    uint nx=vf.size();
+    uint np=vf[0].argument_size() - vf.size();
+    ARIADNE_ASSERT(y0.size()==nx);
+    ARIADNE_ASSERT(y0[0].argument_size()==np+nx);
+
+    // Set up parameters p(a,x,t)=a
+    Vector<TaylorModel> p(np);
+    for(uint i=0; i!=np; ++i) { p[i]=TaylorModel::variable(np+nx+1,i); }
+
+    // Set up initial conditions y0(a,x,t)=g(a,x)
+    Vector<TaylorModel> yz=embed(y0,1u);
+
+    // Set flow solution bound
+    // The Perron-Frobenius operator should act as a contraction on this set
+    Vector<TaylorModel> y(nx);
+    for(uint i=0; i!=y.size(); ++i) {
+        y[i]=TaylorModel::constant(np+nx+1,yz[i].range()+vf[i].range()*Interval(-1,+1));
+    }
+
+    // Reserve memory for solution
+    Vector<TaylorModel> new_y(nx,TaylorModel(np+nx+1));
+
+    // Main iteration
+    for(uint j=0; j<=o; ++j) {
+        new_y=compose(vf,join(p,y));
+        for(uint i=0; i!=nx; ++i) {
+            new_y[i].antidifferentiate(np+nx);
+            new_y[i]+=yz[i];
+
+            //new_y[i]=intersection(y[i],new_y[i]);
+
+            // The following code ignores disjoint set errors
+            // and simply uses the next iterate as the new approximation
+            // I'm not sure if this is entirely safe
+            try {
+                new_y[i]=intersection(y[i],new_y[i]);
+            }
+            catch(const IntersectionException& e) {
+                std::cerr<<"Warning: "<<e.what()<<"\n";
+            }
+        }
+
+        for(uint i=0; i!=nx; ++i) {
+            new_y[i].swap(y[i]);
+        }
+    }
+
+    //for(uint i=0; i!=n; ++i) { y[i].clobber(so,to); }
+    for(uint i=0; i!=nx; ++i) { y[i].sweep(0.0); }
+
+    return y;
+}
+
+
+
 } //namespace Ariadne
 
 

@@ -396,6 +396,8 @@ class PolynomialExpression
 
     virtual PolynomialExpression* derivative(uint j) const {
         return new PolynomialExpression(Ariadne::derivative(*this,j)); }
+    virtual PolynomialExpression* antiderivative(uint j) const {
+        return new PolynomialExpression(Ariadne::antiderivative(*this,j)); }
 
     virtual Vector<PolynomialExpression> gradient() const {
         Vector<PolynomialExpression> g(this->argument_size());

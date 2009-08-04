@@ -66,6 +66,7 @@ TaylorExpression implicit(const ExpressionInterface&, const TaylorFunction&);
 TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
 TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 TaylorFunction flow(const FunctionInterface& vf, const Vector<Interval>& d, const Float& h, uint o);
+TaylorFunction parameterised_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 TaylorExpression unchecked_compose(const TaylorExpression&, const TaylorFunction&);
 TaylorFunction unchecked_compose(const TaylorFunction&, const TaylorFunction&);

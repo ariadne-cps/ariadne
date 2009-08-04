@@ -43,6 +43,15 @@
 
 namespace Ariadne {
 
+//! \brief A monomial with coefficients of some type \a X.
+template<class X>
+class Monomial
+    : public ExpansionValue<X>
+{
+    Monomial(const MultiIndex& a, const X& x) : ExpansionValue<X>(a,x) { }
+    Monomial(const ExpansionValue<X>& v) : ExpansionValue<X>(v) { }
+};
+
 //! \brief A polynomial with coefficients of some type \a X.
 template<class X>
 class Polynomial
@@ -229,6 +238,11 @@ template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const X& c)
 template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const X& c) {
     typedef typename Polynomial<X>::iterator Iter;
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()/=c; } return p; }
+
+template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monomial<X>& m) {
+    typedef typename Polynomial<X>::iterator Iter;
+    if(m.data()==0) { p.clear(); }
+    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->key()+=m.key(); iter->data()*=m.data(); } return p; }
 
 template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const int& c) {
     p+=X(c); return p; }

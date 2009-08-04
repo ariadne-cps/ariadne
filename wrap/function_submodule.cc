@@ -61,6 +61,16 @@ PolynomialExpression derivative(const PolynomialExpression& pe, uint j) {
     return PolynomialExpression(r);
 }
 
+PolynomialExpression antiderivative(const PolynomialExpression& pe, uint j) {
+    Polynomial<Interval> r=derivative(static_cast<const Polynomial<Interval>&>(pe),j);
+    return PolynomialExpression(r);
+}
+
+boost::python::object join_polynomial_expressions(const boost::python::list& pylst) {
+    Vector<PolynomialExpression> exprvec(len(pylst));
+    for(uint i=0; i!=len(pylst); ++i) { exprvec[i]=extract<PolynomialExpression>(pylst[i]); }
+    return boost::python::object(PolynomialFunction(exprvec));
+}
 
 template<class X> X* make(const boost::python::object& obj);
 
@@ -503,9 +513,10 @@ void export_affine_function()
 
 void export_multi_index()
 {
-    class_< MultiIndex > multi_index_class("MultiIndex", no_init);
-    //    multi_index_class.def("__getitem__",(MultiIndex::value_type(MultiIndex::*)(const MultiIndex::size_type&)const) &MultiIndex::operator[]);
-    multi_index_class.def("degree",(MultiIndex::value_type(MultiIndex::*)()const) &MultiIndex::degree);
+    class_< MultiIndex > multi_index_class("MultiIndex", init<uint>());
+    multi_index_class.def("__getitem__",&MultiIndex::get);
+    multi_index_class.def("__setitem__",&MultiIndex::set);
+    multi_index_class.def("degree",&MultiIndex::degree);
     multi_index_class.def(self_ns::str(self));
 }
 
@@ -518,8 +529,6 @@ void export_polynomial()
 
     class_< M > monomial_class(python_name<X>("Monomial"), no_init);
     monomial_class.def("key",(MultiIndex&(M::*)())&M::key,return_value_policy<reference_existing_object>());
-    //monomial_class.def("data",&monomial_data<X>,return_value_policy<reference_existing_object>());
-    //monomial_class.def("data",(X&(M::*)()) &M::data,return_value_policy<reference_existing_object>());
     monomial_class.def("data",(const X&(M::*)()const) &M::data,return_value_policy<copy_const_reference>());
     monomial_class.def(self_ns::str(self));
 
@@ -532,6 +541,7 @@ void export_polynomial()
     polynomial_class.staticmethod("variable");
 
     polynomial_class.def("argument_size", &P::argument_size);
+    polynomial_class.def("insert", &P::insert);
     polynomial_class.def(+self);
     polynomial_class.def(-self);
     polynomial_class.def(self+self);
@@ -554,6 +564,7 @@ void export_polynomial()
     polynomial_class.def("__iter__",boost::python::iterator<P>());
     polynomial_class.def(self_ns::str(self));
     polynomial_class.def("__mul__",&__mul__< Vector<Polynomial<X> >, Polynomial<X>, Vector<Float> >);
+    //polynomial_class.def(self*=M(MultiIndex(0),1.0));
 
     class_< Vector<P> > polynomial_function_class(python_name<X>("PolynomialVector"), no_init);
     polynomial_function_class.def("__getitem__",(const P&(Vector<P>::*)(size_t)const)&Vector<P>::operator[],return_value_policy<copy_const_reference>());
@@ -633,6 +644,7 @@ void export_polynomial_expression()
     polynomial_expression_class.def("__repr__",(std::string(*)(const PolynomialExpression&))&__str__);
 
     def("derivative",(PolynomialExpression(*)(const PolynomialExpression&, uint))&derivative);
+    def("antiderivative",(PolynomialExpression(*)(const PolynomialExpression&, uint))&antiderivative);
 }
 
 
@@ -645,6 +657,8 @@ void export_polynomial_function()
     polynomial_function_class.def("argument_size", &PolynomialFunction::argument_size);
     polynomial_function_class.def("__add__",&__add__<PolynomialFunction,PolynomialFunction,PolynomialFunction>);
     polynomial_function_class.def(self_ns::str(self));
+
+    def("join",&join_polynomial_expressions);
 
     def("flip",(PolynomialFunction(*)(const PolynomialFunction&,uint)) &flip);
 

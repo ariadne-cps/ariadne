@@ -104,6 +104,10 @@ class MultiIndex {
      /*! The number of variables. */
     size_type number_of_variables() const;
     /*! The number of occurrences of the \a i th variable. */
+    value_type get(size_type i) const;
+    /*! Set the number of occurrences of the \a i th variable to \a n. */
+    void set(size_type i, value_type n);
+    /*! The number of occurrences of the \a i th variable. */
     const_reference operator[](size_type i) const;
     /*! The number of occurrences of the \a i th variable. */
     reference operator[](size_type i);
@@ -181,7 +185,7 @@ class MultiIndexValueReference {
     typedef MultiIndex::value_type value_type;
     typedef MultiIndex::word_type word_type;
   private:
-    size_type _n; value_type* _p; size_type _i; 
+    size_type _n; value_type* _p; size_type _i;
   public:
     MultiIndexValueReference(size_type n, value_type* p, size_type i) : _n(n), _p(p), _i(i) { }
     operator const value_type& () { return _p[_i]; }
@@ -193,7 +197,7 @@ class MultiIndexValueReference {
 };
 
 inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
-    if(_p[_i]==0) { 
+    if(_p[_i]==0) {
         ARIADNE_THROW(std::runtime_error,"--MultiIndex[i]"," decrementing zero value at "<<_i<<" in "<<reinterpret_cast<const MultiIndex&>(*this)); }
     --_p[_n]; --_p[_i]; return *this;
 }
@@ -296,6 +300,17 @@ inline MultiIndex::size_type MultiIndex::number_of_variables() const {
     return this->_n;
 }
 
+inline MultiIndex::value_type MultiIndex::get(size_type i) const {
+    assert(i<this->size()); return reinterpret_cast<const value_type*>(this->_p)[i];
+}
+
+inline void MultiIndex::set(size_type i, value_type k) {
+    assert(i<this->size());
+    value_type& ai=reinterpret_cast<value_type*>(this->_p)[i];
+    value_type& d=reinterpret_cast<value_type*>(this->_p)[this->_n];
+    d+=k; d-=ai; ai=k;
+}
+
 inline MultiIndex::value_type const& MultiIndex::operator[](size_type i) const {
     assert(i<this->size()); return reinterpret_cast<const value_type*>(this->_p)[i];
 }
@@ -305,7 +320,7 @@ inline MultiIndexValueReference MultiIndex::operator[](size_type i) {
 }
 
 inline void MultiIndex::increment(size_type i) {
-    ++reinterpret_cast<value_type*>(this->_p)[i]; ++reinterpret_cast<value_type*>(this->_p)[this->_n]; 
+    ++reinterpret_cast<value_type*>(this->_p)[i]; ++reinterpret_cast<value_type*>(this->_p)[this->_n];
 }
 
 inline void MultiIndex::decrement(size_type i) {

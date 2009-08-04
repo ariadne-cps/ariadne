@@ -25,6 +25,7 @@ SRC = \
 	simulation_toolbox.cc \
 	taylor_calculus.cc \
 	solver.cc \
+	integrator.cc \
 	point.cc \
 	box.cc \
 	zonotope.cc \

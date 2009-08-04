@@ -145,6 +145,7 @@ Vector<Interval> solve(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
+Vector<TaylorModel> parameterised_flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
 
 TaylorModel unchecked_compose(const TaylorModel& x, const Vector<TaylorModel>& y);
 Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y);

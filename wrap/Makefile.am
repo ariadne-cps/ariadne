@@ -53,6 +53,7 @@ ARIADNE_SRC = utilities.cc \
 	function_submodule.cc \
 	calculus_submodule.cc \
 	geometry_submodule.cc \
+	solver_submodule.cc \
 	storage_submodule.cc \
 	system_submodule.cc \
 	evolution_submodule.cc \

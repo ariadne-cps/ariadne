@@ -308,6 +308,11 @@ bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool empty(const Vector<Interval>& v);
 
+Vector<Interval> split(const Vector<Interval>& v, uint k, bool lr);
+Vector<Interval> split(const Vector<Interval>& v, bool lr);
+std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v);
+std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v, uint k);
+
 Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Float> midpoint(const Vector<Interval>& v);

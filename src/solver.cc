@@ -1,7 +1,7 @@
 /***************************************************************************
- *            newton_solver.cc
+ *            solver.cc
  *
- *  Copyright  2006-8  Pieter Collins
+ *  Copyright  2006-9  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,27 +21,126 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "newton_solver.h"
+#include "solver.h"
 
 #include "logging.h"
 #include "vector.h"
 #include "matrix.h"
 #include "function_interface.h"
-#include "point.h"
-#include "box.h"
 
 namespace Ariadne {
 
+namespace {
+
+void
+solve_all(Set< Vector<Interval> >& r,
+          const SolverInterface& s,
+          const FunctionInterface& f,
+          const Vector<Interval>& ix)
+{
+    // Test for no solution
+    if(disjoint(f.evaluate(ix),ix)) {
+        //std::cerr<<"No solution in"<<ix<<"\n";
+        return;
+    }
+
+    // If radius is too small, assume solution is not verified
+    if(radius(ix)<s.maximum_error()) {
+        std::cerr<<"Warning: Cannot verify solution in "<<ix<<"\n";
+        return;
+    }
+
+    bool invertible_jacobian=true;
+    try {
+        Matrix<Interval> Jinv=inverse(f.jacobian(ix));
+    }
+    catch(const SingularMatrixException& e) {
+        invertible_jacobian=false;
+    }
+
+    if(invertible_jacobian) {
+        //std::cerr<<"Nonsingular matrix -- applying contractor\n";
+        try {
+            r.insert(s.solve(f,ix));
+        }
+        catch(const EvaluationException& e) {
+            std::cerr<<"Evaluation exception -- No solution in"<<ix<<"\n";
+            // No solution
+        }
+    } else {
+        //std::cerr<<"Singular matrix over "<<ix<<" -- splitting\n";
+        std::pair< Vector<Interval>, Vector<Interval> > splt=split(ix);
+        solve_all(r,s,f,splt.first);
+        solve_all(r,s,f,splt.second);
+    }
+
+}
+
+} // namespace
+
+
+SolverBase::SolverBase(double max_error, uint max_steps)
+  : _max_error(max_error), _max_steps(max_steps) 
+{
+}
+
+
+Set< Vector<Interval> >
+SolverBase::solve_all(const FunctionInterface& f,
+                      const Vector<Interval>& ix) const
+{
+    Set< Vector<Interval> > r;
+    Ariadne::solve_all(r,*this,f,ix);
+    return r;
+}
+
+
+
 Vector<Interval>
-IntervalNewtonSolver::solve(const FunctionInterface& f, 
-                            const Vector<Interval>& ix)
+SolverBase::solve(const FunctionInterface& f,
+                  const Vector<Interval>& ix) const
 {
   const double& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();
   ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
-  Vector<Interval> x(ix);
-  Vector<Interval> r(x);
+  Vector<Interval> r(ix);
+  bool has_solution=false;
   while(n>0) {
+    Vector<Interval> nr=this->step(f,r);
+    ARIADNE_LOG(5,"  nr="<<nr<<"\n");
+
+    if(!has_solution && subset(nr,r)) {
+        has_solution=true;
+    }
+
+    if(has_solution && radius(nr) < e) {
+      return nr;
+    }
+
+    if(disjoint(nr,r)) {
+      throw EvaluationException("No result found -- disjoint");
+    }
+    r=intersection(nr,r);
+    n=n-1;
+  }
+  throw EvaluationException("No result found -- maximum number of steps reached");
+}
+
+
+
+Vector<Interval>
+SolverBase::fixed_point(const FunctionInterface& f, const Vector<Interval>& pt) const
+{
+  return Vector<Interval>(this->solve(DifferenceFunction(f),pt)); 
+}
+
+
+
+
+Vector<Interval>
+IntervalNewtonSolver::step(const FunctionInterface& f,
+                           const Vector<Interval>& x) const
+{
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
     Vector<Float> m=midpoint(x);
@@ -53,78 +152,18 @@ IntervalNewtonSolver::solve(const FunctionInterface& f,
     ARIADNE_LOG(5,"  Df(r)="<<A<<"\n");
     Matrix<Interval> Ainv=inverse(A);
     ARIADNE_LOG(5,"  inverse(Df(r))="<<Ainv<<"\n");
-    Vector<Interval> dx=prod(Ainv , w);
+    Vector<Interval> dx=prod(Ainv, w);
     ARIADNE_LOG(5,"  dx="<<dx<<"\n");
     Vector<Interval> nx= m - dx;
     ARIADNE_LOG(5,"  nx="<<nx<<"\n");
-    Vector<Interval> nr(nx);
-    ARIADNE_LOG(5,"  nr="<<nr<<"\n");
-
-    if(subset(nr,r) && radius(nx) < e) {
-      return nr;
-    }
-    if(disjoint(nr,r)) {
-      throw EvaluationException("No result found -- disjoint");
-    }
-    r=intersection(nr,r);
-    x=r;
-    n=n-1;
-  }
-  throw EvaluationException("No result found -- maximum number of steps reached");
+    return nx;
 }
 
 Vector<Interval>
-IntervalNewtonSolver::fixed_point(const FunctionInterface& f, 
-                                  const Vector<Interval>& ix)
+KrawczykSolver::step(const FunctionInterface& f,
+                     const Vector<Interval>& x) const
 {
-  const double& e=this->maximum_error();
-  uint n=this->maximum_number_of_steps();
-  ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
-  Vector<Interval> x(ix);
-  Vector<Interval> r(x);
-  while(n>0) {
-    ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
-    ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<Float> m=midpoint(x);
-    ARIADNE_LOG(5,"  m="<<m<<"\n");
-    Vector<Interval> im(m);
-    Vector<Interval> w=f.evaluate(im)-im;
-    ARIADNE_LOG(5,"  f(m)="<<w<<"\n");
-    Matrix<Interval> A=f.jacobian(x)-Matrix<Float>::identity(n);
-    ARIADNE_LOG(5,"  Df(r)="<<A<<"\n");
-    Matrix<Interval> Ainv=inverse(A);
-    ARIADNE_LOG(5,"  inverse(Df(r))="<<Ainv<<"\n");
-    Vector<Interval> dx=prod(Ainv , w);
-    ARIADNE_LOG(5,"  dx="<<dx<<"\n");
-    Vector<Interval> nx= m - dx;
-    ARIADNE_LOG(5,"  nx="<<nx<<"\n");
-    Vector<Interval> nr(nx);
-    ARIADNE_LOG(5,"  nr="<<nr<<"\n");
-
-    if(subset(nr,r) && radius(nx) < e) {
-      return nr;
-    }
-    if(disjoint(nr,r)) {
-      throw EvaluationException("No result found -- disjoint");
-    }
-    r=intersection(nr,r);
-    x=r;
-    n=n-1;
-  }
-  throw EvaluationException("No result found -- maximum number of steps reached");
-}
-
-Vector<Interval>
-KrawczykSolver::solve(const FunctionInterface& f,
-                      const Vector<Interval>& ix)
-{
-  const double& e=this->maximum_error();
-  uint n=this->maximum_number_of_steps();
-  ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
-  Vector<Interval> x(ix);
-  Vector<Interval> r(x);
-  Matrix<Float> I=Matrix<Float>::identity(ix.size());
-  while(n>0) {
+    Matrix<Interval> I=Matrix<Interval>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
     Vector<Float> m=midpoint(x);
@@ -142,24 +181,9 @@ KrawczykSolver::solve(const FunctionInterface& f,
     ARIADNE_LOG(5,"  nx="<<nx<<"\n");
     Vector<Interval> nr(nx);
     ARIADNE_LOG(5,"  nr="<<nr<<"\n");
-
-    if(subset(nr,r) && radius(nx) < e) {
-      return nr;
-    }
-    if(disjoint(nr,r)) {
-      throw EvaluationException("No result found -- disjoint");
-    }
-    r=intersection(nr,r);
-    x=r;
-    n=n-1;
-  }
-  throw EvaluationException("No result found -- maximum number of steps reached");
+    return nr;
 }
 
-Vector<Interval>
-KrawczykSolver::fixed_point(const FunctionInterface& f,
-                            const Vector<Interval>& ix)
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
+
+
 } // namespace Ariadne

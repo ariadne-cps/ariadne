@@ -261,11 +261,17 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__neg__",__neg__< Vector<X>, Vector<X> >);
     vector_class.def(boost::python::self_ns::str(self));
     vector_class.def("unit",&Vector<X>::unit);
+    vector_class.def("basis",&Vector<X>::basis);
     vector_class.staticmethod("unit");
+    vector_class.staticmethod("basis");
 
     def("norm",(X(*)(const Vector<X>&)) &norm);
     def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &join);
     def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &join);
+
+    to_python_converter< array< Vector<X> >, array_to_python_list< Vector<X> > >();
+
+
 }
 
 template<class X, class Y>

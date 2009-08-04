@@ -715,11 +715,22 @@ class PolynomialFunction
     virtual std::ostream& write(std::ostream& os) const {
         return os << "PolynomialFunction"<<_p; }
   private:
+    friend PolynomialFunction operator+(const PolynomialFunction&, const PolynomialFunction&);
+    friend PolynomialFunction flip(const PolynomialFunction&, uint);
+  private:
     Vector< Polynomial<Interval> > _p;
 };
 
 inline PolynomialFunction join(const PolynomialExpression& p1, const PolynomialExpression& p2) {
     return join(static_cast<const Polynomial<Interval>&>(p1),static_cast<const Polynomial<Interval>&>(p2));
+}
+
+inline PolynomialFunction operator+(const PolynomialFunction& p1, const PolynomialFunction& p2) {
+    return PolynomialFunction(p1._p + p2._p);
+}
+
+inline PolynomialFunction flip(const PolynomialFunction& p, uint k) {
+    return PolynomialFunction(flip(p._p,k));
 }
 
 class FunctionElement

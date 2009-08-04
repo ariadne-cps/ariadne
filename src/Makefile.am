@@ -24,7 +24,7 @@ SRC = \
 	taylor_function.cc  \
 	simulation_toolbox.cc \
 	taylor_calculus.cc \
-	newton_solver.cc \
+	solver.cc \
 	point.cc \
 	box.cc \
 	zonotope.cc \

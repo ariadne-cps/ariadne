@@ -44,6 +44,8 @@ using namespace boost::numeric;
 
 namespace Ariadne {
 
+class SingularMatrixException {
+};
 
 /// A matrix over a field. See also \link Ariadne::Vector \c Vector<X> \endlink.
 template<class X>

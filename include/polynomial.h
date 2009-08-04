@@ -414,6 +414,37 @@ template<class X> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, cons
 }
 
 
+// Change the polynomial by setting x[k]=1/x[k], and multiplying through to preserve polynomiality.
+// Change the polynomial by setting x[k]=1/x[k], and multiplying through to preserve polynomiality.
+template<class X> Polynomial<X> flip(const Polynomial<X>& p, uint k) {
+    ARIADNE_ASSERT(k<p.argument_size());
+    Polynomial<X> r(p.argument_size());
+
+    uchar deg=0;
+    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        const MultiIndex& pa=iter->key();
+        deg=std::max(deg,pa[k]);
+    }
+
+    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        const MultiIndex& pa=iter->key();
+        const X& pc=iter->data();
+        MultiIndex ra=pa;
+        ra[k]=deg-pa[k];
+        r[ra]=pc;
+    }
+
+    return r;
+}
+
+template<class X> Vector< Polynomial<X> > flip(const Vector< Polynomial<X> >& p, uint k) {
+    Vector< Polynomial<X> > r(p);
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=flip(p[i],k);
+    }
+    return r;
+}
+
 
 inline Polynomial<Interval> operator+(const Polynomial<Interval>& p, const Float& c) {
     return p+Interval(c); }
@@ -439,5 +470,6 @@ inline Polynomial<Interval>& operator*=(Polynomial<Interval>& p, const Float& c)
 inline Polynomial<Interval>& operator/=(Polynomial<Interval>& p, const Float& c) {
     return p/=Interval(c); }
 }
+
 
 #endif /* ARIADNE_POLYNOMIAL_H */

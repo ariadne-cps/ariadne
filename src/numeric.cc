@@ -1018,6 +1018,13 @@ Interval::Interval(Rational ql, Rational qu) : l(ql.get_d()), u(qu.get_d())  {
 #endif // HAVE_GMPXX_H
 
 
+std::ostream&
+operator<<(std::ostream& os, const Interval& ivl)
+{
+    if(ivl.lower()==ivl.upper()) { return os << ivl.lower(); }
+    return os << '{' << ivl.lower() << ':' << ivl.upper() << '}';
+}
+
 /*
 std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
@@ -1026,6 +1033,7 @@ operator<<(std::ostream& os, const Interval& ivl)
 }
 */
 
+/*
 std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
 {
@@ -1074,7 +1082,7 @@ operator<<(std::ostream& os, const Interval& ivl)
     return os;
 
 }
-
+*/
 std::istream&
 operator>>(std::istream& is, Interval& ivl)
 {

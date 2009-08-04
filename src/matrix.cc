@@ -230,7 +230,11 @@ template<class X> Matrix<X> inverse(const Matrix<X>& A) {
 }
 
 template<> Matrix<Interval> inverse<Interval>(const Matrix<Interval>& A) {
-    return lu_inverse(A);
+    try {
+        return lu_inverse(A);
+    } catch(const DivideByZeroException& e) {
+        throw SingularMatrixException();
+    }
 }
 
 

@@ -139,6 +139,7 @@ void export_interval()
     typedef Interval (*IIFUN)(Interval,Interval);
     typedef Interval (*IZFUN)(Interval, int n);
     typedef Interval (*INFUN)(Interval, unsigned int n);
+    typedef bool (*IIPRED)(Interval,Interval);
 
     def("down",&down);
     def("up",&up);
@@ -174,9 +175,10 @@ void export_interval()
 
     def("midpoint", &Interval::midpoint);
     def("radius", &Interval::radius);
-    def("disjoint", &disjoint);
-    def("subset", &subset);
-    def("intersection", &intersection);
+
+    def("disjoint", (IIPRED) &disjoint);
+    def("subset", (IIPRED) &subset);
+    def("intersection", (IIFUN) &intersection);
 
     def("mag", (Float(*)(Interval)) &mag);
 

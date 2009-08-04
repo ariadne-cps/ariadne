@@ -126,6 +126,45 @@ bool empty(const Vector<Interval>& v)
     return false;
 }
 
+
+uint irmax(const Vector<Interval>& v) {
+    uint imw(0);
+    Float mw=v[0].width();
+    for(uint i=1; i!=v.size(); ++i) {
+        if(v[i].width()>mw) { imw=i; mw=v[i].width(); }
+    }
+    return imw;
+}
+
+
+Vector<Interval> split(const Vector<Interval>& v, uint k, bool lr) {
+    ARIADNE_ASSERT(k<v.size());
+    Vector<Interval> r(v);
+    Float c=v[k].midpoint();
+    if(lr) { r[k].set_upper(c); }
+    else { r[k].set_lower(c); }
+    return r;
+}
+
+std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v, uint k) {
+    ARIADNE_ASSERT(k<v.size());
+    std::pair< Vector<Interval>, Vector<Interval> > r(v,v);
+    Float c=v[k].midpoint();
+    r.first[k].set_upper(c); 
+    r.second[k].set_lower(c); 
+    return r;
+}
+
+Vector<Interval> split(const Vector<Interval>& v, bool lr) {
+    return split(v,irmax(v),lr);
+}
+
+std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v) {
+    return split(v,irmax(v));
+}
+
+
+
 Vector<Float> midpoint(const Vector<Interval>& v) 
 {
     Vector<Float> r(v.size());

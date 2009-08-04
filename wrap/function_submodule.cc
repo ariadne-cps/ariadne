@@ -640,11 +640,16 @@ void export_polynomial_function()
 {
     typedef PolynomialFunction PF;
 
-    class_< PF, bases<FunctionInterface> > polynomial_function_class("PolynomialFunction", no_init);
+    class_< PolynomialFunction, bases<FunctionInterface> > polynomial_function_class("PolynomialFunction", no_init);
+    polynomial_function_class.def("result_size", &PolynomialFunction::result_size);
+    polynomial_function_class.def("argument_size", &PolynomialFunction::argument_size);
+    polynomial_function_class.def("__add__",&__add__<PolynomialFunction,PolynomialFunction,PolynomialFunction>);
     polynomial_function_class.def(self_ns::str(self));
 
-    polynomial_function_class.def("result_size", &PF::result_size);
-    polynomial_function_class.def("argument_size", &PF::argument_size);
+    def("flip",(PolynomialFunction(*)(const PolynomialFunction&,uint)) &flip);
+
+    def("flip",(Polynomial<Float>(*)(const Polynomial<Float>&,uint)) &flip);
+
 }
 
 

@@ -29,9 +29,9 @@
 #include "vector.h"
 #include "expansion.h"
 #include "multi_index.h"
+#include "taylor_model.h"
 #include "differential.h"
 #include "polynomial.h"
-#include "taylor_model.h"
 #include "taylor_expression.h"
 #include "taylor_function.h"
 #include "function.h"
@@ -183,6 +183,8 @@ class PythonExpression
         return boost::python::extract< Differential<Float> >(this->_pyf(x)); }
     virtual Differential<Interval> evaluate (const Vector< Differential<Interval> >& x) const {
         return boost::python::extract< Differential<Interval> >(this->_pyf(x)); }
+    virtual Differential<TaylorModel> evaluate (const Vector< Differential<TaylorModel> >& x) const {
+        return boost::python::extract< Differential<TaylorModel> >(this->_pyf(x)); }
 
     virtual PythonExpression* derivative (uint j) const {
         ARIADNE_ASSERT_MSG(false,"Cannot differentiate a Python function"); return 0; }
@@ -352,6 +354,8 @@ void export_expression_interface()
     expression_interface_class.def("smoothness", &ExpressionPyWrap::smoothness);
     expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate<Interval>);
     expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate<TaylorModel>);
+    expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate< Differential<Interval> >);
+    expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate< Differential<TaylorModel> >);
     expression_interface_class.def(self_ns::str(self));
     expression_interface_class.def(self_ns::repr(self));
 

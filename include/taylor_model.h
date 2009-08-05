@@ -467,6 +467,10 @@ class TaylorModel
     friend TaylorModel& operator+=(TaylorModel& x, const TaylorModel& y);
     //! \brief Inplace subtraction of another variable.
     friend TaylorModel& operator-=(TaylorModel& x, const TaylorModel& y);
+    //! \brief Inplace multiplication of another variable. Not any more efficient than ordinary multiplication.
+    friend TaylorModel& operator*=(TaylorModel& x, const TaylorModel& y);
+    //! \brief Inplace division of another variable. Not any more efficient than ordinary division.
+    friend TaylorModel& operator/=(TaylorModel& x, const TaylorModel& y);
     //! \brief Inplace addition of a product of two variables.
     friend TaylorModel& operator+=(TaylorModel& x, const Product<TaylorModel,TaylorModel>& y);
     //! \brief Inplace addition of an exact floating-point constant.

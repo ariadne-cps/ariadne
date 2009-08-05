@@ -38,8 +38,8 @@
 
 #include "multi_index.h"
 #include "expansion.h"
-#include "differential.h"
 #include "taylor_model.h"
+#include "differential.h"
 
 #include "function_interface.h"
 

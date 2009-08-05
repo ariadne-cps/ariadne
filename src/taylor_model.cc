@@ -1099,6 +1099,18 @@ operator-=(TaylorModel& x, const TaylorModel& y)
     _acc(x,neg(y)); return x;
 }
 
+TaylorModel&
+operator*=(TaylorModel& x, const TaylorModel& y)
+{
+    TaylorModel r=x*y; r.swap(x); return x;
+}
+
+TaylorModel&
+operator/=(TaylorModel& x, const TaylorModel& y)
+{
+    TaylorModel r=x/y; r.swap(x); return x;
+}
+
 
 TaylorModel&
 operator+=(TaylorModel& x, const Float& c)

@@ -433,6 +433,7 @@ Differential<X> operator+(const Differential<X>& x, const R& c)
     Differential<X> r(x); r+=X(c); return r;
 }
 
+
 template<class X, class R>
 Differential<X> operator+(const R& c, const Differential<X>& x)
 {
@@ -990,6 +991,24 @@ jacobian(const Vector< Differential<X> >& x)
 
 
 
+
+} //namespace Ariadne
+
+#include "taylor_model.h"
+
+namespace Ariadne {
+
+template<> inline
+Differential<TaylorModel> operator+(const Differential<TaylorModel>& x, const Interval& c)
+{
+    Differential<TaylorModel> r(x); r+=c; return r;
+}
+
+template<> inline
+Differential<TaylorModel> operator*(const Interval& c, const Differential<TaylorModel>& x)
+{
+    Differential<TaylorModel> r(x); r*=c; return r;
+}
 
 
 

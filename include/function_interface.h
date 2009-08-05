@@ -72,6 +72,8 @@ class ExpressionInterface {
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the expression over a vector of interval differentials.
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
+    //! \brief Evaluate the expression over a vector of function model differentials.
+    virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const = 0;
 
     //! \brief Call the function on the type \a T.
     template<class T> T operator()(const Vector<T>& x) { return this->evaluate(x); }

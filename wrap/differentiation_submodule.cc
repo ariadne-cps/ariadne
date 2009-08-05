@@ -23,6 +23,7 @@
  
 #include "array.h"
 #include "numeric.h"
+#include "taylor_model.h"
 #include "differential.h"
 
 #include <boost/python.hpp>
@@ -92,7 +93,7 @@ void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
 template<class DIFF>
-void export_differential(const char*) 
+void export_differential(const char* name) 
 {
     typedef typename DIFF::scalar_type X;
     typedef Vector<X> V;
@@ -101,7 +102,7 @@ void export_differential(const char*)
     typedef Vector<D> DV;
 
 
-    class_<D> differential_class("Differential");
+    class_<D> differential_class(name);
     //differential_class.def("__init__", make_constructor(&make_differential<X>) );
     differential_class.def( init< uint, uint >());
     differential_class.def("value", (const X&(D::*)()const) &D::value, return_value_policy<copy_const_reference>());
@@ -187,9 +188,11 @@ export_differential_vector(const char* name)
 
 template void export_differential< Differential<Float> >(const char*);
 template void export_differential< Differential<Interval> >(const char*);
+template void export_differential< Differential<TaylorModel> >(const char*);
 
 template void export_differential_vector< Differential<Float> >(const char*);
 template void export_differential_vector< Differential<Interval> >(const char*);
+template void export_differential_vector< Differential<TaylorModel> >(const char*);
 
 void differentiation_submodule() 
 {
@@ -205,8 +208,10 @@ void differentiation_submodule()
 
     export_differential< Differential<Float> >("Differential");
     export_differential< Differential<Interval> >("IntervalDifferential");
+    export_differential< Differential<TaylorModel> >("TaylorModelDifferential");
 
     export_differential_vector< Differential<Float> >("DifferentialVector");
     export_differential_vector< Differential<Interval> >("IntervalDifferentialVector");
+    export_differential_vector< Differential<TaylorModel> >("TaylorModelDifferentialVector");
 }
 

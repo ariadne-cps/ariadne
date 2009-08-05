@@ -53,52 +53,58 @@ class IntersectionException;
 class ImplicitFunctionException;
 class FlowBoundsException;
 
-// Rescale the vector x from the domain d to the unit domain.330
+// Rescale the vector x from the domain d to the unit domain.
 Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
 
-// The magnitude of the variable
+//! \relates TaylorModel \brief The magnitude of the variable
 Float mag(const TaylorModel& tm);
-// Split the variable over two domains, subdividing along the independent variable j.
+//! \relates TaylorModel \brief Split the variable over two domains, subdividing along the independent variable j.
 pair<TaylorModel,TaylorModel> split(const TaylorModel& x, uint j);
-// Split the variable, subdividing along the independent variable j
-// and taking the lower/upper half depending on whether half is false or true
+//! \relates TaylorModel
+//!\brief Split the variable, subdividing along the independent variable j
+//! and taking the lower/upper half depending on whether half is false or true
 TaylorModel split(const TaylorModel& x, uint j, bool half);
 
-// Scale the variable by post-composing with an affine map taking the unit interval to ivl.
+//! \relates TaylorModel \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
 TaylorModel scale(const TaylorModel& x, const Interval& ivl);
-// Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
+//! \relates TaylorModel \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
 TaylorModel unscale(const TaylorModel& x, const Interval& ivl);
-// Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
+//! \relates TaylorModel \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
 TaylorModel rescale(const TaylorModel& x, const Interval& ivl1, const Interval& ivl2);
 
-// Evaluate an array of Taylor variables on a vector.
+//! \relates TaylorModel \brief Evaluate an array of Taylor variables on a vector.
 Interval evaluate(const TaylorModel& x, const Vector<Interval>& sy);
-// Evaluate an array of Taylor variables on a vector.
+//! \relates TaylorModel \brief Evaluate an array of Taylor variables on a vector.
 TaylorModel partial_evaluate(const TaylorModel& x, uint k, Float c);
+//! \relates TaylorModel \brief Evaluate an array of Taylor variables on a vector.
 TaylorModel partial_evaluate(const TaylorModel& x, uint k, Interval c);
-// Substitute the TaylorModel y in the  kth variable of \a x.
-// Precondition: x.argument_size()==y.argument_size()+1
+//! \relates TaylorModel
+//! Substitute the TaylorModel y in the  kth variable of \a x.
+//! Precondition: x.argument_size()==y.argument_size()+1
 TaylorModel substitute(const TaylorModel& x, uint k, const TaylorModel& y);
 
-// Embed the variable in a space of higher dimension
+//! \relates TaylorModel \brief Embed the model in a space of higher dimension
 TaylorModel embed(const TaylorModel& tv, uint as);
+//! \relates TaylorModel \brief Embed the model in a space of higher dimension
 TaylorModel embed(uint as, const TaylorModel& tv);
 
-// Test if a variable refines another
+//! \relates TaylorModel \brief Test if a model refines another
 bool refines(const TaylorModel& tv1, const TaylorModel& tv2);
+//! \relates TaylorModel \brief Test if a model is disjoint from
 bool disjoint(const TaylorModel& tv1, const TaylorModel& tv2);
 
-// Antidifferentiation operator
+//! \relates TaylorModel \brief Antidifferentiation operator
 TaylorModel antiderivative(const TaylorModel& x, uint k);
 
-// Differentiation operator; discards error term
+//! \relates TaylorModel \brief Differentiation operator; discards error term
 TaylorModel derivative(const TaylorModel& x, uint k);
 
-// An over-approximation to the intersection of two Taylor models.
-// Since the intersection cannot be represented exactly in the class of
-// TaylorModels, truncation errors as well as roundoff errors may be present.
-// In the absence of roundoff errors, the result is a subset of both arguments,
-// and is guaranteed to contain any function contained in both arguments.
+//! \relates TaylorModel
+//! An over-approximation to the intersection of two Taylor models.
+//! Since the intersection cannot be represented exactly in the class of
+//! TaylorModels, truncation errors as well as roundoff errors may be present.
+//! In the absence of roundoff errors, the result is a subset of both arguments,
+//! and is guaranteed to contain any function contained in both arguments.
 TaylorModel intersection(const TaylorModel& x1, const TaylorModel& x2);
 
 // Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain

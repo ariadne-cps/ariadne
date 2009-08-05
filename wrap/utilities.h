@@ -201,6 +201,20 @@ struct set_to_python_list {
     static const PyTypeObject* get_pytype() { return &PyList_Type; }
 };
 
+template<class T> class Vector;
+
+template<class T>
+struct vector_to_python_list {
+    static PyObject* convert(const Vector<T>& vec) {
+        boost::python::list result;
+        for(uint i=0; i!=vec.size(); ++i) {
+            result.append(boost::python::object(vec[i]));
+        }
+        return boost::python::incref(boost::python::list(result).ptr());
+    }
+    static const PyTypeObject* get_pytype() { return &PyList_Type; }
+};
+
 
 
 

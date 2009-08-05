@@ -738,6 +738,18 @@ Differential<X> compose(const Series<X>& x, const Differential<X>& y)
 
 
 template<class X>
+Vector<X> 
+gradient(const Differential<X>& x)
+{
+    Vector<X> r(x.argument_size());
+    for(uint j=0; j!=x.argument_size(); ++j) {
+        r[j]=x.gradient(j);
+    }
+    return r;
+}
+
+
+template<class X>
 Differential<X> derivative(const Differential<X>& x, uint i)
 {
     if(x.degree()==0) { return Differential<X>(x.argument_size(),0u); }

@@ -31,7 +31,6 @@
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
-#include "expression_interface.h"
 #include "function_interface.h"
 
 #include "macros.h"

@@ -35,7 +35,7 @@
 #include "taylor_model.h"
 #include "taylor_expression.h"
 #include "taylor_function.h"
-#include "expression_interface.h"
+#include "function_interface.h"
 #include "exceptions.h"
 
 namespace Ariadne {

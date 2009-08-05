@@ -27,7 +27,6 @@
 #include "stlio.h"
 #include "vector.h"
 #include "matrix.h"
-#include "expression_interface.h"
 #include "function_interface.h"
 #include "taylor_set.h"
 #include "taylor_expression.h"

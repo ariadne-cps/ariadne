@@ -98,20 +98,32 @@ void read(Matrix<X>& A, const boost::python::object& obj)
   }
 }
 
+template void read(Matrix<double>&,const object&);
 
 template<class X> Vector<X>*
-make_vector(const boost::python::object& obj)
+make_vector(const boost::python::list& lst)
 {
-    Vector<X>* vptr=new Vector<X>();
-    read(*vptr,obj);
+    Vector<X>* vptr=new Vector<X>(boost::python::len(lst));
+    for(uint i=0; i!=vptr->size(); ++i) {
+        (*vptr)[i]=boost::python::extract<X>(lst[i]);
+    }
     return vptr;
 }
 
 template<class X> Matrix<X>*
-make_matrix(const boost::python::object& obj)
+make_matrix(const boost::python::list& lst)
 {
-    Matrix<X>* Aptr=new Matrix<X>();
-    read(*Aptr,obj);
+    list const& elements=lst;
+    int m=len(elements);
+    list row=extract<list>(elements[0]);
+    int n=len(row);
+    Matrix<X>* Aptr=new Matrix<X>(m,n);
+    for(int i=0; i!=m; ++i) {
+        row=extract<list>(elements[i]);
+        if(len(row)!=n) { throw std::runtime_error("Matrix with rows of different sizes"); }
+        for(int j=0; j!=n; ++j) { Aptr->set(i,j,extract<X>(row[j])); }
+    }
+    //read(*Aptr,obj);
     return Aptr;
 }
 
@@ -326,7 +338,7 @@ template<> void export_vector<Interval>()
     export_vector_arithmetic<Interval,Interval,Interval>(interval_vector_class);
     def("midpoint", (Vector<Float>(*)(const Vector<Interval>&)) &midpoint);
     def("subset", (bool(*)(const Vector<Interval>&, const Vector<Interval>&)) &subset);
-
+    implicitly_convertible< Vector<Float>, Vector<Interval> >();
 }
 
 
@@ -420,6 +432,7 @@ template<> void export_matrix<Interval>()
     def("gs_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &gs_solve);
     def("lu_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &lu_solve);
     def("midpoint", (Matrix<Float>(*)(const Matrix<Interval>&)) &midpoint);
+    implicitly_convertible< Matrix<Float>, Matrix<Interval> >();
 }
 
 

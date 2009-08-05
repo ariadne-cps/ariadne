@@ -26,11 +26,15 @@
 #include "logging.h"
 #include "vector.h"
 #include "matrix.h"
-#include "function_interface.h"
-
-namespace Ariadne {
+#include "function.h"
+#include "taylor_function.h"
+#include "taylor_model.h"
 
 namespace {
+
+using namespace Ariadne;
+
+typedef unsigned int uint;
 
 void
 solve_all(Set< Vector<Interval> >& r,
@@ -61,7 +65,7 @@ solve_all(Set< Vector<Interval> >& r,
     if(invertible_jacobian) {
         //std::cerr<<"Nonsingular matrix -- applying contractor\n";
         try {
-            r.insert(s.solve(f,ix));
+            r.insert(s.zero(f,ix));
         }
         catch(const EvaluationException& e) {
             std::cerr<<"Evaluation exception -- No solution in"<<ix<<"\n";
@@ -76,7 +80,213 @@ solve_all(Set< Vector<Interval> >& r,
 
 }
 
+Vector<Interval> ranges(const Vector<TaylorModel>& f) {
+    Vector<Interval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
+}
+
+Vector<TaylorModel>& clobber(Vector<TaylorModel>& h) {
+    for(uint i=0; i!=h.size(); ++i) { h[i].set_error(0.0); } return h; }
+
+// Compute the Jacobian over an arbitrary domain
+Matrix<Interval>
+jacobian2(const Vector<TaylorModel>& f, const Vector<Interval>& x)
+{
+    Vector< Differential<Interval> > dx(x.size());
+    for(uint i=0; i!=x.size()-f.size(); ++i) {
+        dx[i]=Differential<Interval>::constant(f.size(),1u,x[i]); }
+    for(uint i=0; i!=f.size(); ++i) {
+        uint j=i+(x.size()-f.size());
+        dx[j]=Differential<Interval>::variable(f.size(),1u,x[j],i); }
+    Vector< Differential<Interval> > df(f.size());
+    for(uint i=0; i!=f.size(); ++i) {
+        df[i]=evaluate(f[i].expansion(),dx);
+    }
+    Matrix<Interval> J=jacobian(df);
+    return J;
+}
+
+// Compute the Jacobian over the unit domain
+Matrix<Float>
+jacobian2_value(const Vector<TaylorModel>& f)
+{
+    const uint rs=f.size();
+    const uint fas=f[0].argument_size();
+    const uint has=fas-rs;
+    Matrix<Float> J(rs,rs);
+    MultiIndex a(fas);
+    for(uint i=0; i!=rs; ++i) {
+        for(uint j=0; j!=rs; ++j) {
+            a[has+j]=1; const double x=f[i][a]; J[i][j]=x; a[has+j]=0;
+        }
+    }
+    return J;
+}
+
+// Compute the Jacobian over the unit domain
+Matrix<Interval>
+jacobian2_range(const Vector<TaylorModel>& f)
+{
+    uint rs=f.size();
+    uint fas=f[0].argument_size();
+    uint has=fas-rs;
+    Matrix<Interval> J(rs,rs);
+    for(uint i=0; i!=rs; ++i) {
+        for(TaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+            for(uint k=0; k!=rs; ++k) {
+                const uint c=iter->key()[has+k];
+                if(c>0) {
+                    const double& x=iter->data();
+                    if(iter->key().degree()==1) { J[i][k]+=x; }
+                    else { J[i][k]+=Interval(-1,1)*x*c; }
+                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
+                }
+            }
+        }
+    }
+    return J;
+}
+
+//Compute the implicit function by preconditioning f by the inverse
+// of the Jacobian value matrix and using a Gauss-Seidel iteration scheme
+// on the system y=g(y)
+Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
+{
+    //std::cerr<<__FUNCTION__<<std::endl;
+    uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
+
+    Vector<Interval> domain_h(rs,Interval(-1,+1));
+    Vector<TaylorModel> id=TaylorModel::variables(has);
+    Vector<TaylorModel> h=TaylorModel::constants(has,domain_h);
+    Vector<TaylorModel> idh=join(id,h);
+
+    // Compute the Jacobian of f with respect to the second arguments at the centre of the domain
+    Matrix<Float> D2f=jacobian2_value(f);
+
+    // Compute g=-D2finv*(f-D2f*y) = -D2finv*f-y
+    Vector<TaylorModel> g=-f;
+    for(uint i=0; i!=rs; ++i) {
+        for(uint j=has; j!=fas; ++j) {
+            g[i][MultiIndex::unit(fas,j)]=0;
+        }
+    }
+    Matrix<Float> J=inverse(D2f);
+    g=prod(J,g);
+    for(uint i=0; i!=rs; ++i) {
+        g[i].clean();
+    }
+
+    // Iterate h'=h(g(x,h(x)))
+    Vector<TaylorModel> h_new;
+    uint number_non_contracting=rs;
+    array<bool> contracting(rs,false);
+    for(uint k=0; k!=n; ++k) {
+        h_new=compose(g,join(id,h));
+        for(uint i=0; i!=rs; ++i) {
+            if(!contracting[i]) {
+                if(refines(h_new,h)) {
+                    contracting[i]=true;
+                    --number_non_contracting;
+                }
+                if(disjoint(h_new,h)) {
+                    ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel> f)",
+                                "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
+                                " which is disjoint. No solution");
+                }
+            }
+        }
+        for(uint i=0; i!=rs; ++i) {
+            h[i]=intersection(h[i],h_new[i]);
+        }
+    }
+
+    if(number_non_contracting==0) {
+        return h;
+    } else {
+        ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel>)",
+                      "Could not verify solution of implicit function to "<<h<<"\n");
+    }
+}
+
+Vector<TaylorModel>
+newton_implicit(const Vector<TaylorModel>& f)
+{
+    std::cerr<<"f="<<f<<"\n";
+
+    // Check that the arguments are suitable
+    ARIADNE_ASSERT(f.size()>0);
+    for(uint i=1; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); }
+
+    // Set some useful size constants
+    const uint rs=f.size();
+    const uint fas=f[0].argument_size();
+    const uint has=fas-rs;
+
+    // Check to see if a solution exists
+    Matrix<Interval> D2f=jacobian2_range(f);
+    Matrix<Interval> D2finv;
+    try {
+        D2finv=inverse(D2f);
+    }
+    catch(...) {
+        ARIADNE_THROW(ImplicitFunctionException,
+                      "implicit(Vector<TaylorModel>)",
+                      "Jacobian "<<D2f<<" is not invertible");
+    }
+
+    uint number_of_steps=6;
+    Vector<TaylorModel> id=TaylorModel::variables(has);
+    Vector<TaylorModel> h=_implicit5(f,number_of_steps);
+
+    // Perform proper Newton step improvements
+    Vector<Interval> domain_h(h[0].argument_size(),Interval(-1,+1));
+    for(uint i=0; i!=3; ++i) {
+        D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        clobber(h);
+        Vector<TaylorModel> fidh=compose(f,join(id,h));
+        Vector<TaylorModel> dh=prod(D2finv,fidh);
+        h-=dh;
+    }
+
+    // Check that the result has the correct sizes.
+    ARIADNE_ASSERT(h.size()==f.size());
+    for(uint i=0; i!=h.size(); ++i) {
+        ARIADNE_ASSERT(h[0].argument_size()+f.size()==f[i].argument_size());
+    }
+
+    return h;
+}
+
+TaylorFunction
+newton_implicit(const TaylorFunction& f)
+{
+    ARIADNE_ASSERT_MSG(f.argument_size()>f.result_size(),"f.argument_size()<=f.result_size() in implicit(f): f="<<f);
+    uint fas=f.argument_size();
+    uint has=f.argument_size()-f.result_size();
+    Vector<Interval> hdom=project(f.domain(),range(0,has));
+    Vector<Interval> hcodom=project(f.domain(),range(has,fas));
+    return TaylorFunction(hdom,scale(newton_implicit(f.models()),hcodom));
+}
+
 } // namespace
+
+
+
+namespace Ariadne {
+
+class DifferenceFunction
+    : public FunctionTemplate<DifferenceFunction>
+{
+  public:
+    DifferenceFunction(const FunctionInterface& f) : fptr(f.clone()) { }
+    virtual DifferenceFunction* clone() const { return new DifferenceFunction(*this); }
+    virtual uint result_size() const { return fptr->result_size(); }
+    virtual uint argument_size() const { return fptr->argument_size(); }
+    virtual ushort smoothness() const { return fptr->smoothness(); }
+    template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
+    template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
+  private:
+    boost::shared_ptr<FunctionInterface> fptr;
+};
 
 
 SolverBase::SolverBase(double max_error, uint max_steps)
@@ -86,19 +296,19 @@ SolverBase::SolverBase(double max_error, uint max_steps)
 
 
 Set< Vector<Interval> >
-SolverBase::solve_all(const FunctionInterface& f,
-                      const Vector<Interval>& ix) const
+SolverBase::solve(const FunctionInterface& f,
+                  const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
-    Ariadne::solve_all(r,*this,f,ix);
+    ::solve_all(r,*this,f,ix);
     return r;
 }
 
 
 
 Vector<Interval>
-SolverBase::solve(const FunctionInterface& f,
-                  const Vector<Interval>& ix) const
+SolverBase::zero(const FunctionInterface& f,
+                 const Vector<Interval>& ix) const
 {
   const double& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();
@@ -131,7 +341,7 @@ SolverBase::solve(const FunctionInterface& f,
 Vector<Interval>
 SolverBase::fixed_point(const FunctionInterface& f, const Vector<Interval>& pt) const
 {
-  return Vector<Interval>(this->solve(DifferenceFunction(f),pt)); 
+  return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
 }
 
 
@@ -184,6 +394,52 @@ KrawczykSolver::step(const FunctionInterface& f,
     return nr;
 }
 
+
+List<TaylorFunction>
+IntervalNewtonSolver::implicit(const FunctionInterface& f,
+                            const Vector<Interval>& p,
+                            const Vector<Interval>& x) const
+{
+    return List<TaylorFunction>();
+}
+
+List<TaylorFunction>
+KrawczykSolver::implicit(const FunctionInterface& f,
+                      const Vector<Interval>& ip,
+                      const Vector<Interval>& ix) const
+{
+    ARIADNE_ASSERT(f.result_size()==ix.size());
+    ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
+
+    TaylorFunction tf(join(ip,ix),f);
+    List<TaylorFunction> st;
+    st.append(::newton_implicit(tf));
+    return st;
+
+
+    const uint np=ip.size();
+    const uint nx=ix.size();
+
+    TaylorFunction r=TaylorFunction::constant(ip,ix);
+    std::cerr<<"r="<<r<<"\n";
+
+    Vector<Float> m=join(midpoint(ip),midpoint(r.evaluate(midpoint(ip))));
+    Matrix<Float> A=project(f.jacobian(m),range(0,nx),range(np,np+nx));
+    Matrix<Float> I=Matrix<Float>::identity(nx);
+
+    std::cerr<<"m="<<m<<"\n";
+    std::cerr<<"A="<<A<<"\n";
+
+    return List<TaylorFunction>();
+
+    TaylorFunction mr=r; mr.clobber();
+    TaylorFunction fmr=compose(f,mr);
+    TaylorFunction Afmr=A*fmr;
+    TaylorFunction dr=mr-Afmr;
+    //dr=dr+(I-A*(derivative(f)))*(r-mr);
+    
+
+}
 
 
 } // namespace Ariadne

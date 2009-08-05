@@ -151,6 +151,8 @@ int main(int argc, const char* argv[]) {
     double maximum_domain_extent=128;
 
     double a=1.5; double b=0.375;
+    PolynomialExpression x=PolynomialExpression::variable(2,0);
+    PolynomialExpression y=PolynomialExpression::variable(2,1);
     PolynomialFunction henon_map ( (a+x*x+b*y)*e0+x*e1 );
     TaylorSet henon_initial_set = Box(2, 0.875,1.125, 0.125,0.250);
 

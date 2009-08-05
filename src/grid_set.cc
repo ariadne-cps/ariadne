@@ -1767,7 +1767,7 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
             }
         }
     }
-    //Return to the previous level, since the initial call is made
+    //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
         pPath->pop_back();
@@ -1805,7 +1805,7 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
             _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
         }
     }
-    //Return to the previous level, since the initial call is made
+    //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
         pPath->pop_back();
@@ -1841,7 +1841,7 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
             _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
         }        
     }
-    //Return to the previous level, since the initial call is made
+    //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
         pPath->pop_back();
@@ -1979,7 +1979,7 @@ void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
         //not know if it makes any sence to do this, since this does not change the result.
     }
     
-    //Return to the previous level, since the initial call is made
+    //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
         pPath->pop_back();

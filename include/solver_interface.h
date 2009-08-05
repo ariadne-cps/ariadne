@@ -39,8 +39,10 @@ typedef unsigned int uint;
   
 class Interval;
 template<class T> class Set;
+template<class T> class List;
 template<class X> class Vector;
 class FunctionInterface;
+class TaylorFunction;
 
 class EvaluationException : public std::runtime_error
 {
@@ -68,11 +70,15 @@ class SolverInterface
     virtual void set_maximum_number_of_steps(uint max_steps) = 0;
     
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> solve(const FunctionInterface& f,const Vector<Interval>& pt) const = 0;
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<Interval> > solve_all(const FunctionInterface& f,const Vector<Interval>& pt) const = 0;
+    virtual Vector<Interval> zero(const FunctionInterface& f,const Vector<Interval>& pt) const = 0;
     /*! \brief Solve \f$f(x)=x\f$, starting in the interval point \a pt. */
     virtual Vector<Interval> fixed_point(const FunctionInterface& f,const Vector<Interval>& pt) const = 0;
+
+    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
+    virtual Set< Vector<Interval> > solve(const FunctionInterface& f,const Vector<Interval>& pt) const = 0;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
+    virtual List<TaylorFunction> implicit(const FunctionInterface& f, const Vector<Interval>& par, const Vector<Interval>& ix) const = 0;
+
 };
     
 

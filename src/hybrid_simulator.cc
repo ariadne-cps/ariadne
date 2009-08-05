@@ -27,7 +27,6 @@
 #include "stlio.h"
 #include "vector.h"
 #include "point.h"
-#include "expression_interface.h"
 #include "function_interface.h"
 
 #include "logging.h"

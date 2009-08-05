@@ -238,7 +238,7 @@ PythonHybridEvolver::_evolution(EnclosureListType& final, EnclosureListType& rea
         main_namespace["time"]=time;
         main_namespace["semantics"]=int(semantics);
 
-        //PyRun_SimpleString("print\nprint \"Starting Python call\"\nprint dir()\nprint\nprint dir(hybrid_evolver)\nprint\n");
+        //PyRun_SimpleString("print\nprint \"Starting Python evaluate\"\nprint dir()\nprint\nprint dir(hybrid_evolver)\nprint\n");
         PyRun_SimpleString("evolver=hybrid_evolver.HybridEvolverPrototype()");
         PyRun_SimpleString("(final,reachable,intermediate)=evolver.orbit(system,initial,time,semantics)");
 

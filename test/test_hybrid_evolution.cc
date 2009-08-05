@@ -333,7 +333,7 @@ HybridAutomaton TestHybridEvolver::make_hybrid_automaton(const PolynomialExpress
     HybridAutomaton system;
     system.new_mode(q1,PolynomialFunction(join(o,z)));
     system.new_mode(q2,PolynomialFunction(join(z,o)));
-    system.new_transition(e,q1,q2,IdentityFunction(2),PolynomialFunction(guard),true);
+    system.new_transition(e,q1,q2,IdentityFunction(2),PolynomialFunction(1u,guard),true);
     return system;
 }
 

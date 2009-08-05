@@ -38,7 +38,7 @@
 #include "tuple.h"
 
 #include "vector_field.h"
-#include "evolver_interface.h"
+#include "function_interface.h"
 #include "evolver_base.h"
 #include "evolution_parameters.h"
 

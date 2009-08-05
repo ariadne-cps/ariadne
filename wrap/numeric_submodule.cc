@@ -35,9 +35,41 @@ using namespace Ariadne;
 
 
 namespace Ariadne {
-bool definitely(bool b) { return b; }
-bool possibly(bool b) { return b; }
+
+    bool definitely(bool b) { return b; }
+    bool possibly(bool b) { return b; }
+
+    Interval* create_interval(const boost::python::dict& dct) {
+        boost::python::list lst=dct.items();
+        assert(boost::python::len(lst)==1);
+        return new Interval(boost::python::extract<double>(lst[0][0]),boost::python::extract<double>(lst[0][1]));
+    }
+
 }
+
+struct interval_from_python_dict {
+    interval_from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        storage = create_interval(dct);
+        data->convertible = storage;
+    }
+};
+
+/*
+struct interval_from_python_str {
+    interval_from_python_str() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyString_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        std::string str = boost::python::extract<std::string>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        storage = new Interval(str);
+        data->convertible = storage;
+    }
+};
+*/
 
 const char * tribool_c_str(tribool tb) {
   if(indeterminate(tb)) { return "Indeterminate"; }
@@ -75,6 +107,8 @@ void export_tribool() {
     tribool_class.def("__str__", &tribool_c_str);
     tribool_class.def("__repr__", &tribool_c_repr);
 
+    implicitly_convertible<bool,tribool>();
+
     def("indeterminate",(tribool(*)(void))&tribool_indeterminate);
     def("possibly",(bool(*)(bool))&possibly);
     def("possibly",(bool(*)(tribool))&possibly);
@@ -108,7 +142,11 @@ void export_integer()
 {
     class_<Integer> integer_class("Integer",init<int>());
     integer_class.def(boost::python::self_ns::str(self));
+    integer_class.def(boost::python::self_ns::repr(self));
     integer_class.def("__less__",(bool(*)(const Integer&, const Integer&)) &operator<);
+
+    implicitly_convertible<int,Integer>();
+
 }
 #endif
 
@@ -118,7 +156,13 @@ void export_rational()
     class_<Rational> rational_class("Rational",init<int,int>());
     rational_class.def(init<int>());
     rational_class.def(boost::python::self_ns::str(self));
+    rational_class.def(boost::python::self_ns::repr(self));
     rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
+
+    implicitly_convertible<int,Rational>();
+    implicitly_convertible<double,Rational>();
+    implicitly_convertible<Integer,Rational>();
+
 }
 #endif
 
@@ -152,6 +196,7 @@ void export_interval()
     interval_class.def(init<Rational>());
     interval_class.def(init<Rational,Rational>());
 #endif
+    interval_class.def("__init__",make_constructor(&create_interval));
     interval_class.def(+self);
     interval_class.def(-self);
     interval_class.def(self + self);
@@ -170,8 +215,17 @@ void export_interval()
     interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
     interval_class.def("midpoint", &Interval::midpoint);
     interval_class.def("radius", &Interval::radius);
-    interval_class.def("__repr__",&__cstr__<Interval>);
     interval_class.def(boost::python::self_ns::str(self));
+    interval_class.def(boost::python::self_ns::repr(self));
+
+    implicitly_convertible<int,Interval>();
+    implicitly_convertible<double,Interval>();
+#ifdef HAVE_GMPXX_H
+    implicitly_convertible<Rational,Interval>();
+#endif
+
+    interval_from_python_dict();
+    //interval_from_python_str();
 
     def("midpoint", &Interval::midpoint);
     def("radius", &Interval::radius);

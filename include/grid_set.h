@@ -335,7 +335,7 @@ class BinaryTreeNode {
      *  the leaf node defined by the \a path and marks it as enabled. If some prefix of the \a path
      *  references an enabled node then nothing is done.
      *  NOTE: This is a recursive method on the position (\a position) in the binary path (\a path).
-     *  Therefore, the initial call of this method should be done with \a position == 0;
+     *  Therefore, the initial evaluate of this method should be done with \a position == 0;
      */
     static void add_enabled( BinaryTreeNode* pRootTreeNode, const BinaryWord& path, const uint position = 0 );
     
@@ -956,7 +956,7 @@ class GridTreeSet : public GridTreeSubset {
      *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
      *  of the binary tree we should make to get the proper cells for outer approximating \a theSet.
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
-     *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
+     *  from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
      */
     static void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                              const uint max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
@@ -967,7 +967,7 @@ class GridTreeSet : public GridTreeSubset {
      *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
      *  of the binary tree we should make to get the proper cells for inner approximating \a theSet.
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
-     *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
+     *  from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
      */
     static void _adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                              const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
@@ -978,7 +978,7 @@ class GridTreeSet : public GridTreeSubset {
      *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
      *  of the binary tree we should make to get the proper cells for lower approximating \a theSet.
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
-     *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
+     *  from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
      *  The approximation method does not recombine cells, as knowing that both children intersect a set is more
      *  information than knowing that the parent does.
      */

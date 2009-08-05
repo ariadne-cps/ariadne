@@ -28,7 +28,6 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "differential.h"
-#include "expression_interface.h"
 #include "function_interface.h"
 
 #include "geometry.h"

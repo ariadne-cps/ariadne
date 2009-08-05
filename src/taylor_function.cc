@@ -32,7 +32,7 @@
 #include "multi_index.h"
 #include "polynomial.h"
 #include "differential.h"
-#include "expression_interface.h"
+
 #include "function_interface.h"
 #include "taylor_expression.h"
 #include "taylor_function.h"
@@ -582,6 +582,12 @@ TaylorFunction
 operator-(const TaylorFunction& f, const Vector<Interval>& c)
 {
     return TaylorFunction(f.domain(),Vector<TaylorModel>(f.models()-c));
+}
+
+TaylorFunction
+operator*(const Matrix<Float>& A, const TaylorFunction& f)
+{
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(prod(A,f.models())));
 }
 
 TaylorFunction

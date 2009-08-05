@@ -34,7 +34,7 @@
 #include "differential.h"
 #include "taylor_model.h"
 #include "taylor_series.h"
-#include "expression_interface.h"
+#include "function_interface.h"
 #include "exceptions.h"
 
 namespace Ariadne {

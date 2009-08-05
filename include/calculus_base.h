@@ -31,7 +31,6 @@
 #include "tribool.h"
 #include "logging.h"
 #include "function_interface.h"
-#include "expression_interface.h"
 #include "calculus_interface.h"
 
 #include "numeric.h"

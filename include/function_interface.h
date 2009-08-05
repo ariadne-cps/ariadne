@@ -42,11 +42,61 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
 
+//! \brief Interface for expressions whose derivatives can be computed.
+//! \sa FunctionInterface
+class ExpressionInterface {
+  public:
+    //! \brief The type used to describe the number of argument variables.
+    typedef unsigned int SizeType;
+    //! \brief The type used to describe the smoothness of the function.
+    typedef unsigned short SmoothnessType;
+
+    //! \brief Virtual destructor.
+    virtual ~ExpressionInterface() { };
+    //! \brief Create a dynamically-allocated copy.
+    virtual ExpressionInterface* clone() const = 0;
+     
+    //! \brief The smoothness of the expression.
+    virtual SmoothnessType smoothness() const = 0;
+    //! \brief The number of arguments to the expression.
+    virtual SizeType argument_size() const = 0;
+
+    //! \brief Compute an approximation to the value of the expression at the point \a x.
+    virtual Float evaluate(const Vector<Float>& x) const = 0;
+    //! \brief Compute an over-approximation to the values of the expression over the domain \a x. This method provides an <em>interval extension</em> of the expression.
+    virtual Interval evaluate(const Vector<Interval>& x) const = 0;
+
+    //! \brief Evaluate the expression over a vector of Taylor variables.
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const = 0;
+    //! \brief Evaluate the expression over a vector of differentials.
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
+    //! \brief Evaluate the expression over a vector of interval differentials.
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
+
+    //! \brief Call the function on the type \a T.
+    template<class T> T operator()(const Vector<T>& x) { return this->evaluate(x); }
+
+    virtual ExpressionInterface* derivative(uint j) const = 0;
+  
+    //! \brief Write to an output stream.
+    virtual std::ostream& write(std::ostream& os) const = 0;
+};
+
+//! \relates ExpressionInterface
+//! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
+inline std::ostream& operator<<(std::ostream& os, const ExpressionInterface& f) {
+    return f.write(os); 
+}
+
+
 //! \brief Interface for functions whose derivatives can be computed.
+//! \sa ExpressionInterface
 class FunctionInterface {
   public:
-    typedef unsigned int size_type;
-    typedef unsigned short smoothness_type;
+    //! \brief The type used to describe the number of argument variables.
+    typedef unsigned int SizeType;
+    //! \brief The type used to describe the smoothness of the function.
+    typedef unsigned short SmoothnessType;
 
     //! \brief Virtual destructor.
     virtual ~FunctionInterface() { };
@@ -54,11 +104,11 @@ class FunctionInterface {
     virtual FunctionInterface* clone() const = 0;
      
     //! \brief The smoothness of the function.
-    virtual ushort smoothness() const = 0;
+    virtual SmoothnessType smoothness() const = 0;
     //! \brief The number of arguments to the function.
-    virtual uint argument_size() const = 0;
+    virtual SizeType argument_size() const = 0;
     //! \brief The number of result variables of the function.
-    virtual uint result_size() const = 0;
+    virtual SizeType result_size() const = 0;
 
     //! \brief Compute an approximation to the value of the function at the point \a x.
     virtual Vector<Float> evaluate(const Vector<Float>& x) const = 0;
@@ -72,28 +122,31 @@ class FunctionInterface {
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const = 0;
 
+    //! \brief Call the function on the type \a T.
+    template<class T> Vector<T> operator()(const Vector<T>& x) { return this->evaluate(x); }
+
     //! \brief Compute an approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function at the point \a x.
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
     //! \brief Compute an over-approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function over the domain \a x.
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
 
-/*
-    //! \brief Compute an approximation to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function at the point \a x up to degree \a d.
-    virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& d) const = 0;
-    //! \brief Compute over-approximations to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function over the domain \a x up to degree \a d.
-    virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& d) const = 0;
-*/
-
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
-
-    //! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
-    friend std::ostream& operator<<(std::ostream& os, const FunctionInterface& f);
 };
 
+//! \relates FunctionInterface
+//! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
 inline std::ostream& operator<<(std::ostream& os, const FunctionInterface& f) {
     return f.write(os); 
 }
+
+
+
+//! \brief An interface for scalar function models on a restricted domain.
+class ScalarModelInterface {
+    virtual Vector<Interval> domain() const = 0;
+    virtual Interval evaluate(const Vector<Interval>&) const = 0;
+};
 
 
 } // namespace Ariadne

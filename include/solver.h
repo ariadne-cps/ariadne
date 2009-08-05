@@ -39,12 +39,11 @@
 #include "pointer.h"
 #include "container.h"
 #include "numeric.h"
-#include "vector.h"
-#include "function.h"
 
 namespace Ariadne {
 
-    
+template<class X> class Vector;
+
 /*! \ingroup \ingroup Solvers
  *  \brief %Common functionality for solving (nonlinear) equations. 
  */
@@ -67,11 +66,13 @@ class SolverBase
     void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; };
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> solve(const FunctionInterface& f,const Vector<Interval>& pt) const;
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<Interval> > solve_all(const FunctionInterface& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> zero(const FunctionInterface& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
     virtual Vector<Interval> fixed_point(const FunctionInterface& f,const Vector<Interval>& pt) const;
+
+    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
+    virtual Set< Vector<Interval> > solve(const FunctionInterface& f,const Vector<Interval>& pt) const;
+
   protected:
     /*! \brief Perform one iterative step of the contractor. */
     virtual Vector<Interval> step(const FunctionInterface& f,const Vector<Interval>& pt) const = 0;
@@ -90,11 +91,14 @@ class IntervalNewtonSolver
   public:
     /*! \brief Constructor. */
     IntervalNewtonSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
+    virtual List<TaylorFunction> implicit(const FunctionInterface& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+
   protected:
     Vector<Interval>
     step(const FunctionInterface& f,
          const Vector<Interval>& pt) const;
-
 
 
 };
@@ -110,6 +114,10 @@ class KrawczykSolver
   public:
     /*! \brief Constructor. */
     KrawczykSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
+    virtual List<TaylorFunction> implicit(const FunctionInterface& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+
   protected:
     /*! \brief A single step of the Krawczyk contractor. */
     Vector<Interval>
@@ -117,21 +125,6 @@ class KrawczykSolver
           const Vector<Interval>& pt) const; 
 };
 
-
-class DifferenceFunction
-    : public FunctionTemplate<DifferenceFunction>
-{
-  public:
-    DifferenceFunction(const FunctionInterface& f) : fptr(f.clone()) { }
-    virtual DifferenceFunction* clone() const { return new DifferenceFunction(*this); }
-    virtual uint result_size() const { return fptr->result_size(); }
-    virtual uint argument_size() const { return fptr->argument_size(); }
-    virtual ushort smoothness() const { return fptr->smoothness(); }
-    template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
-    template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
-  private:
-    boost::shared_ptr<FunctionInterface> fptr;
-};
 
 
 

@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "expression_interface.h"
 #include "function_interface.h"
 #include "solver_interface.h"
 #include "solver.h"
+#include "taylor_function.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -58,12 +58,14 @@ class SolverWrapper
     double maximum_error() const { return this->get_override("maximum_error")(); }
     void set_maximum_number_of_steps(uint) { this->get_override("set_maximum_number_of_steps")(); }
     uint maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
-    Vector<Interval> solve(const FunctionInterface& f, const Vector<Interval>& bx) const {
-        return this->get_override("solve")(); }
-    Set< Vector<Interval> > solve_all(const FunctionInterface& f, const Vector<Interval>& bx) const {
-        return this->get_override("solve_all")(); }
+    Vector<Interval> zero(const FunctionInterface& f, const Vector<Interval>& bx) const {
+        return this->get_override("zero")(); }
     Vector<Interval> fixed_point(const FunctionInterface& f, const Vector<Interval>& bx) const {
         return this->get_override("fixed_point")(); }
+    Set< Vector<Interval> > solve(const FunctionInterface& f, const Vector<Interval>& bx) const {
+        return this->get_override("solve")(); }
+    List<TaylorFunction> implicit(const FunctionInterface& f, const Vector<Interval>& pd, const Vector<Interval>& bx) const {
+        return this->get_override("implicit")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -73,11 +75,15 @@ class SolverWrapper
 void export_solver()
 {
     class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
-    solver_wrapper_class.def("solve",&SolverInterface::solve);
-    solver_wrapper_class.def("solve_all",&SolverInterface::solve_all);
+    solver_wrapper_class.def("zero",(Vector<Interval>(SolverInterface::*)(const FunctionInterface&,const Vector<Interval>&)const)&SolverInterface::zero);
+    solver_wrapper_class.def("fixed_point",(Vector<Interval>(SolverInterface::*)(const FunctionInterface&,const Vector<Interval>&)const)&SolverInterface::fixed_point);
+    solver_wrapper_class.def("solve",(Set< Vector<Interval> >(SolverInterface::*)(const FunctionInterface&,const Vector<Interval>&)const)&SolverInterface::solve);
 
     class_<IntervalNewtonSolver, bases<SolverInterface> > interval_newton_solver_class("IntervalNewtonSolver",init<double,unsigned int>());
+
     class_<KrawczykSolver, bases<SolverInterface> > krawczyk_solver_class("KrawczykSolver",init<double,unsigned int>());
+    krawczyk_solver_class.def("implicit",(List<TaylorFunction>(KrawczykSolver::*)(const FunctionInterface&,const Vector<Interval>&,const Vector<Interval>&)const) &KrawczykSolver::implicit);
+
 }
 
 
@@ -86,6 +92,7 @@ void export_solver()
 void solver_submodule()
 {
     boost::python::to_python_converter< Set< Vector<Interval> >, set_to_python_list< Vector<Interval> > >();
+    boost::python::to_python_converter< List< TaylorFunction >, list_to_python_list<TaylorFunction> >();
     export_solver();
 }
 

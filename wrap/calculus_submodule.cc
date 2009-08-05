@@ -21,7 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "expression_interface.h"
 #include "function_interface.h"
 #include "polynomial.h"
 #include "function.h"
@@ -75,9 +74,6 @@ void read(std::map<K,V>& m, const boost::python::object& obj) {
 }
 
 
-template<class X>
-void read(Vector<X>& v, const boost::python::object& obj);
-
 
 void read(TaylorModel& t, const boost::python::object& obj) {
     t=boost::python::extract<TaylorModel>(obj);
@@ -97,7 +93,7 @@ void read(TaylorExpression& t, const boost::python::object& obj1, const boost::p
     Vector<Interval> d;
     std::map<MultiIndex,Float> m;
     Float e;
-    read(d,obj1);
+    d=boost::python::extract< Vector<Interval> >(obj1);
     read(m,obj2);
     read(e,obj3);
     ARIADNE_ASSERT(e>=0);

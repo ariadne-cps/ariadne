@@ -36,6 +36,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include "array.h"
 
 namespace Ariadne {
 
@@ -107,6 +108,15 @@ template<class T1, class T2> class Pair
 };
 
 
+template<class T> class Array
+    : public Ariadne::array<T>
+{
+  public:
+    Array() : Ariadne::array<T>() { }
+    Array(const array<T>& l) : Ariadne::array<T>(l) { }
+    template<class I> Array(const I& b, const I& e) : Ariadne::array<T>(b,e) { }
+};
+
 template<class T> class List
     : public std::vector<T>
 {
@@ -114,6 +124,7 @@ template<class T> class List
     List() : std::vector<T>() { }
     List(const std::vector<T>& l) : std::vector<T>(l) { }
     template<class I> List(const I& b, const I& e) : std::vector<T>(b,e) { }
+    void append(const T& t) { this->push_back(t); }
 };
 
 

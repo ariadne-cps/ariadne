@@ -218,6 +218,8 @@ class TaylorFunction {
     /*! \brief Division by a scalar. */
     friend TaylorFunction operator/(const TaylorFunction& f, const Interval& c);
     /*! \brief Multiplication by a matrix. */
+    friend TaylorFunction operator*(const Matrix<Float>& A, const TaylorFunction& f);
+    /*! \brief Multiplication by a matrix. */
     friend TaylorFunction operator*(const Matrix<Interval>& A, const TaylorFunction& f);
 
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.

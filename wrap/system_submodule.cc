@@ -24,7 +24,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include "expression_interface.h"
 #include "function_interface.h"
 #include "formula.h"
 #include "hybrid_automaton.h"

@@ -48,7 +48,7 @@ A more detailed explanation of the hybrid automaton class can be found on the \r
 
 A more detailed explanation of how to analyse a hybrid system can be found on the \ref system_analysis_page documentation page.
 
-An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref tutorial_page  page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink. 
+An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref tutorial_page  page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink.
 
 \section mainpage_advanced_usage Advanced Usage
 
@@ -68,6 +68,7 @@ More information on the mathematical foundations of %Ariadne can be found on the
  - \ref integration_page
  - \ref hybrid_systems_page
  - \ref hybrid_evolution_page
+ - \ref model_checking_page
 
  - \ref references_page
 

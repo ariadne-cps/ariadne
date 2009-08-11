@@ -27,8 +27,8 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
-#include "differential.h"
 #include "taylor_model.h"
+#include "differential.h"
 #include "function.h"
 #include "models.h"
 
@@ -349,7 +349,7 @@ Vector<Interval> range(const Vector<TaylorModel>& tm) {
 }
 
 void TestTaylorModel::test_flow()
-{ 
+{
     {
         // Test flow dx/dt=3/8 on an assymetric domain
         // phi=x0+3t/8 x0=0.25s+0.25
@@ -361,7 +361,7 @@ void TestTaylorModel::test_flow()
    }
 
     // Test flow dx/dt=1/4; dy/dt=y/4 on domain [0.5,0.5]x[0.5,0.5]
-    // 
+    //
     Vector<TaylorModel> vf=(ctm(2,2.0)*v(2,0)+tm(2,1)*v(2,1))*0.25;
     Vector<TaylorModel> dom=0.5*tm(2,0)*v(2,0)+0.5*tm(2,1)*v(2,1);
     uint o=6;

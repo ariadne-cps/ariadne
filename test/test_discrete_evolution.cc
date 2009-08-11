@@ -27,6 +27,7 @@
 #include "tuple.h"
 #include "vector.h"
 #include "matrix.h"
+#include "taylor_model.h"
 #include "differential.h"
 #include "function.h"
 #include "taylor_function.h"
@@ -54,7 +55,7 @@ class TestMapEvolver
     void test() const;
 };
 
-int main() 
+int main()
 {
     TestMapEvolver().test();
     return ARIADNE_TEST_FAILURES;
@@ -69,15 +70,15 @@ void TestMapEvolver::test() const
     // Set up the evolution parameters and grid
     Map::TimeType time(3);
     Float enclosure_radius(0.25);
-    
+
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=enclosure_radius;
 
     // Set up the evaluators
     MapEvolver evolver(parameters);
-  
+
     // Define the initial box
-    Box initial_box(2); 
+    Box initial_box(2);
     initial_box[0]=Interval(1.01,1.03);
     initial_box[1]=Interval(0.51,0.53);
 
@@ -90,24 +91,24 @@ void TestMapEvolver::test() const
     cout << "henon_function.parameters()=" << henon.parameters() << endl;
 
     //UserFunction evaluation sanity check
-    Vector<Float> x(2); x[0]=0.5; x[1]=0.25; 
+    Vector<Float> x(2); x[0]=0.5; x[1]=0.25;
     Vector<Float> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);
     Matrix<Float> dhx(2,2); dhx[0][0]=-2*x[0]; dhx[0][1]=p[1]; dhx[1][0]=1.0;
     ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
- 
+
 
     //UserFunction evaluation sanity check
     cout << "henon.evaluate(" << initial_box << ") " << flush; cout << " = " << henon.evaluate(initial_box) << endl;
     cout << "henon.jacobian(" << initial_box << ") = " << henon.jacobian(initial_box) << endl;
 
-  
+
 
     // Over-approximate the initial set by a grid cell
     EnclosureType initial_set(initial_box);
     cout << "initial_set=" << initial_set << endl << endl << endl;
 
-  
+
     // Compute the reachable sets
     ListSet<EnclosureType> evolve_set,reach_set;
     //evolve_set = evolver.evolve(henon,initial_set,time);
@@ -115,7 +116,7 @@ void TestMapEvolver::test() const
     cout << "initial_bounding_box=" << initial_set.bounding_box() << endl;
     //cout << "evolve_bounding_boxes=" << evolve_set.bounding_boxes() << endl;
     cout << "reach_bounding_boxes=" << reach_set.bounding_boxes() << endl;
-  
+
     // Print the intial, evolve and reach sets
     Figure fig;
     fig << line_style(true) << fill_colour(cyan) << reach_set;

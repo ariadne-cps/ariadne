@@ -26,6 +26,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
+#include "taylor_model.h"
 #include "differential.h"
 #include "taylor_expression.h"
 #include "function.h"

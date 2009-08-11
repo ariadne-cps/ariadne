@@ -31,9 +31,21 @@
 #include "vector.h"
 #include "matrix.h"
 #include "function_interface.h"
+#include "taylor_expression.h"
 #include "taylor_function.h"
 
+#include "polynomial.h"
+
 namespace Ariadne {
+
+template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
+    Vector<X> r(v1.size()+v2.size()+1u);
+    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
+    r[v1.size()+v2.size()]=s3;
+    return r;
+}
+
 
 typedef Vector<Interval> IVector;
 
@@ -61,6 +73,7 @@ IntegratorBase::flow_bounds(const FunctionInterface& vf, const IVector& dp, cons
     bool success=false;
     Vector<Interval> bx,nbx,df;
     Interval ih(0,h);
+
     while(!success) {
         ARIADNE_ASSERT_MSG(h>hmin," h="<<h<<", hmin="<<hmin);
         bx=dx+INITIAL_MULTIPLIER*ih*vf.evaluate(join(dp,dx))+delta;
@@ -83,7 +96,7 @@ IntegratorBase::flow_bounds(const FunctionInterface& vf, const IVector& dp, cons
     ARIADNE_ASSERT(subset(nbx,bx));
 
     Vector<Interval> vfbx;
-    vfbx=vf.evaluate(bx);
+    vfbx=vf.evaluate(join(dp,bx));
 
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
         bx=nbx;
@@ -110,13 +123,80 @@ IntegratorBase::flow_bounds(const FunctionInterface& vf, const IVector& dp, cons
 
 
 
+
 TaylorFunction
-TaylorIntegrator::flow(const FunctionInterface& vf, const IVector& dp, const IVector& dx, Float hmax) const
+IntegratorBase::time_step(const FunctionInterface& vf, const IVector& dp, const IVector& dx, const Float& h) const
 {
-    IVector bx;
+    const uint it=dp.size()+dx.size(); // Index of the time variable
+    TaylorFunction flow=this->flow(vf,dp,dx,h);
+    Float hu=flow.domain()[it].upper();
+    ARIADNE_ASSERT_MSG(hu==h,"Actual time step "<<hu<<" is less then requested time step "<<h);
+    return partial_evaluate(flow,it,h);
+}
+
+
+TaylorFunction
+IntegratorBase::flow(const FunctionInterface& vf, const IVector& dx, const Float& h) const
+{
+    Vector<Interval> dp(0);
+    return this->flow(vf,dp,dx,h);
+}
+
+
+
+TaylorFunction
+TaylorIntegrator::flow(const FunctionInterface& f, const IVector& dp, const IVector& dx, const Float& hmax) const
+{
+    //const Vector<ExpressionInterface> vf=dynamic_cast<const Vector<ExpressionInterface>&>(f);
+
+    ARIADNE_LOG(2,"f="<<f<<" dp="<<dp<<" dx="<<dx<<" hmax="<<hmax<<"\n");
+    const uint np=dp.size();
+    const uint nx=dx.size();
+
+    IVector bx(nx);
     Float h;
-    make_lpair(h,bx)=this->flow_bounds(vf,dp,dx,hmax);
-    //return parameterised_flow(vf,dp,dx,h,this->temporal_order());
+    make_lpair(h,bx)=this->flow_bounds(f,dp,dx,hmax);
+    ARIADNE_LOG(3,"h="<<h<<" bx="<<bx<<"\n");
+
+    IVector dom=join(dp,dx,Interval(-h,h));
+    ARIADNE_LOG(3,"dom="<<dom<<"\n");
+
+/*
+    TaylorFunction phi0(Vector<TaylorExpression>(nx,TaylorExpression(dom)));
+    for(uint i=0; i!=nx; ++i) { phi0[i]=TaylorExpression::variable(dom,i); }
+    ARIADNE_LOG(0,"phi0="<<phi0<<"\n");
+*/
+
+    Vector<TaylorExpression> phi0(nx,TaylorExpression(dom));
+    for(uint i=0; i!=nx; ++i) { phi0[i]=TaylorExpression::variable(dom,np+i); }
+    ARIADNE_LOG(3,"phi0="<<phi0<<"\n");
+
+    Vector<TaylorExpression> phi(np+nx,TaylorExpression(dom));
+    for(uint i=0; i!=np; ++i) { phi[i]=TaylorExpression::variable(dom,i); }
+    for(uint i=0; i!=nx; ++i) { phi[np+i]=TaylorExpression::constant(dom,bx[i]); }
+
+    /*
+    for(uint k=0; k!=this->_temporal_order; ++k) {
+        for(uint i=0; i!=nx; ++i) {
+            phi[np+i]=antiderivative(compose(vf[i],phi),np+nx)+phi0[i];
+        }
+    }
+    */
+
+    ARIADNE_LOG(4,"phi="<<phi<<"\n");
+    for(uint k=0; k!=this->_temporal_order; ++k) {
+        TaylorFunction fphi=compose(f,phi);
+        ARIADNE_LOG(4,"fphi="<<fphi<<"\n");
+        for(uint i=0; i!=nx; ++i) {
+            phi[np+i]=antiderivative(fphi[i],np+nx)+phi0[i];
+        }
+        ARIADNE_LOG(3,"phi="<<phi<<"\n");
+    }
+
+    Vector<TaylorExpression> res(nx,TaylorExpression(dom));
+    for(uint i=0; i!=nx; ++i) { res[i]=phi[np+i]; }
+    return res;
+
 }
 
 

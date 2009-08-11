@@ -46,17 +46,27 @@ class IntegratorInterface
   protected:
     typedef Vector<Interval> IVector;
   public:
+    //! \brief Virtual destructor.
+    virtual ~IntegratorInterface() { };
+
+
     //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt.
     virtual Pair<Float,IVector> flow_bounds(const FunctionInterface& vector_field,
                                             const IVector& parameter_domain,
                                             const IVector& state_domain,
                                             const Float& suggested_time_step) const = 0;
 
-    //! \brief Solve \f$\dot{\phi}(a,x,t)=f(a,\phi(a,x,t))\f$.
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
     virtual TaylorFunction flow(const FunctionInterface& vector_field,
-                                const IVector& parameter_domain,
                                 const IVector& state_domain,
                                 const Float& time_domain) const = 0;
+
+
+    //! \brief Solve \f$\dot{\phi}(a,x,t)=f(a,\phi(a,x,t))\f$.
+    virtual TaylorFunction flow(const FunctionInterface& vector_field,
+                                              const IVector& parameter_domain,
+                                              const IVector& state_domain,
+                                              const Float& time_domain) const = 0;
 
     //! \brief Compute \f$\phi(a,x,h)\f$, where \f$\dot{\phi}(a,x,t)=f(a,\phi(a,x,t))\f$.
     virtual TaylorFunction time_step(const FunctionInterface& vector_field,

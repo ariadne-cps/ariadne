@@ -26,6 +26,9 @@
 #include "solver.h"
 #include "taylor_function.h"
 
+#include "integrator_interface.h"
+#include "integrator.h"
+
 #include <boost/python.hpp>
 using namespace boost::python;
 
@@ -69,6 +72,26 @@ class SolverWrapper
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
+class IntegratorWrapper
+  : public IntegratorInterface, public wrapper< IntegratorInterface >
+{
+  public:
+//    IntegratorInterface* clone() const {
+//        return this->get_override("clone")(); }
+    Pair<Float,IVector> flow_bounds(const FunctionInterface&,const IVector&,const IVector&,const Float&) const {
+        return this->get_override("flow_bounds")(); }
+    TaylorFunction flow(const FunctionInterface& vector_field,const IVector&,const Float&) const {
+        return this->get_override("flow")(); }
+    TaylorFunction flow(const FunctionInterface&,const IVector&,const IVector&,const Float&) const {
+        return this->get_override("flow")(); }
+    TaylorFunction time_step(const FunctionInterface&,const IVector&,const IVector&,const Float&) const {
+        return this->get_override("time_step")(); }
+//    std::ostream& write(std::ostream&) const {
+//        return this->get_override("write")(); }
+};
+
+
+
 }
 
 
@@ -88,12 +111,22 @@ void export_solver()
 
 
 
+void export_integrator()
+{
+    class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
+    class_<TaylorIntegrator, bases<IntegratorInterface> > taylor_integrator_class("TaylorIntegrator",init<unsigned int>());
+    taylor_integrator_class.def("flow",(TaylorFunction(TaylorIntegrator::*)(const FunctionInterface&,const Vector<Interval>&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
+}
+
 
 void solver_submodule()
 {
     boost::python::to_python_converter< Set< Vector<Interval> >, set_to_python_list< Vector<Interval> > >();
     boost::python::to_python_converter< List< TaylorFunction >, list_to_python_list<TaylorFunction> >();
+
     export_solver();
+    export_integrator();
+
 }
 
 

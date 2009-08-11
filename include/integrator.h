@@ -51,19 +51,34 @@ class IntegratorBase
                                             const IVector& parameter_domain,
                                             const IVector& state_domain,
                                             const Float& suggested_time_step) const;
+
+    virtual TaylorFunction time_step(const FunctionInterface& vector_field,
+                                     const IVector& parameter_domain,
+                                     const IVector& state_domain,
+                                     const Float& suggested_time_step) const;
+
+    virtual TaylorFunction flow(const FunctionInterface& vector_field,
+                                const Vector<Interval>& state_domain,
+                                const Float& suggested_time_step) const;
+
+    using IntegratorInterface::flow;
 };
+
 
 class TaylorIntegrator
     : public IntegratorBase
 {
   public:
+    TaylorIntegrator(uint to) : _spacial_order(1), _temporal_order(to), _error(1e-16) { }
+
     uint temporal_order() const { return this->_temporal_order; }
 
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
     virtual TaylorFunction flow(const FunctionInterface& vector_field,
                                 const Vector<Interval>& parameter_domain,
                                 const Vector<Interval>& state_domain,
-                                Float suggested_time_step) const;
+                                const Float& suggested_time_step) const;
+
+    using IntegratorInterface::flow;
 
   private:
     uint _spacial_order;

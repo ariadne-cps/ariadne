@@ -142,7 +142,7 @@ void export_integer()
 {
     class_<Integer> integer_class("Integer",init<int>());
     integer_class.def(boost::python::self_ns::str(self));
-    integer_class.def(boost::python::self_ns::repr(self));
+    //integer_class.def(boost::python::self_ns::repr(self));
     integer_class.def("__less__",(bool(*)(const Integer&, const Integer&)) &operator<);
 
     implicitly_convertible<int,Integer>();
@@ -156,7 +156,7 @@ void export_rational()
     class_<Rational> rational_class("Rational",init<int,int>());
     rational_class.def(init<int>());
     rational_class.def(boost::python::self_ns::str(self));
-    rational_class.def(boost::python::self_ns::repr(self));
+    //rational_class.def(boost::python::self_ns::repr(self));
     rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
 
     implicitly_convertible<int,Rational>();
@@ -216,7 +216,7 @@ void export_interval()
     interval_class.def("midpoint", &Interval::midpoint);
     interval_class.def("radius", &Interval::radius);
     interval_class.def(boost::python::self_ns::str(self));
-    interval_class.def(boost::python::self_ns::repr(self));
+    //interval_class.def(boost::python::self_ns::repr(self));
 
     implicitly_convertible<int,Interval>();
     implicitly_convertible<double,Interval>();

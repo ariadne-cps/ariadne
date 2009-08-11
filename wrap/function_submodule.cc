@@ -337,7 +337,7 @@ void export_polynomial()
     polynomial_class.def(real*self);
     polynomial_class.def("__iter__",boost::python::iterator<P>());
     polynomial_class.def(self_ns::str(self));
-    polynomial_class.def(self_ns::repr(self));
+    //polynomial_class.def(self_ns::repr(self));
 
     to_python_converter< Vector< Polynomial<X> >, vector_to_python_list< Polynomial<X> > >();
 }
@@ -357,7 +357,7 @@ void export_expression_interface()
     expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate< Differential<Interval> >);
     expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate< Differential<TaylorModel> >);
     expression_interface_class.def(self_ns::str(self));
-    expression_interface_class.def(self_ns::repr(self));
+    //expression_interface_class.def(self_ns::repr(self));
 
     def("evaluate",&ExpressionPyWrap::evaluate<Interval>);
     def("evaluate",&ExpressionPyWrap::evaluate<TaylorModel>);
@@ -526,7 +526,7 @@ void export_function_interface()
     function_interface_class.def("jacobian",(FMx(FunctionInterface::*)(const FV&)const)&FunctionInterface::jacobian);
     function_interface_class.def("jacobian",(IMx(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian);
     function_interface_class.def(self_ns::str(self));
-    function_interface_class.def(self_ns::repr(self));
+    //function_interface_class.def(self_ns::repr(self));
 
     def("evaluate",(Vector<Float>(*)(const FunctionInterface&,const Vector<Float>&))&evaluate);
     def("evaluate",(Vector<Interval>(*)(const FunctionInterface&,const Vector<Interval>&))&evaluate);

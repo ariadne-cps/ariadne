@@ -500,6 +500,7 @@ void export_taylor_function()
     typedef Polynomial<Interval> IP;
     typedef Vector<Polynomial<Float> > RPV;
     typedef Vector<Polynomial<Interval> > IPV;
+    typedef Vector<ExpressionInterface> EV;
     typedef TaylorExpression TE;
     typedef TaylorFunction TF;
     typedef ExpressionInterface E;
@@ -510,6 +511,7 @@ void export_taylor_function()
     taylor_function_class.def( init< IV,const F& >());
     taylor_function_class.def( init< IV,const RPV& >());
     taylor_function_class.def( init< IV,const IPV& >());
+    taylor_function_class.def( init< IV,const EV& >());
     taylor_function_class.def("result_size", &TaylorFunction::result_size);
     taylor_function_class.def("argument_size", &TaylorFunction::argument_size);
     taylor_function_class.def("domain", &TaylorFunction::domain, return_value_policy<copy_const_reference>());

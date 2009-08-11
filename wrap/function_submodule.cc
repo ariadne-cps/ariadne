@@ -44,6 +44,30 @@ using namespace boost::python;
 
 namespace Ariadne {
 
+struct vector_function_from_python_list
+{
+    vector_function_from_python_list()     {
+        converter::registry::push_back(&convertible,&construct,type_id< Vector<ExpressionInterface> >());
+    }
+
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr)) { return 0; }
+        return obj_ptr;
+    }
+
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
+    {
+        list lst=extract<list>(obj_ptr);
+        //if (value == 0) boost::python::throw_error_already_set();
+        void* storage = ((converter::rvalue_from_python_storage< Vector<ExpressionInterface> >*)   data)->storage.bytes;
+        Vector<ExpressionInterface> res(len(lst));
+        for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<ExpressionInterface&>(lst[i])); }
+        new (storage) Vector<ExpressionInterface>(res);
+        data->convertible = storage;
+    }
+};
+
+
 // Define to remove ambiguity
 PolynomialExpression operator*(const PolynomialExpression& p, const Float& x) {
     return PolynomialExpression(static_cast<const Polynomial<Interval>&>(p)*Interval(x));
@@ -546,6 +570,8 @@ void export_vector_function()
     class_<VectorFunction, bases< FunctionInterface > > vector_function_class("VectorFunction",no_init);
     vector_function_class.def("__init__", make_constructor(&make<VectorFunction>) );
     vector_function_class.def("__getitem__",(ExpressionInterface const&(VectorFunction::*)(uint)const)&VectorFunction::operator[],return_value_policy<copy_const_reference>());
+
+    vector_function_from_python_list();
 }
 
 void export_affine_function()

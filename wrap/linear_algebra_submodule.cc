@@ -76,6 +76,30 @@ Vector<X> __vgetslice__(const Vector<X>& v, const boost::python::slice& slc)
 */
 
 template<class X>
+struct vector_from_python_list
+{
+    vector_from_python_list() {
+        converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >());
+    }
+
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr)) { return 0; }
+        return obj_ptr;
+    }
+
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
+    {
+        list lst=extract<list>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
+        Vector<X> res(len(lst));
+        for(uint i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
+        new (storage) Vector<X>(res);
+        data->convertible = storage;
+    }
+};
+
+
+template<class X>
 void read(Vector<X>& v, const boost::python::object& obj)
 {
   array<X> a;
@@ -452,6 +476,8 @@ template void export_matrix<Rational>();
 void linear_algebra_submodule() {
     export_vector<Float>();
     export_vector<Interval>();
+    vector_from_python_list<Interval>();
+
     export_matrix<Float>();
     export_matrix<Interval>();
 #ifdef HAVE_GMPXX_H

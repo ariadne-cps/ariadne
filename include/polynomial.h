@@ -527,20 +527,6 @@ Vector< Polynomial<X> > flow(const Vector< Polynomial<X> >& p, uint order)
     return r;
 }
 
-template<class X>
-std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
-    if(p.begin()==p.end()) {
-        return os << "{"<<MultiIndex::zero(p.argument_size())<<":0.0}"; }
-
-    os << "{";
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        os << (iter==p.begin() ? "" : ",");
-        for(unsigned int i=0; i!=iter->key().size(); ++i) {
-            os << (i==0?" ":",") << int(iter->key()[i]); }
-        os << ":" << iter->data(); }
-    return os << " }";
-}
-
 
 template<class X> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, const Vector<Float> e) {
     Vector< Polynomial<X> > r(e.size(),Polynomial<X>(p.argument_size()));
@@ -548,37 +534,6 @@ template<class X> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, cons
     return r;
 }
 
-
-// Change the polynomial by setting x[k]=1/x[k], and multiplying through to preserve polynomiality.
-// Change the polynomial by setting x[k]=1/x[k], and multiplying through to preserve polynomiality.
-template<class X> Polynomial<X> flip(const Polynomial<X>& p, uint k) {
-    ARIADNE_ASSERT(k<p.argument_size());
-    Polynomial<X> r(p.argument_size());
-
-    uchar deg=0;
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        const MultiIndex& pa=iter->key();
-        deg=std::max(deg,pa[k]);
-    }
-
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        const MultiIndex& pa=iter->key();
-        const X& pc=iter->data();
-        MultiIndex ra=pa;
-        ra[k]=deg-pa[k];
-        r[ra]=pc;
-    }
-
-    return r;
-}
-
-template<class X> Vector< Polynomial<X> > flip(const Vector< Polynomial<X> >& p, uint k) {
-    Vector< Polynomial<X> > r(p);
-    for(uint i=0; i!=r.size(); ++i) {
-        r[i]=flip(p[i],k);
-    }
-    return r;
-}
 
 
 inline Polynomial<Interval> operator+(const Polynomial<Interval>& p, const Float& c) {
@@ -604,6 +559,49 @@ inline Polynomial<Interval>& operator*=(Polynomial<Interval>& p, const Float& c)
     return p*=Interval(c); }
 inline Polynomial<Interval>& operator/=(Polynomial<Interval>& p, const Float& c) {
     return p/=Interval(c); }
+
+
+/*
+template<class X>
+std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
+    if(p.begin()==p.end()) {
+        return os << "{"<<MultiIndex::zero(p.argument_size())<<":0.0}"; }
+
+    os << "{";
+    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        os << (iter==p.begin() ? "" : ",");
+        for(unsigned int i=0; i!=iter->key().size(); ++i) {
+            os << (i==0?" ":",") << int(iter->key()[i]); }
+        os << ":" << iter->data(); }
+    return os << " }";
+}
+*/
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
+    bool first_term=true;
+    if(p.expansion().size()==0) {
+        os << "0";
+    } else {
+        for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+            MultiIndex a=iter->key();
+            X v=iter->data();
+            if(v!=0) {
+                if(v>0 && !first_term) { os<<"+"; }
+                first_term=false;
+                bool first_factor=true;
+                if(v<0) { os<<"-"; }
+                if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
+                for(uint j=0; j!=a.size(); ++j) {
+                    if(a[j]!=0) {
+                        if(first_factor) { first_factor=false; } else { os <<"*"; }
+                        os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
+                }
+            }
+        }
+    }
+    return os;
+}
 
 
 /*

@@ -454,7 +454,7 @@ crossing_time(const ExpressionInterface& g, const TaylorFunction& phi)
 
 std::ostream&
 operator<<(std::ostream& os, const TaylorExpression& tv) {
-    return os << "TaylorExpression(" << tv.domain() << "," << tv.expansion() << "," << tv.error() << ")";
+    return os << "TaylorExpression( domain=" << tv.domain() << ", polynomial=" << midpoint(tv.polynomial()) << "+/-" << tv.error() << ")";
 }
 
 

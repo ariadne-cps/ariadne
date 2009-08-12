@@ -308,8 +308,8 @@ bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool empty(const Vector<Interval>& v);
 
-Vector<Interval> split(const Vector<Interval>& v, uint k, bool lr);
-Vector<Interval> split(const Vector<Interval>& v, bool lr);
+Vector<Interval> split(const Vector<Interval>& v, uint k, tribool lr);
+Vector<Interval> split(const Vector<Interval>& v, tribool lr);
 std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v);
 std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v, uint k);
 

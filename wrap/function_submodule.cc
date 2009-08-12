@@ -319,6 +319,7 @@ template<class T> T evaluate(const ExpressionInterface& expr, const Vector<T>& i
 void export_multi_index()
 {
     class_< MultiIndex > multi_index_class("MultiIndex", init<uint>());
+    multi_index_class.def(init<MultiIndex>());
     multi_index_class.def("__init__",make_constructor(&make<MultiIndex>));
     multi_index_class.def("__getitem__",&MultiIndex::get);
     multi_index_class.def("__setitem__",&MultiIndex::set);
@@ -327,15 +328,20 @@ void export_multi_index()
 }
 
 template<class X>
-void export_polynomial()
+void export_monomial()
 {
     typedef ExpansionValue<X> M;
-    typedef Polynomial<X> P;
-
-    class_< M > monomial_class(python_name<X>("Monomial"), no_init);
-    monomial_class.def("key",(MultiIndex&(M::*)())&M::key,return_value_policy<reference_existing_object>());
+    class_< M > monomial_class(python_name<X>("Monomial"), init<MultiIndex,X>());
+    //monomial_class.def("key",(MultiIndex&(M::*)())&M::key,return_value_policy<reference_existing_object>());
+    monomial_class.def("key",(const MultiIndex&(M::*)()const)&M::key,return_value_policy<copy_const_reference>());
     monomial_class.def("data",(const X&(M::*)()const) &M::data,return_value_policy<copy_const_reference>());
     monomial_class.def(self_ns::str(self));
+}
+
+template<class X>
+void export_polynomial()
+{
+    typedef Polynomial<X> P;
 
     //double flt;
     X real;
@@ -469,6 +475,7 @@ void export_polynomial_expression()
     class_< PE, bases<ExpressionInterface> > polynomial_expression_class("Polynomial", init<int>());
     polynomial_expression_class.def(init<ExpressionPointer>());
     polynomial_expression_class.def(init<AffineExpression>());
+    polynomial_expression_class.def(init<PolynomialExpression>());
     polynomial_expression_class.def("constant", (PE(*)(uint,double)) &PE::constant);
     polynomial_expression_class.def("constant", (PE(*)(uint,Interval)) &PE::constant);
     polynomial_expression_class.def("variable", (PE(*)(uint,uint)) &PE::variable);
@@ -478,6 +485,8 @@ void export_polynomial_expression()
     polynomial_expression_class.staticmethod("variables");
 
     polynomial_expression_class.def("argument_size", &PE::argument_size);
+    polynomial_expression_class.def("insert", &PE::insert);
+    polynomial_expression_class.def("__iter__",boost::python::iterator<PE>());
 
     implicitly_convertible<ExpressionPointer,PolynomialExpression>();
     //implicitly_convertible<AffineExpression,PolynomialExpression>();
@@ -545,6 +554,7 @@ void export_function_interface()
     function_interface_class.def("argument_size", pure_virtual(&FunctionInterface::argument_size));
     function_interface_class.def("result_size", pure_virtual(&FunctionInterface::result_size));
     function_interface_class.def("smoothness", pure_virtual(&FunctionInterface::smoothness));
+    function_interface_class.def("__len__", pure_virtual(&FunctionInterface::result_size));
     function_interface_class.def("__call__",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
     function_interface_class.def("__call__",pure_virtual((TMV(FunctionInterface::*)(const TMV&)const)&FunctionInterface::evaluate));
     function_interface_class.def("jacobian",(FMx(FunctionInterface::*)(const FV&)const)&FunctionInterface::jacobian);
@@ -578,6 +588,7 @@ void export_affine_function()
 {
     class_<AffineFunction, bases< FunctionInterface > >
         affine_function_class("AffineFunction", init<Matrix<Float>, Vector<Float> >());
+    affine_function_class.def(init<AffineFunction>());
     affine_function_class.def("__getitem__",(AffineExpression(AffineFunction::*)(uint)const)&AffineFunction::operator[]);
 
 }
@@ -587,6 +598,9 @@ void export_polynomial_function()
     class_< PolynomialFunction, bases<FunctionInterface> >
         polynomial_function_class("PolynomialFunction", no_init);
     polynomial_function_class.def("__init__",make_constructor(&make<PolynomialFunction>));
+    polynomial_function_class.def(init<PolynomialFunction>());
+    polynomial_function_class.def("__getitem__",(PolynomialExpression const&(PolynomialFunction::*)(uint)const)&PolynomialFunction::operator[],return_value_policy<copy_const_reference>());
+    polynomial_function_class.def("__setitem__",(void(PolynomialFunction::*)(uint,const PolynomialExpression&)const)&PolynomialFunction::set);
 
 }
 
@@ -604,6 +618,7 @@ void function_submodule() {
 
     //export_polynomial<Float>();
     //export_polynomial<Interval>();
+    export_monomial<Interval>();
 
     export_affine_expression();
     export_polynomial_expression();

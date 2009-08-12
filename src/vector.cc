@@ -2,7 +2,7 @@
  *            vector.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "macros.h"
 #include "numeric.h"
 #include "vector.h"
@@ -35,8 +35,8 @@ template<> Vector<Float>::Vector(size_t n, const double& t0, const double& t1, .
     : ublas::vector<Float>(n)
 {
     assert(n>=2); va_list args; va_start(args,t1);
-    (*this)[0]=t0; (*this)[1]=t1; 
-    for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,double); } 
+    (*this)[0]=t0; (*this)[1]=t1;
+    for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,double); }
     va_end(args);
 }
 
@@ -63,7 +63,7 @@ bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
     return true;
 }
 
-bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -72,7 +72,7 @@ bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -82,7 +82,7 @@ bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2)
 }
 
 
-bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -91,7 +91,7 @@ bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return false;
 }
 
-bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -100,7 +100,7 @@ bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -109,7 +109,7 @@ bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -118,7 +118,7 @@ bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool empty(const Vector<Interval>& v) 
+bool empty(const Vector<Interval>& v)
 {
     for(size_t i=0; i!=v.size(); ++i) {
         if(empty(v[i])) { return true; }
@@ -137,12 +137,20 @@ uint irmax(const Vector<Interval>& v) {
 }
 
 
-Vector<Interval> split(const Vector<Interval>& v, uint k, bool lr) {
+Vector<Interval> split(const Vector<Interval>& v, uint k, tribool lr) {
     ARIADNE_ASSERT(k<v.size());
     Vector<Interval> r(v);
     Float c=v[k].midpoint();
-    if(lr) { r[k].set_upper(c); }
-    else { r[k].set_lower(c); }
+    if(lr) {
+        r[k].set_upper(c);
+    } else if(!lr) {
+        r[k].set_lower(c);
+    } else {
+        Float cl=(3*v[k].lower()+v[k].upper())/4;
+        Float cu=(v[k].lower()+3*v[k].upper())/4;
+        r[k].set_lower(cl);
+        r[k].set_upper(cu);
+    }
     return r;
 }
 
@@ -150,12 +158,12 @@ std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v,
     ARIADNE_ASSERT(k<v.size());
     std::pair< Vector<Interval>, Vector<Interval> > r(v,v);
     Float c=v[k].midpoint();
-    r.first[k].set_upper(c); 
-    r.second[k].set_lower(c); 
+    r.first[k].set_upper(c);
+    r.second[k].set_lower(c);
     return r;
 }
 
-Vector<Interval> split(const Vector<Interval>& v, bool lr) {
+Vector<Interval> split(const Vector<Interval>& v, tribool lr) {
     return split(v,irmax(v),lr);
 }
 
@@ -165,7 +173,7 @@ std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v)
 
 
 
-Vector<Float> midpoint(const Vector<Interval>& v) 
+Vector<Float> midpoint(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -174,7 +182,7 @@ Vector<Float> midpoint(const Vector<Interval>& v)
     return r;
 }
 
-Vector<Float> lower(const Vector<Interval>& v) 
+Vector<Float> lower(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -183,7 +191,7 @@ Vector<Float> lower(const Vector<Interval>& v)
     return r;
 }
 
-Vector<Float> upper(const Vector<Interval>& v) 
+Vector<Float> upper(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -202,7 +210,7 @@ Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return r;
 }
 
-Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     Vector<Interval> r(v1.size());
@@ -212,7 +220,7 @@ Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>
     return r;
 }
 
-Float radius(const Vector<Interval>& v) 
+Float radius(const Vector<Interval>& v)
 {
     Float r=0;
     for(size_t i=0; i!=v.size(); ++i) {
@@ -221,7 +229,7 @@ Float radius(const Vector<Interval>& v)
     return r;
 }
 
-Float volume(const Vector<Interval>& v) 
+Float volume(const Vector<Interval>& v)
 {
     Float r=1.0;
     for(size_t i=0; i!=v.size(); ++i) {

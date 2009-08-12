@@ -151,77 +151,11 @@ std::string __tbox_str__(const Vector<Interval>& d) {
 }
 
 
-std::string __tpoly_str__(const Polynomial<Interval>& pi) {
-    std::stringstream ss;
-    bool first=true;
-    Float r;
-    if(pi.expansion().size()==0) {
-        r=0.0;
-        ss << "0";
-    } else {
-        r=radius(pi.begin()->data());
-        for(Polynomial<Interval>::const_iterator iter=pi.begin(); iter!=pi.end(); ++iter) {
-            MultiIndex a=iter->key();
-            Float v=midpoint(iter->data());
-            if(abs(v)<1e-15) { r+=abs(v); v=0; }
-            if(v!=0) {
-                if(v>0 && !first) { ss<<"+"; }
-                first=false;
-                if(v<0) { ss<<"-"; }
-                if(abs(v)!=1) { ss<<abs(v); }
-                for(uint j=0; j!=a.size(); ++j) {
-                    if(a[j]!=0) { ss<<"x"<<j; if(a[j]!=1) { ss<<"^"<<int(a[j]); } }
-                }
-            }
-        }
-    }
-    if(r>0) { ss<<"+/-"<<r; }
-    return ss.str();
-}
-
-std::string __str__(const TaylorExpression& te) {
-    std::stringstream ss;
-    //ss<<"TaylorExpression";
-    Polynomial<Interval> p = midpoint(te).polynomial();
-    ss<<__tbox_str__(te.domain());
-    ss<<"( "<<__tpoly_str__(p);
-    if(te.error()>0) { ss<<"+/-"<<te.error(); }
-    ss<<" )";
-    //ss<<"( m=" << te.model()<<" )";
-    return ss.str();
-}
-
-std::string __repr__(const TaylorExpression& te) {
-    std::stringstream ss;
-    //ss << "TaylorExpression( domain=" << te.domain() << ", expansion=" << te.expansion() << ", error=" << te.error() << " )";
-    ss << "TaylorExpression( domain=" << te.domain() << ", model=" << te.model() << " )";
-    return ss.str();
-}
-
 
 TaylorFunction __getslice__(const TaylorFunction& tf, int start, int stop) {
     return TaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
 }
 
-
-std::string __str__(const TaylorFunction& tf) {
-    std::stringstream ss;
-    Vector< Polynomial<Interval> > p=tf.polynomial();
-    //ss<<"TaylorFunction";
-    ss<<__tbox_str__(tf.domain());
-    for(uint i=0; i!=p.size(); ++i) {
-        ss<<(i==0?"( ":"; ")<<__tpoly_str__(p[i]);
-    }
-    ss<<" )";
-    return ss.str();
-}
-
-std::string __repr__(const TaylorFunction& tf) {
-    std::stringstream ss;
-    ss << "TaylorFunction( domain=" << tf.domain() << ", models=" << tf.models() << " )";
-    //ss << "TaylorFunction( domain=" << tf.domain() << ", expansions=" << tf.expansions() << ", errors=" << tf.errors() << " )";
-    return ss.str();
-}
 
 
 
@@ -405,12 +339,12 @@ void export_taylor_variable()
     taylor_expression_class.def(self>R());
     taylor_expression_class.def(self>self);
     taylor_expression_class.def(self<self);
-    //taylor_expression_class.def(self_ns::str(self));
+    taylor_expression_class.def(self_ns::str(self));
     taylor_expression_class.def("__mul__",&__mul__< TaylorFunction, TaylorExpression, Vector<Float> >);
 
-    taylor_expression_class.def("__str__",(std::string(*)(const TE&)) &__str__);
-    taylor_expression_class.def("__cstr__",(std::string(*)(const TE&)) &__cstr__);
-    taylor_expression_class.def("__repr__",(std::string(*)(const TE&)) &__repr__);
+    //taylor_expression_class.def("__str__",(std::string(*)(const TE&)) &__str__);
+    //taylor_expression_class.def("__cstr__",(std::string(*)(const TE&)) &__cstr__);
+    //taylor_expression_class.def("__repr__",(std::string(*)(const TE&)) &__repr__);
     taylor_expression_class.def("value", (const Float&(TE::*)()const) &TE::value,return_value_policy<copy_const_reference>());
     taylor_expression_class.def("truncate", (TE&(TE::*)(uint)) &TE::truncate,return_value_policy<reference_existing_object>());
     taylor_expression_class.def("sweep", (TE&(TE::*)(double))&TE::sweep,return_value_policy<reference_existing_object>());
@@ -538,10 +472,10 @@ void export_taylor_function()
     taylor_function_class.def(self/=R());
     taylor_function_class.def(self+=self);
     taylor_function_class.def(self-=self);
-    //taylor_function_class.def(self_ns::str(self));
-    taylor_function_class.def("__str__",(std::string(*)(const TF&)) &__str__);
-    taylor_function_class.def("__cstr__",(std::string(*)(const TF&)) &__cstr__);
-    taylor_function_class.def("__repr__",(std::string(*)(const TF&)) &__repr__);
+    taylor_function_class.def(self_ns::str(self));
+    //taylor_function_class.def("__str__",(std::string(*)(const TF&)) &__str__);
+    //taylor_function_class.def("__cstr__",(std::string(*)(const TF&)) &__cstr__);
+    //taylor_function_class.def("__repr__",(std::string(*)(const TF&)) &__repr__);
     taylor_function_class.def("clobber", (TF&(TF::*)()) &TF::clobber,return_value_policy<reference_existing_object>());
     //taylor_function_class.def(self_ns::str(self));
     //taylor_function_class.def("truncate", (TaylorFunction&(TaylorFunction::*)(uint)) &TaylorFunction::truncate,return_value_policy<reference_existing_object>());

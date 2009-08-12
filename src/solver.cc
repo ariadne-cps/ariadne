@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "solver.h"
 
 #include "logging.h"
@@ -28,6 +28,7 @@
 #include "matrix.h"
 #include "function.h"
 #include "taylor_function.h"
+#include "taylor_expression.h"
 #include "taylor_model.h"
 
 namespace {
@@ -43,8 +44,8 @@ solve_all(Set< Vector<Interval> >& r,
           const Vector<Interval>& ix)
 {
     // Test for no solution
-    if(disjoint(f.evaluate(ix),ix)) {
-        //std::cerr<<"No solution in"<<ix<<"\n";
+    const Vector<Interval> z(ix.size());
+    if(disjoint(f.evaluate(ix),z)) {
         return;
     }
 
@@ -55,24 +56,48 @@ solve_all(Set< Vector<Interval> >& r,
     }
 
     bool invertible_jacobian=true;
+    //Vector<Interval> nx=2*ix-midpoint(ix);
+    Vector<Interval> nx=ix;
     try {
-        Matrix<Interval> Jinv=inverse(f.jacobian(ix));
+        Matrix<Interval> Jinv=inverse(f.jacobian(nx));
     }
     catch(const SingularMatrixException& e) {
         invertible_jacobian=false;
     }
 
+    bool need_to_split;
+
     if(invertible_jacobian) {
         //std::cerr<<"Nonsingular matrix -- applying contractor\n";
         try {
-            r.insert(s.zero(f,ix));
+            Vector<Interval> y=s.zero(f,nx);
+            bool is_new=true;
+            for(Set<Vector<Interval> >::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
+                if(!disjoint(y,*iter)) {
+                    is_new=false;
+                    break;
+                }
+            }
+            if(is_new) {
+                r.insert(y);
+            }
+            need_to_split=false;
         }
-        catch(const EvaluationException& e) {
-            std::cerr<<"Evaluation exception -- No solution in"<<ix<<"\n";
-            // No solution
+        catch(const NoSolutionException& e) {
+            //std::cerr<<"Warning: NoSolutionException exception: "<<e.what()<<"\n";
+            need_to_split=false;
+        }
+        catch(const SolverException& e) {
+            std::cerr<<"Warning: SolverException exception: "<<e.what()<<"\n";
+            need_to_split=true;
+            // No solution found, try splitting
         }
     } else {
-        //std::cerr<<"Singular matrix over "<<ix<<" -- splitting\n";
+        need_to_split=true;
+    }
+
+    if(need_to_split) {
+        //std::cerr<<"  Splitting "<<ix<<"\n";
         std::pair< Vector<Interval>, Vector<Interval> > splt=split(ix);
         solve_all(r,s,f,splt.first);
         solve_all(r,s,f,splt.second);
@@ -267,11 +292,61 @@ newton_implicit(const TaylorFunction& f)
     return TaylorFunction(hdom,scale(newton_implicit(f.models()),hcodom));
 }
 
+
+
 } // namespace
 
 
 
 namespace Ariadne {
+
+Vector<TaylorExpression> evaluate(const FunctionInterface& f,const Vector<TaylorExpression>& x) {
+    for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
+    Vector<TaylorModel> m(x.size());
+    for(uint i=0; i!=m.size(); ++i) { m[i]=x[i].model(); }
+    m=f.evaluate(m);
+    Vector<TaylorExpression> r(m.size());
+    for(uint i=0; i!=r.size(); ++i) { r[i]=TaylorExpression(x[0].domain(),m[i]); }
+    return r;
+}
+
+Vector<TaylorExpression> intersection(const Vector<TaylorExpression>& x1,const Vector<TaylorExpression>& x2) {
+    Vector<TaylorExpression> r(x1.size());
+    for(uint i=0; i!=r.size(); ++i) { r[i]=intersection(x1[i],x2[i]); }
+    return r;
+}
+
+Vector<TaylorExpression> product(const Matrix<Float>& A,const Vector<TaylorExpression>& v) {
+    Vector<TaylorExpression> r(A.row_size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=TaylorExpression(v[0].domain());
+        for(uint j=0; j!=v.size(); ++j) {
+            r[i]+=A[i][j]*v[j];
+        }
+    }
+    return r;
+}
+
+Vector<TaylorExpression> product(const Matrix<Interval>& A,const Vector<TaylorExpression>& v) {
+    Vector<TaylorExpression> r(A.row_size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=TaylorExpression(v[0].domain());
+        for(uint j=0; j!=v.size(); ++j) {
+            r[i]+=A[i][j]*v[j];
+        }
+    }
+    return r;
+}
+
+Float radius(const Vector<TaylorExpression>& x) {
+    Float r=0.0;
+    for(uint i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
+    return r;
+}
+
+
+
+
 
 class DifferenceFunction
     : public FunctionTemplate<DifferenceFunction>
@@ -290,7 +365,7 @@ class DifferenceFunction
 
 
 SolverBase::SolverBase(double max_error, uint max_steps)
-  : _max_error(max_error), _max_steps(max_steps) 
+  : _max_error(max_error), _max_steps(max_steps)
 {
 }
 
@@ -310,30 +385,40 @@ Vector<Interval>
 SolverBase::zero(const FunctionInterface& f,
                  const Vector<Interval>& ix) const
 {
-  const double& e=this->maximum_error();
-  uint n=this->maximum_number_of_steps();
-  ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
-  Vector<Interval> r(ix);
-  bool has_solution=false;
-  while(n>0) {
-    Vector<Interval> nr=this->step(f,r);
-    ARIADNE_LOG(5,"  nr="<<nr<<"\n");
+    const double& e=this->maximum_error();
+    uint n=this->maximum_number_of_steps();
+    ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
+    Vector<Interval> r(ix);
+    Vector<Interval> nr(r.size());
+    bool has_solution=false;
+    while(n>0) {
+        nr=this->step(f,r);
+        ARIADNE_LOG(5,"  nr="<<nr<<"\n");
 
-    if(!has_solution && subset(nr,r)) {
-        has_solution=true;
-    }
+        if(!has_solution && subset(nr,r)) {
+            has_solution=true;
+        }
 
-    if(has_solution && radius(nr) < e) {
-      return nr;
-    }
+        if(has_solution && radius(nr) < e) {
+            return nr;
+        }
 
-    if(disjoint(nr,r)) {
-      throw EvaluationException("No result found -- disjoint");
+        if(disjoint(nr,r)) {
+            ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; "<<nr<<" is disjoint from "<<r);
+        }
+        r=intersection(nr,r);
+        n=n-1;
     }
-    r=intersection(nr,r);
-    n=n-1;
-  }
-  throw EvaluationException("No result found -- maximum number of steps reached");
+    if(disjoint(f.evaluate(r),Vector<Interval>(f.result_size()))) {
+        ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; f("<<r<<") is disjoint from zero");
+    } else {
+        r+=(eps()+radius(r))*Vector<Interval>(r.size(),Interval(-1,+1));
+        nr=this->step(f,r);
+        if(subset(nr,r)) {
+            return nr;
+        }
+        ARIADNE_THROW(SolverException,"SolverBase::zero","No result verified in "<<ix<<"; maximum number of steps reached with approximation "<<r<<" which cannot be robustly checked");
+    }
 }
 
 
@@ -342,6 +427,61 @@ Vector<Interval>
 SolverBase::fixed_point(const FunctionInterface& f, const Vector<Interval>& pt) const
 {
   return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
+}
+
+
+List<TaylorFunction>
+SolverBase::implicit(const FunctionInterface& f,
+                      const Vector<Interval>& ip,
+                      const Vector<Interval>& ix) const
+{
+    verbosity=5;
+    std::cerr<<f<<" "<<ip<<" "<<ix<<"\n";
+    ARIADNE_ASSERT(f.result_size()==ix.size());
+    ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
+
+    List<TaylorFunction> result;
+
+    const uint np=ip.size();
+    const uint nx=ix.size();
+    const double err=this->maximum_error();
+
+    Vector<TaylorExpression> p=TaylorExpression::variables(ip);
+    std::cerr<<"p="<<p<<"\n";
+    Vector<TaylorExpression> x=TaylorExpression::constants(ip,ix);
+    std::cerr<<"x="<<x<<"\n";
+    Vector<TaylorExpression> nwx(x.size());
+
+    uint steps_remaining=this->maximum_number_of_steps();
+    uint number_unrefined=nx;
+    array<bool> refinement(nx,false);
+    while(steps_remaining>0) {
+        nwx=this->implicit_step(f,p,x);
+        ARIADNE_LOG(5,"  nwx="<<nwx<<"\n");
+
+        for(uint i=0; i!=nx; ++i) {
+            if(!refinement[i]) {
+                if(refines(nwx[i],x[i])) {
+                    refinement[i]=true;
+                    --number_unrefined;
+                } else if(disjoint(nwx[i],x[i])) {
+                    ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; "<<nwx<<" is disjoint from "<<x);
+                }
+            }
+        }
+
+        if( (number_unrefined==0) && (radius(nwx)<err) ) {
+            result.append(TaylorFunction(nwx));
+            break;
+        }
+
+        x=intersection(nwx,x);
+        steps_remaining=steps_remaining-1;
+    }
+
+    return result;
+
+
 }
 
 
@@ -395,51 +535,49 @@ KrawczykSolver::step(const FunctionInterface& f,
 }
 
 
-List<TaylorFunction>
-IntervalNewtonSolver::implicit(const FunctionInterface& f,
-                            const Vector<Interval>& p,
-                            const Vector<Interval>& x) const
+Vector<TaylorExpression>
+IntervalNewtonSolver::implicit_step(const FunctionInterface& f,
+                            const Vector<TaylorExpression>& p,
+                            const Vector<TaylorExpression>& x) const
 {
-    return List<TaylorFunction>();
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
-List<TaylorFunction>
-KrawczykSolver::implicit(const FunctionInterface& f,
-                      const Vector<Interval>& ip,
-                      const Vector<Interval>& ix) const
+Vector<TaylorExpression>
+KrawczykSolver::implicit_step(const FunctionInterface& f,
+                              const Vector<TaylorExpression>& p,
+                              const Vector<TaylorExpression>& x) const
 {
-    ARIADNE_ASSERT(f.result_size()==ix.size());
-    ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
-
-    TaylorFunction tf(join(ip,ix),f);
-    List<TaylorFunction> st;
-    st.append(::newton_implicit(tf));
-    return st;
-
-
-    const uint np=ip.size();
-    const uint nx=ix.size();
-
-    TaylorFunction r=TaylorFunction::constant(ip,ix);
-    std::cerr<<"r="<<r<<"\n";
-
-    Vector<Float> m=join(midpoint(ip),midpoint(r.evaluate(midpoint(ip))));
-    Matrix<Float> A=project(f.jacobian(m),range(0,nx),range(np,np+nx));
-    Matrix<Float> I=Matrix<Float>::identity(nx);
-
-    std::cerr<<"m="<<m<<"\n";
-    std::cerr<<"A="<<A<<"\n";
-
-    return List<TaylorFunction>();
-
-    TaylorFunction mr=r; mr.clobber();
-    TaylorFunction fmr=compose(f,mr);
-    TaylorFunction Afmr=A*fmr;
-    TaylorFunction dr=mr-Afmr;
-    //dr=dr+(I-A*(derivative(f)))*(r-mr);
-    
-
+    verbosity=6;
+    const uint np=p.size();
+    const uint nx=x.size();
+    Matrix<Interval> I=Matrix<Interval>::identity(nx);
+    ARIADNE_LOG(4,"  Contracting "<<x<<"\n");
+    //ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
+    Vector<TaylorExpression> mx(x);
+    for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
+    ARIADNE_LOG(5,"    mx="<<mx<<"\n");
+    Vector<Float> ex(nx);
+    for(uint i=0; i!=nx; ++i) { ex[i]=+x[i].error(); }
+    ARIADNE_LOG(5,"    ex="<<ex<<"\n");
+    Vector<TaylorExpression> fm=evaluate(f,join(p,mx));
+    ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
+    Vector<Interval> rp(np);
+    for(uint i=0; i!=np; ++i) { rp[i]=p[i].range(); }
+    Vector<Interval> rx(nx);
+    for(uint i=0; i!=nx; ++i) { rx[i]=x[i].range(); }
+    Matrix<Interval> J=project(f.jacobian(join(rp,rx)),range(0,nx),range(np,np+nx));
+    ARIADNE_LOG(5,"    D2f(r)="<<J<<"\n");
+    Matrix<Interval> M=inverse(midpoint(J));
+    ARIADNE_LOG(5,"    inverse(D2f(m))="<<M<<"\n");
+    Vector<TaylorExpression> dx=product(M,fm)-prod(Matrix<Interval>(I-prod(M,J)),ex*Interval(-1,+1));
+    ARIADNE_LOG(5,"    dx="<<dx<<"\n");
+    Vector<TaylorExpression> nwx= mx - dx;
+    ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");
+    return nwx;
 }
+
+
 
 
 } // namespace Ariadne

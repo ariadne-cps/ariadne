@@ -286,6 +286,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__init__", make_constructor(&make_vector<X>) );
     vector_class.def(init<int>());
     vector_class.def(init<int,X>());
+    vector_class.def("size", &Vector<X>::size);
     vector_class.def("__len__", &Vector<X>::size);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const double&)) &Vector<X>::set);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const X&)) &Vector<X>::set);

@@ -488,7 +488,7 @@ class PolynomialExpression
 {
   public:
     PolynomialExpression() : Polynomial<Interval>() { }
-    explicit PolynomialExpression(uint n) : Polynomial<Interval>(Polynomial<Interval>::constant(n,Interval(0))) { }
+    explicit PolynomialExpression(uint n) : Polynomial<Interval>(n) { }
     PolynomialExpression(const Polynomial<Float>& p) : Polynomial<Interval>(p) { }
     PolynomialExpression(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
     PolynomialExpression& operator=(const Polynomial<Interval>& p) { this->Polynomial<Interval>::operator=(p); return *this; }
@@ -544,7 +544,7 @@ class PolynomialExpression
     virtual std::ostream& write(std::ostream& os) const;
 };
 
-inline std::ostream& PolynomialExpression::write(std::ostream& os) const { 
+inline std::ostream& PolynomialExpression::write(std::ostream& os) const {
     const PolynomialExpression& p=*this;
     bool first_term=true;
     //bool first_factor=true;
@@ -564,7 +564,7 @@ inline std::ostream& PolynomialExpression::write(std::ostream& os) const {
                 first_term=false;
                 bool first_factor=true;
                 if(v<0) { os<<"-"; }
-                if(abs(v)!=1) { os<<abs(v); first_factor=false; }
+                if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
                 for(uint j=0; j!=a.size(); ++j) {
                     if(a[j]!=0) {
                         if(first_factor) { first_factor=false; } else { os <<"*"; }
@@ -765,13 +765,19 @@ class Vector<ExpressionInterface>
     SizeType size() const { return _expressions.size(); }
     const ExpressionInterface& operator[](SizeType i) const { return *_expressions[i]; }
     void set(SizeType i, const ExpressionInterface& f) {
+        ARIADNE_ASSERT(i<this->result_size());
         ARIADNE_ASSERT(this->size()==0 || !_expressions[0] || f.argument_size()==this->argument_size());
         _expressions[i]=shared_ptr<const ExpressionInterface>(f.clone()); }
     void set(SizeType i, shared_ptr<const ExpressionInterface> p) {
+        ARIADNE_ASSERT(i<this->result_size());
         ARIADNE_ASSERT(this->size()==0 || !_expressions[0] || p->argument_size()==this->argument_size()); _expressions[i]=p; }
     void set(SizeType i, const ExpressionInterface* p) {
+        ARIADNE_ASSERT(i<this->result_size());
         ARIADNE_ASSERT(this->size()==0 || !_expressions[0] || p->argument_size()==this->argument_size());
         _expressions[i]=shared_ptr<const ExpressionInterface>(p); }
+    const ExpressionInterface& get(uint i) const {
+        ARIADNE_ASSERT(i<this->result_size());
+        return *this->_expressions[i]; }
 
     virtual Vector<ExpressionInterface>* clone() const { return new Vector<ExpressionInterface>(*this); }
 
@@ -834,7 +840,12 @@ class PolynomialFunction
         for(uint i=0; i!=p.size(); ++i) { Base::set(i,p[i]); } }
 
     const PolynomialExpression& operator[](uint i) const {
-        return dynamic_cast<const PolynomialExpression&>(Base::operator[](i)); }
+        return dynamic_cast<const PolynomialExpression&>(Base::get(i)); }
+
+    const PolynomialExpression& get(uint i) const {
+        return dynamic_cast<const PolynomialExpression&>(Base::get(i)); }
+    void set(uint i,const PolynomialExpression& p) {
+        return this->Base::set(i,p); }
 
     virtual std::ostream& write(std::ostream& os) const {
         return os << "PolynomialFunction("<<static_cast<const Vector<ExpressionInterface>&>(*this)<<")"; }
@@ -1173,7 +1184,7 @@ class FunctionElement
     virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
         // FIXME: Incorrect
         return x[0]; }
- 
+
     virtual FunctionElement* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual std::ostream& write(std::ostream& os) const { ARIADNE_NOT_IMPLEMENTED; }
   private:

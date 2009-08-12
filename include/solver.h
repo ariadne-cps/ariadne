@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file solver.h
  *  \brief Solver classes for algebraic equations.
  */
@@ -43,9 +43,10 @@
 namespace Ariadne {
 
 template<class X> class Vector;
+class TaylorExpression;
 
 /*! \ingroup \ingroup Solvers
- *  \brief %Common functionality for solving (nonlinear) equations. 
+ *  \brief %Common functionality for solving (nonlinear) equations.
  */
 class SolverBase
     : public SolverInterface
@@ -72,10 +73,14 @@ class SolverBase
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
     virtual Set< Vector<Interval> > solve(const FunctionInterface& f,const Vector<Interval>& pt) const;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
+    virtual List<TaylorFunction> implicit(const FunctionInterface& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
 
   protected:
     /*! \brief Perform one iterative step of the contractor. */
     virtual Vector<Interval> step(const FunctionInterface& f,const Vector<Interval>& pt) const = 0;
+    /*! \brief Perform one iterative step of the contractor. */
+    virtual Vector<TaylorExpression> implicit_step(const FunctionInterface& f,const Vector<TaylorExpression>& p,const Vector<TaylorExpression>& x) const = 0;
   private:
     double _max_error;
     uint _max_steps;
@@ -93,8 +98,7 @@ class IntervalNewtonSolver
     IntervalNewtonSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual List<TaylorFunction> implicit(const FunctionInterface& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
-
+    virtual Vector<TaylorExpression> implicit_step(const FunctionInterface& f, const Vector<TaylorExpression>& p, const Vector<TaylorExpression>& x) const;
   protected:
     Vector<Interval>
     step(const FunctionInterface& f,
@@ -116,13 +120,13 @@ class KrawczykSolver
     KrawczykSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual List<TaylorFunction> implicit(const FunctionInterface& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+    virtual Vector<TaylorExpression> implicit_step(const FunctionInterface& f, const Vector<TaylorExpression>& p, const Vector<TaylorExpression>& x) const;
 
   protected:
     /*! \brief A single step of the Krawczyk contractor. */
     Vector<Interval>
     step(const FunctionInterface& f,
-          const Vector<Interval>& pt) const; 
+          const Vector<Interval>& pt) const;
 };
 
 

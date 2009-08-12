@@ -193,6 +193,7 @@ void export_box()
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
     box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
     box_class.def("__init__", make_constructor(&make<Box>) );
+    box_class.def(init< Vector<Interval> >());
     box_class.def("__str__",&__cstr__<Box>);
 
     def("split", &tuple_split);

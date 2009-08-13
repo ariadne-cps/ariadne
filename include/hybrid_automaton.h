@@ -55,7 +55,7 @@ class DiscreteMode;
 class DiscreteTransition;
 class HybridAutomaton;
 
-class ExpressionInterface;
+class ScalarFunctionInterface;
 class FunctionInterface;
 class Grid;
 
@@ -281,7 +281,7 @@ class HybridAutomaton
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
 
 

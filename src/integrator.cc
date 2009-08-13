@@ -147,7 +147,7 @@ IntegratorBase::flow(const FunctionInterface& vf, const IVector& dx, const Float
 TaylorFunction
 TaylorIntegrator::flow(const FunctionInterface& f, const IVector& dp, const IVector& dx, const Float& hmax) const
 {
-    //const Vector<ExpressionInterface> vf=dynamic_cast<const Vector<ExpressionInterface>&>(f);
+    //const Vector<ScalarFunctionInterface> vf=dynamic_cast<const Vector<ScalarFunctionInterface>&>(f);
 
     ARIADNE_LOG(2,"f="<<f<<" dp="<<dp<<" dx="<<dx<<" hmax="<<hmax<<"\n");
     const uint np=dp.size();

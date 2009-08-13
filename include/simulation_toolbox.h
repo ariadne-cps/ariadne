@@ -38,7 +38,7 @@ namespace Ariadne {
  
 
 typedef double Float;
-class ExpressionInterface;
+class ScalarFunctionInterface;
 class FunctionInterface;
 class Point;
 
@@ -58,14 +58,14 @@ class SimulationToolbox
     //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all 
     //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint, 
     //! and indeterminate otherwise.
-    tribool active(const ExpressionInterface& guard, 
+    tribool active(const ScalarFunctionInterface& guard, 
                    const Point& point) const;
 
   
     //! \brief Computes the time at which point  \a initial_point cross the zero-set of the
     //! the \a guard under evolution of the \a vector_field, for times up to \a maximum_time.
     //! The crossing must be (differentiably) transverse.
-    TimeType crossing_time(const ExpressionInterface& guard,
+    TimeType crossing_time(const ScalarFunctionInterface& guard,
                            const FunctionInterface& vector_field, 
                            const Point& initial_point, 
                            const TimeType& maximum_time) const;

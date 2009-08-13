@@ -82,7 +82,7 @@ class CalculusBase
 
     typedef Float TimeType;
     typedef FunctionInterface FunctionType;
-    typedef ExpressionInterface ExpressionType;
+    typedef ScalarFunctionInterface ExpressionType;
     typedef SetModelType EnclosureType;
   protected:
     tribool _tribool(const IntervalType& ivl) const {
@@ -112,7 +112,7 @@ class CalculusBase
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid.
-    virtual Interval touching_time_interval(const ExpressionInterface& guard,
+    virtual Interval touching_time_interval(const ScalarFunctionInterface& guard,
                                             const FlowModelType& flow_model,
                                             const SetModelType& initial_set_model) const
     {
@@ -137,7 +137,7 @@ class CalculusBase
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid. Deprecated
-    virtual Interval scaled_touching_time_interval(const ExpressionInterface& guard,
+    virtual Interval scaled_touching_time_interval(const ScalarFunctionInterface& guard,
                                                    const FlowSetModelType& flow_set_model) const
     {
         BaseModelType guard_flow_set_model=apply(guard,flow_set_model);
@@ -167,7 +167,7 @@ class CalculusBase
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard under evolution of the \a flow_model.
     //! The crossing must be (differentiably) transverse.
-    virtual TimeModelType crossing_time(const ExpressionInterface& guard,
+    virtual TimeModelType crossing_time(const ScalarFunctionInterface& guard,
                                         const FlowModelType& flow_model,
                                         const SetModelType& initial_set_model) const
     {
@@ -192,7 +192,7 @@ class CalculusBase
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard under evolution of the \a flow_model.
     //! The crossing must be (differentiably) transverse.
-    virtual TimeModelType scaled_crossing_time(const ExpressionInterface& guard,
+    virtual TimeModelType scaled_crossing_time(const ScalarFunctionInterface& guard,
                                                const FlowSetModelType& flow_set_model) const
     {
         return this->scaled_crossing_time(apply(guard,flow_set_model));

@@ -36,7 +36,7 @@ namespace Ariadne {
 template<class T> class array;
 
 class Interval;
-class ExpressionInterface;
+class ScalarFunctionInterface;
 class FunctionInterface;
 template<class X> class Vector;
 
@@ -103,7 +103,7 @@ class CalculusInterface
     typedef Vector<Interval> BoxType;
     typedef Float TimeType;
     typedef FunctionInterface FunctionType;
-    typedef ExpressionInterface ExpressionType;
+    typedef ScalarFunctionInterface ExpressionType;
     typedef SetModelType EnclosureType;
   public:
     //! \brief Virtual destructor.
@@ -148,7 +148,7 @@ class CalculusInterface
     //! touch the set specified by the \a guard under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid.
     virtual Interval
-    touching_time_interval(const ExpressionInterface& guard,
+    touching_time_interval(const ScalarFunctionInterface& guard,
                            const FlowModelType& flow_model,
                            const SetModelType& initial_set_model) const = 0;
 
@@ -179,7 +179,7 @@ class CalculusInterface
     //! the \a guard under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
     //! The crossing must be (differentiably) transverse.
     virtual TimeModelType
-    crossing_time(const ExpressionInterface& guard,
+    crossing_time(const ScalarFunctionInterface& guard,
                   const FlowModelType& flow_model,
                   const SetModelType& initial_set_model) const = 0;
 
@@ -318,7 +318,7 @@ class CalculusInterface
 
     //! \brief A model for the real-valued function \a g over the domain \a d.
     virtual GuardModelType
-    predicate_model(const ExpressionInterface& g,
+    predicate_model(const ScalarFunctionInterface& g,
                     const BoxType& d) const = 0;
 
     //! \brief A model for the real-valued function \a g over the domain \a d.

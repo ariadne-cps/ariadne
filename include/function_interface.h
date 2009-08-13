@@ -44,7 +44,7 @@ template<class X> class Differential;
 
 //! \brief Interface for expressions whose derivatives can be computed.
 //! \sa FunctionInterface
-class ExpressionInterface {
+class ScalarFunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.
     typedef unsigned int SizeType;
@@ -52,9 +52,9 @@ class ExpressionInterface {
     typedef unsigned short SmoothnessType;
 
     //! \brief Virtual destructor.
-    virtual ~ExpressionInterface() { };
+    virtual ~ScalarFunctionInterface() { };
     //! \brief Create a dynamically-allocated copy.
-    virtual ExpressionInterface* clone() const = 0;
+    virtual ScalarFunctionInterface* clone() const = 0;
      
     //! \brief The smoothness of the expression.
     virtual SmoothnessType smoothness() const = 0;
@@ -78,21 +78,21 @@ class ExpressionInterface {
     //! \brief Call the function on the type \a T.
     template<class T> T operator()(const Vector<T>& x) { return this->evaluate(x); }
 
-    virtual ExpressionInterface* derivative(uint j) const = 0;
+    virtual ScalarFunctionInterface* derivative(uint j) const = 0;
   
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
-//! \relates ExpressionInterface
+//! \relates ScalarFunctionInterface
 //! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
-inline std::ostream& operator<<(std::ostream& os, const ExpressionInterface& f) {
+inline std::ostream& operator<<(std::ostream& os, const ScalarFunctionInterface& f) {
     return f.write(os); 
 }
 
 
 //! \brief Interface for functions whose derivatives can be computed.
-//! \sa ExpressionInterface
+//! \sa ScalarFunctionInterface
 class FunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.

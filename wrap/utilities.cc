@@ -67,9 +67,6 @@ read(unsigned long int& n, const boost::python::object& obj)
 
 #ifdef HAVE_GMPXX_H
 
-typedef mpz_class Integer;
-
-
 void
 read(Integer& z, const boost::python::object& obj)
 {
@@ -84,7 +81,7 @@ read(Integer& z, const boost::python::object& obj)
         z=zz();
     }
 }
- 
+
 
 void
 read(Rational& q, const boost::python::object& obj)
@@ -129,7 +126,7 @@ read(Float& x, const boost::python::object& obj)
 void
 read(Interval& x, const boost::python::object& obj)
 {
-    // The calls lx.check() and tx.check() produce compiler warnings 
+    // The calls lx.check() and tx.check() produce compiler warnings
     //   "dereferencing type-punned pointer will break strict-aliasing rules"
     // but this code works, and I don't how to change the extract type
     // to disable the warning without making the check fail.
@@ -153,7 +150,7 @@ read(Interval& x, const boost::python::object& obj)
     } else if(ix.check()) {
         x=ix();
     }
-  
+
 }
 
 

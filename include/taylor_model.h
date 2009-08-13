@@ -44,7 +44,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Expansion;
 
-class ExpressionInterface;
+class ScalarFunctionInterface;
 class FunctionInterface;
 class TaylorModel;
 class TaylorCalculus;
@@ -118,7 +118,7 @@ TaylorModel implicit(const TaylorModel& f);
 TaylorModel implicit_step(const TaylorModel& f, const TaylorModel& h);
 
 // Compute the implicit function f(g(x),h(x))=0
-TaylorModel implicit(const ExpressionInterface& f, const Vector<TaylorModel>& g);
+TaylorModel implicit(const ScalarFunctionInterface& f, const Vector<TaylorModel>& g);
 
 // Solve the equation f(x)=0
 Interval solve(const TaylorModel& f);

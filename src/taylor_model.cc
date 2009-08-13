@@ -3285,7 +3285,7 @@ implicit(const Vector<TaylorModel>& f)
 
 
 TaylorModel
-implicit(const ExpressionInterface& f, const Vector<TaylorModel>& g)
+implicit(const ScalarFunctionInterface& f, const Vector<TaylorModel>& g)
 {
 
     // Check that the arguments are suitable
@@ -3301,8 +3301,8 @@ implicit(const ExpressionInterface& f, const Vector<TaylorModel>& g)
     const uint gas=g[0].argument_size();
     const uint grs=g.size();
 
-    shared_ptr<const ExpressionInterface> df_ptr(f.derivative(gas));
-    const ExpressionInterface& df=*df_ptr;
+    shared_ptr<const ScalarFunctionInterface> df_ptr(f.derivative(gas));
+    const ScalarFunctionInterface& df=*df_ptr;
 
     TaylorModel h0(gas);
     Vector<TaylorModel> jgh=join(g,h0);

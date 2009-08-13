@@ -39,112 +39,53 @@ using namespace Ariadne;
 
 
 
-StateSpace*
+Space*
 make_space(const boost::python::object& obj)
 {
-    StateSpace* spcptr=new StateSpace();
+    Space* spcptr=new Space();
     boost::python::list elements=boost::python::extract<boost::python::list>(obj);
     int m=boost::python::len(elements);
     for(int i=0; i!=m; ++i) {
         RealVariable v=boost::python::extract<RealVariable>(elements[i]);
-        *spcptr,v;
+        spcptr->append(v.name());
     }
     return spcptr;
 }
 
-RealFormula exp(RealVariable v) { return exp(RealFormula(v)); }
-RealFormula log(RealVariable v) { return log(RealFormula(v)); }
-RealFormula sin(RealVariable v) { return sin(RealFormula(v)); }
-RealFormula cos(RealVariable v) { return cos(RealFormula(v)); }
-RealFormula tan(RealVariable v) { return tan(RealFormula(v)); }
-
-// Need to wrap pure virtual function explicitly for some reason...
-ExpressionInterface* expression(const FormulaInterface<Real>& f, const StateSpace& s) { return f.expression(s); }
 
 void export_formula()
 {
-    class_<RealVariable> variable_class("RealVariable", init<std::string>());
-    variable_class.def(init<RealVariable>());
-    variable_class.def("name", &RealVariable::name, return_value_policy<reference_existing_object>());
-    variable_class.def("expression", &RealVariable::expression, return_value_policy<manage_new_object>());
-    variable_class.def("__eq__", &RealVariable::operator==);
-    variable_class.def("__neq__", &RealVariable::operator!=);
-    variable_class.def("__add__", &__add__<RealFormula,RealVariable,RealVariable>);
-    variable_class.def("__sub__", &__sub__<RealFormula,RealVariable,RealVariable>);
-    variable_class.def("__mul__", &__mul__<RealFormula,RealVariable,RealVariable>);
-    variable_class.def("__div__", &__div__<RealFormula,RealVariable,RealVariable>);
-    variable_class.def("__add__", &__add__<RealFormula,RealVariable,double>);
-    variable_class.def("__sub__", &__sub__<RealFormula,RealVariable,double>);
-    variable_class.def("__mul__", &__mul__<RealFormula,RealVariable,double>);
-    variable_class.def("__div__", &__div__<RealFormula,RealVariable,double>);
-    variable_class.def("__add__", &__add__<RealFormula,RealVariable,Interval>);
-    variable_class.def("__sub__", &__sub__<RealFormula,RealVariable,Interval>);
-    variable_class.def("__mul__", &__mul__<RealFormula,RealVariable,Interval>);
-    variable_class.def("__div__", &__div__<RealFormula,RealVariable,Interval>);
-    variable_class.def("__radd__", &__radd__<RealFormula,RealVariable,double>);
-    variable_class.def("__rsub__", &__rsub__<RealFormula,RealVariable,double>);
-    variable_class.def("__rmul__", &__rmul__<RealFormula,RealVariable,double>);
-    variable_class.def("__rdiv__", &__rdiv__<RealFormula,RealVariable,double>);
-    variable_class.def("__radd__", &__radd__<RealFormula,RealVariable,Interval>);
-    variable_class.def("__rsub__", &__rsub__<RealFormula,RealVariable,Interval>);
-    variable_class.def("__rmul__", &__rmul__<RealFormula,RealVariable,Interval>);
-    variable_class.def("__rdiv__", &__rdiv__<RealFormula,RealVariable,Interval>);
-    variable_class.def(self_ns::str(self));
+    implicitly_convertible<RealVariable,RealExpression>();
+    implicitly_convertible<double,RealExpression>();
+    implicitly_convertible<Interval,RealExpression>();
 
-    def("exp", (RealFormula(*)(RealVariable)) &exp);
-    def("log", (RealFormula(*)(RealVariable)) &log);
-    def("sin", (RealFormula(*)(RealVariable)) &sin);
-    def("cos", (RealFormula(*)(RealVariable)) &cos);
-    def("tan", (RealFormula(*)(RealVariable)) &tan);
-
-
-    class_<StateSpace> space_class("StateSpace");
+    class_<Space> space_class("Space");
     space_class.def("__init__", make_constructor(&make_space) );
-    space_class.def("dimension", &StateSpace::dimension);
-    space_class.def("variable", &StateSpace::variable, return_value_policy<reference_existing_object>());
-    space_class.def("index", &StateSpace::index);
+    space_class.def("dimension", &Space::dimension);
+    space_class.def("variable", &Space::variable, return_value_policy<reference_existing_object>());
+    space_class.def("index", &Space::index);
     space_class.def(self_ns::str(self));
 
 
-    class_<RealFormula> formula_class("RealFormula", no_init);
-    formula_class.def("expression", &RealFormula::expression, return_value_policy<manage_new_object>());
-    formula_class.def("__add__", &__add__<RealFormula,RealFormula,RealFormula>);
-    formula_class.def("__sub__", &__sub__<RealFormula,RealFormula,RealFormula>);
-    formula_class.def("__mul__", &__mul__<RealFormula,RealFormula,RealFormula>);
-    formula_class.def("__div__", &__div__<RealFormula,RealFormula,RealFormula>);
-    formula_class.def("__add__", &__add__<RealFormula,RealFormula,double>);
-    formula_class.def("__sub__", &__sub__<RealFormula,RealFormula,double>);
-    formula_class.def("__mul__", &__mul__<RealFormula,RealFormula,double>);
-    formula_class.def("__div__", &__div__<RealFormula,RealFormula,double>);
-    formula_class.def("__add__", &__add__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__sub__", &__sub__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__mul__", &__mul__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__div__", &__div__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__add__", &__add__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def("__sub__", &__sub__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def("__mul__", &__mul__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def("__div__", &__div__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def("__radd__", &__radd__<RealFormula,RealFormula,double>);
-    formula_class.def("__rsub__", &__rsub__<RealFormula,RealFormula,double>);
-    formula_class.def("__rmul__", &__rmul__<RealFormula,RealFormula,double>);
-    formula_class.def("__rdiv__", &__rdiv__<RealFormula,RealFormula,double>);
-    formula_class.def("__radd__", &__radd__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__rsub__", &__rsub__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__rmul__", &__rmul__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__rdiv__", &__rdiv__<RealFormula,RealFormula,Interval>);
-    formula_class.def("__radd__", &__radd__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def("__rsub__", &__rsub__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def("__rmul__", &__rmul__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def("__rdiv__", &__rdiv__<RealFormula,RealFormula,RealVariable>);
-    formula_class.def(self_ns::str(self));
+    class_<RealExpression> expression_class("RealExpression", no_init);
+    expression_class.def("__neg__", &__neg__<RealExpression,RealExpression>);
+    expression_class.def("__add__", &__add__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def("__sub__", &__sub__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def("__mul__", &__mul__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def("__div__", &__div__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def(self_ns::str(self));
 
-    def("exp", (RealFormula(*)(RealFormula)) &exp);
-    def("log", (RealFormula(*)(RealFormula)) &log);
-    def("sin", (RealFormula(*)(RealFormula)) &sin);
-    def("cos", (RealFormula(*)(RealFormula)) &cos);
-    def("tan", (RealFormula(*)(RealFormula)) &tan);
+    def("neg", (RealExpression(*)(RealExpression)) &neg);
+    def("rec", (RealExpression(*)(RealExpression)) &rec);
+    def("sqr", (RealExpression(*)(RealExpression)) &sqr);
+    def("pow", (RealExpression(*)(RealExpression,int)) &pow);
+    def("sqrt", (RealExpression(*)(RealExpression)) &sqrt);
+    def("exp", (RealExpression(*)(RealExpression)) &exp);
+    def("log", (RealExpression(*)(RealExpression)) &log);
+    def("sin", (RealExpression(*)(RealExpression)) &sin);
+    def("cos", (RealExpression(*)(RealExpression)) &cos);
+    def("tan", (RealExpression(*)(RealExpression)) &tan);
 
-    def("expression", &RealFormula::expression, return_value_policy<manage_new_object>());
 
 }
 
@@ -152,7 +93,7 @@ void export_formula()
 
 void export_hybrid_automaton()
 {
-    typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
 
 /*

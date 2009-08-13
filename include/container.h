@@ -29,6 +29,7 @@
 #ifndef ARIADNE_CONTAINER_H
 #define ARIADNE_CONTAINER_H
 
+#include <cassert>
 #include <cstdarg>
 #include <iostream>
 #include <string>
@@ -41,7 +42,7 @@
 namespace Ariadne {
 
 
-
+typedef std::string String;
 
 // Functionality for building arrays or std::vector from comma-separated lists
 class ArrayBuilderTag {};
@@ -161,18 +162,19 @@ template<class T> inline Set<T> join(const Set<T>& s1, const Set<T>& s2) {
 template<class T> inline std::ostream& operator<<(std::ostream& os, const Set<T>& s) {
     return os<<static_cast<const std::set<T>&>(s); }
 
-template<class K, class V, class C> class Map
-    : public std::map<K,V,C>
+template<class K, class V> class Map
+    : public std::map<K,V>
 {
   public:
     V& operator[](const K& k) {
-        return this->std::map<K,V,C>::operator[](k); }
-    const V& operator[](const K& k) const { typename std::map<K,V,C>::const_iterator p=this->find(k);
-        assert(k!=this->end()); return p->second; }
+        return this->std::map<K,V>::operator[](k); }
+    const V& operator[](const K& k) const { typename std::map<K,V>::const_iterator p=this->find(k);
+        assert(p!=this->end()); return p->second; }
     bool has_key(const K& k) const {
         return this->find(k)!=this->end(); }
     void insert(const K& k, const V& v) {
-        this->std::map<K,V,C>::insert(std::make_pair(k,v)); }
+        this->std::map<K,V>::insert(std::make_pair(k,v)); }
+    using std::map<K,V>::insert;
 };
 
 

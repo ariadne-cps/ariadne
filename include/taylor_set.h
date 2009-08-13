@@ -42,7 +42,7 @@ class Interval;
 template<class X> class Vector;
 template<class X> class Matrix;
 
-class ExpressionInterface;
+class ScalarFunctionInterface;
 class FunctionInterface;
 class TaylorModel;
 class TaylorExpression;
@@ -161,7 +161,7 @@ class TaylorSet
 
 TaylorModel apply(const TaylorExpression& f, const TaylorSet& s);
 TaylorSet apply(const TaylorFunction& f, const TaylorSet& s);
-TaylorModel apply(const ExpressionInterface& f, const TaylorSet& s);
+TaylorModel apply(const ScalarFunctionInterface& f, const TaylorSet& s);
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
 
 TaylorModel unchecked_apply(const TaylorExpression& f, const TaylorSet& s);

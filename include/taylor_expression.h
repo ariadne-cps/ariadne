@@ -46,7 +46,7 @@ template<class X> class Polynomial;
 class TaylorModel;
 class TaylorExpression;
 class TaylorFunction;
-class ExpressionInterface;
+class ScalarFunctionInterface;
 
 // Remove the error term
 TaylorExpression midpoint(const TaylorExpression& x);
@@ -68,7 +68,7 @@ Interval evaluate(const TaylorExpression& x, const Vector<Interval>& sy);
 TaylorExpression partial_evaluate(const TaylorExpression& x, uint k, const Interval& c);
 
 // Compose with an expression.
-TaylorExpression compose(const ExpressionInterface& x, const Vector<TaylorExpression>& y);
+TaylorExpression compose(const ScalarFunctionInterface& x, const Vector<TaylorExpression>& y);
 
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<TaylorExpression,TaylorExpression> split(const TaylorExpression& x, uint j);
@@ -85,11 +85,11 @@ TaylorExpression derivative(const TaylorExpression& x, uint k);
 // Implicit function solver; solves f(x,h(x))=0 on dom1(f)
 TaylorExpression implicit(const TaylorExpression& f);
 // Implicit function solver solves f(g(x),h(x))=0 on dom(g)
-TaylorExpression implicit(const ExpressionInterface& f, const TaylorFunction& g);
+TaylorExpression implicit(const ScalarFunctionInterface& f, const TaylorFunction& g);
 // Implicit function solver solves f(x,h(x))=0 on d
-TaylorExpression implicit(const ExpressionInterface& f, const Vector<Interval>& d);
+TaylorExpression implicit(const ScalarFunctionInterface& f, const Vector<Interval>& d);
 
-TaylorExpression crossing_time(const ExpressionInterface& g, const FunctionInterface& f, const Vector<Interval>& d);
+TaylorExpression crossing_time(const ScalarFunctionInterface& g, const FunctionInterface& f, const Vector<Interval>& d);
 
 
 /*! \brief A class representing a quantity depending on other quantities.
@@ -124,7 +124,7 @@ class TaylorExpression
     explicit TaylorExpression(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
 
     //! \brief Construct a TaylorExpression over the domain \a d from the expression \a f.
-    explicit TaylorExpression(const DomainType& d, const ExpressionInterface& f);
+    explicit TaylorExpression(const DomainType& d, const ScalarFunctionInterface& f);
     //! \brief Construct a TaylorExpression over the domain \a d from the polynomial \a p.
     explicit TaylorExpression(const DomainType& d, const Polynomial<Float>& p);
     //! \brief Construct a TaylorExpression over the domain \a d from the interval polynomial \a p.

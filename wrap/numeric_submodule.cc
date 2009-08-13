@@ -143,7 +143,7 @@ void export_integer()
     class_<Integer> integer_class("Integer",init<int>());
     integer_class.def(boost::python::self_ns::str(self));
     //integer_class.def(boost::python::self_ns::repr(self));
-    integer_class.def("__less__",(bool(*)(const Integer&, const Integer&)) &operator<);
+    integer_class.def("__less__",(bool(*)(const mpz_class&, const mpz_class&)) &operator<);
 
     implicitly_convertible<int,Integer>();
 

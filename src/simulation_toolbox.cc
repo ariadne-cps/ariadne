@@ -53,7 +53,7 @@ SimulationToolbox()
 
 tribool
 SimulationToolbox::
-active(const ExpressionInterface& guard, 
+active(const ScalarFunctionInterface& guard, 
        const Point& point) const
 {
     Float value=guard.evaluate(point);
@@ -97,7 +97,7 @@ integration_step(const FunctionInterface& f,
 // Compute the crossing time using bisections
 SimulationToolbox::TimeType
 SimulationToolbox::
-crossing_time(const ExpressionInterface& g,
+crossing_time(const ScalarFunctionInterface& g,
               const FunctionInterface& f, 
               const Point& pt, 
               const TimeType& h) const

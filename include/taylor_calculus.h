@@ -43,7 +43,7 @@ using std::pair;
 template<class T> class array;
 
 class Interval;
-class ExpressionInterface;
+class ScalarFunctionInterface;
 class FunctionInterface;
 template<class X> class Vector;
 class Box;
@@ -82,7 +82,7 @@ class TaylorCalculus
     typedef Interval IntervalType;
     typedef Vector<Interval> BoxType;
     typedef FunctionInterface FunctionType;
-    typedef ExpressionInterface ExpressionType;
+    typedef ScalarFunctionInterface ExpressionType;
 
     typedef SetModelType EnclosureType;
   public:

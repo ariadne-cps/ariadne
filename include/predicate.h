@@ -58,11 +58,11 @@ class ExpressionPredicate
 {
     friend ExpressionPredicate operator!(const ExpressionPredicate&);
   public:
-    ExpressionPredicate(const ExpressionInterface& expression)
+    ExpressionPredicate(const ScalarFunctionInterface& expression)
         : _expression_ptr(expression.clone()), _sign(+1) { }
-    ExpressionPredicate(shared_ptr<const ExpressionInterface> expression_ptr)
+    ExpressionPredicate(shared_ptr<const ScalarFunctionInterface> expression_ptr)
         : _expression_ptr(expression_ptr), _sign(+1) { }
-    const ExpressionInterface& expression() const { return *_expression_ptr; }
+    const ScalarFunctionInterface& expression() const { return *_expression_ptr; }
     int sign() const { return _sign; }
 
     bool same(const ExpressionPredicate& ep2) const {
@@ -85,7 +85,7 @@ class ExpressionPredicate
         else if(range.lower()>0) { return false; }
         else { return indeterminate; } }
   private:
-    shared_ptr<const ExpressionInterface> _expression_ptr;
+    shared_ptr<const ScalarFunctionInterface> _expression_ptr;
     int _sign;
 };
 

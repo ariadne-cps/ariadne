@@ -43,7 +43,7 @@ class SimulationToolboxInterface
     typedef Float RealType;
     typedef Float TimeType;
     typedef Point StateType;
-    typedef ExpressionInterface PredicateType;
+    typedef ScalarFunctionInterface PredicateType;
     typedef FunctionInterface MapType;
     typedef FunctionInterface VectorFieldType;
   public:
@@ -54,14 +54,14 @@ class SimulationToolboxInterface
     //! satisfies the constraint, \a false if the point does not satisfy the constraint, and 
     //! indeterminate if the point lies on the boundary.
     virtual tribool 
-    active(const ExpressionInterface& guard,
+    active(const ScalarFunctionInterface& guard,
            const Point& state) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_point cross the zero-set of the
     //! the \a guard under evolution of the \a vector_field, for times up to \a maximum_time.
     //! The crossing must be (differentiably) transverse.
     virtual TimeType 
-    crossing_time(const ExpressionInterface& guard,
+    crossing_time(const ScalarFunctionInterface& guard,
                   const FunctionInterface& vector_field,
                   const Point& initial_state,
                   const TimeType& maximum_time) const = 0;

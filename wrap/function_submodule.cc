@@ -32,9 +32,11 @@
 #include "taylor_model.h"
 #include "differential.h"
 #include "polynomial.h"
+#include "affine.h"
 #include "taylor_expression.h"
 #include "taylor_function.h"
 #include "function.h"
+#include "formula.h"
 
 #include "utilities.h"
 
@@ -47,7 +49,7 @@ namespace Ariadne {
 struct vector_function_from_python_list
 {
     vector_function_from_python_list()     {
-        converter::registry::push_back(&convertible,&construct,type_id< Vector<ExpressionInterface> >());
+        converter::registry::push_back(&convertible,&construct,type_id< Vector<ScalarFunctionInterface> >());
     }
 
     static void* convertible(PyObject* obj_ptr) {
@@ -59,18 +61,18 @@ struct vector_function_from_python_list
     {
         list lst=extract<list>(obj_ptr);
         //if (value == 0) boost::python::throw_error_already_set();
-        void* storage = ((converter::rvalue_from_python_storage< Vector<ExpressionInterface> >*)   data)->storage.bytes;
-        Vector<ExpressionInterface> res(len(lst));
-        for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<ExpressionInterface&>(lst[i])); }
-        new (storage) Vector<ExpressionInterface>(res);
+        void* storage = ((converter::rvalue_from_python_storage< Vector<ScalarFunctionInterface> >*)   data)->storage.bytes;
+        Vector<ScalarFunctionInterface> res(len(lst));
+        for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<ScalarFunctionInterface&>(lst[i])); }
+        new (storage) Vector<ScalarFunctionInterface>(res);
         data->convertible = storage;
     }
 };
 
 
 // Define to remove ambiguity
-PolynomialExpression operator*(const PolynomialExpression& p, const Float& x) {
-    return PolynomialExpression(static_cast<const Polynomial<Interval>&>(p)*Interval(x));
+ScalarPolynomialFunction operator*(const ScalarPolynomialFunction& p, const Float& x) {
+    return ScalarPolynomialFunction(static_cast<const Polynomial<Interval>&>(p)*Interval(x));
 }
 
 template<class X, class D>
@@ -93,7 +95,7 @@ make(const boost::python::object& obj) {
     boost::python::tuple tup=boost::python::extract<boost::python::tuple>(obj);
     MultiIndex* a=new MultiIndex(len(tup));
     for(uint i=0; i!=a->size(); ++i) {
-        //shared_ptr<ExpressionInterface> expression_ptr=boost::python::extract<shared_ptr<ExpressionInterface> >(elements[i]);
+        //shared_ptr<ScalarFunctionInterface> expression_ptr=boost::python::extract<shared_ptr<ScalarFunctionInterface> >(elements[i]);
         uint ai=boost::python::extract<uint>(tup[i]);
         a->set(i,ai);
     }
@@ -101,14 +103,14 @@ make(const boost::python::object& obj) {
 }
 
 template<>
-Vector<ExpressionInterface>*
+Vector<ScalarFunctionInterface>*
 make(const boost::python::object& obj) {
     boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-    Vector<ExpressionInterface>* r=new Vector<ExpressionInterface>(len(elements));
+    Vector<ScalarFunctionInterface>* r=new Vector<ScalarFunctionInterface>(len(elements));
     for(uint i=0; i!=r->size(); ++i) {
-        //shared_ptr<ExpressionInterface> expression_ptr=boost::python::extract<shared_ptr<ExpressionInterface> >(elements[i]);
-        const ExpressionInterface& expression_ref=boost::python::extract<const ExpressionInterface&>(elements[i]);
-        shared_ptr<ExpressionInterface> expression_ptr(expression_ref.clone());
+        //shared_ptr<ScalarFunctionInterface> expression_ptr=boost::python::extract<shared_ptr<ScalarFunctionInterface> >(elements[i]);
+        const ScalarFunctionInterface& expression_ref=boost::python::extract<const ScalarFunctionInterface&>(elements[i]);
+        shared_ptr<ScalarFunctionInterface> expression_ptr(expression_ref.clone());
         r->set(i,expression_ptr);
     }
     return r;
@@ -119,33 +121,33 @@ PolynomialFunction*
 make<PolynomialFunction>(const boost::python::object& obj)
 {
     boost::python::list lst=boost::python::extract<boost::python::list>(obj);
-    Vector<PolynomialExpression> expressions(boost::python::len(lst));
+    Vector<ScalarPolynomialFunction> expressions(boost::python::len(lst));
     for(uint i=0; i!=expressions.size(); ++i) {
-        expressions[i]=boost::python::extract<PolynomialExpression>(lst[i]);
+        expressions[i]=boost::python::extract<ScalarPolynomialFunction>(lst[i]);
     }
     return new PolynomialFunction(expressions);
 }
 
-template<class T> static T evaluate(const ExpressionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
+template<class T> static T evaluate(const ScalarFunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
 template<class T> static Vector<T> evaluate(const FunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
 
 // RATIONALE:
 // Don't use standard method for wrapping abstract base classes, as this doesn't work well with
 // shared_ptr<>. Instead, write static functions calling the overridden functions without using inheritence
-class ExpressionPyWrap {
+class ScalarFunctionPyWrap {
   public:
-    static ExpressionInterface* clone(const ExpressionInterface& f) { return f.clone(); };
-    static uint argument_size(const ExpressionInterface& f) { return f.argument_size(); }
-    static ushort smoothness(const ExpressionInterface& f) { return f.smoothness(); }
-    template<class T> static T evaluate(const ExpressionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
+    static ScalarFunctionInterface* clone(const ScalarFunctionInterface& f) { return f.clone(); };
+    static uint argument_size(const ScalarFunctionInterface& f) { return f.argument_size(); }
+    static ushort smoothness(const ScalarFunctionInterface& f) { return f.smoothness(); }
+    template<class T> static T evaluate(const ScalarFunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
 };
 
 /*
-class ExpressionPyWrap
-    : public ExpressionInterface
-    , public wrapper< ExpressionInterface >
+class ScalarFunctionPyWrap
+    : public ScalarFunctionInterface
+    , public wrapper< ScalarFunctionInterface >
 {
-    virtual ExpressionInterface* clone() const { return this->get_override("clone")(); };
+    virtual ScalarFunctionInterface* clone() const { return this->get_override("clone")(); };
     virtual uint argument_size() const { return this->get_override("argument_size")(); }
     virtual ushort smoothness() const { return this->get_override("smoothness")(); }
     virtual Float evaluate(const Vector<Float>&) const { return this->get_override("__call__")(); }
@@ -153,7 +155,7 @@ class ExpressionPyWrap
     virtual TaylorModel evaluate(const Vector<TaylorModel>&) const { return this->get_override("__call__")(); }
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >&) const { return this->get_override("__call__")(); }
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >&) const { return this->get_override("__call__")(); }
-    virtual ExpressionInterface* derivative(uint j) const { return this->get_override("derivative")(); }
+    virtual ScalarFunctionInterface* derivative(uint j) const { return this->get_override("derivative")(); }
     virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -182,18 +184,18 @@ class FunctionPyWrap
 
 
 
-class PythonExpression
-    : public ExpressionInterface
+class ScalarPythonFunction
+    : public ScalarFunctionInterface
 {
   public:
-    PythonExpression(std::string& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
-    PythonExpression(uint as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
-    PythonExpression(const object& pyf)
+    ScalarPythonFunction(std::string& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
+    ScalarPythonFunction(uint as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
+    ScalarPythonFunction(const object& pyf)
         : _name(),
           _argument_size(extract<int>(pyf.attr("argument_size"))),
           _pyf(pyf) { }
 
-    PythonExpression* clone() const { return new PythonExpression(*this); }
+    ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
     virtual uint argument_size() const { return this->_argument_size; }
     virtual ushort smoothness() const { return 255; }
 
@@ -210,7 +212,7 @@ class PythonExpression
     virtual Differential<TaylorModel> evaluate (const Vector< Differential<TaylorModel> >& x) const {
         return boost::python::extract< Differential<TaylorModel> >(this->_pyf(x)); }
 
-    virtual PythonExpression* derivative (uint j) const {
+    virtual ScalarPythonFunction* derivative (uint j) const {
         ARIADNE_ASSERT_MSG(false,"Cannot differentiate a Python function"); return 0; }
     virtual std::ostream& write(std::ostream& os) const {
         os << "UserExpression( ";
@@ -272,23 +274,6 @@ class PythonFunction
 };
 
 
-std::string __str__(const AffineFunction& f) {
-    std::stringstream ss;
-    for(uint i=0; i!=f.result_size(); ++i) {
-        ss<<(i==0?"AffineFunction( ":"; ");
-        if(f.b()[i]!=0) { ss<<f.b()[i]; }
-        for(uint j=0; j!=f.argument_size(); ++j) {
-            if(f.A()[i][j]!=0) {
-                if(f.A()[i][j]>0) { ss<<"+"; } else { ss<<"-"; }
-                if(abs(f.A()[i][j])!=1) { ss<<abs(f.A()[i][j]); }
-                //ss<<char('x'+j);
-                ss<<"x"<<j;
-            }
-        }
-    }
-    ss<<" )";
-    return ss.str();
-}
 
 /*
 template<class F> TaylorFunction call_evaluate(const F& f, const TaylorFunction& tf) {
@@ -313,7 +298,9 @@ typedef Vector<TaylorModel> TMV;
 typedef TaylorFunction TFM;
 typedef TaylorModel TM;
 
-template<class T> T evaluate(const ExpressionInterface& expr, const Vector<T>& ix) { return expr.evaluate(ix); }
+template<class T> T evaluate(const ScalarFunctionInterface& expr, const Vector<T>& ix) { return expr.evaluate(ix); }
+
+
 
 
 void export_multi_index()
@@ -372,174 +359,116 @@ void export_polynomial()
     to_python_converter< Vector< Polynomial<X> >, vector_to_python_list< Polynomial<X> > >();
 }
 
-void export_expression_interface()
+void export_scalar_function_interface()
 {
-    class_<ExpressionInterface, shared_ptr<ExpressionInterface>, boost::noncopyable>
-        expression_interface_class("ExpressionInterface",no_init);
+    class_<ScalarFunctionInterface, shared_ptr<ScalarFunctionInterface>, boost::noncopyable>
+        scalar_function_interface_class("ScalarFunctionInterface",no_init);
 
     // Don't use following standard wrapping technique due to clash with shared_ptr
-    //expression_interface_class.def("argument_size", pure_virtual(&ExpressionInterface::argument_size));
+    //expression_interface_class.def("argument_size", pure_virtual(&ScalarFunctionInterface::argument_size));
 
-    expression_interface_class.def("argument_size", &ExpressionPyWrap::argument_size);
-    expression_interface_class.def("smoothness", &ExpressionPyWrap::smoothness);
-    expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate<Interval>);
-    expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate<TaylorModel>);
-    expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate< Differential<Interval> >);
-    expression_interface_class.def("__call__", &ExpressionPyWrap::evaluate< Differential<TaylorModel> >);
-    expression_interface_class.def(self_ns::str(self));
+    scalar_function_interface_class.def("argument_size", &ScalarFunctionPyWrap::argument_size);
+    scalar_function_interface_class.def("smoothness", &ScalarFunctionPyWrap::smoothness);
+    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<Interval>);
+    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<TaylorModel>);
+    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate< Differential<Interval> >);
+    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate< Differential<TaylorModel> >);
+    scalar_function_interface_class.def(self_ns::str(self));
     //expression_interface_class.def(self_ns::repr(self));
 
-    def("evaluate",&ExpressionPyWrap::evaluate<Interval>);
-    def("evaluate",&ExpressionPyWrap::evaluate<TaylorModel>);
-
-    class_<ProjectionExpression, bases< ExpressionInterface > >
-        projection_expression_class("Projection", no_init);
-
-    to_python_converter< array<ProjectionExpression>, array_to_python_list<ProjectionExpression> >();
-
-    def("variable",(ProjectionExpression(*)(uint,uint)) &variable);
-    def("variables",(array<ProjectionExpression>(*)(uint)) &variables);
-    def("projection",(ProjectionExpression(*)(uint,uint)) &variable);
-    def("identity",(array<ProjectionExpression>(*)(uint)) &variables);
-
-    expression_interface_class.def("__neg__",(ExpressionPointer(*)(const ExpressionPointer)) &operator-);
-    expression_interface_class.def("__add__",(ExpressionPointer(*)(const ExpressionPointer,const ExpressionPointer)) &operator+);
-    expression_interface_class.def("__sub__",(ExpressionPointer(*)(const ExpressionPointer,const ExpressionPointer)) &operator-);
-    expression_interface_class.def("__mul__",(ExpressionPointer(*)(const ExpressionPointer,const ExpressionPointer)) &operator*);
-    expression_interface_class.def("__div__",(ExpressionPointer(*)(const ExpressionPointer,const ExpressionPointer)) &operator/);
-
-    expression_interface_class.def("__add__",(ExpressionPointer(*)(const ExpressionPointer,const Interval&)) &operator+);
-    expression_interface_class.def("__sub__",(ExpressionPointer(*)(const ExpressionPointer,const Interval&)) &operator-);
-    expression_interface_class.def("__mul__",(ExpressionPointer(*)(const ExpressionPointer,const Interval&)) &operator*);
-    expression_interface_class.def("__div__",(ExpressionPointer(*)(const ExpressionPointer,const Interval&)) &operator/);
-
-    expression_interface_class.def("__radd__",&__radd__<ExpressionPointer,ExpressionPointer,Interval>);
-    expression_interface_class.def("__rsub__",&__rsub__<ExpressionPointer,ExpressionPointer,Interval>);
-    expression_interface_class.def("__rmul__",&__rmul__<ExpressionPointer,ExpressionPointer,Interval>);
-    expression_interface_class.def("__rdiv__",&__rdiv__<ExpressionPointer,ExpressionPointer,Interval>);
-
-    def("rec",(ExpressionPointer(*)(const ExpressionPointer)) &rec);
-    def("sqr",(ExpressionPointer(*)(const ExpressionPointer)) &sqr);
-    def("pow",(ExpressionPointer(*)(const ExpressionPointer, int n)) &pow);
-
-    def("sqrt",(ExpressionPointer(*)(const ExpressionPointer)) &sqrt);
-    def("exp",(ExpressionPointer(*)(const ExpressionPointer)) &exp);
-    def("log",(ExpressionPointer(*)(const ExpressionPointer)) &log);
-
-    def("sin",(ExpressionPointer(*)(const ExpressionPointer)) &sin);
-    def("cos",(ExpressionPointer(*)(const ExpressionPointer)) &cos);
-    def("tan",(ExpressionPointer(*)(const ExpressionPointer)) &tan);
+    def("evaluate",&ScalarFunctionPyWrap::evaluate<Interval>);
+    def("evaluate",&ScalarFunctionPyWrap::evaluate<TaylorModel>);
 }
 
 
-void export_python_expression()
+void export_scalar_python_function()
 {
-    class_<PythonExpression, bases< ExpressionInterface > > python_expression_class("UserExpression", init<object>());
-    python_expression_class.def(init<uint,object>());
+    class_<ScalarPythonFunction, bases< ScalarFunctionInterface > > scalar_python_function_class("ScalarUserFunction", init<object>());
+    scalar_python_function_class.def(init<uint,object>());
 }
 
 
 
 
 
-void export_affine_expression()
+void export_scalar_affine_function()
 {
-    typedef Float F;
-    typedef Interval I;
-    typedef TaylorModel TM;
-    typedef AffineExpression AE;
-    typedef TaylorExpression TE;
+   class_<ScalarAffineFunction, bases< ScalarFunctionInterface > > scalar_affine_function_class("Affine", init<Vector<Interval>, Interval> ());
+    //scalar_affine_function_class.def(init<ExpressionPointer>());
+    scalar_affine_function_class.def("value",&ScalarAffineFunction::value);
+    scalar_affine_function_class.def("gradient",&ScalarAffineFunction::gradient);
+    scalar_affine_function_class.def("__add__",(ScalarAffineFunction(*)(const ScalarAffineFunction&,const ScalarAffineFunction&))&operator+);
+    scalar_affine_function_class.def("__mul__",(ScalarAffineFunction(*)(const ScalarAffineFunction&,const Interval&))&operator*);
+    scalar_affine_function_class.def("__rmul__",&__rmul__<ScalarAffineFunction,ScalarAffineFunction,Interval>);
 
-    class_<AffineExpression, bases< ExpressionInterface > > affine_expression_class("Affine", init<Vector<Interval>, Interval> ());
-    affine_expression_class.def(init<ExpressionPointer>());
-    affine_expression_class.def("value",&AffineExpression::value);
-    affine_expression_class.def("gradient",&AffineExpression::gradient);
-    affine_expression_class.def("__add__",(AffineExpression(*)(const AffineExpression&,const AffineExpression&))&operator+);
-    affine_expression_class.def("__mul__",(AffineExpression(*)(const AffineExpression&,const Interval&))&operator*);
-    affine_expression_class.def("__rmul__",&__rmul__<AE,AE,I>);
-
-    def("derivative",(Interval(*)(const AffineExpression&,uint)) &derivative);
+    def("derivative",(Interval(*)(const ScalarAffineFunction&,uint)) &derivative);
 
 }
 
 
 
-void export_polynomial_expression()
+void export_scalar_polynomial_function()
 {
-    typedef PolynomialExpression PE;
+    typedef ScalarPolynomialFunction PE;
+
     Float flt;
     Interval ivl;
 
-    array_to_python_list<PolynomialExpression>();
+    array_to_python_list<ScalarPolynomialFunction>();
 
-    class_< PE, bases<ExpressionInterface> > polynomial_expression_class("Polynomial", init<int>());
-    polynomial_expression_class.def(init<ExpressionPointer>());
-    polynomial_expression_class.def(init<AffineExpression>());
-    polynomial_expression_class.def(init<PolynomialExpression>());
-    polynomial_expression_class.def("constant", (PE(*)(uint,double)) &PE::constant);
-    polynomial_expression_class.def("constant", (PE(*)(uint,Interval)) &PE::constant);
-    polynomial_expression_class.def("variable", (PE(*)(uint,uint)) &PE::variable);
-    polynomial_expression_class.def("variables", (array<PE>(*)(uint)) &PE::variables);
-    polynomial_expression_class.staticmethod("constant");
-    polynomial_expression_class.staticmethod("variable");
-    polynomial_expression_class.staticmethod("variables");
+    class_< PE, bases<ScalarFunctionInterface> > scalar_polynomial_function_class("Polynomial", init<int>());
+    //scalar_polynomial_function_class.def(init<ExpressionPointer>());
+    scalar_polynomial_function_class.def(init<ScalarAffineFunction>());
+    scalar_polynomial_function_class.def(init<ScalarPolynomialFunction>());
+    scalar_polynomial_function_class.def("constant", (PE(*)(uint,double)) &PE::constant);
+    scalar_polynomial_function_class.def("constant", (PE(*)(uint,Interval)) &PE::constant);
+    scalar_polynomial_function_class.def("variable", (PE(*)(uint,uint)) &PE::variable);
+    scalar_polynomial_function_class.def("variables", (array<PE>(*)(uint)) &PE::variables);
+    scalar_polynomial_function_class.staticmethod("constant");
+    scalar_polynomial_function_class.staticmethod("variable");
+    scalar_polynomial_function_class.staticmethod("variables");
 
-    polynomial_expression_class.def("argument_size", &PE::argument_size);
-    polynomial_expression_class.def("insert", &PE::insert);
-    polynomial_expression_class.def("__iter__",boost::python::iterator<PE>());
+    scalar_polynomial_function_class.def("argument_size", &PE::argument_size);
+    scalar_polynomial_function_class.def("insert", &PE::insert);
+    scalar_polynomial_function_class.def("__iter__",boost::python::iterator<PE>());
 
-    implicitly_convertible<ExpressionPointer,PolynomialExpression>();
-    //implicitly_convertible<AffineExpression,PolynomialExpression>();
+    //implicitly_convertible<RealExpressionPointer,PolynomialExpression>();
 
-    //polynomial_expression_class.def(+self);
-    //polynomial_expression_class.def(-self);
-    //polynomial_expression_class.def(self+self);
-    //polynomial_expression_class.def(self-self);
-    //polynomial_expression_class.def(self*self);
+    scalar_polynomial_function_class.def("__pos__", &__pos__<PE,PE>);
+    scalar_polynomial_function_class.def("__neg__", &__neg__<PE,PE>);
+    scalar_polynomial_function_class.def("__add__", &__add__<PE,PE,PE>);
+    scalar_polynomial_function_class.def("__sub__", &__sub__<PE,PE,PE>);
+    scalar_polynomial_function_class.def("__mul__", &__mul__<PE,PE,PE>);
 
-    //polynomial_expression_class.def(self+flt);
-    //polynomial_expression_class.def(self-flt);
-    //polynomial_expression_class.def(self*flt);
-    //polynomial_expression_class.def(self/flt);
-    //polynomial_expression_class.def(flt+self);
-    //polynomial_expression_class.def(flt-self);
-    //polynomial_expression_class.def(flt*self);
+    scalar_polynomial_function_class.def("__add__", &__add__<PE,PE,Float>);
+    scalar_polynomial_function_class.def("__sub__", &__sub__<PE,PE,Float>);
+    scalar_polynomial_function_class.def("__mul__", &__mul__<PE,PE,Float>);
+    scalar_polynomial_function_class.def("__div__", &__div__<PE,PE,Float>);
+    scalar_polynomial_function_class.def("__radd__", &__add__<PE,PE,Float>);
+    scalar_polynomial_function_class.def("__rsub__", &__rsub__<PE,PE,Float>);
+    scalar_polynomial_function_class.def("__rmul__", &__mul__<PE,PE,Float>);
 
-    polynomial_expression_class.def("__pos__", &__pos__<PE,PE>);
-    polynomial_expression_class.def("__neg__", &__neg__<PE,PE>);
-    polynomial_expression_class.def("__add__", &__add__<PE,PE,PE>);
-    polynomial_expression_class.def("__sub__", &__sub__<PE,PE,PE>);
-    polynomial_expression_class.def("__mul__", &__mul__<PE,PE,PE>);
+    scalar_polynomial_function_class.def("__add__", &__add__<PE,PE,Interval>);
+    scalar_polynomial_function_class.def("__sub__", &__sub__<PE,PE,Interval>);
+    scalar_polynomial_function_class.def("__mul__", &__mul__<PE,PE,Interval>);
+    scalar_polynomial_function_class.def("__div__", &__div__<PE,PE,Interval>);
+    scalar_polynomial_function_class.def("__radd__", &__add__<PE,PE,Interval>);
+    scalar_polynomial_function_class.def("__rsub__", &__rsub__<PE,PE,Interval>);
+    scalar_polynomial_function_class.def("__rmul__", &__mul__<PE,PE,Interval>);
 
-    polynomial_expression_class.def("__add__", &__add__<PE,PE,Float>);
-    polynomial_expression_class.def("__sub__", &__sub__<PE,PE,Float>);
-    polynomial_expression_class.def("__mul__", &__mul__<PE,PE,Float>);
-    polynomial_expression_class.def("__div__", &__div__<PE,PE,Float>);
-    polynomial_expression_class.def("__radd__", &__add__<PE,PE,Float>);
-    polynomial_expression_class.def("__rsub__", &__rsub__<PE,PE,Float>);
-    polynomial_expression_class.def("__rmul__", &__mul__<PE,PE,Float>);
+    scalar_polynomial_function_class.def(self+=self);
+    scalar_polynomial_function_class.def(self-=self);
+    scalar_polynomial_function_class.def(self+=flt);
+    scalar_polynomial_function_class.def(self-=flt);
+    scalar_polynomial_function_class.def(self*=flt);
+    scalar_polynomial_function_class.def(self/=flt);
+    scalar_polynomial_function_class.def(self+=ivl);
+    scalar_polynomial_function_class.def(self-=ivl);
+    scalar_polynomial_function_class.def(self*=ivl);
+    scalar_polynomial_function_class.def(self/=ivl);
 
-    polynomial_expression_class.def("__add__", &__add__<PE,PE,Interval>);
-    polynomial_expression_class.def("__sub__", &__sub__<PE,PE,Interval>);
-    polynomial_expression_class.def("__mul__", &__mul__<PE,PE,Interval>);
-    polynomial_expression_class.def("__div__", &__div__<PE,PE,Interval>);
-    polynomial_expression_class.def("__radd__", &__add__<PE,PE,Interval>);
-    polynomial_expression_class.def("__rsub__", &__rsub__<PE,PE,Interval>);
-    polynomial_expression_class.def("__rmul__", &__mul__<PE,PE,Interval>);
-
-    polynomial_expression_class.def(self+=self);
-    polynomial_expression_class.def(self-=self);
-    polynomial_expression_class.def(self+=flt);
-    polynomial_expression_class.def(self-=flt);
-    polynomial_expression_class.def(self*=flt);
-    polynomial_expression_class.def(self/=flt);
-    polynomial_expression_class.def(self+=ivl);
-    polynomial_expression_class.def(self-=ivl);
-    polynomial_expression_class.def(self*=ivl);
-    polynomial_expression_class.def(self/=ivl);
-
-    def("derivative",(PolynomialExpression*(PolynomialExpression::*)(uint))&PolynomialExpression::derivative,return_value_policy<manage_new_object>());
-    def("antiderivative",(PolynomialExpression*(PolynomialExpression::*)(uint))&PolynomialExpression::antiderivative,return_value_policy<manage_new_object>());
+    def("derivative",(PE*(PE::*)(uint))&PE::derivative,return_value_policy<manage_new_object>());
+    def("antiderivative",(PE*(PE::*)(uint))&PE::antiderivative,return_value_policy<manage_new_object>());
 
     //implicitly_convertible<Polynomial<Float>,PolynomialExpression>();
     //implicitly_convertible<Polynomial<Interval>,PolynomialExpression>();
@@ -575,11 +504,11 @@ void export_python_function()
 
 void export_vector_function()
 {
-    typedef Vector<ExpressionInterface> VectorFunction;
+    typedef Vector<ScalarFunctionInterface> VectorFunction;
 
     class_<VectorFunction, bases< FunctionInterface > > vector_function_class("VectorFunction",no_init);
     vector_function_class.def("__init__", make_constructor(&make<VectorFunction>) );
-    vector_function_class.def("__getitem__",(ExpressionInterface const&(VectorFunction::*)(uint)const)&VectorFunction::operator[],return_value_policy<copy_const_reference>());
+    vector_function_class.def("__getitem__",(ScalarFunctionInterface const&(VectorFunction::*)(uint)const)&VectorFunction::operator[],return_value_policy<copy_const_reference>());
 
     vector_function_from_python_list();
 }
@@ -589,7 +518,7 @@ void export_affine_function()
     class_<AffineFunction, bases< FunctionInterface > >
         affine_function_class("AffineFunction", init<Matrix<Float>, Vector<Float> >());
     affine_function_class.def(init<AffineFunction>());
-    affine_function_class.def("__getitem__",(AffineExpression(AffineFunction::*)(uint)const)&AffineFunction::operator[]);
+    affine_function_class.def("__getitem__",(ScalarAffineFunction(AffineFunction::*)(uint)const)&AffineFunction::operator[]);
 
 }
 
@@ -599,8 +528,8 @@ void export_polynomial_function()
         polynomial_function_class("PolynomialFunction", no_init);
     polynomial_function_class.def("__init__",make_constructor(&make<PolynomialFunction>));
     polynomial_function_class.def(init<PolynomialFunction>());
-    polynomial_function_class.def("__getitem__",(PolynomialExpression const&(PolynomialFunction::*)(uint)const)&PolynomialFunction::operator[],return_value_policy<copy_const_reference>());
-    polynomial_function_class.def("__setitem__",(void(PolynomialFunction::*)(uint,const PolynomialExpression&)const)&PolynomialFunction::set);
+    polynomial_function_class.def("__getitem__",(ScalarPolynomialFunction const&(PolynomialFunction::*)(uint)const)&PolynomialFunction::operator[],return_value_policy<copy_const_reference>());
+    polynomial_function_class.def("__setitem__",(void(PolynomialFunction::*)(uint,const ScalarPolynomialFunction&)const)&PolynomialFunction::set);
 
 }
 
@@ -608,21 +537,21 @@ void export_polynomial_function()
 
 
 void function_submodule() {
-    to_python_converter< array<PolynomialExpression>, array_to_python_list<PolynomialExpression> >();
+    to_python_converter< array<ScalarPolynomialFunction>, array_to_python_list<ScalarPolynomialFunction> >();
 
     export_multi_index();
 
 
-    export_expression_interface();
+    export_scalar_function_interface();
     export_function_interface();
 
     //export_polynomial<Float>();
     //export_polynomial<Interval>();
     export_monomial<Interval>();
 
-    export_affine_expression();
-    export_polynomial_expression();
-    export_python_expression();
+    export_scalar_affine_function();
+    export_scalar_polynomial_function();
+    export_scalar_python_function();
 
     export_vector_function();
     export_python_function();

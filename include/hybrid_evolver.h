@@ -74,9 +74,9 @@ class HybridEvolver
     : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
-    typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
-    typedef ExpressionInterface ExpressionType;
+    typedef ScalarFunctionInterface ExpressionType;
     typedef FunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
     typedef TaylorFunction FunctionModelType;

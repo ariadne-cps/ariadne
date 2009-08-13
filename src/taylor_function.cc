@@ -621,7 +621,7 @@ partial_evaluate(const TaylorFunction& tf, uint k, const Interval& c)
 
 
 TaylorExpression
-compose(const ExpressionInterface& g, const TaylorFunction& f)
+compose(const ScalarFunctionInterface& g, const TaylorFunction& f)
 {
     return TaylorExpression(f.domain(),g.evaluate(f.models()));
 }
@@ -675,7 +675,7 @@ antiderivative(const TaylorFunction& f, uint k)
 }
 
 TaylorExpression
-implicit(const ExpressionInterface& f, const TaylorFunction& g)
+implicit(const ScalarFunctionInterface& f, const TaylorFunction& g)
 {
     return TaylorExpression(g.domain(),implicit(f,g.models()));
 }

@@ -237,7 +237,7 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 }
 
 
-TaylorModel apply(const ExpressionInterface& f, const TaylorSet& ts)
+TaylorModel apply(const ScalarFunctionInterface& f, const TaylorSet& ts)
 {
     return f.evaluate(ts.models());
 }

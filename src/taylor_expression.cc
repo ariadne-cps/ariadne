@@ -83,7 +83,7 @@ TaylorExpression::TaylorExpression(const DomainType& d, const ExpansionType& f, 
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-TaylorExpression::TaylorExpression(const DomainType& d, const ExpressionInterface& f)
+TaylorExpression::TaylorExpression(const DomainType& d, const ScalarFunctionInterface& f)
     : _domain(d), _model(f.argument_size())
 {
     ARIADNE_ASSERT(d.size()==f.argument_size());
@@ -342,7 +342,7 @@ midpoint(const TaylorExpression& f)
 
 
 TaylorExpression
-compose(const ExpressionInterface& f, const Vector<TaylorExpression>& g)
+compose(const ScalarFunctionInterface& f, const Vector<TaylorExpression>& g)
 {
     ARIADNE_ASSERT(f.argument_size()==g.size());
     for(uint i=0; i!=g.size(); ++i) {
@@ -411,7 +411,7 @@ TaylorExpression implicit(const TaylorExpression& f) {
 
 
 TaylorExpression
-implicit(const ExpressionInterface& f, const Vector<TaylorExpression>& g)
+implicit(const ScalarFunctionInterface& f, const Vector<TaylorExpression>& g)
 {
     ARIADNE_ASSERT(f.argument_size()>g.size());
     ARIADNE_ASSERT(g.size()>0);
@@ -429,7 +429,7 @@ implicit(const ExpressionInterface& f, const Vector<TaylorExpression>& g)
 }
 
 TaylorExpression
-implicit(const ExpressionInterface& f, const Vector<Interval>& d)
+implicit(const ScalarFunctionInterface& f, const Vector<Interval>& d)
 {
     ARIADNE_ASSERT(f.argument_size()>=1u);
     ARIADNE_ASSERT(d.size()+1u==f.argument_size());
@@ -441,7 +441,7 @@ implicit(const ExpressionInterface& f, const Vector<Interval>& d)
 
 
 TaylorExpression
-crossing_time(const ExpressionInterface& g, const TaylorFunction& phi)
+crossing_time(const ScalarFunctionInterface& g, const TaylorFunction& phi)
 {
     Vector<Interval> d=project(phi.domain(),range(0,phi.result_size()));
     Interval h=phi.domain()[phi.result_size()];

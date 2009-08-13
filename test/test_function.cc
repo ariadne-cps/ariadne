@@ -51,14 +51,14 @@ void TestFunction::test()
 
 void TestFunction::test_concept()
 {
-    Vector<ExpressionInterface> vsf(0);
+    Vector<ScalarFunctionInterface> vsf(0);
     FunctionElement fe(vsf,0u);
 
-    ExpressionInterface* e1=0;
-    ExpressionInterface* e2=0;
-    ExpressionInterface* e3=0;
-    //Vector<ExpressionInterface> ve=join(3,*e1,*e2,*e3);
-    Vector<ExpressionInterface> ve=join(3,e1,e2,e3);
+    ScalarFunctionInterface* e1=0;
+    ScalarFunctionInterface* e2=0;
+    ScalarFunctionInterface* e3=0;
+    //Vector<ScalarFunctionInterface> ve=join(3,*e1,*e2,*e3);
+    Vector<ScalarFunctionInterface> ve=join(3,e1,e2,e3);
 
     shared_ptr<const FunctionInterface> fp,gp;
     ComposedFunction h(gp,fp);

@@ -31,7 +31,6 @@
 #include <exception>
 #include <stdexcept>
 #include <string>
-#include <set>
 
 namespace Ariadne {
 

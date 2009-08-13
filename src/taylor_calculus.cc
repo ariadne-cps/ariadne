@@ -650,7 +650,7 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
 TaylorCalculus::PredicateModelType
 TaylorCalculus::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
 {
-    //ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(FunctionInterface,Vector<Interval>","Use ExpressionInterface instead");
+    //ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(FunctionInterface,Vector<Interval>","Use ScalarFunctionInterface instead");
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
     FunctionModelType predicate_model(bx,g);
@@ -660,7 +660,7 @@ TaylorCalculus::predicate_model(FunctionInterface const& g, Vector<Interval> con
 }
 
 TaylorCalculus::PredicateModelType
-TaylorCalculus::predicate_model(ExpressionInterface const& g, Vector<Interval> const& bx) const
+TaylorCalculus::predicate_model(ScalarFunctionInterface const& g, Vector<Interval> const& bx) const
 {
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 

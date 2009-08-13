@@ -38,6 +38,8 @@
 #include <boost/shared_array.hpp>
 
 #include "formula.h"
+#include "container.h"
+#include "valuation.h"
 
 namespace Ariadne {
 
@@ -53,12 +55,15 @@ class HybridGrid;
 class DiscreteState;
 class DiscreteSpace;
 
-class ExpressionInterface;
+class ScalarFunctionInterface;
 class FunctionInterface;
 
-template<class R> class FormulaInterface;
+template<class R> class ExpressionInterface;
 class Grid;
 
+template<class T> class List;
+template<class T> class Set;
+template<class k, class V> class Map;
 
 
 
@@ -78,7 +83,7 @@ class HybridSystem
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
 
 
@@ -94,30 +99,30 @@ class HybridSystem
     //! \brief The list of the hybrid automaton's discrete modes.
     //std::set< DiscreteMode > _modes;
 
-    //struct DiscreteEquation { DiscretePredicate loc; DiscreteVariable lhs; DiscreteFormula rhs; };
-    struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
-    struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealFormula rhs; };
+    //struct DiscreteEquation { DiscretePredicate loc; DiscreteVariable lhs; DiscreteExpression rhs; };
+    struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealExpression rhs; };
+    struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealExpression rhs; };
     struct InvariantPredicate { DiscretePredicate loc; ContinuousPredicate pred; };
-    struct DiscreteUpdate { EventSet evnts; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedFormula rhs;  };
-    struct ContinuousUpdate { EventSet evnts; DiscretePredicate loc; RealVariable lhs; RealFormula rhs;  };
+    struct DiscreteUpdate { EventSet evnts; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedExpression rhs;  };
+    struct ContinuousUpdate { EventSet evnts; DiscretePredicate loc; RealVariable lhs; RealExpression rhs;  };
     struct GuardPredicate { EventSet evnts; DiscretePredicate loc; ContinuousPredicate pred; };
     struct DisabledEvents { EventSet evnts; DiscretePredicate loc; };
 
-    std::vector<DifferentialEquation> _differential_equations;
-    std::vector<AlgebraicEquation> _algebraic_equations;
-    std::vector<DiscreteUpdate> _discrete_updates;
-    std::vector<ContinuousUpdate> _continuous_updates;
-    std::vector<GuardPredicate> _guard_predicates;
-    std::vector<InvariantPredicate> _invariant_predicates;
-    std::vector<DisabledEvents> _disabled_events;
+    List<DifferentialEquation> _differential_equations;
+    List<AlgebraicEquation> _algebraic_equations;
+    List<DiscreteUpdate> _discrete_updates;
+    List<ContinuousUpdate> _continuous_updates;
+    List<GuardPredicate> _guard_predicates;
+    List<InvariantPredicate> _invariant_predicates;
+    List<DisabledEvents> _disabled_events;
 
-    typedef std::vector<DifferentialEquation>::const_iterator dynamic_const_iterator;
-    typedef std::vector<AlgebraicEquation>::const_iterator relation_const_iterator;
-    typedef std::vector<DiscreteUpdate>::const_iterator switch_const_iterator;
-    typedef std::vector<ContinuousUpdate>::const_iterator jump_const_iterator;
-    typedef std::vector<InvariantPredicate>::const_iterator invariant_const_iterator;
-    typedef std::vector<GuardPredicate>::const_iterator guard_const_iterator;
-    typedef std::vector<DisabledEvents>::const_iterator disabled_const_iterator;
+    typedef List<DifferentialEquation>::const_iterator dynamic_const_iterator;
+    typedef List<AlgebraicEquation>::const_iterator relation_const_iterator;
+    typedef List<DiscreteUpdate>::const_iterator switch_const_iterator;
+    typedef List<ContinuousUpdate>::const_iterator jump_const_iterator;
+    typedef List<InvariantPredicate>::const_iterator invariant_const_iterator;
+    typedef List<GuardPredicate>::const_iterator guard_const_iterator;
+    typedef List<DisabledEvents>::const_iterator disabled_const_iterator;
   public:
     //@{
     //! \name Constructors and destructors
@@ -194,49 +199,49 @@ class HybridSystem
     //! \brief .
     EventSet events() const;
     //! \brief .
-    StateSpace discrete_variables() const;
+    Space discrete_variables() const;
     //! \brief .
-    VariableSet result_variables(const Valuation& state) const;
+    VariableSet result_variables(const DiscreteValuation& state) const;
     //! \brief .
-    VariableSet argument_variables(const Valuation& state) const;
+    VariableSet argument_variables(const DiscreteValuation& state) const;
     //! \brief .
-    VariableSet continuous_variables(const Valuation& state) const;
+    VariableSet continuous_variables(const DiscreteValuation& state) const;
     //! \brief .
-    VariableSet state_variables(const Valuation& state) const;
+    VariableSet state_variables(const DiscreteValuation& state) const;
     //! \brief .
-    VariableSet algebraic_variables(const Valuation& state) const;
+    VariableSet algebraic_variables(const DiscreteValuation& state) const;
     //! \brief .
-    VariableSet auxiliary_variables(const Valuation& state) const;
+    VariableSet auxiliary_variables(const DiscreteValuation& state) const;
     //! \brief .
-    VariableSet input_variables(const Valuation& state) const;
+    VariableSet input_variables(const DiscreteValuation& state) const;
     //! \brief .
-    VariableSet output_variables(const Valuation& state) const;
+    VariableSet output_variables(const DiscreteValuation& state) const;
 
     //! \brief .
-    bool check_dynamic(const Valuation& location) const;
+    bool check_dynamic(const DiscreteValuation& location) const;
     //! \brief .
-    bool check_guards(const Valuation& location) const;
+    bool check_guards(const DiscreteValuation& location) const;
     //! \brief .
-    bool check_reset(const Event& event, const Valuation& source, const Valuation& target) const;
+    bool check_reset(const Event& event, const DiscreteValuation& source, const DiscreteValuation& target) const;
 
 
     //! \brief .
-    Valuation target(const Event& event, const Valuation& source) const;
+    DiscreteValuation target(const Event& event, const DiscreteValuation& source) const;
     //! \brief .
-    std::set<RealAssignment> unordered_equations(const Valuation& state) const;
+    Set<RealAssignment> unordered_equations(const DiscreteValuation& state) const;
 
     //! \brief .
-    std::vector<RealAssignment> equations(const Valuation& state) const;
+    List<RealAssignment> equations(const DiscreteValuation& state) const;
     //! \brief .
-    std::vector<RealDynamic> dynamic(const Valuation& state) const;
+    List<RealDynamic> dynamic(const DiscreteValuation& state) const;
     //! \brief .
-    std::vector<EnumeratedUpdate> switching(const Event& event, const Valuation& state) const;
+    List<EnumeratedUpdate> switching(const Event& event, const DiscreteValuation& state) const;
     //! \brief .
-    std::vector<RealUpdate> reset(const Event& event, const Valuation& state) const;
+    List<RealUpdate> reset(const Event& event, const DiscreteValuation& state) const;
     //! \brief .
-    std::map<Event,ContinuousPredicate> guards(const Valuation& state) const;
+    Map<Event,ContinuousPredicate> guards(const DiscreteValuation& state) const;
     //! \brief .
-    ContinuousPredicate guard(const Event& event, const Valuation& state) const;
+    ContinuousPredicate guard(const Event& event, const DiscreteValuation& state) const;
 
     //@}
 

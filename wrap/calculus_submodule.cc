@@ -171,7 +171,7 @@ TaylorExpression sin(const TaylorExpression&);
 TaylorExpression cos(const TaylorExpression&);
 TaylorExpression tan(const TaylorExpression&);
 
-PolynomialExpression polynomial(const TaylorExpression& te) {
+ScalarPolynomialFunction polynomial(const TaylorExpression& te) {
     return te.polynomial();
 }
 
@@ -193,7 +193,7 @@ void export_taylor_model()
     typedef TaylorFunction TF;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
-    typedef ExpressionInterface EI;
+    typedef ScalarFunctionInterface EI;
 
 
     class_<TM> taylor_model_class("TaylorModel");
@@ -288,7 +288,7 @@ void export_taylor_variable()
     typedef TaylorFunction TF;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
-    typedef ExpressionInterface EI;
+    typedef ScalarFunctionInterface EI;
 
     class_<TE> taylor_expression_class("TaylorExpression");
     taylor_expression_class.def("__init__", make_constructor(&make<TE>) );
@@ -364,7 +364,7 @@ void export_taylor_variable()
     taylor_expression_class.def("__call__", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
-    taylor_expression_class.def("polynomial", (PolynomialExpression(*)(const TE&)) &polynomial);
+    taylor_expression_class.def("polynomial", (ScalarPolynomialFunction(*)(const TE&)) &polynomial);
     //taylor_expression_class.staticmethod("set_default_maximum_degree");
     //taylor_expression_class.staticmethod("set_default_sweep_threshold");
     //taylor_expression_class.staticmethod("default_maximum_degree");
@@ -434,10 +434,10 @@ void export_taylor_function()
     typedef Polynomial<Interval> IP;
     typedef Vector<Polynomial<Float> > RPV;
     typedef Vector<Polynomial<Interval> > IPV;
-    typedef Vector<ExpressionInterface> EV;
+    typedef Vector<ScalarFunctionInterface> EV;
     typedef TaylorExpression TE;
     typedef TaylorFunction TF;
-    typedef ExpressionInterface E;
+    typedef ScalarFunctionInterface E;
     typedef FunctionInterface F;
 
     class_<TF> taylor_function_class("TaylorFunction");

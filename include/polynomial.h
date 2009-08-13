@@ -57,7 +57,7 @@ class Monomial
 //! \brief A polynomial with coefficients of some type \a X.
 template<class X>
 class Polynomial
-//    : public ExpressionInterface
+//    : public ScalarFunctionInterface
 {
     template<class XX> friend class Polynomial;
   public:
@@ -67,7 +67,7 @@ class Polynomial
     typedef typename Expansion<X>::const_reference const_reference;
     typedef typename Expansion<X>::iterator iterator;
     typedef typename Expansion<X>::const_iterator const_iterator;
-    typedef ExpressionInterface::SmoothnessType smoothness_type;
+    typedef ScalarFunctionInterface::SmoothnessType smoothness_type;
   public:
     //@{
     //! \name Constructors
@@ -84,7 +84,7 @@ class Polynomial
     Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
     //@}
 /*
-    // ExpressionInterface methods
+    // ScalarFunctionInterface methods
     virtual Polynomial<X>* clone() const;
     virtual smoothness_type smoothness() const { return 255; }
     virtual Float evaluate(const Vector<Float>& x) const;
@@ -605,7 +605,7 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
 
 
 /*
-// ExpressionInterface methods
+// ScalarFunctionInterface methods
 template<class X> inline Polynomial<X>* Polynomial<X>::clone() const {
     return new Polynomial<X>(*this); }
 template<class X> inline Float Polynomial<X>::evaluate(const Vector<Float>& x) const {

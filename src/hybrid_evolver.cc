@@ -402,7 +402,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     //    event times.
 
     // More useful typedefs
-    typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
     typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
 
     const double SMALL_RELATIVE_TIME=1./16;

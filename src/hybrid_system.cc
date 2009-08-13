@@ -33,12 +33,13 @@
 
 namespace Ariadne {
 
-using std::set;
-using std::map;
-using std::pair;
 using std::make_pair;
 
 std::vector<std::string> Event::_names=std::vector<std::string>();
+
+bool evaluate(const DiscretePredicate&, const DiscreteValuation&);
+EnumeratedValue evaluate(const EnumeratedExpression&, const DiscreteValuation&);
+String evaluate(const StringExpression&, const DiscreteValuation&);
 
 HybridSystem::~HybridSystem()
 {
@@ -58,87 +59,87 @@ HybridSystem::events() const
     return result;
 }
 
-StateSpace
+Space
 HybridSystem::discrete_variables() const
 {
     VariableSet variables;
     for(guard_const_iterator iter=this->_guard_predicates.begin(); iter!=this->_guard_predicates.end(); ++iter) {
-        variables.adjoin(iter->loc.arguments()); 
+        variables.adjoin(iter->loc.arguments());
     }
-    return StateSpace(variables);
+    return Space(variables);
 }
 
 VariableSet
-HybridSystem::result_variables(const Valuation& state) const
+HybridSystem::result_variables(const DiscreteValuation& discrete_state) const
 {
     VariableSet result;
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) { result.insert(iter->lhs); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
     }
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) { result.insert(iter->lhs); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
     }
     return result;
 }
 
 VariableSet
-HybridSystem::argument_variables(const Valuation& state) const
+HybridSystem::argument_variables(const DiscreteValuation& discrete_state) const
 {
     VariableSet result;
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) { adjoin(result,iter->rhs.arguments()); }
+        if(evaluate(iter->loc,discrete_state)) { adjoin(result,iter->rhs.arguments()); }
     }
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) { adjoin(result,iter->rhs.arguments()); }
+        if(evaluate(iter->loc,discrete_state)) { adjoin(result,iter->rhs.arguments()); }
     }
     return result;
 }
 
 VariableSet
-HybridSystem::state_variables(const Valuation& state) const
+HybridSystem::state_variables(const DiscreteValuation& discrete_state) const
 {
     VariableSet result;
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) { result.insert(iter->lhs); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
     }
     return result;
 }
 
 VariableSet
-HybridSystem::algebraic_variables(const Valuation& state) const
+HybridSystem::algebraic_variables(const DiscreteValuation& discrete_state) const
 {
     VariableSet result;
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) { result.insert(iter->lhs); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
     }
     return result;
 }
 
 VariableSet
-HybridSystem::auxiliary_variables(const Valuation& state) const
+HybridSystem::auxiliary_variables(const DiscreteValuation& discrete_state) const
 {
-    return intersection(this->algebraic_variables(state),this->argument_variables(state));
+    return intersection(this->algebraic_variables(discrete_state),this->argument_variables(discrete_state));
 }
 
 VariableSet
-HybridSystem::input_variables(const Valuation& state) const
+HybridSystem::input_variables(const DiscreteValuation& discrete_state) const
 {
-    return difference(this->argument_variables(state),this->result_variables(state));
+    return difference(this->argument_variables(discrete_state),this->result_variables(discrete_state));
 }
 
 VariableSet
-HybridSystem::output_variables(const Valuation& state) const
+HybridSystem::output_variables(const DiscreteValuation& discrete_state) const
 {
-    return difference(this->argument_variables(state),this->result_variables(state));
+    return difference(this->argument_variables(discrete_state),this->result_variables(discrete_state));
 }
 
 template<class T>
-std::vector<T>
-flatten(std::map< T, std::set<T> >& dag)
+List<T>
+flatten(Map< T, Set<T> >& dag)
 {
-    std::vector<T> result;
+    List<T> result;
     while(!dag.empty()) {
-        std::set<T> visited;
+        Set<T> visited;
         T t=dag.begin()->first;
         while(!dag[t].empty()) {
             visited.insert(t);
@@ -149,20 +150,20 @@ flatten(std::map< T, std::set<T> >& dag)
         }
         result.push_back(t);
         dag.erase(t);
-        for(typename std::map<T,std::set<T> >::iterator iter=dag.begin(); iter!=dag.end(); ++iter) {
+        for(typename Map<T,Set<T> >::iterator iter=dag.begin(); iter!=dag.end(); ++iter) {
             iter->second.erase(t);
         }
     }
     return result;
 }
 
-Valuation HybridSystem::target(const Event& event, const Valuation& source) const {
+DiscreteValuation HybridSystem::target(const Event& event, const DiscreteValuation& source) const {
     std::cerr<<"\n";
-    Valuation target;
+    DiscreteValuation target;
     for(switch_const_iterator iter=_discrete_updates.begin(); iter!=this->_discrete_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {
-            if(iter->loc.evaluate(source)) {
-                EnumeratedValue val=iter->rhs.evaluate(source);
+            if(evaluate(iter->loc,source)) {
+                EnumeratedValue val=evaluate(iter->rhs,source);
                 std::cerr<<iter->lhs<<":="<<val<<"="<<iter->rhs<<"\n";
                 target.set(iter->lhs,val);
             }
@@ -173,41 +174,41 @@ Valuation HybridSystem::target(const Event& event, const Valuation& source) cons
 }
 
 
-bool HybridSystem::check_dynamic(const Valuation& location) const
+bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
 {
-    typedef std::map<NamedVariable,std::set<NamedVariable> >::iterator dependencies_iterator;
+    typedef Map<Identifier,Set<Identifier> >::iterator dependencies_iterator;
 
-    std::set<NamedVariable> independent_variables;
-    std::set<NamedVariable> differential_variables;
-    std::set<NamedVariable> algebraic_variables;
-    std::set<NamedVariable> auxiliary_variables;
-    std::set<NamedVariable> input_variables;
-    std::set<NamedVariable> output_variables;
+    Set<Identifier> independent_variables;
+    Set<Identifier> differential_variables;
+    Set<Identifier> algebraic_variables;
+    Set<Identifier> auxiliary_variables;
+    Set<Identifier> input_variables;
+    Set<Identifier> output_variables;
 
-    std::map<NamedVariable,std::set<NamedVariable> > differential_dependencies;
-    std::map<NamedVariable,std::set<NamedVariable> > algebraic_dependencies;
+    Map<Identifier,Set<Identifier> > differential_dependencies;
+    Map<Identifier,Set<Identifier> > algebraic_dependencies;
 
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
         bool active;
         try {
-            active=iter->loc.evaluate(location);
+            active=evaluate(iter->loc,location);
         } catch(...) {
             ARIADNE_ASSERT_MSG(false,"cannot determine activation of "<<*iter<<" in location "<<location);
         }
         if(active) {
-            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,static_cast<NamedVariable>(iter->lhs)),"Variable "<<iter->lhs<<" is assigned in two different rules");
-            differential_variables.insert(iter->lhs);
-            differential_dependencies.insert(make_pair(iter->lhs,iter->rhs.arguments()));
+            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,iter->lhs.name()),"Variable "<<iter->lhs.name()<<" is assigned in two different rules");
+            differential_variables.insert(iter->lhs.name());
+            differential_dependencies.insert(make_pair(iter->lhs.name(),iter->rhs.arguments()));
             adjoin(independent_variables,iter->rhs.arguments());
         }
     }
 
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(iter->loc.evaluate(location)) {
-            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,static_cast<NamedVariable>(iter->lhs)),"");
-            ARIADNE_ASSERT_MSG(!has_key(algebraic_dependencies,static_cast<NamedVariable>(iter->lhs)),"");
-            algebraic_variables.insert(iter->lhs);
-            algebraic_dependencies.insert(make_pair(iter->lhs,iter->rhs.arguments()));
+        if(evaluate(iter->loc,location)) {
+            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,iter->lhs.name()),"");
+            ARIADNE_ASSERT_MSG(!has_key(algebraic_dependencies,iter->lhs.name()),"");
+            algebraic_variables.insert(iter->lhs.name());
+            algebraic_dependencies.insert(make_pair(iter->lhs.name(),iter->rhs.arguments()));
             adjoin(independent_variables,iter->rhs.arguments());
        }
     }
@@ -224,22 +225,22 @@ bool HybridSystem::check_dynamic(const Valuation& location) const
     for(dependencies_iterator iter=algebraic_dependencies.begin(); iter!=algebraic_dependencies.end(); ++iter) {
         restrict(iter->second,algebraic_variables);
     }
-    std::vector<NamedVariable> ordered_algebraic_variables=flatten(algebraic_dependencies);
+    std::vector<Identifier> ordered_algebraic_variables=flatten(algebraic_dependencies);
     std::cerr<<"ordered_algebraic_variables="<<ordered_algebraic_variables<<"\n";
 
     return true;
 }
 
-bool HybridSystem::check_reset(const Event& event, const Valuation& source, const Valuation& target) const
+bool HybridSystem::check_reset(const Event& event, const DiscreteValuation& source, const DiscreteValuation& target) const
 {
-    std::set<NamedVariable> source_variables=join(this->state_variables(source),this->auxiliary_variables(source));
-    std::set<NamedVariable> target_state_variables=this->state_variables(source);
-    std::set<NamedVariable> updated_variables;
+    Set<Identifier> source_variables=join(this->state_variables(source),this->auxiliary_variables(source));
+    Set<Identifier> target_state_variables=this->state_variables(source);
+    Set<Identifier> updated_variables;
 
     for(jump_const_iterator iter=this->_continuous_updates.begin(); iter!=this->_continuous_updates.end(); ++iter) {
-        if(iter->evnts.contains(event) && iter->loc.evaluate(source)) {
+        if(iter->evnts.contains(event) && evaluate(iter->loc,source)) {
             ARIADNE_ASSERT_MSG(subset(iter->rhs.arguments(),source_variables),"");
-            updated_variables.insert(iter->lhs);
+            updated_variables.insert(iter->lhs.name());
         }
     }
 
@@ -254,18 +255,19 @@ bool HybridSystem::check_reset(const Event& event, const Valuation& source, cons
 }
 
 
-bool HybridSystem::check_guards(const Valuation& location) const
+bool HybridSystem::check_guards(const DiscreteValuation& location) const
 {
-    std::set<NamedVariable> variables=join(this->state_variables(location),this->auxiliary_variables(location));
+    Set<Identifier> variables=join(this->state_variables(location),this->auxiliary_variables(location));
 
     EventSet unguarded_events=EventSet::all();
 
     for(guard_const_iterator iter=this->_guard_predicates.begin(); iter!=this->_guard_predicates.end(); ++iter) {
-        if(iter->loc.evaluate(location)) {
+        if(evaluate(iter->loc,location)) {
             if(iter->evnts.finite()) {
                 ARIADNE_ASSERT_MSG(subset(iter->pred.arguments(),variables),"");
             } else {
-                if(!(iter->pred==false)) { ARIADNE_ASSERT_MSG(true,"Nontrivial guard applied to an infinite set of events"); }
+                const Expression<tribool>& pred=iter->pred;
+                if(!(pred==false)) { ARIADNE_ASSERT_MSG(true,"Nontrivial guard applied to an infinite set of events"); }
             }
             unguarded_events.remove(iter->evnts);
         }
@@ -276,13 +278,13 @@ bool HybridSystem::check_guards(const Valuation& location) const
 
 
 
-std::set<RealAssignment>
-HybridSystem::unordered_equations(const Valuation& state) const
+Set<RealAssignment>
+HybridSystem::unordered_equations(const DiscreteValuation& state) const
 {
-    std::set<RealVariable> variables;
-    std::set<RealAssignment> equations;
+    Set<RealVariable> variables;
+    Set<RealAssignment> equations;
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) {
+        if(evaluate(iter->loc,state)) {
             ARIADNE_ASSERT(!contains(variables,iter->lhs));
             variables.insert(iter->lhs);
             equations.insert(iter->lhs=iter->rhs);
@@ -292,33 +294,33 @@ HybridSystem::unordered_equations(const Valuation& state) const
 }
 
 
-std::vector<RealAssignment>
-HybridSystem::equations(const Valuation& state) const
+List<RealAssignment>
+HybridSystem::equations(const DiscreteValuation& state) const
 {
-    typedef std::map<NamedVariable,std::set<NamedVariable> >::iterator dependencies_iterator;
+    typedef Map<Identifier,Set<Identifier> >::iterator dependencies_iterator;
 
-    std::set<NamedVariable> variables;
-    std::map<RealVariable,RealFormula> formulae;
+    Set<Identifier> variables;
+    Map<RealVariable,RealExpression> formulae;
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(iter->loc.evaluate(state)) {
+        if(evaluate(iter->loc,state)) {
             ARIADNE_ASSERT(!has_key(formulae,iter->lhs));
-            variables.insert(iter->lhs);
+            variables.insert(iter->lhs.name());
             formulae.insert(make_pair(iter->lhs,iter->rhs));
        }
     }
 
-    std::map<NamedVariable,std::set<NamedVariable> > dependencies;
-    for(std::map<RealVariable,RealFormula>::const_iterator iter=formulae.begin(); iter!=formulae.end(); ++iter) {
-        dependencies.insert(make_pair(iter->first,iter->second.arguments().restrict(variables)));
+    Map<Identifier,Set<Identifier> > dependencies;
+    for(Map<RealVariable,RealExpression>::const_iterator iter=formulae.begin(); iter!=formulae.end(); ++iter) {
+        dependencies.insert(iter->first.name(),iter->second.arguments().restrict(variables));
     }
 
-    std::vector<NamedVariable> ordering=flatten(dependencies);
+    List<Identifier> ordering=flatten(dependencies);
 
-    std::vector<RealAssignment> equations;
-    for(std::vector<NamedVariable>::const_iterator iter=ordering.begin(); iter!=ordering.end(); ++iter)
+    List<RealAssignment> equations;
+    for(List<Identifier>::const_iterator iter=ordering.begin(); iter!=ordering.end(); ++iter)
     {
-        for(std::map<RealVariable,RealFormula>::iterator fiter=formulae.begin(); fiter!=formulae.end(); ++fiter) {
-            if(fiter->first==*iter) { equations.push_back(fiter->first=fiter->second); }
+        for(Map<RealVariable,RealExpression>::iterator fiter=formulae.begin(); fiter!=formulae.end(); ++fiter) {
+            if(fiter->first.name()==*iter) { equations.push_back(fiter->first=fiter->second); }
         }
     }
 
@@ -327,13 +329,13 @@ HybridSystem::equations(const Valuation& state) const
 
 
 
-std::vector<RealDynamic>
-HybridSystem::dynamic(const Valuation& location) const
+List<RealDynamic>
+HybridSystem::dynamic(const DiscreteValuation& location) const
 {
-    std::vector<RealDynamic> dynamic_equations;
+    List<RealDynamic> dynamic_equations;
 
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
-        if(iter->loc.evaluate(location)) {
+        if(evaluate(iter->loc,location)) {
             dynamic_equations.push_back(dot(iter->lhs)=iter->rhs);
         }
     }
@@ -342,14 +344,14 @@ HybridSystem::dynamic(const Valuation& location) const
 }
 
 
-std::vector<EnumeratedUpdate>
-HybridSystem::switching(const Event& event, const Valuation& location) const
+List<EnumeratedUpdate>
+HybridSystem::switching(const Event& event, const DiscreteValuation& location) const
 {
-    std::vector<EnumeratedUpdate> switch_equations;
+    List<EnumeratedUpdate> switch_equations;
 
     for(switch_const_iterator iter=this->_discrete_updates.begin(); iter!=this->_discrete_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {
-            if(iter->loc.evaluate(location)) {
+            if(evaluate(iter->loc,location)) {
                 switch_equations.push_back(next(iter->lhs)=iter->rhs);
             }
         }
@@ -358,14 +360,14 @@ HybridSystem::switching(const Event& event, const Valuation& location) const
 }
 
 
-std::vector<RealUpdate>
-HybridSystem::reset(const Event& event, const Valuation& old_location) const
+List<RealUpdate>
+HybridSystem::reset(const Event& event, const DiscreteValuation& old_location) const
 {
-    std::vector<RealUpdate> continuous_updates;
+    List<RealUpdate> continuous_updates;
 
     for(jump_const_iterator iter=this->_continuous_updates.begin(); iter!=this->_continuous_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {
-            if(iter->loc.evaluate(old_location)) {
+            if(evaluate(iter->loc,old_location)) {
                 continuous_updates.push_back(next(iter->lhs)=iter->rhs);
             }
         }
@@ -375,15 +377,15 @@ HybridSystem::reset(const Event& event, const Valuation& old_location) const
 }
 
 
-std::map<Event,ContinuousPredicate>
-HybridSystem::guards(const Valuation& location) const
+Map<Event,ContinuousPredicate>
+HybridSystem::guards(const DiscreteValuation& location) const
 {
     // Compute possibly active events, and ensure that only finitely many events can occur
     EventSet unguarded_events=EventSet::all();
-    std::map<Event,ContinuousPredicate> guards;
+    Map<Event,ContinuousPredicate> guards;
 
     for(guard_const_iterator iter=this->_guard_predicates.begin(); iter!=this->_guard_predicates.end(); ++iter) {
-        if(iter->loc.evaluate(location)) {
+        if(evaluate(iter->loc,location)) {
             if(iter->evnts.finite()) {
                 ARIADNE_ASSERT_MSG(iter->evnts.size()==1,"Guard "<<*iter<<" is active for multiple events.");
                 Event e=iter->evnts.front();

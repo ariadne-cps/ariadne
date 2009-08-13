@@ -77,8 +77,8 @@ struct ProfileFlow {
 };
 
 struct ProfileCrossing {
-    ProfileCrossing(TaylorCalculus* c_, ExpressionInterface& g_, TaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
-    TaylorCalculus* c; ExpressionInterface& g; TaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
+    ProfileCrossing(TaylorCalculus* c_, ScalarFunctionInterface& g_, TaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
+    TaylorCalculus* c; ScalarFunctionInterface& g; TaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
     TaylorModel operator()() const {
         return c->crossing_time(g,f,s); }
 };

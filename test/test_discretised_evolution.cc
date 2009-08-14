@@ -92,7 +92,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the evaluators
     MapEvolver evolver(parameters);
-    Discretiser< Map, EnclosureType > discrete_evolver(evolver);
+    Discretiser< IteratedMap, EnclosureType > discrete_evolver(evolver);
 
 
     // Set up the vector field
@@ -101,7 +101,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     UserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
-    Map system(henon);
+    IteratedMap system(henon);
 
     // Define a bounding box for the evolution
     std::cout<<"making bounding_box"<<std::endl;

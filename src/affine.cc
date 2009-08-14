@@ -1,8 +1,8 @@
 /***************************************************************************
- *            formula.cc
+ *            affine.cc
  *
  *  Copyright 2009  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -14,15 +14,23 @@
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU Library General Public License for more detai1ls.
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-#include "formula.h"
+
+
+#include "numeric.h"
+#include "vector.h"
+#include "taylor_model.h"
+#include "differential.h"
+
+#include "affine.h"
 
 namespace Ariadne {
 
-} // namespace Ariadne
+} //namespace Ariadne
+
+

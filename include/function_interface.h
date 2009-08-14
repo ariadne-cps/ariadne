@@ -42,6 +42,8 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
 
+static const int SMOOTH=255;
+
 //! \brief Interface for expressions whose derivatives can be computed.
 //! \sa FunctionInterface
 class ScalarFunctionInterface {

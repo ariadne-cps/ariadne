@@ -56,6 +56,11 @@
         } \
     } \
 
+#define ARIADNE_FAIL_MSG(error)             \
+    { \
+        ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Error "<<error<<"\n"); \
+    } \
+
 #define ARIADNE_ASSERT_MSG(expression,error)             \
     { \
         bool result = (expression); \

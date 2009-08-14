@@ -298,11 +298,11 @@ class TestHybridEvolver
     DiscreteState q1,q2;
     DiscreteEvent e;
     HybridEvolver evolver;
-    PolynomialExpression z,o,x,y;
-    PolynomialExpression x0,y0,t;
+    ScalarPolynomialFunction z,o,x,y;
+    ScalarPolynomialFunction x0,y0,t;
   public:
     TestHybridEvolver();
-    HybridAutomaton make_hybrid_automaton(const PolynomialExpression& guard);
+    HybridAutomaton make_hybrid_automaton(const ScalarPolynomialFunction& guard);
 
     void test();
     void test_transverse_linear_crossing();
@@ -319,16 +319,16 @@ TestHybridEvolver::TestHybridEvolver()
     q2=DiscreteState(2);
     e=DiscreteEvent(3);
 
-    z=PolynomialExpression::constant(2,0.0);
-    o=PolynomialExpression::constant(2,1.0);
-    x=PolynomialExpression::variable(2,0);
-    y=PolynomialExpression::variable(2,1);
-    x0=PolynomialExpression::variable(3,0);
-    y0=PolynomialExpression::variable(3,1);
-    t=PolynomialExpression::variable(3,2);
+    z=ScalarPolynomialFunction::constant(2,0.0);
+    o=ScalarPolynomialFunction::constant(2,1.0);
+    x=ScalarPolynomialFunction::variable(2,0);
+    y=ScalarPolynomialFunction::variable(2,1);
+    x0=ScalarPolynomialFunction::variable(3,0);
+    y0=ScalarPolynomialFunction::variable(3,1);
+    t=ScalarPolynomialFunction::variable(3,2);
 }
 
-HybridAutomaton TestHybridEvolver::make_hybrid_automaton(const PolynomialExpression& guard)
+HybridAutomaton TestHybridEvolver::make_hybrid_automaton(const ScalarPolynomialFunction& guard)
 {
     HybridAutomaton system;
     system.new_mode(q1,PolynomialFunction(join(o,z)));
@@ -341,7 +341,7 @@ void TestHybridEvolver::test_transverse_linear_crossing()
 {
     Float r=1.0/8;
     Float tol=1e-5;
-    PolynomialExpression guard=x+y/2-1;
+    ScalarPolynomialFunction guard=x+y/2-1;
     HybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
@@ -349,7 +349,7 @@ void TestHybridEvolver::test_transverse_linear_crossing()
 
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
-    PolynomialExpression ct=-guard; // Crossing time
+    ScalarPolynomialFunction ct=-guard; // Crossing time
     PolynomialFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
@@ -364,7 +364,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
 {
     Float r=1.0/8;
     Float tol=1e-5;
-    PolynomialExpression guard=x-(1+y/2+y*y*y);
+    ScalarPolynomialFunction guard=x-(1+y/2+y*y*y);
     HybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
@@ -372,7 +372,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
 
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
-    PolynomialExpression ct=-guard; // Crossing time
+    ScalarPolynomialFunction ct=-guard; // Crossing time
 
     PolynomialFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
@@ -387,13 +387,13 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
 {
     Float r=1.0/32;
     Float tol=1e-5;
-    PolynomialExpression guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
+    ScalarPolynomialFunction guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
     HybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
-    PolynomialExpression ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
+    ScalarPolynomialFunction ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
     PolynomialFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);

@@ -33,13 +33,13 @@
 #include <iostream>
 #include <string>
 
-#include "function.h"
-#include "operators.h"
 
 #include "macros.h"
 #include "pointer.h"
 #include "container.h"
+#include "stlio.h"
 
+#include "operators.h"
 #include "expression.h"
 
 #include "numeric.h"
@@ -71,6 +71,8 @@ typedef Variable<EnumeratedValue> EnumeratedVariable;
 typedef Variable<String> StringVariable;
 typedef Variable<Integer> IntegerVariable;
 typedef Variable<Real> RealVariable;
+
+typedef Space<Real> RealSpace;
 
 typedef Expression<EnumeratedValue> EnumeratedExpression;
 typedef Expression<String> StringExpression;
@@ -192,6 +194,11 @@ template<class LHS, class RHS> inline std::ostream& operator<<(std::ostream& os,
     return os<<a.lhs<<"="<<a.rhs;
 }
 
+template<class T> inline
+Assignment<Variable<T>,Expression<T> >
+Variable<T>::operator=(const Expression<T>& e) const {
+    return Assignment<Variable<T>,Expression<T> >(*this,e);
+}
 
 
 /*! \brief An internal enumerated type, suitable for use when a finite type is needed.
@@ -248,63 +255,7 @@ struct EnumeratedValue {
 
 
 
-class Space;
-std::ostream& operator<<(std::ostream& os, const Space& spc);
 
-/*! \brief A space defined as a list of named variables.
- *  \details \sa Variable
- */
-struct Space
-{
-  public:
-    //! \brief The trivial space \f$\R^0\f$.
-    Space() : _variables() { }
-    Space(const std::set<Identifier>& vs) : _variables(vs.begin(),vs.end()) { }
-    unsigned int size() const { return _variables.size(); }
-    //! \brief The dimension of the space.
-    unsigned int dimension() const { return _variables.size(); }
-    //! \brief The \a i<sup>th</sup> named variable.
-    const Identifier& operator[](unsigned int i) const { return _variables.at(i); }
-    const Identifier& variable(unsigned int i) const { return _variables.at(i); }
-
-    //! \brief The index of the named variable \a v.
-    unsigned int index(const Identifier& v) const {
-        for(uint i=0; i!=_variables.size(); ++i) {
-            if(v==_variables[i]) { return i; } }
-        ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
-        return _variables.size(); }
-    //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
-    Space& insert(const Identifier& v) {
-        for(uint i=0; i!=_variables.size(); ++i) {
-            if(_variables[i]==v) { return *this; } }
-        _variables.push_back(v); return *this; }
-    //! \brief Adjoins the variables in \a spc.
-    Space& adjoin(const Space& spc) {
-        for(uint i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
-    //! \brief Append the named variable \a v to the variables defining the space.
-    Space& append(const Identifier& v) {
-        for(uint i=0; i!=_variables.size(); ++i) {
-            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
-        }
-        _variables.push_back(v); return *this; }
-    //! \brief Append the named variable \a v to the variables defining the space.
-    Space& operator,(const Identifier& v) { return this->append(v); }
-  public:
-    //! \brief The space containing the union of the variables.
-    friend Space join(const Space&, const Space&);
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream&, const Space&);
-  private:
-    std::vector<Identifier> _variables;
-};
-
-inline std::ostream& operator<<(std::ostream& os, const Space& spc) { return os << spc._variables; }
-
-inline Space operator,(const Identifier& v1, const Identifier& v2) {
-    Space r; r,v1,v2; return r; }
-
-inline Space join(const Space& spc1, const Space& spc2) {
-    Space r(spc1); r.adjoin(spc2); return r; }
 
 
 
@@ -321,8 +272,8 @@ inline Space join(const Space& spc1, const Space& spc2) {
 template<class R> class ExpressionInterface;
 template<class R> class VariableExpression;
 template<class R> class ConstantExpression;
-template<class R, class O, class A> class UnaryExpression;
-template<class R, class O, class A1, class A2> class BinaryExpression;
+template<class R, class Op, class A> class UnaryExpression;
+template<class R, class Op, class A1, class A2> class BinaryExpression;
 template<class R> class Expression;
 template<class R> std::ostream& operator<<(std::ostream&, const Expression<R>& f);
 template<class R> std::ostream& operator<<(std::ostream&, const ExpressionInterface<R>& f);
@@ -344,16 +295,16 @@ template<class T> Next< Variable<T> > next(const Variable<T>& v);
 template<class T>
 struct Next< Variable<T> >
 {
-  private:
+  public:
     typedef Assignment< Next< Variable<T> >, Expression<T> > AssignmentType;
-    Variable<T> _base;
+    Variable<T> base;
   public:
     AssignmentType operator=(const T& val) { return AssignmentType(*this,Expression<T>(val)); }
     AssignmentType operator=(const Variable<T>& var) { return AssignmentType(*this,Expression<T>(var)); }
     AssignmentType operator=(const Expression<T>& expr) { return AssignmentType(*this,expr); }
     friend Next< Variable<T> > next<>(const Variable<T>&);
   private:
-    Next(const Variable<T>& v) : _base(v) { }
+    Next(const Variable<T>& v) : base(v) { }
 };
 
 template<>
@@ -381,7 +332,7 @@ struct Next<RealVariable>
     RealVariable base;
     typedef Assignment<Next<RealVariable>,RealExpression> RealAssignment;
     friend Next<RealVariable> next(const RealVariable& v);
-    RealAssignment operator=(const double& x) { return RealAssignment(*this,RealExpression(ConstantExpression<Real>(x))); }
+    RealAssignment operator=(const double& x) { return RealAssignment(*this,RealExpression(x)); }
     RealAssignment operator=(const RealVariable& var) { return RealAssignment(*this,RealExpression(var)); }
     RealAssignment operator=(const RealExpression& fn) { return RealAssignment(*this,fn); }
     friend std::ostream& operator<<(std::ostream& os, const Next<RealVariable>& self) {
@@ -416,6 +367,8 @@ inline DottedVariable<Real> dot(const Variable<Real>& v) { return DottedVariable
 
 typedef Assignment<EnumeratedVariable,EnumeratedExpression> EnumeratedAssignment;
 typedef Assignment<Next<EnumeratedVariable>,EnumeratedExpression> EnumeratedUpdate;
+typedef Assignment<StringVariable,StringExpression> StringAssignment;
+typedef Assignment<Next<StringVariable>,StringExpression> StringUpdate;
 typedef Assignment<RealVariable,RealExpression> RealAssignment;
 typedef Assignment<Next<RealVariable>,RealExpression> RealUpdate;
 typedef Assignment<DottedVariable<Real>,Expression<Real> > RealDynamic;

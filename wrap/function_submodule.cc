@@ -36,6 +36,7 @@
 #include "taylor_expression.h"
 #include "taylor_function.h"
 #include "function.h"
+#include "expression.h"
 #include "formula.h"
 
 #include "utilities.h"
@@ -416,10 +417,13 @@ void export_scalar_polynomial_function()
 
     array_to_python_list<ScalarPolynomialFunction>();
 
+    implicitly_convertible< Polynomial<Interval>, ScalarPolynomialFunction>();
+
     class_< PE, bases<ScalarFunctionInterface> > scalar_polynomial_function_class("Polynomial", init<int>());
-    //scalar_polynomial_function_class.def(init<ExpressionPointer>());
+    scalar_polynomial_function_class.def(init<Expression<Real>,Space<Real> >());
     scalar_polynomial_function_class.def(init<ScalarAffineFunction>());
     scalar_polynomial_function_class.def(init<ScalarPolynomialFunction>());
+    scalar_polynomial_function_class.def(init< Polynomial<Interval> >());
     scalar_polynomial_function_class.def("constant", (PE(*)(uint,double)) &PE::constant);
     scalar_polynomial_function_class.def("constant", (PE(*)(uint,Interval)) &PE::constant);
     scalar_polynomial_function_class.def("variable", (PE(*)(uint,uint)) &PE::variable);
@@ -524,12 +528,16 @@ void export_affine_function()
 
 void export_polynomial_function()
 {
+    array_from_python_list<String>();
+    //array_from_python_list<RealVariable>();
+
     class_< PolynomialFunction, bases<FunctionInterface> >
         polynomial_function_class("PolynomialFunction", no_init);
     polynomial_function_class.def("__init__",make_constructor(&make<PolynomialFunction>));
     polynomial_function_class.def(init<PolynomialFunction>());
     polynomial_function_class.def("__getitem__",(ScalarPolynomialFunction const&(PolynomialFunction::*)(uint)const)&PolynomialFunction::operator[],return_value_policy<copy_const_reference>());
     polynomial_function_class.def("__setitem__",(void(PolynomialFunction::*)(uint,const ScalarPolynomialFunction&)const)&PolynomialFunction::set);
+
 
 }
 
@@ -538,6 +546,7 @@ void export_polynomial_function()
 
 void function_submodule() {
     to_python_converter< array<ScalarPolynomialFunction>, array_to_python_list<ScalarPolynomialFunction> >();
+    to_python_converter< array<std::string>, array_to_python_list<std::string> >();
 
     export_multi_index();
 

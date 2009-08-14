@@ -36,15 +36,17 @@
 
 #include "macros.h"
 #include "pointer.h"
+#include "container.h"
 
 #include "vector.h"
 #include "matrix.h"
 #include "polynomial.h"
+#include "affine.h"
 #include "taylor_model.h"
 #include "differential.h"
 #include "operators.h"
 #include "expression.h"
-#include "affine.h"
+#include "formula.h"
 
 namespace Ariadne {
 
@@ -110,6 +112,57 @@ template<class T> class UserScalarFunction
     Vector<Interval> _p;
 };
 
+template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
+
+class ScalarExpressionFunction
+//    : public ScalarFunctionInterface
+{
+    Array<String> _space;
+    Expression<Real> _expression;
+  public:
+    typedef unsigned int SizeType;
+
+    ScalarExpressionFunction(const Expression<Real>& e, const Array<String>& s)
+        : _space(s.begin(),s.end()), _expression(_convert(e,_variables(s))) { }
+
+    virtual uint argument_size() const { return _space.size(); }
+    virtual Float evaluate(const Vector<Float>& x) { return this->_evaluate(x); }
+    virtual Interval evaluate(const Vector<Interval>& x) { return this->_evaluate(x); }
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) { return this->_evaluate(x); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) { return this->_evaluate(x); }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) { return this->_evaluate(x); }
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << "Function( space="<<this->_space<<", expression="<<this->_expression<<" )"; }
+    
+  protected:
+    template<class X> X _evaluate(const Vector<X>& x) { return Ariadne::evaluate(_expression,x); }
+
+    static Map<String,SizeType> _variables(const Array<String>& s) {
+        Map<String,SizeType> variables;
+        for(uint i=0; i!=s.size(); ++i) {
+            ARIADNE_ASSERT_MSG(!variables.has_key(s[i]),"Variable name "<<s[i]<<" is duplicated in space "<<s);
+            variables.insert(s[i],i); }
+        return variables; }
+
+    static Expression<Real> _convert(const Expression<Real> e, const Map<String,SizeType>& s);
+
+/*
+    static Expression<Real> _convert(shared_ptr<const ExpressionInterface<Real> > e, const Map<String,SizeType>& s) {
+        const ExpressionInterface<Real>* eptr=e.operator->();
+        const BinaryExpression<Real,Operator>* bptr=dynamic_cast<const BinaryExpression<Real,Operator>*>(eptr);
+        if(bptr) { return make_expression<Real>(bptr->_op,_convert(bptr->_arg1_ptr,s),_convert(bptr->_arg2_ptr,s)); }
+        const UnaryExpression<Real,Operator>* uptr=dynamic_cast<const UnaryExpression<Real,Operator>*>(eptr);
+        if(uptr) { return make_expression<Real>(uptr->_op,_convert(uptr->_arg_ptr,s)); }
+        const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
+        if(cptr) { return Expression<Real>(*cptr); }
+        const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
+        if(vptr) { return Expression<Real>(new CoordinateExpression<Real>(s[vptr->name()])); }
+        const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
+        ARIADNE_ASSERT_MSG(!iptr,"Cannot convert numbered variable");
+    }
+*/
+
+};
 
 
 
@@ -125,7 +178,7 @@ class ScalarPolynomialFunction
     ScalarPolynomialFunction(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
     ScalarPolynomialFunction& operator=(const Polynomial<Interval>& p) { this->Polynomial<Interval>::operator=(p); return *this; }
 
-    ScalarPolynomialFunction(RealExpressionPointer e, const Array<String>& s);
+    ScalarPolynomialFunction(const Expression<Real>& e, const Space<Real>& s) { *this=polynomial(e,s); }
 
     ScalarPolynomialFunction(const ScalarAffineFunction& a) : Polynomial<Interval>(a.argument_size()) {
         uint n=this->argument_size(); (*this)[MultiIndex::zero(n)]=a.b();
@@ -241,40 +294,6 @@ inline ScalarPolynomialFunction::ScalarPolynomialFunction(ExpressionPointer e, c
 }
 
 */
-
-inline ScalarPolynomialFunction::ScalarPolynomialFunction(RealExpressionPointer e, const Array<String>& s) {
-    ScalarPolynomialFunction& r=*this;
-    const ExpressionInterface<Real>* eptr=e.operator->();
-    if(dynamic_cast<const ConstantExpression<Real>*>(eptr)) {
-        const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
-        r =  ScalarPolynomialFunction::constant(s.size(),cptr->value());
-    } else if(dynamic_cast<const CoordinateExpression<Real>*>(eptr)) {
-        const CoordinateExpression<Real>* pptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-        r = ScalarPolynomialFunction::variable(s.size(),pptr->coordinate());
-        //return PolynomialExpression::variable(pptr->argument_size(),pptr->coordinate());
-    } else if(dynamic_cast<const UnaryExpression<Real,Neg>*>(eptr)) {
-        const UnaryExpression<Real,Neg>* uptr=dynamic_cast<const UnaryExpression<Real,Neg>*>(eptr);
-        r = -ScalarPolynomialFunction(uptr->_arg_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Real,Add>*>(eptr)) {
-        const BinaryExpression<Real,Add>* bptr=dynamic_cast<const BinaryExpression<Real,Add>*>(eptr);
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)+ScalarPolynomialFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Real,Sub>*>(eptr)) {
-        const BinaryExpression<Real,Sub>* bptr=dynamic_cast<const BinaryExpression<Real,Sub>*>(eptr);
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)-ScalarPolynomialFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Real,Mul>*>(eptr)) {
-        const BinaryExpression<Real,Mul>* bptr=dynamic_cast<const BinaryExpression<Real,Mul>*>(eptr);
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)*ScalarPolynomialFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Real,Div>*>(eptr)) {
-        const BinaryExpression<Real,Div>* bptr=dynamic_cast<const BinaryExpression<Real,Div>*>(eptr);
-        const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2_ptr.operator->());
-        ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<*e<<" to polynomial.");
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)*(1/cptr->value());
-    } else {
-        ARIADNE_ASSERT_MSG(false,"Cannot convert expression "<<*e<<" to polynomial.");
-    }
-}
-
-
 
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
@@ -491,7 +510,7 @@ class PolynomialFunction
         for(uint i=0; i!=rs; ++i) { Base::set(i,p); } }
 
     template<class E> PolynomialFunction(const ublas::vector_expression<E>& p) : Base(p().size()) {
-        for(uint i=0; i!=p().size(); ++i) { Base::set(i,PolynomialExpression(p()[i])); } }
+        for(uint i=0; i!=p().size(); ++i) { Base::set(i,ScalarPolynomialFunction(p()[i])); } }
 
     PolynomialFunction(const Vector< Polynomial<Float> >& p) : Base(p.size()) {
         for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
@@ -622,8 +641,6 @@ class ProjectionFunction
     SizeType argument_size() const { return this->_as; }
     SizeType p(unsigned int j) const { return this->_p[j]; }
 
-    CoordinateExpression<Real> operator[](unsigned int i) const { return CoordinateExpression<Real>(_as,_p[i]); }
-
   private:
     friend class FunctionTemplate<ProjectionFunction>;
     template<class R, class A> void _compute(R& r, const A& x) const {
@@ -646,7 +663,7 @@ class IdentityFunction
 
     IdentityFunction* clone() const { return new IdentityFunction(*this); }
 
-    CoordinateExpression<Real> operator[](unsigned int i) const { return CoordinateExpression<Real>(_n,i); }
+    //CoordinateExpression<Real> operator[](unsigned int i) const { return CoordinateExpression<Real>(_n,i); }
 
     SizeType result_size() const { return this->_n; }
     SizeType argument_size() const { return this->_n; }

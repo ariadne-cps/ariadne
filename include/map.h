@@ -38,9 +38,9 @@ namespace Ariadne {
 
 class FunctionInterface;
 
-/*! \brief A vector field in Euclidean space.
+/*! \brief An iterated function system in Euclidean space.
  */
-class Map
+class IteratedMap
 {
   public:
     //! \brief The type used to represent time. 
@@ -50,16 +50,16 @@ class Map
     //! \brief The type used to describe the state space. 
     typedef EuclideanSpace StateSpaceType;
   public:
-    Map(const FunctionInterface& f) : _function_ptr(f.clone()) { }
-    Map(const boost::shared_ptr<FunctionInterface>& fptr) : _function_ptr(fptr) { }
+    IteratedMap(const FunctionInterface& f) : _function_ptr(f.clone()) { }
+    IteratedMap(const boost::shared_ptr<FunctionInterface>& fptr) : _function_ptr(fptr) { }
     const FunctionInterface& function() const { return *_function_ptr; }
     Grid grid() const { return Grid(_function_ptr->argument_size()); }
   private:
     boost::shared_ptr<FunctionInterface> _function_ptr;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Map& vf) { 
-    return os << "Map( " << vf.function() << " )"; 
+inline std::ostream& operator<<(std::ostream& os, const IteratedMap& vf) {
+    return os << "IteratedMap( " << vf.function() << " )";
 }
 
 

@@ -215,6 +215,21 @@ struct vector_to_python_list {
     static const PyTypeObject* get_pytype() { return &PyList_Type; }
 };
 
+template<class T>
+struct array_from_python_list {
+    array_from_python_list() {
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< array<T> >()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
+        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
+        array<T>* a=new array<T>(len(lst)); for(uint i=0; i!=a->size(); ++i) { (*a)[i]=boost::python::extract<T>(lst[i]); }
+        void* storage = ((boost::python::converter::rvalue_from_python_storage< array<T> >*)data)->storage.bytes;
+        storage = a;
+        data->convertible = storage;
+    }
+};
+
 
 
 

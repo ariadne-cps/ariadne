@@ -73,7 +73,8 @@ class Float { };
 class Integer : public mpz_class {
   public:
     Integer() : mpz_class() { }
-    template<class T> Integer(const T& n) : mpz_class(n) { }
+    Integer(const int& n) : mpz_class(n) { }
+    Integer(const std::string& s) : mpz_class(s) { }
 };
 
 typedef mpq_class Rational;
@@ -84,11 +85,34 @@ Rational pow(const Rational& q, uint n);
 class Integer {
   public:
     Integer() : _value() { }
-    template<class T> Integer(const T& t) : _value(t) { }
+    Integer(const int& n) : _value(n) { }
+    Integer(const std::string& s) : _value(std::atoi(s.c_str())) { }
     operator int () const  { return _value; }
   private:
     int _value;
 };
+inline Integer operator+(const Integer& z) {
+    return Integer(+int(z)); }
+inline Integer operator-(const Integer& z) {
+    return Integer(-int(z)); }
+inline Integer operator+(const Integer& z1, const Integer& z2) {
+    return Integer(int(z1)+int(z2)); }
+inline Integer operator-(const Integer& z1, const Integer& z2) {
+    return Integer(int(z1)-int(z2)); }
+inline Integer operator*(const Integer& z1, const Integer& z2) {
+    return Integer(int(z1)*int(z2)); }
+inline bool operator==(const Integer& z1, const Integer& z2) {
+    return int(z1)==int(z2); }
+inline bool operator!=(const Integer& z1, const Integer& z2) {
+    return int(z1)!=int(z2); }
+inline bool operator<=(const Integer& z1, const Integer& z2) {
+    return int(z1)<=int(z2); }
+inline bool operator>=(const Integer& z1, const Integer& z2) {
+    return int(z1)>=int(z2); }
+inline bool operator< (const Integer& z1, const Integer& z2) {
+    return int(z1)< int(z2); }
+inline bool operator> (const Integer& z1, const Integer& z2) {
+    return int(z1)> int(z2); }
 
 #endif // HAVE_GMPXX_H
 

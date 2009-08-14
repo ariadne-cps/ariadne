@@ -39,19 +39,49 @@ using namespace Ariadne;
 
 
 
-Space*
+template<class T>
+Space<T>*
 make_space(const boost::python::object& obj)
 {
-    Space* spcptr=new Space();
+    Space<T>* spcptr=new Space<T>();
     boost::python::list elements=boost::python::extract<boost::python::list>(obj);
     int m=boost::python::len(elements);
     for(int i=0; i!=m; ++i) {
-        RealVariable v=boost::python::extract<RealVariable>(elements[i]);
-        spcptr->append(v.name());
+        boost::python::extract<String> xs(elements[i]);
+        if(xs.check()) { spcptr->append(Variable<T>(xs())); }
+        else { Variable<T> v=extract< Variable<T> >(elements[i]); spcptr->append(v); }
     }
     return spcptr;
 }
 
+template<class T>
+struct space_from_python_list {
+    space_from_python_list() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        storage = make_space<T>(extract<object>(obj_ptr));
+        data->convertible = storage;
+    }
+};
+
+
+
+namespace Ariadne {
+    RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }
+    RealExpression operator+(const RealVariable& v) { return +RealExpression(v); }
+    RealExpression operator-(const RealVariable& v) { return -RealExpression(v); }
+    RealExpression operator+(const RealVariable& v, const RealExpression& e) { return RealExpression(v)+e; }
+    RealExpression operator-(const RealVariable& v, const RealExpression& e) { return RealExpression(v)-e; }
+    RealExpression operator*(const RealVariable& v, const RealExpression& e) { return RealExpression(v)*e; }
+    RealExpression operator/(const RealVariable& v, const RealExpression& e) { return RealExpression(v)/e; }
+    RealExpression operator+(const RealExpression& e, const RealVariable& v) { return e+RealExpression(v); }
+    RealExpression operator-(const RealExpression& e, const RealVariable& v) { return e-RealExpression(v); }
+    RealExpression operator*(const RealExpression& e, const RealVariable& v) { return e*RealExpression(v); }
+    RealExpression operator/(const RealExpression& e, const RealVariable& v) { return e/RealExpression(v); }
+}
+
+namespace Ariadne { int length(const array<std::string>& a) { return a.size(); } }
 
 void export_formula()
 {
@@ -59,26 +89,48 @@ void export_formula()
     implicitly_convertible<double,RealExpression>();
     implicitly_convertible<Interval,RealExpression>();
 
-    class_<Space> space_class("Space");
-    space_class.def("__init__", make_constructor(&make_space) );
-    space_class.def("dimension", &Space::dimension);
-    space_class.def("variable", &Space::variable, return_value_policy<reference_existing_object>());
-    space_class.def("index", &Space::index);
+    class_<RealVariable> variable_class("RealVariable", init<std::string>());
+    variable_class.def("__pos__", &__pos__<RealExpression,RealVariable>);
+    variable_class.def("__neg__", &__neg__<RealExpression,RealVariable>);
+    variable_class.def("__add__", &__add__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def("__sub__", &__sub__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def("__mul__", &__mul__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def("__div__", &__div__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def("__radd__", &__radd__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def("__rsub__", &__rsub__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def("__rmul__", &__rmul__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def("__rdiv__", &__rdiv__<RealExpression,RealVariable,RealExpression>);
+    variable_class.def(self_ns::str(self));
+
+    class_<RealSpace> space_class("RealSpace");
+    space_class.def("__init__", make_constructor(&make_space<Real>) );
+    space_class.def("dimension", &RealSpace::dimension);
+    space_class.def("variable", &RealSpace::variable, return_value_policy<reference_existing_object>());
+    space_class.def("index", &RealSpace::index);
     space_class.def(self_ns::str(self));
 
+    def("variable",(RealVariable(*)(const String& s)) &variable);
+    def("variables",&make_space<Real>,return_value_policy<manage_new_object>());
+
+    space_from_python_list<Real>();
 
     class_<RealExpression> expression_class("RealExpression", no_init);
+    expression_class.def("__pos__", &__pos__<RealExpression,RealExpression>);
     expression_class.def("__neg__", &__neg__<RealExpression,RealExpression>);
     expression_class.def("__add__", &__add__<RealExpression,RealExpression,RealExpression>);
     expression_class.def("__sub__", &__sub__<RealExpression,RealExpression,RealExpression>);
     expression_class.def("__mul__", &__mul__<RealExpression,RealExpression,RealExpression>);
     expression_class.def("__div__", &__div__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def("__radd__", &__radd__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression,RealExpression>);
+    expression_class.def("__rdiv__", &__rdiv__<RealExpression,RealExpression,RealExpression>);
     expression_class.def(self_ns::str(self));
 
     def("neg", (RealExpression(*)(RealExpression)) &neg);
     def("rec", (RealExpression(*)(RealExpression)) &rec);
     def("sqr", (RealExpression(*)(RealExpression)) &sqr);
-    def("pow", (RealExpression(*)(RealExpression,int)) &pow);
+    //def("pow", (RealExpression(*)(RealExpression,int)) &pow);
     def("sqrt", (RealExpression(*)(RealExpression)) &sqrt);
     def("exp", (RealExpression(*)(RealExpression)) &exp);
     def("log", (RealExpression(*)(RealExpression)) &log);
@@ -86,6 +138,8 @@ void export_formula()
     def("cos", (RealExpression(*)(RealExpression)) &cos);
     def("tan", (RealExpression(*)(RealExpression)) &tan);
 
+    class_<RealAssignment> assignment_class("RealAssignment",no_init);
+    assignment_class.def(self_ns::str(self));
 
 }
 

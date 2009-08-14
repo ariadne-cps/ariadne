@@ -473,7 +473,7 @@ Differential<X> operator/(const Differential<X>& x, const R& c)
 template<class X, class R>
 Differential<X> operator/(const R& c, const Differential<X>& x)
 {
-    Differential<X> r=reX(c)(x); r*=c; return r;
+    Differential<X> r(rec(x)); r*=X(c); return r;
 }
 
 

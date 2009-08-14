@@ -37,9 +37,6 @@ using std::make_pair;
 
 std::vector<std::string> Event::_names=std::vector<std::string>();
 
-bool evaluate(const DiscretePredicate&, const DiscreteValuation&);
-EnumeratedValue evaluate(const EnumeratedExpression&, const DiscreteValuation&);
-String evaluate(const StringExpression&, const DiscreteValuation&);
 
 HybridSystem::~HybridSystem()
 {
@@ -59,14 +56,14 @@ HybridSystem::events() const
     return result;
 }
 
-Space
+VariableSet
 HybridSystem::discrete_variables() const
 {
     VariableSet variables;
     for(guard_const_iterator iter=this->_guard_predicates.begin(); iter!=this->_guard_predicates.end(); ++iter) {
         variables.adjoin(iter->loc.arguments());
     }
-    return Space(variables);
+    return variables;
 }
 
 VariableSet
@@ -163,7 +160,7 @@ DiscreteValuation HybridSystem::target(const Event& event, const DiscreteValuati
     for(switch_const_iterator iter=_discrete_updates.begin(); iter!=this->_discrete_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {
             if(evaluate(iter->loc,source)) {
-                EnumeratedValue val=evaluate(iter->rhs,source);
+                String val=evaluate(iter->rhs,source);
                 std::cerr<<iter->lhs<<":="<<val<<"="<<iter->rhs<<"\n";
                 target.set(iter->lhs,val);
             }
@@ -344,10 +341,10 @@ HybridSystem::dynamic(const DiscreteValuation& location) const
 }
 
 
-List<EnumeratedUpdate>
+List<StringUpdate>
 HybridSystem::switching(const Event& event, const DiscreteValuation& location) const
 {
-    List<EnumeratedUpdate> switch_equations;
+    List<StringUpdate> switch_equations;
 
     for(switch_const_iterator iter=this->_discrete_updates.begin(); iter!=this->_discrete_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {

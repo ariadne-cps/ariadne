@@ -149,7 +149,7 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
 }
 
 template class Discretiser<VectorField,TaylorSet>;
-template class Discretiser<Map,TaylorSet>;
+template class Discretiser<IteratedMap,TaylorSet>;
 
 
 

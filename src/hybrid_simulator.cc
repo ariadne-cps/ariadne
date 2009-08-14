@@ -58,10 +58,6 @@ class Orbit<HybridPoint>
 {
 };
 
-EnumeratedValue evaluate(const Expression<EnumeratedValue>& e, const DiscreteValuation& loc);
-Float evaluate(const Expression<Real>& e, const ContinuousValuation<Float>& pt);
-tribool evaluate(const Expression<tribool>& e, const ContinuousValuation<Float>& pt);
-
 class DegenerateCrossingException { };
 
 
@@ -170,8 +166,8 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
         }
 
         if(enabled) {
-            std::vector<EnumeratedUpdate> switchings=sys.switching(event,pt);
-            for(std::vector<EnumeratedUpdate>::const_iterator iter=switchings.begin(); iter!=switchings.end(); ++iter) {
+            std::vector<StringUpdate> switchings=sys.switching(event,pt);
+            for(std::vector<StringUpdate>::const_iterator iter=switchings.begin(); iter!=switchings.end(); ++iter) {
                 next_pt.set(iter->lhs.base,evaluate(iter->rhs,pt));
             }
             std::vector<RealUpdate> real_updates=sys.reset(event,pt);

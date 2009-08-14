@@ -15,11 +15,12 @@ SRC = \
 	vector.cc \
 	matrix.cc \
 	linear_programming.cc \
-	polynomial.cc \
 	differential.cc \
 	taylor_model.cc  \
+	expression.cc \
+	affine.cc \
+	polynomial.cc \
 	function.cc \
-	formula.cc \
 	taylor_expression.cc  \
 	taylor_function.cc  \
 	simulation_toolbox.cc \

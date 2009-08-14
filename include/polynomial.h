@@ -36,6 +36,7 @@
 #include <boost/iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
+#include "operators.h"
 #include "multi_index.h"
 #include "expansion.h"
 #include "taylor_model.h"
@@ -44,6 +45,8 @@
 #include "function_interface.h"
 
 namespace Ariadne {
+
+template<class T> class Array;
 
 //! \brief A monomial with coefficients of some type \a X.
 template<class X>
@@ -57,7 +60,6 @@ class Monomial
 //! \brief A polynomial with coefficients of some type \a X.
 template<class X>
 class Polynomial
-//    : public ScalarFunctionInterface
 {
     template<class XX> friend class Polynomial;
   public:
@@ -83,18 +85,7 @@ class Polynomial
     //! \brief A sparse polynomial with coefficients given by a list of indices and coefficients.
     Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
     //@}
-/*
-    // ScalarFunctionInterface methods
-    virtual Polynomial<X>* clone() const;
-    virtual smoothness_type smoothness() const { return 255; }
-    virtual Float evaluate(const Vector<Float>& x) const;
-    virtual Interval evaluate(const Vector<Interval>& x) const;
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const;
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const;
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const;
-    virtual Polynomial<X>* derivative(uint j) const;
-    virtual std::ostream& write(std::ostream& os) const;
-*/
+
     //! \brief Create a constant polynomial in \a as variables with value \a c.
     static Polynomial<X> constant(unsigned int as, const X& c) {
         Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r; }
@@ -604,25 +595,6 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
 }
 
 
-/*
-// ScalarFunctionInterface methods
-template<class X> inline Polynomial<X>* Polynomial<X>::clone() const {
-    return new Polynomial<X>(*this); }
-template<class X> inline Float Polynomial<X>::evaluate(const Vector<Float>& x) const {
-    return Ariadne::evaluate(midpoint(*this),x); }
-template<class X> inline Interval Polynomial<X>::evaluate(const Vector<Interval>& x) const {
-    return Ariadne::evaluate(*this,x); }
-template<class X> inline Differential<Float> Polynomial<X>::evaluate(const Vector< Differential<Float> >& x) const {
-    return Ariadne::evaluate(midpoint(*this),x); }
-template<class X> inline Differential<Interval> Polynomial<X>::evaluate(const Vector< Differential<Interval> >& x) const {
-    return Ariadne::evaluate(*this,x); }
-template<class X> inline TaylorModel Polynomial<X>::evaluate(const Vector<TaylorModel>& x) const {
-    return Ariadne::evaluate(*this,x); }
-template<class X> inline Polynomial<X>* Polynomial<X>::derivative(uint j) const {
-    return new Polynomial<X>(Ariadne::derivative(*this,j)); }
-template<class X> inline std::ostream& Polynomial<X>::write(std::ostream& os) const {
-    return os << *this; }
-*/
 
 
 } // namespace Ariadne

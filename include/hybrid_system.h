@@ -103,7 +103,7 @@ class HybridSystem
     struct DifferentialEquation { DiscretePredicate loc; RealVariable lhs; RealExpression rhs; };
     struct AlgebraicEquation { DiscretePredicate loc; RealVariable lhs; RealExpression rhs; };
     struct InvariantPredicate { DiscretePredicate loc; ContinuousPredicate pred; };
-    struct DiscreteUpdate { EventSet evnts; DiscretePredicate loc; EnumeratedVariable lhs; EnumeratedExpression rhs;  };
+    struct DiscreteUpdate { EventSet evnts; DiscretePredicate loc; StringVariable lhs; StringExpression rhs;  };
     struct ContinuousUpdate { EventSet evnts; DiscretePredicate loc; RealVariable lhs; RealExpression rhs;  };
     struct GuardPredicate { EventSet evnts; DiscretePredicate loc; ContinuousPredicate pred; };
     struct DisabledEvents { EventSet evnts; DiscretePredicate loc; };
@@ -148,7 +148,7 @@ class HybridSystem
     void new_dynamic(DiscretePredicate q, RealDynamic d) {
         DifferentialEquation eqn={q,d.lhs.base,d.rhs}; _differential_equations.push_back(eqn); };
     //! \brief Adds a discrete reset to the system.
-    void new_reset(EventSet e, DiscretePredicate q, EnumeratedUpdate a) {
+    void new_reset(EventSet e, DiscretePredicate q, StringUpdate a) {
         DiscreteUpdate eqn={e,q,a.lhs.base,a.rhs}; _discrete_updates.push_back(eqn); }
     //! \brief Adds a reset equation to the system.
     void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
@@ -172,7 +172,7 @@ class HybridSystem
     //! \brief Adds a differential equation to the system.
     void new_dynamic(RealDynamic d) { this->new_dynamic(DiscretePredicate(true),d); }
     //! \brief Adds a discrete reset to the system, valid in all modes.
-    void new_reset(EventSet e, EnumeratedUpdate du) { this->new_reset(e,DiscretePredicate(true),du); }
+    void new_reset(EventSet e, StringUpdate du) { this->new_reset(e,DiscretePredicate(true),du); }
     //! \brief Adds a reset equation to the system, valid in all modes.
     void new_reset(EventSet e, RealUpdate u) { this->new_reset(e,DiscretePredicate(true),u); }
     //! \brief Adds a guard predicate to the system, valid in all modes.
@@ -187,7 +187,7 @@ class HybridSystem
 
     // Methods for rules valid for all events.
     //! \brief Adds a discrete reset to the system, valid in all modes and for all events.
-    void new_reset(EnumeratedUpdate du) { this->new_reset(EventSet::all(),DiscretePredicate(true),du); }
+    void new_reset(StringUpdate du) { this->new_reset(EventSet::all(),DiscretePredicate(true),du); }
     //! \brief Adds a reset equation to the system, valid in all modes and for all events.
     void new_reset(RealUpdate u) { this->new_reset(EventSet::all(),DiscretePredicate(true),u); }
 
@@ -199,7 +199,7 @@ class HybridSystem
     //! \brief .
     EventSet events() const;
     //! \brief .
-    Space discrete_variables() const;
+    VariableSet discrete_variables() const;
     //! \brief .
     VariableSet result_variables(const DiscreteValuation& state) const;
     //! \brief .
@@ -235,7 +235,7 @@ class HybridSystem
     //! \brief .
     List<RealDynamic> dynamic(const DiscreteValuation& state) const;
     //! \brief .
-    List<EnumeratedUpdate> switching(const Event& event, const DiscreteValuation& state) const;
+    List<StringUpdate> switching(const Event& event, const DiscreteValuation& state) const;
     //! \brief .
     List<RealUpdate> reset(const Event& event, const DiscreteValuation& state) const;
     //! \brief .

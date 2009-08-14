@@ -35,11 +35,11 @@
 
 #include "macros.h"
 #include "container.h"
+#include "tribool.h"
+
 #include "expression.h"
 
 namespace Ariadne {
-
-
 
 
 //! \brief
@@ -49,9 +49,10 @@ class DiscreteValuation {
   public:
     void set(const Variable<String>& v, const StringType& s) { this->_string_values[v.name()]=s; }
     void set(const Variable<Integer>& v, const IntegerType& n) { this->_integer_values[v.name()]=n; }
-    void set(const Variable<EnumeratedValue>& v, const EnumeratedValue& e) { ARIADNE_NOT_IMPLEMENTED; }
     const StringType& get(const Variable<String>& v) const { return _string_values[v.name()]; }
     const IntegerType& get(const Variable<Integer>& v) const { return _integer_values[v.name()]; }
+    const StringType& operator[](const Variable<String>& v) const { return _string_values[v.name()]; }
+    const IntegerType& operator[](const Variable<Integer>& v) const { return _integer_values[v.name()]; }
     const Map<Identifier,StringType>& string_values() const { return _string_values; }
     const Map<Identifier,IntegerType>& integer_values() const { return _integer_values; }
   public:
@@ -83,6 +84,7 @@ template<class X> class Valuation
     using ContinuousValuation<X>::set;
     using DiscreteValuation::get;
     using ContinuousValuation<X>::get;
+    using DiscreteValuation::operator[];
     using ContinuousValuation<X>::operator[];
 };
 
@@ -109,6 +111,17 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Valuat
         os << sep << iter->first << ":" << iter->second; }
     return os << '}';
 }
+
+
+ 
+String evaluate(const Expression<String>&, const DiscreteValuation&);
+Integer evaluate(const Expression<Integer>&, const DiscreteValuation&);
+Boolean evaluate(const Expression<Boolean>&, const DiscreteValuation&);
+template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
+template<class X> Tribool evaluate(const Expression<Tribool>&, const ContinuousValuation<X>&);
+
+template<class X> X evaluate(const Expression<Real>&, const Vector<X>&);
+template<class X> Tribool evaluate(const Expression<Tribool>&, const Vector<X>&);
 
 
 } // namespace Ariadne

@@ -66,7 +66,8 @@ TestHybridSystem::test_build_hybrid_system()
 
     EnumeratedType swtch("Switch",(build_array,"on","off"));
 
-    EnumeratedVariable heater("heater",swtch);
+    //EnumeratedVariable heater("heater",swtch);
+    StringVariable heater("heater");
     RealVariable T("T");
     RealVariable t("t");
     RealVariable u("u");
@@ -109,29 +110,30 @@ TestHybridSystem::test_build_hybrid_system()
     ARIADNE_TEST_PRINT(_system.events());
     ARIADNE_TEST_PRINT(_system.discrete_variables());
 
-    Valuation location;
+    DiscreteValuation location;
 
-    location.set(heater,EnumeratedValue("on"));
+    //location.set(heater,EnumeratedValue("on"));
+    location.set(heater,"on");
     ARIADNE_TEST_PRINT(location);
     ARIADNE_TEST_PRINT(_system.state_variables(location));
     ARIADNE_TEST_PRINT(_system.auxiliary_variables(location));
     ARIADNE_TEST_PRINT(_system.input_variables(location));
 
-    location.set(heater,EnumeratedValue("off"));
+    location.set(heater,"off");
     ARIADNE_TEST_PRINT(location);
     ARIADNE_TEST_PRINT(_system.state_variables(location));
 
     RealVariable xa("xa"), xb("xb"), xc("xc"), xd("xd"), xe("xe"), xf("xf");
     Event e1("e1"), e2("e2"), e3("e3");
-    EnumeratedVariable q1("q1",swtch);
-    EnumeratedVariable q2("q2",swtch);
+    StringVariable q1("q1");
+    StringVariable q2("q2");
     HybridSystem sys;
     sys.new_dynamic(dot(xa)=xc-xb+xd);
     sys.new_equation(xc=xb+xd);
     sys.new_equation(xd=xb+xe);
     sys.new_dynamic(dot(xb)=xe+xb+xc);
     sys.new_equation(xe=xa+xb);
-    Valuation loc;
+    DiscreteValuation loc;
     loc.set(q1,"on");
     loc.set(q2,"off");
 
@@ -145,8 +147,8 @@ TestHybridSystem::test_build_hybrid_system()
     sys.new_guard(!((e1,e2)),false);
     //sys.dynamic(loc);
 
-    Valuation src=loc;
-    Valuation trg=sys.target(e1,src);
+    DiscreteValuation src=loc;
+    DiscreteValuation trg=sys.target(e1,src);
 
     ARIADNE_TEST_PRINT(sys.check_dynamic(loc));
     ARIADNE_TEST_PRINT(sys.check_guards(src));

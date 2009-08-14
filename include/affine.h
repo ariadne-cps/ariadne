@@ -40,9 +40,15 @@
 #include "vector.h"
 #include "matrix.h"
 
-#include "expression.h"
-
 namespace Ariadne {
+
+typedef std::string String;
+template<class T> class Array;
+template<class K, class V> class Map;
+
+class Real;
+template<class T> class Variable;
+template<class R> class Expression;
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
 class ConstantScalarFunction
@@ -67,7 +73,8 @@ class ScalarAffineFunction
 //    ScalarAffineFunction(const ConstantScalarFunction& c)
 //        : _c(c), _g(c.argument_size()) { }
 
-    ScalarAffineFunction(RealExpressionPointer e, const Array<String>& s);
+    ScalarAffineFunction(Expression<Real> e, const Array<String>& s);
+//    ScalarAffineFunction(Expression<Real> e, const Map<String,SizeType>& s);
 
     static ScalarAffineFunction constant(uint n, Float c) {
         return ScalarAffineFunction(Vector<Float>(n),c); }
@@ -162,42 +169,56 @@ inline std::ostream& ScalarAffineFunction::write(std::ostream& os) const {
     return os;
 }
 
-inline ScalarAffineFunction::ScalarAffineFunction(RealExpressionPointer e, const Array<String>& s) {
+/*
+inline ScalarAffineFunction::ScalarAffineFunction(RealExpressionPointer e, const Map<String,SizeType>& s) {
     ScalarAffineFunction& r=*this;
     const ExpressionInterface<Real>* eptr=e.operator->();
-    if(dynamic_cast<const ConstantExpression<Real>*>(eptr)) {
-        const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
-        r =  ScalarAffineFunction::constant(s.size(),cptr->value());
-    } else if(dynamic_cast<const CoordinateExpression<Real>*>(eptr)) {
-        const CoordinateExpression<Real>* pptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-        r = ScalarAffineFunction::variable(s.size(),pptr->coordinate());
-        //return PolynomialExpression::variable(pptr->argument_size(),pptr->coordinate());
-    } else if(dynamic_cast<const UnaryExpression<Real,Neg>*>(eptr)) {
-        const UnaryExpression<Real,Neg>* uptr=dynamic_cast<const UnaryExpression<Real,Neg>*>(eptr);
-        r = -ScalarAffineFunction(uptr->_arg_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Real,Add>*>(eptr)) {
-        const BinaryExpression<Real,Add>* bptr=dynamic_cast<const BinaryExpression<Real,Add>*>(eptr);
-        r =  ScalarAffineFunction(bptr->_arg1_ptr,s)+ScalarAffineFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Real,Sub>*>(eptr)) {
-        const BinaryExpression<Real,Sub>* bptr=dynamic_cast<const BinaryExpression<Real,Sub>*>(eptr);
-        r =  ScalarAffineFunction(bptr->_arg1_ptr,s)-ScalarAffineFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Real,Mul>*>(eptr)) {
-        const BinaryExpression<Real,Mul>* bptr=dynamic_cast<const BinaryExpression<Real,Mul>*>(eptr);
-        const ConstantExpression<Real>* cptr1=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg1_ptr.operator->());
-        const ConstantExpression<Real>* cptr2=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2_ptr.operator->());
-        ARIADNE_ASSERT_MSG(cptr1 || cptr2,"Cannot convert expression "<<*e<<" to affine form.");
-        if(cptr1) { r =  cptr1->value() * ScalarAffineFunction(bptr->_arg2_ptr,s); }
-        else { r =  ScalarAffineFunction(bptr->_arg1_ptr,s) * cptr2->value(); }
-    } else if(dynamic_cast<const BinaryExpression<Real,Div>*>(eptr)) {
-        const BinaryExpression<Real,Div>* bptr=dynamic_cast<const BinaryExpression<Real,Div>*>(eptr);
-        const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2_ptr.operator->());
-        ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<*e<<" to affine form.");
-        r =  ScalarAffineFunction(bptr->_arg1_ptr,s)/cptr->value();
-    } else {
-        ARIADNE_ASSERT_MSG(false,"Cannot convert expression "<<*e<<" to affine form.");
+    Operator op=e->type();
+    const ConstantExpression<Real>* cptr;
+    const VariableExpression<Real>* vptr;
+    const CoordinateExpression<Real>* iptr;
+    const UnaryExpression<Real,Operator>* uptr;
+    const BinaryExpression<Real,Operator>* bptr;
+    const ConstantExpression<Real>* cptr1;
+    const ConstantExpression<Real>* cptr2;
+
+    switch(op) {
+        case CNST:
+            cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
+            r = ScalarAffineFunction::constant(s.size(),cptr->value()); break;
+        case VAR:
+            vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
+            r = ScalarAffineFunction::variable(s.size(),s[vptr->name()]); break;
+        case IND:
+            iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
+            r = ScalarAffineFunction::variable(s.size(),iptr->coordinate()); break;
+        case NEG:
+            uptr=static_cast<const UnaryExpression<Real,Operator>*>(uptr);
+            r = -ScalarAffineFunction(uptr->_arg_ptr,s); break;
+        case ADD:
+            bptr=static_cast<const BinaryExpression<Real,Operator>*>(eptr);
+            r = ScalarAffineFunction(bptr->_arg1_ptr,s)+ScalarAffineFunction(bptr->_arg2_ptr,s); break;
+        case SUB:
+            bptr=static_cast<const BinaryExpression<Real,Operator>*>(eptr);
+            r = ScalarAffineFunction(bptr->_arg1_ptr,s)-ScalarAffineFunction(bptr->_arg2_ptr,s); break;
+        case DIV:
+            bptr=dynamic_cast<const BinaryExpression<Real,Operator>*>(eptr);
+            cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2_ptr.operator->());
+            ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<*e<<" to affine form.");
+            r = ScalarAffineFunction(bptr->_arg1_ptr,s)/cptr->value(); break;
+        case MUL:
+            bptr=static_cast<const BinaryExpression<Real,Operator>*>(eptr);
+            cptr1=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg1_ptr.operator->());
+            cptr2=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2_ptr.operator->());
+            ARIADNE_ASSERT_MSG(cptr1 || cptr2,"Cannot convert expression "<<*e<<" to affine form.");
+            if(cptr1) { r =  cptr1->value() * ScalarAffineFunction(bptr->_arg2_ptr,s); }
+            else { r =  ScalarAffineFunction(bptr->_arg1_ptr,s) * cptr2->value(); }
+            break;
+        default:
+            ARIADNE_ASSERT_MSG(false,"Cannot convert expression "<<*e<<" to affine form.");
     }
 }
-
+*/
 
 
 //! An affine function \f$x\mapsto Ax+b\f$.

@@ -68,7 +68,7 @@ void TestMapEvolver::test() const
     typedef TaylorSet EnclosureType;
 
     // Set up the evolution parameters and grid
-    Map::TimeType time(3);
+    IteratedMap::TimeType time(3);
     Float enclosure_radius(0.25);
 
     EvolutionParameters parameters;

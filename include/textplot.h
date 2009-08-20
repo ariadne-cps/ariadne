@@ -53,7 +53,7 @@ class GridTreeSet;
     
 //! \brief Class for plotting sets as a list of points.
 class TextPlot 
-    : public GraphicsInterface
+    : public FigureInterface
 {
   public:
     ~TextPlot();
@@ -67,6 +67,7 @@ class TextPlot
     void draw(const Box&);
     void draw(const Polytope&);
     void draw(const InterpolatedCurve&);
+    void draw(const DrawableInterface&);
     void close();
   private:
     std::ofstream _fstream;

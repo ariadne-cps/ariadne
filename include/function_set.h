@@ -36,6 +36,7 @@
 #include "vector.h"
 #include "set_interface.h"
 #include "function_interface.h"
+#include "graphics_interface.h"
 
 #include "box.h"
 
@@ -44,6 +45,7 @@ namespace Ariadne {
 //! \brief A set defined as the image of a box under a continuous function.
 class ImageSet
     : public LocatedSetInterface
+    , public DrawableInterface
 {
     Vector<Interval> _domain;
     boost::shared_ptr<FunctionInterface> _function_ptr;
@@ -68,6 +70,7 @@ class ImageSet
     tribool overlaps(const Box&) const;
     tribool inside(const Box&) const;
     Box bounding_box() const;
+    void draw(CanvasInterface&) const;
     std::ostream& write(std::ostream&) const;
 };
 

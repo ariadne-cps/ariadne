@@ -32,6 +32,7 @@
 #include "vector.h"
 
 #include "set_interface.h"
+#include "graphics_interface.h"
 
 namespace Ariadne {
 
@@ -40,6 +41,7 @@ class Point;
 //! A box in Euclidean space.
 class Box
     : public SetInterface,
+      public DrawableInterface,
       public Vector<Interval>
 {
   public:
@@ -164,6 +166,9 @@ class Box
         static const Interval eps(-min,+min);
         return Box((*this)+Vector<Interval>(this->dimension(),eps));
     }
+
+    //! \brief Draw on a canvas.
+    virtual void draw(CanvasInterface& c) const;
 
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const {

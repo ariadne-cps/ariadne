@@ -26,6 +26,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "point.h"
+#include "box.h"
 
 #include "curve.h"
 
@@ -97,5 +98,45 @@ Curve::write(std::ostream& os) const
     return os << "Curve( function=" << *this->_function_ptr << " )";
 }
 
- 
+
+
+InterpolatedCurve* 
+InterpolatedCurve::clone() const
+{
+    return new InterpolatedCurve(*this);
 }
+
+Box 
+InterpolatedCurve::bounding_box() const
+{
+    Box bx(this->_points.begin()->second);
+    for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
+        bx=hull(bx,iter->second);
+    }
+    return bx;
+}
+
+void
+InterpolatedCurve::draw(CanvasInterface& c) const
+{
+    uint xi=c.x_coordinate(); uint yi=c.y_coordinate();
+    const_iterator iter=this->_points.begin();
+    const Point& pt=iter->second;
+    c.move_to(pt[xi],pt[yi]);
+    ++iter;
+    while(iter!=this->_points.end()) {
+        const Point& pt=iter->second;
+        c.line_to(pt[xi],pt[yi]);
+        ++iter;
+    }
+    c.stroke();
+}
+
+std::ostream&
+InterpolatedCurve::write(std::ostream& os) const
+{
+    return os << (*this);
+}
+
+
+} // namespace Ariadne

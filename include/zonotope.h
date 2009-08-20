@@ -79,6 +79,7 @@ class Figure;
 
 class Zonotope 
     : public CompactSetInterface
+    , public DrawableInterface
 {
   private:
     Vector<Float> _centre;
@@ -209,6 +210,8 @@ class Zonotope
     //! \name Input/output.
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
+    /*! \brief Draw on a canvas. */
+    void draw(CanvasInterface& c) const;
     //@}
 };
 
@@ -247,7 +250,6 @@ Zonotope::Zonotope(uint d, uint m, const X* ptr)
 {
 }
 
-void draw(GraphicsInterface& fig, const Zonotope& z);
 
 } // namespace Ariadne
 

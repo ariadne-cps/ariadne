@@ -25,6 +25,7 @@
 
 #include "orbit.h"
 
+#include "box.h"
 #include "point.h"
 #include "curve.h"
 #include "taylor_set.h"
@@ -405,19 +406,19 @@ operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb)
     return os;
 }
 
-void draw(GraphicsInterface& graphic, const Orbit<TaylorSet>& orbit) 
+void draw(CanvasInterface& graphic, const Orbit<TaylorSet>& orbit)
 {
-    draw(graphic,orbit.reach()); 
-    draw(graphic,orbit.initial());
-    draw(graphic,orbit.final());
+    orbit.reach().draw(graphic);
+    orbit.initial().draw(graphic);
+    orbit.final().draw(graphic);
 }
 
 
 
-void draw(GraphicsInterface& graphic, const Orbit<HybridPoint>& orbit) 
+void draw(CanvasInterface& graphic, const Orbit<HybridPoint>& orbit)
 {
     for(uint i=0; i<=orbit.size(); ++i) {
-        draw(graphic,orbit.curve(i));
+        orbit.curve(i).draw(graphic);
     }
 }
 

@@ -34,8 +34,11 @@
 #include "taylor_model.h"
 #include "taylor_expression.h"
 #include "taylor_function.h"
+
+#include "box.h"
 #include "taylor_set.h"
 
+#include "list_set.h"
 #include "grid_set.h"
 
 #include "zonotope.h"
@@ -663,17 +666,18 @@ Vector<Interval> error(const TaylorSet& ts) {
 }
 
 
-void box_draw(GraphicsInterface& fig, const TaylorSet& ts) {
-    draw(fig,ts.bounding_box());
+void box_draw(CanvasInterface& fig, const TaylorSet& ts) {
+    ts.bounding_box().draw(fig);
 }
 
-void boxes_draw(GraphicsInterface& fig, const TaylorSet& ts) {
+void boxes_draw(CanvasInterface& fig, const TaylorSet& ts) {
     static const double resolution=1.0/8;
     double line_width=fig.get_line_width();
     fig.set_line_width(0.0);
     //fig.set_line_style(false);
     //fig.set_line_colour(fig.get_fill_colour());
-    draw(fig,ts.discretise(resolution));
+    ListSet<Box> boxes=ts.discretise(resolution);
+    for(uint i=0; i!=boxes.size(); ++i) { boxes[i].draw(fig); }
     //fig.set_line_colour(black);
     fig.set_line_width(line_width);
     //fig.set_line_style(true);
@@ -690,26 +694,26 @@ void zonotopes_draw_subdivide(ListSet<Zonotope>& zonotopes, const TaylorSet& set
     }
 }
 
-void zonotopes_draw(GraphicsInterface& fig, const TaylorSet& ts) {
+void zonotopes_draw(CanvasInterface& fig, const TaylorSet& ts) {
     static const double resolution=1.0/8;
-    double old_line_width=fig.get_line_width();
-    Colour old_line_colour=fig.get_line_colour();
+    //double old_line_width=fig.get_line_width();
+    //Colour old_line_colour=fig.get_line_colour();
     //fig.set_line_width(0.0);
     //fig.set_line_style(false);
-    fig.set_line_colour(fig.get_fill_colour());
+    //fig.set_line_colour(fig.get_fill_colour());
     ListSet<Zonotope> zonotopes;
     zonotopes_draw_subdivide(zonotopes,ts,resolution);
-    draw(fig,zonotopes);
-    fig.set_line_colour(old_line_colour);
-    fig.set_line_width(old_line_width);
+    for(uint i=0; i!=zonotopes.size(); ++i) { zonotopes[i].draw(fig); }
+    //fig.set_line_colour(old_line_colour);
+    //fig.set_line_width(old_line_width);
     //fig.set_line_style(true);
 }
 
-void affine_draw(GraphicsInterface& fig, const TaylorSet& ts) {
-    draw(fig,zonotope(ts));
+void affine_draw(CanvasInterface& fig, const TaylorSet& ts) {
+    zonotope(ts).draw(fig);
 }
 
-void curve_draw(GraphicsInterface& fig, const TaylorSet& ts) {
+void curve_draw(CanvasInterface& fig, const TaylorSet& ts) {
     assert(ts.dimension()==2 && ts.generators_size()==2);
     std::vector<Point> pts;
     Vector<Float> s(2);
@@ -730,10 +734,14 @@ void curve_draw(GraphicsInterface& fig, const TaylorSet& ts) {
         pts.push_back(midpoint(evaluate(ts,s)));
         s[1]-=1./8;
     }
-    fig.draw(pts);
+    fig.move_to(pts[0][0],pts[0][1]);
+    for(uint i=0; i!=pts.size(); ++i) {
+        fig.line_to(pts[i][0],pts[i][1]);
+    }
 }
 
-void grid_draw(GraphicsInterface& fig, const TaylorSet& ts)
+
+void grid_draw(CanvasInterface& fig, const TaylorSet& ts)
 {
     uint depth=12;
     Float rad=1./8;
@@ -745,25 +753,16 @@ void grid_draw(GraphicsInterface& fig, const TaylorSet& ts)
         }
     }
     gts.recombine();
-    draw(fig,gts);
+    gts.draw(fig);
 }
 
-void draw(GraphicsInterface& fig, const TaylorSet& ts) {
-    box_draw(fig,ts);
-    //zonotopes_draw(fig,ts);
-    //affine_draw(fig, ts);
-    //curve_draw(fig, ts);
-/*
-    static const double MAX_NEGLIGABLE_NORM=1e-10;
-    if(ts.dimension()==2 && ts.generators_size()==2 && norm(error(ts))<MAX_NEGLIGABLE_NORM) {
-        // Curve draw may miss parts of the set.
-        curve_draw(fig,ts);
-    }
-    else {
-        boxes_draw(fig,ts);
-    }
-*/
+void standard_draw(CanvasInterface& fig, const TaylorSet& ts) {
+    affine_draw(fig,ts);
+    //box_draw(fig,ts);
+}
 
+void TaylorSet::draw(CanvasInterface& fig) const {
+    Ariadne::standard_draw(fig,*this);
 }
 
 } // namespace Ariadne

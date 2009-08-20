@@ -635,25 +635,39 @@ template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsig
 
 template<class BS> inline
 void
-draw(GraphicsInterface& graphic, const Orbit< std::pair<int,BS> >& orbit) {
-    draw(graphic,orbit.reach());
-    draw(graphic,orbit.initial());
-    draw(graphic,orbit.final());
+draw(FigureInterface& figure, const Orbit< std::pair<int,BS> >& orbit) {
+    draw(figure,orbit.reach());
+    draw(figure,orbit.initial());
+    draw(figure,orbit.final());
 }
 
 template<class BS> inline
 void
-draw(GraphicsInterface& graphic, const std::pair<int,BS>& hs) {
-    draw(graphic,hs.second);
+draw(FigureInterface& figure, const std::pair<int,BS>& hs) {
+    draw(figure,hs.second);
 }
 
 template<class DS> inline
 void
-draw(GraphicsInterface& graphic, const std::map<int,DS>& hds) {
+draw(FigureInterface& figure, const std::map<int,DS>& hds) {
     for(typename std::map<int,DS>::const_iterator loc_iter=hds.begin();
         loc_iter!=hds.end(); ++loc_iter) {
-        draw(graphic,loc_iter->second);
+        draw(figure,loc_iter->second);
+        //figure.draw(loc_iter->second);
+        //figure << loc_iter->second;
     }
+}
+
+template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const Orbit< std::pair<int,BS> >& horb) {
+    draw(figure,horb); return figure;
+}
+
+template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const std::pair<int,BS>& hs) {
+    draw(figure,hs); return figure;
+}
+
+template<class DS> inline FigureInterface& operator<<(FigureInterface& figure, const std::map<int,DS>& hs) {
+    draw(figure,hs); return figure;
 }
 
 

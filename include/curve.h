@@ -33,6 +33,7 @@
 #include "macros.h"
 #include "stlio.h"
 #include "function_interface.h"
+#include "graphics_interface.h"
 
 namespace Ariadne {
   
@@ -97,7 +98,7 @@ class Curve
     virtual Point value(const Float& s) const;
     /*! \brief The tangent at a point. */
     virtual Vector<Float> tangent(const Float& s) const;
-  
+
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;
   private:
@@ -108,6 +109,7 @@ class Curve
 
 /*!\brief A line segment in Euclidean space. */
 class InterpolatedCurve 
+    : public DrawableInterface
 {
   public:
     typedef std::map< Float, Point >::const_iterator const_iterator;
@@ -135,6 +137,17 @@ class InterpolatedCurve
     const_iterator begin() const { return this->_points.begin(); }
     /*! \brief An iterator to the end point in the curve, NOT the one-past-the-end! */
     const_iterator end() const { return --this->_points.end(); }
+
+    /*! \brief A dynamically-allocated copy. */
+    virtual InterpolatedCurve* clone() const;
+    /*! \brief Draw on a two-dimensional canvas. */
+    virtual void draw(CanvasInterface& c) const;
+    /*! \brief A bounding box for the curve. */
+    virtual Box bounding_box() const;
+
+    /*! \brief Write to an output stream. */
+    virtual std::ostream& write(std::ostream& os) const;
+
   private:
     friend std::ostream& operator<<(std::ostream&, const InterpolatedCurve&);
   private:

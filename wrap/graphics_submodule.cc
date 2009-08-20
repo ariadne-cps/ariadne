@@ -41,11 +41,7 @@ using namespace boost::python;
 
 
 namespace Ariadne { 
-void draw(GraphicsInterface& fig, const Point& p);
-void draw(GraphicsInterface& fig, const Box& p);
-void draw(GraphicsInterface& fig, const Zonotope& z);
-void draw(GraphicsInterface& fig, const Polytope& p);
-void draw(GraphicsInterface& fig, const InterpolatedCurve& c);
+    template<class S> void draw(FigureInterface& fig, const S& sh) { fig.draw(sh); }
 }
 
 
@@ -55,23 +51,26 @@ using namespace Ariadne;
 
 void export_figure() 
 {
-    class_<Figure> figure_class("Figure",init<>());
+    class_<FigureInterface,boost::noncopyable>("FigureInterface",no_init);
+    class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
+
+    //class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
     figure_class.def("set_projection_map",(void(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map);
     figure_class.def("set_projection_map",(void(Figure::*)(const ProjectionFunction&)) &Figure::set_projection_map);
+    figure_class.def("set_projection",(void(Figure::*)(uint,uint,uint)) &Figure::set_projection);
     figure_class.def("set_bounding_box",&Figure::set_bounding_box);
     figure_class.def("set_line_style", (void(Figure::*)(bool)) &Figure::set_line_style);
     figure_class.def("set_line_width", (void(Figure::*)(double)) &Figure::set_line_width);
     figure_class.def("set_line_colour", (void(Figure::*)(double,double,double)) &Figure::set_line_colour);
     figure_class.def("set_fill_style", (void(Figure::*)(bool)) &Figure::set_fill_style);
     figure_class.def("set_fill_colour", (void(Figure::*)(double,double,double)) &Figure::set_fill_colour);
-    figure_class.def("draw",(void(*)(GraphicsInterface&,const Point&))&draw);
-    figure_class.def("draw",(void(*)(GraphicsInterface&,const Box&))&draw);
-    figure_class.def("draw",(void(*)(GraphicsInterface&,const Zonotope&))&draw);
-    figure_class.def("draw",(void(*)(GraphicsInterface&,const Polytope&))&draw);
-    figure_class.def("draw",(void(*)(GraphicsInterface&,const TaylorSet&))&draw);
-    figure_class.def("draw",(void(*)(GraphicsInterface&,const GridTreeSet&))&draw);
-    //figure_class.def("draw",(void(*)(Figure&,const Polyhedron&))&draw);
-    figure_class.def("draw",(void(*)(GraphicsInterface&,const InterpolatedCurve&))&draw);
+    figure_class.def("draw",(void(*)(FigureInterface&,const Point&))&draw);
+    figure_class.def("draw",(void(*)(FigureInterface&,const Box&))&draw);
+    figure_class.def("draw",(void(*)(FigureInterface&,const Zonotope&))&draw);
+    figure_class.def("draw",(void(*)(FigureInterface&,const Polytope&))&draw);
+    figure_class.def("draw",(void(*)(FigureInterface&,const TaylorSet&))&draw);
+    figure_class.def("draw",(void(*)(FigureInterface&,const GridTreeSet&))&draw);
+    figure_class.def("draw",(void(*)(FigureInterface&,const InterpolatedCurve&))&draw);
     figure_class.def("clear",&Figure::clear);
     figure_class.def("display",&Figure::display);
     figure_class.def("write",&Figure::write);

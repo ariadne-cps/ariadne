@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "point.h"
+#include "box.h"
 #include "stlio.h"
 
 namespace Ariadne {
@@ -49,6 +50,24 @@ Point::Point(uint d, const double& x0,  ...)
 Point::Point(const std::string& str)
 {
     *this=make_point(str);
+}
+
+Point* Point::clone() const {
+    return new Point(*this);
+}
+
+Box Point::bounding_box() const {
+    Box r(this->dimension());
+    double e=eps();
+    for(uint i=0; i!=this->dimension(); ++i) {
+        r[i]=(*this)[i]+Interval(-e,+e); }
+    return r;
+}
+
+void Point::draw(CanvasInterface& canv) const {
+    uint ix=canv.x_coordinate();
+    uint iy=canv.y_coordinate();
+    canv.dot((*this)[ix],(*this)[iy]);
 }
 
 Point make_point(const std::string& str)

@@ -95,6 +95,10 @@ void TextPlot::open(const char* cfilename, ios_base::openmode mode)
 
 
 
+void TextPlot::draw(const DrawableInterface& shape) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 void TextPlot::draw(const Point& pt) {
     for(int i = 0; i < pt.dimension(); i++) {
         this->_fstream << double(pt[i]) << " ";

@@ -45,10 +45,27 @@ class Zonotope;
 
 class Colour;
 
+class DrawableInterface;
+class FigureInterface;
+class CanvasInterface;
+class PlanarProjectionMap;
+
+
+struct Vector2d { double x,y; Vector2d(double xx, double yy) : x(xx), y(yy) { } };
+inline Vector2d operator-(const Vector2d& v) { return Vector2d(-v.x,-v.y); }
+inline Vector2d operator+(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x+v2.x,v1.y+v2.y); }
+inline Vector2d operator-(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x-v2.x,v1.y-v2.y); }
+inline Vector2d operator*(const double& s1, const Vector2d& v2) { return Vector2d(s1*v2.x,s1*v2.y); }
+
+struct Point2d { double x,y; Point2d(double xx, double yy) : x(xx), y(yy) { } };
+inline Point2d& operator+=(Point2d& pt, const Vector2d& v) { pt.x+=v.x; pt.y+=v.y; return pt; }
+inline Point2d& operator-=(Point2d& pt, const Vector2d& v) { pt.x-=v.x; pt.y-=v.y; return pt; }
+
 //! \brief Base interface for plotting and drawing classes.
-class GraphicsInterface {
+class FigureInterface {
   public:
-    virtual ~GraphicsInterface() { };
+    virtual ~FigureInterface() { };
+    virtual void set_projection(uint as, uint ix, uint iy) { };
     virtual void set_line_style(bool) { };
     virtual void set_line_width(double) { };
     virtual void set_line_colour(Colour) { };
@@ -58,18 +75,45 @@ class GraphicsInterface {
     virtual Colour get_line_colour() const { return black; };
     virtual bool get_fill_style() const { return true; };
     virtual Colour get_fill_colour() const { return white; };
-    virtual void draw(const std::vector<Point>&) = 0; // Draw a shape bounded by a list of points
-    virtual void draw(const Point&) = 0;
-    virtual void draw(const Box&) = 0;
-    virtual void draw(const Polytope&) = 0;
-    virtual void draw(const InterpolatedCurve&) = 0;
+    virtual void draw(const DrawableInterface&) = 0;
 };
 
-inline void draw(GraphicsInterface& g, const Point& pt) { g.draw(pt); }
-inline void draw(GraphicsInterface& g, const Box& bx) { g.draw(bx); }
-inline void draw(GraphicsInterface& g, const Polytope& p) { g.draw(p); }
-inline void draw(GraphicsInterface& g, const InterpolatedCurve& c) { g.draw(c); }
+inline void draw(FigureInterface& fig, const DrawableInterface& shape) {
+    fig.draw(shape);
+}
+
+class CanvasInterface {
+  public:
+    virtual ~CanvasInterface() { };
+    virtual uint x_coordinate() const = 0;
+    virtual uint y_coordinate() const = 0;
+    virtual void move_to(double x, double y) = 0;
+    virtual void line_to(double x, double y) = 0;
+    virtual void circle(double x, double y, double r) = 0;
+    virtual void dot(double x, double y) = 0;
+    virtual void stroke() = 0;
+    virtual void fill() = 0;
+    virtual void clip() = 0;
+    virtual double get_line_width() const = 0;
+    virtual void set_line_width(double lw) = 0;
+    virtual void set_line_colour(double r, double g, double b) = 0;
+    virtual void set_fill_colour(double r, double g, double b) = 0;
+    virtual void set_bounding_box(double x0, double x1, double y0, double y1) = 0;
+};
+
+
+//! \brief Base interface for drawable objects
+class DrawableInterface {
+  public:
+    virtual ~DrawableInterface() { }
+    virtual DrawableInterface* clone() const = 0;
+    virtual void draw(CanvasInterface& c) const = 0;
+    virtual uint dimension() const = 0;
+    virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
+};
+
 
 } // namespace Ariadne
+
 
 #endif // ARIADNE_GRAPHICS_INTERFACE_H

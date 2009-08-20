@@ -973,6 +973,10 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     return GridCell( theGrid, theBaseCellHeight, theBaseCellWord );
 }
 
+uint GridCell::dimension() const {
+    return this->grid().dimension();
+}
+
 
 /*********************************************GridOpenCell******************************************/
 
@@ -1248,6 +1252,12 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
 }
 
 /********************************************GridTreeSubset*****************************************/
+
+GridTreeSubset* GridTreeSubset::clone( ) const {
+    // Return a GridTreeSet to ensure that memory is copied.
+    return new GridTreeSet(this->grid(),this->_pRootTreeNode);
+}
+
 
 void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
     //1. Take the Box of this GridTreeSubset's GridCell
@@ -1601,6 +1611,18 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
     }
     
     return result;
+}
+
+void GridTreeSubset::draw(CanvasInterface& theGraphic) const {
+    for(GridTreeSubset::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        iter->box().draw(theGraphic);
+    }
+}
+
+std::ostream&
+GridTreeSubset::write(std::ostream& os) const
+{
+    return os << (*this);
 }
 
 /*********************************************GridTreeSet*********************************************/
@@ -2762,17 +2784,17 @@ GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& the
     return resultSet;
 }
 
-void draw(GraphicsInterface& theGraphic, const GridCell& theGridCell) {
-    draw(theGraphic,theGridCell.box());
+void draw(CanvasInterface& theGraphic, const GridCell& theGridCell) {
+    theGridCell.box().draw(theGraphic);
 }
     
-void draw(GraphicsInterface& theGraphic, const GridTreeSet& theGridTreeSet) {
+void draw(CanvasInterface& theGraphic, const GridTreeSet& theGridTreeSet) {
     for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
-        draw(theGraphic,iter->box());
+        iter->box().draw(theGraphic);
     }
 }
 
-void draw(GraphicsInterface& theGraphic, const CompactSetInterface& theSet) {
+void draw(CanvasInterface& theGraphic, const CompactSetInterface& theSet) {
     static const int DRAWING_DEPTH=16;
     draw(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
 }

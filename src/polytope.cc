@@ -286,6 +286,32 @@ apply(const ProjectionFunction& map, const InterpolatedCurve& curve)
 }
 
 
+void Polytope::draw(CanvasInterface& c) const {
+    uint xi=c.x_coordinate(); uint yi=c.y_coordinate();
+
+    Polytope pr(2);
+    Point prv(2);
+
+    // Project polytope onto canvas coordinates
+    for(uint i=0; i!=this->number_of_vertices(); ++i) {
+        const Point& v=this->vertex(i);
+        prv[0]=v[xi]; prv[1]=v[yi];
+    }
+    pr.new_vertex(prv);
+
+    // Reduce boundary of projected polytope
+    reduce2d(pr);
+
+    // Trace boundary
+    prv=pr.vertex(pr.number_of_vertices()-1);
+    c.move_to(prv[0],prv[1]);
+    for(uint i=0; i!=pr.number_of_vertices(); ++i) {
+        prv=pr.vertex(i);
+        c.line_to(prv[0],prv[1]);
+    }
+
+    c.fill();
+}
 
 
 } // namespace Ariadne

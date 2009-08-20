@@ -110,6 +110,13 @@ ImageSet::bounding_box() const
 }
 
 
+void
+ImageSet::draw(CanvasInterface& os) const
+{ 
+    return this->bounding_box().draw(os);
+}
+
+
 std::ostream&
 ImageSet::write(std::ostream& os) const 
 { 

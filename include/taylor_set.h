@@ -31,8 +31,8 @@
 #include "numeric.h"
 #include "vector.h"
 #include "set_interface.h"
+#include "graphics_interface.h"
 
-#include "list_set.h"
 #include "taylor_model.h"
 
 namespace Ariadne {
@@ -49,10 +49,11 @@ class TaylorExpression;
 class TaylorFunction;
 class TaylorSet;
 
+template<class BS> class ListSet;
+
 class Zonotope;
 class Grid;
 class GridTreeSet;
-class GraphicsInterface;
 
 /*! \brief Sets expressed as the image of a box under a polynomial with error bounds.
  *
@@ -60,6 +61,7 @@ class GraphicsInterface;
  */
 class TaylorSet
     : public LocatedSetInterface
+    , public DrawableInterface
 {
   private:
     Vector<TaylorModel> _models;
@@ -122,6 +124,8 @@ class TaylorSet
     virtual tribool inside(const Box&) const;
     //! \brief A bounding box for the set.
     virtual Box bounding_box() const;
+    //! \brief Draw on a two-dimensional canvas.
+    virtual void draw(CanvasInterface& c) const;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const;
 
@@ -171,11 +175,11 @@ GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint dep
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
 Zonotope zonotope(const TaylorSet& ts);
 
-void draw(GraphicsInterface& g, const TaylorSet& ts);
-void box_draw(GraphicsInterface& g, const TaylorSet& ts);
-void affine_draw(GraphicsInterface& g, const TaylorSet& ts);
-void curve_draw(GraphicsInterface& g, const TaylorSet& ts);
-void grid_draw(GraphicsInterface& g, const TaylorSet& ts);
+void standard_draw(CanvasInterface& g, const TaylorSet& ts);
+void box_draw(CanvasInterface& g, const TaylorSet& ts);
+void affine_draw(CanvasInterface& g, const TaylorSet& ts);
+void curve_draw(CanvasInterface& g, const TaylorSet& ts);
+void grid_draw(CanvasInterface& g, const TaylorSet& ts);
 
 void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
 

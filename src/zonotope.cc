@@ -37,7 +37,6 @@
 #include "list_set.h"
 
 #include "polytope.h"
-#include "graphics.h"
 
 
 namespace Ariadne {
@@ -891,9 +890,52 @@ contains(const Zonotope& z, const Point& pt)
 }
 
 
-void draw(GraphicsInterface& fig, const Zonotope& z) {
-    fig.draw(polytope(error_free_over_approximation(z)));
+struct angle_less {
+    bool operator() (const Vector2d& v1, const Vector2d& v2) const {
+        if(v1.y==0) { return true; }
+        else if(v1.y==0) { return false; }
+        else { return (v1.y/v1.x) < (v2.y/v2.x); }
+    }
+};
+
+void Zonotope::draw(CanvasInterface& c) const {
+    const Zonotope& z=*this;
+    uint ix=c.x_coordinate(); uint iy=c.y_coordinate();
+
+    const Vector<Float>& zc=z.centre();
+    const Matrix<Float>& zg=z.generators();
+    const Vector<Float>& ze=z.error();
+
+    Point2d pc(zc[ix],zc[iy]);
+    std::vector< Vector2d > pg;
+    for(uint j=0; j!=z.number_of_generators(); ++j) {
+        Vector2d g(zg[ix][j],zg[iy][j]);
+        if(g.x<0) { g=-g; }
+        pg.push_back(g); 
+    }
+    if(ze[ix]>0) { pg.push_back(Vector2d(ze[ix],0.0)); }
+    if(ze[iy]>0) { pg.push_back(Vector2d(0.0,ze[iy])); }
+
+    std::sort(pg.begin(),pg.end(),angle_less());
+
+    const uint npg=pg.size();
+    Point2d pt=pc;
+    for(uint i=0; i!=npg; ++i) {
+        pt-=pg[i];
+    }
+
+    c.move_to(pt.x,pt.y);
+    for(uint i=0; i!=npg; ++i) {
+        pt+=2*pg[i];
+        c.line_to(pt.x,pt.y);
+    }
+    for(uint i=0; i!=npg; ++i) {
+        pt-=2*pg[i];
+        c.line_to(pt.x,pt.y);
+    }
+    c.fill();
 }
+
 
 
 } // namespace Ariadne

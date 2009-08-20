@@ -47,6 +47,8 @@ class ProjectionFunction;
 struct PlanarProjectionMap {
   public:
     PlanarProjectionMap(uint nn, uint ii, uint jj) : n(nn), i(ii), j(jj) { }
+    uint argument_size() const { return this->n; }
+
     uint n, i, j;
 };
 
@@ -68,7 +70,7 @@ inline FillColour fill_colour(double r, double g, double b) { return FillColour(
 
 //! \brief Class for plotting figures.
 class Figure 
-    : public GraphicsInterface
+    : public FigureInterface
 {
   public:
     ~Figure();
@@ -76,6 +78,11 @@ class Figure
     void set_projection_map(const ProjectionFunction&);
     void set_projection_map(const PlanarProjectionMap&);
     void set_bounding_box(const Box&);
+
+    PlanarProjectionMap get_projection_map() const;
+    Box get_bounding_box() const;
+
+    void set_projection(uint, uint, uint);
 
     void set_line_style(bool);
     void set_line_width(double);
@@ -92,16 +99,15 @@ class Figure
     bool get_fill_style() const;
     Colour get_fill_colour() const;
 
-    void draw(const std::vector<Point>&); // Draw a shape bounded by a list of points
-    void draw(const Point&);
-    void draw(const Box&);
-    void draw(const Polytope&);
-    void draw(const InterpolatedCurve&);
+    void draw(const DrawableInterface& shape);
+
     void clear();
     void display();
     void write(const char* filename);
   public:
     class Data;
+  public:
+    void _paint_all(CanvasInterface& canvas); // Writes all shapes to the canvas
   private:
     Data* _data;
 };
@@ -113,7 +119,7 @@ inline Figure& operator<<(Figure& g, const LineColour& lc) { g.set_line_colour(l
 inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.set_fill_style(fs); return g; }
 inline Figure& operator<<(Figure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
-template<class SET> Figure& operator<<(Figure& g, const SET& set) { draw(g,set); return g; }
+inline Figure& operator<<(Figure& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }
 
 template<class SET> void plot(const char* filename, const SET& set) { 
     Figure g; draw(g,set); g.write(filename); }

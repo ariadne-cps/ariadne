@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "test.h"
+
 #include "function.h"
 #include "graphics.h"
 #include "point.h"
@@ -52,10 +54,12 @@ int main(int argc, char **argv)
     Box bx3(2); bx3[0]=Interval(0.2,0.4); bx3[1]=Interval(0.10,0.25);
     Box bx4(2); bx4[0]=Interval(0.25,0.5); bx4[1]=Interval(0.20,0.50);
     Box bx5(2); bx5[0]=Interval(0.4,0.8); bx5[1]=Interval(0.40,1.1);
+
     double z1cdata[]={0.15,0.6}; double z1gdata[]={0.05,0.0,0.05, 0.0,0.05,0.05};
     Vector<Float> z1c(2,z1cdata);
     Matrix<Float> z1g(2,3,z1gdata);
     Zonotope z1(z1c,z1g);
+    Polytope p1=polytope(z1);
     Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
     Matrix<Float> ts1g=z1g;
     AffineFunction afn1(ts1g,ts1c);
@@ -63,23 +67,17 @@ int main(int argc, char **argv)
 
     UserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
-    
 
     Figure g;
     g << fill_colour(0.5,1.0,1.0)
+      << line_colour(0.0,0.0,0.0)
       << bx1
       << bx2
       << bx3
       << bx4
       << bx5;
-    g << fill_colour(0.0,0.5,0.5)
-      << polytope(z1)
-      << polytope(ts1);
     g.write("test_graphics-bx1");
-    
-    g << fill_colour(1.0,1.0,0.5);
     //g.display();
-
     g.clear();
 
     g.set_fill_colour(1.0,0.5,1.0);
@@ -88,15 +86,40 @@ int main(int argc, char **argv)
     g.set_fill_colour(magenta);
     g.draw(bx5);
     g.write("test_graphics-bx2");
+    g.clear();
 
 
     Box bx2d(2); bx2d[0]=Interval(0.2,0.4); bx2d[1]=Interval(0.2,0.5);
     Box bx3d(3); bx3d[0]=Interval(0.2,0.4); bx3d[1]=Interval(0.2,0.5); bx3d[2]=Interval(0.2,0.7);
-    g.clear();
     g.set_projection_map(ProjectionFunction(2,3,1));
+    g.set_bounding_box(bx3d.bounding_box());
     g.draw(bx3d);
     g.write("test_graphics-bx3");
-   
+    g.clear();
+    g.set_projection_map(PlanarProjectionMap(2,0,1));
+
+    ARIADNE_TEST_PRINT(z1);
+    g.set_bounding_box(z1.bounding_box());
+    g << fill_colour(0.0,0.5,0.5)
+      << z1;
+    g.write("test_graphics-z");
+    g.clear();
+
+    ARIADNE_TEST_PRINT(ts1);
+    g.set_bounding_box(ts1.bounding_box());
+    g << fill_colour(0.0,0.5,0.5)
+      << ts1;
+    g.write("test_graphics-ts");
+    g.clear();
+
+    ARIADNE_TEST_WARN("Skipping output of polytope\n");
+/*
+    std::cerr<<"p1="<<p1<<"\n";
+    g << fill_colour(0.0,0.5,0.5)
+      << p1;
+    g.write("test_graphics-pltp");
+    g.clear();
+*/
 
     InterpolatedCurve cv(Point(2,0.0));
     for(int i=1; i<=10; ++i) {
@@ -104,11 +127,12 @@ int main(int argc, char **argv)
         cv.insert(i,pt);
     }
 
-    g.clear();
+    g.set_bounding_box(cv.bounding_box());
     g.set_line_colour(1,0,0);
     g.draw(cv);
     g.set_line_colour(0,0,0);
     g.write("test_graphics-cv");
+    g.clear();
 
     GridTreeSet gts(2);
     gts.adjoin_outer_approximation(ImageSet(bx1), 6);
@@ -118,17 +142,17 @@ int main(int argc, char **argv)
     gts.adjoin_outer_approximation(ImageSet(bx5),10);
     gts.recombine();
 
-    g.clear();
-    Box bbox(2); bbox[0]=Interval(-1,1); bbox[1]=Interval(-1,1);
+    Box bbox(2); bbox[0]=Interval(-2,2); bbox[1]=Interval(-2,2);
     g.set_bounding_box(bbox);
     g << gts;
     g.write("test_graphics-gts1");
-
     g.clear();
+
     g.set_bounding_box(Box());
-    draw(g,gts);
+    g << gts;
     g.write("test_graphics-gts2");
-    
+    g.clear();
+
 
 }
 

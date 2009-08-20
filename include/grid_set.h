@@ -510,7 +510,7 @@ class GridAbstractCell {
  * 
  * This class does not contain the tree structure, so cannot be used in cursors/iterators.
  */
-class GridCell: public GridAbstractCell {
+class GridCell : public GridAbstractCell {
   protected:
     
     friend class GridTreeCursor;
@@ -545,6 +545,9 @@ class GridCell: public GridAbstractCell {
     
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
     bool operator<(const GridCell& otherCell) const;
+    
+    /*! \brief The dimension of the cell. */
+    uint dimension() const;
     
     /*! \brief Allows to convert the given GridCell into an open grid cell (GridOpenCell)*/
     GridOpenCell interior() const;
@@ -701,7 +704,9 @@ class GridOpenCell: public GridAbstractCell {
  * this class is just a pointer to the node in the tree of some paving. This class is not
  * responsible for deallocation of that original tree.
  */
-class GridTreeSubset {
+class GridTreeSubset
+    : public DrawableInterface
+{
   protected:
             
     friend class GridTreeCursor;
@@ -785,6 +790,9 @@ class GridTreeSubset {
     /*! \brief A copy constructor that only copies the pointer to the root of the binary tree and the cell */
     GridTreeSubset( const GridTreeSubset &otherSubset);
             
+    /*! \brief Make a dynamically-allocated copy as a GridTreeSet. Required for DrawableInterface. */
+    GridTreeSubset* clone() const;
+            
     //@}
 
     /*! Virtual destructor. The destructor needs to be virtual since GridTreeSet is a subclass 
@@ -801,7 +809,7 @@ class GridTreeSubset {
     size_t size() const; 
 
     /*! \brief The dimension of the set. */
-    dimension_type dimension() const;
+    uint dimension() const;
 
     /*! \brief Returns a constant reference to the underlying grid. */
     const Grid& grid() const;
@@ -911,6 +919,17 @@ class GridTreeSubset {
     operator ListSet<Box>() const;
             
     //@}
+
+    //@}
+    //! \name Input/Output
+
+    /*! \brief Draw on a two-dimensional canvas. */
+    void draw(CanvasInterface& canvas) const;
+
+    /*! \brief Write to an output stream. */
+    std::ostream& write(std::ostream& os) const;
+
+    //@{
 };
 
 /*! \brief The GridTreeSet class that represents a set of cells with mixed integer and dyadic coordinates.
@@ -1977,7 +1996,7 @@ inline size_t GridTreeSubset::size() const {
     return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ); 
 }
     
-inline dimension_type GridTreeSubset::dimension( ) const {
+inline uint GridTreeSubset::dimension( ) const {
     return grid().dimension();
 }
 
@@ -2162,6 +2181,15 @@ inline std::ostream& operator<<(std::ostream& os, const GridCell& gridPavingCell
         ", Box: " << gridPavingCell.box() << " )";
 }
 
+inline void draw(FigureInterface& fig, const GridCell& cell) {
+    fig.draw(cell.box());
+}
+
+inline FigureInterface& operator<<(FigureInterface& fig, const GridCell& cell) {
+    fig.draw(cell.box()); return fig;
+}
+
+
 /*************************************FRIENDS OF GridTreeCursor*****************************************/
 
 inline std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor){
@@ -2216,11 +2244,6 @@ template<class A> void serialize(A& archive, Ariadne::GridTreeSet& set, const un
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-void draw(GraphicsInterface& theGraphic, const GridCell& theGridCell); 
-    
-void draw(GraphicsInterface& theGraphic, const GridTreeSet& theGridTreeSet);
-
-void draw(GraphicsInterface& theGraphic, const CompactSetInterface& theSet);
 
 
 } // namespace Ariadne

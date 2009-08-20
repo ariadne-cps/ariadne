@@ -31,11 +31,14 @@
 #include "numeric.h"
 #include "vector.h"
 
+#include "graphics_interface.h"
+
 namespace Ariadne {
 
 //! A point in Euclidean space.
 class Point
     : public Vector<Float>
+    , public DrawableInterface
 {
   public:
     typedef Float real_type;
@@ -50,9 +53,18 @@ class Point
     explicit Point(uint d, const Float& x0, ...);
     //! The origin in \a n dimensions.
     static Point origin(uint n) { return Point(n,0.0); }
+    //! A dynamically-allocated copy.
+    virtual Point* clone() const;
     //! The dimension of the point.
     uint dimension() const { return this->size(); }
     Vector<Float> centre() const { return *this; }
+
+    //! Write to an output stream.
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << static_cast<const Vector<Float>&>(*this); }
+
+    virtual void draw(CanvasInterface& c) const;
+    virtual Box bounding_box() const;
 };
 
 Point make_point(const std::string&);

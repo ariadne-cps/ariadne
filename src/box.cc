@@ -102,6 +102,18 @@ std::vector<Point> Box::vertices() const {
 }
 
 
+void Box::draw(CanvasInterface& c) const
+{
+    uint ix=c.x_coordinate(); uint iy=c.y_coordinate();
+    Interval x=(*this)[ix]; Interval y=(*this)[iy];
+    c.move_to(x.lower(),y.lower());
+    c.line_to(x.upper(),y.lower());
+    c.line_to(x.upper(),y.upper());
+    c.line_to(x.lower(),y.upper());
+    c.line_to(x.lower(),y.lower());
+    c.fill();
+}
+
 Box make_box(const std::string& str)
 {
     // Representation as a literal 

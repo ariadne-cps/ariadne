@@ -40,6 +40,7 @@
 #include "point.h"
 
 #include "set_interface.h"
+#include "graphics_interface.h"
 
 namespace Ariadne {
 
@@ -61,9 +62,11 @@ Point baricentre(const Polytope& p);
 Polytope& reduce2d(Polytope& p);
 Float slope2d(const Point& pt1, const Point& pt2);
 
+
 //! A polytope in Euclidean space, defined by a list of extreme points.
 class Polytope
     : public LocatedSetInterface
+    , public DrawableInterface
 { 
   public: 
     typedef std::vector<Point>::const_iterator const_iterator;
@@ -98,6 +101,7 @@ class Polytope
     virtual tribool overlaps(const Box& bx) const;
     virtual tribool inside(const Box& bx) const;
     virtual Box bounding_box() const;
+    virtual void draw(CanvasInterface& c) const;
     virtual std::ostream& write(std::ostream& os) const { return os << *this; }
   
     //! \brief The convex hull of two polytopes.
@@ -107,8 +111,6 @@ class Polytope
   private:
     std::vector<Point> _vertices;
 };
-
-std::ostream& operator<<(std::ostream& os, const Polytope& p);
 
 
 

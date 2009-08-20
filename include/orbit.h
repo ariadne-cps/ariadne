@@ -229,8 +229,7 @@ template<class ES> std::ostream& operator<<(std::ostream& os, const Orbit< ES >&
 template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorSet>& orb);
 template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb);
 
-
-template<class ES> 
+template<class ES>
 std::ostream& 
 operator<<(std::ostream& os, const Orbit< ES >& orb)
 {
@@ -246,9 +245,7 @@ template<>
 std::ostream& 
 operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
 
-void draw(GraphicsInterface& graphic, const Orbit<TaylorSet>& orbit);
 
-void draw(GraphicsInterface& graphic, const Orbit<HybridPoint>& orbit);
 
 } // namespace Ariadne
 

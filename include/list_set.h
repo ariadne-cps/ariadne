@@ -35,6 +35,8 @@
 
 #include "graphics_interface.h"
 
+#include "box.h"
+
 typedef unsigned int uint;
 
 namespace Ariadne {
@@ -49,7 +51,8 @@ template<class ES> class ListSet< std::pair<DiscreteState,ES> >;
 struct ListSetSummary { uint size, dimension; };
 
 template<class BS>
-class ListSet 
+class ListSet
+    : public DrawableInterface
 {
   private:
     std::vector<BS> _data;
@@ -69,6 +72,7 @@ class ListSet
     template<class Iter> ListSet(Iter first, Iter last) {
         this->_data.insert(this->end(),first,last); };
 
+    ListSet<BS>* clone() const { return new ListSet<BS>(*this); }
 
     /*! \brief Tests if the sets are equal. Tests equality of sequences, 
      *  including ordering. */   
@@ -130,10 +134,34 @@ class ListSet
         return result;
     }
 
-    /*! Returns a summary of the size and dimension. */
+    /*! \brief A bounding box for the whole set. */
+    Box bounding_box() const {
+        if(this->size()==0) { return Box(this->dimension()); }
+        Box result((*this)[0].bounding_box());
+        for(uint i=1; i!=this->size(); ++i) {
+            result=hull(result,(*this)[i].bounding_box()); }
+        return result;
+    }
+
+    /*! \brief Draw on a canvas.
+     *
+     *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the box.h header file.
+     */
+    void draw(CanvasInterface& c) const {
+        for(uint i=0; i!=this->size(); ++i) {
+            (*this)[i].draw(c);
+        }
+    }
+
+    /*! \brief Write to an output stream. */
+    std::ostream& write(std::ostream& os) const {
+        return os << *this; 
+    }
+
+    /*! \brief Returns a summary of the size and dimension. */
     ListSetSummary summary() const { ListSetSummary summary = { this->size(),this->dimension() }; return summary; }
 
-};      
+};
   
 inline std::ostream& operator<<(std::ostream& os, const ListSetSummary& lss) {
     return os << "ListSet( s="<<lss.size<<", d="<<lss.dimension<<")"; }
@@ -147,12 +175,6 @@ operator<<(std::ostream& os, const ListSet<BS>& ls)
     return os << ")";
 }
 
-template<class BS>
-void 
-draw(GraphicsInterface& graphic, const ListSet<BS>& ls) { 
-    for(typename ListSet<BS>::const_iterator iter=ls.begin();
-        iter!=ls.end();  ++iter) { draw(graphic,*iter); } 
-}
 
 
 } // namespace Ariadne

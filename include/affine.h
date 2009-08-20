@@ -106,6 +106,11 @@ class ScalarAffineFunction
     virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
         Differential<TaylorModel> r=x[0]*0+_c; for(uint j=0; j!=_g.size(); ++j) { r+=_g[j]*x[j]; } return r; };
 
+    virtual Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+
 //    virtual ConstantScalarFunction* derivative(uint j) const { return new ConstantScalarFunction(_g.size(),_g[j]); }
     virtual ScalarFunctionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 

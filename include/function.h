@@ -101,9 +101,9 @@ template<class T> class UserScalarFunction
 
     virtual UserScalarFunction<T>* derivative(uint j) { ARIADNE_NOT_IMPLEMENTED; }
 
-    virtual Matrix<Float> gradient(const Vector<Float>& x) const {
+    virtual Vector<Float> gradient(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
         return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
     virtual std::ostream& write(std::ostream& os) const  {
@@ -212,12 +212,17 @@ class ScalarPolynomialFunction
     virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
         return Ariadne::evaluate(static_cast<const Polynomial<Interval>&>(*this),x); }
 
+    virtual Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+
     virtual ScalarPolynomialFunction* derivative(uint j) const {
         return new ScalarPolynomialFunction(Ariadne::derivative(*this,j)); }
     virtual ScalarPolynomialFunction* antiderivative(uint j) const {
         return new ScalarPolynomialFunction(Ariadne::antiderivative(*this,j)); }
 
-    virtual Vector<ScalarPolynomialFunction> gradient() const {
+    virtual Vector<ScalarPolynomialFunction> derivative() const {
         Vector<ScalarPolynomialFunction> g(this->argument_size());
         for(uint i=0; i!=g.size(); ++i) { g[i]=Ariadne::derivative(*this,i); }
         return g; }
@@ -743,6 +748,11 @@ class FunctionElement
     virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
         // FIXME: Incorrect
         return x[0]; }
+
+    virtual Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
     virtual FunctionElement* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual std::ostream& write(std::ostream& os) const { ARIADNE_NOT_IMPLEMENTED; }

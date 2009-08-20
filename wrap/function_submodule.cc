@@ -213,6 +213,11 @@ class ScalarPythonFunction
     virtual Differential<TaylorModel> evaluate (const Vector< Differential<TaylorModel> >& x) const {
         return boost::python::extract< Differential<TaylorModel> >(this->_pyf(x)); }
 
+    virtual Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+
     virtual ScalarPythonFunction* derivative (uint j) const {
         ARIADNE_ASSERT_MSG(false,"Cannot differentiate a Python function"); return 0; }
     virtual std::ostream& write(std::ostream& os) const {
@@ -373,7 +378,6 @@ void export_scalar_function_interface()
     scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<Interval>);
     scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<TaylorModel>);
     scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate< Differential<Interval> >);
-    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate< Differential<TaylorModel> >);
     scalar_function_interface_class.def(self_ns::str(self));
     //expression_interface_class.def(self_ns::repr(self));
 
@@ -397,7 +401,7 @@ void export_scalar_affine_function()
    class_<ScalarAffineFunction, bases< ScalarFunctionInterface > > scalar_affine_function_class("Affine", init<Vector<Interval>, Interval> ());
     //scalar_affine_function_class.def(init<ExpressionPointer>());
     scalar_affine_function_class.def("value",&ScalarAffineFunction::value);
-    scalar_affine_function_class.def("gradient",&ScalarAffineFunction::gradient);
+    scalar_affine_function_class.def("gradient",(Vector<Interval>(ScalarAffineFunction::*)(const Vector<Interval>&)const)&ScalarAffineFunction::gradient);
     scalar_affine_function_class.def("__add__",(ScalarAffineFunction(*)(const ScalarAffineFunction&,const ScalarAffineFunction&))&operator+);
     scalar_affine_function_class.def("__mul__",(ScalarAffineFunction(*)(const ScalarAffineFunction&,const Interval&))&operator*);
     scalar_affine_function_class.def("__rmul__",&__rmul__<ScalarAffineFunction,ScalarAffineFunction,Interval>);
@@ -471,8 +475,8 @@ void export_scalar_polynomial_function()
     scalar_polynomial_function_class.def(self*=ivl);
     scalar_polynomial_function_class.def(self/=ivl);
 
-    def("derivative",(PE*(PE::*)(uint))&PE::derivative,return_value_policy<manage_new_object>());
-    def("antiderivative",(PE*(PE::*)(uint))&PE::antiderivative,return_value_policy<manage_new_object>());
+    def("derivative",(PE*(PE::*)(uint)const)&PE::derivative,return_value_policy<manage_new_object>());
+    def("antiderivative",(PE*(PE::*)(uint)const)&PE::antiderivative,return_value_policy<manage_new_object>());
 
     //implicitly_convertible<Polynomial<Float>,PolynomialExpression>();
     //implicitly_convertible<Polynomial<Interval>,PolynomialExpression>();

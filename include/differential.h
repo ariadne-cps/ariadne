@@ -194,6 +194,10 @@ class Differential
     const X& value() const { return this->operator[](MultiIndex(this->argument_size())); }
     //! \brief The coefficient of \f$x_j\f$.
     const X& gradient(uint j) const { return this->operator[](MultiIndex::unit(this->argument_size(),j)); }
+    //! \brief The vector of coefficients of \f$x_j\f$.
+    Vector<X> gradient() const { Vector<X> r(this->argument_size());
+        for(uint j=0; j!=r.size(); ++j) { r[j]=this->gradient(j); } return r; }
+
 
 
     //! \brief A reference to the coefficient of \f$x_j\f$.

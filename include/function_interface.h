@@ -74,8 +74,13 @@ class ScalarFunctionInterface {
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the expression over a vector of interval differentials.
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
-    //! \brief Evaluate the expression over a vector of function model differentials.
-    virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const = 0;
+    ////! \brief Evaluate the expression over a vector of function model differentials.
+    //virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const = 0;
+
+    //! \brief Compute an approximation to the gradient vector \f$(Df)_{j}=\partial f/\partial x_j\f$ of the function at the point \a x.
+    virtual Vector<Float> gradient(const Vector<Float>& x) const = 0;
+    //! \brief Compute an over-approximation to the gradient vector \f$(Df)_{\j}=\partial f/\partial x_j\f$ of the function over the domain \a x.
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const = 0;
 
     //! \brief Call the function on the type \a T.
     template<class T> T operator()(const Vector<T>& x) { return this->evaluate(x); }

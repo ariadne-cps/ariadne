@@ -49,7 +49,7 @@ typedef bool Boolean;
 typedef tribool Tribool;
 typedef std::string String;
 class Integer;
-class Real { };
+class Real;
 class EnumeratedValue;
 
 typedef String Identifier;

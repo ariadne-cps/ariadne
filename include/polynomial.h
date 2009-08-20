@@ -116,14 +116,18 @@ class Polynomial
     size_type argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The number of structural nonzero terms.
     size_type number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
+    //! \brief The order of the highest term.
+    size_type degree() const { return this->_expansion.degree(); }
     //! \brief The value of the polynomial at zero.
     const X& value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
     //! \brief A reference to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
     X& operator[](const MultiIndex& a) { return this->_expansion[a]; }
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
     const X& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
-    //! \brief A constant referent to the raw data expansion.
+    //! \brief A constant reference to the raw data expansion.
     const Expansion<X>& expansion() const { return this->_expansion; }
+    //! \brief A reference to the raw data expansion.
+    Expansion<X>& expansion() { return this->_expansion; }
     //@}
 
     //@{
@@ -402,6 +406,75 @@ Vector<Y> evaluate(const Vector< Polynomial<X> >& p, const Vector<Y>& x)
 }
 
 
+template<class X>
+Polynomial<X>
+partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
+{
+    Polynomial<X> r(x.argument_size()-1);
+    MultiIndex ra(r.argument_size());
+    if(c==0) {
+        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            MultiIndex::value_type xak=xa[k];
+            if(xak==0) {
+                const X& xv=xiter->data();
+                for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+                for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+                r.expansion().append(ra,xv);
+            }
+        }
+    } else if(c==1) {
+        Polynomial<X> s(x.argument_size()-1);
+        array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+
+        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            const X& xv=xiter->data();
+            MultiIndex::value_type xak=xa[k];
+            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            assert(ra.degree()+xak==xa.degree());
+            p[xak].expansion().append(ra,xv);
+        }
+
+        r=p[0];
+        for(uint i=1; i!=p.size(); ++i) {
+            r+=p[i];
+        }
+    } else {
+        Polynomial<X> s(x.argument_size()-1);
+        array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+
+        array<X> cpowers(x.degree()+1);
+        cpowers[0]=static_cast<X>(1); cpowers[1]=c;
+        if(x.degree()>=2) { cpowers[2]=sqr(c); }
+        for(uint j=3; j<=x.degree(); ++j) {
+            cpowers[j]=cpowers[j-2]*cpowers[2];
+        }
+
+        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            const X& xv=xiter->data();
+            MultiIndex::value_type xak=xa[k];
+            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            assert(ra.degree()+xak==xa.degree());
+            p[xak].expansion().append(ra,xv);
+        }
+        for(uint i=1; i!=p.size(); ++i) {
+            p[i]*=cpowers[i];
+        }
+
+        r=p[0];
+        for(uint i=1; i!=p.size(); ++i) {
+            r+=p[i];
+        }
+    }
+
+    return r;
+}
+
+
 template<class X> inline
 Polynomial<X> compose(const Polynomial<X>& p, const Vector< Polynomial<X> >& q)
 {
@@ -434,6 +507,16 @@ derivative(const Polynomial<X>& p, uint j) {
             ar[j]-=1;
             r.append(ar,val*ap[j]);
         }
+    }
+    return r;
+}
+
+template<class X>
+Vector< Polynomial<X> >
+derivative(const Polynomial<X>& p) {
+    Vector< Polynomial<X> > r(p.argument_size(), Polynomial<X>(p.argument_size()) );
+    for(uint j=0; j!=r.size(); ++j) {
+        r[j]=derivative(p,j);
     }
     return r;
 }

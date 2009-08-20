@@ -250,7 +250,7 @@ class Expansion
   public:
     static X _zero;
   public:
-    typedef X Real;
+    typedef X RealType;
     typedef MultiIndex::size_type size_type;
     typedef MultiIndex::byte_type byte_type;
     typedef MultiIndex::word_type word_type;
@@ -294,19 +294,19 @@ class Expansion
     void reserve(size_type nnz) { this->_coefficients.reserve(nnz*_element_size()); }
     void resize(size_type nnz) { this->_coefficients.resize(nnz*_element_size()); }
 
-    void insert(const MultiIndex& a, const Real& c); // Non-inline user function
-    void append(const MultiIndex& a, const Real& c) {
+    void insert(const MultiIndex& a, const RealType& c); // Non-inline user function
+    void append(const MultiIndex& a, const RealType& c) {
         this->_append(a,c); }
-    void prepend(const MultiIndex& a, const Real& c) {
+    void prepend(const MultiIndex& a, const RealType& c) {
         this->_prepend(a,c); }
-    void append(const MultiIndex& a1, const MultiIndex& a2, const Real& c) {
+    void append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c) {
         this->_append(a1,a2,c); }
 
-    Real& operator[](const MultiIndex& a) {
+    RealType& operator[](const MultiIndex& a) {
         iterator iter=this->lower_bound(a);
-        if(iter==this->end() || iter->key()!=a) { iter=this->_insert(iter,a,0.0); }
+        if(iter==this->end() || iter->key()!=a) { iter=this->_insert(iter,a,static_cast<RealType>(0.0)); }
         return iter->data(); }
-    const Real& operator[](const MultiIndex& a) const {
+    const RealType& operator[](const MultiIndex& a) const {
         const_iterator iter=this->lower_bound(a);
         if(iter==this->end() || iter->key()!=a) { return _zero; }
         else { return iter->data(); } }
@@ -356,7 +356,7 @@ class Expansion
     const word_type* _end_ptr() const { return _coefficients.end().operator->(); }
     word_type* _begin_ptr() { return _coefficients.begin().operator->(); }
     word_type* _end_ptr() { return _coefficients.end().operator->(); }
-    iterator _insert(iterator p, const MultiIndex& a, const Real& x) {
+    iterator _insert(iterator p, const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_insert "<<*this<<" "<<p._ptr()<<" "<<a<<" "<<x<<std::endl;
         if(_coefficients.size()+_element_size()>_coefficients.capacity()) {
             difference_type i=p-begin();
@@ -366,21 +366,21 @@ class Expansion
             _coefficients.resize(_coefficients.size()+_element_size());
         }
         return _allocated_insert(p,a,x); }
-    iterator _insert(const MultiIndex& a, const Real& x) {
+    iterator _insert(const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_insert "<<*this<<" "<<a<<" "<<x<<std::endl;
         _coefficients.resize(_coefficients.size()+_element_size());
         iterator p=std::lower_bound(this->begin(),this->end()-1,a,key_less<value_type,key_type>());
         return _allocated_insert(p,a,x); }
-    iterator _allocated_insert(iterator p, const MultiIndex& a, const Real& x) {
+    iterator _allocated_insert(iterator p, const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_allocated_insert "<<*this<<" "<<p<<" "<<p-begin()<<" "<<a<<" "<<x<<std::endl;
         iterator curr=this->end()-1; iterator prev=curr;
         while(curr!=p) { --prev; *curr=*prev; curr=prev; }
         curr->key()=a; curr->data()=x; return p; }
-    void _prepend(const MultiIndex& a, const Real& x) {
+    void _prepend(const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_prepend "<<*this<<" "<<a<<" "<<x<<std::endl;
         _coefficients.resize(_coefficients.size()+_element_size());
         _allocated_insert(begin(),a,x); }
-    void _append(const MultiIndex& a, const Real& x) {
+    void _append(const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_append "<<*this<<" "<<a<<" "<<x<<"... "<<std::flush;
         _coefficients.resize(_coefficients.size()+_element_size());
         word_type* vp=_end_ptr()-_element_size(); const word_type* ap=a.word_begin();
@@ -388,7 +388,7 @@ class Expansion
         data_type* xp=reinterpret_cast<data_type*>(this->_end_ptr())-1; *xp=x;
         //std::cerr<<"done"<<std::endl;
     }
-    void _append(const MultiIndex&  a1, const MultiIndex&  a2, const Real& x) {
+    void _append(const MultiIndex&  a1, const MultiIndex&  a2, const RealType& x) {
         //std::cerr<<"_append "<<*this<<" "<<a1<<" "<<a2<<" "<<x<<std::endl;
         _coefficients.resize(_coefficients.size()+_element_size());
         word_type* vp=_end_ptr()-_element_size();

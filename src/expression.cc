@@ -32,6 +32,7 @@
 #include "polynomial.h"
 #include "affine.h"
 
+#include "real.h"
 #include "formula.h"
 #include "function.h"
 
@@ -67,15 +68,15 @@ class ConstantExpression<Real>
   public:
     ConstantExpression(const Float& c) : _c(c) { }
     ConstantExpression(const Interval& c) :  _c(c) { }
-    operator Interval() const { return _c; }
-    Interval value() const { return _c; }
+    operator Real() const { return _c; }
+    Real value() const { return _c; }
     virtual Operator type() const { return CNST; }
     virtual Set<String> arguments() const { return Set<String>(); }
     virtual ConstantExpression<Real>* clone() const { return new ConstantExpression<Real>(*this); }
     virtual std::ostream& write(std::ostream& os) const {
         if(_c.lower()==_c.upper()) { os<<midpoint(_c); } else { os<<_c; } return os; }
   private:
-    Interval _c;
+    Real _c;
 };
 
 

@@ -120,16 +120,19 @@ void
 InterpolatedCurve::draw(CanvasInterface& c) const
 {
     uint xi=c.x_coordinate(); uint yi=c.y_coordinate();
-    const_iterator iter=this->_points.begin();
+    const_iterator iter=this->begin();
     const Point& pt=iter->second;
     c.move_to(pt[xi],pt[yi]);
-    ++iter;
-    while(iter!=this->_points.end()) {
+    while(iter!=this->end()) {
+        ++iter;
         const Point& pt=iter->second;
         c.line_to(pt[xi],pt[yi]);
-        ++iter;
     }
-    c.stroke();
+    if(this->begin()->second==(this->end())->second) {
+        c.fill();
+    } else {
+        c.stroke();
+    }
 }
 
 std::ostream&

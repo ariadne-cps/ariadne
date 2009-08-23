@@ -33,6 +33,7 @@
 
 #include "set_interface.h"
 #include "graphics_interface.h"
+#include "point.h"
 
 namespace Ariadne {
 
@@ -77,8 +78,8 @@ class Box
     std::vector<Point> vertices() const;
 
     //! An approximation to the centre of the box.
-    Vector<Float> centre() const {
-        return midpoint(*this);
+    Point centre() const {
+        return Point(midpoint(static_cast<const Vector<Interval>&>(*this)));
     }
 
     //! The radius of the box in the supremum norm.

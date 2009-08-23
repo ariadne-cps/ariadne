@@ -288,6 +288,7 @@ apply(const ProjectionFunction& map, const InterpolatedCurve& curve)
 
 void Polytope::draw(CanvasInterface& c) const {
     uint xi=c.x_coordinate(); uint yi=c.y_coordinate();
+    ARIADNE_ASSERT(max(xi,yi)<this->dimension());
 
     Polytope pr(2);
     Point prv(2);
@@ -296,8 +297,8 @@ void Polytope::draw(CanvasInterface& c) const {
     for(uint i=0; i!=this->number_of_vertices(); ++i) {
         const Point& v=this->vertex(i);
         prv[0]=v[xi]; prv[1]=v[yi];
+        pr.new_vertex(prv);
     }
-    pr.new_vertex(prv);
 
     // Reduce boundary of projected polytope
     reduce2d(pr);

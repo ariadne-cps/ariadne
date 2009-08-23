@@ -38,19 +38,6 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-template<class C>
-struct container_to_python_list
-{
-    static PyObject* convert(const C& c) {
-        boost::python::list result;
-        for(typename C::const_iterator p=c.begin(); p!=c.end(); ++p) {
-            result.append(boost::python::object(*p));
-        }
-        return boost::python::incref(boost::python::tuple(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
 
 class SolverWrapper
   : public SolverInterface, public wrapper< SolverInterface >
@@ -121,8 +108,8 @@ void export_integrator()
 
 void solver_submodule()
 {
-    boost::python::to_python_converter< Set< Vector<Interval> >, set_to_python_list< Vector<Interval> > >();
-    boost::python::to_python_converter< List< TaylorFunction >, list_to_python_list<TaylorFunction> >();
+    to_python_list< Set< Vector<Interval> > >();
+    to_python< List< TaylorFunction > >();
 
     export_solver();
     export_integrator();

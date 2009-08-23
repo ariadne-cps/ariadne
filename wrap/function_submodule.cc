@@ -47,24 +47,48 @@ using namespace boost::python;
 
 namespace Ariadne {
 
-struct vector_function_from_python_list
+template<>
+struct from_python< MultiIndex >
 {
-    vector_function_from_python_list()     {
-        converter::registry::push_back(&convertible,&construct,type_id< Vector<ScalarFunctionInterface> >());
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<MultiIndex>()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        boost::python::tuple tup=extract<boost::python::tuple>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
+        MultiIndex res(len(tup));
+        for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<uint>(tup[i])); }
+        new (storage) MultiIndex(res);
+        data->convertible = storage;
     }
+};
 
-    static void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr)) { return 0; }
-        return obj_ptr;
-    }
 
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
-    {
+template<>
+struct from_python< Vector<ScalarFunctionInterface> >
+{
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<ScalarFunctionInterface> >()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         list lst=extract<list>(obj_ptr);
-        //if (value == 0) boost::python::throw_error_already_set();
         void* storage = ((converter::rvalue_from_python_storage< Vector<ScalarFunctionInterface> >*)   data)->storage.bytes;
         Vector<ScalarFunctionInterface> res(len(lst));
         for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<ScalarFunctionInterface&>(lst[i])); }
+        new (storage) Vector<ScalarFunctionInterface>(res);
+        data->convertible = storage;
+    }
+};
+
+
+template<>
+struct from_python<PolynomialFunction>
+{
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<PolynomialFunction>()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        list lst=extract<list>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage< Vector<ScalarFunctionInterface> >*)   data)->storage.bytes;
+        PolynomialFunction res(Vector< Polynomial<Interval> >(len(lst)));
+        for(uint i=0; i!=res.size(); ++i) { res.set(i,ScalarPolynomialFunction(extract<Polynomial<Interval>&>(lst[i]))); }
         new (storage) Vector<ScalarFunctionInterface>(res);
         data->convertible = storage;
     }
@@ -88,49 +112,10 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
     return J;
 }
 
-template<class X> X* make(const boost::python::object& obj);
 
-template<>
-MultiIndex*
-make(const boost::python::object& obj) {
-    boost::python::tuple tup=boost::python::extract<boost::python::tuple>(obj);
-    MultiIndex* a=new MultiIndex(len(tup));
-    for(uint i=0; i!=a->size(); ++i) {
-        //shared_ptr<ScalarFunctionInterface> expression_ptr=boost::python::extract<shared_ptr<ScalarFunctionInterface> >(elements[i]);
-        uint ai=boost::python::extract<uint>(tup[i]);
-        a->set(i,ai);
-    }
-    return a;
-}
+template<class T> T evaluate(const ScalarFunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
+template<class T> Vector<T> evaluate(const FunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
 
-template<>
-Vector<ScalarFunctionInterface>*
-make(const boost::python::object& obj) {
-    boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-    Vector<ScalarFunctionInterface>* r=new Vector<ScalarFunctionInterface>(len(elements));
-    for(uint i=0; i!=r->size(); ++i) {
-        //shared_ptr<ScalarFunctionInterface> expression_ptr=boost::python::extract<shared_ptr<ScalarFunctionInterface> >(elements[i]);
-        const ScalarFunctionInterface& expression_ref=boost::python::extract<const ScalarFunctionInterface&>(elements[i]);
-        shared_ptr<ScalarFunctionInterface> expression_ptr(expression_ref.clone());
-        r->set(i,expression_ptr);
-    }
-    return r;
-}
-
-template<>
-PolynomialFunction*
-make<PolynomialFunction>(const boost::python::object& obj)
-{
-    boost::python::list lst=boost::python::extract<boost::python::list>(obj);
-    Vector<ScalarPolynomialFunction> expressions(boost::python::len(lst));
-    for(uint i=0; i!=expressions.size(); ++i) {
-        expressions[i]=boost::python::extract<ScalarPolynomialFunction>(lst[i]);
-    }
-    return new PolynomialFunction(expressions);
-}
-
-template<class T> static T evaluate(const ScalarFunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
-template<class T> static Vector<T> evaluate(const FunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
 
 // RATIONALE:
 // Don't use standard method for wrapping abstract base classes, as this doesn't work well with
@@ -281,13 +266,6 @@ class PythonFunction
 
 
 
-/*
-template<class F> TaylorFunction call_evaluate(const F& f, const TaylorFunction& tf) {
-    return TaylorFunction(tf.domain(),f.evaluate(tf.models())); }
-template<class E> TaylorExpression call_evaluate_expression(const E& f, const TaylorFunction& tf) {
-    return TaylorExpression(tf.domain(),f.evaluate(tf.models())); }
-*/
-
 }
 
 using namespace Ariadne;
@@ -304,7 +282,6 @@ typedef Vector<TaylorModel> TMV;
 typedef TaylorFunction TFM;
 typedef TaylorModel TM;
 
-template<class T> T evaluate(const ScalarFunctionInterface& expr, const Vector<T>& ix) { return expr.evaluate(ix); }
 
 
 
@@ -313,11 +290,12 @@ void export_multi_index()
 {
     class_< MultiIndex > multi_index_class("MultiIndex", init<uint>());
     multi_index_class.def(init<MultiIndex>());
-    multi_index_class.def("__init__",make_constructor(&make<MultiIndex>));
     multi_index_class.def("__getitem__",&MultiIndex::get);
     multi_index_class.def("__setitem__",&MultiIndex::set);
     multi_index_class.def("degree",&MultiIndex::degree);
     multi_index_class.def(self_ns::str(self));
+
+    from_python<MultiIndex>();
 }
 
 template<class X>
@@ -362,7 +340,7 @@ void export_polynomial()
     polynomial_class.def(self_ns::str(self));
     //polynomial_class.def(self_ns::repr(self));
 
-    to_python_converter< Vector< Polynomial<X> >, vector_to_python_list< Polynomial<X> > >();
+    to_python< Vector< Polynomial<X> > >();
 }
 
 void export_scalar_function_interface()
@@ -375,6 +353,7 @@ void export_scalar_function_interface()
 
     scalar_function_interface_class.def("argument_size", &ScalarFunctionPyWrap::argument_size);
     scalar_function_interface_class.def("smoothness", &ScalarFunctionPyWrap::smoothness);
+    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<Float>);
     scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<Interval>);
     scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<TaylorModel>);
     scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate< Differential<Interval> >);
@@ -419,7 +398,7 @@ void export_scalar_polynomial_function()
     Float flt;
     Interval ivl;
 
-    array_to_python_list<ScalarPolynomialFunction>();
+    to_python< array<ScalarPolynomialFunction> >();
 
     implicitly_convertible< Polynomial<Interval>, ScalarPolynomialFunction>();
 
@@ -514,11 +493,10 @@ void export_vector_function()
 {
     typedef Vector<ScalarFunctionInterface> VectorFunction;
 
-    class_<VectorFunction, bases< FunctionInterface > > vector_function_class("VectorFunction",no_init);
-    vector_function_class.def("__init__", make_constructor(&make<VectorFunction>) );
+    class_<VectorFunction, bases< FunctionInterface > > vector_function_class("VectorFunction",init<VectorFunction>());
     vector_function_class.def("__getitem__",(ScalarFunctionInterface const&(VectorFunction::*)(uint)const)&VectorFunction::operator[],return_value_policy<copy_const_reference>());
 
-    vector_function_from_python_list();
+    from_python<VectorFunction>();
 }
 
 void export_affine_function()
@@ -532,16 +510,15 @@ void export_affine_function()
 
 void export_polynomial_function()
 {
-    array_from_python_list<String>();
+    from_python< array<String> >();
     //array_from_python_list<RealVariable>();
 
     class_< PolynomialFunction, bases<FunctionInterface> >
-        polynomial_function_class("PolynomialFunction", no_init);
-    polynomial_function_class.def("__init__",make_constructor(&make<PolynomialFunction>));
-    polynomial_function_class.def(init<PolynomialFunction>());
+        polynomial_function_class("PolynomialFunction", init<PolynomialFunction>());
     polynomial_function_class.def("__getitem__",(ScalarPolynomialFunction const&(PolynomialFunction::*)(uint)const)&PolynomialFunction::operator[],return_value_policy<copy_const_reference>());
     polynomial_function_class.def("__setitem__",(void(PolynomialFunction::*)(uint,const ScalarPolynomialFunction&)const)&PolynomialFunction::set);
 
+    from_python<PolynomialFunction>();
 
 }
 
@@ -549,8 +526,8 @@ void export_polynomial_function()
 
 
 void function_submodule() {
-    to_python_converter< array<ScalarPolynomialFunction>, array_to_python_list<ScalarPolynomialFunction> >();
-    to_python_converter< array<std::string>, array_to_python_list<std::string> >();
+    to_python< array<std::string> >();
+    from_python< array<std::string> >();
 
     export_multi_index();
 

@@ -38,128 +38,6 @@ namespace Ariadne {
 
 TaylorExpression max(const TaylorExpression& x, const TaylorExpression& y);
 TaylorExpression min(const TaylorExpression& x, const TaylorExpression& y);
-
-template<class T>
-TaylorExpression midpoint(const TaylorExpression& x) {
-    TaylorExpression r=x;
-    r.set_error(0.0);
-    return r;
-}
-
-
-
-
-void read(MultiIndex& j, const boost::python::object& obj) {
-    array<int> ary;
-    read_tuple_array(ary,obj);
-    j=MultiIndex(ary.size(),ary.begin());
-}
-
-
-template<class K, class V>
-void read(std::map<K,V>& m, const boost::python::object& obj) {
-    V c;
-    K j;
-    boost::python::dict dct=extract<boost::python::dict>(obj);
-    boost::python::list lst=dct.items();
-    for(int i=0; i!=len(lst); ++i) {
-        boost::python::tuple tup=extract<boost::python::tuple>(lst[i]);
-        read(j,tup[0]);
-        read(c,tup[1]);
-        if(i==0) {
-            m=std::map<K,V>();
-        }
-        m[j]=c;
-    }
-}
-
-
-
-void read(TaylorModel& t, const boost::python::object& obj) {
-    t=boost::python::extract<TaylorModel>(obj);
-}
-
-void read(TaylorModel& t, const boost::python::object& obj1, const boost::python::object& obj2) {
-    std::map<MultiIndex,Float> m;
-    Float e;
-    read(m,obj1);
-    read(e,obj2);
-    ARIADNE_ASSERT(e>=0);
-    t=TaylorModel(m,e);
-}
-
-
-void read(TaylorExpression& t, const boost::python::object& obj1, const boost::python::object& obj2, const boost::python::object& obj3) {
-    Vector<Interval> d;
-    std::map<MultiIndex,Float> m;
-    Float e;
-    d=boost::python::extract< Vector<Interval> >(obj1);
-    read(m,obj2);
-    read(e,obj3);
-    ARIADNE_ASSERT(e>=0);
-    t=TaylorExpression(d,m,e);
-}
-
-
-void read(TaylorExpression& te, const boost::python::object& obj);
-
-void read(TaylorExpression& te, const boost::python::tuple& tup) {
-    if(len(tup)==1) {
-        read(te,tup[0]);
-    } else if(len(tup)==3) {
-        read(te,tup[0],tup[1],tup[2]);
-    }
-}
-
-
-void read(TaylorExpression& te, const boost::python::object& obj) {
-    if(check(extract<boost::python::tuple>(obj))) {
-         read(te,extract<boost::python::tuple>(obj));
-    }
-}
-
-boost::python::list
-make_taylor_variables(const Vector<Interval>& x)
-{
-    boost::python::list result;
-    Vector<TaylorExpression> expressions=TaylorExpression::variables(x);
-    for(uint i=0; i!=expressions.size(); ++i) {
-        result.append(expressions[i]);
-    }
-    return result;
-}
-
-
-
-
-boost::python::tuple
-python_split(const TaylorExpression& x, uint j)
-{
-    std::pair<TaylorExpression,TaylorExpression> res=split(x,j);
-    return boost::python::make_tuple(res.first,res.second);
-}
-
-
-
-std::string __tbox_str__(const Vector<Interval>& d) {
-    std::stringstream ss;
-    for(uint j=0; j!=d.size(); ++j) {
-        ss<<(j==0?"[":"x")<<d[j];
-    }
-    ss<<"]";
-    return ss.str();
-}
-
-
-
-TaylorFunction __getslice__(const TaylorFunction& tf, int start, int stop) {
-    return TaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
-}
-
-
-
-
-
 TaylorExpression neg(const TaylorExpression&);
 TaylorExpression rec(const TaylorExpression&);
 TaylorExpression sqr(const TaylorExpression&);
@@ -171,9 +49,66 @@ TaylorExpression sin(const TaylorExpression&);
 TaylorExpression cos(const TaylorExpression&);
 TaylorExpression tan(const TaylorExpression&);
 
+
+TaylorFunction __getslice__(const TaylorFunction& tf, int start, int stop) {
+    return TaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
+}
+
 ScalarPolynomialFunction polynomial(const TaylorExpression& te) {
     return te.polynomial();
 }
+
+
+template<>
+struct from_python<MultiIndex> {
+    from_python() {
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<MultiIndex>()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
+        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+        boost::python::extract<boost::python::tuple> xtup(obj_ptr);
+        boost::python::extract<boost::python::list> xlst(obj_ptr);
+        if(xlst.check()) {
+            MultiIndex a(len(xlst)); for(uint i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<uint>(xlst()[i]); }
+            new (storage) MultiIndex(a);
+        } else {
+            MultiIndex a(len(xtup)); for(uint i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<uint>(xtup()[i]); }
+            new (storage) MultiIndex(a);
+        }
+        data->convertible = storage;
+    }
+};
+
+
+template<class T>
+struct from_python< Expansion<T> > {
+    from_python() {
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Expansion<T> >()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
+        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+        Expansion<T> r;
+        boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
+        boost::python::list lst=dct.values();
+        for(int i=0; i!=len(lst); ++i) {
+            boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[i]);
+            MultiIndex a=boost::python::extract<MultiIndex>(tup[0]);
+            T c=extract<T>(tup[1]);
+            r.append(a,c);
+        }
+        new (storage) Expansion<T>(r);
+        r.unique_sort();
+        data->convertible = storage;
+    }
+};
+
+
+
+
+
+
 
 } // namespace Ariadne
 
@@ -202,8 +137,12 @@ void export_taylor_model()
     taylor_model_class.def("argument_size", &TM::argument_size);
     taylor_model_class.def("domain", &TM::domain);
     taylor_model_class.def("range", &TM::range);
-    taylor_model_class.def("__getitem__", &get_item<TM,A,R>);
-    taylor_model_class.def("__setitem__",&set_item<TM,A,D>);
+    taylor_model_class.def("set_sweep_threshold", &TM::set_sweep_threshold);
+    taylor_model_class.def("get_sweep_threshold", &TM::sweep_threshold);
+    taylor_model_class.def("set_maximum_degree", &TM::set_maximum_degree);
+    taylor_model_class.def("get_maximum_degree", &TM::maximum_degree);
+    taylor_model_class.def("__getitem__", &__getitem__<TM,A,R>);
+    taylor_model_class.def("__setitem__",&__setitem__<TM,A,D>);
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
     taylor_model_class.def(self+self);
@@ -270,7 +209,7 @@ void export_taylor_model()
 
 
     class_< TMV > taylor_model_vector_class("TaylorModelVector");
-    taylor_model_vector_class.def("__getitem__", &get_item<TMV,int,TM>);
+    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,int,TM>);
     taylor_model_vector_class.def(self_ns::str(self));
 }
 
@@ -284,26 +223,29 @@ void export_taylor_variable()
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
+    typedef TaylorModel TM;
     typedef TaylorExpression TE;
     typedef TaylorFunction TF;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
     typedef ScalarFunctionInterface EI;
 
-    class_<TE> taylor_expression_class("TaylorExpression");
-    taylor_expression_class.def("__init__", make_constructor(&make<TE>) );
-    taylor_expression_class.def("__init__", make_constructor(&make3<TE>) );
-    taylor_expression_class.def( init< IV >());
-    taylor_expression_class.def( init< IV, RP >());
-    taylor_expression_class.def( init< IV, const EI& >());
+    class_<TE> taylor_expression_class("TaylorExpression",init<TaylorExpression>());
+    taylor_expression_class.def(init<IV,TM>());
+    taylor_expression_class.def(init<IV,TM>());
+    taylor_expression_class.def(init< IV >());
+    taylor_expression_class.def(init< IV, RP >());
+    taylor_expression_class.def(init< IV, const EI& >());
     taylor_expression_class.def("error", (const R&(TE::*)()const) &TE::error, return_value_policy<copy_const_reference>());
+    taylor_expression_class.def("set_error", (void(TE::*)(const double&)) &TE::set_error);
     taylor_expression_class.def("argument_size", &TE::argument_size);
     taylor_expression_class.def("domain", &TE::domain, return_value_policy<copy_const_reference>());
     taylor_expression_class.def("codomain", &TE::codomain);
     taylor_expression_class.def("centre", &TE::centre);
     taylor_expression_class.def("range", &TE::range);
-    taylor_expression_class.def("__getitem__", &get_item<TE,A,R>);
-    taylor_expression_class.def("__setitem__",&set_item<TE,A,D>);
+    taylor_expression_class.def("model", (const TM&(TE::*)()const)&TE::model, return_value_policy<copy_const_reference>());
+    taylor_expression_class.def("__getitem__", &__getitem__<TE,A,R>);
+    taylor_expression_class.def("__setitem__",&__setitem__<TE,A,D>);
     taylor_expression_class.def(+self);
     taylor_expression_class.def(-self);
     taylor_expression_class.def(self+self);
@@ -369,20 +311,20 @@ void export_taylor_variable()
     //taylor_expression_class.staticmethod("set_default_sweep_threshold");
     //taylor_expression_class.staticmethod("default_maximum_degree");
     //taylor_expression_class.staticmethod("default_sweep_threshold");
-    def("split", &python_split);
 
 
 
     taylor_expression_class.def("constant",(TE(*)(const IV&, const R&))&TE::constant);
     taylor_expression_class.def("constant",(TE(*)(const IV&, const I&))&TE::constant);
     taylor_expression_class.def("variable",(TE(*)(const IV&, uint))&TE::variable);
-    //taylor_expression_class.def("variables",(TF(*)(const IV&)) &TE::variables);
-    taylor_expression_class.def("variables",&make_taylor_variables);
+    taylor_expression_class.def("variables",(TF(*)(const IV&)) &TE::variables);
+
 
     taylor_expression_class.staticmethod("constant");
     taylor_expression_class.staticmethod("variable");
     taylor_expression_class.staticmethod("variables");
 
+    def("split", (std::pair<TE,TE>(*)(const TE&,uint)) &Ariadne::split);
     def("evaluate",(Interval(*)(const TE&,const IV&)) &evaluate);
     def("partial_evaluate",(TE(*)(const TE&,uint,const I&)) &partial_evaluate);
 
@@ -401,9 +343,8 @@ void export_taylor_variable()
     def("embed",(TE(*)(const TE&,const IV&)) &embed);
     def("embed",(TE(*)(const IV&,const TE&)) &embed);
 
-
     def("max",(TE(*)(const TE&,const TE&))&max);
-    def("min",(TE(*)(const TE&,const TE&))&min);
+    def("min",(TE(*)(const TE&,const TE&))&min); 
     def("abs",(TE(*)(const TE&))&abs);
 
     def("neg",(TE(*)(const TE&))&neg);
@@ -419,6 +360,7 @@ void export_taylor_variable()
     def("tan", (TE(*)(const TE&))&tan);
 
 }
+
 
 void export_taylor_function()
 {
@@ -452,9 +394,9 @@ void export_taylor_function()
     taylor_function_class.def("codomain", &TaylorFunction::codomain);
     taylor_function_class.def("centre", &TaylorFunction::centre);
     taylor_function_class.def("range", &TaylorFunction::range);
-    taylor_function_class.def("__getslice__", &__getslice__);
-    taylor_function_class.def("__getitem__", &get_item<TF,N,TE>);
-    taylor_function_class.def("__setitem__",&set_item<TF,N,TE>);
+    //taylor_function_class.def("__getslice__", &__getslice__<TF,N,N,TE>);
+    taylor_function_class.def("__getitem__", &__getitem__<TF,N,TE>);
+    taylor_function_class.def("__setitem__",&__setitem__<TF,N,TE>);
     taylor_function_class.def(-self);
     taylor_function_class.def(self+self);
     taylor_function_class.def(self-self);
@@ -547,9 +489,6 @@ void export_taylor_function()
     def("unchecked_compose",(TF(*)(const TF&,const TF&)) &unchecked_compose);
     def("unchecked_flow",(TF(*)(const TF&,const IV&,const I&, N)) &unchecked_flow);
     def("unchecked_flow",(TF(*)(const TF&,const IV&,const R&, N)) &unchecked_flow);
-
-
-
 }
 
 void calculus_submodule()

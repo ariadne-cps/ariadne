@@ -37,49 +37,41 @@ using namespace boost::python;
 
 using namespace Ariadne;
 
+namespace Ariadne {
 
 
 template<class T>
-Space<T>*
-make_space(const boost::python::object& obj)
-{
-    Space<T>* spcptr=new Space<T>();
-    boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-    int m=boost::python::len(elements);
-    for(int i=0; i!=m; ++i) {
-        boost::python::extract<String> xs(elements[i]);
-        if(xs.check()) { spcptr->append(Variable<T>(xs())); }
-        else { Variable<T> v=extract< Variable<T> >(elements[i]); spcptr->append(v); }
-    }
-    return spcptr;
-}
-
-template<class T>
-struct space_from_python_list {
-    space_from_python_list() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
+struct from_python< Space<T> > {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        storage = make_space<T>(extract<object>(obj_ptr));
+        boost::python::list elements=extract<boost::python::list>(obj_ptr);
+        Space<T>* spc_ptr = new (storage) Space<T>();
+        for(int i=0; i!=len(elements); ++i) {
+            extract<String> xs(elements[i]);
+            if(xs.check()) { spc_ptr->append(Variable<T>(xs())); }
+            else { Variable<T> v=extract< Variable<T> >(elements[i]); spc_ptr->append(v); }
+        }
         data->convertible = storage;
     }
 };
 
 
+RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }
+RealExpression operator+(const RealVariable& v) { return +RealExpression(v); }
+RealExpression operator-(const RealVariable& v) { return -RealExpression(v); }
+RealExpression operator+(const RealVariable& v, const RealExpression& e) { return RealExpression(v)+e; }
+RealExpression operator-(const RealVariable& v, const RealExpression& e) { return RealExpression(v)-e; }
+RealExpression operator*(const RealVariable& v, const RealExpression& e) { return RealExpression(v)*e; }
+RealExpression operator/(const RealVariable& v, const RealExpression& e) { return RealExpression(v)/e; }
+RealExpression operator+(const RealExpression& e, const RealVariable& v) { return e+RealExpression(v); }
+RealExpression operator-(const RealExpression& e, const RealVariable& v) { return e-RealExpression(v); }
+RealExpression operator*(const RealExpression& e, const RealVariable& v) { return e*RealExpression(v); }
+RealExpression operator/(const RealExpression& e, const RealVariable& v) { return e/RealExpression(v); }
 
-namespace Ariadne {
-    RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }
-    RealExpression operator+(const RealVariable& v) { return +RealExpression(v); }
-    RealExpression operator-(const RealVariable& v) { return -RealExpression(v); }
-    RealExpression operator+(const RealVariable& v, const RealExpression& e) { return RealExpression(v)+e; }
-    RealExpression operator-(const RealVariable& v, const RealExpression& e) { return RealExpression(v)-e; }
-    RealExpression operator*(const RealVariable& v, const RealExpression& e) { return RealExpression(v)*e; }
-    RealExpression operator/(const RealVariable& v, const RealExpression& e) { return RealExpression(v)/e; }
-    RealExpression operator+(const RealExpression& e, const RealVariable& v) { return e+RealExpression(v); }
-    RealExpression operator-(const RealExpression& e, const RealVariable& v) { return e-RealExpression(v); }
-    RealExpression operator*(const RealExpression& e, const RealVariable& v) { return e*RealExpression(v); }
-    RealExpression operator/(const RealExpression& e, const RealVariable& v) { return e/RealExpression(v); }
-}
+} // namespace Ariadne
+
 
 namespace Ariadne { int length(const array<std::string>& a) { return a.size(); } }
 
@@ -102,17 +94,16 @@ void export_formula()
     variable_class.def("__rdiv__", &__rdiv__<RealExpression,RealVariable,RealExpression>);
     variable_class.def(self_ns::str(self));
 
-    class_<RealSpace> space_class("RealSpace");
-    space_class.def("__init__", make_constructor(&make_space<Real>) );
+    class_<RealSpace> space_class("RealSpace", init<RealSpace>());
     space_class.def("dimension", &RealSpace::dimension);
     space_class.def("variable", &RealSpace::variable, return_value_policy<reference_existing_object>());
     space_class.def("index", &RealSpace::index);
     space_class.def(self_ns::str(self));
 
-    def("variable",(RealVariable(*)(const String& s)) &variable);
-    def("variables",&make_space<Real>,return_value_policy<manage_new_object>());
+    def("variable",(RealVariable(*)(const String& s)) &variable<Real>);
+    def("variables",(RealSpace(*)(const List<String>& s)) &variables<Real>);
 
-    space_from_python_list<Real>();
+    from_python<RealSpace>();
 
     class_<RealExpression> expression_class("RealExpression", no_init);
     expression_class.def("__pos__", &__pos__<RealExpression,RealExpression>);

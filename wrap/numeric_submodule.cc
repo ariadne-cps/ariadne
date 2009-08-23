@@ -39,21 +39,33 @@ namespace Ariadne {
     bool definitely(bool b) { return b; }
     bool possibly(bool b) { return b; }
 
-    Interval* create_interval(const boost::python::dict& dct) {
-        boost::python::list lst=dct.items();
-        assert(boost::python::len(lst)==1);
-        return new Interval(boost::python::extract<double>(lst[0][0]),boost::python::extract<double>(lst[0][1]));
-    }
 
-}
 
-struct interval_from_python_dict {
-    interval_from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
+template<>
+struct from_python_dict<Interval> {
+    from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyDict_Check(obj_ptr) || len(extract<dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
+        boost::python::list lst=dct.items();
+        assert(boost::python::len(lst)==1);
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        storage = create_interval(dct);
+        new (storage) Interval(boost::python::extract<double>(lst[0][0]),boost::python::extract<double>(lst[0][1]));
+        data->convertible = storage;
+    }
+};
+
+template<>
+struct from_python_list<Interval> {
+    from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr) || len(extract<list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
+        assert(boost::python::len(lst)==2);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        new (storage) Interval(boost::python::extract<double>(lst[0]),boost::python::extract<double>(lst[1]));
         data->convertible = storage;
     }
 };
@@ -70,23 +82,24 @@ struct interval_from_python_str {
     }
 };
 */
+}
 
-const char * tribool_c_str(tribool tb) {
+
+std::string __str__(tribool tb) {
   if(indeterminate(tb)) { return "Indeterminate"; }
   if(tb==true) { return "True"; }
   else if(tb==false) { return "False"; }
   else { return "Indeterminate"; }
 }
 
-const char * tribool_c_repr(tribool tb) {
+std::string __repr__(tribool tb) {
   if(tb==true) { return "tribool(True)"; }
   else if(tb==false) { return "tribool(False)"; }
   else { return "tribool(Indeterminate)"; }
 }
 
-tribool tribool_not(tribool tb) { return !tb; }
-bool tribool_nonzero(tribool tb) { return tb==true; }
-tribool tribool_indeterminate() { return indeterminate; }
+bool __nonzero__(tribool tb) { return tb==true; }
+tribool indeterminate_const() { return indeterminate; }
 
 void export_tribool() {
 
@@ -103,13 +116,13 @@ void export_tribool() {
     tribool_class.def("__or__", (tribool(*)(tribool,bool))(&boost::logic::operator!=));
     // WARNING: __not__ is not a special method!
     tribool_class.def("__not__", (tribool(*)(tribool))(&boost::logic::operator!));
-    tribool_class.def("__nonzero__", &tribool_nonzero);
-    tribool_class.def("__str__", &tribool_c_str);
-    tribool_class.def("__repr__", &tribool_c_repr);
+    tribool_class.def("__nonzero__", (bool(*)(tribool))&__nonzero__);
+    tribool_class.def("__str__", (std::string(*)(tribool))&__str__);
+    tribool_class.def("__repr__", (std::string(*)(tribool))&__repr__);
 
     implicitly_convertible<bool,tribool>();
 
-    def("indeterminate",(tribool(*)(void))&tribool_indeterminate);
+    def("indeterminate",(tribool(*)(void))&indeterminate_const);
     def("possibly",(bool(*)(bool))&possibly);
     def("possibly",(bool(*)(tribool))&possibly);
     def("definitely",(bool(*)(bool))&definitely);
@@ -196,7 +209,6 @@ void export_interval()
     interval_class.def(init<Rational>());
     interval_class.def(init<Rational,Rational>());
 #endif
-    interval_class.def("__init__",make_constructor(&create_interval));
     interval_class.def(+self);
     interval_class.def(-self);
     interval_class.def(self + self);
@@ -215,6 +227,8 @@ void export_interval()
     interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
     interval_class.def("midpoint", &Interval::midpoint);
     interval_class.def("radius", &Interval::radius);
+    interval_class.def("width", &Interval::width);
+    interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
     interval_class.def(boost::python::self_ns::str(self));
     //interval_class.def(boost::python::self_ns::repr(self));
 
@@ -224,8 +238,9 @@ void export_interval()
     implicitly_convertible<Rational,Interval>();
 #endif
 
-    interval_from_python_dict();
-    //interval_from_python_str();
+    from_python_dict<Interval>();
+    from_python_list<Interval>();
+    //from_python_str<Interval>();
 
     def("midpoint", &Interval::midpoint);
     def("radius", &Interval::radius);

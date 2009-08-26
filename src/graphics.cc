@@ -242,6 +242,9 @@ std::string str(double x) {
 
 
 
+std::ostream& operator<<(std::ostream& os, const DrawableInterface& drawable) {
+    return drawable.write(os);
+}
 
 
 void Figure::_paint_all(CanvasInterface& canvas)
@@ -251,6 +254,8 @@ void Figure::_paint_all(CanvasInterface& canvas)
     Box bounding_box=this->_data->bounding_box;
     const PlanarProjectionMap proj=this->_data->projection;
     const std::vector<GraphicsObject>& objects=this->_data->objects;
+
+    uint dimension=proj.argument_size();
 
    // Test if there are no objects to be drawn
     if(objects.empty()) {
@@ -276,11 +281,16 @@ void Figure::_paint_all(CanvasInterface& canvas)
 
     //std::cerr << "bounding_box="<<bounding_box<<"\n";
 
+    // Check projection and bounding box have same values.
+    // If the bounding box dimension is 2, assume these are the bounds on the projected variables.
     // Project the bounding box onto the canvas
     Box bbox(2);
     if(bounding_box.dimension()==2) {
         bbox=bounding_box;
     } else {
+        ARIADNE_ASSERT_MSG(bounding_box.dimension()==proj.argument_size(),"bounding_box="<<static_cast<const DrawableInterface&>(bounding_box)<<", projection="<<proj);
+        ARIADNE_ASSERT(bounding_box.dimension()>proj.i);
+        ARIADNE_ASSERT(bounding_box.dimension()>proj.j);
         bbox[0]=bounding_box[proj.i];
         bbox[1]=bounding_box[proj.j];
     }
@@ -337,18 +347,13 @@ void Figure::_paint_all(CanvasInterface& canvas)
     cairo_translate(cr, utr0, utr1);
 
 
-    
-
-    // Check projection and bounding box have same values;
-    ARIADNE_ASSERT(bounding_box.dimension()==proj.argument_size());
-    ARIADNE_ASSERT(bounding_box.dimension()>proj.i);
-    ARIADNE_ASSERT(bounding_box.dimension()>proj.j);
 
     // Draw shapes
     for(uint i=0; i!=objects.size(); ++i) {
         const DrawableInterface* shape_ptr=objects[i].shape_ptr.operator->();
-        ARIADNE_ASSERT_MSG(bounding_box.dimension()==shape_ptr->dimension(),
-                           "Shape dimension="<<shape_ptr->dimension()<<", bounding_box="<<bounding_box);
+        if(shape_ptr->dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
+        ARIADNE_ASSERT_MSG(dimension==shape_ptr->dimension(),
+                           "Shape "<<*shape_ptr<<", dimension="<<shape_ptr->dimension()<<", bounding_box="<<static_cast<const DrawableInterface&>(bounding_box));
         const Colour& fc=objects[i].fill_colour;
         const Colour& lc=objects[i].line_colour;
         canvas.set_fill_colour(fc.red, fc.green, fc.blue);

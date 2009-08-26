@@ -52,6 +52,10 @@ struct PlanarProjectionMap {
     uint n, i, j;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const PlanarProjectionMap& p) {
+    return os << "PlanarProjectionMap( argument_size="<<p.argument_size()<<", x="<<p.i<<", y="<<p.j<<" )";
+}
+
 
 struct LineStyle { explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } private: bool _style; };
 struct LineWidth { explicit LineWidth(double lw) : _width(lw) { } operator double() const { return this->_width; } private: double _width; };

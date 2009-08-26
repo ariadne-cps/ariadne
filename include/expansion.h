@@ -288,6 +288,7 @@ class Expansion
     unsigned int argument_size() const { return this->_argument_size; }
     unsigned int number_of_nonzeros() const { return _coefficients.size()/_element_size(); }
     unsigned int degree() const { return (--this->end())->key().degree(); }
+    const std::vector<word_type>& coefficients() const { return this->_coefficients; }
 
     bool empty() const { return this->_coefficients.empty(); }
     unsigned int size() const { return this->_coefficients.size()/_element_size(); }
@@ -395,7 +396,8 @@ class Expansion
         const word_type* ap1=a1.word_begin(); const word_type* ap2=a2.word_begin();
         for(unsigned int j=0; j!=_index_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
         data_type* xp=reinterpret_cast<data_type*>(this->_end_ptr())-1; *xp=x; }
-    const std::vector<word_type>& coefficients() const { return this->_coefficients; }
+  public:
+    std::ostream& write(std::ostream& os, const array<std::string>& variables) const;
   private:
     size_type _argument_size;
     std::vector<word_type> _coefficients;
@@ -536,29 +538,45 @@ inline Expansion<Float> midpoint(const Expansion<Interval>& pse) {
 
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
-    //os<<"E(as="<<p.argument_size()<<",nnz="<<p.number_of_nonzeros()<<")";
-    if(p.begin()==p.end()) {
-        if(p.argument_size()==0) {
-            return os<<"{ : }"; }
-        else {
-            os<<"{ 0";
-            for(unsigned int i=1; i!=p.argument_size(); ++i) {
-                os<<",0"; }
-            return os << ": }";
+std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& variable_names) const
+{
+    ARIADNE_ASSERT(this->argument_size()==variable_names.size());
+
+    const Expansion<X>& p=*this;
+    bool first_term=true;
+    if(p.size()==0) {
+        os << "0";
+    } else {
+        for(const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+            MultiIndex a=iter->key();
+            X v=iter->data();
+            if(v!=0) {
+                if(v>0 && !first_term) { os<<"+"; }
+                first_term=false;
+                bool first_factor=true;
+                if(v<0) { os<<"-"; }
+                if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
+                for(uint j=0; j!=a.size(); ++j) {
+                    if(a[j]!=0) {
+                        if(first_factor) { first_factor=false; } else { os <<"*"; }
+                        os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
+                }
+            }
         }
     }
+    return os;
+}
 
-    os << "{";
-    for(typename Expansion<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        os << (iter==p.begin() ? "" : ", ");
-        MultiIndex const& a=iter->key();
-        for(unsigned int i=0; i!=a.size(); ++i) {
-            os << (i==0?"":",") << int(a[i]); }
-        //os<<";"<<int(a.degree());
-        os << ":" << iter->data();
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
+    std::stringstream sstr;
+    array<std::string> variable_names(p.argument_size());
+    for(uint j=0; j!=p.argument_size(); ++j) {
+        sstr << 'x' << j;
+        variable_names[j]=sstr.str();
     }
-    return os << "}";
+    return p.write(os,variable_names);
 }
 
 

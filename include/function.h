@@ -451,7 +451,7 @@ class Vector<ScalarFunctionInterface>
     const ScalarFunctionInterface& operator[](SizeType i) const { return *_expressions[i]; }
     void set(SizeType i, const ScalarFunctionInterface& f) {
         ARIADNE_ASSERT(i<this->result_size());
-        ARIADNE_ASSERT(this->size()==0 || !_expressions[0] || f.argument_size()==this->argument_size());
+        ARIADNE_ASSERT(this->size()==0 || i==0 || f.argument_size()==this->argument_size());
         _expressions[i]=shared_ptr<const ScalarFunctionInterface>(f.clone()); }
     void set(SizeType i, shared_ptr<const ScalarFunctionInterface> p) {
         ARIADNE_ASSERT(i<this->result_size());

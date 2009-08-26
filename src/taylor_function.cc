@@ -290,7 +290,23 @@ TaylorFunction::operator[](uint i) const
     return TaylorExpression(this->_domain,this->_models[i]);
 }
 
+TaylorExpression
+TaylorFunction::get(uint i) const
+{
+    return TaylorExpression(this->_domain,this->_models[i]);
+}
 
+void
+TaylorFunction::set(uint i, const TaylorExpression& e)
+{
+    ARIADNE_ASSERT_MSG(this->size()>i,"Cannot set "<<i<<"th element of TaylorFunction "<<(*this));
+    if(this->domain().size()!=0) {
+        ARIADNE_ASSERT_MSG(e.domain()==this->domain(),"Domain of "<<e<<" conflicts with existing domain "<<this->domain());
+    } else {
+        this->_domain=e.domain();
+    }
+    this->_models[i]=e.model();
+}
 
 
 

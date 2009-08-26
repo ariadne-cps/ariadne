@@ -147,6 +147,10 @@ class TaylorFunction {
     /*! \brief The size of the result. */
     uint result_size() const;
 
+    /*! \brief Get the \a ith Taylor variable */
+    TaylorExpression get(uint i) const;
+    /*! \brief Set the \a ith Taylor variable */
+    void set(uint i, const TaylorExpression& te);
     /*! \brief The \a ith Taylor variable */
     TaylorExpression operator[](uint i) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */

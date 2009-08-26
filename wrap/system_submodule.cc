@@ -78,8 +78,9 @@ namespace Ariadne { int length(const array<std::string>& a) { return a.size(); }
 void export_formula()
 {
     implicitly_convertible<RealVariable,RealExpression>();
-    implicitly_convertible<double,RealExpression>();
-    implicitly_convertible<Interval,RealExpression>();
+    // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be. 
+    //implicitly_convertible<double,RealExpression>();
+    //implicitly_convertible<Interval,RealExpression>();
 
     class_<RealVariable> variable_class("RealVariable", init<std::string>());
     variable_class.def("__pos__", &__pos__<RealExpression,RealVariable>);

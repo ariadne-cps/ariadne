@@ -51,6 +51,10 @@ TaylorExpression tan(const TaylorExpression&);
 
 
 TaylorFunction __getslice__(const TaylorFunction& tf, int start, int stop) {
+    if(start<0) { start+=tf.result_size(); }
+    if(stop<0) { stop+=tf.result_size(); }
+    ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&uint(stop)<=tf.result_size(),
+            "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
     return TaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
 }
 
@@ -105,6 +109,22 @@ struct from_python< Expansion<T> > {
 };
 
 
+template<>
+struct from_python<TaylorFunction> {
+    from_python() {
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<TaylorFunction>()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
+        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+        list lst=extract<boost::python::list>(obj_ptr);
+        TaylorFunction* tf_ptr = new (storage) TaylorFunction(len(lst));
+        for(uint i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,extract<TaylorExpression>(lst[i])); }
+        data->convertible = storage;
+    }
+};
+
+
 
 
 
@@ -115,6 +135,7 @@ struct from_python< Expansion<T> > {
 
 void export_taylor_model()
 {
+    typedef int Z;
     typedef uint N;
     typedef double D;
     typedef Float R;
@@ -232,9 +253,7 @@ void export_taylor_variable()
 
     class_<TE> taylor_expression_class("TaylorExpression",init<TaylorExpression>());
     taylor_expression_class.def(init<IV,TM>());
-    taylor_expression_class.def(init<IV,TM>());
     taylor_expression_class.def(init< IV >());
-    taylor_expression_class.def(init< IV, RP >());
     taylor_expression_class.def(init< IV, const EI& >());
     taylor_expression_class.def("error", (const R&(TE::*)()const) &TE::error, return_value_policy<copy_const_reference>());
     taylor_expression_class.def("set_error", (void(TE::*)(const double&)) &TE::set_error);
@@ -317,7 +336,7 @@ void export_taylor_variable()
     taylor_expression_class.def("constant",(TE(*)(const IV&, const R&))&TE::constant);
     taylor_expression_class.def("constant",(TE(*)(const IV&, const I&))&TE::constant);
     taylor_expression_class.def("variable",(TE(*)(const IV&, uint))&TE::variable);
-    taylor_expression_class.def("variables",(TF(*)(const IV&)) &TE::variables);
+    taylor_expression_class.def("variables",(Vector<TE>(*)(const IV&)) &TE::variables);
 
 
     taylor_expression_class.staticmethod("constant");
@@ -359,6 +378,7 @@ void export_taylor_variable()
     def("cos", (TE(*)(const TE&))&cos);
     def("tan", (TE(*)(const TE&))&tan);
 
+    to_python< Vector<TaylorExpression> >();
 }
 
 
@@ -382,12 +402,11 @@ void export_taylor_function()
     typedef ScalarFunctionInterface E;
     typedef FunctionInterface F;
 
-    class_<TF> taylor_function_class("TaylorFunction");
-    taylor_function_class.def( init< IV >());
+    class_<TF> taylor_function_class("TaylorFunction", init<TaylorFunction>());
+    //taylor_function_class.def( init< IV >());
     taylor_function_class.def( init< IV,const F& >());
-    taylor_function_class.def( init< IV,const RPV& >());
-    taylor_function_class.def( init< IV,const IPV& >());
-    taylor_function_class.def( init< IV,const EV& >());
+    taylor_function_class.def( init< Vector<TaylorExpression> >());
+    taylor_function_class.def("__len__", &TaylorFunction::result_size);
     taylor_function_class.def("result_size", &TaylorFunction::result_size);
     taylor_function_class.def("argument_size", &TaylorFunction::argument_size);
     taylor_function_class.def("domain", &TaylorFunction::domain, return_value_policy<copy_const_reference>());
@@ -395,6 +414,7 @@ void export_taylor_function()
     taylor_function_class.def("centre", &TaylorFunction::centre);
     taylor_function_class.def("range", &TaylorFunction::range);
     //taylor_function_class.def("__getslice__", &__getslice__<TF,N,N,TE>);
+    taylor_function_class.def("__getslice__", (TF(*)(const TF&,int,int))&__getslice__);
     taylor_function_class.def("__getitem__", &__getitem__<TF,N,TE>);
     taylor_function_class.def("__setitem__",&__setitem__<TF,N,TE>);
     taylor_function_class.def(-self);
@@ -489,6 +509,8 @@ void export_taylor_function()
     def("unchecked_compose",(TF(*)(const TF&,const TF&)) &unchecked_compose);
     def("unchecked_flow",(TF(*)(const TF&,const IV&,const I&, N)) &unchecked_flow);
     def("unchecked_flow",(TF(*)(const TF&,const IV&,const R&, N)) &unchecked_flow);
+
+    from_python<TaylorFunction>();
 }
 
 void calculus_submodule()

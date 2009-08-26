@@ -88,7 +88,7 @@ struct from_python<PolynomialFunction>
         list lst=extract<list>(obj_ptr);
         void* storage = ((converter::rvalue_from_python_storage< Vector<ScalarFunctionInterface> >*)   data)->storage.bytes;
         PolynomialFunction res(Vector< Polynomial<Interval> >(len(lst)));
-        for(uint i=0; i!=res.size(); ++i) { res.set(i,ScalarPolynomialFunction(extract<Polynomial<Interval>&>(lst[i]))); }
+        for(uint i=0; i!=res.size(); ++i) { res.set(i,ScalarPolynomialFunction(extract<ScalarPolynomialFunction&>(lst[i]))); }
         new (storage) Vector<ScalarFunctionInterface>(res);
         data->convertible = storage;
     }
@@ -346,7 +346,7 @@ void export_polynomial()
 void export_scalar_function_interface()
 {
     class_<ScalarFunctionInterface, shared_ptr<ScalarFunctionInterface>, boost::noncopyable>
-        scalar_function_interface_class("ScalarFunctionInterface",no_init);
+        scalar_function_interface_class("ExpressionInterface",no_init);
 
     // Don't use following standard wrapping technique due to clash with shared_ptr
     //expression_interface_class.def("argument_size", pure_virtual(&ScalarFunctionInterface::argument_size));
@@ -367,7 +367,7 @@ void export_scalar_function_interface()
 
 void export_scalar_python_function()
 {
-    class_<ScalarPythonFunction, bases< ScalarFunctionInterface > > scalar_python_function_class("ScalarUserFunction", init<object>());
+    class_<ScalarPythonFunction, bases< ScalarFunctionInterface > > scalar_python_function_class("UserExpression", init<object>());
     scalar_python_function_class.def(init<uint,object>());
 }
 
@@ -377,7 +377,7 @@ void export_scalar_python_function()
 
 void export_scalar_affine_function()
 {
-   class_<ScalarAffineFunction, bases< ScalarFunctionInterface > > scalar_affine_function_class("Affine", init<Vector<Interval>, Interval> ());
+   class_<ScalarAffineFunction, bases< ScalarFunctionInterface > > scalar_affine_function_class("AffineExpression", init<Vector<Interval>, Interval> ());
     //scalar_affine_function_class.def(init<ExpressionPointer>());
     scalar_affine_function_class.def("value",&ScalarAffineFunction::value);
     scalar_affine_function_class.def("gradient",(Vector<Interval>(ScalarAffineFunction::*)(const Vector<Interval>&)const)&ScalarAffineFunction::gradient);
@@ -402,7 +402,7 @@ void export_scalar_polynomial_function()
 
     implicitly_convertible< Polynomial<Interval>, ScalarPolynomialFunction>();
 
-    class_< PE, bases<ScalarFunctionInterface> > scalar_polynomial_function_class("Polynomial", init<int>());
+    class_< PE, bases<ScalarFunctionInterface> > scalar_polynomial_function_class("PolynomialExpression", init<int>());
     scalar_polynomial_function_class.def(init<Expression<Real>,Space<Real> >());
     scalar_polynomial_function_class.def(init<ScalarAffineFunction>());
     scalar_polynomial_function_class.def(init<ScalarPolynomialFunction>());

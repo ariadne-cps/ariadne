@@ -49,7 +49,7 @@ template<class X>
 X __vgetitem__(const Vector<X>& v, int i)
 {
     if(i<0) { i+=v.size(); }
-    ARIADNE_ASSERT(0<=i && uint(i)<v.size());
+    ARIADNE_ASSERT_MSG(0<=i && uint(i)<v.size(),"v="<<v<<" i="<<i);
     return v[i];
 }
 
@@ -89,19 +89,6 @@ void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const X& x)
     A[i][j]=x;
 }
 
-
-template<class X>
-struct to_python< Vector<X> > {
-    to_python() { boost::python::to_python_converter< Vector<X>, to_python< Vector<X> > >(); }
-    static PyObject* convert(const Vector<X>& vec) {
-        boost::python::list result;
-        for(uint i=0; i!=vec.size(); ++i) {
-            result.append(boost::python::object(vec[i]));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
 
 template<class X>
 struct from_python< Vector<X> >
@@ -223,7 +210,7 @@ template<class X> void export_vector()
 
 template<> void export_vector<Float>()
 {
-    class_< Vector<Float> > float_vector_class("Vector",init< Vector<Float> >());
+    class_< Vector<Float> > float_vector_class("FloatVector",init< Vector<Float> >());
     export_vector_class<Float>(float_vector_class);
     export_vector_conversion<Float,Float>(float_vector_class);
     export_vector_arithmetic<Float,Float,Float>(float_vector_class);
@@ -232,7 +219,7 @@ template<> void export_vector<Float>()
 
 template<> void export_vector<Interval>()
 {
-    class_< Vector<Interval> > interval_vector_class("IVector",init< Vector<Interval> >());
+    class_< Vector<Interval> > interval_vector_class("IntervalVector",init< Vector<Interval> >());
     export_vector_class<Interval>(interval_vector_class);
     export_vector_conversion<Interval,Float>(interval_vector_class);
     export_vector_conversion<Interval,Interval>(interval_vector_class);

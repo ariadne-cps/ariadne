@@ -68,6 +68,19 @@ struct from_python<Point> {
     }
 };
 
+template<>
+struct from_python<Box> {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<Box>()); }
+    static void* convertible(PyObject* obj_ptr) { std::cerr<<"Checking from_python<Box>::convertible\n"; if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        boost::python::list lst=extract<boost::python::list>(obj_ptr);
+        Box* bx_ptr = new (storage) Box(len(lst));
+        for(int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=extract<Interval>(lst[i]); }
+        data->convertible = storage;
+    }
+};
+
 
 
 
@@ -158,23 +171,25 @@ void export_box()
 {
     typedef Vector<Interval> IVector;
 
-    class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval> > > box_class("Box",init< Vector<Interval> >());
+    class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval> > > box_class("Box",init<Box>());
     box_class.def(init<uint>());
+    box_class.def(init< Vector<Interval> >());
     box_class.def("dimension", (uint(Box::*)()const) &Box::dimension);
     box_class.def("centre", (Point(Box::*)()const) &Box::centre);
     box_class.def("separated", (tribool(Box::*)(const Box&)const) &Box::disjoint);
     box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
     box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
-    box_class.def(init< Vector<Interval> >());
-    box_class.def(init< Vector<Float> >());
     box_class.def(self_ns::str(self));
 
     def("split", (std::pair<Box,Box>(*)(const Box&)) &split);
     def("disjoint", (bool(*)(const IVector&,const IVector&)) &disjoint);
     def("subset", (bool(*)(const IVector&,const IVector&)) &subset);
 
+    from_python<Box>();
+    to_python< std::pair<Box,Box> >();
     implicitly_convertible<Vector<Interval>,Box>();
+    
 }
 
 void export_zonotope()

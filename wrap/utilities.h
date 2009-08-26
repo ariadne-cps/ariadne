@@ -42,14 +42,15 @@
 #include "tuple.h"
 #include "container.h"
 #include "numeric.h"
+#include "vector.h"
 
 namespace Ariadne {
 
 template<class X> inline const char* python_name(const char* name);
 template<> inline const char* python_name<Float>(const char* name) {
-    return (std::string("")+name).c_str(); }
+    return (std::string("Float")+name).c_str(); }
 template<> inline const char* python_name<Interval>(const char* name) {
-    return (std::string("I")+name).c_str(); }
+    return (std::string("Interval")+name).c_str(); }
 
 template<class T> struct to_python;
 template<class T> struct to_python_list;
@@ -206,6 +207,19 @@ struct to_python_list< Ariadne::Set<T> > {
     static const PyTypeObject* get_pytype() { return &PyList_Type; }
 };
 
+
+template<class X>
+struct to_python< Vector<X> > {
+    to_python() { boost::python::to_python_converter< Vector<X>, to_python< Vector<X> > >(); }
+    static PyObject* convert(const Vector<X>& vec) {
+        boost::python::list result;
+        for(uint i=0; i!=vec.size(); ++i) {
+            result.append(boost::python::object(vec[i]));
+        }
+        return boost::python::incref(boost::python::list(result).ptr());
+    }
+    static const PyTypeObject* get_pytype() { return &PyList_Type; }
+};
 
 
 template<class T>

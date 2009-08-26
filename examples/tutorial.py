@@ -26,8 +26,6 @@ from ariadne import *
 # Set Ariadne name of builtin float type
 Float=float
 
-def box(x): return IVector(x)
-
 # Print a list of all available classes and functions
 print dir(),"\n"
 
@@ -75,11 +73,11 @@ print "\n\n"
 ###############################################################################
 
 # Create an interval vector
-b=IVector([1,[2,3],4])
+b=IntervalVector([1,[2,3],4])
 print "b:",b
 
 # Create an interval matrix
-A=IMatrix([[1,[2,3],4],[1.5,1.1,2],[0,0,1]])
+A=IntervalMatrix([[1,[2,3],4],[1.5,1.1,2],[0,0,1]])
 print "A:",A
 
 # Solve the linear equation Ax=b
@@ -95,16 +93,18 @@ print "\n\n"
 argument_size=2
 function=lambda x:sqrt(sqr(x[0])+sqr(x[1]))
 f=UserExpression(argument_size,function)
-print f(Vector([4,3]))
-print f(IVector([4,3]))
+print dir(UserExpression)
+print type(f),type(FloatVector([4,3]))
+#print f(FloatVector([4,3]))
+#print f(IntervalVector([4,3]))
 
 result_size=2
 argument_size=3
 function=lambda (x):[sqrt(sqr(x[0])+sqr(x[1])),x[1]+x[2]]
 f=UserFunction(result_size,argument_size,function)
 print f
-print f(Vector([4,3,0]))
-print f.evaluate(IVector([4,3,0]))
+#print f(FloatVector([4,3,0]))
+#print f.evaluate(IntervalVector([4,3,0]))
 
 print "\n"
 
@@ -148,7 +148,7 @@ print "\n\n"
 
 
 # Create a box to act as the domain of a Taylor expression
-d=IVector([[4,7],[1,6],[-1,1]])
+d=IntervalVector([[4,7],[1,6],[-1,1]])
 print "d:",d
 
 # Create the TaylorExpression representing the function x1 on the domain d
@@ -172,7 +172,7 @@ print "x:",x,"\ny:",y,"\nz:",z,"\n"
 def t(d,j):
     return TaylorExpression.variable(d,j)
 
-#Create a TaylorExpression from a PolynomialExpression
+#Create a TaylorExpression from a Polynomial
 p=PolynomialExpression.variable(3,0)
 tp=TaylorExpression(d,p)
 print "p:",p,"\ntp: ",tp,"\n"
@@ -223,8 +223,8 @@ print
 # Non-arithmetic functions
 
 # Restrict to a subdomain
-d1=box([[-1,1],[-1,1]])
-d2=box([[-0.125,0.125],[0.5,0.75]])
+d1=Box([[-1,1],[-1,1]])
+d2=Box([[-0.125,0.125],[0.5,0.75]])
 w=t(d1,0)*t(d1,1)
 rw=restrict(w,d2)
 print "restrict(w,d2):",rw
@@ -243,11 +243,11 @@ print "combine(x,y):",g
 print
 
 # Function composition
-d=IVector([[4,7],[1,6],[-1,1]])
+d=IntervalVector([[4,7],[1,6],[-1,1]])
 th=TaylorFunction.identity(d)
 cd=th.codomain()
 
-f=AffineFunction(Matrix([[2,1,0],[1,1,1]]),Vector([1,1]))
+f=AffineFunction(FloatMatrix([[2,1,0],[1,1,1]]),FloatVector([1,1]))
 g=PolynomialExpression.variable(3,0)
 
 tg=TaylorExpression(cd,g)
@@ -275,7 +275,7 @@ print
 # Solution of parameterised algebraic equations
 
 # Compute the solution h to the vector equation f(x,h(x))=0
-d=box([[-1,1],[-1,1],[-1,1]])
+d=Box([[-1,1],[-1,1],[-1,1]])
 a=t(d,0)
 x=t(d,1)
 y=t(d,2)
@@ -286,7 +286,7 @@ print "implicit(f):",h
 
 # Compute the solution h to the scalar equation g(x,h(x))=0
 # with f(x,y)=4+x-y^2, so y=sqrt(4+x)
-d=box([[-1,1],[-1,1]])
+d=Box([[-1,1],[-1,1]])
 x=t(d,0)
 y=t(d,1)
 g=x-4*y+y*y
@@ -313,8 +313,8 @@ print "antiderivative(f,0):",if0
 print "antiderivative(f,1):",if1
 
 # Compute the flow of the Taylor function tf starting in the domain D for time interval [-h,+h]
-b=box([[-2,2]])
-d=box([[-1,1]])
+b=Box([[-2,2]])
+d=Box([[-1,1]])
 h=0.5
 o=6 # Temporal order
 f=TaylorFunction.identity(b)

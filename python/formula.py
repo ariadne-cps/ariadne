@@ -47,7 +47,7 @@ def add(*args):
         res=res+arg
     return res
 
-def _neg_(arg): return -arg1
+def _neg_(arg): return -arg
 def _add_(arg1,arg2): return arg1+arg2
 def _mul_(arg1,arg2): return arg1*arg2
 def _sub_(arg1,arg2): return arg1-arg2
@@ -61,6 +61,7 @@ def _not_(arg):
     return ~arg
 
 def _eq_(arg1,arg2): return arg1 == arg2
+def _ne_(arg1,arg2): return arg1 != arg2
 
 def _sgn_(arg):
     if arg>0: return True
@@ -69,6 +70,8 @@ def _sgn_(arg):
 
 def _gt_(arg1,arg2): return arg1 > arg2
 def _lt_(arg1,arg2): return arg1 < arg2
+def _ge_(arg1,arg2): return arg1 >= arg2
+def _le_(arg1,arg2): return arg1 <= arg2
 
 def _exp_(arg): return math.exp(arg)
 def _log_(arg): return math.log(arg)
@@ -80,34 +83,42 @@ class Expression:
     def simplify(self,subexpr={}):
         subexpr[self]=self
         return self
-    
+
     def __neg__(self):
         return UnaryExpression(_neg_,self)
-    
+
     def __add__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_add_,self,other)
-    
+
     def __radd__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_add_,other,self)
-    
+
     def __sub__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_sub_,self,other)
-    
+
+    def __rsub__(self,other):
+        if(not isinstance(other,Expression)): other=Constant(other)
+        return BinaryExpression(_sub_,other,self)
+
     def __mul__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_mul_,self,other)
-    
+
     def __rmul__(self,other):
         if(isinstance(other,float)): other=Constant(str(other),'Real',other)
         return BinaryExpression(_mul_,other,self)
-    
+
     def __div__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_div_,self,other)
-    
+
+    def __rdiv__(self,other):
+        if(not isinstance(other,Expression)): other=Constant(other)
+        return BinaryExpression(_div_,other,self)
+
     def __pow__(self,other):
         assert isinstance(other,int)
         return BinaryExpression(_pow_,self,Constant(other))
@@ -115,23 +126,35 @@ class Expression:
     def __and__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_and_,self,other)
-    
+
     def __or__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_or_,self,other)
-    
+
     def __invert__(self):
         return UnaryExpression(_not_,self)
 
     def __gt__(self,other):
         if(not isinstance(other,Expression)): other=Constant(other)
         return BinaryExpression(_gt_,self,other)
-    
+
+    def __lt__(self,other):
+        if(not isinstance(other,Expression)): other=Constant(other)
+        return BinaryExpression(_lt_,self,other)
+
+    def __ge__(self,other):
+        if(not isinstance(other,Expression)): other=Constant(other)
+        return BinaryExpression(_ge_,self,other)
+
+    def __le__(self,other):
+        if(not isinstance(other,Expression)): other=Constant(other)
+        return BinaryExpression(_le_,self,other)
+
     def __str__(self):
         res=""
         for arg in self.args: res=res+str(arg)+","
         return str(self.op.__name__)+"("+res[:-1]+")"
-    
+
     def __repr__(self):
         return str(self)
 
@@ -162,16 +185,16 @@ class UnaryExpression(Expression):
         self.args=(arg,)
         for arg in self.args:
             assert(isinstance(arg,Expression))
-    
+
     def variables(self):
         return self.args[0].variables()
-    
+
     def evaluate(self,val):
         return self.op(self.args[0].evaluate(val))
-    
+
     def substitute(self,val):
         return self.op(self.args[0].substitute(val))
-    
+
     def simplify(self,subexpr={}):
         arg=self.args[0]
         if arg not in subexpr:
@@ -184,13 +207,15 @@ class UnaryExpression(Expression):
             sself=Constant(str(self),'Real',self.op(sarg.value))
         subexpr[self]=sself
         return sself
-    
+
     def __str__(self):
-        opstr={_exp_:'exp', _log_:'log', _sin_:'sin', _cos_:'cos', _tan_:'&tan', _sgn_:'sgn'}
+        opstr={_neg_:'neg', _exp_:'exp', _log_:'log', _sin_:'sin', _cos_:'cos', _tan_:'&tan', _sgn_:'sgn'}
         if self.op==_not_:
-            return '~'+str(self.args[0])+''
+            return '~'+repr(self.args[0])+''
+        elif self.op==_neg_:
+            return '-'+repr(self.args[0])+''
         else:
-            return opstr[self.op]+'('+str(self.args[0])+')'
+            return opstr[self.op]+'('+repr(self.args[0])+')'
 
 
 class BinaryExpression(Expression):
@@ -199,16 +224,16 @@ class BinaryExpression(Expression):
         self.args=(arg1,arg2)
         for arg in self.args:
             assert(isinstance(arg,Expression))
-    
+
     def variables(self):
         return (self.args[0].variables()).union(self.args[1].variables())
-    
+
     def evaluate(self,val):
         return self.op(self.args[0].evaluate(val),self.args[1].evaluate(val))
-    
+
     def substitute(self,val):
         return self.op(self.args[0].substitute(val),self.args[1].substitute(val))
-    
+
     def simplify(self,subexpr={}):
         op=self.op
         args=self.args
@@ -241,11 +266,13 @@ class BinaryExpression(Expression):
                 sself=sargs[1]
         subexpr[self]=sself
         return sself
-    
+
     def __str__(self):
-        opstr={_add_:' + ', _sub_:' - ', _mul_:'*', _div_:'/', _and_:' & ', _or_:' | ', _eq_:'==',_gt_:'>',_lt_:'<'}
-        if self.op==_pow_: return 'pow('+str(self.args[0])+','+str(self.args[1])+')'
-        return str(self.args[0])+''+opstr[self.op]+''+str(self.args[1])
+        opstr={_add_:' + ', _sub_:' - ', _mul_:'*', _div_:'/', \
+                   _and_:' & ', _or_:' | ', \
+                   _eq_:'==', _ne_:'!=', _gt_:'>',_lt_:'<', _ge_:'>=', _le_:'<='}
+        if self.op==_pow_: return 'pow('+repr(self.args[0])+','+repr(self.args[1])+')'
+        return repr(self.args[0])+''+opstr[self.op]+''+repr(self.args[1])
 
 
 class Variable(Expression):
@@ -269,7 +296,7 @@ class Variable(Expression):
     def __hash__(self):
         return hash(self.name)
     def __str__(self):
-        return self.name
+        #return self.name
         return self.name+":"+str(self.type)
     def __repr__(self):
         return self.name
@@ -300,7 +327,7 @@ class RealVariable(Variable):
 
 class Constant(Expression):
     __types={ type(True):"Bool", type(Indeterminate): "Tribool", type("str"):"String", type(1): 'Integer', type(1.0): 'Real' }
-    
+
     def __init__(self,name,type=None,value=None):
         if value==None:
             self.name=str(name)
@@ -322,9 +349,17 @@ class Constant(Expression):
     def substitute(self,val):
         return self
     def __str__(self):
-        return str(self.value)
-    def __repr__(self):
         return str(self.value)+":Constant"+self.type
+    def __repr__(self):
+        return str(self.name)
+
+class BooleanConstant(Constant):
+    def __init__(self,name,value):
+        Constant.__init__(self,name,'Boolean',bool(value))
+
+class RealConstant(Constant):
+    def __init__(self,name,value):
+        Constant.__init__(self,name,'Real',value)
 
 
 def evaluate(expr,val):
@@ -353,7 +388,7 @@ if __name__=='__main__':
     sss=ss.simplify()
     print sss
     print
-    
+
     a=Variable('a','Bool')
     b=Variable('b','Bool')
     c=Variable('c','Bool')
@@ -364,4 +399,3 @@ if __name__=='__main__':
     print es
     es=es.simplify()
     print es
-    

@@ -2,7 +2,7 @@
  *            grid_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 
 #include "numeric.h"
 #include "function_set.h"
@@ -34,11 +34,11 @@ using namespace boost::python;
 
 
 
-void export_grid() 
+void export_grid()
 {
     typedef Vector<Float> RVector;
     typedef Vector<Interval> IVector;
-  
+
     class_< Grid > grid_class("Grid",no_init);
     grid_class.def(init<uint>());
     grid_class.def(init<uint,Float>());
@@ -50,7 +50,7 @@ void export_grid()
 }
 
 
-void export_grid_cell() 
+void export_grid_cell()
 {
     class_<GridCell> cell_class("GridCell",no_init);
     cell_class.def("dimension", &GridCell::dimension);
@@ -60,14 +60,19 @@ void export_grid_cell()
 
 
 void export_grid_tree_set() {
-    class_<GridTreeSet> grid_tree_set_class("GridTreeSet",init<Grid>());
+    class_<GridTreeSubset> grid_tree_subset_class("GridTreeSubset",no_init);
+
+    class_<GridTreeSet, bases<GridTreeSubset> > grid_tree_set_class("GridTreeSet",init<Grid>());
     grid_tree_set_class.def(init<uint>());
     grid_tree_set_class.def(init<GridTreeSet>());
     grid_tree_set_class.def("bounding_box", &GridTreeSet::bounding_box);
     grid_tree_set_class.def("empty", &GridTreeSet::empty);
+    grid_tree_set_class.def("size", &GridTreeSet::size);
     grid_tree_set_class.def("dimension", &GridTreeSet::dimension);
     grid_tree_set_class.def("clear", &GridTreeSet::clear);
+    grid_tree_set_class.def("mince", &GridTreeSet::mince);
     grid_tree_set_class.def("grid", &GridTreeSet::grid,return_value_policy<copy_const_reference>());
+    grid_tree_set_class.def("measure", &GridTreeSet::measure);
     grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridCell&))(&GridTreeSet::adjoin));
     grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::adjoin));
     grid_tree_set_class.def("restrict", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::restrict));
@@ -75,19 +80,16 @@ void export_grid_tree_set() {
     grid_tree_set_class.def("adjoin_over_approximation", (void(GridTreeSet::*)(const Box&,const uint)) &GridTreeSet::adjoin_over_approximation);
     grid_tree_set_class.def("adjoin_outer_approximation", (void(GridTreeSet::*)(const CompactSetInterface&,const uint)) &GridTreeSet::adjoin_outer_approximation);
     grid_tree_set_class.def("adjoin_inner_approximation", (void(GridTreeSet::*)(const OpenSetInterface&,const uint,const uint)) &GridTreeSet::adjoin_inner_approximation);
-    grid_tree_set_class.def("size", &GridTreeSet::size);
     grid_tree_set_class.def("__len__", &GridTreeSet::size);
-    //grid_tree_set_class.def("__iter__", boost::python::iterator<GridTreeSet>());
-    //grid_tree_set_class.def("__iter__", boost::python::const_iterator<GridTreeSet>());
+    grid_tree_set_class.def("__iter__", boost::python::iterator<const GridTreeSet>());
     grid_tree_set_class.def(self_ns::str(self));
 
 
-    //def("join",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&join));
-    //def("difference",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&difference));
-    //def("regular_intersection",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&regular_intersection));
-    //def("overlap",(tribool(*)(const GridTreeSet&,const GridTreeSet&))(&overlap));
-    //def("inside",(tribool(*)(const GridTreeSet&,const GridTreeSet&))(&inside));
-    //def("inside",(tribool(*)(const CellList&,const GridTreeSet&))(&inside));
+    def("union",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&join));
+    def("difference",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&difference));
+    def("intersection",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersection));
+    def("overlap",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&overlap));
+    def("subset",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));
 
 }
 

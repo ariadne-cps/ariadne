@@ -58,17 +58,33 @@ template<class R> class Expression;
 template<class LHS,class RHS> class Assignment;
 
 
+template<class T> class Constant
+{
+  public:
+    template<class X> explicit Constant(const String& str, const X& value)
+        : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
+    //explicit Constant(const String& str, const T& value)
+    //    : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
+    const String& name() const { return *_name_ptr; }
+    const T& value() const { return *_value_ptr; }
+    bool operator==(const Constant<T>& other) const {
+        if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
+  private:
+    shared_ptr<String> _name_ptr;
+    shared_ptr<T> _value_ptr;
+};
+
 template<class T> class Variable
 {
   public:
-    explicit Variable(const String& str) : _name(new String(str)) { }
-    const String& name() const { return *_name; }
+    explicit Variable(const String& str) : _name_ptr(new String(str)) { }
+    const String& name() const { return *_name_ptr; }
     bool operator==(const Variable<T>& other) const { return this->name()==other.name(); }
     template<class X> bool operator==(const Variable<X>& other) const { ARIADNE_ASSERT(this->name()!=other.name()); return false; }
     template<class X> bool operator!=(const Variable<X>& other) const { return !(*this==other); }
     Assignment< Variable<T>,Expression<T> > operator=(const Expression<T>& e) const;
   private:
-    shared_ptr<String> _name;
+    shared_ptr<String> _name_ptr;
 };
 
 template<class T> inline bool operator<(const Variable<T> v1, const Variable<T>& v2) { return v1.name()<v2.name(); }

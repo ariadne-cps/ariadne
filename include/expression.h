@@ -96,6 +96,7 @@ class Expression {
     explicit Expression(ExpressionInterface<R>* eptr) : _ptr(eptr) { }
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
     Expression(const R& c);
+    Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
     const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
     //! \brief The variables used in the formula.
@@ -115,6 +116,7 @@ class Expression<Real> {
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
     Expression(const double& c);
     Expression(const Interval& c);
+    Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
     const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
     //! \brief The variables used in the formula.
@@ -184,6 +186,10 @@ Expression<Tribool> sgn(Expression<Real> e);
 Expression<Tribool> operator<=(Expression<Real> e1, Expression<Real> e2);
 //! \related Expression \brief .
 Expression<Tribool> operator>=(Expression<Real> e1, Expression<Real> e2);
+//! \related Expression \brief .
+Expression<Tribool> operator< (Expression<Real> e1, Expression<Real> e2);
+//! \related Expression \brief .
+Expression<Tribool> operator> (Expression<Real> e1, Expression<Real> e2);
 
 //! \related Expression \brief .
 Expression<Real> operator+(Expression<Real> e);

@@ -418,7 +418,7 @@ std::ostream& operator<<(std::ostream& os, const HybridSystem& sys) {
 }
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem::DifferentialEquation& de) {
-    os << de.loc << " -> dot("<<de.lhs<<")="<<de.rhs;
+    os << de.loc << " -> dot("<<de.lhs.name()<<")="<<de.rhs;
     return os;
 }
 

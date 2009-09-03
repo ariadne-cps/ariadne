@@ -67,6 +67,8 @@ class EnumeratedValue;
 template<class T> class Variable;
 template<class R> class Expression;
 
+typedef Constant<Real> RealConstant;
+
 typedef Variable<EnumeratedValue> EnumeratedVariable;
 typedef Variable<String> StringVariable;
 typedef Variable<Integer> IntegerVariable;

@@ -156,6 +156,10 @@ class HybridSystem
     //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
+    //! \brief Adds a guard predicate and invariant to the system.
+    void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate a, ContinuousPredicate i) {
+        GuardPredicate aeqn={e,q,a}; _guard_predicates.push_back(aeqn);
+        InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
     //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, bool p) {
         GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }

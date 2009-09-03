@@ -2,7 +2,7 @@
  *            expression.cc
  *
  *  Copyright 2009  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "expression.h"
 #include "valuation.h"
 #include "vector.h"
@@ -188,10 +188,12 @@ bool operator==(const Expression<Tribool>& e, bool v) {
 
 
 template<class R> Expression<R>::Expression(const R& c) : _ptr(new ConstantExpression<R>(c)) { }
+template<class R> Expression<R>::Expression(const Constant<R>& c) : _ptr(new ConstantExpression<R>(c.value())) { }
 template<class R> Expression<R>::Expression(const Variable<R>& v) : _ptr(new VariableExpression<R>(v)) { }
 
 Expression<Real>::Expression(const double& c) : _ptr(new ConstantExpression<Real>(c)) { }
 Expression<Real>::Expression(const Interval& c) : _ptr(new ConstantExpression<Real>(c)) { }
+Expression<Real>::Expression(const Constant<Real>& c) : _ptr(new ConstantExpression<Real>(c.value())) { }
 Expression<Real>::Expression(const Variable<Real>& v) : _ptr(new VariableExpression<Real>(v)) { }
 
 template class Expression<Boolean>;

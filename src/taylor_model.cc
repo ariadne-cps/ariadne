@@ -968,7 +968,7 @@ TaylorModel::truncate(uint d)
         if(adv->key().degree()<=d) {
             *curr=*adv; ++curr;
         } else {
-            this->error()+=adv->data();
+            this->error()+=abs(adv->data());
         }
         ++adv;
     }
@@ -988,7 +988,7 @@ TaylorModel::truncate(const MultiIndex& b)
         if(adv->key()<=b) {
             *curr=*adv; ++curr;
         } else {
-            this->error()+=adv->data();
+            this->error()+=abs(adv->data());
         }
         ++adv;
     }
@@ -2308,7 +2308,7 @@ TaylorModel embed(uint as, const TaylorModel& x)
 std::ostream&
 operator<<(std::ostream& os, const TaylorModel& tv) {
     //os << "TaylorModel";
-    return os << "(" << tv.expansion() << "," << tv.error() << ")";
+    return os << "(" << tv.expansion() << "+/-" << tv.error() << ")";
 }
 
 

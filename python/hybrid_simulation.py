@@ -23,7 +23,12 @@
 import sys
 
 from hybrid_system import *
-import matplotlib.pyplot as pyplot
+
+try:
+    import matplotlib.pyplot as pyplot
+except:
+    print "No matplotlib library available"
+
 
 def sorted_str(dct):
     keys=dct.keys()
@@ -49,7 +54,7 @@ def rk4step(relations,dynamics,valuation,step_size):
         x1val[var]=expr.evaluate(x1val)
 
 
-        
+
     k2val={}; x2val={}
     for (var,expr) in dynamics:
         k2val[var]=expr.evaluate(x1val)
@@ -66,7 +71,7 @@ def rk4step(relations,dynamics,valuation,step_size):
 
     if step_size*L>0.5:
         return rk4step(relations,dynamics,valuation,step_size/2)
-     
+
     k3val={}; x3val={}
     for (var,expr) in dynamics:
         k3val[var]=expr.evaluate(x2val)
@@ -77,14 +82,14 @@ def rk4step(relations,dynamics,valuation,step_size):
     k4val={};
     for (var,expr) in dynamics:
         k4val[var]=expr.evaluate(x3val)
-     
+
     dxval={}
     for (var,expr) in dynamics:
         dxval[var]=(step_size/6.0)*(k1val[var]+2*k2val[var]+2*k3val[var]+k4val[var])
 
     return dxval
 
-    
+
 def simulate(system,initial_valuation,final_time):
 
     result={}
@@ -157,7 +162,7 @@ def plot(orbit,vars):
         pyplot.plot(times,trace)
     pyplot.show()
     #raw_input('Please press return to continue...\n')
-        
+
 
 if __name__=='__main__':
     e=Event("TurnOff")
@@ -168,7 +173,7 @@ if __name__=='__main__':
 
     g=(x>1)
     print g,type(g)
-    
+
     h=HybridSystem()
     h.new_relation(Constant(True),z,x*x+y*y)
     h.new_dynamic(q=="On",x,+1.25*x-y)
@@ -179,7 +184,7 @@ if __name__=='__main__':
     h.new_reset(e,Constant(True),y,0.5*y)
     h.new_transition(e,Constant(True),q,Constant("Off"))
     print h
-    
+
     #print h.variables({q:"On"})
     print h.active_relations({q:"On",})
 

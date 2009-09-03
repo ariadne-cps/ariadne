@@ -27,12 +27,51 @@ from formula import *
 class Event:
     def __init__(self,name):
         self.name=str(name)
+    def __hash__(self):
+        return hash(self.name)
     def __eq__(self,other):
         return self.name==other.name
     def __str__(self):
         return "Event('"+self.name+"')"
     def __repr__(self):
         return self.name
+    def __invert__(self):
+        return EventSet(self).__invert__()
+    def __contains__(self,event):
+        return (event is self)
+
+class EventSet:
+    def __init__(self,events=set()):
+        if isinstance(events,Event):
+            self.set=set([events])
+            self.compl=False
+        elif isinstance(events,EventSet):
+            self.set=events.set
+            self.compl=events.compl
+        else:
+            self.set=set(events)
+            self.compl=False
+
+    def __invert__(self):
+        result=EventSet(self)
+        result.compl=not result.compl
+        return result
+
+    def __contains__(self,event):
+        return (event in self.set) ^ self.compl
+
+    def __str__(self):
+        if len(self.set)==0:
+            if self.compl: return 'all'
+        if len(self.set)==1:
+            if self.compl: return '~['+repr(list(self.set)[0])+']'
+        if self.compl:
+            return '~'+str(list(self.set))
+        else:
+            return str(list(self.set))
+
+    def __repr__(self):
+        return str(self)
 
 
 """A hybrid system, defined by dynamical rules.
@@ -48,27 +87,32 @@ A hybrid system has the following attributes:
 class HybridSystem:
     def __init__(self):
         self.transitions=[]
-        self.relations=[]
+        self.equations=[]
         self.dynamics=[]
+        self.invariants=[]
         self.guards=[]
         self.resets=[]
-    
+
     def new_transition(self,events,locations,variable,expression):
         self.transitions.append((events,locations,variable,expression))
-    
-    def new_relation(self,locations,variable,expression):
-        self.relations.append((locations,variable,expression))
-                
+
+    def new_equation(self,locations,variable,expression):
+        self.equations.append((locations,variable,expression))
+
     def new_dynamic(self,locations,variable,expression):
         self.dynamics.append((locations,variable,expression))
-    
+
     def new_reset(self,events,locations,variable,expression):
         self.resets.append((events,locations,variable,expression))
-    
+
     def new_guard(self,events,locations,activation,invariant=None):
-        if invariant==None: invariant=activation
-        self.guards.append((events,locations,activation,invariant))
-    
+        #if invariant==None: invariant=activation
+        if invariant==None: self.guards.append((events,locations,activation))
+        else: self.guards.append((events,locations,activation,invariant))
+
+    def new_invariant(self,locations,predicate):
+        self.invariants.append((locations,predicate))
+
     def order(self,assignments):
         active={}
         variables=set()
@@ -95,7 +139,7 @@ class HybridSystem:
                 print "Circular dependency in",arguments.keys()
         print "arguments:",arguments
         return result
-    
+
     def active_variables(self,mode):
         argument_variables=set()
         differential_variables=set()
@@ -112,45 +156,46 @@ class HybridSystem:
                 argument_variables.update(expression.variables())
         #assert argument_variables.issubset(differential_variables.union(algebraic_variables))
         return (algebraic_variables,differential_variables,argument_variables)
-    
+
     def active_relations(self,mode):
         result=[]
         for (locations,variable,expression) in self.relations:
             if locations.evaluate(mode):
                 result.append((variable,expression))
         return self.order(result)
-    
+
     def active_dynamics(self,mode):
         result=[]
         for (locations,variable,expression) in self.dynamics:
             if locations.evaluate(mode):
                 result.append((variable,expression))
         return result
-    
+
     def active_guards(self,mode):
         result=[]
-        for (event,locations,activation,invariant) in self.guards:
+        for (events,locations,activation) in self.guards:
             if locations.evaluate(mode):
-                result.append((event,activation))
+                result.append((events,activation))
         return result
-    
+
     def active_resets(self,active_event,mode):
         result=[]
-        for (event,locations,variable,expression) in self.resets:
-            if active_event==event and locations.evaluate(mode):
+        for (events,locations,variable,expression) in self.resets:
+            if active_event in events and locations.evaluate(mode):
                 result.append((variable,expression))
         return result
-    
+
     def active_transitions(self,active_event,mode):
         result=[]
-        for (event,locations,variable,expression) in self.transitions:
-            if active_event==event and locations.evaluate(mode):
+        for (events,locations,variable,expression) in self.transitions:
+            if active_event in events and locations.evaluate(mode):
                 result.append((variable,expression))
         return result
-    
-    def __str__(self):
-        return "HybridSystem(\n  relations="+str(self.relations) \
-                 + ",\n  dynamics="+str(self.dynamics) \
-                 + ",\n  guards="+str(self.guards)+"\n)"
 
-    
+    def __str__(self):
+        return "HybridSystem(\n  relations="+str(self.equations) \
+                 + ",\n  dynamics="+str(self.dynamics) \
+                 + ",\n  invariants="+str(self.invariants) \
+                 + ",\n  guards="+str(self.guards) \
+                 + ",\n  resets="+str(self.resets)+"\n)"
+

@@ -68,6 +68,7 @@ void export_figure()
     figure_class.def("draw",(void(*)(FigureInterface&,const Box&))&draw);
     figure_class.def("draw",(void(*)(FigureInterface&,const Zonotope&))&draw);
     figure_class.def("draw",(void(*)(FigureInterface&,const Polytope&))&draw);
+    //figure_class.def("draw",(void(*)(FigureInterface&,const Polyhedron&))&draw);
     figure_class.def("draw",(void(*)(FigureInterface&,const TaylorSet&))&draw);
     figure_class.def("draw",(void(*)(FigureInterface&,const GridTreeSet&))&draw);
     figure_class.def("draw",(void(*)(FigureInterface&,const InterpolatedCurve&))&draw);

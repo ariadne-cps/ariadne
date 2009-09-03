@@ -52,6 +52,18 @@ enum Comparison {
 
 std::ostream& operator<<(std::ostream&, const Comparison& op);
 
+inline const char* name(const Comparison& op) {
+    switch(op) {
+        case SGN:  return "sgn"; break;
+        case EQ:   return "eq"; break;
+        case NEQ:  return "neq"; break;
+        case GEQ:  return "geq"; break;
+        case LEQ:  return "leq"; break;
+        case GT:   return "lt"; break;
+        case LT:   return "gt"; break;
+    }
+}
+
 inline std::ostream& operator<<(std::ostream& os, const Comparison& op) {
     switch(op) {
         case SGN:  os << "sgn"; break;
@@ -98,38 +110,6 @@ enum Operator {
 
 std::ostream& operator<<(std::ostream&, const Operator& op);
 
-inline std::ostream& operator<<(std::ostream& os, const Operator& op) {
-    switch(op) {
-        case CNST: os << "cnst"; break;
-        case VAR:  os << "var"; break;
-        case IND:  os << "ind"; break;
-        case POS:  os << "pos"; break;
-        case NEG:  os << "neg"; break;
-        case REC:  os << "rec"; break;
-        case ADD:  os << "add"; break;
-        case SUB:  os << "sub"; break;
-        case MUL:  os << "mul"; break;
-        case DIV:  os << "div"; break;
-        case POW:  os << "pow"; break;
-        case NOT:  os << "not"; break;
-        case AND:  os << "and"; break;
-        case OR:   os << "or"; break;
-        case XOR:  os << "xor"; break;
-        case IMPL: os << "impl"; break;
-        case ABS:  os << "abs"; break;
-        case MAX:  os << "max"; break;
-        case MIN:  os << "min"; break;
-        case SQR:  os << "sqr"; break;
-        case SQRT: os << "sqrt"; break;
-        case EXP:  os << "exp"; break;
-        case LOG:  os << "log"; break;
-        case SIN:  os << "sin"; break;
-        case COS:  os << "cos"; break;
-        case TAN:  os << "tan"; break;
-        case ITOR:  os << "itor"; break;
-    }
-    return os;
-}
 
 inline const char* symbol(const Operator& op) {
     switch(op) {
@@ -159,6 +139,41 @@ inline const char* symbol(const Comparison& cmp) {
     }
 }
 
+inline const char* name(const Operator& op) {
+    switch(op) {
+        case CNST: return "cnst"; break;
+        case VAR:  return "var"; break;
+        case IND:  return "ind"; break;
+        case POS:  return "pos"; break;
+        case NEG:  return "neg"; break;
+        case REC:  return "rec"; break;
+        case ADD:  return "add"; break;
+        case SUB:  return "sub"; break;
+        case MUL:  return "mul"; break;
+        case DIV:  return "div"; break;
+        case POW:  return "pow"; break;
+        case NOT:  return "not"; break;
+        case AND:  return "and"; break;
+        case OR:   return "or"; break;
+        case XOR:  return "xor"; break;
+        case IMPL: return "impl"; break;
+        case ABS:  return "abs"; break;
+        case MAX:  return "max"; break;
+        case MIN:  return "min"; break;
+        case SQR:  return "sqr"; break;
+        case SQRT: return "sqrt"; break;
+        case EXP:  return "exp"; break;
+        case LOG:  return "log"; break;
+        case SIN:  return "sin"; break;
+        case COS:  return "cos"; break;
+        case TAN:  return "tan"; break;
+        case ITOR:  return "itor"; break;
+    }
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Operator& op) {
+    return os << name(op);
+}
 
 struct GtrZero {}; struct LessZero {};
 

@@ -62,21 +62,27 @@ class DiscreteValuation;
 template<class X> class ContinuousValuation;
 template<class X> class Vector;
 
-
+class Substitution;
 
 template<class T>
 class ExpressionInterface
 {
+    friend class Expression<T>;
   public:
     virtual ~ExpressionInterface() { }
     virtual ExpressionInterface<T>* clone() const = 0;
     virtual Set<String> arguments() const = 0;
     virtual Operator type() const = 0;
     virtual std::ostream& write(std::ostream& os) const = 0;
+  protected:
+    virtual ExpressionInterface<T>* simplify() const = 0;
 };
 
 template<class R> class Expression;
 template<class R> std::ostream& operator<<(std::ostream&, const Expression<R>&);
+
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
+template<class X> Expression<X> simplify(const Expression<X>& e);
 
 /*! \brief A simple expression in named variables.
  *
@@ -101,6 +107,16 @@ class Expression {
     const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
     //! \brief The variables used in the formula.
     Set<String> arguments() const { return _ptr->arguments(); }
+    //! \brief The name of the type of expression.
+    String operator_name() const { return name(_ptr->type()); }
+    //! \brief The immediate subexpressions used in the formula.
+    List< Expression<R> > subexpressions() const;
+     //! \brief Substitute the constant \a c for the variable \a v.
+    template<class X> Expression<R> substitute(const Variable<X>& v, const X& c) const {
+        return Ariadne::substitute(*this,v,c); };
+    //! \brief Simplify the expression (e.g. by evaluating constants).
+    Expression<R> simplify() const {
+        return Ariadne::simplify(*this); }
     //! \brief Write to an output stream.
     friend std::ostream& operator<< <>(std::ostream&, const Expression<R>&);
   public:
@@ -121,11 +137,23 @@ class Expression<Real> {
     const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
     //! \brief The variables used in the formula.
     Set<String> arguments() const { return _ptr->arguments(); }
+    //! \brief The name of the type of expression.
+    String operator_name() const { return name(_ptr->type()); }
+    //! \brief The immediate subexpressions used in the formula.
+    List< Expression<R> > subexpressions() const;
+    //! \brief Substitute the constant \a c for the variable \a v.
+    template<class X> Expression<R> substitute(const Variable<X>& v, const X& c) const {
+        return Ariadne::substitute(*this,v,c); }
+    //! \brief Simplify the expression (e.g. by evaluating constants).
+    Expression<R> simplify() const {
+        return Ariadne::simplify(*this); }
     //! \brief Write to an output stream.
     friend std::ostream& operator<< <>(std::ostream&, const Expression<R>&);
   public:
     shared_ptr<const ExpressionInterface<R> > _ptr;
 };
+
+
 
 template<class R> inline std::ostream& operator<<(std::ostream& os, const Expression<R>& e) { return e._ptr->write(os); }
 
@@ -138,6 +166,9 @@ template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuatio
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
+
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
+template<class X> Expression<X> simplify(const Expression<X>& e);
 
 bool operator==(const Expression<Tribool>&, bool);
 

@@ -93,6 +93,8 @@ inline std::ostream& operator<<(std::ostream& os, const Variable<EnumeratedValue
 inline std::ostream& operator<<(std::ostream& os, const Variable<String>& v) { return os << v.name() << ":String"; }
 inline std::ostream& operator<<(std::ostream& os, const Variable<Integer>& v) { return os << v.name() << ":Integer"; }
 inline std::ostream& operator<<(std::ostream& os, const Variable<Real>& v) { return os << v.name() << ":Real"; }
+inline std::ostream& operator<<(std::ostream& os, const Variable<Boolean>& v) { return os << v.name() << ":Boolean"; }
+inline std::ostream& operator<<(std::ostream& os, const Variable<Tribool>& v) { return os << v.name() << ":Tribool"; }
 
 template<class T> class Space;
 template<class T> std::ostream& operator<<(std::ostream& os, const Space<T>& spc);

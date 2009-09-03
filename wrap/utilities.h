@@ -321,6 +321,28 @@ R __rmul__(const A1& a1, const A2& a2) { return static_cast<R>(a2*a1); }
 template<class R, class A1, class A2>
 R __rdiv__(const A1& a1, const A2& a2) { return static_cast<R>(a2/a1); }
 
+template<class R, class A1, class A2>
+R __and__(const A1& a1, const A2& a2) { return static_cast<R>(a1 && a2); }
+
+template<class R, class A1, class A2>
+R __or__(const A1& a1, const A2& a2) { return static_cast<R>(a1 || a2); }
+
+template<class R, class A>
+R __not__(const A& a) { return static_cast<R>(!a); }
+
+template<class R, class A1, class A2>
+R __gt__(const A1& a1, const A2& a2) { return static_cast<R>(a1>a2); }
+
+template<class R, class A1, class A2>
+R __lt__(const A1& a1, const A2& a2) { return static_cast<R>(a1<a2); }
+
+template<class R, class A1, class A2>
+R __gte__(const A1& a1, const A2& a2) { return static_cast<R>(a1>=a2); }
+
+template<class R, class A1, class A2>
+R __lte__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
+
+
 template<class T> std::string __cstr__(const T& t) {
     std::stringstream ss; ss << t; return ss.str(); }
 

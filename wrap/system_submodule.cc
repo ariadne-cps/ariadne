@@ -25,6 +25,7 @@
 #include <iomanip>
 
 #include "function_interface.h"
+#include "real.h"
 #include "formula.h"
 #include "hybrid_automaton.h"
 #include "hybrid_time.h"
@@ -78,46 +79,54 @@ namespace Ariadne { int length(const array<std::string>& a) { return a.size(); }
 void export_formula()
 {
     implicitly_convertible<RealVariable,RealExpression>();
+
+    to_python< List<RealExpression> >();
+
+
     // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be. 
     //implicitly_convertible<double,RealExpression>();
     //implicitly_convertible<Interval,RealExpression>();
 
-    class_<RealVariable> variable_class("RealVariable", init<std::string>());
-    variable_class.def("__pos__", &__pos__<RealExpression,RealVariable>);
-    variable_class.def("__neg__", &__neg__<RealExpression,RealVariable>);
-    variable_class.def("__add__", &__add__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def("__sub__", &__sub__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def("__mul__", &__mul__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def("__div__", &__div__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def("__radd__", &__radd__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def("__rsub__", &__rsub__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def("__rmul__", &__rmul__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def("__rdiv__", &__rdiv__<RealExpression,RealVariable,RealExpression>);
-    variable_class.def(self_ns::str(self));
+    class_<RealVariable> real_variable_class("RealVariable", init<std::string>());
+    real_variable_class.def("__pos__", &__pos__<RealExpression,RealVariable>);
+    real_variable_class.def("__neg__", &__neg__<RealExpression,RealVariable>);
+    real_variable_class.def("__add__", &__add__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__sub__", &__sub__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__mul__", &__mul__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__div__", &__div__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__radd__", &__radd__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__rsub__", &__rsub__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__rmul__", &__rmul__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def("__rdiv__", &__rdiv__<RealExpression,RealVariable,RealExpression>);
+    real_variable_class.def(self_ns::str(self));
 
-    class_<RealSpace> space_class("RealSpace", init<RealSpace>());
-    space_class.def("dimension", &RealSpace::dimension);
-    space_class.def("variable", &RealSpace::variable, return_value_policy<reference_existing_object>());
-    space_class.def("index", &RealSpace::index);
-    space_class.def(self_ns::str(self));
+    class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
+    real_space_class.def("dimension", &RealSpace::dimension);
+    real_space_class.def("variable", &RealSpace::variable, return_value_policy<reference_existing_object>());
+    real_space_class.def("index", &RealSpace::index);
+    real_space_class.def(self_ns::str(self));
 
     def("variable",(RealVariable(*)(const String& s)) &variable<Real>);
     def("variables",(RealSpace(*)(const List<String>& s)) &variables<Real>);
 
     from_python<RealSpace>();
 
-    class_<RealExpression> expression_class("RealExpression", no_init);
-    expression_class.def("__pos__", &__pos__<RealExpression,RealExpression>);
-    expression_class.def("__neg__", &__neg__<RealExpression,RealExpression>);
-    expression_class.def("__add__", &__add__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def("__sub__", &__sub__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def("__mul__", &__mul__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def("__div__", &__div__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def("__radd__", &__radd__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def("__rdiv__", &__rdiv__<RealExpression,RealExpression,RealExpression>);
-    expression_class.def(self_ns::str(self));
+    class_<RealExpression> real_expression_class("RealExpression", init<RealExpression>());
+    real_expression_class.def("name", &RealExpression::operator_name);
+    real_expression_class.def("subexpressions", &RealExpression::subexpressions);
+    real_expression_class.def("substitute", &RealExpression::substitute<Real>);
+    real_expression_class.def("simplify", &RealExpression::simplify);
+    real_expression_class.def("__pos__", &__pos__<RealExpression,RealExpression>);
+    real_expression_class.def("__neg__", &__neg__<RealExpression,RealExpression>);
+    real_expression_class.def("__add__", &__add__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__sub__", &__sub__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__mul__", &__mul__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__div__", &__div__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__radd__", &__radd__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__rdiv__", &__rdiv__<RealExpression,RealExpression,RealExpression>);
+    real_expression_class.def(self_ns::str(self));
 
     def("neg", (RealExpression(*)(RealExpression)) &neg);
     def("rec", (RealExpression(*)(RealExpression)) &rec);
@@ -130,9 +139,40 @@ void export_formula()
     def("cos", (RealExpression(*)(RealExpression)) &cos);
     def("tan", (RealExpression(*)(RealExpression)) &tan);
 
-    class_<RealAssignment> assignment_class("RealAssignment",no_init);
-    assignment_class.def(self_ns::str(self));
+    class_<RealAssignment> real_assignment_class("RealAssignment",no_init);
+    real_assignment_class.def(self_ns::str(self));
 
+    typedef Variable<Tribool> TriboolVariable;
+    typedef Expression<Tribool> TriboolExpression;
+
+    to_python< List<TriboolExpression> >();
+
+    class_<TriboolVariable> tribool_variable_class("TriboolVariable", init<std::string>());
+    tribool_variable_class.def(self_ns::str(self));
+
+    class_<TriboolExpression> tribool_expression_class("TriboolExpression",init<TriboolExpression>());
+    tribool_expression_class.def("name", &TriboolExpression::operator_name);
+    tribool_expression_class.def("subexpressions", &TriboolExpression::subexpressions);
+    tribool_expression_class.def("substitute", &TriboolExpression::substitute<Real>);
+    tribool_expression_class.def("substitute", &TriboolExpression::substitute<Tribool>);
+    tribool_expression_class.def("simplify", &TriboolExpression::simplify);
+    tribool_expression_class.def("__and__", &__and__<TriboolExpression,TriboolExpression,TriboolExpression>);
+    tribool_expression_class.def("__or__", &__or__<TriboolExpression,TriboolExpression,TriboolExpression>);
+    tribool_expression_class.def("__neg__", &__not__<TriboolExpression,TriboolExpression>);
+    tribool_expression_class.def(self_ns::str(self));
+
+    implicitly_convertible<TriboolVariable,TriboolExpression>();
+
+    def("sgn", (TriboolExpression(*)(RealExpression)) &sgn);
+
+    real_expression_class.def("__less__", &__gte__<TriboolExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__gtr__", &__lte__<TriboolExpression,RealExpression,RealExpression>);
+    real_expression_class.def("__gt__", &__gte__<TriboolExpression,RealExpression,double>);
+    real_expression_class.def("__lt__", &__lte__<TriboolExpression,RealExpression,double>);
+
+    
+    //class_<RealVariable> real_variable_class("RealVariable", init<std::string>());
+    
 }
 
 

@@ -115,6 +115,8 @@ class InterpolatedCurve
     typedef std::map< Float, Point >::const_iterator const_iterator;
   
   public:
+    /*! \brief Create an empty curve. */
+    InterpolatedCurve() : _points() { }
     /*! \brief Create a curve with a single point \a pt at parameter value 0. */
     InterpolatedCurve(const Point& pt) 
         : _points() { this->insert(0,pt); }

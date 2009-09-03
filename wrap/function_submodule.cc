@@ -454,6 +454,8 @@ void export_scalar_polynomial_function()
     scalar_polynomial_function_class.def(self*=ivl);
     scalar_polynomial_function_class.def(self/=ivl);
 
+    scalar_polynomial_function_class.def("derivative",(PE*(PE::*)(uint)const)&PE::derivative,return_value_policy<manage_new_object>());
+
     def("derivative",(PE*(PE::*)(uint)const)&PE::derivative,return_value_policy<manage_new_object>());
     def("antiderivative",(PE*(PE::*)(uint)const)&PE::antiderivative,return_value_policy<manage_new_object>());
 

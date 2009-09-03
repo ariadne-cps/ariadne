@@ -2,7 +2,7 @@
  *            box.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file box.h
  *  \brief Coordinate-aligned boxes in Euclidean space.
  */
@@ -50,7 +50,7 @@ class Box
 
     //! Construct a singleton point in zero dimensions.
     Box() : Vector<Interval>() { }
-    //! Construct from an integer giving the dimension and a list of floating-point values 
+    //! Construct from an integer giving the dimension and a list of floating-point values
     //! giving alternately lower and upper bounds.
     explicit Box(uint d, const Float& x0l, const Float& x0u, ...);
 
@@ -83,7 +83,7 @@ class Box
     }
 
     //! The radius of the box in the supremum norm.
-    Float radius() const { 
+    Float radius() const {
         Float dmax=0;
         for(uint i=0; i!=this->size(); ++i) {
             dmax = max( dmax, (*this)[i].width() );
@@ -92,7 +92,7 @@ class Box
     }
 
     //! \brief Test if the box is empty.
-    bool empty() const { 
+    bool empty() const {
         return Ariadne::empty(*this);
     }
 
@@ -136,37 +136,46 @@ class Box
 
     //! \brief Tests if the box is disjoint from another box.
     //! Only returns true if the closures are disjoint.
-    virtual tribool disjoint(const Box& other) const { 
+    virtual tribool disjoint(const Box& other) const {
         return Ariadne::disjoint(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box overlaps another box.
     //! Only returns true if the interior of one box intersects the other.
-    virtual tribool overlaps(const Box& other) const { 
+    virtual tribool overlaps(const Box& other) const {
         return Ariadne::overlap(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box covers another box.
-    //! Only returns true if the interior of the box is a superset 
+    //! Only returns true if the interior of the box is a superset
     //! of the closure of the other.
-    virtual tribool covers(const Box& other) const { 
+    virtual tribool covers(const Box& other) const {
         return Ariadne::inside(other.vector(), this->vector());
     }
 
     //! \brief Tests if the box covers another box.
-    //! Only returns true if the closure of the box is a subset 
+    //! Only returns true if the closure of the box is a subset
     //! of the interior of the other.
-    virtual tribool inside(const Box& other) const { 
+    virtual tribool inside(const Box& other) const {
         return Ariadne::inside(this->vector(), other.vector());
     }
 
     //! \brief Returns an enclosing bounding box for the set.
     //! The result is guaranteed to contain the box in its interior.
-    virtual Box bounding_box() const { 
+    virtual Box bounding_box() const {
         static const Float min(std::numeric_limits<double>::min());
         static const Interval eps(-min,+min);
         return Box((*this)+Vector<Interval>(this->dimension(),eps));
     }
+
+    //! \brief Widens the box by the minimal floating-point increment.
+    //! The result is guaranteed to contain the box in its interior.
+    void widen() {
+        static const Float min(std::numeric_limits<double>::min());
+        static const Interval eps(-min,+min);
+        static_cast<Vector<Interval>&>(*this) += Vector<Interval>(this->dimension(),eps);
+    }
+
 
     //! \brief Draw on a canvas.
     virtual void draw(CanvasInterface& c) const;

@@ -25,11 +25,60 @@
 #include "numeric.h"
 #include "function_set.h"
 #include "grid_set.h"
+#include "list_set.h"
 
 using namespace Ariadne;
 
 #include <boost/python.hpp>
 using namespace boost::python;
+
+
+
+// For some reason, Boost::Python doesn't like returning a const GridCell& from an iterator dereference. We therefore
+// wrap the usual GridTreeConstIterator in a class which returns a value upon dereferenceing, and use the range
+// iterator functionality.
+// I have tried several approaches to the return value, and none of them seem to work.
+class PyGridTreeSetConstIterator : public GridTreeConstIterator {
+  public:
+    typedef GridCell value_type;
+    typedef const GridCell reference;
+    typedef const GridCell* pointer;
+
+    PyGridTreeSetConstIterator(GridTreeConstIterator iter) : GridTreeConstIterator(iter) { }
+    const GridCell operator*() const { return this->GridTreeConstIterator::operator*(); }
+};
+
+PyGridTreeSetConstIterator py_cells_begin(const GridTreeSubset& gts) {
+    return PyGridTreeSetConstIterator(gts.begin()); }
+PyGridTreeSetConstIterator py_cells_end(const GridTreeSubset& gts) {
+    return PyGridTreeSetConstIterator(gts.end()); }
+
+
+// Iterator through the boxes of a GridTreeSet set
+class PyGridTreeSetBoxConstIterator {
+  public:
+    typedef boost::forward_traversal_tag iterator_category;
+    typedef Box value_type;
+    typedef size_t difference_type;
+    typedef const Box reference;
+    typedef const Box* pointer;
+
+    PyGridTreeSetBoxConstIterator(GridTreeSet::const_iterator iter) : _iter(iter) { }
+    const Box operator*() const { return this->_iter->box(); }
+    PyGridTreeSetBoxConstIterator& operator++() { ++this->_iter; return *this; }
+    PyGridTreeSetBoxConstIterator operator++(int) { PyGridTreeSetBoxConstIterator ret(*this); ++this->_iter; return ret; }
+    bool operator==(const PyGridTreeSetBoxConstIterator& other) { return this->_iter==other._iter; }
+  private:
+    GridTreeSet::const_iterator _iter;
+};
+
+PyGridTreeSetBoxConstIterator py_boxes_begin(const GridTreeSubset& gts) {
+    return PyGridTreeSetBoxConstIterator(gts.begin()); }
+PyGridTreeSetBoxConstIterator py_boxes_end(const GridTreeSubset& gts) {
+    return PyGridTreeSetBoxConstIterator(gts.end()); }
+
+
+
 
 
 
@@ -52,25 +101,29 @@ void export_grid()
 
 void export_grid_cell()
 {
-    class_<GridCell> cell_class("GridCell",no_init);
-    cell_class.def("dimension", &GridCell::dimension);
-    cell_class.def("box", &GridCell::box, return_value_policy<copy_const_reference>());
-    cell_class.def(self_ns::str(self));
+    class_<GridCell> grid_cell_class("GridCell",no_init);
+    grid_cell_class.def("dimension", &GridCell::dimension);
+    grid_cell_class.def("box", &GridCell::box, return_value_policy<copy_const_reference>());
+    grid_cell_class.def(self_ns::str(self));
+
+
 }
 
 
 void export_grid_tree_set() {
+
     class_<GridTreeSubset> grid_tree_subset_class("GridTreeSubset",no_init);
 
-    class_<GridTreeSet, bases<GridTreeSubset> > grid_tree_set_class("GridTreeSet",init<Grid>());
+    class_<GridTreeSet, bases<GridTreeSubset> > grid_tree_set_class("GridTreeSet",init<GridTreeSet>());
     grid_tree_set_class.def(init<uint>());
-    grid_tree_set_class.def(init<GridTreeSet>());
+    grid_tree_set_class.def(init<Grid>());
     grid_tree_set_class.def("bounding_box", &GridTreeSet::bounding_box);
     grid_tree_set_class.def("empty", &GridTreeSet::empty);
     grid_tree_set_class.def("size", &GridTreeSet::size);
     grid_tree_set_class.def("dimension", &GridTreeSet::dimension);
     grid_tree_set_class.def("clear", &GridTreeSet::clear);
     grid_tree_set_class.def("mince", &GridTreeSet::mince);
+    grid_tree_set_class.def("recombine", &GridTreeSet::recombine);
     grid_tree_set_class.def("grid", &GridTreeSet::grid,return_value_policy<copy_const_reference>());
     grid_tree_set_class.def("measure", &GridTreeSet::measure);
     grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridCell&))(&GridTreeSet::adjoin));
@@ -81,15 +134,20 @@ void export_grid_tree_set() {
     grid_tree_set_class.def("adjoin_outer_approximation", (void(GridTreeSet::*)(const CompactSetInterface&,const uint)) &GridTreeSet::adjoin_outer_approximation);
     grid_tree_set_class.def("adjoin_inner_approximation", (void(GridTreeSet::*)(const OpenSetInterface&,const uint,const uint)) &GridTreeSet::adjoin_inner_approximation);
     grid_tree_set_class.def("__len__", &GridTreeSet::size);
-    grid_tree_set_class.def("__iter__", boost::python::iterator<const GridTreeSet>());
+    //grid_tree_set_class.def("__iter__", boost::python::iterator<const GridTreeSet>());
+    grid_tree_set_class.def("__iter__", range(&py_cells_begin,&py_cells_end));
+    grid_tree_set_class.def("cells", range(&py_cells_begin,&py_cells_end));
+    grid_tree_set_class.def("boxes", range(&py_boxes_begin,&py_boxes_end));
     grid_tree_set_class.def(self_ns::str(self));
-
 
     def("union",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&join));
     def("difference",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&difference));
     def("intersection",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersection));
     def("overlap",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&overlap));
     def("subset",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));
+
+    def("outer_approximation",(GridTreeSet(*)(const CompactSetInterface&,const Grid&,const uint)) &outer_approximation);
+    def("inner_approximation",(GridTreeSet(*)(const OpenSetInterface&,const Grid&,const uint,const uint)) &inner_approximation);
 
 }
 

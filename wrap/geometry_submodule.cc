@@ -149,9 +149,16 @@ class LocatedSetWrapper
 
 
 void export_set_interface() {
-    class_<OpenSetWrapper, boost::noncopyable> open_set_wrapper_class("OpenSetInterface");
-    class_<CompactSetWrapper, boost::noncopyable> compact_set_wrapper_class("CompactSetInterface");
-    class_<LocatedSetWrapper, boost::noncopyable> located_set_wrapper_class("LocatedSetInterface");
+    class_<OpenSetInterface, boost::noncopyable> open_set_wrapper_class("OpenSetInterface", no_init);
+    open_set_wrapper_class.def("covers",&OpenSetInterface::covers);
+    open_set_wrapper_class.def("overlaps",&OpenSetInterface::overlaps);
+
+    class_<CompactSetInterface, boost::noncopyable> compact_set_wrapper_class("CompactSetInterface", no_init);
+    compact_set_wrapper_class.def("disjoint",&CompactSetInterface::disjoint);
+    compact_set_wrapper_class.def("inside",&CompactSetInterface::inside);
+    compact_set_wrapper_class.def("bounding_box",&CompactSetInterface::bounding_box);
+
+    class_<LocatedSetInterface, boost::noncopyable> located_set_wrapper_class("LocatedSetInterface", no_init);
 }
 
 
@@ -180,6 +187,7 @@ void export_box()
     box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
     box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
+    box_class.def("widen", (void(Box::*)()) &Box::widen);
     box_class.def(self_ns::str(self));
 
     def("split", (std::pair<Box,Box>(*)(const Box&)) &split);
@@ -189,16 +197,19 @@ void export_box()
     from_python<Box>();
     to_python< std::pair<Box,Box> >();
     implicitly_convertible<Vector<Interval>,Box>();
-    
+
 }
 
 void export_zonotope()
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface> > zonotope_class("Zonotope",init<Zonotope>());
     zonotope_class.def(init< Point, Matrix<Float>, Vector<Float> >());
+    zonotope_class.def(init< Point, Matrix<Float> >());
+    zonotope_class.def(init< Box >());
     zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
     zonotope_class.def("error",&Zonotope::error,return_value_policy<copy_const_reference>());
+    zonotope_class.def("contains",&Zonotope::contains);
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
     def("contains", (tribool(*)(const Zonotope&,const Point&)) &contains);
@@ -235,6 +246,7 @@ void export_taylor_set()
     class_<TaylorSet,bases<CompactSetInterface> > taylor_set_class("TaylorSet",init<TaylorSet>());
     taylor_set_class.def(init<uint>());
     taylor_set_class.def(init<Box>());
+    //taylor_set_class.def(init<Zonotope>());
     taylor_set_class.def("bounding_box", &TaylorSet::bounding_box);
     taylor_set_class.def("range", &TaylorSet::bounding_box);
     taylor_set_class.def(self_ns::str(self));

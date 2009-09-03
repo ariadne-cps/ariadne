@@ -47,7 +47,13 @@ namespace Ariadne {
 class SingularMatrixException {
 };
 
-/// A matrix over a field. See also \link Ariadne::Vector \c Vector<X> \endlink.
+//! \brief A matrix over a field. See also \link Ariadne::Vector \c Vector<X> \endlink.
+//!
+//! \par Python interface
+//!
+//! In the Python interface, %Ariadne matrices can be constructed from Python literals of the form \br
+//! \c   [[a11,a12,...,a1n],[a21,a22,...,a2n],...,[am1,am2,...,amn]].
+//!
 template<class X>
 class Matrix
     : public ublas::matrix<X>

@@ -262,6 +262,20 @@ inline Float rad_up(Float x, Float y) {
 //! To test if an interval contains a point or another interval, use \c encloses(Interval,Float) or \c encloses(Interval,Interval).
 //! The test \c refines(Interval,Interval) can also be used.
 //! \sa Float
+//!
+//! \par Python interface
+//!
+//! In the Python interface, %Ariadne intervals can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
+//! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
+//! Automatic conversion is used to convert Interval literals of the form \c {a,b} to an Interval in functions.
+//! 
+//! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
+//! representable value by the Python interpreter. <br><br>
+//! \code
+//!   Interval({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
+//!   Interval({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
+//!   Interval([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
+//! \endcode
 class Interval {
   public:
     Interval() : l(0.0), u(0.0) { }

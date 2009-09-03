@@ -45,6 +45,14 @@ using namespace boost::numeric;
 namespace Ariadne {
 
 //! \brief A vector over a field. See also \link Ariadne::Matrix \c Matrix<X> \endlink.
+//!
+//! \par Python interface
+//!
+//! In the Python interface, classes \c FloatVector and \c IntervalVector are defined.
+//! Further, Ariadne vectors can be constructed from literals in the form of a Python list: <br><br>
+//! <code> FloatVector([1.1,2.3,4.2,5]) # Create a FloatVector from a list of Python \c int and \c float types. <br>
+//!        IntervalVector([{1:2.1},[-3,4],2.3,5,{-1.1:2.2}]) # Create an IntervalVector from a list of Python types convertible to Interal</code>
+
 template<class X>
 class Vector
     : public ublas::vector<X>

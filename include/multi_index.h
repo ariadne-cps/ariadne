@@ -21,9 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file multi_index.h
+/*! \brief \file multi_index.h
  *  \brief An index specifying the degree of differentiation.
  */
+
 #ifndef ARIADNE_MULTI_INDEX_H
 #define ARIADNE_MULTI_INDEX_H
 
@@ -56,11 +57,15 @@ template<> class Reference<const MultiIndex>;
 
 //! \brief An array of non-negative integers, suitable for storing the
 //! powers of a term in some polynomial expansion, ordered by degree.
+//!
+//! \par Python interface
+//! In the Python interface, multi-indices can be constructed and automatically converted from Python tuple literals \c (a1,...,am)
+//!
+//! \b Rationale: The reason why tuples are used for multi-index literals is that they can be used as keys in Python \c dict objects.
 class MultiIndex {
   public:
     typedef unsigned int size_type;
-    typedef unsigned char byte_type;
-    typedef unsigned int word_type;
+    typedef unsigned char byte_type;    typedef unsigned int word_type;
 
     typedef byte_type value_type;
     typedef MultiIndexValueReference reference;
@@ -68,89 +73,89 @@ class MultiIndex {
     //typedef unsigned int word_type;
     //typedef unsigned long long int word_type;
   public:
-    /*! Destructor. */
+    //! \brief Destructor.
     ~MultiIndex();
-    /*! Construct a multi index with no coefficients. */
+    //! \brief Construct a multi index with no coefficients.
     explicit MultiIndex();
-    /*! Construct a multi index of degree \a 0 with \a nv variables. */
+    //! \brief Construct a multi index of degree \a 0 with \a nv variables.
     explicit MultiIndex(size_type nv);
-    /*! Construct a multi index with \a nv variables from the array \a ary. */
+    //! \brief Construct a multi index with \a nv variables from the array \a ary.
     explicit MultiIndex(size_type nv, const int* ary);
-    /*! Construct a multi index with \a nv variables from variable arguments. */
+    //! \brief Construct a multi index with \a nv variables from variable arguments.
     explicit MultiIndex(size_type nv, int a1, ...);
 
-    /*! Copy constructor. */
+    //! \brief Copy constructor.
     MultiIndex(const MultiIndex& a);
-    /*! Copy assignment operator. */
+    //! \brief Copy assignment operator.
     MultiIndex& operator=(const MultiIndex& a);
 
-    /*! Construct the zero multi index with \a nv variables. */
+    //! \brief Construct the zero multi index with \a nv variables.
     static MultiIndex zero(size_type nv);
-    /*! Construct the unit multi index in variable \a j with \a nv variables. */
+    //! \brief Construct the unit multi index in variable \a j with \a nv variables.
     static MultiIndex unit(size_type nv, size_type j);
-    /*! Construct the first multi index of degree \a d with \a nv variables. */
+    //! \brief Construct the first multi index of degree \a d with \a nv variables.
     static MultiIndex first(size_type nv, value_type d);
 
-    /*! Resize to hold n variables. */
+    //! \brief Resize to hold n variables.
     void resize(size_type n);
-    /*! Assigns values from another index. Precondition: the size of \a a must equal the current size. */
+    //! \brief Assigns values from another index. Precondition: the size of \a a must equal the current size.
     void assign(const MultiIndex& a);
-    /*! Set all values to zero. */
+    //! \brief Set all values to zero.
     void clear();
-    /*! The number of variables. */
+    //! \brief The number of variables.
     size_type size() const;
-    /*! The degree of the multi-index, equal to the sum of the number of occurrences of the variables. */
+    //! \brief The degree of the multi-index, equal to the sum of the number of occurrences of the variables.
     value_type degree() const;
-     /*! The number of variables. */
+     //! \brief The number of variables.
     size_type number_of_variables() const;
-    /*! The number of occurrences of the \a i th variable. */
+    //! \brief The number of occurrences of the \a i th variable.
     value_type get(size_type i) const;
-    /*! Set the number of occurrences of the \a i th variable to \a n. */
+    //! \brief Set the number of occurrences of the \a i th variable to \a n.
     void set(size_type i, value_type n);
-    /*! The number of occurrences of the \a i th variable. */
+    //! \brief The number of occurrences of the \a i th variable.
     const_reference operator[](size_type i) const;
-    /*! The number of occurrences of the \a i th variable. */
+    //! \brief The number of occurrences of the \a i th variable.
     reference operator[](size_type i);
-    /*! Increment the value of the \a ith element */
+    //! \brief Increment the value of the \a ith element
     void increment(size_type i);
-    /*! Decrement the value of the \a ith element */
+    //! \brief Decrement the value of the \a ith element
     void decrement(size_type i);
 
-    /*! Equality operator. */
+    //! \brief Equality operator.
     friend bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
-    /*! Inequality operator. */
+    //! \brief Inequality operator.
     friend bool operator!=(const MultiIndex& a1, const MultiIndex& a2); // inline
-    /*! Comparison operator. */
+    //! \brief Comparison operator.
     friend bool operator<(const MultiIndex& a1, const MultiIndex& a2); // inline
 
-    /*! Increment. No post-increment operator as we sometimes pass MultiIndex by reference. */
+    //! \brief Increment. No post-increment operator as we sometimes pass MultiIndex by reference.
     MultiIndex& operator++(); // inline
     // No post-increment operator as we sometimes pass MultiIndex by reference.Post increment.
     // MultiIndex operator++(int);
-    /*! Inplace sum. */
+    //! \brief Inplace sum.
     MultiIndex& operator+=(const MultiIndex& a); // inline
-    /*! Inplace difference. */
+    //! \brief Inplace difference.
     MultiIndex& operator-=(const MultiIndex& a); // inline
-    /*! Inplace scalar product. */
+    //! \brief Inplace scalar product.
     MultiIndex& operator*=(const value_type& a); // inline
-    /*! Sum. */
+    //! \brief Sum.
     friend MultiIndex operator+(const MultiIndex& a1, const MultiIndex& a2); // inline
-    /*! Difference. */
+    //! \brief Difference.
     friend MultiIndex operator-(const MultiIndex& a1, const MultiIndex& a2); // inline
-    /*! Scalar product. */
+    //! \brief Scalar product.
     friend MultiIndex operator*(const MultiIndex& a, value_type s); // inline
-    /*! Scalar product. */
+    //! \brief Scalar product.
     friend MultiIndex operator*(value_type s, const MultiIndex& a); // inline
 
-    /*! The position of the element in the array of tensor values. */
+    //! \brief The position of the element in the array of tensor values.
     unsigned int position() const;
 
-    /*! The product of the factorials of the indices. */
+    //! \brief The product of the factorials of the indices.
     unsigned int factorial() const;
-    /*! The number of ordered index arrays with each element occurring the number of times specified by the multi index. */
+    //! \brief The number of ordered index arrays with each element occurring the number of times specified by the multi index.
     unsigned int number() const;
 
-    /*! Write to an output stream. */
+    //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream&, const MultiIndex&);
   public:
     //value_type& at(size_type i) { return _p[i]; }
@@ -546,9 +551,9 @@ std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {
 
 
 
-/*! \brief A bound on a MultiIndex object, allowing different groups of
- *  variables to have different maximum degrees.
- */
+//! \brief \brief A bound on a MultiIndex object, allowing different groups of
+//!variables to have different maximum degrees.
+
 class MultiIndexBound {
   public:
     typedef MultiIndex::size_type size_type;

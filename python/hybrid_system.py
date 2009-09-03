@@ -78,8 +78,8 @@ class EventSet:
 
 A hybrid system has the following attributes:
     transitions: A list of (Event,State,Variable,Expression) tuples
-    relations: A list of (State,Variable,Expression) tuples, giving algebraic relations
-    dynamics: A list of (State,Variable,Expression) tuples, giving differential relations
+    equations: A list of (State,Variable,Expression) tuples, giving algebraic equations
+    dynamics: A list of (State,Variable,Expression) tuples, giving differential equations
     resets: A list of (Event,State,Variable,Expression) tuples
     guards: A list of (Event,State,Activation,Invariant) tuples,
 """
@@ -144,7 +144,7 @@ class HybridSystem:
         argument_variables=set()
         differential_variables=set()
         algebraic_variables=set()
-        for (locations,variable,expression) in self.relations:
+        for (locations,variable,expression) in self.equations:
             if locations.evaluate(mode):
                 assert variable not in algebraic_variables
                 algebraic_variables.add(variable)
@@ -157,9 +157,9 @@ class HybridSystem:
         #assert argument_variables.issubset(differential_variables.union(algebraic_variables))
         return (algebraic_variables,differential_variables,argument_variables)
 
-    def active_relations(self,mode):
+    def active_equations(self,mode):
         result=[]
-        for (locations,variable,expression) in self.relations:
+        for (locations,variable,expression) in self.equations:
             if locations.evaluate(mode):
                 result.append((variable,expression))
         return self.order(result)
@@ -173,7 +173,8 @@ class HybridSystem:
 
     def active_guards(self,mode):
         result=[]
-        for (events,locations,activation) in self.guards:
+        for guard in self.guards:
+            (events,locations,activation) = guard[0:3]
             if locations.evaluate(mode):
                 result.append((events,activation))
         return result
@@ -193,7 +194,7 @@ class HybridSystem:
         return result
 
     def __str__(self):
-        return "HybridSystem(\n  relations="+str(self.equations) \
+        return "HybridSystem(\n  equations="+str(self.equations) \
                  + ",\n  dynamics="+str(self.dynamics) \
                  + ",\n  invariants="+str(self.invariants) \
                  + ",\n  guards="+str(self.guards) \

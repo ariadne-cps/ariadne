@@ -41,16 +41,16 @@ def sorted_str(dct):
     return res
 
 
-def rk4step(relations,dynamics,valuation,step_size):
+def rk4step(equations,dynamics,valuation,step_size):
     x0val=dict(valuation)
-    for (var,expr) in relations:
+    for (var,expr) in equations:
         x0val[var]=expr.evaluate(x0val)
 
     k1val={}; x1val={}
     for (var,expr) in dynamics:
         k1val[var]=expr.evaluate(x0val)
         x1val[var]=x0val[var]+step_size*k1val[var]
-    for (var,expr) in relations:
+    for (var,expr) in equations:
         x1val[var]=expr.evaluate(x1val)
 
 
@@ -59,7 +59,7 @@ def rk4step(relations,dynamics,valuation,step_size):
     for (var,expr) in dynamics:
         k2val[var]=expr.evaluate(x1val)
         x2val[var]=x0val[var]+(0.5*step_size)*k2val[var]
-    for (var,expr) in relations:
+    for (var,expr) in equations:
         x2val[var]=expr.evaluate(x2val)
 
     dx=0.0; df=0.0
@@ -67,16 +67,16 @@ def rk4step(relations,dynamics,valuation,step_size):
         dx=max(dx,abs(x0val[var]-x1val[var]))
         df=max(df,abs(k1val[var]-k2val[var]))
     L=df/dx
-    raw_input("Estimated Lipschitz constant "+str(df)+"/"+str(dx)+" = "+str(df/dx)),
+    #raw_input("Estimated Lipschitz constant "+str(df)+"/"+str(dx)+" = "+str(df/dx)),
 
     if step_size*L>0.5:
-        return rk4step(relations,dynamics,valuation,step_size/2)
+        return rk4step(equations,dynamics,valuation,step_size/2)
 
     k3val={}; x3val={}
     for (var,expr) in dynamics:
         k3val[var]=expr.evaluate(x2val)
         x3val[var]=x0val[var]+(0.5*step_size)*k3val[var]
-    for (var,expr) in relations:
+    for (var,expr) in equations:
         x3val[var]=expr.evaluate(x3val)
 
     k4val={};
@@ -87,37 +87,74 @@ def rk4step(relations,dynamics,valuation,step_size):
     for (var,expr) in dynamics:
         dxval[var]=(step_size/6.0)*(k1val[var]+2*k2val[var]+2*k3val[var]+k4val[var])
 
-    return dxval
+    dxval[RealVariable("time")]=step_size
+    
+    nval=dict(valuation)
+    for var in dxval:
+        nval[var]+=dxval[var]
+    
+    return nval
 
 
-def simulate(system,initial_valuation,final_time):
 
-    result={}
+def compute_crossing(guard,equations,dynamics,initial_valuation,final_valuation,time_step):
+    # Use bisection
+    lower_time_step=0.0
+    upper_time_step=time_step
+    for i in range(0,6):
+        new_time_step=(lower_time_step+upper_time_step)/2
+        new_valuation=rk4step(equations,dynamics,initial_valuation,new_time_step)
+        new_guard_value=guard.evaluate(new_valuation)
+        if new_guard_value:
+            upper_time_step=new_time_step
+        else:
+            lower_time_step=new_time_step
+    return new_valuation
+
+
+def simulate(system,initial_valuation,final_time,final_steps=6):
+
+    result=[]
 
     time=0.0
     steps=0
-    step_size=1./8
+    step_size=1./32
 
     val=dict(initial_valuation)
     print val
 
+    time_var=RealVariable("time")
+    steps_var=IntegerVariable("steps")
+
+    val[time_var]=0.0
+    val[steps_var]=0
+
     print system
 
-    relations=system.active_relations(val)
+    equations=system.active_equations(val)
     dynamics=system.active_dynamics(val)
     guards=system.active_guards(val)
-    while time<final_time:
+    while val[time_var]<final_time and val[steps_var]<final_steps:
         xval=dict(val)
-        for (var,expr) in relations:
+        for (var,expr) in equations:
             xval[var]=expr.evaluate(xval)
-        result[(time,steps)]=xval
+        result.append(xval)
         print xval
         active_event=None
         for (event,activation) in guards:
             if activation.evaluate(xval):
                 active_event=event
+                active_guard=activation
                 break
         if active_event:
+            if len(result)>1:
+                pval=result[-2]
+                if pval[steps_var]==xval[steps_var]:
+                    last_time_step=xval[time_var]-pval[time_var]
+                    xval=compute_crossing(active_guard,equations,dynamics,pval,xval,last_time_step)
+                    result.pop()
+                    result.append(xval)
+            
             transitions=system.active_transitions(active_event,xval)
             resets=system.active_resets(active_event,xval)
             uval={}
@@ -125,28 +162,28 @@ def simulate(system,initial_valuation,final_time):
                 uval[var]=expr.evaluate(xval)
             for (var,expr) in resets:
                 uval[var]=expr.evaluate(xval)
+            uval[time_var]=xval[time_var]
+            uval[steps_var]=xval[steps_var]+1
             steps+=1
-            raw_input('active event'+str(active_event)+' at '+str(val)+' to '+str(uval))
+            #raw_input('active event'+str(active_event)+' at '+str(val)+' to '+str(uval))
             val=uval
-            relations=system.active_relations(val)
+            equations=system.active_equations(val)
             dynamics=system.active_dynamics(val)
             guards=system.active_guards(val)
         else:
-            dxval=rk4step(relations,dynamics,val,step_size)
-            for var in dxval:
-                val[var]+=dxval[var]
-            time+=step_size
+            nval=rk4step(equations,dynamics,val,step_size)
+            val=nval
 
     # Compute extended evaluation at final time
     xval=dict(val)
-    for (var,expr) in relations:
+    for (var,expr) in equations:
         val[var]=expr.evaluate(val)
-    result[(time,steps)]=xval
+    result.append(xval)
 
     return result
 
 
-def plot(orbit,vars):
+def plot_orbit(orbit,vars):
     for var in vars:
         pyplot.xlabel('t')
         pyplot.ylabel(var.name)
@@ -154,8 +191,8 @@ def plot(orbit,vars):
         # also be OK):
         times=[]
         trace=[]
-        for (time,steps) in sorted(orbit.keys()):
-            valuation=orbit[(time,steps)]
+        for valuation in orbit:
+            time=valuation[RealVariable("time")]
             if valuation.has_key(var):
                 times.append(time)
                 trace.append(valuation[var])
@@ -175,7 +212,7 @@ if __name__=='__main__':
     print g,type(g)
 
     h=HybridSystem()
-    h.new_relation(Constant(True),z,x*x+y*y)
+    h.new_equation(Constant(True),z,x*x+y*y)
     h.new_dynamic(q=="On",x,+1.25*x-y)
     h.new_dynamic(q=="Off",x,-1.25*x-y)
     h.new_dynamic(Constant(True),y,x-0.25*y+0.25)
@@ -186,12 +223,12 @@ if __name__=='__main__':
     print h
 
     #print h.variables({q:"On"})
-    print h.active_relations({q:"On",})
+    print h.active_equations({q:"On",})
 
     init={q:"On", x:0.2, y:0.3}
     orb=simulate(h,init,12.0)
     print
-    print sorted_str(orb)
+    print orb
 
-    plot(orb,[x,y])
+    plot_orbit(orb,[x,y])
 

@@ -48,13 +48,19 @@ if __name__=='__main__':
 
     bouncingball.new_guard(bounce,any,(x<=0) & (v<0));
     bouncingball.new_reset(bounce,any,v,-a*v);
+    bouncingball.new_reset(bounce,any,x,Constant(0.0));
 
-    bouncingball.new_reset(all,any,x,x);
+    bouncingball.new_reset(~all,any,x,x);
     bouncingball.new_reset(~bounce,any,v,v);
 
     print "BouncingBall = \n",bouncingball;
 
 
     initial_state={x:1.0, v:0.0}
+    print bouncingball.active_equations({})
 
-    simulate(bouncingball,initial_state,3.0)
+    orb=simulate(bouncingball,initial_state,3.0)
+    print
+    print orb
+
+    plot_orbit(orb,[x])

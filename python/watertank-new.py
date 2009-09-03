@@ -40,7 +40,7 @@ if __name__=='__main__':
     hmax=RealConstant("hmax",8.0);
     delta=RealConstant("delta",0.05);
     lamb=RealConstant("lambda",0.02);
-    b=RealConstant("b",-0.3);
+    b=RealConstant("b",0.3);
 
     # Declare the system variables
     x=RealVariable("x");
@@ -52,7 +52,9 @@ if __name__=='__main__':
     finished_opening=Event("finished_opening");
     finished_closing=Event("finished_closing");
 
-    # The water level is always given by the same dynamic
+    # The water level is always given by the same dynamic.
+    # When alpha is 1, the valve is open and water flows in
+    # When alpha is 0, the valve is open and no water flows in
     watertank.new_dynamic(any, x, -lamb*x+b*alpha);
 
     # Specify the equation for how the valve opens/closes
@@ -64,41 +66,52 @@ if __name__=='__main__':
     # This requires some cleverness on the part of the symbolic system analyser.
     # It would be possible to model the system with alpha explicitly a constant, but this would require some
     # cleverness on the part of the modeler.
-    watertank.new_dynamic((valve=="closed") | (valve=="open"), alpha, 0.0);
+    watertank.new_dynamic((valve=="closed") | (valve=="open"), alpha, Constant(0.0));
 
     # Specify the condition that the valve starts opening when hmax <= x <= hmax+delta
     # using an invariant and guard.
     watertank.new_invariant(any, x<=hmax+delta);
-    watertank.new_guard(start_opening,(valve=="closed") | (valve=="closing"), x>=hmax);
+    watertank.new_guard(start_closing,(valve=="open") | (valve=="opening"), x>=hmax);
 
     # Specify the condition that the valve starts closing when hmin <= x <= hmin+delta
     # using a combined 'invariant and activation'. The event may occur when x<=hmin, and
     # must occur while x>=hmin-delta.
-    watertank.new_guard(start_closing,(valve=="open") | (valve=="opening"), x<=hmin,x>=hmin-delta);
+    watertank.new_guard(start_opening,(valve=="closed") | (valve=="closing"), x<=hmin,x>=hmin-delta);
 
     # Specify the guards for when the valve reaches the desired position
     watertank.new_guard(finished_opening, valve=="opening", alpha>=1.0, alpha<=1.0);
-    watertank.new_guard(finished_closing, valve=="closing", alpha<=1.0, alpha>=1.0);
+    watertank.new_guard(finished_closing, valve=="closing", alpha<=0.0, alpha>=0.0);
 
     # Explicitly disallow events when they don't make sense
-    watertank.new_guard(finished_opening, ~(valve=="opening"), False);
-    watertank.new_guard(finished_closing, ~(valve=="closing"), False);
-    watertank.new_guard(start_closing, ~((valve=="open") | (valve=="opening")), False);
-    watertank.new_guard(start_opening, ~((valve=="closed") | (valve=="closing")), False);
+    watertank.new_guard(finished_opening, ~(valve=="opening"), Constant(False));
+    watertank.new_guard(finished_closing, ~(valve=="closing"), Constant(False));
+    watertank.new_guard(start_closing, ~((valve=="open") | (valve=="opening")), Constant(False));
+    watertank.new_guard(start_opening, ~((valve=="closed") | (valve=="closing")), Constant(False));
 
     # Specify the discrete resets
-    watertank.new_reset(finished_opening, any, valve, "open");
-    watertank.new_reset(finished_closing, any, valve, "closed");
-    watertank.new_reset(start_opening, any, valve, "opening");
-    watertank.new_reset(start_closing, any, valve, "closing");
+    watertank.new_reset(finished_opening, any, valve, Constant("open"));
+    watertank.new_reset(finished_closing, any, valve, Constant("closed"));
+    watertank.new_reset(start_opening, any, valve, Constant("opening"));
+    watertank.new_reset(start_closing, any, valve, Constant("closing"));
 
     # For any event occurring in any location, the value of x and alpha are not updated.
     watertank.new_reset(all, any, x, x);
     watertank.new_reset(all, any, alpha, alpha);
 
 
-    #/ Finished building the automaton
+    # Finished building the automaton
 
     print "Watertank: \n", watertank
 
+
+
+    # Simulate the automaton
+    initial_state={valve:"opening", x:6.0, alpha:0.5}
+    print watertank.active_equations({valve:"open"})
+
+    orbit=simulate(watertank,initial_state,120.0,12)
+    print
+    #print orbit
+
+    plot_orbit(orbit,[x,alpha])
 

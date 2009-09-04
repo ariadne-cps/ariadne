@@ -38,6 +38,12 @@
 
 namespace Ariadne {
 
+template<class T> inline String to_string(const T& t) {
+    std::stringstream ss;
+    ss << t;
+    return ss.str();
+}
+
 
 template<class T> inline
 std::ostream& operator<<(std::ostream& os, const ExpressionInterface<T>& e) { return e.write(os); }
@@ -49,9 +55,10 @@ class ConstantExpression
     : public ExpressionInterface<R>
 {
   public:
-    ConstantExpression(const R& c) : _c(c) { }
+    ConstantExpression(const R& c) : _name(to_string(c)), _c(c) { }
     operator R () const { return _c; }
     R value() const { return _c; }
+    virtual String name() const { return this->_name; }
     virtual Operator type() const { return CNST; }
     virtual Set<String> arguments() const { return Set<String>(); }
     virtual ConstantExpression<R>* clone() const { return new ConstantExpression<R>(*this); }
@@ -59,6 +66,7 @@ class ConstantExpression
   protected:
     virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
   private:
+    String _name;
     R _c;
 };
 
@@ -68,10 +76,11 @@ class ConstantExpression<Real>
     : public ExpressionInterface<Real>
 {
   public:
-    ConstantExpression(const Float& c) : _c(c) { }
-    ConstantExpression(const Interval& c) :  _c(c) { }
+    ConstantExpression(const Float& c) : _name(to_string(c)), _c(c) { }
+    ConstantExpression(const Interval& c) :  _name(to_string(c)), _c(c) { }
     operator Real() const { return _c; }
     Real value() const { return _c; }
+    virtual String name() const { return this->_name; }
     virtual String operator_name() const { return "const"; }
     virtual Operator type() const { return CNST; }
     virtual Set<String> arguments() const { return Set<String>(); }
@@ -81,6 +90,7 @@ class ConstantExpression<Real>
   protected:
     virtual ExpressionInterface<Real>* simplify() const { return this->clone(); }
   private:
+    String _name;
     Real _c;
 };
 
@@ -296,10 +306,21 @@ template<class R> Expression<R>::Expression(const R& c)
 {
 }
 
+template<class R> Expression<R>::Expression(const Constant<R>& c)
+    : _ptr(new ConstantExpression<R>(c.value()))
+{
+}
+
 template<class R> Expression<R>::Expression(const Variable<R>& v)
     : _ptr(new VariableExpression<R>(v))
 {
 }
+
+Expression<Real>::Expression(const double& c) : _ptr(new ConstantExpression<Real>(c)) { }
+Expression<Real>::Expression(const Interval& c) : _ptr(new ConstantExpression<Real>(c)) { }
+Expression<Real>::Expression(const Constant<Real>& c) : _ptr(new ConstantExpression<Real>(c.value())) { }
+Expression<Real>::Expression(const Variable<Real>& v) : _ptr(new VariableExpression<Real>(v)) { }
+
 
 template<class R> List< Expression<R> > Expression<R>::subexpressions() const {
     // Return the basic subexpressions used in forming the expression
@@ -345,10 +366,6 @@ List< Expression<Real> > Expression<Real>::subexpressions() const {
 }
 
 
-
-Expression<Real>::Expression(const double& c) : _ptr(new ConstantExpression<Real>(c)) { }
-Expression<Real>::Expression(const Interval& c) : _ptr(new ConstantExpression<Real>(c)) { }
-Expression<Real>::Expression(const Variable<Real>& v) : _ptr(new VariableExpression<Real>(v)) { }
 
 template class Expression<Boolean>;
 template class Expression<Tribool>;

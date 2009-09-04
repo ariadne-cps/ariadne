@@ -541,12 +541,11 @@ template<class X>
 std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& variable_names) const
 {
     ARIADNE_ASSERT(this->argument_size()==variable_names.size());
-
     const Expansion<X>& p=*this;
-    bool first_term=true;
     if(p.size()==0) {
         os << "0";
     } else {
+        bool first_term=true;
         for(const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
             MultiIndex a=iter->key();
             X v=iter->data();
@@ -559,7 +558,8 @@ std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& va
                 for(uint j=0; j!=a.size(); ++j) {
                     if(a[j]!=0) {
                         if(first_factor) { first_factor=false; } else { os <<"*"; }
-                        os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
+                        os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); }
+                    }
                 }
             }
         }
@@ -570,9 +570,9 @@ std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& va
 
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
-    std::stringstream sstr;
     array<std::string> variable_names(p.argument_size());
     for(uint j=0; j!=p.argument_size(); ++j) {
+        std::stringstream sstr;
         sstr << 'x' << j;
         variable_names[j]=sstr.str();
     }

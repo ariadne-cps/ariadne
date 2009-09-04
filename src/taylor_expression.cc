@@ -270,12 +270,40 @@ partial_evaluate(const TaylorExpression& te, uint k, const Interval& c)
 }
 
 
+// To scale from [a,b] -> [c,d], use scale factor s=(d-c)/(b-a)
+// and translation t=(cb-da)/(b-a)
+TaylorExpression restrict(const TaylorExpression& tv, uint k, const Interval& new_ivl) {
+    ARIADNE_ASSERT(k<tv.argument_size())
+    const Interval& old_ivl=tv.domain()[k];
+    ARIADNE_ASSERT(subset(new_ivl,old_ivl));
+    if(new_ivl==old_ivl) { return tv; }
+    Float a=old_ivl.lower(); Float b=old_ivl.upper();
+    Float c=new_ivl.lower(); Float d=new_ivl.upper();
+    if(a==b) { ARIADNE_ASSERT( a<b || (a==b && c==d) ); return tv; }
+    Interval s=sub_ivl(d,c)/sub_ivl(b,a);
+    Interval t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);
+    Vector<Interval> new_dom=tv.domain();
+    new_dom[k]=new_ivl;
+    return TaylorExpression(new_dom,preaffine(tv.model(),k,s,t));
+}
 
 TaylorExpression restrict(const TaylorExpression& tv, const Vector<Interval>& d) {
     ARIADNE_ASSERT(subset(d,tv.domain()));
-    if(d==tv.domain()) { return tv; }
-    Vector<TaylorModel> s=TaylorModel::rescalings(tv.domain(),d);
-    return TaylorExpression(d,compose(tv._model,s));
+    const Interval& od=tv.domain();
+    TaylorExpression r=tv;
+    for(uint j=0; j!=d.size(); ++j) {
+        if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }
+    }
+    return r;
+}
+
+TaylorExpression extend(const TaylorExpression& tv, const Vector<Interval>& d) {
+    const Vector<Interval>& domain=tv.domain();
+    ARIADNE_ASSERT(subset(domain,d));
+    for(uint i=0; i!=d.size(); ++i) {
+        ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
+    }
+    return TaylorExpression(d,tv._model);
 }
 
 pair<TaylorExpression,TaylorExpression>

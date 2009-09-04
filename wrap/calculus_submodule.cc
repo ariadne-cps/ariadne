@@ -152,9 +152,10 @@ void export_taylor_model()
     typedef ScalarFunctionInterface EI;
 
 
-    class_<TM> taylor_model_class("TaylorModel");
+    class_<TM> taylor_model_class("TaylorModel", init<TaylorModel>());
     taylor_model_class.def( init< N >());
     taylor_model_class.def("error", (const R&(TM::*)()const) &TM::error, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("set_error", (void(TM::*)(const R&)) &TM::set_error);
     taylor_model_class.def("argument_size", &TM::argument_size);
     taylor_model_class.def("domain", &TM::domain);
     taylor_model_class.def("range", &TM::range);
@@ -209,8 +210,11 @@ void export_taylor_model()
     taylor_model_class.staticmethod("variable");
     //taylor_model_class.staticmethod("variables");
 
-    def("partial_evaluate",(TM(*)(const TM&,uint,Float))&partial_evaluate);
-    def("partial_evaluate",(TM(*)(const TM&,uint,Interval))&partial_evaluate);
+    taylor_model_class.def("restrict", (TM&(TM::*)(const Vector<Interval>&))&TM::restrict, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("preaffine", (TM(*)(const TaylorModel&,uint,const Interval&,const Interval&))&preaffine);
+
+    taylor_model_class.def("evaluate", (Interval(TM::*)(const Vector<Interval>&)const)&TM::evaluate);
+    taylor_model_class.def("set",(TM(*)(const TM&,uint,Interval))&partial_evaluate);
 
     def("max",(TM(*)(const TM&,const TM&))&max);
     def("min",(TM(*)(const TM&,const TM&))&min);
@@ -326,6 +330,10 @@ void export_taylor_variable()
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
     taylor_expression_class.def("polynomial", (ScalarPolynomialFunction(*)(const TE&)) &polynomial);
+    taylor_expression_class.def("set", (TE(*)(const TE&,uint j, const Interval&)) &partial_evaluate);
+    taylor_expression_class.def("restrict", (TE(*)(const TE&,const Vector<Interval>&)) &restrict);
+    taylor_expression_class.def("restrict", (TE(*)(const TE&,uint,const Interval&)) &restrict);
+    taylor_expression_class.def("extend", (TE(*)(const TE&,const Vector<Interval>&)) &extend);
     //taylor_expression_class.staticmethod("set_default_maximum_degree");
     //taylor_expression_class.staticmethod("set_default_sweep_threshold");
     //taylor_expression_class.staticmethod("default_maximum_degree");

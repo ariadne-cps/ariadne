@@ -99,6 +99,9 @@ TaylorModel antiderivative(const TaylorModel& x, uint k);
 //! \relates TaylorModel \brief Differentiation operator; discards error term
 TaylorModel derivative(const TaylorModel& x, uint k);
 
+//! \relates TaylorModel \brief Replace the variale x[k] with a*x[k]+b
+TaylorModel preaffine(const TaylorModel&, uint k, const Interval& a, const Interval& b);
+
 //! \relates TaylorModel
 //! An over-approximation to the intersection of two Taylor models.
 //! Since the intersection cannot be represented exactly in the class of

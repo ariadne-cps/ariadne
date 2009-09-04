@@ -53,6 +53,8 @@ TaylorExpression midpoint(const TaylorExpression& x);
 
 // Restrict to a smaller domain. REQUIRED
 TaylorExpression restrict(const TaylorExpression& x, const Vector<Interval>& d);
+// Extend to a larger domain. REQUIRED
+TaylorExpression extend(const TaylorExpression& x, const Vector<Interval>& d);
 
 // Test if a variable refines another
 bool refines(const TaylorExpression& tv1, const TaylorExpression& tv2);
@@ -66,6 +68,8 @@ Interval evaluate(const TaylorExpression& x, const Vector<Interval>& sy);
 
 // Set the value of the \a kth variable to c
 TaylorExpression partial_evaluate(const TaylorExpression& x, uint k, const Interval& c);
+// Restrict the \a kth variable to lie in the interval \a d.
+TaylorExpression restrict(const TaylorExpression& x, uint k, const Interval& d);
 
 // Compose with an expression.
 TaylorExpression compose(const ScalarFunctionInterface& x, const Vector<TaylorExpression>& y);
@@ -299,6 +303,11 @@ class TaylorExpression
     friend TaylorExpression intersection(const TaylorExpression& x1, const TaylorExpression& x2);
     //! \brief Restrict to a subdomain.
     friend TaylorExpression restrict(const TaylorExpression& x, const DomainType& d);
+    //! \brief Restrict the values of the \a k<sup>th</sup> variable to the subinterval \a d.
+    friend TaylorExpression restrict(const TaylorExpression& x, uint k, const Interval& d);
+    //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
+    //! The extension is performed keeping \a x constant over the new coordinates.
+    friend TaylorExpression extend(const TaylorExpression& x, const DomainType& d);
     //@}
 
     /*! \name Arithmetic operations. */

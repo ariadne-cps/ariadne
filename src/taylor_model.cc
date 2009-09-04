@@ -1874,6 +1874,48 @@ TaylorModel& TaylorModel::rescale(const Interval& ocd, const Interval& ncd)
     return x;
 }
 
+
+
+// Replace the kth variable x[k] by a*x[k]+b. 
+TaylorModel preaffine(const TaylorModel& tm, uint k, const Interval& a, const Interval& b) {
+    uint d=tm.degree();
+    uint as=tm.argument_size();
+
+    TaylorModel r(as);
+    r.set_error(tm.error());
+
+    // Create a temporary TaylorModels containing just terms x[k]^i
+    array<TaylorModel> atm(d+1,TaylorModel(as));
+    for(TaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        MultiIndex a=iter->key();
+        const double& c=iter->data();
+        uint ak=a[k];
+        a[k]=0;
+        atm[ak].expansion().append(a,c);
+    }
+
+    TaylorModel xk=TaylorModel::variable(as,k);
+
+    for(uint i=0; i<=d; ++i) {
+        for(uint j=i; j<=d; ++j) {
+            Interval c=(Ariadne::bin(j,i)*Ariadne::pow(a,i)*Ariadne::pow(b,j-i));
+            r+=c*atm[j];
+            atm[j]*=xk;
+        }
+    }
+    return r;
+}
+
+
+TaylorModel restrict(const TaylorModel& tm, uint k, const Interval& nd) {
+    ARIADNE_ASSERT(k<tm.argument_size());
+    ARIADNE_ASSERT(nd.lower()>=-1 && nd.upper()<=+1);
+    Interval a=sub_ivl(nd.upper()/2,nd.lower()/2);
+    Interval b=add_ivl(nd.upper()/2,nd.lower()/2);
+    return preaffine(tm,k,a,b);
+}
+
+
 TaylorModel& TaylorModel::restrict(const Vector<Interval>& nd)
 {
     TaylorModel& x=*this;

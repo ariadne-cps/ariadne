@@ -270,8 +270,10 @@ partial_evaluate(const TaylorExpression& te, uint k, const Interval& c)
 }
 
 
-// To scale from [a,b] -> [c,d], use scale factor s=(d-c)/(b-a)
-// and translation t=(cb-da)/(b-a)
+// To scale from a model on [a,b] to a model on [c,d], use scale factor s=(d-c)/(b-a)
+// and translation t=((c+d)-(a+b))/(b-a)
+// Because we are scaling the model on [-1,+1], this is not the same as
+// the mapping taking [a,b] to [c,d]
 TaylorExpression restrict(const TaylorExpression& tv, uint k, const Interval& new_ivl) {
     ARIADNE_ASSERT(k<tv.argument_size())
     const Interval& old_ivl=tv.domain()[k];
@@ -281,7 +283,8 @@ TaylorExpression restrict(const TaylorExpression& tv, uint k, const Interval& ne
     Float c=new_ivl.lower(); Float d=new_ivl.upper();
     if(a==b) { ARIADNE_ASSERT( a<b || (a==b && c==d) ); return tv; }
     Interval s=sub_ivl(d,c)/sub_ivl(b,a);
-    Interval t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);
+    // Interval t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);  // WRONG!!
+    Interval t=(add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a);
     Vector<Interval> new_dom=tv.domain();
     new_dom[k]=new_ivl;
     return TaylorExpression(new_dom,preaffine(tv.model(),k,s,t));
@@ -289,7 +292,7 @@ TaylorExpression restrict(const TaylorExpression& tv, uint k, const Interval& ne
 
 TaylorExpression restrict(const TaylorExpression& tv, const Vector<Interval>& d) {
     ARIADNE_ASSERT(subset(d,tv.domain()));
-    const Interval& od=tv.domain();
+    const Vector<Interval>& od=tv.domain();
     TaylorExpression r=tv;
     for(uint j=0; j!=d.size(); ++j) {
         if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }

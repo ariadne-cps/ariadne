@@ -30,7 +30,7 @@ using namespace Ariadne;
 int main() 
 {
   
-    /// Set the system parameters
+    // Set the system parameters
     double a = -0.02;
     double b = 0.3;
     double T = 4.0;
@@ -50,24 +50,24 @@ int main()
     double A4[4]={a,0.0,0.0,0.0};
     double b4[2]={0.0,0.0};
 
-    /// Build the Hybrid System
+    // Build the Hybrid System
   
-    /// Create a HybridAutomton object
+    // Create a HybridAutomton object
     HybridAutomaton watertank_system;
   
-    /// Create four discrete states
+    // Create four discrete states
     DiscreteState l1(1);
     DiscreteState l2(2);
     DiscreteState l3(3);
     DiscreteState l4(4);
   
-    /// Create the discrete events
+    // Create the discrete events
     DiscreteEvent e12(12);
     DiscreteEvent e23(23);
     DiscreteEvent e34(34);
     DiscreteEvent e41(41);
   
-    /// Create the dynamics
+    // Create the dynamics
     AffineFunction dynamic1(Matrix<Float>(2,2,A1),Vector<Float>(2,b1));
     AffineFunction dynamic2(Matrix<Float>(2,2,A2),Vector<Float>(2,b2));
     AffineFunction dynamic3(Matrix<Float>(2,2,A3),Vector<Float>(2,b3));
@@ -78,14 +78,14 @@ int main()
     cout << "dynamic3 = " << dynamic3 << endl << endl;
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
-    /// Create the resets
+    // Create the resets
     AffineFunction reset_y_zero(Matrix<Float>(2,2,1.0,0.0,0.0,0.0),Vector<Float>(2,0.0,0.0));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
     AffineFunction reset_y_one(Matrix<Float>(2,2,1.0,0.0,0.0,0.0),Vector<Float>(2,0.0,1.0));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
-    /// Create the guards.
-    /// Guards are true when f(x) = Ax + b > 0
+    // Create the guards.
+    // Guards are true when f(x) = Ax + b > 0
     AffineFunction guard12(Matrix<Float>(1,2,0.0,1.0),Vector<Float>(1,-1.0));
     cout << "guard12=" << guard12 << endl << endl;
     AffineFunction guard23(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1, - hmax + Delta));
@@ -95,16 +95,16 @@ int main()
     AffineFunction guard41(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1,hmin + Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
-    /// Create the invariants.
-    /// Invariants are true when f(x) = Ax + b < 0
-    /// forced transitions do not need an explicit invariant, 
-    /// we need only the invariants for location 2 and 4
+    // Create the invariants.
+    // Invariants are true when f(x) = Ax + b < 0
+    // forced transitions do not need an explicit invariant,
+    // we need only the invariants for location 2 and 4
     AffineFunction inv2(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1, - hmax - Delta));//
     cout << "inv2=" << inv2 << endl << endl;
     AffineFunction inv4(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1, hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
   
-    /// Build the automaton
+    // Build the automaton
     watertank_system.new_mode(l1,dynamic1);
     watertank_system.new_mode(l2,dynamic2);
     watertank_system.new_mode(l3,dynamic3);
@@ -119,18 +119,19 @@ int main()
     watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
 
 
-    /// Finished building the automaton
+    // Finished building the automaton
 
     cout << "Automaton = " << watertank_system << endl << endl;
 
-    /// Compute the system evolution
+    // Compute the system evolution
 
-    /// Create a HybridEvolver object
+    // Create a HybridEvolver object
     HybridEvolver evolver;
 
-    /// Set the evolution parameters
+    // Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
     evolver.parameters().maximum_step_size = 0.05;
+    evolver.verbosity=1;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -146,6 +147,7 @@ int main()
   
     HybridTime evolution_time(64.0,6);
   
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -153,17 +155,20 @@ int main()
     std::cout << "Orbit="<<orbit<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-/*
-    /// Create a ReachabilityAnalyser object
+
+
+    // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
     analyser.parameters().maximum_grid_depth= 14;
+    analyser.verbosity=1;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
     initial_set[l2]=initial_box;
 
-    HybridTime reach_time(64.0,2);
+    // Set maximum flow time and number of steps
+    HybridTime reach_time(64.0,6);
 
     plot("watertank-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
 
@@ -175,7 +180,7 @@ int main()
     std::cout << "done." << std::endl;
     plot("watertank-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
 
-/*
+
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
@@ -207,6 +212,6 @@ int main()
     upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set2,reach_time);
     std::cout << "done." << std::endl;
     plot("watertank-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-*/
+
 
 }

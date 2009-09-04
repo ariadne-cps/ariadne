@@ -5,8 +5,7 @@ LDADD = ../src/libariadne.la $(LIBS)
 bin_PROGRAMS=tutorial watertank bouncingball ecoli \
              watertank-nonlinear watertank-time \
              sinusoid-sin 3bouncingballs \
-             rectifier springs cmos_inverter_analoginput \
-             tangent
+             rectifier springs cmos_inverter_analoginput 
              
 
 tutorial_SOURCES=tutorial.cc

@@ -31,42 +31,96 @@ using namespace Ariadne;
 //
 // the parameters of the functions are a, b and T
 //
-struct Opening : FunctionData<2,2,3> {
+struct Opening : FunctionData<3,3,3> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
         r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1]; 
         r[1] = 1.0/p[2];        
+        r[2] = 1.0;
     }
 };
 
-struct Closing : FunctionData<2,2,3> {
+struct Closing : FunctionData<3,3,3> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
         r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1]; 
         r[1] = -1.0/p[2];        
+        r[2] = 1.0;
     }
 };
 
 
-struct OpenValve : FunctionData<2,2,3> {
+struct OpenValve : FunctionData<3,3,3> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
         r[0] = - p[0] * Ariadne::sqrt(x0) + p[1]; 
-        r[1] = 0.0;        
+        r[1] = 0.0;    
+        r[2] = 1.0;
     }
 };
 
-struct ClosedValve : FunctionData<2,2,3> {
+struct ClosedValve : FunctionData<3,3,3> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
         r[0] = - p[0] * Ariadne::sqrt(x0); 
-        r[1] = 0;        
+        r[1] = 0;
+        r[2] = 1.0;
     }
 };
+
+/// Function for plotting the orbit and reachability set
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+    // Assigns local variables
+    Figure fig; 
+    array<uint> xy(2,xaxis,yaxis);
+
+    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
+    fig.set_bounding_box(bbox); 
+
+    // If the grid must be shown
+    if (MAX_GRID_DEPTH >= 0)
+    {
+	// The rectangle to be drawn
+	Box rect = Box(numVariables);
+	// Chooses the fill colour
+        fig << fill_colour(Colour(1.0,1.0,1.0));
+
+	// Gets the number of times each variable interval would be divided by 2
+        int numDivisions = MAX_GRID_DEPTH / numVariables;
+	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
+	double step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+	// Initiates the x position to the bounding box left bound
+        double pos_x = bbox[0].lower();
+        // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
+	rect[yaxis] = bbox[1];
+        // While between the interval
+        while (pos_x < bbox[0].upper())
+        {
+	    rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+	    pos_x += step_x; // Shifts the x position
+	    fig << rect; // Appends the rectangle
+        }
+
+	// Repeats for the rectangles in the y direction
+	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+        double pos_y = bbox[1].lower();
+	rect[xaxis] = bbox[0];
+        while (pos_y < bbox[1].upper())
+        {
+	    rect[yaxis] = Interval(pos_y,pos_y+step_y);
+   	    fig << rect;
+	    pos_y += step_y;
+        }
+    }
+    // Draws and creates file
+    fig.set_fill_colour(fc); 
+    fig << set; 
+    fig.write(filename); 
+}
 
 
 int main() 
@@ -74,16 +128,19 @@ int main()
   
     /// Set the system parameters
     double a = 0.065;
-    double b = 0.3;
+    double bmin = 0.3;
+    double bmax = 0.34;
     double T = 4.0;
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
+    
+    double tmax = 64.0;
+    int jmax = 1;
  
     Vector<Interval> system_parameters(3);
     system_parameters[0] = a;
-//    system_parameters[1] = Interval(0.3,0.34);        // Now parameters can be given as intervals !!
-    system_parameters[1] = b;
+    system_parameters[1] = Interval(bmin,bmax);        // Now parameters can be given as intervals !!
     system_parameters[2] = T;
 
 
@@ -105,10 +162,10 @@ int main()
     DiscreteEvent e41(41);
   
     /// Create the dynamics
-    Function<Opening> dynamic1(system_parameters);
-    Function<OpenValve> dynamic2(system_parameters);
-    Function<Closing> dynamic3(system_parameters);
-    Function<ClosedValve> dynamic4(system_parameters);
+    UserFunction<Opening> dynamic1(system_parameters);
+    UserFunction<OpenValve> dynamic2(system_parameters);
+    UserFunction<Closing> dynamic3(system_parameters);
+    UserFunction<ClosedValve> dynamic4(system_parameters);
     
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
@@ -116,29 +173,29 @@ int main()
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
     /// Create the resets
-    AffineFunction reset_y_zero(Matrix<Float>(2,2,1.0,0.0,0.0,0.0),Vector<Float>(2,0.0,0.0));
+    AffineFunction reset_y_zero(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,0.0,0.0));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    AffineFunction reset_y_one(Matrix<Float>(2,2,1.0,0.0,0.0,0.0),Vector<Float>(2,0.0,1.0));
+    AffineFunction reset_y_one(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,1.0,0.0));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    AffineFunction guard12(Matrix<Float>(1,2,0.0,1.0),Vector<Float>(1,-1.0));
+    AffineFunction guard12(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,-1.0));
     cout << "guard12=" << guard12 << endl << endl;
-    AffineFunction guard23(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1, - hmax + Delta));
+    AffineFunction guard23(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax + Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    AffineFunction guard34(Matrix<Float>(1,2,0.0,-1.0),Vector<Float>(1,0.0));
+    AffineFunction guard34(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,0.0));
     cout << "guard34=" << guard34 << endl << endl;
-    AffineFunction guard41(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1,hmin + Delta));
+    AffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
     /// forced transitions do not need an explicit invariant, 
     /// we need only the invariants for location 2 and 4
-    AffineFunction inv2(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1, - hmax - Delta));//
+    AffineFunction inv2(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax - Delta));//
     cout << "inv2=" << inv2 << endl << endl;
-    AffineFunction inv4(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1, hmin - Delta));
+    AffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
   
     /// Build the automaton
@@ -151,7 +208,7 @@ int main()
     watertank_system.new_invariant(l4,inv4);
 
     watertank_system.new_forced_transition(e12,l1,l2,reset_y_one,guard12);
-    watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
+    //watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
     watertank_system.new_forced_transition(e34,l3,l4,reset_y_zero,guard34);
     watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
 
@@ -166,8 +223,9 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.125;
+    evolver.parameters().maximum_enclosure_radius = 0.5;
+    evolver.parameters().maximum_step_size = 1.25;
+    evolver.parameters().enable_subdivisions = true;
     evolver.verbosity = 1;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -178,11 +236,11 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(2, 1.001,1.001, 1.0,1.0);
+    Box initial_box(3, 1.00,1.00, 1.0,1.0, 0.0,0.0);
     HybridEnclosureType initial_enclosure(l2,initial_box);
-    Box bounding_box(2, -0.1,10.1, -0.1,1.1);
+    Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
   
-    HybridTime evolution_time(64.0,6);
+    HybridTime evolution_time(tmax,jmax);
   
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
@@ -191,8 +249,11 @@ int main()
     std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
     std::cout << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-nonlinear-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-    plot("watertank-nonlinear-final",bounding_box, Colour(0.0,0.5,1.0), orbit.final());
+    plot("watertank-nonlinear-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("watertank-nonlinear-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("watertank-nonlinear-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    textplot("watertank-nonlinear-orbit", orbit);
+    textplot("watertank-nonlinear-final", orbit.final());
     
 /*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;

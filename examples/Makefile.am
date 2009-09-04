@@ -12,7 +12,9 @@ bin_PROGRAMS=tutorial \
              rectifier springs cmos_inverter_analoginput \
              rectifier_oneloc grid-refinement \
 			 \
-			 watertank-new bouncingball-new
+			 watertank-new bouncingball-new \
+			 \
+			 coconut-demo
 
 
 tutorial_SOURCES = tutorial.cc verify.py
@@ -32,6 +34,8 @@ grid_refinement_SOURCES=grid-refinement.cc
 
 bouncingball_new_SOURCES=bouncingball-new.cc
 watertank_new_SOURCES=watertank-new.cc
+
+coconut_demo_SOURCES=coconut-demo.cc system.cc coconut-demo.h system.h
 
 examples: $(bin_PROGRAMS)
 

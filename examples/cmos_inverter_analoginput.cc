@@ -167,20 +167,21 @@ int main()
     dp[0] = 1e-6; /// Subthreshold current, Id0
     dp[1] = 0.15; /// Threshold voltage, Vth
     dp[2] = 0.035; /// n-Thermal voltage, n*VT
-    dp[3] = 2e-4; /// Load capacitance, Cl
+    dp[3] = 1e-3; /// Load capacitance, Cl
     dp[4] = 1.0; /// Operating voltage, Vdd
     dp[5] = 1.0e-2; /// Beta of the nMOS, beta_n = mu_n * Cox
     dp[6] = 0.5e-2; /// Beta of the pMOS, beta_p = mu_p * Cox
     dp[7] = 1.0; /// Shape factor of the nMOS, Sn
     dp[8] = 2.0; /// Shape factor of the pMOS, Sp
     dp[9] = 0.01; /// Early effect constant, lambda
-    dp[10] = 1.0; /// Frequency, f
+    dp[10] = 0.25; /// Frequency, f
 
     /// Constants
-    float EVOL_TIME = 2.0/dp[10]; /// Evolution time
-    int EVOL_TRANS = 8; /// Evolution transitions
-    float MAX_ENCL_RADIUS = 1.0e-4; /// Maximum enclosure radius
-    float MAX_STEP_SIZE = 0.005; /// Maximum step size
+    float EVOL_TIME = 2.0/dp[10];   /// Evolution time
+    int EVOL_TRANS = 22;            /// Evolution transitions
+    float MAX_ENCL_RADIUS = 0.1;   /// Maximum enclosure radius
+    float MAX_STEP_SIZE = 1e-3;     /// Maximum step size
+    int VERBOSITY = 1;              /// Verbosity of the HybridEvolver
 
     // std::cout << "Enter Maximum number of discrete transitions:";
     // std::cin >> EVOL_TRANS;
@@ -336,7 +337,7 @@ int main()
 
     /// Create a HybridEvolver object
     HybridEvolver evolver;
-    evolver.verbosity = 1;
+    evolver.verbosity = VERBOSITY;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;
@@ -350,6 +351,8 @@ int main()
 
     Box initial_box(3, 0.0,0.0, 0.0,0.0, 0.0,0.0);
     HybridEnclosureType initial_enclosure(nt_ps,initial_box);
+//    Box initial_box(3, 0.161699,0.161699, 0.850000,0.850000, 0.246241,0.246241);
+//    HybridEnclosureType initial_enclosure(nl_pt,initial_box);
 
     HybridTime evolution_time(EVOL_TIME,EVOL_TRANS); 
 

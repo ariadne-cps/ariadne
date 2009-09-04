@@ -118,19 +118,20 @@ int main()
     Vector<Float> dp(5);
     dp[0] = 4.0; /// Amplitude of the input voltage, Vi
     dp[1] = 50.0; /// Sinusoid frequency, f
-    dp[2] = 0.1; /// Diode resistance when on, Ron
+    dp[2] = 10.0; /// Diode resistance when on, Ron
     dp[3] = 0.0001; /// Load capacitance, Cl
     dp[4] = 1000.0; /// Load resistance, Rl
 
     /// Introduces the global parameters
-    float TIME_LIMIT = 2.0/dp[1];
+    float TIME_LIMIT = 1.0/dp[1];
 //    float TIME_LIMIT = 0.0042;
-    float TRAN_LIMIT = 6;
-    float MAX_ENCL_RADIUS = 1.0e-6/dp[1];
-    float MAX_STEP_SIZE = 0.01/dp[1];
-    float LOCK_TOGRID_TIME = 1.0/dp[1];
-    float MAX_GRID_DEPTH = 19;
-    int VERBOSITY=1;
+    float TRAN_LIMIT = 1;
+    float MAX_ENCL_RADIUS = 1.0;
+    float MAX_STEP_SIZE = 1e-5/dp[1];
+//    float LOCK_TOGRID_TIME = 2.0/dp[1];
+    float LOCK_TOGRID_TIME = 0.25/dp[1];
+    float MAX_GRID_DEPTH = 21;
+    int VERBOSITY=3;
     bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
@@ -216,7 +217,7 @@ int main()
 
     /// Create a HybridEvolver object
     HybridEvolver evolver;
-    evolver.verbosity = VERBOSITY;
+    evolver.verbosity = 0;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;
@@ -233,23 +234,26 @@ int main()
 
     Box initial_box(3, 0.0, 0.0, 0.0,0.0, 0.8*dp[0],0.8*dp[0]);
     HybridEnclosureType initial_enclosure(offoff,initial_box);
-    
+
+//    Box initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
+//    HybridEnclosureType initial_enclosure(onoff,initial_box);
+
     std::cout << "Initial set=" << initial_enclosure << std::endl;
   
     HybridTime evolution_time(TIME_LIMIT,TRAN_LIMIT);
 
+/*
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(rectifier,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit.initial="<<orbit.initial()<<std::endl;
-    std::cout << "Orbit.final="<<orbit.final()<<std::endl;
-
+    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
+*/
     Box graphic_box(2,0.0,1.0/dp[1],-dp[0],dp[0]);
     Box graphic_box2(2,-dp[0],dp[0],2.0,dp[0]);
 
     std::cout << "Plotting results..." << std::flush;
-
+/*
     textplot("rectifier_orbit.txt", orbit);
 
     plot("rectifier_orbit_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
@@ -257,25 +261,26 @@ int main()
     plot("rectifier_orbit_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), orbit, -1);
 
     std::cout << "done." << std::endl;
-/*
+*/
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
-    analyser.parameters().grid = Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5)); 
+    rectifier.set_grid(Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5))); 
     std::cout <<  analyser.parameters() << std::endl;
+
+    analyser.verbosity=VERBOSITY;
 
     HybridImageSet initial_set;
     initial_set[offoff]=initial_box;
     HybridTime reach_time(TIME_LIMIT,TRAN_LIMIT);
 
     std::cout << "Computing upper reach set... " << std::endl << std::flush;
-    HybridGridTreeSet* reach = analyser.upper_reach(rectifier,initial_set,reach_time);
-    //HybridGridTreeSet* reach = analyser.chain_reach(rectifier,initial_set);
+    HybridGridTreeSet reach = analyser.upper_reach(rectifier,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
-    plot("rectifier_reach_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, -1);
-    plot("rectifier_reach_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, -1);
-    plot("rectifier_reach_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), *reach, -1);
-*/
+    plot("rectifier_reach_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
+    plot("rectifier_reach_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
+    plot("rectifier_reach_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), reach, -1);
+
 }

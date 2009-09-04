@@ -130,7 +130,7 @@ int main()
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
+    //evolver.parameters().maximum_enclosure_radius = 0.25;
     evolver.parameters().maximum_step_size = 0.125;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -165,17 +165,19 @@ int main()
     std::cout << "Plotting reach set... "<<std::flush;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-
+*/
 
     /// Create a ReachabilityAnalyser object
+    watertank_system.set_grid(Grid(Vector<Float>(2, 1.0, 0.1)));
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().grid_lengths = 0.05;
+    analyser.parameters().maximum_grid_depth=10;
+    analyser.verbosity = 1;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
     initial_set[l2]=initial_box;
-
+/*
     HybridTime reach_time(64.0,2);
 
     plot("watertank-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
@@ -220,5 +222,11 @@ int main()
     std::cout << "done." << std::endl;
     plot("watertank-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
 */
+
+    std::cout << "Computing chain reach set... " << std::flush;
+    HybridGridTreeSet chainreach_set = analyser.chain_reach(watertank_system,initial_set);
+    std::cout << "done." << std::endl;
+    plot("watertank-chainreach",bounding_box, Colour(0.0,0.5,1.0), chainreach_set);
+
 
 }

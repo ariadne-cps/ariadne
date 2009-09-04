@@ -128,6 +128,13 @@ template<class T> class List
     void append(const T& t) { this->push_back(t); }
 };
 
+template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) {
+    List<T> r(l1);
+    for(typename List<T>::const_iterator iter=l2.begin(); iter!=l2.end(); ++iter) {
+        r.append(*iter);
+    }
+    return r;
+}
 
 template<class T> class Set
     : public std::set<T>

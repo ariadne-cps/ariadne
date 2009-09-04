@@ -254,7 +254,7 @@ class HybridSystem
     //! \name Operations on systems.
 
     //! \brief The parallel composition of two systems.
-    HybridSystem parallel_composition(const HybridSystem&, const HybridSystem&);
+    friend HybridSystem parallel_composition(const HybridSystem&, const HybridSystem&);
 
     //@}
 };

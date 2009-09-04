@@ -406,6 +406,20 @@ HybridSystem::guards(const DiscreteValuation& location) const
 }
 
 
+HybridSystem parallel_composition(const HybridSystem& sys1, const HybridSystem& sys2) {
+    // Parallel composition in the new model is easy; we just combine all the system rules!
+    HybridSystem result;
+    result._differential_equations=catenate(sys1._differential_equations,sys2._differential_equations);
+    result._algebraic_equations=catenate(sys1._algebraic_equations,sys2._algebraic_equations);
+    result._discrete_updates=catenate(sys1._discrete_updates,sys2._discrete_updates);
+    result._continuous_updates=catenate(sys1._continuous_updates,sys2._continuous_updates);
+    result._guard_predicates=catenate(sys1._guard_predicates,sys2._guard_predicates);
+    result._invariant_predicates=catenate(sys1._invariant_predicates,sys2._invariant_predicates);
+    result._disabled_events=catenate(sys1._disabled_events,sys2._disabled_events);
+    return result;
+}
+
+
 std::ostream& operator<<(std::ostream& os, const HybridSystem& sys) {
     os << "HybridSystem(\n"
        << "  algebraic_equations=" << sys._algebraic_equations << ",\n"

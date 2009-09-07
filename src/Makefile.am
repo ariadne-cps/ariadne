@@ -21,7 +21,6 @@ SRC = \
 	affine.cc \
 	polynomial.cc \
 	function.cc \
-	taylor_expression.cc  \
 	taylor_function.cc  \
 	simulation_toolbox.cc \
 	taylor_calculus.cc \
@@ -61,7 +60,6 @@ CALCULUS_SRC = \
 	polynomial.cc \
 	differential.cc \
 	taylor_model.cc  \
-	taylor_expression.cc  \
 	taylor_set.cc  \
 	taylor_function.cc  \
 	taylor_calculus.cc

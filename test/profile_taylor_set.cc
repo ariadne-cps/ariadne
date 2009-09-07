@@ -33,9 +33,8 @@ using std::string;
 #include <boost/progress.hpp>
 
 #include "numeric.h"
-#include "taylor_set.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
+#include "taylor_set.h"
 #include "list_set.h"
 #include "taylor_set.h"
 #include "grid_set.h"
@@ -89,7 +88,7 @@ void profile(const char* name, const Test& test, unsigned int tries)
     }
     t=tm.elapsed();
 
-    
+
 
     std::cout << std::fixed
               << std::setw(23) << std::left << name << std::right

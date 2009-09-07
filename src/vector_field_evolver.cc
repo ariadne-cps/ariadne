@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "macros.h"
 #include "array.h"
 #include "tuple.h"
@@ -28,7 +28,6 @@
 #include "vector.h"
 #include "function_interface.h"
 #include "taylor_model.h"
-#include "taylor_expression.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "orbit.h"
@@ -45,7 +44,7 @@ namespace {
 using namespace Ariadne;
 
 template<class V, class Iter> inline
-void append(V& v, Iter begin, Iter end) 
+void append(V& v, Iter begin, Iter end)
 {
     for(;begin!=end;++begin) {
         v.push_back(*begin);
@@ -53,7 +52,7 @@ void append(V& v, Iter begin, Iter end)
 }
 
 template<class V, class C> inline
-void append(V& v, const C& c) 
+void append(V& v, const C& c)
 {
     for(typename C::const_iterator iter=c.begin(); iter!=c.end(); ++iter) {
         v.push_back(*iter);
@@ -61,12 +60,12 @@ void append(V& v, const C& c)
 }
 
 
-} 
+}
 
 
 
 namespace Ariadne {
- 
+
 // Allow subdivisions in upper evolution
 const bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
@@ -93,19 +92,19 @@ VectorFieldEvolver::VectorFieldEvolver(const EvolutionParametersType& p)
 }
 
 
-Orbit<VectorFieldEvolver::EnclosureType> 
+Orbit<VectorFieldEvolver::EnclosureType>
 VectorFieldEvolver::
-orbit(const SystemType& system, 
-      const EnclosureType& initial_set, 
+orbit(const SystemType& system,
+      const EnclosureType& initial_set,
       const TimeType& time,
-      Semantics semantics) const 
+      Semantics semantics) const
 {
     Orbit<EnclosureType> orbit(initial_set);
-    EnclosureListType final; 
-    EnclosureListType reachable; 
-    EnclosureListType intermediate; 
+    EnclosureListType final;
+    EnclosureListType reachable;
+    EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false); 
+                     system,initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -122,17 +121,17 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 
 void
 VectorFieldEvolver::
-_evolution(EnclosureListType& final_sets, 
-           EnclosureListType& reach_sets, 
-           EnclosureListType& intermediate_sets, 
-           const SystemType& system, 
-           const EnclosureType& initial_set, 
-           const TimeType& maximum_time, 
-           Semantics semantics, 
+_evolution(EnclosureListType& final_sets,
+           EnclosureListType& reach_sets,
+           EnclosureListType& intermediate_sets,
+           const SystemType& system,
+           const EnclosureType& initial_set,
+           const TimeType& maximum_time,
+           Semantics semantics,
            bool reach) const
 {
 
-  
+
     typedef FunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
     typedef TaylorFunction FunctionModelType;
@@ -208,13 +207,13 @@ _evolution(EnclosureListType& final_sets,
 void
 VectorFieldEvolver::
 _evolution_step(std::vector< TimedSetType >& working_sets,
-                EnclosureListType& final_sets, 
-                EnclosureListType& reach_sets, 
-                EnclosureListType& intermediate_sets, 
-                const SystemType& system, 
+                EnclosureListType& final_sets,
+                EnclosureListType& reach_sets,
+                EnclosureListType& intermediate_sets,
+                const SystemType& system,
                 const TimedSetType& working_timed_set_model,
-                const TimeType& maximum_time, 
-                Semantics semantics, 
+                const TimeType& maximum_time,
+                Semantics semantics,
                 bool reach) const
 {
     typedef FunctionInterface FunctionType;
@@ -222,7 +221,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
     typedef TaylorFunction MapModelType;
     typedef TaylorFunction FlowModelType;
     typedef TaylorSet SetModelType;
-  
+
     SetModelType current_set_model;
     TimeType current_time;
     ARIADNE_LOG(9,"working_timed_set_model = "<<working_timed_set_model<<"\n");
@@ -230,56 +229,56 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
 
     ARIADNE_LOG(6,"current_time = "<<current_time<<"");
     ARIADNE_LOG(6,"current_set_model = "<<current_set_model<<"\n");
-  
+
     ARIADNE_LOG(2,"box = "<<current_set_model.range()<<" ");
     ARIADNE_LOG(2,"radius = "<<radius(current_set_model.range())<<"\n\n");
     //const uint nd=initial_set_model.result_size();
     //const uint ng=initial_set_model.argument_size();
-  
+
 
     /////////////// Main Evolution ////////////////////////////////
     const FunctionType& dynamic=system.function();
-  
+
     // Set evolution parameters
     const Float maximum_step_size=this->_parameters->maximum_step_size;
     const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
     const Float zero_time=0.0;
-  
+
     // Get bounding boxes for time and space range
     Vector<Interval> current_set_bounds=current_set_model.range();
     ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
-  
+
     //ARIADNE_ASSERT(initial_time_range.width() <= maximum_step_size);
-  
+
     // Compute flow bounds and find flow bounding box
-    Vector<Interval> flow_bounds; 
+    Vector<Interval> flow_bounds;
     Float step_size;
     make_lpair(step_size,flow_bounds)=this->_toolbox->flow_bounds(dynamic,current_set_bounds,maximum_step_size,maximum_bounds_diameter);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(4,"flow_bounds = "<<flow_bounds<<"\n");
-  
+
     // Compute the flow model
     FlowModelType flow_model=this->_toolbox->flow_model(dynamic,current_set_bounds,step_size,flow_bounds);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-  
+
     // Compute the integration time model
     TimeType next_time=current_time+step_size;
     ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
     TimeType integration_time=next_time-current_time;
-  
+
     // Compute the flow tube (reachable set) model and the final set
-    SetModelType reach_set_model=this->_toolbox->reachability_step(flow_model,current_set_model,zero_time,integration_time);         
+    SetModelType reach_set_model=this->_toolbox->reachability_step(flow_model,current_set_model,zero_time,integration_time);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     SetModelType next_set_model=this->_toolbox->integration_step(flow_model,current_set_model,integration_time);
     ARIADNE_LOG(6,"next_set_model = "<<next_set_model<<"\n");
     ARIADNE_LOG(4,"Done computing evolution\n");
-  
+
     reach_sets.adjoin(reach_set_model);
 
     intermediate_sets.adjoin(EnclosureType(next_set_model));
     working_sets.push_back(make_tuple(next_time,next_set_model));
 
-  
+
 
 
 

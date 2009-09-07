@@ -24,7 +24,6 @@
 #include "function_interface.h"
 #include "polynomial.h"
 #include "function.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
 
 #include <boost/python.hpp>
@@ -371,7 +370,7 @@ void export_taylor_variable()
     def("embed",(TE(*)(const IV&,const TE&)) &embed);
 
     def("max",(TE(*)(const TE&,const TE&))&max);
-    def("min",(TE(*)(const TE&,const TE&))&min); 
+    def("min",(TE(*)(const TE&,const TE&))&min);
     def("abs",(TE(*)(const TE&))&abs);
 
     def("neg",(TE(*)(const TE&))&neg);

@@ -31,7 +31,6 @@ check_PROGRAMS = \
 	test_polynomial \
 	test_differential \
 	test_taylor_model \
-	test_taylor_expression \
 	test_taylor_function \
 	test_taylor_set \
 	test_function \

@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "macros.h"
 #include "array.h"
 #include "tuple.h"
@@ -28,7 +28,6 @@
 #include "vector.h"
 #include "function_interface.h"
 #include "taylor_model.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "taylor_set.h"
 #include "orbit.h"
@@ -45,7 +44,7 @@ namespace {
 using namespace Ariadne;
 
 template<class V, class Iter> inline
-void append(V& v, Iter begin, Iter end) 
+void append(V& v, Iter begin, Iter end)
 {
     for(;begin!=end;++begin) {
         v.push_back(*begin);
@@ -53,7 +52,7 @@ void append(V& v, Iter begin, Iter end)
 }
 
 template<class V, class C> inline
-void append(V& v, const C& c) 
+void append(V& v, const C& c)
 {
     for(typename C::const_iterator iter=c.begin(); iter!=c.end(); ++iter) {
         v.push_back(*iter);
@@ -61,12 +60,12 @@ void append(V& v, const C& c)
 }
 
 
-} 
+}
 
 
 
 namespace Ariadne {
- 
+
 // Allow subdivisions in upper evolution
 const bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
@@ -93,19 +92,19 @@ MapEvolver::MapEvolver(const EvolutionParametersType& p)
 }
 
 
-Orbit<MapEvolver::EnclosureType> 
+Orbit<MapEvolver::EnclosureType>
 MapEvolver::
-orbit(const SystemType& system, 
-      const EnclosureType& initial_set, 
+orbit(const SystemType& system,
+      const EnclosureType& initial_set,
       const TimeType& time,
-      Semantics semantics) const 
+      Semantics semantics) const
 {
     Orbit<EnclosureType> orbit(initial_set);
-    EnclosureListType final; 
-    EnclosureListType reachable; 
-    EnclosureListType intermediate; 
+    EnclosureListType final;
+    EnclosureListType reachable;
+    EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false); 
+                     system,initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -122,13 +121,13 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 
 void
 MapEvolver::
-_evolution(EnclosureListType& final_sets, 
-           EnclosureListType& reach_sets, 
-           EnclosureListType& intermediate_sets, 
-           const SystemType& system, 
-           const EnclosureType& initial_set, 
-           const TimeType& maximum_time, 
-           Semantics semantics, 
+_evolution(EnclosureListType& final_sets,
+           EnclosureListType& reach_sets,
+           EnclosureListType& intermediate_sets,
+           const SystemType& system,
+           const EnclosureType& initial_set,
+           const TimeType& maximum_time,
+           Semantics semantics,
            bool reach) const
 {
     verbosity=0;
@@ -193,13 +192,13 @@ _evolution(EnclosureListType& final_sets,
 void
 MapEvolver::
 _evolution_step(std::vector< TimedSetType >& working_sets,
-                EnclosureListType& final_sets, 
-                EnclosureListType& reach_sets, 
-                EnclosureListType& intermediate_sets, 
-                const SystemType& system, 
+                EnclosureListType& final_sets,
+                EnclosureListType& reach_sets,
+                EnclosureListType& intermediate_sets,
+                const SystemType& system,
                 const TimedSetType& current_set,
-                const TimeType& maximum_time, 
-                Semantics semantics, 
+                const TimeType& maximum_time,
+                Semantics semantics,
                 bool reach) const
 {
     SetModelType initial_set_model;
@@ -210,28 +209,28 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
 
     ARIADNE_LOG(6,"initial_time = "<<initial_time<<"");
     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-  
+
     ARIADNE_LOG(2,"box = "<<initial_set_model.range()<<" ");
     ARIADNE_LOG(2,"radius = "<<radius(initial_set_model.range())<<"\n\n");
     //const uint nd=initial_set_model.result_size();
     //const uint ng=initial_set_model.argument_size();
-  
+
 
     /////////////// Main Evolution ////////////////////////////////
 
-  
+
     // Compute the map model
     SetModelType final_set_model=this->_toolbox->reset_step(system.function(),initial_set_model);
     TimeType final_time=initial_time+1;
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
     ARIADNE_LOG(4,"Done computing evolution\n");
-  
+
     reach_sets.adjoin(final_set_model);
 
     intermediate_sets.adjoin(final_set_model);
     working_sets.push_back(make_tuple(final_time,final_set_model));
 
-  
+
 
 
 

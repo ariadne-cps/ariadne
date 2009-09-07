@@ -133,7 +133,7 @@ class ScalarExpressionFunction
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) { return this->_evaluate(x); }
     virtual std::ostream& write(std::ostream& os) const {
         return os << "Function( space="<<this->_space<<", expression="<<this->_expression<<" )"; }
-    
+
   protected:
     template<class X> X _evaluate(const Vector<X>& x) { return Ariadne::evaluate(_expression,x); }
 
@@ -541,6 +541,27 @@ class PolynomialFunction
 
 inline PolynomialFunction join(const ScalarPolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
     return join(static_cast<const Polynomial<Interval>&>(p1),static_cast<const Polynomial<Interval>&>(p2));
+}
+
+inline PolynomialFunction join(const PolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
+    // Need to implement this explicitly since PolynomialFunction does not inherit from Vector<Polynomial>
+    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
+    PolynomialFunction r(p1.result_size()+1u,p1.argument_size());
+    for(uint i=0; i!=p1.result_size(); ++i) {
+        r.set(i,p1[i]); }
+    r.set(p1.result_size(),p2);
+    return r;
+}
+
+inline PolynomialFunction join(const PolynomialFunction& p1, const PolynomialFunction& p2) {
+    // Need to implement this explicitly since PolynomialFunction does not inherit from Vector<Polynomial>
+    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
+    PolynomialFunction r(p1.result_size()+p2.result_size(),p1.argument_size());
+    for(uint i=0; i!=p1.result_size(); ++i) {
+        r.set(i,p1[i]); }
+    for(uint i=0; i!=p2.result_size(); ++i) {
+        r.set(p1.result_size()+i,p2[i]); }
+    return r;
 }
 
 inline PolynomialFunction operator*(const ScalarPolynomialFunction& p, const Vector<Float>& e) {

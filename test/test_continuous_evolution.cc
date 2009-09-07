@@ -29,7 +29,6 @@
 #include "matrix.h"
 #include "function.h"
 #include "taylor_model.h"
-#include "taylor_expression.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "box.h"
@@ -53,7 +52,7 @@ using Models::Henon;
 
 /// This function diverges heavily
 struct FailOne : FunctionData<2,2,1> {
-    template<class R, class A, class P> static void 
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	      r[0] = 1.0;
           r[1] = -p[0] * x[1] + p[0];
@@ -62,7 +61,7 @@ struct FailOne : FunctionData<2,2,1> {
 
 /// This function diverges heavily
 struct FailTwo : FunctionData<3,3,1> {
-    template<class R, class A, class P> static void 
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	      r[0] = 1.0;
           r[1] = x[1] * x[2]/p[0];
@@ -79,7 +78,7 @@ class TestContinuousEvolution
     void failure_test() const;
 };
 
-int main() 
+int main()
 {
     //std::cerr<<"SKIPPED "; return 1;
     TestContinuousEvolution().simple_test();
@@ -90,7 +89,7 @@ int main()
 
 void TestContinuousEvolution::simple_test() const
 {
-    std::cout <<std::endl; 
+    std::cout <<std::endl;
 
     TaylorCalculus calculus;
     AffineFunction vector_field(Matrix<Float>(1,1,0.0),Vector<Float>(1,1.0));
@@ -117,7 +116,7 @@ void TestContinuousEvolution::simple_test() const
     //std::cout <<"="<<<<std::endl;
 }
 
-    
+
 
 void TestContinuousEvolution::test() const
 {
@@ -129,16 +128,16 @@ void TestContinuousEvolution::test() const
     Float time(5.0);
     Float step_size(0.125);
     Float enclosure_radius(0.25);
-    
+
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=enclosure_radius;
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
     VectorFieldEvolver evolver(parameters);
-  
+
     // Define the initial box
-    Box initial_box(2); 
+    Box initial_box(2);
     initial_box[0]=Interval(1.01,1.02);
     initial_box[1]=Interval(0.51,0.52);
 
@@ -155,7 +154,7 @@ void TestContinuousEvolution::test() const
     // cout << "vdp.evaluate(" << initial_box << ") " << flush; // cout << " = " << vdp.evaluate(initial_box) << endl;
     // cout << "vdp.jacobian(" << initial_box << ") = " << vdp.jacobian(initial_box) << endl;
     // cout << endl;
-  
+
     AffineFunction aff(Matrix<Float>(2,2,0.,0.,1.,0.),Vector<Float>(2,1.,0.0));
 
     // Make a hybrid automaton for the Van der Pol equation
@@ -166,7 +165,7 @@ void TestContinuousEvolution::test() const
     // Over-approximate the initial set by a grid cell
     EnclosureType initial_set(initial_box);
     // cout << "initial_set=" << initial_set << endl << endl;
-  
+
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
@@ -201,16 +200,16 @@ void TestContinuousEvolution::failure_test() const
     Float time(0.5);
     Float step_size(0.01);
     Float enclosure_radius(0.25);
-    
+
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=enclosure_radius;
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
     VectorFieldEvolver evolver(parameters);
-  
+
     // Define the initial box
-    Box initial_box(2, 0.0,0.0, 0.9,0.9 ); 
+    Box initial_box(2, 0.0,0.0, 0.9,0.9 );
 
     // cout << "initial_box=" << initial_box << endl;
 
@@ -218,10 +217,10 @@ void TestContinuousEvolution::failure_test() const
     Vector<Float> p(1, 200.0);
     UserFunction<FailOne> failone(p);
     VectorField failone_vf(failone);
-    
+
     EnclosureType initial_set(initial_box);
     // cout << "initial_set=" << initial_set << endl << endl;
-  
+
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
@@ -243,12 +242,12 @@ void TestContinuousEvolution::failure_test() const
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("test_continuous_evolution-failone");
-    
+
     // Set up the vector field for the second test
     p[0] = 0.1;
     UserFunction<FailTwo> failtwo(p);
     VectorField failtwo_vf(failtwo);
-    
+
     Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);
     initial_set = EnclosureType(initial_box2);
 
@@ -272,7 +271,7 @@ void TestContinuousEvolution::failure_test() const
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
-    fig.write("test_continuous_evolution-failtwo");    
+    fig.write("test_continuous_evolution-failtwo");
     std::cout << std::endl;
 
 }

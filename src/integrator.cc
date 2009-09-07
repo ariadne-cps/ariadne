@@ -31,7 +31,6 @@
 #include "vector.h"
 #include "matrix.h"
 #include "function_interface.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
 
 #include "polynomial.h"

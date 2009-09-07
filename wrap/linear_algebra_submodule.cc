@@ -168,6 +168,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     def("norm",(X(*)(const Vector<X>&)) &norm);
     def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &join);
     def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &join);
+    def("join",(Vector<X>(*)(const X&,const X&)) &join);
 
     from_python< Vector<X> >();
     to_python< array< Vector<X> > >();

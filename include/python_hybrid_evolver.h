@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file python_hybrid_evolver.h
  *  \brief Wrapper for an evolver for hybrid systems written in Python
  */
@@ -40,7 +40,6 @@
 
 #include "tuple.h"
 
-#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "taylor_set.h"
 #include "hybrid_set.h"
@@ -55,7 +54,7 @@
 
 #include "logging.h"
 
-namespace Ariadne {  
+namespace Ariadne {
 
 template<class Sys, class BS> class Evolver;
 
@@ -76,7 +75,7 @@ class HybridTime;
 
 
 
-/*! \brief A class for computing the evolution of a hybrid system. 
+/*! \brief A class for computing the evolution of a hybrid system.
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
@@ -107,13 +106,13 @@ class PythonHybridEvolver
     typedef ListSet<EnclosureType> EnclosureListType;
     typedef Float ContinuousTimeType;
   public:
-    
+
     //! \brief Default constructor.
     PythonHybridEvolver() : _parameters() { this->initialise_python(); }
-  
+
     //! \brief Construct from parameters using a default integrator.
     PythonHybridEvolver(const EvolutionParametersType& parameters) : _parameters(parameters) { this->initialise_python(); }
-  
+
     /*! \brief Make a dynamically-allocated copy. */
     PythonHybridEvolver* clone() const { return new PythonHybridEvolver(*this); }
 
@@ -124,32 +123,32 @@ class PythonHybridEvolver
     const EvolutionParametersType& parameters() const { return this->_parameters; }
 
     //@}
-  
+
 
     //@{
     //! \name Evolution using abstract sets.
-    //! \brief Compute an approximation to the orbit set using upper semantics. 
+    //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
-    //! \brief Compute an approximation to the evolution set using upper semantics. 
+    //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
         return final; }
 
-    //! \brief Compute an approximation to the evolution set under upper semantics. 
+    //! \brief Compute an approximation to the evolution set under upper semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
         return intermediate; }
 
   protected:
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     // This is the only method which is called in Python
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time, 
+    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
     void initialise_python();

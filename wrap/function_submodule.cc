@@ -33,7 +33,6 @@
 #include "differential.h"
 #include "polynomial.h"
 #include "affine.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "function.h"
 #include "expression.h"
@@ -98,6 +97,24 @@ struct from_python<PolynomialFunction>
 // Define to remove ambiguity
 ScalarPolynomialFunction operator*(const ScalarPolynomialFunction& p, const Float& x) {
     return ScalarPolynomialFunction(static_cast<const Polynomial<Interval>&>(p)*Interval(x));
+}
+
+// Define explicitly since cannot automatically wrap Vector<Polynomial<Interval> > to PolynomialFunction.
+PolynomialFunction antiderivative(const PolynomialFunction& p, uint k) {
+    PolynomialFunction res(p.result_size(),p.argument_size());
+    for(uint i=0; i!=res.result_size(); ++i) {
+        res.set(i,antiderivative(p[i],k));
+    }
+    return res;
+}
+
+// Define explicitly since cannot automatically wrap Vector<Polynomial<Interval> > to PolynomialFunction.
+PolynomialFunction derivative(const PolynomialFunction& p, uint k) {
+    PolynomialFunction res(p.result_size(),p.argument_size());
+    for(uint i=0; i!=res.result_size(); ++i) {
+        res.set(i,derivative(p[i],k));
+    }
+    return res;
 }
 
 template<class X, class D>
@@ -517,8 +534,16 @@ void export_polynomial_function()
 
     class_< PolynomialFunction, bases<FunctionInterface> >
         polynomial_function_class("PolynomialFunction", init<PolynomialFunction>());
+    polynomial_function_class.def(init<uint,uint>());
     polynomial_function_class.def("__getitem__",(ScalarPolynomialFunction const&(PolynomialFunction::*)(uint)const)&PolynomialFunction::operator[],return_value_policy<copy_const_reference>());
     polynomial_function_class.def("__setitem__",(void(PolynomialFunction::*)(uint,const ScalarPolynomialFunction&)const)&PolynomialFunction::set);
+
+    def("derivative", (PolynomialFunction(*)(const PolynomialFunction&,uint)) &derivative);
+    def("antiderivative", (PolynomialFunction(*)(const PolynomialFunction&,uint)) &antiderivative);
+
+    def("join", (PolynomialFunction(*)(const ScalarPolynomialFunction&, const ScalarPolynomialFunction&)) &join);
+    def("join", (PolynomialFunction(*)(const PolynomialFunction&, const ScalarPolynomialFunction&)) &join);
+    def("join", (PolynomialFunction(*)(const PolynomialFunction&, const PolynomialFunction&)) &join);
 
     from_python<PolynomialFunction>();
 

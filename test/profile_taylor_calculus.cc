@@ -34,7 +34,6 @@ using std::string;
 
 #include "numeric.h"
 #include "taylor_set.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "taylor_calculus.h"
 #include "function.h"

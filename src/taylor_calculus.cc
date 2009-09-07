@@ -30,7 +30,6 @@
 #include "vector.h"
 #include "matrix.h"
 #include "taylor_model.h"
-#include "taylor_expression.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "function.h"
@@ -589,7 +588,7 @@ active(const PredicateModelType& guard_model, const SetModelType& set_model) con
     TimeModelType guard_set_model = apply(guard_model,set_model)[0];
     Interval guard_range=guard_set_model.range();
     tribool guard_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
-    return guard_active;    
+    return guard_active;
 }
 
 

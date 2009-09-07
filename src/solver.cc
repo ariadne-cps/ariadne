@@ -28,7 +28,6 @@
 #include "matrix.h"
 #include "function.h"
 #include "taylor_function.h"
-#include "taylor_expression.h"
 #include "taylor_model.h"
 
 namespace {

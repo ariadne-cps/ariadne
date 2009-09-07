@@ -33,7 +33,6 @@
 #include "taylor_set.h"
 #include "grid_set.h"
 
-#include "taylor_expression.h"
 #include "taylor_function.h"
 
 #include "utilities.h"

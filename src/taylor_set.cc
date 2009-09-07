@@ -32,7 +32,6 @@
 
 #include "geometry.h"
 #include "taylor_model.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
 
 #include "box.h"
@@ -425,7 +424,7 @@ adjoin_outer_approximation2(GridTreeSet& grid_set, const TaylorSet& set, uint de
 }
 
 void
-_adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, Box& domain, 
+_adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, Box& domain,
 			     GridOpenCell cell, uint depth)
 {
     // Compute an over-approximation to the set
@@ -525,7 +524,7 @@ adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint dep
 
 
 GridTreeSet
-discretise1(const TaylorSet& ts, const Grid& g, uint d) 
+discretise1(const TaylorSet& ts, const Grid& g, uint d)
 {
     GridTreeSet gts(g);
     adjoin_outer_approximation1(gts,ts,d);
@@ -534,7 +533,7 @@ discretise1(const TaylorSet& ts, const Grid& g, uint d)
 }
 
 GridTreeSet
-discretise2(const TaylorSet& ts, const Grid& g, uint d) 
+discretise2(const TaylorSet& ts, const Grid& g, uint d)
 {
     GridTreeSet gts(g);
     adjoin_outer_approximation2(gts,ts,d);
@@ -543,7 +542,7 @@ discretise2(const TaylorSet& ts, const Grid& g, uint d)
 }
 
 GridTreeSet
-discretise3(const TaylorSet& ts, const Grid& g, uint d) 
+discretise3(const TaylorSet& ts, const Grid& g, uint d)
 {
     GridTreeSet gts(g);
     adjoin_outer_approximation3(gts,ts,d);
@@ -587,7 +586,7 @@ TaylorSet::subsume(double eps) const
     uint ng=this->generators_size();
 
     // Compute the number of terms whose error is greater the eps
-    uint ne=0; 
+    uint ne=0;
     for(uint i=0; i!=d; ++i) {
         if(this->models()[i].error()>eps) { ++ne; }
     }

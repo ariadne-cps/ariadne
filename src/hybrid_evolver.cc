@@ -29,7 +29,6 @@
 #include "matrix.h"
 #include "function_interface.h"
 #include "taylor_set.h"
-#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "taylor_model.h"
 #include "orbit.h"
@@ -268,11 +267,11 @@ _evolution(EnclosureListType& final_sets,
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
                 ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
                 ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
-                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");                
+                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
                 working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
             }
-        } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) && 
-                  this->_parameters->enable_premature_termination && 
+        } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
+                  this->_parameters->enable_premature_termination &&
                   initial_set_radius>this->_parameters->maximum_enclosure_radius) {
             std::cerr << "\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
                       << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n\n";
@@ -551,7 +550,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     for(std::set<DiscreteEvent>::const_iterator iter=non_transverse_events.begin(); iter!=non_transverse_events.end(); ++iter) {
         if(*iter > 0) {     // If the event is a transition
             activations[*iter]=guards.find(*iter)->second;
-       } 
+       }
     }
 
     // Compute activation times
@@ -607,8 +606,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             }
         }
         // Compute evolution for non-blocking events
-        for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator 
-            iter=activation_times.begin(); iter!=activation_times.end(); ++iter) 
+        for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator
+            iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
         {
             const DiscreteEvent event=iter->first;
             const TimeModelType lower_active_time_model=iter->second.first;
@@ -627,7 +626,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             std::vector<DiscreteEvent> jump_events=events;
             jump_events.push_back(event);
             working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,active_time_model));
-        } 
+        }
     }
 
     wait_for_keypress();
@@ -749,7 +748,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
                 Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(*guard_ptr,flow_set_model);
                 TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
                 // Use 1.0 as upper bound above since flow set model has time interval normalised to [-1,+1]
-                ARIADNE_LOG(3,"touching_time_interval="<<touching_time_interval<<"\n");                
+                ARIADNE_LOG(3,"touching_time_interval="<<touching_time_interval<<"\n");
                 if(touching_time_interval.upper()>=0 && touching_time_interval.lower()<=1.0) {
                     SetModelType finishing_set_model=partial_evaluate(flow_set_model.models(),dimension,1.0);
                     tribool finishing_set_active=this->_toolbox->active(*guard_ptr,finishing_set_model);
@@ -757,24 +756,24 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
                         ARIADNE_LOG(3,"Event is definitely finally active, inserting it into blocking times.\n");
                         event_blocking_times[event]=touching_time_model;
                     } else if(possibly(finishing_set_active)) {
-                        ARIADNE_LOG(3,"Event is possibly finally active.\n");                        
+                        ARIADNE_LOG(3,"Event is possibly finally active.\n");
                         if(touching_time_interval.lower()>SMALL_RELATIVE_TIME) {
-                            ARIADNE_LOG(3,"lower touching time is greater than zero, inserting event into blocking times.\n");                        
+                            ARIADNE_LOG(3,"lower touching time is greater than zero, inserting event into blocking times.\n");
                             TaylorModel lower_touching_time_model=
                                 this->_toolbox->time_model(touching_time_interval.lower(),space_domain);
                             event_blocking_times[finishing_event]=lower_touching_time_model;
                         } else {
-                            ARIADNE_LOG(3,"DANGER: we can't determine whether the crossing is completely finished or not..\n");                                                    
+                            ARIADNE_LOG(3,"DANGER: we can't determine whether the crossing is completely finished or not..\n");
                             // FIXME: Here we are stuck, we can't determine whether the crossing is completely finished or not.
                             // Just put this in as a blocking event and hope for the best...
                             // event_blocking_times[event]=touching_time_model;
-                            // DAVIDE: setting this as a blocking event is not correct, 
+                            // DAVIDE: setting this as a blocking event is not correct,
                             //         because it causes continuous evolution to stop.
                             //         I think it is better to put it into non-transverse-events.
-                            non_transverse_events.insert(event);                            
+                            non_transverse_events.insert(event);
                         }
                     } else {
-                        ARIADNE_LOG(3,"After the flow step, the event is not active again, so the crossing was tangential.\n");                                                    
+                        ARIADNE_LOG(3,"After the flow step, the event is not active again, so the crossing was tangential.\n");
                         // After the flow step, the event is not active again, so the crossing was tangential
                         non_transverse_events.insert(event);
                     }

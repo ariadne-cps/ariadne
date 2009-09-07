@@ -80,16 +80,16 @@ TestHybridEvolution::system()
     double bdata[]={1.0,0.0};
     Matrix<Float> A(2,2,adata);
     Vector<Float> b(2,bdata);
-    AffineFunction dynamic1(A,3*b);
-    AffineFunction dynamic2(A,-b);
+    VectorAffineFunction dynamic1(A,3*b);
+    VectorAffineFunction dynamic2(A,-b);
     IdentityFunction reset(2);
 
     Matrix<Float> c(1,2,bdata);
     Vector<Float> d(1,Float(1.0));
-    AffineFunction guard3(c,-d);
-    AffineFunction guard4(-c,-d);
-    AffineFunction activation4(-c,-d);
-    AffineFunction invariant2(-c,-1.125*d);
+    VectorAffineFunction guard3(c,-d);
+    VectorAffineFunction guard4(-c,-d);
+    VectorAffineFunction activation4(-c,-d);
+    VectorAffineFunction invariant2(-c,-1.125*d);
 
     automaton.new_mode(location1,dynamic1);
     automaton.new_mode(location2,dynamic2);
@@ -109,9 +109,9 @@ void TestHybridEvolution::test_constant_derivative_system() const
     // Starting in a small box near the origin, the system should return to
     // the initial condition after time 2
     DiscreteState q1(1); DiscreteState q2(2); DiscreteEvent e(1);
-    AffineFunction d(FMatrix(2,2, 0.,0.,0.,0.),FVector(2, 1.0,0.));
-    AffineFunction r(FMatrix(2,2, 1.,0.,0.,1.),FVector(2, -2.,0.));
-    AffineFunction g(FMatrix(1,2, 1.,0.,0.,0.),FVector(1, -1.25));
+    VectorAffineFunction d(FMatrix(2,2, 0.,0.,0.,0.),FVector(2, 1.0,0.));
+    VectorAffineFunction r(FMatrix(2,2, 1.,0.,0.,1.),FVector(2, -2.,0.));
+    VectorAffineFunction g(FMatrix(1,2, 1.,0.,0.,0.),FVector(1, -1.25));
 
     HybridAutomaton automaton("Constant Derivative System");
     automaton.new_mode(q1,d);
@@ -170,12 +170,12 @@ void TestHybridEvolution::test_bouncing_ball() const
     DiscreteState q1(1);
     DiscreteState q2(2);
     DiscreteEvent e12(12);
-    //AffineFunction dynamic(FMatrix(3,3, 0.,1.,0., 0.,0.,0., 0.,0.,0.), FVector(3, 0.0, -g, 1.0));
-    //AffineFunction reset(FMatrix(3,3, 1.0,0.0 ,0.0,-a,0.0, 0.0,0.0,1.0), FVector(3, 0.0,0.0,0.0));
-    //AffineFunction guard(FMatrix(1,3, -1.0,0.0,0.0), FVector(1, 0.0));
-    AffineFunction dynamic(FMatrix(2,2, 0.,1., 0.,0.), FVector(2, 0.0, -g));
-    AffineFunction reset(FMatrix(2,2, 1.0,0.0 ,0.0,-a), FVector(2, 0.0,0.0));
-    AffineFunction guard(FMatrix(1,2, -1.0,0.0), FVector(1, 0.0));
+    //VectorAffineFunction dynamic(FMatrix(3,3, 0.,1.,0., 0.,0.,0., 0.,0.,0.), FVector(3, 0.0, -g, 1.0));
+    //VectorAffineFunction reset(FMatrix(3,3, 1.0,0.0 ,0.0,-a,0.0, 0.0,0.0,1.0), FVector(3, 0.0,0.0,0.0));
+    //VectorAffineFunction guard(FMatrix(1,3, -1.0,0.0,0.0), FVector(1, 0.0));
+    VectorAffineFunction dynamic(FMatrix(2,2, 0.,1., 0.,0.), FVector(2, 0.0, -g));
+    VectorAffineFunction reset(FMatrix(2,2, 1.0,0.0 ,0.0,-a), FVector(2, 0.0,0.0));
+    VectorAffineFunction guard(FMatrix(1,2, -1.0,0.0), FVector(1, 0.0));
 
     /// Build the automaton
     HybridAutomaton automaton;
@@ -331,9 +331,9 @@ TestHybridEvolver::TestHybridEvolver()
 HybridAutomaton TestHybridEvolver::make_hybrid_automaton(const ScalarPolynomialFunction& guard)
 {
     HybridAutomaton system;
-    system.new_mode(q1,PolynomialFunction(join(o,z)));
-    system.new_mode(q2,PolynomialFunction(join(z,o)));
-    system.new_transition(e,q1,q2,IdentityFunction(2),PolynomialFunction(1u,guard),true);
+    system.new_mode(q1,VectorPolynomialFunction(join(o,z)));
+    system.new_mode(q2,VectorPolynomialFunction(join(z,o)));
+    system.new_transition(e,q1,q2,IdentityFunction(2),VectorPolynomialFunction(1u,guard),true);
     return system;
 }
 
@@ -350,7 +350,7 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
     ScalarPolynomialFunction ct=-guard; // Crossing time
-    PolynomialFunction f=join(x+ct,y+2-ct);
+    VectorPolynomialFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
@@ -374,7 +374,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
 
     ScalarPolynomialFunction ct=-guard; // Crossing time
 
-    PolynomialFunction f=join(x+ct,y+2-ct);
+    VectorPolynomialFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
@@ -394,7 +394,7 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
     HybridTime evolution_time(2.0,3);
 
     ScalarPolynomialFunction ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
-    PolynomialFunction f=join(x+ct,y+2-ct);
+    VectorPolynomialFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
 

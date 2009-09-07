@@ -55,29 +55,29 @@ FloatVector e0=e(2,0); FloatVector e1=e(2,1);
 
 
 struct ProfileReset {
-    ProfileReset(TaylorCalculus* c_, FunctionInterface& f_, TaylorSet& s_, int n_=1) : c(c_), f(f_), s(s_), n(n_) { }
-    TaylorCalculus* c; FunctionInterface& f; TaylorSet s; int n; typedef TaylorSet Result;
+    ProfileReset(TaylorCalculus* c_, VectorFunctionInterface& f_, TaylorSet& s_, int n_=1) : c(c_), f(f_), s(s_), n(n_) { }
+    TaylorCalculus* c; VectorFunctionInterface& f; TaylorSet s; int n; typedef TaylorSet Result;
     TaylorSet operator()() const { TaylorSet r=c->reset_step(f,s); for(int i=1; i<n; ++i) { r=c->reset_step(f,s); } return r; }
 };
 
 struct ProfileBounds {
-    ProfileBounds(TaylorCalculus* c_, FunctionInterface& f_, IntervalVector d_, Float h_)
+    ProfileBounds(TaylorCalculus* c_, VectorFunctionInterface& f_, IntervalVector d_, Float h_)
         : c(c_), f(f_), d(d_), h(h_) { }
-    TaylorCalculus* c; FunctionInterface& f; IntervalVector d; Float h; typedef TaylorFunction Result;
-    Result operator()() const { c->flow_bounds(f,d,h,std::numeric_limits<double>::max()); TaylorFunction r; return r; }
+    TaylorCalculus* c; VectorFunctionInterface& f; IntervalVector d; Float h; typedef VectorTaylorFunction Result;
+    Result operator()() const { c->flow_bounds(f,d,h,std::numeric_limits<double>::max()); VectorTaylorFunction r; return r; }
 };
 
 struct ProfileFlow {
-    ProfileFlow(TaylorCalculus* c_, FunctionInterface& f_, IntervalVector d_, Float h_, IntervalVector b_)
+    ProfileFlow(TaylorCalculus* c_, VectorFunctionInterface& f_, IntervalVector d_, Float h_, IntervalVector b_)
         : c(c_), f(f_), d(d_), h(h_), b(b_) { }
-    TaylorCalculus* c; FunctionInterface& f; IntervalVector d; Float h; IntervalVector b;
-    typedef TaylorFunction Result;
-    TaylorFunction operator()() const { return c->flow_model(f,d,h,b); }
+    TaylorCalculus* c; VectorFunctionInterface& f; IntervalVector d; Float h; IntervalVector b;
+    typedef VectorTaylorFunction Result;
+    VectorTaylorFunction operator()() const { return c->flow_model(f,d,h,b); }
 };
 
 struct ProfileCrossing {
-    ProfileCrossing(TaylorCalculus* c_, ScalarFunctionInterface& g_, TaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
-    TaylorCalculus* c; ScalarFunctionInterface& g; TaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
+    ProfileCrossing(TaylorCalculus* c_, ScalarFunctionInterface& g_, VectorTaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
+    TaylorCalculus* c; ScalarFunctionInterface& g; VectorTaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
     TaylorModel operator()() const {
         return c->crossing_time(g,f,s); }
 };
@@ -101,8 +101,8 @@ unsigned int number_of_nonzeros(const T& f) {
     return nnz;
 }
 
-template<> double error(const TaylorExpression& t) { return t.model().error(); }
-template<> unsigned int number_of_nonzeros(const TaylorExpression& t) { return t.model().number_of_nonzeros(); }
+template<> double error(const ScalarTaylorFunction& t) { return t.model().error(); }
+template<> unsigned int number_of_nonzeros(const ScalarTaylorFunction& t) { return t.model().number_of_nonzeros(); }
 template<> double error(const TaylorModel& t) { return t.error(); }
 template<> unsigned int number_of_nonzeros(const TaylorModel& t) { return t.number_of_nonzeros(); }
 
@@ -113,7 +113,7 @@ void profile(const char* name, const Test& test, unsigned int tries)
     boost::timer tm; double t=0;
 
     typename Test::Result res=test();
-    //TaylorFunction res=static_cast<TaylorFunction>(test(calc,args1,args2));
+    //VectorTaylorFunction res=static_cast<VectorTaylorFunction>(test(calc,args1,args2));
     unsigned int nnz=number_of_nonzeros(res);
     double err=error(res);
 
@@ -133,7 +133,7 @@ void profile(const char* name, const Test& test, unsigned int tries)
               << std::endl;
 }
 
-struct ForcedVanDerPol : FunctionData<3,3,3> {
+struct ForcedVanDerPol : VectorFunctionData<3,3,3> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
         r[0]=x[1];
@@ -152,30 +152,30 @@ int main(int argc, const char* argv[]) {
     double a=1.5; double b=0.375;
     ScalarPolynomialFunction x=ScalarPolynomialFunction::variable(2,0);
     ScalarPolynomialFunction y=ScalarPolynomialFunction::variable(2,1);
-    PolynomialFunction henon_map ( (a+x*x+b*y)*e0+x*e1 );
+    VectorPolynomialFunction henon_map ( (a+x*x+b*y)*e0+x*e1 );
     TaylorSet henon_initial_set = Box(2, 0.875,1.125, 0.125,0.250);
 
     a=-0.25; b=0.75; double c=1.0;
-    PolynomialFunction spiral_vector_field = (c+a*x-b*y)*e0+(b*x+a*y)*e1;
+    VectorPolynomialFunction spiral_vector_field = (c+a*x-b*y)*e0+(b*x+a*y)*e1;
     IntervalVector spiral_domain = Box(2, 1.25,1.5, 0.5,0.75);
     Float spiral_step_size; IntervalVector spiral_bounding_box;
     make_lpair(spiral_step_size,spiral_bounding_box) =
         TaylorCalculus().flow_bounds(spiral_vector_field,spiral_domain,maximum_step_size,maximum_domain_extent);
 
     Float g=9.8;
-    PolynomialFunction ball_vector_field =  y*e0 - (g + 0.0*x)*e1 ;
-    PolynomialFunction ball_flow = FloatPolynomialVec( (x0+0.5*y0*t)*t*e0 + (y0-g*t)*e1 );
+    VectorPolynomialFunction ball_vector_field =  y*e0 - (g + 0.0*x)*e1 ;
+    VectorPolynomialFunction ball_flow = FloatPolynomialVec( (x0+0.5*y0*t)*t*e0 + (y0-g*t)*e1 );
     IntervalVector ball_domain = Box(2, 1.25,1.75, 0.5,0.5);
     Float ball_step_size; IntervalVector ball_bounding_box;
     make_lpair(ball_step_size,ball_bounding_box) =
         TaylorCalculus().flow_bounds(ball_vector_field,ball_domain,maximum_step_size,maximum_domain_extent);
 
-    TaylorFunction ball_flow_model(join(ball_domain,Interval(0,5.0)),ball_flow);
+    VectorTaylorFunction ball_flow_model(join(ball_domain,Interval(0,5.0)),ball_flow);
 
 
 
     double mu=0.5; a=1.0; double omega=1.0;
-    UserFunction<ForcedVanDerPol> vdp_vf(Vector<Float>(3u,mu,a,omega));
+    VectorUserFunction<ForcedVanDerPol> vdp_vf(Vector<Float>(3u,mu,a,omega));
     Vector<Interval> vdp_dom = Box(3, 1.25,1.5, 0.5,0.75, 0.0,0.0);
 
 

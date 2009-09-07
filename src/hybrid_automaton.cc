@@ -48,7 +48,7 @@ dimension() const
 
 DiscreteMode::
 DiscreteMode(DiscreteState location,
-             const FunctionInterface& dynamic)
+             const VectorFunctionInterface& dynamic)
     :  _location(location), _dynamic(dynamic.clone()), _invariants(), _grid(new Grid(dynamic.argument_size()))
 {
 }
@@ -57,8 +57,8 @@ DiscreteMode(DiscreteState location,
 /*
 DiscreteMode::
 DiscreteMode(DiscreteState location,
-             const boost::shared_ptr< const FunctionInterface > dynamic,
-             const std::map< DiscreteEvent, boost::shared_ptr< const FunctionInterface > >& invariants)
+             const boost::shared_ptr< const VectorFunctionInterface > dynamic,
+             const std::map< DiscreteEvent, boost::shared_ptr< const VectorFunctionInterface > >& invariants)
     :  _location(location), _dynamic(dynamic), _invariants(invariants), _grid(new Grid(dynamic->argument_size()))
 {
     ARIADNE_ASSERT(dynamic->result_size()==dynamic->argument_size());
@@ -87,8 +87,8 @@ DiscreteTransition::
 DiscreteTransition(DiscreteEvent event,
                    const DiscreteMode& source,
                    const DiscreteMode& target,
-                   const FunctionInterface& reset,
-                   const FunctionInterface& activation,
+                   const VectorFunctionInterface& reset,
+                   const VectorFunctionInterface& activation,
                    bool forced)
     : _event(event), _source(&source), _target(&target),
       _activation(activation.clone()), _reset(reset.clone()), _forced(forced)
@@ -104,8 +104,8 @@ DiscreteTransition::
 DiscreteTransition(DiscreteEvent event,
                    const DiscreteMode& source,
                    const DiscreteMode& target,
-                   const boost::shared_ptr< FunctionInterface > reset,
-                   const boost::shared_ptr< FunctionInterface > activation,
+                   const boost::shared_ptr< VectorFunctionInterface > reset,
+                   const boost::shared_ptr< VectorFunctionInterface > activation,
                    bool forced)
     : _event(event), _source(&source), _target(&target),
       _activation(activation), _reset(reset), _forced(forced)
@@ -150,7 +150,7 @@ HybridAutomaton::HybridAutomaton(const std::string& name)
 
 const DiscreteMode&
 HybridAutomaton::new_mode(DiscreteState location,
-                          const FunctionInterface& dynamic)
+                          const VectorFunctionInterface& dynamic)
 {
     ARIADNE_ASSERT(location>0);
     if(this->has_mode(location)) {
@@ -168,7 +168,7 @@ HybridAutomaton::new_mode(DiscreteState location,
 
 const DiscreteMode&
 HybridAutomaton::new_invariant(DiscreteState location,
-                               const FunctionInterface& invariant)
+                               const VectorFunctionInterface& invariant)
 {
     ARIADNE_ASSERT(location>0);
     if(!this->has_mode(location)) {
@@ -185,7 +185,7 @@ HybridAutomaton::new_invariant(DiscreteState location,
             "The invariant has result size " << invariant.result_size()
                 << " but only scalar invariants are currently supported.");
     }
-    boost::shared_ptr< const FunctionInterface > new_invariant(invariant.clone());
+    boost::shared_ptr< const VectorFunctionInterface > new_invariant(invariant.clone());
     DiscreteEvent invariant_event(-8-mode._invariants.size());
     mode._invariants[invariant_event]=new_invariant;
     return mode;
@@ -197,8 +197,8 @@ HybridAutomaton::
 new_transition(DiscreteEvent event,
                const DiscreteMode &source,
                const DiscreteMode &target,
-               const FunctionInterface &reset,
-               const FunctionInterface &activation,
+               const VectorFunctionInterface &reset,
+               const VectorFunctionInterface &activation,
                bool forced)
 {
     ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
@@ -233,8 +233,8 @@ const DiscreteTransition&
 HybridAutomaton::new_transition(DiscreteEvent event,
                                 DiscreteState source,
                                 DiscreteState target,
-                                const FunctionInterface &reset,
-                                const FunctionInterface &activation,
+                                const VectorFunctionInterface &reset,
+                                const VectorFunctionInterface &activation,
                                 bool forced)
 {
     ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
@@ -259,8 +259,8 @@ HybridAutomaton::
 new_forced_transition(DiscreteEvent event,
                       DiscreteState source,
                       DiscreteState target,
-                      const FunctionInterface &reset,
-                      const FunctionInterface &activation)
+                      const VectorFunctionInterface &reset,
+                      const VectorFunctionInterface &activation)
 {
     ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
     if(this->has_transition(event,source)) {
@@ -285,8 +285,8 @@ HybridAutomaton::
 new_unforced_transition(DiscreteEvent event,
                         DiscreteState source,
                         DiscreteState target,
-                        const FunctionInterface &reset,
-                        const FunctionInterface &activation)
+                        const VectorFunctionInterface &reset,
+                        const VectorFunctionInterface &activation)
 {
     ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
     if(this->has_transition(event,source)) {
@@ -451,16 +451,16 @@ HybridAutomaton::transitions(DiscreteState source) const
 }
 
 
-std::map<DiscreteEvent,HybridAutomaton::FunctionPtr>
+std::map<DiscreteEvent,HybridAutomaton::VectorFunctionPtr>
 HybridAutomaton::blocking_guards(DiscreteState source) const
 {
-    std::map<DiscreteEvent,FunctionPtr> result;
+    std::map<DiscreteEvent,VectorFunctionPtr> result;
     const DiscreteMode& mode=this->mode(source);
     for(invariant_const_iterator invariant_iter=mode._invariants.begin();
         invariant_iter!=mode._invariants.end(); ++invariant_iter)
     {
         const DiscreteEvent event=invariant_iter->first;
-        const FunctionPtr invariant_ptr=invariant_iter->second;
+        const VectorFunctionPtr invariant_ptr=invariant_iter->second;
         result[event]=invariant_ptr;
     }
 
@@ -469,7 +469,7 @@ HybridAutomaton::blocking_guards(DiscreteState source) const
     {
         if(transition_iter->source().location()==source && transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
-            const FunctionPtr guard_ptr=transition_iter->activation_ptr();
+            const VectorFunctionPtr guard_ptr=transition_iter->activation_ptr();
             result[event]=guard_ptr;
         }
     }
@@ -477,17 +477,17 @@ HybridAutomaton::blocking_guards(DiscreteState source) const
 }
 
 
-std::map<DiscreteEvent,HybridAutomaton::FunctionPtr>
+std::map<DiscreteEvent,HybridAutomaton::VectorFunctionPtr>
 HybridAutomaton::permissive_guards(DiscreteState source) const
 {
-    std::map<DiscreteEvent,FunctionPtr> result;
+    std::map<DiscreteEvent,VectorFunctionPtr> result;
 
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
     {
         if(transition_iter->source().location()==source && !transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
-            const FunctionPtr guard_ptr=transition_iter->activation_ptr();
+            const VectorFunctionPtr guard_ptr=transition_iter->activation_ptr();
             result[event]=guard_ptr;
         }
     }

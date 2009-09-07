@@ -16,11 +16,11 @@ using namespace Ariadne;
 
 /// Dynamics for the case of both diodes being off
 /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
-struct offoff_df : FunctionData<3,3,5> {
-    template<class R, class A, class P> static void 
+struct offoff_df : VectorFunctionData<3,3,5> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);	
+        r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
 	    r[2] = -x[2]/(p[4]*p[3]);
 //        r[2] = -x[2]/(p[4]*p[3]) - 2e-12/p[3];
     }
@@ -28,8 +28,8 @@ struct offoff_df : FunctionData<3,3,5> {
 
 /// Dynamics for the case of the first diode being on, the second being off
 /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-struct onoff_df : FunctionData<3,3,5> {
-    template<class R, class A, class P> static void 
+struct onoff_df : VectorFunctionData<3,3,5> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
     r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
@@ -40,8 +40,8 @@ struct onoff_df : FunctionData<3,3,5> {
 
 /// Dynamics for the case of the first diode being off, the second being on
 /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-struct offon_df : FunctionData<3,3,5> {
-    template<class R, class A, class P> static void 
+struct offon_df : VectorFunctionData<3,3,5> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
     r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
@@ -52,8 +52,8 @@ struct offon_df : FunctionData<3,3,5> {
 
 /// Dynamics for the case of both diodes being on
 /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-struct onon_df : FunctionData<3,3,5> {
-    template<class R, class A, class P> static void 
+struct onon_df : VectorFunctionData<3,3,5> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
     r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
@@ -63,13 +63,13 @@ struct onon_df : FunctionData<3,3,5> {
 };
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
-    Figure fig; 
+    Figure fig;
     array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_bounding_box(bbox);
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -96,7 +96,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         double pos_y = bbox[1].lower();
 	rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
@@ -107,13 +107,13 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc); 
-    fig << set; 
-    fig.write(filename); 
+    fig.set_fill_colour(fc);
+    fig << set;
+    fig.write(filename);
 }
 
-int main() 
-{    
+int main()
+{
     /// Introduces the dynamics parameters
     Vector<Float> dp(5);
     dp[0] = 4.0; /// Amplitude of the input voltage, Vi
@@ -135,10 +135,10 @@ int main()
     bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomaton object
     HybridAutomaton rectifier;
-  
+
     /// Create the discrete states
     DiscreteState offoff(1);
     DiscreteState onoff(2);
@@ -148,44 +148,44 @@ int main()
     /// Create the discrete events
     DiscreteEvent resettime(1);
     DiscreteEvent jump1(2), jump2(3), jump3(4);
-    
+
     /// Create the resets
 
     /// Reset the time (t^=0,vi^=vi,vo^=vo)
-    AffineFunction resettime_r(Matrix<Float>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
+    VectorAffineFunction resettime_r(Matrix<Float>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
                                Vector<Float>(3,0.0,0.0,0.0));
     /// Do nothing (t^=t,vi^=vi,vo^=vo)
     IdentityFunction noop_r(3);
 
     /// Create the guards
-    
+
     /// Guard for the reset of time (t>=1/f)
-    AffineFunction resettime_g(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1,-1/dp[1]));
+    VectorAffineFunction resettime_g(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1,-1/dp[1]));
     /// Guard for the jump from onoff to offoff (vi-vo<=0)
-    AffineFunction onoff_offoff_g(Matrix<Float>(1,3,0.0,-1.0,1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction onoff_offoff_g(Matrix<Float>(1,3,0.0,-1.0,1.0),Vector<Float>(1,0.0));
     /// Guard for the jump from offon to offoff (-vi-vo<=0)
-    AffineFunction offon_offoff_g(Matrix<Float>(1,3,0.0,1.0,1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction offon_offoff_g(Matrix<Float>(1,3,0.0,1.0,1.0),Vector<Float>(1,0.0));
     /// Guard for the jump from offoff to onoff (vi-vo>=0)
-    AffineFunction offoff_onoff_g(Matrix<Float>(1,3,0.0,1.0,-1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction offoff_onoff_g(Matrix<Float>(1,3,0.0,1.0,-1.0),Vector<Float>(1,0.0));
     /// Guard for the jump from onon to onoff (-vi-vo<=0)
-    AffineFunction onon_onoff_g(Matrix<Float>(1,3,0.0,1.0,1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction onon_onoff_g(Matrix<Float>(1,3,0.0,1.0,1.0),Vector<Float>(1,0.0));
     /// Guard for the jump from offoff to offon (-vi-vo>=0)
-    AffineFunction offoff_offon_g(Matrix<Float>(1,3,0.0,-1.0,-1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction offoff_offon_g(Matrix<Float>(1,3,0.0,-1.0,-1.0),Vector<Float>(1,0.0));
     /// Guard for the jump from onon to offon (vi-vo<=0)
-    AffineFunction onon_offon_g(Matrix<Float>(1,3,0.0,-1.0,1.0),Vector<Float>(1,0.0));
-    /// Guard for the jump from offon to onon (vi-vo>=0) 
-    AffineFunction offon_onon_g(Matrix<Float>(1,3,0.0,1.0,-1.0),Vector<Float>(1,0.0));
-    /// Guard for the jump from onoff to onon (-vi-vo>=0) 
-    AffineFunction onoff_onon_g(Matrix<Float>(1,3,0.0,-1.0,-1.0),Vector<Float>(1,0.0));
- 
+    VectorAffineFunction onon_offon_g(Matrix<Float>(1,3,0.0,-1.0,1.0),Vector<Float>(1,0.0));
+    /// Guard for the jump from offon to onon (vi-vo>=0)
+    VectorAffineFunction offon_onon_g(Matrix<Float>(1,3,0.0,1.0,-1.0),Vector<Float>(1,0.0));
+    /// Guard for the jump from onoff to onon (-vi-vo>=0)
+    VectorAffineFunction onoff_onon_g(Matrix<Float>(1,3,0.0,-1.0,-1.0),Vector<Float>(1,0.0));
+
     /// Create the dynamics
-    Function<offoff_df> offoff_d(dp);
-    Function<onoff_df> onoff_d(dp);
-    Function<offon_df> offon_d(dp);
-    Function<onon_df> onon_d(dp);
-  
+    VectorUserFunction<offoff_df> offoff_d(dp);
+    VectorUserFunction<onoff_df> onoff_d(dp);
+    VectorUserFunction<offon_df> offon_d(dp);
+    VectorUserFunction<onon_df> onon_d(dp);
+
     /// Build the automaton
-    
+
     /// Locations
     rectifier.new_mode(offoff,offoff_d);
     rectifier.new_mode(onoff,onoff_d);
@@ -222,7 +222,7 @@ int main()
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
-    evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;    
+    evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -239,7 +239,7 @@ int main()
 //    HybridEnclosureType initial_enclosure(onoff,initial_box);
 
     std::cout << "Initial set=" << initial_enclosure << std::endl;
-  
+
     HybridTime evolution_time(TIME_LIMIT,TRAN_LIMIT);
 
 /*
@@ -266,7 +266,7 @@ int main()
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
-    rectifier.set_grid(Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5))); 
+    rectifier.set_grid(Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5)));
     std::cout <<  analyser.parameters() << std::endl;
 
     analyser.verbosity=VERBOSITY;

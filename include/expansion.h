@@ -215,7 +215,7 @@ class ExpansionIterator
         return (i._p-_p)/difference_type(_nw+_ds); }
     Ptr operator->() const {
         return reinterpret_cast<Ptr>(const_cast<Iter*>(this)); }
-    Ref operator*() const { 
+    Ref operator*() const {
         return reinterpret_cast<Ref>(const_cast<Iter&>(*this)); }
     Iter& increment() {
         return advance(1); }
@@ -251,6 +251,7 @@ class Expansion
     static X _zero;
   public:
     typedef X RealType;
+    typedef unsigned short int smoothness_type;
     typedef MultiIndex::size_type size_type;
     typedef MultiIndex::byte_type byte_type;
     typedef MultiIndex::word_type word_type;
@@ -336,7 +337,7 @@ class Expansion
     void remove_zeros() {
         //std::cerr<<"remove_zeros... "<<std::flush;
         iterator new_end=std::remove_if(this->begin(),this->end(),data_is_zero<value_type>());
-        this->resize(new_end-this->begin()); 
+        this->resize(new_end-this->begin());
     }
 
 

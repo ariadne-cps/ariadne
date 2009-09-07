@@ -256,9 +256,9 @@ void export_taylor_set()
     def("zonotope", (Zonotope(*)(const TaylorSet&)) &zonotope);
 
     def("apply",(TaylorModel(*)(const ScalarFunctionInterface&,const TaylorSet&)) &apply);
-    def("apply",(TaylorModel(*)(const TaylorExpression&,const TaylorSet&)) &apply);
-    def("apply",(TaylorSet(*)(const FunctionInterface&,const TaylorSet&)) &apply);
-    def("apply",(TaylorSet(*)(const TaylorFunction&,const TaylorSet&)) &apply);
+    def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorSet&)) &apply);
+    def("apply",(TaylorSet(*)(const VectorFunctionInterface&,const TaylorSet&)) &apply);
+    def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
 
     implicitly_convertible<Box,TaylorSet>();
 }

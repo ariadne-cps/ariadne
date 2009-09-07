@@ -149,19 +149,19 @@ int main()
     A1[3][9] = 1.0;
     A1[4][10] = 1.0;
     A1[5][11] = 1.0;
-    AffineFunction all_rolling_d(A1,Vector<Float>(12));   
+    VectorAffineFunction all_rolling_d(A1,Vector<Float>(12));   
 
     /// First and second rolling, third bouncing
     double b2[12]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-g};    
-    AffineFunction firstsecond_rolling_third_bouncing_d(A1,Vector<Float>(12,b2));
+    VectorAffineFunction firstsecond_rolling_third_bouncing_d(A1,Vector<Float>(12,b2));
 
     /// First rolling, second and third bouncing
     double b3[12]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-g,0.0,-g};
-    AffineFunction first_rolling_secondthird_bouncing_d(A1,Vector<Float>(12,b3));
+    VectorAffineFunction first_rolling_secondthird_bouncing_d(A1,Vector<Float>(12,b3));
 
     /// All bouncing
     double b4[12]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,-g,0.0,-g,0.0,-g};
-    AffineFunction all_bouncing_d(A1,Vector<Float>(12,b4));    
+    VectorAffineFunction all_bouncing_d(A1,Vector<Float>(12,b4));    
 
     /// Creates the resets
 
@@ -181,7 +181,7 @@ int main()
     A2[9][9] = 1.0;
     A2[10][10] = 1.0;
     A2[11][11] = 1.0;
-    AffineFunction collision12_r(A2,Vector<Float>(12));
+    VectorAffineFunction collision12_r(A2,Vector<Float>(12));
 
     /// Collision between the second and the third balls
     Matrix<Float> A3 = Matrix<Float>(12,12);
@@ -199,7 +199,7 @@ int main()
     A3[10][8] = m2*(1.0+eps)/(m2+m3);
     A3[10][10] = (m3 - eps*m2)/(m2+m3);	
     A3[11][11] = 1.0;
-    AffineFunction collision23_r(A3,Vector<Float>(12));
+    VectorAffineFunction collision23_r(A3,Vector<Float>(12));
 
 
     /// First bouncing
@@ -216,7 +216,7 @@ int main()
     A4[9][9] = 1.0;
     A4[10][10] = 1.0;
     A4[11][11] = 1.0;
-    AffineFunction first_bouncing_r(A4,Vector<Float>(12));   
+    VectorAffineFunction first_bouncing_r(A4,Vector<Float>(12));   
 
     /// Second bouncing
     Matrix<Float> A5 = Matrix<Float>(12,12);
@@ -232,7 +232,7 @@ int main()
     A5[9][9] = -ky;
     A5[10][10] = 1.0;
     A5[11][11] = 1.0;
-    AffineFunction second_bouncing_r(A5,Vector<Float>(12));   
+    VectorAffineFunction second_bouncing_r(A5,Vector<Float>(12));   
 
     /// Third bouncing
     Matrix<Float> A6 = Matrix<Float>(12,12);
@@ -248,7 +248,7 @@ int main()
     A6[9][9] = 1.0;
     A6[10][10] = kx;
     A6[11][11] = -ky;
-    AffineFunction third_bouncing_r(A6,Vector<Float>(12));   
+    VectorAffineFunction third_bouncing_r(A6,Vector<Float>(12));   
 
     /// Drop from table
     IdentityFunction drop_from_table_r(12);
@@ -256,21 +256,21 @@ int main()
     /// Creates the guards
 
     /// Collision between the first and the second ball (x1 >= x2)
-    AffineFunction collide12_g(Matrix<Float>(1,12, 1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction collide12_g(Matrix<Float>(1,12, 1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
     /// Collision between the second and the third ball (x2 >= x3)
-    AffineFunction collide23_g(Matrix<Float>(1,12, 0.0,0.0,1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction collide23_g(Matrix<Float>(1,12, 0.0,0.0,1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
     /// First reaching the table extension (x1 >= table_x)
-    AffineFunction first_reaching_table_extension_g(Matrix<Float>(1,12, 1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
+    VectorAffineFunction first_reaching_table_extension_g(Matrix<Float>(1,12, 1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
     /// Second reaching the table extension (x2 >= table_x)
-    AffineFunction second_reaching_table_extension_g(Matrix<Float>(1,12, 0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
+    VectorAffineFunction second_reaching_table_extension_g(Matrix<Float>(1,12, 0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
     /// Third reaching the table extension (x3 >= table_x)
-    AffineFunction third_reaching_table_extension_g(Matrix<Float>(1,12, 0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
+    VectorAffineFunction third_reaching_table_extension_g(Matrix<Float>(1,12, 0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
     /// First touching the floor (y1 <= 0)
-    AffineFunction first_touching_floor_g(Matrix<Float>(1,12, 0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction first_touching_floor_g(Matrix<Float>(1,12, 0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
     /// Second touching the floor (y2 <= 0)
-    AffineFunction second_touching_floor_g(Matrix<Float>(1,12, 0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction second_touching_floor_g(Matrix<Float>(1,12, 0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
     /// Third touching the floor (y3 <= 0)
-    AffineFunction third_touching_floor_g(Matrix<Float>(1,12, 0.0,0.0,0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction third_touching_floor_g(Matrix<Float>(1,12, 0.0,0.0,0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
 
     /// Builds the automaton
     balls.new_mode(all_on_pre12collision,all_rolling_d);

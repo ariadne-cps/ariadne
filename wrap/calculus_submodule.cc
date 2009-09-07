@@ -35,29 +35,29 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-TaylorExpression max(const TaylorExpression& x, const TaylorExpression& y);
-TaylorExpression min(const TaylorExpression& x, const TaylorExpression& y);
-TaylorExpression neg(const TaylorExpression&);
-TaylorExpression rec(const TaylorExpression&);
-TaylorExpression sqr(const TaylorExpression&);
-TaylorExpression pow(const TaylorExpression&, int);
-TaylorExpression sqrt(const TaylorExpression&);
-TaylorExpression exp(const TaylorExpression&);
-TaylorExpression log(const TaylorExpression&);
-TaylorExpression sin(const TaylorExpression&);
-TaylorExpression cos(const TaylorExpression&);
-TaylorExpression tan(const TaylorExpression&);
+ScalarTaylorFunction max(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
+ScalarTaylorFunction min(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
+ScalarTaylorFunction neg(const ScalarTaylorFunction&);
+ScalarTaylorFunction rec(const ScalarTaylorFunction&);
+ScalarTaylorFunction sqr(const ScalarTaylorFunction&);
+ScalarTaylorFunction pow(const ScalarTaylorFunction&, int);
+ScalarTaylorFunction sqrt(const ScalarTaylorFunction&);
+ScalarTaylorFunction exp(const ScalarTaylorFunction&);
+ScalarTaylorFunction log(const ScalarTaylorFunction&);
+ScalarTaylorFunction sin(const ScalarTaylorFunction&);
+ScalarTaylorFunction cos(const ScalarTaylorFunction&);
+ScalarTaylorFunction tan(const ScalarTaylorFunction&);
 
 
-TaylorFunction __getslice__(const TaylorFunction& tf, int start, int stop) {
+VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, int start, int stop) {
     if(start<0) { start+=tf.result_size(); }
     if(stop<0) { stop+=tf.result_size(); }
     ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&uint(stop)<=tf.result_size(),
             "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
-    return TaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
+    return VectorTaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
 }
 
-ScalarPolynomialFunction polynomial(const TaylorExpression& te) {
+ScalarPolynomialFunction polynomial(const ScalarTaylorFunction& te) {
     return te.polynomial();
 }
 
@@ -109,16 +109,16 @@ struct from_python< Expansion<T> > {
 
 
 template<>
-struct from_python<TaylorFunction> {
+struct from_python<VectorTaylorFunction> {
     from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<TaylorFunction>()); }
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<VectorTaylorFunction>()); }
     static void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
         void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
         list lst=extract<boost::python::list>(obj_ptr);
-        TaylorFunction* tf_ptr = new (storage) TaylorFunction(len(lst));
-        for(uint i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,extract<TaylorExpression>(lst[i])); }
+        VectorTaylorFunction* tf_ptr = new (storage) VectorTaylorFunction(len(lst));
+        for(uint i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,extract<ScalarTaylorFunction>(lst[i])); }
         data->convertible = storage;
     }
 };
@@ -137,394 +137,350 @@ void export_taylor_model()
     typedef int Z;
     typedef uint N;
     typedef double D;
-    typedef Float R;
-    typedef Interval I;
+    typedef Float Float;
+    typedef Interval Interval;
     typedef MultiIndex A;
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
-    typedef TaylorModel TM;
+    typedef TaylorModel TaylorModel;
     typedef Vector<TaylorModel> TMV;
-    typedef TaylorFunction TF;
+    typedef VectorTaylorFunction VectorTaylorFunction;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
-    typedef ScalarFunctionInterface EI;
+    typedef ScalarFunctionInterface FI;
 
 
-    class_<TM> taylor_model_class("TaylorModel", init<TaylorModel>());
+    class_<TaylorModel> taylor_model_class("TaylorModel", init<TaylorModel>());
     taylor_model_class.def( init< N >());
-    taylor_model_class.def("error", (const R&(TM::*)()const) &TM::error, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("set_error", (void(TM::*)(const R&)) &TM::set_error);
-    taylor_model_class.def("argument_size", &TM::argument_size);
-    taylor_model_class.def("domain", &TM::domain);
-    taylor_model_class.def("range", &TM::range);
-    taylor_model_class.def("set_sweep_threshold", &TM::set_sweep_threshold);
-    taylor_model_class.def("get_sweep_threshold", &TM::sweep_threshold);
-    taylor_model_class.def("set_maximum_degree", &TM::set_maximum_degree);
-    taylor_model_class.def("get_maximum_degree", &TM::maximum_degree);
-    taylor_model_class.def("__getitem__", &__getitem__<TM,A,R>);
-    taylor_model_class.def("__setitem__",&__setitem__<TM,A,D>);
+    taylor_model_class.def("error", (const Float&(TaylorModel::*)()const) &TaylorModel::error, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("set_error", (void(TaylorModel::*)(const Float&)) &TaylorModel::set_error);
+    taylor_model_class.def("argument_size", &TaylorModel::argument_size);
+    taylor_model_class.def("domain", &TaylorModel::domain);
+    taylor_model_class.def("range", &TaylorModel::range);
+    taylor_model_class.def("set_sweep_threshold", &TaylorModel::set_sweep_threshold);
+    taylor_model_class.def("get_sweep_threshold", &TaylorModel::sweep_threshold);
+    taylor_model_class.def("set_maximum_degree", &TaylorModel::set_maximum_degree);
+    taylor_model_class.def("get_maximum_degree", &TaylorModel::maximum_degree);
+    taylor_model_class.def("__getitem__", &__getitem__<TaylorModel,A,Float>);
+    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,A,D>);
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
     taylor_model_class.def(self+self);
     taylor_model_class.def(self-self);
     taylor_model_class.def(self*self);
     taylor_model_class.def(self/self);
-    taylor_model_class.def(self+R());
-    taylor_model_class.def(self-R());
-    taylor_model_class.def(self*R());
-    taylor_model_class.def(self/R());
-    taylor_model_class.def(R()+self);
-    taylor_model_class.def(R()-self);
-    taylor_model_class.def(R()*self);
-    taylor_model_class.def(R()/self);
-    taylor_model_class.def(self+=R());
-    taylor_model_class.def(self-=R());
-    taylor_model_class.def(self*=R());
-    taylor_model_class.def(self/=R());
-    taylor_model_class.def(I()+self);
-    taylor_model_class.def(I()-self);
-    taylor_model_class.def(I()*self);
-    taylor_model_class.def(I()/self);
-    taylor_model_class.def(self+I());
-    taylor_model_class.def(self-I());
-    taylor_model_class.def(self*I());
-    taylor_model_class.def(self/I());
-    taylor_model_class.def(self+=I());
-    taylor_model_class.def(self-=I());
-    taylor_model_class.def(self*=I());
-    taylor_model_class.def(self/=I());
+    taylor_model_class.def(self+Float());
+    taylor_model_class.def(self-Float());
+    taylor_model_class.def(self*Float());
+    taylor_model_class.def(self/Float());
+    taylor_model_class.def(Float()+self);
+    taylor_model_class.def(Float()-self);
+    taylor_model_class.def(Float()*self);
+    taylor_model_class.def(Float()/self);
+    taylor_model_class.def(self+=Float());
+    taylor_model_class.def(self-=Float());
+    taylor_model_class.def(self*=Float());
+    taylor_model_class.def(self/=Float());
+    taylor_model_class.def(Interval()+self);
+    taylor_model_class.def(Interval()-self);
+    taylor_model_class.def(Interval()*self);
+    taylor_model_class.def(Interval()/self);
+    taylor_model_class.def(self+Interval());
+    taylor_model_class.def(self-Interval());
+    taylor_model_class.def(self*Interval());
+    taylor_model_class.def(self/Interval());
+    taylor_model_class.def(self+=Interval());
+    taylor_model_class.def(self-=Interval());
+    taylor_model_class.def(self*=Interval());
+    taylor_model_class.def(self/=Interval());
     taylor_model_class.def(self+=self);
     taylor_model_class.def(self-=self);
-    taylor_model_class.def(self>R());
+    taylor_model_class.def(self>Float());
     taylor_model_class.def(self>self);
     taylor_model_class.def(self<self);
     taylor_model_class.def(self_ns::str(self));
 
-    taylor_model_class.def("constant",(TM(*)(N, const R&))&TM::constant);
-    taylor_model_class.def("constant",(TM(*)(N, const I&))&TM::constant);
-    taylor_model_class.def("variable",(TM(*)(N, N))&TM::variable);
+    taylor_model_class.def("constant",(TaylorModel(*)(N, const Float&))&TaylorModel::constant);
+    taylor_model_class.def("constant",(TaylorModel(*)(N, const Interval&))&TaylorModel::constant);
+    taylor_model_class.def("variable",(TaylorModel(*)(N, N))&TaylorModel::variable);
 
     taylor_model_class.staticmethod("constant");
     taylor_model_class.staticmethod("variable");
     //taylor_model_class.staticmethod("variables");
 
-    taylor_model_class.def("restrict", (TM&(TM::*)(const Vector<Interval>&))&TM::restrict, return_value_policy<reference_existing_object>());
-    taylor_model_class.def("preaffine", (TM(*)(const TaylorModel&,uint,const Interval&,const Interval&))&preaffine);
+    taylor_model_class.def("restrict", (TaylorModel&(TaylorModel::*)(const Vector<Interval>&))&TaylorModel::restrict, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("preaffine", (TaylorModel(*)(const TaylorModel&,uint,const Interval&,const Interval&))&preaffine);
 
-    taylor_model_class.def("evaluate", (Interval(TM::*)(const Vector<Interval>&)const)&TM::evaluate);
-    taylor_model_class.def("set",(TM(*)(const TM&,uint,Interval))&partial_evaluate);
+    taylor_model_class.def("evaluate", (Interval(TaylorModel::*)(const Vector<Interval>&)const)&TaylorModel::evaluate);
+    taylor_model_class.def("set",(TaylorModel(*)(const TaylorModel&,uint,Interval))&partial_evaluate);
 
-    def("max",(TM(*)(const TM&,const TM&))&max);
-    def("min",(TM(*)(const TM&,const TM&))&min);
-    def("abs",(TM(*)(const TM&))&abs);
+    def("max",(TaylorModel(*)(const TaylorModel&,const TaylorModel&))&max);
+    def("min",(TaylorModel(*)(const TaylorModel&,const TaylorModel&))&min);
+    def("abs",(TaylorModel(*)(const TaylorModel&))&abs);
 
-    def("neg",(TM(*)(const TM&))&neg);
-    def("rec",(TM(*)(const TM&))&rec);
-    def("sqr",(TM(*)(const TM&))&sqr);
-    def("pow",(TM(*)(const TM&, int))&pow);
+    def("neg",(TaylorModel(*)(const TaylorModel&))&neg);
+    def("rec",(TaylorModel(*)(const TaylorModel&))&rec);
+    def("sqr",(TaylorModel(*)(const TaylorModel&))&sqr);
+    def("pow",(TaylorModel(*)(const TaylorModel&, int))&pow);
 
-    def("sqrt", (TM(*)(const TM&))&sqrt);
-    def("exp", (TM(*)(const TM&))&exp);
-    def("log", (TM(*)(const TM&))&log);
-    def("sin", (TM(*)(const TM&))&sin);
-    def("cos", (TM(*)(const TM&))&cos);
-    def("tan", (TM(*)(const TM&))&tan);
+    def("sqrt", (TaylorModel(*)(const TaylorModel&))&sqrt);
+    def("exp", (TaylorModel(*)(const TaylorModel&))&exp);
+    def("log", (TaylorModel(*)(const TaylorModel&))&log);
+    def("sin", (TaylorModel(*)(const TaylorModel&))&sin);
+    def("cos", (TaylorModel(*)(const TaylorModel&))&cos);
+    def("tan", (TaylorModel(*)(const TaylorModel&))&tan);
 
 
     class_< TMV > taylor_model_vector_class("TaylorModelVector");
-    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,int,TM>);
+    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,int,TaylorModel>);
     taylor_model_vector_class.def(self_ns::str(self));
 }
 
-void export_taylor_variable()
+void export_scalar_taylor_function()
 {
-    typedef uint N;
-    typedef double D;
-    typedef Float R;
-    typedef Interval I;
-    typedef MultiIndex A;
-    typedef Vector<Float> RV;
-    typedef Vector<Interval> IV;
-    typedef Matrix<Float> RMx;
-    typedef TaylorModel TM;
-    typedef TaylorExpression TE;
-    typedef TaylorFunction TF;
-    typedef Polynomial<Float> RP;
-    typedef Polynomial<Interval> IP;
-    typedef ScalarFunctionInterface EI;
+    typedef Vector<Float> FloatVector;
+    typedef Vector<Interval> IntervalVector;
 
-    class_<TE> taylor_expression_class("TaylorExpression",init<TaylorExpression>());
-    taylor_expression_class.def(init<IV,TM>());
-    taylor_expression_class.def(init< IV >());
-    taylor_expression_class.def(init< IV, const EI& >());
-    taylor_expression_class.def("error", (const R&(TE::*)()const) &TE::error, return_value_policy<copy_const_reference>());
-    taylor_expression_class.def("set_error", (void(TE::*)(const double&)) &TE::set_error);
-    taylor_expression_class.def("argument_size", &TE::argument_size);
-    taylor_expression_class.def("domain", &TE::domain, return_value_policy<copy_const_reference>());
-    taylor_expression_class.def("codomain", &TE::codomain);
-    taylor_expression_class.def("centre", &TE::centre);
-    taylor_expression_class.def("range", &TE::range);
-    taylor_expression_class.def("model", (const TM&(TE::*)()const)&TE::model, return_value_policy<copy_const_reference>());
-    taylor_expression_class.def("__getitem__", &__getitem__<TE,A,R>);
-    taylor_expression_class.def("__setitem__",&__setitem__<TE,A,D>);
-    taylor_expression_class.def(+self);
-    taylor_expression_class.def(-self);
-    taylor_expression_class.def(self+self);
-    taylor_expression_class.def(self-self);
-    taylor_expression_class.def(self*self);
-    taylor_expression_class.def(self/self);
-    taylor_expression_class.def(self+R());
-    taylor_expression_class.def(self-R());
-    taylor_expression_class.def(self*R());
-    taylor_expression_class.def(self/R());
-    taylor_expression_class.def(R()+self);
-    taylor_expression_class.def(R()-self);
-    taylor_expression_class.def(R()*self);
-    taylor_expression_class.def(R()/self);
-    taylor_expression_class.def(self+=R());
-    taylor_expression_class.def(self-=R());
-    taylor_expression_class.def(self*=R());
-    taylor_expression_class.def(self/=R());
-    taylor_expression_class.def(I()+self);
-    taylor_expression_class.def(I()-self);
-    taylor_expression_class.def(I()*self);
-    taylor_expression_class.def(I()/self);
-    taylor_expression_class.def(self+I());
-    taylor_expression_class.def(self-I());
-    taylor_expression_class.def(self*I());
-    taylor_expression_class.def(self/I());
-    taylor_expression_class.def(self+=I());
-    taylor_expression_class.def(self-=I());
-    taylor_expression_class.def(self*=I());
-    taylor_expression_class.def(self/=I());
-    taylor_expression_class.def(self+=self);
-    taylor_expression_class.def(self-=self);
-    taylor_expression_class.def(self>R());
-    taylor_expression_class.def(self>self);
-    taylor_expression_class.def(self<self);
-    taylor_expression_class.def(self_ns::str(self));
-    taylor_expression_class.def("__mul__",&__mul__< TaylorFunction, TaylorExpression, Vector<Float> >);
+    class_<ScalarTaylorFunction> scalar_taylor_function_class("ScalarTaylorFunction",init<ScalarTaylorFunction>());
+    scalar_taylor_function_class.def(init<IntervalVector,TaylorModel>());
+    scalar_taylor_function_class.def(init< IntervalVector >());
+    scalar_taylor_function_class.def(init< IntervalVector, const ScalarFunctionInterface& >());
+    scalar_taylor_function_class.def("error", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const double&)) &ScalarTaylorFunction::set_error);
+    scalar_taylor_function_class.def("argument_size", &ScalarTaylorFunction::argument_size);
+    scalar_taylor_function_class.def("domain", &ScalarTaylorFunction::domain, return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("codomain", &ScalarTaylorFunction::codomain);
+    scalar_taylor_function_class.def("centre", &ScalarTaylorFunction::centre);
+    scalar_taylor_function_class.def("range", &ScalarTaylorFunction::range);
+    scalar_taylor_function_class.def("model", (const TaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("__getitem__", &__getitem__<ScalarTaylorFunction,MultiIndex,Float>);
+    scalar_taylor_function_class.def("__setitem__",&__setitem__<ScalarTaylorFunction,MultiIndex,Float>);
+    scalar_taylor_function_class.def(+self);
+    scalar_taylor_function_class.def(-self);
+    scalar_taylor_function_class.def(self+self);
+    scalar_taylor_function_class.def(self-self);
+    scalar_taylor_function_class.def(self*self);
+    scalar_taylor_function_class.def(self/self);
+    scalar_taylor_function_class.def(self+Float());
+    scalar_taylor_function_class.def(self-Float());
+    scalar_taylor_function_class.def(self*Float());
+    scalar_taylor_function_class.def(self/Float());
+    scalar_taylor_function_class.def(Float()+self);
+    scalar_taylor_function_class.def(Float()-self);
+    scalar_taylor_function_class.def(Float()*self);
+    scalar_taylor_function_class.def(Float()/self);
+    scalar_taylor_function_class.def(self+=Float());
+    scalar_taylor_function_class.def(self-=Float());
+    scalar_taylor_function_class.def(self*=Float());
+    scalar_taylor_function_class.def(self/=Float());
+    scalar_taylor_function_class.def(Interval()+self);
+    scalar_taylor_function_class.def(Interval()-self);
+    scalar_taylor_function_class.def(Interval()*self);
+    scalar_taylor_function_class.def(Interval()/self);
+    scalar_taylor_function_class.def(self+Interval());
+    scalar_taylor_function_class.def(self-Interval());
+    scalar_taylor_function_class.def(self*Interval());
+    scalar_taylor_function_class.def(self/Interval());
+    scalar_taylor_function_class.def(self+=Interval());
+    scalar_taylor_function_class.def(self-=Interval());
+    scalar_taylor_function_class.def(self*=Interval());
+    scalar_taylor_function_class.def(self/=Interval());
+    scalar_taylor_function_class.def(self+=self);
+    scalar_taylor_function_class.def(self-=self);
+    scalar_taylor_function_class.def(self>Float());
+    scalar_taylor_function_class.def(self>self);
+    scalar_taylor_function_class.def(self<self);
+    scalar_taylor_function_class.def(self_ns::str(self));
+    scalar_taylor_function_class.def("__mul__",&__mul__< VectorTaylorFunction, ScalarTaylorFunction, Vector<Float> >);
 
-    //taylor_expression_class.def("__str__",(std::string(*)(const TE&)) &__str__);
-    //taylor_expression_class.def("__cstr__",(std::string(*)(const TE&)) &__cstr__);
-    //taylor_expression_class.def("__repr__",(std::string(*)(const TE&)) &__repr__);
-    taylor_expression_class.def("value", (const Float&(TE::*)()const) &TE::value,return_value_policy<copy_const_reference>());
-    taylor_expression_class.def("truncate", (TE&(TE::*)(uint)) &TE::truncate,return_value_policy<reference_existing_object>());
-    taylor_expression_class.def("sweep", (TE&(TE::*)(double))&TE::sweep,return_value_policy<reference_existing_object>());
-    taylor_expression_class.def("truncate", (TE&(TE::*)()) &TE::truncate,return_value_policy<reference_existing_object>());
-    taylor_expression_class.def("sweep", (TE&(TE::*)())&TE::sweep,return_value_policy<reference_existing_object>());
-    taylor_expression_class.def("clobber", (TE&(TE::*)()) &TE::clobber,return_value_policy<reference_existing_object>());
-    taylor_expression_class.def("clean", (TE&(TE::*)()) &TE::clean,return_value_policy<reference_existing_object>());
-    taylor_expression_class.def("set_maximum_degree",&TE::set_maximum_degree);
-    taylor_expression_class.def("set_sweep_threshold",&TE::set_sweep_threshold);
-    taylor_expression_class.def("maximum_degree",&TE::maximum_degree);
-    taylor_expression_class.def("sweep_threshold",&TE::sweep_threshold);
-    //taylor_expression_class.def("set_default_maximum_degree",&TE::set_default_maximum_degree);
-    //taylor_expression_class.def("set_default_sweep_threshold",&TE::set_default_sweep_threshold);
-    //taylor_expression_class.def("default_maximum_degree",&TE::default_maximum_degree);
-    //taylor_expression_class.def("default_sweep_threshold",&TE::default_sweep_threshold);
-    taylor_expression_class.def("__call__", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
-    taylor_expression_class.def("__call__", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
-    taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
-    taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
-    taylor_expression_class.def("polynomial", (ScalarPolynomialFunction(*)(const TE&)) &polynomial);
-    taylor_expression_class.def("set", (TE(*)(const TE&,uint j, const Interval&)) &partial_evaluate);
-    taylor_expression_class.def("restrict", (TE(*)(const TE&,const Vector<Interval>&)) &restrict);
-    taylor_expression_class.def("restrict", (TE(*)(const TE&,uint,const Interval&)) &restrict);
-    taylor_expression_class.def("extend", (TE(*)(const TE&,const Vector<Interval>&)) &extend);
-    //taylor_expression_class.staticmethod("set_default_maximum_degree");
-    //taylor_expression_class.staticmethod("set_default_sweep_threshold");
-    //taylor_expression_class.staticmethod("default_maximum_degree");
-    //taylor_expression_class.staticmethod("default_sweep_threshold");
+    //scalar_taylor_function_class.def("__str__",(std::string(*)(const ScalarTaylorFunction&)) &__str__);
+    //scalar_taylor_function_class.def("__cstr__",(std::string(*)(const ScalarTaylorFunction&)) &__cstr__);
+    //scalar_taylor_function_class.def("__repr__",(std::string(*)(const ScalarTaylorFunction&)) &__repr__);
+    scalar_taylor_function_class.def("value", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::value,return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("truncate", (ScalarTaylorFunction&(ScalarTaylorFunction::*)(uint)) &ScalarTaylorFunction::truncate,return_value_policy<reference_existing_object>());
+    scalar_taylor_function_class.def("sweep", (ScalarTaylorFunction&(ScalarTaylorFunction::*)(double))&ScalarTaylorFunction::sweep,return_value_policy<reference_existing_object>());
+    scalar_taylor_function_class.def("truncate", (ScalarTaylorFunction&(ScalarTaylorFunction::*)()) &ScalarTaylorFunction::truncate,return_value_policy<reference_existing_object>());
+    scalar_taylor_function_class.def("sweep", (ScalarTaylorFunction&(ScalarTaylorFunction::*)())&ScalarTaylorFunction::sweep,return_value_policy<reference_existing_object>());
+    scalar_taylor_function_class.def("clobber", (ScalarTaylorFunction&(ScalarTaylorFunction::*)()) &ScalarTaylorFunction::clobber,return_value_policy<reference_existing_object>());
+    scalar_taylor_function_class.def("clean", (ScalarTaylorFunction&(ScalarTaylorFunction::*)()) &ScalarTaylorFunction::clean,return_value_policy<reference_existing_object>());
+    scalar_taylor_function_class.def("set_maximum_degree",&ScalarTaylorFunction::set_maximum_degree);
+    scalar_taylor_function_class.def("set_sweep_threshold",&ScalarTaylorFunction::set_sweep_threshold);
+    scalar_taylor_function_class.def("maximum_degree",&ScalarTaylorFunction::maximum_degree);
+    scalar_taylor_function_class.def("sweep_threshold",&ScalarTaylorFunction::sweep_threshold);
+    //scalar_taylor_function_class.def("set_default_maximum_degree",&ScalarTaylorFunction::set_default_maximum_degree);
+    //scalar_taylor_function_class.def("set_default_sweep_threshold",&ScalarTaylorFunction::set_default_sweep_threshold);
+    //scalar_taylor_function_class.def("default_maximum_degree",&ScalarTaylorFunction::default_maximum_degree);
+    //scalar_taylor_function_class.def("default_sweep_threshold",&ScalarTaylorFunction::default_sweep_threshold);
+    scalar_taylor_function_class.def("__call__", (Interval(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
+    scalar_taylor_function_class.def("__call__", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
+    scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
+    scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
+    scalar_taylor_function_class.def("polynomial", (ScalarPolynomialFunction(*)(const ScalarTaylorFunction&)) &polynomial);
+    scalar_taylor_function_class.def("set", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint j, const Interval&)) &partial_evaluate);
+    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Vector<Interval>&)) &restrict);
+    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &restrict);
+    scalar_taylor_function_class.def("extend", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Vector<Interval>&)) &extend);
+    //scalar_taylor_function_class.staticmethod("set_default_maximum_degree");
+    //scalar_taylor_function_class.staticmethod("set_default_sweep_threshold");
+    //scalar_taylor_function_class.staticmethod("default_maximum_degree");
+    //scalar_taylor_function_class.staticmethod("default_sweep_threshold");
 
 
 
-    taylor_expression_class.def("constant",(TE(*)(const IV&, const R&))&TE::constant);
-    taylor_expression_class.def("constant",(TE(*)(const IV&, const I&))&TE::constant);
-    taylor_expression_class.def("variable",(TE(*)(const IV&, uint))&TE::variable);
-    taylor_expression_class.def("variables",(Vector<TE>(*)(const IV&)) &TE::variables);
+    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const IntervalVector&, const Float&))&ScalarTaylorFunction::constant);
+    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const IntervalVector&, const Interval&))&ScalarTaylorFunction::constant);
+    scalar_taylor_function_class.def("variable",(ScalarTaylorFunction(*)(const IntervalVector&, uint))&ScalarTaylorFunction::variable);
+    scalar_taylor_function_class.def("variables",(Vector<ScalarTaylorFunction>(*)(const IntervalVector&)) &ScalarTaylorFunction::variables);
 
 
-    taylor_expression_class.staticmethod("constant");
-    taylor_expression_class.staticmethod("variable");
-    taylor_expression_class.staticmethod("variables");
+    scalar_taylor_function_class.staticmethod("constant");
+    scalar_taylor_function_class.staticmethod("variable");
+    scalar_taylor_function_class.staticmethod("variables");
 
-    def("split", (std::pair<TE,TE>(*)(const TE&,uint)) &Ariadne::split);
-    def("evaluate",(Interval(*)(const TE&,const IV&)) &evaluate);
-    def("partial_evaluate",(TE(*)(const TE&,uint,const I&)) &partial_evaluate);
+    def("split", (std::pair<ScalarTaylorFunction,ScalarTaylorFunction>(*)(const ScalarTaylorFunction&,uint)) &Ariadne::split);
+    def("evaluate",(Interval(*)(const ScalarTaylorFunction&,const IntervalVector&)) &evaluate);
+    def("partial_evaluate",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &partial_evaluate);
 
-    def("midpoint",(TE(*)(const TE&)) &midpoint);
-    def("evaluate",(I(*)(const TE&,const IV&)) &evaluate);
-    def("derivative",(TE(*)(const TE&,N)) &derivative);
-    def("antiderivative",(TE(*)(const TE&,N)) &antiderivative);
+    def("midpoint",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&)) &midpoint);
+    def("evaluate",(Interval(*)(const ScalarTaylorFunction&,const IntervalVector&)) &evaluate);
+    def("derivative",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint)) &derivative);
+    def("antiderivative",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint)) &antiderivative);
 
-    def("refines",(bool(*)(const TE&,const TE&)) &refines);
-    def("disjoint",(bool(*)(const TE&,const TE&)) &disjoint);
-    def("intersection",(TE(*)(const TE&,const TE&)) &intersection);
+    def("refines",(bool(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &refines);
+    def("disjoint",(bool(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &disjoint);
+    def("intersection",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &intersection);
 
-    def("restrict",(TE(*)(const TE&,const IV&)) &restrict);
+    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const IntervalVector&)) &restrict);
 
-    def("embed",(TE(*)(const TE&,const Interval&)) &embed);
-    def("embed",(TE(*)(const TE&,const IV&)) &embed);
-    def("embed",(TE(*)(const IV&,const TE&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Interval&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const IntervalVector&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const IntervalVector&,const ScalarTaylorFunction&)) &embed);
 
-    def("max",(TE(*)(const TE&,const TE&))&max);
-    def("min",(TE(*)(const TE&,const TE&))&min);
-    def("abs",(TE(*)(const TE&))&abs);
+    def("max",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&))&max);
+    def("min",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&))&min);
+    def("abs",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&abs);
 
-    def("neg",(TE(*)(const TE&))&neg);
-    def("rec",(TE(*)(const TE&))&rec);
-    def("sqr",(TE(*)(const TE&))&sqr);
-    def("pow",(TE(*)(const TE&, int))&pow);
+    def("neg",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&neg);
+    def("rec",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&rec);
+    def("sqr",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sqr);
+    def("pow",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&, int))&pow);
 
-    def("sqrt", (TE(*)(const TE&))&sqrt);
-    def("exp", (TE(*)(const TE&))&exp);
-    def("log", (TE(*)(const TE&))&log);
-    def("sin", (TE(*)(const TE&))&sin);
-    def("cos", (TE(*)(const TE&))&cos);
-    def("tan", (TE(*)(const TE&))&tan);
+    def("sqrt", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sqrt);
+    def("exp", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&exp);
+    def("log", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&log);
+    def("sin", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&sin);
+    def("cos", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&cos);
+    def("tan", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&))&tan);
 
-    to_python< Vector<TaylorExpression> >();
+    to_python< Vector<ScalarTaylorFunction> >();
 }
 
 
-void export_taylor_function()
+void export_vector_taylor_function()
 {
-    typedef uint N;
-    typedef double D;
-    typedef Float R;
-    typedef Interval I;
-    typedef MultiIndex A;
-    typedef Vector<Float> RV;
-    typedef Vector<Interval> IV;
-    typedef Matrix<Float> RMx;
+    typedef uint Nat;
+    typedef Vector<Float> FloatVector;
+    typedef Vector<Interval> IntervalVector;
+    typedef Matrix<Float> FloatMatrix;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
     typedef Vector<Polynomial<Float> > RPV;
     typedef Vector<Polynomial<Interval> > IPV;
     typedef Vector<ScalarFunctionInterface> EV;
-    typedef TaylorExpression TE;
-    typedef TaylorFunction TF;
-    typedef ScalarFunctionInterface E;
-    typedef FunctionInterface F;
+    typedef ScalarTaylorFunction ScalarTaylorFunction;
+    typedef VectorTaylorFunction VectorTaylorFunction;
 
-    class_<TF> taylor_function_class("TaylorFunction", init<TaylorFunction>());
-    //taylor_function_class.def( init< IV >());
-    taylor_function_class.def( init< IV,const F& >());
-    taylor_function_class.def( init< Vector<TaylorExpression> >());
-    taylor_function_class.def("__len__", &TaylorFunction::result_size);
-    taylor_function_class.def("result_size", &TaylorFunction::result_size);
-    taylor_function_class.def("argument_size", &TaylorFunction::argument_size);
-    taylor_function_class.def("domain", &TaylorFunction::domain, return_value_policy<copy_const_reference>());
-    taylor_function_class.def("codomain", &TaylorFunction::codomain);
-    taylor_function_class.def("centre", &TaylorFunction::centre);
-    taylor_function_class.def("range", &TaylorFunction::range);
-    //taylor_function_class.def("__getslice__", &__getslice__<TF,N,N,TE>);
-    taylor_function_class.def("__getslice__", (TF(*)(const TF&,int,int))&__getslice__);
-    taylor_function_class.def("__getitem__", &__getitem__<TF,N,TE>);
-    taylor_function_class.def("__setitem__",&__setitem__<TF,N,TE>);
-    taylor_function_class.def(-self);
-    taylor_function_class.def(self+self);
-    taylor_function_class.def(self-self);
-    taylor_function_class.def(self+RV());
-    taylor_function_class.def(self-RV());
-    taylor_function_class.def(self*R());
-    taylor_function_class.def(self/R());
-    //taylor_function_class.def(RV()+self);
-    //taylor_function_class.def(RV()-self);
-    //taylor_function_class.def(R()*self);
-    //taylor_function_class.def(R()/self);
-    taylor_function_class.def(self+=RV());
-    taylor_function_class.def(self-=RV());
-    taylor_function_class.def(self*=R());
-    taylor_function_class.def(self/=R());
-    taylor_function_class.def(self+=self);
-    taylor_function_class.def(self-=self);
-    taylor_function_class.def(self_ns::str(self));
-    //taylor_function_class.def("__str__",(std::string(*)(const TF&)) &__str__);
-    //taylor_function_class.def("__cstr__",(std::string(*)(const TF&)) &__cstr__);
-    //taylor_function_class.def("__repr__",(std::string(*)(const TF&)) &__repr__);
-    taylor_function_class.def("clobber", (TF&(TF::*)()) &TF::clobber,return_value_policy<reference_existing_object>());
-    //taylor_function_class.def(self_ns::str(self));
-    //taylor_function_class.def("truncate", (TaylorFunction&(TaylorFunction::*)(uint)) &TaylorFunction::truncate,return_value_policy<reference_existing_object>());
-    //taylor_function_class.def("sweep", (TaylorFunction&(TaylorFunction::*)(double))&TaylorFunction::sweep,return_value_policy<reference_existing_object>());
-    //taylor_function_class.def("truncate", (TaylorFunction&(TaylorFunction::*)()) &TaylorFunction::truncate,return_value_policy<reference_existing_object>());
-    //taylor_function_class.def("sweep", (TaylorFunction&(TaylorFunction::*)())&TaylorFunction::sweep,return_value_policy<reference_existing_object>());
-    //taylor_function_class.def("clean", (TaylorFunction&(TaylorFunction::*)()) &TaylorFunction::clean,return_value_policy<reference_existing_object>());
-    //taylor_function_class.def("set_maximum_degree",&TaylorFunction::set_maximum_degree);
-    //taylor_function_class.def("set_sweep_threshold",&TaylorFunction::set_sweep_threshold);
-    //taylor_function_class.def("maximum_degree",&TaylorFunction::maximum_degree);
-    //taylor_function_class.def("sweep_threshold",&TaylorFunction::sweep_threshold);
-    //taylor_function_class.def("set_default_maximum_degree",&TaylorFunction::set_default_maximum_degree);
-    //taylor_function_class.def("set_default_sweep_threshold",&TaylorFunction::set_default_sweep_threshold);
-    //taylor_function_class.def("default_maximum_degree",&TaylorFunction::default_maximum_degree);
-    //taylor_function_class.def("default_sweep_threshold",&TaylorFunction::default_sweep_threshold);
-    taylor_function_class.def("__call__", (Vector<Interval>(TaylorFunction::*)(const Vector<Float>&)const) &TaylorFunction::evaluate);
-    taylor_function_class.def("__call__", (Vector<Interval>(TaylorFunction::*)(const Vector<Interval>&)const) &TaylorFunction::evaluate);
-    taylor_function_class.def("evaluate", (Vector<Interval>(TaylorFunction::*)(const Vector<Float>&)const) &TaylorFunction::evaluate);
-    taylor_function_class.def("evaluate", (Vector<Interval>(TaylorFunction::*)(const Vector<Interval>&)const) &TaylorFunction::evaluate);
-    taylor_function_class.def("polynomial", (Vector< Polynomial<Interval> >(TF::*)()const) &TF::polynomial);
-    //taylor_function_class.staticmethod("set_default_maximum_degree");
-    //taylor_function_class.staticmethod("set_default_sweep_threshold");
-    //taylor_function_class.staticmethod("default_maximum_degree");
-    //taylor_function_class.staticmethod("default_sweep_threshold");
+    class_<VectorTaylorFunction> vector_taylor_function_class("VectorTaylorFunction", init<VectorTaylorFunction>());
+    vector_taylor_function_class.def( init< IntervalVector,const VectorFunctionInterface& >());
+    vector_taylor_function_class.def( init< Vector<ScalarTaylorFunction> >());
+    vector_taylor_function_class.def("__len__", &VectorTaylorFunction::result_size);
+    vector_taylor_function_class.def("result_size", &VectorTaylorFunction::result_size);
+    vector_taylor_function_class.def("argument_size", &VectorTaylorFunction::argument_size);
+    vector_taylor_function_class.def("domain", &VectorTaylorFunction::domain, return_value_policy<copy_const_reference>());
+    vector_taylor_function_class.def("codomain", &VectorTaylorFunction::codomain);
+    vector_taylor_function_class.def("centre", &VectorTaylorFunction::centre);
+    vector_taylor_function_class.def("range", &VectorTaylorFunction::range);
+    //vector_taylor_function_class.def("__getslice__", &__getslice__<VectorTaylorFunction,Nat,Nat,ScalarTaylorFunction>);
+    vector_taylor_function_class.def("__getslice__", (VectorTaylorFunction(*)(const VectorTaylorFunction&,int,int))&__getslice__);
+    vector_taylor_function_class.def("__getitem__", &__getitem__<VectorTaylorFunction,uint,ScalarTaylorFunction>);
+    vector_taylor_function_class.def("__setitem__",&__setitem__<VectorTaylorFunction,uint,ScalarTaylorFunction>);
+    vector_taylor_function_class.def(-self);
+    vector_taylor_function_class.def(self+self);
+    vector_taylor_function_class.def(self-self);
+    vector_taylor_function_class.def(self+FloatVector());
+    vector_taylor_function_class.def(self-FloatVector());
+    vector_taylor_function_class.def(self*Float());
+    vector_taylor_function_class.def(self/Float());
+    vector_taylor_function_class.def(self+=FloatVector());
+    vector_taylor_function_class.def(self-=FloatVector());
+    vector_taylor_function_class.def(self*=Float());
+    vector_taylor_function_class.def(self/=Float());
+    vector_taylor_function_class.def(self+=self);
+    vector_taylor_function_class.def(self-=self);
+    vector_taylor_function_class.def(self_ns::str(self));
+    vector_taylor_function_class.def("clobber", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::clobber,return_value_policy<reference_existing_object>());
+    vector_taylor_function_class.def("__call__", (IntervalVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
+    vector_taylor_function_class.def("__call__", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
+    vector_taylor_function_class.def("evaluate", (IntervalVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
+    vector_taylor_function_class.def("evaluate", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
+    vector_taylor_function_class.def("polynomial", (Vector< Polynomial<Interval> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomial);
 
 
-    taylor_function_class.def("constant",(TF(*)(const IV&, const RV&))&TF::constant);
-    taylor_function_class.def("constant",(TF(*)(const IV&, const IV&))&TF::constant);
-    taylor_function_class.def("identity",(TF(*)(const IV&))&TF::identity);
+    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const IntervalVector&, const FloatVector&))&VectorTaylorFunction::constant);
+    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const IntervalVector&, const IntervalVector&))&VectorTaylorFunction::constant);
+    vector_taylor_function_class.def("identity",(VectorTaylorFunction(*)(const IntervalVector&))&VectorTaylorFunction::identity);
 
-    taylor_function_class.staticmethod("constant");
-    taylor_function_class.staticmethod("identity");
+    vector_taylor_function_class.staticmethod("constant");
+    vector_taylor_function_class.staticmethod("identity");
 
-    def("refines", (bool(*)(const TF&,const TF&)) &refines);
-    def("disjoint", (bool(*)(const TF&,const TF&)) &disjoint);
-    def("intersection", (TF(*)(const TF&,const TF&)) &intersection);
+    def("refines", (bool(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &refines);
+    def("disjoint", (bool(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &disjoint);
+    def("intersection", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &intersection);
 
-    def("join", (TF(*)(const TF&,const TF&)) &join);
-    def("join", (TF(*)(const TF&,const TE&)) &join);
-    def("join", (TF(*)(const TE&,const TE&)) &join);
+    def("join", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &join);
+    def("join", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const ScalarTaylorFunction&)) &join);
+    def("join", (VectorTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &join);
 
-    def("combine", (TF(*)(const TE&,const TE&)) &combine);
-    def("combine", (TF(*)(const TE&,const TF&)) &combine);
-    def("combine", (TF(*)(const TF&,const TE&)) &combine);
-    def("combine", (TF(*)(const TF&,const TF&)) &combine);
+    def("combine", (VectorTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &combine);
+    def("combine", (VectorTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &combine);
+    def("combine", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const ScalarTaylorFunction&)) &combine);
+    def("combine", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &combine);
 
-    def("embed",(TF(*)(const TF&,const Interval&)) &embed);
-    def("embed",(TF(*)(const TF&,const IV&)) &embed);
-    def("embed",(TF(*)(const IV&,const TF&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const Interval&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const IntervalVector&,const VectorTaylorFunction&)) &embed);
 
-    def("evaluate",(IV(TF::*)(const RV&)const) &TF::evaluate);
-    def("evaluate",(IV(TF::*)(const IV&)const) &TF::evaluate);
-    def("partial_evaluate",(TF(*)(const TF&,uint,const Interval&)) &partial_evaluate);
-    //def("compose",(TE(*)(const RP&,const TF&)) &compose);
-    def("compose",(TE(*)(const TE&,const TF&)) &compose);
-    def("compose",(TF(*)(const TF&,const TF&)) &compose);
-    def("compose",(TE(*)(const E&,const TF&)) &compose);
-    def("compose",(TF(*)(const F&,const TF&)) &compose);
-    def("implicit",(TE(*)(const E&,const IV&)) &implicit);
-    def("implicit",(TE(*)(const TE&)) &implicit);
-    def("implicit",(TF(*)(const TF&)) &implicit);
-    def("antiderivative",(TF(*)(const TF&,N)) &antiderivative);
-    def("flow",(TF(*)(const TF&,const IV&,const I&, N)) &flow);
-    def("flow",(TF(*)(const TF&,const IV&,const R&, N)) &flow);
-    def("flow",(TF(*)(const F&,const IV&,const R&, N)) &flow);
-    def("parameterised_flow",(TF(*)(const TF&,const IV&,const R&, N)) &parameterised_flow);
+    def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const FloatVector&)const) &VectorTaylorFunction::evaluate);
+    def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
+    def("partial_evaluate",(VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &partial_evaluate);
+    //def("compose",(ScalarTaylorFunction(*)(const RP&,const VectorTaylorFunction&)) &compose);
+    def("compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &compose);
+    def("compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &compose);
+    def("compose",(ScalarTaylorFunction(*)(const ScalarFunctionInterface&,const VectorTaylorFunction&)) &compose);
+    def("compose",(VectorTaylorFunction(*)(const VectorFunctionInterface&,const VectorTaylorFunction&)) &compose);
+    def("implicit",(ScalarTaylorFunction(*)(const ScalarFunctionInterface&,const IntervalVector&)) &implicit);
+    def("implicit",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&)) &implicit);
+    def("implicit",(VectorTaylorFunction(*)(const VectorTaylorFunction&)) &implicit);
+    def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat)) &antiderivative);
+    def("flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Interval&, Nat)) &flow);
+    def("flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &flow);
+    def("flow",(VectorTaylorFunction(*)(const VectorFunctionInterface&,const IntervalVector&,const Float&, Nat)) &flow);
+    def("parameterised_flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &parameterised_flow);
 
-    def("unchecked_compose",(TE(*)(const TE&,const TF&)) &unchecked_compose);
-    def("unchecked_compose",(TF(*)(const TF&,const TF&)) &unchecked_compose);
-    def("unchecked_flow",(TF(*)(const TF&,const IV&,const I&, N)) &unchecked_flow);
-    def("unchecked_flow",(TF(*)(const TF&,const IV&,const R&, N)) &unchecked_flow);
+    def("unchecked_compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &unchecked_compose);
+    def("unchecked_compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &unchecked_compose);
+    def("unchecked_flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Interval&, Nat)) &unchecked_flow);
+    def("unchecked_flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &unchecked_flow);
 
-    from_python<TaylorFunction>();
+    from_python<VectorTaylorFunction>();
 }
 
 void calculus_submodule()
 {
     export_taylor_model();
-    export_taylor_variable();
-    export_taylor_function();
+    export_scalar_taylor_function();
+    export_vector_taylor_function();
 }
 
 

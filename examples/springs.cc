@@ -105,7 +105,7 @@ int main()
     A1[3][1] = -k2/m2;
     b1[3] = k2*p2/m2;
     b1[4] = 1.0;
-    AffineFunction free_d(A1,b1);
+    VectorAffineFunction free_d(A1,b1);
     
     /// Stuck oscillation (x1'=vx1; x2'=vx2; vx1'=vx2'=(k1*p1+k2*p2-(k1+k2)*x1)/(m1+m2); t'=1 )
     Matrix<Float> A2 = Matrix<Float>(5,5);
@@ -117,12 +117,12 @@ int main()
     A2[3][1] = -(k1+k2)/(m1+m2);
     b2[3] = (k1*p1+k2*p2)/(m1+m2);
     b2[4] = 1.0;
-    AffineFunction stuck_d(A2,b2);
+    VectorAffineFunction stuck_d(A2,b2);
 
     /// Create the resets
 
     /// Stick (x1^=x1; x2^=x2; vx1^=vx2^=(m1*vx1+m2*vx2)/(m1+m2) ) 
-    AffineFunction stick_r(Matrix<Float>(5,5, 1.0, 0.0, 0.0,        0.0,        0.0,
+    VectorAffineFunction stick_r(Matrix<Float>(5,5, 1.0, 0.0, 0.0,        0.0,        0.0,
                                               0.0, 1.0, 0.0,        0.0,        0.0,
                                               0.0, 0.0, m1/(m1+m2), m2/(m1+m2), 0.0,
                                               0.0, 0.0, m1/(m1+m2), m2/(m1+m2), 0.0,
@@ -134,10 +134,10 @@ int main()
     /// Create the guards
     
     /// Guard for the transition between free and stuck (x1 >= x2)
-    AffineFunction free2stuck_g(Matrix<Float>(1,5,1.0,-1.0,0.0,0.0,0.0),Vector<Float>(1));
+    VectorAffineFunction free2stuck_g(Matrix<Float>(1,5,1.0,-1.0,0.0,0.0,0.0),Vector<Float>(1));
     /// Guard for the transition between stuck and just free ((k1-k2)*x1 + k2*p2 - k1*p1 >= st)
-    AffineFunction stuck2free_g(Matrix<Float>(1,5,k1-k2,0.0,0.0,0.0,0.0),Vector<Float>(1,k2*p2 -k1*p1 -st));
-    //AffineFunction stuck2free_g(Matrix<Float>(1,4,0.0,0.0,-1.0,1.0),Vector<Float>(1,-st)); 
+    VectorAffineFunction stuck2free_g(Matrix<Float>(1,5,k1-k2,0.0,0.0,0.0,0.0),Vector<Float>(1,k2*p2 -k1*p1 -st));
+    //VectorAffineFunction stuck2free_g(Matrix<Float>(1,4,0.0,0.0,-1.0,1.0),Vector<Float>(1,-st)); 
 
 
     /// Build the automaton

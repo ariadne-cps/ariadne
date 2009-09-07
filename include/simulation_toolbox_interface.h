@@ -20,9 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file simulation_toolbox_interface.h
- *  \brief Interfaces for calculus tools useful for working with dynamical systems. 
+ *  \brief Interfaces for calculus tools useful for working with dynamical systems.
  */
 
 
@@ -32,10 +32,10 @@
 #include "tribool.h"
 
 namespace Ariadne {
- 
 
 
-/*! \brief Tools for analysing dynamical systems by simulation. 
+
+/*! \brief Tools for analysing dynamical systems by simulation.
  */
 class SimulationToolboxInterface
 {
@@ -44,40 +44,40 @@ class SimulationToolboxInterface
     typedef Float TimeType;
     typedef Point StateType;
     typedef ScalarFunctionInterface PredicateType;
-    typedef FunctionInterface MapType;
-    typedef FunctionInterface VectorFieldType;
+    typedef VectorFunctionInterface MapType;
+    typedef VectorFunctionInterface VectorFieldType;
   public:
     //! \brief Virtual destructor.
     virtual ~SimulationToolboxInterface() { }
 
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is the point
-    //! satisfies the constraint, \a false if the point does not satisfy the constraint, and 
+    //! satisfies the constraint, \a false if the point does not satisfy the constraint, and
     //! indeterminate if the point lies on the boundary.
-    virtual tribool 
+    virtual tribool
     active(const ScalarFunctionInterface& guard,
            const Point& state) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_point cross the zero-set of the
     //! the \a guard under evolution of the \a vector_field, for times up to \a maximum_time.
     //! The crossing must be (differentiably) transverse.
-    virtual TimeType 
+    virtual TimeType
     crossing_time(const ScalarFunctionInterface& guard,
-                  const FunctionInterface& vector_field,
+                  const VectorFunctionInterface& vector_field,
                   const Point& initial_state,
                   const TimeType& maximum_time) const = 0;
-  
+
     //! \brief Computes the image of the set defined by \a state under the \a map.
     virtual StateType
-    reset_step(const MapType& map, 
-               const Point& state) const = 0;  
+    reset_step(const MapType& map,
+               const Point& state) const = 0;
 
     //! \brief Computes the points reached by evolution of the \a initial_state under the flow
     //! given by \a vector_field. The \a step_size gives the time the points should be flowed.
-    virtual StateType 
-    integration_step(const FunctionInterface& vector_field, 
-                     const Point& initial_state, 
+    virtual StateType
+    integration_step(const VectorFunctionInterface& vector_field,
+                     const Point& initial_state,
                      const TimeType& step_size) const = 0;
-  
+
 };
 
 } //  namespace Ariadne

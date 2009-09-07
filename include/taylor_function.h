@@ -40,64 +40,64 @@ template<class X> class Matrix;
 template<class X> class Polynomial;
 
 class ScalarFunctionInterface;
-class FunctionInterface;
+class VectorFunctionInterface;
 class MultiIndex;
 class TaylorModel;
-class TaylorExpression;
-class TaylorFunction;
+class ScalarTaylorFunction;
+class VectorTaylorFunction;
 
 // Remove the error term
-TaylorExpression midpoint(const TaylorExpression& x);
+ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
 
 // Restrict to a smaller domain. REQUIRED
-TaylorExpression restrict(const TaylorExpression& x, const Vector<Interval>& d);
+ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const Vector<Interval>& d);
 // Extend to a larger domain. REQUIRED
-TaylorExpression extend(const TaylorExpression& x, const Vector<Interval>& d);
+ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const Vector<Interval>& d);
 
 // Test if a variable refines another
-bool refines(const TaylorExpression& tv1, const TaylorExpression& tv2);
+bool refines(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2);
 // Test if two variables definitely represent different quantities
-bool disjoint(const TaylorExpression& x1, const TaylorExpression& x2);
+bool disjoint(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
 // Test if two variables definitely represent different quantities
-TaylorExpression intersection(const TaylorExpression& x1, const TaylorExpression& x2);
+ScalarTaylorFunction intersection(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
 
 // Evaluate an array of Taylor variables on a vector.
-Interval evaluate(const TaylorExpression& x, const Vector<Interval>& sy);
+Interval evaluate(const ScalarTaylorFunction& x, const Vector<Interval>& sy);
 
 // Set the value of the \a kth variable to c
-TaylorExpression partial_evaluate(const TaylorExpression& x, uint k, const Interval& c);
+ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& x, uint k, const Interval& c);
 // Restrict the \a kth variable to lie in the interval \a d.
-TaylorExpression restrict(const TaylorExpression& x, uint k, const Interval& d);
+ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, uint k, const Interval& d);
 
 // Compose with an expression.
-TaylorExpression compose(const ScalarFunctionInterface& x, const Vector<TaylorExpression>& y);
+ScalarTaylorFunction compose(const ScalarFunctionInterface& x, const VectorTaylorFunction& y);
 
 // Split the variable over two domains, subdividing along the independent variable j.
-pair<TaylorExpression,TaylorExpression> split(const TaylorExpression& x, uint j);
+pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, uint j);
 
 
 // Embed the variable in a space of higher dimension
-TaylorExpression embed(const TaylorExpression& tv1, const Interval& d2);
-TaylorExpression embed(const Vector<Interval>& d1, const TaylorExpression& tv2);
+ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& d2);
+ScalarTaylorFunction embed(const Vector<Interval>& d1, const ScalarTaylorFunction& tv2);
 
 // Antidifferentiation operator
-TaylorExpression antiderivative(const TaylorExpression& x, uint k);
-TaylorExpression derivative(const TaylorExpression& x, uint k);
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k);
+ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k);
 
 // Implicit function solver; solves f(x,h(x))=0 on dom1(f)
-TaylorExpression implicit(const TaylorExpression& f);
+ScalarTaylorFunction implicit(const ScalarTaylorFunction& f);
 // Implicit function solver solves f(g(x),h(x))=0 on dom(g)
-TaylorExpression implicit(const ScalarFunctionInterface& f, const TaylorFunction& g);
+ScalarTaylorFunction implicit(const ScalarFunctionInterface& f, const VectorTaylorFunction& g);
 // Implicit function solver solves f(x,h(x))=0 on d
-TaylorExpression implicit(const ScalarFunctionInterface& f, const Vector<Interval>& d);
+ScalarTaylorFunction implicit(const ScalarFunctionInterface& f, const Vector<Interval>& d);
 
-TaylorExpression crossing_time(const ScalarFunctionInterface& g, const FunctionInterface& f, const Vector<Interval>& d);
+ScalarTaylorFunction crossing_time(const ScalarFunctionInterface& g, const VectorFunctionInterface& f, const Vector<Interval>& d);
 
 
-/*! \brief A TaylorExpression is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
+/*! \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
  *
- * Formally, a TaylorExpression is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
- * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \med \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
+ * Formally, a ScalarTaylorFunction is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
+ * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
  * Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
  * about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
  * However, integrals of \f$f\f$ can be computed.
@@ -112,9 +112,9 @@ TaylorExpression crossing_time(const ScalarFunctionInterface& g, const FunctionI
  * Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
  * for but there are a number of techniques available.
  *
- * \sa Expansion, TaylorModel, TaylorFunction, TaylorSet.
+ * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorSet.
  */
-class TaylorExpression
+class ScalarTaylorFunction
 {
     typedef Vector<Interval> DomainType;
     typedef TaylorModel ModelType;
@@ -132,49 +132,49 @@ class TaylorExpression
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
-    explicit TaylorExpression();
-    //! \brief Construct a TaylorExpression over the domain \a d.
-    explicit TaylorExpression(const DomainType& d);
-    //! \brief Construct a TaylorExpression over the domain \a d, based on the scaled model \a m.
-    explicit TaylorExpression(const DomainType& d, const TaylorModel& m);
-    //! \brief Construct a TaylorExpression over the domain \a d, with scaled power series expansion \a f and error \a e.
-    explicit TaylorExpression(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
+    explicit ScalarTaylorFunction();
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d.
+    explicit ScalarTaylorFunction(const DomainType& d);
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
+    explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel& m);
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d, with scaled power series expansion \a f and error \a e.
+    explicit ScalarTaylorFunction(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
 
-    //! \brief Construct a TaylorExpression over the domain \a d from the expression \a f.
-    explicit TaylorExpression(const DomainType& d, const ScalarFunctionInterface& f);
-    //! \brief Construct a TaylorExpression over the domain \a d from the polynomial \a p.
-    explicit TaylorExpression(const DomainType& d, const Polynomial<Float>& p);
-    //! \brief Construct a TaylorExpression over the domain \a d from the interval polynomial \a p.
-    explicit TaylorExpression(const DomainType& d, const Polynomial<Interval>& p);
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the expression \a f.
+    explicit ScalarTaylorFunction(const DomainType& d, const ScalarFunctionInterface& f);
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the polynomial \a p.
+    explicit ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p);
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the interval polynomial \a p.
+    explicit ScalarTaylorFunction(const DomainType& d, const Polynomial<Interval>& p);
     //@}
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorExpression& operator=(const Float& c) { this->_model=c; return *this; }
+    ScalarTaylorFunction& operator=(const Float& c) { this->_model=c; return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorExpression& operator=(const Interval& c) { this->_model=c; return *this; }
+    ScalarTaylorFunction& operator=(const Interval& c) { this->_model=c; return *this; }
     //@}
 
     //@{
     /*! \name Named constructors. */
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorExpression constant(const DomainType& d, const Float& c);
+    static ScalarTaylorFunction constant(const DomainType& d, const Float& c);
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorExpression constant(const DomainType& d, const Interval& c);
+    static ScalarTaylorFunction constant(const DomainType& d, const Interval& c);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static TaylorExpression variable(const DomainType& d, unsigned int j);
+    static ScalarTaylorFunction variable(const DomainType& d, unsigned int j);
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
-    static TaylorExpression affine(const DomainType& d, const Float& c, const Vector<Float>& g);
+    static ScalarTaylorFunction affine(const DomainType& d, const Float& c, const Vector<Float>& g);
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d.
-    static TaylorExpression affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e) ;
+    static ScalarTaylorFunction affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e) ;
 
     //! \brief Return the vector of constants with values \a c over domain \a d.
-    static Vector<TaylorExpression> constants(const DomainType& d, const Vector<Float>& c);
+    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Float>& c);
     //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<TaylorExpression> constants(const DomainType& d, const Vector<Interval>& c);
+    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Interval>& c);
     //! \brief Return the vector of variables with values \a x over domain \a d.
-    static Vector<TaylorExpression> variables(const DomainType& d);
+    static Vector<ScalarTaylorFunction> variables(const DomainType& d);
     //@}
 
     //@{
@@ -238,9 +238,9 @@ class TaylorExpression
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    bool operator==(const TaylorExpression& tv) const;
+    bool operator==(const ScalarTaylorFunction& tv) const;
     //! \brief Inequality operator.
-    bool operator!=(const TaylorExpression& tv) const { return !(*this==tv); }
+    bool operator!=(const ScalarTaylorFunction& tv) const { return !(*this==tv); }
     //@}
 
     //@{
@@ -256,23 +256,23 @@ class TaylorExpression
     //@{
     /*! \name Simplification operations. */
     //! \brief Truncate to the default maximum degree of the quantity.
-    TaylorExpression& truncate() { this->_model.truncate(); return *this; }
+    ScalarTaylorFunction& truncate() { this->_model.truncate(); return *this; }
     //! \brief Truncate to degree \a deg.
-    TaylorExpression& truncate(uint deg) { this->_model.truncate(deg); return *this; }
+    ScalarTaylorFunction& truncate(uint deg) { this->_model.truncate(deg); return *this; }
     //! \brief Truncate all terms with any coefficient higher than \a a.
-    TaylorExpression& truncate(const MultiIndex& a) { this->_model.truncate(a); return *this; }
+    ScalarTaylorFunction& truncate(const MultiIndex& a) { this->_model.truncate(a); return *this; }
     //! \brief Truncate all terms with any coefficient higher than those given by \a b.
-    TaylorExpression& truncate(const MultiIndexBound& b) { this->_model.truncate(b); return *this; }
+    ScalarTaylorFunction& truncate(const MultiIndexBound& b) { this->_model.truncate(b); return *this; }
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    TaylorExpression& sweep() { this->_model.sweep(); return *this; }
+    ScalarTaylorFunction& sweep() { this->_model.sweep(); return *this; }
     //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
-    TaylorExpression& sweep(double eps) { this->_model.sweep(eps); return *this; }
+    ScalarTaylorFunction& sweep(double eps) { this->_model.sweep(eps); return *this; }
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    TaylorExpression& clean(const TaylorModel::Accuracy& acc) { this->_model.clean(acc); return *this; }
+    ScalarTaylorFunction& clean(const TaylorModel::Accuracy& acc) { this->_model.clean(acc); return *this; }
     //! \brief Remove all terms which have high degree or small magnitude.
-    TaylorExpression& clean() { this->_model.clean(); return *this; }
+    ScalarTaylorFunction& clean() { this->_model.clean(); return *this; }
     //@}
 
     //@{
@@ -294,340 +294,351 @@ class TaylorExpression
     //@{
     /*! \name Non-arithmetic operations. */
     //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
-    friend bool refines(const TaylorExpression& x1, const TaylorExpression& x2);
+    friend bool refines(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
     //! \brief Test if the quantities are disjoint.
-    friend bool disjoint(const TaylorExpression& x1, const TaylorExpression& x2);
+    friend bool disjoint(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
     //! \brief Test if the quantities are disjoint.
-    friend TaylorExpression intersection(const TaylorExpression& x1, const TaylorExpression& x2);
+    friend ScalarTaylorFunction intersection(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
     //! \brief Restrict to a subdomain.
-    friend TaylorExpression restrict(const TaylorExpression& x, const DomainType& d);
+    friend ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const DomainType& d);
     //! \brief Restrict the values of the \a k<sup>th</sup> variable to the subinterval \a d.
-    friend TaylorExpression restrict(const TaylorExpression& x, uint k, const Interval& d);
+    friend ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, uint k, const Interval& d);
     //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
     //! The extension is performed keeping \a x constant over the new coordinates.
-    friend TaylorExpression extend(const TaylorExpression& x, const DomainType& d);
+    friend ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const DomainType& d);
     //@}
 
     /*! \name Arithmetic operations. */
     //! \brief Inplace addition of another variable.
-    friend TaylorExpression& operator+=(TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Inplace subtraction of another variable.
-    friend TaylorExpression& operator-=(TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Inplace addition of a product of two variables.
-    friend TaylorExpression& operator+=(TaylorExpression& x, const Product<TaylorExpression,TaylorExpression>& y);
+    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Product<ScalarTaylorFunction,ScalarTaylorFunction>& y);
     //! \brief Inplace addition of an exact floating-point constant.
-    friend TaylorExpression& operator+=(TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Float& c);
     //! \brief Inplace addition of an interval constant.
-    friend TaylorExpression& operator+=(TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Interval& c);
     //! \brief Inplace subtraction of an exact floating-point constant.
-    friend TaylorExpression& operator-=(TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Float& c);
     //! \brief Inplace subtraction of an interval constant.
-    friend TaylorExpression& operator-=(TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Interval& c);
     //! \brief Inplace multiplication by an exact scalar.
-    friend TaylorExpression& operator*=(TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Float& c);
     //! \brief Inplace multiplication by an approximate scalar.
-    friend TaylorExpression& operator*=(TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Interval& c);
     //! \brief Inplace division by an exact scalar.
-    friend TaylorExpression& operator/=(TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const Float& c);
     //! \brief Inplace division by an approximate scalar.
-    friend TaylorExpression& operator/=(TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const Interval& c);
 
     //! \brief Unary plus.
-    friend TaylorExpression operator+(const TaylorExpression& x);
+    friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x);
     //! \brief Unary minus.
-    friend TaylorExpression operator-(const TaylorExpression& x);
+    friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x);
     //! \brief Addition.
-    friend TaylorExpression operator+(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Subtraction.
-    friend TaylorExpression operator-(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Multiplication.
-    friend TaylorExpression operator*(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Division.
-    friend TaylorExpression operator/(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 
     //! \brief Addition of a scakar.
-    friend TaylorExpression operator+(const TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const Float& c);
     //! \brief Subtraction of a scakar.
-    friend TaylorExpression operator-(const TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const Float& c);
     //! \brief Multiplication by a scakar.
-    friend TaylorExpression operator*(const TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const Float& c);
     //! \brief Division by a scakar.
-    friend TaylorExpression operator/(const TaylorExpression& x, const Float& c);
+    friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const Float& c);
     //! \brief Addition of a scakar.
-    friend TaylorExpression operator+(const TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const Interval& c);
     //! \brief Subtraction of a scakar.
-    friend TaylorExpression operator-(const TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const Interval& c);
     //! \brief Multiplication by a scakar.
-    friend TaylorExpression operator*(const TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const Interval& c);
     //! \brief Division by a scakar.
-    friend TaylorExpression operator/(const TaylorExpression& x, const Interval& c);
+    friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const Interval& c);
     //! \brief Addition of a scakar.
-    friend TaylorExpression operator+(const Float& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator+(const Float& c, const ScalarTaylorFunction& x);
     //! \brief Subtraction from a scakar.
-    friend TaylorExpression operator-(const Float& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator-(const Float& c, const ScalarTaylorFunction& x);
     //! \brief Multiplication by a scakar.
-    friend TaylorExpression operator*(const Float& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator*(const Float& c, const ScalarTaylorFunction& x);
     //! \brief Division through a scalar.
-    friend TaylorExpression operator/(const Float& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator/(const Float& c, const ScalarTaylorFunction& x);
     //! \brief Addition of a scakar.
-    friend TaylorExpression operator+(const Interval& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator+(const Interval& c, const ScalarTaylorFunction& x);
     //! \brief Subtraction from a scakar.
-    friend TaylorExpression operator-(const Interval& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator-(const Interval& c, const ScalarTaylorFunction& x);
     //! \brief Multiplication by a scakar.
-    friend TaylorExpression operator*(const Interval& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator*(const Interval& c, const ScalarTaylorFunction& x);
     //! \brief Division through a scalar.
-    friend TaylorExpression operator/(const Interval& c, const TaylorExpression& x);
+    friend ScalarTaylorFunction operator/(const Interval& c, const ScalarTaylorFunction& x);
 
     //! \brief Maximum. Throws an error if one variable is not greater than the other
     //! over the entire domain.
-    friend TaylorExpression max(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction max(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Minimum. Throws an error if one variable is not greater than the other
     //! over the entire domain.
-    friend TaylorExpression min(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction min(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Addition.
-    friend TaylorExpression add(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction add(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Multiplication.
-    friend TaylorExpression mul(const TaylorExpression& x, const TaylorExpression& y);
+    friend ScalarTaylorFunction mul(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Absolute value. Throws an error if one variable is neither greater than
     //! zero over the entire domain, nor less than zero over the entire domain.
-    friend TaylorExpression abs(const TaylorExpression& x);
+    friend ScalarTaylorFunction abs(const ScalarTaylorFunction& x);
     //! \brief Negation.
-    friend TaylorExpression neg(const TaylorExpression& x);
+    friend ScalarTaylorFunction neg(const ScalarTaylorFunction& x);
     //! \brief Reciprocal.
-    friend TaylorExpression rec(const TaylorExpression& x);
+    friend ScalarTaylorFunction rec(const ScalarTaylorFunction& x);
     //! \brief Square.
-    friend TaylorExpression sqr(const TaylorExpression& x);
+    friend ScalarTaylorFunction sqr(const ScalarTaylorFunction& x);
     //! \brief Power.
-    friend TaylorExpression pow(const TaylorExpression& x, int n);
+    friend ScalarTaylorFunction pow(const ScalarTaylorFunction& x, int n);
     //! \brief Square root.
-    friend TaylorExpression sqrt(const TaylorExpression& x);
+    friend ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x);
     //! \brief Natural exponent.
-    friend TaylorExpression exp(const TaylorExpression& x);
+    friend ScalarTaylorFunction exp(const ScalarTaylorFunction& x);
     //! \brief Natural logarithm.
-    friend TaylorExpression log(const TaylorExpression& x);
+    friend ScalarTaylorFunction log(const ScalarTaylorFunction& x);
     //! \brief Sine.
-    friend TaylorExpression sin(const TaylorExpression& x);
+    friend ScalarTaylorFunction sin(const ScalarTaylorFunction& x);
     //! \brief Cosine.
-    friend TaylorExpression cos(const TaylorExpression& x);
+    friend ScalarTaylorFunction cos(const ScalarTaylorFunction& x);
     //! \brief Tangent.
-    friend TaylorExpression tan(const TaylorExpression& x);
+    friend ScalarTaylorFunction tan(const ScalarTaylorFunction& x);
     //! \brief Inverse sine.
-    friend TaylorExpression asin(const TaylorExpression& x);
+    friend ScalarTaylorFunction asin(const ScalarTaylorFunction& x);
     //! \brief Inverse cosine.
-    friend TaylorExpression acos(const TaylorExpression& x);
+    friend ScalarTaylorFunction acos(const ScalarTaylorFunction& x);
     //! \brief Inverse tangent.
-    friend TaylorExpression atan(const TaylorExpression& x);
+    friend ScalarTaylorFunction atan(const ScalarTaylorFunction& x);
     //@}
 
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const TaylorExpression& x);
+    friend std::ostream& operator<<(std::ostream& os, const ScalarTaylorFunction& x);
     //@}
 
   public:
-    TaylorExpression& clobber() { this->_model.clobber(); return *this; }
-    TaylorExpression& clobber(uint o) { this->_model.clobber(o); return *this; }
-    TaylorExpression& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
+    ScalarTaylorFunction& clobber() { this->_model.clobber(); return *this; }
+    ScalarTaylorFunction& clobber(uint o) { this->_model.clobber(o); return *this; }
+    ScalarTaylorFunction& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
 };
 
 
-inline tribool operator>(const TaylorExpression& x, const Float& c) {
+inline tribool operator>(const ScalarTaylorFunction& x, const Float& c) {
     Interval r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }
-inline tribool operator<(const TaylorExpression& x, const Float& c) {
+inline tribool operator<(const ScalarTaylorFunction& x, const Float& c) {
     Interval r=x.range(); if(r.lower()<c) { return true; } else if(r.upper()>=c) { return false; } else { return indeterminate; } }
 
-inline tribool operator>(const TaylorExpression& x, const TaylorExpression& y) { return (x-y)>0; }
-inline tribool operator<(const TaylorExpression& x, const TaylorExpression& y) { return (x-y)<0; }
+inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
+inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
 
-inline TaylorExpression& operator+=(TaylorExpression& x, const Float& c) {
+inline ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Float& c) {
     x._model+=c; return x; }
-inline TaylorExpression& operator-=(TaylorExpression& x, const Float& c) {
+inline ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Float& c) {
     x._model-=c; return x; }
-inline TaylorExpression& operator*=(TaylorExpression& x, const Float& c) {
+inline ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Float& c) {
     x._model*=c; return x; }
-inline TaylorExpression& operator/=(TaylorExpression& x, const Float& c) {
+inline ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const Float& c) {
     x._model*=c; return x; }
 
-inline TaylorExpression& operator+=(TaylorExpression& x, const Interval& c) {
+inline ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Interval& c) {
     x._model+=c; return x; }
-inline TaylorExpression& operator-=(TaylorExpression& x, const Interval& c) {
+inline ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Interval& c) {
     x._model-=c; return x; }
-inline TaylorExpression& operator*=(TaylorExpression& x, const Interval& c) {
+inline ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Interval& c) {
     x._model*=c; return x; }
-inline TaylorExpression& operator/=(TaylorExpression& x, const Interval& c) {
+inline ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const Interval& c) {
     x._model*=c; return x; }
 
 
-inline TaylorExpression operator+(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,x._model); }
-inline TaylorExpression operator-(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,-x._model); }
+inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,x._model); }
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,-x._model); }
 
-inline TaylorExpression operator+(const TaylorExpression& x, const Float& c) {
-    return TaylorExpression(x._domain,x._model+c); }
-inline TaylorExpression operator-(const TaylorExpression& x, const Float& c) {
-    return TaylorExpression(x._domain,x._model-c); }
-inline TaylorExpression operator*(const TaylorExpression& x, const Float& c) {
-    return TaylorExpression(x._domain,x._model*c); }
-inline TaylorExpression operator/(const TaylorExpression& x, const Float& c) {
-    return TaylorExpression(x._domain,x._model/c); }
-inline TaylorExpression operator+(const TaylorExpression& x, const Interval& c) {
-    return TaylorExpression(x._domain,x._model+c); }
-inline TaylorExpression operator-(const TaylorExpression& x, const Interval& c) {
-    return TaylorExpression(x._domain,x._model-c); }
-inline TaylorExpression operator*(const TaylorExpression& x, const Interval& c) {
-    return TaylorExpression(x._domain,x._model*c); }
-inline TaylorExpression operator/(const TaylorExpression& x, const Interval& c) {
-    return TaylorExpression(x._domain,x._model/c); }
-inline TaylorExpression operator+(const Float& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c+x._model); }
-inline TaylorExpression operator-(const Float& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c-x._model); }
-inline TaylorExpression operator*(const Float& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c*x._model); }
-inline TaylorExpression operator/(const Float& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c/x._model); }
-inline TaylorExpression operator+(const Interval& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c+x._model); }
-inline TaylorExpression operator-(const Interval& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c-x._model); }
-inline TaylorExpression operator*(const Interval& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c*x._model); }
-inline TaylorExpression operator/(const Interval& c, const TaylorExpression& x) {
-    return TaylorExpression(x._domain,c/x._model); }
-
-
-inline TaylorExpression abs(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,abs(x._model)); }
-inline TaylorExpression neg(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,abs(x._model)); }
-inline TaylorExpression rec(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,rec(x._model)); }
-inline TaylorExpression sqr(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,sqr(x._model)); }
-inline TaylorExpression pow(const TaylorExpression& x, int n) {
-    return TaylorExpression(x._domain,pow(x._model,n)); }
-inline TaylorExpression sqrt(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,sqrt(x._model)); }
-inline TaylorExpression exp(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,exp(x._model)); }
-inline TaylorExpression log(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,log(x._model)); }
-inline TaylorExpression sin(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,sin(x._model)); }
-inline TaylorExpression cos(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,cos(x._model)); }
-inline TaylorExpression tan(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,tan(x._model)); }
-inline TaylorExpression asin(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,asin(x._model)); }
-inline TaylorExpression acos(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,acos(x._model)); }
-inline TaylorExpression atan(const TaylorExpression& x) {
-    return TaylorExpression(x._domain,atan(x._model)); }
+inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const Float& c) {
+    return ScalarTaylorFunction(x._domain,x._model+c); }
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const Float& c) {
+    return ScalarTaylorFunction(x._domain,x._model-c); }
+inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const Float& c) {
+    return ScalarTaylorFunction(x._domain,x._model*c); }
+inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const Float& c) {
+    return ScalarTaylorFunction(x._domain,x._model/c); }
+inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const Interval& c) {
+    return ScalarTaylorFunction(x._domain,x._model+c); }
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const Interval& c) {
+    return ScalarTaylorFunction(x._domain,x._model-c); }
+inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const Interval& c) {
+    return ScalarTaylorFunction(x._domain,x._model*c); }
+inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const Interval& c) {
+    return ScalarTaylorFunction(x._domain,x._model/c); }
+inline ScalarTaylorFunction operator+(const Float& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c+x._model); }
+inline ScalarTaylorFunction operator-(const Float& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c-x._model); }
+inline ScalarTaylorFunction operator*(const Float& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c*x._model); }
+inline ScalarTaylorFunction operator/(const Float& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c/x._model); }
+inline ScalarTaylorFunction operator+(const Interval& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c+x._model); }
+inline ScalarTaylorFunction operator-(const Interval& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c-x._model); }
+inline ScalarTaylorFunction operator*(const Interval& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c*x._model); }
+inline ScalarTaylorFunction operator/(const Interval& c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c/x._model); }
 
 
+inline ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,abs(x._model)); }
+inline ScalarTaylorFunction neg(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,abs(x._model)); }
+inline ScalarTaylorFunction rec(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,rec(x._model)); }
+inline ScalarTaylorFunction sqr(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,sqr(x._model)); }
+inline ScalarTaylorFunction pow(const ScalarTaylorFunction& x, int n) {
+    return ScalarTaylorFunction(x._domain,pow(x._model,n)); }
+inline ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,sqrt(x._model)); }
+inline ScalarTaylorFunction exp(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,exp(x._model)); }
+inline ScalarTaylorFunction log(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,log(x._model)); }
+inline ScalarTaylorFunction sin(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,sin(x._model)); }
+inline ScalarTaylorFunction cos(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,cos(x._model)); }
+inline ScalarTaylorFunction tan(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,tan(x._model)); }
+inline ScalarTaylorFunction asin(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,asin(x._model)); }
+inline ScalarTaylorFunction acos(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,acos(x._model)); }
+inline ScalarTaylorFunction atan(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,atan(x._model)); }
 
-inline Interval evaluate(const TaylorExpression& tv, const Vector<Interval>& x) {
+
+
+inline Interval evaluate(const ScalarTaylorFunction& tv, const Vector<Interval>& x) {
     return tv.evaluate(x); }
 
-inline TaylorExpression antiderivative(const TaylorExpression& x, uint k) {
+inline ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k) {
     Interval sf=rad_ivl(x.domain()[k]);
-    return TaylorExpression(x.domain(),antiderivative(x.model(),k)*sf); }
+    return ScalarTaylorFunction(x.domain(),antiderivative(x.model(),k)*sf); }
 
-inline TaylorExpression derivative(const TaylorExpression& x, uint k) {
+inline ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k) {
     Interval sf=1/rad_ivl(x.domain()[k]);
-    return TaylorExpression(x.domain(),derivative(x.model(),k)*sf); }
+    return ScalarTaylorFunction(x.domain(),derivative(x.model(),k)*sf); }
 
-inline TaylorExpression embed(const TaylorExpression& tv1, const Interval& dom2) {
-    return TaylorExpression(join(tv1.domain(),dom2),embed(tv1.model(),1u)); }
-inline TaylorExpression embed(const TaylorExpression& tv1, const Vector<Interval>& dom2) {
-    return TaylorExpression(join(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
-inline TaylorExpression embed(const Vector<Interval>& dom1, const TaylorExpression& tv2) {
-    return TaylorExpression(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
-
-
+inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& dom2) {
+    return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),1u)); }
+inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Vector<Interval>& dom2) {
+    return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
+inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTaylorFunction& tv2) {
+    return ScalarTaylorFunction(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
 
 
-Vector<Interval> evaluate(const TaylorFunction& f, const Vector<Interval>& x);
-TaylorFunction partial_evaluate(const TaylorFunction& f, uint k, const Interval& c);
-TaylorFunction embed(const TaylorFunction& tv1, const Vector<Interval>& d2);
-TaylorFunction embed(const TaylorFunction& tv1, const Interval& d2);
-TaylorFunction embed(const Vector<Interval>& d1, const TaylorFunction& tv2);
-TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
-bool refines(const TaylorFunction&, const TaylorFunction&);
-bool disjoint(const TaylorFunction&, const TaylorFunction&);
-TaylorFunction intersection(const TaylorFunction&, const TaylorFunction&);
-TaylorExpression compose(const ScalarFunctionInterface&, const TaylorFunction&);
-TaylorExpression compose(const TaylorExpression&, const TaylorFunction&);
-TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
-TaylorFunction compose(const FunctionInterface&, const TaylorFunction&);
-TaylorFunction antiderivative(const TaylorFunction&, uint);
-TaylorFunction implicit(const TaylorFunction&);
-TaylorExpression implicit(const ScalarFunctionInterface&, const TaylorFunction&);
-TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
-TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
-TaylorFunction flow(const FunctionInterface& vf, const Vector<Interval>& d, const Float& h, uint o);
-TaylorFunction parameterised_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
-TaylorExpression unchecked_compose(const TaylorExpression&, const TaylorFunction&);
-TaylorFunction unchecked_compose(const TaylorFunction&, const TaylorFunction&);
-TaylorFunction unchecked_implicit(const TaylorFunction&);
-TaylorFunction unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
-TaylorFunction unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
+
+Vector<Interval> evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x);
+VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);
+VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Vector<Interval>& d2);
+VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Interval& d2);
+VectorTaylorFunction embed(const Vector<Interval>& d1, const VectorTaylorFunction& tv2);
+VectorTaylorFunction restrict(const VectorTaylorFunction&, const Vector<Interval>& bx);
+bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
+bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction intersection(const VectorTaylorFunction&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const ScalarFunctionInterface&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const VectorFunctionInterface&, const VectorTaylorFunction&);
+VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
+VectorTaylorFunction implicit(const VectorTaylorFunction&);
+ScalarTaylorFunction implicit(const ScalarFunctionInterface&, const VectorTaylorFunction&);
+VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
+VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
+VectorTaylorFunction flow(const VectorFunctionInterface& vf, const Vector<Interval>& d, const Float& h, uint o);
+VectorTaylorFunction parameterised_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
+
+ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction unchecked_implicit(const VectorTaylorFunction&);
+VectorTaylorFunction unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
+VectorTaylorFunction unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 
 
 
 /*! \brief A taylor_model with multivalued output using the TaylorModel class.
  *
- *  See also TaylorModel, TaylorExpression, TaylorFunction.
+ *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */
-class TaylorFunction {
+class VectorTaylorFunction {
     typedef Float R;
     typedef Interval I;
   public:
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
-    TaylorFunction();
+    VectorTaylorFunction();
+
+    /*! \brief Construct the zero vector function over an unspecified domain. */
+    explicit VectorTaylorFunction(unsigned int result_size);
+
+    /*! \brief Construct from a result size and a domain. */
+    VectorTaylorFunction(unsigned int result_size, const Vector<Interval>& domain);
+
+    /*! \brief Construct a vector function all of whose components are the same. */
+    VectorTaylorFunction(unsigned int result_size, const ScalarTaylorFunction& scalar_function);
 
     /*! \brief Construct from a domain and the expansion. */
-    TaylorFunction(const Vector<Interval>& domain,
+    VectorTaylorFunction(const Vector<Interval>& domain,
                    const Vector< Expansion<Float> >& expansion);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    TaylorFunction(const Vector<Interval>& domain,
+    VectorTaylorFunction(const Vector<Interval>& domain,
                    const Vector< Expansion<Float> >& expansion,
                    const Vector<Float>& error);
 
     /*! \brief Construct from a domain and the models. */
-    explicit TaylorFunction(const Vector<Interval>& domain, const Vector<TaylorModel>& variables);
+    explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector<TaylorModel>& variables);
 
     /*! \brief Construct from a domain and a function. */
-    TaylorFunction(const Vector<Interval>& domain,
-                   const FunctionInterface& function);
+    VectorTaylorFunction(const Vector<Interval>& domain,
+                   const VectorFunctionInterface& function);
 
     /*! \brief Construct from a domain, a function, and accuracy paramters. */
-    TaylorFunction(const Vector<Interval>& domain,
-                   const FunctionInterface& function,
+    VectorTaylorFunction(const Vector<Interval>& domain,
+                   const VectorFunctionInterface& function,
                    shared_ptr<TaylorModel::Accuracy> accuracy_ptr);
 
     /*! \brief Construct from a domain and a polynomial. */
-    TaylorFunction(const Vector<Interval>& domain,
+    VectorTaylorFunction(const Vector<Interval>& domain,
                    const Vector< Polynomial<Float> >& polynomial);
 
     /*! \brief Construct from a domain and a n interval polynomial. */
-    TaylorFunction(const Vector<Interval>& domain,
+    VectorTaylorFunction(const Vector<Interval>& domain,
                    const Vector< Polynomial<Interval> >& polynomial);
 
-    /*! \brief Construct from a vector of Taylor variables. */
-    TaylorFunction(const Vector<TaylorExpression>& variables);
+    /*! \brief Construct from a vector of scalar Taylor functions. */
+    explicit VectorTaylorFunction(const Vector<ScalarTaylorFunction>& components);
 
+    /*! \brief Construct from a vector expression. */
+    template<class E> explicit VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve);
 
     /*! \brief Equality operator. */
-    bool operator==(const TaylorFunction& p) const;
+    bool operator==(const VectorTaylorFunction& p) const;
     /*! \brief Inequality operator. */
-    bool operator!=(const TaylorFunction& p) const;
+    bool operator!=(const VectorTaylorFunction& p) const;
 
     // Data access
     /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
@@ -651,11 +662,11 @@ class TaylorFunction {
     uint result_size() const;
 
     /*! \brief Get the \a ith Taylor variable */
-    TaylorExpression get(uint i) const;
+    ScalarTaylorFunction get(uint i) const;
     /*! \brief Set the \a ith Taylor variable */
-    void set(uint i, const TaylorExpression& te);
+    void set(uint i, const ScalarTaylorFunction& te);
     /*! \brief The \a ith Taylor variable */
-    TaylorExpression operator[](uint i) const;
+    ScalarTaylorFunction operator[](uint i) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Interval>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
@@ -664,102 +675,102 @@ class TaylorFunction {
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
     /*! \brief Truncate to a model of lower order and/or smoothness. */
-    TaylorFunction& truncate(ushort degree);
+    VectorTaylorFunction& truncate(ushort degree);
     /*! \brief Set the error to zero. */
-    TaylorFunction& clobber();
+    VectorTaylorFunction& clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
-    static TaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r);
+    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r);
     /*! \brief The constant Taylor model with result \a c and argument domain \a d. */
-    static TaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c);
+    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c);
     /*! \brief The identity Taylor model on domain \a d. */
-    static TaylorFunction identity(const Vector<Interval>& d);
+    static VectorTaylorFunction identity(const Vector<Interval>& d);
 
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<Interval> > polynomial() const;
 
     /*! \brief Truncate terms higher than \a bd. */
-    TaylorFunction& truncate(const MultiIndexBound& bd);
+    VectorTaylorFunction& truncate(const MultiIndexBound& bd);
 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
 
     /*! \brief Inplace addition. */
-    friend TaylorFunction& operator+=(TaylorFunction& f, const TaylorFunction& g);
+    friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
     /*! \brief Inplace subtraction. */
-    friend TaylorFunction& operator-=(TaylorFunction& f, const TaylorFunction& g);
+    friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
     /*! \brief Inplace addition. */
-    friend TaylorFunction& operator+=(TaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const Vector<Interval>& c);
     /*! \brief Inplace subtraction. */
-    friend TaylorFunction& operator-=(TaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const Vector<Interval>& c);
     /*! \brief Inplace scalar multiplication. */
-    friend TaylorFunction& operator*=(TaylorFunction& f, const Float& c);
+    friend VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const Float& c);
     /*! \brief Inplace scalar division. */
-    friend TaylorFunction& operator/=(TaylorFunction& f, const Float& c);
+    friend VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const Float& c);
 
     /*! \brief Negation. */
-    friend TaylorFunction operator-(const TaylorFunction& f);
+    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f);
     /*! \brief Addition. */
-    friend TaylorFunction operator+(const TaylorFunction& f1, const TaylorFunction& f2);
+    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
     /*! \brief Subtraction. */
-    friend TaylorFunction operator-(const TaylorFunction& f1, const TaylorFunction& f2);
+    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
 
     /*! \brief Addition of a constant. */
-    friend TaylorFunction operator+(const TaylorFunction& f, const Vector<Float>& c);
+    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<Float>& c);
     /*! \brief Subtraction of a constant. */
-    friend TaylorFunction operator-(const TaylorFunction& f, const Vector<Float>& c);
+    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<Float>& c);
     /*! \brief Multiplication by a scalar. */
-    friend TaylorFunction operator*(const Float& c, const TaylorFunction& f);
+    friend VectorTaylorFunction operator*(const Float& c, const VectorTaylorFunction& f);
     /*! \brief Multiplication by a scalar. */
-    friend TaylorFunction operator*(const TaylorFunction& f, const Float& c);
+    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f, const Float& c);
     /*! \brief Division by a scalar. */
-    friend TaylorFunction operator/(const TaylorFunction& f, const Float& c);
+    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f, const Float& c);
     /*! \brief Addition of a constant. */
-    friend TaylorFunction operator+(const TaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<Interval>& c);
     /*! \brief Subtraction of a constant. */
-    friend TaylorFunction operator-(const TaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<Interval>& c);
     /*! \brief Multiplication by a scalar. */
-    friend TaylorFunction operator*(const Interval& c, const TaylorFunction& f);
+    friend VectorTaylorFunction operator*(const Interval& c, const VectorTaylorFunction& f);
     /*! \brief Multiplication by a scalar. */
-    friend TaylorFunction operator*(const TaylorFunction& f, const Interval& c);
+    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f, const Interval& c);
     /*! \brief Division by a scalar. */
-    friend TaylorFunction operator/(const TaylorFunction& f, const Interval& c);
+    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f, const Interval& c);
     /*! \brief Multiplication by a matrix. */
-    friend TaylorFunction operator*(const Matrix<Float>& A, const TaylorFunction& f);
+    friend VectorTaylorFunction operator*(const Matrix<Float>& A, const VectorTaylorFunction& f);
     /*! \brief Multiplication by a matrix. */
-    friend TaylorFunction operator*(const Matrix<Interval>& A, const TaylorFunction& f);
+    friend VectorTaylorFunction operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f);
 
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend TaylorFunction compose(const FunctionInterface& f, const TaylorFunction& g);
+    friend VectorTaylorFunction compose(const VectorFunctionInterface& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend TaylorExpression compose(const TaylorExpression& f, const TaylorFunction& g);
+    friend ScalarTaylorFunction compose(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend TaylorFunction compose(const TaylorFunction& f, const TaylorFunction& g);
+    friend VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
     //! \brief Antiderivative of \a f with respect to variable \a k.
-    friend TaylorFunction antiderivative(const TaylorFunction& f, uint k);
+    friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, uint k);
     //! \brief The flow of the vector field \a vf defined over a space domain \a d over a time interval \a t.
-    friend TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
+    friend VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
     //! \brief Compute the implicit function of \a f satisfying \f$f(c,h(c))=0\f$,
     //! where \f$c\f$ is the centre of the domain of \f$f\f$.
-    friend TaylorFunction implicit(const TaylorFunction& f);
+    friend VectorTaylorFunction implicit(const VectorTaylorFunction& f);
     //! \brief Compute the inverse function of \a f based at the centre of the domain. */
-    friend TaylorFunction inverse(const TaylorFunction& f);
+    friend VectorTaylorFunction inverse(const VectorTaylorFunction& f);
     //! \brief Compute the inverse function of \a f based at \f$f(c)\f$. */
-    friend TaylorFunction inverse(const TaylorFunction& f, const Vector<Float>& c);
+    friend VectorTaylorFunction inverse(const VectorTaylorFunction& f, const Vector<Float>& c);
     //! \brief Compute the function \f$(f,g)(x)=(f(x),g(x))\f$.
-    friend TaylorFunction join(const TaylorFunction& f, const TaylorFunction& g);
-    friend TaylorFunction join(const TaylorFunction& f, const TaylorExpression& g);
-    friend TaylorFunction join(const TaylorExpression& f, const TaylorExpression& g);
+    friend VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+    friend VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
+    friend VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
     //! \brief Compute the function \f$(f\oplus g)(x,y)=(f(x),g(y))\f$.
-    friend TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
-    friend TaylorFunction combine(const TaylorFunction& f, const TaylorExpression& g);
-    friend TaylorFunction combine(const TaylorExpression& f, const TaylorFunction& g);
-    friend TaylorFunction combine(const TaylorExpression& f, const TaylorExpression& g);
+    friend VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+    friend VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
+    friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
+    friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
     //! \brief Restrict the function \a f to a subdomain \a d.
-    friend TaylorFunction restrict(const TaylorFunction& f, const Vector<Interval>& d);
+    friend VectorTaylorFunction restrict(const VectorTaylorFunction& f, const Vector<Interval>& d);
     //! \brief Tests if a function \a f refines another function \a g.
     //! To be a refinement, the domain of \a f must contain the domain of \a g.
-    friend bool refines(const TaylorFunction& f, const TaylorFunction& g);
+    friend bool refines(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
 
     // For compatibility wit Vector.
     uint size() const { return this->result_size(); }
@@ -776,15 +787,22 @@ class TaylorFunction {
     Vector<TaylorModel> _models;
 };
 
-TaylorFunction join(const TaylorFunction& f, const TaylorFunction& g);
-TaylorFunction join(const TaylorFunction& f, const TaylorExpression& g);
-TaylorFunction join(const TaylorExpression& f, const TaylorExpression& g);
-TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
-TaylorFunction combine(const TaylorFunction& f, const TaylorExpression& g);
-TaylorFunction combine(const TaylorExpression& f, const TaylorFunction& g);
-TaylorFunction combine(const TaylorExpression& f, const TaylorExpression& g);
+VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
+VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
+VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
+VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
+VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
 
-std::ostream& operator<<(std::ostream&, const TaylorFunction&);
+std::ostream& operator<<(std::ostream&, const VectorTaylorFunction&);
+
+
+template<class E> VectorTaylorFunction::VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve)            : _domain(), _models(ve().size())
+{
+    if(ve().size()!=0) { this->_domain=ve()[0].domain(); }
+    for(uint i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
+}
 
 } // namespace Ariadne
 

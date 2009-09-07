@@ -48,17 +48,17 @@ int main()
     DiscreteEvent e11(11);
 
     /// Create the dynamics
-    AffineFunction dynamic(Matrix<Float>(2,2,A),Vector<Float>(2,b));
+    VectorAffineFunction dynamic(Matrix<Float>(2,2,A),Vector<Float>(2,b));
 
     cout << "dynamic = " << dynamic << endl << endl;
 
     /// Create the resets
-    AffineFunction reset(Matrix<Float>(2,2,1.0,0.0,0.0,-a),Vector<Float>(2,0.0,0.0));
+    VectorAffineFunction reset(Matrix<Float>(2,2,1.0,0.0,0.0,-a),Vector<Float>(2,0.0,0.0));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    AffineFunction guard(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction guard(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1,0.0));
     cout << "guard=" << guard << endl << endl;
 
 

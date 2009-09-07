@@ -61,6 +61,7 @@ inline const char* name(const Comparison& op) {
         case LEQ:  return "leq"; break;
         case GT:   return "lt"; break;
         case LT:   return "gt"; break;
+        default: assert(false);
     }
 }
 
@@ -73,6 +74,7 @@ inline std::ostream& operator<<(std::ostream& os, const Comparison& op) {
         case LEQ:  os << "<="; break;
         case GT:   os << "> "; break;
         case LT:   os << "< "; break;
+        default: assert(false);
     }
     return os;
 }
@@ -168,6 +170,7 @@ inline const char* name(const Operator& op) {
         case COS:  return "cos"; break;
         case TAN:  return "tan"; break;
         case ITOR:  return "itor"; break;
+        default: assert(false);
     }
 }
 

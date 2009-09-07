@@ -119,7 +119,7 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 struct DetectionData {
     int id;
     DiscreteEvent event;
-    shared_ptr<const FunctionInterface> guard_ptr;
+    shared_ptr<const VectorFunctionInterface> guard_ptr;
     PredicateKind predicate_kind;
     CrossingKind crossing_kind;
     tribool active;
@@ -194,7 +194,7 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -332,7 +332,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     const FunctionType* dynamic_ptr=&initial_mode.dynamic();
 
     ARIADNE_LOG(6,"mode="<<initial_mode<<"\n");
-    std::map< DiscreteEvent, shared_ptr<const FunctionInterface> > invariants
+    std::map< DiscreteEvent, shared_ptr<const VectorFunctionInterface> > invariants
         =initial_mode.invariants();
     ARIADNE_LOG(7,"invariants="<<invariants<<"\n");
     const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
@@ -382,10 +382,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Test invariants
     bool blocking=false;
     Float lower_blocking_time=step_size;
-    for(std::map< DiscreteEvent, shared_ptr<const FunctionInterface> >::const_iterator
+    for(std::map< DiscreteEvent, shared_ptr<const VectorFunctionInterface> >::const_iterator
         iter=invariants.begin(); iter!=invariants.end(); ++iter)
     {
-        shared_ptr<const FunctionInterface> guard_ptr = iter->second;
+        shared_ptr<const VectorFunctionInterface> guard_ptr = iter->second;
         if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
             ARIADNE_LOG(2,"One invariant is possibly active.\n");
             if(semantics == UPPER_SEMANTICS) {
@@ -433,7 +433,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         iter=transitions.begin(); iter!=transitions.end(); ++iter)
     {
         if(iter->forced()) {  // Test only forced transitions
-            shared_ptr<const FunctionInterface> guard_ptr = iter->activation_ptr();
+            shared_ptr<const VectorFunctionInterface> guard_ptr = iter->activation_ptr();
             if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
                 ARIADNE_LOG(2,"Forced transition "<<*iter<<" is possibly active.\n");
                 if(semantics == UPPER_SEMANTICS) {
@@ -495,7 +495,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         for(std::set< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
-            shared_ptr<const FunctionInterface> guard_ptr = iter->activation_ptr();
+            shared_ptr<const VectorFunctionInterface> guard_ptr = iter->activation_ptr();
             if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
                 ARIADNE_LOG(2," "<<*iter<<" is possibly active.\n");
                 if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
@@ -553,7 +553,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         ARIADNE_LOG(4,"jump_time_model="<<jump_time_model<<"\n");
 
                         // Compute activation set model and jump set model
-                        shared_ptr<const FunctionInterface> reset_ptr=iter->reset_ptr();
+                        shared_ptr<const VectorFunctionInterface> reset_ptr=iter->reset_ptr();
                         DiscreteState jump_location=iter->target().location();
                         DiscreteEvent jump_event=iter->event();
 
@@ -579,8 +579,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         for(std::set< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
-            shared_ptr<const FunctionInterface> guard_ptr = iter->activation_ptr();
-            shared_ptr<const FunctionInterface> reset_ptr=iter->reset_ptr();
+            shared_ptr<const VectorFunctionInterface> guard_ptr = iter->activation_ptr();
+            shared_ptr<const VectorFunctionInterface> reset_ptr=iter->reset_ptr();
             DiscreteState jump_location=iter->target().location();
             if(lower_blocking_time <= 0.0) {
                 // No continuous evolution possible, execute only transitions that are initially active
@@ -637,7 +637,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             ARIADNE_LOG(4,"jump_time_model="<<jump_time_model<<"\n");
 
                             // Compute activation set model and jump set model
-                            shared_ptr<const FunctionInterface> reset_ptr=iter->reset_ptr();
+                            shared_ptr<const VectorFunctionInterface> reset_ptr=iter->reset_ptr();
                             DiscreteState jump_location=iter->target().location();
                             SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
                             ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
@@ -709,7 +709,7 @@ timed_evolution(const SystemType& system,
 {
     verbosity=0;
 
-    typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 

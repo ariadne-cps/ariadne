@@ -63,19 +63,19 @@ Polytope polytope(const Polyhedron& p);
 
 
 Polyhedron::Polyhedron()
-    : ConstraintSet(Box(0),ConstantFunction(Vector<Float>(0,1.0),0))
+    : ConstraintSet(Box(0),VectorConstantFunction(Vector<Float>(0,1.0),0))
 {
 }
 
 
 Polyhedron::Polyhedron(uint d)
-    : ConstraintSet( Box(0), ConstantFunction(Vector<Float>(0,1.0),d) )
+    : ConstraintSet( Box(0), VectorConstantFunction(Vector<Float>(0,1.0),d) )
 {
 }
 
 
 Polyhedron::Polyhedron(const Matrix<Float>& A, const Vector<Float>& b)
-    : ConstraintSet( Box(A.row_size(),Interval(0,inf())), AffineFunction(-A,b) )
+    : ConstraintSet( Box(A.row_size(),Interval(0,inf())), VectorAffineFunction(-A,b) )
 {
 }
 
@@ -97,13 +97,13 @@ Polyhedron::Polyhedron(const Polytope& p)
 Matrix<Float>
 Polyhedron::A() const
 {
-    return -dynamic_cast<const AffineFunction&>(this->function()).A();
+    return -dynamic_cast<const VectorAffineFunction&>(this->function()).A();
 }
 
 Vector<Float>
 Polyhedron::b() const
 {
-    return dynamic_cast<const AffineFunction&>(this->function()).b();
+    return dynamic_cast<const VectorAffineFunction&>(this->function()).b();
 }
 
 
@@ -136,7 +136,7 @@ Polyhedron::halfspace(size_t i) const
 
 
 
-Polyhedron 
+Polyhedron
 intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
 {
     ARIADNE_ASSERT(plhd1.dimension()==plhd2.dimension());
@@ -187,7 +187,7 @@ polytope(const Polyhedron& pltp)
 
 
 
-std::ostream& 
+std::ostream&
 Polyhedron::write(std::ostream& os) const
 {
     //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
@@ -200,7 +200,7 @@ Polyhedron::write(std::ostream& os) const
         os << ( i==0 ? "[" : "," );
         for(size_t j=0; j!=d; ++j) {
             os << ( j==0 ? "(" : ",");
-            os << A[i][j]; 
+            os << A[i][j];
         }
         os << ":" << b[i] << ")";
     }
@@ -208,19 +208,19 @@ Polyhedron::write(std::ostream& os) const
     return os;
 }
 
-std::istream& 
-operator>>(std::istream& is, Polyhedron& p) 
+std::istream&
+operator>>(std::istream& is, Polyhedron& p)
 {
     std::vector< std::vector<Float> > Alst;
     std::vector< Float > Blst;
-  
+
     std::vector<Float> a;
     Float b;
-  
+
     char c;
     is >> c;
     assert(c=='[');
-  
+
     c=is.peek();
     while(c=='[') {
         // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
@@ -231,7 +231,7 @@ operator>>(std::istream& is, Polyhedron& p)
         Alst.push_back(a);
         Blst.push_back(b);
     }
-  
+
     size_t m=Alst.size();
     size_t n=Alst[0].size();
     Matrix<Float> A(m,n);
@@ -242,9 +242,9 @@ operator>>(std::istream& is, Polyhedron& p)
         }
         B[i]=Blst[i];
     }
-  
+
     p=Polyhedron(A,B);
-  
+
     return is;
 }
 

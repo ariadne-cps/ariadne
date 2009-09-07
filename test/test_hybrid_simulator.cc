@@ -74,16 +74,16 @@ TestHybridSimulator::system()
     double bdata[]={1.0,0.0};
     Matrix<Float> A(2,2,adata);
     Vector<Float> b(2,bdata);
-    AffineFunction dynamic1(A,3*b);
-    AffineFunction dynamic2(A,-b);
+    VectorAffineFunction dynamic1(A,3*b);
+    VectorAffineFunction dynamic2(A,-b);
     IdentityFunction reset(2);
   
     Matrix<Float> c(1,2,bdata);
     Vector<Float> d(1,Float(1.0));
-    AffineFunction guard3(c,-d);
-    AffineFunction guard4(-c,-d);
-    AffineFunction activation4(-c,-d);
-    AffineFunction invariant2(-c,-1.125*d);
+    VectorAffineFunction guard3(c,-d);
+    VectorAffineFunction guard4(-c,-d);
+    VectorAffineFunction activation4(-c,-d);
+    VectorAffineFunction invariant2(-c,-1.125*d);
 
     automaton.new_mode(location1,dynamic1);
     automaton.new_mode(location2,dynamic2);

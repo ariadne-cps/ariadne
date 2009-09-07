@@ -35,8 +35,8 @@ template<class T1,class T2> class Pair;
 typedef double Float;
 class Interval;
 template<class X> class Vector;
-class FunctionInterface;
-class TaylorFunction;
+class VectorFunctionInterface;
+class VectorTaylorFunction;
 
 /*! \ingroup \ingroup Solvers
  *  \brief %Common functionality for solving (nonlinear) equations.
@@ -51,25 +51,25 @@ class IntegratorInterface
 
 
     //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt.
-    virtual Pair<Float,IVector> flow_bounds(const FunctionInterface& vector_field,
+    virtual Pair<Float,IVector> flow_bounds(const VectorFunctionInterface& vector_field,
                                             const IVector& parameter_domain,
                                             const IVector& state_domain,
                                             const Float& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
-    virtual TaylorFunction flow(const FunctionInterface& vector_field,
+    virtual VectorTaylorFunction flow(const VectorFunctionInterface& vector_field,
                                 const IVector& state_domain,
                                 const Float& time_domain) const = 0;
 
 
     //! \brief Solve \f$\dot{\phi}(a,x,t)=f(a,\phi(a,x,t))\f$.
-    virtual TaylorFunction flow(const FunctionInterface& vector_field,
+    virtual VectorTaylorFunction flow(const VectorFunctionInterface& vector_field,
                                               const IVector& parameter_domain,
                                               const IVector& state_domain,
                                               const Float& time_domain) const = 0;
 
     //! \brief Compute \f$\phi(a,x,h)\f$, where \f$\dot{\phi}(a,x,t)=f(a,\phi(a,x,t))\f$.
-    virtual TaylorFunction time_step(const FunctionInterface& vector_field,
+    virtual VectorTaylorFunction time_step(const VectorFunctionInterface& vector_field,
                                      const IVector& parameter_domain,
                                      const IVector& state_domain,
                                      const Float& time_domain) const = 0;

@@ -132,14 +132,14 @@ _evolution(EnclosureListType& final_sets,
 {
 
 
-    typedef FunctionInterface FunctionType;
+    typedef VectorFunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef TaylorFunction FunctionModelType;
-    typedef TaylorFunction FlowModelType;
+    typedef VectorTaylorFunction FunctionModelType;
+    typedef VectorTaylorFunction FlowModelType;
     typedef TaylorSet SetModelType;
 
 
-    typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -216,10 +216,10 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
                 Semantics semantics,
                 bool reach) const
 {
-    typedef FunctionInterface FunctionType;
+    typedef VectorFunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef TaylorFunction MapModelType;
-    typedef TaylorFunction FlowModelType;
+    typedef VectorTaylorFunction MapModelType;
+    typedef VectorTaylorFunction FlowModelType;
     typedef TaylorSet SetModelType;
 
     SetModelType current_set_model;

@@ -1,6 +1,6 @@
 /*****************************************************************************************************
  *            cmos_inverter_analoginput.cc
- *  
+ *
  *            by Luca Geretti
  *
  * Provides the behavior of a CMOS inverter fed by a sinusoidal (thus analog) input.
@@ -16,14 +16,14 @@ using namespace Ariadne;
 /*
  t: absolute time;
  Vi: input voltage, consequently gate-source voltage for the nMOS, while Vdd-Vi is the gate-source voltage for the pMOS;
- Vo: output voltage, consequently drain-source voltage for the nMOS, while Vdd-Vo is the drain-source voltage for the 
- 
+ Vo: output voltage, consequently drain-source voltage for the nMOS, while Vdd-Vo is the drain-source voltage for the
+
 */
 
 /// Function for the behavior of the system in the nMOS linear mode, pMOS subthreshold mode (Vi >= Vth, Vo <= Vi-Vth)
 /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-struct nl_pt_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void 
+struct nl_pt_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
@@ -33,8 +33,8 @@ struct nl_pt_df : FunctionData<3,3,11> {
 
 /// Function for the behavior of the system in the nMOS saturation mode, pMOS subthreshold mode (Vi >= Vdd-Vth, Vo >= Vi-Vth)
 /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-struct ns_pt_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void 
+struct ns_pt_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
@@ -44,8 +44,8 @@ struct ns_pt_df : FunctionData<3,3,11> {
 
 /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS linear mode (Vi <= Vth, Vo >= Vi+Vth)
 /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-struct nt_pl_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void 
+struct nt_pl_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
@@ -55,8 +55,8 @@ struct nt_pl_df : FunctionData<3,3,11> {
 
 /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS saturation mode (Vi <= Vth, Vo <= Vi+Vth)
 /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-struct nt_ps_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void 
+struct nt_ps_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
@@ -66,8 +66,8 @@ struct nt_ps_df : FunctionData<3,3,11> {
 
 /// Function for the behavior of the system in the nMOS linear mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vo <= Vi-Vth)
 /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-struct nl_ps_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void 
+struct nl_ps_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
@@ -77,8 +77,8 @@ struct nl_ps_df : FunctionData<3,3,11> {
 
 /// Function for the behavior of the system in the nMOS saturation mode, pMOS linear mode (Vth <= Vi <= Vdd-Vth, Vo >= Vi+Vth)
 /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-struct ns_pl_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void 
+struct ns_pl_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
@@ -88,8 +88,8 @@ struct ns_pl_df : FunctionData<3,3,11> {
 
 /// Function for the behavior of the system in the nMOS saturation mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vi-Vth <= Vo <= Vi+Vth)
 /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-struct ns_ps_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void 
+struct ns_ps_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
@@ -99,8 +99,8 @@ struct ns_ps_df : FunctionData<3,3,11> {
 
 /// Function for the behavior of the system in the "rising" or "falling" support locations
 /// (t' = 0; Vi' = 0; Vo'=0 )
-struct support_df : FunctionData<3,3,11> {
-    template<class R, class A, class P> static void  
+struct support_df : VectorFunctionData<3,3,11> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 0.0;
         r[1] = 0.0;
@@ -109,13 +109,13 @@ struct support_df : FunctionData<3,3,11> {
 };
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
-    Figure fig; 
+    Figure fig;
     array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_bounding_box(bbox);
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -142,7 +142,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         double pos_y = bbox[1].lower();
 	rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
@@ -153,14 +153,14 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc); 
-    fig << set; 
-    fig.write(filename); 
+    fig.set_fill_colour(fc);
+    fig << set;
+    fig.write(filename);
 }
 
 
-int main() 
-{    
+int main()
+{
     /// Dynamics parameters
     Vector<Float> dp(11);
 
@@ -186,12 +186,12 @@ int main()
     // std::cout << "Enter Maximum number of discrete transitions:";
     // std::cin >> EVOL_TRANS;
     // std::cout << std::endl << "Maximum discrete transitions = "<< EVOL_TRANS << std::endl;
-    
+
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomaton object
     HybridAutomaton inverter;
-  
+
     /// Create the discrete states
     DiscreteState nt_pl(1);
     DiscreteState nt_ps(2);
@@ -217,17 +217,17 @@ int main()
     DiscreteEvent to_falling_pt(9);
     DiscreteEvent to_rising_ns(10);
     DiscreteEvent to_rising_ps(11);
- 
+
     /// Create the dynamics
-    Function<nt_pl_df> nt_pl_d(dp);
-    Function<nt_ps_df> nt_ps_d(dp);
-    Function<nl_pt_df> nl_pt_d(dp);
-    Function<ns_pt_df> ns_pt_d(dp);
-    Function<nl_ps_df> nl_ps_d(dp);
-    Function<ns_pl_df> ns_pl_d(dp);    
-    Function<ns_ps_df> ns_ps_d(dp);
-    Function<support_df> support_d(dp);
-  
+    VectorUserFunction<nt_pl_df> nt_pl_d(dp);
+    VectorUserFunction<nt_ps_df> nt_ps_d(dp);
+    VectorUserFunction<nl_pt_df> nl_pt_d(dp);
+    VectorUserFunction<ns_pt_df> ns_pt_d(dp);
+    VectorUserFunction<nl_ps_df> nl_ps_d(dp);
+    VectorUserFunction<ns_pl_df> ns_pl_d(dp);
+    VectorUserFunction<ns_ps_df> ns_ps_d(dp);
+    VectorUserFunction<support_df> support_d(dp);
+
     /// Build the automaton
     inverter.new_mode(nt_pl,nt_pl_d);
     inverter.new_mode(nt_ps,nt_ps_d);
@@ -242,28 +242,28 @@ int main()
     inverter.new_mode(rising_ps,support_d);
 
     /// Create the resets
-   
+
     /// Reset for the transitions between modes
     IdentityFunction noop_r(3);
 
     /// Create the guards
 
     /// Guard for the switch-on of the nMOS transistor (Vi >= Vth)
-    AffineFunction non_g(Matrix<Float>(1,3, 0.0,1.0,0.0),Vector<Float>(1,-dp[1]));
+    VectorAffineFunction non_g(Matrix<Float>(1,3, 0.0,1.0,0.0),Vector<Float>(1,-dp[1]));
     /// Guard for the switch-on of the pMOS transistor (Vi <= Vdd-Vth)
-    AffineFunction pon_g(Matrix<Float>(1,3, 0.0,-1.0,0.0),Vector<Float>(1,dp[4]-dp[1]));
+    VectorAffineFunction pon_g(Matrix<Float>(1,3, 0.0,-1.0,0.0),Vector<Float>(1,dp[4]-dp[1]));
     /// Guard for the switch-off of the nMOS transistor (Vi <= Vth)
-    AffineFunction noff_g(Matrix<Float>(1,3, 0.0,-1.0,0.0),Vector<Float>(1,dp[1]));
+    VectorAffineFunction noff_g(Matrix<Float>(1,3, 0.0,-1.0,0.0),Vector<Float>(1,dp[1]));
     /// Guard for the switch-off of the pMOS transistor (Vi >= Vdd-Vth)
-    AffineFunction poff_g(Matrix<Float>(1,3, 0.0,1.0,0.0),Vector<Float>(1,-dp[4]+dp[1]));
+    VectorAffineFunction poff_g(Matrix<Float>(1,3, 0.0,1.0,0.0),Vector<Float>(1,-dp[4]+dp[1]));
     /// Guard for the linear region of the nMOS transistor (Vo <= Vi - Vth)
-    AffineFunction nl_g(Matrix<Float>(1,3, 0.0,1.0,-1.0),Vector<Float>(1,-dp[1]));
+    VectorAffineFunction nl_g(Matrix<Float>(1,3, 0.0,1.0,-1.0),Vector<Float>(1,-dp[1]));
     /// Guard for the saturation region of the nMOS transistor (Vo >= Vi - Vth)
-    AffineFunction ns_g(Matrix<Float>(1,3, 0.0,-1.0,1.0),Vector<Float>(1,dp[1]));
+    VectorAffineFunction ns_g(Matrix<Float>(1,3, 0.0,-1.0,1.0),Vector<Float>(1,dp[1]));
     /// Guard for the linear region of the pMOS transistor (Vo >= Vi + Vth)
-    AffineFunction pl_g(Matrix<Float>(1,3, 0.0,-1.0,1.0),Vector<Float>(1,-dp[1]));
+    VectorAffineFunction pl_g(Matrix<Float>(1,3, 0.0,-1.0,1.0),Vector<Float>(1,-dp[1]));
     /// Guard for the saturation region of the pMOS transistor (Vo <= Vi + Vth)
-    AffineFunction ps_g(Matrix<Float>(1,3, 0.0,1.0,-1.0),Vector<Float>(1,dp[1]));
+    VectorAffineFunction ps_g(Matrix<Float>(1,3, 0.0,1.0,-1.0),Vector<Float>(1,dp[1]));
 
     /// Create the transitions
 
@@ -354,7 +354,7 @@ int main()
 //    Box initial_box(3, 0.161699,0.161699, 0.850000,0.850000, 0.246241,0.246241);
 //    HybridEnclosureType initial_enclosure(nl_pt,initial_box);
 
-    HybridTime evolution_time(EVOL_TIME,EVOL_TRANS); 
+    HybridTime evolution_time(EVOL_TIME,EVOL_TRANS);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(inverter,initial_enclosure,evolution_time,UPPER_SEMANTICS);
@@ -380,5 +380,5 @@ int main()
     if (orbit.reach().find(ns_pl)!=orbit.reach().locations_end())
     	plot("cmos_inverter_analoginput_orbit_t_vo_nsatplin", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_pl], -1);
     if (orbit.reach().find(ns_ps)!=orbit.reach().locations_end())
-    	plot("cmos_inverter_analoginput_orbit_t_vo_nsatpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_ps], -1); 
+    	plot("cmos_inverter_analoginput_orbit_t_vo_nsatpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_ps], -1);
 }

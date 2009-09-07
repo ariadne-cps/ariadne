@@ -2,7 +2,7 @@
  *            function_interface.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file function_interface.h
  *  \brief Interface for functions for which derivatives can be computed.
  */
@@ -44,8 +44,8 @@ template<class X> class Differential;
 
 static const int SMOOTH=255;
 
-//! \brief Interface for expressions whose derivatives can be computed.
-//! \sa FunctionInterface
+//! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$.
+//! See also VectorFunctionInterface.
 class ScalarFunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.
@@ -57,7 +57,7 @@ class ScalarFunctionInterface {
     virtual ~ScalarFunctionInterface() { };
     //! \brief Create a dynamically-allocated copy.
     virtual ScalarFunctionInterface* clone() const = 0;
-     
+
     //! \brief The smoothness of the expression.
     virtual SmoothnessType smoothness() const = 0;
     //! \brief The number of arguments to the expression.
@@ -86,7 +86,7 @@ class ScalarFunctionInterface {
     template<class T> T operator()(const Vector<T>& x) { return this->evaluate(x); }
 
     virtual ScalarFunctionInterface* derivative(uint j) const = 0;
-  
+
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
@@ -94,13 +94,13 @@ class ScalarFunctionInterface {
 //! \relates ScalarFunctionInterface
 //! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
 inline std::ostream& operator<<(std::ostream& os, const ScalarFunctionInterface& f) {
-    return f.write(os); 
+    return f.write(os);
 }
 
 
-//! \brief Interface for functions whose derivatives can be computed.
-//! \sa ScalarFunctionInterface
-class FunctionInterface {
+//! \brief Interface for vector functions \f$\R^n\rightarrow\R^m\f$ whose derivatives can be computed.
+//! See also ScalarFunctionInterface
+class VectorFunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.
     typedef unsigned int SizeType;
@@ -108,10 +108,10 @@ class FunctionInterface {
     typedef unsigned short SmoothnessType;
 
     //! \brief Virtual destructor.
-    virtual ~FunctionInterface() { };
+    virtual ~VectorFunctionInterface() { };
     //! \brief Create a dynamically-allocated copy.
-    virtual FunctionInterface* clone() const = 0;
-     
+    virtual VectorFunctionInterface* clone() const = 0;
+
     //! \brief The smoothness of the function.
     virtual SmoothnessType smoothness() const = 0;
     //! \brief The number of arguments to the function.
@@ -143,10 +143,10 @@ class FunctionInterface {
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
-//! \relates FunctionInterface
+//! \relates VectorFunctionInterface
 //! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
-inline std::ostream& operator<<(std::ostream& os, const FunctionInterface& f) {
-    return f.write(os); 
+inline std::ostream& operator<<(std::ostream& os, const VectorFunctionInterface& f) {
+    return f.write(os);
 }
 
 

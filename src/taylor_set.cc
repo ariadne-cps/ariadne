@@ -52,7 +52,7 @@ TaylorSet::TaylorSet(uint d, uint ng)
 }
 
 
-TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d)
+TaylorSet::TaylorSet(const VectorFunctionInterface& f, const Vector<Interval>& d)
     : _models(f.result_size())
 {
     Vector<TaylorModel> x=TaylorModel::scalings(d);
@@ -244,30 +244,30 @@ TaylorModel apply(const ScalarFunctionInterface& f, const TaylorSet& ts)
     return f.evaluate(ts.models());
 }
 
-TaylorSet apply(const FunctionInterface& f, const TaylorSet& ts)
+TaylorSet apply(const VectorFunctionInterface& f, const TaylorSet& ts)
 {
     return f.evaluate(ts.models());
 }
 
-TaylorModel apply(const TaylorExpression& tf, const TaylorSet& ts)
+TaylorModel apply(const ScalarTaylorFunction& tf, const TaylorSet& ts)
 {
     ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),"tf="<<tf<<" ts="<<ts);
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorSet apply(const TaylorFunction& tf, const TaylorSet& ts)
+TaylorSet apply(const VectorTaylorFunction& tf, const TaylorSet& ts)
 {
     ARIADNE_ASSERT_MSG(possibly(subset(ts.range(),tf.domain())),
         std::setprecision(18)<<"\n  tf="<<tf<<"\n  ts="<<ts<<"\n  ts.range() ="<<ts.range()<<"\n  tf.domain()="<<tf.domain());
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorModel unchecked_apply(const TaylorExpression& tf, const TaylorSet& ts)
+TaylorModel unchecked_apply(const ScalarTaylorFunction& tf, const TaylorSet& ts)
 {
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorSet unchecked_apply(const TaylorFunction& tf, const TaylorSet& ts)
+TaylorSet unchecked_apply(const VectorTaylorFunction& tf, const TaylorSet& ts)
 {
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }

@@ -63,8 +63,8 @@ TestHybridSet::test_hybrid_image_set()
     Vector<Float> b2=Vector<Float>::unit(2,1);
     DiscreteState loc1(23);
     DiscreteState loc2(5);
-    ImageSet ims1(bx,AffineFunction(A,b1));
-    ImageSet ims2(bx,AffineFunction(A,b2));
+    ImageSet ims1(bx,VectorAffineFunction(A,b1));
+    ImageSet ims2(bx,VectorAffineFunction(A,b2));
     his.insert(make_pair(loc1,ims1));
     his[loc2]=ims2;
 

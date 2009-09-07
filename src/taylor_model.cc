@@ -1876,7 +1876,7 @@ TaylorModel& TaylorModel::rescale(const Interval& ocd, const Interval& ncd)
 
 
 
-// Replace the kth variable x[k] by a*x[k]+b. 
+// Replace the kth variable x[k] by a*x[k]+b.
 TaylorModel preaffine(const TaylorModel& tm, uint k, const Interval& a, const Interval& b) {
     uint d=tm.degree();
     uint as=tm.argument_size();

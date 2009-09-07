@@ -27,7 +27,7 @@ using namespace Ariadne;
 
 // The sigmoid function 1/(1+exp(-a*(x-t)))
 template<class X, class C>
-X sigmoid(const X& x, const C& t, const C& a) 
+X sigmoid(const X& x, const C& t, const C& a)
 {
     X r=x;
     r-=t;
@@ -45,10 +45,10 @@ X sigmoid(const X& x, const C& t, const C& a)
 //     Piecewise-Affine Models of Genetic Regulatory Networks"
 //   INRIA Report No 0322, 2006
 //   HSCC06_TR.pdf
-struct EColi : FunctionData<4,4,17> {
+struct EColi : VectorFunctionData<4,4,17> {
 
-    template<class R, class A, class P> static void 
-    compute(R& r, const A& x, const P& p) 
+    template<class R, class A, class P> static void
+    compute(R& r, const A& x, const P& p)
     {
         typedef typename A::value_type X;
         typedef Float C;
@@ -75,7 +75,7 @@ struct EColi : FunctionData<4,4,17> {
         const C gamma_Fis   = 2.0;
         const C gamma_GyrAB = 1.0;
         const C gamma_rrn   = 1.5;
-        
+
         const C x_S         = 1.0;
         const C scal = 2.0;
 
@@ -94,9 +94,9 @@ struct EColi : FunctionData<4,4,17> {
     }
 };
 
-int main() 
+int main()
 {
-    Function<EColi> ecoli_function(Vector<Interval>(17));
+    VectorUserFunction<EColi> ecoli_function(Vector<Interval>(17));
 
     HybridAutomaton ecoli_system;
     DiscreteState starvation_mode(1);

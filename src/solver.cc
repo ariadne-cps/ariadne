@@ -39,7 +39,7 @@ typedef unsigned int uint;
 void
 solve_all(Set< Vector<Interval> >& r,
           const SolverInterface& s,
-          const FunctionInterface& f,
+          const VectorFunctionInterface& f,
           const Vector<Interval>& ix)
 {
     // Test for no solution
@@ -280,15 +280,15 @@ newton_implicit(const Vector<TaylorModel>& f)
     return h;
 }
 
-TaylorFunction
-newton_implicit(const TaylorFunction& f)
+VectorTaylorFunction
+newton_implicit(const VectorTaylorFunction& f)
 {
     ARIADNE_ASSERT_MSG(f.argument_size()>f.result_size(),"f.argument_size()<=f.result_size() in implicit(f): f="<<f);
     uint fas=f.argument_size();
     uint has=f.argument_size()-f.result_size();
     Vector<Interval> hdom=project(f.domain(),range(0,has));
     Vector<Interval> hcodom=project(f.domain(),range(has,fas));
-    return TaylorFunction(hdom,scale(newton_implicit(f.models()),hcodom));
+    return VectorTaylorFunction(hdom,scale(newton_implicit(f.models()),hcodom));
 }
 
 
@@ -299,45 +299,41 @@ newton_implicit(const TaylorFunction& f)
 
 namespace Ariadne {
 
-Vector<TaylorExpression> evaluate(const FunctionInterface& f,const Vector<TaylorExpression>& x) {
+VectorTaylorFunction evaluate(const VectorFunctionInterface& f,const VectorTaylorFunction& x) {
     for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
     Vector<TaylorModel> m(x.size());
     for(uint i=0; i!=m.size(); ++i) { m[i]=x[i].model(); }
     m=f.evaluate(m);
-    Vector<TaylorExpression> r(m.size());
-    for(uint i=0; i!=r.size(); ++i) { r[i]=TaylorExpression(x[0].domain(),m[i]); }
+    VectorTaylorFunction r(m.size());
+    for(uint i=0; i!=r.size(); ++i) { r[i]=ScalarTaylorFunction(x[0].domain(),m[i]); }
     return r;
 }
 
-Vector<TaylorExpression> intersection(const Vector<TaylorExpression>& x1,const Vector<TaylorExpression>& x2) {
-    Vector<TaylorExpression> r(x1.size());
-    for(uint i=0; i!=r.size(); ++i) { r[i]=intersection(x1[i],x2[i]); }
-    return r;
-}
-
-Vector<TaylorExpression> product(const Matrix<Float>& A,const Vector<TaylorExpression>& v) {
-    Vector<TaylorExpression> r(A.row_size());
+VectorTaylorFunction product(const Matrix<Float>& A,const VectorTaylorFunction& v) {
+    VectorTaylorFunction r(A.row_size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=TaylorExpression(v[0].domain());
+        ScalarTaylorFunction t(v[0].domain());
         for(uint j=0; j!=v.size(); ++j) {
-            r[i]+=A[i][j]*v[j];
+            t+=A[i][j]*v[j];
         }
+        r[i]=t;
     }
     return r;
 }
 
-Vector<TaylorExpression> product(const Matrix<Interval>& A,const Vector<TaylorExpression>& v) {
-    Vector<TaylorExpression> r(A.row_size());
+VectorTaylorFunction product(const Matrix<Interval>& A,const VectorTaylorFunction& v) {
+    VectorTaylorFunction r(A.row_size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=TaylorExpression(v[0].domain());
+        ScalarTaylorFunction t(v[0].domain());
         for(uint j=0; j!=v.size(); ++j) {
-            r[i]+=A[i][j]*v[j];
+            t+=A[i][j]*v[j];
         }
+        r[i]=t;
     }
     return r;
 }
 
-Float radius(const Vector<TaylorExpression>& x) {
+Float radius(const VectorTaylorFunction& x) {
     Float r=0.0;
     for(uint i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
     return r;
@@ -348,10 +344,10 @@ Float radius(const Vector<TaylorExpression>& x) {
 
 
 class DifferenceFunction
-    : public FunctionTemplate<DifferenceFunction>
+    : public VectorFunctionTemplate<DifferenceFunction>
 {
   public:
-    DifferenceFunction(const FunctionInterface& f) : fptr(f.clone()) { }
+    DifferenceFunction(const VectorFunctionInterface& f) : fptr(f.clone()) { }
     virtual DifferenceFunction* clone() const { return new DifferenceFunction(*this); }
     virtual uint result_size() const { return fptr->result_size(); }
     virtual uint argument_size() const { return fptr->argument_size(); }
@@ -359,7 +355,7 @@ class DifferenceFunction
     template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
     template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
   private:
-    boost::shared_ptr<FunctionInterface> fptr;
+    boost::shared_ptr<VectorFunctionInterface> fptr;
 };
 
 
@@ -370,7 +366,7 @@ SolverBase::SolverBase(double max_error, uint max_steps)
 
 
 Set< Vector<Interval> >
-SolverBase::solve(const FunctionInterface& f,
+SolverBase::solve(const VectorFunctionInterface& f,
                   const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
@@ -381,7 +377,7 @@ SolverBase::solve(const FunctionInterface& f,
 
 
 Vector<Interval>
-SolverBase::zero(const FunctionInterface& f,
+SolverBase::zero(const VectorFunctionInterface& f,
                  const Vector<Interval>& ix) const
 {
     const double& e=this->maximum_error();
@@ -423,14 +419,14 @@ SolverBase::zero(const FunctionInterface& f,
 
 
 Vector<Interval>
-SolverBase::fixed_point(const FunctionInterface& f, const Vector<Interval>& pt) const
+SolverBase::fixed_point(const VectorFunctionInterface& f, const Vector<Interval>& pt) const
 {
   return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
 }
 
 
-List<TaylorFunction>
-SolverBase::implicit(const FunctionInterface& f,
+List<VectorTaylorFunction>
+SolverBase::implicit(const VectorFunctionInterface& f,
                       const Vector<Interval>& ip,
                       const Vector<Interval>& ix) const
 {
@@ -439,17 +435,17 @@ SolverBase::implicit(const FunctionInterface& f,
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
-    List<TaylorFunction> result;
+    List<VectorTaylorFunction> result;
 
     const uint np=ip.size();
     const uint nx=ix.size();
     const double err=this->maximum_error();
 
-    Vector<TaylorExpression> p=TaylorExpression::variables(ip);
+    VectorTaylorFunction p(ScalarTaylorFunction::variables(ip));
     std::cerr<<"p="<<p<<"\n";
-    Vector<TaylorExpression> x=TaylorExpression::constants(ip,ix);
+    VectorTaylorFunction x(ScalarTaylorFunction::constants(ip,ix));
     std::cerr<<"x="<<x<<"\n";
-    Vector<TaylorExpression> nwx(x.size());
+    VectorTaylorFunction nwx(x.size());
 
     uint steps_remaining=this->maximum_number_of_steps();
     uint number_unrefined=nx;
@@ -470,7 +466,7 @@ SolverBase::implicit(const FunctionInterface& f,
         }
 
         if( (number_unrefined==0) && (radius(nwx)<err) ) {
-            result.append(TaylorFunction(nwx));
+            result.append(VectorTaylorFunction(nwx));
             break;
         }
 
@@ -487,7 +483,7 @@ SolverBase::implicit(const FunctionInterface& f,
 
 
 Vector<Interval>
-IntervalNewtonSolver::step(const FunctionInterface& f,
+IntervalNewtonSolver::step(const VectorFunctionInterface& f,
                            const Vector<Interval>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -509,7 +505,7 @@ IntervalNewtonSolver::step(const FunctionInterface& f,
 }
 
 Vector<Interval>
-KrawczykSolver::step(const FunctionInterface& f,
+KrawczykSolver::step(const VectorFunctionInterface& f,
                      const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -534,18 +530,18 @@ KrawczykSolver::step(const FunctionInterface& f,
 }
 
 
-Vector<TaylorExpression>
-IntervalNewtonSolver::implicit_step(const FunctionInterface& f,
-                            const Vector<TaylorExpression>& p,
-                            const Vector<TaylorExpression>& x) const
+VectorTaylorFunction
+IntervalNewtonSolver::implicit_step(const VectorFunctionInterface& f,
+                            const VectorTaylorFunction& p,
+                            const VectorTaylorFunction& x) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Vector<TaylorExpression>
-KrawczykSolver::implicit_step(const FunctionInterface& f,
-                              const Vector<TaylorExpression>& p,
-                              const Vector<TaylorExpression>& x) const
+VectorTaylorFunction
+KrawczykSolver::implicit_step(const VectorFunctionInterface& f,
+                              const VectorTaylorFunction& p,
+                              const VectorTaylorFunction& x) const
 {
     verbosity=6;
     const uint np=p.size();
@@ -553,13 +549,13 @@ KrawczykSolver::implicit_step(const FunctionInterface& f,
     Matrix<Interval> I=Matrix<Interval>::identity(nx);
     ARIADNE_LOG(4,"  Contracting "<<x<<"\n");
     //ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<TaylorExpression> mx(x);
+    VectorTaylorFunction mx(x);
     for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<Float> ex(nx);
     for(uint i=0; i!=nx; ++i) { ex[i]=+x[i].error(); }
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
-    Vector<TaylorExpression> fm=evaluate(f,join(p,mx));
+    VectorTaylorFunction fm=evaluate(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
     Vector<Interval> rp(np);
     for(uint i=0; i!=np; ++i) { rp[i]=p[i].range(); }
@@ -569,9 +565,9 @@ KrawczykSolver::implicit_step(const FunctionInterface& f,
     ARIADNE_LOG(5,"    D2f(r)="<<J<<"\n");
     Matrix<Interval> M=inverse(midpoint(J));
     ARIADNE_LOG(5,"    inverse(D2f(m))="<<M<<"\n");
-    Vector<TaylorExpression> dx=product(M,fm)-prod(Matrix<Interval>(I-prod(M,J)),ex*Interval(-1,+1));
+    VectorTaylorFunction dx=product(M,fm) - Vector<Interval>( prod(Matrix<Interval>(I-prod(M,J)),ex*Interval(-1,+1)) );
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
-    Vector<TaylorExpression> nwx= mx - dx;
+    VectorTaylorFunction nwx= mx - dx;
     ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");
     return nwx;
 }

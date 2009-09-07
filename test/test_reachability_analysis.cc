@@ -92,19 +92,19 @@ class TestReachabilityAnalysis
         DiscreteState location(1);
 
         /*
-          UserFunction<Henon> henon(make_point("(1.5,-0.375)"));
+          VectorUserFunction<Henon> henon(make_point("(1.5,-0.375)"));
           system.new_mode(location,ConstantFunction(Vector<Float>(2,0.0),2));
           system.new_forced_transition(DiscreteEvent(1),DiscreteState(1),DiscreteState(1),henon,ConstantFunction(Vector<Float>(1,1.0),2));
           ImageSet initial_box(Box("[0.99,1.01]x[-0.01,0.01]"));
         */
         /*
-          UserFunction<VanDerPol> vdp(make_point("(0.75)"));
+          VectorUserFunction<VanDerPol> vdp(make_point("(0.75)"));
           system.new_mode(location,vdp);
           ImageSet initial_box(Box("[0.99,1.01]x[-0.01,0.01]"));
         */
         Matrix<Float> A=Matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
         Vector<Float> b=Vector<Float>("[0.0,0.0]");
-        AffineFunction aff(A,b);
+        VectorAffineFunction aff(A,b);
         system.new_mode(location,aff);
         cout << "Done building system\n";
 

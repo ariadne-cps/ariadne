@@ -84,7 +84,7 @@ class Curve
     /*! \brief Destructor. */
     virtual ~Curve();
     /*! \brief Constructor. */
-    Curve(const FunctionInterface& f);
+    Curve(const VectorFunctionInterface& f);
     /*! \brief Copy constructor. */
     Curve(const Curve& c);
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -102,7 +102,7 @@ class Curve
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;
   private:
-    boost::shared_ptr<FunctionInterface> _function_ptr;
+    boost::shared_ptr<VectorFunctionInterface> _function_ptr;
 };
     
   

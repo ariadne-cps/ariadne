@@ -50,7 +50,7 @@ namespace Ariadne {
 
 template<class Sys, class BS> class Evolver;
 
-class TaylorFunction;
+class VectorTaylorFunction;
 class TaylorSet;
 typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 class HybridAutomaton;
@@ -74,15 +74,15 @@ class HybridEvolver
     : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
-    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
-    typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
-    typedef ScalarFunctionInterface ExpressionType;
-    typedef FunctionInterface FunctionType;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ScalarFunctionPtr;
+    typedef boost::shared_ptr<const VectorFunctionInterface> VectorFunctionPtr;
+    typedef ScalarFunctionInterface ScalarFunctionType;
+    typedef VectorFunctionInterface VectorFunctionType;
     typedef Vector<Interval> BoxType;
-    typedef TaylorFunction FunctionModelType;
-    typedef TaylorFunction MapModelType;
-    typedef TaylorFunction FlowModelType;
-    typedef TaylorExpression ConstraintModelType;
+    typedef VectorTaylorFunction FunctionModelType;
+    typedef VectorTaylorFunction MapModelType;
+    typedef VectorTaylorFunction FlowModelType;
+    typedef ScalarTaylorFunction ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorSet FlowSetModelType;
     typedef TaylorSet SetModelType;
@@ -150,35 +150,35 @@ class HybridEvolver
                                   Semantics semantics, bool reach) const;
 
   protected:
-    TimeModelType crossing_time(FunctionPtr guard, const FlowSetModelType& flow_set) const;
+    TimeModelType crossing_time(VectorFunctionPtr guard, const FlowSetModelType& flow_set) const;
 
-    Interval normal_derivative(FunctionPtr guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
+    Interval normal_derivative(VectorFunctionPtr guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
 
     void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
-                                         const std::map<DiscreteEvent,FunctionPtr>&,
+                                         const std::map<DiscreteEvent,VectorFunctionPtr>&,
                                          const ContinuousEnclosureType&) const;
 
     void compute_flow_model(FlowSetModelType&, BoxType&, Float&,
-                            FunctionPtr, const SetModelType&) const;
+                            VectorFunctionPtr, const SetModelType&) const;
     void compute_flow_model(FunctionModelType&, BoxType&,
-                            FunctionPtr, const BoxType&) const;
+                            VectorFunctionPtr, const BoxType&) const;
 
     void compute_crossing_time_and_direction(TimeModelType&, Interval&,
-                                             FunctionPtr guard, const FlowSetModelType& flow_set) const;
+                                             VectorFunctionPtr guard, const FlowSetModelType& flow_set) const;
 
     void compute_blocking_events(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
-                                 const std::map<DiscreteEvent,FunctionPtr>& guards,
+                                 const std::map<DiscreteEvent,VectorFunctionPtr>& guards,
                                  const FlowSetModelType& flow_set_model) const;
 
     void compute_blocking_time(std::set<DiscreteEvent>&, TimeModelType&,
                                const std::map<DiscreteEvent,TimeModelType>&) const;
 
     void compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
-                                  const std::map<DiscreteEvent,FunctionPtr>& activations,
+                                  const std::map<DiscreteEvent,VectorFunctionPtr>& activations,
                                   const FlowSetModelType& flow_set_model) const;
 
     void compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
-                                  const std::map<DiscreteEvent,FunctionPtr>& activations,
+                                  const std::map<DiscreteEvent,VectorFunctionPtr>& activations,
                                   const FlowSetModelType& flow_set_model,
                                   const TimeModelType& blocking_time_model,
                                   const Semantics sematics) const;

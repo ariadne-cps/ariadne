@@ -83,7 +83,7 @@ void build_automaton() {
     /// Create the dynamics 
 
     // Main dynamics (a'=1,Vr'=k,Vo'=0,P'=0)
-    AffineFunction work_d(Matrix<Float>(4,4),Vector<Float>(4,1.0,k,0.0,0.0));
+    VectorAffineFunction work_d(Matrix<Float>(4,4),Vector<Float>(4,1.0,k,0.0,0.0));
 		
     // For each state
     for (int i=0;i<=NH;i++)
@@ -98,7 +98,7 @@ void build_automaton() {
     /// Create the invariants
 
 	// Invariant to stop execution (Vr >= Vhigh)
-	AffineFunction stop_i(Matrix<Float>(1,4,0.0,-1.0,0.0,0.0),Vector<Float>(1,Vhigh));
+	VectorAffineFunction stop_i(Matrix<Float>(1,4,0.0,-1.0,0.0,0.0),Vector<Float>(1,Vhigh));
 
 	automaton.new_invariant(safe,stop_i);
 	automaton.new_invariant(unsafe,stop_i);
@@ -106,24 +106,24 @@ void build_automaton() {
     /// Create the resets
 
 	/// Resets the control clock counter and the output voltage to the value at level n (a^=0,Vr^=Vr,Vo^=Vo[n],P^=P)
-    Vector<AffineFunction*> vo_r(NH+1);
+    Vector<VectorAffineFunction*> vo_r(NH+1);
 	for (int n=0;n<=NH;n++)
-	    vo_r[n] = new AffineFunction(Matrix<Float>(4,4, 0.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,0.0,0.0, 0.0,0.0,0.0,1.0), Vector<Float>(4,0.0,0.0,Vo[n],0.0));  
+	    vo_r[n] = new VectorAffineFunction(Matrix<Float>(4,4, 0.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,0.0,0.0, 0.0,0.0,0.0,1.0), Vector<Float>(4,0.0,0.0,Vo[n],0.0));  
 		
     /// Create the guards
    
     /// Guard for the checking of the voltage difference (a >= P)
-    AffineFunction chkdiff_g(Matrix<Float>(1,4,1.0,0.0,0.0,-1.0),Vector<Float>(1));
+    VectorAffineFunction chkdiff_g(Matrix<Float>(1,4,1.0,0.0,0.0,-1.0),Vector<Float>(1));
     /// Guard for a positive voltage difference (Vr >= Vo)
-    AffineFunction posdiff_g(Matrix<Float>(1,4,0.0,1.0,-1.0,0.0),Vector<Float>(1));
+    VectorAffineFunction posdiff_g(Matrix<Float>(1,4,0.0,1.0,-1.0,0.0),Vector<Float>(1));
     /// Guard for a negative voltage difference (Vr <= Vo)
-    AffineFunction negdiff_g(Matrix<Float>(1,4,0.0,-1.0,1.0,0.0),Vector<Float>(1));
+    VectorAffineFunction negdiff_g(Matrix<Float>(1,4,0.0,-1.0,1.0,0.0),Vector<Float>(1));
     /// Guard for the end of the reference voltage excursion (Vr <= Vrf)
-    AffineFunction end_g(Matrix<Float>(1,4,0.0,-1.0,0.0,0.0),Vector<Float>(1,Vrf));
+    VectorAffineFunction end_g(Matrix<Float>(1,4,0.0,-1.0,0.0,0.0),Vector<Float>(1,Vrf));
     /// Guard for a safe result (Vo <= Vlow)
-    AffineFunction safe_g(Matrix<Float>(1,4,0.0,0.0,-1.0),Vector<Float>(1,Vlow));
+    VectorAffineFunction safe_g(Matrix<Float>(1,4,0.0,0.0,-1.0),Vector<Float>(1,Vlow));
     /// Guard for a unsafe result (Vo >= Vlow)
-    AffineFunction unsafe_g(Matrix<Float>(1,4,0.0,0.0,1.0),Vector<Float>(1,-Vlow));
+    VectorAffineFunction unsafe_g(Matrix<Float>(1,4,0.0,0.0,1.0),Vector<Float>(1,-Vlow));
 
     /// Create the transitions
     automaton.new_forced_transition(to_safe,end,safe,IdentityFunction(4),safe_g);

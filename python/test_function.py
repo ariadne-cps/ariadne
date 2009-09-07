@@ -26,10 +26,10 @@ Float=float
 d=Float(2.5)
 i=Interval(1.5,1.75)
 
-c=Polynomial.constant(3,1.5)
-x=Polynomial.variable(3,0)
-y=Polynomial.variable(3,1)
-v=Polynomial.variables(3)
+c=ScalarPolynomialFunction.constant(3,1.5)
+x=ScalarPolynomialFunction.variable(3,0)
+y=ScalarPolynomialFunction.variable(3,1)
+v=ScalarPolynomialFunction.variables(3)
 
 p=x+y
 
@@ -42,5 +42,5 @@ i+i; i-p; i*p;
 derivative(p,0)
 antiderivative(p,0)
 
-f=PolynomialFunction([p,p])
+f=VectorPolynomialFunction([p,p])
 

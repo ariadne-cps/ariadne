@@ -31,55 +31,55 @@ using namespace Ariadne;
 //
 // the parameters of the functions are a, b and T
 //
-struct Opening : FunctionData<3,3,3> {
-    template<class R, class A, class P> static void 
+struct Opening : VectorFunctionData<3,3,3> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1]; 
-        r[1] = 1.0/p[2];        
+        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1];
+        r[1] = 1.0/p[2];
         r[2] = 1.0;
     }
 };
 
-struct Closing : FunctionData<3,3,3> {
-    template<class R, class A, class P> static void 
+struct Closing : VectorFunctionData<3,3,3> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1]; 
-        r[1] = -1.0/p[2];        
+        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1];
+        r[1] = -1.0/p[2];
         r[2] = 1.0;
     }
 };
 
 
-struct OpenValve : FunctionData<3,3,3> {
-    template<class R, class A, class P> static void 
+struct OpenValve : VectorFunctionData<3,3,3> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1]; 
-        r[1] = 0.0;    
+        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1];
+        r[1] = 0.0;
         r[2] = 1.0;
     }
 };
 
-struct ClosedValve : FunctionData<3,3,3> {
-    template<class R, class A, class P> static void 
+struct ClosedValve : VectorFunctionData<3,3,3> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0); 
+        r[0] = - p[0] * Ariadne::sqrt(x0);
         r[1] = 0;
         r[2] = 1.0;
     }
 };
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
-    Figure fig; 
+    Figure fig;
     array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_bounding_box(bbox);
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -106,7 +106,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         double pos_y = bbox[1].lower();
 	rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
@@ -117,15 +117,15 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc); 
-    fig << set; 
-    fig.write(filename); 
+    fig.set_fill_colour(fc);
+    fig << set;
+    fig.write(filename);
 }
 
 
-int main() 
+int main()
 {
-  
+
     /// Set the system parameters
     double a = 0.065;
     double bmin = 0.3;
@@ -134,10 +134,10 @@ int main()
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
-    
+
     double tmax = 64.0;
     int jmax = 1;
- 
+
     Vector<Interval> system_parameters(3);
     system_parameters[0] = a;
     system_parameters[1] = Interval(bmin,bmax);        // Now parameters can be given as intervals !!
@@ -145,59 +145,59 @@ int main()
 
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomton object
     HybridAutomaton watertank_system;
-  
+
     /// Create four discrete states
     DiscreteState l1(1);
     DiscreteState l2(2);
     DiscreteState l3(3);
     DiscreteState l4(4);
-  
+
     /// Create the discrete events
     DiscreteEvent e12(12);
     DiscreteEvent e23(23);
     DiscreteEvent e34(34);
     DiscreteEvent e41(41);
-  
+
     /// Create the dynamics
-    UserFunction<Opening> dynamic1(system_parameters);
-    UserFunction<OpenValve> dynamic2(system_parameters);
-    UserFunction<Closing> dynamic3(system_parameters);
-    UserFunction<ClosedValve> dynamic4(system_parameters);
-    
+    VectorUserFunction<Opening> dynamic1(system_parameters);
+    VectorUserFunction<OpenValve> dynamic2(system_parameters);
+    VectorUserFunction<Closing> dynamic3(system_parameters);
+    VectorUserFunction<ClosedValve> dynamic4(system_parameters);
+
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
     cout << "dynamic3 = " << dynamic3 << endl << endl;
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
     /// Create the resets
-    AffineFunction reset_y_zero(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,0.0,0.0));
+    VectorAffineFunction reset_y_zero(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,0.0,0.0));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    AffineFunction reset_y_one(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,1.0,0.0));
+    VectorAffineFunction reset_y_one(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,1.0,0.0));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    AffineFunction guard12(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,-1.0));
+    VectorAffineFunction guard12(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,-1.0));
     cout << "guard12=" << guard12 << endl << endl;
-    AffineFunction guard23(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax + Delta));
+    VectorAffineFunction guard23(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax + Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    AffineFunction guard34(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction guard34(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,0.0));
     cout << "guard34=" << guard34 << endl << endl;
-    AffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
+    VectorAffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
-    /// forced transitions do not need an explicit invariant, 
+    /// forced transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    AffineFunction inv2(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax - Delta));//
+    VectorAffineFunction inv2(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax - Delta));//
     cout << "inv2=" << inv2 << endl << endl;
-    AffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
+    VectorAffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
-  
+
     /// Build the automaton
     watertank_system.new_mode(l1,dynamic1);
     watertank_system.new_mode(l2,dynamic2);
@@ -239,9 +239,9 @@ int main()
     Box initial_box(3, 1.00,1.00, 1.0,1.0, 0.0,0.0);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
-  
+
     HybridTime evolution_time(tmax,jmax);
-  
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -254,7 +254,7 @@ int main()
     plot("watertank-nonlinear-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
     textplot("watertank-nonlinear-orbit", orbit);
     textplot("watertank-nonlinear-final", orbit.final());
-    
+
 /*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);

@@ -51,7 +51,7 @@ using namespace std;
 using Models::Henon;
 
 /// This function diverges heavily
-struct FailOne : FunctionData<2,2,1> {
+struct FailOne : VectorFunctionData<2,2,1> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	      r[0] = 1.0;
@@ -60,7 +60,7 @@ struct FailOne : FunctionData<2,2,1> {
 };
 
 /// This function diverges heavily
-struct FailTwo : FunctionData<3,3,1> {
+struct FailTwo : VectorFunctionData<3,3,1> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	      r[0] = 1.0;
@@ -92,7 +92,7 @@ void TestContinuousEvolution::simple_test() const
     std::cout <<std::endl;
 
     TaylorCalculus calculus;
-    AffineFunction vector_field(Matrix<Float>(1,1,0.0),Vector<Float>(1,1.0));
+    VectorAffineFunction vector_field(Matrix<Float>(1,1,0.0),Vector<Float>(1,1.0));
     Vector<Interval> initial_box(1,Interval(-0.01,0.01));
     TaylorSet initial_set(initial_box);
     double step_size;
@@ -100,9 +100,9 @@ void TestContinuousEvolution::simple_test() const
     make_lpair(step_size,bounding_box)=calculus.flow_bounds(vector_field,initial_box,0.5,1.0);
     step_size=0.25;
     bounding_box=Vector<Interval>(1,Interval(-0.5,1.0));
-    TaylorFunction vector_field_expansion=calculus.map_model(vector_field,Vector<Interval>(1,Interval(-1,+1)));
-    TaylorFunction vector_field_model=calculus.map_model(vector_field,bounding_box);
-    TaylorFunction flow_model=calculus.flow_model(vector_field,initial_box,step_size,bounding_box);
+    VectorTaylorFunction vector_field_expansion=calculus.map_model(vector_field,Vector<Interval>(1,Interval(-1,+1)));
+    VectorTaylorFunction vector_field_model=calculus.map_model(vector_field,bounding_box);
+    VectorTaylorFunction flow_model=calculus.flow_model(vector_field,initial_box,step_size,bounding_box);
     TaylorSet evolve_set=calculus.integration_step(flow_model,initial_set,step_size);
     TaylorSet reach_set=calculus.reachability_step(flow_model,initial_set,0.0,step_size);
     std::cout <<"vector_field="<<vector_field<<std::endl;
@@ -146,16 +146,16 @@ void TestContinuousEvolution::test() const
     // Set up the vector field
     Float mu=0.5;
     Vector<Float> p(1); p[0]=mu;
-    UserFunction<VanDerPol> vdp(p);
+    VectorUserFunction<VanDerPol> vdp(p);
     // cout << "van_der_pol_function=" << vdp << endl;
     // cout << "van_der_pol_function.parameters()=" << vdp.parameters() << endl;
 
-    //UserFunction evaluation sanity check
+    //VectorUserFunction evaluation sanity check
     // cout << "vdp.evaluate(" << initial_box << ") " << flush; // cout << " = " << vdp.evaluate(initial_box) << endl;
     // cout << "vdp.jacobian(" << initial_box << ") = " << vdp.jacobian(initial_box) << endl;
     // cout << endl;
 
-    AffineFunction aff(Matrix<Float>(2,2,0.,0.,1.,0.),Vector<Float>(2,1.,0.0));
+    VectorAffineFunction aff(Matrix<Float>(2,2,0.,0.,1.,0.),Vector<Float>(2,1.,0.0));
 
     // Make a hybrid automaton for the Van der Pol equation
     //VectorField vanderpol(aff);
@@ -215,7 +215,7 @@ void TestContinuousEvolution::failure_test() const
 
     // Set up the vector field for the first test
     Vector<Float> p(1, 200.0);
-    UserFunction<FailOne> failone(p);
+    VectorUserFunction<FailOne> failone(p);
     VectorField failone_vf(failone);
 
     EnclosureType initial_set(initial_box);
@@ -245,7 +245,7 @@ void TestContinuousEvolution::failure_test() const
 
     // Set up the vector field for the second test
     p[0] = 0.1;
-    UserFunction<FailTwo> failtwo(p);
+    VectorUserFunction<FailTwo> failtwo(p);
     VectorField failtwo_vf(failtwo);
 
     Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);

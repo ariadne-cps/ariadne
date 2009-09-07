@@ -72,13 +72,13 @@ struct ScalarFunctionData
 //! <tt>ExpressionData<AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
-template<class T> class UserScalarFunction
+template<class T> class ScalarUserFunction
     : public ScalarFunctionInterface
 {
   public:
-    UserScalarFunction() : _p(this->parameter_size()) { }
-    UserScalarFunction(const Vector<Float>& p) : _p(p) { }
-    UserScalarFunction(const Vector<Interval>& p) : _p(p) { }
+    ScalarUserFunction() : _p(this->parameter_size()) { }
+    ScalarUserFunction(const Vector<Float>& p) : _p(p) { }
+    ScalarUserFunction(const Vector<Interval>& p) : _p(p) { }
 
     const Vector<Interval> parameters() const { return _p; }
 
@@ -99,7 +99,7 @@ template<class T> class UserScalarFunction
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
         Differential<Interval> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,_p); return r; }
 
-    virtual UserScalarFunction<T>* derivative(uint j) { ARIADNE_NOT_IMPLEMENTED; }
+    virtual ScalarUserFunction<T>* derivative(uint j) { ARIADNE_NOT_IMPLEMENTED; }
 
     virtual Vector<Float> gradient(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
@@ -107,7 +107,7 @@ template<class T> class UserScalarFunction
         return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
     virtual std::ostream& write(std::ostream& os) const  {
-        return os << "UserExpression( argument_size="<<this->argument_size()<<" )"; }
+        return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
   private:
     Vector<Interval> _p;
 };
@@ -166,6 +166,78 @@ class ScalarExpressionFunction
 
 
 
+//! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
+class ScalarConstantFunction
+    : public ScalarFunctionInterface
+{
+  public:
+    operator Interval() const;
+};
+
+
+//! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
+class ScalarAffineFunction
+    : public ScalarFunctionInterface,
+      public Affine<Interval>
+{
+  public:
+    explicit ScalarAffineFunction(uint n) : Affine<Interval>(n) { }
+    ScalarAffineFunction(const Affine<Interval>& aff) : Affine<Interval>(aff) { }
+    ScalarAffineFunction(const Vector<Float>& g, const Float& c) : Affine<Interval>(g,c) { }
+    ScalarAffineFunction(const Vector<Interval>& g, const Interval& c) : Affine<Interval>(g,c) { }
+    ScalarAffineFunction(uint as, double c, double g0, ...) {
+        Float _c; Vector<Float> _g(as);
+        _g[0]=g0; va_list args; va_start(args,g0);
+        for(uint i=1; i!=as; ++i) { _g[i]=va_arg(args,double); }
+        *this=ScalarAffineFunction(_g,_c); }
+//    ScalarAffineFunction(const ConstantScalarFunction& c)
+//        : _c(c), _g(c.argument_size()) { }
+
+    ScalarAffineFunction(Expression<Real> e, const Array<String>& s);
+//    ScalarAffineFunction(Expression<Real> e, const Map<String,SizeType>& s);
+
+    static ScalarAffineFunction constant(uint n, Float c) {
+        return ScalarAffineFunction(Vector<Float>(n),c); }
+    static ScalarAffineFunction constant(uint n, Interval c) {
+        return ScalarAffineFunction(Vector<Interval>(n),c); }
+    static ScalarAffineFunction variable(uint n, uint j) {
+        return ScalarAffineFunction(Vector<Interval>::unit(n,j),Interval(0.0)); }
+
+    virtual ScalarAffineFunction* clone() const { return new ScalarAffineFunction(*this); }
+
+    virtual SizeType argument_size() const { return static_cast<Affine<Interval>const&>(*this).argument_size(); }
+    virtual SmoothnessType smoothness() const { return SMOOTH; }
+    virtual Float evaluate(const Vector<Float>& x) const { return this->_evaluate_approx<Float>(x); }
+    virtual Interval evaluate(const Vector<Interval>& x) const { return this->_evaluate<Interval>(x); }
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const { return this->_evaluate<TaylorModel>(x); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
+        return this->_evaluate_approx< Differential<Float> >(x); }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
+        return this->_evaluate< Differential<Interval> >(x); }
+    virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
+        return this->_evaluate< Differential<TaylorModel> >(x); }
+
+    virtual Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+
+//    virtual ConstantScalarFunction* derivative(uint j) const { return new ConstantScalarFunction(_g.size(),_g[j]); }
+    virtual ScalarFunctionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+
+
+    virtual std::ostream& write(std::ostream& os) const { return os << static_cast<Affine<Interval>const&>(*this); }
+  private:
+    template<class R, class A>
+    R _evaluate_approx(const A& x) const {
+        R r=x[0]*0+midpoint(b()); for(uint j=0; j!=argument_size(); ++j) { r+=midpoint(a()[j])*x[j]; } return r; }
+    template<class R, class A>
+    R _evaluate(const A& x) const {
+        R r=x[0]*0+b(); for(uint j=0; j!=argument_size(); ++j) { r+=a()[j]*x[j]; } return r; }
+
+};
+
+
 //! A polynomial expression \f$p:\R^n\rightarrow\R\f$.
 class ScalarPolynomialFunction
     : public ScalarFunctionInterface
@@ -178,7 +250,7 @@ class ScalarPolynomialFunction
     ScalarPolynomialFunction(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
     ScalarPolynomialFunction& operator=(const Polynomial<Interval>& p) { this->Polynomial<Interval>::operator=(p); return *this; }
 
-    ScalarPolynomialFunction(const Expression<Real>& e, const Space<Real>& s) { *this=polynomial(e,s); }
+    ScalarPolynomialFunction(const Expression<Real>& e, const Space<Real>& s) { *this=ScalarPolynomialFunction(polynomial<Interval>(e,s)); }
 
     ScalarPolynomialFunction(const ScalarAffineFunction& a) : Polynomial<Interval>(a.argument_size()) {
         uint n=this->argument_size(); (*this)[MultiIndex::zero(n)]=a.b();
@@ -303,8 +375,8 @@ inline ScalarPolynomialFunction::ScalarPolynomialFunction(ExpressionPointer e, c
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
-class FunctionTemplate
-    : public FunctionInterface
+class VectorFunctionTemplate
+    : public VectorFunctionInterface
 {
   private:
     template<class R, class A> void _base_compute(R& r, const A& a) const {
@@ -312,7 +384,7 @@ class FunctionTemplate
     template<class R, class A> void _base_compute_approx(R& r, const A& a) const {
         static_cast<const F*>(this)->_compute_approx(r,a); }
   protected:
-    FunctionTemplate() { }
+    VectorFunctionTemplate() { }
   public:
     virtual SmoothnessType smoothness() const { return SMOOTH; }
 
@@ -346,7 +418,7 @@ class FunctionTemplate
 
 //! \brief A convenience class defining the meta-data of an %Ariadne function.
 template<uint RS, uint AS, uint PS=0u, uint SM=255u>
-class FunctionData
+class VectorFunctionData
 {
   public:
     //!
@@ -369,20 +441,20 @@ class FunctionData
 //!
 //! The class T must also define meta-data <c>result_size(), argument_size(), parameter_size()
 //! and smoothness()</c> as static functions. These are most easily defined by inheriting from the
-//! <tt>FunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
+//! <tt>ScalarFunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
-template<class T> class UserFunction
-    : public FunctionInterface
+template<class T> class VectorUserFunction
+    : public VectorFunctionInterface
 {
   public:
-    UserFunction() : _p(this->parameter_size()) { }
-    UserFunction(const Vector<Float>& p) : _p(p) { }
-    UserFunction(const Vector<Interval>& p) : _p(p) { }
+    VectorUserFunction() : _p(this->parameter_size()) { }
+    VectorUserFunction(const Vector<Float>& p) : _p(p) { }
+    VectorUserFunction(const Vector<Interval>& p) : _p(p) { }
 
     const Vector<Interval> parameters() const { return _p; }
 
-    virtual UserFunction<T>* clone() const { return new UserFunction<T>(*this); }
+    virtual VectorUserFunction<T>* clone() const { return new VectorUserFunction<T>(*this); }
 
     virtual SizeType result_size() const { return T::result_size(); }
     virtual SizeType argument_size() const { return T::argument_size(); }
@@ -413,35 +485,20 @@ template<class T> class UserFunction
     // TODO: Find a better way for writing functions which can handle transformations which may not have a
     // write() method or operator<<.
     virtual std::ostream& write(std::ostream& os) const  {
-        return os << "UserFunction( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
+        return os << "VectorUserFunction( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
   private:
     Vector<Interval> _p;
 };
 
 
-//! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
-//! \deprecated Use UserFunction instead.
-template<class T> class Function
-    : public UserFunction<T>
-{
-  public:
-    Function() : UserFunction<T>() { _deprecated_warning(); }
-    Function(const Vector<Float>& p) : UserFunction<T>(p) { _deprecated_warning(); }
-    Function(const Vector<Interval>& p) : UserFunction<T>(p) { _deprecated_warning(); }
-  private:
-    void _deprecated_warning() {
-        static bool firsttime=true;
-        if(firsttime) { firsttime=false;
-        std::cerr<<"Deprecated: template<class T> Function is deprecated; use template<class T> UserFunction instead.\n"; }
-    }
-};
+
 
 //! \brief A vector-valued function defined by its scalar-valued components.
 template<>
 class Vector<ScalarFunctionInterface>
-    : public FunctionInterface
+    : public VectorFunctionInterface
 {
-    friend class FunctionTemplate< Vector<ScalarFunctionInterface> >;
+    friend class VectorFunctionTemplate< Vector<ScalarFunctionInterface> >;
   public:
     typedef unsigned int SizeType;
     typedef unsigned short int SmoothnessType;
@@ -503,25 +560,150 @@ class Vector<ScalarFunctionInterface>
 
 
 
+//! A constant function \f$ x\mapsto c\f$ from \f$R^m\f$ to \f$R^n\f$.
+class VectorConstantFunction
+    : public VectorFunctionTemplate<VectorConstantFunction>
+{
+  public:
+    VectorConstantFunction(uint rs, double c0, ...) : _as(), _c(rs) {
+        ARIADNE_ASSERT(rs>0); va_list args; va_start(args,c0);
+        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { _c[i]=va_arg(args,double); } _as=va_arg(args,int);
+        va_end(args);
+    }
+
+    VectorConstantFunction(uint rs, Interval c0, ...) : _as(), _c(rs) {
+        ARIADNE_ASSERT(rs>0); double l,u; va_list args; va_start(args,c0);
+        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { l=va_arg(args,double); u=va_arg(args,double); _c[i]=Interval(l,u); } _as=va_arg(args,int);
+        va_end(args);
+    }
+
+    VectorConstantFunction(const Vector<Float>& c, uint as) : _as(as), _c(c) { }
+    VectorConstantFunction(const Vector<Interval>& c, uint as) : _as(as), _c(c) { }
+//    ConstantExpression<Real,Real> operator[](uint i) const { return ConstantExpression<Real,Real>(_as,this->_c[i]); }
+    Interval operator[](uint i) const { return this->_c[i]; }
+    const Vector<Interval>& c() const { return _c; }
+
+    VectorConstantFunction* clone() const { return new VectorConstantFunction(*this); }
+
+    SizeType result_size() const { return _c.size(); }
+    SizeType argument_size() const { return _as; }
+
+    std::ostream& write(std::ostream& os) const {
+        return os << "VectorConstantFunction( argument_size=" << this->argument_size()
+                  << ", c=" << this->c() << " )"; }
+  private:
+    friend class VectorFunctionTemplate<VectorConstantFunction>;
+    template<class R, class A> void _compute(R& r, const A& x) const {
+        for(uint i=0; i!=result_size(); ++i) { r[i]=_c[i]; } }
+    template<class R, class A> void _compute_approx(R& r, const A& x) const {
+        for(uint i=0; i!=result_size(); ++i) { r[i]=midpoint(_c[i]); } }
+  private:
+    uint _as;
+    Vector<Interval> _c;
+};
+
+
+//! An affine function \f$x\mapsto Ax+b\f$.
+class VectorAffineFunction
+    : public VectorFunctionInterface
+{
+  public:
+
+    //! Construct an affine function from the matrix \a A and vector \a b.
+    VectorAffineFunction(const Matrix<Interval>& A, const Vector<Interval>& b)
+        : _fA(midpoint(A)), _fb(midpoint(b)), _iA(A), _ib(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
+
+    VectorAffineFunction(uint rs, double b0, ...) : _fA(), _fb(rs) {
+        ARIADNE_ASSERT(rs>0);
+        va_list args; va_start(args,b0);
+        _fb[0]=b0; for(size_t i=1; i!=rs; ++i) { _fb[i]=va_arg(args,double); }
+        uint as=va_arg(args,int); ARIADNE_ASSERT(as>0); _fA=Matrix<Float>(rs,as);
+        for(size_t i=0; i!=rs; ++i) { for(size_t j=0; i!=as; ++j) { _fA[i][j]=va_arg(args,double); } }
+        va_end(args);
+        _iA=Matrix<Interval>(_fA); _ib=Vector<Interval>(_fb);
+    }
+
+    const Matrix<Float>& A() const { return _fA; }
+    const Vector<Float>& b() const { return _fb; }
+
+    virtual VectorAffineFunction* clone() const { return new VectorAffineFunction(*this); }
+
+    virtual SizeType result_size() const { return _fA.row_size(); }
+    virtual SizeType argument_size() const { return _fA.column_size(); }
+    virtual SmoothnessType smoothness() const { return SMOOTH; }
+
+    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
+        return prod(_fA,x)+_fb; }
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
+        return prod(_iA,x)+_ib; }
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        return prod(_fA,x)+_fb; }
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
+        return prod(_iA,x)+_ib; }
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
+        return prod(_iA,x)+_ib;
+        ARIADNE_ASSERT(x.size()==this->argument_size());
+        for(uint i=1; i<x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
+        Vector<TaylorModel> r(this->result_size(),x[0]*0.0);
+        for(uint i=0; i!=r.size(); ++i) { r[i]=_ib[i]; for(uint j=0; j!=x.size(); ++j) { r[i]+=_iA[i][j]*x[j]; } }
+        return r;
+    }
+    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
+        return this->_fA; }
+    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+        return this->_iA; }
+
+    virtual ScalarAffineFunction operator[](unsigned int i) const  {
+        ARIADNE_ASSERT(i<this->result_size());
+        Vector<Interval> g(this->argument_size()); for(unsigned int j=0; j!=g.size(); ++j) { g[j]=this->_iA[i][j]; }
+        return ScalarAffineFunction(g,_ib[i]); }
+
+    virtual std::ostream& write(std::ostream& os) const;
+  private:
+    Matrix<Float> _fA; Vector<Float> _fb;
+    Matrix<Interval> _iA; Vector<Interval> _ib;
+};
+
+inline std::ostream& VectorAffineFunction::write(std::ostream& os) const {
+    //return os << "VectorAffineFunction( A="<<midpoint(_iA)<<", b="<<midpoint(_ib)<<" )";
+    const VectorAffineFunction& f=*this;
+    for(uint i=0; i!=f.result_size(); ++i) {
+        os<<(i==0?"VectorAffineFunction( ":"; ");
+        if(f.b()[i]!=0) { os<<f.b()[i]; }
+        for(uint j=0; j!=f.argument_size(); ++j) {
+            if(f.A()[i][j]!=0) {
+                if(f.A()[i][j]>0) { os<<"+"; } else { os<<"-"; }
+                if(abs(f.A()[i][j])!=1) { os<<abs(f.A()[i][j]); }
+                //ss<<char('x'+j);
+                os<<"x"<<j;
+            }
+        }
+    }
+    os<<" )";
+    return os;
+}
+
+
+
 //! A polynomial function.
-class PolynomialFunction
+class VectorPolynomialFunction
     : public Vector<ScalarFunctionInterface>
 {
     typedef Vector<ScalarFunctionInterface> Base;
   public:
-    explicit PolynomialFunction(uint rs, uint as) : Base(rs) {
+    explicit VectorPolynomialFunction(uint rs, uint as) : Base(rs) {
         for(uint i=0; i!=rs; ++i) { Base::set(i,ScalarPolynomialFunction(as)); } }
-    explicit PolynomialFunction(uint rs, const ScalarPolynomialFunction& p) : Base(rs) {
+    explicit VectorPolynomialFunction(uint rs, const ScalarPolynomialFunction& p) : Base(rs) {
         for(uint i=0; i!=rs; ++i) { Base::set(i,p); } }
 
-    template<class E> PolynomialFunction(const ublas::vector_expression<E>& p) : Base(p().size()) {
+    template<class E> VectorPolynomialFunction(const ublas::vector_expression<E>& p) : Base(p().size()) {
         for(uint i=0; i!=p().size(); ++i) { Base::set(i,ScalarPolynomialFunction(p()[i])); } }
 
-    PolynomialFunction(const Vector< Polynomial<Float> >& p) : Base(p.size()) {
+    VectorPolynomialFunction(const Vector< Polynomial<Float> >& p) : Base(p.size()) {
         for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
-    PolynomialFunction(const Vector< Polynomial<Interval> >& p) : Base(p.size()) {
+    VectorPolynomialFunction(const Vector< Polynomial<Interval> >& p) : Base(p.size()) {
         for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
-    PolynomialFunction(const Vector<ScalarPolynomialFunction>& p) : Base(p.size()) {
+    VectorPolynomialFunction(const Vector<ScalarPolynomialFunction>& p) : Base(p.size()) {
         for(uint i=0; i!=p.size(); ++i) { Base::set(i,p[i]); } }
 
     const ScalarPolynomialFunction& operator[](uint i) const {
@@ -533,30 +715,30 @@ class PolynomialFunction
         return this->Base::set(i,p); }
 
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "PolynomialFunction("<<static_cast<const Vector<ScalarFunctionInterface>&>(*this)<<")"; }
+        return os << "VectorPolynomialFunction("<<static_cast<const Vector<ScalarFunctionInterface>&>(*this)<<")"; }
   private:
-    friend PolynomialFunction operator+(const PolynomialFunction&, const PolynomialFunction&);
-    friend PolynomialFunction flip(const PolynomialFunction&, uint);
+    friend VectorPolynomialFunction operator+(const VectorPolynomialFunction&, const VectorPolynomialFunction&);
+    friend VectorPolynomialFunction flip(const VectorPolynomialFunction&, uint);
 };
 
-inline PolynomialFunction join(const ScalarPolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
+inline VectorPolynomialFunction join(const ScalarPolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
     return join(static_cast<const Polynomial<Interval>&>(p1),static_cast<const Polynomial<Interval>&>(p2));
 }
 
-inline PolynomialFunction join(const PolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
-    // Need to implement this explicitly since PolynomialFunction does not inherit from Vector<Polynomial>
+inline VectorPolynomialFunction join(const VectorPolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
+    // Need to implement this explicitly since VectorPolynomialFunction does not inherit from Vector<Polynomial>
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    PolynomialFunction r(p1.result_size()+1u,p1.argument_size());
+    VectorPolynomialFunction r(p1.result_size()+1u,p1.argument_size());
     for(uint i=0; i!=p1.result_size(); ++i) {
         r.set(i,p1[i]); }
     r.set(p1.result_size(),p2);
     return r;
 }
 
-inline PolynomialFunction join(const PolynomialFunction& p1, const PolynomialFunction& p2) {
-    // Need to implement this explicitly since PolynomialFunction does not inherit from Vector<Polynomial>
+inline VectorPolynomialFunction join(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
+    // Need to implement this explicitly since VectorPolynomialFunction does not inherit from Vector<Polynomial>
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    PolynomialFunction r(p1.result_size()+p2.result_size(),p1.argument_size());
+    VectorPolynomialFunction r(p1.result_size()+p2.result_size(),p1.argument_size());
     for(uint i=0; i!=p1.result_size(); ++i) {
         r.set(i,p1[i]); }
     for(uint i=0; i!=p2.result_size(); ++i) {
@@ -564,26 +746,26 @@ inline PolynomialFunction join(const PolynomialFunction& p1, const PolynomialFun
     return r;
 }
 
-inline PolynomialFunction operator*(const ScalarPolynomialFunction& p, const Vector<Float>& e) {
-    PolynomialFunction r(e.size(),p.argument_size());
+inline VectorPolynomialFunction operator*(const ScalarPolynomialFunction& p, const Vector<Float>& e) {
+    VectorPolynomialFunction r(e.size(),p.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,static_cast<ScalarPolynomialFunction>(e[i]*p)); }
     return r;
 }
 
-inline PolynomialFunction operator+(const PolynomialFunction& p1, const PolynomialFunction& p2) {
+inline VectorPolynomialFunction operator+(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
     ARIADNE_ASSERT(p1.result_size()==p2.result_size());
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    PolynomialFunction r(p1.result_size(),p1.argument_size());
+    VectorPolynomialFunction r(p1.result_size(),p1.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,static_cast<ScalarPolynomialFunction>(p1[i]+p2[i])); }
     return r;
 }
 
-inline PolynomialFunction operator-(const PolynomialFunction& p1, const PolynomialFunction& p2) {
+inline VectorPolynomialFunction operator-(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
     ARIADNE_ASSERT(p1.result_size()==p2.result_size());
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    PolynomialFunction r(p1.result_size(),p1.argument_size());
+    VectorPolynomialFunction r(p1.result_size(),p1.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,static_cast<ScalarPolynomialFunction>(p1[i]-p2[i])); }
     return r;
@@ -595,52 +777,10 @@ inline PolynomialFunction operator-(const PolynomialFunction& p1, const Polynomi
 
 
 
-//! A constant function \f$ x\mapsto c\f$ from \f$R^m\f$ to \f$R^n\f$.
-class ConstantFunction
-    : public FunctionTemplate<ConstantFunction>
-{
-  public:
-    ConstantFunction(uint rs, double c0, ...) : _as(), _c(rs) {
-        ARIADNE_ASSERT(rs>0); va_list args; va_start(args,c0);
-        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { _c[i]=va_arg(args,double); } _as=va_arg(args,int);
-        va_end(args);
-    }
-
-    ConstantFunction(uint rs, Interval c0, ...) : _as(), _c(rs) {
-        ARIADNE_ASSERT(rs>0); double l,u; va_list args; va_start(args,c0);
-        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { l=va_arg(args,double); u=va_arg(args,double); _c[i]=Interval(l,u); } _as=va_arg(args,int);
-        va_end(args);
-    }
-
-    ConstantFunction(const Vector<Float>& c, uint as) : _as(as), _c(c) { }
-    ConstantFunction(const Vector<Interval>& c, uint as) : _as(as), _c(c) { }
-//    ConstantExpression<Real,Real> operator[](uint i) const { return ConstantExpression<Real,Real>(_as,this->_c[i]); }
-    Interval operator[](uint i) const { return this->_c[i]; }
-    const Vector<Interval>& c() const { return _c; }
-
-    ConstantFunction* clone() const { return new ConstantFunction(*this); }
-
-    SizeType result_size() const { return _c.size(); }
-    SizeType argument_size() const { return _as; }
-
-    std::ostream& write(std::ostream& os) const {
-        return os << "ConstantFunction( argument_size=" << this->argument_size()
-                  << ", c=" << this->c() << " )"; }
-  private:
-    friend class FunctionTemplate<ConstantFunction>;
-    template<class R, class A> void _compute(R& r, const A& x) const {
-        for(uint i=0; i!=result_size(); ++i) { r[i]=_c[i]; } }
-    template<class R, class A> void _compute_approx(R& r, const A& x) const {
-        for(uint i=0; i!=result_size(); ++i) { r[i]=midpoint(_c[i]); } }
-  private:
-    uint _as;
-    Vector<Interval> _c;
-};
-
 
 //! \brief A projection function \f$ x'_i= x_{p(i)}\f$.
 class ProjectionFunction
-    : public FunctionTemplate<ProjectionFunction>
+    : public VectorFunctionTemplate<ProjectionFunction>
 {
   public:
     //! \brief Construct the identity function in dimension \a n.
@@ -668,7 +808,7 @@ class ProjectionFunction
     SizeType p(unsigned int j) const { return this->_p[j]; }
 
   private:
-    friend class FunctionTemplate<ProjectionFunction>;
+    friend class VectorFunctionTemplate<ProjectionFunction>;
     template<class R, class A> void _compute(R& r, const A& x) const {
         for(uint i=0; i!=result_size(); ++i) { r[i]=x[_p[i]]; } }
     template<class R, class A> void _compute_approx(R& r, const A& x) const {
@@ -681,7 +821,7 @@ class ProjectionFunction
 
 //! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
 class IdentityFunction
-    : public FunctionTemplate<IdentityFunction>
+    : public VectorFunctionTemplate<IdentityFunction>
 {
   public:
     //! \brief Construct the identity function in dimension \a n.
@@ -695,9 +835,9 @@ class IdentityFunction
     SizeType argument_size() const { return this->_n; }
 
     std::ostream& write(std::ostream& os) const {
-        return os << "IdentityFunction( size=" << this->result_size() << " )"; }
+        return os << "VectorIdentityFunction( size=" << this->result_size() << " )"; }
   private:
-    friend class FunctionTemplate<IdentityFunction>;
+    friend class VectorFunctionTemplate<IdentityFunction>;
     template<class R, class A> void _compute(R& r, const A& x) const { r=x; }
     template<class R, class A> void _compute_approx(R& r, const A& x) const { r=x; }
   private:
@@ -706,26 +846,26 @@ class IdentityFunction
 
 
 //! \brief A scaling function \f$x_i' = o_i+l_ix_i\f$.
-class ScalingFunction
-    : public FunctionTemplate<ScalingFunction>
+class VectorScalingFunction
+    : public VectorFunctionTemplate<VectorScalingFunction>
 {
   public:
     //! \brief The scaling function \f$x_i' = o_i+l_ix_i\f$.
-    explicit ScalingFunction(const Vector<Float>& origin,
+    explicit VectorScalingFunction(const Vector<Float>& origin,
                              const Vector<Float>& lengths)
         : _o(origin), _l(lengths) { ARIADNE_ASSERT(origin.size()==lengths.size()); }
     //! \brief The scaling function which takes the unit interval \f$[-1,+1]^n\f$ into \a range.
-    explicit ScalingFunction(const Vector<Interval>& range)
+    explicit VectorScalingFunction(const Vector<Interval>& range)
         : _o(midpoint(range)), _l(range.size()) { for(uint i=0; i!=_l.size(); ++i) { _l[i]=range[i].radius(); } }
     const Vector<Float>& origin() const { return _o; }
     const Vector<Float>& lengths() const { return _l; }
-    ScalingFunction* clone() const { return new ScalingFunction(*this); }
+    VectorScalingFunction* clone() const { return new VectorScalingFunction(*this); }
     SizeType result_size() const { return _l.size(); }
     SizeType argument_size() const { return _l.size(); }
     std::ostream& write(std::ostream& os) const {
-        return os << "ScalingFunction( o=" << this->origin() << ", l=" << this->lengths() << " )"; }
+        return os << "VectorScalingFunction( o=" << this->origin() << ", l=" << this->lengths() << " )"; }
   private:
-    friend class FunctionTemplate<ScalingFunction>;
+    friend class VectorFunctionTemplate<VectorScalingFunction>;
     template<class R, class A> void _compute(R& r, const A& x) const {
         for(uint i=0; i!=result_size(); ++i) { r[i]=_o[i]+_l[i]*x[i]; } }
     template<class R, class A> void _compute_approx(R& r, const A& x) const {
@@ -747,9 +887,9 @@ class FunctionElement
     typedef unsigned int SizeType;
     typedef unsigned short SmoothnessType;
 
-    FunctionElement(const FunctionInterface& f, SizeType i)
+    FunctionElement(const VectorFunctionInterface& f, SizeType i)
         : _fptr(f.clone()), _i(i) { ARIADNE_ASSERT(i<f.result_size()); }
-    FunctionElement(shared_ptr<const FunctionInterface> fptr, SizeType i)
+    FunctionElement(shared_ptr<const VectorFunctionInterface> fptr, SizeType i)
         : _fptr(fptr), _i(i) { ARIADNE_ASSERT(i<fptr->result_size()); }
     FunctionElement* clone() const { return new FunctionElement(*this); }
 
@@ -781,7 +921,7 @@ class FunctionElement
     template<class Y> inline Y _evaluate(const Vector<Y>& x) const {
         return this->_fptr->evaluate(x)[this->_i]; }
   private:
-    shared_ptr<const FunctionInterface> _fptr;
+    shared_ptr<const VectorFunctionInterface> _fptr;
     SizeType _i;
 };
 
@@ -802,11 +942,11 @@ join(uint n, const ScalarFunctionInterface* e0, const ScalarFunctionInterface* e
 
 
 class ComposedFunction
-    : public FunctionTemplate<ComposedFunction>
+    : public VectorFunctionTemplate<ComposedFunction>
 {
-    friend class FunctionTemplate<ComposedFunction>;
+    friend class VectorFunctionTemplate<ComposedFunction>;
   public:
-    ComposedFunction(shared_ptr<const FunctionInterface> g, shared_ptr<const FunctionInterface> f)
+    ComposedFunction(shared_ptr<const VectorFunctionInterface> g, shared_ptr<const VectorFunctionInterface> f)
         : _f(f), _g(g) { ARIADNE_ASSERT(g->argument_size()==f->result_size()); }
     ComposedFunction* clone() const { return new ComposedFunction(*this); }
 
@@ -819,16 +959,16 @@ class ComposedFunction
     template<class X> inline void _compute_approx(Vector<X>& r, const Vector<X>& x) const {
         _compute(r,x); }
   private:
-    shared_ptr<const FunctionInterface> _f;
-    shared_ptr<const FunctionInterface> _g;
+    shared_ptr<const VectorFunctionInterface> _f;
+    shared_ptr<const VectorFunctionInterface> _g;
 };
 
 class JoinedFunction
-    : public FunctionTemplate<JoinedFunction>
+    : public VectorFunctionTemplate<JoinedFunction>
 {
-    friend class FunctionTemplate<JoinedFunction>;
+    friend class VectorFunctionTemplate<JoinedFunction>;
   public:
-    JoinedFunction(shared_ptr<const FunctionInterface> f1, shared_ptr<const FunctionInterface> f2)
+    JoinedFunction(shared_ptr<const VectorFunctionInterface> f1, shared_ptr<const VectorFunctionInterface> f2)
         : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1->argument_size()==f2->argument_size()); }
     JoinedFunction* clone() const { return new JoinedFunction(*this); }
 
@@ -841,15 +981,15 @@ class JoinedFunction
     template<class X> inline void _compute_approx(Vector<X>& r, const Vector<X>& x) const {
         _compute(r,x); }
   private:
-    shared_ptr<const FunctionInterface> _f1;
-    shared_ptr<const FunctionInterface> _f2;
+    shared_ptr<const VectorFunctionInterface> _f1;
+    shared_ptr<const VectorFunctionInterface> _f2;
 };
 
 class CombinedFunction
-    : public FunctionTemplate<JoinedFunction>
+    : public VectorFunctionTemplate<JoinedFunction>
 {
   public:
-    CombinedFunction(shared_ptr<const FunctionInterface> f1, shared_ptr<const FunctionInterface> f2)
+    CombinedFunction(shared_ptr<const VectorFunctionInterface> f1, shared_ptr<const VectorFunctionInterface> f2)
         : _f1(f1), _f2(f2) { }
     CombinedFunction* clone() const { return new CombinedFunction(*this); }
 
@@ -863,8 +1003,8 @@ class CombinedFunction
     template<class X> inline void _compute_approx(Vector<X>& r, const Vector<X>& x) const  {
         _compute(r,x); }
   private:
-    shared_ptr<const FunctionInterface> _f1;
-    shared_ptr<const FunctionInterface> _f2;
+    shared_ptr<const VectorFunctionInterface> _f1;
+    shared_ptr<const VectorFunctionInterface> _f2;
 };
 
 

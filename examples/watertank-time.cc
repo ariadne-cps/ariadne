@@ -80,10 +80,10 @@ int main()
     DiscreteEvent e41(41);
   
     /// Create the dynamics
-    AffineFunction dynamic1(Matrix<Float>(3,3,A1),Vector<Float>(3,b1));
-    AffineFunction dynamic2(Matrix<Float>(3,3,A2),Vector<Float>(3,b2));
-    AffineFunction dynamic3(Matrix<Float>(3,3,A3),Vector<Float>(3,b3));
-    AffineFunction dynamic4(Matrix<Float>(3,3,A4),Vector<Float>(3,b4));
+    VectorAffineFunction dynamic1(Matrix<Float>(3,3,A1),Vector<Float>(3,b1));
+    VectorAffineFunction dynamic2(Matrix<Float>(3,3,A2),Vector<Float>(3,b2));
+    VectorAffineFunction dynamic3(Matrix<Float>(3,3,A3),Vector<Float>(3,b3));
+    VectorAffineFunction dynamic4(Matrix<Float>(3,3,A4),Vector<Float>(3,b4));
     
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
@@ -92,13 +92,13 @@ int main()
 
     /// Create the resets
     IdentityFunction reset_id(3);
-    AffineFunction reset_y_zero(Matrix<Float>(3,3,
+    VectorAffineFunction reset_y_zero(Matrix<Float>(3,3,
                         1.0,0.0,0.0,
                         0.0,0.0,0.0,
                         0.0,0.0,1.0),
                         Vector<Float>(3,0.0,0.0,0.0));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    AffineFunction reset_y_one(Matrix<Float>(3,3,
+    VectorAffineFunction reset_y_one(Matrix<Float>(3,3,
                         1.0,0.0,0.0,
                         0.0,0.0,0.0,
                         0.0,0.0,1.0),
@@ -107,23 +107,23 @@ int main()
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    AffineFunction guard12(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,-1.0));
+    VectorAffineFunction guard12(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,-1.0));
     cout << "guard12=" << guard12 << endl << endl;
-    AffineFunction guard23(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax + Delta));
+    VectorAffineFunction guard23(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax + Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    AffineFunction guard34(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction guard34(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,0.0));
     cout << "guard34=" << guard34 << endl << endl;
-    AffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
+    VectorAffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
     /// forced transitions do not need an explicit invariant
     /// x < hmax + Delta
-    AffineFunction inv2(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax - Delta));//
+    VectorAffineFunction inv2(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax - Delta));//
     cout << "inv2=" << inv2 << endl << endl;
     /// x > hmin - Delta
-    AffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
+    VectorAffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
   
     /// Build the automaton

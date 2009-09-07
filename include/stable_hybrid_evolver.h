@@ -20,9 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file stable_hybrid_evolver.h
- *  \brief The most stable evolver for hybrid systems. 
+ *  \brief The most stable evolver for hybrid systems.
  */
 
 #ifndef ARIADNE_STABLE_HYBRID_EVOLVER_H
@@ -46,11 +46,11 @@
 
 #include "logging.h"
 
-namespace Ariadne {  
+namespace Ariadne {
 
 class TaylorModel;
-class TaylorExpression;
-class TaylorFunction;
+class ScalarTaylorFunction;
+class VectorTaylorFunction;
 class TaylorSet;
 typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 
@@ -67,7 +67,7 @@ class HybridAutomaton;
 
 
 
-/*! \brief A class for computing the evolution of a hybrid system. 
+/*! \brief A class for computing the evolution of a hybrid system.
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
@@ -76,12 +76,12 @@ class StableHybridEvolver
     , public Loggable
 {
     typedef TaylorModel ModelType;
-    typedef FunctionInterface FunctionType;
+    typedef VectorFunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef TaylorFunction FunctionModelType;
-    typedef TaylorFunction MapModelType;
-    typedef TaylorFunction FlowModelType;
-    typedef TaylorExpression ConstraintModelType;
+    typedef VectorTaylorFunction FunctionModelType;
+    typedef VectorTaylorFunction MapModelType;
+    typedef VectorTaylorFunction FlowModelType;
+    typedef ScalarTaylorFunction ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;
@@ -101,13 +101,13 @@ class StableHybridEvolver
     typedef std::vector<TimedEnclosureType> TimedEnclosureListType;
     typedef Float ContinuousTimeType;
   public:
-    
+
     //! \brief Default constructor.
     StableHybridEvolver();
-  
+
     //! \brief Construct from parameters using a default integrator.
     StableHybridEvolver(const EvolutionParametersType& parameters);
-  
+
     /*! \brief Make a dynamically-allocated copy. */
     StableHybridEvolver* clone() const { return new StableHybridEvolver(*this); }
 
@@ -118,38 +118,38 @@ class StableHybridEvolver
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
     //@}
-  
+
 
     //@{
     //! \name Evolution using abstract sets.
-    //! \brief Compute an approximation to the orbit set using the given semantics. 
+    //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
-    //! \brief Compute an approximation to the evolution set using the given semantics. 
+    //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false);
         return final; }
 
-    //! \brief Compute an approximation to the evolution set under the given semantics. 
+    //! \brief Compute an approximation to the evolution set under the given semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
         return reachable; }
 
-    TimedEnclosureListType timed_evolution(const SystemType& system, const EnclosureType& initial, 
+    TimedEnclosureListType timed_evolution(const SystemType& system, const EnclosureType& initial,
         const TimeType& time, Semantics semantics, bool reach) const;
 
   protected:
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time, 
+    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
     typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
-    virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
-                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                 const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+    virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets,
+                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                                 const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
                                  Semantics semantics, bool reach) const;
 
   private:
@@ -159,7 +159,7 @@ class StableHybridEvolver
 };
 
 
-  
+
 } // namespace Ariadne
 
 #endif // ARIADNE_STABLE_HYBRID_EVOLVER_H

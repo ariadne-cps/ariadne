@@ -42,7 +42,6 @@
 #include "taylor_model.h"
 #include "differential.h"
 
-#include "function_interface.h"
 
 namespace Ariadne {
 
@@ -64,12 +63,12 @@ class Polynomial
     template<class XX> friend class Polynomial;
   public:
     typedef typename Expansion<X>::size_type size_type;
+    typedef typename Expansion<X>::smoothness_type smoothness_type;
     typedef typename Expansion<X>::value_type value_type;
     typedef typename Expansion<X>::reference reference;
     typedef typename Expansion<X>::const_reference const_reference;
     typedef typename Expansion<X>::iterator iterator;
     typedef typename Expansion<X>::const_iterator const_iterator;
-    typedef ScalarFunctionInterface::SmoothnessType smoothness_type;
   public:
     //@{
     //! \name Constructors

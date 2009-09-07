@@ -47,17 +47,17 @@ class IntegratorBase
     , public Loggable
 {
   public:
-    virtual Pair<Float,IVector> flow_bounds(const FunctionInterface& vector_field,
+    virtual Pair<Float,IVector> flow_bounds(const VectorFunctionInterface& vector_field,
                                             const IVector& parameter_domain,
                                             const IVector& state_domain,
                                             const Float& suggested_time_step) const;
 
-    virtual TaylorFunction time_step(const FunctionInterface& vector_field,
+    virtual VectorTaylorFunction time_step(const VectorFunctionInterface& vector_field,
                                      const IVector& parameter_domain,
                                      const IVector& state_domain,
                                      const Float& suggested_time_step) const;
 
-    virtual TaylorFunction flow(const FunctionInterface& vector_field,
+    virtual VectorTaylorFunction flow(const VectorFunctionInterface& vector_field,
                                 const Vector<Interval>& state_domain,
                                 const Float& suggested_time_step) const;
 
@@ -73,7 +73,7 @@ class TaylorIntegrator
 
     uint temporal_order() const { return this->_temporal_order; }
 
-    virtual TaylorFunction flow(const FunctionInterface& vector_field,
+    virtual VectorTaylorFunction flow(const VectorFunctionInterface& vector_field,
                                 const Vector<Interval>& parameter_domain,
                                 const Vector<Interval>& state_domain,
                                 const Float& suggested_time_step) const;

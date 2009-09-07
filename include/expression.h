@@ -260,11 +260,9 @@ Expression<Real> tan(Expression<Real> e);
 
 template<class X> class Affine;
 template<class X> class Polynomial;
-class ScalarPolynomialFunction;
 
-template<class X> Affine<X> affine(const Expression<Real>&, const Array<String>&);
-
-ScalarPolynomialFunction polynomial(const Expression<Real>&, const Space<Real>&);
+template<class X> Affine<X> affine(const Expression<Real>&, const Space<Real>&);
+template<class X> Polynomial<X> polynomial(const Expression<Real>&, const Space<Real>&);
 
 
 } // namespace Ariadne

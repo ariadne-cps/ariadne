@@ -157,19 +157,19 @@ int main(int argc,char *argv[])
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
     /// x <= Rif - Delta
-    AffineFunction guard12(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
+    VectorAffineFunction guard12(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
                           Vector<Float>(1,Rif));
     cout << "guard12=" << guard12 << endl << endl;
     /// x >= Rif - Delta
-    AffineFunction guard21(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
+    VectorAffineFunction guard21(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
                           Vector<Float>(1,-Rif));
     cout << "guard21=" << guard21 << endl << endl;
     /// x <= Rif - 1/Kp - Delta
-    AffineFunction guard23(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
+    VectorAffineFunction guard23(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
                           Vector<Float>(1,(Rif-1.0/Kp)));
     cout << "guard23=" << guard23 << endl << endl;
     /// x >= Rif - 1/Kp - Delta
-    AffineFunction guard32(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
+    VectorAffineFunction guard32(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
                           Vector<Float>(1,(1.0/Kp - Rif)));
     cout << "guard32=" << guard32 << endl << endl;
 

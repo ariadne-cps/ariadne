@@ -58,8 +58,8 @@ namespace Ariadne {
 
 template<class Sys, class BS> class Evolver;
 
-class TaylorExpression;
-class TaylorFunction;
+class ScalarTaylorFunction;
+class VectorTaylorFunction;
 class TaylorSet;
 typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 class HybridAutomaton;
@@ -83,12 +83,12 @@ class PythonHybridEvolver
     : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
-    typedef FunctionInterface FunctionType;
+    typedef VectorFunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef TaylorFunction FunctionModelType;
-    typedef TaylorFunction MapModelType;
-    typedef TaylorFunction FlowModelType;
-    typedef TaylorExpression ConstraintModelType;
+    typedef VectorTaylorFunction FunctionModelType;
+    typedef VectorTaylorFunction MapModelType;
+    typedef VectorTaylorFunction FlowModelType;
+    typedef ScalarTaylorFunction ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;

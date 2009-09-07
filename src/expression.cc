@@ -2,7 +2,7 @@
  *            expression.cc
  *
  *  Copyright 2009  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "expression.h"
 #include "valuation.h"
 #include "vector.h"
@@ -34,7 +34,6 @@
 
 #include "real.h"
 #include "formula.h"
-#include "function.h"
 
 namespace Ariadne {
 
@@ -711,6 +710,7 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
     if(cptr) { return e; }
     const VariableExpression<X>* vptr=dynamic_cast<const VariableExpression<X>*>(eptr);
     if(vptr) { return substitute_variable(*vptr,v,c); }
+    ARIADNE_FAIL_MSG("Cannot substitute for a named variable in an unknown expression.");
 }
 
 template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Tribool>& v, const Tribool& c);
@@ -770,7 +770,7 @@ template Expression<Tribool> simplify(const Expression<Tribool>& e);
 
 
 template<class X>
-Polynomial<X> polynomial(const Expression<Real>& e, const Map<Variable<Real>,uint>& s)
+Polynomial<X> polynomial(const Expression<Real>& e, const Space<Real>& s)
 {
     const ExpressionInterface<Real>* const eptr=e.ptr();
     const Operator op=eptr->type();
@@ -787,7 +787,7 @@ Polynomial<X> polynomial(const Expression<Real>& e, const Map<Variable<Real>,uin
             return Polynomial<X>::constant(s.size(),cptr->value()); break;
         case VAR:
             vptr=static_cast<const VariableExpression<Real>*>(eptr);
-            return Polynomial<X>::variable(s.size(),s[vptr->variable()]); break;
+            return Polynomial<X>::variable(s.size(),s.index(vptr->variable())); break;
         case IND:
             iptr=static_cast<const CoordinateExpression<Real>*>(eptr);
             return Polynomial<X>::variable(s.size(),iptr->index()); break;
@@ -814,11 +814,8 @@ Polynomial<X> polynomial(const Expression<Real>& e, const Map<Variable<Real>,uin
 }
 
 
-ScalarPolynomialFunction polynomial(const Expression<Real>& e, const Space<Real>& s) {
-    return ScalarPolynomialFunction(polynomial<Interval>(e,s.indices()));
-}
-
-ScalarAffineFunction affine(const Expression<Real>& e, const Map<String,uint>& s) {
+template<class X>
+Affine<X> affine(const Expression<Real>& e, const Space<Real>& s) {
 
     const ExpressionInterface<Real>* eptr=e.ptr();
     Operator op=eptr->type();
@@ -834,47 +831,42 @@ ScalarAffineFunction affine(const Expression<Real>& e, const Map<String,uint>& s
     switch(op) {
         case CNST:
             cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
-            return ScalarAffineFunction::constant(s.size(),cptr->value()); break;
+            return Affine<X>::constant(s.size(),cptr->value()); break;
         case VAR:
             vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
-            return ScalarAffineFunction::variable(s.size(),s[vptr->name()]); break;
+            return Affine<X>::variable(s.size(),s.index(vptr->variable())); break;
         case IND:
             iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-            return ScalarAffineFunction::variable(s.size(),iptr->coordinate()); break;
+            return Affine<X>::variable(s.size(),iptr->coordinate()); break;
         case NEG:
             uptr=static_cast<const UnaryExpression<Real>*>(eptr);
-            return -affine(uptr->_arg,s); break;
+            return -affine<X>(uptr->_arg,s); break;
         case ADD:
             bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            return affine(bptr->_arg1,s)+affine(bptr->_arg2,s); break;
+            return affine<X>(bptr->_arg1,s)+affine<X>(bptr->_arg2,s); break;
         case SUB:
             bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            return affine(bptr->_arg1,s)-affine(bptr->_arg2,s); break;
+            return affine<X>(bptr->_arg1,s)-affine<X>(bptr->_arg2,s); break;
         case DIV:
             bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
             cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2.ptr());
             ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<e<<" to affine form.");
-            return affine(bptr->_arg1,s)/cptr->value(); break;
+            return affine<X>(bptr->_arg1,s)/static_cast<X>(cptr->value()); break;
         case MUL:
             bptr=static_cast<const BinaryExpression<Real>*>(eptr);
             cptr1=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg1.ptr());
             cptr2=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2.ptr());
             ARIADNE_ASSERT_MSG(cptr1 || cptr2,"Cannot convert expression "<<e<<" to affine form.");
-            if(cptr1) { return cptr1->value() * affine(bptr->_arg2,s); }
-            else { return affine(bptr->_arg1,s) * cptr2->value(); }
+            if(cptr1) { return static_cast<X>(cptr1->value()) * affine<X>(bptr->_arg2,s); }
+            else { return affine<X>(bptr->_arg1,s) * static_cast<X>(cptr2->value()); }
             break;
         default:
             ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to affine form.");
     }
 }
 
-template<class X>
-Affine<X> affine(const Expression<Real>& e, const Array<String>& s) {
-    Map<String,uint> vars;
-    for(uint i=0; i!=s.size(); ++i) { vars.insert(s[i],i); }
-    return affine<X>(e,vars);
-}
-
+template Affine<Interval> affine(const Expression<Real>&, const Space<Real>&);
+template Polynomial<Interval> polynomial(const Expression<Real>&, const Space<Real>&);
 
 
 

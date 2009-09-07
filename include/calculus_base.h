@@ -45,7 +45,7 @@ using std::pair;
 template<class T> class array;
 
 class Interval;
-class FunctionInterface;
+class VectorFunctionInterface;
 template<class X> class Vector;
 class Box;
 
@@ -81,8 +81,8 @@ class CalculusBase
     typedef Vector<Interval> BoxType;
 
     typedef Float TimeType;
-    typedef FunctionInterface FunctionType;
-    typedef ScalarFunctionInterface ExpressionType;
+    typedef VectorFunctionInterface VectorFunctionType;
+    typedef ScalarFunctionInterface ScalarFunctionType;
     typedef SetModelType EnclosureType;
   protected:
     tribool _tribool(const IntervalType& ivl) const {
@@ -123,7 +123,7 @@ class CalculusBase
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid. Deprecated
-    virtual Interval touching_time_interval(const FunctionInterface& guard,
+    virtual Interval touching_time_interval(const VectorFunctionInterface& guard,
                                             const FlowModelType& flow_model,
                                             const SetModelType& initial_set_model) const
     {
@@ -147,7 +147,7 @@ class CalculusBase
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid. Deprecated
-    virtual Interval scaled_touching_time_interval(const FunctionInterface& guard,
+    virtual Interval scaled_touching_time_interval(const VectorFunctionInterface& guard,
                                                      const FlowSetModelType& flow_set_model) const
     {
         BaseModelType guard_flow_set_model=apply(guard,flow_set_model)[0];
@@ -178,7 +178,7 @@ class CalculusBase
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard under evolution of the \a flow_model.
     //! The crossing must be (differentiably) transverse.
-    virtual TimeModelType crossing_time(const FunctionInterface& guard,
+    virtual TimeModelType crossing_time(const VectorFunctionInterface& guard,
                                         const FlowModelType& flow_model,
                                         const SetModelType& initial_set_model) const
     {
@@ -201,7 +201,7 @@ class CalculusBase
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard under evolution of the \a flow_model.
     //! The crossing must be (differentiably) transverse.
-    virtual TimeModelType scaled_crossing_time(const FunctionInterface& guard,
+    virtual TimeModelType scaled_crossing_time(const VectorFunctionInterface& guard,
                                                const FlowSetModelType& flow_set_model) const
     {
         return this->scaled_crossing_time(apply(guard,flow_set_model)[0]);
@@ -236,7 +236,7 @@ class CalculusBase
     //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h and maximum
     //! allowable diameter of \a B are given.
     virtual pair<TimeType,BoxType>
-    flow_bounds(const FunctionType& vf,
+    flow_bounds(const VectorFunctionType& vf,
                 const BoxType& d,
                 const RealType& maximum_step_size,
                 const RealType& maximum_bound_diameter) const = 0;
@@ -244,7 +244,7 @@ class CalculusBase
     //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
     //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h is given.
     virtual pair<TimeType,BoxType>
-    flow_bounds(const FunctionType& vf,
+    flow_bounds(const VectorFunctionType& vf,
                 const BoxType& d,
                 const RealType& maximum_step_size) const
     {
@@ -256,18 +256,18 @@ class CalculusBase
 
     //@{ \name Constructing models for functions
     //! \brief A model for the map \a f over the domain \a d.
-    virtual MapModelType map_model(const FunctionType& f, const BoxType& d) const = 0;
+    virtual MapModelType map_model(const VectorFunctionType& f, const BoxType& d) const = 0;
 
     //! \brief A model for the flow determined by the vector field \a vf over the initial domain \a d,
     //! valid for times up to \a h, assuming that the state remains in the bounding box \a b.
-    virtual FlowModelType flow_model(const FunctionType& vf, const BoxType& d,
+    virtual FlowModelType flow_model(const VectorFunctionType& vf, const BoxType& d,
                                      const TimeType& h, const BoxType& b) const = 0;
 
     //! \brief A model for the real-valued function \a g over the domain \a d. \deprecated
-    virtual PredicateModelType predicate_model(const FunctionType& g, const BoxType& d) const = 0;
+    virtual PredicateModelType predicate_model(const VectorFunctionType& g, const BoxType& d) const = 0;
 
     //! \brief A model for the real-valued function \a g over the domain \a d.
-    virtual PredicateModelType predicate_model(const ExpressionType& g, const BoxType& d) const = 0;
+    virtual PredicateModelType predicate_model(const ScalarFunctionType& g, const BoxType& d) const = 0;
 
     //! \brief A model for the constant time \a t over the box \a d.
     virtual TimeModelType time_model(const Float& t, const BoxType& d) const = 0;
@@ -292,26 +292,26 @@ class CalculusBase
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
     //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
-    tribool active(const ExpressionType& guard,  const BoxType& box) const {
+    tribool active(const ScalarFunctionType& guard,  const BoxType& box) const {
         return this->_tribool(guard.evaluate(box)); }
-    tribool active(const FunctionType& guard,  const BoxType& box) const {
+    tribool active(const VectorFunctionType& guard,  const BoxType& box) const {
         Vector<Interval> range=guard.evaluate(box);
         return this->_tribool(range[0]); }
 
     //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points
     //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
-    tribool active(const ExpressionType& guard,  const SetModelType& set_model) const {
+    tribool active(const ScalarFunctionType& guard,  const SetModelType& set_model) const {
         return this->active(this->predicate_model(guard,set_model.range()),set_model); }
-    tribool active(const FunctionType& guard,  const SetModelType& set_model) const {
+    tribool active(const VectorFunctionType& guard,  const SetModelType& set_model) const {
         TimeModelType guard_set_model = apply(guard,set_model)[0];
         Interval guard_range=guard_set_model.range();
         tribool guard_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
-        return guard_active;    
+        return guard_active;
     }
 
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
-    SetModelType reset_step(const FunctionType& map,
+    SetModelType reset_step(const VectorFunctionType& map,
                             const SetModelType& set_model) const {
         return this->reset_step(this->map_model(map,set_model.range()),set_model); }
 

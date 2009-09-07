@@ -35,7 +35,7 @@
 using namespace Ariadne;
 
 
-struct RadiusSquare : FunctionData<1,2,1> {
+struct RadiusSquare : VectorFunctionData<1,2,1> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
         r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
@@ -58,10 +58,10 @@ int main(int argc, char **argv)
     Zonotope z1(z1c,z1g);
     Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
     Matrix<Float> ts1g=z1g;
-    AffineFunction afn1(ts1g,ts1c);
+    VectorAffineFunction afn1(ts1g,ts1c);
     TaylorSet ts1(afn1,Box::unit_box(3));
 
-    UserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
+    VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
     
     std::cout << "Testing boxes.." << std::endl;

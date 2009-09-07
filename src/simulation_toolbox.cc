@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iomanip>
 
 #include "macros.h"
@@ -42,18 +42,18 @@ class NonInvertibleFunctionException { };
 
 
 
-  
+
 
 
 SimulationToolbox::
-SimulationToolbox() 
+SimulationToolbox()
 {
 }
 
 
 tribool
 SimulationToolbox::
-active(const ScalarFunctionInterface& guard, 
+active(const ScalarFunctionInterface& guard,
        const Point& point) const
 {
     Float value=guard.evaluate(point);
@@ -64,7 +64,7 @@ active(const ScalarFunctionInterface& guard,
 
 Point
 SimulationToolbox::
-reset_step(const FunctionInterface& map, 
+reset_step(const VectorFunctionInterface& map,
            const Point& point) const
 {
     return map.evaluate(point);
@@ -74,8 +74,8 @@ reset_step(const FunctionInterface& map,
 
 Point
 SimulationToolbox::
-integration_step(const FunctionInterface& f, 
-                 const Point& pt, 
+integration_step(const VectorFunctionInterface& f,
+                 const Point& pt,
                  const TimeType& h) const
 {
     // Use 4th-Order Runge-Kutta method as default.
@@ -87,7 +87,7 @@ integration_step(const FunctionInterface& f,
     Vector<RealType> k3=f.evaluate(v);
     v=pt; v+=(h/2)*k3;
     Vector<RealType> k4=f.evaluate(v);
-    
+
     return pt+(h/6)*(k1+2*k2+2*k3+k4);
 }
 
@@ -98,16 +98,16 @@ integration_step(const FunctionInterface& f,
 SimulationToolbox::TimeType
 SimulationToolbox::
 crossing_time(const ScalarFunctionInterface& g,
-              const FunctionInterface& f, 
-              const Point& pt, 
+              const VectorFunctionInterface& f,
+              const Point& pt,
               const TimeType& h) const
 {
     if(g.evaluate(pt)>=0.0) { return 0.0; }
 
     if(g.evaluate(Vector<RealType>(pt+h*f.evaluate(pt)))<0.0) { throw NoCrossingException(); }
     if(g.evaluate(this->integration_step(f,pt,h))<0.0) { throw NoCrossingException(); }
-    
-    
+
+
     // Use bisection to find crossing
     TimeType h0=0.0; TimeType h1=h;
     while(h0!=h1) {
@@ -118,9 +118,9 @@ crossing_time(const ScalarFunctionInterface& g,
             h1=hc;
         }
     }
-    
+
     return h1;
-    
+
 }
 
 }  // namespace Ariadne

@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file simulation_toolbox.h
  *  \brief Methods of point calculus based on the PointVariable class.
  */
@@ -35,11 +35,11 @@
 
 /* \brief Top-level namespace. */
 namespace Ariadne {
- 
+
 
 typedef double Float;
 class ScalarFunctionInterface;
-class FunctionInterface;
+class VectorFunctionInterface;
 class Point;
 
 typedef std::pair<Point,Point> Segment;
@@ -55,32 +55,32 @@ class SimulationToolbox
     //! \brief Default constructor.
     SimulationToolbox();
 
-    //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all 
-    //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint, 
+    //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all
+    //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint,
     //! and indeterminate otherwise.
-    tribool active(const ScalarFunctionInterface& guard, 
+    tribool active(const ScalarFunctionInterface& guard,
                    const Point& point) const;
 
-  
+
     //! \brief Computes the time at which point  \a initial_point cross the zero-set of the
     //! the \a guard under evolution of the \a vector_field, for times up to \a maximum_time.
     //! The crossing must be (differentiably) transverse.
     TimeType crossing_time(const ScalarFunctionInterface& guard,
-                           const FunctionInterface& vector_field, 
-                           const Point& initial_point, 
+                           const VectorFunctionInterface& vector_field,
+                           const Point& initial_point,
                            const TimeType& maximum_time) const;
 
-    //! \brief Computes the image of the set defined by \a point under the map \a map. 
-    Point reset_step(const FunctionInterface& map, 
+    //! \brief Computes the image of the set defined by \a point under the map \a map.
+    Point reset_step(const VectorFunctionInterface& map,
                      const Point& point) const;
-  
+
     //! \brief Computes the points reached by evolution of the \a initial_point under the flow
-    //! given by the \a vector_field. The \a step_size gives the time the point 
+    //! given by the \a vector_field. The \a step_size gives the time the point
     //! should be flowed.
-    Point integration_step(const FunctionInterface& vector_field, 
-                           const Point& initial_point, 
+    Point integration_step(const VectorFunctionInterface& vector_field,
+                           const Point& initial_point,
                            const TimeType& step_size) const;
-  
+
 
 };
 

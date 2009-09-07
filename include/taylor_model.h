@@ -45,7 +45,7 @@ template<class X> class Matrix;
 template<class X> class Expansion;
 
 class ScalarFunctionInterface;
-class FunctionInterface;
+class VectorFunctionInterface;
 class TaylorModel;
 class TaylorCalculus;
 
@@ -120,9 +120,6 @@ TaylorModel compose(const TaylorModel& x, const Vector<Interval>& bx, const Vect
 TaylorModel implicit(const TaylorModel& f);
 TaylorModel implicit_step(const TaylorModel& f, const TaylorModel& h);
 
-// Compute the implicit function f(g(x),h(x))=0
-TaylorModel implicit(const ScalarFunctionInterface& f, const Vector<TaylorModel>& g);
-
 // Solve the equation f(x)=0
 Interval solve(const TaylorModel& f);
 
@@ -164,11 +161,12 @@ Float norm(const Vector<TaylorModel>& tv);
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, TaylorExpression, TaylorFunction, TaylorSet.
+ * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorSet.
  */
 class TaylorModel
 {
-    friend class TaylorExpression;
+    friend class ScalarTaylorFunction;
+    friend class VectorTaylorFunction;
     typedef Expansion<Float> ExpansionType;
   public:
     class Accuracy;

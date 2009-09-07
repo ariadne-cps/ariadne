@@ -36,7 +36,7 @@
 
 namespace Ariadne {  
 
-class FunctionInterface;
+class VectorFunctionInterface;
 
 /*! \brief An iterated function system in Euclidean space.
  */
@@ -50,12 +50,12 @@ class IteratedMap
     //! \brief The type used to describe the state space. 
     typedef EuclideanSpace StateSpaceType;
   public:
-    IteratedMap(const FunctionInterface& f) : _function_ptr(f.clone()) { }
-    IteratedMap(const boost::shared_ptr<FunctionInterface>& fptr) : _function_ptr(fptr) { }
-    const FunctionInterface& function() const { return *_function_ptr; }
+    IteratedMap(const VectorFunctionInterface& f) : _function_ptr(f.clone()) { }
+    IteratedMap(const boost::shared_ptr<VectorFunctionInterface>& fptr) : _function_ptr(fptr) { }
+    const VectorFunctionInterface& function() const { return *_function_ptr; }
     Grid grid() const { return Grid(_function_ptr->argument_size()); }
   private:
-    boost::shared_ptr<FunctionInterface> _function_ptr;
+    boost::shared_ptr<VectorFunctionInterface> _function_ptr;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IteratedMap& vf) {

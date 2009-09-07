@@ -33,29 +33,29 @@ template<class T> void write(const char* filename, const T& t) {
 using namespace Ariadne;
 
 
-const Float pi_flt = Ariadne::pi<Float>(); 
-const Interval pi_ivl = Ariadne::pi<Interval>(); 
+const Float pi_flt = Ariadne::pi<Float>();
+const Interval pi_ivl = Ariadne::pi<Interval>();
 
-// The automaton has two modes, both 
+// The automaton has two modes, both
 // with two variables, room_temperature and time_of_day
 // The dynamics is given by the differential equations
 //   dot(T) = K(T_ext(t) - T(t)) + P delta(q(t) = On) \f$
-// where 
+// where
 //   T_ext(t) = T_av - T_amp \cos(2 pi t)
-// is the external temperature and 
-//   q(t) in {On,Off} 
+// is the external temperature and
+//   q(t) in {On,Off}
 // is the discrete state of the heater.
 //
-// The parameters are the insulation coefficient K, the average 
-// external temperature T_av, the amplitude of the 
+// The parameters are the insulation coefficient K, the average
+// external temperature T_av, the amplitude of the
 // temperature fluctuations T_amp and the power of the heater P.
 //
 // The heater is controlled by a thermostat. The heater turns off whenever
 // the temperature rises above a fixed threshold T_Off and
-// turns on nondeterministically for a temperature \T between 
+// turns on nondeterministically for a temperature \T between
 // T^+_On and \f$T^-_On.
-// 
-// The clock time tau is reset to zero whenever tau becomes 
+//
+// The clock time tau is reset to zero whenever tau becomes
 // equal to one.
 
 // System variables
@@ -63,31 +63,31 @@ const Interval pi_ivl = Ariadne::pi<Interval>();
 //   x[1]: room temperature T (C)
 
 // System paramters
-//   p[0]: Heating power P 
+//   p[0]: Heating power P
 //   p[1]: Thermal coefficient K
 //   p[2]: Average external temperature Te
-//   p[3]: Amplitude of external temperature fluctuations Ta 
+//   p[3]: Amplitude of external temperature fluctuations Ta
 //   p[4]: Temperature at which the heater is turned off Toff
 //   p[5]: Temperature below which the heater may be turned on Tonact
 //   p[6]: Temperature below which the heater must be turned on Toninv
 
 // System dynamic when the heater is on.
-struct HeaterOn : FunctionData<2,2,4> {
-    template<class R, class A, class P> static void 
+struct HeaterOn : VectorFunctionData<2,2,4> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-        r[0] = 1.0; 
+        r[0] = 1.0;
         r[1] = p[0] + p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_flt*x[0]) - x[1] ); // Need explicit Ariadne::cos due to bug in g++.
     }
 };
 
 // System dynamic when the heater is off.
-struct HeaterOff : FunctionData<2,2,4> {
-    template<class R, class A, class P> static void 
+struct HeaterOff : VectorFunctionData<2,2,4> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         typename R::value_type t0=2*pi_flt*x[0];
-        r[0] = 1.0; 
+        r[0] = 1.0;
         r[1] = p[1] * ( p[2] - p[3] * Ariadne::cos(t0) - x[1] ); // Need explicit Ariadne::cos due to bug in g++.
-    }  
+    }
 };
 
 
@@ -95,50 +95,50 @@ HybridAutomaton create_heating_system()
 {
     // Create a HybridAutomton object
     HybridAutomaton heating_system;
-  
+
     // Set the system dynamic parameters
     Float P=4.0;
     Float k=1.0;
     Float Tav=16.0;
     Float Tamp=8.0;
-    
+
     // Set the system control parameters
     Float Toff=22.0;
     Float Ton_upper=15.125;
     Float Ton_lower=14.875;
-  
+
     // Old values
     // Float Ton_upper=15.0;
     // Float Ton_lower=14.5;
 
-    // Create the two discrete state 
+    // Create the two discrete state
     DiscreteState heater_on(1);
     DiscreteState heater_off(2);
-  
+
     // Create the discrete events
     DiscreteEvent switch_on(1);
     DiscreteEvent switch_off(2);
     DiscreteEvent midnight(3);
-  
+
     // Create the dynamics
-    Function<HeaterOn> heater_on_dynamic(Vector<Float>(4, P,k,Tav,Tamp));
-    Function<HeaterOff> heater_off_dynamic(Vector<Float>(4, P,k,Tav,Tamp));
+    VectorUserFunction<HeaterOn> heater_on_dynamic(Vector<Float>(4, P,k,Tav,Tamp));
+    VectorUserFunction<HeaterOff> heater_off_dynamic(Vector<Float>(4, P,k,Tav,Tamp));
 
     // Create the resets
     IdentityFunction heater_turn_off_reset(2);
     IdentityFunction heater_turn_on_reset(2);
-    AffineFunction midnight_reset(Matrix<Float>(2,2,0.0,0.0,0.0,1.0),Vector<Float>(2,0.0,0.0));
+    VectorAffineFunction midnight_reset(Matrix<Float>(2,2,0.0,0.0,0.0,1.0),Vector<Float>(2,0.0,0.0));
 
     // Create the guards.
-    AffineFunction heater_turn_off_guard(Matrix<Float>(1,2,0.0,1.0),Vector<Float>(1,-Toff));
-    AffineFunction heater_turn_on_activation(Matrix<Float>(1,2,0.0,-1.0),Vector<Float>(1,Ton_upper));
-    AffineFunction heater_turn_on_invariant(Matrix<Float>(1,2,0.0,-1.0),Vector<Float>(1,Ton_lower));
-    AffineFunction midnight_guard(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1,-1.0));
-  
+    VectorAffineFunction heater_turn_off_guard(Matrix<Float>(1,2,0.0,1.0),Vector<Float>(1,-Toff));
+    VectorAffineFunction heater_turn_on_activation(Matrix<Float>(1,2,0.0,-1.0),Vector<Float>(1,Ton_upper));
+    VectorAffineFunction heater_turn_on_invariant(Matrix<Float>(1,2,0.0,-1.0),Vector<Float>(1,Ton_lower));
+    VectorAffineFunction midnight_guard(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1,-1.0));
+
     // Create the system modes
     heating_system.new_mode(heater_on,heater_on_dynamic);
     heating_system.new_mode(heater_off,heater_off_dynamic);
-  
+
     // Create the system transitions for switching the heater
     //heating_system.new_invariant(heater_off,heater_turn_on_invariant);
     //heating_system.new_unforced_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation);
@@ -180,10 +180,10 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
     // Define the initial set
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
     HybridEnclosureType initial(heater_off,initial_box);
-  
+
     // Set the maximum evolution time
     HybridTime evolution_time(1.5,4);
-  
+
     // Compute reachable and evolved sets
     cout << "Computing reach and evolve sets... " << flush;
     HybridEnclosureListType reach,evolve;
@@ -248,7 +248,7 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
          Colour(0.25,0.0,0.5), lower_evolve_set);
 
     // Compute over-approximation to finite-time evolved set using upper semantics.
-    // Subdivision is used as necessary to keep the local errors reasonable. 
+    // Subdivision is used as necessary to keep the local errors reasonable.
     // The accumulated global error may be very large.
     std::cout << "Computing upper evolve set... " << std::flush;
     HybridGridTreeSet upper_evolve_set = analyser.upper_evolve(heating_system,initial_set,reach_time);
@@ -284,7 +284,7 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
 
     // Compute the reach set for times between tlower and tupper.
     // The intermediate set is stored to an archive file and used to build the initial set for the reach step
-    // Note that because of peculiarities in the Boost serialization library, 
+    // Note that because of peculiarities in the Boost serialization library,
     // the object to be serialized must be declared const.
     Float tlower=0.25; Float tupper=0.75;
     HybridTime transient_time(tlower,4);
@@ -312,15 +312,15 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
 
 
 
-int main() 
+int main()
 {
     // Create the system
     HybridAutomaton heating_system=create_heating_system();
-    
+
     // Create the analyser classes
     HybridEvolver evolver=create_evolver();
     HybridReachabilityAnalyser reachability_analysier(evolver);
-    
+
     // Compute the system evolution
     compute_evolution(heating_system,evolver);
     compute_reachable_sets(heating_system,evolver);

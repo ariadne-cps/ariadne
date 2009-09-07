@@ -40,7 +40,7 @@ Curve::~Curve()
 
 
 
-Curve::Curve(const FunctionInterface& f) 
+Curve::Curve(const VectorFunctionInterface& f) 
     : _function_ptr(f.clone())
 {
     assert(this->_function_ptr->argument_size()==1);

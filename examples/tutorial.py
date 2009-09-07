@@ -92,8 +92,8 @@ print "\n\n"
 # Create a user-defined scalar-valued function
 argument_size=2
 function=lambda x:sqrt(sqr(x[0])+sqr(x[1]))
-f=UserExpression(argument_size,function)
-print dir(UserExpression)
+f=ScalarUserFunction(argument_size,function)
+print dir(ScalarUserFunction)
 print type(f),type(FloatVector([4,3]))
 #print f(FloatVector([4,3]))
 #print f(IntervalVector([4,3]))
@@ -101,7 +101,7 @@ print type(f),type(FloatVector([4,3]))
 result_size=2
 argument_size=3
 function=lambda (x):[sqrt(sqr(x[0])+sqr(x[1])),x[1]+x[2]]
-f=UserFunction(result_size,argument_size,function)
+f=VectorUserFunction(result_size,argument_size,function)
 print f
 #print f(FloatVector([4,3,0]))
 #print f.evaluate(IntervalVector([4,3,0]))
@@ -110,17 +110,17 @@ print "\n"
 
 
 
-# Create a Polynomial expression in three unknowns, with value \f$x_0\f$.
-p=PolynomialExpression.variable(3,0)
+# Create a scalar polynomial function in three unknowns, with value \f$x_0\f$.
+p=ScalarPolynomialFunction.variable(3,0)
 print p
 
-# Make a shorthand for constructing Polynomial expressions
+# Make a shorthand for constructing polynomial functions.
 def p(n,j):
-    return PolynomialExpression.variable(n,j)
+    return ScalarPolynomialFunction.variable(n,j)
 
 # Arithmetic for Polynomial expressions
-p=PolynomialExpression.variable(3,0)
-q=PolynomialExpression.variable(3,1)
+p=ScalarPolynomialFunction.variable(3,0)
+q=ScalarPolynomialFunction.variable(3,1)
 c=Float(1.0)
 i=Interval(0.875,1.125)
 
@@ -151,12 +151,12 @@ print "\n\n"
 d=IntervalVector([[4,7],[1,6],[-1,1]])
 print "d:",d
 
-# Create the TaylorExpression representing the function x1 on the domain d
-t=TaylorExpression.variable(d,1)
+# Create the scalar Taylor model representing the function x1 on the domain d
+t=ScalarTaylorFunction.variable(d,1)
 print "t:",t,"\n"
 
-# Create all TaylorExpression variables on the domain dom
-tv=TaylorExpression.variables(d)
+# Create all Taylor variables on the domain dom
+tv=ScalarTaylorFunction.variables(d)
 print "tv[0]:",tv[0]
 print "tv[1]:",tv[1]
 print "tv[2]:",tv[2]
@@ -170,11 +170,11 @@ print "x:",x,"\ny:",y,"\nz:",z,"\n"
 
 # Make a shorthand for constructing Taylor expressions
 def t(d,j):
-    return TaylorExpression.variable(d,j)
+    return ScalarTaylorFunction.variable(d,j)
 
-#Create a TaylorExpression from a Polynomial
-p=PolynomialExpression.variable(3,0)
-tp=TaylorExpression(d,p)
+#Create a ScalarTaylorFunction from a Polynomial
+p=ScalarPolynomialFunction.variable(3,0)
+tp=ScalarTaylorFunction(d,p)
 print "p:",p,"\ntp: ",tp,"\n"
 
 # The domain D of x.
@@ -186,7 +186,7 @@ x.range()
 # Convert to a polynomial expression.
 x.polynomial()
 
-# Arithmetic on Taylor expressions
+# Arithmetic on Taylor models
 +x; -x; x+y; x-y; x*y; x/y;
 
 # Define some constants
@@ -244,14 +244,14 @@ print
 
 # Function composition
 d=IntervalVector([[4,7],[1,6],[-1,1]])
-th=TaylorFunction.identity(d)
+th=VectorTaylorFunction.identity(d)
 cd=th.codomain()
 
-f=AffineFunction(FloatMatrix([[2,1,0],[1,1,1]]),FloatVector([1,1]))
-g=PolynomialExpression.variable(3,0)
+f=VectorAffineFunction(FloatMatrix([[2,1,0],[1,1,1]]),FloatVector([1,1]))
+g=ScalarPolynomialFunction.variable(3,0)
 
-tg=TaylorExpression(cd,g)
-tf=TaylorFunction(cd,f)
+tg=ScalarTaylorFunction(cd,g)
+tf=VectorTaylorFunction(cd,f)
 
 # Compose an expression and a Taylor function
 compose(g,th)
@@ -317,7 +317,7 @@ b=Box([[-2,2]])
 d=Box([[-1,1]])
 h=0.5
 o=6 # Temporal order
-f=TaylorFunction.identity(b)
+f=VectorTaylorFunction.identity(b)
 phi=flow(f,d,h,o)
 print "phi:",phi
 print
@@ -342,11 +342,11 @@ print
 d1=Box([[-1,1]])
 d2=Interval(-1,1)
 d=join(d1,d2)
-x=TaylorExpression.variable(d,0)
-y=TaylorExpression.variable(d,1)
+x=ScalarTaylorFunction.variable(d,0)
+y=ScalarTaylorFunction.variable(d,1)
 f=x-4*y+y*y
-i=TaylorFunction.identity(d1)
-h=TaylorExpression.constant(d1,Interval(-1,+1))
+i=VectorTaylorFunction.identity(d1)
+h=ScalarTaylorFunction.constant(d1,Interval(-1,+1))
 
 # Newton contractor to solve f(x,h(x))=0 for scalar f
 h=intersection(rec(derivative(f,1).range())*compose(f,join(i,h)),h)
@@ -356,16 +356,16 @@ print
 
 # Set up differential equation
 b=Box([[-1,1],[-1,1]])
-o=TaylorExpression.constant(b,1)
-x=TaylorExpression.variable(b,0)
-y=TaylorExpression.variable(b,1)
+o=ScalarTaylorFunction.constant(b,1)
+x=ScalarTaylorFunction.variable(b,0)
+y=ScalarTaylorFunction.variable(b,1)
 f=join(o,x) # [dot(x),dot(y)]=[1,x]
 d=Box([[0,0.125],[0,0.125]])
 h=Float(0.5)
 d0=join(d,Interval(-h,+h))
-x0=TaylorExpression.variable(d0,0)
-y0=TaylorExpression.variable(d0,1)
-t=TaylorExpression.variable(d0,2)
+x0=ScalarTaylorFunction.variable(d0,0)
+y0=ScalarTaylorFunction.variable(d0,1)
+t=ScalarTaylorFunction.variable(d0,2)
 phi=join(x0,y0)
 
 # Picard operator to solve dot(phi)(x,t) = f(phi(x,t))

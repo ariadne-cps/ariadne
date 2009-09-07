@@ -28,9 +28,9 @@ i=Interval(1.5,1.75)
 
 bx=Box([{1:3},{-1:2}])
 
-c=TaylorExpression.constant(bx,1.5)
-x=TaylorExpression.variable(bx,0)
-v=TaylorExpression.variables(bx)
+c=ScalarTaylorFunction.constant(bx,1.5)
+x=ScalarTaylorFunction.variable(bx,0)
+v=VectorTaylorFunction.identity(bx)
 y=v[1]
 t=5+2*x+y
 
@@ -44,5 +44,5 @@ i+i; i-t; i*t;
 derivative(t,0)
 antiderivative(t,0)
 
-f=TaylorFunction([t,t])
+f=VectorTaylorFunction([t,t])
 

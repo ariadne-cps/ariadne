@@ -56,7 +56,7 @@ class DiscreteState;
 class DiscreteSpace;
 
 class ScalarFunctionInterface;
-class FunctionInterface;
+class VectorFunctionInterface;
 
 template<class R> class ExpressionInterface;
 class Grid;
@@ -83,12 +83,12 @@ class HybridSystem
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
-    typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ScalarFunctionPtr;
+    typedef boost::shared_ptr<const VectorFunctionInterface> VectorFunctionPtr;
 
 
 /*
-    typedef std::map< Event, boost::shared_ptr<const FunctionInterface> >::const_iterator invariant_const_iterator;
+    typedef std::map< Event, boost::shared_ptr<const VectorFunctionInterface> >::const_iterator invariant_const_iterator;
     typedef std::set< DiscreteTransition >::const_iterator discrete_transition_const_iterator;
     typedef std::set< DiscreteMode >::const_iterator discrete_mode_const_iterator;
 */

@@ -180,7 +180,7 @@ void export_formula()
 void export_hybrid_automaton()
 {
     typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
-    typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
+    typedef boost::shared_ptr<const VectorFunctionInterface> FunctionPtr;
 
 /*
     class_<DiscreteState> discrete_state_class("DiscreteState",no_init);

@@ -15,8 +15,8 @@ using namespace Ariadne;
 /// Non-affine dynamics
 
 /// Dynamics
-struct running_df : FunctionData<3,3,5> {
-    template<class R, class A, class P> static void 
+struct running_df : VectorFunctionData<3,3,5> {
+    template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
         r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
@@ -25,13 +25,13 @@ struct running_df : FunctionData<3,3,5> {
 };
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
-    Figure fig; 
+    Figure fig;
     array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_bounding_box(bbox);
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -58,7 +58,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         double pos_y = bbox[1].lower();
 	rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
@@ -69,13 +69,13 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc); 
-    fig << set; 
-    fig.write(filename); 
+    fig.set_fill_colour(fc);
+    fig << set;
+    fig.write(filename);
 }
 
-int main() 
-{    
+int main()
+{
     /// Introduces the dynamics parameters
     Vector<Float> dp(5);
     dp[0] = 4.0; /// Amplitude of the input voltage, Vi
@@ -93,32 +93,32 @@ int main()
     float MAX_GRID_DEPTH = 12;
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomaton object
     HybridAutomaton rectifier;
-  
+
     /// Create the discrete state
     DiscreteState running(1);
 
     /// Create the discrete events
     DiscreteEvent resettime(1);
-    
+
     /// Create the resets
 
     /// Reset the time (t^=0,vi^=vi,vo^=vo)
-    AffineFunction resettime_r(Matrix<Float>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
+    VectorAffineFunction resettime_r(Matrix<Float>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
                                Vector<Float>(3,0.0,0.0,0.0));
 
     /// Create the guards
-    
+
     /// Guard for the reset of time (t>=1/f)
-    AffineFunction resettime_g(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1,-1/dp[1]));
- 
+    VectorAffineFunction resettime_g(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1,-1/dp[1]));
+
     /// Create the dynamics
-    UserFunction<running_df> running_d(dp);
-  
+    VectorUserFunction<running_df> running_d(dp);
+
     /// Build the automaton
-    
+
     /// Locations
     rectifier.new_mode(running,running_d);
     /// Transitions
@@ -148,9 +148,9 @@ int main()
 
     Box initial_box(3, 0.0, 0.0, 0.0,0.0, 0.75*dp[0],0.75*dp[0]);
     HybridEnclosureType initial_enclosure(running,initial_box);
-    
+
     std::cout << "Initial set=" << initial_enclosure << std::endl;
-  
+
     HybridTime evolution_time(TIME_LIMIT,TRAN_LIMIT);
 
     std::cout << "Computing orbit... " << std::flush;

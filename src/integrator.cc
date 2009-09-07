@@ -49,7 +49,7 @@ template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const
 typedef Vector<Interval> IVector;
 
 Pair<Float,IVector>
-IntegratorBase::flow_bounds(const FunctionInterface& vf, const IVector& dp, const IVector& dx, const Float& hmax) const
+IntegratorBase::flow_bounds(const VectorFunctionInterface& vf, const IVector& dp, const IVector& dx, const Float& hmax) const
 {
 
     ARIADNE_ASSERT(vf.result_size()==dx.size());
@@ -123,19 +123,19 @@ IntegratorBase::flow_bounds(const FunctionInterface& vf, const IVector& dp, cons
 
 
 
-TaylorFunction
-IntegratorBase::time_step(const FunctionInterface& vf, const IVector& dp, const IVector& dx, const Float& h) const
+VectorTaylorFunction
+IntegratorBase::time_step(const VectorFunctionInterface& vf, const IVector& dp, const IVector& dx, const Float& h) const
 {
     const uint it=dp.size()+dx.size(); // Index of the time variable
-    TaylorFunction flow=this->flow(vf,dp,dx,h);
+    VectorTaylorFunction flow=this->flow(vf,dp,dx,h);
     Float hu=flow.domain()[it].upper();
     ARIADNE_ASSERT_MSG(hu==h,"Actual time step "<<hu<<" is less then requested time step "<<h);
     return partial_evaluate(flow,it,h);
 }
 
 
-TaylorFunction
-IntegratorBase::flow(const FunctionInterface& vf, const IVector& dx, const Float& h) const
+VectorTaylorFunction
+IntegratorBase::flow(const VectorFunctionInterface& vf, const IVector& dx, const Float& h) const
 {
     Vector<Interval> dp(0);
     return this->flow(vf,dp,dx,h);
@@ -143,11 +143,9 @@ IntegratorBase::flow(const FunctionInterface& vf, const IVector& dx, const Float
 
 
 
-TaylorFunction
-TaylorIntegrator::flow(const FunctionInterface& f, const IVector& dp, const IVector& dx, const Float& hmax) const
+VectorTaylorFunction
+TaylorIntegrator::flow(const VectorFunctionInterface& f, const IVector& dp, const IVector& dx, const Float& hmax) const
 {
-    //const Vector<ScalarFunctionInterface> vf=dynamic_cast<const Vector<ScalarFunctionInterface>&>(f);
-
     ARIADNE_LOG(2,"f="<<f<<" dp="<<dp<<" dx="<<dx<<" hmax="<<hmax<<"\n");
     const uint np=dp.size();
     const uint nx=dx.size();
@@ -161,18 +159,18 @@ TaylorIntegrator::flow(const FunctionInterface& f, const IVector& dp, const IVec
     ARIADNE_LOG(3,"dom="<<dom<<"\n");
 
 /*
-    TaylorFunction phi0(Vector<TaylorExpression>(nx,TaylorExpression(dom)));
-    for(uint i=0; i!=nx; ++i) { phi0[i]=TaylorExpression::variable(dom,i); }
+    VectorTaylorFunction phi0(VectorTaylorFunction(nx,ScalarTaylorFunction(dom)));
+    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::variable(dom,i); }
     ARIADNE_LOG(0,"phi0="<<phi0<<"\n");
 */
 
-    Vector<TaylorExpression> phi0(nx,TaylorExpression(dom));
-    for(uint i=0; i!=nx; ++i) { phi0[i]=TaylorExpression::variable(dom,np+i); }
+    VectorTaylorFunction phi0(nx,ScalarTaylorFunction(dom));
+    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::variable(dom,np+i); }
     ARIADNE_LOG(3,"phi0="<<phi0<<"\n");
 
-    Vector<TaylorExpression> phi(np+nx,TaylorExpression(dom));
-    for(uint i=0; i!=np; ++i) { phi[i]=TaylorExpression::variable(dom,i); }
-    for(uint i=0; i!=nx; ++i) { phi[np+i]=TaylorExpression::constant(dom,bx[i]); }
+    VectorTaylorFunction phi(np+nx,ScalarTaylorFunction(dom));
+    for(uint i=0; i!=np; ++i) { phi[i]=ScalarTaylorFunction::variable(dom,i); }
+    for(uint i=0; i!=nx; ++i) { phi[np+i]=ScalarTaylorFunction::constant(dom,bx[i]); }
 
     /*
     for(uint k=0; k!=this->_temporal_order; ++k) {
@@ -184,7 +182,7 @@ TaylorIntegrator::flow(const FunctionInterface& f, const IVector& dp, const IVec
 
     ARIADNE_LOG(4,"phi="<<phi<<"\n");
     for(uint k=0; k!=this->_temporal_order; ++k) {
-        TaylorFunction fphi=compose(f,phi);
+        VectorTaylorFunction fphi=compose(f,phi);
         ARIADNE_LOG(4,"fphi="<<fphi<<"\n");
         for(uint i=0; i!=nx; ++i) {
             phi[np+i]=antiderivative(fphi[i],np+nx)+phi0[i];
@@ -192,7 +190,7 @@ TaylorIntegrator::flow(const FunctionInterface& f, const IVector& dp, const IVec
         ARIADNE_LOG(3,"phi="<<phi<<"\n");
     }
 
-    Vector<TaylorExpression> res(nx,TaylorExpression(dom));
+    VectorTaylorFunction res(nx,ScalarTaylorFunction(dom));
     for(uint i=0; i!=nx; ++i) { res[i]=phi[np+i]; }
     return res;
 

@@ -132,10 +132,10 @@ _evolution(EnclosureListType& final_sets,
 {
     verbosity=0;
 
-    typedef FunctionInterface FunctionType;
+    typedef VectorFunctionInterface FunctionType;
     typedef EnclosureType SetModelType;
 
-    typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 

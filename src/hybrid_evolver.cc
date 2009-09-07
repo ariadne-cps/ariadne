@@ -132,7 +132,7 @@ enum CrossingKind { POSITIVE, NEGATIVE, TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 struct DetectionData {
     int id;
     DiscreteEvent event;
-    shared_ptr<const FunctionInterface> guard_ptr;
+    shared_ptr<const VectorFunctionInterface> guard_ptr;
     PredicateKind predicate_kind;
     CrossingKind crossing_kind;
     tribool active;
@@ -211,7 +211,7 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -401,8 +401,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     //    event times.
 
     // More useful typedefs
-    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
-    typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
+    typedef boost::shared_ptr<const ScalarFunctionInterface> ScalarFunctionPtr;
+    typedef boost::shared_ptr<const VectorFunctionInterface> VectorFunctionPtr;
 
     const double SMALL_RELATIVE_TIME=1./16;
 
@@ -418,9 +418,9 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
-    const FunctionPtr dynamic_ptr=mode.dynamic_ptr();
-    const std::map<DiscreteEvent,FunctionPtr> guards=system.blocking_guards(location);
-    std::map<DiscreteEvent,FunctionPtr> activations=system.permissive_guards(location);
+    const VectorFunctionPtr dynamic_ptr=mode.dynamic_ptr();
+    const std::map<DiscreteEvent,VectorFunctionPtr> guards=system.blocking_guards(location);
+    std::map<DiscreteEvent,VectorFunctionPtr> activations=system.permissive_guards(location);
     const std::set<DiscreteTransition> transitions=system.transitions(location);
 
     // Check to make sure dimensions are correct
@@ -634,7 +634,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
 
 HybridEvolver::TimeModelType HybridEvolver::
-crossing_time(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model) const
+crossing_time(VectorFunctionPtr guard_ptr, const FlowSetModelType& flow_set_model) const
 {
     try {
         TimeModelType crossing_time_model=this->_toolbox->scaled_crossing_time(*guard_ptr,flow_set_model);
@@ -652,7 +652,7 @@ crossing_time(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model) con
 Interval jacobian2_range(const TaylorModel& tm);
 
 Interval HybridEvolver::
-normal_derivative(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model, const TimeModelType& crossing_time_model) const
+normal_derivative(VectorFunctionPtr guard_ptr, const FlowSetModelType& flow_set_model, const TimeModelType& crossing_time_model) const
 {
     typedef TimeModelType GuardValueModelType;
     GuardValueModelType guard_flow_set_model=apply(*guard_ptr,flow_set_model)[0];
@@ -663,13 +663,13 @@ normal_derivative(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model,
 
 void HybridEvolver::
 compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_active_events,
-                                const std::map<DiscreteEvent,FunctionPtr>& guards,
+                                const std::map<DiscreteEvent,VectorFunctionPtr>& guards,
                                 const ContinuousEnclosureType& initial_set) const
 {
     typedef TimeModelType GuardValueModelType;
     tribool blocking_event_initially_active=false;
-    for(std::map<DiscreteEvent,FunctionPtr>::const_iterator iter=guards.begin(); iter!=guards.end(); ++iter) {
-        FunctionPtr activation_ptr=iter->second;
+    for(std::map<DiscreteEvent,VectorFunctionPtr>::const_iterator iter=guards.begin(); iter!=guards.end(); ++iter) {
+        VectorFunctionPtr activation_ptr=iter->second;
         tribool initially_active=this->_toolbox->active(*activation_ptr,initial_set);
         if(possibly(initially_active)) {
             initially_active_events.insert(std::make_pair(iter->first,initially_active));
@@ -683,7 +683,7 @@ compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_activ
 // Compute the flow, parameterising space with the set parameters
 void HybridEvolver::
 compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float& time_step,
-                   FunctionPtr dynamic_ptr, const SetModelType& starting_set_model) const
+                   VectorFunctionPtr dynamic_ptr, const SetModelType& starting_set_model) const
 {
     ARIADNE_LOG(3,"compute_flow_model(....)\n");
     const int MAXIMUM_BOUNDS_DIAMETER_FACTOR = 8;
@@ -698,14 +698,14 @@ compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float
     ARIADNE_LOG(3,"flow_bounds="<<flow_bounds<<"\n");
     FlowModelType flow_model=this->_toolbox->flow_model(*dynamic_ptr,starting_set_bounding_box,time_step,flow_bounds);
     ARIADNE_LOG(3,"flow_model="<<flow_model<<"\n");
-    TaylorExpression identity_time_expression=TaylorExpression::variable(BoxType(1u,Interval(-time_step,+time_step)),0u);
+    ScalarTaylorFunction identity_time_expression=ScalarTaylorFunction::variable(BoxType(1u,Interval(-time_step,+time_step)),0u);
     flow_set_model=unchecked_apply(flow_model,combine(starting_set_model.models(),identity_time_expression.model()));
 }
 
 
 void HybridEvolver::
 compute_flow_model(FunctionModelType& , BoxType&,
-                   FunctionPtr, const BoxType&) const
+                   VectorFunctionPtr, const BoxType&) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -714,7 +714,7 @@ compute_flow_model(FunctionModelType& , BoxType&,
 void HybridEvolver::
 compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_times,
                         std::set<DiscreteEvent>& non_transverse_events,
-                        const std::map<DiscreteEvent,FunctionPtr>& guards,
+                        const std::map<DiscreteEvent,VectorFunctionPtr>& guards,
                         const FlowSetModelType& flow_set_model) const
 {
     ARIADNE_LOG(3,"Computing blocking events.\n");
@@ -723,11 +723,11 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
     const double SMALL_RELATIVE_TIME = 1./16;
     FlowSetModelType positive_flow_set_model(split(flow_set_model.models(),dimension,1));
 
-    for(std::map<DiscreteEvent,FunctionPtr>::const_iterator guard_iter=guards.begin();
+    for(std::map<DiscreteEvent,VectorFunctionPtr>::const_iterator guard_iter=guards.begin();
         guard_iter!=guards.end(); ++guard_iter)
     {
         const DiscreteEvent event=guard_iter->first;
-        const FunctionPtr guard_ptr=guard_iter->second;
+        const VectorFunctionPtr guard_ptr=guard_iter->second;
         tribool active = this->_toolbox->active(*guard_ptr,positive_flow_set_model);
         if(possibly(active)) {
             ARIADNE_LOG(3,"Event "<<event<<" possibly active.\n");
@@ -828,13 +828,13 @@ compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
 
 void HybridEvolver::
 compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >& activation_events,
-                          const std::map<DiscreteEvent,FunctionPtr>& activations, const FlowSetModelType& flow_set_model) const
+                          const std::map<DiscreteEvent,VectorFunctionPtr>& activations, const FlowSetModelType& flow_set_model) const
 {
     SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,0.0);
     SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
-    for(std::map<DiscreteEvent,FunctionPtr>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
+    for(std::map<DiscreteEvent,VectorFunctionPtr>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
         DiscreteEvent event=iter->first;
-        FunctionPtr activation_ptr=iter->second;
+        VectorFunctionPtr activation_ptr=iter->second;
         tribool active=this->_toolbox->active(*activation_ptr,flow_set_model);
         if(possibly(active)) {
             tribool initially_active=this->_toolbox->active(*activation_ptr,initial_set_model);
@@ -849,7 +849,7 @@ compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tri
 
 void HybridEvolver::
 compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >& activation_times,
-                         const std::map<DiscreteEvent,FunctionPtr>& activations,
+                         const std::map<DiscreteEvent,VectorFunctionPtr>& activations,
                          const FlowSetModelType& flow_set_model,
                          const TimeModelType& blocking_time_model,
                          const Semantics semantics) const
@@ -858,9 +858,9 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
     SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
     TimeModelType zero_time_model=blocking_time_model*0.0;
 
-    for(std::map<DiscreteEvent,FunctionPtr>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
+    for(std::map<DiscreteEvent,VectorFunctionPtr>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
         DiscreteEvent event=iter->first;
-        FunctionPtr activation_ptr=iter->second;
+        VectorFunctionPtr activation_ptr=iter->second;
 
         ARIADNE_LOG(3,"Computing activation time for event "<<event<<"...");
 

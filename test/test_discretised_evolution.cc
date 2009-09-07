@@ -99,7 +99,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     Float a=1.5; Float b=0.375;
     Vector<Float> p(2); p[0]=a; p[1]=b;
 
-    UserFunction<Henon> henon(p);
+    VectorUserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
     IteratedMap system(henon);
 
@@ -128,7 +128,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach();
     ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate();
     ListSet<EnclosureType> const& final_set=evolve_orbit.final();
-    
+
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     Orbit<GridCell> discrete_orbit
@@ -194,7 +194,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Set up the vector field
     Float mu=0.865;
-    UserFunction<VanDerPol> vdp(Vector<Float>(1,&mu));
+    VectorUserFunction<VanDerPol> vdp(Vector<Float>(1,&mu));
     cout << "vdp=" << vdp << endl;
     VectorField system(vdp);
 
@@ -291,11 +291,11 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     Float a=1.5; Float b=0.375;
     Vector<Float> p(2); p[0]=a; p[1]=b;
 
-    UserFunction<Henon> henon(p);
+    VectorUserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
     HybridAutomaton ha("Henon");
     ha.new_mode(location,IdentityFunction(2));
-    ha.new_transition(event,location,location,henon,ConstantFunction(Vector<Float>(1,1.0),2),true);
+    ha.new_transition(event,location,location,henon,VectorConstantFunction(Vector<Float>(1,1.0),2),true);
 
     // Define a bounding box for the evolution
     std::cout<<"making bounding_box"<<std::endl;

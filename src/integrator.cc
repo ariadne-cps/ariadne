@@ -192,6 +192,7 @@ TaylorIntegrator::flow(const VectorFunctionInterface& f, const IVector& dp, cons
 
     VectorTaylorFunction res(nx,ScalarTaylorFunction(dom));
     for(uint i=0; i!=nx; ++i) { res[i]=phi[np+i]; }
+    ARIADNE_LOG(3,"res="<<res<<"\n");
     return res;
 
 }

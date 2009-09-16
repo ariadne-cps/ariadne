@@ -93,6 +93,7 @@ ScalarTaylorFunction implicit(const ScalarFunctionInterface& f, const Vector<Int
 
 ScalarTaylorFunction crossing_time(const ScalarFunctionInterface& g, const VectorFunctionInterface& f, const Vector<Interval>& d);
 
+class VectorTaylorFunctionElementReference;
 
 /*! \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
  *
@@ -497,6 +498,10 @@ inline ScalarTaylorFunction operator*(const Interval& c, const ScalarTaylorFunct
 inline ScalarTaylorFunction operator/(const Interval& c, const ScalarTaylorFunction& x) {
     return ScalarTaylorFunction(x._domain,c/x._model); }
 
+ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
+ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
+ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
+ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 
 inline ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
     return ScalarTaylorFunction(x._domain,abs(x._model)); }
@@ -578,13 +583,13 @@ VectorTaylorFunction unchecked_flow(const VectorTaylorFunction& vf, const Vector
 VectorTaylorFunction unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 
-
-
 /*! \brief A taylor_model with multivalued output using the TaylorModel class.
  *
  *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */
 class VectorTaylorFunction {
+    friend class VectorTaylorFunctionElementReference;
+
     typedef Float R;
     typedef Interval I;
   public:
@@ -667,6 +672,8 @@ class VectorTaylorFunction {
     void set(uint i, const ScalarTaylorFunction& te);
     /*! \brief The \a ith Taylor variable */
     ScalarTaylorFunction operator[](uint i) const;
+    /*! \brief The \a ith Taylor variable */
+    VectorTaylorFunctionElementReference operator[](uint i);
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Interval>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
@@ -803,6 +810,21 @@ template<class E> VectorTaylorFunction::VectorTaylorFunction(const boost::numeri
     if(ve().size()!=0) { this->_domain=ve()[0].domain(); }
     for(uint i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
 }
+
+class VectorTaylorFunctionElementReference
+{
+    friend class ScalarTaylorFunction;
+    friend class VectorTaylorFunction;
+ public:
+    VectorTaylorFunctionElementReference(VectorTaylorFunction& c, uint i) : _c(&c), _i(i) { }
+    operator ScalarTaylorFunction () const { return this->_c->get(this->_i); }
+    void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
+    void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
+    void set_error(double e) { this->_c->_models[this->_i].set_error(e); }
+  private:
+    VectorTaylorFunction* _c; uint _i;
+};
+
 
 } // namespace Ariadne
 

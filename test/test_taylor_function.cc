@@ -275,7 +275,8 @@ void TestVectorTaylorFunction::test_constructors()
     ARIADNE_TEST_EQUAL(polynomial_model,VectorTaylorFunction(domain,expansion))
 
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain);
-    VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
+    //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
+    VectorTaylorFunction variables_model(ScalarTaylorFunction(1.5-t[0]*t[0]+0.25*t[1])*e0+ScalarTaylorFunction(t[0])*e1);
     ARIADNE_TEST_EQUAL(variables_model,VectorTaylorFunction(domain,expansion));
 
 }

@@ -102,6 +102,7 @@ void export_integrator()
 {
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
     class_<TaylorIntegrator, bases<IntegratorInterface> > taylor_integrator_class("TaylorIntegrator",init<unsigned int>());
+    taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunctionInterface&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
     taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunctionInterface&,const Vector<Interval>&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
 }
 

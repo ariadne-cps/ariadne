@@ -829,7 +829,13 @@ VectorTaylorFunction::result_size() const
 ScalarTaylorFunction
 VectorTaylorFunction::operator[](uint i) const
 {
-    return ScalarTaylorFunction(this->_domain,this->_models[i]);
+    return this->get(i);
+}
+
+VectorTaylorFunctionElementReference
+VectorTaylorFunction::operator[](uint i)
+{
+    return VectorTaylorFunctionElementReference(*this,i);
 }
 
 ScalarTaylorFunction

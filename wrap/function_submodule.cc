@@ -543,12 +543,16 @@ void export_vector_polynomial_function()
     vector_polynomial_function_class.def("__getitem__",(Interval const&(VectorPolynomialFunction::*)(uint)const)&VectorPolynomialFunction::operator[],return_value_policy<copy_const_reference>());
     vector_polynomial_function_class.def("__setitem__",(void(VectorPolynomialFunction::*)(uint,const VectorPolynomialFunction&)const)&VectorPolynomialFunction::set);
 
+    vector_polynomial_function_class.def("identity", (VectorPolynomialFunction(*)(uint)) &VectorPolynomialFunction::identity);
+    vector_polynomial_function_class.staticmethod("identity");
+
     def("derivative", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,uint)) &derivative);
     def("antiderivative", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,uint)) &antiderivative);
 
     def("join", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&, const VectorPolynomialFunction&)) &join);
     def("join", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&, const ScalarPolynomialFunction&)) &join);
     def("join", (VectorPolynomialFunction(*)(const ScalarPolynomialFunction&, const ScalarPolynomialFunction&)) &join);
+    def("join", (VectorPolynomialFunction(*)(const ScalarPolynomialFunction&, const VectorPolynomialFunction&)) &join);
 
     from_python<VectorPolynomialFunction>();
 

@@ -945,6 +945,13 @@ join(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2)
 }
 
 VectorTaylorFunction
+join(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
+{
+    ARIADNE_ASSERT(f1.domain()==f2.domain());
+    return VectorTaylorFunction(f1.domain(),join(f1.model(),f2.models()));
+}
+
+VectorTaylorFunction
 combine(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2)
 {
     return VectorTaylorFunction(join(f1.domain(),f2.domain()),combine(f1.model(),f2.model()));

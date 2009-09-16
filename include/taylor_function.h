@@ -768,6 +768,7 @@ class VectorTaylorFunction {
     friend VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
     friend VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
     friend VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
+    friend VectorTaylorFunction join(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
     //! \brief Compute the function \f$(f\oplus g)(x,y)=(f(x),g(y))\f$.
     friend VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
     friend VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
@@ -797,6 +798,7 @@ class VectorTaylorFunction {
 VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
 VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
 VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
+VectorTaylorFunction join(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
 VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
 VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
 VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);

@@ -705,6 +705,11 @@ class VectorPolynomialFunction
         for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
     VectorPolynomialFunction(const Vector<ScalarPolynomialFunction>& p) : Base(p.size()) {
         for(uint i=0; i!=p.size(); ++i) { Base::set(i,p[i]); } }
+    VectorPolynomialFunction(const array< Polynomial<Interval> >& p) : Base(p.size()) {
+        for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
+
+    static VectorPolynomialFunction identity(uint n) {
+        return VectorPolynomialFunction(ScalarPolynomialFunction::variables(n)); }
 
     const ScalarPolynomialFunction& operator[](uint i) const {
         return dynamic_cast<const ScalarPolynomialFunction&>(Base::get(i)); }
@@ -732,6 +737,16 @@ inline VectorPolynomialFunction join(const VectorPolynomialFunction& p1, const S
     for(uint i=0; i!=p1.result_size(); ++i) {
         r.set(i,p1[i]); }
     r.set(p1.result_size(),p2);
+    return r;
+}
+
+inline VectorPolynomialFunction join(const ScalarPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
+    // Need to implement this explicitly since VectorPolynomialFunction does not inherit from Vector<Polynomial>
+    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
+    VectorPolynomialFunction r(p2.result_size()+1u,p1.argument_size());
+    r.set(0u,p1);
+    for(uint i=0; i!=p2.result_size(); ++i) {
+        r.set(i+1,p2[i]); }
     return r;
 }
 

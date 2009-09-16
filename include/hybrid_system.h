@@ -37,6 +37,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+#include "logging.h"
+
 #include "formula.h"
 #include "container.h"
 #include "valuation.h"
@@ -74,6 +76,7 @@ template<class k, class V> class Map;
 
  */
 class HybridSystem
+    : public Loggable
 {
   public:
     //! \brief The type used to represent time.

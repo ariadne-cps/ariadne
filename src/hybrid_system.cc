@@ -24,6 +24,8 @@
 #include <map>
 
 #include "macros.h"
+#include "logging.h"
+
 #include "stlio.h"
 #include "formula.h"
 #include "function_interface.h"
@@ -155,18 +157,15 @@ flatten(Map< T, Set<T> >& dag)
 }
 
 DiscreteValuation HybridSystem::target(const Event& event, const DiscreteValuation& source) const {
-    std::cerr<<"\n";
     DiscreteValuation target;
     for(switch_const_iterator iter=_discrete_updates.begin(); iter!=this->_discrete_updates.end(); ++iter) {
         if(iter->evnts.contains(event)) {
             if(evaluate(iter->loc,source)) {
                 String val=evaluate(iter->rhs,source);
-                std::cerr<<iter->lhs<<":="<<val<<"="<<iter->rhs<<"\n";
                 target.set(iter->lhs,val);
             }
         }
     }
-    std::cerr<<"\n"<<source<<" "<<target<<"\n\n";
     return target;
 }
 
@@ -210,20 +209,20 @@ bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
        }
     }
 
-    std::cerr<<"differential_variables="<<differential_variables<<"\n";
-    std::cerr<<"algebraic_variables="<<algebraic_variables<<"\n";
-    std::cerr<<"independent_variables="<<independent_variables<<"\n";
+    ARIADNE_LOG(3,"differential_variables="<<differential_variables<<"\n");
+    ARIADNE_LOG(3,"algebraic_variables="<<algebraic_variables<<"\n");
+    ARIADNE_LOG(3,"independent_variables="<<independent_variables<<"\n");
 
     input_variables=difference(independent_variables,join(differential_variables,algebraic_variables));
-    std::cerr<<"input_variables="<<independent_variables<<"\n";
+    ARIADNE_LOG(3,"input_variables="<<independent_variables<<"\n");
     ARIADNE_ASSERT_MSG(input_variables.empty(),"Variables "<<input_variables<<" are used, but have no defining rules");
 
-    std::cerr<<"algebraic_dependencies="<<algebraic_dependencies<<"\n";
+    ARIADNE_LOG(3,"algebraic_dependencies="<<algebraic_dependencies<<"\n");
     for(dependencies_iterator iter=algebraic_dependencies.begin(); iter!=algebraic_dependencies.end(); ++iter) {
         restrict(iter->second,algebraic_variables);
     }
     std::vector<Identifier> ordered_algebraic_variables=flatten(algebraic_dependencies);
-    std::cerr<<"ordered_algebraic_variables="<<ordered_algebraic_variables<<"\n";
+    ARIADNE_LOG(3,"ordered_algebraic_variables="<<ordered_algebraic_variables<<"\n");
 
     return true;
 }
@@ -241,9 +240,9 @@ bool HybridSystem::check_reset(const Event& event, const DiscreteValuation& sour
         }
     }
 
-    std::cerr<<"source_variables="<<source_variables<<"\n";
-    std::cerr<<"target_state_variables="<<target_state_variables<<"\n";
-    std::cerr<<"updated_variables="<<updated_variables<<"\n";
+    ARIADNE_LOG(3,"source_variables="<<source_variables<<"\n");
+    ARIADNE_LOG(3,"target_state_variables="<<target_state_variables<<"\n");
+    ARIADNE_LOG(3,"updated_variables="<<updated_variables<<"\n");
 
     ARIADNE_ASSERT_MSG(subset(updated_variables,target_state_variables),"");
     ARIADNE_ASSERT_MSG(subset(target_state_variables,updated_variables),"");

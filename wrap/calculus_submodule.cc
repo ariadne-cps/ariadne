@@ -126,7 +126,9 @@ struct from_python<VectorTaylorFunction> {
 
 
 
-
+Interval _range1(const TaylorModel&);
+Interval _range2(const TaylorModel&);
+Interval _range3(const TaylorModel&);
 
 
 } // namespace Ariadne
@@ -210,6 +212,7 @@ void export_taylor_model()
     //taylor_model_class.staticmethod("variables");
 
     taylor_model_class.def("restrict", (TaylorModel&(TaylorModel::*)(const Vector<Interval>&))&TaylorModel::restrict, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("restrict", (TaylorModel(*)(const TaylorModel&,uint,const Interval&))&restrict);
     taylor_model_class.def("preaffine", (TaylorModel(*)(const TaylorModel&,uint,const Interval&,const Interval&))&preaffine);
 
     taylor_model_class.def("evaluate", (Interval(TaylorModel::*)(const Vector<Interval>&)const)&TaylorModel::evaluate);
@@ -230,6 +233,12 @@ void export_taylor_model()
     def("sin", (TaylorModel(*)(const TaylorModel&))&sin);
     def("cos", (TaylorModel(*)(const TaylorModel&))&cos);
     def("tan", (TaylorModel(*)(const TaylorModel&))&tan);
+
+    taylor_model_class.def("range1", (Interval(*)(const TaylorModel&)) &_range1);
+    taylor_model_class.def("range2", (Interval(*)(const TaylorModel&)) &_range2);
+    taylor_model_class.def("range3", (Interval(*)(const TaylorModel&)) &_range3);
+
+    def("split",(TaylorModel(*)(const TaylorModel&,uint,tribool)) &split);
 
 
     class_< TMV > taylor_model_vector_class("TaylorModelVector");
@@ -352,6 +361,7 @@ void export_scalar_taylor_function()
     def("intersection",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &intersection);
 
     def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const IntervalVector&)) &restrict);
+    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &restrict);
 
     def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Interval&)) &embed);
     def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const IntervalVector&)) &embed);

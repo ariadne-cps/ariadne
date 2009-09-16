@@ -62,8 +62,8 @@ Float mag(const TaylorModel& tm);
 pair<TaylorModel,TaylorModel> split(const TaylorModel& x, uint j);
 //! \relates TaylorModel
 //!\brief Split the variable, subdividing along the independent variable j
-//! and taking the lower/upper half depending on whether half is false or true
-TaylorModel split(const TaylorModel& x, uint j, bool half);
+//! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
+TaylorModel split(const TaylorModel& x, uint j, tribool half);
 
 //! \relates TaylorModel \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
 TaylorModel scale(const TaylorModel& x, const Interval& ivl);
@@ -101,6 +101,9 @@ TaylorModel derivative(const TaylorModel& x, uint k);
 
 //! \relates TaylorModel \brief Replace the variale x[k] with a*x[k]+b
 TaylorModel preaffine(const TaylorModel&, uint k, const Interval& a, const Interval& b);
+//! \relates TaylorModel \brief Restricts the range of the variable x[k] to the interval d.
+//! \precondition -1 <= d.lower() <= d.upper() <= 1 .
+TaylorModel restrict(const TaylorModel&, uint k, const Interval& d);
 
 //! \relates TaylorModel
 //! An over-approximation to the intersection of two Taylor models.

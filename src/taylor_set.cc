@@ -154,14 +154,41 @@ TaylorSet::radius() const
 tribool
 TaylorSet::disjoint(const Box& bx) const
 {
-    return this->bounding_box().disjoint(bx) || indeterminate;
+    ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Dimension of "<<*this<<" is different from dimension of "<<bx);
+
+    // Expand the bounding box by the error term
+    Box ebx(bx);
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        ebx[i]+=Interval(-this->_models[i].error(),+this->_models[i].error());
+    }
+
+    // Copy the box eliminating error terms
+    TaylorSet efts(*this);
+    for(uint i=0; i!=efts.dimension(); ++i) {
+        efts._models[i].clobber();
+    }
+
+    Box bbx=efts.bounding_box();
+    if(bbx.disjoint(ebx)) {
+        return true;
+    } else if(bbx.subset(ebx)) {
+        return false;
+    } else if(ebx.contains(efts.centre())) {
+        return false;
+    } else if(bbx.radius() * 4 < ebx.radius()) {
+        return indeterminate;
+    } else {
+        std::pair<TaylorSet,TaylorSet> split_efts=this->split();
+        return split_efts.first.disjoint(ebx) && split_efts.second.disjoint(ebx);
+    }
 }
+
 
 
 tribool
 TaylorSet::overlaps(const Box& bx) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    return !this->disjoint(bx);
 }
 
 

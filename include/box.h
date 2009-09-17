@@ -111,6 +111,11 @@ class Box
         return new Box(*this);
     }
 
+    //! \brief Test if the box is a superset of another box.
+    bool contains(const Point& pt) const {
+        return Ariadne::contains(this->vector(),pt.vector());
+    }
+
     //! \brief Test if the box is a subset of another box.
     bool subset(const Box& bx) const {
         return Ariadne::subset(this->vector(),bx.vector());

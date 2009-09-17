@@ -2,7 +2,7 @@
  *            point.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file point.h
  *  \brief Points in Euclidean space.
  */
@@ -48,7 +48,7 @@ class Point
     explicit Point(const std::string& str);
     template<class T> Point(const T& t) : Vector<Float>(t) { }
     template<class T1, class T2> Point(const T1& t1, const T2& t2) : Vector<Float>(t1,t2) { }
-    //! Construct from an integer giving the dimension and a list of floating-point values 
+    //! Construct from an integer giving the dimension and a list of floating-point values
     //! giving the values.
     explicit Point(uint d, const Float& x0, ...);
     //! The origin in \a n dimensions.
@@ -57,6 +57,9 @@ class Point
     virtual Point* clone() const;
     //! The dimension of the point.
     uint dimension() const { return this->size(); }
+    //! An explicit cast to a float vector. Useful to prevent ambiguous function overloads.
+    const Vector<Float>& vector() const { return *this; }
+
     Vector<Float> centre() const { return *this; }
 
     //! Write to an output stream.

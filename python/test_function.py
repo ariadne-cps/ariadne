@@ -30,6 +30,7 @@ c=ScalarPolynomialFunction.constant(3,1.5)
 x=ScalarPolynomialFunction.variable(3,0)
 y=ScalarPolynomialFunction.variable(3,1)
 v=ScalarPolynomialFunction.variables(3)
+id=VectorPolynomialFunction.identity(3)
 
 p=x+y
 
@@ -42,5 +43,11 @@ i+i; i-p; i*p;
 derivative(p,0)
 antiderivative(p,0)
 
-f=VectorPolynomialFunction([p,p])
+b=Box([{0:0.25},{0.25:0.50},{0.50:0.75}])
+f=VectorPolynomialFunction([c,x,y])
+g=ScalarPolynomialFunction(p)
+
+join(g,g); join(f,g); join(g,f); join(f,f)
+compose(g,f); compose(f,f)
+evaluate(f,b); evaluate(g,b)
 

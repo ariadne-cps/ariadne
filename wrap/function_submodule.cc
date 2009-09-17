@@ -546,6 +546,9 @@ void export_vector_polynomial_function()
     vector_polynomial_function_class.def("identity", (VectorPolynomialFunction(*)(uint)) &VectorPolynomialFunction::identity);
     vector_polynomial_function_class.staticmethod("identity");
 
+    def("compose", (ScalarPolynomialFunction(*)(const ScalarPolynomialFunction&,const VectorPolynomialFunction&)) &compose);
+    def("compose", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,const VectorPolynomialFunction&)) &compose);
+
     def("derivative", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,uint)) &derivative);
     def("antiderivative", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,uint)) &antiderivative);
 

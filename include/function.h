@@ -300,6 +300,9 @@ class ScalarPolynomialFunction
         return g; }
 
     virtual std::ostream& write(std::ostream& os) const;
+
+    const Polynomial<Interval>& _polynomial() const {
+        return static_cast<const Polynomial<Interval>&>(*this); }
 };
 
 inline std::ostream& ScalarPolynomialFunction::write(std::ostream& os) const {
@@ -721,6 +724,12 @@ class VectorPolynomialFunction
 
     virtual std::ostream& write(std::ostream& os) const {
         return os << "VectorPolynomialFunction("<<static_cast<const Vector<ScalarFunctionInterface>&>(*this)<<")"; }
+
+    Vector< Polynomial<Interval> > _polynomials() const {
+        Vector<Polynomial<Interval> > r(this->argument_size());
+        for(uint i=0; i!=r.size(); ++i) {
+            r[i]=static_cast<const Polynomial<Interval>&>(dynamic_cast<const ScalarPolynomialFunction&>(Base::get(i))); }
+        return r; }
   private:
     friend VectorPolynomialFunction operator+(const VectorPolynomialFunction&, const VectorPolynomialFunction&);
     friend VectorPolynomialFunction flip(const VectorPolynomialFunction&, uint);
@@ -786,7 +795,13 @@ inline VectorPolynomialFunction operator-(const VectorPolynomialFunction& p1, co
     return r;
 }
 
+inline ScalarPolynomialFunction compose(const ScalarPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
+    return ScalarPolynomialFunction(compose(p1._polynomial(),p2._polynomials()));
+}
 
+inline VectorPolynomialFunction compose(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
+    return VectorPolynomialFunction(compose(p1._polynomials(),p2._polynomials()));
+}
 
 
 

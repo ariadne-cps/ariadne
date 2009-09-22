@@ -692,6 +692,12 @@ template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x) {
 template Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<Float>& x);
 template Float evaluate(const Expression<Real>& e, const ContinuousValuation<Float>& x);
 
+template Float evaluate(const Expression<Real>& e, const Vector<Float>& x);
+template Interval evaluate(const Expression<Real>& e, const Vector<Interval>& x);
+template Differential<Float> evaluate(const Expression<Real>& e, const Vector< Differential<Float> >& x);
+template Differential<Interval> evaluate(const Expression<Real>& e, const Vector< Differential<Interval> >& x);
+template TaylorModel evaluate(const Expression<Real>& e, const Vector<TaylorModel>& x);
+
 template<class X, class Y> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<Y>& v, const Y& c) {
     return Expression<X>(e.clone()); }
 template<class X> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<X>& v, const X& c) {
@@ -868,7 +874,20 @@ Affine<X> affine(const Expression<Real>& e, const Space<Real>& s) {
 template Affine<Interval> affine(const Expression<Real>&, const Space<Real>&);
 template Polynomial<Interval> polynomial(const Expression<Real>&, const Space<Real>&);
 
-
+Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
+{
+    const ExpressionInterface<Real>* eptr=e.ptr();
+    const BinaryExpression<Real,Operator>* bptr=dynamic_cast<const BinaryExpression<Real,Operator>*>(eptr);
+    if(bptr) { return make_expression<Real>(bptr->_op,function(bptr->_arg1,s),function(bptr->_arg2,s)); }
+    const UnaryExpression<Real,Operator>* uptr=dynamic_cast<const UnaryExpression<Real,Operator>*>(eptr);
+    if(uptr) { return make_expression<Real>(uptr->_op,function(uptr->_arg,s)); }
+    const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
+    if(cptr) { return Expression<Real>(*cptr); }
+    const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
+    if(vptr) { return Expression<Real>(new CoordinateExpression<Real>(s.index(vptr->variable()))); }
+    const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
+    ARIADNE_ASSERT_MSG(!iptr,"Cannot convert numbered variable");
+}
 
 
 

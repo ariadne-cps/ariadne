@@ -182,6 +182,7 @@ void export_box()
     box_class.def(init< Vector<Interval> >());
     box_class.def("dimension", (uint(Box::*)()const) &Box::dimension);
     box_class.def("centre", (Point(Box::*)()const) &Box::centre);
+    box_class.def("radius", (Float(Box::*)()const) &Box::radius);
     box_class.def("separated", (tribool(Box::*)(const Box&)const) &Box::disjoint);
     box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);

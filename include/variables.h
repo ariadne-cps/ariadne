@@ -121,6 +121,9 @@ template<class T> struct Space
     const VariableType& variable(SizeType i) const { return _variables.at(i); }
 
     //! \brief A list giving ordered variables.
+    List<String> variable_names() const {
+        List<String> res; for(uint i=0; i!=this->_variables.size(); ++i) { res.append(this->_variables[i].name()); } return res; }
+    //! \brief A list giving ordered variables.
     List<VariableType> variables() const { return this->_variables; }
     //! \brief A map giving the index of a given variable.
     Map<VariableType,SizeType> indices() const {

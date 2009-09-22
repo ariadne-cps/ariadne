@@ -114,6 +114,7 @@ template<class T> class Array
 {
   public:
     Array() : Ariadne::array<T>() { }
+    Array(unsigned int n) : Ariadne::array<T>(n) { }
     Array(const array<T>& l) : Ariadne::array<T>(l) { }
     template<class I> Array(const I& b, const I& e) : Ariadne::array<T>(b,e) { }
 };

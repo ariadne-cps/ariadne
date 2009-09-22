@@ -83,7 +83,7 @@ void export_formula()
     to_python< List<RealExpression> >();
 
 
-    // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be. 
+    // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be.
     //implicitly_convertible<double,RealExpression>();
     //implicitly_convertible<Interval,RealExpression>();
 
@@ -170,9 +170,9 @@ void export_formula()
     real_expression_class.def("__gt__", &__gte__<TriboolExpression,RealExpression,double>);
     real_expression_class.def("__lt__", &__lte__<TriboolExpression,RealExpression,double>);
 
-    
+
     //class_<RealVariable> real_variable_class("RealVariable", init<std::string>());
-    
+
 }
 
 

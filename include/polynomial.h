@@ -90,7 +90,7 @@ class Polynomial
         Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r; }
     //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
     static Polynomial<X> variable(unsigned int as, unsigned int j) {
-        Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
+        ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
     //! \brief Create an array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
     static array< Polynomial<X> > variables(unsigned int as) {

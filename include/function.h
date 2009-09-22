@@ -115,53 +115,37 @@ template<class T> class ScalarUserFunction
 template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
 
 class ScalarExpressionFunction
-//    : public ScalarFunctionInterface
+    : public ScalarFunctionInterface
 {
-    Array<String> _space;
+    Space<Real> _space;
     Expression<Real> _expression;
   public:
     typedef unsigned int SizeType;
 
-    ScalarExpressionFunction(const Expression<Real>& e, const Array<String>& s)
-        : _space(s.begin(),s.end()), _expression(_convert(e,_variables(s))) { }
+    ScalarExpressionFunction(const Expression<Real>& e, const Space<Real>& s)
+        : _space(s), _expression(function(e,s)) { }
 
-    virtual uint argument_size() const { return _space.size(); }
-    virtual Float evaluate(const Vector<Float>& x) { return this->_evaluate(x); }
-    virtual Interval evaluate(const Vector<Interval>& x) { return this->_evaluate(x); }
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) { return this->_evaluate(x); }
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) { return this->_evaluate(x); }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) { return this->_evaluate(x); }
+    virtual ScalarExpressionFunction* clone() const { return new ScalarExpressionFunction(*this); }
+    virtual SizeType argument_size() const { return _space.size(); }
+    virtual SmoothnessType smoothness() const { return SMOOTH; }
+    virtual Float evaluate(const Vector<Float>& x) const { return this->_evaluate(x); }
+    virtual Interval evaluate(const Vector<Interval>& x) const { return this->_evaluate(x); }
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const { return this->_evaluate(x); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_evaluate(x); }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_evaluate(x); }
+
+    virtual Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+
+    virtual ScalarExpressionFunction* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+
     virtual std::ostream& write(std::ostream& os) const {
         return os << "Function( space="<<this->_space<<", expression="<<this->_expression<<" )"; }
 
   protected:
-    template<class X> X _evaluate(const Vector<X>& x) { return Ariadne::evaluate(_expression,x); }
-
-    static Map<String,SizeType> _variables(const Array<String>& s) {
-        Map<String,SizeType> variables;
-        for(uint i=0; i!=s.size(); ++i) {
-            ARIADNE_ASSERT_MSG(!variables.has_key(s[i]),"Variable name "<<s[i]<<" is duplicated in space "<<s);
-            variables.insert(s[i],i); }
-        return variables; }
-
-    static Expression<Real> _convert(const Expression<Real> e, const Map<String,SizeType>& s);
-
-/*
-    static Expression<Real> _convert(shared_ptr<const ExpressionInterface<Real> > e, const Map<String,SizeType>& s) {
-        const ExpressionInterface<Real>* eptr=e.operator->();
-        const BinaryExpression<Real,Operator>* bptr=dynamic_cast<const BinaryExpression<Real,Operator>*>(eptr);
-        if(bptr) { return make_expression<Real>(bptr->_op,_convert(bptr->_arg1_ptr,s),_convert(bptr->_arg2_ptr,s)); }
-        const UnaryExpression<Real,Operator>* uptr=dynamic_cast<const UnaryExpression<Real,Operator>*>(eptr);
-        if(uptr) { return make_expression<Real>(uptr->_op,_convert(uptr->_arg_ptr,s)); }
-        const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
-        if(cptr) { return Expression<Real>(*cptr); }
-        const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
-        if(vptr) { return Expression<Real>(new CoordinateExpression<Real>(s[vptr->name()])); }
-        const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-        ARIADNE_ASSERT_MSG(!iptr,"Cannot convert numbered variable");
-    }
-*/
-
+    template<class X> X _evaluate(const Vector<X>& x) const { return Ariadne::evaluate(_expression,x); }
 };
 
 
@@ -201,6 +185,7 @@ class ScalarAffineFunction
     static ScalarAffineFunction constant(uint n, Interval c) {
         return ScalarAffineFunction(Vector<Interval>(n),c); }
     static ScalarAffineFunction variable(uint n, uint j) {
+        ARIADNE_ASSERT_MSG(j<n,"Cannot create variable function x["<<j<<"] in "<<n<<" arguments; require j<n.");
         return ScalarAffineFunction(Vector<Interval>::unit(n,j),Interval(0.0)); }
 
     virtual ScalarAffineFunction* clone() const { return new ScalarAffineFunction(*this); }
@@ -261,6 +246,7 @@ class ScalarPolynomialFunction
     static ScalarPolynomialFunction constant(uint n, Interval c) {
         return Polynomial<Interval>::constant(n,c); }
     static ScalarPolynomialFunction variable(uint n, uint j) {
+        ARIADNE_ASSERT_MSG(j<n,"Cannot create variable function x["<<j<<"] in "<<n<<" arguments; require j<n.");
         return Polynomial<Interval>::variable(n,j); }
     static array<ScalarPolynomialFunction> variables(uint n) {
         array<ScalarPolynomialFunction> r(n); for(uint i=0; i!=n; ++i) { r[i]=variable(n,i); } return r; }

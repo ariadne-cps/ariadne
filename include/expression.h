@@ -172,6 +172,7 @@ template<class X> Expression<X> simplify(const Expression<X>& e);
 
 bool operator==(const Expression<Tribool>&, bool);
 
+Expression<Real> function(const Expression<Real>& e, const Space<Real>& s);
 
 //! \related Expression \brief .
 Expression<Boolean> operator&&(Expression<Boolean> e1, Expression<Boolean> e2);

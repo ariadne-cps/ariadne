@@ -379,6 +379,10 @@ void export_scalar_function_interface()
 
     def("evaluate",&ScalarFunctionPyWrap::evaluate<Interval>);
     def("evaluate",&ScalarFunctionPyWrap::evaluate<TaylorModel>);
+
+    class_<ScalarExpressionFunction, bases< ScalarFunctionInterface > >
+        scalar_function_class("RealFunction", init<ScalarExpressionFunction>());
+    scalar_function_class.def(init<RealExpression,RealSpace>());
 }
 
 

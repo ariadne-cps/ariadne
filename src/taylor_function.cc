@@ -123,6 +123,7 @@ ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, c
 
 ScalarTaylorFunction ScalarTaylorFunction::variable(const Vector<Interval>& d, uint j)
 {
+    ARIADNE_ASSERT(j<d.size());
     return ScalarTaylorFunction(d,TaylorModel::scaling(d.size(),j,d[j]));
 }
 

@@ -49,6 +49,8 @@ namespace Ariadne {
 template<class X> inline const char* python_name(const char* name);
 template<> inline const char* python_name<Float>(const char* name) {
     return (std::string("Float")+name).c_str(); }
+template<> inline const char* python_name<Real>(const char* name) {
+    return (std::string("Real")+name).c_str(); }
 template<> inline const char* python_name<Interval>(const char* name) {
     return (std::string("Interval")+name).c_str(); }
 

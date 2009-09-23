@@ -47,72 +47,139 @@
 #include "operators.h"
 #include "expression.h"
 #include "formula.h"
+#include "real.h"
 
 namespace Ariadne {
 
+class Real;
+template<class X> class Vector;
+template<class X> class Polynomial;
+template<class T> class Expression;
+template<class T> class Space;
 
-template<uint AS, uint PS=0u, uint SM=255u>
-struct ScalarFunctionData
+class ScalarFunction;
+class VectorFunction;
+
+//! A scalar function \f$f:\R^n\rightarrow\R\f$.
+class ScalarFunction
 {
-    const uint argument_size() const { return AS; }
-    const uint parameter_size() const { return PS; }
-    const uint smoothness() const { return SM; }
-};
-
-
-//! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
-//!
-//! Given a C++ class T with a (static) template method
-//!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
-//! the type <code>UserExpression<T></code> is an Ariadne expression defined by \f$r=f(a)\f$.
-//! The constructor for UserExpression<T> takes a Vector<Float> or Vector<Interval> argument which is used for \a p.
-//!
-//! The class T must also define meta-data <c>argument_size(), parameter_size()
-//! and smoothness()</c>. These are most easily defined by inheriting from the
-//! <tt>ExpressionData<AS,PS,SM=SMOOTH></tt> class.
-//!
-//! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
-template<class T> class ScalarUserFunction
-    : public ScalarFunctionInterface
-{
+    typedef uint Nat;
+    typedef std::ostream OStream;
   public:
-    ScalarUserFunction() : _p(this->parameter_size()) { }
-    ScalarUserFunction(const Vector<Float>& p) : _p(p) { }
-    ScalarUserFunction(const Vector<Interval>& p) : _p(p) { }
+    static ScalarFunction constant(Nat n, Real c);
+    static ScalarFunction variable(Nat n, uint i);
 
-    const Vector<Interval> parameters() const { return _p; }
+    ScalarFunction(Nat n=0u);
+    ScalarFunction(const Expression<Real>& e, const Space<Real>& s);
+    ScalarFunction(const Polynomial<Real>& p);
 
-    virtual SizeType argument_size() const { return T::argument_size(); }
-    virtual SizeType parameter_size() const { return T::parameter_size(); }
-    virtual SmoothnessType smoothness() const { return T::smoothness(); }
+    ScalarFunction(ScalarFunctionInterface* fptr) : _ptr(fptr) { }
+    const ScalarFunctionInterface* pointer() const { return this->_ptr.operator->(); }
+    operator const ScalarFunctionInterface& () const { return *this->_ptr; }
 
-    virtual Float evaluate(const Vector<Float>& x) const {
-        Float r=0; T::compute(r,x,midpoint(_p)); return r; }
-    virtual Interval evaluate(const Vector<Interval>& x) const {
-        Interval r=0; T::compute(r,x,_p); return r; }
+    Nat argument_size() const { return this->_ptr->argument_size(); }
+    Float evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+    Interval evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel evaluate(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
 
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
-        TaylorModel r(x[0].argument_size(),x[0].accuracy_ptr()); T::compute(r,x,_p); return r; }
+    Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+    Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
 
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
-        Differential<Float> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,midpoint(_p)); return r; }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
-        Differential<Interval> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,_p); return r; }
+    Vector<Float> gradient(const Vector<Float>& x) const;
+    Vector<Interval> gradient(const Vector<Interval>& x) const;
 
-    virtual ScalarUserFunction<T>* derivative(uint j) { ARIADNE_NOT_IMPLEMENTED; }
+    ScalarFunction derivative(Nat j) const;
+    Polynomial<Real> polynomial() const;
 
-    virtual Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+    std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
+  public:
+    friend ScalarFunction compose(ScalarFunction, VectorFunction);
+    friend Real evaluate(ScalarFunction, Vector<Real>);
 
-    virtual std::ostream& write(std::ostream& os) const  {
-        return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
+    friend ScalarFunction operator+(const ScalarFunction&);
+    friend ScalarFunction operator-(const ScalarFunction&);
+    friend ScalarFunction operator+(const ScalarFunction&, const ScalarFunction&);
+    friend ScalarFunction operator-(const ScalarFunction&, const ScalarFunction&);
+    friend ScalarFunction operator*(const ScalarFunction&, const ScalarFunction&);
+    friend ScalarFunction operator/(const ScalarFunction&, const ScalarFunction&);
   private:
-    Vector<Interval> _p;
+    shared_ptr<ScalarFunctionInterface> _ptr;
 };
 
-template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
+inline Float evaluate_approx(const ScalarFunction& f, const Vector<Float>& x) { return f(x); }
+inline Interval evaluate(const ScalarFunction& f, const Vector<Interval>& x) { return f(x); }
+inline Vector<Float> gradient_approx(const ScalarFunction& f, const Vector<Float>& x) { return f.gradient(x); }
+inline Vector<Interval> gradient(const ScalarFunction& f, const Vector<Interval>& x) { return f.gradient(x); }
+inline std::ostream& operator<<(std::ostream& os, const ScalarFunction& f) { return f.write(os); }
+
+ScalarFunction operator+(const ScalarFunction&);
+ScalarFunction operator-(const ScalarFunction&);
+ScalarFunction operator+(const ScalarFunction&, const ScalarFunction&);
+ScalarFunction operator-(const ScalarFunction&, const ScalarFunction&);
+ScalarFunction operator*(const ScalarFunction&, const ScalarFunction&);
+ScalarFunction operator/(const ScalarFunction&, const ScalarFunction&);
+ScalarFunction operator+(const ScalarFunction&, const Real&);
+ScalarFunction operator-(const ScalarFunction&, const Real&);
+ScalarFunction operator*(const ScalarFunction&, const Real&);
+ScalarFunction operator/(const ScalarFunction&, const Real&);
+ScalarFunction operator+(const Real&, const ScalarFunction&);
+ScalarFunction operator-(const Real&, const ScalarFunction&);
+ScalarFunction operator*(const Real&, const ScalarFunction&);
+ScalarFunction operator/(const Real&, const ScalarFunction&);
+
+
+//! A vector function \f$f:\R^n\rightarrow\R^m\f$.
+class VectorFunction
+{
+    typedef uint Nat;
+    typedef std::ostream OStream;
+  public:
+    static VectorFunction constant(const Vector<Real>& c, Nat as);
+    static VectorFunction identity(Nat n);
+
+    VectorFunction(Nat rs, Nat as);
+
+    ScalarFunction operator[](Nat i) const;
+    ScalarFunction& operator[](Nat i);
+
+    ScalarFunction get(Nat) const;
+    void set(Nat,ScalarFunction);
+
+    Nat result_size() const;
+    Nat argument_size() const;
+
+    Vector<Float> operator()(const Vector<Float>& x) const;
+    Vector<Interval> operator()(const Vector<Interval>& x) const;
+
+    std::ostream& write(std::ostream& os) const;
+  public:
+    friend VectorFunction join(ScalarFunction, ScalarFunction);
+    friend VectorFunction join(ScalarFunction, VectorFunction);
+    friend VectorFunction join(VectorFunction, ScalarFunction);
+    friend VectorFunction join(VectorFunction, VectorFunction);
+
+    friend VectorFunction compose(VectorFunction, VectorFunction);
+    friend Vector<Real> evaluate(VectorFunction, Vector<Real>);
+
+    friend VectorFunction operator+(VectorFunction,VectorFunction);
+    friend VectorFunction operator*(VectorFunction,ScalarFunction);
+    friend VectorFunction operator*(ScalarFunction,VectorFunction);
+  private:
+    Vector<ScalarFunction> _rep;
+};
+
+inline Vector<Float> evaluate_approx(const VectorFunction& f, const Vector<Float>& x) { return f(x); }
+inline Vector<Interval> evaluate(const VectorFunction& f, const Vector<Interval>& x) { return f(x); }
+inline Vector<Float> jacobian_approx(const VectorFunction& f, const Vector<Float>& x);
+inline Vector<Interval> jacobian(const VectorFunction& f, const Vector<Interval>& x);
+
+inline std::ostream& operator<<(std::ostream& os, const VectorFunction& f) { return f.write(os); }
+
+
+
+
+
+
 
 class ScalarExpressionFunction
     : public ScalarFunctionInterface

@@ -26,6 +26,7 @@
 
 #include "tribool.h"
 #include "numeric.h"
+#include "real.h"
 
 #include <boost/python.hpp>
 
@@ -179,6 +180,19 @@ void export_rational()
 }
 #endif
 
+void export_real()
+{
+    class_<Real> real_class("Real",init<Real>());
+    real_class.def(init<Float>());
+    real_class.def(init<Interval>());
+    real_class.def(boost::python::self_ns::str(self));
+
+    implicitly_convertible<int,Real>();
+    implicitly_convertible<Float,Real>();
+    implicitly_convertible<Interval,Real>();
+}
+
+
 void export_interval()
 {
     using boost::python::class_;
@@ -282,6 +296,7 @@ numeric_submodule()
     export_tribool();
     export_float();
     export_interval();
+    export_real();
 
 #ifdef HAVE_GMPXX_H
     export_integer();

@@ -26,6 +26,7 @@
 #include "array.h"
 #include "container.h"
 #include "numeric.h"
+#include "real.h"
 #include "vector.h"
 #include "expansion.h"
 #include "multi_index.h"
@@ -92,6 +93,22 @@ struct from_python<VectorPolynomialFunction>
         data->convertible = storage;
     }
 };
+
+template<>
+struct from_python<VectorFunction>
+{
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<VectorFunction>()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        list lst=extract<list>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage< VectorFunction >*)   data)->storage.bytes;
+        VectorFunction res(len(lst),0);
+        for(uint i=0; i!=res.result_size(); ++i) { res.set(i,ScalarFunction(extract<ScalarFunction&>(lst[i]))); }
+        new (storage) VectorFunction(res);
+        data->convertible = storage;
+    }
+};
+
 
 
 // Define to remove ambiguity
@@ -320,7 +337,6 @@ void export_monomial()
 {
     typedef ExpansionValue<X> M;
     class_< M > monomial_class(python_name<X>("Monomial"), init<MultiIndex,X>());
-    //monomial_class.def("key",(MultiIndex&(M::*)())&M::key,return_value_policy<reference_existing_object>());
     monomial_class.def("key",(const MultiIndex&(M::*)()const)&M::key,return_value_policy<copy_const_reference>());
     monomial_class.def("data",(const X&(M::*)()const) &M::data,return_value_policy<copy_const_reference>());
     monomial_class.def(self_ns::str(self));
@@ -330,9 +346,8 @@ template<class X>
 void export_polynomial()
 {
     typedef Polynomial<X> P;
-
-    //double flt;
     X real;
+
     class_< P > polynomial_class(python_name<X>("Polynomial"), init<int>());
     polynomial_class.def("constant", (P(*)(uint,double)) &P::constant);
     polynomial_class.staticmethod("constant");
@@ -381,8 +396,67 @@ void export_scalar_function_interface()
     def("evaluate",&ScalarFunctionPyWrap::evaluate<TaylorModel>);
 
     class_<ScalarExpressionFunction, bases< ScalarFunctionInterface > >
-        scalar_function_class("RealFunction", init<ScalarExpressionFunction>());
+        scalar_expression_function_class("RealFunction", init<ScalarExpressionFunction>());
+    scalar_expression_function_class.def(init<RealExpression,RealSpace>());
+}
+
+void export_scalar_function()
+{
+    class_<ScalarFunction>
+        scalar_function_class("ScalarFunction", init<ScalarFunction>());
     scalar_function_class.def(init<RealExpression,RealSpace>());
+    scalar_function_class.def(init< Polynomial<Real> >());
+    scalar_function_class.def("argument_size", &ScalarFunction::argument_size);
+    scalar_function_class.def("derivative", &ScalarFunction::derivative);
+    scalar_function_class.def("polynomial", &ScalarFunction::polynomial);
+    scalar_function_class.def("__call__", (Interval(ScalarFunction::*)(const Vector<Interval>&)const)&ScalarFunction::operator() );
+    scalar_function_class.def("__pos__", &__pos__<ScalarFunction,ScalarFunction>);
+    scalar_function_class.def("__neg__", &__neg__<ScalarFunction,ScalarFunction>);
+    scalar_function_class.def("__add__", &__add__<ScalarFunction,ScalarFunction,ScalarFunction>);
+    scalar_function_class.def("__sub__", &__sub__<ScalarFunction,ScalarFunction,ScalarFunction>);
+    scalar_function_class.def("__mul__", &__mul__<ScalarFunction,ScalarFunction,ScalarFunction>);
+    scalar_function_class.def("__div__", &__div__<ScalarFunction,ScalarFunction,ScalarFunction>);
+    scalar_function_class.def("__add__", &__add__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__sub__", &__sub__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__mul__", &__mul__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__div__", &__div__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__radd__", &__radd__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__rsub__", &__rsub__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__rmul__", &__rmul__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__rdiv__", &__rdiv__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def(self_ns::str(self));
+
+    scalar_function_class.def("constant", (ScalarFunction(*)(uint,Real)) &ScalarFunction::constant);
+    scalar_function_class.def("variable", (ScalarFunction(*)(uint,uint)) &ScalarFunction::variable);
+    scalar_function_class.staticmethod("constant");
+    scalar_function_class.staticmethod("variable");
+
+    def("evaluate_approx", (Float(*)(const ScalarFunction&,const Vector<Float>&)) &evaluate_approx);
+    def("evaluate", (Interval(*)(const ScalarFunction&,const Vector<Interval>&)) &evaluate);
+    def("gradient_approx",(Vector<Float>(*)(const ScalarFunction&,const Vector<Float>&)) &gradient_approx);
+    def("gradient",(Vector<Interval>(*)(const ScalarFunction&,const Vector<Interval>&)) &gradient);
+}
+
+void export_vector_function()
+{
+    class_<VectorFunction>
+        vector_function_class("VectorFunction", init<VectorFunction>());
+    vector_function_class.def("result_size", &VectorFunction::result_size);
+    vector_function_class.def("argument_size", &VectorFunction::argument_size);
+    vector_function_class.def("__getitem__", &VectorFunction::get);
+    vector_function_class.def("__setitem__", &VectorFunction::set);
+    vector_function_class.def("__call__", (Vector<Interval>(VectorFunction::*)(const Vector<Interval>&)const)&VectorFunction::operator() );
+    vector_function_class.def(self_ns::str(self));
+
+    vector_function_class.def("constant", (VectorFunction(*)(uint,Vector<Real>)) &VectorFunction::constant);
+    vector_function_class.def("identity", (VectorFunction(*)(uint)) &VectorFunction::identity);
+    vector_function_class.staticmethod("constant");
+    vector_function_class.staticmethod("identity");
+
+    def("evaluate_approx", (Vector<Float>(*)(const VectorFunction&,const Vector<Float>&)) &evaluate_approx);
+    def("evaluate", (Vector<Interval>(*)(const VectorFunction&,const Vector<Interval>&)) &evaluate);
+
+    from_python<VectorFunction>();
 }
 
 
@@ -511,11 +585,11 @@ void export_vector_function_interface()
     def("evaluate",(Vector<TaylorModel>(*)(const VectorFunctionInterface&,const Vector<TaylorModel>&))&evaluate);
 }
 
-void export_vector_function()
+void export_vector_of_scalar_function()
 {
     typedef Vector<ScalarFunctionInterface> VectorFunction;
 
-    class_<VectorFunction, bases< VectorFunctionInterface > > vector_function_class("VectorFunction",init<VectorFunction>());
+    class_<VectorFunction, bases< VectorFunctionInterface > > vector_function_class("VectorOfFunction",init<VectorFunction>());
     vector_function_class.def("__getitem__",(ScalarFunctionInterface const&(VectorFunction::*)(uint)const)&VectorFunction::operator[],return_value_policy<copy_const_reference>());
 
     from_python<VectorFunction>();
@@ -575,20 +649,25 @@ void function_submodule() {
     export_multi_index();
 
 
-    export_scalar_function_interface();
-    export_vector_function_interface();
+    //export_scalar_function_interface();
+    //export_vector_function_interface();
+
+    export_scalar_function();
+    export_vector_function();
 
     //export_polynomial<Float>();
     //export_polynomial<Interval>();
-    export_monomial<Interval>();
+    export_monomial<Real>();
+    export_polynomial<Real>();
+    //export_monomial<Interval>();
 
-    export_scalar_affine_function();
-    export_scalar_polynomial_function();
-    export_scalar_python_function();
+    //export_scalar_affine_function();
+    //export_scalar_polynomial_function();
+    //export_scalar_python_function();
 
-    export_vector_function();
-    export_vector_affine_function();
-    export_vector_polynomial_function();
-    export_vector_python_function();
+    //export_vector_of_scalar_function();
+    //export_vector_affine_function();
+    //export_vector_polynomial_function();
+    //export_vector_python_function();
 }
 

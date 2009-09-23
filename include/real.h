@@ -3,7 +3,7 @@
  *            real.h
  *
  *  Copyright 2009  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -21,7 +21,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file real.h
  *  \brief Real numbers which can be converted to Float or Interval.
  */
@@ -80,7 +80,7 @@ inline tribool operator<=(const Real& x, const Float& y) { return static_cast<co
 inline tribool operator> (const Real& x, const Float& y) { return static_cast<const Interval&>(x)> y; }
 inline tribool operator< (const Real& x, const Float& y) { return static_cast<const Interval&>(x)< y; }
 
-std::ostream& operator<<(std::ostream& os, const Real& x) {
+inline std::ostream& operator<<(std::ostream& os, const Real& x) {
     return os << "Real(" << x.lower() <<',' << x.upper() << ")"; }
 
 

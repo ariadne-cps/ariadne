@@ -727,13 +727,9 @@ TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y) {
     } else if(yr.lower()>=xr.upper()) {
         return y;
     } else {
-        TaylorVariable z(x.argument_size());
-        z.value()=max(x.value(),y.value());
-        z.error()=(max(xr,yr)-max(x.value(),y.value()));
-        return z;
+        return ((x+y)+abs(x-y))/2;
     }
 }
-
 
 
 
@@ -886,13 +882,24 @@ TaylorVariable abs(const TaylorVariable& x) {
     } else if(xr.upper()<=0.0) {
         return -x;
     } else {
-        TaylorVariable z(x.argument_size());
-        Float xv=x.value();
-        z.value()=(abs(xv));
-        z.error()=(abs(xr)-abs(xv));
-        return z;
+        // Use power series expansion $abs(x)=\sum_{i=0}^{7} p_i x^{2i} \pm e$ for $x\in[-1,+1]$ with
+        // p=[0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667] and e=0.035
+        // TODO: Find more accurate and stable formula
+        static const uint n=7u;
+        static const double p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
+        static const double err=0.035;
+        TaylorVariable r(x.argument_size());
+        Float xmag=mag(xr);
+        TaylorVariable s=x/xmag;
+        s=sqr(s);
+        r=p[n-1];
+        for(uint i=0; i!=(n-1); ++i) {
+            uint j=(n-2)-i;
+            r=p[j]+s*r;
+        }
+        r+=Interval(-err,+err);
+        return r*xmag;
     }
-
 }
 
 Interval _sum(const TaylorVariable& x) {

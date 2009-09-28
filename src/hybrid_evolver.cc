@@ -233,7 +233,7 @@ _evolution(EnclosureListType& final_sets,
         ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
         SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        TimeModelType initial_time_model=this->_toolbox->time_model(0.0,initial_set_model.argument_size());
+        TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
@@ -503,8 +503,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(2,"finishing_set_range = "<<finishing_set.range()<<"\n")
 
     // Set special events and times; note that the time step is scaled to [0,1]
-    TimeModelType zero_time_model = this->_toolbox->time_model(0.0,time_model.argument_size());
-    TimeModelType time_step_model = this->_toolbox->time_model(1.0,time_model.argument_size());
+    TimeModelType zero_time_model = this->_toolbox->time_model(0.0,Box(time_model.argument_size()));
+    TimeModelType time_step_model = this->_toolbox->time_model(1.0,Box(time_model.argument_size()));
     TimeModelType remaining_time_model = (maximum_hybrid_time.continuous_time-time_model)/time_step;
     ARIADNE_LOG(2,"remaining_time = "<<remaining_time_model.range()<<"\n\n")
 

@@ -1,12 +1,48 @@
-#include "../test/test.h"
+/***************************************************************************
+ *            test_misc.cc
+ *
+ *  Copyright 2008-9  Pieter Collins
+ *
+ ****************************************************************************/
 
-#include "python_hybrid_evolver.h"
-#include "taylor_set.h"
-#include "hybrid_set.h"
-#include "hybrid_automaton.h"
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <iostream>
+
+#include "test.h"
+
+#include "user_function.h"
 
 namespace Ariadne {
 
+struct Radius : ScalarFunctionData<2,0> {
+    template<class R, class A, class P>
+    static void compute(R& r, const A& x, const P& p) {
+        r = sqrt( x[0]*x[0] + x[1]*x[1] );
+    }
+};
+
+struct Henon : public VectorFunctionData<2,2,2> {
+    template<class R, class A, class P>
+    static void compute(R& r, const A& x, const P& p) {
+        r[0] = p[0] - x[0]*x[0] - p[1]*x[1];
+        r[1] = x[0];
+    }
+};
 
 } // namespace Ariadne
 
@@ -14,14 +50,19 @@ using namespace Ariadne;
 
 int main() {
 
-    DiscreteState q1(1);
-    HybridAutomaton system;
-    HybridTaylorSet initial(q1,Vector<Interval>(2, -0.125,0.125, 0,0.25));
-    HybridTime time(1.0,2);
-    PythonHybridEvolver evolver;
-    ListSet<HybridTaylorSet> final;
 
+    ScalarUserFunction<Radius> g=ScalarUserFunction<Radius>();
+    std::cout << g(Vector<Float>(2,3.0,4.0)) << "\n\n\n";
 
-    evolver.evolve(system,initial,time);
+    VectorUserFunction<Henon> h=VectorUserFunction<Henon>(Vector<Real>(2,1.5,0.375));
+    Vector<Real> x(2,3.0,4.0);
+    Vector<TaylorModel> t=TaylorModel::variables(2);
+
+    std::cout << h.evaluate(t) << "\n";
+
+    std::cout << h(Vector<Float>(x)) << "\n";
+    std::cout << h(Vector<Interval>(x)) << "\n";
+    std::cout << h.jacobian(Vector<Float>(x)) << "\n";
+    std::cout << h.jacobian(Vector<Interval>(x)) << "\n";
 
 }

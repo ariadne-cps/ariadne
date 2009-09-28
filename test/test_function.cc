@@ -51,27 +51,25 @@ void TestFunction::test()
 
 void TestFunction::test_concept()
 {
-    Vector<ScalarFunctionInterface> vsf(0);
-    FunctionElement fe(vsf,0u);
 
-    ScalarFunctionInterface* e1=0;
-    ScalarFunctionInterface* e2=0;
-    ScalarFunctionInterface* e3=0;
+    ScalarFunction sf1(3);
+    ScalarFunction sf2(3);
+    ScalarFunction sf3(3);
     //Vector<ScalarFunctionInterface> ve=join(3,*e1,*e2,*e3);
-    Vector<ScalarFunctionInterface> ve=join(3,e1,e2,e3);
 
-    shared_ptr<const VectorFunctionInterface> fp,gp;
-    ComposedFunction h(gp,fp);
+    VectorFunction vf=join(sf1,sf2);
 
-    shared_ptr<const VectorFunctionInterface> f1p,f2p;
-    JoinedFunction jf(f1p,f2p);
-    CombinedFunction cf(f1p,f2p);
+    ScalarFunction g(2);
+    ScalarFunction h=compose(g,vf);
 
-    Vector< Polynomial<Float> > p;
-    VectorPolynomialFunction pf(p);
+    VectorFunction jf=join(sf1,sf2);
+    //ScalarFunction cf=combine(sf1,sf2);
 
-    Vector<Float> b; Matrix<Float> A;
-    VectorAffineFunction aff(A,b);
+    Polynomial<Real> p;
+    ScalarFunction pf(p);
+
+    //Vector<Float> b; Matrix<Float> A;
+    //VectorAffineFunction aff(A,b);
 
 }
 

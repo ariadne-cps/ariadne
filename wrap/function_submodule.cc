@@ -63,36 +63,7 @@ struct from_python< MultiIndex >
 };
 
 
-template<>
-struct from_python< Vector<ScalarFunctionInterface> >
-{
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<ScalarFunctionInterface> >()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        list lst=extract<list>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage< Vector<ScalarFunctionInterface> >*)   data)->storage.bytes;
-        Vector<ScalarFunctionInterface> res(len(lst));
-        for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<ScalarFunctionInterface&>(lst[i])); }
-        new (storage) Vector<ScalarFunctionInterface>(res);
-        data->convertible = storage;
-    }
-};
 
-
-template<>
-struct from_python<VectorPolynomialFunction>
-{
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<VectorPolynomialFunction>()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        list lst=extract<list>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage< Vector<ScalarFunctionInterface> >*)   data)->storage.bytes;
-        VectorPolynomialFunction res(Vector< Polynomial<Interval> >(len(lst)));
-        for(uint i=0; i!=res.size(); ++i) { res.set(i,ScalarPolynomialFunction(extract<ScalarPolynomialFunction&>(lst[i]))); }
-        new (storage) Vector<ScalarFunctionInterface>(res);
-        data->convertible = storage;
-    }
-};
 
 template<>
 struct from_python<VectorFunction>
@@ -111,28 +82,6 @@ struct from_python<VectorFunction>
 
 
 
-// Define to remove ambiguity
-ScalarPolynomialFunction operator*(const ScalarPolynomialFunction& p, const Float& x) {
-    return ScalarPolynomialFunction(static_cast<const Polynomial<Interval>&>(p)*Interval(x));
-}
-
-// Define explicitly since cannot automatically wrap Vector<Polynomial<Interval> > to ScalarPolynomialFunction.
-VectorPolynomialFunction antiderivative(const VectorPolynomialFunction& p, uint k) {
-    VectorPolynomialFunction res(p.result_size(),p.argument_size());
-    for(uint i=0; i!=res.result_size(); ++i) {
-        res.set(i,antiderivative(p[i],k));
-    }
-    return res;
-}
-
-// Define explicitly since cannot automatically wrap Vector<Polynomial<Interval> > to ScalarPolynomialFunction.
-VectorPolynomialFunction derivative(const VectorPolynomialFunction& p, uint k) {
-    VectorPolynomialFunction res(p.result_size(),p.argument_size());
-    for(uint i=0; i!=res.result_size(); ++i) {
-        res.set(i,derivative(p[i],k));
-    }
-    return res;
-}
 
 template<class X, class D>
 inline Matrix<X> get_jacobian(const Vector<D>& d) {
@@ -395,9 +344,6 @@ void export_scalar_function_interface()
     def("evaluate",&ScalarFunctionPyWrap::evaluate<Interval>);
     def("evaluate",&ScalarFunctionPyWrap::evaluate<TaylorModel>);
 
-    class_<ScalarExpressionFunction, bases< ScalarFunctionInterface > >
-        scalar_expression_function_class("RealFunction", init<ScalarExpressionFunction>());
-    scalar_expression_function_class.def(init<RealExpression,RealSpace>());
 }
 
 void export_scalar_function()
@@ -470,100 +416,6 @@ void export_scalar_python_function()
 
 
 
-void export_scalar_affine_function()
-{
-    typedef ScalarAffineFunction Self;
-
-    class_<ScalarAffineFunction, bases< ScalarFunctionInterface > > scalar_affine_function_class("ScalarAffineFunction", init<Vector<Interval>, Interval> ());
-    scalar_affine_function_class.def("value",&ScalarAffineFunction::value,return_value_policy<copy_const_reference>());
-    scalar_affine_function_class.def("gradient",(Vector<Interval>(ScalarAffineFunction::*)(const Vector<Interval>&)const)&ScalarAffineFunction::gradient);
-    scalar_affine_function_class.def("__pos__", &__pos__<Self,Self>);
-    scalar_affine_function_class.def("__neg__", &__neg__<Self,Self>);
-    scalar_affine_function_class.def("__add__", &__add__<Self,Self,Self>);
-    scalar_affine_function_class.def("__sub__", &__sub__<Self,Self,Self>);
-    scalar_affine_function_class.def("__mul__", &__mul__<Self,Self,Interval>);
-    scalar_affine_function_class.def("__rmul__", &__rmul__<Self,Self,Interval>);
-    scalar_affine_function_class.def("__div__", &__div__<Self,Self,Interval>);
-
-}
-
-
-
-void export_scalar_polynomial_function()
-{
-    typedef ScalarPolynomialFunction Self;
-
-    Float flt;
-    Interval ivl;
-
-    to_python< array<ScalarPolynomialFunction> >();
-
-    implicitly_convertible< Polynomial<Interval>, ScalarPolynomialFunction>();
-
-    class_< ScalarPolynomialFunction, bases<ScalarFunctionInterface> > scalar_polynomial_function_class("ScalarPolynomialFunction", init<int>());
-    scalar_polynomial_function_class.def(init<Expression<Real>,Space<Real> >());
-    scalar_polynomial_function_class.def(init<ScalarAffineFunction>());
-    scalar_polynomial_function_class.def(init<ScalarPolynomialFunction>());
-    scalar_polynomial_function_class.def(init< Polynomial<Interval> >());
-    scalar_polynomial_function_class.def("constant", (ScalarPolynomialFunction(*)(uint,double)) &ScalarPolynomialFunction::constant);
-    scalar_polynomial_function_class.def("constant", (ScalarPolynomialFunction(*)(uint,Interval)) &ScalarPolynomialFunction::constant);
-    scalar_polynomial_function_class.def("variable", (ScalarPolynomialFunction(*)(uint,uint)) &ScalarPolynomialFunction::variable);
-    scalar_polynomial_function_class.def("variables", (array<ScalarPolynomialFunction>(*)(uint)) &ScalarPolynomialFunction::variables);
-    scalar_polynomial_function_class.staticmethod("constant");
-    scalar_polynomial_function_class.staticmethod("variable");
-    scalar_polynomial_function_class.staticmethod("variables");
-
-    scalar_polynomial_function_class.def("argument_size", &ScalarPolynomialFunction::argument_size);
-    scalar_polynomial_function_class.def("insert", &ScalarPolynomialFunction::insert);
-    scalar_polynomial_function_class.def("__iter__",boost::python::iterator<ScalarPolynomialFunction>());
-
-    //implicitly_convertible<RealExpressionPointer,PolynomialExpression>();
-
-    scalar_polynomial_function_class.def("__pos__", &__pos__<Self,Self>);
-    scalar_polynomial_function_class.def("__neg__", &__neg__<Self,Self>);
-    scalar_polynomial_function_class.def("__add__", &__add__<Self,Self,Self>);
-    scalar_polynomial_function_class.def("__sub__", &__sub__<Self,Self,Self>);
-    scalar_polynomial_function_class.def("__mul__", &__mul__<Self,Self,Self>);
-
-    scalar_polynomial_function_class.def("__add__", &__add__<Self,Self,Float>);
-    scalar_polynomial_function_class.def("__sub__", &__sub__<Self,Self,Float>);
-    scalar_polynomial_function_class.def("__mul__", &__mul__<Self,Self,Float>);
-    scalar_polynomial_function_class.def("__div__", &__div__<Self,Self,Float>);
-    scalar_polynomial_function_class.def("__radd__", &__add__<Self,Self,Float>);
-    scalar_polynomial_function_class.def("__rsub__", &__rsub__<Self,Self,Float>);
-    scalar_polynomial_function_class.def("__rmul__", &__mul__<Self,Self,Float>);
-
-    scalar_polynomial_function_class.def("__add__", &__add__<Self,Self,Interval>);
-    scalar_polynomial_function_class.def("__sub__", &__sub__<Self,Self,Interval>);
-    scalar_polynomial_function_class.def("__mul__", &__mul__<Self,Self,Interval>);
-    scalar_polynomial_function_class.def("__div__", &__div__<Self,Self,Interval>);
-    scalar_polynomial_function_class.def("__radd__", &__add__<Self,Self,Interval>);
-    scalar_polynomial_function_class.def("__rsub__", &__rsub__<Self,Self,Interval>);
-    scalar_polynomial_function_class.def("__rmul__", &__mul__<Self,Self,Interval>);
-
-    scalar_polynomial_function_class.def(self+=self);
-    scalar_polynomial_function_class.def(self-=self);
-    scalar_polynomial_function_class.def(self+=flt);
-    scalar_polynomial_function_class.def(self-=flt);
-    scalar_polynomial_function_class.def(self*=flt);
-    scalar_polynomial_function_class.def(self/=flt);
-    scalar_polynomial_function_class.def(self+=ivl);
-    scalar_polynomial_function_class.def(self-=ivl);
-    scalar_polynomial_function_class.def(self*=ivl);
-    scalar_polynomial_function_class.def(self/=ivl);
-
-    scalar_polynomial_function_class.def("derivative",(ScalarPolynomialFunction*(ScalarPolynomialFunction::*)(uint)const)&ScalarPolynomialFunction::derivative,return_value_policy<manage_new_object>());
-    scalar_polynomial_function_class.def("antiderivative",(ScalarPolynomialFunction*(ScalarPolynomialFunction::*)(uint)const)&ScalarPolynomialFunction::antiderivative,return_value_policy<manage_new_object>());
-
-
-    def("derivative",(ScalarPolynomialFunction*(ScalarPolynomialFunction::*)(uint)const)&ScalarPolynomialFunction::derivative,return_value_policy<manage_new_object>());
-    def("antiderivative",(ScalarPolynomialFunction*(ScalarPolynomialFunction::*)(uint)const)&ScalarPolynomialFunction::antiderivative,return_value_policy<manage_new_object>());
-
-    //implicitly_convertible<Polynomial<Float>,PolynomialExpression>();
-    //implicitly_convertible<Polynomial<Interval>,PolynomialExpression>();
-}
-
-
 
 
 void export_vector_function_interface()
@@ -585,61 +437,12 @@ void export_vector_function_interface()
     def("evaluate",(Vector<TaylorModel>(*)(const VectorFunctionInterface&,const Vector<TaylorModel>&))&evaluate);
 }
 
-void export_vector_of_scalar_function()
-{
-    typedef Vector<ScalarFunctionInterface> VectorFunction;
-
-    class_<VectorFunction, bases< VectorFunctionInterface > > vector_function_class("VectorOfFunction",init<VectorFunction>());
-    vector_function_class.def("__getitem__",(ScalarFunctionInterface const&(VectorFunction::*)(uint)const)&VectorFunction::operator[],return_value_policy<copy_const_reference>());
-
-    from_python<VectorFunction>();
-}
 
 void export_vector_python_function()
 {
     class_<VectorPythonFunction, bases< VectorFunctionInterface > > vector_python_function_class("VectorUserFunction", init<object>());
     vector_python_function_class.def(init<uint,uint,object>());
 }
-
-void export_vector_affine_function()
-{
-    class_<VectorAffineFunction, bases< VectorFunctionInterface > >
-        vector_affine_function_class("VectorAffineFunction", init<VectorAffineFunction>());
-    vector_affine_function_class.def(init< Matrix<Interval>, Vector<Interval> >());
-    vector_affine_function_class.def("__getitem__",(VectorAffineFunction(VectorAffineFunction::*)(uint)const)&VectorAffineFunction::operator[]);
-
-}
-
-void export_vector_polynomial_function()
-{
-    from_python< array<String> >();
-    //array_from_python_list<RealVariable>();
-
-    class_< VectorPolynomialFunction, bases<VectorFunctionInterface> >
-        vector_polynomial_function_class("VectorPolynomialFunction", init<VectorPolynomialFunction>());
-    vector_polynomial_function_class.def(init<uint,uint>());
-    vector_polynomial_function_class.def("__getitem__",(Interval const&(VectorPolynomialFunction::*)(uint)const)&VectorPolynomialFunction::operator[],return_value_policy<copy_const_reference>());
-    vector_polynomial_function_class.def("__setitem__",(void(VectorPolynomialFunction::*)(uint,const VectorPolynomialFunction&)const)&VectorPolynomialFunction::set);
-
-    vector_polynomial_function_class.def("identity", (VectorPolynomialFunction(*)(uint)) &VectorPolynomialFunction::identity);
-    vector_polynomial_function_class.staticmethod("identity");
-
-    def("compose", (ScalarPolynomialFunction(*)(const ScalarPolynomialFunction&,const VectorPolynomialFunction&)) &compose);
-    def("compose", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,const VectorPolynomialFunction&)) &compose);
-
-    def("derivative", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,uint)) &derivative);
-    def("antiderivative", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&,uint)) &antiderivative);
-
-    def("join", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&, const VectorPolynomialFunction&)) &join);
-    def("join", (VectorPolynomialFunction(*)(const VectorPolynomialFunction&, const ScalarPolynomialFunction&)) &join);
-    def("join", (VectorPolynomialFunction(*)(const ScalarPolynomialFunction&, const ScalarPolynomialFunction&)) &join);
-    def("join", (VectorPolynomialFunction(*)(const ScalarPolynomialFunction&, const VectorPolynomialFunction&)) &join);
-
-    from_python<VectorPolynomialFunction>();
-
-}
-
-
 
 
 void function_submodule() {
@@ -655,19 +458,14 @@ void function_submodule() {
     export_scalar_function();
     export_vector_function();
 
+    //export_monomial<Float>();
     //export_polynomial<Float>();
+    //export_monomial<Interval>();
     //export_polynomial<Interval>();
     export_monomial<Real>();
     export_polynomial<Real>();
-    //export_monomial<Interval>();
 
-    //export_scalar_affine_function();
-    //export_scalar_polynomial_function();
     //export_scalar_python_function();
-
-    //export_vector_of_scalar_function();
-    //export_vector_affine_function();
-    //export_vector_polynomial_function();
     //export_vector_python_function();
 }
 

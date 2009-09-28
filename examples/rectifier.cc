@@ -20,7 +20,7 @@ struct offoff_df : VectorFunctionData<3,3,5> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
+        r[1] = p[0]*2.0*pi<Float>()*p[1]*Ariadne::cos(2.0*pi<Float>()*p[1]*x[0]);
 	    r[2] = -x[2]/(p[4]*p[3]);
 //        r[2] = -x[2]/(p[4]*p[3]) - 2e-12/p[3];
     }
@@ -32,7 +32,7 @@ struct onoff_df : VectorFunctionData<3,3,5> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-    r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
+        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
 	r[2] = -x[2]/(p[4]*p[3]) + (x[1]-x[2])/(p[2]*p[3]);
 	// r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035)-2);
     }
@@ -44,7 +44,7 @@ struct offon_df : VectorFunctionData<3,3,5> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-    r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
+        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
 	r[2] = -x[2]/(p[4]*p[3]) - (x[1]+x[2])/(p[2]*p[3]);
 	// r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((-x[1]-x[2])/0.035)-2);
     }
@@ -56,7 +56,8 @@ struct onon_df : VectorFunctionData<3,3,5> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-    r[1] = p[0]*2*pi<Float>()*p[1]*Ariadne::cos(2*pi<Float>()*p[1]*x[0]);
+        std::cerr<<p[0]*2.0*pi<Real>()<<"\n";
+        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
 	r[2] = -x[2]/(p[4]*p[3]) -2*x[2]/(p[2]*p[3]);
 	//r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035) + Ariadne::exp((-x[1]-x[2])/0.035)-2);
     }

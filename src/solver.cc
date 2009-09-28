@@ -342,7 +342,7 @@ Float radius(const VectorTaylorFunction& x) {
 
 
 
-
+/*
 class DifferenceFunction
     : public VectorFunctionTemplate<DifferenceFunction>
 {
@@ -357,6 +357,7 @@ class DifferenceFunction
   private:
     boost::shared_ptr<VectorFunctionInterface> fptr;
 };
+*/
 
 
 SolverBase::SolverBase(double max_error, uint max_steps)
@@ -421,7 +422,8 @@ SolverBase::zero(const VectorFunctionInterface& f,
 Vector<Interval>
 SolverBase::fixed_point(const VectorFunctionInterface& f, const Vector<Interval>& pt) const
 {
-  return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
+    ARIADNE_NOT_IMPLEMENTED;
+    //return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
 }
 
 

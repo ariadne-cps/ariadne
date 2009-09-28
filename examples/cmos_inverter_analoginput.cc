@@ -26,8 +26,8 @@ struct nl_pt_df : VectorFunctionData<3,3,11> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3] * ((x[1]-p[1])*x[2] - x[2]*x[2]/2) + p[0]/p[3] * Ariadne::exp((-x[1]-p[1]+p[4])/p[2]);
+        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
+        r[2] = -p[5]*p[7]/p[3] * ((x[1]-p[1])*x[2] - x[2]*x[2]/2.0) + p[0]/p[3] * Ariadne::exp((-x[1]-p[1]+p[4])/p[2]);
     }
 };
 
@@ -37,8 +37,8 @@ struct ns_pt_df : VectorFunctionData<3,3,11> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3]/2 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[0]/p[3] * Ariadne::exp((-x[1]-p[1]+p[4])/p[2]);
+        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
+        r[2] = -p[5]*p[7]/p[3]/2.0 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[0]/p[3] * Ariadne::exp((-x[1]-p[1]+p[4])/p[2]);
     }
 };
 
@@ -48,8 +48,8 @@ struct nt_pl_df : VectorFunctionData<3,3,11> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
-        r[2] = -p[0]/p[3] * Ariadne::exp((x[1]-p[1])/p[2]) + p[6]*p[8]/p[3] * ((x[1]-p[4]+p[1])*(x[2]-p[4]) - (x[2]-p[4])*(x[2]-p[4])/2);
+        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
+        r[2] = -p[0]/p[3] * Ariadne::exp((x[1]-p[1])/p[2]) + p[6]*p[8]/p[3] * ((x[1]-p[4]+p[1])*(x[2]-p[4]) - (x[2]-p[4])*(x[2]-p[4])/2.0);
     }
 };
 
@@ -59,8 +59,8 @@ struct nt_ps_df : VectorFunctionData<3,3,11> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
-        r[2] = -p[0]/p[3] * Ariadne::exp((x[1]-p[1])/p[2]) + p[6]*p[8]/p[3]/2 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
+        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
+        r[2] = -p[0]/p[3] * Ariadne::exp((x[1]-p[1])/p[2]) + p[6]*p[8]/p[3]/2.0 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
     }
 };
 
@@ -70,8 +70,8 @@ struct nl_ps_df : VectorFunctionData<3,3,11> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3] * ((x[1]-p[1])*x[2] - x[2]*x[2]/2) + p[6]*p[8]/p[3]/2 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
+        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
+        r[2] = -p[5]*p[7]/p[3] * ((x[1]-p[1])*x[2] - x[2]*x[2]/2.0) + p[6]*p[8]/p[3]/2.0 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
     }
 };
 
@@ -81,8 +81,8 @@ struct ns_pl_df : VectorFunctionData<3,3,11> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3]/2 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[6]*p[8]/p[3] * ((x[1]-p[4]+p[1])*(x[2]-p[4]) - (x[2]-p[4])*(x[2]-p[4])/2);
+        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
+        r[2] = -p[5]*p[7]/p[3]/2.0 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[6]*p[8]/p[3] * ((x[1]-p[4]+p[1])*(x[2]-p[4]) - (x[2]-p[4])*(x[2]-p[4])/2.0);
     }
 };
 
@@ -92,8 +92,8 @@ struct ns_ps_df : VectorFunctionData<3,3,11> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[4]*2*pi<Float>()*p[10]*Ariadne::cos(2*pi<Float>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3]/2 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[6]*p[8]/p[3]/2 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
+        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
+        r[2] = -p[5]*p[7]/p[3]/2.0 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[6]*p[8]/p[3]/2.0 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
     }
 };
 

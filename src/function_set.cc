@@ -29,8 +29,55 @@
 namespace Ariadne {
 
 
+//! \brief A scaling function \f$x_i' = o_i+l_ix_i\f$.
+class VectorScalingFunction
+    : public VectorFunctionInterface
+{
+  public:
+    //! \brief The scaling function \f$x_i' = o_i+l_ix_i\f$.
+    explicit VectorScalingFunction() : _o(), _l() { }
+    explicit VectorScalingFunction(const Vector<Float>& origin,
+                             const Vector<Float>& lengths)
+        : _o(origin), _l(lengths) { ARIADNE_ASSERT(origin.size()==lengths.size()); }
+    //! \brief The scaling function which takes the unit interval \f$[-1,+1]^n\f$ into \a range.
+    explicit VectorScalingFunction(const Vector<Interval>& range)
+        : _o(midpoint(range)), _l(range.size()) { for(uint i=0; i!=_l.size(); ++i) { _l[i]=range[i].radius(); } }
+    const Vector<Float>& origin() const { return _o; }
+    const Vector<Float>& lengths() const { return _l; }
+    VectorScalingFunction* clone() const { return new VectorScalingFunction(*this); }
+    SizeType result_size() const { return _l.size(); }
+    SizeType argument_size() const { return _l.size(); }
+    SmoothnessType smoothness() const { return SMOOTH; }
+    Vector<Float> evaluate(const Vector<Float>& x) const {
+        Vector<Float> r(this->result_size()); _compute_approx(r,x); return r; }
+    Vector<Interval> evaluate(const Vector<Interval>& x) const {
+        Vector<Interval> r(this->result_size()); _compute(r,x); return r; }
+    Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
+        Vector<TaylorModel> r(this->result_size(),TaylorModel(x[0].argument_size(),x[0].accuracy_ptr()));
+        _compute(r,x); return r; }
+    Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        Vector< Differential<Float> > r(this->result_size(),Differential<Float>(x[0].argument_size(),x[0].degree()));
+        _compute_approx(r,x); return r; }
+    Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const { 
+        Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
+        _compute_approx(r,x); return r; }
+    Matrix<Float> jacobian(const Vector<Float>& x) const { ARIADNE_NOT_IMPLEMENTED; }
+    Matrix<Interval> jacobian(const Vector<Interval>& x) const { ARIADNE_NOT_IMPLEMENTED; }
+    std::ostream& write(std::ostream& os) const {
+        return os << "VectorScalingFunction( o=" << this->origin() << ", l=" << this->lengths() << " )"; }
+  private:
+    template<class R, class A> void _compute(R& r, const A& x) const {
+        for(uint i=0; i!=result_size(); ++i) { r[i]=_o[i]+_l[i]*x[i]; } }
+    template<class R, class A> void _compute_approx(R& r, const A& x) const {
+        for(uint i=0; i!=result_size(); ++i) { r[i]=_o[i]+_l[i]*x[i]; } }
+  private:
+    Vector<Float> _o;
+    Vector<Float> _l;
+};
+
+
 ImageSet::ImageSet()
-    : _domain(), _function_ptr(new IdentityFunction(0))
+    : _domain(), _function_ptr(new VectorScalingFunction())
 {
 }
 

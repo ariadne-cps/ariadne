@@ -31,9 +31,11 @@
 #include "taylor_model.h"
 #include "taylor_function.h"
 #include "function.h"
+#include "models.h"
 #include "polynomial.h"
 
 #include "test.h"
+
 using namespace std;
 using namespace Ariadne;
 
@@ -42,19 +44,9 @@ Expansion<Float> v(uint n, uint j) { return Expansion<Float>::variable(n,j); }
 Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 ScalarTaylorFunction t(Vector<Interval> d, uint j) { return ScalarTaylorFunction::variable(d,j); }
 
-
-struct Henon : public VectorFunctionData<2,2,2> {
-    template<class R, class A, class P>
-    static void compute(R& r, const A& x, const P& p)
-    {
-        r[0]=-(x[0]*x[0])+p[0]-p[1]*x[1];
-        r[1]=x[0];
-    }
-};
-typedef VectorUserFunction<Henon> HenonFunction;
-
 namespace Ariadne {
 std::pair<Float, Vector<Interval> > flow_bounds(VectorFunctionInterface const&,Vector<Interval> const&,Float const&);
+typedef VectorUserFunction<Henon> HenonFunction;
 }
 
 
@@ -263,7 +255,7 @@ void TestVectorTaylorFunction::test_constructors()
     expansion[1]=Expansion<Float>(2,2, 0,0,0.750, 1,0,0.50);
 
     Vector<Interval> domain(2,0.25,1.25,0.5,1.0);
-    HenonFunction henon_function(Vector<Float>(2,1.5,-0.25));
+    HenonFunction henon_function(Vector<Float>(2,1.5,0.25));
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,henon_model,(domain,henon_function));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])

@@ -56,7 +56,7 @@ outer_approximation(const EnclosureListType& hls,
 // Definition of the nonlinear dynamics for locations Opening and Closing
 // the parameters are a and T
 //
-struct ZeroSaturated : FunctionData<5,5,4> {
+struct ZeroSaturated : VectorFunctionData<5,5,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
@@ -67,7 +67,7 @@ struct ZeroSaturated : FunctionData<5,5,4> {
     }
 };
 
-struct NotSaturated : FunctionData<5,5,4> {
+struct NotSaturated : VectorFunctionData<5,5,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
@@ -78,7 +78,7 @@ struct NotSaturated : FunctionData<5,5,4> {
     }
 };
 
-struct OneSaturated : FunctionData<5,5,4> {
+struct OneSaturated : VectorFunctionData<5,5,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
@@ -142,9 +142,9 @@ int main(int argc,char *argv[])
     DiscreteEvent e32(32);
   
     /// Create the dynamics
-    Function<ZeroSaturated> dynamic1(system_parameters);
-    Function<NotSaturated> dynamic2(system_parameters);
-    Function<OneSaturated> dynamic3(system_parameters);
+    VectorUserFunction<ZeroSaturated> dynamic1(system_parameters);
+    VectorUserFunction<NotSaturated> dynamic2(system_parameters);
+    VectorUserFunction<OneSaturated> dynamic3(system_parameters);
     
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;

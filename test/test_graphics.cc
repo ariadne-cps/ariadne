@@ -34,6 +34,8 @@
 #include "function_set.h"
 #include "grid_set.h"
 
+#include "user_function.h"
+
 using namespace Ariadne;
 
 

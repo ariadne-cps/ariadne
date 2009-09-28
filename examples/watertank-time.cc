@@ -38,7 +38,7 @@ int main()
     double Delta = 0.05;
     double hmax = 5.70;
     double tmax = 20.0;
-    double dmax = 1.0;
+    double dmax = 15.0;
     
     double A1[9]={a,b,0,
                   0,0,0,
@@ -172,7 +172,7 @@ int main()
     Box bounding_box(3, -0.1,9.1, -0.1,1.1, -0.1,tmax+0.1);
   
     HybridTime evolution_time(tmax,dmax);
-  
+/*  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -187,7 +187,7 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;
     g.write("watertank-time-orbit");
-/*
+
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
@@ -195,7 +195,7 @@ int main()
     std::cout << "Orbit="<<reach<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-
+*/
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
@@ -224,6 +224,6 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << lower_reach_set;
     g.write("watertank-time-lower");
-*/
+
 
 }

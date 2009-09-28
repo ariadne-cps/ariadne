@@ -65,7 +65,7 @@ class Vector
     Vector()
         : ublas::vector<X>() { }
     //! \brief Construct a vector of size \a n, with elements initialised to zero.
-    Vector(size_t n)
+    explicit Vector(size_t n)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     Vector(size_t n, const X& t)
@@ -76,7 +76,7 @@ class Vector
     //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
     Vector(size_t n, const double& t0, const double& t1, ...);
     //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
-    Vector(const std::string& str)
+    explicit Vector(const std::string& str)
         : ublas::vector<X>() { std::stringstream ss(str); ss >> *this; }
     //! \brief Copy constructor allows conversion from a vector using another numerical type.
     template<class XX> Vector(const Vector<XX>& v)

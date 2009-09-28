@@ -29,7 +29,7 @@
 #define ARIADNE_MODELS_H
 
 
-#include "function.h"
+#include "user_function.h"
 #include "hybrid_automaton.h"
 
 namespace Ariadne {

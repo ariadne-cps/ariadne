@@ -33,25 +33,24 @@ using std::string;
 #include <boost/progress.hpp>
 
 #include "numeric.h"
+#include "real.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "taylor_calculus.h"
-#include "function.h"
+#include "user_function.h"
 #include "box.h"
 
 namespace Ariadne {
 
-typedef Polynomial<Float> FloatPolynomial;
-typedef Vector<Float> FloatVector;
+typedef Vector<Real> RealVector;
 typedef Vector<Interval> IntervalVector;
-typedef Vector< Polynomial<Float> > FloatPolynomialVec;
 
-FloatPolynomial p(int as, int j) { return FloatPolynomial::variable(as,j); }
-FloatVector e(int rs, int i) { return FloatVector::unit(rs,i); }
+ScalarFunction f(uint as, uint j) { return ScalarFunction::variable(as,j); }
+RealVector e(int rs, int i) { return RealVector::unit(rs,i); }
 
-FloatPolynomial x=p(2,0); FloatPolynomial y=p(2,1);
-FloatPolynomial x0=p(3,0); FloatPolynomial y0=p(3,1); FloatPolynomial t=p(3,2);
-FloatVector e0=e(2,0); FloatVector e1=e(2,1);
+ScalarFunction x=f(2,0); ScalarFunction y=f(2,1);
+ScalarFunction x0=f(3,0); ScalarFunction y0=f(3,1); ScalarFunction t=f(3,2);
+RealVector e0=e(2,0); RealVector e1=e(2,1);
 
 
 struct ProfileReset {
@@ -137,6 +136,10 @@ struct ForcedVanDerPol : VectorFunctionData<3,3,3> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
         r[0]=x[1];
+        std::cerr<<p[0]*x[0]<<"\n";
+        std::cerr<<(1.0-x[0]*x[0])<<"\n";
+        std::cerr<<(1.0-x[0]*x[0])*x[1]-x[0]<<"\n";
+        std::cerr<<sin(p[2]*x[2])<<"\n";
         r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
         r[2]=1.0;
     }
@@ -150,28 +153,36 @@ int main(int argc, const char* argv[]) {
     double maximum_domain_extent=128;
 
     double a=1.5; double b=0.375;
-    ScalarPolynomialFunction x=ScalarPolynomialFunction::variable(2,0);
-    ScalarPolynomialFunction y=ScalarPolynomialFunction::variable(2,1);
-    VectorPolynomialFunction henon_map ( (a+x*x+b*y)*e0+x*e1 );
+    ScalarFunction x=ScalarFunction::variable(2,0);
+    ScalarFunction y=ScalarFunction::variable(2,1);
+    VectorFunction henon_map ( (a+x*x+b*y)*e0+x*e1 );
     TaylorSet henon_initial_set = Box(2, 0.875,1.125, 0.125,0.250);
 
     a=-0.25; b=0.75; double c=1.0;
-    VectorPolynomialFunction spiral_vector_field = (c+a*x-b*y)*e0+(b*x+a*y)*e1;
+    VectorFunction spiral_vector_field = (c+a*x-b*y)*e0+(b*x+a*y)*e1;
     IntervalVector spiral_domain = Box(2, 1.25,1.5, 0.5,0.75);
     Float spiral_step_size; IntervalVector spiral_bounding_box;
     make_lpair(spiral_step_size,spiral_bounding_box) =
         TaylorCalculus().flow_bounds(spiral_vector_field,spiral_domain,maximum_step_size,maximum_domain_extent);
 
     Float g=9.8;
-    VectorPolynomialFunction ball_vector_field =  y*e0 - (g + 0.0*x)*e1 ;
-    VectorPolynomialFunction ball_flow = FloatPolynomialVec( (x0+0.5*y0*t)*t*e0 + (y0-g*t)*e1 );
+    VectorFunction c1=y*e0;
+    ScalarFunction c2=(g+0.0*x);
+    VectorFunction c3=c2*e1;
+    VectorFunction c4=c1+c3;
+    VectorFunction c5=(g+0.0*x)*e1;
+    VectorFunction c6=y*e0+(g+0.0*x)*e1;
+    VectorFunction c7=y*e0-(g+0.0*x)*e1;
+    //VectorFunction ball_vector_field(2,2);
+    //VectorFunction ball_flow(2,3);
+    VectorFunction ball_vector_field =  y*e0 - (g + 0.0*x)*e1 ;
+    VectorFunction ball_flow = (ScalarFunction(x0+(0.5*y0)*t)*t)*e0 + (y0-g*t)*e1 ;
     IntervalVector ball_domain = Box(2, 1.25,1.75, 0.5,0.5);
     Float ball_step_size; IntervalVector ball_bounding_box;
     make_lpair(ball_step_size,ball_bounding_box) =
         TaylorCalculus().flow_bounds(ball_vector_field,ball_domain,maximum_step_size,maximum_domain_extent);
 
     VectorTaylorFunction ball_flow_model(join(ball_domain,Interval(0,5.0)),ball_flow);
-
 
 
     double mu=0.5; a=1.0; double omega=1.0;

@@ -57,10 +57,6 @@ VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, int start, int
     return VectorTaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
 }
 
-ScalarPolynomialFunction polynomial(const ScalarTaylorFunction& te) {
-    return te.polynomial();
-}
-
 
 template<>
 struct from_python<MultiIndex> {
@@ -325,7 +321,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("__call__", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
-    scalar_taylor_function_class.def("polynomial", (ScalarPolynomialFunction(*)(const ScalarTaylorFunction&)) &polynomial);
+    //scalar_taylor_function_class.def("polynomial", (ScalarPolynomialFunction(*)(const ScalarTaylorFunction&)) &polynomial);
     scalar_taylor_function_class.def("set", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint j, const Interval&)) &partial_evaluate);
     scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Vector<Interval>&)) &restrict);
     scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &restrict);

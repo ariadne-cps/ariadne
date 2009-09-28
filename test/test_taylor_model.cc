@@ -24,6 +24,7 @@
 #include <iostream>
 #include <iomanip>
 #include "numeric.h"
+#include "real.h"
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
@@ -305,8 +306,6 @@ void TestTaylorModel::test_implicit()
         TaylorModel f2=4+tm(2,0)-(sqr(tm(2,1)+2));
         TaylorModel i2=tm(1,0);
         TaylorModel h2=implicit(f2);
-        ARIADNE_TEST_PRINT(f2);
-        ARIADNE_TEST_PRINT(h2);
         ARIADNE_TEST_BINARY_PREDICATE(operator<,mag(compose(f2,join(i2,h2)).range()),1e-6);
     }
 

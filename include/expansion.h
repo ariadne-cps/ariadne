@@ -288,7 +288,7 @@ class Expansion
 
     unsigned int argument_size() const { return this->_argument_size; }
     unsigned int number_of_nonzeros() const { return _coefficients.size()/_element_size(); }
-    unsigned int degree() const { return (--this->end())->key().degree(); }
+    unsigned int degree() const { if(this->empty()) { return 0u; } return (--this->end())->key().degree(); }
     const std::vector<word_type>& coefficients() const { return this->_coefficients; }
 
     bool empty() const { return this->_coefficients.empty(); }

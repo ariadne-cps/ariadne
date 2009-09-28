@@ -10,7 +10,7 @@ bin_PROGRAMS=tutorial \
              watertank-nonlinear watertank-time \
              sinusoid-sin 3bouncingballs \
              rectifier springs cmos_inverter_analoginput \
-             rectifier_oneloc grid-refinement \
+             rectifier_oneloc grid-refinement multipleguards\
 			 \
 			 watertank-new bouncingball-new \
 			 \
@@ -31,11 +31,13 @@ springs_SOURCES=springs.cc
 cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc
 rectifier_oneloc_SOURCES=rectifier_oneloc.cc
 grid_refinement_SOURCES=grid-refinement.cc
+multipleguards_SOURCES=multipleguards.cc
 
 bouncingball_new_SOURCES=bouncingball-new.cc
 watertank_new_SOURCES=watertank-new.cc
 
 coconut_demo_SOURCES=coconut-demo.cc system.cc coconut-demo.h system.h
+
 
 examples: $(bin_PROGRAMS)
 

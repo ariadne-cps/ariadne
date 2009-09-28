@@ -34,6 +34,7 @@
 #include <cmath>
 #include <limits>
 #include <stdint.h>
+#include <cstdlib>
 
 #include "tribool.h"
 #include "rounding.h"

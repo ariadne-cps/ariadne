@@ -236,14 +236,14 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(3, 1.00,1.00, 1.0,1.0, 0.0,0.0);
+    Box initial_box(3, 1.00001,1.00001, 1.00001,1.00001, 0.00001,0.00001);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
 
     HybridTime evolution_time(tmax,jmax);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
@@ -252,47 +252,36 @@ int main()
     plot("watertank-nonlinear-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("watertank-nonlinear-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("watertank-nonlinear-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
-    textplot("watertank-nonlinear-orbit", orbit);
-    textplot("watertank-nonlinear-final", orbit.final());
-
-/*
-    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
-    EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
-    std::cout << "done." << std::endl;
-
-    std::cout << "Orbit="<<reach<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-nonlinear-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
+    // textplot("watertank-nonlinear-orbit", orbit);
+    // textplot("watertank-nonlinear-final", orbit.final());
 
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().grid_lengths = 0.05;
+    analyser.verbosity=5;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
     initial_set[l2]=initial_box;
 
-    HybridTime reach_time(64.0,2);
-
-    plot("watertank-nonlinear-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
+    HybridTime reach_time(64.0,6);
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
     std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
+    HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-nonlinear-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
-
+    plot("watertank-nonlinear-lower_reach1", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), lower_reach_set, -1);
+/*
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
     std::cout << "Computing upper reach set... " << std::flush;
-    HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set,reach_time);
+    HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-nonlinear-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
+    plot("watertank-nonlinear-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), upper_reach_set);
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 

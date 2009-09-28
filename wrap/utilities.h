@@ -43,6 +43,7 @@
 #include "container.h"
 #include "numeric.h"
 #include "vector.h"
+#include "real.h"
 
 namespace Ariadne {
 

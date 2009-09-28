@@ -28,7 +28,7 @@
 
 #include "stlio.h"
 #include "formula.h"
-#include "function_interface.h"
+#include "function.h"
 #include "hybrid_time.h"
 #include "hybrid_system.h"
 #include "grid.h"

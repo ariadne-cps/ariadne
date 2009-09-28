@@ -33,7 +33,7 @@
 #include "polynomial.h"
 #include "differential.h"
 
-#include "function_interface.h"
+#include "function.h"
 #include "taylor_function.h"
 
 namespace Ariadne {
@@ -86,7 +86,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const ExpansionT
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const ScalarFunctionInterface& f)
+ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const ScalarFunction& f)
     : _domain(d), _model(f.argument_size())
 {
     ARIADNE_ASSERT(d.size()==f.argument_size());
@@ -377,7 +377,7 @@ midpoint(const ScalarTaylorFunction& f)
 
 
 ScalarTaylorFunction
-compose(const ScalarFunctionInterface& f, const Vector<ScalarTaylorFunction>& g)
+compose(const ScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 {
     ARIADNE_ASSERT(f.argument_size()==g.size());
     for(uint i=0; i!=g.size(); ++i) {
@@ -445,10 +445,10 @@ ScalarTaylorFunction implicit(const ScalarTaylorFunction& f) {
 }
 
 
-TaylorModel implicit(const ScalarFunctionInterface& f, const Vector<TaylorModel>& g);
+TaylorModel implicit(const ScalarFunction& f, const Vector<TaylorModel>& g);
 
 ScalarTaylorFunction
-implicit(const ScalarFunctionInterface& f, const Vector<ScalarTaylorFunction>& g)
+implicit(const ScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 {
     ARIADNE_ASSERT(f.argument_size()>g.size());
     ARIADNE_ASSERT(g.size()>0);
@@ -466,7 +466,7 @@ implicit(const ScalarFunctionInterface& f, const Vector<ScalarTaylorFunction>& g
 }
 
 ScalarTaylorFunction
-implicit(const ScalarFunctionInterface& f, const Vector<Interval>& d)
+implicit(const ScalarFunction& f, const Vector<Interval>& d)
 {
     ARIADNE_ASSERT(f.argument_size()>=1u);
     ARIADNE_ASSERT(d.size()+1u==f.argument_size());
@@ -478,7 +478,7 @@ implicit(const ScalarFunctionInterface& f, const Vector<Interval>& d)
 
 
 ScalarTaylorFunction
-crossing_time(const ScalarFunctionInterface& g, const VectorTaylorFunction& phi)
+crossing_time(const ScalarFunction& g, const VectorTaylorFunction& phi)
 {
     Vector<Interval> d=project(phi.domain(),range(0,phi.result_size()));
     Interval h=phi.domain()[phi.result_size()];
@@ -632,7 +632,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const VectorFunctionInterface& f)
+                               const VectorFunction& f)
     : _domain(d), _models(f.result_size())
 {
     ARIADNE_ASSERT(f.result_size()>0);
@@ -642,7 +642,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const VectorFunctionInterface& f,
+                               const VectorFunction& f,
                                const shared_ptr<TaylorModel::Accuracy> accuracy_ptr)
     : _domain(d), _models(f.result_size())
 {
@@ -1193,13 +1193,13 @@ partial_evaluate(const VectorTaylorFunction& tf, uint k, const Interval& c)
 
 
 ScalarTaylorFunction
-compose(const ScalarFunctionInterface& g, const VectorTaylorFunction& f)
+compose(const ScalarFunction& g, const VectorTaylorFunction& f)
 {
     return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
 
 VectorTaylorFunction
-compose(const VectorFunctionInterface& g, const VectorTaylorFunction& f)
+compose(const VectorFunction& g, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
@@ -1247,7 +1247,7 @@ antiderivative(const VectorTaylorFunction& f, uint k)
 }
 
 ScalarTaylorFunction
-implicit(const ScalarFunctionInterface& f, const VectorTaylorFunction& g)
+implicit(const ScalarFunction& f, const VectorTaylorFunction& g)
 {
     return ScalarTaylorFunction(g.domain(),implicit(f,g.models()));
 }
@@ -1264,7 +1264,7 @@ implicit(const VectorTaylorFunction& f)
 }
 
 VectorTaylorFunction
-flow(const VectorFunctionInterface& vf, const Vector<Interval>& d, const Float& h, const uint o)
+flow(const VectorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
 {
     VectorTaylorFunction phi0=embed(VectorTaylorFunction::identity(d),Vector<Interval>(1u,Interval(-h,+h)));
     VectorTaylorFunction phi=phi0;

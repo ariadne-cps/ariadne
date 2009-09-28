@@ -28,7 +28,7 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "differential.h"
-#include "function_interface.h"
+#include "function.h"
 
 #include "geometry.h"
 #include "taylor_model.h"
@@ -52,7 +52,7 @@ TaylorSet::TaylorSet(uint d, uint ng)
 }
 
 
-TaylorSet::TaylorSet(const VectorFunctionInterface& f, const Vector<Interval>& d)
+TaylorSet::TaylorSet(const VectorFunction& f, const Vector<Interval>& d)
     : _models(f.result_size())
 {
     Vector<TaylorModel> x=TaylorModel::scalings(d);
@@ -266,12 +266,12 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 }
 
 
-TaylorModel apply(const ScalarFunctionInterface& f, const TaylorSet& ts)
+TaylorModel apply(const ScalarFunction& f, const TaylorSet& ts)
 {
     return f.evaluate(ts.models());
 }
 
-TaylorSet apply(const VectorFunctionInterface& f, const TaylorSet& ts)
+TaylorSet apply(const VectorFunction& f, const TaylorSet& ts)
 {
     return f.evaluate(ts.models());
 }

@@ -45,7 +45,7 @@ Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 ScalarTaylorFunction t(Vector<Interval> d, uint j) { return ScalarTaylorFunction::variable(d,j); }
 
 namespace Ariadne {
-std::pair<Float, Vector<Interval> > flow_bounds(VectorFunctionInterface const&,Vector<Interval> const&,Float const&);
+std::pair<Float, Vector<Interval> > flow_bounds(VectorFunction const&,Vector<Interval> const&,Float const&);
 typedef VectorUserFunction<Henon> HenonFunction;
 }
 

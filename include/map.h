@@ -30,13 +30,13 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "function_interface.h"
+#include "function.h"
 #include "set_interface.h"
 #include "grid.h"
 
 namespace Ariadne {  
 
-class VectorFunctionInterface;
+class VectorFunction;
 
 /*! \brief An iterated function system in Euclidean space.
  */
@@ -50,12 +50,11 @@ class IteratedMap
     //! \brief The type used to describe the state space. 
     typedef EuclideanSpace StateSpaceType;
   public:
-    IteratedMap(const VectorFunctionInterface& f) : _function_ptr(f.clone()) { }
-    IteratedMap(const boost::shared_ptr<VectorFunctionInterface>& fptr) : _function_ptr(fptr) { }
-    const VectorFunctionInterface& function() const { return *_function_ptr; }
-    Grid grid() const { return Grid(_function_ptr->argument_size()); }
+    IteratedMap(const VectorFunction& f) : _function(f) { }
+    const VectorFunction& function() const { return _function; }
+    Grid grid() const { return Grid(_function.argument_size()); }
   private:
-    boost::shared_ptr<VectorFunctionInterface> _function_ptr;
+    VectorFunction _function;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IteratedMap& vf) {

@@ -55,7 +55,7 @@ void TestFunction::test_concept()
     ScalarFunction sf1(3);
     ScalarFunction sf2(3);
     ScalarFunction sf3(3);
-    //Vector<ScalarFunctionInterface> ve=join(3,*e1,*e2,*e3);
+    //Vector<ScalarFunction> ve=join(3,*e1,*e2,*e3);
 
     VectorFunction vf=join(sf1,sf2);
 

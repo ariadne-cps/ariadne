@@ -42,8 +42,8 @@ class Interval;
 template<class X> class Vector;
 template<class X> class Matrix;
 
-class ScalarFunctionInterface;
-class VectorFunctionInterface;
+class ScalarFunction;
+class VectorFunction;
 class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
@@ -69,7 +69,7 @@ class TaylorSet
     //! \brief Construct the origin in dimension \a d with \a ng generators.
     TaylorSet(uint d=0, uint ng=0);
     //! \brief Construct the image of the box \a d under the function \a f.
-    TaylorSet(const VectorFunctionInterface& f, const Vector<Interval>& d);
+    TaylorSet(const VectorFunction& f, const Vector<Interval>& d);
     //! \brief Construct from a list of models giving set as the image of a unit box.
     TaylorSet(const Vector<TaylorModel>& tv);
     //! \brief The box \a bx.
@@ -156,7 +156,7 @@ class TaylorSet
     ListSet<TaylorSet> subdivide(Float rad) const;
 
     //! \brief Compute an over-approximation to the image under a function.
-    friend TaylorSet apply(const VectorFunctionInterface& f, const TaylorSet& s);
+    friend TaylorSet apply(const VectorFunction& f, const TaylorSet& s);
     //! \brief Compute an over-approximation to the image under a Taylor function approximation.
     friend TaylorSet apply(const VectorTaylorFunction& f, const TaylorSet& s);
   private:
@@ -165,8 +165,8 @@ class TaylorSet
 
 TaylorModel apply(const ScalarTaylorFunction& f, const TaylorSet& s);
 TaylorSet apply(const VectorTaylorFunction& f, const TaylorSet& s);
-TaylorModel apply(const ScalarFunctionInterface& f, const TaylorSet& s);
-TaylorSet apply(const VectorFunctionInterface& f, const TaylorSet& s);
+TaylorModel apply(const ScalarFunction& f, const TaylorSet& s);
+TaylorSet apply(const VectorFunction& f, const TaylorSet& s);
 
 TaylorModel unchecked_apply(const ScalarTaylorFunction& f, const TaylorSet& s);
 TaylorSet unchecked_apply(const VectorTaylorFunction& f, const TaylorSet& s);

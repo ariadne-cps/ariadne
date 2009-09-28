@@ -77,20 +77,20 @@ class VectorScalingFunction
 
 
 ImageSet::ImageSet()
-    : _domain(), _function_ptr(new VectorScalingFunction())
+    : _domain(), _function(new VectorScalingFunction())
 {
 }
 
 ImageSet::ImageSet(const Vector<Interval>& dom)
     //  : _domain(dom), _function_ptr(new IdentityFunction(dom.size()))
     : _domain(Vector<Interval>(dom.size(),Interval(-1,1))),
-      _function_ptr(new VectorScalingFunction(dom))
+      _function(new VectorScalingFunction(dom))
 {
 }
 
 
-ImageSet::ImageSet(const Vector<Interval>& dom, const VectorFunctionInterface& fn)
-    : _domain(dom), _function_ptr(fn.clone())
+ImageSet::ImageSet(const Vector<Interval>& dom, const VectorFunction& fn)
+    : _domain(dom), _function(fn)
 {
     ARIADNE_ASSERT(dom.size()==fn.argument_size());
 }
@@ -106,7 +106,7 @@ ImageSet::clone() const
 uint
 ImageSet::dimension() const
 {
-    return this->_function_ptr->result_size();
+    return this->_function.result_size();
 }
 
 
@@ -120,13 +120,11 @@ ImageSet::empty() const
 tribool
 ImageSet::disjoint(const Box& bx) const
 {
-    if(dynamic_cast<const IdentityFunction*>(&*this->_function_ptr)) {
-        return Ariadne::disjoint(bx,this->_domain);
-    } else if(dynamic_cast<const VectorScalingFunction*>(&*this->_function_ptr)) {
-        return Ariadne::disjoint(bx,this->_function_ptr->evaluate(this->_domain));
+    if(dynamic_cast<const VectorScalingFunction*>(this->_function.pointer())) {
+        return Ariadne::disjoint(bx,this->_function.evaluate(this->_domain));
     } else {
         static const int MAX_SUBDIVISIONS=8;
-        return Ariadne::disjoint(this->domain(),*this->_function_ptr,bx,radius(bx)/MAX_SUBDIVISIONS);
+        return Ariadne::disjoint(this->domain(),this->_function,bx,radius(bx)/MAX_SUBDIVISIONS);
     }
 }
 
@@ -135,7 +133,7 @@ tribool
 ImageSet::overlaps(const Box& bx) const
 {
     static const int MAX_SUBDIVISIONS=8;
-    return !Ariadne::disjoint(this->domain(),*this->_function_ptr,bx,radius(bx)/MAX_SUBDIVISIONS);
+    return !Ariadne::disjoint(this->domain(),this->_function,bx,radius(bx)/MAX_SUBDIVISIONS);
 }
 
 
@@ -153,7 +151,7 @@ ImageSet::inside(const Box& bx) const
 Box
 ImageSet::bounding_box() const
 {
-    return this->_function_ptr->evaluate(this->_domain);
+    return this->_function.evaluate(this->_domain);
 }
 
 
@@ -174,8 +172,8 @@ ImageSet::write(std::ostream& os) const
 
 
 
-ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const VectorFunctionInterface& fn)
-    : _codomain(codom), _function_ptr(fn.clone())
+ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const VectorFunction& fn)
+    : _codomain(codom), _function(fn)
 {
     ARIADNE_ASSERT(codom.size()==fn.result_size());
 }
@@ -190,7 +188,7 @@ ConstraintSet::clone() const
 uint
 ConstraintSet::dimension() const
 {
-    return this->_function_ptr->argument_size();
+    return this->_function.argument_size();
 }
 
 

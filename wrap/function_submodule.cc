@@ -96,62 +96,6 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
 }
 
 
-template<class T> T evaluate(const ScalarFunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
-template<class T> Vector<T> evaluate(const VectorFunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
-
-
-// RATIONALE:
-// Don't use standard method for wrapping abstract base classes, as this doesn't work well with
-// shared_ptr<>. Instead, write static functions calling the overridden functions without using inheritence
-class ScalarFunctionPyWrap {
-  public:
-    static ScalarFunctionInterface* clone(const ScalarFunctionInterface& f) { return f.clone(); };
-    static uint argument_size(const ScalarFunctionInterface& f) { return f.argument_size(); }
-    static ushort smoothness(const ScalarFunctionInterface& f) { return f.smoothness(); }
-    template<class T> static T evaluate(const ScalarFunctionInterface& f, const Vector<T>& x) { return f.evaluate(x); }
-};
-
-/*
-class ScalarFunctionPyWrap
-    : public ScalarFunctionInterface
-    , public wrapper< ScalarFunctionInterface >
-{
-    virtual ScalarFunctionInterface* clone() const { return this->get_override("clone")(); };
-    virtual uint argument_size() const { return this->get_override("argument_size")(); }
-    virtual ushort smoothness() const { return this->get_override("smoothness")(); }
-    virtual Float evaluate(const Vector<Float>&) const { return this->get_override("__call__")(); }
-    virtual Interval evaluate(const Vector<Interval>&) const { return this->get_override("__call__")(); }
-    virtual TaylorModel evaluate(const Vector<TaylorModel>&) const { return this->get_override("__call__")(); }
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >&) const { return this->get_override("__call__")(); }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >&) const { return this->get_override("__call__")(); }
-    virtual ScalarFunctionInterface* derivative(uint j) const { return this->get_override("derivative")(); }
-    virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
-};
-
-*/
-
-class VectorFunctionPyWrap
-    : public VectorFunctionInterface
-    , public wrapper< VectorFunctionInterface >
-{
-    virtual VectorFunctionInterface* clone() const { return this->get_override("clone")(); };
-    virtual uint result_size() const { return this->get_override("result_size")(); }
-    virtual uint argument_size() const { return this->get_override("argument_size")(); }
-    virtual ushort smoothness() const { return this->get_override("smoothness")(); }
-    virtual Vector<Float> evaluate(const Vector<Float>&) const { return this->get_override("evaluate")(); }
-    virtual Vector<Interval> evaluate(const Vector<Interval>&) const { return this->get_override("evaluate")(); }
-    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>&) const { return this->get_override("evaluate")(); }
-    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >&) const { return this->get_override("evaluate")(); }
-    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >&) const { return this->get_override("evaluate")(); }
-    virtual Matrix<Float> jacobian(const Vector<Float>&) const { return this->get_override("jacobian")(); }
-    virtual Matrix<Interval> jacobian(const Vector<Interval>&) const { return this->get_override("jacobian")(); }
-    virtual Vector< Differential<Float> > expansion(const Vector<Float>&, const ushort&) const { return this->get_override("expansion")(); }
-    virtual Vector< Differential<Interval> > expansion(const Vector<Interval>&, const ushort&) const { return this->get_override("expansion")(); }
-    virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
-};
-
-
-
 
 class ScalarPythonFunction
     : public ScalarFunctionInterface
@@ -324,28 +268,6 @@ void export_polynomial()
     to_python< Vector< Polynomial<X> > >();
 }
 
-void export_scalar_function_interface()
-{
-    class_<ScalarFunctionInterface, shared_ptr<ScalarFunctionInterface>, boost::noncopyable>
-        scalar_function_interface_class("ScalarFunctionInterface",no_init);
-
-    // Don't use following standard wrapping technique due to clash with shared_ptr
-    //expression_interface_class.def("argument_size", pure_virtual(&ScalarFunctionInterface::argument_size));
-
-    scalar_function_interface_class.def("argument_size", &ScalarFunctionPyWrap::argument_size);
-    scalar_function_interface_class.def("smoothness", &ScalarFunctionPyWrap::smoothness);
-    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<Float>);
-    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<Interval>);
-    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate<TaylorModel>);
-    scalar_function_interface_class.def("__call__", &ScalarFunctionPyWrap::evaluate< Differential<Interval> >);
-    scalar_function_interface_class.def(self_ns::str(self));
-    //expression_interface_class.def(self_ns::repr(self));
-
-    def("evaluate",&ScalarFunctionPyWrap::evaluate<Interval>);
-    def("evaluate",&ScalarFunctionPyWrap::evaluate<TaylorModel>);
-
-}
-
 void export_scalar_function()
 {
     class_<ScalarFunction>
@@ -381,6 +303,9 @@ void export_scalar_function()
     def("evaluate", (Interval(*)(const ScalarFunction&,const Vector<Interval>&)) &evaluate);
     def("gradient_approx",(Vector<Float>(*)(const ScalarFunction&,const Vector<Float>&)) &gradient_approx);
     def("gradient",(Vector<Interval>(*)(const ScalarFunction&,const Vector<Interval>&)) &gradient);
+
+    def("derivative", (ScalarFunction(ScalarFunction::*)(uint)const) &ScalarFunction::derivative);
+
 }
 
 void export_vector_function()
@@ -402,6 +327,14 @@ void export_vector_function()
     def("evaluate_approx", (Vector<Float>(*)(const VectorFunction&,const Vector<Float>&)) &evaluate_approx);
     def("evaluate", (Vector<Interval>(*)(const VectorFunction&,const Vector<Interval>&)) &evaluate);
 
+    def("join", (VectorFunction(*)(const ScalarFunction&, const ScalarFunction&)) &join);
+    def("join", (VectorFunction(*)(const VectorFunction&, const ScalarFunction&)) &join);
+    def("join", (VectorFunction(*)(const ScalarFunction&, const VectorFunction&)) &join);
+    def("join", (VectorFunction(*)(const VectorFunction&, const VectorFunction&)) &join);
+
+    def("compose", (ScalarFunction(*)(const ScalarFunction&,const VectorFunction&)) &compose);
+    def("compose", (VectorFunction(*)(const VectorFunction&,const VectorFunction&)) &compose);
+
     from_python<VectorFunction>();
 }
 
@@ -411,32 +344,6 @@ void export_scalar_python_function()
     class_<ScalarPythonFunction, bases< ScalarFunctionInterface > > scalar_python_function_class("ScalarUserFunction", init<object>());
     scalar_python_function_class.def(init<uint,object>());
 }
-
-
-
-
-
-
-
-void export_vector_function_interface()
-{
-    class_<VectorFunctionPyWrap, boost::noncopyable> vector_function_interface_class("VectorFunctionInterface");
-    vector_function_interface_class.def("argument_size", pure_virtual(&VectorFunctionInterface::argument_size));
-    vector_function_interface_class.def("result_size", pure_virtual(&VectorFunctionInterface::result_size));
-    vector_function_interface_class.def("smoothness", pure_virtual(&VectorFunctionInterface::smoothness));
-    vector_function_interface_class.def("__len__", pure_virtual(&VectorFunctionInterface::result_size));
-    vector_function_interface_class.def("__call__",pure_virtual((IV(VectorFunctionInterface::*)(const IV&)const)&VectorFunctionInterface::evaluate));
-    vector_function_interface_class.def("__call__",pure_virtual((TMV(VectorFunctionInterface::*)(const TMV&)const)&VectorFunctionInterface::evaluate));
-    vector_function_interface_class.def("jacobian",(FMx(VectorFunctionInterface::*)(const FV&)const)&VectorFunctionInterface::jacobian);
-    vector_function_interface_class.def("jacobian",(IMx(VectorFunctionInterface::*)(const IV&)const)&VectorFunctionInterface::jacobian);
-    vector_function_interface_class.def(self_ns::str(self));
-    //vector_function_interface_class.def(self_ns::repr(self));
-
-    def("evaluate",(Vector<Float>(*)(const VectorFunctionInterface&,const Vector<Float>&))&evaluate);
-    def("evaluate",(Vector<Interval>(*)(const VectorFunctionInterface&,const Vector<Interval>&))&evaluate);
-    def("evaluate",(Vector<TaylorModel>(*)(const VectorFunctionInterface&,const Vector<TaylorModel>&))&evaluate);
-}
-
 
 void export_vector_python_function()
 {
@@ -450,20 +357,11 @@ void function_submodule() {
     from_python< array<std::string> >();
 
     export_multi_index();
-
-
-    //export_scalar_function_interface();
-    //export_vector_function_interface();
+    export_monomial<Real>();
+    export_polynomial<Real>();
 
     export_scalar_function();
     export_vector_function();
-
-    //export_monomial<Float>();
-    //export_polynomial<Float>();
-    //export_monomial<Interval>();
-    //export_polynomial<Interval>();
-    export_monomial<Real>();
-    export_polynomial<Real>();
 
     //export_scalar_python_function();
     //export_vector_python_function();

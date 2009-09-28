@@ -53,7 +53,7 @@ class NonInvertibleFunctionException  : public std::runtime_error {
 
 
 std::pair<Float, Vector<Interval> >
-flow_bounds(VectorFunctionInterface const& vf,
+flow_bounds(VectorFunction const& vf,
             Vector<Interval> const& d,
             Float const& hmax)
 {
@@ -562,7 +562,7 @@ scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const
 
 
 std::pair<Float, Vector<Interval> >
-TaylorCalculus::flow_bounds(VectorFunctionInterface const& vf,
+TaylorCalculus::flow_bounds(VectorFunction const& vf,
                             Vector<Interval> const& r,
                             Float const& hmax,
                             Float const& dmax) const
@@ -596,7 +596,7 @@ active(const PredicateModelType& guard_model, const SetModelType& set_model) con
 
 
 TaylorCalculus::FunctionModelType
-TaylorCalculus::map_model(VectorFunctionInterface const& f, Vector<Interval> const& bx) const
+TaylorCalculus::map_model(VectorFunction const& f, Vector<Interval> const& bx) const
 {
     ARIADNE_ASSERT(f.argument_size()==bx.size());
 
@@ -609,7 +609,7 @@ TaylorCalculus::map_model(VectorFunctionInterface const& f, Vector<Interval> con
 
 
 TaylorCalculus::FlowModelType
-TaylorCalculus::flow_model(VectorFunctionInterface const& vf, Vector<Interval> const& ibx, Float const& h, Vector<Interval> const& bb) const
+TaylorCalculus::flow_model(VectorFunction const& vf, Vector<Interval> const& ibx, Float const& h, Vector<Interval> const& bb) const
 {
     Vector<Interval> bx=ibx;
 
@@ -647,9 +647,9 @@ TaylorCalculus::flow_model(VectorFunctionInterface const& vf, Vector<Interval> c
 
 
 TaylorCalculus::PredicateModelType
-TaylorCalculus::predicate_model(VectorFunctionInterface const& g, Vector<Interval> const& bx) const
+TaylorCalculus::predicate_model(VectorFunction const& g, Vector<Interval> const& bx) const
 {
-    //ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(VectorFunctionInterface,Vector<Interval>","Use ScalarFunctionInterface instead");
+    //ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(VectorFunction,Vector<Interval>","Use ScalarFunction instead");
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
     FunctionModelType predicate_model(bx,g);
@@ -659,7 +659,7 @@ TaylorCalculus::predicate_model(VectorFunctionInterface const& g, Vector<Interva
 }
 
 TaylorCalculus::PredicateModelType
-TaylorCalculus::predicate_model(ScalarFunctionInterface const& g, Vector<Interval> const& bx) const
+TaylorCalculus::predicate_model(ScalarFunction const& g, Vector<Interval> const& bx) const
 {
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 

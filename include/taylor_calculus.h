@@ -43,8 +43,8 @@ using std::pair;
 template<class T> class array;
 
 class Interval;
-class ScalarFunctionInterface;
-class VectorFunctionInterface;
+class ScalarFunction;
+class VectorFunction;
 template<class X> class Vector;
 class Box;
 class TaylorModel;
@@ -81,8 +81,8 @@ class TaylorCalculus
     typedef Float RealType;
     typedef Interval IntervalType;
     typedef Vector<Interval> BoxType;
-    typedef VectorFunctionInterface VectorFunctionType;
-    typedef ScalarFunctionInterface ScalarFunctionType;
+    typedef VectorFunction VectorFunctionType;
+    typedef ScalarFunction ScalarFunctionType;
 
     typedef SetModelType EnclosureType;
   public:
@@ -238,7 +238,7 @@ class TaylorCalculus
 };
 
 
-std::pair<Float, Vector<Interval> > flow_bounds(VectorFunctionInterface const&,Vector<Interval> const&,Float const&);
+std::pair<Float, Vector<Interval> > flow_bounds(VectorFunction const&,Vector<Interval> const&,Float const&);
 
 }
 

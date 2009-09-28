@@ -63,33 +63,46 @@ Polytope polytope(const Polyhedron& p);
 
 
 Polyhedron::Polyhedron()
-    : ConstraintSet(Box(0),VectorConstantFunction(Vector<Float>(0,1.0),0))
+    : _A(), _b()
 {
 }
 
 
 Polyhedron::Polyhedron(uint d)
-    : ConstraintSet( Box(0), VectorConstantFunction(Vector<Float>(0,1.0),d) )
+    : _A(0,d), _b(0)
 {
 }
 
 
 Polyhedron::Polyhedron(const Matrix<Float>& A, const Vector<Float>& b)
-    : ConstraintSet( Box(A.row_size(),Interval(0,inf())), VectorAffineFunction(-A,b) )
+    : _A(A), _b(b)
 {
+    ARIADNE_ASSERT_MSG(A.column_size()==b.size(),"Invalid sizes of A="<<A<<" and b="<<b<<" for polyhedral constraints");
 }
 
 
 
 
 Polyhedron::Polyhedron(const Box& bx)
-    : ConstraintSet( Ariadne::polyhedron(bx) )
+    : _A(bx.dimension()*2,bx.dimension()), _b(bx.dimension()*2)
 {
+    const uint n=bx.dimension();
+    for(uint i=0; i!=n; ++i) {
+        _A[i][i]=-1;
+        _b[i]=-bx[i].lower();
+        _A[i+n][i]=+1;
+        _b[i+n]=+bx[i].upper();
+    }
 }
 
 Polyhedron::Polyhedron(const Polytope& p)
-    : ConstraintSet( Ariadne::polyhedron(p) )
 {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+Polyhedron* Polyhedron::clone() const
+{
+    return new Polyhedron(*this);
 }
 
 
@@ -97,16 +110,22 @@ Polyhedron::Polyhedron(const Polytope& p)
 Matrix<Float>
 Polyhedron::A() const
 {
-    return -dynamic_cast<const VectorAffineFunction&>(this->function()).A();
+    return this->_A;
 }
 
 Vector<Float>
 Polyhedron::b() const
 {
-    return dynamic_cast<const VectorAffineFunction&>(this->function()).b();
+    return this->_b;
 }
 
 
+
+uint
+Polyhedron::dimension() const
+{
+    return this->_A.column_size();
+}
 
 tribool
 Polyhedron::empty() const
@@ -125,14 +144,22 @@ Polyhedron::bounded() const
 Polyhedron
 Polyhedron::halfspace(size_t i) const
 {
-    ARIADNE_ASSERT(i<this->number_of_constraints());
-    uint d=this->dimension();
-    Matrix<Float> A=project(this->A(),range(i,i+1),range(0,d));
-    Vector<Float> b=project(this->b(),range(i,i+1));
-    return Polyhedron(A,b);
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
+
+tribool Polyhedron::overlaps(const Box& bx) const {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+tribool Polyhedron::covers(const Box& bx) const {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+tribool Polyhedron::disjoint(const Box& bx) const {
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 
 
@@ -151,21 +178,14 @@ intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
 }
 
 
+
+
+
 Polyhedron
 polyhedron(const Box& bx)
 {
-    Vector<Float> b; Matrix<Float> A;
-    uint d=bx.size();
-    for(uint i=0; i!=d; ++i) {
-        A[i][i]=-1.0;
-        b[i]=-bx[i].lower();
-        A[i+d][i]=1.0;
-        b[i+d]=bx[i].upper();
-    }
-    return Polyhedron(A,b);
+    return Polyhedron(bx);
 }
-
-
 
 Polyhedron
 polyhedron(const Polytope& pltp)

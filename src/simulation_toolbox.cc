@@ -28,7 +28,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-#include "function_interface.h"
+#include "function.h"
 #include "point.h"
 
 #include "simulation_toolbox.h"
@@ -53,7 +53,7 @@ SimulationToolbox()
 
 tribool
 SimulationToolbox::
-active(const ScalarFunctionInterface& guard,
+active(const ScalarFunction& guard,
        const Point& point) const
 {
     Float value=guard.evaluate(point);
@@ -64,7 +64,7 @@ active(const ScalarFunctionInterface& guard,
 
 Point
 SimulationToolbox::
-reset_step(const VectorFunctionInterface& map,
+reset_step(const VectorFunction& map,
            const Point& point) const
 {
     return map.evaluate(point);
@@ -74,7 +74,7 @@ reset_step(const VectorFunctionInterface& map,
 
 Point
 SimulationToolbox::
-integration_step(const VectorFunctionInterface& f,
+integration_step(const VectorFunction& f,
                  const Point& pt,
                  const TimeType& h) const
 {
@@ -97,8 +97,8 @@ integration_step(const VectorFunctionInterface& f,
 // Compute the crossing time using bisections
 SimulationToolbox::TimeType
 SimulationToolbox::
-crossing_time(const ScalarFunctionInterface& g,
-              const VectorFunctionInterface& f,
+crossing_time(const ScalarFunction& g,
+              const VectorFunction& f,
               const Point& pt,
               const TimeType& h) const
 {

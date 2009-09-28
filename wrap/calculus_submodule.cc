@@ -146,7 +146,7 @@ void export_taylor_model()
     typedef VectorTaylorFunction VectorTaylorFunction;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
-    typedef ScalarFunctionInterface FI;
+    typedef ScalarFunction FI;
 
 
     class_<TaylorModel> taylor_model_class("TaylorModel", init<TaylorModel>());
@@ -250,7 +250,7 @@ void export_scalar_taylor_function()
     class_<ScalarTaylorFunction> scalar_taylor_function_class("ScalarTaylorFunction",init<ScalarTaylorFunction>());
     scalar_taylor_function_class.def(init<IntervalVector,TaylorModel>());
     scalar_taylor_function_class.def(init< IntervalVector >());
-    scalar_taylor_function_class.def(init< IntervalVector, const ScalarFunctionInterface& >());
+    scalar_taylor_function_class.def(init< IntervalVector, const ScalarFunction& >());
     scalar_taylor_function_class.def("error", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const double&)) &ScalarTaylorFunction::set_error);
     scalar_taylor_function_class.def("argument_size", &ScalarTaylorFunction::argument_size);
@@ -393,12 +393,12 @@ void export_vector_taylor_function()
     typedef Polynomial<Interval> IP;
     typedef Vector<Polynomial<Float> > RPV;
     typedef Vector<Polynomial<Interval> > IPV;
-    typedef Vector<ScalarFunctionInterface> EV;
+    typedef Vector<ScalarFunction> EV;
     typedef ScalarTaylorFunction ScalarTaylorFunction;
     typedef VectorTaylorFunction VectorTaylorFunction;
 
     class_<VectorTaylorFunction> vector_taylor_function_class("VectorTaylorFunction", init<VectorTaylorFunction>());
-    vector_taylor_function_class.def( init< IntervalVector,const VectorFunctionInterface& >());
+    vector_taylor_function_class.def( init< IntervalVector,const VectorFunction& >());
     vector_taylor_function_class.def( init< Vector<ScalarTaylorFunction> >());
     vector_taylor_function_class.def("__len__", &VectorTaylorFunction::result_size);
     vector_taylor_function_class.def("result_size", &VectorTaylorFunction::result_size);
@@ -464,15 +464,15 @@ void export_vector_taylor_function()
     //def("compose",(ScalarTaylorFunction(*)(const RP&,const VectorTaylorFunction&)) &compose);
     def("compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &compose);
     def("compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &compose);
-    def("compose",(ScalarTaylorFunction(*)(const ScalarFunctionInterface&,const VectorTaylorFunction&)) &compose);
-    def("compose",(VectorTaylorFunction(*)(const VectorFunctionInterface&,const VectorTaylorFunction&)) &compose);
-    def("implicit",(ScalarTaylorFunction(*)(const ScalarFunctionInterface&,const IntervalVector&)) &implicit);
+    def("compose",(ScalarTaylorFunction(*)(const ScalarFunction&,const VectorTaylorFunction&)) &compose);
+    def("compose",(VectorTaylorFunction(*)(const VectorFunction&,const VectorTaylorFunction&)) &compose);
+    def("implicit",(ScalarTaylorFunction(*)(const ScalarFunction&,const IntervalVector&)) &implicit);
     def("implicit",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&)) &implicit);
     def("implicit",(VectorTaylorFunction(*)(const VectorTaylorFunction&)) &implicit);
     def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat)) &antiderivative);
     def("flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Interval&, Nat)) &flow);
     def("flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &flow);
-    def("flow",(VectorTaylorFunction(*)(const VectorFunctionInterface&,const IntervalVector&,const Float&, Nat)) &flow);
+    def("flow",(VectorTaylorFunction(*)(const VectorFunction&,const IntervalVector&,const Float&, Nat)) &flow);
     def("parameterised_flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &parameterised_flow);
 
     def("unchecked_compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &unchecked_compose);

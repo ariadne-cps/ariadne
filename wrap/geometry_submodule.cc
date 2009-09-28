@@ -256,9 +256,9 @@ void export_taylor_set()
     def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorSet&,uint)) &adjoin_outer_approximation);
     def("zonotope", (Zonotope(*)(const TaylorSet&)) &zonotope);
 
-    def("apply",(TaylorModel(*)(const ScalarFunctionInterface&,const TaylorSet&)) &apply);
+    def("apply",(TaylorModel(*)(const ScalarFunction&,const TaylorSet&)) &apply);
     def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorSet&)) &apply);
-    def("apply",(TaylorSet(*)(const VectorFunctionInterface&,const TaylorSet&)) &apply);
+    def("apply",(TaylorSet(*)(const VectorFunction&,const TaylorSet&)) &apply);
     def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
 
     implicitly_convertible<Box,TaylorSet>();

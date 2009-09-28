@@ -67,20 +67,20 @@ class SolverBase
     void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; };
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> zero(const VectorFunctionInterface& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> zero(const VectorFunction& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> fixed_point(const VectorFunctionInterface& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> fixed_point(const VectorFunction& f,const Vector<Interval>& pt) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<Interval> > solve(const VectorFunctionInterface& f,const Vector<Interval>& pt) const;
+    virtual Set< Vector<Interval> > solve(const VectorFunction& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual List<VectorTaylorFunction> implicit(const VectorFunctionInterface& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+    virtual List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
 
   protected:
     /*! \brief Perform one iterative step of the contractor. */
-    virtual Vector<Interval> step(const VectorFunctionInterface& f,const Vector<Interval>& pt) const = 0;
+    virtual Vector<Interval> step(const VectorFunction& f,const Vector<Interval>& pt) const = 0;
     /*! \brief Perform one iterative step of the contractor. */
-    virtual VectorTaylorFunction implicit_step(const VectorFunctionInterface& f,const VectorTaylorFunction& p,const VectorTaylorFunction& x) const = 0;
+    virtual VectorTaylorFunction implicit_step(const VectorFunction& f,const VectorTaylorFunction& p,const VectorTaylorFunction& x) const = 0;
   private:
     double _max_error;
     uint _max_steps;
@@ -98,10 +98,10 @@ class IntervalNewtonSolver
     IntervalNewtonSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual VectorTaylorFunction implicit_step(const VectorFunctionInterface& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
+    virtual VectorTaylorFunction implicit_step(const VectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
   protected:
     Vector<Interval>
-    step(const VectorFunctionInterface& f,
+    step(const VectorFunction& f,
          const Vector<Interval>& pt) const;
 
 
@@ -120,12 +120,12 @@ class KrawczykSolver
     KrawczykSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual VectorTaylorFunction implicit_step(const VectorFunctionInterface& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
+    virtual VectorTaylorFunction implicit_step(const VectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
 
   protected:
     /*! \brief A single step of the Krawczyk contractor. */
     Vector<Interval>
-    step(const VectorFunctionInterface& f,
+    step(const VectorFunction& f,
           const Vector<Interval>& pt) const;
 };
 

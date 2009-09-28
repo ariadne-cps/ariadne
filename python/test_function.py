@@ -26,11 +26,11 @@ Float=float
 d=Float(2.5)
 i=Interval(1.5,1.75)
 
-c=ScalarPolynomialFunction.constant(3,1.5)
-x=ScalarPolynomialFunction.variable(3,0)
-y=ScalarPolynomialFunction.variable(3,1)
-v=ScalarPolynomialFunction.variables(3)
-id=VectorPolynomialFunction.identity(3)
+c=ScalarFunction.constant(3,1.5)
+x=ScalarFunction.variable(3,0)
+y=ScalarFunction.variable(3,1)
+#v=ScalarFunction.variables(3)
+id=VectorFunction.identity(3)
 
 p=x+y
 
@@ -41,11 +41,10 @@ p+i; p-i; p*i; p/i;
 i+i; i-p; i*p;
 
 derivative(p,0)
-antiderivative(p,0)
 
 b=Box([{0:0.25},{0.25:0.50},{0.50:0.75}])
-f=VectorPolynomialFunction([c,x,y])
-g=ScalarPolynomialFunction(p)
+f=VectorFunction([c,x,y])
+g=ScalarFunction(p)
 
 join(g,g); join(f,g); join(g,f); join(f,f)
 compose(g,f); compose(f,f)

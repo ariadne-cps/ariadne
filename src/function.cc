@@ -907,21 +907,21 @@ class VectorComposedFunction
 {
     friend class VectorFunctionTemplate<VectorComposedFunction>;
   public:
-    VectorComposedFunction(shared_ptr<const VectorFunctionInterface> g, shared_ptr<const VectorFunctionInterface> f)
-        : _f(f), _g(g) { ARIADNE_ASSERT(g->argument_size()==f->result_size()); }
+    VectorComposedFunction(VectorFunction f, VectorFunction g)
+        : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
     VectorComposedFunction* clone() const { return new VectorComposedFunction(*this); }
 
-    virtual SizeType result_size() const { return this->_g->result_size(); }
-    virtual SizeType argument_size() const { return this->_f->argument_size(); }
-    virtual SmoothnessType smoothness() const { return min(_f->smoothness(),_g->smoothness()); }
+    virtual SizeType result_size() const { return this->_f.result_size(); }
+    virtual SizeType argument_size() const { return this->_g.argument_size(); }
+    virtual SmoothnessType smoothness() const { return min(_f.smoothness(),_g.smoothness()); }
   private:
     template<class X> inline void _compute(Vector<X>& r, const Vector<X>& x) const {
-        r=this->_g->evaluate(this->_f->evaluate(x)); }
+        r=this->_f.evaluate(this->_g.evaluate(x)); }
     template<class X> inline void _compute_approx(Vector<X>& r, const Vector<X>& x) const {
         _compute(r,x); }
   private:
-    shared_ptr<const VectorFunctionInterface> _f;
-    shared_ptr<const VectorFunctionInterface> _g;
+    VectorFunction _f;
+    VectorFunction _g;
 };
 
 class JoinedFunction
@@ -1170,6 +1170,11 @@ VectorFunction::VectorFunction(VectorFunctionInterface* fptr)
 {
 }
 
+VectorFunction::VectorFunction()
+    : _ptr(new VectorOfScalarFunction(0u,ScalarFunction()))
+{
+}
+
 VectorFunction::VectorFunction(Nat rs, Nat as)
     : _ptr(new VectorOfScalarFunction(rs,ScalarFunction::constant(as,Real(0.0))))
 {
@@ -1317,10 +1322,47 @@ VectorFunction join(const ScalarFunction& f1, const ScalarFunction& f2) {
     return r;
 }
 
+VectorFunction join(const VectorFunction& f1, const ScalarFunction& f2) {
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    VectorFunction r(f1.result_size()+1u,f1.argument_size());
+    for(uint i=0u; i!=f1.result_size(); ++i) {
+        r.set(i,f1.get(i));
+    }
+    r.set(f1.result_size(),f2);
+    return r;
+}
+
+VectorFunction join(const ScalarFunction& f1, const VectorFunction& f2) {
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    VectorFunction r(f2.result_size()+1u,f1.argument_size());
+    r.set(0u,f1);
+    for(uint i=0u; i!=f2.result_size(); ++i) {
+        r.set(i+1u,f2.get(i));
+    }
+    return r;
+}
+
+VectorFunction join(const VectorFunction& f1, const VectorFunction& f2) {
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    VectorFunction r(f1.result_size()+f2.result_size(),f1.argument_size());
+    for(uint i=0u; i!=f2.result_size(); ++i) {
+        r.set(i,f1.get(i));
+    }
+    for(uint i=0u; i!=f2.result_size(); ++i) {
+        r.set(i+f1.result_size(),f2.get(i));
+    }
+    return r;
+}
+
 
 ScalarFunction compose(const ScalarFunction& f, const VectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     return ScalarFunction(new ScalarComposedFunction(f,g));
+}
+
+VectorFunction compose(const VectorFunction& f, const VectorFunction& g) {
+    ARIADNE_ASSERT(f.argument_size()==g.result_size());
+    return VectorFunction(new VectorComposedFunction(f,g));
 }
 
 

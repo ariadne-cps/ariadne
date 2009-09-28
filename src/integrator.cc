@@ -30,7 +30,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-#include "function_interface.h"
+#include "function.h"
 #include "taylor_function.h"
 
 #include "polynomial.h"
@@ -49,7 +49,7 @@ template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const
 typedef Vector<Interval> IVector;
 
 Pair<Float,IVector>
-IntegratorBase::flow_bounds(const VectorFunctionInterface& vf, const IVector& dp, const IVector& dx, const Float& hmax) const
+IntegratorBase::flow_bounds(const VectorFunction& vf, const IVector& dp, const IVector& dx, const Float& hmax) const
 {
 
     ARIADNE_ASSERT(vf.result_size()==dx.size());
@@ -124,7 +124,7 @@ IntegratorBase::flow_bounds(const VectorFunctionInterface& vf, const IVector& dp
 
 
 VectorTaylorFunction
-IntegratorBase::time_step(const VectorFunctionInterface& vf, const IVector& dp, const IVector& dx, const Float& h) const
+IntegratorBase::time_step(const VectorFunction& vf, const IVector& dp, const IVector& dx, const Float& h) const
 {
     const uint it=dp.size()+dx.size(); // Index of the time variable
     VectorTaylorFunction flow=this->flow(vf,dp,dx,h);
@@ -135,7 +135,7 @@ IntegratorBase::time_step(const VectorFunctionInterface& vf, const IVector& dp, 
 
 
 VectorTaylorFunction
-IntegratorBase::flow(const VectorFunctionInterface& vf, const IVector& dx, const Float& h) const
+IntegratorBase::flow(const VectorFunction& vf, const IVector& dx, const Float& h) const
 {
     Vector<Interval> dp(0);
     return this->flow(vf,dp,dx,h);
@@ -144,7 +144,7 @@ IntegratorBase::flow(const VectorFunctionInterface& vf, const IVector& dx, const
 
 
 VectorTaylorFunction
-TaylorIntegrator::flow(const VectorFunctionInterface& f, const IVector& dp, const IVector& dx, const Float& hmax) const
+TaylorIntegrator::flow(const VectorFunction& f, const IVector& dp, const IVector& dx, const Float& hmax) const
 {
     ARIADNE_LOG(2,"f="<<f<<" dp="<<dp<<" dx="<<dx<<" hmax="<<hmax<<"\n");
     const uint np=dp.size();

@@ -141,7 +141,7 @@ void export_grid_tree_set() {
     grid_tree_set_class.def(self_ns::str(self));
 
     def("union",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&join));
-    def("difference",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&difference));
+    def("difference",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&difference));
     def("intersection",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersection));
     def("overlap",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&overlap));
     def("subset",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));

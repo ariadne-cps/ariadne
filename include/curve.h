@@ -32,7 +32,7 @@
 
 #include "macros.h"
 #include "stlio.h"
-#include "function_interface.h"
+#include "function.h"
 #include "graphics_interface.h"
 
 namespace Ariadne {
@@ -84,7 +84,7 @@ class Curve
     /*! \brief Destructor. */
     virtual ~Curve();
     /*! \brief Constructor. */
-    Curve(const VectorFunctionInterface& f);
+    Curve(const VectorFunction& f);
     /*! \brief Copy constructor. */
     Curve(const Curve& c);
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -102,7 +102,7 @@ class Curve
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;
   private:
-    boost::shared_ptr<VectorFunctionInterface> _function_ptr;
+    VectorFunction _function;
 };
     
   

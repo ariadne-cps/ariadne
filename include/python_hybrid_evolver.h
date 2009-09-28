@@ -83,7 +83,7 @@ class PythonHybridEvolver
     : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
-    typedef VectorFunctionInterface FunctionType;
+    typedef VectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction FunctionModelType;
     typedef VectorTaylorFunction MapModelType;

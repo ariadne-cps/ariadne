@@ -39,7 +39,7 @@ typedef unsigned int uint;
 void
 solve_all(Set< Vector<Interval> >& r,
           const SolverInterface& s,
-          const VectorFunctionInterface& f,
+          const VectorFunction& f,
           const Vector<Interval>& ix)
 {
     // Test for no solution
@@ -299,7 +299,7 @@ newton_implicit(const VectorTaylorFunction& f)
 
 namespace Ariadne {
 
-VectorTaylorFunction evaluate(const VectorFunctionInterface& f,const VectorTaylorFunction& x) {
+VectorTaylorFunction evaluate(const VectorFunction& f,const VectorTaylorFunction& x) {
     for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
     Vector<TaylorModel> m(x.size());
     for(uint i=0; i!=m.size(); ++i) { m[i]=x[i].model(); }
@@ -347,7 +347,7 @@ class DifferenceFunction
     : public VectorFunctionTemplate<DifferenceFunction>
 {
   public:
-    DifferenceFunction(const VectorFunctionInterface& f) : fptr(f.clone()) { }
+    DifferenceFunction(const VectorFunction& f) : fptr(f.clone()) { }
     virtual DifferenceFunction* clone() const { return new DifferenceFunction(*this); }
     virtual uint result_size() const { return fptr->result_size(); }
     virtual uint argument_size() const { return fptr->argument_size(); }
@@ -355,7 +355,7 @@ class DifferenceFunction
     template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
     template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
   private:
-    boost::shared_ptr<VectorFunctionInterface> fptr;
+    boost::shared_ptr<VectorFunction> fptr;
 };
 */
 
@@ -367,7 +367,7 @@ SolverBase::SolverBase(double max_error, uint max_steps)
 
 
 Set< Vector<Interval> >
-SolverBase::solve(const VectorFunctionInterface& f,
+SolverBase::solve(const VectorFunction& f,
                   const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
@@ -378,7 +378,7 @@ SolverBase::solve(const VectorFunctionInterface& f,
 
 
 Vector<Interval>
-SolverBase::zero(const VectorFunctionInterface& f,
+SolverBase::zero(const VectorFunction& f,
                  const Vector<Interval>& ix) const
 {
     const double& e=this->maximum_error();
@@ -420,7 +420,7 @@ SolverBase::zero(const VectorFunctionInterface& f,
 
 
 Vector<Interval>
-SolverBase::fixed_point(const VectorFunctionInterface& f, const Vector<Interval>& pt) const
+SolverBase::fixed_point(const VectorFunction& f, const Vector<Interval>& pt) const
 {
     ARIADNE_NOT_IMPLEMENTED;
     //return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
@@ -428,7 +428,7 @@ SolverBase::fixed_point(const VectorFunctionInterface& f, const Vector<Interval>
 
 
 List<VectorTaylorFunction>
-SolverBase::implicit(const VectorFunctionInterface& f,
+SolverBase::implicit(const VectorFunction& f,
                       const Vector<Interval>& ip,
                       const Vector<Interval>& ix) const
 {
@@ -485,7 +485,7 @@ SolverBase::implicit(const VectorFunctionInterface& f,
 
 
 Vector<Interval>
-IntervalNewtonSolver::step(const VectorFunctionInterface& f,
+IntervalNewtonSolver::step(const VectorFunction& f,
                            const Vector<Interval>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -507,7 +507,7 @@ IntervalNewtonSolver::step(const VectorFunctionInterface& f,
 }
 
 Vector<Interval>
-KrawczykSolver::step(const VectorFunctionInterface& f,
+KrawczykSolver::step(const VectorFunction& f,
                      const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -533,7 +533,7 @@ KrawczykSolver::step(const VectorFunctionInterface& f,
 
 
 VectorTaylorFunction
-IntervalNewtonSolver::implicit_step(const VectorFunctionInterface& f,
+IntervalNewtonSolver::implicit_step(const VectorFunction& f,
                             const VectorTaylorFunction& p,
                             const VectorTaylorFunction& x) const
 {
@@ -541,7 +541,7 @@ IntervalNewtonSolver::implicit_step(const VectorFunctionInterface& f,
 }
 
 VectorTaylorFunction
-KrawczykSolver::implicit_step(const VectorFunctionInterface& f,
+KrawczykSolver::implicit_step(const VectorFunction& f,
                               const VectorTaylorFunction& p,
                               const VectorTaylorFunction& x) const
 {

@@ -26,7 +26,7 @@
 #include "tuple.h"
 #include "stlio.h"
 #include "vector.h"
-#include "function_interface.h"
+#include "function.h"
 #include "taylor_model.h"
 #include "taylor_function.h"
 #include "taylor_set.h"
@@ -132,10 +132,10 @@ _evolution(EnclosureListType& final_sets,
 {
     verbosity=0;
 
-    typedef VectorFunctionInterface FunctionType;
+    typedef VectorFunction FunctionType;
     typedef EnclosureType SetModelType;
 
-    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 

@@ -35,12 +35,15 @@
 #include "numeric.h"
 #include "vector.h"
 #include "set_interface.h"
-#include "function_interface.h"
+#include "function.h"
 #include "graphics_interface.h"
 
 #include "box.h"
 
 namespace Ariadne {
+
+class Zonotope;
+class Polyhedron;
 
 //! \brief A set defined as the image of a box under a continuous function.
 class ImageSet
@@ -48,20 +51,21 @@ class ImageSet
     , public DrawableInterface
 {
     Vector<Interval> _domain;
-    boost::shared_ptr<VectorFunctionInterface> _function_ptr;
+    VectorFunction _function;
   public:
     //! \brief Default constructor constructs the singleton in \f$\R^0\f$.
     ImageSet();
     //! \brief Construct the image of \a dom under the identity function.
     ImageSet(const Vector<Interval>& dom);
     //! \brief Construct the image of \a dom under the function \a fn.
-    ImageSet(const Vector<Interval>& dom, const VectorFunctionInterface& fn);
+    ImageSet(const Vector<Interval>& dom, const VectorFunction& fn);
     //! \brief The box used to define the set.
     const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
-    const VectorFunctionInterface& function() const { return *this->_function_ptr; }
+    const VectorFunction& function() const { return this->_function; }
     //! \brief Equality operator. Compares functions by referential equality.
-    bool operator==(const ImageSet& ims) const { return this->_domain==ims._domain && this->_function_ptr==ims._function_ptr; }
+    bool operator==(const ImageSet& ims) const {
+        return this->_domain==ims._domain && this->_function.pointer()==ims._function.pointer(); }
 
     ImageSet* clone() const;
     uint dimension() const;
@@ -101,14 +105,16 @@ class ConstraintSet
     : public RegularSetInterface
 {
     Vector<Interval> _codomain;
-    boost::shared_ptr<VectorFunctionInterface> _function_ptr;
+    VectorFunction _function;
   public:
     //! \brief Construct the preimage of \a codom under \a fn.
-    ConstraintSet(const Vector<Interval>& codom, const VectorFunctionInterface& fn);
+    ConstraintSet(const Vector<Interval>& codom, const VectorFunction& fn);
+    //! \brief Construct from a polyhedron.
+    ConstraintSet(const Polyhedron& p);
     //! \brief The codomain of the set.
     const Vector<Interval>& codomain() const { return this->_codomain; }
     //! \brief The function used to define the set.
-    const VectorFunctionInterface& function() const { return *this->_function_ptr; };
+    const VectorFunction& function() const { return this->_function; };
 
     ConstraintSet* clone() const;
     uint dimension() const;

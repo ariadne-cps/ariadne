@@ -39,8 +39,8 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Polynomial;
 
-class ScalarFunctionInterface;
-class VectorFunctionInterface;
+class ScalarFunction;
+class VectorFunction;
 class MultiIndex;
 class TaylorModel;
 class ScalarTaylorFunction;
@@ -70,7 +70,7 @@ ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& x, uint k, con
 ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, uint k, const Interval& d);
 
 // Compose with an expression.
-ScalarTaylorFunction compose(const ScalarFunctionInterface& x, const VectorTaylorFunction& y);
+ScalarTaylorFunction compose(const ScalarFunction& x, const VectorTaylorFunction& y);
 
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, uint j);
@@ -87,11 +87,11 @@ ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k);
 // Implicit function solver; solves f(x,h(x))=0 on dom1(f)
 ScalarTaylorFunction implicit(const ScalarTaylorFunction& f);
 // Implicit function solver solves f(g(x),h(x))=0 on dom(g)
-ScalarTaylorFunction implicit(const ScalarFunctionInterface& f, const VectorTaylorFunction& g);
+ScalarTaylorFunction implicit(const ScalarFunction& f, const VectorTaylorFunction& g);
 // Implicit function solver solves f(x,h(x))=0 on d
-ScalarTaylorFunction implicit(const ScalarFunctionInterface& f, const Vector<Interval>& d);
+ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& d);
 
-ScalarTaylorFunction crossing_time(const ScalarFunctionInterface& g, const VectorFunctionInterface& f, const Vector<Interval>& d);
+ScalarTaylorFunction crossing_time(const ScalarFunction& g, const VectorFunction& f, const Vector<Interval>& d);
 
 class VectorTaylorFunctionElementReference;
 
@@ -142,7 +142,7 @@ class ScalarTaylorFunction
     explicit ScalarTaylorFunction(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the expression \a f.
-    explicit ScalarTaylorFunction(const DomainType& d, const ScalarFunctionInterface& f);
+    explicit ScalarTaylorFunction(const DomainType& d, const ScalarFunction& f);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the polynomial \a p.
     explicit ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the interval polynomial \a p.
@@ -564,16 +564,16 @@ VectorTaylorFunction restrict(const VectorTaylorFunction&, const Vector<Interval
 bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
 bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction intersection(const VectorTaylorFunction&, const VectorTaylorFunction&);
-ScalarTaylorFunction compose(const ScalarFunctionInterface&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const ScalarFunction&, const VectorTaylorFunction&);
 ScalarTaylorFunction compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
-VectorTaylorFunction compose(const VectorFunctionInterface&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const VectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
 VectorTaylorFunction implicit(const VectorTaylorFunction&);
-ScalarTaylorFunction implicit(const ScalarFunctionInterface&, const VectorTaylorFunction&);
+ScalarTaylorFunction implicit(const ScalarFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
 VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
-VectorTaylorFunction flow(const VectorFunctionInterface& vf, const Vector<Interval>& d, const Float& h, uint o);
+VectorTaylorFunction flow(const VectorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 VectorTaylorFunction parameterised_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
@@ -619,11 +619,11 @@ class VectorTaylorFunction {
 
     /*! \brief Construct from a domain and a function. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const VectorFunctionInterface& function);
+                   const VectorFunction& function);
 
     /*! \brief Construct from a domain, a function, and accuracy paramters. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const VectorFunctionInterface& function,
+                   const VectorFunction& function,
                    shared_ptr<TaylorModel::Accuracy> accuracy_ptr);
 
     /*! \brief Construct from a domain and a polynomial. */
@@ -748,7 +748,7 @@ class VectorTaylorFunction {
     friend VectorTaylorFunction operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f);
 
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend VectorTaylorFunction compose(const VectorFunctionInterface& f, const VectorTaylorFunction& g);
+    friend VectorTaylorFunction compose(const VectorFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend ScalarTaylorFunction compose(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.

@@ -49,7 +49,7 @@ f=VectorTaylorFunction([x,c,y])
 g=ScalarTaylorFunction(t)
 compose(f,f); compose(g,f)
 
-p=VectorPolynomialFunction.identity(3)
-q=ScalarPolynomialFunction.variable(3,1)
+p=VectorFunction.identity(3)
+q=ScalarFunction.variable(3,1)
 compose(p,f); compose(q,f)
 

@@ -24,7 +24,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "function_interface.h"
+#include "function.h"
 #include "real.h"
 #include "formula.h"
 #include "hybrid_automaton.h"
@@ -179,28 +179,19 @@ void export_formula()
 
 void export_hybrid_automaton()
 {
-    typedef boost::shared_ptr<const ScalarFunctionInterface> ExpressionPtr;
-    typedef boost::shared_ptr<const VectorFunctionInterface> FunctionPtr;
-
-/*
-    class_<DiscreteState> discrete_state_class("DiscreteState",no_init);
-    discrete_state_class.def(self_ns::str(self));
-
-    class_<DiscreteEvent> discrete_event_class("DiscreteEvent",no_init);
-    discrete_event_class.def(self_ns::str(self));
-*/
+    // Don't use return_value_policy<copy_const_reference> since reference lifetime should not exceed automaton lifetime
 
     class_<DiscreteMode, shared_ptr<DiscreteMode> > discrete_mode_class("DiscreteMode",no_init);
     discrete_mode_class.def("location",&DiscreteMode::location);
-    discrete_mode_class.def("dynamic",&DiscreteMode::dynamic_ptr);
+    discrete_mode_class.def("dynamic",&DiscreteMode::dynamic,return_value_policy<reference_existing_object>());
     discrete_mode_class.def("invariants",&DiscreteMode::invariants,return_value_policy<reference_existing_object>());
 
     class_<DiscreteTransition, shared_ptr<DiscreteTransition> > discrete_transition_class("DiscreteTransition",no_init);
     discrete_transition_class.def("event",&DiscreteTransition::event);
     discrete_transition_class.def("source",&DiscreteTransition::source,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("target",&DiscreteTransition::target,return_value_policy<reference_existing_object>());
-    discrete_transition_class.def("reset",&DiscreteTransition::reset_ptr);
-    discrete_transition_class.def("guard",&DiscreteTransition::activation_ptr);
+    discrete_transition_class.def("reset",&DiscreteTransition::reset,return_value_policy<reference_existing_object>());
+    discrete_transition_class.def("guard",&DiscreteTransition::activation,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("urgency",&DiscreteTransition::forced);
 
     class_<HybridTime> hybrid_time_class("HybridTime",init<double,int>());
@@ -213,7 +204,7 @@ void export_hybrid_automaton()
     hybrid_automaton_class.def("modes",&HybridAutomaton::modes,return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def("transitions",(const std::set<DiscreteTransition>&(HybridAutomaton::*)()const) &HybridAutomaton::transitions,return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def("transitions",(std::set<DiscreteTransition>(HybridAutomaton::*)(DiscreteState)const) &HybridAutomaton::transitions);
-    hybrid_automaton_class.def("blocking_guards",(std::map<DiscreteEvent,FunctionPtr>(HybridAutomaton::*)(DiscreteState)const) &HybridAutomaton::blocking_guards);
+    hybrid_automaton_class.def("blocking_guards",(std::map<DiscreteEvent,VectorFunction>(HybridAutomaton::*)(DiscreteState)const) &HybridAutomaton::blocking_guards);
 
 }
 

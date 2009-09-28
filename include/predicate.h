@@ -58,34 +58,32 @@ class ExpressionPredicate
 {
     friend ExpressionPredicate operator!(const ExpressionPredicate&);
   public:
-    ExpressionPredicate(const ScalarFunctionInterface& expression)
-        : _expression_ptr(expression.clone()), _sign(+1) { }
-    ExpressionPredicate(shared_ptr<const ScalarFunctionInterface> expression_ptr)
-        : _expression_ptr(expression_ptr), _sign(+1) { }
-    const ScalarFunctionInterface& expression() const { return *_expression_ptr; }
+    ExpressionPredicate(const ScalarFunction& expression)
+        : _expression(expression), _sign(+1) { }
+    const ScalarFunction& expression() const { return _expression; }
     int sign() const { return _sign; }
 
     bool same(const ExpressionPredicate& ep2) const {
         const ExpressionPredicate& ep1=*this;
-        return ep1._expression_ptr==ep2._expression_ptr && ep1._sign==ep2._sign; }
+        return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign==ep2._sign; }
     bool opposite(const ExpressionPredicate& ep2) const {
         const ExpressionPredicate& ep1=*this;
-        return ep1._expression_ptr==ep2._expression_ptr && ep1._sign!=ep2._sign; }
+        return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign!=ep2._sign; }
     bool operator<(const ExpressionPredicate& p) const {
-        return (_expression_ptr.operator->()) < (const void*)(p._expression_ptr.operator->()); }
-    size_type argument_size() const { return _expression_ptr->argument_size(); }
+        return (_expression.pointer()) < (const void*)(p._expression.pointer()); }
+    size_type argument_size() const { return _expression.argument_size(); }
     tribool evaluate(const Vector<Float>& x) const {
-        Float value=_expression_ptr->evaluate(x)*_sign;
+        Float value=_expression.evaluate(x)*_sign;
         if(value<0) { return true; }
         else if(value>0) { return false; }
         else { return indeterminate; } }
     tribool evaluate(const Vector<Interval>& x) const {
-        Interval range=_expression_ptr->evaluate(x)*_sign;
+        Interval range=_expression.evaluate(x)*_sign;
         if(range.upper()<0) { return true; }
         else if(range.lower()>0) { return false; }
         else { return indeterminate; } }
   private:
-    shared_ptr<const ScalarFunctionInterface> _expression_ptr;
+    ScalarFunction _expression;
     int _sign;
 };
 

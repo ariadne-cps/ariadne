@@ -34,7 +34,7 @@
 #include "differential.h"
 #include "taylor_model.h"
 #include "taylor_series.h"
-#include "function_interface.h"
+#include "function.h"
 #include "exceptions.h"
 
 namespace Ariadne {
@@ -3504,7 +3504,7 @@ implicit(const Vector<TaylorModel>& f)
 
 
 TaylorModel
-implicit(const ScalarFunctionInterface& f, const Vector<TaylorModel>& g)
+implicit(const ScalarFunction& f, const Vector<TaylorModel>& g)
 {
 
     // Check that the arguments are suitable
@@ -3520,8 +3520,7 @@ implicit(const ScalarFunctionInterface& f, const Vector<TaylorModel>& g)
     const uint gas=g[0].argument_size();
     const uint grs=g.size();
 
-    shared_ptr<const ScalarFunctionInterface> df_ptr(f.derivative(gas));
-    const ScalarFunctionInterface& df=*df_ptr;
+    ScalarFunction df=f.derivative(gas);
 
     TaylorModel h0(gas);
     Vector<TaylorModel> jgh=join(g,h0);

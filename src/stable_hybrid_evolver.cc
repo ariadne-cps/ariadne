@@ -26,7 +26,7 @@
 #include "tuple.h"
 #include "stlio.h"
 #include "vector.h"
-#include "function_interface.h"
+#include "function.h"
 #include "taylor_model.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
@@ -68,7 +68,6 @@ void append(V& v, const C& c)
 namespace Ariadne {
 
 static const int BLOCKING_EVENT = -2;
-using boost::shared_ptr;
 
 class DegenerateCrossingException { };
 
@@ -119,7 +118,7 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 struct DetectionData {
     int id;
     DiscreteEvent event;
-    shared_ptr<const VectorFunctionInterface> guard_ptr;
+    shared_ptr<const VectorFunction> guard_ptr;
     PredicateKind predicate_kind;
     CrossingKind crossing_kind;
     tribool active;
@@ -194,7 +193,7 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -332,7 +331,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     const FunctionType* dynamic_ptr=&initial_mode.dynamic();
 
     ARIADNE_LOG(6,"mode="<<initial_mode<<"\n");
-    std::map< DiscreteEvent, shared_ptr<const VectorFunctionInterface> > invariants
+    std::map< DiscreteEvent, VectorFunction > invariants
         =initial_mode.invariants();
     ARIADNE_LOG(7,"invariants="<<invariants<<"\n");
     const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
@@ -382,33 +381,33 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Test invariants
     bool blocking=false;
     Float lower_blocking_time=step_size;
-    for(std::map< DiscreteEvent, shared_ptr<const VectorFunctionInterface> >::const_iterator
+    for(std::map< DiscreteEvent, VectorFunction >::const_iterator
         iter=invariants.begin(); iter!=invariants.end(); ++iter)
     {
-        shared_ptr<const VectorFunctionInterface> guard_ptr = iter->second;
-        if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
+        VectorFunction guard = iter->second;
+        if(possibly(this->_toolbox->active(guard,flow_bounds))) {
             ARIADNE_LOG(2,"One invariant is possibly active.\n");
             if(semantics == UPPER_SEMANTICS) {
                 // For upper semantics, test if at at least one blocking event
                 // (invariant or urgent transition) is definitely finally activate.
-                if(definitely(this->_toolbox->active(*guard_ptr,final_set_model))) {
+                if(definitely(this->_toolbox->active(guard,final_set_model))) {
                     blocking=true;
                     break;              // Skip other invariants
                 }
             } else {    // LOWER_SEMANTICS
                 // For lower semantics, find a time t0 such that no blocking events are
                 // (possibly) activated before t0.
-                if(possibly(this->_toolbox->active(*guard_ptr,initial_set_model))) {
+                if(possibly(this->_toolbox->active(guard,initial_set_model))) {
                     // Invariant is initially active. No continuous evolution possible
                     blocking = true;
                     lower_blocking_time = 0.0;
                     break;              // Skip remaining invariants
                 }
-                if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
+                if(possibly(this->_toolbox->active(guard,reach_set_model))) {
                     blocking = true;
                     try {
                         // Compute crossing time
-                        ConstraintModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
+                        ConstraintModelType guard_model=this->_toolbox->predicate_model(guard,flow_bounds);
                         TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
                         lower_blocking_time = min(lower_blocking_time, crossing_time_model.range().lower());
                     } catch(DegenerateCrossingException) {
@@ -416,7 +415,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         lower_blocking_time=0.0;
                     }
                 } else {
-                    if(possibly(this->_toolbox->active(*guard_ptr,final_set_model))) {
+                    if(possibly(this->_toolbox->active(guard,final_set_model))) {
                         blocking=true;
                     }
                 }
@@ -433,30 +432,30 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         iter=transitions.begin(); iter!=transitions.end(); ++iter)
     {
         if(iter->forced()) {  // Test only forced transitions
-            shared_ptr<const VectorFunctionInterface> guard_ptr = iter->activation_ptr();
-            if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
+            VectorFunction guard = iter->activation();
+            if(possibly(this->_toolbox->active(guard,flow_bounds))) {
                 ARIADNE_LOG(2,"Forced transition "<<*iter<<" is possibly active.\n");
                 if(semantics == UPPER_SEMANTICS) {
                     // For upper semantics, test if at at least one blocking event
                     // (invariant or urgent transition) is definitely finally activate.
-                    if(definitely(this->_toolbox->active(*guard_ptr,final_set_model))) {
+                    if(definitely(this->_toolbox->active(guard,final_set_model))) {
                         blocking=true;
                         break;              // Skip other invariants
                     }
                 } else {    // LOWER_SEMANTICS
                     // For lower semantics, find a time t0 such that no blocking events are
                     // (possibly) activated before t0.
-                    if(possibly(this->_toolbox->active(*guard_ptr,initial_set_model))) {
+                    if(possibly(this->_toolbox->active(guard,initial_set_model))) {
                         // Forced transition is initially active. No continuous evolution possible
                         blocking = true;
                         lower_blocking_time = 0.0;
                         break;              // Skip remaining invariants
                     }
-                    if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
+                    if(possibly(this->_toolbox->active(guard,reach_set_model))) {
                         blocking = true;
                         try {
                             // Compute crossing time
-                            ConstraintModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
+                            ConstraintModelType guard_model=this->_toolbox->predicate_model(guard,flow_bounds);
                             TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
                             lower_blocking_time = min(lower_blocking_time, crossing_time_model.range().lower());
                         } catch(DegenerateCrossingException) {
@@ -464,7 +463,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             lower_blocking_time=0.0;
                         }
                     } else {
-                        if(possibly(this->_toolbox->active(*guard_ptr,final_set_model))) {
+                        if(possibly(this->_toolbox->active(guard,final_set_model))) {
                             blocking=true;
                         }
                     }
@@ -495,13 +494,13 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         for(std::set< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
-            shared_ptr<const VectorFunctionInterface> guard_ptr = iter->activation_ptr();
-            if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
+            VectorFunction guard = iter->activation();
+            if(possibly(this->_toolbox->active(guard,flow_bounds))) {
                 ARIADNE_LOG(2," "<<*iter<<" is possibly active.\n");
-                if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
+                if(possibly(this->_toolbox->active(guard,reach_set_model))) {
                     Float lower_active_time = 0.0;
                     Float upper_active_time = step_size;
-                    ConstraintModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
+                    ConstraintModelType guard_model=this->_toolbox->predicate_model(guard,flow_bounds);
                     try {
                         // Compute crossing time
                         TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
@@ -514,8 +513,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         if(upper_crossing_time < 0.0 || upper_crossing_time > step_size) {
                             upper_crossing_time = step_size;
                         }
-                        tribool initially_active = this->_toolbox->active(*guard_ptr,initial_set_model);
-                        tribool finally_active = this->_toolbox->active(*guard_ptr,final_set_model);
+                        tribool initially_active = this->_toolbox->active(guard,initial_set_model);
+                        tribool finally_active = this->_toolbox->active(guard,final_set_model);
                         if(!possibly(initially_active)) {
                             // Transition is NOT initally active
                             lower_active_time = lower_crossing_time;
@@ -553,13 +552,13 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         ARIADNE_LOG(4,"jump_time_model="<<jump_time_model<<"\n");
 
                         // Compute activation set model and jump set model
-                        shared_ptr<const VectorFunctionInterface> reset_ptr=iter->reset_ptr();
+                        VectorFunction reset=iter->reset();
                         DiscreteState jump_location=iter->target().location();
                         DiscreteEvent jump_event=iter->event();
 
                         SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
                         ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
-                        SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
+                        SetModelType jump_set_model=this->_toolbox->reset_step(reset,active_set_model);
                         ARIADNE_LOG(4,"jump_location="<<jump_location<<", jump_set_model="<<jump_set_model<<"\n");
 
                         // Adjoin intermediate and jump sets to the result
@@ -579,30 +578,30 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         for(std::set< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
-            shared_ptr<const VectorFunctionInterface> guard_ptr = iter->activation_ptr();
-            shared_ptr<const VectorFunctionInterface> reset_ptr=iter->reset_ptr();
+            VectorFunction guard = iter->activation();
+            VectorFunction reset=iter->reset();
             DiscreteState jump_location=iter->target().location();
             if(lower_blocking_time <= 0.0) {
                 // No continuous evolution possible, execute only transitions that are initially active
-                if(definitely(this->_toolbox->active(*guard_ptr,initial_set_model))) {
+                if(definitely(this->_toolbox->active(guard,initial_set_model))) {
                     ARIADNE_LOG(3," "<<*iter<<" is initially active. Adding jump set to the working sets.\n");
                     activated = true;     // at least one transition have been activated
-                    SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,initial_set_model);
+                    SetModelType jump_set_model=this->_toolbox->reset_step(reset,initial_set_model);
                     // Adjoin intermediate and jump sets to the result
                     working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,initial_time_model));
                     intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
                 }
             } else {    // lower_blocking_time > 0.0
-                if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
+                if(possibly(this->_toolbox->active(guard,flow_bounds))) {
                     ARIADNE_LOG(2," "<<*iter<<" is possibly active.\n");
-                    if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
+                    if(possibly(this->_toolbox->active(guard,reach_set_model))) {
                         Float lower_active_time = lower_blocking_time;
                         Float upper_active_time = 0.0;
-                        if(definitely(this->_toolbox->active(*guard_ptr,initial_set_model))) {
+                        if(definitely(this->_toolbox->active(guard,initial_set_model))) {
                             // Transition is definitely initially active
                             lower_active_time = 0.0;
                         }
-                        if(definitely(this->_toolbox->active(*guard_ptr,final_set_model))) {
+                        if(definitely(this->_toolbox->active(guard,final_set_model))) {
                             // Transition is definitely finally active
                             upper_active_time = lower_blocking_time;
                         }
@@ -610,7 +609,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             // transition is not both finally and initially active, check crossing time
                             try {
                                 // Compute crossing time
-                                ConstraintModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
+                                ConstraintModelType guard_model=this->_toolbox->predicate_model(guard,flow_bounds);
                                 TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
                                 ARIADNE_LOG(3," Crossing time: "<<crossing_time_model.range()<<"\n");
                                 if(crossing_time_model.range().lower() >= 0.0) {
@@ -637,11 +636,11 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             ARIADNE_LOG(4,"jump_time_model="<<jump_time_model<<"\n");
 
                             // Compute activation set model and jump set model
-                            shared_ptr<const VectorFunctionInterface> reset_ptr=iter->reset_ptr();
+                            VectorFunction reset=iter->reset();
                             DiscreteState jump_location=iter->target().location();
                             SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
                             ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
-                            SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
+                            SetModelType jump_set_model=this->_toolbox->reset_step(reset,active_set_model);
                             ARIADNE_LOG(4,"jump_location="<<jump_location<<", jump_set_model="<<jump_set_model<<"\n");
 
                             // Adjoin intermediate and jump sets to the result
@@ -708,8 +707,6 @@ timed_evolution(const SystemType& system,
                 bool reach) const
 {
     verbosity=0;
-
-    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 

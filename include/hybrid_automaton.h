@@ -34,9 +34,7 @@
 #include <set>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-
+#include "function.h"
 
 namespace Ariadne {
 
@@ -55,8 +53,8 @@ class DiscreteMode;
 class DiscreteTransition;
 class HybridAutomaton;
 
-class ScalarFunctionInterface;
-class VectorFunctionInterface;
+class ScalarFunction;
+class VectorFunction;
 class Grid;
 
 /*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
@@ -69,17 +67,15 @@ class Grid;
  */
 class DiscreteMode {
     friend class HybridAutomaton;
-    typedef boost::shared_ptr<const VectorFunctionInterface> VectorFunctionPtr;
-    typedef boost::shared_ptr<const VectorFunctionInterface> ScalarFunctionPtr;
   private:
 
     // The discrete mode's discrete state.
     DiscreteState _location;
 
     // The discrete mode's vector field.
-    VectorFunctionPtr _dynamic;
+    VectorFunction _dynamic;
     // The discrete mode's invariants.
-    std::map< DiscreteEvent, VectorFunctionPtr > _invariants;
+    std::map< DiscreteEvent, VectorFunction > _invariants;
 
     // The discrete mode's grid for reachability analysis.
     boost::shared_ptr< const Grid > _grid;
@@ -89,15 +85,11 @@ class DiscreteMode {
         return this->_location; }
 
     //! \brief The discrete mode's dynamic (a vector field).
-    const VectorFunctionInterface& dynamic() const {
-        return *this->_dynamic; }
-
-    //! \brief The discrete mode's dynamic (a vector field).
-    VectorFunctionPtr dynamic_ptr() const {
+    const VectorFunction& dynamic() const {
         return this->_dynamic; }
 
     //! \brief The discrete mode's invariants.
-    const std::map< DiscreteEvent, VectorFunctionPtr >& invariants() const {
+    const std::map< DiscreteEvent, VectorFunction >& invariants() const {
         return this->_invariants; }
 
     //! \brief The discrete mode's default spacial grid.
@@ -117,12 +109,12 @@ class DiscreteMode {
     // \param dynamic is the mode's vector field.
     // \param invariants is the mode's invariants.
     DiscreteMode(DiscreteState location,
-                 const VectorFunctionInterface& dynamic);
+                 const VectorFunction& dynamic);
 
     // Construct from objects managed by shared pointers (for internal use)
     DiscreteMode(DiscreteState location,
-                 const VectorFunctionPtr dynamic,
-                 const std::vector< VectorFunctionPtr >& invariants);
+                 const VectorFunction dynamic,
+                 const std::vector< VectorFunction >& invariants);
 
 };
 
@@ -159,10 +151,10 @@ class DiscreteTransition
     const DiscreteMode* _target;
 
     // \brief The activation region of the discrete transition.
-    boost::shared_ptr< const VectorFunctionInterface > _activation;
+    VectorFunction _activation;
 
     // \brief The reset of the discrete transition.
-    boost::shared_ptr< const VectorFunctionInterface > _reset;
+    VectorFunction _reset;
 
     // \brief Whether or not the transition is forced.
     bool _forced;
@@ -183,22 +175,12 @@ class DiscreteTransition
 
 
     //! \brief The activation region of the discrete transition.
-    boost::shared_ptr<const VectorFunctionInterface> activation_ptr() const {
+    const VectorFunction& activation() const {
         return this->_activation;
     }
 
-    //! \brief The activation region of the discrete transition.
-    const VectorFunctionInterface& activation() const {
-        return *this->_activation;
-    }
-
     //! \brief The reset map of the discrete transition.
-    const VectorFunctionInterface& reset() const {
-        return *this->_reset;
-    }
-
-    //! \brief The reset map of the discrete transition.
-    boost::shared_ptr<const VectorFunctionInterface> reset_ptr() const {
+    const VectorFunction& reset() const {
         return this->_reset;
     }
 
@@ -214,17 +196,10 @@ class DiscreteTransition
     DiscreteTransition(DiscreteEvent event,
                        const DiscreteMode& source,
                        const DiscreteMode& target,
-                       const VectorFunctionInterface& reset,
-                       const VectorFunctionInterface& activation,
+                       const VectorFunction& reset,
+                       const VectorFunction& activation,
                        bool forced=false);
 
-    // Construct from shared pointers (for internal use). */
-    DiscreteTransition(DiscreteEvent event,
-                       const DiscreteMode& source,
-                       const DiscreteMode& target,
-                       const boost::shared_ptr< VectorFunctionInterface > reset,
-                       const boost::shared_ptr< VectorFunctionInterface > activation,
-                       bool forced=false);
 };
 
 std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt);
@@ -281,13 +256,10 @@ class HybridAutomaton
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    typedef boost::shared_ptr<const ScalarFunctionInterface> ScalarFunctionPtr;
-    typedef boost::shared_ptr<const VectorFunctionInterface> VectorFunctionPtr;
 
-
-    typedef std::map< DiscreteEvent, boost::shared_ptr<const VectorFunctionInterface> >::const_iterator invariant_const_iterator;
-    typedef std::set< DiscreteTransition >::const_iterator discrete_transition_const_iterator;
-    typedef std::set< DiscreteMode >::const_iterator discrete_mode_const_iterator;
+    typedef std::map<DiscreteEvent,VectorFunction>::const_iterator invariant_const_iterator;
+    typedef std::set<DiscreteTransition>::const_iterator discrete_transition_const_iterator;
+    typedef std::set<DiscreteMode>::const_iterator discrete_mode_const_iterator;
   private:
     //! \brief The hybrid automaton's name.
     std::string _name;
@@ -323,7 +295,7 @@ class HybridAutomaton
     //!   \param state is the mode's discrete state.
     //!   \param dynamic is the mode's vector field.
     const DiscreteMode& new_mode(DiscreteState state,
-                                 const VectorFunctionInterface& dynamic);
+                                 const VectorFunction& dynamic);
 
     //! \brief Adds an invariants to a mode of the automaton.
     //!
@@ -331,7 +303,7 @@ class HybridAutomaton
     //!   \param invariants is the new invariants condition.
 
     const DiscreteMode& new_invariant(DiscreteState state,
-                                      const VectorFunctionInterface& invariants);
+                                      const VectorFunction& invariants);
 
     //! \brief Adds an invariants to a mode of the automaton.
     //!
@@ -339,7 +311,7 @@ class HybridAutomaton
     //!    \param invariants is the new invariants condition.
 
     const DiscreteMode& new_invariant(const DiscreteMode& mode,
-                                      const VectorFunctionInterface& invariants);
+                                      const VectorFunction& invariants);
 
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
@@ -353,8 +325,8 @@ class HybridAutomaton
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              DiscreteState source,
                                              DiscreteState target,
-                                             const VectorFunctionInterface& reset,
-                                             const VectorFunctionInterface& activation,
+                                             const VectorFunction& reset,
+                                             const VectorFunction& activation,
                                              bool forced);
 
     //! \brief Adds a forced (urgent) discrete transition to the automaton
@@ -368,8 +340,8 @@ class HybridAutomaton
     const DiscreteTransition& new_forced_transition(DiscreteEvent event,
                                                     DiscreteState source,
                                                     DiscreteState target,
-                                                    const VectorFunctionInterface& reset,
-                                                    const VectorFunctionInterface& activation);
+                                                    const VectorFunction& reset,
+                                                    const VectorFunction& activation);
 
     //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
     //! using the discrete states to specify the source and target modes.
@@ -382,8 +354,8 @@ class HybridAutomaton
     const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
                                                       DiscreteState source,
                                                       DiscreteState target,
-                                                      const VectorFunctionInterface& reset,
-                                                      const VectorFunctionInterface& activation);
+                                                      const VectorFunction& reset,
+                                                      const VectorFunction& activation);
 
     //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
     //!
@@ -396,8 +368,8 @@ class HybridAutomaton
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              const DiscreteMode& source,
                                              const DiscreteMode& target,
-                                             const VectorFunctionInterface& reset,
-                                             const VectorFunctionInterface& activation,
+                                             const VectorFunction& reset,
+                                             const VectorFunction& activation,
                                              bool forced);
 
     //! \brief Set the grid controlling relative scaling in the mode.
@@ -439,10 +411,10 @@ class HybridAutomaton
     std::set< DiscreteTransition > transitions(DiscreteState source) const;
 
     //! \brief The blocking events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,VectorFunctionPtr> blocking_guards(DiscreteState location) const;
+    std::map<DiscreteEvent,VectorFunction> blocking_guards(DiscreteState location) const;
 
     //! \brief The permissive events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,VectorFunctionPtr> permissive_guards(DiscreteState location) const;
+    std::map<DiscreteEvent,VectorFunction> permissive_guards(DiscreteState location) const;
 
     //! \brief The state space of the system.
     HybridSpace state_space() const;

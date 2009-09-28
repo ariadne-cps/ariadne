@@ -93,7 +93,7 @@ template<class X> Expression<X> simplify(const Expression<X>& e);
  *  Formulae in different variables may be combined; the variables of the resulting formula
  *  are all variables occuring in all formulae.
  *  Formulae may be manipulated symbolically.
- *  \sa Variable, ScalarFunctionInterface
+ *  \sa Variable, ScalarFunction
  */
 template<class R>
 class Expression {

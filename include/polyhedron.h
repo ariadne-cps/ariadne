@@ -56,7 +56,7 @@ class Polyhedron;
  *  where \f$A\f$ is a \f$n\times d\f$ matrix and \f$b\f$ is a vector of size \f$n\f$.
  */ 
 class Polyhedron 
-    : public ConstraintSet
+    : public RegularSetInterface
 {
   public:
     //@{ 
@@ -82,6 +82,9 @@ class Polyhedron
     //! \brief Convert from a polytope. 
     explicit Polyhedron(const Polytope& p);
   
+    //! \brief Create a dynamically-allocated copy.
+    virtual Polyhedron* clone() const;
+
     //@}
   
   
@@ -100,11 +103,23 @@ class Polyhedron
     //@{
     //! \name Geometric operations
 
+    //! \brief The dimension of the polyhedron.
+    virtual uint dimension() const;
+
     //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
     virtual tribool empty() const;
 
     //! \brief Tests if the polyhedron is bounded. (Not currently implemented.)
     virtual tribool bounded() const;
+
+    //! \brief Tests if the polyhedron intersects a box. (Not currently implemented.)
+    virtual tribool overlaps(const Box& bx) const;
+
+    //! \brief Tests if the polyhedron is a superset of a box. (Not currently implemented.)
+    virtual tribool covers(const Box& bx) const;
+
+    //! \brief Tests if the polyhedron is disjoint from a box. (Not currently implemented.)
+    virtual tribool disjoint(const Box& bx) const;
 
     //! \brief The \a i<sup>th</sup> defining halfspace. 
     Polyhedron halfspace(size_t i) const;
@@ -132,7 +147,9 @@ class Polyhedron
     //! \brief Write to an output stream. 
     std::ostream& write(std::ostream& os) const;
     //@}
-
+  private:
+    Matrix<Float> _A;
+    Vector<Float> _b;
 };
 
   

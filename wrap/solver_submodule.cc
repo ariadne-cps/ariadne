@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function_interface.h"
+#include "function.h"
 #include "solver_interface.h"
 #include "solver.h"
 #include "taylor_function.h"
@@ -48,13 +48,13 @@ class SolverWrapper
     double maximum_error() const { return this->get_override("maximum_error")(); }
     void set_maximum_number_of_steps(uint) { this->get_override("set_maximum_number_of_steps")(); }
     uint maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
-    Vector<Interval> zero(const VectorFunctionInterface& f, const Vector<Interval>& bx) const {
+    Vector<Interval> zero(const VectorFunction& f, const Vector<Interval>& bx) const {
         return this->get_override("zero")(); }
-    Vector<Interval> fixed_point(const VectorFunctionInterface& f, const Vector<Interval>& bx) const {
+    Vector<Interval> fixed_point(const VectorFunction& f, const Vector<Interval>& bx) const {
         return this->get_override("fixed_point")(); }
-    Set< Vector<Interval> > solve(const VectorFunctionInterface& f, const Vector<Interval>& bx) const {
+    Set< Vector<Interval> > solve(const VectorFunction& f, const Vector<Interval>& bx) const {
         return this->get_override("solve")(); }
-    List<VectorTaylorFunction> implicit(const VectorFunctionInterface& f, const Vector<Interval>& pd, const Vector<Interval>& bx) const {
+    List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& pd, const Vector<Interval>& bx) const {
         return this->get_override("implicit")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
@@ -65,13 +65,13 @@ class IntegratorWrapper
   public:
 //    IntegratorInterface* clone() const {
 //        return this->get_override("clone")(); }
-    Pair<Float,IVector> flow_bounds(const VectorFunctionInterface&,const IVector&,const IVector&,const Float&) const {
+    Pair<Float,IVector> flow_bounds(const VectorFunction&,const IVector&,const IVector&,const Float&) const {
         return this->get_override("flow_bounds")(); }
-    VectorTaylorFunction flow(const VectorFunctionInterface& vector_field,const IVector&,const Float&) const {
+    VectorTaylorFunction flow(const VectorFunction& vector_field,const IVector&,const Float&) const {
         return this->get_override("flow")(); }
-    VectorTaylorFunction flow(const VectorFunctionInterface&,const IVector&,const IVector&,const Float&) const {
+    VectorTaylorFunction flow(const VectorFunction&,const IVector&,const IVector&,const Float&) const {
         return this->get_override("flow")(); }
-    VectorTaylorFunction time_step(const VectorFunctionInterface&,const IVector&,const IVector&,const Float&) const {
+    VectorTaylorFunction time_step(const VectorFunction&,const IVector&,const IVector&,const Float&) const {
         return this->get_override("time_step")(); }
 //    std::ostream& write(std::ostream&) const {
 //        return this->get_override("write")(); }
@@ -85,14 +85,14 @@ class IntegratorWrapper
 void export_solver()
 {
     class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
-    solver_wrapper_class.def("zero",(Vector<Interval>(SolverInterface::*)(const VectorFunctionInterface&,const Vector<Interval>&)const)&SolverInterface::zero);
-    solver_wrapper_class.def("fixed_point",(Vector<Interval>(SolverInterface::*)(const VectorFunctionInterface&,const Vector<Interval>&)const)&SolverInterface::fixed_point);
-    solver_wrapper_class.def("solve",(Set< Vector<Interval> >(SolverInterface::*)(const VectorFunctionInterface&,const Vector<Interval>&)const)&SolverInterface::solve);
+    solver_wrapper_class.def("zero",(Vector<Interval>(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const)&SolverInterface::zero);
+    solver_wrapper_class.def("fixed_point",(Vector<Interval>(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const)&SolverInterface::fixed_point);
+    solver_wrapper_class.def("solve",(Set< Vector<Interval> >(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const)&SolverInterface::solve);
 
     class_<IntervalNewtonSolver, bases<SolverInterface> > interval_newton_solver_class("IntervalNewtonSolver",init<double,unsigned int>());
 
     class_<KrawczykSolver, bases<SolverInterface> > krawczyk_solver_class("KrawczykSolver",init<double,unsigned int>());
-    krawczyk_solver_class.def("implicit",(List<VectorTaylorFunction>(KrawczykSolver::*)(const VectorFunctionInterface&,const Vector<Interval>&,const Vector<Interval>&)const) &KrawczykSolver::implicit);
+    krawczyk_solver_class.def("implicit",(List<VectorTaylorFunction>(KrawczykSolver::*)(const VectorFunction&,const Vector<Interval>&,const Vector<Interval>&)const) &KrawczykSolver::implicit);
 
 }
 
@@ -102,8 +102,8 @@ void export_integrator()
 {
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
     class_<TaylorIntegrator, bases<IntegratorInterface> > taylor_integrator_class("TaylorIntegrator",init<unsigned int>());
-    taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunctionInterface&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
-    taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunctionInterface&,const Vector<Interval>&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
+    taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunction&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
+    taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunction&,const Vector<Interval>&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
 }
 
 

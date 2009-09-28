@@ -74,10 +74,8 @@ class HybridEvolver
     : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
-    typedef boost::shared_ptr<const ScalarFunctionInterface> ScalarFunctionPtr;
-    typedef boost::shared_ptr<const VectorFunctionInterface> VectorFunctionPtr;
-    typedef ScalarFunctionInterface ScalarFunctionType;
-    typedef VectorFunctionInterface VectorFunctionType;
+    typedef ScalarFunction ScalarFunctionType;
+    typedef VectorFunction VectorFunctionType;
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction FunctionModelType;
     typedef VectorTaylorFunction MapModelType;
@@ -150,35 +148,35 @@ class HybridEvolver
                                   Semantics semantics, bool reach) const;
 
   protected:
-    TimeModelType crossing_time(VectorFunctionPtr guard, const FlowSetModelType& flow_set) const;
+    TimeModelType crossing_time(VectorFunction guard, const FlowSetModelType& flow_set) const;
 
-    Interval normal_derivative(VectorFunctionPtr guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
+    Interval normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
 
     void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
-                                         const std::map<DiscreteEvent,VectorFunctionPtr>&,
+                                         const std::map<DiscreteEvent,VectorFunction>&,
                                          const ContinuousEnclosureType&) const;
 
     void compute_flow_model(FlowSetModelType&, BoxType&, Float&,
-                            VectorFunctionPtr, const SetModelType&) const;
+                            VectorFunction, const SetModelType&) const;
     void compute_flow_model(FunctionModelType&, BoxType&,
-                            VectorFunctionPtr, const BoxType&) const;
+                            VectorFunction, const BoxType&) const;
 
     void compute_crossing_time_and_direction(TimeModelType&, Interval&,
-                                             VectorFunctionPtr guard, const FlowSetModelType& flow_set) const;
+                                             VectorFunction guard, const FlowSetModelType& flow_set) const;
 
     void compute_blocking_events(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
-                                 const std::map<DiscreteEvent,VectorFunctionPtr>& guards,
+                                 const std::map<DiscreteEvent,VectorFunction>& guards,
                                  const FlowSetModelType& flow_set_model) const;
 
     void compute_blocking_time(std::set<DiscreteEvent>&, TimeModelType&,
                                const std::map<DiscreteEvent,TimeModelType>&) const;
 
     void compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
-                                  const std::map<DiscreteEvent,VectorFunctionPtr>& activations,
+                                  const std::map<DiscreteEvent,VectorFunction>& activations,
                                   const FlowSetModelType& flow_set_model) const;
 
     void compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
-                                  const std::map<DiscreteEvent,VectorFunctionPtr>& activations,
+                                  const std::map<DiscreteEvent,VectorFunction>& activations,
                                   const FlowSetModelType& flow_set_model,
                                   const TimeModelType& blocking_time_model,
                                   const Semantics sematics) const;

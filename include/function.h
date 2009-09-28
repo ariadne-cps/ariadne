@@ -135,16 +135,16 @@ ScalarFunction pow(const ScalarFunction&, uint);
 
 //! A vector function \f$f:\R^n\rightarrow\R^m\f$.
 class VectorFunction
-// Temporarily make VectorFunction conform to the VectorFunctionInterface
-// to facilitate transfer to new code
-    : public VectorFunctionInterface
 {
     typedef uint Nat;
+    typedef uint SizeType;
+    typedef ushort SmoothnessType;
     typedef std::ostream OStream;
   public:
     static VectorFunction constant(const Vector<Real>& c, Nat as);
     static VectorFunction identity(Nat n);
 
+    VectorFunction();
     VectorFunction(Nat rs, Nat as);
     VectorFunction(Nat rs, const ScalarFunction& sf);
     VectorFunction(VectorFunctionInterface*);

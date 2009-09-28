@@ -26,7 +26,7 @@
 #include "tuple.h"
 #include "stlio.h"
 #include "vector.h"
-#include "function_interface.h"
+#include "function.h"
 #include "taylor_model.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
@@ -132,14 +132,14 @@ _evolution(EnclosureListType& final_sets,
 {
 
 
-    typedef VectorFunctionInterface FunctionType;
+    typedef VectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction FunctionModelType;
     typedef VectorTaylorFunction FlowModelType;
     typedef TaylorSet SetModelType;
 
 
-    typedef boost::shared_ptr< const VectorFunctionInterface > FunctionConstPointer;
+    typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -216,7 +216,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
                 Semantics semantics,
                 bool reach) const
 {
-    typedef VectorFunctionInterface FunctionType;
+    typedef VectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction MapModelType;
     typedef VectorTaylorFunction FlowModelType;

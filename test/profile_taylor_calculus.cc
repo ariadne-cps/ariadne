@@ -34,11 +34,13 @@ using std::string;
 
 #include "numeric.h"
 #include "real.h"
+#include "function.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "taylor_calculus.h"
-#include "user_function.h"
 #include "box.h"
+
+#include "user_function.h"
 
 namespace Ariadne {
 
@@ -54,29 +56,29 @@ RealVector e0=e(2,0); RealVector e1=e(2,1);
 
 
 struct ProfileReset {
-    ProfileReset(TaylorCalculus* c_, VectorFunctionInterface& f_, TaylorSet& s_, int n_=1) : c(c_), f(f_), s(s_), n(n_) { }
-    TaylorCalculus* c; VectorFunctionInterface& f; TaylorSet s; int n; typedef TaylorSet Result;
+    ProfileReset(TaylorCalculus* c_, VectorFunction& f_, TaylorSet& s_, int n_=1) : c(c_), f(f_), s(s_), n(n_) { }
+    TaylorCalculus* c; VectorFunction& f; TaylorSet s; int n; typedef TaylorSet Result;
     TaylorSet operator()() const { TaylorSet r=c->reset_step(f,s); for(int i=1; i<n; ++i) { r=c->reset_step(f,s); } return r; }
 };
 
 struct ProfileBounds {
-    ProfileBounds(TaylorCalculus* c_, VectorFunctionInterface& f_, IntervalVector d_, Float h_)
+    ProfileBounds(TaylorCalculus* c_, VectorFunction& f_, IntervalVector d_, Float h_)
         : c(c_), f(f_), d(d_), h(h_) { }
-    TaylorCalculus* c; VectorFunctionInterface& f; IntervalVector d; Float h; typedef VectorTaylorFunction Result;
+    TaylorCalculus* c; VectorFunction& f; IntervalVector d; Float h; typedef VectorTaylorFunction Result;
     Result operator()() const { c->flow_bounds(f,d,h,std::numeric_limits<double>::max()); VectorTaylorFunction r; return r; }
 };
 
 struct ProfileFlow {
-    ProfileFlow(TaylorCalculus* c_, VectorFunctionInterface& f_, IntervalVector d_, Float h_, IntervalVector b_)
+    ProfileFlow(TaylorCalculus* c_, VectorFunction& f_, IntervalVector d_, Float h_, IntervalVector b_)
         : c(c_), f(f_), d(d_), h(h_), b(b_) { }
-    TaylorCalculus* c; VectorFunctionInterface& f; IntervalVector d; Float h; IntervalVector b;
+    TaylorCalculus* c; VectorFunction& f; IntervalVector d; Float h; IntervalVector b;
     typedef VectorTaylorFunction Result;
     VectorTaylorFunction operator()() const { return c->flow_model(f,d,h,b); }
 };
 
 struct ProfileCrossing {
-    ProfileCrossing(TaylorCalculus* c_, ScalarFunctionInterface& g_, VectorTaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
-    TaylorCalculus* c; ScalarFunctionInterface& g; VectorTaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
+    ProfileCrossing(TaylorCalculus* c_, ScalarFunction& g_, VectorTaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
+    TaylorCalculus* c; ScalarFunction& g; VectorTaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
     TaylorModel operator()() const {
         return c->crossing_time(g,f,s); }
 };

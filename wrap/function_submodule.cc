@@ -272,6 +272,7 @@ void export_scalar_function()
 {
     class_<ScalarFunction>
         scalar_function_class("ScalarFunction", init<ScalarFunction>());
+    scalar_function_class.def(init<uint>());
     scalar_function_class.def(init<RealExpression,RealSpace>());
     scalar_function_class.def(init< Polynomial<Real> >());
     scalar_function_class.def("argument_size", &ScalarFunction::argument_size);
@@ -306,12 +307,22 @@ void export_scalar_function()
 
     def("derivative", (ScalarFunction(ScalarFunction::*)(uint)const) &ScalarFunction::derivative);
 
+    def("pow", (ScalarFunction(*)(const ScalarFunction&,int)) &pow);
+    def("rec", (ScalarFunction(*)(const ScalarFunction&)) &rec);
+    def("sqr", (ScalarFunction(*)(const ScalarFunction&)) &sqr);
+    def("sqrt", (ScalarFunction(*)(const ScalarFunction&)) &sqrt);
+    def("exp", (ScalarFunction(*)(const ScalarFunction&)) &exp);
+    def("log", (ScalarFunction(*)(const ScalarFunction&)) &log);
+    def("sin", (ScalarFunction(*)(const ScalarFunction&)) &sin);
+    def("cos", (ScalarFunction(*)(const ScalarFunction&)) &cos);
+    def("tan", (ScalarFunction(*)(const ScalarFunction&)) &tan);
 }
 
 void export_vector_function()
 {
     class_<VectorFunction>
         vector_function_class("VectorFunction", init<VectorFunction>());
+    vector_function_class.def(init<uint,uint>());
     vector_function_class.def("result_size", &VectorFunction::result_size);
     vector_function_class.def("argument_size", &VectorFunction::argument_size);
     vector_function_class.def("__getitem__", &VectorFunction::get);

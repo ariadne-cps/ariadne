@@ -36,7 +36,6 @@
 #include <boost/iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
-#include "operators.h"
 #include "multi_index.h"
 #include "expansion.h"
 #include "taylor_model.h"

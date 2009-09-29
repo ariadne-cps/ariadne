@@ -44,9 +44,6 @@
 #include "affine.h"
 #include "taylor_model.h"
 #include "differential.h"
-#include "operators.h"
-#include "expression.h"
-#include "formula.h"
 #include "real.h"
 
 namespace Ariadne {
@@ -95,7 +92,7 @@ class ScalarFunction
     ScalarFunction derivative(Nat j) const;
     Polynomial<Real> polynomial() const;
 
-    std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
+    std::ostream& write(std::ostream& os) const;
   public:
     friend ScalarFunction compose(const ScalarFunction&, const VectorFunction&);
     friend Real evaluate(const ScalarFunction&, const Vector<Real>&);
@@ -131,7 +128,15 @@ ScalarFunction operator-(const Real&, const ScalarFunction&);
 ScalarFunction operator*(const Real&, const ScalarFunction&);
 ScalarFunction operator/(const Real&, const ScalarFunction&);
 
-ScalarFunction pow(const ScalarFunction&, uint);
+ScalarFunction pow(const ScalarFunction&, int);
+ScalarFunction rec(const ScalarFunction&);
+ScalarFunction sqr(const ScalarFunction&);
+ScalarFunction sqrt(const ScalarFunction&);
+ScalarFunction exp(const ScalarFunction&);
+ScalarFunction log(const ScalarFunction&);
+ScalarFunction sin(const ScalarFunction&);
+ScalarFunction cos(const ScalarFunction&);
+ScalarFunction tan(const ScalarFunction&);
 
 //! A vector function \f$f:\R^n\rightarrow\R^m\f$.
 class VectorFunction

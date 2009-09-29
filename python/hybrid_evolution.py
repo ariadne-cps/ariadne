@@ -35,31 +35,6 @@ Taylor.__repr__=Taylor.__str__
 def evolve(dynamic):
     pass
 
-class ConstraintSet:
-    def __init__(self,domain,function,equality_constraints,positive_constraints):
-        self.domain=domain
-        self.function=function
-        self.equality_constraints=equality_constraints
-        self.positive_constraints=positive_constraints
-
-    def bounding_box(self):
-        return function(domain)
-
-    def disjoint(self,box):
-        return self.__disjoint(self.domain,box,box.radius())
-
-    def __disjoint(self,domain,box,err):
-        if False: #positive_constraints(domain)
-            return True
-        image=Box(self.function(domain))
-        if disjoint(image,box):
-            return True;
-        if subset(image,box):
-            return False
-        if image.radius()<err:
-            return Indeterminate
-        (subdomain1,subdomain2)=split(domain)
-        return self.__disjoint(subdomain1,box,err) and self.__disjoint(subdomain2,box,err)
 
 if __name__=="__main__":
     x=ScalarAffineFunction([1,2],3)

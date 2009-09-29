@@ -24,6 +24,10 @@
 #include "function.h"
 #include "real.h"
 #include "polynomial.h"
+#include "differential.h"
+#include "taylor_model.h"
+#include "operators.h"
+#include "expression.h"
 
 namespace Ariadne {
 
@@ -208,7 +212,6 @@ inline std::ostream& ScalarPolynomialFunction::write(std::ostream& os) const {
     const ScalarPolynomialFunction& p=*this;
     bool first_term=true;
     //bool first_factor=true;
-    os<<"P["<<p.argument_size()<<"](";
     Float r;
     if(p.expansion().size()==0) {
         r=0.0;
@@ -234,7 +237,6 @@ inline std::ostream& ScalarPolynomialFunction::write(std::ostream& os) const {
         }
     }
     if(r>0) { os<<"+/-"<<r; }
-    os<<")";
     return os;
 }
 
@@ -283,15 +285,13 @@ class ScalarFunctionTemplate
   private:
     template<class R, class A> void _base_compute(R& r, const A& a) const {
         static_cast<const F*>(this)->_compute(r,a); }
-    template<class R, class A> void _base_compute_approx(R& r, const A& a) const {
-        static_cast<const F*>(this)->_compute_approx(r,a); }
   protected:
     ScalarFunctionTemplate() { }
   public:
     virtual SmoothnessType smoothness() const { return SMOOTH; }
 
     virtual Float evaluate(const Vector<Float>& x) const {
-        Float r; _base_compute_approx(r,x); return r; }
+        Float r; _base_compute(r,x); return r; }
     virtual Interval evaluate(const Vector<Interval>& x) const {
         Interval r; _base_compute(r,x); return r; }
 
@@ -301,7 +301,7 @@ class ScalarFunctionTemplate
 
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
         Differential<Float> r(Differential<Float>(x[0].argument_size(),x[0].degree()));
-        _base_compute_approx(r,x); return r; }
+        _base_compute(r,x); return r; }
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
         Differential<Interval> r(Differential<Interval>(x[0].argument_size(),x[0].degree()));
         _base_compute(r,x); return r; }
@@ -328,15 +328,13 @@ class VectorFunctionTemplate
   private:
     template<class R, class A> void _base_compute(R& r, const A& a) const {
         static_cast<const F*>(this)->_compute(r,a); }
-    template<class R, class A> void _base_compute_approx(R& r, const A& a) const {
-        static_cast<const F*>(this)->_compute_approx(r,a); }
   protected:
     VectorFunctionTemplate() { }
   public:
     virtual SmoothnessType smoothness() const { return SMOOTH; }
 
     virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-        Vector<Float> r(this->result_size()); _base_compute_approx(r,x); return r; }
+        Vector<Float> r(this->result_size()); _base_compute(r,x); return r; }
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->result_size()); _base_compute(r,x); return r; }
 
@@ -346,7 +344,7 @@ class VectorFunctionTemplate
 
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
         Vector< Differential<Float> > r(this->result_size(),Differential<Float>(x[0].argument_size(),x[0].degree()));
-        _base_compute_approx(r,x); return r; }
+        _base_compute(r,x); return r; }
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
         Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
         _base_compute(r,x); return r; }
@@ -414,6 +412,28 @@ class VectorOfScalarFunction
     Vector<ScalarFunction> _vec;
 };
 
+
+//! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
+template<class Op> class UnaryFunction
+    : public ScalarFunctionTemplate< UnaryFunction<Op> >
+{
+  public:
+    UnaryFunction(const Op& op, const ScalarFunction& arg)
+        : _op(op), _arg(arg) { }
+    virtual UnaryFunction* clone() const { return new UnaryFunction<Op>(*this); }
+    virtual ScalarFunctionInterface::SizeType argument_size() const {
+        return this->_arg.argument_size(); }
+    virtual ScalarFunctionInterface::SmoothnessType smoothness() const {
+        return this->_arg.pointer()->smoothness(); }
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << _op << "(" << *_arg.pointer() << ")"; }
+  protected:
+    friend class ScalarFunctionTemplate< UnaryFunction<Op> >;
+    template<class R, class A> void _compute(R& r, const A& x) const { r=_op(_arg.evaluate(x)); }
+  public:
+    Op _op;
+    ScalarFunction _arg;
+};
 
 
 //! \brief A vector-valued function defined by its scalar-valued components.
@@ -973,6 +993,7 @@ class CombinedFunction
 
 
 typedef uint Nat;
+typedef int Int;
 
 ScalarFunction ScalarFunction::constant(Nat n, double c)
 {
@@ -1036,6 +1057,11 @@ Polynomial<Real> ScalarFunction::polynomial() const
     ARIADNE_THROW(std::runtime_error,"ScalarFunction::polynomial()","Function "<<*this<<" is not a polynomial.");
 }
 
+std::ostream& ScalarFunction::write(std::ostream& os) const {
+    os << "F["<<this->argument_size()<<"](";
+    this->pointer()->write(os);
+    return os << ")";
+}
 
 ScalarFunction operator+(const ScalarFunction& f)
 {
@@ -1160,6 +1186,40 @@ ScalarFunction pow(const ScalarFunction& f, Nat m)
 }
 
 
+ScalarFunction pow(const ScalarFunction& f, Int n)
+{
+    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(f.pointer());
+    if(p && n>=0) { return ScalarFunction(pow(static_cast<const Polynomial<Interval>&>(*p),Nat(n))); }
+    ARIADNE_FAIL_MSG("");
+}
+
+template<class Op> inline
+ScalarFunction make_unary_function(Op op, const ScalarFunction& f) {
+    return ScalarFunction(new UnaryFunction<Op>(op,f)); }
+
+ScalarFunction rec(const ScalarFunction& f) {
+    return make_unary_function(Rec(),f); }
+
+ScalarFunction sqr(const ScalarFunction& f) {
+    return make_unary_function(Sqr(),f); }
+
+ScalarFunction sqrt(const ScalarFunction& f) {
+    return make_unary_function(Sqrt(),f); }
+
+ScalarFunction exp(const ScalarFunction& f) {
+    return make_unary_function(Exp(),f); }
+
+ScalarFunction log(const ScalarFunction& f) {
+    return make_unary_function(Log(),f); }
+
+ScalarFunction sin(const ScalarFunction& f) {
+    return make_unary_function(Sin(),f); }
+
+ScalarFunction cos(const ScalarFunction& f) {
+    return make_unary_function(Cos(),f); }
+
+ScalarFunction tan(const ScalarFunction& f) {
+    return make_unary_function(Tan(),f); }
 
 
 

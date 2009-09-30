@@ -43,6 +43,8 @@
 #include "container.h"
 #include "valuation.h"
 
+#include "discrete_state.h"
+
 namespace Ariadne {
 
 
@@ -151,7 +153,7 @@ class HybridSystem
     void new_dynamic(DiscretePredicate q, RealDynamic d) {
         DifferentialEquation eqn={q,d.lhs.base,d.rhs}; _differential_equations.push_back(eqn); };
     //! \brief Adds a discrete reset to the system.
-    void new_reset(EventSet e, DiscretePredicate q, StringUpdate a) {
+    void new_transition(EventSet e, DiscretePredicate q, StringUpdate a) {
         DiscreteUpdate eqn={e,q,a.lhs.base,a.rhs}; _discrete_updates.push_back(eqn); }
     //! \brief Adds a reset equation to the system.
     void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
@@ -179,7 +181,7 @@ class HybridSystem
     //! \brief Adds a differential equation to the system.
     void new_dynamic(RealDynamic d) { this->new_dynamic(DiscretePredicate(true),d); }
     //! \brief Adds a discrete reset to the system, valid in all modes.
-    void new_reset(EventSet e, StringUpdate du) { this->new_reset(e,DiscretePredicate(true),du); }
+    void new_transition(EventSet e, StringUpdate du) { this->new_transition(e,DiscretePredicate(true),du); }
     //! \brief Adds a reset equation to the system, valid in all modes.
     void new_reset(EventSet e, RealUpdate u) { this->new_reset(e,DiscretePredicate(true),u); }
     //! \brief Adds a guard predicate to the system, valid in all modes.
@@ -194,7 +196,7 @@ class HybridSystem
 
     // Methods for rules valid for all events.
     //! \brief Adds a discrete reset to the system, valid in all modes and for all events.
-    void new_reset(StringUpdate du) { this->new_reset(EventSet::all(),DiscretePredicate(true),du); }
+    void new_transition(StringUpdate du) { this->new_transition(EventSet::all(),DiscretePredicate(true),du); }
     //! \brief Adds a reset equation to the system, valid in all modes and for all events.
     void new_reset(RealUpdate u) { this->new_reset(EventSet::all(),DiscretePredicate(true),u); }
 

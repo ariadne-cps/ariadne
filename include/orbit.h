@@ -74,7 +74,7 @@ class HybridGridTreeSet;
 class HybridPoint;
 class HybridTime;
 
-typedef int DiscreteState;
+class DiscreteState;
 // class TaylorSet;
 typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 typedef ListSet<TaylorSet> TaylorSetList;

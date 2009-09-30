@@ -264,6 +264,7 @@ void TestHybridEvolution::test_affine_system() const
     Figure fig;
     fig.set_bounding_box(Box(2, -0.25, 0.75, 0.0, 1.0));
     fig << line_style(true);
+    fig << hybrid_reach_set;
     fig << fill_colour(cyan) << hybrid_reach_set;
     fig << fill_colour(magenta) << hybrid_intermediate_set;
     fig << fill_colour(blue) << hybrid_evolve_set;

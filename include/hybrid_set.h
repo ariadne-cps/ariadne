@@ -53,7 +53,7 @@
 
 namespace Ariadne {
 
-typedef int DiscreteState;
+class DiscreteState;
 
 class HybridGridTreeSet;
 class HybridImageSet;
@@ -631,11 +631,11 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
 
 
 template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsigned int version) {
-    archive & static_cast<std::map<int,GridTreeSet>&>(set); }
+    archive & static_cast<std::map<DiscreteState,GridTreeSet>&>(set); }
 
 template<class BS> inline
 void
-draw(FigureInterface& figure, const Orbit< std::pair<int,BS> >& orbit) {
+draw(FigureInterface& figure, const Orbit< std::pair<DiscreteState,BS> >& orbit) {
     draw(figure,orbit.reach());
     draw(figure,orbit.initial());
     draw(figure,orbit.final());
@@ -643,14 +643,14 @@ draw(FigureInterface& figure, const Orbit< std::pair<int,BS> >& orbit) {
 
 template<class BS> inline
 void
-draw(FigureInterface& figure, const std::pair<int,BS>& hs) {
+draw(FigureInterface& figure, const std::pair<DiscreteState,BS>& hs) {
     draw(figure,hs.second);
 }
 
 template<class DS> inline
 void
-draw(FigureInterface& figure, const std::map<int,DS>& hds) {
-    for(typename std::map<int,DS>::const_iterator loc_iter=hds.begin();
+draw(FigureInterface& figure, const std::map<DiscreteState,DS>& hds) {
+    for(typename std::map<DiscreteState,DS>::const_iterator loc_iter=hds.begin();
         loc_iter!=hds.end(); ++loc_iter) {
         draw(figure,loc_iter->second);
         //figure.draw(loc_iter->second);
@@ -658,15 +658,15 @@ draw(FigureInterface& figure, const std::map<int,DS>& hds) {
     }
 }
 
-template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const Orbit< std::pair<int,BS> >& horb) {
+template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const Orbit< std::pair<DiscreteState,BS> >& horb) {
     draw(figure,horb); return figure;
 }
 
-template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const std::pair<int,BS>& hs) {
+template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const std::pair<DiscreteState,BS>& hs) {
     draw(figure,hs); return figure;
 }
 
-template<class DS> inline FigureInterface& operator<<(FigureInterface& figure, const std::map<int,DS>& hs) {
+template<class DS> inline FigureInterface& operator<<(FigureInterface& figure, const std::map<DiscreteState,DS>& hs) {
     draw(figure,hs); return figure;
 }
 
@@ -675,6 +675,7 @@ template<class DS> inline FigureInterface& operator<<(FigureInterface& figure, c
 
 namespace boost { namespace serialization {
 template<class A> void serialize(A& archive, const Ariadne::HybridGridTreeSet& set, const uint version);
+template<class A> void serialize(A& archive, const Ariadne::DiscreteState& state, const uint version);
 }}
 
 #endif // ARIADNE_HYBRID_SET_H

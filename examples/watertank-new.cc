@@ -90,10 +90,10 @@ int main()
     watertank.new_guard(start_opening, !(valve=="closed" || valve=="closing"), false);
 
     // Specify the discrete resets
-    watertank.new_reset(finished_opening, next(valve)="open");
-    watertank.new_reset(finished_closing, next(valve)="closed");
-    watertank.new_reset(start_opening, next(valve)="opening");
-    watertank.new_reset(start_closing, next(valve)="closing");
+    watertank.new_transition(finished_opening, next(valve)="open");
+    watertank.new_transition(finished_closing, next(valve)="closed");
+    watertank.new_transition(start_opening, next(valve)="opening");
+    watertank.new_transition(start_closing, next(valve)="closing");
 
     // For any event occurring in any location, the value of x and alpha are not updated.
     watertank.new_reset(next(x)=x);

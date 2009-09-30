@@ -64,6 +64,7 @@ using std::ofstream; using std::ifstream;
 #include "hybrid_time.h"
 #include "orbit.h"
 
+#include "discrete_state.h"
 #include "hybrid_automaton.h"
 
 #include "vector_field_evolver.h"

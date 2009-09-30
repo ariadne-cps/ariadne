@@ -35,13 +35,14 @@
 
 #include "tribool.h"
 #include "set_interface.h"
+#include "discrete_state.h"
 
 namespace Ariadne {
 
 class Box;
 
 class HybridSpace;
-typedef int DiscreteState;
+class DiscreteState;
 
 typedef std::pair<DiscreteState,Box> HybridBox;
 typedef std::map<DiscreteState,Box> HybridBoxes;

@@ -50,7 +50,7 @@ class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
 
-typedef int DiscreteState;
+class DiscreteState;
 class HybridAutomaton;
 
 

@@ -46,7 +46,7 @@ namespace Ariadne {
  
 template<class ES> class Orbit;
 
-typedef int DiscreteState;
+class DiscreteState;
 
 class HybridGrid;
 class HybridGridCell;

@@ -458,6 +458,9 @@ void export_vector_taylor_function()
     def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&)) &embed);
     def("embed",(VectorTaylorFunction(*)(const IntervalVector&,const VectorTaylorFunction&)) &embed);
 
+    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const Vector<Interval>&)) &restrict);
+    //vector_taylor_function_class.def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &restrict);
+
     def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const FloatVector&)const) &VectorTaylorFunction::evaluate);
     def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
     def("partial_evaluate",(VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &partial_evaluate);

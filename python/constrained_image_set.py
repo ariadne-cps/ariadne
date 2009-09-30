@@ -30,11 +30,11 @@ Float = float
 class ConstrainedImageSet:
     def __init__(self,domain,function, \
                  positive_constraints,equality_constraints,
-                 maximum_positive_constraints,maximum_equality_constraints):
+                 maximum_negative_constraints,maximum_equality_constraints):
         assert(isinstance(domain,Box))
         self.domain=domain
         
-        assert(isinstance(function,VectorFunction))
+        assert(isinstance(function,VectorFunction) or isinstance(function,VectorTaylorFunction))
         assert(function.argument_size()==domain.size())
         self.function=function
         
@@ -49,10 +49,10 @@ class ConstrainedImageSet:
             assert(constraint.argument_size()==domain.size())
         self.equality_constraints=equality_constraints
        
-        for constraint in maximum_positive_constraints:
+        for constraint in maximum_negative_constraints:
             assert(isinstance(constraint,ScalarFunction))
             assert(constraint.argument_size()==domain.size())
-        self.maximum_positive_constraints=maximum_positive_constraints
+        self.maximum_negative_constraints=maximum_negative_constraints
         
         assert(isinstance(maximum_equality_constraints,list))
         for constraint in maximum_equality_constraints:
@@ -106,7 +106,7 @@ class ConstrainedImageSet:
                 if constraint(lowdomain).lower() > 0.0:
                     return []
                 lowdomain[-1]=lowdomain[-1]-lowdomain[-1].width()
-        for constraint in self.maximum_positive_constraints:
+        for constraint in self.maximum_negative_constraints:
             lowdomain=Box(subdomain)
             while lowdomain[-1].lower()>=self.domain[-1].lower():
                 if constraint(lowdomain).lower() > 0.0:
@@ -129,6 +129,9 @@ class ConstrainedImageSet:
             fig.draw(box)
         fig.write(filename)
 
+    def __str__(self):
+        return str(self.domain)+str(self.function)+str(self.maximum_negative_constraints)+"<0"
+    
 def lie_derivative(g,f):
     assert(isinstance(g,ScalarFunction))
     assert(isinstance(f,VectorFunction))

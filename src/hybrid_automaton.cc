@@ -153,6 +153,14 @@ HybridAutomaton::new_mode(DiscreteState location,
 
 const DiscreteMode&
 HybridAutomaton::new_invariant(DiscreteState location,
+                               const ScalarFunction& invariant)
+{
+    return this->new_invariant(location, VectorFunction(1u,invariant));
+}
+
+
+const DiscreteMode&
+HybridAutomaton::new_invariant(DiscreteState location,
                                const VectorFunction& invariant)
 {
     ARIADNE_ASSERT(location>0);
@@ -210,6 +218,18 @@ new_transition(DiscreteEvent event,
 
     this->_transitions.insert(DiscreteTransition(event_id,this_source,this_target,reset,activation,forced));
     return this->transition(event_id,source_id);
+}
+
+
+const DiscreteTransition&
+HybridAutomaton::new_transition(DiscreteEvent event,
+                                DiscreteState source,
+                                DiscreteState target,
+                                const VectorFunction &reset,
+                                const ScalarFunction &activation,
+                                bool forced)
+{
+    return this->new_transition(event,source,target,reset,VectorFunction(1u,activation),forced);
 }
 
 

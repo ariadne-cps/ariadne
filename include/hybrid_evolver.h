@@ -64,7 +64,7 @@ class EvolutionProfiler;
 
 class HybridTime;
 
-typedef int DiscreteEvent;
+class DiscreteEvent;
 
 /*! \brief A class for computing the evolution of a hybrid system.
  *

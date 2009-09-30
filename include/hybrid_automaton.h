@@ -35,14 +35,15 @@
 #include <map>
 
 #include "function.h"
+#include "discrete_state.h"
+
+
 
 namespace Ariadne {
 
 
-//! \brief Type of a discrete state of a hybrid system.
-typedef int DiscreteState;
-//! \brief Type of a  discrete event of a hybrid system.
-typedef int DiscreteEvent;
+
+
 
 class HybridTime;
 class HybridSpace;
@@ -297,6 +298,14 @@ class HybridAutomaton
     const DiscreteMode& new_mode(DiscreteState state,
                                  const VectorFunction& dynamic);
 
+    //! \brief Adds an invariant to a mode of the automaton.
+    //!
+    //!   \param state is the mode's discrete state.
+    //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
+
+    const DiscreteMode& new_invariant(DiscreteState state,
+                                      const ScalarFunction& invariant);
+
     //! \brief Adds an invariants to a mode of the automaton.
     //!
     //!   \param state is the mode's discrete state.
@@ -313,6 +322,21 @@ class HybridAutomaton
     const DiscreteMode& new_invariant(const DiscreteMode& mode,
                                       const VectorFunction& invariants);
 
+
+    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
+    const DiscreteTransition& new_transition(DiscreteEvent event,
+                                             DiscreteState source,
+                                             DiscreteState target,
+                                             const VectorFunction& reset,
+                                             const ScalarFunction& activation,
+                                             bool forced);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!

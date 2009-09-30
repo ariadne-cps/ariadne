@@ -301,13 +301,17 @@ struct Next< Variable<T> >
     typedef Assignment< Next< Variable<T> >, Expression<T> > AssignmentType;
     Variable<T> base;
   public:
-    AssignmentType operator=(const T& val) { return AssignmentType(*this,Expression<T>(val)); }
-    AssignmentType operator=(const Variable<T>& var) { return AssignmentType(*this,Expression<T>(var)); }
-    AssignmentType operator=(const Expression<T>& expr) { return AssignmentType(*this,expr); }
+    AssignmentType operator=(const T& val) const { return AssignmentType(*this,Expression<T>(val)); }
+    AssignmentType operator=(const Variable<T>& var) const { return AssignmentType(*this,Expression<T>(var)); }
+    AssignmentType operator=(const Expression<T>& expr) const { return AssignmentType(*this,expr); }
+    friend std::ostream& operator<<(std::ostream& os, const Next< Variable<T> >& self) {
+        return os << "next(" << self.base.name() << ")"; }
     friend Next< Variable<T> > next<>(const Variable<T>&);
   private:
-    Next(const Variable<T>& v) : base(v) { }
+    explicit Next(const Variable<T>& v) : base(v) { }
 };
+
+template<class T> std::ostream& operator<<(std::ostream&, const Next< Variable<T> >&);
 
 template<>
 struct Next<EnumeratedVariable>
@@ -316,15 +320,15 @@ struct Next<EnumeratedVariable>
     EnumeratedVariable base;
     typedef Assignment<Next<EnumeratedVariable>,EnumeratedExpression> EnumeratedAssignment;
 //     friend Next<EnumeratedVariable> next(const EnumeratedVariable& v);
-    EnumeratedAssignment operator=(const String& str) { return EnumeratedAssignment(*this,EnumeratedExpression(EnumeratedValue(str))); }
-    EnumeratedAssignment operator=(const EnumeratedValue& val) { return EnumeratedAssignment(*this,EnumeratedExpression(val)); }
-    EnumeratedAssignment operator=(const EnumeratedVariable& var) { return EnumeratedAssignment(*this,EnumeratedExpression(var)); }
-    EnumeratedAssignment operator=(const EnumeratedExpression& expr) { return EnumeratedAssignment(*this,expr); }
+    EnumeratedAssignment operator=(const String& str) const { return EnumeratedAssignment(*this,EnumeratedExpression(EnumeratedValue(str))); }
+    EnumeratedAssignment operator=(const EnumeratedValue& val) const { return EnumeratedAssignment(*this,EnumeratedExpression(val)); }
+    EnumeratedAssignment operator=(const EnumeratedVariable& var) const { return EnumeratedAssignment(*this,EnumeratedExpression(var)); }
+    EnumeratedAssignment operator=(const EnumeratedExpression& expr) const { return EnumeratedAssignment(*this,expr); }
     friend std::ostream& operator<<(std::ostream& os, const Next<EnumeratedVariable>& self) {
         return os << "next(" << self.base.name() << ")"; }
     friend Next< Variable<T> > next<>(const Variable<T>&);
   private:
-    Next(const EnumeratedVariable& v) : base(v) { }
+    explicit Next(const EnumeratedVariable& v) : base(v) { }
 };
 
 template<>
@@ -334,38 +338,43 @@ struct Next<RealVariable>
     RealVariable base;
     typedef Assignment<Next<RealVariable>,RealExpression> RealAssignment;
     friend Next<RealVariable> next(const RealVariable& v);
-    RealAssignment operator=(const double& x) { return RealAssignment(*this,RealExpression(x)); }
-    RealAssignment operator=(const RealVariable& var) { return RealAssignment(*this,RealExpression(var)); }
-    RealAssignment operator=(const RealExpression& fn) { return RealAssignment(*this,fn); }
+    RealAssignment operator=(const double& x) const { return RealAssignment(*this,RealExpression(x)); }
+    RealAssignment operator=(const RealVariable& var) const { return RealAssignment(*this,RealExpression(var)); }
+    RealAssignment operator=(const RealExpression& fn) const { return RealAssignment(*this,fn); }
     friend std::ostream& operator<<(std::ostream& os, const Next<RealVariable>& self) {
         return os << "next(" << self.base.name() << ")"; }
     friend Next< Variable<T> > next<>(const Variable<T>&);
   private:
-    Next(const RealVariable& v) : base(v) { }
+    explicit Next(const RealVariable& v) : base(v) { }
 };
 
 template<class T> inline Next< Variable<T> > next(const Variable<T>& v) { return Next< Variable<T> >(v); }
 
-template<class T> inline std::ostream& operator<<(std::ostream& os, const Next< Variable<T> >& nv) { return nv.write(os); }
 
 
 
 template<class T> class DottedVariable;
 
-template<class T>
-struct DottedVariable
+template<>
+struct DottedVariable<Real>
 {
-    Variable<T> base;
-    Assignment<DottedVariable<T>,Expression<T> > operator=(const Expression<T>& f) {
-        return Assignment<DottedVariable<T>,Expression<T> >(*this,f); }
-    Assignment<DottedVariable<T>,Expression<T> > operator=(const Variable<T>& v) {
-        return Assignment<DottedVariable<T>,Expression<T> >(*this,Expression<T>(v)); }
-    friend std::ostream& operator<<(std::ostream& os, const DottedVariable<T>& self) {
+    Variable<Real> base;
+    Assignment<DottedVariable<Real>,Expression<Real> > operator=(const Expression<Real>& f) const {
+        return Assignment<DottedVariable<Real>,Expression<Real> >(*this,f); }
+    Assignment<DottedVariable<Real>,Expression<Real> > operator=(const Variable<Real>& v) const {
+        return Assignment<DottedVariable<Real>,Expression<Real> >(*this,Expression<Real>(v)); }
+    friend std::ostream& operator<<(std::ostream& os, const DottedVariable<Real>& self) {
         return os << "dot(" << self.base.name() << ")"; }
-    explicit DottedVariable(const Variable<T>& v) : base(v) { }
+    friend DottedVariable<Real> dot(const Variable<Real>&);
+  private:
+    explicit DottedVariable(const Variable<Real>& v) : base(v) { }
 };
 
 inline DottedVariable<Real> dot(const Variable<Real>& v) { return DottedVariable<Real>(v); }
+
+typedef DottedVariable<Real> RealDottedVariable;
+typedef Next< Variable<Real> > RealNextVariable;
+typedef Next< Variable<String> > StringNextVariable;
 
 typedef Assignment<EnumeratedVariable,EnumeratedExpression> EnumeratedAssignment;
 typedef Assignment<Next<EnumeratedVariable>,EnumeratedExpression> EnumeratedUpdate;

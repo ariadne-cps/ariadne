@@ -81,8 +81,8 @@ TestHybridSystem::test_build_hybrid_system()
     //system.new_equation(y=RealFormula(T));
 
     // Define the nontrivial update rules
-    system.new_reset(turn_off,heater=="on",next(heater)="off");
-    system.new_reset(turn_on,next(heater)=EnumeratedValue("on"));
+    system.new_transition(turn_off,heater=="on",next(heater)="off");
+    system.new_transition(turn_on,next(heater)=EnumeratedValue("on"));
     system.new_reset(midnight,next(t)=0.0);
 
     // Define the guard sets and invariants
@@ -101,7 +101,7 @@ TestHybridSystem::test_build_hybrid_system()
     // Define the trivial resets for nonjumping variables.
     system.new_reset(!midnight,next(t)=t);
     system.new_reset(next(T)=T);
-    system.new_reset(!(turn_on,turn_off),next(heater)=heater);
+    system.new_transition(!(turn_on,turn_off),next(heater)=heater);
 
     ARIADNE_TEST_PRINT(system);
 
@@ -137,7 +137,7 @@ TestHybridSystem::test_build_hybrid_system()
     loc.set(q1,"on");
     loc.set(q2,"off");
 
-    sys.new_reset(EventSet(e1),next(q1)=q2);
+    sys.new_transition(EventSet(e1),next(q1)=q2);
     sys.new_reset(e1,next(xa)=xc);
     sys.new_reset(e1,next(xb)=xa+xe);
 

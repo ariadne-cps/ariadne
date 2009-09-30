@@ -72,7 +72,7 @@ void build_automaton() {
     DiscreteEvent to_unsafe(6); // Switches to the unsafe location
 
     /// Create the discrete states
-    int states[NH+1][2];
+    DiscreteState states[NH+1][2];
     for (int i=0;i<=NH;i++)
     {
         states[i][0] = DiscreteState(10*i+1);

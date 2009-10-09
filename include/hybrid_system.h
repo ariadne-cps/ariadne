@@ -235,22 +235,31 @@ class HybridSystem
 
 
     //! \brief .
+    EventSet events(const DiscreteValuation& location) const;
+    //! \brief .
+    VectorFunction dynamic(const DiscreteValuation& location) const;
+    //! \brief .
     DiscreteValuation target(const Event& event, const DiscreteValuation& source) const;
+    //! \brief .
+    VectorFunction reset(const Event& event, const DiscreteValuation& source) const;
+    //! \brief .
+    ScalarFunction guard(const Event& event, const DiscreteValuation& source) const;
+
     //! \brief .
     Set<RealAssignment> unordered_equations(const DiscreteValuation& state) const;
 
     //! \brief .
     List<RealAssignment> equations(const DiscreteValuation& state) const;
     //! \brief .
-    List<RealDynamic> dynamic(const DiscreteValuation& state) const;
+    List<RealDynamic> dynamics(const DiscreteValuation& state) const;
     //! \brief .
     List<StringUpdate> switching(const Event& event, const DiscreteValuation& state) const;
     //! \brief .
-    List<RealUpdate> reset(const Event& event, const DiscreteValuation& state) const;
+    List<RealUpdate> resets(const Event& event, const DiscreteValuation& state) const;
     //! \brief .
     Map<Event,ContinuousPredicate> guards(const DiscreteValuation& state) const;
     //! \brief .
-    ContinuousPredicate guard(const Event& event, const DiscreteValuation& state) const;
+    ContinuousPredicate guard_predicate(const Event& event, const DiscreteValuation& state) const;
 
     //@}
 

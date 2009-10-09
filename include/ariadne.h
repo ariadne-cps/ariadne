@@ -65,6 +65,7 @@ using std::ofstream; using std::ifstream;
 #include "orbit.h"
 
 #include "discrete_state.h"
+#include "discrete_event.h"
 #include "hybrid_automaton.h"
 
 #include "vector_field_evolver.h"

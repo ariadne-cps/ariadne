@@ -104,7 +104,6 @@ class Expression {
     Expression(const R& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
-    const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
     //! \brief The variables used in the formula.
     Set<String> arguments() const { return _ptr->arguments(); }
     //! \brief The name of the type of expression.
@@ -120,6 +119,10 @@ class Expression {
     //! \brief Write to an output stream.
     friend std::ostream& operator<< <>(std::ostream&, const Expression<R>&);
   public:
+    // Return a raw pointer to the underlying representation.
+    const ExpressionInterface<R>* _raw_pointer() const { return this->_ptr.operator->(); }
+    const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
+  public:
     shared_ptr<const ExpressionInterface<R> > _ptr;
 };
 
@@ -134,7 +137,8 @@ class Expression<Real> {
     Expression(const Interval& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
-    const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
+    //! \brief Test if two expressions are identical to each other.
+    friend bool identical(const Expression<R>& e1, const Expression<R>& e2);
     //! \brief The variables used in the formula.
     Set<String> arguments() const { return _ptr->arguments(); }
     //! \brief The name of the type of expression.
@@ -150,10 +154,15 @@ class Expression<Real> {
     //! \brief Write to an output stream.
     friend std::ostream& operator<< <>(std::ostream&, const Expression<R>&);
   public:
+    // Return a raw pointer to the underlying representation.
+    const ExpressionInterface<R>* _raw_pointer() const { return this->_ptr.operator->(); }
+    const ExpressionInterface<R>* ptr() const { return _ptr.operator->(); }
+  public:
     shared_ptr<const ExpressionInterface<R> > _ptr;
 };
 
 
+bool identical(const Expression<Real>& e1, const Expression<Real>& e2);
 
 template<class R> inline std::ostream& operator<<(std::ostream& os, const Expression<R>& e) { return e._ptr->write(os); }
 
@@ -197,7 +206,15 @@ Expression<Boolean> operator!=(Variable<String> v1, const String& s2);
 //! \related Expression \brief .
 Expression<Boolean> operator==(Expression<Integer> e1, Expression<Integer> e2);
 //! \related Expression \brief .
+Expression<Boolean> operator!=(Expression<Integer> e1, Expression<Integer> e2);
+//! \related Expression \brief .
 Expression<Boolean> operator>=(Expression<Integer> e1, Expression<Integer> e2);
+//! \related Expression \brief .
+Expression<Boolean> operator<=(Expression<Integer> e1, Expression<Integer> e2);
+//! \related Expression \brief .
+Expression<Boolean> operator> (Expression<Integer> e1, Expression<Integer> e2);
+//! \related Expression \brief .
+Expression<Boolean> operator< (Expression<Integer> e1, Expression<Integer> e2);
 
 //! \related Expression \brief .
 Expression<Integer> operator+(Expression<Integer> e);

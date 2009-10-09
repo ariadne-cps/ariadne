@@ -35,6 +35,31 @@
 
 namespace Ariadne {
 
+template<class R, class Op=Operator, class A1=R, class A2=A1> class BinaryExpression
+    : public ExpressionInterface<R>
+{
+  public:
+    BinaryExpression(Op op, const ExpressionInterface<A1>& expr1, const ExpressionInterface<A2>& expr2)
+        : _op(op), _arg1(expr1.clone()), _arg2(expr2.clone()) { }
+    BinaryExpression(Op op, const ExpressionInterface<A1>* expr1, const ExpressionInterface<A2>* expr2)
+        : _op(op), _arg1(expr1), _arg2(expr2) { }
+    BinaryExpression(Op op, shared_ptr< const ExpressionInterface<A1> > expr1, shared_ptr< const ExpressionInterface<A2> > expr2)
+        : _op(op), _arg1(expr1), _arg2(expr2)  { }
+    virtual String operator_name() const { return name(_op); }
+    virtual Operator type() const { return static_cast<Operator>(_op); }
+    virtual BinaryExpression<R,Op,A1,A2>* clone() const { return new BinaryExpression<R,Op,A1,A2>(_op,_arg1._ptr,_arg2._ptr); }
+    virtual Set<String> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << "(" << _arg1 << symbol(_op) << _arg2 << ")"; }
+  protected:
+    virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
+  public:
+    Op _op;
+    Expression<A1> _arg1;
+    Expression<A2> _arg2;
+};
+
+
 using std::make_pair;
 
 std::vector<std::string> Event::_names=std::vector<std::string>();
@@ -274,6 +299,93 @@ bool HybridSystem::check_guards(const DiscreteValuation& location) const
 
 
 
+/* Functions used to create a hybrid automaton. */
+EventSet
+HybridSystem::events(const DiscreteValuation& location) const
+{
+    EventSet events;
+    for(jump_const_iterator iter=this->_continuous_updates.begin(); iter!=this->_continuous_updates.end(); ++iter) {
+        if(evaluate(iter->loc,location)) {
+            const RealVariable& lhs=iter->lhs;
+            const RealExpression& rhs=iter->rhs;
+            const RealExpression lhse=RealExpression(lhs);
+            if(!identical(lhse,rhs)) {
+                events.adjoin(iter->evnts);
+            }
+            else {
+                std::cerr<<"Reset "<<*iter<<" is trivial.";
+            }
+        }
+    }
+    ARIADNE_ASSERT(events.finite());
+    return events;
+}
+
+
+VectorFunction
+HybridSystem::dynamic(const DiscreteValuation& location) const
+{
+    Set<RealAssignment> algebraic_equations=this->unordered_equations(location);
+    ARIADNE_ASSERT_MSG(algebraic_equations.empty(),"Current implementation can only compute dynamic if there are no algebraic equations.");
+    List<RealDynamic> differential_equations=this->dynamics(location);
+    RealSpace space=this->state_variables(location);
+
+    List<RealExpression> expressions;
+    for(uint i=0; i!=differential_equations.size(); ++i) {
+        const RealExpression& rhs=differential_equations[i].rhs;
+        expressions.push_back(rhs);
+        //expressions.push_back(differential_equations[i].rhs());
+    }
+
+    return VectorFunction(expressions,space);
+}
+
+
+VectorFunction
+HybridSystem::reset(const Event& event, const DiscreteValuation& source) const
+{
+    DiscreteValuation target = this->target(event,source);
+    Set<RealAssignment> source_algebraic_equations=this->unordered_equations(source);
+    ARIADNE_ASSERT_MSG(source_algebraic_equations.empty(),"Current implementation can only compute reset if source has no algebraic equations.");
+    List<RealUpdate> update_equations=this->resets(event,source);
+    RealSpace source_space=this->state_variables(source);
+    RealSpace target_space=this->state_variables(source);
+
+    Map<RealVariable,RealExpression> assignments;
+    for(List<RealUpdate>::const_iterator update_iter=update_equations.begin(); update_iter!=update_equations.end(); ++update_iter) {
+        assignments.insert(update_iter->lhs.base,update_iter->rhs);
+    }
+
+    return VectorFunction(target_space,assignments,source_space);
+}
+
+
+ScalarFunction
+HybridSystem::guard(const Event& event, const DiscreteValuation& location) const
+{
+    ContinuousPredicate guard_predicate=this->guard_predicate(event,location);
+    RealSpace space=this->state_variables(location);
+
+    RealExpression expression(0.0);
+    const ExpressionInterface<tribool>* ptr=guard_predicate._ptr.operator->();
+    const BinaryExpression<tribool,Gtr,Real,Real>* bptr=dynamic_cast< const BinaryExpression<tribool,Gtr,Real,Real>*>(ptr);
+    if(bptr) {
+        expression = bptr->_arg1 - bptr->_arg2;
+    }
+    //if(guard_predicate.operator_name()=="GTR") {
+    //    List< RealExpression > subexpressions = guard_predicate.subexpressions() const;
+    //    expression=subexpressions[0]-subexpressions[1];
+    //} else {
+    //    ARIADNE_ASSERT_MSG(false,"Current implementation can only compute dynamic of form g(x)>0; guard is "<<guard_predicate);
+    //}
+
+    return ScalarFunction(expression,space);
+}
+
+
+
+
+
 Set<RealAssignment>
 HybridSystem::unordered_equations(const DiscreteValuation& state) const
 {
@@ -326,7 +438,7 @@ HybridSystem::equations(const DiscreteValuation& state) const
 
 
 List<RealDynamic>
-HybridSystem::dynamic(const DiscreteValuation& location) const
+HybridSystem::dynamics(const DiscreteValuation& location) const
 {
     List<RealDynamic> dynamic_equations;
 
@@ -356,8 +468,9 @@ HybridSystem::switching(const Event& event, const DiscreteValuation& location) c
 }
 
 
+
 List<RealUpdate>
-HybridSystem::reset(const Event& event, const DiscreteValuation& old_location) const
+HybridSystem::resets(const Event& event, const DiscreteValuation& old_location) const
 {
     List<RealUpdate> continuous_updates;
 
@@ -371,6 +484,7 @@ HybridSystem::reset(const Event& event, const DiscreteValuation& old_location) c
 
     return continuous_updates;
 }
+
 
 
 Map<Event,ContinuousPredicate>
@@ -399,9 +513,18 @@ HybridSystem::guards(const DiscreteValuation& location) const
             }
         }
     }
-    ARIADNE_ASSERT_MSG(unguarded_events.empty(),"Events "<<unguarded_events<<" in location "<<location<<" have no guard predicate");
+    //ARIADNE_WARN_MSG(unguarded_events.empty(),"Events "<<unguarded_events<<" in location "<<location<<" have no guard predicate");
 
     return guards;
+}
+
+
+ContinuousPredicate
+HybridSystem::guard_predicate(const Event& event, const DiscreteValuation& location) const
+{
+    // TODO: Make this more efficient
+    const Map<Event,ContinuousPredicate> grds=this->guards(location);
+    return grds[event];
 }
 
 

@@ -53,28 +53,6 @@ template<class A> inline void serialize(A& archive, DiscreteState& state, const 
     archive & id;
 }
 
-//! \brief Type of a  discrete event of a hybrid system.
-class DiscreteEvent {
-  public:
-    DiscreteEvent() : _id(0) { }
-    DiscreteEvent(int n) : _id(n) { }
-    bool operator==(const DiscreteEvent& e) const { return this->_id==e._id; }
-    bool operator!=(const DiscreteEvent& e) const { return this->_id!=e._id; }
-    bool operator<=(const DiscreteEvent& e) const { return this->_id<=e._id; }
-    bool operator>=(const DiscreteEvent& e) const { return this->_id>=e._id; }
-    bool operator< (const DiscreteEvent& e) const { return this->_id< e._id; }
-    bool operator> (const DiscreteEvent& e) const { return this->_id> e._id; }
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e);
-  private:
-    int _id;
-};
-
-inline std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e) {
-    return os << "e" << e._id; }
-
 } //namespace Ariadne
 
-namespace boost { namespace serialization {
-//template<class A> void serialize(A& archive, const Ariadne::DiscreteState& state, const uint version);
-}}
 #endif /* ARIADNE_DISCRETE_STATE_H */

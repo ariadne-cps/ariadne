@@ -51,8 +51,15 @@ namespace Ariadne {
 class Real;
 template<class X> class Vector;
 template<class X> class Polynomial;
+template<class LHS, class RHS> class Assignment;
+template<class T> class Variable;
 template<class T> class Expression;
 template<class T> class Space;
+
+typedef Variable<Real> RealVariable;
+typedef Expression<Real> RealExpression;
+typedef Space<Real> RealSpace;
+typedef Assignment<RealVariable,RealExpression> RealAssignment;
 
 class ScalarFunction;
 class VectorFunction;
@@ -103,6 +110,8 @@ class ScalarFunction
     friend ScalarFunction operator-(const ScalarFunction&, const ScalarFunction&);
     friend ScalarFunction operator*(const ScalarFunction&, const ScalarFunction&);
     friend ScalarFunction operator/(const ScalarFunction&, const ScalarFunction&);
+  public:
+    const ScalarFunctionInterface* _raw_pointer() const { return this->_ptr.operator->(); }
   private:
     shared_ptr<ScalarFunctionInterface> _ptr;
 };
@@ -155,6 +164,9 @@ class VectorFunction
     VectorFunction(VectorFunctionInterface*);
     const VectorFunctionInterface* pointer() const { return this->_ptr.operator->(); }
 
+    VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s);
+    VectorFunction(const Space<Real>& rs, const Map<RealVariable,RealExpression>& e, const Space<Real>& as);
+
     ScalarFunction operator[](Nat i) const;
     ScalarFunction& operator[](Nat i);
 
@@ -194,6 +206,8 @@ class VectorFunction
     friend VectorFunction operator-(const VectorFunction&, const VectorFunction&);
     friend VectorFunction operator*(const VectorFunction&, const ScalarFunction&);
     friend VectorFunction operator*(const ScalarFunction&, const VectorFunction&);
+  public:
+    const VectorFunctionInterface* _raw_pointer() const { return this->_ptr.operator->(); }
   private:
     shared_ptr<VectorFunctionInterface> _ptr;
 };

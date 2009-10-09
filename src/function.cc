@@ -373,6 +373,11 @@ class VectorOfScalarFunction
     VectorOfScalarFunction(uint rs, const ScalarFunction& f)
         : _vec(rs,f) { }
 
+    void set(uint i, const ScalarFunction& f) {
+        this->_vec[i]=f; }
+    ScalarFunction get(uint i) const {
+        return this->_vec[i]; }
+
     virtual VectorOfScalarFunction* clone() const {
         return new VectorOfScalarFunction(*this); }
 
@@ -401,7 +406,11 @@ class VectorOfScalarFunction
         return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
 
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "VoSF"<<this->_vec; }
+        os << "F[" << this->result_size() << "," << this->argument_size() << "][";
+        for(uint i=0; i!=this->_vec.size(); ++i) {
+            if(i!=0) { os << ","; }
+            this->_vec[i]._raw_pointer()->write(os); }
+        return os << "]"; }
   protected:
     template<class X> Vector<X> _compute(const Vector<X>& x) const {
         Vector<X> r(this->_vec.size());
@@ -1243,6 +1252,24 @@ VectorFunction::VectorFunction(Nat rs, Nat as)
 VectorFunction::VectorFunction(Nat rs, const ScalarFunction& sf)
     : _ptr(new VectorOfScalarFunction(rs,sf))
 {
+}
+
+VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s) 
+    : _ptr(new VectorOfScalarFunction(e.size(),s.size()))
+{
+    VectorOfScalarFunction* vec = static_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
+    for(uint i=0; i!=e.size(); ++i) {
+        vec->set(i,ScalarFunction(e[i],s));
+    }
+}
+
+VectorFunction::VectorFunction(const Space<Real>& rs, const Map<RealVariable,RealExpression>& e, const Space<Real>& as)
+    : _ptr(new VectorOfScalarFunction(rs.size(),as.size()))
+{
+    VectorOfScalarFunction* vec = static_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
+    for(uint i=0; i!=rs.size(); ++i) {
+        vec->set(i,ScalarFunction(e[rs[i]],as));
+    }
 }
 
 VectorFunction VectorFunction::constant(const Vector<Real>& c, Nat as)

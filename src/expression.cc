@@ -295,7 +295,7 @@ template<class R, class Op=Operator, class A=R> class MultiaryExpression
 
 
 bool operator==(const Expression<Tribool>& e, bool v) {
-    const ConstantExpression<Tribool>* expr = dynamic_cast<const ConstantExpression<Tribool>*>(e.ptr());
+    const ConstantExpression<Tribool>* expr = dynamic_cast<const ConstantExpression<Tribool>*>(e._raw_pointer());
     return expr && expr->value()==v;
 }
 
@@ -365,6 +365,21 @@ List< Expression<Real> > Expression<Real>::subexpressions() const {
 }
 
 
+bool identical(const Expression<Real>& e1, const Expression<Real>& e2) {
+    const ExpressionInterface<Real>* ptr1=e1._ptr.operator->();
+    const ExpressionInterface<Real>* ptr2=e2._ptr.operator->();
+    const VariableExpression<Real>* vptr1 = dynamic_cast<const VariableExpression<Real>*>(ptr1);
+    if(e1._ptr==e2._ptr) {
+        return true;
+    } else if(vptr1) {
+        const VariableExpression<Real>* vptr2 = dynamic_cast<const VariableExpression<Real>*>(ptr2);
+        return vptr2 && vptr1->variable()==vptr2->variable();
+    } else {
+        ARIADNE_FAIL_MSG("Cannot test two expressions for identity unless equal by reference or first is a variable.");
+    }
+}
+
+
 
 template class Expression<Boolean>;
 template class Expression<Tribool>;
@@ -409,6 +424,8 @@ Expression<tribool> operator!(Expression<tribool> e) {
 
 Expression<Boolean> operator==(Variable<String> v1, const String& s2) {
     return make_expression<Boolean>(EQ,Expression<String>(v1),Expression<String>(s2)); }
+Expression<Boolean> operator!=(Variable<String> v1, const String& s2) {
+    return make_expression<Boolean>(NEQ,Expression<String>(v1),Expression<String>(s2)); }
 
 
 Expression<Boolean> operator==(Expression<Integer> e1, Expression<Integer> e2) {
@@ -608,7 +625,7 @@ X _compute(Operator op, const X& x) {
 
 
 Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
-    const ExpressionInterface<Boolean>* eptr=e.ptr();
+    const ExpressionInterface<Boolean>* eptr=e._raw_pointer();
     const BinaryExpression<Boolean>* bptr=dynamic_cast<const BinaryExpression<Boolean,Operator>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
     const UnaryExpression<Boolean>* uptr=dynamic_cast<const UnaryExpression<Boolean>*>(eptr);
@@ -623,7 +640,7 @@ Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
 }
 
 String evaluate(const Expression<String>& e, const DiscreteValuation& x) {
-    const ExpressionInterface<String>* eptr=e.ptr();
+    const ExpressionInterface<String>* eptr=e._raw_pointer();
     const ConstantExpression<String>* cptr=dynamic_cast<const ConstantExpression<String>*>(eptr);
     if(cptr) { return cptr->value(); }
     const VariableExpression<String>* vptr=dynamic_cast<const VariableExpression<String>*>(eptr);
@@ -632,7 +649,7 @@ String evaluate(const Expression<String>& e, const DiscreteValuation& x) {
 }
 
 Integer evaluate(const Expression<Integer>& e, const DiscreteValuation& x) {
-    const ExpressionInterface<Integer>* eptr=e.ptr();
+    const ExpressionInterface<Integer>* eptr=e._raw_pointer();
     const BinaryExpression<Integer>* bptr=dynamic_cast<const BinaryExpression<Integer>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
     const UnaryExpression<Integer>* uptr=dynamic_cast<const UnaryExpression<Integer>*>(eptr);
@@ -646,7 +663,7 @@ Integer evaluate(const Expression<Integer>& e, const DiscreteValuation& x) {
 
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x) {
-    const ExpressionInterface<Tribool>* eptr=e.ptr();
+    const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
     const BinaryExpression<Tribool>* bptr=dynamic_cast<const BinaryExpression<Tribool>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
     const BinaryExpression<Tribool,Comparison,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Comparison,Real,Real>*>(eptr);
@@ -655,7 +672,7 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Continuou
 }
 
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x) {
-    const ExpressionInterface<Real>* eptr=e.ptr();
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
     const BinaryExpression<Real>* bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
     const UnaryExpression<Real>* uptr=dynamic_cast<const UnaryExpression<Real>*>(eptr);
@@ -668,7 +685,7 @@ template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuatio
 }
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x) {
-    const ExpressionInterface<Tribool>* eptr=e.ptr();
+    const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
     const BinaryExpression<Tribool>* bptr=dynamic_cast<const BinaryExpression<Tribool>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
     const BinaryExpression<Tribool,Comparison,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Comparison,Real,Real>*>(eptr);
@@ -677,7 +694,7 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>
 }
 
 template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x) {
-    const ExpressionInterface<Real>* eptr=e.ptr();
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
     const BinaryExpression<Real>* bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
     const UnaryExpression<Real>* uptr=dynamic_cast<const UnaryExpression<Real>*>(eptr);
@@ -705,7 +722,7 @@ template<class X> Expression<X> substitute_variable(const VariableExpression<X>&
 
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c) {
-    const ExpressionInterface<X>* eptr=e.ptr();
+    const ExpressionInterface<X>* eptr=e._raw_pointer();
     const BinaryExpression<X,Comparison,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Comparison,Y,Y>*>(eptr);
     if(aptr) { return make_expression<X>(aptr->_op,substitute(aptr->_arg1,v,c),substitute(aptr->_arg2,v,c)); }
     const BinaryExpression<X>* bptr=dynamic_cast<const BinaryExpression<X>*>(eptr);
@@ -778,7 +795,7 @@ template Expression<Tribool> simplify(const Expression<Tribool>& e);
 template<class X>
 Polynomial<X> polynomial(const Expression<Real>& e, const Space<Real>& s)
 {
-    const ExpressionInterface<Real>* const eptr=e.ptr();
+    const ExpressionInterface<Real>* const eptr=e._raw_pointer();
     const Operator op=eptr->type();
 
     const ConstantExpression<Real>* cptr;
@@ -811,7 +828,7 @@ Polynomial<X> polynomial(const Expression<Real>& e, const Space<Real>& s)
             return polynomial<X>(bptr->_arg1,s)*polynomial<X>(bptr->_arg2,s); break;
         case DIV:
             bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2.ptr());
+            cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2._raw_pointer());
             ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<e<<" to polynomial form.");
             return polynomial<X>(bptr->_arg1,s)/cptr->value(); break;
         default:
@@ -823,7 +840,7 @@ Polynomial<X> polynomial(const Expression<Real>& e, const Space<Real>& s)
 template<class X>
 Affine<X> affine(const Expression<Real>& e, const Space<Real>& s) {
 
-    const ExpressionInterface<Real>* eptr=e.ptr();
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
     Operator op=eptr->type();
 
     const ConstantExpression<Real>* cptr;
@@ -855,13 +872,13 @@ Affine<X> affine(const Expression<Real>& e, const Space<Real>& s) {
             return affine<X>(bptr->_arg1,s)-affine<X>(bptr->_arg2,s); break;
         case DIV:
             bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
-            cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2.ptr());
+            cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2._raw_pointer());
             ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<e<<" to affine form.");
             return affine<X>(bptr->_arg1,s)/static_cast<X>(cptr->value()); break;
         case MUL:
             bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            cptr1=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg1.ptr());
-            cptr2=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2.ptr());
+            cptr1=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg1._raw_pointer());
+            cptr2=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2._raw_pointer());
             ARIADNE_ASSERT_MSG(cptr1 || cptr2,"Cannot convert expression "<<e<<" to affine form.");
             if(cptr1) { return static_cast<X>(cptr1->value()) * affine<X>(bptr->_arg2,s); }
             else { return affine<X>(bptr->_arg1,s) * static_cast<X>(cptr2->value()); }
@@ -876,7 +893,7 @@ template Polynomial<Interval> polynomial(const Expression<Real>&, const Space<Re
 
 Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
 {
-    const ExpressionInterface<Real>* eptr=e.ptr();
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
     const BinaryExpression<Real,Operator>* bptr=dynamic_cast<const BinaryExpression<Real,Operator>*>(eptr);
     if(bptr) { return make_expression<Real>(bptr->_op,function(bptr->_arg1,s),function(bptr->_arg2,s)); }
     const UnaryExpression<Real,Operator>* uptr=dynamic_cast<const UnaryExpression<Real,Operator>*>(eptr);

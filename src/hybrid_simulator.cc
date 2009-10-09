@@ -151,7 +151,7 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
 
     std::map<Event,ContinuousPredicate> guards=sys.guards(pt);
     std::vector<RealAssignment> algebraic_assignments=sys.equations(pt);
-    std::vector<RealDynamic> differential_assignments=sys.dynamic(pt);
+    std::vector<RealDynamic> differential_assignments=sys.dynamics(pt);
 
     while(t<tmax) {
 
@@ -170,7 +170,7 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
             for(std::vector<StringUpdate>::const_iterator iter=switchings.begin(); iter!=switchings.end(); ++iter) {
                 next_pt.set(iter->lhs.base,evaluate(iter->rhs,pt));
             }
-            std::vector<RealUpdate> real_updates=sys.reset(event,pt);
+            std::vector<RealUpdate> real_updates=sys.resets(event,pt);
             for(std::vector<RealUpdate>::const_iterator iter=real_updates.begin(); iter!=real_updates.end(); ++iter) {
                 next_pt.set(iter->lhs.base,evaluate(iter->rhs,pt));
             }
@@ -178,7 +178,7 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
             for(std::vector<RealAssignment>::const_iterator iter=algebraic_assignments.begin(); iter!=algebraic_assignments.end(); ++iter) {
                 next_pt.set(iter->lhs,evaluate(iter->rhs,next_pt));
             }
-            differential_assignments=sys.dynamic(next_pt);
+            differential_assignments=sys.dynamics(next_pt);
             guards=sys.guards(next_pt);
             t.discrete_time+=1;
         } else {

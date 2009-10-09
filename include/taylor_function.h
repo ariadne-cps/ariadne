@@ -204,6 +204,8 @@ class ScalarTaylorFunction
     const Float& value() const { return this->_model.value(); }
     //! \brief A polynomial representation.
     Polynomial<Interval> polynomial() const;
+    //! \brief A multivalued function equal to the model on the domain.
+    ScalarFunction function() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) { this->_model.set_error(ne); }
@@ -695,6 +697,8 @@ class VectorTaylorFunction {
 
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<Interval> > polynomial() const;
+    //! \brief A multivalued function equal to the model on the domain.
+    VectorFunction function() const;
 
     /*! \brief Truncate terms higher than \a bd. */
     VectorTaylorFunction& truncate(const MultiIndexBound& bd);

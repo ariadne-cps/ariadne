@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iostream>
+#include <iomanip>
+
 #include "config.h"
 #include "utilities.h"
 
@@ -37,9 +40,10 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-    bool definitely(bool b) { return b; }
-    bool possibly(bool b) { return b; }
+bool definitely(bool b) { return b; }
+bool possibly(bool b) { return b; }
 
+void set_output_precision(uint p) { std::cout << std::setprecision(p); }
 
 
 template<>
@@ -135,6 +139,8 @@ void export_tribool() {
 
 void export_float()
 {
+    def("set_output_precision", &set_output_precision);
+
     def("rec",(Float(*)(Float)) &Ariadne::rec);
     def("sqr",(Float(*)(Float)) &Ariadne::sqr);
     def("sqrt", (Float(*)(Float)) &Ariadne::sqrt);

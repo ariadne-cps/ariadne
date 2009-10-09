@@ -163,6 +163,12 @@ ScalarTaylorFunction::polynomial() const
     return compose(p,s);
 }
 
+ScalarFunction
+ScalarTaylorFunction::function() const
+{
+    return ScalarFunction(this->polynomial());
+}
+
 
 bool ScalarTaylorFunction::operator==(const ScalarTaylorFunction& tv) const
 {
@@ -590,6 +596,11 @@ VectorTaylorFunction::VectorTaylorFunction(uint k)
 {
 }
 
+VectorTaylorFunction::VectorTaylorFunction(uint m, const Vector<Interval>& d)
+    : _domain(d), _models(m,d.size())
+{
+}
+
 VectorTaylorFunction::VectorTaylorFunction(uint k, const ScalarTaylorFunction& f)
     : _domain(f.domain()), _models(k,f.model())
 {
@@ -732,6 +743,17 @@ VectorTaylorFunction::polynomial() const
     }
 
     return compose(p,s);
+}
+
+VectorFunction
+VectorTaylorFunction::function() const
+{
+    Vector< Polynomial<Interval> > polynomial=this->polynomial();
+    VectorFunction result(this->result_size(),this->argument_size());
+    for(uint i=0; i!=this->result_size(); ++i) {
+        result.set(i,ScalarFunction(polynomial[i]));
+    }
+    return result;
 }
 
 bool
@@ -1000,8 +1022,10 @@ restrict(const VectorTaylorFunction& f, const Vector<Interval>& d)
 {
     ARIADNE_ASSERT(subset(d,f.domain()));
     if(d==f.domain()) { return f; }
-    Vector<TaylorModel> s=TaylorModel::rescalings(f.domain(),d);
-    VectorTaylorFunction r(d,compose(f._models,s));
+    VectorTaylorFunction r(f.result_size(),d);
+    for(uint i=0; i!=r.result_size(); ++i) {
+        r.set(i,restrict(f[i],d));
+    }
     r.set_accuracy(f.accuracy_ptr());
     return r;
 }

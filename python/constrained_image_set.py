@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import sys
+import sys,__builtin__
 from ariadne import *
 #from hybrid_system import *
 
@@ -28,34 +28,50 @@ Indeterminate=indeterminate()
 Float = float
 
 class ConstrainedImageSet:
-    def __init__(self,domain,function, \
-                 positive_constraints,equality_constraints,
-                 maximum_negative_constraints,maximum_equality_constraints):
-        assert(isinstance(domain,Box))
+    def __init__(self,domain,function=None, \
+                 positive_constraints=[],equality_constraints=[],
+                 maximum_negative_constraints=[],maximum_equality_constraints=[]):
+        #Copy constructor
+        if function==None:
+            assert isinstance(domain,ConstrainedImageSet)
+            other=domain
+            self.domain=Box(other.domain)
+            self.function=VectorTaylorFunction(other.function)
+            self.positive_constraints=list(other.positive_constraints)
+            self.equality_constraints=list(other.equality_constraints)
+            self.maximum_negative_constraints=list(other.maximum_negative_constraints)
+            self.maximum_equality_constraints=list(other.maximum_equality_constraints)
+            return
+        
+        #Standard constructor
+        if isinstance(domain,IntervalVector):
+            domain=Box(domain)
+        assert isinstance(domain,Box) 
         self.domain=domain
         
-        assert(isinstance(function,VectorFunction) or isinstance(function,VectorTaylorFunction))
-        assert(function.argument_size()==domain.size())
+        assert isinstance(function,VectorFunction) or isinstance(function,VectorTaylorFunction)
+        assert function.argument_size()==domain.size()
         self.function=function
         
-        for constraint in positive_constraints:
-            assert(isinstance(constraint,ScalarFunction))
-            assert(constraint.argument_size()==domain.size())
+        assert(isinstance(positive_constraints,list))
+        for (id,constraint) in positive_constraints:
+            assert isinstance(constraint,ScalarFunction) or isinstance(constraint,ScalarTaylorFunction)
+            assert constraint.argument_size()==domain.size()
         self.positive_constraints=positive_constraints
         
         assert(isinstance(equality_constraints,list))
-        for constraint in equality_constraints:
+        for (id,constraint) in equality_constraints:
             assert(isinstance(constraint,ScalarFunction))
             assert(constraint.argument_size()==domain.size())
         self.equality_constraints=equality_constraints
        
-        for constraint in maximum_negative_constraints:
+        for (id,constraint) in maximum_negative_constraints:
             assert(isinstance(constraint,ScalarFunction))
             assert(constraint.argument_size()==domain.size())
         self.maximum_negative_constraints=maximum_negative_constraints
         
         assert(isinstance(maximum_equality_constraints,list))
-        for constraint in maximum_equality_constraints:
+        for (id,constraint) in maximum_equality_constraints:
             assert(isinstance(constraint,ScalarFunction))
             assert(constraint.argument_size()==domain.size())
         self.maximum_equality_constraints=maximum_equality_constraints
@@ -85,19 +101,25 @@ class ConstrainedImageSet:
         return self.__disjoint(subdomain1,box,err) and self.__disjoint(subdomain2,box,err)
 
 
+    def grid_outer_approximation(self,depth):
+        gts=GridTreeSet(self.function.result_size())
+        for box in self.__outer_approximation(self.domain,depth):
+            gts.adjoin_outer_approximation(box,depth+4)
+        return gts
+        
     def outer_approximation(self,depth):
         return self.__outer_approximation(self.domain,depth)
 
     def __outer_approximation(self,subdomain,depth):
-        eps=__builtins__.pow(2.0,-depth)
-        for constraint in self.positive_constraints:
+        eps=__builtin__.pow(2.0,-depth)
+        for (id,constraint) in self.positive_constraints:
             if constraint(subdomain).upper() < 0.0:
                 return []
-        for constraint in self.equality_constraints:
+        for (id,constraint) in self.equality_constraints:
             constraint_range=constraint(subdomain)
             if constraint_range.lower() > 0.0 or constraint_range.upper()<0.0:
                 return []
-        for constraint in self.maximum_equality_constraints:
+        for (id,constraint) in self.maximum_equality_constraints:
             constraint_range=constraint(subdomain)
             if constraint_range.lower() > 0.0 or constraint_range.upper()<0.0:
                 return []
@@ -106,7 +128,7 @@ class ConstrainedImageSet:
                 if constraint(lowdomain).lower() > 0.0:
                     return []
                 lowdomain[-1]=lowdomain[-1]-lowdomain[-1].width()
-        for constraint in self.maximum_negative_constraints:
+        for (id,constraint) in self.maximum_negative_constraints:
             lowdomain=Box(subdomain)
             while lowdomain[-1].lower()>=self.domain[-1].lower():
                 if constraint(lowdomain).lower() > 0.0:
@@ -121,16 +143,34 @@ class ConstrainedImageSet:
                 self.__outer_approximation(subdomain2,depth)
 
 
-    def plot(self,filename,resolution=4):
+    def plot(self,filename,bounding_box=None,resolution=4):
         assert(self.function.result_size()==2)
         fig=Figure()
-        fig.set_bounding_box(self.bounding_box())
-        for box in self.outer_approximation(resolution):
-            fig.draw(box)
+        if bounding_box==None:
+            bounding_box=self.bounding_box()
+        fig.set_bounding_box(bounding_box)
+        fig.draw(self.grid_outer_approximation(resolution))
+        #for box in self.grid_outer_approximation(resolution):
+        #    fig.draw(box)
         fig.write(filename)
 
+    def box_draw(self,figure,resolution=4):
+        assert(self.function.result_size()==2)
+        for box in self.outer_approximation(resolution):
+            fig.draw(box)
+
+    def grid_draw(self,figure,resolution=4):
+        assert(self.function.result_size()==2)
+        fig.draw(self.grid_outer_approximation(resolution))
+
     def __str__(self):
-        return str(self.domain)+str(self.function)+str(self.maximum_negative_constraints)+"<0"
+        res="ConstrainedImageSet["+str(self.function.result_size())+","+str(self.function.argument_size())+"]("
+        res+="( domain="+str(self.domain)
+        res+=", codomain="+str(self.function(self.domain))
+        res+=", maximum_constraints="+str([ (str(id)+"<0",constraint(self.domain)) for (id,constraint) in self.maximum_negative_constraints])
+        res+=", positive_constraints="+str([ (str(id)+"<0",constraint(self.domain)) for (id,constraint) in self.positive_constraints])
+        res+=" )"
+        return res
     
 def lie_derivative(g,f):
     assert(isinstance(g,ScalarFunction))
@@ -154,27 +194,36 @@ if __name__=='__main__':
     print lie_derivative(g,f)
     
     fig=Figure()
-    resolution=3
-
+    ConstrainedImageSet.draw=ConstrainedImageSet.grid_draw
+    ConstrainedImageSet.draw=ConstrainedImageSet.box_draw
+    resolution=4
+    
     fig.set_bounding_box(f(d))
-    s=ConstrainedImageSet(d,f,[],[],[h],[])
+    set=ConstrainedImageSet(d,f,[],[],[('h',h)],[])
     fig.set_fill_colour(0.0,0.0,1.0)
-    for box in s.outer_approximation(resolution): fig.draw(box)
-    s=ConstrainedImageSet(d,f,[],[],[],[h])
+    set.draw(fig,resolution)
+    set=ConstrainedImageSet(d,f,[],[],[],[('h',h)])
     fig.set_fill_colour(0.0,1.0,1.0)
-    for box in s.outer_approximation(resolution): fig.draw(box)
+    set.draw(fig,resolution)
+    for cell in set.grid_outer_approximation(resolution): fig.draw(cell.box())
     fig.write("constrained_image_set-1")
-
     fig.clear()
     
+    
     fig.set_bounding_box(id(d))
-    s=ConstrainedImageSet(d,id,[],[],[],[])
+    set=ConstrainedImageSet(d,id,[],[],[],[])
     fig.set_fill_colour(0.0,0.0,1.0)
-    for box in s.outer_approximation(resolution): fig.draw(box)
-    s=ConstrainedImageSet(d,id,[h],[],[],[])
+    set.draw(fig,resolution)
+    set=ConstrainedImageSet(d,id,[('h',h)],[],[],[])
     fig.set_fill_colour(1.0,0.0,1.0)
-    for box in s.outer_approximation(resolution): fig.draw(box)
-    s=ConstrainedImageSet(d,id,[],[h],[],[])
+    set.draw(fig,resolution)
+    set=ConstrainedImageSet(d,id,[],[('h',h)],[],[])
     fig.set_fill_colour(0.0,1.0,1.0)
-    for box in s.outer_approximation(resolution): fig.draw(box)
+    set.draw(fig,resolution)
+    c=InterpolatedCurve(0.0,[0.0,0.0])
+    for i in range(0,64+1):
+        s=d[1].lower()+d[1].width()*(i/64.0)
+        c.insert(s,[s-s*s*s,s])
+    fig.draw(c)
     fig.write("constrained_image_set-2")
+

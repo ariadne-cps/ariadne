@@ -180,6 +180,7 @@ void export_box()
     class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval> > > box_class("Box",init<Box>());
     box_class.def(init<uint>());
     box_class.def(init< Vector<Interval> >());
+    box_class.def("__eq__", (bool(*)(const Vector<Interval>&,const Vector<Interval>&)) &operator==);
     box_class.def("dimension", (uint(Box::*)()const) &Box::dimension);
     box_class.def("centre", (Point(Box::*)()const) &Box::centre);
     box_class.def("radius", (Float(Box::*)()const) &Box::radius);

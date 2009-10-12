@@ -98,11 +98,11 @@ GridTreeSet join(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 
-GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth);
-GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
-GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth);
-template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const uint depth);
-GridTreeSet inner_approximation(const OpenSetInterface& theSet, const Grid& theGrid, const uint height, const uint depth);
+GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint numSubdivInDim);
+GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint numSubdivInDim);
+GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint numSubdivInDim);
+template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const uint numSubdivInDim);
+GridTreeSet inner_approximation(const OpenSetInterface& theSet, const Grid& theGrid, const uint height, const uint numSubdivInDim);
 
 template<class A> void serialize(A& archive, const GridTreeSet& set, const uint version);
 
@@ -705,15 +705,13 @@ class GridOpenCell: public GridAbstractCell {
  * this class is just a pointer to the node in the tree of some paving. This class is not
  * responsible for deallocation of that original tree.
  */
-class GridTreeSubset
-    : public DrawableInterface
-{
+class GridTreeSubset : public DrawableInterface {
   protected:
 
     friend class GridTreeCursor;
 
-    friend GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const uint depth );
-    friend GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const uint depth );
+    friend GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const uint numSubdivInDim );
+    friend GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const uint numSubdivInDim );
 
     /*! \brief The pointer to the root node of the subpaving tree.
      * Note that, this is not necessarily the root node of the corresponding paving tree.
@@ -769,7 +767,18 @@ class GridTreeSubset
      */
     static tribool overlaps( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                              const uint theHeight, BinaryWord &theWord, const Box& theBox );
-
+    
+    /*! Allow to convert the number of subdivisions in each dimension, i.e. \a numSubdivInDim,
+     *  starting from the zero cell into the number of subdivisions that have to be done in a
+     *  subpaving rooted to the primary cell of the height \a primaryCellHeight and having a 
+     *  length of the path from the primary cell to the root cell of length \a primaryToRootCellPathLength.
+     *  Returns zero if the binary tree already has a sufficient number of subdivisions due to
+     *  its root cell being smaller than the cells obtained when subdividing \a numSubdivInDim
+     *  times in each dimension starting from the zero-cell level.
+     */
+    int zero_cell_subdivisions_to_tree_subdivisions( const uint numSubdivInDim, const uint primaryCellHeight,
+                                                     const uint primaryToRootCellPathLength ) const;
+    
   public:
 
     /*! \brief A short name for the constant iterator */
@@ -844,11 +853,19 @@ class GridTreeSubset
     //@{
     //! \name Subdivisions
 
+    /*! \brief Subdivides the tree in such a way thaty it's depth becomes ( height + numSubdivInDim ) * D
+     * Where height is the height of the primary cell to which the tree is rooted, \a numSubdivInDim is
+     * the number of subdivisions in each dimension, and D is the number of dimensions of our space.
+     * Note that, in case the subset is already subdivided to the required depth then nothing is done.
+     * The latter can happen if the root cell of the subset is below the depth ( height + numSubdivInDim ) * D.
+     */
+    void mince( const uint numSubdivInDim );
+
     /*! \brief Subdivides the tree up to the depth specified by the parameter.
      * Note that, we start from the root of the sub-paving and thus the subdivision
      * is done relative to it but not to the root of the original paving.
      */
-    void mince( const uint theNewDepth );
+    void mince_to_tree_depth( const uint theNewDepth );
 
     /*! \brief Subdivide the paving until the smallest depth such that the leaf
      * cells size is <= \a theMaxCellWidth. Note that, the disabled cells are
@@ -969,7 +986,7 @@ class GridTreeSet : public GridTreeSubset {
      *  cell of height \a otherPavingPCellHeight and set \a has_stopped to true.
      */
     BinaryTreeNode* align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled, const bool stop_on_disabled, bool & has_stopped );
-
+    
     /*! \brief This method adjoins the outer approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented
      *  by the paving's binary node \a pBinaryTreeNode. When adding the outer approximation, we compute it
@@ -1154,14 +1171,16 @@ class GridTreeSet : public GridTreeSubset {
     friend GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
 
     //@}
-
+    
     //@{
     //! \name Geometric Approximation
 
-    /*! \brief Adjoin an over approximation to box, computing to the given depth.
-     *  \pre The box must have nonempty interior.
+    /*! \brief Adjoin an over approximation to box, computing to the given depth:
+     *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of
+     *   the zero cell we should make to get the proper cells for outer approximating \a theSet.
+     *   \pre The box must have nonempty interior.
      */
-    void adjoin_over_approximation( const Box& theBox, const uint depth );
+    void adjoin_over_approximation( const Box& theBox, const uint numSubdivInDim );
 
     /*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
      *  This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
@@ -1173,32 +1192,43 @@ class GridTreeSet : public GridTreeSubset {
      * 4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
      * 5. Disables the cells that are disjoint with the \a theSet
      */
-    void adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth );
+    void adjoin_outer_approximation( const CompactSetInterface& theSet, const uint numSubdivInDim );
 
-    /*! \brief Adjoin a lower approximation to a given set, computing to the given height and depth.
+    /*! \brief Adjoin a lower approximation to a given set, computing to the given height and depth:
+     *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
+     *   zero cell we should make to get the proper cells for outer approximating \a theSet.
      *   A lower approximation comprises all cells intersecting a given set.
      */
-    void adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint depth );
+    void adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint numSubdivInDim );
 
-    /*! \brief Adjoin a lower approximation to a given set restricted to the given bounding box, computing to the given depth.
+    /*! \brief Adjoin a lower approximation to a given set restricted to the given bounding box,
+     *   computing to the given depth: \a numSubdivInDim -- defines, how many subdivisions in each
+     *   dimension from the level of the zero cell we should make to get the proper cells for outer
+     *   approximating \a theSet. A lower approximation comprises all cells intersecting a given set.
+     */
+    void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint numSubdivInDim );
+
+    /*! \brief Adjoin a lower approximation to a given set, computing to the given depth
+     *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
+     *   zero cell we should make to get the proper cells for outer approximating \a theSet.
      *   A lower approximation comprises all cells intersecting a given set.
      */
-    void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint depth );
+    void adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint numSubdivInDim );
 
-    /*! \brief Adjoin a lower approximation to a given set, computing to the given depth.
-     *   A lower approximation comprises all cells intersecting a given set.
-     */
-    void adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth );
-
-    /*! \brief Adjoin an inner approximation to a given set, computing to the given height and depth.
+    /*! \brief Adjoin an inner approximation to a given set, computing to the given height and depth:
+     *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
+     *   zero cell we should make to get the proper cells for outer approximating \a theSet.
      *   An inner approximation comprises all cells that are sub-cells of the given set.
      */
-    void adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint depth );
+    void adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint numSubdivInDim );
 
-    /*! \brief Adjoin an inner approximation to a given set restricted to the given bounding box, computing to the given depth.
-     *   An inner approximation comprises all cells that are sub-cells of the given set.
+    /*! \brief Adjoin an inner approximation to a given set restricted to the given bounding box,
+     *   computing to the given depth: \a numSubdivInDim -- defines, how many subdivisions in each
+     *   dimension from the level of the zero cell we should make to get the proper cells for outer
+     *   approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
+     *   the given set.
      */
-    void adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& bounding_box, const uint depth );
+    void adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& bounding_box, const uint numSubdivInDim );
 
     //@}
 
@@ -2028,7 +2058,26 @@ inline Box GridTreeSubset::bounding_box() const {
 
 }
 
-inline void GridTreeSubset::mince( const uint theNewDepth ) {
+inline int GridTreeSubset::zero_cell_subdivisions_to_tree_subdivisions( const uint numSubdivInDim, const uint primaryCellHeight,
+                                                                        const uint primaryToRootCellPathLength ) const {
+    //Here we take the height of the primary cell that the subpaving's root cell is rooted to
+    //This height times the number of dimensions is the number of subdivisions to make in
+    //the primary cell to reach the level of the zero cell. This plus the numSubdivInDim 
+    //times the number of dimensions gives us the total number of the primary cell we have
+    //to make. But, the given paving is has the root node different from the primary cell,
+    //thus we have to subtract the length of the path from the primary cell to the root cell
+    //of this subpaving, to get the proper number of subdivisions to make in the binary tree
+    int theNewDepth = ( primaryCellHeight + numSubdivInDim ) * _theGridCell.grid().dimension() - primaryToRootCellPathLength;
+    //If the new depth is not positive then we already have the required number
+    //of subdivisions so then nothing has to be done, so we return zero!
+    return (theNewDepth > 0) ? theNewDepth : 0;
+}
+
+inline void GridTreeSubset::mince( const uint numSubdivInDim ) {
+    mince_to_tree_depth( zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, _theGridCell.height(), _theGridCell.word().size() ) );
+}
+
+inline void GridTreeSubset::mince_to_tree_depth( const uint theNewDepth ) {
     _pRootTreeNode->mince( theNewDepth );
 }
 
@@ -2217,30 +2266,30 @@ inline std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTree
     return os << "GridTreeSet( " << theGridTreeSubset << " )";
 }
 
-inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth) {
-    Grid theGrid(theSet.dimension());
-    return outer_approximation(theSet,theGrid,depth);
+inline GridTreeSet outer_approximation( const CompactSetInterface& theSet, const uint numSubdivInDim ) {
+    Grid theGrid( theSet.dimension() );
+    return outer_approximation( theSet, theGrid, numSubdivInDim );
 }
 
-inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth) {
-    GridTreeSet result(theGrid);
-    result.adjoin_outer_approximation(theSet,depth);
+inline GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const uint numSubdivInDim ) {
+    GridTreeSet result( theGrid );
+    result.adjoin_outer_approximation( theSet, numSubdivInDim );
     return result;
 }
 
-inline GridTreeSet inner_approximation(const OpenSetInterface& theSet, const Grid& theGrid, const uint height, const uint depth) {
-    GridTreeSet result(theGrid);
-    result.adjoin_inner_approximation(theSet,height,depth);
+inline GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const uint height, const uint numSubdivInDim ) {
+    GridTreeSet result( theGrid );
+    result.adjoin_inner_approximation( theSet, height, numSubdivInDim );
     return result;
 }
 
 
 template<class BS>
-GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const uint depth) {
-    ARIADNE_ASSERT_MSG(theSet.dimension()==theGrid.dimension(),"theSet="<<theSet<<", theGrid="<<theGrid);
-    GridTreeSet result(theGrid);
+GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const uint numSubdivInDim) {
+    ARIADNE_ASSERT_MSG( theSet.dimension()==theGrid.dimension(),"theSet="<<theSet<<", theGrid="<<theGrid );
+    GridTreeSet result( theGrid );
     for(typename ListSet<BS>::const_iterator iter=theSet.begin(); iter!=theSet.end(); ++iter) {
-        result.adjoin_outer_approximation(*iter,depth);
+        result.adjoin_outer_approximation( *iter, numSubdivInDim );
     }
     result.recombine();
     return result;

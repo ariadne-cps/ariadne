@@ -39,12 +39,15 @@
 
 namespace Ariadne {
 
+class Point;
 class Box;
 
 class HybridSpace;
 class DiscreteState;
+template<class BS> class HybridBasicSet;
 
-typedef std::pair<DiscreteState,Box> HybridBox;
+typedef HybridBasicSet<Point> HybridPoint;
+typedef HybridBasicSet<Box> HybridBox;
 typedef std::map<DiscreteState,Box> HybridBoxes;
 
 //! \brief Base class for sets in a hybrid space.

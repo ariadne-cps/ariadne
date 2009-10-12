@@ -34,6 +34,10 @@
 #include "grid_set.h"
 
 #include "taylor_function.h"
+#include "discrete_event.h"
+
+#include "hybrid_set.h"
+#include "hybrid_evolver-constrained.h"
 
 #include "utilities.h"
 
@@ -80,6 +84,35 @@ struct from_python<Box> {
     }
 };
 
+
+template<class ES>
+struct to_python< ListSet<ES> > {
+    to_python() { boost::python::to_python_converter< ListSet<ES>, to_python< ListSet<ES> > >(); }
+
+    static PyObject* convert(const ListSet<ES>& ls) {
+        boost::python::list result;
+        for(typename ListSet<ES>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+            result.append(boost::python::object(*iter));
+        }
+        return boost::python::incref(boost::python::list(result).ptr());
+    }
+    static const PyTypeObject* get_pytype() { return &PyList_Type; }
+};
+
+template<class ES>
+struct to_python< ListSet< HybridBasicSet<ES> > > {
+    typedef ListSet< HybridBasicSet<ES> > SetType;
+    to_python() { boost::python::to_python_converter< SetType, to_python<SetType> >(); }
+
+    static PyObject* convert(const SetType& hls) {
+        boost::python::dict result;
+        for(typename SetType::locations_const_iterator iter=hls.locations_begin(); iter!=hls.locations_end(); ++iter) {
+            result[iter->first]=iter->second;
+        }
+        return boost::python::incref(boost::python::dict(result).ptr());
+    }
+    static const PyTypeObject* get_pytype() { return &PyDict_Type; }
+};
 
 
 
@@ -265,6 +298,79 @@ void export_taylor_set()
     implicitly_convertible<Box,TaylorSet>();
 }
 
+void export_taylor_constrained_flow_set()
+{
+    class_<TaylorConstrainedFlowSet,bases<LocatedSetInterface> >
+        taylor_set_class("TaylorConstrainedFlowSet",init<TaylorConstrainedFlowSet>());
+    taylor_set_class.def(init<Vector<Interval>,VectorFunction>());
+    taylor_set_class.def(init<VectorTaylorFunction>());
+    taylor_set_class.def(init<Box>());
+
+    taylor_set_class.def("new_invariant",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarFunction&)) &TaylorConstrainedFlowSet::new_invariant);
+    taylor_set_class.def("new_guard",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarFunction&)) &TaylorConstrainedFlowSet::new_guard);
+    taylor_set_class.def("new_activation",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarFunction&)) &TaylorConstrainedFlowSet::new_activation);
+
+    taylor_set_class.def("new_invariant",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarTaylorFunction&)) &TaylorConstrainedFlowSet::new_invariant);
+    taylor_set_class.def("new_guard",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarTaylorFunction&)) &TaylorConstrainedFlowSet::new_guard);
+    taylor_set_class.def("new_activation",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarTaylorFunction&)) &TaylorConstrainedFlowSet::new_activation);
+
+    taylor_set_class.def("domain", &TaylorConstrainedFlowSet::domain);
+    taylor_set_class.def("function", &TaylorConstrainedFlowSet::function);
+    taylor_set_class.def("dimension", &TaylorConstrainedFlowSet::dimension);
+    taylor_set_class.def("empty", &TaylorConstrainedFlowSet::empty);
+    taylor_set_class.def("bounding_box", &TaylorConstrainedFlowSet::bounding_box);
+    taylor_set_class.def("outer_approximation", &TaylorConstrainedFlowSet::outer_approximation);
+    taylor_set_class.def(self_ns::str(self));
+
+    def("apply",(TaylorConstrainedFlowSet(*)(const VectorFunction&, const TaylorConstrainedFlowSet&)) &apply);
+    //def("apply",(TaylorModel(*)(const ScalarFunction&,const TaylorSet&)) &apply);
+    //def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorSet&)) &apply);
+    //def("apply",(TaylorSet(*)(const VectorFunction&,const TaylorSet&)) &apply);
+    //def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
+}
+
+
+void export_constrained_image_set()
+{
+    class_<ConstrainedImageSet>
+        constrained_image_set_class("ConstrainedImageSet",init<ConstrainedImageSet>());
+    constrained_image_set_class.def(init<Box>());
+    constrained_image_set_class.def(self_ns::str(self));
+}
+
+
+void export_hybrid_box()
+{
+    class_<HybridBox> hybrid_box_class("HybridBox",init<HybridBox>());
+    hybrid_box_class.def(init<DiscreteState,Box>());
+    hybrid_box_class.def("location",&HybridBox::location,return_value_policy<copy_const_reference>());
+    hybrid_box_class.def("continuous_state_set",&HybridBox::continuous_state_set,return_value_policy<copy_const_reference>());
+    hybrid_box_class.def(self_ns::str(self));
+}
+
+void export_hybrid_taylor_set()
+{
+    class_<HybridTaylorSet> hybrid_taylor_set_class("HybridTaylorSet",init<HybridTaylorSet>());
+    hybrid_taylor_set_class.def(init<DiscreteState,Box>());
+    hybrid_taylor_set_class.def(init<DiscreteState,TaylorSet>());
+    hybrid_taylor_set_class.def(self_ns::str(self));
+
+    implicitly_convertible<HybridBox,HybridTaylorSet>();
+}
+
+void export_hybrid_constrained_image_set()
+{
+    class_<HybridConstrainedImageSet>
+        hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
+    hybrid_constrained_image_set_class.def(init<DiscreteState,Box>());
+    //hybrid_constrained_image_set_class.def(init<DiscreteState,ConstrainedImageSet>());
+    hybrid_constrained_image_set_class.def(self_ns::str(self));
+
+    implicitly_convertible<HybridBox,HybridConstrainedImageSet>();
+}
+
+
+
 
 void geometry_submodule() {
     export_set_interface();
@@ -274,5 +380,14 @@ void geometry_submodule() {
     export_polytope();
     export_taylor_set();
     export_curve();
+
+    export_constrained_image_set();
+
+    export_hybrid_box();
+    export_hybrid_taylor_set();
+    export_hybrid_constrained_image_set();
+
+    to_python< ListSet<TaylorSet> >();
+    to_python< ListSet<HybridTaylorSet> >();
 }
 

@@ -180,7 +180,7 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
             }
             differential_assignments=sys.dynamics(next_pt);
             guards=sys.guards(next_pt);
-            t.discrete_time+=1;
+            t._discrete_time+=1;
         } else {
             HybridVector k1,k2,k3,k4;
             HybridPoint pt1,pt2,pt3,pt4;
@@ -199,7 +199,7 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
             k4=evaluate(differential_assignments,pt3);
 
             next_pt=pt+(h/6)*(k1+2*(k2+k3)+k4);
-            t.continuous_time+=h;
+            t._continuous_time+=h;
         }
         pt=next_pt;
         orbit[t]=pt;

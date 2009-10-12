@@ -183,6 +183,74 @@ void grid_draw(CanvasInterface& g, const TaylorSet& ts);
 
 void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
 
+class DiscreteEvent;
+
+//! \brief A set defined as the image of a subset of a box (the \em domain) under a continuous function.
+//! The domain is of the form \f$(x_1,\ldots,x_n,t_0,\ldots,t_k)\f$ where each \f$\delta_i\f$ is positive.
+//! The constraints are of the form \f$a(x,t)\geq0\f$, \f$i(x,\ldots,[0,t_k])\leq 0\f$ or \f$g(x,\ldots,[0,t_k])\leq 0 \wedge g(x,\ldots,t_k)=0\f$.
+//! We abbreviate the latter as \f$g(x,t,[0,t_k]) <\!\&\!= 0\f$.
+class TaylorConstrainedFlowSet
+    : public LocatedSetInterface
+{
+    Vector<Interval> _domain;
+    Vector<TaylorModel> _models;
+    // Constraints of the form c(x,[0,t])<=0
+    std::map<DiscreteEvent,TaylorModel> _invariants;
+    // Constraints of the form a(x,t)>=0
+    std::map<DiscreteEvent,TaylorModel> _activations;
+    // Constraints of the form g(x,t)<&=0
+    std::map<DiscreteEvent,TaylorModel> _guards;
+  public:
+    //! \brief Construct the preimage of \a codom under \a fn.
+    TaylorConstrainedFlowSet(const Vector<Interval>& dom, const VectorFunction& fn);
+    //! \brief Construct the preimage of \a codom under \a fn.
+    TaylorConstrainedFlowSet(const VectorTaylorFunction& fn);
+    //! \brief Construct the preimage of \a codom under \a fn.
+    TaylorConstrainedFlowSet(const Box& bx);
+    //! \brief A dynamically-allocated copy.
+    TaylorConstrainedFlowSet* clone() const;
+
+    //! \brief Add a new constraint of the form \f$i(x,\ldots,[0,t_k])\leq0\f$.
+    void new_invariant(const DiscreteEvent& e, const ScalarFunction& c);
+    //! \brief Add a new constraint of the form \f$g(x,\ldots,[0,t_k])<\!\&\!=0\f$.
+    void new_guard(const DiscreteEvent& e, const ScalarFunction& c);
+    //! \brief Add a new constraint of the form \f$a(x,\ldots,t_k)\geq0\f$.
+    void new_activation(const DiscreteEvent& e, const ScalarFunction& c);
+
+    //! \brief Add a new constraint of the form \f$i(x,\ldots,[0,t_k])\leq0\f$.
+    void new_invariant(const DiscreteEvent& e, const ScalarTaylorFunction& c);
+    //! \brief Add a new constraint of the form \f$g(x,\ldots,[0,t_k])<\!\&\!=0\f$.
+    void new_guard(const DiscreteEvent& e, const ScalarTaylorFunction& c);
+    //! \brief Add a new constraint of the form \f$a(x,\ldots,t_k)\geq0\f$.
+    void new_activation(const DiscreteEvent& e, const ScalarTaylorFunction& c);
+
+    //! \brief The domain of the set.
+    Vector<Interval> domain() const;
+    //! \brief The function used to define the set.
+    VectorTaylorFunction function() const;
+
+    uint dimension() const;
+    tribool empty() const;
+    tribool disjoint(const Box&) const;
+    tribool overlaps(const Box&) const;
+    tribool inside(const Box&) const;
+    Box bounding_box() const;
+    GridTreeSet outer_approximation(const Grid& grid, uint depth) const;
+    std::ostream& write(std::ostream&) const;
+  private:
+    friend TaylorConstrainedFlowSet apply(const VectorFunction& f, const TaylorConstrainedFlowSet& s);
+    friend TaylorConstrainedFlowSet apply(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
+    friend TaylorConstrainedFlowSet apply_flow(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
+  private:
+    void _adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth) const;
+    tribool _empty(const Vector<Interval>& subdomain, uint depth) const;
+};
+
+
+TaylorConstrainedFlowSet apply(const VectorFunction& f, const TaylorConstrainedFlowSet& s);
+TaylorConstrainedFlowSet apply(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
+TaylorConstrainedFlowSet apply_flow(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
+
 
 
 } //namespace Ariadne

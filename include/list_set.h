@@ -47,7 +47,8 @@ template<class ES> class ListSet;
 class DiscreteState;
 
 // Declare template specialisation for hybrid list set
-template<class ES> class ListSet< std::pair<DiscreteState,ES> >;
+template<class ES> class HybridBasicSet;
+template<class ES> class ListSet< HybridBasicSet<ES> >;
 
 struct ListSetSummary { uint size, dimension; };
 
@@ -70,6 +71,8 @@ class ListSet
     explicit ListSet(const BS& bs) { this->adjoin(bs); }
     template<class BST> ListSet(const ListSet<BST>& ls) {
         this->_data.insert(this->end(),ls.begin(),ls.end()); }
+    ListSet(const std::vector<BS>& lst) {
+        this->_data.insert(this->end(),lst.begin(),lst.end()); }
     template<class Iter> ListSet(Iter first, Iter last) {
         this->_data.insert(this->end(),first,last); };
 

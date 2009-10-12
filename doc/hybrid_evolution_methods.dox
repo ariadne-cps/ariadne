@@ -28,7 +28,115 @@
 
 
 
-\page hybrid_evolution_page Hybrid Evolution Methods
+\page hybrid_evolution_page Hybrid Evolution Methods (Version 0.5)
+
+\section hybrid_evolution_constraints Evolution of a hybrid system with constraints
+
+Given an initial state \f$x_0\f$, we wish to compute the set of all points
+reachable at times up to time \f$t\f$, and all points reached at exactly time \f$t\f$.
+We denote by \f$\Psi(x_0,t)\f$ the set of points reached starting at \f$x_0\f$ at time \f$t\f$.
+
+Suppose we start at a given initial state \f$x_0\f$ at time \f$t_0\f$ (which may depend on \f$x_0\f$), and undergo a sequence of events
+\f$e_{i}\f$ with guards \f$g_i\f$ and resets \f$r_i\f$.
+Let \f$\phi_i(x,t)\f$ denote the solution of the differential equation \f$\dot{x}=f_i(x)\f$ valid after the \f$i^\mathrm{th}\f$ event.
+Let \f$t_i\f$ be the time of the \f$i^\mathrm{th}\f$ event.
+Then the state at time \f$t\f$ assuming that there are \f$n\f$ events is given by
+\f[ y(t) = y_n(t) = \phi_{n}(x_n,t-t_n) \f]
+where
+\f[ x_{m+1} = r_{m+1}(\phi_{m}(x_m,t_{m+1}-t_m)  \f]
+and the times \f$t_m\f$ satisfy
+\f[ t_0 \leq t_1 \leq \cdots \leq t_m \leq t . \f]
+If \f$p_m(x)\leq0\f$ is a progress (time-can-pass,tcp) predicate valid in mode \f$m\f$, then we must have
+\f[ p_m(\phi_{m}(x_m,[0,t_{m+1}-t_{m}])) \leq 0 \f]
+and if \f$a_m(x)\geq0\f$ is the activation predicate of the \f$m^\mathrm{th}\f$ event, then we must have
+\f[ a_{m}( \phi_{m-1}(x_{m-1},t_{m}-t_{m-1}) ) \geq 0 . \f]
+If the event \f$e_{m}\f$ is urgent, then we have
+\f[ g_{m}( \phi(x_{m-1}(x_{m-1},[0,t_{m}-t_{m-1}]))\leq 0 \wedge g_{m}( \phi(x_{m-1}(x_{m-1},0,t_{m}-t_{m-1}) = 0 . \f]
+
+If we set \f$\delta_m=t_{m+1}-t_m\f$, then the equations reduce to
+\f[ \begin{aligned}
+        y_n(t) &= \phi_{n}(x_n,t-(t_0+\delta_0+\cdots+\delta_n)) \\
+        x_{m+1} &= r_{m+1}(\phi_{m}(x_m,\delta_m)) \\
+\end{aligned} \f]
+with constraints
+\f[ \begin{aligned}
+        \delta_i &\geq 0; \\
+        t-(t_0+\delta_0+\cdots+\delta_n) &\geq 0; \\[\jot]
+        g_{m}\circ\phi(x_{m-1},[0,\delta_m]) &\leq 0 \\
+        g_{m}\circ\phi(x_{m-1},\delta_m) &= 0 .
+\end{aligned} \f]
+This is useful, as a constraint of the form \f$\delta_m\geq0\f$ can be encoded directly in the domain of a ConstrainedImageSet, but a constraint of the form \f$t_{m+1}\geq t_m\f$ cannot be.
+
+In the case of two events, both of which are urgent, and maximum time \f$T\f$, we can expand the conditions
+\f[ y(t) = \phi_2\bigl(r_2\circ\phi_1\bigl(r_1\circ\phi_0(x_0,\delta_0),\delta_1\bigr),t-(t_0(x_0)+\delta_0+\delta_1)\bigr) \f]
+with constraints
+\f[ \begin{aligned}
+        x_0\in B,\ t,\delta_0,\delta_1 &\in [0,T]; \\[\jot]
+        t-(t_0(x_0)+\delta_0+\delta_1) &\geq 0; \\[\jot]
+        g_1\circ\phi_0(x_0,[0,\delta_0]) &\leq 0; \\
+        g_1\circ\phi_0(x_0,\delta_0) &= 0; \\[\jot]
+        g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0),[0,\delta_1]) &\leq 0; \\
+        g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0),\delta_1) &= 0.
+\end{aligned} \f]
+
+If we can solve for the crossing time \f$t_1\f$ (equivalently, the dwell time \f$\delta_0\f$) as a function of \f$x_0\f$, then we can eliminate the constraints involving \f$g_1\f$ from the system of equations.
+\f[ \begin{aligned}
+        x_0\in B,\ t,\delta_1 &\in [0,T]; \\[\jot]
+        \delta_0(x_0) &\geq 0; \\[\jot]
+        t-(t_0(x_0)+\delta_0(x_0)+\delta_1) &\geq 0; \\[\jot]
+        g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0(x_0)),[0,\delta_1]) &\leq 0; \\
+        g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0(x_0)),\delta_1) &= 0.
+\end{aligned} \f]
+Alternatively, if we can solve for \f$t_2\f$ in terms of \f$x_1\f$, then we can eliminate the constraints involving \f$g_2\f$.
+\f[ \begin{aligned}
+        x_0\in B,\ t,\delta_0 &\in [0,T]; \\[\jot]
+        \delta_1(r_1\circ\phi_0(x_0,\delta_0)) &\geq 0; \\[\jot]
+        t-(t_0+\delta_0+\delta_1(r_1\circ\phi_0(x_0,\delta_0))) &\geq 0; \\[\jot]
+        g_1\circ\phi_0(x_0,[0,\delta_0]) &\leq 0; \\
+        g_1\circ\phi_0(x_0,\delta_0) &= 0; \\[\jot]
+\end{aligned} \f]
+In general, if we can solve for \f$t_{m+1}\f$ in terms of \f$x_{m}\f$, we have
+\f[ x_{m+1} = \phi_m(x_m,\delta_m(x_m)) = \phi_{m}(x_{m}(x_0,\ldots),\delta_m(x_0,\ldots)) . \f]
+
+
+\section hybrid_evolution_constraint_set The ConstrainedImageSet class
+
+An \link ImageSet ImageSet\endlink in \f$\R^n\f$ is the image of a compact box \f$C\f$ under a continuous function \f$h:\R^p\rightarrow\R^n\f$, and is given by \f[ S = \{ x\in\R^n \mid \exists\,s\in C,\ h(s)=x \} = \{ h(s) \mid s\in C \} = h(C) . \f]
+An ImageSet is \em overt (even if \f$C\f$ were allowed to be unbounded), and \em compact.
+A \link ConstraintSet ConstraintSet\endlink in \f$\R^n\f$ is the preimage of a box \f$D\f$ under a continuous function \f$g:\R^n\rightarrow\R^m\f$, and is given by \f[ S = \{ x\in\R^n \mid g(x) \in D \} = g^{-1}(D) . \f]
+A ConstraintSet is open if \f$D\f$ is open, and closed if \f$D\f$ is closed.
+
+In general, ImageSets are useful for representing enclosures in the evolution of a system, and ConstraintSets for regions used in the specification. However, for hybrid system evolution, we often need the properties of both kinds of set, which leads us to use ConstrainedImageSets.
+
+A \c ConstrainedImageSet is the image of a restricted subset of a compact box under a continuous function.
+\f[ S = \{ h(s) \mid s\in C \wedge g(s) \in D \} . \f]
+The intersection of \f$S\f$ with \f$\{ x\mid e(x) \in E \}\f$ is then
+\f[  \{ h(s) \mid s\in C \wedge g(s) \in D \wedge e\circ h(s) \in E \} . \f]
+The image of \f$S\f$ under a continuous function \f$f\f$ is then
+\f[ f(S) = \{ (f\circ h)(s) \mid s\in C \wedge g(s) \in D \} . \f]
+However, the preimage cannot be easily computed.
+
+It is sometimes useful to extend the class of predicates allowed to simplify the representation of guards and invariants.
+Suppose \f$T=[0,t_{\max}]\f$ is a time interval, \f$D\f$ is an initial state set, and \f$\phi(x,t)\f$ denotes the flow.
+Then the flow restricted to the invariant \f$p(x(t))\leq 0\f$ can be represented as
+\f[ S = \{ \phi(x_0,t) \mid x_0\in D,\ t\in T \text{ and } p\circ\phi(x_0,[0,t])\leq 0 \} \f]
+where \f$p\circ\phi(x_0,[0,t])\leq 0\f$ is a shorthand for
+\f[ \sup\{ p(\phi(x_0,s)) \mid s\in[0,t] \} \leq 0 . \f]
+If the set is supposed to represent the state after a discrete transition, then we have
+\f[ S = \{ \phi_1(r_1\circ\phi_0(x_0,\delta_0),t-(t_0+\delta_0)) \mid x_0\in D,\ \delta_0,t\in T,\ t-(t_0+\delta_0)\geq 0, \ \text{ and } p_0\circ\phi_0(x_0,[0,\delta_0])\leq 0 \} . \f]
+Note that here, the condition \f$p_0\circ\phi_0(x_0,[0,\delta_0])\leq 0\f$ is independent of the variable \f$t\f$, and can be most simply written as a function of the \f$n+1\f$ variables $x_0,\delta_0$ rather than the \f$n+2\f$ variables \f$x_0,\delta_0,t\f$.
+
+We therefore order the independent variables of a constrained image set representing the evolution of a hybrid system as
+\f[ x_{0} \in D \subset \R^n,\ \delta_0,\ldots,\delta_k\in[0,t_{\max}],\ t\in[0,t_{\max}] . \f]
+Then, if a constraint function depends on \f$n+j\f$ variables, these are assumed to be \f$x_{0,1},\ldots,x_{0,n},\delta_0,\ldots,\delta_j\f$.
+Note that in practice, some of the dwell-times \f$\delta_i\f$ may be missing if they can be solved for explicitly.
+
+
+
+
+
+
+\page hybrid_evolution_page_4 Hybrid Evolution Methods (Version 0.4)
 
 The evolution of a hybrid system takes place in a number of steps.
 Each step consists of a continuous evolution, followed by at most one discrete transition.

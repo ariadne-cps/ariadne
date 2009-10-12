@@ -121,6 +121,12 @@ ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, c
     return ScalarTaylorFunction(d,TaylorModel::constant(d.size(),c));
 }
 
+ScalarTaylorFunction ScalarTaylorFunction::variable(const Interval& ivl)
+{
+    Vector<Interval> d(1,ivl);
+    return ScalarTaylorFunction(d,TaylorModel::scaling(d.size(),0u,d[0u]));
+}
+
 ScalarTaylorFunction ScalarTaylorFunction::variable(const Vector<Interval>& d, uint j)
 {
     ARIADNE_ASSERT(j<d.size());
@@ -1020,7 +1026,7 @@ embed(const Vector<Interval>& d, const VectorTaylorFunction& f)
 VectorTaylorFunction
 restrict(const VectorTaylorFunction& f, const Vector<Interval>& d)
 {
-    ARIADNE_ASSERT(subset(d,f.domain()));
+    ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restrict "<<f<<" to non-sub-domain "<<d);
     if(d==f.domain()) { return f; }
     VectorTaylorFunction r(f.result_size(),d);
     for(uint i=0; i!=r.result_size(); ++i) {

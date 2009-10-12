@@ -46,27 +46,32 @@ struct HybridTime
     typedef int DiscreteTimeType;
 
     //! \brief The continuous (real, physical) time.
-    ContinuousTimeType continuous_time;
+    const ContinuousTimeType& continuous_time() const { return this->_continuous_time; }
     //! \brief The number of discrete steps taken.
-    DiscreteTimeType discrete_time;
+    const DiscreteTimeType& discrete_time() const { return this->_discrete_time; }
+
+    //! \brief The continuous (real, physical) time.
+    ContinuousTimeType _continuous_time;
+    //! \brief The number of discrete steps taken.
+    DiscreteTimeType _discrete_time;
   public:
     HybridTime(double t, int n)
-        : continuous_time(t), discrete_time(n) { } 
+        : _continuous_time(t), _discrete_time(n) { } 
 };
 
 inline bool operator==(const HybridTime& ht1, const HybridTime& ht2) {
-    return ht1.continuous_time==ht2.continuous_time &&
-        ht1.discrete_time==ht2.discrete_time; 
+    return ht1._continuous_time==ht2._continuous_time &&
+        ht1._discrete_time==ht2._discrete_time; 
 }
 
 inline bool operator!=(const HybridTime& ht1, const HybridTime& ht2) {
-    return ht1.continuous_time!=ht2.continuous_time ||
-        ht1.discrete_time!=ht2.discrete_time; 
+    return ht1._continuous_time!=ht2._continuous_time ||
+        ht1._discrete_time!=ht2._discrete_time; 
 }
 
 inline bool operator<=(const HybridTime& ht1, const HybridTime& ht2) {
-    return ht1.continuous_time<=ht2.continuous_time &&
-        ht1.discrete_time<=ht2.discrete_time; 
+    return ht1._continuous_time<=ht2._continuous_time &&
+        ht1._discrete_time<=ht2._discrete_time; 
 }
 
 inline bool operator<(const HybridTime& ht1, const HybridTime& ht2) {
@@ -74,7 +79,7 @@ inline bool operator<(const HybridTime& ht1, const HybridTime& ht2) {
 }
 
 inline std::ostream& operator<<(std::ostream& os, const HybridTime& ht) {
-    return os << "("<<ht.continuous_time<<","<<ht.discrete_time<<")";
+    return os << "("<<ht._continuous_time<<","<<ht._discrete_time<<")";
 }
 
 } // namespace Ariadne

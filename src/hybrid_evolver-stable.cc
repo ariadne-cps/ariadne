@@ -1,5 +1,5 @@
 /***************************************************************************
- *            stable_hybrid_evolver.cc
+ *            hybrid_evolver-stable.cc
  *
  *  Copyright  2008  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *
@@ -38,7 +38,7 @@
 
 #include "hybrid_time.h"
 #include "hybrid_automaton.h"
-#include "stable_hybrid_evolver.h"
+#include "hybrid_evolver-stable.h"
 
 namespace {
 
@@ -197,8 +197,8 @@ _evolution(EnclosureListType& final_sets,
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
-    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
-    const Float maximum_time=maximum_hybrid_time.continuous_time;
+    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
+    const Float maximum_time=maximum_hybrid_time.continuous_time();
 
 
     typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
@@ -718,8 +718,8 @@ timed_evolution(const SystemType& system,
     // result set
     TimedEnclosureListType result;
 
-    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
-    const Float maximum_time=maximum_hybrid_time.continuous_time;
+    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
+    const Float maximum_time=maximum_hybrid_time.continuous_time();
 
 
 

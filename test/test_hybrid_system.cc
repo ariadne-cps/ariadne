@@ -29,6 +29,7 @@
 #include "vector.h"
 #include "matrix.h"
 
+#include "function.h"
 #include "hybrid_system.h"
 
 using namespace std;

@@ -118,9 +118,12 @@ class ScalarFunction
 
 inline Float evaluate_approx(const ScalarFunction& f, const Vector<Float>& x) { return f(x); }
 inline Interval evaluate(const ScalarFunction& f, const Vector<Interval>& x) { return f(x); }
+inline TaylorModel compose(const ScalarFunction& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
 inline Vector<Float> gradient_approx(const ScalarFunction& f, const Vector<Float>& x) { return f.gradient(x); }
 inline Vector<Interval> gradient(const ScalarFunction& f, const Vector<Interval>& x) { return f.gradient(x); }
 inline std::ostream& operator<<(std::ostream& os, const ScalarFunction& f) { return f.write(os); }
+
+ScalarFunction embed(const ScalarFunction&, uint i);
 
 ScalarFunction operator+(const ScalarFunction&);
 ScalarFunction operator-(const ScalarFunction&);
@@ -214,6 +217,7 @@ class VectorFunction
 
 inline Vector<Float> evaluate_approx(const VectorFunction& f, const Vector<Float>& x) { return f(x); }
 inline Vector<Interval> evaluate(const VectorFunction& f, const Vector<Interval>& x) { return f(x); }
+inline Vector<TaylorModel> compose(const VectorFunction& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
 inline Matrix<Float> jacobian_approx(const VectorFunction& f, const Vector<Float>& x);
 inline Matrix<Interval> jacobian(const VectorFunction& f, const Vector<Interval>& x);
 
@@ -230,6 +234,7 @@ VectorFunction join(const VectorFunction&, const VectorFunction&);
 
 ScalarFunction compose(const ScalarFunction& f, const VectorFunction& g);
 VectorFunction compose(const VectorFunction& f, const VectorFunction& g);
+ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f);
 
 inline std::ostream& operator<<(std::ostream& os, const VectorFunction& f) { return f.write(os); }
 

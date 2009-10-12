@@ -135,7 +135,9 @@ IntegratorBase::time_step(const VectorFunction& vf, const IVector& dp, const IVe
 
 
 VectorTaylorFunction
-IntegratorBase::flow(const VectorFunction& vf, const IVector& dx, const Float& h) const
+IntegratorBase::flow(const VectorFunction& vf,
+                     const Vector<Interval>& dx,
+                     const Float& h) const
 {
     Vector<Interval> dp(0);
     return this->flow(vf,dp,dx,h);

@@ -60,7 +60,8 @@ class HybridImageSet;
 class HybridConstraintSet;
 
 
-
+template<class HBS> class HybridBasicSetExpression { };
+template<class HDS> class HybridDenotableSetExpression { };
 
 //! \brief A hybrid space \f$\bigsqcup_{q\in Q} \R^{d_q}\f$ with discrete states \f$Q\f$.
 class HybridSpace
@@ -118,16 +119,18 @@ bounding_boxes(const std::map<DiscreteState,uint> space, Interval bound)
     return result;
 }
 
-/*! \brief A point in a hybrid space */
-class HybridPoint
-    : public std::pair<DiscreteState,Point>
+
+template<class BS>
+class HybridBasicSet
+    : public std::pair<DiscreteState,BS>
 {
   public:
-    template<class T> HybridPoint(const T& hpt) : std::pair<DiscreteState,Point>(hpt) { }
-    template<class T1, class T2> HybridPoint(const T1& q, const T2& pt)
-        : std::pair<DiscreteState,Point>(q,pt) { }
+    typedef BS ContinuousStateSetType;
+    HybridBasicSet(const DiscreteState& q, const BS& s) : std::pair<DiscreteState,BS>(q,s) { }
+    HybridBasicSet(const std::pair<DiscreteState,BS>& p) : std::pair<DiscreteState,BS>(p) { }
+    const DiscreteState& location() const { return this->first; }
+    const ContinuousStateSetType& continuous_state_set() const { return this->second; }
 };
-
 
 template< class DS, class HBS >
 class HybridSetConstIterator
@@ -264,6 +267,12 @@ class HybridListSet
         for(locations_const_iterator loc_iter=hls.locations_begin();
             loc_iter!=hls.locations_end(); ++loc_iter) {
             (*this)[loc_iter->first].adjoin(loc_iter->second); } }
+    void adjoin(const ListSet<std::pair<DiscreteState,ES> >& hls) {
+        for(locations_const_iterator loc_iter=hls.locations_begin();
+            loc_iter!=hls.locations_end(); ++loc_iter) {
+            (*this)[loc_iter->first].adjoin(loc_iter->second); } }
+    void adjoin(const HybridBasicSet<ES>& hbs) {
+        (*this)[hbs.location()].adjoin(hbs.continuous_state_set()); }
 
     HybridListSet<Box> bounding_boxes() const {
         HybridListSet<Box> result;
@@ -277,19 +286,19 @@ class HybridListSet
 
 
 template<class ES>
-class ListSet< std::pair<DiscreteState,ES> >
+class ListSet< HybridBasicSet<ES> >
     : public HybridListSet<ES>
 {
   public:
     ListSet() { }
-    ListSet(const std::pair<DiscreteState,ES>& hes) { this->adjoin(hes); }
+    ListSet(const HybridBasicSet<ES>& hes) { this->adjoin(hes); }
 };
 
 
 template<class ES>
 std::ostream&
 operator<<(std::ostream& os,
-           const ListSet< std::pair<DiscreteState,ES> >& ls) {
+           const ListSet< HybridBasicSet<ES> >& ls) {
     const std::map< DiscreteState, ListSet<ES> >& hls=ls;
     return os << "HybridListSet" << hls;
 }
@@ -635,7 +644,7 @@ template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsig
 
 template<class BS> inline
 void
-draw(FigureInterface& figure, const Orbit< std::pair<DiscreteState,BS> >& orbit) {
+draw(FigureInterface& figure, const Orbit< BS >& orbit) {
     draw(figure,orbit.reach());
     draw(figure,orbit.initial());
     draw(figure,orbit.final());
@@ -643,9 +652,11 @@ draw(FigureInterface& figure, const Orbit< std::pair<DiscreteState,BS> >& orbit)
 
 template<class BS> inline
 void
-draw(FigureInterface& figure, const std::pair<DiscreteState,BS>& hs) {
-    draw(figure,hs.second);
+draw(FigureInterface& figure, const HybridBasicSet<BS>& hs) {
+    draw(figure,hs.continuous_state_set());
 }
+
+
 
 template<class DS> inline
 void
@@ -658,11 +669,11 @@ draw(FigureInterface& figure, const std::map<DiscreteState,DS>& hds) {
     }
 }
 
-template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const Orbit< std::pair<DiscreteState,BS> >& horb) {
+template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const Orbit< HybridBasicSet<BS> >& horb) {
     draw(figure,horb); return figure;
 }
 
-template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const std::pair<DiscreteState,BS>& hs) {
+template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const HybridBasicSet<BS>& hs) {
     draw(figure,hs); return figure;
 }
 

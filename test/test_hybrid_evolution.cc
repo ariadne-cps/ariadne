@@ -219,7 +219,7 @@ void TestHybridEvolution::test_affine_system() const
     const DiscreteEvent event4(4);
 
     typedef TaylorSet EnclosureType;
-    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
+    typedef HybridBasicSet<TaylorSet> HybridEnclosureType;
 
     // Set up the evolution parameters and grid
     Float step_size(0.5);

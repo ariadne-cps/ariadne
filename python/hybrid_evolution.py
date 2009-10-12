@@ -23,6 +23,7 @@
 import sys
 from ariadne import *
 from constrained_image_set import *
+
 #from hybrid_system import *
 
 Indeterminate=indeterminate()
@@ -37,6 +38,7 @@ Interval.__str__=interval_str
 del interval_str
 
 Taylor=ScalarTaylorFunction
+#ConstrainedImageSet=TaylorConstrainedFlowSet
 
 #Set representation functions
 Taylor.__repr__=Taylor.__str__
@@ -53,7 +55,7 @@ ConstrainedImageSet.__repr__=ConstrainedImageSet.__str__
 
 # Define extra functionality for TaylorFunctions
 def taylor_set(f,j,g):
-    """Set the value of the jth variable to g. The new domain is the same as the old domain.
+    """Set the value of the jth variable to g. The new domain is the old domain with the jth variable removed.
        Either g is a constant, or g is a scalar variable with domain equal to the new domain."""
     n=f.domain().size()
     subdomain=Box( [ f.domain()[i] for i in range(0,j)+range(j+1,n) ] )
@@ -74,6 +76,15 @@ def taylor_substitute(f,j,g):
     h[j]=g
     return compose(f,h)
 
+def lie_derivative(g,f):
+    assert(isinstance(g,ScalarFunction))
+    assert(isinstance(f,VectorFunction))
+    assert(g.argument_size()==f.result_size()==f.argument_size())
+    r=ScalarFunction(g.argument_size())
+    for i in range(0,g.argument_size()):
+        r=r+derivative(g,i)*f[i]
+    return r
+
 ScalarTaylorFunction.set=taylor_set
 VectorTaylorFunction.set=taylor_set
 ScalarTaylorFunction.substitute=taylor_substitute
@@ -91,170 +102,179 @@ class Set(set):
             res+=str(x)
         return res+"}"
 
-class Data:
+class ConstraintData:
     def __init__(self):
         pass
     def __repr__(self):
-        res="{ "
-        for field in dir(self):
-            if field[0]!='_': res+=str(field)+":"+str(getattr(self,field))+", "
-        return res+"}"
+        res="{ constraint_range:"+str(self.constraint_range)+", derivative_range:"+str(self.derivative_range)+" }"
+        return res
+
+class Composer:
+    def __call__(self,f1,f2):
+        return compose(f1,f2)
+
+
+class PrototypeHybridEvolver:
+    def __init__(self):
+        self.integrator=TaylorIntegrator(5)
+        self.maximum_step_size=5.5
     
-def evolve(system,initial_location,initial_set,initial_time,maximum_time):
-    integrator=TaylorIntegrator(5)
+    def orbit(self,system,initial_hybrid_set,maximum_hybrid_time,semantics=None):
+        assert isinstance(system,HybridAutomaton)
+        initial_location=initial_hybrid_set.location()
+        initial_set=initial_hybrid_set.continuous_state_set()
+        assert isinstance(initial_location,DiscreteState)
+        if isinstance(initial_set,IntervalVector):
+            initial_set=ConstrainedImageSet(initial_set,VectorFunction.identity(initial_set.size()))
+        assert isinstance(initial_set,ConstrainedImageSet)
+        initial_time=ScalarTaylorFunction.constant(initial_set.domain(),0.0)
+        assert Box(initial_time.domain())==Box(initial_set.domain())
+        print initial_time.domain(),initial_set.domain()
+        print type(initial_time.domain()),type(initial_set.domain())
+        assert initial_time.domain()==initial_set.domain()
+        assert isinstance(maximum_hybrid_time,HybridTime)
+        maximum_time=maximum_hybrid_time.continuous_time()
+        
+        initial_events=()
+        working_sets=[(initial_events,initial_location,initial_set,initial_time)]
+        reach_sets=[]
+        evolve_sets=[]
+
+        while len(working_sets)!=0:
+            self.upper_evolution_step(working_sets,reach_sets,evolve_sets,system,maximum_time)
+        return (reach_sets,evolve_sets)
+
+
+    def upper_evolution_step(self,working_sets,reach_sets,evolve_sets,system,maximum_time):
+        
+        (starting_events,starting_location,starting_set,starting_time)=working_sets[-1]
+        assert isinstance(starting_time,ScalarTaylorFunction)
+        working_sets.pop()
+        # FIXME: Remove this!
+        if len(starting_set.domain())>4: return
     
-    assert isinstance(system,HybridAutomaton)
-    assert isinstance(initial_location,DiscreteState)
-    if isinstance(initial_set,IntervalVector):
-        initial_set=ConstrainedImageSet(initial_set,VectorFunction.identity(initial_set.size()))
-    assert isinstance(initial_set,ConstrainedImageSet)
-    if isinstance(initial_time,float):
-        initial_time=ScalarTaylorFunction.constant(initial_set.domain,initial_time)
-    assert isinstance(initial_time,ScalarTaylorFunction)
-    assert initial_time.domain()==initial_set.domain
+        n=starting_set.dimension()
+        m=starting_set._domain.dimension()
+        
+        print "UPPER EVOLUTION STEP"
+        
+        # Extract dynamic and constraints
+        starting_mode=system.mode(starting_location)
+        dynamic=starting_mode.dynamic()
+        invariants=starting_mode.invariants()
+        guards={}
+        activations={}
+        resets={}
+        targets={}
+        transitions=system.transitions(starting_location)
+        for transition in transitions:
+            assert isinstance(transition.guard(),ScalarFunction)
+            resets[transition.event()]=transition.reset()
+            targets[transition.event()]=transition.target().location()
+            if transition.urgency():
+                guards[transition.event()]=transition.guard()
+            else:
+                activations[transition.event()]=transition.guard()
+        print "\nstarting_events:",starting_events,
+        print "\nstarting_location:",starting_location,
+        print "\nstarting_set:",starting_set
+        print "\nstarting_time:",starting_time
+        print "\ninvariants:",invariants,"\nguards:",guards,"\nactivations:",activations,"\nresets:",resets
+        
+        # Compute initially active guards
+        print
+        starting_bounding_box=Box(starting_set.bounding_box())
+        starting_ranges={}
+        no_flow=False
+        for (event,constraint) in invariants.items() + guards.items():
+            constraint_range=constraint(starting_bounding_box)
+            print str(event)+".starting_range():",constraint_range
+            starting_ranges[event]=constraint(starting_bounding_box)
+            if constraint_range.lower()>0.0:
+                no_flow=True
+        print
+        assert(no_flow==False)
+        
+        # Compute flow
+        flow=self.integrator.flow(dynamic,starting_set.bounding_box(),self.maximum_step_size)
+        print "flow:",flow
+        flow_domain=Box(flow.domain())
+        step_size=flow_domain[-1].upper()
+        flow_domain[-1]=Interval(0,step_size)
+        flow=restrict(flow,flow_domain)
+        print "flow:",flow
+        print "flow.domain():",flow.domain()
+        print "flow.range():",flow.range()
+        #TODO: Compose flow with current evolution function
+        np=starting_set.domain().size()
+        flowed_set=ConstrainedImageSet(starting_set)
+        flowed_set.apply_flow(flow)
+        composed_flow=flowed_set.function()
+        print "\ncomposed_flow:",composed_flow
+        print "composed_flow.domain():",composed_flow.domain()
+        print "composed_flow.range():",composed_flow.range()
+        flow=composed_flow
+        print
+        print flowed_set._domain
+        print flowed_set._function
+        print "\nflowed_set:",flowed_set
+        #print flow.polynomial()
 
-    initial_bounding_box=Box(initial_set.bounding_box())
+        # Compute restrictions on continuous evolution
+        reached_set=ConstrainedImageSet(flowed_set)
+        for (event,constraint) in invariants.items()+guards.items():
+            derivative=lie_derivative(constraint,dynamic)
+            reached_set.new_invariant(event,constraint,derivative)
+        print reached_set
+        reach_sets.append((starting_events,reached_set,))
 
-    # Extract dynamic and constraints
-    initial_mode=system.mode(initial_location)
-    dynamic=initial_mode.dynamic()
-    invariants=initial_mode.invariants()
-    transitions=system.transitions(initial_location)
-    guards={}
-    activations={}
-    resets={}
-    for transition in transitions:
-        assert isinstance(transition.guard(),ScalarFunction)
-        resets[transition.event()]=transition.reset()
-        if transition.urgency():
-            guards[transition.event()]=transition.guard()
-        else:
-            activations[transition.event()]=transition.guard()
-    print "\ninvariants:",invariants,"\nguards:",guards,"\nactivations:",activations,"\nresets:",resets
-    
-    # Compute initially active guards
-    print
-    initial_ranges={}
-    no_flow=False
-    for (event,constraint) in invariants.items() + guards.items():
-        constraint_range=constraint(initial_bounding_box)
-        print str(event)+".initial_range():",constraint_range
-        initial_ranges[event]=constraint(initial_bounding_box)
-        if constraint_range.lower()>0.0:
-            no_flow=True
-    print
-    assert(no_flow==False)
-    
-    # Compute flow
-    flow=integrator.flow(dynamic,initial_set.bounding_box(),maximum_time)
-    print "flow:",flow
-    flow_domain=Box(join(initial_set.bounding_box(),Interval(0,maximum_time)))
-    flow=restrict(flow,flow_domain)
-    print "flow:",flow
-    flow_range=Box(flow.range())
-    print "flow.domain():",flow_domain
-    print "flow.range():",flow_range
-    print
-    #print flow.polynomial()
+        # Compute the set reached after one time step of the flow; corresponds to setting t=t0+delta
+        # By "finishing" we mean completing one full time step without a jump; this corresponds to delta=h.
+        # By "final", we mean completing the full evolution; this corresponds to t=t_max.
+        print "\nstarting_time:",starting_time
+        starting_time_function=embed(starting_time,Interval(0,step_size))
+        print "starting_time_function:",starting_time_function
+        dwell_time_function=ScalarTaylorFunction.variable(starting_time_function.domain(),m)
+        print "dwell_time_function:",dwell_time_function
+        evolution_time_function=starting_time_function+dwell_time_function
+        print "evolution_time_function:",evolution_time_function
+        finishing_constraint=dwell_time_function-step_size
+        print "finishing_constraint:",finishing_constraint
+        final_constraint=evolution_time_function-maximum_time
+        print "final_constraint:",final_constraint
 
-    # Compute ranges of constraints
-    constraint_data={}
-    for (event,constraint) in invariants.items()+guards.items()+activations.items():
-        data=Data()
-        flowed_constraint=compose(constraint,flow)
-        constraint_range1=flowed_constraint(flow_domain)
-        constraint_range2=constraint(flow(flow_domain))
-        constraint_range=intersection(constraint_range1,constraint_range2)
-        print event,constraint_range1,constraint_range2,constraint_range
-        if constraint_range.upper()>=0.0 or True:
-            constraint_derivative=lie_derivative(constraint,dynamic)
-            flowed_constraint_derivative=compose(constraint_derivative,flow)
-            constraint_derivative_range=flowed_constraint_derivative(flow_domain)
-            data.constraint_range=constraint_range
-            data.derivative_range=constraint_derivative_range
-            data.flowed_constraint=flowed_constraint
-            constraint_data[event]=data
-    print "constraint_data:",constraint_data
-    
-    event_sequence=()
-    evolved_set=ConstrainedImageSet(flow.domain(),flow,[],[],[],[])
-    evolved_sets={tuple(event_sequence):evolved_set}
+        finishing_set=ConstrainedImageSet(reached_set)
+        finishing_set.new_equation(DiscreteEvent(0),finishing_constraint.function())
+        final_set=ConstrainedImageSet(reached_set)
+        final_set.new_equation(DiscreteEvent(0),final_constraint.function())
+        print "\nreached_set:",reached_set
+        print "\nfinishing_set:",finishing_set
+        print "\nfinal_set:",final_set
+        evolve_sets.append((starting_events,final_set))
 
-    # Determine which constraints may limit progress
-    progress_constraints={}
-    for event in invariants.keys()+guards.keys():
-        data=constraint_data[event]
-        if data.constraint_range.upper() >= 0.0:
-            progress_constraints[event]=data.flowed_constraint
-    print "progress_constraints:", [ event for event in progress_constraints ]
-    
-    # Determine which constraints may activate transitions
-    transition_constraints={}
-    for event in activations.keys()+guards.keys():
-        data=constraint_data[event]
-        if data.constraint_range.upper() >= 0.0:
-            transition_constraints[event]=data.flowed_constraint
-    print "transition_constraints:", [ event for event in transition_constraints ]
+        # FIXME: Don't add finishing set since we get infinite loop as we don't check for valid finishing time
+        working_sets.append((starting_events,starting_location,finishing_set,evolution_time_function))
 
-    # Compute the reached set under the flow
-    reach_set=ConstrainedImageSet(domain=flow_domain,function=flow,maximum_negative_constraints=progress_constraints)
-    print "\nreach_set:",reach_set,"\n"
+        # Compute the reached set under a single event
+        for (event,constraint) in guards.items()+activations.items():
+            constraint_range=reached_set.compute_range(constraint)
+            print "\nconstraint_range("+str(event)+"):",constraint_range
+            if constraint_range.upper()>=0:
+                derivative=lie_derivative(constraint,dynamic)
+                target=targets[event]
+                reset=resets[event]
+                jumping_set=ConstrainedImageSet(reached_set)
+                jumping_set.new_activation(event,constraint,derivative)
+                #jumped_set=apply(reset,jumping_set)
+                jumped_set=ConstrainedImageSet(jumping_set)
+                jumped_set.apply_map(reset)
+                print "\njumped_set("+str(event)+"):",jumped_set
+                dwell_time_function=ScalarTaylorFunction.variable(flow.domain(),len(flow_domain)-1)
+                jumped_time_function=embed(starting_time,Interval({0:step_size}))+dwell_time_function
+                working_sets.append((starting_events+(event,),target,jumped_set,jumped_time_function))
+        print "\nDONE STEP\n"
 
-    # Compute the reached set under a single event
-    for event in transition_constraints:
-        reset=resets[event]
-        reset_flow=compose(reset,flow)
-        event_progress_constraints=dict(progress_constraints)
-        if event in event_progress_constraints:
-            # event is urgent
-            event_guard_constraint={event:progress_constraints[event]}
-            event_progress_constraints.remove(event)
-            event_reach_set=ConstrainedImageSet(domain=flow_domain,function=reset_flow,
-                                                maximum_negative_constraints=event_progress_constraints,
-                                                maximum_equality_constraints=event_guard_constraint)
-        else:
-            event_activation_constraint={event:transition_constraints[event]}
-            event_reach_set=ConstrainedImageSet(domain=flow_domain,function=reset_flow,
-                                                maximum_negative_constraints=progress_constraints,
-                                                positive_constraints=event_activation_constraint)
-        print "\njumped_set:",jumped_set,"\n"
-
-    print "\nDONE\n"
-
-    return { (): reach_set }
-    for (event,guard,reset,urgency) in \
-            [ (transition.event(),transition.guard(),transition.reset(),transition.urgency()) for transition in transitions ]:
-        event_str="g"+str(event)[1:]
-        assert isinstance(guard,ScalarFunction)
-        guard_derivative=lie_derivative(guard,dynamic)
-        guard_range1=compose(guard,flow).range()
-        guard_range2=guard(flow.range())
-        guard_range=intersection(guard_range1,guard_range2)
-        guard_derivative_range=compose(guard_derivative,flow).range()
-        print event_str+".range():",guard_range1
-        print event_str+".range():",guard_range2
-        print "d"+event_str+".range():",guard_derivative_range
-        if guard_range.upper() < 0.0:
-            print "  guard",event_str,"is not active"
-        elif evaluate(guard,initial_set).lower() > 0.0:
-            print "  guard",event_str,"is initially active"
-        else: 
-            print "  guard",event_str,"may be active"
-            print "  reset:",reset
-            new_event_sequence=event_sequence+(event,)
-            new_domain=evolved_set.domain
-            new_function=compose(reset,flow)
-            new_invariants=None #Compute new invariants here
-            new_guards=None #Compute new guards here
-            print new_domain,new_function
-            new_evolved_set=ConstrainedImageSet(evolved_set)
-            new_evolved_set.function=new_function
-            new_evolved_set.positive_constraints.append((event,compose(guard,flow)))
-            #new_evolved_set.positive_constraints.append((event,compose(guard_derivative,flow)))
-            #(join(initial_set,join(Interval(0,time),Interval(0,time))))
-            evolved_sets[new_event_sequence]=new_evolved_set
-    return evolved_sets
-
+        raw_input("Press any key to continue...")
 
 def test_function():
     tx = [ ScalarTaylorFunction.variable([{-2:2},{-1:1},{0:3}],i) for i in range(0,3) ]
@@ -271,10 +291,18 @@ def test_function():
     print tf.set(1,0.125*tg2)
     print tf.substitute(1,0.125*tg3)
 
+def plot(filename,set,bounding_box=None,resolution=4):
+    fig=Figure()
+    if bounding_box==None:
+        bounding_box=set.bounding_box()
+    fig.set_bounding_box(bounding_box)
+    fig.draw(set.outer_approximation(Grid(set.dimension()),resolution))
+        #for box in self.grid_outer_approximation(resolution):
+        #    fig.draw(box)
+    fig.write(filename)
 
-if __name__=="__main__":
-    #test_function()
 
+def build_system():
     q1=DiscreteState(1)
     q2=DiscreteState(2)
     e12=DiscreteEvent(12)
@@ -285,49 +313,72 @@ if __name__=="__main__":
 
     hsys=HybridAutomaton()
     hsys.new_mode(q1,[o,3*x])
+    hsys.new_invariant(q1,y-0.126-0.5)
+    hsys.new_mode(q2,[o,2*o])
+    hsys.new_transition(e12,q1,q2,[x+1,y-1],y-0.31,True)
+    
     #hsys.new_mode(q1,[0.0*x+1.0,0.0*y+2.0])
     #sys.new_mode(q1,[0.5*x+y,-x-0.5*y])
-    hsys.new_invariant(q1,y-0.126-0.5)
-    hsys.new_mode(q2,[x,y])
     #hsys.new_transition(e12,q1,q2,[x+1,y-1],x-0.175,False)
-    hsys.new_transition(e12,q1,q2,[x+1,y-1],y-0.5,False)
     #hsys.new_transition(e12,q1,q2,VectorFunction([x+1,y+1]),x-1,False)
 
-    DiscreteState.__repr__=DiscreteState.__str__
-    DiscreteEvent.__repr__=DiscreteEvent.__str__
+    hsys.initial_location=q1
+    hsys.initial_set=Box([{0.0625:0.125},{0:0.0625}])
+    hsys.initial_time=0.0
+    hsys.evolution_time=1.05
+
+    return hsys
+
+
+if __name__=="__main__":
+    #test_function()
+
+    from watertank_automaton import watertank
+
+    err=Interval(-1,+1)*0.03125;
+    initial_location=DiscreteState(3) #opening
+    initial_box=Box([1.0+err,0.0625+err])
+    watertank.initial_set=HybridBox(initial_location,initial_box)
+    watertank.evolution_time=HybridTime(0.5,12)
+    watertank.bounding_box=Box([{0:9},{-0.1:1.1}])
+    automaton=watertank
+
+    print
+    print automaton
+    print
+    print [ mode.location() for mode in automaton.modes() ]
+    print [ (mode.location(), [ (transition.event(),transition.target().location()) for transition in automaton.transitions(mode.location()) ]) for mode in automaton.modes() ]
+    print
+
+
+    print "computing evolution..."
+    evolver=PrototypeHybridEvolver()
+    (reached_sets,evolved_sets)=evolver.orbit(automaton,automaton.initial_set,automaton.evolution_time)
     
-
-    print hsys
-    print [ mode.location() for mode in hsys.modes() ]
-    print [ (mode.location(), [ (transition.event(),transition.target().location()) for transition in hsys.transitions(mode.location()) ]) for mode in hsys.modes() ]
-    print
-
-    m1=hsys.mode(q1)
-    print m1
-    print m1.location(), m1.dynamic(),m1.invariants()
-    t12=hsys.transition(e12,q1)
-    print t12.event(), t12.source().location(), t12.target().location(), t12.reset(), t12.guard(), t12.urgency()
+    #evolver=HybridEvolver()
+    #orbit = evolver.orbit(automaton,automaton.initial_set,automaton.evolution_time)
+    #print orbit
+    #reached_sets=orbit.reach()
+    #evolved_sets=orbit.evolve()
+    
+    
+    print "\nreached_sets:"
+    for (events,reached_set) in reached_sets:
+        print str(events)+":\n"+str(reached_set)
+    print "\nevolved_sets:"
+    for (events,evolved_set) in evolved_sets:
+        print str(events)+":\n"+str(evolved_set)
     print
     
-    initial_location=q1
-    initial_set=Box([{0:0.125},{0:0.125}])
-    initial_set=Box([{0:0.0625},{0:0.0625}])
-
-    print hsys.modes()
-    print hsys.transitions()
-    print hsys.transitions(q1)
-
-    initial_time=0.0
-    evolution_time=0.5
-    
-    evolved_sets = evolve(hsys,initial_location,initial_set,initial_time,evolution_time)
-
-    print
-    print "evolved_sets=\n"+str(evolved_sets)
-    print
-    bounding_box=Box([{-1:2},{-2:1}])
+  
+    bounding_box=automaton.bounding_box
+    print "reach...",
+    plot("hybrid_evolution-0.png",reached_sets[0][1],bounding_box,resolution=6)
+    print " plotted "
     i=0;
-    for (events,evolved_set) in evolved_sets.items():
-        print events,evolved_set.function,evolved_set.maximum_negative_constraints
-        evolved_set.plot("hybrid_evolution-"+str(i)+".png",bounding_box,resolution=6)
+    for (events,evolved_set) in evolved_sets:
         i=i+1
+        print events,"...",
+        #print events,evolved_set.function,evolved_set.maximum_negative_constraints
+        plot("hybrid_evolution-"+str(i)+".png",evolved_set,bounding_box,resolution=6)
+        print " plotted "

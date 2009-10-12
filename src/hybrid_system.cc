@@ -543,7 +543,7 @@ HybridSystem parallel_composition(const HybridSystem& sys1, const HybridSystem& 
 
 
 std::ostream& operator<<(std::ostream& os, const HybridSystem& sys) {
-    os << "HybridSystem(\n"
+    os << std::boolalpha << "HybridSystem(\n"
        << "  algebraic_equations=" << sys._algebraic_equations << ",\n"
        << "  differential_equations=" << sys._differential_equations << ",\n"
        << "  discrete_resets=" << sys._discrete_updates << ",\n"

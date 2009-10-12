@@ -27,70 +27,132 @@ from ariadne import *
 Indeterminate=indeterminate()
 Float = float
 
-class ConstrainedImageSet:
-    def __init__(self,domain,function=None, \
-                 positive_constraints=[],equality_constraints=[],
-                 maximum_negative_constraints=[],maximum_equality_constraints=[]):
-        #Copy constructor
-        if function==None:
-            assert isinstance(domain,ConstrainedImageSet)
-            other=domain
-            self.domain=Box(other.domain)
-            self.function=VectorTaylorFunction(other.function)
-            self.positive_constraints=list(other.positive_constraints)
-            self.equality_constraints=list(other.equality_constraints)
-            self.maximum_negative_constraints=list(other.maximum_negative_constraints)
-            self.maximum_equality_constraints=list(other.maximum_equality_constraints)
-            return
-        
-        #Standard constructor
-        if isinstance(domain,IntervalVector):
-            domain=Box(domain)
-        assert isinstance(domain,Box) 
-        self.domain=domain
-        
-        assert isinstance(function,VectorFunction) or isinstance(function,VectorTaylorFunction)
-        assert function.argument_size()==domain.size()
-        self.function=function
-        
-        assert(isinstance(positive_constraints,list))
-        for (id,constraint) in positive_constraints:
-            assert isinstance(constraint,ScalarFunction) or isinstance(constraint,ScalarTaylorFunction)
-            assert constraint.argument_size()==domain.size()
-        self.positive_constraints=positive_constraints
-        
-        assert(isinstance(equality_constraints,list))
-        for (id,constraint) in equality_constraints:
-            assert(isinstance(constraint,ScalarFunction))
-            assert(constraint.argument_size()==domain.size())
-        self.equality_constraints=equality_constraints
-       
-        for (id,constraint) in maximum_negative_constraints:
-            assert(isinstance(constraint,ScalarFunction))
-            assert(constraint.argument_size()==domain.size())
-        self.maximum_negative_constraints=maximum_negative_constraints
-        
-        assert(isinstance(maximum_equality_constraints,list))
-        for (id,constraint) in maximum_equality_constraints:
-            assert(isinstance(constraint,ScalarFunction))
-            assert(constraint.argument_size()==domain.size())
-        self.maximum_equality_constraints=maximum_equality_constraints
-       
-        self.time_variable=len(domain)-1
 
+class ConstrainedImageSet:
+    def __init__(self,domain=None,function=None):
+        # Default constructor computes empty set
+        if domain==None and function==None:
+            self._empty=True
+        
+        #Copy constructor
+        if function==None and isinstance(domain,ConstrainedImageSet):
+            other=domain
+            self._empty=other._empty
+            self._domain=Box(other._domain)
+            self._function=VectorTaylorFunction(other._function)
+            self._positive=dict(other._positive)
+            self._zero=dict(other._zero)
+            self._negative=dict(other._negative)
+            self._always_negative=dict(other._always_negative)
+            self._always_negative_and_zero=dict(other._always_negative)
+            return
+
+        #Construct from a TaylorVectorFunction
+        if function==None:
+            assert isinstance(domain,VectorTaylorFunction)
+            model=domain
+            self._domain=Box(model.domain())
+            self._function=model
+        else:
+            #Standard constructor
+            if isinstance(domain,IntervalVector):
+                domain=Box(domain)
+            assert isinstance(domain,Box)
+            if isinstance(function,VectorFunction):
+                function=VectorTaylorFunction(domain,function)
+            assert isinstance(function,VectorTaylorFunction)
+            assert function.domain()==domain
+            self._domain=domain
+            self._function=function
+        self._empty=False
+        self._positive={}
+        self._zero={}
+        self._negative={}
+        self._always_negative={}
+        self._always_negative_and_zero={}
+        self._restrictions=[GridTreeSet(Grid(self._domain.size()))]
+
+    def compute_range(self,constraint):
+        composed_constraint=compose(constraint,self._function)
+        constraint_range=composed_constraint(self._domain)
+        return constraint_range
+    
+    def empty(self):
+        return self._empty
+    
+    def dimension(self):
+        return self._function.result_size()
+
+    def domain(self):
+        return self._domain
+
+    def function(self):
+        return self._function
 
     def bounding_box(self):
-        return Box(self.function(self.domain)).bounding_box()
-
+        return Box(self._function(self._domain)).bounding_box()
 
     def disjoint(self,box):
-        return self.__disjoint(self.domain,box,box.radius())
+        return self.__disjoint(self._domain,box,box.radius())
 
+    def apply_map(self,map):
+        self._function=compose(map,self._function)
+
+    def apply_flow(self,flow):
+        time_domain=Interval(flow.domain()[-1])
+        self._domain=join(self._domain,time_domain)
+        self._function=unchecked_compose(flow,combine(self._function,ScalarTaylorFunction.variable([time_domain],0)))
+        
+    def new_activation(self,event,constraint,derivative):
+        assert isinstance(constraint,ScalarFunction)
+        composed_constraint=compose(constraint,self._function)
+        constraint_range=composed_constraint(self._domain)
+        print str(event)+".range():",constraint_range
+        if constraint_range.lower()>=0.0:
+            self._positive[event]=composed_constraint*0.0+1.0
+        elif constraint_range.upper()<=0.0:
+            self._positive[event]=composed_constraint*0.0-1.0
+            self._empty=True
+        else:
+            self._positive[event]=composed_constraint
+
+    def new_guard(self,event,constraint,derivative):
+        assert isinstance(constraint,ScalarFunction)
+        composed_constraint=compose(constraint,self._function)
+        constraint_range=composed_constraint(self._domain)
+        print str(event)+".range():",constraint_range
+        if constraint_range.lower()>=0.0:
+            self._always_negative_and_zero[event]=composed_constraint*0.0+1.0
+        elif constraint_range.upper()<=0.0:
+            self._always_negative_and_zero[event]=composed_constraint*0.0-1.0
+        else:
+            self._always_negative_and_zero[event]=composed_constraint
+
+    def new_invariant(self,event,constraint,derivative):
+        assert isinstance(constraint,ScalarFunction)
+        composed_constraint=compose(constraint,self._function)
+        constraint_range=composed_constraint(self._domain)
+        print str(event)+".range():",constraint_range
+        if constraint_range.upper()>=0.0:
+            composed_derivative=compose(derivative,self._function)
+            derivative_range=composed_derivative(self._domain)
+            if derivative_range.lower()>0.0:
+                # Transverse crossing; invariant holds where negative
+                self._negative[event]=composed_constraint
+            else:
+                self._always_negative[event]=composed_constraint
+
+    def new_equation(self,event,constraint):
+        assert isinstance(constraint,ScalarFunction)
+        self._zero[event]=ScalarTaylorFunction(self._domain,constraint)
+       
+
+    
 
     def __disjoint(self,domain,box,err):
         if False: #positive_constraints(domain)
             return True
-        image=Box(self.function(domain))
+        image=Box(self._function(domain))
         if disjoint(image,box):
             return True;
         if subset(image,box):
@@ -101,40 +163,52 @@ class ConstrainedImageSet:
         return self.__disjoint(subdomain1,box,err) and self.__disjoint(subdomain2,box,err)
 
 
-    def grid_outer_approximation(self,depth):
-        gts=GridTreeSet(self.function.result_size())
-        for box in self.__outer_approximation(self.domain,depth):
+    def grid_outer_approximation(self,grid,depth):
+        gts=GridTreeSet(grid)
+        for box in self.__outer_approximation(self._domain,depth):
             gts.adjoin_outer_approximation(box,depth+4)
         return gts
         
-    def outer_approximation(self,depth):
-        return self.__outer_approximation(self.domain,depth)
+    def box_approximation(self,depth):
+        return self.__outer_approximation(self._domain,depth)
+
+    def outer_approximation(self,grid,depth):
+        return self.grid_outer_approximation(grid,depth)
 
     def __outer_approximation(self,subdomain,depth):
+        assert len(self._always_negative_and_zero)==0
         eps=__builtin__.pow(2.0,-depth)
-        for (id,constraint) in self.positive_constraints:
-            if constraint(subdomain).upper() < 0.0:
+        for (id,constraint) in self._zero.items():
+            if constraint(subdomain[:constraint.argument_size()]).upper() < 0.0 or constraint(subdomain).lower() > 0.0:
                 return []
-        for (id,constraint) in self.equality_constraints:
-            constraint_range=constraint(subdomain)
+        for (id,constraint) in self._positive.items():
+            if constraint(subdomain[:constraint.argument_size()]).upper() < 0.0:
+                return []
+        for (id,constraint) in self._negative.items():
+            if constraint(subdomain[:constraint.argument_size()]).lower() > 0.0:
+                return []
+        #for (id,constraint) in self._equations.items():
+        #    constraint_range=constraint(subdomain)
+        #    if constraint_range.lower() > 0.0 or constraint_range.upper()<0.0:
+        #        return []
+        for (id,constraint) in self._always_negative_and_zero.items():
+            constraint_range=constraint[:constraint.argument_size()](subdomain)
             if constraint_range.lower() > 0.0 or constraint_range.upper()<0.0:
                 return []
-        for (id,constraint) in self.maximum_equality_constraints:
-            constraint_range=constraint(subdomain)
-            if constraint_range.lower() > 0.0 or constraint_range.upper()<0.0:
-                return []
-            lowdomain=Box(subdomain)
-            while lowdomain[-1].lower()>=self.domain[-1].lower():
+            lowdomain=Box(subdomain[:constraint.argument_size()])
+            while lowdomain[-1].lower()>=self._domain[-1].lower():
                 if constraint(lowdomain).lower() > 0.0:
                     return []
                 lowdomain[-1]=lowdomain[-1]-lowdomain[-1].width()
-        for (id,constraint) in self.maximum_negative_constraints:
-            lowdomain=Box(subdomain)
-            while lowdomain[-1].lower()>=self.domain[-1].lower():
+        for (id,constraint) in self._always_negative.items():
+            lowdomain=Box(subdomain[:constraint.argument_size()])
+            while lowdomain[-1].lower()>=self._domain[-1].lower():
                 if constraint(lowdomain).lower() > 0.0:
                     return []
                 lowdomain[-1]=lowdomain[-1]-lowdomain[-1].width()
-        range=Box(self.function(subdomain))
+        #for (id,constraint,auxiliary) in self._ranged_negative.items():
+        #    assert False
+        range=Box(self._function(subdomain))
         if range.radius()<eps:
             return [range]
         else:
@@ -164,11 +238,13 @@ class ConstrainedImageSet:
         fig.draw(self.grid_outer_approximation(resolution))
 
     def __str__(self):
-        res="ConstrainedImageSet["+str(self.function.result_size())+","+str(self.function.argument_size())+"]("
-        res+="( domain="+str(self.domain)
-        res+=", codomain="+str(self.function(self.domain))
-        res+=", maximum_constraints="+str([ (str(id)+"<0",constraint(self.domain)) for (id,constraint) in self.maximum_negative_constraints])
-        res+=", positive_constraints="+str([ (str(id)+"<0",constraint(self.domain)) for (id,constraint) in self.positive_constraints])
+        res="ConstrainedImageSet["+str(self._function.result_size())+","+str(self._function.argument_size())+"]("
+        res+="( domain="+str(self._domain)
+        res+=", codomain="+str(self._function(self._domain))
+        res+=", invariants="+str([ (str(id)+"<=0",constraint(self._domain[:constraint.argument_size()])) for (id,constraint) in self._always_negative.items()])
+        res+=", increasing_invariants="+str([ (str(id)+"<=0",constraint(self._domain[:constraint.argument_size()])) for (id,constraint) in self._negative.items()])
+        res+=", activations="+str([ (str(id)+">=0",constraint(self._domain[:constraint.argument_size()])) for (id,constraint) in self._positive.items()])
+        #res+=", guards="+str([ (str(id)+"<&=",constraint(self._domain)) for (id,constraint) in self._guards.items()])
         res+=" )"
         return res
     

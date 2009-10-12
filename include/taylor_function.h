@@ -159,6 +159,8 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Named constructors. */
+    //! \brief Construct the quantity \f$x_0\f$ over the one-dimensional domain \a d.
+    static ScalarTaylorFunction variable(const Interval& d);
     //! \brief Construct a constant quantity in \a as independent variables.
     static ScalarTaylorFunction constant(const DomainType& d, const Float& c);
     //! \brief Construct a constant quantity in \a as independent variables.

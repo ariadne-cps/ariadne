@@ -156,6 +156,8 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__setitem__", &__vsetitem__<X>);
     vector_class.def("__getitem__", &__vgetitem__<X>);
     vector_class.def("__getslice__", &__vgetslice__<X>);
+    vector_class.def("__eq__", &__eq__<bool,Vector<X>,Vector<X> >);
+    vector_class.def("__ne__", &__ne__<bool,Vector<X>,Vector<X> >);
     vector_class.def("__pos__", &__pos__< Vector<X>, Vector<X> >);
     vector_class.def("__neg__", &__neg__< Vector<X>, Vector<X> >);
     vector_class.def("__str__",&__cstr__< Vector<X> >);

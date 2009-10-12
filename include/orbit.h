@@ -71,12 +71,15 @@ class GridCell;
 class GridTreeSet;
 class HybridGridCell;
 class HybridGridTreeSet;
-class HybridPoint;
 class HybridTime;
 
 class DiscreteState;
-// class TaylorSet;
-typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
+template<class BS> class HybridBasicSet;
+
+typedef HybridBasicSet<Point> HybridPoint;
+typedef HybridBasicSet<Box> HybridBox;
+typedef HybridBasicSet<TaylorSet> HybridTaylorSet;
+typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
 typedef ListSet<TaylorSet> TaylorSetList;
 typedef ListSet<HybridTaylorSet> HybridTaylorSetList;
 
@@ -101,9 +104,9 @@ class Orbit<HybridPoint>
     void insert(HybridTime ht, HybridPoint& hpt);
     uint size() const;
     const InterpolatedCurve& curve(uint m) const;
-    const std::vector< std::pair<DiscreteState,InterpolatedCurve> >& curves() const { return *this->_curves; }
+    const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves; }
   private:
-    boost::shared_ptr<std::vector< std::pair<DiscreteState,InterpolatedCurve> > > _curves;
+    boost::shared_ptr<std::vector<HybridInterpolatedCurve> > _curves;
 };
 
 template<>

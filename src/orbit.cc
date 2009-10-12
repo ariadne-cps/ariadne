@@ -49,7 +49,7 @@ Orbit<Point>::insert(Time t, const Point& pt)
 
 
 Orbit<HybridPoint>::Orbit(const HybridPoint& pt)
-    : _curves(new std::vector< std::pair<DiscreteState,InterpolatedCurve> >(1u,make_pair(pt.first,InterpolatedCurve(pt.second))))
+    : _curves(new std::vector<HybridInterpolatedCurve>(1u,make_pair(pt.first,InterpolatedCurve(pt.second))))
 { }
 
 uint
@@ -67,11 +67,11 @@ Orbit<HybridPoint>::curve(uint m) const
 void 
 Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
 {
-    ARIADNE_ASSERT((uint)ht.discrete_time<=this->size());
-    if(this->size()==ht.discrete_time) {
-        this->_curves->push_back(make_pair(hpt.first,InterpolatedCurve(hpt.second)));
+    ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
+    if(this->size()==ht.discrete_time()) {
+        this->_curves->push_back(make_pair(hpt.location(),InterpolatedCurve(hpt.continuous_state_set())));
     } else {
-        (*this->_curves)[ht.discrete_time].second.insert(ht.continuous_time,hpt.second);
+        (*this->_curves)[ht.discrete_time()].second.insert(ht.continuous_time(),hpt.continuous_state_set());
     }
 }
 

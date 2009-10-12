@@ -39,7 +39,7 @@
 
 #include "hybrid_time.h"
 #include "hybrid_automaton.h"
-#include "hybrid_evolver.h"
+#include "hybrid_evolver-image.h"
 
 namespace {
 
@@ -81,12 +81,12 @@ class DegenerateCrossingException : public std::runtime_error {
     DegenerateCrossingException(const char* msg) : std::runtime_error(msg) { }
 };
 
-const DiscreteEvent HybridEvolver::starting_event = -1;
-const DiscreteEvent HybridEvolver::finishing_event = -2;
-const DiscreteEvent HybridEvolver::blocking_event = -3;
-const DiscreteEvent HybridEvolver::final_time_event = -4;
+const DiscreteEvent ImageSetHybridEvolver::starting_event = -1;
+const DiscreteEvent ImageSetHybridEvolver::finishing_event = -2;
+const DiscreteEvent ImageSetHybridEvolver::blocking_event = -3;
+const DiscreteEvent ImageSetHybridEvolver::final_time_event = -4;
 
-HybridEvolver::HybridEvolver()
+ImageSetHybridEvolver::ImageSetHybridEvolver()
     : _parameters(new EvolutionParametersType()),
       _toolbox(new TaylorCalculus())
 {
@@ -94,15 +94,15 @@ HybridEvolver::HybridEvolver()
 
 
 
-HybridEvolver::HybridEvolver(const EvolutionParametersType& p)
+ImageSetHybridEvolver::ImageSetHybridEvolver(const EvolutionParametersType& p)
     : _parameters(new EvolutionParametersType(p)),
       _toolbox(new TaylorCalculus)
 {
 }
 
 
-Orbit<HybridEvolver::EnclosureType>
-HybridEvolver::
+Orbit<ImageSetHybridEvolver::EnclosureType>
+ImageSetHybridEvolver::
 orbit(const SystemType& system,
       const EnclosureType& initial_set,
       const TimeType& time,
@@ -200,7 +200,7 @@ inline bool operator<(const DetectionData& d1, const DetectionData& d2) {
 
 
 void
-HybridEvolver::
+ImageSetHybridEvolver::
 _evolution(EnclosureListType& final_sets,
            EnclosureListType& reach_sets,
            EnclosureListType& intermediate_sets,
@@ -214,8 +214,8 @@ _evolution(EnclosureListType& final_sets,
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
-    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
-    const Float maximum_time=maximum_hybrid_time.continuous_time;
+    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
+    const Float maximum_time=maximum_hybrid_time.continuous_time();
 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
 
@@ -303,7 +303,7 @@ _evolution(EnclosureListType& final_sets,
 
 // Old evolution step using detection data
 void
-HybridEvolver::
+ImageSetHybridEvolver::
 _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
@@ -421,7 +421,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Check to make sure dimensions are correct
     ARIADNE_ASSERT(set_model.argument_size()==time_model.argument_size());
-    ARIADNE_ASSERT(set_model.result_size()==mode.dimension());
+    ARIADNE_ASSERT_MSG(set_model.result_size()==mode.dimension(),"set_model="<<set_model<<", mode="<<mode);
 
     ARIADNE_LOG(2,"\n\nHybridEvolver::_evolution_step(...)\n");
     ARIADNE_LOG(2,"events = "<<events<<" ");
@@ -501,7 +501,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Set special events and times; note that the time step is scaled to [0,1]
     TimeModelType zero_time_model = this->_toolbox->time_model(0.0,Box(time_model.argument_size()));
     TimeModelType time_step_model = this->_toolbox->time_model(1.0,Box(time_model.argument_size()));
-    TimeModelType remaining_time_model = (maximum_hybrid_time.continuous_time-time_model)/time_step;
+    TimeModelType remaining_time_model = (maximum_hybrid_time.continuous_time()-time_model)/time_step;
     ARIADNE_LOG(2,"remaining_time = "<<remaining_time_model.range()<<"\n\n")
 
     // Compute event blocking times
@@ -629,7 +629,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 }
 
 
-HybridEvolver::TimeModelType HybridEvolver::
+ImageSetHybridEvolver::TimeModelType ImageSetHybridEvolver::
 crossing_time(VectorFunction guard, const FlowSetModelType& flow_set_model) const
 {
     try {
@@ -647,7 +647,7 @@ crossing_time(VectorFunction guard, const FlowSetModelType& flow_set_model) cons
 
 Interval jacobian2_range(const TaylorModel& tm);
 
-Interval HybridEvolver::
+Interval ImageSetHybridEvolver::
 normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set_model, const TimeModelType& crossing_time_model) const
 {
     typedef TimeModelType GuardValueModelType;
@@ -657,7 +657,7 @@ normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set_model, 
 }
 
 
-void HybridEvolver::
+void ImageSetHybridEvolver::
 compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_active_events,
                                 const std::map<DiscreteEvent,VectorFunction>& guards,
                                 const ContinuousEnclosureType& initial_set) const
@@ -677,7 +677,7 @@ compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_activ
 }
 
 // Compute the flow, parameterising space with the set parameters
-void HybridEvolver::
+void ImageSetHybridEvolver::
 compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float& time_step,
                    VectorFunction dynamic, const SetModelType& starting_set_model) const
 {
@@ -699,7 +699,7 @@ compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float
 }
 
 
-void HybridEvolver::
+void ImageSetHybridEvolver::
 compute_flow_model(FunctionModelType& , BoxType&,
                    VectorFunction, const BoxType&) const
 {
@@ -707,7 +707,7 @@ compute_flow_model(FunctionModelType& , BoxType&,
 }
 
 
-void HybridEvolver::
+void ImageSetHybridEvolver::
 compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_times,
                         std::set<DiscreteEvent>& non_transverse_events,
                         const std::map<DiscreteEvent,VectorFunction>& guards,
@@ -782,7 +782,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
 }
 
 
-void HybridEvolver::
+void ImageSetHybridEvolver::
 compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
                       TimeModelType& blocking_time,
                       const std::map<DiscreteEvent,TimeModelType>& event_blocking_times) const
@@ -822,7 +822,7 @@ compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
 }
 
 
-void HybridEvolver::
+void ImageSetHybridEvolver::
 compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >& activation_events,
                           const std::map<DiscreteEvent,VectorFunction>& activations, const FlowSetModelType& flow_set_model) const
 {
@@ -843,7 +843,7 @@ compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tri
 }
 
 
-void HybridEvolver::
+void ImageSetHybridEvolver::
 compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >& activation_times,
                          const std::map<DiscreteEvent,VectorFunction>& activations,
                          const FlowSetModelType& flow_set_model,

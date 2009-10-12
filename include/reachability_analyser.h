@@ -33,11 +33,14 @@
 
 #include "hybrid_set_interface.h"
 #include "evolver_interface.h"
+#include "discretiser_interface.h"
 #include "reachability_analyser_interface.h"
 
 #include "orbit.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
+
+#include "discretiser.h"
 
 #include "logging.h"
 
@@ -48,13 +51,15 @@ template<class ES> class Orbit;
 
 class DiscreteState;
 
+template<class BS> class HybridBasicSet;
+typedef HybridBasicSet<Box> HybridBox;
+
 class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
 class HybridGridTreeSet;
 
 template<class ES> class HybridListSet;
-class HybridEvolver;
 template<class ES> class HybridDiscretiser;
 
 
@@ -65,11 +70,9 @@ class HybridReachabilityAnalyser
     : public ReachabilityAnalyserInterface<HybridAutomaton>
     , public Loggable
 {
-    typedef TaylorSet EnclosureType;
-    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
-    boost::shared_ptr< HybridDiscretiser<EnclosureType> > _discretiser;
+    boost::shared_ptr< DiscretiserInterface<HybridAutomaton,HybridGridCell> > _discretiser;
   public:
     typedef DiscreteEvolutionParameters EvolutionParametersType;
     typedef HybridAutomaton SystemType;
@@ -88,11 +91,15 @@ class HybridReachabilityAnalyser
     virtual ~HybridReachabilityAnalyser();
 
     /*! \brief Construct from a method for evolving basic sets. */
-    HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver);
+    HybridReachabilityAnalyser(const DiscretiserInterface<HybridAutomaton,HybridGridCell>& discretiser);
 
     /*! \brief Construct from evolution parameters and a method for evolving basic sets. */
-    HybridReachabilityAnalyser(const EvolutionParametersType& parameters, 
+    template<class HybridEnclosureType>
+    HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
                                const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver);
+
+    template<class HybridEnclosureType>
+    HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver);
 
     /*! \brief Make a dynamically-allocated copy. */
     virtual HybridReachabilityAnalyser* clone() const { return new HybridReachabilityAnalyser(*this); }
@@ -180,6 +187,25 @@ class HybridReachabilityAnalyser
   private:
     // Helper functions for approximating sets
 };
+
+
+template<class HybridEnclosureType>
+HybridReachabilityAnalyser::
+HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
+    : _parameters(new EvolutionParametersType())
+    , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
+{
+}
+
+
+template<class HybridEnclosureType>
+HybridReachabilityAnalyser::
+HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
+                           const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
+    : _parameters(new EvolutionParametersType(parameters))
+    , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
+{
+}
 
 
 } // namespace Ariadne

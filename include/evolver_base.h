@@ -65,7 +65,7 @@ template<class SYS, class ES> class EvolverBase
         
     //! \brief Compute an approximation to the evolution set under the given semantics. 
     void evolution(ESL& final, const SYS& system, const ESL& initial, const T& time, Semantics semantics) const {
-        ESL reachable; ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,system,*iter,time,semantics,false); } }
+        ESL reachable; ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,system,ES(*iter),time,semantics,false); } }
 
     //! \brief Compute an approximation to the evolution set under the given semantics. 
     void evolution(ESL& final, ESL& reachable, const SYS& system, const ES& initial, const T& time, Semantics semantics) const {

@@ -174,6 +174,10 @@ template<class K, class V> class Map
     : public std::map<K,V>
 {
   public:
+    Map<K,V>()
+        : std::map<K,V>() { }
+    Map<K,V>(const std::map<K,V>& m)
+        : std::map<K,V>(m) { }
     V& operator[](const K& k) {
         return this->std::map<K,V>::operator[](k); }
     const V& operator[](const K& k) const { typename std::map<K,V>::const_iterator p=this->find(k);
@@ -184,6 +188,9 @@ template<class K, class V> class Map
         this->std::map<K,V>::insert(std::make_pair(k,v)); }
     using std::map<K,V>::insert;
 };
+template<class K,class V> inline Map<K,V> join(const Map<K,V>& m1, const Map<K,V>& m2) {
+    Map<K,V> r(m1); for(typename Map<K,V>::const_iterator i=m2.begin(); i!=m2.end(); ++i) { r.insert(*i); } return r; }
+
 
 
 } // namespace Ariadne

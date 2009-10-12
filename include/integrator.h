@@ -78,7 +78,7 @@ class TaylorIntegrator
                                 const Vector<Interval>& state_domain,
                                 const Float& suggested_time_step) const;
 
-    using IntegratorInterface::flow;
+    using IntegratorBase::flow;
 
   private:
     uint _spacial_order;

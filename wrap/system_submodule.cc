@@ -102,6 +102,7 @@ template<class T> uint __hash__(const T&);
 template<> uint __hash__<DiscreteEvent>(const DiscreteEvent& e) { return reinterpret_cast<const uint&>(e); }
 template<> uint __hash__<DiscreteState>(const DiscreteState& q) { return reinterpret_cast<const uint&>(q); }
 
+
 RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }
 RealExpression operator+(const RealVariable& v) { return +RealExpression(v); }
 RealExpression operator-(const RealVariable& v) { return -RealExpression(v); }
@@ -124,6 +125,7 @@ void export_formula()
     implicitly_convertible<Event,EventSet>();
 
     implicitly_convertible<String,StringExpression>();
+    implicitly_convertible<StringVariable,StringExpression>();
 
     implicitly_convertible<int,IntegerExpression>();
     implicitly_convertible<Integer,IntegerExpression>();
@@ -154,8 +156,11 @@ void export_formula()
     string_variable_class.def("__ne__", &__ne__<Expression<bool>,StringVariable,std::string>);
     string_variable_class.def(self_ns::str(self));
 
+    class_<StringExpression> string_expression_class("StringExpression", init<StringExpression>());
+    string_expression_class.def(self_ns::str(self));
+
     class_<StringNextVariable> string_next_variable_class("StringNextVariable", no_init);
-    string_next_variable_class.def("__lshift__", (StringUpdate(StringNextVariable::*)(const String&)const) &StringNextVariable::operator=);
+    string_next_variable_class.def("__lshift__", (StringUpdate(StringNextVariable::*)(const StringExpression&)const) &StringNextVariable::operator=);
     string_next_variable_class.def(self_ns::str(self));
 
     def("next", (StringNextVariable(*)(const StringVariable&)) &next);
@@ -303,9 +308,17 @@ void export_formula()
     discrete_predicate_class.def("__invert__", &__not__<DiscretePredicate,DiscretePredicate>);
     discrete_predicate_class.def(self_ns::str(self));
 
+    class_<ContinuousPredicate> continuous_predicate_class("ContinuousPredicate", init<ContinuousPredicate>());
+    continuous_predicate_class.def(init<tribool>());
+    continuous_predicate_class.def("__and__", &__and__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
+    continuous_predicate_class.def("__or__", &__or__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
+    continuous_predicate_class.def("__invert__", &__not__<ContinuousPredicate,ContinuousPredicate>);
+    continuous_predicate_class.def(self_ns::str(self));
+
     class_<TriboolVariable> tribool_variable_class("TriboolVariable", init<std::string>());
     tribool_variable_class.def(self_ns::str(self));
 
+    /*
     class_<TriboolExpression> tribool_expression_class("TriboolExpression",init<TriboolExpression>());
     tribool_expression_class.def("name", &TriboolExpression::operator_name);
     tribool_expression_class.def("subexpressions", &TriboolExpression::subexpressions);
@@ -316,8 +329,9 @@ void export_formula()
     tribool_expression_class.def("__or__", &__or__<TriboolExpression,TriboolExpression,TriboolExpression>);
     tribool_expression_class.def("__neg__", &__not__<TriboolExpression,TriboolExpression>);
     tribool_expression_class.def(self_ns::str(self));
+    */
 
-    implicitly_convertible<TriboolVariable,TriboolExpression>();
+    implicitly_convertible<TriboolVariable,ContinuousPredicate>();
 
     def("sgn", (TriboolExpression(*)(RealExpression)) &sgn);
 
@@ -370,8 +384,8 @@ void export_hybrid_automaton()
     discrete_transition_class.def(self_ns::str(self));
 
     class_<HybridTime> hybrid_time_class("HybridTime",init<double,int>());
-    //hybrid_time_class.def("continuous_time",&HybridTime::continuous_time);
-    //hybrid_time_class.def("discrete_time",&HybridTime::discrete_time);
+    hybrid_time_class.def("continuous_time",&HybridTime::continuous_time,return_value_policy<copy_const_reference>());
+    hybrid_time_class.def("discrete_time",&HybridTime::discrete_time,return_value_policy<copy_const_reference>());
 
     class_<HybridAutomaton> hybrid_automaton_class("HybridAutomaton",init<>());
     hybrid_automaton_class.def("mode",&HybridAutomaton::mode,return_value_policy<reference_existing_object>());
@@ -399,11 +413,15 @@ void export_hybrid_system()
     class_<HybridSystem> hybrid_system_class("HybridSystem",init<>());
     hybrid_system_class.def("new_equation",(void(HybridSystem::*)(DiscretePredicate,RealAssignment)) &HybridSystem::new_equation);
     hybrid_system_class.def("new_dynamic",(void(HybridSystem::*)(DiscretePredicate,RealDynamic)) &HybridSystem::new_dynamic);
-    hybrid_system_class.def("new_transition",(void(HybridSystem::*)(EventSet,DiscretePredicate,StringUpdate)) &HybridSystem::new_transition);
-    hybrid_system_class.def("new_reset",(void(HybridSystem::*)(EventSet,DiscretePredicate,RealUpdate)) &HybridSystem::new_reset);
-    hybrid_system_class.def("new_guard",(void(HybridSystem::*)(EventSet,DiscretePredicate,ContinuousPredicate)) &HybridSystem::new_guard);
+    //hybrid_system_class.def("new_transition",(void(HybridSystem::*)(EventSet,DiscretePredicate,StringUpdate)) &HybridSystem::new_transition);
+    //hybrid_system_class.def("new_reset",(void(HybridSystem::*)(EventSet,DiscretePredicate,RealUpdate)) &HybridSystem::new_reset);
+    //hybrid_system_class.def("new_guard",(void(HybridSystem::*)(EventSet,DiscretePredicate,ContinuousPredicate)) &HybridSystem::new_guard);
+    hybrid_system_class.def("new_transition",(void(HybridSystem::*)(DiscretePredicate,EventSet,StringUpdate)) &HybridSystem::new_transition);
+    hybrid_system_class.def("new_reset",(void(HybridSystem::*)(DiscretePredicate,EventSet,RealUpdate)) &HybridSystem::new_reset);
+    hybrid_system_class.def("new_guard",(void(HybridSystem::*)(DiscretePredicate,EventSet,ContinuousPredicate)) &HybridSystem::new_guard);
+    hybrid_system_class.def("new_guard",(void(HybridSystem::*)(DiscretePredicate,EventSet,ContinuousPredicate,ContinuousPredicate)) &HybridSystem::new_guard);
     hybrid_system_class.def("new_invariant",(void(HybridSystem::*)(DiscretePredicate,ContinuousPredicate)) &HybridSystem::new_invariant);
-    hybrid_system_class.def("new_disabled_events",(void(HybridSystem::*)(EventSet,DiscretePredicate))  &HybridSystem::new_disabled_events);
+    hybrid_system_class.def("new_disabled_events",(void(HybridSystem::*)(DiscretePredicate,EventSet))  &HybridSystem::new_disabled_events);
     hybrid_system_class.def("events",(EventSet(HybridSystem::*)(const DiscreteValuation&)const)  &HybridSystem::events);
     hybrid_system_class.def("dynamic",(VectorFunction(HybridSystem::*)(const DiscreteValuation&)const)  &HybridSystem::dynamic);
     hybrid_system_class.def("target",(DiscreteValuation(HybridSystem::*)(const Event&,const DiscreteValuation&)const)  &HybridSystem::target);

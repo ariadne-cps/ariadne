@@ -69,18 +69,9 @@ HybridReachabilityAnalyser::
 
 
 HybridReachabilityAnalyser::
-HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
+HybridReachabilityAnalyser(const DiscretiserInterface<HybridAutomaton,HybridGridCell>& discretiser)
     : _parameters(new EvolutionParametersType())
-    , _discretiser(new HybridDiscretiser<EnclosureType>(evolver))
-{
-}
-
-
-HybridReachabilityAnalyser::
-HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
-                           const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
-    : _parameters(new EvolutionParametersType(parameters))
-    , _discretiser(new HybridDiscretiser<EnclosureType>(evolver))
+    , _discretiser(discretiser.clone())
 {
 }
 
@@ -101,7 +92,7 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
     HybridGridTreeSet cells=set;
     cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        result.adjoin(this->_discretiser->reach(sys,*iter,time,grid,accuracy,UPPER_SEMANTICS));
+        result.adjoin(this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS).reach());
     }
     return result;
 }
@@ -117,7 +108,7 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
     GTS result(grid); GTS cells=set; cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
         ARIADNE_LOG(5,"Evolving cell = "<<*iter<<"\n");
-        result.adjoin(this->_discretiser->evolve(sys,*iter,time,grid,accuracy,UPPER_SEMANTICS));
+        result.adjoin(this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS).final());
     }
     ARIADNE_LOG(4,"_upper_evolve result size = "<<result.size()<<"\n");
     return result;
@@ -147,7 +138,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
     */
 
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        Orbit<HybridGridCell> evolution=this->_discretiser->evolution(sys,*iter,time,grid,accuracy,UPPER_SEMANTICS);
+        Orbit<HybridGridCell> evolution=this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS);
         ARIADNE_LOG(4,"  evolution reach size= "<<evolution.reach().size()<<"\n");
         ARIADNE_LOG(4,"  evolution final size= "<<evolution.final().size()<<"\n");
         reach.adjoin(evolution.reach());
@@ -181,7 +172,7 @@ lower_evolve(const SystemType& system,
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
         ARIADNE_LOG(3,".");
         GC cell=*bs_iter;
-        GTS cell_final=this->_discretiser->evolve(system,cell,time,grid,grid_depth,LOWER_SEMANTICS);
+        GTS cell_final=this->_discretiser->evolution(system,cell,time,grid_depth,LOWER_SEMANTICS).final();
         final.adjoin(cell_final);
     }
     ARIADNE_LOG(3,"\n");
@@ -210,7 +201,7 @@ lower_reach(const SystemType& system,
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
         ARIADNE_LOG(3,".");
         GC cell=*bs_iter;
-        Orbit<GC> orbit = this->_discretiser->evolution(system,cell,time,grid,grid_depth,LOWER_SEMANTICS);
+        Orbit<GC> orbit = this->_discretiser->evolution(system,cell,time,grid_depth,LOWER_SEMANTICS);
         reach.adjoin(orbit.reach());
         reach.adjoin(orbit.final());
     }
@@ -242,7 +233,7 @@ lower_reach_evolve(const SystemType& system,
     ARIADNE_LOG(3,"computing lower evolution.");
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
         ARIADNE_LOG(3,".");
-        Orbit<GC> orbit = this->_discretiser->evolution(system,*bs_iter,time,grid,grid_depth,LOWER_SEMANTICS);
+        Orbit<GC> orbit = this->_discretiser->evolution(system,*bs_iter,time,grid_depth,LOWER_SEMANTICS);
         reach.adjoin(orbit.reach());
         evolve.adjoin(orbit.final());
     }
@@ -263,8 +254,8 @@ upper_evolve(const SystemType& system,
     int grid_depth = this->_parameters->maximum_grid_depth;
     evolve.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve.size()<<"\n");
-    Float real_time=time.continuous_time;
-    uint discrete_steps=time.discrete_time;
+    Float real_time=time.continuous_time();
+    uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
@@ -304,8 +295,8 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(4,"initial size = "<<evolve.size()<<"\n");
     GTS reach(evolve);
     ARIADNE_LOG(4,"reach size ="<<reach.size()<<"\n");
-    Float real_time=time.continuous_time;
-    uint discrete_steps=time.discrete_time;
+    Float real_time=time.continuous_time();
+    uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
@@ -357,8 +348,8 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(4,"initial_evolve"<<evolve<<"\n");
     GTS reach(evolve);
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
-    Float real_time=time.continuous_time;
-    uint discrete_steps=time.discrete_time;
+    Float real_time=time.continuous_time();
+    uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;

@@ -39,6 +39,7 @@
 #include "graphics_interface.h"
 
 #include "box.h"
+#include "taylor_function.h"
 
 namespace Ariadne {
 
@@ -123,6 +124,9 @@ class ConstraintSet
     tribool covers(const Box&) const;
     std::ostream& write(std::ostream&) const;
 };
+
+
+
 
 } // namespace Ariadne 
 

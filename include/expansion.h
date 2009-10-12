@@ -156,16 +156,11 @@ template<class X> struct key_less<ExpansionValue<X>,MultiIndex> {
 template<class X>
 inline bool operator<(const ExpansionValue<X>& dv1, const ExpansionValue<X>& dv2) {
     return dv1.key()<dv2.key();
-/*
-    assert(dv1._n==dv2._n); typedef MultiIndex::value_type value_type;
-    MultiIndex::size_type n=dv1._n;
-    const value_type* dv1p=reinterpret_cast<const value_type*>(dv1._p);
-    const value_type* dv2p=reinterpret_cast<const value_type*>(dv2._p);
-    if(dv1p[n]!=dv2p[n]) { bool res=dv1p[n]<dv2p[n]; return res; }
-    for(MultiIndex::size_type i=0; i!=n; ++i) {
-        if(dv1p[i]!=dv2p[i]) { bool res=(dv1p[i]<dv2p[i]); return res; } }
-    return false;
-*/
+}
+
+template<class X>
+inline bool data_less(const ExpansionValue<X>& dv1, const ExpansionValue<X>& dv2) {
+    return dv1.data()<dv2.data();
 }
 
 

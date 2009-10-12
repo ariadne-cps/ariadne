@@ -3175,6 +3175,14 @@ compose(const Vector<TaylorModel>& x,
     return _compose(x,unscale(y,d));
 }
 
+Vector<TaylorModel>
+unchecked_compose(const Vector<TaylorModel>& x,
+        const Vector<Interval>& d,
+        const Vector<TaylorModel>& y)
+{
+    return _compose(x,unscale(y,d));
+}
+
 
 
 

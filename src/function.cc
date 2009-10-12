@@ -31,9 +31,13 @@
 
 namespace Ariadne {
 
+template<class T> inline std::string str(const T& t) {
+    std::stringstream ss; ss << t; return ss.str(); }
+
 class ScalarExpressionFunction
     : public ScalarFunctionInterface
 {
+  public:
     Space<Real> _space;
     Expression<Real> _expression;
   public:
@@ -1232,6 +1236,20 @@ ScalarFunction tan(const ScalarFunction& f) {
 
 
 
+ScalarFunction embed(const ScalarFunction& f, uint k) {
+    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(f.pointer());
+    if(p) {
+        return ScalarFunction(new ScalarPolynomialFunction(embed(0u,*p,k)));
+    }
+    const ScalarExpressionFunction* e=dynamic_cast<const ScalarExpressionFunction*>(f.pointer());
+    if(e) {
+        Space<Real> new_space=e->_space;
+        for(uint i=0; i!=k; ++i) { new_space.append(Variable<Real>("x"+str(k))); }
+        return new ScalarExpressionFunction(e->_expression,new_space);
+    }
+    ARIADNE_FAIL_MSG("Cannot embed function "<<f<<" in a different space.");
+}
+
 
 
 VectorFunction::VectorFunction(VectorFunctionInterface* fptr)
@@ -1316,6 +1334,7 @@ ScalarFunction& VectorFunction::operator[](Nat i)
     ARIADNE_ASSERT_MSG(vptr,"Can only set component of a vector of scalar functions.");
     return vptr->_vec[i];
 }
+
 
 Vector<Float> VectorFunction::operator()(const Vector<Float>& x) const
 {
@@ -1452,5 +1471,15 @@ VectorFunction compose(const VectorFunction& f, const VectorFunction& g) {
     return VectorFunction(new VectorComposedFunction(f,g));
 }
 
+ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f) {
+    assert(g.argument_size()==f.result_size());
+    assert(f.result_size()==f.argument_size());
+    ScalarFunction r(g.argument_size());
+    for(uint i=0; i!=g.argument_size(); ++i) {
+        r=r+g.derivative(i)*f[i];
+        //r=r+derivative(g,i)*f[i];
+    }
+    return r;
+}
 
 } // namespace Ariadne

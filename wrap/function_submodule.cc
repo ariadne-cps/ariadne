@@ -316,6 +316,8 @@ void export_scalar_function()
     def("sin", (ScalarFunction(*)(const ScalarFunction&)) &sin);
     def("cos", (ScalarFunction(*)(const ScalarFunction&)) &cos);
     def("tan", (ScalarFunction(*)(const ScalarFunction&)) &tan);
+
+    def("embed",(ScalarFunction(*)(const ScalarFunction&,uint)) &embed);
 }
 
 void export_vector_function()

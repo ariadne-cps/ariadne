@@ -148,6 +148,7 @@ Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2
 Vector<TaylorModel> combine(const TaylorModel& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const TaylorModel& x1, const TaylorModel& x2);
 Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<TaylorModel>& g);
+Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<Interval>& d, const Vector<TaylorModel>& g);
 
 //Vector operations which cannot be computed componentwise
 Vector<Interval> solve(const Vector<TaylorModel>& f);
@@ -158,6 +159,7 @@ Vector<TaylorModel> parameterised_flow(const Vector<TaylorModel>& x, const Vecto
 
 TaylorModel unchecked_compose(const TaylorModel& x, const Vector<TaylorModel>& y);
 Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y);
+Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Vector<TaylorModel>& y);
 Vector<TaylorModel> unchecked_flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
 
 Float norm(const Vector<TaylorModel>& tv);

@@ -93,6 +93,18 @@ class DiscreteMode {
     const std::map< DiscreteEvent, VectorFunction >& invariants() const {
         return this->_invariants; }
 
+    //! \brief The discrete mode's invariants, converted to scalar functions.
+    std::map< DiscreteEvent, ScalarFunction > scalar_invariants() const {
+        std::map<DiscreteEvent,ScalarFunction> result;
+        for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=this->_invariants.begin();
+            iter!=this->_invariants.end(); ++iter)
+        {
+            ARIADNE_ASSERT_MSG(iter->second.result_size()==1,"Invariant "<<*iter<<" is not scalar.");
+            result[iter->first]=iter->second[0];
+        }
+        return result;
+    }
+
     //! \brief The discrete mode's default spacial grid.
     const Grid& grid() const {
         return *this->_grid; }
@@ -178,6 +190,12 @@ class DiscreteTransition
     //! \brief The activation region of the discrete transition.
     const VectorFunction& activation() const {
         return this->_activation;
+    }
+
+    //! \brief The activation region of the discrete transition.
+    const ScalarFunction scalar_activation() const {
+        ARIADNE_ASSERT_MSG(this->_activation.result_size()==1,"Constraint "<<this->_activation<<" is not scalar.");
+        return this->_activation[0];
     }
 
     //! \brief The reset map of the discrete transition.

@@ -44,6 +44,8 @@
 #include "polytope.h"
 #include "graphics_interface.h"
 
+#include "discrete_event.h"
+
 namespace Ariadne {
 
 TaylorSet::TaylorSet(uint d, uint ng)
@@ -790,6 +792,278 @@ void standard_draw(CanvasInterface& fig, const TaylorSet& ts) {
 void TaylorSet::draw(CanvasInterface& fig) const {
     Ariadne::standard_draw(fig,*this);
 }
+
+
+
+
+
+TaylorConstrainedFlowSet::TaylorConstrainedFlowSet(const Vector<Interval>& domain, const VectorFunction& function)
+    : _domain(domain), _models(VectorTaylorFunction(domain,function).models())
+{
+}
+
+
+TaylorConstrainedFlowSet::TaylorConstrainedFlowSet(const VectorTaylorFunction& function)
+    : _domain(function.domain()), _models(function.models())
+{
+}
+
+
+TaylorConstrainedFlowSet::TaylorConstrainedFlowSet(const Box& box)
+    : _domain(box), _models(TaylorModel::variables(box.dimension()))
+{
+}
+
+
+TaylorConstrainedFlowSet* TaylorConstrainedFlowSet::clone() const
+{
+    return new TaylorConstrainedFlowSet(*this);
+}
+
+
+
+void TaylorConstrainedFlowSet::new_invariant(const DiscreteEvent& e, const ScalarFunction& c)
+{
+    this->_invariants.insert(std::make_pair(e,compose(c,this->_models)));
+}
+
+
+void TaylorConstrainedFlowSet::new_activation(const DiscreteEvent& e, const ScalarFunction& c)
+{
+    this->_activations.insert(std::make_pair(e,compose(c,this->_models)));
+}
+
+
+void TaylorConstrainedFlowSet::new_guard(const DiscreteEvent& e, const ScalarFunction& c)
+{
+    this->_guards.insert(std::make_pair(e,compose(c,this->_models)));
+}
+
+
+
+void TaylorConstrainedFlowSet::new_invariant(const DiscreteEvent& e, const ScalarTaylorFunction& c)
+{
+    ARIADNE_ASSERT(c.domain()==this->domain());
+    this->_invariants.insert(std::make_pair(e,c.model()));
+}
+
+
+void TaylorConstrainedFlowSet::new_activation(const DiscreteEvent& e, const ScalarTaylorFunction& c)
+{
+    ARIADNE_ASSERT(c.domain()==this->domain());
+    this->_activations.insert(std::make_pair(e,c.model()));
+}
+
+
+void TaylorConstrainedFlowSet::new_guard(const DiscreteEvent& e, const ScalarTaylorFunction& c)
+{
+    ARIADNE_ASSERT(c.domain()==this->domain());
+    this->_guards.insert(std::make_pair(e,c.model()));
+}
+
+
+
+Vector<Interval> TaylorConstrainedFlowSet::domain() const
+{
+    return this->_domain;
+}
+
+VectorTaylorFunction TaylorConstrainedFlowSet::function() const
+{
+    return VectorTaylorFunction(this->_domain,this->_models);
+}
+
+
+uint TaylorConstrainedFlowSet::dimension() const
+{
+    return this->_models.size();
+}
+
+tribool TaylorConstrainedFlowSet::empty() const
+{
+    return this->_empty(this->_domain,8);
+}
+
+tribool TaylorConstrainedFlowSet::_empty(const Vector<Interval>& subdomain, uint depth) const 
+{
+    typedef std::map<DiscreteEvent,TaylorModel>::const_iterator iterator;
+    double max_error=1.0/(1<<depth);
+    const uint ds=this->_domain.size();
+    for(iterator iter=this->_activations.begin(); iter!=this->_activations.end(); ++iter) {
+        Interval constraint_range=iter->second.evaluate(subdomain);
+        if(constraint_range.upper() < 0.0) { 
+            return true;
+        }
+    }
+    for(iterator iter=this->_guards.begin(); iter!=this->_guards.end(); ++iter) {
+        const TaylorModel& constraint=iter->second;
+        Interval constraint_range=constraint.evaluate(subdomain);
+        if(constraint_range.lower() > 0.0 or constraint_range.upper()<0.0) {
+            return true;
+        }
+        Vector<Interval> lowdomain=subdomain;
+        while(lowdomain[ds-1].lower() >= this->_domain[ds-1].lower()) {
+            if(constraint.evaluate(lowdomain).lower() > 0.0) {
+                return true;
+            }
+            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
+        }
+    }
+    for(iterator iter=this->_invariants.begin(); iter!=this->_invariants.end(); ++iter) {
+        const TaylorModel& constraint=iter->second;
+        Vector<Interval> lowdomain=subdomain;
+        while(lowdomain[ds-1].lower()>this->_domain[ds-1].lower()) {
+            if(constraint.evaluate(lowdomain).lower() > 0.0) {
+                return true;
+            }
+            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
+        }
+    }
+    if(depth==0) {
+        return indeterminate;
+    } else {
+        Vector<Interval> subdomain1,subdomain2;
+        make_lpair(subdomain1,subdomain2)=split(subdomain);
+        return this->_empty(subdomain1,depth-1) and
+            this->_empty(subdomain2,depth-1);
+    }
+}
+
+
+
+tribool TaylorConstrainedFlowSet::disjoint(const Box&) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+tribool TaylorConstrainedFlowSet::overlaps(const Box&) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+tribool TaylorConstrainedFlowSet::inside(const Box&) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+Box TaylorConstrainedFlowSet::bounding_box() const {
+    Box r(this->dimension());
+    for(uint i=0; i!=r.dimension(); ++i) {
+        r[i]=this->_models[i].range();
+    }
+    return r;
+}
+
+
+TaylorConstrainedFlowSet apply(const VectorFunction& map, const TaylorConstrainedFlowSet& set)
+{
+    // If the set is given by the image h(x) on domain D,
+    // compute phi(h(x),t) on domain 
+    ARIADNE_ASSERT(map.argument_size()==set.dimension());
+    TaylorConstrainedFlowSet result(set);
+    result._models=compose(map,set._models);
+    return result;
+}
+
+
+TaylorConstrainedFlowSet apply(const VectorTaylorFunction& map, const TaylorConstrainedFlowSet& set)
+{
+    // If the set is given by the image h(x) on domain D,
+    // compute phi(h(x),t) on domain 
+    ARIADNE_ASSERT(map.argument_size()==set.dimension());
+    TaylorConstrainedFlowSet result(set);
+    result._models=compose(map.models(),map.domain(),set._models);
+    return result;
+}
+
+
+TaylorConstrainedFlowSet apply_flow(const VectorTaylorFunction& phi, const TaylorConstrainedFlowSet& set)
+{
+    // If the set is given by the image h(x) on domain D,
+    // compute phi(h(x),t) on domain 
+    ARIADNE_ASSERT(phi.argument_size()==set.dimension()+1u);
+    const uint n=set.dimension();
+    
+    TaylorConstrainedFlowSet result(set);
+    result._domain=join(result._domain,phi.domain()[n]);
+    result._models=compose(phi.models(),phi.domain(),combine(result._models,TaylorModel::variable(1,0)));
+    return result;
+}
+
+
+GridTreeSet TaylorConstrainedFlowSet::outer_approximation(const Grid& grid, uint depth) const
+{
+    GridTreeSet gts(grid);
+    this->_adjoin_outer_approximation_to(gts,Vector<Interval>(this->_domain.size(),Interval(-1,+1)),depth);
+    return gts;
+}
+
+void TaylorConstrainedFlowSet::_adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth) const
+{
+    typedef std::map<DiscreteEvent,TaylorModel>::const_iterator iterator;
+    double max_error=1.0/(1<<depth);
+    const uint ds=this->_domain.size();
+    for(iterator iter=this->_activations.begin(); iter!=this->_activations.end(); ++iter) {
+        Interval constraint_range=iter->second.evaluate(subdomain);
+        if(constraint_range.upper() < 0.0) { 
+            return;
+        }
+    }
+    for(iterator iter=this->_guards.begin(); iter!=this->_guards.end(); ++iter) {
+        const TaylorModel& constraint=iter->second;
+        Interval constraint_range=constraint.evaluate(subdomain);
+        if(constraint_range.lower() > 0.0 or constraint_range.upper()<0.0) {
+            return;
+        }
+        Vector<Interval> lowdomain=subdomain;
+        while(lowdomain[ds-1].lower() >= this->_domain[ds-1].lower()) {
+            if(constraint.evaluate(lowdomain).lower() > 0.0) {
+                return;
+            }
+            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
+        }
+    }
+    for(iterator iter=this->_invariants.begin(); iter!=this->_invariants.end(); ++iter) {
+        const TaylorModel& constraint=iter->second;
+        Vector<Interval> lowdomain=subdomain;
+        while(lowdomain[ds-1].lower()>this->_domain[ds-1].lower()) {
+            if(constraint.evaluate(lowdomain).lower() > 0.0) {
+                return;
+            }
+            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
+        }
+    }
+    Box range=evaluate(_models,subdomain);
+    if(range.radius()<max_error) {
+        gts.adjoin_outer_approximation(range,depth+2);
+    } else {
+        Vector<Interval> subdomain1,subdomain2;
+        make_lpair(subdomain1,subdomain2)=split(subdomain);
+        this->_adjoin_outer_approximation_to(gts,subdomain1,depth);
+        this->_adjoin_outer_approximation_to(gts,subdomain2,depth);
+    }
+}
+
+
+template<class K, class V> std::vector<K> keys(const std::map<K,V>& m) {
+    std::vector<K> v;
+    for(typename std::map<K,V>::const_iterator i=m.begin(); i!=m.end(); ++i) {
+        v.push_back(i->first);
+    }
+    return v;
+}
+
+std::ostream& TaylorConstrainedFlowSet::write(std::ostream& os) const
+{
+    return os << "TaylorConstrainedFlowSet"
+              << "(\n  domain=" << this->_domain
+              << ",\n  function="<<VectorTaylorFunction(this->_domain,this->_models).function()
+              << ",\n  invariants<<"<<keys(this->_invariants)
+              << ",\n  activations<<"<<keys(this->_activations)
+              << ",\n  guards<<"<<keys(this->_guards)
+              << "\n)\n";
+}
+
 
 } // namespace Ariadne
 

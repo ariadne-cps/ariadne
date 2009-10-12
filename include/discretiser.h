@@ -32,6 +32,7 @@
 
 #include "numeric.h"
 #include "evolver_interface.h"
+#include "discretiser_interface.h"
 #include "hybrid_automaton.h"
 #include "vector_field.h"
 
@@ -46,12 +47,13 @@ class GridCell;
 class GridTreeSet;
 
 class HybridAutomaton;
+class DiscreteState;
+template<class BS> class HybridBasicSet;
+
 class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
 
-class DiscreteState;
-class HybridAutomaton;
 
 
 /*!  \brief A class for computing the evolution of a discrete-time autonomous system.
@@ -127,15 +129,16 @@ class Discretiser
  */
 template<class ES>
 class HybridDiscretiser
-    : public Loggable
+    : public DiscretiserInterface<HybridAutomaton,HybridGridCell>
+    , public Loggable
 {
     typedef int AccuracyType;
-    typedef typename HybridAutomaton::TimeType TimeType;
+    typedef HybridAutomaton::TimeType TimeType;
     typedef HybridAutomaton SystemType;
     typedef HybridGridCell BasicSetType;
     typedef HybridGridTreeSet DenotableSetType;
     typedef ES ContinuousEnclosureType;
-    typedef std::pair<DiscreteState,ES> EnclosureType;
+    typedef HybridBasicSet<ES> EnclosureType;
   private:
     boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver;
   public:
@@ -160,8 +163,7 @@ class HybridDiscretiser
     virtual Orbit<BasicSetType> 
     evolution(const SystemType& system, 
               const BasicSetType& initial_set, 
-              const TimeType& time, 
-              const HybridGrid& grid,
+              const TimeType& time,
               const AccuracyType accuracy,
               const Semantics semantics) const;
 
@@ -170,8 +172,7 @@ class HybridDiscretiser
     virtual DenotableSetType 
     reach(const SystemType& system, 
                 const BasicSetType& initial_set, 
-                const TimeType& time, 
-                const HybridGrid& grid,
+                const TimeType& time,
                 const AccuracyType accuracy,
                 const Semantics semantics) const;
 
@@ -180,8 +181,7 @@ class HybridDiscretiser
     virtual DenotableSetType 
     evolve(const SystemType& system, 
                  const BasicSetType& initial_set, 
-                 const TimeType& time, 
-                 const HybridGrid& grid,
+                 const TimeType& time,
                  const AccuracyType accuracy,
                  const Semantics semantics) const;
 
@@ -189,16 +189,14 @@ class HybridDiscretiser
     virtual Orbit<BasicSetType> 
     lower_evolution(const SystemType& system, 
                     const BasicSetType& initial_set, 
-                    const TimeType& time, 
-                    const HybridGrid& grid,
+                    const TimeType& time,
                     const AccuracyType accuracy) const;
   
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType> 
     upper_evolution(const SystemType& system, 
                     const BasicSetType& initial_set, 
-                    const TimeType& time, 
-                    const HybridGrid& grid,
+                    const TimeType& time,
                     const AccuracyType accuracy) const; 
 
   
@@ -206,12 +204,10 @@ class HybridDiscretiser
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
-                                    const HybridGrid& grid,
                                     const AccuracyType accuracy) const;
 
     DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
                                  const BasicSetType& initial_set,
-                                 const HybridGrid& grid,
                                  const AccuracyType accuracy) const;  
 };
 

@@ -91,8 +91,10 @@ An %Ariadne hybrid system is a model of a deterministic or nondeterministic syst
 A hybrid system lives in a \em universe, the states of which are described by variables, and the transitions by real time and discrete actions.
  - A countable set of \link DiscreteEvent DiscreteEvents\endlink, each labelled by a valid \c String identifier.
  - A countable set of \link Variable Variables\endlink, each labelled by a unique \c String identifier, and each with a \c type, which can be
-   - \c DiscreteVariable: A quantity lying in a denumerable discrete topological space e.g \c EnumeratedVariable, \c IntegerVariable
-   - \c ContinuousVariable: A quantity lying in a countably-based (connected) topological space e.g. \c RealVariable
+  - \c DiscreteVariable: A quantity lying in a denumerable discrete topological space e.g \c EnumeratedVariable, \c IntegerVariable.
+       Testing for equality of two values of a discrete variable must be a decidable operation.
+  - \c ContinuousVariable: A quantity lying in a countably-based (connected) topological space e.g. \c RealVariable.
+       Testing for equality of two values of a continuous variable is (typically) undecidable, though in most cases inequality is verifiable.
 
 Initially, all possible behaviour is possible in the universe; variables can change arbitrarily, and actions can occur at any time with arbitrary updates. A system model is a finite set of \em Rules, which restrict the possible behaviour of the universe.
 
@@ -102,30 +104,30 @@ The main rationale for defining systems by rules is that adding new rules can on
 Since %Ariadne is a computational tool for analysing system evolution, the rules governing the system have to be \em intensional (defined using explicit assignments of variables) rather than \em extensional (defined by equations relating the variables). Since we wish to assign a rigorous computational semantics, all functions must be computable, in particular, all functions must be \em continuous. This means that a discrete variable can only (sensibly) be defined in terms of other discrete variables.
 
 The main types of rules proposed for %Ariadne are
- - Continuous assignments: <tt> p(q) -> y=f(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
- - %Differential assignments: <tt> p(q) -> dot(y)=f(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
- - Discrete updates: <tt> {e} & p(q) -> next(q)=v </tt>
- - Continuous updates: <tt> {e} & p(q) -> next(y)=f(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
- - Guard predicates: <tt> {e} & p(q) -> g(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
+ - Continuous assignments: <tt> p(q) -> x<sub>i</sub>=f(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
+ - %Differential assignments: <tt> p(q) -> dot(x<sub>i</sub>)=f(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
  - Invariant predicates: <tt> p(q) -> g(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
+ - Discrete updates: <tt> p(q) & s(e) -> next(q<sub>i</sub>)=u(q<sub>i</sub>,...,q<sub>k</sub>) </tt>
+ - Continuous updates: <tt> p(q) & s(e) -> next(x<sub>i</sub>)=f(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
+ - Guard predicates: <tt> p(q) & s(e) -> g(x<sub>1</sub>,...,x<sub>k</sub>) </tt>
 
 Each rule is valid given a predicate \c p(q) on the discrete state. Rules relating to action transitions are valid for single events.
 
 Note that if no continuous or differential assignment is given to a continuous variable, then the value of that variable is arbitrary during time transitions. To ensure that a continuous variable remains constant, use
 <tt> dot(x) = 0 </tt>. Discrete variables cannot change during time transitions, so there is no need to provide a behaviour.
 
-Note that the guard condition <tt> e & p(q) \implies g(x<sub>1</sub>,...,x<sub>k</sub>) </tt> only implies a restriction on the conditions under which event \c e can occur if \c p(q) is true. For other states, the guard conditions places <em>no restriction</em> on when \c e can occur. Hence if \c e can \em only occur when \c e is true, then both the guard conditions
-<tt> e & p(q) -> g(x) </tt> and <tt> e & !p(q) -> false </tt>
+Note that the guard condition <tt> p(q) & s(e) \implies g(x<sub>1</sub>,...,x<sub>k</sub>) </tt> only implies a restriction on the conditions under which event \c e can occur if \c p(q) is true. For other states, the guard conditions places <em>no restriction</em> on when \c e can occur. Hence if \c e can \em only occur when \c e is true, then both the guard conditions
+<tt> p(q) & s(e) -> g(x) </tt> and <tt> ~p(q) & s(e) -> false </tt>
 need to be used.
 
 Note that there is no default update for variables. During an action transition, if no \c next(x)= assignment is given, and no \c x= assignment is valid in the next discrete location, then the value of \c x is undefined. Hence if the value of \c x does not change during a discrete transition \c e in location \c q, then the predicate
-<tt> e & q -> next(x)=x </tt>
+<tt> q & e -> next(x)=x </tt>
 needs to be used.
 
 Note that since there is no variable hiding, any variable can be affected by any event. In order to make sure that a variable \c x can only change during events \c e1 and \c e2, then the condition
-<tt> !{e1,e2} -> next(x)=x </tt>
+<tt> ~{e1,e2} -> next(x)=x </tt>
 needs to be used. If \c x can never jump, then the condition <tt> next(x) = x </tt> should be used.
-In order to analyse a system, a rule of the form <tt>!{e<sub>1</sub>,...,e<sub>k</sub>} -> next(x)=x</tt> needs to be given for all variables \c x. In other words, we need to specify the only events which can cause \c x to change.
+In order to analyse a system, a rule of the form <tt>~{e<sub>1</sub>,...,e<sub>k</sub>} -> next(x)=x</tt> needs to be given for all variables \c x. In other words, we need to specify the only events which can cause \c x to change.
 
 \par Rationale
 The rationale for providing explicit rules for constant and nonjumping variables is that otherwise one component may change the behaviour of another. For example, if a system has only rule <tt>dot(x)=a-x</tt>, and \c a were implicitly taken to be constant duing time transitions, then composing with the system <tt>dot(a)=-a</tt> would change the behaviour. This would make it impossible to use assume-guarantee reasoning.
@@ -145,7 +147,7 @@ Alternatively, it might be useful to have "may" and "must" guard predicates
                   <- e <- g<sub>must</sub>(x<sub>1</sub>,...,x<sub>k</sub>) ) </tt>
 
 \par More general rules
-It might be useful to allow more general rules than those given above. For example, if an event \c e is only possible in discrete states \c p(q) and continuous states \c g(x), then it would be easier to write <tt>e -> p(q) & g(x)</tt> rather than <tt>e & p(q) -> g(x); e & !p(q) -> false</tt>.
+It might be useful to allow more general rules than those given above. For example, if an event \c e is only possible in discrete states \c p(q) and continuous states \c g(x), then it would be easier to write <tt>e -> p(q) & g(x)</tt> rather than <tt>p(q) & e -> g(x); ~p(q) & e -> false</tt>.
 
 \par Variable bounds
 It is almost certainly useful to be able to specify bounds on variables, such as
@@ -174,6 +176,62 @@ A system is \em underspecified if a variable has no defining rule in a given con
 
 A system which has invalid discrete contexts can still be analysed if these contexts do not arise during the evolution. However, it is important to provide a static analysis of the system to find the contexts in which it is invalid.
 
+
+\section hybrid_system_conversion Conversion to a Hybrid Automaton
+
+In order to simulate or verify a hybrid system, the system description must contain enough information to be able to solve for all the variables of interest. In particular, we should be able to convert the description to a hybrid automaton, which is a \em constructive description of a hybrid system.
+
+Since there may be some discrete valuations which naturally arise during modelling but do not correspond to valid discrete modes e.g. because some variable is overspecified, we construct a hybrid automaton from a set of initial discrete states. The automaton is <em>statically valid</em> if every discrete state reachable from an initial discrete state in the discrete abstraction of the hybrid system is valid.
+
+We need the following definitions
+ - <b>Discrete states</b>
+    - A discrete valuation q' is a \em refinement of q if every variable q<sub>i</sub> occuring in q also occurs in q' and has the same value.
+    - A set of <em>discrete states</em> is a set of valuations, none of which is a refinement of another.
+ - <b>Continuous variables</b> For a discrete valuation <tt>q</tt>, a continuous variable x<sub>i</sub> is
+    - A <em>state variable</em> if it is defined by a differential equation
+        dot(x<sub>i</sub>)=f(x<sub>1</sub>,...,x<sub>k</sub>).
+    - An <em>output</em> or <em>auxiliary variable </em> if it is defined by an algebraic equation
+        x<sub>i</sub>=f(x<sub>1</sub>,...,x<sub>k</sub>).
+    - An <em>input variable</em>  if it is used in the description of a state or auxiliary variable,
+        in a guard condition or in a reset relation, but is not defined by a differential or algebraic equation.
+ - <b>Trivial events</b> An event e is \em trivial in discrete state q if \em either
+    - the guard condition is the constant <tt>false</tt>, \em or
+    - during a discrete transition, the discrete updates are of the form next(q<sub>i</sub>)=q<sub>i</sub>
+      and the continuous resets are of the form next(x<sub>i</sub>)=x<sub>i</sub>.
+    - Since no valuation may refine another, no extra discrete assignments are allowed.
+
+A hybrid system is <em>convertable to a hybrid automaton</em> if the following conditions are satisfied.
+ - <b>State refinement</b> It is not possible to reach a discrete valuation which is a refinement of another discrete valuation.
+    - This condition is not strictly necessary, but it results in no loss of generality in the dynamics, and may help find modelling errors. Further, it means that the algorithm to convert to a hybrid automaton terminates if all discrete variables take on finitely many values.
+ - <b>State predicates</b> Any discrete predicate p(q) is computable in any discrete state q.
+ - <b>No unbounded input variables</b> In any discrete state, there are no input variables.
+   - As a weaker condition (resulting in a nondeterministic automaton), we can require: <b>No unbounded input variables</b> In any discrete state, any input variable x<sub>i</sub> lies in a bounded interval [a,b].
+ - <b>Algebraic loops</b> In a discrete state q, the graph giving the dependencies of the auxiliary variables must be acyclic.
+    - This means that there is an order of computation of the auxiliary variables in which each only depends on already computed variables.
+ - <b>Guard conditions</b> Every guard condition g(x<sub>1</sub>,...,x<sub>k</sub>) defined in a discrete state q
+        may only use state and auxiliary variables.
+ - <b>Reset relations</b> Every reset relation next(x<sub>i</sub>)=r(x<sub>1</sub>,...,x<sub>k</sub>) defined in a discrete state q, must \em either only use state and auxiliary variables in q, \em or the guard condition must be the constant <tt>false</tt>.
+ - <b>Transitions</b> In every discrete transition, all the state variables in the new mode are specified by a reset, but none of the discrete variables are.
+ - <b>Finitely many events</b> In a discrete state q, there can be only finitely many nontrivial discrete events.
+    - This is required in order that the discrete automaton has only a finite number of arrows from any discrete state.
+
+Note that in a subsystem i.e. a system which may be composed with others, there is a difference between an event with guard condition <tt>false</tt> and a guard with all resets of the form <tt>next</tt>(v<sub>i</sub>)=v<sub>i</sub>. In the former, the event cannot happen at all in any parallel composition, whereas in the latter, the event may happen, but just does not directly affect the state of the subsystem.
+
+To convert a hybrid system to a hybrid automaton, we use the following algorithm:
+ - For each new discrete valuation:
+   - Check if the valuation is not a refinement of an existing valuation.
+   - Extract the continuous state variables x<sub>i</sub>.
+   - Solve for the output/auxiliary variables in terms of the state variables.
+   - Substitute the auxiliary variables in terms of the state variables in the dynamic equations.
+   - Substitute the auxiliary variables in terms of the state variables in the invariants.
+   - Compute the set of nontrivial events and check that this is finite.
+ - For each nontrivial event:
+   - Compute the target discrete state. If this is new, insert in the set of uncomputed discrete states.
+   - Substitute the auxiliary variables in terms of the state variables in the guard predicates.
+   - Substitute the auxiliary variables in terms of the state variables in the reset equations.
+
+The main difficulty is to test triviality, since it requires proving triviality for all but finitely many events.
+To do this, we use the fact that since the only atomic test allowed on the current event \a e is testing for equality with a constant event \a e<sub>i</sub>, every set of events is either computably finite or cofinite. It is simple to prove triviality for a cofinite set of events.
 
 \section hybrid_system_example Example - A simple heating system
 

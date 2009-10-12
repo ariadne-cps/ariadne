@@ -489,7 +489,7 @@ Vector< Polynomial<X> > compose(const Vector< Polynomial<X> >& p, const Vector< 
 template<class X> inline
 Polynomial<X> embed(unsigned int before_size, const Polynomial<X>& x, unsigned int after_size)
 {
-    return x.expansion().embed(before_size,after_size);
+    return Polynomial<X>(embed(before_size,x.expansion(),after_size));
 }
 
 template<class X>

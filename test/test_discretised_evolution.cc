@@ -266,7 +266,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 void TestDiscretisedEvolution::test_hybrid_time() const
 {
     typedef TaylorSet EnclosureType;
-    typedef std::pair<DiscreteState,EnclosureType> HybridEnclosureType;
+    typedef HybridBasicSet<EnclosureType> HybridEnclosureType;
 
     cout << __PRETTY_FUNCTION__ << endl;
 
@@ -320,7 +320,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     cout << "Computing evolution... " << flush;
     // evolver.verbosity=1;
     Orbit<HybridEnclosureType> evolve_orbit
-        = evolver.orbit(ha,hybrid_initial_set,htime,UPPER_SEMANTICS);
+        = evolver.orbit(ha,HybridEnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     cout << "enclosure_orbit="<<evolve_orbit<<endl;
@@ -337,7 +337,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     //Orbit<HybridGridCell> discrete_orbit
     //    = discrete_evolver.upper_evolution(ha,hybrid_initial_cell,htime,depth);
     Orbit<HybridGridCell> discrete_orbit
-        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,hagrid,depth,UPPER_SEMANTICS);
+        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     GridTreeSet const& reach_cells=discrete_orbit.reach()[location];

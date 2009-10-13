@@ -53,6 +53,7 @@
 #endif
 
 #include "numeric.h"
+#include "real.h"
 
 namespace Ariadne {
 
@@ -1096,6 +1097,69 @@ operator>>(std::istream& is, Interval& ivl)
     ivl.set(l,u);
     return is;
 }
+
+
+#ifdef HAVE_GMPXX_H
+
+Real::Real(const std::string& str)
+{
+    Rational q;
+    bool decimal_point=false;
+    uint decimal_places=0;
+    const char* c_ptr=str.c_str();
+    while(*c_ptr != 0) {
+        const char& c=*c_ptr;
+        std::cerr<<c<<(c-'0')<<"\n";
+        if(c=='.') {
+            if(decimal_point) {
+                ARIADNE_THROW(std::runtime_error,"Real(String)","real literal \""<<str<<"\" has more than one decimal point.");
+            }
+            else {
+                decimal_point=true;
+            }
+        } else if(c>='0' && c<='9') {
+            q=q*10+(c-'0');
+            if(decimal_point) {
+                ++decimal_places;
+            }
+        } else {
+            ARIADNE_THROW(std::runtime_error,"Real(String)","invalid symbol '"<<c<<"' in string literal \""<<str<<"\"");
+        }
+        ++c_ptr;
+    }
+    for(uint i=0; i!=decimal_places; ++i) {
+        q=q/10;
+    }
+    *this=Real(q);
+}
+
+Real::Real(const Rational& q)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    double x=q.get_d();
+    volatile double ml=-x;
+    volatile double u=x;
+    set_rounding_upward();
+    while(-ml>q) {
+        ml+=std::numeric_limits<double>::min();
+    }
+    while(u<q) {
+        u+=std::numeric_limits<double>::min();
+    }
+    *this=Real(-ml,x,u);
+    set_rounding_mode(rnd);
+}
+
+#else
+
+Real::Real(const std::string& str)
+{
+    ARIADNE_THROW(std::runtime_error,"Need GMP library to convert string literal to Real.");
+}
+
+#endif
+
+
 
 } // namespace Ariadne
 

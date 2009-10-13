@@ -28,13 +28,18 @@
 #ifndef ARIADNE_DISCRETE_EVENT_H
 #define ARIADNE_DISCRETE_EVENT_H
 
+
 namespace Ariadne {
+
+template<class T> std::string to_str(const T& t);
 
 //! \brief Type of a  discrete event of a hybrid system.
 class DiscreteEvent {
   public:
-    DiscreteEvent() : _id(0) { }
-    DiscreteEvent(int n) : _id(n) { }
+    DiscreteEvent() : _id("e?") { }
+    DiscreteEvent(int n) : _id(std::string("e"+to_str(n))) { }
+    DiscreteEvent(const std::string& s) : _id(s) { }
+    std::string name() const { return this->_id; }
     bool operator==(const DiscreteEvent& e) const { return this->_id==e._id; }
     bool operator!=(const DiscreteEvent& e) const { return this->_id!=e._id; }
     bool operator<=(const DiscreteEvent& e) const { return this->_id<=e._id; }
@@ -43,16 +48,15 @@ class DiscreteEvent {
     bool operator> (const DiscreteEvent& e) const { return this->_id> e._id; }
     friend std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e);
   private:
-    int _id;
+    std::string _id;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e) {
-    if(e._id < 0) { return os << "i" << -e._id; }
-    else { return os << "e" << e._id; }
+    return os << e._id;
 }
 
 template<class A> inline void serialize(A& archive, DiscreteEvent& event, const uint version) {
-    int& id=reinterpret_cast<int&>(event);
+    std::string& id=reinterpret_cast<std::string&>(event);
     archive & id;
 }
 

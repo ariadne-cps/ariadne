@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <functional>
 
 #include "function.h"
 #include "real.h"
@@ -99,8 +100,10 @@ struct from_python< EventSet > {
 };
 
 template<class T> uint __hash__(const T&);
-template<> uint __hash__<DiscreteEvent>(const DiscreteEvent& e) { return reinterpret_cast<const uint&>(e); }
-template<> uint __hash__<DiscreteState>(const DiscreteState& q) { return reinterpret_cast<const uint&>(q); }
+template<> uint __hash__<DiscreteEvent>(const DiscreteEvent& e) {
+    return reinterpret_cast<const ushort&>(e.name().c_str()[0]); }
+template<> uint __hash__<DiscreteState>(const DiscreteState& q) {
+    return reinterpret_cast<const ushort&>(q.name().c_str()[0]); }
 
 
 RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }
@@ -357,6 +360,7 @@ void export_hybrid_automaton()
     discrete_state_class.def("__hash__", &__hash__<DiscreteState>);
     discrete_state_class.def(self_ns::str(self));
     implicitly_convertible<int,DiscreteState>();
+    implicitly_convertible<std::string,DiscreteState>();
 
     class_<DiscreteEvent> discrete_event_class("DiscreteEvent",init<DiscreteEvent>());
     discrete_event_class.def("__eq__", &__eq__<bool,DiscreteEvent,DiscreteEvent>);
@@ -364,6 +368,7 @@ void export_hybrid_automaton()
     discrete_event_class.def("__hash__", &__hash__<DiscreteEvent>);
     discrete_event_class.def(self_ns::str(self));
     implicitly_convertible<int,DiscreteEvent>();
+    implicitly_convertible<std::string,DiscreteEvent>();
 
     class_<DiscreteMode, shared_ptr<DiscreteMode> > discrete_mode_class("DiscreteMode",no_init);
     discrete_mode_class.def("location",&DiscreteMode::location);

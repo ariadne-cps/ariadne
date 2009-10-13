@@ -137,7 +137,6 @@ const DiscreteMode&
 HybridAutomaton::new_mode(DiscreteState location,
                           const VectorFunction& dynamic)
 {
-    ARIADNE_ASSERT(location>0);
     if(this->has_mode(location)) {
         throw std::runtime_error("The hybrid automaton already has a mode with the given id");
     }

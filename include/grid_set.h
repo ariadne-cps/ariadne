@@ -2184,7 +2184,7 @@ inline void GridTreeSet::adjoin( const GridCell& theCell ) {
 }
 
 inline void GridTreeSet::adjoin( const GridTreeSubset& theOtherSubPaving ) {
-    ARIADNE_ASSERT( this->grid() == theOtherSubPaving.cell().grid() );
+    ARIADNE_ASSERT_MSG( this->grid() == theOtherSubPaving.cell().grid(), "Cannot adjoin GridTreeSubset with grid "<<theOtherSubPaving.cell().grid()<<" to GridTreeSet with grid "<<this->grid() );
 
     bool has_stopped = false;
     //Align the paving and the cell

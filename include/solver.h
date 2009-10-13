@@ -43,6 +43,7 @@
 namespace Ariadne {
 
 template<class X> class Vector;
+class ScalarTaylorFunction;
 class VectorTaylorFunction;
 
 /*! \ingroup \ingroup Solvers
@@ -75,6 +76,8 @@ class SolverBase
     virtual Set< Vector<Interval> > solve(const VectorFunction& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    virtual ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
 
   protected:
     /*! \brief Perform one iterative step of the contractor. */

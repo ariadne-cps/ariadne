@@ -482,6 +482,17 @@ SolverBase::implicit(const VectorFunction& f,
 }
 
 
+ScalarTaylorFunction
+SolverBase::implicit(const ScalarFunction& f,
+                      const Vector<Interval>& ip,
+                      const Interval& ix) const
+{
+    List<VectorTaylorFunction> res=this->implicit(VectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
+    ARIADNE_ASSERT(res.size()==1u);
+    return res[0][0];
+}
+
+
 
 
 Vector<Interval>

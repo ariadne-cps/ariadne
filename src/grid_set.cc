@@ -1319,7 +1319,11 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
 }
 
 double GridTreeSubset::measure() const {
-    ARIADNE_NOT_IMPLEMENTED;
+    double result=0.0;
+    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        result+=iter->box().measure();
+    }
+    return result;
 }
 
 

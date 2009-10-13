@@ -91,6 +91,15 @@ class Box
         return up(dmax/2);
     }
 
+    //! An approximation to the Lesbegue measure (area, volume) of the box.
+    Float measure() const {
+        Float meas=1;
+        for(uint i=0; i!=this->size(); ++i) {
+            meas *= (*this)[i].width();
+        }
+        return meas;
+    }
+
     //! \brief Test if the box is empty.
     bool empty() const {
         return Ariadne::empty(*this);

@@ -236,7 +236,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(3, 1.00001,1.00001, 1.00001,1.00001, 0.00001,0.00001);
+    Box initial_box(3, 1.00001,1.00001, 1.00000,1.00001, 0.0000,0.0000);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
 

@@ -77,6 +77,9 @@ class ConstrainedImageSet
     ConstrainedImageSet& operator=(const ConstrainedImageSet&);
     ConstrainedImageSet* clone() const;
 
+    Box domain() const;
+    VectorFunction function() const;
+
     void apply_map(VectorFunction);
     void apply_flow(VectorFunction, Interval);
     void apply_flow(VectorTaylorFunction);

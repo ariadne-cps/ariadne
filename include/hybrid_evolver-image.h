@@ -147,12 +147,12 @@ class ImageSetHybridEvolver
                                   Semantics semantics, bool reach) const;
 
   protected:
-    TimeModelType crossing_time(VectorFunction guard, const FlowSetModelType& flow_set) const;
+    TimeModelType crossing_time(ScalarFunction guard, const FlowSetModelType& flow_set) const;
 
-    Interval normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
+    Interval normal_derivative(ScalarFunction guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
 
     void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
-                                         const std::map<DiscreteEvent,VectorFunction>&,
+                                         const std::map<DiscreteEvent,ScalarFunction>&,
                                          const ContinuousEnclosureType&) const;
 
     void compute_flow_model(FlowSetModelType&, BoxType&, Float&,
@@ -161,21 +161,21 @@ class ImageSetHybridEvolver
                             VectorFunction, const BoxType&) const;
 
     void compute_crossing_time_and_direction(TimeModelType&, Interval&,
-                                             VectorFunction guard, const FlowSetModelType& flow_set) const;
+                                             ScalarFunction guard, const FlowSetModelType& flow_set) const;
 
     void compute_blocking_events(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
-                                 const std::map<DiscreteEvent,VectorFunction>& guards,
+                                 const std::map<DiscreteEvent,ScalarFunction>& guards,
                                  const FlowSetModelType& flow_set_model) const;
 
     void compute_blocking_time(std::set<DiscreteEvent>&, TimeModelType&,
                                const std::map<DiscreteEvent,TimeModelType>&) const;
 
     void compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
-                                  const std::map<DiscreteEvent,VectorFunction>& activations,
+                                  const std::map<DiscreteEvent,ScalarFunction>& activations,
                                   const FlowSetModelType& flow_set_model) const;
 
     void compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
-                                  const std::map<DiscreteEvent,VectorFunction>& activations,
+                                  const std::map<DiscreteEvent,ScalarFunction>& activations,
                                   const FlowSetModelType& flow_set_model,
                                   const TimeModelType& blocking_time_model,
                                   const Semantics sematics) const;

@@ -37,6 +37,7 @@
 #include "function.h"
 #include "discrete_state.h"
 #include "discrete_event.h"
+#include "formula.h"
 
 
 namespace Ariadne {
@@ -73,10 +74,26 @@ class DiscreteMode {
     // The discrete mode's discrete state.
     DiscreteState _location;
 
+    // The discrete mode's state variables
+    RealSpace _state_space;
+
+    // The discrete mode's auxiliary/output variables
+    RealSpace _auxiliary_space;
+
+    // The discrete mode's input variables
+    RealSpace _input_space;
+
+    // The algebraic equations
+    List<RealAlgebraicAssignment> _algebraic_equations;
+
+    // The algebraic equations
+    List<RealDifferentialAssignment> _differential_equations;
+
     // The discrete mode's vector field.
     VectorFunction _dynamic;
+
     // The discrete mode's invariants.
-    std::map< DiscreteEvent, VectorFunction > _invariants;
+    std::map< DiscreteEvent, ScalarFunction > _invariants;
 
     // The discrete mode's grid for reachability analysis.
     boost::shared_ptr< const Grid > _grid;
@@ -89,21 +106,20 @@ class DiscreteMode {
     const VectorFunction& dynamic() const {
         return this->_dynamic; }
 
-    //! \brief The discrete mode's invariants.
-    const std::map< DiscreteEvent, VectorFunction >& invariants() const {
-        return this->_invariants; }
-
-    //! \brief The discrete mode's invariants, converted to scalar functions.
-    std::map< DiscreteEvent, ScalarFunction > scalar_invariants() const {
-        std::map<DiscreteEvent,ScalarFunction> result;
-        for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=this->_invariants.begin();
+    //! \brief The discrete mode's invariants, converted to vector functions.
+    const std::map< DiscreteEvent, VectorFunction > vector_invariants() const {
+        std::map<DiscreteEvent,VectorFunction> result;
+        for(std::map<DiscreteEvent,ScalarFunction>::const_iterator iter=this->_invariants.begin();
             iter!=this->_invariants.end(); ++iter)
         {
-            ARIADNE_ASSERT_MSG(iter->second.result_size()==1,"Invariant "<<*iter<<" is not scalar.");
-            result[iter->first]=iter->second[0];
+            result[iter->first]=VectorFunction(1u,iter->second);
         }
         return result;
     }
+
+    //! \brief The discrete mode's invariants.
+    const std::map< DiscreteEvent, ScalarFunction >& invariants() const {
+        return this->_invariants; }
 
     //! \brief The discrete mode's default spacial grid.
     const Grid& grid() const {
@@ -127,12 +143,13 @@ class DiscreteMode {
     // Construct from objects managed by shared pointers (for internal use)
     DiscreteMode(DiscreteState location,
                  const VectorFunction dynamic,
-                 const std::vector< VectorFunction >& invariants);
+                 const std::vector< ScalarFunction >& invariants);
 
 };
 
 
-std::ostream& operator<<(std::ostream& os, const DiscreteMode& dm);
+inline std::ostream& operator<<(std::ostream& os, const DiscreteMode& dm) {
+    return dm.write(os); }
 
 inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
     return mode1.location() < mode2.location(); }
@@ -164,7 +181,7 @@ class DiscreteTransition
     const DiscreteMode* _target;
 
     // \brief The activation region of the discrete transition.
-    VectorFunction _activation;
+    ScalarFunction _activation;
 
     // \brief The reset of the discrete transition.
     VectorFunction _reset;
@@ -172,6 +189,9 @@ class DiscreteTransition
     // \brief Whether or not the transition is forced.
     bool _forced;
 
+    List<RealUpdateAssignment> _update_equations;
+
+    ContinuousPredicate _guard_predicate;
   public:
 
     //! \brief The discrete event associated with the discrete transition.
@@ -188,15 +208,15 @@ class DiscreteTransition
 
 
     //! \brief The activation region of the discrete transition.
-    const VectorFunction& activation() const {
+    const ScalarFunction& activation() const {
         return this->_activation;
     }
 
     //! \brief The activation region of the discrete transition.
-    const ScalarFunction scalar_activation() const {
-        ARIADNE_ASSERT_MSG(this->_activation.result_size()==1,"Constraint "<<this->_activation<<" is not scalar.");
-        return this->_activation[0];
+    const VectorFunction vector_activation() const {
+        return VectorFunction(1u,this->_activation);
     }
+
 
     //! \brief The reset map of the discrete transition.
     const VectorFunction& reset() const {
@@ -208,6 +228,8 @@ class DiscreteTransition
         return this->_forced;
     }
 
+    //! \brief Write to an output stream.
+    std::ostream& write(std::ostream& os) const;
   private:
 
 
@@ -216,12 +238,13 @@ class DiscreteTransition
                        const DiscreteMode& source,
                        const DiscreteMode& target,
                        const VectorFunction& reset,
-                       const VectorFunction& activation,
+                       const ScalarFunction& activation,
                        bool forced=false);
 
 };
 
-std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt);
+inline std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt) {
+    return dt.write(os); }
 
 inline bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
@@ -276,7 +299,7 @@ class HybridAutomaton
     typedef HybridSpace StateSpaceType;
 
 
-    typedef std::map<DiscreteEvent,VectorFunction>::const_iterator invariant_const_iterator;
+    typedef std::map<DiscreteEvent,ScalarFunction>::const_iterator invariant_const_iterator;
     typedef std::set<DiscreteTransition>::const_iterator discrete_transition_const_iterator;
     typedef std::set<DiscreteMode>::const_iterator discrete_mode_const_iterator;
   private:
@@ -310,6 +333,24 @@ class HybridAutomaton
     //! \name Methods for building the automaton.
 
     //! \brief Adds a discrete mode to the automaton.
+    const DiscreteMode& new_mode(DiscreteState state,
+                                 const List<RealAlgebraicAssignment>& equations,
+                                 const List<RealDifferentialAssignment>& dynamic);
+
+    //! \brief Adds a discrete mode to the automaton.
+    const DiscreteMode& new_mode(DiscreteState state,
+                                 const List<RealDifferentialAssignment>& dynamic);
+
+    //! \brief Adds a discrete mode to the automaton.
+    const DiscreteMode& new_mode(DiscreteState state,
+                                 const List<RealAlgebraicAssignment>& equations);
+
+    //! \brief Adds a discrete mode to the automaton.
+    const DiscreteMode& new_invariant(DiscreteState state,
+                                      DiscreteEvent event,
+                                      const ContinuousPredicate& constraint);
+
+     //! \brief Adds a discrete mode to the automaton.
     //!
     //!   \param state is the mode's discrete state.
     //!   \param dynamic is the mode's vector field.
@@ -362,7 +403,7 @@ class HybridAutomaton
     //!    \param source is the transition's source location.
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
+    //!    \param activation is the transition's activation region; must be a one-dimensional valued function.
     //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              DiscreteState source,
@@ -370,6 +411,36 @@ class HybridAutomaton
                                              const VectorFunction& reset,
                                              const VectorFunction& activation,
                                              bool forced);
+
+
+    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
+    const DiscreteTransition& new_transition(DiscreteEvent event,
+                                             DiscreteState source,
+                                             DiscreteState target,
+                                             const List<RealUpdateAssignment>& reset,
+                                             const ContinuousPredicate& guard,
+                                             bool urgent);
+
+    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param activation is the transition's activation region.
+    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
+    //! As there is no reset parameter, the target location cannot have any state variables.
+    const DiscreteTransition& new_transition(DiscreteEvent event,
+                                             DiscreteState source,
+                                             DiscreteState target,
+                                             const ContinuousPredicate& guard,
+                                             bool urgent);
 
     //! \brief Adds a forced (urgent) discrete transition to the automaton
     //! using the discrete states to specify the source and target modes.
@@ -453,10 +524,10 @@ class HybridAutomaton
     std::set< DiscreteTransition > transitions(DiscreteState source) const;
 
     //! \brief The blocking events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,VectorFunction> blocking_guards(DiscreteState location) const;
+    std::map<DiscreteEvent,ScalarFunction> blocking_guards(DiscreteState location) const;
 
     //! \brief The permissive events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,VectorFunction> permissive_guards(DiscreteState location) const;
+    std::map<DiscreteEvent,ScalarFunction> permissive_guards(DiscreteState location) const;
 
     //! \brief The state space of the system.
     HybridSpace state_space() const;
@@ -473,6 +544,9 @@ class HybridAutomaton
     //@}
 
 };
+
+HybridAutomaton parallel_composition(const HybridAutomaton& components1, const HybridAutomaton& components2);
+HybridAutomaton parallel_composition(const List<HybridAutomaton>& components);
 
 std::ostream& operator<<(std::ostream& os, const HybridAutomaton& ha);
 

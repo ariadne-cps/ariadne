@@ -353,7 +353,7 @@ HybridSystem::reset(const Event& event, const DiscreteValuation& source) const
 
     Map<RealVariable,RealExpression> assignments;
     for(List<RealUpdate>::const_iterator update_iter=update_equations.begin(); update_iter!=update_equations.end(); ++update_iter) {
-        assignments.insert(update_iter->lhs.base,update_iter->rhs);
+        assignments.insert(update_iter->lhs.base(),update_iter->rhs);
     }
 
     return VectorFunction(target_space,assignments,source_space);

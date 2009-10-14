@@ -27,7 +27,10 @@
 #include "differential.h"
 #include "taylor_model.h"
 #include "operators.h"
+#include "variables.h"
 #include "expression.h"
+#include "assignment.h"
+#include "space.h"
 
 namespace Ariadne {
 

@@ -315,7 +315,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     Set<DiscreteTransition> transitions=system.transitions(starting_location);
 
     VectorFunction dynamic=mode.dynamic();
-    Map<DiscreteEvent,ScalarFunction> invariants(mode.scalar_invariants());
+    Map<DiscreteEvent,ScalarFunction> invariants(mode.invariants());
 
     Map<DiscreteEvent,ScalarFunction> guards;
     Map<DiscreteEvent,ScalarFunction> activations;
@@ -327,9 +327,9 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     {
         const DiscreteEvent& event=transition_iter->event();
         if(transition_iter->forced()) {
-            guards[event]=transition_iter->scalar_activation();
+            guards[event]=transition_iter->activation();
         } else {
-            activations[event]=transition_iter->scalar_activation();
+            activations[event]=transition_iter->activation();
         }
         resets[event]=transition_iter->reset();
         targets[event]=transition_iter->target().location();

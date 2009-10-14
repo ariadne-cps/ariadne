@@ -124,6 +124,7 @@ template<class T> class List
 {
   public:
     List() : std::vector<T>() { }
+    List(unsigned int n, const T& t) : std::vector<T>(n,t) { }
     List(const std::vector<T>& l) : std::vector<T>(l) { }
     template<class I> List(const I& b, const I& e) : std::vector<T>(b,e) { }
     void append(const T& t) { this->push_back(t); }
@@ -145,7 +146,7 @@ template<class T> class Set
     Set(const std::set<T>& s) : std::set<T>(s) { }
 
     bool contains(const T& t) {
-        return this->find(t)==this->end(); }
+        return this->find(t)!=this->end(); }
     bool subset(const std::set<T>& s) {
         for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
             if(!this->contains(*iter)) { return false; } } return true; }

@@ -70,12 +70,15 @@ watertank.new_mode(closed,[-lamb*x+b*alpha,zero]);
 watertank.new_mode(opening,[-lamb*x+b*alpha,recT]);
 watertank.new_mode(closing,[-lamb*x+b*alpha,-recT]);
 
+# Example syntax for invariants
+# watertank.new_invariant(open,x-hmax)
+
 # Specify the condition that the valve starts closing when hmax <= x <= hmax+delta
 # using an invariant and guard.
 #watertank.new_invariant(open, x-(hmax+delta));
 #watertank.new_transition(start_closing,open,closing,identity,x-hmax,False)
 #watertank.new_transition(start_closing,opening,closing,identity,x-hmax,False)
-watertank.new_transition(start_closing,open,closing,identity,x-hmax,True)
+watertank.new_transition(start_closing,open,closing,[x,alpha],x-hmax,True)
 watertank.new_transition(start_closing,opening,closing,identity,x-hmax,True)
 
 # Specify the condition that the valve starts opening when hmin <= x <= hmin+delta
@@ -89,76 +92,16 @@ watertank.new_transition(finished_closing,closing,closed,identity,-alpha,True)
 
 if __name__=='__main__':
 
-    # Create the system object
-    watertank=HybridAutomaton();
-
-    # Declare some constants. Note that system parameters should be given as variables.
-    T=4.0;
-    hmin=5.5;
-    hmax=8.0;
-    delta=0.05;
-    lamb=0.02;
-    b=0.3;
-
-    # Declare the system variables
-    x=ScalarFunction.variable(2,0);
-    alpha=ScalarFunction.variable(2,1);
-
-    # Declare useful constant functions
-    zero=ScalarFunction.constant(2,0.0);
-    recT=ScalarFunction.constant(2,1.0/T);
-
-    open=DiscreteState(1);
-    closed=DiscreteState(2);
-    opening=DiscreteState(3);
-    closing=DiscreteState(4);
-    
-    # Declare the events we use
-    start_opening=DiscreteEvent(3);
-    start_closing=DiscreteEvent(4);
-    finished_opening=DiscreteEvent(1);
-    finished_closing=DiscreteEvent(2);
-
-    identity=VectorFunction.identity(2)
-    
-    # The water level is always given by the same dynamic.
-    # When alpha is 1, the valve is open and water flows in
-    # When alpha is 0, the valve is open and no water flows in
-    # The valve opens and closes at rate 1/T
-    watertank.new_mode(open,[-lamb*x+b*alpha,zero]);
-    watertank.new_mode(closed,[-lamb*x+b*alpha,zero]);
-    watertank.new_mode(opening,[-lamb*x+b*alpha,recT]);
-    watertank.new_mode(closing,[-lamb*x+b*alpha,-recT]);
-
-    # Specify the condition that the valve starts closing when hmax <= x <= hmax+delta
-    # using an invariant and guard.
-    #watertank.new_invariant(open, x-(hmax+delta));
-    #watertank.new_transition(start_closing,open,closing,identity,x-hmax,False)
-    #watertank.new_transition(start_closing,opening,closing,identity,x-hmax,False)
-    watertank.new_transition(start_closing,open,closing,identity,x-hmax,True)
-    watertank.new_transition(start_closing,opening,closing,identity,x-hmax,True)
-
-    # Specify the condition that the valve starts opening when hmin <= x <= hmin+delta
-    # using a combined 'invariant and activation'. The event may occur when x<=hmin, and
-    # must occur while x>=hmin-delta.
-    watertank.new_transition(start_opening,closed,opening,identity,hmin-x,True)
-    watertank.new_transition(start_opening,closing,opening,identity,hmin-x,True)
-
-    watertank.new_transition(finished_opening,opening,open,identity,alpha-1,True)
-    watertank.new_transition(finished_closing,closing,closed,identity,-alpha,True)
-
-    # Finished building the automaton
-
-    print "Watertank: \n", watertank
 
     print dir()
     #evolver=StableHybridEvolver()
     #evolver=ImageSetHybridEvolver()
     evolver=ConstrainedImageSetHybridEvolver()
+    evolver=HybridEvolver()
 
     err=Interval(-1,+1)*0.03125;
-    initial_location=open
-    initial_box=Box([1.0+err,0.0625+err])
+    initial_location=opening
+    initial_box=Box([1.0+err,0.125+err])
 
     initial_set=HybridBox(initial_location,initial_box)
     
@@ -169,13 +112,17 @@ if __name__=='__main__':
     evolve=orbit.evolve()
     
     print orbit
+    print
     print reach
     print evolve
-    
+
+    print len(reach[open])
+
     fig=Figure()
     fig.set_bounding_box([{0.0:8.5},{-0.1:+1.1}])
     fig.set_fill_colour(1.0,0.0,0.0)
     for (loc,sets) in reach.items():
+        print loc,len(sets)
         for set in sets:
             fig.draw(set)
     fig.set_fill_colour(1.0,1.0,0.0)

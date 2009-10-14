@@ -22,6 +22,7 @@
  */
 
 #include "expression.h"
+#include "space.h"
 #include "valuation.h"
 #include "vector.h"
 

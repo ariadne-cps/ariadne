@@ -25,6 +25,7 @@
 #include "real.h"
 #include "expression.h"
 #include "hybrid_system.h"
+#include "hybrid_automaton.h"
 
 using namespace Ariadne;
 using std::cout; using std::endl;
@@ -46,7 +47,7 @@ int main()
     RealConstant b("b",-0.3);
 
     // Declare the system variables
-    RealVariable x("x");
+    RealVariable h("h");
     RealVariable alpha("alpha");
 
     // Declare the events we use
@@ -56,7 +57,7 @@ int main()
     Event finished_closing("finished_closing");
 
     // The water level is always given by the same dynamic
-    watertank.new_dynamic(dot(x)=-lambda*x+b*alpha);
+    watertank.new_dynamic(dot(h)=-lambda*h+b*alpha);
 
     // Specify the equation for how the valve opens/closes
     watertank.new_dynamic(valve=="opening", dot(alpha)=+1.0/T);
@@ -69,15 +70,15 @@ int main()
     // cleverness on the part of the modeler.
     watertank.new_dynamic(valve=="closed" || valve=="open", dot(alpha)=0.0);
 
-    // Specify the condition that the valve starts opening when hmax <= x <= hmax+delta
+    // Specify the condition that the valve starts opening when hmax <= h <= hmax+delta
     // using an invariant and guard.
-    watertank.new_invariant(x<=hmax+delta);
-    watertank.new_guard(start_opening,valve=="closed" || valve=="closing", x>=hmax);
+    watertank.new_invariant(h<=hmax+delta);
+    watertank.new_guard(start_opening,valve=="closed" || valve=="closing", h>=hmax);
 
-    // Specify the condition that the valve starts closing when hmin <= x <= hmin+delta
-    // using a combined 'invariant and activation'. The event may occur when x<=hmin, and
-    // must occur while x>=hmin-delta.
-    watertank.new_guard(start_closing,valve=="open" || valve=="opening", x<=hmin,x>=hmin-delta);
+    // Specify the condition that the valve starts closing when hmin <= h <= hmin+delta
+    // using a combined 'invariant and activation'. The event may occur when h<=hmin, and
+    // must occur while h>=hmin-delta.
+    watertank.new_guard(start_closing,valve=="open" || valve=="opening", h<=hmin,h>=hmin-delta);
 
     // Specify the guards for when the valve reaches the desired position
     watertank.new_guard(finished_opening, valve=="opening", alpha>=1.0, alpha<=1.0);
@@ -95,8 +96,8 @@ int main()
     watertank.new_transition(start_opening, next(valve)="opening");
     watertank.new_transition(start_closing, next(valve)="closing");
 
-    // For any event occurring in any location, the value of x and alpha are not updated.
-    watertank.new_reset(next(x)=x);
+    // For any event occurring in any location, the value of h and alpha are not updated.
+    watertank.new_reset(next(h)=h);
     watertank.new_reset(next(alpha)=alpha);
 
 
@@ -105,5 +106,42 @@ int main()
     cout << "Watertank = " << std::boolalpha << watertank << endl << endl;
 
 
+{
+    HybridAutomaton watertank;
+
+    const bool urgent=true;
+    const bool permissive=true;
+
+    RealConstant o("1.0",1.0);
+    RealConstant hmax("hmax",8.0);
+    RealConstant hmin("hmin","8.0");
+    RealVariable h("height");
+    RealVariable a("alpha");
+
+    DiscreteEvent start_closing("start_closing");
+    DiscreteEvent start_opening("start_opening");
+    DiscreteEvent finish_closing("finish_closing");
+    DiscreteEvent finish_opening("finish_opening");
+    DiscreteState open("open");
+    DiscreteState closed("closed");
+    DiscreteState opening("opening");
+    DiscreteState closing("closing");
+
+    RealExpression dh=6.0*alpha-h;
+    watertank.new_mode(open,alpha=1.0,dot(h)=dh);
+    watertank.new_mode(closed,alpha=0.0,dot(h)=dh);
+    watertank.new_mode(opening,(dot(h)=dh,dot(alpha)=1.0));
+    watertank.new_mode(closing,(dot(h)=dh,dot(alpha)=-1.0));
+
+    watertank.new_transition(start_closing,open,closing,(next(alpha)=alpha,next(h)=h),h>=hmax,urgent);
+    watertank.new_transition(start_closing,opening,closing,(next(alpha)=alpha,next(h)=h),h>=hmax,urgent);
+    watertank.new_transition(start_opening,closed,opening,(next(alpha)=alpha,next(h)=h),h<=hmin,urgent);
+    watertank.new_transition(start_opening,closing,opening,(next(alpha)=alpha,next(h)=h),h<=hmin,urgent);
+    watertank.new_transition(finish_closing,closing,closed,(next(h)=h),alpha>=1.0,urgent);
+    watertank.new_transition(finish_opening,opening,closed,(next(h)=h),alpha<=1.0,urgent);
+
+    std::cout << "WatertankAutomaton = " << watertank << endl;
+
+}
 
 }

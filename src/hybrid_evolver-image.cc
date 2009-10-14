@@ -415,8 +415,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
     const VectorFunction dynamic=mode.dynamic();
-    const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
-    std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
+    const std::map<DiscreteEvent,ScalarFunction> guards=system.blocking_guards(location);
+    std::map<DiscreteEvent,ScalarFunction> activations=system.permissive_guards(location);
     const std::set<DiscreteTransition> transitions=system.transitions(location);
 
     // Check to make sure dimensions are correct
@@ -630,15 +630,16 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
 
 ImageSetHybridEvolver::TimeModelType ImageSetHybridEvolver::
-crossing_time(VectorFunction guard, const FlowSetModelType& flow_set_model) const
+crossing_time(ScalarFunction guard, const FlowSetModelType& flow_set_model) const
 {
+    VectorFunction vector_guard(1u,guard);
     try {
-        TimeModelType crossing_time_model=this->_toolbox->scaled_crossing_time(guard,flow_set_model);
+        TimeModelType crossing_time_model=this->_toolbox->scaled_crossing_time(vector_guard,flow_set_model);
         return crossing_time_model;
     }
     catch(DegenerateCrossingException e) {
         BoxType space_domain=project(flow_set_model.domain(),range(0,flow_set_model.argument_size()-1));
-        Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(guard,flow_set_model);
+        Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(vector_guard,flow_set_model);
         TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
         return touching_time_model;
     } // end non-transverse crossing
@@ -648,7 +649,7 @@ crossing_time(VectorFunction guard, const FlowSetModelType& flow_set_model) cons
 Interval jacobian2_range(const TaylorModel& tm);
 
 Interval ImageSetHybridEvolver::
-normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set_model, const TimeModelType& crossing_time_model) const
+normal_derivative(ScalarFunction guard, const FlowSetModelType& flow_set_model, const TimeModelType& crossing_time_model) const
 {
     typedef TimeModelType GuardValueModelType;
     GuardValueModelType guard_flow_set_model=apply(guard,flow_set_model)[0];
@@ -659,13 +660,13 @@ normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set_model, 
 
 void ImageSetHybridEvolver::
 compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_active_events,
-                                const std::map<DiscreteEvent,VectorFunction>& guards,
+                                const std::map<DiscreteEvent,ScalarFunction>& guards,
                                 const ContinuousEnclosureType& initial_set) const
 {
     typedef TimeModelType GuardValueModelType;
     tribool blocking_event_initially_active=false;
-    for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=guards.begin(); iter!=guards.end(); ++iter) {
-        VectorFunction activation=iter->second;
+    for(std::map<DiscreteEvent,ScalarFunction>::const_iterator iter=guards.begin(); iter!=guards.end(); ++iter) {
+        ScalarFunction activation=iter->second;
         tribool initially_active=this->_toolbox->active(activation,initial_set);
         if(possibly(initially_active)) {
             initially_active_events.insert(std::make_pair(iter->first,initially_active));
@@ -710,7 +711,7 @@ compute_flow_model(FunctionModelType& , BoxType&,
 void ImageSetHybridEvolver::
 compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_times,
                         std::set<DiscreteEvent>& non_transverse_events,
-                        const std::map<DiscreteEvent,VectorFunction>& guards,
+                        const std::map<DiscreteEvent,ScalarFunction>& guards,
                         const FlowSetModelType& flow_set_model) const
 {
     ARIADNE_LOG(3,"Computing blocking events.\n");
@@ -719,18 +720,19 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
     const double SMALL_RELATIVE_TIME = 1./16;
     FlowSetModelType positive_flow_set_model(split(flow_set_model.models(),dimension,1));
 
-    for(std::map<DiscreteEvent,VectorFunction>::const_iterator guard_iter=guards.begin();
+    for(std::map<DiscreteEvent,ScalarFunction>::const_iterator guard_iter=guards.begin();
         guard_iter!=guards.end(); ++guard_iter)
     {
         const DiscreteEvent event=guard_iter->first;
-        const VectorFunction guard=guard_iter->second;
+        const ScalarFunction guard=guard_iter->second;
+        const VectorFunction vector_guard(1u,guard);
         tribool active = this->_toolbox->active(guard,positive_flow_set_model);
         if(possibly(active)) {
             ARIADNE_LOG(3,"Event "<<event<<" possibly active.\n");
             TimeModelType crossing_time_model;
             Interval normal_derivative;
             try {
-                crossing_time_model=this->_toolbox->scaled_crossing_time(guard,flow_set_model);
+                crossing_time_model=this->_toolbox->scaled_crossing_time(vector_guard,flow_set_model);
                 normal_derivative=this->normal_derivative(guard,flow_set_model,crossing_time_model);
                 assert(normal_derivative.lower()>0 || normal_derivative.upper()<0);
                 if(normal_derivative.lower()>0) {
@@ -741,7 +743,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
             catch(DegenerateCrossingException e) {
                 ARIADNE_LOG(3,"Degenerate Crossing exception catched.\n");
                 BoxType space_domain=project(flow_set_model.domain(),range(0,flow_set_model.argument_size()-1));
-                Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(guard,flow_set_model);
+                Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(vector_guard,flow_set_model);
                 TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
                 // Use 1.0 as upper bound above since flow set model has time interval normalised to [-1,+1]
                 ARIADNE_LOG(3,"touching_time_interval="<<touching_time_interval<<"\n");
@@ -824,13 +826,13 @@ compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
 
 void ImageSetHybridEvolver::
 compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >& activation_events,
-                          const std::map<DiscreteEvent,VectorFunction>& activations, const FlowSetModelType& flow_set_model) const
+                          const std::map<DiscreteEvent,ScalarFunction>& activations, const FlowSetModelType& flow_set_model) const
 {
     SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,0.0);
     SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
-    for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
+    for(std::map<DiscreteEvent,ScalarFunction>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
         DiscreteEvent event=iter->first;
-        VectorFunction activation=iter->second;
+        ScalarFunction activation=iter->second;
         tribool active=this->_toolbox->active(activation,flow_set_model);
         if(possibly(active)) {
             tribool initially_active=this->_toolbox->active(activation,initial_set_model);
@@ -845,7 +847,7 @@ compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tri
 
 void ImageSetHybridEvolver::
 compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >& activation_times,
-                         const std::map<DiscreteEvent,VectorFunction>& activations,
+                         const std::map<DiscreteEvent,ScalarFunction>& activations,
                          const FlowSetModelType& flow_set_model,
                          const TimeModelType& blocking_time_model,
                          const Semantics semantics) const
@@ -854,9 +856,9 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
     SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
     TimeModelType zero_time_model=blocking_time_model*0.0;
 
-    for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
+    for(std::map<DiscreteEvent,ScalarFunction>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
         DiscreteEvent event=iter->first;
-        VectorFunction activation=iter->second;
+        ScalarFunction activation=iter->second;
 
         ARIADNE_LOG(3,"Computing activation time for event "<<event<<"...");
 

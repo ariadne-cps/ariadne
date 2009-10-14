@@ -55,7 +55,8 @@ class EnumeratedValue;
 typedef String Identifier;
 
 template<class T> class Variable;
-template<class R> class Expression;
+template<class T> class Space;
+template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
 
 class DiscreteValuation;
@@ -101,6 +102,7 @@ class Expression {
     explicit Expression(const ExpressionInterface<R>& e) : _ptr(e.clone()) { }
     explicit Expression(ExpressionInterface<R>* eptr) : _ptr(eptr) { }
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
+    Expression() { R z; *this=Expression(z); }
     Expression(const R& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);

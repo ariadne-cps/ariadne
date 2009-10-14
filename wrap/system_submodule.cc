@@ -44,25 +44,6 @@ namespace Ariadne {
 
 
 
-ScalarFunction discrete_transition_guard(const DiscreteTransition& transition) {
-    ARIADNE_ASSERT(transition.activation().result_size()==1);
-    return transition.activation()[0];
-}
-
-std::map<DiscreteEvent,ScalarFunction> discrete_mode_invariants(const DiscreteMode& mode) {
-    std::map<DiscreteEvent,ScalarFunction> scalar_invariants;
-    std::map<DiscreteEvent,VectorFunction>const& vector_invariants=mode.invariants();
-    
-    for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=vector_invariants.begin();
-        iter!=vector_invariants.end(); ++iter)
-    {
-        ARIADNE_ASSERT(iter->second.result_size()==1);
-        scalar_invariants.insert(std::make_pair(iter->first,iter->second[0]));
-    }
-
-    return scalar_invariants;
-}
-
 
 
 template<class T>
@@ -162,11 +143,11 @@ void export_formula()
     class_<StringExpression> string_expression_class("StringExpression", init<StringExpression>());
     string_expression_class.def(self_ns::str(self));
 
-    class_<StringNextVariable> string_next_variable_class("StringNextVariable", no_init);
-    string_next_variable_class.def("__lshift__", (StringUpdate(StringNextVariable::*)(const StringExpression&)const) &StringNextVariable::operator=);
+    class_<PrimedStringVariable> string_next_variable_class("PrimedStringVariable", no_init);
+    string_next_variable_class.def("__lshift__", (StringUpdate(PrimedStringVariable::*)(const StringExpression&)const) &StringExpression::operator=);
     string_next_variable_class.def(self_ns::str(self));
 
-    def("next", (StringNextVariable(*)(const StringVariable&)) &next);
+    def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);
 
 
     class_<IntegerVariable> integer_variable_class("IntegerVariable", init<std::string>());
@@ -187,11 +168,11 @@ void export_formula()
     integer_variable_class.def("__gt__", &__gt__<DiscretePredicate,IntegerVariable,IntegerExpression>);
     integer_variable_class.def(self_ns::str(self));
 
-    class_<IntegerNextVariable> integer_next_variable_class("IntegerNextVariable", no_init);
-    integer_next_variable_class.def("__lshift__", (IntegerUpdate(IntegerNextVariable::*)(const IntegerExpression&)const) &IntegerNextVariable::operator=);
+    class_<PrimedIntegerVariable> integer_next_variable_class("PrimedIntegerVariable", no_init);
+    integer_next_variable_class.def("__lshift__", (IntegerUpdate(PrimedIntegerVariable::*)(const IntegerExpression&)const) &PrimedIntegerVariable::operator=);
     integer_next_variable_class.def(self_ns::str(self));
 
-    def("next", (IntegerNextVariable(*)(const IntegerVariable&)) &next);
+    def("next", (PrimedIntegerVariable(*)(const IntegerVariable&)) &next);
 
     class_<IntegerExpression> integer_expression_class("IntegerExpression", init<IntegerExpression>());
     integer_expression_class.def("__pos__", &__pos__<IntegerExpression,IntegerExpression>);
@@ -230,17 +211,17 @@ void export_formula()
     real_variable_class.def("eq", (RealAssignment(RealVariable::*)(const RealExpression&)const) &RealVariable::operator=);
     real_variable_class.def(self_ns::str(self));
 
-    class_<RealDottedVariable> real_dotted_variable_class("RealDottedVariable", no_init);
-    real_dotted_variable_class.def("__lshift__", (RealDynamic(RealDottedVariable::*)(const RealExpression&)const) &RealDottedVariable::operator=);
+    class_<DottedRealVariable> real_dotted_variable_class("DottedRealVariable", no_init);
+    real_dotted_variable_class.def("__lshift__", (RealDynamic(DottedRealVariable::*)(const RealExpression&)const) &DottedRealVariable::operator=);
     real_dotted_variable_class.def(self_ns::str(self));
 
-    def("dot", (RealDottedVariable(*)(const RealVariable&)) &dot);
+    def("dot", (DottedRealVariable(*)(const RealVariable&)) &dot);
 
-    class_<RealNextVariable> real_next_variable_class("RealNextVariable", no_init);
-    real_next_variable_class.def("__lshift__", (RealUpdate(RealNextVariable::*)(const RealExpression&)const) &RealNextVariable::operator=);
+    class_<PrimedRealVariable> real_next_variable_class("PrimedRealVariable", no_init);
+    real_next_variable_class.def("__lshift__", (RealUpdate(PrimedRealVariable::*)(const RealExpression&)const) &PrimedRealVariable::operator=);
     real_next_variable_class.def(self_ns::str(self));
 
-    def("next", (RealNextVariable(*)(const RealVariable&)) &next);
+    def("next", (PrimedRealVariable(*)(const RealVariable&)) &next);
 
     class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
@@ -375,7 +356,7 @@ void export_hybrid_automaton()
     discrete_mode_class.def("dynamic",&DiscreteMode::dynamic,return_value_policy<reference_existing_object>());
     //discrete_mode_class.def("invariants",&DiscreteMode::invariants,return_value_policy<reference_existing_object>());
     discrete_mode_class.def("invariants",&DiscreteMode::invariants,return_value_policy<copy_const_reference>());
-    discrete_mode_class.def("invariants",&discrete_mode_invariants);
+    //discrete_mode_class.def("invariants",&discrete_mode_invariants);
     discrete_mode_class.def(self_ns::str(self));
 
     class_<DiscreteTransition, shared_ptr<DiscreteTransition> > discrete_transition_class("DiscreteTransition",no_init);
@@ -384,7 +365,7 @@ void export_hybrid_automaton()
     discrete_transition_class.def("target",&DiscreteTransition::target,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("reset",&DiscreteTransition::reset,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("activation",&DiscreteTransition::activation,return_value_policy<reference_existing_object>());
-    discrete_transition_class.def("guard",&discrete_transition_guard);
+    discrete_transition_class.def("guard",&DiscreteTransition::activation,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("urgency",&DiscreteTransition::forced);
     discrete_transition_class.def(self_ns::str(self));
 

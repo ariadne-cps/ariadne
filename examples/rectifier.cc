@@ -131,7 +131,7 @@ int main()
     float MAX_STEP_SIZE = 1e-5/dp[1];
 //    float LOCK_TOGRID_TIME = 2.0/dp[1];
     float LOCK_TOGRID_TIME = 0.25/dp[1];
-    float MAX_GRID_DEPTH = 21;
+    float MAX_GRID_DEPTH = 7;
     int VERBOSITY=3;
     bool ENABLE_SUBDIV=false;
 

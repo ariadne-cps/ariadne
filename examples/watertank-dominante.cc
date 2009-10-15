@@ -221,7 +221,7 @@ int main(int argc,char *argv[])
 
     Vector<Float> lengths(5, 0.25, 1.0, 1.0, 1.0, 1.0);
     HybridGridTreeSet hgts(watertank_system.state_space(), lengths);
-    uint grid_depth = 18;
+    uint grid_depth = 9;
     uint grid_height = 8;
     
     std::cout << "Computing timed evolution starting from location l3, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
@@ -254,7 +254,7 @@ int main(int argc,char *argv[])
     HybridReachabilityAnalyser analyser(evolver);
     analyser.verbosity = 4;
     analyser.parameters().lock_to_grid_time = total_time;
-    analyser.parameters().maximum_grid_depth= 14;
+    analyser.parameters().maximum_grid_depth= 7;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;

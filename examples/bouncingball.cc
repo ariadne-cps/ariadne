@@ -118,7 +118,7 @@ int main()
     HybridReachabilityAnalyser analyser(evolver);
     analyser.verbosity = 6;
     analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().maximum_grid_depth= 10;
+    analyser.parameters().maximum_grid_depth= 5;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;

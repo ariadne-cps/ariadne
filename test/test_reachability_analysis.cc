@@ -64,7 +64,7 @@ class TestReachabilityAnalysis
     static HybridReachabilityAnalyser build_analyser()
     {
         EvolutionParameters parameters;
-        parameters.maximum_grid_depth=8;
+        parameters.maximum_grid_depth=4;
         parameters.maximum_step_size=0.25;
         parameters.lock_to_grid_time=1.0;
     

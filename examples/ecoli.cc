@@ -136,8 +136,8 @@ int main()
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time=lock_to_grid_time;
-    analyser.parameters().initial_grid_depth=18;
-    analyser.parameters().maximum_grid_depth=18;
+    analyser.parameters().initial_grid_depth=4;
+    analyser.parameters().maximum_grid_depth=4;
     std::cout<<"Discrete evolution parameters="<<analyser.parameters()<<"\n";
 
     HybridImageSet initial_set;

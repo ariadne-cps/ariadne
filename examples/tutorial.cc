@@ -217,9 +217,9 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
 {
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().initial_grid_density=10;
-    analyser.parameters().initial_grid_depth=12;
-    analyser.parameters().maximum_grid_depth=12;
+    analyser.parameters().initial_grid_density=5;
+    analyser.parameters().initial_grid_depth=6;
+    analyser.parameters().maximum_grid_depth=6;
 
 
     // Define the initial set

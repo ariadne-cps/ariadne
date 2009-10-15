@@ -114,7 +114,7 @@ int main()
 
     /// Sets the analyzer parameters
     double LOCK_TO_GRID_TIME = 3.0;
-    int MAX_GRID_DEPTH = 12;
+    int MAX_GRID_DEPTH = 2;
 
     /// Builds the Hybrid System
   

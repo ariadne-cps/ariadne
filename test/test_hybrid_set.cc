@@ -61,8 +61,8 @@ TestHybridSet::test_hybrid_image_set()
     Matrix<Float> A=Matrix<Float>::identity(2);
     Vector<Float> b1=Vector<Float>::unit(2,0);
     Vector<Float> b2=Vector<Float>::unit(2,1);
-    DiscreteState loc1(23);
-    DiscreteState loc2(5);
+    DiscreteState loc1(123);
+    DiscreteState loc2(105);
     ImageSet ims1(bx,VectorAffineFunction(A,b1));
     ImageSet ims2(bx,VectorAffineFunction(A,b2));
     his.insert(make_pair(loc1,ims1));
@@ -79,8 +79,8 @@ void
 TestHybridSet::test_hybrid_list_set() 
 {
     HybridListSet<Box> hls;
-    DiscreteState loc1(23);
-    DiscreteState loc2(5);
+    DiscreteState loc1(123);
+    DiscreteState loc2(105);
     Box bx1=make_box("[0,1]");
     Box bx2=make_box("[2,3]");
     Box bx3=make_box("[1,2]x[2,3]");

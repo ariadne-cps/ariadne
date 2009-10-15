@@ -90,7 +90,7 @@ int main()
     float MAX_ENCL_RADIUS = 0.001/dp[1];
     float MAX_STEP_SIZE = 0.001/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];
-    float MAX_GRID_DEPTH = 12;
+    float MAX_GRID_DEPTH = 4;
 
     /// Build the Hybrid System
 

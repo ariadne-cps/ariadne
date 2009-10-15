@@ -97,9 +97,9 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the vector field
     Float a=1.5; Float b=0.375;
-    Vector<Float> p(2); p[0]=a; p[1]=b;
-
-    VectorUserFunction<Henon> henon(p);
+    ScalarFunction x=ScalarFunction::variable(2,0);
+    ScalarFunction y=ScalarFunction::variable(2,1);
+    VectorFunction henon=join(a-x*x+b*y,x);
     cout << "henon=" << henon << endl;
     IteratedMap system(henon);
 
@@ -288,10 +288,13 @@ void TestDiscretisedEvolution::test_hybrid_time() const
 
 
     // Set up the vector field
-    Float a=1.5; Float b=0.375;
-    Vector<Float> p(2); p[0]=a; p[1]=b;
+    Real a=1.5; Real b=0.375;
+    ScalarFunction x=ScalarFunction::variable(2,0);
+    ScalarFunction y=ScalarFunction::variable(2,1);
+    VectorFunction henon=join(a-x*x+b*y,x);
+    cout << "henon=" << henon << endl;
+    IteratedMap system(henon);
 
-    VectorUserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
     HybridAutomaton ha("Henon");
     ha.new_mode(location,IdentityFunction(2));

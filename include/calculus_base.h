@@ -302,7 +302,7 @@ class CalculusBase
     //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
     tribool active(const ScalarFunctionType& guard,  const SetModelType& set_model) const {
-        return this->active(this->predicate_model(guard,set_model.range()),set_model); }
+        return this->active(this->predicate_model(guard,set_model.bounding_box()),set_model); }
     tribool active(const VectorFunctionType& guard,  const SetModelType& set_model) const {
         TimeModelType guard_set_model = apply(guard,set_model)[0];
         Interval guard_range=guard_set_model.range();

@@ -96,6 +96,8 @@ template<class T> class Expression;
 template<class LHS, class RHS>
 struct Assignment
 {
+    template<class XLHS> explicit Assignment(const Assignment<XLHS,RHS>& a)
+        : lhs(a.lhs), rhs(a.rhs) { }
     Assignment(const LHS& l, const RHS& r) : lhs(l), rhs(r) { }
     operator List< Assignment<LHS,RHS> >() const { return List< Assignment<LHS,RHS> >(1u,*this); }
     LHS lhs; RHS rhs;

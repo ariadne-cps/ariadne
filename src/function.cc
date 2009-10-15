@@ -84,35 +84,35 @@ class ScalarConstantFunction
 
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
-class ScalarAffineFunction
+class ScalarAffineFunctionRepresentation
     : public ScalarFunctionInterface,
       public Affine<Interval>
 {
   public:
-    explicit ScalarAffineFunction(uint n) : Affine<Interval>(n) { }
-    ScalarAffineFunction(const Affine<Interval>& aff) : Affine<Interval>(aff) { }
-    ScalarAffineFunction(const Vector<Float>& g, const Float& c) : Affine<Interval>(g,c) { }
-    ScalarAffineFunction(const Vector<Interval>& g, const Interval& c) : Affine<Interval>(g,c) { }
-    ScalarAffineFunction(uint as, double c, double g0, ...) {
+    explicit ScalarAffineFunctionRepresentation(uint n) : Affine<Interval>(n) { }
+    ScalarAffineFunctionRepresentation(const Affine<Interval>& aff) : Affine<Interval>(aff) { }
+    ScalarAffineFunctionRepresentation(const Vector<Float>& g, const Float& c) : Affine<Interval>(g,c) { }
+    ScalarAffineFunctionRepresentation(const Vector<Interval>& g, const Interval& c) : Affine<Interval>(g,c) { }
+    ScalarAffineFunctionRepresentation(uint as, double c, double g0, ...) {
         Float _c; Vector<Float> _g(as);
         _g[0]=g0; va_list args; va_start(args,g0);
         for(uint i=1; i!=as; ++i) { _g[i]=va_arg(args,double); }
-        *this=ScalarAffineFunction(_g,_c); }
-//    ScalarAffineFunction(const ConstantScalarFunction& c)
+        *this=ScalarAffineFunctionRepresentation(_g,_c); }
+//    ScalarAffineFunctionRepresentation(const ConstantScalarFunction& c)
 //        : _c(c), _g(c.argument_size()) { }
 
-    ScalarAffineFunction(Expression<Real> e, const Array<String>& s);
-//    ScalarAffineFunction(Expression<Real> e, const Map<String,SizeType>& s);
+    ScalarAffineFunctionRepresentation(Expression<Real> e, const Array<String>& s);
+//    ScalarAffineFunctionRepresentation(Expression<Real> e, const Map<String,SizeType>& s);
 
-    static ScalarAffineFunction constant(uint n, Float c) {
-        return ScalarAffineFunction(Vector<Float>(n),c); }
-    static ScalarAffineFunction constant(uint n, Interval c) {
-        return ScalarAffineFunction(Vector<Interval>(n),c); }
-    static ScalarAffineFunction variable(uint n, uint j) {
+    static ScalarAffineFunctionRepresentation constant(uint n, Float c) {
+        return ScalarAffineFunctionRepresentation(Vector<Float>(n),c); }
+    static ScalarAffineFunctionRepresentation constant(uint n, Interval c) {
+        return ScalarAffineFunctionRepresentation(Vector<Interval>(n),c); }
+    static ScalarAffineFunctionRepresentation variable(uint n, uint j) {
         ARIADNE_ASSERT_MSG(j<n,"Cannot create variable function x["<<j<<"] in "<<n<<" arguments; require j<n.");
-        return ScalarAffineFunction(Vector<Interval>::unit(n,j),Interval(0.0)); }
+        return ScalarAffineFunctionRepresentation(Vector<Interval>::unit(n,j),Interval(0.0)); }
 
-    virtual ScalarAffineFunction* clone() const { return new ScalarAffineFunction(*this); }
+    virtual ScalarAffineFunctionRepresentation* clone() const { return new ScalarAffineFunctionRepresentation(*this); }
 
     virtual SizeType argument_size() const { return static_cast<Affine<Interval>const&>(*this).argument_size(); }
     virtual SmoothnessType smoothness() const { return SMOOTH; }
@@ -161,7 +161,7 @@ class ScalarPolynomialFunction
 
     ScalarPolynomialFunction(const Expression<Real>& e, const Space<Real>& s) { *this=ScalarPolynomialFunction(polynomial<Interval>(e,s)); }
 
-    ScalarPolynomialFunction(const ScalarAffineFunction& a) : Polynomial<Interval>(a.argument_size()) {
+    ScalarPolynomialFunction(const ScalarAffineFunctionRepresentation& a) : Polynomial<Interval>(a.argument_size()) {
         uint n=this->argument_size(); (*this)[MultiIndex::zero(n)]=a.b();
         for(uint i=0; i!=n; ++i) { (*this)[MultiIndex::unit(n,i)]=a.a()[i]; } }
 
@@ -613,10 +613,10 @@ class VectorAffineFunctionRepresentation
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
         return this->_iA; }
 
-    virtual ScalarAffineFunction operator[](unsigned int i) const  {
+    virtual ScalarAffineFunctionRepresentation operator[](unsigned int i) const  {
         ARIADNE_ASSERT(i<this->result_size());
         Vector<Interval> g(this->argument_size()); for(unsigned int j=0; j!=g.size(); ++j) { g[j]=this->_iA[i][j]; }
-        return ScalarAffineFunction(g,_ib[i]); }
+        return ScalarAffineFunctionRepresentation(g,_ib[i]); }
 
     virtual std::ostream& write(std::ostream& os) const;
   private:
@@ -628,7 +628,7 @@ inline std::ostream& VectorAffineFunctionRepresentation::write(std::ostream& os)
     //return os << "VectorAffineFunction( A="<<midpoint(_iA)<<", b="<<midpoint(_ib)<<" )";
     const VectorAffineFunctionRepresentation& f=*this;
     for(uint i=0; i!=f.result_size(); ++i) {
-        os<<(i==0?"VectorAffineFunction( ":"; ");
+        os<<(i==0?"( ":"; ");
         if(f.b()[i]!=0) { os<<f.b()[i]; }
         for(uint j=0; j!=f.argument_size(); ++j) {
             if(f.A()[i][j]!=0) {
@@ -1027,6 +1027,14 @@ ScalarFunction ScalarFunction::constant(Nat n, Real c)
 
 ScalarFunction ScalarFunction::variable(Nat n, Nat j)
 {
+    ARIADNE_DEPRECATED("ScalarFunction::variable","Use ScalarFunction::coordinate instead");
+    Polynomial<Interval> p(n);
+    p[MultiIndex::unit(n,j)]=1.0;
+    return ScalarFunction(p);
+}
+
+ScalarFunction ScalarFunction::coordinate(Nat n, Nat j)
+{
     Polynomial<Interval> p(n);
     p[MultiIndex::unit(n,j)]=1.0;
     return ScalarFunction(p);
@@ -1045,6 +1053,11 @@ ScalarFunction::ScalarFunction(const Polynomial<Real>& p)
 ScalarFunction::ScalarFunction(const Expression<Real>& e, const Space<Real>& s)
     : _ptr(new ScalarExpressionFunction(e,s))
 {
+}
+
+
+ScalarFunction::ScalarFunction(const Expression<tribool>& e, const List< Variable<Real> >& s) {
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -1255,6 +1268,8 @@ ScalarFunction embed(const ScalarFunction& f, uint k) {
 
 
 
+
+
 VectorFunction::VectorFunction(VectorFunctionInterface* fptr)
     : _ptr(fptr)
 {
@@ -1284,6 +1299,7 @@ VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Re
     }
 }
 
+/*
 VectorFunction::VectorFunction(const Space<Real>& rs, const Map<RealVariable,RealExpression>& e, const Space<Real>& as)
     : _ptr(new VectorOfScalarFunction(rs.size(),as.size()))
 {
@@ -1292,6 +1308,74 @@ VectorFunction::VectorFunction(const Space<Real>& rs, const Map<RealVariable,Rea
         vec->set(i,ScalarFunction(e[rs[i]],as));
     }
 }
+*/
+
+struct VectorExpressionFunction : public VectorFunctionTemplate<VectorExpressionFunction>
+{
+    VectorExpressionFunction(const List<ExtendedRealVariable>& rv,
+                             const List< Assignment<ExtendedRealVariable,RealExpression> >& eq,
+                             const List<RealVariable>& av)
+        : _result_variables(rv), _argument_variables(av), _assignments(eq) { }
+
+    List<ExtendedRealVariable> _result_variables;
+ List<RealVariable> _argument_variables;
+    List< Assignment<ExtendedRealVariable,RealExpression> > _assignments;
+
+    virtual uint result_size() const { return this->_result_variables.size(); }
+    virtual uint argument_size() const { return this->_argument_variables.size(); }
+
+    virtual VectorExpressionFunction* clone() const { return new VectorExpressionFunction(*this); }
+
+    template<class X> void _compute(Vector<X>& result, const Vector<X>& x) const {
+        Map<ExtendedRealVariable,X> values;
+        for(uint i=0; i!=_argument_variables.size(); ++i) {
+            values[_argument_variables[i]]=x[i];
+        }
+        for(uint i=0; i!=_assignments.size(); ++i) {
+            values[_assignments[i].lhs]=Ariadne::evaluate(_assignments[i].rhs,values);
+        }
+        for(uint i=0; i!=result.size(); ++i) {
+            result[i]=values[_result_variables[i]];
+        }
+    }
+
+    std::ostream& write(std::ostream& os) const {
+        return os << this->_result_variables << this->_argument_variables << this->_assignments;
+    }
+
+};
+
+
+VectorFunction::VectorFunction(const List<ExtendedRealVariable>& rv,
+                               const List<ExtendedRealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunction(rv,eq,av)) 
+{
+}
+
+VectorFunction::VectorFunction(const List<RealVariable>& rv,
+                               const List<RealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunction(List<ExtendedRealVariable>(rv),List<ExtendedRealAssignment>(eq),av))
+{
+}
+
+VectorFunction::VectorFunction(const List<DottedRealVariable>& rv,
+                               const List<DottedRealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunction(List<ExtendedRealVariable>(rv),List<ExtendedRealAssignment>(eq),av))
+{
+}
+
+VectorFunction::VectorFunction(const List<PrimedRealVariable>& rv,
+                               const List<PrimedRealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunction(List<ExtendedRealVariable>(rv),List<ExtendedRealAssignment>(eq),av))
+{
+}
+
+
+
 
 VectorFunction VectorFunction::constant(const Vector<Real>& c, Nat as)
 {
@@ -1314,8 +1398,16 @@ VectorFunction VectorFunction::identity(Nat n)
 
 ScalarFunction VectorFunction::get(Nat i) const
 {
+    ScalarFunction result(this->argument_size());
+    const VectorConstantFunctionRepresentation* cptr=dynamic_cast<const VectorConstantFunctionRepresentation*>(this->_ptr.operator->());
+    if(cptr) { //std::cerr<<ScalarFunction::constant(this->argument_size(),cptr->c()[i])<<"\n";
+        return ScalarFunction::constant(this->argument_size(),cptr->c()[i]); }
+    const VectorAffineFunctionRepresentation* aptr=dynamic_cast<const VectorAffineFunctionRepresentation*>(this->_ptr.operator->());
+    if(aptr) { uint as=aptr->argument_size(); Vector<Real> a(as);
+        for(uint j=0; j!=as; ++j) { a[j]=aptr->A()[i][j]; } Real b=aptr->b()[i];
+        return ScalarFunction(new ScalarAffineFunctionRepresentation(a,b)); }
     const VectorOfScalarFunction* vptr=dynamic_cast<const VectorOfScalarFunction*>(this->_ptr.operator->());
-    ARIADNE_ASSERT_MSG(vptr,"Can only get component of a vector of scalar functions.");
+    ARIADNE_ASSERT_MSG(vptr,"Can only get component of a vector of scalar functions, input was "<<*this<<" of type "<<typeid(this->pointer()).name());
     return vptr->_vec[i];
 }
 
@@ -1359,6 +1451,15 @@ Matrix<Interval> VectorFunction::jacobian(const Vector<Interval>& x) const
     return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); 
 }
 
+
+
+
+
+
+ScalarAffineFunction::ScalarAffineFunction(const Vector<Real>& a, const Real& b)
+    : ScalarFunction(new ScalarAffineFunctionRepresentation(a,b))
+{
+}
 
 IdentityFunction::IdentityFunction(uint n)
     : VectorFunction(new IdentityFunctionRepresentation(n))

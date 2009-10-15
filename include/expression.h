@@ -174,6 +174,7 @@ Integer evaluate(const Expression<Integer>& e, const DiscreteValuation& q);
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x);
+template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,X>& x);
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);

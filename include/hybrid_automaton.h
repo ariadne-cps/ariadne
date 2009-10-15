@@ -59,6 +59,9 @@ class ScalarFunction;
 class VectorFunction;
 class Grid;
 
+static const bool urgent=true;
+static const bool permissive=false;
+
 /*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
  * within and invariant constraint set.
  *
@@ -84,10 +87,13 @@ class DiscreteMode {
     RealSpace _input_space;
 
     // The algebraic equations
-    List<RealAlgebraicAssignment> _algebraic_equations;
+    List<RealAlgebraicAssignment> _algebraic_assignments;
 
     // The algebraic equations
-    List<RealDifferentialAssignment> _differential_equations;
+    List<RealDifferentialAssignment> _differential_assignments;
+
+    // The discrete mode's invariants.
+    Map< DiscreteEvent, ContinuousPredicate > _invariant_predicates;
 
     // The discrete mode's vector field.
     VectorFunction _dynamic;
@@ -189,7 +195,7 @@ class DiscreteTransition
     // \brief Whether or not the transition is forced.
     bool _forced;
 
-    List<RealUpdateAssignment> _update_equations;
+    List<RealUpdateAssignment> _update_assignments;
 
     ContinuousPredicate _guard_predicate;
   public:
@@ -302,6 +308,8 @@ class HybridAutomaton
     typedef std::map<DiscreteEvent,ScalarFunction>::const_iterator invariant_const_iterator;
     typedef std::set<DiscreteTransition>::const_iterator discrete_transition_const_iterator;
     typedef std::set<DiscreteMode>::const_iterator discrete_mode_const_iterator;
+    typedef std::set<DiscreteTransition>::const_iterator transition_const_iterator;
+    typedef std::set<DiscreteMode>::const_iterator mode_const_iterator;
   private:
     //! \brief The hybrid automaton's name.
     std::string _name;
@@ -415,20 +423,43 @@ class HybridAutomaton
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
-    //!    \param event is the transition's event.
     //!    \param source is the transition's source location.
+    //!    \param event is the transition's event.
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
-    const DiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteState source,
+    //!    \param guard is the transition's activation region.
+    const DiscreteTransition& new_transition(DiscreteState source,
+                                             DiscreteEvent event,
                                              DiscreteState target,
                                              const List<RealUpdateAssignment>& reset,
-                                             const ContinuousPredicate& guard,
-                                             bool urgent);
+                                             const ContinuousPredicate& guard);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    //! The guard is the constant "True" i.e. the event is an input event.
+    //!
+    //!    \param source is the transition's source location.
+    //!    \param event is the transition's event.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    const DiscreteTransition& new_transition(DiscreteState source,
+                                             DiscreteEvent event,
+                                             DiscreteState target,
+                                             const List<RealUpdateAssignment>& reset);
+
+     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
+    //!
+    //!    \param source is the transition's source location.
+    //!    \param event is the transition's event.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param guard is the transition's activation region.
+    const DiscreteTransition& new_transition(DiscreteState source,
+                                             DiscreteEvent event,
+                                             DiscreteState target,
+                                             const ContinuousPredicate& guard);
+
+   //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
     //!    \param event is the transition's event.
     //!    \param source is the transition's source location.
@@ -507,12 +538,14 @@ class HybridAutomaton
 
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
     bool has_transition(DiscreteEvent event, DiscreteState source) const;
+    bool has_transition(DiscreteState source, DiscreteEvent event) const;
 
     //! \brief The discrete mode with given discrete state.
     const DiscreteMode& mode(DiscreteState state) const;
 
     //! \brief The discrete transition with given \a event and \a source location.
     const DiscreteTransition& transition(DiscreteEvent event, DiscreteState source) const;
+    const DiscreteTransition& transition(DiscreteState source, DiscreteEvent event) const;
 
     //! \brief The set of discrete modes. (Not available in Python interface)
     const std::set< DiscreteMode >& modes() const;
@@ -540,15 +573,86 @@ class HybridAutomaton
 
     //! \brief The natural grid to use in the over all locations.
     HybridGrid grid() const;
-
     //@}
 
+    //@{
+    //! \name New-style access for compositional hybrid automata.
+
+    //! \brief The target location of the discrete event from the given discrete location.
+    DiscreteState target(const DiscreteState& source, const DiscreteEvent& event);
+    // Alternative form for backwards compatibility
+    DiscreteState target(const DiscreteEvent& event, const DiscreteState& source);
+    //! \brief The state (dotted) variables in the given location.
+    List<RealVariable> state_variables(DiscreteState location) const;
+    //! \brief The auxiliary (algebraic/output) variables in the given location.
+    List<RealVariable> auxiliary_variables(DiscreteState location) const;
+    //! \brief The algebraic equations valid in the given location.
+    List<RealAssignment> algebraic_assignments(const DiscreteState& location) const;
+    //! \brief The differential equations valid in the given location.
+    List<DottedRealAssignment> differential_assignments(const DiscreteState& location) const;
+    //! \brief The differential equations valid in the given location.
+    List<PrimedRealAssignment> update_assignments(const DiscreteState& source, const DiscreteEvent& event) const;
+    //! \brief The invariant predicates valid in the given location.
+    Map<DiscreteEvent,ContinuousPredicate> invariant_predicates(const DiscreteState& location) const;
+    ContinuousPredicate invariant_predicate(const DiscreteState& location, const DiscreteEvent& action) const;
+    //! \brief The guard predicate for the given event in the given location.
+    ContinuousPredicate guard_predicate(const DiscreteState& location, const DiscreteEvent& event) const;
+    //@}
+
+    //! \brief Write to an output stream.
+    std::ostream& write(std::ostream&) const;
 };
 
-HybridAutomaton parallel_composition(const HybridAutomaton& components1, const HybridAutomaton& components2);
-HybridAutomaton parallel_composition(const List<HybridAutomaton>& components);
+inline std::ostream& operator<<(std::ostream& os, const HybridAutomaton& ha) {
+    return ha.write(os); }
 
-std::ostream& operator<<(std::ostream& os, const HybridAutomaton& ha);
+
+
+class CompositeHybridAutomaton {
+    typedef List<DiscreteState> DiscreteLocation;
+  public:
+    CompositeHybridAutomaton(const HybridAutomaton&);
+    CompositeHybridAutomaton(const List<HybridAutomaton>&);
+    uint number_of_components() const;
+    const HybridAutomaton& component(uint) const;
+
+    const Set<DiscreteMode> modes() const;
+    const Set<DiscreteTransition> transitions(const DiscreteLocation& location) const;
+
+    bool has_mode(const DiscreteLocation&) const;
+    bool has_transition(const DiscreteLocation&, const DiscreteEvent&) const;
+    DiscreteLocation target(const DiscreteLocation&, const DiscreteEvent&) const;
+
+    List<RealVariable> variables(const DiscreteLocation&) const;
+    List<RealVariable> state_variables(const DiscreteLocation&) const;
+    List<RealVariable> auxiliary_variables(const DiscreteLocation&) const;
+    List<RealAssignment> algebraic_assignments(const DiscreteLocation&) const;
+    List<DottedRealAssignment> differential_assignments(const DiscreteLocation&) const;
+    List<PrimedRealAssignment> update_assignments(const DiscreteLocation&, const DiscreteEvent&) const;
+
+    Map<DiscreteEvent,ContinuousPredicate> invariant_predicates(const DiscreteLocation&) const;
+    ContinuousPredicate invariant_predicate(const DiscreteLocation&, const DiscreteEvent&) const;
+    ContinuousPredicate guard_predicate( const DiscreteLocation&, const DiscreteEvent&) const;
+
+    VectorFunction output(const DiscreteLocation&) const;
+    VectorFunction dynamic(const DiscreteLocation&) const;
+    VectorFunction reset(const DiscreteLocation&, const DiscreteEvent&) const;
+
+    Map<DiscreteEvent,ScalarFunction> invariants(const DiscreteLocation&) const;
+    ScalarFunction invariant(const DiscreteLocation&, const DiscreteEvent&) const;
+    ScalarFunction guard(const DiscreteLocation&, const DiscreteEvent&) const;
+
+    std::ostream& write(std::ostream&) const;
+  private:
+    List<HybridAutomaton> _components;
+};
+
+inline CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& components) {
+    return CompositeHybridAutomaton(components); }
+
+inline std::ostream& operator<<(std::ostream& os, const CompositeHybridAutomaton& ha) {
+    return ha.write(os); }
+
 
 
 } // namespace Ariadne

@@ -685,6 +685,19 @@ template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuatio
     ARIADNE_FAIL_MSG("");
 }
 
+template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,X>& x) {
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
+    const BinaryExpression<Real>* bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
+    if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
+    const UnaryExpression<Real>* uptr=dynamic_cast<const UnaryExpression<Real>*>(eptr);
+    if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
+    const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
+    if(cptr) { X r; _set_constant(r,cptr->value()); return r; }
+    const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
+    if(vptr) { ARIADNE_ASSERT_MSG(x.has_key(vptr->variable()),"Valuation "<<x<<" does not contain variable "<<vptr->variable()<<" used in expression "<<e); return x[vptr->variable()]; }
+    ARIADNE_FAIL_MSG("");
+}
+
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x) {
     const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
     const BinaryExpression<Tribool>* bptr=dynamic_cast<const BinaryExpression<Tribool>*>(eptr);
@@ -709,6 +722,13 @@ template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x) {
 
 template Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<Float>& x);
 template Float evaluate(const Expression<Real>& e, const ContinuousValuation<Float>& x);
+
+
+template Float evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Float>& x);
+template Interval evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Interval>& x);
+template Differential<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Float> >& x);
+template Differential<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Interval> >& x);
+template TaylorModel evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,TaylorModel>& x);
 
 template Float evaluate(const Expression<Real>& e, const Vector<Float>& x);
 template Interval evaluate(const Expression<Real>& e, const Vector<Interval>& x);

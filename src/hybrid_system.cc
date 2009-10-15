@@ -356,7 +356,8 @@ HybridSystem::reset(const Event& event, const DiscreteValuation& source) const
         assignments.insert(update_iter->lhs.base(),update_iter->rhs);
     }
 
-    return VectorFunction(target_space,assignments,source_space);
+    ARIADNE_NOT_IMPLEMENTED
+    //return VectorFunction(target_space,assignments,source_space);
 }
 
 

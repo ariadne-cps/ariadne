@@ -375,7 +375,7 @@ void export_hybrid_automaton()
 
     class_<HybridAutomaton> hybrid_automaton_class("HybridAutomaton",init<>());
     hybrid_automaton_class.def("mode",&HybridAutomaton::mode,return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("transition",&HybridAutomaton::transition,return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("transition",(const DiscreteTransition&(HybridAutomaton::*)(DiscreteEvent,DiscreteState)const) &HybridAutomaton::transition,return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def("modes",&HybridAutomaton::modes,return_value_policy<copy_const_reference>());
     hybrid_automaton_class.def("transitions",(const std::set<DiscreteTransition>&(HybridAutomaton::*)()const) &HybridAutomaton::transitions,return_value_policy<copy_const_reference>());
     hybrid_automaton_class.def("transitions",(std::set<DiscreteTransition>(HybridAutomaton::*)(DiscreteState)const) &HybridAutomaton::transitions);

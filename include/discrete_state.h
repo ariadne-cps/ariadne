@@ -32,6 +32,8 @@ namespace Ariadne {
 
 template<class T> std::string to_str(const T& t) {
     std::stringstream ss; ss<<t; return ss.str(); }
+template<class T> std::string to_string(const T& t) {
+    std::stringstream ss; ss<<t; return ss.str(); }
 
 class DiscreteState {
   public:

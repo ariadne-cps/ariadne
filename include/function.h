@@ -52,14 +52,25 @@ class Real;
 template<class X> class Vector;
 template<class X> class Polynomial;
 template<class LHS, class RHS> class Assignment;
+template<class T> class ExtendedVariable;
 template<class T> class Variable;
+template<class T> class DottedVariable;
+template<class T> class PrimedVariable;
 template<class T> class Expression;
 template<class T> class Space;
 
+typedef ExtendedVariable<Real> ExtendedRealVariable;
+typedef Variable<Real> RealVariable;
+typedef DottedVariable<Real> DottedRealVariable;
+typedef PrimedVariable<Real> PrimedRealVariable;
 typedef Variable<Real> RealVariable;
 typedef Expression<Real> RealExpression;
 typedef Space<Real> RealSpace;
+
 typedef Assignment<RealVariable,RealExpression> RealAssignment;
+typedef Assignment<ExtendedRealVariable,RealExpression> ExtendedRealAssignment;
+typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
+typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
 
 class ScalarFunction;
 class VectorFunction;
@@ -73,9 +84,11 @@ class ScalarFunction
     static ScalarFunction constant(Nat n, double c);
     static ScalarFunction constant(Nat n, Real c);
     static ScalarFunction variable(Nat n, uint i);
+    static ScalarFunction coordinate(Nat n, uint i);
 
     explicit ScalarFunction(Nat n=0u);
     ScalarFunction(const Expression<Real>& e, const Space<Real>& s);
+    ScalarFunction(const Expression<tribool>& e, const List< Variable<Real> >& s);
     ScalarFunction(const Polynomial<Real>& p);
 
     ScalarFunction(ScalarFunctionInterface* fptr) : _ptr(fptr) { }
@@ -168,7 +181,23 @@ class VectorFunction
     const VectorFunctionInterface* pointer() const { return this->_ptr.operator->(); }
 
     VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s);
-    VectorFunction(const Space<Real>& rs, const Map<RealVariable,RealExpression>& e, const Space<Real>& as);
+    VectorFunction(const List<ExtendedRealVariable>& rs, const Map<ExtendedRealVariable,RealExpression>& e, const List<RealVariable>& as);
+
+    VectorFunction(const List<RealVariable>& rv,
+                   const List<RealAssignment>& eq,
+                   const List<RealVariable>& av);
+
+    VectorFunction(const List<ExtendedRealVariable>& rv,
+                   const List<ExtendedRealAssignment>& eq,
+                   const List<RealVariable>& av);
+
+    VectorFunction(const List<DottedRealVariable>& rv,
+                   const List<DottedRealAssignment>& eq,
+                   const List<RealVariable>& av);
+
+    VectorFunction(const List<PrimedRealVariable>& rv,
+                   const List<PrimedRealAssignment>& eq,
+                   const List<RealVariable>& av);
 
     ScalarFunction operator[](Nat i) const;
     ScalarFunction& operator[](Nat i);
@@ -237,6 +266,17 @@ VectorFunction compose(const VectorFunction& f, const VectorFunction& g);
 ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f);
 
 inline std::ostream& operator<<(std::ostream& os, const VectorFunction& f) { return f.write(os); }
+
+
+
+
+class ScalarAffineFunction
+    : public ScalarFunction
+{
+  public:
+    //! \brief Construct the affine function \f$f(x)=\sum a_ix_i+b\f$.
+    ScalarAffineFunction(const Vector<Real>& a, const Real& b);
+};
 
 
 class IdentityFunction

@@ -243,6 +243,21 @@ struct from_python< Ariadne::array<T> > {
 };
 
 template<class T>
+struct from_python< Ariadne::List<T> > {
+    from_python() {
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< List<T> >()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
+        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
+        List<T> l; l.reserve(len(lst)); for(int i=0; i!=len(lst); ++i) { l.append(boost::python::extract<T>(lst[i])); }
+        void* storage = ((boost::python::converter::rvalue_from_python_storage< array<T> >*)data)->storage.bytes;
+        new (storage) List<T>(l);
+        data->convertible = storage;
+    }
+};
+
+template<class T>
 struct from_python_list< Ariadne::array<T> > {
     from_python_list() {
         boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< array<T> >()); }

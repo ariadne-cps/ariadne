@@ -257,6 +257,7 @@ template<class R> std::ostream& operator<<(std::ostream&, const ExpressionInterf
 
 
 
+typedef ExtendedVariable<Real> ExtendedRealVariable;
 typedef DottedVariable<Real> DottedRealVariable;
 typedef PrimedVariable<Real> PrimedRealVariable;
 typedef PrimedVariable<String> PrimedStringVariable;
@@ -276,6 +277,9 @@ typedef Assignment<DottedRealVariable,RealExpression> RealDynamic;
 typedef Assignment<RealVariable,RealExpression> RealAlgebraicAssignment;
 typedef Assignment<PrimedRealVariable,RealExpression> RealUpdateAssignment;
 typedef Assignment<DottedRealVariable,RealExpression> RealDifferentialAssignment;
+typedef Assignment<ExtendedRealVariable,RealExpression> ExtendedRealAssignment;
+typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
+typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
 
 
 

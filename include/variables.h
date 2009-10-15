@@ -123,7 +123,7 @@ inline std::ostream& UntypedVariable::write(std::ostream& os) const {
         case dotted: os << "dot("<<this->name()<<")"; break;
         case primed: os << "next("<<this->name()<<")"; break;
     }
-    os << ":" << name(this->_type);
+    //os << ":" << name(this->_type);
     return os;
 }
 
@@ -194,12 +194,6 @@ template<class T> class PrimedVariable
 template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {
     return PrimedVariable<T>(var); }
 
-inline std::ostream& operator<<(std::ostream& os, const Variable<EnumeratedValue>& v) { return os << v.name() << ":Enumerated"; }
-inline std::ostream& operator<<(std::ostream& os, const Variable<String>& v) { return os << v.name() << ":String"; }
-inline std::ostream& operator<<(std::ostream& os, const Variable<Integer>& v) { return os << v.name() << ":Integer"; }
-inline std::ostream& operator<<(std::ostream& os, const Variable<Real>& v) { return os << v.name() << ":Real"; }
-inline std::ostream& operator<<(std::ostream& os, const Variable<Boolean>& v) { return os << v.name() << ":Boolean"; }
-inline std::ostream& operator<<(std::ostream& os, const Variable<Tribool>& v) { return os << v.name() << ":Tribool"; }
 
 
 } // namespace Ariadne

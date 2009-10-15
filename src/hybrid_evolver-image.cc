@@ -442,6 +442,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Compute initially active guards
     std::map<DiscreteEvent,tribool> initially_active_events;
+    ARIADNE_LOG(9,"computing_initially_active_events...\n");
     this->compute_initially_active_events(initially_active_events, guards, set_model);
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
 
@@ -485,7 +486,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model);
 
     for(uint i=0; i!=flow_set_model.size(); ++i) {
-        if(flow_set_model[i].error()<0) {
+        if(flow_set_model[i].error()<0.0) {
             std::cerr<<flow_set_model<<std::endl;
         }
     }
@@ -532,7 +533,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     if(blocking_events.size()!=1 && blocking_time_model.range().upper()>SMALL_RELATIVE_TIME) {
         blocking_events.clear();
         blocking_events.insert(finishing_event);
-        if(blocking_time_model.range().lower()>0) {
+        if(blocking_time_model.range().lower()>0.0) {
             blocking_time_model-=blocking_time_model.error();
             blocking_time_model.set_error(0.0);
         }
@@ -544,9 +545,9 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Treat non-transverse urgent events as non-urgent in upper semantics
     for(std::set<DiscreteEvent>::const_iterator iter=non_transverse_events.begin(); iter!=non_transverse_events.end(); ++iter) {
-        if(*iter > 0) {     // If the event is a transition
+        if(system.has_transition(*iter,location)) {    // If the event is a transition
             activations[*iter]=guards.find(*iter)->second;
-       }
+        }
     }
 
     // Compute activation times
@@ -591,7 +592,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
             } else if(event==final_time_event) {
                 final_sets.adjoin(make_pair(location,evolved_set_model));
-            } else if(event>=0) { // not an invariant
+            } else if(system.has_transition(event,location)) { // not an invariant
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 const DiscreteTransition& transition=system.transition(event,location);
                 SetModelType jump_set_model=apply(transition.reset(),evolved_set_model);
@@ -652,7 +653,7 @@ Interval ImageSetHybridEvolver::
 normal_derivative(ScalarFunction guard, const FlowSetModelType& flow_set_model, const TimeModelType& crossing_time_model) const
 {
     typedef TimeModelType GuardValueModelType;
-    GuardValueModelType guard_flow_set_model=apply(guard,flow_set_model)[0];
+    GuardValueModelType guard_flow_set_model=apply(guard,flow_set_model);
     Interval normal_derivative=jacobian2_range(guard_flow_set_model);
     return normal_derivative;
 }
@@ -734,8 +735,8 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
             try {
                 crossing_time_model=this->_toolbox->scaled_crossing_time(vector_guard,flow_set_model);
                 normal_derivative=this->normal_derivative(guard,flow_set_model,crossing_time_model);
-                assert(normal_derivative.lower()>0 || normal_derivative.upper()<0);
-                if(normal_derivative.lower()>0) {
+                ARIADNE_ASSERT(normal_derivative.lower()>0.0 || normal_derivative.upper()<0.0);
+                if(normal_derivative.lower()>0.0) {
                     ARIADNE_LOG(3,"Event "<<event<<" inserted into blocking times.\n");
                     event_blocking_times[event]=crossing_time_model;
                 }
@@ -747,7 +748,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
                 TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
                 // Use 1.0 as upper bound above since flow set model has time interval normalised to [-1,+1]
                 ARIADNE_LOG(3,"touching_time_interval="<<touching_time_interval<<"\n");
-                if(touching_time_interval.upper()>=0 && touching_time_interval.lower()<=1.0) {
+                if(touching_time_interval.upper()>=0.0 && touching_time_interval.lower()<=1.0) {
                     SetModelType finishing_set_model=partial_evaluate(flow_set_model.models(),dimension,1.0);
                     tribool finishing_set_active=this->_toolbox->active(guard,finishing_set_model);
                     if(definitely(finishing_set_active)) {

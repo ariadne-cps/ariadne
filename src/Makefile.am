@@ -39,6 +39,7 @@ SRC = \
 	hybrid_set.cc \
 	geometry.cc \
 	hybrid_automaton.cc \
+	hybrid_simulator.cc \
 	hybrid_system.cc \
 	orbit.cc \
 	map_evolver.cc \
@@ -46,7 +47,6 @@ SRC = \
 	hybrid_evolver-stable.cc \
 	hybrid_evolver-image.cc \
 	hybrid_evolver-constrained.cc \
-	hybrid_simulator.cc \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \
@@ -66,9 +66,8 @@ CALCULUS_SRC = \
 	taylor_calculus.cc
 
 #	hybrid_simulator.cc
+#	hybrid_system.cc 
 
-#	taylor_model.cc
-#	taylor_set.cc
 
 lib_LTLIBRARIES = libariadne.la libcalculus.la
 libariadne_la_SOURCES = $(SRC)

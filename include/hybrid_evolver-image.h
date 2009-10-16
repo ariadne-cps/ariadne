@@ -52,7 +52,7 @@ template<class Sys, class BS> class Evolver;
 
 class VectorTaylorFunction;
 class TaylorSet;
-class HybridAutomaton;
+class MonolithicHybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
@@ -70,7 +70,7 @@ class DiscreteEvent;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class ImageSetHybridEvolver
-    : public EvolverBase<HybridAutomaton,HybridTaylorSet>
+    : public EvolverBase<MonolithicHybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
     typedef ScalarFunction ScalarFunctionType;
@@ -86,11 +86,11 @@ class ImageSetHybridEvolver
     typedef TaylorSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
+    typedef MonolithicHybridAutomaton SystemType;
     typedef TaylorSet ContinuousEnclosureType;
     typedef HybridBasicSet<TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;

@@ -51,7 +51,7 @@ class TestReachabilityAnalysis
 {  
 
     HybridReachabilityAnalyser analyser;
-    HybridAutomaton system;
+    MonolithicHybridAutomaton system;
     Grid grid;
     Interval bound;
     HybridImageSet initial_set;
@@ -70,7 +70,7 @@ class TestReachabilityAnalysis
     
         Grid grid(2);
         HybridEvolver evolver(parameters);
-        EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver_interface
+        EvolverInterface<MonolithicHybridAutomaton,HybridEnclosureType>& evolver_interface
             =evolver;
         //HybridDiscretiser<EnclosureType> discretiser(evolver);
         HybridReachabilityAnalyser analyser(parameters,evolver_interface);

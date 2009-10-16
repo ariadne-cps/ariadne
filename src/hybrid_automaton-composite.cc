@@ -40,15 +40,15 @@ class HybridSet {};
 
 
 uint
-DiscreteMode::
+AtomicDiscreteMode::
 dimension() const
 {
     return this->_dynamic.argument_size();
 }
 
 
-DiscreteMode::
-DiscreteMode(DiscreteState location,
+AtomicDiscreteMode::
+AtomicDiscreteMode(DiscreteState location,
              const VectorFunction& dynamic)
     :  _location(location), _dynamic(dynamic), _invariants(), _grid(new Grid(dynamic.argument_size()))
 {
@@ -56,8 +56,8 @@ DiscreteMode(DiscreteState location,
 
 
 /*
-DiscreteMode::
-DiscreteMode(DiscreteState location,
+AtomicDiscreteMode::
+AtomicDiscreteMode(DiscreteState location,
              const boost::shared_ptr< const VectorFunction > dynamic,
              const std::map< DiscreteEvent, boost::shared_ptr< const VectorFunction > >& invariants)
     :  _location(location), _dynamic(dynamic), _invariants(invariants), _grid(new Grid(dynamic->argument_size()))
@@ -72,10 +72,10 @@ DiscreteMode(DiscreteState location,
 
 
 std::ostream&
-DiscreteMode::write(std::ostream& os) const
+AtomicDiscreteMode::write(std::ostream& os) const
 {
-    const DiscreteMode& mode=*this;
-    os << "DiscreteMode( "
+    const AtomicDiscreteMode& mode=*this;
+    os << "AtomicDiscreteMode( "
        << "location=" << mode.location() << ", ";
     if(mode._algebraic_assignments.size()>0) {
         os << "algebraic_equations="<<mode._algebraic_assignments<<", "; }
@@ -90,10 +90,10 @@ DiscreteMode::write(std::ostream& os) const
 
 
 
-DiscreteTransition::
-DiscreteTransition(DiscreteEvent event,
-                   const DiscreteMode& source,
-                   const DiscreteMode& target,
+AtomicDiscreteTransition::
+AtomicDiscreteTransition(DiscreteEvent event,
+                   const AtomicDiscreteMode& source,
+                   const AtomicDiscreteMode& target,
                    const VectorFunction& reset,
                    const ScalarFunction& activation,
                    bool forced)
@@ -109,10 +109,10 @@ DiscreteTransition(DiscreteEvent event,
 
 
 std::ostream&
-DiscreteTransition::write(std::ostream& os) const
+AtomicDiscreteTransition::write(std::ostream& os) const
 {
-    const DiscreteTransition& transition=*this;
-    return os << "DiscreteTransition( "
+    const AtomicDiscreteTransition& transition=*this;
+    return os << "AtomicDiscreteTransition( "
               << "event=" << transition.event() << ", "
               << "source=" << transition.source().location() << ", "
               << "target=" << transition.target().location() << ", "
@@ -126,15 +126,15 @@ DiscreteTransition::write(std::ostream& os) const
 
 
 
-HybridAutomaton::~HybridAutomaton()
+AtomicHybridAutomaton::~AtomicHybridAutomaton()
 {
 }
 
-HybridAutomaton::HybridAutomaton()
+AtomicHybridAutomaton::AtomicHybridAutomaton()
 {
 }
 
-HybridAutomaton::HybridAutomaton(const std::string& name)
+AtomicHybridAutomaton::AtomicHybridAutomaton(const std::string& name)
     : _name(name)
 {
 }
@@ -143,8 +143,8 @@ HybridAutomaton::HybridAutomaton(const std::string& name)
 
 
 
-const DiscreteMode&
-HybridAutomaton::new_mode(DiscreteState location,
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::new_mode(DiscreteState location,
                           const List<RealAlgebraicAssignment>& equations,
                           const List<RealDifferentialAssignment>& dynamic)
 {
@@ -162,7 +162,7 @@ HybridAutomaton::new_mode(DiscreteState location,
     for(uint i=0; i!=equations.size(); ++i) {
         if(defined_variables.contains(equations[i].lhs.name())) {
             std::cerr<<defined_variables,equations[i].lhs.name();
-            ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_mode",
+            ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_mode",
                           "Variable "<<equations[i].lhs<<" is defined twice by the algebraic equations "<<equations<<" for mode "<<location);
         }
         auxiliary_space.append(equations[i].lhs);
@@ -172,7 +172,7 @@ HybridAutomaton::new_mode(DiscreteState location,
     // Compute the state variables ordered by the given differential equations
     for(uint i=0; i!=dynamic.size(); ++i) {
         if(defined_variables.contains(dynamic[i].lhs.base().name())) {
-            ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_mode",
+            ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_mode",
                           "Variable "<<dynamic[i].lhs.base()<<" is defined by the differential equations "<<dynamic<<" for mode "<<location<<" is already defined");
         }
         state_space.append(dynamic[i].lhs.base());
@@ -189,7 +189,7 @@ HybridAutomaton::new_mode(DiscreteState location,
     }
 
     // TODO: Compute function
-    DiscreteMode new_mode=DiscreteMode(location,VectorFunction(1,1));
+    AtomicDiscreteMode new_mode=AtomicDiscreteMode(location,VectorFunction(1,1));
 
     new_mode._state_space=state_space;
     new_mode._auxiliary_space=auxiliary_space;
@@ -201,15 +201,15 @@ HybridAutomaton::new_mode(DiscreteState location,
     return this->mode(location);
 }
 
-const DiscreteMode&
-HybridAutomaton::new_mode(DiscreteState location,
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::new_mode(DiscreteState location,
                           const List<RealDifferentialAssignment>& dynamic)
 {
     return this->new_mode(location,List<RealAlgebraicAssignment>(),dynamic);
 }
 
-const DiscreteMode&
-HybridAutomaton::new_mode(DiscreteState location,
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::new_mode(DiscreteState location,
                           const List<RealAlgebraicAssignment>& equations)
 {
     return this->new_mode(location,equations,List<RealDifferentialAssignment>());
@@ -217,43 +217,43 @@ HybridAutomaton::new_mode(DiscreteState location,
 
 
 
-const DiscreteMode&
-HybridAutomaton::new_invariant(DiscreteState location,
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::new_invariant(DiscreteState location,
                                DiscreteEvent action,
                                const ContinuousPredicate& constraint)
 {
-    DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
+    AtomicDiscreteMode& mode=const_cast<AtomicDiscreteMode&>(this->mode(location));
     mode._invariant_predicates.insert(make_pair(action,constraint));
     return mode;
 }
 
 
-const DiscreteTransition&
-HybridAutomaton::new_transition(DiscreteState source,
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::new_transition(DiscreteState source,
                                 DiscreteEvent event,
                                 DiscreteState target,
                                 const List<RealUpdateAssignment>& reset,
                                 const ContinuousPredicate& guard)
 {
-    DiscreteMode& source_mode=const_cast<DiscreteMode&>(this->mode(source)); // Non-constant since we may wish to update input variables
-    const DiscreteMode& target_mode=this->mode(target);
+    AtomicDiscreteMode& source_mode=const_cast<AtomicDiscreteMode&>(this->mode(source)); // Non-constant since we may wish to update input variables
+    const AtomicDiscreteMode& target_mode=this->mode(target);
     RealSpace target_state_space=this->mode(target)._state_space;
     RealSpace target_auxiliary_space=this->mode(target)._auxiliary_space;
     Set<String> updated_variables;
     Set<String> argument_variables;
     for(uint i=0; i!=reset.size(); ++i) {
         if(!target_state_space.contains(reset[i].lhs.base())) {
-            ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_transition",
+            ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_transition",
                           "reset "<<reset<<" specifies variable "<<reset[i].lhs.base().name()<<
                           " which is not a state variable of the target location "<<target);
         }
         if(target_auxiliary_space.contains(reset[i].lhs.base())) {
-            ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_transition",
+            ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_transition",
                           "reset "<<reset<<" specifies variable "<<reset[i].lhs.base().name()<<
                           " which is already specified by the algebraic equations valid in "<<target);
         }
         if(updated_variables.contains(reset[i].lhs.base().name())) {
-            ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_transition",
+            ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_transition",
                           "reset "<<reset<<" specifies variable "<<reset[i].lhs.base().name()<<" twice.");
         } else {
             updated_variables.insert(reset[i].lhs.base().name());
@@ -269,7 +269,7 @@ HybridAutomaton::new_transition(DiscreteState source,
 
     VectorFunction reset_function(1,1);
     ScalarFunction guard_function(1);
-    DiscreteTransition new_transition=DiscreteTransition(event,source_mode,target_mode,reset_function,guard_function,permissive);
+    AtomicDiscreteTransition new_transition=AtomicDiscreteTransition(event,source_mode,target_mode,reset_function,guard_function,permissive);
     new_transition._update_assignments=reset;
     new_transition._guard_predicate=guard;
     this->_transitions.insert(new_transition);
@@ -277,8 +277,8 @@ HybridAutomaton::new_transition(DiscreteState source,
 }
 
 
-const DiscreteTransition&
-HybridAutomaton::new_transition(DiscreteState source,
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::new_transition(DiscreteState source,
                                 DiscreteEvent event,
                                 DiscreteState target,
                                 const ContinuousPredicate& guard)
@@ -287,34 +287,34 @@ HybridAutomaton::new_transition(DiscreteState source,
 }
 
 
-const DiscreteMode&
-HybridAutomaton::new_mode(DiscreteState location,
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::new_mode(DiscreteState location,
                           const VectorFunction& dynamic)
 {
     if(this->has_mode(location)) {
         throw std::runtime_error("The hybrid automaton already has a mode with the given id");
     }
     if(dynamic.result_size()!=dynamic.argument_size()) {
-        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_mode(location,dynamic)",
+        ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_mode(location,dynamic)",
             "The dynamic has argument size " << dynamic.argument_size()
                 << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
     }
-    this->_modes.insert(DiscreteMode(location,dynamic));
+    this->_modes.insert(AtomicDiscreteMode(location,dynamic));
     return this->mode(location);
 }
 
 
-const DiscreteMode&
-HybridAutomaton::new_invariant(DiscreteState location,
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::new_invariant(DiscreteState location,
                                const ScalarFunction& invariant)
 {
     ARIADNE_ASSERT(location>0);
     if(!this->has_mode(location)) {
         throw std::runtime_error("The location of the invariant must be in the automaton.");
     }
-    DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
+    AtomicDiscreteMode& mode=const_cast<AtomicDiscreteMode&>(this->mode(location));
     if(invariant.argument_size()!=mode.dimension()) {
-        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_invariant(location,invariant)",
+        ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_invariant(location,invariant)",
             "The invariant has argument size " << invariant.argument_size()
                 << " but the mode has state-space dimension " << mode.dimension());
     }
@@ -324,12 +324,12 @@ HybridAutomaton::new_invariant(DiscreteState location,
 }
 
 
-const DiscreteMode&
-HybridAutomaton::new_invariant(DiscreteState location,
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::new_invariant(DiscreteState location,
                                const VectorFunction& invariant)
 {
     if(invariant.result_size()!=1u) {
-        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_invariant(location,invariant)",
+        ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_invariant(location,invariant)",
             "The invariant has result size " << invariant.result_size()
                 << " but only scalar invariants are currently supported.");
     }
@@ -337,8 +337,8 @@ HybridAutomaton::new_invariant(DiscreteState location,
 }
 
 
-const DiscreteTransition&
-HybridAutomaton::new_transition(const DiscreteEvent event_id,
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::new_transition(const DiscreteEvent event_id,
                                 const DiscreteState source_id,
                                 const DiscreteState target_id,
                                 const VectorFunction& reset,
@@ -356,16 +356,16 @@ HybridAutomaton::new_transition(const DiscreteEvent event_id,
         throw std::runtime_error("The desitination mode of the transition must be in the automaton");
     }
 
-    const DiscreteMode& this_source=this->mode(source_id);
-    const DiscreteMode& this_target=this->mode(target_id);
+    const AtomicDiscreteMode& this_source=this->mode(source_id);
+    const AtomicDiscreteMode& this_target=this->mode(target_id);
 
-    this->_transitions.insert(DiscreteTransition(event_id,this_source,this_target,reset,activation,forced));
+    this->_transitions.insert(AtomicDiscreteTransition(event_id,this_source,this_target,reset,activation,forced));
     return this->transition(event_id,source_id);
 }
 
 
-const DiscreteTransition&
-HybridAutomaton::
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::
 new_transition(DiscreteEvent event,
                DiscreteState source,
                DiscreteState target,
@@ -374,7 +374,7 @@ new_transition(DiscreteEvent event,
                bool forced)
 {
     if(activation.result_size()!=1u) {
-        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_transition(...)",
+        ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_transition(...)",
             "The activation function has result size " << activation.result_size()
                 << " but only scalar activations are currently supported.");
     }
@@ -382,8 +382,8 @@ new_transition(DiscreteEvent event,
 }
 
 
-const DiscreteTransition&
-HybridAutomaton::
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::
 new_forced_transition(DiscreteEvent event,
                       DiscreteState source,
                       DiscreteState target,
@@ -401,20 +401,20 @@ new_forced_transition(DiscreteEvent event,
         throw std::runtime_error("The automaton does not contain a mode with ths given desitination id");
     }
     if(activation.result_size()!=1u) {
-        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_transition(...)",
+        ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_transition(...)",
             "The activation function has result size " << activation.result_size()
                 << " but only scalar activations are currently supported.");
     }
 
-    const DiscreteMode& source_mode=this->mode(source);
-    const DiscreteMode& target_mode=this->mode(target);
-    this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation[0],true));
+    const AtomicDiscreteMode& source_mode=this->mode(source);
+    const AtomicDiscreteMode& target_mode=this->mode(target);
+    this->_transitions.insert(AtomicDiscreteTransition(event,source_mode,target_mode,reset,activation[0],true));
     return this->transition(event,source);
 }
 
 
-const DiscreteTransition&
-HybridAutomaton::
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::
 new_unforced_transition(DiscreteEvent event,
                         DiscreteState source,
                         DiscreteState target,
@@ -432,26 +432,26 @@ new_unforced_transition(DiscreteEvent event,
         throw std::runtime_error("The automaton does not contain a mode with ths given desitination id");
     }
     if(activation.result_size()!=1u) {
-        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_transition(...)",
+        ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::new_transition(...)",
             "The activation function has result size " << activation.result_size()
                 << " but only scalar activations are currently supported.");
     }
 
-    const DiscreteMode& source_mode=this->mode(source);
-    const DiscreteMode& target_mode=this->mode(target);
-    this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation[0],false));
+    const AtomicDiscreteMode& source_mode=this->mode(source);
+    const AtomicDiscreteMode& target_mode=this->mode(target);
+    this->_transitions.insert(AtomicDiscreteTransition(event,source_mode,target_mode,reset,activation[0],false));
     return this->transition(event,source);
 }
 
 
 void
-HybridAutomaton::set_grid(DiscreteState location,
+AtomicHybridAutomaton::set_grid(DiscreteState location,
                           const Grid& grid)
 {
     if(!this->has_mode(location)) {
         throw std::runtime_error("The automaton does not contain a mode with ths given location id");
     }
-    DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
+    AtomicDiscreteMode& mode=const_cast<AtomicDiscreteMode&>(this->mode(location));
     if(grid.dimension()!=mode.dimension()) {
         throw std::runtime_error("The mode of the automaton has a different dimension to the grid.");
     }
@@ -459,12 +459,12 @@ HybridAutomaton::set_grid(DiscreteState location,
 }
 
 void
-HybridAutomaton::set_grid(const Grid& grid)
+AtomicHybridAutomaton::set_grid(const Grid& grid)
 {
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
         mode_iter!=this->_modes.end(); ++mode_iter)
     {
-        DiscreteMode& mode=const_cast<DiscreteMode&>(*mode_iter);
+        AtomicDiscreteMode& mode=const_cast<AtomicDiscreteMode&>(*mode_iter);
         if(grid.dimension()!=mode.dimension()) {
             throw std::runtime_error("The automaton has a different dimension to the grid.");
         }
@@ -473,12 +473,12 @@ HybridAutomaton::set_grid(const Grid& grid)
 }
 
 void
-HybridAutomaton::set_grid(const HybridGrid& hgrid)
+AtomicHybridAutomaton::set_grid(const HybridGrid& hgrid)
 {
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
         mode_iter!=this->_modes.end(); ++mode_iter)
     {
-        DiscreteMode& mode=const_cast<DiscreteMode&>(*mode_iter);
+        AtomicDiscreteMode& mode=const_cast<AtomicDiscreteMode&>(*mode_iter);
         DiscreteState loc = mode.location();
         if(hgrid.find(loc) == hgrid.end()) {
             throw std::runtime_error("The automaton does not contain a mode with this given location id");
@@ -493,7 +493,7 @@ HybridAutomaton::set_grid(const HybridGrid& hgrid)
 
 
 bool
-HybridAutomaton::has_mode(DiscreteState state) const
+AtomicHybridAutomaton::has_mode(DiscreteState state) const
 {
     // FIXME: This is a hack since we use std::set which cannot be searched by id.
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -508,14 +508,14 @@ HybridAutomaton::has_mode(DiscreteState state) const
 
 
 bool
-HybridAutomaton::has_transition(DiscreteEvent event, DiscreteState source) const
+AtomicHybridAutomaton::has_transition(DiscreteEvent event, DiscreteState source) const
 {
    return this->has_transition(source,event);
 }
 
 
 bool
-HybridAutomaton::has_transition(DiscreteState source, DiscreteEvent event) const
+AtomicHybridAutomaton::has_transition(DiscreteState source, DiscreteEvent event) const
 {
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
@@ -530,7 +530,7 @@ HybridAutomaton::has_transition(DiscreteState source, DiscreteEvent event) const
 
 
 HybridSet
-HybridAutomaton::invariant() const
+AtomicHybridAutomaton::invariant() const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -538,7 +538,7 @@ HybridAutomaton::invariant() const
 
 
 HybridSpace
-HybridAutomaton::state_space() const
+AtomicHybridAutomaton::state_space() const
 {
     HybridSpace result;
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -550,16 +550,16 @@ HybridAutomaton::state_space() const
 }
 
 
-const std::set< DiscreteMode >&
-HybridAutomaton::modes() const
+const std::set< AtomicDiscreteMode >&
+AtomicHybridAutomaton::modes() const
 {
     return this->_modes;
 }
 
 
 
-const DiscreteMode&
-HybridAutomaton::mode(DiscreteState state) const
+const AtomicDiscreteMode&
+AtomicHybridAutomaton::mode(DiscreteState state) const
 {
     // FIXME: This is a hack; we should use a logarithmic time real search to find a mode with the given discrete state.
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -569,22 +569,22 @@ HybridAutomaton::mode(DiscreteState state) const
                 return *mode_iter;
             }
         }
-    ARIADNE_THROW(std::runtime_error,"HybridAutomaton::mode(DiscreteState)",state<<" is not a location of the automaton with modes "<<this->modes());
+    ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::mode(DiscreteState)",state<<" is not a location of the automaton with modes "<<this->modes());
 }
 
 
-const std::set< DiscreteTransition >&
-HybridAutomaton::transitions() const
+const std::set< AtomicDiscreteTransition >&
+AtomicHybridAutomaton::transitions() const
 {
     return this->_transitions;
 }
 
 
 
-std::set< DiscreteTransition >
-HybridAutomaton::transitions(DiscreteState source) const
+std::set< AtomicDiscreteTransition >
+AtomicHybridAutomaton::transitions(DiscreteState source) const
 {
-    std::set< DiscreteTransition > result;
+    std::set< AtomicDiscreteTransition > result;
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
@@ -597,10 +597,10 @@ HybridAutomaton::transitions(DiscreteState source) const
 
 
 std::map<DiscreteEvent,ScalarFunction>
-HybridAutomaton::blocking_guards(DiscreteState source) const
+AtomicHybridAutomaton::blocking_guards(DiscreteState source) const
 {
     std::map<DiscreteEvent,ScalarFunction> result;
-    const DiscreteMode& mode=this->mode(source);
+    const AtomicDiscreteMode& mode=this->mode(source);
     for(invariant_const_iterator invariant_iter=mode._invariants.begin();
         invariant_iter!=mode._invariants.end(); ++invariant_iter)
     {
@@ -623,7 +623,7 @@ HybridAutomaton::blocking_guards(DiscreteState source) const
 
 
 std::map<DiscreteEvent,ScalarFunction>
-HybridAutomaton::permissive_guards(DiscreteState source) const
+AtomicHybridAutomaton::permissive_guards(DiscreteState source) const
 {
     std::map<DiscreteEvent,ScalarFunction> result;
 
@@ -642,15 +642,15 @@ HybridAutomaton::permissive_guards(DiscreteState source) const
 
 
 
-const DiscreteTransition&
-HybridAutomaton::transition(DiscreteEvent event, DiscreteState source) const
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::transition(DiscreteEvent event, DiscreteState source) const
 {
     return this->transition(source,event);
 }
 
 
-const DiscreteTransition&
-HybridAutomaton::transition(DiscreteState source, DiscreteEvent event) const
+const AtomicDiscreteTransition&
+AtomicHybridAutomaton::transition(DiscreteState source, DiscreteEvent event) const
 {
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
@@ -659,27 +659,27 @@ HybridAutomaton::transition(DiscreteState source, DiscreteEvent event) const
             return *transition_iter;
         }
     }
-    ARIADNE_THROW(std::runtime_error,"HybridAutomaton::transition(DiscreteEvent,DiscreteState)",
+    ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::transition(DiscreteEvent,DiscreteState)",
                   "Transition ("<<event<<","<<source<<") is not in the hybrid automaton with transitions "<<this->transitions());
 }
 
 
 const std::string&
-HybridAutomaton::name() const
+AtomicHybridAutomaton::name() const
 {
     return this->_name;
 }
 
 Grid
-HybridAutomaton::grid(DiscreteState location) const
+AtomicHybridAutomaton::grid(DiscreteState location) const
 {
     ARIADNE_ASSERT(this->has_mode(location));
-    const DiscreteMode& mode=this->mode(location);
+    const AtomicDiscreteMode& mode=this->mode(location);
     return Grid(mode.dimension());
 }
 
 HybridGrid
-HybridAutomaton::grid() const
+AtomicHybridAutomaton::grid() const
 {
     HybridGrid result;
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -691,17 +691,17 @@ HybridAutomaton::grid() const
 }
 
 std::ostream&
-HybridAutomaton::write(std::ostream& os) const
+AtomicHybridAutomaton::write(std::ostream& os) const
 {
-    const HybridAutomaton& ha=*this;
+    const AtomicHybridAutomaton& ha=*this;
     os << "\nHybridAutomaton( \n  modes=\n";
-    for(HybridAutomaton::mode_const_iterator mode_iter=ha.modes().begin();
+    for(AtomicHybridAutomaton::mode_const_iterator mode_iter=ha.modes().begin();
         mode_iter!=ha.modes().end(); ++mode_iter)
     {
         os << "    " <<*mode_iter<<",\n";
     }
     os << "  transitions=\n";
-    for(HybridAutomaton::transition_const_iterator transition_iter=ha.transitions().begin();
+    for(AtomicHybridAutomaton::transition_const_iterator transition_iter=ha.transitions().begin();
         transition_iter!=ha.transitions().end(); ++transition_iter)
     {
         os << "    " <<*transition_iter<<",\n";
@@ -712,14 +712,14 @@ HybridAutomaton::write(std::ostream& os) const
 
 
 DiscreteState
-HybridAutomaton::target(const DiscreteEvent& event, const DiscreteState& source) {
+AtomicHybridAutomaton::target(const DiscreteEvent& event, const DiscreteState& source) {
     return this->transition(event,source).target().location();
 }
 
 List<RealVariable>
-HybridAutomaton::state_variables(DiscreteState location) const {
+AtomicHybridAutomaton::state_variables(DiscreteState location) const {
     List<RealVariable> result;
-    const DiscreteMode& mode=this->mode(location);
+    const AtomicDiscreteMode& mode=this->mode(location);
     for(uint i=0; i!=mode._differential_assignments.size(); ++i) {
         result.append(mode._differential_assignments[i].lhs.base());
     }
@@ -727,9 +727,9 @@ HybridAutomaton::state_variables(DiscreteState location) const {
 }
 
 List<RealVariable>
-HybridAutomaton::auxiliary_variables(DiscreteState location) const {
+AtomicHybridAutomaton::auxiliary_variables(DiscreteState location) const {
     List<RealVariable> result;
-    const DiscreteMode& mode=this->mode(location);
+    const AtomicDiscreteMode& mode=this->mode(location);
     for(uint i=0; i!=mode._algebraic_assignments.size(); ++i) {
         result.append(mode._algebraic_assignments[i].lhs);
     }
@@ -738,32 +738,32 @@ HybridAutomaton::auxiliary_variables(DiscreteState location) const {
 
 
 List<RealAssignment>
-HybridAutomaton::algebraic_assignments(const DiscreteState& location) const {
+AtomicHybridAutomaton::algebraic_assignments(const DiscreteState& location) const {
     return this->mode(location)._algebraic_assignments;
 }
 
 List<DottedRealAssignment>
-HybridAutomaton::differential_assignments(const DiscreteState& location) const {
+AtomicHybridAutomaton::differential_assignments(const DiscreteState& location) const {
     return this->mode(location)._differential_assignments;
 }
 
 List<PrimedRealAssignment>
-HybridAutomaton::update_assignments(const DiscreteState& source, const DiscreteEvent& event) const {
+AtomicHybridAutomaton::update_assignments(const DiscreteState& source, const DiscreteEvent& event) const {
     return this->transition(event,source)._update_assignments;
 }
 
 Map<DiscreteEvent,ContinuousPredicate>
-HybridAutomaton::invariant_predicates(const DiscreteState& location) const {
+AtomicHybridAutomaton::invariant_predicates(const DiscreteState& location) const {
     return this->mode(location)._invariant_predicates;
 }
 
 ContinuousPredicate
-HybridAutomaton::invariant_predicate(const DiscreteState& location, const DiscreteEvent& action) const {
+AtomicHybridAutomaton::invariant_predicate(const DiscreteState& location, const DiscreteEvent& action) const {
     return this->mode(location)._invariant_predicates[action];
 }
 
 ContinuousPredicate
-HybridAutomaton::guard_predicate(const DiscreteState& source, const DiscreteEvent& event) const {
+AtomicHybridAutomaton::guard_predicate(const DiscreteState& source, const DiscreteEvent& event) const {
     return this->transition(event,source)._guard_predicate;
 }
 
@@ -772,10 +772,10 @@ HybridAutomaton::guard_predicate(const DiscreteState& source, const DiscreteEven
 
 
 
-CompositeHybridAutomaton::CompositeHybridAutomaton(const HybridAutomaton& automaton)
+CompositeHybridAutomaton::CompositeHybridAutomaton(const AtomicHybridAutomaton& automaton)
     : _components(1u,automaton) { }
 
-CompositeHybridAutomaton::CompositeHybridAutomaton(const List<HybridAutomaton>& components)
+CompositeHybridAutomaton::CompositeHybridAutomaton(const List<AtomicHybridAutomaton>& components)
     : _components(components) { }
 
 uint
@@ -784,7 +784,7 @@ CompositeHybridAutomaton::number_of_components() const
     return this->_components.size();
 }
 
-const HybridAutomaton&
+const AtomicHybridAutomaton&
 CompositeHybridAutomaton::component(uint k) const {
     return this->_components[k];
 }
@@ -802,28 +802,28 @@ List<PrimedRealVariable> next(const List<RealVariable>& v) {
 }
 
 
-VectorFunction 
+VectorFunction
 CompositeHybridAutomaton::output(const DiscreteLocation& location) const {
     return VectorFunction(auxiliary_variables(location),algebraic_assignments(location),state_variables(location));
 }
 
-VectorFunction 
+VectorFunction
 CompositeHybridAutomaton::dynamic(const DiscreteLocation& location) const {
     return VectorFunction(dot(state_variables(location)),differential_assignments(location),variables(location));
 }
 
-VectorFunction 
+VectorFunction
 CompositeHybridAutomaton::reset(const DiscreteLocation& source, const DiscreteEvent& event) const {
     DiscreteLocation target=this->target(source,event);
     return VectorFunction(next(state_variables(target)),update_assignments(source,event),variables(source));
 }
 
-Map<DiscreteEvent,ScalarFunction> 
+Map<DiscreteEvent,ScalarFunction>
 CompositeHybridAutomaton::invariants(const DiscreteLocation& location) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-ScalarFunction 
+ScalarFunction
 CompositeHybridAutomaton::guard(const DiscreteLocation& location, const DiscreteEvent& event) const {
     return ScalarFunction(guard_predicate(location,event),variables(location));
 }

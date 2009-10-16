@@ -117,7 +117,7 @@ int main()
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
-    HybridAutomaton multipleguards;
+    MonolithicHybridAutomaton multipleguards;
   
     /// Create the discrete states
     DiscreteState pospos(1);

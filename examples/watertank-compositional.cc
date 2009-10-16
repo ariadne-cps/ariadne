@@ -47,7 +47,7 @@ int main()
     RealVariable alpha("alpha");
 
     // Create the tank object
-    HybridAutomaton tank("tank");
+    AtomicHybridAutomaton tank("tank");
 
     // Declare a trivial discrete mode.
     DiscreteState trivial("");
@@ -74,7 +74,7 @@ int main()
     DiscreteState closed("closed");
     DiscreteState closing("closing");
 
-    HybridAutomaton valve("valve");
+    AtomicHybridAutomaton valve("valve");
 
     // Since alpha is a known constant when the valve is open or closed,
     // specify alpha by an algebraic equation.

@@ -23,7 +23,7 @@ int main()
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    HybridAutomaton sinusoid;
+    MonolithicHybridAutomaton sinusoid;
 
     /// Create the discrete state
     DiscreteState l1(1);

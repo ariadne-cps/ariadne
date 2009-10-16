@@ -69,7 +69,7 @@ HybridReachabilityAnalyser::
 
 
 HybridReachabilityAnalyser::
-HybridReachabilityAnalyser(const DiscretiserInterface<HybridAutomaton,HybridGridCell>& discretiser)
+HybridReachabilityAnalyser(const DiscretiserInterface<MonolithicHybridAutomaton,HybridGridCell>& discretiser)
     : _parameters(new EvolutionParametersType())
     , _discretiser(discretiser.clone())
 {
@@ -82,7 +82,7 @@ HybridReachabilityAnalyser(const DiscretiserInterface<HybridAutomaton,HybridGrid
 
 // Helper functions for operators on lists of sets.
 HybridGridTreeSet
-HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
+HybridReachabilityAnalyser::_upper_reach(const MonolithicHybridAutomaton& sys,
                                          const HybridGridTreeSet& set,
                                          const HybridTime& time,
                                          const int accuracy) const
@@ -99,7 +99,7 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
 
 
 HybridGridTreeSet
-HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
+HybridReachabilityAnalyser::_upper_evolve(const MonolithicHybridAutomaton& sys,
                                           const HybridGridTreeSet& set,
                                           const HybridTime& time,
                                           const int accuracy) const
@@ -116,7 +116,7 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
 
 
 std::pair<HybridGridTreeSet,HybridGridTreeSet>
-HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
+HybridReachabilityAnalyser::_upper_reach_evolve(const MonolithicHybridAutomaton& sys,
                                                 const HybridGridTreeSet& set,
                                                 const HybridTime& time,
                                                 const int accuracy) const

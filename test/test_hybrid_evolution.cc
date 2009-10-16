@@ -59,7 +59,7 @@ class TestHybridEvolution
     static const bool non_urgent=false;
     static const bool urgent=true;
   private:
-    static HybridAutomaton system();
+    static MonolithicHybridAutomaton system();
   public:
     void test() const;
     void test_constant_derivative_system() const;
@@ -67,7 +67,7 @@ class TestHybridEvolution
     void test_affine_system() const;
 };
 
-HybridAutomaton
+MonolithicHybridAutomaton
 TestHybridEvolution::system()
 {
     const DiscreteState location1(1);
@@ -75,7 +75,7 @@ TestHybridEvolution::system()
     const DiscreteEvent event3(3);
     const DiscreteEvent event4(4);
 
-    HybridAutomaton automaton("Affine Hysteresis System");
+    MonolithicHybridAutomaton automaton("Affine Hysteresis System");
     double adata[]={-0.5,-1.0,1.0,-0.5};
     double bdata[]={1.0,0.0};
     Matrix<Float> A(2,2,adata);
@@ -113,7 +113,7 @@ void TestHybridEvolution::test_constant_derivative_system() const
     VectorAffineFunction r(FMatrix(2,2, 1.,0.,0.,1.),FVector(2, -2.,0.));
     VectorAffineFunction g(FMatrix(1,2, 1.,0.,0.,0.),FVector(1, -1.25));
 
-    HybridAutomaton automaton("Constant Derivative System");
+    MonolithicHybridAutomaton automaton("Constant Derivative System");
     automaton.new_mode(q1,d);
     automaton.new_mode(q2,d);
     automaton.new_transition(e,q1,q2,r,g,urgent);
@@ -178,7 +178,7 @@ void TestHybridEvolution::test_bouncing_ball() const
     VectorAffineFunction guard(FMatrix(1,2, -1.0,0.0), FVector(1, 0.0));
 
     /// Build the automaton
-    HybridAutomaton automaton;
+    MonolithicHybridAutomaton automaton;
     automaton.new_mode(q1,dynamic);
     automaton.new_mode(q2,dynamic);
     automaton.new_transition(e12,q1,q2,reset,guard,urgent);
@@ -235,7 +235,7 @@ void TestHybridEvolution::test_affine_system() const
 
 
     // Make a hybrid automaton for the Van der Pol equation
-    HybridAutomaton automaton=system();
+    MonolithicHybridAutomaton automaton=system();
     ARIADNE_TEST_PRINT(automaton);
 
     // Define the initial box
@@ -303,7 +303,7 @@ class TestHybridEvolver
     ScalarFunction x0,y0,t;
   public:
     TestHybridEvolver();
-    HybridAutomaton make_hybrid_automaton(const ScalarFunction& guard);
+    MonolithicHybridAutomaton make_hybrid_automaton(const ScalarFunction& guard);
 
     void test();
     void test_transverse_linear_crossing();
@@ -329,9 +329,9 @@ TestHybridEvolver::TestHybridEvolver()
     t=ScalarFunction::variable(3,2);
 }
 
-HybridAutomaton TestHybridEvolver::make_hybrid_automaton(const ScalarFunction& guard)
+MonolithicHybridAutomaton TestHybridEvolver::make_hybrid_automaton(const ScalarFunction& guard)
 {
-    HybridAutomaton system;
+    MonolithicHybridAutomaton system;
     system.new_mode(q1,VectorFunction(join(o,z)));
     system.new_mode(q2,VectorFunction(join(z,o)));
     system.new_transition(e,q1,q2,IdentityFunction(2),VectorFunction(1u,guard),true);
@@ -343,7 +343,7 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     Float r=1.0/8;
     Float tol=1e-5;
     ScalarFunction guard=x+y/2-1;
-    HybridAutomaton system=make_hybrid_automaton(guard);
+    MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
@@ -366,7 +366,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
     Float r=1.0/8;
     Float tol=1e-5;
     ScalarFunction guard=x-(1+y/2+y*y*y);
-    HybridAutomaton system=make_hybrid_automaton(guard);
+    MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
@@ -389,7 +389,7 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
     Float r=1.0/32;
     Float tol=1e-5;
     ScalarFunction guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
-    HybridAutomaton system=make_hybrid_automaton(guard);
+    MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);

@@ -118,8 +118,8 @@ int main()
 
     /// Builds the Hybrid System
   
-    /// Creates a HybridAutomaton object
-    HybridAutomaton balls;
+    /// Creates a MonolithicHybridAutomaton object
+    MonolithicHybridAutomaton balls;
   
     /// Creates discrete states
     DiscreteState all_on_pre12collision(1);

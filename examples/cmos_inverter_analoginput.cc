@@ -189,8 +189,8 @@ int main()
 
     /// Build the Hybrid System
 
-    /// Create a HybridAutomaton object
-    HybridAutomaton inverter;
+    /// Create a MonolithicHybridAutomaton object
+    MonolithicHybridAutomaton inverter;
 
     /// Create the discrete states
     DiscreteState nt_pl(1);

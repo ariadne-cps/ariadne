@@ -296,7 +296,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     IteratedMap system(henon);
 
     cout << "henon=" << henon << endl;
-    HybridAutomaton ha("Henon");
+    MonolithicHybridAutomaton ha("Henon");
     ha.new_mode(location,IdentityFunction(2));
     ha.new_transition(event,location,location,henon,VectorConstantFunction(Vector<Float>(1,1.0),2),true);
 

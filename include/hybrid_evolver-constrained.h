@@ -51,7 +51,7 @@ namespace Ariadne {
 template<class Sys, class ES> class Evolver;
 
 class ConstrainedImageSet;
-class HybridAutomaton;
+class MonolithicHybridAutomaton;
 
 class EvolutionParameters;
 
@@ -149,16 +149,16 @@ struct TimedHybridConstrainedImageSet : public HybridConstrainedImageSet {
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class ConstrainedImageSetHybridEvolver
-    : public EvolverBase<HybridAutomaton,HybridConstrainedImageSet>
+    : public EvolverBase<MonolithicHybridAutomaton,HybridConstrainedImageSet>
 //    , public Loggable
 {
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
+    typedef MonolithicHybridAutomaton SystemType;
     typedef TaylorSet ContinuousEnclosureType;
     typedef HybridConstrainedImageSet HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
@@ -214,7 +214,7 @@ class ConstrainedImageSetHybridEvolver
                           ListSet<HybridConstrainedImageSet>&,
                           ListSet<HybridConstrainedImageSet>&,
                           ListSet<HybridConstrainedImageSet>&,
-                          HybridAutomaton const& system,
+                          MonolithicHybridAutomaton const& system,
                           HybridTime const& maximum_time) const;
 
  private:

@@ -94,8 +94,8 @@ int main()
 
     /// Build the Hybrid System
 
-    /// Create a HybridAutomaton object
-    HybridAutomaton rectifier;
+    /// Create a MonolithicHybridAutomaton object
+    MonolithicHybridAutomaton rectifier;
 
     /// Create the discrete state
     DiscreteState running(1);

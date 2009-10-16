@@ -61,7 +61,7 @@ void build_automaton() {
 
 	int DEPTH_ADD[4] = {3,0,0,3};
 
-    /// Create a HybridAutomaton object
+    /// Create a MonolithicHybridAutomaton object
 
     /// Create the events
     DiscreteEvent chk(1); // Checks the current voltage

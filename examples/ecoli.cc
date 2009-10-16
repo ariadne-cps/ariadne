@@ -98,7 +98,7 @@ int main()
 {
     VectorUserFunction<EColi> ecoli_function(Vector<Interval>(17));
 
-    HybridAutomaton ecoli_system;
+    MonolithicHybridAutomaton ecoli_system;
     DiscreteState starvation_mode(1);
     ecoli_system.new_mode(starvation_mode,ecoli_function);
 

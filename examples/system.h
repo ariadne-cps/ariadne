@@ -28,8 +28,8 @@
 
 using namespace Ariadne;
 
-// Variables and objects that will be used to define the system 
-HybridAutomaton automaton;
+// Variables and objects that will be used to define the system
+MonolithicHybridAutomaton automaton;
 Box initial_box;
 DiscreteState initial_state;
 DiscreteState safe(1001);

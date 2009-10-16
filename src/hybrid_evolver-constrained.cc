@@ -243,7 +243,7 @@ _adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVector& subdomain
 
 Orbit<HybridConstrainedImageSet>
 ConstrainedImageSetHybridEvolver::
-orbit(const HybridAutomaton& system,
+orbit(const MonolithicHybridAutomaton& system,
       const HybridConstrainedImageSet& initial,
       const HybridTime& time,
       Semantics semantics) const
@@ -263,7 +263,7 @@ ConstrainedImageSetHybridEvolver::
 _evolution(EnclosureListType& final,
            EnclosureListType& reachable,
            EnclosureListType& intermediate,
-           HybridAutomaton const& system,
+           MonolithicHybridAutomaton const& system,
            HybridConstrainedImageSet const& initial_set,
            HybridTime const& maximum_time,
            Semantics semantics,
@@ -284,7 +284,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
                       ListSet<HybridConstrainedImageSet>& reach_sets,
                       ListSet<HybridConstrainedImageSet>& evolve_sets,
                       ListSet<HybridConstrainedImageSet>& intermediate_sets,
-                      HybridAutomaton const& system,
+                      MonolithicHybridAutomaton const& system,
                       HybridTime const& maximum_hybrid_time) const
 {
     typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;

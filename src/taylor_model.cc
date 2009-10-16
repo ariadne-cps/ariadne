@@ -3233,7 +3233,52 @@ solve(const Vector<TaylorModel>& f)
 
 TaylorModel
 implicit(const TaylorModel& f) {
-    return implicit(Vector<TaylorModel>(1u,f))[0];
+
+    // Check that the arguments are suitable
+    ARIADNE_ASSERT(f.argument_size()>1);
+
+    // Set some useful size constants
+    const uint rs=1u;
+    const uint fas=f.argument_size();
+    const uint has=fas-1u;
+
+    // Check to see if a solution exists
+    TaylorModel g=derivative(f,has);
+    Interval g_range=g.range();
+    if(g_range.lower()<=0 && g_range.upper()>=0) {
+        ARIADNE_THROW(ImplicitFunctionException,
+                      "implicit(TaylorModel)",
+                      "derivative "<<g_range<<" is not invertible");
+    }
+
+    uint number_of_steps=10;
+    Vector<TaylorModel> id=TaylorModel::variables(has);
+    //TaylorModel h=TaylorModel::constant(has,Interval(-1,+1));
+    TaylorModel h=TaylorModel::constant(has,Interval(0));
+    Vector<TaylorModel> idh=join(id,h);
+    // Perform proper Newton step improvements
+    //std::cerr<<"\nf="<<f<<"\n";
+    //std::cerr<<"g="<<g<<"\n";
+    //std::cerr<<"id="<<id<<"\n";
+    //std::cerr<<"h="<<h<<"\n";
+    for(uint i=0; i!=number_of_steps; ++i) {
+        TaylorModel& h=idh[has];
+        TaylorModel gidh=compose(g,idh);
+        h.clobber();
+        TaylorModel fidh=compose(f,idh);
+        TaylorModel dh=fidh/gidh;
+        TaylorModel nh=h-dh;
+        h=nh;
+        //std::cerr<<"fh["<<i<<"]="<<fidh<<"\n";
+        //std::cerr<<"gh["<<i<<"]="<<gidh<<"\n";
+        //std::cerr<<"dh["<<i<<"]="<<dh<<"\n";
+        //std::cerr<<"nh["<<i<<"]="<<idh[has]<<"\n";
+    }
+    //std::cerr<<"err="<<compose(f,idh)<<"\n\n";
+    //std::cerr<<"res="<<idh[has]<<"\n\n";
+    return idh[has];
+    //std::cerr<<"IMPLICIT(TaylorModel f="<<f<<")\n";
+    //return implicit(Vector<TaylorModel>(1u,f))[0];
 }
 
 

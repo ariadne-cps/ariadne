@@ -61,7 +61,7 @@ class EvolutionProfiler;
 template<class ES> class Orbit;
 
 class HybridTime;
-class HybridAutomaton;
+class MonolithicHybridAutomaton;
 
 
 
@@ -72,7 +72,7 @@ class HybridAutomaton;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class StableHybridEvolver
-    : public EvolverBase< HybridAutomaton, HybridTaylorSet>
+    : public EvolverBase< MonolithicHybridAutomaton, HybridTaylorSet>
     , public Loggable
 {
     typedef TaylorModel ModelType;
@@ -87,11 +87,11 @@ class StableHybridEvolver
     typedef TaylorSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
+    typedef MonolithicHybridAutomaton SystemType;
     typedef TaylorSet ContinuousEnclosureType;
     typedef HybridBasicSet<TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;

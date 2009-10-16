@@ -74,7 +74,7 @@ template<class k, class V> class Map;
 /*! \brief A hybrid system, comprising continuous-time behaviour
  *  at each discrete mode, coupled by instantaneous discrete transitions.
  *  The state space is given by a hybrid set.
- * \sa \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink.
+ * \sa \link Ariadne::MonolithicHybridAutomaton \c MonolithicHybridAutomaton \endlink.
 
  */
 class HybridSystem

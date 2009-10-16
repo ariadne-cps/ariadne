@@ -107,7 +107,7 @@ int main()
 
 
 {
-    HybridAutomaton watertank;
+    MonolithicHybridAutomaton watertank;
 
     const bool urgent=true;
     const bool permissive=true;

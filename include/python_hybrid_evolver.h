@@ -62,7 +62,7 @@ class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorSet;
 typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
-class HybridAutomaton;
+class MonolithicHybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
@@ -80,7 +80,7 @@ class HybridTime;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class PythonHybridEvolver
-    : public EvolverBase<HybridAutomaton,HybridTaylorSet>
+    : public EvolverBase<MonolithicHybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
     typedef VectorFunction FunctionType;
@@ -94,11 +94,11 @@ class PythonHybridEvolver
     typedef TaylorSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
+    typedef MonolithicHybridAutomaton SystemType;
     typedef TaylorSet ContinuousEnclosureType;
     typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
@@ -212,7 +212,7 @@ PythonHybridEvolver::initialise_python()
             enclosure_list_class("HybridTaylorSetList",boost::python::no_init);
         enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorSet>));
 
-        boost::python::class_<HybridAutomaton>("HybridAutomaton",boost::python::no_init);
+        boost::python::class_<MonolithicHybridAutomaton>("MonolithicHybridAutomaton",boost::python::no_init);
         boost::python::class_<EnclosureType>("HybridTaylorSet",boost::python::no_init);
         boost::python::class_<HybridTime>("HybridTime",boost::python::no_init);
         //boost::python::enum_<Semantics>("Semantics")

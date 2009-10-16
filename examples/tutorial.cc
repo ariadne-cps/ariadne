@@ -91,10 +91,10 @@ struct HeaterOff : VectorFunctionData<2,2,4> {
 };
 
 
-HybridAutomaton create_heating_system()
+MonolithicHybridAutomaton create_heating_system()
 {
     // Create a HybridAutomton object
-    HybridAutomaton heating_system;
+    MonolithicHybridAutomaton heating_system;
 
     // Set the system dynamic parameters
     Float P=4.0;
@@ -166,7 +166,7 @@ HybridEvolver create_evolver()
 }
 
 
-void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolver& evolver)
+void compute_evolution(const MonolithicHybridAutomaton& heating_system, const HybridEvolver& evolver)
 {
     // Redefine the two discrete states
     DiscreteState heater_on(1);
@@ -213,7 +213,7 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
 }
 
 
-void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridEvolver& evolver)
+void compute_reachable_sets(const MonolithicHybridAutomaton& heating_system, const HybridEvolver& evolver)
 {
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
@@ -273,7 +273,7 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
 
 
 
-void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
+void compute_reachable_sets_with_serialisation(const MonolithicHybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
 {
     // Define the initial set
     HybridImageSet initial_set;
@@ -315,7 +315,7 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
 int main()
 {
     // Create the system
-    HybridAutomaton heating_system=create_heating_system();
+    MonolithicHybridAutomaton heating_system=create_heating_system();
 
     // Create the analyser classes
     HybridEvolver evolver=create_evolver();

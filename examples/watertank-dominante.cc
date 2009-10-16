@@ -128,7 +128,7 @@ int main(int argc,char *argv[])
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
-    HybridAutomaton watertank_system;
+    MonolithicHybridAutomaton watertank_system;
   
     /// Create four discrete states
     DiscreteState l1(1);      // Zero saturated

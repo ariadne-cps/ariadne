@@ -39,7 +39,7 @@ int main()
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    HybridAutomaton ball;
+    MonolithicHybridAutomaton ball;
 
     /// Create four discrete states
     DiscreteState l1(1);
@@ -102,9 +102,9 @@ int main()
     std::cout << "Orbit="<<orbit<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-    
+
     textplot("ball-orbit.txt",orbit);
-    
+
 /*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(ball,initial_enclosure,evolution_time);

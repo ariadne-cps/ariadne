@@ -38,7 +38,8 @@ SRC = \
 	approximate_set.cc \
 	hybrid_set.cc \
 	geometry.cc \
-	hybrid_automaton.cc \
+	hybrid_automaton-monolithic.cc \
+	hybrid_automaton-composite.cc \
 	hybrid_simulator.cc \
 	hybrid_system.cc \
 	orbit.cc \
@@ -66,7 +67,7 @@ CALCULUS_SRC = \
 	taylor_calculus.cc
 
 #	hybrid_simulator.cc
-#	hybrid_system.cc 
+#	hybrid_system.cc
 
 
 lib_LTLIBRARIES = libariadne.la libcalculus.la

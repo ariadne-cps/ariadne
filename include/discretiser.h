@@ -46,7 +46,7 @@ class Grid;
 class GridCell;
 class GridTreeSet;
 
-class HybridAutomaton;
+class MonolithicHybridAutomaton;
 class DiscreteState;
 template<class BS> class HybridBasicSet;
 
@@ -129,12 +129,12 @@ class Discretiser
  */
 template<class ES>
 class HybridDiscretiser
-    : public DiscretiserInterface<HybridAutomaton,HybridGridCell>
+    : public DiscretiserInterface<MonolithicHybridAutomaton,HybridGridCell>
     , public Loggable
 {
     typedef int AccuracyType;
-    typedef HybridAutomaton::TimeType TimeType;
-    typedef HybridAutomaton SystemType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton SystemType;
     typedef HybridGridCell BasicSetType;
     typedef HybridGridTreeSet DenotableSetType;
     typedef ES ContinuousEnclosureType;

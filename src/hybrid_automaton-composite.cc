@@ -934,6 +934,10 @@ CompositeHybridAutomaton::guard_predicate(const DiscreteLocation& location, cons
 }
 
 
-
+std::ostream&
+CompositeHybridAutomaton::write(std::ostream& os) const
+{
+    return os << "CompositeHybridAutomaton(\n" << this->_components << "\n)\n";
+}
 
 }

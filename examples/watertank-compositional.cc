@@ -25,6 +25,9 @@
 #include "real.h"
 #include "expression.h"
 #include "hybrid_automaton.h"
+#include "hybrid_evolver.h"
+#include "hybrid_set.h"
+
 
 using namespace Ariadne;
 using std::cout; using std::endl;
@@ -56,7 +59,6 @@ int main()
     // The inflow is controlled by the valve alpha, the outflow depends on the
     // pressure, which is proportional to the water height.
     tank.new_mode(trivial,(dot(height)=-lambda*height+rate*alpha));
-
 
 
 
@@ -106,5 +108,46 @@ int main()
     valve.new_transition(closing,finished_closing,closed,alpha<=0.0);
 
 
-    CompositeHybridAutomaton controlled_tank((tank,valve));
+    CompositeHybridAutomaton watertank_system((tank,valve));
+    std::cout << "watertank_system:\n" << watertank_system << "\n";
+
+
+
+
+/*
+    // Compute the system evolution
+
+    // Create a HybridEvolver object
+    HybridEvolver evolver;
+    evolver.verbosity = 1;
+
+    // Set the evolution parameters
+    evolver.parameters().maximum_enclosure_radius = 0.25;
+    evolver.parameters().maximum_step_size = 0.125;
+    std::cout <<  evolver.parameters() << std::endl;
+
+    // Declare the type to be used for the system evolution
+    typedef HybridEvolver::EnclosureType HybridEnclosureType;
+    typedef HybridEvolver::OrbitType OrbitType;
+    typedef HybridEvolver::EnclosureListType EnclosureListType;
+
+    std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
+
+    DiscreteLocation initial_location=(trivial,opening);
+    Box initial_box(2, 0.0,0.00, 0.0,0.00);
+    HybridEnclosureType initial_enclosure(DiscreteLocation((trivial,opening)),initial_box);
+    Box bounding_box(2, -0.1,9.1, -0.1,1.1);
+  
+    HybridTime evolution_time(80.0,5);
+  
+    std::cout << "Computing orbit... " << std::flush;
+    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    std::cout << "done." << std::endl;
+
+    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
+    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
+    //std::cout << "Plotting orbit... "<<std::flush;
+    //plot("watertank_compositional-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    std::cout << "done." << std::endl;
+*/
 }

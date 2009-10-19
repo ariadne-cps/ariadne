@@ -331,8 +331,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     const FunctionType* dynamic_ptr=&initial_mode.dynamic();
 
     ARIADNE_LOG(6,"mode="<<initial_mode<<"\n");
-    std::map< DiscreteEvent, VectorFunction > invariants
-        =initial_mode.vector_invariants();
+    std::map< DiscreteEvent, ScalarFunction > invariants
+        =initial_mode.invariants();
     ARIADNE_LOG(7,"invariants="<<invariants<<"\n");
     const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
     ARIADNE_LOG(7,"transitions="<<transitions<<"\n");
@@ -381,10 +381,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Test invariants
     bool blocking=false;
     Float lower_blocking_time=step_size;
-    for(std::map< DiscreteEvent, VectorFunction >::const_iterator
+    for(std::map< DiscreteEvent, ScalarFunction >::const_iterator
         iter=invariants.begin(); iter!=invariants.end(); ++iter)
     {
-        VectorFunction guard = iter->second;
+        ScalarFunction guard = iter->second;
         if(possibly(this->_toolbox->active(guard,flow_bounds))) {
             ARIADNE_LOG(2,"One invariant is possibly active.\n");
             if(semantics == UPPER_SEMANTICS) {
@@ -432,7 +432,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         iter=transitions.begin(); iter!=transitions.end(); ++iter)
     {
         if(iter->forced()) {  // Test only forced transitions
-            VectorFunction guard = iter->vector_activation();
+            ScalarFunction guard = iter->activation();
             if(possibly(this->_toolbox->active(guard,flow_bounds))) {
                 ARIADNE_LOG(2,"Forced transition "<<*iter<<" is possibly active.\n");
                 if(semantics == UPPER_SEMANTICS) {
@@ -494,7 +494,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         for(std::set< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
-            VectorFunction guard = iter->vector_activation();
+            ScalarFunction guard = iter->activation();
             if(possibly(this->_toolbox->active(guard,flow_bounds))) {
                 ARIADNE_LOG(2," "<<*iter<<" is possibly active.\n");
                 if(possibly(this->_toolbox->active(guard,reach_set_model))) {
@@ -578,7 +578,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         for(std::set< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
-            VectorFunction guard = iter->vector_activation();
+            ScalarFunction guard = iter->activation();
             VectorFunction reset=iter->reset();
             DiscreteState jump_location=iter->target().location();
             if(lower_blocking_time <= 0.0) {

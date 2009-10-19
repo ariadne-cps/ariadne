@@ -121,20 +121,28 @@ ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, c
     return ScalarTaylorFunction(d,TaylorModel::constant(d.size(),c));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::variable(const Interval& ivl)
+ScalarTaylorFunction ScalarTaylorFunction::identity(const Interval& ivl)
 {
     Vector<Interval> d(1,ivl);
     return ScalarTaylorFunction(d,TaylorModel::scaling(d.size(),0u,d[0u]));
 }
 
+ScalarTaylorFunction ScalarTaylorFunction::coordinate(const Vector<Interval>& d, uint j)
+{
+    ARIADNE_ASSERT(j<d.size());
+    return ScalarTaylorFunction(d,TaylorModel::scaling(d.size(),j,d[j]));
+}
+
 ScalarTaylorFunction ScalarTaylorFunction::variable(const Vector<Interval>& d, uint j)
 {
+    ARIADNE_DEPRECATED("ScalarTaylorFunction::variable","Use ScalarTaylorFunction::coordinate instead");
     ARIADNE_ASSERT(j<d.size());
     return ScalarTaylorFunction(d,TaylorModel::scaling(d.size(),j,d[j]));
 }
 
 Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const Vector<Interval>& d, const Vector<Interval>& c)
 {
+    ARIADNE_DEPRECATED("ScalarTaylorFunction::constants","Use VectorTaylorFunction::coordinate instead");
     Vector<ScalarTaylorFunction> x(c.size(),ScalarTaylorFunction(d));
     for(uint i=0; i!=c.size(); ++i) {
         x[i]=c[i];
@@ -144,9 +152,19 @@ Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const Vector<Interv
 
 Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Vector<Interval>& d)
 {
-    Vector<ScalarTaylorFunction> x(d.size());
-    for(uint i=0; i!=d.size(); ++i) {
-        x[i]=ScalarTaylorFunction::variable(d,i);
+    ARIADNE_DEPRECATED("ScalarTaylorFunction::variables","Use VectorTaylorFunction::identity instead");
+    return variables(d,0u,d.size());
+}
+
+Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Vector<Interval>& d, uint imin, uint imax)
+{
+    ARIADNE_DEPRECATED("ScalarTaylorFunction::variables","Use VectorTaylorFunction::projection instead");
+    ARIADNE_ASSERT(imin<=imax);
+    ARIADNE_ASSERT(imax<=d.size());
+
+    Vector<ScalarTaylorFunction> x(imax-imin);
+    for(uint i=imin; i!=imax; ++i) {
+        x[i-imin]=ScalarTaylorFunction::variable(d,i);
     }
     return x;
 }
@@ -266,6 +284,42 @@ ScalarTaylorFunction::evaluate(const Vector<Interval>& x) const
     return Ariadne::evaluate(this->_model,sx);
 }
 
+
+ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const Vector<Interval>& d) {
+    ARIADNE_ASSERT(subset(d,tv.domain()));
+    const Vector<Interval>& od=tv.domain();
+    ScalarTaylorFunction r=tv;
+    for(uint j=0; j!=d.size(); ++j) {
+        if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }
+    }
+    return r;
+}
+
+ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Vector<Interval>& d) {
+    const Vector<Interval>& domain=tv.domain();
+    ARIADNE_ASSERT(subset(domain,d));
+    for(uint i=0; i!=d.size(); ++i) {
+        ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
+    }
+    return ScalarTaylorFunction(d,tv._model);
+}
+
+
+ScalarTaylorFunction
+compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
+{
+    ARIADNE_ASSERT_MSG(subset(f.range(),g.domain()),"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain());
+    return ScalarTaylorFunction(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
+}
+
+ScalarTaylorFunction
+unchecked_compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
+{
+        return ScalarTaylorFunction(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
+}
+
+
+
 ScalarTaylorFunction
 partial_evaluate(const ScalarTaylorFunction& te, uint k, const Interval& c)
 {
@@ -290,7 +344,7 @@ partial_evaluate(const ScalarTaylorFunction& te, uint k, const Interval& c)
 // and translation t=((c+d)-(a+b))/(b-a)
 // Because we are scaling the model on [-1,+1], this is not the same as
 // the mapping taking [a,b] to [c,d]
-ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, uint k, const Interval& new_ivl) {
+ScalarTaylorFunction partial_restrict(const ScalarTaylorFunction& tv, uint k, const Interval& new_ivl) {
     ARIADNE_ASSERT(k<tv.argument_size())
     const Interval& old_ivl=tv.domain()[k];
     ARIADNE_ASSERT(subset(new_ivl,old_ivl));
@@ -306,24 +360,13 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, uint k, const Inte
     return ScalarTaylorFunction(new_dom,preaffine(tv.model(),k,s,t));
 }
 
-ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const Vector<Interval>& d) {
-    ARIADNE_ASSERT(subset(d,tv.domain()));
-    const Vector<Interval>& od=tv.domain();
-    ScalarTaylorFunction r=tv;
-    for(uint j=0; j!=d.size(); ++j) {
-        if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }
-    }
-    return r;
+
+ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, uint k, const Interval& new_ivl) {
+    return partial_restrict(tv,k,new_ivl);
 }
 
-ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Vector<Interval>& d) {
-    const Vector<Interval>& domain=tv.domain();
-    ARIADNE_ASSERT(subset(domain,d));
-    for(uint i=0; i!=d.size(); ++i) {
-        ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
-    }
-    return ScalarTaylorFunction(d,tv._model);
-}
+
+
 
 pair<ScalarTaylorFunction,ScalarTaylorFunction>
 split(const ScalarTaylorFunction& tv, uint j)
@@ -729,6 +772,12 @@ VectorTaylorFunction::identity(const Vector<Interval>& d)
     return VectorTaylorFunction(d,TaylorModel::scalings(d));
 }
 
+VectorTaylorFunction
+VectorTaylorFunction::projection(const Vector<Interval>& d, uint imin, uint imax)
+{
+    return VectorTaylorFunction(ScalarTaylorFunction::variables(d,imin,imax));
+}
+
 
 Polynomial<Interval> polynomial(const TaylorModel& tm) {
     return Polynomial<Interval>(tm.expansion())+Interval(-tm.error(),+tm.error());
@@ -836,6 +885,18 @@ const Vector<TaylorModel>&
 VectorTaylorFunction::models() const
 {
     return this->_models;
+}
+
+const TaylorModel&
+VectorTaylorFunction::model(uint i) const
+{
+    return this->_models[i];
+}
+
+TaylorModel&
+VectorTaylorFunction::model(uint i)
+{
+    return this->_models[i];
 }
 
 
@@ -1036,6 +1097,12 @@ restrict(const VectorTaylorFunction& f, const Vector<Interval>& d)
     return r;
 }
 
+std::pair<VectorTaylorFunction,VectorTaylorFunction>
+split(const VectorTaylorFunction& tf, uint j)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 bool
 refines(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
@@ -1222,6 +1289,23 @@ partial_evaluate(const VectorTaylorFunction& tf, uint k, const Interval& c)
 }
 
 
+VectorTaylorFunction
+partial_restrict(const VectorTaylorFunction& tf, uint k, const Interval& c)
+{
+    VectorTaylorFunction r(tf.result_size(),tf.domain());
+    for(uint i=0; i!=tf.result_size(); ++i) {
+        r[i]=partial_restrict(tf[i],k,c);
+    }
+    return r;
+}
+
+VectorTaylorFunction
+restrict(const VectorTaylorFunction& tf, uint k, const Interval& c)
+{
+    return partial_restrict(tf,k,c);
+}
+
+
 ScalarTaylorFunction
 compose(const ScalarFunction& g, const VectorTaylorFunction& f)
 {
@@ -1241,19 +1325,6 @@ compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
     return VectorTaylorFunction(f.domain(),Ariadne::compose(g.models(),unscale(f.models(),g.domain())));
 }
 
-
-ScalarTaylorFunction
-compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
-{
-    ARIADNE_ASSERT_MSG(subset(f.range(),g.domain()),"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain());
-    return ScalarTaylorFunction(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
-}
-
-ScalarTaylorFunction
-unchecked_compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
-{
-        return ScalarTaylorFunction(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
-}
 
 VectorTaylorFunction
 unchecked_compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)

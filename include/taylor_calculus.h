@@ -205,8 +205,6 @@ class TaylorCalculus
     //! \brief A model for the real-valued function \a g over the domain \a d.
     PredicateModelType predicate_model(const ScalarFunctionType& g, const BoxType& d) const;
 
-    //! \brief A model for the real-valued function \a g over the domain \a d. \deprecated
-    PredicateModelType predicate_model(const VectorFunctionType& g, const BoxType& d) const;
 
     //! \brief A model for the constant time \a t over the box \a d.
     TimeModelType time_model(const Float& t, const BoxType& d) const;

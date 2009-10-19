@@ -288,6 +288,7 @@ _evolution(EnclosureListType& final_sets,
                         <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
                         <<" s="<<std::setw(3)<<std::left<<initial_events.size()
                         <<" t="<<std::setw(7)<<std::fixed<<initial_time_model.value()
+                        <<" a="<<std::setw(3)<<std::left<<initial_set_model.argument_size()
                         <<" r="<<std::setw(7)<<initial_set_model.radius()
                         <<" l="<<std::setw(3)<<std::left<<initial_location
                         <<" c="<<initial_set_model.centre()
@@ -633,14 +634,14 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 ImageSetHybridEvolver::TimeModelType ImageSetHybridEvolver::
 crossing_time(ScalarFunction guard, const FlowSetModelType& flow_set_model) const
 {
-    VectorFunction vector_guard(1u,guard);
     try {
-        TimeModelType crossing_time_model=this->_toolbox->scaled_crossing_time(vector_guard,flow_set_model);
+        TimeModelType crossing_time_model=this->_toolbox->scaled_crossing_time(guard,flow_set_model);
         return crossing_time_model;
     }
     catch(DegenerateCrossingException e) {
+        std::cerr<<"WARNING: Degenerate crossing with guard "<<guard<<"\n";
         BoxType space_domain=project(flow_set_model.domain(),range(0,flow_set_model.argument_size()-1));
-        Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(vector_guard,flow_set_model);
+        Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(guard,flow_set_model);
         TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
         return touching_time_model;
     } // end non-transverse crossing
@@ -726,14 +727,13 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
     {
         const DiscreteEvent event=guard_iter->first;
         const ScalarFunction guard=guard_iter->second;
-        const VectorFunction vector_guard(1u,guard);
         tribool active = this->_toolbox->active(guard,positive_flow_set_model);
         if(possibly(active)) {
             ARIADNE_LOG(3,"Event "<<event<<" possibly active.\n");
             TimeModelType crossing_time_model;
             Interval normal_derivative;
             try {
-                crossing_time_model=this->_toolbox->scaled_crossing_time(vector_guard,flow_set_model);
+                crossing_time_model=this->_toolbox->scaled_crossing_time(guard,flow_set_model);
                 normal_derivative=this->normal_derivative(guard,flow_set_model,crossing_time_model);
                 ARIADNE_ASSERT(normal_derivative.lower()>0.0 || normal_derivative.upper()<0.0);
                 if(normal_derivative.lower()>0.0) {
@@ -744,7 +744,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
             catch(DegenerateCrossingException e) {
                 ARIADNE_LOG(3,"Degenerate Crossing exception catched.\n");
                 BoxType space_domain=project(flow_set_model.domain(),range(0,flow_set_model.argument_size()-1));
-                Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(vector_guard,flow_set_model);
+                Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(guard,flow_set_model);
                 TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
                 // Use 1.0 as upper bound above since flow set model has time interval normalised to [-1,+1]
                 ARIADNE_LOG(3,"touching_time_interval="<<touching_time_interval<<"\n");
@@ -873,10 +873,19 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
         } else if(possibly(active)) {
             ARIADNE_LOG(3,"event is possibly enabled.\n");
             // Compute whether the event is enabled at the beginning and end of the time interval
+            //std::cerr<<"initial_set.bounding_box()="<<initial_set_model.range()<<"\n";
+            //std::cerr<<"initially_active.range()="<<apply(activation,initial_set_model).range()<<"\n";
+            //std::cerr<<"initially_active.range()="<<activation(initial_set_model.range())<<"\n";
             tribool initially_active=this->_toolbox->active(activation,initial_set_model);
+            ARIADNE_LOG(7,"initially_active="<<initially_active<<"\n");
+            //std::cerr<<"final_set.bounding_box()="<<final_set_model.range()<<"\n";
+            //std::cerr<<"finally_active.range()="<<apply(activation,final_set_model).range()<<"\n";
+            //std::cerr<<"finally_active.range()="<<activation(final_set_model.range())<<"\n";
             tribool finally_active=this->_toolbox->active(activation,final_set_model);
-
+            ARIADNE_LOG(7,"finally_active="<<finally_active<<"\n");
+            
             TimeModelType crossing_time_model=this->crossing_time(activation,flow_set_model);
+            ARIADNE_LOG(7,"crossing_time_model="<<crossing_time_model<<"\n");
 
             TimeModelType lower_crossing_time_model=crossing_time_model-crossing_time_model.error();
             TimeModelType upper_crossing_time_model=crossing_time_model+crossing_time_model.error();
@@ -932,6 +941,7 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
                     }
                     break;
             }
+
         }
     }
 

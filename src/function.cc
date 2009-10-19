@@ -1391,7 +1391,7 @@ VectorFunction VectorFunction::identity(Nat n)
 {
     VectorOfScalarFunction* res = new VectorOfScalarFunction(n,n);
     for(uint i=0; i!=n; ++i) {
-        res->_vec[i]=ScalarFunction::variable(n,i);
+        res->_vec[i]=ScalarFunction::coordinate(n,i);
     }
     return VectorFunction(res);
 }

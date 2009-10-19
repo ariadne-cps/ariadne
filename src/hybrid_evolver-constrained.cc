@@ -128,14 +128,14 @@ void ConstrainedImageSet::apply_map(VectorFunction map) {
 
 void ConstrainedImageSet::apply_flow(VectorFunction phi, Interval time_domain) {
     _data->_domain=join(_data->_domain,time_domain);
-    _data->_models=compose(phi,combine(_data->_models,ScalarTaylorFunction::variable(time_domain).model()));
+    _data->_models=compose(phi,combine(_data->_models,ScalarTaylorFunction::identity(time_domain).model()));
 }
 
 void ConstrainedImageSet::apply_flow(VectorTaylorFunction phi) {
     std::cerr<<"apply_flow(VectorTaylorFunction)\n";
     Interval time_domain=phi.domain()[phi.domain().size()-1];
     _data->_domain=join(_data->_domain,time_domain);
-    _data->_models=unchecked_compose(phi.models(),phi.domain(),combine(_data->_models,ScalarTaylorFunction::variable(time_domain).model()));
+    _data->_models=unchecked_compose(phi.models(),phi.domain(),combine(_data->_models,ScalarTaylorFunction::identity(time_domain).model()));
 }
 
 void ConstrainedImageSet::new_invariant(DiscreteEvent event, ScalarFunction constraint, ScalarFunction derivative) {

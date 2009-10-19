@@ -106,42 +106,4 @@ int main()
     cout << "Watertank = " << std::boolalpha << watertank << endl << endl;
 
 
-{
-    MonolithicHybridAutomaton watertank;
-
-    const bool urgent=true;
-    const bool permissive=true;
-
-    RealConstant o("1.0",1.0);
-    RealConstant hmax("hmax",8.0);
-    RealConstant hmin("hmin","8.0");
-    RealVariable h("height");
-    RealVariable a("alpha");
-
-    DiscreteEvent start_closing("start_closing");
-    DiscreteEvent start_opening("start_opening");
-    DiscreteEvent finish_closing("finish_closing");
-    DiscreteEvent finish_opening("finish_opening");
-    DiscreteState open("open");
-    DiscreteState closed("closed");
-    DiscreteState opening("opening");
-    DiscreteState closing("closing");
-
-    RealExpression dh=6.0*alpha-h;
-    watertank.new_mode(open,alpha=1.0,dot(h)=dh);
-    watertank.new_mode(closed,alpha=0.0,dot(h)=dh);
-    watertank.new_mode(opening,(dot(h)=dh,dot(alpha)=1.0));
-    watertank.new_mode(closing,(dot(h)=dh,dot(alpha)=-1.0));
-
-    watertank.new_transition(start_closing,open,closing,(next(alpha)=alpha,next(h)=h),h>=hmax,urgent);
-    watertank.new_transition(start_closing,opening,closing,(next(alpha)=alpha,next(h)=h),h>=hmax,urgent);
-    watertank.new_transition(start_opening,closed,opening,(next(alpha)=alpha,next(h)=h),h<=hmin,urgent);
-    watertank.new_transition(start_opening,closing,opening,(next(alpha)=alpha,next(h)=h),h<=hmin,urgent);
-    watertank.new_transition(finish_closing,closing,closed,(next(h)=h),alpha>=1.0,urgent);
-    watertank.new_transition(finish_opening,opening,closed,(next(h)=h),alpha<=1.0,urgent);
-
-    std::cout << "WatertankAutomaton = " << watertank << endl;
-
-}
-
 }

@@ -73,9 +73,12 @@ struct GraphicsObject {
 
 struct Figure::Data 
 {
-    Data() : bounding_box(0), projection(2,0,1), current_line_width(1.0), current_line_colour(0,0,0), current_fill_colour(0.75,0.75,0.75) { }
+    Data() : bounding_box(0), projection(2,0,1), x_axis_label(""), y_axis_label(""),
+             current_line_width(1.0), current_line_colour(0,0,0), current_fill_colour(0.75,0.75,0.75) { }
     Box bounding_box;
     PlanarProjectionMap projection;
+    string x_axis_label;
+    string y_axis_label;
     bool current_line_style;
     double current_line_width;
     Colour current_line_colour;
@@ -108,6 +111,16 @@ void Figure::draw(const DrawableInterface& shape)
 void Figure::set_projection(uint as, uint ix, uint iy)
 {
     this->_data->projection=PlanarProjectionMap(as,ix,iy);
+}
+
+void Figure::set_x_axis_label(const string& label)
+{
+    this->_data->x_axis_label = label;
+}
+
+void Figure::set_y_axis_label(const string& label)
+{
+    this->_data->y_axis_label = label;
 }
 
 void Figure::set_projection_map(const ProjectionFunction& pf) 
@@ -166,6 +179,17 @@ void Figure::set_fill_colour(Colour fc)
 void Figure::set_fill_colour(double r, double g, double b)
 { 
     this->set_fill_colour(Colour(r,g,b));
+}
+
+
+string Figure::get_x_axis_label() const
+{ 
+    return this->_data->x_axis_label;
+}
+
+string Figure::get_y_axis_label() const
+{ 
+    return this->_data->y_axis_label;
 }
 
 bool Figure::get_line_style() const
@@ -377,6 +401,9 @@ void Figure::_paint_all(CanvasInterface& canvas)
     std::string text_xu=str(bbox[0].upper());
     std::string text_yl=str(bbox[1].lower());
     std::string text_yu=str(bbox[1].upper());
+    std::string text_xm=this->_data->x_axis_label;
+    std::string text_ym=this->_data->y_axis_label;
+    
 
     // Write axis labels
     cairo_text_extents_t te;
@@ -386,6 +413,10 @@ void Figure::_paint_all(CanvasInterface& canvas)
     cairo_text_extents (cr, text_xu.c_str(), &te);
     cairo_move_to(cr, canvas_width-te.width-4, canvas_height-bottom_margin+4+te.height);
     cairo_show_text (cr, text_xu.c_str());
+    cairo_text_extents (cr, text_xm.c_str(), &te);
+    cairo_move_to(cr, (canvas_height+left_margin-right_margin)/2.0, canvas_height-bottom_margin+4+te.height);
+    cairo_show_text (cr, text_xm.c_str());
+    
 
     cairo_text_extents (cr, text_yl.c_str(), &te);
     cairo_move_to(cr, left_margin-te.width-6, canvas_width-bottom_margin+2);
@@ -393,6 +424,10 @@ void Figure::_paint_all(CanvasInterface& canvas)
     cairo_text_extents (cr, text_yu.c_str(), &te);
     cairo_move_to(cr, left_margin-te.width-6, top_margin+te.height+2);
     cairo_show_text (cr, text_yu.c_str());
+    cairo_text_extents (cr, text_ym.c_str(), &te);
+    cairo_move_to(cr, left_margin-te.width-6, (canvas_width+bottom_margin-top_margin-te.height)/2.0);
+    cairo_show_text (cr, text_ym.c_str());
+    
     
     // Draw bounding box
     cairo_set_line_width (cr, 2.0);

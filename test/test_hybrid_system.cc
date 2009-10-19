@@ -31,6 +31,7 @@
 
 #include "function.h"
 #include "hybrid_system.h"
+#include "function.h"
 
 using namespace std;
 using namespace Ariadne;

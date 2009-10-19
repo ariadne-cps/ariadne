@@ -21,7 +21,10 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 
     fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
     fig.set_bounding_box(bbox); 
-
+    
+    fig.set_x_axis_label("x label");
+    fig.set_y_axis_label("y label");
+    
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
     {

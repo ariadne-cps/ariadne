@@ -88,6 +88,9 @@ class Figure
 
     void set_projection(uint, uint, uint);
 
+    void set_x_axis_label(const string&);
+    void set_y_axis_label(const string&);
+
     void set_line_style(bool);
     void set_line_width(double);
     void set_line_colour(Colour);
@@ -96,6 +99,9 @@ class Figure
 
     void set_line_colour(double, double, double);
     void set_fill_colour(double, double, double);
+
+    string get_x_axis_label() const;
+    string get_y_axis_label() const;
 
     bool get_line_style() const;
     double get_line_width() const;

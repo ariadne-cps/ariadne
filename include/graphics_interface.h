@@ -66,10 +66,14 @@ class FigureInterface {
   public:
     virtual ~FigureInterface() { };
     virtual void set_projection(uint as, uint ix, uint iy) { };
+    virtual void set_x_axis_label(const string&) { };
+    virtual void set_y_axis_label(const string&) { };
     virtual void set_line_style(bool) { };
     virtual void set_line_width(double) { };
     virtual void set_line_colour(Colour) { };
     virtual void set_fill_colour(Colour) { };
+    virtual string get_x_axis_label() const { return ""; };
+    virtual string get_y_axis_label() const { return ""; };
     virtual bool get_line_style() const { return true; };
     virtual double get_line_width() const { return 1.0; };
     virtual Colour get_line_colour() const { return black; };

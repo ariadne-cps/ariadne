@@ -92,5 +92,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_hybrid_system test_hybrid_evolution test_textplot
+XFAIL_TESTS = test_hybrid_system test_hybrid_evolution test_discretised_evolution test_reachability_analysis test_textplot
 testsubdir = ./

@@ -112,10 +112,6 @@ template<class LHS, class RHS> inline std::ostream& operator<<(std::ostream& os,
 }
 
 template<class T> inline Assignment< Variable<T>, Expression<T> >
-Variable<T>::operator=(const double& val) const {
-    return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(T(val))); }
-
-template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const T& val) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(val)); }
 
@@ -126,6 +122,23 @@ Variable<T>::operator=(const Variable<T>& var) const {
 template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(expr)); }
+
+
+inline Assignment< Variable<Real>, Expression<Real> >
+Variable<Real>::operator=(const double& val) const {
+    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(val)); }
+
+inline Assignment< Variable<Real>, Expression<Real> >
+Variable<Real>::operator=(const Real& val) const {
+    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(val)); }
+
+inline Assignment< Variable<Real>, Expression<Real> >
+Variable<Real>::operator=(const Variable<Real>& var) const {
+    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(var)); }
+
+inline Assignment< Variable<Real>, Expression<Real> >
+Variable<Real>::operator=(const Expression<Real>& expr) const {
+    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(expr)); }
 
 
 

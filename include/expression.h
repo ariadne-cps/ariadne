@@ -137,6 +137,7 @@ class Expression<Real> {
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
     Expression(const double& c);
     Expression(const Interval& c);
+    Expression(const Real& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
     //! \brief Test if two expressions are identical to each other.
@@ -278,13 +279,25 @@ Expression<Real> cos(Expression<Real> e);
 //! \related Expression \brief .
 Expression<Real> tan(Expression<Real> e);
 
+//! \related Expression \brief .
+Expression<Real> max(Expression<Real> e1, Expression<Real> e2);
+//! \related Expression \brief .
+Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
+//! \related Expression \brief .
+Expression<Real> abs(Expression<Real> e);
+
+enum Sign { positive=+1, negative=-1, zero=0 };
+
+//! \related Expression \brief Try to compute a real expression which has the
+//! given \a sign when the predicate \a p is true.
+Expression<Real> indicator(Expression<tribool> p, Sign sign=positive);
+
 
 template<class X> class Affine;
 template<class X> class Polynomial;
 
 template<class X> Affine<X> affine(const Expression<Real>&, const Space<Real>&);
 template<class X> Polynomial<X> polynomial(const Expression<Real>&, const Space<Real>&);
-
 
 } // namespace Ariadne
 

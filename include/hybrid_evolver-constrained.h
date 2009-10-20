@@ -108,23 +108,23 @@ typedef HybridBasicSet<ConstrainedImageSet> HybridConstrainedImageSet;
 template<>
 struct HybridBasicSet<ConstrainedImageSet>
 {
-    typedef DiscreteState first_type;
+    typedef DiscreteLocation first_type;
     typedef ConstrainedImageSet ContinuousStateSetType;
 
-    HybridBasicSet(const DiscreteState& q_, const Box& s_)
+    HybridBasicSet(const DiscreteLocation& q_, const Box& s_)
         : _events(), _location(q_), _set(s_) { }
-    HybridBasicSet(const std::pair<DiscreteState,ConstrainedImageSet>& hs_)
+    HybridBasicSet(const std::pair<DiscreteLocation,ConstrainedImageSet>& hs_)
         : _events(), _location(hs_.first), _set(hs_.second) { }
-    HybridBasicSet(const DiscreteState& q_, const ConstrainedImageSet& s_)
+    HybridBasicSet(const DiscreteLocation& q_, const ConstrainedImageSet& s_)
         : _events(), _location(q_), _set(s_) { }
-    HybridBasicSet(const List<DiscreteEvent>& e_, const DiscreteState& q_, const ConstrainedImageSet& s_)
+    HybridBasicSet(const List<DiscreteEvent>& e_, const DiscreteLocation& q_, const ConstrainedImageSet& s_)
         : _events(e_), _location(q_), _set(s_) { }
     uint dimension() const { return _set.dimension(); }
-    DiscreteState location() const { return _location; }
+    DiscreteLocation location() const { return _location; }
     ConstrainedImageSet const& continuous_state_set() const { return _set; }
 
     List<DiscreteEvent> _events;
-    DiscreteState _location;
+    DiscreteLocation _location;
     ConstrainedImageSet _set;
 };
  
@@ -136,9 +136,9 @@ inline std::ostream& operator<<(std::ostream& os, const HybridConstrainedImageSe
 struct TimedHybridConstrainedImageSet : public HybridConstrainedImageSet {
     TimedHybridConstrainedImageSet(const HybridConstrainedImageSet& hs_)
         : HybridConstrainedImageSet(hs_), _time(ScalarFunction::constant(hs_.dimension(),0.0)) { }
-    TimedHybridConstrainedImageSet(DiscreteState q_, const ConstrainedImageSet& s_)
+    TimedHybridConstrainedImageSet(DiscreteLocation q_, const ConstrainedImageSet& s_)
         : HybridConstrainedImageSet(q_,s_), _time(ScalarFunction::constant(s_.dimension(),0.0)) { }
-    TimedHybridConstrainedImageSet(List<DiscreteEvent> e_, DiscreteState q_, const ConstrainedImageSet& s_, const ScalarFunction& t_)
+    TimedHybridConstrainedImageSet(List<DiscreteEvent> e_, DiscreteLocation q_, const ConstrainedImageSet& s_, const ScalarFunction& t_)
         : HybridConstrainedImageSet(e_,q_,s_), _time(t_) { }
     ScalarFunction _time;
 };

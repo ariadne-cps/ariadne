@@ -38,6 +38,7 @@
 #include "tuple.h"
 
 #include "hybrid_set.h"
+#include "hybrid_time.h"
 
 #include "hybrid_automaton.h"
 #include "evolver_interface.h"
@@ -62,7 +63,6 @@ template<class ES> class Orbit;
 
 class HybridTime;
 class MonolithicHybridAutomaton;
-
 
 
 
@@ -146,7 +146,7 @@ class StableHybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteLocation, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,

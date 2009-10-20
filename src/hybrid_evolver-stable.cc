@@ -201,14 +201,14 @@ _evolution(EnclosureListType& final_sets,
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 
 
-    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteLocation, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
 
     std::vector< HybridTimedSetType > working_sets;
 
     {
         // Set up initial timed set models
         ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        DiscreteState initial_location;
+        DiscreteLocation initial_location;
         ContinuousEnclosureType initial_continuous_set;
         make_lpair(initial_location,initial_continuous_set)=initial_set;
         ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
@@ -226,7 +226,7 @@ _evolution(EnclosureListType& final_sets,
     while(!working_sets.empty()) {
         HybridTimedSetType current_set=working_sets.back();
         working_sets.pop_back();
-        DiscreteState initial_location=current_set.first;
+        DiscreteLocation initial_location=current_set.first;
         IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
@@ -300,7 +300,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     ARIADNE_LOG(2,"\nStableHybridEvolver::_evolution_step(...)\n");
 
-    DiscreteState initial_location(0);
+    DiscreteLocation initial_location;
     IntegerType initial_steps;
     SetModelType initial_set_model;
     TimeModelType initial_time_model;
@@ -431,7 +431,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     for(std::set< DiscreteTransition >::const_iterator
         iter=transitions.begin(); iter!=transitions.end(); ++iter)
     {
-        if(iter->forced()) {  // Test only forced transitions
+        if(iter->urgency()==urgent) {  // Test only forced transitions
             ScalarFunction guard = iter->activation();
             if(possibly(this->_toolbox->active(guard,flow_bounds))) {
                 ARIADNE_LOG(2,"Forced transition "<<*iter<<" is possibly active.\n");
@@ -519,7 +519,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             // Transition is NOT initally active
                             lower_active_time = lower_crossing_time;
                         }
-                        if(iter->forced()) {
+                        if(iter->urgency()==urgent) {
                             // Forced transition
                             upper_active_time = upper_crossing_time;
                         } else  {
@@ -553,7 +553,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
                         // Compute activation set model and jump set model
                         VectorFunction reset=iter->reset();
-                        DiscreteState jump_location=iter->target().location();
+                        DiscreteLocation jump_location=iter->target();
                         DiscreteEvent jump_event=iter->event();
 
                         SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
@@ -580,7 +580,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         {
             ScalarFunction guard = iter->activation();
             VectorFunction reset=iter->reset();
-            DiscreteState jump_location=iter->target().location();
+            DiscreteLocation jump_location=iter->target();
             if(lower_blocking_time <= 0.0) {
                 // No continuous evolution possible, execute only transitions that are initially active
                 if(definitely(this->_toolbox->active(guard,initial_set_model))) {
@@ -637,7 +637,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
                             // Compute activation set model and jump set model
                             VectorFunction reset=iter->reset();
-                            DiscreteState jump_location=iter->target().location();
+                            DiscreteLocation jump_location=iter->target();
                             SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
                             ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
                             SetModelType jump_set_model=this->_toolbox->reset_step(reset,active_set_model);
@@ -723,14 +723,14 @@ timed_evolution(const SystemType& system,
 
 
 
-    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteLocation, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
 
     std::vector< HybridTimedSetType > working_sets;
 
     {
         // Set up initial timed set models
         ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        DiscreteState initial_location;
+        DiscreteLocation initial_location;
         ContinuousEnclosureType initial_continuous_set;
         make_lpair(initial_location,initial_continuous_set)=initial_set;
         ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
@@ -748,7 +748,7 @@ timed_evolution(const SystemType& system,
     while(!working_sets.empty()) {
         HybridTimedSetType current_set=working_sets.back();
         working_sets.pop_back();
-        DiscreteState initial_location=current_set.first;
+        DiscreteLocation initial_location=current_set.first;
         IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;

@@ -200,6 +200,20 @@ struct to_python< Ariadne::List<T> > {
 };
 
 template<class T>
+struct to_python< Ariadne::Set<T> > {
+    to_python() { boost::python::to_python_converter< Ariadne::Set<T>, to_python< Ariadne::Set<T> > >(); }
+    static PyObject* convert(const Ariadne::Set<T>& set) {
+        boost::python::list values;
+        for(typename Ariadne::Set<T>::const_iterator iter=set.begin(); iter!=set.end(); ++iter) {
+            values.append(boost::python::object(*iter));
+        }
+        PyObject* result=PySet_New(values.ptr());
+        return result;
+    }
+    static const PyTypeObject* get_pytype() { return &PySet_Type; }
+};
+
+template<class T>
 struct to_python_list< Ariadne::Set<T> > {
     to_python_list() { boost::python::to_python_converter< Ariadne::Set<T>, to_python_list< Ariadne::Set<T> > >(); }
     static PyObject* convert(const Set<T>& set) {
@@ -210,6 +224,19 @@ struct to_python_list< Ariadne::Set<T> > {
         return boost::python::incref(boost::python::list(result).ptr());
     }
     static const PyTypeObject* get_pytype() { return &PyList_Type; }
+};
+
+template<class K, class V>
+struct to_python<Ariadne::Map<K,V> > {
+    to_python() { boost::python::to_python_converter< Ariadne::Map<K,V>, to_python< Ariadne::Map<K,V> > >(); }
+    static PyObject* convert(const Ariadne::Map<K,V>& map) {
+        boost::python::dict result;
+        for(typename Ariadne::Map<K,V>::const_iterator iter=map.begin(); iter!=map.end(); ++iter) {
+            result[boost::python::object(iter->first)]=boost::python::object(iter->second);
+        }
+        return boost::python::incref(boost::python::dict(result).ptr());
+    }
+    static const PyTypeObject* get_pytype() { return &PyDict_Type; }
 };
 
 

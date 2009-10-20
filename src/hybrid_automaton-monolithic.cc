@@ -53,23 +53,6 @@ DiscreteMode(DiscreteState location,
 {
 }
 
-
-/*
-DiscreteMode::
-DiscreteMode(DiscreteState location,
-             const boost::shared_ptr< const VectorFunction > dynamic,
-             const std::map< DiscreteEvent, boost::shared_ptr< const VectorFunction > >& invariants)
-    :  _location(location), _dynamic(dynamic), _invariants(invariants), _grid(new Grid(dynamic->argument_size()))
-{
-    ARIADNE_ASSERT(dynamic->result_size()==dynamic->argument_size());
-    for(uint i=0; i!=invariants.size(); ++i) {
-        ARIADNE_ASSERT(invariants[i]->argument_size()==dynamic->argument_size());
-        ARIADNE_ASSERT(invariants[i]->result_size()==1u);
-    }
-}
-*/
-
-
 std::ostream&
 operator<<(std::ostream& os, const DiscreteMode& mode)
 {
@@ -98,19 +81,18 @@ DiscreteTransition(DiscreteEvent event,
     ARIADNE_ASSERT(reset.result_size()==target.dimension());
 }
 
-
-
-
 std::ostream&
 operator<<(std::ostream& os, const DiscreteTransition& transition)
 {
     return os << "DiscreteTransition( "
               << "event=" << transition.event() << ", "
-              << "source=" << transition.source().location() << ", "
-              << "target=" << transition.target().location() << ", "
+              << "source=" << transition.source() << ", "
+              << "target=" << transition.target() << ", "
               << "reset=" << transition.reset() << ", "
               << "activation=" << transition.activation() << " )";
 }
+
+
 
 
 
@@ -248,48 +230,12 @@ new_unforced_transition(DiscreteEvent event,
 }
 
 
-/*
-const DiscreteTransition&
-MonolithicHybridAutomaton::
-new_transition(DiscreteEvent event,
-               const DiscreteMode &source,
-               const DiscreteMode &target,
-               const VectorFunction &reset,
-               const VectorFunction &activation,
-               bool forced)
-{
-    ARIADNE_DEPRECATED("new_transition(DiscreteEvent,DiscreteMode,DiscreteMode,VectorFunction,ScalarFunction,bool)",
-            "Use new_transition(DiscreteEvent,DiscreteState,DiscreteState,VectorFunction,ScalarFunction,bool) instead");
-    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
-    DiscreteEvent event_id=event;
-    DiscreteState source_id=source.location();
-    DiscreteState target_id=target.location();
-    if(this->has_transition(event_id,source_id)) {
-        throw std::runtime_error("The automaton already has a transition with the given event_id and source id.");
-    }
-    if(!this->has_mode(source_id)) {
-        throw std::runtime_error("The source mode of the transition must be in the automaton");
-    }
-    if(!this->has_mode(target_id)) {
-        throw std::runtime_error("The desitination mode of the transition must be in the automaton");
-    }
 
-    const DiscreteMode& this_source=this->mode(source_id);
-    const DiscreteMode& this_target=this->mode(target_id);
-    if(&source!=&this_source) {
-        throw std::runtime_error("The source mode of the transition is not equal to the mode in the automaton with the same id.");
-    }
-    if(&target!=&this_target) {
-        throw std::runtime_error("The target mode of the transition is not equal to the mode in the automaton with the same id.");
-    }
 
-    return this->new_transition(event,source_id,target_id,reset,activation,forced);
-}
-*/
 
 void
 MonolithicHybridAutomaton::set_grid(DiscreteState location,
-                          const Grid& grid)
+                                    const Grid& grid)
 {
     if(!this->has_mode(location)) {
         throw std::runtime_error("The automaton does not contain a mode with ths given location id");
@@ -323,7 +269,7 @@ MonolithicHybridAutomaton::set_grid(const HybridGrid& hgrid)
     {
         DiscreteMode& mode=const_cast<DiscreteMode&>(*mode_iter);
         DiscreteState loc = mode.location();
-        if(hgrid.find(loc) == hgrid.end()) {
+        if(!hgrid.has_location(loc)) {
             throw std::runtime_error("The automaton does not contain a mode with this given location id");
         }
         if(hgrid[loc].dimension()!=mode.dimension()) {
@@ -335,10 +281,12 @@ MonolithicHybridAutomaton::set_grid(const HybridGrid& hgrid)
 
 
 
+
+
 bool
 MonolithicHybridAutomaton::has_mode(DiscreteState state) const
 {
-    // FIXME: This is a hack since we use std::set which cannot be searched by id.
+    // FIXME: This is a hack since we use Set which cannot be searched by id.
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
         mode_iter!=this->_modes.end(); ++mode_iter)
         {
@@ -356,13 +304,171 @@ MonolithicHybridAutomaton::has_transition(DiscreteEvent event, DiscreteState sou
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
-            if(transition_iter->event()==event && transition_iter->source().location()==source) {
+            if(transition_iter->event()==event && transition_iter->source()==source) {
                 return true;
             }
         }
     return false;
 }
 
+
+
+bool
+MonolithicHybridAutomaton::has_mode(DiscreteLocation location) const
+{
+    // FIXME: This is a hack since we use Set which cannot be searched by id.
+    ARIADNE_ASSERT(location.size()==1);
+    for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
+        mode_iter!=this->_modes.end(); ++mode_iter)
+        {
+            if(mode_iter->location()==location[0]) {
+                return true;
+            }
+        }
+    return false;
+}
+
+
+bool
+MonolithicHybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const
+{
+    ARIADNE_ASSERT(source.size()==1);
+    for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
+        transition_iter!=this->_transitions.end(); ++transition_iter)
+        {
+            if(transition_iter->event()==event && transition_iter->source()==source[0]) {
+                return true;
+            }
+        }
+    return false;
+}
+
+
+
+const DiscreteMode&
+MonolithicHybridAutomaton::mode(DiscreteLocation location) const
+{
+    // FIXME: This is a hack since we use Set which cannot be searched by id.
+    ARIADNE_ASSERT(location.size()==1);
+    return this->mode(location[0]);
+}
+
+
+const DiscreteTransition&
+MonolithicHybridAutomaton::transition(DiscreteLocation source, DiscreteEvent event) const
+{
+    ARIADNE_ASSERT(source.size()==1);
+    return this->transition(event,source[0]);
+}
+
+Set<DiscreteTransition>
+MonolithicHybridAutomaton::transitions(DiscreteLocation source) const
+{
+    ARIADNE_DEPRECATED("MonolithicHybridAutomaton::transitions(DiscreteLocation)","Use guards(DiscreteLocation) to get events instead.");
+    ARIADNE_ASSERT(source.size()==1);
+    Set<DiscreteTransition> result;
+    for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
+        iter!=this->_transitions.end(); ++iter)
+    {
+        if(iter->source()==source[0]) {
+            result.insert(*iter);
+        }
+    }
+    return result;
+}
+
+
+uint
+MonolithicHybridAutomaton::dimension(DiscreteLocation location) const
+{
+    ARIADNE_ASSERT(location.size()==1);
+    return this->mode(location[0]).dynamic().result_size();
+}
+
+VectorFunction
+MonolithicHybridAutomaton::dynamic(DiscreteLocation location) const
+{
+    ARIADNE_ASSERT(location.size()==1);
+    return this->mode(location[0]).dynamic();
+}
+
+Map<DiscreteEvent,ScalarFunction>
+MonolithicHybridAutomaton::invariants(DiscreteLocation location) const
+{
+    ARIADNE_ASSERT(location.size()==1);
+    return this->mode(location[0]).invariants();
+}
+
+Map<DiscreteEvent,ScalarFunction>
+MonolithicHybridAutomaton::guards(DiscreteLocation location) const
+{
+    ARIADNE_ASSERT(location.size()==1);
+    Map<DiscreteEvent,ScalarFunction> result;
+    for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
+        iter!=this->_transitions.end(); ++iter)
+    {
+        if(iter->source()==location[0] && iter->urgency()==urgent) {
+            result.insert(iter->event(),iter->guard());
+        }
+    }
+    return result;
+}
+
+Map<DiscreteEvent,ScalarFunction>
+MonolithicHybridAutomaton::activations(DiscreteLocation location) const
+{
+    ARIADNE_ASSERT(location.size()==1);
+    Map<DiscreteEvent,ScalarFunction> result;
+    for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
+        iter!=this->_transitions.end(); ++iter)
+    {
+        if(iter->source()==location[0] && iter->urgency()==permissive) {
+            result.insert(iter->event(),iter->activation());
+        }
+    }
+    return result;
+}
+
+DiscreteLocation
+MonolithicHybridAutomaton::target(DiscreteLocation location, DiscreteEvent event) const
+{
+    ARIADNE_ASSERT(location.size()==1);
+    return this->transition(location[0],event).target();
+}
+
+VectorFunction
+MonolithicHybridAutomaton::reset(DiscreteLocation location, DiscreteEvent event) const
+{
+    ARIADNE_ASSERT(location.size()==1);
+    return this->transition(location[0],event).reset();
+}
+
+
+Map<DiscreteEvent,DiscreteLocation>
+MonolithicHybridAutomaton::targets(DiscreteLocation location) const
+{
+    ARIADNE_DEPRECATED("MonolithicHybridAutomaton::targets(DiscreteLocation)","Use guards(DiscreteLocation) to get events and target(DiscreteLocation,DiscreteEvent) instead.");
+    ARIADNE_ASSERT(location.size()==1);
+    Map<DiscreteEvent,DiscreteLocation> result;
+    Set<DiscreteTransition> transitions=this->transitions(location);
+    for(Set<DiscreteTransition>::const_iterator iter=transitions.begin(); iter!=transitions.end(); ++iter) {
+        result.insert(iter->event(),iter->target());
+    }
+    return result;
+}
+
+Map<DiscreteEvent,VectorFunction>
+MonolithicHybridAutomaton::resets(DiscreteLocation location) const
+{
+    ARIADNE_DEPRECATED("MonolithicHybridAutomaton::resets(DiscreteLocation)","Use guards(DiscreteLocation) to get events and reset(DiscreteLocation,DiscreteEvent) instead.");
+    ARIADNE_ASSERT(location.size()==1);
+    Map<DiscreteEvent,VectorFunction> result;
+    Set<DiscreteTransition> transitions=this->transitions(location);
+    for(Set<DiscreteTransition>::const_iterator iter=transitions.begin(); iter!=transitions.end(); ++iter) {
+        result.insert(iter->event(),iter->reset());
+    }
+    return result;
+}
 
 
 HybridSet
@@ -386,7 +492,7 @@ MonolithicHybridAutomaton::state_space() const
 }
 
 
-const std::set< DiscreteMode >&
+const Set< DiscreteMode >&
 MonolithicHybridAutomaton::modes() const
 {
     return this->_modes;
@@ -409,7 +515,7 @@ MonolithicHybridAutomaton::mode(DiscreteState state) const
 }
 
 
-const std::set< DiscreteTransition >&
+const Set< DiscreteTransition >&
 MonolithicHybridAutomaton::transitions() const
 {
     return this->_transitions;
@@ -417,14 +523,14 @@ MonolithicHybridAutomaton::transitions() const
 
 
 
-std::set< DiscreteTransition >
+Set< DiscreteTransition >
 MonolithicHybridAutomaton::transitions(DiscreteState source) const
 {
-    std::set< DiscreteTransition > result;
+    Set< DiscreteTransition > result;
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
-            if(transition_iter->source().location()==source) {
+            if(transition_iter->source()==source) {
                 result.insert(*transition_iter);
             }
         }
@@ -432,12 +538,12 @@ MonolithicHybridAutomaton::transitions(DiscreteState source) const
 }
 
 
-std::map<DiscreteEvent,ScalarFunction>
+Map<DiscreteEvent,ScalarFunction>
 MonolithicHybridAutomaton::blocking_guards(DiscreteState source) const
 {
-    std::map<DiscreteEvent,ScalarFunction> result;
+    Map<DiscreteEvent,ScalarFunction> result;
     const DiscreteMode& mode=this->mode(source);
-    for(std::map<DiscreteEvent,ScalarFunction>::const_iterator invariant_iter=mode._invariants.begin();
+    for(Map<DiscreteEvent,ScalarFunction>::const_iterator invariant_iter=mode._invariants.begin();
         invariant_iter!=mode._invariants.end(); ++invariant_iter)
     {
         const DiscreteEvent event=invariant_iter->first;
@@ -448,7 +554,7 @@ MonolithicHybridAutomaton::blocking_guards(DiscreteState source) const
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
     {
-        if(transition_iter->source().location()==source && transition_iter->forced()) {
+        if(transition_iter->source()==source && transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
             const ScalarFunction guard=transition_iter->activation();
             result[event]=guard;
@@ -458,15 +564,15 @@ MonolithicHybridAutomaton::blocking_guards(DiscreteState source) const
 }
 
 
-std::map<DiscreteEvent,ScalarFunction>
+Map<DiscreteEvent,ScalarFunction>
 MonolithicHybridAutomaton::permissive_guards(DiscreteState source) const
 {
-    std::map<DiscreteEvent,ScalarFunction> result;
+    Map<DiscreteEvent,ScalarFunction> result;
 
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
     {
-        if(transition_iter->source().location()==source && !transition_iter->forced()) {
+        if(transition_iter->source()==source && !transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
             const ScalarFunction guard=transition_iter->activation();
             result[event]=guard;
@@ -483,7 +589,7 @@ MonolithicHybridAutomaton::transition(DiscreteEvent event, DiscreteState source)
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
-            if(transition_iter->event()==event && transition_iter->source().location()==source) {
+            if(transition_iter->event()==event && transition_iter->source()==source) {
                 return *transition_iter;
             }
         }

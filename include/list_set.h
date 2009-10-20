@@ -44,7 +44,7 @@ namespace Ariadne {
 
 class Box;
 template<class ES> class ListSet;
-class DiscreteState;
+class DiscreteLocation;
 
 // Declare template specialisation for hybrid list set
 template<class ES> class HybridBasicSet;

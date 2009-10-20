@@ -49,7 +49,7 @@ namespace Ariadne {
  
 template<class ES> class Orbit;
 
-class DiscreteState;
+class DiscreteLocation;
 
 template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;

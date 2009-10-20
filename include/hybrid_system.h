@@ -56,7 +56,7 @@ class HybridSpace;
 class HybridSet;
 class HybridGrid;
 
-class DiscreteState;
+class DiscreteLocation;
 class DiscreteSpace;
 
 class ScalarFunction;

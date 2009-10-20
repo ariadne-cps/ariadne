@@ -330,10 +330,10 @@ void export_hybrid_automaton()
 {
     // Don't use return_value_policy<copy_const_reference> since reference lifetime should not exceed automaton lifetime
 
-    to_python< std::map<DiscreteEvent,VectorFunction> >();
-    to_python< std::map<DiscreteEvent,ScalarFunction> >();
-    to_python< std::set<DiscreteMode> >();
-    to_python< std::set<DiscreteTransition> >();
+    to_python< Map<DiscreteEvent,VectorFunction> >();
+    to_python< Map<DiscreteEvent,ScalarFunction> >();
+    to_python< Set<DiscreteMode> >();
+    to_python< Set<DiscreteTransition> >();
 
     class_<DiscreteState> discrete_state_class("DiscreteState",init<DiscreteState>());
     discrete_state_class.def("__eq__", &__eq__<bool,DiscreteState,DiscreteState>);
@@ -361,8 +361,8 @@ void export_hybrid_automaton()
 
     class_<DiscreteTransition, shared_ptr<DiscreteTransition> > discrete_transition_class("DiscreteTransition",no_init);
     discrete_transition_class.def("event",&DiscreteTransition::event);
-    discrete_transition_class.def("source",&DiscreteTransition::source,return_value_policy<reference_existing_object>());
-    discrete_transition_class.def("target",&DiscreteTransition::target,return_value_policy<reference_existing_object>());
+    discrete_transition_class.def("source",&DiscreteTransition::source);
+    discrete_transition_class.def("target",&DiscreteTransition::target);
     discrete_transition_class.def("reset",&DiscreteTransition::reset,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("activation",&DiscreteTransition::activation,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("guard",&DiscreteTransition::activation,return_value_policy<reference_existing_object>());
@@ -374,11 +374,11 @@ void export_hybrid_automaton()
     hybrid_time_class.def("discrete_time",&HybridTime::discrete_time,return_value_policy<copy_const_reference>());
 
     class_<MonolithicHybridAutomaton> hybrid_automaton_class("MonolithicHybridAutomaton",init<>());
-    hybrid_automaton_class.def("mode",&MonolithicHybridAutomaton::mode,return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("transition",(const DiscreteTransition&(MonolithicHybridAutomaton::*)(DiscreteEvent,DiscreteState)const) &MonolithicHybridAutomaton::transition,return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("mode",(const DiscreteMode&(MonolithicHybridAutomaton::*)(DiscreteState)const) &MonolithicHybridAutomaton::mode,return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("transition",(const DiscreteTransition&(MonolithicHybridAutomaton::*)(DiscreteEvent,DiscreteState)const)  &MonolithicHybridAutomaton::transition,return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def("modes",&MonolithicHybridAutomaton::modes,return_value_policy<copy_const_reference>());
-    hybrid_automaton_class.def("transitions",(const std::set<DiscreteTransition>&(MonolithicHybridAutomaton::*)()const) &MonolithicHybridAutomaton::transitions,return_value_policy<copy_const_reference>());
-    hybrid_automaton_class.def("transitions",(std::set<DiscreteTransition>(MonolithicHybridAutomaton::*)(DiscreteState)const) &MonolithicHybridAutomaton::transitions);
+    hybrid_automaton_class.def("transitions",(const Set<DiscreteTransition>&(MonolithicHybridAutomaton::*)()const) &MonolithicHybridAutomaton::transitions,return_value_policy<copy_const_reference>());
+    hybrid_automaton_class.def("transitions",(Set<DiscreteTransition>(MonolithicHybridAutomaton::*)(DiscreteState)const) &MonolithicHybridAutomaton::transitions);
     hybrid_automaton_class.def("blocking_guards",(std::map<DiscreteEvent,VectorFunction>(MonolithicHybridAutomaton::*)(DiscreteState)const) &MonolithicHybridAutomaton::blocking_guards);
     hybrid_automaton_class.def("new_mode",(const DiscreteMode&(MonolithicHybridAutomaton::*)(DiscreteState,const VectorFunction&)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def("new_invariant",(const DiscreteMode&(MonolithicHybridAutomaton::*)(DiscreteState,const ScalarFunction&)) &MonolithicHybridAutomaton::new_invariant, return_value_policy<reference_existing_object>());

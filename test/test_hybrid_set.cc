@@ -112,10 +112,10 @@ TestHybridSet::test_hybrid_list_set()
     ListSet<Box> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5); 
 
     HybridListSet<Box>::locations_const_iterator loc_iter=hls.locations_begin();
-    ARIADNE_TEST_EQUAL(loc_iter->first,loc2);
+    ARIADNE_TEST_EQUAL(loc_iter->first[0],loc2);
     ARIADNE_TEST_EQUAL(loc_iter->second,ls2);
     ++loc_iter;
-    ARIADNE_TEST_EQUAL(loc_iter->first,loc1);
+    ARIADNE_TEST_EQUAL(loc_iter->first[0],loc1);
     ARIADNE_TEST_EQUAL(loc_iter->second,ls1);
     ++loc_iter;
     ARIADNE_TEST_ASSERT(loc_iter==hls.locations_end());

@@ -47,7 +47,7 @@ class GridCell;
 class GridTreeSet;
 
 class MonolithicHybridAutomaton;
-class DiscreteState;
+class DiscreteLocation;
 template<class BS> class HybridBasicSet;
 
 class HybridGrid;

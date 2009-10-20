@@ -147,10 +147,24 @@ template<class T> class Variable
 {
   public:
     explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
-    Assignment< Variable<T>, Expression<T> > operator=(const double& e) const;
-    Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
-    Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+    inline Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
+    inline Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
+    inline Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+};
+
+template<> class Variable<Real>
+    : public ExtendedVariable<Real>
+{
+    typedef Real T;
+    double _resolution;
+  public:
+    explicit Variable(const String& nm) : ExtendedVariable<T>(nm), _resolution(1.0) { }
+    inline Assignment< Variable<T>, Expression<T> > operator=(const double& e) const;
+    inline Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
+    inline Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
+    inline Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+    void set_resolution(double dx) { assert(dx>0.0); this->_resolution=dx; }
+    double resolution() const { return this->_resolution; }
 };
 
 
@@ -162,10 +176,10 @@ template<class T> class DottedVariable
   public:
     friend DottedVariable<Real> dot(const Variable<Real>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
-    Assignment< DottedVariable<T>, Expression<T> > operator=(const double& e) const;
-    Assignment< DottedVariable<T>, Expression<T> > operator=(const T& e) const;
-    Assignment< DottedVariable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    Assignment< DottedVariable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const double& e) const;
+    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const T& e) const;
+    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const Variable<T>& e) const;
+    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const Expression<T>& e) const;
   private:
     explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),dotted) { }
 };
@@ -183,10 +197,10 @@ template<class T> class PrimedVariable
   public:
     friend PrimedVariable<T> next<>(const Variable<T>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
-    AssignmentType operator=(const double& val) const;
-    AssignmentType operator=(const T& val) const;
-    AssignmentType operator=(const Variable<T>& var) const;
-    AssignmentType operator=(const Expression<T>& expr) const;
+    inline AssignmentType operator=(const double& val) const;
+    inline AssignmentType operator=(const T& val) const;
+    inline AssignmentType operator=(const Variable<T>& var) const;
+    inline AssignmentType operator=(const Expression<T>& expr) const;
   private:
     explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),primed) { }
 };

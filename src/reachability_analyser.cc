@@ -163,7 +163,7 @@ lower_evolve(const SystemType& system,
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
     Gr grid=system.grid();
-    GTS initial; GTS final;
+    GTS initial(system.grid()); GTS final(system.grid());
 
     // Improve accuracy of initial set for lower computations
     initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
@@ -191,7 +191,7 @@ lower_reach(const SystemType& system,
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
     Gr grid=system.grid();
-    GTS initial; GTS reach;
+    GTS initial(system.grid()); GTS reach(system.grid());
 
     ARIADNE_LOG(3,"Adjoining initial set to the grid...\n");
     // Improve accuracy of initial set for lower computations
@@ -223,7 +223,7 @@ lower_reach_evolve(const SystemType& system,
 
     Gr grid=system.grid();
 
-    GTS initial;
+    GTS initial(grid);
 
     GTS reach=(grid); GTS evolve(grid);
 
@@ -305,7 +305,7 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     ARIADNE_LOG(3,"discrete_steps="<<discrete_steps<<"\n");
-    GTS found;
+    GTS found(grid);
     for(uint i=0; i!=time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);

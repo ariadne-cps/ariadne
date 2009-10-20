@@ -55,8 +55,6 @@ class ScalarFunction;
 class VectorFunction;
 class Grid;
 
-static const bool urgent=true;
-static const bool permissive=false;
 
 /*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
  * within and invariant constraint set.

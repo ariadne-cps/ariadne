@@ -318,6 +318,7 @@ template<class R> Expression<R>::Expression(const Variable<R>& v)
 
 Expression<Real>::Expression(const double& c) : _ptr(new ConstantExpression<Real>(c)) { }
 Expression<Real>::Expression(const Interval& c) : _ptr(new ConstantExpression<Real>(c)) { }
+Expression<Real>::Expression(const Real& c) : _ptr(new ConstantExpression<Real>(c)) { }
 Expression<Real>::Expression(const Constant<Real>& c) : _ptr(new ConstantExpression<Real>(c.value())) { }
 Expression<Real>::Expression(const Variable<Real>& v) : _ptr(new VariableExpression<Real>(v)) { }
 
@@ -506,9 +507,15 @@ Expression<Real> sin(Expression<Real> e) {
     return make_expression<Real>(SIN,e); }
 Expression<Real> cos(Expression<Real> e) {
     return make_expression<Real>(COS,e); }
-
 Expression<Real> tan(Expression<Real> e) {
     return make_expression<Real>(TAN,e); }
+
+Expression<Real> max(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Real>(MAX,e1,e2); }
+Expression<Real> min(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Real>(MIN,e1,e2); }
+Expression<Real> abs(Expression<Real> e) {
+    return make_expression<Real>(ABS,e); }
 
 
 
@@ -924,10 +931,38 @@ Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
     const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
     if(vptr) { return Expression<Real>(new CoordinateExpression<Real>(s.index(vptr->variable()))); }
     const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-    ARIADNE_ASSERT_MSG(!iptr,"Cannot convert numbered variable");
+    ARIADNE_FAIL_MSG("Cannot convert numbered variable");
 }
 
 
+Expression<Real> indicator(Expression<tribool> e, Sign sign) {
+    assert(sign==positive);
+    ExpressionInterface<tribool>* eptr=const_cast<ExpressionInterface<tribool>*>(e._ptr.operator->());
+    BinaryExpression<tribool,Gtr,Real,Real>* cgptr;
+    BinaryExpression<tribool,Less,Real,Real>* clptr;
+    BinaryExpression<tribool,And>* baptr;
+    BinaryExpression<tribool,Or>* boptr;
+    UnaryExpression<tribool,Not>* unptr;
+    switch(eptr->type()) {
+        case GEQ: case GT:
+            cgptr=dynamic_cast<BinaryExpression<tribool,Gtr,Real,Real>*>(eptr);
+            return (cgptr->_arg1-cgptr->_arg2);
+        case LEQ: case LT:
+            clptr=dynamic_cast<BinaryExpression<tribool,Less,Real,Real>*>(eptr);
+            return (clptr->_arg2-clptr->_arg1);
+        case AND:
+            baptr=dynamic_cast<BinaryExpression<tribool,And>*>(eptr);
+            return min(indicator(baptr->_arg1),indicator(baptr->_arg2));
+        case OR:
+            boptr=dynamic_cast<BinaryExpression<tribool,Or>*>(eptr);
+            return max(indicator(boptr->_arg1),indicator(boptr->_arg2));
+        case NOT:
+            unptr=dynamic_cast<UnaryExpression<tribool,Not>*>(eptr);
+            return neg(indicator(unptr->_arg));
+        default:
+            ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << *eptr);
+    }
+}
 
 
 } // namespace Ariadne

@@ -480,7 +480,7 @@ AtomicHybridAutomaton::set_grid(const HybridGrid& hgrid)
     {
         AtomicDiscreteMode& mode=const_cast<AtomicDiscreteMode&>(*mode_iter);
         DiscreteState loc = mode.location();
-        if(hgrid.find(loc) == hgrid.end()) {
+        if(!hgrid.has_location(loc)) {
             throw std::runtime_error("The automaton does not contain a mode with this given location id");
         }
         if(hgrid[loc].dimension()!=mode.dimension()) {

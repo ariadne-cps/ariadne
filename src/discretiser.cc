@@ -47,7 +47,7 @@ outer_approximation(const ListSet<HybridBasicSet<ES> >& hls,
     for(typename HybridListSet<ES>::const_iterator 
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
-            DiscreteState loc=iter->first;
+            DiscreteLocation loc=iter->first;
             const ES& es=iter->second;
             if(result.find(loc)==result.locations_end()) {
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
@@ -66,22 +66,18 @@ template<>
 HybridGridTreeSet 
 outer_approximation(const ListSet< HybridBasicSet<ConstrainedImageSet> >& hls,
 //outer_approximation(const HybridListSet< ConstrainedImageSet >& hls,
-                    const HybridGrid& hgr,
+                    const HybridGrid& grid,
                     const int accuracy)
 {
     typedef ConstrainedImageSet ES;
-    HybridGridTreeSet result;
+    HybridGridTreeSet result(grid);
     //for(typename HybridListSet<ES>::const_iterator 
     for(ListSet< HybridBasicSet<ES> >::const_iterator
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
             HybridBasicSet<ES> hes(*iter);
-            DiscreteState loc=hes.location();
+            DiscreteLocation loc=hes.location();
             const ES& es=hes.continuous_state_set();
-            if(result.find(loc)==result.locations_end()) {
-                Grid grid=hgr[loc];
-                result.insert(make_pair(loc,GridTreeSet(grid)));
-            }
             GridTreeSet& gts=result[loc];
             gts.adjoin(es.outer_approximation(gts.grid(),accuracy));
             //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
@@ -92,7 +88,7 @@ outer_approximation(const ListSet< HybridBasicSet<ConstrainedImageSet> >& hls,
 
 //typedef ApproximateTaylorModel DefaultModelType;
 //typedef ApproximateTaylorModel DefaultEnclosureType;
-//typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
+//typedef std::pair<DiscreteLocation,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 template<class Sys,class ES>
 Orbit<typename Discretiser<Sys,ES>::BasicSetType> 
@@ -199,7 +195,8 @@ evolution(const SystemType& system,
     Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,semantics);
     ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\nOK\n");
-    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,system.grid(),accuracy);
+    HybridGrid hgrid=system.grid();
+    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,hgrid,accuracy);
     ARIADNE_LOG(5,"discrete_orbit reach size="<<discrete_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"discrete_orbit final size="<<discrete_orbit.final().size()<<"\n");
     return discrete_orbit;
@@ -269,26 +266,25 @@ template<class ES>
 Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
 HybridDiscretiser<ES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
-            const BasicSetType& initial_set,
-            const HybridGrid& hgrid,
+            const BasicSetType& initial,
+            const HybridGrid& grid,
             const int accuracy) const
 {
     ARIADNE_LOG(3,"HybridDiscretiser<ES>::_discretise(...)"<<"\n");
     ARIADNE_LOG(6,"continuous_orbit="<<continuous_orbit<<"\n");
 
+    DenotableSetType initial_set(grid);
+    initial_set.adjoin(initial);
     DenotableSetType reach_set
-        = outer_approximation(continuous_orbit.reach(),hgrid,
-                              accuracy);
+        = outer_approximation(continuous_orbit.reach(),grid,accuracy);
     ARIADNE_LOG(4,"reach_set size="<<reach_set.size()<<"\n");
     ARIADNE_LOG(6,"reach_set="<<reach_set<<"\n");
     DenotableSetType intermediate_set
-        = outer_approximation(continuous_orbit.intermediate(),hgrid,
-                              accuracy);
+        = outer_approximation(continuous_orbit.intermediate(),grid,accuracy);
     ARIADNE_LOG(4,"intermediate_set size="<<intermediate_set.size()<<"\n");
     ARIADNE_LOG(6,"intermediate_set="<<intermediate_set<<"\n");
     DenotableSetType final_set
-        = outer_approximation(continuous_orbit.final(),hgrid,
-                              accuracy);
+        = outer_approximation(continuous_orbit.final(),grid,accuracy);
     ARIADNE_LOG(4,"final_set size="<<final_set.size()<<"\n");
     ARIADNE_LOG(6,"final_set="<<final_set<<"\n");
     return Orbit<BasicSetType>(initial_set,reach_set,intermediate_set,final_set);

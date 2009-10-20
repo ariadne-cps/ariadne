@@ -28,6 +28,11 @@
 #ifndef ARIADNE_HYBRID_AUTOMATON_H
 #define ARIADNE_HYBRID_AUTOMATON_H
 
+namespace Ariadne {
+static const bool urgent=true;
+static const bool permissive=false;
+}
+
 #include "hybrid_automaton-monolithic.h"
 #include "hybrid_automaton-composite.h"
 

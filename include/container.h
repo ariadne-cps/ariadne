@@ -147,6 +147,7 @@ template<class T> class Set
   public:
     Set() : std::set<T>() { }
     Set(const std::set<T>& s) : std::set<T>(s) { }
+    explicit Set(const std::vector<T>& l) : std::set<T>(l.begin(),l.end()) { }
 
     bool contains(const T& t) {
         return this->find(t)!=this->end(); }
@@ -182,6 +183,9 @@ template<class K, class V> class Map
         : std::map<K,V>() { }
     Map<K,V>(const std::map<K,V>& m)
         : std::map<K,V>(m) { }
+    template<class W> explicit Map<K,V>(const std::map<K,W>& m) {
+        for(typename std::map<K,W>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
+            this->insert(iter->first,V(iter->second)); } }
     V& operator[](const K& k) {
         return this->std::map<K,V>::operator[](k); }
     const V& operator[](const K& k) const { typename std::map<K,V>::const_iterator p=this->find(k);
@@ -190,6 +194,12 @@ template<class K, class V> class Map
         return this->find(k)!=this->end(); }
     void insert(const K& k, const V& v) {
         this->std::map<K,V>::insert(std::make_pair(k,v)); }
+    Set<K> keys() const {
+        Set<K> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+            res.insert(iter->first); } return res; }
+    List<V> values() const {
+        List<V> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+            res.append(iter->second); } return res; }
     using std::map<K,V>::insert;
 };
 template<class K,class V> inline Map<K,V> join(const Map<K,V>& m1, const Map<K,V>& m2) {

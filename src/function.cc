@@ -1057,7 +1057,7 @@ ScalarFunction::ScalarFunction(const Expression<Real>& e, const Space<Real>& s)
 
 
 ScalarFunction::ScalarFunction(const Expression<tribool>& e, const List< Variable<Real> >& s) {
-    ARIADNE_NOT_IMPLEMENTED;
+    *this = ScalarFunction(new ScalarExpressionFunction(indicator(e),s));
 }
 
 

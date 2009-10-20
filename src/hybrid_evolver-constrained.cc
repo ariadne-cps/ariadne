@@ -298,7 +298,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     working_sets.pop_back();
     
     List<DiscreteEvent>& starting_events=current_data._events;
-    DiscreteState starting_location=current_data._location;
+    DiscreteLocation starting_location=current_data._location;
     ConstrainedImageSet& starting_set=current_data._set;
     ScalarFunction& starting_time=current_data._time;
 
@@ -320,19 +320,19 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     Map<DiscreteEvent,ScalarFunction> guards;
     Map<DiscreteEvent,ScalarFunction> activations;
     Map<DiscreteEvent,VectorFunction> resets;
-    Map<DiscreteEvent,DiscreteState> targets;
+    Map<DiscreteEvent,DiscreteLocation> targets;
     
     for(Set<DiscreteTransition>::const_iterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         const DiscreteEvent& event=transition_iter->event();
-        if(transition_iter->forced()) {
+        if(transition_iter->urgency()==urgent) {
             guards[event]=transition_iter->activation();
         } else {
             activations[event]=transition_iter->activation();
         }
         resets[event]=transition_iter->reset();
-        targets[event]=transition_iter->target().location();
+        targets[event]=transition_iter->target();
     }
 
     print("\ninvariants:",invariants);
@@ -417,7 +417,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
         DiscreteEvent const& event=iter->first;
         ScalarFunction const& constraint=iter->second;
         ScalarFunction derivative=lie_derivative(constraint,dynamic);
-        DiscreteState target=targets[event];
+        DiscreteLocation target=targets[event];
         VectorFunction reset=resets[event];
         ConstrainedImageSet jumping_set(reached_set);
         jumping_set.new_activation(event,constraint,derivative);

@@ -86,8 +86,8 @@ int main()
     MonolithicHybridAutomaton springs;
   
     /// Create the discrete states
-    DiscreteState free(1);
-    DiscreteState stuck(2);
+    AtomicDiscreteLocation free(1);
+    AtomicDiscreteLocation stuck(2);
 
     /// Create the discrete events
     DiscreteEvent sticking(1);

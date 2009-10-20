@@ -43,7 +43,7 @@
 #include "container.h"
 #include "valuation.h"
 
-#include "discrete_state.h"
+#include "discrete_location.h"
 
 namespace Ariadne {
 

@@ -39,7 +39,7 @@ outer_approximation(const EnclosureListType& hls,
     for(EnclosureListType::const_iterator 
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
-            DiscreteState loc=iter->first;
+            AtomicDiscreteLocation loc=iter->first;
             const ContinuousEnclosureType& es=iter->second;
             if(result.find(loc)==result.locations_end()) {
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
@@ -131,9 +131,9 @@ int main(int argc,char *argv[])
     MonolithicHybridAutomaton watertank_system;
   
     /// Create four discrete states
-    DiscreteState l1(1);      // Zero saturated
-    DiscreteState l2(2);      // Not saturated
-    DiscreteState l3(3);      // One saturated
+    AtomicDiscreteLocation l1(1);      // Zero saturated
+    AtomicDiscreteLocation l2(2);      // Not saturated
+    AtomicDiscreteLocation l3(3);      // One saturated
   
     /// Create the discrete events
     DiscreteEvent e12(12);

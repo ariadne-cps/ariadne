@@ -99,7 +99,7 @@ int main()
     VectorUserFunction<EColi> ecoli_function(Vector<Interval>(17));
 
     MonolithicHybridAutomaton ecoli_system;
-    DiscreteState starvation_mode(1);
+    AtomicDiscreteLocation starvation_mode(1);
     ecoli_system.new_mode(starvation_mode,ecoli_function);
 
     PlanarProjectionMap projection(4,0,1);

@@ -47,7 +47,7 @@ dimension() const
 
 
 DiscreteMode::
-DiscreteMode(DiscreteState location,
+DiscreteMode(AtomicDiscreteLocation location,
              const VectorFunction& dynamic)
     :  _location(location), _dynamic(dynamic), _invariants(), _grid(new Grid(dynamic.argument_size()))
 {
@@ -115,7 +115,7 @@ MonolithicHybridAutomaton::MonolithicHybridAutomaton(const std::string& name)
 
 
 const DiscreteMode&
-MonolithicHybridAutomaton::new_mode(DiscreteState location,
+MonolithicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
                           const VectorFunction& dynamic)
 {
     if(this->has_mode(location)) {
@@ -132,7 +132,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteState location,
 
 
 const DiscreteMode&
-MonolithicHybridAutomaton::new_invariant(DiscreteState location,
+MonolithicHybridAutomaton::new_invariant(AtomicDiscreteLocation location,
                                const ScalarFunction& invariant)
 {
     ARIADNE_ASSERT(location>0);
@@ -152,7 +152,7 @@ MonolithicHybridAutomaton::new_invariant(DiscreteState location,
 
 
 const DiscreteMode&
-MonolithicHybridAutomaton::new_invariant(DiscreteState location,
+MonolithicHybridAutomaton::new_invariant(AtomicDiscreteLocation location,
                                const VectorFunction& invariant)
 {
     if(invariant.result_size()!=1u) {
@@ -166,8 +166,8 @@ MonolithicHybridAutomaton::new_invariant(DiscreteState location,
 
 const DiscreteTransition&
 MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
-                                DiscreteState source,
-                                DiscreteState target,
+                                AtomicDiscreteLocation source,
+                                AtomicDiscreteLocation target,
                                 const VectorFunction &reset,
                                 const ScalarFunction &activation,
                                 bool forced)
@@ -192,8 +192,8 @@ MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
 
 const DiscreteTransition&
 MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
-                                DiscreteState source,
-                                DiscreteState target,
+                                AtomicDiscreteLocation source,
+                                AtomicDiscreteLocation target,
                                 const VectorFunction &reset,
                                 const VectorFunction &activation,
                                 bool forced)
@@ -209,8 +209,8 @@ MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
 const DiscreteTransition&
 MonolithicHybridAutomaton::
 new_forced_transition(DiscreteEvent event,
-                      DiscreteState source,
-                      DiscreteState target,
+                      AtomicDiscreteLocation source,
+                      AtomicDiscreteLocation target,
                       const VectorFunction &reset,
                       const VectorFunction &activation)
 {
@@ -221,8 +221,8 @@ new_forced_transition(DiscreteEvent event,
 const DiscreteTransition&
 MonolithicHybridAutomaton::
 new_unforced_transition(DiscreteEvent event,
-                        DiscreteState source,
-                        DiscreteState target,
+                        AtomicDiscreteLocation source,
+                        AtomicDiscreteLocation target,
                         const VectorFunction &reset,
                         const VectorFunction &activation)
 {
@@ -234,7 +234,7 @@ new_unforced_transition(DiscreteEvent event,
 
 
 void
-MonolithicHybridAutomaton::set_grid(DiscreteState location,
+MonolithicHybridAutomaton::set_grid(AtomicDiscreteLocation location,
                                     const Grid& grid)
 {
     if(!this->has_mode(location)) {
@@ -268,7 +268,7 @@ MonolithicHybridAutomaton::set_grid(const HybridGrid& hgrid)
         mode_iter!=this->_modes.end(); ++mode_iter)
     {
         DiscreteMode& mode=const_cast<DiscreteMode&>(*mode_iter);
-        DiscreteState loc = mode.location();
+        AtomicDiscreteLocation loc = mode.location();
         if(!hgrid.has_location(loc)) {
             throw std::runtime_error("The automaton does not contain a mode with this given location id");
         }
@@ -284,7 +284,7 @@ MonolithicHybridAutomaton::set_grid(const HybridGrid& hgrid)
 
 
 bool
-MonolithicHybridAutomaton::has_mode(DiscreteState state) const
+MonolithicHybridAutomaton::has_mode(AtomicDiscreteLocation state) const
 {
     // FIXME: This is a hack since we use Set which cannot be searched by id.
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -299,7 +299,7 @@ MonolithicHybridAutomaton::has_mode(DiscreteState state) const
 
 
 bool
-MonolithicHybridAutomaton::has_transition(DiscreteEvent event, DiscreteState source) const
+MonolithicHybridAutomaton::has_transition(DiscreteEvent event, AtomicDiscreteLocation source) const
 {
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
@@ -501,7 +501,7 @@ MonolithicHybridAutomaton::modes() const
 
 
 const DiscreteMode&
-MonolithicHybridAutomaton::mode(DiscreteState state) const
+MonolithicHybridAutomaton::mode(AtomicDiscreteLocation state) const
 {
     // FIXME: This is a hack; we should use a logarithmic time real search to find a mode with the given discrete state.
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -524,7 +524,7 @@ MonolithicHybridAutomaton::transitions() const
 
 
 Set< DiscreteTransition >
-MonolithicHybridAutomaton::transitions(DiscreteState source) const
+MonolithicHybridAutomaton::transitions(AtomicDiscreteLocation source) const
 {
     Set< DiscreteTransition > result;
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
@@ -539,7 +539,7 @@ MonolithicHybridAutomaton::transitions(DiscreteState source) const
 
 
 Map<DiscreteEvent,ScalarFunction>
-MonolithicHybridAutomaton::blocking_guards(DiscreteState source) const
+MonolithicHybridAutomaton::blocking_guards(AtomicDiscreteLocation source) const
 {
     Map<DiscreteEvent,ScalarFunction> result;
     const DiscreteMode& mode=this->mode(source);
@@ -565,7 +565,7 @@ MonolithicHybridAutomaton::blocking_guards(DiscreteState source) const
 
 
 Map<DiscreteEvent,ScalarFunction>
-MonolithicHybridAutomaton::permissive_guards(DiscreteState source) const
+MonolithicHybridAutomaton::permissive_guards(AtomicDiscreteLocation source) const
 {
     Map<DiscreteEvent,ScalarFunction> result;
 
@@ -584,7 +584,7 @@ MonolithicHybridAutomaton::permissive_guards(DiscreteState source) const
 
 
 const DiscreteTransition&
-MonolithicHybridAutomaton::transition(DiscreteEvent event, DiscreteState source) const
+MonolithicHybridAutomaton::transition(DiscreteEvent event, AtomicDiscreteLocation source) const
 {
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
@@ -604,7 +604,7 @@ MonolithicHybridAutomaton::name() const
 }
 
 Grid
-MonolithicHybridAutomaton::grid(DiscreteState location) const
+MonolithicHybridAutomaton::grid(AtomicDiscreteLocation location) const
 {
     ARIADNE_ASSERT(this->has_mode(location));
     const DiscreteMode& mode=this->mode(location);

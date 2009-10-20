@@ -32,7 +32,7 @@ HybridGrid::HybridGrid(const HybridSpace& hs, double l) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-void HybridGrid::insert(uint i, DiscreteState q, const Grid& g) {
+void HybridGrid::insert(uint i, AtomicDiscreteLocation q, const Grid& g) {
     this->_component_grids[i].insert(q,g); }
 
 Grid HybridGrid::operator[](const DiscreteLocation& loc) const {
@@ -50,7 +50,7 @@ Grid& HybridGrid::operator[](const DiscreteLocation& loc) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-bool HybridGrid::has_location(const DiscreteState& q) const {
+bool HybridGrid::has_location(const AtomicDiscreteLocation& q) const {
     return this->_component_grids[0].find(q) != this->_component_grids[0].end();
 }
 

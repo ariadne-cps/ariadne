@@ -89,12 +89,12 @@ class TestReachabilityAnalysis
         std::cout<<std::setprecision(20);
         std::cerr<<std::setprecision(20);
         std::clog<<std::setprecision(20);
-        DiscreteState location(1);
+        AtomicDiscreteLocation location(1);
 
         /*
           VectorUserFunction<Henon> henon(make_point("(1.5,-0.375)"));
           system.new_mode(location,ConstantFunction(Vector<Float>(2,0.0),2));
-          system.new_forced_transition(DiscreteEvent(1),DiscreteState(1),DiscreteState(1),henon,ConstantFunction(Vector<Float>(1,1.0),2));
+          system.new_forced_transition(DiscreteEvent(1),AtomicDiscreteLocation(1),AtomicDiscreteLocation(1),henon,ConstantFunction(Vector<Float>(1,1.0),2));
           ImageSet initial_box(Box("[0.99,1.01]x[-0.01,0.01]"));
         */
         /*
@@ -148,7 +148,7 @@ class TestReachabilityAnalysis
     }
 
     void test_lower_reach_evolve() {  
-        DiscreteState loc(1);
+        AtomicDiscreteLocation loc(1);
         Box bounding_box(2,bound);
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(system,initial_set,reach_time);
@@ -163,7 +163,7 @@ class TestReachabilityAnalysis
   
     void test_upper_reach_evolve() {  
         cout << "Computing timed reachable set" << endl;
-        DiscreteState loc(1);
+        AtomicDiscreteLocation loc(1);
         Box bounding_box(2,bound);
         HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(system,initial_set,reach_time);
         cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
@@ -179,7 +179,7 @@ class TestReachabilityAnalysis
   
     void test_chain_reach() {  
         cout << "Computing chain reachable set" << endl;
-        DiscreteState loc(1);
+        AtomicDiscreteLocation loc(1);
         HybridBoxes bounding_boxes
             =Ariadne::bounding_boxes(system.state_space(),bound);
         Box bounding_box=bounding_boxes[loc];

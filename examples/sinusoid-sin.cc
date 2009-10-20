@@ -26,7 +26,7 @@ int main()
     MonolithicHybridAutomaton sinusoid;
 
     /// Create the discrete state
-    DiscreteState l1(1);
+    AtomicDiscreteLocation l1(1);
 
     /// Create the discrete event
     DiscreteEvent e1(1);

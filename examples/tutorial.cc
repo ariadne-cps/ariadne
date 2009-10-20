@@ -112,8 +112,8 @@ MonolithicHybridAutomaton create_heating_system()
     // Float Ton_lower=14.5;
 
     // Create the two discrete state
-    DiscreteState heater_on(1);
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation heater_on(1);
+    AtomicDiscreteLocation heater_off(2);
 
     // Create the discrete events
     DiscreteEvent switch_on(1);
@@ -169,8 +169,8 @@ HybridEvolver create_evolver()
 void compute_evolution(const MonolithicHybridAutomaton& heating_system, const HybridEvolver& evolver)
 {
     // Redefine the two discrete states
-    DiscreteState heater_on(1);
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation heater_on(1);
+    AtomicDiscreteLocation heater_off(2);
 
     // Declare the type to be used for the system evolution
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
@@ -224,7 +224,7 @@ void compute_reachable_sets(const MonolithicHybridAutomaton& heating_system, con
 
     // Define the initial set
     HybridImageSet initial_set;
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation heater_off(2);
     Box initial_box(2, 0.0,0.015625/4, 16.0,16.0+0.0625/16);
     initial_set[heater_off]=initial_box;
 
@@ -277,7 +277,7 @@ void compute_reachable_sets_with_serialisation(const MonolithicHybridAutomaton& 
 {
     // Define the initial set
     HybridImageSet initial_set;
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation heater_off(2);
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
     initial_set[heater_off]=initial_box;
 

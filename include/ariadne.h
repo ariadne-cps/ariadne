@@ -64,7 +64,7 @@ using std::ofstream; using std::ifstream;
 #include "hybrid_time.h"
 #include "orbit.h"
 
-#include "discrete_state.h"
+#include "discrete_location.h"
 #include "discrete_event.h"
 #include "hybrid_automaton.h"
 

@@ -72,7 +72,7 @@ TestCompositeHybridAutomaton::test_build_hybrid_system()
     AtomicHybridAutomaton tank("tank");
 
     // Declare a trivial discrete mode.
-    DiscreteState trivial("draining");
+    AtomicDiscreteLocation trivial("draining");
 
     // The water level is always given by the same dynamic
     // The inflow is controlled by the valve alpha, the outflow depends on the
@@ -90,10 +90,10 @@ TestCompositeHybridAutomaton::test_build_hybrid_system()
     DiscreteEvent finished_closing("finished_closing");
 
     // Declare the locations we use
-    DiscreteState open("open");
-    DiscreteState opening("opening");
-    DiscreteState closed("closed");
-    DiscreteState closing("closing");
+    AtomicDiscreteLocation open("open");
+    AtomicDiscreteLocation opening("opening");
+    AtomicDiscreteLocation closed("closed");
+    AtomicDiscreteLocation closing("closing");
 
     AtomicHybridAutomaton valve("valve");
 
@@ -140,10 +140,10 @@ TestCompositeHybridAutomaton::test_build_hybrid_system()
 void
 TestCompositeHybridAutomaton::test_static_analysis()
 {
-    DiscreteLocation initial_location=(DiscreteState("draining"),DiscreteState("opening"));
+    DiscreteLocation initial_location=(AtomicDiscreteLocation("draining"),AtomicDiscreteLocation("opening"));
     ARIADNE_TEST_PRINT(discrete_reachability(_system,initial_location));
 
-    DiscreteLocation invalid_location=(DiscreteState("nonexistent"),DiscreteState("opening"));
+    DiscreteLocation invalid_location=(AtomicDiscreteLocation("nonexistent"),AtomicDiscreteLocation("opening"));
     ARIADNE_TEST_FAIL(discrete_reachability(_system,invalid_location));
 }
 

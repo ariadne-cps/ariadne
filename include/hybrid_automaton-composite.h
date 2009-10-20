@@ -35,7 +35,7 @@
 #include <map>
 
 #include "function.h"
-#include "discrete_state.h"
+#include "discrete_location.h"
 #include "discrete_event.h"
 #include "formula.h"
 
@@ -130,7 +130,7 @@ class AtomicDiscreteMode {
     friend class AtomicHybridAutomaton;
   private:
     // The discrete mode's discrete state.
-    DiscreteState _location;
+    AtomicDiscreteLocation _location;
 
     // The algebraic equations
     List<RealAlgebraicAssignment> _algebraic_assignments;
@@ -144,10 +144,10 @@ class AtomicDiscreteMode {
     // The discrete mode's grid for reachability analysis.
     Map<DiscreteEvent,AtomicDiscreteTransition> _transitions;
   private:
-    AtomicDiscreteMode(DiscreteState, const List<RealAlgebraicAssignment>&,const List<RealDifferentialAssignment>&);
+    AtomicDiscreteMode(AtomicDiscreteLocation, const List<RealAlgebraicAssignment>&,const List<RealDifferentialAssignment>&);
   public:
     //! \brief The mode's discrete state.
-    DiscreteState location() const { return this->_location; }
+    AtomicDiscreteLocation location() const { return this->_location; }
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
@@ -217,7 +217,7 @@ class AtomicHybridAutomaton
     String _name;
 
     //! \brief The list of the hybrid automaton's discrete modes.
-    Map< DiscreteState, AtomicDiscreteMode > _modes;
+    Map< AtomicDiscreteLocation, AtomicDiscreteMode > _modes;
 
   public:
     //@{
@@ -241,24 +241,24 @@ class AtomicHybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     const AtomicDiscreteMode&
-    new_mode(DiscreteState state,
+    new_mode(AtomicDiscreteLocation state,
              const List<RealAlgebraicAssignment>& equations,
              const List<RealDifferentialAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
     const AtomicDiscreteMode&
-    new_mode(DiscreteState state,
+    new_mode(AtomicDiscreteLocation state,
              const List<RealDifferentialAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
     const AtomicDiscreteMode&
-    new_mode(DiscreteState state,
+    new_mode(AtomicDiscreteLocation state,
              const List<RealAlgebraicAssignment>& equations);
 
 
     //! \brief Adds a discrete mode to the automaton.
     const AtomicDiscreteMode&
-    new_invariant(DiscreteState state,
+    new_invariant(AtomicDiscreteLocation state,
                   DiscreteEvent event,
                   const ContinuousPredicate& constraint);
 
@@ -269,9 +269,9 @@ class AtomicHybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
-    const AtomicDiscreteTransition& new_transition(DiscreteState source,
+    const AtomicDiscreteTransition& new_transition(AtomicDiscreteLocation source,
                                              DiscreteEvent event,
-                                             DiscreteState target,
+                                             AtomicDiscreteLocation target,
                                              const List<RealUpdateAssignment>& reset,
                                              const ContinuousPredicate& guard);
 
@@ -282,9 +282,9 @@ class AtomicHybridAutomaton
     //!    \param event is the transition's event.
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
-    const AtomicDiscreteTransition& new_transition(DiscreteState source,
+    const AtomicDiscreteTransition& new_transition(AtomicDiscreteLocation source,
                                              DiscreteEvent event,
-                                             DiscreteState target,
+                                             AtomicDiscreteLocation target,
                                              const List<RealUpdateAssignment>& reset);
 
      //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
@@ -295,14 +295,14 @@ class AtomicHybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
-    const AtomicDiscreteTransition& new_transition(DiscreteState source,
+    const AtomicDiscreteTransition& new_transition(AtomicDiscreteLocation source,
                                              DiscreteEvent event,
-                                             DiscreteState target,
+                                             AtomicDiscreteLocation target,
                                              const ContinuousPredicate& guard);
 
 
     //! \brief Set the grid controlling relative scaling in the mode. \deprecated
-    void set_grid(DiscreteState location, const Grid& grid);
+    void set_grid(AtomicDiscreteLocation location, const Grid& grid);
 
     //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode. \deprecated
     void set_grid(const Grid& grid);
@@ -319,34 +319,34 @@ class AtomicHybridAutomaton
     const String& name() const;
 
     //! \brief The set of discrete locations.
-    Set<DiscreteState> locations() const;
+    Set<AtomicDiscreteLocation> locations() const;
 
     //! \brief The discrete events possible in location \a source.
-    Set<DiscreteEvent> events(DiscreteState source) const;
+    Set<DiscreteEvent> events(AtomicDiscreteLocation source) const;
 
     //! \brief Test if the hybrid automaton has a discrete mode with the given \a location.
-    bool has_mode(DiscreteState location) const;
+    bool has_mode(AtomicDiscreteLocation location) const;
 
     //! \brief Test if the hybrid automaton has a discrete transition with the given \a event label in \a location.
-    bool has_invariant(DiscreteState source, DiscreteEvent event) const;
+    bool has_invariant(AtomicDiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
-    bool has_transition(DiscreteState source, DiscreteEvent event) const;
+    bool has_transition(AtomicDiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief The discrete mode with given discrete state.
-    const AtomicDiscreteMode& mode(DiscreteState location) const;
+    const AtomicDiscreteMode& mode(AtomicDiscreteLocation location) const;
 
     //! \brief The discrete mode with given discrete state.
-    AtomicDiscreteMode& mode(DiscreteState location);
+    AtomicDiscreteMode& mode(AtomicDiscreteLocation location);
 
     //! \brief The discrete transition with given \a event and \a source location.
-    const ContinuousPredicate& invariant(DiscreteState location, DiscreteEvent event) const;
+    const ContinuousPredicate& invariant(AtomicDiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The discrete transition with given \a event and \a source location.
-    const AtomicDiscreteTransition& transition(DiscreteState source, DiscreteEvent event) const;
+    const AtomicDiscreteTransition& transition(AtomicDiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief The discrete transitions from location \a source.
-    Set<AtomicDiscreteTransition> transitions(DiscreteState source) const;
+    Set<AtomicDiscreteTransition> transitions(AtomicDiscreteLocation source) const;
 
     //@}
 
@@ -354,22 +354,22 @@ class AtomicHybridAutomaton
     //! \name New-style access for compositional hybrid automata.
 
     //! \brief The target location of the discrete event from the given discrete location.
-    DiscreteState target(const DiscreteState& source, const DiscreteEvent& event);
+    AtomicDiscreteLocation target(const AtomicDiscreteLocation& source, const DiscreteEvent& event);
     //! \brief The state (dotted) variables in the given location.
-    List<RealVariable> state_variables(DiscreteState location) const;
+    List<RealVariable> state_variables(AtomicDiscreteLocation location) const;
     //! \brief The auxiliary (algebraic/output) variables in the given location.
-    List<RealVariable> auxiliary_variables(DiscreteState location) const;
+    List<RealVariable> auxiliary_variables(AtomicDiscreteLocation location) const;
     //! \brief The algebraic equations valid in the given location.
-    List<RealAssignment> algebraic_assignments(const DiscreteState& location) const;
+    List<RealAssignment> algebraic_assignments(const AtomicDiscreteLocation& location) const;
     //! \brief The differential equations valid in the given location.
-    List<DottedRealAssignment> differential_assignments(const DiscreteState& location) const;
+    List<DottedRealAssignment> differential_assignments(const AtomicDiscreteLocation& location) const;
     //! \brief The differential equations valid in the given location.
-    List<PrimedRealAssignment> update_assignments(const DiscreteState& source, const DiscreteEvent& event) const;
+    List<PrimedRealAssignment> update_assignments(const AtomicDiscreteLocation& source, const DiscreteEvent& event) const;
     //! \brief The invariant predicates valid in the given location.
-    Map<DiscreteEvent,ContinuousPredicate> invariant_predicates(const DiscreteState& location) const;
-    ContinuousPredicate invariant_predicate(const DiscreteState& location, const DiscreteEvent& action) const;
+    Map<DiscreteEvent,ContinuousPredicate> invariant_predicates(const AtomicDiscreteLocation& location) const;
+    ContinuousPredicate invariant_predicate(const AtomicDiscreteLocation& location, const DiscreteEvent& action) const;
     //! \brief The guard predicate for the given event in the given location.
-    ContinuousPredicate guard_predicate(const DiscreteState& location, const DiscreteEvent& event) const;
+    ContinuousPredicate guard_predicate(const AtomicDiscreteLocation& location, const DiscreteEvent& event) const;
     //@}
 
     //! \brief Write to an output stream.
@@ -382,7 +382,6 @@ inline std::ostream& operator<<(std::ostream& os, const AtomicHybridAutomaton& h
 
 
 class CompositeHybridAutomaton {
-    typedef List<DiscreteState> DiscreteLocation;
   public:
     CompositeHybridAutomaton();
     CompositeHybridAutomaton(const AtomicHybridAutomaton&);

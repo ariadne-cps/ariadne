@@ -120,10 +120,10 @@ int main()
     MonolithicHybridAutomaton multipleguards;
   
     /// Create the discrete states
-    DiscreteState pospos(1);
-    DiscreteState posneg(2);
-    DiscreteState negpos(3);
-    DiscreteState negneg(4);	
+    AtomicDiscreteLocation pospos(1);
+    AtomicDiscreteLocation posneg(2);
+    AtomicDiscreteLocation negpos(3);
+    AtomicDiscreteLocation negneg(4);	
 
     /// Create the discrete events
     DiscreteEvent pospos2posneg(12);

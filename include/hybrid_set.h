@@ -306,16 +306,16 @@ class HybridAutomaton;
 
 class HybridGrid
 {
-    List< Map<DiscreteState,Grid> > _component_grids;
+    List< Map<AtomicDiscreteLocation,Grid> > _component_grids;
   public:
     HybridGrid(uint n=0u);
     HybridGrid(const HybridSpace& hs, double l);
-    void insert(uint i, DiscreteState q, const Grid& g);
+    void insert(uint i, AtomicDiscreteLocation q, const Grid& g);
     Grid operator[](const DiscreteLocation& loc) const;
     Grid& operator[](const DiscreteLocation& loc);
 
     // Deprecated
-    bool has_location(const DiscreteState& q) const;
+    bool has_location(const AtomicDiscreteLocation& q) const;
     bool has_location(const DiscreteLocation& q) const;
 };
 

@@ -35,7 +35,7 @@
 #include <map>
 
 #include "function.h"
-#include "discrete_state.h"
+#include "discrete_location.h"
 #include "discrete_event.h"
 
 
@@ -72,7 +72,7 @@ class DiscreteMode {
   private:
 
     // The discrete mode's discrete state.
-    DiscreteState _location;
+    AtomicDiscreteLocation _location;
 
     // The discrete mode's vector field.
     VectorFunction _dynamic;
@@ -84,7 +84,7 @@ class DiscreteMode {
     boost::shared_ptr< const Grid > _grid;
   public:
     //! \brief The mode's discrete state.
-    DiscreteState location() const {
+    AtomicDiscreteLocation location() const {
         return this->_location; }
 
     //! \brief The discrete mode's dynamic (a vector field).
@@ -114,11 +114,11 @@ class DiscreteMode {
     // \param id is the identifier of the mode.
     // \param dynamic is the mode's vector field.
     // \param invariants is the mode's invariants.
-    DiscreteMode(DiscreteState location,
+    DiscreteMode(AtomicDiscreteLocation location,
                  const VectorFunction& dynamic);
 
     // Construct from objects managed by shared pointers (for internal use)
-    DiscreteMode(DiscreteState location,
+    DiscreteMode(AtomicDiscreteLocation location,
                  const VectorFunction dynamic,
                  const std::vector< VectorFunction >& invariants);
 
@@ -181,11 +181,11 @@ class DiscreteTransition
 
 
     //! \brief The source mode of the discrete transition.
-    DiscreteState source() const {
+    AtomicDiscreteLocation source() const {
         return this->_source->location(); }
 
     //! \brief The target of the discrete transition.
-    DiscreteState target() const {
+    AtomicDiscreteLocation target() const {
         return this->_target->location(); }
 
 
@@ -319,7 +319,7 @@ class MonolithicHybridAutomaton
     //!
     //!   \param state is the mode's discrete state.
     //!   \param dynamic is the mode's vector field.
-    const DiscreteMode& new_mode(DiscreteState state,
+    const DiscreteMode& new_mode(AtomicDiscreteLocation state,
                                  const VectorFunction& dynamic);
 
     //! \brief Adds an invariant to a mode of the automaton.
@@ -327,7 +327,7 @@ class MonolithicHybridAutomaton
     //!   \param state is the mode's discrete state.
     //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
 
-    const DiscreteMode& new_invariant(DiscreteState state,
+    const DiscreteMode& new_invariant(AtomicDiscreteLocation state,
                                       const ScalarFunction& invariant);
 
     //! \brief Adds an invariants to a mode of the automaton.
@@ -335,7 +335,7 @@ class MonolithicHybridAutomaton
     //!   \param state is the mode's discrete state.
     //!   \param invariants is the new invariants condition.
 
-    const DiscreteMode& new_invariant(DiscreteState state,
+    const DiscreteMode& new_invariant(AtomicDiscreteLocation state,
                                       const VectorFunction& invariants);
 
     //! \brief Adds an invariants to a mode of the automaton.
@@ -356,8 +356,8 @@ class MonolithicHybridAutomaton
     //!    \param activation is the transition's activation region.
     //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
     const DiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteState source,
-                                             DiscreteState target,
+                                             AtomicDiscreteLocation source,
+                                             AtomicDiscreteLocation target,
                                              const VectorFunction& reset,
                                              const ScalarFunction& activation,
                                              bool forced);
@@ -371,8 +371,8 @@ class MonolithicHybridAutomaton
     //!    \param activation is the transition's activation region.
     //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
     const DiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteState source,
-                                             DiscreteState target,
+                                             AtomicDiscreteLocation source,
+                                             AtomicDiscreteLocation target,
                                              const VectorFunction& reset,
                                              const VectorFunction& activation,
                                              bool forced);
@@ -386,8 +386,8 @@ class MonolithicHybridAutomaton
     //!    \param reset is the transition's reset.
     //!    \param activation is the transition's activation region.
     const DiscreteTransition& new_forced_transition(DiscreteEvent event,
-                                                    DiscreteState source,
-                                                    DiscreteState target,
+                                                    AtomicDiscreteLocation source,
+                                                    AtomicDiscreteLocation target,
                                                     const VectorFunction& reset,
                                                     const VectorFunction& activation);
 
@@ -400,8 +400,8 @@ class MonolithicHybridAutomaton
     //!    \param reset is the transition's reset.
     //!    \param activation is the transition's activation region.
     const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
-                                                      DiscreteState source,
-                                                      DiscreteState target,
+                                                      AtomicDiscreteLocation source,
+                                                      AtomicDiscreteLocation target,
                                                       const VectorFunction& reset,
                                                       const VectorFunction& activation);
 /*
@@ -422,7 +422,7 @@ class MonolithicHybridAutomaton
 */
 
     //! \brief Set the grid controlling relative scaling in the mode.
-    void set_grid(DiscreteState location, const Grid& grid);
+    void set_grid(AtomicDiscreteLocation location, const Grid& grid);
 
     //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode.
     void set_grid(const Grid& grid);
@@ -431,16 +431,16 @@ class MonolithicHybridAutomaton
     void set_grid(const HybridGrid& hgrid);
 
     //! \brief Test if the hybrid automaton has a discrete mode \a location.
-    bool has_mode(DiscreteState location) const;
+    bool has_mode(AtomicDiscreteLocation location) const;
 
     //! \brief Test if the hybrid automaton has a discrete transition with \a event and \a source.
-    bool has_transition(DiscreteEvent event, DiscreteState source) const;
+    bool has_transition(DiscreteEvent event, AtomicDiscreteLocation source) const;
 
     //! \brief The discrete mode with identifier \a source.
-    DiscreteMode const& mode(DiscreteState source) const;
+    DiscreteMode const& mode(AtomicDiscreteLocation source) const;
 
     //! \brief The discrete transition with \a event and \a source.
-    DiscreteTransition const& transition(DiscreteEvent event, DiscreteState source) const;
+    DiscreteTransition const& transition(DiscreteEvent event, AtomicDiscreteLocation source) const;
 
     //@}
 
@@ -490,14 +490,14 @@ class MonolithicHybridAutomaton
     const Set< DiscreteTransition >& transitions() const;
 
     //! \brief The discrete transitions from location \a source.
-    Set< DiscreteTransition > transitions(DiscreteState source) const;
+    Set< DiscreteTransition > transitions(AtomicDiscreteLocation source) const;
     Set< DiscreteTransition > transitions(DiscreteLocation source) const;
 
     //! \brief The blocking events (invariants and urgent transitions) in \a location.
-    Map<DiscreteEvent,ScalarFunction> blocking_guards(DiscreteState location) const;
+    Map<DiscreteEvent,ScalarFunction> blocking_guards(AtomicDiscreteLocation location) const;
 
     //! \brief The permissive events (invariants and urgent transitions) in \a location.
-    Map<DiscreteEvent,ScalarFunction> permissive_guards(DiscreteState location) const;
+    Map<DiscreteEvent,ScalarFunction> permissive_guards(AtomicDiscreteLocation location) const;
 
     //! \brief The state space of the system.
     HybridSpace state_space() const;
@@ -506,7 +506,7 @@ class MonolithicHybridAutomaton
     HybridSet invariant() const;
 
     //! \brief The natural grid to use in the specified location.
-    Grid grid(DiscreteState location) const;
+    Grid grid(AtomicDiscreteLocation location) const;
 
     //! \brief The natural grid to use in the over all locations.
     HybridGrid grid() const;

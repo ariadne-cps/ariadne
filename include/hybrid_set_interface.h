@@ -35,7 +35,7 @@
 
 #include "tribool.h"
 #include "set_interface.h"
-#include "discrete_state.h"
+#include "discrete_location.h"
 
 namespace Ariadne {
 

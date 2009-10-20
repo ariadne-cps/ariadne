@@ -53,7 +53,7 @@ int main()
     AtomicHybridAutomaton tank("tank");
 
     // Declare a trivial discrete mode.
-    DiscreteState trivial("");
+    AtomicDiscreteLocation trivial("");
 
     // The water level is always given by the same dynamic
     // The inflow is controlled by the valve alpha, the outflow depends on the
@@ -71,10 +71,10 @@ int main()
     DiscreteEvent finished_closing("finished_closing");
 
     // Declare the locations we use
-    DiscreteState open("open");
-    DiscreteState opening("opening");
-    DiscreteState closed("closed");
-    DiscreteState closing("closing");
+    AtomicDiscreteLocation open("open");
+    AtomicDiscreteLocation opening("opening");
+    AtomicDiscreteLocation closed("closed");
+    AtomicDiscreteLocation closing("closing");
 
     AtomicHybridAutomaton valve("valve");
 

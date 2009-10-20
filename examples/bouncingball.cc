@@ -42,7 +42,7 @@ int main()
     MonolithicHybridAutomaton ball;
 
     /// Create four discrete states
-    DiscreteState l1(1);
+    AtomicDiscreteLocation l1(1);
 
     /// Create the discrete events
     DiscreteEvent e11(11);

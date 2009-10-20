@@ -141,10 +141,10 @@ int main()
     MonolithicHybridAutomaton rectifier;
 
     /// Create the discrete states
-    DiscreteState offoff(1);
-    DiscreteState onoff(2);
-    DiscreteState offon(3);
-    DiscreteState onon(4);
+    AtomicDiscreteLocation offoff(1);
+    AtomicDiscreteLocation onoff(2);
+    AtomicDiscreteLocation offon(3);
+    AtomicDiscreteLocation onon(4);
 
     /// Create the discrete events
     DiscreteEvent resettime(1);

@@ -64,8 +64,8 @@ int main()
 MonolithicHybridAutomaton
 TestHybridSimulator::system()
 {
-    const DiscreteState location1(1);
-    const DiscreteState location2(2);
+    const AtomicDiscreteLocation location1(1);
+    const AtomicDiscreteLocation location2(2);
     const DiscreteEvent event3(3);
     const DiscreteEvent event4(4);
 
@@ -101,8 +101,8 @@ void TestHybridSimulator::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    const DiscreteState location1(1);
-    const DiscreteState location2(2);
+    const AtomicDiscreteLocation location1(1);
+    const AtomicDiscreteLocation location2(2);
     const DiscreteEvent event3(3);
     const DiscreteEvent event4(4);
 

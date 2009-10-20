@@ -98,7 +98,7 @@ int main()
     MonolithicHybridAutomaton rectifier;
 
     /// Create the discrete state
-    DiscreteState running(1);
+    AtomicDiscreteLocation running(1);
 
     /// Create the discrete events
     DiscreteEvent resettime(1);

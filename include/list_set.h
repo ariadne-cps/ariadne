@@ -34,7 +34,7 @@
 #include "macros.h"
 
 #include "graphics_interface.h"
-#include "discrete_state.h"
+#include "discrete_location.h"
 
 #include "box.h"
 

@@ -342,7 +342,7 @@ void export_constrained_image_set()
 void export_hybrid_box()
 {
     class_<HybridBox> hybrid_box_class("HybridBox",init<HybridBox>());
-    hybrid_box_class.def(init<DiscreteState,Box>());
+    hybrid_box_class.def(init<AtomicDiscreteLocation,Box>());
     hybrid_box_class.def("location",&HybridBox::location,return_value_policy<copy_const_reference>());
     hybrid_box_class.def("continuous_state_set",&HybridBox::continuous_state_set,return_value_policy<copy_const_reference>());
     hybrid_box_class.def(self_ns::str(self));
@@ -351,8 +351,8 @@ void export_hybrid_box()
 void export_hybrid_taylor_set()
 {
     class_<HybridTaylorSet> hybrid_taylor_set_class("HybridTaylorSet",init<HybridTaylorSet>());
-    hybrid_taylor_set_class.def(init<DiscreteState,Box>());
-    hybrid_taylor_set_class.def(init<DiscreteState,TaylorSet>());
+    hybrid_taylor_set_class.def(init<AtomicDiscreteLocation,Box>());
+    hybrid_taylor_set_class.def(init<AtomicDiscreteLocation,TaylorSet>());
     hybrid_taylor_set_class.def(self_ns::str(self));
 
     implicitly_convertible<HybridBox,HybridTaylorSet>();
@@ -362,8 +362,8 @@ void export_hybrid_constrained_image_set()
 {
     class_<HybridConstrainedImageSet>
         hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
-    hybrid_constrained_image_set_class.def(init<DiscreteState,Box>());
-    //hybrid_constrained_image_set_class.def(init<DiscreteState,ConstrainedImageSet>());
+    hybrid_constrained_image_set_class.def(init<AtomicDiscreteLocation,Box>());
+    //hybrid_constrained_image_set_class.def(init<AtomicDiscreteLocation,ConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(self_ns::str(self));
 
     implicitly_convertible<HybridBox,HybridConstrainedImageSet>();

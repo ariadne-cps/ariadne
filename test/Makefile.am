@@ -34,6 +34,7 @@ check_PROGRAMS = \
 	test_taylor_function \
 	test_taylor_set \
 	test_function \
+	test_hybrid_automaton \
 	test_hybrid_system \
 	test_grid_set \
 	test_hybrid_set \

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            watertank.cc
+ *            test_hybrid_automaton.cc
  *
- *  Copyright  2008-9  Davide Bresolin, Pieter Collins
+ *  Copyright  2009  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,18 +21,40 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cstdarg>
-#include "real.h"
+#include <iostream>
+#include <fstream>
+
+#include "test.h"
+
 #include "expression.h"
 #include "hybrid_automaton.h"
-#include "hybrid_evolver.h"
-#include "hybrid_set.h"
 
-
+using namespace std;
 using namespace Ariadne;
-using std::cout; using std::endl;
 
-int main()
+
+class TestCompositeHybridAutomaton {
+  public:
+    void test();
+  private:
+    void test_build_hybrid_system();
+    void test_static_analysis();
+  private:
+    CompositeHybridAutomaton _system;
+};
+
+void
+TestCompositeHybridAutomaton::test()
+{
+    std::clog<<std::boolalpha;
+    std::cerr<<std::boolalpha;
+    ARIADNE_TEST_CALL(test_build_hybrid_system());
+    ARIADNE_TEST_CALL(test_static_analysis());
+}
+
+
+void
+TestCompositeHybridAutomaton::test_build_hybrid_system()
 {
     // Declare some constants. Note that system parameters should be given as variables.
     RealConstant T("T",4.0);
@@ -42,9 +64,6 @@ int main()
     RealConstant lambda("lambda",0.02);
     RealConstant rate("rate",0.3);
 
-
-
-
     // Declare the system variables
     RealVariable height("height");
     RealVariable alpha("alpha");
@@ -53,14 +72,14 @@ int main()
     AtomicHybridAutomaton tank("tank");
 
     // Declare a trivial discrete mode.
-    DiscreteState trivial("");
+    DiscreteState trivial("draining");
 
     // The water level is always given by the same dynamic
     // The inflow is controlled by the valve alpha, the outflow depends on the
     // pressure, which is proportional to the water height.
     tank.new_mode(trivial,(dot(height)=-lambda*height+rate*alpha));
 
-
+    ARIADNE_TEST_PRINT(tank);
 
     // Describe the valve model
 
@@ -89,7 +108,7 @@ int main()
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    valve.new_invariant(open,start_closing,height<=hmax);
+    valve.new_invariant(open,start_closing,height<=hmax || (height>=hmin && !(height<=hmin+1)));
     valve.new_invariant(opening,start_closing,height<=hmax);
     valve.new_invariant(opening,finished_opening,alpha<=1.0);
     valve.new_invariant(closed,start_opening,height>=hmin);
@@ -107,47 +126,30 @@ int main()
     valve.new_transition(opening,finished_opening,open,alpha>=1.0);
     valve.new_transition(closing,finished_closing,closed,alpha<=0.0);
 
+    ARIADNE_TEST_PRINT(valve);
 
     CompositeHybridAutomaton watertank_system((tank,valve));
     std::cout << "watertank_system:\n" << watertank_system << "\n";
 
+    _system=watertank_system;
 
-
-
-/*
-    // Compute the system evolution
-
-    // Create a HybridEvolver object
-    HybridEvolver evolver;
-    evolver.verbosity = 1;
-
-    // Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.125;
-    std::cout <<  evolver.parameters() << std::endl;
-
-    // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
-
-    std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
-
-    DiscreteLocation initial_location=(trivial,opening);
-    Box initial_box(2, 0.0,0.00, 0.0,0.00);
-    HybridEnclosureType initial_enclosure(DiscreteLocation((trivial,opening)),initial_box);
-    Box bounding_box(2, -0.1,9.1, -0.1,1.1);
-
-    HybridTime evolution_time(80.0,5);
-
-    std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
-    std::cout << "done." << std::endl;
-
-    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    //std::cout << "Plotting orbit... "<<std::flush;
-    //plot("watertank_compositional-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-    std::cout << "done." << std::endl;
-*/
 }
+
+
+
+void
+TestCompositeHybridAutomaton::test_static_analysis()
+{
+    DiscreteLocation initial_location=(DiscreteState("draining"),DiscreteState("opening"));
+    ARIADNE_TEST_PRINT(discrete_reachability(_system,initial_location));
+
+    DiscreteLocation invalid_location=(DiscreteState("nonexistent"),DiscreteState("opening"));
+    ARIADNE_TEST_FAIL(discrete_reachability(_system,invalid_location));
+}
+
+
+int main() {
+    TestCompositeHybridAutomaton().test();
+    return ARIADNE_TEST_FAILURES;
+}
+

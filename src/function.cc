@@ -1290,7 +1290,7 @@ VectorFunction::VectorFunction(Nat rs, const ScalarFunction& sf)
 {
 }
 
-VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s) 
+VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s)
     : _ptr(new VectorOfScalarFunction(e.size(),s.size()))
 {
     VectorOfScalarFunction* vec = static_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
@@ -1340,7 +1340,8 @@ struct VectorExpressionFunction : public VectorFunctionTemplate<VectorExpression
     }
 
     std::ostream& write(std::ostream& os) const {
-        return os << this->_result_variables << this->_argument_variables << this->_assignments;
+        //return os << this->_result_variables << this->_argument_variables << this->_assignments;
+        return os << this->_assignments;
     }
 
 };
@@ -1349,7 +1350,7 @@ struct VectorExpressionFunction : public VectorFunctionTemplate<VectorExpression
 VectorFunction::VectorFunction(const List<ExtendedRealVariable>& rv,
                                const List<ExtendedRealAssignment>& eq,
                                const List<RealVariable>& av)
-    : _ptr(new VectorExpressionFunction(rv,eq,av)) 
+    : _ptr(new VectorExpressionFunction(rv,eq,av))
 {
 }
 
@@ -1448,7 +1449,7 @@ Matrix<Float> VectorFunction::jacobian(const Vector<Float>& x) const
 
 Matrix<Interval> VectorFunction::jacobian(const Vector<Interval>& x) const
 {
-    return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); 
+    return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x)));
 }
 
 

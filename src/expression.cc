@@ -226,8 +226,7 @@ template<class R, class Op=Operator, class A1=R, class A2=A1> class BinaryExpres
     virtual Operator type() const { return static_cast<Operator>(_op); }
     virtual BinaryExpression<R,Op,A1,A2>* clone() const { return new BinaryExpression<R,Op,A1,A2>(_op,_arg1._ptr,_arg2._ptr); }
     virtual Set<String> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
-    virtual std::ostream& write(std::ostream& os) const {
-        return os << "(" << _arg1 << symbol(_op) << _arg2 << ")"; }
+    virtual std::ostream& write(std::ostream& os) const;
   protected:
     virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
   public:
@@ -237,31 +236,19 @@ template<class R, class Op=Operator, class A1=R, class A2=A1> class BinaryExpres
 };
 
 
-//! A composed scalar function, based on an arthmetic operator.
-template<class R, class A> class BinaryExpression<R,Comparison,A,A>
-    : public ExpressionInterface<R>
-{
-    typedef Comparison Op; typedef A A1; typedef A A2;
-  public:
-    BinaryExpression(Op op, const ExpressionInterface<A1>& expr1, const ExpressionInterface<A2>& expr2)
-        : _op(op), _arg1(expr1.clone()), _arg2(expr2.clone()) { }
-    BinaryExpression(Op op, const ExpressionInterface<A1>* expr1, const ExpressionInterface<A2>* expr2)
-        : _op(op), _arg1(expr1), _arg2(expr2) { }
-    BinaryExpression(Op op, shared_ptr< const ExpressionInterface<A1> > expr1, shared_ptr< const ExpressionInterface<A2> > expr2)
-        : _op(op), _arg1(expr1), _arg2(expr2)  { }
-    virtual String operator_name() const { return name(_op); }
-    virtual Operator type() const { return static_cast<Operator>(_op); }
-    virtual BinaryExpression<R,Op,A1,A2>* clone() const { return new BinaryExpression<R,Op,A1,A2>(_op,_arg1._ptr,_arg2._ptr); }
-    virtual Set<String> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
-    virtual std::ostream& write(std::ostream& os) const {
-        return os << "(" << _arg1 << symbol(_op) << _arg2 << ")"; }
-  protected:
-    virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
-  public:
-    Op _op;
-    Expression<A1> _arg1;
-    Expression<A2> _arg2;
-};
+template<class R, class Op, class A1, class A2> inline
+std::ostream& BinaryExpression<R,Op,A1,A2>::write(std::ostream& os) const {
+    switch(_op) {
+        case AND: case OR:
+        case ADD: case SUB: case MUL: case DIV:
+        case EQ: case NEQ: case LT: case GT: case LEQ: case GEQ:
+            return os << "(" << _arg1 << symbol(_op) << _arg2 << ")";
+        default:
+            return os << name(_op) << "(" << _arg1 << "," << _arg2 << ")";
+    }
+}
+
+
 
 
 //! An expression in multiple variables of the same type
@@ -525,7 +512,7 @@ inline void _set_constant(TaylorModel& r, const Interval& c) { r.clear(); r+=c; 
 inline void _set_constant(Differential<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
 inline void _set_constant(Differential<Interval>& r, const Interval& c) { r.clear(); r+=c; }
 
-Boolean _compute(Comparison cmp, const String& s1, const String& s2) {
+Boolean _compare(Operator cmp, const String& s1, const String& s2) {
     switch(cmp) {
         case EQ:  return s1==s2;
         case NEQ: return s1!=s2;
@@ -533,7 +520,7 @@ Boolean _compute(Comparison cmp, const String& s1, const String& s2) {
     }
 }
 
-Boolean _compute(Comparison cmp, const Integer& z1, const Integer& z2) {
+Boolean _compare(Operator cmp, const Integer& z1, const Integer& z2) {
     switch(cmp) {
         case EQ:  return z1==z2;
         case NEQ: return z1!=z2;
@@ -545,7 +532,7 @@ Boolean _compute(Comparison cmp, const Integer& z1, const Integer& z2) {
     }
 }
 
-template<class X> Tribool _compute(Comparison cmp, const X& x1, const X& x2) {
+template<class X> Tribool _compare(Operator cmp, const X& x1, const X& x2) {
     switch(cmp) {
         case GT: case GEQ: return x1>x2;
         case LT: case LEQ: return x1<x2;
@@ -640,10 +627,10 @@ Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
     if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
     const ConstantExpression<Boolean>* cptr=dynamic_cast<const ConstantExpression<Boolean>*>(eptr);
     if(cptr) { return cptr->value(); }
-    const BinaryExpression<Boolean,Comparison,String>* bsptr=dynamic_cast<const BinaryExpression<Boolean,Comparison,String>*>(eptr);
-    if(bsptr) { return _compute(bsptr->_op,evaluate(bsptr->_arg1,x),evaluate(bsptr->_arg2,x)); }
-    const BinaryExpression<Boolean,Comparison,Integer>* bzptr=dynamic_cast<const BinaryExpression<Boolean,Comparison,Integer>*>(eptr);
-    if(bzptr) { return _compute(bsptr->_op,evaluate(bzptr->_arg1,x),evaluate(bzptr->_arg2,x)); }
+    const BinaryExpression<Boolean,Operator,String>* bsptr=dynamic_cast<const BinaryExpression<Boolean,Operator,String>*>(eptr);
+    if(bsptr) { return _compare(bsptr->_op,evaluate(bsptr->_arg1,x),evaluate(bsptr->_arg2,x)); }
+    const BinaryExpression<Boolean,Operator,Integer>* bzptr=dynamic_cast<const BinaryExpression<Boolean,Operator,Integer>*>(eptr);
+    if(bzptr) { return _compare(bsptr->_op,evaluate(bzptr->_arg1,x),evaluate(bzptr->_arg2,x)); }
     ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a Boolean using variables "<<x);
 }
 
@@ -674,8 +661,8 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Continuou
     const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
     const BinaryExpression<Tribool>* bptr=dynamic_cast<const BinaryExpression<Tribool>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
-    const BinaryExpression<Tribool,Comparison,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Comparison,Real,Real>*>(eptr);
-    if(brptr) { return _compute(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
+    const BinaryExpression<Tribool,Operator,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+    if(brptr) { return _compare(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
     ARIADNE_FAIL_MSG("");
 }
 
@@ -709,8 +696,8 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>
     const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
     const BinaryExpression<Tribool>* bptr=dynamic_cast<const BinaryExpression<Tribool>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
-    const BinaryExpression<Tribool,Comparison,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Comparison,Real,Real>*>(eptr);
-    if(brptr) { return _compute(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
+    const BinaryExpression<Tribool,Operator,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+    if(brptr) { return _compare(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
     ARIADNE_FAIL_MSG("");
 }
 
@@ -751,7 +738,7 @@ template<class X> Expression<X> substitute_variable(const VariableExpression<X>&
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c) {
     const ExpressionInterface<X>* eptr=e._raw_pointer();
-    const BinaryExpression<X,Comparison,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Comparison,Y,Y>*>(eptr);
+    const BinaryExpression<X,Operator,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Operator,Y,Y>*>(eptr);
     if(aptr) { return make_expression<X>(aptr->_op,substitute(aptr->_arg1,v,c),substitute(aptr->_arg2,v,c)); }
     const BinaryExpression<X>* bptr=dynamic_cast<const BinaryExpression<X>*>(eptr);
     if(bptr) { return make_expression<X>(bptr->_op,substitute(bptr->_arg1,v,c),substitute(bptr->_arg2,v,c)); }
@@ -936,29 +923,33 @@ Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
 
 
 Expression<Real> indicator(Expression<tribool> e, Sign sign) {
-    assert(sign==positive);
     ExpressionInterface<tribool>* eptr=const_cast<ExpressionInterface<tribool>*>(e._ptr.operator->());
-    BinaryExpression<tribool,Gtr,Real,Real>* cgptr;
-    BinaryExpression<tribool,Less,Real,Real>* clptr;
-    BinaryExpression<tribool,And>* baptr;
-    BinaryExpression<tribool,Or>* boptr;
-    UnaryExpression<tribool,Not>* unptr;
+    BinaryExpression<Tribool,Operator,Real,Real>* cptr;
+    BinaryExpression<Tribool,Operator,Tribool,Tribool>* bptr;
+    UnaryExpression<tribool,Operator,Tribool>* nptr;
     switch(eptr->type()) {
         case GEQ: case GT:
-            cgptr=dynamic_cast<BinaryExpression<tribool,Gtr,Real,Real>*>(eptr);
-            return (cgptr->_arg1-cgptr->_arg2);
+            cptr=dynamic_cast<BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+            assert(cptr);
+            if(sign==positive) { return cptr->_arg1-cptr->_arg2; }
+            else { return cptr->_arg2-cptr->_arg1; }
         case LEQ: case LT:
-            clptr=dynamic_cast<BinaryExpression<tribool,Less,Real,Real>*>(eptr);
-            return (clptr->_arg2-clptr->_arg1);
+            cptr=dynamic_cast<BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+            assert(cptr);
+            if(sign==positive) { return cptr->_arg2-cptr->_arg1; }
+            else { return cptr->_arg1-cptr->_arg2; }
         case AND:
-            baptr=dynamic_cast<BinaryExpression<tribool,And>*>(eptr);
-            return min(indicator(baptr->_arg1),indicator(baptr->_arg2));
+            bptr=dynamic_cast<BinaryExpression<Tribool,Operator,Tribool,Tribool>*>(eptr);
+            assert(bptr);
+            return min(indicator(bptr->_arg1,sign),indicator(bptr->_arg2,sign));
         case OR:
-            boptr=dynamic_cast<BinaryExpression<tribool,Or>*>(eptr);
-            return max(indicator(boptr->_arg1),indicator(boptr->_arg2));
+            bptr=dynamic_cast<BinaryExpression<tribool,Operator,Tribool,Tribool>*>(eptr);
+            assert(bptr);
+            return max(indicator(bptr->_arg1,sign),indicator(bptr->_arg2,sign));
         case NOT:
-            unptr=dynamic_cast<UnaryExpression<tribool,Not>*>(eptr);
-            return neg(indicator(unptr->_arg));
+            nptr=dynamic_cast<UnaryExpression<tribool,Operator,Tribool>*>(eptr);
+            assert(nptr);
+            return neg(indicator(nptr->_arg,sign));
         default:
             ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << *eptr);
     }

@@ -56,107 +56,6 @@ class VectorFunction;
 class Grid;
 
 
-/*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
- * within and invariant constraint set.
- *
- * A %AtomicDiscreteMode can only be created using the new_mode() method in
- * the %AtomicHybridAutomaton class.
- *
- * \sa \link Ariadne::AtomicHybridAutomaton \c AtomicHybridAutomaton \endlink, \link Ariadne::AtomicDiscreteTransition \c AtomicDiscreteTransition \endlink
- */
-class AtomicDiscreteMode {
-    friend class AtomicHybridAutomaton;
-  private:
-
-    // The discrete mode's discrete state.
-    DiscreteState _location;
-
-    // The discrete mode's state variables
-    RealSpace _state_space;
-
-    // The discrete mode's auxiliary/output variables
-    RealSpace _auxiliary_space;
-
-    // The discrete mode's input variables
-    RealSpace _input_space;
-
-    // The algebraic equations
-    List<RealAlgebraicAssignment> _algebraic_assignments;
-
-    // The algebraic equations
-    List<RealDifferentialAssignment> _differential_assignments;
-
-    // The discrete mode's invariants.
-    Map< DiscreteEvent, ContinuousPredicate > _invariant_predicates;
-
-    // The discrete mode's vector field.
-    VectorFunction _dynamic;
-
-    // The discrete mode's invariants.
-    std::map< DiscreteEvent, ScalarFunction > _invariants;
-
-    // The discrete mode's grid for reachability analysis.
-    boost::shared_ptr< const Grid > _grid;
-  public:
-    //! \brief The mode's discrete state.
-    DiscreteState location() const {
-        return this->_location; }
-
-    //! \brief The discrete mode's dynamic (a vector field).
-    const VectorFunction& dynamic() const {
-        return this->_dynamic; }
-
-    //! \brief The discrete mode's invariants, converted to vector functions.
-    const std::map< DiscreteEvent, VectorFunction > vector_invariants() const {
-        std::map<DiscreteEvent,VectorFunction> result;
-        for(std::map<DiscreteEvent,ScalarFunction>::const_iterator iter=this->_invariants.begin();
-            iter!=this->_invariants.end(); ++iter)
-        {
-            result[iter->first]=VectorFunction(1u,iter->second);
-        }
-        return result;
-    }
-
-    //! \brief The discrete mode's invariants.
-    const std::map< DiscreteEvent, ScalarFunction >& invariants() const {
-        return this->_invariants; }
-
-    //! \brief The discrete mode's default spacial grid.
-    const Grid& grid() const {
-        return *this->_grid; }
-
-    //! \brief The dimension of the discrete mode.
-    uint dimension() const;
-
-    //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const;
-
-  private:
-    // Construct discrete mode.
-    //
-    // \param id is the identifier of the mode.
-    // \param dynamic is the mode's vector field.
-    // \param invariants is the mode's invariants.
-    AtomicDiscreteMode(DiscreteState location,
-                 const VectorFunction& dynamic);
-
-    // Construct from objects managed by shared pointers (for internal use)
-    AtomicDiscreteMode(DiscreteState location,
-                 const VectorFunction dynamic,
-                 const std::vector< ScalarFunction >& invariants);
-
-};
-
-
-inline std::ostream& operator<<(std::ostream& os, const AtomicDiscreteMode& dm) {
-    return dm.write(os); }
-
-inline bool operator<(const AtomicDiscreteMode& mode1, const AtomicDiscreteMode& mode2) {
-    return mode1.location() < mode2.location(); }
-
-
-
-
 /*! \brief A discrete transition of a hybrid automaton, representing an instantaneous
  * jump from one discrete mode to another, governed by an activation set and a reset map.
  *
@@ -169,87 +68,102 @@ inline bool operator<(const AtomicDiscreteMode& mode1, const AtomicDiscreteMode&
  */
 class AtomicDiscreteTransition
 {
+    friend class AtomicDiscreteMode;
     friend class AtomicHybridAutomaton;
   private:
     // \brief The discrete transition's identificator.
     DiscreteEvent _event;
 
     // \brief The source of the discrete transition.
-    const AtomicDiscreteMode* _source;
+    const AtomicDiscreteMode* _source_mode;
 
     // \brief The target of the discrete transition.
-    const AtomicDiscreteMode* _target;
+    const AtomicDiscreteMode* _target_mode;
 
-    // \brief The activation region of the discrete transition.
-    ScalarFunction _activation;
+    // \brief The guard predicate of the discrete transition.
+    ContinuousPredicate _guard_predicate;
 
-    // \brief The reset of the discrete transition.
-    VectorFunction _reset;
-
-    // \brief Whether or not the transition is forced.
-    bool _forced;
-
+    // \brief The reset assignments of the discrete transition.
     List<RealUpdateAssignment> _update_assignments;
 
-    ContinuousPredicate _guard_predicate;
+    // \brief Whether or not the transition is forced (Deprecated)
+    bool _forced;
+
   public:
 
     //! \brief The discrete event associated with the discrete transition.
-    DiscreteEvent event() const {
-        return this->_event; }
+    DiscreteEvent event() const { return this->_event; }
 
     //! \brief The source mode of the discrete transition.
-    const AtomicDiscreteMode& source() const {
-        return *this->_source; }
+    const AtomicDiscreteMode& source_mode() const { return *this->_source_mode; }
 
-    //! \brief The target of the discrete transition.
-    const AtomicDiscreteMode& target() const {
-        return *this->_target; }
-
-
-    //! \brief The activation region of the discrete transition.
-    const ScalarFunction& activation() const {
-        return this->_activation;
-    }
-
-    //! \brief The activation region of the discrete transition.
-    const VectorFunction vector_activation() const {
-        return VectorFunction(1u,this->_activation);
-    }
-
-
-    //! \brief The reset map of the discrete transition.
-    const VectorFunction& reset() const {
-        return this->_reset;
-    }
-
-    //! \brief True if the transition is forced (occurs as soon as it is activated).
-    bool forced() const {
-        return this->_forced;
-    }
+    //! \brief The target mode of the discrete transition.
+    const AtomicDiscreteMode& target_mode() const { return *this->_target_mode; }
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
   private:
-
-
     // Construct from shared pointers (for internal use).
     AtomicDiscreteTransition(DiscreteEvent event,
-                       const AtomicDiscreteMode& source,
-                       const AtomicDiscreteMode& target,
-                       const VectorFunction& reset,
-                       const ScalarFunction& activation,
-                       bool forced=false);
-
+                             const AtomicDiscreteMode& source,
+                             const AtomicDiscreteMode& target,
+                             const List<RealUpdateAssignment>& reset,
+                             const ContinuousPredicate& guard);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const AtomicDiscreteTransition& dt) {
     return dt.write(os); }
 
+
+
+
+/*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
+ * within and invariant constraint set.
+ *
+ * A %AtomicDiscreteMode can only be created using the new_mode() method in
+ * the %AtomicHybridAutomaton class.
+ *
+ * \sa \link Ariadne::AtomicHybridAutomaton \c AtomicHybridAutomaton \endlink, \link Ariadne::AtomicDiscreteTransition \c AtomicDiscreteTransition \endlink
+ */
+class AtomicDiscreteMode {
+    friend class AtomicDiscreteTransition;
+    friend class AtomicHybridAutomaton;
+  private:
+    // The discrete mode's discrete state.
+    DiscreteState _location;
+
+    // The algebraic equations
+    List<RealAlgebraicAssignment> _algebraic_assignments;
+
+    // The algebraic equations
+    List<RealDifferentialAssignment> _differential_assignments;
+
+    // The discrete mode's invariants.
+    Map<DiscreteEvent,ContinuousPredicate> _invariant_predicates;
+
+    // The discrete mode's grid for reachability analysis.
+    Map<DiscreteEvent,AtomicDiscreteTransition> _transitions;
+  private:
+    AtomicDiscreteMode(DiscreteState, const List<RealAlgebraicAssignment>&,const List<RealDifferentialAssignment>&);
+  public:
+    //! \brief The mode's discrete state.
+    DiscreteState location() const { return this->_location; }
+
+    //! \brief Write to an output stream.
+    std::ostream& write(std::ostream& os) const;
+};
+
+
+inline std::ostream& operator<<(std::ostream& os, const AtomicDiscreteMode& dm) {
+    return dm.write(os); }
+
+inline bool operator<(const AtomicDiscreteMode& mode1, const AtomicDiscreteMode& mode2) {
+    return mode1.location() < mode2.location(); }
+
 inline bool operator<(const AtomicDiscreteTransition& transition1, const AtomicDiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
         || (transition1.event() == transition2.event()
-            && transition1.source().location() < transition2.source().location());
+            && transition1.source_mode().location() < transition2.source_mode().location());
 }
 
 
@@ -298,21 +212,12 @@ class AtomicHybridAutomaton
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-
-    typedef std::map<DiscreteEvent,ScalarFunction>::const_iterator invariant_const_iterator;
-    typedef std::set<AtomicDiscreteTransition>::const_iterator discrete_transition_const_iterator;
-    typedef std::set<AtomicDiscreteMode>::const_iterator discrete_mode_const_iterator;
-    typedef std::set<AtomicDiscreteTransition>::const_iterator transition_const_iterator;
-    typedef std::set<AtomicDiscreteMode>::const_iterator mode_const_iterator;
   private:
     //! \brief The hybrid automaton's name.
-    std::string _name;
+    String _name;
 
     //! \brief The list of the hybrid automaton's discrete modes.
-    std::set< AtomicDiscreteMode > _modes;
-
-    //! \brief The hybrid automaton's transitions.
-    std::set< AtomicDiscreteTransition > _transitions;
+    Map< DiscreteState, AtomicDiscreteMode > _modes;
 
   public:
     //@{
@@ -322,7 +227,7 @@ class AtomicHybridAutomaton
     AtomicHybridAutomaton();
 
     //! \brief Construct an empty automaton with the given name
-    AtomicHybridAutomaton(const std::string& name);
+    AtomicHybridAutomaton(const String& name);
 
     //! \brief Construct dynamically-allocated copy. (Not currently implemented)
     AtomicHybridAutomaton* clone() const;
@@ -335,85 +240,27 @@ class AtomicHybridAutomaton
     //! \name Methods for building the automaton.
 
     //! \brief Adds a discrete mode to the automaton.
-    const AtomicDiscreteMode& new_mode(DiscreteState state,
-                                 const List<RealAlgebraicAssignment>& equations,
-                                 const List<RealDifferentialAssignment>& dynamic);
+    const AtomicDiscreteMode&
+    new_mode(DiscreteState state,
+             const List<RealAlgebraicAssignment>& equations,
+             const List<RealDifferentialAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
-    const AtomicDiscreteMode& new_mode(DiscreteState state,
-                                 const List<RealDifferentialAssignment>& dynamic);
+    const AtomicDiscreteMode&
+    new_mode(DiscreteState state,
+             const List<RealDifferentialAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
-    const AtomicDiscreteMode& new_mode(DiscreteState state,
-                                 const List<RealAlgebraicAssignment>& equations);
+    const AtomicDiscreteMode&
+    new_mode(DiscreteState state,
+             const List<RealAlgebraicAssignment>& equations);
+
 
     //! \brief Adds a discrete mode to the automaton.
-    const AtomicDiscreteMode& new_invariant(DiscreteState state,
-                                      DiscreteEvent event,
-                                      const ContinuousPredicate& constraint);
-
-     //! \brief Adds a discrete mode to the automaton.
-    //!
-    //!   \param state is the mode's discrete state.
-    //!   \param dynamic is the mode's vector field.
-    const AtomicDiscreteMode& new_mode(DiscreteState state,
-                                 const VectorFunction& dynamic);
-
-    //! \brief Adds an invariant to a mode of the automaton.
-    //!
-    //!   \param state is the mode's discrete state.
-    //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
-
-    const AtomicDiscreteMode& new_invariant(DiscreteState state,
-                                      const ScalarFunction& invariant);
-
-    //! \brief Adds an invariants to a mode of the automaton.
-    //!
-    //!   \param state is the mode's discrete state.
-    //!   \param invariants is the new invariants condition.
-
-    const AtomicDiscreteMode& new_invariant(DiscreteState state,
-                                      const VectorFunction& invariants);
-
-    //! \brief Adds an invariants to a mode of the automaton.
-    //!
-    //!    \param mode is the discrete mode.
-    //!    \param invariants is the new invariants condition.
-
-    const AtomicDiscreteMode& new_invariant(const AtomicDiscreteMode& mode,
-                                      const VectorFunction& invariants);
-
-
-    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
-    const AtomicDiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteState source,
-                                             DiscreteState target,
-                                             const VectorFunction& reset,
-                                             const ScalarFunction& activation,
-                                             bool forced);
-
-    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region; must be a one-dimensional valued function.
-    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
-    const AtomicDiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteState source,
-                                             DiscreteState target,
-                                             const VectorFunction& reset,
-                                             const VectorFunction& activation,
-                                             bool forced);
-
+    const AtomicDiscreteMode&
+    new_invariant(DiscreteState state,
+                  DiscreteEvent event,
+                  const ContinuousPredicate& constraint);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
@@ -453,70 +300,14 @@ class AtomicHybridAutomaton
                                              DiscreteState target,
                                              const ContinuousPredicate& guard);
 
-   //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param activation is the transition's activation region.
-    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
-    //! As there is no reset parameter, the target location cannot have any state variables.
-    const AtomicDiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteState source,
-                                             DiscreteState target,
-                                             const ContinuousPredicate& guard,
-                                             bool urgent);
 
-    //! \brief Adds a forced (urgent) discrete transition to the automaton
-    //! using the discrete states to specify the source and target modes.
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    const AtomicDiscreteTransition& new_forced_transition(DiscreteEvent event,
-                                                    DiscreteState source,
-                                                    DiscreteState target,
-                                                    const VectorFunction& reset,
-                                                    const VectorFunction& activation);
-
-    //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
-    //! using the discrete states to specify the source and target modes.
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    const AtomicDiscreteTransition& new_unforced_transition(DiscreteEvent event,
-                                                      DiscreteState source,
-                                                      DiscreteState target,
-                                                      const VectorFunction& reset,
-                                                      const VectorFunction& activation);
-
-    //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
-    //!
-    //!    \param event is the discrete transition's discrete event.
-    //!    \param source is the discrete transition's source mode.
-    //!    \param target is the discrete transition's target mode.
-    //!    \param reset is the discrete transition's reset.
-    //!    \param activation is the discrete transition's activation region.
-    //!    \param forced determines whether the transition is forced or unforced.
-    const AtomicDiscreteTransition& new_transition(DiscreteEvent event,
-                                             const AtomicDiscreteMode& source,
-                                             const AtomicDiscreteMode& target,
-                                             const VectorFunction& reset,
-                                             const VectorFunction& activation,
-                                             bool forced);
-
-    //! \brief Set the grid controlling relative scaling in the mode.
+    //! \brief Set the grid controlling relative scaling in the mode. \deprecated
     void set_grid(DiscreteState location, const Grid& grid);
 
-    //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode.
+    //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode. \deprecated
     void set_grid(const Grid& grid);
 
-    //! \brief Set the hybrid grid controlling relative scaling.
+    //! \brief Set the hybrid grid controlling relative scaling. \deprecated
     void set_grid(const HybridGrid& hgrid);
 
     //@}
@@ -525,48 +316,38 @@ class AtomicHybridAutomaton
     //! \name Data access and queries.
 
     //! \brief Returns the hybrid automaton's name.
-    const std::string& name() const;
+    const String& name() const;
 
-    //! \brief Test if the hybrid automaton has a discrete mode with discrete state \a state.
-    bool has_mode(DiscreteState state) const;
+    //! \brief The set of discrete locations.
+    Set<DiscreteState> locations() const;
+
+    //! \brief The discrete events possible in location \a source.
+    Set<DiscreteEvent> events(DiscreteState source) const;
+
+    //! \brief Test if the hybrid automaton has a discrete mode with the given \a location.
+    bool has_mode(DiscreteState location) const;
+
+    //! \brief Test if the hybrid automaton has a discrete transition with the given \a event label in \a location.
+    bool has_invariant(DiscreteState source, DiscreteEvent event) const;
 
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
-    bool has_transition(DiscreteEvent event, DiscreteState source) const;
     bool has_transition(DiscreteState source, DiscreteEvent event) const;
 
     //! \brief The discrete mode with given discrete state.
-    const AtomicDiscreteMode& mode(DiscreteState state) const;
+    const AtomicDiscreteMode& mode(DiscreteState location) const;
+
+    //! \brief The discrete mode with given discrete state.
+    AtomicDiscreteMode& mode(DiscreteState location);
 
     //! \brief The discrete transition with given \a event and \a source location.
-    const AtomicDiscreteTransition& transition(DiscreteEvent event, DiscreteState source) const;
+    const ContinuousPredicate& invariant(DiscreteState location, DiscreteEvent event) const;
+
+    //! \brief The discrete transition with given \a event and \a source location.
     const AtomicDiscreteTransition& transition(DiscreteState source, DiscreteEvent event) const;
 
-    //! \brief The set of discrete modes. (Not available in Python interface)
-    const std::set< AtomicDiscreteMode >& modes() const;
-
-    //! \brief The set of discrete transitions. (Not available in Python interface)
-    const std::set< AtomicDiscreteTransition >& transitions() const;
-
     //! \brief The discrete transitions from location \a source.
-    std::set< AtomicDiscreteTransition > transitions(DiscreteState source) const;
+    Set<AtomicDiscreteTransition> transitions(DiscreteState source) const;
 
-    //! \brief The blocking events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,ScalarFunction> blocking_guards(DiscreteState location) const;
-
-    //! \brief The permissive events (invariants and urgent transitions) in \a location.
-    std::map<DiscreteEvent,ScalarFunction> permissive_guards(DiscreteState location) const;
-
-    //! \brief The state space of the system.
-    HybridSpace state_space() const;
-
-    //! \brief The hybrid set giving the invariants for each discrete location.
-    HybridSet invariant() const;
-
-    //! \brief The natural grid to use in the specified location.
-    Grid grid(DiscreteState location) const;
-
-    //! \brief The natural grid to use in the over all locations.
-    HybridGrid grid() const;
     //@}
 
     //@{
@@ -574,8 +355,6 @@ class AtomicHybridAutomaton
 
     //! \brief The target location of the discrete event from the given discrete location.
     DiscreteState target(const DiscreteState& source, const DiscreteEvent& event);
-    // Alternative form for backwards compatibility
-    DiscreteState target(const DiscreteEvent& event, const DiscreteState& source);
     //! \brief The state (dotted) variables in the given location.
     List<RealVariable> state_variables(DiscreteState location) const;
     //! \brief The auxiliary (algebraic/output) variables in the given location.
@@ -605,6 +384,7 @@ inline std::ostream& operator<<(std::ostream& os, const AtomicHybridAutomaton& h
 class CompositeHybridAutomaton {
     typedef List<DiscreteState> DiscreteLocation;
   public:
+    CompositeHybridAutomaton();
     CompositeHybridAutomaton(const AtomicHybridAutomaton&);
     CompositeHybridAutomaton(const List<AtomicHybridAutomaton>&);
     uint number_of_components() const;
@@ -615,6 +395,7 @@ class CompositeHybridAutomaton {
 
     bool has_mode(const DiscreteLocation&) const;
     bool has_transition(const DiscreteLocation&, const DiscreteEvent&) const;
+    Set<DiscreteEvent> events(const DiscreteLocation&) const;
     DiscreteLocation target(const DiscreteLocation&, const DiscreteEvent&) const;
 
     List<RealVariable> variables(const DiscreteLocation&) const;
@@ -626,15 +407,19 @@ class CompositeHybridAutomaton {
 
     Map<DiscreteEvent,ContinuousPredicate> invariant_predicates(const DiscreteLocation&) const;
     ContinuousPredicate invariant_predicate(const DiscreteLocation&, const DiscreteEvent&) const;
+    Map<DiscreteEvent,ContinuousPredicate> guard_predicates(const DiscreteLocation&) const;
     ContinuousPredicate guard_predicate( const DiscreteLocation&, const DiscreteEvent&) const;
 
-    VectorFunction output(const DiscreteLocation&) const;
-    VectorFunction dynamic(const DiscreteLocation&) const;
-    VectorFunction reset(const DiscreteLocation&, const DiscreteEvent&) const;
+    VectorFunction output_function(const DiscreteLocation&) const;
+    VectorFunction dynamic_function(const DiscreteLocation&) const;
+    VectorFunction reset_function(const DiscreteLocation&, const DiscreteEvent&) const;
 
-    Map<DiscreteEvent,ScalarFunction> invariants(const DiscreteLocation&) const;
-    ScalarFunction invariant(const DiscreteLocation&, const DiscreteEvent&) const;
-    ScalarFunction guard(const DiscreteLocation&, const DiscreteEvent&) const;
+    Map<DiscreteEvent,ScalarFunction> invariant_functions(const DiscreteLocation&) const;
+    Map<DiscreteEvent,ScalarFunction> guard_functions(const DiscreteLocation&) const;
+    ScalarFunction invariant_function(const DiscreteLocation&, const DiscreteEvent&) const;
+    ScalarFunction guard_function(const DiscreteLocation&, const DiscreteEvent&) const;
+
+    void check_mode(const DiscreteLocation&) const;
 
     std::ostream& write(std::ostream&) const;
   private:
@@ -647,7 +432,7 @@ inline CompositeHybridAutomaton parallel_composition(const List<AtomicHybridAuto
 inline std::ostream& operator<<(std::ostream& os, const CompositeHybridAutomaton& ha) {
     return ha.write(os); }
 
-
+Set<DiscreteLocation> discrete_reachability(const CompositeHybridAutomaton&, const DiscreteLocation&);
 
 } // namespace Ariadne
 

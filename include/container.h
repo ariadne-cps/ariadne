@@ -144,6 +144,8 @@ template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) 
 template<class T> class Set
     : public std::set<T>
 {
+    template<class TT, class KK> class KeyEqual {
+        bool operator()(const TT& t, const KK& k) { return t.key()==k; } };
   public:
     Set() : std::set<T>() { }
     Set(const std::set<T>& s) : std::set<T>(s) { }
@@ -192,6 +194,9 @@ template<class K, class V> class Map
         assert(p!=this->end()); return p->second; }
     bool has_key(const K& k) const {
         return this->find(k)!=this->end(); }
+    V& value(const K& k) {
+        typename std::map<K,V>::iterator iter=this->find(k);
+        assert(iter!=this->end()); return iter->second; }
     void insert(const K& k, const V& v) {
         this->std::map<K,V>::insert(std::make_pair(k,v)); }
     Set<K> keys() const {

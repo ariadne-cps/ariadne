@@ -40,44 +40,6 @@
 namespace Ariadne {
 
 
-enum Comparison {
-    EQ,    // Equal
-    NEQ,   // Not equal
-    GEQ,   // Greater or equal
-    LEQ,   // Less or equal
-    GT,    // Greater than
-    LT,    // Less than
-    SGN    // Compare with zero
-};
-
-std::ostream& operator<<(std::ostream&, const Comparison& op);
-
-inline const char* name(const Comparison& op) {
-    switch(op) {
-        case SGN:  return "sgn"; break;
-        case EQ:   return "eq"; break;
-        case NEQ:  return "neq"; break;
-        case GEQ:  return "geq"; break;
-        case LEQ:  return "leq"; break;
-        case GT:   return "lt"; break;
-        case LT:   return "gt"; break;
-        default: assert(false);
-    }
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Comparison& op) {
-    switch(op) {
-        case SGN:  os << "sgn"; break;
-        case EQ:   os << "=="; break;
-        case NEQ:  os << "!="; break;
-        case GEQ:  os << ">="; break;
-        case LEQ:  os << "<="; break;
-        case GT:   os << "> "; break;
-        case LT:   os << "< "; break;
-        default: assert(false);
-    }
-    return os;
-}
 
 
 enum Operator {
@@ -107,7 +69,14 @@ enum Operator {
     OR,    // Logical or
     XOR,   // Logical exclusive or
     IMPL,  // Logical implication
-    ITOR   // Conversion of Int to Real
+    ITOR,   // Conversion of Int to Real
+    EQ=-1,    // Equal
+    NEQ=-2,   // Not equal
+    GEQ=-3,   // Greater or equal
+    LEQ=-4,   // Less or equal
+    GT=-5,    // Greater than
+    LT=-6,    // Less than
+    SGN=-7    // Compare with zero
 };
 
 std::ostream& operator<<(std::ostream&, const Operator& op);
@@ -125,12 +94,6 @@ inline const char* symbol(const Operator& op) {
         case NOT:  return "!"; break;
         case AND:  return "&"; break;
         case OR:   return "|"; break;
-        default: assert(false);
-    }
-}
-
-inline const char* symbol(const Comparison& cmp) {
-    switch(cmp) {
         case EQ:  return "=="; break;
         case NEQ: return "!="; break;
         case LEQ: return "<="; break;
@@ -170,6 +133,13 @@ inline const char* name(const Operator& op) {
         case COS:  return "cos"; break;
         case TAN:  return "tan"; break;
         case ITOR:  return "itor"; break;
+        case SGN:  return "sgn"; break;
+        case EQ:   return "eq"; break;
+        case NEQ:  return "neq"; break;
+        case GEQ:  return "geq"; break;
+        case LEQ:  return "leq"; break;
+        case GT:   return "lt"; break;
+        case LT:   return "gt"; break;
         default: assert(false);
     }
 }

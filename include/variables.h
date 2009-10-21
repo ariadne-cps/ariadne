@@ -37,6 +37,8 @@
 #include "pointer.h"
 #include "container.h"
 
+#include "operators.h"
+
 namespace Ariadne {
 
 
@@ -51,12 +53,7 @@ class EnumeratedValue;
 
 typedef String Identifier;
 
-class UntypedVariable;
-template<class T> class ExtendedVariable;
 template<class T> class Variable;
-template<class T> class DottedVariable;
-template<class T> class PrimedVariable;
-
 template<class R> class Expression;
 template<class LHS,class RHS> class Assignment;
 
@@ -77,136 +74,103 @@ template<class T> class Constant
     shared_ptr<T> _value_ptr;
 };
 
-enum VariableType { type_bool, type_tribool, type_enumerated, type_string, type_integer, type_real };
-enum VariableCategory { simple, dotted, primed };
-
-class UntypedVariable {
-  public:
-    const String& name() const { return *_name_ptr; }
-    bool operator==(const UntypedVariable& other) const {
-        return (this->name()==other.name()) && (this->_category==other._category); }
-    bool operator!=(const UntypedVariable& other) const { return !(*this==other); }
-    bool operator<(const UntypedVariable& other) const {
-        return this->name()<other.name() || (this->name()==other.name() && this->_type < other._type); }
-    virtual std::ostream& write(std::ostream&) const;
-  public:
-    static std::string name(const VariableType& tp) {
-        switch(tp) {
-            case type_bool: return "Bool";
-            case type_tribool: return "Tribool";
-            case type_enumerated: return "Enumerated";
-            case type_string: return "String";
-            case type_integer: return "Integer";
-            case type_real: return "Real";
-        }
-        return "Unknown";
-    }
-  protected:
-    explicit UntypedVariable(const std::string& nm, VariableType tp, VariableCategory cat=simple) 
-        : _name_ptr(new std::string(nm)), _type(tp), _category(cat) { }
-  private:
-    shared_ptr<std::string> _name_ptr;
-    VariableType _type;
-    VariableCategory _category;
-};
-
-template<class T> inline VariableType variable_type() { ARIADNE_FAIL_MSG("Unknown variable type"); }
-template<> inline VariableType variable_type<bool>() { return type_bool; }
-template<> inline VariableType variable_type<tribool>() { return type_tribool; }
-template<> inline VariableType variable_type<String>() { return type_string; }
-template<> inline VariableType variable_type<Integer>() { return type_integer; }
-template<> inline VariableType variable_type<Real>() { return type_real; }
-
-inline std::ostream& UntypedVariable::write(std::ostream& os) const {
-    switch(this->_category) {
-        case simple: os << this->name(); break;
-        case dotted: os << "dot("<<this->name()<<")"; break;
-        case primed: os << "next("<<this->name()<<")"; break;
-    }
-    //os << ":" << name(this->_type);
-    return os;
-}
-
-inline std::ostream& operator<<(std::ostream& os, const UntypedVariable& var) {
-    return var.write(os); }
-
-
-
-template<class T> class ExtendedVariable
-    : public UntypedVariable
-{
-  public:
-    Assignment< ExtendedVariable<T>,Expression<T> > operator=(const Expression<T>& e) const;
-  protected:
-    explicit ExtendedVariable(const String& nm, VariableCategory cat=simple)
-        : UntypedVariable(nm, variable_type<T>(), cat) { }
-};
-
 template<class T> class Variable
-    : public ExtendedVariable<T>
 {
   public:
-    explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
-    inline Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
-};
-
-template<> class Variable<Real>
-    : public ExtendedVariable<Real>
-{
-    typedef Real T;
-    double _resolution;
-  public:
-    explicit Variable(const String& nm) : ExtendedVariable<T>(nm), _resolution(1.0) { }
-    inline Assignment< Variable<T>, Expression<T> > operator=(const double& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
-    void set_resolution(double dx) { assert(dx>0.0); this->_resolution=dx; }
-    double resolution() const { return this->_resolution; }
-};
-
-
-DottedVariable<Real> dot(const Variable<Real>&);
-
-template<class T> class DottedVariable
-    : public ExtendedVariable<T>
-{
-  public:
-    friend DottedVariable<Real> dot(const Variable<Real>&);
-    Variable<T> base() const { return Variable<T>(this->name()); }
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const double& e) const;
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const T& e) const;
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+    explicit Variable(const String& str) : _name_ptr(new String(str)) { }
+    const String& name() const { return *_name_ptr; }
+    bool operator==(const Variable<T>& other) const { return this->name()==other.name(); }
+    template<class X> bool operator==(const Variable<X>& other) const { ARIADNE_ASSERT(this->name()!=other.name()); return false; }
+    template<class X> bool operator!=(const Variable<X>& other) const { return !(*this==other); }
+    Assignment< Variable<T>,Expression<T> > operator=(const Expression<T>& e) const;
   private:
-    explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),dotted) { }
+    shared_ptr<String> _name_ptr;
 };
 
-inline DottedVariable<Real> dot(const Variable<Real>& var) {
-    return DottedVariable<Real>(var); }
+template<class T> inline bool operator<(const Variable<T> v1, const Variable<T>& v2) { return v1.name()<v2.name(); }
 
+inline std::ostream& operator<<(std::ostream& os, const Variable<EnumeratedValue>& v) { return os << v.name() << ":Enumerated"; }
+inline std::ostream& operator<<(std::ostream& os, const Variable<String>& v) { return os << v.name() << ":String"; }
+inline std::ostream& operator<<(std::ostream& os, const Variable<Integer>& v) { return os << v.name() << ":Integer"; }
+inline std::ostream& operator<<(std::ostream& os, const Variable<Real>& v) { return os << v.name() << ":Real"; }
+inline std::ostream& operator<<(std::ostream& os, const Variable<Boolean>& v) { return os << v.name() << ":Boolean"; }
+inline std::ostream& operator<<(std::ostream& os, const Variable<Tribool>& v) { return os << v.name() << ":Tribool"; }
 
-template<class T> PrimedVariable<T> next(const Variable<T>&);
+template<class T> class Space;
+template<class T> std::ostream& operator<<(std::ostream& os, const Space<T>& spc);
 
-template<class T> class PrimedVariable
-    : public ExtendedVariable<T>
+/*! \brief A space defined as a list of named variables of type \a T
+ *  \details \sa Variable
+ */
+template<class T> struct Space
 {
-    typedef Assignment< PrimedVariable<T>, Expression<T> > AssignmentType;
+    typedef unsigned int SizeType;
+    typedef Variable<T> VariableType;
   public:
-    friend PrimedVariable<T> next<>(const Variable<T>&);
-    Variable<T> base() const { return Variable<T>(this->name()); }
-    inline AssignmentType operator=(const double& val) const;
-    inline AssignmentType operator=(const T& val) const;
-    inline AssignmentType operator=(const Variable<T>& var) const;
-    inline AssignmentType operator=(const Expression<T>& expr) const;
+    //! \brief The trivial space \f$\R^0\f$.
+    Space() : _variables() { }
+    Space(const Set<String>& vs) : _variables(vs.begin(),vs.end()) { }
+    Space(const List<String>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
+    Space(const List<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
+
+    SizeType size() const { return _variables.size(); }
+    //! \brief The dimension of the space.
+    SizeType dimension() const { return _variables.size(); }
+    //! \brief The \a i<sup>th</sup> named variable.
+    const VariableType& operator[](SizeType i) const { return _variables.at(i); }
+    const VariableType& variable(SizeType i) const { return _variables.at(i); }
+
+    //! \brief A list giving ordered variables.
+    List<String> variable_names() const {
+        List<String> res; for(uint i=0; i!=this->_variables.size(); ++i) { res.append(this->_variables[i].name()); } return res; }
+    //! \brief A list giving ordered variables.
+    List<VariableType> variables() const { return this->_variables; }
+    //! \brief A map giving the index of a given variable.
+    Map<VariableType,SizeType> indices() const {
+        Map<VariableType,SizeType> indices;
+        for(uint i=0; i!=this->_variables.size(); ++i) {
+            ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
+            indices.insert(this->_variables[i],i);
+        }
+        return indices; }
+
+    //! \brief The index of the named variable \a v.
+    SizeType index(const VariableType& v) const {
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(v==_variables[i]) { return i; } }
+        ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
+        return _variables.size(); }
+    //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
+    Space<T>& insert(const VariableType& v) {
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(_variables[i]==v) { return *this; } }
+        _variables.push_back(v); return *this; }
+    //! \brief Adjoins the variables in \a spc.
+    Space<T>& adjoin(const Space<T>& spc) {
+        for(uint i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
+    //! \brief Append the named variable \a v to the variables defining the space.
+    Space<T>& append(const VariableType& v) {
+        for(uint i=0; i!=_variables.size(); ++i) {
+            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
+        }
+        _variables.push_back(v); return *this; }
+    //! \brief Append the named variable \a v to the variables defining the space.
+    Space<T>& operator,(const String& v) { return this->append(VariableType(v)); }
   private:
-    explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),primed) { }
+    List<VariableType> _variables;
 };
 
-template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {
-    return PrimedVariable<T>(var); }
+template<class T> inline std::ostream& operator<<(std::ostream& os, const Space<T>& spc) { return os << spc.variables(); }
+
+template<class T> inline Space<T> operator,(const Identifier& v1, const Identifier& v2) {
+    Space<T> r; r,Variable<T>(v1),Variable<T>(v2); return r; }
+
+template<class T> inline Space<T> join(const Space<T>& spc1, const Space<T>& spc2) {
+    Space<T> r(spc1); r.adjoin(spc2); return r; }
+
+
+template<class T> Variable<T> variable(const String& s) { return Variable<T>(s); }
+template<class T> Space<T> variables(const List<String>& s) { return Space<T>(s); }
 
 
 

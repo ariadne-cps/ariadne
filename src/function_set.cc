@@ -165,7 +165,7 @@ ImageSet::draw(CanvasInterface& os) const
 std::ostream&
 ImageSet::write(std::ostream& os) const
 {
-    return os << "ImageSet( domain=" << this->domain() << ", function=" << this->function() << ")";
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 

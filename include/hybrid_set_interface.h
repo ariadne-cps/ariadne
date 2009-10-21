@@ -35,7 +35,7 @@
 
 #include "tribool.h"
 #include "set_interface.h"
-#include "discrete_location.h"
+#include "discrete_state.h"
 
 namespace Ariadne {
 
@@ -43,11 +43,12 @@ class Point;
 class Box;
 
 class HybridSpace;
+class DiscreteState;
 template<class BS> class HybridBasicSet;
 
 typedef HybridBasicSet<Point> HybridPoint;
 typedef HybridBasicSet<Box> HybridBox;
-typedef std::map<DiscreteLocation,Box> HybridBoxes;
+typedef std::map<DiscreteState,Box> HybridBoxes;
 
 //! \brief Base class for sets in a hybrid space.
 class HybridSetInterfaceBase 
@@ -56,7 +57,7 @@ class HybridSetInterfaceBase
     virtual ~HybridSetInterfaceBase() { };
     virtual HybridSetInterfaceBase* clone() const = 0;
     virtual HybridSpace space() const = 0;
-    virtual SetInterfaceBase const& operator[](DiscreteLocation) const = 0;
+    virtual SetInterfaceBase const& operator[](DiscreteState) const = 0;
     virtual std::ostream& write(std::ostream& os) const = 0;
     friend std::ostream& operator<<(std::ostream& os, const HybridSetInterfaceBase& hs);
 };
@@ -69,7 +70,7 @@ class HybridBoundedSetInterface
     virtual HybridBoundedSetInterface* clone() const = 0;
     virtual tribool inside(const HybridBoxes& bx) const = 0;
     virtual HybridBoxes bounding_box() const = 0;
-    virtual BoundedSetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual BoundedSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 //! \brief Interface for overt sets in a hybrid space. 
@@ -79,7 +80,7 @@ class HybridOvertSetInterface
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
     virtual tribool overlaps(const HybridBox& bx) const = 0;
-    virtual OvertSetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual OvertSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 //! \brief Interface for open sets in a hybrid space. 
@@ -89,7 +90,7 @@ class HybridOpenSetInterface
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
     virtual tribool covers(const HybridBox& bx) const = 0;
-    virtual OpenSetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual OpenSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 //! \brief Interface for closed sets in a hybrid space. 
@@ -99,7 +100,7 @@ class HybridClosedSetInterface
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
     virtual tribool disjoint(const HybridBox& bx) const = 0;
-    virtual ClosedSetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual ClosedSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 //! \brief Interface for compact (closed and bounded) sets in a hybrid space. 
@@ -109,7 +110,7 @@ class HybridCompactSetInterface
 {
   public:
     virtual HybridCompactSetInterface* clone() const = 0;
-    virtual CompactSetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual CompactSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 //! \brief Interface for regular (open and closed) sets in a hybrid space. 
@@ -118,7 +119,7 @@ class HybridRegularSetInterface
       public virtual HybridClosedSetInterface
 {
     virtual HybridRegularSetInterface* clone() const = 0;
-    virtual RegularSetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual RegularSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 //! \brief Interface for located (overt and compact) sets in a hybrid space. 
@@ -127,7 +128,7 @@ class HybridLocatedSetInterface
       public virtual HybridCompactSetInterface
 {
     virtual HybridLocatedSetInterface* clone() const = 0;
-    virtual LocatedSetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual LocatedSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 //! \brief Complete set interface for bounded regular sets in a hybrid space.
@@ -136,7 +137,7 @@ class HybridSetInterface
       public virtual HybridLocatedSetInterface
 {
     virtual HybridSetInterface* clone() const = 0;
-    virtual SetInterface const& operator[](DiscreteLocation) const = 0;
+    virtual SetInterface const& operator[](DiscreteState) const = 0;
 };
     
 

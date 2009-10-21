@@ -97,9 +97,9 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the vector field
     Float a=1.5; Float b=0.375;
-    ScalarFunction x=ScalarFunction::variable(2,0);
-    ScalarFunction y=ScalarFunction::variable(2,1);
-    VectorFunction henon=join(a-x*x+b*y,x);
+    Vector<Float> p(2); p[0]=a; p[1]=b;
+
+    VectorUserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
     IteratedMap system(henon);
 
@@ -275,7 +275,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     uint steps(6);
     Float maximum_step_size(0.125);
     int depth=8;
-    AtomicDiscreteLocation location(1);
+    DiscreteState location(1);
     DiscreteEvent event(1);
 
     EvolutionParameters parameters;
@@ -288,15 +288,12 @@ void TestDiscretisedEvolution::test_hybrid_time() const
 
 
     // Set up the vector field
-    Real a=1.5; Real b=0.375;
-    ScalarFunction x=ScalarFunction::variable(2,0);
-    ScalarFunction y=ScalarFunction::variable(2,1);
-    VectorFunction henon=join(a-x*x+b*y,x);
-    cout << "henon=" << henon << endl;
-    IteratedMap system(henon);
+    Float a=1.5; Float b=0.375;
+    Vector<Float> p(2); p[0]=a; p[1]=b;
 
+    VectorUserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
-    MonolithicHybridAutomaton ha("Henon");
+    HybridAutomaton ha("Henon");
     ha.new_mode(location,IdentityFunction(2));
     ha.new_transition(event,location,location,henon,VectorConstantFunction(Vector<Float>(1,1.0),2),true);
 

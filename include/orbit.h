@@ -67,15 +67,13 @@ template<class ES> class Orbit;
 template<class BS> class ListSet;
 class Point;
 class InterpolatedCurve;
-class Grid;
 class GridCell;
 class GridTreeSet;
-class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
 class HybridTime;
 
-class DiscreteLocation;
+class DiscreteState;
 template<class BS> class HybridBasicSet;
 
 typedef HybridBasicSet<Point> HybridPoint;
@@ -119,12 +117,10 @@ class Orbit<GridCell>
     typedef GridCell EnclosureType;
     typedef GridTreeSet EnclosureListType;
 
-    Orbit(const Grid&, const GridCell&);
-    Orbit(const GridTreeSet&);
-    Orbit(const GridTreeSet&, const GridTreeSet&,
+    Orbit(const GridCell&);
+    Orbit(const GridCell&, const GridTreeSet&,
           const GridTreeSet&, const GridTreeSet&);
-    Grid const& grid() const;
-    GridTreeSet const& initial() const;
+    GridCell const& initial() const;
     GridTreeSet const& reach() const;
     GridTreeSet const& intermediate() const;
     GridTreeSet const& final() const;
@@ -140,12 +136,10 @@ class Orbit<HybridGridCell>
     typedef HybridGridCell EnclosureType;
     typedef HybridGridTreeSet EnclosureListType;
 
-    Orbit(const HybridGrid&, const HybridGridCell&);
-    Orbit(const HybridGridTreeSet&);
-    Orbit(const HybridGridTreeSet&, const HybridGridTreeSet&,
+    Orbit(const HybridGridCell&);
+    Orbit(const HybridGridCell&, const HybridGridTreeSet&,
           const HybridGridTreeSet&, const HybridGridTreeSet&);
-    HybridGrid const& grid() const;
-    HybridGridTreeSet const& initial() const;
+    HybridGridCell const& initial() const;
     HybridGridTreeSet const& reach() const;
     HybridGridTreeSet const& intermediate() const;
     HybridGridTreeSet const& final() const;

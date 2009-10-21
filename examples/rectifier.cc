@@ -131,20 +131,20 @@ int main()
     float MAX_STEP_SIZE = 1e-5/dp[1];
 //    float LOCK_TOGRID_TIME = 2.0/dp[1];
     float LOCK_TOGRID_TIME = 0.25/dp[1];
-    float MAX_GRID_DEPTH = 7;
+    float MAX_GRID_DEPTH = 21;
     int VERBOSITY=3;
     bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
 
-    /// Create a MonolithicHybridAutomaton object
-    MonolithicHybridAutomaton rectifier;
+    /// Create a HybridAutomaton object
+    HybridAutomaton rectifier;
 
     /// Create the discrete states
-    AtomicDiscreteLocation offoff(1);
-    AtomicDiscreteLocation onoff(2);
-    AtomicDiscreteLocation offon(3);
-    AtomicDiscreteLocation onon(4);
+    DiscreteState offoff(1);
+    DiscreteState onoff(2);
+    DiscreteState offon(3);
+    DiscreteState onon(4);
 
     /// Create the discrete events
     DiscreteEvent resettime(1);

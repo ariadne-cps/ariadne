@@ -46,6 +46,18 @@ class TaylorModel;
 class TaylorSet;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
+template<class X> class Differential;
+typedef Differential<Float> ApproximateTaylorVariable;
+class ApproximateTaylorModel;
+
+template<> struct CalculusTypes<ApproximateTaylorVariable>
+{
+    typedef ApproximateTaylorModel VariableType;
+    typedef ApproximateTaylorModel TimeModelType;
+    typedef ApproximateTaylorModel PredicateModelType;
+    typedef ApproximateTaylorModel SetModelType;
+    typedef ApproximateTaylorModel FunctionModelType;
+};
 
 template<> struct CalculusTypes<TaylorModel>
 {
@@ -103,12 +115,18 @@ class CalculusInterface
     virtual tribool
     active(const ScalarFunctionType& guard,
            const BoxType& box) const = 0;
+    virtual tribool
+    active(const VectorFunctionType& guard,
+           const BoxType& box) const = 0;
 
     //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points
     //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
     virtual tribool
     active(const ScalarFunctionType& guard,
+           const SetModelType& set_model) const = 0;
+    virtual tribool
+    active(const VectorFunctionType& guard,
            const SetModelType& set_model) const = 0;
 
     //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all
@@ -138,7 +156,15 @@ class CalculusInterface
     //! touch the set specified by the \a guard under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid. (Deprecated; guard should be an expression)
     virtual Interval
-    scaled_touching_time_interval(const ScalarFunction& guard,
+    touching_time_interval(const VectorFunction& guard,
+                           const FlowModelType& flow_model,
+                           const SetModelType& initial_set_model) const = 0;
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid. (Deprecated; guard should be an expression)
+    virtual Interval
+    scaled_touching_time_interval(const VectorFunction& guard,
                                   const FlowSetModelType& flow_set_model) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
@@ -157,11 +183,19 @@ class CalculusInterface
                   const FlowModelType& flow_model,
                   const SetModelType& initial_set_model) const = 0;
 
-    //! \brief Computes the time at which points in the \a flow_set_model cross the zero-set of the
-    //! the \a guard.
-    //! The crossing must be (differentiably) transverse.
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
+    //! The crossing must be (differentiably) transverse. (Deprecated; guard should be an expression)
     virtual TimeModelType
-    scaled_crossing_time(const ScalarFunction& guard,
+    crossing_time(const VectorFunction& guard_function,
+                  const FlowModelType& flow_model,
+                  const SetModelType& initial_set_model) const = 0;
+
+    //! \brief Computes the time at which points in the \a flow_set_model cross the zero-set of the
+    //! the \a guard under.
+    //! The crossing must be (differentiably) transverse. (Deprecated; guard should be an expression)
+    virtual TimeModelType
+    scaled_crossing_time(const VectorFunction& guard_function,
                          const FlowSetModelType& flow_set_model) const = 0;
 
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
@@ -285,6 +319,11 @@ class CalculusInterface
     //! \brief A model for the real-valued function \a g over the domain \a d.
     virtual GuardModelType
     predicate_model(const ScalarFunction& g,
+                    const BoxType& d) const = 0;
+
+    //! \brief A model for the real-valued function \a g over the domain \a d.
+    virtual GuardModelType
+    predicate_model(const VectorFunction& g,
                     const BoxType& d) const = 0;
 
     //! \brief A model for the constant time function \a t over the domain \a d.

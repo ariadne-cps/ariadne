@@ -266,29 +266,27 @@ final() const
 
 
 struct Orbit<GridCell>::Data {
-    Data(const Grid& grid) : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    GridTreeSet initial;
+    Data(const GridCell& initial_set) 
+        : initial(initial_set) { }
+    GridCell initial;
     GridTreeSet reach;
     GridTreeSet intermediate;
     GridTreeSet final;
 };
 
 Orbit<GridCell>::
-Orbit(const GridTreeSet& initial_set)
-    : _data(new Data(initial_set.grid()))
+Orbit(const GridCell& initial_set)
+    : _data(new Data(initial_set))
 {
-    this->_data->initial=initial_set;
 }
 
-
 Orbit<GridCell>::
-Orbit(const GridTreeSet& initial_set,
+Orbit(const GridCell& initial_set,
       const GridTreeSet& reach_set,
       const GridTreeSet& intermediate_set,
       const GridTreeSet& final_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set))
 {
-    this->_data->initial=initial_set;
     this->_data->reach=reach_set;
     this->_data->intermediate=intermediate_set;
     this->_data->final=final_set;
@@ -297,7 +295,7 @@ Orbit(const GridTreeSet& initial_set,
 }
 
 
-GridTreeSet const&
+GridCell const&
 Orbit<GridCell>::
 initial() const
 {
@@ -328,35 +326,33 @@ final() const
 
 
 struct Orbit<HybridGridCell>::Data {
-    Data(const HybridGrid& grid)
-        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    HybridGridTreeSet initial;
+    Data(const HybridGridCell& initial_set) 
+        : initial(initial_set) { }
+    HybridGridCell initial;
     HybridGridTreeSet reach;
     HybridGridTreeSet intermediate;
     HybridGridTreeSet final;
 };
 
 Orbit<HybridGridCell>::
-Orbit(const HybridGridTreeSet& initial_set)
-    : _data(new Data(initial_set.grid()))
+Orbit(const HybridGridCell& initial_set)
+    : _data(new Data(initial_set))
 {
-    this->_data->initial=initial_set;
 }
 
 Orbit<HybridGridCell>::
-Orbit(const HybridGridTreeSet& initial_set,
+Orbit(const HybridGridCell& initial_set,
       const HybridGridTreeSet& reach_set,
       const HybridGridTreeSet& intermediate_set,
       const HybridGridTreeSet& final_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set))
 {
-    this->_data->initial=initial_set;
     this->_data->reach=reach_set;
     this->_data->intermediate=intermediate_set;
     this->_data->final=final_set;
 }
 
-HybridGridTreeSet const&
+HybridGridCell const&
 Orbit<HybridGridCell>::
 initial() const
 {

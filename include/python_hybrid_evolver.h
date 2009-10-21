@@ -61,8 +61,8 @@ template<class Sys, class BS> class Evolver;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorSet;
-typedef std::pair<DiscreteLocation,TaylorSet> HybridTaylorSet;
-class MonolithicHybridAutomaton;
+typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
+class HybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
@@ -80,7 +80,7 @@ class HybridTime;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class PythonHybridEvolver
-    : public EvolverBase<MonolithicHybridAutomaton,HybridTaylorSet>
+    : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
     typedef VectorFunction FunctionType;
@@ -94,13 +94,13 @@ class PythonHybridEvolver
     typedef TaylorSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef MonolithicHybridAutomaton::TimeType TimeType;
+    typedef HybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef MonolithicHybridAutomaton SystemType;
+    typedef HybridAutomaton SystemType;
     typedef TaylorSet ContinuousEnclosureType;
-    typedef pair<DiscreteLocation,TaylorSet> HybridEnclosureType;
+    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -144,7 +144,7 @@ class PythonHybridEvolver
         return intermediate; }
 
   protected:
-    typedef tuple<DiscreteLocation, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     // This is the only method which is called in Python
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
@@ -180,17 +180,17 @@ orbit(const SystemType& system,
 enum Bool { False, True };
 
 template<class SET>
-ListSet< std::pair<DiscreteLocation,SET> >*
+ListSet< std::pair<DiscreteState,SET> >*
 make_hybrid_list_set(const boost::python::list& pylst)
 //make_hybrid_list_set(const boost::python::object& pyobj)
 {
-    ListSet< std::pair<DiscreteLocation,SET> >* result=new ListSet< std::pair<DiscreteLocation,SET> >();
+    ListSet< std::pair<DiscreteState,SET> >* result=new ListSet< std::pair<DiscreteState,SET> >();
     //boost::python::list pylst=boost::python::extract<boost::python::list>(pyobj);
     for(int i=0; i!=len(pylst); ++i) {
         boost::python::tuple pytup=boost::python::extract<boost::python::tuple>(pylst[i]);
-        Ariadne::DiscreteLocation q(boost::python::extract<int>(pytup[0]));
+        Ariadne::DiscreteState q(boost::python::extract<int>(pytup[0]));
         SET s(boost::python::extract<SET>(pytup[1]));
-        //std::pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);
+        //std::pair<Ariadne::DiscreteState,SET> pr=std::make_pair(q,s);
         //result->adjoin(std::make_pair(q,s));
     }
     return result;
@@ -208,11 +208,11 @@ PythonHybridEvolver::initialise_python()
         boost::python::object evolution_namespace = evolution_module.attr("__dict__");
         main_namespace["hybrid_evolver"]=evolution_module;
 
-        boost::python::class_< ListSet< std::pair<DiscreteLocation,TaylorSet> > >
+        boost::python::class_< ListSet< std::pair<DiscreteState,TaylorSet> > >
             enclosure_list_class("HybridTaylorSetList",boost::python::no_init);
         enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorSet>));
 
-        boost::python::class_<MonolithicHybridAutomaton>("MonolithicHybridAutomaton",boost::python::no_init);
+        boost::python::class_<HybridAutomaton>("HybridAutomaton",boost::python::no_init);
         boost::python::class_<EnclosureType>("HybridTaylorSet",boost::python::no_init);
         boost::python::class_<HybridTime>("HybridTime",boost::python::no_init);
         //boost::python::enum_<Semantics>("Semantics")

@@ -212,9 +212,9 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
       transient_steps(0),
       lock_to_grid_time(1.0),
       lock_to_grid_steps(1),
-      initial_grid_depth(5),
-      initial_grid_density(4),
-      maximum_grid_depth(3),
+      initial_grid_depth(10),
+      initial_grid_density(8),
+      maximum_grid_depth(6),
       maximum_grid_height(16)
 { }
 

@@ -34,7 +34,6 @@ check_PROGRAMS = \
 	test_taylor_function \
 	test_taylor_set \
 	test_function \
-	test_hybrid_automaton \
 	test_hybrid_system \
 	test_grid_set \
 	test_hybrid_set \
@@ -93,5 +92,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_hybrid_system test_hybrid_evolution test_discretised_evolution test_reachability_analysis test_textplot
+XFAIL_TESTS = test_hybrid_system test_hybrid_set test_hybrid_evolution test_textplot
 testsubdir = ./

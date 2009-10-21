@@ -114,20 +114,20 @@ int main()
 
     /// Sets the analyzer parameters
     double LOCK_TO_GRID_TIME = 3.0;
-    int MAX_GRID_DEPTH = 2;
+    int MAX_GRID_DEPTH = 12;
 
     /// Builds the Hybrid System
   
-    /// Creates a MonolithicHybridAutomaton object
-    MonolithicHybridAutomaton balls;
+    /// Creates a HybridAutomaton object
+    HybridAutomaton balls;
   
     /// Creates discrete states
-    AtomicDiscreteLocation all_on_pre12collision(1);
-    AtomicDiscreteLocation all_on_pre23collision(2);
-    AtomicDiscreteLocation all_on_postcollisions(3);
-    AtomicDiscreteLocation firstsecond_on_third_off(4);
-    AtomicDiscreteLocation first_on_secondthird_off(5);
-    AtomicDiscreteLocation all_off(6);   
+    DiscreteState all_on_pre12collision(1);
+    DiscreteState all_on_pre23collision(2);
+    DiscreteState all_on_postcollisions(3);
+    DiscreteState firstsecond_on_third_off(4);
+    DiscreteState first_on_secondthird_off(5);
+    DiscreteState all_off(6);   
 
     /// Creates the discrete events
     DiscreteEvent collide12_e(1);

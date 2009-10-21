@@ -117,13 +117,13 @@ int main()
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
-    MonolithicHybridAutomaton multipleguards;
+    HybridAutomaton multipleguards;
   
     /// Create the discrete states
-    AtomicDiscreteLocation pospos(1);
-    AtomicDiscreteLocation posneg(2);
-    AtomicDiscreteLocation negpos(3);
-    AtomicDiscreteLocation negneg(4);	
+    DiscreteState pospos(1);
+    DiscreteState posneg(2);
+    DiscreteState negpos(3);
+    DiscreteState negneg(4);	
 
     /// Create the discrete events
     DiscreteEvent pospos2posneg(12);

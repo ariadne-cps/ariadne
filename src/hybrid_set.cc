@@ -25,37 +25,5 @@
 
 namespace Ariadne {
 
-HybridGrid::HybridGrid(uint n) : _component_grids(n) { }
-
-HybridGrid::HybridGrid(const HybridSpace& hs, double l) {
-    ARIADNE_DEPRECATED("HybridGrid(HybridSpace,double)","No current replacement");
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-void HybridGrid::insert(uint i, AtomicDiscreteLocation q, const Grid& g) {
-    this->_component_grids[i].insert(q,g); }
-
-Grid HybridGrid::operator[](const DiscreteLocation& loc) const {
-    assert(loc.size()==this->_component_grids.size());
-    Vector<Float> lengths;
-    for(uint i=0; i!=this->_component_grids.size(); ++i) {
-        lengths=join(lengths,this->_component_grids[i][loc[i]].lengths());
-    }
-    return Grid(lengths);
-}
-
-Grid& HybridGrid::operator[](const DiscreteLocation& loc) {
-    ARIADNE_DEPRECATED("Grid& HybridGrid::operator[](DiscreteLocation)",
-                       "Cannot directly set grid in a location.");
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-bool HybridGrid::has_location(const AtomicDiscreteLocation& q) const {
-    return this->_component_grids[0].find(q) != this->_component_grids[0].end();
-}
-
-bool HybridGrid::has_location(const DiscreteLocation& loc) const {
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
 } // namespace Ariadne

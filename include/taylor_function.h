@@ -46,24 +46,13 @@ class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 
-
 // Remove the error term
 ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
 
-// Set the value of the \a kth variable to c
-ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const Interval& c);
-// Evaluate a scalar Taylor function on a vector.
-Interval evaluate(const ScalarTaylorFunction& x, const Vector<Interval>& sy);
-
-// Restrict the \a kth variable to lie in the interval \a d.
-ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, uint k, const Interval& d);
 // Restrict to a smaller domain. REQUIRED
 ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const Vector<Interval>& d);
 // Extend to a larger domain. REQUIRED
 ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const Vector<Interval>& d);
-
-// Compose with an expression.
-ScalarTaylorFunction compose(const ScalarFunction& x, const VectorTaylorFunction& y);
 
 // Test if a variable refines another
 bool refines(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2);
@@ -72,6 +61,16 @@ bool disjoint(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
 // Test if two variables definitely represent different quantities
 ScalarTaylorFunction intersection(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
 
+// Evaluate an array of Taylor variables on a vector.
+Interval evaluate(const ScalarTaylorFunction& x, const Vector<Interval>& sy);
+
+// Set the value of the \a kth variable to c
+ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& x, uint k, const Interval& c);
+// Restrict the \a kth variable to lie in the interval \a d.
+ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, uint k, const Interval& d);
+
+// Compose with an expression.
+ScalarTaylorFunction compose(const ScalarFunction& x, const VectorTaylorFunction& y);
 
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, uint j);
@@ -161,14 +160,12 @@ class ScalarTaylorFunction
     //@{
     /*! \name Named constructors. */
     //! \brief Construct the quantity \f$x_0\f$ over the one-dimensional domain \a d.
-    static ScalarTaylorFunction identity(const Interval& d);
+    static ScalarTaylorFunction variable(const Interval& d);
     //! \brief Construct a constant quantity in \a as independent variables.
     static ScalarTaylorFunction constant(const DomainType& d, const Float& c);
     //! \brief Construct a constant quantity in \a as independent variables.
     static ScalarTaylorFunction constant(const DomainType& d, const Interval& c);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static ScalarTaylorFunction coordinate(const DomainType& d, unsigned int j);
-    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d (Deprecated).
     static ScalarTaylorFunction variable(const DomainType& d, unsigned int j);
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
     static ScalarTaylorFunction affine(const DomainType& d, const Float& c, const Vector<Float>& g);
@@ -181,8 +178,6 @@ class ScalarTaylorFunction
     static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Interval>& c);
     //! \brief Return the vector of variables with values \a x over domain \a d.
     static Vector<ScalarTaylorFunction> variables(const DomainType& d);
-    //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
-    static Vector<ScalarTaylorFunction> variables(const DomainType& d, uint imin, uint imax);
     //@}
 
     //@{
@@ -670,11 +665,6 @@ class VectorTaylorFunction {
     /*! \brief The data used to define the centre of the Taylor model. */
     const Vector<TaylorModel>& models() const;
 
-    /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    const TaylorModel& model(uint i) const;
-    /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    TaylorModel& model(uint i);
-
     /*! \brief The size of the argument. */
     uint argument_size() const;
     /*! \brief The size of the result. */
@@ -706,8 +696,6 @@ class VectorTaylorFunction {
     static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c);
     /*! \brief The identity Taylor model on domain \a d. */
     static VectorTaylorFunction identity(const Vector<Interval>& d);
-    //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorTaylorFunction projection(const Vector<Interval>& d, uint imin, uint imax);
 
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<Interval> > polynomial() const;
@@ -812,26 +800,6 @@ class VectorTaylorFunction {
     Vector<Interval> _domain;
     Vector<TaylorModel> _models;
 };
-
-// Set the value of the \a kth variable to c
-VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);
-// Evaluate a scalar Taylor function on a vector.
-Vector<Interval> evaluate(const VectorTaylorFunction& f, const Vector<Interval>& c);
-
-// Restrict the \a kth variable to lie in the interval \a d.
-VectorTaylorFunction restrict(const VectorTaylorFunction& f, uint k, const Interval& d);
-// Restrict to a smaller domain. REQUIRED
-VectorTaylorFunction restrict(const VectorTaylorFunction& f, const Vector<Interval>& d);
-// Extend to a larger domain. REQUIRED
-VectorTaylorFunction extend(const VectorTaylorFunction& f, const Vector<Interval>& d);
-
-// The argument size of the result is the same as that of \a e, and must be either the same as that of \a f, or one less.
-VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& e);
-// Compose a vector function with a Taylor function.
-VectorTaylorFunction compose(const VectorFunction& f, const VectorTaylorFunction& e);
-
-// Split the domain into halves along the \a j<sup>th</sup> coordinate.
-std::pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, uint j);
 
 VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
 VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);

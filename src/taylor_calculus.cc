@@ -365,7 +365,6 @@ crossing_time(const PredicateModelType& guard_model,
               const FlowModelType& flow_model,
               const SetModelType& initial_set_model) const
 {
-    //std::cerr<<"crossing_time(guard_model,flow_model,initial_set_model)\n";
     uint dimension=flow_model.result_size();
     RealType minimum_time=flow_model.domain()[dimension].lower();
     RealType maximum_time=flow_model.domain()[dimension].upper();
@@ -410,7 +409,6 @@ TaylorCalculus::TimeModelType
 TaylorCalculus::
 scaled_crossing_time(const BaseModelType& guard_flow_set_model) const
 {
-    //std::cerr<<"scaled_crossing_time(guard_flow_set_model)\n";
     TimeModelType hitting_time_model;
     try {
         hitting_time_model=Ariadne::implicit(guard_flow_set_model);
@@ -587,7 +585,7 @@ tribool
 TaylorCalculus::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    TimeModelType guard_set_model = apply(guard_model,set_model);
+    TimeModelType guard_set_model = apply(guard_model,set_model)[0];
     Interval guard_range=guard_set_model.range();
     tribool guard_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
     return guard_active;
@@ -647,6 +645,18 @@ TaylorCalculus::flow_model(VectorFunction const& vf, Vector<Interval> const& ibx
 }
 
 
+
+TaylorCalculus::PredicateModelType
+TaylorCalculus::predicate_model(VectorFunction const& g, Vector<Interval> const& bx) const
+{
+    //ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(VectorFunction,Vector<Interval>","Use ScalarFunction instead");
+    ARIADNE_ASSERT(g.argument_size()==bx.size());
+
+    FunctionModelType predicate_model(bx,g);
+    ARIADNE_LOG(6,"predicate_model = "<<predicate_model<<"\n");
+
+    return predicate_model[0];
+}
 
 TaylorCalculus::PredicateModelType
 TaylorCalculus::predicate_model(ScalarFunction const& g, Vector<Interval> const& bx) const

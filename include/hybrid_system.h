@@ -43,7 +43,7 @@
 #include "container.h"
 #include "valuation.h"
 
-#include "discrete_location.h"
+#include "discrete_state.h"
 
 namespace Ariadne {
 
@@ -56,7 +56,7 @@ class HybridSpace;
 class HybridSet;
 class HybridGrid;
 
-class DiscreteLocation;
+class DiscreteState;
 class DiscreteSpace;
 
 class ScalarFunction;
@@ -74,7 +74,7 @@ template<class k, class V> class Map;
 /*! \brief A hybrid system, comprising continuous-time behaviour
  *  at each discrete mode, coupled by instantaneous discrete transitions.
  *  The state space is given by a hybrid set.
- * \sa \link Ariadne::MonolithicHybridAutomaton \c MonolithicHybridAutomaton \endlink.
+ * \sa \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink.
 
  */
 class HybridSystem
@@ -151,17 +151,17 @@ class HybridSystem
         AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
     //! \brief Adds a differential equation to the system.
     void new_dynamic(DiscretePredicate q, RealDynamic d) {
-        DifferentialEquation eqn={q,d.lhs.base(),d.rhs}; _differential_equations.push_back(eqn); };
+        DifferentialEquation eqn={q,d.lhs.base,d.rhs}; _differential_equations.push_back(eqn); };
     //! \brief Adds a discrete reset to the system.
     void new_transition(EventSet e, DiscretePredicate q, StringUpdate a) {
-        DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
+        DiscreteUpdate eqn={e,q,a.lhs.base,a.rhs}; _discrete_updates.push_back(eqn); }
     void new_transition(DiscretePredicate q, EventSet e, StringUpdate a) {
-        DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
+        DiscreteUpdate eqn={e,q,a.lhs.base,a.rhs}; _discrete_updates.push_back(eqn); }
     //! \brief Adds a reset equation to the system.
     void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
-        ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
+        ContinuousUpdate eqn={e,q,a.lhs.base,a.rhs}; _continuous_updates.push_back(eqn); }
     void new_reset(DiscretePredicate q, EventSet e, RealUpdate a) {
-        ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
+        ContinuousUpdate eqn={e,q,a.lhs.base,a.rhs}; _continuous_updates.push_back(eqn); }
     //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }

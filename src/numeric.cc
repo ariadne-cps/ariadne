@@ -1109,6 +1109,7 @@ Real::Real(const std::string& str)
     const char* c_ptr=str.c_str();
     while(*c_ptr != 0) {
         const char& c=*c_ptr;
+        std::cerr<<c<<(c-'0')<<"\n";
         if(c=='.') {
             if(decimal_point) {
                 ARIADNE_THROW(std::runtime_error,"Real(String)","real literal \""<<str<<"\" has more than one decimal point.");

@@ -128,14 +128,14 @@ void ConstrainedImageSet::apply_map(VectorFunction map) {
 
 void ConstrainedImageSet::apply_flow(VectorFunction phi, Interval time_domain) {
     _data->_domain=join(_data->_domain,time_domain);
-    _data->_models=compose(phi,combine(_data->_models,ScalarTaylorFunction::identity(time_domain).model()));
+    _data->_models=compose(phi,combine(_data->_models,ScalarTaylorFunction::variable(time_domain).model()));
 }
 
 void ConstrainedImageSet::apply_flow(VectorTaylorFunction phi) {
     std::cerr<<"apply_flow(VectorTaylorFunction)\n";
     Interval time_domain=phi.domain()[phi.domain().size()-1];
     _data->_domain=join(_data->_domain,time_domain);
-    _data->_models=unchecked_compose(phi.models(),phi.domain(),combine(_data->_models,ScalarTaylorFunction::identity(time_domain).model()));
+    _data->_models=unchecked_compose(phi.models(),phi.domain(),combine(_data->_models,ScalarTaylorFunction::variable(time_domain).model()));
 }
 
 void ConstrainedImageSet::new_invariant(DiscreteEvent event, ScalarFunction constraint, ScalarFunction derivative) {
@@ -243,7 +243,7 @@ _adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVector& subdomain
 
 Orbit<HybridConstrainedImageSet>
 ConstrainedImageSetHybridEvolver::
-orbit(const MonolithicHybridAutomaton& system,
+orbit(const HybridAutomaton& system,
       const HybridConstrainedImageSet& initial,
       const HybridTime& time,
       Semantics semantics) const
@@ -263,7 +263,7 @@ ConstrainedImageSetHybridEvolver::
 _evolution(EnclosureListType& final,
            EnclosureListType& reachable,
            EnclosureListType& intermediate,
-           MonolithicHybridAutomaton const& system,
+           HybridAutomaton const& system,
            HybridConstrainedImageSet const& initial_set,
            HybridTime const& maximum_time,
            Semantics semantics,
@@ -284,7 +284,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
                       ListSet<HybridConstrainedImageSet>& reach_sets,
                       ListSet<HybridConstrainedImageSet>& evolve_sets,
                       ListSet<HybridConstrainedImageSet>& intermediate_sets,
-                      MonolithicHybridAutomaton const& system,
+                      HybridAutomaton const& system,
                       HybridTime const& maximum_hybrid_time) const
 {
     typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
@@ -298,7 +298,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     working_sets.pop_back();
     
     List<DiscreteEvent>& starting_events=current_data._events;
-    DiscreteLocation starting_location=current_data._location;
+    DiscreteState starting_location=current_data._location;
     ConstrainedImageSet& starting_set=current_data._set;
     ScalarFunction& starting_time=current_data._time;
 
@@ -315,24 +315,24 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     Set<DiscreteTransition> transitions=system.transitions(starting_location);
 
     VectorFunction dynamic=mode.dynamic();
-    Map<DiscreteEvent,ScalarFunction> invariants(mode.invariants());
+    Map<DiscreteEvent,ScalarFunction> invariants(mode.scalar_invariants());
 
     Map<DiscreteEvent,ScalarFunction> guards;
     Map<DiscreteEvent,ScalarFunction> activations;
     Map<DiscreteEvent,VectorFunction> resets;
-    Map<DiscreteEvent,DiscreteLocation> targets;
+    Map<DiscreteEvent,DiscreteState> targets;
     
     for(Set<DiscreteTransition>::const_iterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         const DiscreteEvent& event=transition_iter->event();
-        if(transition_iter->urgency()==urgent) {
-            guards[event]=transition_iter->activation();
+        if(transition_iter->forced()) {
+            guards[event]=transition_iter->scalar_activation();
         } else {
-            activations[event]=transition_iter->activation();
+            activations[event]=transition_iter->scalar_activation();
         }
         resets[event]=transition_iter->reset();
-        targets[event]=transition_iter->target();
+        targets[event]=transition_iter->target().location();
     }
 
     print("\ninvariants:",invariants);
@@ -417,7 +417,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
         DiscreteEvent const& event=iter->first;
         ScalarFunction const& constraint=iter->second;
         ScalarFunction derivative=lie_derivative(constraint,dynamic);
-        DiscreteLocation target=targets[event];
+        DiscreteState target=targets[event];
         VectorFunction reset=resets[event];
         ConstrainedImageSet jumping_set(reached_set);
         jumping_set.new_activation(event,constraint,derivative);

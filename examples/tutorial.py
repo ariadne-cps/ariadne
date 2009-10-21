@@ -89,41 +89,40 @@ print "\n\n"
 # Function submodule
 ###############################################################################
 
-### ScalarUserFunction and VectorUserFunction no longer supported
+# Create a user-defined scalar-valued function
+argument_size=2
+function=lambda x:sqrt(sqr(x[0])+sqr(x[1]))
+f=ScalarUserFunction(argument_size,function)
+print dir(ScalarUserFunction)
+print type(f),type(FloatVector([4,3]))
+#print f(FloatVector([4,3]))
+#print f(IntervalVector([4,3]))
 
-## Create a user-defined scalar-valued function
-#argument_size=2
-#function=lambda x:sqrt(sqr(x[0])+sqr(x[1]))
-#f=ScalarUserFunction(argument_size,function)
-#print dir(ScalarUserFunction)
-#print type(f),type(FloatVector([4,3]))
-##print f(FloatVector([4,3]))
-##print f(IntervalVector([4,3]))
+result_size=2
+argument_size=3
+function=lambda (x):[sqrt(sqr(x[0])+sqr(x[1])),x[1]+x[2]]
+f=VectorUserFunction(result_size,argument_size,function)
+print f
+#print f(FloatVector([4,3,0]))
+#print f.evaluate(IntervalVector([4,3,0]))
 
-#result_size=2
-#argument_size=3
-#function=lambda (x):[sqrt(sqr(x[0])+sqr(x[1])),x[1]+x[2]]
-#f=VectorUserFunction(result_size,argument_size,function)
-#print f
-##print f(FloatVector([4,3,0]))
-##print f.evaluate(IntervalVector([4,3,0]))
-#
-#print "\n"
+print "\n"
 
 
 
 # Create a scalar polynomial function in three unknowns, with value \f$x_0\f$.
-p=ScalarFunction.variable(3,0)
+p=ScalarPolynomialFunction.variable(3,0)
 print p
 
 # Make a shorthand for constructing polynomial functions.
 def p(n,j):
-    return ScalarFunction.variable(n,j)
+    return ScalarPolynomialFunction.variable(n,j)
 
 # Arithmetic for Polynomial expressions
-p=ScalarFunction.variable(3,0)
-q=ScalarFunction.variable(3,1)
-c=Real(1.0)
+p=ScalarPolynomialFunction.variable(3,0)
+q=ScalarPolynomialFunction.variable(3,1)
+c=Float(1.0)
+i=Interval(0.875,1.125)
 
 print +p, -p;
 print p+q, p-q, p*q;
@@ -131,8 +130,12 @@ print p+q, p-q, p*q;
 print p+c, p-c, p*c, p/c;
 print c+p, c-p, c*p;
 
+print p+i, p-i, p*i, p/i;
+print i+p, i-p, i*p;
+
 p+=q; p-=q;
 p+=c; p-=c; p*=c; p/=c;
+p+=i; p-=i; p*=i; p/=i;
 
 print "\n\n"
 
@@ -170,7 +173,7 @@ def t(d,j):
     return ScalarTaylorFunction.variable(d,j)
 
 #Create a ScalarTaylorFunction from a Polynomial
-p=ScalarFunction.variable(3,0)
+p=ScalarPolynomialFunction.variable(3,0)
 tp=ScalarTaylorFunction(d,p)
 print "p:",p,"\ntp: ",tp,"\n"
 
@@ -180,8 +183,8 @@ x.domain()
 x.codomain()
 # An over-approximation to p(D)+/-e.
 x.range()
-### Convert to a polynomial expression.
-##x.polynomial()
+# Convert to a polynomial expression.
+x.polynomial()
 
 # Arithmetic on Taylor models
 +x; -x; x+y; x-y; x*y; x/y;
@@ -244,9 +247,8 @@ d=IntervalVector([[4,7],[1,6],[-1,1]])
 th=VectorTaylorFunction.identity(d)
 cd=th.codomain()
 
-##f=VectorFunction.affine(FloatMatrix([[2,1,0],[1,1,1]]),FloatVector([1,1]))
-f=VectorFunction(2,3)
-g=ScalarFunction.variable(3,0)
+f=VectorAffineFunction(FloatMatrix([[2,1,0],[1,1,1]]),FloatVector([1,1]))
+g=ScalarPolynomialFunction.variable(3,0)
 
 tg=ScalarTaylorFunction(cd,g)
 tf=VectorTaylorFunction(cd,f)
@@ -310,29 +312,15 @@ if1=antiderivative(f,1)
 print "antiderivative(f,0):",if0
 print "antiderivative(f,1):",if1
 
-# Compute the flow of the Taylor function f starting in the domain D for time interval [-h,+h]
-b=Box([[-4,4]])
+# Compute the flow of the Taylor function tf starting in the domain D for time interval [-h,+h]
+b=Box([[-2,2]])
 d=Box([[-1,1]])
 h=0.5
-o=8 # Temporal order
+o=6 # Temporal order
 f=VectorTaylorFunction.identity(b)
 phi=flow(f,d,h,o)
 print "phi:",phi
 print
-
-# Compute two time steps of the flow of the Taylor function f starting in domain D for the interval [h,2h]
-phi0=phi
-phi0h=partial_evaluate(phi,1,h)
-dd=phi0h.range()
-phi=flow(f,dd,h,o)
-tr=ScalarTaylorFunction.variable([{0:2*h}],0)-h
-phi1=compose(phi,combine(phi0h,tr))
-print "phi0:",phi0
-print "phi1:",phi1
-print
-sys.exit()
-
-
 
 ## Contractors
 

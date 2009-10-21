@@ -73,7 +73,7 @@ struct SingularVanDerPolGuard
 
 SingularVanDerPol::
 SingularVanDerPol(const Vector<Interval>& p)
-    : MonolithicHybridAutomaton("SingularVanDerPolOscillator")
+    : HybridAutomaton("SingularVanDerPolOscillator")
 {
     Function<SingularVanDerPolDynamic> dynamic(p);
     Function<SingularVanDerPolReset> reset;

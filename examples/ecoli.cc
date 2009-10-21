@@ -98,8 +98,8 @@ int main()
 {
     VectorUserFunction<EColi> ecoli_function(Vector<Interval>(17));
 
-    MonolithicHybridAutomaton ecoli_system;
-    AtomicDiscreteLocation starvation_mode(1);
+    HybridAutomaton ecoli_system;
+    DiscreteState starvation_mode(1);
     ecoli_system.new_mode(starvation_mode,ecoli_function);
 
     PlanarProjectionMap projection(4,0,1);
@@ -136,8 +136,8 @@ int main()
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time=lock_to_grid_time;
-    analyser.parameters().initial_grid_depth=4;
-    analyser.parameters().maximum_grid_depth=4;
+    analyser.parameters().initial_grid_depth=18;
+    analyser.parameters().maximum_grid_depth=18;
     std::cout<<"Discrete evolution parameters="<<analyser.parameters()<<"\n";
 
     HybridImageSet initial_set;

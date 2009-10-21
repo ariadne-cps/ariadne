@@ -49,7 +49,7 @@ int verbosity=0;
 class TestHybridSimulator
 {
   private:
-    static MonolithicHybridAutomaton system();
+    static HybridAutomaton system();
   public:
     void test() const;
 };
@@ -61,15 +61,15 @@ int main()
     return ARIADNE_TEST_FAILURES;
 }
 
-MonolithicHybridAutomaton
+HybridAutomaton
 TestHybridSimulator::system()
 {
-    const AtomicDiscreteLocation location1(1);
-    const AtomicDiscreteLocation location2(2);
+    const DiscreteState location1(1);
+    const DiscreteState location2(2);
     const DiscreteEvent event3(3);
     const DiscreteEvent event4(4);
 
-    MonolithicHybridAutomaton automaton("Affine Hysteresis System");
+    HybridAutomaton automaton("Affine Hysteresis System");
     double adata[]={-0.5,-1.0,1.0,-0.5};
     double bdata[]={1.0,0.0};
     Matrix<Float> A(2,2,adata);
@@ -101,8 +101,8 @@ void TestHybridSimulator::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    const AtomicDiscreteLocation location1(1);
-    const AtomicDiscreteLocation location2(2);
+    const DiscreteState location1(1);
+    const DiscreteState location2(2);
     const DiscreteEvent event3(3);
     const DiscreteEvent event4(4);
 
@@ -119,7 +119,7 @@ void TestHybridSimulator::test() const
 
 
     // Make a hybrid automaton for the Van der Pol equation
-    MonolithicHybridAutomaton automaton=system();
+    HybridAutomaton automaton=system();
     ARIADNE_TEST_PRINT(automaton);
 
     // Define the initial box

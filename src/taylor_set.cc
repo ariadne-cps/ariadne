@@ -209,7 +209,7 @@ TaylorSet::bounding_box() const
     for(uint i=0; i!=this->dimension(); ++i) {
         r[i]=(*this)[i].range();
     }
-    return r.bounding_box();
+    return r;
 }
 
 

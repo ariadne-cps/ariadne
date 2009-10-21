@@ -27,7 +27,7 @@
 
 using namespace Ariadne;
 
-MonolithicHybridAutomaton create_boost_power_converter()
+HybridAutomaton create_boost_power_converter()
 {
     // Variables V, I
     // Parameters L,R,C,E

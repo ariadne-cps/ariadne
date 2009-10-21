@@ -63,13 +63,13 @@ int main()
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
-    MonolithicHybridAutomaton watertank_system;
+    HybridAutomaton watertank_system;
   
     /// Create four discrete states
-    AtomicDiscreteLocation l1(1);
-    AtomicDiscreteLocation l2(2);
-    AtomicDiscreteLocation l3(3);
-    AtomicDiscreteLocation l4(4);
+    DiscreteState l1(1);
+    DiscreteState l2(2);
+    DiscreteState l3(3);
+    DiscreteState l4(4);
   
     /// Create the discrete events
     DiscreteEvent e12(12);
@@ -200,7 +200,7 @@ int main()
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 10.0;
-    analyser.parameters().maximum_grid_depth = 5;
+    analyser.parameters().maximum_grid_depth = 10;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;

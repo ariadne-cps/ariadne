@@ -61,7 +61,7 @@ void build_automaton() {
 
 	int DEPTH_ADD[4] = {3,0,0,3};
 
-    /// Create a MonolithicHybridAutomaton object
+    /// Create a HybridAutomaton object
 
     /// Create the events
     DiscreteEvent chk(1); // Checks the current voltage
@@ -72,13 +72,13 @@ void build_automaton() {
     DiscreteEvent to_unsafe(6); // Switches to the unsafe location
 
     /// Create the discrete states
-    AtomicDiscreteLocation states[NH+1][2];
+    DiscreteState states[NH+1][2];
     for (int i=0;i<=NH;i++)
     {
-        states[i][0] = AtomicDiscreteLocation(10*i+1);
-        states[i][1] = AtomicDiscreteLocation(10*i+2);		
+        states[i][0] = DiscreteState(10*i+1);
+        states[i][1] = DiscreteState(10*i+2);		
     }
-    AtomicDiscreteLocation end(1000);
+    DiscreteState end(1000);
 
     /// Create the dynamics 
 

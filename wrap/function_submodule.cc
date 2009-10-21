@@ -296,10 +296,8 @@ void export_scalar_function()
     scalar_function_class.def(self_ns::str(self));
 
     scalar_function_class.def("constant", (ScalarFunction(*)(uint,Real)) &ScalarFunction::constant);
-    scalar_function_class.def("coordinate", (ScalarFunction(*)(uint,uint)) &ScalarFunction::coordinate);
     scalar_function_class.def("variable", (ScalarFunction(*)(uint,uint)) &ScalarFunction::variable);
     scalar_function_class.staticmethod("constant");
-    scalar_function_class.staticmethod("coordinate");
     scalar_function_class.staticmethod("variable");
 
     def("evaluate_approx", (Float(*)(const ScalarFunction&,const Vector<Float>&)) &evaluate_approx);
@@ -324,28 +322,9 @@ void export_scalar_function()
 
 void export_vector_function()
 {
-    implicitly_convertible<RealAssignment,ExtendedRealAssignment>();
-    implicitly_convertible<PrimedRealAssignment,ExtendedRealAssignment>();
-    implicitly_convertible<DottedRealAssignment,ExtendedRealAssignment>();
-
-    implicitly_convertible<RealVariable,ExtendedRealVariable>();
-    implicitly_convertible<PrimedRealVariable,ExtendedRealVariable>();
-    implicitly_convertible<DottedRealVariable,ExtendedRealVariable>();
-    
-    from_python< List<RealVariable> >();
-    from_python< List<RealAssignment> >();
-
-    from_python< List<ExtendedRealVariable> >();
-    from_python< List<ExtendedRealAssignment> >();
-
-    
     class_<VectorFunction>
         vector_function_class("VectorFunction", init<VectorFunction>());
     vector_function_class.def(init<uint,uint>());
-
-    vector_function_class.def(init< List<ExtendedRealVariable>, List<ExtendedRealAssignment>, List<RealVariable> >());
-    //vector_function_class.def(init< List<RealVariable>, List<RealAssignment>, List<RealVariable> >());
-
     vector_function_class.def("result_size", &VectorFunction::result_size);
     vector_function_class.def("argument_size", &VectorFunction::argument_size);
     vector_function_class.def("__getitem__", &VectorFunction::get);

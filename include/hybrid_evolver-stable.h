@@ -38,7 +38,6 @@
 #include "tuple.h"
 
 #include "hybrid_set.h"
-#include "hybrid_time.h"
 
 #include "hybrid_automaton.h"
 #include "evolver_interface.h"
@@ -62,7 +61,8 @@ class EvolutionProfiler;
 template<class ES> class Orbit;
 
 class HybridTime;
-class MonolithicHybridAutomaton;
+class HybridAutomaton;
+
 
 
 
@@ -72,7 +72,7 @@ class MonolithicHybridAutomaton;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class StableHybridEvolver
-    : public EvolverBase< MonolithicHybridAutomaton, HybridTaylorSet>
+    : public EvolverBase< HybridAutomaton, HybridTaylorSet>
     , public Loggable
 {
     typedef TaylorModel ModelType;
@@ -87,11 +87,11 @@ class StableHybridEvolver
     typedef TaylorSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef MonolithicHybridAutomaton::TimeType TimeType;
+    typedef HybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef MonolithicHybridAutomaton SystemType;
+    typedef HybridAutomaton SystemType;
     typedef TaylorSet ContinuousEnclosureType;
     typedef HybridBasicSet<TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
@@ -146,7 +146,7 @@ class StableHybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<DiscreteLocation, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,

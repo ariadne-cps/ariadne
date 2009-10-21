@@ -55,8 +55,7 @@ class EnumeratedValue;
 typedef String Identifier;
 
 template<class T> class Variable;
-template<class T> class Space;
-template<class T> class Expression;
+template<class R> class Expression;
 template<class LHS,class RHS> class Assignment;
 
 class DiscreteValuation;
@@ -102,7 +101,6 @@ class Expression {
     explicit Expression(const ExpressionInterface<R>& e) : _ptr(e.clone()) { }
     explicit Expression(ExpressionInterface<R>* eptr) : _ptr(eptr) { }
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
-    Expression() { R z; *this=Expression(z); }
     Expression(const R& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
@@ -137,7 +135,6 @@ class Expression<Real> {
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
     Expression(const double& c);
     Expression(const Interval& c);
-    Expression(const Real& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
     //! \brief Test if two expressions are identical to each other.
@@ -175,7 +172,6 @@ Integer evaluate(const Expression<Integer>& e, const DiscreteValuation& q);
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x);
-template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,X>& x);
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
@@ -279,25 +275,13 @@ Expression<Real> cos(Expression<Real> e);
 //! \related Expression \brief .
 Expression<Real> tan(Expression<Real> e);
 
-//! \related Expression \brief .
-Expression<Real> max(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
-Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
-Expression<Real> abs(Expression<Real> e);
-
-enum Sign { positive=+1, negative=-1, zero=0 };
-
-//! \related Expression \brief Try to compute a real expression which has the
-//! given \a sign when the predicate \a p is true.
-Expression<Real> indicator(Expression<tribool> p, Sign sign=positive);
-
 
 template<class X> class Affine;
 template<class X> class Polynomial;
 
 template<class X> Affine<X> affine(const Expression<Real>&, const Space<Real>&);
 template<class X> Polynomial<X> polynomial(const Expression<Real>&, const Space<Real>&);
+
 
 } // namespace Ariadne
 

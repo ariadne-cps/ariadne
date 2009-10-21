@@ -189,21 +189,21 @@ int main()
 
     /// Build the Hybrid System
 
-    /// Create a MonolithicHybridAutomaton object
-    MonolithicHybridAutomaton inverter;
+    /// Create a HybridAutomaton object
+    HybridAutomaton inverter;
 
     /// Create the discrete states
-    AtomicDiscreteLocation nt_pl(1);
-    AtomicDiscreteLocation nt_ps(2);
-    AtomicDiscreteLocation nl_pt(3);
-    AtomicDiscreteLocation ns_pt(4);
-    AtomicDiscreteLocation nl_ps(5);
-    AtomicDiscreteLocation ns_pl(6);
-    AtomicDiscreteLocation ns_ps(7);
-    AtomicDiscreteLocation falling_nt(8);
-    AtomicDiscreteLocation falling_pt(9);
-    AtomicDiscreteLocation rising_ns(10);
-    AtomicDiscreteLocation rising_ps(11);
+    DiscreteState nt_pl(1);
+    DiscreteState nt_ps(2);
+    DiscreteState nl_pt(3);
+    DiscreteState ns_pt(4);
+    DiscreteState nl_ps(5);
+    DiscreteState ns_pl(6);
+    DiscreteState ns_ps(7);
+    DiscreteState falling_nt(8);
+    DiscreteState falling_pt(9);
+    DiscreteState rising_ns(10);
+    DiscreteState rising_ps(11);
 
     /// Create the discrete events
     DiscreteEvent to_nt_pl(1);

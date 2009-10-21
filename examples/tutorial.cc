@@ -91,10 +91,10 @@ struct HeaterOff : VectorFunctionData<2,2,4> {
 };
 
 
-MonolithicHybridAutomaton create_heating_system()
+HybridAutomaton create_heating_system()
 {
     // Create a HybridAutomton object
-    MonolithicHybridAutomaton heating_system;
+    HybridAutomaton heating_system;
 
     // Set the system dynamic parameters
     Float P=4.0;
@@ -112,8 +112,8 @@ MonolithicHybridAutomaton create_heating_system()
     // Float Ton_lower=14.5;
 
     // Create the two discrete state
-    AtomicDiscreteLocation heater_on(1);
-    AtomicDiscreteLocation heater_off(2);
+    DiscreteState heater_on(1);
+    DiscreteState heater_off(2);
 
     // Create the discrete events
     DiscreteEvent switch_on(1);
@@ -166,11 +166,11 @@ HybridEvolver create_evolver()
 }
 
 
-void compute_evolution(const MonolithicHybridAutomaton& heating_system, const HybridEvolver& evolver)
+void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolver& evolver)
 {
     // Redefine the two discrete states
-    AtomicDiscreteLocation heater_on(1);
-    AtomicDiscreteLocation heater_off(2);
+    DiscreteState heater_on(1);
+    DiscreteState heater_off(2);
 
     // Declare the type to be used for the system evolution
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
@@ -213,18 +213,18 @@ void compute_evolution(const MonolithicHybridAutomaton& heating_system, const Hy
 }
 
 
-void compute_reachable_sets(const MonolithicHybridAutomaton& heating_system, const HybridEvolver& evolver)
+void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridEvolver& evolver)
 {
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().initial_grid_density=5;
-    analyser.parameters().initial_grid_depth=6;
-    analyser.parameters().maximum_grid_depth=6;
+    analyser.parameters().initial_grid_density=10;
+    analyser.parameters().initial_grid_depth=12;
+    analyser.parameters().maximum_grid_depth=12;
 
 
     // Define the initial set
     HybridImageSet initial_set;
-    AtomicDiscreteLocation heater_off(2);
+    DiscreteState heater_off(2);
     Box initial_box(2, 0.0,0.015625/4, 16.0,16.0+0.0625/16);
     initial_set[heater_off]=initial_box;
 
@@ -273,11 +273,11 @@ void compute_reachable_sets(const MonolithicHybridAutomaton& heating_system, con
 
 
 
-void compute_reachable_sets_with_serialisation(const MonolithicHybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
+void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
 {
     // Define the initial set
     HybridImageSet initial_set;
-    AtomicDiscreteLocation heater_off(2);
+    DiscreteState heater_off(2);
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
     initial_set[heater_off]=initial_box;
 
@@ -315,7 +315,7 @@ void compute_reachable_sets_with_serialisation(const MonolithicHybridAutomaton& 
 int main()
 {
     // Create the system
-    MonolithicHybridAutomaton heating_system=create_heating_system();
+    HybridAutomaton heating_system=create_heating_system();
 
     // Create the analyser classes
     HybridEvolver evolver=create_evolver();

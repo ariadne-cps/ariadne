@@ -135,7 +135,7 @@ struct Lorenz : VectorFunctionData<3,3,3> {
 
 //! The singularly forced Van der Pol oscillator.
 class SingularVanDerPol
-    : public MonolithicHybridAutomaton
+    : public HybridAutomaton
 {
     SingularVanDerPol(const Vector<Interval>& p);
 };

@@ -42,8 +42,6 @@ template<class T> class List;
 template<class X> class Vector;
 class VectorFunction;
 class VectorTaylorFunction;
-class ScalarFunction;
-class ScalarTaylorFunction;
 
 class SolverException : public std::runtime_error
 {
@@ -88,8 +86,6 @@ class SolverInterface
     virtual Set< Vector<Interval> > solve(const VectorFunction& f,const Vector<Interval>& pt) const = 0;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const = 0;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const = 0;
 
 };
 

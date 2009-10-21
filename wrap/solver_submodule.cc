@@ -56,8 +56,6 @@ class SolverWrapper
         return this->get_override("solve")(); }
     List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& pd, const Vector<Interval>& bx) const {
         return this->get_override("implicit")(); }
-    ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& pd, const Interval& ivl) const {
-        return this->get_override("implicit")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -95,7 +93,6 @@ void export_solver()
 
     class_<KrawczykSolver, bases<SolverInterface> > krawczyk_solver_class("KrawczykSolver",init<double,unsigned int>());
     krawczyk_solver_class.def("implicit",(List<VectorTaylorFunction>(KrawczykSolver::*)(const VectorFunction&,const Vector<Interval>&,const Vector<Interval>&)const) &KrawczykSolver::implicit);
-    krawczyk_solver_class.def("implicit",(ScalarTaylorFunction(KrawczykSolver::*)(const ScalarFunction&,const Vector<Interval>&,const Interval&)const) &KrawczykSolver::implicit);
 
 }
 

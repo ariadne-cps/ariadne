@@ -38,8 +38,7 @@ namespace Ariadne {
 
 template<class ES>
 HybridGridTreeSet 
-//outer_approximation(const HybridListSet<ES>& hls,
-outer_approximation(const ListSet<HybridBasicSet<ES> >& hls,
+outer_approximation(const HybridListSet<ES>& hls,
                     const HybridGrid& hgr,
                     const int accuracy)
 {
@@ -60,13 +59,34 @@ outer_approximation(const ListSet<HybridBasicSet<ES> >& hls,
 }
 
 
+template<class ES>
+HybridGridTreeSet 
+outer_approximation(const ListSet< HybridBasicSet<ES> >& hls,
+                    const int accuracy)
+{
+    HybridGridTreeSet result;
+    //for(typename HybridListSet<ES>::const_iterator 
+    for(typename ListSet< HybridBasicSet<ES> >::const_iterator 
+            iter=hls.begin(); iter!=hls.end(); ++iter)
+        {
+            HybridBasicSet<ES> hbs(*iter);
+            DiscreteState loc=hbs.location();
+            const ES& es=hbs.continuous_state_set();
+            if(result.find(loc)==result.locations_end()) {
+                result.insert(make_pair(loc,GridTreeSet(es.dimension())));
+            }
+            GridTreeSet& gts=result[loc];
+            gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
+            //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
+        }
+    return result;
+}
+
 
 
 template<>
 HybridGridTreeSet 
 outer_approximation(const ListSet< HybridBasicSet<ConstrainedImageSet> >& hls,
-//outer_approximation(const HybridListSet< ConstrainedImageSet >& hls,
-                    const HybridGrid& hgr,
                     const int accuracy)
 {
     typedef ConstrainedImageSet ES;
@@ -79,8 +99,7 @@ outer_approximation(const ListSet< HybridBasicSet<ConstrainedImageSet> >& hls,
             DiscreteState loc=hes.location();
             const ES& es=hes.continuous_state_set();
             if(result.find(loc)==result.locations_end()) {
-                Grid grid=hgr[loc];
-                result.insert(make_pair(loc,GridTreeSet(grid)));
+                result.insert(make_pair(loc,GridTreeSet(es.dimension())));
             }
             GridTreeSet& gts=result[loc];
             gts.adjoin(es.outer_approximation(gts.grid(),accuracy));
@@ -199,7 +218,7 @@ evolution(const SystemType& system,
     Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,semantics);
     ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\nOK\n");
-    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,system.grid(),accuracy);
+    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,accuracy);
     ARIADNE_LOG(5,"discrete_orbit reach size="<<discrete_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"discrete_orbit final size="<<discrete_orbit.final().size()<<"\n");
     return discrete_orbit;
@@ -215,8 +234,7 @@ reach(const SystemType& system,
             const AccuracyType accuracy,
             const Semantics semantics) const
 {
-    return this->_discretise(this->_evolver->reach(system,this->_enclosure(initial_set),time,semantics),
-                             initial_set,system.grid(),accuracy);
+    return this->_discretise(this->_evolver->reach(system,this->_enclosure(initial_set),time,semantics),initial_set,accuracy);
 }
 
 template<class ES>
@@ -230,8 +248,7 @@ evolve(const SystemType& system,
 {
     EnclosureType initial_enclosure=this->_enclosure(initial_set);
     ListSet<EnclosureType> final_enclosures=this->_evolver->evolve(system,initial_enclosure,time,semantics);
-    HybridGrid grid=system.grid();
-    return this->_discretise(final_enclosures,initial_set,grid,accuracy);
+    return this->_discretise(final_enclosures,initial_set,accuracy);
 }
 
 template<class ES>
@@ -270,24 +287,23 @@ Orbit<typename HybridDiscretiser<ES>::BasicSetType>
 HybridDiscretiser<ES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial_set,
-            const HybridGrid& hgrid,
             const int accuracy) const
 {
     ARIADNE_LOG(3,"HybridDiscretiser<ES>::_discretise(...)"<<"\n");
     ARIADNE_LOG(6,"continuous_orbit="<<continuous_orbit<<"\n");
 
     DenotableSetType reach_set
-        = outer_approximation(continuous_orbit.reach(),hgrid,
+        = outer_approximation(continuous_orbit.reach(),
                               accuracy);
     ARIADNE_LOG(4,"reach_set size="<<reach_set.size()<<"\n");
     ARIADNE_LOG(6,"reach_set="<<reach_set<<"\n");
     DenotableSetType intermediate_set
-        = outer_approximation(continuous_orbit.intermediate(),hgrid,
+        = outer_approximation(continuous_orbit.intermediate(),
                               accuracy);
     ARIADNE_LOG(4,"intermediate_set size="<<intermediate_set.size()<<"\n");
     ARIADNE_LOG(6,"intermediate_set="<<intermediate_set<<"\n");
     DenotableSetType final_set
-        = outer_approximation(continuous_orbit.final(),hgrid,
+        = outer_approximation(continuous_orbit.final(),
                               accuracy);
     ARIADNE_LOG(4,"final_set size="<<final_set.size()<<"\n");
     ARIADNE_LOG(6,"final_set="<<final_set<<"\n");
@@ -300,14 +316,14 @@ HybridGridTreeSet
 HybridDiscretiser<ES>::
 _discretise(const ListSet<EnclosureType>& enclosure_list_set,
             const BasicSetType& initial_set,
-            const HybridGrid& hgrid,
             const int accuracy) const
 {
     ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
     ARIADNE_LOG(6,"enclosure_list_set="<<enclosure_list_set<<"\n");
 
     DenotableSetType discretised_set
-        = outer_approximation(enclosure_list_set,hgrid,accuracy);
+        = outer_approximation(enclosure_list_set,
+                              accuracy);
     ARIADNE_LOG(4,"discretised_set="<<discretised_set<<"\n");
     return discretised_set; 
 }

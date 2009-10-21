@@ -114,7 +114,7 @@ int main(int argc, char** argv)
 
     /// Create a HybridEvolver object
     HybridEvolver evolver;
-    evolver.verbosity = 1;
+    evolver.verbosity = 0;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;

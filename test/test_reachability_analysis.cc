@@ -64,10 +64,10 @@ class TestReachabilityAnalysis
     static HybridReachabilityAnalyser build_analyser()
     {
         EvolutionParameters parameters;
-        parameters.maximum_grid_depth=4;
+        parameters.maximum_grid_depth=8;
         parameters.maximum_step_size=0.25;
         parameters.lock_to_grid_time=1.0;
-        
+    
         Grid grid(2);
         HybridEvolver evolver(parameters);
         EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver_interface
@@ -108,7 +108,7 @@ class TestReachabilityAnalysis
         system.new_mode(location,aff);
         cout << "Done building system\n";
 
-        ImageSet initial_box(make_box("[1.999999,2.0]x[0.0,0.000001]"));
+        ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
         initial_set[location]=initial_box;
         cout << "Done creating initial set\n" << endl;
 
@@ -150,7 +150,6 @@ class TestReachabilityAnalysis
     void test_lower_reach_evolve() {  
         DiscreteState loc(1);
         Box bounding_box(2,bound);
-        analyser.verbosity=0;
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(system,initial_set,reach_time);
         cout << "Computing timed reachable set" << endl;
@@ -166,7 +165,6 @@ class TestReachabilityAnalysis
         cout << "Computing timed reachable set" << endl;
         DiscreteState loc(1);
         Box bounding_box(2,bound);
-        analyser.verbosity=0;
         HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(system,initial_set,reach_time);
         cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
         HybridGridTreeSet upper_reach_set=analyser.upper_reach(system,initial_set,reach_time);

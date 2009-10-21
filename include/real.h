@@ -38,15 +38,11 @@ namespace Ariadne {
 class Real : public Interval {
   public:
     explicit Real() : Interval() { }
-    explicit Real(const std::string& s);
     Real(int n) : Interval(n) { }
     Real(double x) : Interval(x) { }
-#ifdef HAVE_GMPXX_H
-    Real(const Rational& q);
-#endif
+    //explicit Real(Float flt) : Interval(flt) { }
     explicit Real(Interval ivl) : Interval(ivl) { }
     explicit Real(double l, double u) : Interval(l,u) { }
-    explicit Real(double l, double x, double u) : Interval(l,u) { }
     Real& operator=(const Float& x) { static_cast<Interval&>(*this)=x; return *this; }
     Real& operator=(const Interval& x) { static_cast<Interval&>(*this)=x; return *this; }
     operator Float() const { return this->midpoint(); }

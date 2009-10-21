@@ -204,12 +204,10 @@ class HybridDiscretiser
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
-                                    const HybridGrid& system_grid,
                                     const AccuracyType accuracy) const;
 
     DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
                                  const BasicSetType& initial_set,
-                                 const HybridGrid& system_grid,
                                  const AccuracyType accuracy) const;  
 };
 

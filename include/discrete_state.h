@@ -30,15 +30,10 @@
 
 namespace Ariadne {
 
-template<class T> std::string to_str(const T& t) {
-    std::stringstream ss; ss<<t; return ss.str(); }
-
 class DiscreteState {
   public:
-    DiscreteState() : _id("q?") { }
-    DiscreteState(int n) : _id(std::string("q"+to_str(n))) { }
-    DiscreteState(const std::string& s) : _id(s) { }
-    std::string name() const { return this->_id; }
+    DiscreteState() : _id(0) { }
+    DiscreteState(int n) : _id(n) { }
     bool operator==(const DiscreteState& q) const { return this->_id==q._id; }
     bool operator!=(const DiscreteState& q) const { return this->_id!=q._id; }
     bool operator<=(const DiscreteState& q) const { return this->_id<=q._id; }
@@ -47,14 +42,14 @@ class DiscreteState {
     bool operator> (const DiscreteState& q) const { return this->_id> q._id; }
     friend std::ostream& operator<<(std::ostream& os, const DiscreteState& q);
   private:
-    std::string _id;
+    int _id;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DiscreteState& q) {
-    return os << q._id; }
+    return os << "q" << q._id; }
 
 template<class A> inline void serialize(A& archive, DiscreteState& state, const uint version) {
-    std::string& id=reinterpret_cast<std::string&>(state);
+    int& id=reinterpret_cast<int&>(state);
     archive & id;
 }
 

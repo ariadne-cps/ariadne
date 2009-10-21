@@ -108,7 +108,6 @@ int main()
     double b[3]={0.0,0.0,1.0};
 
     float EVOL_TIME = 1.0/f;
-    EVOL_TIME = 1.0;
     int EVOL_TRANS = 4;
    
     float MAX_ENCL_RADIUS = 1e-1;

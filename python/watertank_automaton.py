@@ -48,16 +48,16 @@ alpha=ScalarFunction.variable(2,1);
 zero=ScalarFunction.constant(2,0.0);
 recT=ScalarFunction.constant(2,1.0/T);
 
-open=DiscreteState("open");
-closed=DiscreteState("closed");
-opening=DiscreteState("opening");
-closing=DiscreteState("closing");
+open=DiscreteState(1);
+closed=DiscreteState(2);
+opening=DiscreteState(3);
+closing=DiscreteState(4);
 
 # Declare the events we use
-start_opening=DiscreteEvent("start_opening");
-start_closing=DiscreteEvent("start_closing");
-finished_opening=DiscreteEvent("finished_opening");
-finished_closing=DiscreteEvent("finished_closing");
+start_opening=DiscreteEvent(3);
+start_closing=DiscreteEvent(4);
+finished_opening=DiscreteEvent(1);
+finished_closing=DiscreteEvent(2);
 
 identity=VectorFunction.identity(2)
 

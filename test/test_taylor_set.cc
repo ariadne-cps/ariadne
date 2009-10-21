@@ -108,14 +108,14 @@ TestTaylorSet::test_discretise()
 
     Grid grid(2);
     uint height(5);
-    uint depth(3);
+    uint depth(6);
     GridTreeSet gts=ts.discretise(grid,depth);
 
     //ListSet<Box> bxfine=ts.discretise(1.0/(1<<(depth/2+3)));
     //GridTreeSet gtsfine=outer_approximation(bxfine,grid,depth+4);
     //ARIADNE_TEST_PRINT(gtsfine);
 
-    ListSet<Box> bxls=ts.discretise(1.0/(1<<depth));
+    ListSet<Box> bxls=ts.discretise(1.0/(1<<depth/2));
     GridTreeSet bxgts=outer_approximation(bxls,grid,depth);
 
     // The discretisation which would be obtained using the bounding box.

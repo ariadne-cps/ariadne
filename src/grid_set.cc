@@ -906,7 +906,7 @@ Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uin
 //the newly created word for the low-left cell of the open cell
 GridOpenCell GridCell::interior() const {
     BinaryWord theOpenCellWord = _theWord;
-    for( uint i = 0; i < _theGrid.dimension(); i++) {
+    for(int i = 0; i < _theGrid.dimension(); i++) {
         theOpenCellWord.push_back(false);
     }
     //The open cell will be defined by the given new word, i.e. the path to the
@@ -987,7 +987,7 @@ Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const B
     Box openCellBoxInLattice( theGrid.dimension() );
     
     //Go through all the dimensions, and double the box size in the positive axis direction.
-    for( uint dim = 0; dim < theGrid.dimension(); dim++){
+    for(int dim = 0; dim < theGrid.dimension(); dim++){
         Interval openCellBoxInLatticeDimInterval;
         Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
         Float lower = baseCellBoxInLatticeDimInterval.lower();
@@ -1075,7 +1075,7 @@ GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& 
 
 GridTreeSet GridOpenCell::closure() const {
     //01. First we compute the height of the primary cell that encloses the given open cell
-    const uint newHeight = smallest_enclosing_primary_cell_height( _theBox, _theGrid );
+    const int newHeight = smallest_enclosing_primary_cell_height( _theBox, _theGrid );
     
     //02. Re-route (if needed) the base cell to the new primary cell
     uint theBaseCellHeight = _theHeight;
@@ -1129,7 +1129,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
     //for the dimensions that are not set to one in cellPosition will be undefined. Also,
     //count the required number of iverse dimensions
     int inverseDimensionsNumber = 0;
-    for( uint i = 0; i < num_dimensions; i++ ) {
+    for( int i = 0; i < num_dimensions; i++ ) {
         invert_position[ i ] = NO_INVERSE_POSITION;
         inverseDimensionsNumber += cellPosition[i];
     }
@@ -1182,7 +1182,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
 
 void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
                                   BinaryWord& cellPosition, std::vector<GridOpenCell>& result ) {
-    const uint num_dimensions = theCell.grid().dimension();
+    const int num_dimensions = theCell.grid().dimension();
     if( cellPosition.size() < num_dimensions ) {
         //Choose the left direction in the current dimension
         cellPosition.push_back( false );
@@ -1204,7 +1204,7 @@ void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTr
             //Take the given word theCell.word() and then add the directions from the cellPosition
             //The latter start from the first axis till the last one, but the path in coverCellBaseWord
             //currently ends at some other axis so we need to align them when appending cellPosition
-            for( uint i = 0; i < num_dimensions ; i++ ) {
+            for( int i = 0; i < num_dimensions ; i++ ) {
                 coverCellBaseWord.push_back( cellPosition[ coverCellBaseWord.size() % num_dimensions ] );
             }
             //Add the resulting cover cell
@@ -1315,15 +1315,11 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
     }
         
     //Mince to the computed number of tree levels
-    mince_to_tree_depth(needed_num_tree_subdiv);
+    mince(needed_num_tree_subdiv);
 }
 
 double GridTreeSubset::measure() const {
-    double result=0.0;
-    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        result+=iter->box().measure();
-    }
-    return result;
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -1770,7 +1766,7 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
         if( pBinaryTreeNode->is_enabled() ){ //NOTE: A non-leaf node can not be enabled so this check suffices
             //DO NOTHING: If it is enabled, then we can not add anything new to it.
         } else {
-            //If the node is not enabled, so may be we can add something from the outer approximation of theSet.
+            //If the node is no enabled, so may be we can add something from the outer approximation of theSet.
             if( pPath->size() < max_mince_depth ){
                 //Since we still do not have the finest cells for the outer approximation of theSet, we split 
                 pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
@@ -1814,10 +1810,8 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
 
     if( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
-            //We should not mince any further.
-            //If the cell is not a leaf, then some subset is enabled,
-            //so the lower approximation does not add any information.
-            //If the cell is a leaf, we mark it as enabled.
+            //We should not mince any further. If the cell is not a leaf, then some subset is enabled, so the
+            //lower approximation does not add any information. If the cell is a leaf, we mark it as enabled.
             if( ! pBinaryTreeNode->has_enabled() ) {
                 pBinaryTreeNode->make_leaf(true);
             }
@@ -1876,17 +1870,17 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
     }
 }
     
-void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint depth ) {
     // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
     for(size_t i=0; i!=theBox.dimension(); ++i) {
         if(theBox[i].lower()>=theBox[i].upper()) {
             ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(Box,uint)","Box "<<theBox<<" has empty interior.");
         }
     }
-    this->adjoin_outer_approximation( theBox, numSubdivInDim );
+    this->adjoin_outer_approximation(theBox,depth);
 }
 
-void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
         
@@ -1907,7 +1901,7 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
         //Compute the depth to which we must mince the outer approximation of the adjoining set.
         //This depth is relative to the root of the constructed paving, which has been alligned
         //with the binary tree node pBinaryTreeNode.
-        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, outer_approx_primary_cell_height, 0 );
+        const uint max_mince_depth = outer_approx_primary_cell_height * theGrid.dimension() + depth;
             
         //Adjoin the outer approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord(); 
@@ -1920,11 +1914,11 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
 
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
-void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint numSubdivInDim ) {
-    this->adjoin_lower_approximation( theSet, theSet.bounding_box(), numSubdivInDim );
+void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth ) {
+    this->adjoin_lower_approximation( theSet, theSet.bounding_box(), depth );
 }
 
-void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint depth ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
     
@@ -1939,7 +1933,7 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
         //Compute the depth to which we must mince the outer approximation of the adjoining set.
         //This depth is relative to the root of the constructed paving, which has been alligned
         //with the binary tree node pBinaryTreeNode.
-        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
+        const uint max_mince_depth = height * theGrid.dimension() + depth;
             
         //Adjoin the outer approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord(); 
@@ -1956,7 +1950,7 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     }
 }
 
-void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
@@ -1965,7 +1959,7 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     const uint height = GridCell::smallest_enclosing_primary_cell_height( theBoundingBox, theGrid );
     
     //Adjoin the lower approximation with the bounding cell being the primary cell at the given height.
-    adjoin_lower_approximation( theSet, height, numSubdivInDim );
+    adjoin_lower_approximation( theSet, height, depth );
 }
 
 void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
@@ -2014,7 +2008,7 @@ void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
     }
 }
 
-void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint depth ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
 
@@ -2029,7 +2023,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
         //Compute the depth to which we must mince the inner approximation of the adjoining set.
         //This depth is relative to the root of the constructed paving, which has been alligned
         //with the binary tree node pBinaryTreeNode.
-        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
+        const uint max_mince_depth = height * theGrid.dimension() + depth;
         
         //Adjoin the inner approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord(); 
@@ -2038,7 +2032,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     }
 }
 
-void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& theBoundingBox, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
@@ -2052,7 +2046,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     //go higher. Remember that the inner approximations consists of the cells
     //that are subsets of the set theSet Adjoin the inner approximation with
     //the bounding cell being the primary cell at the given height.
-    adjoin_inner_approximation( theSet, height, numSubdivInDim );
+    adjoin_inner_approximation( theSet, height, depth );
 }
 
 void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){

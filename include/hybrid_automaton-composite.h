@@ -71,22 +71,25 @@ class AtomicDiscreteTransition
     friend class AtomicDiscreteMode;
     friend class AtomicHybridAutomaton;
   private:
-    // \brief The discrete transition's identificator.
+    //  The discrete transition's identificator.
     DiscreteEvent _event;
 
-    // \brief The source of the discrete transition.
-    const AtomicDiscreteMode* _source_mode;
+    // IMPORTANT: Can't use pointers here since they break default copy
+    // used to create composite automaton
 
-    // \brief The target of the discrete transition.
-    const AtomicDiscreteMode* _target_mode;
+    //  The source of the discrete transition.
+    AtomicDiscreteLocation _source;
 
-    // \brief The guard predicate of the discrete transition.
+    //  The target of the discrete transition.
+    AtomicDiscreteLocation _target;
+
+    //  The guard predicate of the discrete transition.
     ContinuousPredicate _guard_predicate;
 
-    // \brief The reset assignments of the discrete transition.
+    //  The reset assignments of the discrete transition.
     List<RealUpdateAssignment> _update_assignments;
 
-    // \brief Whether or not the transition is forced (Deprecated)
+    //  Whether or not the transition is forced (Deprecated)
     bool _forced;
 
   public:
@@ -95,18 +98,23 @@ class AtomicDiscreteTransition
     DiscreteEvent event() const { return this->_event; }
 
     //! \brief The source mode of the discrete transition.
-    const AtomicDiscreteMode& source_mode() const { return *this->_source_mode; }
+    AtomicDiscreteLocation source() const { return this->_source; }
 
     //! \brief The target mode of the discrete transition.
-    const AtomicDiscreteMode& target_mode() const { return *this->_target_mode; }
+    AtomicDiscreteLocation target() const { return this->_target; };
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
   private:
-    // Construct from shared pointers (for internal use).
     AtomicDiscreteTransition(DiscreteEvent event,
-                             const AtomicDiscreteMode& source,
-                             const AtomicDiscreteMode& target,
+                             const AtomicDiscreteMode& source_mode,
+                             const AtomicDiscreteMode& target_mode,
+                             const List<RealUpdateAssignment>& reset,
+                             const ContinuousPredicate& guard);
+
+    AtomicDiscreteTransition(DiscreteEvent event,
+                             AtomicDiscreteLocation source,
+                             AtomicDiscreteLocation target,
                              const List<RealUpdateAssignment>& reset,
                              const ContinuousPredicate& guard);
 };
@@ -163,7 +171,7 @@ inline bool operator<(const AtomicDiscreteMode& mode1, const AtomicDiscreteMode&
 inline bool operator<(const AtomicDiscreteTransition& transition1, const AtomicDiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
         || (transition1.event() == transition2.event()
-            && transition1.source_mode().location() < transition2.source_mode().location());
+            && transition1.source() < transition2.source());
 }
 
 
@@ -333,6 +341,9 @@ class AtomicHybridAutomaton
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
     bool has_transition(AtomicDiscreteLocation source, DiscreteEvent event) const;
 
+    //! \brief The discrete modes of the automaton.
+    Set<AtomicDiscreteMode> modes() const;
+
     //! \brief The discrete mode with given discrete state.
     const AtomicDiscreteMode& mode(AtomicDiscreteLocation location) const;
 
@@ -354,7 +365,7 @@ class AtomicHybridAutomaton
     //! \name New-style access for compositional hybrid automata.
 
     //! \brief The target location of the discrete event from the given discrete location.
-    AtomicDiscreteLocation target(const AtomicDiscreteLocation& source, const DiscreteEvent& event);
+    AtomicDiscreteLocation target(const AtomicDiscreteLocation& source, const DiscreteEvent& event) const;
     //! \brief The state (dotted) variables in the given location.
     List<RealVariable> state_variables(AtomicDiscreteLocation location) const;
     //! \brief The auxiliary (algebraic/output) variables in the given location.

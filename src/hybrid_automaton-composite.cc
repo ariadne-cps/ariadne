@@ -52,12 +52,12 @@ AtomicDiscreteMode::write(std::ostream& os) const
 {
     const AtomicDiscreteMode& mode=*this;
     os << "AtomicDiscreteMode( "
-       << "location=" << mode._location << ", ";
+       << "location=" << mode._location;
     if(mode._algebraic_assignments.size()>0) {
-        os << "algebraic_equations="<<mode._algebraic_assignments<<", "; }
+        os << ", algebraic_equations="<<mode._algebraic_assignments; }
     if(mode._differential_assignments.size()>0) {
-        os << "differential_equations="<<mode._differential_assignments<<", "; }
-    return os;
+        os << ", differential_equations="<<mode._differential_assignments; }
+    return os << " )";
 }
 
 
@@ -65,11 +65,22 @@ AtomicDiscreteMode::write(std::ostream& os) const
 
 AtomicDiscreteTransition::
 AtomicDiscreteTransition(DiscreteEvent event,
-                   const AtomicDiscreteMode& source,
-                   const AtomicDiscreteMode& target,
+                   const AtomicDiscreteMode& source_mode,
+                   const AtomicDiscreteMode& target_mode,
                    const List<RealUpdateAssignment>& reset,
                    const ContinuousPredicate& guard)
-    : _event(event), _source_mode(&source), _target_mode(&target),
+    : _event(event), _source(source_mode.location()), _target(target_mode.location()),
+      _guard_predicate(guard), _update_assignments(reset)
+{
+}
+
+AtomicDiscreteTransition::
+AtomicDiscreteTransition(DiscreteEvent event,
+                         AtomicDiscreteLocation source,
+                         AtomicDiscreteLocation target,
+                         const List<RealUpdateAssignment>& reset,
+                         const ContinuousPredicate& guard)
+    : _event(event), _source(source), _target(target),
       _guard_predicate(guard), _update_assignments(reset)
 {
 }
@@ -80,8 +91,8 @@ AtomicDiscreteTransition::write(std::ostream& os) const
     const AtomicDiscreteTransition& transition=*this;
     return os << "AtomicDiscreteTransition( "
               << "event=" << transition._event << ", "
-              << "source=" << transition._source_mode->_location << ", "
-              << "target=" << transition._target_mode->_location << ", "
+              << "source=" << transition._source << ", "
+              << "target=" << transition._target << ", "
               << "reset=" << transition._update_assignments << ", "
               << "guard=" << transition._guard_predicate << " )";
 }
@@ -155,7 +166,7 @@ AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
     AtomicDiscreteMode new_mode=AtomicDiscreteMode(location,equations,dynamic);
 
     this->_modes.insert(location,new_mode);
-    return this->mode(location);
+    return this->_modes.value(location);
 }
 
 const AtomicDiscreteMode&
@@ -293,6 +304,12 @@ AtomicHybridAutomaton::has_transition(AtomicDiscreteLocation source, DiscreteEve
 
 
 
+Set<AtomicDiscreteMode>
+AtomicHybridAutomaton::modes() const
+{
+    return Set<AtomicDiscreteMode>(this->_modes.values());
+}
+
 AtomicDiscreteMode&
 AtomicHybridAutomaton::mode(AtomicDiscreteLocation state)
 {
@@ -332,6 +349,16 @@ AtomicHybridAutomaton::transition(AtomicDiscreteLocation source, DiscreteEvent e
                       "The automaton "<<*this<<" has no mode transition with source "<<source<<" and event "<<event);
     }
     return this->_modes[source]._transitions[event];
+}
+
+Set<AtomicDiscreteTransition>
+AtomicHybridAutomaton::transitions(AtomicDiscreteLocation source) const
+{
+    if(!this->has_mode(source)) {
+        ARIADNE_THROW(std::runtime_error,"AtomicHybridAutomaton::transitions(AtomicDiscreteLocation)",
+                      "The automaton "<<*this<<" has no mode "<<source);
+    }
+    return Set<AtomicDiscreteTransition>(this->_modes[source]._transitions.values());
 }
 
 
@@ -412,17 +439,23 @@ AtomicHybridAutomaton::write(std::ostream& os) const
 {
     const AtomicHybridAutomaton& ha=*this;
     os << "\nHybridAutomaton( \n  modes=\n";
-    for(Map<AtomicDiscreteLocation,AtomicDiscreteMode>::const_iterator mode_iter=ha._modes.begin();
-        mode_iter!=ha._modes.end(); ++mode_iter)
+    Set<AtomicDiscreteMode> modes=ha.modes();
+    for(Set<AtomicDiscreteMode>::const_iterator mode_iter=modes.begin();
+            mode_iter!=modes.end(); ++mode_iter)
     {
         os << "    " <<*mode_iter<<",\n";
     }
     os << "  transitions=\n";
-    //for(AtomicHybridAutomaton::transition_const_iterator transition_iter=ha.transitions().begin();
-    //    transition_iter!=ha.transitions().end(); ++transition_iter)
-    //{
-    //    os << "    " <<*transition_iter<<",\n";
-    //}
+    for(Set<AtomicDiscreteMode>::const_iterator mode_iter=modes.begin();
+        mode_iter!=modes.end(); ++mode_iter)
+    {
+        Set<AtomicDiscreteTransition> transitions=ha.transitions(mode_iter->location());
+        for(Set<AtomicDiscreteTransition>::const_iterator transition_iter=transitions.begin();
+            transition_iter!=transitions.end(); ++transition_iter)
+        {
+            os << "    " <<*transition_iter<<",\n";
+        }
+    }
     return os << ")\n";
 }
 
@@ -450,8 +483,8 @@ AtomicHybridAutomaton::auxiliary_variables(AtomicDiscreteLocation location) cons
 
 
 AtomicDiscreteLocation
-AtomicHybridAutomaton::target(const AtomicDiscreteLocation& source, const DiscreteEvent& event) {
-    return this->transition(source,event).target_mode().location();
+AtomicHybridAutomaton::target(const AtomicDiscreteLocation& source, const DiscreteEvent& event) const {
+    return this->transition(source,event).target();
 }
 
 List<RealAssignment>
@@ -573,10 +606,12 @@ CompositeHybridAutomaton::events(const DiscreteLocation& source) const
 
 DiscreteLocation
 CompositeHybridAutomaton::target(const DiscreteLocation& source, const DiscreteEvent& event) const {
-    DiscreteLocation result;
+   // std::cerr<<"CompositeHybridAutomaton::target("<<source<<","<<event<<")\n";
+    DiscreteLocation result; result.reserve(source.size());
     for(uint i=0; i!=this->_components.size(); ++i) {
         if(this->_components[i].has_transition(source[i],event)) {
-            result.append(this->_components[i].transition(source[i],event).target_mode().location());
+            AtomicDiscreteLocation target=this->_components[i].target(source[i],event);
+            result.append(target);
         } else {
             result.append(source[i]);
         }
@@ -761,7 +796,7 @@ discrete_reachability(const CompositeHybridAutomaton& automaton, const DiscreteL
     while(!working.empty()) {
         ++step;
         for(Set<DiscreteLocation>::const_iterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
-
+            std::cerr<<"new_mode\n";
             DiscreteLocation location=*source_iter;
             std::cerr<<"  mode: "<<location<<":\n";
             std::cerr<<"      output="<<automaton.algebraic_assignments(location)<<"\n";
@@ -778,8 +813,10 @@ discrete_reachability(const CompositeHybridAutomaton& automaton, const DiscreteL
             }
 
             Set<DiscreteEvent> events=automaton.events(location);
+            std::cerr<<"  events: "<<events<<"\n";
             for(Set<DiscreteEvent>::const_iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
                 DiscreteEvent event=*event_iter;
+                std::cerr<<"    event:"<<event<<"\n";
                 DiscreteLocation target=automaton.target(location,event);
                 std::cerr<<"    transition: "<<event<<" -> "<<target<<"\n";
                 std::cerr<<"        reset="<<automaton.update_assignments(location,event)<<"\n";
@@ -791,14 +828,13 @@ discrete_reachability(const CompositeHybridAutomaton& automaton, const DiscreteL
                     reached.insert(target);
                     steps.insert(target,step);
                 }
-            }
+           }
         }
-        std::cerr<<"\n"<<step<<" "<<found<<"\n\n";
+        std::cerr<<"\nstep "<<step<<" found: "<<found<<"\n\n";
         working.clear();
         working.swap(found);
     }
 
-    std::cerr<<steps<<"\n";
     return reached;
 }
 

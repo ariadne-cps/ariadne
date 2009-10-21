@@ -197,6 +197,9 @@ template<class K, class V> class Map
     V& value(const K& k) {
         typename std::map<K,V>::iterator iter=this->find(k);
         assert(iter!=this->end()); return iter->second; }
+    const V& value(const K& k) const {
+        typename std::map<K,V>::const_iterator iter=this->find(k);
+        assert(iter!=this->end()); return iter->second; }
     void insert(const K& k, const V& v) {
         this->std::map<K,V>::insert(std::make_pair(k,v)); }
     Set<K> keys() const {

@@ -918,6 +918,7 @@ Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
     const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
     if(vptr) { return Expression<Real>(new CoordinateExpression<Real>(s.index(vptr->variable()))); }
     const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
+    if(iptr) { return e; }
     ARIADNE_FAIL_MSG("Cannot convert numbered variable");
 }
 

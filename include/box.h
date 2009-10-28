@@ -168,9 +168,10 @@ class Box
     //! \brief Returns an enclosing bounding box for the set.
     //! The result is guaranteed to contain the box in its interior.
     virtual Box bounding_box() const {
-        static const Float min(std::numeric_limits<double>::min());
-        static const Interval eps(-min,+min);
-        return Box((*this)+Vector<Interval>(this->dimension(),eps));
+        Box result(*this);
+        for(uint i=0; i!=result.dimension(); ++i) {
+            result[i]=trunc(result[i]); }
+        return result;
     }
 
     //! \brief Widens the box by the minimal floating-point increment.

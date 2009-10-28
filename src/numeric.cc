@@ -677,6 +677,22 @@ inline double _mul_up(volatile double x, volatile double y) { set_rounding_upwar
 inline double _div_down(volatile double x, volatile double y) { set_rounding_downward(); return x/y; }
 inline double _div_up(volatile double x, volatile double y) { set_rounding_upward(); return x/y; }
 
+Interval trunc(Interval x)
+{
+    rounding_mode_t rm=get_rounding_mode();
+    const double& xl=x.lower();
+    const double& xu=x.upper();
+    // Use machine epsilon instead of minimum to move away from zero
+    const double fm=std::numeric_limits<float>::epsilon();
+    volatile float tu=xu;
+    if(tu<xu) { set_rounding_upward(); tu+=fm; }
+    volatile float tl=xl;
+    if(tl>xl) { set_rounding_downward(); tl-=fm; }
+    set_rounding_mode(rm);
+    assert(tl<=xl); assert(tu>=xu);
+    return Interval(double(tl),double(tu));
+}
+
 Interval trunc(Interval x, uint n)
 {
     Interval e=Interval(pow(2.0,52-n));

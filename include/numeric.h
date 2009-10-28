@@ -344,6 +344,8 @@ inline Interval hull(Interval i1, Interval i2) {
     return Interval(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
 }
 
+// Over-approximate by an interval with float coefficients
+Interval trunc(Interval);
 Interval trunc(Interval, uint eps);
 
 inline Float med(Interval i) { return (i.lower()+i.upper())/2; }

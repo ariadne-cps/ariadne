@@ -74,7 +74,7 @@ struct from_python<Point> {
 template<>
 struct from_python<Box> {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<Box>()); }
-    static void* convertible(PyObject* obj_ptr) { std::cerr<<"Checking from_python<Box>::convertible\n"; if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
         boost::python::list lst=extract<boost::python::list>(obj_ptr);
@@ -297,6 +297,8 @@ void export_taylor_set()
     def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorSet&)) &apply);
     def("apply",(TaylorSet(*)(const VectorFunction&,const TaylorSet&)) &apply);
     def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
+
+    def("unchecked_apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &unchecked_apply);
 
     implicitly_convertible<Box,TaylorSet>();
     to_python< std::pair<TaylorSet,TaylorSet> >();

@@ -1297,10 +1297,11 @@ VectorTaylorFunction
 flow(const VectorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
 {
     VectorTaylorFunction phi0=embed(VectorTaylorFunction::identity(d),Vector<Interval>(1u,Interval(-h,+h)));
-    VectorTaylorFunction phi=phi0;
+    Vector<Interval> hvfd=0*h*vf(d);
+    VectorTaylorFunction phi=phi0+hvfd;
 
     for(uint i=0; i!=10; ++i) {
-        phi=antiderivative(compose(vf,phi),vf.result_size());
+        phi=phi0+antiderivative(compose(vf,phi),vf.result_size())*h;
     }
 
     return phi;

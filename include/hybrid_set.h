@@ -119,6 +119,20 @@ bounding_boxes(const std::map<DiscreteState,uint> space, Interval bound)
     return result;
 }
 
+inline
+HybridBoxes
+bounding_boxes(const std::map<DiscreteState,uint> space, const Box& bbox)
+{
+    HybridBoxes result;
+    for(std::map<DiscreteState,uint>::const_iterator loc_iter=space.begin();
+        loc_iter!=space.end(); ++loc_iter)
+        {
+            result.insert(make_pair(loc_iter->first,bbox));
+        }
+    return result;
+}
+
+
 
 template<class BS>
 class HybridBasicSet

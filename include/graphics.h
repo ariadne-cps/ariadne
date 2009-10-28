@@ -193,7 +193,61 @@ void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
     g.write(filename); 
 }
 
+//  Luca's enhanced plot function.
+//  if MAX_GRID_DEPTH is different from -1, plot the corresponding grid
+/*
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+    // Assigns local variables
+    Figure fig; 
+    array<uint> xy(2,xaxis,yaxis);
 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
+    fig.set_bounding_box(bbox); 
+    
+    fig.set_x_axis_label("x label");
+    fig.set_y_axis_label("y label");
+    
+    // If the grid must be shown
+    if (MAX_GRID_DEPTH >= 0)
+    {
+	// The rectangle to be drawn
+	Box rect = Box(numVariables);
+	// Chooses the fill colour
+        fig << fill_colour(Colour(1.0,1.0,1.0));
+
+	// Gets the number of times each variable interval would be divided by 2
+        int numDivisions = MAX_GRID_DEPTH / numVariables;
+	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
+	double step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+	// Initiates the x position to the bounding box left bound
+        double pos_x = bbox[0].lower();
+        // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
+	rect[yaxis] = bbox[1];
+        // While between the interval
+        while (pos_x < bbox[0].upper())
+        {
+	    rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+	    pos_x += step_x; // Shifts the x position
+	    fig << rect; // Appends the rectangle
+        }
+
+	// Repeats for the rectangles in the y direction
+	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+        double pos_y = bbox[1].lower();
+	rect[xaxis] = bbox[0];
+        while (pos_y < bbox[1].upper())
+        {
+	    rect[yaxis] = Interval(pos_y,pos_y+step_y);
+   	    fig << rect;
+	    pos_y += step_y;
+        }
+    }
+    // Draws and creates file
+    fig.set_fill_colour(fc); 
+    fig << set; 
+    fig.write(filename); 
+}
+*/
 
 
 } // namespace Ariadne

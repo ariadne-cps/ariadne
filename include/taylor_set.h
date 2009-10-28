@@ -48,6 +48,7 @@ class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorSet;
+class ImageSet;
 
 template<class BS> class ListSet;
 
@@ -70,6 +71,8 @@ class TaylorSet
     TaylorSet(uint d=0, uint ng=0);
     //! \brief Construct the image of the box \a d under the function \a f.
     TaylorSet(const VectorFunction& f, const Vector<Interval>& d);
+    //! \brief Construct from an ImageSet.
+    TaylorSet(const ImageSet& is);
     //! \brief Construct from a list of models giving set as the image of a unit box.
     TaylorSet(const Vector<TaylorModel>& tv);
     //! \brief The box \a bx.

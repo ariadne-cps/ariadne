@@ -48,6 +48,7 @@ template<class BS> class HybridBasicSet;
 
 typedef HybridBasicSet<Point> HybridPoint;
 typedef HybridBasicSet<Box> HybridBox;
+
 typedef std::map<DiscreteState,Box> HybridBoxes;
 
 //! \brief Base class for sets in a hybrid space.

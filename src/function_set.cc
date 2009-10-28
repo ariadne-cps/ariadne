@@ -124,7 +124,7 @@ ImageSet::disjoint(const Box& bx) const
         return Ariadne::disjoint(bx,this->_function.evaluate(this->_domain));
     } else {
         static const int MAX_SUBDIVISIONS=8;
-        return Ariadne::disjoint(this->domain(),this->_function,bx,radius(bx)/MAX_SUBDIVISIONS);
+        return Ariadne::disjoint(this->domain(),this->_function,bx,bx.radius()/MAX_SUBDIVISIONS);
     }
 }
 
@@ -133,7 +133,7 @@ tribool
 ImageSet::overlaps(const Box& bx) const
 {
     static const int MAX_SUBDIVISIONS=8;
-    return !Ariadne::disjoint(this->domain(),this->_function,bx,radius(bx)/MAX_SUBDIVISIONS);
+    return !Ariadne::disjoint(this->domain(),this->_function,bx,bx.radius()/MAX_SUBDIVISIONS);
 }
 
 

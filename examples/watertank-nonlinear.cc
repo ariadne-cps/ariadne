@@ -128,19 +128,20 @@ int main()
 
     /// Set the system parameters
     double a = 0.065;
-    double bmin = 0.3;
-    double bmax = 0.34;
+    double b = 0.3;
     double T = 4.0;
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
 
     double tmax = 64.0;
-    int jmax = 1;
+    int jmax = 6;
+    
+    int max_grid_depth=3;
 
     Vector<Interval> system_parameters(3);
     system_parameters[0] = a;
-    system_parameters[1] = Interval(bmin,bmax);        // Now parameters can be given as intervals !!
+    system_parameters[1] = b;
     system_parameters[2] = T;
 
 
@@ -208,7 +209,7 @@ int main()
     watertank_system.new_invariant(l4,inv4);
 
     watertank_system.new_forced_transition(e12,l1,l2,reset_y_one,guard12);
-    //watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
+    watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
     watertank_system.new_forced_transition(e34,l3,l4,reset_y_zero,guard34);
     watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
 
@@ -223,7 +224,7 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.5;
+    evolver.parameters().maximum_enclosure_radius = 50.0;
     evolver.parameters().maximum_step_size = 1.25;
     evolver.parameters().enable_subdivisions = true;
     evolver.verbosity = 1;
@@ -236,77 +237,97 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(3, 1.00001,1.00001, 1.00000,1.00001, 0.0000,0.0000);
+    Box initial_box(3, 1.0000,1.000, 1.00000,1.000, 0.0000,0.000);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
 
     HybridTime evolution_time(tmax,jmax);
 
-    std::cout << "Computing orbit... " << std::flush;
+    std::cout << "Computing orbit with lower semantics... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
     std::cout << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-nonlinear-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
-    plot("watertank-nonlinear-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
-    plot("watertank-nonlinear-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
-    // textplot("watertank-nonlinear-orbit", orbit);
-    // textplot("watertank-nonlinear-final", orbit.final());
+    plot("watertank-nonlinear-lower-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("watertank-nonlinear-lower-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("watertank-nonlinear-lower-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    HybridGridTreeSet hgr = outer_approximation(orbit.reach(),watertank_system.grid(),max_grid_depth);
+    plot("watertank-nonlinear-lower-orbit-xy-grid", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), hgr, -1);
 
+    std::cout << "Computing orbit with upper semantics... " << std::flush;
+    orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    std::cout << "done." << std::endl;
+
+    std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
+    std::cout << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
+    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
+    plot("watertank-nonlinear-upper-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("watertank-nonlinear-upper-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("watertank-nonlinear-upper-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    hgr = outer_approximation(orbit.reach(),watertank_system.grid(),max_grid_depth);
+    plot("watertank-nonlinear-upper-orbit-xy-grid", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), hgr, -1);
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.verbosity=5;
+    analyser.parameters().lock_to_grid_time = 100.0;
+    analyser.parameters().lock_to_grid_steps = 10;
+    analyser.parameters().maximum_grid_depth = max_grid_depth;
+    analyser.verbosity=3;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
     initial_set[l2]=initial_box;
 
-    HybridTime reach_time(64.0,6);
+    HybridTime reach_time(tmax,jmax);
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
+    std::cout << "Computing lower evolve set... " << std::flush;
+    HybridGridTreeSet evolve_set = analyser.lower_evolve(watertank_system,initial_set,reach_time);
+    std::cout << "done." << std::endl;
+    plot("watertank-nonlinear-lower_evolve", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), evolve_set, -1);
+
     std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
+    HybridGridTreeSet reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-nonlinear-lower_reach1", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), lower_reach_set, -1);
-/*
-    // Compute evolved sets and reach sets using upper semantics.
-    // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
-    // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
+    plot("watertank-nonlinear-lower_reach", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), reach_set, -1);
+
+    std::cout << "Computing lower reach and evolve set... " << std::flush;
+    make_lpair(reach_set,evolve_set) = analyser.lower_reach_evolve(watertank_system,initial_set,reach_time);
+    std::cout << "done." << std::endl;
+    plot("watertank-nonlinear-lower_reach_evolve1", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), reach_set, -1);
+    plot("watertank-nonlinear-lower_reach_evolve2", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), evolve_set, -1);
+
+    std::cout << "Computing upper evolve set... " << std::flush;
+    evolve_set = analyser.upper_evolve(watertank_system,initial_set,reach_time);
+    std::cout << "done." << std::endl;
+    plot("watertank-nonlinear-upper_evolve", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), evolve_set, -1);
+
     std::cout << "Computing upper reach set... " << std::flush;
-    HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);
+    reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-nonlinear-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), upper_reach_set);
+    plot("watertank-nonlinear-upper_reach", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), reach_set, -1);
 
-    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
-
-    Box initial_box2(2, 0.0,0.001, 0.0,0.001);
-    HybridImageSet initial_set2;
-    initial_set2[l1]=initial_box2;
-
-    plot("watertank-nonlinear-initial_set2",bounding_box, Colour(0.0,0.5,1.0), initial_set2);
-
-    // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
-    // These functions run a bunch of simulations with bounded approximation errors and combines the results.
-    // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
-    std::cout << "Computing lower reach set... " << std::flush;
-    lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set2,reach_time);
+    std::cout << "Computing upper reach and evolve set... " << std::flush;
+    make_lpair(reach_set,evolve_set) = analyser.upper_reach_evolve(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-nonlinear-lower_reach2",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
+    plot("watertank-nonlinear-upper_reach_evolve1", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), reach_set, -1);
+    plot("watertank-nonlinear-upper_reach_evolve2", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), evolve_set, -1);
 
-    // Compute evolved sets and reach sets using upper semantics.
-    // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
-    // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
-    std::cout << "Computing upper reach set... " << std::flush;
-    upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set2,reach_time);
+    analyser.parameters().lock_to_grid_time = 100.0;
+    analyser.parameters().lock_to_grid_steps = 1;
+
+
+    // bould bounding box to ensure termination fo chain_reach
+    HybridBoxes hbox = bounding_boxes(watertank_system.state_space(), bounding_box);
+
+    std::cout << "Computing chain reach set.... " << std::flush;
+    reach_set = analyser.chain_reach(watertank_system,initial_set,hbox);
     std::cout << "done." << std::endl;
-    plot("watertank-nonlinear-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
+    plot("watertank-nonlinear-chainreach", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), reach_set, -1);
 
-*/
 
 }

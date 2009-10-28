@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "system.h"
+#include "coconut-system.h"
 
 void build_automaton() {
     // Define evolution parameters
     MAX_ENCL_RADIUS = 0.2; /// Maximum enclosure radius
-    MAX_STEP_SIZE = 0.5e-2; /// Maximum step size
+    MAX_STEP_SIZE = 0.25; /// Maximum step size
     LOCK_TOGRID_TIME = 100.0;
     LOCK_TOGRID_STEPS = 100;
 

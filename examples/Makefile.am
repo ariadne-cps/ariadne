@@ -36,7 +36,7 @@ multipleguards_SOURCES=multipleguards.cc
 bouncingball_new_SOURCES=bouncingball-new.cc
 watertank_new_SOURCES=watertank-new.cc
 
-coconut_demo_SOURCES=coconut-demo.cc system.cc coconut-demo.h system.h
+coconut_demo_SOURCES=coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
 
 
 examples: $(bin_PROGRAMS)

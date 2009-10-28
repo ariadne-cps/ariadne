@@ -336,20 +336,18 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     cout << "Computing discretised evolution... " << flush;
     //Orbit<HybridGridCell> discrete_orbit
     //    = discrete_evolver.upper_evolution(ha,hybrid_initial_cell,htime,depth);
-    Orbit<HybridGridCell> discrete_orbit
-        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
+    HybridEnclosureType hybrid_initial_enclosure = discrete_evolver.enclosure(hybrid_initial_cell);
+    HybridGridTreeSet reach,final;
+    make_lpair(reach,final)
+        = discrete_evolver.evolution(ha,hybrid_initial_enclosure,htime,depth,UPPER_SEMANTICS);
     cout << "done." << endl;
 
-    GridTreeSet const& reach_cells=discrete_orbit.reach()[location];
-    GridTreeSet const& intermediate_cells=discrete_orbit.intermediate()[location];
-    GridTreeSet const& final_cells=discrete_orbit.final()[location];
+    GridTreeSet const& reach_cells=reach[location];
+    GridTreeSet const& final_cells=final[location];
 
     cout << "initial_set=" << initial_set.range() << endl << endl;
-    cout << "initial_cell=" << initial_cell.box() << endl << endl;
     cout << "reach_set=" << reach_set << endl << endl;
     cout << "reach_cells=" << reach_cells << endl << endl;
-    cout << "intermediate_set=" << intermediate_set << endl << endl;
-    cout << "intermediate_cells=" << intermediate_cells << endl << endl;
     cout << "final_set=" << final_set << endl << endl;
     cout << "final_cells=" << final_cells << endl << endl;
 
@@ -360,8 +358,6 @@ void TestDiscretisedEvolution::test_hybrid_time() const
         fig << line_style(true);
         fig << line_style(true);
         fig << fill_colour(cyan) << reach_cells;
-        fig << fill_colour(magenta) << intermediate_cells;
-        fig << fill_colour(yellow) << initial_cell;
         fig << fill_colour(green) << final_cells;
         fig.write("test_discrete_evolver-hybrid-cells");
     }

@@ -71,6 +71,9 @@ int main(int argc, char **argv)
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
 
     Figure g;
+    // Set label of the axes
+    g.set_x_axis_label("x");
+    g.set_y_axis_label("y");    
     g << fill_colour(0.5,1.0,1.0)
       << line_colour(0.0,0.0,0.0)
       << bx1

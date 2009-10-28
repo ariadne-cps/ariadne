@@ -133,6 +133,7 @@ class ImageSetHybridEvolver
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
+        reachable.adjoin(final);
         return reachable; }
 
   protected:

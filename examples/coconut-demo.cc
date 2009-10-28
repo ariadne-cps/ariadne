@@ -14,7 +14,7 @@
 #include "coconut-demo.h"
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, int xaxis, int yaxis, int numVariables, const Box& bbox, const Colour& fc, const SET& set, const string& xlabel, const string& ylabel, int MAX_GRID_DEPTH) { 
     // Assigns local variables
     Figure fig; 
     array<uint> xy(2,xaxis,yaxis);
@@ -22,8 +22,8 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
     fig.set_bounding_box(bbox); 
     
-    fig.set_x_axis_label("x label");
-    fig.set_y_axis_label("y label");
+    fig.set_x_axis_label(xlabel);
+    fig.set_y_axis_label(ylabel);
     
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -31,16 +31,16 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 	// The rectangle to be drawn
 	Box rect = Box(numVariables);
 	// Chooses the fill colour
-        fig << fill_colour(Colour(1.0,1.0,1.0));
+    fig << fill_colour(Colour(1.0,1.0,1.0));
 
 	// Gets the number of times each variable interval would be divided by 2
-        int numDivisions = MAX_GRID_DEPTH / numVariables;
+    int numDivisions = MAX_GRID_DEPTH / numVariables;
 	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
 	double step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
 	// Initiates the x position to the bounding box left bound
         double pos_x = bbox[0].lower();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
-	rect[yaxis] = bbox[1];
+	    rect[yaxis] = bbox[1];
         // While between the interval
         while (pos_x < bbox[0].upper())
         {
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
     HybridGridTreeSet reach = analyser.chain_reach(automaton,initial_set);	
     std::cout << "done." << std::endl;
 
-    plot("automaton_reach", 1, 2, 4, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
+    plot("automaton_reach", 1, 2, 4, graphic_box, Colour(0.0,0.5,1.0), reach, "x", "y", MAX_GRID_DEPTH);
 
     if(command == C_SYNTH) {
         if (reach[unsafe].empty())

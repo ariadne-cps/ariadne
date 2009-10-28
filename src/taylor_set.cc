@@ -39,6 +39,7 @@
 
 #include "list_set.h"
 #include "grid_set.h"
+#include "function_set.h"
 
 #include "zonotope.h"
 #include "polytope.h"
@@ -59,6 +60,11 @@ TaylorSet::TaylorSet(const VectorFunction& f, const Vector<Interval>& d)
 {
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_models=f.evaluate(x);
+}
+
+TaylorSet::TaylorSet(const ImageSet& is)
+{
+    *this = TaylorSet(is.function(), is.domain());
 }
 
 TaylorSet::TaylorSet(const Vector<Interval>& bx)

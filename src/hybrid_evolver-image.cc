@@ -272,8 +272,8 @@ _evolution(EnclosureListType& final_sets,
         } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
                   this->_parameters->enable_premature_termination &&
                   initial_set_radius>this->_parameters->maximum_enclosure_radius) {
-            std::cerr << "\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
-                      << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n\n";
+            ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
+                        << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n\n");
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,

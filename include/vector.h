@@ -148,6 +148,10 @@ class Vector
     //! \brief %Scalar division.
     friend template<class X> Vector<X> operator/(const Vector<X>& v, const X& s);
 
+    //! \brief The minimum value.
+    friend template<class X> X min(const Vector<X>& v);
+    //! \brief The maximum value.
+    friend template<class X> X max(const Vector<X>& v);
     //! \brief The supremum norm.
     friend template<class X> X norm(const Vector<X>& v);
     //! \brief The inner product.
@@ -181,6 +185,33 @@ Vector<X> operator+(const Vector<X>& v)
 {
     return v;
 }
+
+template<class X>
+X min(const Vector<X> &v)
+{
+    X r=0;
+    if(v.size() > 0) {
+        r=v[0];
+        for(size_t i=1; i<v.size(); ++i) {
+            r=min(r,v[i]);  
+        }
+    }
+    return r;
+}
+
+template<class X>
+X max(const Vector<X> &v)
+{
+    X r=0;
+    if(v.size() > 0) {
+        r=v[0];
+        for(size_t i=1; i<v.size(); ++i) {
+            r=max(r,v[i]);  
+        }
+    }
+    return r;
+}
+
 
 template<class X>
 X sup_norm(const Vector<X>& v)

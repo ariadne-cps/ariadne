@@ -222,6 +222,8 @@ void export_box()
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
     box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
     box_class.def("widen", (void(Box::*)()) &Box::widen);
+    box_class.def("split", (std::pair<Box,Box>(Box::*)()const) &Box::split);
+    box_class.def("split", (std::pair<Box,Box>(Box::*)(uint)const) &Box::split);
     box_class.def(self_ns::str(self));
 
     def("split", (std::pair<Box,Box>(*)(const Box&)) &split);
@@ -283,9 +285,10 @@ void export_taylor_set()
     //taylor_set_class.def(init<Zonotope>());
     taylor_set_class.def("bounding_box", &TaylorSet::bounding_box);
     taylor_set_class.def("range", &TaylorSet::bounding_box);
+    taylor_set_class.def("split", (std::pair<TaylorSet,TaylorSet>(TaylorSet::*)()const) &TaylorSet::split);
+    taylor_set_class.def("split", (std::pair<TaylorSet,TaylorSet>(TaylorSet::*)(uint)const) &TaylorSet::split);
     taylor_set_class.def(self_ns::str(self));
 
-    def("split", (std::pair<TaylorSet,TaylorSet>(TaylorSet::*)()const) &TaylorSet::split);
     def("outer_approximation", (GridTreeSet(*)(const TaylorSet&,const Grid&,uint)) &outer_approximation);
     def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorSet&,uint)) &adjoin_outer_approximation);
     def("zonotope", (Zonotope(*)(const TaylorSet&)) &zonotope);
@@ -296,6 +299,7 @@ void export_taylor_set()
     def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
 
     implicitly_convertible<Box,TaylorSet>();
+    to_python< std::pair<TaylorSet,TaylorSet> >();
 }
 
 void export_taylor_constrained_flow_set()

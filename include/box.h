@@ -181,6 +181,11 @@ class Box
         static_cast<Vector<Interval>&>(*this) += Vector<Interval>(this->dimension(),eps);
     }
 
+    //! \brief Split into two along the largest side.
+    std::pair<Box,Box> split() const { return Ariadne::split(*this); }
+
+    //! \brief Split into two along side with index \a i.
+    std::pair<Box,Box> split(uint i) const { return Ariadne::split(*this,i); };
 
     //! \brief Draw on a canvas.
     virtual void draw(CanvasInterface& c) const;

@@ -35,6 +35,7 @@
 #include "polytope.h"
 #include "textplot.h"
 #include "grid_set.h"
+#include "list_set.h"
 
 namespace Ariadne {
 
@@ -94,13 +95,8 @@ void TextPlot::open(const char* cfilename, ios_base::openmode mode)
 }
 
 
-
-void TextPlot::draw(const DrawableInterface& shape) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
 void TextPlot::draw(const Point& pt) {
-    for(int i = 0; i < pt.dimension(); i++) {
+    for(uint i = 0; i < pt.dimension(); i++) {
         this->_fstream << double(pt[i]) << " ";
     }
     this->_fstream << std::endl;
@@ -127,6 +123,16 @@ void TextPlot::draw(const InterpolatedCurve& c) {
         this->draw(iter->second);
     }
     this->_fstream << std::endl;
+}
+
+void TextPlot::draw(const GridCell& cell) {
+    this->draw(cell.box());
+}
+
+void TextPlot::draw(const GridTreeSubset& gts) {
+    for(GridTreeSubset::const_iterator iter=gts.begin(); iter!=gts.end(); ++iter) {
+        this->draw(iter->box());
+    }
 }
 
 void TextPlot::close() {

@@ -70,7 +70,7 @@ class TestReachabilityAnalysis
         
         Grid grid(2);
         HybridEvolver evolver(parameters);
-        evolver.verbosity=1;
+        evolver.verbosity=0;
         //HybridDiscretiser<EnclosureType> discretiser(evolver);
         HybridReachabilityAnalyser analyser(parameters,evolver);
         cout << "Done building analyser\n";
@@ -165,7 +165,7 @@ class TestReachabilityAnalysis
         cout << "Computing timed reachable set" << endl;
         DiscreteState loc(1);
         Box bounding_box(2,bound);
-        analyser.verbosity=3;
+        analyser.verbosity=0;
         HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(system,initial_set,reach_time);
         cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
         HybridGridTreeSet upper_reach_set=analyser.upper_reach(system,initial_set,reach_time);
@@ -185,7 +185,7 @@ class TestReachabilityAnalysis
             =Ariadne::bounding_boxes(system.state_space(),bound);
         Box bounding_box=bounding_boxes[loc];
 
-        analyser.verbosity=3;
+        analyser.verbosity=0;
         analyser.parameters().transient_time=4.0;
         analyser.parameters().lock_to_grid_time=1.0;
         cout << analyser.parameters();

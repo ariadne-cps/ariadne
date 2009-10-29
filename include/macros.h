@@ -98,6 +98,8 @@
 #define ARIADNE_PRETTY_FUNCTION __FUNCTION__
 #elif defined(darwin) || defined(__darwin) || defined(__darwin__)
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#elif defined(__APPLE__) && defined(__MACH__)
+#define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #else
 #define ARIADNE_PRETTY_FUNCTION ""
 #endif 

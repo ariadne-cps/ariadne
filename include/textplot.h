@@ -33,8 +33,10 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <map>
 
 #include "graphics_interface.h"
+#include "list_set.h"
 
 typedef unsigned int uint;
 
@@ -48,12 +50,15 @@ class Polytope;
 class InterpolatedCurve;
 class Zonotope;
 class TaylorSet;
-class GridTreeSet;
+class GridCell;
+class GridTreeSubset;
+template<class BS> class ListSet;
+template<class BS> class HybridBasicSet;
+class DiscreteState;
 
     
 //! \brief Class for plotting sets as a list of points.
 class TextPlot 
-    : public FigureInterface
 {
   public:
     ~TextPlot();
@@ -67,16 +72,40 @@ class TextPlot
     void draw(const Box&);
     void draw(const Polytope&);
     void draw(const InterpolatedCurve&);
-    void draw(const DrawableInterface&);
+    void draw(const GridCell&);
+    void draw(const GridTreeSubset&);
+    template<class BS> void draw(const ListSet<BS>&);    
+    template<class BS> void draw(const HybridBasicSet<BS>&);
+    template<class BS> void draw(const std::map< DiscreteState,BS >&);    
     void close();
   private:
     std::ofstream _fstream;
 };
 
-template<class SET> TextPlot& operator<<(TextPlot& g, const SET& set) { draw(g, set); return g; }
+template<class BS> 
+void TextPlot::draw(const ListSet<BS>& ls) {
+    for(uint i=0; i!=ls.size(); ++i) {
+        this->draw(ls[i]);
+    }
+}
+
+template<class BS> 
+void TextPlot::draw(const HybridBasicSet<BS>& hbs) {
+    this->draw(hbs.continuous_state_set());
+}
+
+template<class DS> inline
+void TextPlot::draw(const std::map<DiscreteState,DS>& hds) {
+    for(typename std::map<DiscreteState,DS>::const_iterator loc_iter=hds.begin();
+        loc_iter!=hds.end(); ++loc_iter) {
+        this->draw(loc_iter->second);
+    }
+}
+
+template<class SET> TextPlot& operator<<(TextPlot& g, const SET& set) { g.draw(set); return g; }
 
 template<class SET> void textplot(const char* filename, const SET& set) { 
-    TextPlot g(filename); draw(g, set); g.close(); }
+    TextPlot g(filename); g.draw(set); g.close(); }
 
 } // namespace Ariadne
 

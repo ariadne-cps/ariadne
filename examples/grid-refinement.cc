@@ -39,8 +39,8 @@ int main()
     double hmax = 8.0;
     
     // Initial grid depth and maximum grid depth
-    int min_grid_depth = 4;
-    int max_grid_depth = 14;
+    int min_grid_depth = 2;
+    int max_grid_depth = 7;
     
     // System is verified safe at the 4th iteration
     double minsafe=5.25;
@@ -162,7 +162,8 @@ int main()
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().maximum_grid_depth=4;
+    analyser.parameters().maximum_grid_depth=2;
+    analyser.verbosity=3;
     std::cout <<  analyser.parameters() << std::endl;
 
     // Set the grid
@@ -173,7 +174,7 @@ int main()
     Float eps = 1.0/4.0;
     // GRID REFINEMENT LOOP
     //
-    // This verification loop starts with a grid_depth of 4 (that is, cells of size 0.25), and proceeds as follows:
+    // This verification loop starts with a grid_depth of 2 (that is, cells of size 0.25), and proceeds as follows:
     //      1. Compute an over-approximation of the reachability set of the automaton
     //      2. Check if the result is safe (i.e., water level between minsafe and maxsafe)
     //      3. If the result is safe, exit with success.
@@ -184,7 +185,7 @@ int main()
     //
     std::cout << "Starting verification loop. Water level should be kept between "<< minsafe<< " and "<< maxsafe<<std::endl<<std::endl;
     int grid_depth;
-    for(grid_depth = min_grid_depth; grid_depth <= max_grid_depth ; grid_depth+=2) {    
+    for(grid_depth = min_grid_depth; grid_depth <= max_grid_depth ; grid_depth++) {    
         std::cout << "Computing upper reach set with grid depth " << grid_depth <<" and cell size "<<eps<<"..." << std::flush;
         analyser.parameters().maximum_grid_depth=grid_depth;
         HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);

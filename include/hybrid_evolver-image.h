@@ -185,7 +185,6 @@ class ImageSetHybridEvolver
     static const DiscreteEvent starting_event;
     static const DiscreteEvent finishing_event;
     static const DiscreteEvent blocking_event;
-    static const DiscreteEvent final_time_event;
 
  private:
     boost::shared_ptr< EvolutionParametersType > _parameters;

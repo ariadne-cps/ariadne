@@ -191,7 +191,7 @@ class HybridImageSet
         return this->std::map<DiscreteState,ImageSet>::end(); }
 
     using std::map<DiscreteState,ImageSet>::insert;
-
+    
     virtual HybridImageSet* clone() const { return new HybridImageSet(*this); }
     virtual HybridSpace space() const { return HybridSpace(*this); }
     virtual ImageSet& operator[](DiscreteState q) {

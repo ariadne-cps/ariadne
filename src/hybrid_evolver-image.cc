@@ -84,7 +84,6 @@ class DegenerateCrossingException : public std::runtime_error {
 const DiscreteEvent ImageSetHybridEvolver::starting_event = -1;
 const DiscreteEvent ImageSetHybridEvolver::finishing_event = -2;
 const DiscreteEvent ImageSetHybridEvolver::blocking_event = -3;
-const DiscreteEvent ImageSetHybridEvolver::final_time_event = -4;
 
 ImageSetHybridEvolver::ImageSetHybridEvolver()
     : _parameters(new EvolutionParametersType()),
@@ -480,9 +479,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Compute continuous evolution
     FlowSetModelType flow_set_model; BoxType flow_bounds; Float time_step;
+    const Float maximum_time=maximum_hybrid_time.continuous_time();
 
     ARIADNE_LOG(2,"Computing flow model.\n");
-    compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model);
+    compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
 
     for(uint i=0; i!=flow_set_model.size(); ++i) {
         if(flow_set_model[i].error()<0) {
@@ -501,8 +501,6 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Set special events and times; note that the time step is scaled to [0,1]
     TimeModelType zero_time_model = this->_toolbox->time_model(0.0,Box(time_model.argument_size()));
     TimeModelType time_step_model = this->_toolbox->time_model(1.0,Box(time_model.argument_size()));
-    TimeModelType remaining_time_model = (maximum_hybrid_time.continuous_time()-time_model)/time_step;
-    ARIADNE_LOG(2,"remaining_time = "<<remaining_time_model.range()<<"\n\n")
 
     // Compute event blocking times
     std::map<DiscreteEvent, TimeModelType> event_blocking_times;
@@ -510,7 +508,6 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
 
     event_blocking_times[finishing_event]=time_step_model;
-    event_blocking_times[final_time_event]=remaining_time_model;
     compute_blocking_events(event_blocking_times,non_transverse_events,guards,flow_set_model);
     ARIADNE_LOG(3,"event_blocking_times="<<event_blocking_times<<"\n");
 
@@ -589,8 +586,6 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 // TODO: Better estimate to use smaller blocking time
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
-            } else if(event==final_time_event) {
-                final_sets.adjoin(make_pair(location,evolved_set_model));
             } else if(event>=0) { // not an invariant
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 const DiscreteTransition& transition=system.transition(event,location);
@@ -679,11 +674,13 @@ compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_activ
 // Compute the flow, parameterising space with the set parameters
 void ImageSetHybridEvolver::
 compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float& time_step,
-                   VectorFunction dynamic, const SetModelType& starting_set_model) const
+                   VectorFunction dynamic, const SetModelType& starting_set_model, 
+                   const TimeModelType& starting_time_model, Float finishing_time) const
 {
     ARIADNE_LOG(3,"compute_flow_model(....)\n");
     const int MAXIMUM_BOUNDS_DIAMETER_FACTOR = 8;
-    const Float maximum_step_size=this->_parameters->maximum_step_size;
+    float remaining_time = finishing_time - starting_time_model.range().lower();
+    const Float maximum_step_size=min(this->_parameters->maximum_step_size, remaining_time);
     const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*MAXIMUM_BOUNDS_DIAMETER_FACTOR;
 
     BoxType starting_set_bounding_box=starting_set_model.range();
@@ -698,13 +695,6 @@ compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float
     flow_set_model=unchecked_apply(flow_model,combine(starting_set_model.models(),identity_time_expression.model()));
 }
 
-
-void ImageSetHybridEvolver::
-compute_flow_model(FunctionModelType& , BoxType&,
-                   VectorFunction, const BoxType&) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
 
 void ImageSetHybridEvolver::

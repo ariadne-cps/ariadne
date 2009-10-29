@@ -156,10 +156,8 @@ class ImageSetHybridEvolver
                                          const std::map<DiscreteEvent,VectorFunction>&,
                                          const ContinuousEnclosureType&) const;
 
-    void compute_flow_model(FlowSetModelType&, BoxType&, Float&,
-                            VectorFunction, const SetModelType&) const;
-    void compute_flow_model(FunctionModelType&, BoxType&,
-                            VectorFunction, const BoxType&) const;
+    void compute_flow_model(FlowSetModelType&, BoxType&, Float&, VectorFunction, 
+                            const SetModelType&, const TimeModelType&, Float) const;
 
     void compute_crossing_time_and_direction(TimeModelType&, Interval&,
                                              VectorFunction guard, const FlowSetModelType& flow_set) const;

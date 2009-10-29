@@ -143,6 +143,9 @@ inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 inline Float down(Float x) { return x>0 ? x*(1-2e-16) : x*(1+2e-16); }
 inline Float up(Float x) { return x>0 ? x*(1+2e-16) : x*(1-2e-16); }
 
+inline Float min(Float x, Float y) { return std::min(x,y); }
+inline Float max(Float x, Float y) { return std::max(x,y); }
+
 // The magnitude of a quantity is the funciton norm; always a real
 //   Provided for consistency with other types for which mag and abs are different
 inline Float mag(Float x) { return abs(x); }

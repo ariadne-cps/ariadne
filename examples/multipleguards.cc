@@ -92,7 +92,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     fig.write(filename); 
 }
 
-int main() 
+int main(int argc, char **argv) 
 {
   
     float f = 1.0; // Frequency
@@ -108,8 +108,14 @@ int main()
     double b[3]={0.0,0.0,1.0};
 
     float EVOL_TIME = 1.0/f;
-    EVOL_TIME = 1.0;
+    if(argc > 1) {
+        EVOL_TIME = atof(argv[1]);
+    }
+    int VERBOSITY = 1;
     int EVOL_TRANS = 4;
+    if(argc > 2) {
+        VERBOSITY = atoi(argv[2]);
+    }
    
     float MAX_ENCL_RADIUS = 1e-1;
     float MAX_STEP_SIZE = 1e-2;
@@ -183,7 +189,7 @@ int main()
 
     /// Create a HybridEvolver object
     HybridEvolver evolver;
-    evolver.verbosity = 1;
+    evolver.verbosity = VERBOSITY;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;

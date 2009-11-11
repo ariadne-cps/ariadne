@@ -69,9 +69,11 @@ TestHybridSet::test_hybrid_image_set()
     his[loc2]=ims2;
 
     HybridImageSet::locations_const_iterator iter=his.locations_begin();
+    ARIADNE_ASSERT_EQUAL(iter->second,ims1);
+    ++iter;
     ARIADNE_ASSERT_EQUAL(iter->second,ims2);
     ++iter;
-    ARIADNE_ASSERT_EQUAL(iter->second,ims1);
+    ARIADNE_TEST_ASSERT(iter==his.locations_end());
 }
 
 
@@ -96,15 +98,15 @@ TestHybridSet::test_hybrid_list_set()
     ARIADNE_TEST_PRINT(hls);
 
     HybridListSet<Box>::const_iterator iter=hls.begin();
+    ARIADNE_TEST_EQUAL(*iter,HybridBox(loc1,bx1));
+    ++iter;
+    ARIADNE_TEST_EQUAL(*iter,HybridBox(loc1,bx2));
+    ++iter;
     ARIADNE_TEST_EQUAL(*iter,HybridBox(loc2,bx3));
     ++iter;
     ARIADNE_TEST_EQUAL(*iter,HybridBox(loc2,bx4));
     ++iter;
     ARIADNE_TEST_EQUAL(*iter,HybridBox(loc2,bx5));
-    ++iter;
-    ARIADNE_TEST_EQUAL(*iter,HybridBox(loc1,bx1));
-    ++iter;
-    ARIADNE_TEST_EQUAL(*iter,HybridBox(loc1,bx2));
     ++iter;
     ARIADNE_TEST_ASSERT(iter==hls.end());
 
@@ -112,11 +114,11 @@ TestHybridSet::test_hybrid_list_set()
     ListSet<Box> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5); 
 
     HybridListSet<Box>::locations_const_iterator loc_iter=hls.locations_begin();
-    ARIADNE_TEST_EQUAL(loc_iter->first,loc2);
-    ARIADNE_TEST_EQUAL(loc_iter->second,ls2);
-    ++loc_iter;
     ARIADNE_TEST_EQUAL(loc_iter->first,loc1);
     ARIADNE_TEST_EQUAL(loc_iter->second,ls1);
+    ++loc_iter;
+    ARIADNE_TEST_EQUAL(loc_iter->first,loc2);
+    ARIADNE_TEST_EQUAL(loc_iter->second,ls2);
     ++loc_iter;
     ARIADNE_TEST_ASSERT(loc_iter==hls.locations_end());
 

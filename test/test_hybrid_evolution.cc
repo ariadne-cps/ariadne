@@ -352,6 +352,7 @@ void TestHybridEvolver::test_transverse_linear_crossing()
 
     ScalarFunction ct=-guard; // Crossing time
     VectorFunction f=join(x+ct,y+2-ct);
+    // VectorFunction f=join(x+ct,y+ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());

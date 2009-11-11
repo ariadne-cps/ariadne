@@ -478,7 +478,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     }
 
     // Compute continuous evolution
-    FlowSetModelType flow_set_model; BoxType flow_bounds; Float time_step;
+    FlowSetModelType flow_set_model; BoxType flow_bounds; 
+    Float time_step = this->_parameters->maximum_step_size;
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 
     ARIADNE_LOG(2,"Computing flow model.\n");
@@ -537,8 +538,15 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     }
     ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
     ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
-
-
+/*
+    // If blocking time is smaller than the time step, recompute the flow up to blocking time
+    if(blocking_time_model.range().upper()<time_step) {
+        time_step = blocking_time_model.range().upper();
+        ARIADNE_LOG(2,"Blocking time is smaller than time step, recomputing flow model.\n");
+        compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
+        ARIADNE_LOG(2,"  new time step = " << time_step << "\n");        
+    }       
+*/
     // Treat non-transverse urgent events as non-urgent in upper semantics
     for(std::set<DiscreteEvent>::const_iterator iter=non_transverse_events.begin(); iter!=non_transverse_events.end(); ++iter) {
         if(*iter > 0) {     // If the event is a transition
@@ -680,7 +688,7 @@ compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float
     ARIADNE_LOG(3,"compute_flow_model(....)\n");
     const int MAXIMUM_BOUNDS_DIAMETER_FACTOR = 8;
     float remaining_time = finishing_time - starting_time_model.range().lower();
-    const Float maximum_step_size=min(this->_parameters->maximum_step_size, remaining_time);
+    const Float maximum_step_size=min(time_step, remaining_time);
     const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*MAXIMUM_BOUNDS_DIAMETER_FACTOR;
 
     BoxType starting_set_bounding_box=starting_set_model.range();

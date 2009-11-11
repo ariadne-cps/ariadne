@@ -647,6 +647,7 @@ chain_reach(const SystemType& system,
         evolve.adjoin(initial);
     }
     evolve.restrict(bounding);
+    ARIADNE_LOG(3,"  found "<<reach.size()<<" cells, of which "<<evolve.size()<<" are new.\n");   
     
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);

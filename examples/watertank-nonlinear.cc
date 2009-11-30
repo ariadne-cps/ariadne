@@ -237,7 +237,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(3, 1.0000,1.000, 1.00000,1.000, 0.0000,0.000);
+    Box initial_box(3, 1.0000,1.200, 1.00000,1.000, 0.0000,0.000);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
 
@@ -269,6 +269,8 @@ int main()
     hgr = outer_approximation(orbit.reach(),watertank_system.grid(),max_grid_depth);
     plot("watertank-nonlinear-upper-orbit-xy-grid", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), hgr, -1);
 
+    evolver.verbosity = 0;
+
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 100.0;
@@ -285,16 +287,19 @@ int main()
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
+    std::cout << "System grid = "<< watertank_system.grid() << std::endl;
     std::cout << "Computing lower evolve set... " << std::flush;
     HybridGridTreeSet evolve_set = analyser.lower_evolve(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
     plot("watertank-nonlinear-lower_evolve", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), evolve_set, -1);
 
+    std::cout << "System grid = "<< watertank_system.grid() << std::endl;
     std::cout << "Computing lower reach set... " << std::flush;
     HybridGridTreeSet reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
     plot("watertank-nonlinear-lower_reach", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), reach_set, -1);
 
+    std::cout << "System grid = "<< watertank_system.grid() << std::endl;
     std::cout << "Computing lower reach and evolve set... " << std::flush;
     make_lpair(reach_set,evolve_set) = analyser.lower_reach_evolve(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;

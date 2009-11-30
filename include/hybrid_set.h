@@ -344,7 +344,8 @@ class HybridGrid
     template<class HGSET> HybridGrid(const HGSET& set) {
         for(typename HGSET::locations_const_iterator loc_iter=set.
                 locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
-            this->insert(make_pair(loc_iter->first,loc_iter->second.grid())); }
+            this->insert(make_pair(loc_iter->first,loc_iter->second.grid())); 
+        }
     }
 
     HybridSpace state_space() const {

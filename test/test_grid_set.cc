@@ -48,6 +48,18 @@ static const uint heightOne = 1;
 static const uint heightTwo = 2;
 static const uint heightThree = 3;
 static const uint heightFour = 4;
+
+void test_grid() {
+    // Test copy constructor
+    Grid gr1(2, 1.0);
+    Grid gr2(gr1);
+    ARIADNE_TEST_COMPARE(gr1, ==, gr2);
+    
+    // Modification of gr2 should not affect gr1
+    Vector<Float> lengths(2, 2.0, 2.0);
+    gr2.set_lengths(lengths);
+    ARIADNE_TEST_COMPARE(gr1, !=, gr2);
+}
     
 void test_binary_tree() {
     const BinaryTreeNode * BINARY_TREE_NODE_NULL_POINTER = NULL;
@@ -2941,6 +2953,8 @@ void test_subset_superset_box(){
 }
 
 int main() {
+
+    test_grid();
 
     test_binary_tree();
 

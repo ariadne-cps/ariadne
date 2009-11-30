@@ -12,7 +12,7 @@ bin_PROGRAMS=tutorial \
              rectifier springs cmos_inverter_analoginput \
              rectifier_oneloc grid-refinement multipleguards\
 			 \
-			 watertank-new bouncingball-new \
+			 watertank-new bouncingball-new sawtooth \
 			 \
 			 coconut-demo
 
@@ -32,6 +32,7 @@ cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc
 rectifier_oneloc_SOURCES=rectifier_oneloc.cc
 grid_refinement_SOURCES=grid-refinement.cc
 multipleguards_SOURCES=multipleguards.cc
+sawtooth_SOURCES=sawtooth.cc
 
 bouncingball_new_SOURCES=bouncingball-new.cc
 watertank_new_SOURCES=watertank-new.cc

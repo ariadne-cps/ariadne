@@ -52,7 +52,10 @@ class Grid {
     typedef Float real_type;
   private:
     // Structure containing actual data values
-    struct Data;
+    struct Data { 
+        Vector<Float> _origin; 
+        Vector<Float> _lengths; 
+    };
   public:
     //! Destructor.
     ~Grid();
@@ -89,7 +92,13 @@ class Grid {
                 
     //! The strides between successive integer points.
     const Vector<Float>& lengths() const;
-                
+
+    //! Set the origin of the grid.
+    void set_origin(const Vector<Float>& origin);
+
+    //! Set the  strides between successive integer points.
+    void set_lengths(const Vector<Float>& lenghts);
+
     //! Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const Grid& g);
 
@@ -114,7 +123,9 @@ class Grid {
     void _create(const Vector<Float>& o, const Vector<Float>& l);
   private:
     // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
-    boost::shared_ptr<Data> _data;
+    // boost::shared_ptr<Data> _data;
+    // WRONG! By using references, modifications are not local to the current instance. Using simple data instead.
+    Data _data;
 };
 
 

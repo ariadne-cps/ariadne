@@ -154,8 +154,8 @@ lower_evolve(const SystemType& system,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_evolve(...)\n");
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
-    Gr grid=system.grid();
-    GTS initial(grid); GTS final(grid);
+    Gr grid(system.grid());
+    GTS initial; GTS final;
 
     // For each location, test if the radius of the set is smaller than the grid cell
     for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
@@ -163,18 +163,39 @@ lower_evolve(const SystemType& system,
     {
         Vector<Float> cell = grid[loc_iter->first].lengths();
         Float cell_radius = (min(cell))/(1 << (grid_depth+4));
-        if (radius(loc_iter->second.bounding_box()) > cell_radius) {
+        Vector<Float> origin = grid[loc_iter->first].origin();
+        Box bbox = loc_iter->second.bounding_box();
+        if (radius(bbox) > cell_radius) {
+            // if bigger, map to the grid
+            // First of all, test if the bounding box lies on cell boundaries or not
+            for(uint i = 0 ; i < bbox.dimension() ; ++i) {
+                // test if the i-th dimension is a singleton interval AND
+                // if it lies on a cell boundary
+                cell_radius = cell[i]/(1 << (grid_depth+4));
+                Float intpart, fractpart;
+                fractpart = modf((bbox[i].lower()-origin[i])/cell_radius,&intpart);
+                if(bbox[i].singleton() && (fractpart == 0.0)) {
+                    // the set lies on the boundary, shift the grid center by half cell size
+                    origin[i]+=cell_radius/2.0;
+                    grid[loc_iter->first].set_origin(origin);
+                }
+            }        
             // if bigger, map to the grid
             ARIADNE_LOG(3,"Adjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
+            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
             initial[loc_iter->first].adjoin_lower_approximation(loc_iter->second,grid_height,grid_depth+4);
         } else {
-            // if smaller, compute the evolution directly
             ARIADNE_LOG(3,"Computing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
+            // if smaller, compute the evolution directly
             EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
             GTS cell_final=this->_discretiser->evolve(system,initial_enclosure,time,grid_depth,LOWER_SEMANTICS);
             final.adjoin(cell_final);            
+            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
         }
     }
+
+    ARIADNE_LOG(4,"grid="<<grid<<"\n");
+
     ARIADNE_LOG(3,"initial.size()="<<initial.size()<<"\n");
     if(!initial.empty()) {
         ARIADNE_LOG(3,"computing lower evolution from the grid.");
@@ -199,8 +220,8 @@ lower_reach(const SystemType& system,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach(...)\n");
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
-    Gr grid=system.grid();
-    GTS initial(grid); GTS reach(grid);
+    Gr grid(system.grid());
+    GTS initial; GTS reach;
 
     // For each location, test if the radius of the set is smaller than the grid cell
     for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
@@ -208,9 +229,26 @@ lower_reach(const SystemType& system,
     {
         Vector<Float> cell = grid[loc_iter->first].lengths();
         Float cell_radius = (min(cell))/(1 << (grid_depth+4));
-        if (radius(loc_iter->second.bounding_box()) > cell_radius) {
+        Vector<Float> origin = grid[loc_iter->first].origin();
+        Box bbox = loc_iter->second.bounding_box();
+        if (radius(bbox) > cell_radius) {
+            // if bigger, map to the grid
+            // First of all, test if the bounding box lies on cell boundaries or not
+            for(uint i = 0 ; i < bbox.dimension() ; ++i) {
+                // test if the i-th dimension is a singleton interval AND
+                // if it lies on a cell boundary
+                cell_radius = cell[i]/(1 << (grid_depth+4));
+                Float intpart, fractpart;
+                fractpart = modf((bbox[i].lower()-origin[i])/cell_radius,&intpart);
+                if(bbox[i].singleton() && (fractpart == 0.0)) {
+                    // the set lies on the boundary, shift the grid center by half cell size
+                    origin[i]+=cell_radius/2.0;
+                    grid[loc_iter->first].set_origin(origin);
+                }
+            }        
             // if bigger, map to the grid
             ARIADNE_LOG(3,"Adjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
+            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
             initial[loc_iter->first].adjoin_lower_approximation(loc_iter->second,grid_height,grid_depth+4);
         } else {
             ARIADNE_LOG(3,"Computing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
@@ -218,9 +256,13 @@ lower_reach(const SystemType& system,
             EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
             GTS cell_reach=this->_discretiser->reach(system,initial_enclosure,time,grid_depth,LOWER_SEMANTICS);
             reach.adjoin(cell_reach);            
+            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
         }
     }
 
+    ARIADNE_LOG(4,"grid="<<grid<<"\n");
+
+    ARIADNE_LOG(3,"initial.size()="<<initial.size()<<"\n");
     if(!initial.empty()) {
         ARIADNE_LOG(3,"Computing lower reach set from the grid...");
         for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
@@ -247,8 +289,8 @@ lower_reach_evolve(const SystemType& system,
     int grid_height = this->_parameters->maximum_grid_height;
 
     Gr grid=system.grid();
-    GTS initial(grid);
-    GTS reach(grid); GTS evolve(grid);
+    GTS initial;
+    GTS reach; GTS evolve;
 
     // For each location, test if the radius of the set is smaller than the grid cell
     for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
@@ -256,9 +298,26 @@ lower_reach_evolve(const SystemType& system,
     {
         Vector<Float> cell = grid[loc_iter->first].lengths();
         Float cell_radius = (min(cell))/(1 << (grid_depth+4));
-        if (radius(loc_iter->second.bounding_box()) > cell_radius) {
+        Vector<Float> origin = grid[loc_iter->first].origin();
+        Box bbox = loc_iter->second.bounding_box();
+        if (radius(bbox) > cell_radius) {
+            // if bigger, map to the grid
+            // First of all, test if the bounding box lies on cell boundaries or not
+            for(uint i = 0 ; i < bbox.dimension() ; ++i) {
+                // test if the i-th dimension is a singleton interval AND
+                // if it lies on a cell boundary
+                cell_radius = cell[i]/(1 << (grid_depth+4));
+                Float intpart, fractpart;
+                fractpart = modf((bbox[i].lower()-origin[i])/cell_radius,&intpart);
+                if(bbox[i].singleton() && (fractpart == 0.0)) {
+                    // the set lies on the boundary, shift the grid center by half cell size
+                    origin[i]+=cell_radius/2.0;
+                    grid[loc_iter->first].set_origin(origin);
+                }
+            }        
             // if bigger, map to the grid
             ARIADNE_LOG(3,"Adjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
+            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
             initial[loc_iter->first].adjoin_lower_approximation(loc_iter->second,grid_height,grid_depth+4);
         } else {
             ARIADNE_LOG(3,"Computing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
@@ -268,8 +327,11 @@ lower_reach_evolve(const SystemType& system,
             make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,initial_enclosure,time,grid_depth,LOWER_SEMANTICS);
             reach.adjoin(cell_reach);
             evolve.adjoin(cell_final);
+            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));           
         }
     }
+
+    ARIADNE_LOG(4,"grid="<<grid<<"\n");
 
     ARIADNE_LOG(3,"initial.size()="<<initial.size()<<"\n");
     if(!initial.empty()) {

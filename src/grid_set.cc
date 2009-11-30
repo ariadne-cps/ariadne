@@ -42,19 +42,12 @@ typedef size_t size_type;
 
 /****************************************Grid**********************************************/
 
- 
-struct Grid::Data 
-{ 
-    Vector<Float> _origin; 
-    Vector<Float> _lengths; 
-};
-
 Grid::~Grid()
 {
 }
  
 Grid::Grid()
-    : _data(new Data())
+    : _data()
 {
 }
  
@@ -64,7 +57,7 @@ Grid::Grid(const Grid& gr)
 }
  
 Grid::Grid(uint d)
-    : _data(new Data())
+    : _data()
 {
     Vector<Float> origin(d,Float(0));
     Vector<Float> lengths(d,Float(1));
@@ -72,7 +65,7 @@ Grid::Grid(uint d)
 }
  
 Grid::Grid(uint d, Float l)
-    : _data(new Data())
+    : _data()
 {
     Vector<Float> origin(d,Float(0));
     Vector<Float> lengths(d,l);
@@ -80,14 +73,14 @@ Grid::Grid(uint d, Float l)
 }
 
 Grid::Grid(const Vector<Float>& lengths)
-    : _data(new Data())
+    : _data()
 {
     Vector<Float> origin(lengths.size(),0);
     this->_create(origin,lengths);
 }
  
 Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
-    : _data(new Data())
+    : _data()
 {
     if(origin.size() != lengths.size()) {
         throw IncompatibleSizes(ARIADNE_PRETTY_FUNCTION);
@@ -97,45 +90,62 @@ Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
 
 void Grid::_create(const Vector<Float>& origin, const Vector<Float>& lengths) 
 {
-    this->_data->_origin=origin;
-    this->_data->_lengths=lengths;
+    this->_data._origin=origin;
+    this->_data._lengths=lengths;
 }
 
 uint Grid::dimension() const
 {
-    return this->_data->_lengths.size();
+    return this->_data._lengths.size();
 }
 
 const Vector<Float>& Grid::origin() const
 {
-    return this->_data->_origin;
+    return this->_data._origin;
 }
 
 const Vector<Float>& Grid::lengths() const
 {
-    return this->_data->_lengths;
+    return this->_data._lengths;
 }
+
+void Grid::set_origin(const Vector<Float>& origin)
+{
+    if(origin.size() != this->_data._origin.size()) {
+        throw IncompatibleSizes(ARIADNE_PRETTY_FUNCTION);
+    }
+    this->_data._origin=origin;
+}
+
+void Grid::set_lengths(const Vector<Float>& lengths)
+{
+    if(lengths.size() != this->_data._lengths.size()) {
+        throw IncompatibleSizes(ARIADNE_PRETTY_FUNCTION);
+    }
+    this->_data._lengths=lengths;
+}
+
 
 Float Grid::coordinate(uint d, dyadic_type x) const 
 {
-    return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
+    return add_approx(this->_data._origin[d],mul_approx(this->_data._lengths[d],x));
 }
 
 Float Grid::subdivision_coordinate(uint d, dyadic_type x) const 
 {
-    return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
+    return add_approx(this->_data._origin[d],mul_approx(this->_data._lengths[d],x));
 }
 
 Float Grid::subdivision_coordinate(uint d, integer_type n) const 
 {
-    return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
+    return add_approx(this->_data._origin[d],mul_approx(this->_data._lengths[d],n));
 }
 
 int Grid::subdivision_index(uint d, const real_type& x) const 
 {
     Float half=0.5;
-    int n=int(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
-    Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
+    int n=int(floor(add_approx(div_approx(sub_approx(x,this->_data._origin[d]),this->_data._lengths[d]),half)));
+    Float sc=add_approx(this->_data._origin[d],mul_approx(this->_data._lengths[d],n));
     if(sc == x) { 
         return n; 
     } else {
@@ -143,14 +153,14 @@ int Grid::subdivision_index(uint d, const real_type& x) const
                   << "sc=" << sc << " x=" << x << " sc-x=" << Interval(sc-x) << "\n"
                   << "sc==x=" << (sc==x) << " sc!=x=" << (sc!=x)
                   << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl; 
-        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data._origin[d]<<", this->lengths[d]="<<this->_data._lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
  
 int Grid::subdivision_lower_index(uint d, const real_type& x) const 
 {
-    int n=int(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
+    int n=int(floor(div_down(sub_down(x,this->_data._origin[d]),this->_data._lengths[d])));
+    if(x>=add_approx(this->_data._origin[d],mul_approx(this->_data._lengths[d],(n+1)))) {
         return n+1;
     } else {
         return n;
@@ -159,8 +169,8 @@ int Grid::subdivision_lower_index(uint d, const real_type& x) const
  
 int Grid::subdivision_upper_index(uint d, const real_type& x) const 
 {
-    int n=int(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
+    int n=int(ceil(div_up(sub_up(x,this->_data._origin[d]),this->_data._lengths[d])));
+    if(x<=add_approx(this->_data._origin[d],mul_approx(this->_data._lengths[d],(n-1)))) {
         return n-1;
     } else {
         return n;
@@ -169,11 +179,7 @@ int Grid::subdivision_upper_index(uint d, const real_type& x) const
  
 bool Grid::operator==(const Grid& g) const
 {
-    if(this->_data==g._data) { 
-        return true; 
-    } else {
-        return this->_data->_origin==g._data->_origin && this->_data->_lengths==g._data->_lengths;
-    }
+    return this->_data._origin==g._data._origin && this->_data._lengths==g._data._lengths;
 }
  
 bool Grid::operator!=(const Grid& g) const
@@ -210,7 +216,7 @@ Vector<Float> Grid::point(const array<int>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
-        res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
+        res[i]=this->_data._origin[i]+this->_data._lengths[i]*a[i];
     }
     return res;
 }
@@ -219,7 +225,7 @@ Vector<Float> Grid::point(const array<double>& a) const
 {
     Vector<float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
-        res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
+        res[i]=this->_data._origin[i]+this->_data._lengths[i]*a[i];
     }
     return res;
 }

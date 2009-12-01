@@ -297,8 +297,10 @@ void export_scalar_function()
 
     scalar_function_class.def("constant", (ScalarFunction(*)(uint,Real)) &ScalarFunction::constant);
     scalar_function_class.def("variable", (ScalarFunction(*)(uint,uint)) &ScalarFunction::variable);
+    scalar_function_class.def("coordinate", (ScalarFunction(*)(uint,uint)) &ScalarFunction::coordinate);
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("variable");
+    scalar_function_class.staticmethod("coordinate");
 
     def("evaluate_approx", (Float(*)(const ScalarFunction&,const Vector<Float>&)) &evaluate_approx);
     def("evaluate", (Interval(*)(const ScalarFunction&,const Vector<Interval>&)) &evaluate);

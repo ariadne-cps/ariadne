@@ -376,6 +376,9 @@ class VectorOfScalarFunction
         : _vec(rs,ScalarFunction(as)) { }
     VectorOfScalarFunction(uint rs, const ScalarFunction& f)
         : _vec(rs,f) { }
+    VectorOfScalarFunction(const List<ScalarFunction>& f)
+        : _vec(f.size())
+    { for(uint i=0; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); this->_vec[i]=f[i]; } }
 
     void set(uint i, const ScalarFunction& f) {
         this->_vec[i]=f; }
@@ -1029,6 +1032,13 @@ ScalarFunction ScalarFunction::variable(Nat n, Nat j)
     return ScalarFunction(p);
 }
 
+ScalarFunction ScalarFunction::coordinate(Nat n, Nat j)
+{
+    Polynomial<Interval> p(n);
+    p[MultiIndex::unit(n,j)]=1.0;
+    return ScalarFunction(p);
+}
+
 ScalarFunction::ScalarFunction(Nat n)
     : _ptr(new ScalarPolynomialFunction(Polynomial<Interval>::constant(n,Interval(0.0))))
 {
@@ -1272,7 +1282,12 @@ VectorFunction::VectorFunction(Nat rs, const ScalarFunction& sf)
 {
 }
 
-VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s) 
+VectorFunction::VectorFunction(const List<ScalarFunction>& vsf)
+    : _ptr(new VectorOfScalarFunction(vsf))
+{
+}
+
+VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s)
     : _ptr(new VectorOfScalarFunction(e.size(),s.size()))
 {
     VectorOfScalarFunction* vec = static_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
@@ -1304,7 +1319,7 @@ VectorFunction VectorFunction::identity(Nat n)
 {
     VectorOfScalarFunction* res = new VectorOfScalarFunction(n,n);
     for(uint i=0; i!=n; ++i) {
-        res->_vec[i]=ScalarFunction::variable(n,i);
+        res->_vec[i]=ScalarFunction::coordinate(n,i);
     }
     return VectorFunction(res);
 }
@@ -1353,7 +1368,7 @@ Matrix<Float> VectorFunction::jacobian(const Vector<Float>& x) const
 
 Matrix<Interval> VectorFunction::jacobian(const Vector<Interval>& x) const
 {
-    return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); 
+    return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x)));
 }
 
 

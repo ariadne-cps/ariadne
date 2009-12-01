@@ -73,6 +73,7 @@ class ScalarFunction
     static ScalarFunction constant(Nat n, double c);
     static ScalarFunction constant(Nat n, Real c);
     static ScalarFunction variable(Nat n, uint i);
+    static ScalarFunction coordinate(Nat n, uint i);
 
     explicit ScalarFunction(Nat n=0u);
     ScalarFunction(const Expression<Real>& e, const Space<Real>& s);
@@ -92,6 +93,10 @@ class ScalarFunction
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Differential<Interval> operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel operator()(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
+
 
     Vector<Float> gradient(const Vector<Float>& x) const;
     Vector<Interval> gradient(const Vector<Interval>& x) const;
@@ -167,6 +172,7 @@ class VectorFunction
     VectorFunction(VectorFunctionInterface*);
     const VectorFunctionInterface* pointer() const { return this->_ptr.operator->(); }
 
+    VectorFunction(const List<ScalarFunction>& vsf);
     VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s);
     VectorFunction(const Space<Real>& rs, const Map<RealVariable,RealExpression>& e, const Space<Real>& as);
 
@@ -194,6 +200,10 @@ class VectorFunction
 
     Vector<Float> operator()(const Vector<Float>& x) const;
     Vector<Interval> operator()(const Vector<Interval>& x) const;
+    Vector< Differential<Float> > operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Vector< Differential<Interval> > operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    Vector<TaylorModel> operator()(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
+
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
   public:

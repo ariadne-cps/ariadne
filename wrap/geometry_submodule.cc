@@ -221,7 +221,7 @@ void export_box()
     box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
     box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
-    box_class.def("widen", (void(Box::*)()) &Box::widen);
+    box_class.def("widen", (Box(Box::*)()const) &Box::widen);
     box_class.def("split", (std::pair<Box,Box>(Box::*)()const) &Box::split);
     box_class.def("split", (std::pair<Box,Box>(Box::*)(uint)const) &Box::split);
     box_class.def(self_ns::str(self));

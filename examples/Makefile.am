@@ -14,7 +14,9 @@ bin_PROGRAMS=tutorial \
 			 \
 			 watertank-new bouncingball-new \
 			 \
-			 coconut-demo
+			 coconut-demo \
+			 \
+			 automatic_differentiation
 
 
 tutorial_SOURCES = tutorial.cc verify.py
@@ -37,6 +39,8 @@ bouncingball_new_SOURCES=bouncingball-new.cc
 watertank_new_SOURCES=watertank-new.cc
 
 coconut_demo_SOURCES=coconut-demo.cc system.cc coconut-demo.h system.h
+
+automatic_differentiation_SOURCES=automatic_differentiation.cc
 
 
 examples: $(bin_PROGRAMS)

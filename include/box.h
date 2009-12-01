@@ -166,20 +166,24 @@ class Box
     }
 
     //! \brief Returns an enclosing bounding box for the set.
-    //! The result is guaranteed to contain the box in its interior.
+    //! The result is guaranteed to have nonempty interior, and floating-point 
+    //! boundary coefficients so the centre and radius are exactly computable.
     virtual Box bounding_box() const {
-        Box result(*this);
+        Box result(this->dimension());
         for(uint i=0; i!=result.dimension(); ++i) {
-            result[i]=trunc(result[i]); }
+            if((*this)[i].lower()==(*this)[i].upper()) { result[i]=trunc(Ariadne::widen((*this)[i])); }
+            else { result[i]=trunc((*this)[i]); } }
         return result;
     }
 
     //! \brief Widens the box by the minimal floating-point increment.
     //! The result is guaranteed to contain the box in its interior.
-    void widen() {
-        static const Float min(std::numeric_limits<double>::min());
-        static const Interval eps(-min,+min);
-        static_cast<Vector<Interval>&>(*this) += Vector<Interval>(this->dimension(),eps);
+    Box widen() const {
+        Box result(this->dimension());
+        for(uint i=0; i!=result.dimension(); ++i) {
+            result[i]=Ariadne::widen((*this)[i]);
+        }
+        return result;
     }
 
     //! \brief Split into two along the largest side.

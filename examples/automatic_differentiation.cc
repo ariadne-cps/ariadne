@@ -61,6 +61,7 @@ int main() {
     Differential<Float> dg=g(dx);
     std::cout << "g=" << g << "\n";
     std::cout << "dg=" << dg << "\n";
-    std::cout << "dg[0][0,2,0]=" << dg[MultiIndex(3,0,2,0)] << "\n";
+    std::cout << "dg[0][0,2,0]=" << dg[MultiIndex(3,0,2,0)] << "\n\n";
+
 
 }

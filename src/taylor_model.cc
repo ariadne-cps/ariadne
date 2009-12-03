@@ -1152,7 +1152,7 @@ double TaylorModel::sweep_threshold() const {
 TaylorModel&
 operator+=(TaylorModel& x, const TaylorModel& y)
 {
-    if(x.argument_size()==0) { x=TaylorModel::zero(y.argument_size()); }
+    if(x.argument_size()==0) { x=TaylorModel::constant(y.argument_size(),x.value()); }
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     _acc(x,y); return x;
 
@@ -1161,7 +1161,7 @@ operator+=(TaylorModel& x, const TaylorModel& y)
 TaylorModel&
 operator-=(TaylorModel& x, const TaylorModel& y)
 {
-    if(x.argument_size()==0) { x=TaylorModel::zero(y.argument_size()); }
+    if(x.argument_size()==0) { x=TaylorModel::constant(y.argument_size(),x.value()); }
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     _acc(x,neg(y)); return x;
 }

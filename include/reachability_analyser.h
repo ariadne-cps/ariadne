@@ -149,11 +149,27 @@ class HybridReachabilityAnalyser
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const HybridImageSet& initial_set) const;
+
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. 
+        Returns the final time of evolution and the total number of cells processed by the algorithm. */
+    virtual SetApproximationType chain_reach(const SystemType& system,
+                                             const HybridImageSet& initial_set,
+                                             HybridTime& final_time,
+                                             int& processed_cells) const;
+
   
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const HybridImageSet& initial_set, 
                                              const HybridBoxes& bounding_domain) const;
+  
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain.
+        Returns the final time of evolution and the total number of cells processed by the algorithm.  \deprecated */
+    virtual SetApproximationType chain_reach(const SystemType& system,
+                                             const HybridImageSet& initial_set, 
+                                             const HybridBoxes& bounding_domain,
+                                             HybridTime& final_time,
+                                             int& processed_cells) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
     virtual SetApproximationType viable(const HybridAutomaton& system,

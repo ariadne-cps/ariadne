@@ -579,7 +579,9 @@ upper_reach_evolve(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system,
-            const HybridImageSet& initial_set) const
+            const HybridImageSet& initial_set,
+            HybridTime& final_time,
+            int& processed_cells) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::chain_reach(system,set)\n");
     Float transient_time = this->_parameters->transient_time;
@@ -593,6 +595,8 @@ chain_reach(const SystemType& system,
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<","<<lock_to_grid_steps<<")\n");
 
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
+
+    processed_cells = 0;
 
     Gr grid=system.grid();
     GTS evolve(grid), reach(grid), initial(grid), found(grid);
@@ -630,6 +634,8 @@ chain_reach(const SystemType& system,
         reach.adjoin(found);
         evolve.adjoin(initial);
     }
+    ARIADNE_LOG(3,"  found "<<reach.size()<<" cells, of which "<<evolve.size()<<" are new.\n");   
+    processed_cells += reach.size();
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
     while(!evolve.empty()) {
         make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
@@ -638,11 +644,25 @@ chain_reach(const SystemType& system,
         evolve.remove(reach);
         found.restrict_to_height(maximum_grid_height);
         reach.adjoin(found);
+        transient_time += lock_to_grid_time;
+        transient_steps += lock_to_grid_steps;
+        processed_cells += found.size();
         ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
         // ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
     }
+    final_time = HybridTime(transient_time, transient_steps);
     reach.recombine();
     return reach;
+}
+
+HybridReachabilityAnalyser::SetApproximationType
+HybridReachabilityAnalyser::
+chain_reach(const SystemType& system,
+            const HybridImageSet& initial_set) const
+{   
+    HybridTime ftime(0,0);
+    int cells=0;
+    return this->chain_reach(system, initial_set, ftime, cells);
 }
 
 
@@ -650,7 +670,9 @@ HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system,
             const HybridImageSet& initial_set,
-            const HybridBoxes& bounding_set) const
+            const HybridBoxes& bounding_set,
+            HybridTime& final_time,
+            int& processed_cells) const
 {
     // FIXME: Use tree sets throughout
 
@@ -666,6 +688,8 @@ chain_reach(const SystemType& system,
 
     ARIADNE_LOG(5,"bounding_domain="<<bounding_domain<<"\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
+
+    processed_cells = 0;
 
     Gr grid=system.grid();
     //GTS bounding; bounding.adjoin_inner_approximation(bounding_domain,maximum_grid_depth);
@@ -709,6 +733,7 @@ chain_reach(const SystemType& system,
         evolve.adjoin(initial);
     }
     evolve.restrict(bounding);
+    processed_cells += reach.size();
     ARIADNE_LOG(3,"  found "<<reach.size()<<" cells, of which "<<evolve.size()<<" are new.\n");   
     
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
@@ -720,12 +745,27 @@ chain_reach(const SystemType& system,
         evolve.remove(reach);
         evolve.restrict(bounding);
         reach.adjoin(found);
+        transient_time += lock_to_grid_time;
+        transient_steps += lock_to_grid_steps;
+        processed_cells += found.size();
         ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
         // ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
     }
+    final_time = HybridTime(transient_time, transient_steps);
     reach.recombine();
     reach.restrict(bounding);
     return reach;
+}
+
+HybridReachabilityAnalyser::SetApproximationType
+HybridReachabilityAnalyser::
+chain_reach(const SystemType& system,
+            const HybridImageSet& initial_set,
+            const HybridBoxes& bounding_set) const
+{
+    HybridTime ftime(0,0);
+    int cells=0;
+    return this->chain_reach(system, initial_set, bounding_set, ftime, cells);
 }
 
 

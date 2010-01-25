@@ -29,10 +29,15 @@
 #include <stdexcept>
 #include <fenv.h>
 
+#include "config.h"
+
+
 #include "function.h"
 #include "predicate.h"
+#include "numeric.h"
 
 #include "test.h"
+
 
 using namespace std;
 using namespace Ariadne;
@@ -41,15 +46,9 @@ class TestFunction
 {
   public:
     void test();
-  private:
-    void test_concept();
 };
 
 void TestFunction::test()
-{
-}
-
-void TestFunction::test_concept()
 {
 
     ScalarFunction sf1(3);
@@ -67,10 +66,30 @@ void TestFunction::test_concept()
 
     Polynomial<Real> p;
     ScalarFunction pf(p);
+    ARIADNE_TEST_EQUAL(p,pf.polynomial());
 
-    //Vector<Float> b; Matrix<Float> A;
-    //VectorAffineFunction aff(A,b);
-
+    Vector<Float> b(1); Matrix<Float> A(1,1);
+    b[0]=1.0/3.0; A[0][0]=1.0;
+    VectorAffineFunction aff(A,b);
+    ARIADNE_TEST_EQUAL(aff.ib(),b);
+    ARIADNE_TEST_EQUAL(aff.iA(),A);
+    
+    Vector<Interval> ib(1); Matrix<Interval> iA(1,1);
+    ib[0]=Interval(1.0)/Interval(3.0);
+    iA[0][0]=1.0;
+    VectorAffineFunction iaff(iA,ib);
+    ARIADNE_TEST_EQUAL(iaff.ib(),ib);
+    ARIADNE_TEST_EQUAL(iaff.iA(),iA);
+    
+#ifdef HAVE_GMPXX_H
+    Vector<Rational> rb(1); Matrix<Rational> rA(1,1);
+    rb[0]=Rational(1.0,3.0);
+    rA[0][0]=1.0;
+    VectorAffineFunction raff(rA,rb);
+    ARIADNE_TEST_EQUAL(raff.ib(),rb);
+    ARIADNE_TEST_EQUAL(raff.iA(),rA);
+#endif // HAVE_GMPXX_H
+    
 }
 
 int main() {

@@ -278,9 +278,12 @@ class VectorAffineFunction
     : public VectorFunction
 {
   public:
-    VectorAffineFunction(const Matrix<Real>& A, const Vector<Real>& b);
+    VectorAffineFunction(const Matrix<Interval>& iA, const Vector<Interval>& ib);
+
     const Matrix<Real> A() const;
     const Vector<Real> b() const;
+    const Matrix<Interval> iA() const;
+    const Vector<Interval> ib() const;
 };
 
 

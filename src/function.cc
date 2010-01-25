@@ -582,6 +582,8 @@ class VectorAffineFunctionRepresentation
 
     const Matrix<Float>& A() const { return _fA; }
     const Vector<Float>& b() const { return _fb; }
+    const Matrix<Interval>& iA() const { return _iA; }
+    const Vector<Interval>& ib() const { return _ib; }
 
     virtual VectorAffineFunctionRepresentation* clone() const { return new VectorAffineFunctionRepresentation(*this); }
 
@@ -1372,9 +1374,8 @@ VectorConstantFunction::VectorConstantFunction(const Vector<Real>& c, uint as)
 {
 }
 
-
-VectorAffineFunction::VectorAffineFunction(const Matrix<Real>& A, const Vector<Real>& b)
-    : VectorFunction(new VectorAffineFunctionRepresentation(A,b))
+VectorAffineFunction::VectorAffineFunction(const Matrix<Interval>& iA, const Vector<Interval>& ib)
+    : VectorFunction(new VectorAffineFunctionRepresentation(iA,ib))
 {
 }
 
@@ -1387,6 +1388,16 @@ const Matrix<Real> VectorAffineFunction::A() const
 const Vector<Real> VectorAffineFunction::b() const
 {
     return static_cast<const VectorAffineFunctionRepresentation*>(this->pointer())->b();
+}
+
+const Matrix<Interval> VectorAffineFunction::iA() const
+{
+    return static_cast<const VectorAffineFunctionRepresentation*>(this->pointer())->iA();
+}
+
+const Vector<Interval> VectorAffineFunction::ib() const
+{
+    return static_cast<const VectorAffineFunctionRepresentation*>(this->pointer())->ib();
 }
 
 

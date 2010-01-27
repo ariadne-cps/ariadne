@@ -67,9 +67,9 @@ class MultiIndex {
     typedef unsigned int size_type;
     typedef unsigned char byte_type;    typedef unsigned int word_type;
 
-    typedef byte_type value_type;
+    typedef byte_type index_type;
     typedef MultiIndexValueReference reference;
-    typedef const value_type& const_reference;
+    typedef const index_type& const_reference;
     //typedef unsigned int word_type;
     //typedef unsigned long long int word_type;
   public:
@@ -94,7 +94,7 @@ class MultiIndex {
     //! \brief Construct the unit multi index in variable \a j with \a nv variables.
     static MultiIndex unit(size_type nv, size_type j);
     //! \brief Construct the first multi index of degree \a d with \a nv variables.
-    static MultiIndex first(size_type nv, value_type d);
+    static MultiIndex first(size_type nv, index_type d);
 
     //! \brief Resize to hold n variables.
     void resize(size_type n);
@@ -105,13 +105,13 @@ class MultiIndex {
     //! \brief The number of variables.
     size_type size() const;
     //! \brief The degree of the multi-index, equal to the sum of the number of occurrences of the variables.
-    value_type degree() const;
+    index_type degree() const;
      //! \brief The number of variables.
     size_type number_of_variables() const;
     //! \brief The number of occurrences of the \a i th variable.
-    value_type get(size_type i) const;
+    index_type get(size_type i) const;
     //! \brief Set the number of occurrences of the \a i th variable to \a n.
-    void set(size_type i, value_type n);
+    void set(size_type i, index_type n);
     //! \brief The number of occurrences of the \a i th variable.
     const_reference operator[](size_type i) const;
     //! \brief The number of occurrences of the \a i th variable.
@@ -137,15 +137,15 @@ class MultiIndex {
     //! \brief Inplace difference.
     MultiIndex& operator-=(const MultiIndex& a); // inline
     //! \brief Inplace scalar product.
-    MultiIndex& operator*=(const value_type& a); // inline
+    MultiIndex& operator*=(const index_type& a); // inline
     //! \brief Sum.
     friend MultiIndex operator+(const MultiIndex& a1, const MultiIndex& a2); // inline
     //! \brief Difference.
     friend MultiIndex operator-(const MultiIndex& a1, const MultiIndex& a2); // inline
     //! \brief Scalar product.
-    friend MultiIndex operator*(const MultiIndex& a, value_type s); // inline
+    friend MultiIndex operator*(const MultiIndex& a, index_type s); // inline
     //! \brief Scalar product.
-    friend MultiIndex operator*(value_type s, const MultiIndex& a); // inline
+    friend MultiIndex operator*(index_type s, const MultiIndex& a); // inline
 
     //! \brief The position of the element in the array of tensor values.
     unsigned int position() const;
@@ -158,11 +158,11 @@ class MultiIndex {
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream&, const MultiIndex&);
   public:
-    //value_type& at(size_type i) { return _p[i]; }
-    const value_type& at(size_type i) const { return reinterpret_cast<const value_type*>(_p)[i]; }
-    value_type& at(size_type i) { return reinterpret_cast<value_type*>(_p)[i]; }
-    value_type* begin() { return reinterpret_cast<value_type*>(_p); }
-    const value_type* begin() const { return reinterpret_cast<const value_type*>(_p); }
+    //index_type& at(size_type i) { return _p[i]; }
+    const index_type& at(size_type i) const { return reinterpret_cast<const index_type*>(_p)[i]; }
+    index_type& at(size_type i) { return reinterpret_cast<index_type*>(_p)[i]; }
+    index_type* begin() { return reinterpret_cast<index_type*>(_p); }
+    const index_type* begin() const { return reinterpret_cast<const index_type*>(_p); }
   public:
     size_type word_size() const { return _nw; }
     word_type& word_at(size_type j) { return _p[j]; }
@@ -187,14 +187,14 @@ class MultiIndex {
 
 class MultiIndexValueReference {
     typedef MultiIndex::size_type size_type;
-    typedef MultiIndex::value_type value_type;
+    typedef MultiIndex::index_type index_type;
     typedef MultiIndex::word_type word_type;
   private:
-    size_type _n; value_type* _p; size_type _i;
+    size_type _n; index_type* _p; size_type _i;
   public:
-    MultiIndexValueReference(size_type n, value_type* p, size_type i) : _n(n), _p(p), _i(i) { }
-    operator const value_type& () { return _p[_i]; }
-    MultiIndexValueReference& operator=(const value_type& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
+    MultiIndexValueReference(size_type n, index_type* p, size_type i) : _n(n), _p(p), _i(i) { }
+    operator const index_type& () { return _p[_i]; }
+    MultiIndexValueReference& operator=(const index_type& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
     MultiIndexValueReference& operator++() { ++_p[_n]; ++_p[_i]; return *this; }
     MultiIndexValueReference& operator--();
     MultiIndexValueReference& operator+=(int k) { _p[_n]+=k; _p[_i]+=k; return *this; }
@@ -229,7 +229,7 @@ inline MultiIndex::MultiIndex(size_type n, const int* ary)
     : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
-    value_type* p=reinterpret_cast<value_type*>(_p);
+    index_type* p=reinterpret_cast<index_type*>(_p);
     p[n]=0; for(size_type i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
 }
 
@@ -237,7 +237,7 @@ inline MultiIndex::MultiIndex(size_type n, int a0, ...)
     : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     ARIADNE_ASSERT(n>0);
-    value_type* p=reinterpret_cast<value_type*>(_p);
+    index_type* p=reinterpret_cast<index_type*>(_p);
     p[0]=a0; p[_n]=a0;
     va_list args; va_start(args,a0);
     for(size_type i=1; i!=n; ++i) {
@@ -271,16 +271,16 @@ inline MultiIndex MultiIndex::zero(size_type n)
 inline MultiIndex MultiIndex::unit(size_type n, size_type i)
 {
     MultiIndex result(n);
-    reinterpret_cast<value_type*>(result._p)[i]=1u;
-    reinterpret_cast<value_type*>(result._p)[n]=1u;
+    reinterpret_cast<index_type*>(result._p)[i]=1u;
+    reinterpret_cast<index_type*>(result._p)[n]=1u;
     return result;
 }
 
-inline MultiIndex MultiIndex::first(size_type n, value_type d)
+inline MultiIndex MultiIndex::first(size_type n, index_type d)
 {
     MultiIndex result(n);
-    reinterpret_cast<value_type*>(result._p)[0]=d;
-    reinterpret_cast<value_type*>(result._p)[n]=d;
+    reinterpret_cast<index_type*>(result._p)[0]=d;
+    reinterpret_cast<index_type*>(result._p)[n]=d;
     return result;
 }
 
@@ -297,40 +297,40 @@ inline MultiIndex::size_type MultiIndex::size() const {
     return this->_n;
 }
 
-inline MultiIndex::value_type MultiIndex::degree() const {
-    return reinterpret_cast<const value_type*>(this->_p)[this->_n];
+inline MultiIndex::index_type MultiIndex::degree() const {
+    return reinterpret_cast<const index_type*>(this->_p)[this->_n];
 }
 
 inline MultiIndex::size_type MultiIndex::number_of_variables() const {
     return this->_n;
 }
 
-inline MultiIndex::value_type MultiIndex::get(size_type i) const {
-    assert(i<this->size()); return reinterpret_cast<const value_type*>(this->_p)[i];
+inline MultiIndex::index_type MultiIndex::get(size_type i) const {
+    assert(i<this->size()); return reinterpret_cast<const index_type*>(this->_p)[i];
 }
 
-inline void MultiIndex::set(size_type i, value_type k) {
+inline void MultiIndex::set(size_type i, index_type k) {
     assert(i<this->size());
-    value_type& ai=reinterpret_cast<value_type*>(this->_p)[i];
-    value_type& d=reinterpret_cast<value_type*>(this->_p)[this->_n];
+    index_type& ai=reinterpret_cast<index_type*>(this->_p)[i];
+    index_type& d=reinterpret_cast<index_type*>(this->_p)[this->_n];
     d+=k; d-=ai; ai=k;
 }
 
-inline MultiIndex::value_type const& MultiIndex::operator[](size_type i) const {
-    assert(i<this->size()); return reinterpret_cast<const value_type*>(this->_p)[i];
+inline MultiIndex::index_type const& MultiIndex::operator[](size_type i) const {
+    assert(i<this->size()); return reinterpret_cast<const index_type*>(this->_p)[i];
 }
 
 inline MultiIndexValueReference MultiIndex::operator[](size_type i) {
-    return MultiIndexValueReference(this->_n,reinterpret_cast<value_type*>(this->_p),i);
+    return MultiIndexValueReference(this->_n,reinterpret_cast<index_type*>(this->_p),i);
 }
 
 inline void MultiIndex::increment(size_type i) {
-    ++reinterpret_cast<value_type*>(this->_p)[i]; ++reinterpret_cast<value_type*>(this->_p)[this->_n];
+    ++reinterpret_cast<index_type*>(this->_p)[i]; ++reinterpret_cast<index_type*>(this->_p)[this->_n];
 }
 
 inline void MultiIndex::decrement(size_type i) {
-    ARIADNE_ASSERT(reinterpret_cast<value_type*>(this->_p)[i]>0u);
-    --reinterpret_cast<value_type*>(this->_p)[i]; --reinterpret_cast<value_type*>(this->_p)[this->_n];
+    ARIADNE_ASSERT(reinterpret_cast<index_type*>(this->_p)[i]>0u);
+    --reinterpret_cast<index_type*>(this->_p)[i]; --reinterpret_cast<index_type*>(this->_p)[this->_n];
 }
 
 
@@ -415,7 +415,7 @@ MultiIndex& MultiIndex::operator++()
     assert(_n>0);
 
     size_type const n=this->_n;
-    value_type* const p=reinterpret_cast<value_type*>(this->_p);
+    index_type* const p=reinterpret_cast<index_type*>(this->_p);
 
     if(n==1) {
         ++p[0];
@@ -427,7 +427,7 @@ MultiIndex& MultiIndex::operator++()
         ++p[n-1];
         return *this;
     } else {
-        value_type li=p[n-1];
+        index_type li=p[n-1];
         p[n-1]=0;
         for(size_type k=n-1; k!=0; --k) {
             if(p[k-1]!=0) {
@@ -464,7 +464,7 @@ MultiIndex& MultiIndex::operator-=(const MultiIndex& a) {
 }
 
 inline
-MultiIndex& MultiIndex::operator*=(const value_type& s) {
+MultiIndex& MultiIndex::operator*=(const index_type& s) {
     for(size_type j=0; j!=this->word_size(); ++j) {
         this->word_at(j)*=s;
     }
@@ -492,12 +492,12 @@ MultiIndex operator-(const MultiIndex& a1, const MultiIndex& a2) {
 }
 
 inline
-MultiIndex operator*(const MultiIndex& a, MultiIndex::value_type s) {
+MultiIndex operator*(const MultiIndex& a, MultiIndex::index_type s) {
     MultiIndex r(a); r*=s; return r;
 }
 
 inline
-MultiIndex operator*(MultiIndex::value_type s, const MultiIndex& a) {
+MultiIndex operator*(MultiIndex::index_type s, const MultiIndex& a) {
     MultiIndex r(a); r*=s; return r;
 }
 

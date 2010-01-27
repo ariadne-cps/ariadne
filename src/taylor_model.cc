@@ -2273,7 +2273,7 @@ partial_evaluate(const TaylorModel& x, uint k, Interval c)
     if(c==0) {
         for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
-            MultiIndex::value_type xak=xa[k];
+            MultiIndex::index_type xak=xa[k];
             if(xak==0) {
                 const Float& xv=xiter->data();
                 for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
@@ -2289,7 +2289,7 @@ partial_evaluate(const TaylorModel& x, uint k, Interval c)
         for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const Float& xv=xiter->data();
-            MultiIndex::value_type xak=xa[k];
+            MultiIndex::index_type xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
@@ -2312,7 +2312,7 @@ partial_evaluate(const TaylorModel& x, uint k, Interval c)
         for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const Float& xv=xiter->data();
-            MultiIndex::value_type xak=xa[k];
+            MultiIndex::index_type xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());

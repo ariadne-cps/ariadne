@@ -192,7 +192,7 @@ class ExpansionIterator
     typedef ExpansionIterator<X,Ref,Ptr> Iter;
   public:
     typedef MultiIndex::size_type size_type;
-    typedef MultiIndex::value_type byte_type;
+    typedef MultiIndex::index_type byte_type;
     typedef MultiIndex::word_type word_type;
     typedef X data_type;
 

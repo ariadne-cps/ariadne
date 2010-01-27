@@ -413,7 +413,7 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
     if(c==0) {
         for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
-            MultiIndex::value_type xak=xa[k];
+            MultiIndex::index_type xak=xa[k];
             if(xak==0) {
                 const X& xv=xiter->data();
                 for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
@@ -428,7 +428,7 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
         for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const X& xv=xiter->data();
-            MultiIndex::value_type xak=xa[k];
+            MultiIndex::index_type xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
@@ -453,7 +453,7 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
         for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const X& xv=xiter->data();
-            MultiIndex::value_type xak=xa[k];
+            MultiIndex::index_type xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());

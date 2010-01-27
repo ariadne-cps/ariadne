@@ -279,28 +279,36 @@ TestInterval::test_constructors()
     }
 
     // Constructor with approximations
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
     Interval ivld3(Rational(21,10),Rational(16,5));
     cout<<ivld3<<std::endl;
     ARIADNE_TEST_ASSERT(ivld3.lower()<Rational(21,10));
     ARIADNE_TEST_ASSERT(ivld3.upper()>Rational(16,5));
 #else
     Interval ivld3(2.1,3.2);
-#endif // HAVE_GMPXX_H
+    ARIADNE_TEST_EQUAL(ivld3.lower(),2.1);
+    ARIADNE_TEST_EQUAL(ivld3.upper(),3.2);
+#endif // HAVE_RATIONAL
 
     // Constructor from approximate values
     Interval ivld4(2.1,3.2);
     ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1);
     ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
 
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
     // Approximate constructor from a single value
     Interval ivld5(Rational(1,3));
     ARIADNE_TEST_COMPARE(ivld5.lower(),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(ivld5.upper(),>,Rational(1,3));
+    // Constructor from a single ratioanl value that is exaclty representable
+    Interval ivld51(Rational(3,1));
+    ARIADNE_TEST_EQUAL(ivld51.lower(),Rational(3,1));
+    ARIADNE_TEST_EQUAL(ivld51.upper(),Rational(3,1));
 #else
     Interval ivld5(1./3.);
-#endif // HAVE_GMPXX_H
+    ARIADNE_TEST_EQUAL(ivld5.lower(),1./3.);
+    ARIADNE_TEST_EQUAL(ivld5.upper(),1./3.);    
+#endif // HAVE_RATIONAL
 
     // Exact constructor from a single value
     Interval ivld6(Float(1.25));

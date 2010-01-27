@@ -81,14 +81,14 @@ void TestFunction::test()
     ARIADNE_TEST_EQUAL(iaff.ib(),ib);
     ARIADNE_TEST_EQUAL(iaff.iA(),iA);
     
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
     Vector<Rational> rb(1); Matrix<Rational> rA(1,1);
     rb[0]=Rational(1.0,3.0);
     rA[0][0]=1.0;
     VectorAffineFunction raff(rA,rb);
     ARIADNE_TEST_EQUAL(raff.ib(),rb);
     ARIADNE_TEST_EQUAL(raff.iA(),rA);
-#endif // HAVE_GMPXX_H
+#endif // HAVE_RATIONAL
     
 }
 

@@ -41,7 +41,7 @@ class Real : public Interval {
     explicit Real(const std::string& s);
     Real(int n) : Interval(n) { }
     Real(double x) : Interval(x) { }
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
     Real(const Rational& q);
 #endif
     explicit Real(Interval ivl) : Interval(ivl) { }

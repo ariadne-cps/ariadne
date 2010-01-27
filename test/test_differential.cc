@@ -282,7 +282,7 @@ class TestDifferentialVector {
 int main() {
     TestDifferential< Differential<Float> > tf;
     TestDifferentialVector< Differential<Float> > tfv;
-//#if defined HAVE_GMPXX_H and not defined ARIADNE_USE_ARRAY_EXPANSION
+//#if defined HAVE_RATIONAL and not defined ARIADNE_USE_ARRAY_EXPANSION
 //    TestDifferential< Differential<Rational> > tq;
 //    TestDifferentialVector< Differential<Rational> > tqv;
 //#endif

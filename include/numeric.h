@@ -69,6 +69,7 @@ class Rational { };
 class Float { };
 #endif // DOXYGEN
 
+typedef double Float;
 
 #ifdef HAVE_GMPXX_H
 class Integer : public mpz_class {
@@ -78,10 +79,12 @@ class Integer : public mpz_class {
     Integer(const std::string& s) : mpz_class(s) { }
 };
 
+#define HAVE_RATIONAL 1
 typedef mpq_class Rational;
 Rational sqr(const Rational& q);
 Rational pow(const Rational& q, int n);
 Rational pow(const Rational& q, uint n);
+Float float_approx(const Rational& q);
 #else
 class Integer {
   public:
@@ -116,9 +119,6 @@ inline bool operator> (const Integer& z1, const Integer& z2) {
     return int(z1)> int(z2); }
 
 #endif // HAVE_GMPXX_H
-
-
-typedef double Float;
 
 
 using std::min;
@@ -289,10 +289,10 @@ class Interval {
     Interval(const Interval& i) : l(i.l), u(i.u) { }
 
     Interval(Float lower, Float upper) : l(lower), u(upper) { ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper); }
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
     Interval(Rational q);
     Interval(Rational lower, Rational upper);
-#endif // HAVE_GMPXX_H
+#endif // HAVE_RATIONAL
 
     const Float& lower() const { return l; }
     const Float& upper() const { return u; }

@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "config.h"
 #include "macros.h"
 #include "numeric.h"
 #include "real.h"
@@ -62,6 +63,18 @@ template<> Vector<Interval>::Vector(size_t n, const double& t0, const double& t1
     }
     va_end(args);
 }
+
+#ifdef HAVE_RATIONAL
+template<> Vector<Rational>::Vector(size_t n, const double& t0, const double& t1, ...)
+    : ublas::vector<Rational>(n)
+{
+    assert(n>=2); va_list args; va_start(args,t1);
+    (*this)[0]=t0; (*this)[1]=t1;
+    for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,double); }
+    va_end(args);
+}
+#endif // HAVE_RATIONAL
+
 
 
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)

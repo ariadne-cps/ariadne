@@ -407,7 +407,7 @@ Expansion<X>::insert(const MultiIndex& a, const X& x) {
 
 // Disable construction of Expansion<Rational> since above implementation only
 // works for "plain old data" types
-#if defined HAVE_GMPXX_H and defined ARIADNE_NUMERIC_H
+#if defined HAVE_RATIONAL
 template<> class Expansion<Rational>;
 #endif
 

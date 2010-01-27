@@ -93,12 +93,20 @@ class Matrix
 
     //! \brief Equality operator. Allows comparison with a matrix using another real type.
     template<class XX> bool operator==(const Matrix<XX>& A) const;
+    //! \brief Inequality operator. Allows comparison with a matrix using another real type.
+    template<class XX> bool operator!=(const Matrix<XX>& A) const;
     //@}
 
     //@{
     //! \name Data access
 
-
+    //! \brief Assignment operator from a single scalar value. It assigns the (0,0) element of the Matrix to \a val.
+    Matrix<X>& operator=(const X& val)  {
+        (*this)[0][0] = val; currow = 0; curcol = 0; return *this; }
+    //! \brief Comma operator. Used to assign all elements of a matrix in a singe line of code.
+    //! \brief \code Matrix<X> v(2,2); v = val12, val22, val21, val22; \endcode
+    Matrix<X>& operator,(const X& val);
+    
     //! \brief The number of rows of the matrix.
     size_t row_size() const { return this->size1(); }
     //! \brief The number of columns of the matrix.
@@ -195,6 +203,10 @@ class Matrix
 
 #endif
 
+  private:
+    //! \brief Auxiliary variables needed for the comma operator.
+    size_t curcol, currow;
+    
 };
 
 class PivotMatrix;
@@ -261,6 +273,17 @@ template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x0, ...)
     va_end(args);
 }
 
+template<class X> 
+Matrix<X>& Matrix<X>::operator,(const X& val)
+{
+    if(++curcol >= this->column_size()) {
+        curcol = 0;
+        currow++;
+    }
+    this->set(currow,curcol,val);
+    return *this;
+}
+
 template<class X> template<class XX> bool Matrix<X>::operator==(const Matrix<XX>& A2) const
 {
     const Matrix<X>& A1=*this;
@@ -275,6 +298,11 @@ template<class X> template<class XX> bool Matrix<X>::operator==(const Matrix<XX>
         }
     }
     return true;
+}
+
+template<class X> template<class XX> bool Matrix<X>::operator!=(const Matrix<XX>& A2) const
+{
+    return !(*this == A2);
 }
 
 template<class X> Matrix<X> operator+(const Matrix<X>& A)

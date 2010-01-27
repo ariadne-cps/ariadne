@@ -54,8 +54,8 @@ TestVector::test_concept()
 {
     Float fx;
     Interval ix;
-    Vector<Float> fv;
-    Vector<Interval> iv;
+    Vector<Float> fv, fvv;
+    Vector<Interval> iv, ivv;
   
     fv=fv+fv; iv=fv+fv; iv=fv+iv; iv=iv+fv; iv=iv+iv; 
     fv=fv-fv; iv=fv-fv; iv=fv-iv; iv=iv-fv; iv=iv-iv; 
@@ -63,6 +63,37 @@ TestVector::test_concept()
     fv=fx*fv; iv=fx*fv; iv=fx*iv; iv=ix*fv; iv=ix*iv; 
     fv=fv*fx; iv=fv*fx; iv=fv*ix; iv=iv*fx; iv=iv*ix; 
     fv=fv/fx; iv=fv/fx; iv=fv/ix; iv=iv/fx; iv=iv/ix; 
+    
+    // Test variadic constructor and comma operator
+    fv = Vector<Float>(3);
+    fv[0] = 1.0; fv[1] = 2.0; fv[2] = 3.3;
+    fvv = Vector<Float>(3, 1.0, 2.0, 3.3);
+    ARIADNE_TEST_EQUAL(fv,fvv);
+    fvv = Vector<Float>(3);
+    ARIADNE_TEST_COMPARE(fv,!=,fvv);
+    fvv = 1.0, 2.0, 3.3;
+    ARIADNE_TEST_EQUAL(fv,fvv);
+       
+    iv = Vector<Interval>(3);
+    iv[0] = 1.0; iv[1] = 2.0; iv[2] = 3.3;
+    ivv = Vector<Interval>(3, 1.0,1.0, 2.0,2.0, 3.3,3.3);
+    ARIADNE_TEST_EQUAL(iv,ivv);
+    ivv = Vector<Interval>(3);
+    ARIADNE_TEST_COMPARE(iv,!=,ivv);
+    ivv = Interval(1.0,1.0), Interval(2.0,2.0), Interval(3.3,3.3);
+    ARIADNE_TEST_EQUAL(iv,ivv);
+       
+#ifdef HAVE_RATIONAL
+    Vector<Rational> rv(3);
+    rv[0] = 1.0; rv[1] = 2.0; rv[2] = 3.3;
+    Vector<Rational> rvv (3, 1.0, 2.0, 3.3);
+    ARIADNE_TEST_EQUAL(rv,rvv);
+    rvv = Vector<Rational>(3);
+    ARIADNE_TEST_COMPARE(rv,!=,rvv);
+    rvv = 1.0, 2.0, 3.3;
+    ARIADNE_TEST_EQUAL(rv,rvv);
+#endif // HAVE_RATIONAL
+     
 }
 
 

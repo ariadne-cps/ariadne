@@ -31,9 +31,9 @@
 template class boost::numeric::ublas::matrix<Ariadne::Float>;
 template class boost::numeric::ublas::matrix<Ariadne::Interval>;
 
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
 template class boost::numeric::ublas::matrix<Ariadne::Rational>;
-#endif // HAVE_GMPXX_H
+#endif // HAVE_RATIONAL
 
 
 namespace Ariadne {
@@ -802,12 +802,12 @@ template Matrix<Interval> solve(const Matrix<Interval>&, const Matrix<Interval>&
 template Matrix<Interval> lu_solve(const Matrix<Interval>&, const Matrix<Interval>&);
 template Matrix<Interval> gs_solve(const Matrix<Interval>&, const Matrix<Interval>&);
 template Vector<Interval> solve(const Matrix<Interval>&, const Vector<Interval>&);
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);
 template Matrix<Rational> solve(const Matrix<Rational>&, const Matrix<Rational>&);
 template Vector<Rational> solve(const Matrix<Rational>&, const Vector<Rational>&);
-#endif
+#endif // HAVE_RATIONAL
 
 } // namespace Ariadne
 

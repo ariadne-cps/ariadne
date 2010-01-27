@@ -111,6 +111,14 @@ class Vector
     //@{
     //! \name Data access
 
+    //! \brief Assignment operator from a single scalar value. It assigns the first element of the vector to \a val.
+    Vector<X>& operator=(const X& val)  {
+        (*this)[0] = val; current = 0; return *this; }
+    //! \brief Comma operator. Used to assign all elements of a vector in a row.
+    //! \brief \code Vector<X> v(3); v = val1, val2, val3; \endcode
+    Vector<X>& operator,(const X& val) {
+        (*this)[++current] = val; return *this; }    
+
 #ifdef DOXYGEN
     //! \brief The number of elements of the vector.
     size_t size() const;
@@ -171,6 +179,10 @@ class Vector
     //! \brief Read from an output stream.
     friend template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v);
 #endif // DOXYGEN
+
+  private:
+    //! \brief Auxiliary variable needed for the operator comma
+    size_t current;
 };
 
 typedef ublas::slice Slice;

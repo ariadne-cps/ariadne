@@ -272,7 +272,7 @@ void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& 
 
 template<class X> inline X inf();
 template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
 template<> inline Rational inf<Rational>() { return Rational(1,-0); }
 #endif
 
@@ -1287,9 +1287,9 @@ constrained_feasible_by_enumeration(const Matrix<X>& A, const Vector<X>& b,
 
 ARIADNE_INSTANTIATE_LINEAR_PROGRAMMING(Float);
 
-#ifdef HAVE_GMPXX_H 
+#ifdef HAVE_RATIONAL
 ARIADNE_INSTANTIATE_LINEAR_PROGRAMMING(Rational);
-#endif // HAVE_GMPXX_H
+#endif // HAVE_RATIONAL
 
 #undef ARIADNE_INSTANTIATE_LINEAR_PROGRAMMING
 

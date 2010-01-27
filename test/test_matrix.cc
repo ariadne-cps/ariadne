@@ -79,6 +79,40 @@ TestMatrix::test_concept()
 
     fv=prod(fA,fv); iv=prod(fA,fv); iv=prod(fA,iv); iv=prod(iA,fv); iv=prod(iA,iv); 
     fA=prod(fA,fA); iA=prod(fA,fA); iA=prod(fA,iA); iA=prod(iA,fA); iA=prod(iA,iA); 
+    
+    // Test variadic constructor and comma operator
+    fA = Matrix<Float>(2,2);
+    fA[0][0] = 1.0; fA[0][1] = 2.0; 
+    fA[1][0] = 3.3; fA[1][1] = 4.4;
+    Matrix<Float> fAv(2,2, 1.0, 2.0, 3.3, 4.4);
+    ARIADNE_TEST_EQUAL(fA,fAv);
+    fAv = Matrix<Float>(2,2);
+    ARIADNE_TEST_COMPARE(fA,!=,fAv);
+    fAv = 1.0, 2.0, 3.3, 4.4;
+    ARIADNE_TEST_EQUAL(fA,fAv);
+       
+    iA = Matrix<Interval>(2,2);
+    iA[0][0] = 1.0; iA[0][1] = 2.0; 
+    iA[1][0] = 3.3; iA[1][1] = 4.4;
+    Matrix<Interval> iAv(2,2, 1.0, 2.0, 3.3, 4.4);
+    ARIADNE_TEST_EQUAL(iA,iAv);
+    iAv = Matrix<Interval>(2,2);
+    ARIADNE_TEST_COMPARE(iA,!=,iAv);
+    iAv = Interval(1.0,1.0), Interval(2.0,2.0), Interval(3.3,3.3), Interval(4.4,4.4);
+    ARIADNE_TEST_EQUAL(iA,iAv);
+       
+#ifdef HAVE_RATIONAL
+    Matrix<Rational> rA(2,2);
+    rA[0][0] = 1.0; rA[0][1] = 2.0; 
+    rA[1][0] = 3.3; rA[1][1] = 4.4;
+    Matrix<Rational> rAv (2,2, 1.0, 2.0, 3.3, 4.4);
+    ARIADNE_TEST_EQUAL(rA,rAv);
+    rAv = Matrix<Rational>(2,2);
+    ARIADNE_TEST_COMPARE(rA,!=,rAv);
+    rAv = 1.0, 2.0, 3.3, 4.4;
+    ARIADNE_TEST_EQUAL(rA,rAv);
+#endif // HAVE_RATIONAL
+         
 }
 
 

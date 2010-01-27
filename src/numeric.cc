@@ -978,9 +978,9 @@ Interval atan(Interval i)
 
 
 
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
 
-typedef mpq_class Rational;
+// typedef mpq_class Rational;
 
 Rational sqr(const Rational& q) { return q*q; }
 
@@ -996,6 +996,9 @@ Rational pow(const Rational& q, int n) {
     else { return pow(1/q,uint(-n)); }
 }
 
+Float float_approx(const Rational& q) {
+    return q.get_d();
+}
 
 Interval::Interval(Rational q) : l(q.get_d()), u(l) {
     rounding_mode_t rounding_mode=get_rounding_mode();
@@ -1016,7 +1019,7 @@ Interval::Interval(Rational ql, Rational qu) : l(ql.get_d()), u(qu.get_d())  {
 }
 
 
-#endif // HAVE_GMPXX_H
+#endif // HAVE_RATIONAL
 
 
 std::ostream&
@@ -1099,7 +1102,7 @@ operator>>(std::istream& is, Interval& ivl)
 }
 
 
-#ifdef HAVE_GMPXX_H
+#ifdef HAVE_RATIONAL
 
 Real::Real(const std::string& str)
 {
@@ -1157,7 +1160,7 @@ Real::Real(const std::string& str)
     ARIADNE_THROW(std::runtime_error,"Need GMP library to convert string literal to Real.");
 }
 
-#endif
+#endif // HAVE_RATIONAL
 
 
 

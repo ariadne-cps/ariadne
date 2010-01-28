@@ -1476,6 +1476,7 @@ Interval _range2(const TaylorModel& tm) {
 
 // Compute the range by grouping all quadratic terms x[i]^2 with linear terms x[i]
 // The range of ax^2+bx+c is a([-1,1]+b/2a)^2+(c-b^2/4a)
+// WARNING: If the quadratic term is very small, large errors can result due to numerical instability
 Interval _range3(const TaylorModel& tm) {
     const uint as=tm.argument_size();
     array<double> linear_terms(as,0.0);
@@ -1513,7 +1514,7 @@ Interval _range3(const TaylorModel& tm) {
 
 Interval
 TaylorModel::range() const {
-    return Ariadne::_range3(*this);
+    return Ariadne::_range1(*this);
 }
 
 

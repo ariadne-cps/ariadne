@@ -335,7 +335,7 @@ int main()
     evolver.verbosity = VERBOSITY;
 
     /// Sets the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = MAX_ENCLOSURE_RADIUS;
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(12,MAXIMUM_ENCLOSURE_RADIUS);
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
     std::cout <<  evolver.parameters() << std::endl;
   

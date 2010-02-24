@@ -221,7 +221,7 @@ int main()
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_RADIUS);
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
     evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;
     std::cout <<  evolver.parameters() << std::endl;

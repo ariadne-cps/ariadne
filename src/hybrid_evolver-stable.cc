@@ -200,7 +200,6 @@ _evolution(EnclosureListType& final_sets,
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 
-
     typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
 
     std::vector< HybridTimedSetType > working_sets;
@@ -220,6 +219,9 @@ _evolution(EnclosureListType& final_sets,
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_location,0,initial_set_model,initial_time_model));
+
+		// Checks for match between the enclosure cell size and the set size
+		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
     }
 
 
@@ -230,11 +232,20 @@ _evolution(EnclosureListType& final_sets,
         IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
-        RealType initial_set_radius=radius(initial_set_model.range());
+		Vector<Interval> initial_set_model_range=initial_set_model.range();
+
+		// Checks whether the range can be included into the maximum_enclosure_cell
+		bool maximum_enclosure_reached = false;
+		for (uint i=0;i<initial_set_model_range.size();++i) {
+			if (initial_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i]) {
+				maximum_enclosure_reached = true;
+				break; 
+			}
+		}
+
         if(initial_time_model.range().lower()>=maximum_time || initial_steps>=maximum_steps) {
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions
-                  && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
+        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && maximum_enclosure_reached) {
             // Subdivide
             uint nd=initial_set_model.dimension();
             TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
@@ -246,8 +257,7 @@ _evolution(EnclosureListType& final_sets,
                 working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }
         } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
-                  this->_parameters->enable_premature_termination &&
-                  initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+                  this->_parameters->enable_premature_termination && maximum_enclosure_reached) {
             ARIADNE_LOG(1,"\nWARNING: Terminating evolution at time " << initial_time_model.value()
                           << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n");
         } else {
@@ -341,7 +351,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Set evolution parameters
     const Float maximum_step_size=this->_parameters->maximum_step_size;
-    const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
+    const Float maximum_bounds_diameter=max(this->_parameters->maximum_enclosure_cell);
     const Float zero_time=0.0;
 
     // Get bounding boxes for time and space range
@@ -752,18 +762,26 @@ timed_evolution(const SystemType& system,
         IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
-        RealType initial_set_radius=radius(initial_set_model.range());
+        Vector<Interval> initial_set_model_range=initial_set_model.range();
+		// Checks whether the range can be included into the maximum_enclosure_cell
+		bool maximum_enclosure_reached = false;
+		for (uint i=0;i<initial_set_model_range.size();++i) {
+			if (initial_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i]) {
+				maximum_enclosure_reached = true;
+				break; 
+			}
+		}
+
         ARIADNE_LOG(5,"initial_steps = "<<initial_steps<<"\n");
         ARIADNE_LOG(5,"initial_time_model.range = "<<initial_time_model.range() <<"\n");
         ARIADNE_LOG(5,"initial_location = "<<initial_location<<"\n");
-        ARIADNE_LOG(5,"initial_set_model.range = "<<initial_set_model.range()<<"\n");
+        ARIADNE_LOG(5,"initial_set_model.range = "<<initial_set_model_range<<"\n");
 
         if(initial_time_model.range().lower()>=maximum_time || initial_steps>=maximum_steps) {
             Interval final_time(initial_time_model.range());
             EnclosureType final_enclosure(initial_location,this->_toolbox->enclosure(initial_set_model));
             result.push_back(TimedEnclosureType(final_time,final_enclosure));
-        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions
-                  && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
+        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && maximum_enclosure_reached) {
             // Subdivide
             uint nd=initial_set_model.dimension();
             TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
@@ -775,8 +793,7 @@ timed_evolution(const SystemType& system,
                 working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }
         } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
-                  this->_parameters->enable_premature_termination &&
-                  initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+                  this->_parameters->enable_premature_termination && maximum_enclosure_reached) {
             Interval final_time(initial_time_model.range());
             EnclosureType final_enclosure(initial_location,this->_toolbox->enclosure(initial_set_model));
             result.push_back(TimedEnclosureType(final_time,final_enclosure));

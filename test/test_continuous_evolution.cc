@@ -127,10 +127,10 @@ void TestContinuousEvolution::test() const
     // Set up the evolution parameters and grid
     Float time(5.0);
     Float step_size(0.125);
-    Float enclosure_radius(0.25);
+    Vector<Float> enclosure_cell(2,0.25,0.25);
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=enclosure_radius;
+    parameters.maximum_enclosure_cell=enclosure_cell;
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
@@ -199,10 +199,10 @@ void TestContinuousEvolution::failure_test() const
     // Set up the evolution parameters and grid
     Float time(0.5);
     Float step_size(0.01);
-    Float enclosure_radius(0.25);
+    Vector<Float> enclosure_cell(2,0.25,0.25);
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=enclosure_radius;
+    parameters.maximum_enclosure_cell=enclosure_cell;
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators

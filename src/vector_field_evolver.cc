@@ -156,26 +156,38 @@ _evolution(EnclosureListType& final_sets,
         SetModelType initial_set_model=this->_toolbox->set_model(initial_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_time,initial_set_model));
-    }
 
+		// Checks for match between the enclosure cell size and the set size
+		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+    }
 
     while(!working_sets.empty()) {
         TimedSetType current_timed_set=working_sets.back();
         working_sets.pop_back();
         TimeType current_time=current_timed_set.first;
         SetModelType current_set_model=current_timed_set.second;
-        RealType current_set_radius=radius(current_set_model.range());
+
+		Vector<Interval> current_set_model_range=current_set_model.range();
+
+		// Checks whether the range can be included into the maximum_enclosure_cell
+		bool maximum_enclosure_reached = false;
+		for (uint i=0;i<current_set_model_range.size();++i) {
+			if (current_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i]) {
+				maximum_enclosure_reached = true;
+				break; 
+			}
+		}
+
         if(current_time>=maximum_time) {
             final_sets.adjoin(this->_toolbox->enclosure(current_set_model));
-        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
-                  && (current_set_radius>this->_parameters->maximum_enclosure_radius)) {
+        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS && maximum_enclosure_reached) {
             // Subdivide
             array< SetModelType > subdivisions=this->_toolbox->subdivide(current_set_model);
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 SetModelType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_tuple(current_time,subdivided_set_model));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && current_set_radius>this->_parameters->maximum_enclosure_radius) {
+        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && maximum_enclosure_reached) {
             std::cerr << "WARNING: Terminating lower evolution at time " << current_time
                       << " and set " << current_set_model << " due to maximum radius being exceeded.";
         } else {
@@ -241,7 +253,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
 
     // Set evolution parameters
     const Float maximum_step_size=this->_parameters->maximum_step_size;
-    const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
+    const Float maximum_bounds_diameter=max(this->_parameters->maximum_enclosure_cell);
     const Float zero_time=0.0;
 
     // Get bounding boxes for time and space range

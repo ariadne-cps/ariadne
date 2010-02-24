@@ -224,7 +224,7 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 50.0;
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,50.0);
     evolver.parameters().maximum_step_size = 1.25;
     evolver.parameters().enable_subdivisions = true;
     evolver.verbosity = 1;

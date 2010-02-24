@@ -145,7 +145,7 @@ int main()
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.5);
     evolver.parameters().maximum_step_size = 0.125;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -188,6 +188,11 @@ int main()
     for(grid_depth = min_grid_depth; grid_depth <= max_grid_depth ; grid_depth++) {    
         std::cout << "Computing upper reach set with grid depth " << grid_depth <<" and cell size "<<eps<<"..." << std::flush;
         analyser.parameters().maximum_grid_depth=grid_depth;
+
+	// <TEMPORARY>
+        evolver.parameters().maximum_step_size = std::pow(2,-grid_depth);
+	// </TEMPORARY>
+
         HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);
         std::cout << "done." << std::endl;
         char filename[30];

@@ -69,10 +69,10 @@ void TestMapEvolver::test() const
 
     // Set up the evolution parameters and grid
     IteratedMap::TimeType time(3);
-    Float enclosure_radius(0.25);
+    Vector<Float> enclosure_cell(2,0.25,0.25);
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=enclosure_radius;
+    parameters.maximum_enclosure_cell=enclosure_cell;
 
     // Set up the evaluators
     MapEvolver evolver(parameters);

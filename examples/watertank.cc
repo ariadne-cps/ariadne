@@ -50,6 +50,8 @@ int main()
     double A4[4]={a,0.0,0.0,0.0};
     double b4[2]={0.0,0.0};
 
+	ScalarFunction u(2,1.0);
+
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
@@ -130,7 +132,7 @@ int main()
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.25);
     evolver.parameters().maximum_step_size = 0.125;
     std::cout <<  evolver.parameters() << std::endl;
 

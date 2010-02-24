@@ -108,10 +108,11 @@ void TestHybridSimulator::test() const
 
     // Set up the simulator parameters and grid
     Float step_size(0.125);
-    Float enclosure_radius(0.25);
+    Vector<Float> enclosure_cell(2,0.25);
     
     EvolutionParameters parameters;
     parameters.maximum_step_size=step_size;
+	parameters.maximum_enclosure_cell=enclosure_cell;
 
     // Set up the evaluators
     HybridSimulator simulator(parameters);

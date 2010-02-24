@@ -109,8 +109,8 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.5;
-    evolver.parameters().maximum_step_size = pi<Float>()/2.0;
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.5);
+    evolver.parameters().maximum_step_size = 0.1*pi<Float>();
     std::cout <<  evolver.parameters() << std::endl;
     evolver.verbosity=1;
 
@@ -128,11 +128,11 @@ int main()
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(sinusoid,initial_enclosure,evolution_time,LOWER_SEMANTICS);
-    std::cout << "done." << std::endl;
+    std::cout << "done." << std::endl << orbit << std::endl << orbit.reach() << std::endl;
 
     //std::cout << "Orbit="<<orbit<<std::endl;
 
-    Box graphic_box(2, -0.5,3*pi<Float>()+0.5, -4.0,4.0);
+    Box graphic_box(2, -0.5,3*pi<Float>()+0.5, -2.5,2.5);
     plot("sinusoid_sin_orbit", 0, 1, 2, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
 
 }

@@ -158,7 +158,7 @@ HybridEvolver create_evolver()
     HybridEvolver evolver;
 
     // Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.25);
     evolver.parameters().maximum_step_size = 0.0625;
     cout <<  evolver.parameters() << endl;
 

@@ -59,12 +59,12 @@ class ContinuousEvolutionParameters {
     //! Decreasing this value increases the accuracy of the computation. 
     RealType maximum_step_size;
 
-    //! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound). 
-    RealType minimum_enclosure_radius;
+    //! \brief A suggested minimum cell of a basic set after a subdivision (not a strict bound). 
+    Vector<RealType> minimum_enclosure_cell;
 
-    //! \brief The maximum allowable radius of a basic set during integration. 
-    //! Decreasing this value increases the accuracy of the computation of an over-approximation. 
-    RealType maximum_enclosure_radius;
+    //! \brief The maximum allowable cell of a basic set during integration. 
+    //! Decreasing the volume of the cell increases the accuracy of the computation of an over-approximation. 
+    Vector<RealType> maximum_enclosure_cell;
     
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
@@ -200,8 +200,8 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       temporal_order(4),
       minimum_step_size(0.0),
       maximum_step_size(1.0),
-      minimum_enclosure_radius(0.0),
-      maximum_enclosure_radius(100.0),
+      minimum_enclosure_cell(Vector<RealType>(0)),
+      maximum_enclosure_cell(Vector<RealType>(0)),
       enable_subdivisions(false),
       enable_premature_termination(true)
 { }
@@ -228,8 +228,8 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << ",\n  temporal_order=" << p.temporal_order
        << ",\n  minimum_step_size=" << p.minimum_step_size
        << ",\n  maximum_step_size=" << p.maximum_step_size
-       << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
-       << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
+       << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
+       << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
        << ",\n  enable_subdivisions=" << p.enable_subdivisions
        << ",\n  enable_premature_termination=" << p.enable_premature_termination
        << "\n)\n";
@@ -269,8 +269,8 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  temporal_order=" << p.temporal_order
        << ",\n  minimum_step_size=" << p.minimum_step_size
        << ",\n  maximum_step_size=" << p.maximum_step_size
-       << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
-       << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
+       << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
+       << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
 
        << ",\n\n  lock_to_grid_steps=" << p.lock_to_grid_steps
        << ",\n  lock_to_grid_time=" << p.lock_to_grid_time

@@ -211,7 +211,7 @@ _evolution(EnclosureListType& final_sets,
 {
     typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
 
-    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n"); 
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
@@ -236,6 +236,9 @@ _evolution(EnclosureListType& final_sets,
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
+
+		// Checks for match between the enclosure cell size and the set size
+		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
     }
 
 
@@ -246,15 +249,24 @@ _evolution(EnclosureListType& final_sets,
         EventListType initial_events=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
-        RealType initial_set_radius=radius(initial_set_model.range());
+		Vector<Interval> initial_set_model_range=initial_set_model.range();
+
+		// Checks whether the range can be included into the maximum_enclosure_cell
+		bool maximum_enclosure_reached = false;
+		for (uint i=0;i<initial_set_model_range.size();++i) {
+			if (initial_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i]) {
+				maximum_enclosure_reached = true;
+				break; 
+			}
+		}
+
         if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions
-                  && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
+        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && maximum_enclosure_reached) {
             // Subdivide
-            ARIADNE_LOG(1,"WARNING: computed set larger than maximum_enclosure_radius, subdividing.\n");
-            ARIADNE_LOG(3,"initial_set_radius*10000="<<initial_set_radius*10000<<"\n");
+            ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model_range << " widths larger than maximum_enclosure_cell " << this->_parameters->maximum_enclosure_cell << ", subdividing.\n");
+            ARIADNE_LOG(3,"initial_set_model_range*10000="<<initial_set_model_range*10000<<"\n");
             uint nd=initial_set_model.dimension();
             SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
             array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
@@ -269,10 +281,9 @@ _evolution(EnclosureListType& final_sets,
                 working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
             }
         } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
-                  this->_parameters->enable_premature_termination &&
-                  initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+                  this->_parameters->enable_premature_termination && maximum_enclosure_reached) {
             ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
-                        << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n\n");
+                        << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,
@@ -689,7 +700,7 @@ compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float
     const int MAXIMUM_BOUNDS_DIAMETER_FACTOR = 8;
     float remaining_time = finishing_time - starting_time_model.range().lower();
     const Float maximum_step_size=min(time_step, remaining_time);
-    const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*MAXIMUM_BOUNDS_DIAMETER_FACTOR;
+    const Float maximum_bounds_diameter=max(this->_parameters->maximum_enclosure_cell)*MAXIMUM_BOUNDS_DIAMETER_FACTOR;
 
     BoxType starting_set_bounding_box=starting_set_model.range();
     ARIADNE_LOG(3,"starting_set_bounding_box="<<starting_set_bounding_box<<"\n");

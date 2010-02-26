@@ -35,6 +35,7 @@
 #include "discretiser_interface.h"
 #include "hybrid_automaton.h"
 #include "vector_field.h"
+#include "evolution_statistics.h"
 
 #include "logging.h"
 
@@ -171,7 +172,16 @@ class HybridDiscretiser
         return this->_evolver; }
   
     //@}
-  
+
+    //@{
+    //! \name Gets and resets the continuous evolution statistics
+
+	//! \brief Gets the evolution statistics from the evolver
+	const ContinuousEvolutionStatistics& statistics() const { return this->_evolver->statistics(); }
+
+	//! \brief Resets the evolution statistics of the evolver
+	void reset_statistics() { this->_evolver->statistics().reset(); }
+		
     //@{
     //! \name Evaluation on basic sets.
   

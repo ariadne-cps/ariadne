@@ -1,7 +1,7 @@
 /***************************************************************************
  *            reachability_analyser.h
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-10  Alberto Casagrande, Pieter Collins, Luca Geretti
  *
  ****************************************************************************/
 
@@ -30,7 +30,6 @@
 
 #include <boost/smart_ptr.hpp>
 
-
 #include "hybrid_set_interface.h"
 #include "evolver_interface.h"
 #include "discretiser_interface.h"
@@ -45,7 +44,6 @@
 
 #include "logging.h"
 
-
 namespace Ariadne {
  
 template<class ES> class Orbit;
@@ -58,12 +56,9 @@ typedef HybridBasicSet<Box> HybridBox;
 class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
-class HybridGridTreeSet;
 
 template<class ES> class HybridListSet;
 template<class ES> class HybridDiscretiser;
-
-
 
 /*! \brief A class for performing reachability analysis on a hybrid system.
  */
@@ -72,9 +67,11 @@ class HybridReachabilityAnalyser
 {
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
+	boost::shared_ptr< DiscreteEvolutionStatistics > _statistics;
     boost::shared_ptr< HybridDiscretiser<HybridEvolver::ContinuousEnclosureType> > _discretiser;
   public:
     typedef DiscreteEvolutionParameters EvolutionParametersType;
+	typedef DiscreteEvolutionStatistics	EvolutionStatisticsType;
     typedef HybridAutomaton SystemType;
     typedef SystemType::StateSpaceType StateSpaceType;
     typedef SystemType::TimeType TimeType;
@@ -103,13 +100,20 @@ class HybridReachabilityAnalyser
     //@}
   
     //@{ 
-    //! \name Methods to set and get the parameters controlling the accuracy.
+    //! \name Methods to set and get the parameters controlling the accuracy
     /*! \brief The parameters controlling the accuracy. */
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
     /*! \brief A reference to the parameters controlling the accuracy. */
     EvolutionParametersType& parameters() { return *this->_parameters; }
     //@}
-  
+
+    //@{ 
+    //! \name Methods to set and get the statistics related to the analyses
+    /*! \brief The statistics stemming from the analyses. */
+    const EvolutionStatisticsType& statistics() const { return *this->_statistics; }
+    /*! \brief A reference to the statistics stemming from the analyses. */
+    EvolutionStatisticsType& statistics() { return *this->_statistics; }
+    //@}
   
     //@{
     //! \name Evaluation of systems on abstract sets
@@ -149,27 +153,11 @@ class HybridReachabilityAnalyser
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const HybridImageSet& initial_set) const;
-
-    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. 
-        Returns the final time of evolution and the total number of cells processed by the algorithm. */
-    virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const HybridImageSet& initial_set,
-                                             HybridTime& final_time,
-                                             int& processed_cells) const;
-
   
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const HybridImageSet& initial_set, 
                                              const HybridBoxes& bounding_domain) const;
-  
-    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain.
-        Returns the final time of evolution and the total number of cells processed by the algorithm.  \deprecated */
-    virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const HybridImageSet& initial_set, 
-                                             const HybridBoxes& bounding_domain,
-                                             HybridTime& final_time,
-                                             int& processed_cells) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
     virtual SetApproximationType viable(const HybridAutomaton& system,
@@ -206,6 +194,7 @@ template<class HybridEnclosureType>
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType())
+	, _statistics(new EvolutionStatisticsType())
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 }
@@ -216,6 +205,7 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
                            const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType(parameters))
+	, _statistics(new EvolutionStatisticsType())
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 }

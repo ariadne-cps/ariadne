@@ -1,7 +1,7 @@
 /***************************************************************************
  *            evolver_interface.h
  *
- *  Copyright  2008  Pieter Collins
+ *  Copyright  2008-10  Pieter Collins, Luca Geretti
  * 
  ****************************************************************************/
 
@@ -28,6 +28,7 @@
 #ifndef ARIADNE_EVOLVER_INTERFACE_H
 #define ARIADNE_EVOLVER_INTERFACE_H
 
+#include "evolution_statistics.h"
 
 namespace Ariadne {
 
@@ -53,6 +54,7 @@ class EvolverInterface
     typedef ES EnclosureType;
     typedef typename SystemType::TimeType TimeType;
     typedef ListSet<EnclosureType> EnclosureListType;
+	typedef ContinuousEvolutionStatistics EvolutionStatisticsType;
 
     //! \brief Virtual destructor. 
     virtual ~EvolverInterface() {};
@@ -62,6 +64,12 @@ class EvolverInterface
 
     //! \brief Write to an output stream. 
     virtual std::ostream& write(std::ostream& os) const = 0;
+
+	//! \brief Set the statistics of the evolution.
+	virtual EvolutionStatisticsType& statistics() = 0;
+
+	//! \brief Get the statistics of the evolution.
+    virtual const EvolutionStatisticsType& statistics() const = 0;
 
   public:
     //! \brief Compute an approximation to the evolved set under the given semantics. 

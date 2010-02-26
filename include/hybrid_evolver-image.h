@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_evolver-image.h
  *
- *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007-10  Alberto Casagrande, Pieter Collins, Luca Geretti
  *
  ****************************************************************************/
 
@@ -59,8 +59,6 @@ class EvolutionParameters;
 class TaylorModel;
 template<class MDL> class CalculusInterface;
 
-class EvolutionProfiler;
-
 class HybridTime;
 
 class DiscreteEvent;
@@ -110,15 +108,17 @@ class ImageSetHybridEvolver
 
     //@{
     //! \name Parameters controlling the evolution.
+
     //! \brief A reference to the parameters controlling the evolution.
     EvolutionParametersType& parameters() { return *this->_parameters; }
+	//! \brief A constant reference to the parameters controlling the evolution.
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
     //@}
 
-
     //@{
     //! \name Evolution using abstract sets.
+
     //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
@@ -189,7 +189,6 @@ class ImageSetHybridEvolver
  private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
     boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
-    //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
 

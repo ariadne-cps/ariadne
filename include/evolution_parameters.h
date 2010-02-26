@@ -181,10 +181,12 @@ class DiscreteEvolutionParameters {
     //! This parameter is only used in the chain_reach() routine.
     IntType maximum_grid_height;
 
-    //! \brief Set the size of the region used for computation. 
-    //! \details
-    //! Increasing this value reduces the risk of error due to missing orbits which leave the bounding domain. 
-    //RealType maximum_bounding_domain_size;
+    //! \brief Set the allowed bounding domain for chain reachability computations.
+	//! \details
+    //! Please note that the box is ultimately outer approximated on the grid, therefore the HybridBoxes does not represent a strict bounding on the HybridGridTreeSet resulting from computation.
+    //! <br>
+	//! This parameters is only used in the chain_reach() routine.
+    HybridBoxes bounding_domain;
 
 };
 
@@ -253,8 +255,8 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
+       << ",\n  bounding_domain=" << p.bounding_domain
 
-       //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
        << "\n)\n";
     return os;
 }
@@ -282,8 +284,8 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
+       << ",\n  bounding_domain=" << p.bounding_domain
 
-       //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
        << "\n)\n";
     return os;
 }

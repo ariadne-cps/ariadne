@@ -226,7 +226,7 @@ void TestHybridEvolution::test_affine_system() const
     Float enclosure_radius(0.25);
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=enclosure_radius;
+    parameters.maximum_enclosure_cell=Vector(2,2*enclosure_radius);
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators

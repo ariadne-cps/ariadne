@@ -179,7 +179,7 @@ int main()
     /// Constants
     float EVOL_TIME = 2.0/dp[10];   /// Evolution time
     int EVOL_TRANS = 22;            /// Evolution transitions
-    float MAX_ENCL_RADIUS = 0.1;   /// Maximum enclosure radius
+    float MAX_ENCL_WIDTH = 0.1;   /// Maximum enclosure width
     float MAX_STEP_SIZE = 1e-3;     /// Maximum step size
     int VERBOSITY = 1;              /// Verbosity of the HybridEvolver
 
@@ -340,7 +340,7 @@ int main()
     evolver.verbosity = VERBOSITY;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_RADIUS);
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_WIDTH);
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
     std::cout <<  evolver.parameters() << std::endl;
 

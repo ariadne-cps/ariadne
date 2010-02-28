@@ -77,7 +77,7 @@ int main()
     float st = 1.9; // Stickyness
     float EVOL_TIME = 25.0; // Evolution time
     int   EVOL_TRANS = 4; // Evolution transitions
-    float MAX_ENCLOSURE_RADIUS = 0.02; // Maximum enclosure radius
+    float MAX_ENCLOSURE_WIDTH = 0.02; // Maximum enclosure width
     float MAX_STEP_SIZE = 0.05; // Maximum integration step size
 
     /// Build the Hybrid System
@@ -162,7 +162,7 @@ int main()
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(5,MAXIMUM_ENCLOSURE_RADIUS);
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(5,MAXIMUM_ENCLOSURE_WIDTH);
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
     std::cout <<  evolver.parameters() << std::endl;
 

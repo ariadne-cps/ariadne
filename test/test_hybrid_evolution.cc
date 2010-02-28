@@ -223,10 +223,10 @@ void TestHybridEvolution::test_affine_system() const
 
     // Set up the evolution parameters and grid
     Float step_size(0.5);
-    Float enclosure_radius(0.25);
+    Float max_enclosure_width(0.25);
 
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_cell=Vector(2,2*enclosure_radius);
+    parameters.maximum_enclosure_cell=Vector<Float>(2,max_enclosure_width);
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators

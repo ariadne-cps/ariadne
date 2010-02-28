@@ -37,7 +37,7 @@ extern DiscreteState unsafe;
 
 // Evolution parameters
 extern Grid grid;
-extern float MAX_ENCL_RADIUS; /// Maximum enclosure radius
+extern float MAX_ENCL_WIDTH; /// Maximum enclosure width
 extern float MAX_STEP_SIZE; /// Maximum step size
 extern float LOCK_TOGRID_TIME;
 extern int LOCK_TOGRID_STEPS;

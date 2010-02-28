@@ -127,7 +127,7 @@ int main()
     float TIME_LIMIT = 1.0/dp[1];
 //    float TIME_LIMIT = 0.0042;
     float TRAN_LIMIT = 1;
-    float MAX_ENCL_RADIUS = 1.0;
+    float MAX_ENCL_WIDTH = 1.0;
     float MAX_STEP_SIZE = 1e-5/dp[1];
 //    float LOCK_TOGRID_TIME = 2.0/dp[1];
     float LOCK_TOGRID_TIME = 0.25/dp[1];
@@ -221,7 +221,7 @@ int main()
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_RADIUS);
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_WIDTH);
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
     evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;
     std::cout <<  evolver.parameters() << std::endl;

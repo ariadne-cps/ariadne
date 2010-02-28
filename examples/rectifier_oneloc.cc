@@ -87,7 +87,7 @@ int main()
     /// Introduces the global parameters
     float TIME_LIMIT = 1.0/dp[1];
     float TRAN_LIMIT = 12;
-    float MAX_ENCL_RADIUS = 0.001/dp[1];
+    float MAX_ENCL_WIDTH = 0.001/dp[1];
     float MAX_STEP_SIZE = 0.001/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];
     float MAX_GRID_DEPTH = 12;
@@ -135,7 +135,7 @@ int main()
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_RADIUS);
+    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_WIDTH);
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
     std::cout <<  evolver.parameters() << std::endl;
 

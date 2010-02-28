@@ -37,7 +37,7 @@ DiscreteState unsafe(999);
 
 // Evolution parameters
 Grid grid;
-float MAX_ENCL_RADIUS = 1.0; /// Maximum enclosure radius
+float MAX_ENCL_WIDTH = 1.0; /// Maximum enclosure width
 float MAX_STEP_SIZE = 0.25; /// Maximum step size
 float LOCK_TOGRID_TIME = 10.0;
 int LOCK_TOGRID_STEPS = 1;

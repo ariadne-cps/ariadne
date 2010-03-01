@@ -211,7 +211,8 @@ class HybridImageSet
         for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {
             if(!loc_iter->second.empty()) {
                 HybridBoxes::const_iterator hbx_loc_iter=hbx.find(loc_iter->first);
-                if(hbx_loc_iter!=hbx.end() && !loc_iter->second.inside(hbx_loc_iter->second)) { return false; }
+                if(hbx_loc_iter!=hbx.end()) {
+					if(!loc_iter->second.inside(hbx_loc_iter->second)) { return false; } }
             } } return true; }
     virtual HybridBoxes bounding_box() const {
         HybridBoxes result;
@@ -554,26 +555,38 @@ class HybridGridTreeSet
 
     bool disjoint(const HybridBox& hbx) const {
         locations_const_iterator loc_iter = this->find( hbx.first );
-        return loc_iter != this->locations_end() || loc_iter->second.disjoint( hbx.second );
+        return loc_iter == this->locations_end() || loc_iter->second.disjoint( hbx.second );
     }
 
     bool overlaps(const HybridBox& hbx) const {
         locations_const_iterator loc_iter = this->find( hbx.first );
-        return loc_iter != this->locations_end() && loc_iter->second.overlaps( hbx.second );
+        if (loc_iter != this->locations_end())
+			return loc_iter->second.overlaps( hbx.second );
+		else
+			return false;
     }
 
     bool superset(const HybridBox& hbx) const {
         locations_const_iterator loc_iter=this->find(hbx.first);
-        return loc_iter!=this->locations_end() && loc_iter->second.superset( hbx.second );
+        if (loc_iter!=this->locations_end())
+			return loc_iter->second.superset( hbx.second );
+		else
+			return false;
     }
 
     bool subset(const HybridBoxes& hbx) const  {
-        for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
-            if( !loc_iter->second.empty() ) {
-                HybridBoxes::const_iterator hbx_loc_iter = hbx.find( loc_iter->first );
-                if( hbx_loc_iter != hbx.end() && ! loc_iter->second.subset( hbx_loc_iter->second ) ) {
-                    return false;
+        for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) 
+		{
+		    if( !loc_iter->second.empty() ) // If there are cells in the location
+			{
+                HybridBoxes::const_iterator hbx_loc_iter = hbx.find( loc_iter->first ); // Gets the corresponding hybrid box
+                if( hbx_loc_iter != hbx.end()) // If the location exists in the hybrid box
+				{
+					if (! loc_iter->second.subset( hbx_loc_iter->second ) ) // If the cells are not included in the box of the location
+                    	return false;
                 }
+				else // Otherwise it cannot be a subset of the hybrid box
+					return false;
             }
         }
         return true;

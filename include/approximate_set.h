@@ -189,9 +189,9 @@ inline tribool HybridOuterApproximation::inside(const HybridBoxes& hbxs) const {
     {
         if( !loc_iter->second.empty() ) { 
             HybridBoxes::const_iterator hbxs_loc_iter = hbxs.find( loc_iter->first ); 
-            if( hbxs_loc_iter != hbxs.end() && ! loc_iter->second.inside( hbxs_loc_iter->second ) ) { 
-                return false; 
-            }
+            if( hbxs_loc_iter != hbxs.end())
+				if(! loc_iter->second.inside( hbxs_loc_iter->second ) )
+                	return false; 
         } 
     }
     return true;

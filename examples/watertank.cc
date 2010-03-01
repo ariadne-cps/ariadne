@@ -50,8 +50,6 @@ int main()
     double A4[4]={a,0.0,0.0,0.0};
     double b4[2]={0.0,0.0};
 
-	ScalarFunction u(2,1.0);
-
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
@@ -129,7 +127,7 @@ int main()
 
     /// Create a HybridEvolver object
     HybridEvolver evolver;
-    evolver.verbosity = 1;
+    evolver.verbosity = 0;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.25);
@@ -159,7 +157,7 @@ int main()
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
-/*
+
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -171,8 +169,9 @@ int main()
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().grid_lengths = 0.05;
+    analyser.parameters().lock_to_grid_time = 30.0;
+	analyser.parameters().maximum_grid_depth = 0;
+    watertank_system.set_grid(Grid(Vector<Float>(2),Vector<Float>(2,0.2)));
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
@@ -186,19 +185,19 @@ int main()
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
     std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
+    HybridGridTreeSet lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
+    plot("watertank-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), lower_reach_set_ptr);
 
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
     std::cout << "Computing upper reach set... " << std::flush;
-    HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set,reach_time);
+    HybridGridTreeSet upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-
-    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
+    plot("watertank-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), upper_reach_set_ptr);
+/*    
+	std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
     Box initial_box2(2, 0.0,0.001, 0.0,0.001);
     HybridImageSet initial_set2;

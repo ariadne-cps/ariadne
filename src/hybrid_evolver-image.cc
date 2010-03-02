@@ -211,15 +211,15 @@ _evolution(EnclosureListType& final_sets,
            bool reach) const
 {
     typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
+    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n"); 
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
+	uint current_working_sets_total; // The working sets total related to this evolution run
 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
-
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     std::vector< HybridTimedSetType > working_sets;
 
@@ -238,11 +238,15 @@ _evolution(EnclosureListType& final_sets,
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
 
-		// Checks for match between the enclosure cell size and the set size
+		// Check for match between the enclosure cell size and the set size
 		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
     }
 
-    while(!working_sets.empty()) {
+	// Create the largest_enclosure_cell statistics, if not currently dimensioned
+	if (this->_statistics->largest_enclosure_cell.size() == 0) this->_statistics->largest_enclosure_cell = Vector<Float>(working_sets.back().third.size());
+
+	// While there exists a working set, process it and increment the total
+	for (current_working_sets_total = 0; !working_sets.empty(); current_working_sets_total++) {
         HybridTimedSetType current_set=working_sets.back();
         working_sets.pop_back();
         DiscreteState initial_location=current_set.first;
@@ -251,11 +255,14 @@ _evolution(EnclosureListType& final_sets,
         TimeModelType initial_time_model=current_set.fourth;
 		Vector<Interval> initial_set_model_range=initial_set_model.range();
 
-		
-		// Checks whether the range can be included into the maximum_enclosure_cell
+		// Check whether the range can be included into the maximum_enclosure_cell
 		bool has_max_enclosure_been_reached = false;		
-		for (uint i=0;i<initial_set_model_range.size();++i) {
-			if (initial_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i]) {
+		for (uint i=0;i<initial_set_model_range.size();++i) 
+		{
+			Float rangewidth = initial_set_model_range[i].width(); // Store the width
+			this->_statistics->largest_enclosure_cell[i] = max(this->_statistics->largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
+			// If larger than the maximum allowed
+			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
 				this->_statistics->has_max_enclosure_been_reached = true; // Global information
 				has_max_enclosure_been_reached = true; // Local information
 				break; 
@@ -306,9 +313,10 @@ _evolution(EnclosureListType& final_sets,
                         <<" e="<<initial_events
                         <<"                      ");
         }
-
     }
 
+	// Update the largest working sets number
+	this->_statistics->largest_working_sets_total = max(this->_statistics->largest_working_sets_total, current_working_sets_total);
 }
 
 

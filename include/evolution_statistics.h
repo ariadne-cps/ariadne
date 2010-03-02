@@ -37,7 +37,7 @@
 namespace Ariadne {
 
 //! \brief Statistics related to the execution of the evolution methods.
-//! \details The statistics are not reset between the execution of evolution methods. This choice 
+//! \details The statistics are not reset between the executions of evolution methods. This choice 
 //! allows to gather statistics between subsequent executions stemming from the analysis methods.
 //! <br>
 //! The statistics are reset at the beginning of any public HybridReachabilityAnalyser analysis method.
@@ -51,22 +51,24 @@ class ContinuousEvolutionStatistics {
     //! \brief Default constructor gives "empty" values.
     ContinuousEvolutionStatistics();
 
-	//! \brief The largest evolution time among the working sets
+	//! \brief The largest evolution time among the working sets.
+	//! \details The values are summed between subsequent evolution runs, thus yielding an upper bound on the total evolution time.
 	RealType largest_evol_time;
 
-	//! \brief The largest evolution steps among the working sets
+	//! \brief The largest evolution steps among the working sets.
+	//! \details The values are summed between subsequent evolution runs, thus yielding an upper bound on the total evolution steps.
 	UnsignedIntType largest_evol_steps;
 
-	//! \brief The largest enclosure cell among the working sets
+	//! \brief The largest enclosure cell among the working sets.
 	Vector<RealType> largest_enclosure_cell;
 
-	//! \brief The largest total number of working sets
+	//! \brief The largest total number of working sets.
 	UnsignedIntType largest_working_sets_total;
 
-	//! \brief Whether the maximum enclosure cell has been reached by the actual enclosure bounding box
+	//! \brief Whether the maximum enclosure cell has been reached by the actual enclosure bounding box.
 	bool has_max_enclosure_been_reached;
 
-	//! \brief Resets the statistics to their initial values
+	//! \brief Resets the statistics to their initial values.
 	void reset() {
 		largest_evol_time = 0.0;
 		largest_evol_steps = 0;
@@ -92,38 +94,48 @@ class DiscreteEvolutionStatistics {
 	//! \brief The total number of grid locks.
 	UnsignedIntType total_locks;
 
-	//! \brief The total number of recurrent locks (for chain_reach only).
-	UnsignedIntType total_recurrent_locks;
+	//! \brief The largest cell size resulting from the discretization of the evolve set after each grid lock.
+    //! \details The initial set discretization is not considered.
+    //! <br>
+    //! The lower_reach analysis returns zero since it is not possible to extract the final cell set.
+	UnsignedIntType largest_intermediate_size;
 
 	//! \brief Whether a reach region restriction occurred (for chain_reach only).
 	bool has_restriction_occurred;	
 
-	//! \brief Resets the statistics to their initial values
+	//! \brief Resets the statistics to their initial values,
 	void reset() {
 		total_locks = 0;
-		total_recurrent_locks = 0;
+		largest_intermediate_size = 0;
 		has_restriction_occurred = false;
 	}
 };
 
 //! \brief Statistics for controlling the accuracy of evolution methods and reachability analysis.
 class EvolutionStatistics
-    : public ContinuousEvolutionStatistics, public DiscreteEvolutionStatistics 
-{ };
+    : public ContinuousEvolutionStatistics, public DiscreteEvolutionStatistics { 
+  public:
+	
+	//! \brief Constructs an "empty" statistics object.
+	EvolutionStatistics(): ContinuousEvolutionStatistics(), DiscreteEvolutionStatistics() { }
 
-//! \brief Constructs the default continuous evolution statistics
+	//! \brief Constructs a statistics object based on existing continuous/discrete evolution statistics.
+	EvolutionStatistics(ContinuousEvolutionStatistics ces, DiscreteEvolutionStatistics des): ContinuousEvolutionStatistics(ces), DiscreteEvolutionStatistics(des) { }
+};
+
+//! \brief Constructs the default continuous evolution statistics.
 inline
 ContinuousEvolutionStatistics::ContinuousEvolutionStatistics() { 
 	reset();
 }
 
-//! \brief Constructs the default discrete evolution statistics
+//! \brief Constructs the default discrete evolution statistics.
 inline
 DiscreteEvolutionStatistics::DiscreteEvolutionStatistics() { 
 	reset();
 }
 
-//! \brief Outputs the continuous evolution statistics
+//! \brief Outputs the continuous evolution statistics.
 inline
 std::ostream& 
 operator<<(std::ostream& os, const ContinuousEvolutionStatistics& p) 
@@ -138,20 +150,20 @@ operator<<(std::ostream& os, const ContinuousEvolutionStatistics& p)
     return os;
 }
 
-//! \brief Outputs the discrete evolution statistics
+//! \brief Outputs the discrete evolution statistics.
 inline
 std::ostream& 
 operator<<(std::ostream& os, const DiscreteEvolutionStatistics& p) 
 {
     os << "DiscreteEvolutionStatistics"
        << "(\n  total_locks=" << p.total_locks
-       << ",\n  total_recurrent_locks=" << p.total_recurrent_locks
+       << ",\n  largest_intermediate_size=" << p.largest_intermediate_size
        << ",\n  has_restriction_occurred=" << p.has_restriction_occurred
        << "\n)\n";
     return os;
 }
 
-//! \brief Outputs the evolution statistics
+//! \brief Outputs the evolution statistics.
 inline
 std::ostream& 
 operator<<(std::ostream& os, const EvolutionStatistics& p) 
@@ -163,7 +175,7 @@ operator<<(std::ostream& os, const EvolutionStatistics& p)
        << ",\n  largest_working_sets_total=" << p.largest_working_sets_total
        << ",\n  has_max_enclosure_been_reached=" << p.has_max_enclosure_been_reached
        << ",\n  total_locks=" << p.total_locks
-       << ",\n  total_recurrent_locks=" << p.total_recurrent_locks
+       << ",\n  largest_intermediate_size=" << p.largest_intermediate_size
        << ",\n  has_restriction_occurred=" << p.has_restriction_occurred
        << "\n)\n";
     return os;

@@ -201,19 +201,27 @@ class HybridImageSet
         return this->find(q)->second; }
     virtual tribool overlaps(const HybridBox& hbx) const {
         locations_const_iterator loc_iter=this->find(hbx.first);
-        return loc_iter!=this->locations_end()
-            && loc_iter->second.overlaps(hbx.second); }
+        if (loc_iter!=this->locations_end()) return loc_iter->second.overlaps(hbx.second);
+		else return false; }
     virtual tribool disjoint(const HybridBox& hbx) const {
         locations_const_iterator loc_iter=this->find(hbx.first);
-        return loc_iter!=this->locations_end()
-            || loc_iter->second.disjoint(hbx.second); }
+        if (loc_iter!=this->locations_end()) return loc_iter->second.disjoint(hbx.second);
+		else return true; } 
     virtual tribool inside(const HybridBoxes& hbx) const  {
+		tribool result = true; // Initially assumed as true
         for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {
             if(!loc_iter->second.empty()) {
                 HybridBoxes::const_iterator hbx_loc_iter=hbx.find(loc_iter->first);
-                if(hbx_loc_iter!=hbx.end()) {
-					if(!loc_iter->second.inside(hbx_loc_iter->second)) { return false; } }
-            } } return true; }
+                if(hbx_loc_iter!=hbx.end()) // If the locations match
+				{
+					tribool temp_result = loc_iter->second.inside(hbx_loc_iter->second); 
+					if (!possibly(temp_result)) return false; // If the ImageSet is not inside the box, returns false
+					else if (indeterminate(temp_result)) result = indeterminate; // If it is not decided, the result is reduced to indeterminate
+				}
+				else return false; // Otherwise the result is certainly false
+            } 
+		} 
+		return result; }
     virtual HybridBoxes bounding_box() const {
         HybridBoxes result;
         for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {
@@ -553,12 +561,15 @@ class HybridGridTreeSet
     HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
     HybridSpace space() const { return HybridSpace(*this); }
 
-    bool disjoint(const HybridBox& hbx) const {
+    tribool disjoint(const HybridBox& hbx) const {
         locations_const_iterator loc_iter = this->find( hbx.first );
-        return loc_iter == this->locations_end() || loc_iter->second.disjoint( hbx.second );
+        if (loc_iter != this->locations_end())
+			return loc_iter->second.disjoint( hbx.second );
+		else
+			return true;
     }
 
-    bool overlaps(const HybridBox& hbx) const {
+    tribool overlaps(const HybridBox& hbx) const {
         locations_const_iterator loc_iter = this->find( hbx.first );
         if (loc_iter != this->locations_end())
 			return loc_iter->second.overlaps( hbx.second );
@@ -566,15 +577,16 @@ class HybridGridTreeSet
 			return false;
     }
 
-    bool superset(const HybridBox& hbx) const {
+    tribool superset(const HybridBox& hbx) const {
         locations_const_iterator loc_iter=this->find(hbx.first);
-        if (loc_iter!=this->locations_end())
+        if (loc_iter != this->locations_end())
 			return loc_iter->second.superset( hbx.second );
 		else
 			return false;
     }
 
-    bool subset(const HybridBoxes& hbx) const  {
+    tribool subset(const HybridBoxes& hbx) const  {
+		bool result = true; // Initially assumed as true
         for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) 
 		{
 		    if( !loc_iter->second.empty() ) // If there are cells in the location
@@ -582,14 +594,15 @@ class HybridGridTreeSet
                 HybridBoxes::const_iterator hbx_loc_iter = hbx.find( loc_iter->first ); // Gets the corresponding hybrid box
                 if( hbx_loc_iter != hbx.end()) // If the location exists in the hybrid box
 				{
-					if (! loc_iter->second.subset( hbx_loc_iter->second ) ) // If the cells are not included in the box of the location
-                    	return false;
+					const tribool temp_result = loc_iter->second.subset( hbx_loc_iter->second ); // Temporarily store the result
+					if (!possibly(temp_result)) return false; // If the cells are not included in the box of the location, directly return false
+					else if (indeterminate(temp_result)) result = indeterminate; // Otherwise if indeterminate, set the result as indeterminate
                 }
 				else // Otherwise it cannot be a subset of the hybrid box
 					return false;
             }
         }
-        return true;
+        return result;
     }
 
     HybridBoxes bounding_box() const {

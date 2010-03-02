@@ -228,8 +228,12 @@ evolution(const SystemType& system,
     ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\nOK\n");
     HybridGridTreeSet reach=this->_discretise(continuous_orbit.reach(),system.grid(),accuracy);
     HybridGridTreeSet final=this->_discretise(continuous_orbit.final(),system.grid(),accuracy);
+	reach.adjoin(final); // Always adjoin the reached region with the final region (preferable for consistency with _evolver.reach() )
     ARIADNE_LOG(5,"discretised reach size="<<reach.size()<<"\n");
     ARIADNE_LOG(5,"discretised final size="<<final.size()<<"\n");
+
+	ARIADNE_ASSERT_MSG(possibly(final.subset(reach.bounding_box())), "The final region is not included into the reached region!"); // TO BE REMOVED as soon as the "THE FINAL always included in REACH" property is verified
+
     return make_pair(reach,final);
 }
 

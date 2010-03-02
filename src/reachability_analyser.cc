@@ -543,8 +543,6 @@ upper_reach_evolve(const SystemType& system,
 		this->_statistics->total_locks++; // Increases the total locks counter
     }
 
-    reach.adjoin(evolve); // This last step is necessary in particular cases where the final set is not included into the reach set (TO BE VERIFIED IF IT IS NECESSARY)
-
     reach.recombine();
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
     evolve.recombine();

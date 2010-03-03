@@ -215,6 +215,9 @@ _evolution(EnclosureListType& final_sets,
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n"); 
 
+	// Gets the proper statistics in respect to the semantics
+	CommonContinuousEvolutionStatistics& statistics = (semantics == UPPER_SEMANTICS) ? this->_statistics->upper() : this->_statistics->lower();
+
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 	uint current_working_sets_total; // The working sets total related to this evolution run
@@ -243,7 +246,7 @@ _evolution(EnclosureListType& final_sets,
     }
 
 	// Create the largest_enclosure_cell statistics, if not currently dimensioned
-	if (this->_statistics->largest_enclosure_cell.size() == 0) this->_statistics->largest_enclosure_cell = Vector<Float>(working_sets.back().third.size());
+	if (statistics.largest_enclosure_cell.size() == 0) statistics.largest_enclosure_cell = Vector<Float>(working_sets.back().third.size());
 
 	// While there exists a working set, process it and increment the total
 	for (current_working_sets_total = 0; !working_sets.empty(); current_working_sets_total++) {
@@ -260,10 +263,10 @@ _evolution(EnclosureListType& final_sets,
 		for (uint i=0;i<initial_set_model_range.size();++i) 
 		{
 			Float rangewidth = initial_set_model_range[i].width(); // Store the width
-			this->_statistics->largest_enclosure_cell[i] = max(this->_statistics->largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
+			statistics.largest_enclosure_cell[i] = max(statistics.largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
 			// If larger than the maximum allowed
 			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
-				this->_statistics->has_max_enclosure_been_reached = true; // Global information
+				statistics.has_max_enclosure_been_reached = true; // Global information
 				has_max_enclosure_been_reached = true; // Local information
 				break; 
 			}
@@ -316,7 +319,7 @@ _evolution(EnclosureListType& final_sets,
     }
 
 	// Update the largest working sets number
-	this->_statistics->largest_working_sets_total = max(this->_statistics->largest_working_sets_total, current_working_sets_total);
+	statistics.largest_working_sets_total = max(statistics.largest_working_sets_total, current_working_sets_total);
 }
 
 

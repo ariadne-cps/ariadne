@@ -150,8 +150,7 @@ lower_evolve(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_evolve(...)\n");
 
-	this->_statistics->reset(); // Resets the discrete statistics
-	this->_discretiser->reset_statistics(); // Resets the continuous statistics
+	this->_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
@@ -206,11 +205,8 @@ lower_evolve(const SystemType& system,
             GTS cell_final=this->_discretiser->evolve(system,enclosure,time,grid_depth,LOWER_SEMANTICS);
             final.adjoin(cell_final);
         }
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,final.size()); // Updates the largest intermediate size
     }
     ARIADNE_LOG(3,"\n");
-
-	this->_statistics->total_locks = 1; // Sets the total locks
 
     return final;
 }
@@ -224,8 +220,8 @@ lower_reach(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach(...)\n");
 
-	this->_statistics->reset(); // Resets the discrete statistics
-	this->_discretiser->reset_statistics(); // Resets the continuous statistics
+	this->_statistics->lower().reset(); // Resets the discrete statistics
+	this->_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
@@ -283,7 +279,7 @@ lower_reach(const SystemType& system,
     }
     ARIADNE_LOG(3,"\n");
 
-	this->_statistics->total_locks = 1; // Sets the total locks    
+	this->_statistics->lower().reach = reach;
 
 	return reach;
 }
@@ -298,8 +294,8 @@ lower_reach_evolve(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach_evolve(...)\n");
 
-	this->_statistics->reset(); // Resets the discrete statistics
-	this->_discretiser->reset_statistics(); // Resets the continuous statistics
+	this->_statistics->lower().reset(); // Resets the discrete statistics
+	this->_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
@@ -360,11 +356,10 @@ lower_reach_evolve(const SystemType& system,
             reach.adjoin(cell_reach);
             evolve.adjoin(cell_final);
         }
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
     }
     ARIADNE_LOG(3,"\n");
 
-	this->_statistics->total_locks = 1; // Sets the total locks
+	this->_statistics->lower().reach = reach;
 
     return make_pair(reach,evolve);
 }
@@ -378,8 +373,8 @@ upper_evolve(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
  
-	this->_statistics->reset(); // Resets the discrete statistics
-	this->_discretiser->reset_statistics(); // Resets the continuous statistics
+	this->_statistics->upper().reset(); // Resets the discrete statistics
+	this->_discretiser->reset_upper_statistics(); // Resets the continuous statistics
 
     Gr grid=system.grid();
     GTS evolve(grid), initial(grid);
@@ -427,17 +422,17 @@ upper_evolve(const SystemType& system,
     for(uint i=1; i<time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
+		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
     }
 
-	this->_statistics->total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
+	this->_statistics->upper().total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
 
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
         evolve=this->_upper_evolve(system,evolve,hybrid_remainder_time,grid_depth);
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
-		this->_statistics->total_locks++; // Increases the total locks counter
+		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
+		this->_statistics->upper().total_locks++; // Increases the total locks counter
     }
     evolve.recombine();
     ARIADNE_LOG(4,"final_evolve.size()="<<evolve.size()<<"\n");
@@ -471,8 +466,8 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
 
-	this->_statistics->reset(); // Resets the discrete statistics
-	this->_discretiser->reset_statistics(); // Resets the continuous statistics
+	this->_statistics->upper().reset(); // Resets the discrete statistics
+	this->_discretiser->reset_upper_statistics(); // Resets the continuous statistics
 
     Gr grid=system.grid();
     GTS found(grid),evolve(grid),reach(grid),initial(grid);
@@ -517,7 +512,7 @@ upper_reach_evolve(const SystemType& system,
         ARIADNE_LOG(4,"initial_evolve.size()="<<initial.size()<<"\n");
         make_lpair(found,initial)=this->_upper_reach_evolve(system,initial,hybrid_lock_to_grid_time,grid_depth);
         evolve.adjoin(initial);
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,initial.size()); // Updates the largest intermediate size
+		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,initial.size()); // Updates the largest intermediate size
         reach.adjoin(found);
     }
 
@@ -528,22 +523,23 @@ upper_reach_evolve(const SystemType& system,
         ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
         reach.adjoin(found);
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
+		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
         ARIADNE_LOG(3,"  found "<<found.size()<<" cells.\n");
     }
 
-	this->_statistics->total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
+	this->_statistics->upper().total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
 
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
         ARIADNE_LOG(3,"computing evolution for the remaining time...\n");
         make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
         reach.adjoin(found);
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
-		this->_statistics->total_locks++; // Increases the total locks counter
+		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
+		this->_statistics->upper().total_locks++; // Increases the total locks counter
     }
 
     reach.recombine();
+	this->_statistics->upper().reach = reach;
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
     evolve.recombine();
     ARIADNE_LOG(4,"evolve="<<evolve<<"\n");
@@ -560,8 +556,8 @@ chain_reach(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::chain_reach(system,initial_set)\n");
 
-	this->_statistics->reset(); // Resets the discrete statistics
-	this->_discretiser->reset_statistics(); // Resets the continuous statistics
+	this->_statistics->upper().reset(); // Resets the discrete statistics
+	this->_discretiser->reset_upper_statistics(); // Resets the continuous statistics
 
     HybridBoxes bounding_domain = this->_parameters->bounding_domain;
     Float transient_time = this->_parameters->transient_time;
@@ -634,11 +630,11 @@ chain_reach(const SystemType& system,
     }
 	 
     // If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-	if (!this->_statistics->has_restriction_occurred)
-		if (!evolve.subset(bounding_box)) this->_statistics->has_restriction_occurred = true;
+	if (!this->_statistics->upper().has_restriction_occurred)
+		if (!evolve.subset(bounding_box)) this->_statistics->upper().has_restriction_occurred = true;
 
     evolve.restrict(bounding);
-	this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
+	this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 
     ARIADNE_LOG(3,"  found "<<reach.size()<<" cells, of which "<<evolve.size()<<" are new.\n");   
     
@@ -646,29 +642,31 @@ chain_reach(const SystemType& system,
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
 
 	// While the final set has new cells in respect to the previous reach set, process them and increase the number of locks (starting from 1 due to the initial transient phase)
-    for (this->_statistics->total_locks = 1; !evolve.empty(); this->_statistics->total_locks++) {
+    for (this->_statistics->upper().total_locks = 1; !evolve.empty(); this->_statistics->upper().total_locks++) {
 
         make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
         ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
 
 		// If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-		if (!this->_statistics->has_restriction_occurred)
-			if (!evolve.subset(bounding_box)) this->_statistics->has_restriction_occurred = true;
+		if (!this->_statistics->upper().has_restriction_occurred)
+			if (!evolve.subset(bounding_box)) this->_statistics->upper().has_restriction_occurred = true;
 
         evolve.remove(reach);
         evolve.restrict(bounding);
-		this->_statistics->largest_intermediate_size = max(this->_statistics->largest_intermediate_size,evolve.size()); // Update the largest intermediate size
+		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Update the largest intermediate size
         reach.adjoin(found);
         ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
     }
     reach.recombine();
 
     // If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-	if (!this->_statistics->has_restriction_occurred)
-		if (!evolve.subset(bounding_box)) this->_statistics->has_restriction_occurred = true;
+	if (!this->_statistics->upper().has_restriction_occurred)
+		if (!evolve.subset(bounding_box)) this->_statistics->upper().has_restriction_occurred = true;
 
     reach.restrict(bounding);
+	this->_statistics->upper().reach = reach;
+
     return reach;
 }
 

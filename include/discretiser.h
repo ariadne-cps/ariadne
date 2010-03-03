@@ -179,8 +179,10 @@ class HybridDiscretiser
 	//! \brief Gets the evolution statistics from the evolver
 	const ContinuousEvolutionStatistics& statistics() const { return this->_evolver->statistics(); }
 
-	//! \brief Resets the evolution statistics of the evolver
-	void reset_statistics() { this->_evolver->statistics().reset(); }
+	//! \brief Resets the lower evolution statistics of the evolver
+	void reset_lower_statistics() { this->_evolver->statistics().lower().reset(); }
+	//! \brief Resets the upper evolution statistics of the evolver
+	void reset_upper_statistics() { this->_evolver->statistics().upper().reset(); }
 		
     //@{
     //! \name Evaluation on basic sets.

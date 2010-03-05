@@ -127,7 +127,7 @@ int main()
 
     /// Create a HybridEvolver object
     HybridEvolver evolver;
-    evolver.verbosity = 0;
+    evolver.verbosity = 1;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.25);
@@ -141,12 +141,12 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.00, 0.0,0.00);
+    Box initial_box(2, 6.0,6.00, 1.0,1.00);
     HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
   
     HybridTime evolution_time(80.0,5);
-  
+/*  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -166,7 +166,7 @@ int main()
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
 
-
+*/
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 30.0;
@@ -192,10 +192,11 @@ int main()
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
-    std::cout << "Computing upper reach set... " << std::flush;
+/*    std::cout << "Computing upper reach set... " << std::flush;
     HybridGridTreeSet upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
     plot("watertank-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), upper_reach_set_ptr);
+*/
 /*    
 	std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 

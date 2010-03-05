@@ -25,7 +25,7 @@
 
 void build_automaton() {
     // Define evolution parameters
-    MAX_ENCL_RADIUS = 0.2; /// Maximum enclosure radius
+    MAX_ENCL_WIDTH = 0.2; /// Maximum enclosure radius
     MAX_STEP_SIZE = 0.25; /// Maximum step size
     LOCK_TOGRID_TIME = 100.0;
     LOCK_TOGRID_STEPS = 100;

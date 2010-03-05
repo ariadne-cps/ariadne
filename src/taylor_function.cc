@@ -1135,7 +1135,7 @@ operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 {
     ARIADNE_ASSERT(!intersection(f1.domain(),f2.domain()).empty());
     if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<TaylorModel>(f1.models()+f2.models()));
+        return VectorTaylorFunction(f1.domain(),Vector<TaylorModel>(f1.models()-f2.models()));
     } else {
         Box new_domain=intersection(f1.domain(),f2.domain());
         return operator-(restrict(f1,new_domain),restrict(f2,new_domain));

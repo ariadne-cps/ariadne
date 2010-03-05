@@ -87,6 +87,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     int depth=8;
 
     EvolutionParameters parameters;
+	parameters.maximum_enclosure_cell=Vector<Float>(2,0.5);
     parameters.maximum_step_size=maximum_step_size;
     Grid grid(2);
 
@@ -184,6 +185,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     int depth=8;
 
     EvolutionParameters parameters;
+	parameters.maximum_enclosure_cell=Vector<Float>(2,0.5);
     parameters.maximum_step_size=maximum_step_size;
     Grid grid(2);
 
@@ -279,6 +281,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     DiscreteEvent event(1);
 
     EvolutionParameters parameters;
+	parameters.maximum_enclosure_cell=Vector<Float>(2,0.5);
     parameters.maximum_step_size=maximum_step_size;
     Grid grid(2);
 

@@ -123,6 +123,7 @@ void TestHybridEvolution::test_constant_derivative_system() const
 
     HybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
+	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ARIADNE_TEST_PRINT(automaton);
     ARIADNE_TEST_PRINT(initial_set);
@@ -190,6 +191,7 @@ void TestHybridEvolution::test_bouncing_ball() const
     HybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=0.125;
+	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ARIADNE_TEST_PRINT(automaton);
     ARIADNE_TEST_PRINT(initial_set);
@@ -223,7 +225,7 @@ void TestHybridEvolution::test_affine_system() const
 
     // Set up the evolution parameters and grid
     Float step_size(0.5);
-    Float max_enclosure_width(0.25);
+    Float max_enclosure_width(0.5);
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_cell=Vector<Float>(2,max_enclosure_width);
@@ -232,7 +234,7 @@ void TestHybridEvolution::test_affine_system() const
     // Set up the evaluators
     HybridEvolver evolver(parameters);
     evolver.verbosity = evolver_verbosity;
-
+	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     // Make a hybrid automaton for the Van der Pol equation
     HybridAutomaton automaton=system();
@@ -348,6 +350,8 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
+	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
     ScalarFunction ct=-guard; // Crossing time
@@ -372,6 +376,8 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
+	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
     ScalarFunction ct=-guard; // Crossing time
@@ -394,6 +400,8 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
+
+	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ScalarFunction ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
     VectorFunction f=join(x+ct,y+2-ct);

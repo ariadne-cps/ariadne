@@ -127,7 +127,7 @@ void TestContinuousEvolution::test() const
     // Set up the evolution parameters and grid
     Float time(5.0);
     Float step_size(0.125);
-    Vector<Float> enclosure_cell(2,0.25,0.25);
+    Vector<Float> enclosure_cell(2,0.5);
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
@@ -199,7 +199,7 @@ void TestContinuousEvolution::failure_test() const
     // Set up the evolution parameters and grid
     Float time(0.5);
     Float step_size(0.01);
-    Vector<Float> enclosure_cell(2,0.25,0.25);
+    Vector<Float> enclosure_cell(2,0.5);
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
@@ -248,12 +248,16 @@ void TestContinuousEvolution::failure_test() const
     VectorUserFunction<FailTwo> failtwo(p);
     VectorField failtwo_vf(failtwo);
 
+	Vector<Float> enclosure_cell2(3,0.5);
+	evolver.parameters().maximum_enclosure_cell=enclosure_cell2;
     Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);
     initial_set = EnclosureType(initial_box2);
 
     time = 1.5;
 
     // Compute the reachable sets
+	cout << parameters.maximum_enclosure_cell.size() << std::flush;
+
     orbit = evolver.orbit(failtwo_vf,initial_set,time,semantics);
 
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;

@@ -183,7 +183,9 @@ class HybridDiscretiser
 	void reset_lower_statistics() { this->_evolver->statistics().lower().reset(); }
 	//! \brief Resets the upper evolution statistics of the evolver
 	void reset_upper_statistics() { this->_evolver->statistics().upper().reset(); }
-		
+	//! \brief Resets the upper evolution statistics of the evolver related to the largest evolution time/steps
+	void reset_upper_largest_evol_statistics() { this->_evolver->statistics().upper().reset_largest_evol(); }
+
     //@{
     //! \name Evaluation on basic sets.
   

@@ -221,10 +221,12 @@ _evolution(EnclosureListType& final_sets,
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 	uint current_working_sets_total; // The working sets total related to this evolution run
+	Float current_largest_evol_time = 0.0; // The current largest evolution time (to be added to the largest_evol_time statistics)
+	uint current_largest_evol_steps = 0; // The current largest evolution steps (to be added to the largest_evol_steps statistics)
 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
 
-    std::vector< HybridTimedSetType > working_sets;
+    std::list< HybridTimedSetType > working_sets;
 
     {
         // Set up initial timed set models
@@ -250,8 +252,10 @@ _evolution(EnclosureListType& final_sets,
 
 	// While there exists a working set, process it and increment the total
 	for (current_working_sets_total = 0; !working_sets.empty(); current_working_sets_total++) {
-        HybridTimedSetType current_set=working_sets.back();
-        working_sets.pop_back();
+        HybridTimedSetType current_set=working_sets.front();
+		//if (semantics == LOWER_SEMANTICS)
+		//	cout << "." << working_sets.size() << std::flush;
+        working_sets.pop_front();
         DiscreteState initial_location=current_set.first;
         EventListType initial_events=current_set.second;
         SetModelType initial_set_model=current_set.third;
@@ -316,10 +320,18 @@ _evolution(EnclosureListType& final_sets,
                         <<" e="<<initial_events
                         <<"                      ");
         }
+
+		// Updates the current largest evolution time and steps
+		current_largest_evol_time = max(current_largest_evol_time,initial_time_model.value());
+		current_largest_evol_steps = max(current_largest_evol_steps,initial_events.size());
     }
 
 	// Update the largest working sets number
 	statistics.largest_working_sets_total = max(statistics.largest_working_sets_total, current_working_sets_total);
+	// Update the largest evolution time
+	statistics.largest_evol_time = max(statistics.largest_evol_time, current_largest_evol_time);
+	// Update the largest evolution steps
+	statistics.largest_evol_steps = max(statistics.largest_evol_steps, current_largest_evol_steps);
 }
 
 
@@ -327,7 +339,7 @@ _evolution(EnclosureListType& final_sets,
 // Old evolution step using detection data
 void
 ImageSetHybridEvolver::
-_evolution_step(std::vector< HybridTimedSetType >& working_sets,
+_evolution_step(std::list< HybridTimedSetType >& working_sets,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,

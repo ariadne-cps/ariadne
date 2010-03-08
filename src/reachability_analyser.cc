@@ -208,6 +208,10 @@ lower_evolve(const SystemType& system,
     }
     ARIADNE_LOG(3,"\n");
 
+	// Copies the largest evolution time and steps to the statistics
+	this->_statistics->lower().largest_evol_time = this->_discretiser->statistics().lower().largest_evol_time;
+	this->_statistics->lower().largest_evol_steps = this->_discretiser->statistics().lower().largest_evol_steps;
+
     return final;
 }
 
@@ -279,7 +283,11 @@ lower_reach(const SystemType& system,
     }
     ARIADNE_LOG(3,"\n");
 
+	// Copies the reached region
 	this->_statistics->lower().reach = reach;
+	// Copies the largest evolution time and steps to the statistics
+	this->_statistics->lower().largest_evol_time = this->_discretiser->statistics().lower().largest_evol_time;
+	this->_statistics->lower().largest_evol_steps = this->_discretiser->statistics().lower().largest_evol_steps;
 
 	return reach;
 }
@@ -359,7 +367,11 @@ lower_reach_evolve(const SystemType& system,
     }
     ARIADNE_LOG(3,"\n");
 
+	// Copies the reached region
 	this->_statistics->lower().reach = reach;
+	// Copies the largest evolution time and steps to the statistics
+	this->_statistics->lower().largest_evol_time = this->_discretiser->statistics().lower().largest_evol_time;
+	this->_statistics->lower().largest_evol_steps = this->_discretiser->statistics().lower().largest_evol_steps;
 
     return make_pair(reach,evolve);
 }
@@ -418,11 +430,20 @@ upper_evolve(const SystemType& system,
         initial=this->_upper_evolve(system,initial,hybrid_lock_to_grid_time,grid_depth);
         evolve.adjoin(initial);
     }
+
+	// Adds the largest evolution time and steps to the statistics, then resets such statistics
+	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;
+	this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps;
+	this->_discretiser->reset_upper_largest_evol_statistics();
+
     // time steps evolution loop
     for(uint i=1; i<time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
+		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
+		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
+		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
     }
 
 	this->_statistics->upper().total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
@@ -433,6 +454,9 @@ upper_evolve(const SystemType& system,
         evolve=this->_upper_evolve(system,evolve,hybrid_remainder_time,grid_depth);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 		this->_statistics->upper().total_locks++; // Increases the total locks counter
+		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
+		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
+		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
     }
     evolve.recombine();
     ARIADNE_LOG(4,"final_evolve.size()="<<evolve.size()<<"\n");
@@ -466,8 +490,8 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
 
-	this->_statistics->upper().reset(); // Resets the discrete statistics
-	this->_discretiser->reset_upper_statistics(); // Resets the continuous statistics
+	this->_statistics->upper().reset(); // Reset the discrete statistics
+	this->_discretiser->reset_upper_statistics(); // Reset the continuous statistics
 
     Gr grid=system.grid();
     GTS found(grid),evolve(grid),reach(grid),initial(grid);
@@ -516,6 +540,11 @@ upper_reach_evolve(const SystemType& system,
         reach.adjoin(found);
     }
 
+	// Adds the largest evolution time and steps to the statistics, then resets such statistics
+	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;
+	this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps;
+	this->_discretiser->reset_upper_largest_evol_statistics();
+
     // time steps evolution loop        
     for(uint i=1; i<time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
@@ -524,6 +553,9 @@ upper_reach_evolve(const SystemType& system,
         ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
         reach.adjoin(found);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
+		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
+		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
+		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
         ARIADNE_LOG(3,"  found "<<found.size()<<" cells.\n");
     }
 
@@ -536,6 +568,9 @@ upper_reach_evolve(const SystemType& system,
         reach.adjoin(found);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 		this->_statistics->upper().total_locks++; // Increases the total locks counter
+		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
+		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
+		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
     }
 
     reach.recombine();
@@ -628,6 +663,11 @@ chain_reach(const SystemType& system,
         reach.adjoin(found);
         evolve.adjoin(initial);
     }
+
+	// Adds the largest evolution time and steps to the statistics, then resets such statistics
+	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;
+	this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps;
+	this->_discretiser->reset_upper_largest_evol_statistics();
 	 
     // If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
 	if (!this->_statistics->upper().has_restriction_occurred)
@@ -654,8 +694,13 @@ chain_reach(const SystemType& system,
 
         evolve.remove(reach);
         evolve.restrict(bounding);
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Update the largest intermediate size
         reach.adjoin(found);
+
+		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Update the largest intermediate size
+		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
+		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
+		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
+
         ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
     }
     reach.recombine();

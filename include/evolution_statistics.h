@@ -54,11 +54,9 @@ class CommonContinuousEvolutionStatistics {
 	CommonContinuousEvolutionStatistics(const CommonContinuousEvolutionStatistics& statistics);
 
 	//! \brief The largest evolution time among the working sets.
-	//! \details The values are summed between subsequent evolution runs, thus yielding an upper bound on the total evolution time.
 	RealType largest_evol_time;
 
 	//! \brief The largest evolution steps among the working sets.
-	//! \details The values are summed between subsequent evolution runs, thus yielding an upper bound on the total evolution steps.
 	UnsignedIntType largest_evol_steps;
 
 	//! \brief The largest enclosure cell among the working sets.
@@ -74,9 +72,18 @@ class CommonContinuousEvolutionStatistics {
 	void reset() {
 		largest_evol_time = 0.0;
 		largest_evol_steps = 0;
-		largest_enclosure_cell = Vector<Float>(0);
+		largest_enclosure_cell = Vector<RealType>(0);
 		largest_working_sets_total = 0;
 		has_max_enclosure_been_reached = false;
+	}
+
+	//! \brief Resets only the statistics related to the largest evolution time and steps.
+	//! \details This method is needed for the evaluation of the largest_evol_time or largest_evol_steps in the discrete case for the analysis methods: 
+    //! these statistics are valid only between two subsequent grid locks and therefore must be properly reset, while other statistics such as the has_max_enclosure_been_reached 
+    //! must be preserved over the whole analysis method.
+	void reset_largest_evol() {
+		largest_evol_time = 0.0;
+		largest_evol_steps = 0;
 	}
 };
 
@@ -94,11 +101,19 @@ class LowerDiscreteEvolutionStatistics {
 	//! \brief Constructs the lower discrete evolution statistics from existing statistics.
 	LowerDiscreteEvolutionStatistics(const LowerDiscreteEvolutionStatistics& statistics);
 
+	//! \brief The largest evolution time among the working sets.
+	RealType largest_evol_time;
+
+	//! \brief The largest evolution steps among the working sets.
+	UnsignedIntType largest_evol_steps;
+
 	//! \brief The reached region.
 	HybridGridTreeSet reach;
 
 	//! \brief Resets the statistics to their initial values,
 	void reset() {
+		largest_evol_time = 0.0;
+		largest_evol_steps = 0;
 		reach = HybridGridTreeSet();
 	}
 };
@@ -117,6 +132,12 @@ class UpperDiscreteEvolutionStatistics {
 	//! \brief Constructs the upper discrete evolution statistics from existing statistics.
 	UpperDiscreteEvolutionStatistics(const UpperDiscreteEvolutionStatistics& statistics);
 
+	//! \brief The largest evolution time among the working sets.
+	RealType largest_evol_time;
+
+	//! \brief The largest evolution steps among the working sets.
+	UnsignedIntType largest_evol_steps;
+
 	//! \brief The total number of grid locks.
 	UnsignedIntType total_locks;
 
@@ -134,6 +155,8 @@ class UpperDiscreteEvolutionStatistics {
 
 	//! \brief Resets the statistics to their initial values,
 	void reset() {
+		largest_evol_time = 0.0;
+		largest_evol_steps = 0;
 		total_locks = 0;
 		largest_intermediate_size = 0;
 		has_restriction_occurred = false;
@@ -325,6 +348,8 @@ std::ostream&
 operator<<(std::ostream& os, const LowerDiscreteEvolutionStatistics& p) 
 {
     os << "LowerDiscreteEvolutionStatistics"
+       << "(\n  largest_evol_time=" << p.largest_evol_time
+       << ",\n  largest_evol_steps=" << p.largest_evol_steps
 	   << ",\n  reach=" << p.reach
        << "\n)\n";
     return os;
@@ -336,7 +361,9 @@ std::ostream&
 operator<<(std::ostream& os, const UpperDiscreteEvolutionStatistics& p) 
 {
     os << "UpperDiscreteEvolutionStatistics"
-       << "(\n  total_locks=" << p.total_locks
+       << "(\n  largest_evol_time=" << p.largest_evol_time
+       << ",\n  largest_evol_steps=" << p.largest_evol_steps
+       << ",\n  total_locks=" << p.total_locks
        << ",\n  largest_intermediate_size=" << p.largest_intermediate_size
        << ",\n  has_restriction_occurred=" << p.has_restriction_occurred
 	   << ",\n  reach=" << p.reach

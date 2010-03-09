@@ -66,6 +66,7 @@ class TestReachabilityAnalysis
         EvolutionParameters parameters;
         parameters.maximum_grid_depth=2;
         parameters.maximum_step_size=0.25;
+		parameters.maximum_enclosure_cell=Vector<Float>(2,0.5);
         parameters.lock_to_grid_time=4.0;
         
         Grid grid(2);

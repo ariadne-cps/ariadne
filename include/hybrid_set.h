@@ -187,18 +187,23 @@ class HybridImageSet
         return this->find(q)->second; }
     virtual tribool overlaps(const HybridBox& hbx) const {
         locations_const_iterator loc_iter=this->find(hbx.first);
-        return loc_iter!=this->locations_end()
-            && loc_iter->second.overlaps(hbx.second); }
+        if(loc_iter==this->locations_end()) { return false; }
+        return loc_iter->second.overlaps(hbx.second); }
     virtual tribool disjoint(const HybridBox& hbx) const {
         locations_const_iterator loc_iter=this->find(hbx.first);
-        return loc_iter!=this->locations_end()
-            || loc_iter->second.disjoint(hbx.second); }
+        if(loc_iter==this->locations_end()) { return true; }
+        return loc_iter->second.disjoint(hbx.second); }
     virtual tribool inside(const HybridBoxes& hbx) const  {
+        tribool result = true;
         for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {
             if(!loc_iter->second.empty()) {
                 HybridBoxes::const_iterator hbx_loc_iter=hbx.find(loc_iter->first);
-                if(hbx_loc_iter!=hbx.end() && !loc_iter->second.inside(hbx_loc_iter->second)) { return false; }
-            } } return true; }
+                if(hbx_loc_iter==hbx.end()) { result=false; }
+                else { result = result && loc_iter->second.inside(hbx_loc_iter->second); }
+                if(result==false) { return result; }
+            }
+        }
+        return result; }
     virtual HybridBoxes bounding_box() const {
         HybridBoxes result;
         for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {

@@ -886,16 +886,16 @@ class GridTreeSubset
      */
 
     /*! \brief Tests if a grid set is a subset of a box. */
-    tribool subset( const Box& theBox ) const;
+    bool subset( const Box& theBox ) const;
 
     /*! \brief Tests if a grid set is a superset of a box. */
-    tribool superset( const Box& theBox ) const;
+    bool superset( const Box& theBox ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
-    tribool disjoint( const Box& theBox  ) const;
+    bool disjoint( const Box& theBox  ) const;
 
     /*! \brief Tests if a grid set overlaps a box. */
-    tribool overlaps( const Box& theBox ) const;
+    bool overlaps( const Box& theBox ) const;
 
     //@}
 
@@ -2057,7 +2057,7 @@ inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
     return _pRootTreeNode;
 }
 
-inline tribool GridTreeSubset::superset( const Box& theBox ) const {
+inline bool GridTreeSubset::superset( const Box& theBox ) const {
     //Simply check if theBox is covered by the set and then make sure that
     //all tree cells that are not disjoint from theBox are enabled
 
@@ -2075,7 +2075,7 @@ inline tribool GridTreeSubset::superset( const Box& theBox ) const {
     }
 }
 
-inline tribool GridTreeSubset::subset( const Box& theBox ) const {
+inline bool GridTreeSubset::subset( const Box& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -2088,7 +2088,7 @@ inline tribool GridTreeSubset::subset( const Box& theBox ) const {
     return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, theBox );
 }
 
-inline tribool GridTreeSubset::disjoint( const Box& theBox ) const {
+inline bool GridTreeSubset::disjoint( const Box& theBox ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
@@ -2098,7 +2098,7 @@ inline tribool GridTreeSubset::disjoint( const Box& theBox ) const {
     return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, theBox );
 }
 
-inline tribool GridTreeSubset::overlaps( const Box& theBox ) const {
+inline bool GridTreeSubset::overlaps( const Box& theBox ) const {
     //Check if the box of the root cell overlaps with theBox,
     //if not then theBox does not intersect with the cell,
     //otherwise we need to find at least one enabled node

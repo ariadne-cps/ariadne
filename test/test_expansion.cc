@@ -50,6 +50,7 @@ class TestExpansion
     void test_concept();
     void test_iterator_concept();
     void test_data_access();
+    void test_equality();
     void test_cleanup();
     void test_constructors();
     void test_indexing();
@@ -62,6 +63,7 @@ void TestExpansion::test()
 {
     ARIADNE_TEST_CALL(test_working());
     ARIADNE_TEST_CALL(test_data_access());
+    ARIADNE_TEST_CALL(test_equality());
     ARIADNE_TEST_CALL(test_cleanup());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_indexing());
@@ -242,6 +244,23 @@ void TestExpansion::test_data_access()
 
 }
 
+void TestExpansion::test_equality()
+{
+    MI a(2);
+    MI b(2); ++b;
+    Expansion<Float> e1(2),e2(2);
+    e1[a]=1.0; e1[a]=0.0;
+    e1[b]=2.0;
+    e2[b]=2.0;
+    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by explicit zeros are considered nonequal."); }
+    e1[a]=0.0;
+    e2[a]=-0.0;
+    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by +0 versus -0 coefficients are considered nonequal."); }
+    e1[a]=-0.0;
+    ARIADNE_TEST_EQUAL(e1,e2);
+}
+
+
 void TestExpansion::test_cleanup()
 {
     // Test to see if the cleanup/sort operations work.
@@ -326,7 +345,7 @@ void TestExpansion::test_indexing()
     ARIADNE_TEST_EQUAL(e[MI(3, 0,1,0)],3.0);
     ARIADNE_TEST_EXECUTE(e[MI(3, 0,0,1)]=7.0);
     ARIADNE_TEST_EQUAL(e[MI(3, 0,0,1)],7.0);
-    
+
     // Test insert at beginning
     e.clear();
     e[MI(3, 0,1,0)]=2.0;

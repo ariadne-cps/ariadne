@@ -376,7 +376,7 @@ void TestVectorTaylorFunction::test_implicit()
     ARIADNE_TEST_PRINT(h1);
     VectorTaylorFunction if1=implicit(f1);
     ARIADNE_TEST_PRINT(if1);
-    ARIADNE_TEST_EQUAL(if1,h1);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<=,norm((if1-h1).range()),0.0);
 
     // Test computation of sqrt(4+x)-2 on [-1,+1] by solving 4+x-(y+2)*(y+2)=0
     Vector<Interval> df2(2, -1.0,+1.0, -1.0,+1.0);

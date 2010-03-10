@@ -43,6 +43,7 @@ class Real : public Interval {
     Real(double x) : Interval(x) { }
 #ifdef HAVE_RATIONAL
     Real(const Rational& q);
+    Real& operator=(const Rational& x) { static_cast<Interval&>(*this)=x; return *this; }
 #endif
     explicit Real(Interval ivl) : Interval(ivl) { }
     explicit Real(double l, double u) : Interval(l,u) { }
@@ -86,6 +87,22 @@ inline tribool operator>=(const Real& x, const int& y) { return static_cast<Inte
 inline tribool operator<=(const Real& x, const int& y) { return static_cast<Interval>(x)<=static_cast<Interval>(y); }
 inline tribool operator> (const Real& x, const int& y) { return static_cast<Interval>(x)> static_cast<Interval>(y); }
 inline tribool operator< (const Real& x, const int& y) { return static_cast<Interval>(x)< static_cast<Interval>(y); }
+
+inline tribool operator==(const Real& x, const Float& y) { return static_cast<Interval>(x)==static_cast<Interval>(y); }
+inline tribool operator!=(const Real& x, const Float& y) { return static_cast<Interval>(x)!=static_cast<Interval>(y); }
+//inline tribool operator>=(const Real& x, const Float& y) { return static_cast<Interval>(x)>=static_cast<Interval>(y); }
+//inline tribool operator<=(const Real& x, const Float& y) { return static_cast<Interval>(x)<=static_cast<Interval>(y); }
+//inline tribool operator> (const Real& x, const Float& y) { return static_cast<Interval>(x)> static_cast<Interval>(y); }
+//inline tribool operator< (const Real& x, const Float& y) { return static_cast<Interval>(x)< static_cast<Interval>(y); }
+
+#ifdef HAVE_RATIONAL
+inline tribool operator==(const Real& x, const Rational& y) { return static_cast<Interval>(x)==static_cast<Interval>(y); }
+inline tribool operator!=(const Real& x, const Rational& y) { return static_cast<Interval>(x)!=static_cast<Interval>(y); }
+//inline tribool operator>=(const Real& x, const Float& y) { return static_cast<Interval>(x)>=static_cast<Interval>(y); }
+//inline tribool operator<=(const Real& x, const Float& y) { return static_cast<Interval>(x)<=static_cast<Interval>(y); }
+//inline tribool operator> (const Real& x, const Float& y) { return static_cast<Interval>(x)> static_cast<Interval>(y); }
+//inline tribool operator< (const Real& x, const Float& y) { return static_cast<Interval>(x)< static_cast<Interval>(y); }
+#endif  // HAVE_RATIONAL
 
 template<> inline Real pi<>() { return Real(pi<Interval>()); }
 inline Real rec(const Real& x) { return Real(rec(static_cast<Interval>(x))); }

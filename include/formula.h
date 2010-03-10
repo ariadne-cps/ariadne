@@ -40,7 +40,10 @@
 #include "stlio.h"
 
 #include "operators.h"
+#include "variables.h"
 #include "expression.h"
+#include "assignment.h"
+#include "space.h"
 
 #include "numeric.h"
 
@@ -85,7 +88,7 @@ typedef Expression<bool> DiscretePredicate;
 typedef Expression<tribool> ContinuousPredicate;
 
 typedef String Identifier;
-typedef Set<Identifier> VariableSet;
+typedef Set<UntypedVariable> VariableSet;
 typedef Set< Variable<Real> > RealVariableSet;
 
 
@@ -180,28 +183,6 @@ inline std::ostream& operator<<(std::ostream& os, const EventSet& self) {
 
 
 
-//! \brief An assignment statement.
-template<class LHS, class RHS>
-struct Assignment
-{
-    Assignment(const LHS& l, const RHS& r) : lhs(l), rhs(r) { }
-    LHS lhs; RHS rhs;
-};
-
-template<class LHS, class RHS> bool operator<(const Assignment<LHS,RHS>& a1, const Assignment<LHS,RHS>& a2) {
-    return a1.lhs < a2.lhs;
-}
-
-template<class LHS, class RHS> inline std::ostream& operator<<(std::ostream& os, const Assignment<LHS,RHS>& a) {
-    return os<<a.lhs<<"="<<a.rhs;
-}
-
-template<class T> inline
-Assignment<Variable<T>,Expression<T> >
-Variable<T>::operator=(const Expression<T>& e) const {
-    return Assignment<Variable<T>,Expression<T> >(*this,e);
-}
-
 
 /*! \brief An internal enumerated type, suitable for use when a finite type is needed.
  *  \sa EnumeratedType, EnumeratedVariable, DiscretePredicate
@@ -259,18 +240,6 @@ struct EnumeratedValue {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 template<class R> class ExpressionInterface;
 template<class R> class VariableExpression;
 template<class R> class ConstantExpression;
@@ -288,105 +257,30 @@ template<class R> std::ostream& operator<<(std::ostream&, const ExpressionInterf
 
 
 
-
-template<class T> struct NextVariable;
-template<class T> NextVariable<T> next(const Variable<T>& v);
-
-
-
-template<class T>
-struct NextVariable
-{
-  public:
-    typedef Assignment< NextVariable<T>, Expression<T> > AssignmentType;
-    Variable<T> base;
-  public:
-    AssignmentType operator=(const T& val) const { return AssignmentType(*this,Expression<T>(val)); }
-    AssignmentType operator=(const Variable<T>& var) const { return AssignmentType(*this,Expression<T>(var)); }
-    AssignmentType operator=(const Expression<T>& expr) const { return AssignmentType(*this,expr); }
-    friend std::ostream& operator<<(std::ostream& os, const NextVariable<T>& self) {
-        return os << "next(" << self.base.name() << ")"; }
-    friend NextVariable<T> next<>(const Variable<T>&);
-  private:
-    explicit NextVariable(const Variable<T>& v) : base(v) { }
-};
-
-template<class T> std::ostream& operator<<(std::ostream&, const NextVariable<T>&);
-
-template<>
-struct NextVariable<EnumeratedValue>
-{
-    typedef EnumeratedValue T;
-    EnumeratedVariable base;
-    typedef Assignment<NextVariable<EnumeratedValue>,EnumeratedExpression> EnumeratedAssignment;
-//     friend Next<EnumeratedVariable> next(const EnumeratedVariable& v);
-    EnumeratedAssignment operator=(const String& str) const { return EnumeratedAssignment(*this,EnumeratedExpression(EnumeratedValue(str))); }
-    EnumeratedAssignment operator=(const EnumeratedValue& val) const { return EnumeratedAssignment(*this,EnumeratedExpression(val)); }
-    EnumeratedAssignment operator=(const EnumeratedVariable& var) const { return EnumeratedAssignment(*this,EnumeratedExpression(var)); }
-    EnumeratedAssignment operator=(const EnumeratedExpression& expr) const { return EnumeratedAssignment(*this,expr); }
-    friend std::ostream& operator<<(std::ostream& os, const NextVariable<EnumeratedValue>& self) {
-        return os << "next(" << self.base.name() << ")"; }
-    friend NextVariable<T> next<>(const Variable<T>&);
-  private:
-    explicit NextVariable(const EnumeratedVariable& v) : base(v) { }
-};
-
-template<>
-struct NextVariable<Real>
-{
-    typedef Real T;
-    RealVariable base;
-    typedef Assignment<NextVariable<Real>,RealExpression> RealAssignment;
-    friend NextVariable<Real> next(const RealVariable& v);
-    RealAssignment operator=(const double& x) const { return RealAssignment(*this,RealExpression(x)); }
-    RealAssignment operator=(const RealVariable& var) const { return RealAssignment(*this,RealExpression(var)); }
-    RealAssignment operator=(const RealExpression& fn) const { return RealAssignment(*this,fn); }
-    friend std::ostream& operator<<(std::ostream& os, const NextVariable<Real>& self) {
-        return os << "next(" << self.base.name() << ")"; }
-    friend NextVariable<T> next<>(const Variable<T>&);
-  private:
-    explicit NextVariable(const RealVariable& v) : base(v) { }
-};
-
-template<class T> inline NextVariable<T> next(const Variable<T>& v) { return NextVariable<T>(v); }
-
-
-
-
-template<class T> class DottedVariable;
-
-template<>
-struct DottedVariable<Real>
-{
-    Variable<Real> base;
-    Assignment<DottedVariable<Real>,Expression<Real> > operator=(const Expression<Real>& f) const {
-        return Assignment<DottedVariable<Real>,Expression<Real> >(*this,f); }
-    Assignment<DottedVariable<Real>,Expression<Real> > operator=(const Variable<Real>& v) const {
-        return Assignment<DottedVariable<Real>,Expression<Real> >(*this,Expression<Real>(v)); }
-    friend std::ostream& operator<<(std::ostream& os, const DottedVariable<Real>& self) {
-        return os << "dot(" << self.base.name() << ")"; }
-    friend DottedVariable<Real> dot(const Variable<Real>&);
-  private:
-    explicit DottedVariable(const Variable<Real>& v) : base(v) { }
-};
-
-inline DottedVariable<Real> dot(const Variable<Real>& v) { return DottedVariable<Real>(v); }
-
-typedef DottedVariable<Real> RealDottedVariable;
-typedef NextVariable<Real> RealNextVariable;
-typedef NextVariable<String> StringNextVariable;
-typedef NextVariable<Integer> IntegerNextVariable;
-typedef NextVariable<EnumeratedValue> EnumeratedNextVariable;
+typedef ExtendedVariable<Real> ExtendedRealVariable;
+typedef DottedVariable<Real> DottedRealVariable;
+typedef PrimedVariable<Real> PrimedRealVariable;
+typedef PrimedVariable<String> PrimedStringVariable;
+typedef PrimedVariable<Integer> PrimedIntegerVariable;
+typedef PrimedVariable<EnumeratedValue> PrimedEnumeratedVariable;
 
 typedef Assignment<EnumeratedVariable,EnumeratedExpression> EnumeratedAssignment;
-typedef Assignment<EnumeratedNextVariable,EnumeratedExpression> EnumeratedUpdate;
+typedef Assignment<PrimedEnumeratedVariable,EnumeratedExpression> EnumeratedUpdate;
 typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;
-typedef Assignment<IntegerNextVariable,IntegerExpression> IntegerUpdate;
+typedef Assignment<PrimedIntegerVariable,IntegerExpression> IntegerUpdate;
 typedef Assignment<StringVariable,StringExpression> StringAssignment;
-typedef Assignment<StringNextVariable,StringExpression> StringUpdate;
+typedef Assignment<PrimedStringVariable,StringExpression> StringUpdate;
 typedef Assignment<RealVariable,RealExpression> RealAssignment;
-typedef Assignment<RealNextVariable,RealExpression> RealUpdate;
-typedef Assignment<RealDottedVariable,RealExpression> RealDynamic;
+typedef Assignment<PrimedRealVariable,RealExpression> RealUpdate;
+typedef Assignment<DottedRealVariable,RealExpression> RealDynamic;
+
+typedef Assignment<RealVariable,RealExpression> RealAlgebraicAssignment;
+typedef Assignment<PrimedRealVariable,RealExpression> RealUpdateAssignment;
+typedef Assignment<DottedRealVariable,RealExpression> RealDifferentialAssignment;
+typedef Assignment<ExtendedRealVariable,RealExpression> ExtendedRealAssignment;
+typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
+typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
+
 
 
 

@@ -28,10 +28,9 @@
 #ifndef ARIADNE_DISCRETE_STATE_H
 #define ARIADNE_DISCRETE_STATE_H
 
-namespace Ariadne {
+#include "container.h"
 
-template<class T> std::string to_str(const T& t) {
-    std::stringstream ss; ss<<t; return ss.str(); }
+namespace Ariadne {
 
 class DiscreteState {
   public:

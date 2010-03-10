@@ -52,7 +52,8 @@ outer_approximation(const ListSet<HybridBasicSet<ES> >& hls,
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
             }
             GridTreeSet& gts=result[loc];
-            gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
+            gts.adjoin_outer_approximation(Box(es.range()),accuracy);
+            //gts.adjoin_outer_approximation(es,accuracy);
             //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
         }
     return result;
@@ -71,7 +72,8 @@ outer_approximation(const HybridBasicSet<ES>& hs,
         result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
     }
     GridTreeSet& gts=result[loc];
-    gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
+    // gts.adjoin_outer_approximation(es,accuracy);
+    gts.adjoin_outer_approximation(Box(es.range()),accuracy);
     return result;
 }
 

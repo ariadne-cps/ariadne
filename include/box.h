@@ -68,7 +68,7 @@ class Box
 
     //! The upper quadrant box \f$[0,infty]^n\f$ in \a n dimensions.
     static Box upper_quadrant(uint n) {
-        return Box(n,Interval(0,inf()));
+        return Box(n,Interval(0,inf<Float>()));
     }
 
     //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.
@@ -189,6 +189,12 @@ class Box
         static const Interval eps(-min,+min);
         static_cast<Vector<Interval>&>(*this) += Vector<Interval>(this->dimension(),eps);
     }
+
+    //! \brief Split into two along the largest side.
+    std::pair<Box,Box> split() const { return Ariadne::split(*this); }
+
+    //! \brief Split into two along side with index \a i.
+    std::pair<Box,Box> split(uint i) const { return Ariadne::split(*this,i); };
 
 
     //! \brief Draw on a canvas.

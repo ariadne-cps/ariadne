@@ -51,6 +51,10 @@ using std::ofstream; using std::ifstream;
 #include "user_function.h"
 #include "taylor_model.h"
 
+#include "expression.h"
+#include "variables.h"
+#include "assignment.h"
+
 #include "function_set.h"
 #include "taylor_set.h"
 #include "grid_set.h"

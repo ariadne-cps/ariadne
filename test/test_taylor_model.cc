@@ -23,7 +23,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include "config.h"
 #include "numeric.h"
 #include "real.h"
 #include "vector.h"

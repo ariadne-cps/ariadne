@@ -42,6 +42,9 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
 
+class ScalarFunction;
+class VectorFunction;
+
 static const int SMOOTH=255;
 
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$.
@@ -50,16 +53,9 @@ class ScalarFunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.
     typedef unsigned int SizeType;
-    //! \brief The type used to describe the smoothness of the function.
-    typedef unsigned short SmoothnessType;
 
     //! \brief Virtual destructor.
     virtual ~ScalarFunctionInterface() { };
-    //! \brief Create a dynamically-allocated copy.
-    virtual ScalarFunctionInterface* clone() const = 0;
-
-    //! \brief The smoothness of the expression.
-    virtual SmoothnessType smoothness() const = 0;
     //! \brief The number of arguments to the expression.
     virtual SizeType argument_size() const = 0;
 
@@ -74,19 +70,13 @@ class ScalarFunctionInterface {
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the expression over a vector of interval differentials.
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
-    ////! \brief Evaluate the expression over a vector of function model differentials.
-    //virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const = 0;
 
-    //! \brief Compute an approximation to the gradient vector \f$(Df)_{j}=\partial f/\partial x_j\f$ of the function at the point \a x.
-    virtual Vector<Float> gradient(const Vector<Float>& x) const = 0;
-    //! \brief Compute an over-approximation to the gradient vector \f$(Df)_{\j}=\partial f/\partial x_j\f$ of the function over the domain \a x.
-    virtual Vector<Interval> gradient(const Vector<Interval>& x) const = 0;
+    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
+    virtual ScalarFunction derivative(uint i) const = 0;
 
-    //! \brief Call the function on the type \a T.
-    template<class T> T operator()(const Vector<T>& x) { return this->evaluate(x); }
 
-    virtual ScalarFunctionInterface* derivative(uint j) const = 0;
-
+    //! \brief Write a brief version to an output stream.
+    virtual std::ostream& repr(std::ostream& os) const = 0;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
@@ -104,16 +94,10 @@ class VectorFunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.
     typedef unsigned int SizeType;
-    //! \brief The type used to describe the smoothness of the function.
-    typedef unsigned short SmoothnessType;
 
     //! \brief Virtual destructor.
     virtual ~VectorFunctionInterface() { };
-    //! \brief Create a dynamically-allocated copy.
-    virtual VectorFunctionInterface* clone() const = 0;
 
-    //! \brief The smoothness of the function.
-    virtual SmoothnessType smoothness() const = 0;
     //! \brief The number of arguments to the function.
     virtual SizeType argument_size() const = 0;
     //! \brief The number of result variables of the function.
@@ -131,13 +115,8 @@ class VectorFunctionInterface {
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const = 0;
 
-    //! \brief Call the function on the type \a T.
-    template<class T> Vector<T> operator()(const Vector<T>& x) { return this->evaluate(x); }
-
-    //! \brief Compute an approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function at the point \a x.
-    virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
-    //! \brief Compute an over-approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function over the domain \a x.
-    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
+    //! \brief Get the \a i<sup>th</sup> component function.
+    virtual ScalarFunction operator[](uint i) const = 0;
 
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;

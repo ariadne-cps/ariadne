@@ -270,14 +270,6 @@ void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& 
 }
 
 
-template<class X> inline X inf();
-template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
-#ifdef HAVE_RATIONAL
-template<> inline Rational inf<Rational>() { return Rational(1,-0); }
-#endif
-
-
-
 // Compute the variable types from the permutation, taking m basic variables and all non-basic variables lower.
 template<class X>
 array<VariableType>

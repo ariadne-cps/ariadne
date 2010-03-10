@@ -54,8 +54,10 @@ class EnumeratedValue;
 
 typedef String Identifier;
 
+class UntypedVariable;
 template<class T> class Variable;
-template<class R> class Expression;
+template<class T> class Space;
+template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
 
 class DiscreteValuation;
@@ -71,7 +73,7 @@ class ExpressionInterface
   public:
     virtual ~ExpressionInterface() { }
     virtual ExpressionInterface<T>* clone() const = 0;
-    virtual Set<String> arguments() const = 0;
+    virtual Set<UntypedVariable> arguments() const = 0;
     virtual Operator type() const = 0;
     virtual std::ostream& write(std::ostream& os) const = 0;
   protected:
@@ -101,13 +103,14 @@ class Expression {
     explicit Expression(const ExpressionInterface<R>& e) : _ptr(e.clone()) { }
     explicit Expression(ExpressionInterface<R>* eptr) : _ptr(eptr) { }
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
+    Expression() { R z; *this=Expression(z); }
     Expression(const R& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
     //! \brief The variables used in the formula.
-    Set<String> arguments() const { return _ptr->arguments(); }
-    //! \brief The name of the type of expression.
-    String operator_name() const { return name(_ptr->type()); }
+    Set<UntypedVariable> arguments() const { return _ptr->arguments(); }
+    //! \brief The operator used to construct the expression from subexpressions.
+    Operator op() const { return _ptr->type(); }
     //! \brief The immediate subexpressions used in the formula.
     List< Expression<R> > subexpressions() const;
      //! \brief Substitute the constant \a c for the variable \a v.
@@ -133,16 +136,18 @@ class Expression<Real> {
     explicit Expression(const ExpressionInterface<R>& e) : _ptr(e.clone()) { }
     explicit Expression(const ExpressionInterface<R>* eptr) : _ptr(eptr) { }
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
+    Expression() { *this=Expression(0.0); }
     Expression(const double& c);
     Expression(const Interval& c);
+    Expression(const Real& c);
     Expression(const Constant<R>& c);
     Expression(const Variable<R>& v);
     //! \brief Test if two expressions are identical to each other.
     friend bool identical(const Expression<R>& e1, const Expression<R>& e2);
     //! \brief The variables used in the formula.
-    Set<String> arguments() const { return _ptr->arguments(); }
-    //! \brief The name of the type of expression.
-    String operator_name() const { return name(_ptr->type()); }
+    Set<UntypedVariable> arguments() const { return _ptr->arguments(); }
+    //! \brief The operator used to construct the expression from subexpressions.
+    Operator op() const { return _ptr->type(); }
     //! \brief The immediate subexpressions used in the formula.
     List< Expression<R> > subexpressions() const;
     //! \brief Substitute the constant \a c for the variable \a v.
@@ -172,6 +177,7 @@ Integer evaluate(const Expression<Integer>& e, const DiscreteValuation& q);
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x);
+template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,X>& x);
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
@@ -275,13 +281,34 @@ Expression<Real> cos(Expression<Real> e);
 //! \related Expression \brief .
 Expression<Real> tan(Expression<Real> e);
 
+//! \related Expression \brief .
+Expression<Real> max(Expression<Real> e1, Expression<Real> e2);
+//! \related Expression \brief .
+Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
+//! \related Expression \brief .
+Expression<Real> abs(Expression<Real> e);
+
+enum Sign { positive=+1, negative=-1, zero=0 };
+
+//! \related Expression \brief Try to compute a real expression which has the
+//! given \a sign when the predicate \a p is true.
+Expression<Real> indicator(Expression<tribool> p, Sign sign=positive);
+
+//! \related Expression \brief Returns true if the expressions are mutual negations.
+//!
+//! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
+//! or (a1>=a2; a2>=a1).
+tribool opposite(Expression<tribool> p, Expression<tribool> q);
+
 
 template<class X> class Affine;
 template<class X> class Polynomial;
 
+//! \related Expression \brief Compute the derivative of expression \a e with respect to the variable \a v.
+Expression<Real> derivative(const Expression<Real>& e, const Variable<Real>& v);
+
 template<class X> Affine<X> affine(const Expression<Real>&, const Space<Real>&);
 template<class X> Polynomial<X> polynomial(const Expression<Real>&, const Space<Real>&);
-
 
 } // namespace Ariadne
 

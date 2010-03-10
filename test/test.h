@@ -287,6 +287,19 @@ int test_case_counter = 0;
     class variable expression;                                          \
 
 
+/*! \brief Constructs object \a variable of type \a class from \a expression. */
+#define ARIADNE_TEST_NAMED_CONSTRUCT(class,variable,expression)               \
+    {                                                                   \
+        std::cout << #class << " " << #variable << "=" << #class << "::" << #expression << ": " << std::flush; \
+        try {                                                           \
+            class variable = class :: expression;                                  \
+            std::cout << #variable << "==" << variable << "\n" << std::endl; \
+        }                                                               \
+        ARIADNE_TEST_CATCH("Named constructor `" << #class << "" << #variable << "=" << #class << "::" << #expression << "'") \
+    }                                                                   \
+    class variable = class :: expression;                                          \
+
+
 /*! \brief Assigns object \a variable from \a expression. */
 #define ARIADNE_TEST_ASSIGN(variable, expression)                       \
     {                                                                   \

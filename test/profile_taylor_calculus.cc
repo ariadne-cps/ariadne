@@ -32,7 +32,6 @@ using std::string;
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
-#include "config.h"
 #include "numeric.h"
 #include "real.h"
 #include "function.h"

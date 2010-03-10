@@ -503,7 +503,7 @@ derivative(const Polynomial<X>& p, uint j) {
             const X& val=iter->data();
             ar=ap;
             ar[j]-=1;
-            r.append(ar,val*ap[j]);
+            r.append(ar,val*static_cast<X>(ap[j]));
         }
     }
     return r;
@@ -652,26 +652,25 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
     bool first_term=true;
-    if(p.expansion().size()==0) {
-        os << "0";
-    } else {
-        for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-            MultiIndex a=iter->key();
-            X v=iter->data();
-            if(v!=0) {
-                if(v>0 && !first_term) { os<<"+"; }
-                first_term=false;
-                bool first_factor=true;
-                if(v<0) { os<<"-"; }
-                if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
-                for(uint j=0; j!=a.size(); ++j) {
-                    if(a[j]!=0) {
-                        if(first_factor) { first_factor=false; } else { os <<"*"; }
-                        os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
-                }
+    bool zero=true;
+    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        MultiIndex a=iter->key();
+        X v=iter->data();
+        if(v!=0) {
+            zero=false;
+            if(v>0 && !first_term) { os<<"+"; }
+            first_term=false;
+            bool first_factor=true;
+            if(v<0) { os<<"-"; }
+            if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
+            for(uint j=0; j!=a.size(); ++j) {
+                if(a[j]!=0) {
+                    if(first_factor) { first_factor=false; } else { os <<"*"; }
+                    os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
             }
         }
     }
+    if(zero) { os << "0"; }
     return os;
 }
 

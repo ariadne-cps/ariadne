@@ -359,11 +359,13 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     // VectorFunction f=join(x+ct,y+ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
-    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
-
-    plot("test_hybrid_evolution-transverse_linear_crossing",Box(2, -1.0,3.0, -1.0,3.0),
-         Colour(0,0,1),evolved_set[q2][0]);
+    ARIADNE_TEST_ASSERT(!evolved_set.empty());
+    if(!evolved_set.empty()){
+        ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
+        ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
+        plot("test_hybrid_evolution-transverse_linear_crossing",Box(2, -1.0,3.0, -1.0,3.0),
+             Colour(0,0,1),evolved_set[q2][0]);
+    }
 }
 
 void TestHybridEvolver::test_transverse_cubic_crossing()
@@ -385,10 +387,13 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
     VectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
-    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
-    plot("test_hybrid_evolution-transverse_cubic_crossing",Box(2, -1.0,3.0, -1.0,3.0),
-         Colour(0,0,1),evolved_set[q2][0]);
+    ARIADNE_TEST_ASSERT(!evolved_set.empty());
+    if(!evolved_set.empty()){
+        ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
+        ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
+        plot("test_hybrid_evolution-transverse_cubic_crossing",Box(2, -1.0,3.0, -1.0,3.0),
+             Colour(0,0,1),evolved_set[q2][0]);
+    }
 }
 
 void TestHybridEvolver::test_transverse_cube_root_crossing()
@@ -407,17 +412,19 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
     VectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
-
+    
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
-
-    //ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
-    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
+    
+    ARIADNE_TEST_ASSERT(!evolved_set.empty());
+    
+    if(!evolved_set.empty()) {
+        ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
+    }
 }
 
 void TestHybridEvolver::test() {
     ARIADNE_TEST_CALL(test_transverse_linear_crossing());
     ARIADNE_TEST_CALL(test_transverse_cubic_crossing());
-    test_transverse_cube_root_crossing();
     ARIADNE_TEST_CALL(test_transverse_cube_root_crossing());
 }
 

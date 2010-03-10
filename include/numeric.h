@@ -69,7 +69,6 @@ class Rational { };
 class Float { };
 #endif // DOXYGEN
 
-typedef double Float;
 
 #ifdef HAVE_GMPXX_H
 class Integer : public mpz_class {
@@ -84,7 +83,6 @@ typedef mpq_class Rational;
 Rational sqr(const Rational& q);
 Rational pow(const Rational& q, int n);
 Rational pow(const Rational& q, uint n);
-Float float_approx(const Rational& q);
 #else
 class Integer {
   public:
@@ -121,6 +119,9 @@ inline bool operator> (const Integer& z1, const Integer& z2) {
 #endif // HAVE_GMPXX_H
 
 
+typedef double Float;
+
+
 using std::min;
 using std::max;
 using std::abs;
@@ -136,8 +137,15 @@ uint64_t bin(uint64_t n, uint64_t k);
 
 
 template<class X> X pi();
+template<class X> inline X inf();
 
-inline Float inf() { return std::numeric_limits<double>::max(); }
+template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
+#ifdef HAVE_RATIONAL
+template<> inline Rational inf<Rational>() { return Rational(1,-0); }
+#endif
+
+
+inline Float mx() { return std::numeric_limits<double>::max(); }
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 
 inline Float down(Float x) { return x>0 ? x*(1-2e-16) : x*(1+2e-16); }
@@ -335,7 +343,7 @@ inline bool empty(Interval i) {
 }
 
 inline bool bounded(Interval i) {
-    return i.lower()!=-inf() && i.upper()!=+inf();
+    return i.lower()!=-inf<Float>() && i.upper()!=+inf<Float>();
 }
 
 inline Interval intersection(Interval i1, Interval i2) {

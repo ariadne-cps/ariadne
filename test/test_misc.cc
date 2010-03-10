@@ -25,6 +25,7 @@
 
 #include "test.h"
 
+#include "function.h"
 #include "user_function.h"
 
 namespace Ariadne {
@@ -49,7 +50,6 @@ struct Henon : public VectorFunctionData<2,2,2> {
 using namespace Ariadne;
 
 int main() {
-
 
     ScalarUserFunction<Radius> g=ScalarUserFunction<Radius>();
     std::cout << g(Vector<Float>(2,3.0,4.0)) << "\n\n\n";

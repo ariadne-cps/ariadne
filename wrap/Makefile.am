@@ -4,8 +4,10 @@ AM_LDFLAGS = -module
 INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
 LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
 
-pythondir=${pkgpyexecdir}
+pythondir=${prefix}/lib/ariadne/python
 libdir=${pyexecdir}
+
+pythoninstalldir=${prefix}/lib/ariadne/python
 
 python_DATA = __init__.py
 python_LIBS = ariadne.la interval.la differentiation.la
@@ -23,12 +25,12 @@ python: $(python_LTLIBRARIES)
 install-exec-local:
 	echo "Using the installer " $(INSTALL)
 	echo $(pyexecdir)
-	echo $(pkgpyexecdir)
+	echo $(pythoninstalldir)
 	echo $(python_MODULES)
 	echo $(python_LIBS)
-	mkdir -p $(pkgpyexecdir)
-	$(INSTALL) $(python_MODULES) $(pkgpyexecdir)/
-	$(INSTALL) $(python_DATA) $(pkgpyexecdir)/
+	mkdir -p $(pythoninstalldir)
+	$(INSTALL) $(python_MODULES) $(pythoninstalldir)/
+	$(INSTALL) $(python_DATA) $(pythoninstalldir)/
 
 
 interval_la_SOURCES=$(INTERVAL_SRC)
@@ -55,7 +57,6 @@ ARIADNE_SRC = utilities.cc \
 	geometry_submodule.cc \
 	solver_submodule.cc \
 	storage_submodule.cc \
-	system_submodule.cc \
 	evolution_submodule.cc \
 	graphics_submodule.cc
 

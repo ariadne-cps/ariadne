@@ -39,14 +39,12 @@ SRC = \
 	hybrid_set.cc \
 	geometry.cc \
 	hybrid_automaton.cc \
-	hybrid_system.cc \
 	orbit.cc \
 	map_evolver.cc \
 	vector_field_evolver.cc \
 	hybrid_evolver-stable.cc \
 	hybrid_evolver-image.cc \
 	hybrid_evolver-constrained.cc \
-	hybrid_simulator.cc \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \

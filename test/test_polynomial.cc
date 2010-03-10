@@ -56,6 +56,7 @@ void TestPolynomial::test()
     ARIADNE_TEST_CALL(test_cleanup());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_indexing());
+    ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_variables());
     ARIADNE_TEST_CALL(test_find());
 }
@@ -281,6 +282,13 @@ void TestPolynomial::test_arithmetic()
     ARIADNE_TEST_EQUAL(P(3)+P(3),P(3));
     ARIADNE_TEST_EQUAL(P(3)+P(3,1, 2,1,0,2.0),P(3,1, 2,1,0,2.0));
     ARIADNE_TEST_EQUAL(P(3)+P(3,3, 2,1,0,2.0, 0,1,0,3.0, 1,1,0,5.0), P(3,3, 0,1,0,3.0, 1,1,0,5.0, 2,1,0,2.0));
+    ARIADNE_TEST_EQUAL(P(3)-P(3,1, 2,1,0,2.0),P(3,1, 2,1,0,-2.0));
+    ARIADNE_TEST_EQUAL(P(3)-P(3,3, 2,1,0,2.0, 0,1,0,3.0, 1,1,0,5.0), P(3,3, 0,1,0,-3.0, 1,1,0,-5.0, 2,1,0,-2.0));
+    ARIADNE_TEST_EQUAL(P(3)*P(3,1, 2,1,0,2.0), P(3));
+    ARIADNE_TEST_EQUAL(P(2,2, 2,0,3.0, 0,0,6.0)*P(2,2, 1,1,2.0, 0,1,3.0), P(2,4, 3,1,6.0, 2,1,9.0, 1,1,12.0, 0,1,18.0));
+    ARIADNE_TEST_EQUAL(P(2,2, 1,0,3.0, 0,1,2.0)*P(2,2, 1,0,2.0, 0,1,3.0), P(2,3, 2,0,6.0, 1,1,13.0, 0,2,6.0));
+    // ARIADNE_PRINT(P(3)/P(3,1, 2,1,0,2.0));
+
 
     Polynomial<Float> x0(3); x0[MultiIndex(3, 1,0,0)]=1.0;
     Polynomial<Float> x1(3); x1[MultiIndex(3, 0,1,0)]=1.0;

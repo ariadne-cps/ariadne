@@ -262,7 +262,6 @@ Matrix<Float> midpoint(const Matrix<Interval>&);
 
 Matrix<Float> pivot_matrix(const array<size_t>& p);
 
-
 template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x0, ...)
     : ublas::matrix<X>(r,c)
 {

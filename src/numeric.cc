@@ -696,8 +696,8 @@ Interval rec(Interval i)
         ru=_div_up(1.0,il);
         set_rounding_mode(rnd);
     } else {
-        rl=-inf();
-        ru=+inf();
+        rl=-inf<Float>();
+        ru=+inf<Float>();
         ARIADNE_THROW(DivideByZeroException,"Interval rec(Interval ivl)","ivl="<<i);
     }
     return Interval(rl,ru);
@@ -790,7 +790,7 @@ Interval div(Interval i1, Interval i2)
     }
     else {
         ARIADNE_THROW(DivideByZeroException,"Interval div(Interval ivl1, Interval ivl2)","ivl1="<<i1<<", ivl2="<<i2);
-        rl=-inf(); ru=+inf();
+        rl=-inf<Float>(); ru=+inf<Float>();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -809,7 +809,7 @@ Interval div(Interval i1, Float x2)
     } else if(x2<0) {
         rl=_div_down(i1u,x2); ru=_div_up(i1l,x2);
     } else {
-        rl=-inf(); ru=+inf();
+        rl=-inf<Float>(); ru=+inf<Float>();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -824,7 +824,7 @@ Interval div(Float x1, Interval i2)
     volatile double rl,ru;
     if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
-        rl=-inf(); ru=+inf();
+        rl=-inf<Float>(); ru=+inf<Float>();
     } else if(x1>=0) {
         rl=_div_down(x1,i2u); ru=_div_up(x1,i2l);
     } else {
@@ -1112,7 +1112,6 @@ Real::Real(const std::string& str)
     const char* c_ptr=str.c_str();
     while(*c_ptr != 0) {
         const char& c=*c_ptr;
-        std::cerr<<c<<(c-'0')<<"\n";
         if(c=='.') {
             if(decimal_point) {
                 ARIADNE_THROW(std::runtime_error,"Real(String)","real literal \""<<str<<"\" has more than one decimal point.");

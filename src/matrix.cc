@@ -27,6 +27,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+#include "function.h"
 
 template class boost::numeric::ublas::matrix<Ariadne::Float>;
 template class boost::numeric::ublas::matrix<Ariadne::Interval>;

@@ -47,7 +47,6 @@ class VectorScalingFunction
     VectorScalingFunction* clone() const { return new VectorScalingFunction(*this); }
     SizeType result_size() const { return _l.size(); }
     SizeType argument_size() const { return _l.size(); }
-    SmoothnessType smoothness() const { return SMOOTH; }
     Vector<Float> evaluate(const Vector<Float>& x) const {
         Vector<Float> r(this->result_size()); _compute_approx(r,x); return r; }
     Vector<Interval> evaluate(const Vector<Interval>& x) const {
@@ -58,11 +57,12 @@ class VectorScalingFunction
     Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
         Vector< Differential<Float> > r(this->result_size(),Differential<Float>(x[0].argument_size(),x[0].degree()));
         _compute_approx(r,x); return r; }
-    Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const { 
+    Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
         Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
         _compute_approx(r,x); return r; }
     Matrix<Float> jacobian(const Vector<Float>& x) const { ARIADNE_NOT_IMPLEMENTED; }
     Matrix<Interval> jacobian(const Vector<Interval>& x) const { ARIADNE_NOT_IMPLEMENTED; }
+    ScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; } 
     std::ostream& write(std::ostream& os) const {
         return os << "VectorScalingFunction( o=" << this->origin() << ", l=" << this->lengths() << " )"; }
   private:
@@ -124,7 +124,7 @@ ImageSet::disjoint(const Box& bx) const
         return Ariadne::disjoint(bx,this->_function.evaluate(this->_domain));
     } else {
         static const int MAX_SUBDIVISIONS=8;
-        return Ariadne::disjoint(this->domain(),this->_function,bx,bx.radius()/MAX_SUBDIVISIONS);
+        return Ariadne::disjoint(this->domain(),this->_function,bx,radius(bx)/MAX_SUBDIVISIONS);
     }
 }
 
@@ -133,7 +133,7 @@ tribool
 ImageSet::overlaps(const Box& bx) const
 {
     static const int MAX_SUBDIVISIONS=8;
-    return !Ariadne::disjoint(this->domain(),this->_function,bx,bx.radius()/MAX_SUBDIVISIONS);
+    return !Ariadne::disjoint(this->domain(),this->_function,bx,radius(bx)/MAX_SUBDIVISIONS);
 }
 
 
@@ -165,7 +165,7 @@ ImageSet::draw(CanvasInterface& os) const
 std::ostream&
 ImageSet::write(std::ostream& os) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    return os << "ImageSet( domain=" << this->domain() << ", function=" << this->function() << ")";
 }
 
 

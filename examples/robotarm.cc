@@ -53,6 +53,34 @@ void simplify(Matrix<RealExpression>& m) {
     }
 }
 
+ListSet<TaylorSet> apply(const VectorFunction& f, const ListSet<TaylorSet>& ls) {
+    ListSet<TaylorSet> ret;
+    for(ListSet<TaylorSet>::const_iterator iter=ls.begin(); iter != ls.end() ; iter++) {
+        ret.push_back(apply(f, TaylorSet(iter->bounding_box())));
+    }
+    
+    return ret;
+}
+
+Float max_radius(const ListSet<TaylorSet>& ls) {
+    Float rad=0.0;
+    for(ListSet<TaylorSet>::const_iterator iter=ls.begin(); iter != ls.end() ; iter++) {
+        if(iter->radius() > rad)
+            rad = iter->radius();
+    }
+    
+    return rad;
+}
+
+ListSet<Box> bounding_boxes(const ListSet<TaylorSet>& ls) {
+    ListSet<Box> ret;
+    for(ListSet<TaylorSet>::const_iterator iter=ls.begin(); iter != ls.end() ; iter++) {
+        ret.push_back(iter->bounding_box());
+    }
+    
+    return ret;
+}
+
 int main(int argc, char** argv) 
 {
     // Definition of the arm system
@@ -166,7 +194,7 @@ int main(int argc, char** argv)
     Float time(1.0);
     if(argc >= 4)   // read initial value for time from the arguments
         time = atof(argv[3]);
-    Float step_size(0.125);
+    Float step_size(1.25e-2);
     Vector<Float> enclosure_cell(7,0.5);
 
     EvolutionParameters parameters;
@@ -178,10 +206,10 @@ int main(int argc, char** argv)
     evolver.verbosity = 1;
     
     // Define the initial box
-    Float iu1 = 0.0;
+    Float iu1 = 5e-4;
     if(argc >= 2)   // read initial value for u1 from the arguments
         iu1 = atof(argv[1]);
-    Float iu2 = 0.0;
+    Float iu2 = 5e-4;
     if(argc >= 3)   // read initial value for u2 from the arguments
         iu2 = atof(argv[2]);
     
@@ -198,7 +226,6 @@ int main(int argc, char** argv)
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    ListSet<TaylorSet> evolve_set,reach_set;
     Orbit<TaylorSet> orbit = evolver.orbit(robotarm,initial_set,time,semantics);
     cout << std::endl;
     
@@ -258,7 +285,58 @@ int main(int argc, char** argv)
     fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-orbit-u2");
 
+
+    /*
+     *  Convert polar coordinates theta1, theta2 into cartesian coordinates
+     *  for plotting the trajectory
+     */
+    
+    // Definition of the conversion function
+    RealExpression px1 = r1 * cos(x1) + r2 * cos(x1 + x2);
+    RealExpression px2 = r1 * sin(x1) + r2 * sin(x1 + x2);
+    RealExpression pt = t;
+    
+    List<RealExpression> projlist;
+    projlist.append(px1);       projlist.append(px2);
+    // projlist.append(pt);
+    VectorFunction proj(projlist, varlist);
+    
+    TaylorSet cartesian_initial = apply(proj, orbit.initial());
+    ListSet<TaylorSet> cartesian_final = apply(proj, orbit.final());
+    ListSet<TaylorSet> cartesian_reach = apply(proj, orbit.reach());
+
+    // Plotting cartesian trajectory
+    fig.clear();
+    fig.set_bounding_box(Box(2, -0.5,0.5, -0.5,0.5));
+    fig.set_projection_map(PlanarProjectionMap(2,0,1));
+    fig << line_style(true) << fill_colour(cyan) << cartesian_reach;
+    fig << fill_colour(red) << cartesian_final;
+    fig << fill_colour(blue) << cartesian_initial;
+    fig.write("robotarm-orbit-xy");
+
     std::cout << "done!" << std::endl;
+    
+    std::cout << "Cartesian final = " << cartesian_final << std::endl;
+    std::cout << "Polar final = " << orbit.final() << std::endl;
+    
+    
+/*      
+    std::cout << "Projection function = " << proj << std::endl;
+    std::cout << "           evaluate = " << proj.evaluate(orbit.initial().range()) << std::endl;
+    
+    std::cout << "Initial set = " << orbit.initial() << std::endl;
+    std::cout << "     domain = " << orbit.initial().domain() << std::endl;
+    std::cout << "      range = " << orbit.initial().range() << std::endl;
+    std::cout << "     models = " << orbit.initial().models() << std::endl;
+
+    TaylorSet cartesian_initial = apply(proj, orbit.initial());
+    std::cout << "Projected set = " << cartesian_initial << std::endl;
+    std::cout << "       domain = " << cartesian_initial.domain() << std::endl;
+    std::cout << "        range = " << cartesian_initial.range() << std::endl;
+    std::cout << "       models = " << cartesian_initial.models() << std::endl;
+*/
+    
+    
     
     return 0;
      

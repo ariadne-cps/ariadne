@@ -32,7 +32,6 @@ rectifier_oneloc_SOURCES=rectifier_oneloc.cc
 grid_refinement_SOURCES=grid-refinement.cc
 multipleguards_SOURCES=multipleguards.cc
 robotarm_SOURCES=robotarm.cc
-robotarm_scalarfunctions_SOURCES=robotarm-scalarfunctions.cc
 
 coconut_demo_SOURCES=coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
 

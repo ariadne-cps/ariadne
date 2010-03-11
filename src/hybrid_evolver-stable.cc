@@ -563,7 +563,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
                         // Compute activation set model and jump set model
                         VectorFunction reset=iter->reset();
-                        DiscreteState jump_location=iter->target().location();
+                        DiscreteState jump_location=iter->target();
                         DiscreteEvent jump_event=iter->event();
 
                         SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
@@ -590,7 +590,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         {
             VectorFunction guard = iter->activation();
             VectorFunction reset=iter->reset();
-            DiscreteState jump_location=iter->target().location();
+            DiscreteState jump_location=iter->target();
             if(lower_blocking_time <= 0.0) {
                 // No continuous evolution possible, execute only transitions that are initially active
                 if(definitely(this->_toolbox->active(guard,initial_set_model))) {
@@ -647,7 +647,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
                             // Compute activation set model and jump set model
                             VectorFunction reset=iter->reset();
-                            DiscreteState jump_location=iter->target().location();
+                            DiscreteState jump_location=iter->target();
                             SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
                             ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
                             SetModelType jump_set_model=this->_toolbox->reset_step(reset,active_set_model);

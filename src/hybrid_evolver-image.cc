@@ -545,7 +545,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
                 ARIADNE_LOG(3,"Transition "<<iter->event()<<" should be activated.\n");
                 SetModelType jump_set_model=this->_toolbox->reset_step(iter->reset(),set_model);
                 TimeModelType jump_time_model=time_model;
-                DiscreteState jump_location=iter->target().location();
+                DiscreteState jump_location=iter->target();
                 std::vector<DiscreteEvent> jump_events=events;
                 jump_events.push_back(iter->event());
                 ARIADNE_LOG(2,"Pushing back "<<jump_set_model<<" into working_sets\n");
@@ -688,7 +688,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 const DiscreteTransition& transition=system.transition(event,location);
                 SetModelType jump_set_model=apply(transition.reset(),evolved_set_model);
-                DiscreteState jump_location=transition.target().location();
+                DiscreteState jump_location=transition.target();
                 std::vector<DiscreteEvent> jump_events=events;
                 jump_events.push_back(event);
                 working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,final_time_model));
@@ -712,7 +712,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
             ARIADNE_LOG(3,"  jump_set_model="<<active_set_model.range()<<";\n");
             const TimeModelType active_time_model = this->_toolbox->reachability_time(time_model+lower_active_time_model*time_step,time_model+upper_active_time_model*time_step);
             ARIADNE_LOG(3,"  active_time_model="<<active_time_model.range()<<".\n");
-            DiscreteState jump_location=transition.target().location();
+            DiscreteState jump_location=transition.target();
             std::vector<DiscreteEvent> jump_events=events;
             jump_events.push_back(event);
             working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,active_time_model));

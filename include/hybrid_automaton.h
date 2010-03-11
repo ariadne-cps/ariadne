@@ -158,10 +158,10 @@ class DiscreteTransition
     DiscreteEvent _event;
 
     // \brief The source of the discrete transition.
-    const DiscreteMode* _source;
+    DiscreteState _source;
 
     // \brief The target of the discrete transition.
-    const DiscreteMode* _target;
+    DiscreteState _target;
 
     // \brief The activation region of the discrete transition.
     VectorFunction _activation;
@@ -179,12 +179,12 @@ class DiscreteTransition
         return this->_event; }
 
     //! \brief The source mode of the discrete transition.
-    const DiscreteMode& source() const {
-        return *this->_source; }
+    DiscreteState source() const {
+        return this->_source; }
 
     //! \brief The target of the discrete transition.
-    const DiscreteMode& target() const {
-        return *this->_target; }
+    DiscreteState target() const {
+        return this->_target; }
 
 
     //! \brief The activation region of the discrete transition.
@@ -226,7 +226,7 @@ std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt);
 inline bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
         || (transition1.event() == transition2.event()
-            && transition1.source().location() < transition2.source().location());
+            && transition1.source() < transition2.source());
 }
 
 

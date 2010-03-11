@@ -304,6 +304,19 @@ class HybridListSet
             result[loc_iter->first]=loc_iter->second.bounding_boxes(); }
         return result; }
 
+    // A box for the whole set
+    Box bounding_box() const {
+        if(this->size()==0) { return Box(0); }
+        locations_const_iterator loc_iter=this->locations_begin();
+        Box result(loc_iter->second.bounding_box());
+        for(loc_iter++; loc_iter!=this->locations_end(); ++loc_iter) {
+            Box bx=loc_iter->second.bounding_box();
+            result=hull(result,bx);             
+        }
+        return result;
+    }
+
+
     HybridSpace space() const { return HybridSpace(*this); }
 };
 

@@ -90,7 +90,7 @@ DiscreteTransition(DiscreteEvent event,
                    const VectorFunction& reset,
                    const VectorFunction& activation,
                    bool forced)
-    : _event(event), _source(&source), _target(&target),
+    : _event(event), _source(source.location()), _target(target.location()),
       _activation(activation), _reset(reset), _forced(forced)
 {
     ARIADNE_ASSERT(activation.result_size()==1);
@@ -107,8 +107,8 @@ operator<<(std::ostream& os, const DiscreteTransition& transition)
 {
     return os << "DiscreteTransition( "
               << "event=" << transition.event() << ", "
-              << "source=" << transition.source().location() << ", "
-              << "target=" << transition.target().location() << ", "
+              << "source=" << transition.source() << ", "
+              << "target=" << transition.target() << ", "
               << "reset=" << transition.reset() << ", "
               << "activation=" << transition.activation() << " )";
 }
@@ -378,7 +378,7 @@ HybridAutomaton::has_transition(DiscreteEvent event, DiscreteState source) const
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
-            if(transition_iter->event()==event && transition_iter->source().location()==source) {
+            if(transition_iter->event()==event && transition_iter->source()==source) {
                 return true;
             }
         }
@@ -446,7 +446,7 @@ HybridAutomaton::transitions(DiscreteState source) const
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
-            if(transition_iter->source().location()==source) {
+            if(transition_iter->source()==source) {
                 result.insert(*transition_iter);
             }
         }
@@ -470,7 +470,7 @@ HybridAutomaton::blocking_guards(DiscreteState source) const
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
     {
-        if(transition_iter->source().location()==source && transition_iter->forced()) {
+        if(transition_iter->source()==source && transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
             const VectorFunction guard=transition_iter->activation();
             result[event]=guard;
@@ -488,7 +488,7 @@ HybridAutomaton::permissive_guards(DiscreteState source) const
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
     {
-        if(transition_iter->source().location()==source && !transition_iter->forced()) {
+        if(transition_iter->source()==source && !transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
             const VectorFunction guard=transition_iter->activation();
             result[event]=guard;
@@ -505,7 +505,7 @@ HybridAutomaton::transition(DiscreteEvent event, DiscreteState source) const
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
-            if(transition_iter->event()==event && transition_iter->source().location()==source) {
+            if(transition_iter->event()==event && transition_iter->source()==source) {
                 return *transition_iter;
             }
         }

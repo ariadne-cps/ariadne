@@ -332,7 +332,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
             activations[event]=transition_iter->scalar_activation();
         }
         resets[event]=transition_iter->reset();
-        targets[event]=transition_iter->target().location();
+        targets[event]=transition_iter->target();
     }
 
     print("\ninvariants:",invariants);

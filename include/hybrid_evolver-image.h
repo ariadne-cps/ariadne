@@ -143,6 +143,7 @@ class ImageSetHybridEvolver
 
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::list< HybridTimedSetType >& working_sets,
+   								 std::map< DiscreteState, uint>& working_sets_sizes,
                                   EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                   const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
                                   Semantics semantics, bool reach) const;

@@ -226,7 +226,10 @@ _evolution(EnclosureListType& final_sets,
 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
 
+	// The working sets, pushed back and popped front
     std::list< HybridTimedSetType > working_sets;
+	// The counters keeping track of the size of working_sets related to each location
+	std::map<DiscreteState,uint> working_sets_sizes;
 
     {
         // Set up initial timed set models
@@ -242,6 +245,7 @@ _evolution(EnclosureListType& final_sets,
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
+		working_sets_sizes[initial_location]++;
 
 		// Check for match between the enclosure cell size and the set size
 		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
@@ -252,17 +256,63 @@ _evolution(EnclosureListType& final_sets,
 
 	// While there exists a working set, process it and increment the total
 	for (current_working_sets_total = 0; !working_sets.empty(); current_working_sets_total++) {
-        HybridTimedSetType current_set=working_sets.front();
-		//if (semantics == LOWER_SEMANTICS)
-		//	cout << "." << working_sets.size() << std::flush;
-        working_sets.pop_front();
+
+		// Get the least recent working set, pop it and update the corresponding size
+		HybridTimedSetType current_set = working_sets.front(); 
+		working_sets.pop_front();
+		working_sets_sizes[current_set.first]--;
+
+		// Perform pruning of the current working set, if the optimization is enabled, the semantics is lower, and the maximum location volume and working sets sizes are greater than zero
+		if (this->_parameters->enable_working_sets_pruning && 
+			semantics == LOWER_SEMANTICS &&
+			working_sets_sizes[current_set.first] > 0 && 
+			this->_parameters->hybrid_maximum_working_sets_volume[current_set.first] > 0)
+		{
+			// Get the diameter of the largest enclosure cell
+			Float largest_enclosure_cell_diameter = 0.0;
+			for (Vector<Float>::const_iterator it=statistics.largest_enclosure_cell.begin(); it != statistics.largest_enclosure_cell.end(); it++)
+				largest_enclosure_cell_diameter = max(largest_enclosure_cell_diameter,(*it));
+			// Get the approximate volume of the working sets
+			Float approximate_working_sets_volume = working_sets_sizes[current_set.first];
+			for (Vector<Float>::const_iterator it=statistics.largest_enclosure_cell.begin(); it != statistics.largest_enclosure_cell.end(); it++)
+				approximate_working_sets_volume *= largest_enclosure_cell_diameter;
+			
+			// Gets the ratio of coverage ( >= -1 , but irrelevant if > 1)
+			Float ratio = approximate_working_sets_volume/this->_parameters->hybrid_maximum_working_sets_volume[current_set.first] -1.0;
+
+	        ARIADNE_LOG(2,"checking for pruning with ratio "<<ratio<<".. ");
+			// If the ratio is greater than zero, then there is at least one full coverage; if the random variable is lesser than ratio*RAND_MAX means 
+			// that if ratio > 1 (i.e. at least double coverage) then the working set is always discarded; if 0 < ratio < 1, then it is stochastically discarded 
+			if (ratio > 0 && rand() < ratio*RAND_MAX) {
+	        	ARIADNE_LOG(2,"performed.\n");	
+				continue;
+			}
+			else
+	        	ARIADNE_LOG(2,"not performed.\n");
+		} 
+
+		// New set and time models, if set model reduction is to be performed		
+		SetModelType new_set_model;
+		TimeModelType new_time_model;
+
+		// Perform set model reduction if enabled and if the interleaving distance is met
+		if (this->_parameters->enable_set_model_reduction && !((current_set.second.size()+1) % (this->_parameters->set_model_events_size_interleaving+1)))
+		{
+			new_set_model = this->_toolbox->set_model(ContinuousEnclosureType(current_set.third.range()));
+			new_time_model = this->_toolbox->time_model(current_set.fourth.range(),Box(new_set_model.argument_size()));
+			current_set = make_tuple(current_set.first,current_set.second, new_set_model, new_time_model);
+		}
+
+		// Get the members of the current set
         DiscreteState initial_location=current_set.first;
-        EventListType initial_events=current_set.second;
-        SetModelType initial_set_model=current_set.third;
-        TimeModelType initial_time_model=current_set.fourth;
+        EventListType initial_events=current_set.second;  	
+		SetModelType initial_set_model=current_set.third;
+		TimeModelType initial_time_model=current_set.fourth;		
+
+		// Get the range of the set model
 		Vector<Interval> initial_set_model_range=initial_set_model.range();
 
-		// Check whether the range can be included into the maximum_enclosure_cell
+		// Check whether the range can be included into the maximum_enclosure_cell (and enlarge the largest_enclosure_cell, if necessary)
 		bool has_max_enclosure_been_reached = false;		
 		for (uint i=0;i<initial_set_model_range.size();++i) 
 		{
@@ -295,6 +345,7 @@ _evolution(EnclosureListType& final_sets,
                 ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
                 ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
                 working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
+				working_sets_sizes[initial_location]++;
             }
         } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
                   this->_parameters->enable_premature_termination && has_max_enclosure_been_reached) {
@@ -302,7 +353,7 @@ _evolution(EnclosureListType& final_sets,
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
         } else {
             // Compute evolution
-            this->_evolution_step(working_sets,
+            this->_evolution_step(working_sets,working_sets_sizes,
                                   final_sets,reach_sets,intermediate_sets,
                                   system,current_set,maximum_hybrid_time,
                                   semantics,reach);
@@ -321,7 +372,7 @@ _evolution(EnclosureListType& final_sets,
                         <<"                      ");
         }
 
-		// Updates the current largest evolution time and steps
+		// Update the current largest evolution time and steps
 		current_largest_evol_time = max(current_largest_evol_time,initial_time_model.value());
 		current_largest_evol_steps = max(current_largest_evol_steps,initial_events.size());
     }
@@ -340,6 +391,7 @@ _evolution(EnclosureListType& final_sets,
 void
 ImageSetHybridEvolver::
 _evolution_step(std::list< HybridTimedSetType >& working_sets,
+				std::map< DiscreteState, uint>& working_sets_sizes,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
@@ -498,6 +550,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
                 jump_events.push_back(iter->event());
                 ARIADNE_LOG(2,"Pushing back "<<jump_set_model<<" into working_sets\n");
                 working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
+				working_sets_sizes[jump_location]++;
             }
         }
         // Adjoin reach and intermediate sets
@@ -630,6 +683,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
                 // TODO: Better estimate to use smaller blocking time
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
+				working_sets_sizes[location]++;
             } else if(event>=0) { // not an invariant
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 const DiscreteTransition& transition=system.transition(event,location);
@@ -638,6 +692,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
                 std::vector<DiscreteEvent> jump_events=events;
                 jump_events.push_back(event);
                 working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,final_time_model));
+				working_sets_sizes[jump_location]++;
             }
         }
         // Compute evolution for non-blocking events
@@ -661,6 +716,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
             std::vector<DiscreteEvent> jump_events=events;
             jump_events.push_back(event);
             working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,active_time_model));
+			working_sets_sizes[jump_location]++;
         }
     }
 

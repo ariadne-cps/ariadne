@@ -65,12 +65,30 @@ class ContinuousEvolutionParameters {
     //! \brief The maximum allowable cell of a basic set during integration. 
     //! Decreasing the volume of the cell increases the accuracy of the computation of an over-approximation. 
     Vector<RealType> maximum_enclosure_cell;
+
+	//! \brief The interleaving of events before set model reduction.
+    //! \details The value represents the number of events between two set model reductions: a value of zero implies that a set model is always reduced.
+	//! Used in conjunction with enable_set_model_reduction. 
+	UnsignedIntType set_model_events_size_interleaving;
+
+	//! \brief The maximum overall volume of working sets that is allowed inside a location.
+	//! \details Used in conjunction with enable_working_sets_pruning.
+	std::map<DiscreteState,Float> hybrid_maximum_working_sets_volume;
     
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
 
     //! \brief Terminate evolution if basic sets became too large (true by default).
     bool enable_premature_termination;
+
+	//! \brief Reduces a set model to the equivalent of its bounding box, every set_model_events_size_interleaving events (false by default).
+	bool enable_set_model_reduction;
+
+	//! \brief Enables the pruning of the working sets when too large (false by default).
+    //! \details The pruning is done probabilistically, as soon as the volume of the working sets is larger than the hybrid_maximum_working_sets_volume.
+	//! <br>
+    //! This parameter is used only under lower semantics.
+	bool enable_working_sets_pruning;
 };
 
 
@@ -204,8 +222,12 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       maximum_step_size(1.0),
       minimum_enclosure_cell(Vector<RealType>(0)),
       maximum_enclosure_cell(Vector<RealType>(0)),
+	  set_model_events_size_interleaving(0),
+	  hybrid_maximum_working_sets_volume(),
       enable_subdivisions(false),
-      enable_premature_termination(true)
+      enable_premature_termination(true),
+	  enable_set_model_reduction(false),
+	  enable_working_sets_pruning(false)
 { }
 
 inline
@@ -232,8 +254,12 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << ",\n  maximum_step_size=" << p.maximum_step_size
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
+       << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
+       << ",\n  hybrid_maximum_working_sets_volume=" << p.hybrid_maximum_working_sets_volume
        << ",\n  enable_subdivisions=" << p.enable_subdivisions
        << ",\n  enable_premature_termination=" << p.enable_premature_termination
+       << ",\n  enable_set_model_reduction=" << p.enable_set_model_reduction
+       << ",\n  enable_working_sets_pruning=" << p.enable_working_sets_pruning
        << "\n)\n";
     return os;
 }
@@ -273,6 +299,8 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  maximum_step_size=" << p.maximum_step_size
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
+       << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
+       << ",\n  hybrid_maximum_working_sets_volume=" << p.hybrid_maximum_working_sets_volume
 
        << ",\n\n  lock_to_grid_steps=" << p.lock_to_grid_steps
        << ",\n  lock_to_grid_time=" << p.lock_to_grid_time

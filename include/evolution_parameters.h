@@ -192,6 +192,13 @@ class DiscreteEvolutionParameters {
     //! This parameter is only used in upper_evolve(), upper_reach() and chain_reach() routines.
     IntType maximum_grid_depth;
 
+    //! \brief Set the highest allowed value of maximum_grid_depth to be used by an analysis method that iteratively refines the grid depth.
+    //! \details
+    //! Increasing this value increases the accuracy of the computation for iterative methods. 
+    //!  <br> 
+    //! This parameter is only used in the verify_iterative() routine.
+	IntType highest_maximum_grid_depth;
+
     //! \brief Set the maximum height used for approximation on a grid for chain reachability computations.
     //! \details
     //! Increasing this value increases domain over which computation is performed. 
@@ -239,6 +246,7 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
       initial_grid_depth(10),
       initial_grid_density(8),
       maximum_grid_depth(6),
+	  highest_maximum_grid_depth(9),
       maximum_grid_height(16)
 { }
 
@@ -280,6 +288,7 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  initial_grid_depth=" << p.initial_grid_depth
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
+       << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
 
@@ -311,6 +320,7 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  initial_grid_depth=" << p.initial_grid_depth
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
+       << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
 

@@ -30,6 +30,7 @@
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
 #include "grid_set.h"
+#include "discrete_event.h"
 
 namespace Ariadne {
 
@@ -162,7 +163,6 @@ const DiscreteMode&
 HybridAutomaton::new_invariant(DiscreteState location,
                                const VectorFunction& invariant)
 {
-    ARIADNE_ASSERT(location>0);
     if(!this->has_mode(location)) {
         throw std::runtime_error("The location of the invariant must be in the automaton.");
     }
@@ -177,60 +177,10 @@ HybridAutomaton::new_invariant(DiscreteState location,
             "The invariant has result size " << invariant.result_size()
                 << " but only scalar invariants are currently supported.");
     }
-    DiscreteEvent invariant_event(-8-mode._invariants.size());
+    DiscreteEvent invariant_event(std::string("invariant_"+to_str(mode._invariants.size())));
     mode._invariants[invariant_event]=invariant;
     return mode;
 }
-
-
-const DiscreteTransition&
-HybridAutomaton::
-new_transition(DiscreteEvent event,
-               const DiscreteMode &source,
-               const DiscreteMode &target,
-               const VectorFunction &reset,
-               const VectorFunction &activation,
-               bool forced)
-{
-    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
-    DiscreteEvent event_id=event;
-    DiscreteState source_id=source.location();
-    DiscreteState target_id=target.location();
-    if(this->has_transition(event_id,source_id)) {
-        throw std::runtime_error("The automaton already has a transition with the given event_id and source id.");
-    }
-    if(!this->has_mode(source_id)) {
-        throw std::runtime_error("The source mode of the transition must be in the automaton");
-    }
-    if(!this->has_mode(target_id)) {
-        throw std::runtime_error("The desitination mode of the transition must be in the automaton");
-    }
-
-    const DiscreteMode& this_source=this->mode(source_id);
-    const DiscreteMode& this_target=this->mode(target_id);
-    if(&source!=&this_source) {
-        throw std::runtime_error("The source mode of the transition is not equal to the mode in the automaton with the same id.");
-    }
-    if(&target!=&this_target) {
-        throw std::runtime_error("The target mode of the transition is not equal to the mode in the automaton with the same id.");
-    }
-
-    this->_transitions.insert(DiscreteTransition(event_id,this_source,this_target,reset,activation,forced));
-    return this->transition(event_id,source_id);
-}
-
-
-const DiscreteTransition&
-HybridAutomaton::new_transition(DiscreteEvent event,
-                                DiscreteState source,
-                                DiscreteState target,
-                                const VectorFunction &reset,
-                                const ScalarFunction &activation,
-                                bool forced)
-{
-    return this->new_transition(event,source,target,reset,VectorFunction(1u,activation),forced);
-}
-
 
 const DiscreteTransition&
 HybridAutomaton::new_transition(DiscreteEvent event,
@@ -240,7 +190,9 @@ HybridAutomaton::new_transition(DiscreteEvent event,
                                 const VectorFunction &activation,
                                 bool forced)
 {
-    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
+    if(!event.is_transition()) {
+        throw std::runtime_error("Transition event names cannot start with \"invariant\".");    
+    }
     if(this->has_transition(event,source)) {
         throw std::runtime_error("The automaton already has a transition with the given id and source id.");
     }
@@ -259,27 +211,90 @@ HybridAutomaton::new_transition(DiscreteEvent event,
 
 const DiscreteTransition&
 HybridAutomaton::
+new_transition(DiscreteEvent event,
+               DiscreteState source,
+               DiscreteState target,
+               const VectorFunction &reset,
+               const ScalarFunction &activation,
+               bool forced)
+{
+    return this->new_transition(event,source,target,reset,VectorFunction(1u,activation),forced);
+}
+
+const DiscreteTransition&
+HybridAutomaton::
+new_transition(DiscreteEvent event,
+               const DiscreteMode &source,
+               const DiscreteMode &target,
+               const VectorFunction &reset,
+               const VectorFunction &activation,
+               bool forced)
+{
+    DiscreteState source_id=source.location();
+    DiscreteState target_id=target.location();
+    return this->new_transition(event,source_id,target_id,reset,activation,forced);
+}
+
+const DiscreteTransition&
+HybridAutomaton::
+new_transition(DiscreteEvent event,
+               const DiscreteMode &source,
+               const DiscreteMode &target,
+               const VectorFunction &reset,
+               const ScalarFunction &activation,
+               bool forced)
+{
+    DiscreteState source_id=source.location();
+    DiscreteState target_id=target.location();
+    return this->new_transition(event,source_id,target_id,reset,VectorFunction(1u,activation),forced);
+}
+
+const DiscreteTransition&
+HybridAutomaton::
+new_forced_transition(DiscreteEvent event,
+                      DiscreteState source,
+                      DiscreteState target,
+                      const VectorFunction &reset,
+                      const ScalarFunction &activation)
+{
+    return this->new_transition(event,source,target,reset,VectorFunction(1u,activation),true);
+}
+
+const DiscreteTransition&
+HybridAutomaton::
 new_forced_transition(DiscreteEvent event,
                       DiscreteState source,
                       DiscreteState target,
                       const VectorFunction &reset,
                       const VectorFunction &activation)
 {
-    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
-    if(this->has_transition(event,source)) {
-        throw std::runtime_error("The automaton already has a transition with the given id and source id.");
-    }
-    if(!this->has_mode(source)) {
-        throw std::runtime_error("The automaton does not contain a mode with ths given source id");
-    }
-    if(!this->has_mode(target)) {
-        throw std::runtime_error("The automaton does not contain a mode with ths given desitination id");
-    }
+    return this->new_transition(event,source,target,reset,activation,true);
+}
 
-    const DiscreteMode& source_mode=this->mode(source);
-    const DiscreteMode& target_mode=this->mode(target);
-    this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,true));
-    return this->transition(event,source);
+const DiscreteTransition&
+HybridAutomaton::
+new_forced_transition(DiscreteEvent event,
+                      const DiscreteMode &source,
+                      const DiscreteMode &target,
+                      const VectorFunction &reset,
+                      const VectorFunction &activation)
+{
+    DiscreteState source_id=source.location();
+    DiscreteState target_id=target.location();
+    return this->new_transition(event,source_id,target_id,reset,activation,true);
+}
+
+const DiscreteTransition&
+HybridAutomaton::
+new_forced_transition(DiscreteEvent event,
+                      const DiscreteMode &source,
+                      const DiscreteMode &target,
+                      const VectorFunction &reset,
+                      const ScalarFunction &activation)
+{
+    DiscreteState source_id=source.location();
+    DiscreteState target_id=target.location();
+    return this->new_transition(event,source_id,target_id,reset,VectorFunction(1u,activation),true);
 }
 
 
@@ -289,24 +304,49 @@ new_unforced_transition(DiscreteEvent event,
                         DiscreteState source,
                         DiscreteState target,
                         const VectorFunction &reset,
+                        const ScalarFunction &activation)
+{
+    return this->new_transition(event,source,target,reset,VectorFunction(1u,activation),false);
+}
+
+const DiscreteTransition&
+HybridAutomaton::
+new_unforced_transition(DiscreteEvent event,
+                        DiscreteState source,
+                        DiscreteState target,
+                        const VectorFunction &reset,
                         const VectorFunction &activation)
 {
-    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
-    if(this->has_transition(event,source)) {
-        throw std::runtime_error("The automaton already has a transition with the given id and source id.");
-    }
-    if(!this->has_mode(source)) {
-        throw std::runtime_error("The automaton does not contain a mode with ths given source id");
-    }
-    if(!this->has_mode(target)) {
-        throw std::runtime_error("The automaton does not contain a mode with ths given desitination id");
-    }
+    return this->new_transition(event,source,target,reset,activation,false);
 
-    const DiscreteMode& source_mode=this->mode(source);
-    const DiscreteMode& target_mode=this->mode(target);
-    this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,false));
-    return this->transition(event,source);
 }
+
+const DiscreteTransition&
+HybridAutomaton::
+new_unforced_transition(DiscreteEvent event,
+                        const DiscreteMode &source,
+                        const DiscreteMode &target,
+                        const VectorFunction &reset,
+                        const VectorFunction &activation)
+{
+    DiscreteState source_id=source.location();
+    DiscreteState target_id=target.location();
+    return this->new_transition(event,source_id,target_id,reset,activation,false);
+}
+
+const DiscreteTransition&
+HybridAutomaton::
+new_unforced_transition(DiscreteEvent event,
+                        const DiscreteMode &source,
+                        const DiscreteMode &target,
+                        const VectorFunction &reset,
+                        const ScalarFunction &activation)
+{
+    DiscreteState source_id=source.location();
+    DiscreteState target_id=target.location();
+    return this->new_transition(event,source_id,target_id,reset,VectorFunction(1u,activation),false);
+}
+
 
 
 void
@@ -509,7 +549,8 @@ HybridAutomaton::transition(DiscreteEvent event, DiscreteState source) const
                 return *transition_iter;
             }
         }
-    throw std::runtime_error("The hybrid automaton does not have a transition with the given event and source.");
+    ARIADNE_THROW(std::runtime_error, "HybridAutomaton::transition(event, source)",
+        "The hybrid automaton does not have a transition with event \"" << event << "\" and source \"" << source << "\".");
 }
 
 

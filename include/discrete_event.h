@@ -46,6 +46,8 @@ class DiscreteEvent {
     bool operator>=(const DiscreteEvent& e) const { return this->_id>=e._id; }
     bool operator< (const DiscreteEvent& e) const { return this->_id< e._id; }
     bool operator> (const DiscreteEvent& e) const { return this->_id> e._id; }
+    // We assume that invariant event names starts with "invariant"
+    bool is_transition() const { return (this->_id.compare(0,9,"invariant") != 0); }   
     friend std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e);
   private:
     std::string _id;

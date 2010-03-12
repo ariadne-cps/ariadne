@@ -628,7 +628,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 */
     // Treat non-transverse urgent events as non-urgent in upper semantics
     for(std::set<DiscreteEvent>::const_iterator iter=non_transverse_events.begin(); iter!=non_transverse_events.end(); ++iter) {
-        if(*iter > 0) {     // If the event is a transition
+        if(iter->is_transition()) {     // If the event is a transition
             activations[*iter]=guards.find(*iter)->second;
        }
     }
@@ -674,7 +674,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
 				working_sets_sizes[location]++;
-            } else if(event>=0) { // not an invariant
+            } else if(event.is_transition()) { // not an invariant
                 intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 const DiscreteTransition& transition=system.transition(event,location);
                 SetModelType jump_set_model=apply(transition.reset(),evolved_set_model);

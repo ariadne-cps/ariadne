@@ -223,6 +223,7 @@ class DiscreteTransition
 
 std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt);
 
+
 inline bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
         || (transition1.event() == transition2.event()
@@ -371,33 +372,20 @@ class HybridAutomaton
                                              const VectorFunction& activation,
                                              bool forced);
 
-    //! \brief Adds a forced (urgent) discrete transition to the automaton
-    //! using the discrete states to specify the source and target modes.
+    //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
     //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    const DiscreteTransition& new_forced_transition(DiscreteEvent event,
-                                                    DiscreteState source,
-                                                    DiscreteState target,
-                                                    const VectorFunction& reset,
-                                                    const VectorFunction& activation);
-
-    //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
-    //! using the discrete states to specify the source and target modes.
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
-                                                      DiscreteState source,
-                                                      DiscreteState target,
-                                                      const VectorFunction& reset,
-                                                      const VectorFunction& activation);
+    //!    \param event is the discrete transition's discrete event.
+    //!    \param source is the discrete transition's source mode.
+    //!    \param target is the discrete transition's target mode.
+    //!    \param reset is the discrete transition's reset.
+    //!    \param activation is the discrete transition's activation region.
+    //!    \param forced determines whether the transition is forced or unforced.
+    const DiscreteTransition& new_transition(DiscreteEvent event,
+                                             const DiscreteMode& source,
+                                             const DiscreteMode& target,
+                                             const VectorFunction& reset,
+                                             const ScalarFunction& activation,
+                                             bool forced);
 
     //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
     //!
@@ -413,6 +401,118 @@ class HybridAutomaton
                                              const VectorFunction& reset,
                                              const VectorFunction& activation,
                                              bool forced);
+
+    //! \brief Adds a forced (urgent) discrete transition to the automaton
+    //! using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_forced_transition(DiscreteEvent event,
+                                                    DiscreteState source,
+                                                    DiscreteState target,
+                                                    const VectorFunction& reset,
+                                                    const ScalarFunction& activation);
+
+    //! \brief Adds a forced (urgent) discrete transition to the automaton
+    //! using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_forced_transition(DiscreteEvent event,
+                                                    DiscreteState source,
+                                                    DiscreteState target,
+                                                    const VectorFunction& reset,
+                                                    const VectorFunction& activation);
+
+    //! \brief Adds a forced (urgent) discrete transition to the automaton
+    //! using the discrete modes to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_forced_transition(DiscreteEvent event,
+                                                    const DiscreteMode& source,
+                                                    const DiscreteMode& target,
+                                                    const VectorFunction& reset,
+                                                    const ScalarFunction& activation);
+
+    //! \brief Adds a forced (urgent) discrete transition to the automaton
+    //! using the discrete modes to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_forced_transition(DiscreteEvent event,
+                                                    const DiscreteMode& source,
+                                                    const DiscreteMode& target,
+                                                    const VectorFunction& reset,
+                                                    const VectorFunction& activation);
+
+    //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
+    //! using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
+                                                      DiscreteState source,
+                                                      DiscreteState target,
+                                                      const VectorFunction& reset,
+                                                      const ScalarFunction& activation);
+
+    //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
+    //! using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
+                                                      DiscreteState source,
+                                                      DiscreteState target,
+                                                      const VectorFunction& reset,
+                                                      const VectorFunction& activation);
+
+    //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
+    //! using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
+                                                      const DiscreteMode& source,
+                                                      const DiscreteMode& target,
+                                                      const VectorFunction& reset,
+                                                      const ScalarFunction& activation);
+
+    //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
+    //! using the discrete states to specify the source and target modes.
+    //!
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
+    const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
+                                                      const DiscreteMode& source,
+                                                      const DiscreteMode& target,
+                                                      const VectorFunction& reset,
+                                                      const VectorFunction& activation);
 
     //! \brief Set the grid controlling relative scaling in the mode.
     void set_grid(DiscreteState location, const Grid& grid);

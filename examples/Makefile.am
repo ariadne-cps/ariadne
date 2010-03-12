@@ -13,8 +13,7 @@ bin_PROGRAMS=tutorial \
              rectifier_oneloc grid-refinement multipleguards\
 			 robotarm \
 			 \
-			 coconut-demo
-
+			 coconut-demo 
 
 tutorial_SOURCES = tutorial.cc verify.py
 boost_power_converter_SOURCES=boost_power_converter.cc
@@ -34,7 +33,6 @@ multipleguards_SOURCES=multipleguards.cc
 robotarm_SOURCES=robotarm.cc
 
 coconut_demo_SOURCES=coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
-
 
 examples: $(bin_PROGRAMS)
 

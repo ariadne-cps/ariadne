@@ -61,6 +61,12 @@ template<class ES> class HybridListSet;
 template<class ES> class HybridDiscretiser;
 
 /*! \brief A class for performing reachability analysis on a hybrid system.
+	\details Log levels and the methods that are allowed to log output at such a level.
+	<br>	1: Methods using the verify_iterative() method; 
+	<br>	2: The verify_iterative() method;								
+	<br>	3: The verify() and viable() methods;
+	<br>	4: Remaining analysis methods implemented from reachability_analyser_interface.h;
+	<br>	5: Internal analysis methods.
  */
 class HybridReachabilityAnalyser
     : public Loggable

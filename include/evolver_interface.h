@@ -28,6 +28,7 @@
 #ifndef ARIADNE_EVOLVER_INTERFACE_H
 #define ARIADNE_EVOLVER_INTERFACE_H
 
+#include "evolution_parameters.h"
 #include "evolution_statistics.h"
 
 namespace Ariadne {
@@ -54,7 +55,9 @@ class EvolverInterface
     typedef ES EnclosureType;
     typedef typename SystemType::TimeType TimeType;
     typedef ListSet<EnclosureType> EnclosureListType;
+	typedef ContinuousEvolutionParameters EvolutionParametersType;
 	typedef ContinuousEvolutionStatistics EvolutionStatisticsType;
+
 
     //! \brief Virtual destructor. 
     virtual ~EvolverInterface() {};
@@ -70,6 +73,13 @@ class EvolverInterface
 
 	//! \brief Get the statistics of the evolution.
     virtual const EvolutionStatisticsType& statistics() const = 0;
+
+	//! \brief Set the parameters of the evolution.
+	virtual EvolutionParametersType& parameters() = 0;
+
+	//! \brief Get the parameters of the evolution.
+    virtual const EvolutionParametersType& parameters() const = 0;
+
 
   public:
     //! \brief Compute an approximation to the evolved set under the given semantics. 

@@ -35,6 +35,7 @@
 #include "discretiser_interface.h"
 #include "hybrid_automaton.h"
 #include "vector_field.h"
+#include "evolution_parameters.h"
 #include "evolution_statistics.h"
 
 #include "logging.h"
@@ -185,6 +186,19 @@ class HybridDiscretiser
 	void reset_upper_statistics() { this->_evolver->statistics().upper().reset(); }
 	//! \brief Resets the upper evolution statistics of the evolver related to the largest evolution time/steps
 	void reset_upper_largest_evol_statistics() { this->_evolver->statistics().upper().reset_largest_evol(); }
+
+	//@}
+
+    //@{
+    //! \name Gets and sets the continuous evolution parameters
+
+	//! \brief Gets the evolution parameters from the evolver
+	const ContinuousEvolutionParameters& parameters() const { return this->_evolver->parameters(); }
+
+	//! \brief Gets a reference for setting the evolution parameters from the evolver
+	ContinuousEvolutionParameters& parameters() { return this->_evolver->parameters(); }
+
+	//@}
 
     //@{
     //! \name Evaluation on basic sets.

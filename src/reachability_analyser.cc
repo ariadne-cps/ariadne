@@ -474,7 +474,7 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
 
 	GTS reach, evolve;
-	make_lpair(reach,evolve) = upper_reach_evolve(system, initial_set, time); // Runs the upper_reach_evolve routine on its behalf
+	make_lpair(reach,evolve) = this->upper_reach_evolve(system, initial_set, time); // Runs the upper_reach_evolve routine on its behalf
 
     return reach; // Returns the reached region only
 }
@@ -726,7 +726,7 @@ chain_reach(const SystemType& system,
 	this->_parameters->bounding_domain = bounding_set;
 
 	// Returns the result of chain_reach with implicit bounding set
-	return chain_reach(system,initial_set);
+	return this->chain_reach(system,initial_set);
 }
 
 
@@ -739,14 +739,118 @@ viable(const SystemType& system,
 }
 
 
+bool 
+HybridReachabilityAnalyser::
+_safe(const SystemType& system, 
+	  const HybridImageSet& initial_set, 
+	  const HybridBoxes& safe_box)
+{
+	ARIADNE_LOG(4,"Safety analysis... ");
+
+	HybridGridTreeSet reach = chain_reach(system,initial_set); // Perform the chain reachability analysis	
+
+	// If the reached region was not restricted and the maximum enclosure bounds have not been reached while not subdividing, a verification is feasible
+	if (!this->_statistics->upper().has_restriction_occurred && !(this->_discretiser->statistics().upper().has_max_enclosure_been_reached && !this->_discretiser->parameters().enable_subdivisions))
+	{
+		// If the reached region is definitely inside the hybrid safe box, the result is safe 
+		bool result = definitely(reach.subset(safe_box));
+
+		ARIADNE_LOG(4, (result ? "safe.\n" : "not safe.\n") );
+
+		return result;
+	}
+	// Otherwise notify and return false
+	else
+	{
+		ARIADNE_LOG(4,"not checked due to: ");
+		if (this->_statistics->upper().has_restriction_occurred)
+			ARIADNE_LOG(4,"<domain bounds> ");
+		if (this->_discretiser->statistics().upper().has_max_enclosure_been_reached && !this->_discretiser->parameters().enable_subdivisions)
+			ARIADNE_LOG(4,"<enclosure bounds>");
+		ARIADNE_LOG(4,"\n");
+		return false;
+	}
+}
+
+bool 
+HybridReachabilityAnalyser::
+_unsafe(const SystemType& system, 
+		const HybridImageSet& initial_set, 
+		const HybridBoxes& safe_box)
+{
+	ARIADNE_LOG(4,"Unsafety analysis... ");
+
+	// Get the size of the continuous space (NOTE: assumed equal for all locations)
+	const uint css = system.state_space().locations_begin()->second; 
+	// Create the evolution time from the upper approximation obtained in the upper case
+	HybridTime lrt = HybridTime(this->_statistics->upper().largest_evol_time,this->_statistics->upper().largest_evol_steps); 
+
+	// Get the sizes of the upper reached set for each location
+
+		// Get a copy of the upper reached region
+		HybridGridTreeSet upperreach = this->_statistics->upper().reach;
+		// The sizes of the reached region
+		std::map<DiscreteState,uint> sizes;
+		// For each location, obtain the size of the reach set
+		for(HybridGridTreeSet::locations_iterator loc_iter=upperreach.locations_begin();
+			loc_iter!=upperreach.locations_end(); ++loc_iter) 
+		{
+			// Mince the region to the maximum depth
+			loc_iter->second.mince(this->_parameters->maximum_grid_depth);
+			// Store the (location,size) pair
+			sizes.insert(make_pair<DiscreteState,uint>(loc_iter->first,loc_iter->second.size()));
+		}
+		// Assign the sizes
+		this->_discretiser->parameters().hybrid_working_sets_size_limit = sizes;
+
+	HybridGridTreeSet lowerreach = lower_reach(system,initial_set,lrt);
+
+	// Create a safe set enlarged for the falsification		
+	HybridBoxes safe_box_enl = safe_box;
+	for (HybridBoxes::iterator hbx_it = safe_box_enl.begin(); hbx_it != safe_box_enl.end(); hbx_it++)
+		hbx_it->second.widen();
+
+	// Get a copy of the grid
+	HybridGrid hg = system.grid();
+	// Get the safe box enlarged by a grid cell and half a maximum enclosure cell
+	for (HybridGrid::locations_const_iterator hg_it = hg.locations_begin(); hg_it != hg.locations_end(); hg_it++)
+		for (uint i=0;i<css;i++)
+			safe_box_enl[hg_it->first][i] += Interval(-this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2,this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2)+Interval(-hg_it->second.lengths()[i],hg_it->second.lengths()[i])/(1<<this->_parameters->maximum_grid_depth);
+
+	// If the reach is definitely not included in the enlarged safe box, then it is unsafe
+	bool result = definitely(!lowerreach.subset(safe_box_enl));
+
+	ARIADNE_LOG(4, (result ? "unsafe.\n" : "not unsafe.\n") );
+
+	return result;
+}
 
 tribool
 HybridReachabilityAnalyser::
 verify(const SystemType& system,
        const HybridImageSet& initial_set,
-       const HybridImageSet& safe_set) const
+       const HybridBoxes& safe_box)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+		ARIADNE_LOG(3, "Verification... ");
+
+		// Perform the safety analysis
+		if (this->_safe(system,initial_set,safe_box)) 
+		{
+			ARIADNE_LOG(3, " safe.\n");
+			return true;
+		}
+	
+		// Perform the unsafety analysis
+		if (this->_unsafe(system,initial_set,safe_box)) 
+		{
+			ARIADNE_LOG(3, " unsafe.\n");
+			return false;
+		}
+
+		ARIADNE_LOG(3, " indeterminate.\n");
+
+		// Return indeterminate if both failed
+		return indeterminate;
 }
 
 

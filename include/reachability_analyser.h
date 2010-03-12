@@ -65,8 +65,9 @@ template<class ES> class HybridDiscretiser;
 	<br>	1: Methods using the verify_iterative() method; 
 	<br>	2: The verify_iterative() method;								
 	<br>	3: The verify() and viable() methods;
-	<br>	4: Remaining analysis methods implemented from reachability_analyser_interface.h;
-	<br>	5: Internal analysis methods.
+	<br>	4: Internal methods for verify() and viable();
+	<br>	5: Remaining analysis methods implemented from reachability_analyser_interface.h;
+	<br>	6: Internal methods for the remaining analysis methods.
  */
 class HybridReachabilityAnalyser
     : public Loggable
@@ -166,14 +167,15 @@ class HybridReachabilityAnalyser
                                              const HybridBoxes& bounding_domain) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
-    virtual SetApproximationType viable(const HybridAutomaton& system,
+    virtual SetApproximationType viable(const SystemType& system,
                                         const HybridImageSet& bounding_set) const;
   
-    /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_set. */
-    virtual tribool verify(const HybridAutomaton& system, 
+    /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box. */
+    virtual tribool verify(const SystemType& system, 
                            const HybridImageSet& initial_set, 
-                           const HybridImageSet& safe_set) const;
+                           const HybridBoxes& safe_box);
     //@}
+
   
   public:
     typedef HybridTime T;
@@ -191,8 +193,18 @@ class HybridReachabilityAnalyser
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
-  private:
-    // Helper functions for approximating sets
+  public:
+
+	/*! \brief Verify whether the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
+	bool _safe(const SystemType& system, 
+			   const HybridImageSet& initial_set, 
+			   const HybridBoxes& safe_box);
+
+	/*! \brief Verify whether the automaton \a system starting in \a initial_set possibly exits the \a safe_box. */	
+	bool _unsafe(const SystemType& system, 
+			 	 const HybridImageSet& initial_set, 
+				 const HybridBoxes& safe_box);
+
 };
 
 

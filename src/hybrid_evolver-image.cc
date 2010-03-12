@@ -262,23 +262,13 @@ _evolution(EnclosureListType& final_sets,
 		working_sets.pop_front();
 		working_sets_sizes[current_set.first]--;
 
-		// Perform pruning of the current working set, if the optimization is enabled, the semantics is lower, and the maximum location volume and working sets sizes are greater than zero
+		// Perform pruning of the current working set, if the optimization is enabled, the semantics is lower, and the working sets size is greater than the corresponding limit
 		if (this->_parameters->enable_working_sets_pruning && 
 			semantics == LOWER_SEMANTICS &&
-			working_sets_sizes[current_set.first] > 0 && 
-			this->_parameters->hybrid_maximum_working_sets_volume[current_set.first] > 0)
+			working_sets_sizes[current_set.first] > this->_parameters->hybrid_working_sets_size_limit[current_set.first])
 		{
-			// Get the diameter of the largest enclosure cell
-			Float largest_enclosure_cell_diameter = 0.0;
-			for (Vector<Float>::const_iterator it=statistics.largest_enclosure_cell.begin(); it != statistics.largest_enclosure_cell.end(); it++)
-				largest_enclosure_cell_diameter = max(largest_enclosure_cell_diameter,(*it));
-			// Get the approximate volume of the working sets
-			Float approximate_working_sets_volume = working_sets_sizes[current_set.first];
-			for (Vector<Float>::const_iterator it=statistics.largest_enclosure_cell.begin(); it != statistics.largest_enclosure_cell.end(); it++)
-				approximate_working_sets_volume *= largest_enclosure_cell_diameter;
-			
 			// Gets the ratio of coverage ( >= -1 , but irrelevant if > 1)
-			Float ratio = approximate_working_sets_volume/this->_parameters->hybrid_maximum_working_sets_volume[current_set.first] -1.0;
+			Float ratio = ((Float)working_sets_sizes[current_set.first])/((Float)this->_parameters->hybrid_working_sets_size_limit[current_set.first]) -1.0;
 
 	        ARIADNE_LOG(2,"checking for pruning with ratio "<<ratio<<".. ");
 			// If the ratio is greater than zero, then there is at least one full coverage; if the random variable is lesser than ratio*RAND_MAX means 

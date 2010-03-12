@@ -71,9 +71,9 @@ class ContinuousEvolutionParameters {
 	//! Used in conjunction with enable_set_model_reduction. 
 	UnsignedIntType set_model_events_size_interleaving;
 
-	//! \brief The maximum overall volume of working sets that is allowed inside a location.
+	//! \brief The limit on working sets size for each location before pruning.
 	//! \details Used in conjunction with enable_working_sets_pruning.
-	std::map<DiscreteState,Float> hybrid_maximum_working_sets_volume;
+	std::map<DiscreteState,uint> hybrid_working_sets_size_limit;
     
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
@@ -223,7 +223,7 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       minimum_enclosure_cell(Vector<RealType>(0)),
       maximum_enclosure_cell(Vector<RealType>(0)),
 	  set_model_events_size_interleaving(0),
-	  hybrid_maximum_working_sets_volume(),
+	  hybrid_working_sets_size_limit(),
       enable_subdivisions(false),
       enable_premature_termination(true),
 	  enable_set_model_reduction(false),
@@ -255,7 +255,7 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
        << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
-       << ",\n  hybrid_maximum_working_sets_volume=" << p.hybrid_maximum_working_sets_volume
+       << ",\n  hybrid_working_sets_size_limit=" << p.hybrid_working_sets_size_limit
        << ",\n  enable_subdivisions=" << p.enable_subdivisions
        << ",\n  enable_premature_termination=" << p.enable_premature_termination
        << ",\n  enable_set_model_reduction=" << p.enable_set_model_reduction
@@ -300,7 +300,7 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
        << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
-       << ",\n  hybrid_maximum_working_sets_volume=" << p.hybrid_maximum_working_sets_volume
+       << ",\n  hybrid_working_sets_size_limit=" << p.hybrid_working_sets_size_limit
 
        << ",\n\n  lock_to_grid_steps=" << p.lock_to_grid_steps
        << ",\n  lock_to_grid_time=" << p.lock_to_grid_time

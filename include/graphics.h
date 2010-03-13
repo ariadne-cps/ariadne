@@ -22,17 +22,21 @@
  */
  
 /*! \file graphics.h
- *  \brief Graphics class for drawting and outputting figures.
+ *  \brief Graphics class for drawing and outputting figures.
  */
 
 #ifndef ARIADNE_GRAPHICS_H
 #define ARIADNE_GRAPHICS_H
 
+#include <cstdarg>
+#include <cstdio>
 #include <iosfwd>
 #include <string>
 #include <vector>
 
 #include "graphics_interface.h"
+#include "discrete_state.h"
+#include "box.h"
 
 typedef unsigned int uint;
 
@@ -193,61 +197,80 @@ void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
     g.write(filename); 
 }
 
-//  Luca's enhanced plot function.
-//  if MAX_GRID_DEPTH is different from -1, plot the corresponding grid
-/*
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
-    // Assigns local variables
-    Figure fig; 
-    array<uint> xy(2,xaxis,yaxis);
+//! \brief Plots figures for each couple of coordinates, with graphic box automatically chosen as the bounding box of the set. Also, saves the figures on a given folder under the current path.
+template<class SET> 
+void plot(const string& foldername, const string& filename, const SET& set)  
+{
+	// If a set exists
+	if (set.size()>0)
+	{
+		// Gets the bounds of the set
+		std::map<DiscreteState,Box> set_bounds = set.bounding_box();
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
-    
-    fig.set_x_axis_label("x label");
-    fig.set_y_axis_label("y label");
-    
-    // If the grid must be shown
-    if (MAX_GRID_DEPTH >= 0)
-    {
-	// The rectangle to be drawn
-	Box rect = Box(numVariables);
-	// Chooses the fill colour
-        fig << fill_colour(Colour(1.0,1.0,1.0));
+		// Gets the number of variables (NOTE: assumed equal for each mode)
+		uint numvar = set_bounds.begin()->second.dimension();	
 
-	// Gets the number of times each variable interval would be divided by 2
-        int numDivisions = MAX_GRID_DEPTH / numVariables;
-	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-	double step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
-	// Initiates the x position to the bounding box left bound
-        double pos_x = bbox[0].lower();
-        // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
-	rect[yaxis] = bbox[1];
-        // While between the interval
-        while (pos_x < bbox[0].upper())
-        {
-	    rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
-	    pos_x += step_x; // Shifts the x position
-	    fig << rect; // Appends the rectangle
-        }
+		// For each variable (last excluded)
+		for (uint x=0;x<numvar-1;x++)
+		{
+			// For each following variable
+			for (uint y=x+1;y<numvar;y++)
+			{
+				// Initializes the iterator
+				std::map<DiscreteState,Box>::const_iterator it = set_bounds.begin();
 
-	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
-        double pos_y = bbox[1].lower();
-	rect[xaxis] = bbox[0];
-        while (pos_y < bbox[1].upper())
-        {
-	    rect[yaxis] = Interval(pos_y,pos_y+step_y);
-   	    fig << rect;
-	    pos_y += step_y;
-        }
-    }
-    // Draws and creates file
-    fig.set_fill_colour(fc); 
-    fig << set; 
-    fig.write(filename); 
+				// Sets the initial value for the graphics box	
+				Box graphics_box(2);
+				graphics_box[0] = it->second[x];
+				graphics_box[1] = it->second[y];
+
+				// For each other location			
+				while (++it != set_bounds.end())
+				{
+					// Gets the bounding box for the location
+					Box evaluation_box(2);
+					evaluation_box[0] = it->second[x]; 
+					evaluation_box[1] = it->second[y];
+			
+					// Enlarges the graphics box
+
+					// For each axis
+					for (uint u=0;u<2;u++)
+					{
+						// If the evaluated box has higher upper bound, extends the graphics box
+						if (evaluation_box[u].upper() > graphics_box[u].upper())
+							graphics_box[u].set_upper(evaluation_box[u].upper());
+						// If the evaluated box has lower lower bound, extends the graphics box
+						if (evaluation_box[u].lower() < graphics_box[u].lower())
+							graphics_box[u].set_lower(evaluation_box[u].lower());
+					}
+				}
+	
+				// Plots the result
+
+				// Assigns local variables
+				Figure fig; 
+				array<uint> xy(2,x,y);
+
+				fig.set_projection_map(ProjectionFunction(xy,numvar)); 
+				fig.set_bounding_box(graphics_box); 
+
+				// Appends the set, with the desired fill color
+				fig.set_fill_colour(Colour(1.0,0.75,0.0)); 
+				draw(fig,set); 
+
+				// If there are more than two variables, prints the variable numbers				
+				char num_char[6] = "";
+				if (numvar>2)
+					sprintf(num_char,"[%u,%u]",x,y);
+				// Writes the figure file
+				fig.write((foldername+"/"+filename+num_char).c_str()); 
+			}
+		} 
+	}
+	else
+		ARIADNE_WARN("Empty set, no plotting produced.");
 }
-*/
 
 
 } // namespace Ariadne

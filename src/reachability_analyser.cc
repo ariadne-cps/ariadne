@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -395,14 +398,14 @@ upper_evolve(const SystemType& system,
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
-    Float remainder_time=real_time-time_steps*lock_to_grid_time;
+    Float remaining_time=real_time-time_steps*lock_to_grid_time;
     if(time_steps == 0) {
         time_steps=1;
-        remainder_time=0.0;
+        remaining_time=0.0;
         lock_to_grid_time=real_time;
     }
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
-    HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
+    HybridTime hybrid_remaining_time(remaining_time,discrete_steps);
     ARIADNE_LOG(5,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(5,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     ARIADNE_LOG(5,"computing first reachability step...\n");
@@ -448,10 +451,10 @@ upper_evolve(const SystemType& system,
 
 	this->_statistics->upper().total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
 
-    ARIADNE_LOG(5,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve.empty() && remainder_time > 0) {
-        ARIADNE_LOG(5,"computing evolution for remainder time...\n");
-        evolve=this->_upper_evolve(system,evolve,hybrid_remainder_time,grid_depth);
+    ARIADNE_LOG(5,"remaining_time="<<remaining_time<<"\n");
+    if(!evolve.empty() && remaining_time > 0) {
+        ARIADNE_LOG(5,"computing evolution for remaining time...\n");
+        evolve=this->_upper_evolve(system,evolve,hybrid_remaining_time,grid_depth);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 		this->_statistics->upper().total_locks++; // Increases the total locks counter
 		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
@@ -500,14 +503,14 @@ upper_reach_evolve(const SystemType& system,
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
-    Float remainder_time=real_time-time_steps*lock_to_grid_time;
+    Float remaining_time=real_time-time_steps*lock_to_grid_time;
     if(time_steps == 0) {
         time_steps=1;
-        remainder_time=0.0;
+        remaining_time=0.0;
         lock_to_grid_time=real_time;
     }
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
-    HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
+    HybridTime hybrid_remaining_time(remaining_time,discrete_steps);
     ARIADNE_LOG(5,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(5,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     ARIADNE_LOG(5,"computing first reachability step...\n");
@@ -561,10 +564,10 @@ upper_reach_evolve(const SystemType& system,
 
 	this->_statistics->upper().total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
 
-    ARIADNE_LOG(5,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve.empty() && remainder_time > 0) {
+    ARIADNE_LOG(5,"remaining_time="<<remaining_time<<"\n");
+    if(!evolve.empty() && remaining_time > 0) {
         ARIADNE_LOG(5,"computing evolution for the remaining time...\n");
-        make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
+        make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_remaining_time,grid_depth);
         reach.adjoin(found);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 		this->_statistics->upper().total_locks++; // Increases the total locks counter
@@ -772,6 +775,7 @@ _safe(const SystemType& system,
 	}
 }
 
+
 bool 
 HybridReachabilityAnalyser::
 _unsafe(const SystemType& system, 
@@ -825,6 +829,7 @@ _unsafe(const SystemType& system,
 	return result;
 }
 
+
 tribool
 HybridReachabilityAnalyser::
 verify(const SystemType& system,
@@ -854,9 +859,335 @@ verify(const SystemType& system,
 }
 
 
+HybridFloatVector 
+HybridReachabilityAnalyser::
+_getDomainHMAD(const HybridAutomaton& system) const
+{ 
+	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = system.state_space().locations_begin()->second;
+
+	// The variable for the bounding box of the derivatives
+	Vector<Interval> der;
+	// The variable for the result, correctly initialized
+	Vector<Float> mad = Vector<Float>(css);
+    // The variable for the hybrid maximum absolute derivatives
+	HybridFloatVector hmad;
+
+    // For each mode
+	for (set<DiscreteMode>::const_iterator it = system.modes().begin(); it != system.modes().end(); it++)
+	{
+		// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
+		der = it->dynamic()(this->_parameters->bounding_domain.find(it->location())->second); 
+
+		// Gets the maximum absolute derivatives
+		for (uint i=0;i<css;i++)
+			mad[i] = abs(der[i]).upper();
+
+		// Inserts the values for the location
+		hmad.insert(pair<DiscreteState,Vector<Float> >(it->location(),mad)); 
+	}
+
+	// Returns
+	return hmad;
+}
 
 
+HybridFloatVector 
+HybridReachabilityAnalyser::
+_getReachHMAD(const HybridAutomaton& system) const
+{
+	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = system.state_space().locations_begin()->second;
+
+	// The variable for the bounding box of the derivatives
+	Vector<Interval> der;
+    // The variable for the result
+	HybridFloatVector hmad;
+
+	// Gets the dynamic for the given DiscreteState
+	for (set<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
+	{
+		// Inserts the corresponding pair, initialized with zero maximum absolute derivatives
+		hmad.insert(pair<DiscreteState,Vector<Float> >(modes_it->location(),Vector<Float>(css)));
+
+		// For each of its hybrid cells			
+		for (GridTreeSet::const_iterator cells_it = this->_statistics->upper().reach[modes_it->location()].begin(); 
+										 cells_it != this->_statistics->upper().reach[modes_it->location()].end(); 
+										 cells_it++)
+		{
+			// Gets the derivative bounds
+			der = modes_it->dynamic()(cells_it->box());
+
+			// For each variable, sets the maximum value
+			for (uint i=0;i<css;i++)
+				hmad[modes_it->location()][i] = max(hmad[modes_it->location()][i], abs(der[i]).upper()); 
+		}			
+	}
+
+	// Returns
+	return hmad;
+}
 
 
+void 
+HybridReachabilityAnalyser::
+_setMaximumStepSize(const HybridFloatVector& hmad, 
+					const HybridGrid& hgrid)
+{
+	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = hmad.begin()->second.size();
+
+	// Initializes the maximum step size
+	Float mss = std::numeric_limits<double>::infinity();
+	// For each couple DiscreteState,Vector<Float>
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) 
+	{
+		// For each dimension of the space
+		for (uint i=0;i<css;i++)
+			mss = min(mss,hgrid[hfv_it->first].lengths()[i]/(1<<this->_parameters->maximum_grid_depth)/hfv_it->second[i]);
+	}
+
+	// Assigns
+	this->_discretiser->parameters().maximum_step_size = mss;
+}
+
+void
+HybridReachabilityAnalyser::
+_setMaximumEnclosureCell(const HybridGrid& hgrid)
+{
+	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = hgrid.locations_begin()->second.lengths().size();
+
+	// Initializes the result
+	Vector<Float> mec(css);
+
+	// For each location and dimension of the space
+	for (HybridGrid::locations_const_iterator hg_it = hgrid.locations_begin(); hg_it != hgrid.locations_end(); hg_it++)
+		for (uint i=0;i<css;i++)
+			if (hg_it->second.lengths()[i] > mec[i])
+				mec[i] = hg_it->second.lengths()[i];
+
+	// Scales the cell in respect to the maximum grid depth
+	for (uint i=0;i<css;i++)
+		mec[i] /= (1<<this->_parameters->maximum_grid_depth);
+
+	// Assigns
+	this->_discretiser->parameters().maximum_enclosure_cell = 2*mec;
+}
+
+
+HybridGrid 
+HybridReachabilityAnalyser::
+_getHybridGrid(const HybridFloatVector& hmad) const
+{
+	// Get the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = hmad.begin()->second.size();
+
+	// Initialize the hybrid grid
+	HybridGrid hg;	
+
+	// For each couple DiscreteState,Vector<Float>
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
+	{
+		// Initialize the maximum derivative/domain_width ratio
+		Float maxratio = 0.0;
+		// Initialize the gridlengths
+		Vector<Float> gridlengths(css);
+		// Initialize the minimum length to use for zero-derivative variables (will be the minimum among both grid lengths and domain widths)
+		Float minlength = std::numeric_limits<double>::infinity();
+
+		// For each dimension of the continuous space
+		for (uint i=0;i<css;i++)
+		{	
+			maxratio = max(maxratio,hfv_it->second[i]/this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the largest ratio
+			minlength = min(minlength,this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the smallest domain width
+		}
+
+		// Assign the lengths and check the minimum length to be assigned
+		for (uint i=0;i<css;i++)
+		{
+			if (hfv_it->second[i] > 0) // If the derivative is greater than zero
+			{
+				gridlengths[i] = hfv_it->second[i]/maxratio; // Assign the length
+				minlength = min(minlength,gridlengths[i]); // Reduce the minimum length by comparing it to the current grid length
+			}
+		}
+
+		// Assign the minimum length for zero-derivative variables
+		for (uint i=0;i<css;i++)
+			if (gridlengths[i] == 0) // If it has zero grid length, assign minlength
+				gridlengths[i] = minlength;
+
+		// Assign the grid, centered on the origin
+		hg[hfv_it->first] = Grid(Vector<Float>(css),gridlengths);
+
+	}
+
+	// Return
+	return hg;
+}
+
+
+HybridGrid 
+HybridReachabilityAnalyser::
+_getEqualizedHybridGrid(const HybridFloatVector& hmad) const
+{
+	// Get the size of the space (NOTE: taken as equal for all locations)
+	const uint css = hmad.begin()->second.size();
+
+	// Initialize the maximum derivative/domain_width ratio
+	Float maxratio = 0.0;
+	// Initialize the minimum length to use for zero-derivative variables
+	Float minlength = std::numeric_limits<double>::infinity();
+	// Initialize the gridlengths
+	Vector<Float> gridlengths(css);		
+	// Initialize the maximum absolute derivatives
+	Vector<Float> mad(css);
+
+	// Get the maximum absolute derivatives
+	for (uint i=0;i<css;i++)
+		// For each couple DiscreteState,Vector<Float>
+		for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
+			mad[i] = max(mad[i],hfv_it->second[i]);
+
+	// For each dimension
+	for (uint i=0;i<css;i++)
+		// For each couple DiscreteState,Vector<Float>
+		for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
+		{
+			maxratio = max(maxratio,mad[i]/this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Check for maximum ratio
+			minlength = min(minlength,this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the minimum domain length
+		}
+
+	// Assign the lengths and checks the minimum length to be assigned
+	for (uint i=0;i<css;i++)
+	{
+		// If the derivative is greater than zero
+		if (mad[i] > 0)
+		{	
+			gridlengths[i] = mad[i]/maxratio; // Assign the length
+			minlength = min(minlength,gridlengths[i]); // Get the minimum between the current minimum and the current length
+		}		
+	}
+
+	// Correct the lengths that are zero
+	for (uint i=0;i<css;i++)
+		// If it has zero grid length, assign minlength
+		if (gridlengths[i] == 0)
+			gridlengths[i] = minlength;
+	
+	// Save the grid, centered on the origin
+	Grid gr(Vector<Float>(css),gridlengths);
+
+	// Initialize the hybrid grid
+	HybridGrid hg;
+	// Populate it
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
+		hg[hfv_it->first] = gr;		
+	
+	// Return
+	return hg;
+} 
+
+
+void 
+HybridReachabilityAnalyser::
+_setInitialParameters(SystemType& system, const HybridBoxes& domain)
+{
+	// Fixed parameters
+	this->_discretiser->parameters().enable_subdivisions = true;
+	this->_discretiser->parameters().enable_set_model_reduction = true;
+	this->_discretiser->parameters().enable_working_sets_pruning = true;
+	this->_parameters->transient_time = 1e10;
+	this->_parameters->transient_steps = 1;
+	this->_parameters->lock_to_grid_time = 1e10;		
+	this->_parameters->lock_to_grid_steps = 1;
+	this->_parameters->bounding_domain = domain; // Set the domain (IMPORTANT: must be done before using _getDomainHMAD and _getEqualizedHybridGrid)
+
+	this->_parameters->maximum_grid_depth = 0; // Initial value, incremented at each iteration
+
+	HybridFloatVector hmad = this->_getDomainHMAD(system); // Evaluate the maximum absolute derivatives from the domain
+
+	system.set_grid(this->_getEqualizedHybridGrid(hmad)); // Initial grid
+	this->_setMaximumStepSize(hmad,system.grid()); // Initial maximum step size
+	this->_setMaximumEnclosureCell(system.grid()); // Initial maximum enclosure cell
+}
+
+
+void 
+HybridReachabilityAnalyser::
+_adaptParameters(SystemType& system)
+{
+		// Evaluate the maximum absolute derivatives
+		HybridFloatVector hmad = (this->_statistics->upper().reach.size() > 0) ? this->_getReachHMAD(system) : this->_getDomainHMAD(system); 
+
+		this->_parameters->maximum_grid_depth++; // Increase the maximum grid depth
+
+		system.set_grid(this->_getEqualizedHybridGrid(hmad)); // New grid
+		this->_setMaximumStepSize(hmad,system.grid()); // New maximum step size
+		this->_setMaximumEnclosureCell(system.grid()); // New maximum enclosure cell
+}
+
+
+tribool 
+HybridReachabilityAnalyser::
+verify_iterative(SystemType& system, 
+				 const HybridImageSet& initial_set, 
+				 const HybridBoxes& safe_box, 
+				 const HybridBoxes& domain)
+{
+	ARIADNE_LOG(2,"\nIterative verification...\n");
+
+	// Limit size for the chain reach
+	const uint MAX_REACH_SIZE = 1500000;
+	// Limit maximum number of working sets for the lower reach
+	const uint MAX_WORKING_SETS_TOTAL = 500000;
+
+	// Initialize the seed for internal random number generation
+	srand(time(NULL));
+
+	// Save the folder name as a function of the automaton name and of the current timestamp, then create the main folder and the verification run folder
+	time_t mytime;
+	time(&mytime);
+	string foldername = system.name()+".png";
+	mkdir(foldername.c_str(),0777);
+	foldername = foldername+"/"+asctime(localtime(&mytime));
+	mkdir(foldername.c_str(),0777);
+	char mgd_char[10];
+	string filename;
+
+	// Set the initial parameters
+	this->_setInitialParameters(system, domain);
+
+    while(1)
+	{ 
+		/// Print some information on the current iteration
+		sprintf(mgd_char,"%i",this->_parameters->maximum_grid_depth);
+		ARIADNE_LOG(2, "DEPTH " << this->_parameters->maximum_grid_depth << ":\n"); 
+		ARIADNE_LOG(3, "Maximum step size: " << this->_discretiser->parameters().maximum_step_size << "\n");
+		ARIADNE_LOG(3, "Maximum enclosure cell: " << this->_discretiser->parameters().maximum_enclosure_cell << "\n");
+
+		// Perform the verification
+		tribool result = this->verify(system,initial_set,safe_box);
+		// Return the result, if it is not indeterminate
+		if (!indeterminate(result)) return result;
+
+		// Plot the reached region (if no definite result has been obtained)
+		filename = "upper-";
+		plot(foldername,filename + mgd_char, this->_statistics->upper().reach);
+		// Plot the reached region (if no definite result has been obtained)
+		filename = "lower-";
+		plot(foldername,filename + mgd_char, this->_statistics->lower().reach); 
+
+		// Check if the chain reach size is sufficiently low, and that the lower reach working sets total is sufficiently low, in order to stop the verification
+		if (this->_statistics->upper().reach.size() > MAX_REACH_SIZE || this->_discretiser->statistics().lower().largest_working_sets_total > MAX_WORKING_SETS_TOTAL) break;
+		
+		// Adapt the parameters for the next iteration
+		this->_adaptParameters(system);
+    }
+
+	// Return indeterminate
+	return indeterminate;
+}
 
 } // namespace Ariadne

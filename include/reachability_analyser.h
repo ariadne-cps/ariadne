@@ -29,6 +29,8 @@
 #define ARIADNE_REACHABILITY_ANALYSER_H
 
 #include <boost/smart_ptr.hpp>
+#include <cstdarg>
+#include <config.h>
 
 #include "hybrid_set_interface.h"
 #include "evolver_interface.h"
@@ -52,6 +54,7 @@ class DiscreteState;
 
 template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;
+typedef std::map<DiscreteState,Vector<Float> > HybridFloatVector;
 
 class HybridGrid;
 class HybridGridCell;
@@ -174,10 +177,18 @@ class HybridReachabilityAnalyser
     virtual tribool verify(const SystemType& system, 
                            const HybridImageSet& initial_set, 
                            const HybridBoxes& safe_box);
+
+	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box inside \domain, in an iterative way by tuning the evolution/analysis parameters. */
+	tribool verify_iterative(SystemType& system, 
+							 const HybridImageSet& initial_set, 
+							 const HybridBoxes& safe_box, 
+							 const HybridBoxes& domain);
+
     //@}
 
   
   public:
+
     typedef HybridTime T;
     typedef HybridAutomaton Sys;
     typedef HybridListSet<Box> BxLS;
@@ -188,12 +199,13 @@ class HybridReachabilityAnalyser
     typedef HybridOpenSetInterface OpSI;
     typedef HybridOvertSetInterface OvSI;
     typedef HybridCompactSetInterface CoSI;
-  public:
+
+  private:
+
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
-  public:
 
 	/*! \brief Verify whether the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
 	bool _safe(const SystemType& system, 
@@ -205,6 +217,34 @@ class HybridReachabilityAnalyser
 			 	 const HybridImageSet& initial_set, 
 				 const HybridBoxes& safe_box);
 
+	/*! \brief Get the hybrid maximum absolute derivatives of \system given the bounding domain parameter. 
+		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
+	HybridFloatVector _getDomainHMAD(const SystemType& system) const;
+
+	/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach statistics. 
+		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
+	HybridFloatVector _getReachHMAD(const SystemType& system) const;
+
+	/*! \brief Set the maximum integration step size, under the assumption that given the maximum derivatives \a hmad, 
+		a variable in a step must not cover a length greater than the corresponding length of the grid \a hgrid at maximum depth. */
+	void _setMaximumStepSize(const HybridFloatVector& hmad, 
+							  const HybridGrid& hgrid);
+
+	/*! \brief Set the maximum enclosure cell from the hybrid grid \a hgrid. */
+	void _setMaximumEnclosureCell(const HybridGrid& hgrid);
+
+	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.*/
+	HybridGrid _getHybridGrid(const HybridFloatVector& hmad) const;
+
+	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen equally for all locations.*/
+	HybridGrid _getEqualizedHybridGrid(const HybridFloatVector& hmad) const;
+
+	/*! \brief Set the initial evolution parameters and the grid given the automaton \a system and the bounding domain \a domain.*/
+	void _setInitialParameters(SystemType& system, 
+							   const HybridBoxes& domain);
+
+	/*! \brief Adapts the parameters for the next verification iteration, given previous statistics. */
+	void _adaptParameters(SystemType& system);
 };
 
 

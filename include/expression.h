@@ -84,6 +84,7 @@ template<class R> class Expression;
 template<class R> std::ostream& operator<<(std::ostream&, const Expression<R>&);
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Constant<Y>& con, const Y& c);
 template<class X> Expression<X> simplify(const Expression<X>& e);
 
 /*! \brief A simple expression in named variables.
@@ -113,9 +114,12 @@ class Expression {
     Operator op() const { return _ptr->type(); }
     //! \brief The immediate subexpressions used in the formula.
     List< Expression<R> > subexpressions() const;
-     //! \brief Substitute the constant \a c for the variable \a v.
+    //! \brief Substitute the constant \a c for the variable \a v.
     template<class X> Expression<R> substitute(const Variable<X>& v, const X& c) const {
         return Ariadne::substitute(*this,v,c); };
+	//! \brief Substitute the constant \a c into the Constant \a con.
+    template<class X> Expression<R> substitute(const Constant<X>& con, const X& c) const {
+        return Ariadne::substitute(*this,con,c); };
     //! \brief Simplify the expression (e.g. by evaluating constants).
     Expression<R> simplify() const {
         return Ariadne::simplify(*this); }
@@ -153,6 +157,9 @@ class Expression<Real> {
     //! \brief Substitute the constant \a c for the variable \a v.
     template<class X> Expression<R> substitute(const Variable<X>& v, const X& c) const {
         return Ariadne::substitute(*this,v,c); }
+	//! \brief Substitute the constant \a c into the Constant \a con.
+    template<class X> Expression<R> substitute(const Constant<X>& con, const X& c) const {
+        return Ariadne::substitute(*this,con,c); };
     //! \brief Simplify the expression (e.g. by evaluating constants).
     Expression<R> simplify() const {
         return Ariadne::simplify(*this); }
@@ -183,6 +190,7 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>
 template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Constant<Y>& con, const Y& c);
 template<class X> Expression<X> simplify(const Expression<X>& e);
 
 bool operator==(const Expression<Tribool>&, bool);

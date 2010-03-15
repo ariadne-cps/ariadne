@@ -745,6 +745,9 @@ template<class X, class Y> Expression<X> substitute_variable(const VariableExpre
 template<class X> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<X>& v, const X& c) {
     if(e.variable()==v) { return Expression<X>(c); } else { return Expression<X>(e.clone()); } }
 
+template<class X> Expression<X> substitute_constant(const ConstantExpression<X>& e, const Constant<X>& con, const X& c) {
+	if (e.name()==con.name()) { return Expression<X>(c); } else	{ return Expression<X>(e.clone()); }
+ }
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c) {
     const ExpressionInterface<X>* eptr=e._raw_pointer();
@@ -761,9 +764,25 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
     ARIADNE_FAIL_MSG("Cannot substitute for a named variable in an unknown expression.");
 }
 
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Constant<Y>& con, const Y& c) {
+    const ExpressionInterface<X>* eptr=e._raw_pointer();
+    const BinaryExpression<X,Operator,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Operator,Y,Y>*>(eptr);
+    if(aptr) { return make_expression<X>(aptr->_op,substitute(aptr->_arg1,con,c),substitute(aptr->_arg2,con,c)); }
+    const BinaryExpression<X>* bptr=dynamic_cast<const BinaryExpression<X>*>(eptr);
+    if(bptr) { return make_expression<X>(bptr->_op,substitute(bptr->_arg1,con,c),substitute(bptr->_arg2,con,c)); }
+    const UnaryExpression<X>* uptr=dynamic_cast<const UnaryExpression<X>*>(eptr);
+    if(uptr) { return make_expression<X>(uptr->_op,substitute(uptr->_arg,con,c)); }
+    const ConstantExpression<X>* cptr=dynamic_cast<const ConstantExpression<X>*>(eptr);
+    if(cptr) { return substitute_constant(*cptr,con,c); }
+    const VariableExpression<X>* vptr=dynamic_cast<const VariableExpression<X>*>(eptr);
+    if(vptr) { return e; }
+    ARIADNE_FAIL_MSG("Cannot substitute for a named constant in an unknown expression.");
+}
+
 template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Tribool>& v, const Tribool& c);
 template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
+template Expression<Real> substitute(const Expression<Real>& e, const Constant<Real>& con, const Real& c);
 
 namespace {
 

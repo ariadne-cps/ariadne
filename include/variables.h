@@ -70,6 +70,7 @@ template<class T> class Constant
     //    : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
     const String& name() const { return *_name_ptr; }
     const T& value() const { return *_value_ptr; }
+	void set_value(const T& c) { *_value_ptr = c; }
     bool operator==(const Constant<T>& other) const {
         if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
   private:

@@ -538,6 +538,9 @@ class HybridAutomaton
 	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all the functions of modes and transitions. */
 	void substitute(const Constant<Real>& con, const Real& c);
 
+	/*! \brief Substitute the value of the Constant \a con into the corresponding Constant on all the functions of modes and transitions. */
+	void substitute(const Constant<Real>& con) { this->substitute(con,con.value()); }
+
 	//@}
 
     //@{

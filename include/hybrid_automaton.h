@@ -37,7 +37,7 @@
 #include "function.h"
 #include "discrete_state.h"
 #include "discrete_event.h"
-
+#include "variables.h"
 
 namespace Ariadne {
 

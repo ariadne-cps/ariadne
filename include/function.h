@@ -54,6 +54,7 @@ template<class X> class Polynomial;
 template<class LHS, class RHS> class Assignment;
 template<class T> class ExtendedVariable;
 template<class T> class Variable;
+template<class T> class Constant;
 template<class T> class DottedVariable;
 template<class T> class PrimedVariable;
 template<class T> class Expression;

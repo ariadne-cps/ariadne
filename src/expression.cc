@@ -615,12 +615,16 @@ template<class X>
 X _compute(Operator op, const X& x) {
     switch(op) {
         case NEG: return -x;
-        case REC: return 1/x;
+        case POS: return x;
+        case REC: return 1.0/x;
+        case SQR: return sqr(x);
+        case SQRT: return sqrt(x);
         case EXP: return exp(x);
         case LOG: return log(x);
         case SIN: return sin(x);
         case COS: return cos(x);
         case TAN: return cos(x);
+        case ABS: return abs(x);
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one real argument.");
     }
 }
@@ -726,7 +730,7 @@ template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x) {
 
 template Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<Float>& x);
 template Float evaluate(const Expression<Real>& e, const ContinuousValuation<Float>& x);
-
+template Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& x);
 
 template Float evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Float>& x);
 template Interval evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Interval>& x);
@@ -740,16 +744,16 @@ template Differential<Float> evaluate(const Expression<Real>& e, const Vector< D
 template Differential<Interval> evaluate(const Expression<Real>& e, const Vector< Differential<Interval> >& x);
 template TaylorModel evaluate(const Expression<Real>& e, const Vector<TaylorModel>& x);
 
-template<class X, class Y> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<Y>& v, const Y& c) {
+template<class X, class Y> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<Y>& v, const Expression<Y>& c) {
     return Expression<X>(e.clone()); }
-template<class X> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<X>& v, const X& c) {
+template<class X> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<X>& v, const Expression<X>& c) {
     if(e.variable()==v) { return Expression<X>(c); } else { return Expression<X>(e.clone()); } }
 
 template<class X> Expression<X> substitute_constant(const ConstantExpression<X>& e, const Constant<X>& con, const X& c) {
 	if (e.name()==con.name()) { return Expression<X>(c); } else	{ return Expression<X>(e.clone()); }
  }
 
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c) {
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& c) {
     const ExpressionInterface<X>* eptr=e._raw_pointer();
     const BinaryExpression<X,Operator,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Operator,Y,Y>*>(eptr);
     if(aptr) { return make_expression<X>(aptr->_op,substitute(aptr->_arg1,v,c),substitute(aptr->_arg2,v,c)); }
@@ -779,9 +783,9 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
     ARIADNE_FAIL_MSG("Cannot substitute for a named constant in an unknown expression.");
 }
 
-template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Tribool>& v, const Tribool& c);
-template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Real>& v, const Real& c);
-template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
+template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Tribool>& v, const Expression<Tribool>& c);
+template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Real>& v, const Expression<Real>& c);
+template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Expression<Real>& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Constant<Real>& con, const Real& c);
 
 namespace {
@@ -794,11 +798,38 @@ template<> inline Expression<Real> _simplify(const Expression<Real>& e) {
     // std::cout << "Simplifying expression "<< e << std::endl;
     //return e;
     const ExpressionInterface<Real>* eptr=e._raw_pointer();
-    //const UnaryExpression<Real>* uptr=static_cast<const UnaryExpression<Real>*>(eptr);
+    const UnaryExpression<Real>* uptr=dynamic_cast<const UnaryExpression<Real>*>(eptr);
+    if(uptr) {  // Expression is unary
+        Expression<Real> sarg=simplify(uptr->_arg);
+        const ConstantExpression<Real>* carg=dynamic_cast<const ConstantExpression<Real>*>(sarg._raw_pointer());
+        if(carg) {  // Argument is a constant
+            try {
+                return _compute<Real>(uptr->_op,carg->value());
+            } catch (std::runtime_error) {  
+                // Operator not supported by _compute, skip
+            }                
+        }
+        return make_expression<Real>(uptr->_op,sarg);
+    }
     const BinaryExpression<Real>* bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
-    if(!bptr) { return e; }
+    if(!bptr) { return e; }     // Expression is neither unary nor binary, do not simplify
+    // Simplify the two arguments
     Expression<Real> sarg1=simplify(bptr->_arg1);
     Expression<Real> sarg2=simplify(bptr->_arg2);
+    // std::cout << "Expression is binary with arguments " << std::endl;
+    // std::cout << "  " << sarg1 << std::endl;
+    // std::cout << "  " << sarg2 << std::endl;
+    // Check which arguments are constants
+    const ConstantExpression<Real>* carg1=dynamic_cast<const ConstantExpression<Real>*>(sarg1._raw_pointer());
+    const ConstantExpression<Real>* carg2=dynamic_cast<const ConstantExpression<Real>*>(sarg2._raw_pointer());
+    if(carg1 && carg2) {    // If both arguments are constants, return the computed value of the expression
+        // std::cout << "Both arguments are constants with value " << carg1->value() << " and " << carg2->value() << std::endl;
+        try {
+            return _compute<Real>(bptr->_op,carg1->value(),carg2->value());
+        } catch(std::runtime_error) {
+            // Operator not supported by _compute, skip
+        }
+    }
     Expression<Real> zero(0.0);
     Expression<Real> one(1.0);
     switch(eptr->type()) {
@@ -823,7 +854,7 @@ template<> inline Expression<Real> _simplify(const Expression<Real>& e) {
         default:
             break;
     }
-    return e;
+    return make_expression<Real>(bptr->_op,sarg1,sarg2);
 
 }
 

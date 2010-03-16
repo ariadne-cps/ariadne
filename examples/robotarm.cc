@@ -1,7 +1,7 @@
 /***************************************************************************
- *            watertank.cc
+ *            robotarm.cc
  *
- *  Copyright  2008  Davide Bresolin
+ *  Copyright  2010  Davide Bresolin
  *
  ****************************************************************************/
 
@@ -23,7 +23,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-
+#include "valuation.h"
 
 using namespace Ariadne;
 
@@ -108,6 +108,15 @@ int main(int argc, char** argv)
     // Time
     RealVariable t("t");
 
+/*
+    RealExpression e1 = r1 * x1 * x2;
+    RealExpression e2 = e1.substitute(x1, RealExpression(m1));
+    RealExpression e3 = simplify(e2);
+     
+    std::cout << "e1 = " << e1 << std::endl;
+    std::cout << "e2 = " << e2 << std::endl;
+    std::cout << "e3 = " << e3 << std::endl;
+*/
     /* 
      * Dynamics is expressed as a function of ddot theta1 and ddot theta2 (angular accelerations)
      *
@@ -134,12 +143,12 @@ int main(int argc, char** argv)
     std::cout << "g1 = " << g1 << std::endl;
     std::cout << "g2 = " << g2 << std::endl;
     
-    /*
-     * Invert M to obtain dynamics for dot dot theta1, dot dot theta2 in function of 
-     * u1, u2, theta1, theta2, dot theta1, dot theta2.
-     *
-     * dot dot theta = M^-1 (u - g)
-     */
+    //
+    // Invert M to obtain dynamics for dot dot theta1, dot dot theta2 in function of 
+    // u1, u2, theta1, theta2, dot theta1, dot theta2.
+    //
+    // dot dot theta = M^-1 (u - g)
+    //
     Matrix<RealExpression> invm = inverse2x2(m);
     simplify(invm);
     std::cout << "invm11 = " << invm[0][0] << std::endl;
@@ -147,9 +156,9 @@ int main(int argc, char** argv)
     std::cout << "invm21 = " << invm[1][0] << std::endl;
     std::cout << "invm22 = " << invm[1][1] << std::endl;
 
-    /*
-     * Define differential equations for dot dot theta1, dot dot theta2, dot theta1 and dot theta2.
-     */
+    //
+    // Define differential equations for dot dot theta1, dot dot theta2, dot theta1 and dot theta2.
+    //
     RealExpression dv1 = invm[0][0] * (u1 - g1) + invm[0][1] * (u2 - g2);
     RealExpression dv2 = invm[1][0] * (u1 - g1) + invm[1][1] * (u2 - g2);
     RealExpression dx1 = v1;
@@ -160,20 +169,48 @@ int main(int argc, char** argv)
     dv2.simplify();
     std::cout << "dot v1 = " << dv1 << std::endl;
     std::cout << "dot v2 = " << dv2 << std::endl;
-    /*
-     * Inputs u1 and u2 are constant
-     */
-    RealExpression du1 = 0.0;
-    RealExpression du2 = 0.0;
+    //
+    // Inputs u1 and u2 are obtained from a given trajectory
+    //
+    // Algebraic expression for the trajectory
+    RealExpression alg_a1 = 0.0;                    // dot dot theta1   (no acceleration)
+    RealExpression alg_a2 = 0.0;                    // dot dot theta2
+    RealExpression alg_v1 = 2*pi<Float>()/60.0;     // dot theta1       (constant angular speed)
+    RealExpression alg_v2 = 2*pi<Float>()/5.0;     // dot theta2
+    RealExpression alg_x1 = alg_v1 * t;             // theta1
+    RealExpression alg_x2 = alg_v2 * t;             // theta2
+    std::cout << "Algebraic expression for a1 = " << alg_a1 << std::endl;
+    std::cout << "Algebraic expression for a2 = " << alg_a2 << std::endl;
+    std::cout << "Algebraic expression for v1 = " << alg_v1 << std::endl;
+    std::cout << "Algebraic expression for v2 = " << alg_v2 << std::endl;
+    std::cout << "Algebraic expression for x1 = " << alg_x1 << std::endl;
+    std::cout << "Algebraic expression for x2 = " << alg_x2 << std::endl << std::endl;
+    RealExpression alg_u1= simplify(m[0][0]*alg_a1 + m[1][0]*alg_a2 + g1);
+    RealExpression alg_u2= simplify(m[1][0]*alg_a1 + m[1][1]*alg_a2 + g2);
+    alg_u1 = alg_u1.substitute(v1, alg_v1);
+    alg_u1 = alg_u1.substitute(v2, alg_v2);
+    alg_u1 = alg_u1.substitute(x1, alg_x1);
+    alg_u1 = simplify(alg_u1.substitute(x2, alg_x2));
+    std::cout << "Algebraic expression for u1 = " << alg_u1 << std::endl;
+    alg_u2 = alg_u2.substitute(v1, alg_v1);
+    alg_u2 = alg_u2.substitute(v2, alg_v2);
+    alg_u2 = alg_u2.substitute(x1, alg_x1);
+    alg_u2 = simplify(alg_u2.substitute(x2, alg_x2));
+    std::cout << "Algebraic expression for u2 = " << alg_u2 << std::endl;
+       
+    RealExpression du1 = simplify(derivative(alg_u1,t));
+    RealExpression du2 = simplify(derivative(alg_u2,t));
+
     std::cout << "dot u1 = " << du1 << std::endl;
     std::cout << "dot u2 = " << du2 << std::endl;
+
     // t is a clock
     RealExpression dt= 1.0;
     std::cout << "dot t = " << dt << std::endl << std::endl;
         
-    /*
-     * Set up the VectorFunction representing the dynamics;
-     */
+    //
+    // Set up the VectorFunction representing the dynamics;
+    //
     List<RealExpression> exprlist;
     exprlist.append(dx1);       exprlist.append(dx2);
     exprlist.append(dv1);       exprlist.append(dv2);
@@ -248,12 +285,12 @@ int main(int argc, char** argv)
     DiscreteEvent x1g2pi("x1g2pi");
     DiscreteEvent x2l0("x2l0");
     DiscreteEvent x2g2pi("x2g2pi");
-/*
-    robotarm.new_transition(x1l0, free, free, reset_x1_k2pi, ScalarFunction(x1_leq_zero, varlist), true);
-    robotarm.new_transition(x1g2pi, free, free, reset_x1_zero, ScalarFunction(x1_geq_k2pi, varlist), true);
-    robotarm.new_transition(x2l0, free, free, reset_x2_k2pi, ScalarFunction(x2_leq_zero, varlist), true);
-    robotarm.new_transition(x2g2pi, free, free, reset_x2_zero, ScalarFunction(x2_geq_k2pi, varlist), true);
-*/
+
+//    robotarm.new_transition(x1l0, free, free, reset_x1_k2pi, ScalarFunction(x1_leq_zero, varlist), true);
+//    robotarm.new_transition(x1g2pi, free, free, reset_x1_zero, ScalarFunction(x1_geq_k2pi, varlist), true);
+//    robotarm.new_transition(x2l0, free, free, reset_x2_k2pi, ScalarFunction(x2_leq_zero, varlist), true);
+//    robotarm.new_transition(x2g2pi, free, free, reset_x2_zero, ScalarFunction(x2_geq_k2pi, varlist), true);
+
     // Transitions that puts u1 and u2 to zero after t0 seconds
     exprlist[0] = idx1;         exprlist[1] = idx2;
     exprlist[4] = zero;         exprlist[5] = zero;
@@ -266,12 +303,12 @@ int main(int argc, char** argv)
     std::cout << "RobotArm = " << std::endl;
     std::cout << robotarm << std::endl << std::endl;
         
-    /*
-     * COMPUTE THE EVOLUTION OF THE SYSTEM
-     */
+    //
+    // COMPUTE THE EVOLUTION OF THE SYSTEM
+    //
       
     // Set up the evolution parameters and grid
-    Float time(10.0);
+    Float time(60.0);
     if(argc >= 4)   // read initial value for time from the arguments
         time = atof(argv[3]);
     int steps = 2;
@@ -294,18 +331,30 @@ int main(int argc, char** argv)
     evolver.verbosity = 1;
     
     // Define the initial box
-    Float iu1 = 5e-5;
+    //
+    // The default initial values for u1 and u2 are given by alg_u1(0.0) and alg_u2(0.0)
+    //
+    ContinuousValuation<Real> val;
+    val.set(t, 0.0);
+    std::cout << "Initial valuation: " << val << std::endl;    
+    Real iu1 = evaluate(alg_u1,val);
     if(argc >= 2)   // read initial value for u1 from the arguments
         iu1 = atof(argv[1]);
-    Float iu2 = 5e-5;
+    Real iu2 = evaluate(alg_u2,val);
     if(argc >= 3)   // read initial value for u2 from the arguments
         iu2 = atof(argv[2]);
-    
-    Box initial_box(7, 0.5*pi<Float>(),0.5*pi<Float>(), 0.0,0.0, 0.0,0.0, 0.0,0.0, iu1,iu1, iu2,iu2, 0.0,0.0);
+    Real iv1 = evaluate(alg_v1, val);
+    Real iv2 = evaluate(alg_v2, val);
+    Real ix1 = evaluate(alg_x1, val);
+    Real ix2 = evaluate(alg_x2, val);
+    Box initial_box(7, ix1.lower(),ix1.upper(), ix2.lower(),ix2.upper(), 
+                       iv1.lower(),iv1.upper(), iv2.lower(),iv2.upper(),
+                       iu1.lower(),iu1.upper(), iu2.lower(),iu2.upper(), 
+                       0.0,0.0);
     cout << "initial_box=" << initial_box << endl;
 
     // Over-approximate the initial set by a grid cell
-    HybridEnclosureType initial_set(speedup, initial_box);
+    HybridEnclosureType initial_set(free, initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
@@ -377,10 +426,10 @@ int main(int argc, char** argv)
     fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-orbit-u2");
 
-    /*
-     *  Convert polar coordinates theta1, theta2 into cartesian coordinates
-     *  for plotting the trajectory
-     */
+    //
+    //  Convert polar coordinates theta1, theta2 into cartesian coordinates
+    //  for plotting the trajectory
+    //
     
     // Definition of the conversion function
     RealExpression px1 = r1 * cos(x1) + r2 * cos(x1 + x2);
@@ -422,29 +471,24 @@ int main(int argc, char** argv)
 
     std::cout << "done!" << std::endl;
 
-/*    
-    std::cout << "Cartesian final = " << cartesian_final << std::endl;
-    std::cout << "Polar final = " << orbit.final() << std::endl;
     
-    
-      
-    std::cout << "Projection function = " << proj << std::endl;
-    std::cout << "           evaluate = " << proj.evaluate(orbit.initial().range()) << std::endl;
-    
-    std::cout << "Initial set = " << orbit.initial() << std::endl;
-    std::cout << "     domain = " << orbit.initial().domain() << std::endl;
-    std::cout << "      range = " << orbit.initial().range() << std::endl;
-    std::cout << "     models = " << orbit.initial().models() << std::endl;
+//     std::cout << "Cartesian final = " << cartesian_final << std::endl;
+//     std::cout << "Polar final = " << orbit.final() << std::endl;
+//       
+//     std::cout << "Projection function = " << proj << std::endl;
+//     std::cout << "           evaluate = " << proj.evaluate(orbit.initial().range()) << std::endl;
+//     
+//     std::cout << "Initial set = " << orbit.initial() << std::endl;
+//     std::cout << "     domain = " << orbit.initial().domain() << std::endl;
+//     std::cout << "      range = " << orbit.initial().range() << std::endl;
+//     std::cout << "     models = " << orbit.initial().models() << std::endl;
+// 
+//     TaylorSet cartesian_initial = apply(proj, orbit.initial());
+//     std::cout << "Projected set = " << cartesian_initial << std::endl;
+//     std::cout << "       domain = " << cartesian_initial.domain() << std::endl;
+//     std::cout << "        range = " << cartesian_initial.range() << std::endl;
+//     std::cout << "       models = " << cartesian_initial.models() << std::endl;
 
-    TaylorSet cartesian_initial = apply(proj, orbit.initial());
-    std::cout << "Projected set = " << cartesian_initial << std::endl;
-    std::cout << "       domain = " << cartesian_initial.domain() << std::endl;
-    std::cout << "        range = " << cartesian_initial.range() << std::endl;
-    std::cout << "       models = " << cartesian_initial.models() << std::endl;
-*/
-    
-    
-    
     return 0;
      
 }

@@ -113,6 +113,7 @@ inline Real log(const Real& x) { return Real(log(static_cast<Interval>(x))); }
 inline Real sin(const Real& x) { return Real(sin(static_cast<Interval>(x))); }
 inline Real cos(const Real& x) { return Real(cos(static_cast<Interval>(x))); }
 inline Real tan(const Real& x) { return Real(tan(static_cast<Interval>(x))); }
+inline Real abs(const Real& x) { return Real(abs(static_cast<Interval>(x))); }
 
 inline std::ostream& operator<<(std::ostream& os, const Real& x) {
     return os << "Real(" << x.lower() <<',' << x.upper() << ")"; }

@@ -146,7 +146,7 @@ HybridAutomaton::new_mode(DiscreteState location,
             "The dynamic has argument size " << dynamic.argument_size()
                 << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
     }
-    this->_modes.insert(DiscreteMode(location,dynamic));
+    this->_modes.push_back(DiscreteMode(location,dynamic));
     return this->mode(location);
 }
 
@@ -205,7 +205,7 @@ HybridAutomaton::new_transition(DiscreteEvent event,
 
     const DiscreteMode& source_mode=this->mode(source);
     const DiscreteMode& target_mode=this->mode(target);
-    this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,forced));
+    this->_transitions.push_back(DiscreteTransition(event,source_mode,target_mode,reset,activation,forced));
     return this->transition(event,source);
 }
 
@@ -400,7 +400,7 @@ HybridAutomaton::set_grid(const HybridGrid& hgrid)
 bool
 HybridAutomaton::has_mode(DiscreteState state) const
 {
-    // FIXME: This is a hack since we use std::set which cannot be searched by id.
+    // FIXME: This is a hack since we use std::list which cannot be searched by id.
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
         mode_iter!=this->_modes.end(); ++mode_iter)
         {
@@ -448,7 +448,7 @@ HybridAutomaton::state_space() const
 }
 
 
-const std::set< DiscreteMode >&
+const std::list< DiscreteMode >&
 HybridAutomaton::modes() const
 {
     return this->_modes;
@@ -471,7 +471,7 @@ HybridAutomaton::mode(DiscreteState state) const
 }
 
 
-const std::set< DiscreteTransition >&
+const std::list< DiscreteTransition >&
 HybridAutomaton::transitions() const
 {
     return this->_transitions;
@@ -479,15 +479,15 @@ HybridAutomaton::transitions() const
 
 
 
-std::set< DiscreteTransition >
+std::list< DiscreteTransition >
 HybridAutomaton::transitions(DiscreteState source) const
 {
-    std::set< DiscreteTransition > result;
+    std::list< DiscreteTransition > result;
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
         {
             if(transition_iter->source()==source) {
-                result.insert(*transition_iter);
+                result.push_back(*transition_iter);
             }
         }
     return result;
@@ -586,7 +586,14 @@ operator<<(std::ostream& os, const HybridAutomaton& ha)
     return os << "HybridAutomaton( modes=" << ha.modes() << ", transitions=" << ha.transitions() << ")";
 }
 
-
+void 
+HybridAutomaton::substitute(const Constant<Real>& con, const Real& c)
+{
+	for (std::list<DiscreteMode>::iterator modes_it=this->_modes.begin();modes_it!=this->_modes.end();modes_it++)
+		modes_it->substitute(con,c);
+	for (std::list<DiscreteTransition>::iterator trans_it=this->_transitions.begin();trans_it!=this->_transitions.end();trans_it++)
+		trans_it->substitute(con,c);
+}
 
 
 }

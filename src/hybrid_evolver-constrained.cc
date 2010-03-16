@@ -312,7 +312,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     
     // Extract mode and transitions, dynamic and constraints
     DiscreteMode mode=system.mode(starting_location);
-    Set<DiscreteTransition> transitions=system.transitions(starting_location);
+    std::list<DiscreteTransition> transitions=system.transitions(starting_location);
 
     VectorFunction dynamic=mode.dynamic();
     Map<DiscreteEvent,ScalarFunction> invariants(mode.scalar_invariants());
@@ -322,7 +322,7 @@ _upper_evolution_step(List<TimedHybridConstrainedImageSet>& working_sets,
     Map<DiscreteEvent,VectorFunction> resets;
     Map<DiscreteEvent,DiscreteState> targets;
     
-    for(Set<DiscreteTransition>::const_iterator transition_iter=transitions.begin();
+    for(std::list<DiscreteTransition>::const_iterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         const DiscreteEvent& event=transition_iter->event();

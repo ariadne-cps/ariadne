@@ -344,7 +344,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     std::map< DiscreteEvent, VectorFunction > invariants
         =initial_mode.invariants();
     ARIADNE_LOG(7,"invariants="<<invariants<<"\n");
-    const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
+    const std::list< DiscreteTransition > transitions = system.transitions(initial_location);
     ARIADNE_LOG(7,"transitions="<<transitions<<"\n");
 
 
@@ -438,7 +438,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         ARIADNE_LOG(3,"Blocking time after checking invariants = "<<lower_blocking_time<<"\n");
 
     // Test transitions
-    for(std::set< DiscreteTransition >::const_iterator
+    for(std::list< DiscreteTransition >::const_iterator
         iter=transitions.begin(); iter!=transitions.end(); ++iter)
     {
         if(iter->forced()) {  // Test only forced transitions
@@ -501,7 +501,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     if(semantics == UPPER_SEMANTICS) {
         // Upper semantics: execute every transition that is possibly active.
         ARIADNE_LOG(2,"Computing discrete transitions.\n");
-        for(std::set< DiscreteTransition >::const_iterator
+        for(std::list< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
             VectorFunction guard = iter->activation();
@@ -585,7 +585,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     } else { // LOWER_SEMANTICS
         // Lower semantics: execute every transition that is definitely active.
         ARIADNE_LOG(2,"Computing discrete transitions.\n");
-        for(std::set< DiscreteTransition >::const_iterator
+        for(std::list< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
             VectorFunction guard = iter->activation();

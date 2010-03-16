@@ -494,7 +494,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     const VectorFunction dynamic=mode.dynamic();
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
-    const std::set<DiscreteTransition> transitions=system.transitions(location);
+    const std::list<DiscreteTransition> transitions=system.transitions(location);
 
     // Check to make sure dimensions are correct
     ARIADNE_ASSERT(set_model.argument_size()==time_model.argument_size());
@@ -526,7 +526,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     if(definitely(initially_active_events[blocking_event])) {
         ARIADNE_LOG(2,"A blocking event is initially active, no continuous evolution, just apply discrete events.\n");
         // No continuous evolution; just apply discrete events
-        for(std::set<DiscreteTransition>::const_iterator iter=transitions.begin();
+        for(std::list<DiscreteTransition>::const_iterator iter=transitions.begin();
             iter!=transitions.end(); ++iter)
         {
             ARIADNE_LOG(3,"Testing transition "<<iter->event()<<".\n");

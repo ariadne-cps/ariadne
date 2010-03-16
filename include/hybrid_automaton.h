@@ -105,6 +105,13 @@ class DiscreteMode {
         return result;
     }
 
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on the invariants and dynamic functions. */
+	void substitute(const Constant<Real>& con, const Real& c) {
+		this->_dynamic.substitute(con,c);
+		for (std::map<DiscreteEvent,VectorFunction>::iterator it=this->_invariants.begin();it!=this->_invariants.end();it++)
+			it->second.substitute(con,c);
+	}
+
     //! \brief The discrete mode's default spacial grid.
     const Grid& grid() const {
         return *this->_grid; }
@@ -186,6 +193,11 @@ class DiscreteTransition
     DiscreteState target() const {
         return this->_target; }
 
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on the reset and activation functions. */
+	void substitute(const Constant<Real>& con, const Real& c) {
+		this->_activation.substitute(con,c);
+		this->_reset.substitute(con,c);
+	}
 
     //! \brief The activation region of the discrete transition.
     const VectorFunction& activation() const {
@@ -278,17 +290,17 @@ class HybridAutomaton
 
 
     typedef std::map<DiscreteEvent,VectorFunction>::const_iterator invariant_const_iterator;
-    typedef std::set<DiscreteTransition>::const_iterator discrete_transition_const_iterator;
-    typedef std::set<DiscreteMode>::const_iterator discrete_mode_const_iterator;
+    typedef std::list<DiscreteTransition>::const_iterator discrete_transition_const_iterator;
+    typedef std::list<DiscreteMode>::const_iterator discrete_mode_const_iterator;
   private:
     //! \brief The hybrid automaton's name.
     std::string _name;
 
     //! \brief The list of the hybrid automaton's discrete modes.
-    std::set< DiscreteMode > _modes;
+    std::list< DiscreteMode > _modes;
 
     //! \brief The hybrid automaton's transitions.
-    std::set< DiscreteTransition > _transitions;
+    std::list< DiscreteTransition > _transitions;
 
   public:
     //@{
@@ -523,7 +535,10 @@ class HybridAutomaton
     //! \brief Set the hybrid grid controlling relative scaling.
     void set_grid(const HybridGrid& hgrid);
 
-    //@}
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all the functions of modes and transitions. */
+	void substitute(const Constant<Real>& con, const Real& c);
+
+	//@}
 
     //@{
     //! \name Data access and queries.
@@ -544,13 +559,13 @@ class HybridAutomaton
     const DiscreteTransition& transition(DiscreteEvent event, DiscreteState source) const;
 
     //! \brief The set of discrete modes. (Not available in Python interface)
-    const std::set< DiscreteMode >& modes() const;
+    const std::list< DiscreteMode >& modes() const;
 
     //! \brief The set of discrete transitions. (Not available in Python interface)
-    const std::set< DiscreteTransition >& transitions() const;
+    const std::list< DiscreteTransition >& transitions() const;
 
     //! \brief The discrete transitions from location \a source.
-    std::set< DiscreteTransition > transitions(DiscreteState source) const;
+    std::list< DiscreteTransition > transitions(DiscreteState source) const;
 
     //! \brief The blocking events (invariants and urgent transitions) in \a location.
     std::map<DiscreteEvent,VectorFunction> blocking_guards(DiscreteState location) const;

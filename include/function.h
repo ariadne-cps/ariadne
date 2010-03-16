@@ -61,9 +61,9 @@ template<class T> class Space;
 
 typedef ExtendedVariable<Real> ExtendedRealVariable;
 typedef Variable<Real> RealVariable;
+typedef Constant<Real> RealConstant;
 typedef DottedVariable<Real> DottedRealVariable;
 typedef PrimedVariable<Real> PrimedRealVariable;
-typedef Variable<Real> RealVariable;
 typedef Expression<Real> RealExpression;
 typedef Space<Real> RealSpace;
 
@@ -105,6 +105,9 @@ class ScalarFunction
     Float evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Interval evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
     TaylorModel evaluate(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
+
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all expressions. */
+	void substitute(const Constant<Real>& con, const Real& c);
 
     Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
@@ -218,6 +221,9 @@ class VectorFunction
 
     Nat result_size() const { return this->_ptr->result_size(); }
     Nat argument_size() const { return this->_ptr->argument_size(); }
+
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all expressions. */
+	void substitute(const RealConstant& con, const Real& c);
 
     Vector<Float> evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Vector<Interval> evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }

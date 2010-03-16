@@ -120,6 +120,11 @@ struct ScalarExpressionFunctionBody
     virtual std::ostream& write(std::ostream& os) const {
         return os << "Function( space="<<this->_space<<", expression="<<this->_expression<<" )"; }
 
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present */
+	void substitute(const Constant<Real>& con, const Real& c) {
+		this->_expression = this->_expression.substitute(con,c);
+	}
+
     template<class X> void _compute(X& r, const Vector<X>& x) const {
         Map<ExtendedRealVariable,X> valuation;
         for(uint i=0; i!=x.size(); ++i) { valuation[_space.variable(i)]=x[i]; }
@@ -155,6 +160,12 @@ struct VectorExpressionFunctionBody
             result[i]=values[_result_variables[i]];
         }
     }
+
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all expressions. */
+	void substitute(const RealConstant& con, const Real& c) {
+		for (List< Assignment<ExtendedRealVariable,RealExpression> >::iterator it=this->_assignments.begin();it!=this->_assignments.end();it++)
+			it->rhs = it->rhs.substitute(con,c);
+	}
 
     virtual ScalarFunction operator[](uint i) const {
         if(_result_variables.size()==_assignments.size()) {
@@ -382,6 +393,12 @@ struct VectorOfScalarFunctionBody
         this->_vec[i]=f; }
     ScalarFunction get(uint i) const {
         return this->_vec[i]; }
+
+	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all expressions. */
+	void substitute(const RealConstant& con, const Real& c) {
+		for (Vector<ScalarFunction>::iterator it=this->_vec.begin();it!=this->_vec.end();it++)
+			(*it).substitute(con,c);
+	}
 
     virtual uint result_size() const {
         return _vec.size(); }
@@ -777,6 +794,12 @@ Polynomial<Real> ScalarFunction::polynomial() const
     ARIADNE_THROW(std::runtime_error,"ScalarFunction::polynomial()","FunctionBody "<<*this<<" is not a polynomial.");
 }
 
+void ScalarFunction::substitute(const Constant<Real>& con, const Real& c) 
+{ 
+		ScalarExpressionFunctionBody* sefb_ptr=dynamic_cast<ScalarExpressionFunctionBody*>(this->_ptr.operator->());
+		if (sefb_ptr) sefb_ptr->substitute(con,c); 
+}
+
 
 template<class Op> inline
 ScalarFunction make_unary_function(Op op, const ScalarFunction& f) {
@@ -1062,9 +1085,6 @@ VectorFunction::VectorFunction(const Space<Real>& rs, const Map<RealVariable,Rea
 
 
 
-
-
-
 VectorFunction::VectorFunction(const List<ExtendedRealVariable>& rv,
                                const List<ExtendedRealAssignment>& eq,
                                const List<RealVariable>& av)
@@ -1126,6 +1146,15 @@ void VectorFunction::set(Nat i, ScalarFunction f)
     ARIADNE_ASSERT_MSG(vptr,"Can only set component of a vector of scalar functions.");
     vptr->_vec[i]=f;
 }
+
+void VectorFunction::substitute(const RealConstant& con, const Real& c)
+{
+	VectorExpressionFunctionBody* e_ptr=dynamic_cast<VectorExpressionFunctionBody*>(this->_ptr.operator->());
+	VectorOfScalarFunctionBody* s_ptr=dynamic_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+	if (e_ptr) e_ptr->substitute(con,c);
+	else if (s_ptr) s_ptr->substitute(con,c);	
+}
+
 
 ScalarFunction VectorFunction::operator[](Nat i) const
 {

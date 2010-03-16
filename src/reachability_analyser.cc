@@ -879,7 +879,7 @@ _getDomainHMAD(const HybridAutomaton& system) const
 	HybridFloatVector hmad;
 
     // For each mode
-	for (set<DiscreteMode>::const_iterator it = system.modes().begin(); it != system.modes().end(); it++)
+	for (list<DiscreteMode>::const_iterator it = system.modes().begin(); it != system.modes().end(); it++)
 	{
 		// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
 		der = it->dynamic()(this->_parameters->bounding_domain.find(it->location())->second); 
@@ -910,7 +910,7 @@ _getReachHMAD(const HybridAutomaton& system) const
 	HybridFloatVector hmad;
 
 	// Gets the dynamic for the given DiscreteState
-	for (set<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
+	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
 	{
 		// Inserts the corresponding pair, initialized with zero maximum absolute derivatives
 		hmad.insert(pair<DiscreteState,Vector<Float> >(modes_it->location(),Vector<Float>(css)));
@@ -1143,11 +1143,6 @@ verify_iterative(SystemType& system,
 {
 	ARIADNE_LOG(2,"\n\tIterative verification...\n");
 
-	// Limit size for the chain reach
-	const uint MAX_REACH_SIZE = 150000;
-	// Limit maximum number of working sets for the lower reach
-	const uint MAX_WORKING_SETS_TOTAL = 50000;
-
 	// Initialize the seed for internal random number generation
 	srand(time(NULL));
 
@@ -1164,7 +1159,7 @@ verify_iterative(SystemType& system,
 	// Set the initial parameters
 	this->_setInitialParameters(system, domain);
 
-    while(1)
+    while(this->_parameters->maximum_grid_depth <= this->_parameters->highest_maximum_grid_depth)
 	{ 
 		/// Print some information on the current iteration
 		sprintf(mgd_char,"%i",this->_parameters->maximum_grid_depth);
@@ -1183,9 +1178,6 @@ verify_iterative(SystemType& system,
 		// Plot the reached region (if no definite result has been obtained)
 		filename = "lower-";
 		plot(foldername,filename + mgd_char, this->_statistics->lower().reach); 
-
-		// Check if the chain reach size is sufficiently low, and that the lower reach working sets total is sufficiently low, in order to stop the verification
-		if (this->_statistics->upper().reach.size() > MAX_REACH_SIZE || this->_discretiser->statistics().lower().largest_working_sets_total > MAX_WORKING_SETS_TOTAL) break;
 		
 		// Adapt the parameters for the next iteration
 		this->_adaptParameters(system);

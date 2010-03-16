@@ -750,7 +750,7 @@ template<class X> Expression<X> substitute_variable(const VariableExpression<X>&
     if(e.variable()==v) { return Expression<X>(c); } else { return Expression<X>(e.clone()); } }
 
 template<class X> Expression<X> substitute_constant(const ConstantExpression<X>& e, const Constant<X>& con, const X& c) {
-	if (e.name()==con.name()) { return Expression<X>(c); } else	{ return Expression<X>(e.clone()); }
+	if (e.name()==con.name()) { return Expression<X>(ConstantExpression<X>(con.name(),c)); } else	{ return Expression<X>(e.clone()); }
  }
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& c) {

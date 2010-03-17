@@ -1026,6 +1026,7 @@ std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
 {
     if(ivl.lower()==ivl.upper()) { return os << ivl.lower(); }
+	else if (ivl.empty()) { return os << "{}"; }
     return os << '{' << ivl.lower() << ':' << ivl.upper() << '}';
 }
 

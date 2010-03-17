@@ -178,11 +178,35 @@ class HybridReachabilityAnalyser
                            const HybridImageSet& initial_set, 
                            const HybridBoxes& safe_box);
 
-	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box inside \domain, in an iterative way by tuning the evolution/analysis parameters. */
+	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box inside \a domain, 
+		in an iterative way by tuning the evolution/analysis parameters. */
 	tribool verify_iterative(SystemType& system, 
 							 const HybridImageSet& initial_set, 
 							 const HybridBoxes& safe_box, 
 							 const HybridBoxes& domain);
+
+	/*! \brief Compute an underapproximation of the safety interval of \a parameter inside the \a parameter_interval for the automaton 
+		\a system starting in \a initial_set, where the safe region is \a safe_box inside \a domain. 
+        \details The procedure returns the interval of safety. */
+	Interval safety_parametric(SystemType& system, 
+							   const HybridImageSet& initial_set, 
+							   const HybridBoxes& safe_box, 
+			 				   const HybridBoxes& domain,
+							   const RealConstant& parameter,
+							   const Interval& parameter_interval,
+							   const Float& tolerance);
+
+	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter inside the \a parameter_interval for the automaton 
+		\a system starting in \a initial_set, where the safe region is \a safe_box inside \a domain. 
+        \details The procedure returns the intervals of safety and unsafety. */
+	std::pair<Interval,Interval> safety_unsafety_parametric(SystemType& system, 
+										 					const HybridImageSet& initial_set, 
+										 					const HybridBoxes& safe_box, 
+			 							 					const HybridBoxes& domain,
+										 					const RealConstant& parameter,
+										 					const Interval& parameter_interval,
+										 					const Float& tolerance);
+
 
     //@}
 

@@ -308,12 +308,14 @@ class Interval {
     const Float radius() const { return sub_up(u,l)/2; }
     const Float width() const { return sub_up(u,l); }
 
+	
     bool empty() const { return l>u; }
     bool singleton() const { return l==u; }
 
     void set_lower(const Float& lower) { ARIADNE_ASSERT(lower<=this->u); l=lower; }
     void set_upper(const Float& upper) { ARIADNE_ASSERT(this->l<=upper); u=upper; }
     void set(const Float& lower, const Float& upper) { ARIADNE_ASSERT(lower<=upper); l=lower; u=upper; }
+	void make_empty() { l=std::numeric_limits<float>::max(); u=-std::numeric_limits<float>::max(); }
   public:
   private:
     double l, u;

@@ -840,22 +840,20 @@ verify(const SystemType& system,
 		if (this->_safe(system,initial_set,safe_box)) 
 		{
 			ARIADNE_LOG(3, "\t\tSafe.\n");
+			ARIADNE_LOG(4, "\t\t\tChain reach largest evolution time: " << this->_statistics->upper().largest_evol_time << "\n");
+			ARIADNE_LOG(4, "\t\t\tChain reach largest evolution steps: " << this->_statistics->upper().largest_evol_steps << "\n");
 			return true;
 		}
-	
-		ARIADNE_LOG(4, "\t\t\tChain reach largest evolution time: " << this->_statistics->upper().largest_evol_time << "\n");
-		ARIADNE_LOG(4, "\t\t\tChain reach largest evolution steps: " << this->_statistics->upper().largest_evol_steps << "\n");
 
 		// Perform the unsafety analysis
 		if (this->_unsafe(system,initial_set,safe_box)) 
 		{
 			ARIADNE_LOG(3, "\t\tUnsafe.\n");
+			ARIADNE_LOG(4, "\t\t\tLower reach largest evolution time: " << this->_statistics->lower().largest_evol_time << "\n");
+			ARIADNE_LOG(4, "\t\t\tLower reach largest evolution steps: " << this->_statistics->lower().largest_evol_steps << "\n");
+			ARIADNE_LOG(4, "\t\t\tLower reach largest enclosure cell: " << this->_discretiser->statistics().lower().largest_enclosure_cell << "\n");
 			return false;
 		}
-
-		ARIADNE_LOG(4, "\t\t\tLower reach largest evolution time: " << this->_statistics->lower().largest_evol_time << "\n");
-		ARIADNE_LOG(4, "\t\t\tLower reach largest evolution steps: " << this->_statistics->lower().largest_evol_steps << "\n");
-		ARIADNE_LOG(4, "\t\t\tLower reach largest enclosure cell: " << this->_discretiser->statistics().lower().largest_enclosure_cell << "\n");
 
 		ARIADNE_LOG(3, "\t\tIndeterminate.\n");
 
@@ -1172,10 +1170,9 @@ verify_iterative(SystemType& system,
 		// Return the result, if it is not indeterminate
 		if (!indeterminate(result)) return result;
 
-		// Plot the reached region (if no definite result has been obtained)
+		// Plot the reached regions (if no definite result has been obtained)
 		filename = "upper-";
 		plot(foldername,filename + mgd_char, this->_statistics->upper().reach);
-		// Plot the reached region (if no definite result has been obtained)
 		filename = "lower-";
 		plot(foldername,filename + mgd_char, this->_statistics->lower().reach); 
 		
@@ -1186,5 +1183,377 @@ verify_iterative(SystemType& system,
 	// Return indeterminate
 	return indeterminate;
 }
+
+Interval
+HybridReachabilityAnalyser::
+safety_parametric(SystemType& system, 
+				  const HybridImageSet& initial_set, 
+				  const HybridBoxes& safe_box, 
+				  const HybridBoxes& domain,
+				  const RealConstant& parameter,
+				  const Interval& parameter_interval,
+				  const Float& tolerance)	
+{
+	// Copy the parameter and interval for local operations
+	RealConstant param = parameter;
+	Interval param_int = parameter_interval;
+
+	// Check the lower bound
+	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
+
+	// Set the parameter
+	param.set_value(parameter_interval.lower());
+	// Substitute the value
+	system.substitute(param);
+	// Perform the verification
+	tribool lower_result = this->verify_iterative(system,initial_set,safe_box,domain);
+
+	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
+	else { ARIADNE_LOG(1,"Not safe.\n"); }
+
+	// Check the upper bound
+	ARIADNE_LOG(1,"Checking upper interval bound... ");
+
+	// Set the parameter
+	param.set_value(parameter_interval.upper());
+	// Substitute the value
+	system.substitute(param);
+	// Perform the verification
+	tribool upper_result = this->verify_iterative(system,initial_set,safe_box,domain);
+
+	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
+	else { ARIADNE_LOG(1,"Not safe.\n"); }
+
+	// Analyse the results
+
+	// The source of update
+	bool updateFromBottom;
+
+	// Create an empty interval
+	Interval empty_int;
+	empty_int.make_empty();
+
+	// If both extremes are definitely safe, no more verification is involved
+	if (definitely(lower_result) && definitely(upper_result)) {
+		return parameter_interval;
+	}
+	// If both extremes are not definitely safe, no more verification is involved
+	else if (!definitely(lower_result) && !definitely(upper_result)) {
+		return empty_int;
+	}
+	// Otherwise it updates from the bottom or the top depending on the lower_result being safe or not
+	else updateFromBottom = definitely(lower_result);		
+
+	// While the tolerance bound has not been hit
+	while (param_int.width() > tolerance)
+	{
+		// Set the parameter as the midpoint of the interval
+		param.set_value(param_int.midpoint());
+		// Substitute the value
+		system.substitute(param);
+
+		ARIADNE_LOG(1,"Checking " << param_int << " (midpoint: " << param_int.midpoint() << ", width: " << param_int.width() << ") ... ");
+
+		// Perform the verification
+		tribool result = this->verify_iterative(system,initial_set,safe_box,domain);
+
+		if (definitely(result))
+		{
+			if (updateFromBottom)
+			{
+				ARIADNE_LOG(1,"Safe, refining upwards.\n");
+				param_int.set_lower(param.value());
+			}
+			else
+			{
+				ARIADNE_LOG(1,"Safe, refining downwards.\n");
+				param_int.set_upper(param.value());
+			}
+		}
+		else
+		{
+			if (updateFromBottom)
+			{
+				ARIADNE_LOG(1,"Not safe, refining downwards.\n");
+				param_int.set_upper(param.value());
+			}
+			else
+			{
+				ARIADNE_LOG(1,"Not safe, refining upwards.\n");
+				param_int.set_lower(param.value());
+			}
+		}
+	}
+
+	if (updateFromBottom)
+		return Interval(parameter_interval.lower(),param_int.lower());
+	else
+		return Interval(param_int.upper(),parameter_interval.upper());
+}
+
+std::pair<Interval,Interval>
+HybridReachabilityAnalyser::
+safety_unsafety_parametric(SystemType& system, 
+						   const HybridImageSet& initial_set, 
+						   const HybridBoxes& safe_box, 
+						   const HybridBoxes& domain,
+						   const RealConstant& parameter,
+						   const Interval& parameter_interval,
+						   const Float& tolerance)	
+{
+	// Copy the parameter for local operations
+	RealConstant param = parameter;
+	// Create the safety and unsafety intervals: they represent the search intervals, not the intervals where the system is proved safe or unsafe
+	Interval safety_int = parameter_interval;
+	Interval unsafety_int = parameter_interval;
+
+	// Check the lower bound
+	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
+
+	// Set the parameter
+	param.set_value(parameter_interval.lower());
+	// Substitute the value
+	system.substitute(param);
+	// Perform the verification
+	tribool lower_result = this->verify_iterative(system,initial_set,safe_box,domain);
+
+	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
+	else if (!possibly(lower_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
+	else ARIADNE_LOG(1,"Indeterminate.\n");
+
+	// Check the upper bound
+	ARIADNE_LOG(1,"Checking upper interval bound... ");
+
+	// Set the parameter
+	param.set_value(parameter_interval.upper());
+	// Substitute the value
+	system.substitute(param);
+	// Perform the verification
+	tribool upper_result = this->verify_iterative(system,initial_set,safe_box,domain);
+
+	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
+	else if (!possibly(upper_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
+	else ARIADNE_LOG(1,"Indeterminate.\n");
+
+	// Analyse the results
+
+	// Where the safe value is found
+	bool safeOnBottom;
+
+	// Create an empty interval
+	Interval empty_int;
+	empty_int.make_empty();
+
+	// If both extremes are safe, no more verification is involved
+	if (definitely(lower_result) && definitely(upper_result)) {
+		return make_pair<Interval,Interval>(parameter_interval,empty_int);
+	}
+	// If both extremes are unsafe, no more verification is involved
+	else if (!possibly(lower_result) && !possibly(upper_result)) {
+		return make_pair<Interval,Interval>(empty_int,parameter_interval);
+	}
+	// If both extremes are indeterminate, no verification is possible
+	else if (indeterminate(lower_result) && indeterminate(upper_result)) {
+		return make_pair<Interval,Interval>(empty_int,empty_int);
+	}
+	// If the lower extreme is safe or the upper extreme is unsafe, the safe values are on the bottom
+	else if (definitely(lower_result) || !possibly(upper_result)) {
+		safeOnBottom = true;		
+		// If there are indeterminate values, reset the corresponding intervals as empty
+		if (indeterminate(lower_result)) safety_int = empty_int;
+		if (indeterminate(upper_result)) unsafety_int = empty_int;
+	}		
+	// If the upper extreme is safe or the lower extreme is unsafe, the safe values are on the top
+	else {
+		safeOnBottom = false;		
+		// If there are indeterminate values, reset the corresponding intervals as empty
+		if (indeterminate(lower_result)) unsafety_int = empty_int;
+		if (indeterminate(upper_result)) safety_int = empty_int;
+	}
+
+	// Verification loop
+	while (true)
+	{
+		// The verification result
+		tribool result;
+
+		// Safety interval check
+		if (!safety_int.empty())
+		{
+			// Set the parameter as the midpoint of the interval
+			param.set_value(safety_int.midpoint());
+			// Substitute the value
+			system.substitute(param);
+
+			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() << ", width: " << safety_int.width() << ") ... ");
+
+			// Perform the verification
+			result = this->verify_iterative(system,initial_set,safe_box,domain);
+
+			// If safe
+			if (definitely(result))
+			{
+				if (safeOnBottom)
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(param.value());
+
+					ARIADNE_LOG(1,"Safe, refining upwards.\n");
+					safety_int.set_lower(param.value());
+				}
+				else
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int)) unsafety_int.set_upper(param.value());
+
+					ARIADNE_LOG(1,"Safe, refining downwards.\n");
+					safety_int.set_upper(param.value());
+				}
+			}
+			// If unsafe
+			else if (!possibly(result))
+			{
+				if (safeOnBottom)
+				{
+					ARIADNE_LOG(1,"Unsafe, refining downwards and resetting the unsafety.\n");
+					safety_int.set_upper(param.value());
+				}
+				else
+				{
+					ARIADNE_LOG(1,"Unsafe, refining upwards and resetting the unsafety.\n");
+					safety_int.set_lower(param.value());
+				}
+
+				// The unsafety interval now becomes the same as the safety interval
+				unsafety_int = safety_int;
+			}
+			// If indeterminate
+			else 
+			{
+				if (safeOnBottom)
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(param.value());
+
+					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
+					safety_int.set_upper(param.value());
+				}
+				else
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int))	unsafety_int.set_upper(param.value());
+
+					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
+					safety_int.set_lower(param.value());
+				}
+			}
+
+			/* Break if the safety interval is lesser than the tolerance or (if the unsafety interval is not empty)
+			 if the minimum distance between the safe and unsafe values is lesser than the tolerance */
+			if ((safety_int.width() <= tolerance) || (!unsafety_int.empty() &&
+				((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance)) ||
+				(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance)))))
+				break;
+
+		}
+
+		// Unsafety interval check
+		if (!unsafety_int.empty())
+		{
+			// Set the parameter as the midpoint of the interval
+			param.set_value(unsafety_int.midpoint());
+			// Substitute the value
+			system.substitute(param);
+
+			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() << ", width: " << unsafety_int.width() << ") ... ");
+
+			// Perform the verification
+			result = this->verify_iterative(system,initial_set,safe_box,domain);
+
+			// If safe
+			if (definitely(result))
+			{
+				if (safeOnBottom)
+				{
+					ARIADNE_LOG(1,"Safe, refining upwards and resetting the safety.\n");
+					unsafety_int.set_lower(param.value());
+				}
+				else
+				{
+					ARIADNE_LOG(1,"Safe, refining downwards and resetting the safety.\n");
+					unsafety_int.set_upper(param.value());
+				}
+
+				// The safety interval now becomes the same as the unsafety interval
+				safety_int = unsafety_int;
+			}
+			// If unsafe
+			else if (!possibly(result))
+			{
+				if (safeOnBottom)
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int)) safety_int.set_upper(param.value());
+
+					ARIADNE_LOG(1,"Unsafe, refining downwards.\n");
+					unsafety_int.set_upper(param.value());
+				}
+				else
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int)) safety_int.set_lower(param.value());
+
+					ARIADNE_LOG(1,"Unsafe, refining upwards.\n");
+					unsafety_int.set_lower(param.value());
+				}
+			}
+			// If indeterminate
+			else 
+			{
+				if (safeOnBottom)
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int)) safety_int.set_upper(param.value());
+
+					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
+					unsafety_int.set_lower(param.value());
+				}
+				else
+				{
+					// If the unsafety interval is the same as the safety interval, update it too
+					if (equal(unsafety_int,safety_int)) safety_int.set_lower(param.value());
+
+					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
+					unsafety_int.set_upper(param.value());
+				}
+			}
+
+			/* Break if the unsafety interval is lesser than the tolerance or (if the safety interval is not empty)
+			 if the minimum distance between the safe and unsafe values is lesser than the tolerance */
+			if ((unsafety_int.width() <= tolerance) || (!safety_int.empty() &&
+				((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance)) ||
+				(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance)))))
+				break;
+		}
+	}
+
+	// The result intervals for safe and unsafe values
+	Interval safe_result, unsafe_result;
+
+	// Get the safe and unsafe intervals
+	if (safeOnBottom)
+	{
+		safe_result = (safety_int.empty() ? safety_int : Interval(parameter_interval.lower(),safety_int.lower()));
+		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(unsafety_int.upper(),parameter_interval.upper()));
+	}	
+	else
+	{
+		safe_result = (safety_int.empty() ? safety_int : Interval(safety_int.upper(),parameter_interval.upper()));	
+		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(parameter_interval.lower(),unsafety_int.lower()));	
+	}
+
+	return make_pair<Interval,Interval>(safe_result,unsafe_result);
+}
+
 
 } // namespace Ariadne

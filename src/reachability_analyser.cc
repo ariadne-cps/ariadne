@@ -592,9 +592,11 @@ chain_reach(const SystemType& system,
 {
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::chain_reach(system,initial_set)\n");
 
-	this->_statistics->upper().reset(); // Resets the discrete statistics
-	this->_discretiser->reset_upper_statistics(); // Resets the continuous statistics
+	// Reset statistics
+	this->_statistics->upper().reset();
+	this->_discretiser->reset_upper_statistics();
 
+	// Assign local variables
     HybridBoxes bounding_domain = this->_parameters->bounding_domain;
     Float transient_time = this->_parameters->transient_time;
     int transient_steps = this->_parameters->transient_steps;
@@ -610,15 +612,11 @@ chain_reach(const SystemType& system,
 	// Checks consistency of the bounding domain in respect to the state space
 	HybridSpace hspace = system.state_space();
 	// If the DiscreteState was not found or otherwise if the continuous space sizes mismatch, throws an error
-	for (HybridSpace::locations_const_iterator hs_it = hspace.locations_begin(); hs_it != hspace.locations_end(); ++hs_it) 
-	{
-		if (bounding_domain.find(hs_it->first) == bounding_domain.end())
-		{
-			ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the discrete space.");		
-		}		
-		else if (hs_it->second != bounding_domain[hs_it->first].size())
-			ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the continuous space.");		
-	}
+	for (HybridSpace::locations_const_iterator hs_it = hspace.locations_begin(); hs_it != hspace.locations_end(); ++hs_it) {
+		if (bounding_domain.find(hs_it->first) == bounding_domain.end()) {
+			ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the discrete space."); }		
+		else if (hs_it->second != bounding_domain[hs_it->first].size()) {
+			ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the continuous space."); }}
 
     Gr grid=system.grid();
     GTS bounding(grid), evolve(grid), reach(grid), initial(grid), found(grid);
@@ -630,40 +628,37 @@ chain_reach(const SystemType& system,
 
     if(transient_time <= 0.0 || transient_steps <= 0) {
         transient_time = lock_to_grid_time;
-        transient_steps = lock_to_grid_steps;
-    }
+        transient_steps = lock_to_grid_steps; }
+
     HybridTime hybrid_transient_time(transient_time, transient_steps);
     ARIADNE_LOG(5,"\t\t\t\tComputing first evolution step...\n");
 
     // For each location, test if the radius of the set is smaller than the grid cell
     for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
-        loc_iter!=initial_set.locations_end(); ++loc_iter) 
-    {
+        loc_iter!=initial_set.locations_end(); ++loc_iter)
+	{
         Vector<Float> cell = grid[loc_iter->first].lengths();
         Float cell_radius = (min(cell))/(1 << (maximum_grid_depth));
 
         if (radius(loc_iter->second.bounding_box()) > cell_radius) {
-            // if bigger, map to the grid
-            ARIADNE_LOG(6,"\t\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
-            initial[loc_iter->first].adjoin_outer_approximation(loc_iter->second,maximum_grid_depth);
-        } else {
+            ARIADNE_LOG(6,"\t\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n"); // If bigger, map to the grid
+            initial[loc_iter->first].adjoin_outer_approximation(loc_iter->second,maximum_grid_depth); } 
+		else {
             ARIADNE_LOG(6,"\t\t\t\t\tComputing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
             // if smaller, compute the evolution directly
             EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
             GTS cell_reach,cell_final;
             make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,initial_enclosure,hybrid_transient_time,maximum_grid_depth,UPPER_SEMANTICS);
             reach.adjoin(cell_reach);
-            evolve.adjoin(cell_final);
-        }
-    }
+            evolve.adjoin(cell_final); }
+	}
 
     if(!initial.empty()) {
         ARIADNE_LOG(5,"\t\t\t\tComputing evolution on the grid...\n")
         make_lpair(found,initial)=this->_upper_reach_evolve(system,initial,hybrid_transient_time,maximum_grid_depth);
         ARIADNE_LOG(6,"\t\t\t\t\tfound "<<found.size()<<" cells.\n");
         reach.adjoin(found);
-        evolve.adjoin(initial);
-    }
+        evolve.adjoin(initial); }
 
 	// Adds the largest evolution time and steps to the statistics, then resets such statistics
 	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;
@@ -840,8 +835,6 @@ verify(const SystemType& system,
 		if (this->_safe(system,initial_set,safe_box)) 
 		{
 			ARIADNE_LOG(3, "\t\tSafe.\n");
-			ARIADNE_LOG(4, "\t\t\tChain reach largest evolution time: " << this->_statistics->upper().largest_evol_time << "\n");
-			ARIADNE_LOG(4, "\t\t\tChain reach largest evolution steps: " << this->_statistics->upper().largest_evol_steps << "\n");
 			return true;
 		}
 
@@ -849,9 +842,6 @@ verify(const SystemType& system,
 		if (this->_unsafe(system,initial_set,safe_box)) 
 		{
 			ARIADNE_LOG(3, "\t\tUnsafe.\n");
-			ARIADNE_LOG(4, "\t\t\tLower reach largest evolution time: " << this->_statistics->lower().largest_evol_time << "\n");
-			ARIADNE_LOG(4, "\t\t\tLower reach largest evolution steps: " << this->_statistics->lower().largest_evol_steps << "\n");
-			ARIADNE_LOG(4, "\t\t\tLower reach largest enclosure cell: " << this->_discretiser->statistics().lower().largest_enclosure_cell << "\n");
 			return false;
 		}
 
@@ -1107,7 +1097,7 @@ _setInitialParameters(SystemType& system, const HybridBoxes& domain)
 	this->_parameters->lock_to_grid_steps = 1;
 	this->_parameters->bounding_domain = domain; // Set the domain (IMPORTANT: must be done before using _getDomainHMAD and _getEqualizedHybridGrid)
 
-	this->_parameters->maximum_grid_depth = 0; // Initial value, incremented at each iteration
+	this->_parameters->maximum_grid_depth = this->_parameters->lowest_maximum_grid_depth; // Initial value, incremented at each iteration
 
 	HybridFloatVector hmad = this->_getDomainHMAD(system); // Evaluate the maximum absolute derivatives from the domain
 
@@ -1162,11 +1152,14 @@ verify_iterative(SystemType& system,
 		/// Print some information on the current iteration
 		sprintf(mgd_char,"%i",this->_parameters->maximum_grid_depth);
 		ARIADNE_LOG(2, "\tDEPTH " << this->_parameters->maximum_grid_depth << "\n"); 
-		ARIADNE_LOG(3, "\n\t\tMaximum step size: " << this->_discretiser->parameters().maximum_step_size << "\n");
+		ARIADNE_LOG(3, "\t\tMaximum step size: " << this->_discretiser->parameters().maximum_step_size << "\n");
 		ARIADNE_LOG(3, "\t\tMaximum enclosure cell: " << this->_discretiser->parameters().maximum_enclosure_cell << "\n");
 
 		// Perform the verification
 		tribool result = this->verify(system,initial_set,safe_box);
+		ARIADNE_LOG(3, "\t\tChain reach working sets limits: " << this->_discretiser->parameters().hybrid_working_sets_size_limit << "\n");
+		ARIADNE_LOG(3, "\t\tLargest enclosure cell: " << this->_discretiser->statistics().lower().largest_enclosure_cell << "\n");
+		ARIADNE_LOG(3, "\t\tLargest working sets total: " << this->_discretiser->statistics().lower().largest_working_sets_total << "\n");		
 		// Return the result, if it is not indeterminate
 		if (!indeterminate(result)) return result;
 
@@ -1257,33 +1250,20 @@ safety_parametric(SystemType& system,
 		// Perform the verification
 		tribool result = this->verify_iterative(system,initial_set,safe_box,domain);
 
-		if (definitely(result))
-		{
-			if (updateFromBottom)
-			{
+		if (definitely(result)) {
+			if (updateFromBottom) {
 				ARIADNE_LOG(1,"Safe, refining upwards.\n");
-				param_int.set_lower(param.value());
-			}
-			else
-			{
+				param_int.set_lower(param.value()); }
+			else {
 				ARIADNE_LOG(1,"Safe, refining downwards.\n");
-				param_int.set_upper(param.value());
-			}
-		}
-		else
-		{
-			if (updateFromBottom)
-			{
+				param_int.set_upper(param.value()); }}
+		else {
+			if (updateFromBottom) {
 				ARIADNE_LOG(1,"Not safe, refining downwards.\n");
-				param_int.set_upper(param.value());
-			}
-			else
-			{
+				param_int.set_upper(param.value()); }
+			else {
 				ARIADNE_LOG(1,"Not safe, refining upwards.\n");
-				param_int.set_lower(param.value());
-			}
-		}
-	}
+				param_int.set_lower(param.value()); }}}
 
 	if (updateFromBottom)
 		return Interval(parameter_interval.lower(),param_int.lower());
@@ -1346,39 +1326,34 @@ safety_unsafety_parametric(SystemType& system,
 
 	// If both extremes are safe, no more verification is involved
 	if (definitely(lower_result) && definitely(upper_result)) {
-		return make_pair<Interval,Interval>(parameter_interval,empty_int);
-	}
+		return make_pair<Interval,Interval>(parameter_interval,empty_int); }
 	// If both extremes are unsafe, no more verification is involved
 	else if (!possibly(lower_result) && !possibly(upper_result)) {
-		return make_pair<Interval,Interval>(empty_int,parameter_interval);
-	}
+		return make_pair<Interval,Interval>(empty_int,parameter_interval); }
 	// If both extremes are indeterminate, no verification is possible
 	else if (indeterminate(lower_result) && indeterminate(upper_result)) {
-		return make_pair<Interval,Interval>(empty_int,empty_int);
-	}
+		return make_pair<Interval,Interval>(empty_int,empty_int); }
 	// If the lower extreme is safe or the upper extreme is unsafe, the safe values are on the bottom
 	else if (definitely(lower_result) || !possibly(upper_result)) {
 		safeOnBottom = true;		
 		// If there are indeterminate values, reset the corresponding intervals as empty
 		if (indeterminate(lower_result)) safety_int = empty_int;
-		if (indeterminate(upper_result)) unsafety_int = empty_int;
-	}		
+		if (indeterminate(upper_result)) unsafety_int = empty_int; }		
 	// If the upper extreme is safe or the lower extreme is unsafe, the safe values are on the top
 	else {
 		safeOnBottom = false;		
 		// If there are indeterminate values, reset the corresponding intervals as empty
 		if (indeterminate(lower_result)) unsafety_int = empty_int;
-		if (indeterminate(upper_result)) safety_int = empty_int;
-	}
+		if (indeterminate(upper_result)) safety_int = empty_int; }
 
 	// Verification loop
-	while (true)
+	while (true) 
 	{
 		// The verification result
 		tribool result;
 
 		// Safety interval check
-		if (!safety_int.empty())
+		if (!safety_int.empty()) 
 		{
 			// Set the parameter as the midpoint of the interval
 			param.set_value(safety_int.midpoint());
@@ -1391,70 +1366,51 @@ safety_unsafety_parametric(SystemType& system,
 			result = this->verify_iterative(system,initial_set,safe_box,domain);
 
 			// If safe
-			if (definitely(result))
-			{
-				if (safeOnBottom)
-				{
+			if (definitely(result)) {
+				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(param.value());
 
 					ARIADNE_LOG(1,"Safe, refining upwards.\n");
-					safety_int.set_lower(param.value());
-				}
-				else
-				{
+					safety_int.set_lower(param.value()); }
+				else {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int)) unsafety_int.set_upper(param.value());
 
 					ARIADNE_LOG(1,"Safe, refining downwards.\n");
-					safety_int.set_upper(param.value());
-				}
-			}
+					safety_int.set_upper(param.value()); }}
 			// If unsafe
-			else if (!possibly(result))
-			{
-				if (safeOnBottom)
-				{
+			else if (!possibly(result)) {
+				if (safeOnBottom) {
 					ARIADNE_LOG(1,"Unsafe, refining downwards and resetting the unsafety.\n");
-					safety_int.set_upper(param.value());
-				}
-				else
-				{
+					safety_int.set_upper(param.value()); }
+				else {
 					ARIADNE_LOG(1,"Unsafe, refining upwards and resetting the unsafety.\n");
-					safety_int.set_lower(param.value());
-				}
+					safety_int.set_lower(param.value()); }
 
 				// The unsafety interval now becomes the same as the safety interval
-				unsafety_int = safety_int;
-			}
+				unsafety_int = safety_int; }
 			// If indeterminate
-			else 
-			{
-				if (safeOnBottom)
-				{
+			else {
+				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(param.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
-					safety_int.set_upper(param.value());
-				}
-				else
-				{
+					safety_int.set_upper(param.value()); }
+				else {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int))	unsafety_int.set_upper(param.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
-					safety_int.set_lower(param.value());
-				}
-			}
+					safety_int.set_lower(param.value()); }}
 
-			/* Break if the safety interval is lesser than the tolerance or (if the unsafety interval is not empty)
-			 if the minimum distance between the safe and unsafe values is lesser than the tolerance */
+			/* Break if the safety interval is lesser than the tolerance or, if the unsafety interval is not empty,
+			 if the minimum distance between the safe and unsafe values is lesser than the tolerance (which is a more relaxed condition) */
 			if ((safety_int.width() <= tolerance) || (!unsafety_int.empty() &&
 				((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance)) ||
 				(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance)))))
 				break;
-
 		}
 
 		// Unsafety interval check
@@ -1471,65 +1427,47 @@ safety_unsafety_parametric(SystemType& system,
 			result = this->verify_iterative(system,initial_set,safe_box,domain);
 
 			// If safe
-			if (definitely(result))
-			{
-				if (safeOnBottom)
-				{
+			if (definitely(result)) {
+				if (safeOnBottom) {
 					ARIADNE_LOG(1,"Safe, refining upwards and resetting the safety.\n");
-					unsafety_int.set_lower(param.value());
-				}
-				else
-				{
+					unsafety_int.set_lower(param.value()); }
+				else {
 					ARIADNE_LOG(1,"Safe, refining downwards and resetting the safety.\n");
-					unsafety_int.set_upper(param.value());
-				}
+					unsafety_int.set_upper(param.value()); }
 
 				// The safety interval now becomes the same as the unsafety interval
-				safety_int = unsafety_int;
-			}
+				safety_int = unsafety_int; }
 			// If unsafe
-			else if (!possibly(result))
-			{
-				if (safeOnBottom)
-				{
+			else if (!possibly(result)) {
+				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int)) safety_int.set_upper(param.value());
 
 					ARIADNE_LOG(1,"Unsafe, refining downwards.\n");
-					unsafety_int.set_upper(param.value());
-				}
-				else
-				{
+					unsafety_int.set_upper(param.value()); }
+				else {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int)) safety_int.set_lower(param.value());
 
 					ARIADNE_LOG(1,"Unsafe, refining upwards.\n");
-					unsafety_int.set_lower(param.value());
-				}
-			}
+					unsafety_int.set_lower(param.value()); }}
 			// If indeterminate
-			else 
-			{
-				if (safeOnBottom)
-				{
+			else {
+				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int)) safety_int.set_upper(param.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
-					unsafety_int.set_lower(param.value());
-				}
-				else
-				{
+					unsafety_int.set_lower(param.value()); }
+				else {
 					// If the unsafety interval is the same as the safety interval, update it too
 					if (equal(unsafety_int,safety_int)) safety_int.set_lower(param.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
-					unsafety_int.set_upper(param.value());
-				}
-			}
+					unsafety_int.set_upper(param.value()); }}
 
-			/* Break if the unsafety interval is lesser than the tolerance or (if the safety interval is not empty)
-			 if the minimum distance between the safe and unsafe values is lesser than the tolerance */
+			/* Break if the safety interval is lesser than the tolerance or, if the unsafety interval is not empty,
+			 if the minimum distance between the safe and unsafe values is lesser than the tolerance (which is a more relaxed condition) */
 			if ((unsafety_int.width() <= tolerance) || (!safety_int.empty() &&
 				((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance)) ||
 				(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance)))))
@@ -1541,16 +1479,12 @@ safety_unsafety_parametric(SystemType& system,
 	Interval safe_result, unsafe_result;
 
 	// Get the safe and unsafe intervals
-	if (safeOnBottom)
-	{
+	if (safeOnBottom) {
 		safe_result = (safety_int.empty() ? safety_int : Interval(parameter_interval.lower(),safety_int.lower()));
-		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(unsafety_int.upper(),parameter_interval.upper()));
-	}	
-	else
-	{
+		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(unsafety_int.upper(),parameter_interval.upper())); }	
+	else {
 		safe_result = (safety_int.empty() ? safety_int : Interval(safety_int.upper(),parameter_interval.upper()));	
-		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(parameter_interval.lower(),unsafety_int.lower()));	
-	}
+		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(parameter_interval.lower(),unsafety_int.lower())); }
 
 	return make_pair<Interval,Interval>(safe_result,unsafe_result);
 }

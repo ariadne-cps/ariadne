@@ -31,6 +31,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <string>
 #include <vector>
 #include <list>
 #include <deque>
@@ -149,7 +150,7 @@ read_sequence(std::istream& is, Container& v,
     try {
         is >> c;
         if(c != opening) {
-            throw std::ios_base::failure("Ariadne::Base::read_vector: Input must begin with "+opening);
+            throw std::ios_base::failure(std::string("Ariadne::Base::read_vector: Input must begin with ")+opening);
         }
     
         /* Handle case of empty list */
@@ -164,7 +165,7 @@ read_sequence(std::istream& is, Container& v,
                 throw std::ios_base::failure("Ariadne::Base::read_vector: End-of-file reached");
             }
             if(c!=separator) {
-                throw std::ios_base::failure("Ariadne::Base::read_vector: Items in list must be separated by "+separator);
+                throw std::ios_base::failure(std::string("Ariadne::Base::read_vector: Items in list must be separated by ")+separator);
             }
             is >> x;
             if(is.fail()) {

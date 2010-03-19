@@ -51,8 +51,8 @@ namespace Ariadne {
 template<class Sys, class BS> class Evolver;
 
 class VectorTaylorFunction;
-class TaylorSet;
-class HybridAutomaton;
+class TaylorImageSet;
+class MonolithicHybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
@@ -70,7 +70,7 @@ class DiscreteEvent;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class ImageSetHybridEvolver
-    : public EvolverBase<HybridAutomaton,HybridTaylorSet>
+    : public EvolverBase<MonolithicHybridAutomaton,HybridTaylorImageSet>
     , public Loggable
 {
     typedef ScalarFunction ScalarFunctionType;
@@ -81,18 +81,18 @@ class ImageSetHybridEvolver
     typedef VectorTaylorFunction FlowModelType;
     typedef ScalarTaylorFunction ConstraintModelType;
     typedef TaylorModel TimeModelType;
-    typedef TaylorSet FlowSetModelType;
-    typedef TaylorSet SetModelType;
-    typedef TaylorSet TimedSetModelType;
+    typedef TaylorImageSet FlowSetModelType;
+    typedef TaylorImageSet SetModelType;
+    typedef TaylorImageSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
-    typedef TaylorSet ContinuousEnclosureType;
-    typedef HybridBasicSet<TaylorSet> HybridEnclosureType;
+    typedef MonolithicHybridAutomaton SystemType;
+    typedef TaylorImageSet ContinuousEnclosureType;
+    typedef HybridBasicSet<TaylorImageSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -140,19 +140,19 @@ class ImageSetHybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteLocation, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                                   EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                   const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
                                   Semantics semantics, bool reach) const;
 
   protected:
-    TimeModelType crossing_time(VectorFunction guard, const FlowSetModelType& flow_set) const;
+    TimeModelType crossing_time(ScalarFunction guard, const FlowSetModelType& flow_set) const;
 
-    Interval normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
+    Interval normal_derivative(ScalarFunction guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
 
     void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
-                                         const std::map<DiscreteEvent,VectorFunction>&,
+                                         const std::map<DiscreteEvent,ScalarFunction>&,
                                          const ContinuousEnclosureType&) const;
 
     void compute_flow_model(FlowSetModelType&, BoxType&, Float&,
@@ -161,21 +161,21 @@ class ImageSetHybridEvolver
                             VectorFunction, const BoxType&) const;
 
     void compute_crossing_time_and_direction(TimeModelType&, Interval&,
-                                             VectorFunction guard, const FlowSetModelType& flow_set) const;
+                                             ScalarFunction guard, const FlowSetModelType& flow_set) const;
 
     void compute_blocking_events(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
-                                 const std::map<DiscreteEvent,VectorFunction>& guards,
+                                 const std::map<DiscreteEvent,ScalarFunction>& guards,
                                  const FlowSetModelType& flow_set_model) const;
 
     void compute_blocking_time(std::set<DiscreteEvent>&, TimeModelType&,
                                const std::map<DiscreteEvent,TimeModelType>&) const;
 
     void compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
-                                  const std::map<DiscreteEvent,VectorFunction>& activations,
+                                  const std::map<DiscreteEvent,ScalarFunction>& activations,
                                   const FlowSetModelType& flow_set_model) const;
 
     void compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
-                                  const std::map<DiscreteEvent,VectorFunction>& activations,
+                                  const std::map<DiscreteEvent,ScalarFunction>& activations,
                                   const FlowSetModelType& flow_set_model,
                                   const TimeModelType& blocking_time_model,
                                   const Semantics sematics) const;

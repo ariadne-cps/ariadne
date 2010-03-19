@@ -82,7 +82,6 @@ template<class T> class ScalarUserFunction
 
         virtual SizeType argument_size() const { return T::argument_size(); }
         virtual SizeType parameter_size() const { return T::parameter_size(); }
-        virtual SmoothnessType smoothness() const { return T::smoothness(); }
 
         virtual Float evaluate(const Vector<Float>& x) const {
             Float r=0; T::compute(r,x,_p); return r; }
@@ -97,14 +96,19 @@ template<class T> class ScalarUserFunction
         virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
             Differential<Interval> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,_p); return r; }
 
-        virtual ScalarFunctionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const {
+            Propagator<Interval> r; T::compute(r,x,_p); return r; }
+
+        virtual ScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
         virtual Vector<Float> gradient(const Vector<Float>& x) const {
             return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
         virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
             return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
-        virtual std::ostream& write(std::ostream& os) const  {
+         virtual std::ostream& repr(std::ostream& os) const  {
+            return os << "USER"; }
+       virtual std::ostream& write(std::ostream& os) const  {
             return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
     };
   public:
@@ -163,7 +167,6 @@ template<class T> class VectorUserFunction
         virtual SizeType result_size() const { return T::result_size(); }
         virtual SizeType argument_size() const { return T::argument_size(); }
         virtual SizeType parameter_size() const { return T::parameter_size(); }
-        virtual SmoothnessType smoothness() const { return T::smoothness(); }
 
         virtual Vector<Float> evaluate(const Vector<Float>& x) const {
             Vector<Float> r(this->result_size(),0.0); T::compute(r,x,_p); return r; }
@@ -181,10 +184,15 @@ template<class T> class VectorUserFunction
             Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
             T::compute(r,x,_p); return r; }
 
+        virtual Vector<Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const {
+            Vector<Propagator<Interval> >  r(this->result_size()); T::compute(r,x,_p); return r; }
+
         virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
         virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
+
+        virtual ScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a
         // write() method or operator<<.

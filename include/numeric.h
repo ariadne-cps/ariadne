@@ -136,8 +136,15 @@ uint64_t bin(uint64_t n, uint64_t k);
 
 
 template<class X> X pi();
+template<class X> inline X inf();
 
-inline Float inf() { return std::numeric_limits<double>::max(); }
+template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
+#ifdef HAVE_GMPXX_H
+template<> inline Rational inf<Rational>() { return Rational(1,-0); }
+#endif
+
+
+inline Float mx() { return std::numeric_limits<double>::max(); }
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 
 inline Float down(Float x) { return x>0 ? x*(1-2e-16) : x*(1+2e-16); }
@@ -285,7 +292,8 @@ class Interval {
     Interval(Float x) : l(x), u(x) { }
     Interval(const Interval& i) : l(i.l), u(i.u) { }
 
-    Interval(Float lower, Float upper) : l(lower), u(upper) { ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper); }
+    Interval(Float lower, Float upper) : l(lower), u(upper) { }
+        // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
 #ifdef HAVE_GMPXX_H
     Interval(Rational q);
     Interval(Rational lower, Rational upper);
@@ -300,9 +308,13 @@ class Interval {
     bool empty() const { return l>u; }
     bool singleton() const { return l==u; }
 
-    void set_lower(const Float& lower) { ARIADNE_ASSERT(lower<=this->u); l=lower; }
-    void set_upper(const Float& upper) { ARIADNE_ASSERT(this->l<=upper); u=upper; }
-    void set(const Float& lower, const Float& upper) { ARIADNE_ASSERT(lower<=upper); l=lower; u=upper; }
+    void set_empty() { l=1.0; u=0.0; }
+    void set_lower(const Float& lower) { l=lower; }
+        // ARIADNE_ASSERT(lower<=this->u);
+    void set_upper(const Float& upper) { u=upper; }
+        // ARIADNE_ASSERT(this->l<=upper);
+    void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
+        // ARIADNE_ASSERT(lower<=upper);
   public:
   private:
     double l, u;
@@ -332,11 +344,11 @@ inline bool empty(Interval i) {
 }
 
 inline bool bounded(Interval i) {
-    return i.lower()!=-inf() && i.upper()!=+inf();
+    return i.lower()!=-inf<Float>() && i.upper()!=+inf<Float>();
 }
 
 inline Interval intersection(Interval i1, Interval i2) {
-    if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { return Interval(1,-1); }
+    if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { Interval result; result.set_empty(); return result; }
     return Interval(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
 }
 

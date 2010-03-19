@@ -53,6 +53,7 @@
 #endif
 
 #include "numeric.h"
+#include "real.h"
 
 namespace Ariadne {
 
@@ -86,7 +87,7 @@ bin(uint8_t n, uint8_t k)
 {
     ARIADNE_ASSERT(n<32);  // Maximum computable bin(n,n/2) using 32 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
+    if(k>n+1) { std::cerr << "ERROR: bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
@@ -114,7 +115,7 @@ bin(uint16_t n, uint16_t k)
 {
     ARIADNE_ASSERT(n<16);  // Maximum computable bin(n,n/2) using 16 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
+    if(k>n+1) { std::cerr << "ERROR: bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint16_t r=1;
@@ -142,7 +143,7 @@ bin(uint32_t n, uint32_t k)
 {
     ARIADNE_ASSERT(n<31);  // Maximum computable bin(n,n/2) using 32 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
+    if(k>n+1) { std::cerr << "ERROR: bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
@@ -172,7 +173,7 @@ bin(uint64_t n, uint64_t k)
 {
     ARIADNE_ASSERT(n<63);  // Maximum computable bin(n,n/2) using 64 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
+    if(k>n+1) { std::cerr << "ERROR: bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint64_t r=1;
@@ -272,7 +273,6 @@ double texp(double x) {
     double r=1.0; double t=1.0;
     for(uint i=1; i!=20; ++i) {
         t*=x; t/=i; r+=t;
-        //std::cerr<<i<<" "<<t<<" "<<r<<"\n";
     }
     return r;
 }
@@ -393,7 +393,6 @@ double pi_opp() {
 }
 
 double sin_rnd(double x) {
-    //std::cerr<<"sin_rnd("<<x<<")\n";
     volatile double two_pi_rnd=2*pi_rnd();
     volatile double two_pi_opp=2*pi_opp();
 
@@ -434,7 +433,6 @@ double sin_rnd(double x) {
 
 
 double cos_rnd(double x) {
-    //std::cerr<<"cos_rnd("<<x<<")\n";
     const double pi_rnd=Ariadne::pi_rnd();
     const double pi_opp=Ariadne::pi_opp();
     const double half_pi_rnd=pi_rnd/2;
@@ -446,7 +444,6 @@ double cos_rnd(double x) {
     long int n_opp=(long int)(std::floor(div_opp(x,pi_rnd)));
 
     if(n_rnd!=n_opp) {
-        //std::cerr<<"  n_rnd="<<n_rnd<<" n_opp="<<n_opp<<"\n";
         if(n_rnd>n_opp) {
             // Rounding upwards
             if(n_rnd%2==0) { return 1.0; }
@@ -478,21 +475,17 @@ double cos_rnd(double x) {
 
     int q = (long int)(std::floor(y/quarter_pi_approx)) % 8;
     assert(q<=4);
-    //std::cerr<<"  n="<<n_rnd<<" y="<<y<<" q="<<q;
 
     volatile double w,c;
     if(q==0) {
         w=y;
-        //std::cerr<<" w="<<w<<"\n";
         c=pos_cos_rnd_series(w);
     } else if(q==1 || q==2) {
         w=sub_rnd(pi_rnd/2,y);
-        //std::cerr<<" w="<<w<<"\n";
         if(w>=0.0) { c=pos_sin_rnd_series(w); }
         else { c=neg_sin_rnd_series(-w); }
     } else if(q==3 || q==4) {
         w=sub_opp(pi_opp,y);
-        //std::cerr<<" w="<<w<<"\n";
         c=neg_cos_rnd_series(w);
     } else {
         assert(false);
@@ -505,16 +498,15 @@ double cos_rnd(double x) {
     volatile double z=0.0;
 
     ARIADNE_ASSERT(-two_pi_approx<=y && y<=two_pi_approx);
-    using std::cerr; using std::endl;
     switch(q) {
-    case -4: { w = +y + 2*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=neg_cos_rnd_series(w); break; }
-    case -3: { w = +y + 1*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=neg_sin_rnd_series(w); break; }
-    case -2: { w = +y + 1*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=pos_sin_rnd_series(w); break; }
-    case -1: { w = +y + 0*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=pos_cos_rnd_series(w); break; }
-    case +0: { w = -y + 0*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=pos_cos_rnd_series(w); break; }
-    case +1: { w = -y + 1*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=pos_sin_rnd_series(w); break; }
-    case +2: { w = -y + 1*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=neg_sin_rnd_series(w); break; }
-    case +3: { w = -y + 2*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=neg_cos_rnd_series(w); break; }
+    case -4: { w = +y + 2*half_pi_rnd; w=+w; w=max(w,z); c=neg_cos_rnd_series(w); break; }
+    case -3: { w = +y + 1*half_pi_rnd; w=-w; w=max(w,z); c=neg_sin_rnd_series(w); break; }
+    case -2: { w = +y + 1*half_pi_rnd; w=+w; w=max(w,z); c=pos_sin_rnd_series(w); break; }
+    case -1: { w = +y + 0*half_pi_rnd; w=-w; w=max(w,z); c=pos_cos_rnd_series(w); break; }
+    case +0: { w = -y + 0*half_pi_rnd; w=-w; w=max(w,z); c=pos_cos_rnd_series(w); break; }
+    case +1: { w = -y + 1*half_pi_rnd; w=+w; w=max(w,z); c=pos_sin_rnd_series(w); break; }
+    case +2: { w = -y + 1*half_pi_rnd; w=-w; w=max(w,z); c=neg_sin_rnd_series(w); break; }
+    case +3: { w = -y + 2*half_pi_rnd; w=+w; w=max(w,z); c=neg_cos_rnd_series(w); break; }
     default: { assert(false); }
     }
 
@@ -727,8 +719,8 @@ Interval rec(Interval i)
         ru=_div_up(1.0,il);
         set_rounding_mode(rnd);
     } else {
-        rl=-inf();
-        ru=+inf();
+        rl=-inf<Float>();
+        ru=+inf<Float>();
         ARIADNE_THROW(DivideByZeroException,"Interval rec(Interval ivl)","ivl="<<i);
     }
     return Interval(rl,ru);
@@ -820,8 +812,8 @@ Interval div(Interval i1, Interval i2)
         }
     }
     else {
-        ARIADNE_THROW(DivideByZeroException,"Interval div(Interval ivl1, Interval ivl2)","ivl1="<<i1<<", ivl2="<<i2);
-        rl=-inf(); ru=+inf();
+        // ARIADNE_THROW(DivideByZeroException,"Interval div(Interval ivl1, Interval ivl2)","ivl1="<<i1<<", ivl2="<<i2);
+        rl=-inf<Float>(); ru=+inf<Float>();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -840,7 +832,7 @@ Interval div(Interval i1, Float x2)
     } else if(x2<0) {
         rl=_div_down(i1u,x2); ru=_div_up(i1l,x2);
     } else {
-        rl=-inf(); ru=+inf();
+        rl=-inf<Float>(); ru=+inf<Float>();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -855,7 +847,7 @@ Interval div(Float x1, Interval i2)
     volatile double rl,ru;
     if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
-        rl=-inf(); ru=+inf();
+        rl=-inf<Float>(); ru=+inf<Float>();
     } else if(x1>=0) {
         rl=_div_down(x1,i2u); ru=_div_up(x1,i2l);
     } else {
@@ -888,14 +880,12 @@ Interval sqr(Interval i)
 
 Interval pow(Interval i, int n)
 {
-    //std::cerr<<"pow("<<i<<","<<n<<")\n";
     if(n<0) { return pow(rec(i),uint(-n)); }
     else return pow(i,uint(n));
 }
 
 Interval pow(Interval i, uint m)
 {
-    //std::cerr<<"pow("<<i<<","<<m<<"u)\n";
     const Interval& nvi=i;
     if(m%2==0) { i=abs(nvi); }
     volatile double rl,ru;
@@ -955,7 +945,6 @@ Interval sin(Interval i)
 
 Interval cos(Interval i)
 {
-    //std::cerr<<"cos("<<i<<")"<<std::endl;
     ARIADNE_ASSERT(i.lower()<=i.upper());
 
     rounding_mode_t rnd = get_rounding_mode();
@@ -1128,6 +1117,68 @@ operator>>(std::istream& is, Interval& ivl)
     ivl.set(l,u);
     return is;
 }
+
+
+#ifdef HAVE_GMPXX_H
+
+Real::Real(const std::string& str)
+{
+    Rational q;
+    bool decimal_point=false;
+    uint decimal_places=0;
+    const char* c_ptr=str.c_str();
+    while(*c_ptr != 0) {
+        const char& c=*c_ptr;
+        if(c=='.') {
+            if(decimal_point) {
+                ARIADNE_THROW(std::runtime_error,"Real(String)","real literal \""<<str<<"\" has more than one decimal point.");
+            }
+            else {
+                decimal_point=true;
+            }
+        } else if(c>='0' && c<='9') {
+            q=q*10+(c-'0');
+            if(decimal_point) {
+                ++decimal_places;
+            }
+        } else {
+            ARIADNE_THROW(std::runtime_error,"Real(String)","invalid symbol '"<<c<<"' in string literal \""<<str<<"\"");
+        }
+        ++c_ptr;
+    }
+    for(uint i=0; i!=decimal_places; ++i) {
+        q=q/10;
+    }
+    *this=Real(q);
+}
+
+Real::Real(const Rational& q)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    double x=q.get_d();
+    volatile double ml=-x;
+    volatile double u=x;
+    set_rounding_upward();
+    while(-ml>q) {
+        ml+=std::numeric_limits<double>::min();
+    }
+    while(u<q) {
+        u+=std::numeric_limits<double>::min();
+    }
+    *this=Real(-ml,x,u);
+    set_rounding_mode(rnd);
+}
+
+#else
+
+Real::Real(const std::string& str)
+{
+    ARIADNE_THROW(std::runtime_error,"Need GMP library to convert string literal to Real.");
+}
+
+#endif
+
+
 
 } // namespace Ariadne
 

@@ -81,6 +81,7 @@ if __name__=='__main__':
     watertank.new_dynamic(valve=="opening", dot(alpha) << +1.0/T);
     watertank.new_dynamic(valve=="closing", dot(alpha) << -1.0/T);
 
+    watertank.new_dynamic(valve=="opening", [dot(alpha) << +1.0/T, dot(x) << -lamb*x+b*alpha]);
     # When the valve is open or closed, alpha is constant.
     # Note that since we know alpha=0.0 or alpha=1.0, we should not need to consider alpha as a state variable.
     # This requires some cleverness on the part of the symbolic system analyser.

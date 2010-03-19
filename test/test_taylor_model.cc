@@ -379,6 +379,5 @@ void TestTaylorModel::test_flow()
 int main() {
     TestTaylorModel().test();
 
-    std::cerr << "INCOMPLETE " << std::flush;
     return ARIADNE_TEST_FAILURES;
 }

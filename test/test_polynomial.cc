@@ -246,7 +246,7 @@ void TestPolynomial::test_indexing()
     ARIADNE_TEST_EQUAL(q[MultiIndex(3, 0,1,0)],3.0);
     q[MultiIndex(3, 0,0,1)]=7.0;
     ARIADNE_TEST_EQUAL(q[MultiIndex(3, 0,0,1)],7.0);
-    
+
     // Test insert at beginning
     p.clear();
     p[MultiIndex(3, 0,1,0)]=2.0;
@@ -288,7 +288,7 @@ void TestPolynomial::test_arithmetic()
 
 void TestPolynomial::test_variables()
 {
-    array< Polynomial<Float> > x=Polynomial<Float>::variables(3);
+    Vector< Polynomial<Float> > x=Polynomial<Float>::variables(3);
     array< Vector<Float> > e=Vector<Float>::basis(2);
 
     ARIADNE_TEST_EQUAL(x[0], Polynomial<Float>(3,1, 1,0,0,1.0));

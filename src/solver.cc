@@ -42,15 +42,12 @@ solve_all(Set< Vector<Interval> >& r,
           const VectorFunction& f,
           const Vector<Interval>& ix)
 {
+    uint verbosity=s.verbosity;
+    ARIADNE_LOG(5,"solve_all(f,ix): f="<<f<<", ix="<<ix<<"\n");
+
     // Test for no solution
     const Vector<Interval> z(ix.size());
     if(disjoint(f.evaluate(ix),z)) {
-        return;
-    }
-
-    // If radius is too small, assume solution is not verified
-    if(radius(ix)<s.maximum_error()) {
-        std::cerr<<"Warning: Cannot verify solution in "<<ix<<"\n";
         return;
     }
 
@@ -64,7 +61,7 @@ solve_all(Set< Vector<Interval> >& r,
         invertible_jacobian=false;
     }
 
-    bool need_to_split;
+    bool need_to_split=true;
 
     if(invertible_jacobian) {
         //std::cerr<<"Nonsingular matrix -- applying contractor\n";
@@ -96,6 +93,18 @@ solve_all(Set< Vector<Interval> >& r,
     }
 
     if(need_to_split) {
+        // If radius is too small, assume solution is not verified
+        if(radius(ix)<s.maximum_error()) {
+            if(!invertible_jacobian) {
+                std::cerr<<"Warning: Cannot verify solution in "<<ix<<" with f="<<f(ix)<<"; "
+                         <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
+                         <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n";
+            } else {
+                std::cerr<<"Warning: Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(ix)<<".\n";
+            }
+            return;
+        }
+
         //std::cerr<<"  Splitting "<<ix<<"\n";
         std::pair< Vector<Interval>, Vector<Interval> > splt=split(ix);
         solve_all(r,s,f,splt.first);
@@ -234,8 +243,6 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
 Vector<TaylorModel>
 newton_implicit(const Vector<TaylorModel>& f)
 {
-    std::cerr<<"f="<<f<<"\n";
-
     // Check that the arguments are suitable
     ARIADNE_ASSERT(f.size()>0);
     for(uint i=1; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); }
@@ -366,9 +373,19 @@ SolverBase::SolverBase(double max_error, uint max_steps)
 }
 
 
-Set< Vector<Interval> >
+Vector<Interval>
 SolverBase::solve(const VectorFunction& f,
                   const Vector<Interval>& ix) const
+{
+    Set< Vector<Interval> > r;
+    ::solve_all(r,*this,f,ix);
+    if(r.size()!=1u) { ARIADNE_THROW(SolverException,"SolverBase::solve","non-unique solution in solve("<<f<<","<<ix<<")"); }
+    return *r.begin();
+}
+
+Set< Vector<Interval> >
+SolverBase::solve_all(const VectorFunction& f,
+                      const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
     ::solve_all(r,*this,f,ix);
@@ -427,34 +444,35 @@ SolverBase::fixed_point(const VectorFunction& f, const Vector<Interval>& pt) con
 }
 
 
-List<VectorTaylorFunction>
+VectorTaylorFunction
 SolverBase::implicit(const VectorFunction& f,
                       const Vector<Interval>& ip,
                       const Vector<Interval>& ix) const
 {
-    verbosity=5;
-    std::cerr<<f<<" "<<ip<<" "<<ix<<"\n";
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
-    List<VectorTaylorFunction> result;
+    VectorTaylorFunction result;
 
     const uint np=ip.size();
     const uint nx=ix.size();
     const double err=this->maximum_error();
 
-    VectorTaylorFunction p(ScalarTaylorFunction::variables(ip));
-    std::cerr<<"p="<<p<<"\n";
-    VectorTaylorFunction x(ScalarTaylorFunction::constants(ip,ix));
-    std::cerr<<"x="<<x<<"\n";
+    VectorTaylorFunction p(VectorTaylorFunction::identity(ip));
+    VectorTaylorFunction x(VectorTaylorFunction::constant(ip,ix));
     VectorTaylorFunction nwx(x.size());
+    VectorTaylorFunction fnwx(f.result_size());
 
     uint steps_remaining=this->maximum_number_of_steps();
     uint number_unrefined=nx;
     array<bool> refinement(nx,false);
     while(steps_remaining>0) {
         nwx=this->implicit_step(f,p,x);
+        fnwx=compose(f,join(p,nwx));
+        ARIADNE_LOG(5,"\n  step="<<this->maximum_number_of_steps()-steps_remaining<<"\n");
         ARIADNE_LOG(5,"  nwx="<<nwx<<"\n");
+        ARIADNE_LOG(5,"  fnwx="<<fnwx<<"\n");
+        ARIADNE_LOG(6,"\n");
 
         for(uint i=0; i!=nx; ++i) {
             if(!refinement[i]) {
@@ -467,18 +485,27 @@ SolverBase::implicit(const VectorFunction& f,
             }
         }
 
-        if( (number_unrefined==0) && (radius(nwx)<err) ) {
-            result.append(VectorTaylorFunction(nwx));
-            break;
+        if( (number_unrefined==0) && (radius(nwx)<err) && (radius(fnwx)<err) ) {
+            return VectorTaylorFunction(nwx);
         }
 
         x=intersection(nwx,x);
         steps_remaining=steps_remaining-1;
     }
 
-    return result;
+    ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","Could not prove existence of a solution in "<<ix<<".");
 
 
+}
+
+
+ScalarTaylorFunction
+SolverBase::implicit(const ScalarFunction& f,
+                      const Vector<Interval>& ip,
+                      const Interval& ix) const
+{
+    VectorTaylorFunction res=this->implicit(VectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
+    return res[0];
 }
 
 
@@ -532,6 +559,33 @@ KrawczykSolver::step(const VectorFunction& f,
 }
 
 
+Vector<Interval>
+FactoredKrawczykSolver::step(const VectorFunction& f,
+                             const Vector<Interval>& x) const
+{
+    Matrix<Interval> I=Matrix<Interval>::identity(x.size());
+    ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
+    ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
+    Vector<Float> m=midpoint(x);
+    ARIADNE_LOG(5,"  m="<<m<<"\n");
+    Vector<Interval> im(m);
+    Vector<Interval> fm=f.evaluate(im);
+    ARIADNE_LOG(5,"  f(m)="<<fm<<"\n");
+    Matrix<Interval> J=f.jacobian(x);
+    ARIADNE_LOG(5,"  Df(r)="<<J<<"\n");
+    Matrix<Float> mJ=midpoint(J);
+    Matrix<Interval> M=inverse(mJ);
+    ARIADNE_LOG(5,"  inverse(Df(m))="<<M<<"\n");
+    Vector<Interval> dx=prod(M,fm+prod(Matrix<Interval>(J-mJ),Vector<Interval>(x-m)));
+    ARIADNE_LOG(5,"  dx="<<dx<<"\n");
+    Vector<Interval> nx= m - dx;
+    ARIADNE_LOG(5,"  nx="<<nx<<"\n");
+    Vector<Interval> nr(nx);
+    ARIADNE_LOG(5,"  nr="<<nr<<"\n");
+    return nr;
+}
+
+
 VectorTaylorFunction
 IntervalNewtonSolver::implicit_step(const VectorFunction& f,
                             const VectorTaylorFunction& p,
@@ -545,7 +599,6 @@ KrawczykSolver::implicit_step(const VectorFunction& f,
                               const VectorTaylorFunction& p,
                               const VectorTaylorFunction& x) const
 {
-    verbosity=6;
     const uint np=p.size();
     const uint nx=x.size();
     Matrix<Interval> I=Matrix<Interval>::identity(nx);

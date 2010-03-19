@@ -98,10 +98,10 @@ HybridSystem::result_variables(const DiscreteValuation& discrete_state) const
 {
     VariableSet result;
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
-        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs); }
     }
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs); }
     }
     return result;
 }
@@ -124,7 +124,7 @@ HybridSystem::state_variables(const DiscreteValuation& discrete_state) const
 {
     VariableSet result;
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
-        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs); }
     }
     return result;
 }
@@ -134,7 +134,7 @@ HybridSystem::algebraic_variables(const DiscreteValuation& discrete_state) const
 {
     VariableSet result;
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
-        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs.name()); }
+        if(evaluate(iter->loc,discrete_state)) { result.insert(iter->lhs); }
     }
     return result;
 }
@@ -197,17 +197,17 @@ DiscreteValuation HybridSystem::target(const Event& event, const DiscreteValuati
 
 bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
 {
-    typedef Map<Identifier,Set<Identifier> >::iterator dependencies_iterator;
+    typedef Map<UntypedVariable,Set<UntypedVariable> >::iterator dependencies_iterator;
 
-    Set<Identifier> independent_variables;
-    Set<Identifier> differential_variables;
-    Set<Identifier> algebraic_variables;
-    Set<Identifier> auxiliary_variables;
-    Set<Identifier> input_variables;
-    Set<Identifier> output_variables;
+    Set<UntypedVariable> independent_variables;
+    Set<UntypedVariable> differential_variables;
+    Set<UntypedVariable> algebraic_variables;
+    Set<UntypedVariable> auxiliary_variables;
+    Set<UntypedVariable> input_variables;
+    Set<UntypedVariable> output_variables;
 
-    Map<Identifier,Set<Identifier> > differential_dependencies;
-    Map<Identifier,Set<Identifier> > algebraic_dependencies;
+    Map<UntypedVariable,Set<UntypedVariable> > differential_dependencies;
+    Map<UntypedVariable,Set<UntypedVariable> > algebraic_dependencies;
 
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
         bool active;
@@ -217,19 +217,19 @@ bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
             ARIADNE_ASSERT_MSG(false,"cannot determine activation of "<<*iter<<" in location "<<location);
         }
         if(active) {
-            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,iter->lhs.name()),"Variable "<<iter->lhs.name()<<" is assigned in two different rules");
-            differential_variables.insert(iter->lhs.name());
-            differential_dependencies.insert(make_pair(iter->lhs.name(),iter->rhs.arguments()));
+            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,iter->lhs),"Variable "<<iter->lhs.name()<<" is assigned in two different rules");
+            differential_variables.insert(iter->lhs);
+            differential_dependencies.insert(make_pair(iter->lhs,iter->rhs.arguments()));
             adjoin(independent_variables,iter->rhs.arguments());
         }
     }
 
     for(relation_const_iterator iter=this->_algebraic_equations.begin(); iter!=this->_algebraic_equations.end(); ++iter) {
         if(evaluate(iter->loc,location)) {
-            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,iter->lhs.name()),"");
-            ARIADNE_ASSERT_MSG(!has_key(algebraic_dependencies,iter->lhs.name()),"");
-            algebraic_variables.insert(iter->lhs.name());
-            algebraic_dependencies.insert(make_pair(iter->lhs.name(),iter->rhs.arguments()));
+            ARIADNE_ASSERT_MSG(!has_key(differential_dependencies,iter->lhs),"");
+            ARIADNE_ASSERT_MSG(!has_key(algebraic_dependencies,iter->lhs),"");
+            algebraic_variables.insert(iter->lhs);
+            algebraic_dependencies.insert(make_pair(iter->lhs,iter->rhs.arguments()));
             adjoin(independent_variables,iter->rhs.arguments());
        }
     }
@@ -261,7 +261,7 @@ bool HybridSystem::check_reset(const Event& event, const DiscreteValuation& sour
     for(jump_const_iterator iter=this->_continuous_updates.begin(); iter!=this->_continuous_updates.end(); ++iter) {
         if(iter->evnts.contains(event) && evaluate(iter->loc,source)) {
             ARIADNE_ASSERT_MSG(subset(iter->rhs.arguments(),source_variables),"");
-            updated_variables.insert(iter->lhs.name());
+            updated_variables.insert(iter->lhs);
         }
     }
 
@@ -313,7 +313,7 @@ HybridSystem::events(const DiscreteValuation& location) const
                 events.adjoin(iter->evnts);
             }
             else {
-                std::cerr<<"Reset "<<*iter<<" is trivial.";
+                std::cerr<<"WARNING: Reset "<<*iter<<" is implicitly trivial.";
             }
         }
     }
@@ -353,10 +353,11 @@ HybridSystem::reset(const Event& event, const DiscreteValuation& source) const
 
     Map<RealVariable,RealExpression> assignments;
     for(List<RealUpdate>::const_iterator update_iter=update_equations.begin(); update_iter!=update_equations.end(); ++update_iter) {
-        assignments.insert(update_iter->lhs.base,update_iter->rhs);
+        assignments.insert(update_iter->lhs.base(),update_iter->rhs);
     }
 
-    return VectorFunction(target_space,assignments,source_space);
+    ARIADNE_NOT_IMPLEMENTED
+    //return VectorFunction(target_space,assignments,source_space);
 }
 
 

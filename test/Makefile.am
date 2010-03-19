@@ -30,13 +30,19 @@ check_PROGRAMS = \
 	test_expansion \
 	test_polynomial \
 	test_differential \
+    test_function \
+    test_expression \
 	test_taylor_model \
 	test_taylor_function \
-	test_taylor_set \
-	test_function \
-	test_hybrid_system \
-	test_grid_set \
-	test_hybrid_set \
+    test_function_sets \
+    test_affine_sets \
+    test_taylor_sets \
+    test_grid_set \
+    test_hybrid_set \
+	test_hybrid_automaton \
+    test_nonlinear_programming \
+    test_constraint_solver \
+	test_solvers \
 	test_discrete_evolution \
 	test_continuous_evolution \
 	test_hybrid_evolution \
@@ -71,13 +77,15 @@ test_expansion_SOURCES=test_expansion.cc
 test_polynomial_SOURCES=test_polynomial.cc
 test_differential_SOURCES=test_differential.cc
 test_taylor_model_SOURCES=test_taylor_model.cc
-test_taylor_expression_SOURCES=test_taylor_expression.cc
 test_taylor_function_SOURCES=test_taylor_function.cc
-test_taylor_set_SOURCES=test_taylor_set.cc
+test_function_sets_SOURCES=test_function_sets.cc
+test_affine_sets_SOURCES=test_affine_sets.cc
+test_taylor_sets_SOURCES=test_taylor_sets.cc
+test_expression_SOURCES=test_expression.cc
 test_function_SOURCES=test_function.cc
 test_grid_set_SOURCES=test_grid_set.cc
 test_hybrid_set_SOURCES=test_hybrid_set.cc
-test_hybrid_system_SOURCES=test_hybrid_system.cc
+test_hybrid_automaton=test_hybrid_automaton.cc
 test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
@@ -92,5 +100,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_hybrid_system test_hybrid_evolution test_textplot
+XFAIL_TESTS =
 testsubdir = ./

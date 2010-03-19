@@ -24,7 +24,7 @@
 #include <cstdarg>
 #include "real.h"
 #include "expression.h"
-#include "hybrid_system.h"
+#include "hybrid_automaton.h"
 
 using namespace Ariadne;
 using std::cout;
@@ -35,23 +35,16 @@ int main()
     Constant<Real> a("a",0.5);
     Constant<Real> g("g",9.8);
 
-    HybridSystem bouncingball;
+    AtomicHybridAutomaton bouncingball("Bouncing Ball");
+    AtomicDiscreteLocation falling("-");
+    DiscreteEvent bounce("bounce");
 
     RealVariable x("x");
     RealVariable v("v");
 
-    Event bounce("bounce");
-
-    bouncingball.new_dynamic(dot(x)=v);
-    bouncingball.new_dynamic(dot(v)=-g);
-
-    bouncingball.new_invariant(x>=0);
-
-    bouncingball.new_guard(bounce,(x<=0) && (v<0));
-    bouncingball.new_reset(bounce,next(v)=-a*v);
-
-    bouncingball.new_reset(next(x)=x);
-    bouncingball.new_reset(!bounce,next(v)=v);
+    bouncingball.new_mode(falling, (dot(x)=v, dot(v)=-g) );
+    bouncingball.new_invariant(falling, bounce, x>=0);
+    bouncingball.new_transition(falling, bounce, x<=0 && v<0, falling, (next(x)=x, next(v)=-a*v) );
 
     cout << "BouncingBall = \n" << std::boolalpha << bouncingball;
 }

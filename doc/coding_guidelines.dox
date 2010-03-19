@@ -30,6 +30,11 @@
 
 \page coding_guidelines_page Coding Guidelines
 
+\section gdblibtoolusage Using GDB with libtool
+ - To use the GNU debugger under libtool, run <code>libtool --mode=execute gdb test_xxx</code> (This works with libtool 2.2.6)
+ 
+
+
 \section cppcodingstandards C++ Coding Standards
  - Use C++ casts rather than C-style casts. i.e. use static_cast<T>(x) and not (T)x.
 
@@ -51,6 +56,44 @@
  - Tabs must not be used for indentation
  - Namespaces should not be indented
  - Scope classifiers (public, protected, private) should be indented by half the basic indentation.
+
+<b>Handle/Body Hierarchies</b>
+
+A handle-body hierarchy must implement a virtual \c check_assign method in the handle class hierarchy to perform dynamic type-checking. This is to ensure type-safety in the following code:
+\code
+Base b;    // Handle class with body of type BaseBody
+
+Derived d; // Handle class derived from Base using Base to provide the pointer,
+           // with body of type DerivedBody derived from BaseBody.
+
+b=d; // Ok; downcast
+d=b; // Upcast caught at compile-time
+
+Base& br=d;
+br=b; // Oops, d now holds an object of dynamic type BaseBody
+\endcode
+A minimal implementation of this technique is:
+\code
+class Base {
+  public:
+    Base& operator=(const Base& other) {
+        check_assign(other.handle.operator->());
+        handle=other.handle; return *this; }
+  protected:
+    Base(BaseBody* p) : handle(p) { }
+    virtual void check_assign(const BaseBody* pointer) { }
+  private:
+    shared_ptr<BaseBody> handle;
+};
+
+struct Derived : public Base {
+  protected:
+    virtual void check_assign(const BaseBody* pointer) {
+        assert(dynamic_cast<const DerivedBody*>(other.pointer())); }
+};
+\endcode
+
+ 
 
 <b>Common mistakes</b>
  - A class static constant should be declared inside the class and initialised outside the class body. This initialisation should go in a source code file (.cc or .code.h or .template.h). An exception is an integer constant, which may be initialised in the class definition.

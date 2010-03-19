@@ -2,7 +2,7 @@
  *            graphics_interface.h
  *
  *  Copyright 2009  Davide Bresolin
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file graphics_interface.h
  *  \brief Base graphics interface from which all plotting and drawing classes are inherited.
  */
@@ -56,25 +56,32 @@ inline Vector2d operator-(const Vector2d& v) { return Vector2d(-v.x,-v.y); }
 inline Vector2d operator+(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x+v2.x,v1.y+v2.y); }
 inline Vector2d operator-(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x-v2.x,v1.y-v2.y); }
 inline Vector2d operator*(const double& s1, const Vector2d& v2) { return Vector2d(s1*v2.x,s1*v2.y); }
+inline std::ostream& operator<<(std::ostream& os, const Vector2d& v) { return os << "["<<v.x<<","<<v.y<<"]"; }
 
 struct Point2d { double x,y; Point2d(double xx, double yy) : x(xx), y(yy) { } };
+inline bool operator==(Point2d& pt1, const Point2d& pt2) { return pt1.x==pt2.x && pt1.y==pt2.y; }
 inline Point2d& operator+=(Point2d& pt, const Vector2d& v) { pt.x+=v.x; pt.y+=v.y; return pt; }
 inline Point2d& operator-=(Point2d& pt, const Vector2d& v) { pt.x-=v.x; pt.y-=v.y; return pt; }
+inline std::ostream& operator<<(std::ostream& os, const Point2d& pt) { return os << "("<<pt.x<<","<<pt.y<<")"; }
+
+struct Box2d { double xl,xu,yl,yu; Box2d(double xxl, double xxu, double yyl, double yyu) : xl(xxl), xu(xxu), yl(yl), yu(yyu) { } };
 
 //! \brief Base interface for plotting and drawing classes.
 class FigureInterface {
   public:
     virtual ~FigureInterface() { };
-    virtual void set_projection(uint as, uint ix, uint iy) { };
-    virtual void set_line_style(bool) { };
-    virtual void set_line_width(double) { };
-    virtual void set_line_colour(Colour) { };
-    virtual void set_fill_colour(Colour) { };
-    virtual bool get_line_style() const { return true; };
-    virtual double get_line_width() const { return 1.0; };
-    virtual Colour get_line_colour() const { return black; };
-    virtual bool get_fill_style() const { return true; };
-    virtual Colour get_fill_colour() const { return white; };
+    virtual void set_projection(uint as, uint ix, uint iy) = 0;
+    virtual void set_line_style(bool) = 0;
+    virtual void set_line_width(double) = 0;
+    virtual void set_line_colour(Colour) = 0;
+    virtual void set_fill_opacity(double) = 0;
+    virtual void set_fill_colour(Colour) = 0;
+    virtual bool get_line_style() const = 0;
+    virtual double get_line_width() const = 0;
+    virtual Colour get_line_colour() const = 0;
+    virtual bool get_fill_style() const = 0;
+    virtual double get_fill_opacity() const = 0;
+    virtual Colour get_fill_colour() const = 0;
     virtual void draw(const DrawableInterface&) = 0;
 };
 
@@ -97,8 +104,10 @@ class CanvasInterface {
     virtual double get_line_width() const = 0;
     virtual void set_line_width(double lw) = 0;
     virtual void set_line_colour(double r, double g, double b) = 0;
+    virtual void set_fill_opacity(double fo) = 0;
     virtual void set_fill_colour(double r, double g, double b) = 0;
-    virtual void set_bounding_box(double x0, double x1, double y0, double y1) = 0;
+    virtual void set_bounding_box(double xl, double xu, double yl, double yu) = 0;
+    virtual void get_bounding_box(double& xl, double& xu, double& yl, double& yu) = 0;
 };
 
 

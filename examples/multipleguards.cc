@@ -108,6 +108,7 @@ int main()
     double b[3]={0.0,0.0,1.0};
 
     float EVOL_TIME = 1.0/f;
+    EVOL_TIME = 1.0;
     int EVOL_TRANS = 4;
    
     float MAX_ENCL_RADIUS = 1e-1;
@@ -116,13 +117,13 @@ int main()
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
-    HybridAutomaton multipleguards;
+    MonolithicHybridAutomaton multipleguards;
   
     /// Create the discrete states
-    DiscreteState pospos(1);
-    DiscreteState posneg(2);
-    DiscreteState negpos(3);
-    DiscreteState negneg(4);	
+    AtomicDiscreteLocation pospos(1);
+    AtomicDiscreteLocation posneg(2);
+    AtomicDiscreteLocation negpos(3);
+    AtomicDiscreteLocation negneg(4);	
 
     /// Create the discrete events
     DiscreteEvent pospos2posneg(12);

@@ -93,22 +93,44 @@ struct ExpansionValue {
     typedef MultiIndex::word_type word_type;
 
     ~ExpansionValue() {
-        std::cerr<<"destroy "<< *this<<"... "<<std::flush; delete[] _p; std::cerr<<" done"<<std::endl;}
+        //std::cerr<<"destroy "<< *this<<"... "<<std::flush;
+        delete[] _p;
+        //std::cerr<<" done"<<std::endl;
+    }
     ExpansionValue(const MultiIndex& a, const X& x)
-        : _n(a.size()), _nw(a.word_size()), _p() { std::cerr<<"create... "<<std::flush; _p=new word_type[_nw+_ds]; key()=a; data()=x; std::cerr<<*this<<" done"<<std::endl; }
+        : _n(a.size()), _nw(a.word_size()), _p() {
+        //std::cerr<<"create... "<<std::flush;
+        _p=new word_type[_nw+_ds]; key()=a; data()=x;
+        //std::cerr<<*this<<" done"<<std::endl;
+    }
     ExpansionValue(const ExpansionValue<X>& v)
-        : _n(v._n), _nw(v._nw), _p() { std::cerr<<"copy construct from "<<v<<"... "<<std::flush; _p=new word_type[v._nw+_ds]; std::cerr<<" assigning... "<<std::flush; _assign(v._p); std::cerr<<*this<<" done"<<std::endl; }
+        : _n(v._n), _nw(v._nw), _p() {
+        //std::cerr<<"copy construct from "<<v<<"... "<<std::flush;
+        _p=new word_type[v._nw+_ds];
+        //std::cerr<<" assigning... "<<std::flush;
+        _assign(v._p);
+        //std::cerr<<*this<<" done"<<std::endl;
+    }
     ExpansionValue<X>& operator=(const ExpansionValue<X>& v) {
-        std::cerr<<"operator= "<<*this<<" "<<v<<"... "<<std::flush; if(this!=&v) { _resize(v._n,v._nw); _assign(v._p); } std::cerr<<" done"<<std::endl; return *this; }
+        //std::cerr<<"operator= "<<*this<<" "<<v<<"... "<<std::flush;
+        if(this!=&v) { _resize(v._n,v._nw); _assign(v._p); }
+        //std::cerr<<" done"<<std::endl;
+        return *this;
+    }
     const MultiIndex& key() const { return *reinterpret_cast<const MultiIndex*>(this); }
     const X& data() const { return *reinterpret_cast<const X*>(_p+_nw); }
     MultiIndex& key() { return *reinterpret_cast<MultiIndex*>(this); }
     X& data() { return *reinterpret_cast<X*>(_p+_nw); }
   private:
     void _resize(size_type n, size_type nw) {
-        std::cerr<<"resize"<<*this<<" "<<n<<" "<<nw<<"..."<<std::flush;
-        if(_nw!=nw) { std::cerr<<" reallocating..."<<std::flush; delete[] _p; _nw=nw; _p=new word_type[_nw+_ds]; }
-        _n=n; std::cerr<<" done"<<std::endl;}
+        //std::cerr<<"resize"<<*this<<" "<<n<<" "<<nw<<"..."<<std::flush;
+        if(_nw!=nw) {
+            //std::cerr<<" reallocating..."<<std::flush;
+            delete[] _p; _nw=nw; _p=new word_type[_nw+_ds];
+        }
+        _n=n;
+        //std::cerr<<" done"<<std::endl;
+    }
     void _assign(const word_type* p) {
         //std::cerr<<"assign"<<*this<<" "<<(void*)_p<<"..."<<std::flush;
         for(size_type j=0; j!=_nw+_ds; ++j) { _p[j]=p[j]; }

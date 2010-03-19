@@ -56,9 +56,9 @@ RealVector e0=e(2,0); RealVector e1=e(2,1);
 
 
 struct ProfileReset {
-    ProfileReset(TaylorCalculus* c_, VectorFunction& f_, TaylorSet& s_, int n_=1) : c(c_), f(f_), s(s_), n(n_) { }
-    TaylorCalculus* c; VectorFunction& f; TaylorSet s; int n; typedef TaylorSet Result;
-    TaylorSet operator()() const { TaylorSet r=c->reset_step(f,s); for(int i=1; i<n; ++i) { r=c->reset_step(f,s); } return r; }
+    ProfileReset(TaylorCalculus* c_, VectorFunction& f_, TaylorImageSet& s_, int n_=1) : c(c_), f(f_), s(s_), n(n_) { }
+    TaylorCalculus* c; VectorFunction& f; TaylorImageSet s; int n; typedef TaylorImageSet Result;
+    TaylorImageSet operator()() const { TaylorImageSet r=c->reset_step(f,s); for(int i=1; i<n; ++i) { r=c->reset_step(f,s); } return r; }
 };
 
 struct ProfileBounds {
@@ -77,8 +77,8 @@ struct ProfileFlow {
 };
 
 struct ProfileCrossing {
-    ProfileCrossing(TaylorCalculus* c_, ScalarFunction& g_, VectorTaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
-    TaylorCalculus* c; ScalarFunction& g; VectorTaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
+    ProfileCrossing(TaylorCalculus* c_, ScalarFunction& g_, VectorTaylorFunction& f_, TaylorImageSet s_) : c(c_), g(g_), f(f_), s(s_) { }
+    TaylorCalculus* c; ScalarFunction& g; VectorTaylorFunction& f; TaylorImageSet s; typedef TaylorModel Result;
     TaylorModel operator()() const {
         return c->crossing_time(g,f,s); }
 };
@@ -158,7 +158,7 @@ int main(int argc, const char* argv[]) {
     ScalarFunction x=ScalarFunction::variable(2,0);
     ScalarFunction y=ScalarFunction::variable(2,1);
     VectorFunction henon_map ( (a+x*x+b*y)*e0+x*e1 );
-    TaylorSet henon_initial_set = Box(2, 0.875,1.125, 0.125,0.250);
+    TaylorImageSet henon_initial_set = Box(2, 0.875,1.125, 0.125,0.250);
 
     a=-0.25; b=0.75; double c=1.0;
     VectorFunction spiral_vector_field = (c+a*x-b*y)*e0+(b*x+a*y)*e1;

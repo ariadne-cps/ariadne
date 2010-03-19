@@ -50,12 +50,12 @@ class Box;
 class Zonotope;
 class Polytope;
 class InterpolatedCurve;
-class TaylorSet;
+class TaylorImageSet;
 
 Polytope polytope(const Box& bx);
 Polytope polytope(const Zonotope& z);
 Polytope polytope(const Polytope& p);
-Polytope polytope(const TaylorSet& ts);
+Polytope polytope(const TaylorImageSet& ts);
 
 Point baricentre(const Polytope& p);
 

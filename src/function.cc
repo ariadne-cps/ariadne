@@ -22,618 +22,435 @@
  */
 
 #include "function.h"
+#include "function_template.h"
 #include "real.h"
 #include "polynomial.h"
 #include "differential.h"
 #include "taylor_model.h"
+#include "propagator.h"
 #include "operators.h"
+#include "variables.h"
 #include "expression.h"
+#include "assignment.h"
+#include "space.h"
 
 namespace Ariadne {
 
 template<class T> inline std::string str(const T& t) {
     std::stringstream ss; ss << t; return ss.str(); }
 
-class ScalarExpressionFunction
-    : public ScalarFunctionInterface
+typedef uint SizeType;
+typedef uint Nat;
+typedef int Int;
+
+inline std::ostream& operator<<(std::ostream& os, const ScalarFunctionInterface* f) { return f->repr(os); }
+
+
+
+
+
+struct ScalarExpressionFunctionBody
+    : ScalarFunctionTemplate<ScalarExpressionFunctionBody>
 {
-  public:
     Space<Real> _space;
     Expression<Real> _expression;
-  public:
-    typedef unsigned int SizeType;
 
-    ScalarExpressionFunction(const Expression<Real>& e, const Space<Real>& s)
-        : _space(s), _expression(function(e,s)) { }
-
-    virtual ScalarExpressionFunction* clone() const { return new ScalarExpressionFunction(*this); }
+    ScalarExpressionFunctionBody(const Expression<Real>& e, const Space<Real>& s)
+        : _space(s), _expression(e) { }
     virtual SizeType argument_size() const { return _space.size(); }
-    virtual SmoothnessType smoothness() const { return SMOOTH; }
-    virtual Float evaluate(const Vector<Float>& x) const { return this->_evaluate(x); }
-    virtual Interval evaluate(const Vector<Interval>& x) const { return this->_evaluate(x); }
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const { return this->_evaluate(x); }
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_evaluate(x); }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_evaluate(x); }
-
-    virtual Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
-
-    virtual ScalarExpressionFunction* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-
+    virtual ScalarFunction derivative(uint j) const { return ScalarFunction(Ariadne::derivative(_expression,_space[j]),_space); }
     virtual std::ostream& write(std::ostream& os) const {
         return os << "Function( space="<<this->_space<<", expression="<<this->_expression<<" )"; }
 
-  protected:
-    template<class X> X _evaluate(const Vector<X>& x) const { return Ariadne::evaluate(_expression,x); }
+    template<class X> void _compute(X& r, const Vector<X>& x) const {
+        Map<ExtendedRealVariable,X> valuation;
+        for(uint i=0; i!=x.size(); ++i) { valuation[_space.variable(i)]=x[i]; }
+        r=Ariadne::evaluate(_expression,valuation); }
 };
 
-
-
-//! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
-class ScalarConstantFunction
-    : public ScalarFunctionInterface
+struct VectorExpressionFunctionBody
+    : VectorFunctionTemplate<VectorExpressionFunctionBody>
 {
-  public:
-    operator Interval() const;
-};
+    VectorExpressionFunctionBody(const List<ExtendedRealVariable>& rv,
+                             const List< Assignment<ExtendedRealVariable,RealExpression> >& eq,
+                             const List<RealVariable>& av)
+        : _result_variables(rv), _argument_variables(av), _assignments(eq) { }
 
+    List<ExtendedRealVariable> _result_variables;
+    List<RealVariable> _argument_variables;
+    List< Assignment<ExtendedRealVariable,RealExpression> > _assignments;
 
-//! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
-class ScalarAffineFunction
-    : public ScalarFunctionInterface,
-      public Affine<Interval>
-{
-  public:
-    explicit ScalarAffineFunction(uint n) : Affine<Interval>(n) { }
-    ScalarAffineFunction(const Affine<Interval>& aff) : Affine<Interval>(aff) { }
-    ScalarAffineFunction(const Vector<Float>& g, const Float& c) : Affine<Interval>(g,c) { }
-    ScalarAffineFunction(const Vector<Interval>& g, const Interval& c) : Affine<Interval>(g,c) { }
-    ScalarAffineFunction(uint as, double c, double g0, ...) {
-        Float _c; Vector<Float> _g(as);
-        _g[0]=g0; va_list args; va_start(args,g0);
-        for(uint i=1; i!=as; ++i) { _g[i]=va_arg(args,double); }
-        *this=ScalarAffineFunction(_g,_c); }
-//    ScalarAffineFunction(const ConstantScalarFunction& c)
-//        : _c(c), _g(c.argument_size()) { }
+    virtual uint result_size() const { return this->_result_variables.size(); }
+    virtual uint argument_size() const { return this->_argument_variables.size(); }
 
-    ScalarAffineFunction(Expression<Real> e, const Array<String>& s);
-//    ScalarAffineFunction(Expression<Real> e, const Map<String,SizeType>& s);
+    virtual VectorExpressionFunctionBody* clone() const { return new VectorExpressionFunctionBody(*this); }
 
-    static ScalarAffineFunction constant(uint n, Float c) {
-        return ScalarAffineFunction(Vector<Float>(n),c); }
-    static ScalarAffineFunction constant(uint n, Interval c) {
-        return ScalarAffineFunction(Vector<Interval>(n),c); }
-    static ScalarAffineFunction variable(uint n, uint j) {
-        ARIADNE_ASSERT_MSG(j<n,"Cannot create variable function x["<<j<<"] in "<<n<<" arguments; require j<n.");
-        return ScalarAffineFunction(Vector<Interval>::unit(n,j),Interval(0.0)); }
-
-    virtual ScalarAffineFunction* clone() const { return new ScalarAffineFunction(*this); }
-
-    virtual SizeType argument_size() const { return static_cast<Affine<Interval>const&>(*this).argument_size(); }
-    virtual SmoothnessType smoothness() const { return SMOOTH; }
-    virtual Float evaluate(const Vector<Float>& x) const { return this->_evaluate_approx<Float>(x); }
-    virtual Interval evaluate(const Vector<Interval>& x) const { return this->_evaluate<Interval>(x); }
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const { return this->_evaluate<TaylorModel>(x); }
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
-        return this->_evaluate_approx< Differential<Float> >(x); }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
-        return this->_evaluate< Differential<Interval> >(x); }
-    virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
-        return this->_evaluate< Differential<TaylorModel> >(x); }
-
-    virtual Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
-
-//    virtual ConstantScalarFunction* derivative(uint j) const { return new ConstantScalarFunction(_g.size(),_g[j]); }
-    virtual ScalarFunctionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-
-
-    virtual std::ostream& write(std::ostream& os) const { return os << static_cast<Affine<Interval>const&>(*this); }
-  private:
-    template<class R, class A>
-    R _evaluate_approx(const A& x) const {
-        R r=x[0]*0+midpoint(b()); for(uint j=0; j!=argument_size(); ++j) { r+=midpoint(a()[j])*x[j]; } return r; }
-    template<class R, class A>
-    R _evaluate(const A& x) const {
-        R r=x[0]*0+b(); for(uint j=0; j!=argument_size(); ++j) { r+=a()[j]*x[j]; } return r; }
-
-};
-
-
-//! A polynomial expression \f$p:\R^n\rightarrow\R\f$.
-class ScalarPolynomialFunction
-    : public ScalarFunctionInterface
-    , public Polynomial<Interval>
-{
-  public:
-    ScalarPolynomialFunction() : Polynomial<Interval>() { }
-    explicit ScalarPolynomialFunction(uint n) : Polynomial<Interval>(n) { }
-    ScalarPolynomialFunction(const Polynomial<Float>& p) : Polynomial<Interval>(p) { }
-    ScalarPolynomialFunction(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
-    ScalarPolynomialFunction& operator=(const Polynomial<Interval>& p) { this->Polynomial<Interval>::operator=(p); return *this; }
-
-    ScalarPolynomialFunction(const Expression<Real>& e, const Space<Real>& s) { *this=ScalarPolynomialFunction(polynomial<Interval>(e,s)); }
-
-    ScalarPolynomialFunction(const ScalarAffineFunction& a) : Polynomial<Interval>(a.argument_size()) {
-        uint n=this->argument_size(); (*this)[MultiIndex::zero(n)]=a.b();
-        for(uint i=0; i!=n; ++i) { (*this)[MultiIndex::unit(n,i)]=a.a()[i]; } }
-
-    static ScalarPolynomialFunction constant(uint n, Float c) {
-        return Polynomial<Interval>::constant(n,c); }
-    static ScalarPolynomialFunction constant(uint n, Interval c) {
-        return Polynomial<Interval>::constant(n,c); }
-    static ScalarPolynomialFunction variable(uint n, uint j) {
-        ARIADNE_ASSERT_MSG(j<n,"Cannot create variable function x["<<j<<"] in "<<n<<" arguments; require j<n.");
-        return Polynomial<Interval>::variable(n,j); }
-    static array<ScalarPolynomialFunction> variables(uint n) {
-        array<ScalarPolynomialFunction> r(n); for(uint i=0; i!=n; ++i) { r[i]=variable(n,i); } return r; }
-
-    virtual ScalarPolynomialFunction* clone() const { return new ScalarPolynomialFunction(*this); }
-
-    virtual ScalarFunctionInterface::SizeType argument_size() const {
-        return static_cast<const Polynomial<Interval>&>(*this).argument_size(); }
-    virtual ScalarFunctionInterface::SmoothnessType smoothness() const {
-        return SMOOTH; }
-    virtual Float evaluate(const Vector<Float>& x) const {
-        return Ariadne::evaluate(midpoint(static_cast<const Polynomial<Interval>&>(*this)),x); }
-    virtual Interval evaluate(const Vector<Interval>& x) const {
-        return Ariadne::evaluate(static_cast<const Polynomial<Interval>&>(*this),x); }
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
-        return Ariadne::evaluate(static_cast<const Polynomial<Interval>&>(*this),x); }
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
-        return Ariadne::evaluate(midpoint(static_cast<const Polynomial<Interval>&>(*this)),x); }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
-        return Ariadne::evaluate(static_cast<const Polynomial<Interval>&>(*this),x); }
-    virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
-        return Ariadne::evaluate(static_cast<const Polynomial<Interval>&>(*this),x); }
-
-    virtual Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
-
-    virtual ScalarPolynomialFunction* derivative(uint j) const {
-        return new ScalarPolynomialFunction(Ariadne::derivative(*this,j)); }
-    virtual ScalarPolynomialFunction* antiderivative(uint j) const {
-        return new ScalarPolynomialFunction(Ariadne::antiderivative(*this,j)); }
-
-    virtual Vector<ScalarPolynomialFunction> derivative() const {
-        Vector<ScalarPolynomialFunction> g(this->argument_size());
-        for(uint i=0; i!=g.size(); ++i) { g[i]=Ariadne::derivative(*this,i); }
-        return g; }
-
-    virtual std::ostream& write(std::ostream& os) const;
-
-    const Polynomial<Interval>& _polynomial() const {
-        return static_cast<const Polynomial<Interval>&>(*this); }
-};
-
-inline std::ostream& ScalarPolynomialFunction::write(std::ostream& os) const {
-    const ScalarPolynomialFunction& p=*this;
-    bool first_term=true;
-    //bool first_factor=true;
-    Float r;
-    if(p.expansion().size()==0) {
-        r=0.0;
-        os << "0";
-    } else {
-        r=radius(p.begin()->data());
-        for(Polynomial<Interval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-            MultiIndex a=iter->key();
-            Float v=midpoint(iter->data());
-            if(abs(v)<1e-15) { r+=abs(v); v=0; }
-            if(v!=0) {
-                if(v>0 && !first_term) { os<<"+"; }
-                first_term=false;
-                bool first_factor=true;
-                if(v<0) { os<<"-"; }
-                if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
-                for(uint j=0; j!=a.size(); ++j) {
-                    if(a[j]!=0) {
-                        if(first_factor) { first_factor=false; } else { os <<"*"; }
-                        os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
-                }
-            }
+    template<class X> void _compute(Vector<X>& result, const Vector<X>& x) const {
+        Map<ExtendedRealVariable,X> values;
+        for(uint i=0; i!=_argument_variables.size(); ++i) {
+            values[_argument_variables[i]]=x[i];
+        }
+        for(uint i=0; i!=_assignments.size(); ++i) {
+            values[_assignments[i].lhs]=Ariadne::evaluate(_assignments[i].rhs,values);
+        }
+        for(uint i=0; i!=result.size(); ++i) {
+            result[i]=values[_result_variables[i]];
         }
     }
-    if(r>0) { os<<"+/-"<<r; }
-    return os;
-}
 
-/*
-
-inline ScalarPolynomialFunction::ScalarPolynomialFunction(ExpressionPointer e, const Array<String>& s) {
-    ScalarPolynomialFunction& r=*this;
-    const ExpressionInterface* eptr=e.operator->();
-    if(dynamic_cast<const ConstantExpression*>(eptr)) {
-        const ConstantExpression* cptr=dynamic_cast<const ConstantExpression*>(eptr);
-        r =  ScalarPolynomialFunction::constant(s.size(),cptr->value());
-    } else if(dynamic_cast<const CoordinateExpression*>(eptr)) {
-        const CoordinateExpression* pptr=dynamic_cast<const CoordinateExpression*>(eptr);
-        r = ScalarPolynomialFunction::variable(s.size(),pptr->coordinate());
-        //return PolynomialExpression::variable(pptr->argument_size(),pptr->coordinate());
-    } else if(dynamic_cast<const UnaryExpression<Neg>*>(eptr)) {
-        const UnaryExpression<Neg>* uptr=dynamic_cast<const UnaryExpression<Neg>*>(eptr);
-        r = -ScalarPolynomialFunction(uptr->_arg_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Add>*>(eptr)) {
-        const BinaryExpression<Add>* bptr=dynamic_cast<const BinaryExpression<Add>*>(eptr);
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)+ScalarPolynomialFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Sub>*>(eptr)) {
-        const BinaryExpression<Sub>* bptr=dynamic_cast<const BinaryExpression<Sub>*>(eptr);
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)-ScalarPolynomialFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Mul>*>(eptr)) {
-        const BinaryExpression<Mul>* bptr=dynamic_cast<const BinaryExpression<Mul>*>(eptr);
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)*ScalarPolynomialFunction(bptr->_arg2_ptr,s);
-    } else if(dynamic_cast<const BinaryExpression<Div>*>(eptr)) {
-        const BinaryExpression<Div>* bptr=dynamic_cast<const BinaryExpression<Div>*>(eptr);
-        const ConstantExpression* cptr=dynamic_cast<const ConstantExpression*>(bptr->_arg2_ptr.operator->());
-        ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<*e<<" to polynomial.");
-        r =  ScalarPolynomialFunction(bptr->_arg1_ptr,s)*(1/cptr->value());
-    } else {
-        ARIADNE_ASSERT_MSG(false,"Cannot convert expression "<<*e<<" to polynomial.");
+    virtual ScalarFunction operator[](uint i) const {
+        if(_result_variables.size()==_assignments.size()) {
+            for(uint i=0; i!=_assignments.size(); ++i) {
+                if(_assignments[i].lhs==_result_variables[i]) {
+                    return ScalarFunction(_assignments[i].rhs,_argument_variables);
+                }
+                ARIADNE_THROW(std::runtime_error,"VectorExpressionFunction::operator[]",
+                              "Variable "<<_argument_variables[i]<<" has no assignment");
+            }
+        }
+        ARIADNE_FAIL_MSG("Can only compute index of a function with no dependencies");
     }
-}
 
-*/
+    std::ostream& write(std::ostream& os) const {
+        //return os << this->_result_variables << this->_argument_variables << this->_assignments;
+        return os << this->_assignments;
+    }
 
-
-// A wrapper for classes with non-static _compute and _compute_approx methods
-template<class F>
-class ScalarFunctionTemplate
-    : public ScalarFunctionInterface
-{
-  private:
-    template<class R, class A> void _base_compute(R& r, const A& a) const {
-        static_cast<const F*>(this)->_compute(r,a); }
-  protected:
-    ScalarFunctionTemplate() { }
-  public:
-    virtual SmoothnessType smoothness() const { return SMOOTH; }
-
-    virtual Float evaluate(const Vector<Float>& x) const {
-        Float r; _base_compute(r,x); return r; }
-    virtual Interval evaluate(const Vector<Interval>& x) const {
-        Interval r; _base_compute(r,x); return r; }
-
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
-        TaylorModel r(TaylorModel(x[0].argument_size(),x[0].accuracy_ptr()));
-        _base_compute(r,x); return r; }
-
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
-        Differential<Float> r(Differential<Float>(x[0].argument_size(),x[0].degree()));
-        _base_compute(r,x); return r; }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
-        Differential<Interval> r(Differential<Interval>(x[0].argument_size(),x[0].degree()));
-        _base_compute(r,x); return r; }
-
-    virtual Vector<Float> gradient(const Vector<Float>& x) const {
-        return Ariadne::gradient(this->evaluate(Differential<Float>::variables(1u,x))); }
-    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return Ariadne::gradient(this->evaluate(Differential<Interval>::variables(1u,x))); }
-
-    virtual ScalarFunctionInterface* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-
-    // TODO: Find a better way for writing functions which can handle transformations which may not have a
-    // write() method or operator<<.
-    virtual std::ostream& write(std::ostream& os) const  {
-        return os << "ScalarFunction( argument_size="<<this->argument_size()<<" )"; }
-};
-
-
-// A wrapper for classes with non-static _compute and _compute_approx methods
-template<class F>
-class VectorFunctionTemplate
-    : public VectorFunctionInterface
-{
-  private:
-    template<class R, class A> void _base_compute(R& r, const A& a) const {
-        static_cast<const F*>(this)->_compute(r,a); }
-  protected:
-    VectorFunctionTemplate() { }
-  public:
-    virtual SmoothnessType smoothness() const { return SMOOTH; }
-
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-        Vector<Float> r(this->result_size()); _base_compute(r,x); return r; }
-    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-        Vector<Interval> r(this->result_size()); _base_compute(r,x); return r; }
-
-    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        Vector<TaylorModel> r(this->result_size(),TaylorModel(x[0].argument_size(),x[0].accuracy_ptr()));
-        _base_compute(r,x); return r; }
-
-    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
-        Vector< Differential<Float> > r(this->result_size(),Differential<Float>(x[0].argument_size(),x[0].degree()));
-        _base_compute(r,x); return r; }
-    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
-        Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
-        _base_compute(r,x); return r; }
-
-    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
-    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
-
-    // TODO: Find a better way for writing functions which can handle transformations which may not have a
-    // write() method or operator<<.
-    virtual std::ostream& write(std::ostream& os) const  {
-        return os << "Function( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
 };
 
 
 
 
-class VectorOfScalarFunction
-    : public VectorFunctionInterface
+
+//! A constant function f(x)=c
+struct ScalarConstantFunctionBody
+    : ScalarFunctionTemplate<ScalarConstantFunctionBody>
 {
-    friend class VectorFunction;
-  public:
-    VectorOfScalarFunction(uint rs, uint as)
-        : _vec(rs,ScalarFunction(as)) { }
-    VectorOfScalarFunction(uint rs, const ScalarFunction& f)
-        : _vec(rs,f) { }
-    VectorOfScalarFunction(const List<ScalarFunction>& f)
-        : _vec(f.size())
-    { for(uint i=0; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); this->_vec[i]=f[i]; } }
+    SizeType _argument_size;
+    Real _value;
 
-    void set(uint i, const ScalarFunction& f) {
-        this->_vec[i]=f; }
-    ScalarFunction get(uint i) const {
-        return this->_vec[i]; }
+    ScalarConstantFunctionBody(uint as, const Real& c) : _argument_size(as), _value(c) { }
+    operator Real() const { return _value; }
 
-    virtual VectorOfScalarFunction* clone() const {
-        return new VectorOfScalarFunction(*this); }
+    virtual SizeType argument_size() const { return _argument_size; }
+    virtual ScalarFunction derivative(uint j) const { return ScalarFunction::constant(_argument_size,0.0); }
+    virtual std::ostream& repr(std::ostream& os) const { return os << this->_value; }
+    virtual std::ostream& write(std::ostream& os) const { return os << "CF["<<this->_argument_size<<"]("<<this->_value<<")"; }
+    template<class X> void _compute(X& r, const Vector<X>& x) const {
+        if(x.size()==0) { r=_value; } else { r=x[0]*0+_value; } }
+};
 
-    virtual uint result_size() const {
-        return _vec.size(); }
-    virtual uint argument_size() const {
-        if(_vec.size()==0) { return 0; } return _vec[0].argument_size(); }
 
-    virtual ushort smoothness() const {
-        return SMOOTH; }
+//! A coordinate function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=x_i\f$.
+struct ScalarCoordinateFunctionBody
+    : ScalarFunctionTemplate<ScalarCoordinateFunctionBody>
+{
+    SizeType _argument_size;
+    SizeType _index;
 
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-        return this->_compute(x); }
-    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-        return this->_compute(x); }
-    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
-        return this->_compute(x); }
-    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
-        return this->_compute(x); }
-    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        return this->_compute(x); }
+    ScalarCoordinateFunctionBody(uint as, uint i) : _argument_size(as), _index(i) { }
+    SizeType index() const { return _index; }
 
-    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
-    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
-
-    virtual std::ostream& write(std::ostream& os) const {
-        os << "F[" << this->result_size() << "," << this->argument_size() << "][";
-        for(uint i=0; i!=this->_vec.size(); ++i) {
-            if(i!=0) { os << ","; }
-            this->_vec[i]._raw_pointer()->write(os); }
-        return os << "]"; }
-  protected:
-    template<class X> Vector<X> _compute(const Vector<X>& x) const {
-        Vector<X> r(this->_vec.size());
-        for(uint i=0; i!=r.size(); ++i) {
-            r[i]=_vec[i].evaluate(x); }
-        return r; }
-  public:
-    Vector<ScalarFunction> _vec;
+    virtual SizeType argument_size() const { return _argument_size; }
+    virtual ScalarFunction derivative(uint j) const {
+        if(j==_index) { return ScalarFunction::constant(_argument_size,1.0); }
+        else { return ScalarFunction::constant(_argument_size,0.0); } }
+    virtual std::ostream& repr(std::ostream& os) const { return os << "x"<<this->_index; }
+    virtual std::ostream& write(std::ostream& os) const { return os << "F["<<this->_argument_size<<"](x"<<this->_index<<")"; }
+    template<class X> void _compute(X& r, const Vector<X>& x) const { r=x[_index]; }
 };
 
 
 //! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
-template<class Op> class UnaryFunction
-    : public ScalarFunctionTemplate< UnaryFunction<Op> >
+template<class Op> struct UnaryFunctionBody
+    : ScalarFunctionTemplate< UnaryFunctionBody<Op> >
 {
   public:
-    UnaryFunction(const Op& op, const ScalarFunction& arg)
+    UnaryFunctionBody(const Op& op, const ScalarFunction& arg)
         : _op(op), _arg(arg) { }
-    virtual UnaryFunction* clone() const { return new UnaryFunction<Op>(*this); }
-    virtual ScalarFunctionInterface::SizeType argument_size() const {
+    virtual UnaryFunctionBody* clone() const { return new UnaryFunctionBody<Op>(*this); }
+    virtual SizeType argument_size() const {
         return this->_arg.argument_size(); }
-    virtual ScalarFunctionInterface::SmoothnessType smoothness() const {
-        return this->_arg.pointer()->smoothness(); }
+
+    virtual ScalarFunction derivative(uint j) const {
+        switch(_op.code()) {
+            case POS: return _arg.derivative(j);
+            case NEG: return -_arg.derivative(j);
+            case REC: return -_arg.derivative(j)/sqr(_arg);
+            case SQR: return 2.0*_arg.derivative(j)*_arg;
+            case SQRT: return _arg.derivative(j)/(2.0*sqrt(_arg));
+            case EXP: return _arg*_arg.derivative(j);
+            case LOG: return _arg.derivative(j)/_arg;
+            case SIN: return _arg.derivative(j)*cos(_arg);
+            case COS: return -_arg.derivative(j)*sin(_arg);
+            default: ARIADNE_FAIL_MSG("Unknown unary function "<<this->_op);
+        }
+    }
+
+    virtual std::ostream& repr(std::ostream& os) const {
+        return os << _op << "(" << _arg._raw_pointer() << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << _op << "(" << *_arg.pointer() << ")"; }
-  protected:
-    friend class ScalarFunctionTemplate< UnaryFunction<Op> >;
+        return os << "F["<<this->argument_size()<<"](" << this <<")"; }
+
     template<class R, class A> void _compute(R& r, const A& x) const { r=_op(_arg.evaluate(x)); }
-  public:
+
     Op _op;
     ScalarFunction _arg;
 };
 
 
-//! \brief A vector-valued function defined by its scalar-valued components.
-template<>
-class Vector<ScalarFunctionInterface>
-    : public VectorFunctionInterface
+//! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
+template<class Op> struct BinaryFunctionBody
+    : ScalarFunctionTemplate< BinaryFunctionBody<Op> >
 {
-    friend class VectorFunctionTemplate< Vector<ScalarFunctionInterface> >;
   public:
-    typedef unsigned int SizeType;
-    typedef unsigned short int SmoothnessType;
+    BinaryFunctionBody(const Op& op, const ScalarFunction& arg1, const ScalarFunction& arg2)
+        : _op(op), _arg1(arg1), _arg2(arg2) { ARIADNE_ASSERT_MSG(arg1.argument_size()==arg2.argument_size(),"op='"<<op<<"', arg1="<<arg1<<", arg2="<<arg2); }
+    virtual BinaryFunctionBody<Op>* clone() const { return new BinaryFunctionBody<Op>(*this); }
+    virtual SizeType argument_size() const {
+        return this->_arg1.argument_size(); }
 
-    Vector(SizeType n) : _expressions(n) { }
-    SizeType size() const { return _expressions.size(); }
-    const ScalarFunctionInterface& operator[](SizeType i) const { return *_expressions[i]; }
-    void set(SizeType i, const ScalarFunctionInterface& f) {
-        ARIADNE_ASSERT(i<this->result_size());
-        ARIADNE_ASSERT(this->size()==0 || i==0 || f.argument_size()==this->argument_size());
-        _expressions[i]=shared_ptr<const ScalarFunctionInterface>(f.clone()); }
-    void set(SizeType i, shared_ptr<const ScalarFunctionInterface> p) {
-        ARIADNE_ASSERT(i<this->result_size());
-        ARIADNE_ASSERT(this->size()==0 || !_expressions[0] || p->argument_size()==this->argument_size()); _expressions[i]=p; }
-    void set(SizeType i, const ScalarFunctionInterface* p) {
-        ARIADNE_ASSERT(i<this->result_size());
-        ARIADNE_ASSERT(this->size()==0 || !_expressions[0] || p->argument_size()==this->argument_size());
-        _expressions[i]=shared_ptr<const ScalarFunctionInterface>(p); }
-    const ScalarFunctionInterface& get(uint i) const {
-        ARIADNE_ASSERT(i<this->result_size());
-        return *this->_expressions[i]; }
+    virtual ScalarFunction derivative(uint j) const {
+        switch(_op.code()) {
+            case ADD: return _arg1.derivative(j)+_arg2.derivative(j);
+            case SUB: return _arg1.derivative(j)-_arg2.derivative(j);
+            case MUL: return _arg1.derivative(j)*_arg2+_arg1*_arg2.derivative(j);
+            case DIV: return _arg1.derivative(j)/_arg2-_arg2.derivative(j)*_arg1/sqr(_arg2);
+            default: ARIADNE_FAIL_MSG("Unknown binary function "<<this->_op);
+        }
+    }
 
-    virtual Vector<ScalarFunctionInterface>* clone() const { return new Vector<ScalarFunctionInterface>(*this); }
-
-    virtual SizeType result_size() const { return _expressions.size(); }
-    virtual SizeType argument_size() const { if(_expressions[0]) { return _expressions[0]->argument_size(); } else { return 0; } }
-    virtual SmoothnessType smoothness() const {
-        SmoothnessType res=_expressions[0]->smoothness();
-        for(uint i=1; i!=this->size(); ++i) {
-            res=max(res,_expressions[i]->smoothness()); } return res; }
-
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-        Vector<Float> r(result_size()); _compute_approx(r,x); return r; }
-    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-        Vector<Interval> r(result_size()); _compute(r,x); return r; }
-    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        Vector<TaylorModel> r(result_size()); _compute(r,x); return r; }
-    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
-        Vector< Differential<Float> > r(result_size()); _compute_approx(r,x); return r; }
-    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
-        Vector< Differential<Interval> > r(result_size()); _compute_approx(r,x); return r; }
-
-    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
-    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
-
+    virtual std::ostream& repr(std::ostream& os) const {
+        return os << _arg1._raw_pointer() << symbol(_op.code()) << _arg2._raw_pointer(); }
     virtual std::ostream& write(std::ostream& os) const {
-        os<<"["; for(uint i=0; i!=this->result_size(); ++i) { if(i!=0) { os<<","; } os<<(*this)[i]; } return os<<"]"; }
-  private:
-    template<class Y> inline void _compute(Vector<Y>& r, const Vector<Y>& x) const {
-        for(SizeType i=0; i!=this->result_size(); ++i) {
-            r[i]=this->_expressions[i]->evaluate(x); } }
-    template<class Y> inline void _compute_approx(Vector<Y>& r, const Vector<Y>& x) const {
-        _compute(r,x); }
-  private:
-    array< boost::shared_ptr<const ScalarFunctionInterface> > _expressions;
+        return os << "F["<<this->argument_size()<<"]("<< this <<")"; }
+
+    template<class R, class A> void _compute(R& r, const A& x) const { r=_op(_arg1.evaluate(x),_arg2.evaluate(x)); }
+
+    Op _op;
+    ScalarFunction _arg1;
+    ScalarFunction _arg2;
 };
 
 
 
-//! A constant function \f$ x\mapsto c\f$ from \f$R^m\f$ to \f$R^n\f$.
-class VectorConstantFunctionRepresentation
-    : public VectorFunctionTemplate<VectorConstantFunctionRepresentation>
+
+
+
+//! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
+struct ScalarAffineFunctionBody
+    : ScalarFunctionTemplate<ScalarAffineFunctionBody>
 {
-  public:
-    VectorConstantFunctionRepresentation(uint rs, double c0, ...) : _as(), _c(rs) {
+    explicit ScalarAffineFunctionBody(uint n) : _affine(n) { }
+    ScalarAffineFunctionBody(const Affine<Real>& aff) : _affine(aff) { }
+    ScalarAffineFunctionBody(const Vector<Real>& g, const Real& c) : _affine(g,c) { }
+
+    virtual SizeType argument_size() const { return _affine.argument_size(); }
+    virtual ScalarFunction derivative(uint j) const {
+        return ScalarFunction::constant(_affine.argument_size(),_affine.gradient(j)); }
+    virtual std::ostream& write(std::ostream& os) const { return os << _affine; }
+    virtual std::ostream& repr(std::ostream& os) const { return os << "AF["<<this->argument_size()<<"]("<<_affine<<")"; }
+    template<class X> void _compute(X& r, const Vector<X>& x) const {
+        r=x[0]*0+_affine.value(); for(uint j=0; j!=argument_size(); ++j) { r+=_affine.gradient(j)*x[j]; } }
+    Affine<Real> _affine;
+};
+
+
+struct ScalarPolynomialFunctionBody
+    : ScalarFunctionTemplate<ScalarPolynomialFunctionBody>
+{
+    explicit ScalarPolynomialFunctionBody(uint n) : _polynomial(n) { }
+    ScalarPolynomialFunctionBody(const Polynomial<Real>& p) : _polynomial(p) { }
+
+    virtual SizeType argument_size() const { return _polynomial.argument_size(); }
+    virtual ScalarFunction derivative(uint j) const { return ScalarFunction(Ariadne::derivative(_polynomial,j)); }
+    virtual std::ostream& repr(std::ostream& os) const {
+        return os << Polynomial<Float>(_polynomial); }
+    virtual std::ostream& write(std::ostream& os) const { return
+        os << "PF["<<this->argument_size()<<"]("<<Polynomial<Float>(_polynomial)<<")"; }
+    template<class X> void _compute(X& r, const Vector<X>& x) const {
+        r=x[0]*0; r=Ariadne::evaluate(_polynomial,x); }
+    Polynomial<Real> _polynomial;
+};
+
+struct ScalarExpansionFunctionBody
+: ScalarFunctionTemplate<ScalarExpansionFunctionBody>
+{
+    explicit ScalarExpansionFunctionBody(uint n) : _expansion(n) { }
+    ScalarExpansionFunctionBody(const Expansion<Real>& p) : _expansion(p) { }
+
+    virtual SizeType argument_size() const { return _expansion.argument_size(); }
+    virtual ScalarFunction derivative(uint j) const { return ScalarFunction(Ariadne::derivative(Polynomial<Real>(_expansion),j)); }
+    virtual std::ostream& repr(std::ostream& os) const {
+        return os << Expansion<Float>(_expansion); }
+    virtual std::ostream& write(std::ostream& os) const { return
+        os << "EF["<<this->argument_size()<<"]("<<Polynomial<Float>(_expansion)<<")"; }
+    template<class X> void _compute(X& r, const Vector<X>& x) const {
+        r=x[0]*0; r=Ariadne::evaluate(_expansion,x); }
+        Expansion<Real> _expansion;
+};
+
+inline void add_error(Float& x, const Float& e) { }
+inline void add_error(Interval& x, const Float& e) { x+=Interval(-e,+e); }
+inline void add_error(Differential<Float>& x, const Float& e) { }
+inline void add_error(Differential<Interval>& x, const Float& e) { x+=Interval(-e,+e); }
+inline void add_error(TaylorModel& x, const Float& e) { x+=Interval(-e,+e); }
+inline void add_error(Propagator<Interval>& x, const Float& e) { x=x+Propagator<Interval>(Interval(-e,+e)); }
+
+/*
+
+class ScalarTaylorFunction;
+
+//! An Taylor function expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=p(s^{-1}(x)\f$.
+struct ScalarTaylorFunctionBody
+    : ScalarFunctionTemplate<ScalarTaylorFunctionBody>
+{
+    explicit ScalarTaylorFunctionBody(uint n) : _domain(n,Interval(-1,+1)), _polynomial(n), _error(0.0) { }
+    ScalarTaylorFunctionBody(const ScalarTaylorFunction& tm) : _domain(tm._domain), _polynomial(tm._polynomial), _error(tm._error) { }
+
+    virtual SizeType argument_size() const { return _polynomial.argument_size(); }
+    virtual ScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual std::ostream& write(std::ostream& os) const { return os << _polynomial; }
+    virtual std::ostream& repr(std::ostream& os) const { return os << "TF["<<this->argument_size()<<"]("<<_polynomial<<")"; }
+    template<class X> void _compute(X& r, const Vector<X>& x) const {
+        Vector<X> u=x; for(uint i=0; i!=n; ++i) { u[i]/=_domain[i].radius(); u[i]-=_domain[i].centre(); }
+        r=evaluate(_polynomial,u); add_error(r,_error); }
+
+    Vector<Interval> _domain;
+    Polynomial<Float> _polynomial;
+    Float _error;
+};
+
+*/
+
+
+
+struct VectorOfScalarFunctionBody
+    : VectorFunctionTemplate<VectorOfScalarFunctionBody>
+{
+    VectorOfScalarFunctionBody(uint rs, uint as)
+        : _as(as), _vec(rs,ScalarFunction(as)) { }
+    VectorOfScalarFunctionBody(uint rs, const ScalarFunction& f)
+        : _as(f.argument_size()), _vec(rs,f) { }
+
+    void set(uint i, const ScalarFunction& f) {
+        ARIADNE_ASSERT(f.argument_size()==this->argument_size());
+        this->_vec[i]=f; }
+    ScalarFunction get(uint i) const {
+        return this->_vec[i]; }
+
+    virtual uint result_size() const {
+        return _vec.size(); }
+    virtual uint argument_size() const {
+        return _as; }
+
+    virtual ScalarFunction operator[](uint i) const {
+        return ScalarFunction(this->_vec[i]); }
+
+    virtual std::ostream& write(std::ostream& os) const {
+        os << "F[" << this->result_size() << "," << this->argument_size() << "][";
+        for(uint i=0; i!=this->_vec.size(); ++i) {
+            if(i!=0) { os << ","; }
+            this->_vec[i]._raw_pointer()->repr(os); }
+        return os << "]"; }
+
+    template<class X> void _compute(Vector<X>& r, const Vector<X>& x) const {
+        r=Vector<X>(this->_vec.size());
+        for(uint i=0; i!=r.size(); ++i) {
+            r[i]=_vec[i].evaluate(x); } }
+
+    uint _as;
+    Vector<ScalarFunction> _vec;
+
+};
+
+
+
+
+
+//! A constant function \f$ x\mapsto c\f$ from \f$R^m\f$ to \f$R^n\f$.
+struct VectorConstantFunctionBody
+    : VectorFunctionTemplate<VectorConstantFunctionBody>
+{
+    VectorConstantFunctionBody(uint rs, double c0, ...) : _as(), _c(rs) {
         ARIADNE_ASSERT(rs>0); va_list args; va_start(args,c0);
         _c[0]=c0; for(size_t i=1; i!=rs; ++i) { _c[i]=va_arg(args,double); } _as=va_arg(args,int);
         va_end(args);
     }
 
-    VectorConstantFunctionRepresentation(uint rs, Interval c0, ...) : _as(), _c(rs) {
+    VectorConstantFunctionBody(uint rs, Interval c0, ...) : _as(), _c(rs) {
         ARIADNE_ASSERT(rs>0); double l,u; va_list args; va_start(args,c0);
         _c[0]=c0; for(size_t i=1; i!=rs; ++i) { l=va_arg(args,double); u=va_arg(args,double); _c[i]=Interval(l,u); } _as=va_arg(args,int);
         va_end(args);
     }
 
-    VectorConstantFunctionRepresentation(const Vector<Float>& c, uint as) : _as(as), _c(c) { }
-    VectorConstantFunctionRepresentation(const Vector<Interval>& c, uint as) : _as(as), _c(c) { }
-    VectorConstantFunctionRepresentation(const Vector<Real>& c, uint as) : _as(as), _c(c) { }
-//    ConstantExpression<Real,Real> operator[](uint i) const { return ConstantExpression<Real,Real>(_as,this->_c[i]); }
-    const Real& operator[](uint i) const { return this->_c[i]; }
-    const Vector<Real>& c() const { return _c; }
+    VectorConstantFunctionBody(const Vector<Float>& c, uint as) : _as(as), _c(c) { }
+    VectorConstantFunctionBody(const Vector<Interval>& c, uint as) : _as(as), _c(c) { }
+    VectorConstantFunctionBody(const Vector<Real>& c, uint as) : _as(as), _c(c) { }
 
-    VectorConstantFunctionRepresentation* clone() const { return new VectorConstantFunctionRepresentation(*this); }
+    const Vector<Real>& c() const { return _c; }
 
     SizeType result_size() const { return _c.size(); }
     SizeType argument_size() const { return _as; }
-
+    ScalarFunction operator[](uint i) const { return ScalarFunction(this->_c[i]); }
     std::ostream& write(std::ostream& os) const {
-        return os << "VectorConstantFunction( argument_size=" << this->argument_size()
+        return os << "VectorConstantFunctionBody( argument_size=" << this->argument_size()
                   << ", c=" << this->c() << " )"; }
-  private:
-    friend class VectorFunctionTemplate<VectorConstantFunctionRepresentation>;
+
     template<class R, class A> void _compute(R& r, const A& x) const {
         for(uint i=0; i!=result_size(); ++i) { r[i]=_c[i]; } }
-    template<class R, class A> void _compute_approx(R& r, const A& x) const {
-        for(uint i=0; i!=result_size(); ++i) { r[i]=midpoint(_c[i]); } }
-  private:
+
     uint _as;
     Vector<Real> _c;
 };
 
 
-//! An affine function \f$x\mapsto Ax+b\f$.
-class VectorAffineFunctionRepresentation
-    : public VectorFunctionInterface
+// An affine function \f$x\mapsto Ax+b\f$.
+struct VectorAffineFunctionBody
+    : public VectorFunctionTemplate<VectorAffineFunctionBody>
 {
-  public:
 
-    //! Construct an affine function from the matrix \a A and vector \a b.
-    VectorAffineFunctionRepresentation(const Matrix<Interval>& A, const Vector<Interval>& b)
-        : _fA(midpoint(A)), _fb(midpoint(b)), _iA(A), _ib(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
-
-    VectorAffineFunctionRepresentation(uint rs, double b0, ...) : _fA(), _fb(rs) {
+    VectorAffineFunctionBody(const Matrix<Real>& A, const Vector<Real>& b)
+        : _A(A), _b(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
+    VectorAffineFunctionBody(uint rs, double b0, ...) : _A(), _b(rs) {
         ARIADNE_ASSERT(rs>0);
         va_list args; va_start(args,b0);
-        _fb[0]=b0; for(size_t i=1; i!=rs; ++i) { _fb[i]=va_arg(args,double); }
-        uint as=va_arg(args,int); ARIADNE_ASSERT(as>0); _fA=Matrix<Float>(rs,as);
-        for(size_t i=0; i!=rs; ++i) { for(size_t j=0; i!=as; ++j) { _fA[i][j]=va_arg(args,double); } }
+        _b[0]=b0; for(size_t i=1; i!=rs; ++i) { _b[i]=va_arg(args,double); }
+        uint as=va_arg(args,int); ARIADNE_ASSERT(as>0); _A=Matrix<Real>(rs,as);
+        for(size_t i=0; i!=rs; ++i) { for(size_t j=0; i!=as; ++j) { _A[i][j]=va_arg(args,double); } }
         va_end(args);
-        _iA=Matrix<Interval>(_fA); _ib=Vector<Interval>(_fb);
     }
 
-    const Matrix<Float>& A() const { return _fA; }
-    const Vector<Float>& b() const { return _fb; }
+    const Matrix<Real>& A() const { return _A; }
+    const Vector<Real>& b() const { return _b; }
 
-    virtual VectorAffineFunctionRepresentation* clone() const { return new VectorAffineFunctionRepresentation(*this); }
+    virtual SizeType result_size() const { return _A.row_size(); }
+    virtual SizeType argument_size() const { return _A.column_size(); }
 
-    virtual SizeType result_size() const { return _fA.row_size(); }
-    virtual SizeType argument_size() const { return _fA.column_size(); }
-    virtual SmoothnessType smoothness() const { return SMOOTH; }
+    template<class X> void _compute(Vector<X>& r, const Vector<X>& x) const { r=prod(_A,x)+_b; }
 
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-        return prod(_fA,x)+_fb; }
-    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-        return prod(_iA,x)+_ib; }
-    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
-        return prod(_fA,x)+_fb; }
-    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
-        return prod(_iA,x)+_ib; }
-    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        return prod(_iA,x)+_ib;
-        ARIADNE_ASSERT(x.size()==this->argument_size());
-        for(uint i=1; i<x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
-        Vector<TaylorModel> r(this->result_size(),x[0]*0.0);
-        for(uint i=0; i!=r.size(); ++i) { r[i]=_ib[i]; for(uint j=0; j!=x.size(); ++j) { r[i]+=_iA[i][j]*x[j]; } }
-        return r;
-    }
-    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->_fA; }
-    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return this->_iA; }
+    virtual Matrix<Real> jacobian(const Vector<Real>& x) const { return this->_A; }
 
-    virtual ScalarAffineFunction operator[](unsigned int i) const  {
+    virtual ScalarFunction operator[](unsigned int i) const  {
         ARIADNE_ASSERT(i<this->result_size());
-        Vector<Interval> g(this->argument_size()); for(unsigned int j=0; j!=g.size(); ++j) { g[j]=this->_iA[i][j]; }
-        return ScalarAffineFunction(g,_ib[i]); }
+        Vector<Real> g(this->argument_size()); for(unsigned int j=0; j!=g.size(); ++j) { g[j]=this->_A[i][j]; }
+        return ScalarAffineFunction(g,_b[i]); }
 
     virtual std::ostream& write(std::ostream& os) const;
-  private:
-    Matrix<Float> _fA; Vector<Float> _fb;
-    Matrix<Interval> _iA; Vector<Interval> _ib;
+
+    Matrix<Real> _A; Vector<Real> _b;
 };
 
-inline std::ostream& VectorAffineFunctionRepresentation::write(std::ostream& os) const {
-    //return os << "VectorAffineFunction( A="<<midpoint(_iA)<<", b="<<midpoint(_ib)<<" )";
-    const VectorAffineFunctionRepresentation& f=*this;
+inline std::ostream& VectorAffineFunctionBody::write(std::ostream& os) const {
+    //return os << "VectorAffineFunctionBody( A="<<midpoint(_iA)<<", b="<<midpoint(_ib)<<" )";
+    const VectorAffineFunctionBody& f=*this;
     for(uint i=0; i!=f.result_size(); ++i) {
-        os<<(i==0?"VectorAffineFunction( ":"; ");
-        if(f.b()[i]!=0) { os<<f.b()[i]; }
+        os<<(i==0?"( ":"; ");
+        if(f.b()[i]!=0) { os<<f._b[i]; }
         for(uint j=0; j!=f.argument_size(); ++j) {
-            if(f.A()[i][j]!=0) {
-                if(f.A()[i][j]>0) { os<<"+"; } else { os<<"-"; }
-                if(abs(f.A()[i][j])!=1) { os<<abs(f.A()[i][j]); }
+            if(f._A[i][j]!=0) {
+                if(f._A[i][j]>0) { os<<"+"; } else { os<<"-"; }
+                if(abs(f._A[i][j])!=1) { os<<abs(f._A[i][j]); }
                 //ss<<char('x'+j);
                 os<<"x"<<j;
             }
@@ -646,206 +463,114 @@ inline std::ostream& VectorAffineFunctionRepresentation::write(std::ostream& os)
 
 
 //! A polynomial function.
-class VectorPolynomialFunction
-    : public Vector<ScalarFunctionInterface>
+struct VectorPolynomialFunctionBody
 {
-    typedef Vector<ScalarFunctionInterface> Base;
-  public:
-    explicit VectorPolynomialFunction(uint rs, uint as) : Base(rs) {
-        for(uint i=0; i!=rs; ++i) { Base::set(i,ScalarPolynomialFunction(as)); } }
-    explicit VectorPolynomialFunction(uint rs, const ScalarPolynomialFunction& p) : Base(rs) {
-        for(uint i=0; i!=rs; ++i) { Base::set(i,p); } }
+    explicit VectorPolynomialFunctionBody(uint rs, uint as) : _polynomials(rs,Polynomial<Real>(as)) { }
+    VectorPolynomialFunctionBody(const Vector< Polynomial<Real> >& p) : _polynomials(p) { }
 
-    template<class E> VectorPolynomialFunction(const ublas::vector_expression<E>& p) : Base(p().size()) {
-        for(uint i=0; i!=p().size(); ++i) { Base::set(i,ScalarPolynomialFunction(p()[i])); } }
+    virtual SizeType result_size() const { return _polynomials.size(); }
+    virtual SizeType argument_size() const { return _polynomials[0].argument_size(); }
+    virtual ScalarFunction operator[](uint i) const { return ScalarFunction(this->_polynomials[i]); }
+    virtual std::ostream& write(std::ostream& os) const { return os << _polynomials; }
+    template<class R, class A> void _compute(R& r, const A& x) const { r=Ariadne::evaluate(_polynomials,x); }
 
-    VectorPolynomialFunction(const Vector< Polynomial<Float> >& p) : Base(p.size()) {
-        for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
-    VectorPolynomialFunction(const Vector< Polynomial<Interval> >& p) : Base(p.size()) {
-        for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
-    VectorPolynomialFunction(const Vector<ScalarPolynomialFunction>& p) : Base(p.size()) {
-        for(uint i=0; i!=p.size(); ++i) { Base::set(i,p[i]); } }
-    VectorPolynomialFunction(const array< Polynomial<Interval> >& p) : Base(p.size()) {
-        for(uint i=0; i!=p.size(); ++i) { Base::set(i,ScalarPolynomialFunction(p[i])); } }
-
-    static VectorPolynomialFunction identity(uint n) {
-        return VectorPolynomialFunction(ScalarPolynomialFunction::variables(n)); }
-
-    const ScalarPolynomialFunction& operator[](uint i) const {
-        return dynamic_cast<const ScalarPolynomialFunction&>(Base::get(i)); }
-
-    const ScalarPolynomialFunction& get(uint i) const {
-        return dynamic_cast<const ScalarPolynomialFunction&>(Base::get(i)); }
-    void set(uint i,const ScalarPolynomialFunction& p) {
-        return this->Base::set(i,p); }
-
-    virtual std::ostream& write(std::ostream& os) const {
-        return os << "VectorPolynomialFunction("<<static_cast<const Vector<ScalarFunctionInterface>&>(*this)<<")"; }
-
-    Vector< Polynomial<Interval> > _polynomials() const {
-        Vector<Polynomial<Interval> > r(this->argument_size());
-        for(uint i=0; i!=r.size(); ++i) {
-            r[i]=static_cast<const Polynomial<Interval>&>(dynamic_cast<const ScalarPolynomialFunction&>(Base::get(i))); }
-        return r; }
-  private:
-    friend VectorPolynomialFunction operator+(const VectorPolynomialFunction&, const VectorPolynomialFunction&);
-    friend VectorPolynomialFunction flip(const VectorPolynomialFunction&, uint);
+    Vector< Polynomial<Real> > _polynomials;
 };
 
-inline VectorPolynomialFunction join(const ScalarPolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
-    return join(static_cast<const Polynomial<Interval>&>(p1),static_cast<const Polynomial<Interval>&>(p2));
-}
-
-inline VectorPolynomialFunction join(const VectorPolynomialFunction& p1, const ScalarPolynomialFunction& p2) {
-    // Need to implement this explicitly since VectorPolynomialFunction does not inherit from Vector<Polynomial>
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    VectorPolynomialFunction r(p1.result_size()+1u,p1.argument_size());
-    for(uint i=0; i!=p1.result_size(); ++i) {
-        r.set(i,p1[i]); }
-    r.set(p1.result_size(),p2);
-    return r;
-}
-
-inline VectorPolynomialFunction join(const ScalarPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
-    // Need to implement this explicitly since VectorPolynomialFunction does not inherit from Vector<Polynomial>
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    VectorPolynomialFunction r(p2.result_size()+1u,p1.argument_size());
-    r.set(0u,p1);
-    for(uint i=0; i!=p2.result_size(); ++i) {
-        r.set(i+1,p2[i]); }
-    return r;
-}
-
-inline VectorPolynomialFunction join(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
-    // Need to implement this explicitly since VectorPolynomialFunction does not inherit from Vector<Polynomial>
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    VectorPolynomialFunction r(p1.result_size()+p2.result_size(),p1.argument_size());
-    for(uint i=0; i!=p1.result_size(); ++i) {
-        r.set(i,p1[i]); }
-    for(uint i=0; i!=p2.result_size(); ++i) {
-        r.set(p1.result_size()+i,p2[i]); }
-    return r;
-}
-
-inline VectorPolynomialFunction operator*(const ScalarPolynomialFunction& p, const Vector<Float>& e) {
-    VectorPolynomialFunction r(e.size(),p.argument_size());
-    for(uint i=0; i!=r.result_size(); ++i) {
-        r.set(i,static_cast<ScalarPolynomialFunction>(e[i]*p)); }
-    return r;
-}
-
-inline VectorPolynomialFunction operator+(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
-    ARIADNE_ASSERT(p1.result_size()==p2.result_size());
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    VectorPolynomialFunction r(p1.result_size(),p1.argument_size());
-    for(uint i=0; i!=r.result_size(); ++i) {
-        r.set(i,static_cast<ScalarPolynomialFunction>(p1[i]+p2[i])); }
-    return r;
-}
-
-inline VectorPolynomialFunction operator-(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
-    ARIADNE_ASSERT(p1.result_size()==p2.result_size());
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    VectorPolynomialFunction r(p1.result_size(),p1.argument_size());
-    for(uint i=0; i!=r.result_size(); ++i) {
-        r.set(i,static_cast<ScalarPolynomialFunction>(p1[i]-p2[i])); }
-    return r;
-}
-
-inline ScalarPolynomialFunction compose(const ScalarPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
-    return ScalarPolynomialFunction(compose(p1._polynomial(),p2._polynomials()));
-}
-
-inline VectorPolynomialFunction compose(const VectorPolynomialFunction& p1, const VectorPolynomialFunction& p2) {
-    return VectorPolynomialFunction(compose(p1._polynomials(),p2._polynomials()));
-}
 
 
 
-
-
-
-//! \brief A projection function \f$ x'_i= x_{p(i)}\f$.
-class ProjectionFunctionRepresentation
-    : public VectorFunctionTemplate<ProjectionFunctionRepresentation>
+// \brief A projection function \f$ x'_i= x_{p(i)}\f$.
+struct ProjectionFunctionBody
+    : VectorFunctionTemplate<ProjectionFunctionBody>
 {
-  public:
-    //! \brief Construct the identity function in dimension \a n.
-    ProjectionFunctionRepresentation(uint n) : _as(n), _p(n) {
+
+    // \brief Construct the identity function in dimension \a n.
+    ProjectionFunctionBody(uint n) : _as(n), _p(n) {
         for(uint i=0; i!=n; ++i) { _p[i]=i; } }
-    //! \brief Construct the projection functions \f$f_i(x)=x_{i+k}\f$ for \f$i=0,\ldots,m-1\f$. Precondition: \f$m+k\leq n\f$.
-    ProjectionFunctionRepresentation(uint m, uint n, uint k) : _as(n), _p(m) {
+    // \brief Construct the projection functions \f$f_i(x)=x_{i+k}\f$ for \f$i=0,\ldots,m-1\f$. Precondition: \f$m+k\leq n\f$.
+    ProjectionFunctionBody(uint m, uint n, uint k) : _as(n), _p(m) {
         ARIADNE_ASSERT(m+k<=n); for(uint j=0; j!=m; ++j) { _p[j]=k+j; } }
-    //! \brief Construct the projection function  with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,m-1\f$.
-    ProjectionFunctionRepresentation(uint m, uint n, const array<uint>& p) : _as(n), _p(p) {
+    // \brief Construct the projection function  with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,m-1\f$.
+    ProjectionFunctionBody(uint m, uint n, const array<uint>& p) : _as(n), _p(p) {
         ARIADNE_ASSERT(p.size()==m); for(uint i=0; i!=_p.size(); ++i) { ARIADNE_ASSERT(p[i]<n); } }
-    //! \brief Construct the projection function with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,|p|-1\f$.
-    ProjectionFunctionRepresentation(const array<uint>& p, uint n) : _as(n), _p(p) {
+    // \brief Construct the projection function with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,|p|-1\f$.
+    ProjectionFunctionBody(const array<uint>& p, uint n) : _as(n), _p(p) {
         for(uint i=0; i!=_p.size(); ++i) { ARIADNE_ASSERT(p[i]<n); } }
-    ProjectionFunctionRepresentation(const Range& rng, uint as) : _as(as), _p(rng.size()) {
+    ProjectionFunctionBody(const Range& rng, uint as) : _as(as), _p(rng.size()) {
         ARIADNE_ASSERT(rng.start()+rng.size()<=as);
         for(uint i=0; i!=_p.size(); ++i) { _p[i]=rng.start()+i; } }
-    std::ostream& write(std::ostream& os) const {
-        return os << "ProjectionFunction( p=" << this->_p << " )"; }
-
-    ProjectionFunctionRepresentation* clone() const { return new ProjectionFunctionRepresentation(*this); }
-
+    SizeType p(unsigned int j) const { return this->_p[j]; }
     SizeType result_size() const { return this->_p.size(); }
     SizeType argument_size() const { return this->_as; }
-    SizeType p(unsigned int j) const { return this->_p[j]; }
+    ScalarFunction operator[](uint i) const { return ScalarFunction::coordinate(_as,_p[i]); }
+    std::ostream& write(std::ostream& os) const {
+        return os << "ProjectionFunctionBody( p=" << this->_p << " )"; }
 
-  private:
-    friend class VectorFunctionTemplate<ProjectionFunctionRepresentation>;
     template<class R, class A> void _compute(R& r, const A& x) const {
         for(uint i=0; i!=result_size(); ++i) { r[i]=x[_p[i]]; } }
-    template<class R, class A> void _compute_approx(R& r, const A& x) const {
-        for(uint i=0; i!=result_size(); ++i) { r[i]=x[_p[i]]; } }
-  private:
+
     uint _as;
     array<uint> _p;
 };
 
 
-ProjectionFunction::ProjectionFunction(uint m, uint n, uint k)
-    : VectorFunction(new ProjectionFunctionRepresentation(m,n,k))
-{
-}
-
-ProjectionFunction::ProjectionFunction(const array<uint>& p, uint n)
-    : VectorFunction(new ProjectionFunctionRepresentation(p,n))
-{
-}
-
-ProjectionFunction::ProjectionFunction(uint m, uint n, const array<uint>& p)
-    : VectorFunction(new ProjectionFunctionRepresentation(m,n,p))
-{
-}
-
 
 
 //! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
-class IdentityFunctionRepresentation
-    : public VectorFunctionTemplate<IdentityFunctionRepresentation>
+struct IdentityFunctionBody
+    : VectorFunctionTemplate<IdentityFunctionBody>
 {
-  public:
-    //! \brief Construct the identity function in dimension \a n.
-    IdentityFunctionRepresentation(uint n) : _n(n) { }
-
-    IdentityFunctionRepresentation* clone() const { return new IdentityFunctionRepresentation(*this); }
-
-    //CoordinateExpression<Real> operator[](unsigned int i) const { return CoordinateExpression<Real>(_n,i); }
-
+    IdentityFunctionBody(uint n) : _n(n) { }
     SizeType result_size() const { return this->_n; }
     SizeType argument_size() const { return this->_n; }
-
+    ScalarFunction operator[](uint i) const { return ScalarFunction::coordinate(_n,i); }
     std::ostream& write(std::ostream& os) const {
-        return os << "VectorIdentityFunction( size=" << this->result_size() << " )"; }
-  private:
-    friend class VectorFunctionTemplate<IdentityFunctionRepresentation>;
+        return os << "IdentityFunctionBody( size=" << this->result_size() << " )"; }
+
     template<class R, class A> void _compute(R& r, const A& x) const { r=x; }
-    template<class R, class A> void _compute_approx(R& r, const A& x) const { r=x; }
-  private:
+
     uint _n;
+};
+
+//! \brief The unscaling function \f$ x_i\mapsto (x_i-c_i)/r_i\f$ in \f$\R^n\f$.
+struct VectorUnscalingFunctionBody
+: VectorFunctionTemplate<VectorUnscalingFunctionBody>
+{
+    VectorUnscalingFunctionBody(const Vector<Interval>& bx) : _bx(bx) { }
+    SizeType result_size() const { return this->_bx.size(); }
+    SizeType argument_size() const { return this->_bx.size(); }
+    ScalarFunction operator[](uint i) const { return (ScalarFunction::coordinate(_bx.size(),i)-Real(med_ivl(_bx[i])))/Real(rad_ivl(_bx[i])); }
+    std::ostream& write(std::ostream& os) const {
+        return os << "VectorUnscalingFunction( domain=" << this->_bx << " )"; }
+
+    template<class R, class A> void _compute(R& r, const A& x) const {
+        for(uint i=0; i!=result_size(); ++i) {
+            r[i]=(x[i]-Real(med_ivl(_bx[i])))/Real(rad_ivl(_bx[i])); } }
+
+    Vector<Interval> _bx;
+};
+
+
+
+// A Lie deriviative \f$\nabla g\cdot f\f$.
+struct LieDerivativeFunctionBody
+    : ScalarFunctionTemplate<LieDerivativeFunctionBody>
+{
+    //! \brief Construct the identity function in dimension \a n.
+    LieDerivativeFunctionBody(const ScalarFunction& g, const VectorFunction& f) {
+        ARIADNE_ASSERT(g.argument_size()==f.argument_size());
+        ARIADNE_ASSERT(f.result_size()==f.argument_size());
+        _g=g; for(uint j=0; j!=g.argument_size(); ++j) { _dg[j]=g.derivative(j); } _f=f; }
+    SizeType argument_size() const { return _g.argument_size(); }
+    std::ostream& write(std::ostream& os) const { return os << "LieDerivative( g="<<_g<<", f="<<_f<<" )"; }
+
+    template<class R, class A> void _compute(R& r, const A& x) const {
+        Vector<R> fx=_f.evaluate(x); r=0; for(uint i=0; i!=_dg.size(); ++i) { r+=fx[i]+_dg[i].evaluate(x); } }
+
+    ScalarFunction _g;
+    List<ScalarFunction> _dg;
+    VectorFunction _f;
 };
 
 
@@ -854,165 +579,105 @@ class IdentityFunctionRepresentation
 
 
 
-class FunctionElement
-    : public ScalarFunctionInterface
+struct FunctionElementBody
+    : ScalarFunctionTemplate<FunctionElementBody>
 {
-  public:
-    typedef unsigned int SizeType;
-    typedef unsigned short SmoothnessType;
+    FunctionElementBody(const VectorFunction& f, SizeType i)
+        : _f(f), _i(i) { ARIADNE_ASSERT(i<f.result_size()); }
 
-    FunctionElement(const VectorFunctionInterface& f, SizeType i)
-        : _fptr(f.clone()), _i(i) { ARIADNE_ASSERT(i<f.result_size()); }
-    FunctionElement(shared_ptr<const VectorFunctionInterface> fptr, SizeType i)
-        : _fptr(fptr), _i(i) { ARIADNE_ASSERT(i<fptr->result_size()); }
-    FunctionElement* clone() const { return new FunctionElement(*this); }
+    virtual SizeType argument_size() const { return _f.argument_size(); }
+    virtual std::ostream& write(std::ostream& os) const { return os<<_f<<"["<<_i<<"]"; }
 
-    SizeType argument_size() const { return _fptr->argument_size(); }
-    SmoothnessType smoothness() const { return _fptr->smoothness(); }
+    template<class Y> inline void _compute(Y& r, const Vector<Y>& x) const {
+        r=this->_f.evaluate(x)[_i]; }
 
-    virtual Float evaluate(const Vector<Float>& x) const {
-        return this->_evaluate(x); }
-    virtual Interval evaluate(const Vector<Interval>& x) const {
-        return this->_evaluate(x); }
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
-        return this->_evaluate(x); }
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
-        return this->_evaluate(x); }
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
-        return this->_evaluate(x); }
-    virtual Differential<TaylorModel> evaluate(const Vector< Differential<TaylorModel> >& x) const {
-        // FIXME: Incorrect
-        return x[0]; }
-
-    virtual Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
-
-    virtual FunctionElement* derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-    virtual std::ostream& write(std::ostream& os) const { ARIADNE_NOT_IMPLEMENTED; }
-  private:
-    template<class Y> inline Y _evaluate(const Vector<Y>& x) const {
-        return this->_fptr->evaluate(x)[this->_i]; }
-  private:
-    shared_ptr<const VectorFunctionInterface> _fptr;
+    VectorFunction _f;
     SizeType _i;
 };
 
 
 
-inline Vector<ScalarFunctionInterface>
-join(uint n, const ScalarFunctionInterface* e0, const ScalarFunctionInterface* e1, ...) {
-    Vector<ScalarFunctionInterface> res(n);
-    res.set(0,e0->clone());
-    res.set(1,e1->clone());
-    va_list args; va_start(args,e1);
-    for(uint i=2; i!=n; ++i) {
-        const ScalarFunctionInterface* ei=va_arg(args,const ScalarFunctionInterface*);
-        res.set(i,ei->clone());
-    }
-    return res;
-}
 
 
-class ScalarComposedFunction
-    : public ScalarFunctionTemplate<ScalarComposedFunction>
+struct ScalarComposedFunctionBody
+    : ScalarFunctionTemplate<ScalarComposedFunctionBody>
 {
-    friend class ScalarFunctionTemplate<ScalarComposedFunction>;
-  public:
-    ScalarComposedFunction(const ScalarFunction& f, const VectorFunction& g)
+    ScalarComposedFunctionBody(const ScalarFunction& f, const VectorFunction& g)
         : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
-    ScalarComposedFunction* clone() const { return new ScalarComposedFunction(*this); }
+    virtual SizeType argument_size() const { return _g.argument_size(); }
+    virtual ScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual std::ostream& write(std::ostream& os) const { return os << "ScalarComposedFunctionBody( f="<<_f<<", g="<<_g<<" )"; }
 
-    virtual SizeType result_size() const { return this->_g.result_size(); }
-    virtual SizeType argument_size() const { return this->_f.argument_size(); }
-    virtual SmoothnessType smoothness() const { return min(_f.pointer()->smoothness(),_g.pointer()->smoothness()); }
-  private:
     template<class X> inline void _compute(X& r, const Vector<X>& x) const {
-        r=this->_f.evaluate(this->_g.evaluate(x)); }
-    template<class X> inline void _compute_approx(X& r, const Vector<X>& x) const {
-        _compute(r,x); }
-  private:
+        r=_f.evaluate(_g.evaluate(x)); }
+
     ScalarFunction _f;
     VectorFunction _g;
 };
 
 
-class VectorComposedFunction
-    : public VectorFunctionTemplate<VectorComposedFunction>
+struct VectorComposedFunctionBody
+    :  VectorFunctionTemplate<VectorComposedFunctionBody>
 {
-    friend class VectorFunctionTemplate<VectorComposedFunction>;
-  public:
-    VectorComposedFunction(VectorFunction f, VectorFunction g)
+    VectorComposedFunctionBody(VectorFunction f, VectorFunction g)
         : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
-    VectorComposedFunction* clone() const { return new VectorComposedFunction(*this); }
+    virtual SizeType result_size() const { return _f.result_size(); }
+    virtual SizeType argument_size() const { return _g.argument_size(); }
+    virtual ScalarFunction operator[](uint i) const { return compose(_f[i],_g); }
+    virtual std::ostream& write(std::ostream& os) const { return os << "ComposedFunctionBody( f="<<_f<<", g="<<_g<<" )"; }
 
-    virtual SizeType result_size() const { return this->_f.result_size(); }
-    virtual SizeType argument_size() const { return this->_g.argument_size(); }
-    virtual SmoothnessType smoothness() const { return min(_f.smoothness(),_g.smoothness()); }
-  private:
     template<class X> inline void _compute(Vector<X>& r, const Vector<X>& x) const {
-        r=this->_f.evaluate(this->_g.evaluate(x)); }
-    template<class X> inline void _compute_approx(Vector<X>& r, const Vector<X>& x) const {
-        _compute(r,x); }
-  private:
+        r=_f.evaluate(_g.evaluate(x)); }
+
     VectorFunction _f;
     VectorFunction _g;
 };
 
-class JoinedFunction
-    : public VectorFunctionTemplate<JoinedFunction>
+struct JoinedFunctionBody
+    : VectorFunctionTemplate<JoinedFunctionBody>
 {
-    friend class VectorFunctionTemplate<JoinedFunction>;
-  public:
-    JoinedFunction(shared_ptr<const VectorFunctionInterface> f1, shared_ptr<const VectorFunctionInterface> f2)
-        : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1->argument_size()==f2->argument_size()); }
-    JoinedFunction* clone() const { return new JoinedFunction(*this); }
+    JoinedFunctionBody(VectorFunction f1, VectorFunction f2)
+        : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1.argument_size()==f2.argument_size()); }
+    virtual SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }
+    virtual SizeType argument_size() const { return _f1.argument_size(); }
+    virtual std::ostream& write(std::ostream& os) const { return os << "JoinedFunctionBody( f1="<<_f1<<", f2="<<_f2<<" )"; }
 
-    virtual SizeType result_size() const { return _f1->result_size()+_f2->result_size(); }
-    virtual SizeType argument_size() const { return _f1->argument_size(); }
-    virtual SmoothnessType smoothness() const { return min(_f1->smoothness(),_f2->smoothness()); }
-  private:
     template<class X> inline void _compute(Vector<X>& r, const Vector<X>& x) const {
-        r=join(_f1->evaluate(x),_f2->evaluate(x)); }
-    template<class X> inline void _compute_approx(Vector<X>& r, const Vector<X>& x) const {
-        _compute(r,x); }
-  private:
-    shared_ptr<const VectorFunctionInterface> _f1;
-    shared_ptr<const VectorFunctionInterface> _f2;
+        r=join(_f1.evaluate(x),_f2.evaluate(x));
+        std::cerr<<"x="<<x<<", r="<<r<<"\n";}
+
+    VectorFunction _f1;
+    VectorFunction _f2;
 };
 
-class CombinedFunction
-    : public VectorFunctionTemplate<JoinedFunction>
+class CombinedFunctionBody
+    : VectorFunctionTemplate<JoinedFunctionBody>
 {
-  public:
-    CombinedFunction(shared_ptr<const VectorFunctionInterface> f1, shared_ptr<const VectorFunctionInterface> f2)
+    CombinedFunctionBody(VectorFunction f1, VectorFunction f2)
         : _f1(f1), _f2(f2) { }
-    CombinedFunction* clone() const { return new CombinedFunction(*this); }
+    virtual SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }
+    virtual SizeType argument_size() const { return _f1.argument_size()+_f2.argument_size(); }
+    virtual std::ostream& write(std::ostream& os) const { return os << "CombinedFunctionBody( f1="<<_f1<<", f2="<<_f2<<" )"; }
 
-    virtual SizeType result_size() const { return _f1->result_size()+_f2->result_size(); }
-    virtual SizeType argument_size() const { return _f1->argument_size()+_f2->argument_size(); }
-    virtual SmoothnessType smoothness() const { return min(_f1->smoothness(),_f2->smoothness()); }
-  private:
     template<class X> inline void _compute(Vector<X>& r, const Vector<X>& x) const {
-        return r=combine(_f1->evaluate(project(x,range(0,_f1->argument_size()))),
-                         _f2->evaluate(project(x,range(_f1->argument_size(),this->argument_size())))); }
-    template<class X> inline void _compute_approx(Vector<X>& r, const Vector<X>& x) const  {
-        _compute(r,x); }
-  private:
-    shared_ptr<const VectorFunctionInterface> _f1;
-    shared_ptr<const VectorFunctionInterface> _f2;
+        return r=combine(_f1.evaluate(project(x,range(0,_f1.argument_size()))),
+                         _f2.evaluate(project(x,range(_f1.argument_size(),this->argument_size())))); }
+
+    VectorFunction _f1;
+    VectorFunction _f2;
 };
 
 
 
 
 
-typedef uint Nat;
-typedef int Int;
+
+//------------------------ ScalarFunction -----------------------------------//
 
 ScalarFunction ScalarFunction::constant(Nat n, double c)
 {
+    //return ScalarFunction(new ScalarConstantFunctionBody(n,c));
+
     Polynomial<Interval> p(n);
     p[MultiIndex::zero(n)]=c;
     return ScalarFunction(p);
@@ -1020,6 +685,8 @@ ScalarFunction ScalarFunction::constant(Nat n, double c)
 
 ScalarFunction ScalarFunction::constant(Nat n, Real c)
 {
+    //return ScalarFunction(new ScalarConstantFunctionBody(n,c));
+
     Polynomial<Interval> p(n);
     p[MultiIndex::zero(n)]=c;
     return ScalarFunction(p);
@@ -1027,6 +694,8 @@ ScalarFunction ScalarFunction::constant(Nat n, Real c)
 
 ScalarFunction ScalarFunction::variable(Nat n, Nat j)
 {
+    ARIADNE_DEPRECATED("ScalarFunction::variable","Use ScalarFunction::coordinate instead");
+    //return ScalarFunction(new ScalarCoordinateFunctionBody(n,j));
     Polynomial<Interval> p(n);
     p[MultiIndex::unit(n,j)]=1.0;
     return ScalarFunction(p);
@@ -1034,149 +703,202 @@ ScalarFunction ScalarFunction::variable(Nat n, Nat j)
 
 ScalarFunction ScalarFunction::coordinate(Nat n, Nat j)
 {
+    return ScalarFunction(new ScalarCoordinateFunctionBody(n,j));
+
     Polynomial<Interval> p(n);
     p[MultiIndex::unit(n,j)]=1.0;
     return ScalarFunction(p);
 }
 
+List<ScalarFunction> ScalarFunction::coordinates(Nat n)
+{
+    List<ScalarFunction> result(n);
+    for(Nat i=0; i!=n; ++i) {
+        result[i]=ScalarFunction::coordinate(n,i);
+    }
+    return result;
+}
+
 ScalarFunction::ScalarFunction(Nat n)
-    : _ptr(new ScalarPolynomialFunction(Polynomial<Interval>::constant(n,Interval(0.0))))
+    : _ptr(new ScalarPolynomialFunctionBody(Polynomial<Interval>::constant(n,Interval(0.0))))
 {
 }
 
 ScalarFunction::ScalarFunction(const Polynomial<Real>& p)
-    : _ptr(new ScalarPolynomialFunction(Polynomial<Interval>(p)))
+    : _ptr(new ScalarPolynomialFunctionBody(Polynomial<Interval>(p)))
 {
 }
 
 ScalarFunction::ScalarFunction(const Expression<Real>& e, const Space<Real>& s)
-    : _ptr(new ScalarExpressionFunction(e,s))
+    : _ptr(new ScalarExpressionFunctionBody(e,s))
 {
 }
 
 
-Vector<Float> ScalarFunction::gradient(const Vector<Float>& x) const {
-    return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).gradient();
+ScalarFunction::ScalarFunction(const Expression<Real>& e, const List< Variable<Real> >& s)
+    : _ptr(new ScalarExpressionFunctionBody(e,s))
+{
 }
 
-Vector<Interval> ScalarFunction::gradient(const Vector<Interval>& x) const
+ScalarFunction::ScalarFunction(const Expression<tribool>& e, const List< Variable<Real> >& s)
 {
-    return this->_ptr->evaluate(Differential<Interval>::variables(1u,x)).gradient();
+    *this = ScalarFunction(new ScalarExpressionFunctionBody(indicator(e),s));
 }
+
+ScalarFunction::ScalarFunction(const Expansion<Float>& e)
+{
+    *this = ScalarFunction(new ScalarExpansionFunctionBody(e));
+}
+
+
 
 
 ScalarFunction ScalarFunction::derivative(Nat j) const
 {
-    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(this->pointer());
-    if(p) { return ScalarFunction(Ariadne::derivative(static_cast<const Polynomial<Interval>&>(*p),j)); }
-    ARIADNE_THROW(std::runtime_error,"ScalarFunction::derivative()","Function "<<*this<<" is not a polynomial.");
+    return this->pointer()->derivative(j);
 }
 
 
 Polynomial<Real> ScalarFunction::polynomial() const
 {
-    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(this->pointer());
-    if(p) { return Polynomial<Real>(static_cast<const Polynomial<Interval>&>(*p)); }
-    ARIADNE_THROW(std::runtime_error,"ScalarFunction::polynomial()","Function "<<*this<<" is not a polynomial.");
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(this->pointer());
+    if(p) { return p->_polynomial; }
+    const ScalarExpressionFunctionBody* e=dynamic_cast<const ScalarExpressionFunctionBody*>(this->pointer());
+    if(e) { return Ariadne::polynomial<Real>(e->_expression,e->_space); }
+    ARIADNE_THROW(std::runtime_error,"ScalarFunction::polynomial()","FunctionBody "<<*this<<" is not a polynomial.");
 }
 
-std::ostream& ScalarFunction::write(std::ostream& os) const {
-    os << "F["<<this->argument_size()<<"](";
-    this->pointer()->write(os);
-    return os << ")";
-}
+
+template<class Op> inline
+ScalarFunction make_unary_function(Op op, const ScalarFunction& f) {
+    return ScalarFunction(new UnaryFunctionBody<Op>(op,f)); }
+
+template<class Op> inline
+ScalarFunction make_binary_function(Op op, const ScalarFunction& f1, const ScalarFunction& f2) {
+    return ScalarFunction(new BinaryFunctionBody<Op>(op,f1,f2)); }
+
 
 ScalarFunction operator+(const ScalarFunction& f)
 {
     //std::cerr<<"+f1, f1="<<f1<<"\n";
-    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(f.pointer());
-    if(p) { return ScalarFunction( +static_cast<const Polynomial<Interval>&>(*p) ); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    if(p) { return ScalarFunction( +p->_polynomial ); }
+    return f;
 }
 
 ScalarFunction operator-(const ScalarFunction& f)
 {
     //std::cerr<<"-f1, f1="<<f1<<"\n";
-    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(f.pointer());
-    if(p) { return ScalarFunction( -static_cast<const Polynomial<Interval>&>(*p) ); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    if(p) { return ScalarFunction( -p->_polynomial ); }
+    const ScalarExpressionFunctionBody* e=dynamic_cast<const ScalarExpressionFunctionBody*>(f.pointer());
+    if(e) {
+        return ScalarFunction(-e->_expression,e->_space);
+    }
+    return make_unary_function(Neg(),f);
 }
 
 ScalarFunction operator+(const ScalarFunction& f1, const ScalarFunction& f2)
 {
     //std::cerr<<"f1+f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunction* p1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    const ScalarPolynomialFunction* p2=dynamic_cast<const ScalarPolynomialFunction*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
     if(p1 && p2) {
-        return ScalarFunction(static_cast<const Polynomial<Interval>&>(*p1) + static_cast<const Polynomial<Interval>&>(*p2) );
+        return ScalarFunction(p1->_polynomial + p2->_polynomial );
     }
-    ARIADNE_FAIL_MSG("");
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    const ScalarExpressionFunctionBody* e2=dynamic_cast<const ScalarExpressionFunctionBody*>(f2.pointer());
+    if(e1 && e2 && e1->_space==e2->_space) {
+        return ScalarFunction(e1->_expression+e2->_expression,e1->_space);
+    }
+    return make_binary_function(Add(),f1,f2);
 }
 
 ScalarFunction operator-(const ScalarFunction& f1, const ScalarFunction& f2)
 {
     //std::cerr<<"f1-f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunction* p1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    const ScalarPolynomialFunction* p2=dynamic_cast<const ScalarPolynomialFunction*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
     if(p1 && p2) {
-        return ScalarFunction(static_cast<const Polynomial<Interval>&>(*p1) - static_cast<const Polynomial<Interval>&>(*p2) );
+        return ScalarFunction(p1->_polynomial - p2->_polynomial );
     }
-    ARIADNE_FAIL_MSG("");
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    const ScalarExpressionFunctionBody* e2=dynamic_cast<const ScalarExpressionFunctionBody*>(f2.pointer());
+    if(e1 && e2 && e1->_space==e2->_space) {
+        return ScalarFunction(e1->_expression-e2->_expression,e1->_space);
+    }
+    return make_binary_function(Sub(),f1,f2);
 }
 
 ScalarFunction operator*(const ScalarFunction& f1, const ScalarFunction& f2)
 {
     //std::cerr<<"f1*f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunction* p1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    const ScalarPolynomialFunction* p2=dynamic_cast<const ScalarPolynomialFunction*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
     if(p1 && p2) {
-        return ScalarFunction(static_cast<const Polynomial<Interval>&>(*p1) * static_cast<const Polynomial<Interval>&>(*p2) );
+        return ScalarFunction(p1->_polynomial * p2->_polynomial );
     }
-    ARIADNE_FAIL_MSG("");
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    const ScalarExpressionFunctionBody* e2=dynamic_cast<const ScalarExpressionFunctionBody*>(f2.pointer());
+    if(e1 && e2 && e1->_space==e2->_space) {
+        return ScalarFunction(e1->_expression*e2->_expression,e1->_space);
+    }
+    return make_binary_function(Mul(),f1,f2);
 }
 
 ScalarFunction operator/(const ScalarFunction& f1, const ScalarFunction& f2)
 {
     //std::cerr<<"f1/f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunction* pf1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    const ScalarPolynomialFunction* pf2=dynamic_cast<const ScalarPolynomialFunction*>(f2.pointer());
-    if(pf1 && pf2) {
-        const Polynomial<Interval>& p1=static_cast<const Polynomial<Interval>&>(*pf1);
-        const Polynomial<Interval>& p2=static_cast<const Polynomial<Interval>&>(*pf2);
-        if(p2.degree()==0) {
-            return ScalarFunction(p1/p2.value());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
+    if(p1 && p2) {
+        if(p2->_polynomial.degree()==0) {
+            return ScalarFunction(p1->_polynomial/p2->_polynomial);
         }
     }
-    ARIADNE_FAIL_MSG("");
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    const ScalarExpressionFunctionBody* e2=dynamic_cast<const ScalarExpressionFunctionBody*>(f2.pointer());
+    if(e1 && e2 && e1->_space==e2->_space) {
+        return ScalarFunction(e1->_expression/e2->_expression,e1->_space);
+    }
+    return make_binary_function(Div(),f1,f2);
 }
 
 
 ScalarFunction operator+(const ScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunction* p1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    if(p1) { return ScalarFunction(static_cast<const Polynomial<Interval>&>(*p1) + static_cast<Interval>(s2) ); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    if(p1) { return ScalarFunction(p1->_polynomial + static_cast<Real>(s2) ); }
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    if(e1) { return ScalarFunction(e1->_expression+s2,e1->_space); }
+    return f1+ScalarFunction::constant(f1.argument_size(),s2);
 }
 
 ScalarFunction operator-(const ScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunction* p1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    if(p1) { return ScalarFunction(static_cast<const Polynomial<Interval>&>(*p1) - static_cast<Interval>(s2) ); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    if(p1) { return ScalarFunction(p1->_polynomial - static_cast<Real>(s2) ); }
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    if(e1) { return ScalarFunction(e1->_expression-s2,e1->_space); }
+    return f1-ScalarFunction::constant(f1.argument_size(),s2);
 }
 
 ScalarFunction operator*(const ScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunction* p1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    if(p1) { return ScalarFunction(static_cast<const Polynomial<Interval>&>(*p1) * static_cast<Interval>(s2) ); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    if(p1) { return ScalarFunction(p1->_polynomial * static_cast<Real>(s2) ); }
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    if(e1) { return ScalarFunction(e1->_expression*s2,e1->_space); }
+    return f1*ScalarFunction::constant(f1.argument_size(),s2);
 }
 
 ScalarFunction operator/(const ScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunction* p1=dynamic_cast<const ScalarPolynomialFunction*>(f1.pointer());
-    if(p1) { return ScalarFunction(static_cast<const Polynomial<Interval>&>(*p1) / static_cast<Interval>(s2) ); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    if(p1) { return ScalarFunction(p1->_polynomial / static_cast<Real>(s2) ); }
+    const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
+    if(e1) { return ScalarFunction(e1->_expression/s2,e1->_space); }
+    return f1/ScalarFunction::constant(f1.argument_size(),s2);
 }
 
 ScalarFunction operator+(const Real& s1, const ScalarFunction& f2)
@@ -1186,9 +908,11 @@ ScalarFunction operator+(const Real& s1, const ScalarFunction& f2)
 
 ScalarFunction operator-(const Real& s1, const ScalarFunction& f2)
 {
-    const ScalarPolynomialFunction* p2=dynamic_cast<const ScalarPolynomialFunction*>(f2.pointer());
-    if(p2) { return ScalarFunction( static_cast<Interval>(s1) - static_cast<const Polynomial<Interval>&>(*p2) ); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
+    if(p2) { return ScalarFunction( static_cast<Real>(s1) - p2->_polynomial ); }
+    const ScalarExpressionFunctionBody* e2=dynamic_cast<const ScalarExpressionFunctionBody*>(f2.pointer());
+    if(e2) { return ScalarFunction(s1-e2->_expression,e2->_space); }
+    return ScalarFunction::constant(f2.argument_size(),s1)-f2;
 }
 
 ScalarFunction operator*(const Real& s1, const ScalarFunction& f2)
@@ -1198,27 +922,29 @@ ScalarFunction operator*(const Real& s1, const ScalarFunction& f2)
 
 ScalarFunction operator/(const Real& s1, const ScalarFunction& f2)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    const ScalarExpressionFunctionBody* e2=dynamic_cast<const ScalarExpressionFunctionBody*>(f2.pointer());
+    if(e2) { return ScalarFunction(s1/e2->_expression,e2->_space); }
+    return ScalarFunction::constant(f2.argument_size(),s1)/f2;
 }
 
 ScalarFunction pow(const ScalarFunction& f, Nat m)
 {
-    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(f.pointer());
-    if(p) { return ScalarFunction(pow(static_cast<const Polynomial<Interval>&>(*p),m)); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    if(p) { return ScalarFunction(pow(p->_polynomial,m)); }
+    const ScalarExpressionFunctionBody* e=dynamic_cast<const ScalarExpressionFunctionBody*>(f.pointer());
+    if(e) { return ScalarFunction(pow(e->_expression,m),e->_space); }
+    ARIADNE_FAIL_MSG("Cannot compute power of "<<f<<" and "<<m<<"\n");
 }
 
 
 ScalarFunction pow(const ScalarFunction& f, Int n)
 {
-    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(f.pointer());
-    if(p && n>=0) { return ScalarFunction(pow(static_cast<const Polynomial<Interval>&>(*p),Nat(n))); }
-    ARIADNE_FAIL_MSG("");
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    if(p && n>=0) { return ScalarFunction(pow(p->_polynomial,Nat(n))); }
+    const ScalarExpressionFunctionBody* e=dynamic_cast<const ScalarExpressionFunctionBody*>(f.pointer());
+    if(e) { return ScalarFunction(pow(e->_expression,n),e->_space); }
+    ARIADNE_FAIL_MSG("Cannot compute power of "<<f<<" and "<<n<<"\n");
 }
-
-template<class Op> inline
-ScalarFunction make_unary_function(Op op, const ScalarFunction& f) {
-    return ScalarFunction(new UnaryFunction<Op>(op,f)); }
 
 ScalarFunction rec(const ScalarFunction& f) {
     return make_unary_function(Rec(),f); }
@@ -1247,20 +973,23 @@ ScalarFunction tan(const ScalarFunction& f) {
 
 
 ScalarFunction embed(const ScalarFunction& f, uint k) {
-    const ScalarPolynomialFunction* p=dynamic_cast<const ScalarPolynomialFunction*>(f.pointer());
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
     if(p) {
-        return ScalarFunction(new ScalarPolynomialFunction(embed(0u,*p,k)));
+        return ScalarFunction(new ScalarPolynomialFunctionBody(embed(0u,p->_polynomial,k)));
     }
-    const ScalarExpressionFunction* e=dynamic_cast<const ScalarExpressionFunction*>(f.pointer());
+    const ScalarExpressionFunctionBody* e=dynamic_cast<const ScalarExpressionFunctionBody*>(f.pointer());
     if(e) {
         Space<Real> new_space=e->_space;
         for(uint i=0; i!=k; ++i) { new_space.append(Variable<Real>("x"+str(k))); }
-        return new ScalarExpressionFunction(e->_expression,new_space);
+        return new ScalarExpressionFunctionBody(e->_expression,new_space);
     }
     ARIADNE_FAIL_MSG("Cannot embed function "<<f<<" in a different space.");
 }
 
 
+
+
+//------------------------ Vector Function ----------------------------------//
 
 VectorFunction::VectorFunction(VectorFunctionInterface* fptr)
     : _ptr(fptr)
@@ -1268,47 +997,100 @@ VectorFunction::VectorFunction(VectorFunctionInterface* fptr)
 }
 
 VectorFunction::VectorFunction()
-    : _ptr(new VectorOfScalarFunction(0u,ScalarFunction()))
+    : _ptr(new VectorOfScalarFunctionBody(0u,ScalarFunction()))
 {
 }
 
 VectorFunction::VectorFunction(Nat rs, Nat as)
-    : _ptr(new VectorOfScalarFunction(rs,ScalarFunction::constant(as,Real(0.0))))
+    : _ptr(new VectorOfScalarFunctionBody(rs,ScalarFunction::constant(as,Real(0.0))))
 {
 }
 
 VectorFunction::VectorFunction(Nat rs, const ScalarFunction& sf)
-    : _ptr(new VectorOfScalarFunction(rs,sf))
+    : _ptr(new VectorOfScalarFunctionBody(rs,sf))
 {
 }
 
-VectorFunction::VectorFunction(const List<ScalarFunction>& vsf)
-    : _ptr(new VectorOfScalarFunction(vsf))
+VectorFunction::VectorFunction(const List<ScalarFunction>& lsf)
 {
+    ARIADNE_ASSERT(lsf.size()>0);
+    this->_ptr=shared_ptr<VectorFunctionInterface>(new VectorOfScalarFunctionBody(lsf.size(),lsf[0].argument_size()));
+    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+    for(uint i=0; i!=lsf.size(); ++i) {
+        vec->set(i,lsf[i]);
+    }
 }
 
-VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s)
-    : _ptr(new VectorOfScalarFunction(e.size(),s.size()))
+VectorFunction::VectorFunction(const Vector< Polynomial<Real> >& p)
 {
-    VectorOfScalarFunction* vec = static_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
+    ARIADNE_ASSERT(p.size()>0);
+    this->_ptr=shared_ptr<VectorFunctionInterface>(new VectorOfScalarFunctionBody(p.size(),p[0].argument_size()));
+    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+    for(uint i=0; i!=p.size(); ++i) {
+        vec->set(i,ScalarFunction(p[i]));
+    }
+}
+
+VectorFunction::VectorFunction(const List< Expression<Real> >& e, const List< Variable<Real> >& s)
+    : _ptr(new VectorOfScalarFunctionBody(e.size(),s.size()))
+{
+    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
     for(uint i=0; i!=e.size(); ++i) {
         vec->set(i,ScalarFunction(e[i],s));
     }
 }
 
+/*
 VectorFunction::VectorFunction(const Space<Real>& rs, const Map<RealVariable,RealExpression>& e, const Space<Real>& as)
-    : _ptr(new VectorOfScalarFunction(rs.size(),as.size()))
+    : _ptr(new VectorOfScalarFunctionBody(rs.size(),as.size()))
 {
-    VectorOfScalarFunction* vec = static_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
+    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
     for(uint i=0; i!=rs.size(); ++i) {
         vec->set(i,ScalarFunction(e[rs[i]],as));
     }
 }
+*/
+
+
+
+
+
+
+VectorFunction::VectorFunction(const List<ExtendedRealVariable>& rv,
+                               const List<ExtendedRealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunctionBody(rv,eq,av))
+{
+}
+
+VectorFunction::VectorFunction(const List<RealVariable>& rv,
+                               const List<RealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunctionBody(List<ExtendedRealVariable>(rv),List<ExtendedRealAssignment>(eq),av))
+{
+}
+
+VectorFunction::VectorFunction(const List<DottedRealVariable>& rv,
+                               const List<DottedRealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunctionBody(List<ExtendedRealVariable>(rv),List<ExtendedRealAssignment>(eq),av))
+{
+}
+
+VectorFunction::VectorFunction(const List<PrimedRealVariable>& rv,
+                               const List<PrimedRealAssignment>& eq,
+                               const List<RealVariable>& av)
+    : _ptr(new VectorExpressionFunctionBody(List<ExtendedRealVariable>(rv),List<ExtendedRealAssignment>(eq),av))
+{
+}
+
+
+
 
 VectorFunction VectorFunction::constant(const Vector<Real>& c, Nat as)
 {
     const Nat rs=c.size();
-    VectorOfScalarFunction* res = new VectorOfScalarFunction(rs,as);
+    VectorOfScalarFunctionBody* res = new VectorOfScalarFunctionBody(rs,as);
     for(uint i=0; i!=rs; ++i) {
         res->_vec[i]=ScalarFunction::constant(as,c[i]);
     }
@@ -1317,7 +1099,7 @@ VectorFunction VectorFunction::constant(const Vector<Real>& c, Nat as)
 
 VectorFunction VectorFunction::identity(Nat n)
 {
-    VectorOfScalarFunction* res = new VectorOfScalarFunction(n,n);
+    VectorOfScalarFunctionBody* res = new VectorOfScalarFunctionBody(n,n);
     for(uint i=0; i!=n; ++i) {
         res->_vec[i]=ScalarFunction::coordinate(n,i);
     }
@@ -1326,14 +1108,12 @@ VectorFunction VectorFunction::identity(Nat n)
 
 ScalarFunction VectorFunction::get(Nat i) const
 {
-    const VectorOfScalarFunction* vptr=dynamic_cast<const VectorOfScalarFunction*>(this->_ptr.operator->());
-    ARIADNE_ASSERT_MSG(vptr,"Can only get component of a vector of scalar functions.");
-    return vptr->_vec[i];
+    return this->_ptr->operator[](i);
 }
 
 void VectorFunction::set(Nat i, ScalarFunction f)
 {
-    VectorOfScalarFunction* vptr=dynamic_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
+    VectorOfScalarFunctionBody* vptr=dynamic_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
     ARIADNE_ASSERT_MSG(vptr,"Can only set component of a vector of scalar functions.");
     vptr->_vec[i]=f;
 }
@@ -1342,68 +1122,6 @@ ScalarFunction VectorFunction::operator[](Nat i) const
 {
     return this->get(i);
 }
-
-ScalarFunction& VectorFunction::operator[](Nat i)
-{
-    VectorOfScalarFunction* vptr=dynamic_cast<VectorOfScalarFunction*>(this->_ptr.operator->());
-    ARIADNE_ASSERT_MSG(vptr,"Can only set component of a vector of scalar functions.");
-    return vptr->_vec[i];
-}
-
-
-Vector<Float> VectorFunction::operator()(const Vector<Float>& x) const
-{
-    return this->_ptr->evaluate(x);
-}
-
-Vector<Interval> VectorFunction::operator()(const Vector<Interval>& x) const
-{
-    return this->_ptr->evaluate(x);
-}
-
-Matrix<Float> VectorFunction::jacobian(const Vector<Float>& x) const
-{
-    return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x)));
-}
-
-Matrix<Interval> VectorFunction::jacobian(const Vector<Interval>& x) const
-{
-    return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x)));
-}
-
-
-IdentityFunction::IdentityFunction(uint n)
-    : VectorFunction(new IdentityFunctionRepresentation(n))
-{
-}
-
-const uint ProjectionFunction::p(uint i) const
-{
-    return static_cast<const ProjectionFunctionRepresentation*>(this->pointer())->p(i);
-}
-
-VectorConstantFunction::VectorConstantFunction(const Vector<Real>& c, uint as)
-    : VectorFunction(new VectorConstantFunctionRepresentation(c,as))
-{
-}
-
-
-VectorAffineFunction::VectorAffineFunction(const Matrix<Real>& A, const Vector<Real>& b)
-    : VectorFunction(new VectorAffineFunctionRepresentation(A,b))
-{
-}
-
-
-const Matrix<Real> VectorAffineFunction::A() const
-{
-    return static_cast<const VectorAffineFunctionRepresentation*>(this->pointer())->A();
-}
-
-const Vector<Real> VectorAffineFunction::b() const
-{
-    return static_cast<const VectorAffineFunctionRepresentation*>(this->pointer())->b();
-}
-
 
 VectorFunction operator*(const ScalarFunction& f, const Vector<Real>& e) {
     for(uint i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(e[i]==Real(0) || e[i]==Real(1)); }
@@ -1434,6 +1152,10 @@ VectorFunction operator-(const VectorFunction& f1, const VectorFunction& f2) {
     return r;
 }
 
+
+
+
+//------------------------ Function operators -------------------------------//
 
 VectorFunction join(const ScalarFunction& f1, const ScalarFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
@@ -1466,7 +1188,7 @@ VectorFunction join(const ScalarFunction& f1, const VectorFunction& f2) {
 VectorFunction join(const VectorFunction& f1, const VectorFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
     VectorFunction r(f1.result_size()+f2.result_size(),f1.argument_size());
-    for(uint i=0u; i!=f2.result_size(); ++i) {
+    for(uint i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
     for(uint i=0u; i!=f2.result_size(); ++i) {
@@ -1475,26 +1197,122 @@ VectorFunction join(const VectorFunction& f1, const VectorFunction& f2) {
     return r;
 }
 
-
 ScalarFunction compose(const ScalarFunction& f, const VectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return ScalarFunction(new ScalarComposedFunction(f,g));
+    return ScalarFunction(new ScalarComposedFunctionBody(f,g));
 }
 
 VectorFunction compose(const VectorFunction& f, const VectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return VectorFunction(new VectorComposedFunction(f,g));
+    return VectorFunction(new VectorComposedFunctionBody(f,g));
 }
 
 ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f) {
-    assert(g.argument_size()==f.result_size());
-    assert(f.result_size()==f.argument_size());
-    ScalarFunction r(g.argument_size());
+    ARIADNE_ASSERT(g.argument_size()==f.result_size());
+    ARIADNE_ASSERT(f.result_size()==f.argument_size());
+    ARIADNE_ASSERT(f.result_size()>0);
+
     for(uint i=0; i!=g.argument_size(); ++i) {
-        r=r+g.derivative(i)*f[i];
-        //r=r+derivative(g,i)*f[i];
     }
-    return r;
+
+    try {
+        ScalarFunction r=g.derivative(0)*f[0];
+        for(uint i=1; i!=g.argument_size(); ++i) {
+            r=r+g.derivative(i)*f[i];
+        }
+        return r;
+    }
+    catch(...) {
+        ARIADNE_FAIL_MSG("Failed to compute Lie derivative of "<<g<<" under vector field "<<f<<"\n");
+    }
 }
+
+
+
+//------------------------ Special functions --------------------------------//
+
+ScalarAffineFunction::ScalarAffineFunction(const Vector<Real>& a, const Real& b)
+    : ScalarFunction(new ScalarAffineFunctionBody(a,b))
+{
+}
+
+void ScalarAffineFunction::_check_type(const ScalarFunctionInterface* pointer) const {
+    ARIADNE_ASSERT(dynamic_cast<const ScalarAffineFunctionBody*>(pointer)); }
+
+
+
+VectorConstantFunction::VectorConstantFunction(const Vector<Real>& c, uint as)
+    : VectorFunction(new VectorConstantFunctionBody(c,as))
+{
+}
+
+void VectorConstantFunction::_check_type(const VectorFunctionInterface* pointer) const { }
+
+
+VectorAffineFunction::VectorAffineFunction(const Matrix<Real>& A, const Vector<Real>& b)
+    : VectorFunction(new VectorAffineFunctionBody(A,b))
+{
+}
+
+void VectorAffineFunction::_check_type(const VectorFunctionInterface* pointer) const {
+    ARIADNE_ASSERT(dynamic_cast<const VectorAffineFunctionBody*>(pointer)); }
+
+const Matrix<Real> VectorAffineFunction::A() const
+{
+    return static_cast<const VectorAffineFunctionBody*>(this->pointer())->A();
+}
+
+const Vector<Real> VectorAffineFunction::b() const
+{
+    return static_cast<const VectorAffineFunctionBody*>(this->pointer())->b();
+}
+
+
+
+IdentityFunction::IdentityFunction(uint n)
+    : VectorFunction(new IdentityFunctionBody(n))
+{
+}
+
+void IdentityFunction::_check_type(const VectorFunctionInterface* pointer) const {
+    ARIADNE_ASSERT(dynamic_cast<const IdentityFunctionBody*>(pointer)); }
+
+
+
+
+ProjectionFunction::ProjectionFunction(uint m, uint n, uint k)
+    : VectorFunction(new ProjectionFunctionBody(m,n,k))
+{
+}
+
+ProjectionFunction::ProjectionFunction(const array<uint>& p, uint n)
+    : VectorFunction(new ProjectionFunctionBody(p,n))
+{
+}
+
+ProjectionFunction::ProjectionFunction(uint m, uint n, const array<uint>& p)
+    : VectorFunction(new ProjectionFunctionBody(m,n,p))
+{
+}
+
+const uint ProjectionFunction::p(uint i) const
+{
+    return static_cast<const ProjectionFunctionBody*>(this->pointer())->p(i);
+}
+
+void ProjectionFunction::_check_type(const VectorFunctionInterface* pointer) const {
+    ARIADNE_ASSERT(dynamic_cast<const ProjectionFunctionBody*>(pointer)); }
+
+
+VectorUnscalingFunction::VectorUnscalingFunction(const Vector<Interval>& bx)
+    : VectorFunction(new VectorUnscalingFunctionBody(bx))
+{
+}
+
+void VectorUnscalingFunction::_check_type(const VectorFunctionInterface* pointer) const {
+    ARIADNE_ASSERT(dynamic_cast<const VectorUnscalingFunction*>(pointer)); }
+
+
+
 
 } // namespace Ariadne

@@ -120,17 +120,6 @@ class CalculusBase
         return this->touching_time_interval(guard_model,flow_model,initial_set_model);
     }
 
-    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
-    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
-    //! gives the minimum and maximum time for which the evolution is valid. Deprecated
-    virtual Interval touching_time_interval(const VectorFunction& guard,
-                                            const FlowModelType& flow_model,
-                                            const SetModelType& initial_set_model) const
-    {
-        PredicateModelType guard_model=this->map_model(guard,flow_model.range())[0];
-        return this->touching_time_interval(guard_model,flow_model,initial_set_model);
-    }
-
     //! \brief Computes an over-approximation to the touching time interval scaling the flow step to [-1,+1]
     virtual Interval scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const = 0;
 
@@ -141,16 +130,6 @@ class CalculusBase
                                                    const FlowSetModelType& flow_set_model) const
     {
         BaseModelType guard_flow_set_model=apply(guard,flow_set_model);
-        return this->scaled_touching_time_interval(guard_flow_set_model);
-    }
-
-    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
-    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
-    //! gives the minimum and maximum time for which the evolution is valid. Deprecated
-    virtual Interval scaled_touching_time_interval(const VectorFunction& guard,
-                                                     const FlowSetModelType& flow_set_model) const
-    {
-        BaseModelType guard_flow_set_model=apply(guard,flow_set_model)[0];
         return this->scaled_touching_time_interval(guard_flow_set_model);
     }
 
@@ -175,17 +154,6 @@ class CalculusBase
         return this->crossing_time(guard_model,flow_model,initial_set_model);
     }
 
-    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
-    //! the \a guard under evolution of the \a flow_model.
-    //! The crossing must be (differentiably) transverse.
-    virtual TimeModelType crossing_time(const VectorFunction& guard,
-                                        const FlowModelType& flow_model,
-                                        const SetModelType& initial_set_model) const
-    {
-        PredicateModelType guard_model=this->map_model(guard,flow_model.range())[0];
-        return this->crossing_time(guard_model,flow_model,initial_set_model);
-    }
-
     //! The crossing must be (differentiably) transverse.
     virtual TimeModelType scaled_crossing_time(const BaseModelType& guard_flow_set_model) const = 0;
 
@@ -198,14 +166,7 @@ class CalculusBase
         return this->scaled_crossing_time(apply(guard,flow_set_model));
     }
 
-    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
-    //! the \a guard under evolution of the \a flow_model.
-    //! The crossing must be (differentiably) transverse.
-    virtual TimeModelType scaled_crossing_time(const VectorFunction& guard,
-                                               const FlowSetModelType& flow_set_model) const
-    {
-        return this->scaled_crossing_time(apply(guard,flow_set_model)[0]);
-    }
+
 
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model. The \a integration_time_model \f$\tau(e)\f$ gives the time the point
@@ -263,9 +224,6 @@ class CalculusBase
     virtual FlowModelType flow_model(const VectorFunctionType& vf, const BoxType& d,
                                      const TimeType& h, const BoxType& b) const = 0;
 
-    //! \brief A model for the real-valued function \a g over the domain \a d. \deprecated
-    virtual PredicateModelType predicate_model(const VectorFunctionType& g, const BoxType& d) const = 0;
-
     //! \brief A model for the real-valued function \a g over the domain \a d.
     virtual PredicateModelType predicate_model(const ScalarFunctionType& g, const BoxType& d) const = 0;
 
@@ -302,7 +260,7 @@ class CalculusBase
     //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
     tribool active(const ScalarFunctionType& guard,  const SetModelType& set_model) const {
-        return this->active(this->predicate_model(guard,set_model.range()),set_model); }
+        return this->active(this->predicate_model(guard,set_model.bounding_box()),set_model); }
     tribool active(const VectorFunctionType& guard,  const SetModelType& set_model) const {
         TimeModelType guard_set_model = apply(guard,set_model)[0];
         Interval guard_range=guard_set_model.range();

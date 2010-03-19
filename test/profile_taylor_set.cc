@@ -45,21 +45,21 @@ namespace Ariadne {
 
 
 struct ProfileDiscretise {
-    typedef GridTreeSet (* FunctionPtr)(const TaylorSet&, const Grid&,uint);
-    ProfileDiscretise(FunctionPtr f_, TaylorSet& s_, Grid& g_, uint d_)  : f(f_), s(s_), g(g_), d(d_) { }
-    FunctionPtr f; TaylorSet s; Grid g; uint d; typedef GridTreeSet Result;
+    typedef GridTreeSet (* FunctionPtr)(const TaylorImageSet&, const Grid&,uint);
+    ProfileDiscretise(FunctionPtr f_, TaylorImageSet& s_, Grid& g_, uint d_)  : f(f_), s(s_), g(g_), d(d_) { }
+    FunctionPtr f; TaylorImageSet s; Grid g; uint d; typedef GridTreeSet Result;
     Result run() const { GridTreeSet r = f(s,g,d); return r; }
 };
 
 struct ProfileBoxDiscretise {
-    ProfileBoxDiscretise(TaylorSet& s_, double e_)  : s(s_), e(e_) { }
-    TaylorSet s; double e; typedef ListSet<Box> Result;
+    ProfileBoxDiscretise(TaylorImageSet& s_, double e_)  : s(s_), e(e_) { }
+    TaylorImageSet s; double e; typedef ListSet<Box> Result;
     Result run() const { ListSet<Box> r = s.discretise(e); return r; }
 };
 
 struct ProfileBoxGridDiscretise {
-    ProfileBoxGridDiscretise(TaylorSet& s_, double e_, Grid& g_, uint d_)  : s(s_), e(e_), g(g_), d(d_) { }
-    TaylorSet s; double e; Grid g; uint d; typedef GridTreeSet Result;
+    ProfileBoxGridDiscretise(TaylorImageSet& s_, double e_, Grid& g_, uint d_)  : s(s_), e(e_), g(g_), d(d_) { }
+    TaylorImageSet s; double e; Grid g; uint d; typedef GridTreeSet Result;
     Result run() const {
         ListSet<Box> ls = s.discretise(e);
         GridTreeSet r=outer_approximation(ls,g,d);
@@ -99,18 +99,18 @@ void profile(const char* name, const Test& test, unsigned int tries)
               << std::endl;
 }
 
-GridTreeSet discretise1(const TaylorSet&, const Grid&, const uint);
-GridTreeSet discretise2(const TaylorSet&, const Grid&, const uint);
-GridTreeSet discretise3(const TaylorSet&, const Grid&, const uint);
-GridTreeSet discretise4(const TaylorSet&, const Grid&, const uint);
+GridTreeSet discretise1(const TaylorImageSet&, const Grid&, const uint);
+GridTreeSet discretise2(const TaylorImageSet&, const Grid&, const uint);
+GridTreeSet discretise3(const TaylorImageSet&, const Grid&, const uint);
+GridTreeSet discretise4(const TaylorImageSet&, const Grid&, const uint);
 
 int main(int argc, const char* argv[])
 {
 
     int n=1;
 
-    TaylorSet set(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.03125, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
-    //TaylorSet set(2,2,2, 0.0,1.0,0.25,0.125,-0.375,0.35, 0.03125, 0.0,0.5,1.0,1.0,0.125,-0.125, 0.0);
+    TaylorImageSet set(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.03125, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
+    //TaylorImageSet set(2,2,2, 0.0,1.0,0.25,0.125,-0.375,0.35, 0.03125, 0.0,0.5,1.0,1.0,0.125,-0.125, 0.0);
     std::cerr<<set<<"\n";
 
     Grid grid(2);

@@ -2,7 +2,7 @@
  *            graphics_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,19 +20,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "config.h"
 
-#include "point.h"
 #include "graphics_interface.h"
 #include "graphics.h"
+#include "point.h"
 #include "box.h"
-#include "zonotope.h"
-#include "polytope.h"
-#include "polyhedron.h"
-#include "curve.h"
-#include "taylor_set.h"
-#include "grid_set.h"
 #include "function.h"
 
 #include <boost/python.hpp>
@@ -40,7 +34,7 @@
 using namespace boost::python;
 
 
-namespace Ariadne { 
+namespace Ariadne {
     template<class S> void draw(FigureInterface& fig, const S& sh) { fig.draw(sh); }
 }
 
@@ -49,7 +43,7 @@ using namespace Ariadne;
 
 
 
-void export_figure() 
+void export_figure()
 {
     class_<FigureInterface,boost::noncopyable>("FigureInterface",no_init);
     class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
@@ -64,14 +58,7 @@ void export_figure()
     figure_class.def("set_line_colour", (void(Figure::*)(double,double,double)) &Figure::set_line_colour);
     figure_class.def("set_fill_style", (void(Figure::*)(bool)) &Figure::set_fill_style);
     figure_class.def("set_fill_colour", (void(Figure::*)(double,double,double)) &Figure::set_fill_colour);
-    figure_class.def("draw",(void(*)(FigureInterface&,const Point&))&draw);
-    figure_class.def("draw",(void(*)(FigureInterface&,const Box&))&draw);
-    figure_class.def("draw",(void(*)(FigureInterface&,const Zonotope&))&draw);
-    figure_class.def("draw",(void(*)(FigureInterface&,const Polytope&))&draw);
-    //figure_class.def("draw",(void(*)(FigureInterface&,const Polyhedron&))&draw);
-    figure_class.def("draw",(void(*)(FigureInterface&,const TaylorSet&))&draw);
-    figure_class.def("draw",(void(*)(FigureInterface&,const GridTreeSet&))&draw);
-    figure_class.def("draw",(void(*)(FigureInterface&,const InterpolatedCurve&))&draw);
+    figure_class.def("draw",(void(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw);
     figure_class.def("clear",&Figure::clear);
     figure_class.def("display",&Figure::display);
     figure_class.def("write",&Figure::write);

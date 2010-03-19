@@ -30,14 +30,15 @@
 #include "zonotope.h"
 #include "polytope.h"
 #include "polyhedron.h"
-#include "taylor_set.h"
 #include "grid_set.h"
+#include "function_set.h"
+#include "taylor_set.h"
+#include "affine_set.h"
 
 #include "taylor_function.h"
 #include "discrete_event.h"
 
 #include "hybrid_set.h"
-#include "hybrid_evolver-constrained.h"
 
 #include "utilities.h"
 
@@ -191,6 +192,9 @@ void export_set_interface() {
     compact_set_wrapper_class.def("bounding_box",&CompactSetInterface::bounding_box);
 
     class_<LocatedSetInterface, boost::noncopyable> located_set_wrapper_class("LocatedSetInterface", no_init);
+
+    class_<DrawableInterface,boost::noncopyable>("DrawableInterface",no_init);
+
 }
 
 
@@ -210,7 +214,7 @@ void export_box()
 {
     typedef Vector<Interval> IVector;
 
-    class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval> > > box_class("Box",init<Box>());
+    class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval>,DrawableInterface > > box_class("Box",init<Box>());
     box_class.def(init<uint>());
     box_class.def(init< Vector<Interval> >());
     box_class.def("__eq__", (bool(*)(const Vector<Interval>&,const Vector<Interval>&)) &operator==);
@@ -224,11 +228,15 @@ void export_box()
     box_class.def("widen", (Box(Box::*)()const) &Box::widen);
     box_class.def("split", (std::pair<Box,Box>(Box::*)()const) &Box::split);
     box_class.def("split", (std::pair<Box,Box>(Box::*)(uint)const) &Box::split);
+    box_class.def("split", (std::pair<Box,Box>(Box::*)()const) &Box::split);
     box_class.def(self_ns::str(self));
 
     def("split", (std::pair<Box,Box>(*)(const Box&)) &split);
     def("disjoint", (bool(*)(const IVector&,const IVector&)) &disjoint);
     def("subset", (bool(*)(const IVector&,const IVector&)) &subset);
+
+    def("hull", (Box(*)(const Box&,const Box&)) &hull);
+    def("intersection", (Box(*)(const Box&,const Box&)) &intersection);
 
     from_python<Box>();
     to_python< std::pair<Box,Box> >();
@@ -238,7 +246,7 @@ void export_box()
 
 void export_zonotope()
 {
-    class_<Zonotope,bases<CompactSetInterface,OpenSetInterface> > zonotope_class("Zonotope",init<Zonotope>());
+    class_<Zonotope,bases<CompactSetInterface,OpenSetInterface,DrawableInterface> > zonotope_class("Zonotope",init<Zonotope>());
     zonotope_class.def(init< Point, Matrix<Float>, Vector<Float> >());
     zonotope_class.def(init< Point, Matrix<Float> >());
     zonotope_class.def(init< Box >());
@@ -256,7 +264,7 @@ void export_zonotope()
 
 void export_polytope()
 {
-    class_<Polytope,bases<LocatedSetInterface> > polytope_class("Polytope",init<Polytope>());
+    class_<Polytope,bases<LocatedSetInterface,DrawableInterface> > polytope_class("Polytope",init<Polytope>());
     polytope_class.def(init<int>());
     polytope_class.def("new_vertex",&Polytope::new_vertex);
     polytope_class.def("__iter__",boost::python::range(&Polytope::vertices_begin,&Polytope::vertices_end));
@@ -268,7 +276,7 @@ void export_curve()
 {
     to_python< std::pair<const Float,Point> >();
 
-    class_<InterpolatedCurve> interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
+    class_<InterpolatedCurve,bases<DrawableInterface> > interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
     interpolated_curve_class.def(init<Float,Point>());
     interpolated_curve_class.def("insert", &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__",boost::python::range(&InterpolatedCurve::begin,&InterpolatedCurve::end));
@@ -279,76 +287,84 @@ void export_curve()
 
 void export_taylor_set()
 {
-    class_<TaylorSet,bases<CompactSetInterface> > taylor_set_class("TaylorSet",init<TaylorSet>());
+    class_<TaylorImageSet,bases<CompactSetInterface,DrawableInterface> > taylor_set_class("TaylorImageSet",init<TaylorImageSet>());
     taylor_set_class.def(init<uint>());
     taylor_set_class.def(init<Box>());
     //taylor_set_class.def(init<Zonotope>());
-    taylor_set_class.def("bounding_box", &TaylorSet::bounding_box);
-    taylor_set_class.def("range", &TaylorSet::bounding_box);
-    taylor_set_class.def("split", (std::pair<TaylorSet,TaylorSet>(TaylorSet::*)()const) &TaylorSet::split);
-    taylor_set_class.def("split", (std::pair<TaylorSet,TaylorSet>(TaylorSet::*)(uint)const) &TaylorSet::split);
+    taylor_set_class.def("bounding_box", &TaylorImageSet::bounding_box);
+    taylor_set_class.def("range", &TaylorImageSet::bounding_box);
+    taylor_set_class.def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)()const) &TaylorImageSet::split);
+    taylor_set_class.def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)(uint)const) &TaylorImageSet::split);
     taylor_set_class.def(self_ns::str(self));
 
-    def("outer_approximation", (GridTreeSet(*)(const TaylorSet&,const Grid&,uint)) &outer_approximation);
-    def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorSet&,uint)) &adjoin_outer_approximation);
-    def("zonotope", (Zonotope(*)(const TaylorSet&)) &zonotope);
+    def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)()const) &TaylorImageSet::split);
+    def("outer_approximation", (GridTreeSet(*)(const TaylorImageSet&,const Grid&,uint)) &outer_approximation);
+    def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorImageSet&,uint)) &adjoin_outer_approximation);
+    def("zonotope", (Zonotope(*)(const TaylorImageSet&)) &zonotope);
 
-    def("apply",(TaylorModel(*)(const ScalarFunction&,const TaylorSet&)) &apply);
-    def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorSet&)) &apply);
-    def("apply",(TaylorSet(*)(const VectorFunction&,const TaylorSet&)) &apply);
-    def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
+    def("apply",(TaylorModel(*)(const ScalarFunction&,const TaylorImageSet&)) &apply);
+    def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorImageSet&)) &apply);
+    def("apply",(TaylorImageSet(*)(const VectorFunction&,const TaylorImageSet&)) &apply);
+    def("apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &apply);
 
-    def("unchecked_apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &unchecked_apply);
+    def("unchecked_apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &unchecked_apply);
 
-    implicitly_convertible<Box,TaylorSet>();
-    to_python< std::pair<TaylorSet,TaylorSet> >();
+    implicitly_convertible<Box,TaylorImageSet>();
+
+    to_python< std::pair<TaylorImageSet,TaylorImageSet> >();
 }
 
-void export_taylor_constrained_flow_set()
+
+
+void export_affine_set()
 {
-    class_<TaylorConstrainedFlowSet,bases<LocatedSetInterface> >
-        taylor_set_class("TaylorConstrainedFlowSet",init<TaylorConstrainedFlowSet>());
-    taylor_set_class.def(init<Vector<Interval>,VectorFunction>());
-    taylor_set_class.def(init<VectorTaylorFunction>());
-    taylor_set_class.def(init<Box>());
 
-    taylor_set_class.def("new_invariant",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarFunction&)) &TaylorConstrainedFlowSet::new_invariant);
-    taylor_set_class.def("new_guard",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarFunction&)) &TaylorConstrainedFlowSet::new_guard);
-    taylor_set_class.def("new_activation",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarFunction&)) &TaylorConstrainedFlowSet::new_activation);
-
-    taylor_set_class.def("new_invariant",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarTaylorFunction&)) &TaylorConstrainedFlowSet::new_invariant);
-    taylor_set_class.def("new_guard",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarTaylorFunction&)) &TaylorConstrainedFlowSet::new_guard);
-    taylor_set_class.def("new_activation",(void(TaylorConstrainedFlowSet::*)(const DiscreteEvent&,const ScalarTaylorFunction&)) &TaylorConstrainedFlowSet::new_activation);
-
-    taylor_set_class.def("domain", &TaylorConstrainedFlowSet::domain);
-    taylor_set_class.def("function", &TaylorConstrainedFlowSet::function);
-    taylor_set_class.def("dimension", &TaylorConstrainedFlowSet::dimension);
-    taylor_set_class.def("empty", &TaylorConstrainedFlowSet::empty);
-    taylor_set_class.def("bounding_box", &TaylorConstrainedFlowSet::bounding_box);
-    taylor_set_class.def("outer_approximation", &TaylorConstrainedFlowSet::outer_approximation);
-    taylor_set_class.def(self_ns::str(self));
-
-    def("apply",(TaylorConstrainedFlowSet(*)(const VectorFunction&, const TaylorConstrainedFlowSet&)) &apply);
-    //def("apply",(TaylorModel(*)(const ScalarFunction&,const TaylorSet&)) &apply);
-    //def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorSet&)) &apply);
-    //def("apply",(TaylorSet(*)(const VectorFunction&,const TaylorSet&)) &apply);
-    //def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
+    class_<AffineSet,bases<DrawableInterface> >
+        affine_set_class("AffineSet",init<AffineSet>());
+    affine_set_class.def(init<Vector<Interval>, Matrix<Float>, Vector<Float> >());
+    affine_set_class.def(init<Matrix<Float>, Vector<Float> >());
+    affine_set_class.def("new_inequality_constraint", &AffineSet::new_inequality_constraint);
+    affine_set_class.def("new_equality_constraint", &AffineSet::new_equality_constraint);
+    affine_set_class.def("dimension", &AffineSet::dimension);
+    affine_set_class.def("bounded", &AffineSet::bounded);
+    affine_set_class.def("empty", &AffineSet::empty);
+    affine_set_class.def("bounding_box", &AffineSet::bounding_box);
+    affine_set_class.def("disjoint", &AffineSet::disjoint);
+    affine_set_class.def("adjoin_outer_approximation_to", &AffineSet::adjoin_outer_approximation_to);
+    affine_set_class.def("outer_approximation", &AffineSet::outer_approximation);
+    affine_set_class.def("boundary", &AffineSet::boundary);
+    affine_set_class.def(self_ns::str(self));
 }
 
 
 void export_constrained_image_set()
 {
-    class_<ConstrainedImageSet>
+    class_<ConstrainedImageSet,bases<DrawableInterface> >
         constrained_image_set_class("ConstrainedImageSet",init<ConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
+    constrained_image_set_class.def(init<Box,VectorFunction>());
+    constrained_image_set_class.def("new_space_constraint", (void(ConstrainedImageSet::*)(const NonlinearConstraint&))&ConstrainedImageSet::new_space_constraint);
+    constrained_image_set_class.def("new_parameter_constraint", (void(ConstrainedImageSet::*)(const NonlinearConstraint&))&ConstrainedImageSet::new_parameter_constraint);
+    constrained_image_set_class.def("apply", &ConstrainedImageSet::apply);
+    //constrained_image_set_class.def("apply_map", &ConstrainedImageSet::apply_map);
+    //constrained_image_set_class.def("new_zero_constraint", &ConstrainedImageSet::new_zero_constraint);
+    //constrained_image_set_class.def("new_positive_constraint", &ConstrainedImageSet::new_positive_constraint);
+    //constrained_image_set_class.def("new_negative_constraint", &ConstrainedImageSet::new_negative_constraint);
+    //constrained_image_set_class.def("new_zero_maximum_constraint", &ConstrainedImageSet::new_zero_maximum_constraint);
+    //constrained_image_set_class.def("new_negative_maximum_constraint", &ConstrainedImageSet::new_negative_maximum_constraint);
+    //constrained_image_set_class.def("outer_approximation", &ConstrainedImageSet::outer_approximation);
+    constrained_image_set_class.def("adjoin_outer_approximation_to", &ConstrainedImageSet::adjoin_outer_approximation_to);
+    constrained_image_set_class.def("disjoint", &ConstrainedImageSet::disjoint);
+    constrained_image_set_class.def("overlaps", &ConstrainedImageSet::overlaps);
     constrained_image_set_class.def(self_ns::str(self));
+
 }
 
 
 void export_hybrid_box()
 {
     class_<HybridBox> hybrid_box_class("HybridBox",init<HybridBox>());
-    hybrid_box_class.def(init<DiscreteState,Box>());
+    hybrid_box_class.def(init<AtomicDiscreteLocation,Box>());
     hybrid_box_class.def("location",&HybridBox::location,return_value_policy<copy_const_reference>());
     hybrid_box_class.def("continuous_state_set",&HybridBox::continuous_state_set,return_value_policy<copy_const_reference>());
     hybrid_box_class.def(self_ns::str(self));
@@ -356,20 +372,22 @@ void export_hybrid_box()
 
 void export_hybrid_taylor_set()
 {
-    class_<HybridTaylorSet> hybrid_taylor_set_class("HybridTaylorSet",init<HybridTaylorSet>());
-    hybrid_taylor_set_class.def(init<DiscreteState,Box>());
-    hybrid_taylor_set_class.def(init<DiscreteState,TaylorSet>());
+    class_<HybridTaylorImageSet> hybrid_taylor_set_class("HybridTaylorImageSet",init<HybridTaylorImageSet>());
+    hybrid_taylor_set_class.def(init<AtomicDiscreteLocation,Box>());
+    hybrid_taylor_set_class.def(init<AtomicDiscreteLocation,TaylorImageSet>());
     hybrid_taylor_set_class.def(self_ns::str(self));
 
-    implicitly_convertible<HybridBox,HybridTaylorSet>();
+    implicitly_convertible<HybridBox,HybridTaylorImageSet>();
 }
 
 void export_hybrid_constrained_image_set()
 {
+    typedef HybridBasicSet<ConstrainedImageSet> HybridConstrainedImageSet;
+
     class_<HybridConstrainedImageSet>
         hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
-    hybrid_constrained_image_set_class.def(init<DiscreteState,Box>());
-    //hybrid_constrained_image_set_class.def(init<DiscreteState,ConstrainedImageSet>());
+    hybrid_constrained_image_set_class.def(init<AtomicDiscreteLocation,Box>());
+    //hybrid_constrained_image_set_class.def(init<AtomicDiscreteLocation,ConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(self_ns::str(self));
 
     implicitly_convertible<HybridBox,HybridConstrainedImageSet>();
@@ -387,13 +405,14 @@ void geometry_submodule() {
     export_taylor_set();
     export_curve();
 
+    export_affine_set();
     export_constrained_image_set();
 
     export_hybrid_box();
     export_hybrid_taylor_set();
     export_hybrid_constrained_image_set();
 
-    to_python< ListSet<TaylorSet> >();
-    to_python< ListSet<HybridTaylorSet> >();
+    to_python< ListSet<TaylorImageSet> >();
+    to_python< ListSet<HybridTaylorImageSet> >();
 }
 

@@ -501,7 +501,7 @@ void test_grid_paving_const_iterator(){
     ARIADNE_TEST_EQUAL(theGPCursor.is_enabled(), true);
 }
 
-void test_grid_sub_paving(){
+void test_grid_sub_paving_one(){
     
     //Allocate the Grid, one Dimension
     Vector<Float> originOne(1); originOne.set(0, 0.0);
@@ -534,7 +534,7 @@ void test_grid_sub_paving(){
     
     //Mince to the level two from the root of the paving, this should give
     //us 4 leaf nodes with intervals of width 0.125 (in the original space)
-    theGridSPOneDim.mince(2);
+    theGridSPOneDim.mince_to_tree_depth(2);
 
     ARIADNE_PRINT_TEST_COMMENT("Minced the sub-paving to depth 2");
     std::vector< GridCell* > expected_result_arr(4);
@@ -591,7 +591,7 @@ void test_grid_sub_paving(){
 
     ARIADNE_PRINT_TEST_COMMENT("Recombine and Mince the sub-paving to depth 2, this should give us four sub cells");
     theGridSPTwoDim.recombine();
-    theGridSPTwoDim.mince(2);
+    theGridSPTwoDim.mince_to_tree_depth(2);
 
     expected_result_arr[0] =  new GridCell( theTwoDimGrid, theHeight, make_binary_word("0100") );
     expected_result_arr[1] =  new GridCell( theTwoDimGrid, theHeight, make_binary_word("0101") );
@@ -622,6 +622,97 @@ void test_grid_sub_paving(){
     ARIADNE_TEST_EQUAL( theGridSPTwoDim.depth(), 4u );
 }
 
+void test_grid_sub_paving_two() {
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTwoDimGrid(2, 1.0);
+    
+    //Define the higth of the primary root cell.
+    const uint theHeight = 2;
+
+    //Create the binary tree;
+    BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(true);
+
+    //Create the path to the root node of the subpaving, which
+    //corresponds to pRootTreeNode->left_node()->left_node()
+    BinaryWord thePathToSubPavingRoot;
+    thePathToSubPavingRoot.push_back(false);
+    thePathToSubPavingRoot.push_back(false);
+    
+    //Create the GridTreeSubset
+    GridTreeSubset theGridSPOneDim( theTwoDimGrid, theHeight, thePathToSubPavingRoot, pRootTreeNode );
+    std::vector< GridCell* > expected_result_arr( 16 );
+    
+    ARIADNE_PRINT_TEST_COMMENT("Take the [-1,1]x[-1,1] box and do mince(0), i.e. down to the lovel of zero cells");
+    expected_result_arr[0]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("0000") );
+    expected_result_arr[1]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("0001") );
+    expected_result_arr[2]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("0010") );
+    expected_result_arr[3]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("0011") );
+    theGridSPOneDim.mince(0);
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 4 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    ARIADNE_PRINT_TEST_COMMENT("Take the [-1,1]x[-1,1] box and do mince(1), i.e. one time in each dimension from the zero cell level");
+    expected_result_arr[0]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000000") );
+    expected_result_arr[1]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000001") );
+    expected_result_arr[2]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000010") );
+    expected_result_arr[3]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000011") );
+    expected_result_arr[4]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000100") );
+    expected_result_arr[5]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000101") );
+    expected_result_arr[6]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000110") );
+    expected_result_arr[7]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000111") );
+    expected_result_arr[8]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001000") );
+    expected_result_arr[9]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001001") );
+    expected_result_arr[10] = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001010") );
+    expected_result_arr[11] = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001011") );
+    expected_result_arr[12] = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001100") );
+    expected_result_arr[13] = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001101") );
+    expected_result_arr[14] = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001110") );
+    expected_result_arr[15] = new GridCell( theTwoDimGrid, theHeight, make_binary_word("001111") );
+    theGridSPOneDim.mince(1);
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 16 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+}
+
+void test_grid_sub_paving_three() {
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTwoDimGrid(2, 1.0);
+    
+    //Define the higth of the primary root cell.
+    const uint theHeight = 1;
+
+    //Create the binary tree;
+    BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(true);
+
+    //Create the path to the root node of the subpaving, which corresponds 
+    //to pRootTreeNode->left_node()->left_node()->left_node()->left_node()
+    BinaryWord thePathToSubPavingRoot = make_binary_word("0000");
+    
+    //Create the GridTreeSubset
+    GridTreeSubset theGridSPOneDim( theTwoDimGrid, theHeight, thePathToSubPavingRoot, pRootTreeNode );
+    std::vector< GridCell* > expected_result_arr( 4 );
+    
+    ARIADNE_PRINT_TEST_COMMENT("Take the [-1,-0.5]x[-1,-0.5] box and do mince(0), i.e. nothing should get minced");
+    theGridSPOneDim.mince(0);
+    expected_result_arr[0]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("0000") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 1 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    ARIADNE_PRINT_TEST_COMMENT("Take the [-1,-0.5]x[-1,-0.5] box and do mince(1), i.e. nothing should get minced");
+    theGridSPOneDim.mince(1);
+    expected_result_arr[0]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("0000") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 1 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    ARIADNE_PRINT_TEST_COMMENT("Take the [-1,-0.5]x[-1,-0.5] box and do mince(2), i.e. we should get four subcells");
+    expected_result_arr[0]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000000") );
+    expected_result_arr[1]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000001") );
+    expected_result_arr[2]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000010") );
+    expected_result_arr[3]  = new GridCell( theTwoDimGrid, theHeight, make_binary_word("000011") );
+    theGridSPOneDim.mince(2);
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 4 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+}
+
 void test_grid_paving(){
     //Create a trivial 4-dimensional Grid
     Grid trivialFourDimGrid( Vector<Float>("[0.0,0.0,0.0,0.0]"), Vector<Float>("[1.0,1.0,1.0,1.0]") );
@@ -636,7 +727,7 @@ void test_grid_paving(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet copy constructor");
     GridTreeSet theTrivialPaving( ( *pTrivialPaving ) );
-    pTrivialPaving->mince(1);
+    pTrivialPaving->mince_to_tree_depth(1);
     
     ARIADNE_PRINT_TEST_COMMENT("Minced trivial paving for [0,1]x[0,1]x[0,1]x[0,1], enabled cell: ");
     GridTreeSet expected_result_minced(trivialFourDimGrid , 0, make_binary_word("100"), make_binary_word("11") );
@@ -1597,7 +1688,7 @@ void test_adjoin_outer_approximation_operation(){
     ARIADNE_TEST_EQUAL( expected_grid_tree_set1, theOneCellPaving );
     
     ARIADNE_PRINT_TEST_COMMENT("The GridTreeSet after adding the cell: ");
-    theOneCellPaving.adjoin_outer_approximation( static_cast<const LocatedSetInterface&>(initialRectangle), 2 );
+    theOneCellPaving.adjoin_outer_approximation( static_cast<const LocatedSetInterface&>(initialRectangle), 1 );
     tree = make_binary_word("1110101111110010011001001110010011001001111001000111001000111110010011001001001111001000000");
     leaves = make_binary_word("0001011111010111111010010100010111111010100000");
     GridTreeSet expected_grid_tree_set2( theTrivialGrid, 4, tree, leaves );
@@ -1628,7 +1719,7 @@ void test_adjoin_outer_approximation_operation(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Create an outer_approximation of the rectangle on the scaling grid and get the GridTreeSet");
     Grid theScalingGrid(2, 2.0);
-    GridTreeSet theOuterApproxGridTreeSet = outer_approximation( static_cast<LocatedSetInterface&>(initialRectangle), theScalingGrid, 2 );
+    GridTreeSet theOuterApproxGridTreeSet = outer_approximation( static_cast<LocatedSetInterface&>(initialRectangle), theScalingGrid, 1 );
     //IVAN S. ZAPREEV
     //NOTE: The recombination is needed because in the scaling Grid doing
     //    outer_approximation( theScalingGrid, initialRectangle, 2 )
@@ -1675,9 +1766,9 @@ void test_adjoin_inner_approximation_operation_one(){
     ARIADNE_TEST_EQUAL( theSetZero, theSetZeroCopy );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetZero.adjoin_inner_approximation( theBoxZeroOne, 1, 4) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetZero.adjoin_inner_approximation( theBoxZeroOne, 1, 2) ");
     ARIADNE_PRINT_TEST_COMMENT("The complete inner approximation of theBoxZeroOne should be added sine it is enclosed in the primary cell of height one.");
-    theSetZero.adjoin_inner_approximation( theBoxZeroOne, heightOne, 4);
+    theSetZero.adjoin_inner_approximation( theBoxZeroOne, heightOne, 2);
     std::vector< GridCell* > expected_result_arr( 4 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010011") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010110") );
@@ -1699,12 +1790,12 @@ void test_adjoin_inner_approximation_operation_two(){
     Box theBoundingBoxOneOne = make_box("[-0.99,0.99]x[-0.99,1.99]");
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetOne.adjoin_inner_approximation( theBoxOneOne, 1, 4) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetOne.adjoin_inner_approximation( theBoxOneOne, 1, 2) ");
     ARIADNE_PRINT_TEST_COMMENT("theSetOne");
     cout << theSetOne << endl;
     ARIADNE_PRINT_TEST_COMMENT("theBoxOneOne");
     cout << theBoxOneOne << endl;
-    theSetOne.adjoin_inner_approximation( theBoxOneOne, heightOne, 4);
+    theSetOne.adjoin_inner_approximation( theBoxOneOne, heightOne, 2);
     std::vector< GridCell* > expected_result_arr( 7 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010001") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010011") );
@@ -1715,11 +1806,11 @@ void test_adjoin_inner_approximation_operation_two(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetOneCopy.adjoin_inner_approximation( theBoxOneOne, theBoundingBoxOneOne, 4) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetOneCopy.adjoin_inner_approximation( theBoxOneOne, theBoundingBoxOneOne, 2) ");
     ARIADNE_PRINT_TEST_COMMENT("theBoundingBoxZeroOne");
     cout << theBoundingBoxOneOne << endl;
     ARIADNE_PRINT_TEST_COMMENT("Nothing should be added since theBoundingBoxOneOne is rooted to the primary cell of height two.");
-    theSetOneCopy.adjoin_inner_approximation( theBoxOneOne, theBoundingBoxOneOne, 4);
+    theSetOneCopy.adjoin_inner_approximation( theBoxOneOne, theBoundingBoxOneOne, 2);
     expected_result_arr[0]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010001") );
     expected_result_arr[1]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010011") );
     expected_result_arr[2]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("000101") );
@@ -1743,12 +1834,12 @@ void test_adjoin_inner_approximation_operation_three(){
     Box theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwo.adjoin_inner_approximation( theBoxTwoOne, 1, 4) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwo.adjoin_inner_approximation( theBoxTwoOne, 1, 2) ");
     ARIADNE_PRINT_TEST_COMMENT("theSetTwo");
     cout << theSetTwo << endl;
     ARIADNE_PRINT_TEST_COMMENT("theBoxTwoOne");
     cout << theBoxTwoOne << endl;
-    theSetTwo.adjoin_inner_approximation( theBoxTwoOne, heightOne, 4);
+    theSetTwo.adjoin_inner_approximation( theBoxTwoOne, heightOne, 2);
     std::vector< GridCell* > expected_result_arr( 5 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0011") );
@@ -1757,10 +1848,10 @@ void test_adjoin_inner_approximation_operation_three(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwoCopy.adjoin_inner_approximation( theBoxTwoOne, 2, 4) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwoCopy.adjoin_inner_approximation( theBoxTwoOne, 2, 2) ");
     ARIADNE_PRINT_TEST_COMMENT("theSetTwoCopy");
     cout << theSetTwoCopy << endl;
-    theSetTwoCopy.adjoin_inner_approximation( theBoxTwoOne, heightTwo, 4);
+    theSetTwoCopy.adjoin_inner_approximation( theBoxTwoOne, heightTwo, 2);
     expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0011") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("011010") );
@@ -2039,8 +2130,8 @@ void test_cell_subset_subset() {
                                       pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince(2) (height=0)");
-    theSmallSubPaving.mince(2);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince_to_tree_depth(2) (height=0)");
+    theSmallSubPaving.mince_to_tree_depth(2);
     ARIADNE_PRINT_TEST_COMMENT("theCell");
     cout << theCell << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSmallSubPaving");
@@ -2061,8 +2152,8 @@ void test_cell_subset_subset() {
                                     pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince(2) (height=2)");
-    theSmallSubPaving.mince(2);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince_to_tree_depth(2) (height=2)");
+    theSmallSubPaving.mince_to_tree_depth(2);
     ARIADNE_PRINT_TEST_COMMENT("theCell");
     cout << theCell << endl;
     ARIADNE_PRINT_TEST_COMMENT("theBigSubPaving");
@@ -2079,8 +2170,8 @@ void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theBigSubPaving), true );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince(2), left_node()->left_node()->set_disabled() (height=2)");
-    theSmallSubPaving.mince(2);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince_to_tree_depth(2), left_node()->left_node()->set_disabled() (height=2)");
+    theSmallSubPaving.mince_to_tree_depth(2);
     theSmallSubPaving.binary_tree()->left_node()->left_node()->set_disabled();
     ARIADNE_PRINT_TEST_COMMENT("theCell");
     cout << theCell << endl;
@@ -2089,8 +2180,8 @@ void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theBigSubPaving), false );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince(2), left_node()->left_node()->set_enabled(), right_node()->make_leaf(false) (height=2)");
-    theSmallSubPaving.mince(2);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince_to_tree_depth(2), left_node()->left_node()->set_enabled(), right_node()->make_leaf(false) (height=2)");
+    theSmallSubPaving.mince_to_tree_depth(2);
     theSmallSubPaving.binary_tree()->left_node()->left_node()->set_enabled();
     theSmallSubPaving.binary_tree()->right_node()->make_leaf(false);
     ARIADNE_PRINT_TEST_COMMENT("theCell");
@@ -2107,8 +2198,8 @@ void test_cell_subset_subset() {
     theSmallPaving.binary_tree()->right_node()->split();
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince(2) (after restoring the binary tree) (height=2)");
-    theSmallPaving.mince(2);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince_to_tree_depth(2) (after restoring the binary tree) (height=2)");
+    theSmallPaving.mince_to_tree_depth(2);
     ARIADNE_PRINT_TEST_COMMENT("theCell");
     cout << theCell << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSmallPaving");
@@ -2125,8 +2216,8 @@ void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theSmallPaving), true );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince(2), left_node()->left_node()->set_disabled() (height=2)");
-    theSmallPaving.mince(2);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince_to_tree_depth(2), left_node()->left_node()->set_disabled() (height=2)");
+    theSmallPaving.mince_to_tree_depth(2);
     theSmallPaving.binary_tree()->left_node()->left_node()->set_disabled();
     ARIADNE_PRINT_TEST_COMMENT("theCell");
     cout << theCell << endl;
@@ -2135,8 +2226,8 @@ void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theSmallPaving), false );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince(2), left_node()->left_node()->set_enabled(), ...right_node()->make_leaf(false) (height=2)");
-    theSmallPaving.mince(2);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince_to_tree_depth(2), left_node()->left_node()->set_enabled(), ...right_node()->make_leaf(false) (height=2)");
+    theSmallPaving.mince_to_tree_depth(2);
     theSmallPaving.binary_tree()->left_node()->left_node()->set_enabled();
     theSmallPaving.binary_tree()->right_node()->make_leaf(false);
     ARIADNE_PRINT_TEST_COMMENT("theCell");
@@ -2154,8 +2245,8 @@ void test_cell_subset_subset() {
     pBinaryTreeRootCopy->left_node()->left_node()->right_node()->right_node()->right_node()->split();
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince(6) (after restoring the binary tree) (height=2)");
-    theBigPaving.mince(6);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince_to_tree_depth(6) (after restoring the binary tree) (height=2)");
+    theBigPaving.mince_to_tree_depth(6);
     ARIADNE_PRINT_TEST_COMMENT("theCell");
     cout << theCell << endl;
     ARIADNE_PRINT_TEST_COMMENT("theBigPaving");
@@ -2172,8 +2263,8 @@ void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), true );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince(6), ...left_node()->left_node()->set_disabled() (height=2)");
-    theBigPaving.mince(6);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince_to_tree_depth(6), ...left_node()->left_node()->set_disabled() (height=2)");
+    theBigPaving.mince_to_tree_depth(6);
     theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->left_node()->left_node()->set_disabled();
     ARIADNE_PRINT_TEST_COMMENT("theCell");
     cout << theCell << endl;
@@ -2182,8 +2273,8 @@ void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), false );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince(6), ...left_node()->left_node()->set_enabled(), ...right_node()->make_leaf(false) (height=2)");
-    theBigPaving.mince(6);
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSet.mince_to_tree_depth(6), ...left_node()->left_node()->set_enabled(), ...right_node()->make_leaf(false) (height=2)");
+    theBigPaving.mince_to_tree_depth(6);
     theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->left_node()->left_node()->set_enabled();
     theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->right_node()->make_leaf(false);
     ARIADNE_PRINT_TEST_COMMENT("theCell");
@@ -2490,14 +2581,14 @@ void test_subset_overlap_subset() {
     ARIADNE_PRINT_TEST_COMMENT("theSetOne");
     cout << theSetOne << endl;
     ARIADNE_PRINT_TEST_COMMENT("Mince theSet and theSetOne to depth 10, just to make things more complex");
-    theSet.mince(10);
-    theSetOne.mince(10);
+    theSet.mince_to_tree_depth(10);
+    theSetOne.mince_to_tree_depth(10);
     ARIADNE_TEST_EQUAL( overlap( theSet, theSetOne ), true );
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridTreeSubset& theSetOne, const GridTreeSubset& theSet )");
     ARIADNE_PRINT_TEST_COMMENT("Mince theSet to depth 20, just to make things more complex");
-    theSet.mince(20);
+    theSet.mince_to_tree_depth(20);
     ARIADNE_TEST_EQUAL( overlap( theSetOne, theSet ), true );
     
 }
@@ -2549,7 +2640,7 @@ void test_subset_subset_subset() {
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetThree )");
     ARIADNE_PRINT_TEST_COMMENT("Mince theSubSetThree to depth 10, just to make things more complex");
-    theSubSetThree.mince(10);
+    theSubSetThree.mince_to_tree_depth(10);
     ARIADNE_TEST_EQUAL( subset( theSubSetTwo, theSubSetThree ), true );
     
     //Create a new set which is a subset of theSubSetThree but is not a superset of theSubSetTwo
@@ -2866,8 +2957,10 @@ int main() {
     test_grid_open_cell_five();
     test_grid_open_cell_six();
 
-    test_grid_sub_paving();
-
+    test_grid_sub_paving_one();
+    test_grid_sub_paving_two();
+    test_grid_sub_paving_three();
+    
     test_grid_paving();
 
     test_adjoin_operation_one();

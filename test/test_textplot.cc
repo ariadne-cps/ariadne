@@ -2,7 +2,7 @@
  *            test_textplot.cc
  *
  *  Copyright 2009  Davide Bresolin
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "function.h"
 #include "textplot.h"
 #include "point.h"
@@ -43,10 +43,10 @@ struct RadiusSquare : VectorFunctionData<1,2,1> {
         r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
     }
 };
-                   
 
 
-int main(int argc, char **argv) 
+
+int main(int argc, char **argv)
 {
 
     Box bx1(2); bx1[0]=Interval(-0.2,0.2); bx1[1]=Interval(-0.1,0.10);
@@ -61,11 +61,11 @@ int main(int argc, char **argv)
     Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
     Matrix<Float> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
-    TaylorSet ts1(afn1,Box::unit_box(3));
+    TaylorImageSet ts1(afn1,Box::unit_box(3));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
-    
+
     std::cout << "Testing boxes.." << std::endl;
     TextPlot g("test_textplot-bx1.txt");
     g << bx1
@@ -81,13 +81,14 @@ int main(int argc, char **argv)
     g.draw(bx5);
     g.close();
 
-    std::cout << "Testing zonotopes and TaylorSets.." << std::endl;    
-    g.open("test_textplot-zts.txt");
-    g << z1
-      << ts1;
-    g.close();
-    
-    std::cout << "Testing interpolated curves.." << std::endl;    
+    std::cout << "Testing zonotopes and TaylorSets.." << std::endl;
+    std::cerr << "WARNING: No output defined for Zonotopes and TaylorSets." << std::endl;
+    //g.open("test_textplot-zts.txt");
+    //g << z1
+    //  << ts1;
+    //g.close();
+
+    std::cout << "Testing interpolated curves.." << std::endl;
     InterpolatedCurve cv(Point(2,0.0));
     for(int i=1; i<=10; ++i) {
         Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
@@ -98,16 +99,14 @@ int main(int argc, char **argv)
     g.draw(cv);
     g.close();
 
-    std::cout << "Testing grid sets.." << std::endl;    
+    std::cout << "Testing grid sets.." << std::endl;
     GridTreeSet gts(2);
-    gts.adjoin_outer_approximation(ImageSet(bx1), 6);
-    gts.adjoin_outer_approximation(ImageSet(bx2), 7);
-    gts.adjoin_outer_approximation(ImageSet(bx3), 8);
-    gts.adjoin_outer_approximation(ImageSet(bx4), 9);
-    gts.adjoin_outer_approximation(ImageSet(bx5),10);
+    gts.adjoin_outer_approximation(ImageSet(bx1), 2);
+    gts.adjoin_outer_approximation(ImageSet(bx2), 3);
+    gts.adjoin_outer_approximation(ImageSet(bx3), 4);
     gts.recombine();
 
-    std::cout << "outputting GridSets.." << std::endl;        
+    std::cout << "outputting GridSets.." << std::endl;
     g.open("test_textplot-gts1.txt");
     g << gts;
     g.close();
@@ -115,6 +114,6 @@ int main(int argc, char **argv)
     g.open("test_textplot-gts2.txt");
     draw(g,gts);
     g.close();
-    
+
 }
 

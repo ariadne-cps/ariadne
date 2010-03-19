@@ -65,6 +65,8 @@ class TestScalarTaylorFunction
     void test_functions();
     void test_compose();
     void test_antiderivative();
+    void test_substitute();
+    void test_conversion();
   private:
     Vector<Interval> d(unsigned int n) { return Vector<Interval>(n,Interval(-1,+1)); }
     typedef Expansion<Float> e;
@@ -80,6 +82,8 @@ void TestScalarTaylorFunction::test()
     ARIADNE_TEST_CALL(test_functions());
     ARIADNE_TEST_CALL(test_compose());
     ARIADNE_TEST_CALL(test_antiderivative());
+    ARIADNE_TEST_CALL(test_substitute());
+    ARIADNE_TEST_CALL(test_conversion());
 }
 
 
@@ -201,6 +205,47 @@ void TestScalarTaylorFunction::test_antiderivative()
     ScalarTaylorFunction atm=antiderivative(tm,1u);
 }
 
+void TestScalarTaylorFunction::test_substitute()
+{
+    Vector<Interval> d1(1, -0.75,+0.75);
+    ScalarTaylorFunction tu=ScalarTaylorFunction::coordinate(d1,0);
+
+    Vector<Interval> d2(2, -0.75,+0.75, -0.25,+0.75);
+    ScalarTaylorFunction tx=ScalarTaylorFunction::coordinate(d2,0);
+    ScalarTaylorFunction ty=ScalarTaylorFunction::coordinate(d2,1);
+
+    ScalarTaylorFunction tf=1+3*tx*ty;
+    ScalarTaylorFunction ts=0.25+tu*tu;
+
+    ScalarTaylorFunction tg=substitute(tf,1,ts);
+    ScalarTaylorFunction tr=1+0.75*tu+3*tu*tu*tu;
+    ARIADNE_TEST_EQUAL(tg,tr);
+}
+
+void TestScalarTaylorFunction::test_conversion() {
+    // Test conversion between ordinary functions and Taylor functions.
+    Vector<Interval> D(2, -0.5,0.5, -1.0,2.0);
+    Vector<Float> pt(2, -0.25,0.25);
+    Vector<Interval> ipt(pt);
+    VectorFunction x=VectorFunction::identity(2);
+
+    ScalarFunction f=(1-x[0]*x[0]-0.5*x[1]);
+    ScalarTaylorFunction tf(D,f);
+    ScalarFunction cf=tf.function();
+    
+    ARIADNE_TEST_PRINT(f);
+    ARIADNE_TEST_PRINT(tf);
+    ARIADNE_TEST_PRINT(cf);
+    
+    // Conversion to TaylorFunction should be exact in second component
+    ARIADNE_TEST_BINARY_PREDICATE(subset,f(ipt),tf(ipt));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,tf(ipt),f(ipt)+Interval(-1e-15,1e-15));
+    
+    // Conversion from TaylorFunction should preserve exact computation
+    ARIADNE_TEST_EQUAL(tf(ipt),cf(ipt));
+}
+
+
 /*
 VectorTaylorFunction henon(const VectorTaylorFunction& x, const Vector<Float>& p)
 {
@@ -223,6 +268,7 @@ class TestVectorTaylorFunction
     void test_join();
     void test_combine();
     void test_flow();
+    void test_conversion();
 };
 
 
@@ -245,6 +291,7 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_implicit());
     ARIADNE_TEST_CALL(test_join());
     ARIADNE_TEST_CALL(test_flow());
+    ARIADNE_TEST_CALL(test_conversion());
 }
 
 
@@ -536,7 +583,7 @@ void TestVectorTaylorFunction::test_flow()
         Polynomial<Float> x0=Polynomial<Float>::variable(3,0);
         Polynomial<Float> y0=Polynomial<Float>::variable(3,1);
         Polynomial<Float> t=p(3,2);
-        TaylorSet initial_set_model(VectorPolynomialFunction((0.264+0.0005*x)*ex+(0.046+0.0005*y)*ey), Vector<Interval>(2,Interval(-1,+1)));
+        TaylorImageSet initial_set_model(VectorPolynomialFunction((0.264+0.0005*x)*ex+(0.046+0.0005*y)*ey), Vector<Interval>(2,Interval(-1,+1)));
         VectorPolynomialFunction vector_field((0.3-0.02*x)*ex+(0.0*y)*ey);
         double step_size=0.125;
         TaylorModel integration_time_model=TaylorModel::constant(2,step_size);
@@ -545,7 +592,7 @@ void TestVectorTaylorFunction::test_flow()
         Vector<Interval> flow_bound(2, 0.263538,0.264482, 0.0458876,0.0468876);
         VectorTaylorFunction vector_field_model(flow_bound,vector_field);
         VectorTaylorFunction flow_model=unchecked_flow(vector_field_model,flow_domain,Interval(0.0,step_size),6);
-        TaylorSet final_set_model=apply(flow_model,TaylorSet(join(initial_set_model.models(),integration_time_model)));
+        TaylorImageSet final_set_model=apply(flow_model,TaylorImageSet(join(initial_set_model.models(),integration_time_model)));
 
         ARIADNE_TEST_PRINT(vector_field);
         ARIADNE_TEST_PRINT(initial_set_model);
@@ -558,7 +605,7 @@ void TestVectorTaylorFunction::test_flow()
             Vector<Interval> flow_bound=flow_bounds(vector_field,flow_domain,step_size).second;
             VectorTaylorFunction vector_field_model(flow_bound,vector_field);
             VectorTaylorFunction flow_model=unchecked_flow(vector_field_model,flow_domain,Interval(0.0,step_size),6);
-            final_set_model=apply(flow_model,TaylorSet(join(initial_set_model.models(),integration_time_model)));
+            final_set_model=apply(flow_model,TaylorImageSet(join(initial_set_model.models(),integration_time_model)));
             initial_set_model=final_set_model;
             std::cerr<<final_set_model<<"\n";
         }
@@ -566,10 +613,10 @@ void TestVectorTaylorFunction::test_flow()
     }
 */
 /*
-TaylorSet([({0,0;0:0.26401, 1,0;1:0.000472061},2.53714e-15),({0,0;0:0.0463876, 0,1;1:0.0005},3.48973e-16)])
+TaylorImageSet([({0,0;0:0.26401, 1,0;1:0.000472061},2.53714e-15),({0,0;0:0.0463876, 0,1;1:0.0005},3.48973e-16)])
 flow_model=VectorTaylorFunction( [[0.263538:0.264482],[0.0458876:0.0468876],[0:0.125]], [{ 0,0,0:[-6.25667e-16:-6.99588e-17], 1,0,0:[1:1], 0,0,1:[0.0175693:0.0175693], 1,0,1:[-0.02:-0.02], 0,0,2:[-0.000175693:-0.000175693], 1,0,2:[0.0002:0.0002], 0,0,3:[1.17128e-06:1.17128e-06], 1,0,3:[-1.33333e-06:-1.33333e-06], 0,0,4:[-5.85422e-09:-5.85422e-09], 1,0,4:[6.65833e-09:6.65833e-09], 0,0,5:[1.63649e-11:1.63649e-11] },{ 0,0,0:[-7.63278e-17:7.63278e-17], 0,1,0:[1:1], 0,0,1:[-0.0463876:-0.0463876] }] )
 integration_time_model=({0,0;0:0.125},0)
-final_set_model=TaylorSet([({0,0;0:0.265544, 1,0;1:0.000470882},2.71563e-15),({0,0;0:0.0405892, 0,1;1:0.0005},3.51577e-16)])
+final_set_model=TaylorImageSet([({0,0;0:0.265544, 1,0;1:0.000470882},2.71563e-15),({0,0;0:0.0405892, 0,1;1:0.0005},3.51577e-16)])
 */
 }
 
@@ -603,6 +650,32 @@ void TestVectorTaylorFunction::test_combine()
     VectorTaylorFunction function3(domain3,polynomial3);
     ARIADNE_TEST_EQUAL(combine(function1,function2),function3);
 
+}
+
+void TestVectorTaylorFunction::test_conversion()
+{
+    // Test conversion between ordinary functions and Taylor functions.
+    Vector<Interval> D(2, -0.5,0.5, -1.0,2.0);
+    Vector<Float> pt(2, -0.25,0.25);
+    Vector<Interval> ipt(pt);
+    VectorFunction x=VectorFunction::identity(2);
+
+    VectorFunction h=VectorFunction((1-x[0]*x[0]-0.5*x[1],x[0]+Real(0)));
+     VectorTaylorFunction th(D,h);
+    VectorFunction ch=th.function();
+    
+    ARIADNE_TEST_PRINT(h);
+    ARIADNE_TEST_PRINT(th);
+    ARIADNE_TEST_PRINT(ch);
+    
+    // Conversion to TaylorFunction should be exact in second component
+    ARIADNE_TEST_EQUAL(th(pt)[1],h(pt)[1]);
+    ARIADNE_TEST_EQUAL(th(ipt)[1],h(ipt)[1]);
+    ARIADNE_TEST_BINARY_PREDICATE(subset,h[0](ipt),th[0](ipt));
+    
+    // Conversion from TaylorFunction should preserve exact computation
+    ARIADNE_TEST_EQUAL(th(ipt),ch(ipt));
+    
 }
 
 

@@ -28,12 +28,12 @@
 
 using namespace Ariadne;
 
-// Variables and objects that will be used to define the system 
-extern HybridAutomaton automaton;
+// Variables and objects that will be used to define the system
+extern MonolithicHybridAutomaton automaton;
 extern Box initial_box;
-extern DiscreteState initial_state;
-extern DiscreteState safe;
-extern DiscreteState unsafe;
+extern AtomicDiscreteLocation initial_state;
+extern AtomicDiscreteLocation safe;
+extern AtomicDiscreteLocation unsafe;
 
 // Evolution parameters
 extern Grid grid;

@@ -92,6 +92,9 @@ class BinaryWord : public std::vector<bool> {
     //! \brief Default constructor makes an empty word. 
     BinaryWord() : std::vector<bool>() { }
 
+    //! \brief Construct from a string literal consisting of zeros and ones. 
+    explicit BinaryWord(const std::string& str);
+
     //! Comparison operator. 
     bool operator<(const BinaryWord& w) const;
 
@@ -202,6 +205,9 @@ inline BinaryWord make_binary_word(const std::string& string_data) {
     return binary_word;
 }
     
+inline BinaryWord::BinaryWord(const std::string& str) {
+    *this=make_binary_word(str); }
+
 /*! \brief Serializes data into a stream.
  * The data format is "01011" or "e" for an empty word.
  */

@@ -27,8 +27,9 @@
 /*! \file serialization.h
  *  \brief Reading and writing to a boost archive.
  */
- 
-//#define BOOST_NO_INT64_T
+
+// FIXME: This is a hack which fixes some bugs involving long ints on some machines
+#define BOOST_NO_INT64_T
 
 #include <iostream>
 #include <iomanip>
@@ -37,12 +38,12 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-//#include <boost/serialization/vector.hpp>
-//#include <boost/serialization/set.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/set.hpp>
 #include <boost/serialization/map.hpp>
 
 namespace Ariadne {
- 
+
 using boost::archive::text_oarchive;
 using boost::archive::text_iarchive;
 

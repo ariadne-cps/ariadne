@@ -61,8 +61,8 @@ TestHybridSet::test_hybrid_image_set()
     Matrix<Float> A=Matrix<Float>::identity(2);
     Vector<Float> b1=Vector<Float>::unit(2,0);
     Vector<Float> b2=Vector<Float>::unit(2,1);
-    DiscreteState loc1(23);
-    DiscreteState loc2(5);
+    AtomicDiscreteLocation loc1(123);
+    AtomicDiscreteLocation loc2(105);
     ImageSet ims1(bx,VectorAffineFunction(A,b1));
     ImageSet ims2(bx,VectorAffineFunction(A,b2));
     his.insert(make_pair(loc1,ims1));
@@ -79,8 +79,8 @@ void
 TestHybridSet::test_hybrid_list_set() 
 {
     HybridListSet<Box> hls;
-    DiscreteState loc1(23);
-    DiscreteState loc2(5);
+    AtomicDiscreteLocation loc1(123);
+    AtomicDiscreteLocation loc2(105);
     Box bx1=make_box("[0,1]");
     Box bx2=make_box("[2,3]");
     Box bx3=make_box("[1,2]x[2,3]");
@@ -112,10 +112,10 @@ TestHybridSet::test_hybrid_list_set()
     ListSet<Box> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5); 
 
     HybridListSet<Box>::locations_const_iterator loc_iter=hls.locations_begin();
-    ARIADNE_TEST_EQUAL(loc_iter->first,loc2);
+    ARIADNE_TEST_EQUAL(loc_iter->first[0],loc2);
     ARIADNE_TEST_EQUAL(loc_iter->second,ls2);
     ++loc_iter;
-    ARIADNE_TEST_EQUAL(loc_iter->first,loc1);
+    ARIADNE_TEST_EQUAL(loc_iter->first[0],loc1);
     ARIADNE_TEST_EQUAL(loc_iter->second,ls1);
     ++loc_iter;
     ARIADNE_TEST_ASSERT(loc_iter==hls.locations_end());

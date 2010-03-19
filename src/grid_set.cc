@@ -42,27 +42,27 @@ typedef size_t size_type;
 
 /****************************************Grid**********************************************/
 
- 
-struct Grid::Data 
-{ 
-    Vector<Float> _origin; 
-    Vector<Float> _lengths; 
+
+struct Grid::Data
+{
+    Vector<Float> _origin;
+    Vector<Float> _lengths;
 };
 
 Grid::~Grid()
 {
 }
- 
+
 Grid::Grid()
     : _data(new Data())
 {
 }
- 
+
 Grid::Grid(const Grid& gr)
     : _data(gr._data)
 {
 }
- 
+
 Grid::Grid(uint d)
     : _data(new Data())
 {
@@ -70,7 +70,7 @@ Grid::Grid(uint d)
     Vector<Float> lengths(d,Float(1));
     this->_create(origin,lengths);
 }
- 
+
 Grid::Grid(uint d, Float l)
     : _data(new Data())
 {
@@ -85,7 +85,7 @@ Grid::Grid(const Vector<Float>& lengths)
     Vector<Float> origin(lengths.size(),0);
     this->_create(origin,lengths);
 }
- 
+
 Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
     : _data(new Data())
 {
@@ -95,7 +95,7 @@ Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
     this->_create(origin,lengths);
 }
 
-void Grid::_create(const Vector<Float>& origin, const Vector<Float>& lengths) 
+void Grid::_create(const Vector<Float>& origin, const Vector<Float>& lengths)
 {
     this->_data->_origin=origin;
     this->_data->_lengths=lengths;
@@ -116,38 +116,38 @@ const Vector<Float>& Grid::lengths() const
     return this->_data->_lengths;
 }
 
-Float Grid::coordinate(uint d, dyadic_type x) const 
+Float Grid::coordinate(uint d, dyadic_type x) const
 {
     return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
 }
 
-Float Grid::subdivision_coordinate(uint d, dyadic_type x) const 
+Float Grid::subdivision_coordinate(uint d, dyadic_type x) const
 {
     return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
 }
 
-Float Grid::subdivision_coordinate(uint d, integer_type n) const 
+Float Grid::subdivision_coordinate(uint d, integer_type n) const
 {
     return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
 }
 
-int Grid::subdivision_index(uint d, const real_type& x) const 
+int Grid::subdivision_index(uint d, const real_type& x) const
 {
     Float half=0.5;
     int n=int(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
     Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
-    if(sc == x) { 
-        return n; 
+    if(sc == x) {
+        return n;
     } else {
         std::cerr << std::setprecision(20) << std::boolalpha
                   << "sc=" << sc << " x=" << x << " sc-x=" << Interval(sc-x) << "\n"
                   << "sc==x=" << (sc==x) << " sc!=x=" << (sc!=x)
-                  << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl; 
+                  << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl;
         ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
- 
-int Grid::subdivision_lower_index(uint d, const real_type& x) const 
+
+int Grid::subdivision_lower_index(uint d, const real_type& x) const
 {
     int n=int(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
@@ -156,8 +156,8 @@ int Grid::subdivision_lower_index(uint d, const real_type& x) const
         return n;
     }
 }
- 
-int Grid::subdivision_upper_index(uint d, const real_type& x) const 
+
+int Grid::subdivision_upper_index(uint d, const real_type& x) const
 {
     int n=int(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
@@ -166,16 +166,16 @@ int Grid::subdivision_upper_index(uint d, const real_type& x) const
         return n;
     }
 }
- 
+
 bool Grid::operator==(const Grid& g) const
 {
-    if(this->_data==g._data) { 
-        return true; 
+    if(this->_data==g._data) {
+        return true;
     } else {
         return this->_data->_origin==g._data->_origin && this->_data->_lengths==g._data->_lengths;
     }
 }
- 
+
 bool Grid::operator!=(const Grid& g) const
 {
     return !(*this==g);
@@ -234,7 +234,7 @@ Vector<Interval> Grid::box(const array<double>& lower, const array<double>& uppe
     return res;
 }
 
-std::ostream& operator<<(std::ostream& os, const Grid& gr) 
+std::ostream& operator<<(std::ostream& os, const Grid& gr)
 {
     os << "Grid( ";
     os << "origin=" << gr.origin() << ", ";
@@ -243,7 +243,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 }
 
 /****************************************BinaryTreeNode**********************************************/
-    
+
 bool BinaryTreeNode::has_enabled() const {
     if( is_leaf() ) {
         return is_enabled();
@@ -251,7 +251,7 @@ bool BinaryTreeNode::has_enabled() const {
         return ( left_node()->has_enabled() || right_node()->has_enabled() );
     }
 }
-    
+
 bool BinaryTreeNode::all_enabled() const {
     if( is_leaf() ) {
         return is_enabled();
@@ -262,7 +262,7 @@ bool BinaryTreeNode::all_enabled() const {
 
 bool BinaryTreeNode::is_enabled( const BinaryWord & path, const uint position) const {
     bool result = false ;
-        
+
     if( this->is_leaf() ){
         //If we are in an enabled leaf node then the answer is true.
         //Since path.size() >= 0, the node defined by the path is a
@@ -291,7 +291,7 @@ bool BinaryTreeNode::is_enabled( const BinaryWord & path, const uint position) c
 
 bool BinaryTreeNode::is_equal_nodes( const BinaryTreeNode * pFirstNode, const BinaryTreeNode * pSecondNode ) {
     bool result = true;
-        
+
     if( pFirstNode != pSecondNode){
         //If the pointers do not reference the same objects
         if( ( pFirstNode != NULL ) && ( pSecondNode != NULL ) ){
@@ -307,7 +307,7 @@ bool BinaryTreeNode::is_equal_nodes( const BinaryTreeNode * pFirstNode, const Bi
     }
     return result;
 }
-    
+
 bool BinaryTreeNode::operator==(const BinaryTreeNode & otherNode ) const {
     return ( ( this->_isEnabled == otherNode._isEnabled ) ||
              ( indeterminate( this->_isEnabled     ) &&
@@ -348,7 +348,7 @@ void BinaryTreeNode::restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode 
         }
     }
 }
-    
+
 void BinaryTreeNode::remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode ) {
     if( ( pThisNode != NULL ) && ( pOtherNode != NULL ) ){
         if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
@@ -389,7 +389,7 @@ void BinaryTreeNode::remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * 
         }
     }
 }
-    
+
 void BinaryTreeNode::restore_node( BinaryTreeNode * pCurrentNode, uint & arr_index, uint & leaf_counter,
                                    const BooleanArray& theTree, const BooleanArray& theEnabledCells) {
     //If we are not done with the the tree yet
@@ -406,7 +406,7 @@ void BinaryTreeNode::restore_node( BinaryTreeNode * pCurrentNode, uint & arr_ind
         } else {
             //If we are in a leaf node then chek if it needs to be enabled/disabled
             pCurrentNode->_isEnabled = theEnabledCells[leaf_counter];
-                
+
             leaf_counter++;
         }
     }
@@ -421,9 +421,9 @@ void BinaryTreeNode::mince_node(BinaryTreeNode * pCurrentNode, const uint depth)
             //indeterminate (non-leaf) then there is a work to do.
             if( ! pCurrentNode->is_disabled() ){
                 pCurrentNode->split();
-                
+
                 const int remaining_depth = depth - 1;
-                
+
                 mince_node( pCurrentNode->_pLeftNode, remaining_depth );
                 mince_node( pCurrentNode->_pRightNode, remaining_depth );
             }
@@ -440,7 +440,7 @@ void BinaryTreeNode::recombine_node(BinaryTreeNode * pCurrentNode) {
         if( ! pCurrentNode->is_leaf() ){
             BinaryTreeNode * pLeftNode = pCurrentNode->_pLeftNode;
             BinaryTreeNode * pRightNode = pCurrentNode->_pRightNode;
-            
+
             //This recursive calls ensure that we do recombination from the bottom up
             recombine_node( pLeftNode );
             recombine_node( pRightNode );
@@ -457,11 +457,11 @@ void BinaryTreeNode::recombine_node(BinaryTreeNode * pCurrentNode) {
         throw std::runtime_error( ARIADNE_PRETTY_FUNCTION );
     }
 }
-    
+
 uint BinaryTreeNode::depth() const {
     //The depth of the sub-tree rooted to this node
     uint result;
-        
+
     if( ! this->is_leaf() ){
         //If the node is not a leaf, compute the depth of the sub-trees and take the maximum + 1
         //Note that, both left and right sub-nodes must exist, by to the way we construct the tree
@@ -470,13 +470,13 @@ uint BinaryTreeNode::depth() const {
         //If the node is a leaf then the depth of the sub-tree is zero
         result = 0;
     }
-        
+
     return result;
 }
 
 size_t BinaryTreeNode::count_enabled_leaf_nodes( const BinaryTreeNode* pNode ) {
-    if(pNode->is_leaf()) { 
-        return pNode->is_enabled() ? 1u : 0u; 
+    if(pNode->is_leaf()) {
+        return pNode->is_enabled() ? 1u : 0u;
     } else {
         return count_enabled_leaf_nodes(pNode->left_node())
             + count_enabled_leaf_nodes(pNode->right_node());
@@ -493,7 +493,7 @@ void BinaryTreeNode::tree_to_binary_words( BinaryWord & tree, BinaryWord & leave
         _pRightNode->tree_to_binary_words( tree, leaves );
     }
 }
-    
+
 void BinaryTreeNode::add_enabled( const BinaryTreeNode * pOtherSubTree, const BinaryWord & path ){
     //1. Locate the node, follow the path until it's end or until we meet an enabled node
     BinaryTreeNode * pCurrentSubTree = this;
@@ -512,7 +512,7 @@ void BinaryTreeNode::add_enabled( const BinaryTreeNode * pOtherSubTree, const Bi
         add_enabled( pCurrentSubTree, pOtherSubTree );
     }
 }
-    
+
 void BinaryTreeNode::add_enabled( BinaryTreeNode* pToTreeRoot, const BinaryTreeNode* pFromTreeRoot ){
     if( pToTreeRoot->is_leaf() ){
         //If we are adding something to a leaf node
@@ -580,7 +580,7 @@ void BinaryTreeNode::add_enabled( BinaryTreeNode* pRootTreeNode, const BinaryWor
         }
     }
 }
-    
+
 BinaryTreeNode * BinaryTreeNode::prepend_tree( const BinaryWord & rootNodePath, BinaryTreeNode * oldRootNode){
     //Create the new binary tree node
     BinaryTreeNode * pRootBinaryTreeNode = new BinaryTreeNode(), * pCurrentBinaryTreeNode = pRootBinaryTreeNode;
@@ -610,10 +610,10 @@ bool BinaryTreeNode::overlap( const BinaryTreeNode * pRootNodeOne, const BinaryT
 
     bool isNodeOneALeaf = pRootNodeOne->is_leaf();
     bool isNodeTwoALeaf = pRootNodeTwo->is_leaf();
-        
+
     if( isNodeOneALeaf && isNodeTwoALeaf ) {
         //If both nodes are leaves, then the trees overlap if only both of the nodes are enabled
-        result = pRootNodeOne->is_enabled() && pRootNodeTwo->is_enabled(); 
+        result = pRootNodeOne->is_enabled() && pRootNodeTwo->is_enabled();
     } else {
         if( ! isNodeOneALeaf && isNodeTwoALeaf ){
             //If the second node is a leaf then the trees overlap is it is enabled
@@ -627,12 +627,12 @@ bool BinaryTreeNode::overlap( const BinaryTreeNode * pRootNodeOne, const BinaryT
             } else {
                 //Both nodes are non-lead nodes, then the trees overlap if
                 //either their left or right branches overlap
-                result = overlap( pRootNodeOne->left_node(), pRootNodeTwo->left_node() ) || 
+                result = overlap( pRootNodeOne->left_node(), pRootNodeTwo->left_node() ) ||
                     overlap( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
             }
         }
     }
-        
+
     return result;
 }
 
@@ -641,12 +641,12 @@ bool BinaryTreeNode::subset( const BinaryTreeNode * pRootNodeOne, const BinaryTr
 
     bool isNodeOneALeaf = pRootNodeOne->is_leaf();
     bool isNodeTwoALeaf = pRootNodeTwo->is_leaf();
-        
+
     if( isNodeOneALeaf && isNodeTwoALeaf ) {
         //If both nodes are leaves, then pRootNodeOne is a subset of pRootNodeTwo if:
         // 1. both of the nodes are enabled or
         // 2. pRootNodeOne is disabled (represents an empty set)
-        result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->is_enabled(); 
+        result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->is_enabled();
     } else {
         if( ! isNodeOneALeaf && isNodeTwoALeaf ){
             //If pRootNodeTwo is a leaf then pRootNodeOne is a subset of pRootNodeTwo if:
@@ -668,7 +668,7 @@ bool BinaryTreeNode::subset( const BinaryTreeNode * pRootNodeOne, const BinaryTr
             }
         }
     }
-        
+
     return result;
 }
 
@@ -676,7 +676,7 @@ bool BinaryTreeNode::subset( const BinaryTreeNode * pRootNodeOne, const BinaryTr
 
 /****************************************GridTreeConstIterator************************************/
 
-GridTreeConstIterator::GridTreeConstIterator(  ) : _pGridTreeCursor()  {  
+GridTreeConstIterator::GridTreeConstIterator(  ) : _pGridTreeCursor()  {
 }
 
 void GridTreeConstIterator::find_next_enabled_leaf() {
@@ -704,7 +704,7 @@ void GridTreeConstIterator::find_next_enabled_leaf() {
         }
     }
 }
-    
+
 bool GridTreeConstIterator::navigate_to(bool firstLast){
     bool isEnabledLeafFound = false;
     if( _pGridTreeCursor.is_leaf() ){
@@ -734,12 +734,12 @@ bool GridTreeConstIterator::navigate_to(bool firstLast){
             isEnabledLeafFound = navigate_to( firstLast );
         }
     }
-        
+
     //If the enabled leaf is not found and we are not in the root then we go back
     if( ! isEnabledLeafFound && ! _pGridTreeCursor.is_root() ){
         _pGridTreeCursor.move_up();
     }
-        
+
     return isEnabledLeafFound;
 }
 
@@ -752,7 +752,7 @@ Vector<Interval> GridAbstractCell::primary_cell_lattice_box( const uint theHeigh
         primary_cell_at_height(i, leftBottomCorner, rightTopCorner);
     }
     // 1.2 Constructing and return the box defining the primary cell (relative to the grid).
-        
+
     return Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
 }
 
@@ -771,7 +771,7 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Vector<Inte
         //Otherwise increase the height and recompute the new borders
         primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
     }while( true );
-        
+
     return height;
 }
 
@@ -789,27 +789,27 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Box& theBox
 Box GridAbstractCell::lattice_box_to_space(const Vector<Interval> & theLatticeBox, const Grid& theGrid ){
     const uint dimensions = theGrid.dimension();
     Box theTmpBox( dimensions );
-        
+
     Vector<Float> theGridOrigin( theGrid.origin() );
     Vector<Float> theGridLengths( theGrid.lengths() );
-        
+
     for(uint current_dimension = 0; current_dimension < dimensions; current_dimension ++){
         const Float theDimLength = theGridLengths[current_dimension];
         const Float theDimOrigin = theGridOrigin[current_dimension];
-        //Recompute the new dimension coordinates, detaching them from the grid 
+        //Recompute the new dimension coordinates, detaching them from the grid
         //Compute lower and upper bounds separately, and then set the box lower
         //and upper values simultaneously to prevent lower temporarily higher than upper.
         Float lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) );
         Float upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) );
         theTmpBox[current_dimension].set(lower,upper);
     }
-        
+
     return theTmpBox;
 }
 
 BinaryWord GridAbstractCell::primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight) {
     BinaryWord theBinaryPath;
-        
+
     //The path from one primary cell to another consists of alternating subsequences
     //of length \a dimensions. These subsequences consist either of ones or zeroes.
     //Odd primary cell height means that the first subsequence will consist of all
@@ -823,7 +823,7 @@ BinaryWord GridAbstractCell::primary_cell_path( const uint dimensions, const uin
             }
         }
     }
-        
+
     return theBinaryPath;
 }
 
@@ -834,7 +834,7 @@ bool GridAbstractCell::compare_abstract_grid_cells(const GridAbstractCell * pCel
     const BinaryWord * pThisWord, * pOtherWord;
     //This is the temporary word to be used if heights are not equal
     BinaryWord rootNodePath;
-    
+
     if( pCellLeft->_theHeight == cellRight._theHeight ) {
         //if the primary cells are of the same height, then we just compare the original binary words.
         pThisWord = & (pCellLeft->_theWord);
@@ -857,7 +857,7 @@ bool GridAbstractCell::compare_abstract_grid_cells(const GridAbstractCell * pCel
     switch( comparator ){
         case COMPARE_EQUAL : return (*pThisWord) == (*pOtherWord);
         case COMPARE_LESS : return (*pThisWord) < (*pOtherWord);
-        default: 
+        default:
             throw InvalidInput("The method's comparator argument should be either GridAbstractCell::COMPARE_EQUAL or GridAbstractCell::COMPARE_LESS.");
     }
 }
@@ -868,6 +868,14 @@ GridCell GridCell::split(bool isRight) const {
     BinaryWord theWord = _theWord;
     theWord.push_back( isRight );
     return GridCell( _theGrid, _theHeight, theWord);
+}
+
+std::pair<GridCell,GridCell> GridCell::split() const {
+    BinaryWord theLeftWord = _theWord;
+    theLeftWord.push_back( false );
+    BinaryWord theRightWord = _theWord;
+    theRightWord.push_back( true );
+    return std::make_pair(GridCell( _theGrid, _theHeight, theLeftWord),GridCell( _theGrid, _theHeight, theRightWord));
 }
 
 GridCell GridCell::smallest_enclosing_primary_cell( const Box& theBox, const Grid& theGrid) {
@@ -906,7 +914,7 @@ Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uin
 //the newly created word for the low-left cell of the open cell
 GridOpenCell GridCell::interior() const {
     BinaryWord theOpenCellWord = _theWord;
-    for(int i = 0; i < _theGrid.dimension(); i++) {
+    for( uint i = 0; i < _theGrid.dimension(); i++) {
         theOpenCellWord.push_back(false);
     }
     //The open cell will be defined by the given new word, i.e. the path to the
@@ -936,18 +944,18 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
         //Otherwise increase the height and recompute the new borders
         primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
     } while(true);
-    
+
     //3. If it can not then we take the lowest required primary cell to root this cell to and
     //   to re-route the given base cell of GridOpenCell to that one.
     uint theBaseCellHeight = theHeight;
     BinaryWord theBaseCellWord = theWord;
     if( height > theBaseCellHeight ) {
-        //If we need a higher primary cell then extend the height and the word for the case cell 
+        //If we need a higher primary cell then extend the height and the word for the case cell
         theBaseCellWord = primary_cell_path( dimensions, height, theBaseCellHeight );
         theBaseCellWord.append( theWord );
         theBaseCellHeight = height;
     }
-    
+
     //4. We need to start from the end of the new (extended) word representing the base cell. Then
     //   we go backwards and look for the smallest cell such that the upper border computed in 1.
     //   is less than the cell's box upper border (in the given dimension). This is indicated by incountering
@@ -959,7 +967,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
             break;
         }
     }
-    
+
     //5. When this entry in the word is found from that point on we have to inverse the path in such
     //   a way that every component in the dimension from this point till the end of the word is
     //   inverted. This will provide us with the path to the neighborind cell in the given dimension
@@ -969,7 +977,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
             theBaseCellWord[index] = !theBaseCellWord[index];
         }
     }
-    
+
     return GridCell( theGrid, theBaseCellHeight, theBaseCellWord );
 }
 
@@ -985,9 +993,9 @@ uint GridCell::dimension() const {
 Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
     Vector<Interval> baseCellBoxInLattice =  GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord );
     Box openCellBoxInLattice( theGrid.dimension() );
-    
+
     //Go through all the dimensions, and double the box size in the positive axis direction.
-    for(int dim = 0; dim < theGrid.dimension(); dim++){
+    for( uint dim = 0; dim < theGrid.dimension(); dim++){
         Interval openCellBoxInLatticeDimInterval;
         Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
         Float lower = baseCellBoxInLatticeDimInterval.lower();
@@ -998,7 +1006,7 @@ Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const B
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
     }
-    
+
     return lattice_box_to_space( openCellBoxInLattice, theGrid );
 }
 
@@ -1030,7 +1038,7 @@ GridOpenCell GridOpenCell::split(tribool isRight) const {
             theNewPrimaryCellHeight = _theHeight;
         }
     }
-    
+
     //Construct the new open cell and return it
     return GridOpenCell( _theGrid, theNewPrimaryCellHeight, theNewBaseCellPath );
 }
@@ -1056,7 +1064,7 @@ GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenC
             }
         }
     }
-    
+
     //Return the result, is null If the box of theOpenCell does not cover the given box
     return pSmallestOpenCell;
 }
@@ -1064,7 +1072,7 @@ GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenC
 GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& theGrid ) {
     //01. First we find the smallest primary GridCell that contain the given Box.
     GridCell thePrimaryCell = GridCell::smallest_enclosing_primary_cell( theBox, theGrid );
-    
+
     //02. Second we start subdividing it to find out the root cell for the smallest open cell containing theBox
     //NOTE: smallest_open_subcell returns NULL or a pointer to new open cell, but here we are sure that
     //we can not get NULL because of the choice of thePrimaryCell, therefore we do the following:
@@ -1075,12 +1083,12 @@ GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& 
 
 GridTreeSet GridOpenCell::closure() const {
     //01. First we compute the height of the primary cell that encloses the given open cell
-    const int newHeight = smallest_enclosing_primary_cell_height( _theBox, _theGrid );
-    
+    const uint newHeight = smallest_enclosing_primary_cell_height( _theBox, _theGrid );
+
     //02. Re-route (if needed) the base cell to the new primary cell
     uint theBaseCellHeight = _theHeight;
     BinaryWord theBaseCellWord = _theWord;
-    //If we need a higher primary cell then extend the height and the word for the base cell 
+    //If we need a higher primary cell then extend the height and the word for the base cell
     if( newHeight > theBaseCellHeight ) {
         theBaseCellWord = primary_cell_path( _theGrid.dimension(), newHeight, theBaseCellHeight );
         theBaseCellWord.append( _theWord );
@@ -1089,12 +1097,12 @@ GridTreeSet GridOpenCell::closure() const {
 
     //03. Allocate the resulting GridTreeSet with the root at the needed height
     GridTreeSet theResultSet( _theGrid, theBaseCellHeight, new BinaryTreeNode( false ) );
-    
+
     //04. The preparations are done, now we need to add the base cell to the
     //    resulting GridTreeSet and to compute and add the other neighboring cells.
     BinaryWord tmpWord;
     neighboring_cells( theResultSet.cell().height(), theBaseCellWord, tmpWord, theResultSet );
-    
+
     return theResultSet;
 }
 
@@ -1129,14 +1137,14 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
     //for the dimensions that are not set to one in cellPosition will be undefined. Also,
     //count the required number of iverse dimensions
     int inverseDimensionsNumber = 0;
-    for( int i = 0; i < num_dimensions; i++ ) {
+    for( uint i = 0; i < num_dimensions; i++ ) {
         invert_position[ i ] = NO_INVERSE_POSITION;
         inverseDimensionsNumber += cellPosition[i];
     }
-    
+
     //02. Create the path to the neighboring cell and initialize it with the path to the base cell
     BinaryWord theNeighborCellWord = theBaseCellWord;
-    
+
     //03. We need to start from the end of the new (extended) word representing the base cell. Then
     //    we go backwards and, for each dimension in which we need to move from the base cell, look
     //    for the first zero in the path. This position, for each dimension, will indicate the path
@@ -1148,9 +1156,9 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
         for( int position = ( theNeighborCellWord.size() - 1 ); position >= 0; position-- ){
             //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
             int dimension = position % num_dimensions;
-            //If we need to inverse in this dimension and this is the first found position in 
+            //If we need to inverse in this dimension and this is the first found position in
             //this dimension from which on we should inverse then save the position index.
-            if( cellPosition[ dimension ] && !theNeighborCellWord[ position ] && 
+            if( cellPosition[ dimension ] && !theNeighborCellWord[ position ] &&
                 ( invert_position[ dimension ] == NO_INVERSE_POSITION ) ) {
                 invert_position[ dimension ] = position;
                 //Since it will typically be the case the the binary word to the base cell will be
@@ -1166,7 +1174,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
             }
         }
     }
-    
+
     //04. Since now all the inversion positions are found, we need to go through the path again and
     //    inverse it in the needed dimesnions starting from (corresponding) the found positions on.
     //    This will provide us with the path to the neighborind cell in the given dimension
@@ -1176,13 +1184,13 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
             theNeighborCellWord[index] = !theNeighborCellWord[index];
         }
     }
-    
+
     return GridCell( theGrid, theHeight, theNeighborCellWord );
 }
 
 void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
                                   BinaryWord& cellPosition, std::vector<GridOpenCell>& result ) {
-    const int num_dimensions = theCell.grid().dimension();
+    const uint num_dimensions = theCell.grid().dimension();
     if( cellPosition.size() < num_dimensions ) {
         //Choose the left direction in the current dimension
         cellPosition.push_back( false );
@@ -1204,7 +1212,7 @@ void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTr
             //Take the given word theCell.word() and then add the directions from the cellPosition
             //The latter start from the first axis till the last one, but the path in coverCellBaseWord
             //currently ends at some other axis so we need to align them when appending cellPosition
-            for( int i = 0; i < num_dimensions ; i++ ) {
+            for( uint i = 0; i < num_dimensions ; i++ ) {
                 coverCellBaseWord.push_back( cellPosition[ coverCellBaseWord.size() % num_dimensions ] );
             }
             //Add the resulting cover cell
@@ -1215,7 +1223,7 @@ void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTr
 
 std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell ) {
     std::vector<GridOpenCell> result;
-    
+
     //01 First check if one open cell is a subset of another open cell or if they overlap
     if( theLeftOpenCell.box().covers( theRightOpenCell.box() ) ) {
             //If theRightOpenCell is a subset of theLeftOpenCell
@@ -1229,11 +1237,11 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
                 //02 If the open cells overlap then let us get the cells contained by the two open cells
                 GridTreeSet theLeftCellSet = theLeftOpenCell.closure();
                 GridTreeSet theRightCellSet = theRightOpenCell.closure();
-                
+
                 //03 Then we compute their intersection
                 GridTreeSet intersectionSet = ::intersection( theLeftCellSet, theRightCellSet );
                 //NOTE: It seems to me there is no need to recombine the resulting set, it will not reduce anything
-                
+
                 //04 Iterate through all the cells in the intersection and first add their interiors to the resulting set, second
                 //check if the two cells have common border and/or vertex and if they do then add extra open cells, lying withing
                 //the intersection and covering the common border and/or vertex.
@@ -1247,7 +1255,7 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
             }
         }
     }
-    
+
     return result;
 }
 
@@ -1264,13 +1272,13 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
     //   I.e. the box that corresponds to the root cell of
     //   the GridTreeSubset in the original space.
     const Box& theRootCellBox = _theGridCell.box();
-        
+
     //2. Compute the widths of the box in each dimension and the maximum number
     //   among the number of subdivisions that we need to do in each dimension
     //   in order to make the width in this dimension <= theMaxCellWidth.
     const uint dimensions = _theGridCell.dimension();
     uint max_num_subdiv_dim = 0, num_subdiv = 0, max_subdiv_dim = 0;
-        
+
     for(uint i = 0; i < dimensions; i++){
         //Get the number of required subdivisions in this dimension
         //IVAN S ZAPREEV:
@@ -1283,7 +1291,7 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
             max_subdiv_dim = i;
         }
     }
-    
+
     //3. Let the maximum number of subdivisions M has to be done in dimension K  with the total number of
     //   dimensions N: 1 <= K <= N. This means that from this cell down we have to do M splits for dimension K.
     uint needed_num_tree_subdiv = 0;
@@ -1295,7 +1303,7 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
         const uint pathLength = _theGridCell.word().size();
         //If pathLength == 0 then there were no subdivisions in the tree, so we assign last_subdiv_dim == -1
         const int last_subdiv_dim = ( pathLength == 0 ) ? -1 : ( pathLength - 1 )  % dimensions;
-            
+
         //3.2 Compute the needed number of tree subdivisions by first computing how many subdivisions in the tree
         //we need to do to reach and split the dimension K one first time and then we should add the remaining
         //( M - 1 )*N tree subdevisions which will make shure that the K'th dimension is subdivided M times.
@@ -1313,13 +1321,17 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
         }
         needed_num_tree_subdiv = first_subdiv_steps + ( max_num_subdiv_dim - 1 ) * dimensions;
     }
-        
+
     //Mince to the computed number of tree levels
-    mince(needed_num_tree_subdiv);
+    mince_to_tree_depth(needed_num_tree_subdiv);
 }
 
 double GridTreeSubset::measure() const {
-    ARIADNE_NOT_IMPLEMENTED;
+    double result=0.0;
+    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        result+=iter->box().measure();
+    }
+    return result;
 }
 
 
@@ -1341,11 +1353,11 @@ GridTreeSubset::operator ListSet<Box>() const {
 tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                 const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
-    
+
     //Check if the current node's cell intersects with theBox
     Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool doIntersect = theCellsBox.overlaps( theBox );
-    
+
     if( ! doIntersect ) {
         //If theBox does not intersect with the cell then for the covering relation
         //is is not important if we add or remove this cell, so we return true
@@ -1371,7 +1383,7 @@ tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& 
             theWord.push_back(false);
             const tribool result_left = covers( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
-            
+
             if( ! result_left) {
                 //If there is definitely no covering property then this is all
                 //we need to know so there is not need to check the other branch.
@@ -1382,7 +1394,7 @@ tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& 
                 theWord.push_back(true);
                 const tribool result_right = covers( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
-                
+
                 if( !result_right ) {
                     //IF: The right sub-node reports false, then the result is false
                     //NOTE: We already sorted out the case of ( (!result_left) == true) before
@@ -1404,18 +1416,18 @@ tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& 
             }
         }
     }
-    
+
     return result;
 }
 
 tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                 const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
-    
+
     //Check if the current node overlaps with theBox
     Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool isASubset = theCellsBox.subset( theBox );
-    
+
     if( isASubset ){
         //It does not matter if pCurrentNode has enableds leaves or not we already know that the cell
         //corresponding to this node is geometrically a subset of theBox.
@@ -1443,7 +1455,7 @@ tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& 
                 theWord.push_back(false);
                 const tribool result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
-                
+
                 if( !result_left ) {
                     //If the left branch is not a subset, then there is no need to check the right one
                     result = false;
@@ -1452,7 +1464,7 @@ tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& 
                     theWord.push_back(true);
                     const tribool result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                     theWord.pop_back();
-                    
+
                     if( !result_right ) {
                         //IF: The right sub-node reports false, then the result is false
                         //NOTE: We already sorted out the case of ( (!result_left) == true) before
@@ -1475,18 +1487,18 @@ tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& 
             }
         }
     }
-    
+
     return result;
 }
 
 tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                   const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool intersect;
-    
+
     //Check if the current node overlaps with theBox
     Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool doPossiblyIntersect = !theCellsBox.disjoint( theBox );
-    
+
     if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
         //If there is a possible intersection then we do the checking
         if( pCurrentNode->is_leaf() ) {
@@ -1503,7 +1515,7 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
             theWord.push_back(false);
             const tribool intersect_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
-            
+
             //
             //WARNING: I know how to write a shorter code, like:
             //          if( ! ( intersect = definitely( intersect_left ) ) ) {
@@ -1542,18 +1554,18 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
         //If there is no intersection then we just stop with a negative intersect
         intersect = false;
     }
-    
+
     return !intersect;
 }
 
 tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                   const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
-    
+
     //Check if the current node overlaps with theBox
     Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool doPossiblyIntersect = theCellsBox.overlaps( theBox );
-    
+
     if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
         //If there is a possible intersection then we do the checking
         if( pCurrentNode->is_leaf() ) {
@@ -1570,7 +1582,7 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
             theWord.push_back(false);
             const tribool result_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
-            
+
             //
             //WARNING: I know how to write a shorter code, like:
             //          if( ! ( result = definitely( result_left ) ) ) {
@@ -1609,7 +1621,7 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
         //If there is no intersection then we just stop with a negative result
         result = false;
     }
-    
+
     return result;
 }
 
@@ -1634,7 +1646,7 @@ GridTreeSet::GridTreeSet( const Grid& theGrid, const bool enable  ) :
     GridTreeSubset( theGrid, 0, BinaryWord(), new BinaryTreeNode( enable ) ){
 }
 
-GridTreeSet::GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeNode * pRootTreeNode ) : 
+GridTreeSet::GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeNode * pRootTreeNode ) :
     GridTreeSubset( theGrid, theHeight, BinaryWord(), pRootTreeNode ){
 }
 
@@ -1661,7 +1673,7 @@ GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theLatticeBox ) :
     //3. Point 2. implies that the word to the root of GridTreeSubset should be set to
     //   empty and we have only one disabled node in the binary tree
 }
-    
+
 GridTreeSet::GridTreeSet( const Grid& theGrid, uint theHeight, const BooleanArray& theTree, const BooleanArray& theEnabledCells ) :
     GridTreeSubset( theGrid, theHeight, BinaryWord(), new BinaryTreeNode( theTree, theEnabledCells ) ) {
     //Use the super class constructor and the binary tree constructed from the arrays: theTree and theEnabledCells
@@ -1680,7 +1692,7 @@ GridTreeSet& GridTreeSet::operator=( const GridTreeSet & theGridTreeSet ) {
             delete GridTreeSubset::_pRootTreeNode;
             GridTreeSubset::_pRootTreeNode = NULL;
         }
-        static_cast<GridTreeSubset&>(*this) = 
+        static_cast<GridTreeSubset&>(*this) =
             GridTreeSubset( theGridTreeSet._theGridCell.grid(), theGridTreeSet._theGridCell.height(),
                             theGridTreeSet._theGridCell.word(), new BinaryTreeNode( *theGridTreeSet._pRootTreeNode ));
     }
@@ -1690,20 +1702,20 @@ GridTreeSet& GridTreeSet::operator=( const GridTreeSet & theGridTreeSet ) {
 GridTreeSet* GridTreeSet::clone() const {
     return new GridTreeSet( *this );
 }
-    
+
 GridTreeSet::~GridTreeSet() {
     if( GridTreeSubset::_pRootTreeNode != NULL){
         delete GridTreeSubset::_pRootTreeNode;
         GridTreeSubset::_pRootTreeNode = NULL;
     }
 }
-    
+
 void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
     const uint fromPCellHeight = this->cell().height();
-        
+
     //The primary cell of this paving is lower then the one in the other paving so this
     //paving's has to be rerooted to another primary cell and then we merge the pavings.
-    //1. Compute the path 
+    //1. Compute the path
     BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), toPCellHeight, fromPCellHeight );
     //2. Substitute the root node of the paiving with the extended tree
     this->_pRootTreeNode = BinaryTreeNode::prepend_tree( primaryCellPath, this->_pRootTreeNode );
@@ -1714,16 +1726,16 @@ void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
 BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled,
                                               const bool stop_on_disabled, bool & has_stopped ) {
     const uint thisPavingPCellHeight = this->cell().height();
-        
+
     //The current root node of the GridTreeSet
     BinaryTreeNode * pBinaryTreeNode = this->_pRootTreeNode;
-        
+
     if( thisPavingPCellHeight > otherPavingPCellHeight ){
 
         //The primary cell of this paving is higher then the one of the other paving.
         //1. We locate the path to the primary cell node common with the other paving
         BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), thisPavingPCellHeight, otherPavingPCellHeight );
-            
+
         //2. Locate the binary tree node corresponding to this primnary cell
         uint position = 0;
         while( position < primaryCellPath.size() &&
@@ -1747,14 +1759,14 @@ BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight,
     }
     return pBinaryTreeNode;
 }
-    
+
 void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                                const uint max_mince_depth,  const CompactSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
-    
+
     if( bool( theSet.disjoint( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
         //disjoint from pSet and thus there will be nothing added to this cell.
@@ -1766,9 +1778,9 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
         if( pBinaryTreeNode->is_enabled() ){ //NOTE: A non-leaf node can not be enabled so this check suffices
             //DO NOTHING: If it is enabled, then we can not add anything new to it.
         } else {
-            //If the node is no enabled, so may be we can add something from the outer approximation of theSet.
+            //If the node is not enabled, so may be we can add something from the outer approximation of theSet.
             if( pPath->size() < max_mince_depth ){
-                //Since we still do not have the finest cells for the outer approximation of theSet, we split 
+                //Since we still do not have the finest cells for the outer approximation of theSet, we split
                 pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
                 //Check the left branch
                 pPath->push_back(false);
@@ -1810,14 +1822,16 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
 
     if( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
-            //We should not mince any further. If the cell is not a leaf, then some subset is enabled, so the
-            //lower approximation does not add any information. If the cell is a leaf, we mark it as enabled.
+            //We should not mince any further.
+            //If the cell is not a leaf, then some subset is enabled,
+            //so the lower approximation does not add any information.
+            //If the cell is a leaf, we mark it as enabled.
             if( ! pBinaryTreeNode->has_enabled() ) {
                 pBinaryTreeNode->make_leaf(true);
             }
         } else {
             //If the node is no enabled, so may be we can add something from the lower approximation of theSet.
-            //Since we still do not have the finest cells for the lower approximation of theSet, we split 
+            //Since we still do not have the finest cells for the lower approximation of theSet, we split
             pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
             //Check the left branch
             pPath->push_back(false);
@@ -1833,12 +1847,12 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
         pPath->pop_back();
     }
 }
-    
+
 void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                                const uint max_mince_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
-    
+
     if( bool( theSet.covers( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
         pBinaryTreeNode->mince( max_mince_depth - pPath->size() );
@@ -1849,19 +1863,19 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
             //so the lower approximation does not add any information.
             //If the cell is a leaf, we mark it as enabled.
             if( pBinaryTreeNode->is_leaf() ) {
-                pBinaryTreeNode->set_enabled(); 
+                pBinaryTreeNode->set_enabled();
             }
         } else {
-            //Since we still do not have the finest cells for the outer approximation of theSet, we split 
+            //Since we still do not have the finest cells for the outer approximation of theSet, we split
             pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
-            
+
             //Check the left branch
             pPath->push_back(false);
             _adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
             //Check the right branch
             pPath->push_back(true);
             _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-        }        
+        }
     }
     //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
@@ -1869,21 +1883,21 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
         pPath->pop_back();
     }
 }
-    
-void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint depth ) {
+
+void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint numSubdivInDim ) {
     // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
     for(size_t i=0; i!=theBox.dimension(); ++i) {
         if(theBox[i].lower()>=theBox[i].upper()) {
             ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(Box,uint)","Box "<<theBox<<" has empty interior.");
         }
     }
-    this->adjoin_outer_approximation(theBox,depth);
+    this->adjoin_outer_approximation( theBox, numSubdivInDim );
 }
 
-void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth ) {
+void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
-        
+
     //1. Compute the smallest GridCell (corresponding to the primary cell)
     //   that encloses the theSet (after it is mapped onto theGrid).
     const uint height = GridCell::smallest_enclosing_primary_cell_height( theSet.bounding_box(), theGrid );
@@ -1893,7 +1907,7 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
     //2. Align this paving and paving enclosing the provided set
     bool has_stopped = false;
     BinaryTreeNode* pBinaryTreeNode = align_with_cell( outer_approx_primary_cell_height, true, false, has_stopped );
-        
+
     //If the outer aproximation of the bounding box of the provided set is enclosed
     //in an enabled cell of this paving, then there is nothing to be done. The latter
     //is because adjoining the outer approx of the set will not change this paving.
@@ -1901,10 +1915,10 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
         //Compute the depth to which we must mince the outer approximation of the adjoining set.
         //This depth is relative to the root of the constructed paving, which has been alligned
         //with the binary tree node pBinaryTreeNode.
-        const uint max_mince_depth = outer_approx_primary_cell_height * theGrid.dimension() + depth;
-            
+        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, outer_approx_primary_cell_height, 0 );
+
         //Adjoin the outer approximation, computing it on the fly.
-        BinaryWord * pEmptyPath = new BinaryWord(); 
+        BinaryWord * pEmptyPath = new BinaryWord();
         _adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, outer_approx_primary_cell_height,
                                      max_mince_depth, theSet, pEmptyPath );
 
@@ -1914,18 +1928,18 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
 
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
-void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth ) {
-    this->adjoin_lower_approximation( theSet, theSet.bounding_box(), depth );
+void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint numSubdivInDim ) {
+    this->adjoin_lower_approximation( theSet, theSet.bounding_box(), numSubdivInDim );
 }
 
-void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint depth ) {
+void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
-    
+
     //Align this paving and paving at the given height
     bool has_stopped = false;
     BinaryTreeNode* pBinaryTreeNode = align_with_cell( height, true, false, has_stopped );
-        
+
     //If the lower aproximation of the bounding box of the provided set is enclosed
     //in an enabled cell of this paving, then there is nothing to be done. The latter
     //is because adjoining the outer approx of the set will not change this paving.
@@ -1933,10 +1947,10 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
         //Compute the depth to which we must mince the outer approximation of the adjoining set.
         //This depth is relative to the root of the constructed paving, which has been alligned
         //with the binary tree node pBinaryTreeNode.
-        const uint max_mince_depth = height * theGrid.dimension() + depth;
-            
+        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
+
         //Adjoin the outer approximation, computing it on the fly.
-        BinaryWord * pEmptyPath = new BinaryWord(); 
+        BinaryWord * pEmptyPath = new BinaryWord();
         //const RegularSetInterface* theRegularVersionOfSet = dynamic_cast<const RegularSetInterface*>(&theSet);
         const OpenSetInterface* theOpenVersionOfSet = dynamic_cast<const OpenSetInterface*>(&theSet);
         //const LocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const LocatedSetInterface*>(&theSet);
@@ -1950,16 +1964,16 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     }
 }
 
-void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
+void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
-    
+
     //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
     const uint height = GridCell::smallest_enclosing_primary_cell_height( theBoundingBox, theGrid );
-    
+
     //Adjoin the lower approximation with the bounding cell being the primary cell at the given height.
-    adjoin_lower_approximation( theSet, height, depth );
+    adjoin_lower_approximation( theSet, height, numSubdivInDim );
 }
 
 void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
@@ -1981,9 +1995,9 @@ void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
                 //and we know that the node's box only overlaps with theSet but is not it's
                 //subset we have to exclude it from the inner approximation of theSet.
             } else {
-                //Since we still do not have the finest cells for the outer approximation of theSet, we split 
+                //Since we still do not have the finest cells for the outer approximation of theSet, we split
                 pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
-                
+
                 //Check the left branch
                 pPath->push_back(false);
                 _adjoin_inner_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
@@ -2000,7 +2014,7 @@ void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
         //TODO: We could mince the node until the depth (max_mince_depth - pPath->size()) but I do
         //not know if it makes any sence to do this, since this does not change the result.
     }
-    
+
     //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
@@ -2008,14 +2022,14 @@ void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
     }
 }
 
-void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint depth ) {
+void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
 
     //Align this paving and paving at the given height
     bool has_stopped = false;
     BinaryTreeNode* pBinaryTreeNode = align_with_cell( height, true, false, has_stopped );
-        
+
     //If the inner aproximation of the bounding box of the provided set is enclosed
     //in an enabled cell of this paving, then there is nothing to be done. The latter
     //is because adjoining the inner approx of the set will not change this paving.
@@ -2023,44 +2037,44 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
         //Compute the depth to which we must mince the inner approximation of the adjoining set.
         //This depth is relative to the root of the constructed paving, which has been alligned
         //with the binary tree node pBinaryTreeNode.
-        const uint max_mince_depth = height * theGrid.dimension() + depth;
-        
+        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
+
         //Adjoin the inner approximation, computing it on the fly.
-        BinaryWord * pEmptyPath = new BinaryWord(); 
+        BinaryWord * pEmptyPath = new BinaryWord();
         _adjoin_inner_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, theSet, pEmptyPath );
         delete pEmptyPath;
     }
 }
 
-void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
+void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& theBoundingBox, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
-    
+
     //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
     const uint height = GridCell::smallest_enclosing_primary_cell_height( theBoundingBox, theGrid );
-    
+
     //Compute the height of the smallest primary cell that encloses the box
     //Note that, since we will need to adjoin inner approximation bounded by
     //the theBoundingBox, it is enough to take this cell's height and not to
     //go higher. Remember that the inner approximations consists of the cells
     //that are subsets of the set theSet Adjoin the inner approximation with
     //the bounding cell being the primary cell at the given height.
-    adjoin_inner_approximation( theSet, height, depth );
+    adjoin_inner_approximation( theSet, height, numSubdivInDim );
 }
 
 void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){
     //The root of the binary tree of the current Paving
     BinaryTreeNode * pBinaryTreeNode = this->_pRootTreeNode;
-        
+
     //The primary cell of this paving is higher then the one of the other paving.
     //1. We locate the path to the primary cell node common with the other paving
     BinaryWord rootNodePath = GridCell::primary_cell_path( this->cell().grid().dimension(), this->cell().height(), theOtherSubPaving.cell().height() );
-        
+
     //2. Add the suffix path from the primary cell to the root node of
     //theOtherSubPaving. This is needed in order to be able to reach this root.
     rootNodePath.append( theOtherSubPaving.cell().word() );
-        
+
     //3. Restrict this binary tree to the other one assuming the path prefix rootNodePath
     uint position = 0;
     //This will point to the children nodes that do not have chance for being in the restriction
@@ -2092,7 +2106,7 @@ void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){
         }
         //Move the unused branch into a disabled leaf node
         pBranchToDisable->make_leaf(false);
-            
+
         //Move to the next path element
         position++;
     }
@@ -2119,15 +2133,15 @@ void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){
 void GridTreeSet::remove_from_lower( const GridTreeSubset& theOtherSubPaving ){
     //The root of the binary tree of the current Paving
     BinaryTreeNode * pBinaryTreeNode = this->_pRootTreeNode;
-        
+
     //The primary cell of this paving is higher then the one of the other paving.
     //1. We locate the path to the primary cell node common with the other paving
     BinaryWord rootNodePath = GridCell::primary_cell_path( this->cell().grid().dimension(), this->cell().height(), theOtherSubPaving.cell().height() );
-        
+
     //2. Add the suffix path from the primary cell to the root node of
     //theOtherSubPaving. This is needed in order to be able to reach this root.
     rootNodePath.append( theOtherSubPaving.cell().word() );
-        
+
     //3. Remove theOtherSubPaving from this binary tree assuming the path prefix rootNodePath
     uint position = 0;
     //Iterate the path, get to the root cell of theOtherSubPaving
@@ -2148,7 +2162,7 @@ void GridTreeSet::remove_from_lower( const GridTreeSubset& theOtherSubPaving ){
         }
         //Follow the path and do the removal, the other branch stays intact
         pBinaryTreeNode = (rootNodePath[position]) ? pBinaryTreeNode->right_node() : pBinaryTreeNode->left_node();
-            
+
         //Move to the next path element
         position++;
     }
@@ -2162,7 +2176,7 @@ void GridTreeSet::remove_from_lower( const GridTreeSubset& theOtherSubPaving ){
         BinaryTreeNode::remove( pBinaryTreeNode, theOtherSubPaving.binary_tree() );
     }
 }
-    
+
 void GridTreeSet::clear(  ) {
     // TODO: Pieter: This implementation may not be optimal. Please could you
     // check this, Ivan.
@@ -2173,30 +2187,30 @@ void GridTreeSet::clear(  ) {
 void GridTreeSet::restrict( const GridTreeSubset& theOtherSubPaving ) {
     const uint thisPavingPCellHeight = this->cell().height();
     const uint otherPavingPCellHeight = theOtherSubPaving.cell().height();
-        
+
     ARIADNE_ASSERT( this->grid() == theOtherSubPaving.grid() );
 
     //In case theOtherSubPaving has the primary cell that is higher then this one
-    //we extend it, i.e. reroot it to the same height primary cell.        
+    //we extend it, i.e. reroot it to the same height primary cell.
     if( thisPavingPCellHeight < otherPavingPCellHeight ){
         up_to_primary_cell( otherPavingPCellHeight );
     }
-        
+
     //Now it is simple to restrict this set to another, since this set's
     //primary cell is not lower then for the other one
     restrict_to_lower( theOtherSubPaving );
 }
-    
+
 void GridTreeSet::remove( const GridCell& theCell ) {
     ARIADNE_ASSERT( this->grid() == theCell.grid() );
-        
+
     //If needed, extend the tree of this paving and then find it's the
     //primary cell common with the primary cell of the provided GridCell
     //If we encounter a disabled node then we do not move on, since then
     //there is nothing to remove, otherwise we split the node and go down
     bool has_stopped = false;
     BinaryTreeNode* pCurrentPrimaryCell = align_with_cell( theCell.height(), false, true, has_stopped );
-        
+
     if( ! has_stopped ) {
         //Follow theCell.word() path in the tree rooted to pCommonPrimaryCell,
         //do that until we encounter a leaf node, then stop
@@ -2209,7 +2223,7 @@ void GridTreeSet::remove( const GridCell& theCell ) {
             }
             pCurrentPrimaryCell = path[position] ? pCurrentPrimaryCell->right_node() : pCurrentPrimaryCell->left_node();
         }
-            
+
         //Check if we stopped because it was a leaf node
         if( pCurrentPrimaryCell->is_leaf() ) {
             if( pCurrentPrimaryCell->is_enabled() ) {
@@ -2234,32 +2248,32 @@ void GridTreeSet::remove( const GridCell& theCell ) {
         //disabled node, so there is nothing to remove from
     }
 }
-    
+
 void GridTreeSet::remove( const GridTreeSubset& theOtherSubPaving ) {
     const uint thisPavingPCellHeight = this->cell().height();
     const uint otherPavingPCellHeight = theOtherSubPaving.cell().height();
-        
+
     ARIADNE_ASSERT( this->grid() == theOtherSubPaving.grid() );
 
     //In case theOtherSubPaving has the primary cell that is higher then this one
-    //we extend it, i.e. reroot it to the same height primary cell.        
+    //we extend it, i.e. reroot it to the same height primary cell.
     if( thisPavingPCellHeight < otherPavingPCellHeight ){
         up_to_primary_cell( otherPavingPCellHeight );
     }
-        
+
     //Now it is simple to remove theOtherSubPaving elements from this set,
     //since this set's primary cell is not lower then for the other one.
     remove_from_lower( theOtherSubPaving );
 }
-    
+
 void GridTreeSet::restrict_to_height( const uint theHeight ) {
     const uint thisPavingPCellHeight = this->cell().height();
-        
+
     if( thisPavingPCellHeight > theHeight){
-        std::cerr << "Warning: restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n";
+        std::cerr << "WARNING: restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n";
 
         BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellHeight, theHeight );
-            
+
         //Go throught the tree and disable all the leaves that
         //are not rooted to the primary cell defined by this path
         BinaryTreeNode * pCurrentNode = _pRootTreeNode;
@@ -2289,11 +2303,11 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
         }
     }
 }
-    
+
 /*************************************FRIENDS OF BinaryTreeNode*************************************/
 
 /*************************************FRIENDS OF GridCell*****************************************/
-    
+
 bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne, BinaryWord * pPathPrefixTwo, uint *pPrimaryCellHeight ) {
     //Test that the Grids are equal
     ARIADNE_ASSERT( theCellOne.grid() == theCellTwo.grid() );
@@ -2316,9 +2330,9 @@ bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord *
             //is user data and isDefault should stay false.
         }
     }
-        
+
     //Check if theCellOne is a subset of theCellTwo:
-        
+
     //01 Align the cell's primary cells by finding path prefixes
     uint primary_cell_height;
     if( theCellOne.height() < theCellTwo.height() ) {
@@ -2335,14 +2349,14 @@ bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord *
     if( pPrimaryCellHeight != NULL ){
         *pPrimaryCellHeight = primary_cell_height;
     }
-        
+
     //02 Add the rest of the paths to the path prefixes to get the complete paths
     pPathPrefixOne->append( theCellOne.word() );
     pPathPrefixTwo->append( theCellTwo.word() );
-        
+
     //03 theCellOne is a subset of theCellTwo if pathPrefixTwo is a prefix of pathPrefixOne
     bool result = pPathPrefixTwo->is_prefix( *pPathPrefixOne );
-        
+
     //04 If working with default parameters, then release memory
     if( isDefault ) {
         delete pPathPrefixOne;
@@ -2353,13 +2367,13 @@ bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord *
 }
 
 /*************************************FRIENDS OF GridTreeSubset*****************************************/
-    
+
 bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
     bool result = false;
-        
+
     //Test that the Grids are equal
     ARIADNE_ASSERT( theCell.grid() == theSet.grid() );
-        
+
     //Test if theCell is a subset of theSet, first check
     //if the cell can be a subset of the given tree.
     BinaryWord pathPrefixCell, pathPrefixSet;
@@ -2370,7 +2384,7 @@ bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
         //tree in theSet. Therefore, removing 0..pathPrefixSet.size() elements
         //from pathPrefixCell will give us a path to theCell in the tree of theSet.
         pathPrefixCell.erase( pathPrefixCell.begin(), pathPrefixCell.begin() + pathPrefixSet.size() );
-            
+
         //Check that the cell given by pathPrefixCell is enabled in the tree of theSet
         result = theSet.binary_tree()->is_enabled( pathPrefixCell );
     } else {
@@ -2378,13 +2392,13 @@ bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
     }
     return result;
 }
-    
+
 bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
     bool result = false;
-        
+
     //Test that the Grids are equal
     ARIADNE_ASSERT( theCell.grid() == theSet.grid() );
-        
+
     //If the primary cell of the theCell is lower that that of theSet
     //Then we re-root theCell to the primary cell theSet.cell().height()
     const GridCell * pWorkGridCell;
@@ -2402,13 +2416,13 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
     BinaryWord pathFromPCellCellToSetsRootNode = GridCell::primary_cell_path( theCell.dimension(), pWorkGridCell->height(), theSetsPCellHeight );
     //Append the path from the primary cell node to the root binary tree node of theSet
     pathFromPCellCellToSetsRootNode.append( theSet.cell().word() );
-        
+
     const BinaryWord & workCellWord = pWorkGridCell->word();
     if( workCellWord.is_prefix( pathFromPCellCellToSetsRootNode ) ) {
         //If the path (from some primary cell) to the cell is a prefix
         //of the path (from the same primary cell) to the root of the
         //sub-paving, then theCell contains theSet
-            
+
         result = theSet.binary_tree()->has_enabled();
     } else {
         if( pathFromPCellCellToSetsRootNode.is_prefix( workCellWord ) ) {
@@ -2417,7 +2431,7 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
             //path (from the same primary cell) to the cell, then the
             //cell might be somwhere within the tree and we should
             //check if it overlaps with the tree
-                
+
             const BinaryTreeNode *pCurrentNode = theSet.binary_tree();
             //Note that, pathFromPCellCellToSetsRootNode.size() < workCellWord.size()
             //Because we already checked for workCellWord.is_prefix( pathFromPCellCellToSetsRootNode )
@@ -2432,7 +2446,7 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
                     pCurrentNode = ( workCellWord[i] ? pCurrentNode->right_node() : pCurrentNode->left_node() );
                 }
             }
-                
+
             //At this point we have the following cases:
             // 1. pCurrentNode - is a leaf node, contains theCell as a subset, is an enabled node
             // RESULT: theSet and theCell overlap
@@ -2449,11 +2463,11 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
             //This means that theCell and theSet do not overlap
         }
     }
-        
+
     if( theSetsPCellHeight > theCell.height() ) {
         delete pWorkGridCell;
     }
-        
+
     return result;
 }
 
@@ -2517,7 +2531,7 @@ static bool subset(const BinaryTreeNode * pSubTreeRootNode, const BinaryTreeNode
         if( pSuperTreeRootNode->has_enabled() ) {
             //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
             const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
-            
+
             if( pCurrentSuperTreeNode->is_leaf() ) {
                 //If we've reached the leaf node then pSubTreeRootNode is a subset of pSuperTreeRootNode if this
                 //node is enabled, otherwise not. This is because we know that pSubTreeRootNode is not empty.
@@ -2548,10 +2562,10 @@ static bool subset(const BinaryTreeNode * pSubTreeRootNode, const BinaryTreeNode
  */
 static bool subset( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode ) {
     bool result = false;
-    
+
     //First we iterate throught the path pathFromSuperToSub trying to reach the common node with pSubTreeRootNode
     //Since we want to know if pSuperTreeRootNode is a subset of pSubTreeRootNode, the branches of pSuperTreeRootNode
-    //that we ommit traveling the path pathFromSuperToSub, should contain no enabled leaf nodes. Because otherwise 
+    //that we ommit traveling the path pathFromSuperToSub, should contain no enabled leaf nodes. Because otherwise
     //pSuperTreeRootNode is not a subset of pSubTreeRootNode. Apart from this, once we encounter a leaf node on the
     //path we stop because the we can already decide if pSuperTreeRootNode is a subset of pSubTreeRootNode.
     uint path_element = 0;
@@ -2574,7 +2588,7 @@ static bool subset( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
         }
         path_element++;
     }
-    
+
     if( areExtraLeavesDisabled ) {
         //If pSuperTreeRootNode does not have enabled leaves that are outside the bounding cell of
         //pSubTreeRootNode, this means that pSuperTreeRootNode can be a subset of pSubTreeRootNode.
@@ -2611,22 +2625,22 @@ static bool subset( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
 
 bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     bool result = false;
-        
+
     //Test that the Grids are equal
     ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
-    
+
     //Define paths for the root cells of theSet1 and theSet2 from the common primary cell
     BinaryWord pathCommonPCtoRC1;
     BinaryWord pathCommonPCtoRC2;
     //Get the paths from the common primary cell to the root nodes of the set's binary trees
     common_primary_cell_path( theSet1, theSet2, pathCommonPCtoRC1, pathCommonPCtoRC2 );
-    
+
     //At this point we know paths from the common primary cell
     //to the root nodes of both subsets. If one of these paths is a prefix of
     //the other one, then there is a chance that theSet1 is a subset of theSet2.
     //If not, then they definitely do not overlap.
     if( pathCommonPCtoRC1.is_prefix( pathCommonPCtoRC2 ) ) {
-        //In this case theSet2 is a subset of the bounding cell of theSet1. Still 
+        //In this case theSet2 is a subset of the bounding cell of theSet1. Still
         //it is possible that theSet1 is a subset of theSet2 if all cells of theSet1
         //outside the bounding box of theSet2 are disabled cells. This we check by
         //following the path from the foor of theSet1 to the root of theSet2.
@@ -2649,7 +2663,7 @@ bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
 
     return result;
 }
-    
+
 /*! \brief This is a helper functiuon for bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
  *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
  *  pSubTreeRootNode. In general we see if the sets represented by pSuperTreeRootNode and pSubTreeRootNode overlap.
@@ -2657,13 +2671,13 @@ bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
  */
 static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode) {
     bool result = false;
-        
+
     //Check if both sets are not empty
     if( pSuperTreeRootNode->has_enabled() && pSubTreeRootNode->has_enabled() ) {
 
         //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
         const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
-            
+
         if( pCurrentSuperTreeNode->is_leaf() ) {
             //If we've reached the leaf node then the sets overlap if this node is enabled,
             //otherwise not. This is because we know that pSubTreeRootNode is not empty.
@@ -2674,16 +2688,16 @@ static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
             result = BinaryTreeNode::overlap( pCurrentSuperTreeNode, pSubTreeRootNode );
         }
     }
-        
+
     return result;
 }
-    
+
 bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     bool result = false;
-        
+
     //Test that the Grids are equal
     ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
-    
+
     //Define paths for the root cells of theSet1 and theSet2 from the common primary cell
     BinaryWord pathCommonPCtoRC1;
     BinaryWord pathCommonPCtoRC2;
@@ -2708,14 +2722,14 @@ bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
             result = false;
         }
     }
-        
+
     return result;
 }
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
 GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth) {
-    return outer_approximation(ImageSet(theBox),theGrid,depth);
+    return outer_approximation(static_cast<const CompactSetInterface&>(theBox),theGrid,depth);
 }
 
 GridTreeSet outer_approximation(const Box& theBox, const uint depth) {
@@ -2725,61 +2739,61 @@ GridTreeSet outer_approximation(const Box& theBox, const uint depth) {
 GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     //Test that the Grids are equal
     ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
-        
-    //Compute the highest primary cell 
+
+    //Compute the highest primary cell
     const uint heightSet1 = theSet1.cell().height();
     const uint heightSet2 = theSet2.cell().height();
     const uint maxPCHeight = ( heightSet1 <  heightSet2 ) ? heightSet2 : heightSet1;
-        
+
     //Create the resulting GridTreeSet
     GridTreeSet resultSet( theSet1.grid(), maxPCHeight, new BinaryTreeNode() );
-        
+
     //Adjoin the sets
     resultSet.adjoin( theSet1 );
     resultSet.adjoin( theSet2 );
-        
+
     //Return the result
     return resultSet;
 }
-    
+
 GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     //Test that the Grids are equal
     ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
-        
-    //Compute the highest primary cell 
+
+    //Compute the highest primary cell
     const uint heightSet1 = theSet1.cell().height();
     const uint heightSet2 = theSet2.cell().height();
     const uint maxPCHeight = ( heightSet1 <  heightSet2 ) ? heightSet2 : heightSet1;
-        
+
     //Create the resulting GridTreeSet
     GridTreeSet resultSet( theSet1.grid(), maxPCHeight, new BinaryTreeNode() );
-        
+
     //Adjoin the first set
     resultSet.adjoin( theSet1 );
     //Intersect the result with the second set
     resultSet.restrict( theSet2 );
-        
+
     //Return the result
     return resultSet;
 }
-    
+
 GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     //Test that the Grids are equal
     ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
-        
-    //Compute the highest primary cell 
+
+    //Compute the highest primary cell
     const uint heightSet1 = theSet1.cell().height();
     const uint heightSet2 = theSet2.cell().height();
     const uint maxPCHeight = ( heightSet1 <  heightSet2 ) ? heightSet2 : heightSet1;
-        
+
     //Create the resulting GridTreeSet
     GridTreeSet resultSet( theSet1.grid(), maxPCHeight, new BinaryTreeNode() );
-        
+
     //Adjoin the first set
     resultSet.adjoin( theSet1 );
     //Remove the second set from the result set
     resultSet.remove( theSet2 );
-        
+
     //Return the result
     return resultSet;
 }
@@ -2787,7 +2801,7 @@ GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& the
 void draw(CanvasInterface& theGraphic, const GridCell& theGridCell) {
     theGridCell.box().draw(theGraphic);
 }
-    
+
 void draw(CanvasInterface& theGraphic, const GridTreeSet& theGridTreeSet) {
     for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
         iter->box().draw(theGraphic);

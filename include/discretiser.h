@@ -46,8 +46,8 @@ class Grid;
 class GridCell;
 class GridTreeSet;
 
-class HybridAutomaton;
-class DiscreteState;
+class MonolithicHybridAutomaton;
+class DiscreteLocation;
 template<class BS> class HybridBasicSet;
 
 class HybridGrid;
@@ -129,12 +129,12 @@ class Discretiser
  */
 template<class ES>
 class HybridDiscretiser
-    : public DiscretiserInterface<HybridAutomaton,HybridGridCell>
+    : public DiscretiserInterface<MonolithicHybridAutomaton,HybridGridCell>
     , public Loggable
 {
     typedef int AccuracyType;
-    typedef HybridAutomaton::TimeType TimeType;
-    typedef HybridAutomaton SystemType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton SystemType;
     typedef HybridGridCell BasicSetType;
     typedef HybridGridTreeSet DenotableSetType;
     typedef ES ContinuousEnclosureType;
@@ -204,10 +204,12 @@ class HybridDiscretiser
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
+                                    const HybridGrid& system_grid,
                                     const AccuracyType accuracy) const;
 
     DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
                                  const BasicSetType& initial_set,
+                                 const HybridGrid& system_grid,
                                  const AccuracyType accuracy) const;  
 };
 

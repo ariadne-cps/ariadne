@@ -94,7 +94,7 @@ void TestContinuousEvolution::simple_test() const
     TaylorCalculus calculus;
     VectorAffineFunction vector_field(Matrix<Float>(1,1,0.0),Vector<Float>(1,1.0));
     Vector<Interval> initial_box(1,Interval(-0.01,0.01));
-    TaylorSet initial_set(initial_box);
+    TaylorImageSet initial_set(initial_box);
     double step_size;
     Box bounding_box(2);
     make_lpair(step_size,bounding_box)=calculus.flow_bounds(vector_field,initial_box,0.5,1.0);
@@ -103,8 +103,8 @@ void TestContinuousEvolution::simple_test() const
     VectorTaylorFunction vector_field_expansion=calculus.map_model(vector_field,Vector<Interval>(1,Interval(-1,+1)));
     VectorTaylorFunction vector_field_model=calculus.map_model(vector_field,bounding_box);
     VectorTaylorFunction flow_model=calculus.flow_model(vector_field,initial_box,step_size,bounding_box);
-    TaylorSet evolve_set=calculus.integration_step(flow_model,initial_set,step_size);
-    TaylorSet reach_set=calculus.reachability_step(flow_model,initial_set,0.0,step_size);
+    TaylorImageSet evolve_set=calculus.integration_step(flow_model,initial_set,step_size);
+    TaylorImageSet reach_set=calculus.reachability_step(flow_model,initial_set,0.0,step_size);
     std::cout <<"vector_field="<<vector_field<<std::endl;
     std::cout <<"vector_field_expansion="<<vector_field_expansion<<std::endl;
     std::cout <<"step_size="<<step_size<<std::endl;
@@ -122,7 +122,7 @@ void TestContinuousEvolution::test() const
 {
     // cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef TaylorSet EnclosureType;
+    typedef TaylorImageSet EnclosureType;
 
     // Set up the evolution parameters and grid
     Float time(5.0);
@@ -194,7 +194,7 @@ void TestContinuousEvolution::failure_test() const
 
     // cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef TaylorSet EnclosureType;
+    typedef TaylorImageSet EnclosureType;
 
     // Set up the evolution parameters and grid
     Float time(0.5);

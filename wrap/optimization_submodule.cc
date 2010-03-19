@@ -2,7 +2,7 @@
  *            optimization_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,14 +20,19 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "config.h"
 
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+#include "box.h"
 
+#include "function.h"
+#include "constraint.h"
 #include "linear_programming.h"
+#include "nonlinear_programming.h"
+#include "constraint_solver.h"
 
 #include "utilities.h"
 
@@ -67,48 +72,75 @@ void export_internal_array(const char* name)
 void export_variable_type()
 {
     typedef array<VariableType> VariableTypeArray;
-    
+
     enum_<VariableType> variable_enum("VariableType");
     variable_enum.value("BASIS", BASIS);
     variable_enum.value("LOWER", LOWER);
     variable_enum.value("UPPER", UPPER);
 }
 
+void export_interior_point_solver()
+{
+    to_python< Ariadne::tuple< Vector<Float>, Vector<Float>, Vector<Float> > >();
+
+    class_<InteriorPointSolver> interior_point_solver_class("InteriorPointSolver",init<>());
+    interior_point_solver_class.def("optimize", &InteriorPointSolver::optimize);
+    interior_point_solver_class.def("feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&, const Vector<Float>&,const Matrix<Float>&,const Vector<Float>&,const Vector<Float>&,const Vector<Float>&)const) &InteriorPointSolver::feasible);
+    interior_point_solver_class.def("feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&, const Vector<Float>&,const Vector<Float>& ,const Vector<Float>& )const) &InteriorPointSolver::feasible);
+    interior_point_solver_class.def("optimize", &InteriorPointSolver::_optimize);
+    interior_point_solver_class.def("validate", &InteriorPointSolver::validate);
+}
+
+
+void export_constraint_solver()
+{
+    class_<NonlinearConstraint> nonlinear_constraint_class("NonlinearConstraint",init<ScalarFunction,Interval>());
+    nonlinear_constraint_class.def("__eq__",(NonlinearConstraint(*)(const ScalarFunction&,const Float&)) operator==);
+    nonlinear_constraint_class.def(self_ns::str(self));
+
+
+    class_<ConstraintSolver> constraint_solver_class("ConstraintSolver", init<>());
+    constraint_solver_class.def("hull_reduce", &ConstraintSolver::hull_reduce);
+    constraint_solver_class.def("box_reduce", &ConstraintSolver::box_reduce);
+    constraint_solver_class.def("monotone_reduce", &ConstraintSolver::monotone_reduce);
+}
+
+
+
 template<class X>
-void export_linear_programming()
+void export_simplex_solver()
 {
     typedef array<size_t> SizeArray;
 
     to_python< std::pair< array<size_t>, Matrix<X> > >();
 
-    def("lpstep",(bool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,SizeArray&,Matrix<X>&,Vector<X>&)) &lpstep);
-    def("lpstep",(bool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,array<VariableType>&,array<size_t>&,Matrix<X>&,Vector<X>&)) &lpstep);
-  
+    class_< SimplexSolver<X> > simplex_solver_class("SimplexSolver", init<>());
+    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,SizeArray&,Matrix<X>&,Vector<X>&)) &SimplexSolver<X>::lpstep);
+    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,array<VariableType>&,array<size_t>&,Matrix<X>&,Vector<X>&)) &SimplexSolver<X>::lpstep);
 
-    def("primal_feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&)) &primal_feasible);
-    def("dual_feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&)) &dual_feasible);
-    def("constrained_feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &constrained_feasible);
 
-    def("verify_primal_feasibility",(tribool(*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &verify_primal_feasibility);
-    def("verify_dual_feasibility",(tribool(*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &verify_dual_feasibility);
-    def("verify_constrained_feasibility",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const array<VariableType>&)) &verify_constrained_feasibility);
+    simplex_solver_class.def("primal_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&)) &SimplexSolver<X>::primal_feasible);
+    simplex_solver_class.def("dual_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&)) &SimplexSolver<X>::dual_feasible);
+    simplex_solver_class.def("constrained_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &SimplexSolver<X>::constrained_feasible);
 
-    def("compute_basis",(std::pair< SizeArray, Matrix<X> >(*)(const Matrix<X>&)) &compute_basis<X>);
+    simplex_solver_class.def("verify_primal_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &SimplexSolver<X>::verify_primal_feasibility);
+    simplex_solver_class.def("verify_dual_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &SimplexSolver<X>::verify_dual_feasibility);
+    simplex_solver_class.def("verify_constrained_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const array<VariableType>&)) &SimplexSolver<X>::verify_constrained_feasibility);
 
-    def("constrained_feasible_by_enumeration",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &constrained_feasible_by_enumeration);
+    simplex_solver_class.def("compute_basis",(std::pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)) &SimplexSolver<X>::compute_basis);
+
+    simplex_solver_class.def("constrained_feasible_by_enumeration",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &SimplexSolver<X>::constrained_feasible_by_enumeration);
 }
-   
-#ifdef HAVE_GMPXX_H
-template void export_linear_programming<Rational>();
-#endif
 
 
 void optimization_submodule() {
     export_variable_type();
     export_array<size_t>("SizeArray");
     export_internal_array<VariableType>("VariableTypeArray");
-    export_linear_programming<Float>();
+    export_simplex_solver<Float>();
 #ifdef HAVE_GMPXX_H
-    export_linear_programming<Rational>();
+    export_simplex_solver<Rational>();
 #endif
+    export_interior_point_solver();
+    export_constraint_solver();
 }

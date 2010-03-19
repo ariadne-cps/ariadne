@@ -60,9 +60,9 @@ template<class Sys, class BS> class Evolver;
 
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
-class TaylorSet;
-typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
-class HybridAutomaton;
+class TaylorImageSet;
+typedef std::pair<DiscreteLocation,TaylorImageSet> HybridTaylorImageSet;
+class MonolithicHybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
@@ -80,7 +80,7 @@ class HybridTime;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class PythonHybridEvolver
-    : public EvolverBase<HybridAutomaton,HybridTaylorSet>
+    : public EvolverBase<MonolithicHybridAutomaton,HybridTaylorImageSet>
     , public Loggable
 {
     typedef VectorFunction FunctionType;
@@ -90,17 +90,17 @@ class PythonHybridEvolver
     typedef VectorTaylorFunction FlowModelType;
     typedef ScalarTaylorFunction ConstraintModelType;
     typedef TaylorModel TimeModelType;
-    typedef TaylorSet SetModelType;
-    typedef TaylorSet TimedSetModelType;
+    typedef TaylorImageSet SetModelType;
+    typedef TaylorImageSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
-    typedef TaylorSet ContinuousEnclosureType;
-    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
+    typedef MonolithicHybridAutomaton SystemType;
+    typedef TaylorImageSet ContinuousEnclosureType;
+    typedef pair<DiscreteLocation,TaylorImageSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -144,7 +144,7 @@ class PythonHybridEvolver
         return intermediate; }
 
   protected:
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteLocation, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     // This is the only method which is called in Python
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
@@ -180,17 +180,17 @@ orbit(const SystemType& system,
 enum Bool { False, True };
 
 template<class SET>
-ListSet< std::pair<DiscreteState,SET> >*
+ListSet< std::pair<DiscreteLocation,SET> >*
 make_hybrid_list_set(const boost::python::list& pylst)
 //make_hybrid_list_set(const boost::python::object& pyobj)
 {
-    ListSet< std::pair<DiscreteState,SET> >* result=new ListSet< std::pair<DiscreteState,SET> >();
+    ListSet< std::pair<DiscreteLocation,SET> >* result=new ListSet< std::pair<DiscreteLocation,SET> >();
     //boost::python::list pylst=boost::python::extract<boost::python::list>(pyobj);
     for(int i=0; i!=len(pylst); ++i) {
         boost::python::tuple pytup=boost::python::extract<boost::python::tuple>(pylst[i]);
-        Ariadne::DiscreteState q(boost::python::extract<int>(pytup[0]));
+        Ariadne::DiscreteLocation q(boost::python::extract<int>(pytup[0]));
         SET s(boost::python::extract<SET>(pytup[1]));
-        //std::pair<Ariadne::DiscreteState,SET> pr=std::make_pair(q,s);
+        //std::pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);
         //result->adjoin(std::make_pair(q,s));
     }
     return result;
@@ -208,18 +208,18 @@ PythonHybridEvolver::initialise_python()
         boost::python::object evolution_namespace = evolution_module.attr("__dict__");
         main_namespace["hybrid_evolver"]=evolution_module;
 
-        boost::python::class_< ListSet< std::pair<DiscreteState,TaylorSet> > >
-            enclosure_list_class("HybridTaylorSetList",boost::python::no_init);
-        enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorSet>));
+        boost::python::class_< ListSet< std::pair<DiscreteLocation,TaylorImageSet> > >
+            enclosure_list_class("HybridTaylorImageSetList",boost::python::no_init);
+        enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorImageSet>));
 
-        boost::python::class_<HybridAutomaton>("HybridAutomaton",boost::python::no_init);
-        boost::python::class_<EnclosureType>("HybridTaylorSet",boost::python::no_init);
+        boost::python::class_<MonolithicHybridAutomaton>("MonolithicHybridAutomaton",boost::python::no_init);
+        boost::python::class_<EnclosureType>("HybridTaylorImageSet",boost::python::no_init);
         boost::python::class_<HybridTime>("HybridTime",boost::python::no_init);
         //boost::python::enum_<Semantics>("Semantics")
         //    .value("UPPER_SEMANTICS", UPPER_SEMANTICS).value("LOWER_SEMANTICS", LOWER_SEMANTICS);
 
-        evolution_namespace["HybridTaylorSetList"]=enclosure_list_class;
-        //main_namespace["TaylorSetList"]=enclosure_list_class;
+        evolution_namespace["HybridTaylorImageSetList"]=enclosure_list_class;
+        //main_namespace["TaylorImageSetList"]=enclosure_list_class;
 }
 
 

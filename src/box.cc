@@ -101,6 +101,15 @@ std::vector<Point> Box::vertices() const {
     return v;
 }
 
+Box hull(const Box& bx1, const Box& bx2) {
+    return Box(Ariadne::hull(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
+}
+
+Box intersection(const Box& bx1, const Box& bx2) {
+    return Box(Ariadne::intersection(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
+}
+
+
 
 void Box::draw(CanvasInterface& c) const
 {

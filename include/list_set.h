@@ -34,7 +34,7 @@
 #include "macros.h"
 
 #include "graphics_interface.h"
-#include "discrete_state.h"
+#include "discrete_location.h"
 
 #include "box.h"
 
@@ -44,7 +44,7 @@ namespace Ariadne {
 
 class Box;
 template<class ES> class ListSet;
-class DiscreteState;
+class DiscreteLocation;
 
 // Declare template specialisation for hybrid list set
 template<class ES> class HybridBasicSet;

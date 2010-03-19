@@ -23,22 +23,18 @@
 from ariadne import *
 Float=float
 
-d=Float(2.5)
-i=Interval(1.5,1.75)
+r=Real(1.75)
 
 c=ScalarFunction.constant(3,1.5)
-x=ScalarFunction.variable(3,0)
-y=ScalarFunction.variable(3,1)
-#v=ScalarFunction.variables(3)
+x=ScalarFunction.coordinate(3,0)
+y=ScalarFunction.coordinate(3,1)
 id=VectorFunction.identity(3)
 
 p=x+y
 
 +p; -p; p+p; p-p; p*p;
-p+d; p-d; p*d; p/d;
-d+p; d-p; d*p;
-p+i; p-i; p*i; p/i;
-i+i; i-p; i*p;
+p+r; p-r; p*r; p/r;
+r+p; r-p; r*p;
 
 derivative(p,0)
 

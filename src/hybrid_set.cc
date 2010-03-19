@@ -2,7 +2,7 @@
  *            hybrid_set.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,10 +20,34 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "hybrid_set.h"
 
 namespace Ariadne {
+
+HybridGrid::HybridGrid() : _grids() { }
+
+HybridGrid::HybridGrid(const HybridSpace& hs, double l) {
+    for(HybridSpace::const_iterator iter=hs.begin(); iter!=hs.end(); ++iter) {
+        this->_grids.insert(iter->first,Grid(iter->second,l));
+    }
+}
+
+void HybridGrid::insert(DiscreteLocation q, const Grid& g) {
+    this->_grids.insert(q,g);
+}
+
+Grid HybridGrid::operator[](const DiscreteLocation& loc) const {
+    return this->_grids[loc];
+}
+
+Grid& HybridGrid::operator[](const DiscreteLocation& loc) {
+    return this->_grids[loc];
+}
+
+bool HybridGrid::has_location(const DiscreteLocation& q) const {
+    return this->_grids.find(q) != this->_grids.end();
+}
 
 
 } // namespace Ariadne

@@ -199,7 +199,6 @@ void export_taylor_model()
     taylor_model_class.def(self<self);
     taylor_model_class.def(self_ns::str(self));
 
-    taylor_model_class.def("constant",(TaylorModel(*)(N, const Float&))&TaylorModel::constant);
     taylor_model_class.def("constant",(TaylorModel(*)(N, const Interval&))&TaylorModel::constant);
     taylor_model_class.def("variable",(TaylorModel(*)(N, N))&TaylorModel::variable);
 
@@ -336,11 +335,13 @@ void export_scalar_taylor_function()
 
     scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const IntervalVector&, const Float&))&ScalarTaylorFunction::constant);
     scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const IntervalVector&, const Interval&))&ScalarTaylorFunction::constant);
+    scalar_taylor_function_class.def("coordinate",(ScalarTaylorFunction(*)(const IntervalVector&, uint))&ScalarTaylorFunction::coordinate);
     scalar_taylor_function_class.def("variable",(ScalarTaylorFunction(*)(const IntervalVector&, uint))&ScalarTaylorFunction::variable);
     scalar_taylor_function_class.def("variables",(Vector<ScalarTaylorFunction>(*)(const IntervalVector&)) &ScalarTaylorFunction::variables);
 
 
     scalar_taylor_function_class.staticmethod("constant");
+    scalar_taylor_function_class.staticmethod("coordinate");
     scalar_taylor_function_class.staticmethod("variable");
     scalar_taylor_function_class.staticmethod("variables");
 
@@ -461,7 +462,9 @@ void export_vector_taylor_function()
     def("embed",(VectorTaylorFunction(*)(const IntervalVector&,const VectorTaylorFunction&)) &embed);
 
     def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const Vector<Interval>&)) &restrict);
-    //vector_taylor_function_class.def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &restrict);
+    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &restrict);
+
+    def("split", (std::pair<VectorTaylorFunction,VectorTaylorFunction>(*)(const VectorTaylorFunction&,uint)) &Ariadne::split);
 
     def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const FloatVector&)const) &VectorTaylorFunction::evaluate);
     def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);

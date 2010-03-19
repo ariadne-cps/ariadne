@@ -28,6 +28,26 @@ Indeterminate=indeterminate()
 Float = float
 
 
+class ComposedFunction:
+    def __init__(self,first,second):
+        print first,second
+        assert first.argument_size() == second.result_size()
+        self.first=first
+        self.second=second
+    def argument_size(self):
+        return self.second.argument_size()
+    def __call__(self,arguments):
+        assert len(arguments) >= self.argument_size()
+        arguments=arguments[:self.argument_size()]
+        return self.first(self.second(arguments))
+    def __str__(self):
+        if hasattr(self,"codomain"):
+            return str(self.first)+","+str(self.codomain)
+        else:
+            return str(self.first)
+    def __repr__(self):
+        return str(self)
+
 class ConstrainedImageSet:
     def __init__(self,domain=None,function=None):
         # Default constructor computes empty set
@@ -64,7 +84,7 @@ class ConstrainedImageSet:
             assert function.domain()==domain
             self._domain=domain
             self._function=function
-        self._empty=False
+        self._empty=None
         self._positive={}
         self._zero={}
         self._negative={}
@@ -78,6 +98,8 @@ class ConstrainedImageSet:
         return constraint_range
     
     def empty(self):
+        if self._empty == None:
+            self._empty = self.grid_outer_approximation(Grid(self.dimension()),6).empty()
         return self._empty
     
     def dimension(self):
@@ -105,7 +127,7 @@ class ConstrainedImageSet:
         
     def new_activation(self,event,constraint,derivative):
         assert isinstance(constraint,ScalarFunction)
-        composed_constraint=compose(constraint,self._function)
+        composed_constraint=ComposedFunction(constraint,self._function)
         constraint_range=composed_constraint(self._domain)
         print str(event)+".range():",constraint_range
         if constraint_range.lower()>=0.0:
@@ -118,22 +140,38 @@ class ConstrainedImageSet:
 
     def new_guard(self,event,constraint,derivative):
         assert isinstance(constraint,ScalarFunction)
-        composed_constraint=compose(constraint,self._function)
+        composed_constraint=ComposedFunction(constraint,self._function)
         constraint_range=composed_constraint(self._domain)
         print str(event)+".range():",constraint_range
-        if constraint_range.lower()>=0.0:
+        if constraint_range.lower()>0.0:
             self._always_negative_and_zero[event]=composed_constraint*0.0+1.0
-        elif constraint_range.upper()<=0.0:
-            self._always_negative_and_zero[event]=composed_constraint*0.0-1.0
+            self._empty=True
+        elif constraint_range.upper()<0.0:
+            pass
+            #self._always_negative_and_zero[event]=composed_constraint*0.0-1.0
         else:
-            self._always_negative_and_zero[event]=composed_constraint
+            composed_derivative=compose(derivative,self._function)
+            derivative_range=composed_derivative(self._domain)
+            if derivative_range.lower()>0.0 and False:
+                print "Solving for transverse crossing"
+                solver=KrawczykSolver(1e-8,4)
+                solved_function=solver.implicit(composed_derivative.function(),self._domain[:-1],self._domain[-1])
+                print solved_function
+                raw_input("")
+                self._negative[event]=composed_constraint
+            else:
+                self._always_negative_and_zero[event]=composed_constraint
 
     def new_invariant(self,event,constraint,derivative):
         assert isinstance(constraint,ScalarFunction)
-        composed_constraint=compose(constraint,self._function)
+        composed_constraint=ComposedFunction(constraint,self._function)
         constraint_range=composed_constraint(self._domain)
         print str(event)+".range():",constraint_range
-        if constraint_range.upper()>=0.0:
+        if constraint_range.lower()>0.0:
+            self._empty=True
+        elif constraint_range.upper()<0.0:
+            pass
+        else:
             composed_derivative=compose(derivative,self._function)
             derivative_range=composed_derivative(self._domain)
             if derivative_range.lower()>0.0:
@@ -143,9 +181,51 @@ class ConstrainedImageSet:
                 self._always_negative[event]=composed_constraint
 
     def new_equation(self,event,constraint):
+        print "new_equation"
         assert isinstance(constraint,ScalarFunction)
-        self._zero[event]=ScalarTaylorFunction(self._domain,constraint)
+        composed_constraint=ComposedFunction(constraint,self._function)
+        constraint_range=composed_constraint(self._domain)
+        print str(event)+".range():",constraint_range
+        if constraint_range.upper()<0.0:
+            self._zero[event]=composed_constraint*0.0-1.0
+            self._empty=True
+        elif constraint_range.lower()>0.0:
+            self._zero[event]=composed_constraint*0.0-1.0
+            self._empty=True
+        else:
+            self._zero[event]=composed_constraint
        
+    def new_raw_equation(self,event,constraint):
+        print "new_raw_equation"
+        assert isinstance(constraint,ScalarFunction)
+        assert constraint.argument_size() <= len(self._domain)
+        constraint_range=constraint(self._domain)
+        print str(event)+".range():",constraint_range
+        if constraint_range.upper()<0.0:
+            self._zero[event]=constraint*0.0-1.0
+            self._empty=True
+        elif constraint_range.lower()>0.0:
+            self._zero[event]=constraint*0.0+1.0
+            self._empty=True
+        else:
+            self._zero[event]=constraint
+       
+    def new_raw_invariant(self,event,constraint):
+        print "new_raw_invariant"
+        assert isinstance(constraint,ScalarFunction)
+        assert constraint.argument_size() <= len(self._domain)
+        constraint_range=constraint(self._domain)
+        print str(event)+".range():",constraint_range
+        if constraint_range.upper()<0.0:
+            pass
+        elif constraint_range.lower()>0.0:
+            self._negative[event]=constraint*0.0+1.0
+            self._empty=True
+        else:
+            self._negative[event]=constraint
+       
+    def new_termination(self,event,constraint):
+        self.new_raw_invariant(event,constraint)
 
     
 
@@ -169,14 +249,13 @@ class ConstrainedImageSet:
             gts.adjoin_outer_approximation(box,depth+4)
         return gts
         
-    def box_approximation(self,depth):
+    def box_outer_approximation(self,depth):
         return self.__outer_approximation(self._domain,depth)
 
     def outer_approximation(self,grid,depth):
         return self.grid_outer_approximation(grid,depth)
 
     def __outer_approximation(self,subdomain,depth):
-        assert len(self._always_negative_and_zero)==0
         eps=__builtin__.pow(2.0,-depth)
         for (id,constraint) in self._zero.items():
             if constraint(subdomain[:constraint.argument_size()]).upper() < 0.0 or constraint(subdomain).lower() > 0.0:
@@ -192,7 +271,7 @@ class ConstrainedImageSet:
         #    if constraint_range.lower() > 0.0 or constraint_range.upper()<0.0:
         #        return []
         for (id,constraint) in self._always_negative_and_zero.items():
-            constraint_range=constraint[:constraint.argument_size()](subdomain)
+            constraint_range=constraint(subdomain)
             if constraint_range.lower() > 0.0 or constraint_range.upper()<0.0:
                 return []
             lowdomain=Box(subdomain[:constraint.argument_size()])
@@ -218,33 +297,52 @@ class ConstrainedImageSet:
 
 
     def plot(self,filename,bounding_box=None,resolution=4):
+        print "PLOT"
         assert(self.function.result_size()==2)
         fig=Figure()
         if bounding_box==None:
             bounding_box=self.bounding_box()
         fig.set_bounding_box(bounding_box)
-        fig.draw(self.grid_outer_approximation(resolution))
+        approximation=self.grid_outer_approximation(resolution)
+        if empty(approximation):
+            print self,"is empty",
+        print approximation.measure()
+        fig.draw(approximation)
         #for box in self.grid_outer_approximation(resolution):
         #    fig.draw(box)
         fig.write(filename)
 
     def box_draw(self,figure,resolution=4):
-        assert(self.function.result_size()==2)
-        for box in self.outer_approximation(resolution):
-            fig.draw(box)
+        assert(self._function.result_size()==2)
+        for box in self.box_outer_approximation(resolution):
+            figure.draw(box)
 
     def grid_draw(self,figure,resolution=4):
-        assert(self.function.result_size()==2)
-        fig.draw(self.grid_outer_approximation(resolution))
+        assert(self._function.result_size()==2)
+        approximation=self.grid_outer_approximation(Grid(2),resolution)
+        print approximation.measure()
+        figure.draw(approximation)
+
+    def draw(self,figure,resolution=4):
+        self.box_draw(figure,resolution)
+        #self.grid_draw(figure,resolution)
 
     def __str__(self):
-        res="ConstrainedImageSet["+str(self._function.result_size())+","+str(self._function.argument_size())+"]("
+        domain=self._domain
+        invariants=[ str(id)+":"+str(constraint)+"<=0, "+str(constraint(domain)) \
+            for (id,constraint) in self._always_negative.items()]
+        increasing_invariants=[ str(id)+":"+str(constraint)+"<=0, "+str(constraint(domain)) \
+            for (id,constraint) in self._negative.items()]
+        activations=[ str(id)+":"+str(constraint)+"<=0, "+str(constraint(domain)) \
+            for (id,constraint) in self._negative.items()]
+        res="ConstrainedImageSet(\n"
         res+="( domain="+str(self._domain)
+        res+="( function="+str(self._function.function())
         res+=", codomain="+str(self._function(self._domain))
-        res+=", invariants="+str([ (str(id)+"<=0",constraint(self._domain[:constraint.argument_size()])) for (id,constraint) in self._always_negative.items()])
-        res+=", increasing_invariants="+str([ (str(id)+"<=0",constraint(self._domain[:constraint.argument_size()])) for (id,constraint) in self._negative.items()])
-        res+=", activations="+str([ (str(id)+">=0",constraint(self._domain[:constraint.argument_size()])) for (id,constraint) in self._positive.items()])
-        #res+=", guards="+str([ (str(id)+"<&=",constraint(self._domain)) for (id,constraint) in self._guards.items()])
+        res+=", invariants="+str(self._always_negative)
+        res+=", increasing_invariants="+str(self._negative)
+        res+=", activations="+str(self._positive)
+        res+=", equations="+str(self._zero)
         res+=" )"
         return res
     

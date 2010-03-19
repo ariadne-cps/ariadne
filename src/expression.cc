@@ -22,12 +22,14 @@
  */
 
 #include "expression.h"
+#include "space.h"
 #include "valuation.h"
 #include "vector.h"
 
 #include "numeric.h"
 #include "taylor_model.h"
 #include "differential.h"
+#include "propagator.h"
 
 #include "polynomial.h"
 #include "affine.h"
@@ -36,12 +38,6 @@
 #include "formula.h"
 
 namespace Ariadne {
-
-template<class T> inline String to_string(const T& t) {
-    std::stringstream ss;
-    ss << t;
-    return ss.str();
-}
 
 
 template<class T> inline
@@ -54,14 +50,15 @@ class ConstantExpression
     : public ExpressionInterface<R>
 {
   public:
+    ConstantExpression(const std::string& nm, const R& c) : _name(nm), _c(c) { }
     ConstantExpression(const R& c) : _name(to_string(c)), _c(c) { }
     operator R () const { return _c; }
     R value() const { return _c; }
     virtual String name() const { return this->_name; }
     virtual Operator type() const { return CNST; }
-    virtual Set<String> arguments() const { return Set<String>(); }
+    virtual Set<UntypedVariable> arguments() const { return Set<UntypedVariable>(); }
     virtual ConstantExpression<R>* clone() const { return new ConstantExpression<R>(*this); }
-    virtual std::ostream& write(std::ostream& os) const { return os << _c; }
+    virtual std::ostream& write(std::ostream& os) const { return os << _name; }
   protected:
     virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
   private:
@@ -75,6 +72,7 @@ class ConstantExpression<Real>
     : public ExpressionInterface<Real>
 {
   public:
+    ConstantExpression(const std::string& nm, const Real& c) : _name(nm), _c(c) { }
     ConstantExpression(const Float& c) : _name(to_string(c)), _c(c) { }
     ConstantExpression(const Interval& c) :  _name(to_string(c)), _c(c) { }
     operator Real() const { return _c; }
@@ -82,10 +80,9 @@ class ConstantExpression<Real>
     virtual String name() const { return this->_name; }
     virtual String operator_name() const { return "const"; }
     virtual Operator type() const { return CNST; }
-    virtual Set<String> arguments() const { return Set<String>(); }
+    virtual Set<UntypedVariable> arguments() const { return Set<UntypedVariable>(); }
     virtual ConstantExpression<Real>* clone() const { return new ConstantExpression<Real>(*this); }
-    virtual std::ostream& write(std::ostream& os) const {
-        if(_c.lower()==_c.upper()) { os<<midpoint(_c); } else { os<<_c; } return os; }
+    virtual std::ostream& write(std::ostream& os) const { return os << _name; }
   protected:
     virtual ExpressionInterface<Real>* simplify() const { return this->clone(); }
   private:
@@ -107,7 +104,7 @@ class VariableExpression
     virtual String operator_name() const { return "var"; }
     virtual Operator type() const { return VAR; }
     virtual VariableExpression<R>* clone() const { return new VariableExpression<R>(*this); }
-    virtual Set<String> arguments() const { Set<String> r; r.insert(this->name()); return r; }
+    virtual Set<UntypedVariable> arguments() const { Set<UntypedVariable> r; r.insert(this->_var); return r; }
     virtual std::ostream& write(std::ostream& os) const { return os << this->name(); }
   protected:
     virtual ExpressionInterface<R>* simplify() const {
@@ -135,7 +132,7 @@ class CoordinateExpression<Real>
     virtual String operator_name() const { return "coord"; }
     virtual Operator type() const { return IND; }
     virtual CoordinateExpression<Real>* clone() const { return new CoordinateExpression<Real>(*this); }
-    virtual Set<String> arguments() const { Set<String> r; r.insert(this->name()); return r; }
+    virtual Set<UntypedVariable> arguments() const { ARIADNE_FAIL_MSG("Cannot compute arguments of a CoordinateExpression"); }
     virtual std::ostream& write(std::ostream& os) const { return os << this->name(); }
   protected:
     virtual ExpressionInterface<Real>* simplify() const { return this->clone(); }
@@ -160,7 +157,7 @@ template<class R, class Op=Operator, class A=R> class UnaryExpression
     virtual String operator_name() const { return name(_op); }
     virtual Operator type() const { return static_cast<Operator>(_op); }
     virtual UnaryExpression<R,Op,A>* clone() const { return new UnaryExpression<R,Op,A>(_op,_arg._ptr); }
-    virtual Set<String> arguments() const { return this->_arg.arguments(); }
+    virtual Set<UntypedVariable> arguments() const { return this->_arg.arguments(); }
     virtual std::ostream& write(std::ostream& os) const;
   protected:
     virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
@@ -184,7 +181,7 @@ template<class R> class UnaryExpression<R,Operator,R>
     virtual String operator_name() const { return name(_op); }
     virtual Operator type() const { return static_cast<Operator>(_op); }
     virtual UnaryExpression<R,Op,A>* clone() const { return new UnaryExpression<R,Op,A>(_op,_arg._ptr); }
-    virtual Set<String> arguments() const { return this->_arg.arguments(); }
+    virtual Set<UntypedVariable> arguments() const { return this->_arg.arguments(); }
     virtual std::ostream& write(std::ostream& os) const;
   protected:
     virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
@@ -224,9 +221,8 @@ template<class R, class Op=Operator, class A1=R, class A2=A1> class BinaryExpres
     virtual String operator_name() const { return name(_op); }
     virtual Operator type() const { return static_cast<Operator>(_op); }
     virtual BinaryExpression<R,Op,A1,A2>* clone() const { return new BinaryExpression<R,Op,A1,A2>(_op,_arg1._ptr,_arg2._ptr); }
-    virtual Set<String> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
-    virtual std::ostream& write(std::ostream& os) const {
-        return os << "(" << _arg1 << symbol(_op) << _arg2 << ")"; }
+    virtual Set<UntypedVariable> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
+    virtual std::ostream& write(std::ostream& os) const;
   protected:
     virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
   public:
@@ -236,31 +232,19 @@ template<class R, class Op=Operator, class A1=R, class A2=A1> class BinaryExpres
 };
 
 
-//! A composed scalar function, based on an arthmetic operator.
-template<class R, class A> class BinaryExpression<R,Comparison,A,A>
-    : public ExpressionInterface<R>
-{
-    typedef Comparison Op; typedef A A1; typedef A A2;
-  public:
-    BinaryExpression(Op op, const ExpressionInterface<A1>& expr1, const ExpressionInterface<A2>& expr2)
-        : _op(op), _arg1(expr1.clone()), _arg2(expr2.clone()) { }
-    BinaryExpression(Op op, const ExpressionInterface<A1>* expr1, const ExpressionInterface<A2>* expr2)
-        : _op(op), _arg1(expr1), _arg2(expr2) { }
-    BinaryExpression(Op op, shared_ptr< const ExpressionInterface<A1> > expr1, shared_ptr< const ExpressionInterface<A2> > expr2)
-        : _op(op), _arg1(expr1), _arg2(expr2)  { }
-    virtual String operator_name() const { return name(_op); }
-    virtual Operator type() const { return static_cast<Operator>(_op); }
-    virtual BinaryExpression<R,Op,A1,A2>* clone() const { return new BinaryExpression<R,Op,A1,A2>(_op,_arg1._ptr,_arg2._ptr); }
-    virtual Set<String> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
-    virtual std::ostream& write(std::ostream& os) const {
-        return os << "(" << _arg1 << symbol(_op) << _arg2 << ")"; }
-  protected:
-    virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
-  public:
-    Op _op;
-    Expression<A1> _arg1;
-    Expression<A2> _arg2;
-};
+template<class R, class Op, class A1, class A2> inline
+std::ostream& BinaryExpression<R,Op,A1,A2>::write(std::ostream& os) const {
+    switch(_op) {
+        case AND: case OR:
+        case ADD: case SUB: case MUL: case DIV:
+        case EQ: case NEQ: case LT: case GT: case LEQ: case GEQ:
+            return os << "(" << _arg1 << symbol(_op) << _arg2 << ")";
+        default:
+            return os << name(_op) << "(" << _arg1 << "," << _arg2 << ")";
+    }
+}
+
+
 
 
 //! An expression in multiple variables of the same type
@@ -278,8 +262,8 @@ template<class R, class Op=Operator, class A=R> class MultiaryExpression
     virtual String operator_name() const { return name(_op); }
     virtual Operator type() const { return static_cast<Operator>(_op); }
     virtual MultiaryExpression<R,Op,A>* clone() const { return new MultiaryExpression<R,Op,A>(_op,_args); }
-    virtual Set<String> arguments() const {
-        Set<String> res; for(uint i=0; i!=_args.size(); ++i) { res.adjoin(_args[i].arguments()); } return res; }
+    virtual Set<UntypedVariable> arguments() const {
+        Set<UntypedVariable> res; for(uint i=0; i!=_args.size(); ++i) { res.adjoin(_args[i].arguments()); } return res; }
     virtual std::ostream& write(std::ostream& os) const {
         return os << _op << _args; }
 /*
@@ -306,7 +290,7 @@ template<class R> Expression<R>::Expression(const R& c)
 }
 
 template<class R> Expression<R>::Expression(const Constant<R>& c)
-    : _ptr(new ConstantExpression<R>(c.value()))
+    : _ptr(new ConstantExpression<R>(c.name(),c.value()))
 {
 }
 
@@ -317,7 +301,8 @@ template<class R> Expression<R>::Expression(const Variable<R>& v)
 
 Expression<Real>::Expression(const double& c) : _ptr(new ConstantExpression<Real>(c)) { }
 Expression<Real>::Expression(const Interval& c) : _ptr(new ConstantExpression<Real>(c)) { }
-Expression<Real>::Expression(const Constant<Real>& c) : _ptr(new ConstantExpression<Real>(c.value())) { }
+Expression<Real>::Expression(const Real& c) : _ptr(new ConstantExpression<Real>(c)) { }
+Expression<Real>::Expression(const Constant<Real>& c) : _ptr(new ConstantExpression<Real>(c.name(),c.value())) { }
 Expression<Real>::Expression(const Variable<Real>& v) : _ptr(new VariableExpression<Real>(v)) { }
 
 
@@ -338,7 +323,7 @@ template<class R> List< Expression<R> > Expression<R>::subexpressions() const {
             res.append(bptr->_arg2);
         }
         else {
-            std::cerr<<"Warning: subexpressions of "<<*this<<"\n";
+            std::cerr<<"WARNING: subexpressions of "<<*this<<"\n";
         }
     }
     return res;
@@ -366,16 +351,29 @@ List< Expression<Real> > Expression<Real>::subexpressions() const {
 
 
 bool identical(const Expression<Real>& e1, const Expression<Real>& e2) {
-    const ExpressionInterface<Real>* ptr1=e1._ptr.operator->();
-    const ExpressionInterface<Real>* ptr2=e2._ptr.operator->();
-    const VariableExpression<Real>* vptr1 = dynamic_cast<const VariableExpression<Real>*>(ptr1);
-    if(e1._ptr==e2._ptr) {
-        return true;
-    } else if(vptr1) {
-        const VariableExpression<Real>* vptr2 = dynamic_cast<const VariableExpression<Real>*>(ptr2);
-        return vptr2 && vptr1->variable()==vptr2->variable();
-    } else {
-        ARIADNE_FAIL_MSG("Cannot test two expressions for identity unless equal by reference or first is a variable.");
+   if(e1._ptr==e2._ptr) { return true; }
+    if(e1.op()!=e2.op()) { return false; }
+    const VariableExpression<Real> *vptr1, *vptr2;
+    const ConstantExpression<Real> *cptr1, *cptr2;
+    switch(e1.op()) {
+        case VAR:
+            vptr1 = dynamic_cast<const VariableExpression<Real>*>(e1._raw_pointer());
+            vptr2 = dynamic_cast<const VariableExpression<Real>*>(e2._raw_pointer());
+            assert(vptr1); assert(vptr2);
+            return (vptr1->variable()==vptr2->variable());
+        case CNST:
+            cptr1 = dynamic_cast<const ConstantExpression<Real>*>(e1._raw_pointer());
+            cptr2 = dynamic_cast<const ConstantExpression<Real>*>(e2._raw_pointer());
+            assert(cptr1); assert(cptr2);
+            return (cptr1->value()==cptr2->value());
+        default:
+            List< Expression<Real> > sub1=e1.subexpressions();
+            List< Expression<Real> > sub2=e2.subexpressions();
+            bool result=true;
+            for(uint i=0; i!=sub1.size(); ++i) {
+                result = result && identical(sub1[i],sub2[i]);
+            }
+            return result;
     }
 }
 
@@ -486,8 +484,10 @@ Expression<Real> operator*(Expression<Real> e1, Expression<Real> e2) {
 Expression<Real> operator/(Expression<Real> e1, Expression<Real> e2) {
     return make_expression<Real>(DIV,e1,e2); }
 
-//Expression<Real> pow(Expression<Real> e, int n) { }
-//    return make_expression(POW,e,n); }
+Expression<Real> pow(Expression<Real> e, int n) {
+    ARIADNE_NOT_IMPLEMENTED;
+    //return make_expression(POW,e,n);
+}
 
 Expression<Real> neg(Expression<Real> e) {
     return make_expression<Real>(NEG,e); }
@@ -505,9 +505,15 @@ Expression<Real> sin(Expression<Real> e) {
     return make_expression<Real>(SIN,e); }
 Expression<Real> cos(Expression<Real> e) {
     return make_expression<Real>(COS,e); }
-
 Expression<Real> tan(Expression<Real> e) {
     return make_expression<Real>(TAN,e); }
+
+Expression<Real> max(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Real>(MAX,e1,e2); }
+Expression<Real> min(Expression<Real> e1, Expression<Real> e2) {
+    return make_expression<Real>(MIN,e1,e2); }
+Expression<Real> abs(Expression<Real> e) {
+    return make_expression<Real>(ABS,e); }
 
 
 
@@ -516,8 +522,9 @@ inline void _set_constant(Interval& r, const Interval& c) { r=c; }
 inline void _set_constant(TaylorModel& r, const Interval& c) { r.clear(); r+=c; }
 inline void _set_constant(Differential<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
 inline void _set_constant(Differential<Interval>& r, const Interval& c) { r.clear(); r+=c; }
+inline void _set_constant(Propagator<Interval>& r, const Interval& c) { r=c; }
 
-Boolean _compute(Comparison cmp, const String& s1, const String& s2) {
+Boolean _compare(Operator cmp, const String& s1, const String& s2) {
     switch(cmp) {
         case EQ:  return s1==s2;
         case NEQ: return s1!=s2;
@@ -525,7 +532,7 @@ Boolean _compute(Comparison cmp, const String& s1, const String& s2) {
     }
 }
 
-Boolean _compute(Comparison cmp, const Integer& z1, const Integer& z2) {
+Boolean _compare(Operator cmp, const Integer& z1, const Integer& z2) {
     switch(cmp) {
         case EQ:  return z1==z2;
         case NEQ: return z1!=z2;
@@ -537,7 +544,7 @@ Boolean _compute(Comparison cmp, const Integer& z1, const Integer& z2) {
     }
 }
 
-template<class X> Tribool _compute(Comparison cmp, const X& x1, const X& x2) {
+template<class X> Tribool _compare(Operator cmp, const X& x1, const X& x2) {
     switch(cmp) {
         case GT: case GEQ: return x1>x2;
         case LT: case LEQ: return x1<x2;
@@ -632,10 +639,10 @@ Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
     if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
     const ConstantExpression<Boolean>* cptr=dynamic_cast<const ConstantExpression<Boolean>*>(eptr);
     if(cptr) { return cptr->value(); }
-    const BinaryExpression<Boolean,Comparison,String>* bsptr=dynamic_cast<const BinaryExpression<Boolean,Comparison,String>*>(eptr);
-    if(bsptr) { return _compute(bsptr->_op,evaluate(bsptr->_arg1,x),evaluate(bsptr->_arg2,x)); }
-    const BinaryExpression<Boolean,Comparison,Integer>* bzptr=dynamic_cast<const BinaryExpression<Boolean,Comparison,Integer>*>(eptr);
-    if(bzptr) { return _compute(bsptr->_op,evaluate(bzptr->_arg1,x),evaluate(bzptr->_arg2,x)); }
+    const BinaryExpression<Boolean,Operator,String>* bsptr=dynamic_cast<const BinaryExpression<Boolean,Operator,String>*>(eptr);
+    if(bsptr) { return _compare(bsptr->_op,evaluate(bsptr->_arg1,x),evaluate(bsptr->_arg2,x)); }
+    const BinaryExpression<Boolean,Operator,Integer>* bzptr=dynamic_cast<const BinaryExpression<Boolean,Operator,Integer>*>(eptr);
+    if(bzptr) { return _compare(bsptr->_op,evaluate(bzptr->_arg1,x),evaluate(bzptr->_arg2,x)); }
     ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a Boolean using variables "<<x);
 }
 
@@ -666,8 +673,8 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Continuou
     const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
     const BinaryExpression<Tribool>* bptr=dynamic_cast<const BinaryExpression<Tribool>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
-    const BinaryExpression<Tribool,Comparison,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Comparison,Real,Real>*>(eptr);
-    if(brptr) { return _compute(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
+    const BinaryExpression<Tribool,Operator,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+    if(brptr) { return _compare(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
     ARIADNE_FAIL_MSG("");
 }
 
@@ -684,12 +691,25 @@ template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuatio
     ARIADNE_FAIL_MSG("");
 }
 
+template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,X>& x) {
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
+    const BinaryExpression<Real>* bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
+    if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
+    const UnaryExpression<Real>* uptr=dynamic_cast<const UnaryExpression<Real>*>(eptr);
+    if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
+    const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
+    if(cptr) { X r=x.begin()->second*0; _set_constant(r,cptr->value()); return r; }
+    const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
+    if(vptr) { ARIADNE_ASSERT_MSG(x.has_key(vptr->variable()),"Valuation "<<x<<" does not contain variable "<<vptr->variable()<<" used in expression "<<e); return x[vptr->variable()]; }
+    ARIADNE_FAIL_MSG("");
+}
+
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x) {
     const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
     const BinaryExpression<Tribool>* bptr=dynamic_cast<const BinaryExpression<Tribool>*>(eptr);
     if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
-    const BinaryExpression<Tribool,Comparison,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Comparison,Real,Real>*>(eptr);
-    if(brptr) { return _compute(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
+    const BinaryExpression<Tribool,Operator,Real,Real>* brptr=dynamic_cast<const BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+    if(brptr) { return _compare(bptr->_op,evaluate(brptr->_arg1,x),evaluate(brptr->_arg2,x)); }
     ARIADNE_FAIL_MSG("");
 }
 
@@ -700,7 +720,7 @@ template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x) {
     const UnaryExpression<Real>* uptr=dynamic_cast<const UnaryExpression<Real>*>(eptr);
     if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
     const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
-    if(cptr) { X r; _set_constant(r,cptr->value()); return r; }
+    if(cptr) { X r=x[0]*0; _set_constant(r,cptr->value()); return r; }
     const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
     if(iptr) { return x[iptr->index()]; }
     ARIADNE_FAIL_MSG("");
@@ -709,11 +729,20 @@ template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x) {
 template Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<Float>& x);
 template Float evaluate(const Expression<Real>& e, const ContinuousValuation<Float>& x);
 
+
+template Float evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Float>& x);
+template Interval evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Interval>& x);
+template Differential<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Float> >& x);
+template Differential<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Interval> >& x);
+template TaylorModel evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,TaylorModel>& x);
+template Propagator<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Propagator<Interval> >& x);
+
 template Float evaluate(const Expression<Real>& e, const Vector<Float>& x);
 template Interval evaluate(const Expression<Real>& e, const Vector<Interval>& x);
 template Differential<Float> evaluate(const Expression<Real>& e, const Vector< Differential<Float> >& x);
 template Differential<Interval> evaluate(const Expression<Real>& e, const Vector< Differential<Interval> >& x);
 template TaylorModel evaluate(const Expression<Real>& e, const Vector<TaylorModel>& x);
+template Propagator<Interval> evaluate(const Expression<Real>& e, const Vector< Propagator<Interval> >& x);
 
 template<class X, class Y> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<Y>& v, const Y& c) {
     return Expression<X>(e.clone()); }
@@ -723,7 +752,7 @@ template<class X> Expression<X> substitute_variable(const VariableExpression<X>&
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c) {
     const ExpressionInterface<X>* eptr=e._raw_pointer();
-    const BinaryExpression<X,Comparison,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Comparison,Y,Y>*>(eptr);
+    const BinaryExpression<X,Operator,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Operator,Y,Y>*>(eptr);
     if(aptr) { return make_expression<X>(aptr->_op,substitute(aptr->_arg1,v,c),substitute(aptr->_arg2,v,c)); }
     const BinaryExpression<X>* bptr=dynamic_cast<const BinaryExpression<X>*>(eptr);
     if(bptr) { return make_expression<X>(bptr->_op,substitute(bptr->_arg1,v,c),substitute(bptr->_arg2,v,c)); }
@@ -740,12 +769,50 @@ template Expression<Tribool> substitute(const Expression<Tribool>& e, const Vari
 template Expression<Tribool> substitute(const Expression<Tribool>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
 
-template<class X> Expression<X> simplify(const Expression<X>& e) {
+namespace {
+
+template<class X> inline Expression<X> _simplify(const Expression<X>& e) {
     return e;
 }
 
+template<> inline Expression<Real> _simplify(const Expression<Real>& e) {
+    //return e;
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
+    //const UnaryExpression<Real>* uptr=static_cast<const UnaryExpression<Real>*>(eptr);
+    const BinaryExpression<Real>* bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
+    if(!bptr) { return e; }
+    Expression<Real> sarg1=simplify(bptr->_arg1);
+    Expression<Real> sarg2=simplify(bptr->_arg2);
+    Expression<Real> zero(0.0);
+    Expression<Real> one(1.0);
+    switch(eptr->type()) {
+        case ADD:
+            if(identical(sarg2,zero)) { return sarg1; }
+            if(identical(sarg1,zero)) { return sarg2; }
+            break;
+        case SUB:
+            if(identical(sarg2,zero)) { return sarg1; }
+            if(identical(sarg1,zero)) { return -sarg2; }
+            break;
+        case MUL:
+            if(identical(sarg1,zero)) { return sarg1; }
+            if(identical(sarg2,zero)) { return sarg2; }
+            if(identical(sarg1,one)) { return sarg2; }
+            if(identical(sarg2,one)) { return sarg1; }
+            break;
+        case DIV:
+            if(identical(sarg1,zero)) { return sarg1; }
+            if(identical(sarg1,one)) { return rec(sarg2); }
+            if(identical(sarg2,one)) { return sarg1; }
+        default:
+            break;
+    }
+    return e;
 
-template<> Expression<Tribool> simplify(const Expression<Tribool>& e) {
+}
+
+
+template<> inline Expression<Tribool> _simplify(const Expression<Tribool>& e) {
     const ExpressionInterface<Tribool>* eptr=e._ptr.operator->();
     const UnaryExpression<Tribool>* uptr=dynamic_cast<const UnaryExpression<Tribool>*>(eptr);
     if(uptr) {
@@ -786,6 +853,12 @@ template<> Expression<Tribool> simplify(const Expression<Tribool>& e) {
         }
     }
     return e;
+}
+
+} // namespace
+
+template<class X> Expression<X> simplify(const Expression<X>& e) {
+    return Ariadne::_simplify(e);
 }
 
 template Expression<Real> simplify(const Expression<Real>& e);
@@ -890,6 +963,7 @@ Affine<X> affine(const Expression<Real>& e, const Space<Real>& s) {
 
 template Affine<Interval> affine(const Expression<Real>&, const Space<Real>&);
 template Polynomial<Interval> polynomial(const Expression<Real>&, const Space<Real>&);
+template Polynomial<Real> polynomial(const Expression<Real>&, const Space<Real>&);
 
 Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
 {
@@ -903,10 +977,141 @@ Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
     const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
     if(vptr) { return Expression<Real>(new CoordinateExpression<Real>(s.index(vptr->variable()))); }
     const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-    ARIADNE_ASSERT_MSG(!iptr,"Cannot convert numbered variable");
+    if(iptr) { return e; }
+    ARIADNE_FAIL_MSG("Cannot convert numbered variable");
+}
+
+Expression<Real> derivative(const Expression<Real>& e, const Variable<Real>& v)
+{
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
+    const VariableExpression<Real>* vptr=static_cast<const VariableExpression<Real>*>(eptr);
+    const UnaryExpression<Real>* uptr=static_cast<const UnaryExpression<Real>*>(eptr);
+    const BinaryExpression<Real>* bptr=static_cast<const BinaryExpression<Real>*>(eptr);
+    switch(eptr->type()) {
+        case CNST:
+            return Expression<Real>(0.0);
+        case VAR:
+            if(vptr->variable()==v) { return Expression<Real>(1.0); }
+            else { return Expression<Real>(0.0); }
+        case ADD:
+            return simplify( derivative(bptr->_arg1,v)+derivative(bptr->_arg2,v) );
+        case SUB:
+            return simplify( derivative(bptr->_arg1,v)-derivative(bptr->_arg2,v) );
+        case MUL:
+            return simplify( bptr->_arg1*derivative(bptr->_arg2,v)+derivative(bptr->_arg1,v)*bptr->_arg2 );
+        case DIV:
+            return simplify( derivative(bptr->_arg1 * rec(bptr->_arg2),v) );
+        case NEG:
+            return simplify( - derivative(uptr->_arg,v) );
+        case REC:
+            return simplify( - derivative(uptr->_arg,v) * rec(sqr(uptr->_arg)) );
+        case SQR:
+            return simplify( 2 * derivative(uptr->_arg,v) * uptr->_arg );
+        case EXP:
+            return derivative(uptr->_arg,v) * uptr->_arg;
+        case LOG:
+            return derivative(uptr->_arg,v) * rec(uptr->_arg);
+        case SIN:
+            return derivative(uptr->_arg,v) * cos(uptr->_arg);
+        case COS:
+            return -derivative(uptr->_arg,v) * sin(uptr->_arg);
+        case TAN:
+            return derivative(uptr->_arg,v) * (1-sqr(uptr->_arg));
+        default:
+            ARIADNE_THROW(std::runtime_error,"derivative(RealExpression,RealVariable)",
+                          "Cannot compute derivative of "<<e<<"\n");
+    }
 }
 
 
+Expression<Real> indicator(Expression<tribool> e, Sign sign) {
+    ExpressionInterface<tribool>* eptr=const_cast<ExpressionInterface<tribool>*>(e._ptr.operator->());
+    ConstantExpression<Tribool>* cnptr;
+    BinaryExpression<Tribool,Operator,Real,Real>* cptr;
+    BinaryExpression<Tribool,Operator,Tribool,Tribool>* bptr;
+    UnaryExpression<tribool,Operator,Tribool>* nptr;
+    tribool value;
+    switch(eptr->type()) {
+        case CNST:
+            cnptr=dynamic_cast<ConstantExpression<Tribool>*>(eptr);
+            value=( sign==positive ? cnptr->value() : !cnptr->value() );
+            if(value==true) { return RealExpression(+1.0); }
+            else if(value==false) {  return RealExpression(-1.0); }
+            else { return RealExpression(0.0); }
+        case GEQ: case GT:
+            cptr=dynamic_cast<BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+            assert(cptr);
+            if(sign==positive) { return cptr->_arg1-cptr->_arg2; }
+            else { return cptr->_arg2-cptr->_arg1; }
+        case LEQ: case LT:
+            cptr=dynamic_cast<BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
+            assert(cptr);
+            if(sign==positive) { return cptr->_arg2-cptr->_arg1; }
+            else { return cptr->_arg1-cptr->_arg2; }
+        case AND:
+            bptr=dynamic_cast<BinaryExpression<Tribool,Operator,Tribool,Tribool>*>(eptr);
+            assert(bptr);
+            return min(indicator(bptr->_arg1,sign),indicator(bptr->_arg2,sign));
+        case OR:
+            bptr=dynamic_cast<BinaryExpression<tribool,Operator,Tribool,Tribool>*>(eptr);
+            assert(bptr);
+            return max(indicator(bptr->_arg1,sign),indicator(bptr->_arg2,sign));
+        case NOT:
+            nptr=dynamic_cast<UnaryExpression<tribool,Operator,Tribool>*>(eptr);
+            assert(nptr);
+            return neg(indicator(nptr->_arg,sign));
+        default:
+            ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << *eptr);
+    }
+}
+
+
+tribool opposite(Expression<tribool> e1, Expression<tribool> e2) {
+    // Simple test if two expressions are negations of each other.
+    // Current
+
+    typedef BinaryExpression<Tribool,Operator,Real,Real> ComparisonInterface;
+
+    ExpressionInterface<tribool>* e1ptr=const_cast<ExpressionInterface<tribool>*>(e1._raw_pointer());
+    ExpressionInterface<tribool>* e2ptr=const_cast<ExpressionInterface<tribool>*>(e2._raw_pointer());
+
+    Operator e1op, e2op;
+    switch(e1ptr->type()) {
+        case GEQ: case GT:
+            e1op=GEQ; break;
+        case LEQ: case LT:
+            e1op=LEQ; break;
+        default:
+            return indeterminate;
+    }
+    switch(e2ptr->type()) {
+        case GEQ: case GT:
+            e2op=GEQ; break;
+        case LEQ: case LT:
+            e2op=LEQ; break;
+        default:
+            return indeterminate;
+    }
+
+    // Both expressions are <=,<,>=,> comparisons
+    ComparisonInterface* c1ptr=dynamic_cast<ComparisonInterface*>(e1ptr);
+    ComparisonInterface* c2ptr=dynamic_cast<ComparisonInterface*>(e2ptr);
+    assert(c1ptr); assert(c2ptr);
+    Expression<Real> e1arg1=c1ptr->_arg1;
+    Expression<Real> e1arg2=c1ptr->_arg2;
+    Expression<Real> e2arg1=c2ptr->_arg1;
+    Expression<Real> e2arg2=c2ptr->_arg2;
+
+    // Test if the expressions are of the form a1<=a2; a1>=a2 or a1<=a2; a2<=a1
+    if(e1op==e2op) {
+        if(identical(e1arg1,e2arg2) && identical(e1arg2,e2arg1)) { return true; }
+        else { return indeterminate; }
+    } else {
+        if(identical(e1arg1,e2arg1) && identical(e1arg2,e2arg2)) { return true; }
+        else { return indeterminate; }
+    }
+
+}
 
 
 } // namespace Ariadne

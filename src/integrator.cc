@@ -162,16 +162,16 @@ TaylorIntegrator::flow(const VectorFunction& f, const IVector& dp, const IVector
 
 /*
     VectorTaylorFunction phi0(VectorTaylorFunction(nx,ScalarTaylorFunction(dom)));
-    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::variable(dom,i); }
+    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::coordinate(dom,i); }
     ARIADNE_LOG(0,"phi0="<<phi0<<"\n");
 */
 
     VectorTaylorFunction phi0(nx,ScalarTaylorFunction(dom));
-    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::variable(dom,np+i); }
+    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::coordinate(dom,np+i); }
     ARIADNE_LOG(3,"phi0="<<phi0<<"\n");
 
     VectorTaylorFunction phi(np+nx,ScalarTaylorFunction(dom));
-    for(uint i=0; i!=np; ++i) { phi[i]=ScalarTaylorFunction::variable(dom,i); }
+    for(uint i=0; i!=np; ++i) { phi[i]=ScalarTaylorFunction::coordinate(dom,i); }
     for(uint i=0; i!=nx; ++i) { phi[np+i]=ScalarTaylorFunction::constant(dom,bx[i]); }
 
     /*

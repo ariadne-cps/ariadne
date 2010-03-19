@@ -70,9 +70,12 @@ class Vector
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     Vector(size_t n, const X& t)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
-    //! \brief Construct a vector of size \a n, with values initialised from the C-style array beginning at \a ptr.
-    template<class XX> Vector(size_t n, const XX* ptr)
+        //! \brief Construct a vector of size \a n, with values initialised from the C-style array beginning at \a ptr.
+        template<class XX> Vector(size_t n, const XX* ptr)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
+    //! \brief Construct a list..
+    template<class XX> explicit Vector(const std::vector<XX>& lst)
+        : ublas::vector<X>(lst.size()) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=lst[i]; } }
     //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
     Vector(size_t n, const double& t0, const double& t1, ...);
     //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
@@ -272,7 +275,7 @@ bool operator!=(const Vector<X1>& v1, const Vector<X2>& v2)
 template<class X1, class X2>
 bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
 {
-    if(v1.size()!=v2.size()) { return false; }
+    if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
     for(size_t i=0; i!=v1.size(); ++i) {
         if(v1[i]<v2[i]) { return true; }
         else if(v1[i]>v2[i]) { return false; }

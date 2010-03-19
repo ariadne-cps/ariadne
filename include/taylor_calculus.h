@@ -48,7 +48,7 @@ class VectorFunction;
 template<class X> class Vector;
 class Box;
 class TaylorModel;
-class TaylorSet;
+class TaylorImageSet;
 class VectorTaylorFunction;
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
@@ -73,7 +73,7 @@ class TaylorCalculus
     typedef TaylorModel::Accuracy AccuracyType;
     typedef TaylorModel VariableType;
     typedef TaylorModel TimeModelType;
-    typedef TaylorSet SetModelType;
+    typedef TaylorImageSet SetModelType;
     typedef VectorTaylorFunction MapModelType;
     typedef VectorTaylorFunction FlowModelType;
     typedef ScalarTaylorFunction PredicateModelType;
@@ -205,8 +205,6 @@ class TaylorCalculus
     //! \brief A model for the real-valued function \a g over the domain \a d.
     PredicateModelType predicate_model(const ScalarFunctionType& g, const BoxType& d) const;
 
-    //! \brief A model for the real-valued function \a g over the domain \a d. \deprecated
-    PredicateModelType predicate_model(const VectorFunctionType& g, const BoxType& d) const;
 
     //! \brief A model for the constant time \a t over the box \a d.
     TimeModelType time_model(const Float& t, const BoxType& d) const;

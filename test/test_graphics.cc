@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
     Matrix<Float> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
-    TaylorSet ts1(afn1,Box::unit_box(3));
+    TaylorImageSet ts1(afn1,Box::unit_box(3));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);

@@ -147,13 +147,13 @@ int main()
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    HybridAutomaton watertank_system;
+    MonolithicHybridAutomaton watertank_system;
 
     /// Create four discrete states
-    DiscreteState l1(1);
-    DiscreteState l2(2);
-    DiscreteState l3(3);
-    DiscreteState l4(4);
+    AtomicDiscreteLocation l1(1);
+    AtomicDiscreteLocation l2(2);
+    AtomicDiscreteLocation l3(3);
+    AtomicDiscreteLocation l4(4);
 
     /// Create the discrete events
     DiscreteEvent e12(12);
@@ -236,7 +236,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(3, 1.00001,1.00001, 1.00001,1.00001, 0.00001,0.00001);
+    Box initial_box(3, 1.00001,1.00001, 1.00000,1.00001, 0.0000,0.0000);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
 

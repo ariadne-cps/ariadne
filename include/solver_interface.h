@@ -32,6 +32,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "logging.h"
+
 namespace Ariadne {
 
 typedef unsigned int uint;
@@ -42,6 +44,8 @@ template<class T> class List;
 template<class X> class Vector;
 class VectorFunction;
 class VectorTaylorFunction;
+class ScalarFunction;
+class ScalarTaylorFunction;
 
 class SolverException : public std::runtime_error
 {
@@ -58,14 +62,18 @@ class NoSolutionException : public SolverException
 };
 
 
+
 /*! \ingroup EvaluatorInterfaces \ingroup Solvers
  *  \brief %Interface for solving (nonlinear) equations.
  */
 class SolverInterface
+    : public Loggable
 {
   public:
     /*! \brief Virtual destructor. */
     virtual ~SolverInterface() { };
+    /*! \brief Make a dynamically-allocated copy. */
+    virtual SolverInterface* clone() const = 0;
 
     /*! \brief The maximum permissible error of the solution. */
     virtual double maximum_error() const = 0;
@@ -82,11 +90,17 @@ class SolverInterface
     /*! \brief Solve \f$f(x)=x\f$, starting in the interval point \a pt. */
     virtual Vector<Interval> fixed_point(const VectorFunction& f,const Vector<Interval>& pt) const = 0;
 
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<Interval> > solve(const VectorFunction& f,const Vector<Interval>& pt) const = 0;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const = 0;
+    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Throws a SolverException if there is not a unique solution. */
+    virtual Vector<Interval> solve(const VectorFunction& f,const Vector<Interval>& pt) const = 0;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    virtual VectorTaylorFunction implicit(const VectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const = 0;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    virtual ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const = 0;
 
+    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Returns a set of boxes for which it can be <em>proved</em> that
+     *  a solution exists in the box. This means that some solutions may be omitted if they are not sufficiently robust.
+     */
+    virtual Set< Vector<Interval> > solve_all(const VectorFunction& f,const Vector<Interval>& pt) const = 0;
 };
 
 

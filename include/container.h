@@ -33,6 +33,7 @@
 #include <cstdarg>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <vector>
 #include <set>
@@ -44,27 +45,10 @@ namespace Ariadne {
 
 typedef std::string String;
 
-// Functionality for building arrays or std::vector from comma-separated lists
-class ArrayBuilderTag {};
-static ArrayBuilderTag build_array;
-
-template<class T>
-inline std::vector<T> operator,(ArrayBuilderTag, const T& t) {
-    std::vector<T> v; v.push_back(t); return v; }
-
-template<class T>
-inline std::vector<T> operator,(const T& t1, const T& t2) {
-    std::vector<T> v; v.push_back(t1); v.push_back(t2); return v; }
-template<class T>
-inline std::vector<T> operator,(const std::vector<T>& v, const T& t) {
-    std::vector<T> r(v); r.push_back(t); return r; }
-
 inline std::vector<std::string> operator,(const std::string& s1, const char* s2) {
     std::vector<std::string> v; v.push_back(std::string(s1)); v.push_back(std::string(s2)); return v; }
 inline std::vector<std::string> operator,(const std::vector<std::string>& v1, const char* s2) {
     std::vector<std::string> r(v1); r.push_back(std::string(s2)); return r; }
-inline std::vector<std::string> operator,(ArrayBuilderTag, const char* s) {
-    std::vector<std::string> v; v.push_back(std::string(s)); return v; }
 
 
 template<class T> inline bool contains(const std::set<T>& s, const T& t) {
@@ -99,6 +83,11 @@ template<class K,class V,class C> inline bool has_key(const std::map<K,V,C>& m, 
 
 // Temporary home for useful auxiliary classes
 
+template<class T> std::string to_str(const T& t) {
+    std::stringstream ss; ss<<t; return ss.str(); }
+template<class T> std::string to_string(const T& t) {
+    std::stringstream ss; ss<<t; return ss.str(); }
+
 template<class T1, class T2> class Pair
     : public std::pair<T1,T2>
 {
@@ -124,9 +113,13 @@ template<class T> class List
 {
   public:
     List() : std::vector<T>() { }
+    List(unsigned int n) : std::vector<T>(n) { }
+    List(unsigned int n, const T& t) : std::vector<T>(n,t) { }
     List(const std::vector<T>& l) : std::vector<T>(l) { }
+    template<class X> List(const List<X>& l) : std::vector<T>(l.begin(),l.end()) { }
     template<class I> List(const I& b, const I& e) : std::vector<T>(b,e) { }
     void append(const T& t) { this->push_back(t); }
+    void append(const List<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
 };
 
 template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) {
@@ -137,15 +130,33 @@ template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) 
     return r;
 }
 
+template<class T> inline List<T> catenate(const List<T>& l1, const T& t2) {
+    List<T> r(l1);
+    r.append(t2);
+    return r;
+}
+
+
+template<class T>
+inline List<T> operator,(const T& t1, const T& t2) {
+    List<T> v; v.push_back(t1); v.push_back(t2); return v; }
+template<class T>
+inline List<T> operator,(const std::vector<T>& v, const T& t) {
+    List<T> r(v); r.push_back(t); return r; }
+
 template<class T> class Set
     : public std::set<T>
 {
+    template<class TT, class KK> class KeyEqual {
+        bool operator()(const TT& t, const KK& k) { return t.key()==k; } };
   public:
     Set() : std::set<T>() { }
     Set(const std::set<T>& s) : std::set<T>(s) { }
+    explicit Set(const std::vector<T>& l) : std::set<T>(l.begin(),l.end()) { }
+    template<class I> Set(const I& b, const I& e) : std::set<T>(b,e) { }
 
     bool contains(const T& t) {
-        return this->find(t)==this->end(); }
+        return this->find(t)!=this->end(); }
     bool subset(const std::set<T>& s) {
         for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
             if(!this->contains(*iter)) { return false; } } return true; }
@@ -178,19 +189,48 @@ template<class K, class V> class Map
         : std::map<K,V>() { }
     Map<K,V>(const std::map<K,V>& m)
         : std::map<K,V>(m) { }
+    template<class W> explicit Map<K,V>(const std::map<K,W>& m) {
+        for(typename std::map<K,W>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
+            this->insert(iter->first,V(iter->second)); } }
     V& operator[](const K& k) {
         return this->std::map<K,V>::operator[](k); }
     const V& operator[](const K& k) const { typename std::map<K,V>::const_iterator p=this->find(k);
         assert(p!=this->end()); return p->second; }
     bool has_key(const K& k) const {
         return this->find(k)!=this->end(); }
+    V& value(const K& k) {
+        typename std::map<K,V>::iterator iter=this->find(k);
+        assert(iter!=this->end()); return iter->second; }
+    const V& value(const K& k) const {
+        typename std::map<K,V>::const_iterator iter=this->find(k);
+        assert(iter!=this->end()); return iter->second; }
     void insert(const K& k, const V& v) {
         this->std::map<K,V>::insert(std::make_pair(k,v)); }
+    void remove_keys(const Set<K>& s) {
+        for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) { this->erase(*iter); } }
+    Set<K> keys() const {
+        Set<K> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+            res.insert(iter->first); } return res; }
+    List<V> values() const {
+        List<V> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+            res.append(iter->second); } return res; }
     using std::map<K,V>::insert;
 };
 template<class K,class V> inline Map<K,V> join(const Map<K,V>& m1, const Map<K,V>& m2) {
     Map<K,V> r(m1); for(typename Map<K,V>::const_iterator i=m2.begin(); i!=m2.end(); ++i) { r.insert(*i); } return r; }
 
+
+template<class T> inline Array<T> make_array(const T& t) { return Array<T>(1u,t); }
+template<class T> inline Array<T> make_array(const List<T>& lst) { return Array<T>(lst.begin(),lst.end()); }
+template<class T> inline Array<T> make_array(const std::vector<T>& vec) { return Array<T>(vec.begin(),vec.end()); }
+template<class T> inline Array<T> make_array(const array<T>& ary) { return Array<T>(ary); }
+template<class T> inline Array<T> make_array(const Array<T>& ary) { return Array<T>(ary); }
+
+template<class T> inline List<T> make_list(const T& t) { return List<T>(1u,t); }
+template<class T> inline List<T> make_list(const List<T>& lst) { return lst; }
+template<class T> inline List<T> make_list(const std::vector<T>& vec) { return List<T>(vec); }
+template<class T> inline List<T> make_list(const array<T>& ary) { return List<T>(ary); }
+template<class T> inline List<T> make_list(const Array<T>& ary) { return List<T>(ary); }
 
 
 } // namespace Ariadne

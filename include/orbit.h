@@ -67,21 +67,23 @@ template<class ES> class Orbit;
 template<class BS> class ListSet;
 class Point;
 class InterpolatedCurve;
+class Grid;
 class GridCell;
 class GridTreeSet;
+class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
 class HybridTime;
 
-class DiscreteState;
+class DiscreteLocation;
 template<class BS> class HybridBasicSet;
 
 typedef HybridBasicSet<Point> HybridPoint;
 typedef HybridBasicSet<Box> HybridBox;
-typedef HybridBasicSet<TaylorSet> HybridTaylorSet;
+typedef HybridBasicSet<TaylorImageSet> HybridTaylorImageSet;
 typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
-typedef ListSet<TaylorSet> TaylorSetList;
-typedef ListSet<HybridTaylorSet> HybridTaylorSetList;
+typedef ListSet<TaylorImageSet> TaylorImageSetList;
+typedef ListSet<HybridTaylorImageSet> HybridTaylorImageSetList;
 
 template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
 
@@ -117,10 +119,12 @@ class Orbit<GridCell>
     typedef GridCell EnclosureType;
     typedef GridTreeSet EnclosureListType;
 
-    Orbit(const GridCell&);
-    Orbit(const GridCell&, const GridTreeSet&,
+    Orbit(const Grid&, const GridCell&);
+    Orbit(const GridTreeSet&);
+    Orbit(const GridTreeSet&, const GridTreeSet&,
           const GridTreeSet&, const GridTreeSet&);
-    GridCell const& initial() const;
+    Grid const& grid() const;
+    GridTreeSet const& initial() const;
     GridTreeSet const& reach() const;
     GridTreeSet const& intermediate() const;
     GridTreeSet const& final() const;
@@ -136,10 +140,12 @@ class Orbit<HybridGridCell>
     typedef HybridGridCell EnclosureType;
     typedef HybridGridTreeSet EnclosureListType;
 
-    Orbit(const HybridGridCell&);
-    Orbit(const HybridGridCell&, const HybridGridTreeSet&,
+    Orbit(const HybridGrid&, const HybridGridCell&);
+    Orbit(const HybridGridTreeSet&);
+    Orbit(const HybridGridTreeSet&, const HybridGridTreeSet&,
           const HybridGridTreeSet&, const HybridGridTreeSet&);
-    HybridGridCell const& initial() const;
+    HybridGrid const& grid() const;
+    HybridGridTreeSet const& initial() const;
     HybridGridTreeSet const& reach() const;
     HybridGridTreeSet const& intermediate() const;
     HybridGridTreeSet const& final() const;
@@ -177,60 +183,60 @@ class Orbit
 };
 
 template<>
-class Orbit<TaylorSet>
+class Orbit<TaylorImageSet>
 {
     class Data;
-    typedef TaylorSetList list_set_const_iterator;
+    typedef TaylorImageSetList list_set_const_iterator;
   public:
-    typedef TaylorSet EnclosureType;
-    typedef TaylorSetList EnclosureListType;
+    typedef TaylorImageSet EnclosureType;
+    typedef TaylorImageSetList EnclosureListType;
 
-    Orbit(const TaylorSet&);
-    void adjoin_reach(const TaylorSet& set);
-    void adjoin_intermediate(const TaylorSet& set);
-    void adjoin_final(const TaylorSet& set);
+    Orbit(const TaylorImageSet&);
+    void adjoin_reach(const TaylorImageSet& set);
+    void adjoin_intermediate(const TaylorImageSet& set);
+    void adjoin_final(const TaylorImageSet& set);
 
-    void adjoin_reach(const TaylorSetList& set);
-    void adjoin_intermediate(const TaylorSetList& set);
-    void adjoin_final(const TaylorSetList& set);
+    void adjoin_reach(const TaylorImageSetList& set);
+    void adjoin_intermediate(const TaylorImageSetList& set);
+    void adjoin_final(const TaylorImageSetList& set);
 
-    TaylorSet const& initial() const;
-    TaylorSetList const& reach() const;
-    TaylorSetList const& intermediate() const;
-    TaylorSetList const& final() const;
+    TaylorImageSet const& initial() const;
+    TaylorImageSetList const& reach() const;
+    TaylorImageSetList const& intermediate() const;
+    TaylorImageSetList const& final() const;
   private:
     boost::shared_ptr<Data> _data;
 };
 
 template<>
-class Orbit<HybridTaylorSet>
+class Orbit<HybridTaylorImageSet>
 {
     class Data;
-    typedef HybridTaylorSetList list_set_const_iterator;
+    typedef HybridTaylorImageSetList list_set_const_iterator;
   public:
-    typedef HybridTaylorSet EnclosureType;
-    typedef HybridTaylorSetList EnclosureListType;
+    typedef HybridTaylorImageSet EnclosureType;
+    typedef HybridTaylorImageSetList EnclosureListType;
 
-    Orbit(const HybridTaylorSet&);
-    void adjoin_reach(const HybridTaylorSet& set);
-    void adjoin_intermediate(const HybridTaylorSet& set);
-    void adjoin_final(const HybridTaylorSet& set);
+    Orbit(const HybridTaylorImageSet&);
+    void adjoin_reach(const HybridTaylorImageSet& set);
+    void adjoin_intermediate(const HybridTaylorImageSet& set);
+    void adjoin_final(const HybridTaylorImageSet& set);
 
-    void adjoin_reach(const HybridTaylorSetList& set);
-    void adjoin_intermediate(const HybridTaylorSetList& set);
-    void adjoin_final(const HybridTaylorSetList& set);
+    void adjoin_reach(const HybridTaylorImageSetList& set);
+    void adjoin_intermediate(const HybridTaylorImageSetList& set);
+    void adjoin_final(const HybridTaylorImageSetList& set);
 
-    HybridTaylorSet const& initial() const;
-    HybridTaylorSetList const& reach() const;
-    HybridTaylorSetList const& intermediate() const;
-    HybridTaylorSetList const& final() const;
+    HybridTaylorImageSet const& initial() const;
+    HybridTaylorImageSetList const& reach() const;
+    HybridTaylorImageSetList const& intermediate() const;
+    HybridTaylorImageSetList const& final() const;
   private:
     boost::shared_ptr<Data> _data;
 };
 
 template<class ES> std::ostream& operator<<(std::ostream& os, const Orbit< ES >& orb);
-template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorSet>& orb);
-template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb);
+template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorImageSet>& orb);
+template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorImageSet>& orb);
 
 template<class ES>
 std::ostream& 

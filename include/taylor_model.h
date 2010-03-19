@@ -166,7 +166,7 @@ Float norm(const Vector<TaylorModel>& tv);
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorSet.
+ * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorImageSet.
  */
 class TaylorModel
 {

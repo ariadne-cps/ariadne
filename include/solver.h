@@ -43,6 +43,7 @@
 namespace Ariadne {
 
 template<class X> class Vector;
+class ScalarTaylorFunction;
 class VectorTaylorFunction;
 
 /*! \ingroup \ingroup Solvers
@@ -50,7 +51,6 @@ class VectorTaylorFunction;
  */
 class SolverBase
     : public SolverInterface
-    , public Loggable
 {
   public:
     /*! \brief Constructor. */
@@ -72,10 +72,14 @@ class SolverBase
     virtual Vector<Interval> fixed_point(const VectorFunction& f,const Vector<Interval>& pt) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<Interval> > solve(const VectorFunction& f,const Vector<Interval>& pt) const;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+    virtual Vector<Interval> solve(const VectorFunction& f,const Vector<Interval>& pt) const;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    virtual VectorTaylorFunction implicit(const VectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    virtual ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
 
+    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
+    virtual Set< Vector<Interval> > solve_all(const VectorFunction& f,const Vector<Interval>& pt) const;
   protected:
     /*! \brief Perform one iterative step of the contractor. */
     virtual Vector<Interval> step(const VectorFunction& f,const Vector<Interval>& pt) const = 0;
@@ -96,11 +100,13 @@ class IntervalNewtonSolver
   public:
     /*! \brief Constructor. */
     IntervalNewtonSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    /*! \brief Cloning operator. */
+    virtual IntervalNewtonSolver* clone() const { return new IntervalNewtonSolver(*this); }
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual VectorTaylorFunction implicit_step(const VectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
-  protected:
-    Vector<Interval>
+  public:
+    virtual Vector<Interval>
     step(const VectorFunction& f,
          const Vector<Interval>& pt) const;
 
@@ -118,17 +124,38 @@ class KrawczykSolver
   public:
     /*! \brief Constructor. */
     KrawczykSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    /*! \brief Cloning operator. */
+    virtual KrawczykSolver* clone() const { return new KrawczykSolver(*this); }
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual VectorTaylorFunction implicit_step(const VectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
 
-  protected:
+  public:
     /*! \brief A single step of the Krawczyk contractor. */
-    Vector<Interval>
+    virtual Vector<Interval>
     step(const VectorFunction& f,
           const Vector<Interval>& pt) const;
 };
 
+
+/*! \ingroup Solvers
+ *  \brief Modified Krawczyk solver. Uses the contractor \f$[x']=x_0-J^{-1}(f(x_0)+(J-Df([x])([x]-x_0)\f$
+ *  where \f$J\f$ is typically \f$Df(x_0)\f$.
+ */
+class FactoredKrawczykSolver
+    : public KrawczykSolver
+{
+  public:
+    /*! \brief Constructor. */
+    FactoredKrawczykSolver(Float max_error, uint max_steps) : KrawczykSolver(max_error,max_steps) { }
+    /*! \brief Cloning operator. */
+    virtual FactoredKrawczykSolver* clone() const { return new FactoredKrawczykSolver(*this); }
+  public:
+    /*! \brief A single step of the modified Krawczyk contractor. */
+    virtual Vector<Interval>
+    step(const VectorFunction& f,
+          const Vector<Interval>& pt) const;
+};
 
 
 

@@ -39,7 +39,7 @@ outer_approximation(const EnclosureListType& hls,
     for(EnclosureListType::const_iterator 
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
-            DiscreteState loc=iter->first;
+            AtomicDiscreteLocation loc=iter->first;
             const ContinuousEnclosureType& es=iter->second;
             if(result.find(loc)==result.locations_end()) {
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
@@ -128,12 +128,12 @@ int main(int argc,char *argv[])
     /// Build the Hybrid System
   
     /// Create a HybridAutomton object
-    HybridAutomaton watertank_system;
+    MonolithicHybridAutomaton watertank_system;
   
     /// Create four discrete states
-    DiscreteState l1(1);      // Zero saturated
-    DiscreteState l2(2);      // Not saturated
-    DiscreteState l3(3);      // One saturated
+    AtomicDiscreteLocation l1(1);      // Zero saturated
+    AtomicDiscreteLocation l2(2);      // Not saturated
+    AtomicDiscreteLocation l3(3);      // One saturated
   
     /// Create the discrete events
     DiscreteEvent e12(12);
@@ -221,7 +221,7 @@ int main(int argc,char *argv[])
 
     Vector<Float> lengths(5, 0.25, 1.0, 1.0, 1.0, 1.0);
     HybridGridTreeSet hgts(watertank_system.state_space(), lengths);
-    uint grid_depth = 18;
+    uint grid_depth = 9;
     uint grid_height = 8;
     
     std::cout << "Computing timed evolution starting from location l3, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
@@ -254,7 +254,7 @@ int main(int argc,char *argv[])
     HybridReachabilityAnalyser analyser(evolver);
     analyser.verbosity = 4;
     analyser.parameters().lock_to_grid_time = total_time;
-    analyser.parameters().maximum_grid_depth= 14;
+    analyser.parameters().maximum_grid_depth= 7;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;

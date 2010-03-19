@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <functional>
 
 #include "function.h"
 #include "real.h"
@@ -42,25 +43,6 @@ using namespace Ariadne;
 namespace Ariadne {
 
 
-
-ScalarFunction discrete_transition_guard(const DiscreteTransition& transition) {
-    ARIADNE_ASSERT(transition.activation().result_size()==1);
-    return transition.activation()[0];
-}
-
-std::map<DiscreteEvent,ScalarFunction> discrete_mode_invariants(const DiscreteMode& mode) {
-    std::map<DiscreteEvent,ScalarFunction> scalar_invariants;
-    std::map<DiscreteEvent,VectorFunction>const& vector_invariants=mode.invariants();
-    
-    for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=vector_invariants.begin();
-        iter!=vector_invariants.end(); ++iter)
-    {
-        ARIADNE_ASSERT(iter->second.result_size()==1);
-        scalar_invariants.insert(std::make_pair(iter->first,iter->second[0]));
-    }
-
-    return scalar_invariants;
-}
 
 
 
@@ -99,8 +81,10 @@ struct from_python< EventSet > {
 };
 
 template<class T> uint __hash__(const T&);
-template<> uint __hash__<DiscreteEvent>(const DiscreteEvent& e) { return reinterpret_cast<const uint&>(e); }
-template<> uint __hash__<DiscreteState>(const DiscreteState& q) { return reinterpret_cast<const uint&>(q); }
+template<> uint __hash__<DiscreteEvent>(const DiscreteEvent& e) {
+    return reinterpret_cast<const ushort&>(e.name().c_str()[0]); }
+template<> uint __hash__<AtomicDiscreteLocation>(const AtomicDiscreteLocation& q) {
+    return reinterpret_cast<const ushort&>(q.name().c_str()[0]); }
 
 
 RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }
@@ -122,8 +106,6 @@ namespace Ariadne { int length(const array<std::string>& a) { return a.size(); }
 
 void export_formula()
 {
-    implicitly_convertible<Event,EventSet>();
-
     implicitly_convertible<String,StringExpression>();
     implicitly_convertible<StringVariable,StringExpression>();
 
@@ -136,6 +118,11 @@ void export_formula()
 
     to_python< List<RealExpression> >();
 
+    from_python< List<DiscreteEvent> >();
+
+/*
+    implicitly_convertible<Event,EventSet>();
+
     class_<Event> event_class("Event", init<std::string>());
     event_class.def(self_ns::str(self));
 
@@ -145,7 +132,7 @@ void export_formula()
     event_set_class.def(self_ns::str(self));
 
     from_python<EventSet>();
-
+*/
 
     // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be.
     //implicitly_convertible<double,RealExpression>();
@@ -159,11 +146,11 @@ void export_formula()
     class_<StringExpression> string_expression_class("StringExpression", init<StringExpression>());
     string_expression_class.def(self_ns::str(self));
 
-    class_<StringNextVariable> string_next_variable_class("StringNextVariable", no_init);
-    string_next_variable_class.def("__lshift__", (StringUpdate(StringNextVariable::*)(const StringExpression&)const) &StringNextVariable::operator=);
+    class_<PrimedStringVariable> string_next_variable_class("PrimedStringVariable", no_init);
+    string_next_variable_class.def("__lshift__", (StringUpdate(PrimedStringVariable::*)(const StringExpression&)const) &StringExpression::operator=);
     string_next_variable_class.def(self_ns::str(self));
 
-    def("next", (StringNextVariable(*)(const StringVariable&)) &next);
+    def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);
 
 
     class_<IntegerVariable> integer_variable_class("IntegerVariable", init<std::string>());
@@ -184,11 +171,11 @@ void export_formula()
     integer_variable_class.def("__gt__", &__gt__<DiscretePredicate,IntegerVariable,IntegerExpression>);
     integer_variable_class.def(self_ns::str(self));
 
-    class_<IntegerNextVariable> integer_next_variable_class("IntegerNextVariable", no_init);
-    integer_next_variable_class.def("__lshift__", (IntegerUpdate(IntegerNextVariable::*)(const IntegerExpression&)const) &IntegerNextVariable::operator=);
+    class_<PrimedIntegerVariable> integer_next_variable_class("PrimedIntegerVariable", no_init);
+    integer_next_variable_class.def("__lshift__", (IntegerUpdate(PrimedIntegerVariable::*)(const IntegerExpression&)const) &PrimedIntegerVariable::operator=);
     integer_next_variable_class.def(self_ns::str(self));
 
-    def("next", (IntegerNextVariable(*)(const IntegerVariable&)) &next);
+    def("next", (PrimedIntegerVariable(*)(const IntegerVariable&)) &next);
 
     class_<IntegerExpression> integer_expression_class("IntegerExpression", init<IntegerExpression>());
     integer_expression_class.def("__pos__", &__pos__<IntegerExpression,IntegerExpression>);
@@ -227,17 +214,17 @@ void export_formula()
     real_variable_class.def("eq", (RealAssignment(RealVariable::*)(const RealExpression&)const) &RealVariable::operator=);
     real_variable_class.def(self_ns::str(self));
 
-    class_<RealDottedVariable> real_dotted_variable_class("RealDottedVariable", no_init);
-    real_dotted_variable_class.def("__lshift__", (RealDynamic(RealDottedVariable::*)(const RealExpression&)const) &RealDottedVariable::operator=);
+    class_<DottedRealVariable> real_dotted_variable_class("DottedRealVariable", no_init);
+    real_dotted_variable_class.def("__lshift__", (RealDynamic(DottedRealVariable::*)(const RealExpression&)const) &DottedRealVariable::operator=);
     real_dotted_variable_class.def(self_ns::str(self));
 
-    def("dot", (RealDottedVariable(*)(const RealVariable&)) &dot);
+    def("dot", (DottedRealVariable(*)(const RealVariable&)) &dot);
 
-    class_<RealNextVariable> real_next_variable_class("RealNextVariable", no_init);
-    real_next_variable_class.def("__lshift__", (RealUpdate(RealNextVariable::*)(const RealExpression&)const) &RealNextVariable::operator=);
+    class_<PrimedRealVariable> real_next_variable_class("PrimedRealVariable", no_init);
+    real_next_variable_class.def("__lshift__", (RealUpdate(PrimedRealVariable::*)(const RealExpression&)const) &PrimedRealVariable::operator=);
     real_next_variable_class.def(self_ns::str(self));
 
-    def("next", (RealNextVariable(*)(const RealVariable&)) &next);
+    def("next", (PrimedRealVariable(*)(const RealVariable&)) &next);
 
     class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
@@ -251,7 +238,6 @@ void export_formula()
     from_python<RealSpace>();
 
     class_<RealExpression> real_expression_class("RealExpression", init<RealExpression>());
-    real_expression_class.def("name", &RealExpression::operator_name);
     real_expression_class.def("subexpressions", &RealExpression::subexpressions);
     real_expression_class.def("substitute", &RealExpression::substitute<Real>);
     real_expression_class.def("simplify", &RealExpression::simplify);
@@ -346,17 +332,18 @@ void export_hybrid_automaton()
 {
     // Don't use return_value_policy<copy_const_reference> since reference lifetime should not exceed automaton lifetime
 
-    to_python< std::map<DiscreteEvent,VectorFunction> >();
-    to_python< std::map<DiscreteEvent,ScalarFunction> >();
-    to_python< std::set<DiscreteMode> >();
-    to_python< std::set<DiscreteTransition> >();
+    to_python< Map<DiscreteEvent,VectorFunction> >();
+    to_python< Map<DiscreteEvent,ScalarFunction> >();
+    to_python< Set<DiscreteMode> >();
+    to_python< Set<DiscreteTransition> >();
 
-    class_<DiscreteState> discrete_state_class("DiscreteState",init<DiscreteState>());
-    discrete_state_class.def("__eq__", &__eq__<bool,DiscreteState,DiscreteState>);
-    discrete_state_class.def("__ne__", &__ne__<bool,DiscreteState,DiscreteState>);
-    discrete_state_class.def("__hash__", &__hash__<DiscreteState>);
+    class_<AtomicDiscreteLocation> discrete_state_class("AtomicDiscreteLocation",init<AtomicDiscreteLocation>());
+    discrete_state_class.def("__eq__", &__eq__<bool,AtomicDiscreteLocation,AtomicDiscreteLocation>);
+    discrete_state_class.def("__ne__", &__ne__<bool,AtomicDiscreteLocation,AtomicDiscreteLocation>);
+    discrete_state_class.def("__hash__", &__hash__<AtomicDiscreteLocation>);
     discrete_state_class.def(self_ns::str(self));
-    implicitly_convertible<int,DiscreteState>();
+    implicitly_convertible<int,AtomicDiscreteLocation>();
+    implicitly_convertible<std::string,AtomicDiscreteLocation>();
 
     class_<DiscreteEvent> discrete_event_class("DiscreteEvent",init<DiscreteEvent>());
     discrete_event_class.def("__eq__", &__eq__<bool,DiscreteEvent,DiscreteEvent>);
@@ -364,22 +351,23 @@ void export_hybrid_automaton()
     discrete_event_class.def("__hash__", &__hash__<DiscreteEvent>);
     discrete_event_class.def(self_ns::str(self));
     implicitly_convertible<int,DiscreteEvent>();
+    implicitly_convertible<std::string,DiscreteEvent>();
 
     class_<DiscreteMode, shared_ptr<DiscreteMode> > discrete_mode_class("DiscreteMode",no_init);
     discrete_mode_class.def("location",&DiscreteMode::location);
     discrete_mode_class.def("dynamic",&DiscreteMode::dynamic,return_value_policy<reference_existing_object>());
     //discrete_mode_class.def("invariants",&DiscreteMode::invariants,return_value_policy<reference_existing_object>());
     discrete_mode_class.def("invariants",&DiscreteMode::invariants,return_value_policy<copy_const_reference>());
-    discrete_mode_class.def("invariants",&discrete_mode_invariants);
+    //discrete_mode_class.def("invariants",&discrete_mode_invariants);
     discrete_mode_class.def(self_ns::str(self));
 
     class_<DiscreteTransition, shared_ptr<DiscreteTransition> > discrete_transition_class("DiscreteTransition",no_init);
     discrete_transition_class.def("event",&DiscreteTransition::event);
-    discrete_transition_class.def("source",&DiscreteTransition::source,return_value_policy<reference_existing_object>());
-    discrete_transition_class.def("target",&DiscreteTransition::target,return_value_policy<reference_existing_object>());
+    discrete_transition_class.def("source",&DiscreteTransition::source);
+    discrete_transition_class.def("target",&DiscreteTransition::target);
     discrete_transition_class.def("reset",&DiscreteTransition::reset,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("activation",&DiscreteTransition::activation,return_value_policy<reference_existing_object>());
-    discrete_transition_class.def("guard",&discrete_transition_guard);
+    discrete_transition_class.def("guard",&DiscreteTransition::activation,return_value_policy<reference_existing_object>());
     discrete_transition_class.def("urgency",&DiscreteTransition::forced);
     discrete_transition_class.def(self_ns::str(self));
 
@@ -387,52 +375,24 @@ void export_hybrid_automaton()
     hybrid_time_class.def("continuous_time",&HybridTime::continuous_time,return_value_policy<copy_const_reference>());
     hybrid_time_class.def("discrete_time",&HybridTime::discrete_time,return_value_policy<copy_const_reference>());
 
-    class_<HybridAutomaton> hybrid_automaton_class("HybridAutomaton",init<>());
-    hybrid_automaton_class.def("mode",&HybridAutomaton::mode,return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("transition",&HybridAutomaton::transition,return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("modes",&HybridAutomaton::modes,return_value_policy<copy_const_reference>());
-    hybrid_automaton_class.def("transitions",(const std::set<DiscreteTransition>&(HybridAutomaton::*)()const) &HybridAutomaton::transitions,return_value_policy<copy_const_reference>());
-    hybrid_automaton_class.def("transitions",(std::set<DiscreteTransition>(HybridAutomaton::*)(DiscreteState)const) &HybridAutomaton::transitions);
-    hybrid_automaton_class.def("blocking_guards",(std::map<DiscreteEvent,VectorFunction>(HybridAutomaton::*)(DiscreteState)const) &HybridAutomaton::blocking_guards);
-    hybrid_automaton_class.def("new_mode",(const DiscreteMode&(HybridAutomaton::*)(DiscreteState,const VectorFunction&)) &HybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("new_invariant",(const DiscreteMode&(HybridAutomaton::*)(DiscreteState,const ScalarFunction&)) &HybridAutomaton::new_invariant, return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("new_transition",(const DiscreteTransition&(HybridAutomaton::*)(DiscreteEvent,DiscreteState,DiscreteState,const VectorFunction&,const ScalarFunction&,bool)) &HybridAutomaton::new_transition, return_value_policy<reference_existing_object>());
+    class_<MonolithicHybridAutomaton> hybrid_automaton_class("MonolithicHybridAutomaton",init<>());
+    hybrid_automaton_class.def("mode",(const DiscreteMode&(MonolithicHybridAutomaton::*)(AtomicDiscreteLocation)const) &MonolithicHybridAutomaton::mode,return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("transition",(const DiscreteTransition&(MonolithicHybridAutomaton::*)(DiscreteEvent,AtomicDiscreteLocation)const)  &MonolithicHybridAutomaton::transition,return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("modes",&MonolithicHybridAutomaton::modes,return_value_policy<copy_const_reference>());
+    hybrid_automaton_class.def("transitions",(const Set<DiscreteTransition>&(MonolithicHybridAutomaton::*)()const) &MonolithicHybridAutomaton::transitions,return_value_policy<copy_const_reference>());
+    hybrid_automaton_class.def("transitions",(Set<DiscreteTransition>(MonolithicHybridAutomaton::*)(AtomicDiscreteLocation)const) &MonolithicHybridAutomaton::transitions);
+    hybrid_automaton_class.def("blocking_guards",(std::map<DiscreteEvent,VectorFunction>(MonolithicHybridAutomaton::*)(AtomicDiscreteLocation)const) &MonolithicHybridAutomaton::blocking_guards);
+    hybrid_automaton_class.def("new_mode",(const DiscreteMode&(MonolithicHybridAutomaton::*)(AtomicDiscreteLocation,const VectorFunction&)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("new_invariant",(const DiscreteMode&(MonolithicHybridAutomaton::*)(AtomicDiscreteLocation,const ScalarFunction&)) &MonolithicHybridAutomaton::new_invariant, return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("new_transition",(const DiscreteTransition&(MonolithicHybridAutomaton::*)(DiscreteEvent,AtomicDiscreteLocation,AtomicDiscreteLocation,const VectorFunction&,const ScalarFunction&,bool)) &MonolithicHybridAutomaton::new_transition, return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def(self_ns::str(self));
 
 }
 
-void export_hybrid_system()
-{
-    class_<DiscreteValuation> discrete_valuation_class("DiscreteValuation",init<DiscreteValuation>());
-    discrete_valuation_class.def(init<>());
-    discrete_valuation_class.def("set", (void(DiscreteValuation::*)(const StringVariable&, const String&)) &DiscreteValuation::set);
-    discrete_valuation_class.def("set", (void(DiscreteValuation::*)(const IntegerVariable&, const int&)) &DiscreteValuation::set);
-    discrete_valuation_class.def(self_ns::str(self));
 
-
-    class_<HybridSystem> hybrid_system_class("HybridSystem",init<>());
-    hybrid_system_class.def("new_equation",(void(HybridSystem::*)(DiscretePredicate,RealAssignment)) &HybridSystem::new_equation);
-    hybrid_system_class.def("new_dynamic",(void(HybridSystem::*)(DiscretePredicate,RealDynamic)) &HybridSystem::new_dynamic);
-    //hybrid_system_class.def("new_transition",(void(HybridSystem::*)(EventSet,DiscretePredicate,StringUpdate)) &HybridSystem::new_transition);
-    //hybrid_system_class.def("new_reset",(void(HybridSystem::*)(EventSet,DiscretePredicate,RealUpdate)) &HybridSystem::new_reset);
-    //hybrid_system_class.def("new_guard",(void(HybridSystem::*)(EventSet,DiscretePredicate,ContinuousPredicate)) &HybridSystem::new_guard);
-    hybrid_system_class.def("new_transition",(void(HybridSystem::*)(DiscretePredicate,EventSet,StringUpdate)) &HybridSystem::new_transition);
-    hybrid_system_class.def("new_reset",(void(HybridSystem::*)(DiscretePredicate,EventSet,RealUpdate)) &HybridSystem::new_reset);
-    hybrid_system_class.def("new_guard",(void(HybridSystem::*)(DiscretePredicate,EventSet,ContinuousPredicate)) &HybridSystem::new_guard);
-    hybrid_system_class.def("new_guard",(void(HybridSystem::*)(DiscretePredicate,EventSet,ContinuousPredicate,ContinuousPredicate)) &HybridSystem::new_guard);
-    hybrid_system_class.def("new_invariant",(void(HybridSystem::*)(DiscretePredicate,ContinuousPredicate)) &HybridSystem::new_invariant);
-    hybrid_system_class.def("new_disabled_events",(void(HybridSystem::*)(DiscretePredicate,EventSet))  &HybridSystem::new_disabled_events);
-    hybrid_system_class.def("events",(EventSet(HybridSystem::*)(const DiscreteValuation&)const)  &HybridSystem::events);
-    hybrid_system_class.def("dynamic",(VectorFunction(HybridSystem::*)(const DiscreteValuation&)const)  &HybridSystem::dynamic);
-    hybrid_system_class.def("target",(DiscreteValuation(HybridSystem::*)(const Event&,const DiscreteValuation&)const)  &HybridSystem::target);
-    hybrid_system_class.def("reset",(VectorFunction(HybridSystem::*)(const Event&,const DiscreteValuation&)const)  &HybridSystem::reset);
-    hybrid_system_class.def("guard",(ScalarFunction(HybridSystem::*)(const Event&,const DiscreteValuation&)const)  &HybridSystem::guard);
-    hybrid_system_class.def(self_ns::str(self));
-}
 
 void system_submodule() {
     export_formula();
     export_hybrid_automaton();
-    export_hybrid_system();
 }
 

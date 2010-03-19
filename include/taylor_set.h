@@ -28,12 +28,14 @@
 #define ARIADNE_TAYLOR_SET_H
 
 #include <iosfwd>
+#include "container.h"
 #include "numeric.h"
 #include "vector.h"
 #include "set_interface.h"
 #include "graphics_interface.h"
 
 #include "taylor_model.h"
+#include "taylor_function.h"
 
 namespace Ariadne {
 
@@ -44,10 +46,13 @@ template<class X> class Matrix;
 
 class ScalarFunction;
 class VectorFunction;
+class NonlinearConstraint;
 class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
-class TaylorSet;
+class TaylorImageSet;
+
+class AffineSet;
 
 template<class BS> class ListSet;
 
@@ -59,7 +64,7 @@ class GridTreeSet;
  *
  *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */
-class TaylorSet
+class TaylorImageSet
     : public LocatedSetInterface
     , public DrawableInterface
 {
@@ -67,24 +72,24 @@ class TaylorSet
     Vector<TaylorModel> _models;
   public:
     //! \brief Construct the origin in dimension \a d with \a ng generators.
-    TaylorSet(uint d=0, uint ng=0);
+    TaylorImageSet(uint d=0, uint ng=0);
     //! \brief Construct the image of the box \a d under the function \a f.
-    TaylorSet(const VectorFunction& f, const Vector<Interval>& d);
+    TaylorImageSet(const VectorFunction& f, const Vector<Interval>& d);
     //! \brief Construct from a list of models giving set as the image of a unit box.
-    TaylorSet(const Vector<TaylorModel>& tv);
+    TaylorImageSet(const Vector<TaylorModel>& tv);
     //! \brief The box \a bx.
-    TaylorSet(const Vector<Interval>& bx);
+    TaylorImageSet(const Vector<Interval>& bx);
 
     //! \brief Construct from raw data in the form of dense polynomial expansions with errors.
-    TaylorSet(uint rs, uint as, uint deg, double x0, ...);
+    TaylorImageSet(uint rs, uint as, uint deg, double x0, ...);
     //! \brief Construct from raw data in the form of a polynomial expansion with errors.
-    TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
+    TaylorImageSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
 
-    template<class E> TaylorSet(const ublas::vector_expression<E>& e) {
-        *this = TaylorSet(Vector<TaylorModel>(e())); }
+    template<class E> TaylorImageSet(const ublas::vector_expression<E>& e) {
+        *this = TaylorImageSet(Vector<TaylorModel>(e())); }
 
     //! \brief Equality operator.
-    friend bool operator==(const TaylorSet& ts1, const TaylorSet& ts2);
+    friend bool operator==(const TaylorImageSet& ts1, const TaylorImageSet& ts2);
 
     //! \brief Set the accuracy parameters.
     void set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr);
@@ -115,7 +120,7 @@ class TaylorSet
 
 
     //! \brief Create a dynamically-allocated copy.
-    virtual TaylorSet* clone() const { return new TaylorSet(*this); }
+    virtual TaylorImageSet* clone() const { return new TaylorImageSet(*this); }
     //! \brief Tests if the set is disjoint from a box.
     virtual tribool disjoint(const Box&) const;
     //! \brief Tests if the set overlaps a box.
@@ -134,7 +139,7 @@ class TaylorSet
     //! \brief The radius of the set.
     Float radius() const;
     //! \brief An over-approximation in the form of a zonotope.
-    TaylorSet linearise() const;
+    TaylorImageSet linearise() const;
     //! \brief An over-approximation in the form of a list of boxes.
     ListSet<Box> discretise(const Float& eps) const;
     //! \brief An outer-approximation on a grid.
@@ -143,114 +148,129 @@ class TaylorSet
     GridTreeSet& discretise(GridTreeSet& grid_set, uint depth) const;
     //! \brief An over-approximation with better numerical conditioning;
     //! currently implemented as the orthogonal part of a QR factorisation.
-    TaylorSet recondition() const;
+    TaylorImageSet recondition() const;
     //! \brief Subsume the constant error terms in new generators.
-    TaylorSet subsume() const;
+    TaylorImageSet subsume() const;
     //! \brief Subsume constant error terms of magnitude greater than \a e in new generators.
-    TaylorSet subsume(double e) const;
+    TaylorImageSet subsume(double e) const;
     //! \brief Split by subdividing along generator \a g.
-    pair<TaylorSet,TaylorSet> split(uint g) const;
+    pair<TaylorImageSet,TaylorImageSet> split(uint g) const;
     //! \brief Split by subdividing along a judiciously-chosen generator.
-    pair<TaylorSet,TaylorSet> split() const;
+    pair<TaylorImageSet,TaylorImageSet> split() const;
     //! \brief Subdivide into sets of maximum radius \a rad.
-    ListSet<TaylorSet> subdivide(Float rad) const;
+    ListSet<TaylorImageSet> subdivide(Float rad) const;
 
     //! \brief Compute an over-approximation to the image under a function.
-    friend TaylorSet apply(const VectorFunction& f, const TaylorSet& s);
+    friend TaylorImageSet apply(const VectorFunction& f, const TaylorImageSet& s);
     //! \brief Compute an over-approximation to the image under a Taylor function approximation.
-    friend TaylorSet apply(const VectorTaylorFunction& f, const TaylorSet& s);
+    friend TaylorImageSet apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
   private:
     Matrix<Float> jacobian() const;
 };
 
-TaylorModel apply(const ScalarTaylorFunction& f, const TaylorSet& s);
-TaylorSet apply(const VectorTaylorFunction& f, const TaylorSet& s);
-TaylorModel apply(const ScalarFunction& f, const TaylorSet& s);
-TaylorSet apply(const VectorFunction& f, const TaylorSet& s);
+TaylorModel apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
+TaylorImageSet apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
+TaylorModel apply(const ScalarFunction& f, const TaylorImageSet& s);
+TaylorImageSet apply(const VectorFunction& f, const TaylorImageSet& s);
 
-TaylorModel unchecked_apply(const ScalarTaylorFunction& f, const TaylorSet& s);
-TaylorSet unchecked_apply(const VectorTaylorFunction& f, const TaylorSet& s);
+TaylorModel unchecked_apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
+TaylorImageSet unchecked_apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
 
-GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);
-void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
-Zonotope zonotope(const TaylorSet& ts);
+GridTreeSet outer_approximation(const TaylorImageSet& set, const Grid& grid, uint depth);
+void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth);
+Zonotope zonotope(const TaylorImageSet& ts);
 
-void standard_draw(CanvasInterface& g, const TaylorSet& ts);
-void box_draw(CanvasInterface& g, const TaylorSet& ts);
-void affine_draw(CanvasInterface& g, const TaylorSet& ts);
-void curve_draw(CanvasInterface& g, const TaylorSet& ts);
-void grid_draw(CanvasInterface& g, const TaylorSet& ts);
+void standard_draw(CanvasInterface& g, const TaylorImageSet& ts);
+void box_draw(CanvasInterface& g, const TaylorImageSet& ts);
+void affine_draw(CanvasInterface& g, const TaylorImageSet& ts);
+void curve_draw(CanvasInterface& g, const TaylorImageSet& ts);
+void grid_draw(CanvasInterface& g, const TaylorImageSet& ts);
 
-void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
+void plot(const char* fn, const Box& bbx, const TaylorImageSet& ts);
 
-class DiscreteEvent;
+class HybridEnclosure;
 
-//! \brief A set defined as the image of a subset of a box (the \em domain) under a continuous function.
-//! The domain is of the form \f$(x_1,\ldots,x_n,t_0,\ldots,t_k)\f$ where each \f$\delta_i\f$ is positive.
-//! The constraints are of the form \f$a(x,t)\geq0\f$, \f$i(x,\ldots,[0,t_k])\leq 0\f$ or \f$g(x,\ldots,[0,t_k])\leq 0 \wedge g(x,\ldots,t_k)=0\f$.
-//! We abbreviate the latter as \f$g(x,t,[0,t_k]) <\!\&\!= 0\f$.
-class TaylorConstrainedFlowSet
-    : public LocatedSetInterface
+//! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
+class TaylorConstrainedImageSet
+    : public DrawableInterface
 {
+
     Vector<Interval> _domain;
-    Vector<TaylorModel> _models;
-    // Constraints of the form c(x,[0,t])<=0
-    std::map<DiscreteEvent,TaylorModel> _invariants;
-    // Constraints of the form a(x,t)>=0
-    std::map<DiscreteEvent,TaylorModel> _activations;
-    // Constraints of the form g(x,t)<&=0
-    std::map<DiscreteEvent,TaylorModel> _guards;
+    VectorTaylorFunction _function;
+    List<ScalarTaylorFunction> _constraints;
+    List<ScalarTaylorFunction> _equations;
   public:
-    //! \brief Construct the preimage of \a codom under \a fn.
-    TaylorConstrainedFlowSet(const Vector<Interval>& dom, const VectorFunction& fn);
-    //! \brief Construct the preimage of \a codom under \a fn.
-    TaylorConstrainedFlowSet(const VectorTaylorFunction& fn);
-    //! \brief Construct the preimage of \a codom under \a fn.
-    TaylorConstrainedFlowSet(const Box& bx);
-    //! \brief A dynamically-allocated copy.
-    TaylorConstrainedFlowSet* clone() const;
+    TaylorConstrainedImageSet();
+    TaylorConstrainedImageSet(Box);
+    TaylorConstrainedImageSet(Box, VectorFunction);
+    TaylorConstrainedImageSet(Box, VectorFunction, List<NonlinearConstraint>);
+    TaylorConstrainedImageSet(Box, VectorFunction, NonlinearConstraint);
+    TaylorConstrainedImageSet(Box, const List<ScalarFunction>&);
 
-    //! \brief Add a new constraint of the form \f$i(x,\ldots,[0,t_k])\leq0\f$.
-    void new_invariant(const DiscreteEvent& e, const ScalarFunction& c);
-    //! \brief Add a new constraint of the form \f$g(x,\ldots,[0,t_k])<\!\&\!=0\f$.
-    void new_guard(const DiscreteEvent& e, const ScalarFunction& c);
-    //! \brief Add a new constraint of the form \f$a(x,\ldots,t_k)\geq0\f$.
-    void new_activation(const DiscreteEvent& e, const ScalarFunction& c);
+    TaylorConstrainedImageSet(const VectorTaylorFunction&);
+    TaylorConstrainedImageSet* clone() const;
 
-    //! \brief Add a new constraint of the form \f$i(x,\ldots,[0,t_k])\leq0\f$.
-    void new_invariant(const DiscreteEvent& e, const ScalarTaylorFunction& c);
-    //! \brief Add a new constraint of the form \f$g(x,\ldots,[0,t_k])<\!\&\!=0\f$.
-    void new_guard(const DiscreteEvent& e, const ScalarTaylorFunction& c);
-    //! \brief Add a new constraint of the form \f$a(x,\ldots,t_k)\geq0\f$.
-    void new_activation(const DiscreteEvent& e, const ScalarTaylorFunction& c);
-
-    //! \brief The domain of the set.
     Vector<Interval> domain() const;
-    //! \brief The function used to define the set.
-    VectorTaylorFunction function() const;
+    Vector<Interval> codomain() const;
+    VectorFunction function() const;
+    VectorTaylorFunction const& taylor_function() const;
+
+    //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
+    //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
+    void substitute(uint j, ScalarTaylorFunction v);
+    //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
+    void apply_map(VectorFunction r);
+    //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
+    void apply_flow(VectorFunction phi, Interval time);
+    //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
+    void apply_flow(VectorTaylorFunction phi, Interval time);
+
+    //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
+    void new_negative_constraint(ScalarFunction g);
+    void new_negative_constraint(ScalarTaylorFunction g);
+    //! \brief Introduces the constraint \f$h(s) = 0\f$.
+    void new_equality_constraint(ScalarFunction h);
+
+    //! \brief  Returns true if \f$g(x)\leq0\f$ over the whole set,
+    //! false if the constraint is negative over the whole set,
+    //! and indeterminate otherwise.
+    tribool satisfies(ScalarFunction g) const;
 
     uint dimension() const;
-    tribool empty() const;
-    tribool disjoint(const Box&) const;
-    tribool overlaps(const Box&) const;
-    tribool inside(const Box&) const;
+    uint number_of_parameters() const;
     Box bounding_box() const;
-    GridTreeSet outer_approximation(const Grid& grid, uint depth) const;
+    Point centre() const;
+    Float radius() const;
+    tribool bounded() const;
+    tribool empty() const;
+    tribool disjoint(Box bx) const;
+
+    GridTreeSet outer_approximation(const Grid& grid, int depth) const;
+    GridTreeSet subdivision_outer_approximation(const Grid& grid, int depth) const;
+    GridTreeSet affine_outer_approximation(const Grid& grid, int depth) const;
+
+    void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+
+    AffineSet affine_approximation() const;
+    AffineSet affine_over_approximation() const;
+
+    Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split(uint dim) const;
+    TaylorConstrainedImageSet restriction(const Vector<Interval>& subdomain) const;
+
+    void draw(CanvasInterface&) const;
+    void box_draw(CanvasInterface&) const;
+    void affine_draw(CanvasInterface&, uint=1u) const;
     std::ostream& write(std::ostream&) const;
   private:
-    friend TaylorConstrainedFlowSet apply(const VectorFunction& f, const TaylorConstrainedFlowSet& s);
-    friend TaylorConstrainedFlowSet apply(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
-    friend TaylorConstrainedFlowSet apply_flow(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
-  private:
-    void _adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth) const;
-    tribool _empty(const Vector<Interval>& subdomain, uint depth) const;
+    void _check() const;
+    void _subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth, const Vector<Float>& errors) const;
+    void _solve_zero_constraints();
 };
 
-
-TaylorConstrainedFlowSet apply(const VectorFunction& f, const TaylorConstrainedFlowSet& s);
-TaylorConstrainedFlowSet apply(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
-TaylorConstrainedFlowSet apply_flow(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
-
+inline std::ostream& operator<<(std::ostream& os, const TaylorConstrainedImageSet& s) { return s.write(os); }
 
 
 } //namespace Ariadne

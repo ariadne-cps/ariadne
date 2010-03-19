@@ -16,11 +16,13 @@ SRC = \
 	matrix.cc \
 	linear_programming.cc \
 	differential.cc \
+	propagator.cc \
 	taylor_model.cc  \
 	expression.cc \
 	affine.cc \
 	polynomial.cc \
 	function.cc \
+	nonlinear_programming.cc \
 	taylor_function.cc  \
 	simulation_toolbox.cc \
 	taylor_calculus.cc \
@@ -36,17 +38,19 @@ SRC = \
 	taylor_set.cc \
 	grid_set.cc \
 	approximate_set.cc \
+	affine_set.cc \
 	hybrid_set.cc \
+	hybrid_enclosure.cc \
 	geometry.cc \
-	hybrid_automaton.cc \
-	hybrid_system.cc \
+	hybrid_automaton-monolithic.cc \
+	hybrid_automaton-composite.cc \
 	orbit.cc \
+	constraint_solver.cc \
 	map_evolver.cc \
 	vector_field_evolver.cc \
 	hybrid_evolver-stable.cc \
 	hybrid_evolver-image.cc \
 	hybrid_evolver-constrained.cc \
-	hybrid_simulator.cc \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \
@@ -66,9 +70,8 @@ CALCULUS_SRC = \
 	taylor_calculus.cc
 
 #	hybrid_simulator.cc
+#	hybrid_system.cc
 
-#	taylor_model.cc
-#	taylor_set.cc
 
 lib_LTLIBRARIES = libariadne.la libcalculus.la
 libariadne_la_SOURCES = $(SRC)

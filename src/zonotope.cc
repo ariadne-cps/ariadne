@@ -2,7 +2,7 @@
  *            zonotope.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -49,7 +49,7 @@ template<class X> class LinearProgram {
 
 
 template<class BS>
-ListSet<BS> 
+ListSet<BS>
 subdivide(const BS& bs, const Float& r)
 {
     ListSet<BS> result;
@@ -67,8 +67,8 @@ subdivide(const BS& bs, const Float& r)
 
 
 
-void 
-accumulate(Float& value, Float& error, uint n, const Float* aptr, const Float* bptr) 
+void
+accumulate(Float& value, Float& error, uint n, const Float* aptr, const Float* bptr)
 {
     Interval v=value;
     for(uint i=0; i!=n; ++i) {
@@ -108,7 +108,7 @@ row_errors(const Matrix<Interval>& A)
 
 Vector<Float>
 errors(const Vector<Interval>& pt)
-{  
+{
     Vector<Float> result(pt.size());
     for(uint i=0; i!=pt.size(); ++i) {
         result[i]=pt[i].radius();
@@ -130,9 +130,9 @@ row_errors(const Vector<Interval>& pt, const Matrix<Interval>& A)
     }
     return result;
 }
-  
+
 Vector<Float>
-add_up(const Vector<Float>& v1, const Vector<Float>& v2) 
+add_up(const Vector<Float>& v1, const Vector<Float>& v2)
 {
     Vector<Float> result;
     for(uint i=0; i!=v1.size(); ++i) {
@@ -141,8 +141,8 @@ add_up(const Vector<Float>& v1, const Vector<Float>& v2)
     return result;
 }
 
-tribool 
-norm_grtr(const Vector<Float>& v1, const Vector<Float>& v2) 
+tribool
+norm_grtr(const Vector<Float>& v1, const Vector<Float>& v2)
 {
     return norm(v1)>norm(v2);
 }
@@ -152,24 +152,24 @@ norm_grtr(const Vector<Float>& v1, const Vector<Float>& v2)
 
 
 
- 
+
 Zonotope::~Zonotope()
 {
 }
 
- 
+
 Zonotope::Zonotope()
     : _centre(), _generators(), _error()
 {
 }
 
- 
+
 Zonotope::Zonotope(uint d)
     : _centre(d), _generators(d,0), _error(d)
 {
 }
 
- 
+
 Zonotope::Zonotope(uint d, uint m)
     : _centre(d), _generators(d,m), _error(d)
 {
@@ -195,7 +195,7 @@ Zonotope::Zonotope(uint d, uint m, double x0, ...)
     va_end(args);
 }
 
- 
+
 Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e)
     : _centre(c), _generators(G), _error(e)
 {
@@ -203,28 +203,28 @@ Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<
     assert(c.size()==e.size());
 }
 
- 
+
 Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G)
     : _centre(c), _generators(G), _error(c.size())
 {
     assert(c.size()==G.row_size());
 }
 
- 
+
 Zonotope::Zonotope(const Vector<Interval>& c, const Matrix<Float>& G)
     : _centre(midpoint(c)), _generators(G), _error(errors(c))
 {
     assert(c.size()==G.row_size());
 }
 
- 
+
 Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Interval>& G)
     : _centre(c), _generators(midpoint(G)), _error(row_errors(G))
 {
     assert(c.size()==G.row_size());
 }
 
- 
+
 Zonotope::Zonotope(const Vector<Interval>& c, const Matrix<Interval>& G)
     : _centre(midpoint(c)), _generators(midpoint(G)), _error(row_errors(c,G))
 {
@@ -232,16 +232,16 @@ Zonotope::Zonotope(const Vector<Interval>& c, const Matrix<Interval>& G)
 }
 
 
-       
-Zonotope::Zonotope(const Zonotope& z) 
+
+Zonotope::Zonotope(const Zonotope& z)
     : _centre(z._centre), _generators(z._generators), _error(z._error)
 {
 }
 
-       
+
 Zonotope&
-Zonotope::operator=(const Zonotope& z) 
-{ 
+Zonotope::operator=(const Zonotope& z)
+{
     if(this!=&z) {
         this->_centre=z._centre;
         this->_generators=z._generators;
@@ -250,7 +250,7 @@ Zonotope::operator=(const Zonotope& z)
     return *this;
 }
 
-       
+
 Zonotope*
 Zonotope::clone() const
 {
@@ -270,42 +270,42 @@ Zonotope::dimension() const
     return this->_centre.size();
 }
 
-       
+
 uint
 Zonotope::number_of_generators() const
 {
     return this->_generators.column_size();
 }
 
-       
+
 const Vector<Float>&
 Zonotope::centre() const
 {
     return this->_centre;
 }
 
-       
+
 const Matrix<Float>&
 Zonotope::generators() const
 {
     return this->_generators;
 }
 
-       
+
 const Vector<Float>&
 Zonotope::error() const
 {
     return this->_error;
 }
 
-       
+
 Vector<Interval>
 Zonotope::domain() const
 {
     return Vector<Interval>(this->number_of_generators(),Interval(-1,1));
 }
 
-       
+
 Box
 Zonotope::bounding_box() const
 {
@@ -314,14 +314,14 @@ Zonotope::bounding_box() const
     return b;
 }
 
-       
+
 Float
 Zonotope::radius() const
 {
     return Ariadne::radius(this->bounding_box());
 }
 
-       
+
 tribool
 Zonotope::contains(const Point& pt) const
 {
@@ -353,31 +353,31 @@ Zonotope::write(std::ostream& os) const
 
 
 
-       
+
 tribool
-empty(const Zonotope& z) 
+empty(const Zonotope& z)
 {
     return false;
 }
 
-       
+
 tribool
-bounded(const Zonotope& z) 
+bounded(const Zonotope& z)
 {
     return true;
 }
 
-       
 
-       
-Float 
-radius(const Zonotope& z) 
+
+
+Float
+radius(const Zonotope& z)
 {
     return Ariadne::radius(z.centre()+prod(z.generators(),z.domain())+z.error()*Interval(-1,1));
 }
 
 
-       
+
 
 
 
@@ -398,16 +398,16 @@ split(const Zonotope& z)
 {
     // FIXME: Not quite guarenteed to give an over-approximation
     typedef Interval I;
-  
-  
+
+
     ListSet< Zonotope  > result;
-  
+
     uint d=z.dimension();
     uint m=z.number_of_generators();
     Vector<Float> const& c=z.centre();
     Matrix<Float> const& G=z.generators();
     Vector<Float> const& e=z.error();
-  
+
     array<Float> norms(m,0);
     for(uint j=0; j!=m; ++j) {
         norms[j]=norm(Vector<Float>(column(G,j)));
@@ -427,14 +427,14 @@ split(const Zonotope& z)
             longest_generator=m+k;
         }
     }
-  
+
     if(longest_generator<m) {
         Matrix<Float> new_generators=z.generators();
         uint j=longest_generator;
         for(uint i=0; i!=d; ++i) {
             new_generators(i,j)=div_up(new_generators(i,j),2);
         }
-    
+
         Vector<Float> v=column(new_generators,j);
         Vector<Float> new_centre=sub_approx(c,v);
         result.adjoin(Zonotope(new_centre,new_generators,e));
@@ -452,13 +452,13 @@ split(const Zonotope& z)
         result.adjoin(Zonotope(new_centre,new_generators,new_error));
     }
     return result;
-} 
+}
 
 
 
 
-       
-Zonotope::Zonotope(const Box& r) 
+
+Zonotope::Zonotope(const Box& r)
     : _centre(r.size()), _generators(r.size(),r.size()), _error(r.size())
 {
     uint d=r.size();
@@ -477,83 +477,38 @@ Zonotope::Zonotope(const Box& r)
 
 
 
-/*
+
+
+
+
 Zonotope
-apply(const AffineModel& am,
-      const Zonotope& z)
-{
-  
-    typedef Interval I;
-  
-    assert(z.centre()==am.centre());
-    if(!inside(z,am.domain())) {
-        std::cerr<<"z="<<z<<"\nz.bounding_box()="<<z.bounding_box()<<"\nam.domain()="<<am.domain()<<std::endl;
-    }
-    assert(possibly(inside(z,am.domain())));
-  
-    uint d=z.size();
-    uint m=z.number_of_generators();
-    uint nd=am.result_size();
-    
-    //Vector<Float> const& c=z.centre();
-    Matrix<Float> const& G=z.generators();
-    Vector<Float> const& e=z.error();
-
-    Vector<Interval> const& nic=am.value();
-    Matrix<Interval> const& iDf=am.jacobian();
-    Matrix<Interval> niG=iDf*G;
-    
-    Vector<Float> nc=midpoint(nic);
-    Matrix<Float> nG=midpoint(niG);
-    Vector<Float> ne(nd);
-    
-    for(uint i=0; i!=nd; ++i) {
-        R& err=ne[i];
-        err=add_up(err,nic[i].radius());
-        for(uint j=0; j!=m; ++j) {
-            err=add_up(err,niG(i,j).radius());
-        }
-        for(uint k=0; k!=d; ++k) {
-            err=add_up(err,mul_up(mag(iDf(i,k)),e[k]));
-        }
-    }
-  
-    return Zonotope(nc,nG,ne);
-
-}
-
-*/
-
-
- 
-Zonotope 
 approximation(const Zonotope& z)
 {
     return Zonotope(z.centre(),z.generators());
 }
 
- 
+
 Zonotope
 over_approximation(const Zonotope& z)
 {
     return z;
 }
 
- 
+
 Zonotope
 error_free_over_approximation(const Zonotope& z)
 {
     uint d=z.dimension();
     uint m=z.number_of_generators();
-    
+
     // Count number of nonzero error values
-    uint e=0; 
-    for(uint i=0; i!=d; ++i) { 
+    uint e=0;
+    for(uint i=0; i!=d; ++i) {
         if(z.error()[i]!=0) { ++e; }
     }
     Matrix<Float> nG(d,m+e);
     project(nG,range(0,d),range(0,m))=z.generators();
-    
+
     uint j=m;
     for(uint i=0; i!=d; ++i) {
         if(z.error()[i]!=0) {
@@ -564,17 +519,10 @@ error_free_over_approximation(const Zonotope& z)
     return Zonotope(z.centre(),nG);
 }
 
- 
-/*
-Zonotope
-nonsingular_over_approximation(const Zonotope& z)
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}  
-*/
 
 
- 
+
+
 /*
 Zonotope
 orthogonal_over_approximation(const Zonotope& z)
@@ -582,21 +530,21 @@ orthogonal_over_approximation(const Zonotope& z)
     //assert(iz.size()==iz.number_of_generators());
     typedef Interval I;
     Zonotope ez=error_free_over_approximation(z);
-    
+
     const Vector<Float>& c=ez.centre();
     const Matrix<Float>& G=ez.generators();
-    
+
     Matrix<Float> aQ,aR;
     make_lpair(aQ,aR)=qr_approx(G);
-    
+
     Matrix<Interval> aQinv=inverse(aQ);
     Matrix<Interval> iR=aQinv*G;
     DiagonalMatrix<Float> aD(::row_norms(iR));
-    
+
     Matrix<Interval> niG=aQ*aD;
-    
+
     return Zonotope(c,niG);
-}  
+}
 */
 
 
@@ -604,21 +552,21 @@ Zonotope
 cascade_over_approximation(const Zonotope& z, uint cs)
 {
     using namespace std;
-  
-    if(z.number_of_generators()<=z.dimension()*cs) { return z; }  
+
+    if(z.number_of_generators()<=z.dimension()*cs) { return z; }
 
     assert(z.number_of_generators()%z.dimension()==0);
 
     uint d=z.dimension();
     uint nb=z.number_of_generators()/z.dimension(); // number of generator blocks
-   
+
 
     const Matrix<Float>& G=z.generators();
     array<Float> norms(nb);
     for(uint i=0; i!=nb; ++i) {
         norms[i]=Ariadne::norm(Matrix<Float>(project(G,range(0,d),range(i*d,(i+1)*d))));
     }
-  
+
     // Compute the new number of blocks
     uint nnb=cs;
     Float sum=0;
@@ -646,7 +594,7 @@ cascade_over_approximation(const Zonotope& z, uint cs)
 Zonotope
 orthogonal_over_approximation(const Zonotope& z)
 {
-    
+
     Zonotope r=error_free_over_approximation(z);
     Matrix<Float> J=r.generators();
 
@@ -660,13 +608,13 @@ orthogonal_over_approximation(const Zonotope& z)
     for(uint j=0; j!=n; ++j) { }
 
     return z;
-// Choose 
+// Choose
 }
 
 
 /*
- 
-Zonotope<Interval,R> 
+
+Zonotope<Interval,R>
 orthogonal_over_approximation(const Zonotope<R,R>& z)
 {
     // FIXME: Subdivide in zero order as well!
@@ -676,11 +624,11 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
         warn=false;
     }
     Zonotope<R,R> oaz=over_approximation(z);
-    
+
     QRMatrix< Interval > QR(oaz.generators());
     Point< Interval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
-    
+
     Matrix< Interval > q=QR.Q();
     Matrix< Interval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
@@ -697,12 +645,12 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
     return Zonotope<R,R>(midpoint(c),G);
 }
 
- 
-Zonotope<Interval,R> 
+
+Zonotope<Interval,R>
 orthogonal_over_approximation(const Zonotope<Interval,R>& z)
 {
     Zonotope<R,R> oaz=over_approximation(z);
-  
+
     QRMatrix< Interval > QR(oaz.generators());
     Point< Interval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
@@ -723,16 +671,16 @@ orthogonal_over_approximation(const Zonotope<Interval,R>& z)
     return Zonotope<Interval,R>(c,G);
 }
 
- 
-Zonotope< Interval > 
+
+Zonotope< Interval >
 orthogonal_over_approximation(const Zonotope< Interval >& z)
 {
     Zonotope<R,R> oaz=over_approximation(z);
-  
+
     QRMatrix< Interval > QR(oaz.generators());
     Point< Interval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
-    
+
     Matrix< Interval > q=QR.Q();
     Matrix< Interval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
@@ -756,7 +704,7 @@ orthogonal_over_approximation(const Zonotope< Interval >& z)
 
 
 std::ostream&
-operator<<(std::ostream& os, const Zonotope& z) 
+operator<<(std::ostream& os, const Zonotope& z)
 {
     os << "[";
     for(uint i=0; i!=z.dimension(); ++i) {
@@ -780,7 +728,7 @@ operator<<(std::ostream& os, const Zonotope& z)
 
 
 
-std::istream& 
+std::istream&
 operator>>(std::istream& is, Zonotope& z)
 {
     Vector<Float> centre;
@@ -803,7 +751,7 @@ inside(const Zonotope& z, const Box& bx)
 
 
 tribool
-overlaps(const Zonotope& z, const Box& bx) 
+overlaps(const Zonotope& z, const Box& bx)
 {
     return !disjoint(z,bx);
 }
@@ -838,13 +786,13 @@ disjoint(const Zonotope& z, const Box& bx)
         u[d+j]=+1;
     }
 
-    return ! constrained_feasible(A,b,l,u);
+    return ! SimplexSolver<Float>().constrained_feasible(A,b,l,u);
 }
 
-    
+
 /* Set up constrained linear program Ax=b, l\leq x\leq u.
  * Here, A=[z1.G,z2.G], b=z1.c-z2.c, l=[-o,-o], u=[+o,+o]
- * Still need to take into account errors, particularly in 
+ * Still need to take into account errors, particularly in
  * the \a b vector.
  */
 tribool
@@ -867,25 +815,25 @@ disjoint(const Zonotope& z1, const Zonotope& z2)
     project(A,range(0,d),range(0,ng1))=G1;
     project(A,range(0,d),range(ng1,ng1+ng2))=G2;
 
-    return ! constrained_feasible(A,b,l,u);
+    return ! SimplexSolver<Float>().constrained_feasible(A,b,l,u);
 }
 
 
 /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
  */
-tribool 
+tribool
 contains(const Zonotope& z, const Point& pt)
-{ 
+{
     //std::clog << "Zonotope::contains(const Vector<Float>& )" << std::endl;
     assert(z.dimension()==pt.dimension());
     uint m=z.number_of_generators();
-  
+
     const Matrix<Float>& A=z.generators();
     Vector<Float> b=pt-z.centre();
     Vector<Float> l(m,-1.0);
     Vector<Float> u(m,1.0);
-    
-    tribool result=constrained_feasible(A,b,l,u);
+
+    tribool result=SimplexSolver<Float>().constrained_feasible(A,b,l,u);
     return result;
 }
 
@@ -911,7 +859,7 @@ void Zonotope::draw(CanvasInterface& c) const {
     for(uint j=0; j!=z.number_of_generators(); ++j) {
         Vector2d g(zg[ix][j],zg[iy][j]);
         if(g.x<0) { g=-g; }
-        pg.push_back(g); 
+        pg.push_back(g);
     }
     if(ze[ix]>0) { pg.push_back(Vector2d(ze[ix],0.0)); }
     if(ze[iy]>0) { pg.push_back(Vector2d(0.0,ze[iy])); }

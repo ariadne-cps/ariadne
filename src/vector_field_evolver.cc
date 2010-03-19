@@ -136,7 +136,7 @@ _evolution(EnclosureListType& final_sets,
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction FunctionModelType;
     typedef VectorTaylorFunction FlowModelType;
-    typedef TaylorSet SetModelType;
+    typedef TaylorImageSet SetModelType;
 
 
     typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
@@ -220,7 +220,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction MapModelType;
     typedef VectorTaylorFunction FlowModelType;
-    typedef TaylorSet SetModelType;
+    typedef TaylorImageSet SetModelType;
 
     SetModelType current_set_model;
     TimeType current_time;

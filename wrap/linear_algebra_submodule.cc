@@ -217,7 +217,7 @@ template<> void export_vector<Float>()
     export_vector_class<Float>(float_vector_class);
     export_vector_conversion<Float,Float>(float_vector_class);
     export_vector_arithmetic<Float,Float,Float>(float_vector_class);
-    export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
+    //export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
 }
 
 template<> void export_vector<Interval>()
@@ -229,9 +229,12 @@ template<> void export_vector<Interval>()
     export_vector_arithmetic<Interval,Interval,Float>(interval_vector_class);
     export_vector_arithmetic<Interval,Interval,Interval>(interval_vector_class);
     def("midpoint", (Vector<Float>(*)(const Vector<Interval>&)) &midpoint);
+    def("intersection", (Vector<Interval>(*)(const Vector<Interval>&,const Vector<Interval>&)) &intersection);
+    def("hull", (Vector<Interval>(*)(const Vector<Interval>&,const Vector<Interval>&)) &intersection);
     def("subset", (bool(*)(const Vector<Interval>&, const Vector<Interval>&)) &subset);
+    def("disjoint", (bool(*)(const Vector<Interval>&, const Vector<Interval>&)) &disjoint);
 
-    implicitly_convertible< Vector<Float>, Vector<Interval> >();
+    //implicitly_convertible< Vector<Float>, Vector<Interval> >();
 
 
 }
@@ -307,7 +310,7 @@ template<> void export_matrix<Float>()
     export_matrix_class<Float>(matrix_class);
     export_matrix_conversion<Float,Float>(matrix_class);
     export_matrix_arithmetic<Float,Float,Float>(matrix_class);
-    export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
+    //export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
 
     def("triangular_decomposition",&triangular_decomposition);
     def("orthogonal_decomposition", &orthogonal_decomposition);
@@ -331,7 +334,7 @@ template<> void export_matrix<Interval>()
     def("lu_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &lu_solve);
     def("midpoint", (Matrix<Float>(*)(const Matrix<Interval>&)) &midpoint);
 
-    implicitly_convertible< Matrix<Float>, Matrix<Interval> >();
+    //implicitly_convertible< Matrix<Float>, Matrix<Interval> >();
 }
 
 

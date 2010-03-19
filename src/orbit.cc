@@ -2,7 +2,7 @@
  *            orbit.cc
  *
  *  Copyright 2007-8  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <utility>
 
 #include "orbit.h"
@@ -41,7 +41,7 @@ Orbit<Point>::Orbit(const Point& pt)
     : _curve(new InterpolatedCurve(0.0,pt))
 { }
 
-void 
+void
 Orbit<Point>::insert(Time t, const Point& pt)
 {
     this->_curve->insert(t,pt);
@@ -58,13 +58,13 @@ Orbit<HybridPoint>::size() const
     return this->_curves->size();
 }
 
-const InterpolatedCurve& 
+const InterpolatedCurve&
 Orbit<HybridPoint>::curve(uint m) const
 {
-    return (*this->_curves)[m].second; 
+    return (*this->_curves)[m].second;
 }
 
-void 
+void
 Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
 {
     ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
@@ -76,96 +76,96 @@ Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
 }
 
 
-template<> 
-std::ostream& 
+template<>
+std::ostream&
 operator<<(std::ostream& os, const Orbit< HybridPoint >& orb)
 {
     return os << orb.curves();
 }
 
 
-struct Orbit<TaylorSet>::Data {
-    Data(const TaylorSet& initial_set) 
+struct Orbit<TaylorImageSet>::Data {
+    Data(const TaylorImageSet& initial_set)
         : initial(initial_set) { }
-    TaylorSet initial;
-    TaylorSetList reach;
-    TaylorSetList intermediate;
-    TaylorSetList final;
+    TaylorImageSet initial;
+    TaylorImageSetList reach;
+    TaylorImageSetList intermediate;
+    TaylorImageSetList final;
 };
 
-Orbit<TaylorSet>::
-Orbit(const TaylorSet& initial_set)
+Orbit<TaylorImageSet>::
+Orbit(const TaylorImageSet& initial_set)
     : _data(new Data(initial_set))
 {
 }
 
 void
-Orbit<TaylorSet>::
-adjoin_reach(const TaylorSet& set)
+Orbit<TaylorImageSet>::
+adjoin_reach(const TaylorImageSet& set)
 {
     this->_data->reach.adjoin(set);
 }
 
 void
-Orbit<TaylorSet>::
-adjoin_intermediate(const TaylorSet& set)
+Orbit<TaylorImageSet>::
+adjoin_intermediate(const TaylorImageSet& set)
 {
     this->_data->intermediate.adjoin(set);
 }
 
 void
-Orbit<TaylorSet>::
-adjoin_final(const TaylorSet& set)
+Orbit<TaylorImageSet>::
+adjoin_final(const TaylorImageSet& set)
 {
     this->_data->final.adjoin(set);
 }
 
 
 void
-Orbit<TaylorSet>::
-adjoin_reach(const TaylorSetList& list_set)
+Orbit<TaylorImageSet>::
+adjoin_reach(const TaylorImageSetList& list_set)
 {
     this->_data->reach.adjoin(list_set);
 }
 
 void
-Orbit<TaylorSet>::
-adjoin_intermediate(const TaylorSetList& list_set)
+Orbit<TaylorImageSet>::
+adjoin_intermediate(const TaylorImageSetList& list_set)
 {
     this->_data->intermediate.adjoin(list_set);
 }
 
 void
-Orbit<TaylorSet>::
-adjoin_final(const TaylorSetList& list_set)
+Orbit<TaylorImageSet>::
+adjoin_final(const TaylorImageSetList& list_set)
 {
     this->_data->final.adjoin(list_set);
 }
 
 
-TaylorSet const&
-Orbit<TaylorSet>::
+TaylorImageSet const&
+Orbit<TaylorImageSet>::
 initial() const
 {
     return this->_data->initial;
 }
 
-TaylorSetList const&
-Orbit<TaylorSet>::
+TaylorImageSetList const&
+Orbit<TaylorImageSet>::
 reach() const
 {
     return this->_data->reach;
 }
 
-TaylorSetList const&
-Orbit<TaylorSet>::
+TaylorImageSetList const&
+Orbit<TaylorImageSet>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-TaylorSetList const&
-Orbit<TaylorSet>::
+TaylorImageSetList const&
+Orbit<TaylorImageSet>::
 final() const
 {
     return this->_data->final;
@@ -174,88 +174,88 @@ final() const
 
 
 
-struct Orbit<HybridTaylorSet>::Data {
-    Data(const HybridTaylorSet& initial_set) 
+struct Orbit<HybridTaylorImageSet>::Data {
+    Data(const HybridTaylorImageSet& initial_set)
         : initial(initial_set) { }
-    HybridTaylorSet initial;
-    HybridTaylorSetList reach;
-    HybridTaylorSetList intermediate;
-    HybridTaylorSetList final;
+    HybridTaylorImageSet initial;
+    HybridTaylorImageSetList reach;
+    HybridTaylorImageSetList intermediate;
+    HybridTaylorImageSetList final;
 };
 
-Orbit<HybridTaylorSet>::
-Orbit(const HybridTaylorSet& initial_set)
+Orbit<HybridTaylorImageSet>::
+Orbit(const HybridTaylorImageSet& initial_set)
     : _data(new Data(initial_set))
 {
 }
 
 void
-Orbit<HybridTaylorSet>::
-adjoin_reach(const HybridTaylorSet& set)
+Orbit<HybridTaylorImageSet>::
+adjoin_reach(const HybridTaylorImageSet& set)
 {
     this->_data->reach.adjoin(set);
 }
 
 void
-Orbit<HybridTaylorSet>::
-adjoin_intermediate(const HybridTaylorSet& set)
+Orbit<HybridTaylorImageSet>::
+adjoin_intermediate(const HybridTaylorImageSet& set)
 {
     this->_data->intermediate.adjoin(set);
 }
 
 void
-Orbit<HybridTaylorSet>::
-adjoin_final(const HybridTaylorSet& set)
+Orbit<HybridTaylorImageSet>::
+adjoin_final(const HybridTaylorImageSet& set)
 {
     this->_data->final.adjoin(set);
 }
 
 
 void
-Orbit<HybridTaylorSet>::
-adjoin_reach(const HybridTaylorSetList& list_set)
+Orbit<HybridTaylorImageSet>::
+adjoin_reach(const HybridTaylorImageSetList& list_set)
 {
     this->_data->reach.adjoin(list_set);
 }
 
 void
-Orbit<HybridTaylorSet>::
-adjoin_intermediate(const HybridTaylorSetList& list_set)
+Orbit<HybridTaylorImageSet>::
+adjoin_intermediate(const HybridTaylorImageSetList& list_set)
 {
     this->_data->intermediate.adjoin(list_set);
 }
 
 void
-Orbit<HybridTaylorSet>::
-adjoin_final(const HybridTaylorSetList& list_set)
+Orbit<HybridTaylorImageSet>::
+adjoin_final(const HybridTaylorImageSetList& list_set)
 {
     this->_data->final.adjoin(list_set);
 }
 
 
-HybridTaylorSet const&
-Orbit<HybridTaylorSet>::
+HybridTaylorImageSet const&
+Orbit<HybridTaylorImageSet>::
 initial() const
 {
     return this->_data->initial;
 }
 
-HybridTaylorSetList const&
-Orbit<HybridTaylorSet>::
+HybridTaylorImageSetList const&
+Orbit<HybridTaylorImageSet>::
 reach() const
 {
     return this->_data->reach;
 }
 
-HybridTaylorSetList const&
-Orbit<HybridTaylorSet>::
+HybridTaylorImageSetList const&
+Orbit<HybridTaylorImageSet>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-HybridTaylorSetList const&
-Orbit<HybridTaylorSet>::
+HybridTaylorImageSetList const&
+Orbit<HybridTaylorImageSet>::
 final() const
 {
     return this->_data->final;
@@ -266,36 +266,36 @@ final() const
 
 
 struct Orbit<GridCell>::Data {
-    Data(const GridCell& initial_set) 
-        : initial(initial_set) { }
-    GridCell initial;
+    Data(const Grid& grid) : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    GridTreeSet initial;
     GridTreeSet reach;
     GridTreeSet intermediate;
     GridTreeSet final;
 };
 
 Orbit<GridCell>::
-Orbit(const GridCell& initial_set)
-    : _data(new Data(initial_set))
+Orbit(const GridTreeSet& initial_set)
+    : _data(new Data(initial_set.grid()))
 {
+    this->_data->initial=initial_set;
 }
 
+
 Orbit<GridCell>::
-Orbit(const GridCell& initial_set,
+Orbit(const GridTreeSet& initial_set,
       const GridTreeSet& reach_set,
       const GridTreeSet& intermediate_set,
       const GridTreeSet& final_set)
-    : _data(new Data(initial_set))
+    : _data(new Data(initial_set.grid()))
 {
+    this->_data->initial=initial_set;
     this->_data->reach=reach_set;
     this->_data->intermediate=intermediate_set;
     this->_data->final=final_set;
-    std::cerr<<"Orbit<GridCell>::Orbit(...)\n  initial="<<initial_set<<"\n  reach="<<reach_set<<"\n  intermediate="<<intermediate_set<<"\n  final="<<final_set<<"\n\n"<<std::flush;
-    std::cerr<<"orbit="<<*this<<"\n\n"<<std::flush;
 }
 
 
-GridCell const&
+GridTreeSet const&
 Orbit<GridCell>::
 initial() const
 {
@@ -326,33 +326,35 @@ final() const
 
 
 struct Orbit<HybridGridCell>::Data {
-    Data(const HybridGridCell& initial_set) 
-        : initial(initial_set) { }
-    HybridGridCell initial;
+    Data(const HybridGrid& grid)
+        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    HybridGridTreeSet initial;
     HybridGridTreeSet reach;
     HybridGridTreeSet intermediate;
     HybridGridTreeSet final;
 };
 
 Orbit<HybridGridCell>::
-Orbit(const HybridGridCell& initial_set)
-    : _data(new Data(initial_set))
+Orbit(const HybridGridTreeSet& initial_set)
+    : _data(new Data(initial_set.grid()))
 {
+    this->_data->initial=initial_set;
 }
 
 Orbit<HybridGridCell>::
-Orbit(const HybridGridCell& initial_set,
+Orbit(const HybridGridTreeSet& initial_set,
       const HybridGridTreeSet& reach_set,
       const HybridGridTreeSet& intermediate_set,
       const HybridGridTreeSet& final_set)
-    : _data(new Data(initial_set))
+    : _data(new Data(initial_set.grid()))
 {
+    this->_data->initial=initial_set;
     this->_data->reach=reach_set;
     this->_data->intermediate=intermediate_set;
     this->_data->final=final_set;
 }
 
-HybridGridCell const&
+HybridGridTreeSet const&
 Orbit<HybridGridCell>::
 initial() const
 {
@@ -381,11 +383,11 @@ final() const
 }
 
 
-template<> 
-std::ostream& 
-operator<<(std::ostream& os, const Orbit<TaylorSet>& orb)
+template<>
+std::ostream&
+operator<<(std::ostream& os, const Orbit<TaylorImageSet>& orb)
 {
-    os << "Orbit(\n  initial=" << Orbit<TaylorSet>::EnclosureListType(orb.initial()).bounding_boxes()
+    os << "Orbit(\n  initial=" << Orbit<TaylorImageSet>::EnclosureListType(orb.initial()).bounding_boxes()
        << "\n  intermediate=" << orb.intermediate().bounding_boxes()
        << "\n  reach=" << orb.reach().bounding_boxes()
        << "\n  final=" << orb.final().bounding_boxes()
@@ -394,11 +396,11 @@ operator<<(std::ostream& os, const Orbit<TaylorSet>& orb)
 }
 
 
-template<> 
-std::ostream& 
-operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb)
+template<>
+std::ostream&
+operator<<(std::ostream& os, const Orbit<HybridTaylorImageSet>& orb)
 {
-    os << "Orbit(\n  initial=" << Orbit<HybridTaylorSet>::EnclosureListType(orb.initial()).bounding_boxes()
+    os << "Orbit(\n  initial=" << Orbit<HybridTaylorImageSet>::EnclosureListType(orb.initial()).bounding_boxes()
        << "\n  intermediate=" << orb.intermediate().bounding_boxes()
        << "\n  reach=" << orb.reach().bounding_boxes()
        << "\n  final=" << orb.final().bounding_boxes()
@@ -406,7 +408,7 @@ operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb)
     return os;
 }
 
-void draw(CanvasInterface& graphic, const Orbit<TaylorSet>& orbit)
+void draw(CanvasInterface& graphic, const Orbit<TaylorImageSet>& orbit)
 {
     orbit.reach().draw(graphic);
     orbit.initial().draw(graphic);

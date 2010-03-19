@@ -125,7 +125,7 @@ HybridVector operator*(const Float& s, const HybridVector& hv) {
 HybridVector evaluate(const std::vector<RealDynamic>& dyn, const HybridPoint& pt) {
     HybridVector r;
     for(std::vector<RealDynamic>::const_iterator dyn_iter=dyn.begin(); dyn_iter!=dyn.end(); ++dyn_iter) {
-        r[dyn_iter->lhs.base]=evaluate(dyn_iter->rhs,pt);
+        r[dyn_iter->lhs.base()]=evaluate(dyn_iter->rhs,pt);
     }
     return r;
 }
@@ -168,11 +168,11 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
         if(enabled) {
             std::vector<StringUpdate> switchings=sys.switching(event,pt);
             for(std::vector<StringUpdate>::const_iterator iter=switchings.begin(); iter!=switchings.end(); ++iter) {
-                next_pt.set(iter->lhs.base,evaluate(iter->rhs,pt));
+                next_pt.set(iter->lhs.base(),evaluate(iter->rhs,pt));
             }
             std::vector<RealUpdate> real_updates=sys.resets(event,pt);
             for(std::vector<RealUpdate>::const_iterator iter=real_updates.begin(); iter!=real_updates.end(); ++iter) {
-                next_pt.set(iter->lhs.base,evaluate(iter->rhs,pt));
+                next_pt.set(iter->lhs.base(),evaluate(iter->rhs,pt));
             }
             algebraic_assignments=sys.equations(pt);
             for(std::vector<RealAssignment>::const_iterator iter=algebraic_assignments.begin(); iter!=algebraic_assignments.end(); ++iter) {

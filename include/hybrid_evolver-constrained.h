@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_evolver.h
+/*! \file hybrid_evolver-constrained.h
  *  \brief Evolver for hybrid systems.
  */
 
@@ -39,7 +39,8 @@
 
 #include "hybrid_set.h"
 
-#include "hybrid_automaton.h"
+#include "hybrid_enclosure.h"
+#include "hybrid_automaton-composite.h"
 #include "evolver_interface.h"
 #include "evolver_base.h"
 #include "evolution_parameters.h"
@@ -48,124 +49,32 @@
 
 namespace Ariadne {
 
-template<class Sys, class ES> class Evolver;
-
-class ConstrainedImageSet;
-class HybridAutomaton;
-
-class EvolutionParameters;
-
-class EvolutionProfiler;
-
-class HybridTime;
-
-class DiscreteEvent;
-
-template<class ES> class ListSet;
-
-class ConstrainedImageSet
-    : public DrawableInterface
-{
-    class Data;
-    typedef Vector<Interval> IntervalVector;
-  public:
-    ConstrainedImageSet();
-    ConstrainedImageSet(IntervalVector);
-    ConstrainedImageSet(IntervalVector, VectorFunction);
-
-    ConstrainedImageSet(const ConstrainedImageSet&);
-    ConstrainedImageSet& operator=(const ConstrainedImageSet&);
-    ConstrainedImageSet* clone() const;
-
-    void apply_map(VectorFunction);
-    void apply_flow(VectorFunction, Interval);
-    void apply_flow(VectorTaylorFunction);
-
-    void new_invariant(DiscreteEvent,ScalarFunction,ScalarFunction);
-    void new_activation(DiscreteEvent,ScalarFunction,ScalarFunction);
-    void new_guard(DiscreteEvent,ScalarFunction,ScalarFunction);
-    void new_equation(DiscreteEvent,ScalarFunction);
-
-    uint dimension() const;
-    uint number_of_parameters() const;
-    Box bounding_box() const;
-    tribool disjoint(Box bx);
-    GridTreeSet outer_approximation(Grid g, int depth) const;
-
-    void draw(CanvasInterface&) const;
-    std::ostream& write(std::ostream&) const;
-  private:
-    shared_ptr<Data> _data; 
-};
-
-inline std::ostream& operator<<(std::ostream& os, const ConstrainedImageSet& s) { return s.write(os); }
-
-typedef HybridBasicSet<ConstrainedImageSet> HybridConstrainedImageSet;
-
-template<>
-struct HybridBasicSet<ConstrainedImageSet>
-{
-    typedef DiscreteState first_type;
-    typedef ConstrainedImageSet ContinuousStateSetType;
-
-    HybridBasicSet(const DiscreteState& q_, const Box& s_)
-        : _events(), _location(q_), _set(s_) { }
-    HybridBasicSet(const std::pair<DiscreteState,ConstrainedImageSet>& hs_)
-        : _events(), _location(hs_.first), _set(hs_.second) { }
-    HybridBasicSet(const DiscreteState& q_, const ConstrainedImageSet& s_)
-        : _events(), _location(q_), _set(s_) { }
-    HybridBasicSet(const List<DiscreteEvent>& e_, const DiscreteState& q_, const ConstrainedImageSet& s_)
-        : _events(e_), _location(q_), _set(s_) { }
-    uint dimension() const { return _set.dimension(); }
-    DiscreteState location() const { return _location; }
-    ConstrainedImageSet const& continuous_state_set() const { return _set; }
-
-    List<DiscreteEvent> _events;
-    DiscreteState _location;
-    ConstrainedImageSet _set;
-};
- 
-inline std::ostream& operator<<(std::ostream& os, const HybridConstrainedImageSet& hs) {
-    return os << hs._events << ":" << hs._location <<"," << hs._set;
-}
-
-
-struct TimedHybridConstrainedImageSet : public HybridConstrainedImageSet {
-    TimedHybridConstrainedImageSet(const HybridConstrainedImageSet& hs_)
-        : HybridConstrainedImageSet(hs_), _time(ScalarFunction::constant(hs_.dimension(),0.0)) { }
-    TimedHybridConstrainedImageSet(DiscreteState q_, const ConstrainedImageSet& s_)
-        : HybridConstrainedImageSet(q_,s_), _time(ScalarFunction::constant(s_.dimension(),0.0)) { }
-    TimedHybridConstrainedImageSet(List<DiscreteEvent> e_, DiscreteState q_, const ConstrainedImageSet& s_, const ScalarFunction& t_)
-        : HybridConstrainedImageSet(e_,q_,s_), _time(t_) { }
-    ScalarFunction _time;
-};
-
 
 /*! \brief A class for computing the evolution of a hybrid system.
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class ConstrainedImageSetHybridEvolver
-    : public EvolverBase<HybridAutomaton,HybridConstrainedImageSet>
-//    , public Loggable
+    : public EvolverBase<CompositeHybridAutomaton,HybridEnclosure>
+    , public Loggable
 {
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef HybridTime TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
-    typedef TaylorSet ContinuousEnclosureType;
-    typedef HybridConstrainedImageSet HybridEnclosureType;
+    typedef CompositeHybridAutomaton SystemType;
+    typedef TaylorImageSet ContinuousEnclosureType;
+    typedef HybridEnclosure HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
-    typedef ListSet<HybridConstrainedImageSet> EnclosureListType;
+    typedef ListSet<HybridEnclosure> EnclosureListType;
     typedef Float ContinuousTimeType;
   public:
 
     //! \brief Default constructor.
-    ConstrainedImageSetHybridEvolver() : _parameters() { }
+    ConstrainedImageSetHybridEvolver() : _parameters(new EvolutionParametersType()) { }
 
     //! \brief Construct from parameters using a default integrator.
     ConstrainedImageSetHybridEvolver(const EvolutionParametersType& parameters) :
@@ -207,16 +116,16 @@ class ConstrainedImageSetHybridEvolver
                             Semantics semantics, bool reach) const;
 
     void
-    _upper_evolution_step(List<TimedHybridConstrainedImageSet>&,
-                          ListSet<HybridConstrainedImageSet>&,
-                          ListSet<HybridConstrainedImageSet>&,
-                          ListSet<HybridConstrainedImageSet>&,
-                          HybridAutomaton const& system,
+    _upper_evolution_step(List<HybridEnclosure>& working,
+                          ListSet<HybridEnclosure>& final,
+                          ListSet<HybridEnclosure>& reachable,
+                          ListSet<HybridEnclosure>& intermediate,
+                          CompositeHybridAutomaton const& system,
                           HybridTime const& maximum_time) const;
 
  private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< EvolutionProfiler >  _profiler;
+    //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
 

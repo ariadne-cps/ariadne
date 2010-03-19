@@ -28,6 +28,8 @@
 #ifndef ARIADNE_TEST_H
 #define ARIADNE_TEST_H
 
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <exception>
 
@@ -40,6 +42,19 @@ template<class R, class ER>
 bool
 ariadne_check(std::ostream& os, const R& r, const ER& er) {
     os << r << std::flush; return (r==er);
+}
+
+inline int get_verbosity(int argc, const char* argv[]) {
+    if(argc>1) {
+        if(std::strcmp(argv[1],"-v")==0) {
+            if(argc>2) {
+                return std::atoi(argv[2]);
+            }
+        } else {
+            std::cerr << "Unrecognised command-line option \"" << argv[1] << "\"\n";
+        }
+    }
+    return 0;
 }
 
 //This is the variable that stores counter for the number of test cases
@@ -285,6 +300,19 @@ int test_case_counter = 0;
         ARIADNE_TEST_CATCH("Constructor `" << #class << "" << #variable << "" << #expression << "'") \
     }                                                                   \
     class variable expression;                                          \
+
+
+/*! \brief Constructs object \a variable of type \a class from \a expression. */
+#define ARIADNE_TEST_NAMED_CONSTRUCT(class,variable,expression)               \
+    {                                                                   \
+        std::cout << #class << " " << #variable << "=" << #class << "::" << #expression << ": " << std::flush; \
+        try {                                                           \
+            class variable = class :: expression;                                  \
+            std::cout << #variable << "==" << variable << "\n" << std::endl; \
+        }                                                               \
+        ARIADNE_TEST_CATCH("Named constructor `" << #class << "" << #variable << "=" << #class << "::" << #expression << "'") \
+    }                                                                   \
+    class variable = class :: expression;                                          \
 
 
 /*! \brief Assigns object \a variable from \a expression. */

@@ -35,11 +35,14 @@
 #include "polynomial.h"
 #include "affine.h"
 #include "taylor_function.h"
+#include "constraint.h"
 #include "function.h"
 #include "expression.h"
 #include "formula.h"
+#include "constraint_solver.h"
 
 #include "utilities.h"
+
 
 
 #include <boost/python.hpp>
@@ -74,7 +77,7 @@ struct from_python<VectorFunction>
         list lst=extract<list>(obj_ptr);
         void* storage = ((converter::rvalue_from_python_storage< VectorFunction >*)   data)->storage.bytes;
         VectorFunction res(len(lst),0);
-        for(uint i=0; i!=res.result_size(); ++i) { res.set(i,ScalarFunction(extract<ScalarFunction&>(lst[i]))); }
+        for(uint i=0; i!=res.result_size(); ++i) { res.set(i,extract<ScalarFunction>(lst[i])); }
         new (storage) VectorFunction(res);
         data->convertible = storage;
     }
@@ -124,14 +127,17 @@ class ScalarPythonFunction
         return boost::python::extract< Differential<Interval> >(this->_pyf(x)); }
     virtual Differential<TaylorModel> evaluate (const Vector< Differential<TaylorModel> >& x) const {
         return boost::python::extract< Differential<TaylorModel> >(this->_pyf(x)); }
+    virtual Propagator<Interval> evaluate (const Vector< Propagator<Interval> >& x) const {
+        return boost::python::extract< Propagator<Interval> >(this->_pyf(x)); }
 
     virtual Vector<Float> gradient(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
     virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
         return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
-    virtual ScalarPythonFunction* derivative (uint j) const {
-        ARIADNE_ASSERT_MSG(false,"Cannot differentiate a Python function"); return 0; }
+    virtual ScalarFunction derivative (uint j) const {
+        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
+    virtual std::ostream& repr(std::ostream& os) const { return os; }
     virtual std::ostream& write(std::ostream& os) const {
         os << "ScalarUserFunction( ";
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
@@ -171,12 +177,16 @@ class VectorPythonFunction
         return boost::python::extract< Vector< Differential<Float> > >(this->_pyf(x)); }
     virtual Vector< Differential<Interval> > evaluate (const Vector< Differential<Interval> >& x) const {
         return boost::python::extract< Vector< Differential<Interval> > >(this->_pyf(x)); }
+    virtual Vector< Propagator<Interval> > evaluate (const Vector< Propagator<Interval> >& x) const {
+        return boost::python::extract< Vector< Propagator<Interval> > >(this->_pyf(x)); }
 
     virtual Matrix<Float> jacobian (const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
     virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const {
         return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
 
+    virtual ScalarFunction operator[](uint i) const {
+        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
 
     virtual std::ostream& write(std::ostream& os) const {
         os << "VectorUserFunction( ";
@@ -238,17 +248,19 @@ void export_monomial()
 template<class X>
 void export_polynomial()
 {
-    typedef Polynomial<X> P;
     X real;
 
-    class_< P > polynomial_class(python_name<X>("Polynomial"), init<int>());
-    polynomial_class.def("constant", (P(*)(uint,double)) &P::constant);
+    class_< Polynomial<X> > polynomial_class(python_name<X>("Polynomial"), init< Polynomial<X> >());
+    polynomial_class.def(init<uint>());
+    polynomial_class.def("constant", (Polynomial<X>(*)(uint,double)) &Polynomial<X>::constant);
     polynomial_class.staticmethod("constant");
-    polynomial_class.def("variable", (P(*)(uint,uint)) &P::variable);
+    polynomial_class.def("variable", (Polynomial<X>(*)(uint,uint)) &Polynomial<X>::variable);
     polynomial_class.staticmethod("variable");
+    polynomial_class.def("variables", (Vector< Polynomial<X> >(*)(uint)) &Polynomial<X>::variables);
+    polynomial_class.staticmethod("variables");
 
-    polynomial_class.def("argument_size", &P::argument_size);
-    polynomial_class.def("insert", &P::insert);
+    polynomial_class.def("argument_size", &Polynomial<X>::argument_size);
+    polynomial_class.def("insert", &Polynomial<X>::insert);
     polynomial_class.def(+self);
     polynomial_class.def(-self);
     polynomial_class.def(self+self);
@@ -261,7 +273,7 @@ void export_polynomial()
     polynomial_class.def(real+self);
     polynomial_class.def(real-self);
     polynomial_class.def(real*self);
-    polynomial_class.def("__iter__",boost::python::iterator<P>());
+    polynomial_class.def("__iter__",boost::python::iterator< Polynomial<X> >());
     polynomial_class.def(self_ns::str(self));
     //polynomial_class.def(self_ns::repr(self));
 
@@ -279,6 +291,9 @@ void export_scalar_function()
     scalar_function_class.def("derivative", &ScalarFunction::derivative);
     scalar_function_class.def("polynomial", &ScalarFunction::polynomial);
     scalar_function_class.def("__call__", (Interval(ScalarFunction::*)(const Vector<Interval>&)const)&ScalarFunction::operator() );
+    scalar_function_class.def("__call__", (Float(ScalarFunction::*)(const Vector<Float>&)const)&ScalarFunction::operator() );
+    scalar_function_class.def("gradient", (Vector<Interval>(ScalarFunction::*)(const Vector<Interval>&)const)&ScalarFunction::gradient );
+    scalar_function_class.def("gradient", (Vector<Interval>(ScalarFunction::*)(const Vector<Interval>&)const)&ScalarFunction::gradient );
     scalar_function_class.def("__pos__", &__pos__<ScalarFunction,ScalarFunction>);
     scalar_function_class.def("__neg__", &__neg__<ScalarFunction,ScalarFunction>);
     scalar_function_class.def("__add__", &__add__<ScalarFunction,ScalarFunction,ScalarFunction>);
@@ -293,13 +308,15 @@ void export_scalar_function()
     scalar_function_class.def("__rsub__", &__rsub__<ScalarFunction,ScalarFunction,Real>);
     scalar_function_class.def("__rmul__", &__rmul__<ScalarFunction,ScalarFunction,Real>);
     scalar_function_class.def("__rdiv__", &__rdiv__<ScalarFunction,ScalarFunction,Real>);
+    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,ScalarFunction,Interval>);
+    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,ScalarFunction,Real>);
+    scalar_function_class.def("__le__", &__le__<NonlinearConstraint,ScalarFunction,Real>);
+    scalar_function_class.def("__ge__", &__ge__<NonlinearConstraint,ScalarFunction,Real>);
     scalar_function_class.def(self_ns::str(self));
 
     scalar_function_class.def("constant", (ScalarFunction(*)(uint,Real)) &ScalarFunction::constant);
-    scalar_function_class.def("variable", (ScalarFunction(*)(uint,uint)) &ScalarFunction::variable);
     scalar_function_class.def("coordinate", (ScalarFunction(*)(uint,uint)) &ScalarFunction::coordinate);
     scalar_function_class.staticmethod("constant");
-    scalar_function_class.staticmethod("variable");
     scalar_function_class.staticmethod("coordinate");
 
     def("evaluate_approx", (Float(*)(const ScalarFunction&,const Vector<Float>&)) &evaluate_approx);
@@ -320,18 +337,43 @@ void export_scalar_function()
     def("tan", (ScalarFunction(*)(const ScalarFunction&)) &tan);
 
     def("embed",(ScalarFunction(*)(const ScalarFunction&,uint)) &embed);
+
+    typedef Polynomial<Real> RealPolynomial;
+    implicitly_convertible<RealPolynomial,ScalarFunction>();
 }
 
 void export_vector_function()
 {
+    implicitly_convertible<RealAssignment,ExtendedRealAssignment>();
+    implicitly_convertible<PrimedRealAssignment,ExtendedRealAssignment>();
+    implicitly_convertible<DottedRealAssignment,ExtendedRealAssignment>();
+
+    implicitly_convertible<RealVariable,ExtendedRealVariable>();
+    implicitly_convertible<PrimedRealVariable,ExtendedRealVariable>();
+    implicitly_convertible<DottedRealVariable,ExtendedRealVariable>();
+
+    from_python< List<RealVariable> >();
+    from_python< List<RealAssignment> >();
+
+    from_python< List<ExtendedRealVariable> >();
+    from_python< List<ExtendedRealAssignment> >();
+
+
     class_<VectorFunction>
         vector_function_class("VectorFunction", init<VectorFunction>());
     vector_function_class.def(init<uint,uint>());
+
+    vector_function_class.def(init< List<ExtendedRealVariable>, List<ExtendedRealAssignment>, List<RealVariable> >());
+    //vector_function_class.def(init< List<RealVariable>, List<RealAssignment>, List<RealVariable> >());
+
     vector_function_class.def("result_size", &VectorFunction::result_size);
     vector_function_class.def("argument_size", &VectorFunction::argument_size);
     vector_function_class.def("__getitem__", &VectorFunction::get);
     vector_function_class.def("__setitem__", &VectorFunction::set);
     vector_function_class.def("__call__", (Vector<Interval>(VectorFunction::*)(const Vector<Interval>&)const)&VectorFunction::operator() );
+    vector_function_class.def("__call__", (Vector<Float>(VectorFunction::*)(const Vector<Float>&)const)&VectorFunction::operator() );
+    vector_function_class.def("jacobian", (Matrix<Interval>(VectorFunction::*)(const Vector<Interval>&)const) &VectorFunction::jacobian);
+    vector_function_class.def("jacobian", (Matrix<Float>(VectorFunction::*)(const Vector<Float>&)const) &VectorFunction::jacobian);
     vector_function_class.def(self_ns::str(self));
 
     vector_function_class.def("constant", (VectorFunction(*)(uint,Vector<Real>)) &VectorFunction::constant);

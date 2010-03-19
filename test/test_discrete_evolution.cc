@@ -65,7 +65,7 @@ void TestMapEvolver::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef TaylorSet EnclosureType;
+    typedef TaylorImageSet EnclosureType;
 
     // Set up the evolution parameters and grid
     IteratedMap::TimeType time(3);

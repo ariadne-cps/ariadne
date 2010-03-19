@@ -28,17 +28,17 @@
 
 using namespace Ariadne;
 
-// Variables and objects that will be used to define the system 
-HybridAutomaton automaton;
+// Variables and objects that will be used to define the system
+MonolithicHybridAutomaton automaton;
 Box initial_box;
-DiscreteState initial_state;
-DiscreteState safe(1001);
-DiscreteState unsafe(999);
+AtomicDiscreteLocation initial_state;
+AtomicDiscreteLocation safe(1001);
+AtomicDiscreteLocation unsafe(999);
 
 // Evolution parameters
 Grid grid;
 float MAX_ENCL_RADIUS = 1.0; /// Maximum enclosure radius
-float MAX_STEP_SIZE = 0.1; /// Maximum step size
+float MAX_STEP_SIZE = 0.25; /// Maximum step size
 float LOCK_TOGRID_TIME = 10.0;
 int LOCK_TOGRID_STEPS = 1;
 int MAX_GRID_DEPTH = 16;

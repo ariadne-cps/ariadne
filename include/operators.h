@@ -40,44 +40,6 @@
 namespace Ariadne {
 
 
-enum Comparison {
-    EQ,    // Equal
-    NEQ,   // Not equal
-    GEQ,   // Greater or equal
-    LEQ,   // Less or equal
-    GT,    // Greater than
-    LT,    // Less than
-    SGN    // Compare with zero
-};
-
-std::ostream& operator<<(std::ostream&, const Comparison& op);
-
-inline const char* name(const Comparison& op) {
-    switch(op) {
-        case SGN:  return "sgn"; break;
-        case EQ:   return "eq"; break;
-        case NEQ:  return "neq"; break;
-        case GEQ:  return "geq"; break;
-        case LEQ:  return "leq"; break;
-        case GT:   return "lt"; break;
-        case LT:   return "gt"; break;
-        default: assert(false);
-    }
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Comparison& op) {
-    switch(op) {
-        case SGN:  os << "sgn"; break;
-        case EQ:   os << "=="; break;
-        case NEQ:  os << "!="; break;
-        case GEQ:  os << ">="; break;
-        case LEQ:  os << "<="; break;
-        case GT:   os << "> "; break;
-        case LT:   os << "< "; break;
-        default: assert(false);
-    }
-    return os;
-}
 
 
 enum Operator {
@@ -99,6 +61,9 @@ enum Operator {
     SIN,   // Sine
     COS,   // Cosine
     TAN,   // Tangent
+    ASIN,   // ArcSine
+    ACOS,   // ArcCosine
+    ATAN,   // ArcTangent
     ABS,   // Absolute value
     MAX,   // Maximum
     MIN,   // Minimum
@@ -107,7 +72,16 @@ enum Operator {
     OR,    // Logical or
     XOR,   // Logical exclusive or
     IMPL,  // Logical implication
-    ITOR   // Conversion of Int to Real
+    ITOR,   // Conversion of Int to Real
+    EQ=-1,    // Equal
+    NEQ=-2,   // Not equal
+    GEQ=-3,   // Greater or equal
+    LEQ=-4,   // Less or equal
+    GT=-5,    // Greater than
+    LT=-6,    // Less than
+    SGN=-7,   // Compare with zero
+    SUBS=-8,   // Compare as a subset
+    DISJ=-9    // Compare disjointness
 };
 
 std::ostream& operator<<(std::ostream&, const Operator& op);
@@ -125,12 +99,6 @@ inline const char* symbol(const Operator& op) {
         case NOT:  return "!"; break;
         case AND:  return "&"; break;
         case OR:   return "|"; break;
-        default: assert(false);
-    }
-}
-
-inline const char* symbol(const Comparison& cmp) {
-    switch(cmp) {
         case EQ:  return "=="; break;
         case NEQ: return "!="; break;
         case LEQ: return "<="; break;
@@ -170,6 +138,14 @@ inline const char* name(const Operator& op) {
         case COS:  return "cos"; break;
         case TAN:  return "tan"; break;
         case ITOR:  return "itor"; break;
+        case SGN:  return "sgn"; break;
+        case EQ:   return "eq"; break;
+        case NEQ:  return "neq"; break;
+        case GEQ:  return "geq"; break;
+        case LEQ:  return "leq"; break;
+        case GT:   return "lt"; break;
+        case LT:   return "gt"; break;
+        case SUBS:   return "subs"; break;
         default: assert(false);
     }
 }
@@ -198,28 +174,60 @@ struct Equal {
     template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 == a2; }
 };
 
-struct And { template<class T> T operator()(const T& a1, const T& a2) const { return a1 && a2; } };
-struct Or { template<class T> T operator()(const T& a1, const T& a2) const { return a1 || a2; } };
-struct Not { template<class T> T operator()(const T& a) const { return !a; } };
+struct And {
+    template<class T> T operator()(const T& a1, const T& a2) const { return a1 && a2; }
+    Operator code() const { return AND; } };
+struct Or {
+    template<class T> T operator()(const T& a1, const T& a2) const { return a1 || a2; }
+    Operator code() const { return OR; } };
+struct Not {
+    template<class T> T operator()(const T& a) const { return !a; }
+    Operator code() const { return NOT; } };
 
-struct Add { template<class T> T operator()(const T& a1, const T& a2) const { return a1+a2; } };
-struct Sub { template<class T> T operator()(const T& a1, const T& a2) const { return a1-a2; } };
-struct Mul { template<class T> T operator()(const T& a1, const T& a2) const { return a1*a2; } };
-struct Div { template<class T> T operator()(const T& a1, const T& a2) const { return a1/a2; } };
+struct Add {
+    template<class T> T operator()(const T& a1, const T& a2) const { return a1+a2; }
+    Operator code() const { return ADD; } };
+struct Sub {
+    template<class T> T operator()(const T& a1, const T& a2) const { return a1-a2; }
+    Operator code() const { return SUB; } };
+struct Mul {
+    template<class T> T operator()(const T& a1, const T& a2) const { return a1*a2; }
+    Operator code() const { return MUL; } };
+struct Div {
+    template<class T> T operator()(const T& a1, const T& a2) const { return a1/a2; }
+    Operator code() const { return DIV; } };
 
 //struct Pow { template<class T, class N> T operator()(const T& a, const N& n) const { return Ariadne::pow(a,n); } };
 struct Pow { Pow(int n) : n(n) { } template<class T> T operator()(const T& a) const { return Ariadne::pow(a,n); } int n; };
 
-struct Neg { template<class T> T operator()(const T& a) const { return Ariadne::neg(a); } };
-struct Rec { template<class T> T operator()(const T& a) const { return Ariadne::rec(a); } };
-struct Sqr { template<class T> T operator()(const T& a) const { return Ariadne::sqr(a); } };
-struct Sqrt { template<class T> T operator()(const T& a) const { return Ariadne::sqrt(a); } };
+struct Neg {
+    template<class T> T operator()(const T& a) const { return neg(a); }
+    Operator code() const { return NEG; } };
+struct Rec {
+    template<class T> T operator()(const T& a) const { return rec(a); }
+    Operator code() const { return REC; } };
+struct Sqr {
+    template<class T> T operator()(const T& a) const { return sqr(a); }
+    Operator code() const { return SQR; } };
+struct Sqrt {
+    template<class T> T operator()(const T& a) const { return sqrt(a); }
+    Operator code() const { return SQRT; } };
 
-struct Exp { template<class T> T operator()(const T& a) const { return Ariadne::exp(a); } };
-struct Log { template<class T> T operator()(const T& a) const { return Ariadne::log(a); } };
-struct Sin { template<class T> T operator()(const T& a) const { return Ariadne::sin(a); } };
-struct Cos { template<class T> T operator()(const T& a) const { return Ariadne::cos(a); } };
-struct Tan { template<class T> T operator()(const T& a) const { return Ariadne::tan(a); } };
+struct Exp {
+    template<class T> T operator()(const T& a) const { return exp(a); }
+    Operator code() const { return EXP; } };
+struct Log {
+    template<class T> T operator()(const T& a) const { return log(a); }
+    Operator code() const { return LOG; } };
+struct Sin {
+    template<class T> T operator()(const T& a) const { return sin(a); }
+    Operator code() const { return SIN; } };
+struct Cos {
+    template<class T> T operator()(const T& a) const { return cos(a); }
+    Operator code() const { return COS; } };
+struct Tan {
+    template<class T> T operator()(const T& a) const { return tan(a); }
+    Operator code() const { return TAN; } };
 
 
 inline std::ostream& operator<<(std::ostream& os, const Less& v) { return os << "<="; }

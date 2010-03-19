@@ -38,6 +38,7 @@
 #include "tuple.h"
 
 #include "hybrid_set.h"
+#include "hybrid_time.h"
 
 #include "hybrid_automaton.h"
 #include "evolver_interface.h"
@@ -51,8 +52,8 @@ namespace Ariadne {
 class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
-class TaylorSet;
-typedef HybridBasicSet<TaylorSet> HybridTaylorSet;
+class TaylorImageSet;
+typedef HybridBasicSet<TaylorImageSet> HybridTaylorImageSet;
 
 template<class MDL> class CalculusInterface;
 
@@ -61,8 +62,7 @@ class EvolutionProfiler;
 template<class ES> class Orbit;
 
 class HybridTime;
-class HybridAutomaton;
-
+class MonolithicHybridAutomaton;
 
 
 
@@ -72,7 +72,7 @@ class HybridAutomaton;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class StableHybridEvolver
-    : public EvolverBase< HybridAutomaton, HybridTaylorSet>
+    : public EvolverBase< MonolithicHybridAutomaton, HybridTaylorImageSet>
     , public Loggable
 {
     typedef TaylorModel ModelType;
@@ -83,17 +83,17 @@ class StableHybridEvolver
     typedef VectorTaylorFunction FlowModelType;
     typedef ScalarTaylorFunction ConstraintModelType;
     typedef TaylorModel TimeModelType;
-    typedef TaylorSet SetModelType;
-    typedef TaylorSet TimedSetModelType;
+    typedef TaylorImageSet SetModelType;
+    typedef TaylorImageSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomaton::TimeType TimeType;
+    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef HybridAutomaton SystemType;
-    typedef TaylorSet ContinuousEnclosureType;
-    typedef HybridBasicSet<TaylorSet> HybridEnclosureType;
+    typedef MonolithicHybridAutomaton SystemType;
+    typedef TaylorImageSet ContinuousEnclosureType;
+    typedef HybridBasicSet<TaylorImageSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef pair< Interval , EnclosureType > TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
@@ -146,7 +146,7 @@ class StableHybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteLocation, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,

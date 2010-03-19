@@ -40,6 +40,9 @@ python: lib
 tests: lib
 	(cd test; make tests)
 
+examples: lib
+	(cd examples; make examples)
+
 profiles: lib
 	(cd test; make profiles)
 

@@ -27,6 +27,8 @@
 #include "grid_set.h"
 #include "list_set.h"
 
+#include "utilities.h"
+
 using namespace Ariadne;
 
 #include <boost/python.hpp>
@@ -101,12 +103,18 @@ void export_grid()
 
 void export_grid_cell()
 {
+
     class_<GridCell> grid_cell_class("GridCell",no_init);
     grid_cell_class.def("dimension", &GridCell::dimension);
+    grid_cell_class.def("depth", &GridCell::depth);
+    grid_cell_class.def("split", (std::pair<GridCell,GridCell>(GridCell::*)()const) &GridCell::split);
+    grid_cell_class.def("split", (GridCell(GridCell::*)(bool)const) &GridCell::split);
     grid_cell_class.def("box", &GridCell::box, return_value_policy<copy_const_reference>());
     grid_cell_class.def(self_ns::str(self));
 
+    def("smallest_enclosing_primary_cell", &GridCell::smallest_enclosing_primary_cell);
 
+    to_python< std::pair<GridCell,GridCell> >();
 }
 
 
@@ -145,6 +153,8 @@ void export_grid_tree_set() {
     def("intersection",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersection));
     def("overlap",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&overlap));
     def("subset",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));
+    def("overlap",(bool(*)(const GridCell&,const GridTreeSubset&))(&overlap));
+    def("subset",(bool(*)(const GridCell&,const GridTreeSubset&))(&subset));
 
     def("outer_approximation",(GridTreeSet(*)(const CompactSetInterface&,const Grid&,const uint)) &outer_approximation);
     def("inner_approximation",(GridTreeSet(*)(const OpenSetInterface&,const Grid&,const uint,const uint)) &inner_approximation);

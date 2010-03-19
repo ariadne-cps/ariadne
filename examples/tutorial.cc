@@ -26,6 +26,9 @@
 
 #include "ariadne.h"
 
+#include "hybrid_automaton-composite.h"
+#include "hybrid_evolver-constrained.h"
+
 template<class T> void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();
 }
@@ -59,103 +62,74 @@ const Interval pi_ivl = Ariadne::pi<Interval>();
 // equal to one.
 
 // System variables
-//   x[0]: time-of-day tau (d)
-//   x[1]: room temperature T (C)
+//   time-of-day t (d)
+//   room temperature T (C)
 
 // System paramters
-//   p[0]: Heating power P
-//   p[1]: Thermal coefficient K
-//   p[2]: Average external temperature Te
-//   p[3]: Amplitude of external temperature fluctuations Ta
-//   p[4]: Temperature at which the heater is turned off Toff
-//   p[5]: Temperature below which the heater may be turned on Tonact
-//   p[6]: Temperature below which the heater must be turned on Toninv
-
-// System dynamic when the heater is on.
-struct HeaterOn : VectorFunctionData<2,2,4> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-        r[0] = 1.0;
-        r[1] = p[0] + p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_flt*x[0]) - x[1] ); // Need explicit Ariadne::cos due to bug in g++.
-    }
-};
-
-// System dynamic when the heater is off.
-struct HeaterOff : VectorFunctionData<2,2,4> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-        typename R::value_type t0=2*pi_flt*x[0];
-        r[0] = 1.0;
-        r[1] = p[1] * ( p[2] - p[3] * Ariadne::cos(t0) - x[1] ); // Need explicit Ariadne::cos due to bug in g++.
-    }
-};
+//   Heating power P
+//   Thermal coefficient K
+//   Average external temperature Te
+//   Amplitude of external temperature fluctuations Ta
+//   Temperature at which the heater is turned off Toff
+//   Temperature below which the heater may be turned on Tonact
+//   Temperature below which the heater must be turned on Toninv
 
 
-HybridAutomaton create_heating_system()
+
+CompositeHybridAutomaton create_heating_system()
 {
-    // Create a HybridAutomton object
-    HybridAutomaton heating_system;
-
     // Set the system dynamic parameters
-    Float P=4.0;
-    Float k=1.0;
-    Float Tav=16.0;
-    Float Tamp=8.0;
+    RealConstant pi("pi",Ariadne::pi<Real>());
+
+    RealConstant P("P",4.0);
+    RealConstant K("K",1.0);
+    RealConstant Tav("Tav",16.0);
+    RealConstant Tamp("Tamp",8.0);
 
     // Set the system control parameters
-    Float Toff=22.0;
-    Float Ton_upper=15.125;
-    Float Ton_lower=14.875;
-
-    // Old values
-    // Float Ton_upper=15.0;
-    // Float Ton_lower=14.5;
+    RealConstant Tmax("Tmax",22.0);
+    RealConstant Tmin("Tmin",15.0);
+    Real Toff=22.0;
+    Real Ton=15.0;
+    Real Ton_upper=15.125;
+    Real Ton_lower=14.875;
 
     // Create the two discrete state
-    DiscreteState heater_on(1);
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation on("on");
+    AtomicDiscreteLocation off("off");
+    AtomicDiscreteLocation ok("ok");
 
     // Create the discrete events
-    DiscreteEvent switch_on(1);
-    DiscreteEvent switch_off(2);
-    DiscreteEvent midnight(3);
+    DiscreteEvent switch_on("switch_on");
+    DiscreteEvent switch_off("switch_off");
+    DiscreteEvent midnight("midnight");
 
-    // Create the dynamics
-    VectorUserFunction<HeaterOn> heater_on_dynamic(Vector<Float>(4, P,k,Tav,Tamp));
-    VectorUserFunction<HeaterOff> heater_off_dynamic(Vector<Float>(4, P,k,Tav,Tamp));
-
-    // Create the resets
-    IdentityFunction heater_turn_off_reset(2);
-    IdentityFunction heater_turn_on_reset(2);
-    VectorAffineFunction midnight_reset(Matrix<Float>(2,2,0.0,0.0,0.0,1.0),Vector<Float>(2,0.0,0.0));
-
-    // Create the guards.
-    VectorAffineFunction heater_turn_off_guard(Matrix<Float>(1,2,0.0,1.0),Vector<Float>(1,-Toff));
-    VectorAffineFunction heater_turn_on_activation(Matrix<Float>(1,2,0.0,-1.0),Vector<Float>(1,Ton_upper));
-    VectorAffineFunction heater_turn_on_invariant(Matrix<Float>(1,2,0.0,-1.0),Vector<Float>(1,Ton_lower));
-    VectorAffineFunction midnight_guard(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1,-1.0));
+    RealVariable T("T");
+    RealVariable t("t");
 
     // Create the system modes
-    heating_system.new_mode(heater_on,heater_on_dynamic);
-    heating_system.new_mode(heater_off,heater_off_dynamic);
+    AtomicHybridAutomaton heater;
+    heater.new_mode( on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
+    heater.new_mode( off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
+    heater.new_invariant( on, switch_off, T<=Tmin );
+    heater.new_invariant( off, switch_on, T>=Tmax );
+    heater.new_transition( off, switch_on, T<=Tmin, on, next(T)=T );
+    heater.new_transition( on, switch_off, T>=Tmax, off, next(T)=T );
 
-    // Create the system transitions for switching the heater
-    //heating_system.new_invariant(heater_off,heater_turn_on_invariant);
-    //heating_system.new_unforced_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation);
-    heating_system.new_forced_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation);
-    heating_system.new_forced_transition(switch_off,heater_on,heater_off,heater_turn_off_reset,heater_turn_off_guard);
+    AtomicHybridAutomaton clock;
+    clock.new_mode( ok, (dot(t)=1.0) );
+    //clock.new_invariant( ok, midnight, t<=1.0 );
+    clock.new_transition( ok, midnight, t>=1.0, ok, next(t)=0.0, urgent );
 
-    // Create the system transitions for resetting the clock at midnight
-    heating_system.new_forced_transition(midnight,heater_on,heater_on,midnight_reset,midnight_guard);
-    heating_system.new_forced_transition(midnight,heater_off,heater_off,midnight_reset,midnight_guard);
+    CompositeHybridAutomaton heating_system((heater,clock));
 
     return heating_system;
 }
 
-HybridEvolver create_evolver()
+ConstrainedImageSetHybridEvolver create_evolver()
 {
     // Create a HybridEvolver object
-    HybridEvolver evolver;
+    ConstrainedImageSetHybridEvolver evolver;
 
     // Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
@@ -166,20 +140,22 @@ HybridEvolver create_evolver()
 }
 
 
-void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolver& evolver)
+void compute_evolution(const CompositeHybridAutomaton& heating_system, const ConstrainedImageSetHybridEvolver& evolver)
 {
+
     // Redefine the two discrete states
-    DiscreteState heater_on(1);
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation ok("ok");
+    AtomicDiscreteLocation on("on");
+    AtomicDiscreteLocation off("off");
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::EnclosureListType HybridEnclosureListType;
-    typedef HybridEvolver::OrbitType OrbitType;
+    typedef ConstrainedImageSetHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef ConstrainedImageSetHybridEvolver::EnclosureListType HybridEnclosureListType;
+    typedef ConstrainedImageSetHybridEvolver::OrbitType OrbitType;
 
     // Define the initial set
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
-    HybridEnclosureType initial(heater_off,initial_box);
+    HybridEnclosureType initial((off,ok),initial_box);
 
     // Set the maximum evolution time
     HybridTime evolution_time(1.5,4);
@@ -193,9 +169,9 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
     plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve);
     plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[heater_off], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[heater_off]);
+         Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
     plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[heater_on], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[heater_on]);
+         Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
     cout << "done." << endl;
 
     // Compute the orbit.
@@ -213,18 +189,19 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
 }
 
 
-void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridEvolver& evolver)
+void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, const ConstrainedImageSetHybridEvolver& evolver)
 {
+/*
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().initial_grid_density=10;
-    analyser.parameters().initial_grid_depth=12;
-    analyser.parameters().maximum_grid_depth=12;
+    analyser.parameters().initial_grid_density=5;
+    analyser.parameters().initial_grid_depth=6;
+    analyser.parameters().maximum_grid_depth=6;
 
 
     // Define the initial set
     HybridImageSet initial_set;
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation heater_off(2);
     Box initial_box(2, 0.0,0.015625/4, 16.0,16.0+0.0625/16);
     initial_set[heater_off]=initial_box;
 
@@ -269,15 +246,17 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
     HybridGridTreeSet chain_reach_set = analyser.chain_reach(heating_system,initial_set);
     std::cout << "done." << std::endl;
     plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,21.0), Colour(0.0,0.5,1.0), chain_reach_set);
+*/
 }
 
 
 
-void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
+void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
 {
+/*
     // Define the initial set
     HybridImageSet initial_set;
-    DiscreteState heater_off(2);
+    AtomicDiscreteLocation heater_off(2);
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
     initial_set[heater_off]=initial_box;
 
@@ -307,6 +286,7 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
 
     HybridGridTreeSet upper_recurrent_set = analyser.upper_reach(heating_system,initial_set,recurrent_time);
     plot("tutorial-upper_recurrent.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
+*/
 }
 
 
@@ -315,11 +295,13 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
 int main()
 {
     // Create the system
-    HybridAutomaton heating_system=create_heating_system();
+    CompositeHybridAutomaton heating_system=create_heating_system();
+    std::cerr<<heating_system<<"\n";
 
     // Create the analyser classes
-    HybridEvolver evolver=create_evolver();
-    HybridReachabilityAnalyser reachability_analysier(evolver);
+    ConstrainedImageSetHybridEvolver evolver=create_evolver();
+    HybridReachabilityAnalyser reachability_analysier();//evolver);
+    std::cerr<<evolver<<"\n";
 
     // Compute the system evolution
     compute_evolution(heating_system,evolver);

@@ -82,12 +82,12 @@ int main()
 
     /// Build the Hybrid System
   
-    /// Create a HybridAutomaton object
-    HybridAutomaton springs;
+    /// Create a MonolithicHybridAutomaton object
+    MonolithicHybridAutomaton springs;
   
     /// Create the discrete states
-    DiscreteState free(1);
-    DiscreteState stuck(2);
+    AtomicDiscreteLocation free(1);
+    AtomicDiscreteLocation stuck(2);
 
     /// Create the discrete events
     DiscreteEvent sticking(1);

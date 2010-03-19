@@ -223,6 +223,18 @@ template<class X> Matrix<X> inverse(const PLUMatrix<X>& A);
 template<class X> Matrix<X> solve(const PLUMatrix<X>& A, const Matrix<X>& B);
 template<class X> Vector<X> solve(const PLUMatrix<X>& A, const Vector<X>& B);
 
+template<class X>
+class DiagonalMatrix {
+    Vector<X> _x;
+  public:
+    DiagonalMatrix(const Vector<X>& x) : _x(x) { }
+    const Vector<X>& diagonal() const { return _x; }
+    template<class XX> Vector<XX> operator*(const Vector<XX>& v) { 
+        Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=_x[i]*v[i]; } return result; }
+    template<class XX> Vector<XX> solve(const Vector<XX>& v) { 
+        Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=v[i]/_x[i]; } return result; }
+};
+
 struct PivotMatrix : public array<size_t> {
     PivotMatrix(size_t n=0u) : array<size_t>(n) {
         for(uint i=0; i!=n; ++i) { (*this)[i]=i; } }

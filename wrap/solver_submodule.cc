@@ -52,12 +52,17 @@ class SolverWrapper
         return this->get_override("zero")(); }
     Vector<Interval> fixed_point(const VectorFunction& f, const Vector<Interval>& bx) const {
         return this->get_override("fixed_point")(); }
-    Set< Vector<Interval> > solve(const VectorFunction& f, const Vector<Interval>& bx) const {
+    Vector<Interval> solve(const VectorFunction& f, const Vector<Interval>& bx) const {
         return this->get_override("solve")(); }
-    List<VectorTaylorFunction> implicit(const VectorFunction& f, const Vector<Interval>& pd, const Vector<Interval>& bx) const {
+    VectorTaylorFunction implicit(const VectorFunction& f, const Vector<Interval>& pd, const Vector<Interval>& bx) const {
         return this->get_override("implicit")(); }
+    ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& pd, const Interval& ivl) const {
+        return this->get_override("implicit")(); }
+    Set< Vector<Interval> > solve_all(const VectorFunction& f, const Vector<Interval>& bx) const {
+        return this->get_override("solve_all")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
+
 
 class IntegratorWrapper
   : public IntegratorInterface, public wrapper< IntegratorInterface >
@@ -85,15 +90,14 @@ class IntegratorWrapper
 void export_solver()
 {
     class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
-    solver_wrapper_class.def("zero",(Vector<Interval>(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const)&SolverInterface::zero);
-    solver_wrapper_class.def("fixed_point",(Vector<Interval>(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const)&SolverInterface::fixed_point);
-    solver_wrapper_class.def("solve",(Set< Vector<Interval> >(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const)&SolverInterface::solve);
+    solver_wrapper_class.def("solve",pure_virtual((Vector<Interval>(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const) &SolverInterface::solve));
+    solver_wrapper_class.def("implicit",pure_virtual((VectorTaylorFunction(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&,const Vector<Interval>&)const) &SolverInterface::implicit));
+    solver_wrapper_class.def("implicit",pure_virtual((ScalarTaylorFunction(SolverInterface::*)(const ScalarFunction&,const Vector<Interval>&,const Interval&)const) &SolverInterface::implicit));
+    solver_wrapper_class.def("solve_all",pure_virtual((Set< Vector<Interval> >(SolverInterface::*)(const VectorFunction&,const Vector<Interval>&)const) &SolverInterface::solve_all));
+    //solver_wrapper_class.def(self_ns::str(self));
 
     class_<IntervalNewtonSolver, bases<SolverInterface> > interval_newton_solver_class("IntervalNewtonSolver",init<double,unsigned int>());
-
     class_<KrawczykSolver, bases<SolverInterface> > krawczyk_solver_class("KrawczykSolver",init<double,unsigned int>());
-    krawczyk_solver_class.def("implicit",(List<VectorTaylorFunction>(KrawczykSolver::*)(const VectorFunction&,const Vector<Interval>&,const Vector<Interval>&)const) &KrawczykSolver::implicit);
-
 }
 
 
@@ -110,7 +114,7 @@ void export_integrator()
 void solver_submodule()
 {
     to_python_list< Set< Vector<Interval> > >();
-    to_python< List< VectorTaylorFunction > >();
+    to_python< List< Vector<Interval> > >();
 
     export_solver();
     export_integrator();

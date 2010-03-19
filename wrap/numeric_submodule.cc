@@ -191,11 +191,13 @@ void export_real()
     class_<Real> real_class("Real",init<Real>());
     real_class.def(init<Float>());
     real_class.def(init<Interval>());
+    real_class.def(init<std::string>());
+    real_class.def("radius", &Interval::radius);
     real_class.def(boost::python::self_ns::str(self));
 
     implicitly_convertible<int,Real>();
-    implicitly_convertible<Float,Real>();
-    implicitly_convertible<Interval,Real>();
+    implicitly_convertible<double,Real>();
+    implicitly_convertible<Real,Interval>();
 }
 
 
@@ -249,6 +251,7 @@ void export_interval()
     interval_class.def("radius", &Interval::radius);
     interval_class.def("width", &Interval::width);
     interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
+    interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
     interval_class.def(boost::python::self_ns::str(self));
     //interval_class.def(boost::python::self_ns::repr(self));
 

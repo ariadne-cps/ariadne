@@ -276,9 +276,8 @@ void _scal(TaylorModel& r, const Float& c)
 void _scal(TaylorModel& r, const Interval& c)
 {
     ARIADNE_ASSERT_MSG(c.lower()<=c.upper(),c);
-    if(r.error()<0) {
-        std::cerr<<r.error()<<std::endl;
-    }
+    ARIADNE_ASSERT_MSG(r.error()>=0,"r="<<r);
+
     //std::cerr<<"TaylorModel::scal(Interval c) c="<<c<<std::endl;
     Float& re=r.error();
     set_rounding_upward();
@@ -1127,6 +1126,25 @@ TaylorModel::clobber(uint so, uint to)
 
 // Accuracy control
 
+void TaylorModel::set_default_maximum_degree(uint d) {
+    ARIADNE_ASSERT(d<128);
+    _default_maximum_degree=d;
+}
+
+void TaylorModel::set_default_sweep_threshold(double me) {
+    ARIADNE_ASSERT(me>0.0);
+    _default_sweep_threshold=me;
+}
+
+uint TaylorModel::default_maximum_degree() {
+    return _default_maximum_degree;
+}
+
+double TaylorModel::default_sweep_threshold() {
+    return _default_sweep_threshold;
+}
+
+
 void TaylorModel::set_maximum_degree(uint d) {
     this->_accuracy_ptr->_maximum_degree=d;
 }
@@ -1252,20 +1270,28 @@ operator-(const TaylorModel& x) {
 
 TaylorModel
 operator+(const TaylorModel& x, const TaylorModel& y) {
-    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
+    if(x.argument_size()==0) { return x.range()+y; }
+    if(y.argument_size()==0) { return x+y.range(); }
+    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),
+        "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
     TaylorModel r(x.argument_size()); _add(r,x,y); return r;
 }
 
 TaylorModel
 operator-(const TaylorModel& x, const TaylorModel& y) {
-    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x=("<<x.argument_size()<<")"<<x<<"y="<<y<<"\n");
+    if(x.argument_size()==0) { return x.range()-y; }
+    if(y.argument_size()==0) { return x-y.range(); }
+    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),
+        "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
     TaylorModel r=neg(y); _acc(r,x); return r;
 }
 
 TaylorModel
 operator*(const TaylorModel& x, const TaylorModel& y) {
-    if(x.argument_size()!=y.argument_size()) { std::cerr<<"operator*(TaylorModel x, TaylorModel y)\n  x="<<x<<" y="<<y<<"\n"; }
-    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
+    if(x.argument_size()==0) { return x.range()*y; }
+    if(y.argument_size()==0) { return x*y.range(); }
+    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),
+        "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
     TaylorModel r(y.argument_size(),y.accuracy_ptr()); _mul(r,x,y); return r;
 }
 
@@ -1602,7 +1628,7 @@ _compose1(const series_function_pointer& fn, const TaylorModel& tm, Float eps)
 
     Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
-        std::cerr<<"Warning: Truncation error estimate "<<truncation_error_estimate
+        std::cerr<<"WARNING: Truncation error estimate "<<truncation_error_estimate
                  <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
     }
 
@@ -1639,7 +1665,7 @@ _compose2(const series_function_pointer& fn, const TaylorModel& tm, Float eps)
     Float truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
-        std::cerr<<"Warning: Truncation error estimate "<<truncation_error
+        std::cerr<<"WARNING: Truncation error estimate "<<truncation_error
                  <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
     }
 
@@ -1682,7 +1708,7 @@ _compose3(const series_function_pointer& fn, const TaylorModel& tm, Float eps)
     Float truncation_error=max(se.lower()*p.lower(),se.upper()*p.upper());
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
-        std::cerr<<"Warning: Truncation error estimate "<<truncation_error
+        std::cerr<<"WARNING: Truncation error estimate "<<truncation_error
                  <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
     }
 
@@ -2257,6 +2283,27 @@ template<> class Powers<Interval> {
 };
 
 
+TaylorModel substitute(const TaylorModel& x, uint k, const TaylorModel& s) {
+    ARIADNE_ASSERT(x.argument_size()==s.argument_size()+1u);
+    const uint n=s.argument_size();
+    Vector<TaylorModel> y(n+1);
+    for(uint i=0; i!=n; ++i) {
+        y[i]=TaylorModel::variable(n,i);
+    }
+    y[n]=s;
+    return compose(x,y);
+}
+
+Vector<TaylorModel> substitute(const Vector<TaylorModel>& x, uint k, const TaylorModel& s) {
+    const uint n=s.argument_size();
+    Vector<TaylorModel> y(n+1);
+    for(uint i=0; i!=n; ++i) {
+        y[i]=TaylorModel::variable(n,i);
+    }
+    y[n]=s;
+    return compose(x,y);
+}
+
 
 TaylorModel
 partial_evaluate(const TaylorModel& x, uint k, Float c)
@@ -2525,9 +2572,9 @@ TaylorModel embed(uint as, const TaylorModel& x)
 // Input/output operators
 
 std::ostream&
-operator<<(std::ostream& os, const TaylorModel& tv) {
+operator<<(std::ostream& os, const TaylorModel& tm) {
     //os << "TaylorModel";
-    return os << "(" << tv.expansion() << "+/-" << tv.error() << ")";
+    return os << "TM["<<tm.argument_size()<<"](" << tm.expansion() << "+/-" << tm.error() << ")";
 }
 
 
@@ -3122,8 +3169,8 @@ Vector<TaylorModel>
 _compose(const Vector<TaylorModel>& x,
          const Vector<TaylorModel>& ys)
 {
-    ARIADNE_ASSERT(x.size()>0);
-    ARIADNE_ASSERT(ys.size()==x[0].argument_size());
+    ARIADNE_ASSERT_MSG(x.size()>0,"x="<<x<<", ys="<<ys);
+    ARIADNE_ASSERT_MSG(ys.size()==x[0].argument_size(),"x="<<x<<", ys="<<ys);
     for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
     for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys[0].argument_size(),"ys="<<ys); }
 
@@ -3233,7 +3280,52 @@ solve(const Vector<TaylorModel>& f)
 
 TaylorModel
 implicit(const TaylorModel& f) {
-    return implicit(Vector<TaylorModel>(1u,f))[0];
+
+    // Check that the arguments are suitable
+    ARIADNE_ASSERT(f.argument_size()>1);
+
+    // Set some useful size constants
+    const uint rs=1u;
+    const uint fas=f.argument_size();
+    const uint has=fas-1u;
+
+    // Check to see if a solution exists
+    TaylorModel g=derivative(f,has);
+    Interval g_range=g.range();
+    if(g_range.lower()<=0 && g_range.upper()>=0) {
+        ARIADNE_THROW(ImplicitFunctionException,
+                      "implicit(TaylorModel)",
+                      "derivative "<<g_range<<" is not invertible");
+    }
+
+    uint number_of_steps=10;
+    Vector<TaylorModel> id=TaylorModel::variables(has);
+    //TaylorModel h=TaylorModel::constant(has,Interval(-1,+1));
+    TaylorModel h=TaylorModel::constant(has,Interval(0));
+    Vector<TaylorModel> idh=join(id,h);
+    // Perform proper Newton step improvements
+    //std::cerr<<"\nf="<<f<<"\n";
+    //std::cerr<<"g="<<g<<"\n";
+    //std::cerr<<"id="<<id<<"\n";
+    //std::cerr<<"h="<<h<<"\n";
+    for(uint i=0; i!=number_of_steps; ++i) {
+        TaylorModel& h=idh[has];
+        TaylorModel gidh=compose(g,idh);
+        h.clobber();
+        TaylorModel fidh=compose(f,idh);
+        TaylorModel dh=fidh/gidh;
+        TaylorModel nh=h-dh;
+        h=nh;
+        //std::cerr<<"fh["<<i<<"]="<<fidh<<"\n";
+        //std::cerr<<"gh["<<i<<"]="<<gidh<<"\n";
+        //std::cerr<<"dh["<<i<<"]="<<dh<<"\n";
+        //std::cerr<<"nh["<<i<<"]="<<idh[has]<<"\n";
+    }
+    //std::cerr<<"err="<<compose(f,idh)<<"\n\n";
+    //std::cerr<<"res="<<idh[has]<<"\n\n";
+    return idh[has];
+    //std::cerr<<"IMPLICIT(TaylorModel f="<<f<<")\n";
+    //return implicit(Vector<TaylorModel>(1u,f))[0];
 }
 
 
@@ -3467,38 +3559,7 @@ implicit(const Vector<TaylorModel>& f)
         Vector<TaylorModel> dh=prod(D2finv,fidh);
         h-=dh;
     }
-    /*
-    std::cerr<<"\n  f="<<f<<std::endl;
-    std::cerr<<"  h="<<h<<"\n\n";
-    for(uint k=0; k!=6; ++k) {
-        Matrix<Interval> D2finv=inverse(jacobian2(f,join(h_dom,ranges(h))));
-        std::cerr<<"    D2finv="<<D2finv<<"\n";
-        h_err=errors(h);
-        clobber(h);
-        fidh=compose(f,join(id,h));
-        std::cerr<<"    fidh="<<fidh<<"\n";
-        deltah=prod(D2finv,fidh);
-        std::cerr<<"    deltah="<<deltah<<"\n";
-        std::cerr<<"      h_err="<<h_err<<" dh_nrm="<<norms(deltah)<<" dh_err="<<errors(deltah)<<"\n";
-        h-=deltah;
-        std::cerr<<"\n  h="<<h<<"\n\n";
-    }
-    */
 
-/*    // Perform a final rigorous step to check inclusion
-    Vector<TaylorModel> old_h,idh;
-    old_h=h;
-    id=TaylorModel::variables(has);
-    idh=join(id,h);
-    D2finv=inverse(jacobian2(f,ranges(idh)));
-    clobber(h);
-    idh=join(id,h);
-    fidh=compose(f,idh);
-    deltah=prod(D2finv,fidh);
-    h-=deltah;
-
-    if(!refines(h,old_h)) { std::cerr<<"Warning: h="<<h<<" does not refine "<<old_h<<"\n"; }
-*/
     // Check that the result has the correct sizes.
     ARIADNE_ASSERT(h.size()==f.size());
     for(uint i=0; i!=h.size(); ++i) {
@@ -3613,7 +3674,7 @@ unchecked_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0, uin
                 new_y[i]=intersection(y[i],new_y[i]);
             }
             catch(const IntersectionException& e) {
-                std::cerr<<"Warning: "<<e.what()<<"\n";
+                std::cerr<<"WARNING: "<<e.what()<<"\n";
             }
         }
 
@@ -3684,7 +3745,7 @@ parameterised_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0,
                 new_y[i]=intersection(y[i],new_y[i]);
             }
             catch(const IntersectionException& e) {
-                std::cerr<<"Warning: "<<e.what()<<"\n";
+                std::cerr<<"WARNING: "<<e.what()<<"\n";
             }
         }
 

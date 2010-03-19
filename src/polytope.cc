@@ -37,7 +37,7 @@
 
 namespace Ariadne { 
 
-Zonotope zonotope(const TaylorSet& ts);
+Zonotope zonotope(const TaylorImageSet& ts);
 
 tribool 
 Polytope::disjoint(const Box& bx) const {
@@ -128,7 +128,7 @@ Polytope polytope(const Polytope& p)
 }
 
 
-Polytope polytope(const TaylorSet& ts) 
+Polytope polytope(const TaylorImageSet& ts) 
 {
     return polytope(zonotope(ts)); 
 }

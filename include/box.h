@@ -68,7 +68,7 @@ class Box
 
     //! The upper quadrant box \f$[0,infty]^n\f$ in \a n dimensions.
     static Box upper_quadrant(uint n) {
-        return Box(n,Interval(0,inf()));
+        return Box(n,Interval(0,inf<Float>()));
     }
 
     //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.
@@ -89,6 +89,15 @@ class Box
             dmax = max( dmax, (*this)[i].width() );
         }
         return up(dmax/2);
+    }
+
+    //! An approximation to the Lesbegue measure (area, volume) of the box.
+    Float measure() const {
+        Float meas=1;
+        for(uint i=0; i!=this->size(); ++i) {
+            meas *= (*this)[i].width();
+        }
+        return meas;
     }
 
     //! \brief Test if the box is empty.
@@ -166,7 +175,7 @@ class Box
     }
 
     //! \brief Returns an enclosing bounding box for the set.
-    //! The result is guaranteed to have nonempty interior, and floating-point 
+    //! The result is guaranteed to have nonempty interior, and floating-point
     //! boundary coefficients so the centre and radius are exactly computable.
     virtual Box bounding_box() const {
         Box result(this->dimension());
@@ -188,7 +197,6 @@ class Box
 
     //! \brief Split into two along the largest side.
     std::pair<Box,Box> split() const { return Ariadne::split(*this); }
-
     //! \brief Split into two along side with index \a i.
     std::pair<Box,Box> split(uint i) const { return Ariadne::split(*this,i); };
 
@@ -200,6 +208,11 @@ class Box
         return os << *static_cast<const Vector<Interval>*>(this);
     }
 };
+
+//! \brief The smallest box containing the two boxes.
+Box hull(const Box& bx1, const Box& bx2);
+//! \brief The intersection of the two boxes.
+Box intersection(const Box& bx1, const Box& bx2);
 
 Box make_box(const std::string& str);
 

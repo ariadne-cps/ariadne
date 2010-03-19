@@ -22,47 +22,11 @@
  */
 
 #include <iostream>
-
 #include "test.h"
 
-#include "user_function.h"
-
-namespace Ariadne {
-
-struct Radius : ScalarFunctionData<2,0> {
-    template<class R, class A, class P>
-    static void compute(R& r, const A& x, const P& p) {
-        r = sqrt( x[0]*x[0] + x[1]*x[1] );
-    }
-};
-
-struct Henon : public VectorFunctionData<2,2,2> {
-    template<class R, class A, class P>
-    static void compute(R& r, const A& x, const P& p) {
-        r[0] = p[0] - x[0]*x[0] - p[1]*x[1];
-        r[1] = x[0];
-    }
-};
-
-} // namespace Ariadne
+namespace Ariadne { }
 
 using namespace Ariadne;
 
 int main() {
-
-
-    ScalarUserFunction<Radius> g=ScalarUserFunction<Radius>();
-    std::cout << g(Vector<Float>(2,3.0,4.0)) << "\n\n\n";
-
-    VectorUserFunction<Henon> h=VectorUserFunction<Henon>(Vector<Real>(2,1.5,0.375));
-    Vector<Real> x(2,3.0,4.0);
-    Vector<TaylorModel> t=TaylorModel::variables(2);
-
-    std::cout << h.evaluate(t) << "\n";
-
-    std::cout << h(Vector<Float>(x)) << "\n";
-    std::cout << h(Vector<Interval>(x)) << "\n";
-    std::cout << h.jacobian(Vector<Float>(x)) << "\n";
-    std::cout << h.jacobian(Vector<Interval>(x)) << "\n";
-
 }

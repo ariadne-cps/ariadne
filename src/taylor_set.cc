@@ -35,39 +35,50 @@
 #include "taylor_function.h"
 
 #include "box.h"
+#include "zonotope.h"
+#include "polytope.h"
+
+#include "function_set.h"
 #include "taylor_set.h"
+#include "affine_set.h"
 
 #include "list_set.h"
 #include "grid_set.h"
 
-#include "zonotope.h"
-#include "polytope.h"
+#include "constraint_solver.h"
+#include "nonlinear_programming.h"
+
 #include "graphics_interface.h"
 
 #include "discrete_event.h"
 
 namespace Ariadne {
 
-TaylorSet::TaylorSet(uint d, uint ng)
+template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
+
+typedef Vector<Float> FloatVector;
+typedef Vector<Interval> IntervalVector;
+
+TaylorImageSet::TaylorImageSet(uint d, uint ng)
     : _models(d,ng)
 {
 }
 
 
-TaylorSet::TaylorSet(const VectorFunction& f, const Vector<Interval>& d)
+TaylorImageSet::TaylorImageSet(const VectorFunction& f, const Vector<Interval>& d)
     : _models(f.result_size())
 {
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_models=f.evaluate(x);
 }
 
-TaylorSet::TaylorSet(const Vector<Interval>& bx)
+TaylorImageSet::TaylorImageSet(const Vector<Interval>& bx)
     : _models(TaylorModel::scalings(bx))
 {
 }
 
 
-TaylorSet::TaylorSet(const Vector<TaylorModel>& tvs)
+TaylorImageSet::TaylorImageSet(const Vector<TaylorModel>& tvs)
     : _models(tvs)
 {
     if(this->_models.size()>0) {
@@ -78,7 +89,7 @@ TaylorSet::TaylorSet(const Vector<TaylorModel>& tvs)
     }
 }
 
-TaylorSet::TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e)
+TaylorImageSet::TaylorImageSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e)
     : _models(f.size())
 {
     ARIADNE_ASSERT(f.size()==e.size());
@@ -87,7 +98,7 @@ TaylorSet::TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e
     }
 }
 
-TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
+TaylorImageSet::TaylorImageSet(uint rs, uint as, uint deg, double x0, ...)
     : _models(rs)
 {
     double x=x0;
@@ -96,7 +107,6 @@ TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
     for(uint i=0; i!=rs; ++i) {
         (*this)[i]=TaylorModel(as);
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
-            //std::cerr<<"  "<<int(j.degree())<<":"<<j<<" "<<x<<"\n";
             if(x!=0.0) { (*this)[i].expansion().append(j,x); }
             x=va_arg(args,double);
         }
@@ -109,14 +119,14 @@ TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
 }
 
 bool
-operator==(const TaylorSet& ts1,const TaylorSet& ts2)
+operator==(const TaylorImageSet& ts1,const TaylorImageSet& ts2)
 {
     return ts1.models()==ts2.models();
 }
 
 
 void
-TaylorSet::set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr)
+TaylorImageSet::set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr)
 {
     for(uint i=0; i!=this->dimension(); ++i) {
         this->_models[i].set_accuracy(acc_ptr);
@@ -124,14 +134,14 @@ TaylorSet::set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr)
 }
 
 shared_ptr<TaylorModel::Accuracy>
-TaylorSet::accuracy_ptr() const
+TaylorImageSet::accuracy_ptr() const
 {
     return this->_models[0].accuracy_ptr();
 }
 
 
 Vector<Float>
-TaylorSet::centre() const
+TaylorImageSet::centre() const
 {
     Vector<Float> result(this->dimension());
     for(uint i=0; i!=this->dimension(); ++i) {
@@ -143,7 +153,7 @@ TaylorSet::centre() const
 
 
 Float
-TaylorSet::radius() const
+TaylorImageSet::radius() const
 {
     Float result=0.0;
     for(uint i=0; i!=this->dimension(); ++i) {
@@ -154,7 +164,7 @@ TaylorSet::radius() const
 
 
 tribool
-TaylorSet::disjoint(const Box& bx) const
+TaylorImageSet::disjoint(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Dimension of "<<*this<<" is different from dimension of "<<bx);
 
@@ -165,7 +175,7 @@ TaylorSet::disjoint(const Box& bx) const
     }
 
     // Copy the box eliminating error terms
-    TaylorSet efts(*this);
+    TaylorImageSet efts(*this);
     for(uint i=0; i!=efts.dimension(); ++i) {
         efts._models[i].clobber();
     }
@@ -180,7 +190,7 @@ TaylorSet::disjoint(const Box& bx) const
     } else if(bbx.radius() * 4 < ebx.radius()) {
         return indeterminate;
     } else {
-        std::pair<TaylorSet,TaylorSet> split_efts=this->split();
+        std::pair<TaylorImageSet,TaylorImageSet> split_efts=this->split();
         return split_efts.first.disjoint(ebx) && split_efts.second.disjoint(ebx);
     }
 }
@@ -188,14 +198,14 @@ TaylorSet::disjoint(const Box& bx) const
 
 
 tribool
-TaylorSet::overlaps(const Box& bx) const
+TaylorImageSet::overlaps(const Box& bx) const
 {
     return !this->disjoint(bx);
 }
 
 
 tribool
-TaylorSet::inside(const Box& bx) const
+TaylorImageSet::inside(const Box& bx) const
 {
     Vector<Interval> bb=this->bounding_box();
     return Ariadne::inside(bb,bx) || indeterminate;
@@ -203,20 +213,20 @@ TaylorSet::inside(const Box& bx) const
 
 
 Box
-TaylorSet::bounding_box() const
+TaylorImageSet::bounding_box() const
 {
     Box r(this->dimension());
     for(uint i=0; i!=this->dimension(); ++i) {
         r[i]=(*this)[i].range();
     }
-    return r;
+    return r.bounding_box();
 }
 
 
-TaylorSet
-TaylorSet::linearise() const
+TaylorImageSet
+TaylorImageSet::linearise() const
 {
-    TaylorSet res(*this);
+    TaylorImageSet res(*this);
     for(uint i=0; i!=this->dimension(); ++i) {
         res[i].truncate(1);
     }
@@ -238,7 +248,7 @@ _discretise_step(ListSet<Box>& result, const Vector<TaylorModel>& models, const 
 }
 
 ListSet<Box>
-TaylorSet::discretise(const Float& eps) const
+TaylorImageSet::discretise(const Float& eps) const
 {
     ListSet<Box> result;
     Box domain=this->domain();
@@ -253,14 +263,14 @@ TaylorSet::discretise(const Float& eps) const
 }
 
 GridTreeSet
-TaylorSet::discretise(const Grid& g, uint d) const
+TaylorImageSet::discretise(const Grid& g, uint d) const
 {
     GridTreeSet gts(g);
     return this->discretise(gts,d);
 }
 
 GridTreeSet&
-TaylorSet::discretise(GridTreeSet& gts, uint d) const
+TaylorImageSet::discretise(GridTreeSet& gts, uint d) const
 {
     adjoin_outer_approximation(gts,*this,d);
     gts.recombine();
@@ -268,42 +278,42 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 }
 
 
-TaylorModel apply(const ScalarFunction& f, const TaylorSet& ts)
+TaylorModel apply(const ScalarFunction& f, const TaylorImageSet& ts)
 {
     return f.evaluate(ts.models());
 }
 
-TaylorSet apply(const VectorFunction& f, const TaylorSet& ts)
+TaylorImageSet apply(const VectorFunction& f, const TaylorImageSet& ts)
 {
     return f.evaluate(ts.models());
 }
 
-TaylorModel apply(const ScalarTaylorFunction& tf, const TaylorSet& ts)
+TaylorModel apply(const ScalarTaylorFunction& tf, const TaylorImageSet& ts)
 {
     ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),"tf="<<tf<<" ts="<<ts);
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorSet apply(const VectorTaylorFunction& tf, const TaylorSet& ts)
+TaylorImageSet apply(const VectorTaylorFunction& tf, const TaylorImageSet& ts)
 {
     ARIADNE_ASSERT_MSG(possibly(subset(ts.range(),tf.domain())),
         std::setprecision(18)<<"\n  tf="<<tf<<"\n  ts="<<ts<<"\n  ts.range() ="<<ts.range()<<"\n  tf.domain()="<<tf.domain());
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorModel unchecked_apply(const ScalarTaylorFunction& tf, const TaylorSet& ts)
+TaylorModel unchecked_apply(const ScalarTaylorFunction& tf, const TaylorImageSet& ts)
 {
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorSet unchecked_apply(const VectorTaylorFunction& tf, const TaylorSet& ts)
+TaylorImageSet unchecked_apply(const VectorTaylorFunction& tf, const TaylorImageSet& ts)
 {
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }
 
 
 Zonotope
-zonotope(const TaylorSet& ts)
+zonotope(const TaylorImageSet& ts)
 {
     uint d=ts.dimension();
     uint ng=ts.generators_size();
@@ -333,16 +343,16 @@ zonotope(const TaylorSet& ts)
 
 
 
-pair<TaylorSet,TaylorSet>
-TaylorSet::split(uint j) const
+pair<TaylorImageSet,TaylorImageSet>
+TaylorImageSet::split(uint j) const
 {
     pair< Vector<TaylorModel>, Vector<TaylorModel> > s=Ariadne::split(this->_models,j);
-    return make_pair( TaylorSet(s.first),
-                      TaylorSet(s.second) );
+    return make_pair( TaylorImageSet(s.first),
+                      TaylorImageSet(s.second) );
 }
 
-pair<TaylorSet,TaylorSet>
-TaylorSet::split() const
+pair<TaylorImageSet,TaylorImageSet>
+TaylorImageSet::split() const
 {
     uint d=this->dimension();
     uint ng=this->generators_size();
@@ -370,7 +380,7 @@ TaylorSet::split() const
     }
 
     if(emax>rmax) {
-        pair<TaylorSet,TaylorSet> result=make_pair(*this,*this);
+        pair<TaylorImageSet,TaylorImageSet> result=make_pair(*this,*this);
         TaylorModel& model1=result.first._models[aemax];
         TaylorModel& model2=result.second._models[aemax];
         model1.set_error(emax/2);
@@ -393,7 +403,6 @@ _adjoin_outer_approximation1(GridTreeSet& grid_set,
     uint d=models.size();
 
     Box range=evaluate(models,domain);
-    //std::cerr<<"range="<<range<<"\n";
     if(range.radius()<eps) {
         grid_set.adjoin_over_approximation(range+errors,depth);
     } else {
@@ -406,7 +415,7 @@ _adjoin_outer_approximation1(GridTreeSet& grid_set,
 
 
 void
-adjoin_outer_approximation1(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+adjoin_outer_approximation1(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth)
 {
     Box domain(set.generators_size(),Interval(-1,+1));
     Float eps=1.0/(1<<(depth/set.dimension()));
@@ -422,15 +431,14 @@ adjoin_outer_approximation1(GridTreeSet& grid_set, const TaylorSet& set, uint de
 
 void
 _adjoin_outer_approximation2(GridTreeSet& grid_set,
-                             const TaylorSet& set, const Vector<Interval>& errors,
+                             const TaylorImageSet& set, const Vector<Interval>& errors,
                              Float eps, uint depth)
 {
     Box range=set.range();
-    //std::cerr<<"range="<<range<<"\n";
     if(range.radius()<eps) {
         grid_set.adjoin_over_approximation(range+errors,depth);
     } else {
-        std::pair<TaylorSet,TaylorSet> subsets=set.split();
+        std::pair<TaylorImageSet,TaylorImageSet> subsets=set.split();
         _adjoin_outer_approximation2(grid_set,subsets.first,errors,eps,depth);
         _adjoin_outer_approximation2(grid_set,subsets.second,errors,eps,depth);
     }
@@ -438,11 +446,11 @@ _adjoin_outer_approximation2(GridTreeSet& grid_set,
 
 
 void
-adjoin_outer_approximation2(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+adjoin_outer_approximation2(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth)
 {
     Box domain(set.generators_size(),Interval(-1,+1));
     Float eps=1.0/(1<<(depth/set.dimension()));
-    TaylorSet error_free_set(set);
+    TaylorImageSet error_free_set(set);
     Vector<Interval> errors(set.dimension());
     for(uint i=0; i!=set.dimension(); ++i) {
         errors[i]=set.models()[i].error()*Interval(-1,+1);
@@ -453,7 +461,7 @@ adjoin_outer_approximation2(GridTreeSet& grid_set, const TaylorSet& set, uint de
 }
 
 void
-_adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, Box& domain,
+_adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorImageSet& set, Box& domain,
 			     GridOpenCell cell, uint depth)
 {
     // Compute an over-approximation to the set
@@ -489,9 +497,9 @@ _adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, Box& d
 }
 
 void
-adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth)
 {
-    TaylorSet error_free_set=set.subsume();
+    TaylorImageSet error_free_set=set.subsume();
     Box domain=error_free_set.domain();
     GridOpenCell cell=GridOpenCell::outer_approximation(error_free_set.bounding_box(),grid_set.grid());
     _adjoin_outer_approximation3(grid_set,error_free_set,domain,cell,depth);
@@ -500,7 +508,7 @@ adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, uint de
 
 
 void
-_adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorSet& set,
+_adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorImageSet& set,
                              GridOpenCell cell, uint depth)
 {
     // Compute an over-approximation to the set
@@ -527,17 +535,17 @@ _adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorSet& set,
         return;
     }
 
-    // Subdivide the TaylorSet and try again
-    std::pair<TaylorSet,TaylorSet> subsets=set.split();
+    // Subdivide the TaylorImageSet and try again
+    std::pair<TaylorImageSet,TaylorImageSet> subsets=set.split();
     _adjoin_outer_approximation4(grid_set,subsets.first,cell,depth);
     _adjoin_outer_approximation4(grid_set,subsets.second,cell,depth);
 }
 
 void
-adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth)
 {
     GridOpenCell cell=GridOpenCell::outer_approximation(set.bounding_box(),grid_set.grid());
-    TaylorSet error_free_set=set.subsume();
+    TaylorImageSet error_free_set=set.subsume();
     _adjoin_outer_approximation4(grid_set,error_free_set,cell,depth);
     grid_set.recombine();
 }
@@ -546,14 +554,14 @@ adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorSet& set, uint de
 // adjoin_outer_approximation3 (using subdivision of the set) is better than
 // adjoin_outer_approximation2 (using subdivision of the domain).
 void
-adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth)
 {
     adjoin_outer_approximation1(grid_set,set,depth);
 }
 
 
 GridTreeSet
-discretise1(const TaylorSet& ts, const Grid& g, uint d)
+discretise1(const TaylorImageSet& ts, const Grid& g, uint d)
 {
     GridTreeSet gts(g);
     adjoin_outer_approximation1(gts,ts,d);
@@ -562,7 +570,7 @@ discretise1(const TaylorSet& ts, const Grid& g, uint d)
 }
 
 GridTreeSet
-discretise2(const TaylorSet& ts, const Grid& g, uint d)
+discretise2(const TaylorImageSet& ts, const Grid& g, uint d)
 {
     GridTreeSet gts(g);
     adjoin_outer_approximation2(gts,ts,d);
@@ -571,7 +579,7 @@ discretise2(const TaylorSet& ts, const Grid& g, uint d)
 }
 
 GridTreeSet
-discretise3(const TaylorSet& ts, const Grid& g, uint d)
+discretise3(const TaylorImageSet& ts, const Grid& g, uint d)
 {
     GridTreeSet gts(g);
     adjoin_outer_approximation3(gts,ts,d);
@@ -580,7 +588,7 @@ discretise3(const TaylorSet& ts, const Grid& g, uint d)
 }
 
 GridTreeSet
-discretise4(const TaylorSet& ts, const Grid& g, uint d)
+discretise4(const TaylorImageSet& ts, const Grid& g, uint d)
 {
     GridTreeSet gts(g);
     adjoin_outer_approximation4(gts,ts,d);
@@ -590,7 +598,7 @@ discretise4(const TaylorSet& ts, const Grid& g, uint d)
 
 
 Matrix<Float>
-TaylorSet::jacobian() const
+TaylorImageSet::jacobian() const
 {
     Matrix<Float> J(this->dimension(),this->generators_size());
     for(uint i=0; i!=this->dimension(); ++i) {
@@ -601,15 +609,15 @@ TaylorSet::jacobian() const
     return J;
 }
 
-TaylorSet
-TaylorSet::subsume() const
+TaylorImageSet
+TaylorImageSet::subsume() const
 {
     return this->subsume(0.0);
 }
 
 
-TaylorSet
-TaylorSet::subsume(double eps) const
+TaylorImageSet
+TaylorImageSet::subsume(double eps) const
 {
     uint d=this->dimension();
     uint ng=this->generators_size();
@@ -620,7 +628,7 @@ TaylorSet::subsume(double eps) const
         if(this->models()[i].error()>eps) { ++ne; }
     }
 
-    TaylorSet result(embed(this->models(),ne));
+    TaylorImageSet result(embed(this->models(),ne));
     uint k=ng; // The in independent variable corresponding to the error term
     for(uint i=0; i!=d; ++i) {
         if(result._models[i].error()>eps) {
@@ -635,7 +643,7 @@ TaylorSet::subsume(double eps) const
 
 
 GridTreeSet
-outer_approximation(const TaylorSet& set, const Grid& grid, uint depth)
+outer_approximation(const TaylorImageSet& set, const Grid& grid, uint depth)
 {
     ARIADNE_ASSERT(set.dimension()==grid.dimension());
     GridTreeSet grid_set(grid);
@@ -645,8 +653,8 @@ outer_approximation(const TaylorSet& set, const Grid& grid, uint depth)
 
 
 
-TaylorSet
-TaylorSet::recondition() const
+TaylorImageSet
+TaylorImageSet::recondition() const
 {
     Matrix<Float> T=triangular_multiplier(this->jacobian());
     Vector<TaylorModel> scal(T.row_size(),T.column_size());
@@ -655,21 +663,21 @@ TaylorSet::recondition() const
             scal[i][MultiIndex::unit(this->generators_size(),j)]=T[i][j];
         }
     }
-    return TaylorSet(compose(this->models(),scal));
+    return TaylorImageSet(compose(this->models(),scal));
 }
 
 std::ostream&
-TaylorSet::write(std::ostream& os) const
+TaylorImageSet::write(std::ostream& os) const
 {
-    return os << "TaylorSet(" << this->_models << ")";
-    os << "TaylorSet(\n";
+    return os << "TaylorImageSet(" << this->_models << ")";
+    os << "TaylorImageSet(\n";
     os << "  dimension=" << this->dimension() << ",\n" << std::flush;
     os << "  models=" << this->_models << ",\n" << std::flush;
     os << ")\n";
     return os;
 }
 
-Vector<Interval> evaluate(const TaylorSet& ts, const Vector<Interval>& iv) {
+Vector<Interval> evaluate(const TaylorImageSet& ts, const Vector<Interval>& iv) {
     Vector<Interval> r(ts.dimension());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=ts[i].evaluate(iv);
@@ -677,7 +685,7 @@ Vector<Interval> evaluate(const TaylorSet& ts, const Vector<Interval>& iv) {
     return r;
 }
 
-Vector<Interval> evaluate(const TaylorSet& ts, const Vector<Float>& v) {
+Vector<Interval> evaluate(const TaylorImageSet& ts, const Vector<Float>& v) {
     Vector<Interval> r(ts.dimension());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=ts[i].evaluate(v);
@@ -685,7 +693,7 @@ Vector<Interval> evaluate(const TaylorSet& ts, const Vector<Float>& v) {
     return r;
 }
 
-Vector<Interval> error(const TaylorSet& ts) {
+Vector<Interval> error(const TaylorImageSet& ts) {
     Vector<Interval> r(ts.dimension());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=ts[i].error();
@@ -694,11 +702,11 @@ Vector<Interval> error(const TaylorSet& ts) {
 }
 
 
-void box_draw(CanvasInterface& fig, const TaylorSet& ts) {
+void box_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     ts.bounding_box().draw(fig);
 }
 
-void boxes_draw(CanvasInterface& fig, const TaylorSet& ts) {
+void boxes_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     static const double resolution=1.0/8;
     double line_width=fig.get_line_width();
     fig.set_line_width(0.0);
@@ -711,10 +719,10 @@ void boxes_draw(CanvasInterface& fig, const TaylorSet& ts) {
     //fig.set_line_style(true);
 }
 
-void zonotopes_draw_subdivide(ListSet<Zonotope>& zonotopes, const TaylorSet& set, const double resolution)
+void zonotopes_draw_subdivide(ListSet<Zonotope>& zonotopes, const TaylorImageSet& set, const double resolution)
 {
     if(set.bounding_box().radius()>=resolution) {
-        std::pair<TaylorSet,TaylorSet> subdivisions=set.split();
+        std::pair<TaylorImageSet,TaylorImageSet> subdivisions=set.split();
         zonotopes_draw_subdivide(zonotopes,subdivisions.first,resolution);
         zonotopes_draw_subdivide(zonotopes,subdivisions.second,resolution);
     } else {
@@ -722,7 +730,7 @@ void zonotopes_draw_subdivide(ListSet<Zonotope>& zonotopes, const TaylorSet& set
     }
 }
 
-void zonotopes_draw(CanvasInterface& fig, const TaylorSet& ts) {
+void zonotopes_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     static const double resolution=1.0/8;
     //double old_line_width=fig.get_line_width();
     //Colour old_line_colour=fig.get_line_colour();
@@ -737,11 +745,11 @@ void zonotopes_draw(CanvasInterface& fig, const TaylorSet& ts) {
     //fig.set_line_style(true);
 }
 
-void affine_draw(CanvasInterface& fig, const TaylorSet& ts) {
+void affine_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     zonotope(ts).draw(fig);
 }
 
-void curve_draw(CanvasInterface& fig, const TaylorSet& ts) {
+void curve_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     assert(ts.dimension()==2 && ts.generators_size()==2);
     std::vector<Point> pts;
     Vector<Float> s(2);
@@ -769,7 +777,7 @@ void curve_draw(CanvasInterface& fig, const TaylorSet& ts) {
 }
 
 
-void grid_draw(CanvasInterface& fig, const TaylorSet& ts)
+void grid_draw(CanvasInterface& fig, const TaylorImageSet& ts)
 {
     uint depth=12;
     Float rad=1./8;
@@ -784,285 +792,18 @@ void grid_draw(CanvasInterface& fig, const TaylorSet& ts)
     gts.draw(fig);
 }
 
-void standard_draw(CanvasInterface& fig, const TaylorSet& ts) {
+void standard_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     affine_draw(fig,ts);
     //box_draw(fig,ts);
 }
 
-void TaylorSet::draw(CanvasInterface& fig) const {
+void TaylorImageSet::draw(CanvasInterface& fig) const {
     Ariadne::standard_draw(fig,*this);
 }
 
 
 
 
-
-TaylorConstrainedFlowSet::TaylorConstrainedFlowSet(const Vector<Interval>& domain, const VectorFunction& function)
-    : _domain(domain), _models(VectorTaylorFunction(domain,function).models())
-{
-}
-
-
-TaylorConstrainedFlowSet::TaylorConstrainedFlowSet(const VectorTaylorFunction& function)
-    : _domain(function.domain()), _models(function.models())
-{
-}
-
-
-TaylorConstrainedFlowSet::TaylorConstrainedFlowSet(const Box& box)
-    : _domain(box), _models(TaylorModel::variables(box.dimension()))
-{
-}
-
-
-TaylorConstrainedFlowSet* TaylorConstrainedFlowSet::clone() const
-{
-    return new TaylorConstrainedFlowSet(*this);
-}
-
-
-
-void TaylorConstrainedFlowSet::new_invariant(const DiscreteEvent& e, const ScalarFunction& c)
-{
-    this->_invariants.insert(std::make_pair(e,compose(c,this->_models)));
-}
-
-
-void TaylorConstrainedFlowSet::new_activation(const DiscreteEvent& e, const ScalarFunction& c)
-{
-    this->_activations.insert(std::make_pair(e,compose(c,this->_models)));
-}
-
-
-void TaylorConstrainedFlowSet::new_guard(const DiscreteEvent& e, const ScalarFunction& c)
-{
-    this->_guards.insert(std::make_pair(e,compose(c,this->_models)));
-}
-
-
-
-void TaylorConstrainedFlowSet::new_invariant(const DiscreteEvent& e, const ScalarTaylorFunction& c)
-{
-    ARIADNE_ASSERT(c.domain()==this->domain());
-    this->_invariants.insert(std::make_pair(e,c.model()));
-}
-
-
-void TaylorConstrainedFlowSet::new_activation(const DiscreteEvent& e, const ScalarTaylorFunction& c)
-{
-    ARIADNE_ASSERT(c.domain()==this->domain());
-    this->_activations.insert(std::make_pair(e,c.model()));
-}
-
-
-void TaylorConstrainedFlowSet::new_guard(const DiscreteEvent& e, const ScalarTaylorFunction& c)
-{
-    ARIADNE_ASSERT(c.domain()==this->domain());
-    this->_guards.insert(std::make_pair(e,c.model()));
-}
-
-
-
-Vector<Interval> TaylorConstrainedFlowSet::domain() const
-{
-    return this->_domain;
-}
-
-VectorTaylorFunction TaylorConstrainedFlowSet::function() const
-{
-    return VectorTaylorFunction(this->_domain,this->_models);
-}
-
-
-uint TaylorConstrainedFlowSet::dimension() const
-{
-    return this->_models.size();
-}
-
-tribool TaylorConstrainedFlowSet::empty() const
-{
-    return this->_empty(this->_domain,8);
-}
-
-tribool TaylorConstrainedFlowSet::_empty(const Vector<Interval>& subdomain, uint depth) const 
-{
-    typedef std::map<DiscreteEvent,TaylorModel>::const_iterator iterator;
-    double max_error=1.0/(1<<depth);
-    const uint ds=this->_domain.size();
-    for(iterator iter=this->_activations.begin(); iter!=this->_activations.end(); ++iter) {
-        Interval constraint_range=iter->second.evaluate(subdomain);
-        if(constraint_range.upper() < 0.0) { 
-            return true;
-        }
-    }
-    for(iterator iter=this->_guards.begin(); iter!=this->_guards.end(); ++iter) {
-        const TaylorModel& constraint=iter->second;
-        Interval constraint_range=constraint.evaluate(subdomain);
-        if(constraint_range.lower() > 0.0 or constraint_range.upper()<0.0) {
-            return true;
-        }
-        Vector<Interval> lowdomain=subdomain;
-        while(lowdomain[ds-1].lower() >= this->_domain[ds-1].lower()) {
-            if(constraint.evaluate(lowdomain).lower() > 0.0) {
-                return true;
-            }
-            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
-        }
-    }
-    for(iterator iter=this->_invariants.begin(); iter!=this->_invariants.end(); ++iter) {
-        const TaylorModel& constraint=iter->second;
-        Vector<Interval> lowdomain=subdomain;
-        while(lowdomain[ds-1].lower()>this->_domain[ds-1].lower()) {
-            if(constraint.evaluate(lowdomain).lower() > 0.0) {
-                return true;
-            }
-            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
-        }
-    }
-    if(depth==0) {
-        return indeterminate;
-    } else {
-        Vector<Interval> subdomain1,subdomain2;
-        make_lpair(subdomain1,subdomain2)=split(subdomain);
-        return this->_empty(subdomain1,depth-1) and
-            this->_empty(subdomain2,depth-1);
-    }
-}
-
-
-
-tribool TaylorConstrainedFlowSet::disjoint(const Box&) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-tribool TaylorConstrainedFlowSet::overlaps(const Box&) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-tribool TaylorConstrainedFlowSet::inside(const Box&) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-Box TaylorConstrainedFlowSet::bounding_box() const {
-    Box r(this->dimension());
-    for(uint i=0; i!=r.dimension(); ++i) {
-        r[i]=this->_models[i].range();
-    }
-    return r;
-}
-
-
-TaylorConstrainedFlowSet apply(const VectorFunction& map, const TaylorConstrainedFlowSet& set)
-{
-    // If the set is given by the image h(x) on domain D,
-    // compute phi(h(x),t) on domain 
-    ARIADNE_ASSERT(map.argument_size()==set.dimension());
-    TaylorConstrainedFlowSet result(set);
-    result._models=compose(map,set._models);
-    return result;
-}
-
-
-TaylorConstrainedFlowSet apply(const VectorTaylorFunction& map, const TaylorConstrainedFlowSet& set)
-{
-    // If the set is given by the image h(x) on domain D,
-    // compute phi(h(x),t) on domain 
-    ARIADNE_ASSERT(map.argument_size()==set.dimension());
-    TaylorConstrainedFlowSet result(set);
-    result._models=compose(map.models(),map.domain(),set._models);
-    return result;
-}
-
-
-TaylorConstrainedFlowSet apply_flow(const VectorTaylorFunction& phi, const TaylorConstrainedFlowSet& set)
-{
-    // If the set is given by the image h(x) on domain D,
-    // compute phi(h(x),t) on domain 
-    ARIADNE_ASSERT(phi.argument_size()==set.dimension()+1u);
-    const uint n=set.dimension();
-    
-    TaylorConstrainedFlowSet result(set);
-    result._domain=join(result._domain,phi.domain()[n]);
-    result._models=compose(phi.models(),phi.domain(),combine(result._models,TaylorModel::variable(1,0)));
-    return result;
-}
-
-
-GridTreeSet TaylorConstrainedFlowSet::outer_approximation(const Grid& grid, uint depth) const
-{
-    GridTreeSet gts(grid);
-    this->_adjoin_outer_approximation_to(gts,Vector<Interval>(this->_domain.size(),Interval(-1,+1)),depth);
-    return gts;
-}
-
-void TaylorConstrainedFlowSet::_adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth) const
-{
-    typedef std::map<DiscreteEvent,TaylorModel>::const_iterator iterator;
-    double max_error=1.0/(1<<depth);
-    const uint ds=this->_domain.size();
-    for(iterator iter=this->_activations.begin(); iter!=this->_activations.end(); ++iter) {
-        Interval constraint_range=iter->second.evaluate(subdomain);
-        if(constraint_range.upper() < 0.0) { 
-            return;
-        }
-    }
-    for(iterator iter=this->_guards.begin(); iter!=this->_guards.end(); ++iter) {
-        const TaylorModel& constraint=iter->second;
-        Interval constraint_range=constraint.evaluate(subdomain);
-        if(constraint_range.lower() > 0.0 or constraint_range.upper()<0.0) {
-            return;
-        }
-        Vector<Interval> lowdomain=subdomain;
-        while(lowdomain[ds-1].lower() >= this->_domain[ds-1].lower()) {
-            if(constraint.evaluate(lowdomain).lower() > 0.0) {
-                return;
-            }
-            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
-        }
-    }
-    for(iterator iter=this->_invariants.begin(); iter!=this->_invariants.end(); ++iter) {
-        const TaylorModel& constraint=iter->second;
-        Vector<Interval> lowdomain=subdomain;
-        while(lowdomain[ds-1].lower()>this->_domain[ds-1].lower()) {
-            if(constraint.evaluate(lowdomain).lower() > 0.0) {
-                return;
-            }
-            lowdomain[ds-1]=lowdomain[ds-1]-lowdomain[ds-1].width();
-        }
-    }
-    Box range=evaluate(_models,subdomain);
-    if(range.radius()<max_error) {
-        gts.adjoin_outer_approximation(range,depth+2);
-    } else {
-        Vector<Interval> subdomain1,subdomain2;
-        make_lpair(subdomain1,subdomain2)=split(subdomain);
-        this->_adjoin_outer_approximation_to(gts,subdomain1,depth);
-        this->_adjoin_outer_approximation_to(gts,subdomain2,depth);
-    }
-}
-
-
-template<class K, class V> std::vector<K> keys(const std::map<K,V>& m) {
-    std::vector<K> v;
-    for(typename std::map<K,V>::const_iterator i=m.begin(); i!=m.end(); ++i) {
-        v.push_back(i->first);
-    }
-    return v;
-}
-
-std::ostream& TaylorConstrainedFlowSet::write(std::ostream& os) const
-{
-    return os << "TaylorConstrainedFlowSet"
-              << "(\n  domain=" << this->_domain
-              << ",\n  function="<<VectorTaylorFunction(this->_domain,this->_models).function()
-              << ",\n  invariants<<"<<keys(this->_invariants)
-              << ",\n  activations<<"<<keys(this->_activations)
-              << ",\n  guards<<"<<keys(this->_guards)
-              << "\n)\n";
-}
 
 
 } // namespace Ariadne
@@ -1076,7 +817,7 @@ std::ostream& TaylorConstrainedFlowSet::write(std::ostream& os) const
 
 namespace Ariadne {
 
-void plot(const char* filename, const Box& bbx, const TaylorSet& set)
+void plot(const char* filename, const Box& bbx, const TaylorImageSet& set)
 {
     Box bb=set.bounding_box();
 
@@ -1142,6 +883,709 @@ void plot(const char* filename, const Box& bbx, const TaylorSet& set)
 
 }
 
+
+TaylorModel& operator-=(TaylorModel& tm, const MultiIndex& a) {
+    for(TaylorModel::iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        iter->key()-=a;
+    }
+    return tm;
+}
+
+// TODO: Make more efficient
+inline void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
+    for(uint i=0; i!=r.size(); ++i) { r[i]=a[i]; }
+}
+
+
+void TaylorConstrainedImageSet::_check() const {
+    ARIADNE_ASSERT_MSG(this->_function.argument_size()==this->domain().size(),*this);
+    for(List<ScalarTaylorFunction>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
+    }
+    for(List<ScalarTaylorFunction>::const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+        ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
+    }
+}
+
+// FIXME: What if solving for constraint leaves domain?
+void TaylorConstrainedImageSet::_solve_zero_constraints() {
+    this->_check();
+    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ) {
+        const Vector<Interval>& domain=this->domain();
+        const TaylorModel& model=iter->model();
+        const uint k=model.argument_size()-1u;
+        TaylorModel zeroth_order(k);
+        TaylorModel first_order(k);
+        bool is_zeroth_order=true;
+        bool is_first_order=true;
+        MultiIndex r(k);
+        // Try linear approach in last coefficient
+        for(TaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
+            if(tmiter->key()[k]==0) {
+                assign_all_but_last(r,tmiter->key());
+                zeroth_order.expansion().append(r,tmiter->data());
+            } else if(tmiter->key()[k]==1) {
+                is_zeroth_order=false;
+                assign_all_but_last(r,tmiter->key());
+                first_order.expansion().append(r,tmiter->data());
+            } else {
+                is_first_order=false; break;
+            }
+        }
+        if(is_first_order && !is_zeroth_order) {
+            const Vector<Interval> new_domain=project(domain,range(0,k));
+            TaylorModel substitution_model=-zeroth_order/first_order;
+            this->_function=VectorTaylorFunction(new_domain,Ariadne::substitute(this->_function.models(),k,substitution_model));
+            for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_constraints.begin();
+                    constraint_iter!=this->_constraints.end(); ++constraint_iter) {
+                ScalarTaylorFunction& constraint=*constraint_iter;
+                constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
+            }
+            for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_equations.begin();
+                    constraint_iter!=this->_equations.end(); ++constraint_iter) {
+                ScalarTaylorFunction& constraint=*constraint_iter;
+                constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
+            }
+            // Since we are using an std::vector, assign iterator to next element
+            iter=this->_equations.erase(iter);
+            this->_check();
+        } else {
+            ARIADNE_WARN("No method for solving constraint "<<*iter<<" currently implemented.");
+            ++iter;
+        }
+    }
+}
+
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet()
+    : _domain(), _function()
+{
+}
+
+TaylorConstrainedImageSet* TaylorConstrainedImageSet::clone() const
+{
+    return new TaylorConstrainedImageSet(*this);
+}
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box)
+{
+    // Ensure domain elements have nonempty radius
+    const double min=std::numeric_limits<double>::min();
+    IntervalVector domain=box;
+    for(uint i=0; i!=domain.size(); ++i) {
+        if(domain[i].radius()==0) {
+            domain[i]+=Interval(-min,+min);
+        }
+    }
+    this->_function=VectorTaylorFunction::identity(box);
+}
+
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function)
+{
+    ARIADNE_ASSERT_MSG(box.size()==function.argument_size(),"domain="<<box<<", function="<<function);
+    const double min=std::numeric_limits<double>::min();
+    IntervalVector domain=box;
+    for(uint i=0; i!=domain.size(); ++i) {
+        if(domain[i].radius()==0) {
+            domain[i]+=Interval(-min,+min);
+        }
+    }
+
+    this->_function=VectorTaylorFunction(domain,function);
+}
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function, List<NonlinearConstraint> constraints)
+{
+    ARIADNE_ASSERT_MSG(box.size()==function.argument_size(),"domain="<<box<<", function="<<function);
+    const double min=std::numeric_limits<double>::min();
+    IntervalVector domain=box;
+    for(uint i=0; i!=domain.size(); ++i) {
+        if(domain[i].radius()==0) {
+            domain[i]+=Interval(-min,+min);
+        }
+    }
+
+    this->_function=VectorTaylorFunction(domain,function);
+
+    for(uint i=0; i!=constraints.size(); ++i) {
+        ARIADNE_ASSERT_MSG(box.size()==constraints[i].function().argument_size(),"domain="<<box<<", constraint="<<constraints[i]);
+        if(constraints[i].bounds().singleton()) {
+            this->new_equality_constraint(constraints[i].function()-constraints[i].bounds().midpoint());
+        } else {
+            if(constraints[i].bounds().lower()>-inf<Float>()) {
+                this->new_negative_constraint(constraints[i].bounds().lower()-constraints[i].function());
+            }
+            if(constraints[i].bounds().upper()<+inf<Float>()) {
+                this->new_negative_constraint(constraints[i].function()-constraints[i].bounds().upper());
+            }
+        }
+    }
+
+}
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function, NonlinearConstraint constraint)
+{
+    *this=TaylorConstrainedImageSet(box,function,make_list(constraint));
+}
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, const List<ScalarFunction>& components)
+{
+    const double min=std::numeric_limits<double>::min();
+    IntervalVector domain=box;
+    for(uint i=0; i!=domain.size(); ++i) {
+        if(domain[i].radius()==0) {
+            domain[i]+=Interval(-min,+min);
+        }
+    }
+
+    this->_function=VectorTaylorFunction(components.size(),domain);
+    for(uint i=0; i!=components.size(); ++i) {
+        this->_function.set(i,ScalarTaylorFunction(domain,components[i]));
+    }
+
+    this->_check();
+}
+
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const VectorTaylorFunction& function)
+{
+    this->_function=function;
+}
+
+
+
+tribool TaylorConstrainedImageSet::satisfies(ScalarFunction constraint) const
+{
+    Interval constraint_range=constraint(this->codomain());
+    if(constraint_range.lower()>0.0) { return true; }
+    else if(constraint_range.upper()<0.0) { return false; }
+    else { return indeterminate; }
+}
+
+
+void TaylorConstrainedImageSet::substitute(uint j, ScalarTaylorFunction v)
+{
+    ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
+                       "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
+    this->_function = Ariadne::substitute(this->_function,j,v);
+    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        *iter = Ariadne::substitute(*iter,j,v);
+    }
+    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+        *iter = Ariadne::substitute(*iter,j,v);
+    }
+
+    this->_check();
+}
+
+void TaylorConstrainedImageSet::apply_map(VectorFunction map)
+{
+    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
+    VectorTaylorFunction& function=this->_function;
+    function=compose(map,function);
+    this->_check();
+}
+
+void TaylorConstrainedImageSet::apply_flow(VectorFunction flow, Interval time)
+{
+    ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
+    this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time))));
+    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        *iter=embed(*iter,time);
+    }
+    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+        *iter=embed(*iter,time);
+    }
+    this->_check();
+}
+
+void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Interval time)
+{
+    ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
+    this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time))));
+    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        *iter=embed(*iter,time);
+    }
+    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+        *iter=embed(*iter,time);
+    }
+    this->_check();
+}
+
+
+void TaylorConstrainedImageSet::new_negative_constraint(ScalarFunction constraint) {
+    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_constraints.append(ScalarTaylorFunction(this->domain(),constraint));
+}
+
+void TaylorConstrainedImageSet::new_negative_constraint(ScalarTaylorFunction constraint) {
+    ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_constraints.append(constraint);
+}
+
+void TaylorConstrainedImageSet::new_equality_constraint(ScalarFunction constraint) {
+    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
+}
+
+
+
+
+
+IntervalVector TaylorConstrainedImageSet::domain() const {
+    return this->_function.domain();
+}
+
+IntervalVector TaylorConstrainedImageSet::codomain() const {
+    return Box(this->_function.range()).bounding_box();
+}
+
+VectorFunction TaylorConstrainedImageSet::function() const {
+    return VectorFunction(Vector< Polynomial<Real> >(this->_function.polynomial()));
+}
+
+VectorTaylorFunction const& TaylorConstrainedImageSet::taylor_function() const {
+    return this->_function;
+}
+
+uint TaylorConstrainedImageSet::dimension() const {
+    return this->_function.result_size();
+}
+
+uint TaylorConstrainedImageSet::number_of_parameters() const {
+    return this->_function.argument_size();
+}
+
+Box TaylorConstrainedImageSet::bounding_box() const {
+    return Box(this->_function.codomain()).bounding_box();
+}
+
+Float TaylorConstrainedImageSet::radius() const {
+    return this->bounding_box().radius();
+}
+
+Point TaylorConstrainedImageSet::centre() const {
+    return this->bounding_box().centre();
+}
+
+
+tribool TaylorConstrainedImageSet::bounded() const {
+    return Box(this->domain()).bounded() || indeterminate;
+}
+
+tribool TaylorConstrainedImageSet::empty() const {
+    return this->disjoint(this->bounding_box());
+}
+
+tribool TaylorConstrainedImageSet::disjoint(Box bx) const {
+    static bool warn=true;
+    if(warn) {
+        ARIADNE_WARN("TaylorConstrainedImageSet::disjoint(Box) is not correctly implemented");
+        warn=false;
+    }
+    return this->affine_approximation().disjoint(bx);
+}
+
+
+Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
+TaylorConstrainedImageSet::split(uint d) const
+{
+    Vector<Interval> subdomain1,subdomain2;
+    make_lpair(subdomain1,subdomain2)=Ariadne::split(this->_function.domain(),d);
+
+    VectorTaylorFunction function1,function2;
+    make_lpair(function1,function2)=Ariadne::split(this->_function,d);
+
+    Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
+    result=make_pair(TaylorConstrainedImageSet(function1),TaylorConstrainedImageSet(function2));
+    TaylorConstrainedImageSet& result1=result.first;
+    TaylorConstrainedImageSet& result2=result.second;
+
+    ScalarTaylorFunction constraint1,constraint2;
+    for(List<ScalarTaylorFunction>::const_iterator iter=this->_constraints.begin();
+        iter!=this->_constraints.end(); ++iter)
+    {
+        const ScalarTaylorFunction& constraint=*iter;
+        make_lpair(constraint1,constraint2)=Ariadne::split(constraint,d);
+        result1._constraints.append(constraint1);
+        result2._constraints.append(constraint2);
+    }
+
+    ScalarTaylorFunction equation1,equation2;
+    for(List<ScalarTaylorFunction>::const_iterator iter=this->_equations.begin();
+        iter!=this->_equations.end(); ++iter)
+    {
+        const ScalarTaylorFunction& equation=*iter;
+        make_lpair(equation1,equation1)=Ariadne::split(equation,d);
+        result1._equations.append(equation1);
+        result2._equations.append(equation1);
+    }
+
+    return make_pair(result1,result2);
+}
+
+
+
+
+
+
+ScalarFunction make_function(const ScalarTaylorFunction& stf) {
+    return ScalarFunction(stf.polynomial())+Real(Interval(-stf.error(),+stf.error()));
+}
+
+void adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
+{
+    // When making a new starting primal point, need to move components away from zero
+    // This constant shows how far away from zero the points are
+    static const double XSIGMA=0.125;
+    static const double TERR=-1.0/((1<<e)*1024.0);
+
+    uint verbosity=0u;
+
+    const uint m=fg.argument_size();
+    const uint n=fg.result_size();
+    ARIADNE_LOG(2,"\nadjoin_outer_approximation(...)\n");
+    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
+
+    ConstraintSolver solver;
+    NonlinearInteriorPointOptimiser optimiser;
+
+    Float t;
+    Point z(x.size());
+
+    if(subset(b,r)) {
+        return;
+    }
+
+    Box bx=join(static_cast<const IntervalVector&>(b.box()),static_cast<const IntervalVector&>(c));
+
+    optimiser.compute_tz(d,fg,bx,y,t,z);
+    for(uint i=0; i!=12; ++i) {
+        ARIADNE_LOG(4," t="<<t);
+        optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
+        if(t>0) { break; }
+    }
+    ARIADNE_LOG(4,"\n  t="<<t<<"\n  y="<<y<<"\n    x="<<x<<"\n    z="<<z<<"\n");
+
+    if(t<TERR) {
+        // Probably disjoint, so try to prove this
+        Box nd=d;
+
+        // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
+        // This should be easier than using all constraints separately
+        ScalarFunction xg=ScalarFunction::constant(m,0);
+        Interval cnst=0.0;
+        for(uint j=0; j!=n; ++j) {
+            xg = xg - (Real(x[j])-x[n+j])*fg[j];
+            cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
+        }
+        for(uint i=0; i!=m; ++i) {
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarFunction::coordinate(m,i);
+            cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
+        }
+        xg = Real(cnst) + xg;
+
+        ARIADNE_LOG(4,"    xg="<<xg<<"\n");
+        ScalarTaylorFunction txg(d,xg);
+        ARIADNE_LOG(4,"    txg="<<txg.polynomial()<<"\n");
+
+        xg=ScalarFunction(txg.polynomial());
+        NonlinearConstraint constraint=(xg>=0.0);
+
+        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
+        solver.hull_reduce(constraint,nd);
+        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
+        if(nd.empty()) {
+            ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
+            return;
+        }
+
+        for(uint i=0; i!=m; ++i) {
+            solver.box_reduce(constraint,nd,i);
+            ARIADNE_LOG(8,"  dom="<<nd<<"\n");
+            if(nd.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+        }
+        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
+
+        //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
+        ARIADNE_LOG(4,"  Splitting domain\n");
+        Pair<Box,Box> sd=d.split();
+        Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        Point ny = midpoint(sd.first);
+        adjoin_outer_approximation_to(r, sd.first, fg, c, b, nx, ny, e);
+        nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        ny = midpoint(sd.second);
+        adjoin_outer_approximation_to(r, sd.second, fg, c, b, x, ny, e);
+    }
+
+    if(b.tree_depth()>=e*int(b.dimension())) {
+        ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
+        r.adjoin(b);
+    } else {
+        ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
+        Pair<GridCell,GridCell> sb = b.split();
+        Point sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        Point sy = y;
+        adjoin_outer_approximation_to(r,d,fg,c,sb.first,sx,sy,e);
+        sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        sy = y;
+        adjoin_outer_approximation_to(r,d,fg,c,sb.second,sx,sy,e);
+    }
+
+
+}
+
+
+void adjoin_outer_approximation_to(GridTreeSet&, const Box& domain, const VectorFunction& function, const VectorFunction& negative_constraints, int depth);
+
+void TaylorConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+{
+    this->affine_adjoin_outer_approximation_to(paving,depth);
+    //this->this->_adjoin_outer_approximation_to(paving,this->bounding_box(),depth);
+}
+
+void TaylorConstrainedImageSet::subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+{
+    Vector<Float> errors(paving.dimension());
+    for(uint i=0; i!=errors.size(); ++i) {
+        errors[i]=paving.grid().lengths()[i]/(1<<depth);
+    }
+    this->_subdivision_adjoin_outer_approximation_to(paving,this->domain(),depth,errors);
+}
+
+void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+{
+    this->affine_approximation().adjoin_outer_approximation_to(paving,depth);
+}
+
+void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int e) const
+{
+    ARIADNE_ASSERT(p.dimension()==this->dimension());
+    const Box& d=this->domain();
+    const VectorFunction& f=this->function();
+
+    VectorFunction g(this->_constraints.size(),d.size());
+    uint i=0;
+    for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
+        g.set(i,make_function(*citer));
+        ++i;
+    }
+
+    GridCell b=GridCell::smallest_enclosing_primary_cell(g(d),p.grid());
+    Box c=intersection(g(d)+IntervalVector(g.result_size(),Interval(-1,1)),Box(g.result_size(),Interval(-inf<Float>(),0.0)));
+
+    Point y=midpoint(d);
+    const uint l=(d.size()+f.result_size()+g.result_size())*2;
+    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
+
+    VectorFunction fg=join(f,g);
+
+    Ariadne::adjoin_outer_approximation_to(p,d,fg,c,b,x,y,e);
+
+}
+
+GridTreeSet TaylorConstrainedImageSet::outer_approximation(const Grid& grid, int depth) const
+{
+    GridTreeSet paving(grid);
+    this->adjoin_outer_approximation_to(paving,depth);
+    return paving;
+}
+
+GridTreeSet TaylorConstrainedImageSet::subdivision_outer_approximation(const Grid& grid, int depth) const
+{
+    GridTreeSet paving(grid);
+    this->subdivision_adjoin_outer_approximation_to(paving,depth);
+    return paving;
+}
+
+GridTreeSet TaylorConstrainedImageSet::affine_outer_approximation(const Grid& grid, int depth) const
+{
+    GridTreeSet paving(grid);
+    this->affine_adjoin_outer_approximation_to(paving,depth);
+    return paving;
+}
+
+
+
+TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<Interval>& subdomain) const
+{
+    ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
+    TaylorConstrainedImageSet result(*this);
+    result._function=Ariadne::restrict(result._function,subdomain);
+    ScalarTaylorFunction new_constraint;
+    for(List<ScalarTaylorFunction>::iterator iter=result._constraints.begin();
+        iter!=result._constraints.end(); ++iter)
+    {
+        ScalarTaylorFunction& constraint=*iter;
+        constraint=Ariadne::restrict(constraint,subdomain);
+    }
+    for(List<ScalarTaylorFunction>::iterator iter=result._equations.begin();
+        iter!=result._equations.end(); ++iter)
+    {
+        ScalarTaylorFunction& equation=*iter;
+        equation=Ariadne::restrict(equation,subdomain);
+    }
+    return result;
+}
+
+
+
+void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
+    this->affine_draw(canvas,0u);
+}
+
+void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {
+    this->bounding_box().draw(canvas);
+}
+
+void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accuracy) const {
+    static const int depth=accuracy;
+    List<Box> subdomains;
+    List<Box> splitdomains;
+    subdomains.append(this->domain());
+    Box splitdomain1,splitdomain2;
+    for(int i=0; i!=depth; ++i) {
+        for(uint k=0; k!=this->number_of_parameters(); ++k) {
+            for(uint n=0; n!=subdomains.size(); ++n) {
+                make_lpair(splitdomain1,splitdomain2)=subdomains[n].split(k);
+                splitdomains.append(splitdomain1);
+                splitdomains.append(splitdomain2);
+            }
+            subdomains.swap(splitdomains);
+            splitdomains.clear();
+        }
+    }
+
+    for(uint n=0; n!=subdomains.size(); ++n) {
+        this->restriction(subdomains[n]).affine_approximation().draw(canvas);
+    }
+};
+
+
+Map<List<DiscreteEvent>,ScalarFunction> pretty(const Map<List<DiscreteEvent>,ScalarTaylorFunction>& constraints) {
+    Map<List<DiscreteEvent>,ScalarFunction> result;
+    for(Map<List<DiscreteEvent>,ScalarTaylorFunction>::const_iterator iter=constraints.begin();
+    iter!=constraints.end(); ++iter) {
+        result.insert(iter->first,iter->second.function());
+    }
+    return result;
+}
+
+
+template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
+    Map<K,V> r;
+    for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) {
+        r.insert(*m.find(*iter));
+    }
+    return r;
+}
+
+std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
+    os << "TaylorConstrainedImageSet";
+    os << "(\n  domain=" << this->domain();
+    os << ",\n  function=" << this->taylor_function();
+    os << ",\n  constraints=" << this->_constraints;
+    os << ",\n  equations=" << this->_equations;
+    os << "\n)\n";
+    return os;
+}
+
+
+
+void TaylorConstrainedImageSet::
+_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVector& subdomain,
+                                           uint depth, const FloatVector& errors) const
+{
+    // How small an over-approximating box needs to be relative to the cell size
+    static const double RELATIVE_SMALLNESS=0.5;
+
+    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+
+    for(const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;;
+        Interval constraint_range=constraint.evaluate(subdomain);
+        if(constraint_range.lower() > 0.0) {
+            return;
+        }
+    }
+    for(const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        Interval constraint_range=constraint.evaluate(subdomain);
+        if(constraint_range.lower() > 0.0 || constraint_range.upper() < 0.0 ) {
+            return;
+        }
+    }
+
+    Box range=evaluate(this->_function,subdomain);
+    bool small=true;
+    for(uint i=0; i!=range.size(); ++i) {
+        if(range[i].radius()>errors[i]*RELATIVE_SMALLNESS) {
+            small=false;
+            break;
+        }
+    }
+
+    if(small) {
+        gts.adjoin_outer_approximation(range,depth);
+    } else {
+        Vector<Interval> subdomain1,subdomain2;
+        make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
+        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain1,depth,errors);
+        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain2,depth,errors);
+    }
+}
+
+
+AffineSet
+TaylorConstrainedImageSet::affine_approximation() const
+{
+    this->_check();
+    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+
+    const uint nx=this->dimension();
+    const uint np=this->number_of_parameters();
+
+    TaylorConstrainedImageSet set(*this);
+
+    if(set._equations.size()>0) {
+        set._solve_zero_constraints();
+    }
+    this->_check();
+
+    Vector<Float> h(nx);
+    Matrix<Float> G(nx,np);
+    for(uint i=0; i!=nx; ++i) {
+        ScalarTaylorFunction component=set._function[i];
+        h[i]=component.model().value();
+        for(uint j=0; j!=np; ++j) {
+            G[i][j]=component.model().gradient(j);
+        }
+    }
+    AffineSet result(G,h);
+
+    Vector<Float> a(np);
+    Float b;
+
+    for(const_iterator iter=set._constraints.begin();
+            iter!=set._constraints.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        b=-constraint.model().value();
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        result.new_inequality_constraint(a,b);
+    }
+
+    for(const_iterator iter=set._equations.begin();
+            iter!=set._equations.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        b=-constraint.model().value();
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        result.new_equality_constraint(a,b);
+    }
+    return result;
+}
+
+
 } // namespace Ariadne
 
 
@@ -1149,7 +1593,7 @@ void plot(const char* filename, const Box& bbx, const TaylorSet& set)
 
 namespace Ariadne {
 
-void plot(const char* filename, const Box& bbx, const TaylorSet& set)
+void plot(const char* filename, const Box& bbx, const TaylorImageSet& set)
 {
     throw std::runtime_error("No facilities for drawing graphics are available.");
 }

@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <cassert>
 
 #include "vector.h"
@@ -34,57 +34,57 @@
 namespace Ariadne {
 
 
-Curve::~Curve() 
+Curve::~Curve()
 {
 }
 
 
 
-Curve::Curve(const VectorFunction& f) 
+Curve::Curve(const VectorFunction& f)
     : _function(f)
 {
     assert(this->_function.argument_size()==1);
 }
 
 
-Curve::Curve(const Curve& c) 
+Curve::Curve(const Curve& c)
     : _function(c._function)
 {
 }
 
 
-Curve* 
-Curve::clone() const 
+Curve*
+Curve::clone() const
 {
     return new Curve(*this);
 }
 
 
-uint 
-Curve::dimension() const 
+uint
+Curve::dimension() const
 {
     return this->_function.result_size();
 }
 
 
-ushort 
-Curve::smoothness() const 
+ushort
+Curve::smoothness() const
 {
-    return this->_function.smoothness();
+    return SMOOTH;
 }
 
 
 
-Point 
-Curve::value(const Float& s) const 
+Point
+Curve::value(const Float& s) const
 {
     Vector<Float> v(1,&s);
     return Point(this->_function.evaluate(v));
 }
 
 
-Vector< Float > 
-Curve::tangent(const Float& s) const 
+Vector< Float >
+Curve::tangent(const Float& s) const
 {
     Vector<Float> v(1,&s);
     return column(this->_function.jacobian(v),0);
@@ -92,21 +92,21 @@ Curve::tangent(const Float& s) const
 
 
 
-std::ostream& 
-Curve::write(std::ostream& os) const 
+std::ostream&
+Curve::write(std::ostream& os) const
 {
     return os << "Curve( function=" << this->_function << " )";
 }
 
 
 
-InterpolatedCurve* 
+InterpolatedCurve*
 InterpolatedCurve::clone() const
 {
     return new InterpolatedCurve(*this);
 }
 
-Box 
+Box
 InterpolatedCurve::bounding_box() const
 {
     Box bx(this->_points.begin()->second);

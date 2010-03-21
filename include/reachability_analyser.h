@@ -137,6 +137,12 @@ class HybridReachabilityAnalyser
     lower_reach(const SystemType& system, 
                 const HybridImageSet& initial_set, 
                 const TimeType& time) const;
+
+    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time, while pruning the enclosure sets after lock_to_grid_steps transitions. */
+	SetApproximationType
+    lower_reach_pruning(const SystemType& system, 
+                	    const HybridImageSet& initial_set, 
+                	    const TimeType& time) const;
   
     /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. */
     virtual std::pair<SetApproximationType,SetApproximationType>

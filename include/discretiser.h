@@ -154,6 +154,7 @@ class HybridDiscretiser
     typedef HybridGridTreeSet DenotableSetType;
     typedef ES ContinuousEnclosureType;
     typedef HybridBasicSet<ES> EnclosureType;
+	typedef ListSet<EnclosureType> EnclosureListType;
   private:
     boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver;
   public:
@@ -229,6 +230,16 @@ class HybridDiscretiser
                  const TimeType& time,
                  const AccuracyType accuracy,
                  const Semantics semantics) const;
+
+	//! \brief Compute approximations to the lower reachable and evolved set
+    //! of \a system starting in \a initial_set over \a time,
+    //! also returning the enclosures of the final sets.
+	tuple<DenotableSetType,DenotableSetType,EnclosureListType> 
+	reach_evolve_enclosures(const SystemType& system, 
+		        			const EnclosureType& initial_set, 
+		        			const TimeType& time,
+		        			const AccuracyType accuracy,
+							const Semantics semantics) const;
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual std::pair<DenotableSetType,DenotableSetType>

@@ -122,7 +122,6 @@ class ImageSetHybridEvolver
     //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
-
     //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
@@ -136,6 +135,13 @@ class ImageSetHybridEvolver
         reachable.adjoin(final);
         return reachable; }
 
+    //! \brief Compute an approximation to the evolution set under the given semantics, returning the reached and final sets.
+    std::pair<EnclosureListType,EnclosureListType> reach_evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=LOWER_SEMANTICS) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
+        reachable.adjoin(final);
+        return make_pair<EnclosureListType,EnclosureListType>(reachable,final); }
+
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
@@ -143,7 +149,6 @@ class ImageSetHybridEvolver
 
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::list< HybridTimedSetType >& working_sets,
-   								 std::map< DiscreteState, uint>& working_sets_sizes,
                                   EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                   const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
                                   Semantics semantics, bool reach) const;

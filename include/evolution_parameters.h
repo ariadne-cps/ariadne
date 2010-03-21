@@ -70,10 +70,6 @@ class ContinuousEvolutionParameters {
     //! \details The value represents the number of events between two set model reductions: a value of zero implies that a set model is always reduced.
 	//! Used in conjunction with enable_set_model_reduction. 
 	UnsignedIntType set_model_events_size_interleaving;
-
-	//! \brief The limit on working sets size for each location before pruning.
-	//! \details Used in conjunction with enable_working_sets_pruning.
-	std::map<DiscreteState,uint> hybrid_working_sets_size_limit;
     
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
@@ -84,11 +80,6 @@ class ContinuousEvolutionParameters {
 	//! \brief Reduces a set model to the equivalent of its bounding box, every set_model_events_size_interleaving events (false by default).
 	bool enable_set_model_reduction;
 
-	//! \brief Enables the pruning of the working sets when too large (false by default).
-    //! \details The pruning is done probabilistically, as soon as the volume of the working sets is larger than the hybrid_maximum_working_sets_volume.
-	//! <br>
-    //! This parameter is used only under lower semantics.
-	bool enable_working_sets_pruning;
 };
 
 
@@ -221,6 +212,12 @@ class DiscreteEvolutionParameters {
 	//! This parameters is only used in the chain_reach() routine.
     HybridBoxes bounding_domain;
 
+	//! \brief Enables the pruning of the trajectories when too large (false by default).
+    //! \details The pruning is done probabilistically.
+	//! <br>
+    //! This parameter is used only under lower semantics.
+	bool enable_lower_pruning;
+
 };
 
 //! \brief Parameters for controlling the accuracy of evolution methods and reachability analysis.
@@ -238,11 +235,9 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       minimum_enclosure_cell(Vector<RealType>(0)),
       maximum_enclosure_cell(Vector<RealType>(0)),
 	  set_model_events_size_interleaving(0),
-	  hybrid_working_sets_size_limit(),
       enable_subdivisions(false),
       enable_premature_termination(true),
-	  enable_set_model_reduction(false),
-	  enable_working_sets_pruning(false)
+	  enable_set_model_reduction(false)
 { }
 
 inline
@@ -256,7 +251,8 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
       maximum_grid_depth(6),
 	  lowest_maximum_grid_depth(0),
 	  highest_maximum_grid_depth(9),
-      maximum_grid_height(16)
+      maximum_grid_height(16),
+	  enable_lower_pruning(false)
 { }
 
 
@@ -272,11 +268,9 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
        << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
-       << ",\n  hybrid_working_sets_size_limit=" << p.hybrid_working_sets_size_limit
        << ",\n  enable_subdivisions=" << p.enable_subdivisions
        << ",\n  enable_premature_termination=" << p.enable_premature_termination
        << ",\n  enable_set_model_reduction=" << p.enable_set_model_reduction
-       << ",\n  enable_working_sets_pruning=" << p.enable_working_sets_pruning
        << "\n)\n";
     return os;
 }
@@ -292,7 +286,6 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
 
        << ",\n  transient_time=" << p.transient_time
        << ",\n  transient_steps=" << p.transient_steps
-
 
        << ",\n  initial_grid_depth=" << p.initial_grid_depth
        << ",\n  initial_grid_density=" << p.initial_grid_density
@@ -319,7 +312,6 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
        << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
-       << ",\n  hybrid_working_sets_size_limit=" << p.hybrid_working_sets_size_limit
 
        << ",\n\n  lock_to_grid_steps=" << p.lock_to_grid_steps
        << ",\n  lock_to_grid_time=" << p.lock_to_grid_time

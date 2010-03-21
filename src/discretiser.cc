@@ -254,6 +254,23 @@ reach(const SystemType& system,
 }
 
 template<class ES>
+tuple< HybridGridTreeSet,HybridGridTreeSet,ListSet<HybridBasicSet<ES> > >
+HybridDiscretiser<ES>::reach_evolve_enclosures(const SystemType& system, 
+            const HybridBasicSet<ES>& initial_set, 
+            const TimeType& time,
+            const AccuracyType accuracy,
+			const Semantics semantics) const
+{
+	typedef ListSet<HybridBasicSet<ES> > EnclosureListType;
+	EnclosureListType reach, final;
+
+	make_lpair<EnclosureListType,EnclosureListType>(reach,final) = this->_evolver->reach_evolve(system,initial_set,time,semantics);
+
+    return make_tuple<HybridGridTreeSet,HybridGridTreeSet,EnclosureListType>(this->_discretise(reach,system.grid(),accuracy),this->_discretise(final,system.grid(),accuracy),final);
+}
+
+
+template<class ES>
 HybridGridTreeSet 
 HybridDiscretiser<ES>::
 evolve(const SystemType& system, 

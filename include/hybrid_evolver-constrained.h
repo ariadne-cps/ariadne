@@ -40,7 +40,7 @@
 #include "hybrid_set.h"
 
 #include "hybrid_enclosure.h"
-#include "hybrid_automaton-composite.h"
+#include "hybrid_automaton_interface.h"
 #include "evolver_interface.h"
 #include "evolver_base.h"
 #include "evolution_parameters.h"
@@ -55,16 +55,16 @@ namespace Ariadne {
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class ConstrainedImageSetHybridEvolver
-    : public EvolverBase<CompositeHybridAutomaton,HybridEnclosure>
+    : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
     , public Loggable
 {
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridTime TimeType;
+    typedef HybridAutomatonInterface::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
-    typedef CompositeHybridAutomaton SystemType;
+    typedef HybridAutomatonInterface SystemType;
     typedef TaylorImageSet ContinuousEnclosureType;
     typedef HybridEnclosure HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
@@ -120,8 +120,8 @@ class ConstrainedImageSetHybridEvolver
                           ListSet<HybridEnclosure>& final,
                           ListSet<HybridEnclosure>& reachable,
                           ListSet<HybridEnclosure>& intermediate,
-                          CompositeHybridAutomaton const& system,
-                          HybridTime const& maximum_time) const;
+                          SystemType const& system,
+                          TimeType const& maximum_time) const;
 
  private:
     boost::shared_ptr< EvolutionParametersType > _parameters;

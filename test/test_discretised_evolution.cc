@@ -275,7 +275,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     uint steps(6);
     Float maximum_step_size(0.125);
     int depth=8;
-    AtomicDiscreteLocation location(1);
+    DiscreteLocation location(1);
     DiscreteEvent event(1);
 
     EvolutionParameters parameters;

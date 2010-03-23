@@ -1087,6 +1087,14 @@ void TaylorConstrainedImageSet::apply_map(VectorFunction map)
     this->_check();
 }
 
+void TaylorConstrainedImageSet::apply_map(VectorTaylorFunction map)
+{
+    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
+    VectorTaylorFunction& function=this->_function;
+    function=compose(map,function);
+    this->_check();
+}
+
 void TaylorConstrainedImageSet::apply_flow(VectorFunction flow, Interval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
@@ -1100,10 +1108,23 @@ void TaylorConstrainedImageSet::apply_flow(VectorFunction flow, Interval time)
     this->_check();
 }
 
+void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Float time)
+{
+    ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
+    this->_function=compose(flow,join(this->_function,ScalarTaylorFunction::constant(this->_function.domain(),time)));
+    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        *iter=embed(*iter,time);
+    }
+    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+        *iter=embed(*iter,time);
+    }
+    this->_check();
+}
+
 void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Interval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time))));
+    this->_function=compose(flow,combine(this->_function,ScalarTaylorFunction::identity(time)));
     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
@@ -1484,6 +1505,7 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
     os << "TaylorConstrainedImageSet";
     os << "(\n  domain=" << this->domain();
+    os << ",\n  range=" << this->bounding_box();
     os << ",\n  function=" << this->taylor_function();
     os << ",\n  constraints=" << this->_constraints;
     os << ",\n  equations=" << this->_equations;
@@ -1585,6 +1607,21 @@ TaylorConstrainedImageSet::affine_approximation() const
     return result;
 }
 
+TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Interval& ivl) {
+    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+
+    VectorTaylorFunction new_function=combine(set.taylor_function(),ScalarTaylorFunction::identity(ivl));
+
+    TaylorConstrainedImageSet result(new_function);
+    for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
+        result._constraints.append(embed(*iter,ivl));
+    }
+    for(const_iterator iter=set._equations.begin(); iter!=set._equations.end(); ++iter) {
+        result._equations.append(embed(*iter,ivl));
+    }
+
+    return result;
+}
 
 } // namespace Ariadne
 

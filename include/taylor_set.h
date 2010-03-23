@@ -186,7 +186,6 @@ void affine_draw(CanvasInterface& g, const TaylorImageSet& ts);
 void curve_draw(CanvasInterface& g, const TaylorImageSet& ts);
 void grid_draw(CanvasInterface& g, const TaylorImageSet& ts);
 
-void plot(const char* fn, const Box& bbx, const TaylorImageSet& ts);
 
 class HybridEnclosure;
 
@@ -194,11 +193,11 @@ class HybridEnclosure;
 class TaylorConstrainedImageSet
     : public DrawableInterface
 {
-
     Vector<Interval> _domain;
     VectorTaylorFunction _function;
     List<ScalarTaylorFunction> _constraints;
     List<ScalarTaylorFunction> _equations;
+
   public:
     TaylorConstrainedImageSet();
     TaylorConstrainedImageSet(Box);
@@ -220,10 +219,14 @@ class TaylorConstrainedImageSet
     void substitute(uint j, ScalarTaylorFunction v);
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     void apply_map(VectorFunction r);
+    //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
+    void apply_map(VectorTaylorFunction r);
     //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
     void apply_flow(VectorFunction phi, Interval time);
     //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
     void apply_flow(VectorTaylorFunction phi, Interval time);
+    //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
+    void apply_flow(VectorTaylorFunction phi, Float time);
 
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
     void new_negative_constraint(ScalarFunction g);
@@ -268,6 +271,8 @@ class TaylorConstrainedImageSet
     void _check() const;
     void _subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth, const Vector<Float>& errors) const;
     void _solve_zero_constraints();
+  private:
+    friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const Interval&);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const TaylorConstrainedImageSet& s) { return s.write(os); }

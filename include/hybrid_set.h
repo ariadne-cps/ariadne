@@ -46,7 +46,6 @@
 #include "hybrid_set_interface.h"
 #include "point.h"
 #include "box.h"
-#include "orbit.h"
 
 #include "serialization.h"
 
@@ -608,14 +607,6 @@ template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsig
 
 template<class BS> inline
 void
-draw(FigureInterface& figure, const Orbit< BS >& orbit) {
-    draw(figure,orbit.reach());
-    draw(figure,orbit.initial());
-    draw(figure,orbit.final());
-}
-
-template<class BS> inline
-void
 draw(FigureInterface& figure, const HybridBasicSet<BS>& hs) {
     draw(figure,hs.continuous_state_set());
 }
@@ -631,10 +622,6 @@ draw(FigureInterface& figure, const std::map<DiscreteLocation,DS>& hds) {
         //figure.draw(loc_iter->second);
         //figure << loc_iter->second;
     }
-}
-
-template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const Orbit< HybridBasicSet<BS> >& horb) {
-    draw(figure,horb); return figure;
 }
 
 template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const HybridBasicSet<BS>& hs) {

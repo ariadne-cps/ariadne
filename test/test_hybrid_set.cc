@@ -45,24 +45,25 @@ class TestHybridSet {
     void test_hybrid_list_set();
 };
 
-void 
-TestHybridSet::test() 
+void
+TestHybridSet::test()
 {
     ARIADNE_TEST_CALL(test_hybrid_image_set());
     ARIADNE_TEST_CALL(test_hybrid_list_set());
 }
 
 
-void 
-TestHybridSet::test_hybrid_image_set() 
+void
+TestHybridSet::test_hybrid_image_set()
 {
     HybridImageSet his;
     Box bx=Box::unit_box(2);
     Matrix<Float> A=Matrix<Float>::identity(2);
     Vector<Float> b1=Vector<Float>::unit(2,0);
     Vector<Float> b2=Vector<Float>::unit(2,1);
-    AtomicDiscreteLocation loc1(123);
-    AtomicDiscreteLocation loc2(105);
+    StringVariable var("q");
+    DiscreteLocation loc1(123);
+    DiscreteLocation loc2(105);
     ImageSet ims1(bx,VectorAffineFunction(A,b1));
     ImageSet ims2(bx,VectorAffineFunction(A,b2));
     his.insert(make_pair(loc1,ims1));
@@ -75,12 +76,12 @@ TestHybridSet::test_hybrid_image_set()
 }
 
 
-void 
-TestHybridSet::test_hybrid_list_set() 
+void
+TestHybridSet::test_hybrid_list_set()
 {
     HybridListSet<Box> hls;
-    AtomicDiscreteLocation loc1(123);
-    AtomicDiscreteLocation loc2(105);
+    DiscreteLocation loc1(123);
+    DiscreteLocation loc2(105);
     Box bx1=make_box("[0,1]");
     Box bx2=make_box("[2,3]");
     Box bx3=make_box("[1,2]x[2,3]");
@@ -108,14 +109,14 @@ TestHybridSet::test_hybrid_list_set()
     ++iter;
     ARIADNE_TEST_ASSERT(iter==hls.end());
 
-    ListSet<Box> ls1; ls1.adjoin(bx1); ls1.adjoin(bx2); 
-    ListSet<Box> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5); 
+    ListSet<Box> ls1; ls1.adjoin(bx1); ls1.adjoin(bx2);
+    ListSet<Box> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5);
 
     HybridListSet<Box>::locations_const_iterator loc_iter=hls.locations_begin();
-    ARIADNE_TEST_EQUAL(loc_iter->first[0],loc2);
+    ARIADNE_TEST_EQUAL(loc_iter->first,loc2);
     ARIADNE_TEST_EQUAL(loc_iter->second,ls2);
     ++loc_iter;
-    ARIADNE_TEST_EQUAL(loc_iter->first[0],loc1);
+    ARIADNE_TEST_EQUAL(loc_iter->first,loc1);
     ARIADNE_TEST_EQUAL(loc_iter->second,ls1);
     ++loc_iter;
     ARIADNE_TEST_ASSERT(loc_iter==hls.locations_end());

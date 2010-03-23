@@ -112,8 +112,8 @@ struct VectorExpressionFunctionBody
     }
 
     std::ostream& write(std::ostream& os) const {
-        //return os << this->_result_variables << this->_argument_variables << this->_assignments;
-        return os << this->_assignments;
+        //return os << "F["<<this->result_size()<<","<<this->argument_size()<<"]"<<this->_assignments;
+        return os << "F["<<this->_result_variables<<","<<this->_argument_variables<<"]"<<this->_assignments;
     }
 
 };

@@ -38,6 +38,7 @@
 #include "discrete_location.h"
 #include "discrete_event.h"
 
+#include "hybrid_automaton_interface.h"
 
 namespace Ariadne {
 
@@ -272,6 +273,7 @@ inline bool operator<(const DiscreteTransition& transition1, const DiscreteTrans
 
  */
 class MonolithicHybridAutomaton
+    : public HybridAutomatonInterface
 {
   public:
     //! \brief The type used to represent time.

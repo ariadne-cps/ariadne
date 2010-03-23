@@ -25,6 +25,7 @@
 
 #include "macros.h"
 #include "stlio.h"
+#include "expression.h"
 #include "function.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"
@@ -365,15 +366,15 @@ AtomicHybridAutomaton::name() const
     return this->_name;
 }
 
-AtomicHybridAutomaton::operator StringVariable () const 
+AtomicHybridAutomaton::operator StringVariable () const
 {
     return StringVariable(this->_name);
 }
 
 DiscreteLocation
-AtomicHybridAutomaton::operator==(AtomicDiscreteLocation q) const 
+AtomicHybridAutomaton::operator==(AtomicDiscreteLocation q) const
 {
-    DiscreteLocation r; r.insert(*this,q.name()); return r; 
+    DiscreteLocation r; r.insert(*this,q.name()); return r;
 }
 
 Set<AtomicDiscreteLocation>
@@ -675,6 +676,23 @@ CompositeHybridAutomaton::component(uint k) const {
     return this->_components[k];
 }
 
+DiscreteLocation
+CompositeHybridAutomaton::location(const List<AtomicDiscreteLocation>& lst) const
+{
+    ARIADNE_ASSERT(this->_components.size()==lst.size());
+    DiscreteLocation r;
+    for(uint i=0; i!=this->_components.size(); ++i) {
+        r.insert(StringVariable(this->_components[i]),lst[i].name());
+    }
+    return r;
+}
+
+DiscreteLocation
+CompositeHybridAutomaton::location(const AtomicDiscreteLocation& lst) const
+{
+    return this->location(List<AtomicDiscreteLocation>(1u,lst));
+}
+
 List<DottedRealVariable> dot(const List<RealVariable>& v) {
     List<DottedRealVariable> result;
     for(uint i=0; i!=v.size(); ++i) { result.append(dot(v[i])); }
@@ -690,7 +708,7 @@ List<PrimedRealVariable> next(const List<RealVariable>& v) {
 
 
 bool
-CompositeHybridAutomaton::has_mode(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::has_mode(DiscreteLocation location) const {
     for(uint i=0; i!=this->_components.size(); ++i) {
         if(!this->_components[i].has_mode(location[this->_components[i]])) {
             return false;
@@ -700,7 +718,7 @@ CompositeHybridAutomaton::has_mode(const DiscreteLocation& location) const {
 }
 
 bool
-CompositeHybridAutomaton::has_transition(const DiscreteLocation& source, const DiscreteEvent& event) const {
+CompositeHybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const {
     for(uint i=0; i!=this->_components.size(); ++i) {
         if(this->_components[i].has_transition(source[this->_components[i]],event)) {
             return true;
@@ -711,7 +729,7 @@ CompositeHybridAutomaton::has_transition(const DiscreteLocation& source, const D
 
 
 Set< DiscreteEvent >
-CompositeHybridAutomaton::transition_events(const DiscreteLocation& source) const
+CompositeHybridAutomaton::transition_events(DiscreteLocation source) const
 {
     Set< DiscreteEvent > result;
     for(uint i=0; i!=this->_components.size(); ++i) {
@@ -721,7 +739,7 @@ CompositeHybridAutomaton::transition_events(const DiscreteLocation& source) cons
 }
 
 Set< DiscreteEvent >
-CompositeHybridAutomaton::invariant_events(const DiscreteLocation& source) const
+CompositeHybridAutomaton::invariant_events(DiscreteLocation source) const
 {
     Set< DiscreteEvent > result;
     for(uint i=0; i!=this->_components.size(); ++i) {
@@ -734,8 +752,8 @@ CompositeHybridAutomaton::invariant_events(const DiscreteLocation& source) const
 
 
 DiscreteLocation
-CompositeHybridAutomaton::target(const DiscreteLocation& source, const DiscreteEvent& event) const {
-    DiscreteLocation result; 
+CompositeHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) const {
+    DiscreteLocation result;
     for(uint i=0; i!=this->_components.size(); ++i) {
         StringVariable var=this->_components[i];
         if(this->_components[i].has_transition(source[var],event)) {
@@ -750,12 +768,12 @@ CompositeHybridAutomaton::target(const DiscreteLocation& source, const DiscreteE
 
 
 List<RealVariable>
-CompositeHybridAutomaton::variables(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::variables(DiscreteLocation location) const {
     return catenate(this->state_variables(location),this->auxiliary_variables(location));
 }
 
 List<RealVariable>
-CompositeHybridAutomaton::state_variables(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::state_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
         ARIADNE_ASSERT(this->_components[i].has_mode(location[this->_components[i]]));
@@ -766,7 +784,7 @@ CompositeHybridAutomaton::state_variables(const DiscreteLocation& location) cons
 }
 
 List<RealVariable>
-CompositeHybridAutomaton::auxiliary_variables(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
         ARIADNE_ASSERT(this->_components[i].has_mode(location[this->_components[i]]));
@@ -778,7 +796,7 @@ CompositeHybridAutomaton::auxiliary_variables(const DiscreteLocation& location) 
 
 // Find all algebraic equations valid in the location
 List<RealAssignment>
-CompositeHybridAutomaton::algebraic_assignments(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::algebraic_assignments(DiscreteLocation location) const {
     List<RealAssignment> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
         result.append(this->_components[i].algebraic_assignments(location[this->_components[i]]));
@@ -789,7 +807,7 @@ CompositeHybridAutomaton::algebraic_assignments(const DiscreteLocation& location
 }
 
 List<DottedRealAssignment>
-CompositeHybridAutomaton::differential_assignments(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::differential_assignments(DiscreteLocation location) const {
     List<DottedRealAssignment> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
         result.append(this->_components[i].differential_assignments(location[this->_components[i]]));
@@ -800,7 +818,7 @@ CompositeHybridAutomaton::differential_assignments(const DiscreteLocation& locat
 
 
 List<PrimedRealAssignment>
-CompositeHybridAutomaton::update_assignments(const DiscreteLocation& location, const DiscreteEvent& event) const {
+CompositeHybridAutomaton::update_assignments(DiscreteLocation location, DiscreteEvent event) const {
     List<PrimedRealAssignment> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
         result.append(this->_components[i].update_assignments(location[this->_components[i]],event));
@@ -810,7 +828,7 @@ CompositeHybridAutomaton::update_assignments(const DiscreteLocation& location, c
 
 
 ContinuousPredicate
-CompositeHybridAutomaton::invariant_predicate(const DiscreteLocation& location, const DiscreteEvent& event) const {
+CompositeHybridAutomaton::invariant_predicate(DiscreteLocation location, DiscreteEvent event) const {
     ContinuousPredicate result(true);
     for(uint i=0; i!=this->_components.size(); ++i) {
         ContinuousPredicate guard=this->_components[i].invariant_predicate(location[this->_components[i]],event);
@@ -823,7 +841,7 @@ CompositeHybridAutomaton::invariant_predicate(const DiscreteLocation& location, 
 
 
 ContinuousPredicate
-CompositeHybridAutomaton::guard_predicate(const DiscreteLocation& location, const DiscreteEvent& event) const {
+CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEvent event) const {
     ContinuousPredicate result(true);
     for(uint i=0; i!=this->_components.size(); ++i) {
         ContinuousPredicate guard=this->_components[i].guard_predicate(location[this->_components[i]],event);
@@ -839,35 +857,49 @@ CompositeHybridAutomaton::guard_predicate(const DiscreteLocation& location, cons
 
 
 VectorFunction
-CompositeHybridAutomaton::output_function(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::output_function(DiscreteLocation location) const {
     return VectorFunction(auxiliary_variables(location),algebraic_assignments(location),state_variables(location));
 }
 
 VectorFunction
-CompositeHybridAutomaton::dynamic_function(const DiscreteLocation& location) const {
-    return VectorFunction(dot(state_variables(location)),differential_assignments(location),variables(location));
+CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
+    List<RealDifferentialAssignment> differential=this->differential_assignments(location);
+    List<RealAssignment> algebraic=this->algebraic_assignments(location);
+    for(uint i=0; i!=algebraic.size(); ++i) {
+        for(uint j=0; j!=differential.size(); ++j) {
+            differential[j].rhs=substitute(differential[j].rhs,algebraic[i].lhs,algebraic[i].rhs);
+        }
+    }
+    return VectorFunction(dot(state_variables(location)),differential,state_variables(location));
 }
 
 VectorFunction
-CompositeHybridAutomaton::reset_function(const DiscreteLocation& source, const DiscreteEvent& event) const {
+CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation target=this->target(source,event);
-    return VectorFunction(next(state_variables(target)),update_assignments(source,event),variables(source));
+    List<RealUpdateAssignment> update=this->update_assignments(source,event);
+    List<RealAssignment> algebraic=this->algebraic_assignments(source);
+    for(uint i=0; i!=algebraic.size(); ++i) {
+        for(uint j=0; j!=update.size(); ++j) {
+            update[j].rhs=substitute(update[j].rhs,algebraic[i].lhs,algebraic[i].rhs);
+        }
+    }
+    return VectorFunction(next(state_variables(target)),update,state_variables(source));
 }
 
 ScalarFunction
-CompositeHybridAutomaton::invariant_function(const DiscreteLocation& location, const DiscreteEvent& event) const {
-    return ScalarFunction(indicator(invariant_predicate(location,event),negative),variables(location));
+CompositeHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
+    return ScalarFunction(indicator(substitute(invariant_predicate(location,event),algebraic_assignments(location)),negative),state_variables(location));
 }
 
 ScalarFunction
-CompositeHybridAutomaton::guard_function(const DiscreteLocation& location, const DiscreteEvent& event) const {
-    return ScalarFunction(indicator(guard_predicate(location,event)),variables(location));
+CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
+    return ScalarFunction(indicator(substitute(guard_predicate(location,event),algebraic_assignments(location))),state_variables(location));
 }
 
 
 
 Set<DiscreteEvent>
-CompositeHybridAutomaton::blocking_events(const DiscreteLocation& location) const
+CompositeHybridAutomaton::blocking_events(DiscreteLocation location) const
 {
     Set<DiscreteEvent> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
@@ -877,7 +909,7 @@ CompositeHybridAutomaton::blocking_events(const DiscreteLocation& location) cons
 }
 
 Set<DiscreteEvent>
-CompositeHybridAutomaton::urgent_events(const DiscreteLocation& location) const
+CompositeHybridAutomaton::urgent_events(DiscreteLocation location) const
 {
     Set<DiscreteEvent> result;
     Set<DiscreteEvent> duplicates;
@@ -895,7 +927,7 @@ CompositeHybridAutomaton::urgent_events(const DiscreteLocation& location) const
 
 
 Set<DiscreteEvent>
-CompositeHybridAutomaton::permissive_events(const DiscreteLocation& location) const
+CompositeHybridAutomaton::permissive_events(DiscreteLocation location) const
 {
     Set<DiscreteEvent> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
@@ -905,7 +937,11 @@ CompositeHybridAutomaton::permissive_events(const DiscreteLocation& location) co
 }
 
 
-
+Grid
+CompositeHybridAutomaton::grid(DiscreteLocation location) const
+{
+    return Grid(this->state_variables(location).size());
+}
 
 std::ostream&
 CompositeHybridAutomaton::write(std::ostream& os) const
@@ -1040,7 +1076,7 @@ List<RealAssignment> order(const List<RealAssignment>& assignments, const Set<Re
 
 
 void
-CompositeHybridAutomaton::check_mode(const DiscreteLocation& location) const {
+CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
     List<RealAssignment> equations=this->algebraic_assignments(location);
     List<DottedRealAssignment> dynamics=this->differential_assignments(location);
 
@@ -1075,7 +1111,7 @@ CompositeHybridAutomaton::check_mode(const DiscreteLocation& location) const {
     for(Map<DiscreteEvent,ContinuousPredicate>::const_iterator invariant_iter=invariants.begin();
         invariant_iter!=invariants.end(); ++invariant_iter)
     {
-        const DiscreteEvent& action=invariant_iter->first;
+        DiscreteEvent action=invariant_iter->first;
         const ContinuousPredicate& invariant=invariant_iter->second;
         if(!subset(real_arguments(invariant),result_variables)) {
             undefined_variables=difference(real_arguments(invariant),result_variables);
@@ -1137,7 +1173,7 @@ CompositeHybridAutomaton::check_mode(const DiscreteLocation& location) const {
 
 
 void
-CompositeHybridAutomaton::check_reachable_modes(const DiscreteLocation& initial_location) const
+CompositeHybridAutomaton::check_reachable_modes(DiscreteLocation initial_location) const
 {
     Set<DiscreteLocation> initial_locations;
     initial_locations.insert(initial_location);
@@ -1155,7 +1191,7 @@ CompositeHybridAutomaton::check_reachable_modes(const Set<DiscreteLocation>& ini
 }
 
 Set<DiscreteLocation>
-CompositeHybridAutomaton::discrete_reachability(const DiscreteLocation& initial_location) const
+CompositeHybridAutomaton::discrete_reachability(DiscreteLocation initial_location) const
 {
     Set<DiscreteLocation> initial_locations;
     initial_locations.insert(initial_location);

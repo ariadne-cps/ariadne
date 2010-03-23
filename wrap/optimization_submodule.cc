@@ -71,9 +71,9 @@ void export_internal_array(const char* name)
 
 void export_variable_type()
 {
-    typedef array<VariableType> VariableTypeArray;
+    typedef array<Slackness> SlacknessArray;
 
-    enum_<VariableType> variable_enum("VariableType");
+    enum_<Slackness> variable_enum("Slackness");
     variable_enum.value("BASIS", BASIS);
     variable_enum.value("LOWER", LOWER);
     variable_enum.value("UPPER", UPPER);
@@ -116,16 +116,16 @@ void export_simplex_solver()
 
     class_< SimplexSolver<X> > simplex_solver_class("SimplexSolver", init<>());
     simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,SizeArray&,Matrix<X>&,Vector<X>&)) &SimplexSolver<X>::lpstep);
-    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,array<VariableType>&,array<size_t>&,Matrix<X>&,Vector<X>&)) &SimplexSolver<X>::lpstep);
+    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,array<Slackness>&,array<size_t>&,Matrix<X>&,Vector<X>&)) &SimplexSolver<X>::lpstep);
 
 
     simplex_solver_class.def("primal_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&)) &SimplexSolver<X>::primal_feasible);
     simplex_solver_class.def("dual_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&)) &SimplexSolver<X>::dual_feasible);
     simplex_solver_class.def("constrained_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &SimplexSolver<X>::constrained_feasible);
 
-    simplex_solver_class.def("verify_primal_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &SimplexSolver<X>::verify_primal_feasibility);
-    simplex_solver_class.def("verify_dual_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &SimplexSolver<X>::verify_dual_feasibility);
-    simplex_solver_class.def("verify_constrained_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const array<VariableType>&)) &SimplexSolver<X>::verify_constrained_feasibility);
+    simplex_solver_class.def("verify_primal_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<Slackness>&)) &SimplexSolver<X>::verify_primal_feasibility);
+    simplex_solver_class.def("verify_dual_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<Slackness>&)) &SimplexSolver<X>::verify_dual_feasibility);
+    simplex_solver_class.def("verify_constrained_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const array<Slackness>&)) &SimplexSolver<X>::verify_constrained_feasibility);
 
     simplex_solver_class.def("compute_basis",(std::pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)) &SimplexSolver<X>::compute_basis);
 
@@ -136,7 +136,7 @@ void export_simplex_solver()
 void optimization_submodule() {
     export_variable_type();
     export_array<size_t>("SizeArray");
-    export_internal_array<VariableType>("VariableTypeArray");
+    export_internal_array<Slackness>("SlacknessArray");
     export_simplex_solver<Float>();
 #ifdef HAVE_GMPXX_H
     export_simplex_solver<Rational>();

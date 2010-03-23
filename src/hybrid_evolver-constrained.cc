@@ -30,6 +30,7 @@
 #include "hybrid_time.h"
 #include "hybrid_automaton.h"
 #include "hybrid_evolver-constrained.h"
+#include "orbit.h"
 
 #include "integrator.h"
 
@@ -49,7 +50,7 @@ typedef Vector<Interval> IntervalVector;
 
 Orbit<HybridEnclosure>
 ConstrainedImageSetHybridEvolver::
-orbit(const CompositeHybridAutomaton& system,
+orbit(const HybridAutomatonInterface& system,
       const HybridEnclosure& initial,
       const HybridTime& time,
       Semantics semantics) const
@@ -69,7 +70,7 @@ ConstrainedImageSetHybridEvolver::
 _evolution(EnclosureListType& final,
            EnclosureListType& reachable,
            EnclosureListType& intermediate,
-           CompositeHybridAutomaton const& system,
+           HybridAutomatonInterface const& system,
            HybridEnclosure const& initial_set,
            HybridTime const& maximum_time,
            Semantics semantics,
@@ -90,14 +91,11 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
                       ListSet<HybridEnclosure>& evolve_sets,
                       ListSet<HybridEnclosure>& reach_sets,
                       ListSet<HybridEnclosure>& intermediate_sets,
-                      CompositeHybridAutomaton const& system,
+                      HybridAutomatonInterface const& system,
                       HybridTime const& maximum_hybrid_time) const
 {
     typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
     typedef Set<DiscreteEvent>::const_iterator event_iterator;
-
-    TaylorModel::set_default_sweep_threshold(1e-6);
-    TaylorModel::set_default_maximum_degree(6);
 
     TaylorIntegrator integrator(5);
     Float step_size=1.0;
@@ -118,7 +116,8 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     ARIADNE_LOG(4,"starting_space_set:"<<starting_space_set<<"\n");
     ARIADNE_LOG(4,"starting_time:"<<starting_time<<"\n");
 
-    if(starting_time.argument_size()>5) { std::cerr<< "ABORTING\n"; return; }
+    if(starting_time.argument_size()>5) {
+        std::cerr<< "ABORTING: Too many independent parameters ("<<starting_time.argument_size()<<")\n"; return; }
 
     // Set the dimension
     const uint n=starting_set.dimension();
@@ -197,14 +196,15 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
 
     // Set the reached set, the next working set and the final set
     HybridEnclosure final_set(reached_set);
-    HybridEnclosure progress_set(reached_set);
 
     reached_set.set_maximum_time(final_time_event,maximum_time);
     ARIADNE_LOG(4,"reached_set:"<<reached_set<<"\n");
     ARIADNE_LOG(4,"final_set:"<<reached_set<<"\n");
     final_set.set_time(final_time_event,maximum_time);
     ARIADNE_LOG(4,"final_set:"<<final_set<<"\n");
-    progress_set.set_dwell_time(time_step_event,step_size);
+
+    HybridEnclosure progress_set(starting_set);
+    progress_set.apply_flow(flow_model,step_size);
     ARIADNE_LOG(4,"progress_set:"<<progress_set<<"\n");
 
     reach_sets.adjoin(reached_set);
@@ -239,15 +239,16 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     ARIADNE_LOG(4,"DONE STEP\n"<<"\n");
 
     if(verbosity==1) {
-        ARIADNE_LOG(1,"\r"
-                    <<"#w="<<std::setw(4)<<working_sets.size()
+        ARIADNE_LOG(1,"\n\r"
+                    <<"#w="<<std::setw(4)<<std::left<<working_sets.size()
                     <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
                     <<" s="<<std::setw(3)<<std::left<<starting_events.size()
                     //<<" t="<<std::setw(7)<<std::fixed<<starting_time.value()
-                    <<" t="<<std::setw(7)<<std::fixed<<starting_time
+                    <<" t=["<<std::setw(7)<<std::left<<std::fixed<<starting_time.range().lower()
+                    <<","<<std::setw(7)<<std::left<<std::fixed<<starting_time.range().upper()<<"]"
                     <<" a="<<std::setw(3)<<std::left<<starting_set.continuous_state_set().domain().size()
                     <<" r="<<std::setw(7)<<starting_set.continuous_state_set().radius()
-                    <<" l="<<std::setw(3)<<std::left<<starting_location
+                    <<" l="<<std::left<<starting_location
                     <<" c="<<starting_set.continuous_state_set().centre()
                     <<" e="<<starting_events
                     <<"                      ");

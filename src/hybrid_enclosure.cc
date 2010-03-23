@@ -68,8 +68,20 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box)
-  : _location(location), _events(), _set(box),
-    _time(ScalarTaylorFunction::constant(box,0.0))
+    : _location(location), _events(), _set(box),
+      _time(ScalarTaylorFunction::constant(box,0.0))
+{
+}
+
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set)
+    : _location(location), _events(), _set(set),
+      _time(ScalarTaylorFunction::constant(set.domain(),0.0))
+{
+}
+
+HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>& hpair)
+    : _location(hpair.first), _events(), _set(hpair.second),
+      _time(ScalarTaylorFunction::constant(hpair.second.domain(),0.0))
 {
 }
 
@@ -98,6 +110,12 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
+void HybridEnclosure::apply_flow(VectorTaylorFunction phi, Float time)
+{
+    this->_set.apply_map(partial_evaluate(phi,phi.argument_size()-1,time));
+    this->_time+=time;
+}
+
 void HybridEnclosure::apply_flow(VectorFunction phi, Interval time_domain)
 {
     this->_set.apply_flow(phi,time_domain);
@@ -105,9 +123,8 @@ void HybridEnclosure::apply_flow(VectorFunction phi, Interval time_domain)
     this->_time=embed(this->_time,time_domain)+ScalarTaylorFunction::coordinate(new_domain,new_domain.size()-1u);
 }
 
-void HybridEnclosure::apply_flow(VectorTaylorFunction phi)
+void HybridEnclosure::apply_flow(VectorTaylorFunction phi, Interval time_domain)
 {
-    Interval time_domain=phi.domain()[phi.argument_size()-1u];
     this->_set.apply_flow(phi,time_domain);
     Vector<Interval> const& new_domain=this->_set.domain();
     this->_time=embed(this->_time,time_domain)+ScalarTaylorFunction::coordinate(new_domain,new_domain.size()-1u);

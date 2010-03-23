@@ -26,7 +26,7 @@
  */
 
 #ifndef ARIADNE_HYBRID_ENCLOSURE_H
-#define ARIADNE_CONSTRAINED_IMAGE_SET_H
+#define ARIADNE_HYBRID_ENCLOSURE_H
 
 #include <string>
 #include <vector>
@@ -34,7 +34,9 @@
 #include <iostream>
 
 #include <boost/smart_ptr.hpp>
-#include "taylor_function.h"
+#include "discrete_location.h"
+#include "discrete_event.h"
+#include "taylor_set.h"
 #include "graphics_interface.h"
 #include "container.h"
 #include "logging.h"
@@ -58,6 +60,9 @@ class DiscreteEvent;
 class Figure;
 class CanvasInterface;
 
+template<class ES> class ListSet;
+template<class ES> class HybridListSet;
+template<> class ListSet<HybridEnclosure>;
 
 template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;
@@ -67,26 +72,28 @@ class HybridEnclosure
     : public DrawableInterface
 {
     friend class ConstrainedImageSetHybridEvolver;
-    typedef Vector<Interval> IntervalVector;
-  private:
+  public:
+    typedef TaylorConstrainedImageSet ContinuousStateSetType;
+    private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
     List< List<DiscreteEvent> > _constraint_events;
-    TaylorConstrainedImageSet _set;
+    ContinuousStateSetType _set;
     ScalarTaylorFunction _time;
   public:
-    typedef TaylorConstrainedImageSet ContinuousStateSetType;
-
     HybridEnclosure(const DiscreteLocation&, const Box&);
+    HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>&);
+    HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
     ~HybridEnclosure();
     HybridEnclosure* clone() const;
 
     const DiscreteLocation& location() const;
-    const TaylorConstrainedImageSet& continuous_state_set() const;
+    const ContinuousStateSetType& continuous_state_set() const;
 
     void apply_reset(DiscreteEvent, DiscreteLocation, VectorFunction);
     void apply_flow(VectorFunction, Interval);
-    void apply_flow(VectorTaylorFunction);
+    void apply_flow(VectorTaylorFunction, Float);
+    void apply_flow(VectorTaylorFunction, Interval);
 
     void set_maximum_time(DiscreteEvent,Float);
     void set_time(DiscreteEvent,Float);
@@ -112,7 +119,27 @@ class HybridEnclosure
 
 inline std::ostream& operator<<(std::ostream& os, const HybridEnclosure& s) { return s.write(os); }
 
+}
+
+#include "hybrid_set.h"
+
+namespace Ariadne {
+
+template<>
+class ListSet<HybridEnclosure>
+    : public HybridListSet<HybridEnclosure::ContinuousStateSetType>
+{
+  public:
+    ListSet() { }
+    ListSet(const HybridEnclosure& hes) { this->adjoin(hes); }
+    using HybridListSet<HybridEnclosure::ContinuousStateSetType>::adjoin;
+    void adjoin(const HybridEnclosure& hes) { this->adjoin(hes.location(),hes.continuous_state_set()); }
+};
+
+inline std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls) {
+    return os << static_cast<const HybridListSet<HybridEnclosure::ContinuousStateSetType>&>(hls);
+}
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CONSTRAINED_IMAGE_SET_H
+#endif // ARIADNE_HYBRID_ENCLOSURE_H

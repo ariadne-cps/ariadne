@@ -31,6 +31,7 @@
 namespace Ariadne {
 }
 
+#include "hybrid_automaton_interface.h"
 #include "hybrid_automaton-monolithic.h"
 #include "hybrid_automaton-composite.h"
 

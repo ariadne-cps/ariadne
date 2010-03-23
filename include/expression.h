@@ -84,6 +84,9 @@ template<class R> class Expression;
 template<class R> std::ostream& operator<<(std::ostream&, const Expression<R>&);
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& c);
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
+
 template<class X> Expression<X> simplify(const Expression<X>& e);
 
 /*! \brief A simple expression in named variables.

@@ -52,8 +52,8 @@ Pair<Float,IVector>
 IntegratorBase::flow_bounds(const VectorFunction& vf, const IVector& dp, const IVector& dx, const Float& hmax) const
 {
 
-    ARIADNE_ASSERT(vf.result_size()==dx.size());
-    ARIADNE_ASSERT(vf.argument_size()==dp.size()+dx.size());
+    ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
+    ARIADNE_ASSERT_MSG(vf.argument_size()==dp.size()+dx.size(),"vector_field="<<vf<<", parameters="<<dp<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
 
     // Set up constants of the method.

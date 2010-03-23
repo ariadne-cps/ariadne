@@ -144,15 +144,17 @@ TestCompositeHybridAutomaton::test_build_hybrid_system()
 void
 TestCompositeHybridAutomaton::test_static_analysis()
 {
-    AtomicDiscreteLocation draining("draining");
-    AtomicDiscreteLocation opening("opening");
-    AtomicDiscreteLocation open("open");
+    String draining("draining");
+    String opening("opening");
+    String open("open");
 
+    StringVariable tank("tank");
+    StringVariable valve("valve");
 
-    ARIADNE_TEST_EXECUTE(_system.check_mode((draining,opening)));
-    ARIADNE_TEST_EXECUTE(_system.check_mode((draining,open)));
-    ARIADNE_TEST_EXECUTE(_system.check_reachable_modes((draining,opening)));
-    ARIADNE_TEST_EXECUTE(_system.discrete_reachability((draining,opening)));
+    ARIADNE_TEST_EXECUTE(_system.check_mode((tank%=draining,valve%=opening)));
+    ARIADNE_TEST_EXECUTE(_system.check_mode((tank%=draining,valve%=open)));
+    ARIADNE_TEST_EXECUTE(_system.check_reachable_modes((tank%=draining,valve%=opening)));
+    ARIADNE_TEST_EXECUTE(_system.discrete_reachability((tank%=draining,valve%=opening)));
 
     //DiscreteLocation invalid_location=(AtomicDiscreteLocation("nonexistent"),AtomicDiscreteLocation("opening"));
     //ARIADNE_TEST_FAIL(_system.discrete_reachability(invalid_location));

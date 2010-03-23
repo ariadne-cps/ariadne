@@ -35,22 +35,7 @@ namespace Ariadne {
 
 enum Urgency { urgent, permissive };
 
-template<class X> struct Equation {
-    Equation(const Variable<X>& v, const X& c) : lhs(v), rhs(c) { }
-    Variable<X> lhs;
-    X rhs;
-};
-
-typedef Equation<String> StringEquation;
 typedef Variable<String> StringVariable;
-
-template<class X> inline StringEquation operator==(const StringVariable& v, const String& s) { 
-    return StringEquation(v,s);
-}
-
-inline StringEquation operator==(const StringVariable& v, const char* s) {
-    return StringEquation(v,s);
-}
 
 class IncompleteLocationError : public std::runtime_error {
   public:
@@ -62,10 +47,14 @@ class DiscreteLocation
 {
   public:
     DiscreteLocation() { }
-    void insert(const StringVariable& v, const String& s) { 
+    explicit DiscreteLocation(const int& n) {
+        this->_valuation.insert(StringVariable("q"),to_string(n)); }
+    explicit DiscreteLocation(const std::string& s) {
+        this->_valuation.insert(StringVariable("q"),s); }
+    void insert(const StringVariable& v, const String& s) {
         if(_valuation.has_key(v)) { ARIADNE_THROW(std::runtime_error,"DiscreteLocation::insert","Location "<<*this<<" already has variable "<<v<<"\n"); }
         this->_valuation.insert(v,s); }
-    void adjoin(const DiscreteLocation& q) { 
+    void adjoin(const DiscreteLocation& q) {
         for(Map<StringVariable,String>::const_iterator iter=q._valuation.begin(); iter!=q._valuation.end(); ++iter) {
             this->insert(iter->first,iter->second); } }
     bool has_key(const StringVariable& v) { return this->_valuation.has_key(v); }
@@ -80,8 +69,8 @@ class DiscreteLocation
 
 inline bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     tribool result=true;
-    Map<StringVariable,String>::const_iterator q1iter=q1._valuation.begin(); 
-    Map<StringVariable,String>::const_iterator q2iter=q2._valuation.begin(); 
+    Map<StringVariable,String>::const_iterator q1iter=q1._valuation.begin();
+    Map<StringVariable,String>::const_iterator q2iter=q2._valuation.begin();
     while(q1iter!=q1._valuation.end() && q2iter!=q2._valuation.end()) {
         if(q1iter==q1._valuation.end() || q2iter==q2._valuation.end()) {
             result=indeterminate;
@@ -107,22 +96,18 @@ inline bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     }
     ARIADNE_THROW(IncompleteLocationError,"DiscreteLocation::operator==","q1="<<q1<<" and q2="<<q2<<" cannot be compared.");
     return result;
-}  
+}
 
 inline bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     return q1._valuation < q2._valuation;
 }
 
-inline DiscreteLocation operator,(const StringEquation& q1, const StringEquation& q2) {
-    DiscreteLocation r; r.insert(q1.lhs,q1.rhs); r.insert(q2.lhs,q2.rhs); return r; 
-}
-
-inline DiscreteLocation operator,(const DiscreteLocation& q1, const StringEquation& q2) {
-    DiscreteLocation r(q1); r.insert(q2.lhs,q2.rhs); return r; 
+inline DiscreteLocation operator%=(const StringVariable& v, const String& s) {
+    DiscreteLocation loc; loc.insert(v,s); return loc;
 }
 
 inline DiscreteLocation operator,(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    DiscreteLocation r(q1); 
+    DiscreteLocation r(q1);
     for(Map<StringVariable,String>::const_iterator iter=q2._valuation.begin(); iter!=q2._valuation.end(); ++iter) {
         r.insert(iter->first,iter->second);
     }

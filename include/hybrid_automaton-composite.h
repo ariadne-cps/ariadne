@@ -40,8 +40,12 @@
 #include "formula.h"
 #include "logging.h"
 
+#include "hybrid_automaton_interface.h"
+
 
 namespace Ariadne {
+
+class HybridAutomatonInterface;
 
 class HybridTime;
 class HybridSpace;
@@ -379,10 +383,10 @@ class AtomicHybridAutomaton
 
     //! \brief Returns the variable containing the hybrid automaton's location.
     operator StringVariable() const;
-   
+
     //! \brief A DiscreteLocation giving the state of the hybrid automaton.
     DiscreteLocation operator==(AtomicDiscreteLocation location) const;
-    
+
     //! \brief The set of discrete locations.
     Set<AtomicDiscreteLocation> locations() const;
 
@@ -474,7 +478,8 @@ inline std::ostream& operator<<(std::ostream& os, const AtomicHybridAutomaton& h
  * \sa \link Ariadne::AtomicHybridAutomaton \c AtomicHybridAutomaton \endlink
  */
 class CompositeHybridAutomaton
-    : public Loggable
+    : public HybridAutomatonInterface
+    , public Loggable
 {
   public:
     typedef HybridTime TimeType;
@@ -497,34 +502,37 @@ class CompositeHybridAutomaton
     uint number_of_components() const;
     //! \brief The \a i<sup>th</sup> component automaton.
     const AtomicHybridAutomaton& component(uint i) const;
+    //! \brief The discrete location corresponding to the list of atomic discrete locations.
+    DiscreteLocation location(const List<AtomicDiscreteLocation>& lst) const;
+    DiscreteLocation location(const AtomicDiscreteLocation& lst) const;
     //@}
 
     // The signatures of these methods are wrong.
     //const Set<AtomicDiscreteMode> modes() const;
-    //const Set<AtomicDiscreteTransition> transitions(const DiscreteLocation& location) const;
+    //const Set<AtomicDiscreteTransition> transitions(DiscreteLocation location) const;
 
     //@{
     //! \name Methods for finding the modes, transitions and events of the composite automaton.
 
     //! \brief Tests if the automaton has a mode corresponding to the given location.
-    bool has_mode(const DiscreteLocation&) const;
+    bool has_mode(DiscreteLocation) const;
     //! \brief Tests if the automaton has a transition corresponding to the given location and event.
-    bool has_transition(const DiscreteLocation&, const DiscreteEvent&) const;
+    bool has_transition(DiscreteLocation, DiscreteEvent) const;
 
     //! \brief The set of events corresponding to a discrete transition.
-    Set<DiscreteEvent> transition_events(const DiscreteLocation&) const;
+    Set<DiscreteEvent> transition_events(DiscreteLocation) const;
     //! \brief The set of events corresponding to an invariant or time-can-progress predicate.
-    Set<DiscreteEvent> invariant_events(const DiscreteLocation&) const;
+    Set<DiscreteEvent> invariant_events(DiscreteLocation) const;
     //! \brief The set of events corresponding to a non-urgent action.
-    Set<DiscreteEvent> permissive_events(const DiscreteLocation&) const;
+    Set<DiscreteEvent> permissive_events(DiscreteLocation) const;
     //! \brief The set of events corresponding to an urgent action.
-    Set<DiscreteEvent> urgent_events(const DiscreteLocation&) const;
+    Set<DiscreteEvent> urgent_events(DiscreteLocation) const;
     //! \brief The set of events which prohibit further continuous evolution.
     //! Equal to the union of invariant_events and urgent_events.
-    Set<DiscreteEvent> blocking_events(const DiscreteLocation&) const;
+    Set<DiscreteEvent> blocking_events(DiscreteLocation) const;
 
     //! \brief The target location when \a event occurs in the \a source location.
-    DiscreteLocation target(const DiscreteLocation& source, const DiscreteEvent& event) const;
+    DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const;
     //@}
 
     //@{
@@ -532,33 +540,35 @@ class CompositeHybridAutomaton
 
 
     //! \brief The continuous variables which are defined in the location.
-    List<RealVariable> variables(const DiscreteLocation&) const;
+    List<RealVariable> variables(DiscreteLocation) const;
     //! \brief The continuous variables which are state variables in the location.
     //! The state variables are those defined by a differential equation i.e. the dotted variables.
-    List<RealVariable> state_variables(const DiscreteLocation&) const;
+    List<RealVariable> state_variables(DiscreteLocation) const;
     //! \brief The dependent continuous variables which are not state variables in the location.
     //! These variables are defined by algebraic equations.
-    List<RealVariable> auxiliary_variables(const DiscreteLocation&) const;
+    List<RealVariable> auxiliary_variables(DiscreteLocation) const;
 
     //! \brief The algebraic equations valid in the location, ordered so that the defining equation for a variable
     //! occurs before any equation using that variable.
-    List<RealAssignment> algebraic_assignments(const DiscreteLocation& location) const;
+    List<RealAssignment> algebraic_assignments(DiscreteLocation location) const;
     //! \brief The differential equations valid in the location.
-    List<DottedRealAssignment> differential_assignments(const DiscreteLocation& location) const;
+    List<DottedRealAssignment> differential_assignments(DiscreteLocation location) const;
     //! \brief The reset equations used when the \a event occurs in the \a source location.
-    List<PrimedRealAssignment> update_assignments(const DiscreteLocation& source, const DiscreteEvent& event) const;
+    List<PrimedRealAssignment> update_assignments(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The invariant (time-can-progress predicates) corresponding to the given \a event.
-    ContinuousPredicate invariant_predicate(const DiscreteLocation& location, const DiscreteEvent& event) const;
+    ContinuousPredicate invariant_predicate(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard (activation predicate) corresponding to the given \a event.
-    ContinuousPredicate guard_predicate( const DiscreteLocation& location, const DiscreteEvent& event) const;
+    ContinuousPredicate guard_predicate( DiscreteLocation location, DiscreteEvent event) const;
     //@}
 
 
-    VectorFunction output_function(const DiscreteLocation&) const;
-    VectorFunction dynamic_function(const DiscreteLocation&) const;
-    VectorFunction reset_function(const DiscreteLocation&, const DiscreteEvent&) const;
-    ScalarFunction invariant_function(const DiscreteLocation&, const DiscreteEvent&) const;
-    ScalarFunction guard_function(const DiscreteLocation&, const DiscreteEvent&) const;
+    VectorFunction output_function(DiscreteLocation) const;
+    VectorFunction dynamic_function(DiscreteLocation) const;
+    VectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
+    ScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
+    ScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
+
+    Grid grid(DiscreteLocation) const;
 
     //@{
     //! \name Methods for checking the validity of the automaton.
@@ -567,9 +577,9 @@ class CompositeHybridAutomaton
     //!
     //! Includes a check for algebraic dependencies, over-defined variables, under-defined variables, and
     //! variables which should be defined in a reset but are not.
-    void check_mode(const DiscreteLocation&) const;
+    void check_mode(DiscreteLocation) const;
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial location.
-    void check_reachable_modes(const DiscreteLocation&) const;
+    void check_reachable_modes(DiscreteLocation) const;
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial locations.
     void check_reachable_modes(const Set<DiscreteLocation>&) const;
     //@}
@@ -578,7 +588,7 @@ class CompositeHybridAutomaton
     //! \name Discrete reachability analysis.
 
     //! \brief Performs a discrete reachability analysis from the given initial location.
-    Set<DiscreteLocation> discrete_reachability(const DiscreteLocation&) const;
+    Set<DiscreteLocation> discrete_reachability(DiscreteLocation) const;
     //! \brief Performs a discrete reachability analysis from the given initial locations.
     Set<DiscreteLocation> discrete_reachability(const Set<DiscreteLocation>&) const;
     //@}

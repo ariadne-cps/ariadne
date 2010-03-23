@@ -2,7 +2,7 @@
  *            orbit.h
  *
  *  Copyright 2007  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file orbit.h
  *  \brief Orbits of dynamic systems
  */
@@ -38,6 +38,7 @@
 #include "numeric.h"
 #include "graphics_interface.h"
 #include "taylor_set.h"
+#include "hybrid_enclosure.h"
 
 
 
@@ -239,7 +240,7 @@ template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorImageSet
 template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorImageSet>& orb);
 
 template<class ES>
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& os, const Orbit< ES >& orb)
 {
     os << "Orbit(\n  initial=" << orb.initial()
@@ -250,8 +251,8 @@ operator<<(std::ostream& os, const Orbit< ES >& orb)
     return os;
 }
 
-template<> 
-std::ostream& 
+template<>
+std::ostream&
 operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
 
 

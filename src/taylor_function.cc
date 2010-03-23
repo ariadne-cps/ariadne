@@ -140,6 +140,7 @@ ScalarTaylorFunction ScalarTaylorFunction::variable(const Vector<Interval>& d, u
     return ScalarTaylorFunction(d,TaylorModel::scaling(d.size(),j,d[j]));
 }
 
+
 Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const Vector<Interval>& d, const Vector<Interval>& c)
 {
     ARIADNE_DEPRECATED("ScalarTaylorFunction::constants","Use VectorTaylorFunction::constant instead");

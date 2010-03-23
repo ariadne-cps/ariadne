@@ -37,6 +37,7 @@
 
 #include "tuple.h"
 
+#include "taylor_set.h"
 #include "hybrid_set.h"
 #include "hybrid_time.h"
 

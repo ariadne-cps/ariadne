@@ -553,6 +553,84 @@ MonolithicHybridAutomaton::grid() const
     return result;
 }
 
+Set<DiscreteEvent>
+MonolithicHybridAutomaton::urgent_events(DiscreteLocation source) const
+{
+    Set<DiscreteEvent> result;
+    for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
+        iter!=this->_transitions.end(); ++iter)
+    {
+        if(iter->source()==source && iter->urgency()==urgent) {
+            result.insert(iter->event());
+        }
+    }
+    return result;
+}
+
+Set<DiscreteEvent>
+MonolithicHybridAutomaton::permissive_events(DiscreteLocation source) const
+{
+    Set<DiscreteEvent> result;
+    for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
+        iter!=this->_transitions.end(); ++iter)
+    {
+        if(iter->source()==source && iter->urgency()==permissive) {
+            result.insert(iter->event());
+        }
+    }
+    return result;
+}
+
+Set<DiscreteEvent>
+MonolithicHybridAutomaton::invariant_events(DiscreteLocation location) const
+{
+    return this->mode(location)._invariants.keys();
+}
+
+
+Set<DiscreteEvent> MonolithicHybridAutomaton::blocking_events(DiscreteLocation location) const
+{
+    return join(this->urgent_events(location),this->invariant_events(location));
+}
+
+Set<DiscreteEvent> MonolithicHybridAutomaton::transition_events(DiscreteLocation source) const
+{
+    Set<DiscreteEvent> result;
+    for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
+        iter!=this->_transitions.end(); ++iter)
+    {
+        if(iter->source()==source) {
+            result.insert(iter->event());
+        }
+    }
+    return result;
+}
+
+VectorFunction
+MonolithicHybridAutomaton::dynamic_function(DiscreteLocation location) const
+{
+    return this->dynamic(location);
+}
+
+VectorFunction
+MonolithicHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const
+{
+    return this->reset(source,event);
+}
+
+ScalarFunction
+MonolithicHybridAutomaton::guard_function(DiscreteLocation source, DiscreteEvent event) const
+{
+    return this->guards(source)[event];
+}
+
+ScalarFunction
+MonolithicHybridAutomaton::invariant_function(DiscreteLocation source, DiscreteEvent event) const
+{
+    return this->invariants(source)[event];
+}
+
+
 std::ostream&
 operator<<(std::ostream& os, const MonolithicHybridAutomaton& ha)
 {

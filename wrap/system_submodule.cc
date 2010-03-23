@@ -84,7 +84,7 @@ template<class T> uint __hash__(const T&);
 template<> uint __hash__<DiscreteEvent>(const DiscreteEvent& e) {
     return reinterpret_cast<const ushort&>(e.name().c_str()[0]); }
 template<> uint __hash__<DiscreteLocation>(const DiscreteLocation& q) {
-    return reinterpret_cast<const ushort&>(to_string(q)); }
+    return reinterpret_cast<const ushort&>(to_string(q).c_str()[0]); }
 
 
 RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }

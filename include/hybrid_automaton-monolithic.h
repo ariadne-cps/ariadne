@@ -501,6 +501,15 @@ class MonolithicHybridAutomaton
     //! \brief The natural grid to use in the over all locations.
     HybridGrid grid() const;
 
+    virtual Set<DiscreteEvent> urgent_events(DiscreteLocation) const;
+    virtual Set<DiscreteEvent> permissive_events(DiscreteLocation) const;
+    virtual Set<DiscreteEvent> blocking_events(DiscreteLocation) const;
+    virtual Set<DiscreteEvent> invariant_events(DiscreteLocation) const;
+    virtual Set<DiscreteEvent> transition_events(DiscreteLocation) const;
+    virtual VectorFunction dynamic_function(DiscreteLocation) const;
+    virtual VectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
+    virtual ScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
+    virtual ScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
     //@}
 
 };

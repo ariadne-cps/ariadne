@@ -98,6 +98,10 @@ inline bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     return result;
 }
 
+inline bool operator!=(const DiscreteLocation& q1, const DiscreteLocation& q2) {
+    return !(q1==q2);
+}
+
 inline bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     return q1._valuation < q2._valuation;
 }

@@ -35,9 +35,7 @@
 #include "taylor_set.h"
 #include "affine_set.h"
 
-#include "taylor_function.h"
-#include "discrete_event.h"
-
+#include "discrete_location.h"
 #include "hybrid_set.h"
 
 #include "utilities.h"
@@ -364,7 +362,7 @@ void export_constrained_image_set()
 void export_hybrid_box()
 {
     class_<HybridBox> hybrid_box_class("HybridBox",init<HybridBox>());
-    hybrid_box_class.def(init<AtomicDiscreteLocation,Box>());
+    hybrid_box_class.def(init<DiscreteLocation,Box>());
     hybrid_box_class.def("location",&HybridBox::location,return_value_policy<copy_const_reference>());
     hybrid_box_class.def("continuous_state_set",&HybridBox::continuous_state_set,return_value_policy<copy_const_reference>());
     hybrid_box_class.def(self_ns::str(self));
@@ -372,9 +370,11 @@ void export_hybrid_box()
 
 void export_hybrid_taylor_set()
 {
+    typedef HybridBasicSet<TaylorImageSet> HybridTaylorImageSet;
+
     class_<HybridTaylorImageSet> hybrid_taylor_set_class("HybridTaylorImageSet",init<HybridTaylorImageSet>());
-    hybrid_taylor_set_class.def(init<AtomicDiscreteLocation,Box>());
-    hybrid_taylor_set_class.def(init<AtomicDiscreteLocation,TaylorImageSet>());
+    hybrid_taylor_set_class.def(init<DiscreteLocation,Box>());
+    hybrid_taylor_set_class.def(init<DiscreteLocation,TaylorImageSet>());
     hybrid_taylor_set_class.def(self_ns::str(self));
 
     implicitly_convertible<HybridBox,HybridTaylorImageSet>();
@@ -386,8 +386,8 @@ void export_hybrid_constrained_image_set()
 
     class_<HybridConstrainedImageSet>
         hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
-    hybrid_constrained_image_set_class.def(init<AtomicDiscreteLocation,Box>());
-    //hybrid_constrained_image_set_class.def(init<AtomicDiscreteLocation,ConstrainedImageSet>());
+    hybrid_constrained_image_set_class.def(init<DiscreteLocation,Box>());
+    //hybrid_constrained_image_set_class.def(init<DiscreteLocation,ConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(self_ns::str(self));
 
     implicitly_convertible<HybridBox,HybridConstrainedImageSet>();
@@ -412,6 +412,7 @@ void geometry_submodule() {
     export_hybrid_taylor_set();
     export_hybrid_constrained_image_set();
 
+    typedef HybridBasicSet<TaylorImageSet> HybridTaylorImageSet;
     to_python< ListSet<TaylorImageSet> >();
     to_python< ListSet<HybridTaylorImageSet> >();
 }

@@ -118,8 +118,8 @@ class InteriorPointSolver {
 
 
 //! \relates SimplexSolver \brief The type of variable; lower bounded, upper bounded, or basic.
-enum VariableType { LOWER=-1, BASIS=0, UPPER=+1 };
-std::ostream& operator<<(std::ostream& os, VariableType t);
+enum Slackness { LOWER=-1, BASIS=0, UPPER=+1 };
+std::ostream& operator<<(std::ostream& os, Slackness t);
 
 //! \ingroup OptimisationModule
 //! Solver for linear programming problems using the simplex algorithm.
@@ -144,14 +144,14 @@ class SimplexSolver {
     //! Returns the optimal vector. Throws an error if the problem is infeasible.
     //! Uses starting variable types \a vt.
     Vector<X>
-    optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt);
+    optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt);
 
     //! \ingroup LinearProgrammingModule
     //! Solve the linear programming problem \f$\min cx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
     //! Returns the optimal vector. Throws an error if the problem is infeasible.
     //! Uses starting variable types vt, permutation p and inverse basic matrix B.
     Vector<X>
-    optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt, array<size_t>& p, Matrix<X>& B);
+    optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B);
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$0 \leq x\f$ and \f$Ax=b\f$.
@@ -171,7 +171,7 @@ class SimplexSolver {
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
     Vector<X>
-    feasible_point(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt, array<size_t>& p, Matrix<X>& B);
+    feasible_point(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B);
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
@@ -179,7 +179,7 @@ class SimplexSolver {
     //! The values of \a p and \a B corresponding to \a vt may be given.
     //! The values of \a x and \a y are output parameters, giving access to the final primal and dual variables.
     tribool
-    constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y);
+    constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y);
 
 
 
@@ -187,17 +187,17 @@ class SimplexSolver {
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
     tribool
-    verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const array<VariableType>& vt);
+    verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const array<Slackness>& vt);
 
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
     tribool
-    verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<VariableType>& vt);
+    verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<Slackness>& vt);
 
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
     tribool
-    verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType>& vt);
+    verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt);
 
     tribool
     constrained_feasible_by_enumeration(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
@@ -215,14 +215,14 @@ class SimplexSolver {
 
     //! \ingroup LinearProgrammingModule
     //! Perform a single step of the standard linear programming problem, updating the variable type array \a vt, the ordered variable array \a p, the inverse basis matrix \a B and the variables \a x.
-    bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
+    bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm, choosing basic variable \a s to exit the basis.
     //! The index s is with respect to the list of basic variables, and not the original variable list.
     //! The function to optimize is not needed for this procedure.
     //! The variable which left the basis is the new p[s]
-    void lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s);
+    void lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s);
 
     //! \ingroup LinearProgrammingModule
     //! Compute the inverse of the matrix \a A<sub>B</sub> for basic variables given by the first m items of a p.
@@ -233,13 +233,13 @@ class SimplexSolver {
 
     //! \ingroup LinearProgrammingModule
     //! Compute primal variables \a x for the constrained linear programming problem.
-    template<class XX> Vector<XX> compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType>& vt, const array<size_t>& p, const Matrix<XX>& B);
+    template<class XX> Vector<XX> compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B);
 
 
   private:
     tribool _primal_feasible(const Matrix<X>& A, const Vector<X>& b, array<size_t>& p, Matrix<X>& B);
     tribool _dual_feasible(const Matrix<X>& A, const Vector<X>& c, array<size_t>& p, Matrix<X>& B);
-    tribool _constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
+    tribool _constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
 
 
 };

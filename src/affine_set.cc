@@ -51,7 +51,7 @@ struct LinearProgram {
     Vector<X> c;
     Vector<X> l;
     Vector<X> u;
-    array<VariableType> vt;
+    array<Slackness> vt;
     array<size_t> p;
     Matrix<X> B;
     Vector<X> x;
@@ -569,7 +569,7 @@ AffineSet::boundary(uint xc, uint yc) const
 
     Matrix<Float> B=Matrix<Float>::identity(m);
 
-    array<VariableType> vt(n+m);
+    array<Slackness> vt(n+m);
     for(uint j=0; j!=n; ++j) { vt[j]=LOWER; }
     for(uint i=0; i!=m; ++i) { vt[n+i]=BASIS; }
 
@@ -584,7 +584,7 @@ AffineSet::boundary(uint xc, uint yc) const
 
     int MAX_STEPS=10;
     int STEPS=0;
-    array<VariableType> initial_variable_type=vt;
+    array<Slackness> initial_variable_type=vt;
 
     Vector<Float> x=prod(G,e)+h;
     Vector<Float> v(2,0.0,-1.0);

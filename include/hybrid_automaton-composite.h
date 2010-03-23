@@ -56,6 +56,23 @@ class ScalarFunction;
 class VectorFunction;
 class Grid;
 
+//! \brief Type of a  discrete location of an atomic hybrid automaton.
+class AtomicDiscreteLocation {
+  public:
+    AtomicDiscreteLocation() : _id("q?") { }
+    AtomicDiscreteLocation(int n) : _id(std::string("q"+to_str(n))) { }
+    AtomicDiscreteLocation(const std::string& s) : _id(s) { }
+    std::string name() const { return this->_id; }
+    bool operator==(const AtomicDiscreteLocation& q) const { return this->_id==q._id; }
+    bool operator!=(const AtomicDiscreteLocation& q) const { return this->_id!=q._id; }
+    bool operator<=(const AtomicDiscreteLocation& q) const { return this->_id<=q._id; }
+    bool operator>=(const AtomicDiscreteLocation& q) const { return this->_id>=q._id; }
+    bool operator< (const AtomicDiscreteLocation& q) const { return this->_id< q._id; }
+    bool operator> (const AtomicDiscreteLocation& q) const { return this->_id> q._id; }
+    friend std::ostream& operator<<(std::ostream& os, const AtomicDiscreteLocation& q);
+  private:
+    std::string _id;
+};
 
 /*! \brief A discrete transition of a hybrid automaton, representing an instantaneous
  * jump from one discrete mode to another, governed by an activation set and a reset map.
@@ -360,6 +377,12 @@ class AtomicHybridAutomaton
     //! \brief Returns the hybrid automaton's name.
     const String& name() const;
 
+    //! \brief Returns the variable containing the hybrid automaton's location.
+    operator StringVariable() const;
+   
+    //! \brief A DiscreteLocation giving the state of the hybrid automaton.
+    DiscreteLocation operator==(AtomicDiscreteLocation location) const;
+    
     //! \brief The set of discrete locations.
     Set<AtomicDiscreteLocation> locations() const;
 

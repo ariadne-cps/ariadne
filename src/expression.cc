@@ -280,7 +280,8 @@ template<class R, class Op=Operator, class A=R> class MultiaryExpression
 
 bool operator==(const Expression<Tribool>& e, bool v) {
     const ConstantExpression<Tribool>* expr = dynamic_cast<const ConstantExpression<Tribool>*>(e._raw_pointer());
-    return expr && expr->value()==v;
+    // No shortcircuit of return since right-hand side is a tribool
+    return expr && bool(expr->value()==v);
 }
 
 

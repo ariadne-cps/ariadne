@@ -29,103 +29,60 @@
 #define ARIADNE_DISCRETE_LOCATION_H
 
 #include "container.h"
-#include "variables.h"
 
 namespace Ariadne {
 
 enum Urgency { urgent, permissive };
 
-typedef Variable<String> StringVariable;
+template<class T> class List;
 
-class IncompleteLocationError : public std::runtime_error {
+//! \brief Type of a  discrete location of an atomic hybrid automaton.
+class AtomicDiscreteLocation {
   public:
-      IncompleteLocationError(const std::string& what) : std::runtime_error(what) { }
+    AtomicDiscreteLocation() : _id("q?") { }
+    AtomicDiscreteLocation(int n) : _id(std::string("q"+to_str(n))) { }
+    AtomicDiscreteLocation(const std::string& s) : _id(s) { }
+    std::string name() const { return this->_id; }
+    bool operator==(const AtomicDiscreteLocation& q) const { return this->_id==q._id; }
+    bool operator!=(const AtomicDiscreteLocation& q) const { return this->_id!=q._id; }
+    bool operator<=(const AtomicDiscreteLocation& q) const { return this->_id<=q._id; }
+    bool operator>=(const AtomicDiscreteLocation& q) const { return this->_id>=q._id; }
+    bool operator< (const AtomicDiscreteLocation& q) const { return this->_id< q._id; }
+    bool operator> (const AtomicDiscreteLocation& q) const { return this->_id> q._id; }
+    friend std::ostream& operator<<(std::ostream& os, const AtomicDiscreteLocation& q);
+  private:
+    std::string _id;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const AtomicDiscreteLocation& q) {
+    return os << q._id; }
 
 //! \brief Type of a  discrete location of a hybrid system.
+//! Currently implemented as a list of String elements, but this may change...
 class DiscreteLocation
+    : public List<AtomicDiscreteLocation>
 {
   public:
-    DiscreteLocation() { }
-    explicit DiscreteLocation(const int& n) {
-        this->_valuation.insert(StringVariable("q"),to_string(n)); }
-    explicit DiscreteLocation(const std::string& s) {
-        this->_valuation.insert(StringVariable("q"),s); }
-    void insert(const StringVariable& v, const String& s) {
-        if(_valuation.has_key(v)) { ARIADNE_THROW(std::runtime_error,"DiscreteLocation::insert","Location "<<*this<<" already has variable "<<v<<"\n"); }
-        this->_valuation.insert(v,s); }
-    void adjoin(const DiscreteLocation& q) {
-        for(Map<StringVariable,String>::const_iterator iter=q._valuation.begin(); iter!=q._valuation.end(); ++iter) {
-            this->insert(iter->first,iter->second); } }
-    bool has_key(const StringVariable& v) { return this->_valuation.has_key(v); }
-    const String& operator[](const StringVariable& v) const { return this->_valuation[v]; }
-    friend bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2);
-    friend bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2);
-    friend DiscreteLocation operator,(const DiscreteLocation& os, const DiscreteLocation& q);
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteLocation& q);
-  private:
-    Map<StringVariable,String> _valuation;
+    DiscreteLocation() : List<AtomicDiscreteLocation>() { }
+    explicit DiscreteLocation(int n): List<AtomicDiscreteLocation>(1u,AtomicDiscreteLocation(n)) { }
+    explicit DiscreteLocation(const std::string& s) : List<AtomicDiscreteLocation>(1u,AtomicDiscreteLocation(s)) { }
+    DiscreteLocation(const AtomicDiscreteLocation& q) : List<AtomicDiscreteLocation>(1u,q) { }
+    DiscreteLocation(const List<AtomicDiscreteLocation>& l) : List<AtomicDiscreteLocation>(l) { }
 };
 
-inline bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    tribool result=true;
-    Map<StringVariable,String>::const_iterator q1iter=q1._valuation.begin();
-    Map<StringVariable,String>::const_iterator q2iter=q2._valuation.begin();
-    while(q1iter!=q1._valuation.end() && q2iter!=q2._valuation.end()) {
-        if(q1iter==q1._valuation.end() || q2iter==q2._valuation.end()) {
-            result=indeterminate;
-            break;
-        }
-        if(q1iter->first==q2iter->first) {
-            if(q1iter->second != q2iter->second) {
-                return false;
-            }
-            ++q1iter;
-            ++q2iter;
-        } else {
-            result=indeterminate;
-            if(q1iter->first < q2iter->first) {
-                ++q1iter;
-            } else {
-                ++q2iter;
-            }
-        }
-    }
-    if(definitely(result)) {
-        return true;
-    }
-    ARIADNE_THROW(IncompleteLocationError,"DiscreteLocation::operator==","q1="<<q1<<" and q2="<<q2<<" cannot be compared.");
-    return result;
-}
+inline DiscreteLocation operator,(const AtomicDiscreteLocation& q1, const AtomicDiscreteLocation& q2) {
+    DiscreteLocation loc; loc.append(q1); loc.append(q2); return loc; }
 
-inline bool operator!=(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    return !(q1==q2);
-}
 
-inline bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    return q1._valuation < q2._valuation;
-}
-
-inline DiscreteLocation operator%=(const StringVariable& v, const String& s) {
-    DiscreteLocation loc; loc.insert(v,s); return loc;
-}
-
-inline DiscreteLocation operator,(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    DiscreteLocation r(q1);
-    for(Map<StringVariable,String>::const_iterator iter=q2._valuation.begin(); iter!=q2._valuation.end(); ++iter) {
-        r.insert(iter->first,iter->second);
-    }
-    return r;
-}
-
-inline std::ostream& operator<<(std::ostream& os, const DiscreteLocation& q) {
-    return os << q._valuation;
+template<class A> inline void serialize(A& archive, AtomicDiscreteLocation& state, const uint version) {
+    std::string& id=reinterpret_cast<std::string&>(state);
+    archive & id;
 }
 
 template<class A> inline void serialize(A& archive, DiscreteLocation& location, const uint version) {
-    archive & location._valuation;
+    std::vector<AtomicDiscreteLocation>& vec=static_cast<std::vector<AtomicDiscreteLocation>&>(location);
+    archive & vec;
 }
-
 
 } //namespace Ariadne
 

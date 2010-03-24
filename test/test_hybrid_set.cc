@@ -61,7 +61,6 @@ TestHybridSet::test_hybrid_image_set()
     Matrix<Float> A=Matrix<Float>::identity(2);
     Vector<Float> b1=Vector<Float>::unit(2,0);
     Vector<Float> b2=Vector<Float>::unit(2,1);
-    StringVariable var("q");
     DiscreteLocation loc1(123);
     DiscreteLocation loc2(105);
     ImageSet ims1(bx,VectorAffineFunction(A,b1));

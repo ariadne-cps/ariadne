@@ -183,61 +183,7 @@ class Orbit
     ESL _final;
 };
 
-template<>
-class Orbit<TaylorImageSet>
-{
-    class Data;
-    typedef TaylorImageSetList list_set_const_iterator;
-  public:
-    typedef TaylorImageSet EnclosureType;
-    typedef TaylorImageSetList EnclosureListType;
-
-    Orbit(const TaylorImageSet&);
-    void adjoin_reach(const TaylorImageSet& set);
-    void adjoin_intermediate(const TaylorImageSet& set);
-    void adjoin_final(const TaylorImageSet& set);
-
-    void adjoin_reach(const TaylorImageSetList& set);
-    void adjoin_intermediate(const TaylorImageSetList& set);
-    void adjoin_final(const TaylorImageSetList& set);
-
-    TaylorImageSet const& initial() const;
-    TaylorImageSetList const& reach() const;
-    TaylorImageSetList const& intermediate() const;
-    TaylorImageSetList const& final() const;
-  private:
-    boost::shared_ptr<Data> _data;
-};
-
-template<>
-class Orbit<HybridTaylorImageSet>
-{
-    class Data;
-    typedef HybridTaylorImageSetList list_set_const_iterator;
-  public:
-    typedef HybridTaylorImageSet EnclosureType;
-    typedef HybridTaylorImageSetList EnclosureListType;
-
-    Orbit(const HybridTaylorImageSet&);
-    void adjoin_reach(const HybridTaylorImageSet& set);
-    void adjoin_intermediate(const HybridTaylorImageSet& set);
-    void adjoin_final(const HybridTaylorImageSet& set);
-
-    void adjoin_reach(const HybridTaylorImageSetList& set);
-    void adjoin_intermediate(const HybridTaylorImageSetList& set);
-    void adjoin_final(const HybridTaylorImageSetList& set);
-
-    HybridTaylorImageSet const& initial() const;
-    HybridTaylorImageSetList const& reach() const;
-    HybridTaylorImageSetList const& intermediate() const;
-    HybridTaylorImageSetList const& final() const;
-  private:
-    boost::shared_ptr<Data> _data;
-};
-
 template<class ES> std::ostream& operator<<(std::ostream& os, const Orbit< ES >& orb);
-template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorImageSet>& orb);
-template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorImageSet>& orb);
 
 template<class ES>
 std::ostream&
@@ -255,7 +201,11 @@ template<>
 std::ostream&
 operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
 
-
+template<class ES> void draw(FigureInterface& figure, const Orbit<ES>& orbit) {
+    draw(figure,orbit.reach());
+    draw(figure,orbit.initial());
+    draw(figure,orbit.final());
+}
 
 } // namespace Ariadne
 

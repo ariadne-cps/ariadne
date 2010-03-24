@@ -72,13 +72,13 @@ TestContraintHybridEvolver::affine_flow_system() {
 
     RealVariable x("x");
     RealVariable y("y");
-    AtomicHybridAutomaton affine("Affine Flow Automaton");
     AtomicDiscreteLocation upwards("upwards");
     AtomicDiscreteLocation downwards("downwards");
     DiscreteEvent changeup("changeup");
     DiscreteEvent changedown("changedown");
     DiscreteEvent block("block");
 
+    AtomicHybridAutomaton affine("Affine Flow Automaton");
     affine.new_mode(upwards,(dot(x)=1.0,dot(y)=1.0));
     affine.new_mode(downwards,(dot(x)=1.0,dot(y)=-1.0));
 
@@ -110,7 +110,7 @@ TestContraintHybridEvolver::test_affine_flow_system() const
 
 
     AtomicDiscreteLocation upwards("upwards");
-    DiscreteLocation initial_location=system.location(upwards);
+    DiscreteLocation initial_location(upwards);
     double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
     HybridBox initial_set(initial_location,initial_box);

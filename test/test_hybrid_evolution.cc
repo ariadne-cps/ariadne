@@ -122,7 +122,7 @@ TestContraintHybridEvolver::test_affine_flow_system() const
     ARIADNE_TEST_PRINT(evolution_time);
 
     ConstrainedImageSetHybridEvolver::OrbitType orbit=evolver.orbit(system,initial_enclosure,evolution_time);
-    //ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_PRINT(orbit);
 
     std::cerr<<"plotting... ";
     plot("test_constraint_hybrid_evolver-affine",Box(2, -1.0,11.0, -6.0, 6.0), Colour(0.75,0.75,0.75),Box(2,-1.0,11.0,-2.0,-1.5),Colour(0.25,0.25,0.5),orbit.reach(),Colour(0.5,0.5,0.75),orbit.final(),Colour(0.5,0.5,0.75),orbit.initial());

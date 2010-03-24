@@ -207,6 +207,10 @@ template<class ES> void draw(FigureInterface& figure, const Orbit<ES>& orbit) {
     draw(figure,orbit.final());
 }
 
+template<class ES> FigureInterface& operator<<(FigureInterface& figure, const Orbit<ES>& orbit) {
+    draw(figure,orbit); return figure;
+}
+
 } // namespace Ariadne
 
 #endif // ARIADNE_ORBIT_H

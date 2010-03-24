@@ -30,10 +30,10 @@ template<class X, class C>
 X sigmoid(const X& x, const C& t, const C& a)
 {
     X r=x;
-    r-=t;
-    r*=(-a);
+    r=r-t;
+    r=r*(-a);
     r=Ariadne::exp(r);
-    r+=1;
+    r=r+1;
     r=Ariadne::rec(r);
     return r;
 }

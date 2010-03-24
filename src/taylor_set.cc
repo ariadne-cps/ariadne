@@ -1432,6 +1432,7 @@ GridTreeSet TaylorConstrainedImageSet::affine_outer_approximation(const Grid& gr
 TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<Interval>& subdomain) const
 {
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
+    ARIADNE_ASSERT_MSG(subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
     TaylorConstrainedImageSet result(*this);
     result._function=Ariadne::restrict(result._function,subdomain);
     ScalarTaylorFunction new_constraint;
@@ -1479,7 +1480,7 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
     }
 
     for(uint n=0; n!=subdomains.size(); ++n) {
-        this->restriction(subdomains[n]).affine_approximation().draw(canvas);
+        this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
     }
 };
 
@@ -1587,6 +1588,59 @@ TaylorConstrainedImageSet::affine_approximation() const
     AffineSet result(G,h);
 
     Vector<Float> a(np);
+    Float b;
+
+    for(const_iterator iter=set._constraints.begin();
+            iter!=set._constraints.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        b=-constraint.model().value();
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        result.new_inequality_constraint(a,b);
+    }
+
+    for(const_iterator iter=set._equations.begin();
+            iter!=set._equations.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        b=-constraint.model().value();
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        result.new_equality_constraint(a,b);
+    }
+    return result;
+}
+
+AffineSet
+TaylorConstrainedImageSet::affine_over_approximation() const
+{
+    this->_check();
+    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+
+    const uint nx=this->dimension();
+    const uint np=this->number_of_parameters();
+
+    TaylorConstrainedImageSet set(*this);
+
+    if(set._equations.size()>0) {
+        set._solve_zero_constraints();
+    }
+    this->_check();
+
+    for(uint i=0; i!=nx; ++i) {
+        const_cast<TaylorModel&>(set._function.models()[i]).truncate(1u);
+    }
+
+    Vector<Float> h(nx);
+    Matrix<Float> G(nx,np+nx);
+    for(uint i=0; i!=nx; ++i) {
+        ScalarTaylorFunction component=set._function[i];
+        h[i]=component.model().value();
+        for(uint j=0; j!=np; ++j) {
+            G[i][j]=component.model().gradient(j);
+        }
+        G[i][np+i]=component.model().error();
+    }
+    AffineSet result(G,h);
+
+    Vector<Float> a(np+nx);
     Float b;
 
     for(const_iterator iter=set._constraints.begin();

@@ -24,6 +24,7 @@
 #include <cstdarg>
 #include "real.h"
 #include "expression.h"
+#include "orbit.h"
 #include "hybrid_automaton.h"
 #include "hybrid_evolver.h"
 #include "hybrid_set.h"

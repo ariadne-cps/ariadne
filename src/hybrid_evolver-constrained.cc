@@ -148,6 +148,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     VectorTaylorFunction flow_model=integrator.flow(dynamic,flow_spacial_domain,maximum_time);
     ARIADNE_LOG(4,"twosided_flow_model:"<<flow_model<<"\n");
     Box flow_domain=Box(flow_model.domain());
+    step_size=flow_domain[n].upper();
 
     // Computed flowed set
     flow_domain[n]=Interval(0,step_size);
@@ -166,8 +167,10 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     Set<DiscreteEvent> invariant_and_guard_events=join(blocking_events,urgent_events);
     for(event_iterator iter=invariant_and_guard_events.begin(); iter!=invariant_and_guard_events.end(); ++iter) {
         DiscreteEvent const& event=*iter;
+        ARIADNE_LOG(4,"    event="<<event<<" ");
         ScalarFunction const& constraint=system.invariant_function(starting_location,event);
         ScalarFunction derivative=lie_derivative(constraint,dynamic);
+        ARIADNE_LOG(4,"constraint="<<constraint<<"\n");
         reached_set.new_invariant(event,constraint,derivative);
     }
     ARIADNE_LOG(4,"reached_set:"<<reached_set<<"\n");

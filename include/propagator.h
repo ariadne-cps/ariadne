@@ -131,6 +131,8 @@ template<class X> inline Propagator<X> operator+(const Propagator<X>& a1, const 
 template<class X> inline Propagator<X> operator-(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(SUB,a1,a2); }
 template<class X> inline Propagator<X> operator*(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(MUL,a1,a2); }
 template<class X> inline Propagator<X> operator/(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(DIV,a1,a2); }
+template<class X> inline Propagator<X> min(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(MIN,a1,a2); }
+template<class X> inline Propagator<X> max(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(MAX,a1,a2); }
 template<class X> inline Propagator<X> neg(const Propagator<X>& a) { return Propagator<X>(NEG,a); }
 template<class X> inline Propagator<X> rec(const Propagator<X>& a) { return Propagator<X>(REC,a); }
 template<class X> inline Propagator<X> sqr(const Propagator<X>& a) { return Propagator<X>(SQR,a); }
@@ -184,6 +186,8 @@ Propagator<X>& Propagator<X>::assign(const ValuationType& x)
         case SUB: value()=a1.assign(x).value()-a2.assign(x).value(); break;
         case MUL: value()=a1.assign(x).value()*a2.assign(x).value(); break;
         case DIV: value()=a1.assign(x).value()/a2.assign(x).value(); break;
+        case MIN: value()=min(a1.assign(x).value(),a2.assign(x).value()); break;
+        case MAX: value()=max(a1.assign(x).value(),a2.assign(x).value()); break;
         case POS: value()=a1.assign(x).value(); break;
         case NEG: value()=-a1.assign(x).value(); break;
         case REC: value()=rec(a1.assign(x).value()); break;
@@ -216,6 +220,8 @@ Propagator<X>& Propagator<X>::propagate(Vector<X>& x)
         case SUB: restrict(a1.value(),a2.value()+v0); restrict(a2.value(),a1.value()-v0); break;
         case MUL: restrict(a1.value(),v0/a2.value()); restrict(a2.value(),v0/a1.value()); break;
         case DIV: restrict(a1.value(),a2.value()*v0); restrict(a2.value(),a1.value()/v0); break;
+        case MIN: restrict(a1.value(),min(v0,a2.value())); restrict(a2.value(),min(v0,a1.value())); break;
+        case MAX: restrict(a1.value(),max(v0,a2.value())); restrict(a2.value(),max(v0,a1.value())); break;
         case POS: restrict(a1.value(),v0); break;
         case NEG: restrict(a1.value(),neg(v0)); break;
         case REC: restrict(a1.value(),rec(v0)); break;

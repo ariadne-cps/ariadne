@@ -131,6 +131,7 @@ template<class X> inline Propagator<X> operator+(const Propagator<X>& a1, const 
 template<class X> inline Propagator<X> operator-(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(SUB,a1,a2); }
 template<class X> inline Propagator<X> operator*(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(MUL,a1,a2); }
 template<class X> inline Propagator<X> operator/(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(DIV,a1,a2); }
+template<class X> inline Propagator<X> pow(const Propagator<X>& a1, const int& n2) { return Propagator<X>(POW,a1,n2); }
 template<class X> inline Propagator<X> min(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(MIN,a1,a2); }
 template<class X> inline Propagator<X> max(const Propagator<X>& a1, const Propagator<X>& a2) { return Propagator<X>(MAX,a1,a2); }
 template<class X> inline Propagator<X> neg(const Propagator<X>& a) { return Propagator<X>(NEG,a); }

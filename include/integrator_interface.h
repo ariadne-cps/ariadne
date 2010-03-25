@@ -49,6 +49,8 @@ class IntegratorInterface
     //! \brief Virtual destructor.
     virtual ~IntegratorInterface() { };
 
+    /*! \brief Make a dynamically-allocated copy. */
+    virtual IntegratorInterface* clone() const = 0;
 
     //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt.
     virtual Pair<Float,IVector> flow_bounds(const VectorFunction& vector_field,

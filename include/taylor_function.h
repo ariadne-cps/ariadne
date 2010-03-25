@@ -589,6 +589,10 @@ VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>
 VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 VectorTaylorFunction flow(const VectorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 VectorTaylorFunction parameterised_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
+Float norm(const ScalarTaylorFunction& f);
+Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
+Float distance(const VectorTaylorFunction& f1, const VectorFunction& f2);
+
 
 ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
@@ -853,6 +857,8 @@ VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFu
 VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
 VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
 VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
+
+Float norm(const VectorTaylorFunction& f);
 
 std::ostream& operator<<(std::ostream&, const VectorTaylorFunction&);
 

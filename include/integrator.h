@@ -71,6 +71,8 @@ class TaylorIntegrator
   public:
     TaylorIntegrator(uint to) : _spacial_order(1), _temporal_order(to), _error(1e-16) { }
 
+    virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }
+
     uint temporal_order() const { return this->_temporal_order; }
 
     virtual VectorTaylorFunction flow(const VectorFunction& vector_field,
@@ -80,7 +82,7 @@ class TaylorIntegrator
 
     using IntegratorBase::flow;
 
-  private:
+  public:
     uint _spacial_order;
     uint _temporal_order;
     double _error;

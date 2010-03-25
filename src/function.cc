@@ -199,7 +199,7 @@ template<class Op> struct UnaryFunctionBody
 };
 
 
-//! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
+
 template<class Op> struct BinaryFunctionBody
     : ScalarFunctionTemplate< BinaryFunctionBody<Op> >
 {
@@ -230,6 +230,37 @@ template<class Op> struct BinaryFunctionBody
     Op _op;
     ScalarFunction _arg1;
     ScalarFunction _arg2;
+};
+
+
+// \brief The power function \f$(x,n)\mapsto x^n\f$.
+template<> struct BinaryFunctionBody<Pow>
+    : ScalarFunctionTemplate< BinaryFunctionBody<Pow> >
+{
+  public:
+    BinaryFunctionBody(const Pow& op, const ScalarFunction& arg1, const Int& arg2)
+        : _op(op), _arg1(arg1), _arg2(arg2) {  }
+    virtual BinaryFunctionBody<Pow>* clone() const { return new BinaryFunctionBody<Pow>(*this); }
+    virtual SizeType argument_size() const {
+        return this->_arg1.argument_size(); }
+
+    virtual ScalarFunction derivative(uint j) const {
+        if(_arg2==0) { return ScalarFunction::constant(this->argument_size(),0.0); }
+        if(_arg2==1) { return _arg1.derivative(j); }
+        if(_arg2==2) { return 2*_arg1.derivative(j)*_arg1; }
+        return _arg2*_arg1.derivative(j)*pow(_arg1,_arg2-1);
+    }
+
+    virtual std::ostream& repr(std::ostream& os) const {
+        return os << "pow(" << _arg1._raw_pointer() << "," << _arg2 << ")"; }
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << "F["<<this->argument_size()<<"]("<< this <<")"; }
+
+    template<class R, class A> void _compute(R& r, const A& x) const { r=pow(_arg1.evaluate(x),_arg2); }
+
+    Pow _op;
+    ScalarFunction _arg1;
+    Int _arg2;
 };
 
 
@@ -777,6 +808,10 @@ template<class Op> inline
 ScalarFunction make_binary_function(Op op, const ScalarFunction& f1, const ScalarFunction& f2) {
     return ScalarFunction(new BinaryFunctionBody<Op>(op,f1,f2)); }
 
+inline
+ScalarFunction make_binary_function(Pow op, const ScalarFunction& f1, const Int& n2) {
+    return ScalarFunction(new BinaryFunctionBody<Pow>(op,f1,n2)); }
+
 
 ScalarFunction operator+(const ScalarFunction& f)
 {
@@ -933,7 +968,7 @@ ScalarFunction pow(const ScalarFunction& f, Nat m)
     if(p) { return ScalarFunction(pow(p->_polynomial,m)); }
     const ScalarExpressionFunctionBody* e=dynamic_cast<const ScalarExpressionFunctionBody*>(f.pointer());
     if(e) { return ScalarFunction(pow(e->_expression,m),e->_space); }
-    ARIADNE_FAIL_MSG("Cannot compute power of "<<f<<" and "<<m<<"\n");
+    return make_binary_function(Pow(),f,m);
 }
 
 
@@ -943,7 +978,7 @@ ScalarFunction pow(const ScalarFunction& f, Int n)
     if(p && n>=0) { return ScalarFunction(pow(p->_polynomial,Nat(n))); }
     const ScalarExpressionFunctionBody* e=dynamic_cast<const ScalarExpressionFunctionBody*>(f.pointer());
     if(e) { return ScalarFunction(pow(e->_expression,n),e->_space); }
-    ARIADNE_FAIL_MSG("Cannot compute power of "<<f<<" and "<<n<<"\n");
+    return make_binary_function(Pow(),f,n);
 }
 
 ScalarFunction rec(const ScalarFunction& f) {

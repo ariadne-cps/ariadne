@@ -197,8 +197,10 @@ struct Div {
     template<class T> T operator()(const T& a1, const T& a2) const { return a1/a2; }
     Operator code() const { return DIV; } };
 
-//struct Pow { template<class T, class N> T operator()(const T& a, const N& n) const { return Ariadne::pow(a,n); } };
-struct Pow { Pow(int n) : n(n) { } template<class T> T operator()(const T& a) const { return Ariadne::pow(a,n); } int n; };
+struct Pow {
+    template<class T, class N> T operator()(const T& a, const N& n) const { return pow(a,n); }
+    Operator code() const { return DIV; } };
+//struct Pow { Pow(int n) : n(n) { } template<class T> T operator()(const T& a) const { return Ariadne::pow(a,n); } int n; };
 
 struct Neg {
     template<class T> T operator()(const T& a) const { return neg(a); }

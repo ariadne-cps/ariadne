@@ -68,8 +68,8 @@ class IntegratorWrapper
   : public IntegratorInterface, public wrapper< IntegratorInterface >
 {
   public:
-//    IntegratorInterface* clone() const {
-//        return this->get_override("clone")(); }
+    IntegratorInterface* clone() const {
+        return this->get_override("clone")(); }
     Pair<Float,IVector> flow_bounds(const VectorFunction&,const IVector&,const IVector&,const Float&) const {
         return this->get_override("flow_bounds")(); }
     VectorTaylorFunction flow(const VectorFunction& vector_field,const IVector&,const Float&) const {

@@ -412,6 +412,18 @@ ScalarTaylorFunction intersection(const ScalarTaylorFunction& tv1, const ScalarT
     return ScalarTaylorFunction(tv1.domain(),intersection(tv1.model(),tv2.model()));
 }
 
+Float norm(const ScalarTaylorFunction& f) {
+    return norm(f.model());
+}
+
+Float distance(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2) {
+    return norm(f1-f2);
+}
+
+Float distance(const ScalarTaylorFunction& f1, const ScalarFunction& f2) {
+    return distance(f1,ScalarTaylorFunction(f1.domain(),f2));
+}
+
 Vector<ScalarTaylorFunction> compose(const Vector<ScalarTaylorFunction>& x, const Vector<ScalarTaylorFunction>& y) {
     ARIADNE_NOT_IMPLEMENTED; }
 ScalarTaylorFunction compose(const ScalarTaylorFunction& x, const Vector<ScalarTaylorFunction>& y) {
@@ -1579,9 +1591,21 @@ unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const 
     return flow;
 }
 
+Float norm(const VectorTaylorFunction& f) {
+    Float res=0.0;
+    for(uint i=0; i!=f.result_size(); ++i) {
+        res=max(res,norm(f[i]));
+    }
+    return res;
+}
 
+Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
+    return norm(f1-f2);
+}
 
-
+Float distance(const VectorTaylorFunction& f1, const VectorFunction& f2) {
+    return distance(f1,VectorTaylorFunction(f1.domain(),f2));
+}
 
 
 std::ostream&

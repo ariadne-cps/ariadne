@@ -72,9 +72,9 @@ DiscreteTransition(DiscreteEvent event,
                    const DiscreteMode& target,
                    const VectorFunction& reset,
                    const ScalarFunction& activation,
-                   bool forced)
+                   Urgency urgency)
     : _event(event), _source(&source), _target(&target),
-      _activation(activation), _reset(reset), _forced(forced)
+      _activation(activation), _reset(reset), _urgency(urgency)
 {
     ARIADNE_ASSERT(activation.argument_size()==source.dimension());
     ARIADNE_ASSERT(reset.argument_size()==source.dimension());
@@ -89,7 +89,8 @@ operator<<(std::ostream& os, const DiscreteTransition& transition)
               << "source=" << transition.source() << ", "
               << "target=" << transition.target() << ", "
               << "reset=" << transition.reset() << ", "
-              << "activation=" << transition.activation() << " )";
+              << "activation=" << transition.activation()<< ", "
+              << "urgent=" << std::boolalpha << transition.urgency() << " )";
 }
 
 
@@ -169,9 +170,8 @@ MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
                                 DiscreteLocation target,
                                 const VectorFunction &reset,
                                 const ScalarFunction &activation,
-                                bool forced)
+                                Urgency urgency)
 {
-    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
     if(this->has_transition(event,source)) {
         throw std::runtime_error("The automaton already has a transition with the given id and source id.");
     }
@@ -184,25 +184,25 @@ MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
 
     const DiscreteMode& source_mode=this->mode(source);
     const DiscreteMode& target_mode=this->mode(target);
-    this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,forced));
+    this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,urgency));
     return this->transition(event,source);
 }
 
 
 const DiscreteTransition&
 MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
-                                DiscreteLocation source,
-                                DiscreteLocation target,
-                                const VectorFunction &reset,
-                                const VectorFunction &activation,
-                                bool forced)
+                                          DiscreteLocation source,
+                                          DiscreteLocation target,
+                                          const VectorFunction &reset,
+                                          const VectorFunction &activation,
+                                          Urgency urgency)
 {
     if(activation.result_size()!=1u) {
         ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_transition(...)",
             "The activation " << activation << " has result size " << activation.result_size()
                 << " but only scalar constraints are currently supported.");
     }
-    return this->new_transition(event,source,target,reset,activation[0],forced);
+    return this->new_transition(event,source,target,reset,activation[0],urgency);
 }
 
 const DiscreteTransition&
@@ -213,7 +213,7 @@ new_forced_transition(DiscreteEvent event,
                       const VectorFunction &reset,
                       const VectorFunction &activation)
 {
-    return new_transition(event,source,target,reset,activation,true);
+    return new_transition(event,source,target,reset,activation,urgent);
 }
 
 
@@ -225,7 +225,7 @@ new_unforced_transition(DiscreteEvent event,
                         const VectorFunction &reset,
                         const VectorFunction &activation)
 {
-    return new_transition(event,source,target,reset,activation,false);
+    return new_transition(event,source,target,reset,activation,permissive);
 }
 
 
@@ -528,7 +528,8 @@ MonolithicHybridAutomaton::transition(DiscreteEvent event, DiscreteLocation sour
                 return *transition_iter;
             }
         }
-    throw std::runtime_error("The hybrid automaton does not have a transition with the given event and source.");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::transition",
+                      "The hybrid automaton does not have a transition with event "<<event<<" and source "<<source<<".");
 }
 
 
@@ -626,13 +627,21 @@ MonolithicHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent
 ScalarFunction
 MonolithicHybridAutomaton::guard_function(DiscreteLocation source, DiscreteEvent event) const
 {
-    return this->guards(source)[event];
+    return this->transition(source,event).activation();
 }
 
 ScalarFunction
 MonolithicHybridAutomaton::invariant_function(DiscreteLocation source, DiscreteEvent event) const
 {
-    return this->invariants(source)[event];
+    if(this->invariants(source).has_key(event)) {
+        return this->invariants(source)[event];
+    }
+    else if(this->guards(source).has_key(event)) {
+        return this->guards(source)[event];
+    } else {
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::invariant_function",
+                      "automaton "<<*this<<" has no invariant with event "<<event<<" in location "<<source<<"\n");
+    }
 }
 
 

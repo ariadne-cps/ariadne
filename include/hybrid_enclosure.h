@@ -71,7 +71,7 @@ class HybridGridTreeSet;
 class HybridEnclosure
     : public DrawableInterface
 {
-    friend class ConstrainedImageSetHybridEvolver;
+    friend class ConstraintHybridEvolver;
   public:
     typedef TaylorConstrainedImageSet ContinuousStateSetType;
     private:
@@ -96,6 +96,7 @@ class HybridEnclosure
     void apply_flow(VectorTaylorFunction, Interval);
 
     void set_maximum_time(DiscreteEvent,Float);
+    void set_step_time(Float);
     void set_time(DiscreteEvent,Float);
     void set_dwell_time(DiscreteEvent,Float);
     void set_dwell_time(DiscreteEvent,ScalarFunction);
@@ -103,6 +104,7 @@ class HybridEnclosure
 
     void new_invariant(DiscreteEvent,ScalarFunction,ScalarFunction);
     void new_activation(DiscreteEvent,ScalarFunction,ScalarFunction);
+    void new_guard(DiscreteEvent,ScalarFunction,ScalarFunction);
     void new_time_bound(DiscreteEvent,ScalarFunction);
 
     uint dimension() const;

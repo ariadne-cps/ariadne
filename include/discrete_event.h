@@ -33,6 +33,8 @@ namespace Ariadne {
 
 template<class T> std::string to_str(const T& t);
 
+enum Urgency { permissive=false, urgent=true };
+
 //! \brief Type of a  discrete event of a hybrid system.
 class DiscreteEvent {
   public:

@@ -30,11 +30,11 @@ using namespace Ariadne;
 int main()
 {
     /// Set the system parameters
-    double a = 0.5;
-    double g = 9.8;
+    Float a = 0.5;
+    Float g = 9.8;
 
-    double A[4]={0,1.0,0,0};
-    double b[2]={0,-g};
+    Float A[4]={0,1.0,0,0};
+    Float b[2]={0,-g};
 
     /// Build the Hybrid System
 
@@ -42,12 +42,12 @@ int main()
     MonolithicHybridAutomaton ball;
 
     /// Create four discrete states
-    DiscreteLocation l1(1);
-    cout << "location = " << l1 << endl << endl;
+    DiscreteLocation freefall("freefall");
+    cout << "location = " << freefall << endl << endl;
 
     /// Create the discrete events
-    DiscreteEvent e11(11);
-    cout << "event = " << e11 << endl << endl;
+    DiscreteEvent bounce("bounce");
+    cout << "event = " << bounce << endl << endl;
 
     /// Create the dynamics
     VectorAffineFunction dynamic(Matrix<Float>(2,2,A),Vector<Float>(2,b));
@@ -63,16 +63,15 @@ int main()
     cout << "guard=" << guard << endl << endl;
 
     /// Build the automaton
-    ball.new_mode(l1,dynamic);
-    ball.new_transition(e11,l1,l1,reset,guard,urgent);
+    ball.new_mode(freefall,dynamic);
+    ball.new_transition(bounce,freefall,freefall,reset,guard,urgent);
     /// Finished building the automaton
 
     cout << "Automaton = " << ball << endl << endl;
-
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    ConstraintHybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
@@ -81,17 +80,17 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef ConstraintHybridEvolver::EnclosureType EnclosureType;
+    typedef ConstraintHybridEvolver::EnclosureListType EnclosureListType;
+    typedef ConstraintHybridEvolver::OrbitType OrbitType;
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
     Box initial_box(2, 1.999,2.0, 0.0,0.001);
-    HybridEnclosureType initial_enclosure(l1,initial_box);
+    EnclosureType initial_enclosure(freefall,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
 
-    HybridTime evolution_time(4.0,4);
+    HybridTime evolution_time(3.0,4);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);

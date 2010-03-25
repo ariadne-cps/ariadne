@@ -181,7 +181,7 @@ ScalarTaylorFunction::polynomial() const
 
     Vector<Polynomial<Interval> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].radius()<=0) { std::cerr<<"WARNING: zero radius in domain of VectorTaylorFunction"<<std::endl; }
+        if(this->domain()[j].radius()<=0) { std::cerr<<"WARNING: zero radius in domain "<<this->domain()<<" of VectorTaylorFunction"<<std::endl; }
         else { s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
     }
 

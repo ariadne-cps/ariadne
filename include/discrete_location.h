@@ -32,8 +32,6 @@
 
 namespace Ariadne {
 
-enum Urgency { urgent, permissive };
-
 template<class T> class List;
 
 //! \brief Type of a  discrete location of an atomic hybrid automaton.

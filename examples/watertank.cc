@@ -138,24 +138,24 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    ConstraintHybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.125;
+    evolver.parameters().maximum_step_size = 0.625;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef ConstraintHybridEvolver::EnclosureType EnclosureType;
+    typedef ConstraintHybridEvolver::EnclosureListType EnclosureListType;
+    typedef ConstraintHybridEvolver::OrbitType OrbitType;
 
-    std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
+    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.00, 0.0,0.00);
-    HybridEnclosureType initial_enclosure(l1,initial_box);
-    Box bounding_box(2, -0.1,9.1, -0.1,1.1);
+    Box initial_box(2, 0.0,0.001, 0.0,0.001);
+    EnclosureType initial_enclosure(l1,initial_box);
+    Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
     HybridTime evolution_time(80.0,5);
 
@@ -163,7 +163,8 @@ int main()
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
+    std::cout << "Orbit.final_size="<<orbit.final().size()<<std::endl;
+    std::cout << "Orbit.reach_size="<<orbit.reach().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     std::cout << "Plotting orbit... "<<std::flush;
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);

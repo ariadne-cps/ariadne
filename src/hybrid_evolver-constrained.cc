@@ -49,7 +49,7 @@ typedef Vector<Interval> IntervalVector;
 
 
 Orbit<HybridEnclosure>
-ConstrainedImageSetHybridEvolver::
+ConstraintHybridEvolver::
 orbit(const HybridAutomatonInterface& system,
       const HybridEnclosure& initial,
       const HybridTime& time,
@@ -66,7 +66,7 @@ orbit(const HybridAutomatonInterface& system,
 
 
 void
-ConstrainedImageSetHybridEvolver::
+ConstraintHybridEvolver::
 _evolution(EnclosureListType& final,
            EnclosureListType& reachable,
            EnclosureListType& intermediate,
@@ -86,7 +86,7 @@ _evolution(EnclosureListType& final,
 }
 
 void
-ConstrainedImageSetHybridEvolver::
+ConstraintHybridEvolver::
 _upper_evolution_step(List<HybridEnclosure>& working_sets,
                       ListSet<HybridEnclosure>& evolve_sets,
                       ListSet<HybridEnclosure>& reach_sets,
@@ -166,64 +166,44 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     // Compute restrictions on continuous evolution
     Set<DiscreteEvent> invariant_and_guard_events=join(blocking_events,urgent_events);
     for(event_iterator iter=invariant_and_guard_events.begin(); iter!=invariant_and_guard_events.end(); ++iter) {
-        DiscreteEvent const& event=*iter;
-        ARIADNE_LOG(4,"    event="<<event<<" ");
-        ScalarFunction const& constraint=system.invariant_function(starting_location,event);
+        DiscreteEvent event=*iter;
+        ARIADNE_LOG(4,"    event:"<<event<<", ");
+        ScalarFunction constraint=system.invariant_function(starting_location,event);
+        ARIADNE_LOG(4,"constraint:"<<constraint<<"\n");
         ScalarFunction derivative=lie_derivative(constraint,dynamic);
-        ARIADNE_LOG(4,"constraint="<<constraint<<"\n");
         reached_set.new_invariant(event,constraint,derivative);
     }
     ARIADNE_LOG(4,"reached_set:"<<reached_set<<"\n");
 
-/*
-    // Compute the set reached after one time step of the flow; corresponds to setting t=t0+delta
-    // By "finishing" we mean completing one full time step without a jump; this corresponds to delta=h.
-    // By "final", we mean completing the full evolution; this corresponds to t=t_max.
-    ARIADNE_LOG(4,"starting_time:"<<starting_time<<"\n");
-    ScalarTaylorFunction remaining_time_function=maximum_time-starting_time;
-    ARIADNE_LOG(4,"remaining_time_function:"<<remaining_time_function<<"\n");
-    ScalarTaylorFunction starting_time_function=embed(starting_time,1u);
-    ARIADNE_LOG(4,"starting_time_function:"<<starting_time_function<<"\n");
-    ScalarTaylorFunction step_time_function=ScalarTaylorFunction::constant(m,step_size);
-    ARIADNE_LOG(4,"step_time_function:"<<step_time_function<<"\n");
-    ScalarTaylorFunction dwell_time_function=ScalarFunction::coordinate(m+1u,m);
-    ARIADNE_LOG(4,"dwell_time_function:"<<dwell_time_function<<"\n");
-    ScalarTaylorFunction evolution_time_function=starting_time_function+dwell_time_function;
-    ARIADNE_LOG(4,"evolution_time_function:"<<evolution_time_function<<"\n");
-    ScalarTaylorFunction progress_constraint=dwell_time_function-step_size;
-    ARIADNE_LOG(4,"progress_constraint:"<<progress_constraint<<"\n");
-    ScalarTaylorFunction final_constraint=evolution_time_function-maximum_time;
-    ARIADNE_LOG(4,"final_constraint:"<<final_constraint<<"\n");
-    ARIADNE_LOG(4,""<<"\n");
-*/
 
     // Set the reached set, the next working set and the final set
     HybridEnclosure final_set(reached_set);
+    HybridEnclosure progress_set(reached_set);
 
     reached_set.set_maximum_time(final_time_event,maximum_time);
     ARIADNE_LOG(4,"reached_set:"<<reached_set<<"\n");
-    ARIADNE_LOG(4,"final_set:"<<reached_set<<"\n");
     final_set.set_time(final_time_event,maximum_time);
     ARIADNE_LOG(4,"final_set:"<<final_set<<"\n");
+    ARIADNE_LOG(4,"final_set.empty():"<<final_set.empty()<<"\n");
 
-    HybridEnclosure progress_set(starting_set);
-    progress_set.apply_flow(flow_model,step_size);
+    progress_set.set_step_time(step_size);
     ARIADNE_LOG(4,"progress_set:"<<progress_set<<"\n");
 
     reach_sets.adjoin(reached_set);
     ARIADNE_LOG(4,"reach_sets.size():"<<reach_sets.size()<<"\n");
     if(!final_set.empty()) { evolve_sets.adjoin(final_set); }
     ARIADNE_LOG(4,"evolve_sets.size():"<<evolve_sets.size()<<"\n");
-    if(!progress_set.empty() && progress_set._time.range().lower()<=maximum_time) {
+    if(!progress_set.empty() && progress_set._time.range().lower()<maximum_time) {
         working_sets.append(progress_set); }
     ARIADNE_LOG(4,"working_sets.size():"<<working_sets.size()<<"\n");
 
     // Compute the reached set under a single event
     if(starting_events.size()<maximum_steps) {
         for(event_iterator iter=transition_events.begin(); iter!=transition_events.end(); ++iter) {
-            DiscreteEvent const& event=*iter;
-            ScalarFunction const& constraint=system.guard_function(starting_location,event);
-            ARIADNE_LOG(4,"constraint:"<<constraint<<"\n");
+            DiscreteEvent event=*iter;
+            ARIADNE_LOG(4,"event:"<<event<<", ");
+            ScalarFunction constraint=system.guard_function(starting_location,event);
+            ARIADNE_LOG(4,"guard:"<<constraint<<"\n");
             tribool satisfied=reached_set.continuous_state_set().satisfies(constraint);
             if(possibly(satisfied)) {
                 ScalarFunction derivative=lie_derivative(constraint,dynamic);
@@ -231,10 +211,17 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
                 DiscreteLocation target=system.target(starting_location,event);
                 VectorFunction reset=system.reset_function(starting_location,event);
                 HybridEnclosure jump_set(reached_set);
-                jump_set.new_activation(event,constraint,derivative);
+                if(urgent_events.contains(event)) {
+                    //jump_set.new_guard(event,constraint,derivative);
+                    jump_set.new_activation(event,constraint,derivative);
+                } else {
+                    jump_set.new_activation(event,constraint,derivative);
+                }
                 jump_set.apply_reset(event,target,reset);
                 ARIADNE_LOG(4,"jump_set("<<event<<"):"<<jump_set<<"\n");
-                working_sets.append(jump_set);
+                if(!jump_set.empty()) {
+                    working_sets.append(jump_set);
+                }
             }
         }
     }

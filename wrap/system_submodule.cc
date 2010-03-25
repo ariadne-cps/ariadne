@@ -384,7 +384,7 @@ void export_hybrid_automaton()
     hybrid_automaton_class.def("blocking_guards",(std::map<DiscreteEvent,VectorFunction>(MonolithicHybridAutomaton::*)(DiscreteLocation)const) &MonolithicHybridAutomaton::blocking_guards);
     hybrid_automaton_class.def("new_mode",(const DiscreteMode&(MonolithicHybridAutomaton::*)(DiscreteLocation,const VectorFunction&)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def("new_invariant",(const DiscreteMode&(MonolithicHybridAutomaton::*)(DiscreteLocation,const ScalarFunction&)) &MonolithicHybridAutomaton::new_invariant, return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("new_transition",(const DiscreteTransition&(MonolithicHybridAutomaton::*)(DiscreteEvent,DiscreteLocation,DiscreteLocation,const VectorFunction&,const ScalarFunction&,bool)) &MonolithicHybridAutomaton::new_transition, return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("new_transition",(const DiscreteTransition&(MonolithicHybridAutomaton::*)(DiscreteEvent,DiscreteLocation,DiscreteLocation,const VectorFunction&,const ScalarFunction&,Urgency)) &MonolithicHybridAutomaton::new_transition, return_value_policy<reference_existing_object>());
     hybrid_automaton_class.def(self_ns::str(self));
 
 }

@@ -121,6 +121,8 @@ class TaylorImageSet
 
     //! \brief Create a dynamically-allocated copy.
     virtual TaylorImageSet* clone() const { return new TaylorImageSet(*this); }
+    //! \brief Tests if the set is empty.
+    virtual tribool empty() const;
     //! \brief Tests if the set is disjoint from a box.
     virtual tribool disjoint(const Box&) const;
     //! \brief Tests if the set overlaps a box.
@@ -217,6 +219,8 @@ class TaylorConstrainedImageSet
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     void substitute(uint j, ScalarTaylorFunction v);
+    //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
+    void substitute(uint j, Float c);
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     void apply_map(VectorFunction r);
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
@@ -233,9 +237,25 @@ class TaylorConstrainedImageSet
     void new_negative_constraint(ScalarTaylorFunction g);
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
     void new_equality_constraint(ScalarFunction h);
+    void new_zero_constraint(ScalarFunction h);
 
-    //! \brief  Returns true if \f$g(x)\leq0\f$ over the whole set,
-    //! false if the constraint is negative over the whole set,
+    //! \brief The negative constraints.
+    const List<ScalarTaylorFunction>& negative_constraints() const;
+    //! \brief The zero constraints.
+    const List<ScalarTaylorFunction>& zero_constraints() const;
+
+    //! \brief The number of negative constraints.
+    uint number_of_negative_constraints() const;
+    //! \brief The number of zero constraints.
+    uint number_of_zero_constraints() const;
+
+    //! \brief The \a i<sup>th</sup> negative constraint.
+    ScalarTaylorFunction negative_constraint(uint i) const;
+    //! \brief The \a i<sup>th</sup> zero constraint.
+    ScalarTaylorFunction zero_constraint(uint i) const;
+
+    //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
+    //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
     tribool satisfies(ScalarFunction g) const;
 

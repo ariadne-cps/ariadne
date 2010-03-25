@@ -119,7 +119,7 @@ int main()
     // Compute the system evolution
 
     // Create a HybridEvolver object
-    ConstrainedImageSetHybridEvolver evolver;
+    ConstraintHybridEvolver evolver;
     evolver.verbosity = 1;
 
     // Set the evolution parameters
@@ -128,9 +128,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef ConstrainedImageSetHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef ConstrainedImageSetHybridEvolver::OrbitType OrbitType;
-    typedef ConstrainedImageSetHybridEvolver::EnclosureListType EnclosureListType;
+    typedef ConstraintHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef ConstraintHybridEvolver::OrbitType OrbitType;
+    typedef ConstraintHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 

@@ -164,7 +164,7 @@ class DiscreteTransition
     VectorFunction _reset;
 
     // \brief Whether or not the transition is urgent or permissive.
-    bool _forced;
+    Urgency _urgency;
 
   public:
 
@@ -207,12 +207,12 @@ class DiscreteTransition
 
     //! \brief True if the transition is forced (occurs as soon as it is activated).
     bool forced() const {
-        return this->_forced;
+        return this->_urgency;
     }
 
     //! \brief True if the transition is forced (occurs as soon as it is activated).
-    bool urgency() const {
-        return this->_forced;
+    Urgency urgency() const {
+        return this->_urgency;
     }
 
   private:
@@ -224,7 +224,7 @@ class DiscreteTransition
                        const DiscreteMode& target,
                        const VectorFunction& reset,
                        const ScalarFunction& activation,
-                       bool forced=false);
+                       Urgency urgency);
 
 };
 
@@ -362,7 +362,7 @@ class MonolithicHybridAutomaton
                                              DiscreteLocation target,
                                              const VectorFunction& reset,
                                              const ScalarFunction& activation,
-                                             bool forced);
+                                             Urgency urgency);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
@@ -377,7 +377,7 @@ class MonolithicHybridAutomaton
                                              DiscreteLocation target,
                                              const VectorFunction& reset,
                                              const VectorFunction& activation,
-                                             bool forced);
+                                             Urgency urgency);
 
     //! \brief Adds a forced (urgent) discrete transition to the automaton
     //! using the discrete states to specify the source and target modes.

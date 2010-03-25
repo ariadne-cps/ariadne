@@ -125,10 +125,10 @@ CompositeHybridAutomaton create_heating_system()
     return heating_system;
 }
 
-ConstrainedImageSetHybridEvolver create_evolver()
+ConstraintHybridEvolver create_evolver()
 {
     // Create a HybridEvolver object
-    ConstrainedImageSetHybridEvolver evolver;
+    ConstraintHybridEvolver evolver;
 
     // Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
@@ -140,7 +140,7 @@ ConstrainedImageSetHybridEvolver create_evolver()
 }
 
 
-void compute_evolution(const CompositeHybridAutomaton& heating_system, const ConstrainedImageSetHybridEvolver& evolver)
+void compute_evolution(const CompositeHybridAutomaton& heating_system, const ConstraintHybridEvolver& evolver)
 {
 
     // Redefine the two discrete states
@@ -149,9 +149,9 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Con
     AtomicDiscreteLocation off("off");
 
     // Declare the type to be used for the system evolution
-    typedef ConstrainedImageSetHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef ConstrainedImageSetHybridEvolver::EnclosureListType HybridEnclosureListType;
-    typedef ConstrainedImageSetHybridEvolver::OrbitType OrbitType;
+    typedef ConstraintHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef ConstraintHybridEvolver::EnclosureListType HybridEnclosureListType;
+    typedef ConstraintHybridEvolver::OrbitType OrbitType;
 
     // Define the initial set
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
@@ -189,7 +189,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Con
 }
 
 
-void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, const ConstrainedImageSetHybridEvolver& evolver)
+void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, const ConstraintHybridEvolver& evolver)
 {
 /*
     // Create a ReachabilityAnalyser object
@@ -299,7 +299,7 @@ int main()
     std::cerr<<heating_system<<"\n";
 
     // Create the analyser classes
-    ConstrainedImageSetHybridEvolver evolver=create_evolver();
+    ConstraintHybridEvolver evolver=create_evolver();
     HybridReachabilityAnalyser reachability_analysier();//evolver);
     std::cerr<<evolver<<"\n";
 

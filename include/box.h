@@ -38,6 +38,9 @@
 namespace Ariadne {
 
 class Point;
+class Box;
+
+Box widen(const Box& bx);
 
 //! A box in Euclidean space.
 class Box
@@ -178,11 +181,7 @@ class Box
     //! The result is guaranteed to have nonempty interior, and floating-point
     //! boundary coefficients so the centre and radius are exactly computable.
     virtual Box bounding_box() const {
-        Box result(this->dimension());
-        for(uint i=0; i!=result.dimension(); ++i) {
-            if((*this)[i].lower()==(*this)[i].upper()) { result[i]=trunc(Ariadne::widen((*this)[i])); }
-            else { result[i]=trunc((*this)[i]); } }
-        return result;
+        return Ariadne::widen(*this);
     }
 
     //! \brief Widens the box by the minimal floating-point increment.
@@ -209,10 +208,12 @@ class Box
     }
 };
 
-//! \brief The smallest box containing the two boxes.
+//! \relates Box \brief The smallest box containing the two boxes.
 Box hull(const Box& bx1, const Box& bx2);
-//! \brief The intersection of the two boxes.
+//! \relates Box \brief The intersection of the two boxes.
 Box intersection(const Box& bx1, const Box& bx2);
+//! \relates Box \brief A box which is wider than the input, and has single-precision values.
+Box widen(const Box& bx);
 
 Box make_box(const std::string& str);
 

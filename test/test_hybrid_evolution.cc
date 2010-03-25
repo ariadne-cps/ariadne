@@ -103,7 +103,10 @@ TestContraintHybridEvolver::test() const
 void
 TestContraintHybridEvolver::test_affine_flow_system() const
 {
-    ConstrainedImageSetHybridEvolver evolver;
+    ConstraintHybridEvolver evolver;
+    typedef ConstraintHybridEvolver::HybridEnclosureType HybridEnclosureType;
+
+    evolver.parameters().maximum_step_size=8.0;
 
     CompositeHybridAutomaton system=affine_flow_system();
     ARIADNE_TEST_PRINT(system);
@@ -113,21 +116,49 @@ TestContraintHybridEvolver::test_affine_flow_system() const
     DiscreteLocation initial_location(upwards);
     double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
-    HybridBox initial_set(initial_location,initial_box);
+    HybridEnclosureType initial_enclosure(initial_location,initial_box);
+    ARIADNE_TEST_PRINT(initial_enclosure);
 
-    ConstrainedImageSetHybridEvolver::HybridEnclosureType initial_enclosure(initial_location,initial_box);
-    ARIADNE_TEST_PRINT(initial_set);
+    HybridTime evolution_time(0.0,0u);
 
-    HybridTime evolution_time(8.0,3);
+    evolution_time=HybridTime(1.0,3);
     ARIADNE_TEST_PRINT(evolution_time);
-
-    ConstrainedImageSetHybridEvolver::OrbitType orbit=evolver.orbit(system,initial_enclosure,evolution_time);
+    ConstraintHybridEvolver::OrbitType orbit=evolver.orbit(system,initial_enclosure,evolution_time);
     ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
+    ARIADNE_TEST_EQUAL(orbit.reach().size(),1u);
 
-    std::cerr<<"plotting... ";
-    plot("test_constraint_hybrid_evolver-affine",Box(2, -1.0,11.0, -6.0, 6.0), Colour(0.75,0.75,0.75),Box(2,-1.0,11.0,-2.0,-1.5),Colour(0.25,0.25,0.5),orbit.reach(),Colour(0.5,0.5,0.75),orbit.final(),Colour(0.5,0.5,0.75),orbit.initial());
-    //plot("test_contraint_hybrid_evolver-affine",Box(2, -1.0,8.0, -4.0, 4.0), Colour(0.5,0.5,0.75),orbit.final());
-    std::cerr<<"done\n";
+    evolution_time=HybridTime(2.0,3);
+    ARIADNE_TEST_PRINT(evolution_time);
+    orbit=evolver.orbit(system,initial_enclosure,evolution_time);
+    ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_EQUAL(orbit.reach().size(),2u);
+    ARIADNE_TEST_EQUAL(orbit.final().size(),2u);
+    plot("test_constraint_hybrid_evolver-affine-t=2",Box(2, -1.0,11.0, -6.0, 6.0), Colour(0.75,0.75,0.75),Box(2,-1.0,11.0,-2.0,-1.5),Colour(0.25,0.25,0.5),orbit.reach(),Colour(0.5,0.5,0.75),orbit.final(),Colour(0.5,0.5,0.75),orbit.initial());
+
+    evolution_time=HybridTime(4.0,3);
+    ARIADNE_TEST_PRINT(evolution_time);
+    orbit=evolver.orbit(system,initial_enclosure,evolution_time);
+    ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_EQUAL(orbit.reach().size(),2u);
+    ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
+
+    evolution_time=HybridTime(6.0,3);
+    ARIADNE_TEST_PRINT(evolution_time);
+    orbit=evolver.orbit(system,initial_enclosure,evolution_time);
+    ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_EQUAL(orbit.reach().size(),3u);
+    ARIADNE_TEST_EQUAL(orbit.final().size(),2u);
+
+    plot("test_constraint_hybrid_evolver-affine-t=6",Box(2, -1.0,11.0, -6.0, 6.0), Colour(0.75,0.75,0.75),Box(2,-1.0,11.0,-2.0,-1.5),Colour(0.25,0.25,0.5),orbit.reach(),Colour(0.5,0.5,0.75),orbit.final(),Colour(0.5,0.5,0.75),orbit.initial());
+
+    evolution_time=HybridTime(8.0,3);
+    ARIADNE_TEST_PRINT(evolution_time);
+    orbit=evolver.orbit(system,initial_enclosure,evolution_time);
+    ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_EQUAL(orbit.reach().size(),3u);
+    ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
+    plot("test_constraint_hybrid_evolver-affine-t=8",Box(2, -1.0,11.0, -6.0, 6.0), Colour(0.75,0.75,0.75),Box(2,-1.0,11.0,-2.0,-1.5),Colour(0.25,0.25,0.5),orbit.reach(),Colour(0.5,0.5,0.75),orbit.final(),Colour(0.5,0.5,0.75),orbit.initial());
 }
 
 /*

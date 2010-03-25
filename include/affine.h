@@ -60,6 +60,8 @@ class Affine
     explicit Affine(uint as, double c, double g0, ...) : _c(static_cast<X>(c)), _g(as) {
         _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
         for(uint i=1; i!=as; ++i) { _g[i]=static_cast<X>(va_arg(args,double)); } }
+    template<class XX> explicit Affine(const Affine<XX>& aff)
+        : _c(aff.b()), _g(aff.a()) { }
 
     Affine<X>& operator=(const X& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=static_cast<X>(0); } return *this; }

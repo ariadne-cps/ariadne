@@ -60,7 +60,7 @@ struct ScalarExpressionFunctionBody
     virtual SizeType argument_size() const { return _space.size(); }
     virtual ScalarFunction derivative(uint j) const { return ScalarFunction(Ariadne::derivative(_expression,_space[j]),_space); }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "Function( space="<<this->_space<<", expression="<<this->_expression<<" )"; }
+        return os << "EF["<<this->argument_size()<<"]( space="<<this->_space<<", expression="<<this->_expression<<" )"; }
 
     template<class X> void _compute(X& r, const Vector<X>& x) const {
         Map<ExtendedRealVariable,X> valuation;
@@ -112,8 +112,8 @@ struct VectorExpressionFunctionBody
     }
 
     std::ostream& write(std::ostream& os) const {
-        //return os << "F["<<this->result_size()<<","<<this->argument_size()<<"]"<<this->_assignments;
-        return os << "F["<<this->_result_variables<<","<<this->_argument_variables<<"]"<<this->_assignments;
+        return os << "EF["<<this->result_size()<<","<<this->argument_size()<<"]"
+                  <<"( expression=" << this->_assignments << ")";
     }
 
 };
@@ -135,7 +135,7 @@ struct ScalarConstantFunctionBody
     virtual SizeType argument_size() const { return _argument_size; }
     virtual ScalarFunction derivative(uint j) const { return ScalarFunction::constant(_argument_size,0.0); }
     virtual std::ostream& repr(std::ostream& os) const { return os << this->_value; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "CF["<<this->_argument_size<<"]("<<this->_value<<")"; }
+    virtual std::ostream& write(std::ostream& os) const { return os << "CF["<<this->_argument_size<<"]("<<Float(this->_value)<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const {
         if(x.size()==0) { r=_value; } else { r=x[0]*0+_value; } }
 };
@@ -279,8 +279,8 @@ struct ScalarAffineFunctionBody
     virtual SizeType argument_size() const { return _affine.argument_size(); }
     virtual ScalarFunction derivative(uint j) const {
         return ScalarFunction::constant(_affine.argument_size(),_affine.gradient(j)); }
-    virtual std::ostream& write(std::ostream& os) const { return os << _affine; }
-    virtual std::ostream& repr(std::ostream& os) const { return os << "AF["<<this->argument_size()<<"]("<<_affine<<")"; }
+    virtual std::ostream& repr(std::ostream& os) const { return os << Affine<Float>(_affine); }
+    virtual std::ostream& write(std::ostream& os) const { return os << "AF["<<this->argument_size()<<"]("<<Affine<Float>(_affine)<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const {
         r=x[0]*0+_affine.value(); for(uint j=0; j!=argument_size(); ++j) { r+=_affine.gradient(j)*x[j]; } }
     Affine<Real> _affine;
@@ -473,15 +473,15 @@ struct VectorAffineFunctionBody
 };
 
 inline std::ostream& VectorAffineFunctionBody::write(std::ostream& os) const {
-    //return os << "VectorAffineFunctionBody( A="<<midpoint(_iA)<<", b="<<midpoint(_ib)<<" )";
     const VectorAffineFunctionBody& f=*this;
+    os << "AF[" << f.result_size() <<"," << f.argument_size() << "]";
     for(uint i=0; i!=f.result_size(); ++i) {
         os<<(i==0?"( ":"; ");
-        if(f.b()[i]!=0) { os<<f._b[i]; }
+        if(f.b()[i]!=0) { os<<Float(f._b[i]); }
         for(uint j=0; j!=f.argument_size(); ++j) {
             if(f._A[i][j]!=0) {
                 if(f._A[i][j]>0) { os<<"+"; } else { os<<"-"; }
-                if(abs(f._A[i][j])!=1) { os<<abs(f._A[i][j]); }
+                if(abs(f._A[i][j])!=1) { os<<abs(Float(f._A[i][j])); }
                 //ss<<char('x'+j);
                 os<<"x"<<j;
             }
@@ -1242,9 +1242,9 @@ VectorFunction compose(const VectorFunction& f, const VectorFunction& g) {
 }
 
 ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f) {
-    ARIADNE_ASSERT(g.argument_size()==f.result_size());
-    ARIADNE_ASSERT(f.result_size()==f.argument_size());
-    ARIADNE_ASSERT(f.result_size()>0);
+    ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
+    ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
+    ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
 
     for(uint i=0; i!=g.argument_size(); ++i) {
     }

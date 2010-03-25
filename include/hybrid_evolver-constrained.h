@@ -54,7 +54,7 @@ namespace Ariadne {
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
-class ConstrainedImageSetHybridEvolver
+class ConstraintHybridEvolver
     : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
     , public Loggable
 {
@@ -74,14 +74,14 @@ class ConstrainedImageSetHybridEvolver
   public:
 
     //! \brief Default constructor.
-    ConstrainedImageSetHybridEvolver() : _parameters(new EvolutionParametersType()) { }
+    ConstraintHybridEvolver() : _parameters(new EvolutionParametersType()) { }
 
     //! \brief Construct from parameters using a default integrator.
-    ConstrainedImageSetHybridEvolver(const EvolutionParametersType& parameters) :
+    ConstraintHybridEvolver(const EvolutionParametersType& parameters) :
         _parameters(new EvolutionParametersType(parameters)) { }
 
     /*! \brief Make a dynamically-allocated copy. */
-    ConstrainedImageSetHybridEvolver* clone() const { return new ConstrainedImageSetHybridEvolver(*this); }
+    ConstraintHybridEvolver* clone() const { return new ConstraintHybridEvolver(*this); }
 
     //@{
     //! \name Parameters controlling the evolution.
@@ -123,7 +123,12 @@ class ConstrainedImageSetHybridEvolver
                           SystemType const& system,
                           TimeType const& maximum_time) const;
 
- private:
+    ScalarTaylorFunction
+    _crossing_time(const ScalarFunction& guard,
+                   const VectorFunction& dynamic,
+                   const Box& initial,
+                   Float maximum_time);
+  private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };

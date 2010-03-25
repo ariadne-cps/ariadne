@@ -2,7 +2,7 @@
  *            box.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <sstream>
 #include <string>
 #include <vector>
@@ -70,34 +70,34 @@ void make_vertices_down(const Box& bx, uint i, uint n, Point& pt, std::vector<Po
     }
 }
 
-        
+
 Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
     : Vector<Interval>(d)
 {
-    assert(d>=1); 
-    va_list args; 
+    assert(d>=1);
+    va_list args;
     va_start(args,x0u);
     (*this)[0]=Interval(x0l,x0u);
-    for(uint i=1; i!=d; ++i) { 
+    for(uint i=1; i!=d; ++i) {
         Float xil=va_arg(args,Float);
         Float xiu=va_arg(args,Float);
-        (*this)[i]=Interval(xil,xiu); 
-    } 
+        (*this)[i]=Interval(xil,xiu);
+    }
     va_end(args);
 }
 
-Box::Box(const std::string& str) 
+Box::Box(const std::string& str)
 {
     *this=make_box(str);
 }
 
 std::vector<Point> Box::vertices() const {
     std::vector<Point> v;
-    uint n = this->dimension();    
+    uint n = this->dimension();
     if(n > 0) {
         Point pt(n);
         make_vertices_up(*this, 0, n-1, pt, v);
-    }     
+    }
     return v;
 }
 
@@ -109,7 +109,17 @@ Box intersection(const Box& bx1, const Box& bx2) {
     return Box(Ariadne::intersection(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
 }
 
-
+Box widen(const Box& bx) {
+    Box result(bx.dimension());
+    for(uint i=0; i!=result.dimension(); ++i) {
+        if(bx[i].lower()==bx[i].upper()) {
+            result[i]=trunc(Ariadne::widen(bx[i]));
+        } else {
+            result[i]=trunc(bx[i]);
+        }
+    }
+    return result;
+}
 
 void Box::draw(CanvasInterface& c) const
 {
@@ -125,12 +135,12 @@ void Box::draw(CanvasInterface& c) const
 
 Box make_box(const std::string& str)
 {
-    // Representation as a literal 
-    //   "[a1,b1]x[a2,b2]x...x[an,bn]" 
+    // Representation as a literal
+    //   "[a1,b1]x[a2,b2]x...x[an,bn]"
 
     std::stringstream ss(str);
     std::vector<Interval> vec;
-    Interval ivl; 
+    Interval ivl;
     char c;
 
     c='x';

@@ -164,6 +164,12 @@ TaylorImageSet::radius() const
 
 
 tribool
+TaylorImageSet::empty() const
+{
+    return false;
+}
+
+tribool
 TaylorImageSet::disjoint(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Dimension of "<<*this<<" is different from dimension of "<<bx);
@@ -703,7 +709,7 @@ Vector<Interval> error(const TaylorImageSet& ts) {
 
 
 void box_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
-    ts.bounding_box().draw(fig);
+    if(!ts.empty()) { ts.bounding_box().draw(fig); }
 }
 
 void boxes_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
@@ -969,30 +975,26 @@ TaylorConstrainedImageSet* TaylorConstrainedImageSet::clone() const
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box)
 {
+    std::cerr<<"TaylorConstrainedImageSet("<<box<<")\n";
     // Ensure domain elements have nonempty radius
     const double min=std::numeric_limits<double>::min();
     IntervalVector domain=box;
     for(uint i=0; i!=domain.size(); ++i) {
         if(domain[i].radius()==0) {
             domain[i]+=Interval(-min,+min);
+            domain[i]=widen(domain(i));
         }
     }
-    this->_function=VectorTaylorFunction::identity(box);
+    std::cerr<<"domain="<<domain<<"\n";
+    this->_function=VectorTaylorFunction::identity(domain);
 }
 
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function)
 {
     ARIADNE_ASSERT_MSG(box.size()==function.argument_size(),"domain="<<box<<", function="<<function);
-    const double min=std::numeric_limits<double>::min();
-    IntervalVector domain=box;
-    for(uint i=0; i!=domain.size(); ++i) {
-        if(domain[i].radius()==0) {
-            domain[i]+=Interval(-min,+min);
-        }
-    }
-
-    this->_function=VectorTaylorFunction(domain,function);
+    std::cerr<<"TaylorConstrainedImageSet("<<box<<","<<function<<")\n";
+    this->_function=VectorTaylorFunction(box,function);
 }
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function, List<NonlinearConstraint> constraints)
@@ -1055,12 +1057,13 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const VectorTaylorFunction&
 
 
 
+// Returns true if the entire set is positive; false if entire set is negative
 tribool TaylorConstrainedImageSet::satisfies(ScalarFunction constraint) const
 {
     Interval constraint_range=constraint(this->codomain());
+    if(constraint_range.upper()<0.0) { return false; }
     if(constraint_range.lower()>0.0) { return true; }
-    else if(constraint_range.upper()<0.0) { return false; }
-    else { return indeterminate; }
+    return indeterminate;
 }
 
 
@@ -1068,14 +1071,26 @@ void TaylorConstrainedImageSet::substitute(uint j, ScalarTaylorFunction v)
 {
     ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
                        "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
-    this->_function = Ariadne::substitute(this->_function,j,v);
+                       this->_function = Ariadne::substitute(this->_function,j,v);
+                       for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+                           *iter = Ariadne::substitute(*iter,j,v);
+                       }
+                       for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+                           *iter = Ariadne::substitute(*iter,j,v);
+                       }
+
+                       this->_check();
+}
+
+void TaylorConstrainedImageSet::substitute(uint j, Float c)
+{
+    this->_function = Ariadne::partial_evaluate(this->_function,j,c);
     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        *iter = Ariadne::substitute(*iter,j,v);
+        *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
     for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-        *iter = Ariadne::substitute(*iter,j,v);
+        *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
-
     this->_check();
 }
 
@@ -1150,6 +1165,36 @@ void TaylorConstrainedImageSet::new_equality_constraint(ScalarFunction constrain
     this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
 }
 
+void TaylorConstrainedImageSet::new_zero_constraint(ScalarFunction constraint) {
+    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
+}
+
+List<ScalarTaylorFunction> const&
+TaylorConstrainedImageSet::negative_constraints() const {
+    return this->_constraints;
+}
+
+List<ScalarTaylorFunction> const&
+TaylorConstrainedImageSet::zero_constraints() const {
+    return this->_equations;
+}
+
+uint TaylorConstrainedImageSet::number_of_negative_constraints() const {
+    return this->_constraints.size();
+}
+
+uint TaylorConstrainedImageSet::number_of_zero_constraints() const {
+    return this->_equations.size();
+}
+
+ScalarTaylorFunction TaylorConstrainedImageSet::negative_constraint(uint i) const {
+    return this->_constraints[i];
+}
+
+ScalarTaylorFunction TaylorConstrainedImageSet::zero_constraint(uint i) const {
+    return this->_equations[i];
+}
 
 
 
@@ -1454,8 +1499,8 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
 
 
 void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
-    this->box_draw(canvas);
-    //this->affine_draw(canvas,0u);
+    //this->box_draw(canvas);
+    this->affine_draw(canvas,0u);
 }
 
 void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {

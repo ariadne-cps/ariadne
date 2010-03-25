@@ -46,6 +46,7 @@
 #include "graphics_interface.h"
 #include "hybrid_enclosure.h"
 #include "hybrid_set.h"
+#include <expression.h>
 
 
 namespace Ariadne {
@@ -98,6 +99,16 @@ void HybridEnclosure::new_activation(DiscreteEvent event, ScalarFunction constra
     this->_set.new_negative_constraint(compose(-constraint,this->_set.function()));
 }
 
+void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, ScalarFunction derivative) {
+    Interval derivative_range=derivative(this->continuous_state_set().bounding_box());
+    if(derivative_range.lower()<=0.0) {
+        ARIADNE_FAIL_MSG("Currently only urgent events with positive Lie derivative are supported");
+    }
+    std::cerr<<"\n\nset="<<*this<<"\n\n";
+    ARIADNE_FAIL_MSG("Currently only permissive events are supported");
+    this->_set.new_equality_constraint(compose(-constraint,this->_set.function()));
+}
+
 void HybridEnclosure::new_time_bound(DiscreteEvent event, ScalarFunction constraint) {
     this->_set.new_negative_constraint(constraint);
 }
@@ -135,6 +146,13 @@ void HybridEnclosure::apply_flow(VectorTaylorFunction phi, Interval time_domain)
 void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
 {
     this->_set.new_negative_constraint(this->_time-final_time);
+}
+
+void HybridEnclosure::set_step_time(Float step_time)
+{
+    uint n=this->continuous_state_set().number_of_parameters()-1u;
+    this->_set.substitute(n,step_time);
+    this->_time=partial_evaluate(this->_time,n,step_time);
 }
 
 void HybridEnclosure::set_time(DiscreteEvent event, Float final_time)
@@ -196,12 +214,25 @@ void HybridEnclosure::draw(CanvasInterface& canvas) const
     this->_set.draw(canvas);
 }
 
+List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tf) {
+    List< Polynomial<Interval> > p;
+    for(uint i=0; i!=tf.size(); ++i) {
+        p.append(tf[i].polynomial());
+    }
+    return p;
+}
+
 std::ostream& HybridEnclosure::write(std::ostream& os) const
 {
-    return os << "HybridEnclosure( events=" << this->_events
+    return os << "HybridEnclosure"
+              << "( events=" << this->_events
               << ", location=" << this->_location
-              << ", spacial_set=" << this->_set
-              << ", time="<<this->_time << ")";
+              << ", domain=" << this->_set.domain()
+              << ", range=" << this->_set.bounding_box()
+              << ", function=" << this->_set.function()
+              << ", negative=" << polynomials(this->_set.negative_constraints())
+              << ", zero=" << polynomials(this->_set.zero_constraints())
+              << ", time="<<this->_time.polynomial() << ")";
 }
 
 

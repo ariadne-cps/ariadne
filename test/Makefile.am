@@ -41,6 +41,7 @@ check_PROGRAMS = \
     test_hybrid_set \
 	test_hybrid_automaton \
     test_nonlinear_programming \
+    test_integrator \
     test_constraint_solver \
 	test_solvers \
 	test_discrete_evolution \

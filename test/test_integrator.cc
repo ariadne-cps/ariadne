@@ -75,6 +75,7 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
+        ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8);
     }
 
@@ -87,6 +88,7 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
+        ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8);
     }
 
@@ -99,6 +101,7 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
+        ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4);
     };
 
@@ -112,18 +115,20 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
+        ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-3);
     };
 
     void test_logistic() {
         VectorFunction f=(x*(o-x),o);
         IntervalVector d=(Interval(0.25,0.5),Interval(-0.25,0.25));
-        Float h=0.25;
+        Float h=0.5;
         VectorTaylorFunction flow=integrator->flow(f,d,h);
         VectorTaylorFunction expected_flow( flow.domain(), (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t, y0+t) );
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
+        ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_PRINT(flow-expected_flow);
         ARIADNE_TEST_PRINT((flow-expected_flow).truncate(2));
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),0.0006);
@@ -132,7 +137,7 @@ class TestIntegrator
 
 int main(int argc, const char **argv) {
     int verbosity=get_verbosity(argc,argv);
-    TaylorIntegrator taylor_integrator(6);
+    TaylorIntegrator taylor_integrator(16,1e-6);
     taylor_integrator.verbosity=verbosity;
     TestIntegrator(taylor_integrator).test();
     std::cerr<<"INCOMPLETE "<<std::flush;

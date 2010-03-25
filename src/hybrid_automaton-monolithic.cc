@@ -127,8 +127,6 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                 << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
     }
     this->_modes.insert(DiscreteMode(location,dynamic));
-    std::cerr<<"Here\n";
-    std::cerr<<*this<<"\n";
     return this->mode(location);
 }
 
@@ -161,7 +159,7 @@ MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
             "The invariant has result size " << invariant.result_size()
                 << " but only scalar constraints are currently supported.");
     }
-    return this->new_invariant(location, invariant);
+    return this->new_invariant(location, invariant[0]);
 }
 
 
@@ -215,7 +213,7 @@ new_forced_transition(DiscreteEvent event,
                       const VectorFunction &reset,
                       const VectorFunction &activation)
 {
-    return new_transition(event,source,target,reset,activation,false);
+    return new_transition(event,source,target,reset,activation,true);
 }
 
 

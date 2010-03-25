@@ -121,7 +121,7 @@ class DiscreteMode {
     // Construct from objects managed by shared pointers (for internal use)
     DiscreteMode(DiscreteLocation location,
                  const VectorFunction dynamic,
-                 const std::vector< VectorFunction >& invariants);
+                 const std::vector< ScalarFunction >& invariants);
 
 };
 

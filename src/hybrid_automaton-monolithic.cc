@@ -127,6 +127,8 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                 << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
     }
     this->_modes.insert(DiscreteMode(location,dynamic));
+    std::cerr<<"Here\n";
+    std::cerr<<*this<<"\n";
     return this->mode(location);
 }
 
@@ -202,7 +204,7 @@ MonolithicHybridAutomaton::new_transition(DiscreteEvent event,
             "The activation " << activation << " has result size " << activation.result_size()
                 << " but only scalar constraints are currently supported.");
     }
-    return this->new_transition(event,source,target,reset,activation,forced);
+    return this->new_transition(event,source,target,reset,activation[0],forced);
 }
 
 const DiscreteTransition&
@@ -320,7 +322,12 @@ MonolithicHybridAutomaton::has_transition(DiscreteEvent event, DiscreteLocation 
 const DiscreteMode&
 MonolithicHybridAutomaton::mode(DiscreteLocation location) const
 {
-    return this->mode(location);
+    for(Set<DiscreteMode>::const_iterator iter=this->_modes.begin(); iter!=this->_modes.end(); ++iter) {
+        if(iter->location()==location) {
+            return *iter;
+        }
+    }
+    ARIADNE_FAIL_MSG("MonolithicHybridAutomaton "<<*this<<" has no mode "<<location<<"\n");
 }
 
 

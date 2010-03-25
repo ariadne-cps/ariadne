@@ -60,15 +60,37 @@ inline std::ostream& operator<<(std::ostream& os, const AtomicDiscreteLocation& 
 //! \brief Type of a  discrete location of a hybrid system.
 //! Currently implemented as a list of String elements, but this may change...
 class DiscreteLocation
-    : public List<AtomicDiscreteLocation>
 {
+    typedef size_t size_type;
   public:
-    DiscreteLocation() : List<AtomicDiscreteLocation>() { }
-    explicit DiscreteLocation(int n): List<AtomicDiscreteLocation>(1u,AtomicDiscreteLocation(n)) { }
-    explicit DiscreteLocation(const std::string& s) : List<AtomicDiscreteLocation>(1u,AtomicDiscreteLocation(s)) { }
-    DiscreteLocation(const AtomicDiscreteLocation& q) : List<AtomicDiscreteLocation>(1u,q) { }
-    DiscreteLocation(const List<AtomicDiscreteLocation>& l) : List<AtomicDiscreteLocation>(l) { }
+    DiscreteLocation() : _lst() { }
+    explicit DiscreteLocation(int n): _lst(1u,AtomicDiscreteLocation(n)) { }
+    explicit DiscreteLocation(const std::string& s) : _lst(1u,AtomicDiscreteLocation(s)) { }
+    DiscreteLocation(const AtomicDiscreteLocation& q) : _lst(1u,q) { }
+    DiscreteLocation(const List<AtomicDiscreteLocation>& l) : _lst(l) { }
+    size_type size() const { return _lst.size(); }
+    const AtomicDiscreteLocation& operator[](size_type i) const { assert(i<_lst.size()); return _lst[i]; }
+    void append(AtomicDiscreteLocation q) { _lst.append(q); }
+    friend std::ostream& operator<<(std::ostream& os, const DiscreteLocation& q) { return os << q._lst; }
+  private:
+    List<AtomicDiscreteLocation> _lst;
 };
+
+inline bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
+    if(q1.size()!=q2.size()) { return false; }
+    for(uint i=0; i!=q1.size(); ++i) { if(q1[i]!=q2[i]) { return false; } }
+    return true;
+}
+
+inline bool operator!=(const DiscreteLocation& q1, const DiscreteLocation& q2) {
+    return !(q1==q2);
+}
+
+inline bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
+    if(q1.size()!=q2.size()) { return q1.size() < q2.size(); }
+    for(uint i=0; i!=q1.size(); ++i) { if(q1[i]!=q2[i]) { return q1[i]<q2[i]; } }
+    return false;
+}
 
 inline DiscreteLocation operator,(const AtomicDiscreteLocation& q1, const AtomicDiscreteLocation& q2) {
     DiscreteLocation loc; loc.append(q1); loc.append(q2); return loc; }

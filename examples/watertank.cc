@@ -27,9 +27,9 @@
 using namespace Ariadne;
 
 
-int main() 
+int main()
 {
-  
+
     /// Set the system parameters
     double a = -0.02;
     double b = 0.3;
@@ -37,7 +37,7 @@ int main()
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
-    
+
     double A1[4]={a,b,0,0};
     double b1[2]={0,1.0/T};
 
@@ -51,28 +51,28 @@ int main()
     double b4[2]={0.0,0.0};
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomton object
     MonolithicHybridAutomaton watertank_system;
-  
+
     /// Create four discrete states
     AtomicDiscreteLocation l1(1);
     AtomicDiscreteLocation l2(2);
     AtomicDiscreteLocation l3(3);
     AtomicDiscreteLocation l4(4);
-  
+
     /// Create the discrete events
     DiscreteEvent e12(12);
     DiscreteEvent e23(23);
     DiscreteEvent e34(34);
     DiscreteEvent e41(41);
-  
+
     /// Create the dynamics
     VectorAffineFunction dynamic1(Matrix<Real>(2,2,A1),Vector<Real>(2,b1));
     VectorAffineFunction dynamic2(Matrix<Real>(2,2,A2),Vector<Real>(2,b2));
     VectorAffineFunction dynamic3(Matrix<Real>(2,2,A3),Vector<Real>(2,b3));
     VectorAffineFunction dynamic4(Matrix<Real>(2,2,A4),Vector<Real>(2,b4));
-    
+
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
     cout << "dynamic3 = " << dynamic3 << endl << endl;
@@ -109,13 +109,13 @@ int main()
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
-    /// forced transitions do not need an explicit invariant, 
+    /// forced transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    VectorAffineFunction inv2(Matrix<Real>(1,2,1.0,0.0),Vector<Real>(1, - hmax - Delta));//
+    ScalarAffineFunction inv2(Vector<Real>(2,1.0,0.0),Real(-hmax - Delta));
     cout << "inv2=" << inv2 << endl << endl;
-    VectorAffineFunction inv4(Matrix<Real>(1,2,-1.0,0.0),Vector<Real>(1, hmin - Delta));
+    ScalarAffineFunction inv4(Vector<Real>(2,-1.0,0.0),Real(hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
-  
+
     /// Build the automaton
     watertank_system.new_mode(l1,dynamic1);
     watertank_system.new_mode(l2,dynamic2);
@@ -156,9 +156,9 @@ int main()
     Box initial_box(2, 0.0,0.00, 0.0,0.00);
     HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
-  
+
     HybridTime evolution_time(80.0,5);
-  
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;

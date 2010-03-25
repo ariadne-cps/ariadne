@@ -118,7 +118,6 @@ CompositeHybridAutomaton create_heating_system()
 
     AtomicHybridAutomaton clock;
     clock.new_mode( ok, (dot(t)=1.0) );
-    //clock.new_invariant( ok, midnight, t<=1.0 );
     clock.new_transition( ok, midnight, t>=1.0, ok, next(t)=0.0, urgent );
 
     CompositeHybridAutomaton heating_system((heater,clock));
@@ -133,7 +132,8 @@ ConstrainedImageSetHybridEvolver create_evolver()
 
     // Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.0625;
+    evolver.parameters().maximum_step_size = 0.125;
+    evolver.verbosity=1;
     cout <<  evolver.parameters() << endl;
 
     return evolver;

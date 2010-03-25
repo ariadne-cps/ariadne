@@ -42,14 +42,15 @@ int main()
     MonolithicHybridAutomaton ball;
 
     /// Create four discrete states
-    AtomicDiscreteLocation l1(1);
+    DiscreteLocation l1(1);
+    cout << "location = " << l1 << endl << endl;
 
     /// Create the discrete events
     DiscreteEvent e11(11);
+    cout << "event = " << e11 << endl << endl;
 
     /// Create the dynamics
     VectorAffineFunction dynamic(Matrix<Float>(2,2,A),Vector<Float>(2,b));
-
     cout << "dynamic = " << dynamic << endl << endl;
 
     /// Create the resets
@@ -58,15 +59,12 @@ int main()
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    VectorAffineFunction guard(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1,0.0));
+    ScalarAffineFunction guard(Vector<Float>(2,-1.0,0.0),Float(0.0));
     cout << "guard=" << guard << endl << endl;
-
 
     /// Build the automaton
     ball.new_mode(l1,dynamic);
-
-    ball.new_forced_transition(e11,l1,l1,reset,guard);
-
+    ball.new_transition(e11,l1,l1,reset,guard,urgent);
     /// Finished building the automaton
 
     cout << "Automaton = " << ball << endl << endl;
@@ -100,10 +98,9 @@ int main()
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit="<<orbit<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
 
-    textplot("ball-orbit.txt",orbit);
+    //textplot("ball-orbit.txt",orbit);
 
 /*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;

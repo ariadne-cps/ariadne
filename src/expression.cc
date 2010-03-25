@@ -771,7 +771,6 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
 }
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& c) {
-    std::cerr<<"substitute(e="<<e<<", v="<<v<<", c="<<c<<")\n";
     const ExpressionInterface<X>* eptr=e._raw_pointer();
     const BinaryExpression<X,Operator,Y,Y>* aptr=dynamic_cast<const BinaryExpression<X,Operator,Y,Y>*>(eptr);
     if(aptr) { return make_expression<X>(aptr->_op,substitute(aptr->_arg1,v,c),substitute(aptr->_arg2,v,c)); }

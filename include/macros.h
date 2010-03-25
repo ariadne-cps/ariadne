@@ -2,7 +2,7 @@
  *            macros.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file macros.h
  *  \brief Commonly used macros.
  */
@@ -78,13 +78,13 @@
     } \
 
 #define ARIADNE_NOT_IMPLEMENTED                 \
-    throw NotImplemented(ARIADNE_PRETTY_FUNCTION); 
+    throw NotImplemented(ARIADNE_PRETTY_FUNCTION);
 
 #define ARIADNE_DEPRECATED(fn,msg)          \
     static bool first_time=true; \
     if(first_time) { \
         first_time=false; \
-        std::cerr<<"Warning: Function" << #fn << " is deprecated. " << #msg << std::endl; \
+        std::cerr<<"WARNING: Function" << #fn << " is deprecated. " << #msg << std::endl; \
     } \
 
 #define ARIADNE_WARN(msg)          \
@@ -100,7 +100,7 @@
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #else
 #define ARIADNE_PRETTY_FUNCTION ""
-#endif 
+#endif
 
 
 #endif // ARIADNE_MACROS_H

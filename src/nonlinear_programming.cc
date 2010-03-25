@@ -971,9 +971,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<Fea
     std::ostream& write(std::ostream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
-        std::cerr<<"computing... \n";
         const X zero=arg[0]*0.0;
-        std::cerr<<"  zero="<<zero<<"\n";
         const uint l=2*(m+n);
         assert(arg.size()==l+m+l+1);
         Vector<X> x(project(arg,range(0u,l)));
@@ -998,7 +996,6 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<Fea
         project(res,range(l,l+m))=rx;
         project(res,range(l+m,l+m+l))=rs;
         res[l+m+l]=rt;
-        std::cerr<<"  done\n";
     }
 };
 

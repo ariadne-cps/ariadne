@@ -674,8 +674,7 @@ struct JoinedFunctionBody
     virtual std::ostream& write(std::ostream& os) const { return os << "JoinedFunctionBody( f1="<<_f1<<", f2="<<_f2<<" )"; }
 
     template<class X> inline void _compute(Vector<X>& r, const Vector<X>& x) const {
-        r=join(_f1.evaluate(x),_f2.evaluate(x));
-        std::cerr<<"x="<<x<<", r="<<r<<"\n";}
+        r=join(_f1.evaluate(x),_f2.evaluate(x)); }
 
     VectorFunction _f1;
     VectorFunction _f2;

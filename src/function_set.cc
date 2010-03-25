@@ -514,7 +514,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
     ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<"\n");
 
     if(!(t<=1e10)) {
-        std::cerr<<"feasibility failed\n";
+        std::cerr<<"WARNING: feasibility failed\n";
         char c; cin >> c;
         t=0.0;
         y=midpoint(d);

@@ -52,6 +52,12 @@ class IntegratorInterface
     /*! \brief Make a dynamically-allocated copy. */
     virtual IntegratorInterface* clone() const = 0;
 
+    /*! \brief Set the maximum allowable error in the flow. */
+    virtual void set_maximum_error(double) = 0;
+
+    /*! \brief Set the temporal order (if appropriate). */
+    virtual void set_temporal_order(unsigned int) = 0;
+
     //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt.
     virtual Pair<Float,IVector> flow_bounds(const VectorFunction& vector_field,
                                             const IVector& parameter_domain,

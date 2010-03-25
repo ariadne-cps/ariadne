@@ -47,6 +47,12 @@ class IntegratorBase
     , public Loggable
 {
   public:
+      IntegratorBase(uint to, double e) : _temporal_order(to), _maximum_error(e) { assert(e>0.0); }
+    virtual void set_temporal_order(uint m) { this->_temporal_order=m; }
+    virtual void set_maximum_error(double e) { assert(e>0.0); this->_maximum_error=e; }
+    uint temporal_order() const { return this->_temporal_order; }
+    double maximum_error() const  { return this->_maximum_error; }
+
     virtual Pair<Float,IVector> flow_bounds(const VectorFunction& vector_field,
                                             const IVector& parameter_domain,
                                             const IVector& state_domain,
@@ -62,6 +68,10 @@ class IntegratorBase
                                 const Float& suggested_time_step) const;
 
     using IntegratorInterface::flow;
+
+  public:
+    uint _temporal_order;
+    double _maximum_error;
 };
 
 
@@ -69,11 +79,8 @@ class TaylorIntegrator
     : public IntegratorBase
 {
   public:
-    TaylorIntegrator(uint to) : _spacial_order(1), _temporal_order(to), _error(1e-16) { }
-
+    TaylorIntegrator(uint to, double e) : IntegratorBase(to,e) { }
     virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }
-
-    uint temporal_order() const { return this->_temporal_order; }
 
     virtual VectorTaylorFunction flow(const VectorFunction& vector_field,
                                 const Vector<Interval>& parameter_domain,
@@ -81,11 +88,6 @@ class TaylorIntegrator
                                 const Float& suggested_time_step) const;
 
     using IntegratorBase::flow;
-
-  public:
-    uint _spacial_order;
-    uint _temporal_order;
-    double _error;
 };
 
 

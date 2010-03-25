@@ -183,13 +183,19 @@ TaylorIntegrator::flow(const VectorFunction& f, const IVector& dp, const IVector
     */
 
     ARIADNE_LOG(4,"phi="<<phi<<"\n");
-    for(uint k=0; k!=this->_temporal_order; ++k) {
+    for(uint k=0; k!=this->temporal_order(); ++k) {
+        bool last_step=(phi.error()<this->maximum_error());
         VectorTaylorFunction fphi=compose(f,phi);
         ARIADNE_LOG(4,"fphi="<<fphi<<"\n");
         for(uint i=0; i!=nx; ++i) {
             phi[np+i]=antiderivative(fphi[i],np+nx)+phi0[i];
         }
         ARIADNE_LOG(3,"phi="<<phi<<"\n");
+        if(last_step) { break; }
+    }
+
+    if(phi.error()>this->maximum_error()) {
+        std::cerr<<"WARNING: Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->temporal_order()<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n";
     }
 
     VectorTaylorFunction res(nx,ScalarTaylorFunction(dom));

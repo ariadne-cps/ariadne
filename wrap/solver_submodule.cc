@@ -70,6 +70,10 @@ class IntegratorWrapper
   public:
     IntegratorInterface* clone() const {
         return this->get_override("clone")(); }
+    void set_temporal_order(uint) {
+        this->get_override("set_temporal_order")(); }
+    void set_maximum_error(double) {
+        this->get_override("set_maximum_error")(); }
     Pair<Float,IVector> flow_bounds(const VectorFunction&,const IVector&,const IVector&,const Float&) const {
         return this->get_override("flow_bounds")(); }
     VectorTaylorFunction flow(const VectorFunction& vector_field,const IVector&,const Float&) const {
@@ -105,9 +109,9 @@ void export_solver()
 void export_integrator()
 {
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
-    class_<TaylorIntegrator, bases<IntegratorInterface> > taylor_integrator_class("TaylorIntegrator",init<unsigned int>());
-    taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunction&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
-    taylor_integrator_class.def("flow",(VectorTaylorFunction(TaylorIntegrator::*)(const VectorFunction&,const Vector<Interval>&,const Vector<Interval>&,const Float&)const)&TaylorIntegrator::flow);
+    integrator_wrapper_class.def("flow",(VectorTaylorFunction(IntegratorInterface::*)(const VectorFunction&,const Vector<Interval>&,const Float&)const)&IntegratorInterface::flow);
+    integrator_wrapper_class.def("flow",(VectorTaylorFunction(IntegratorInterface::*)(const VectorFunction&,const Vector<Interval>&,const Vector<Interval>&,const Float&)const)&IntegratorInterface::flow);
+    class_<TaylorIntegrator, bases<IntegratorInterface> > taylor_integrator_class("TaylorIntegrator",init<unsigned int,double>());
 }
 
 

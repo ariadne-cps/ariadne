@@ -1454,7 +1454,8 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
 
 
 void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
-    this->affine_draw(canvas,0u);
+    this->box_draw(canvas);
+    //this->affine_draw(canvas,0u);
 }
 
 void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {

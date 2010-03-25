@@ -848,6 +848,16 @@ VectorTaylorFunction::errors() const
     return e;
 }
 
+Float
+VectorTaylorFunction::error() const
+{
+    Float e=0.0;
+    for(uint i=0; i!=this->result_size(); ++i) {
+        e=max(e,this->models()[i].error());
+    }
+    return e;
+}
+
 VectorFunction
 VectorTaylorFunction::function() const
 {

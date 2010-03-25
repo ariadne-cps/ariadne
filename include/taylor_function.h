@@ -724,6 +724,8 @@ class VectorTaylorFunction {
     Vector< Polynomial<Interval> > polynomial() const;
     /*! \brief The vector of roundoff/truncation errors of each component. */
     Vector< Float > errors() const;
+    /*! \brief The maximum roundoff/truncation error of the components. */
+    Float error() const;
     //! \brief A multivalued function equal to the model on the domain.
     VectorFunction function() const;
 

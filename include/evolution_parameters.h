@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file evolution_parameters.h
  *  \brief Parameters for controlling the accuracy of evaluation methods.
  */
@@ -42,7 +42,7 @@ class ContinuousEvolutionParameters {
     typedef uint UnsignedIntType;
     typedef double RealType;
 
-    //! \brief Default constructer gives reasonable values. 
+    //! \brief Default constructer gives reasonable values.
     ContinuousEvolutionParameters();
 
     //! \brief A suggested order for the representation of enclosure sets.
@@ -51,21 +51,25 @@ class ContinuousEvolutionParameters {
     //! \brief A suggested order for the time-stepping method used for numerical integration.
     UnsignedIntType temporal_order;
 
-    //! \brief A suggested minimum step size for integration. 
-    //! This value may be ignored if an integration step cannot be performed without reducing the step size below this value. 
+    //! \brief The accuracy required for integration.
+    //! Decreasing this value increases the accuracy of the computation.
+    RealType flow_accuracy;
+
+    //! \brief A suggested minimum step size for integration.
+    //! This value may be ignored if an integration step cannot be performed without reducing the step size below this value.
     RealType minimum_step_size;
 
-    //! \brief The maximum allowable step size for integration. 
-    //! Decreasing this value increases the accuracy of the computation. 
+    //! \brief The maximum allowable step size for integration.
+    //! Decreasing this value increases the accuracy of the computation.
     RealType maximum_step_size;
 
-    //! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound). 
+    //! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound).
     RealType minimum_enclosure_radius;
 
-    //! \brief The maximum allowable radius of a basic set during integration. 
-    //! Decreasing this value increases the accuracy of the computation of an over-approximation. 
+    //! \brief The maximum allowable radius of a basic set during integration.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType maximum_enclosure_radius;
-    
+
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
 
@@ -83,61 +87,61 @@ class DiscreteEvolutionParameters {
     typedef uint UnsignedIntType;
     //! \brief The real type.
     typedef double RealType;
-  
-    //! \brief Default constructer gives reasonable values. 
+
+    //! \brief Default constructer gives reasonable values.
     DiscreteEvolutionParameters();
 
     //! \brief The time after which infinite-time upper-evolution routines
-    //! may approximate computed sets on a grid. 
+    //! may approximate computed sets on a grid.
     //! \details
     //! This value should be set to the time after which the transient
     //! behaviour has mostly died out. If there are no transients (i.e. the system evolves
-    //! for a certain time and then stops), then this parameter should be set to a value 
+    //! for a certain time and then stops), then this parameter should be set to a value
     //! slightly higher than the maximum running time.
-    //! <br> 
+    //! <br>
     //! Setting this value to the time at which transients die out can improve the
-    //! speed and accuracy of the computations. 
-    //!  <br> 
+    //! speed and accuracy of the computations.
+    //!  <br>
     //! This parameter is only used by chain_reach routine.
     RealType transient_time;
 
-    //! \brief The number of discrete steps after which infinite-time upper evolution 
-    //! routines may approximate computed sets on the grid. 
+    //! \brief The number of discrete steps after which infinite-time upper evolution
+    //! routines may approximate computed sets on the grid.
     //! \details
-    //! Note that the transients are assumed to have died out after <em>either</em> 
-    //! transient_time or transient_steps has been reached. 
-    //! <br> 
+    //! Note that the transients are assumed to have died out after <em>either</em>
+    //! transient_time or transient_steps has been reached.
+    //! <br>
     //! For example, if a hybrid system makes at most three steps before settling down
-    //! into its limiting behaviour, then this parameter should be set to three. 
-    //! <br> 
+    //! into its limiting behaviour, then this parameter should be set to three.
+    //! <br>
     //! Setting this value to the number of steps at which transients die out can improve the
-    //! speed and accuracy of the computations. 
-    //! <br> 
+    //! speed and accuracy of the computations.
+    //! <br>
     //! This parameter is only used by chain_reach() routine.
     //! \sa #transient_time
     UnsignedIntType transient_steps;
-    // (See the #transient_time parameter.) 
+    // (See the #transient_time parameter.)
 
     //! \brief The time after which an upper evolution or reachability analysis routine
-    //! may approximate computed sets on a grid, in order to use previously cached 
-    //! integration results for the grid. 
+    //! may approximate computed sets on a grid, in order to use previously cached
+    //! integration results for the grid.
     //! \details
-    //! Increasing this parameter improves the accuracy of the computations. 
-    //! Setting this parameter too low usually results in meaningless computations. 
-    //! As a rule of thumb, a typical system trajectory should move at least four 
+    //! Increasing this parameter improves the accuracy of the computations.
+    //! Setting this parameter too low usually results in meaningless computations.
+    //! As a rule of thumb, a typical system trajectory should move at least four
     //! times the grid size between locking to the grid. <br>
-    //! For forced oscillators, this parameter should be set to the forcing time, 
-    //! or a multiple or fraction thereof. 
+    //! For forced oscillators, this parameter should be set to the forcing time,
+    //! or a multiple or fraction thereof.
     //! <br>
     //! This parameter is only used for continuous-time computation.
     RealType lock_to_grid_time;
 
     //! \brief The time after which an evolver may approximate computed sets on a grid,
-    //! in order to use previously cached results for the grid. 
+    //! in order to use previously cached results for the grid.
     //! \details
-    //! Increasing this parameter may improve the accuracy of the computations.  
-    //! If there is recurrence in the system, then this parameter should be set to 
-    //! the average recurrence time, if known. 
+    //! Increasing this parameter may improve the accuracy of the computations.
+    //! If there is recurrence in the system, then this parameter should be set to
+    //! the average recurrence time, if known.
     //!  <br>
     //! This parameter is only used for discrete-time computation.
     UnsignedIntType lock_to_grid_steps;
@@ -148,9 +152,9 @@ class DiscreteEvolutionParameters {
     //! with sides of length \f$l/2^{d}\f$.
     //! If the initial set is an open set, then this parameter may be unused; instead the initial sets are points,
     //! spaced according to the initial_grid_density.
-    //!  <br> 
+    //!  <br>
     //! Increasing this value increases the accuracy of the computation of lower evolution.
-    //!  <br> 
+    //!  <br>
     //! This parameter is only used in the lower_evolve() and lower_reach() routines.
     IntType initial_grid_depth;
 
@@ -158,46 +162,47 @@ class DiscreteEvolutionParameters {
     //! \details
     //! Setting this value to \a g will on a grid with lengths \a l will result in the use of one initial box
     //! (one simulation) for each cell of size \f$l/2^g\f$. If the #initial_grid_depth parameter is higher, then
-    //! the initial sets will be smaller than the specified cell. 
-    //!  <br> 
+    //! the initial sets will be smaller than the specified cell.
+    //!  <br>
     //! Increasing this value increases the number of initial sets used in the computation of lower_evolve() and lower_reach().
     //! and decreases their spacing.
-    //!  <br> 
+    //!  <br>
     //! This parameter is only used in the lower_evolve() and lower_reach() routines.
     //! \internal Pieter: I don't like the name of this parameter very much, any other suggestions?
     IntType initial_grid_density;
 
     //! \brief Set the depth used for approximation on a grid for computations using upper semantics.
     //! \details
-    //! Increasing this value increases the accuracy of the computation. 
-    //!  <br> 
+    //! Increasing this value increases the accuracy of the computation.
+    //!  <br>
     //! This parameter is only used in upper_evolve(), upper_reach() and chain_reach() routines.
     IntType maximum_grid_depth;
 
     //! \brief Set the maximum height used for approximation on a grid for chain reachability computations.
     //! \details
-    //! Increasing this value increases domain over which computation is performed. 
-    //!  <br> 
+    //! Increasing this value increases domain over which computation is performed.
+    //!  <br>
     //! This parameter is only used in the chain_reach() routine.
     IntType maximum_grid_height;
 
-    //! \brief Set the size of the region used for computation. 
+    //! \brief Set the size of the region used for computation.
     //! \details
-    //! Increasing this value reduces the risk of error due to missing orbits which leave the bounding domain. 
+    //! Increasing this value reduces the risk of error due to missing orbits which leave the bounding domain.
     //RealType maximum_bounding_domain_size;
 
 };
 
 //! \brief Parameters for controlling the accuracy of evolution methods and reachability analysis.
 class EvolutionParameters
-    : public ContinuousEvolutionParameters, public DiscreteEvolutionParameters 
+    : public ContinuousEvolutionParameters, public DiscreteEvolutionParameters
 { };
 
 
 inline
-ContinuousEvolutionParameters::ContinuousEvolutionParameters() 
+ContinuousEvolutionParameters::ContinuousEvolutionParameters()
     : spacial_order(1),
       temporal_order(4),
+      flow_accuracy(1e-5),
       minimum_step_size(0.0),
       maximum_step_size(1.0),
       minimum_enclosure_radius(0.0),
@@ -207,7 +212,7 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
 { }
 
 inline
-DiscreteEvolutionParameters::DiscreteEvolutionParameters() 
+DiscreteEvolutionParameters::DiscreteEvolutionParameters()
     : transient_time(0.0),
       transient_steps(0),
       lock_to_grid_time(1.0),
@@ -220,12 +225,13 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
 
 
 inline
-std::ostream& 
-operator<<(std::ostream& os, const ContinuousEvolutionParameters& p) 
+std::ostream&
+operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
 {
     os << "ContinuousEvolutionParameters"
        << "(\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
+       << ",\n  flow_accuracy=" << p.flow_accuracy
        << ",\n  minimum_step_size=" << p.minimum_step_size
        << ",\n  maximum_step_size=" << p.maximum_step_size
        << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
@@ -238,8 +244,8 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
 
 
 inline
-std::ostream& 
-operator<<(std::ostream& os, const DiscreteEvolutionParameters& p) 
+std::ostream&
+operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
 {
     os << "DiscreteEvolutionParameters"
        << "(\n  lock_to_grid_steps=" << p.lock_to_grid_steps
@@ -261,12 +267,13 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
 
 
 inline
-std::ostream& 
-operator<<(std::ostream& os, const EvolutionParameters& p) 
+std::ostream&
+operator<<(std::ostream& os, const EvolutionParameters& p)
 {
     os << "EvolutionParameters"
        << "(\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
+       << ",\n  flow_accuracy=" << p.flow_accuracy
        << ",\n  minimum_step_size=" << p.minimum_step_size
        << ",\n  maximum_step_size=" << p.maximum_step_size
        << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius

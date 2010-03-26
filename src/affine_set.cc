@@ -632,7 +632,7 @@ AffineSet::boundary(uint xc, uint yc) const
             } // k!=r
         }
 
-        ARIADNE_ASSERT(s<m+n);
+        ARIADNE_ASSERT_MSG(s<m+n,"Could not find direction to move along boundary of AffineSet.");
         ARIADNE_ASSERT(vt[p[s]]!=BASIS);
         lpsolver.lpstep(A,b,l,u,vt,p,B,e,s);
         lb=p[s];

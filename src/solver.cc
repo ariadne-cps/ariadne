@@ -466,6 +466,7 @@ SolverBase::implicit(const VectorFunction& f,
     uint steps_remaining=this->maximum_number_of_steps();
     uint number_unrefined=nx;
     array<bool> refinement(nx,false);
+
     while(steps_remaining>0) {
         nwx=this->implicit_step(f,p,x);
         fnwx=compose(f,join(p,nwx));
@@ -628,6 +629,89 @@ KrawczykSolver::implicit_step(const VectorFunction& f,
 }
 
 
+ScalarTaylorFunction
+IntervalNewtonSolver::implicit(const ScalarFunction& f,
+                               const Vector<Interval>& ip,
+                               const Interval& ix) const
+{
+    ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", ip="<<ip<<", ix="<<ix<<"\n");
+    const uint n=ip.size();
+    ScalarFunction df=f.derivative(n);
 
+    Vector<Interval> mp=midpoint(ip);
+    Interval dfmpix=df(join(mp,ix));
+
+    if(dfmpix.lower()<=0.0 && dfmpix.upper()>=0.0) {
+        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","df(x,[y])="<<dfmpix<<" which contains zero.");
+    }
+
+    Interval x=ix;
+    bool validated=false;
+    for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
+        Interval mx=midpoint(x);
+        Interval nx=mx-f(join(mp,mx))/df(join(mp,x));
+        if(disjoint(nx,x)) {
+            ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","No solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix);
+        }
+        if(subset(nx,x)) {
+            validated=true;
+            x=nx;
+            if(x.radius()<this->maximum_error()) { break; }
+        } else {
+            x=intersection(x,nx);
+        }
+    }
+
+    ScalarTaylorFunction h=ScalarTaylorFunction::constant(ip,midpoint(x));
+    VectorTaylorFunction id=VectorTaylorFunction::identity(ip);
+    ScalarTaylorFunction dh;
+
+    for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
+        dh=compose(f,join(id,h))/df(join(mp,Interval(h.value())));
+        h=h-dh;
+        h.clobber();
+        Float herr=norm(dh);
+        ARIADNE_LOG(6,"  dh="<<dh.range()<<"\n h="<<h<<"\n");
+        if(herr<this->maximum_error()/2) { break; }
+    }
+    ARIADNE_LOG(4," happrox="<<h<<"\n");
+
+    h.error()+=mag(dh.range())*4;
+    Interval dfipix=df(join(ip,h.range()));
+    if(dfipix.lower()<=0.0 && dfipix.upper()>=0.0) {
+        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
+                      "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
+    }
+
+    // Try to verify implicit function
+    Interval dfmpmx=df(join(mp,Interval(h.value())));
+    Interval herr=Interval(-h.error(),+h.error());
+    Float sf=mag(1-dfipix/dfmpmx);
+    Interval dherr=(1-dfipix/dfmpmx)*herr;
+    ScalarTaylorFunction hnew=h;
+    hnew.clobber();
+    dh=compose(f,join(id,hnew));
+    hnew=hnew-dh+dherr;
+    if(refines(hnew,h)) { return hnew; }
+
+    // Try one more step using larger error
+    hnew.error()+=mag(dh.range())*4;
+    h=hnew;
+    dfmpmx=df(join(mp,Interval(h.value())));
+    herr=Interval(-h.error(),+h.error());
+    dfipix=df(join(ip,h.range()));
+    sf=mag(1-dfipix/dfmpmx);
+    dherr=(1-dfipix/dfmpmx)*herr;
+    hnew=h;
+    hnew.clobber();
+    dh=compose(f,join(id,hnew));
+    hnew=hnew-dh+dherr;
+
+    if(!refines(hnew,h)) {
+        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
+                      "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
+    }
+    return hnew;
+}
 
 } // namespace Ariadne

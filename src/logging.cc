@@ -21,13 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iostream>
 #include "logging.h"
 
 namespace Ariadne {
 
 std::ofstream log_file_stream;
 
-void redirect_log(const char* filename) 
+void redirect_log(const char* filename)
 {
     if(log_file_stream.is_open()) {
         log_file_stream.close();
@@ -36,6 +37,15 @@ void redirect_log(const char* filename)
     std::clog.rdbuf( log_file_stream.rdbuf() );
 }
 
-int global_verbosity=0; 
+int global_verbosity=0;
 
 }
+
+bool startup_function() {
+    std::cerr << std::boolalpha;
+    std::cout << std::boolalpha;
+    std::clog << std::boolalpha;
+    return true;
+}
+
+static const bool startup = startup_function();

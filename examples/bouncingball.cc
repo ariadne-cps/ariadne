@@ -75,7 +75,7 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
-    evolver.parameters().maximum_step_size = 1.0/64;
+    evolver.parameters().maximum_step_size = 1.0/32;
     evolver.verbosity = 1;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -90,7 +90,7 @@ int main()
     EnclosureType initial_enclosure(freefall,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
 
-    HybridTime evolution_time(3.0,4);
+    HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);

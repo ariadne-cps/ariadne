@@ -90,23 +90,50 @@ HybridEnclosure* HybridEnclosure::clone() const {
     return new HybridEnclosure(*this);
 }
 
-
-void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarFunction constraint, ScalarFunction derivative) {
-    this->_set.new_negative_constraint(compose(constraint,this->_set.function()));
+VectorTaylorFunction const&
+HybridEnclosure::space_function() const
+{
+    return this->_set.taylor_function();
 }
 
-void HybridEnclosure::new_activation(DiscreteEvent event, ScalarFunction constraint, ScalarFunction derivative) {
+ScalarTaylorFunction const&
+HybridEnclosure::time_function() const
+{
+    return this->_time;
+}
+
+
+void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarFunction constraint) {
+    Interval range=compose(constraint,this->space_function()).evaluate(this->continuous_state_set().domain());
+    if(range.upper()>=0.0) {
+        this->_constraint_events.push_back((this->_events,event));
+        this->_set.new_negative_constraint(compose(constraint,this->_set.function()));
+    }
+}
+
+void HybridEnclosure::new_activation(DiscreteEvent event, ScalarFunction constraint) {
+    this->_constraint_events.push_back((this->_events,event));
     this->_set.new_negative_constraint(compose(-constraint,this->_set.function()));
 }
 
-void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, ScalarFunction derivative) {
-    Interval derivative_range=derivative(this->continuous_state_set().bounding_box());
-    if(derivative_range.lower()<=0.0) {
-        ARIADNE_FAIL_MSG("Currently only urgent events with positive Lie derivative are supported");
-    }
-    std::cerr<<"\n\nset="<<*this<<"\n\n";
+void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint) {
     ARIADNE_FAIL_MSG("Currently only permissive events are supported");
+    this->_constraint_events.push_back((this->_events,event));
     this->_set.new_equality_constraint(compose(-constraint,this->_set.function()));
+}
+
+void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, ScalarTaylorFunction crossing_time) {
+    // Remove the invariant corresponding to the event
+    List<DiscreteEvent> events=(this->_events,event);
+    for(uint i=this->_constraint_events.size()-1u; i!=uint(-1); --i) {
+        if(this->_constraint_events[i]==events) {
+            this->_constraint_events[i]=this->_constraint_events.back();
+            this->_set._constraints[i]=this->_set._constraints.back();
+            this->_constraint_events.pop_back();
+            this->_set._constraints.pop_back();
+        }
+    }
+    this->set_dwell_time(event,crossing_time);
 }
 
 void HybridEnclosure::new_time_bound(DiscreteEvent event, ScalarFunction constraint) {

@@ -105,6 +105,8 @@ class IntervalNewtonSolver
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual VectorTaylorFunction implicit_step(const VectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    virtual ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
   public:
     virtual Vector<Interval>
     step(const VectorFunction& f,

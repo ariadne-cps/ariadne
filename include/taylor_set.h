@@ -195,6 +195,7 @@ class HybridEnclosure;
 class TaylorConstrainedImageSet
     : public DrawableInterface
 {
+    friend class HybridEnclosure;
     Vector<Interval> _domain;
     VectorTaylorFunction _function;
     List<ScalarTaylorFunction> _constraints;
@@ -244,6 +245,8 @@ class TaylorConstrainedImageSet
     //! \brief The zero constraints.
     const List<ScalarTaylorFunction>& zero_constraints() const;
 
+    //! \brief The number of negative constraints.
+    uint number_of_constraints() const;
     //! \brief The number of negative constraints.
     uint number_of_negative_constraints() const;
     //! \brief The number of zero constraints.

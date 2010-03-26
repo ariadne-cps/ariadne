@@ -33,6 +33,7 @@
 #include "orbit.h"
 
 #include "integrator.h"
+#include "solver.h"
 
 namespace Ariadne {
 
@@ -111,6 +112,23 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     TaylorConstrainedImageSet& starting_space_set=starting_set._set;
     ScalarTaylorFunction& starting_time=starting_set._time;
 
+    if(verbosity==1) {
+        ARIADNE_LOG(1,"\r"
+                    <<"#w="<<std::setw(4)<<std::left<<working_sets.size()+1u
+                    <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                    <<" s="<<std::setw(3)<<std::left<<starting_events.size()
+                    //<<" t="<<std::setw(7)<<std::fixed<<starting_time.value()
+                    <<" t=["<<std::setw(7)<<std::left<<std::fixed<<starting_time.range().lower()
+                    <<","<<std::setw(7)<<std::left<<std::fixed<<starting_time.range().upper()<<"]"
+                    <<" a="<<std::setw(2)<<std::left<<starting_set.continuous_state_set().domain().size()
+                    <<" nc="<<std::setw(2)<<std::left<<starting_set.continuous_state_set().number_of_constraints()
+                    <<" r="<<std::setw(7)<<starting_set.continuous_state_set().radius()
+                    <<" l="<<std::left<<starting_location
+                    <<" c="<<starting_set.continuous_state_set().centre()
+                    <<" e="<<starting_events
+                    <<"                      \n");
+    }
+
     ARIADNE_LOG(4,"starting_events:"<<starting_events<<"\n");
     ARIADNE_LOG(4,"starting_location:"<<starting_location<<"\n");
     ARIADNE_LOG(4,"starting_space_set:"<<starting_space_set<<"\n");
@@ -164,14 +182,13 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     ARIADNE_LOG(4,"flowed_set:"<<reached_set<<"\n");
 
     // Compute restrictions on continuous evolution
-    Set<DiscreteEvent> invariant_and_guard_events=join(blocking_events,urgent_events);
-    for(event_iterator iter=invariant_and_guard_events.begin(); iter!=invariant_and_guard_events.end(); ++iter) {
+    Set<DiscreteEvent> invariant_and_urgent_events=join(invariant_events,urgent_events);
+    for(event_iterator iter=invariant_and_urgent_events.begin(); iter!=invariant_and_urgent_events.end(); ++iter) {
         DiscreteEvent event=*iter;
         ARIADNE_LOG(4,"    event:"<<event<<", ");
         ScalarFunction constraint=system.invariant_function(starting_location,event);
         ARIADNE_LOG(4,"constraint:"<<constraint<<"\n");
-        ScalarFunction derivative=lie_derivative(constraint,dynamic);
-        reached_set.new_invariant(event,constraint,derivative);
+        reached_set.new_invariant(event,constraint);
     }
     ARIADNE_LOG(4,"reached_set:"<<reached_set<<"\n");
 
@@ -191,9 +208,9 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
 
     reach_sets.adjoin(reached_set);
     ARIADNE_LOG(4,"reach_sets.size():"<<reach_sets.size()<<"\n");
-    if(!final_set.empty()) { evolve_sets.adjoin(final_set); }
+    if(!definitely(final_set.empty())) { evolve_sets.adjoin(final_set); }
     ARIADNE_LOG(4,"evolve_sets.size():"<<evolve_sets.size()<<"\n");
-    if(!progress_set.empty() && progress_set._time.range().lower()<maximum_time) {
+    if(!definitely(progress_set.empty()) && progress_set._time.range().lower()<maximum_time) {
         working_sets.append(progress_set); }
     ARIADNE_LOG(4,"working_sets.size():"<<working_sets.size()<<"\n");
 
@@ -207,19 +224,46 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
             tribool satisfied=reached_set.continuous_state_set().satisfies(constraint);
             if(possibly(satisfied)) {
                 ScalarFunction derivative=lie_derivative(constraint,dynamic);
-                ARIADNE_LOG(4,"derivative:"<<derivative<<"\n");
+                ARIADNE_LOG(4,"guard_lie_derivative:"<<derivative<<"\n");
                 DiscreteLocation target=system.target(starting_location,event);
                 VectorFunction reset=system.reset_function(starting_location,event);
                 HybridEnclosure jump_set(reached_set);
                 if(urgent_events.contains(event)) {
-                    //jump_set.new_guard(event,constraint,derivative);
-                    jump_set.new_activation(event,constraint,derivative);
+                    Interval constraint_range=compose(constraint,flow_model).range();
+                    Interval derivative_range=compose(derivative,flow_model).range();
+                    ARIADNE_LOG(4,"constraint_range:"<<constraint_range<<"\n");
+                    ARIADNE_LOG(4,"derivative_range:"<<derivative_range<<"\n");
+                    if(derivative_range.lower()>0.0) {
+                        IntervalNewtonSolver solver(1e-4,8u);
+                        try {
+                            const VectorTaylorFunction& set_function=jump_set.space_function();
+                            const ScalarTaylorFunction& time_function=jump_set.time_function();
+                            const Vector<Interval>& set_domain=set_function.domain();
+                            const uint np=set_domain.size()-1u;
+                            ScalarTaylorFunction composed_guard=compose(constraint,join(set_function,time_function));
+                            ARIADNE_LOG(4,"composed_guard:"<<composed_guard<<"\n");
+                            ScalarTaylorFunction crossing_time=solver.implicit(ScalarFunction(composed_guard.polynomial()),
+                                            Vector<Interval>(project(set_domain,range(0,np))),set_domain[np]);
+                            ARIADNE_LOG(4,"crossing_time:"<<crossing_time<<"\n");
+                            // FIXME: Currently use code for non-urgent crossings since adding a new guard is not reliable
+                            jump_set.new_activation(event,constraint);
+                            //jump_set.new_guard(event,constraint,crossing_time);
+                        }
+                        catch(std::exception& e) {
+                            std::cerr<<"WARNING: Error in computing crossing time for "<<event<<" in "<<starting_location<<": "<<e.what()<<"\n";
+                            jump_set.new_activation(event,constraint);
+                        }
+                    } else {
+                        std::cerr<<"WARNINING: Non-transverse crossing for "<<event<<" in "<<starting_location<<"\n";
+                        jump_set.new_activation(event,constraint);
+                    }
                 } else {
-                    jump_set.new_activation(event,constraint,derivative);
+                    jump_set.new_activation(event,constraint);
                 }
                 jump_set.apply_reset(event,target,reset);
-                ARIADNE_LOG(4,"jump_set("<<event<<"):"<<jump_set<<"\n");
-                if(!jump_set.empty()) {
+                ARIADNE_LOG(4,"jump_set["<<event<<"]:"<<jump_set<<"\n");
+                ARIADNE_LOG(4,"jump_set["<<event<<"].empty():"<<jump_set.empty()<<"\n");
+                if(!definitely(jump_set.empty())) {
                     working_sets.append(jump_set);
                 }
             }
@@ -228,21 +272,6 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
 
     ARIADNE_LOG(4,"DONE STEP\n"<<"\n");
 
-    if(verbosity==1) {
-        ARIADNE_LOG(1,"\n\r"
-                    <<"#w="<<std::setw(4)<<std::left<<working_sets.size()
-                    <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                    <<" s="<<std::setw(3)<<std::left<<starting_events.size()
-                    //<<" t="<<std::setw(7)<<std::fixed<<starting_time.value()
-                    <<" t=["<<std::setw(7)<<std::left<<std::fixed<<starting_time.range().lower()
-                    <<","<<std::setw(7)<<std::left<<std::fixed<<starting_time.range().upper()<<"]"
-                    <<" a="<<std::setw(3)<<std::left<<starting_set.continuous_state_set().domain().size()
-                    <<" r="<<std::setw(7)<<starting_set.continuous_state_set().radius()
-                    <<" l="<<std::left<<starting_location
-                    <<" c="<<starting_set.continuous_state_set().centre()
-                    <<" e="<<starting_events
-                    <<"                      ");
-    }
 
     return;
 }

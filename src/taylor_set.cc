@@ -975,7 +975,6 @@ TaylorConstrainedImageSet* TaylorConstrainedImageSet::clone() const
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box)
 {
-    std::cerr<<"TaylorConstrainedImageSet("<<box<<")\n";
     // Ensure domain elements have nonempty radius
     const double min=std::numeric_limits<double>::min();
     IntervalVector domain=box;
@@ -985,7 +984,6 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box)
             domain[i]=widen(domain(i));
         }
     }
-    std::cerr<<"domain="<<domain<<"\n";
     this->_function=VectorTaylorFunction::identity(domain);
 }
 
@@ -993,7 +991,6 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box)
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function)
 {
     ARIADNE_ASSERT_MSG(box.size()==function.argument_size(),"domain="<<box<<", function="<<function);
-    std::cerr<<"TaylorConstrainedImageSet("<<box<<","<<function<<")\n";
     this->_function=VectorTaylorFunction(box,function);
 }
 
@@ -1178,6 +1175,10 @@ TaylorConstrainedImageSet::negative_constraints() const {
 List<ScalarTaylorFunction> const&
 TaylorConstrainedImageSet::zero_constraints() const {
     return this->_equations;
+}
+
+uint TaylorConstrainedImageSet::number_of_constraints() const {
+    return this->_constraints.size()+this->_equations.size();
 }
 
 uint TaylorConstrainedImageSet::number_of_negative_constraints() const {
@@ -1526,7 +1527,11 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
     }
 
     for(uint n=0; n!=subdomains.size(); ++n) {
-        this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+        try {
+            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+        } catch(...) {
+            this->restriction(subdomains[n]).box_draw(canvas);
+        }
     }
 };
 

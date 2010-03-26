@@ -143,7 +143,7 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.625;
+    evolver.parameters().maximum_step_size = 1.25;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -157,7 +157,7 @@ int main()
     EnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
-    HybridTime evolution_time(80.0,5);
+    HybridTime evolution_time(50.0,5);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);

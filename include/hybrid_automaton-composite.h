@@ -490,6 +490,9 @@ class CompositeHybridAutomaton
     //! \brief Tests if the automaton has a transition corresponding to the given location and event.
     bool has_transition(DiscreteLocation, DiscreteEvent) const;
 
+    //! \brief The dimension of the state spacec in the given \a location.
+    uint dimension(DiscreteLocation location) const;
+
     //! \brief The set of events corresponding to a discrete transition.
     Set<DiscreteEvent> transition_events(DiscreteLocation) const;
     //! \brief The set of events corresponding to an invariant or time-can-progress predicate.

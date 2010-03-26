@@ -734,6 +734,11 @@ CompositeHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) c
 }
 
 
+uint
+CompositeHybridAutomaton::dimension(DiscreteLocation location) const {
+    return this->state_variables(location).size();
+}
+
 List<RealVariable>
 CompositeHybridAutomaton::variables(DiscreteLocation location) const {
     return catenate(this->state_variables(location),this->auxiliary_variables(location));

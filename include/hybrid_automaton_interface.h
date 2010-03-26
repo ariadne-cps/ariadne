@@ -62,6 +62,9 @@ class HybridAutomatonInterface {
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
     virtual bool has_transition(DiscreteLocation source, DiscreteEvent event) const = 0;
 
+    //! \brief The dimension of the state spacec in the given \a location.
+    virtual uint dimension(DiscreteLocation location) const = 0;
+
     //! \brief The set of urgent events possible in the given \a location.
     virtual Set<DiscreteEvent> urgent_events(DiscreteLocation location) const = 0;
 

@@ -71,7 +71,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    ConstraintHybridEvolver evolver;
+    ImageSetHybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
@@ -80,9 +80,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef ConstraintHybridEvolver::EnclosureType EnclosureType;
-    typedef ConstraintHybridEvolver::EnclosureListType EnclosureListType;
-    typedef ConstraintHybridEvolver::OrbitType OrbitType;
+    typedef ImageSetHybridEvolver::EnclosureType EnclosureType;
+    typedef ImageSetHybridEvolver::EnclosureListType EnclosureListType;
+    typedef ImageSetHybridEvolver::OrbitType OrbitType;
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 

@@ -415,10 +415,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const VectorFunction dynamic=system.dynamic(location);
-    const Map<DiscreteEvent,ScalarFunction> invariants=system.invariants(location);
+    const Map<DiscreteEvent,ScalarFunction> invariants=join(system.invariants(location),system.guards(location));
     const Map<DiscreteEvent,DiscreteLocation> targets=system.targets(location);
     const Map<DiscreteEvent,VectorFunction> resets=system.resets(location);
-    Map<DiscreteEvent,ScalarFunction> activations=system.activations(location);
+    Map<DiscreteEvent,ScalarFunction> activations=join(system.activations(location),system.guards(location));
 
     // Check to make sure dimensions are correct
     ARIADNE_ASSERT(set_model.argument_size()==time_model.argument_size());
@@ -441,6 +441,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     Set<DiscreteEvent> invariant_events=invariants.keys();
     Set<DiscreteEvent> activation_events=activations.keys();
+    ARIADNE_LOG(2,"invariant_events = "<<invariant_events<<"\n");
+    ARIADNE_LOG(2,"activation_events = "<<activation_events<<"\n");
 
 
     // Compute initially active invariants

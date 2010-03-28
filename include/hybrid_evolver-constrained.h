@@ -74,11 +74,10 @@ class ConstraintHybridEvolver
   public:
 
     //! \brief Default constructor.
-    ConstraintHybridEvolver() : _parameters(new EvolutionParametersType()) { }
+    ConstraintHybridEvolver();
 
     //! \brief Construct from parameters using a default integrator.
-    ConstraintHybridEvolver(const EvolutionParametersType& parameters) :
-        _parameters(new EvolutionParametersType(parameters)) { }
+    ConstraintHybridEvolver(const EvolutionParametersType& parameters);
 
     /*! \brief Make a dynamically-allocated copy. */
     ConstraintHybridEvolver* clone() const { return new ConstraintHybridEvolver(*this); }

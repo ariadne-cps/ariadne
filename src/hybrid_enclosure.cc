@@ -117,13 +117,15 @@ void HybridEnclosure::new_activation(DiscreteEvent event, ScalarFunction constra
 }
 
 void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint) {
-    ARIADNE_FAIL_MSG("Currently only permissive events are supported");
     this->_constraint_events.push_back((this->_events,event));
-    this->_set.new_equality_constraint(compose(-constraint,this->_set.function()));
+    this->_set.new_negative_constraint(compose(constraint,this->_set.function()));
+    this->_constraint_events.push_back((this->_events,event));
+    this->_set.new_negative_constraint(compose(-constraint,this->_set.function()));
 }
 
 void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, ScalarTaylorFunction crossing_time) {
     // Remove the invariant corresponding to the event
+    ARIADNE_ASSERT(crossing_time.argument_size()+1u==this->continuous_state_set ().number_of_parameters());
     List<DiscreteEvent> events=(this->_events,event);
     for(uint i=this->_constraint_events.size()-1u; i!=uint(-1); --i) {
         if(this->_constraint_events[i]==events) {
@@ -184,7 +186,6 @@ void HybridEnclosure::set_step_time(Float step_time)
 
 void HybridEnclosure::set_time(DiscreteEvent event, Float final_time)
 {
-    const uint m=this->_time.argument_size()-1;
     ScalarTaylorFunction dwell_time=implicit(this->_time-final_time);
     this->set_dwell_time(event,dwell_time);
     this->_time=ScalarTaylorFunction::constant(this->_set.domain(),final_time);

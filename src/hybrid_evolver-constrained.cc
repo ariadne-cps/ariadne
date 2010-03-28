@@ -35,12 +35,26 @@
 #include "integrator.h"
 #include "solver.h"
 
+namespace {
+
+ScalarTaylorFunction approximate_crossing_time(const ScalarTaylorFunction& tf, Interval normal) {
+    ScalarFunction f(tf.polynomial());
+    Vector<Interval> sdom=project(tf.domain(),range(0u,tf.argument_size()-1u));
+    VectorTaylorFunction id=VectorTaylorFunction::identity(sdom);
+    ScalarTaylorFunction h=ScalarTaylorFunction::constant(sdom,tf.domain()[f.argument_size()-1u].midpoint());
+    for(unsigned int i=0; i!=8; ++i) {
+        h=h-compose(f,join(id,h))/normal.midpoint();
+        h.clobber();
+    }
+    return h;
+}
+
+} // namespace
+
 namespace Ariadne {
 
 DiscreteEvent final_time_event("_final_time_");
 DiscreteEvent time_step_event("_step_size_");
-
-
 
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
@@ -65,6 +79,14 @@ orbit(const HybridAutomatonInterface& system,
     return orbit;
 }
 
+
+ConstraintHybridEvolver::ConstraintHybridEvolver()
+    : _parameters(new EvolutionParametersType())
+{ }
+
+ConstraintHybridEvolver::ConstraintHybridEvolver(const EvolutionParametersType& parameters)
+    : _parameters(new EvolutionParametersType(parameters)) 
+{ }
 
 void
 ConstraintHybridEvolver::
@@ -139,7 +161,6 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
 
     // Set the dimension
     const uint n=starting_set.dimension();
-    const uint m=starting_set.continuous_state_set().number_of_parameters();
 
     // Extract mode and transitions, dynamic and constraints
     //DiscreteMode mode=system.mode(starting_location);
@@ -147,18 +168,6 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
 
     VectorFunction dynamic=system.dynamic_function(starting_location);
     ARIADNE_LOG(4,"dynamic:"<<dynamic<<"\n");
-
-    Set<DiscreteEvent> invariant_events=system.invariant_events(starting_location);
-    ARIADNE_LOG(4,"invariant_events:"<<invariant_events<<"\n");
-    Set<DiscreteEvent> transition_events=system.transition_events(starting_location);
-    ARIADNE_LOG(4,"transition_events:"<<transition_events<<"\n");
-    Set<DiscreteEvent> blocking_events=system.blocking_events(starting_location);
-    ARIADNE_LOG(4,"blocking_events:"<<blocking_events<<"\n");
-    Set<DiscreteEvent> urgent_events=system.urgent_events(starting_location);
-    ARIADNE_LOG(4,"urgent_events:"<<urgent_events<<"\n");
-    Set<DiscreteEvent> permissive_events=system.permissive_events(starting_location);
-    ARIADNE_LOG(4,"permissive_events:"<<permissive_events<<"\n");
-    ARIADNE_LOG(4,"\n");
 
     // Compute flow and actual time step size used
     IntervalVector flow_spacial_domain(starting_set.continuous_state_set().bounding_box());
@@ -174,6 +183,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     ARIADNE_LOG(4,"flow_model:"<<flow_model<<"\n");
     ARIADNE_LOG(4,"flow_model.domain():"<<flow_model.domain()<<"\n");
     ARIADNE_LOG(4,"flow_model.range():"<<flow_model.range()<<"\n");
+    Box flow_bounds=flow_model.range();
     VectorFunction flow=flow_model.function();
     ARIADNE_LOG(4,"flow:"<<flow<<"\n");
     ARIADNE_LOG(4,"starting_set:"<<starting_set<<"\n");
@@ -181,16 +191,138 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     reached_set.apply_flow(flow,flow_domain[n]);
     ARIADNE_LOG(4,"flowed_set:"<<reached_set<<"\n");
 
-    // Compute restrictions on continuous evolution
-    Set<DiscreteEvent> invariant_and_urgent_events=join(invariant_events,urgent_events);
-    for(event_iterator iter=invariant_and_urgent_events.begin(); iter!=invariant_and_urgent_events.end(); ++iter) {
+    ARIADNE_LOG(4,"\n");
+    Set<DiscreteEvent> invariant_events=system.invariant_events(starting_location);
+    ARIADNE_LOG(4,"invariant_events:"<<invariant_events<<"\n");
+    Set<DiscreteEvent> urgent_events=system.urgent_events(starting_location);
+    ARIADNE_LOG(4,"urgent_events:"<<urgent_events<<"\n");
+    Set<DiscreteEvent> permissive_events=system.permissive_events(starting_location);
+    ARIADNE_LOG(4,"permissive_events:"<<permissive_events<<"\n");
+
+    // Compute possibly active invariants
+    for(Set<DiscreteEvent>::iterator iter=invariant_events.begin(); iter!=invariant_events.end(); ) {
+        if(compose(system.invariant_function(starting_location,*iter),flow_model).range().upper()<0.0) {
+            invariant_events.erase(iter++);
+        } else {
+            ++iter;
+        }
+    } 
+    // Compute possibly active urgent events
+    for(Set<DiscreteEvent>::iterator iter=urgent_events.begin(); iter!=urgent_events.end(); ) {
+        if(compose(system.guard_function(starting_location,*iter),flow_model).range().upper()<0.0) {
+            urgent_events.erase(iter++);
+        } else {
+            ++iter;
+        }
+    }
+    // Compute possibly active permissive events
+    for(Set<DiscreteEvent>::iterator iter=permissive_events.begin(); iter!=permissive_events.end(); ) {
+        if(compose(system.guard_function(starting_location,*iter),flow_model).range().upper()<0.0) {
+            permissive_events.erase(iter++);
+        } else {
+            ++iter;
+        }
+    }
+    
+    ARIADNE_LOG(4,"possibly_active_invariant_events:"<<invariant_events<<"\n");
+    ARIADNE_LOG(4,"possibly_active_urgent_events:"<<urgent_events<<"\n");
+    ARIADNE_LOG(4,"possibly_active_permissive_events:"<<permissive_events<<"\n");
+    ARIADNE_LOG(4,"\n");
+   
+    Set<DiscreteEvent> blocking_events=join(invariant_events,urgent_events);
+    Set<DiscreteEvent> transition_events=join(permissive_events,urgent_events);
+    
+    // Compute restrictions on continuous evolution due to invariants
+    for(Set<DiscreteEvent>::iterator iter=invariant_events.begin(); iter!=invariant_events.end(); ++iter) {
         DiscreteEvent event=*iter;
         ARIADNE_LOG(4,"    event:"<<event<<", ");
         ScalarFunction constraint=system.invariant_function(starting_location,event);
         ARIADNE_LOG(4,"constraint:"<<constraint<<"\n");
         reached_set.new_invariant(event,constraint);
     }
+    ARIADNE_LOG(4,"progress_set:"<<reached_set<<"\n");
+
+    // Cache constraint functions for urgent events
+    Map<DiscreteEvent,ScalarFunction> constraint_functions;
+    for(Set<DiscreteEvent>::const_iterator iter=urgent_events.begin(); iter!=urgent_events.end(); ++iter) {
+        constraint_functions.insert(*iter,system.guard_function(starting_location,*iter));
+    }
+    
+    if(starting_events.size()<maximum_steps) {
+        // Compute the reached set under a single urgent event
+        // TODO: Better to compute crossing time on the flow domain, and apply flow to starting set
+        for(Set<DiscreteEvent>::const_iterator iter=urgent_events.begin(); iter!=urgent_events.end(); ++iter) {
+            DiscreteEvent event=*iter;
+            HybridEnclosure jump_set=reached_set;
+            for(Map<DiscreteEvent,ScalarFunction>::const_iterator other_iter=constraint_functions.begin(); 
+                other_iter!=constraint_functions.end(); ++other_iter) 
+            {
+                if(other_iter->first!=event) { jump_set.new_invariant(other_iter->first,other_iter->second); }
+            }
+            ScalarFunction guard=constraint_functions[event];
+            // Test for transversality
+            ScalarFunction guard_derivative=lie_derivative(guard,dynamic);
+            Interval normal_derivative_1=guard_derivative(flow_bounds);
+            Interval normal_derivative_2=ScalarTaylorFunction(flow_bounds,guard_derivative).range();
+            Interval normal_derivative_3=compose(guard_derivative,flow_model).range();
+            Interval normal_derivative=intersection(intersection(normal_derivative_1,normal_derivative_2),normal_derivative_3);
+            if(normal_derivative.lower()>0.0 || normal_derivative.upper()<0.0) {
+                // If transverse crossing, try to compute crossing time
+                try {
+                    // Compute crossing time as a function of the set's parameters (except for the last parameter, which is the current dwell time)
+                    ScalarTaylorFunction guarded_evolution=compose(guard,jump_set.continuous_state_set().taylor_function());
+                    ScalarTaylorFunction crossing_time_model=approximate_crossing_time(guarded_evolution,normal_derivative);
+                    /*
+                    IntervalVector evolution_domain=guarded_evolution.domain();
+                    uint nsp=evolution_domain.size()-1u; // The number of parameters, excluding time
+                    Vector<Interval> parameter_domain=project(evolution_domain,range(0u,nsp));
+                    Interval time_domain=evolution_domain[nsp];
+                    ScalarTaylorFunction crossing_time_model=
+                        IntervalNewtonSolver(1e-8,12).implicit(ScalarFunction(guarded_evolution.polynomial()),flow_spacial_domain,time_domain);
+                    */
+                    jump_set.new_guard(event,guard,crossing_time_model);
+                } 
+                catch(const ImplicitFunctionException& e) {
+                    std::cerr<<"WARNING: "<<e.what()<<"\n";
+                    jump_set.new_guard(event,guard);
+                }
+            } else {
+                // If non-transverse crossing introduce guard as equation
+                jump_set.new_guard(event,guard);
+            }       
+            if(!definitely(jump_set.empty())) {
+                DiscreteLocation target=system.target(starting_location,event);
+                VectorFunction reset=system.reset_function(starting_location,event);
+                jump_set.apply_reset(event,target,reset);
+                working_sets.append(jump_set);
+            }
+        }
+    }
+
+    // Compute restrictions on continuous evolution due to urgent events
+    for(Set<DiscreteEvent>::const_iterator iter=urgent_events.begin(); iter!=urgent_events.end(); ++iter) {
+        DiscreteEvent event=*iter;
+        ARIADNE_LOG(4,"    event:"<<event<<", ");
+        ScalarFunction constraint=system.guard_function(starting_location,event);
+        ARIADNE_LOG(4,"constraint:"<<constraint<<"\n");
+        reached_set.new_invariant(event,constraint);
+    }
     ARIADNE_LOG(4,"reached_set:"<<reached_set<<"\n");
+        
+    if(starting_events.size()<maximum_steps) {
+        // Compute the reached set under a single permissive event
+        for(Set<DiscreteEvent>::const_iterator iter=permissive_events.begin(); iter!=permissive_events.end(); ++iter) {
+            DiscreteEvent event=*iter;
+            HybridEnclosure jump_set=reached_set;
+            jump_set.new_guard(event,system.guard_function(starting_location,event));
+            if(!definitely(jump_set.empty())) {
+                DiscreteLocation target=system.target(starting_location,event);
+                VectorFunction reset=system.reset_function(starting_location,event);
+                jump_set.apply_reset(event,target,reset);
+                working_sets.append(jump_set);
+            }
+        }
+    }
 
 
     // Set the reached set, the next working set and the final set
@@ -213,62 +345,6 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     if(!definitely(progress_set.empty()) && progress_set._time.range().lower()<maximum_time) {
         working_sets.append(progress_set); }
     ARIADNE_LOG(4,"working_sets.size():"<<working_sets.size()<<"\n");
-
-    // Compute the reached set under a single event
-    if(starting_events.size()<maximum_steps) {
-        for(event_iterator iter=transition_events.begin(); iter!=transition_events.end(); ++iter) {
-            DiscreteEvent event=*iter;
-            ARIADNE_LOG(4,"event:"<<event<<", ");
-            ScalarFunction constraint=system.guard_function(starting_location,event);
-            ARIADNE_LOG(4,"guard:"<<constraint<<"\n");
-            tribool satisfied=reached_set.continuous_state_set().satisfies(constraint);
-            if(possibly(satisfied)) {
-                ScalarFunction derivative=lie_derivative(constraint,dynamic);
-                ARIADNE_LOG(4,"guard_lie_derivative:"<<derivative<<"\n");
-                DiscreteLocation target=system.target(starting_location,event);
-                VectorFunction reset=system.reset_function(starting_location,event);
-                HybridEnclosure jump_set(reached_set);
-                if(urgent_events.contains(event)) {
-                    Interval constraint_range=compose(constraint,flow_model).range();
-                    Interval derivative_range=compose(derivative,flow_model).range();
-                    ARIADNE_LOG(4,"constraint_range:"<<constraint_range<<"\n");
-                    ARIADNE_LOG(4,"derivative_range:"<<derivative_range<<"\n");
-                    if(derivative_range.lower()>0.0) {
-                        IntervalNewtonSolver solver(1e-4,8u);
-                        try {
-                            const VectorTaylorFunction& set_function=jump_set.space_function();
-                            const ScalarTaylorFunction& time_function=jump_set.time_function();
-                            const Vector<Interval>& set_domain=set_function.domain();
-                            const uint np=set_domain.size()-1u;
-                            ScalarTaylorFunction composed_guard=compose(constraint,join(set_function,time_function));
-                            ARIADNE_LOG(4,"composed_guard:"<<composed_guard<<"\n");
-                            ScalarTaylorFunction crossing_time=solver.implicit(ScalarFunction(composed_guard.polynomial()),
-                                            Vector<Interval>(project(set_domain,range(0,np))),set_domain[np]);
-                            ARIADNE_LOG(4,"crossing_time:"<<crossing_time<<"\n");
-                            // FIXME: Currently use code for non-urgent crossings since adding a new guard is not reliable
-                            jump_set.new_activation(event,constraint);
-                            //jump_set.new_guard(event,constraint,crossing_time);
-                        }
-                        catch(std::exception& e) {
-                            std::cerr<<"WARNING: Error in computing crossing time for "<<event<<" in "<<starting_location<<": "<<e.what()<<"\n";
-                            jump_set.new_activation(event,constraint);
-                        }
-                    } else {
-                        std::cerr<<"WARNINING: Non-transverse crossing for "<<event<<" in "<<starting_location<<"\n";
-                        jump_set.new_activation(event,constraint);
-                    }
-                } else {
-                    jump_set.new_activation(event,constraint);
-                }
-                jump_set.apply_reset(event,target,reset);
-                ARIADNE_LOG(4,"jump_set["<<event<<"]:"<<jump_set<<"\n");
-                ARIADNE_LOG(4,"jump_set["<<event<<"].empty():"<<jump_set.empty()<<"\n");
-                if(!definitely(jump_set.empty())) {
-                    working_sets.append(jump_set);
-                }
-            }
-        }
-    }
 
     ARIADNE_LOG(4,"DONE STEP\n"<<"\n");
 

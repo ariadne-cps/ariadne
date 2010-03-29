@@ -73,11 +73,8 @@ HybridReachabilityAnalyser(const HybridDiscretiser<HybridEvolver::ContinuousEncl
     : _parameters(new EvolutionParametersType())
     , _discretiser(discretiser.clone())
 {
+	this->plot_verify_results = false;
 }
-
-
-
-
 
 
 // Helper functions for operators on lists of sets.
@@ -354,7 +351,7 @@ lower_reach_pruning(const SystemType& system,
 			HybridTime lock_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
 
 			// For each grid lock
-			for (uint i=0;i<this->_statistics->upper().largest_evol_steps/this->_parameters->lock_to_grid_steps;i++)
+			for (uint i=0;i<time.discrete_time()/this->_parameters->lock_to_grid_steps;i++)
 			{	
 				// The sizes of the evolve and enclosures at the end of the step
 				std::map<DiscreteState,uint> evolve_endofstep_sizes;
@@ -919,7 +916,7 @@ _unsafe(const SystemType& system,
 	// Get the size of the continuous space (NOTE: assumed equal for all locations)
 	const uint css = system.state_space().locations_begin()->second; 
 	// Create the evolution time from the upper approximation obtained in the upper case
-	HybridTime lrt = HybridTime(this->_statistics->upper().largest_evol_time,this->_statistics->upper().largest_evol_steps); 
+	HybridTime lrt = HybridTime(this->_statistics->upper().largest_evol_time,this->_statistics->upper().largest_evol_steps);
 
 	// Perform the proper lower reach
 	HybridGridTreeSet lowerreach = (this->_parameters->enable_lower_pruning ? this->lower_reach_pruning(system,initial_set,lrt) : this->lower_reach(system,initial_set,lrt));
@@ -1252,15 +1249,19 @@ verify_iterative(SystemType& system,
 {
 	ARIADNE_LOG(2,"\n\tIterative verification...\n");
 
-	// Save the folder name as a function of the automaton name and of the current timestamp, then create the main folder and the verification run folder
 	time_t mytime;
 	time(&mytime);
 	string foldername = system.name()+".png";
-	mkdir(foldername.c_str(),0777);
-	foldername = foldername+"/"+asctime(localtime(&mytime));
-	mkdir(foldername.c_str(),0777);
 	char mgd_char[10];
 	string filename;
+
+	// Save the folder name as a function of the automaton name and of the current timestamp, then create the main folder and the verification run folder
+	if (this->plot_verify_results)
+	{
+		mkdir(foldername.c_str(),0777);
+		foldername = foldername+"/"+asctime(localtime(&mytime));
+		mkdir(foldername.c_str(),0777);
+	}
 
 	// Set the initial parameters
 	this->_setInitialParameters(system, domain);
@@ -1276,15 +1277,22 @@ verify_iterative(SystemType& system,
 		// Perform the verification
 		tribool result = this->verify(system,initial_set,safe_box);
 		ARIADNE_LOG(3, "\t\tLargest enclosure cell: " << this->_discretiser->statistics().lower().largest_enclosure_cell << "\n");	
+
+		// Plot the results, if desired
+		if (this->plot_verify_results)
+		{
+			// Plot the upper region
+			filename = "upper-";
+			plot(foldername,filename + mgd_char, this->_statistics->upper().reach);
+			// Plot the lower region, if the result is not true (otherwise the lower region has not been computed on this iteration)
+			filename = "lower-";
+			if (!definitely(result))
+				plot(foldername,filename + mgd_char, this->_statistics->lower().reach); 
+		}
+
 		// Return the result, if it is not indeterminate
 		if (!indeterminate(result)) return result;
 
-		// Plot the reached regions (if no definite result has been obtained)
-		filename = "upper-";
-		plot(foldername,filename + mgd_char, this->_statistics->upper().reach);
-		filename = "lower-";
-		plot(foldername,filename + mgd_char, this->_statistics->lower().reach); 
-		
 		// Adapt the parameters for the next iteration
 		this->_adaptParameters(system);
     }

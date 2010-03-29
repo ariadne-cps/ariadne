@@ -216,6 +216,10 @@ class HybridReachabilityAnalyser
 
     //@}
 
+  public:
+
+	// Determine if the upper/lower reached regions of verify_iterative (and of all the functions using it) must be shown (false by default)
+	bool plot_verify_results;
   
   public:
 
@@ -277,7 +281,6 @@ class HybridReachabilityAnalyser
 	void _adaptParameters(SystemType& system);
 };
 
-
 template<class HybridEnclosureType>
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
@@ -285,6 +288,7 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosur
 	, _statistics(new EvolutionStatisticsType())
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
+	this->plot_verify_results = false;
 }
 
 
@@ -296,6 +300,7 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
 	, _statistics(new EvolutionStatisticsType())
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
+	this->plot_verify_results = false;
 }
 
 

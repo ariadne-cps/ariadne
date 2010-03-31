@@ -20,10 +20,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
+#include "workers.h"
+
 #include "discretiser.h"
 
 #include "taylor_set.h"
+#include "hybrid_time.h"
 #include "orbit.h"
 #include "function_set.h"
 #include "polytope.h"
@@ -234,8 +237,6 @@ evolution(const SystemType& system,
     ARIADNE_LOG(5,"discretised reach size="<<reach.size()<<"\n");
     ARIADNE_LOG(5,"discretised final size="<<final.size()<<"\n");
 
-	ARIADNE_ASSERT_MSG(possibly(final.subset(reach.bounding_box())), "The final region is not included into the reached region!"); // TO BE REMOVED as soon as the "THE FINAL always included in REACH" property is verified
-
     return make_pair(reach,final);
 }
 
@@ -254,19 +255,67 @@ reach(const SystemType& system,
 }
 
 template<class ES>
-tuple< HybridGridTreeSet,HybridGridTreeSet,ListSet<HybridBasicSet<ES> > >
-HybridDiscretiser<ES>::reach_evolve_enclosures(const SystemType& system, 
+HybridGridTreeSet 
+HybridDiscretiser<ES>::
+lower_reach(const SystemType& system, 
             const HybridBasicSet<ES>& initial_set, 
-            const TimeType& time,
-            const AccuracyType accuracy,
-			const Semantics semantics) const
+    		const TimeType& time,
+			const TimeType& lock_time,
+    		const AccuracyType accuracy,
+			const bool prune,
+			const uint concurrency) const
 {
-	typedef ListSet<HybridBasicSet<ES> > EnclosureListType;
-	EnclosureListType reach, final;
+	typedef std::list<HybridBasicSet<ES> > EL;
+	typedef ListSet<HybridBasicSet<ES> > ELS;
+	typedef HybridGridTreeSet HGTS;
+	typedef std::map<DiscreteState,uint> HUM;
 
-	make_lpair<EnclosureListType,EnclosureListType>(reach,final) = this->_evolver->reach_evolve(system,initial_set,time,semantics);
+	// Create the initial enclosures (initially just the enclosure of the initial_set in the current location)
+	EL initial_enclosures, final_enclosures;
+	initial_enclosures.push_back(initial_set);
+	HybridGrid grid = system.grid();
 
-    return make_tuple<HybridGridTreeSet,HybridGridTreeSet,EnclosureListType>(this->_discretise(reach,system.grid(),accuracy),this->_discretise(final,system.grid(),accuracy),final);
+	// The result
+	HGTS reach(grid);
+
+	// For each grid lock
+	for (uint i=0;i<((uint)time.discrete_time()/lock_time.discrete_time());i++)
+	{	
+		// The sizes of the adjoined or superposed evolve 
+		std::map<DiscreteState,uint> adjoined_evolve_sizes;
+		std::map<DiscreteState,uint> superposed_evolve_sizes;
+		// The evolve
+		HGTS evolve;
+
+		// Create the worker
+		LowerReachWorker<ES> worker((*this),initial_enclosures,reach,system,lock_time,accuracy,concurrency);
+
+		// Compute and get the result
+		make_ltuple<HUM,HUM,EL>(adjoined_evolve_sizes,superposed_evolve_sizes,final_enclosures) = worker.get_result();
+
+		// Pruning of the dump of the final enclosures into the initial enclosures
+		while (!final_enclosures.empty())
+		{
+			// Pop the current enclosure
+			EnclosureType encl = final_enclosures.front();
+			final_enclosures.pop_front();
+
+			// If pruning is to be performed
+			if (prune)
+			{
+				// Get the ratio between the adjoined evolve size and the superposed evolve size
+				Float ratio = (Float)adjoined_evolve_sizes[encl.location()]/(Float)superposed_evolve_sizes[encl.location()];
+
+				// At least 2 enclosures are inserted, then the enclosures are pruned as long as the number of enclosures is at least twice the number of evolve cells
+				if (initial_enclosures.size() <= 2 || rand() < 2*ratio*RAND_MAX)
+					initial_enclosures.push_back(encl);
+			}
+			else
+				initial_enclosures.push_back(encl);				
+		}
+	}
+
+    return reach;
 }
 
 

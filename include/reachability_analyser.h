@@ -137,12 +137,6 @@ class HybridReachabilityAnalyser
     lower_reach(const SystemType& system, 
                 const HybridImageSet& initial_set, 
                 const TimeType& time) const;
-
-    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time, while pruning the enclosure sets after lock_to_grid_steps transitions. */
-	SetApproximationType
-    lower_reach_pruning(const SystemType& system, 
-                	    const HybridImageSet& initial_set, 
-                	    const TimeType& time) const;
   
     /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. */
     virtual std::pair<SetApproximationType,SetApproximationType>
@@ -220,6 +214,8 @@ class HybridReachabilityAnalyser
 
 	// Determine if the upper/lower reached regions of verify_iterative (and of all the functions using it) must be shown (false by default)
 	bool plot_verify_results;
+	// The reduction in the number of logical cores used in multithreading (down from the maximum concurrency of the machine) (zero by default)
+	uint free_cores;
   
   public:
 
@@ -289,6 +285,7 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosur
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 	this->plot_verify_results = false;
+	this->free_cores = 0;
 }
 
 
@@ -301,6 +298,7 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 	this->plot_verify_results = false;
+	this->free_cores = 0;
 }
 
 

@@ -57,7 +57,6 @@ class HybridGridCell;
 class HybridGridTreeSet;
 
 
-
 /*!  \brief A class for computing the evolution of a discrete-time autonomous system.
  */
 template<class Sys, class ES>
@@ -222,6 +221,18 @@ class HybridDiscretiser
                 const AccuracyType accuracy,
                 const Semantics semantics) const;
 
+    //! \brief Compute approximations to the lower reachable set 
+    //! of \a system starting in \a initial_set over \a time, with 
+	//! optional \a prune and defined \a concurrency for computational efficiency. */
+    virtual DenotableSetType 
+    lower_reach(const SystemType& system, 
+        		const EnclosureType& initial_set, 
+        		const TimeType& time,
+				const TimeType& lock_time,
+        		const AccuracyType accuracy,
+				const bool prune,
+				const uint concurrency) const;
+
     //! \brief Compute approximations to the evolved set 
     //! of \a system starting in \a initial_set over \a time. */
     virtual DenotableSetType 
@@ -230,16 +241,6 @@ class HybridDiscretiser
                  const TimeType& time,
                  const AccuracyType accuracy,
                  const Semantics semantics) const;
-
-	//! \brief Compute approximations to the lower reachable and evolved set
-    //! of \a system starting in \a initial_set over \a time,
-    //! also returning the enclosures of the final sets.
-	tuple<DenotableSetType,DenotableSetType,EnclosureListType> 
-	reach_evolve_enclosures(const SystemType& system, 
-		        			const EnclosureType& initial_set, 
-		        			const TimeType& time,
-		        			const AccuracyType accuracy,
-							const Semantics semantics) const;
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual std::pair<DenotableSetType,DenotableSetType>
@@ -258,10 +259,10 @@ class HybridDiscretiser
     /*! \brief Convert a cell of the grid into an enclosure set for computing evolution. */
     EnclosureType enclosure(const BasicSetType& bs) const;
     
-  private:
+  public:
     DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
                                 const HybridGrid& system_grid,
-                                const AccuracyType accuracy) const;  
+                                const AccuracyType accuracy) const; 
 };
 
 } // namespace Ariadne

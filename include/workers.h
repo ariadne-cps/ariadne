@@ -22,6 +22,7 @@
  */
 
 #include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
 #include "ariadne.h"
 

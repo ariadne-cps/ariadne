@@ -28,6 +28,8 @@
 #include "hybrid_io_automaton.h"
 #include "hybrid_automaton.h"
 #include "assignment.h"
+#include "space.h"
+#include "grid.h"
 
 
 namespace Ariadne {
@@ -37,7 +39,8 @@ namespace Ariadne {
 //
 
 // Checks whether a set is disjoint from a map (i.e., no common keys)
-bool disjoint(const std::set<RealVariable>& s, const std::map< RealVariable, RealExpression >& m) {
+template< class X >
+bool disjoint(const std::set<RealVariable>& s, const std::map< RealVariable, X >& m) {
     // Scan all elements of s
     for(std::set<RealVariable>::iterator iter=s.begin(); iter != s.end(); iter++) {
         if(m.find(*iter) != m.end()) {
@@ -45,6 +48,18 @@ bool disjoint(const std::set<RealVariable>& s, const std::map< RealVariable, Rea
         }
     }
     return true;    // No common elements, set and map are disjoint
+}
+
+// Checks whether a map is a subset of a set (i.e., all keys belongs to the set)
+template< class X >
+bool subset(const std::map< RealVariable, X >& m, const std::set<RealVariable>& s) {
+    // Scan all elements of m
+    for(typename std::map< RealVariable, X >::const_iterator iter=m.begin(); iter != m.end(); iter++) {
+        if(s.find(iter->first) == s.end()) {
+            return false;   // Found an element of m that is not in s, map is not a subset of the set
+        }
+    }
+    return true;    // All elements of m are in s, map is a subset of the set
 }
 
 
@@ -95,6 +110,16 @@ DiscreteIOMode::add_invariant(const RealExpression& inv)
 {
     this->_invariants.push_back(inv);
 }
+
+void 
+DiscreteIOMode::substitute(const Constant<Real>& con, const Real& c) 
+{
+    for(std::map<RealVariable, RealExpression>::iterator it=this->_dynamics.begin();it!=this->_dynamics.end();it++)
+        it->second.substitute(con,c);
+    for(std::list<RealExpression>::iterator it=this->_invariants.begin();it!=this->_invariants.end();it++)
+        it->substitute(con,c);
+}
+
 
 std::ostream&
 operator<<(std::ostream& os, const DiscreteIOMode& mode)
@@ -196,6 +221,15 @@ DiscreteIOTransition::set_activation(const RealExpression& inv)
     this->_activation = inv;
 }
 
+void 
+DiscreteIOTransition::substitute(const Constant<Real>& con, const Real& c) 
+{
+    this->_activation.substitute(con,c);
+    for(std::map<RealVariable, RealExpression>::iterator it=this->_reset.begin(); it != this->_reset.end(); it++)
+        it->second.substitute(con,c);
+}
+
+
 std::ostream&
 operator<<(std::ostream& os, const DiscreteIOTransition& transition)
 {
@@ -216,7 +250,8 @@ HybridIOAutomaton::
 HybridIOAutomaton()
     : _name(""), 
       _input_vars(), _output_vars(), _internal_vars(),
-      _input_events(), _output_events(), _internal_events()
+      _input_events(), _output_events(), _internal_events(),
+      _grid()
 {
 }
 
@@ -224,7 +259,8 @@ HybridIOAutomaton::
 HybridIOAutomaton(const std::string& name)
     : _name(name), 
       _input_vars(), _output_vars(), _internal_vars(),
-      _input_events(), _output_events(), _internal_events()
+      _input_events(), _output_events(), _internal_events(),
+      _grid()
 {
 }
 
@@ -235,7 +271,8 @@ HybridIOAutomaton(const std::string& name,
                   const std::set< RealVariable >& internal_vars)
     : _name(name), 
       _input_vars(input_vars), _output_vars(output_vars), _internal_vars(internal_vars),
-      _input_events(), _output_events(), _internal_events()
+      _input_events(), _output_events(), _internal_events(),
+      _grid()
 {
     // Input, output, and internal events and variables must be disjoint
     ARIADNE_ASSERT_MSG(disjoint<RealVariable>(input_vars, output_vars), 
@@ -257,7 +294,8 @@ HybridIOAutomaton(const std::string& name,
                   const std::set< DiscreteEvent >& internal_events)
     : _name(name), 
       _input_vars(input_vars), _output_vars(output_vars), _internal_vars(internal_vars),
-      _input_events(input_events), _output_events(output_events), _internal_events(internal_events)
+      _input_events(input_events), _output_events(output_events), _internal_events(internal_events),
+      _grid()
 {
     // Input, output, and internal events and variables must be disjoint
     ARIADNE_ASSERT_MSG(disjoint<RealVariable>(input_vars, output_vars), 
@@ -530,6 +568,51 @@ HybridIOAutomaton::set_activation(DiscreteEvent event,
     return trans;
 }
 
+void 
+HybridIOAutomaton::set_grid(const std::map< RealVariable, Float>& grid) 
+{
+    // Check if grid is consistent with the variables of the automaton
+    // grid spacing of input variables cannot be specified 
+    ARIADNE_ASSERT_MSG(disjoint(this->_input_vars, grid),
+        "Grid " << grid << " is not disjoint from the set of input variables of automaton " << this->name());
+    // check if all variables of the grid are controlled by the automaton
+    ARIADNE_ASSERT_MSG(subset(grid, this->controlled_vars()),
+        "Grid " << grid << " contains variables that do not belongs to automaton " << this->name());
+    
+    this->_grid = grid;
+}
+
+void 
+HybridIOAutomaton::set_grid(const RealVariable& var, Float scaling)
+{
+    // Variable var should be a controlled variable of the automaton.
+    ARIADNE_ASSERT_MSG(!contains(this->_input_vars, var),
+        "Variable " << var << " is an input variable for automaton " << this->name() <<
+        ": grid scaling cannot be specified.");
+    ARIADNE_ASSERT_MSG(contains(this->controlled_vars(), var),
+        "Variable " << var << " does not belong to automaton " << this->name() <<
+        ": grid scaling cannot be specified.");
+    
+    this->_grid[var] = scaling;
+}
+
+const std::map< RealVariable, Float >&
+HybridIOAutomaton::grid() const 
+{
+    return this->_grid;
+}
+    
+Float 
+HybridIOAutomaton::grid(const RealVariable& var) const
+{
+    std::map< RealVariable, Float >::const_iterator iter = this->_grid.find(var);
+    
+    if(iter == this->_grid.end())   // If spacing is not specified, return the default value of 1.0
+        return 1.0;
+        
+    return iter->second;
+}
+
 bool 
 HybridIOAutomaton::has_input_var(const RealVariable& u) const
 {
@@ -711,6 +794,16 @@ HybridIOAutomaton::internal_vars() const
     return this->_internal_vars;
 }
 
+std::set< RealVariable >
+HybridIOAutomaton::controlled_vars() const
+{
+    std::set< RealVariable > result = this->_internal_vars;
+    result.insert(this->_output_vars.begin(), this->_output_vars.end());
+    
+    return result;
+}
+
+
 const std::set< DiscreteEvent >& 
 HybridIOAutomaton::input_events() const
 {
@@ -729,8 +822,17 @@ HybridIOAutomaton::internal_events() const
     return this->_internal_events;
 }
 
+std::set< DiscreteEvent >
+HybridIOAutomaton::controlled_events() const
+{
+    std::set< DiscreteEvent > result = this->_internal_events;
+    result.insert(this->_output_events.begin(), this->_output_events.end());
+    
+    return result;
+}
 
-HybridAutomaton make_monolithic_automaton(const HybridIOAutomaton& hioa) 
+
+std::pair< HybridAutomaton, RealSpace > make_monolithic_automaton(const HybridIOAutomaton& hioa) 
 {
     // Check if the input hioa is closed: no input variables or events
     if(!hioa.input_vars().empty()) {
@@ -755,6 +857,8 @@ HybridAutomaton make_monolithic_automaton(const HybridIOAutomaton& hioa)
     {
         varlist.append(*variter);
     }
+    // create the RealSpace corresponding to varlist
+    RealSpace spc(varlist);
     
     // Create a monolithic automaton with the same name.
     HybridAutomaton ha(hioa.name());
@@ -772,7 +876,7 @@ HybridAutomaton make_monolithic_automaton(const HybridIOAutomaton& hioa)
             exprlist.append(modeiter->dynamics(*viter));
         }
         // Create a VectorFunction for the dynamics
-        VectorFunction dyn(exprlist,varlist);
+        VectorFunction dyn(exprlist,spc);
         DiscreteState loc = modeiter->location();
         ha.new_mode(loc,dyn);
         // List all invariants
@@ -781,7 +885,7 @@ HybridAutomaton make_monolithic_automaton(const HybridIOAutomaton& hioa)
         for(std::list< RealExpression >::const_iterator inviter=invlist.begin(); 
             inviter != invlist.end(); inviter++)
         {
-            ha.new_invariant(loc, ScalarFunction(*inviter, varlist));
+            ha.new_invariant(loc, ScalarFunction(*inviter, spc));
         }
     }
 
@@ -798,13 +902,21 @@ HybridAutomaton make_monolithic_automaton(const HybridIOAutomaton& hioa)
             exprlist.append(triter->reset(*viter));
         }
         // Create a VectorFunction for the reset
-        VectorFunction res(exprlist,varlist);
+        VectorFunction res(exprlist,spc);
         // Add the transition to the monolithic automaton
         ha.new_transition(triter->event(), triter->source(), triter->target(),
-                          res, ScalarFunction(triter->activation(), varlist), triter->forced());
+                          res, ScalarFunction(triter->activation(), spc), triter->forced());
     }
     
-    return ha;
+    // Set the grid
+    Vector<Float> lengths(spc.size());
+    for(uint i = 0 ; i < spc.size() ; i++) {
+        lengths[i] = hioa.grid(spc[i]);
+    }
+    Grid grid(lengths);
+    ha.set_grid(grid);
+    
+    return make_pair(ha, spc);
 }
 
 //
@@ -1069,12 +1181,18 @@ HybridIOAutomaton compose(const std::string& name,
                          input_vars, output_vars, internal_vars,
                          input_events, output_events, internal_events);
     
+    // Set the grid as the union of the grids of the two components
+    std::map< RealVariable, Float > grid = ha1.grid();
+    grid.insert(ha2.grid().begin(), ha2.grid().end());
+    ha.set_grid(grid);
+    
     // Start the recursive composition from the initial states init1 and init2.
     _recursive_composition(ha, ha1, ha2, init1, init2);
     
     return ha;
 
 }
+
 
 
 std::ostream&
@@ -1085,7 +1203,8 @@ operator<<(std::ostream& os, const HybridIOAutomaton& ha)
         ", internal vars=" << ha.internal_vars() <<
         ", input events=" << ha.input_events() << ", output events=" << ha.output_events() <<
         ", internal events=" << ha.internal_events() <<        
-        ", modes=" << ha.modes() << ", transitions=" << ha.transitions() << ")";
+        ", modes=" << ha.modes() << ", transitions=" << ha.transitions() <<
+        ", grid=" << ha.grid() << ")";
 }
 
 void 

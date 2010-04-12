@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include "numeric.h"
+#include "space.h"
 #include "discrete_state.h"
 #include "expression.h"
 #include "assignment.h"
@@ -84,6 +85,14 @@ void TestHybridIOAutomaton::test_tank_definition()
     tank.set_dynamics(flow, x, dyn);
     // setting the dynamic of an input var should cause an exception
     ARIADNE_TEST_FAIL(tank.set_dynamics(flow, y, dyn));
+    
+    // Setting and checking the grid
+    // default value should be 1.0
+    ARIADNE_TEST_EQUAL(tank.grid(x),1.0);
+    std::map< RealVariable, Float > grid;
+    grid[x] = 2.0;
+    ARIADNE_TEST_TRY(tank.set_grid(grid));
+    ARIADNE_TEST_EQUAL(tank.grid(x),2.0);
     
     ARIADNE_TEST_PRINT(tank);
     
@@ -166,6 +175,14 @@ void TestHybridIOAutomaton::test_valve_definition()
     ARIADNE_TEST_FAIL(valve.new_forced_transition(e_open, idle, idle, y_geq_one));
     // creating a transition with an input event and a custom activation should cause an exception
     ARIADNE_TEST_FAIL(valve.new_unforced_transition(e_open, idle, idle, y_geq_one));
+
+    // Setting and checking the grid
+    std::map< RealVariable, Float > grid;
+    grid[x] = 1.0;
+    // x is not a variable of valve
+    ARIADNE_TEST_FAIL(valve.set_grid(grid));
+    ARIADNE_TEST_TRY(valve.set_grid(y, 0.1));
+    ARIADNE_TEST_EQUAL(valve.grid(y), 0.1);
     
     ARIADNE_TEST_PRINT(valve);
    
@@ -221,7 +238,11 @@ void TestHybridIOAutomaton::test_controller_definition()
     // Add the invariant x > hmin - delta to falling
     RealExpression x_geq_hmin = hmin - delta - x;
     controller.new_invariant(falling, x_geq_hmin);
-    
+ 
+    // Setting and checking the grid
+    // x is an input variable for controller, an exception should occur
+    ARIADNE_TEST_FAIL(controller.set_grid(x, 2.0));  
+ 
     ARIADNE_TEST_PRINT(controller);
    
 }
@@ -240,14 +261,16 @@ void TestHybridIOAutomaton::test_composition()
 void TestHybridIOAutomaton::test_conversion() 
 {
     HybridAutomaton ha;
+    RealSpace spc;
     
     ARIADNE_TEST_FAIL(make_monolithic_automaton(tank));
     ARIADNE_TEST_FAIL(make_monolithic_automaton(valve));
     ARIADNE_TEST_FAIL(make_monolithic_automaton(controller));
     
-    ha = make_monolithic_automaton(system);
+    ARIADNE_TEST_TRY(make_lpair(ha,spc) = make_monolithic_automaton(system));
     
     ARIADNE_TEST_PRINT(ha);
+    ARIADNE_TEST_PRINT(spc);
 
 }
 

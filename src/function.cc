@@ -1072,6 +1072,16 @@ VectorFunction::VectorFunction(const List< Expression<Real> >& e, const List< Va
     }
 }
 
+VectorFunction::VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s)
+    : _ptr(new VectorOfScalarFunctionBody(e.size(),s.size()))
+{
+    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+    for(uint i=0; i!=e.size(); ++i) {
+        vec->set(i,ScalarFunction(e[i],s));
+    }
+}
+
+
 /*
 VectorFunction::VectorFunction(const Space<Real>& rs, const Map<RealVariable,RealExpression>& e, const Space<Real>& as)
     : _ptr(new VectorOfScalarFunctionBody(rs.size(),as.size()))

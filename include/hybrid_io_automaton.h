@@ -88,9 +88,7 @@ class DiscreteIOMode {
         return this->_invariants; }
    
 	//! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on the invariants and dynamic functions.
-	void substitute(const Constant<Real>& con, const Real& c) {
-	    ARIADNE_NOT_IMPLEMENTED;
-	}
+	void substitute(const Constant<Real>& con, const Real& c);
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
@@ -173,9 +171,7 @@ class DiscreteIOTransition
         return this->_target; }
 
 	//! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on the reset and activation functions.
-	void substitute(const Constant<Real>& con, const Real& c) {
-	    ARIADNE_NOT_IMPLEMENTED;
-	}
+	void substitute(const Constant<Real>& con, const Real& c);
 
     //! \brief The activation region of the discrete transition.
     const RealExpression& activation() const {
@@ -550,10 +546,16 @@ class HybridIOAutomaton
     const std::set< RealVariable >& output_vars() const;
     const std::set< RealVariable >& internal_vars() const;
 
+    //! \brief The sets of controlled variables of the automaton (i.e., internal and output variables).
+    std::set< RealVariable > controlled_vars() const;        
+
     //! \brief The sets of input, output, and internal events.
     const std::set< DiscreteEvent >& input_events() const;
     const std::set< DiscreteEvent >& output_events() const;
     const std::set< DiscreteEvent >& internal_events() const;
+
+    //! \brief The sets of controlled events of the automaton (i.e., internal and output events).
+    std::set< DiscreteEvent > controlled_events() const;
 
     //! \brief Test if the hybrid automaton has a input variable named \a u.
     bool has_input_var(const RealVariable& u) const;
@@ -595,15 +597,11 @@ class HybridIOAutomaton
     std::list< DiscreteIOTransition > transitions(DiscreteState source) const;
 
     //! \brief The natural grid to use over all variables.
-    std::map< RealVariable, Float > grid() const {
-        ARIADNE_NOT_IMPLEMENTED;
-    }
+    const std::map< RealVariable, Float >& grid() const;
     
-    //! \brief The grid spacing for a given variable.
-    Float grid_spacing(const RealVariable& var) {
-        ARIADNE_NOT_IMPLEMENTED;
-    }
-    
+    //! \brief The grid scaling for a given variable.
+    Float grid(const RealVariable& var) const;
+
     //@}
 
 };
@@ -615,7 +613,7 @@ class HybridIOAutomaton
 //!     The input HybridIOAutomaton should be closed (no input variables or events) and
 //!     with all dynamics, activations, and resets specified. Otherwise an exception is thrown.
 //!
-HybridAutomaton make_monolithic_automaton(const HybridIOAutomaton& hioa);
+std::pair< HybridAutomaton, RealSpace > make_monolithic_automaton(const HybridIOAutomaton& hioa);
 
 //! \brief Compose two HybridIOAutomaton.
 //!     The two I/O automata should be compatible. No conflict between variables and events.

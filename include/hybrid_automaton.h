@@ -58,6 +58,7 @@ class ScalarFunction;
 class VectorFunction;
 class Grid;
 
+
 /*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
  * within and invariant constraint set.
  *
@@ -589,6 +590,9 @@ class HybridAutomaton
     HybridGrid grid() const;
 
     //@}
+    
+    //! \brief non-standard assignment operator from a pair (HybridAutomaton, RealSpace).
+    HybridAutomaton& operator=(const std::pair< HybridAutomaton, RealSpace >& pair);
 
 };
 

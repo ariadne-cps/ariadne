@@ -31,6 +31,8 @@
 #include "hybrid_automaton.h"
 #include "grid_set.h"
 #include "discrete_event.h"
+#include "space.h"
+
 
 namespace Ariadne {
 
@@ -77,7 +79,8 @@ operator<<(std::ostream& os, const DiscreteMode& mode)
     return os << "DiscreteMode( "
               << "location=" << mode.location() << ", "
               << "dynamic=" << mode.dynamic() << ", "
-              << "invariants=" << mode.invariants() << " )";
+              << "invariants=" << mode.invariants() << ", "
+              << "grid=" << mode.grid() << " )";
 }
 
 
@@ -111,7 +114,8 @@ operator<<(std::ostream& os, const DiscreteTransition& transition)
               << "source=" << transition.source() << ", "
               << "target=" << transition.target() << ", "
               << "reset=" << transition.reset() << ", "
-              << "activation=" << transition.activation() << " )";
+              << "activation=" << transition.activation() << ", "
+              << (transition.forced() ? "forced" : "unforced") << " )";
 }
 
 
@@ -580,10 +584,23 @@ HybridAutomaton::grid() const
     return result;
 }
 
+HybridAutomaton& 
+HybridAutomaton::operator=(const std::pair< HybridAutomaton, RealSpace >& pair) 
+{
+    //std::cout << pair.first << std::endl;
+    // Handle self-assignment
+    if(this == &(pair.first)) return *this;
+    this->_name = pair.first.name();
+    this->_modes = pair.first.modes();
+    this->_transitions = pair.first.transitions();
+    return *this;
+}
+
+
 std::ostream&
 operator<<(std::ostream& os, const HybridAutomaton& ha)
 {
-    return os << "HybridAutomaton( modes=" << ha.modes() << ", transitions=" << ha.transitions() << ")";
+    return os << "HybridAutomaton( name=" << ha.name() << " modes=" << ha.modes() << ", transitions=" << ha.transitions() << ")";
 }
 
 void 

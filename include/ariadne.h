@@ -51,6 +51,7 @@ using std::ofstream; using std::ifstream;
 #include "user_function.h"
 #include "taylor_model.h"
 
+#include "space.h"
 #include "expression.h"
 #include "variables.h"
 #include "assignment.h"
@@ -71,6 +72,7 @@ using std::ofstream; using std::ifstream;
 #include "discrete_state.h"
 #include "discrete_event.h"
 #include "hybrid_automaton.h"
+#include "hybrid_io_automaton.h"
 
 #include "vector_field_evolver.h"
 #include "hybrid_evolver.h"

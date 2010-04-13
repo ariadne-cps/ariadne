@@ -249,11 +249,12 @@ void TestHybridIOAutomaton::test_controller_definition()
 
 void TestHybridIOAutomaton::test_composition() 
 {
-    HybridIOAutomaton valvecontr = compose("valvecontr", valve, controller, 
-                                           DiscreteState("idle"), DiscreteState("rising"));
-    ARIADNE_TEST_PRINT(valvecontr);
-    system = compose("system", valvecontr, tank,
-                     DiscreteState("idle,rising"), DiscreteState("flow"));
+    HybridIOAutomaton valvetank;
+    ARIADNE_TEST_TRY(valvetank = compose("valvecontr", valve, tank, 
+                                         DiscreteState("idle"), DiscreteState("flow")));
+    ARIADNE_TEST_PRINT(valvetank);
+    ARIADNE_TEST_TRY(system = compose("system", valvetank, controller,
+                                      DiscreteState("idle,flow"), DiscreteState("rising")));
     ARIADNE_TEST_PRINT(system);
                      
 }

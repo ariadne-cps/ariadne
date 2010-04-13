@@ -443,9 +443,9 @@ HybridIOAutomaton::new_transition(DiscreteEvent event,
                                   const RealExpression& activation,
                                   bool forced)
 {
-    ARIADNE_ASSERT_MSG(!this->has_input_event(event),
+    ARIADNE_ASSERT_MSG(!this->has_input_event(event) || identical(activation,1.0),
         "Error in transition " << event << " from " << source << " of automaton " << this->name() <<
-        ": transitions labelled with input events cannot have a custom activation region.");
+        ": transitions labelled with input events cannot have an activation different from true.");
     this->new_transition(event, source, target, forced);
     this->set_reset(event, source, reset);
     this->set_activation(event, source, activation);
@@ -472,9 +472,9 @@ HybridIOAutomaton::new_transition(DiscreteEvent event,
                                   const RealExpression& activation,
                                   bool forced)
 {
-    ARIADNE_ASSERT_MSG(!this->has_input_event(event),
+    ARIADNE_ASSERT_MSG(!this->has_input_event(event) || identical(activation,1.0),
         "Error in transition " << event << " from " << source << " of automaton " << this->name() <<
-        ": transitions labelled with input events cannot have a custom activation region.");
+        ": transitions labelled with input events cannot have an activation different from true.");
     this->new_transition(event, source, target, forced);
     this->set_activation(event, source, activation);
     return this->transition(event,source);
@@ -559,9 +559,9 @@ HybridIOAutomaton::set_activation(DiscreteEvent event,
             << event << " and source " << source << ".");
     }
 
-    ARIADNE_ASSERT_MSG(!this->has_input_event(event),
+    ARIADNE_ASSERT_MSG(!this->has_input_event(event) || identical(activation,1.0),
         "Error in transition " << event << " from " << source << " of automaton " << this->name() <<
-        ": transitions labelled with input events cannot have a custom activation region.");
+        ": transitions labelled with input events cannot have an activation different from true.");
     
     DiscreteIOTransition& trans = this->_transition(event,source);
     trans.set_activation(activation);

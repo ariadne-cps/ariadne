@@ -313,6 +313,16 @@ HybridIOAutomaton(const std::string& name,
         "Output and internal variables are not disjoint in the definition of automaton " << name);
 }
 
+const std::string&
+HybridIOAutomaton::set_name(const std::string& name)
+{
+    ARIADNE_ASSERT_MSG(name != "",
+        "Automaton's name must be nonempty.")
+    
+    this->_name = name;
+    return this->_name;
+}
+
 const std::set< RealVariable >& 
 HybridIOAutomaton::add_input_var(const RealVariable& u)
 {
@@ -1041,7 +1051,7 @@ DiscreteState _recursive_composition(HybridIOAutomaton& ha,
     {
         // std::cout << "Checking transition " << *iter << "..." << std::endl;
         // remember that transition with shared events have already been added in the previous loop
-        if(ha1.has_input_event(iter->event()) || ha2.has_output_event(iter->event()))
+        if(ha1.has_input_event(iter->event()) || ha1.has_output_event(iter->event()))
         {   // event is shared with ha1: transition have already been added, skip
             continue;
         }

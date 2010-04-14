@@ -336,6 +336,9 @@ class HybridIOAutomaton
     //@{
     //! \name Methods for building the automaton.
 
+    //! \brief Change the automaton's name.
+    const std::string& set_name(const std::string& name);
+
     //! \brief Adds an input variable \param u to the automaton.
     const std::set< RealVariable >& add_input_var(const RealVariable& u);
 

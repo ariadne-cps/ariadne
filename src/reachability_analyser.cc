@@ -956,7 +956,7 @@ _setMaximumEnclosureCell(const HybridGrid& hgrid)
 		mec[i] /= (1<<this->_parameters->maximum_grid_depth);
 
 	// Assigns
-	this->_discretiser->parameters().maximum_enclosure_cell = 2*mec;
+	this->_discretiser->parameters().maximum_enclosure_cell = 10*mec;
 }
 
 
@@ -1002,8 +1002,8 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 			if (gridlengths[i] == 0) // If it has zero grid length, assign minlength
 				gridlengths[i] = minlength;
 
-		// Assign the grid, centered on the origin
-		hg[hfv_it->first] = Grid(Vector<Float>(css),gridlengths);
+		// Assign the grid, centered on the centre of the domain
+		hg[hfv_it->first] = Grid(this->_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);
 
 	}
 
@@ -1059,15 +1059,20 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 		// If it has zero grid length, assign minlength
 		if (gridlengths[i] == 0)
 			gridlengths[i] = minlength;
-	
-	// Save the grid, centered on the origin
-	Grid gr(Vector<Float>(css),gridlengths);
 
 	// Initialize the hybrid grid
 	HybridGrid hg;
-	// Populate it
+	// Populate it, centered on the centre of the domain
 	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-		hg[hfv_it->first] = gr;		
+		hg[hfv_it->first] = Grid(this->_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);
+/*	{
+		Vector<Float> lengths = Vector<Float>(css);
+		for (uint i=0;i<css;i++)
+			lengths[i] = this->_parameters->bounding_domain[hfv_it->first][i].width()/(1<<this->_parameters->maximum_grid_depth);
+		hg[hfv_it->first] = Grid(Vector<Float>(css),lengths);
+
+	}
+*/				
 	
 	// Return
 	return hg;
@@ -1078,13 +1083,6 @@ void
 HybridReachabilityAnalyser::
 _setInitialParameters(SystemType& system, const HybridBoxes& domain)
 {
-	// Fixed parameters
-	this->_discretiser->parameters().enable_subdivisions = true;
-	this->_discretiser->parameters().enable_set_model_reduction = true;
-	this->_parameters->transient_time = 1e10;
-	this->_parameters->transient_steps = 1;
-	this->_parameters->lock_to_grid_time = 1e10;		
-	this->_parameters->lock_to_grid_steps = 1;
 	this->_parameters->bounding_domain = domain; // Set the domain (IMPORTANT: must be done before using _getDomainHMAD and _getEqualizedHybridGrid)
 
 	this->_parameters->maximum_grid_depth = this->_parameters->lowest_maximum_grid_depth; // Initial value, incremented at each iteration

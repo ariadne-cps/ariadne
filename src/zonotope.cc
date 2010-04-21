@@ -892,8 +892,9 @@ contains(const Zonotope& z, const Point& pt)
 
 struct angle_less {
     bool operator() (const Vector2d& v1, const Vector2d& v2) const {
-        if(v1.y==0) { return true; }
-        else if(v1.y==0) { return false; }
+        if(v1.x==0 && v2.x == 0) { return v1.y < v2.y; }
+        else if(v1.x == 0 && v1.y < 0) { return true; }
+		else if(v2.x == 0 && v2.y > 0) { return false; }
         else { return (v1.y/v1.x) < (v2.y/v2.x); }
     }
 };
@@ -916,7 +917,7 @@ void Zonotope::draw(CanvasInterface& c) const {
     if(ze[ix]>0) { pg.push_back(Vector2d(ze[ix],0.0)); }
     if(ze[iy]>0) { pg.push_back(Vector2d(0.0,ze[iy])); }
 
-    std::sort(pg.begin(),pg.end(),angle_less());
+    std::sort(pg.begin(),pg.end(),angle_less()); 
 
     const uint npg=pg.size();
     Point2d pt=pc;

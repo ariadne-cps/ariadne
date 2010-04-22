@@ -326,8 +326,7 @@ _evolution(EnclosureListType& final_sets,
 
 
         if(verbosity==1) {
-            ARIADNE_LOG(1,"\r"
-                        <<"#w="<<std::setw(4)<<working_sets.size()
+            ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
                         <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
                         <<" s="<<std::setw(3)<<std::left<<initial_events.size()
                         <<" t="<<std::setw(7)<<std::fixed<<initial_time_model.value()
@@ -335,7 +334,7 @@ _evolution(EnclosureListType& final_sets,
                         <<" l="<<std::setw(3)<<std::left<<initial_location
                         <<" c="<<initial_set_model.centre()
                         <<" e="<<initial_events
-                        <<"                      ");
+                        <<"\n");
 
         }
 

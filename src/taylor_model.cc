@@ -3198,7 +3198,12 @@ _solve1(const Vector<TaylorModel>& f, uint n)
     for(uint i=0; i!=n; ++i) {
         midpt_x=midpoint(x);
         Df=jacobian(f,x);
-        Dfinv=inverse(Df);
+        try {
+            Dfinv=inverse(Df);
+        } catch(const SingularMatrixException& e) {
+            ARIADNE_FAIL_MSG("SingularMatrixException catch.");
+        }
+
         delta_x=prod(Dfinv,evaluate(f,Vector<Interval>(midpt_x)));
         new_x=midpt_x-delta_x;
 
@@ -3248,8 +3253,13 @@ Vector<TaylorModel> _implicit1(const Vector<TaylorModel>& f, uint n)
     Vector<TaylorModel> id=TaylorModel::variables(has);
     Vector<TaylorModel> h=TaylorModel::zeros(has,rs);
     Vector<TaylorModel> fidh,dh;
-
-    Matrix<Float> D2finv=inverse(jacobian2_value(f));
+    
+    Matrix<Float> D2finv;
+    try {
+        D2finv=inverse(jacobian2_value(f));
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }
 
     //std::cerr<<"\n  f="<<f<<std::endl;
     //std::cerr<<"  h="<<h<<"\n\n";
@@ -3279,7 +3289,12 @@ Vector<TaylorModel> _implicit2(const Vector<TaylorModel>& f, uint n)
     //std::cerr<<"\n  f="<<f<<std::endl;
     //std::cerr<<"  h="<<h<<"\n\n";
     for(uint k=0; k!=n; ++k) {
-        Matrix<Interval> D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        Matrix<Interval> D2finv;
+        try {
+            D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        } catch(const SingularMatrixException& e) {
+            ARIADNE_FAIL_MSG("SingularMatrixException");
+        }
         //std::cerr<<"    D2finv="<<D2finv<<"\n";
         clobber(h);
         fidh=compose(f,join(id,h));
@@ -3300,9 +3315,13 @@ Vector<TaylorModel> _implicit3(const Vector<TaylorModel>& f, uint n)
     Vector<TaylorModel> id=TaylorModel::variables(has);
     Vector<TaylorModel> h=TaylorModel::zeros(has,rs);
     Vector<TaylorModel> fidh,dh;
-
-    Matrix<Interval> D2finv=inverse(jacobian2_range(f));
-
+    
+    Matrix<Interval> D2finv;
+    try {
+        D2finv=inverse(jacobian2_range(f));
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }    
     //std::cerr<<"\n  f="<<f<<std::endl;
     //std::cerr<<"  h="<<h<<"\n\n";
     for(uint k=0; k!=n; ++k) {
@@ -3332,7 +3351,12 @@ Vector<TaylorModel> _implicit4(const Vector<TaylorModel>& f, uint n)
     //std::cerr<<"\n  f="<<f<<std::endl;
     //std::cerr<<"  h="<<h<<"\n\n";
     for(uint k=0; k!=n; ++k) {
-        Matrix<Interval> D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        Matrix<Interval> D2finv;
+        try {
+            D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        } catch(const SingularMatrixException& e) {
+            ARIADNE_FAIL_MSG("SingularMatrixException");
+        }
         //std::cerr<<"    D2finv="<<D2finv<<"\n";
         Vector<Interval> h_err=errors(h);
         clobber(h);
@@ -3369,7 +3393,13 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
             g[i][MultiIndex::unit(fas,j)]=0;
         }
     }
-    Matrix<Float> J=inverse(D2f);
+    Matrix<Float> J;
+    try {
+        J=inverse(D2f);
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }
+    
     g=prod(J,g);
     for(uint i=0; i!=rs; ++i) {
         g[i].clean();
@@ -3462,7 +3492,13 @@ implicit(const Vector<TaylorModel>& f)
     // Perform proper Newton step improvements
     Vector<Interval> domain_h(h[0].argument_size(),Interval(-1,+1));
     for(uint i=0; i!=3; ++i) {
-        D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        try {
+            D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        } catch(...) {
+            ARIADNE_THROW(ImplicitFunctionException,
+                          "implicit(Vector<TaylorModel>)",
+                          "Jacobian "<<D2f<<" is not invertible");
+        }
         clobber(h);
         Vector<TaylorModel> fidh=compose(f,join(id,h));
         Vector<TaylorModel> dh=prod(D2finv,fidh);

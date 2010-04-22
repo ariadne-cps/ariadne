@@ -57,8 +57,9 @@ solve_all(Set< Vector<Interval> >& r,
     bool invertible_jacobian=true;
     //Vector<Interval> nx=2*ix-midpoint(ix);
     Vector<Interval> nx=ix;
+    Matrix<Interval> Jinv;
     try {
-        Matrix<Interval> Jinv=inverse(f.jacobian(nx));
+        Jinv=inverse(f.jacobian(nx));
     }
     catch(const SingularMatrixException& e) {
         invertible_jacobian=false;
@@ -193,7 +194,12 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
             g[i][MultiIndex::unit(fas,j)]=0;
         }
     }
-    Matrix<Float> J=inverse(D2f);
+    Matrix<Float> J;
+    try {
+        J=inverse(D2f);
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }
     g=prod(J,g);
     for(uint i=0; i!=rs; ++i) {
         g[i].clean();
@@ -264,7 +270,11 @@ newton_implicit(const Vector<TaylorModel>& f)
     // Perform proper Newton step improvements
     Vector<Interval> domain_h(h[0].argument_size(),Interval(-1,+1));
     for(uint i=0; i!=3; ++i) {
-        D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        try {
+            D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        } catch(const SingularMatrixException& e) {
+            ARIADNE_FAIL_MSG("SingularMatrixException");
+        }
         clobber(h);
         Vector<TaylorModel> fidh=compose(f,join(id,h));
         Vector<TaylorModel> dh=prod(D2finv,fidh);
@@ -508,7 +518,12 @@ IntervalNewtonSolver::step(const VectorFunction& f,
     ARIADNE_LOG(5,"  f(m)="<<w<<"\n");
     Matrix<Interval> A=f.jacobian(x);
     ARIADNE_LOG(5,"  Df(r)="<<A<<"\n");
-    Matrix<Interval> Ainv=inverse(A);
+    Matrix<Interval> Ainv;
+    try {
+        Ainv=inverse(A);
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }
     ARIADNE_LOG(5,"  inverse(Df(r))="<<Ainv<<"\n");
     Vector<Interval> dx=prod(Ainv, w);
     ARIADNE_LOG(5,"  dx="<<dx<<"\n");
@@ -531,7 +546,12 @@ KrawczykSolver::step(const VectorFunction& f,
     ARIADNE_LOG(5,"  f(m)="<<fm<<"\n");
     Matrix<Interval> J=f.jacobian(x);
     ARIADNE_LOG(5,"  Df(r)="<<J<<"\n");
-    Matrix<Interval> M=inverse(midpoint(J));
+    Matrix<Interval> M;
+    try {
+        M=inverse(midpoint(J));
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }
     ARIADNE_LOG(5,"  inverse(Df(m))="<<M<<"\n");
     Vector<Interval> dx=prod(M,fm)-prod(Matrix<Interval>(I-prod(M,J)),Vector<Interval>(x-m));
     ARIADNE_LOG(5,"  dx="<<dx<<"\n");
@@ -576,7 +596,12 @@ KrawczykSolver::implicit_step(const VectorFunction& f,
     for(uint i=0; i!=nx; ++i) { rx[i]=x[i].range(); }
     Matrix<Interval> J=project(f.jacobian(join(rp,rx)),range(0,nx),range(np,np+nx));
     ARIADNE_LOG(5,"    D2f(r)="<<J<<"\n");
-    Matrix<Interval> M=inverse(midpoint(J));
+    Matrix<Interval> M;
+    try {
+        M=inverse(midpoint(J));
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }
     ARIADNE_LOG(5,"    inverse(D2f(m))="<<M<<"\n");
     VectorTaylorFunction dx=product(M,fm) - Vector<Interval>( prod(Matrix<Interval>(I-prod(M,J)),ex*Interval(-1,+1)) );
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");

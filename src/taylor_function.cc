@@ -427,8 +427,12 @@ implicit(const Vector<ScalarTaylorFunction>& f)
         //std::cerr<<"  Df="<<Df<<std::endl;
         Matrix<Interval> D2f=project(Df,range(0,rs),range(has,fas));
         //std::cerr<<"  D2f="<<J<<std::endl;
-        Matrix<Interval> D2finv=inverse(D2f);
-
+        Matrix<Interval> D2finv;
+        try {
+            D2finv=inverse(D2f);
+        } catch(const SingularMatrixException& e) {
+            ARIADNE_FAIL_MSG("SingularMatrixException");
+        }
         for(uint i=0; i!=rs; ++i) {
             h[i].set_error(0);
         }

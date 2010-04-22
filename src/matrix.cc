@@ -189,7 +189,12 @@ template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Int
     const size_t m=B.column_size();
 
     // Precondition A and B
-    Matrix<Float> J=inverse(midpoint(A));
+    Matrix<Float> J;
+    try {
+        J=inverse(midpoint(A));
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException catche");
+    }
     Matrix<Interval> JA=prod(J,A);
     Matrix<Interval> JB=prod(J,B);
     //std::cerr<<"J="<<J<<"\nJA="<<JA<<"\nJB="<<JB<<"\n";
@@ -240,7 +245,11 @@ template<> Matrix<Interval> inverse<Interval>(const Matrix<Interval>& A) {
 
 
 template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B) {
-    return prod(inverse(A),B);
+    try {
+        return prod(inverse(A),B);
+    } catch(const SingularMatrixException& e) {
+        ARIADNE_FAIL_MSG("SingularMatrixException");
+    }
 }
 
 template<> Matrix<Interval> solve(const Matrix<Interval>& A, const Matrix<Interval>& B) {

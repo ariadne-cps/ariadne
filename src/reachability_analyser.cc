@@ -629,7 +629,7 @@ chain_reach(const SystemType& system,
     Gr grid=system.grid();
     GTS bounding(grid), evolve(grid), reach(grid), initial(grid), found(grid);
 
-    bounding.adjoin_outer_approximation(bounding_domain,maximum_grid_depth); 
+    bounding.adjoin_outer_approximation(bounding_domain,0); 
 	bounding.recombine();
 	HybridBoxes bounding_box = bounding.bounding_box(); // Used for the restriction check
     ARIADNE_LOG(6,"\t\t\t\t\tbounding_size="<<bounding.size()<<"\n");
@@ -754,7 +754,7 @@ _safe(const SystemType& system,
 	HybridGridTreeSet reach = chain_reach(system,initial_set); // Perform the chain reachability analysis	
 
 	// If the reached region was not restricted and the maximum enclosure bounds have not been reached while not subdividing, a verification is feasible
-	if (!this->_statistics->upper().has_restriction_occurred && !(this->_discretiser->statistics().upper().has_max_enclosure_been_reached && !this->_discretiser->parameters().enable_subdivisions))
+	if (!this->_statistics->upper().has_restriction_occurred)
 	{
 		// If the reached region is definitely inside the hybrid safe box, the result is safe 
 		bool result = definitely(reach.subset(safe_box));
@@ -769,8 +769,6 @@ _safe(const SystemType& system,
 		ARIADNE_LOG(4,"\t\t\tNot checked due to: ");
 		if (this->_statistics->upper().has_restriction_occurred)
 			ARIADNE_LOG(4,"<domain bounds> ");
-		if (this->_discretiser->statistics().upper().has_max_enclosure_been_reached && !this->_discretiser->parameters().enable_subdivisions)
-			ARIADNE_LOG(4,"<enclosure bounds>");
 		ARIADNE_LOG(4,"\n");
 		return false;
 	}
@@ -956,7 +954,7 @@ _setMaximumEnclosureCell(const HybridGrid& hgrid)
 		mec[i] /= (1<<this->_parameters->maximum_grid_depth);
 
 	// Assigns
-	this->_discretiser->parameters().maximum_enclosure_cell = 10*mec;
+	this->_discretiser->parameters().maximum_enclosure_cell = 1.9*mec;
 }
 
 

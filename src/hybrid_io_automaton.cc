@@ -202,6 +202,24 @@ DiscreteIOTransition(DiscreteEvent event,
 }
 
 void
+DiscreteIOTransition::set_event(DiscreteEvent event)
+{
+    this->_event = event;
+}
+
+void
+DiscreteIOTransition::set_source(DiscreteState source)
+{
+    this->_source = source;
+}
+
+void
+DiscreteIOTransition::set_target(DiscreteState target)
+{
+    this->_target = target;
+}
+
+void
 DiscreteIOTransition::set_reset(const RealVariable& var,
                                 const RealExpression& res)
 {
@@ -400,6 +418,16 @@ HybridIOAutomaton::new_mode(DiscreteState location)
 }
 
 const DiscreteIOMode&
+HybridIOAutomaton::new_mode(const DiscreteIOMode& mode)
+{
+    if(this->has_mode(mode.location())) {
+        ARIADNE_FAIL_MSG("The hybrid automaton " << this->_name << " already has a mode with id " << mode.location() << ".");
+    }
+    this->_modes.push_back(mode);
+    return mode;
+}
+
+const DiscreteIOMode&
 HybridIOAutomaton::new_mode(DiscreteState location,
                             const std::map< RealVariable, RealExpression >& dynamics)
 {
@@ -517,6 +545,27 @@ HybridIOAutomaton::new_transition(DiscreteEvent event,
           
     this->_transitions.push_back(DiscreteIOTransition(event,source,target,forced));
     return this->transition(event,source);
+}
+
+const DiscreteIOTransition&
+HybridIOAutomaton::new_transition(const DiscreteIOTransition& trans)
+{
+    if(!trans.event().is_transition()) {
+        ARIADNE_FAIL_MSG("Transition event names cannot start with \"invariant\".");    
+    }
+    if(this->has_transition(trans.event(),trans.source())) {
+        ARIADNE_FAIL_MSG("The automaton " << this->_name << " already has a transition with id "
+            << trans.event() << " and source " << trans.source() << ".");
+    }
+    if(!this->has_mode(trans.source())) {
+        ARIADNE_FAIL_MSG("The automaton " << this->_name << " does not contain a source mode with id " << trans.source());
+    }
+    if(!this->has_mode(trans.target())) {
+        ARIADNE_FAIL_MSG("The automaton " << this->_name << " does not contain a target mode with id " << trans.target());
+    }
+          
+    this->_transitions.push_back(trans);
+    return trans;
 }
 
 

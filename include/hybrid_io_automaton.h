@@ -93,7 +93,6 @@ class DiscreteIOMode {
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
 
-  private:
     // Construct discrete mode.
     //
     // \param id is the identifier of the mode.
@@ -196,8 +195,6 @@ class DiscreteIOTransition
         return this->_forced;
     }
 
-  private:
-
     // Construct a new transition (for internal use).    
     DiscreteIOTransition(DiscreteEvent event,
                          DiscreteState source,
@@ -223,6 +220,12 @@ class DiscreteIOTransition
                          const RealExpression& activation,
                          bool forced=false);
                          
+    void set_event(DiscreteEvent event);
+    
+    void set_source(DiscreteState source);
+    
+    void set_target(DiscreteState target);
+
     // Set the reset map for a given variable
     void set_reset(const RealVariable& var,
                    const RealExpression& res);
@@ -366,6 +369,8 @@ class HybridIOAutomaton
     const DiscreteIOMode& new_mode(DiscreteState state,
                                    const std::map< RealVariable, RealExpression >& dynamic);
 
+    const DiscreteIOMode& new_mode(const DiscreteIOMode& mode);
+    
     //! \brief Sets the dynamic for a variable in a mode of the automaton.
     //!
     //!   \param state is the mode's discrete state.
@@ -414,6 +419,8 @@ class HybridIOAutomaton
                                                DiscreteState target,
                                                bool forced);
 
+    const DiscreteIOTransition& new_transition(const DiscreteIOTransition& trans);
+    
     //! \brief Adds a forced (urgent) discrete transition to the automaton.
     //!
     //!    \param event is the transition's event.

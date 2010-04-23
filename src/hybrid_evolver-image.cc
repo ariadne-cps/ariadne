@@ -302,6 +302,7 @@ _evolution(EnclosureListType& final_sets,
             uint nd=initial_set_model.dimension();
             SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
             array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
+            ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
                 ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
@@ -316,6 +317,10 @@ _evolution(EnclosureListType& final_sets,
                   this->_parameters->enable_premature_termination && has_max_enclosure_been_reached) {
             ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
+            if(semantics == UPPER_SEMANTICS) {
+                // adjoin to the final sets
+                final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
+            }
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,

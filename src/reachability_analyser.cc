@@ -1090,6 +1090,7 @@ _setInitialParameters(SystemType& system, const HybridBoxes& domain)
 	HybridFloatVector hmad = this->_getDomainHMAD(system); // Evaluate the maximum absolute derivatives from the domain
 
 	system.set_grid(this->_getEqualizedHybridGrid(hmad)); // Initial grid
+
 	this->_setMaximumStepSize(hmad,system.grid()); // Initial maximum step size
 	this->_setMaximumEnclosureCell(system.grid()); // Initial maximum enclosure cell
 }
@@ -1121,7 +1122,7 @@ verify_iterative(SystemType& system,
 
 	time_t mytime;
 	time(&mytime);
-	string foldername = system.name()+".png";
+	string foldername = system.name()+"-png";
 	char mgd_char[10];
 	string filename;
 

@@ -627,7 +627,7 @@ chain_reach(const SystemType& system,
 			ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the continuous space."); }}
 
     Gr grid=system.grid();
-    GTS bounding(grid), evolve(grid), reach(grid), initial(grid), found(grid);
+    GTS bounding(grid), evolve(grid), reach(grid), initial(grid), found(grid), filled(grid);
 
     bounding.adjoin_outer_approximation(bounding_domain,0); 
 	bounding.recombine();
@@ -680,13 +680,16 @@ chain_reach(const SystemType& system,
     evolve.restrict(bounding);
 	this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 
-    ARIADNE_LOG(5,"\t\t\t\tfound "<<reach.size()<<" cells, of which "<<evolve.size()<<" are new.\n");   
+    ARIADNE_LOG(5,"\t\t\t\tfound "<<reach.size()<<" cells, of which "<<evolve.size()<<" are new.\n"); 
     
     ARIADNE_LOG(5,"\t\t\t\tComputing recurrent evolution...\n");
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
 
 	// While the final set has new cells in respect to the previous reach set, process them and increase the number of locks (starting from 1 due to the initial transient phase)
     for (this->_statistics->upper().total_locks = 1; !evolve.empty(); this->_statistics->upper().total_locks++) {
+
+		// Add the evolve region to the filled region
+		filled.adjoin(evolve);  
 
         make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
         ARIADNE_LOG(6,"\t\t\t\t\tfound.size()="<<found.size()<<"\n");
@@ -696,7 +699,7 @@ chain_reach(const SystemType& system,
 		if (!this->_statistics->upper().has_restriction_occurred)
 			if (!evolve.subset(bounding_box)) this->_statistics->upper().has_restriction_occurred = true;
 
-        evolve.remove(reach);
+        evolve.remove(filled); // Remove only the cells that are filled
         evolve.restrict(bounding);
         reach.adjoin(found);
 

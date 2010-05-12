@@ -197,6 +197,10 @@ bool operator==(const Expression<Tribool>&, bool);
 
 Expression<Real> function(const Expression<Real>& e, const Space<Real>& s);
 
+//! \brief Return the original expression, where a Delta constant is subtracted to those VariableExpressions having positive overall sign; 
+//! being a recursive function, \a positive is the initial sign
+Expression<Real> left_delta_restrict(Expression<Real> expr, bool positive);
+
 //! \related Expression \brief .
 Expression<Boolean> operator&&(Expression<Boolean> e1, Expression<Boolean> e2);
 //! \related Expression \brief .

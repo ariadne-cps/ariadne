@@ -28,6 +28,7 @@
 #include "hybrid_io_automaton.h"
 #include "hybrid_automaton.h"
 #include "assignment.h"
+#include "operators.h"
 #include "space.h"
 #include "grid.h"
 
@@ -1252,7 +1253,287 @@ HybridIOAutomaton compose(const std::string& name,
 
 }
 
+HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
+{
+	typedef std::map<DiscreteEvent,bool> ReceivedEventsMap;
+	typedef std::list<std::pair<DiscreteState,ReceivedEventsMap> > LocationsWithReceivedEvents;
 
+	// Create the Delta constant with arbitrary value 0
+	RealConstant Delta("Delta",0.0);
+	// Create the d variable
+	RealVariable d("d");
+
+	// Create the target automaton with a copy of the original variables and events
+	HybridIOAutomaton aasap(hioa.name()+"_aasap",
+							hioa.input_vars(),
+							hioa.output_vars(),
+							hioa.internal_vars(),
+							hioa.input_events(),
+							hioa.output_events(),
+							hioa.internal_events());
+
+	// Add the AASAP internal variables and events
+		
+		// For each input event
+		for (std::set<DiscreteEvent>::const_iterator input_event_it = aasap.input_events().begin(); input_event_it != aasap.input_events().end(); input_event_it++)
+		{
+			// Clock for waiting for acknowledgement of each input event
+			aasap.add_internal_var(RealVariable("y_" + input_event_it->name()));
+			// The corresponding input acknowledgment event
+			aasap.add_internal_event(DiscreteEvent(input_event_it->name() + "_ack"));			
+		}
+		// Variable for remaining in the same location
+		aasap.add_internal_var(d);
+
+	// Get the input events, internal events and output events of the automaton
+	const std::set<DiscreteEvent>& input_events = aasap.input_events();
+	const std::set<DiscreteEvent>& internal_events = aasap.internal_events();
+	const std::set<DiscreteEvent>& output_events = aasap.output_events();
+
+	// Create the destination locations with the information about received events, and copy the original modes into the aasap ones
+
+		// Initialize the list of locations with received events information
+		LocationsWithReceivedEvents lwre;
+
+		// For each mode of the original automaton
+		for (std::list<DiscreteIOMode>::const_iterator mode_it = hioa.modes().begin(); mode_it != hioa.modes().end(); mode_it++)
+		{
+			// We must construct 2^num_input_events locations
+			for (int i=0;i < (1<<input_events.size());i++)
+			{
+				// Initialize the state name
+				std::string statename = mode_it->location().name();
+
+				// Initialize the received events map
+				ReceivedEventsMap rem;
+
+				// Initialize the iterator and counter
+				std::set<DiscreteEvent>::const_iterator input_event_it = input_events.begin();
+				int j=0; 
+
+				// For each event
+				while (input_event_it != input_events.end())
+				{
+					// Stores the information of being received
+					bool is_received = (((1<<j) & i) > 0);
+
+					// If received, adds the input event name to the state name
+					if (is_received)
+						statename += "_" + input_event_it->name();
+
+					// Insert the information about whether the event is considered received
+					rem.insert(make_pair<DiscreteEvent,bool>(*input_event_it,is_received));
+
+					// Increase the iterator and the counter
+					input_event_it++; 
+					j++;
+				}
+
+				// Add the corresponding mode to the AASAP automaton, along with the original dynamics
+				aasap.new_mode(DiscreteState(statename),mode_it->dynamics());
+
+				// Add the original location with received events
+				lwre.push_back(make_pair<DiscreteState,ReceivedEventsMap>(mode_it->location(),rem));
+			}
+		}
+
+	// For each location of the AASAP automaton
+	for (LocationsWithReceivedEvents::const_iterator lwre_it = lwre.begin(); lwre_it != lwre.end(); lwre_it++)
+	{
+		// Get the AASAP name of the location
+			
+			// Initial value
+			std::string location_aasap_name = lwre_it->first.name();
+			// For each input event, if received 
+			for (ReceivedEventsMap::const_iterator rem_it = lwre_it->second.begin(); rem_it != lwre_it->second.end(); rem_it++)
+				if (rem_it->second)
+					location_aasap_name += "_" + rem_it->first.name();
+
+		// Hold the aasap location
+
+			DiscreteState aasap_location(location_aasap_name);
+
+		// Hold the received events map
+
+			ReceivedEventsMap rem = lwre_it->second;
+
+		// Insert the dynamics of the AASAP internal variables
+
+			// The expression for a running clock
+			RealExpression clock_running = 1.0;
+			// The expression for an idle clock
+			RealExpression clock_idle = 0.0;
+
+			// For d, the dynamics is always to run
+			aasap.set_dynamics(aasap_location, d, clock_running);
+
+			// For the y variables, it depends whether the corresponding input event has been received or not
+			for (ReceivedEventsMap::const_iterator rem_it = rem.begin(); rem_it != rem.end(); rem_it++)
+				aasap.set_dynamics(aasap_location, RealVariable("y_"+rem_it->first.name()), rem_it->second ? clock_running : clock_idle);
+
+		// Insert the transitions due to input events
+			
+			// For each input event
+			for (std::set<DiscreteEvent>::const_iterator input_event_it = input_events.begin(); input_event_it != input_events.end(); input_event_it++)
+			{
+				// Identify the target location: the same if the event has already been received, the one with the received event otherwise; 
+				// in the second case, a reset of the corresponding clock is required
+				std::string target_location;
+			
+				// If the event has already been received, create a loop transition, otherwise create a transition to the proper location, resetting the related clock
+				if (rem[*input_event_it])
+					aasap.new_unforced_transition(*input_event_it,aasap_location,aasap_location);
+				else
+				{
+					// Create the reset (reset to zero only the variable corresponding to the event)
+					std::map< RealVariable, RealExpression> reset; 
+					for (std::set<RealVariable>::const_iterator var_it = aasap.internal_vars().begin(); var_it != aasap.internal_vars().end(); var_it++)
+					{
+						if (var_it->name() != "y_"+input_event_it->name())
+							reset[*var_it] = *var_it;
+						else
+							reset[*var_it] = 0.0;
+					}
+
+					// Initialize the target location name
+					std::string target_location_name = lwre_it->first.name();
+					// Copy the received events map information
+					ReceivedEventsMap target_rem = rem;
+					// Set the received event flag as true
+					target_rem[*input_event_it] = true;
+					// Build the name by appending the received events
+					for (ReceivedEventsMap::const_iterator rem_it = target_rem.begin(); rem_it != target_rem.end(); rem_it++)
+						if (rem_it->second)
+							target_location_name += "_" + rem_it->first.name();
+
+					// Create the transition
+					aasap.new_unforced_transition(*input_event_it,aasap_location,DiscreteState(target_location_name),reset);					
+				}
+			}
+
+		// Insert the transitions due to internal and output events
+
+			// Join the two sets
+			std::set<DiscreteEvent> internal_output_events = internal_events;
+			internal_output_events.insert(output_events.begin(),output_events.end());
+
+			std::cout << "Location: " << location_aasap_name << "\n";
+
+			// For each event
+			for (std::set<DiscreteEvent>::const_iterator event_it = internal_output_events.begin(); event_it != internal_output_events.end(); event_it++)
+			{
+				// Initialize the flags that inform whether this is an input acknowledgement event and whether the corresponding input event has been received
+				bool is_input_acknowledgement_event = false;
+				bool has_input_event_been_received = false;
+
+				// Initialize the base event (used for storing the base event for input acknowledgement events)
+				DiscreteEvent base_event = *event_it;
+	
+				// Verify if this is an input acknowledgement event
+				for (std::set<DiscreteEvent>::const_iterator input_event_it = input_events.begin(); input_event_it != input_events.end(); input_event_it++)
+					if (event_it->name() == input_event_it->name()+"_ack")
+					{
+						// Set the flag
+						is_input_acknowledgement_event = true;
+						// Set if the related input event has been received
+						has_input_event_been_received = rem[*input_event_it];
+						// Store the base event
+						base_event = *input_event_it;
+						// No more event checking is necessary
+						break;
+					}
+
+				// Consider it only if it IS NOT an input acknowledgment event, or (if it IS) if the corresponding input event HAS been received
+				if (!is_input_acknowledgement_event || has_input_event_been_received)
+				{
+					// For each transition of the original automaton... 
+					for (std::list<DiscreteIOTransition>::const_iterator trans_it = hioa.transitions().begin(); trans_it != hioa.transitions().end(); trans_it++)
+					{
+						// ...featuring the same base event and the same base source location
+						if (trans_it->event().name() == base_event.name() && trans_it->source().name() == lwre_it->first.name())
+						{
+							// Initialize the target location name as the original target name
+							std::string target_location_name = trans_it->target().name();
+							// Copy the received events map information
+							ReceivedEventsMap target_rem = rem;
+							// If this is an input acknowledgment event, set the corresponding target received information as false
+							if (is_input_acknowledgement_event)
+								target_rem[base_event] = false;
+							// Build the name by appending the received events
+							for (ReceivedEventsMap::const_iterator rem_it = target_rem.begin(); rem_it != target_rem.end(); rem_it++)
+								if (rem_it->second)
+									target_location_name += "_" + rem_it->first.name();
+
+							// Create the reset (equal to the original reset, plus resetting d and keeping the previous value for the variables associated to input events)
+							std::map<RealVariable,RealExpression> reset = trans_it->reset(); 
+							reset[d] = 0.0;
+							for (std::set<DiscreteEvent>::const_iterator input_event_it = input_events.begin(); input_event_it != input_events.end(); input_event_it++)
+								reset[RealVariable("y_" + input_event_it->name())] = RealVariable("y_" + input_event_it->name());
+						}
+					}
+				}
+			}
+
+		// Insert the invariants
+
+			// There is an invariant for all the original transitions related to either:
+			// a) input events that have been received in the considered location
+			// b) internal and output events
+
+			// Initialize the lists
+			std::list<DiscreteIOTransition> inp_transitions;
+			std::list<DiscreteIOTransition> intout_transitions;
+
+			// For each transition of the original automaton...
+			for (std::list<DiscreteIOTransition>::const_iterator trans_it = hioa.transitions().begin(); trans_it != hioa.transitions().end(); trans_it++)
+			{
+				// ...featuring the same source location as the base of the considered location
+				if (trans_it->source().name() == lwre_it->first.name())
+				{
+					// Get the information of the event being present in the ReceivedEventMap (i.e. being an input event) of the considered location
+					std::map<DiscreteEvent,bool>::iterator rem_it = rem.find(trans_it->event());
+
+					// If the transition event is an input event
+					if (rem_it != rem.end())
+					{
+						// If it has been received, add the related invariant
+						if (rem_it->second)
+						{
+							// Prepare the expression
+							RealExpression invariant = min(d-Delta,RealVariable("y_"+rem_it->first.name()) -Delta);
+							// Add the invariant
+							aasap.new_invariant(aasap_location,invariant);						
+						}
+					}
+					// Otherwise it is an internal or output event
+					else
+					{
+							// Prepare the expression
+							RealExpression invariant = min(d-Delta,left_delta_restrict(trans_it->activation(),true));
+							// Add the invariant
+							aasap.new_invariant(aasap_location,invariant);						
+					}
+				}
+			}
+	}
+
+	// Returns
+	return aasap;
+}
+
+bool is_elastic_controller(const HybridIOAutomaton& hioa)
+{
+	/*
+		1) Only clocks
+		2) Only internal variables
+		3) Only forced transitions for internal and output events
+		4) Resets only to zero
+		5) Guards on a single clock and no >=0.0 guards
+	*/
+
+	// If it passed all checks, return true
+	return true;
+}
 
 std::ostream&
 operator<<(std::ostream& os, const HybridIOAutomaton& ha)

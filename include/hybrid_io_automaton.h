@@ -625,6 +625,13 @@ class HybridIOAutomaton
 //!
 std::pair< HybridAutomaton, RealSpace > make_monolithic_automaton(const HybridIOAutomaton& hioa);
 
+//! \brief Checks whether an HybridIOAutomaton is an elastic controller under the AASAP methodology.
+bool is_elastic_controller(const HybridIOAutomaton& hioa);
+
+//! \brief Convert an HybridIOAutomaton to a relaxed HybridIOAutomaton under the AASAP semantics. 
+//! The input automaton must be an elastic controller.
+HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa);
+
 //! \brief Compose two HybridIOAutomaton.
 //!     The two I/O automata should be compatible. No conflict between variables and events.
 HybridIOAutomaton compose(const std::string& name, 

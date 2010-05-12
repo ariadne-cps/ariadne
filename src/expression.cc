@@ -1028,6 +1028,95 @@ Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
     ARIADNE_FAIL_MSG("Cannot convert numbered variable");
 }
 
+Expression<Real> left_delta_restrict(Expression<Real> expr, bool positive)
+{
+	// Create the (reserved) Delta constant
+	Constant<Real> Delta("Delta",0.0);
+
+	// Useful variables
+	Expression<Real> left_subexpr, right_subexpr, unique_subexpr;
+
+	// Get the operator
+	Operator op = expr.op();
+
+	// Get the subexpressions
+	List<RealExpression> subexpressions = expr.subexpressions();
+
+	// If more than two subexpressions exists, throws an error since the case is not handled
+	ARIADNE_ASSERT_MSG(subexpressions.size() <= 2, "Unhandled case: multiary expression.");
+
+	// Depending on the operator
+	switch (op)
+	{
+		// Subtraction
+		case SUB:
+
+			// Run the restriction on the left member
+			left_subexpr = left_delta_restrict(subexpressions.back(),not(positive));
+			// Pop the left member
+			subexpressions.pop_back();
+			// Run the restriction on the right member, whose sign has to be inverted
+			right_subexpr = left_delta_restrict(subexpressions.back(),positive);		
+		
+			// Rebuild the expression
+			return make_expression<Real>(op, left_subexpr, right_subexpr);
+
+		// Negation
+		case NEG:	
+
+			// Run the restriction on the only subexpression, whose sign has to be inverted
+			unique_subexpr = left_delta_restrict(subexpressions.back(),not(positive));
+
+			// Rebuild the expression
+			return make_expression<Real>(op, unique_subexpr);
+
+		// Variable
+		case VAR:
+
+			// If the sign is positive, subtract Delta
+			return (positive ? expr-Delta : expr);
+
+		// Constant
+		case CNST:
+
+			// Return the original expression			
+			return expr;
+
+		// Unary operators
+		case POS:
+		case ABS:
+
+			// Run the restriction on the only subexpression
+			unique_subexpr = left_delta_restrict(subexpressions.back(),positive);
+
+			// Rebuild the expression
+			return make_expression<Real>(op, unique_subexpr);
+
+		// Binary operators
+		case ADD:
+		case MIN:
+		case MUL:
+		case DIV:
+
+			// Run the restriction on the left member
+			left_subexpr = left_delta_restrict(subexpressions.back(),positive);
+			// Pop the left member
+			subexpressions.pop_back();
+			// Run the restriction on the right member
+			right_subexpr = left_delta_restrict(subexpressions.back(),positive);		
+		
+			// Rebuild the expression
+			return make_expression<Real>(op, left_subexpr, right_subexpr);
+
+		default:
+
+			ARIADNE_FAIL_MSG("Unhandled case for activation expression.");
+			
+	}
+	
+}
+
+
 Expression<Real> derivative(const Expression<Real>& e, const Variable<Real>& v)
 {
     const ExpressionInterface<Real>* eptr=e._raw_pointer();

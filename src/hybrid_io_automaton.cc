@@ -1475,8 +1475,11 @@ HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
 							for (std::set<DiscreteEvent>::const_iterator input_event_it = input_events.begin(); input_event_it != input_events.end(); input_event_it++)
 								reset[RealVariable("y_" + input_event_it->name())] = RealVariable("y_" + input_event_it->name());
 
-							// Create the transition
-							aasap.new_unforced_transition(*event_it,aasap_location,DiscreteState(target_location_name),reset,trans_it->activation()-Delta);
+							// If the activation is always true, do not explicitate it, otherwise enlarge it by Delta
+							if (identical(trans_it->activation(),RealExpression(1.0)))							
+								aasap.new_unforced_transition(*event_it,aasap_location,DiscreteState(target_location_name),reset);
+							else
+								aasap.new_unforced_transition(*event_it,aasap_location,DiscreteState(target_location_name),reset,trans_it->activation()-Delta);
 						}
 					}
 				}
@@ -1487,10 +1490,6 @@ HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
 			// There is an invariant for all the original transitions related to either:
 			// a) input events that have been received in the considered location
 			// b) internal and output events
-
-			// Initialize the lists
-			std::list<DiscreteIOTransition> inp_transitions;
-			std::list<DiscreteIOTransition> intout_transitions;
 
 			// For each transition of the original automaton...
 			for (std::list<DiscreteIOTransition>::const_iterator trans_it = hioa.transitions().begin(); trans_it != hioa.transitions().end(); trans_it++)

@@ -1382,7 +1382,14 @@ HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
 			
 				// If the event has already been received, create a loop transition, otherwise create a transition to the proper location, resetting the related clock
 				if (rem[*input_event_it])
-					aasap.new_unforced_transition(*input_event_it,aasap_location,aasap_location);
+				{
+					// Create the reset (the identity)
+					std::map< RealVariable, RealExpression> reset; 
+					for (std::set<RealVariable>::const_iterator var_it = aasap.internal_vars().begin(); var_it != aasap.internal_vars().end(); var_it++)
+						reset[*var_it] = *var_it;
+					
+					aasap.new_unforced_transition(*input_event_it,aasap_location,aasap_location,reset);					
+				}
 				else
 				{
 					// Create the reset (reset to zero only the variable corresponding to the event)
@@ -1416,8 +1423,6 @@ HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
 			// Join the two sets
 			std::set<DiscreteEvent> internal_output_events = internal_events;
 			internal_output_events.insert(output_events.begin(),output_events.end());
-
-			std::cout << "Location: " << location_aasap_name << "\n";
 
 			// For each event
 			for (std::set<DiscreteEvent>::const_iterator event_it = internal_output_events.begin(); event_it != internal_output_events.end(); event_it++)
@@ -1469,6 +1474,9 @@ HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
 							reset[d] = 0.0;
 							for (std::set<DiscreteEvent>::const_iterator input_event_it = input_events.begin(); input_event_it != input_events.end(); input_event_it++)
 								reset[RealVariable("y_" + input_event_it->name())] = RealVariable("y_" + input_event_it->name());
+
+							// Create the transition
+							aasap.new_unforced_transition(*event_it,aasap_location,DiscreteState(target_location_name),reset,trans_it->activation()-Delta);
 						}
 					}
 				}

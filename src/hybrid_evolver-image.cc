@@ -252,16 +252,10 @@ _evolution(EnclosureListType& final_sets,
 
 	// While there exists a working set, process it and increment the total
 	while(!working_sets.empty()) {
-//         if(working_sets.size() > 1) {
-//             std::cout << "There is more than one set in the working sets list." << std::endl;
-//             std::string strin;
-//             std::cin >> strin;
-//         }
+
 		// Get the least recent working set, pop it and update the corresponding size
 		HybridTimedSetType current_set = working_sets.front(); 
 		working_sets.pop_front();
-
-        
 
 		// New set and time models, if set model reduction is to be performed		
 		SetModelType new_set_model;

@@ -116,9 +116,9 @@ void
 DiscreteIOMode::substitute(const Constant<Real>& con, const Real& c) 
 {
     for(std::map<RealVariable, RealExpression>::iterator it=this->_dynamics.begin();it!=this->_dynamics.end();it++)
-        it->second.substitute(con,c);
+        it->second = it->second.substitute(con,c);
     for(std::list<RealExpression>::iterator it=this->_invariants.begin();it!=this->_invariants.end();it++)
-        it->substitute(con,c);
+        *it = it->substitute(con,c);
 }
 
 
@@ -243,9 +243,9 @@ DiscreteIOTransition::set_activation(const RealExpression& inv)
 void 
 DiscreteIOTransition::substitute(const Constant<Real>& con, const Real& c) 
 {
-    this->_activation.substitute(con,c);
+    this->_activation = this->_activation.substitute(con,c);
     for(std::map<RealVariable, RealExpression>::iterator it=this->_reset.begin(); it != this->_reset.end(); it++)
-        it->second.substitute(con,c);
+        it->second = it->second.substitute(con,c);
 }
 
 

@@ -599,6 +599,8 @@ template<class X> X _compute(Operator op, const X& x1, const X& x2) {
         case SUB: return x1-x2;
         case MUL: return x1*x2;
         case DIV: return x1/x2;
+        case MIN: return min(x1,x2);
+        case MAX: return max(x1,x2);
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two real arguments.");
     }
 }

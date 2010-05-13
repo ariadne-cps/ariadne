@@ -1479,7 +1479,7 @@ HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
 							if (identical(trans_it->activation(),RealExpression(1.0)))							
 								aasap.new_unforced_transition(*event_it,aasap_location,DiscreteState(target_location_name),reset);
 							else
-								aasap.new_unforced_transition(*event_it,aasap_location,DiscreteState(target_location_name),reset,trans_it->activation()-Delta);
+								aasap.new_unforced_transition(*event_it,aasap_location,DiscreteState(target_location_name),reset,trans_it->activation()+Delta);
 						}
 					}
 				}
@@ -1516,7 +1516,7 @@ HybridIOAutomaton aasap_relaxation(const HybridIOAutomaton& hioa)
 					else
 					{
 							// Prepare the expression
-							RealExpression invariant = min(d-Delta,left_delta_restrict(trans_it->activation(),true));
+							RealExpression invariant = min(d-Delta,-left_delta_restrict(trans_it->activation(),true));
 							// Add the invariant
 							aasap.new_invariant(aasap_location,invariant);						
 					}
@@ -1533,9 +1533,10 @@ bool is_elastic_controller(const HybridIOAutomaton& hioa)
 	/*
 		1) Only clocks
 		2) Only internal variables
-		3) Only forced transitions for internal and output events
-		4) Resets only to zero
-		5) Guards on a single clock and no >=0.0 guards
+		3) All input events have to be handled in any location
+		4) Only forced transitions for internal and output events
+		5) Resets only to zero
+		6) Guards on a single clock and no >=0.0 guards
 	*/
 
 	// If it passed all checks, return true

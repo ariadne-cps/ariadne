@@ -75,6 +75,7 @@ class ContinuousEvolutionParameters {
     bool enable_subdivisions;
 
     //! \brief Terminate evolution if basic sets became too large (true by default).
+	//! \details In the case of upper semantics, if true and no subdivisions are present, the set is put into the final sets. In the case of lower semantics, the set is discarded.
     bool enable_premature_termination;
 
 	//! \brief Reduces a set model to the equivalent of its bounding box, every set_model_events_size_interleaving events (false by default).

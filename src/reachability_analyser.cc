@@ -913,28 +913,6 @@ _getReachHMAD(const HybridAutomaton& system) const
 }
 
 
-void 
-HybridReachabilityAnalyser::
-_setMaximumStepSize(const HybridFloatVector& hmad, 
-					const HybridGrid& hgrid)
-{
-	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
-	const uint css = hmad.begin()->second.size();
-
-	// Initializes the maximum step size
-	Float mss = std::numeric_limits<double>::infinity();
-	// For each couple DiscreteState,Vector<Float>
-	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) 
-	{
-		// For each dimension of the space
-		for (uint i=0;i<css;i++)
-			mss = min(mss,hgrid[hfv_it->first].lengths()[i]/(1<<this->_parameters->maximum_grid_depth)/hfv_it->second[i]);
-	}
-
-	// Assigns
-	this->_discretiser->parameters().maximum_step_size = mss;
-}
-
 void
 HybridReachabilityAnalyser::
 _setMaximumEnclosureCell(const HybridGrid& hgrid)
@@ -955,8 +933,31 @@ _setMaximumEnclosureCell(const HybridGrid& hgrid)
 	for (uint i=0;i<css;i++)
 		mec[i] /= (1<<this->_parameters->maximum_grid_depth);
 
-	// Assigns
+	// Assigns (NOTE: it is preferable to have the multiplier slightly lesser than an integer multiple of the grid cell)
 	this->_discretiser->parameters().maximum_enclosure_cell = 1.9*mec;
+}
+
+
+void 
+HybridReachabilityAnalyser::
+_setMaximumStepSize(const HybridFloatVector& hmad)
+{
+	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = hmad.begin()->second.size();
+
+	// Initializes the maximum step size
+	Float mss = 0.0;
+	// For each couple DiscreteState,Vector<Float>
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) 
+	{
+		// For each dimension of the space, if the derivative is not zero
+		for (uint i=0;i<css;i++)
+			if (hfv_it->second[i] > 0)
+				mss = max(mss,this->_discretiser->parameters().maximum_enclosure_cell[i]/hfv_it->second[i]);
+	}
+
+	// Assigns
+	this->_discretiser->parameters().maximum_step_size = mss;
 }
 
 
@@ -1064,15 +1065,7 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 	HybridGrid hg;
 	// Populate it, centered on the centre of the domain
 	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-		hg[hfv_it->first] = Grid(this->_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);
-/*	{
-		Vector<Float> lengths = Vector<Float>(css);
-		for (uint i=0;i<css;i++)
-			lengths[i] = this->_parameters->bounding_domain[hfv_it->first][i].width()/(1<<this->_parameters->maximum_grid_depth);
-		hg[hfv_it->first] = Grid(Vector<Float>(css),lengths);
-
-	}
-*/				
+		hg[hfv_it->first] = Grid(this->_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);			
 	
 	// Return
 	return hg;
@@ -1091,8 +1084,8 @@ _setInitialParameters(SystemType& system, const HybridBoxes& domain)
 
 	system.set_grid(this->_getEqualizedHybridGrid(hmad)); // Initial grid
 
-	this->_setMaximumStepSize(hmad,system.grid()); // Initial maximum step size
 	this->_setMaximumEnclosureCell(system.grid()); // Initial maximum enclosure cell
+	this->_setMaximumStepSize(hmad); // Initial maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
 }
 
 
@@ -1106,8 +1099,9 @@ _adaptParameters(SystemType& system)
 		this->_parameters->maximum_grid_depth++; // Increase the maximum grid depth
 
 		system.set_grid(this->_getEqualizedHybridGrid(hmad)); // New grid
-		this->_setMaximumStepSize(hmad,system.grid()); // New maximum step size
 		this->_setMaximumEnclosureCell(system.grid()); // New maximum enclosure cell
+		this->_setMaximumStepSize(hmad); // New maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
+
 }
 
 
@@ -1133,7 +1127,6 @@ verify_iterative(SystemType& system,
 		string timestring = asctime(localtime(&mytime));
 		timestring.erase(std::remove(timestring.begin(), timestring.end(), '\n'), timestring.end());
 		foldername = foldername+"/"+timestring;
-;
 		mkdir(foldername.c_str(),0777);
 	}
 
@@ -1145,6 +1138,7 @@ verify_iterative(SystemType& system,
 		/// Print some information on the current iteration
 		sprintf(mgd_char,"%i",this->_parameters->maximum_grid_depth);
 		ARIADNE_LOG(2, "\tDEPTH " << this->_parameters->maximum_grid_depth << "\n"); 
+		ARIADNE_LOG(3, "\t\tGrid: " << system.grid() << "\n");
 		ARIADNE_LOG(3, "\t\tMaximum step size: " << this->_discretiser->parameters().maximum_step_size << "\n");
 		ARIADNE_LOG(3, "\t\tMaximum enclosure cell: " << this->_discretiser->parameters().maximum_enclosure_cell << "\n");
 

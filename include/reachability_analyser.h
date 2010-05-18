@@ -256,9 +256,8 @@ class HybridReachabilityAnalyser
 	HybridFloatVector _getReachHMAD(const SystemType& system) const;
 
 	/*! \brief Set the maximum integration step size, under the assumption that given the maximum derivatives \a hmad, 
-		a variable in a step must not cover a length greater than the corresponding length of the grid \a hgrid at maximum depth. */
-	void _setMaximumStepSize(const HybridFloatVector& hmad, 
-							  const HybridGrid& hgrid);
+		all variables in a step must cover a length greater than the maximum enclosure cell. */
+	void _setMaximumStepSize(const HybridFloatVector& hmad);
 
 	/*! \brief Set the maximum enclosure cell from the hybrid grid \a hgrid. */
 	void _setMaximumEnclosureCell(const HybridGrid& hgrid);

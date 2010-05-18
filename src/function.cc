@@ -365,6 +365,7 @@ struct VectorOfScalarFunctionBody
         : _as(f.argument_size()), _vec(rs,f) { }
 
     void set(uint i, const ScalarFunction& f) {
+        if(this->argument_size()==0u) { this->_as=f.argument_size(); }
         ARIADNE_ASSERT(f.argument_size()==this->argument_size());
         this->_vec[i]=f; }
     ScalarFunction get(uint i) const {
@@ -1149,7 +1150,7 @@ void VectorFunction::set(Nat i, ScalarFunction f)
 {
     VectorOfScalarFunctionBody* vptr=dynamic_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
     ARIADNE_ASSERT_MSG(vptr,"Can only set component of a vector of scalar functions.");
-    vptr->_vec[i]=f;
+    vptr->set(i,f);
 }
 
 ScalarFunction VectorFunction::operator[](Nat i) const

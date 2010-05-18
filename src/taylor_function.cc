@@ -1030,12 +1030,55 @@ VectorTaylorFunction::set(uint i, const ScalarTaylorFunction& e)
 
 
 VectorTaylorFunction&
-VectorTaylorFunction::truncate(ushort degree)
+VectorTaylorFunction::sweep()
+{
+    for(uint i=0; i!=this->size(); ++i) {
+        this->_models[i].sweep();
+    }
+    return *this;
+}
+
+VectorTaylorFunction&
+VectorTaylorFunction::truncate()
+{
+    for(uint i=0; i!=this->size(); ++i) {
+        this->_models[i].truncate();
+    }
+    return *this;
+}
+
+VectorTaylorFunction&
+VectorTaylorFunction::sweep(double threshold)
+{
+    for(uint i=0; i!=this->size(); ++i) {
+        this->_models[i].sweep(threshold);
+    }
+    return *this;
+}
+
+VectorTaylorFunction&
+VectorTaylorFunction::truncate(uint degree)
 {
     for(uint i=0; i!=this->size(); ++i) {
         this->_models[i].truncate(degree);
     }
     return *this;
+}
+
+void
+VectorTaylorFunction::set_sweep_threshold(double threshold)
+{
+    for(uint i=0; i!=this->size(); ++i) {
+        this->_models[i].set_sweep_threshold(threshold);
+    }
+}
+
+void
+VectorTaylorFunction::set_maximum_degree(uint degree)
+{
+    for(uint i=0; i!=this->size(); ++i) {
+        this->_models[i].set_maximum_degree(degree);
+    }
 }
 
 VectorTaylorFunction&

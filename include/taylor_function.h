@@ -706,8 +706,19 @@ class VectorTaylorFunction {
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
+    //! \brief Remove all terms whose coefficient has magnitude
+    //! lower than the cutoff threshold of the quantity.
+    VectorTaylorFunction& sweep();
+    //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
+    VectorTaylorFunction& sweep(double eps);
+    //! \brief Truncate to the default maximum degree of the quantity.
+    VectorTaylorFunction& truncate();
     /*! \brief Truncate to a model of lower order and/or smoothness. */
-    VectorTaylorFunction& truncate(ushort degree);
+    VectorTaylorFunction& truncate(uint degree);
+    //! \brief Specify the maximum degree \a md for terms which may be present in the expansion.
+    void set_maximum_degree(uint md);
+    //! \brief Specify the minimum absolute value \a me for coefficients of terms which may be present in the expansion.
+    void set_sweep_threshold(double me);
     /*! \brief Set the error to zero. */
     VectorTaylorFunction& clobber();
 

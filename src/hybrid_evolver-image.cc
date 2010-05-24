@@ -279,29 +279,56 @@ _evolution(EnclosureListType& final_sets,
 		Vector<Interval> initial_set_model_range=initial_set_model.range();
 
 		// Check whether the range can be included into the maximum_enclosure_cell (and enlarge the largest_enclosure_cell, if necessary)
-		bool has_max_enclosure_been_reached = false;		
+		bool has_max_enclosure_been_reached = false;	
+		Float maxratio = 0.0; // Hold the maximum ratio between the set width and the largest enclosure cell width	
+		uint maxratio_dimension = -1; // Hold the dimension corresponding to the maximum ratio
 		for (uint i=0;i<initial_set_model_range.size();++i) 
 		{
 			Float rangewidth = initial_set_model_range[i].width(); // Store the width
 			statistics.largest_enclosure_cell[i] = max(statistics.largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
 			// If larger than the maximum allowed
 			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
+				// If a ratio greater than the current maximum is detected, update the maximum ratio information				
+				if (rangewidth/this->_parameters->maximum_enclosure_cell[i] > maxratio)
+				{
+					maxratio = rangewidth/this->_parameters->maximum_enclosure_cell[i];
+					maxratio_dimension = i;
+				}
 				statistics.has_max_enclosure_been_reached = true; // Global information
 				has_max_enclosure_been_reached = true; // Local information
 				break; 
 			}
 		}
 
+		// If the time model range width is greater than half the maximum step size, we will divide the timed model in respect to time
+		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->maximum_step_size/2);
+
         if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if(semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && has_max_enclosure_been_reached) {
-            // Subdivide
-            ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model_range << " widths larger than maximum_enclosure_cell " << this->_parameters->maximum_enclosure_cell << ", subdividing.\n");
-            ARIADNE_LOG(3,"initial_set_model_range*10000="<<initial_set_model_range*10000<<"\n");
+        } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
+            // Subdivide over time
+            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->maximum_step_size << ", subdividing over time.\n");
             uint nd=initial_set_model.dimension();
             SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
-            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
+            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,nd);
+            ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
+            for(uint i=0; i!=subdivisions.size(); ++i) {
+                TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
+                ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
+                SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
+                TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
+                ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
+                ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
+                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
+                working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
+            }	
+		} else if (semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && has_max_enclosure_been_reached) {
+            // Subdivide over space
+            ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model_range << " widths larger than maximum_enclosure_cell " << this->_parameters->maximum_enclosure_cell << ", subdividing.\n");
+            uint nd=initial_set_model.dimension();
+            SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
+            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,maxratio_dimension);
             ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
@@ -633,6 +660,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(4,"blocking_time_model="<<blocking_time_model<<"\n");
     SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,zero_time_model,blocking_time_model);
     reach_sets.adjoin(make_pair(location,reachable_set));
+	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
     ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
     ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
     if(semantics==LOWER_SEMANTICS && blocking_events.size()!=1) {

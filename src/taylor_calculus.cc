@@ -770,6 +770,40 @@ TaylorCalculus::subdivide(SetModelType const& set) const
     return result;
 }
 
+array<TaylorCalculus::SetModelType>
+TaylorCalculus::subdivide(SetModelType const& set, const uint& d) const
+{
+	// Initialize the least-width pair by creating a split over the error component
+	std::pair<SetModelType,SetModelType> least_width_pair = make_pair(set,set);
+	// Refer to the first and second models of the pair
+    TaylorModel& model1=least_width_pair.first[d];
+    TaylorModel& model2=least_width_pair.second[d];
+	// Get the error of the model
+	Float error = model1.error();
+	// Split the error
+    model1.set_error(error/2);
+    model1-=error/2;
+    model2.set_error(error/2);
+    model2+=error/2;
+
+	// Analyse the split over each generator
+	for (uint i=0; i<set.generators_size(); i++)
+	{
+		// Get the current pair
+		std::pair<SetModelType,SetModelType> current_pair = set.split(i);
+
+		// If the current pair has lesser width than the least_width_pair, save it as the new least-width one
+		if (current_pair.first[d].range().width() + current_pair.second[d].range().width() < least_width_pair.first[d].range().width() + least_width_pair.second[d].range().width())
+			least_width_pair = current_pair;
+	}
+
+	// Prepare the output result in array format
+    array<SetModelType> result(2);
+    result[0]=least_width_pair.first;
+    result[1]=least_width_pair.second;
+    return result;
+}
+
 
 TaylorCalculus::SetModelType
 TaylorCalculus::simplify(SetModelType const&) const

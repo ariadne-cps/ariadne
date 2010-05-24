@@ -231,6 +231,8 @@ class TaylorCalculus
     BoxType bounding_box(const SetModelType& s) const;
     //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces.
     array<SetModelType> subdivide(const SetModelType& s) const;
+    //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces whose overlapping in the \a d dimension is minimized.
+    array<SetModelType> subdivide(const SetModelType& s, const uint& d) const;
     //! \brief An over-approximation to the set \a s with a simplified description.
     SetModelType simplify(const SetModelType& s) const;
     //@}

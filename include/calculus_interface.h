@@ -367,6 +367,8 @@ class CalculusInterface
     virtual BoxType bounding_box(const SetModelType& s) const = 0;
     //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces.
     virtual array<SetModelType> subdivide(const SetModelType& s) const = 0;
+    //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces whose width in the \a d dimension is minimized.
+    virtual array<SetModelType> subdivide(const SetModelType& s, const uint& d) const = 0;
     //! \brief An over-approximation to the set \a s with a simplified description.
     virtual SetModelType simplify(const SetModelType& s) const = 0;
     //@}

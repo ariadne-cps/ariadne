@@ -3442,7 +3442,6 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
 Vector<TaylorModel>
 implicit(const Vector<TaylorModel>& f)
 {
-
     // Check that the arguments are suitable
     ARIADNE_ASSERT(f.size()>0);
     for(uint i=1; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); }

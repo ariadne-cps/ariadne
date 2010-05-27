@@ -11,7 +11,7 @@ bin_PROGRAMS=tutorial \
              sinusoid-sin 3bouncingballs \
              rectifier springs cmos_inverter_analoginput \
              rectifier_oneloc grid-refinement multipleguards\
-			 robotarm \
+			 robotarm watertank-verify watertank-nonlinear-verify \
 			 \
 			 coconut-demo 
 
@@ -31,6 +31,8 @@ rectifier_oneloc_SOURCES=rectifier_oneloc.cc
 grid_refinement_SOURCES=grid-refinement.cc
 multipleguards_SOURCES=multipleguards.cc
 robotarm_SOURCES=robotarm.cc
+watertank_verify_SOURCES=watertank-verify.cc
+watertank_nonlinear_verify_SOURCES=watertank-nonlinear-verify.cc
 
 coconut_demo_SOURCES=coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
 

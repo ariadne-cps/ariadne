@@ -309,7 +309,7 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 
 		// Check whether the bounding box is included into the bounding domain
 		if (!initial_set_model.bounding_box().subset(bounding_domain.find(initial_location)->second)) {
-			ARIADNE_LOG(3,"\n\n\n\nThe initial set is not included into the bounding domain, discarding the set.\n");
+			ARIADNE_LOG(3,"\n\n\n\nThe initial set " << initial_set_model.bounding_box() << " << is not included into the bounding domain, discarding the set.\n");
         } else if(initial_time_model.range().lower()>=maximum_time) {
             ARIADNE_LOG(3,"\n\n\n\nFinal time reached, adjoining the initial set to the final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));

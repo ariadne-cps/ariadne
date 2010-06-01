@@ -242,6 +242,29 @@ evolution(const SystemType& system,
 
 
 template<class ES>
+std::pair<HybridGridTreeSet,HybridGridTreeSet>
+HybridDiscretiser<ES>::
+upper_evolution_continuous(const SystemType& system, 
+          				   const EnclosureType& initial_set, 
+				           const TimeType& time,
+          				   const AccuracyType accuracy,
+          				   const HybridBoxes& bounding_domain) const
+{
+    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
+    Orbit<EnclosureType> continuous_orbit=this->_evolver->upper_orbit_continuous(system,initial_set,time,bounding_domain);
+    ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
+    ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\nOK\n");
+    HybridGridTreeSet reach=this->_discretise(continuous_orbit.reach(),system.grid(),accuracy);
+    HybridGridTreeSet final=this->_discretise(continuous_orbit.final(),system.grid(),accuracy);
+	reach.adjoin(final); // Always adjoin the reached region with the final region (preferable for consistency with _evolver.reach() )
+    ARIADNE_LOG(5,"discretised reach size="<<reach.size()<<"\n");
+    ARIADNE_LOG(5,"discretised final size="<<final.size()<<"\n");
+
+    return make_pair(reach,final);
+}
+
+
+template<class ES>
 HybridGridTreeSet 
 HybridDiscretiser<ES>::
 reach(const SystemType& system, 

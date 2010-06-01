@@ -101,6 +101,11 @@ class MapEvolver
     //! \brief Compute an approximation to the orbit set using upper semantics. 
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
+    //! \name Evolution using abstract sets.
+    //! \brief Compute an approximation to the orbit set using upper semantics, with only the continuous part. 
+    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, const HybridBoxes& bounding_domain) const {
+		ARIADNE_NOT_IMPLEMENTED;
+	}
 
     //! \brief Compute an approximation to the evolution set using upper semantics. 
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {

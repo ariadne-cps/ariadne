@@ -122,6 +122,9 @@ class ImageSetHybridEvolver
     //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
+    //! \brief Compute an approximation to the orbit set for upper semantics, with continuous evolution only.
+    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, const HybridBoxes& bounding_domain) const;
+
     //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
@@ -147,11 +150,19 @@ class ImageSetHybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
+    virtual void _upper_evolution_continuous(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time, const HybridBoxes& bounding_domain, bool reach) const;
+
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::list< HybridTimedSetType >& working_sets,
                                   EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                   const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
                                   Semantics semantics, bool reach) const;
+
+    virtual void _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
+                                  				  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                                  				  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+												  bool reach) const;
 
   protected:
     TimeModelType crossing_time(VectorFunction guard, const FlowSetModelType& flow_set) const;

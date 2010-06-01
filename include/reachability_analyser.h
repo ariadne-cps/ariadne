@@ -164,6 +164,11 @@ class HybridReachabilityAnalyser
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const HybridImageSet& initial_set) const;
   
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set; the method performs discretisation before transitions, then */
+	/*! checks activations on the discretised cells. */
+    virtual SetApproximationType chain_reach_grid(const SystemType& system,
+                                             const HybridImageSet& initial_set) const;
+
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const HybridImageSet& initial_set, 
@@ -236,6 +241,7 @@ class HybridReachabilityAnalyser
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
+    std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
 
 	/*! \brief Verify whether the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
 	bool _safe(const SystemType& system, 

@@ -150,6 +150,130 @@ private:
     }             
 };
 
+// Worker for the _upper_reach_evolve_continuous routine in reachability_analyser.cc
+class UpperReachEvolveContinuousWorker
+{
+public:
+
+	typedef HybridGridTreeSet HGTS;
+    typedef HybridEvolver::EnclosureType EnclosureType;
+	typedef HybridEvolver::ContinuousEnclosureType CE;
+
+	// Constructor
+    UpperReachEvolveContinuousWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser, const HybridAutomaton& sys, const list<EnclosureType>& initial_enclosures, const HybridBoxes& bounding_domain, const HybridTime& time, const int& accuracy, const uint& concurrency) 
+	: _discretiser(discretiser),
+	  _sys(sys), 
+	  _initial_enclosures(initial_enclosures),
+	  _bounding_domain(bounding_domain),
+	  _time(time),
+	  _accuracy(accuracy),
+	  _concurrency(concurrency),
+	  _enclosures_it(_initial_enclosures.begin())
+    {
+		_reach = HGTS(sys.grid());
+		_evolve = HGTS(sys.grid());
+		_enclosures_it = _initial_enclosures.begin();
+    }
+ 
+    ~UpperReachEvolveContinuousWorker()
+    {
+    }
+
+    // Create the threads and produce the required results
+    std::pair<HGTS,HGTS> get_result() 
+    {
+		// Create and start the threads
+		_start();
+
+		// Wait for the completion of all threads
+		_wait_completion();
+
+		// Get the result
+		return make_pair<HGTS,HGTS>(_reach,_evolve);
+    }
+ 
+private:
+
+	// A reference to the input variables
+	const boost::shared_ptr<HybridDiscretiser<CE> >& _discretiser;
+	const HybridAutomaton& _sys;
+	const list<EnclosureType>& _initial_enclosures;
+	const HybridBoxes& _bounding_domain;
+	const HybridTime& _time;
+	const int& _accuracy;
+	const uint& _concurrency;
+	// The sets in which the _compute function adjoins results
+	HGTS _reach, _evolve;
+
+	// The various threads
+    std::list<boost::shared_ptr<boost::thread> > _m_threads;
+	// The mutexes for synchronization
+    boost::mutex _inp_mutex, _out_mutex;
+	// The iterator for the enclosures
+	list<EnclosureType>::const_iterator _enclosures_it;
+
+	friend class HybridDiscretiser<CE>;
+ 
+	// Create and start the threads
+	void _start()
+	{
+		for (uint i=0;i<_concurrency;i++)
+	        _m_threads.push_back(boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&UpperReachEvolveContinuousWorker::_compute, this))));
+	}
+
+    // Compute the result
+    void _compute() 
+    {
+		// Execution loop
+        while (true)
+        {
+			// Get the lock for input
+			_inp_mutex.lock();
+
+			// If all enclosures have been picked
+			if (_enclosures_it == _initial_enclosures.end())
+			{
+				// Release the lock for input
+				_inp_mutex.unlock();					
+				// End processing
+				break;
+			}
+            else
+			{
+				// Increase the iterator
+				_enclosures_it++;
+
+				EnclosureType enclosure = *_enclosures_it;
+
+				// Release the lock for input
+				_inp_mutex.unlock();		
+
+				// The reach and evolve regions
+        		HGTS reach, evolve;
+				// Process and assign the regions
+		        make_lpair(reach,evolve)=_discretiser->upper_evolution_continuous(_sys,enclosure,_time,_accuracy,_bounding_domain);
+				
+				// Get the lock for output
+				_out_mutex.lock();
+
+				// Adjoin to the global reach and evolve
+		        _reach.adjoin(reach);
+        		_evolve.adjoin(evolve);
+
+				// Release the lock for output
+				_out_mutex.unlock();
+			}
+        }
+    }       
+
+	// Wait for completion of all threads
+    void _wait_completion()
+    {
+		for (std::list<boost::shared_ptr<boost::thread> >::iterator it = _m_threads.begin(); it != _m_threads.end(); it++)
+			(*it)->join();
+    }             
+};
+
 // Worker for the lower_reach routine in discretiser.cc
 template<class ES>
 class LowerReachWorker

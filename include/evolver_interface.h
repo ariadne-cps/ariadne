@@ -90,6 +90,14 @@ class EvolverInterface
           const TimeType& time, 
           Semantics semantics) const = 0;
 
+    //! \brief Compute an approximation to the evolved set for upper semantics, with continuous evolution only. 
+    virtual 
+    Orbit<EnclosureType>
+    upper_orbit_continuous(const SystemType& system, 
+          				   const EnclosureType& initial_set, 
+          				   const TimeType& time,
+						   const HybridBoxes& bounding_domain) const = 0;
+
     //! \brief Compute an approximation to the evolved set under the given semantics. 
     virtual 
     EnclosureListType 

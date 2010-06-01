@@ -181,7 +181,7 @@ int main()
 	HybridEvolver evolver;
 	evolver.verbosity = 0;		
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 2; 
+	analyser.verbosity = 4;
 	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = false; 
 	analyser.parameters().enable_lower_pruning = true;
@@ -191,12 +191,15 @@ int main()
 	analyser.parameters().transient_steps = 1;
 	analyser.parameters().lock_to_grid_time = 1e10;		
 	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.plot_verify_results = false;
-	analyser.free_cores = 7;
+	analyser.plot_verify_results = true;
+	analyser.free_cores = 0;
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
+	analyser.verify_iterative(system, initial_set, safe_box, domain);
+
+	/*
 	// Perform the analysis
 	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, parameter_interval, tolerance);
 
@@ -225,4 +228,5 @@ int main()
 	}	
 	else
 		cout << "\nError: the interval could not be verified.\n\n";
+	*/
 }

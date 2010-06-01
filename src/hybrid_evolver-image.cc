@@ -239,13 +239,11 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
-	Float current_largest_evol_time = 0.0; // The current largest evolution time (to be added to the largest_evol_time statistics)
-	uint current_largest_evol_steps = 0; // The current largest evolution steps (to be added to the largest_evol_steps statistics)
 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
 
 	// The working sets, pushed back and popped front
-    std::list< HybridTimedSetType > working_sets;
+    std::list<HybridTimedSetType> working_sets;
 
     {
         // Set up initial timed set models
@@ -295,21 +293,13 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 		Vector<Interval> initial_set_model_range=initial_set_model.range();
 
 		// Check whether the range widths can be included into the maximum_enclosure_cell (and enlarge the largest_enclosure_cell, if necessary)
-		bool has_max_enclosure_been_reached = false;	
-		Float maxratio = 0.0; // Hold the maximum ratio between the set width and the largest enclosure cell width	
-		uint maxratio_dimension = -1; // Hold the dimension corresponding to the maximum ratio
+		bool has_max_enclosure_been_reached = false;
 		for (uint i=0;i<initial_set_model_range.size();++i) 
 		{
 			Float rangewidth = initial_set_model_range[i].width(); // Store the width
 			statistics.largest_enclosure_cell[i] = max(statistics.largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
 			// If larger than the maximum allowed
 			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
-				// If a ratio greater than the current maximum is detected, update the maximum ratio information				
-				if (rangewidth/this->_parameters->maximum_enclosure_cell[i] > maxratio)
-				{
-					maxratio = rangewidth/this->_parameters->maximum_enclosure_cell[i];
-					maxratio_dimension = i;
-				}
 				statistics.has_max_enclosure_been_reached = true; // Global information
 				has_max_enclosure_been_reached = true; // Local information
 				break; 
@@ -346,16 +336,10 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
                         <<" e="<<initial_events
                         <<"\n");
         }
-
-		// Update the current largest evolution time and steps
-		current_largest_evol_time = max(current_largest_evol_time,initial_time_model.value());
-		current_largest_evol_steps = max(current_largest_evol_steps,initial_events.size());
     }
 
-	// Update the largest evolution time
-	statistics.largest_evol_time = max(statistics.largest_evol_time, current_largest_evol_time);
-	// Update the largest evolution steps
-	statistics.largest_evol_steps = max(statistics.largest_evol_steps, current_largest_evol_steps);
+	// Set the largest evolution steps, fixed at 1
+	statistics.largest_evol_steps = 1;
 }
 
 void
@@ -1023,12 +1007,18 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
     ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
     ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
+	// Enlarge the largest enclosure cell, if necessary
+	for (uint i=0;i<reachable_set.size();++i)
+		this->_statistics->upper().largest_enclosure_cell[i] = max(this->_statistics->upper().largest_enclosure_cell[i],reachable_set[i].range().width());
 
     TimeModelType final_time_model=time_model+blocking_time_model*time_step;
     ARIADNE_LOG(2,"final_time_range="<<final_time_model.range()<<"\n");
     SetModelType evolved_set_model=this->_toolbox->integration_step(flow_set_model,blocking_time_model);
     ARIADNE_LOG(2,"evolved_set_model.argument_size()="<<evolved_set_model.argument_size()<<"\n");
     ARIADNE_LOG(2,"evolved_set_range="<<evolved_set_model.range()<<"\n");
+
+	// Get the maximum between the upper value of the time model and the current largest evolution time
+	this->_statistics->upper().largest_evol_time = max(this->_statistics->upper().largest_evol_time, final_time_model.range().upper());
 
     // Compute evolution for blocking events
     for(std::set<DiscreteEvent>::const_iterator iter=blocking_events.begin(); iter!=blocking_events.end(); ++iter) {

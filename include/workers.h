@@ -240,10 +240,11 @@ private:
 			}
             else
 			{
+            	// Assign the enclosure
+				EnclosureType enclosure = *_enclosures_it;
+
 				// Increase the iterator
 				_enclosures_it++;
-
-				EnclosureType enclosure = *_enclosures_it;
 
 				// Release the lock for input
 				_inp_mutex.unlock();		

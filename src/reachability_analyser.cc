@@ -793,21 +793,25 @@ chain_reach_grid(const SystemType& system,
         make_lpair(new_reach,new_final)=this->_upper_reach_evolve_continuous(system,initial_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
 		// Clear the initial enclosures
 		initial_enclosures.clear();
-        ARIADNE_LOG(6,"\t\t\t\t\tReach size ="<<new_reach.size()<<"\n");
-        ARIADNE_LOG(6,"\t\t\t\t\tFinal size ="<<new_final.size()<<"\n");
 
 		// Remove from the result those cells that have already been checked or evolved from
         new_final.remove(intermediate);
 		new_reach.remove(reach);
+
+        ARIADNE_LOG(6,"\t\t\t\t\tReach size after removal = "<<new_reach.size()<<"\n");
+        ARIADNE_LOG(6,"\t\t\t\t\tFinal size after removal = "<<new_final.size()<<"\n");
 
 		// Mince the final cells, then for each of them add the enclosure into the new initial enclosures
 		new_final.mince(maximum_grid_depth);
 		for (GTS::const_iterator cell_it = new_final.begin(); cell_it != new_final.end(); cell_it++)
 			initial_enclosures.push_back(this->_discretiser->enclosure(*cell_it));
 
+		ARIADNE_LOG(6,"\t\t\t\t\tEnclosures size before transition checking = "<<initial_enclosures.size()<<"\n");
+
 		// Mince the reach cells, then for each of them and for each transition, check the activation:
 		// If it is possibly active, create the enclosure, apply the reset and put the result into the new initial enclosures
 		new_reach.mince(maximum_grid_depth);
+		ARIADNE_LOG(6,"\t\t\t\t\tReach size after mincing = "<<new_reach.size()<<"\n");
 		for (GTS::const_iterator cell_it = new_reach.begin(); cell_it != new_reach.end(); cell_it++)
 		{
 			// Get the transitions for the corresponding location
@@ -815,19 +819,26 @@ chain_reach_grid(const SystemType& system,
 			// Get the enclosure of the cell
 			EnclosureType encl = this->_discretiser->enclosure(*cell_it);
 
+			ARIADNE_LOG(7,"\t\t\t\t\t\tEnclosure = "<<encl<<"\n");
+
 			// For each of them
 			for (list<DiscreteTransition>::const_iterator trans_it = transitions.begin(); trans_it != transitions.end(); trans_it++)
 			{
+				ARIADNE_LOG(8,"\t\t\t\t\t\t\tTransition = "<<*trans_it<<"\n");
 				// Get the time model of the guard
     			TaylorModel guard_time_model = apply(trans_it->activation(),encl.continuous_state_set())[0];
 
+    			ARIADNE_LOG(8,"\t\t\t\t\t\t\tGuard time model = "<<guard_time_model<<" (range: " << guard_time_model.range() << ")\n");
+
 				// If possibly active, get the set model after the reset, enclose it and add it to the initial enclosures
-            	if (!guard_time_model.range().upper()<0) {
+            	if (!(guard_time_model.range().upper()<0)) {
                 	TaylorSet jump_set_model= tc.reset_step(trans_it->reset(),encl.continuous_state_set());
                 	initial_enclosures.push_back(EnclosureType(trans_it->target(),jump_set_model));
             	}	
 			}
 		}
+
+		ARIADNE_LOG(6,"\t\t\t\t\tEnclosures size after transition checking = "<<initial_enclosures.size()<<"\n");
 
 		// Adjoin to the accumulated reach and intermediate cells
         reach.adjoin(new_reach);
@@ -841,11 +852,11 @@ chain_reach_grid(const SystemType& system,
 		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
 		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
 		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
-
-        ARIADNE_LOG(6,"\t\t\t\t\tfound "<<new_reach.size()<<" cells, of which "<<new_final.size()<<" are new.\n");
     }
 
 	this->_statistics->upper().reach = reach;
+
+	ARIADNE_LOG(5,"\t\t\t\tFound a total of " << reach.size() << " reached cells.\n");
 
     return reach;
 }
@@ -882,10 +893,22 @@ _safe(const SystemType& system,
 {
 	ARIADNE_LOG(4,"\t\t\tSafety analysis...\n");
 
-	HybridGridTreeSet reach = chain_reach_grid(system,initial_set); // Perform the chain reachability analysis	
+	HybridGridTreeSet reach = chain_reach(system,initial_set); // Perform the chain reachability analysis
 
-	// If the reached region was not restricted and the maximum enclosure bounds have not been reached while not subdividing, a verification is feasible
-	if (!this->_statistics->upper().has_restriction_occurred)
+	// Get the bounds of the reach set
+	HybridBoxes bounds = reach.bounding_box();
+
+	// Check for each location that the bounds are included into the domain
+	bool is_inside_domain = true; // Initial value for the reached set being inside the domain
+	for (HybridBoxes::const_iterator loc_it = bounds.begin(); loc_it != bounds.end(); loc_it++) {
+		if (!(loc_it->second.subset(this->_parameters->bounding_domain[loc_it->first]))) {
+			is_inside_domain = false;
+			break;
+		}
+	}
+
+	// If the reached region is inside the domain
+	if (is_inside_domain)
 	{
 		// If the reached region is definitely inside the hybrid safe box, the result is safe 
 		bool result = definitely(reach.subset(safe_box));
@@ -897,10 +920,7 @@ _safe(const SystemType& system,
 	// Otherwise notify and return false
 	else
 	{
-		ARIADNE_LOG(4,"\t\t\tNot checked due to: ");
-		if (this->_statistics->upper().has_restriction_occurred)
-			ARIADNE_LOG(4,"<domain bounds> ");
-		ARIADNE_LOG(4,"\n");
+		ARIADNE_LOG(4,"\t\t\tNot checked due to domain bounds.\n");
 		return false;
 	}
 }
@@ -919,27 +939,34 @@ _unsafe(const SystemType& system,
 	// Create the evolution time from the upper approximation obtained in the upper case
 	HybridTime lrt = HybridTime(this->_statistics->upper().largest_evol_time,this->_statistics->upper().largest_evol_steps);
 
+	ARIADNE_LOG(5,"\t\t\tRunning for " << this->_statistics->upper().largest_evol_time << " seconds and " << this->_statistics->upper().largest_evol_steps << " steps...\n");
+
 	// Get the lower reach
 	HybridGridTreeSet lowerreach = this->lower_reach(system,initial_set,lrt);
 
-	// Create a safe set enlarged for the falsification		
-	HybridBoxes safe_box_enl = safe_box;
-	for (HybridBoxes::iterator hbx_it = safe_box_enl.begin(); hbx_it != safe_box_enl.end(); hbx_it++)
-		hbx_it->second.widen();
+	if (lowerreach.size() > 0)
+	{
+		// Create a safe set enlarged for the falsification
+		HybridBoxes safe_box_enl = safe_box;
+		for (HybridBoxes::iterator hbx_it = safe_box_enl.begin(); hbx_it != safe_box_enl.end(); hbx_it++)
+			hbx_it->second.widen();
 
-	// Get a copy of the grid
-	HybridGrid hg = system.grid();
-	// Get the safe box enlarged by a grid cell and half a maximum enclosure cell
-	for (HybridGrid::locations_const_iterator hg_it = hg.locations_begin(); hg_it != hg.locations_end(); hg_it++)
-		for (uint i=0;i<css;i++)
-			safe_box_enl[hg_it->first][i] += Interval(-this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2,this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2)+Interval(-hg_it->second.lengths()[i],hg_it->second.lengths()[i])/(1<<this->_parameters->maximum_grid_depth);
+		// Get a copy of the grid
+		HybridGrid hg = system.grid();
+		// Get the safe box enlarged by a grid cell and half a maximum enclosure cell
+		for (HybridGrid::locations_const_iterator hg_it = hg.locations_begin(); hg_it != hg.locations_end(); hg_it++)
+			for (uint i=0;i<css;i++)
+				safe_box_enl[hg_it->first][i] += Interval(-this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2,this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2)+Interval(-hg_it->second.lengths()[i],hg_it->second.lengths()[i])/(1<<this->_parameters->maximum_grid_depth);
 
-	// If the reach is definitely not included in the enlarged safe box, then it is unsafe
-	bool result = definitely(!lowerreach.subset(safe_box_enl));
+		// If the reach is definitely not included in the enlarged safe box, then it is unsafe
+		bool result = definitely(!lowerreach.subset(safe_box_enl));
 
-	ARIADNE_LOG(4, (result ? "\t\t\tUnsafe.\n" : "\t\t\tNot unsafe.\n") );
+		ARIADNE_LOG(4, (result ? "\t\t\tUnsafe.\n" : "\t\t\tNot unsafe.\n") );
 
-	return result;
+		return result;
+	}
+	else
+		return false;
 }
 
 

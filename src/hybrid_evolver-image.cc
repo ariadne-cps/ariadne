@@ -652,6 +652,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     const VectorFunction dynamic=mode.dynamic();
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
+    const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();
     const std::list<DiscreteTransition> transitions=system.transitions(location);
 
     // Check to make sure dimensions are correct
@@ -673,16 +674,39 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(2,"guards = "<<guards<<"\n\n");
     ARIADNE_LOG(2,"activations = "<<activations<<"\n\n");
 
-
-
     // Compute initially active guards
     std::map<DiscreteEvent,tribool> initially_active_events;
     this->compute_initially_active_events(initially_active_events, guards, set_model);
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
 
-    // Test for initially active events, and process these as requred
+    // Test for initially active events, and process these as required
     if(definitely(initially_active_events[blocking_event])) {
+
+    	// Flag to hold the information of an invariant being definitely active for this set model
+    	bool has_active_invariant = false;
+
+        // Check if at least one invariant is definitely active in this mode
+        for(std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); inv_it++) {
+            tribool active=this->_toolbox->active(inv_it->second,set_model);
+            if(definitely(active)) {
+				has_active_invariant = true;
+				break;
+            }
+        }
+
+		// The set model is added only if there is no definitely active invariant
+        if (!has_active_invariant) {
+            reach_sets.insert(make_pair(location,set_model));
+            intermediate_sets.insert(make_pair(location,set_model));
+        }
+        else
+        {
+        	// If the invariant is definitely initially active, the discrete events should not be evaluated
+        	ARIADNE_LOG(2,"An invariant is initially active: discarding the set.\n");
+        }
+
         ARIADNE_LOG(2,"A blocking event is initially active, no continuous evolution, just apply discrete events.\n");
+
         // No continuous evolution; just apply discrete events
         for(std::list<DiscreteTransition>::const_iterator iter=transitions.begin();
             iter!=transitions.end(); ++iter)
@@ -700,9 +724,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
                 working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
             }
         }
-        // Adjoin reach and intermediate sets
-        reach_sets.insert(make_pair(location,set_model));
-        intermediate_sets.insert(make_pair(location,set_model));
+
         // No need for further work this step
         return;
 
@@ -899,6 +921,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     const VectorFunction dynamic=mode.dynamic();
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
+    const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();
     const std::list<DiscreteTransition> transitions=system.transitions(location);
 
     // Check to make sure dimensions are correct
@@ -926,12 +949,30 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     this->compute_initially_active_events(initially_active_events, guards, set_model);
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
 
-    // Test for initially active events, and process these as requred
+    // Test for initially active events, and process these as required
     if(definitely(initially_active_events[blocking_event])) {
-        ARIADNE_LOG(2,"A blocking event is initially active: no continuous evolution, adjoining reach and intermediate sets.\n");
-        // Adjoin reach and intermediate sets
-        reach_sets.insert(make_pair(location,set_model));
-        intermediate_sets.insert(make_pair(location,set_model));
+
+    	// Flag to hold the information of an invariant being definitely active for this set model
+    	bool has_active_invariant = false;
+
+        // Check if at least one invariant is definitely active in this mode
+        for(std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); inv_it++) {
+            tribool active=this->_toolbox->active(inv_it->second,set_model);
+            if(definitely(active)) {
+				has_active_invariant = true;
+				break;
+            }
+        }
+
+		// The set model is added only if there is no definitely active invariant
+        if (!has_active_invariant) {
+        	ARIADNE_LOG(2,"A forced transition is initially active: no continuous evolution, adjoining reach set.\n");
+            reach_sets.insert(make_pair(location,set_model));
+            intermediate_sets.insert(make_pair(location,set_model));
+        }
+        else
+        	ARIADNE_LOG(2,"An invariant is initially active: no continuous evolution, discarding the set.\n");
+
         return;
     }
 

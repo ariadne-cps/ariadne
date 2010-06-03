@@ -1900,7 +1900,9 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
     //   that encloses the theSet (after it is mapped onto theGrid).
     const uint height = GridCell::smallest_enclosing_primary_cell_height( theSet.bounding_box(), theGrid );
     //Compute the height of the primary cell for the outer approximation stepping up by the number of dimensions
-    const uint outer_approx_primary_cell_height = height + theGrid.dimension();
+    // NOTE: (Luca) Given that a Box::inside(Box) check is performed for the retrieval of the primary cell height, it is not necessary to
+    // introduce an over-approximation of such height
+    const uint outer_approx_primary_cell_height = height; // + 1;
 
     //2. Align this paving and paving enclosing the provided set
     bool has_stopped = false;

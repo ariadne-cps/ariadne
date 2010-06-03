@@ -247,7 +247,7 @@ class BinaryTreeNode {
     //! \name Leaf Operations
 
     /*! \brief This method makes the node to become a leaf node with the enabled value : \a is_enabled
-     * NOTE: the leat and the right sub-trees (are deallocated.
+     * NOTE: the left and the right sub-trees (are deallocated.
      * WARNING: this method MUST NOT be called on a non-leaf node!!!
      */
     void make_leaf( tribool is_enabled );
@@ -346,7 +346,7 @@ class BinaryTreeNode {
     static BinaryTreeNode * prepend_tree( const BinaryWord & rootNodePath, BinaryTreeNode * oldRootNode);
 
     /*! \brief This method restricts \a pThisNode to \a pOtherNode.
-     * In essance we do the inplace AND on the tree node pThisNode.
+     * In essence we do the inplace AND on the tree node pThisNode.
      * Note that, this method is recursive.
      */
     static void restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
@@ -356,14 +356,14 @@ class BinaryTreeNode {
      */
     static void remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
 
-    /*! \brief checks if two trees overlap in a set-theory sence.
+    /*! \brief checks if two trees overlap in a set-theory sense.
      * I.e. we assume that pRootNodeOne and pRootNodeTwo correspond to the same (virtual) root
      * and then we see if the enabled leaf node of one tree contain enabled leaf nodes of
      * another tree as their (virtual) children.
      */
     static bool overlap( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo );
 
-    /*! \brief checks if the tree pRootNodeOne is a subset of the tree pRootNodeTwo, in a set-theory sence.
+    /*! \brief checks if the tree pRootNodeOne is a subset of the tree pRootNodeTwo, in a set-theory sense.
      * I.e. we assume that pRootNodeOne and pRootNodeTwo correspond to the same (virtual) root
      * and then we see if every enabled leaf node of pRootNodeOne is contained in the enabled leaf nodes of
      * pRootNodeTwo, or it is covered by the enabled leaf nodes of pRootNodeTwo. When we write, contained and
@@ -414,11 +414,11 @@ class GridAbstractCell {
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
      *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
-     *  The function checks that both cells are on the same grid and then alignes their primary cells.
+     *  The function checks that both cells are on the same grid and then aligns their primary cells.
      *  The latter is done by extending the binary word of the cell with the lowest primary cell with
-     *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
+     *  the corresponding prefix. When the words are aligned, we simply use the == and < operators of
      *  the \a BinaryWord class.
-     *  NOTE: Since the function is only based on comparison of the Grids, the words definings the cells and the
+     *  NOTE: Since the function is only based on comparison of the Grids, the words defining the cells and the
      *  primary cell heights we can use it in sub-classes for comparing cells of the same types
      */
     static bool compare_abstract_grid_cells(const GridAbstractCell * pCellLeft, const GridAbstractCell &cellRight, const uint comparator );
@@ -455,7 +455,7 @@ class GridAbstractCell {
 
     /*! \brief The primary-cell box on some grid is defined by the height above the zero level cells.
      *     The coordinates of the primary cells change uniformly. For example (3-D):
-     *       Heigth | (left bottom) | (right top)
+     *       Height | (left bottom) | (right top)
      *       ---------------------------------------
      *          0   | (0, 0, 0)     | (1, 1, 1)
      *          1   | (-1, -1, -1)  | (1, 1, 1)
@@ -464,14 +464,14 @@ class GridAbstractCell {
      *          4   | (-5, -5, -5)  | (11, 11, 11)
      *     The cell size is always double the size of the previous-level cell and one
      *     of the corners stays the same as well. If Li, Ri are the left-, right-corned
-     *     coordinates at livel i then we have the following recursive definition:
+     *     coordinates at level i then we have the following recursive definition:
      *       L0 = 0, R0 = 0
      *       Li = 2*L(i-1) - R(i-1) (if i is odd)
      *       Li = L(i-1)            (if i is even)
      *       Ri = R(i-1)            (if i is odd)
      *       Ri = 2*R(i-1) - L(i-1) (if i is even)
      *
-     *  WARNING: The returned box must be interptered relative to some grid.
+     *  WARNING: The returned box must be interpreted relative to some grid.
      *  In other words, we assume some lattice and the relation to the original
      *  space is not taken into account.
      *
@@ -483,7 +483,7 @@ class GridAbstractCell {
 
     /*! \brief Takes the lattice box \a theLatticeBox related to some (unknown) grid and computes the
      *   smallest primary cell on that grid that will contain this box.
-     *   The method returns the hight of that primary cell.
+     *   The method returns the height of that primary cell.
      */
     static uint smallest_enclosing_primary_cell_height( const Vector<Interval>& theLatticeBox );
 
@@ -507,7 +507,7 @@ class GridAbstractCell {
 /*! \brief A cell of a grid paving. Note that this class represents the closed cell.
  *  It is uniquely defined by the path from the primary cell and is exactly on cell in a grid.
  *  This is different from the GridOpenCell which is open and the path from the root cell defines
- *  its lower left sub cell wheres the complete open cell is a union of 4 cells.
+ *  its lower left sub cell where the complete open cell is a union of 4 cells.
  *
  * This class does not contain the tree structure, so cannot be used in cursors/iterators.
  */
@@ -558,7 +558,7 @@ class GridCell : public GridAbstractCell {
 
     /*! \brief this method computes the box in the original space based on the \a theGrid,
      *  and a cell which is obtained by traversing the path given by \a _theWord from the
-     * primary cell located at the heigth \a theHeight above the zero level cells
+     * primary cell located at the height \a theHeight above the zero level cells
      * (relative to the grid).
      */
     static Box compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
@@ -572,9 +572,9 @@ class GridCell : public GridAbstractCell {
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
      *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
-     *  The function checks that both cells are on the same grid and then alignes their primary cells.
+     *  The function checks that both cells are on the same grid and then aligns their primary cells.
      *  The latter is done by extending the binary word of the cell with the lowest primary cell with
-     *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
+     *  the corresponding prefix. When the words are aligned, we simply use the == and < operators of
      *  the \a BinaryWord class.
      */
     static bool compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator );
@@ -586,7 +586,7 @@ class GridCell : public GridAbstractCell {
 };
 
 /*! \brief An open cell of a grid paving. This cell is open and the path from the primary cell
- *  defines its lower left sub cell wheres the complete open cell is a union of 4 cells.
+ *  defines its lower left sub cell where the complete open cell is a union of 4 cells.
  *
  * This class does not contain the tree structure, so cannot be used in cursors/iterators.
  * NOTE: The open cell is defined by its base cell which is a simple GridCell corresponding
@@ -607,7 +607,7 @@ class GridOpenCell: public GridAbstractCell {
     /*! \brief This method allows to enumerate the GridCells that are located in the positive
      *  axis direction from the base cell. The base cell is defined by \a theHeight and
      *  \a theBaseCellWord. When called \a cellPosition should be an empty word. This is a
-     *  technical parameter used in the method's recursivce calls. \a theResultSet is the vector
+     *  technical parameter used in the method's recursive calls. \a theResultSet is the vector
      *  to which all the neighboring cell will be added, i.e. it is a return parameter.
      *  NOTE: The cell defined by \a theHeight, \a theBaseCellWord will also be in \a theResultSet.
      */
@@ -616,7 +616,7 @@ class GridOpenCell: public GridAbstractCell {
 
     /*! \brief This method allows to compute the neighboring (to the right) cell of
      *  the base cell given by \a theHeight and \a theBaseCellWord. Here \a cellPosition
-     *  is the position of the neighboring cell with resect to the base cell in the
+     *  is the position of the neighboring cell with respect to the base cell in the
      *  theGrid.dimensions() dimensional space. Note that if \a cellPosition consists
      *  of theGrid.dimensions() zeroes then we adjoin the base cell itself.
      */
@@ -667,13 +667,13 @@ class GridOpenCell: public GridAbstractCell {
     /*! \brief Computes all the cells that constitute the GridOpenCell in the form of the GridTreeSet.*/
     GridTreeSet closure() const;
 
-    /*! \brief Computes the intersection of two GridOpenCell as a list of open cells whoes union
-     * gives the intersection. This is done becase the intersection can no always be represented
+    /*! \brief Computes the intersection of two GridOpenCell as a list of open cells whose union
+     * gives the intersection. This is done because the intersection can no always be represented
      * as one open cell. If the intersection is empty then it returns an empty vector.
      * WARNING: This operation is expensive because we do not always get a single cell as a result.
      * Moreover, currently intersecting an open cell with itself or a subcell sharing a common border
      * with the cell will result in more that one open cell. Still the operation is robust, it always
-     * results in a set of open cells whoes union is the exact intersection of the given open cells.
+     * results in a set of open cells whose union is the exact intersection of the given open cells.
      */
     static std::vector<GridOpenCell> intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
 
@@ -688,9 +688,9 @@ class GridOpenCell: public GridAbstractCell {
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
      *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
-     *  The function checks that both cells are on the same grid and then alignes their primary cells.
+     *  The function checks that both cells are on the same grid and then aligns their primary cells.
      *  The latter is done by extending the binary word of the cell with the lowest primary cell with
-     *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
+     *  the corresponding prefix. When the words are aligned, we simply use the == and < operators of
      *  the \a BinaryWord class.
      */
     static bool compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator );
@@ -842,7 +842,7 @@ class GridTreeSubset : public DrawableInterface {
     Box bounding_box() const;
 
     /*! \brief Allows to test if the two subpavings are "equal". The method returns true if
-     * the grida are equal and the binary trees are equal. Note that, only in case both
+     * the grids are equal and the binary trees are equal. Note that, only in case both
      * GridTreeSubset objects are recombines, this method is guaranteed to tell you that
      * the two GridTreeSubset represent equal sets.
      */
@@ -853,7 +853,7 @@ class GridTreeSubset : public DrawableInterface {
     //@{
     //! \name Subdivisions
 
-    /*! \brief Subdivides the tree in such a way thaty it's depth becomes ( height + numSubdivInDim ) * D
+    /*! \brief Subdivides the tree in such a way that its depth becomes ( height + numSubdivInDim ) * D
      * Where height is the height of the primary cell to which the tree is rooted, \a numSubdivInDim is
      * the number of subdivisions in each dimension, and D is the number of dimensions of our space.
      * Note that, in case the subset is already subdivided to the required depth then nothing is done.
@@ -973,7 +973,7 @@ class GridTreeSet : public GridTreeSubset {
      *  \a otherPavingPCellHeight and if it is:
      *    (a) higher then for this paving, pre-pends \a _pRootTreeNode.
      *    (b) lower then for this paving, locates it in this paging's tree.
-     *    (c) equal to the hight of this paving's primary cell, does nothing.
+     *    (c) equal to the height of this paving's primary cell, does nothing.
      *  This method returns the node corresponding to the primary cell of
      *  height \a otherPavingPCellHeight in the (updated) paving.
      *  If \a stop_on_enabled is set to true then for the case (b) if we meet
@@ -997,6 +997,20 @@ class GridTreeSet : public GridTreeSubset {
      */
     static void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                              const uint max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
+
+    /*! \brief This method adjoins the outer approximation of \a theSet (computed on the fly) to this paving.
+     *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented
+     *  by the paving's binary node \a pBinaryTreeNode. When adding the outer approximation, we compute it
+     *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
+     *  of the binary tree we should make to get the proper cells for outer approximating \a theSet.
+     *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
+     *  from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
+     *  This method is more efficient in the sense that the lattice_box is provided: this allows to save the computation of
+     *  the box, which at each recursive call is recalculated by simply splitting over the correct dimension
+     */
+    static void _adjoin_outer_approximation( const Grid & theGrid, const Vector<Interval>& lattice_box, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                             const uint max_mince_depth,  const CompactSetInterface& theSet, BinaryWord * pPath );
+
 
     /*! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_height and represented
@@ -1023,19 +1037,19 @@ class GridTreeSet : public GridTreeSubset {
                                              const uint max_mince_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
-     *  It is specialised for open sets, for which we have the superset() operator. If a set is a superset of
+     *  It is specialized for open sets, for which we have the superset() operator. If a set is a superset of
      *  a cell, then we know it overlaps the cell and all its children.
      */
     static void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                              const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
-    /*! \brief This method is uset to do restriction of this set to the set given by
+    /*! \brief This method is used to do restriction of this set to the set given by
      *  \a theOtherSubPaving Note that, here we require that the height of the primary
      *  root cell of this set is >= the height of the primary root cell of \a theOtherSubPaving.
      */
     void restrict_to_lower( const GridTreeSubset& theOtherSubPaving );
 
-    /*! \brief This method is uset to remove \a theOtherSubPaving from this set.
+    /*! \brief This method is used to remove \a theOtherSubPaving from this set.
      *  Note that, here we require that the height of the primary root cell of
      *  this set is >= the height of the primary root cell of \a theOtherSubPaving.
      */
@@ -1185,7 +1199,7 @@ class GridTreeSet : public GridTreeSubset {
     /*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
      *  This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
      *  Note that, the depth is the total number of subdivisions (in all dimensions) of the unit
-     *  cell of the grid. This method does the followig:
+     *  cell of the grid. This method does the following:
      * 1. Computes the smallest Primary cell enclosing \a theSet
      * 2. Allocates the paving for this cell
      * 3. Minces the paving to the level: depth + \<the primary cell height\>
@@ -1257,10 +1271,10 @@ class GridTreeCursor {
 
     GridCell _theCurrentGridCell;
 
-    /*! \brief Push the node into the atack */
+    /*! \brief Push the node into the stack */
     void push( BinaryTreeNode* pLatestNode );
 
-    /*! \brief Pop the node from the atack, return NULL is the stack is empty */
+    /*! \brief Pop the node from the stack, return NULL is the stack is empty */
     BinaryTreeNode* pop( );
 
     /*! \brief Check is the stack contains just one element, i.e. we are at the root */
@@ -1316,10 +1330,10 @@ class GridTreeCursor {
     //@{
     //! \name Leaf Operations
 
-    /*! \brief Markes the leaf node as enabled, otherwise they through \a NotALeafNodeEsception */
+    /*! \brief Marks the leaf node as enabled, otherwise they through \a NotALeafNodeEsception */
     void set_enabled() const;
 
-    /*! \brief Markes the leaf node as disabled, otherwise they through \a NotALeafNodeEsception */
+    /*! \brief Marks the leaf node as disabled, otherwise they through \a NotALeafNodeEsception */
     void set_disabled() const;
 
     //@}
@@ -1415,8 +1429,8 @@ class GridTreeConstIterator : public boost::iterator_facade< GridTreeConstIterat
      *  STL Trivial Iterator concept. */
     GridTreeConstIterator();
 
-    /*! \brief The constructor that accepts the subpacing \a pSubPaving to iterate on
-     * The paramerter \a firstLastNone indicatges whether we want to position the iterator
+    /*! \brief The constructor that accepts the subpaving \a pSubPaving to iterate on
+     * The paramereter \a firstLastNone indicates whether we want to position the iterator
      * on the first enabled leaf node (firstLastNone == true) or the last one (firstLastNone == false)
      * or we are constructing the "end iterator" that does not point anywhere.
      */
@@ -1478,7 +1492,7 @@ inline BinaryTreeNode::BinaryTreeNode( const BooleanArray& theTree, const Boolea
     //Make default initialization
     init( false, NULL, NULL ) ;
 
-    //If the tree is not empry and there are enabled leafs then do the thing
+    //If the tree is not empty and there are enabled leafs then do the thing
     if( ( theTree.size() ) > 0 && ( theEnabledCells.size() > 0 ) ) {
         uint arr_index = 0, leaf_counter = 0;
         restore_node( this, arr_index, leaf_counter, theTree, theEnabledCells );
@@ -1805,7 +1819,7 @@ inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSub
         _is_in_end_state = ! navigate_to( definitely( firstLastNone ) );
     } else {
         //In this case if we do nothing, the cursor in the iterator will point to the root node
-        //Since this can be the only node in the tre we should add a marker that indicates that
+        //Since this can be the only node in the tree we should add a marker that indicates that
         //the iterator is at the end state.
         _is_in_end_state = true;
     }
@@ -1990,7 +2004,7 @@ inline GridTreeSubset::GridTreeSubset( const GridTreeSubset &otherSubset ) : _pR
 inline GridTreeSubset::~GridTreeSubset() {
     //IVAN S ZAPREEV:
     //WARNING: This method should have no implementation what so ever
-    //All the synamically allocatged data should be destroyed from the
+    //All the dynamically allocated data should be destroyed from the
     //corresponding Paving object
 }
 
@@ -1999,7 +2013,7 @@ inline uint GridTreeSubset::compute_number_subdiv( Float theWidth, const Float t
     //   minimum N : ( theWidth / 2^{N} ) <= theMaxWidth
     //This is equivalent to (because all values are positive)
     //   minimum N : theWidth / theMaxWidth <= 2^{N}
-    //log is a continuous-increasing dunction, thus the latter is
+    //log is a continuous-increasing function, thus the latter is
     //equivalent to (since 0 < theMaxWidth, theWidth < infinite )
     //   minimum N : log( theWidth / theMaxWidth ) <= N
     //In computations then we need to take
@@ -2118,7 +2132,7 @@ inline tribool GridTreeSubset::superset( const Box& theBox ) const {
         //of the set, then clearly theBox is not a subset of this set.
         return false;
     } else {
-        //Otherwise, is theBox is possibly a subset then we try to see furhter
+        //Otherwise, is theBox is possibly a subset then we try to see further
         BinaryWord pathCopy( cell().word() );
         return GridTreeSubset::covers( binary_tree(), grid(), cell().height(), pathCopy, theBox );
     }

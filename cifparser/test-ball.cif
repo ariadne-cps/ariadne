@@ -1,0 +1,10 @@
+model BouncingBall() =
+|[ 
+    intern var x,v: cont real = (10.0, 0.0)
+             ; a,g: disc real = (0.5, 9.8)
+:: |( 
+    mode fly = flow dot x = v & dot v = -g
+        when x <= 0 and v <= 0 now do v := -a*v goto fly
+:: fly
+)|
+]|

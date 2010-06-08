@@ -1,0 +1,15 @@
+model TankController() =
+|[ extern var V: cont real = 10
+            ; Qi, Qo: alg real
+            ; n: disc nat = 0
+:: |( mode physics = inv dot V = Qi - Qo
+                       &    Qi = n * 5
+                       &    Qo = sqrt(V)
+   :: physics
+   )|
+||
+   |( mode closed = when V <= 2  now do n := 1 goto opened
+         , opened = when V >= 10 now do n := 0 goto closed
+   :: closed
+   )|
+]|

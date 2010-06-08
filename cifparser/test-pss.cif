@@ -1,0 +1,93 @@
+automaton Controller() =
+|[ extern chan  UP! : void
+	  ;	DOWN! : void
+	  ;	N2P? : void
+	  ;	P2N? : void
+::|( mode preIncr =
+			act UP! goto Incr
+	, Incr =
+			act UP! goto Incr
+			act P2N? goto Incr
+			act N2P? goto preDecr
+	, preDecr =
+			act DOWN! goto Decr
+	, Decr =
+			act DOWN! goto Decr
+			act N2P? goto Decr
+			act P2N? goto preIncr
+	:: preDecr
+  )|
+]|
+
+automaton refVoltage() =
+|[ output var Vr : cont real
+   intern var Vhigh : disc real = 1.2
+	  ;   Vmin  : disc real = 0.8
+   	  ;   T1 : disc real = 0.000012
+::|( mode Fref = tcp Vr >= Vmin
+		 flow dot Vr = -(0.02 / T1)
+			when Vr <= Vmin goto Rref
+	, Rref = tcp Vr <= Vhigh
+		 flow dot Vr = (0.02 / T1)
+			when Vr >= Vhigh goto Fref
+     :: Rref
+  )|
+]|
+
+automaton Environment() = 
+|[ extern chan  UP? : void
+	  ;	DOWN? : void
+   output var	Vc : cont real	  
+   intern clock k1
+   	  var  T1 : disc real = 0.000012
+::|( mode Idle =
+			act DOWN? goto Fall
+			act UP? goto Rise
+	, Rise = tcp k1 <= T1
+		 flow dot Vc = (0.05 / T1)
+			when k1 >= T1 do k1 := 0 goto Idle
+	, Fall = tcp k1 <= T1
+		 flow dot Vc = -(0.05 / T1)
+			when k1 >= T1 do k1 := 0 goto Idle
+	::Idle
+  )|
+]|
+
+automaton voltageEval() =
+|[ extern chan  P2N! : void
+	  ;	N2P! : void
+   input  var Vc
+	  ,   Vr :  real
+   intern clock k2
+	  var H : disc real = 0.00005
+	  ;   T2: disc real = 0.000001
+::|( mode Pwait = tcp k2 <= T2
+			when k2 >= T2 act P2N! goto Nidle
+	, Nidle = tcp (Vc - Vr <= H)
+			when Vc - Vr >= -H do k2 := 0 goto Nwait
+	, Nwait = tcp k2 <= T2
+			when k2 >= T2 act N2P! goto Pidle
+	, Pidle = tcp (Vc - Vr >= -H)
+			when Vc - Vr <= H do k2 := 0 goto Pwait
+	::Pidle
+  )|
+]|
+
+model System() =
+|[ intern chan  UP! : void
+	  ;	DOWN!: void
+	  ;	N2P! : void
+	  ;	P2N! : void
+   intern var Vr : cont real = 1.2
+	  ;   Vc : cont real = 1.4
+  connect {UP, C.UP, E.UP}
+	, {DOWN, C.DOWN, E.DOWN}
+	, {N2P, C.N2P, VOLT.N2P}
+	, {P2N, C.P2N, VOLT.P2N}
+	, {Vr, RV.Vr, VOLT.Vr}
+	, {Vc, E.Vc, VOLT.Vc}
+:: C : Controller()
+|| E : Environment()
+|| RV : refVoltage()
+|| VOLT : voltageEval()
+]|

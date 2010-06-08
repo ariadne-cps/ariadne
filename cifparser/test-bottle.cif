@@ -1,0 +1,76 @@
+model Bottle_Filling_System() =
+|[ extern var VT: cont real = 2.0
+            ; QFl, QFr: alg real
+   connect {VT, tank.VT, left.VT, right.VT}
+         , {QFl, tank.QFl, left.QF}
+         , {QFr, tank.QFr, right.QF}
+:: 
+   left : Bottle_Filling_Line()
+|| tank: |[ output var VT: cont real
+            extern var QFl, QFr: alg real
+            intern var a, b:         disc nat  = (0, 0)
+                     ; n:            cont real
+                     ; pH:           alg  real
+                     ; c, Qa, Qu:    alg  real
+                     ; Qseta, Qsetu: disc real = (0.5, 1.5)
+                     ; cu, ca:       disc real = (0.0, 0.0005)
+                     ; Kloss:        disc real = 0.000002
+         :: |( init pH = 7.0
+             , mode physics =
+                          inv dot VT = Qu + Qa - QFl - QFr
+                            & dot  n = cu*Qu + ca*Qa - c*QFl - c*QFr - Kloss*VT
+                            &      n = c*VT
+                            &     pH = -log(c/1000)
+                            &     Qa = a*Qseta
+                            &     Qu = b*Qsetu
+            :: physics
+            )|
+         || |( mode closed = when pH >= 7.1 now do a := 1 goto opened
+                  , opened = when pH <= 7   now do a := 0 goto closed
+            :: closed
+            )|
+         || |( mode closed = when VT <= 2   now do b  := 1 goto opened
+                  , opened = when VT >= 10  now do b  := 0 goto closed
+            :: closed
+            )|
+         ]|
+|| right : Bottle_Filling_Line()
+]|
+ 
+automaton Bottle_Filling_Line() =
+|[ input var VT: real
+   extern var QF: alg real
+   intern var g:  disc nat = 0
+            ; VB: cont real
+   connect {QF, fp.QF},
+           {VT, fc.VT},
+           {VB, fp.VB, fc.VB},
+           {g, fp.g, fc.g}
+:: fp : Filling_Physics()
+|| fc : Filling_Controller()
+]|
+ 
+automaton Filling_Physics() =
+|[ input var g:           nat
+   output var VB:    cont real = 0
+   extern var QF:    alg  real
+   intern var QsetF: disc real = 1
+:: |( mode m = inv dot VB = QF
+                 &     QF = g*QsetF
+   :: m
+   )|
+]|
+ 
+automaton Filling_Controller() =
+|[ input var VB, VT: real
+   output var g: disc nat
+   intern var ttr: disc real = 0.2
+          clock t
+:: |( mode start   = now do g := 1 goto filling
+         , filling = when VT <= 0.5 now do g := 0 goto stopped
+                     when VB >= 1   now do (g,t) := (0,0) goto delay
+         , stopped = when VT >= 0.7 now do g := 1 goto filling
+         , delay   = when t >= ttr now do (VB,g) := (0,1) goto filling
+   :: start
+   )|
+]|

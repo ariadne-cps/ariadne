@@ -1,0 +1,9 @@
+V
+a_b
+a5
+1.0e+3
+1.03
+0.0
+1e99
+"ciao mondo"
+"ciao mondo\ncasa"

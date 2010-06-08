@@ -1,0 +1,12 @@
+model TankController() =
+|[ 
+   extern var V: cont real = 10
+:: |( mode closed = 
+            inv dot V = sqrt(V)
+            when V <= 2  now goto opened
+         , opened = 
+            inv dot V = sqrt(V) + 5.0
+            when V >= 10 now goto closed
+   :: closed
+   )|
+]|

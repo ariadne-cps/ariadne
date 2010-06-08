@@ -5,14 +5,38 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADER([config.h])
 
+# Save the user-given value of CXXFLAGS for later use
+CXXFLAGS_EARLY=${CXXFLAGS}
+
 # Checks for programs.
 AC_PROG_CXX
+
+# this macro is used to get the arguments supplied
+# to the configure script (./configure --enable-debug)
+# Check if we have enable debug support.
+AC_MSG_CHECKING(whether to enable debugging)
+AC_ARG_ENABLE(debug, [AS_HELP_STRING([--enable-debug=(yes/no)], [turn on debugging (default no)])],
+              enable_debug=${enableval}, enable_debug="no")
+# If enable_debug is yes, then put the correct CXXFLAGS
+if test "x$enable_debug" = "xyes"; then
+    # If user provided a custom value for CXXFLAGS, do no change it
+    if test "x$CXXFLAGS_EARLY" = "x"; then
+        CXXFLAGS="-g3 -O0"
+    fi
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
 
 # Checks for libraries.
 AC_LANG(C++)
 
 # Disable static libraries
 AC_DISABLE_STATIC
+
+# Check for Flex and Bison
+AC_PROG_LEX
+AC_PROG_YACC
 
 # Checks for Libtool
 AC_PROG_LIBTOOL
@@ -24,6 +48,8 @@ AC_CHECK_SIZEOF([long int])
 
 # Check for standard header files.
 AC_STDC_HEADERS
+
+
 
 # Check for standard fenv.h (optional)
 AC_CHECK_HEADER([fenv.h],[AC_DEFINE([HAVE_FENV_H],[1],[Define to 1 if you have the <fenv.h> header file.])],[AC_MSG_WARN([Standard C header file fenv.h is missing. Only assembly-language rounding is supported.])])
@@ -91,6 +117,22 @@ AC_ARG_ENABLE(mp,[AS_HELP_STRING([--enable-mp],[enable compilation of FloatMP ty
               [AC_DEFINE([ENABLE_MULTIPLE_PRECISION],[1],[Define to 1 if you want to use multiple-precision floating-point numbers.])],
               [AC_MSG_RESULT([no])],[AC_MSG_RESULT([yes])])
 
+# this macro is used to get the arguments supplied
+# to the configure script (./configure --with-static-exec)
+# Check if we have to link executables statically 
+# (needed to allow debugging in Eclipse).
+AC_MSG_CHECKING(whether to to link executables statically)
+AC_ARG_ENABLE(static-exec, [AS_HELP_STRING([--enable-static-exec(=yes/no)],[link statically executable files (default no)])],
+            static_exec=${enableval}, static_exec="no")
+# If static_exec is yes, then put the correct EXEC_LDFLAGS
+if test "x$static_exec" = "xyes"; then
+    EXEC_LDFLAGS="-static"
+    AC_MSG_RESULT(yes)
+else
+    EXEC_LDFLAGS=""
+    AC_MSG_RESULT(no)
+fi
+
 AC_MSG_NOTICE([LIBS=$LIBS])
 AC_MSG_NOTICE([GTK_LIBS=$GTK_LIBS])
 AC_MSG_NOTICE([CAIRO_LIBS=$CAIRO_LIBS])
@@ -99,11 +141,13 @@ AC_MSG_NOTICE([BOOST_PYTHON_LIB=$BOOST_PYTHON_LIB])
 AC_MSG_NOTICE([HAVE_BOOST_PYTHON_HPP='$HAVE_BOOST_PYTHON_HPP'])
 AC_MSG_NOTICE([HAVE_LIBBOOST_PYTHON='$HAVE_LIBBOOST_PYTHON'])
 AC_MSG_NOTICE([WANT_PYTHON_INTERFACE=$WANT_PYTHON_INTERFACE])
+AC_MSG_NOTICE([EXEC_LDFLAGS=$EXEC_LDFLAGS])
 
 AC_SUBST(BOOST_PYTHON_LIB)
+AC_SUBST(EXEC_LDFLAGS)
 
 # Declare which Makefiles need to be built
-AC_CONFIG_FILES([Makefile include/Makefile src/Makefile wrap/Makefile python/Makefile test/Makefile examples/Makefile])
+AC_CONFIG_FILES([Makefile include/Makefile src/Makefile wrap/Makefile python/Makefile test/Makefile examples/Makefile cifparser/Makefile])
 
 # Output results of autoconf tests
 AC_OUTPUT

@@ -97,26 +97,26 @@ int main(int argc, char** argv)
     Float Jm1 = Jm + Jg1;   Float Jm2 = Jm + Jg2;   // kg m^2
     Float N1 = 90.0;        Float N2 = 220.0;       // coupling ratio
     
+    Float pmin = 0.5;                                 // Sampling period
+    Float pmax = 1.25;                                 // Sampling period
+    Float lper = 30.0;                              // Switching period
+    
     // State variables
     RealVariable x1("x1");  // theta1: shoulder angle
     RealVariable v1("v1");  // dot theta1
     RealVariable x2("x2");  // theta2: elbow angle
     RealVariable v2("v2");  // dot theta2
     // Input variables
-    RealVariable u1("u1");  // Input torque for the shoulder
-    RealVariable u2("u2");  // Input torque for the elbow
-    // Time
+    RealVariable u1("u1");      // Input torque for the shoulder
+    RealVariable u2("u2");      // Input torque for the elbow
+    RealVariable uc1("u1");    // Input torque from the controller
+    RealVariable uc2("u2");    // Input torque from the controller
+  
+    // Time and clocks
     RealVariable t("t");
+    RealVariable l("l");
+    RealVariable c("c");        // Sampling clock for the network
 
-/*
-    RealExpression e1 = r1 * x1 * x2;
-    RealExpression e2 = e1.substitute(x1, RealExpression(m1));
-    RealExpression e3 = simplify(e2);
-     
-    std::cout << "e1 = " << e1 << std::endl;
-    std::cout << "e2 = " << e2 << std::endl;
-    std::cout << "e3 = " << e3 << std::endl;
-*/
     /* 
      * Dynamics is expressed as a function of ddot theta1 and ddot theta2 (angular accelerations)
      *
@@ -170,15 +170,16 @@ int main(int argc, char** argv)
     std::cout << "dot v1 = " << dv1 << std::endl;
     std::cout << "dot v2 = " << dv2 << std::endl;
     //
-    // Inputs u1 and u2 are obtained from a given trajectory
+    // Inputs uc1 and uc2 are obtained from a given trajectory
     //
     // Algebraic expression for the trajectory
-    RealExpression alg_a1 = 0.0;                    // dot dot theta1   (no acceleration)
-    RealExpression alg_a2 = 0.0;                    // dot dot theta2
-    RealExpression alg_v1 = 2*pi<Float>()/60.0;     // dot theta1       (constant angular speed)
-    RealExpression alg_v2 = 2*pi<Float>()/5.0;     // dot theta2
-    RealExpression alg_x1 = alg_v1 * t;             // theta1
-    RealExpression alg_x2 = alg_v2 * t;             // theta2
+    RealExpression alg_x1 = pi<Float>() * cos(2* pi<Float>() / 120.0 * t);             // theta1
+//    RealExpression alg_x1 = 2*pi<Float>()/sqr(60.0) * sqr(t);             // theta1
+    RealExpression alg_x2 = pi<Float>() * cos(2* pi<Float>() / 30.0 * t);             // theta1
+    RealExpression alg_v1 = derivative(alg_x1, t);     // dot theta1      
+    RealExpression alg_v2 = derivative(alg_x2, t);     // dot theta2
+    RealExpression alg_a1 = derivative(alg_v1, t);                    // dot dot theta1 
+    RealExpression alg_a2 = derivative(alg_v2, t);                    // dot dot theta2
     std::cout << "Algebraic expression for a1 = " << alg_a1 << std::endl;
     std::cout << "Algebraic expression for a2 = " << alg_a2 << std::endl;
     std::cout << "Algebraic expression for v1 = " << alg_v1 << std::endl;
@@ -186,122 +187,176 @@ int main(int argc, char** argv)
     std::cout << "Algebraic expression for x1 = " << alg_x1 << std::endl;
     std::cout << "Algebraic expression for x2 = " << alg_x2 << std::endl << std::endl;
     RealExpression alg_u1= simplify(m[0][0]*alg_a1 + m[1][0]*alg_a2 + g1);
-    RealExpression alg_u2= simplify(m[1][0]*alg_a1 + m[1][1]*alg_a2 + g2);
+    std::cout << "Algebraic expression for uc1 = " << alg_u1 << std::endl;
     alg_u1 = alg_u1.substitute(v1, alg_v1);
+    std::cout << "                             = " << alg_u1 << std::endl;
     alg_u1 = alg_u1.substitute(v2, alg_v2);
+    std::cout << "                             = " << alg_u1 << std::endl;
     alg_u1 = alg_u1.substitute(x1, alg_x1);
+    std::cout << "                             = " << alg_u1 << std::endl;
     alg_u1 = simplify(alg_u1.substitute(x2, alg_x2));
-    std::cout << "Algebraic expression for u1 = " << alg_u1 << std::endl;
+    std::cout << "                             = " << alg_u1 << std::endl;
+    RealExpression alg_u2= simplify(m[1][0]*alg_a1 + m[1][1]*alg_a2 + g2);
     alg_u2 = alg_u2.substitute(v1, alg_v1);
     alg_u2 = alg_u2.substitute(v2, alg_v2);
     alg_u2 = alg_u2.substitute(x1, alg_x1);
     alg_u2 = simplify(alg_u2.substitute(x2, alg_x2));
-    std::cout << "Algebraic expression for u2 = " << alg_u2 << std::endl;
+    std::cout << "Algebraic expression for uc2 = " << alg_u2 << std::endl;
        
-    RealExpression du1 = simplify(derivative(alg_u1,t));
-    RealExpression du2 = simplify(derivative(alg_u2,t));
+    RealExpression duc1 = simplify(derivative(alg_u1,t));
+    RealExpression duc2 = simplify(derivative(alg_u2,t));
 
-    std::cout << "dot u1 = " << du1 << std::endl;
-    std::cout << "dot u2 = " << du2 << std::endl;
+    std::cout << "dot u1 = " << duc1 << std::endl;
+    std::cout << "dot u2 = " << duc2 << std::endl;
+
+//    return 0;
 
     // t is a clock
     RealExpression dt= 1.0;
     std::cout << "dot t = " << dt << std::endl << std::endl;
-        
-    //
-    // Set up the VectorFunction representing the dynamics;
-    //
-    List<RealExpression> exprlist;
-    exprlist.append(dx1);       exprlist.append(dx2);
-    exprlist.append(dv1);       exprlist.append(dv2);
-    exprlist.append(du1);       exprlist.append(du2);
-    exprlist.append(dt);
-    std::cout << "Expression list = " << exprlist << std::endl;
-    List<RealVariable> varlist;
-    varlist.append(x1);         varlist.append(x2);
-    varlist.append(v1);         varlist.append(v2);
-    varlist.append(u1);         varlist.append(u2);
-    varlist.append(t);
-    std::cout << "Variable list = " << varlist << std::endl << std::endl;
-  
-    VectorFunction dyn(exprlist,varlist);
-    std::cout << "Dynamics = " << std::endl << dyn << std::endl << std::endl;
 
-    // Transitions that keeps theta1 and theta2 in [0, k*2pi]
-    int k = 4;
-    RealExpression x1_leq_zero = -x1;               // x1 <= 0.0
-    RealExpression x1_geq_k2pi = x1 - k*2.0*pi<Float>();      // x1 >= 2pi
-    RealExpression x2_leq_zero = -x2;               // x1 <= 0.0
-    RealExpression x2_geq_k2pi = x2 - k*2.0*pi<Float>();      // x1 >= 2pi
-    std::cout << "Guards:" << std::endl;
-    std::cout << "  x1 <= 0.0 : " << x1_leq_zero << std::endl;
-    std::cout << "  x1 >= 2pi : " << x1_geq_k2pi << std::endl;
-    std::cout << "  x2 <= 0.0 : " << x2_leq_zero << std::endl;
-    std::cout << "  x2 >= 2pi : " << x2_geq_k2pi << std::endl;
-        
-    // Reset Functions
-    RealExpression zero = 0.0;
-    RealExpression ktwopi = k*2*pi<Float>();
-    RealExpression idx1 = x1;
-    RealExpression idx2 = x2;   
-    RealExpression idv1 = v1;
-    RealExpression idv2 = v2;
-    RealExpression idu1 = u1;
-    RealExpression idu2 = u2;
-    RealExpression idt = t;
-    
-    // VectorFunctions for the resets
-    exprlist[0] = zero;     exprlist[1] = idx2;
-    exprlist[2] = idv1;     exprlist[3] = idv2;
-    exprlist[4] = idu1;     exprlist[5] = idu2;
-    exprlist[6] = idt;
-    VectorFunction reset_x1_zero(exprlist, varlist);
-    exprlist[0] = ktwopi;     exprlist[1] = idx2;
-    VectorFunction reset_x1_k2pi(exprlist, varlist);
-    exprlist[0] = idx1;      exprlist[1] = zero;
-    VectorFunction reset_x2_zero(exprlist, varlist);
-    exprlist[0] = idx1;      exprlist[1] = ktwopi;
-    VectorFunction reset_x2_k2pi(exprlist, varlist);
-    
-    std::cout << "Resets:" << std::endl;
-    std::cout << "    x1 := 0 : " << reset_x1_zero << std::endl;
-    std::cout << "  x1 := 2pi : " << reset_x1_k2pi << std::endl;
-    std::cout << "    x2 := 0 : " << reset_x2_zero << std::endl;
-    std::cout << "  x2 := 2pi : " << reset_x2_k2pi << std::endl;
-    
+//    return 0;
+ 
     //
     // Definition of the Hybrid Automaton for the Robot Arm
     //
-    HybridAutomaton robotarm("RobotArm");
+    HybridIOAutomaton robotarm("RobotArm");
+    robotarm.add_input_var(u1);
+    robotarm.add_input_var(u2);
+    robotarm.add_output_var(x1);
+    robotarm.add_output_var(v1);
+    robotarm.add_output_var(x2);
+    robotarm.add_output_var(v2);   
+    // events to keep x1 and x2 between -pi and pi
+    DiscreteEvent x1l("x1l");    DiscreteEvent x1u("x1u");
+    DiscreteEvent x2l("x2l");    DiscreteEvent x2u("x2u");
+    robotarm.add_internal_event(x1l);   robotarm.add_internal_event(x1u);
+    robotarm.add_internal_event(x2l);   robotarm.add_internal_event(x2u);
     
-    // Two modes: initial speed-up and free run
-    DiscreteState speedup("speedup");
-    robotarm.new_mode(speedup, dyn);
+    // One mode: free run
     DiscreteState free("free");
-    robotarm.new_mode(free, dyn);
+    robotarm.new_mode(free);
+    robotarm.set_dynamics(free, x1, dx1);
+    robotarm.set_dynamics(free, v1, dv1);
+    robotarm.set_dynamics(free, x2, dx2);
+    robotarm.set_dynamics(free, v2, dv2);
+    // transitions that resets x1
+    robotarm.new_forced_transition(x1l, free, free, indicator((x1 <= -pi<Float>()) && (v1 <= 0.0), positive));
+    robotarm.set_reset(x1l, free, x1, pi<Float>());
+    robotarm.set_reset(x1l, free, x2, x2);
+    robotarm.set_reset(x1l, free, v1, v1);
+    robotarm.set_reset(x1l, free, v2, v2);
+    robotarm.new_forced_transition(x1u, free, free, indicator((x1 >= pi<Float>()) && (v1 >= 0.0), positive));
+    robotarm.set_reset(x1u, free, x1, -pi<Float>());
+    robotarm.set_reset(x1u, free, x2, x2);
+    robotarm.set_reset(x1u, free, v1, v1);
+    robotarm.set_reset(x1u, free, v2, v2);
+    // transitions that resets x2
+    robotarm.new_forced_transition(x2l, free, free, indicator((x2 <= -pi<Float>()) && (v2 <= 0.0), positive));
+    robotarm.set_reset(x2l, free, x2, pi<Float>());
+    robotarm.set_reset(x2l, free, x1, x1);
+    robotarm.set_reset(x2l, free, v1, v1);
+    robotarm.set_reset(x2l, free, v2, v2);
+    robotarm.new_forced_transition(x2u, free, free, indicator((x2 >= pi<Float>()) && (v2 >= 0.0), positive));
+    robotarm.set_reset(x2u, free, x2, -pi<Float>());
+    robotarm.set_reset(x2u, free, x1, x1);
+    robotarm.set_reset(x2u, free, v1, v1);
+    robotarm.set_reset(x2u, free, v2, v2);
     
-    // Transitions
-    DiscreteEvent x1l0("x1l0");
-    DiscreteEvent x1g2pi("x1g2pi");
-    DiscreteEvent x2l0("x2l0");
-    DiscreteEvent x2g2pi("x2g2pi");
-
-//    robotarm.new_transition(x1l0, free, free, reset_x1_k2pi, ScalarFunction(x1_leq_zero, varlist), true);
-//    robotarm.new_transition(x1g2pi, free, free, reset_x1_zero, ScalarFunction(x1_geq_k2pi, varlist), true);
-//    robotarm.new_transition(x2l0, free, free, reset_x2_k2pi, ScalarFunction(x2_leq_zero, varlist), true);
-//    robotarm.new_transition(x2g2pi, free, free, reset_x2_zero, ScalarFunction(x2_geq_k2pi, varlist), true);
-
-    // Transitions that puts u1 and u2 to zero after t0 seconds
-    exprlist[0] = idx1;         exprlist[1] = idx2;
-    exprlist[4] = zero;         exprlist[5] = zero;
-    VectorFunction set_u1u2_zero(exprlist, varlist);
-    Float t0 = 5.0;
-    RealExpression  t_geq_t0 = t - t0;
-    DiscreteEvent stop("stop");
-    robotarm.new_transition(stop, speedup, free, set_u1u2_zero, ScalarFunction(t_geq_t0, varlist), true);
-
     std::cout << "RobotArm = " << std::endl;
     std::cout << robotarm << std::endl << std::endl;
+
+    //
+    // Definition of the Hybrid Automaton for the controller
+    //
+    HybridIOAutomaton controller("Controller");
+    controller.add_output_var(uc1);
+    controller.add_output_var(uc2);
+    controller.add_internal_var(t);     // global time
+    controller.add_internal_var(l);     // local clock
+    DiscreteEvent lreset("lreset");
+    controller.add_internal_event(lreset);     // local clock
+    
+    // Two modes: uc1 and uc2 increase
+    DiscreteState incr("incr");
+    controller.new_mode(incr);
+    controller.set_dynamics(incr, uc1, duc1);
+    controller.set_dynamics(incr, uc2, duc2);
+    controller.set_dynamics(incr, t, dt);
+    controller.set_dynamics(incr, l, dt);
+
+//     DiscreteState decr("decr");
+//     controller.new_mode(decr);
+//     controller.set_dynamics(decr, uc1, -5e-7);
+//     controller.set_dynamics(decr, uc2, -2.5e-6);
+//     controller.set_dynamics(decr, t, dt);
+//     controller.set_dynamics(decr, l, dt);
+
+    // Two transitions that resets l and switch mode
+    RealExpression l_geq_lper = l - lper;     // l >= lper
+    RealExpression l_res_zero = 0.0;    // l := 0
+    RealExpression uc1id = uc1;     // uc1 := uc1
+    RealExpression uc2id = uc2;     // uc2 := uc2
+    RealExpression tid = t;         // t := t
+//     controller.new_forced_transition(lreset, incr, decr, l_geq_lper);
+//     controller.set_reset(lreset, incr, l, l_res_zero);
+//     controller.set_reset(lreset, incr, uc1, uc1id);
+//     controller.set_reset(lreset, incr, uc2, uc2id);
+//     controller.set_reset(lreset, incr, t, tid);
+//     controller.new_forced_transition(lreset, decr, incr, l_geq_lper);
+//     controller.set_reset(lreset, decr, l, l_res_zero);
+//     controller.set_reset(lreset, decr, uc1, uc1id);
+//     controller.set_reset(lreset, decr, uc2, uc2id);
+//     controller.set_reset(lreset, decr, t, tid);
+        
+    std::cout << "Controller = " << std::endl;
+    std::cout << controller << std::endl << std::endl;
+    
+    //
+    // Hybrid Automaton for the network
+    //
+//     HybridIOAutomaton network("Network");
+//     network.add_input_var(uc1);
+//     network.add_input_var(uc2);
+//     network.add_output_var(u1);
+//     network.add_output_var(u2);
+//     network.add_internal_var(c);
+//     DiscreteEvent sample_e("sample_e");
+//     network.add_internal_event(sample_e);
+//     
+//     // One mode: sample uc1 and uc2
+//     DiscreteState sample("sample");
+//     network.new_mode(sample);
+//     network.set_dynamics(sample, u1, 0.0);
+//     network.set_dynamics(sample, u2, 0.0);
+//     network.set_dynamics(sample, c, dt);
+// 
+//     // One transition that resets c and update the value of u1 and u2
+//     RealExpression c_res_zero = 0.0;    // c := 0
+//     RealExpression u1_eq_uc1 = uc1;     // u1 := uc1
+//     RealExpression u2_eq_uc2 = uc2;     // u2 := uc2
+//     network.new_forced_transition(sample_e, sample, sample, indicator(c >= pmin, positive));
+//     // network.new_invariant(sample, indicator(c <= pmax, negative));
+//     network.set_reset(sample_e, sample, c, c_res_zero);
+//     network.set_reset(sample_e, sample, u1, u1_eq_uc1);
+//     network.set_reset(sample_e, sample, u2, u2_eq_uc2);
+// 
+//     std::cout << "Network = " << std::endl;
+//     std::cout << network << std::endl << std::endl;
+//         
+    //
+    // COMPOSE THE SYSTEM
+    //
+//    HybridIOAutomaton contrnet = compose("contrnet", controller, network, incr, sample);
+//    HybridIOAutomaton ncs = compose("NCS", contrnet, robotarm, DiscreteState("incr,sample"), free);
+    HybridIOAutomaton ncs = compose("NCS", controller, robotarm, incr, free);
+    RealSpace spc;
+    HybridAutomaton system;
+    make_lpair<HybridAutomaton, RealSpace>(system, spc) = make_monolithic_automaton(ncs);
+
+    std::cout << "Complete System = " << std::endl;
+    std::cout << system << std::endl << std::endl;
+
         
     //
     // COMPUTE THE EVOLUTION OF THE SYSTEM
@@ -309,20 +364,21 @@ int main(int argc, char** argv)
       
     // Set up the evolution parameters and grid
     Float time(60.0);
-    if(argc >= 4)   // read initial value for time from the arguments
-        time = atof(argv[3]);
-    int steps = 2;
-    if(argc >= 5)   // read initial value for steps from the arguments
-        steps = atoi(argv[4]);
+    if(argc >= 2)   // read initial value for time from the arguments
+        time = atof(argv[1]);
+    int steps = 10;
+    if(argc >= 3)   // read initial value for steps from the arguments
+        steps = atoi(argv[2]);
     Float step_size(1.25e-2);
-    if(argc >= 6)
-        step_size = atof(argv[5]);  // read step size from the arguments        
-    Vector<Float> enclosure_cell(7,0.5);
+    if(argc >= 4)
+        step_size = atof(argv[3]);  // read step size from the arguments        
+    Vector<Float> enclosure_cell(spc.dimension(),1.0);
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
     parameters.maximum_step_size=step_size;
     parameters.enable_set_model_reduction=true;
+    parameters.enable_premature_termination=true;
 
     std::cout << "Evolution parameters:" << parameters << std::endl;
 
@@ -336,31 +392,49 @@ int main(int argc, char** argv)
     //
     ContinuousValuation<Real> val;
     val.set(t, 0.0);
-    std::cout << "Initial valuation: " << val << std::endl;    
-    Real iu1 = evaluate(alg_u1,val);
-    if(argc >= 2)   // read initial value for u1 from the arguments
-        iu1 = atof(argv[1]);
-    Real iu2 = evaluate(alg_u2,val);
-    if(argc >= 3)   // read initial value for u2 from the arguments
-        iu2 = atof(argv[2]);
-    Real iv1 = evaluate(alg_v1, val);
-    Real iv2 = evaluate(alg_v2, val);
-    Real ix1 = evaluate(alg_x1, val);
-    Real ix2 = evaluate(alg_x2, val);
-    Box initial_box(7, ix1.lower(),ix1.upper(), ix2.lower(),ix2.upper(), 
-                       iv1.lower(),iv1.upper(), iv2.lower(),iv2.upper(),
-                       iu1.lower(),iu1.upper(), iu2.lower(),iu2.upper(), 
-                       0.0,0.0);
+    std::cout << "Initial valuation: ";    
+    Real iv1 = 0.0;
+    std::cout << ", v1 = " << iv1;
+    Real iv2 = 0.0;
+    std::cout << ", v2 = " << iv2;
+    Real ix1 = evaluate(alg_x1, val);;
+    std::cout << ", x1 = " << ix1;
+    Real ix2 = evaluate(alg_x2, val);;
+    std::cout << ", x2 = " << ix2;
+    Real iuc1 = evaluate(alg_u1, val);
+    std::cout << "uc1 = " << iuc1;
+    Real iuc2 = evaluate(alg_u2, val);
+    std::cout << ", uc2 = " << iuc2 << endl; 
+    Real iu1 = iuc1;
+    std::cout << "u1 = " << iu1;
+    Real iu2 = iuc2;
+    std::cout << ", u2 = " << iu2;
+    
+    Box initial_box(spc.dimension());
+    initial_box[spc.index(x1)] = Interval(ix1.lower(),ix1.upper());
+    initial_box[spc.index(v1)] = Interval(iv1.lower(),iv1.upper());
+    initial_box[spc.index(x2)] = Interval(ix2.lower(),ix2.upper());
+    initial_box[spc.index(v2)] = Interval(iv2.lower(),iv2.upper());
+    initial_box[spc.index(u1)] = Interval(iu1.lower(),iu1.upper());
+    initial_box[spc.index(u2)] = Interval(iu2.lower(),iu2.upper());
+    initial_box[spc.index(uc1)] = Interval(iuc1.lower(),iuc1.upper());
+    initial_box[spc.index(uc2)] = Interval(iuc2.lower(),iuc2.upper());
+    initial_box[spc.index(t)] = Interval(0.0,0.0);
+//    initial_box[spc.index(c)] = Interval(0.0,0.0);
+    initial_box[spc.index(l)] = Interval(0.5*lper,0.5*lper);
+    
     cout << "initial_box=" << initial_box << endl;
 
+
     // Over-approximate the initial set by a grid cell
-    HybridEnclosureType initial_set(free, initial_box);
+//    HybridEnclosureType initial_set(DiscreteState("incr,sample,free"), initial_box);
+    HybridEnclosureType initial_set(DiscreteState("incr,free"), initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    Orbit<HybridEnclosureType> orbit = evolver.orbit(robotarm,initial_set,HybridTime(time,steps),semantics);
+    Orbit<HybridEnclosureType> orbit = evolver.orbit(system,initial_set,HybridTime(time,steps),semantics);
     cout << std::endl;
     
     Box bbox = orbit.reach().bounding_box();
@@ -374,16 +448,38 @@ int main(int argc, char** argv)
     std::cout << "Plotting..." << std::flush;
     Figure fig;
     // Plotting x1 and x2
-    fig.set_projection_map(PlanarProjectionMap(7,6,0));
-    fig.set_bounding_box(Box(2, 0.0,time, bbox[0].lower(),bbox[0].upper()));
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(x1)));
+    fig.set_bounding_box(Box(2, 0.0,time, -pi<Float>(), pi<Float>()));
+    // Plot the reference trajectory for x1
+    fig << line_style(true) << fill_colour(yellow);
+    Float tstep = time/100.0;
+    Box bx(spc.dimension());
+    for(Float tp = 0.0; tp <= time; tp += tstep) {
+        Interval ti(tp-0.1*tstep, tp+0.1*tstep);
+        val.set(t, Real(ti));
+        Interval x1i = evaluate(alg_x1, val);
+        bx[spc.index(x1)] = x1i;
+        bx[spc.index(t)] = ti;
+        fig << bx;
+    }
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-orbit-x1");
     fig.clear();
-    fig.set_projection_map(PlanarProjectionMap(7,6,1));
-    fig.set_bounding_box(Box(2, 0.0,time, bbox[1].lower(),bbox[1].upper()));
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(x2)));
+    fig.set_bounding_box(Box(2, 0.0,time, -pi<Float>(), pi<Float>()));
+    // Plot the reference trajectory for x2
+    fig << line_style(true) << fill_colour(yellow);
+    for(Float tp = 0.0; tp <= time; tp += tstep) {
+        Interval ti(tp-0.1*tstep, tp+0.1*tstep);
+        val.set(t, Real(ti));
+        Interval x2i = evaluate(alg_x2, val);
+        bx[spc.index(x2)] = x2i;
+        bx[spc.index(t)] = ti;
+        fig << bx;
+    }
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
@@ -392,16 +488,16 @@ int main(int argc, char** argv)
 
     // Plotting v1 and v2
     fig.clear();
-    fig.set_projection_map(PlanarProjectionMap(7,6,2));
-    fig.set_bounding_box(Box(2, 0.0,time, bbox[2].lower(),bbox[2].upper()));
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(v1)));
+    fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(v1)].lower(),bbox[spc.index(v1)].upper()));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-orbit-v1");
     fig.clear();
-    fig.set_projection_map(PlanarProjectionMap(7,6,3));
-    fig.set_bounding_box(Box(2, 0.0,time, bbox[3].lower(),bbox[3].upper()));
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(v2)));
+    fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(v2)].lower(),bbox[spc.index(v2)].upper()));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
@@ -410,21 +506,60 @@ int main(int argc, char** argv)
 
     // Plotting u1 and u2
     fig.clear();
-    fig.set_projection_map(PlanarProjectionMap(7,6,4));
-    fig.set_bounding_box(Box(2, 0.0,time, bbox[4].lower(),bbox[4].upper()));
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(u1)));
+    fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(u1)].lower(),bbox[spc.index(u1)].upper()));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-orbit-u1");
     fig.clear();
-    fig.set_projection_map(PlanarProjectionMap(7,6,5));
-    fig.set_bounding_box(Box(2, 0.0,time, bbox[5].lower(),bbox[5].upper()));
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(u2)));
+    fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(u2)].lower(),bbox[spc.index(u2)].upper()));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-orbit-u2");
+
+    // Plotting uc1 and uc2
+    fig.clear();
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(uc1)));
+    fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(uc1)].lower(),bbox[spc.index(uc1)].upper()));
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+    fig << fill_colour(magenta) << orbit.intermediate();
+    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(blue) << initial_set;
+    fig.write("robotarm-orbit-uc1");
+    fig.clear();
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(uc2)));
+    fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(uc2)].lower(),bbox[spc.index(uc2)].upper()));
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+    fig << fill_colour(magenta) << orbit.intermediate();
+    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(blue) << initial_set;
+    fig.write("robotarm-orbit-uc2");
+
+    // Plotting c
+//     fig.clear();
+//     fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(c)));
+//     fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(c)].lower(),bbox[spc.index(c)].upper()));
+//     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+//     fig << fill_colour(magenta) << orbit.intermediate();
+//     fig << fill_colour(red) << orbit.final();
+//     fig << fill_colour(blue) << initial_set;
+//     fig.write("robotarm-orbit-c");
+
+    // Plotting l
+    fig.clear();
+    fig.set_projection_map(PlanarProjectionMap(spc.dimension(),spc.index(t),spc.index(l)));
+    fig.set_bounding_box(Box(2, 0.0,time, bbox[spc.index(l)].lower(),bbox[spc.index(l)].upper()));
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+    fig << fill_colour(magenta) << orbit.intermediate();
+    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(blue) << initial_set;
+    fig.write("robotarm-orbit-l");
+
 
     //
     //  Convert polar coordinates theta1, theta2 into cartesian coordinates
@@ -439,7 +574,7 @@ int main(int argc, char** argv)
     List<RealExpression> projlist;
     projlist.append(px1);       projlist.append(px2);
     projlist.append(pt);
-    VectorFunction proj(projlist, varlist);
+    VectorFunction proj(projlist, spc);
     
     HybridEnclosureType cartesian_initial(orbit.initial().location(), apply(proj, orbit.initial().continuous_state_set()));
     ListSet<HybridEnclosureType> cartesian_final = apply(proj, orbit.final());
@@ -490,5 +625,5 @@ int main(int argc, char** argv)
 //     std::cout << "       models = " << cartesian_initial.models() << std::endl;
 
     return 0;
-     
+
 }

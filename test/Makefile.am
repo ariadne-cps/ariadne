@@ -8,6 +8,7 @@ TESTS_ENVIRONMENT = ./run_test.sh
 PROFILES_ENVIRONMENT = ./run_profile.sh
 
 AM_CXXFLAGS = -Wall
+AM_LDFLAGS = $(EXEC_LDFLAGS)
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS += $(CAIRO_LIBS) $(GTK_LIBS)
@@ -71,7 +72,6 @@ test_expansion_SOURCES=test_expansion.cc
 test_polynomial_SOURCES=test_polynomial.cc
 test_differential_SOURCES=test_differential.cc
 test_taylor_model_SOURCES=test_taylor_model.cc
-test_taylor_expression_SOURCES=test_taylor_expression.cc
 test_taylor_function_SOURCES=test_taylor_function.cc
 test_taylor_set_SOURCES=test_taylor_set.cc
 test_function_SOURCES=test_function.cc

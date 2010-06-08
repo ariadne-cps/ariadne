@@ -1,4 +1,4 @@
-SUBDIRS = include src test wrap examples
+SUBDIRS = include src test wrap examples cifparser
 
 EXTRA_DIST = Doxyfile
 
@@ -30,6 +30,9 @@ doc:
 
 lib:
 	(cd src; make lib)
+
+cifparser: lib
+	(cd cifparser; make)
 
 wrap: lib
 	(cd wrap; make wrap)

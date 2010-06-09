@@ -909,12 +909,17 @@ struct angle_less {
 
 void Zonotope::draw(CanvasInterface& c) const {
     const Zonotope& z=*this;
+    // Get the coordinates indexes of the projection
     uint ix=c.x_coordinate(); uint iy=c.y_coordinate();
 
     const Vector<Float>& zc=z.centre();
     const Matrix<Float>& zg=z.generators();
     const Vector<Float>& ze=z.error();
 
+    // Recover the 2d projections of the generators,
+    // where the x coordinate is inverted if negative
+    // (Luca: does not influence the generators but apparently
+    // simplifies their sorting)
     Point2d pc(zc[ix],zc[iy]);
     std::vector< Vector2d > pg;
     for(uint j=0; j!=z.number_of_generators(); ++j) {
@@ -922,26 +927,35 @@ void Zonotope::draw(CanvasInterface& c) const {
         if(g.x<0) { g=-g; }
         pg.push_back(g); 
     }
+    // Add generators corresponding to errors, if non-zero
     if(ze[ix]>0) { pg.push_back(Vector2d(ze[ix],0.0)); }
     if(ze[iy]>0) { pg.push_back(Vector2d(0.0,ze[iy])); }
-	
+    // Sort the generators for increasing angle
     std::sort(pg.begin(),pg.end(),angle_less()); 
 
+    // Create a point corresponding to the lower bound
     const uint npg=pg.size();
     Point2d pt=pc;
     for(uint i=0; i!=npg; ++i) {
         pt-=pg[i];
     }
 
+    // Shift the canvas to the lower bound
     c.move_to(pt.x,pt.y);
+
+    // Identify and connect the vertices in counterclockwise fashion
+
+    // Connect points up to the upper bound
     for(uint i=0; i!=npg; ++i) {
         pt+=2*pg[i];
         c.line_to(pt.x,pt.y);
     }
+    // Connect points down to the lower bound
     for(uint i=0; i!=npg; ++i) {
         pt-=2*pg[i];
         c.line_to(pt.x,pt.y);
     }
+    // Fill the resulting path
     c.fill();
 }
 

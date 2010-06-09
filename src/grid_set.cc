@@ -1765,10 +1765,10 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
     
-    if( bool( theSet.disjoint( theCurrentCell.box() ) ) ) {
+    if( definitely( theSet.disjoint( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whose representation in the original space is
         //disjoint from pSet and thus there will be nothing added to this cell.
-    } else if( pOpenSet && bool( pOpenSet->covers( theCurrentCell.box() ) ) ) {
+    } else if( pOpenSet && definitely( pOpenSet->covers( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
     } else {
         //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
@@ -1814,10 +1814,10 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, const Vecto
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
 
-    if( bool( theSet.disjoint( theCurrentCellBox ) ) ) {
+    if( definitely( theSet.disjoint( theCurrentCellBox ) ) ) {
         //DO NOTHING: We are in the node whose representation in the original space is
         //disjoint from pSet and thus there will be nothing added to this cell.
-    } else if( pOpenSet && bool( pOpenSet->covers( theCurrentCellBox ) ) ) {
+    } else if( pOpenSet && definitely( pOpenSet->covers( theCurrentCellBox ) ) ) {
         pBinaryTreeNode->make_leaf(true);
     } else {
         //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
@@ -1880,7 +1880,7 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
-    if( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
+    if( definitely( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
             //We should not mince any further.
             //If the cell is not a leaf, then some subset is enabled,
@@ -1913,10 +1913,10 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
     
-    if( bool( theSet.covers( theCurrentCell.box() ) ) ) {
+    if( definitely( theSet.covers( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
         pBinaryTreeNode->mince( max_mince_depth - pPath->size() );
-    } else if ( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
+    } else if ( definitely( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
             //We should not mince any further.
             //If the cell is not a leaf, then some subset is enabled,

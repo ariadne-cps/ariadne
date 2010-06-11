@@ -985,14 +985,14 @@ verify(const SystemType& system,
 			ARIADNE_LOG(3, "\t\tSafe.\n");
 			return true;
 		}
-/*
+
 		// Perform the unsafety analysis
 		if (this->_unsafe(system,initial_set,safe_box)) 
 		{
 			ARIADNE_LOG(3, "\t\tUnsafe.\n");
 			return false;
 		}
-*/
+
 		ARIADNE_LOG(3, "\t\tIndeterminate.\n");
 
 		// Return indeterminate if both failed

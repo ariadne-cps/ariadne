@@ -176,6 +176,12 @@ TaylorSet::disjoint(const Box& bx) const
         efts._models[i].clobber();
     }
 
+	// This variable governs whether the result is indeterminate due to the fact that the evaluation box
+    // is too large in respect to the TaylorSet bounding box, or if the TaylorSet should be split and the check repeated
+    // on both the resulting parts.
+    // The lower the value of m, the more likely that an indeterminate result would be returned
+    float m = 2;
+
     Box bbx=efts.bounding_box();
     if(bbx.disjoint(ebx)) {
         return true;
@@ -183,11 +189,53 @@ TaylorSet::disjoint(const Box& bx) const
         return false;
     } else if(ebx.contains(efts.centre())) {
         return false;
-    } else if(bbx.radius() * 4 < ebx.radius()) {
+    } else if(bbx.radius() * m < ebx.radius()) {
         return indeterminate;
     } else {
         std::pair<TaylorSet,TaylorSet> split_efts=this->split();
         return split_efts.first.disjoint(ebx) && split_efts.second.disjoint(ebx);
+    }
+}
+
+tribool
+TaylorSet::disjoint(const Box& bx, SplitTaylorSetBinaryTreeNode * pNode) const
+{
+    ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Dimension of "<<*this<<" is different from dimension of "<<bx);
+
+    // Expand the bounding box by the error term
+    Box ebx(bx);
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        ebx[i]+=Interval(-this->_models[i].error(),+this->_models[i].error());
+    }
+
+    // Copy the box eliminating error terms
+    TaylorSet efts(*this);
+    for(uint i=0; i!=efts.dimension(); ++i) {
+        efts._models[i].clobber();
+    }
+
+	// This variable governs whether the result is indeterminate due to the fact that the evaluation box
+    // is too large in respect to the TaylorSet bounding box, or if the TaylorSet should be split and the check repeated
+    // on both the resulting parts.
+    // The lower the value of m, the more likely that an indeterminate result would be returned
+    float m = 2;
+
+    Box bbx=efts.bounding_box();
+    if(bbx.disjoint(ebx)) {
+        return true;
+    } else if(bbx.subset(ebx)) {
+        return false;
+    } else if(ebx.contains(efts.centre())) {
+        return false;
+    } else if(bbx.radius() * m < ebx.radius()) {
+        return indeterminate;
+    } else {
+    	// Split the current cache node (note that it will not re-create anything if the splitted sets already exist)
+        pNode->split();
+        // Get the TaylorSets resulted from splitting
+        const TaylorSet& left_ts = pNode->left_node()->getTaylorSet();
+        const TaylorSet& right_ts = pNode->right_node()->getTaylorSet();
+        return left_ts.disjoint(ebx,pNode->left_node()) && right_ts.disjoint(ebx,pNode->right_node());
     }
 }
 
@@ -1068,6 +1116,22 @@ std::ostream& TaylorConstrainedFlowSet::write(std::ostream& os) const
               << ",\n  activations<<"<<keys(this->_activations)
               << ",\n  guards<<"<<keys(this->_guards)
               << "\n)\n";
+}
+
+
+void SplitTaylorSetBinaryTreeNode::split(){
+
+	// Only if the node is a leaf
+	if (is_leaf())
+	{
+		// Creates the splitted TaylorSets
+		std::pair<TaylorSet,TaylorSet> split_ts=_ts.split();
+
+		// Allocates and associates the new nodes
+		_pLeftNode = new SplitTaylorSetBinaryTreeNode(split_ts.first);
+		_pRightNode = new SplitTaylorSetBinaryTreeNode(split_ts.second);
+	}
+
 }
 
 

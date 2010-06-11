@@ -50,7 +50,7 @@
 #include "set_interface.h"
 #include "vector.h"
 #include "grid.h"
-
+#include "taylor_set.h"
 #include "graphics_interface.h"
 
 using namespace std;
@@ -1006,11 +1006,26 @@ class GridTreeSet : public GridTreeSubset {
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
      *  from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
      *  This method is more efficient in the sense that the lattice_box is provided: this allows to save the computation of
-     *  the box, which at each recursive call is recalculated by simply splitting over the correct dimension
+     *  the box, which at each recursive call is recalculated by simply splitting over the correct dimension.
      */
     static void _adjoin_outer_approximation( const Grid & theGrid, const Vector<Interval>& lattice_box, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                              const uint max_mince_depth,  const CompactSetInterface& theSet, BinaryWord * pPath );
 
+    /*! \brief This method adjoins the outer approximation of \a theSet (computed on the fly) to this paving.
+     *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented
+     *  by the paving's binary node \a pBinaryTreeNode. When adding the outer approximation, we compute it
+     *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
+     *  of the binary tree we should make to get the proper cells for outer approximating \a theSet.
+     *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
+     *  from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
+     *  This method is specific to TaylorSets: it keeps a cache of the splittings of the TaylorSet required by the disjoint() check
+     *  performed in the function, in order to avoid repeating the split() operation when calling this function multiple times on
+     *  the same TaylorSet.
+     */
+    static void _adjoin_outer_approximation_taylorset( const Grid & theGrid, const Vector<Interval>& lattice_box,
+													   SplitTaylorSetBinaryTreeNode * pCacheRootNode, BinaryTreeNode * pBinaryTreeNode,
+													   const uint primary_cell_height, const uint max_mince_depth,
+													   const TaylorSet& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_height and represented

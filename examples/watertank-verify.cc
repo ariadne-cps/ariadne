@@ -79,18 +79,24 @@ int main()
 		valve.add_input_event(e_close);
 		DiscreteEvent e_idle("idle");
 		valve.add_internal_event(e_idle);
-		
+
 		// Three states:
 		// Idle (valve either fully closed or fully opened)
 		RealExpression dynidle = 0.0;
 		valve.new_mode(idle);
+		valve.new_invariant(idle, -y);
+		valve.new_invariant(idle, y-1.0);
 		valve.set_dynamics(idle, y, dynidle);
 		// Opening (valve is opening)
 		valve.new_mode(opening);
+		valve.new_invariant(idle, -y);
+		valve.new_invariant(idle, y-1.0);
 		RealExpression dynopening = 1.0/T;
 		valve.set_dynamics(opening, y, dynopening);
 		// Closing (valve is closing)
 		valve.new_mode(closing);
+		valve.new_invariant(idle, -y);
+		valve.new_invariant(idle, y-1.0);
 		RealExpression dynclosing = -1.0/T;
 		valve.set_dynamics(closing, y, dynclosing);
 		

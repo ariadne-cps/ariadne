@@ -253,7 +253,7 @@ private:
         		HGTS reach, evolve;
 				// Process and assign the regions
 		        make_lpair(reach,evolve)=_discretiser->upper_evolution_continuous(_sys,enclosure,_time,_accuracy,_bounding_domain);
-				
+
 				// Get the lock for output
 				_out_mutex.lock();
 

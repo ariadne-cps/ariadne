@@ -48,6 +48,7 @@ class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorSet;
+class SplitTaylorSetBinaryTreeNode;
 class ImageSet;
 
 template<class BS> class ListSet;
@@ -121,6 +122,8 @@ class TaylorSet
     virtual TaylorSet* clone() const { return new TaylorSet(*this); }
     //! \brief Tests if the set is disjoint from a box.
     virtual tribool disjoint(const Box&) const;
+    //! \brief Tests if the set is disjoint from a box, reading from and writing into a cache of the splitted TaylorSet tree.
+    virtual tribool disjoint(const Box&, SplitTaylorSetBinaryTreeNode* pNode) const;
     //! \brief Tests if the set overlaps a box.
     virtual tribool overlaps(const Box&) const;
     //! \brief Tests if the set is a subset of a box.
@@ -254,7 +257,64 @@ TaylorConstrainedFlowSet apply(const VectorFunction& f, const TaylorConstrainedF
 TaylorConstrainedFlowSet apply(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
 TaylorConstrainedFlowSet apply_flow(const VectorTaylorFunction& f, const TaylorConstrainedFlowSet& s);
 
+//! \brief A node of a binary tree representing the splittings of a TaylorSet
+class SplitTaylorSetBinaryTreeNode
+{
+  private:
 
+	/*! \brief The TaylorSet associated with the node */
+	TaylorSet _ts;
+
+    /*! \brief The left and right subnodes of the tree. Note that,
+     * \a pLeftNode == \a NULL iff \a pRightNode == \a NULL.
+     */
+	SplitTaylorSetBinaryTreeNode* _pLeftNode;
+	SplitTaylorSetBinaryTreeNode* _pRightNode;
+
+  public:
+
+    //@{
+    //! \name Constructors
+
+    /*! \brief Construct a tree node. */
+    explicit SplitTaylorSetBinaryTreeNode(const TaylorSet& ts);
+
+    //@}
+
+    ~SplitTaylorSetBinaryTreeNode();
+
+    //@{
+    //! \name Properties
+
+    /*! \brief Return the TaylorSet */
+    const TaylorSet& getTaylorSet() const { return _ts; }
+
+    /*! \brief Return true if the node is a leaf otherwise false. It is sufficient to check the left node. */
+    bool is_leaf() const { return _pLeftNode == NULL; }
+
+    /*! \brief Return the left sub-node */
+    SplitTaylorSetBinaryTreeNode * left_node() const { return _pLeftNode; }
+
+    /*! \brief Return the right sub-node */
+    SplitTaylorSetBinaryTreeNode * right_node() const { return _pRightNode; }
+
+    /*! \brief Splits the leaf node, i.e. adds two subnodes with the splitted TaylorSet parts */
+    void split();
+
+};
+
+inline SplitTaylorSetBinaryTreeNode::SplitTaylorSetBinaryTreeNode(const TaylorSet& ts){
+    _ts = ts;
+    _pLeftNode = NULL;
+    _pRightNode = NULL;
+}
+
+inline SplitTaylorSetBinaryTreeNode::~SplitTaylorSetBinaryTreeNode(){
+    if(!is_leaf()) {
+        delete _pLeftNode;
+        delete _pRightNode;
+    }
+}
 
 } //namespace Ariadne
 

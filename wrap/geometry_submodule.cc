@@ -338,22 +338,26 @@ void export_affine_set()
 void export_constrained_image_set()
 {
     class_<ConstrainedImageSet,bases<DrawableInterface> >
-        constrained_image_set_class("ConstrainedImageSet",init<ConstrainedImageSet>());
+    constrained_image_set_class("ConstrainedImageSet",init<ConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
     constrained_image_set_class.def(init<Box,VectorFunction>());
+    constrained_image_set_class.def("domain", &ConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
+    constrained_image_set_class.def("function", &ConstrainedImageSet::function,return_value_policy<copy_const_reference>());
+    constrained_image_set_class.def("constraint", &ConstrainedImageSet::constraint,return_value_policy<copy_const_reference>());
+    constrained_image_set_class.def("number_of_parameters", &ConstrainedImageSet::number_of_parameters);
+    constrained_image_set_class.def("number_of_constraints", &ConstrainedImageSet::number_of_constraints);
+    constrained_image_set_class.def("apply", &ConstrainedImageSet::apply);
     constrained_image_set_class.def("new_space_constraint", (void(ConstrainedImageSet::*)(const NonlinearConstraint&))&ConstrainedImageSet::new_space_constraint);
     constrained_image_set_class.def("new_parameter_constraint", (void(ConstrainedImageSet::*)(const NonlinearConstraint&))&ConstrainedImageSet::new_parameter_constraint);
-    constrained_image_set_class.def("apply", &ConstrainedImageSet::apply);
-    //constrained_image_set_class.def("apply_map", &ConstrainedImageSet::apply_map);
-    //constrained_image_set_class.def("new_zero_constraint", &ConstrainedImageSet::new_zero_constraint);
-    //constrained_image_set_class.def("new_positive_constraint", &ConstrainedImageSet::new_positive_constraint);
-    //constrained_image_set_class.def("new_negative_constraint", &ConstrainedImageSet::new_negative_constraint);
-    //constrained_image_set_class.def("new_zero_maximum_constraint", &ConstrainedImageSet::new_zero_maximum_constraint);
-    //constrained_image_set_class.def("new_negative_maximum_constraint", &ConstrainedImageSet::new_negative_maximum_constraint);
     //constrained_image_set_class.def("outer_approximation", &ConstrainedImageSet::outer_approximation);
+    constrained_image_set_class.def("affine_approximation", &ConstrainedImageSet::affine_approximation);
+    //constrained_image_set_class.def("affine_over_approximation", &ConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("adjoin_outer_approximation_to", &ConstrainedImageSet::adjoin_outer_approximation_to);
+    constrained_image_set_class.def("inside", &ConstrainedImageSet::inside);
     constrained_image_set_class.def("disjoint", &ConstrainedImageSet::disjoint);
     constrained_image_set_class.def("overlaps", &ConstrainedImageSet::overlaps);
+    constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)()const) &ConstrainedImageSet::split);
+    constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)(uint)const) &ConstrainedImageSet::split);
     constrained_image_set_class.def(self_ns::str(self));
 
 }

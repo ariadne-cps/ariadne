@@ -31,6 +31,7 @@
 #include "function_set.h"
 #include "list_set.h"
 #include "grid_set.h"
+#include "taylor_set.h"
 
 #include "set_interface.h"
 
@@ -442,7 +443,7 @@ void BinaryTreeNode::mince_node(BinaryTreeNode * pCurrentNode, const uint depth)
 void BinaryTreeNode::recombine_node(BinaryTreeNode * pCurrentNode) {
     //Just a safety check
     if( pCurrentNode != NULL ){
-        //If it is not a leaf node then it should have both of it's subnodes != NULL
+        //If it is not a leaf node then it should have both of its subnodes != NULL
         if( ! pCurrentNode->is_leaf() ){
             BinaryTreeNode * pLeftNode = pCurrentNode->_pLeftNode;
             BinaryTreeNode * pRightNode = pCurrentNode->_pRightNode;
@@ -501,7 +502,7 @@ void BinaryTreeNode::tree_to_binary_words( BinaryWord & tree, BinaryWord & leave
 }
     
 void BinaryTreeNode::add_enabled( const BinaryTreeNode * pOtherSubTree, const BinaryWord & path ){
-    //1. Locate the node, follow the path until it's end or until we meet an enabled node
+    //1. Locate the node, follow the path until its end or until we meet an enabled node
     BinaryTreeNode * pCurrentSubTree = this;
     uint position = 0;
     while( ( position < path.size() ) && ! pCurrentSubTree->is_enabled() ){
@@ -924,7 +925,7 @@ GridOpenCell GridCell::interior() const {
 //NOTE: Here we work with the lattice boxes that are in the grid
 GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const uint dim ) {
     const uint dimensions = theGrid.dimension();
-    //1. Extend the base cell in the given dimension (dim) by it's half width. This way
+    //1. Extend the base cell in the given dimension (dim) by its half width. This way
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Vector<Interval> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
@@ -1667,7 +1668,7 @@ GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theLatticeBox ) :
     GridTreeSubset( theGrid, GridCell::smallest_enclosing_primary_cell_height( theLatticeBox ),
                     BinaryWord(), new BinaryTreeNode( false ) ) {
     //1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
-    //2. This cell is defined by it's height and becomes the root of the GridTreeSet
+    //2. This cell is defined by its height and becomes the root of the GridTreeSet
     //3. Point 2. implies that the word to the root of GridTreeSubset should be set to
     //   empty and we have only one disabled node in the binary tree
 }
@@ -1786,6 +1787,10 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
                 //Check the right branch
                 pPath->push_back(true);
                 _adjoin_outer_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                // If both the leaves become enabled, recombine up one level
+                // (mainly beneficial in those cases where closed sets are involved)
+                if (pBinaryTreeNode->left_node()->is_enabled() && pBinaryTreeNode->right_node()->is_enabled())
+                	pBinaryTreeNode->make_leaf(true);
             } else {
                 //We should not mince any further, so since the node is a leaf and
                 //its cell is not disjoint from theSet, we mark the node as enabled.
@@ -1814,7 +1819,16 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, const Vecto
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
 
-    if( definitely( theSet.disjoint( theCurrentCellBox ) ) ) {
+    const TaylorSet* pTaylorSet=dynamic_cast<const TaylorSet*>(&theSet);
+
+    // For TaylorSets, the disjoint(Box) method in the next if clause would perform splitting at almost any cell size in order to retrieve a result.
+    // Since, given the fact that a TaylorSet is not an OpenSet and therefore can not produce leaves before having reached the maximum mince depth,
+    // we prefer to delay splitting at that point for efficiency.
+    // Summarizing:
+    // a) if theSet is a TaylorSet with non-maximum depth, we perform a simplified disjoint test on the bounding box of the TaylorSet;
+	// b) if theSet is a TaylorSet with maximum depth, or if it is not a TaylorSet, we use the disjoint test of theSet itself.
+    if ((pTaylorSet && pPath->size() < max_mince_depth && definitely( theSet.bounding_box().disjoint( theCurrentCellBox ))) ||
+    	(((pTaylorSet && pPath->size() == max_mince_depth) || !pTaylorSet) && definitely( theSet.disjoint( theCurrentCellBox ) )) ) {
         //DO NOTHING: We are in the node whose representation in the original space is
         //disjoint from pSet and thus there will be nothing added to this cell.
     } else if( pOpenSet && definitely( pOpenSet->covers( theCurrentCellBox ) ) ) {
@@ -1848,6 +1862,81 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, const Vecto
                 //Check the right branch
                 pPath->push_back(true);
                 _adjoin_outer_approximation( theGrid, right_lattice_box, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                // If both the leaves become enabled, recombine up one level
+				// (mainly beneficial in those cases where closed sets are involved)
+				if (pBinaryTreeNode->left_node()->is_enabled() && pBinaryTreeNode->right_node()->is_enabled())
+					pBinaryTreeNode->make_leaf(true);
+            } else {
+                //We should not mince any further, so since the node is a leaf and
+                //its cell is not disjoint from theSet, we mark the node as enabled.
+                if( !pBinaryTreeNode->is_leaf() ){
+                    //If the node is not leaf, then we make it an enabled one
+                    pBinaryTreeNode->make_leaf(true);
+                } else {
+                    //Just make the node enabled
+                    pBinaryTreeNode->set_enabled();
+                }
+            }
+        }
+    }
+    //Return to the previous level, since the initial evaluate is made
+    //with the empty word, we check that it is not yet empty.
+    if( pPath->size() > 0 ) {
+        pPath->pop_back();
+    }
+}
+
+void GridTreeSet::_adjoin_outer_approximation_taylorset( const Grid & theGrid, const Vector<Interval>& lattice_box,
+														 SplitTaylorSetBinaryTreeNode * pCacheRootNode, BinaryTreeNode * pBinaryTreeNode,
+														 const uint primary_cell_height, const uint max_mince_depth,
+														 const TaylorSet& theSet, BinaryWord * pPath ) {
+
+    // Transform the lattice box into a cell box
+    Box theCurrentCellBox = GridAbstractCell::lattice_box_to_space(lattice_box, theGrid);
+
+    // For TaylorSets, the disjoint(Box) method in the next if clause would perform splitting at almost any cell size in order to retrieve a result.
+    // Since, given the fact that a TaylorSet is not an OpenSet and therefore can not produce leaves before having reached the maximum mince depth,
+    // we prefer to delay splitting at that point for efficiency.
+    // Summarizing:
+    // a) if theSet is a TaylorSet with non-maximum depth, we perform a simplified disjoint test on the bounding box of the TaylorSet;
+	// b) if theSet is a TaylorSet with maximum depth, or if it is not a TaylorSet, we use the disjoint test of theSet itself.
+    if ((pPath->size() < max_mince_depth && definitely( theSet.bounding_box().disjoint( theCurrentCellBox ))) ||
+    	((pPath->size() == max_mince_depth) && definitely( theSet.disjoint( theCurrentCellBox, pCacheRootNode ) )) ) {
+        //DO NOTHING: We are in the node whose representation in the original space is
+        //disjoint from pSet and thus there will be nothing added to this cell.
+    } else {
+        //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
+        //of its outer approximation, unless this node is already an enabled leaf node.
+        if( pBinaryTreeNode->is_enabled() ){ //NOTE: A non-leaf node can not be enabled so this check suffices
+            //DO NOTHING: If it is enabled, then we can not add anything new to it.
+        } else {
+            //The node is not enabled, so maybe we can add something from the outer approximation of theSet.
+            if( pPath->size() < max_mince_depth ){
+
+                // Get the dimension to split on the new lattice boxes
+				// NOTE: pPath->size() provides the side that pPath will have below after we add a false/true to the path
+                uint new_dimension = (pPath->size()) % theGrid.dimension();
+                // Copy the previous lattice box into the new lattice boxes
+				Vector<Interval> left_lattice_box = lattice_box;
+				Vector<Interval> right_lattice_box = lattice_box;
+				// Get the midpoint for the dimension to split
+                Float middlePointInCurrDim = lattice_box[new_dimension].midpoint();
+                // Assign the new values
+				left_lattice_box[new_dimension].set_upper( middlePointInCurrDim );
+				right_lattice_box[new_dimension].set_lower( middlePointInCurrDim );
+
+                //Since we still do not have the finest cells for the outer approximation of theSet, we split
+                pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
+                //Check the left branch
+                pPath->push_back(false);
+                _adjoin_outer_approximation_taylorset( theGrid, left_lattice_box, pCacheRootNode, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                //Check the right branch
+                pPath->push_back(true);
+                _adjoin_outer_approximation_taylorset( theGrid, right_lattice_box, pCacheRootNode, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                // If both the leaves become enabled, recombine up one level
+				// (mainly beneficial in those cases where closed sets are involved)
+				if (pBinaryTreeNode->left_node()->is_enabled() && pBinaryTreeNode->right_node()->is_enabled())
+					pBinaryTreeNode->make_leaf(true);
             } else {
                 //We should not mince any further, so since the node is a leaf and
                 //its cell is not disjoint from theSet, we mark the node as enabled.
@@ -1986,9 +2075,24 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
         // _adjoin_outer_approximation.
         Vector<Interval> lattice_box = GridCell::compute_lattice_box(GridTreeSubset::_theGridCell.grid().dimension(),
 																	 outer_approx_primary_cell_height,*pEmptyPath);
+        // Dynamic cast for checking if theSet is a TaylorSet
+        const TaylorSet* pTaylorSet=dynamic_cast<const TaylorSet*>(&theSet);
+
         // Perform the recursive adjoining by starting at the level of the primary cell (due to the empty path)
-        _adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), lattice_box, pBinaryTreeNode, outer_approx_primary_cell_height,
-                                     max_mince_depth, theSet, pEmptyPath );
+        if (pTaylorSet) {
+        	// Create the root tree node of the cache, populated with the original TaylorSet
+        	SplitTaylorSetBinaryTreeNode* pCacheRootNode = new SplitTaylorSetBinaryTreeNode(*pTaylorSet);
+        	_adjoin_outer_approximation_taylorset( GridTreeSubset::_theGridCell.grid(), lattice_box, pCacheRootNode, pBinaryTreeNode, outer_approx_primary_cell_height,
+												   max_mince_depth, *pTaylorSet, pEmptyPath );
+        	/*_adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), lattice_box, pBinaryTreeNode, outer_approx_primary_cell_height,
+										 max_mince_depth, theSet, pEmptyPath );*/
+        	// Delete the node and consequently the whole tree that resulted from splitting
+        	delete pCacheRootNode;
+        }
+        else {
+        	_adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), lattice_box, pBinaryTreeNode, outer_approx_primary_cell_height,
+										 max_mince_depth, theSet, pEmptyPath );
+        }
 
         delete pEmptyPath;
     }
@@ -2060,7 +2164,7 @@ void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
             //space, then there might be something to add from the inner approximation of theSet.
             if( pPath->size() >= max_mince_depth ) {
                 //DO NOTHING: Since it is the maximum depth to which we were allowed to mince
-                //and we know that the node's box only overlaps with theSet but is not it's
+                //and we know that the node's box only overlaps with theSet but is not its
                 //subset we have to exclude it from the inner approximation of theSet.
             } else {
                 //Since we still do not have the finest cells for the outer approximation of theSet, we split 
@@ -2074,7 +2178,7 @@ void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeN
                 _adjoin_inner_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
             }
         } else {
-            //DO NOTHING: the node's box is disjoint from theSet and thus it or it's
+            //DO NOTHING: the node's box is disjoint from theSet and thus it or its
             //sub nodes can not be the part of the inner approximation of theSet.
         }
     } else {
@@ -2507,7 +2611,7 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
             //in case we encounter a leaf node then we just stop, because it is enough information for us
             for( uint i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
                 if( pCurrentNode->is_leaf() ) {
-                    //We reached the leaf node and theCell is it's subset, so we stop now
+                    //We reached the leaf node and theCell is its subset, so we stop now
                     break;
                 } else {
                     //Follow the path to the node corresponding to theCell within the binary tree of theSet

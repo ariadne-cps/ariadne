@@ -21,7 +21,7 @@ AC_ARG_ENABLE(debug, [AS_HELP_STRING([--enable-debug=(yes/no)], [turn on debugg
 if test "x$enable_debug" = "xyes"; then
     # If user provided a custom value for CXXFLAGS, do no change it
     if test "x$CXXFLAGS_EARLY" = "x"; then
-        CXXFLAGS="-g3 -O0"
+        CXXFLAGS="-pg -g3 -O0"
     fi
     AC_MSG_RESULT(yes)
 else

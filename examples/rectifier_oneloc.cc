@@ -86,7 +86,7 @@ int main()
 
     /// Introduces the global parameters
     float TIME_LIMIT = 1.0/dp[1];
-    float TRAN_LIMIT = 12;
+    int TRAN_LIMIT = 12;
     float MAX_ENCL_RADIUS = 0.001/dp[1];
     float MAX_STEP_SIZE = 0.001/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];

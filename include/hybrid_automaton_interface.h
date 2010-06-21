@@ -95,6 +95,7 @@ class HybridAutomatonInterface {
     virtual Set<DiscreteEvent> blocking_events(DiscreteLocation location) const = 0;
     virtual Set<DiscreteEvent> invariant_events(DiscreteLocation location) const = 0;
     virtual Set<DiscreteEvent> transition_events(DiscreteLocation location) const = 0;
+    void reset(DiscreteEvent arg1);
 
 };
 

@@ -1120,7 +1120,7 @@ void TaylorConstrainedImageSet::apply_flow(VectorFunction flow, Interval time)
     this->_check();
 }
 
-void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Float time)
+void TaylorConstrainedImageSet::apply_flow_step(VectorTaylorFunction flow, Float time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_function=compose(flow,join(this->_function,ScalarTaylorFunction::constant(this->_function.domain(),time)));
@@ -1146,6 +1146,18 @@ void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Interval t
     this->_check();
 }
 
+void TaylorConstrainedImageSet::new_state_constraint(NonlinearConstraint constraint) {
+    Float infty=+inf<Float>();
+    Interval interval=constraint.bounds();
+    ScalarTaylorFunction composed_function=compose(constraint.function(),this->_function);
+    if(interval.lower()==0.0 && interval.upper()==0.0) {
+        this->new_zero_constraint(composed_function);
+    } else if(interval.lower()==0.0 && interval.upper()==infty) {
+        this->new_negative_constraint(-composed_function);
+    } else if(interval.lower()==-infty && interval.upper()==0.0) {
+        this->new_negative_constraint(composed_function);
+    }
+}
 
 void TaylorConstrainedImageSet::new_negative_constraint(ScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
@@ -1170,6 +1182,11 @@ void TaylorConstrainedImageSet::new_zero_constraint(ScalarFunction constraint) {
 List<ScalarTaylorFunction> const&
 TaylorConstrainedImageSet::negative_constraints() const {
     return this->_constraints;
+}
+
+void TaylorConstrainedImageSet::new_zero_constraint(ScalarTaylorFunction constraint) {
+    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_equations.append(constraint);
 }
 
 List<ScalarTaylorFunction> const&
@@ -1236,6 +1253,15 @@ Point TaylorConstrainedImageSet::centre() const {
     return this->bounding_box().centre();
 }
 
+
+tribool
+TaylorConstrainedImageSet::satisfies(NonlinearConstraint c) const
+{
+    TaylorConstrainedImageSet copy=*this;
+    copy.new_state_constraint(c);
+    if(copy.empty()) { return false; }
+    else { return indeterminate; }
+}
 
 tribool TaylorConstrainedImageSet::bounded() const {
     return Box(this->domain()).bounded() || indeterminate;

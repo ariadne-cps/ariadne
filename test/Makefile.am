@@ -46,6 +46,7 @@ check_PROGRAMS = \
 	test_solvers \
 	test_discrete_evolution \
 	test_continuous_evolution \
+	test_hybrid_evolver \
 	test_hybrid_evolution \
 	test_discretised_evolution \
 	test_reachability_analysis \
@@ -89,6 +90,7 @@ test_hybrid_set_SOURCES=test_hybrid_set.cc
 test_hybrid_automaton=test_hybrid_automaton.cc
 test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
+test_hybrid_evolution_SOURCES=test_hybrid_evolver.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 test_discretised_evolution_SOURCES=test_discretised_evolution.cc
 test_reachability_analysis_SOURCES=test_reachability_analysis.cc

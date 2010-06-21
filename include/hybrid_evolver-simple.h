@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver-constrained.h
+ *            hybrid_evolver-simple.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_evolver-constrained.h
- *  \brief Evolver for hybrid systems.
+/*! \file hybrid_evolver-simple.h
+ *  \brief Evolver for hybrid systems with only transverse urgent guards.
  */
 
-#ifndef ARIADNE_HYBRID_EVOLVER_CONSTRAINED_H
-#define ARIADNE_HYBRID_EVOLVER_CONSTRAINED_H
+#ifndef ARIADNE_HYBRID_EVOLVER_SIMPLE_H
+#define ARIADNE_HYBRID_EVOLVER_SIMPLE_H
 
 #include <string>
 #include <vector>
@@ -49,12 +49,13 @@
 
 namespace Ariadne {
 
+struct TransitionData;
 
 /*! \brief A class for computing the evolution of a hybrid system.
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
-class ConstraintHybridEvolver
+class SimpleHybridEvolver
     : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
     , public Loggable
 {
@@ -65,7 +66,7 @@ class ConstraintHybridEvolver
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
     typedef HybridAutomatonInterface SystemType;
-    typedef TaylorImageSet ContinuousEnclosureType;
+    typedef TaylorConstrainedImageSet ContinuousEnclosureType;
     typedef HybridEnclosure HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
@@ -74,13 +75,13 @@ class ConstraintHybridEvolver
   public:
 
     //! \brief Default constructor.
-    ConstraintHybridEvolver();
+    SimpleHybridEvolver();
 
     //! \brief Construct from parameters using a default integrator.
-    ConstraintHybridEvolver(const EvolutionParametersType& parameters);
+    SimpleHybridEvolver(const EvolutionParametersType& parameters);
 
     /*! \brief Make a dynamically-allocated copy. */
-    ConstraintHybridEvolver* clone() const { return new ConstraintHybridEvolver(*this); }
+    SimpleHybridEvolver* clone() const { return new SimpleHybridEvolver(*this); }
 
     //@{
     //! \name Parameters controlling the evolution.
@@ -114,16 +115,58 @@ class ConstraintHybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
+    virtual
     void
     _upper_evolution_step(List<HybridEnclosure>& working,
-                          List<HybridEnclosure>& pending,
                           ListSet<HybridEnclosure>& final,
                           ListSet<HybridEnclosure>& reachable,
                           ListSet<HybridEnclosure>& intermediate,
                           SystemType const& system,
                           TimeType const& maximum_time) const;
 
-    ScalarTaylorFunction
+    virtual
+    VectorIntervalFunction
+    _compute_flow(VectorFunction vector_field,
+                  Box const& initial_set,
+                  Float& step_size) const;
+
+    virtual
+    void
+    _compute_active_events(Set<DiscreteEvent>& active_events,
+                           VectorFunction const& dynamic,
+                           Map<DiscreteEvent,ScalarFunction> const& guard_functions,
+                           VectorIntervalFunction const& flow,
+                           HybridEnclosure const& initial_set) const;
+
+    virtual
+    void
+    _compute_crossing_times(Map<DiscreteEvent,ScalarIntervalFunction>& crossing_times,
+                            Set<DiscreteEvent> const& active_events,
+                            Map<DiscreteEvent,ScalarFunction> const& guard_functions,
+                            VectorIntervalFunction const& flow,
+                            IntervalVector const& domain) const;
+
+    virtual
+    HybridEnclosure
+    _process_initial_events(List<HybridEnclosure>& working_sets,
+                            HybridEnclosure const& starting_set,
+                            Map<DiscreteEvent,TransitionData> const& transitions) const;
+
+    virtual
+    void
+    _apply_time_step(HybridEnclosure& reach_set, HybridEnclosure& evolve_set,
+                     ListSet<HybridEnclosure>& final_sets, List<HybridEnclosure>& jump_sets,
+                     HybridEnclosure const& initial_set, Float const& final_time,
+                     VectorIntervalFunction const& flow, ScalarIntervalFunction const& evolution_time,
+                     Set<DiscreteEvent> const& active_events, Map<DiscreteEvent,ScalarIntervalFunction> const& crossing_times,
+                     Map<DiscreteEvent,TransitionData> const& transitions) const;
+
+    virtual
+    ScalarIntervalFunction
+    _evolution_time(ScalarIntervalFunction const& maximum_evolution_time,
+                    Map<DiscreteEvent,ScalarIntervalFunction> const& crossing_times) const;
+
+    ScalarIntervalFunction
     _crossing_time(const ScalarFunction& guard,
                    const VectorFunction& dynamic,
                    const Box& initial,
@@ -134,7 +177,25 @@ class ConstraintHybridEvolver
 };
 
 
+class DeterministicHybridEvolver
+    : public SimpleHybridEvolver
+{
+  protected:
+    virtual void
+    _upper_evolution_step(List<HybridEnclosure>& working,
+                          ListSet<HybridEnclosure>& final,
+                          ListSet<HybridEnclosure>& reachable,
+                          ListSet<HybridEnclosure>& intermediate,
+                          SystemType const& system,
+                          TimeType const& maximum_time) const;
+
+    virtual
+    ScalarIntervalFunction
+    _evolution_time(ScalarIntervalFunction const& maximum_evolution_time,
+                    Map<DiscreteEvent,ScalarIntervalFunction> const& crossing_times) const;
+
+};
 
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_EVOLVER_CONSTRAINED_H
+#endif // ARIADNE_HYBRID_EVOLVER_SIMPLE_H

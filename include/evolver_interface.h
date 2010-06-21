@@ -2,7 +2,7 @@
  *            evolver_interface.h
  *
  *  Copyright  2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file evolver_interface.h
  *  \brief Interface for computing a single time step of the evolution of a system.
  */
@@ -37,16 +37,16 @@ using std::pair;
 template<class ES> class ListSet;
 template<class ES> class Orbit;
 
-enum Semantics { LOWER_SEMANTICS, UPPER_SEMANTICS }; 
+enum Semantics { LOWER_SEMANTICS, UPPER_SEMANTICS };
 
-  
+
 /*! \brief Interface for evolving a dynamic system.
  *
  * \sa \link Ariadne::CalculusInterface \c CalculusInterface<S,M,F> \endlink
  *   , \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink
  */
-template<class SYS, class ES> 
-class EvolverInterface 
+template<class SYS, class ES>
+class EvolverInterface
 {
   public:
     typedef SYS SystemType;
@@ -54,97 +54,97 @@ class EvolverInterface
     typedef typename SystemType::TimeType TimeType;
     typedef ListSet<EnclosureType> EnclosureListType;
 
-    //! \brief Virtual destructor. 
+    //! \brief Virtual destructor.
     virtual ~EvolverInterface() {};
 
     //! \brief Cloning operator.
     virtual EvolverInterface<SYS,ES>* clone() const = 0;
 
-    //! \brief Write to an output stream. 
+    //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
 
   public:
-    //! \brief Compute an approximation to the evolved set under the given semantics. 
-    virtual 
+    //! \brief Compute an approximation to the evolved set under the given semantics.
+    virtual
     Orbit<EnclosureType>
-    orbit(const SystemType& system, 
-          const EnclosureType& initial_set, 
-          const TimeType& time, 
+    orbit(const SystemType& system,
+          const EnclosureType& initial_set,
+          const TimeType& time,
           Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the evolved set under the given semantics. 
-    virtual 
-    EnclosureListType 
-    evolve(const SystemType& system, 
-           const EnclosureType& initial_set, 
-           const TimeType& time, 
+    //! \brief Compute an approximation to the evolved set under the given semantics.
+    virtual
+    EnclosureListType
+    evolve(const SystemType& system,
+           const EnclosureType& initial_set,
+           const TimeType& time,
            Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the reachable set under the given semantics. 
-    virtual 
-    EnclosureListType 
-    reach(const SystemType& system, 
-          const EnclosureType& initial_set, 
-          const TimeType& time, 
+    //! \brief Compute an approximation to the reachable set under the given semantics.
+    virtual
+    EnclosureListType
+    reach(const SystemType& system,
+          const EnclosureType& initial_set,
+          const TimeType& time,
           Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the evolved and reachable sets under the given semantics. 
-    virtual 
-    pair<EnclosureListType,EnclosureListType> 
-    reach_evolve(const SystemType& system, 
-                 const EnclosureType& initial_set, 
-                 const TimeType& time, 
+    //! \brief Compute an approximation to the evolved and reachable sets under the given semantics.
+    virtual
+    pair<EnclosureListType,EnclosureListType>
+    reach_evolve(const SystemType& system,
+                 const EnclosureType& initial_set,
+                 const TimeType& time,
                  Semantics semantics) const = 0;
-  
-  
-    //! \brief Compute an approximation to the evolved set under the given semantics. 
-    virtual 
-    void 
-    evolution(EnclosureListType& final, 
-              const SystemType& system, 
-              const EnclosureType& initial, 
-              const TimeType& time, 
+
+
+    //! \brief Compute an approximation to the evolved set under the given semantics.
+    virtual
+    void
+    evolution(EnclosureListType& final,
+              const SystemType& system,
+              const EnclosureType& initial,
+              const TimeType& time,
               Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the evolved and reachable sets 
-    //! under the given semantics. 
-    virtual void evolution(EnclosureListType& final, 
-                           EnclosureListType& intermediate, 
-                           const SystemType& system, 
-                           const EnclosureType& initial, 
-                           const TimeType& time, 
+    //! \brief Compute an approximation to the evolved and reachable sets
+    //! under the given semantics.
+    virtual void evolution(EnclosureListType& final,
+                           EnclosureListType& intermediate,
+                           const SystemType& system,
+                           const EnclosureType& initial,
+                           const TimeType& time,
                            Semantics semantics) const = 0;
-  
 
-    //! \brief Compute an approximation to the evolved set under the given semantics, 
-    //! starting from a list of enclosure sets. 
-    virtual 
-    void 
-    evolution(EnclosureListType& final, 
-              const SystemType& system, 
-              const EnclosureListType& initial, 
-              const TimeType& time, 
+
+    //! \brief Compute an approximation to the evolved set under the given semantics,
+    //! starting from a list of enclosure sets.
+    virtual
+    void
+    evolution(EnclosureListType& final,
+              const SystemType& system,
+              const EnclosureListType& initial,
+              const TimeType& time,
               Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the evolved and reachable sets 
-    //! under the given semantics starting from a list of enclosure sets. 
-    virtual 
-    void 
-    evolution(EnclosureListType& final, 
-              EnclosureListType& intermediate, 
-              const SystemType& system, 
-              const EnclosureListType& initial, 
-              const TimeType& time, 
+    //! \brief Compute an approximation to the evolved and reachable sets
+    //! under the given semantics starting from a list of enclosure sets.
+    virtual
+    void
+    evolution(EnclosureListType& final,
+              EnclosureListType& intermediate,
+              const SystemType& system,
+              const EnclosureListType& initial,
+              const TimeType& time,
               Semantics semantics) const = 0;
-  
+
 
 };
 
 
 template<class SYS, class ES> inline
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& os, const EvolverInterface<SYS,ES>& e) {
-    return e.write(os); 
+    return e.write(os);
 }
 
 

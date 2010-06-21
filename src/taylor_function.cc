@@ -63,8 +63,17 @@ void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
     set_rounding_mode(rounding_mode);
 }
 
+/*
+Interval _unscale(const Interval& d, const Interval& x) {
+    if(d.lower()==d.upper()) { return Interval(0.0); }
+    return ( 2*x - add_ivl(d.lower(),d.upper()) ) / sub_ivl(d.upper(),d.lower());
+}
 
-
+TaylorModel _unscale(const Interval& d, const TaylorModel& x) {
+    if(d.lower()==d.upper()) { return TaylorModel(x.argument_size()); }
+    return ( 2*x - add_ivl(d.lower(),d.upper()) ) / sub_ivl(d.upper(),d.lower());
+}
+*/
 
 ScalarTaylorFunction::ScalarTaylorFunction()
     : _domain(0), _model(0)

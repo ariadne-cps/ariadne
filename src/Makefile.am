@@ -51,6 +51,7 @@ SRC = \
 	hybrid_evolver-stable.cc \
 	hybrid_evolver-image.cc \
 	hybrid_evolver-constrained.cc \
+	hybrid_evolver-simple.cc \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \

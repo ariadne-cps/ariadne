@@ -2,7 +2,7 @@
  *            hybrid_time.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file hybrid_time.h
  *  \brief Hybrid times
  */
@@ -31,8 +31,8 @@
 
 namespace Ariadne {
 
-//! \brief A value in a hybrid time domain, being a pair comprising a real \a continuous_time 
-//! and an integer \a discrete_time. 
+//! \brief A value in a hybrid time domain, being a pair comprising a real \a continuous_time
+//! and an integer \a discrete_time.
 //!
 //! When a %HybridTime is used to define a bound on a hybrid evolution, the evolution should
 //! stop when <em>either</em> the continuous time or the discrete time reaches the bounding
@@ -56,22 +56,25 @@ struct HybridTime
     DiscreteTimeType _discrete_time;
   public:
     HybridTime(double t, int n)
-        : _continuous_time(t), _discrete_time(n) { } 
+      : _continuous_time(t), _discrete_time(n) { }
+    HybridTime(int n, double t)
+      : _continuous_time(t), _discrete_time(n) {
+          ARIADNE_FAIL_MSG("HybridTime(int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
 };
 
 inline bool operator==(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time==ht2._continuous_time &&
-        ht1._discrete_time==ht2._discrete_time; 
+        ht1._discrete_time==ht2._discrete_time;
 }
 
 inline bool operator!=(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time!=ht2._continuous_time ||
-        ht1._discrete_time!=ht2._discrete_time; 
+        ht1._discrete_time!=ht2._discrete_time;
 }
 
 inline bool operator<=(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time<=ht2._continuous_time &&
-        ht1._discrete_time<=ht2._discrete_time; 
+        ht1._discrete_time<=ht2._discrete_time;
 }
 
 inline bool operator<(const HybridTime& ht1, const HybridTime& ht2) {

@@ -202,6 +202,38 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const VectorFu
 }
 
 
+void ConstraintSolver::reduce(const List<NonlinearConstraint>& constraints, Box& domain) const
+{
+    const double MINIMUM_REDUCTION = 0.75;
+
+    if(domain.empty()) { return; }
+
+    Float domain_magnitude=0.0;
+    for(uint j=0; j!=domain.size(); ++j) {
+        domain_magnitude+=domain[j].width();
+    }
+    Float old_domain_magnitude=domain_magnitude;
+
+    do {
+        for(uint i=0; i!=constraints.size(); ++i) {
+            this->hull_reduce(constraints[i],domain);
+        }
+        for(uint i=0; i!=constraints.size(); ++i) {
+            for(uint j=0; j!=domain.size(); ++j) {
+                this->box_reduce(constraints[i],domain,j);
+            }
+        }
+
+        if(domain.empty()) { return; }
+        old_domain_magnitude=domain_magnitude;
+        domain_magnitude=0.0;
+        for(uint j=0; j!=domain.size(); ++j) {
+            domain_magnitude+=domain[j].width();
+        }
+    } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
+}
+
+
 void ConstraintSolver::hull_reduce(const NonlinearConstraint& constraint, Box& domain) const
 {
     const ScalarFunction& function=constraint.function();

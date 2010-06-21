@@ -230,8 +230,11 @@ class TaylorConstrainedImageSet
     void apply_flow(VectorFunction phi, Interval time);
     //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
     void apply_flow(VectorTaylorFunction phi, Interval time);
-    //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
-    void apply_flow(VectorTaylorFunction phi, Float time);
+    //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
+    void apply_flow_step(VectorTaylorFunction phi, Float h);
+
+    //! \brief Introduces the constraint \f$c\f$ applied to \f$x=f(s)\f$.
+    void new_state_constraint(NonlinearConstraint c);
 
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
     void new_negative_constraint(ScalarFunction g);
@@ -239,6 +242,7 @@ class TaylorConstrainedImageSet
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
     void new_equality_constraint(ScalarFunction h);
     void new_zero_constraint(ScalarFunction h);
+    void new_zero_constraint(ScalarTaylorFunction h);
 
     //! \brief The negative constraints.
     const List<ScalarTaylorFunction>& negative_constraints() const;
@@ -261,6 +265,9 @@ class TaylorConstrainedImageSet
     //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
     tribool satisfies(ScalarFunction g) const;
+    //! \brief Tests if the set satisfies the constraint \a c. Returns \tt true if all points in the set satisfy
+    //! the constraint, and \tt false if no points in the set satisfy the constraint.
+    virtual tribool satisfies(NonlinearConstraint c) const;
 
     uint dimension() const;
     uint number_of_parameters() const;

@@ -63,6 +63,9 @@ class ConstraintSolverInterface {
     virtual Pair<Tribool,Point> feasible(const Box& domain, const VectorFunction& function, const Box& codomain) const = 0;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
     virtual Tribool check_feasibility(const Box& domain, const VectorFunction& function, const Box& codomain, const Point& point) const = 0;
+    //! \brief Try to reduce the size of the domain by propagating interval constraints.
+    virtual void reduce(const List<NonlinearConstraint>& constraints, Box& domain) const = 0;
+
 };
 
 
@@ -81,6 +84,9 @@ class ConstraintSolver
 
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
     virtual Tribool check_feasibility(const Box& domain, const VectorFunction& function, const Box& codomain, const Point& point) const;
+
+    //! \brief Try to reduce the size of the domain by propagating interval constraints.
+    virtual void reduce(const List<NonlinearConstraint>& constraints, Box& domain) const;
 
     //! \brief Try to enforce hull consistency by propagating interval constraints.
     //! This method is sharp if each variable occurs at most once in the constraint.

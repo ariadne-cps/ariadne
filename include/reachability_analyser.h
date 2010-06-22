@@ -217,8 +217,11 @@ class HybridReachabilityAnalyser
 
   public:
 
-	// Determine if the upper/lower reached regions of verify_iterative (and of all the functions using it) must be shown (false by default)
+	// Determine if the upper/lower reached regions of verify_iterative (and of all the functions using it) must be saved into figures (false by default)
 	bool plot_verify_results;
+	// Determine if the reached region (resulting from the chain_reach_grid() procedure) is to be dumped into disk for those locations not involved in
+	// the evolution, and reloaded when required again.
+	bool chain_reach_dumping;
 	// The reduction in the number of logical cores used in multithreading (down from the maximum concurrency of the machine) (zero by default)
 	uint free_cores;
   
@@ -290,6 +293,7 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosur
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 	this->plot_verify_results = false;
+	this->chain_reach_dumping = false;
 	this->free_cores = 0;
 }
 
@@ -303,6 +307,7 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 	this->plot_verify_results = false;
+	this->chain_reach_dumping = false;
 	this->free_cores = 0;
 }
 

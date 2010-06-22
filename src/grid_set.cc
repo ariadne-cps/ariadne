@@ -23,6 +23,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 
 #include "macros.h"
@@ -499,6 +500,62 @@ void BinaryTreeNode::tree_to_binary_words( BinaryWord & tree, BinaryWord & leave
         _pLeftNode->tree_to_binary_words( tree, leaves );
         _pRightNode->tree_to_binary_words( tree, leaves );
     }
+}
+
+void BinaryTreeNode::add_enabled_from_file(FILE*& file){
+
+	// Get the information on the presence of leaves
+	int hasLeaves = fgetc(file);
+
+	// If the current node has no leaves, it is a leaf itself
+	if (hasLeaves == 0)
+	{
+		// Set if the leaf is enabled
+		_isEnabled = (bool) fgetc(file);
+	}
+	else
+	{
+		// Split the node
+        _pLeftNode  = new BinaryTreeNode(_isEnabled);
+        _pRightNode = new BinaryTreeNode(_isEnabled);
+
+		// We proceed in the left branch
+		_pLeftNode->add_enabled_from_file(file);
+		// We proceed in the right branch
+		_pRightNode->add_enabled_from_file(file);
+	}
+}
+
+void BinaryTreeNode::remove_to_file(FILE*& file){
+
+	// Get the boolean value for the presence of leaves (checking the left node suffices)
+	bool hasLeaves = (_pLeftNode != NULL);
+	// Put the information into the file
+	fputc(hasLeaves, file);
+
+	// If it has no leaves, it is a leaf itself
+	if (!hasLeaves)
+	{
+		// Get the boolean value for the enabledness
+		bool isEnabled = _isEnabled;
+		// Put the information into the file
+		fputc(isEnabled, file);
+	}
+	else
+	{
+		// Remove the left subtree
+		_pLeftNode->remove_to_file(file);
+		// Deallocate the node
+		delete(_pLeftNode);
+		// Set the pointer to NULL
+		_pLeftNode = NULL;
+		// Remove the right subtree
+		_pRightNode->remove_to_file(file);
+		// Deallocate the node
+		delete(_pRightNode);
+		// Set the pointer to NULL
+		_pRightNode = NULL;
+	}
 }
     
 void BinaryTreeNode::add_enabled( const BinaryTreeNode * pOtherSubTree, const BinaryWord & path ){
@@ -2474,6 +2531,39 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
             }
         }
     }
+}
+
+void GridTreeSet::import_from_file(const char*& filename)
+{
+	// Open the file in read mode
+	FILE* file = fopen(filename,"r");
+
+	// Add from file, starting from the root
+	_pRootTreeNode->add_enabled_from_file(file);
+
+	// Close the file
+	fclose(file);
+
+	// Destroy the file
+	if (std::remove(filename) != 0 )
+	    ARIADNE_FAIL_MSG("Error deleting file " << filename << ".");
+}
+
+void GridTreeSet::export_to_file(const char*& filename)
+{
+	// Open the file in write mode
+	FILE* file = fopen(filename,"w");
+
+	// Remove the left and right subtrees
+	_pRootTreeNode->remove_to_file(file);
+
+	// Set the enabledness to unknown and set its left and right nodes to NULL
+	_pRootTreeNode->set_unknown_unchecked();
+
+	// Flush the file
+	fflush(file);
+	// Close the file
+	fclose(file);
 }
     
 /*************************************FRIENDS OF BinaryTreeNode*************************************/

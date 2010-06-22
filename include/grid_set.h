@@ -263,6 +263,11 @@ class BinaryTreeNode {
      */
     void set_unknown();
 
+    /*! \brief Marks the node as neither enabled nor disabled, and sets its left and right nodes to NULL without deleting them.
+     * It is necessary for certain procedures, such as importing from file.
+     */
+    void set_unknown_unchecked();
+
     /*! \brief Splits the leaf node, i.e. adds two subnodes with the _isEnabled field value inherited from the parent node.
      * The parent's _isEnabled is set to intermediate, because the subsequent operation on the subtree might enable/disable
      * subnodes and we do not want to keep track of these changes. If the node is not a leaf then nothing is done.
@@ -307,6 +312,14 @@ class BinaryTreeNode {
      * If some prefix of the \a path references an enabled node then nothing is done.
      */
     void add_enabled( const BinaryWord & path );
+
+    /*! \brief Adds the subtree serialized in \a file, where after each leaf we append its enabledness.
+     * For efficiency it is implicitly assumed, thus not checked, that the node is a leaf. */
+    void add_enabled_from_file(FILE*& file);
+
+    /*! \brief Removes the left and right subtrees serializing them into \a file, depth first, where
+     * after each leaf we append its enabledness. */
+    void remove_to_file(FILE*& file);
 
     /*! \brief This method adjoins the enabled nodes of \a subTree to this tree.
      * Note that, the position of the root node of \a subTree within this
@@ -1263,6 +1276,18 @@ class GridTreeSet : public GridTreeSubset {
 
     //@{
     //! \name Input/output routines.
+
+    /*! \brief Import the content from the file \a filename and destroy the file. It is assumed that the tree has
+     * only its root node, with the proper GridCell already present, so that it has previously been dumped into such file.
+     * Thus, for efficiency, no check at all is performed.
+     */
+    void import_from_file(const char*& filename);
+
+    /*! \brief Export the tree to the file \a filename (without appending) and removes the corresponding nodes from the tree.
+     * The remaining tree thus features the root only.
+	 */
+    void export_to_file(const char*& filename);
+
     //@}
 
 };
@@ -1578,6 +1603,12 @@ inline void BinaryTreeNode::set_unknown() {
     } else {
         throw IsALeafNodeException(ARIADNE_PRETTY_FUNCTION);
     }
+}
+
+inline void BinaryTreeNode::set_unknown_unchecked() {
+    _isEnabled = indeterminate;
+    _pLeftNode = NULL;
+    _pRightNode = NULL;
 }
 
 inline void BinaryTreeNode::make_leaf(tribool is_enabled ){

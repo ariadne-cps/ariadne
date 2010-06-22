@@ -777,17 +777,66 @@ chain_reach_grid(const SystemType& system,
     Gr grid=system.grid();
     GTS new_final(grid), new_reach(grid), reach(grid), intermediate(grid);
 
-    // For each location, insert the enclosure of the initial set
+    // Initialize (with true values) the information about locations in use on the previous iteration and
+    // initialize (with false values) the information about locations in use on the current iteration
+    std::map<DiscreteState,bool> previousLocationsInUse;
+    std::map<DiscreteState,bool> currentLocationsInUse;
+    for (HybridGrid::locations_const_iterator grid_it = grid.locations_begin(); grid_it != grid.locations_end(); grid_it++) {
+        previousLocationsInUse[grid_it->first] = true;
+    	currentLocationsInUse[grid_it->first] = false;
+    }
+
+    // For each location, insert the enclosure of the initial set and set to true the corresponding locationsInUse value
     for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin(); loc_iter!=initial_set.locations_end(); ++loc_iter)
+    {
 		initial_enclosures.push_back(EnclosureType(loc_iter->first,ContinuousEnclosureType(loc_iter->second)));
-    
+		currentLocationsInUse[loc_iter->first] = true;
+    }
+
     ARIADNE_LOG(5,"\t\t\t\tComputing recurrent evolution...\n");
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
 
 	// While the final set has new cells in respect to the previous reach set, process them and increase the number of locks
     for (this->_statistics->upper().total_locks = 0; !initial_enclosures.empty(); this->_statistics->upper().total_locks++)  
 	{
-		// Holds information of the presence of at least one transition
+    	ARIADNE_LOG(5,"\t\t\t\tIteration " << this->_statistics->upper().total_locks << "\n");
+
+	    // If dumping must be performed
+	    if (this->chain_reach_dumping) {
+	    	// Prepare the initial string
+	    	string locations = "\t\t\t\t\tWorking in locations: ";
+			// Dump into files those reached regions associated with newly-found not-in-use locations, and
+	    	// load from files those reached regions associated with newly-found in-use locations
+			for (std::map<DiscreteState,bool>::const_iterator loc_it = currentLocationsInUse.begin(); loc_it != currentLocationsInUse.end(); loc_it++) {
+				// Add the location in use
+				if (loc_it->second)
+					locations += loc_it->first.name() + " ";
+
+				// Get the file name string as [systemname].[locationname].dump
+				string filename = system.name() + "." + loc_it->first.name() + ".dump";
+				const char * filename_ch = filename.c_str();
+				// If it is not currently in use but was in use before, dump it
+				// If it is currently in use but was not in use before, load it
+				if (!loc_it->second && previousLocationsInUse[loc_it->first]) {
+					ARIADNE_LOG(6,"\t\t\t\t\tDumping reached region for location " << loc_it->first.name() << "\n");
+					reach[loc_it->first].export_to_file(filename_ch);
+				}
+				else if (loc_it->second && !previousLocationsInUse[loc_it->first]) {
+					ARIADNE_LOG(6,"\t\t\t\t\tRestoring reached region for location " << loc_it->first.name() << "\n");
+					reach[loc_it->first].import_from_file(filename_ch);
+				}
+			}
+			ARIADNE_LOG(6,locations << "\n");
+			// Copy the current locations in use into the previous ones
+			previousLocationsInUse = currentLocationsInUse;
+	    }
+
+        // Reset (with false values) the information about locations in use on the current iteration
+        std::map<DiscreteState,bool> nextLocationsInUse;
+        for (HybridGrid::locations_const_iterator grid_it = grid.locations_begin(); grid_it != grid.locations_end(); grid_it++)
+        	currentLocationsInUse[grid_it->first] = false;
+
+		// Holds information on the presence of at least one transition
     	bool transitions_occurred = false;
 
 		// Evolve the initial enclosures
@@ -795,9 +844,16 @@ chain_reach_grid(const SystemType& system,
 		// Clear the initial enclosures
 		initial_enclosures.clear();
 
-		// Remove from the result those cells that have already been checked or evolved from
+		// Remove from the result those cells that have already been evolved from or checked for activations
         new_final.remove(intermediate);
 		new_reach.remove(reach);
+
+	    // If dumping must be performed
+	    if (this->chain_reach_dumping) {
+			// Check the new final region and set as in-use all the locations whose reached region is not empty
+			for (GTS::locations_iterator loc_it = new_final.locations_begin(); loc_it != new_final.locations_end(); loc_it++)
+				currentLocationsInUse[loc_it->first] = !loc_it->second.empty();
+	    }
 
         ARIADNE_LOG(6,"\t\t\t\t\tReach size after removal = "<<new_reach.size()<<"\n");
         ARIADNE_LOG(6,"\t\t\t\t\tFinal size after removal = "<<new_final.size()<<"\n");
@@ -835,6 +891,7 @@ chain_reach_grid(const SystemType& system,
             		transitions_occurred = true; // Notify that at least one transition occurred
                 	TaylorSet jump_set_model= tc.reset_step(trans_it->reset(),encl.continuous_state_set());
                 	initial_enclosures.push_back(EnclosureType(trans_it->target(),jump_set_model));
+                	currentLocationsInUse[trans_it->target()] = true; // Set the in-use value for the target location as true
             	}	
 			}
 		}
@@ -855,6 +912,22 @@ chain_reach_grid(const SystemType& system,
 		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
     }
 
+    // Restore those reached regions dumped in the previous iteration
+    // (please note that currentLocationsInUse must feature false values only)
+    if (this->chain_reach_dumping) {
+		for (std::map<DiscreteState,bool>::const_iterator loc_it = previousLocationsInUse.begin(); loc_it != previousLocationsInUse.end(); loc_it++) {
+			// Get the file name string as [systemname].[locationname].dump
+			string filename = system.name() + "." + loc_it->first.name() + ".dump";
+			const char * filename_ch = filename.c_str();
+			// If the location was not used
+			if (!loc_it->second) {
+				ARIADNE_LOG(6,"\t\t\t\t\tRestoring reached region for location " << loc_it->first.name() << "\n");
+				reach[loc_it->first].import_from_file(filename_ch);
+			}
+		}
+    }
+
+    // Save the reached region
 	this->_statistics->upper().reach = reach;
 
 	ARIADNE_LOG(5,"\t\t\t\tFound a total of " << reach.size() << " reached cells.\n");

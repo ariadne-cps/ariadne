@@ -240,6 +240,12 @@ class HybridReachabilityAnalyser
 
   private:
 
+    /*! \brief Generates a list of hybrid enclosures from the \a initial_set, depending on the minimum cell size
+     * given by the \a grid.
+     */
+    list<HybridBasicSet<TaylorSet> > _split_initial_set(const HybridImageSet initial_set,
+										   const HybridGrid grid) const;
+
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;

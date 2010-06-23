@@ -79,6 +79,62 @@ HybridReachabilityAnalyser(const HybridDiscretiser<HybridEvolver::ContinuousEncl
 	this->plot_verify_results = false;
 }
 
+list<HybridBasicSet<TaylorSet> >
+HybridReachabilityAnalyser::
+_split_initial_set(const HybridImageSet initial_set,
+				   const HybridGrid grid) const
+{
+	// The initial enclosures
+	list<EnclosureType> initial_enclosures;
+
+	// For each location, split the original enclosure into a list of enclosures
+	// having widths lesser than the grid lengths at maximum depth
+	for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
+		 loc_iter!=initial_set.locations_end(); ++loc_iter)
+		{
+		// Get the grid lengths at the maximum depth (i.e. the minimum cell widths)
+		Vector<Float> mincell_widths = grid[loc_iter->first].lengths()/(1 << _parameters->maximum_grid_depth);
+
+		// Keep a list of the continuous enclosures to split
+		list<ContinuousEnclosureType> continuous_enclosures;
+		// Insert the original continuous enclosure
+		continuous_enclosures.push_front(ContinuousEnclosureType(loc_iter->second));
+
+		/* While there are continuous enclosures:
+		 * a) pick one, pop it and check it against the mincell_lengths
+		 * 	 i) if larger, split it and put the couple into the continuous_enclosures
+		 *   ii) if not, put the enclosure (paired with the location) into the initial_enclosures
+		 */
+		while (!continuous_enclosures.empty()) {
+			// Pick and pop from the back (interpreted as the least recent)
+			ContinuousEnclosureType enclosure = continuous_enclosures.back();
+			continuous_enclosures.pop_back();
+			// Keep a flag to identify if any splitting occurred (defaults to false)
+			bool hasBeenSplit = false;
+			// For each dimension
+			for (uint i=0; i < enclosure.dimension(); i++) {
+				// If the width of the range for the model on the i-th dimension is greater than the minimum cell length
+				if (enclosure[i].range().width() > mincell_widths[i]) {
+					// Split on the dimension and put the resulting enclosures in the continuous enclosures
+					pair<ContinuousEnclosureType,ContinuousEnclosureType> split_result = enclosure.split(i);
+					continuous_enclosures.push_front(split_result.first);
+					continuous_enclosures.push_front(split_result.second);
+					// Set the flag as true and skip the remaining checks
+					hasBeenSplit = true;
+					break;
+				}
+			}
+			// If it has not been split, put the hybrid enclosure into the initial enclosures
+			if (!hasBeenSplit)
+				initial_enclosures.push_back(EnclosureType(loc_iter->first,enclosure));
+		}
+	}
+
+	ARIADNE_LOG(6,"\t\t\t\t\tSplit initial enclosures size=" << initial_enclosures.size() << "\n");
+
+	// Returns
+	return initial_enclosures;
+}
 
 // Helper functions for operators on lists of sets.
 HybridGridTreeSet
@@ -135,7 +191,6 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
 	// Check that the concurrency is greater than zero
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
-	//this->_discretiser->verbosity = 5;
 	// Create the worker
 	UpperReachEvolveWorker worker(this->_discretiser,sys,set,time,accuracy,concurrency);
 
@@ -161,7 +216,6 @@ HybridReachabilityAnalyser::_upper_reach_evolve_continuous(const HybridAutomaton
 	// Check that the concurrency is greater than zero
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
-	//this->_discretiser->verbosity = 5;
 	// Create the worker
 	UpperReachEvolveContinuousWorker worker(this->_discretiser,sys,initial_enclosures,this->_parameters->bounding_domain,time,accuracy,concurrency);
 
@@ -184,67 +238,23 @@ lower_evolve(const SystemType& system,
 
 	this->_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
-    int grid_depth = this->_parameters->maximum_grid_depth;
-    int grid_height = this->_parameters->maximum_grid_height;
-    Gr grid(system.grid());
-    GTS initial; GTS final;
+    GTS evolve;
 
-    // For each location, test if the radius of the set is smaller than the grid cell
-    for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
-        loc_iter!=initial_set.locations_end(); ++loc_iter) 
-    {
-        Vector<Float> cell = grid[loc_iter->first].lengths();
-        Float cell_radius = (min(cell))/(1 << (grid_depth+4));
-        Vector<Float> origin = grid[loc_iter->first].origin();
-        Box bbox = loc_iter->second.bounding_box();
-        if (radius(bbox) > cell_radius) {
-            // if bigger, map to the grid
-            // First of all, test if the bounding box lies on cell boundaries or not
-            for(uint i = 0 ; i < bbox.dimension() ; ++i) {
-                // test if the i-th dimension is a singleton interval AND
-                // if it lies on a cell boundary
-                cell_radius = cell[i]/(1 << (grid_depth+4));
-                Float intpart, fractpart;
-                fractpart = modf((bbox[i].lower()-origin[i])/cell_radius,&intpart);
-                if(bbox[i].singleton() && (fractpart == 0.0)) {
-                    // the set lies on the boundary, shift the grid center by half cell size
-                    origin[i]+=cell_radius/2.0;
-                    grid[loc_iter->first].set_origin(origin);
-                }
-            }        
-            // if bigger, map to the grid
-            ARIADNE_LOG(6,"\t\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
-            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
-            initial[loc_iter->first].adjoin_lower_approximation(loc_iter->second,grid_height,grid_depth+4);
-        } else {
-            ARIADNE_LOG(6,"\t\t\t\t\tComputing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
-            // if smaller, compute the evolution directly
-            EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
-            GTS cell_final=this->_discretiser->evolve(system,initial_enclosure,time,grid_depth,LOWER_SEMANTICS);
-            final.adjoin(cell_final);            
-            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
-        }
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,system.grid());
+
+	ARIADNE_LOG(5,"\t\t\t\tComputing evolution...\n");
+    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
+    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
+        GTS cell_final=this->_discretiser->evolve(system,*encl_it,time,_parameters->maximum_grid_depth,LOWER_SEMANTICS);
+        evolve.adjoin(cell_final);
     }
-
-    ARIADNE_LOG(5,"\t\t\t\tgrid="<<grid<<"\n");
-
-    ARIADNE_LOG(5,"\t\t\t\tinitial.size()="<<initial.size()<<"\n");
-    if(!initial.empty()) {
-        ARIADNE_LOG(5,"\t\t\t\tcomputing lower evolution from the grid.");
-        for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-            ARIADNE_LOG(5,".");
-            EnclosureType enclosure=this->_discretiser->enclosure(*bs_iter);
-            GTS cell_final=this->_discretiser->evolve(system,enclosure,time,grid_depth,LOWER_SEMANTICS);
-            final.adjoin(cell_final);
-        }
-    }
-    ARIADNE_LOG(4,"\n");
 
 	// Copies the largest evolution time and steps to the statistics
 	this->_statistics->lower().largest_evol_time = this->_discretiser->statistics().lower().largest_evol_time;
 	this->_statistics->lower().largest_evol_steps = this->_discretiser->statistics().lower().largest_evol_steps;
 
-    return final;
+    return evolve;
 }
 
 
@@ -260,9 +270,7 @@ lower_reach(const SystemType& system,
 	this->_discretiser->reset_lower_statistics(); // Reset the continuous statistics
 
     int grid_depth = this->_parameters->maximum_grid_depth;
-    int grid_height = this->_parameters->maximum_grid_height;
-    Gr grid(system.grid());
-    GTS initial; GTS reach;
+    GTS reach;
 
 	// Get the actual concurrency
 	const uint concurrency = boost::thread::hardware_concurrency() - this->free_cores;
@@ -272,54 +280,14 @@ lower_reach(const SystemType& system,
 	// Get the lock time, in the case pruning is to be performed
 	TimeType lock_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
 
-    // For each location, test if the radius of the set is smaller than the grid cell
-    for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
-        loc_iter!=initial_set.locations_end(); ++loc_iter) 
-    {
-        Vector<Float> cell = grid[loc_iter->first].lengths();
-        Float cell_radius = (min(cell))/(1 << (grid_depth+4));
-        Vector<Float> origin = grid[loc_iter->first].origin();
-        Box bbox = loc_iter->second.bounding_box();
-        if (radius(bbox) > cell_radius) {
-            // if bigger, map to the grid
-            // First of all, test if the bounding box lies on cell boundaries or not
-            for(uint i = 0 ; i < bbox.dimension() ; ++i) {
-                // test if the i-th dimension is a singleton interval AND
-                // if it lies on a cell boundary
-                cell_radius = cell[i]/(1 << (grid_depth+4));
-                Float intpart, fractpart;
-                fractpart = modf((bbox[i].lower()-origin[i])/cell_radius,&intpart);
-                if(bbox[i].singleton() && (fractpart == 0.0)) {
-                    // the set lies on the boundary, shift the grid center by half cell size
-                    origin[i]+=cell_radius/2.0;
-                    grid[loc_iter->first].set_origin(origin);
-                }
-            }        
-            // if bigger, map to the grid
-            ARIADNE_LOG(6,"\t\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
-            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
-            initial[loc_iter->first].adjoin_lower_approximation(loc_iter->second,grid_height,grid_depth+4);
-        } else {
-            ARIADNE_LOG(6,"\t\t\t\t\tComputing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
-            // if smaller, compute the evolution directly
-            EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
-			GTS cell_reach = this->_discretiser->lower_reach(system,initial_enclosure,time,lock_time,grid_depth,this->_parameters->enable_lower_pruning,concurrency);
-            reach.adjoin(cell_reach);            
-            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
-        }
-    }
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,system.grid());
 
-    ARIADNE_LOG(5,"\t\t\t\tgrid="<<grid<<"\n");
-
-    ARIADNE_LOG(5,"\t\t\t\tinitial.size()="<<initial.size()<<"\n");
-    if(!initial.empty()) {
-        ARIADNE_LOG(5,"\t\t\t\tComputing lower reach set from the grid...");
-        for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-            ARIADNE_LOG(5,".");
-            EnclosureType enclosure=this->_discretiser->enclosure(*bs_iter);
-			GTS cell_reach = this->_discretiser->lower_reach(system,enclosure,time,lock_time,grid_depth,this->_parameters->enable_lower_pruning,concurrency);
-            reach.adjoin(cell_reach);
-        }
+	ARIADNE_LOG(5,"\t\t\t\tComputing evolution...\n");
+    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
+    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
+    	GTS cell_reach = this->_discretiser->lower_reach(system,*encl_it,time,lock_time,grid_depth,_parameters->enable_lower_pruning,concurrency);
+    	reach.adjoin(cell_reach);
     }
 
 	// Copies the reached region
@@ -344,64 +312,20 @@ lower_reach_evolve(const SystemType& system,
 	this->_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
     int grid_depth = this->_parameters->maximum_grid_depth;
-    int grid_height = this->_parameters->maximum_grid_height;
 
     Gr grid=system.grid();
-    GTS initial;
     GTS reach; GTS evolve;
 
-    // For each location, test if the radius of the set is smaller than the grid cell
-    for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
-        loc_iter!=initial_set.locations_end(); ++loc_iter) 
-    {
-        Vector<Float> cell = grid[loc_iter->first].lengths();
-        Float cell_radius = (min(cell))/(1 << (grid_depth+4));
-        Vector<Float> origin = grid[loc_iter->first].origin();
-        Box bbox = loc_iter->second.bounding_box();
-        if (radius(bbox) > cell_radius) {
-            // if bigger, map to the grid
-            // First of all, test if the bounding box lies on cell boundaries or not
-            for(uint i = 0 ; i < bbox.dimension() ; ++i) {
-                // test if the i-th dimension is a singleton interval AND
-                // if it lies on a cell boundary
-                cell_radius = cell[i]/(1 << (grid_depth+4));
-                Float intpart, fractpart;
-                fractpart = modf((bbox[i].lower()-origin[i])/cell_radius,&intpart);
-                if(bbox[i].singleton() && (fractpart == 0.0)) {
-                    // the set lies on the boundary, shift the grid center by half cell size
-                    origin[i]+=cell_radius/2.0;
-                    grid[loc_iter->first].set_origin(origin);
-                }
-            }        
-            // if bigger, map to the grid
-            ARIADNE_LOG(6,"\t\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
-            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));
-            initial[loc_iter->first].adjoin_lower_approximation(loc_iter->second,grid_height,grid_depth+4);
-        } else {
-            ARIADNE_LOG(6,"\t\t\t\t\tComputing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
-            // if smaller, compute the evolution directly
-            EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
-            GTS cell_reach, cell_final;
-            make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,initial_enclosure,time,grid_depth,LOWER_SEMANTICS);
-            reach.adjoin(cell_reach);
-            evolve.adjoin(cell_final);
-            initial.insert(make_pair(loc_iter->first,grid[loc_iter->first]));           
-        }
-    }
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
 
-    ARIADNE_LOG(5,"\t\t\t\tgrid="<<grid<<"\n");
-
-    ARIADNE_LOG(5,"\t\t\t\tinitial.size()="<<initial.size()<<"\n");
-    if(!initial.empty()) {
-        ARIADNE_LOG(5,"\t\t\t\tcomputing lower evolution from the grid.");
-        for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-            ARIADNE_LOG(5,".");
-            EnclosureType enclosure=this->_discretiser->enclosure(*bs_iter);
-            GTS cell_reach,cell_final;
-            make_lpair(cell_reach,cell_final) = this->_discretiser->evolution(system,enclosure,time,grid_depth,LOWER_SEMANTICS);
-            reach.adjoin(cell_reach);
-            evolve.adjoin(cell_final);
-        }
+	ARIADNE_LOG(5,"\t\t\t\tComputing evolution...\n");
+    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
+    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
+        GTS cell_reach,cell_final;
+        make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,*encl_it,time,grid_depth,LOWER_SEMANTICS);
+        reach.adjoin(cell_reach);
+        evolve.adjoin(cell_final);
     }
 
 	// Copies the reached region
@@ -426,7 +350,7 @@ upper_evolve(const SystemType& system,
 	this->_discretiser->reset_upper_statistics(); // Resets the continuous statistics
 
     Gr grid=system.grid();
-    GTS evolve(grid), initial(grid);
+    GTS evolve(grid);
     int grid_depth = this->_parameters->maximum_grid_depth;
     Float real_time=time.continuous_time();
     uint discrete_steps=time.discrete_time();
@@ -442,30 +366,15 @@ upper_evolve(const SystemType& system,
     HybridTime hybrid_remaining_time(remaining_time,discrete_steps);
     ARIADNE_LOG(5,"\t\t\t\treal_time="<<real_time<<"\n");
     ARIADNE_LOG(5,"\t\t\t\ttime_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
-    ARIADNE_LOG(5,"\t\t\t\tcomputing first reachability step...\n");
-    // For each location, test if the radius of the set is smaller than the grid cell
-    for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
-        loc_iter!=initial_set.locations_end(); ++loc_iter) 
-    {
-        Vector<Float> cell = grid[loc_iter->first].lengths();
-        Float cell_radius = (min(cell))/(1 << (grid_depth));
-        if (radius(loc_iter->second.bounding_box()) > cell_radius) {
-            // if bigger, map to the grid
-            ARIADNE_LOG(5,"\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
-            initial[loc_iter->first].adjoin_outer_approximation(loc_iter->second,grid_depth);
-        } else {
-            ARIADNE_LOG(5,"\t\t\t\tComputing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
-            // if smaller, compute the evolution directly
-            EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
-            GTS cell_final=this->_discretiser->evolve(system,initial_enclosure,time,grid_depth,UPPER_SEMANTICS);
-            evolve.adjoin(cell_final);
-        }
-    }
-    if(!initial.empty()) {
-        ARIADNE_LOG(5,"\t\t\t\tcomputing evolution from the grid...\n");
-        ARIADNE_LOG(6,"\t\t\t\t\tinitial_evolve.size()="<<initial.size()<<"\n");
-        initial=this->_upper_evolve(system,initial,hybrid_lock_to_grid_time,grid_depth);
-        evolve.adjoin(initial);
+
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
+
+	ARIADNE_LOG(5,"\t\t\t\tComputing initial evolution...\n");
+    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
+    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
+        GTS cell_final=this->_discretiser->evolve(system,*encl_it,hybrid_lock_to_grid_time,grid_depth,UPPER_SEMANTICS);
+        evolve.adjoin(cell_final);
     }
 
 	// Adds the largest evolution time and steps to the statistics, then resets such statistics
@@ -475,7 +384,7 @@ upper_evolve(const SystemType& system,
 
     // time steps evolution loop
     for(uint i=1; i<time_steps; ++i) {
-        ARIADNE_LOG(5,"\t\t\t\tcomputing "<<i+1<<"-th reachability step...\n");
+        ARIADNE_LOG(5,"\t\t\t\tComputing "<<i+1<<"-th reachability step...\n");
         evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
@@ -487,7 +396,7 @@ upper_evolve(const SystemType& system,
 
     ARIADNE_LOG(5,"\t\t\t\tremaining_time="<<remaining_time<<"\n");
     if(!evolve.empty() && remaining_time > 0) {
-        ARIADNE_LOG(5,"\t\t\t\tcomputing evolution for remaining time...\n");
+        ARIADNE_LOG(5,"\t\t\t\tComputing evolution for remaining time...\n");
         evolve=this->_upper_evolve(system,evolve,hybrid_remaining_time,grid_depth);
 		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 		this->_statistics->upper().total_locks++; // Increases the total locks counter
@@ -531,7 +440,7 @@ upper_reach_evolve(const SystemType& system,
 	this->_discretiser->reset_upper_statistics(); // Reset the continuous statistics
 
     Gr grid=system.grid();
-    GTS found(grid),evolve(grid),reach(grid),initial(grid);
+    GTS found(grid),evolve(grid),reach(grid);
     int grid_depth = this->_parameters->maximum_grid_depth;
     Float real_time=time.continuous_time();
     uint discrete_steps=time.discrete_time();
@@ -547,34 +456,17 @@ upper_reach_evolve(const SystemType& system,
     HybridTime hybrid_remaining_time(remaining_time,discrete_steps);
     ARIADNE_LOG(5,"\t\t\t\treal_time="<<real_time<<"\n");
     ARIADNE_LOG(5,"\t\t\t\ttime_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
-    ARIADNE_LOG(5,"\t\t\t\tcomputing first reachability step...\n");
-    // For each location, test if the radius of the set is smaller than the grid cell
-    for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
-        loc_iter!=initial_set.locations_end(); ++loc_iter) 
-    {
-        Vector<Float> cell = grid[loc_iter->first].lengths();
-        Float cell_radius = (min(cell))/(1 << (grid_depth));
-        if (radius(loc_iter->second.bounding_box()) > cell_radius) {
-            // if bigger, map to the grid
-            ARIADNE_LOG(6,"\t\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n");
-            initial[loc_iter->first].adjoin_outer_approximation(loc_iter->second,grid_depth);
-        } else {
-            ARIADNE_LOG(6,"\t\t\t\t\tComputing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
-            // if smaller, compute the evolution directly
-            EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
-            GTS cell_reach,cell_final;
-            make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,initial_enclosure,time,grid_depth,UPPER_SEMANTICS);
-            reach.adjoin(cell_reach);
-            evolve.adjoin(cell_final);
-        }
-    }
-    if(!initial.empty()) {
-        ARIADNE_LOG(5,"\t\t\t\t\tcomputing evolution from the grid...\n");
-        ARIADNE_LOG(6,"\t\t\t\t\tinitial_evolve.size()="<<initial.size()<<"\n");
-        make_lpair(found,initial)=this->_upper_reach_evolve(system,initial,hybrid_lock_to_grid_time,grid_depth);
-        evolve.adjoin(initial);
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,initial.size()); // Updates the largest intermediate size
-        reach.adjoin(found);
+
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
+
+	ARIADNE_LOG(5,"\t\t\t\tComputing initial evolution...\n");
+    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
+    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
+        GTS cell_reach,cell_final;
+        make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,*encl_it,hybrid_lock_to_grid_time,grid_depth,UPPER_SEMANTICS);
+        reach.adjoin(cell_reach);
+        evolve.adjoin(cell_final);
     }
 
 	// Adds the largest evolution time and steps to the statistics, then resets such statistics
@@ -653,7 +545,7 @@ chain_reach(const SystemType& system,
 			ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the continuous space."); }}
 
     Gr grid=system.grid();
-    GTS bounding(grid), evolve(grid), reach(grid), initial(grid), found(grid), intermediate(grid);
+    GTS bounding(grid), evolve(grid), reach(grid), found(grid), intermediate(grid);
 
     bounding.adjoin_outer_approximation(bounding_domain,0u); 
     ARIADNE_LOG(6,"\t\t\t\t\tbounding_size(pre recombine)="<<bounding.size()<<"\n");
@@ -668,32 +560,17 @@ chain_reach(const SystemType& system,
     HybridTime hybrid_transient_time(transient_time, transient_steps);
     ARIADNE_LOG(5,"\t\t\t\tComputing first evolution step...\n");
 
-    // For each location, test if the radius of the set is smaller than the grid cell
-    for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin();
-        loc_iter!=initial_set.locations_end(); ++loc_iter)
-	{
-        Vector<Float> cell = grid[loc_iter->first].lengths();
-        Float cell_radius = (min(cell))/(1 << (maximum_grid_depth));
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
 
-        if (radius(loc_iter->second.bounding_box()) > cell_radius) {
-            ARIADNE_LOG(6,"\t\t\t\t\tAdjoining initial set for location "<<loc_iter->first<<" to the grid...\n"); // If bigger, map to the grid
-            initial[loc_iter->first].adjoin_outer_approximation(loc_iter->second,maximum_grid_depth); } 
-		else {
-            ARIADNE_LOG(6,"\t\t\t\t\tComputing evolution for initial set in location "<<loc_iter->first<<" directly...\n");
-            // if smaller, compute the evolution directly
-            EnclosureType initial_enclosure(loc_iter->first,ContinuousEnclosureType(loc_iter->second));
-            GTS cell_reach,cell_final;
-            make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,initial_enclosure,hybrid_transient_time,maximum_grid_depth,UPPER_SEMANTICS);
-            reach.adjoin(cell_reach);
-            evolve.adjoin(cell_final); }
-	}
-
-    if(!initial.empty()) {
-        ARIADNE_LOG(5,"\t\t\t\tComputing evolution on the grid...\n")
-        make_lpair(found,initial)=this->_upper_reach_evolve(system,initial,hybrid_transient_time,maximum_grid_depth);
-        ARIADNE_LOG(6,"\t\t\t\t\tfound "<<found.size()<<" cells.\n");
-        reach.adjoin(found);
-        evolve.adjoin(initial); }
+	ARIADNE_LOG(5,"\t\t\t\tComputing transient evolution...\n");
+    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
+    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
+        GTS cell_reach,cell_final;
+        make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,*encl_it,hybrid_transient_time,maximum_grid_depth,UPPER_SEMANTICS);
+        reach.adjoin(cell_reach);
+        evolve.adjoin(cell_final);
+    }
 
 	// Adds the largest evolution time and steps to the statistics, then resets such statistics
 	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;

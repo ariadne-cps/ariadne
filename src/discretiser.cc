@@ -305,7 +305,7 @@ lower_reach(const SystemType& system,
 	// For each grid lock
 	for (uint i=0;i<((uint)time.discrete_time()/lock_time.discrete_time());i++)
 	{	
-		// The sizes of the adjoined or superposed evolve 
+		// The sizes of the adjoined (the cells) or superposed (the enclosures) evolve
 		std::map<DiscreteState,uint> adjoined_evolve_sizes;
 		std::map<DiscreteState,uint> superposed_evolve_sizes;
 		// The evolve

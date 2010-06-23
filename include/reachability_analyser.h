@@ -163,16 +163,22 @@ class HybridReachabilityAnalyser
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
     virtual SetApproximationType chain_reach(const SystemType& system,
                                              const HybridImageSet& initial_set) const;
-  
-    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set; the method performs discretisation before transitions, then */
-	/*! checks activations on the discretised cells. */
-    virtual SetApproximationType chain_reach_grid(const SystemType& system,
-                                             const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
     virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const HybridImageSet& initial_set, 
+                                             const HybridImageSet& initial_set,
                                              const HybridBoxes& bounding_domain) const;
+
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
+     * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells. */
+    virtual SetApproximationType upper_chain_reach(const SystemType& system,
+												   const HybridImageSet& initial_set) const;
+
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
+         * lower semantics; the method performs periodical discretisations and checks the new reached region for inclusion
+         * The resulting set is a subset of the outer-approximation of the whole evolution set. */
+        virtual SetApproximationType lower_chain_reach(const SystemType& system,
+    												   const HybridImageSet& initial_set) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
     virtual SetApproximationType viable(const SystemType& system,
@@ -248,6 +254,8 @@ class HybridReachabilityAnalyser
 
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
+    GTS _lower_reach(const Sys& system, std::list<EnclosureType>& initial_set,
+    		         const HybridTime& time, const HybridTime& lock_time) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;

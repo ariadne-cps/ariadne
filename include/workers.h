@@ -276,34 +276,36 @@ private:
 };
 
 // Worker for the lower_reach routine in discretiser.cc
-template<class ES>
 class LowerReachWorker
 {
 public:
 
 	typedef HybridGridTreeSet HGTS;
-	typedef std::list<HybridBasicSet<ES> > EL;
-	typedef ListSet<HybridBasicSet<ES> > ELS;
+    typedef HybridEvolver::EnclosureType EnclosureType;
+	typedef HybridEvolver::ContinuousEnclosureType CE;
+	typedef std::list<EnclosureType> EL;
+	typedef ListSet<EnclosureType> ELS;
 	typedef std::map<DiscreteState,uint> HUM;
 
-	friend class HybridDiscretiser<ES>;
+	friend class HybridDiscretiser<CE>;
 
 	// Constructor
-    LowerReachWorker(const HybridDiscretiser<ES>& discretiser, 
-					 EL& initial_enclosures, 
-					 HGTS& reach, 
+    LowerReachWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser,
+					 EL& initial_enclosures,
 					 const HybridAutomaton& sys, 
 					 const HybridTime& time, 
+					 const HybridBoxes& bounding_domain,
 					 const int& accuracy, 
 					 const uint& concurrency) 
 	: _discretiser(discretiser),
 	  _initial_enclosures(initial_enclosures),
-	  _reach(reach),
 	  _sys(sys), 
 	  _time(time),
+	  _bounding_domain(bounding_domain),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency)
     {
+    	_reach = HGTS(sys.grid());
 		_evolve_global = HGTS(sys.grid());
     }
  
@@ -312,7 +314,7 @@ public:
     }
 
     // Create the threads and produce the required results
-    tuple<HUM,HUM,EL> get_result() 
+    tuple<HUM,HUM,EL,HGTS> get_result()
     {
 		// Create and start the threads
 		_start();
@@ -325,17 +327,17 @@ public:
 			_adjoined_evolve_sizes[evolve_global_it->first] = evolve_global_it->second.size();
 
 		// Get the result
-		return make_tuple<HUM,HUM,EL>(_adjoined_evolve_sizes,_superposed_evolve_sizes,_final_enclosures);
+		return make_tuple<HUM,HUM,EL,HGTS>(_adjoined_evolve_sizes,_superposed_evolve_sizes,_final_enclosures,_reach);
     }
  
 private:
 
 	// A reference to the input variables
-	const HybridDiscretiser<ES>& _discretiser;
+    const boost::shared_ptr<HybridDiscretiser<CE> >& _discretiser;
 	EL& _initial_enclosures;
-	HGTS& _reach;
 	const HybridAutomaton& _sys;
 	const HybridTime& _time;
+	const HybridBoxes& _bounding_domain;
 	const int& _accuracy;
 	const uint& _concurrency;
 	// The adjoined evolve common to all threads
@@ -344,6 +346,8 @@ private:
 	HUM _adjoined_evolve_sizes, _superposed_evolve_sizes;
 	// The final enclosures
 	EL _final_enclosures;
+	// The reached region
+	HGTS _reach;
 
 	// The various threads
     std::list<boost::shared_ptr<boost::thread> > _m_threads;
@@ -377,7 +381,7 @@ private:
             else
 			{
 				// Get the least recent element and remove it
-				HybridBasicSet<ES> current_initial_enclosure = _initial_enclosures.front();
+				HybridBasicSet<CE> current_initial_enclosure = _initial_enclosures.front();
 				_initial_enclosures.pop_front();
 
 				// Release the lock for input
@@ -387,11 +391,11 @@ private:
 				ELS current_reach_enclosures, current_evolve_enclosures;
 
 				// Get the enclosures from the initial enclosure, in a lock_time flight
-				make_lpair<ELS,ELS>(current_reach_enclosures,current_evolve_enclosures) = _discretiser.evolver()->reach_evolve(_sys,current_initial_enclosure,_time,LOWER_SEMANTICS);
+				make_lpair<ELS,ELS>(current_reach_enclosures,current_evolve_enclosures) = _discretiser->evolver()->lower_reach_evolve(_sys,current_initial_enclosure,_time,_bounding_domain);
 
 				// Get the discretisation
-				current_reach = _discretiser._discretise(current_reach_enclosures,_sys.grid(),_accuracy);
-				current_evolve = _discretiser._discretise(current_evolve_enclosures,_sys.grid(),_accuracy);
+				current_reach = _discretiser->_discretise(current_reach_enclosures,_sys.grid(),_accuracy);
+				current_evolve = _discretiser->_discretise(current_evolve_enclosures,_sys.grid(),_accuracy);
 
 				// Get the lock for output
 				_out_mutex.lock();
@@ -407,9 +411,9 @@ private:
 			    _reach.adjoin(current_reach);
 		
 				// Add the current_enclosures to the final enclosures
-				for (typename ELS::locations_const_iterator loc_it = current_evolve_enclosures.locations_begin(); loc_it != current_evolve_enclosures.locations_end(); loc_it++)
-					for (typename ListSet<ES>::const_iterator list_it = loc_it->second.begin(); list_it != loc_it->second.end(); list_it++)
-						_final_enclosures.push_back(HybridBasicSet<ES>(loc_it->first,*list_it));
+				for (ELS::locations_const_iterator loc_it = current_evolve_enclosures.locations_begin(); loc_it != current_evolve_enclosures.locations_end(); loc_it++)
+					for (ListSet<CE>::const_iterator list_it = loc_it->second.begin(); list_it != loc_it->second.end(); list_it++)
+						_final_enclosures.push_back(EnclosureType(loc_it->first,*list_it));
 
 				// Release the lock for output
 				_out_mutex.unlock();

@@ -309,9 +309,9 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 
 		// Check whether the bounding box is included into the bounding domain
 		if (!initial_set_model.bounding_box().subset(bounding_domain.find(initial_location)->second)) {
-			ARIADNE_LOG(3,"\n\n\n\nThe initial set " << initial_set_model.bounding_box() << " << is not included into the bounding domain, discarding the set.\n");
+			ARIADNE_LOG(3,"  The initial set " << initial_set_model.bounding_box() << " << is not included into the bounding domain, discarding the set.\n");
         } else if(initial_time_model.range().lower()>=maximum_time) {
-            ARIADNE_LOG(3,"\n\n\n\nFinal time reached, adjoining the initial set to the final sets.\n");
+            ARIADNE_LOG(3,"  Final time reached, adjoining the initial set to the final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if(has_max_enclosure_been_reached) {
             ARIADNE_LOG(1,"\n\nTerminating evolution at time " << initial_time_model.value()
@@ -337,21 +337,18 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
                         <<"\n");
         }
     }
-
-	// Set the largest evolution steps, fixed at 1
-	statistics.largest_evol_steps = 1;
 }
 
 void
 ImageSetHybridEvolver::
-_evolution(EnclosureListType& final_sets,
-           EnclosureListType& reach_sets,
-           EnclosureListType& intermediate_sets,
-           const SystemType& system,
-           const EnclosureType& initial_set,
-           const TimeType& maximum_hybrid_time,
-           Semantics semantics,
-           bool reach) const
+_lower_evolution(EnclosureListType& final_sets,
+				 EnclosureListType& reach_sets,
+				 EnclosureListType& intermediate_sets,
+				 const SystemType& system,
+				 const EnclosureType& initial_set,
+				 const TimeType& maximum_hybrid_time,
+				 const HybridBoxes& bounding_domain,
+				 bool reach) const
 {
     typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
@@ -359,12 +356,10 @@ _evolution(EnclosureListType& final_sets,
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n"); 
 
 	// Gets the proper statistics in respect to the semantics
-	CommonContinuousEvolutionStatistics& statistics = (semantics == UPPER_SEMANTICS) ? this->_statistics->upper() : this->_statistics->lower();
+	CommonContinuousEvolutionStatistics& statistics = this->_statistics->lower();
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
-	Float current_largest_evol_time = 0.0; // The current largest evolution time (to be added to the largest_evol_time statistics)
-	uint current_largest_evol_steps = 0; // The current largest evolution steps (to be added to the largest_evol_steps statistics)
 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
 
@@ -446,7 +441,10 @@ _evolution(EnclosureListType& final_sets,
 		// If the time model range width is greater than half the maximum step size, we will divide the timed model in respect to time
 		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->maximum_step_size/2);
 
-        if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
+		// Check whether the bounding box is included into the bounding domain
+		if (!initial_set_model.bounding_box().subset(bounding_domain.find(initial_location)->second)) {
+			ARIADNE_LOG(3,"  The initial set " << initial_set_model.bounding_box() << " << is not included into the bounding domain, discarding the set.\n");
+		} else if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
@@ -466,6 +464,156 @@ _evolution(EnclosureListType& final_sets,
                 ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
                 working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
             }	
+		} else if((!this->_parameters->enable_subdivisions) &&
+                  this->_parameters->enable_premature_termination && has_max_enclosure_been_reached) {
+            ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
+                        << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
+
+        } else {
+            // Compute evolution
+            this->_evolution_step(working_sets,
+                                  final_sets,reach_sets,intermediate_sets,
+                                  system,current_set,maximum_hybrid_time,
+                                  LOWER_SEMANTICS,reach);
+        }
+
+
+        if(verbosity==1) {
+            ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
+                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                        <<" s="<<std::setw(3)<<std::left<<initial_events.size()
+                        <<" t="<<std::fixed<<initial_time_model.value()
+                        <<" r="<<std::setw(7)<<initial_set_model.radius()
+                        <<" l="<<std::setw(3)<<std::left<<initial_location
+                        <<" c="<<initial_set_model.centre()
+                        <<" e="<<initial_events
+                        <<"\n");
+        }
+    }
+}
+
+void
+ImageSetHybridEvolver::
+_evolution(EnclosureListType& final_sets,
+           EnclosureListType& reach_sets,
+           EnclosureListType& intermediate_sets,
+           const SystemType& system,
+           const EnclosureType& initial_set,
+           const TimeType& maximum_hybrid_time,
+           Semantics semantics,
+           bool reach) const
+{
+    typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
+    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+
+    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
+
+	// Gets the proper statistics in respect to the semantics
+	CommonContinuousEvolutionStatistics& statistics = (semantics == UPPER_SEMANTICS) ? this->_statistics->upper() : this->_statistics->lower();
+
+    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
+    const Float maximum_time=maximum_hybrid_time.continuous_time();
+
+    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
+
+	// The working sets, pushed back and popped front
+    std::list< HybridTimedSetType > working_sets;
+
+    {
+        // Set up initial timed set models
+        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
+        DiscreteState initial_location;
+        ContinuousEnclosureType initial_continuous_set;
+        make_lpair(initial_location,initial_continuous_set)=initial_set;
+        ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
+        SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
+        ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
+        TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
+        ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
+        TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
+        ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
+        working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
+
+		// Check for match between the enclosure cell size and the set size
+		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+    }
+
+	// Create the largest_enclosure_cell statistics, if not currently dimensioned
+	if (statistics.largest_enclosure_cell.size() == 0) statistics.largest_enclosure_cell = Vector<Float>(working_sets.back().third.size());
+
+	// While there exists a working set, process it and increment the total
+	while(!working_sets.empty()) {
+
+		// Get the least recent working set, pop it and update the corresponding size
+		HybridTimedSetType current_set = working_sets.front();
+		working_sets.pop_front();
+
+		// New set and time models, if set model reduction is to be performed
+		SetModelType new_set_model;
+		TimeModelType new_time_model;
+
+		// Perform set model reduction if enabled and if the interleaving distance is met
+		if (this->_parameters->enable_set_model_reduction && !((current_set.second.size()+1) % (this->_parameters->set_model_events_size_interleaving+1)))
+		{
+			new_set_model = this->_toolbox->set_model(ContinuousEnclosureType(current_set.third.range()));
+			new_time_model = this->_toolbox->time_model(current_set.fourth.range(),Box(new_set_model.argument_size()));
+			current_set = make_tuple(current_set.first,current_set.second, new_set_model, new_time_model);
+		}
+
+		// Get the members of the current set
+        DiscreteState initial_location=current_set.first;
+        EventListType initial_events=current_set.second;
+		SetModelType initial_set_model=current_set.third;
+		TimeModelType initial_time_model=current_set.fourth;
+
+		// Get the range of the set model
+		Vector<Interval> initial_set_model_range=initial_set_model.range();
+
+		// Check whether the range can be included into the maximum_enclosure_cell (and enlarge the largest_enclosure_cell, if necessary)
+		bool has_max_enclosure_been_reached = false;
+		Float maxratio = 0.0; // Hold the maximum ratio between the set width and the largest enclosure cell width
+		uint maxratio_dimension = -1; // Hold the dimension corresponding to the maximum ratio
+		for (uint i=0;i<initial_set_model_range.size();++i)
+		{
+			Float rangewidth = initial_set_model_range[i].width(); // Store the width
+			statistics.largest_enclosure_cell[i] = max(statistics.largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
+			// If larger than the maximum allowed
+			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
+				// If a ratio greater than the current maximum is detected, update the maximum ratio information
+				if (rangewidth/this->_parameters->maximum_enclosure_cell[i] > maxratio)
+				{
+					maxratio = rangewidth/this->_parameters->maximum_enclosure_cell[i];
+					maxratio_dimension = i;
+				}
+				statistics.has_max_enclosure_been_reached = true; // Global information
+				has_max_enclosure_been_reached = true; // Local information
+				break;
+			}
+		}
+
+		// If the time model range width is greater than half the maximum step size, we will divide the timed model in respect to time
+		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->maximum_step_size/2);
+
+		if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
+            ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
+            final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
+        } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
+            // Subdivide over time
+            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->maximum_step_size << ", subdividing over time.\n");
+            uint nd=initial_set_model.dimension();
+            SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
+            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,nd);
+            ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
+            for(uint i=0; i!=subdivisions.size(); ++i) {
+                TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
+                ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
+                SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
+                TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
+                ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
+                ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
+                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
+                working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
+            }
 		} else if (semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && has_max_enclosure_been_reached) {
             // Subdivide over space
             ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model_range << " widths larger than maximum_enclosure_cell " << this->_parameters->maximum_enclosure_cell << ", subdividing.\n");
@@ -511,28 +659,7 @@ _evolution(EnclosureListType& final_sets,
                         <<" e="<<initial_events
                         <<"\n");
         }
-
-        if(verbosity==1) {
-			for (std::list< HybridTimedSetType >::const_iterator it = working_sets.begin(); it != working_sets.end(); it++)
-		        ARIADNE_LOG(1,"t="<<std::setw(7)<<std::fixed<< it->fourth.range()
-		                    <<" sr="<<std::setw(7)<< it->third.radius()
-		                    <<" l="<<std::setw(3)<< std::left<< it->first
-		                    <<" c="<< it->third.centre()
-		                    <<" e="<< it->second
-		                    <<"\n");
-
-			ARIADNE_LOG(1,"\n");		
-		}
-
-		// Update the current largest evolution time and steps
-		current_largest_evol_time = max(current_largest_evol_time,initial_time_model.value());
-		current_largest_evol_steps = max(current_largest_evol_steps,initial_events.size());
     }
-
-	// Update the largest evolution time
-	statistics.largest_evol_time = max(statistics.largest_evol_time, current_largest_evol_time);
-	// Update the largest evolution steps
-	statistics.largest_evol_steps = max(statistics.largest_evol_steps, current_largest_evol_steps);
 }
 
 
@@ -1057,9 +1184,6 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     SetModelType evolved_set_model=this->_toolbox->integration_step(flow_set_model,blocking_time_model);
     ARIADNE_LOG(2,"evolved_set_model.argument_size()="<<evolved_set_model.argument_size()<<"\n");
     ARIADNE_LOG(2,"evolved_set_range="<<evolved_set_model.range()<<"\n");
-
-	// Get the maximum between the upper value of the time model and the current largest evolution time
-	this->_statistics->upper().largest_evol_time = max(this->_statistics->upper().largest_evol_time, final_time_model.range().upper());
 
     // Compute evolution for blocking events
     for(std::set<DiscreteEvent>::const_iterator iter=blocking_events.begin(); iter!=blocking_events.end(); ++iter) {

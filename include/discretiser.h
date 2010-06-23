@@ -184,8 +184,6 @@ class HybridDiscretiser
 	void reset_lower_statistics() { this->_evolver->statistics().lower().reset(); }
 	//! \brief Resets the upper evolution statistics of the evolver
 	void reset_upper_statistics() { this->_evolver->statistics().upper().reset(); }
-	//! \brief Resets the upper evolution statistics of the evolver related to the largest evolution time/steps
-	void reset_upper_largest_evol_statistics() { this->_evolver->statistics().upper().reset_largest_evol(); }
 
 	//@}
 
@@ -230,18 +228,6 @@ class HybridDiscretiser
                 const TimeType& time,
                 const AccuracyType accuracy,
                 const Semantics semantics) const;
-
-    //! \brief Compute approximations to the lower reachable set 
-    //! of \a system starting in \a initial_set over \a time, with 
-	//! optional \a prune and defined \a concurrency for computational efficiency. */
-    virtual DenotableSetType 
-    lower_reach(const SystemType& system, 
-        		const EnclosureType& initial_set, 
-        		const TimeType& time,
-				const TimeType& lock_time,
-        		const AccuracyType accuracy,
-				const bool prune,
-				const uint concurrency) const;
 
     //! \brief Compute approximations to the evolved set 
     //! of \a system starting in \a initial_set over \a time. */

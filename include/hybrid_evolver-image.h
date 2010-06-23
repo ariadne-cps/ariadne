@@ -145,10 +145,21 @@ class ImageSetHybridEvolver
         reachable.adjoin(final);
         return make_pair<EnclosureListType,EnclosureListType>(reachable,final); }
 
+    //! \brief Compute an approximation to the evolution set under the lower semantics, returning the reached and final sets.
+    std::pair<EnclosureListType,EnclosureListType> lower_reach_evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, const HybridBoxes& bounding_domain) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_lower_evolution(final,reachable,intermediate,system,initial_set,time,bounding_domain,true);
+        reachable.adjoin(final);
+        return make_pair<EnclosureListType,EnclosureListType>(reachable,final); }
+
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
+
+    virtual void _lower_evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
+                            const HybridBoxes& bounding_domain, bool reach) const;
 
     virtual void _upper_evolution_continuous(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, const HybridBoxes& bounding_domain, bool reach) const;

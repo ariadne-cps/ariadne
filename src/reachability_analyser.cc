@@ -76,7 +76,7 @@ HybridReachabilityAnalyser(const HybridDiscretiser<HybridEvolver::ContinuousEncl
     : _parameters(new EvolutionParametersType())
     , _discretiser(discretiser.clone())
 {
-	this->plot_verify_results = false;
+	plot_verify_results = false;
 }
 
 list<HybridBasicSet<TaylorSet> >
@@ -130,7 +130,7 @@ _split_initial_set(const HybridImageSet initial_set,
 		}
 	}
 
-	ARIADNE_LOG(6,"\t\t\t\t\tSplit initial enclosures size=" << initial_enclosures.size() << "\n");
+	ARIADNE_LOG(6,"\t\t\t\t\tSplit initial enclosures size = " << initial_enclosures.size() << "\n");
 
 	// Returns
 	return initial_enclosures;
@@ -148,10 +148,78 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
     HybridGridTreeSet cells=set;
     cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        EnclosureType enclosure=this->_discretiser->enclosure(*iter);
-        result.adjoin(this->_discretiser->reach(sys,enclosure,time,accuracy,UPPER_SEMANTICS));
+        EnclosureType enclosure=_discretiser->enclosure(*iter);
+        result.adjoin(_discretiser->reach(sys,enclosure,time,accuracy,UPPER_SEMANTICS));
     }
     return result;
+}
+
+
+HybridGridTreeSet
+HybridReachabilityAnalyser::_lower_reach(const HybridAutomaton& system,
+							 			 std::list<EnclosureType>& initial_enclosures,
+										 const HybridTime& time,
+										 const HybridTime& lock_time) const
+{
+	typedef std::list<EnclosureType> EL;
+	typedef std::map<DiscreteState,uint> HUM;
+
+	// Get the actual concurrency
+	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
+	// Check that the concurrency is greater than zero
+	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
+
+	// The final enclosures
+	EL final_enclosures;
+	HybridGrid grid = system.grid();
+
+	// The result
+	GTS reach(grid);
+
+	// For each grid lock
+	for (uint i=0;i<((uint)time.discrete_time()/lock_time.discrete_time());i++)
+	{
+		// The sizes of the adjoined (the cells) or superposed (the enclosures) evolve
+		std::map<DiscreteState,uint> adjoined_evolve_sizes;
+		std::map<DiscreteState,uint> superposed_evolve_sizes;
+		// The evolve
+		GTS evolve;
+		// The current reach
+		GTS current_reach;
+
+		// Create the worker
+		LowerReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
+							    _parameters->bounding_domain,_parameters->maximum_grid_depth,concurrency);
+
+		// Compute and get the result
+		make_ltuple<HUM,HUM,EL,GTS>(adjoined_evolve_sizes,superposed_evolve_sizes,final_enclosures,current_reach) = worker.get_result();
+
+		// Adjoin the current reach
+		reach.adjoin(current_reach);
+
+		// Pruning of the dump of the final enclosures into the initial enclosures
+		while (!final_enclosures.empty())
+		{
+			// Pop the current enclosure
+			EnclosureType encl = final_enclosures.front();
+			final_enclosures.pop_front();
+
+			// If pruning is to be performed
+			if (_parameters->enable_lower_pruning)
+			{
+				// Get the ratio between the adjoined evolve size and the superposed evolve size
+				Float ratio = (Float)adjoined_evolve_sizes[encl.location()]/(Float)superposed_evolve_sizes[encl.location()];
+
+				// At least 2 enclosures are inserted, then the enclosures are pruned as long as the number of enclosures is at least twice the number of evolve cells
+				if (initial_enclosures.size() <= 2 || rand() < 2*ratio*RAND_MAX)
+					initial_enclosures.push_back(encl);
+			}
+			else
+				initial_enclosures.push_back(encl);
+		}
+	}
+
+    return reach;
 }
 
 
@@ -165,8 +233,8 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
     GTS result(grid); GTS cells=set; cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
         ARIADNE_LOG(6,"\t\t\t\t\tEvolving cell = "<<*iter<<"\n");
-        EnclosureType enclosure=this->_discretiser->enclosure(*iter);
-        result.adjoin(this->_discretiser->evolve(sys,enclosure,time,accuracy,UPPER_SEMANTICS));
+        EnclosureType enclosure=_discretiser->enclosure(*iter);
+        result.adjoin(_discretiser->evolve(sys,enclosure,time,accuracy,UPPER_SEMANTICS));
     }
     ARIADNE_LOG(5,"\t\t\t\t_upper_evolve result size = "<<result.size()<<"\n");
     return result;
@@ -179,20 +247,20 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
                                                 const HybridTime& time,
                                                 const int accuracy) const
 {
-    ARIADNE_LOG(5,"\t\t\t\tHybridReachabilityAnalyser::_upper_reach_evolve(...)\n");
+    ARIADNE_LOG(6,"\t\t\t\t\tHybridReachabilityAnalyser::_upper_reach_evolve(...)\n");
 
 	// Copy the set into the initial set and mince it to the desired precision
 	GTS initial_set = set;
 	initial_set.mince(accuracy);
 
 	// Get the actual concurrency
-	const uint concurrency = boost::thread::hardware_concurrency() - this->free_cores;
+	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
 
 	// Check that the concurrency is greater than zero
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
 	// Create the worker
-	UpperReachEvolveWorker worker(this->_discretiser,sys,set,time,accuracy,concurrency);
+	UpperReachEvolveWorker worker(_discretiser,sys,set,time,accuracy,concurrency);
 
 	// Compute and get the result
 	std::pair<GTS,GTS> result = worker.get_result();
@@ -208,16 +276,16 @@ HybridReachabilityAnalyser::_upper_reach_evolve_continuous(const HybridAutomaton
                                                 		   const HybridTime& time,
                                                 		   const int accuracy) const
 {
-    ARIADNE_LOG(5,"\t\t\t\tHybridReachabilityAnalyser::_upper_reach_evolve_continuous(...)\n");
+    ARIADNE_LOG(6,"\t\t\t\t\tHybridReachabilityAnalyser::_upper_reach_evolve_continuous(...)\n");
 
 	// Get the actual concurrency
-	const uint concurrency = boost::thread::hardware_concurrency() - this->free_cores;
+	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
 
 	// Check that the concurrency is greater than zero
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
 	// Create the worker
-	UpperReachEvolveContinuousWorker worker(this->_discretiser,sys,initial_enclosures,this->_parameters->bounding_domain,time,accuracy,concurrency);
+	UpperReachEvolveContinuousWorker worker(_discretiser,sys,initial_enclosures,_parameters->bounding_domain,time,accuracy,concurrency);
 
 	// Compute and get the result
 	std::pair<GTS,GTS> result = worker.get_result();
@@ -236,7 +304,7 @@ lower_evolve(const SystemType& system,
 {
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::lower_evolve(...)\n");
 
-	this->_discretiser->reset_lower_statistics(); // Resets the continuous statistics
+	_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
     GTS evolve;
 
@@ -246,13 +314,9 @@ lower_evolve(const SystemType& system,
 	ARIADNE_LOG(5,"\t\t\t\tComputing evolution...\n");
     // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
-        GTS cell_final=this->_discretiser->evolve(system,*encl_it,time,_parameters->maximum_grid_depth,LOWER_SEMANTICS);
+        GTS cell_final=_discretiser->evolve(system,*encl_it,time,_parameters->maximum_grid_depth,LOWER_SEMANTICS);
         evolve.adjoin(cell_final);
     }
-
-	// Copies the largest evolution time and steps to the statistics
-	this->_statistics->lower().largest_evol_time = this->_discretiser->statistics().lower().largest_evol_time;
-	this->_statistics->lower().largest_evol_steps = this->_discretiser->statistics().lower().largest_evol_steps;
 
     return evolve;
 }
@@ -266,35 +330,25 @@ lower_reach(const SystemType& system,
 {
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::lower_reach(...)\n");
 
-	this->_statistics->lower().reset(); // Reset the discrete statistics
-	this->_discretiser->reset_lower_statistics(); // Reset the continuous statistics
-
-    int grid_depth = this->_parameters->maximum_grid_depth;
-    GTS reach;
+	_statistics->lower().reset(); // Reset the discrete statistics
+	_discretiser->reset_lower_statistics(); // Reset the continuous statistics
 
 	// Get the actual concurrency
-	const uint concurrency = boost::thread::hardware_concurrency() - this->free_cores;
+	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
 	// Check that the concurrency is greater than zero
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
 	// Get the lock time, in the case pruning is to be performed
-	TimeType lock_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
+	TimeType lock_time(_parameters->lock_to_grid_time,_parameters->lock_to_grid_steps);
 
     // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
     list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,system.grid());
 
-	ARIADNE_LOG(5,"\t\t\t\tComputing evolution...\n");
-    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
-    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
-    	GTS cell_reach = this->_discretiser->lower_reach(system,*encl_it,time,lock_time,grid_depth,_parameters->enable_lower_pruning,concurrency);
-    	reach.adjoin(cell_reach);
-    }
+    // Calculates the reached region
+    GTS reach = _lower_reach(system,initial_enclosures,time,lock_time);
 
-	// Copies the reached region
-	this->_statistics->lower().reach = reach;
-	// Copies the largest evolution time and steps to the statistics
-	this->_statistics->lower().largest_evol_time = this->_discretiser->statistics().lower().largest_evol_time;
-	this->_statistics->lower().largest_evol_steps = this->_discretiser->statistics().lower().largest_evol_steps;
+	// Copies the reached region into the statistics
+	_statistics->lower().reach = reach;
 
 	return reach;
 }
@@ -308,10 +362,10 @@ lower_reach_evolve(const SystemType& system,
 {
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::lower_reach_evolve(...)\n");
 
-	this->_statistics->lower().reset(); // Resets the discrete statistics
-	this->_discretiser->reset_lower_statistics(); // Resets the continuous statistics
+	_statistics->lower().reset(); // Resets the discrete statistics
+	_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
-    int grid_depth = this->_parameters->maximum_grid_depth;
+    int grid_depth = _parameters->maximum_grid_depth;
 
     Gr grid=system.grid();
     GTS reach; GTS evolve;
@@ -323,16 +377,13 @@ lower_reach_evolve(const SystemType& system,
     // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
         GTS cell_reach,cell_final;
-        make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,*encl_it,time,grid_depth,LOWER_SEMANTICS);
+        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,time,grid_depth,LOWER_SEMANTICS);
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
 
 	// Copies the reached region
-	this->_statistics->lower().reach = reach;
-	// Copies the largest evolution time and steps to the statistics
-	this->_statistics->lower().largest_evol_time = this->_discretiser->statistics().lower().largest_evol_time;
-	this->_statistics->lower().largest_evol_steps = this->_discretiser->statistics().lower().largest_evol_steps;
+	_statistics->lower().reach = reach;
 
     return make_pair(reach,evolve);
 }
@@ -346,15 +397,15 @@ upper_evolve(const SystemType& system,
 {
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::upper_evolve(...)\n");
  
-	this->_statistics->upper().reset(); // Resets the discrete statistics
-	this->_discretiser->reset_upper_statistics(); // Resets the continuous statistics
+	_statistics->upper().reset(); // Resets the discrete statistics
+	_discretiser->reset_upper_statistics(); // Resets the continuous statistics
 
     Gr grid=system.grid();
     GTS evolve(grid);
-    int grid_depth = this->_parameters->maximum_grid_depth;
+    int grid_depth = _parameters->maximum_grid_depth;
     Float real_time=time.continuous_time();
     uint discrete_steps=time.discrete_time();
-    Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
+    Float lock_to_grid_time=_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remaining_time=real_time-time_steps*lock_to_grid_time;
     if(time_steps == 0) {
@@ -373,36 +424,20 @@ upper_evolve(const SystemType& system,
 	ARIADNE_LOG(5,"\t\t\t\tComputing initial evolution...\n");
     // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
-        GTS cell_final=this->_discretiser->evolve(system,*encl_it,hybrid_lock_to_grid_time,grid_depth,UPPER_SEMANTICS);
+        GTS cell_final=_discretiser->evolve(system,*encl_it,hybrid_lock_to_grid_time,grid_depth,UPPER_SEMANTICS);
         evolve.adjoin(cell_final);
     }
-
-	// Adds the largest evolution time and steps to the statistics, then resets such statistics
-	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;
-	this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps;
-	this->_discretiser->reset_upper_largest_evol_statistics();
 
     // time steps evolution loop
     for(uint i=1; i<time_steps; ++i) {
         ARIADNE_LOG(5,"\t\t\t\tComputing "<<i+1<<"-th reachability step...\n");
-        evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
-		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
-		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
-		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
+        evolve=_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
     }
-
-	this->_statistics->upper().total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
 
     ARIADNE_LOG(5,"\t\t\t\tremaining_time="<<remaining_time<<"\n");
     if(!evolve.empty() && remaining_time > 0) {
         ARIADNE_LOG(5,"\t\t\t\tComputing evolution for remaining time...\n");
-        evolve=this->_upper_evolve(system,evolve,hybrid_remaining_time,grid_depth);
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
-		this->_statistics->upper().total_locks++; // Increases the total locks counter
-		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
-		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
-		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
+        evolve=_upper_evolve(system,evolve,hybrid_remaining_time,grid_depth);
     }
     evolve.recombine();
     ARIADNE_LOG(6,"\t\t\t\t\tfinal_evolve.size()="<<evolve.size()<<"\n");
@@ -420,7 +455,7 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::upper_reach(system,set,time)\n");
 
 	GTS reach, evolve;
-	make_lpair(reach,evolve) = this->upper_reach_evolve(system, initial_set, time); // Runs the upper_reach_evolve routine on its behalf
+	make_lpair(reach,evolve) = upper_reach_evolve(system, initial_set, time); // Runs the upper_reach_evolve routine on its behalf
 
     return reach; // Returns the reached region only
 }
@@ -436,15 +471,15 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(5,"\t\t\t\tinitial_set="<<initial_set<<"\n");
 
-	this->_statistics->upper().reset(); // Reset the discrete statistics
-	this->_discretiser->reset_upper_statistics(); // Reset the continuous statistics
+	_statistics->upper().reset(); // Reset the discrete statistics
+	_discretiser->reset_upper_statistics(); // Reset the continuous statistics
 
     Gr grid=system.grid();
     GTS found(grid),evolve(grid),reach(grid);
-    int grid_depth = this->_parameters->maximum_grid_depth;
+    int grid_depth = _parameters->maximum_grid_depth;
     Float real_time=time.continuous_time();
     uint discrete_steps=time.discrete_time();
-    Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
+    Float lock_to_grid_time=_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remaining_time=real_time-time_steps*lock_to_grid_time;
     if(time_steps == 0) {
@@ -464,46 +499,30 @@ upper_reach_evolve(const SystemType& system,
     // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
         GTS cell_reach,cell_final;
-        make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,*encl_it,hybrid_lock_to_grid_time,grid_depth,UPPER_SEMANTICS);
+        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,hybrid_lock_to_grid_time,grid_depth,UPPER_SEMANTICS);
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
 
-	// Adds the largest evolution time and steps to the statistics, then resets such statistics
-	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;
-	this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps;
-	this->_discretiser->reset_upper_largest_evol_statistics();
-
     // time steps evolution loop        
     for(uint i=1; i<time_steps; ++i) {
         ARIADNE_LOG(5,"\t\t\t\tcomputing "<<i+1<<"-th reachability step...\n");
-        make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
+        make_lpair(found,evolve) = _upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
         ARIADNE_LOG(6,"\t\t\t\t\tfound.size()="<<found.size()<<"\n");
         ARIADNE_LOG(6,"\t\t\t\t\tevolve.size()="<<evolve.size()<<"\n");
         reach.adjoin(found);
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
-		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
-		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
-		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
         ARIADNE_LOG(5,"\t\t\t\tfound "<<found.size()<<" cells.\n");
     }
-
-	this->_statistics->upper().total_locks = time_steps+1; // Sets the number of locks (time_steps + the "initial" lock)
 
     ARIADNE_LOG(5,"\t\t\t\tremaining_time="<<remaining_time<<"\n");
     if(!evolve.empty() && remaining_time > 0) {
         ARIADNE_LOG(5,"\t\t\t\tcomputing evolution for the remaining time...\n");
-        make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_remaining_time,grid_depth);
+        make_lpair(found,evolve) = _upper_reach_evolve(system,evolve,hybrid_remaining_time,grid_depth);
         reach.adjoin(found);
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
-		this->_statistics->upper().total_locks++; // Increases the total locks counter
-		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
-		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
-		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
     }
 
     reach.recombine();
-	this->_statistics->upper().reach = reach;
+	_statistics->upper().reach = reach;
     ARIADNE_LOG(5,"\t\t\t\treach="<<reach<<"\n");
     evolve.recombine();
     ARIADNE_LOG(5,"\t\t\t\tevolve="<<evolve<<"\n");
@@ -521,16 +540,16 @@ chain_reach(const SystemType& system,
     ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::chain_reach(system,initial_set)\n");
 
 	// Reset statistics
-	this->_statistics->upper().reset();
-	this->_discretiser->reset_upper_statistics();
+	_statistics->upper().reset();
+	_discretiser->reset_upper_statistics();
 
 	// Assign local variables
-    HybridBoxes bounding_domain = this->_parameters->bounding_domain;
-    Float transient_time = this->_parameters->transient_time;
-    int transient_steps = this->_parameters->transient_steps;
-    Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
-    int lock_to_grid_steps = this->_parameters->lock_to_grid_steps;
-    int maximum_grid_depth = this->_parameters->maximum_grid_depth;
+    HybridBoxes bounding_domain = _parameters->bounding_domain;
+    Float transient_time = _parameters->transient_time;
+    int transient_steps = _parameters->transient_steps;
+    Float lock_to_grid_time = _parameters->lock_to_grid_time;
+    int lock_to_grid_steps = _parameters->lock_to_grid_steps;
+    int maximum_grid_depth = _parameters->maximum_grid_depth;
 
     ARIADNE_LOG(6,"\t\t\t\t\ttransient_time=("<<transient_time<<","<<transient_steps<<")\n");
     ARIADNE_LOG(6,"\t\t\t\t\tlock_to_grid_time=("<<lock_to_grid_time<<","<<lock_to_grid_steps<<")\n");
@@ -567,22 +586,16 @@ chain_reach(const SystemType& system,
     // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
         GTS cell_reach,cell_final;
-        make_lpair(cell_reach,cell_final)=this->_discretiser->evolution(system,*encl_it,hybrid_transient_time,maximum_grid_depth,UPPER_SEMANTICS);
+        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,hybrid_transient_time,maximum_grid_depth,UPPER_SEMANTICS);
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
-
-	// Adds the largest evolution time and steps to the statistics, then resets such statistics
-	this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time;
-	this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps;
-	this->_discretiser->reset_upper_largest_evol_statistics();
 	 
     // If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-	if (!this->_statistics->upper().has_restriction_occurred)
-		if (!evolve.subset(bounding_box)) this->_statistics->upper().has_restriction_occurred = true;
+	if (!_statistics->upper().has_restriction_occurred)
+		if (!evolve.subset(bounding_box)) _statistics->upper().has_restriction_occurred = true;
 
     evolve.restrict(bounding);
-	this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Updates the largest intermediate size
 
     ARIADNE_LOG(5,"\t\t\t\tfound "<<reach.size()<<" cells, of which "<<evolve.size()<<" are new.\n"); 
     
@@ -590,96 +603,104 @@ chain_reach(const SystemType& system,
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
 
 	// While the final set has new cells in respect to the previous reach set, process them and increase the number of locks (starting from 1 due to the initial transient phase)
-    for (this->_statistics->upper().total_locks = 1; !evolve.empty(); this->_statistics->upper().total_locks++) {
+    for (uint i = 0; !evolve.empty(); i++) {
 
+    	ARIADNE_LOG(5,"\t\t\t\tIteration "<<i<<"\n");
 		// Add the evolve region to the intermediate region
 		intermediate.adjoin(evolve);  
 
-        make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
+        make_lpair(found,evolve)=_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
         ARIADNE_LOG(6,"\t\t\t\t\tfound.size()="<<found.size()<<"\n");
         ARIADNE_LOG(6,"\t\t\t\t\tevolve.size()="<<evolve.size()<<"\n");
 
 		// If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-		if (!this->_statistics->upper().has_restriction_occurred)
-			if (!evolve.subset(bounding_box)) this->_statistics->upper().has_restriction_occurred = true;
+		if (!_statistics->upper().has_restriction_occurred)
+			if (!evolve.subset(bounding_box)) _statistics->upper().has_restriction_occurred = true;
 
         evolve.remove(intermediate); // Remove only the cells that are intermediate
         evolve.restrict(bounding);
         reach.adjoin(found);
-
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,evolve.size()); // Update the largest intermediate size
-		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
-		this->_statistics->upper().largest_evol_steps += this->_discretiser->statistics().upper().largest_evol_steps; // Adds the largest evolution steps to the statistics
-		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
 
         ARIADNE_LOG(6,"\t\t\t\t\tfound "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
     }
     reach.recombine();
 
     // If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-	if (!this->_statistics->upper().has_restriction_occurred)
-		if (!evolve.subset(bounding_box)) this->_statistics->upper().has_restriction_occurred = true;
+	if (!_statistics->upper().has_restriction_occurred)
+		if (!evolve.subset(bounding_box)) _statistics->upper().has_restriction_occurred = true;
 
     reach.restrict(bounding);
-	this->_statistics->upper().reach = reach;
+	_statistics->upper().reach = reach;
 
     return reach;
+}
+
+HybridReachabilityAnalyser::SetApproximationType
+HybridReachabilityAnalyser::
+chain_reach(const SystemType& system,
+            const HybridImageSet& initial_set,
+            const HybridBoxes& bounding_set) const
+{
+	// Assigns the input bounding_set to the bounding domain
+	_parameters->bounding_domain = bounding_set;
+
+	// Returns the result of chain_reach with implicit bounding set
+	return chain_reach(system,initial_set);
 }
 
 
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
-chain_reach_grid(const SystemType& system,
-            	 const HybridImageSet& initial_set) const
+upper_chain_reach(const SystemType& system,
+            const HybridImageSet& initial_set) const
 {
-    ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::chain_reach_grid(system,initial_set)\n");
+    ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::upper_chain_reach(system,initial_set)\n");
 
 	// Reset statistics
-	this->_statistics->upper().reset();
-	this->_discretiser->reset_upper_statistics();
+	_statistics->upper().reset();
+	_discretiser->reset_upper_statistics();
 
 	// Helper class for operations on Taylor sets
 	TaylorCalculus tc;
 
 	// Assign local variables
-    Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
-    int lock_to_grid_steps = this->_parameters->lock_to_grid_steps;
-    int maximum_grid_depth = this->_parameters->maximum_grid_depth;
-
-	// The enclosures of the initial cells
-	list<EnclosureType> initial_enclosures;
-
-    ARIADNE_LOG(6,"\t\t\t\t\tlock_to_grid_time="<<lock_to_grid_time<<"\n");
+    Float lock_to_grid_time = _parameters->lock_to_grid_time;
+    int lock_to_grid_steps = _parameters->lock_to_grid_steps;
+    int maximum_grid_depth = _parameters->maximum_grid_depth;
 
     Gr grid=system.grid();
     GTS new_final(grid), new_reach(grid), reach(grid), intermediate(grid);
 
-    // Initialize (with true values) the information about locations in use on the previous iteration and
-    // initialize (with false values) the information about locations in use on the current iteration
-    std::map<DiscreteState,bool> previousLocationsInUse;
-    std::map<DiscreteState,bool> currentLocationsInUse;
-    for (HybridGrid::locations_const_iterator grid_it = grid.locations_begin(); grid_it != grid.locations_end(); grid_it++) {
-        previousLocationsInUse[grid_it->first] = true;
-    	currentLocationsInUse[grid_it->first] = false;
+    // The information about previous and current locations in use (only for dumping the chain reach)
+	std::map<DiscreteState,bool> previousLocationsInUse;
+	std::map<DiscreteState,bool> currentLocationsInUse;
+
+    // If dumping must be performed
+    if (chain_reach_dumping) {
+    	// Initialize (with true values) the information about locations in use on the previous iteration and
+    	// initialize (with false values) the information about locations in use on the current iteration
+		for (HybridGrid::locations_const_iterator grid_it = grid.locations_begin(); grid_it != grid.locations_end(); grid_it++) {
+			previousLocationsInUse[grid_it->first] = true;
+			currentLocationsInUse[grid_it->first] = false;
+		}
+		// For each location, set to true the corresponding currentLocationsInUse value
+		for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin(); loc_iter!=initial_set.locations_end(); ++loc_iter)
+			currentLocationsInUse[loc_iter->first] = true;
     }
 
-    // For each location, insert the enclosure of the initial set and set to true the corresponding locationsInUse value
-    for(HybridImageSet::locations_const_iterator loc_iter=initial_set.locations_begin(); loc_iter!=initial_set.locations_end(); ++loc_iter)
-    {
-		initial_enclosures.push_back(EnclosureType(loc_iter->first,ContinuousEnclosureType(loc_iter->second)));
-		currentLocationsInUse[loc_iter->first] = true;
-    }
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
 
     ARIADNE_LOG(5,"\t\t\t\tComputing recurrent evolution...\n");
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
 
 	// While the final set has new cells in respect to the previous reach set, process them and increase the number of locks
-    for (this->_statistics->upper().total_locks = 0; !initial_enclosures.empty(); this->_statistics->upper().total_locks++)  
+    for (uint i=0; !initial_enclosures.empty(); i++)
 	{
-    	ARIADNE_LOG(5,"\t\t\t\tIteration " << this->_statistics->upper().total_locks << "\n");
+    	ARIADNE_LOG(5,"\t\t\t\tIteration " << i << "\n");
 
 	    // If dumping must be performed
-	    if (this->chain_reach_dumping) {
+	    if (chain_reach_dumping) {
 	    	// Prepare the initial string
 	    	string locations = "\t\t\t\t\tWorking in locations: ";
 			// Dump into files those reached regions associated with newly-found not-in-use locations, and
@@ -713,11 +734,8 @@ chain_reach_grid(const SystemType& system,
         for (HybridGrid::locations_const_iterator grid_it = grid.locations_begin(); grid_it != grid.locations_end(); grid_it++)
         	currentLocationsInUse[grid_it->first] = false;
 
-		// Holds information on the presence of at least one transition
-    	bool transitions_occurred = false;
-
 		// Evolve the initial enclosures
-        make_lpair(new_reach,new_final)=this->_upper_reach_evolve_continuous(system,initial_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
+        make_lpair(new_reach,new_final)=_upper_reach_evolve_continuous(system,initial_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
 		// Clear the initial enclosures
 		initial_enclosures.clear();
 
@@ -726,7 +744,7 @@ chain_reach_grid(const SystemType& system,
 		new_reach.remove(reach);
 
 	    // If dumping must be performed
-	    if (this->chain_reach_dumping) {
+	    if (chain_reach_dumping) {
 			// Check the new final region and set as in-use all the locations whose reached region is not empty
 			for (GTS::locations_iterator loc_it = new_final.locations_begin(); loc_it != new_final.locations_end(); loc_it++)
 				currentLocationsInUse[loc_it->first] = !loc_it->second.empty();
@@ -738,7 +756,7 @@ chain_reach_grid(const SystemType& system,
 		// Mince the final cells, then for each of them add the enclosure into the new initial enclosures
 		new_final.mince(maximum_grid_depth);
 		for (GTS::const_iterator cell_it = new_final.begin(); cell_it != new_final.end(); cell_it++)
-			initial_enclosures.push_back(this->_discretiser->enclosure(*cell_it));
+			initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
 
 		// Mince the reach cells, then for each of them and for each transition, check the activation:
 		// If it is possibly active, create the enclosure, apply the reset and put the result into the new initial enclosures
@@ -750,7 +768,7 @@ chain_reach_grid(const SystemType& system,
 			// Get the transitions for the corresponding location
 			list<DiscreteTransition> transitions = system.transitions(cell_it->first);
 			// Get the enclosure of the cell
-			EnclosureType encl = this->_discretiser->enclosure(*cell_it);
+			EnclosureType encl = _discretiser->enclosure(*cell_it);
 
 			ARIADNE_LOG(7,"\t\t\t\t\t\tEnclosure = "<<encl<<"\n");
 
@@ -765,7 +783,6 @@ chain_reach_grid(const SystemType& system,
 
 				// If possibly active, get the set model after the reset, enclose it and add it to the initial enclosures
             	if (!(guard_time_model.range().upper()<0)) {
-            		transitions_occurred = true; // Notify that at least one transition occurred
                 	TaylorSet jump_set_model= tc.reset_step(trans_it->reset(),encl.continuous_state_set());
                 	initial_enclosures.push_back(EnclosureType(trans_it->target(),jump_set_model));
                 	currentLocationsInUse[trans_it->target()] = true; // Set the in-use value for the target location as true
@@ -782,16 +799,11 @@ chain_reach_grid(const SystemType& system,
 		// Recombine both
 		reach.recombine();
 		intermediate.recombine();
-
-		this->_statistics->upper().largest_intermediate_size = max(this->_statistics->upper().largest_intermediate_size,new_final.size()); // Update the largest intermediate size
-		this->_statistics->upper().largest_evol_time += this->_discretiser->statistics().upper().largest_evol_time; // Adds the largest evolution time to the statistics
-		if (transitions_occurred) this->_statistics->upper().largest_evol_steps += 1; // Increase the evolution steps, if at least one transition occurred
-		this->_discretiser->reset_upper_largest_evol_statistics(); // Resets the continuous statistics related to the largest evolution time/steps
     }
 
     // Restore those reached regions dumped in the previous iteration
     // (please note that currentLocationsInUse must feature false values only)
-    if (this->chain_reach_dumping) {
+    if (chain_reach_dumping) {
 		for (std::map<DiscreteState,bool>::const_iterator loc_it = previousLocationsInUse.begin(); loc_it != previousLocationsInUse.end(); loc_it++) {
 			// Get the file name string as [systemname].[locationname].dump
 			string filename = system.name() + "." + loc_it->first.name() + ".dump";
@@ -805,25 +817,107 @@ chain_reach_grid(const SystemType& system,
     }
 
     // Save the reached region
-	this->_statistics->upper().reach = reach;
+	_statistics->upper().reach = reach;
 
 	ARIADNE_LOG(5,"\t\t\t\tFound a total of " << reach.size() << " reached cells.\n");
 
     return reach;
 }
 
-
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
-chain_reach(const SystemType& system,
-            const HybridImageSet& initial_set,
-            const HybridBoxes& bounding_set) const
+lower_chain_reach(const SystemType& system,
+				  const HybridImageSet& initial_set) const
 {
-	// Assigns the input bounding_set to the bounding domain
-	this->_parameters->bounding_domain = bounding_set;
+	typedef std::list<EnclosureType> EL;
+	typedef std::map<DiscreteState,uint> HUM;
 
-	// Returns the result of chain_reach with implicit bounding set
-	return this->chain_reach(system,initial_set);
+    ARIADNE_LOG(4,"\t\t\tHybridReachabilityAnalyser::lower_chain_reach(system,initial_set)\n");
+
+	_statistics->lower().reset(); // Reset the discrete statistics
+	_discretiser->reset_lower_statistics(); // Reset the continuous statistics
+
+	// Get the actual concurrency
+	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
+	// Check that the concurrency is greater than zero
+	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
+
+	// The global reach region
+    GTS reach(system.grid());
+
+	// Get the lock time, in the case pruning is to be performed
+	TimeType lock_time(_parameters->lock_to_grid_time,_parameters->lock_to_grid_steps);
+
+    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
+    EL initial_enclosures = _split_initial_set(initial_set,system.grid());
+
+	// Perform loop
+	for (uint i=0;;i++)
+	{
+		ARIADNE_LOG(5,"\t\t\t\tIteration " << i << "\n");
+
+		// The final enclosures
+		EL final_enclosures;
+
+		// The sizes of the adjoined (the cells) or superposed (the enclosures) evolve
+		std::map<DiscreteState,uint> adjoined_evolve_sizes;
+		std::map<DiscreteState,uint> superposed_evolve_sizes;
+		// The evolve
+		GTS evolve;
+		// The new reach
+		GTS new_reach;
+
+		ARIADNE_LOG(6,"\t\t\t\t\tInitial enclosures size = " << initial_enclosures.size() << "\n");
+
+		// Create the worker
+		LowerReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
+								_parameters->bounding_domain,_parameters->maximum_grid_depth,concurrency);
+
+		// Compute and get the result
+		make_ltuple<HUM,HUM,EL,GTS>(adjoined_evolve_sizes,superposed_evolve_sizes,final_enclosures,new_reach) = worker.get_result();
+		// Get the original size for logging purposes
+		uint original_size = new_reach.size();
+		// Remove from the partial reached region the global reached region
+		new_reach.remove(reach);
+
+		ARIADNE_LOG(6,"\t\t\t\t\tReach size before removal = " << original_size << "\n");
+		ARIADNE_LOG(6,"\t\t\t\t\tReach size after removal  = " << new_reach.size() << "\n");
+
+		// Check for inclusion: if no new cells are found, terminate
+		if (new_reach.empty())
+			break;
+
+		// Otherwise proceed and adjoin the new reach
+		reach.adjoin(new_reach);
+
+		// Pruning of the dump of the final enclosures into the initial enclosures
+		while (!final_enclosures.empty())
+		{
+			// Pop the current enclosure
+			EnclosureType encl = final_enclosures.front();
+			final_enclosures.pop_front();
+
+			/* If pruning is to be performed, push just a fraction of the final_enclosures into the initial_enclosures;
+			 * otherwise, push indiscriminately.
+			 */
+			if (_parameters->enable_lower_pruning)
+			{
+				// Get the ratio between the adjoined evolve size and the superposed evolve size
+				Float ratio = (Float)adjoined_evolve_sizes[encl.location()]/(Float)superposed_evolve_sizes[encl.location()];
+
+				// At least 2 enclosures are inserted, then the enclosures are pruned as long as the number of enclosures is at least twice the number of evolve cells
+				if (initial_enclosures.size() <= 2 || rand() < 2*ratio*RAND_MAX)
+					initial_enclosures.push_back(encl);
+			}
+			else
+				initial_enclosures.push_back(encl);
+		}
+	}
+
+	// Copies the reached region
+	_statistics->lower().reach = reach;
+
+	return reach;
 }
 
 
@@ -844,7 +938,7 @@ _safe(const SystemType& system,
 {
 	ARIADNE_LOG(4,"\t\t\tSafety analysis...\n");
 
-	HybridGridTreeSet reach = chain_reach_grid(system,initial_set); // Perform the chain reachability analysis
+	HybridGridTreeSet reach = upper_chain_reach(system,initial_set); // Perform the chain reachability analysis
 
 	// Get the bounds of the reach set
 	HybridBoxes bounds = reach.bounding_box();
@@ -852,7 +946,7 @@ _safe(const SystemType& system,
 	// Check for each location that the bounds are included into the domain
 	bool is_inside_domain = true; // Initial value for the reached set being inside the domain
 	for (HybridBoxes::const_iterator loc_it = bounds.begin(); loc_it != bounds.end(); loc_it++) {
-		if (!(loc_it->second.subset(this->_parameters->bounding_domain[loc_it->first]))) {
+		if (!(loc_it->second.subset(_parameters->bounding_domain[loc_it->first]))) {
 			is_inside_domain = false;
 			break;
 		}
@@ -887,13 +981,9 @@ _unsafe(const SystemType& system,
 
 	// Get the size of the continuous space (NOTE: assumed equal for all locations)
 	const uint css = system.state_space().locations_begin()->second; 
-	// Create the evolution time from the upper approximation obtained in the upper case
-	HybridTime lrt = HybridTime(this->_statistics->upper().largest_evol_time,this->_statistics->upper().largest_evol_steps);
-
-	ARIADNE_LOG(5,"\t\t\tRunning for " << this->_statistics->upper().largest_evol_time << " seconds and " << this->_statistics->upper().largest_evol_steps << " steps...\n");
 
 	// Get the lower reach
-	HybridGridTreeSet lowerreach = this->lower_reach(system,initial_set,lrt);
+	HybridGridTreeSet lowerreach = lower_chain_reach(system,initial_set);
 
 	if (lowerreach.size() > 0)
 	{
@@ -907,7 +997,7 @@ _unsafe(const SystemType& system,
 		// Get the safe box enlarged by a grid cell and half a maximum enclosure cell
 		for (HybridGrid::locations_const_iterator hg_it = hg.locations_begin(); hg_it != hg.locations_end(); hg_it++)
 			for (uint i=0;i<css;i++)
-				safe_box_enl[hg_it->first][i] += Interval(-this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2,this->_discretiser->statistics().lower().largest_enclosure_cell[i]/2)+Interval(-hg_it->second.lengths()[i],hg_it->second.lengths()[i])/(1<<this->_parameters->maximum_grid_depth);
+				safe_box_enl[hg_it->first][i] += Interval(-_discretiser->statistics().lower().largest_enclosure_cell[i]/2,_discretiser->statistics().lower().largest_enclosure_cell[i]/2)+Interval(-hg_it->second.lengths()[i],hg_it->second.lengths()[i])/(1<<_parameters->maximum_grid_depth);
 
 		// If the reach is definitely not included in the enlarged safe box, then it is unsafe
 		bool result = definitely(!lowerreach.subset(safe_box_enl));
@@ -930,14 +1020,14 @@ verify(const SystemType& system,
 		ARIADNE_LOG(3, "\t\tVerification...\n");
 
 		// Perform the safety analysis
-		if (this->_safe(system,initial_set,safe_box)) 
+		if (_safe(system,initial_set,safe_box))
 		{
 			ARIADNE_LOG(3, "\t\tSafe.\n");
 			return true;
 		}
 
 		// Perform the unsafety analysis
-		if (this->_unsafe(system,initial_set,safe_box)) 
+		if (_unsafe(system,initial_set,safe_box))
 		{
 			ARIADNE_LOG(3, "\t\tUnsafe.\n");
 			return false;
@@ -968,7 +1058,7 @@ _getDomainHMAD(const HybridAutomaton& system) const
 	for (list<DiscreteMode>::const_iterator it = system.modes().begin(); it != system.modes().end(); it++)
 	{
 		// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
-		der = it->dynamic()(this->_parameters->bounding_domain.find(it->location())->second); 
+		der = it->dynamic()(_parameters->bounding_domain.find(it->location())->second);
 
 		// Gets the maximum absolute derivatives
 		for (uint i=0;i<css;i++)
@@ -1002,8 +1092,8 @@ _getReachHMAD(const HybridAutomaton& system) const
 		hmad.insert(pair<DiscreteState,Vector<Float> >(modes_it->location(),Vector<Float>(css)));
 
 		// For each of its hybrid cells			
-		for (GridTreeSet::const_iterator cells_it = this->_statistics->upper().reach[modes_it->location()].begin(); 
-										 cells_it != this->_statistics->upper().reach[modes_it->location()].end(); 
+		for (GridTreeSet::const_iterator cells_it = _statistics->upper().reach[modes_it->location()].begin();
+										 cells_it != _statistics->upper().reach[modes_it->location()].end();
 										 cells_it++)
 		{
 			// Gets the derivative bounds
@@ -1038,10 +1128,10 @@ _setMaximumEnclosureCell(const HybridGrid& hgrid)
 
 	// Scales the cell in respect to the maximum grid depth
 	for (uint i=0;i<css;i++)
-		mec[i] /= (1<<this->_parameters->maximum_grid_depth);
+		mec[i] /= (1<<_parameters->maximum_grid_depth);
 
 	// Assigns (NOTE: it is preferable to have the multiplier slightly lesser than an integer multiple of the grid cell)
-	this->_discretiser->parameters().maximum_enclosure_cell = 1.9*mec;
+	_discretiser->parameters().maximum_enclosure_cell = 1.9*mec;
 }
 
 
@@ -1060,11 +1150,11 @@ _setMaximumStepSize(const HybridFloatVector& hmad)
 		// For each dimension of the space, if the derivative is not zero
 		for (uint i=0;i<css;i++)
 			if (hfv_it->second[i] > 0)
-				mss = max(mss,this->_discretiser->parameters().maximum_enclosure_cell[i]/hfv_it->second[i]);
+				mss = max(mss,_discretiser->parameters().maximum_enclosure_cell[i]/hfv_it->second[i]);
 	}
 
 	// Assigns
-	this->_discretiser->parameters().maximum_step_size = mss;
+	_discretiser->parameters().maximum_step_size = mss;
 }
 
 
@@ -1091,8 +1181,8 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 		// For each dimension of the continuous space
 		for (uint i=0;i<css;i++)
 		{	
-			maxratio = max(maxratio,hfv_it->second[i]/this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the largest ratio
-			minlength = min(minlength,this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the smallest domain width
+			maxratio = max(maxratio,hfv_it->second[i]/_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the largest ratio
+			minlength = min(minlength,_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the smallest domain width
 		}
 
 		// Assign the lengths and check the minimum length to be assigned
@@ -1111,7 +1201,7 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 				gridlengths[i] = minlength;
 
 		// Assign the grid, centered on the centre of the domain
-		hg[hfv_it->first] = Grid(this->_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);
+		hg[hfv_it->first] = Grid(_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);
 
 	}
 
@@ -1147,8 +1237,8 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 		// For each couple DiscreteState,Vector<Float>
 		for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
 		{
-			maxratio = max(maxratio,mad[i]/this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Check for maximum ratio
-			minlength = min(minlength,this->_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the minimum domain length
+			maxratio = max(maxratio,mad[i]/_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Check for maximum ratio
+			minlength = min(minlength,_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the minimum domain length
 		}
 
 	// Assign the lengths and checks the minimum length to be assigned
@@ -1172,7 +1262,7 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 	HybridGrid hg;
 	// Populate it, centered on the centre of the domain
 	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-		hg[hfv_it->first] = Grid(this->_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);			
+		hg[hfv_it->first] = Grid(_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);
 	
 	// Return
 	return hg;
@@ -1183,16 +1273,16 @@ void
 HybridReachabilityAnalyser::
 _setInitialParameters(SystemType& system, const HybridBoxes& domain)
 {
-	this->_parameters->bounding_domain = domain; // Set the domain (IMPORTANT: must be done before using _getDomainHMAD and _getEqualizedHybridGrid)
+	_parameters->bounding_domain = domain; // Set the domain (IMPORTANT: must be done before using _getDomainHMAD and _getEqualizedHybridGrid)
 
-	this->_parameters->maximum_grid_depth = this->_parameters->lowest_maximum_grid_depth; // Initial value, incremented at each iteration
+	_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth; // Initial value, incremented at each iteration
 
-	HybridFloatVector hmad = this->_getDomainHMAD(system); // Evaluate the maximum absolute derivatives from the domain
+	HybridFloatVector hmad = _getDomainHMAD(system); // Evaluate the maximum absolute derivatives from the domain
 
-	system.set_grid(this->_getEqualizedHybridGrid(hmad)); // Initial grid
+	system.set_grid(_getEqualizedHybridGrid(hmad)); // Initial grid
 
-	this->_setMaximumEnclosureCell(system.grid()); // Initial maximum enclosure cell
-	this->_setMaximumStepSize(hmad); // Initial maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
+	_setMaximumEnclosureCell(system.grid()); // Initial maximum enclosure cell
+	_setMaximumStepSize(hmad); // Initial maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
 }
 
 
@@ -1201,14 +1291,13 @@ HybridReachabilityAnalyser::
 _adaptParameters(SystemType& system)
 {
 		// Evaluate the maximum absolute derivatives
-		HybridFloatVector hmad = (this->_statistics->upper().reach.size() > 0) ? this->_getReachHMAD(system) : this->_getDomainHMAD(system); 
+		HybridFloatVector hmad = (_statistics->upper().reach.size() > 0) ? _getReachHMAD(system) : _getDomainHMAD(system);
 
-		this->_parameters->maximum_grid_depth++; // Increase the maximum grid depth
+		_parameters->maximum_grid_depth++; // Increase the maximum grid depth
 
-		system.set_grid(this->_getEqualizedHybridGrid(hmad)); // New grid
-		this->_setMaximumEnclosureCell(system.grid()); // New maximum enclosure cell
-		this->_setMaximumStepSize(hmad); // New maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
-
+		system.set_grid(_getEqualizedHybridGrid(hmad)); // New grid
+		_setMaximumEnclosureCell(system.grid()); // New maximum enclosure cell
+		_setMaximumStepSize(hmad); // New maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
 }
 
 
@@ -1228,7 +1317,7 @@ verify_iterative(SystemType& system,
 	string filename;
 
 	// Save the folder name as a function of the automaton name and of the current timestamp, then create the main folder and the verification run folder
-	if (this->plot_verify_results)
+	if (plot_verify_results)
 	{
 		mkdir(foldername.c_str(),0777);
 		string timestring = asctime(localtime(&mytime));
@@ -1238,38 +1327,38 @@ verify_iterative(SystemType& system,
 	}
 
 	// Set the initial parameters
-	this->_setInitialParameters(system, domain);
+	_setInitialParameters(system, domain);
 
-    while(this->_parameters->maximum_grid_depth <= this->_parameters->highest_maximum_grid_depth)
+    while(_parameters->maximum_grid_depth <= _parameters->highest_maximum_grid_depth)
 	{ 
 		/// Print some information on the current iteration
-		sprintf(mgd_char,"%i",this->_parameters->maximum_grid_depth);
-		ARIADNE_LOG(2, "\tDEPTH " << this->_parameters->maximum_grid_depth << "\n"); 
+		sprintf(mgd_char,"%i", _parameters->maximum_grid_depth);
+		ARIADNE_LOG(2, "\tDEPTH " << _parameters->maximum_grid_depth << "\n");
 		ARIADNE_LOG(3, "\t\tGrid: " << system.grid() << "\n");
-		ARIADNE_LOG(3, "\t\tMaximum step size: " << this->_discretiser->parameters().maximum_step_size << "\n");
-		ARIADNE_LOG(3, "\t\tMaximum enclosure cell: " << this->_discretiser->parameters().maximum_enclosure_cell << "\n");
+		ARIADNE_LOG(3, "\t\tMaximum step size: " << _discretiser->parameters().maximum_step_size << "\n");
+		ARIADNE_LOG(3, "\t\tMaximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
 
 		// Perform the verification
-		tribool result = this->verify(system,initial_set,safe_box);
-		ARIADNE_LOG(3, "\t\tLargest enclosure cell: " << this->_discretiser->statistics().lower().largest_enclosure_cell << "\n");	
+		tribool result = verify(system,initial_set,safe_box);
+		ARIADNE_LOG(3, "\t\tLargest enclosure cell: " << _discretiser->statistics().lower().largest_enclosure_cell << "\n");
 
 		// Plot the results, if desired
-		if (this->plot_verify_results)
+		if (plot_verify_results)
 		{
 			// Plot the upper region
 			filename = "upper-";
-			plot(foldername,filename + mgd_char, this->_statistics->upper().reach);
+			plot(foldername,filename + mgd_char, _statistics->upper().reach);
 			// Plot the lower region, if the result is not true (otherwise the lower region has not been computed on this iteration)
 			filename = "lower-";
 			if (!definitely(result))
-				plot(foldername,filename + mgd_char, this->_statistics->lower().reach); 
+				plot(foldername,filename + mgd_char, _statistics->lower().reach);
 		}
 
 		// Return the result, if it is not indeterminate
 		if (!indeterminate(result)) return result;
 
 		// Adapt the parameters for the next iteration
-		this->_adaptParameters(system);
+		_adaptParameters(system);
     }
 
 	// Return indeterminate
@@ -1298,7 +1387,7 @@ safety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool lower_result = this->verify_iterative(system,initial_set,safe_box,domain);
+	tribool lower_result = verify_iterative(system,initial_set,safe_box,domain);
 
 	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else { ARIADNE_LOG(1,"Not safe.\n"); }
@@ -1311,7 +1400,7 @@ safety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool upper_result = this->verify_iterative(system,initial_set,safe_box,domain);
+	tribool upper_result = verify_iterative(system,initial_set,safe_box,domain);
 
 	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else { ARIADNE_LOG(1,"Not safe.\n"); }
@@ -1347,7 +1436,7 @@ safety_parametric(SystemType& system,
 		ARIADNE_LOG(1,"Checking " << param_int << " (midpoint: " << param_int.midpoint() << ", width: " << param_int.width() << ") ... ");
 
 		// Perform the verification
-		tribool result = this->verify_iterative(system,initial_set,safe_box,domain);
+		tribool result = verify_iterative(system,initial_set,safe_box,domain);
 
 		if (definitely(result)) {
 			if (updateFromBottom) {
@@ -1394,7 +1483,7 @@ safety_unsafety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool lower_result = this->verify_iterative(system,initial_set,safe_box,domain);
+	tribool lower_result = verify_iterative(system,initial_set,safe_box,domain);
 
 	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(lower_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
@@ -1408,13 +1497,13 @@ safety_unsafety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool upper_result = this->verify_iterative(system,initial_set,safe_box,domain);
+	tribool upper_result = verify_iterative(system,initial_set,safe_box,domain);
 
 	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(upper_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
 	else ARIADNE_LOG(1,"Indeterminate.\n");
 
-	// Analyse the results
+	// Analyze the results
 
 	// Where the safe value is found
 	bool safeOnBottom;
@@ -1462,7 +1551,7 @@ safety_unsafety_parametric(SystemType& system,
 			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() << ", width: " << safety_int.width() << ") ... ");
 
 			// Perform the verification
-			result = this->verify_iterative(system,initial_set,safe_box,domain);
+			result = verify_iterative(system,initial_set,safe_box,domain);
 
 			// If safe
 			if (definitely(result)) {
@@ -1523,7 +1612,7 @@ safety_unsafety_parametric(SystemType& system,
 			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() << ", width: " << unsafety_int.width() << ") ... ");
 
 			// Perform the verification
-			result = this->verify_iterative(system,initial_set,safe_box,domain);
+			result = verify_iterative(system,initial_set,safe_box,domain);
 
 			// If safe
 			if (definitely(result)) {

@@ -222,7 +222,10 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_WIDTH);
-    evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
+    evolver.parameters().hybrid_maximum_step_size[1] = MAX_STEP_SIZE;
+    evolver.parameters().hybrid_maximum_step_size[2] = MAX_STEP_SIZE;
+    evolver.parameters().hybrid_maximum_step_size[3] = MAX_STEP_SIZE;
+    evolver.parameters().hybrid_maximum_step_size[4] = MAX_STEP_SIZE;
     evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;
     std::cout <<  evolver.parameters() << std::endl;
 

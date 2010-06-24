@@ -341,7 +341,8 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_WIDTH);
-    evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
+    for (uint i=1;i<=11;i++)
+    	evolver.parameters().hybrid_maximum_step_size[i] = MAX_STEP_SIZE;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution

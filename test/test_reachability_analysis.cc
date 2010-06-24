@@ -65,7 +65,7 @@ class TestReachabilityAnalysis
     {
         EvolutionParameters parameters;
         parameters.maximum_grid_depth=2;
-        parameters.maximum_step_size=0.25;
+        parameters.hybrid_maximum_step_size[1]=0.25;
 		parameters.maximum_enclosure_cell=Vector<Float>(2,0.5);
         parameters.lock_to_grid_time=4.0;
         
@@ -151,6 +151,7 @@ class TestReachabilityAnalysis
         DiscreteState loc(1);
         Box bounding_box(2,bound);
         analyser.verbosity=0;
+        analyser.parameters().bounding_domain[loc] = bounding_box;
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(system,initial_set,reach_time);
         cout << "Computing timed reachable set" << endl;

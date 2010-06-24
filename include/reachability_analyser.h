@@ -270,17 +270,18 @@ class HybridReachabilityAnalyser
 			 	 const HybridImageSet& initial_set, 
 				 const HybridBoxes& safe_box);
 
-	/*! \brief Get the hybrid maximum absolute derivatives of \system given the bounding domain parameter. 
-		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
-	HybridFloatVector _getDomainHMAD(const SystemType& system) const;
-
 	/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach statistics. 
 		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
-	HybridFloatVector _getReachHMAD(const SystemType& system) const;
+	HybridFloatVector _getHybridMaximumAbsoluteDerivatives(const SystemType& system) const;
 
-	/*! \brief Set the maximum integration step size, under the assumption that given the maximum derivatives \a hmad, 
-		all variables in a step must cover a length greater than the maximum enclosure cell. */
-	void _setMaximumStepSize(const HybridFloatVector& hmad);
+	/*! \brief Set the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
+		all variables in a step must cover a length greater than a length determined by the \a hgrid. */
+	void _setHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid);
+
+	/*! \brief Set the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
+		all variables in a step must cover a length greater than a length determined by the \a hgrid. The value is equal for all
+		locations and corresponds to the largest integration step among the locations. */
+	void _setEqualizedHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid);
 
 	/*! \brief Set the maximum enclosure cell from the hybrid grid \a hgrid. */
 	void _setMaximumEnclosureCell(const HybridGrid& hgrid);
@@ -295,8 +296,8 @@ class HybridReachabilityAnalyser
 	void _setInitialParameters(SystemType& system, 
 							   const HybridBoxes& domain);
 
-	/*! \brief Adapts the parameters for the next verification iteration, given previous statistics. */
-	void _adaptParameters(SystemType& system);
+	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
+	void _tuneParameters(SystemType& system);
 };
 
 template<class HybridEnclosureType>

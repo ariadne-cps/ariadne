@@ -42,7 +42,7 @@ int main()
 	// The parameter to modify, its interval and the tolerance
 	RealConstant parameter = delta;
 	Interval parameter_interval(0.0,0.0);
-	double tolerance = 1e-2;
+	Float tolerance = 1e-2;
 
     // Create the tank automaton
 
@@ -84,19 +84,19 @@ int main()
 		// Idle (valve either fully closed or fully opened)
 		RealExpression dynidle = 0.0;
 		valve.new_mode(idle);
-		valve.new_invariant(idle, -y);
-		valve.new_invariant(idle, y-1.0);
+		//valve.new_invariant(idle, -y);
+		//valve.new_invariant(idle, y-1.0);
 		valve.set_dynamics(idle, y, dynidle);
 		// Opening (valve is opening)
 		valve.new_mode(opening);
-		valve.new_invariant(idle, -y);
-		valve.new_invariant(idle, y-1.0);
+		//valve.new_invariant(opening, -y);
+		//valve.new_invariant(opening, y-1.0);
 		RealExpression dynopening = 1.0/T;
 		valve.set_dynamics(opening, y, dynopening);
 		// Closing (valve is closing)
 		valve.new_mode(closing);
-		valve.new_invariant(idle, -y);
-		valve.new_invariant(idle, y-1.0);
+		//valve.new_invariant(closing, -y);
+		//valve.new_invariant(closing, y-1.0);
 		RealExpression dynclosing = -1.0/T;
 		valve.set_dynamics(closing, y, dynclosing);
 		
@@ -187,18 +187,19 @@ int main()
 	HybridEvolver evolver;
 	evolver.verbosity = 0;		
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 4;
+	analyser.verbosity = 6;
 	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = false; 
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 9;
+	analyser.parameters().highest_maximum_grid_depth = 6;
 	analyser.parameters().transient_time = 1e10;
 	analyser.parameters().transient_steps = 1;
 	analyser.parameters().lock_to_grid_time = 1e10;		
 	analyser.parameters().lock_to_grid_steps = 1;
 	analyser.plot_verify_results = true;
 	analyser.free_cores = 0;
+	analyser.chain_reach_dumping = true;
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;

@@ -131,7 +131,7 @@ void TestContinuousEvolution::test() const
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
-    parameters.maximum_step_size=step_size;
+    parameters.hybrid_maximum_step_size[0] = step_size;
 
     // Set up the evaluators
     VectorFieldEvolver evolver(parameters);
@@ -203,7 +203,7 @@ void TestContinuousEvolution::failure_test() const
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
-    parameters.maximum_step_size=step_size;
+    parameters.hybrid_maximum_step_size[0] = step_size;
 
     // Set up the evaluators
     VectorFieldEvolver evolver(parameters);

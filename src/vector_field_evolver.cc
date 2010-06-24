@@ -252,7 +252,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
     const FunctionType& dynamic=system.function();
 
     // Set evolution parameters
-    const Float maximum_step_size=this->_parameters->maximum_step_size;
+    const Float maximum_step_size=this->_parameters->hybrid_maximum_step_size.begin()->second;
     const Float maximum_bounds_diameter=max(this->_parameters->maximum_enclosure_cell);
     const Float zero_time=0.0;
 

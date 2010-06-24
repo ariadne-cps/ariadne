@@ -985,6 +985,8 @@ _unsafe(const SystemType& system,
 	// Get the lower reach
 	HybridGridTreeSet lowerreach = lower_chain_reach(system,initial_set);
 
+	ARIADNE_LOG(5, "\t\t\t\tLargest enclosure cell: " << _discretiser->statistics().lower().largest_enclosure_cell << "\n");
+
 	if (lowerreach.size() > 0)
 	{
 		// Create a safe set enlarged for the falsification
@@ -1042,40 +1044,7 @@ verify(const SystemType& system,
 
 HybridFloatVector 
 HybridReachabilityAnalyser::
-_getDomainHMAD(const HybridAutomaton& system) const
-{ 
-	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
-	const uint css = system.state_space().locations_begin()->second;
-
-	// The variable for the bounding box of the derivatives
-	Vector<Interval> der;
-	// The variable for the result, correctly initialized
-	Vector<Float> mad = Vector<Float>(css);
-    // The variable for the hybrid maximum absolute derivatives
-	HybridFloatVector hmad;
-
-    // For each mode
-	for (list<DiscreteMode>::const_iterator it = system.modes().begin(); it != system.modes().end(); it++)
-	{
-		// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
-		der = it->dynamic()(_parameters->bounding_domain.find(it->location())->second);
-
-		// Gets the maximum absolute derivatives
-		for (uint i=0;i<css;i++)
-			mad[i] = abs(der[i]).upper();
-
-		// Inserts the values for the location
-		hmad.insert(pair<DiscreteState,Vector<Float> >(it->location(),mad)); 
-	}
-
-	// Returns
-	return hmad;
-}
-
-
-HybridFloatVector 
-HybridReachabilityAnalyser::
-_getReachHMAD(const HybridAutomaton& system) const
+_getHybridMaximumAbsoluteDerivatives(const HybridAutomaton& system) const
 {
 	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = system.state_space().locations_begin()->second;
@@ -1085,24 +1054,40 @@ _getReachHMAD(const HybridAutomaton& system) const
     // The variable for the result
 	HybridFloatVector hmad;
 
-	// Gets the dynamic for the given DiscreteState
+	// Get the HybridGridTreeSet
+	HybridGridTreeSet& hybridreach = _statistics->upper().reach;
+
+	// For each mode
 	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
 	{
-		// Inserts the corresponding pair, initialized with zero maximum absolute derivatives
-		hmad.insert(pair<DiscreteState,Vector<Float> >(modes_it->location(),Vector<Float>(css)));
+		// Get the location
+		const DiscreteState& loc = modes_it->location();
 
-		// For each of its hybrid cells			
-		for (GridTreeSet::const_iterator cells_it = _statistics->upper().reach[modes_it->location()].begin();
-										 cells_it != _statistics->upper().reach[modes_it->location()].end();
-										 cells_it++)
-		{
-			// Gets the derivative bounds
-			der = modes_it->dynamic()(cells_it->box());
+		// Insert the corresponding hmad pair, initialized with zero maximum absolute derivatives
+		hmad.insert(pair<DiscreteState,Vector<Float> >(loc,Vector<Float>(css)));
 
-			// For each variable, sets the maximum value
+		// If the reached region for the location exists and is not empty, check its cells, otherwise use the whole domain
+		if (hybridreach.has_location(loc) && !hybridreach[loc].empty()) {
+			// Get the GridTreeSet
+			GridTreeSet& reach = hybridreach[loc];
+			// For each of its hybrid cells
+			for (GridTreeSet::const_iterator cells_it = reach.begin(); cells_it != reach.end(); cells_it++)
+			{
+				// Gets the derivative bounds
+				der = modes_it->dynamic()(cells_it->box());
+
+				// For each variable, sets the maximum value
+				for (uint i=0;i<css;i++)
+					hmad[loc][i] = max(hmad[loc][i], abs(der[i]).upper());
+			}
+		} else {
+			// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
+			der = modes_it->dynamic()(_parameters->bounding_domain.find(loc)->second);
+
+			// Gets the maximum absolute derivatives
 			for (uint i=0;i<css;i++)
-				hmad[modes_it->location()][i] = max(hmad[modes_it->location()][i], abs(der[i]).upper()); 
-		}			
+				hmad[loc][i] = abs(der[i]).upper();
+		}
 	}
 
 	// Returns
@@ -1137,24 +1122,62 @@ _setMaximumEnclosureCell(const HybridGrid& hgrid)
 
 void 
 HybridReachabilityAnalyser::
-_setMaximumStepSize(const HybridFloatVector& hmad)
+_setEqualizedHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid)
 {
 	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = hmad.begin()->second.size();
+
+	// Initialize the hybrid maximum step size
+	std::map<DiscreteState,Float> hmss;
 
 	// Initializes the maximum step size
 	Float mss = 0.0;
 	// For each couple DiscreteState,Vector<Float>
 	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) 
 	{
-		// For each dimension of the space, if the derivative is not zero
+		// For each dimension of the space, if the derivative is not zero,
+		// evaluates the ratio between the minimum cell length and the derivative itself
 		for (uint i=0;i<css;i++)
 			if (hfv_it->second[i] > 0)
-				mss = max(mss,_discretiser->parameters().maximum_enclosure_cell[i]/hfv_it->second[i]);
+				mss = max(mss,hgrid[hfv_it->first].lengths()[i]/(1 << _parameters->maximum_grid_depth)/hfv_it->second[i]);
+	}
+
+	// Populates the map
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
+		hmss.insert(std::pair<DiscreteState,Float>(hfv_it->first,mss));
+
+	// Assigns
+	_discretiser->parameters().hybrid_maximum_step_size = hmss;
+}
+
+
+void
+HybridReachabilityAnalyser::
+_setHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid)
+{
+	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = hmad.begin()->second.size();
+
+	// Initialize the hybrid maximum step size
+	std::map<DiscreteState,Float> hmss;
+
+	// For each couple DiscreteState,Vector<Float>
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
+	{
+		// Initializes the maximum step size
+		Float mss = 0.0;
+		// For each dimension of the space, if the derivative is not zero,
+		// evaluates the ratio between the minimum cell length and the derivative itself
+		for (uint i=0;i<css;i++)
+			if (hfv_it->second[i] > 0)
+				mss = max(mss,hgrid[hfv_it->first].lengths()[i]/(1 << _parameters->maximum_grid_depth)/hfv_it->second[i]);
+
+		// Inserts the value
+		hmss.insert(std::pair<DiscreteState,Float>(hfv_it->first,mss));
 	}
 
 	// Assigns
-	_discretiser->parameters().maximum_step_size = mss;
+	_discretiser->parameters().hybrid_maximum_step_size = hmss;
 }
 
 
@@ -1273,31 +1296,33 @@ void
 HybridReachabilityAnalyser::
 _setInitialParameters(SystemType& system, const HybridBoxes& domain)
 {
-	_parameters->bounding_domain = domain; // Set the domain (IMPORTANT: must be done before using _getDomainHMAD and _getEqualizedHybridGrid)
-
-	_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth; // Initial value, incremented at each iteration
-
-	HybridFloatVector hmad = _getDomainHMAD(system); // Evaluate the maximum absolute derivatives from the domain
-
-	system.set_grid(_getEqualizedHybridGrid(hmad)); // Initial grid
-
-	_setMaximumEnclosureCell(system.grid()); // Initial maximum enclosure cell
-	_setMaximumStepSize(hmad); // Initial maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
+	// Set the domain
+	_parameters->bounding_domain = domain;
+	// Initial value, incremented at each iteration
+	_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth;
 }
 
 
 void 
 HybridReachabilityAnalyser::
-_adaptParameters(SystemType& system)
+_tuneParameters(SystemType& system)
 {
-		// Evaluate the maximum absolute derivatives
-		HybridFloatVector hmad = (_statistics->upper().reach.size() > 0) ? _getReachHMAD(system) : _getDomainHMAD(system);
+	// Evaluate the maximum absolute derivatives
+	HybridFloatVector hmad = _getHybridMaximumAbsoluteDerivatives(system);
 
-		_parameters->maximum_grid_depth++; // Increase the maximum grid depth
+	ARIADNE_LOG(3, "\t\tHybrid maximum absolute derivatives: " << hmad << "\n");
 
-		system.set_grid(_getEqualizedHybridGrid(hmad)); // New grid
-		_setMaximumEnclosureCell(system.grid()); // New maximum enclosure cell
-		_setMaximumStepSize(hmad); // New maximum step size (IMPORTANT: must be done after the calculation of the maximum enclosure cell)
+	_parameters->maximum_grid_depth++; // Increase the maximum grid depth
+
+	// Grid
+	system.set_grid(_getHybridGrid(hmad));
+	ARIADNE_LOG(3, "\t\tHybrid grid: " << system.grid() << "\n");
+	// Maximum enclosure cell
+	_setMaximumEnclosureCell(system.grid());
+	ARIADNE_LOG(3, "\t\tHybrid maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
+	// Maximum step size
+	_setHybridMaximumStepSize(hmad,system.grid());
+	ARIADNE_LOG(3, "\t\tMaximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
 }
 
 
@@ -1331,16 +1356,14 @@ verify_iterative(SystemType& system,
 
     while(_parameters->maximum_grid_depth <= _parameters->highest_maximum_grid_depth)
 	{ 
-		/// Print some information on the current iteration
-		sprintf(mgd_char,"%i", _parameters->maximum_grid_depth);
+    	sprintf(mgd_char,"%i", _parameters->maximum_grid_depth);
 		ARIADNE_LOG(2, "\tDEPTH " << _parameters->maximum_grid_depth << "\n");
-		ARIADNE_LOG(3, "\t\tGrid: " << system.grid() << "\n");
-		ARIADNE_LOG(3, "\t\tMaximum step size: " << _discretiser->parameters().maximum_step_size << "\n");
-		ARIADNE_LOG(3, "\t\tMaximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
+
+		// Tune the parameters for the next iteration
+		_tuneParameters(system);
 
 		// Perform the verification
 		tribool result = verify(system,initial_set,safe_box);
-		ARIADNE_LOG(3, "\t\tLargest enclosure cell: " << _discretiser->statistics().lower().largest_enclosure_cell << "\n");
 
 		// Plot the results, if desired
 		if (plot_verify_results)
@@ -1357,8 +1380,6 @@ verify_iterative(SystemType& system,
 		// Return the result, if it is not indeterminate
 		if (!indeterminate(result)) return result;
 
-		// Adapt the parameters for the next iteration
-		_adaptParameters(system);
     }
 
 	// Return indeterminate

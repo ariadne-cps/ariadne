@@ -262,7 +262,8 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 
 		// Check for match between the enclosure cell size and the set size
 		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
-
+		// Check for non-zero maximum step size
+		ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
 		// Checks consistency of the bounding domain in respect to the state space
 		HybridSpace hspace = system.state_space();
 		// If the DiscreteState was not found or otherwise if the continuous space sizes mismatch, throws an error
@@ -383,6 +384,16 @@ _lower_evolution(EnclosureListType& final_sets,
 
 		// Check for match between the enclosure cell size and the set size
 		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+		// Check for non-zero maximum step size
+		ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
+		// Checks consistency of the bounding domain in respect to the state space
+		HybridSpace hspace = system.state_space();
+		// If the DiscreteState was not found or otherwise if the continuous space sizes mismatch, throws an error
+		for (HybridSpace::locations_const_iterator hs_it = hspace.locations_begin(); hs_it != hspace.locations_end(); ++hs_it) {
+			if (bounding_domain.find(hs_it->first) == bounding_domain.end()) {
+				ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the discrete space."); }
+			else if (hs_it->second != bounding_domain.find(hs_it->first)->second.size()) {
+				ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the continuous space."); }}
     }
 
 	// Create the largest_enclosure_cell statistics, if not currently dimensioned
@@ -439,7 +450,7 @@ _lower_evolution(EnclosureListType& final_sets,
 		}
 
 		// If the time model range width is greater than half the maximum step size, we will divide the timed model in respect to time
-		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->maximum_step_size/2);
+		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
 
 		// Check whether the bounding box is included into the bounding domain
 		if (!initial_set_model.bounding_box().subset(bounding_domain.find(initial_location)->second)) {
@@ -449,7 +460,7 @@ _lower_evolution(EnclosureListType& final_sets,
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
             // Subdivide over time
-            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->maximum_step_size << ", subdividing over time.\n");
+            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
             uint nd=initial_set_model.dimension();
             SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
             array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,nd);
@@ -536,6 +547,8 @@ _evolution(EnclosureListType& final_sets,
 
 		// Check for match between the enclosure cell size and the set size
 		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+		// Check for non-zero maximum step size
+		ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
     }
 
 	// Create the largest_enclosure_cell statistics, if not currently dimensioned
@@ -592,14 +605,14 @@ _evolution(EnclosureListType& final_sets,
 		}
 
 		// If the time model range width is greater than half the maximum step size, we will divide the timed model in respect to time
-		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->maximum_step_size/2);
+		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
 
 		if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
             // Subdivide over time
-            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->maximum_step_size << ", subdividing over time.\n");
+            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
             uint nd=initial_set_model.dimension();
             SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
             array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,nd);
@@ -864,7 +877,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 
     // Compute continuous evolution
     FlowSetModelType flow_set_model; BoxType flow_bounds; 
-    Float time_step = this->_parameters->maximum_step_size;
+    Float time_step = this->_parameters->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 
     ARIADNE_LOG(2,"Computing flow model.\n");
@@ -1105,7 +1118,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 
     // Compute continuous evolution
     FlowSetModelType flow_set_model; BoxType flow_bounds; 
-    Float time_step = this->_parameters->maximum_step_size;
+    Float time_step = this->_parameters->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 
     ARIADNE_LOG(2,"Computing flow model.\n");

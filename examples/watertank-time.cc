@@ -156,7 +156,10 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,0.1);
-    evolver.parameters().maximum_step_size = 0.1;
+    evolver.parameters().hybrid_maximum_step_size[l1] = 0.1;
+    evolver.parameters().hybrid_maximum_step_size[l2] = 0.1;
+    evolver.parameters().hybrid_maximum_step_size[l3] = 0.1;
+    evolver.parameters().hybrid_maximum_step_size[l4] = 0.1;
     evolver.verbosity=1;
     std::cout <<  evolver.parameters() << std::endl;
 

@@ -121,7 +121,9 @@ int main(int argc, char** argv)
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_cell = Vector<Float>(4,MAX_ENCL_WIDTH);
-    evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
+    HybridSpace hspace = automaton.state_space();
+    for (HybridSpace::locations_const_iterator loc_it = hspace.locations_begin(); loc_it != hspace.locations_end(); loc_it++)
+    	evolver.parameters().hybrid_maximum_step_size[loc_it->first]=MAX_STEP_SIZE;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the automaton evolution

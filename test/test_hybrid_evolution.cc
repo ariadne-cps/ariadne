@@ -190,7 +190,8 @@ void TestHybridEvolution::test_bouncing_ball() const
 
     HybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
-    evolver.parameters().maximum_step_size=0.125;
+    evolver.parameters().hybrid_maximum_step_size[1]=0.125;
+    evolver.parameters().hybrid_maximum_step_size[2]=0.125;
 	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ARIADNE_TEST_PRINT(automaton);
@@ -229,7 +230,10 @@ void TestHybridEvolution::test_affine_system() const
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_cell=Vector<Float>(2,max_enclosure_width);
-    parameters.maximum_step_size=step_size;
+    parameters.hybrid_maximum_step_size[1]=step_size;
+    parameters.hybrid_maximum_step_size[2]=step_size;
+    parameters.hybrid_maximum_step_size[3]=step_size;
+    parameters.hybrid_maximum_step_size[4]=step_size;
 
     // Set up the evaluators
     HybridEvolver evolver(parameters);
@@ -351,6 +355,9 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     HybridTime evolution_time(2.0,3);
 
 	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+	HybridSpace hspace = system.state_space();
+	for (HybridSpace::locations_const_iterator loc_it = hspace.locations_begin(); loc_it != hspace.locations_end(); loc_it++)
+		evolver.parameters().hybrid_maximum_step_size[loc_it->first] = 1.0;
 
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 

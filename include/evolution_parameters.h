@@ -55,9 +55,9 @@ class ContinuousEvolutionParameters {
     //! This value may be ignored if an integration step cannot be performed without reducing the step size below this value. 
     RealType minimum_step_size;
 
-    //! \brief The maximum allowable step size for integration. 
-    //! Decreasing this value increases the accuracy of the computation. 
-    RealType maximum_step_size;
+    //! \brief The maximum allowable step size for integration, different for each location.
+    //! Decreasing the values increases the accuracy of the computation.
+    std::map<DiscreteState,RealType> hybrid_maximum_step_size;
 
     //! \brief A suggested minimum cell of a basic set after a subdivision (not a strict bound). 
     Vector<RealType> minimum_enclosure_cell;
@@ -232,7 +232,7 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
     : spacial_order(1),
       temporal_order(4),
       minimum_step_size(0.0),
-      maximum_step_size(1.0),
+      hybrid_maximum_step_size(std::map<DiscreteState,RealType>()),
       minimum_enclosure_cell(Vector<RealType>(0)),
       maximum_enclosure_cell(Vector<RealType>(0)),
 	  set_model_events_size_interleaving(0),
@@ -265,7 +265,7 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << "(\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
        << ",\n  minimum_step_size=" << p.minimum_step_size
-       << ",\n  maximum_step_size=" << p.maximum_step_size
+       << ",\n  hybrid_maximum_step_size=" << p.hybrid_maximum_step_size
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
        << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
@@ -309,7 +309,7 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << "(\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
        << ",\n  minimum_step_size=" << p.minimum_step_size
-       << ",\n  maximum_step_size=" << p.maximum_step_size
+       << ",\n  hybrid_maximum_step_size=" << p.hybrid_maximum_step_size
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
        << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving

@@ -11,10 +11,10 @@ bin_PROGRAMS=tutorial \
              watertank-nonlinear watertank-time \
              sinusoid-sin 3bouncingballs \
              rectifier springs cmos_inverter_analoginput \
-             rectifier_oneloc grid-refinement multipleguards\
+             rectifier_oneloc \
 			 robotarm watertank-verify watertank-nonlinear-verify \
 			 \
-			 coconut-demo coconut-final-demo
+			 pss-revised coconut-demo coconut-final-demo
 
 tutorial_SOURCES = tutorial.cc verify.py
 boost_power_converter_SOURCES=boost_power_converter.cc
@@ -29,13 +29,11 @@ rectifier_SOURCES=rectifier.cc
 springs_SOURCES=springs.cc
 cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc
 rectifier_oneloc_SOURCES=rectifier_oneloc.cc
-grid_refinement_SOURCES=grid-refinement.cc
-multipleguards_SOURCES=multipleguards.cc
 robotarm_SOURCES=robotarm.cc
 watertank_verify_SOURCES=watertank-verify.cc
 watertank_nonlinear_verify_SOURCES=watertank-nonlinear-verify.cc
+pss_revised_SOURCES = pss-revised.cc
 coconut_final_demo_SOURCES=coconut-final-demo.cc
-
 coconut_demo_SOURCES=coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
 
 examples: $(bin_PROGRAMS)

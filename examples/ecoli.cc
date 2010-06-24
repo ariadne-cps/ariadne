@@ -111,7 +111,7 @@ int main()
     /// Set the evolution parameters
     HybridEvolver evolver;
     evolver.parameters().maximum_enclosure_cell = Vector<Float>(4,0.25);
-    evolver.parameters().maximum_step_size = 0.25;
+    evolver.parameters().hybrid_maximum_step_size[starvation_mode] = 0.25;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the types to be used for the system evolution

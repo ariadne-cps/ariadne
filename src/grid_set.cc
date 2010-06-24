@@ -2141,8 +2141,6 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
         	SplitTaylorSetBinaryTreeNode* pCacheRootNode = new SplitTaylorSetBinaryTreeNode(*pTaylorSet);
         	_adjoin_outer_approximation_taylorset( GridTreeSubset::_theGridCell.grid(), lattice_box, pCacheRootNode, pBinaryTreeNode, outer_approx_primary_cell_height,
 												   max_mince_depth, *pTaylorSet, pEmptyPath );
-        	/*_adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), lattice_box, pBinaryTreeNode, outer_approx_primary_cell_height,
-										 max_mince_depth, theSet, pEmptyPath );*/
         	// Delete the node and consequently the whole tree that resulted from splitting
         	delete pCacheRootNode;
         }

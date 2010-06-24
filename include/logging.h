@@ -33,7 +33,11 @@
 
 //! Send a message to the global logging stream. 
 #define ARIADNE_LOG(level,msg)                                  \
-    if(verbosity >= level) { std::clog << msg << std::flush; }
+    if(verbosity >= level) { \
+		std::string tabulation; \
+		for (uint ariadne_log=0;ariadne_log<level-1;ariadne_log++) \
+			tabulation += "\t"; \
+		std::clog << tabulation + msg << std::flush; }
 
 namespace Ariadne {
   

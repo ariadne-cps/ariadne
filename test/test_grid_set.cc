@@ -1704,7 +1704,8 @@ void test_adjoin_outer_approximation_operation(){
     tree = make_binary_word("1110101111110010011001001110010011001001111001000111001000111110010011001001001111001000000");
     leaves = make_binary_word("0001011111010111111010010100010111111010100000");
     GridTreeSet expected_grid_tree_set2( theTrivialGrid, 4, tree, leaves );
-    ARIADNE_TEST_EQUAL( expected_grid_tree_set2, theOneCellPaving );
+    ARIADNE_TEST_ASSERT( subset(expected_grid_tree_set2, theOneCellPaving) );
+    ARIADNE_TEST_ASSERT( subset(theOneCellPaving, expected_grid_tree_set2) );
     
     ARIADNE_PRINT_TEST_COMMENT("Recombined GridTreeSet after adding the cell: ");
     std::vector< GridCell* > expected_result_arr(16);

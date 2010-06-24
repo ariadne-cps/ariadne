@@ -132,7 +132,7 @@ class HybridReachabilityAnalyser
                                               const HybridImageSet& initial_set, 
                                               const TimeType& time) const;
   
-    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time. */
+    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time (discrete part only). */
     virtual SetApproximationType
     lower_reach(const SystemType& system, 
                 const HybridImageSet& initial_set, 
@@ -247,15 +247,12 @@ class HybridReachabilityAnalyser
   private:
 
     /*! \brief Generates a list of hybrid enclosures from the \a initial_set, depending on the minimum cell size
-     * given by the \a grid.
-     */
+     * given by the \a grid. */
     list<HybridBasicSet<TaylorSet> > _split_initial_set(const HybridImageSet initial_set,
 										   const HybridGrid grid) const;
 
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
-    GTS _lower_reach(const Sys& system, std::list<EnclosureType>& initial_set,
-    		         const HybridTime& time, const HybridTime& lock_time) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;

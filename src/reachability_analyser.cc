@@ -156,74 +156,6 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
 
 
 HybridGridTreeSet
-HybridReachabilityAnalyser::_lower_reach(const HybridAutomaton& system,
-							 			 std::list<EnclosureType>& initial_enclosures,
-										 const HybridTime& time,
-										 const HybridTime& lock_time) const
-{
-	typedef std::list<EnclosureType> EL;
-	typedef std::map<DiscreteState,uint> HUM;
-
-	// Get the actual concurrency
-	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
-	// Check that the concurrency is greater than zero
-	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
-
-	// The final enclosures
-	EL final_enclosures;
-	HybridGrid grid = system.grid();
-
-	// The result
-	GTS reach(grid);
-
-	// For each grid lock
-	for (uint i=0;i<((uint)time.discrete_time()/lock_time.discrete_time());i++)
-	{
-		// The sizes of the adjoined (the cells) or superposed (the enclosures) evolve
-		std::map<DiscreteState,uint> adjoined_evolve_sizes;
-		std::map<DiscreteState,uint> superposed_evolve_sizes;
-		// The evolve
-		GTS evolve;
-		// The current reach
-		GTS current_reach;
-
-		// Create the worker
-		LowerReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
-							    _parameters->bounding_domain,_parameters->maximum_grid_depth,concurrency);
-
-		// Compute and get the result
-		make_ltuple<HUM,HUM,EL,GTS>(adjoined_evolve_sizes,superposed_evolve_sizes,final_enclosures,current_reach) = worker.get_result();
-
-		// Adjoin the current reach
-		reach.adjoin(current_reach);
-
-		// Pruning of the dump of the final enclosures into the initial enclosures
-		while (!final_enclosures.empty())
-		{
-			// Pop the current enclosure
-			EnclosureType encl = final_enclosures.front();
-			final_enclosures.pop_front();
-
-			// If pruning is to be performed
-			if (_parameters->enable_lower_pruning)
-			{
-				// Get the ratio between the adjoined evolve size and the superposed evolve size
-				Float ratio = (Float)adjoined_evolve_sizes[encl.location()]/(Float)superposed_evolve_sizes[encl.location()];
-
-				// At least 2 enclosures are inserted, then the enclosures are pruned as long as the number of enclosures is at least twice the number of evolve cells
-				if (initial_enclosures.size() <= 2 || rand() < 2*ratio*RAND_MAX)
-					initial_enclosures.push_back(encl);
-			}
-			else
-				initial_enclosures.push_back(encl);
-		}
-	}
-
-    return reach;
-}
-
-
-HybridGridTreeSet
 HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
                                           const HybridGridTreeSet& set,
                                           const HybridTime& time,
@@ -334,20 +266,18 @@ lower_reach(const SystemType& system,
 	_statistics->lower().reset(); // Reset the discrete statistics
 	_discretiser->reset_lower_statistics(); // Reset the continuous statistics
 
-	// Get the actual concurrency
-	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
-	// Check that the concurrency is greater than zero
-	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
-
-	// Get the lock time, in the case pruning is to be performed
-	TimeType lock_time(_parameters->lock_to_grid_time,_parameters->lock_to_grid_steps);
+    // The reached region
+    GTS reach(system.grid());
 
     // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
     list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,system.grid());
 
     ARIADNE_LOG(6,"Evolving and discretising...\n");
-    // Calculates the reached region
-    GTS reach = _lower_reach(system,initial_enclosures,time,lock_time);
+
+    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
+    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
+        reach.adjoin(_discretiser->reach(system,*encl_it,time,_parameters->maximum_grid_depth,LOWER_SEMANTICS));
+    }
 
 	// Copies the reached region into the statistics
 	_statistics->lower().reach = reach;
@@ -367,19 +297,17 @@ lower_reach_evolve(const SystemType& system,
 	_statistics->lower().reset(); // Resets the discrete statistics
 	_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
-    int grid_depth = _parameters->maximum_grid_depth;
-
-    Gr grid=system.grid();
+	// The reached and evolved regions
     GTS reach; GTS evolve;
 
     // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
-    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
+    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,system.grid());
 
 	ARIADNE_LOG(5,"Computing evolution...\n");
     // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
         GTS cell_reach,cell_final;
-        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,time,grid_depth,LOWER_SEMANTICS);
+        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,time,_parameters->maximum_grid_depth,LOWER_SEMANTICS);
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
@@ -397,52 +325,11 @@ upper_evolve(const SystemType& system,
              const HybridImageSet& initial_set,
              const TimeType& time) const
 {
-    ARIADNE_LOG(4,"HybridReachabilityAnalyser::upper_evolve(...)\n");
+    ARIADNE_LOG(4,"HybridReachabilityAnalyser::upper_evolve(system,set,time)\n");
  
-	_statistics->upper().reset(); // Resets the discrete statistics
-	_discretiser->reset_upper_statistics(); // Resets the continuous statistics
+	GTS reach, evolve;
+	make_lpair(reach,evolve) = upper_reach_evolve(system, initial_set, time); // Runs the upper_reach_evolve routine on its behalf
 
-    Gr grid=system.grid();
-    GTS evolve(grid);
-    int grid_depth = _parameters->maximum_grid_depth;
-    Float real_time=time.continuous_time();
-    uint discrete_steps=time.discrete_time();
-    Float lock_to_grid_time=_parameters->lock_to_grid_time;
-    uint time_steps=uint(real_time/lock_to_grid_time);
-    Float remaining_time=real_time-time_steps*lock_to_grid_time;
-    if(time_steps == 0) {
-        time_steps=1;
-        remaining_time=0.0;
-        lock_to_grid_time=real_time;
-    }
-    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
-    HybridTime hybrid_remaining_time(remaining_time,discrete_steps);
-    ARIADNE_LOG(5,"real_time="<<real_time<<"\n");
-    ARIADNE_LOG(5,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
-
-    // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
-    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
-
-	ARIADNE_LOG(5,"Computing initial evolution...\n");
-    // For each initial enclosure, perform evolution and adjoin to the reach and evolve regions
-    for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
-        GTS cell_final=_discretiser->evolve(system,*encl_it,hybrid_lock_to_grid_time,grid_depth,UPPER_SEMANTICS);
-        evolve.adjoin(cell_final);
-    }
-
-    // time steps evolution loop
-    for(uint i=1; i<time_steps; ++i) {
-        ARIADNE_LOG(5,"Computing "<<i+1<<"-th reachability step...\n");
-        evolve=_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
-    }
-
-    ARIADNE_LOG(5,"remaining_time="<<remaining_time<<"\n");
-    if(!evolve.empty() && remaining_time > 0) {
-        ARIADNE_LOG(5,"Computing evolution for remaining time...\n");
-        evolve=_upper_evolve(system,evolve,hybrid_remaining_time,grid_depth);
-    }
-    evolve.recombine();
-    ARIADNE_LOG(6,"final_evolve.size()="<<evolve.size()<<"\n");
     return evolve;
 }
 
@@ -461,7 +348,6 @@ upper_reach(const SystemType& system,
 
     return reach; // Returns the reached region only
 }
-
 
 
 std::pair<HybridReachabilityAnalyser::SetApproximationType,HybridReachabilityAnalyser::SetApproximationType>

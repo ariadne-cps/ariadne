@@ -292,14 +292,12 @@ public:
 					 EL& initial_enclosures,
 					 const HybridAutomaton& sys, 
 					 const HybridTime& time, 
-					 const HybridBoxes& bounding_domain,
 					 const int& accuracy, 
 					 const uint& concurrency) 
 	: _discretiser(discretiser),
 	  _initial_enclosures(initial_enclosures),
 	  _sys(sys), 
 	  _time(time),
-	  _bounding_domain(bounding_domain),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency)
     {
@@ -335,7 +333,6 @@ private:
 	EL& _initial_enclosures;
 	const HybridAutomaton& _sys;
 	const HybridTime& _time;
-	const HybridBoxes& _bounding_domain;
 	const int& _accuracy;
 	const uint& _concurrency;
 	// The adjoined evolve common to all threads
@@ -389,7 +386,7 @@ private:
 				ELS current_reach_enclosures, current_evolve_enclosures;
 
 				// Get the enclosures from the initial enclosure, in a lock_time flight
-				make_lpair<ELS,ELS>(current_reach_enclosures,current_evolve_enclosures) = _discretiser->evolver()->lower_reach_evolve(_sys,current_initial_enclosure,_time,_bounding_domain);
+				make_lpair<ELS,ELS>(current_reach_enclosures,current_evolve_enclosures) = _discretiser->evolver()->reach_evolve(_sys,current_initial_enclosure,_time, LOWER_SEMANTICS);
 
 				// Get the discretisation
 				current_reach = _discretiser->_discretise(current_reach_enclosures,_sys.grid(),_accuracy);

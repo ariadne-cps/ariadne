@@ -631,16 +631,6 @@ upper_chain_reach(const SystemType& system,
         new_final.remove(intermediate);
 		new_reach.remove(reach);
 
-		char text[100] = "";
-		sprintf(text,"iter%u-flow,closing,falling",i);
-		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,closing,falling")]);
-		sprintf(text,"iter%u-flow,idle,falling",i);
-		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,idle,falling")]);
-		sprintf(text,"iter%u-flow,opening,rising",i);
-		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,opening,rising")]);
-		sprintf(text,"iter%u-flow,idle,rising",i);
-		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,idle,rising")]);
-
 	    // If dumping must be performed
 	    if (chain_reach_dumping) {
 			// Check the new final region and set as in-use all the locations whose reached region is not empty
@@ -662,7 +652,10 @@ upper_chain_reach(const SystemType& system,
 				initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
 			} else if (!cell_it->second.box().disjoint(_parameters->bounding_domain[loc])) {
 				initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
+			} else {
+				ARIADNE_LOG(7,"Discarding enclosure from final cell outside the domain.\n");
 			}
+
 		}
 
 		// Mince the reach cells, then for each of them and for each transition, check the activation:
@@ -672,21 +665,17 @@ upper_chain_reach(const SystemType& system,
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
 		for (GTS::const_iterator cell_it = new_reach.begin(); cell_it != new_reach.end(); cell_it++)
 		{
-			/* If the cell lies outside the bounding domain, discard it */
-
-			// Get the location
-			const DiscreteState& loc = cell_it->first;
-			// If not inside nor disjoint from the bounding domain, move to the next cell
-			if (!cell_it->second.box().inside(_parameters->bounding_domain[loc]) &&
-				!cell_it->second.box().disjoint(_parameters->bounding_domain[loc])) {
-				ARIADNE_LOG(7,"Discarding reached cell being outside the domain.\n");
+			// If the cell lies outside the bounding domain (i.e. not inside nor disjoint), ignore it
+			if (!cell_it->second.box().inside(_parameters->bounding_domain[cell_it->first]) &&
+				!cell_it->second.box().disjoint(_parameters->bounding_domain[cell_it->first])) {
+				ARIADNE_LOG(7,"Discarding enclosure from reach cell outside the domain.\n");
 				continue;
 			}
 
 			// Get the enclosure of the cell
 			EnclosureType encl = _discretiser->enclosure(*cell_it);
 
-			ARIADNE_LOG(7,"Enclosure = "<<encl<<"\n");
+			ARIADNE_LOG(7,"Checking transitions for enclosure "<<encl<<"\n");
 
 			// Get the transitions for the corresponding location
 			list<DiscreteTransition> transitions = system.transitions(cell_it->first);
@@ -790,7 +779,7 @@ lower_chain_reach(const SystemType& system,
 
 		// Create the worker
 		LowerReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
-								_parameters->bounding_domain,_parameters->maximum_grid_depth,concurrency);
+								_parameters->maximum_grid_depth,concurrency);
 
 		ARIADNE_LOG(6,"Evolving and discretising...\n");
 
@@ -818,13 +807,23 @@ lower_chain_reach(const SystemType& system,
 			EnclosureType encl = final_enclosures.front();
 			final_enclosures.pop_front();
 
+			// Get the location
+			const DiscreteState& loc = encl.location();
+
+			// If the enclosure lies outside the bounding domain (i.e. not inside nor disjoint), ignore it
+			if (!encl.continuous_state_set().bounding_box().inside(_parameters->bounding_domain[loc]) &&
+				!encl.continuous_state_set().bounding_box().disjoint(_parameters->bounding_domain[loc])) {
+				ARIADNE_LOG(7,"Discarding enclosure outside the domain.\n");
+				continue;
+			}
+
 			/* If pruning is to be performed, push just a fraction of the final_enclosures into the initial_enclosures;
 			 * otherwise, push indiscriminately.
 			 */
 			if (_parameters->enable_lower_pruning)
 			{
 				// Get the ratio between the adjoined evolve size and the superposed evolve size
-				Float ratio = (Float)adjoined_evolve_sizes[encl.location()]/(Float)superposed_evolve_sizes[encl.location()];
+				Float ratio = (Float)adjoined_evolve_sizes[loc]/(Float)superposed_evolve_sizes[loc];
 
 				// At least 2 enclosures are inserted, then the enclosures are pruned as long as the number of enclosures is at least twice the number of evolve cells
 				if (initial_enclosures.size() <= 2 || rand() < 2*ratio*RAND_MAX)

@@ -143,15 +143,6 @@ class StableHybridEvolver
         this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
         return reachable; }
 
-    //! \brief Compute an approximation to the evolution set under the lower semantics, returning the reached and final sets.
-    std::pair<EnclosureListType,EnclosureListType>
-    lower_reach_evolve(const SystemType& system,
-					   const EnclosureType& initial_set,
-					   const TimeType& time,
-					   const HybridBoxes& bounding_domain) const {
-    	ARIADNE_NOT_IMPLEMENTED;
-    }
-
     TimedEnclosureListType timed_evolution(const SystemType& system, const EnclosureType& initial,
         const TimeType& time, Semantics semantics, bool reach) const;
 

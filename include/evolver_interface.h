@@ -121,13 +121,6 @@ class EvolverInterface
                  const TimeType& time, 
                  Semantics semantics) const = 0;
   
-    //! \brief Compute an approximation to the evolution set under the lower semantics, returning the reached and final sets.
-    virtual std::pair<EnclosureListType,EnclosureListType>
-    lower_reach_evolve(const SystemType& system,
-					   const EnclosureType& initial_set,
-					   const TimeType& time,
-					   const HybridBoxes& bounding_domain) const = 0;
-  
     //! \brief Compute an approximation to the evolved set under the given semantics. 
     virtual 
     void 

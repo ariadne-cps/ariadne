@@ -217,8 +217,7 @@ class HybridDiscretiser
     upper_evolution_continuous(const SystemType& system, 
               			 	   const EnclosureType& initial_set, 
               			 	   const TimeType& time,
-              			       const AccuracyType accuracy,
-							   const HybridBoxes& bounding_domain) const;
+              			       const AccuracyType accuracy) const;
 
     //! \brief Compute approximations to the reachable set 
     //! of \a system starting in \a initial_set over \a time. */

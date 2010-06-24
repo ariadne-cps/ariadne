@@ -123,7 +123,7 @@ class ImageSetHybridEvolver
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
     //! \brief Compute an approximation to the orbit set for upper semantics, with continuous evolution only.
-    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, const HybridBoxes& bounding_domain) const;
+    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const;
 
     //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
@@ -162,7 +162,7 @@ class ImageSetHybridEvolver
                             const HybridBoxes& bounding_domain, bool reach) const;
 
     virtual void _upper_evolution_continuous(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time, const HybridBoxes& bounding_domain, bool reach) const;
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time, bool reach) const;
 
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::list< HybridTimedSetType >& working_sets,

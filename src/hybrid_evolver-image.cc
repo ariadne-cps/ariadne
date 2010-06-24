@@ -125,15 +125,14 @@ Orbit<ImageSetHybridEvolver::EnclosureType>
 ImageSetHybridEvolver::
 upper_orbit_continuous(const SystemType& system,
 				       const EnclosureType& initial_set,
-				       const TimeType& time,
-					   const HybridBoxes& bounding_domain) const
+				       const TimeType& time) const
 {
     Orbit<EnclosureType> orbit(initial_set);
     EnclosureListType final;
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_upper_evolution_continuous(final,reachable,intermediate,
-                     				  system,initial_set,time,bounding_domain,false);
+                     				  system,initial_set,time,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -226,7 +225,6 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
            			  	 	const SystemType& system,
            			  		const EnclosureType& initial_set,
            			  		const TimeType& maximum_hybrid_time,
-					  		const HybridBoxes& bounding_domain,
            			  		bool reach) const
 {
     typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
@@ -264,14 +262,6 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
 		// Check for non-zero maximum step size
 		ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
-		// Checks consistency of the bounding domain in respect to the state space
-		HybridSpace hspace = system.state_space();
-		// If the DiscreteState was not found or otherwise if the continuous space sizes mismatch, throws an error
-		for (HybridSpace::locations_const_iterator hs_it = hspace.locations_begin(); hs_it != hspace.locations_end(); ++hs_it) {
-			if (bounding_domain.find(hs_it->first) == bounding_domain.end()) {
-				ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the discrete space."); }		
-			else if (hs_it->second != bounding_domain.find(hs_it->first)->second.size()) {
-				ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the continuous space."); }}
     }
 
 	// Create the largest_enclosure_cell statistics, if not currently dimensioned
@@ -307,11 +297,7 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 			}
 		}
 
-
-		// Check whether the bounding box is included into the bounding domain
-		if (!initial_set_model.bounding_box().subset(bounding_domain.find(initial_location)->second)) {
-			ARIADNE_LOG(3,"  The initial set " << initial_set_model.bounding_box() << " << is not included into the bounding domain, discarding the set.\n");
-        } else if(initial_time_model.range().lower()>=maximum_time) {
+        if(initial_time_model.range().lower()>=maximum_time) {
             ARIADNE_LOG(3,"  Final time reached, adjoining the initial set to the final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if(has_max_enclosure_been_reached) {

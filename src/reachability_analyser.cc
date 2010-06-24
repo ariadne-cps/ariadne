@@ -217,7 +217,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve_continuous(const HybridAutomaton
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
 	// Create the worker
-	UpperReachEvolveContinuousWorker worker(_discretiser,sys,initial_enclosures,_parameters->bounding_domain,time,accuracy,concurrency);
+	UpperReachEvolveContinuousWorker worker(_discretiser,sys,initial_enclosures,time,accuracy,concurrency);
 
 	ARIADNE_LOG(6,"Evolving and discretising...\n");
 	// Compute and get the result
@@ -631,6 +631,16 @@ upper_chain_reach(const SystemType& system,
         new_final.remove(intermediate);
 		new_reach.remove(reach);
 
+		char text[100] = "";
+		sprintf(text,"iter%u-flow,closing,falling",i);
+		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,closing,falling")]);
+		sprintf(text,"iter%u-flow,idle,falling",i);
+		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,idle,falling")]);
+		sprintf(text,"iter%u-flow,opening,rising",i);
+		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,opening,rising")]);
+		sprintf(text,"iter%u-flow,idle,rising",i);
+		plot(text,Box(2,0.0,20.0,-2.0,4.0),Colour(1.0,0.5,1.0),new_reach[DiscreteState("flow,idle,rising")]);
+
 	    // If dumping must be performed
 	    if (chain_reach_dumping) {
 			// Check the new final region and set as in-use all the locations whose reached region is not empty
@@ -641,10 +651,19 @@ upper_chain_reach(const SystemType& system,
         ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
         ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
 
-		// Mince the final cells, then for each of them add the enclosure into the new initial enclosures
+		/* Mince the final cells, then for each of them add the enclosure into the new initial enclosures
+		 * if their bounding box is not outside (i.e. inside, or not inside but not disjoint) the bounding domain */
 		new_final.mince(maximum_grid_depth);
-		for (GTS::const_iterator cell_it = new_final.begin(); cell_it != new_final.end(); cell_it++)
-			initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
+		for (GTS::const_iterator cell_it = new_final.begin(); cell_it != new_final.end(); cell_it++) {
+			// Get the location
+			const DiscreteState& loc = cell_it->first;
+			// If inside the domain
+			if (cell_it->second.box().inside(_parameters->bounding_domain[loc])) {
+				initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
+			} else if (!cell_it->second.box().disjoint(_parameters->bounding_domain[loc])) {
+				initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
+			}
+		}
 
 		// Mince the reach cells, then for each of them and for each transition, check the activation:
 		// If it is possibly active, create the enclosure, apply the reset and put the result into the new initial enclosures
@@ -653,14 +672,26 @@ upper_chain_reach(const SystemType& system,
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
 		for (GTS::const_iterator cell_it = new_reach.begin(); cell_it != new_reach.end(); cell_it++)
 		{
-			// Get the transitions for the corresponding location
-			list<DiscreteTransition> transitions = system.transitions(cell_it->first);
+			/* If the cell lies outside the bounding domain, discard it */
+
+			// Get the location
+			const DiscreteState& loc = cell_it->first;
+			// If not inside nor disjoint from the bounding domain, move to the next cell
+			if (!cell_it->second.box().inside(_parameters->bounding_domain[loc]) &&
+				!cell_it->second.box().disjoint(_parameters->bounding_domain[loc])) {
+				ARIADNE_LOG(7,"Discarding reached cell being outside the domain.\n");
+				continue;
+			}
+
 			// Get the enclosure of the cell
 			EnclosureType encl = _discretiser->enclosure(*cell_it);
 
 			ARIADNE_LOG(7,"Enclosure = "<<encl<<"\n");
 
-			// For each of them
+			// Get the transitions for the corresponding location
+			list<DiscreteTransition> transitions = system.transitions(cell_it->first);
+
+			// For each transition
 			for (list<DiscreteTransition>::const_iterator trans_it = transitions.begin(); trans_it != transitions.end(); trans_it++)
 			{
 				ARIADNE_LOG(8,"Transition = "<<*trans_it<<"\n");
@@ -842,19 +873,13 @@ _safe(const SystemType& system,
 		}
 	}
 
-	// If the reached region is inside the domain
-	if (is_inside_domain)
-	{
+	// If the reached region is inside the domain, perform checking, otherwise return false
+	if (is_inside_domain) {
 		// If the reached region is definitely inside the hybrid safe box, the result is safe 
 		bool result = definitely(reach.subset(safe_box));
-
 		ARIADNE_LOG(4, (result ? "Safe.\n" : "Not safe.\n") );
-
 		return result;
-	}
-	// Otherwise notify and return false
-	else
-	{
+	} else {
 		ARIADNE_LOG(4,"Not checked due to domain bounds.\n");
 		return false;
 	}

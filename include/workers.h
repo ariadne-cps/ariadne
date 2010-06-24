@@ -160,11 +160,10 @@ public:
 	typedef HybridEvolver::ContinuousEnclosureType CE;
 
 	// Constructor
-    UpperReachEvolveContinuousWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser, const HybridAutomaton& sys, const list<EnclosureType>& initial_enclosures, const HybridBoxes& bounding_domain, const HybridTime& time, const int& accuracy, const uint& concurrency) 
+    UpperReachEvolveContinuousWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser, const HybridAutomaton& sys, const list<EnclosureType>& initial_enclosures, const HybridTime& time, const int& accuracy, const uint& concurrency)
 	: _discretiser(discretiser),
 	  _sys(sys), 
 	  _initial_enclosures(initial_enclosures),
-	  _bounding_domain(bounding_domain),
 	  _time(time),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency),
@@ -198,7 +197,6 @@ private:
 	const boost::shared_ptr<HybridDiscretiser<CE> >& _discretiser;
 	const HybridAutomaton& _sys;
 	const list<EnclosureType>& _initial_enclosures;
-	const HybridBoxes& _bounding_domain;
 	const HybridTime& _time;
 	const int& _accuracy;
 	const uint& _concurrency;
@@ -252,7 +250,7 @@ private:
 				// The reach and evolve regions
         		HGTS reach, evolve;
 				// Process and assign the regions
-		        make_lpair(reach,evolve)=_discretiser->upper_evolution_continuous(_sys,enclosure,_time,_accuracy,_bounding_domain);
+		        make_lpair(reach,evolve)=_discretiser->upper_evolution_continuous(_sys,enclosure,_time,_accuracy);
 
 				// Get the lock for output
 				_out_mutex.lock();

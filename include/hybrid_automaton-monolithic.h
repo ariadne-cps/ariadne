@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton.h
+ *            hybrid_automaton-monolithic.h
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *
@@ -482,6 +482,12 @@ class MonolithicHybridAutomaton
 
     //! \brief The discrete transitions from location \a source.
     Set< DiscreteTransition > transitions(DiscreteLocation source) const;
+
+    //! \brief The set of all events possible in the given \a location.
+    Set<DiscreteEvent> events(DiscreteLocation location) const;
+
+    //! \brief The kind (permissive, urgent etc) of the event.
+    EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The blocking events (invariants and urgent transitions) in \a location.
     Map<DiscreteEvent,ScalarFunction> blocking_guards(DiscreteLocation location) const;

@@ -566,7 +566,7 @@ MonolithicHybridAutomaton::urgent_events(DiscreteLocation source) const
     for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
         iter!=this->_transitions.end(); ++iter)
     {
-        if(iter->source()==source && iter->urgency()==urgent) {
+        if( iter->source()==source && (iter->urgency()==urgent || iter->urgency()==impact) ) {
             result.insert(iter->event());
         }
     }
@@ -610,6 +610,30 @@ Set<DiscreteEvent> MonolithicHybridAutomaton::transition_events(DiscreteLocation
         }
     }
     return result;
+}
+
+Set<DiscreteEvent>
+MonolithicHybridAutomaton::events(DiscreteLocation location) const
+{
+    Set<DiscreteEvent> result=this->mode(location)._invariants.keys();
+    for(Set<DiscreteTransition>::const_iterator iter=this->_transitions.begin();
+        iter!=this->_transitions.end(); ++iter)
+    {
+        if(iter->source()==location) {
+            result.insert(iter->event());
+        }
+    }
+    return result;
+}
+
+EventKind
+MonolithicHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent event) const
+{
+    if(this->mode(location)._invariants.has_key(event)) {
+        return PROGRESS;
+    } else {
+        return this->transition(location,event).urgency();
+    }
 }
 
 VectorFunction

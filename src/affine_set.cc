@@ -519,7 +519,12 @@ AffineSet::boundary(uint xc, uint yc) const
 
     SimplexSolver<Float> lpsolver;
 
-    List< Affine<Float> > const& constraints=this->_constraints;
+    static const double EQUATION_WIDENING = 1e-8;
+    List< Affine<Float> > constraints=this->_constraints;
+    for(uint i=0; i!=this->_equations.size(); ++i) {
+        constraints.append(this->_equations[i]-EQUATION_WIDENING);
+        constraints.append(-this->_equations[i]-EQUATION_WIDENING);
+    }
     Box const& domain=this->domain();
     const size_t m=constraints.size();
     const size_t n=domain.size();

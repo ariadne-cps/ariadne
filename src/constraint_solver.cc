@@ -218,13 +218,15 @@ void ConstraintSolver::reduce(const List<NonlinearConstraint>& constraints, Box&
         for(uint i=0; i!=constraints.size(); ++i) {
             this->hull_reduce(constraints[i],domain);
         }
+        if(domain.empty()) { return; }
+
         for(uint i=0; i!=constraints.size(); ++i) {
             for(uint j=0; j!=domain.size(); ++j) {
                 this->box_reduce(constraints[i],domain,j);
             }
         }
-
         if(domain.empty()) { return; }
+
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0.0;
         for(uint j=0; j!=domain.size(); ++j) {

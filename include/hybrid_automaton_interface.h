@@ -45,6 +45,15 @@ class Grid;
 
 template<class T> class Set;
 
+enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
+inline std::ostream& operator<<(std::ostream&, const EventKind& evk);
+
+typedef EventKind Urgency;
+static const EventKind permissive = PERMISSIVE;
+static const EventKind urgent = URGENT;
+static const EventKind impact = IMPACT;
+
+
 //! \brief Base interface for hybrid systems, to allow different types to be used in evolution routines.
 class HybridAutomatonInterface {
   public:
@@ -74,6 +83,12 @@ class HybridAutomatonInterface {
     //! \brief The dynamic valid in the mode \a location.
     virtual VectorFunction dynamic_function(DiscreteLocation location) const = 0;
 
+    //! \brief The set of all events possible in the given \a location.
+    virtual Set<DiscreteEvent> events(DiscreteLocation location) const = 0;
+
+    //! \brief The kind (permissive, urgent etc) of the event.
+    virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const = 0;
+
     //! \brief The invariants valid in the mode \a location.
     virtual ScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
@@ -98,6 +113,16 @@ class HybridAutomatonInterface {
     void reset(DiscreteEvent arg1);
 
 };
+
+inline std::ostream& operator<<(std::ostream& os, const EventKind& evk) {
+    switch(evk) {
+        case INVARIANT: os<<"invariant"; break;
+        case PROGRESS: os<<"progress"; break;
+        case PERMISSIVE: os<<"permissive"; break;
+        case URGENT: os<<"urgent"; break;
+        case IMPACT: os<<"impact"; break;
+    } return os;
+}
 
 } //namespace Ariadne
 

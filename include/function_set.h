@@ -200,6 +200,8 @@ class ConstrainedImageSet
     const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
     const VectorFunction& function() const { return this->_function; };
+    //! \brief The function used to define the set.
+    const List<NonlinearConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
     uint number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
@@ -253,6 +255,9 @@ class ConstrainedImageSet
     tribool overlaps(const Box&) const;
     //! \brief Adjoin an outer approximation to a paving.
     void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+
+    //! \brief Test if the set satisfies the state constraint at all points.
+    tribool satisfies(const NonlinearConstraint& c) const;
 
     //! \brief Draw to a canvas.
     void draw(CanvasInterface&) const;

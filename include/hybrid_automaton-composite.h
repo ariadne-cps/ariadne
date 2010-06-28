@@ -493,6 +493,8 @@ class CompositeHybridAutomaton
     //! \brief The dimension of the state spacec in the given \a location.
     uint dimension(DiscreteLocation location) const;
 
+    //! \brief The set of all events possible in the given \a location.
+    Set<DiscreteEvent> events(DiscreteLocation location) const;
     //! \brief The set of events corresponding to a discrete transition.
     Set<DiscreteEvent> transition_events(DiscreteLocation) const;
     //! \brief The set of events corresponding to an invariant or time-can-progress predicate.
@@ -536,6 +538,7 @@ class CompositeHybridAutomaton
     //@}
 
 
+    EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
     VectorFunction output_function(DiscreteLocation) const;
     VectorFunction dynamic_function(DiscreteLocation) const;
     VectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;

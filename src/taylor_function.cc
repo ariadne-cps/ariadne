@@ -1689,6 +1689,22 @@ operator<<(std::ostream& os, const VectorTaylorFunction& p)
     return p.write(os);
 }
 
+Polynomial<Interval> polynomial(const ScalarTaylorFunction& tfn) {
+    return Polynomial<Interval>(tfn.polynomial());
+}
+
+Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn) {
+    return Vector< Polynomial<Interval> >(tfn.polynomial());
+}
+
+List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns) {
+    List< Polynomial<Interval> > result;
+    for(uint i=0; i!=tfns.size(); ++i) {
+        result.append(polynomial(tfns[i]));
+    }
+    return result;
+}
+
 
 
 /*

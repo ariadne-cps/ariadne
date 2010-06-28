@@ -716,6 +716,22 @@ CompositeHybridAutomaton::invariant_events(DiscreteLocation source) const
     return result;
 }
 
+Set<DiscreteEvent>
+CompositeHybridAutomaton::events(DiscreteLocation location) const
+{
+    return join(this->invariant_events(location),this->transition_events(location));
+}
+
+EventKind
+CompositeHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent event) const
+{
+    bool is_invariant=this->invariant_events(location).contains(event);
+    bool is_activation=this->transition_events(location).contains(event);
+    if(is_activation  && is_invariant) { return urgent; }
+    else if(is_activation) { return permissive; }
+    else { return PROGRESS; }
+}
+
 
 
 

@@ -1554,7 +1554,8 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
 
     for(uint n=0; n!=subdomains.size(); ++n) {
         try {
-            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+            //this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+            this->restriction(subdomains[n]).affine_approximation().draw(canvas);
         } catch(...) {
             this->restriction(subdomains[n]).box_draw(canvas);
         }
@@ -1572,6 +1573,7 @@ Map<List<DiscreteEvent>,ScalarFunction> pretty(const Map<List<DiscreteEvent>,Sca
 }
 
 
+
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
     Map<K,V> r;
     for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) {
@@ -1581,14 +1583,26 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 }
 
 std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
-    os << "TaylorConstrainedImageSet";
-    os << "(\n  domain=" << this->domain();
-    os << ",\n  range=" << this->bounding_box();
-    os << ",\n  function=" << this->taylor_function();
-    os << ",\n  constraints=" << this->_constraints;
-    os << ",\n  equations=" << this->_equations;
-    os << "\n)\n";
-    return os;
+    const bool LONG_FORMAT=false;
+
+    if(LONG_FORMAT) {
+        os << "TaylorConstrainedImageSet"
+           << "(\n  domain=" << this->domain()
+           << ",\n  range=" << this->bounding_box()
+           << ",\n  function=" << this->taylor_function()
+           << ",\n  constraints=" << this->_constraints
+           << ",\n  equations=" << this->_equations
+           << "\n)\n";
+    } else {
+        os << "TaylorConstrainedImageSet"
+           << "( domain=" << this->domain()
+           << ", range=" << this->bounding_box()
+           << ", function=" << polynomial(this->taylor_function())
+           << ", constraints=" << polynomials(this->_constraints)
+           << ", equations=" << polynomials(this->_equations)
+           << ")";
+
+    } return os;
 }
 
 
@@ -1648,9 +1662,7 @@ TaylorConstrainedImageSet::affine_approximation() const
 
     TaylorConstrainedImageSet set(*this);
 
-    if(set._equations.size()>0) {
-        set._solve_zero_constraints();
-    }
+    //if(set._equations.size()>0) { set._solve_zero_constraints(); }
     this->_check();
 
     Vector<Float> h(nx);

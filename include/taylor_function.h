@@ -29,6 +29,7 @@
 #define ARIADNE_TAYLOR_FUNCTION_H
 
 #include <iosfwd>
+#include "container.h"
 #include "numeric.h"
 #include "vector.h"
 #include "taylor_model.h"
@@ -874,6 +875,11 @@ VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFu
 Float norm(const VectorTaylorFunction& f);
 
 std::ostream& operator<<(std::ostream&, const VectorTaylorFunction&);
+
+// Conversion operatations
+Polynomial<Interval> polynomial(const ScalarTaylorFunction& tfn);
+Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn);
+List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns);
 
 
 template<class E> VectorTaylorFunction::VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve)            : _domain(), _models(ve().size())

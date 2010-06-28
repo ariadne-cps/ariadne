@@ -29,6 +29,7 @@
 #include "point.h"
 #include "curve.h"
 #include "taylor_set.h"
+#include "function_set.h"
 #include "list_set.h"
 #include "hybrid_set.h"
 

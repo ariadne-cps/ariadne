@@ -32,6 +32,7 @@
 #endif // HAVE_GMPXX_H
 
 #include <cmath>
+#include <cassert>
 #include <limits>
 #include <stdint.h>
 #include <cstdlib>
@@ -276,7 +277,7 @@ inline Float rad_up(Float x, Float y) {
 //! In the Python interface, %Ariadne intervals can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
 //! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
 //! Automatic conversion is used to convert Interval literals of the form \c {a,b} to an Interval in functions.
-//! 
+//!
 //! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
 //! representable value by the Python interpreter. <br><br>
 //! \code
@@ -348,11 +349,11 @@ inline bool bounded(Interval i) {
 }
 
 inline Interval intersection(Interval i1, Interval i2) {
-    if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { Interval result; result.set_empty(); return result; }
     return Interval(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
 }
 
 inline Interval hull(Interval i1, Interval i2) {
+    assert(i1.lower()<=i1.upper() && i2.lower()<=i2.upper());
     return Interval(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
 }
 

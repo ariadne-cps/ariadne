@@ -325,6 +325,35 @@ ConstrainedImageSet::affine_approximation() const
 }
 
 
+tribool ConstrainedImageSet::satisfies(const NonlinearConstraint& nc) const
+{
+    const Float infty = inf<Float>();
+
+    if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
+        return true;
+    }
+
+    ConstraintSolver solver;
+    const Box& domain=this->_domain;
+    List<NonlinearConstraint> all_constraints=this->_constraints;
+    ScalarFunction composed_function = compose(nc.function(),this->_function);
+    const Interval& bounds = nc.bounds();
+
+    Tribool result;
+    if(bounds.upper()<+infty) {
+        all_constraints.append( composed_function >= bounds.upper() );
+        result=solver.feasible(all_constraints,domain).first;
+        all_constraints.pop_back();
+        if(definitely(result)) { return false; }
+    }
+    if(bounds.lower()>-infty) {
+        all_constraints.append(composed_function <= bounds.lower());
+        result = result || solver.feasible(all_constraints,domain).first;
+    }
+    return !result;
+}
+
+
 tribool ConstrainedImageSet::disjoint(const Box& bx) const
 {
     ConstraintSolver solver;
@@ -624,7 +653,7 @@ void ConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& 
 
 void draw(CanvasInterface& cnvs, const ConstrainedImageSet& set, uint depth)
 {
-    if(depth==0) {
+    if( depth==0) {
         set.affine_approximation().draw(cnvs);
     } else {
         Pair<ConstrainedImageSet,ConstrainedImageSet> split=set.split();
@@ -636,7 +665,7 @@ void draw(CanvasInterface& cnvs, const ConstrainedImageSet& set, uint depth)
 void
 ConstrainedImageSet::draw(CanvasInterface& cnvs) const
 {
-    static const uint DEPTH = 6;
+    static const uint DEPTH = 0;
     Ariadne::draw(cnvs,*this,DEPTH);
 }
 

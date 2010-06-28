@@ -27,9 +27,9 @@
 using namespace Ariadne;
 
 
-int main() 
+int main()
 {
-  
+
     /// Set the system parameters
     double a = -0.02;
     double b = 0.3;
@@ -61,16 +61,16 @@ int main()
     double b4[3]={0.0,0.0,1.0};
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomton object
     MonolithicHybridAutomaton watertank_system;
-  
+
     /// Create four discrete states
     AtomicDiscreteLocation l1(1);
     AtomicDiscreteLocation l2(2);
     AtomicDiscreteLocation l3(3);
     AtomicDiscreteLocation l4(4);
-  
+
     /// Create the discrete events
     DiscreteEvent e12(12);
     DiscreteEvent e13(13);
@@ -78,13 +78,13 @@ int main()
     DiscreteEvent e34(34);
     DiscreteEvent e31(31);
     DiscreteEvent e41(41);
-  
+
     /// Create the dynamics
     VectorAffineFunction dynamic1(Matrix<Float>(3,3,A1),Vector<Float>(3,b1));
     VectorAffineFunction dynamic2(Matrix<Float>(3,3,A2),Vector<Float>(3,b2));
     VectorAffineFunction dynamic3(Matrix<Float>(3,3,A3),Vector<Float>(3,b3));
     VectorAffineFunction dynamic4(Matrix<Float>(3,3,A4),Vector<Float>(3,b4));
-    
+
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
     cout << "dynamic3 = " << dynamic3 << endl << endl;
@@ -125,7 +125,7 @@ int main()
     /// x > hmin - Delta
     VectorAffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
-  
+
     /// Build the automaton
     watertank_system.new_mode(l1,dynamic1);
     watertank_system.new_mode(l2,dynamic2);
@@ -138,7 +138,7 @@ int main()
     watertank_system.new_invariant(l4,inv4);
 
     watertank_system.new_forced_transition(e12,l1,l2,reset_y_one,guard12);
-    watertank_system.new_unforced_transition(e13,l1,l3,reset_id,guard23);    
+    watertank_system.new_unforced_transition(e13,l1,l3,reset_id,guard23);
     watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
     watertank_system.new_forced_transition(e34,l3,l4,reset_y_zero,guard34);
     watertank_system.new_unforced_transition(e31,l3,l1,reset_id,guard41);
@@ -170,9 +170,9 @@ int main()
     Box initial_box(3, 5.0,5.001, 1.0,1.001, 0.0,0.001);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, -0.1,9.1, -0.1,1.1, -0.1,tmax+0.1);
-  
+
     HybridTime evolution_time(tmax,dmax);
-/*  
+/*
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;

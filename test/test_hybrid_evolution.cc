@@ -65,8 +65,6 @@ Colour final_set_colour(0.75,0.75,1.00);
 Colour initial_set_colour(0.75,0.75,1.00);
 Colour guard_set_colour(0.75,0.75,0.75);
 
-typedef EvolverInterface<HybridAutomatonInterface,HybridEnclosure> HybridEvolverInterface;
-
 // Test evolution of realistic hybrid systems
 class TestHybridEvolution
 {
@@ -94,7 +92,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     ScalarFunction v=ScalarFunction::coordinate(2,1);
     Float lambda=0.5;
     bouncing_ball.new_mode(q,(v,-c));
-    bouncing_ball.new_transition(e,q,q,(x+0.000001,-lambda*v),-x,urgent);
+    bouncing_ball.new_transition(e,q,q,(x+0.000001,-lambda*v),-x,impact);
 
     Float height=2.0;
     Float radius=1.0/64;
@@ -156,7 +154,7 @@ void TestHybridEvolution::test_water_tank() const {
     watertank.new_transition(finished_closing,closing,closed,(height,aperture),-aperture,urgent);
 
     DiscreteLocation initial_location=opening;
-    Box initial_box(2, 0.0,0.05, 0.0,0.05);
+    Box initial_box(2, 0.0,0.05, 0.0,0.01);
     HybridEnclosure initial_enclosure(initial_location,initial_box);
 
     //HybridTime evolution_time(80.0,5);

@@ -44,6 +44,10 @@ template<class X> class Affine;
 template<class X> Affine<X> operator-(const Affine<X>&);
 template<class X> Affine<X> operator+(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&, const Affine<X>&);
+template<class X> Affine<X> operator+(const X&, const Affine<X>&);
+template<class X> Affine<X> operator+(const Affine<X>&, const X&);
+template<class X> Affine<X> operator-(const X&, const Affine<X>&);
+template<class X> Affine<X> operator-(const Affine<X>&, const X&);
 template<class X> Affine<X> operator*(const X&, const Affine<X>&);
 template<class X> Affine<X> operator*(const Affine<X>&, const X&);
 template<class X> Affine<X> operator/(const Affine<X>&, const X&);
@@ -91,6 +95,10 @@ class Affine
     friend Affine<X> operator-<>(const Affine<X>&);
     friend Affine<X> operator+<>(const Affine<X>&, const Affine<X>&);
     friend Affine<X> operator-<>(const Affine<X>&, const Affine<X>&);
+    friend Affine<X> operator+<>(const X&, const Affine<X>&);
+    friend Affine<X> operator+<>(const Affine<X>&, const X&);
+    friend Affine<X> operator-<>(const X&, const Affine<X>&);
+    friend Affine<X> operator-<>(const Affine<X>&, const X&);
     friend Affine<X> operator*<>(const X&, const Affine<X>&);
     friend Affine<X> operator*<>(const Affine<X>&, const X&);
     friend Affine<X> operator/<>(const Affine<X>&, const X&);
@@ -111,6 +119,22 @@ template<class X> inline Affine<X> operator+(const Affine<X>& f1, const Affine<X
 //! \brief Subtraction of two affine expressions.
 template<class X> inline Affine<X> operator-(const Affine<X>& f1, const Affine<X>& f2) {
     return Affine<X>(Vector<X>(f1._g-f2._g),f1._c-f2._c); }
+//! \relates Affine
+//! \brief Addition of a constant to an affine expression.
+template<class X> inline Affine<X> operator+(const Affine<X>& f1, const X& c2) {
+    return Affine<X>(Vector<X>(f1._g),f1._c+c2); }
+//! \relates Affine
+//! \brief Addition of a constant to an affine expression.
+template<class X> inline Affine<X> operator+(const X& c1, const Affine<X>& f2) {
+    return Affine<X>(Vector<X>(f2._g),c1+f2._c); }
+//! \relates Affine
+//! \brief Subtraction of a constant to an affine expression.
+template<class X> inline Affine<X> operator-(const Affine<X>& f1, const X& c2) {
+    return Affine<X>(Vector<X>(f1._g),f1._c-c2); }
+//! \relates Affine
+//! \brief Subtraction of an affine expression from a constant.
+template<class X> inline Affine<X> operator-(const X& c1, const Affine<X>& f2) {
+    return Affine<X>(Vector<X>(-f2._g),c1-f2._c); }
 //! \relates Affine
 //! \brief Scalar multiplication of an affine expression.
 template<class X> inline Affine<X> operator*(const X& c, const Affine<X>& f) {

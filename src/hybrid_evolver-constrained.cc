@@ -428,9 +428,9 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     HybridEnclosure final_set(reached_set);
     HybridEnclosure progress_set(reached_set);
 
-    reached_set.set_maximum_time(final_time_event,maximum_time);
+    reached_set.bound_time(maximum_time);
     ARIADNE_LOG(4,"reached_set:"<<reached_set<<"\n");
-    final_set.set_time(final_time_event,maximum_time);
+    final_set.set_time(maximum_time);
     ARIADNE_LOG(4,"final_set:"<<final_set<<"\n");
     ARIADNE_LOG(4,"final_set.empty():"<<final_set.empty()<<"\n");
 

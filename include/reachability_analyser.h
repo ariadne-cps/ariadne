@@ -257,15 +257,15 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
 
-	/*! \brief Verify whether the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
-	bool _safe(const SystemType& system, 
-			   const HybridImageSet& initial_set, 
-			   const HybridBoxes& safe_box);
+	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
+	bool _prove(const SystemType& system,
+			    const HybridImageSet& initial_set,
+			    const HybridBoxes& safe_box);
 
-	/*! \brief Verify whether the automaton \a system starting in \a initial_set possibly exits the \a safe_box. */	
-	bool _unsafe(const SystemType& system, 
-			 	 const HybridImageSet& initial_set, 
-				 const HybridBoxes& safe_box);
+	/*! \brief Disprove that the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
+	bool _disprove(const SystemType& system,
+			 	   const HybridImageSet& initial_set,
+				   const HybridBoxes& safe_box);
 
 	/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach statistics. 
 		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */

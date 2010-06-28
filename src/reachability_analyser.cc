@@ -208,8 +208,6 @@ HybridReachabilityAnalyser::_upper_reach_evolve_continuous(const HybridAutomaton
                                                 		   const HybridTime& time,
                                                 		   const int accuracy) const
 {
-    ARIADNE_LOG(6,"HybridReachabilityAnalyser::_upper_reach_evolve_continuous(...)\n");
-
 	// Get the actual concurrency
 	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
 
@@ -620,6 +618,8 @@ upper_chain_reach(const SystemType& system,
         for (HybridGrid::locations_const_iterator grid_it = grid.locations_begin(); grid_it != grid.locations_end(); grid_it++)
         	currentLocationsInUse[grid_it->first] = false;
 
+        ARIADNE_LOG(6,"Initial enclosures size = " << initial_enclosures.size() << "\n");
+
 		// Evolve the initial enclosures
         make_lpair(new_reach,new_final)=_upper_reach_evolve_continuous(system,initial_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
 		// Clear the initial enclosures
@@ -663,10 +663,11 @@ upper_chain_reach(const SystemType& system,
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
 		for (GTS::const_iterator cell_it = new_reach.begin(); cell_it != new_reach.end(); cell_it++)
 		{
-			// If the cell lies outside the bounding domain (i.e. not inside nor disjoint), ignore it
+			// If the cell lies outside the bounding domain (i.e. not inside and disjoint), ignore it and notify
 			if (!cell_it->second.box().inside(_parameters->bounding_domain[cell_it->first]) &&
-				!cell_it->second.box().disjoint(_parameters->bounding_domain[cell_it->first])) {
+				cell_it->second.box().disjoint(_parameters->bounding_domain[cell_it->first])) {
 				ARIADNE_LOG(7,"Discarding enclosure from reach cell outside the domain.\n");
+				_statistics->upper().has_restriction_occurred = true;
 				continue;
 			}
 
@@ -695,8 +696,6 @@ upper_chain_reach(const SystemType& system,
             	}	
 			}
 		}
-
-		ARIADNE_LOG(6,"Enclosures size after transition checking = "<<initial_enclosures.size()<<"\n");
 
 		// Adjoin to the accumulated reach and intermediate cells
         reach.adjoin(new_reach);
@@ -757,8 +756,8 @@ lower_chain_reach(const SystemType& system,
 
     ARIADNE_LOG(5,"Computing recurrent evolution...\n");
 
-	// Perform loop
-	for (uint i=0;;i++)
+	// Perform an infinite loop (exception taken if no initial enclosures exist)
+	for (uint i=0;!initial_enclosures.empty();i++)
 	{
 		ARIADNE_LOG(5,"Iteration " << i << "\n");
 
@@ -798,6 +797,8 @@ lower_chain_reach(const SystemType& system,
 		// Otherwise proceed and adjoin the new reach
 		reach.adjoin(new_reach);
 
+		ARIADNE_LOG(6,"Final enclosures size = " << final_enclosures.size() << "\n");
+
 		// Pruning of the dump of the final enclosures into the initial enclosures
 		while (!final_enclosures.empty())
 		{
@@ -808,11 +809,12 @@ lower_chain_reach(const SystemType& system,
 			// Get the location
 			const DiscreteState& loc = encl.location();
 
-			/* If the enclosure lies outside the bounding domain (i.e. not inside nor disjoint), then the
+			/* If the enclosure lies outside the bounding domain (i.e. not inside and disjoint), then the
 			 * domain is not proper and an error should be thrown. */
 			if (!encl.continuous_state_set().bounding_box().inside(_parameters->bounding_domain[loc]) &&
-				!encl.continuous_state_set().bounding_box().disjoint(_parameters->bounding_domain[loc])) {
-				ARIADNE_FAIL_MSG("Found an enclosure lying outside the domain in lower semantics: the domain is incorrect.\n");
+				encl.continuous_state_set().bounding_box().disjoint(_parameters->bounding_domain[loc])) {
+				ARIADNE_FAIL_MSG("Found an enclosure with bounding box " << encl.continuous_state_set().bounding_box() <<
+								 " lying outside the domain in lower semantics: the domain is incorrect.\n");
 			}
 
 			/* If pruning is to be performed, push just a fraction of the final_enclosures into the initial_enclosures;
@@ -850,34 +852,25 @@ viable(const SystemType& system,
 
 bool 
 HybridReachabilityAnalyser::
-_safe(const SystemType& system, 
-	  const HybridImageSet& initial_set, 
-	  const HybridBoxes& safe_box)
+_prove(const SystemType& system,
+	   const HybridImageSet& initial_set,
+	   const HybridBoxes& safe_box)
 {
-	ARIADNE_LOG(4,"Safety analysis...\n");
+	ARIADNE_LOG(4,"Proving...\n");
 
 	HybridGridTreeSet reach = upper_chain_reach(system,initial_set); // Perform the chain reachability analysis
 
 	// Get the bounds of the reach set
 	HybridBoxes bounds = reach.bounding_box();
 
-	// Check for each location that the bounds are included into the domain
-	bool is_inside_domain = true; // Initial value for the reached set being inside the domain
-	for (HybridBoxes::const_iterator loc_it = bounds.begin(); loc_it != bounds.end(); loc_it++) {
-		if (!(loc_it->second.subset(_parameters->bounding_domain[loc_it->first]))) {
-			is_inside_domain = false;
-			break;
-		}
-	}
-
-	// If the reached region is inside the domain, perform checking, otherwise return false
-	if (is_inside_domain) {
-		// If the reached region is definitely inside the hybrid safe box, the result is safe 
+	// If the reached region has not been restricted, perform checking, otherwise return false
+	if (!_statistics->upper().has_restriction_occurred) {
+		// If the reached region is definitely inside the hybrid safe box, the safety property is proved
 		bool result = definitely(reach.subset(safe_box));
-		ARIADNE_LOG(4, (result ? "Safe.\n" : "Not safe.\n") );
+		ARIADNE_LOG(4, (result ? "Proved.\n" : "Not proved.\n") );
 		return result;
 	} else {
-		ARIADNE_LOG(4,"Not checked due to domain bounds.\n");
+		ARIADNE_LOG(4,"Not checked due to restriction inside the domain.\n");
 		return false;
 	}
 }
@@ -885,11 +878,11 @@ _safe(const SystemType& system,
 
 bool 
 HybridReachabilityAnalyser::
-_unsafe(const SystemType& system, 
-		const HybridImageSet& initial_set, 
-		const HybridBoxes& safe_box)
+_disprove(const SystemType& system,
+		  const HybridImageSet& initial_set,
+		  const HybridBoxes& safe_box)
 {
-	ARIADNE_LOG(4,"Unsafety analysis...\n");
+	ARIADNE_LOG(4,"Disproving...\n");
 
 	// Get the size of the continuous space (NOTE: assumed equal for all locations)
 	const uint css = system.state_space().locations_begin()->second; 
@@ -901,7 +894,7 @@ _unsafe(const SystemType& system,
 
 	if (lowerreach.size() > 0)
 	{
-		// Create a safe set enlarged for the falsification
+		// Create a safe set enlarged for the disproving
 		HybridBoxes safe_box_enl = safe_box;
 		for (HybridBoxes::iterator hbx_it = safe_box_enl.begin(); hbx_it != safe_box_enl.end(); hbx_it++)
 			hbx_it->second.widen();
@@ -916,7 +909,7 @@ _unsafe(const SystemType& system,
 		// If the reach is definitely not included in the enlarged safe box, then it is unsafe
 		bool result = definitely(!lowerreach.subset(safe_box_enl));
 
-		ARIADNE_LOG(4, (result ? "Unsafe.\n" : "Not unsafe.\n") );
+		ARIADNE_LOG(4, (result ? "Disproved.\n" : "Not disproved.\n") );
 
 		return result;
 	}
@@ -933,15 +926,15 @@ verify(const SystemType& system,
 {
 		ARIADNE_LOG(3, "Verification...\n");
 
-		// Perform the safety analysis
-		if (_safe(system,initial_set,safe_box))
+		// Perform the proving
+		if (_prove(system,initial_set,safe_box))
 		{
 			ARIADNE_LOG(3, "Safe.\n");
 			return true;
 		}
 
-		// Perform the unsafety analysis
-		if (_unsafe(system,initial_set,safe_box))
+		// Perform the disproving
+		if (_disprove(system,initial_set,safe_box))
 		{
 			ARIADNE_LOG(3, "Unsafe.\n");
 			return false;
@@ -1103,10 +1096,16 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 	// Initialize the hybrid grid
 	HybridGrid hg;	
 
-	// Keep the minimum non-zero length for each variable on each location
-	std::map<DiscreteState,Vector<Float> > minNonZeroLengths;
+	// Initialize the hybrid grid lengths
+	std::map<DiscreteState,Vector<Float> > hybridgridlengths;
 
-	// For each couple DiscreteState,Vector<Float>
+	// Keep the minimum non-zero length for each variable
+	Vector<Float> minNonZeroLengths(css);
+	// Initialize the values to infinity
+	for (uint i=0;i<css;i++)
+		minNonZeroLengths[i] = std::numeric_limits<double>::infinity();
+
+	// Get the grid lengths from the derivatives
 	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
 	{
 		// Keep the location
@@ -1114,34 +1113,38 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 		// Keep the domain box
 		const Box& domain_box = _parameters->bounding_domain.find(loc)->second;
 
+		// Initialize the lengths
+		Vector<Float> gridlengths(css);
+
 		// Initialize the maximum derivative/domain_width ratio among variables
 		Float maxratio = 0.0;
-		// Initialize the gridlengths
-		Vector<Float> gridlengths(css);
-		// Initialize the minimum lengths to use for zero-derivative variables as the domain box widths
-		Float minlength =  std::numeric_limits<double>::infinity();
 
 		// For each dimension of the continuous space
 		for (uint i=0;i<css;i++)
-		{	
 			maxratio = max(maxratio,hfv_it->second[i]/domain_box[i].width()); // Get the largest ratio
-			minlength = min(minlength,domain_box[i].width()); // Get the smallest domain width
-		}
 
 		// Assign the lengths and check the minimum length to be assigned
 		for (uint i=0;i<css;i++)
 		{
-			if (hfv_it->second[i] > 0) // If the derivative is greater than zero
-			{
-				gridlengths[i] = hfv_it->second[i]/maxratio; // Assign the length
-				minlength = min(minlength,gridlengths[i]); // Reduce the minimum length by comparing it to the current grid length
+			// Update the minimum in respect to the domain width
+			minNonZeroLengths[i] = min(minNonZeroLengths[i],domain_box[i].width());
+			// If the derivative is greater than zero, get the grid length and update the minimum in respect to the grid length
+			if (hfv_it->second[i] > 0) {
+				gridlengths[i] = hfv_it->second[i]/maxratio;
+				minNonZeroLengths[i] = min(minNonZeroLengths[i],hfv_it->second[i]/maxratio);
 			}
 		}
 
-		// Assign the minimum length for zero-derivative variables
-		for (uint i=0;i<css;i++)
-			if (gridlengths[i] == 0) // If it has zero grid length, assign minlength
-				gridlengths[i] = minlength;
+		// Add the pair to the hybrid lengths
+		hybridgridlengths.insert(make_pair<DiscreteState,Vector<Float> >(loc,gridlengths));
+	}
+
+	// Now that the minimum lengths have been evaluated, we can assign the lengths in those cases where the variables
+	// have zero derivative, then complete the construction of the hybrid grid
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) {
+
+		// Keep the location
+		const DiscreteState& loc = hfv_it->first;
 
 		/* Choose the center for the grid: the center of the reached region, if a non-empty reached region exists,
 		 * otherwise the center of the domain box */
@@ -1149,76 +1152,21 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 		if (_statistics->upper().reach.has_location(loc) && !_statistics->upper().reach[loc].empty()) {
 			centre = _statistics->upper().reach[loc].bounding_box().centre();
 		} else {
-			centre = domain_box.centre();
-		}
-		hg[loc] = Grid(centre,gridlengths);
-	}
-
-	// Return
-	return hg;
-}
-
-/*
-HybridGrid
-HybridReachabilityAnalyser::
-_getHybridGrid(const HybridFloatVector& hmad) const
-{
-	// Get the size of the continuous space (NOTE: taken as equal for all locations)
-	const uint css = hmad.begin()->second.size();
-
-	// Initialize the hybrid grid
-	HybridGrid hg;
-
-	// For each couple DiscreteState,Vector<Float>
-	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-	{
-		// Keep the location
-		const DiscreteState& loc = hfv_it->first;
-
-		// Initialize the maximum derivative/domain_width ratio
-		Float maxratio = 0.0;
-		// Initialize the gridlengths
-		Vector<Float> gridlengths(css);
-		// Initialize the minimum length to use for zero-derivative variables (will be the minimum among both grid lengths and domain widths)
-		Float minlength = std::numeric_limits<double>::infinity();
-
-		// For each dimension of the continuous space
-		for (uint i=0;i<css;i++)
-		{
-			maxratio = max(maxratio,hfv_it->second[i]/_parameters->bounding_domain.find(loc)->second[i].width()); // Get the largest ratio
-			minlength = min(minlength,_parameters->bounding_domain.find(loc)->second[i].width()); // Get the smallest domain width
-		}
-
-		// Assign the lengths and check the minimum length to be assigned
-		for (uint i=0;i<css;i++)
-		{
-			if (hfv_it->second[i] > 0) // If the derivative is greater than zero
-			{
-				gridlengths[i] = hfv_it->second[i]/maxratio; // Assign the length
-				minlength = min(minlength,gridlengths[i]); // Reduce the minimum length by comparing it to the current grid length
-			}
-		}
-
-		// Assign the minimum length for zero-derivative variables
-		for (uint i=0;i<css;i++)
-			if (gridlengths[i] == 0) // If it has zero grid length, assign minlength
-				gridlengths[i] = minlength;
-
-		// Choose the center for the grid: the center of the reached region, if a non-empty reached region exists,
-		// otherwise the center of the domain
-		Vector<Float> centre(css);
-		if (_statistics->upper().reach.has_location(loc) && !_statistics->upper().reach[loc].empty()) {
-			centre = _statistics->upper().reach[loc].bounding_box().centre();
-		} else {
 			centre = _parameters->bounding_domain.find(loc)->second.centre();
 		}
-		hg[loc] = Grid(centre,gridlengths);
+
+		// For each variable having zero length, assign the minimum value
+		for (uint i=0;i<css;i++)
+			if (hybridgridlengths[loc][i] == 0)
+				hybridgridlengths[loc][i] = minNonZeroLengths[i];
+
+		// Add the related grid
+		hg[loc] = Grid(centre,hybridgridlengths[loc]);
 	}
 
 	// Return
 	return hg;
 }
-*/
 
 
 HybridGrid 
@@ -1231,7 +1179,7 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 	// Initialize the maximum derivative/domain_width ratio
 	Float maxratio = 0.0;
 	// Initialize the minimum length to use for zero-derivative variables
-	Float minlength = std::numeric_limits<double>::infinity();
+	Vector<Float> minlengths(css,std::numeric_limits<double>::infinity());
 	// Initialize the gridlengths
 	Vector<Float> gridlengths(css);		
 	// Initialize the maximum absolute derivatives
@@ -1239,7 +1187,6 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 
 	// Get the maximum absolute derivatives
 	for (uint i=0;i<css;i++)
-		// For each couple DiscreteState,Vector<Float>
 		for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
 			mad[i] = max(mad[i],hfv_it->second[i]);
 
@@ -1249,25 +1196,12 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 		for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
 		{
 			maxratio = max(maxratio,mad[i]/_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Check for maximum ratio
-			minlength = min(minlength,_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the minimum domain length
+			minlengths[i] = min(minlengths[i],_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the minimum domain length
 		}
 
-	// Assign the lengths and checks the minimum length to be assigned
+	// Assign the lengths
 	for (uint i=0;i<css;i++)
-	{
-		// If the derivative is greater than zero
-		if (mad[i] > 0)
-		{	
-			gridlengths[i] = mad[i]/maxratio; // Assign the length
-			minlength = min(minlength,gridlengths[i]); // Get the minimum between the current minimum and the current length
-		}		
-	}
-
-	// Correct the lengths that are zero
-	for (uint i=0;i<css;i++)
-		// If it has zero grid length, assign minlength
-		if (gridlengths[i] == 0)
-			gridlengths[i] = minlength;
+		gridlengths[i] = (mad[i] > 0) ? mad[i]/maxratio : minlengths[i];
 
 	// Initialize the hybrid grid
 	HybridGrid hg;
@@ -1305,16 +1239,16 @@ _tuneParameters(SystemType& system)
 
 	// Evaluate the maximum absolute derivatives
 	HybridFloatVector hmad = _getHybridMaximumAbsoluteDerivatives(system);
-	ARIADNE_LOG(3, "Hybrid maximum absolute derivatives: " << hmad << "\n");
+	ARIADNE_LOG(3, "Maximum absolute derivatives: " << hmad << "\n");
 	// Grid
 	system.set_grid(_getHybridGrid(hmad));
-	ARIADNE_LOG(3, "Hybrid grid: " << system.grid() << "\n");
+	ARIADNE_LOG(3, "Grid: " << system.grid() << "\n");
 	// Maximum enclosure cell
 	_setMaximumEnclosureCell(system.grid());
 	ARIADNE_LOG(3, "Maximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
 	// Maximum step size
 	_setHybridMaximumStepSize(hmad,system.grid());
-	ARIADNE_LOG(3, "Hybrid maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
+	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
 }
 
 

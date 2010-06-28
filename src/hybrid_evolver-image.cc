@@ -283,12 +283,11 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 		// Get the range of the set model
 		Vector<Interval> initial_set_model_range=initial_set_model.range();
 
-		// Check whether the range widths can be included into the maximum_enclosure_cell (and enlarge the largest_enclosure_cell, if necessary)
+		// Check whether the range widths can be included into the maximum_enclosure_cell
 		bool has_max_enclosure_been_reached = false;
 		for (uint i=0;i<initial_set_model_range.size();++i) 
 		{
 			Float rangewidth = initial_set_model_range[i].width(); // Store the width
-			statistics.largest_enclosure_cell[i] = max(statistics.largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
 			// If larger than the maximum allowed
 			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
 				statistics.has_max_enclosure_been_reached = true; // Global information
@@ -405,14 +404,13 @@ _evolution(EnclosureListType& final_sets,
 		// Get the range of the set model
 		Vector<Interval> initial_set_model_range=initial_set_model.range();
 
-		// Check whether the range can be included into the maximum_enclosure_cell (and enlarge the largest_enclosure_cell, if necessary)
+		// Check whether the range can be included into the maximum_enclosure_cell
 		bool has_max_enclosure_been_reached = false;
 		Float maxratio = 0.0; // Hold the maximum ratio between the set width and the largest enclosure cell width
 		uint maxratio_dimension = -1; // Hold the dimension corresponding to the maximum ratio
 		for (uint i=0;i<initial_set_model_range.size();++i)
 		{
 			Float rangewidth = initial_set_model_range[i].width(); // Store the width
-			statistics.largest_enclosure_cell[i] = max(statistics.largest_enclosure_cell[i],rangewidth); // Enlarge the largest enclosure cell, if necessary
 			// If larger than the maximum allowed
 			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
 				// If a ratio greater than the current maximum is detected, update the maximum ratio information
@@ -610,6 +608,9 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     make_ltuple(location,events,set_model,time_model)=working_set;
     steps=events.size();
 
+	// Gets the proper statistics in respect to the semantics
+	CommonContinuousEvolutionStatistics& statistics = (semantics == UPPER_SEMANTICS) ? this->_statistics->upper() : this->_statistics->lower();
+
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
     const VectorFunction dynamic=mode.dynamic();
@@ -798,6 +799,15 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(4,"blocking_time_model="<<blocking_time_model<<"\n");
     SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,zero_time_model,blocking_time_model);
     reach_sets.adjoin(make_pair(location,reachable_set));
+
+    /* Update the largest enclosure set size in respect to the reachable set:
+     * a) Get the range;
+     * b) For each variable, update the largest enclosure cell with the width of the corresponding range.
+     */
+    Vector<Interval> reachable_set_range = reachable_set.range();
+    for (uint i=0;i<reachable_set_range.size();i++)
+    	statistics.largest_enclosure_cell[i] = max(statistics.largest_enclosure_cell[i],reachable_set_range[i].width());
+
 	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
     ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
     ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
@@ -1011,6 +1021,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
     ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
     ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
+
 	// Enlarge the largest enclosure cell, if necessary
 	for (uint i=0;i<reachable_set.size();++i)
 		this->_statistics->upper().largest_enclosure_cell[i] = max(this->_statistics->upper().largest_enclosure_cell[i],reachable_set[i].range().width());

@@ -793,7 +793,7 @@ Interval div(Interval i1, Interval i2)
     volatile double& i2l=const_cast<volatile double&>(i2.lower());
     volatile double& i2u=const_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
-    if(i2l>=0) {
+    if(i2l>0) {
         if(i1l>=0) {
             rl=_div_down(i1l,i2u); ru=_div_up(i1u,i2l);
         } else if(i1u<=0) {
@@ -802,7 +802,7 @@ Interval div(Interval i1, Interval i2)
             rl=_div_down(i1l,i2l); ru=_div_up(i1u,i2l);
         }
     }
-    else if(i2u<=0) {
+    else if(i2u<0) {
         if(i1l>=0) {
             rl=_div_down(i1u,i2u); ru=_div_up(i1l,i2l);
         } else if(i1u<=0) {

@@ -145,10 +145,26 @@ class ImageSetHybridEvolver
         reachable.adjoin(final);
         return make_pair<EnclosureListType,EnclosureListType>(reachable,final); }
 
+    //! \brief Compute an approximation to the evolution set under the given semantics, returning the reached and final sets, and the information
+    //! on having disproved.
+    tuple<EnclosureListType,EnclosureListType,bool> lower_chain_reach_evolve_disprove(const SystemType& system, const EnclosureType& initial_set,
+																					  const TimeType& time, const HybridBoxes& disprove_bounds,
+																					  const bool& skip_if_disproved) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        bool isDisproved = this->_lower_evolution_disprove(final,reachable,intermediate,system,initial_set,time,
+														   true,disprove_bounds,skip_if_disproved);
+        reachable.adjoin(final);
+        return make_tuple<EnclosureListType,EnclosureListType,bool>(reachable,final,isDisproved); }
+
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
+
+    virtual bool _lower_evolution_disprove(EnclosureListType& final, EnclosureListType& reachable,
+										   EnclosureListType& intermediate, const SystemType& system,
+										   const EnclosureType& initial, const TimeType& time, bool reach,
+										   const HybridBoxes& disprove_bounds, bool skip_if_disproved) const;
 
     virtual void _upper_evolution_continuous(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, bool reach) const;
@@ -163,6 +179,11 @@ class ImageSetHybridEvolver
                                   				  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                   				  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
 												  bool reach) const;
+
+    virtual bool _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
+												EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+												const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
+												bool reach, const HybridBoxes& disprove_bounds) const;
 
   protected:
     TimeModelType crossing_time(VectorFunction guard, const FlowSetModelType& flow_set) const;
@@ -196,6 +217,11 @@ class ImageSetHybridEvolver
                                   const TimeModelType& blocking_time_model,
                                   const Semantics sematics) const;
 
+  private:
+
+    bool _check_bounds(const uint& numDivisions,
+					   const TaylorSet& reachable_set,
+					   const Box& disprove_bounds) const;
 
   protected:
     // Special events

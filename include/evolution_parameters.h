@@ -207,17 +207,25 @@ class DiscreteEvolutionParameters {
     IntType maximum_grid_height;
 
     //! \brief Set the allowed bounding domain for chain reachability computations.
-	//! \details
-    //! Please note that the box is ultimately outer approximated on the grid, therefore the HybridBoxes does not represent a strict bounding on the HybridGridTreeSet resulting from computation.
     //! <br>
-	//! This parameters is only used in the chain_reach() routine.
+	//! This parameters is only used in the chain_reach() routines.
     HybridBoxes bounding_domain;
+
+    //! \brief The safe region that synthesizes a reachability property.
+	//! <br>
+	//! This parameters is only used in the chain_reach() routines.
+    HybridBoxes safe_region;
 
 	//! \brief Enables the pruning of the trajectories when too large (false by default).
     //! \details The pruning is done probabilistically.
 	//! <br>
     //! This parameter is used only under lower semantics.
 	bool enable_lower_pruning;
+
+	//! \brief Skips further evolution if the system is disproved.
+	//! <br>
+	//! This parameter is used only for lower_chain_reach and underlying evolution routines.
+	bool skip_if_disproved;
 
 };
 
@@ -253,7 +261,8 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
 	  lowest_maximum_grid_depth(0),
 	  highest_maximum_grid_depth(9),
       maximum_grid_height(16),
-	  enable_lower_pruning(false)
+	  enable_lower_pruning(false),
+	  skip_if_disproved(true)
 { }
 
 
@@ -295,7 +304,9 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
-
+       << ",\n  safe_region=" << p.safe_region
+       << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
+       << ",\n  skip_if_disproved=" << p.skip_if_disproved
        << "\n)\n";
     return os;
 }
@@ -327,6 +338,9 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
+       << ",\n  safe_region=" << p.safe_region
+       << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
+       << ",\n  skip_if_disproved=" << p.skip_if_disproved
 
        << "\n)\n";
     return os;

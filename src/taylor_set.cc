@@ -251,8 +251,20 @@ TaylorSet::overlaps(const Box& bx) const
 tribool
 TaylorSet::inside(const Box& bx) const
 {
-    Vector<Interval> bb=this->bounding_box();
-    return Ariadne::inside(bb,bx) || indeterminate;
+    //Vector<Interval> bb=this->bounding_box();
+    //return tribool(Ariadne::inside(bb,bx)) || indeterminate;
+
+	Vector<Interval> bb=this->bounding_box();
+
+	// If the bounding box is inside, then all points of the TaylorSet are inside
+	// Similarly, if the bounding box is not inside and is disjoint, then all points of the TaylorSet are outside and
+	// consequently not inside
+	if (Ariadne::inside(bb,bx))
+		return true;
+	else if (Ariadne::disjoint(bb,bx))
+		return false;
+	else
+		return indeterminate;
 }
 
 

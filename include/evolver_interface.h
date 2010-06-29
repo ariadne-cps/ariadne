@@ -56,7 +56,6 @@ class EvolverInterface
     typedef typename SystemType::TimeType TimeType;
     typedef ListSet<EnclosureType> EnclosureListType;
 	typedef ContinuousEvolutionParameters EvolutionParametersType;
-	typedef ContinuousEvolutionStatistics EvolutionStatisticsType;
 
 
     //! \brief Virtual destructor. 
@@ -67,12 +66,6 @@ class EvolverInterface
 
     //! \brief Write to an output stream. 
     virtual std::ostream& write(std::ostream& os) const = 0;
-
-	//! \brief Set the statistics of the evolution.
-	virtual EvolutionStatisticsType& statistics() = 0;
-
-	//! \brief Get the statistics of the evolution.
-    virtual const EvolutionStatisticsType& statistics() const = 0;
 
 	//! \brief Set the parameters of the evolution.
 	virtual EvolutionParametersType& parameters() = 0;
@@ -120,6 +113,15 @@ class EvolverInterface
                  const EnclosureType& initial_set, 
                  const TimeType& time, 
                  Semantics semantics) const = 0;
+
+    //! \brief Compute an approximation to the evolved and reachable sets under lower semantics for chain reachability,
+    //! where the disproving result is provided.
+    virtual
+    tuple<EnclosureListType,EnclosureListType,bool>
+    lower_chain_reach_evolve_disprove(const SystemType& system,
+									  const EnclosureType& initial_set,
+									  const TimeType& time, const HybridBoxes& disprove_bounds,
+									  const bool& skip_if_disproved) const = 0;
   
     //! \brief Compute an approximation to the evolved set under the given semantics. 
     virtual 

@@ -120,6 +120,13 @@ class VectorFieldEvolver
         this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
         return reachable; }
 
+    //! \brief Compute an approximation to the evolution set under the given semantics, returning the reached and final sets, and the information
+    //! on having disproved.
+    tuple<EnclosureListType,EnclosureListType,bool> lower_chain_reach_evolve_disprove(const SystemType& system, const EnclosureType& initial_set,
+    																					  const TimeType& time, const HybridBoxes& disprove_bounds,
+    																					  const bool& skip_if_disproved) const {
+            ARIADNE_NOT_IMPLEMENTED; }
+
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, 

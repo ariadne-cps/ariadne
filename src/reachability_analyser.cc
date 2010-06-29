@@ -235,8 +235,6 @@ lower_evolve(const SystemType& system,
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::lower_evolve(...)\n");
 
-	_discretiser->reset_lower_statistics(); // Resets the continuous statistics
-
     GTS evolve;
 
     // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
@@ -260,9 +258,6 @@ lower_reach(const SystemType& system,
             const TimeType& time) const
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::lower_reach(...)\n");
-
-	_statistics->lower().reset(); // Reset the discrete statistics
-	_discretiser->reset_lower_statistics(); // Reset the continuous statistics
 
     // The reached region
     GTS reach(system.grid());
@@ -291,9 +286,6 @@ lower_reach_evolve(const SystemType& system,
                    const TimeType& time) const
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::lower_reach_evolve(...)\n");
-
-	_statistics->lower().reset(); // Resets the discrete statistics
-	_discretiser->reset_lower_statistics(); // Resets the continuous statistics
 
 	// The reached and evolved regions
     GTS reach; GTS evolve;
@@ -356,9 +348,6 @@ upper_reach_evolve(const SystemType& system,
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
-
-	_statistics->upper().reset(); // Reset the discrete statistics
-	_discretiser->reset_upper_statistics(); // Reset the continuous statistics
 
     Gr grid=system.grid();
     GTS found(grid),evolve(grid),reach(grid);
@@ -425,10 +414,6 @@ chain_reach(const SystemType& system,
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::chain_reach(system,initial_set)\n");
 
-	// Reset statistics
-	_statistics->upper().reset();
-	_discretiser->reset_upper_statistics();
-
 	// Assign local variables
     HybridBoxes bounding_domain = _parameters->bounding_domain;
     Float transient_time = _parameters->transient_time;
@@ -476,10 +461,6 @@ chain_reach(const SystemType& system,
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
-	 
-    // If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-	if (!_statistics->upper().has_restriction_occurred)
-		if (!evolve.subset(bounding_box)) _statistics->upper().has_restriction_occurred = true;
 
     evolve.restrict(bounding);
 
@@ -499,10 +480,6 @@ chain_reach(const SystemType& system,
         ARIADNE_LOG(6,"found.size()="<<found.size()<<"\n");
         ARIADNE_LOG(6,"evolve.size()="<<evolve.size()<<"\n");
 
-		// If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-		if (!_statistics->upper().has_restriction_occurred)
-			if (!evolve.subset(bounding_box)) _statistics->upper().has_restriction_occurred = true;
-
         evolve.remove(intermediate); // Remove only the cells that are intermediate
         evolve.restrict(bounding);
         reach.adjoin(found);
@@ -510,10 +487,6 @@ chain_reach(const SystemType& system,
         ARIADNE_LOG(6,"found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
     }
     reach.recombine();
-
-    // If the evolve region is not a subset of the bounding region, the region will be restricted (NOTE: for efficiency, only performed if the region is currently considered unrestricted)
-	if (!_statistics->upper().has_restriction_occurred)
-		if (!evolve.subset(bounding_box)) _statistics->upper().has_restriction_occurred = true;
 
     reach.restrict(bounding);
 	_statistics->upper().reach = reach;
@@ -535,14 +508,13 @@ chain_reach(const SystemType& system,
 }
 
 
-HybridReachabilityAnalyser::SetApproximationType
+std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
 HybridReachabilityAnalyser::
 upper_chain_reach(const SystemType& system,
             const HybridImageSet& initial_set) const
 {
-	// Reset statistics
-	_statistics->upper().reset();
-	_discretiser->reset_upper_statistics();
+	// Initialize the validity flag (will be invalidated if any restriction of the reached region is performed)
+	bool isValid = true;
 
 	// Helper class for operations on Taylor sets
 	TaylorCalculus tc;
@@ -667,7 +639,7 @@ upper_chain_reach(const SystemType& system,
 			if (!cell_it->second.box().inside(_parameters->bounding_domain[cell_it->first]) &&
 				cell_it->second.box().disjoint(_parameters->bounding_domain[cell_it->first])) {
 				ARIADNE_LOG(7,"Discarding enclosure from reach cell outside the domain.\n");
-				_statistics->upper().has_restriction_occurred = true;
+				isValid = false;
 				continue;
 			}
 
@@ -726,19 +698,16 @@ upper_chain_reach(const SystemType& system,
 
 	ARIADNE_LOG(5,"Found a total of " << reach.size() << " reached cells.\n");
 
-    return reach;
+    return make_pair<GTS,bool>(reach,isValid);
 }
 
-HybridReachabilityAnalyser::SetApproximationType
+std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
 HybridReachabilityAnalyser::
 lower_chain_reach(const SystemType& system,
 				  const HybridImageSet& initial_set) const
 {
 	typedef std::list<EnclosureType> EL;
 	typedef std::map<DiscreteState,uint> HUM;
-
-	_statistics->lower().reset(); // Reset the discrete statistics
-	_discretiser->reset_lower_statistics(); // Reset the continuous statistics
 
 	// Get the actual concurrency
 	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
@@ -750,6 +719,19 @@ lower_chain_reach(const SystemType& system,
 
 	// Get the lock time, in the case pruning is to be performed
 	TimeType lock_time(_parameters->lock_to_grid_time,_parameters->lock_to_grid_steps);
+
+	// Get the widened safe hybrid box
+	HybridBoxes disprove_bounds;
+	for (HybridBoxes::const_iterator loc_it = _parameters->safe_region.begin(); loc_it != _parameters->safe_region.end(); loc_it++) {
+		// Copy the related box and widen it
+		Box bx = loc_it->second;
+		bx.widen();
+		// Insert the couple with widened box
+		disprove_bounds.insert(make_pair<DiscreteState,Box>(loc_it->first,bx));
+	}
+
+    // The disproving result
+    bool isDisproved = false;
 
     // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
     EL initial_enclosures = _split_initial_set(initial_set,system.grid());
@@ -764,24 +746,34 @@ lower_chain_reach(const SystemType& system,
 		// The final enclosures
 		EL final_enclosures;
 
+		// The evolve sizes resulting from evolution
+		std::pair<HUM,HUM> evolve_sizes;
+
 		// The sizes of the adjoined (the cells) or superposed (the enclosures) evolve
-		std::map<DiscreteState,uint> adjoined_evolve_sizes;
-		std::map<DiscreteState,uint> superposed_evolve_sizes;
+		HUM& adjoined_evolve_sizes = evolve_sizes.first;
+		HUM& superposed_evolve_sizes = evolve_sizes.second;
+
 		// The evolve
 		GTS evolve;
 		// The new reach
 		GTS new_reach;
+		// The new disproving result
+		bool new_isDisproved = false;
 
 		ARIADNE_LOG(6,"Initial enclosures size = " << initial_enclosures.size() << "\n");
 
 		// Create the worker
-		LowerReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
-								_parameters->maximum_grid_depth,concurrency);
+		LowerChainReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
+									 _parameters->maximum_grid_depth,concurrency, disprove_bounds, _parameters->skip_if_disproved);
 
 		ARIADNE_LOG(6,"Evolving and discretising...\n");
 
 		// Compute and get the result
-		make_ltuple<HUM,HUM,EL,GTS>(adjoined_evolve_sizes,superposed_evolve_sizes,final_enclosures,new_reach) = worker.get_result();
+		make_ltuple<std::pair<HUM,HUM>,EL,GTS,bool>(evolve_sizes,final_enclosures,
+																new_reach,new_isDisproved) = worker.get_result();
+
+		// Update the disproving result flag
+		isDisproved = isDisproved || new_isDisproved;
 
 		ARIADNE_LOG(6,"Reach size before removal = " << new_reach.size() << "\n");
 
@@ -837,7 +829,7 @@ lower_chain_reach(const SystemType& system,
 	// Copies the reached region
 	_statistics->lower().reach = reach;
 
-	return reach;
+	return make_pair<GTS,bool>(reach,isDisproved);
 }
 
 
@@ -853,20 +845,24 @@ viable(const SystemType& system,
 bool 
 HybridReachabilityAnalyser::
 _prove(const SystemType& system,
-	   const HybridImageSet& initial_set,
-	   const HybridBoxes& safe_box)
+	   const HybridImageSet& initial_set)
 {
 	ARIADNE_LOG(4,"Proving...\n");
 
-	HybridGridTreeSet reach = upper_chain_reach(system,initial_set); // Perform the chain reachability analysis
+	// The reachable set
+	HybridGridTreeSet reach;
+	// The flag that informs whether the region is valid for proving
+	bool isValid;
+
+	make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set); // Perform the chain reachability analysis
 
 	// Get the bounds of the reach set
 	HybridBoxes bounds = reach.bounding_box();
 
-	// If the reached region has not been restricted, perform checking, otherwise return false
-	if (!_statistics->upper().has_restriction_occurred) {
-		// If the reached region is definitely inside the hybrid safe box, the safety property is proved
-		bool result = definitely(reach.subset(safe_box));
+	// If the reached region is valid (i.e. it has not been restricted), perform checking, otherwise return false
+	if (isValid) {
+		// If the reached region is definitely inside the hybrid safe region, the safety property is proved
+		bool result = definitely(reach.subset(_parameters->safe_region));
 		ARIADNE_LOG(4, (result ? "Proved.\n" : "Not proved.\n") );
 		return result;
 	} else {
@@ -879,62 +875,41 @@ _prove(const SystemType& system,
 bool 
 HybridReachabilityAnalyser::
 _disprove(const SystemType& system,
-		  const HybridImageSet& initial_set,
-		  const HybridBoxes& safe_box)
+		  const HybridImageSet& initial_set)
 {
 	ARIADNE_LOG(4,"Disproving...\n");
 
-	// Get the size of the continuous space (NOTE: assumed equal for all locations)
-	const uint css = system.state_space().locations_begin()->second; 
+	// The reach
+	HybridGridTreeSet reach;
+	// The flag which notifies if the system has been disproved
+	bool isDisproved;
 
-	// Get the lower reach
-	HybridGridTreeSet lowerreach = lower_chain_reach(system,initial_set);
+	// Get the result
+	make_lpair<HybridGridTreeSet,bool>(reach,isDisproved) = lower_chain_reach(system,initial_set);
 
-	ARIADNE_LOG(5, "Largest enclosure cell: " << _discretiser->statistics().lower().largest_enclosure_cell << "\n");
+	// Notify
+	ARIADNE_LOG(4, (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
 
-	if (lowerreach.size() > 0)
-	{
-		// Create a safe set enlarged for the disproving
-		HybridBoxes safe_box_enl = safe_box;
-		for (HybridBoxes::iterator hbx_it = safe_box_enl.begin(); hbx_it != safe_box_enl.end(); hbx_it++)
-			hbx_it->second.widen();
-
-		// Get a copy of the grid
-		HybridGrid hg = system.grid();
-		// Get the safe box enlarged by a grid cell and half a maximum enclosure cell
-		for (HybridGrid::locations_const_iterator hg_it = hg.locations_begin(); hg_it != hg.locations_end(); hg_it++)
-			for (uint i=0;i<css;i++)
-				safe_box_enl[hg_it->first][i] += Interval(-_discretiser->statistics().lower().largest_enclosure_cell[i]/2,_discretiser->statistics().lower().largest_enclosure_cell[i]/2)+Interval(-hg_it->second.lengths()[i],hg_it->second.lengths()[i])/(1<<_parameters->maximum_grid_depth);
-
-		// If the reach is definitely not included in the enlarged safe box, then it is unsafe
-		bool result = definitely(!lowerreach.subset(safe_box_enl));
-
-		ARIADNE_LOG(4, (result ? "Disproved.\n" : "Not disproved.\n") );
-
-		return result;
-	}
-	else
-		return false;
+	return isDisproved;
 }
 
 
 tribool
 HybridReachabilityAnalyser::
 verify(const SystemType& system,
-       const HybridImageSet& initial_set,
-       const HybridBoxes& safe_box)
+       const HybridImageSet& initial_set)
 {
 		ARIADNE_LOG(3, "Verification...\n");
 
 		// Perform the proving
-		if (_prove(system,initial_set,safe_box))
+		if (_prove(system,initial_set))
 		{
 			ARIADNE_LOG(3, "Safe.\n");
 			return true;
 		}
 
 		// Perform the disproving
-		if (_disprove(system,initial_set,safe_box))
+		if (_disprove(system,initial_set))
 		{
 			ARIADNE_LOG(3, "Unsafe.\n");
 			return false;
@@ -1216,10 +1191,12 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 
 void 
 HybridReachabilityAnalyser::
-_setInitialParameters(SystemType& system, const HybridBoxes& domain)
+_setInitialParameters(SystemType& system, const HybridBoxes& domain, const HybridBoxes& safe_region)
 {
 	// Set the domain
 	_parameters->bounding_domain = domain;
+	// Set the safe region
+	_parameters->safe_region = safe_region;
 }
 
 
@@ -1256,7 +1233,7 @@ tribool
 HybridReachabilityAnalyser::
 verify_iterative(SystemType& system, 
 				 const HybridImageSet& initial_set, 
-				 const HybridBoxes& safe_box, 
+				 const HybridBoxes& safe,
 				 const HybridBoxes& domain)
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
@@ -1278,7 +1255,7 @@ verify_iterative(SystemType& system,
 	}
 
 	// Set the initial parameters
-	_setInitialParameters(system, domain);
+	_setInitialParameters(system, domain, safe);
 
     for(_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth;
     	_parameters->maximum_grid_depth <= _parameters->highest_maximum_grid_depth;
@@ -1291,7 +1268,7 @@ verify_iterative(SystemType& system,
 		_tuneParameters(system);
 
 		// Perform the verification
-		tribool result = verify(system,initial_set,safe_box);
+		tribool result = verify(system,initial_set);
 
 		// Plot the results, if desired
 		if (plot_verify_results)
@@ -1318,7 +1295,7 @@ Interval
 HybridReachabilityAnalyser::
 safety_parametric(SystemType& system, 
 				  const HybridImageSet& initial_set, 
-				  const HybridBoxes& safe_box, 
+				  const HybridBoxes& safe,
 				  const HybridBoxes& domain,
 				  const RealConstant& parameter,
 				  const Interval& parameter_interval,
@@ -1336,7 +1313,7 @@ safety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool lower_result = verify_iterative(system,initial_set,safe_box,domain);
+	tribool lower_result = verify_iterative(system,initial_set,safe,domain);
 
 	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else { ARIADNE_LOG(1,"Not safe.\n"); }
@@ -1349,7 +1326,7 @@ safety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool upper_result = verify_iterative(system,initial_set,safe_box,domain);
+	tribool upper_result = verify_iterative(system,initial_set,safe,domain);
 
 	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else { ARIADNE_LOG(1,"Not safe.\n"); }
@@ -1385,7 +1362,7 @@ safety_parametric(SystemType& system,
 		ARIADNE_LOG(1,"Checking " << param_int << " (midpoint: " << param_int.midpoint() << ", width: " << param_int.width() << ") ... ");
 
 		// Perform the verification
-		tribool result = verify_iterative(system,initial_set,safe_box,domain);
+		tribool result = verify_iterative(system,initial_set,safe,domain);
 
 		if (definitely(result)) {
 			if (updateFromBottom) {
@@ -1412,7 +1389,7 @@ std::pair<Interval,Interval>
 HybridReachabilityAnalyser::
 safety_unsafety_parametric(SystemType& system, 
 						   const HybridImageSet& initial_set, 
-						   const HybridBoxes& safe_box, 
+						   const HybridBoxes& safe,
 						   const HybridBoxes& domain,
 						   const RealConstant& parameter,
 						   const Interval& parameter_interval,
@@ -1432,7 +1409,7 @@ safety_unsafety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool lower_result = verify_iterative(system,initial_set,safe_box,domain);
+	tribool lower_result = verify_iterative(system,initial_set,safe,domain);
 
 	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(lower_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
@@ -1446,7 +1423,7 @@ safety_unsafety_parametric(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool upper_result = verify_iterative(system,initial_set,safe_box,domain);
+	tribool upper_result = verify_iterative(system,initial_set,safe,domain);
 
 	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(upper_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
@@ -1500,7 +1477,7 @@ safety_unsafety_parametric(SystemType& system,
 			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() << ", width: " << safety_int.width() << ") ... ");
 
 			// Perform the verification
-			result = verify_iterative(system,initial_set,safe_box,domain);
+			result = verify_iterative(system,initial_set,safe,domain);
 
 			// If safe
 			if (definitely(result)) {
@@ -1561,7 +1538,7 @@ safety_unsafety_parametric(SystemType& system,
 			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() << ", width: " << unsafety_int.width() << ") ... ");
 
 			// Perform the verification
-			result = verify_iterative(system,initial_set,safe_box,domain);
+			result = verify_iterative(system,initial_set,safe,domain);
 
 			// If safe
 			if (definitely(result)) {

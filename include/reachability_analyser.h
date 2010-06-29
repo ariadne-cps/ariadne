@@ -170,15 +170,18 @@ class HybridReachabilityAnalyser
                                              const HybridBoxes& bounding_domain) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
-     * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells. */
-    virtual SetApproximationType upper_chain_reach(const SystemType& system,
-												   const HybridImageSet& initial_set) const;
+     * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
+     * \return The reach set and a flag notifying if the result is valid for verification (i.e. has not been restricted due to
+     * the bounding domain). */
+    virtual std::pair<SetApproximationType,bool> upper_chain_reach(const SystemType& system,
+																   const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
          * lower semantics; the method performs periodical discretisations and checks the new reached region for inclusion
-         * The resulting set is a subset of the outer-approximation of the whole evolution set. */
-        virtual SetApproximationType lower_chain_reach(const SystemType& system,
-    												   const HybridImageSet& initial_set) const;
+         * The resulting set is a subset of the outer-approximation of the whole evolution set.
+         * \return The reach set and the disproving result (true if disproved, false otherwise). */
+        virtual std::pair<SetApproximationType,bool> lower_chain_reach(const SystemType& system,
+																	   const HybridImageSet& initial_set) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
     virtual SetApproximationType viable(const SystemType& system,
@@ -186,33 +189,32 @@ class HybridReachabilityAnalyser
   
     /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box. */
     virtual tribool verify(const SystemType& system, 
-                           const HybridImageSet& initial_set, 
-                           const HybridBoxes& safe_box);
+                           const HybridImageSet& initial_set);
 
-	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box inside \a domain, 
+	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe inside \a domain,
 		in an iterative way by tuning the evolution/analysis parameters. */
 	tribool verify_iterative(SystemType& system, 
 							 const HybridImageSet& initial_set, 
-							 const HybridBoxes& safe_box, 
+							 const HybridBoxes& safe,
 							 const HybridBoxes& domain);
 
 	/*! \brief Compute an underapproximation of the safety interval of \a parameter inside the \a parameter_interval for the automaton 
-		\a system starting in \a initial_set, where the safe region is \a safe_box inside \a domain. 
+		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
         \details The procedure returns the interval of safety. */
 	Interval safety_parametric(SystemType& system, 
 							   const HybridImageSet& initial_set, 
-							   const HybridBoxes& safe_box, 
+							   const HybridBoxes& safe,
 			 				   const HybridBoxes& domain,
 							   const RealConstant& parameter,
 							   const Interval& parameter_interval,
 							   const Float& tolerance);
 
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter inside the \a parameter_interval for the automaton 
-		\a system starting in \a initial_set, where the safe region is \a safe_box inside \a domain. 
+		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
         \details The procedure returns the intervals of safety and unsafety. */
 	std::pair<Interval,Interval> safety_unsafety_parametric(SystemType& system, 
 										 					const HybridImageSet& initial_set, 
-										 					const HybridBoxes& safe_box, 
+										 					const HybridBoxes& safe,
 			 							 					const HybridBoxes& domain,
 										 					const RealConstant& parameter,
 										 					const Interval& parameter_interval,
@@ -257,15 +259,13 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
 
-	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
+	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
 	bool _prove(const SystemType& system,
-			    const HybridImageSet& initial_set,
-			    const HybridBoxes& safe_box);
+			    const HybridImageSet& initial_set);
 
-	/*! \brief Disprove that the automaton \a system starting in \a initial_set definitely remains in \a safe_box. */
+	/*! \brief Disprove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
 	bool _disprove(const SystemType& system,
-			 	   const HybridImageSet& initial_set,
-				   const HybridBoxes& safe_box);
+			 	   const HybridImageSet& initial_set);
 
 	/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach statistics. 
 		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
@@ -289,9 +289,10 @@ class HybridReachabilityAnalyser
 	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen equally for all locations.*/
 	HybridGrid _getEqualizedHybridGrid(const HybridFloatVector& hmad) const;
 
-	/*! \brief Set the initial evolution parameters and the grid given the automaton \a system and the bounding domain \a domain.*/
+	/*! \brief Set the initial evolution parameters and the grid given the automaton \a system, the bounding domain \a domain and the safe region \a safe.*/
 	void _setInitialParameters(SystemType& system, 
-							   const HybridBoxes& domain);
+							   const HybridBoxes& domain,
+							   const HybridBoxes& safe);
 
 	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
 	void _tuneParameters(SystemType& system);

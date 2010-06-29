@@ -29,7 +29,6 @@
 #define ARIADNE_EVOLVER_BASE_H
 
 #include "evolver_interface.h"
-#include "evolution_statistics.h"
 #include "list_set.h"
 
 namespace Ariadne {
@@ -38,7 +37,6 @@ namespace Ariadne {
 template<class SYS, class ES> class EvolverBase
     : public EvolverInterface<SYS,ES>
 {
-    typedef ContinuousEvolutionStatistics EvolutionStatisticsType;
     typedef EvolverInterface<SYS,ES> Interface;
     typedef typename SYS::TimeType T;
     typedef ListSet<ES> ESL;
@@ -50,19 +48,9 @@ template<class SYS, class ES> class EvolverBase
         return os << "Evolver( ... )"; }
 
     //! \brief Default constructor.
-    EvolverBase(): _statistics(new EvolutionStatisticsType())
+    EvolverBase()
 	{
 	}
-
-	//@{
-	//! \name Statistics related to the execution.
-
-    //! \brief A reference to the statistics related to the execution of the evolution.
-    virtual EvolutionStatisticsType& statistics() { return *this->_statistics; }
-    //! \brief A constant reference to the statistics related to the execution of the evolution.
-    virtual const EvolutionStatisticsType& statistics() const { return *this->_statistics; }
-
-	//@}
 
   public:
     //! \brief Compute an approximation to the evolution set under the given semantics. 
@@ -98,8 +86,6 @@ template<class SYS, class ES> class EvolverBase
   protected:
     virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, const SYS& system, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
 
-  protected:
-	boost::shared_ptr< EvolutionStatisticsType > _statistics;
 };
 
   

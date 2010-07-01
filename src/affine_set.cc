@@ -626,7 +626,7 @@ AffineSet::boundary(uint xc, uint yc) const
                 Float cross=v[0]*w[1]-v[1]*w[0];
                 Float cos_theta=dot/cross;
                 ARIADNE_LOG(5,"  p="<<p<<" k="<<k<<" p[k]="<<p[k]<<" d="<<d<<" w="<<w<<" v="<<v<<" dot="<<dot<<" cross="<<cross<<" cos="<<cos_theta<<"\n");
-                if(cross<0) { ARIADNE_WARN("cross product is="<<cross<<"; should be negative."); if(cross>-1e-8) { cross=+0.0; } }
+                if(cross<0) { ARIADNE_WARN("AffineSet::boundary(...): cross product is="<<cross<<"; should be positive."); if(cross>-1e-8) { cross=+0.0; } }
                 if(cross==0.0) { cos_theta=(dot>0.0) ? +inf<Float>() : -inf<Float>(); }
                 //ARIADNE_ASSERT(cross>0);
                 if(cos_theta>cos_theta_max) {

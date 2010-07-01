@@ -283,7 +283,7 @@ void HybridEnclosure::apply_flow_and_set_time(VectorIntervalFunction phi, Scalar
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
     ARIADNE_ASSERT_MSG(omega.argument_size()==this->number_of_parameters(),
                        "Final time "<<omega<<" must be a function of "<<this->number_of_parameters()<<" parameterisation variables");
-    this->_apply_flow_step(phi,omega-this->_time);
+    this->_state=unchecked_compose(phi,join(this->_state,omega-this->_time));
     this->_time=omega;
 }
 
@@ -291,7 +291,7 @@ void HybridEnclosure::apply_flow_and_set_time(VectorIntervalFunction phi, Float 
 {
     ARIADNE_ASSERT_MSG(phi.argument_size()==this->dimension()+1,
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
-    this->_apply_flow_step(phi,tmax-this->_time);
+    this->_state=unchecked_compose(phi,join(this->_state,tmax-this->_time));
     this->_time=tmax;
 }
 

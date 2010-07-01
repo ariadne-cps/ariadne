@@ -185,6 +185,20 @@ int test_case_counter = 0;
 
 
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
+#define ARIADNE_TEST_CHECK_WARN(expression,expected)                         \
+    {                                                                   \
+        std::cout << #expression << ": " << std::flush; \
+        bool ok = ariadne_check(std::cout,expression,expected);         \
+        if(ok) {                                                        \
+            std::cout << "\n" << std::endl;                             \
+        } else {                                                        \
+            std::cout << "\nWARNING: expected " << #expression << " = " << #expected << " == " << (expected) << " \n" << std::endl; \
+            std::cerr << "WARNING: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed; obtained " << (expression) << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+/*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
 #define ARIADNE_TEST_CHECK(expression,expected)                         \
     {                                                                   \
         std::cout << #expression << ": " << std::flush; \
@@ -193,8 +207,8 @@ int test_case_counter = 0;
             std::cout << "\n" << std::endl;                             \
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: expected " << #expression << " = " << #expected << " = " << (expected) << " \n" << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed." << std::endl; \
+            std::cout << "\nERROR: expected " << #expression << " = " << #expected << " == " << (expected) << " \n" << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed; obtained " << (expression) << std::endl; \
         }                                                               \
     }                                                                   \
 

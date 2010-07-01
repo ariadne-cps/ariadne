@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver-constrained.cc
+ *            hybrid_evolver-working.cc
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -29,7 +29,7 @@
 #include "grid_set.h"
 #include "hybrid_time.h"
 #include "hybrid_automaton.h"
-#include "hybrid_evolver-simple.h"
+#include "hybrid_evolver-working.h"
 #include "orbit.h"
 
 #include "integrator.h"
@@ -271,6 +271,8 @@ _process_initial_events(EvolutionData& evolution_data,
                     HybridEnclosure immediate_jump_set=invariant_set;
                     immediate_jump_set.new_activation(event,transition.guard_function);
                     if(!definitely(immediate_jump_set.empty())) {
+                        // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
+                        evolution_data.reach_sets.append(immediate_jump_set);
                         immediate_jump_set.apply_reset(event,transition.target,transition.reset_function);
                         ARIADNE_LOG(4,"immediate_jump_set="<<immediate_jump_set<<"\n");
                         evolution_data.intermediate_sets.append(immediate_jump_set);
@@ -283,7 +285,11 @@ _process_initial_events(EvolutionData& evolution_data,
             }
         }
     }
-    evolution_data.starting_sets.append(flowable_set);
+
+    // Put the flowable set in the starting sets for ordinary evolution
+    if(!definitely(flowable_set.empty())) {
+        evolution_data.starting_sets.append(flowable_set);
+    }
 }
 
 VectorIntervalFunction
@@ -410,7 +416,7 @@ _compute_timing(Set<DiscreteEvent> const& active_events,
         result.step_kind=UNWIND_STEP;
         if(remaining_time_range.width()<result.step_size) {
             Float constant_finishing_time=result.final_time-remaining_time_range.lower()+result.step_size;
-            result.finishing_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),constant_finishing_time);
+            result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),constant_finishing_time);
         } else {
             // FIXME: The finishing time may need to be adjusted
             result.finishing_time=0.5*(result.step_size+initial_set.time_function());
@@ -478,99 +484,148 @@ _compute_transverse_jump_set(HybridEnclosure const& starting_set,
     return jump_set;
 }
 
-// Apply time step without using any crossing functions
-// Currently, do not handle CONCAVE and DEGENERATE constraints
-void TransverseSimpleHybridEvolver::
-_apply_time_step(EvolutionData& evolution_data,
-                 HybridEnclosure const& starting_set,
-                 VectorIntervalFunction const& flow,
-                 TimingData const& timing_data,
-                 Map<DiscreteEvent,CrossingData> const& crossings,
-                 VectorFunction const& dynamic,
-                 Map<DiscreteEvent,TransitionData> const& transitions) const
+
+
+
+/*
+HybridEnclosure
+HybridEvolverBase::
+_apply_final_time_step(HybridEnclosure const& starting_set,
+                       Float const& final_time,
+                       VectorTaylorFunction const& flow,
+                       Set<DiscreteEvent> const& active_events,
+                       Map<DiscreteEvent,ScalarFunction> const& guards) const
 {
-    ARIADNE_LOG(2,"TransverseSimpleHybridEvolver::_apply_time_step(...)\n");
-    ARIADNE_LOG(4,"starting_time="<<starting_set.time_function().polynomial());
-    //ARIADNE_LOG(4,"evolution_time="<<evolution_time.range()<<" final_time="<<final_time<<"\n");
+    // FIXME: Check for remaining time outside of flow time domain
+    DiscreteEvent final_time_event("final_time");
+    ScalarIntervalFunction final_time_function=ScalarIntervalFunction::constant(starting_set.parameter_domain(),final_time);
 
-    Set<DiscreteEvent> blocking_events=Ariadne::blocking_events(transitions);
-    Set<DiscreteEvent> activating_events=Ariadne::activating_events(transitions);
+    HybridEnclosure final_set=starting_set;
+    final_set.apply_flow_and_set_time(flow,final_time_function);
 
-    // Compute reach set
-    HybridEnclosure reach_set=starting_set;
-    reach_set.apply_flow(flow,timing_data.evolution_time);
-    HybridEnclosure evolve_set=starting_set;
-    evolve_set.apply_flow_step(flow,timing_data.evolution_time);
-
-    // Compute reach and evolve sets
-    for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
-        event_iter!=blocking_events.end(); ++event_iter)
+    for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
+        event_iter!=active_events.end(); ++event_iter)
     {
         DiscreteEvent event=*event_iter;
-        CrossingKind  crossing_kind = crossings[event].crossing_kind;
-        TransitionData const & transition = transitions[event];
-        switch(crossing_kind) {
-            case INCREASING: case CONVEX:
-                reach_set.new_invariant(event,transition.guard_function);
-                evolve_set.new_invariant(event,transition.guard_function);
-                break;
-            case DECREASING:
-                break;
-            case DEGENERATE: case CONCAVE:
-                //ARIADNE_FAIL_MESSAGE("Crossing kind "<<crossing_kind<<" not handled by HybridEvolverBase");
-                break;
-            default:
-                //ARIADNE_FAIL_MESSAGE("Crossing kind "<<crossing_kind<<" not recognised by HybridEvolverBase");
-                break;
-        }
+        final_set.new_invariant(event,guards[event]);
     }
 
-    // Compute jump sets
-    for(Set<DiscreteEvent>::const_iterator event_iter=activating_events.begin();
-        event_iter!=activating_events.end(); ++event_iter)
+    return final_set;
+}
+*/
+
+
+void
+HybridEvolverBase::
+_upper_evolution_flow(EvolutionData& evolution_data,
+                      HybridAutomatonInterface const& system,
+                      HybridTime const& maximum_hybrid_time) const
+{
+    ARIADNE_LOG(3,"HybridEvolverBase::_upper_evolution_flow\n");
+
+    typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
+    typedef Set<DiscreteEvent>::const_iterator event_iterator;
+
+    const Float final_time=maximum_hybrid_time.continuous_time();
+    const uint maximum_steps=maximum_hybrid_time.discrete_time();
+
+    // Routine check for emptiness
+    if(evolution_data.working_sets.empty()) { return; }
+
+    // Get the starting set for this round of evolution
+    HybridEnclosure initial_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
+    ARIADNE_LOG(2,"initial_set="<<initial_set<<"\n\n");
+
+    // Test if maximum number of steps has been reached
+    if(initial_set.previous_events().size()>maximum_steps) {
+        evolution_data.evolve_sets.append(initial_set); return;
+    }
+
+    if(initial_set.time_range().lower()>=final_time) {
+        ARIADNE_WARN("starting_set.time_range()="<<initial_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
+        return;
+    }
+
+    // Extract starting location
+    const DiscreteLocation location=initial_set.location();
+
+    // Cache dynamic and constraint functions
+    VectorFunction dynamic=system.dynamic_function(location);
+    Map<DiscreteEvent,TransitionData> transitions = this->_extract_transitions(location,system);
+    Set<DiscreteEvent> events = transitions.keys();
+
+    ARIADNE_LOG(4,"\ndynamic="<<dynamic<<"\n");
+    ARIADNE_LOG(4,"transitions="<<transitions<<"\n\n");
+
+    // Process the initially active events; cut out active points to leave initial flowable set.
+    this->_process_initial_events(evolution_data, initial_set,transitions);
+    ARIADNE_ASSERT(evolution_data.starting_sets.size()<=1);
+
+    while(!evolution_data.starting_sets.empty()) {
+        this->_upper_evolution_step(evolution_data,dynamic,transitions,final_time);
+    }
+}
+
+void
+HybridEvolverBase::
+_upper_evolution_step(EvolutionData& evolution_data,
+                      VectorFunction const& dynamic,
+                      Map<DiscreteEvent,TransitionData> const& transitions,
+                      Real const& final_time) const
+{
+    ARIADNE_LOG(3,"HybridEvolverBase::_upper_evolution_step\n");
+    HybridEnclosure starting_set=evolution_data.starting_sets.back(); evolution_data.starting_sets.pop_back();
+
+    ARIADNE_LOG(2,"starting_set="<<starting_set<<"\n");
+    if(definitely(starting_set.empty())) {
+        ARIADNE_LOG(4,"Empty starting_set "<<starting_set<<"\n");
+        return;
+    }
+
+    if(starting_set.time_range().lower()>=static_cast<Float>(final_time)) {
+        ARIADNE_WARN("starting_set.time_range()="<<starting_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
+        return;
+    }
+
+    if(verbosity==1) { _log_summary(evolution_data.working_sets.size(),evolution_data.reach_sets.size(),starting_set); }
+
+    Map<DiscreteEvent,ScalarFunction> guard_functions;
+    for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
+        transition_iter!=transitions.end(); ++transition_iter)
     {
-        DiscreteEvent event=*event_iter;
-        TransitionData const & transition = transitions[event];
-        HybridEnclosure jump_set=reach_set;
-        switch(transitions[event].event_kind) {
-            case PERMISSIVE:
-                jump_set.new_activation(event,transition.guard_function);
-                break;
-            case URGENT: case IMPACT:
-                jump_set.new_guard(event,transition.guard_function);
-                jump_set.new_invariant(event,lie_derivative(transition.guard_function,dynamic));
-                break;
-            default:
-                break;
-        }
-        if(!definitely(jump_set.empty())) {
-            jump_set.apply_reset(event,transition.target,transition.reset_function);
-            evolution_data.working_sets.append(jump_set);
-        }
+        guard_functions.insert(transition_iter->first,transition_iter->second.guard_function);
     }
+    ARIADNE_LOG(4,"guards="<<guard_functions<<"\n");
 
-    //FIXME: Sort this out...
-    Real final_time = timing_data.final_time;
+    // Compute the bounding box of the enclosure
+    const Box starting_bounding_box=starting_set.space_bounding_box();
 
-    HybridEnclosure final_set=reach_set;
-    final_set.set_time(final_time);
+    // Compute flow and actual time step size used
+    const FlowFunctionPatch flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->parameters().maximum_step_size);
+    ARIADNE_LOG(4,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range()<<"\n");
 
-    reach_set.bound_time(final_time);
+    // Compute possibly active urgent events with increasing guards, and crossing times
+    Set<DiscreteEvent> active_events =
+        this->_compute_active_events(dynamic,guard_functions,flow_model,starting_set);
 
-    if(evolve_set.time_function().range().upper() > Float(final_time)) {
-        evolve_set.bound_time(final_time);
-    }
+    // Compute the kind of crossing (increasing, convex, etc);
+    Map<DiscreteEvent,CrossingData> crossing_data =
+        this->_compute_crossings(active_events,dynamic,guard_functions,flow_model,starting_set);
 
-    if(!definitely(final_set.empty())) {
-        evolution_data.evolve_sets.append(final_set);
-    }
+    // Compute end conditions for flow
+    TimingData timing_data = this->_compute_timing(active_events,Real(final_time),flow_model,crossing_data,starting_set);
 
-    evolution_data.starting_sets.append(evolve_set);
-    evolution_data.reach_sets.append(reach_set);
+    // Apply the time step
+    HybridEnclosure reach_set, evolve_set;
+    this->_apply_time_step(evolution_data,starting_set,flow_model,timing_data,crossing_data,dynamic,transitions);
 }
 
 
-void SimpleHybridEvolver::
+
+
+DiscreteEvent step_time_event("step_time");
+
+void GeneralHybridEvolver::
 _apply_time_step(EvolutionData& evolution_data,
                  HybridEnclosure const& starting_set,
                  VectorIntervalFunction const& flow,
@@ -579,7 +634,7 @@ _apply_time_step(EvolutionData& evolution_data,
                  VectorFunction const& dynamic,
                  Map<DiscreteEvent,TransitionData> const& transitions) const
 {
-    ARIADNE_LOG(2,"SimpleHybridEvolver::_apply_time_step(...)\n");
+    ARIADNE_LOG(2,"GeneralHybridEvolver::_apply_time_step(...)\n");
     ARIADNE_LOG(4,"starting_time="<<starting_set.time_function().polynomial()<<"\n");
     //ARIADNE_LOG(4,"evolution_time="<<evolution_time.range()<<" final_time="<<final_time<<"\n");
 
@@ -727,146 +782,8 @@ _apply_time_step(EvolutionData& evolution_data,
 }
 
 
-/*
-HybridEnclosure
-HybridEvolverBase::
-_apply_final_time_step(HybridEnclosure const& starting_set,
-                       Float const& final_time,
-                       VectorTaylorFunction const& flow,
-                       Set<DiscreteEvent> const& active_events,
-                       Map<DiscreteEvent,ScalarFunction> const& guards) const
-{
-    // FIXME: Check for remaining time outside of flow time domain
-    DiscreteEvent final_time_event("final_time");
-    ScalarIntervalFunction final_time_function=ScalarIntervalFunction::constant(starting_set.parameter_domain(),final_time);
-
-    HybridEnclosure final_set=starting_set;
-    final_set.apply_flow_and_set_time(flow,final_time_function);
-
-    for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
-        event_iter!=active_events.end(); ++event_iter)
-    {
-        DiscreteEvent event=*event_iter;
-        final_set.new_invariant(event,guards[event]);
-    }
-
-    return final_set;
-}
-*/
-
-
 void
-HybridEvolverBase::
-_upper_evolution_flow(EvolutionData& evolution_data,
-                      HybridAutomatonInterface const& system,
-                      HybridTime const& maximum_hybrid_time) const
-{
-    ARIADNE_LOG(3,"HybridEvolverBase::_upper_evolution_flow\n");
-
-    typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
-    typedef Set<DiscreteEvent>::const_iterator event_iterator;
-
-    const Float final_time=maximum_hybrid_time.continuous_time();
-    const uint maximum_steps=maximum_hybrid_time.discrete_time();
-
-    // Routine check for emptiness
-    if(evolution_data.working_sets.empty()) { return; }
-
-    // Get the starting set for this round of evolution
-    HybridEnclosure initial_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
-    ARIADNE_LOG(2,"initial_set="<<initial_set<<"\n\n");
-
-    // Test if maximum number of steps has been reached
-    if(initial_set.previous_events().size()>maximum_steps) {
-        evolution_data.evolve_sets.append(initial_set); return;
-    }
-
-    if(initial_set.time_range().lower()>=final_time) {
-        ARIADNE_WARN("starting_set.time_range()="<<initial_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
-        return;
-    }
-
-    // Extract starting location
-    const DiscreteLocation location=initial_set.location();
-
-    // Cache dynamic and constraint functions
-    VectorFunction dynamic=system.dynamic_function(location);
-    Map<DiscreteEvent,TransitionData> transitions = this->_extract_transitions(location,system);
-    Set<DiscreteEvent> events = transitions.keys();
-
-    ARIADNE_LOG(4,"\ndynamic="<<dynamic<<"\n");
-    ARIADNE_LOG(4,"transitions="<<transitions<<"\n\n");
-
-    // Process the initially active events; cut out active points to leave initial flowable set.
-    this->_process_initial_events(evolution_data, initial_set,transitions);
-    ARIADNE_ASSERT(evolution_data.starting_sets.size()==1);
-
-    while(!evolution_data.starting_sets.empty()) {
-        this->_upper_evolution_step(evolution_data,dynamic,transitions,final_time);
-    }
-}
-
-void
-HybridEvolverBase::
-_upper_evolution_step(EvolutionData& evolution_data,
-                      VectorFunction const& dynamic,
-                      Map<DiscreteEvent,TransitionData> const& transitions,
-                      Real const& final_time) const
-{
-    ARIADNE_LOG(3,"HybridEvolverBase::_upper_evolution_step\n");
-    HybridEnclosure starting_set=evolution_data.starting_sets.back(); evolution_data.starting_sets.pop_back();
-
-    ARIADNE_LOG(2,"starting_set="<<starting_set<<"\n");
-    if(definitely(starting_set.empty())) {
-        ARIADNE_LOG(4,"Empty starting_set "<<starting_set<<"\n");
-        return;
-    }
-
-    if(starting_set.time_range().lower()>=static_cast<Float>(final_time)) {
-        ARIADNE_WARN("starting_set.time_range()="<<starting_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
-        return;
-    }
-
-    if(verbosity==1) { _log_summary(evolution_data.working_sets.size(),evolution_data.reach_sets.size(),starting_set); }
-
-    Map<DiscreteEvent,ScalarFunction> guard_functions;
-    for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
-        transition_iter!=transitions.end(); ++transition_iter)
-    {
-        guard_functions.insert(transition_iter->first,transition_iter->second.guard_function);
-    }
-    ARIADNE_LOG(4,"guards="<<guard_functions<<"\n");
-
-    // Compute the bounding box of the enclosure
-    const Box starting_bounding_box=starting_set.space_bounding_box();
-
-    // Compute flow and actual time step size used
-    const FlowFunctionPatch flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->parameters().maximum_step_size);
-    ARIADNE_LOG(4,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range()<<"\n");
-
-    // Compute possibly active urgent events with increasing guards, and crossing times
-    Set<DiscreteEvent> active_events =
-        this->_compute_active_events(dynamic,guard_functions,flow_model,starting_set);
-
-    // Compute the kind of crossing (increasing, convex, etc);
-    Map<DiscreteEvent,CrossingData> crossing_data =
-        this->_compute_crossings(active_events,dynamic,guard_functions,flow_model,starting_set);
-
-    // Compute end conditions for flow
-    TimingData timing_data = this->_compute_timing(active_events,Real(final_time),flow_model,crossing_data,starting_set);
-
-    // Apply the time step
-    HybridEnclosure reach_set, evolve_set;
-    this->_apply_time_step(evolution_data,starting_set,flow_model,timing_data,crossing_data,dynamic,transitions);
-}
-
-
-
-
-DiscreteEvent step_time_event("step_time");
-
-void
-VerySimpleHybridEvolver::
+PureConstraintHybridEvolver::
 _apply_time_step(EvolutionData& evolution_data,
                  HybridEnclosure const& starting_set,
                  VectorIntervalFunction const& flow,
@@ -876,7 +793,7 @@ _apply_time_step(EvolutionData& evolution_data,
                  Map<DiscreteEvent,TransitionData> const& transitions) const
 {
     // Apply time step without computing transition crossing times
-    ARIADNE_LOG(3,"VerySimpleHybridEvolver::_apply_time_step(...)\n");
+    ARIADNE_LOG(3,"PureConstraintHybridEvolver::_apply_time_step(...)\n");
     ARIADNE_ASSERT(crossings.size()<=1);
 
     HybridEnclosure reach_set=starting_set;
@@ -917,6 +834,41 @@ _apply_time_step(EvolutionData& evolution_data,
         ARIADNE_LOG(4,"  evolve_set="<<evolve_set<<"\n");
     }
     //{ char c; cin.get(c); }
+}
+
+TimingData
+DeterministicTransverseHybridEvolver::
+_compute_timing(Set<DiscreteEvent> const& active_events,
+                Real final_time,
+                VectorIntervalFunction const& flow,
+                Map<DiscreteEvent,CrossingData> const& crossings,
+                HybridEnclosure const& initial_set) const
+{
+    // TODO: Implement this functions correctly
+    TimingData result;
+    result.step_size=flow.domain()[flow.domain().size()-1].upper();
+    result.final_time=final_time;
+    ScalarIntervalFunction remaining_time=result.final_time-initial_set.time_function();
+    Interval remaining_time_range=remaining_time.range();
+    // NOTE: The time function may be negative or greater than the final time
+    // over part of the parameter domain.
+    if(remaining_time_range.upper()<=result.step_size) {
+        result.step_kind=FINAL_STEP;
+        result.finishing_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),final_time);
+    } else if(remaining_time_range.lower()<=result.step_size) {
+        result.step_kind=UNWIND_STEP;
+        if(remaining_time_range.width()<result.step_size) {
+            Float constant_finishing_time=result.final_time-remaining_time_range.lower()+result.step_size;
+            result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),constant_finishing_time);
+        } else {
+            // FIXME: The finishing time may need to be adjusted
+            result.finishing_time=0.5*(result.step_size+initial_set.time_function());
+        }
+    } else {
+        result.step_kind=FULL_STEP;
+        result.evolution_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),result.step_size);
+    }
+    return result;
 }
 
 void
@@ -970,8 +922,8 @@ _apply_time_step(EvolutionData& evolution_data,
                 jump_set.bound_time(timing.final_time);
                 break;
         }
-
         ARIADNE_LOG(4,"  active_set="<<jump_set<<"\n");
+
         jump_set.apply_reset(event,transitions[event].target,transitions[event].reset_function);
         ARIADNE_LOG(4,"  jump_set="<<jump_set<<"\n");
         if(!definitely(jump_set.empty())) {
@@ -992,6 +944,7 @@ _apply_time_step(EvolutionData& evolution_data,
             reach_set.apply_flow(flow,timing.evolution_time);
             break;
         case UNWIND_STEP:
+            ARIADNE_LOG(4,"finishing_time="<<timing.finishing_time<<"\n");
             evolve_set.apply_flow_and_set_time(flow,timing.finishing_time);
             reach_set.apply_flow_and_bound_time(flow,timing.finishing_time);
             break;
@@ -1122,7 +1075,6 @@ _apply_time_step(EvolutionData& evolution_data,
         CrossingData const& crossing = crossings[event];
         TransitionData const& transition = transition_iter->second;
         CrossingKind crossing_kind=crossing.crossing_kind;
-        std::cerr<<crossing_kind;
         if(is_blocking(transition.event_kind)) {
             switch(crossing.crossing_kind) {
                 case INCREASING: case CONVEX:

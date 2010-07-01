@@ -75,9 +75,10 @@ typedef ScalarTaylorFunction ScalarIntervalFunction;
 typedef VectorTaylorFunction VectorIntervalFunction;
 
 //! \brief A class representing an enclosure for a hybrid evolution.
-//! Handles progress, activation and guard constraints correctly.
+//! Handles progress, activation and guard constraints internally.
 //! The set is represented as the image of a box \f$D\f$ under a function model \f$\hat{f}(s)\f$, under the constraints
 //! \f$\hat{c}(s) \leq 0\f$ and \f$\hat{e}(s)=0\f$. Also keeps track of the current time \f$\hat{t}(s)\f$.
+//!
 //! In other words, \f[ S=\{ \hat{f}(s);\  \hat{t}(s) \mid s\in D \mid \hat{c}(s) \leq 0 \ \wedge \hat{e}(s)=0 \} . \f]
 //! In the following documentation, we sometimes write \f$\xi(s)\f$ for \f$\hat{f}(s)\f$ and \f$\tau(s)\f$ for \f$\hat{t}(s)\f$.
 //!

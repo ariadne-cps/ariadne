@@ -29,8 +29,8 @@ i=Interval(1.5,1.75)
 bx=Box([{1:3},{-1:2},{-3:3}])
 
 c=ScalarTaylorFunction.constant(bx,1.5)
-x=ScalarTaylorFunction.variable(bx,0)
-y=ScalarTaylorFunction.variable(bx,1)
+x=ScalarTaylorFunction.coordinate(bx,0)
+y=ScalarTaylorFunction.coordinate(bx,1)
 v=VectorTaylorFunction.identity(bx)
 y=v[1]
 t=5+2*x+y
@@ -50,6 +50,6 @@ g=ScalarTaylorFunction(t)
 compose(f,f); compose(g,f)
 
 p=VectorFunction.identity(3)
-q=ScalarFunction.variable(3,1)
+q=ScalarFunction.coordinate(3,1)
 compose(p,f); compose(q,f)
 

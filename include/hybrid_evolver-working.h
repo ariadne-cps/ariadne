@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver-simple.h
+ *            hybrid_evolver-working.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_evolver-simple.h
- *  \brief Evolver for hybrid systems with only transverse urgent guards.
+/*! \file hybrid_evolver-working.h
+ *  \brief Hybrid evolver classes under development
  */
 
-#ifndef ARIADNE_HYBRID_EVOLVER_SIMPLE_H
-#define ARIADNE_HYBRID_EVOLVER_SIMPLE_H
+#ifndef ARIADNE_HYBRID_EVOLVER_WORKING_H
+#define ARIADNE_HYBRID_EVOLVER_WORKING_H
 
 #include <string>
 #include <vector>
@@ -60,8 +60,7 @@ class FlowFunctionPatch
     IntervalVector codomain() const { return this->VectorIntervalFunction::codomain(); }
 };
 
-/*! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
- */
+//! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
 class HybridEvolverInterface
     : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
 {
@@ -77,12 +76,11 @@ struct FinalData;
 struct EvolutionData;
 
 
-/*! \brief Base routines for hybrid evolution.
- *
- * Includes routines for extracting system information in a mode,
- * applying initial events, computing crossing times,
- * computing the evolution time, and applying a time step.
- */
+//! \brief Base routines for hybrid evolution.
+//!
+//! Includes routines for extracting system information in a mode,
+//! applying initial events, computing crossing times,
+//! computing the evolution time, and applying a time step.
 class HybridEvolverBase
     : public HybridEvolverInterface
     , public Loggable
@@ -156,6 +154,7 @@ class HybridEvolverBase
                           Map<DiscreteEvent,TransitionData> const& transitions,
                           Real const& final_time) const;
 
+    //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
     void
     _log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const;
@@ -231,6 +230,8 @@ class HybridEvolverBase
 bool is_blocking(EventKind evk);
 bool is_activating(EventKind evk);
 
+//! \brief A data type used to store information about a transtion of a hybrid system.
+//! \relates HybridEvolverInterface
 struct TransitionData
 {
     EventKind event_kind;
@@ -243,9 +244,10 @@ struct TransitionData
 };
 
 
-//! \brief The kind of step taken in the evolution
+//! \brief The way trajectories of the flow $\phi(x_0,t)$ cross the guard set $g(x)=0$.
+//! \relates CrossingData
 enum CrossingKind {
-    DEGENERATE=0, //!< The step is taken for a fixed time \a h. The actual step length depends only on the starting state.
+    DEGENERATE=0, //!< The crossing may be degenerate to second order.
     NEGATIVE, //!< The guard function is negative on the flow domain. No event occurs.
     POSITIVE, //!< The guard function is negative on the domain. The event occurs immediately (if urgent) or at all times (if permissive).
     INCREASING, //!< The guard function is strictly increasing along flow lines.
@@ -256,6 +258,7 @@ enum CrossingKind {
 std::ostream& operator<<(std::ostream& os, const CrossingKind& crk);
 
 //! \brief A data type used to store information about the way flow lines cross a guard \f$g(x)=0\f$.
+//! \relates HybridEvolverInterface
 struct CrossingData
 {
     CrossingData() : crossing_kind() { }
@@ -268,6 +271,7 @@ struct CrossingData
 };
 
 //! \brief The kind of step taken in the evolution
+//! \relates HybridEvolverInterface
 enum StepKind {
     FULL_STEP, //!< The step is taken for a fixed time \a h. The actual step length depends only on the starting state.
     CREEP_STEP, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
@@ -277,6 +281,7 @@ enum StepKind {
 std::ostream& operator<<(std::ostream& os, const StepKind& crk);
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
+//! \relates HybridEvolverInterface
 struct TimingData
 {
     StepKind step_kind; //!< The kind of step taken in the evolution
@@ -287,6 +292,7 @@ struct TimingData
 };
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
+//! \relates HybridEvolverInterface
 struct EvolutionData
 {
     List<HybridEnclosure> working_sets;
@@ -297,16 +303,19 @@ struct EvolutionData
     List<HybridEnclosure> intermediate_sets;
 };
 
-/*! \brief A class for computing the evolution of a hybrid system.
- */
-class SimpleHybridEvolver
+//! \brief A class for computing the evolution of a general hybrid system as
+//! efficiently as possible. In particular, crossing times are computed
+//! explicitly, and the number of additional constraints is minimised.
+//!
+//! This class is still under development and may not work properly.
+class GeneralHybridEvolver
     : public HybridEvolverBase
 {
   public:
 
-    SimpleHybridEvolver() : HybridEvolverBase() { }
-    SimpleHybridEvolver(const EvolutionParametersType& parameters) : HybridEvolverBase(parameters) { };
-    SimpleHybridEvolver* clone() const { return new SimpleHybridEvolver(*this); }
+    GeneralHybridEvolver() : HybridEvolverBase() { ARIADNE_WARN("GeneralHybridEvolver class still under development\n"); }
+    GeneralHybridEvolver(const EvolutionParametersType& parameters) : HybridEvolverBase(parameters) { ARIADNE_WARN("GeneralHybridEvolver class still under development\n"); }
+    GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
 
   protected:
     virtual
@@ -321,16 +330,18 @@ class SimpleHybridEvolver
 
 };
 
-/*! \brief A class for computing the evolution of a hybrid system.
- */
-class VerySimpleHybridEvolver
+//! \brief A class for computing the evolution of a hybrid system which never
+//! computes crossing times explicitly. This means that there is no need to
+//! solve algebraic equations. The restrictions on the enclosure sets are
+//! specified purely in terms of constraints.
+class PureConstraintHybridEvolver
     : public HybridEvolverBase
 {
   public:
 
-    VerySimpleHybridEvolver() : HybridEvolverBase() { }
-    VerySimpleHybridEvolver(const EvolutionParametersType& parameters) : HybridEvolverBase(parameters) { };
-    VerySimpleHybridEvolver* clone() const { return new VerySimpleHybridEvolver(*this); }
+    PureConstraintHybridEvolver() : HybridEvolverBase() { }
+    PureConstraintHybridEvolver(const EvolutionParametersType& parameters) : HybridEvolverBase(parameters) { };
+    PureConstraintHybridEvolver* clone() const { return new PureConstraintHybridEvolver(*this); }
 
   protected:
     virtual
@@ -347,44 +358,11 @@ class VerySimpleHybridEvolver
 
 
 
-class TransverseSimpleHybridEvolver
-    : public HybridEvolverBase
-{
-    TransverseSimpleHybridEvolver() : HybridEvolverBase() { }
-    TransverseSimpleHybridEvolver(const EvolutionParametersType& parameters) : HybridEvolverBase(parameters) { };
-    TransverseSimpleHybridEvolver* clone() const { return new TransverseSimpleHybridEvolver(*this); }
 
-  protected:
-    virtual void
-    _apply_time_step(EvolutionData& evolution_data,
-                     HybridEnclosure const& starting_set,
-                     VectorIntervalFunction const& flow,
-                     TimingData const& timing_data,
-                     Map<DiscreteEvent,CrossingData> const& crossing_data,
-                     VectorFunction const& dynamic,
-                     Map<DiscreteEvent,TransitionData> const& transitions) const;
-
-};
-
-class DeterministicTransverseHybridEvolver
-    : public SimpleHybridEvolver
-{
-  public:
-    DeterministicTransverseHybridEvolver* clone() const { return new DeterministicTransverseHybridEvolver(*this); }
-  protected:
-    virtual void
-    _apply_time_step(EvolutionData& evolution_data,
-                     HybridEnclosure const& starting_set,
-                     VectorIntervalFunction const& flow,
-                     TimingData const& timing_data,
-                     Map<DiscreteEvent,CrossingData> const& crossing_data,
-                     VectorFunction const& dynamic,
-                     Map<DiscreteEvent,TransitionData> const& transitions) const;
-
-};
-
+//! \brief A hybrid evolver which can only handle systems for which crossings
+//! with the guard sets are transverse.
 class TransverseHybridEvolver
-    : public SimpleHybridEvolver
+    : public HybridEvolverBase
 {
   public:
     TransverseHybridEvolver* clone() const { return new TransverseHybridEvolver(*this); }
@@ -400,8 +378,10 @@ class TransverseHybridEvolver
 
 };
 
+//! \brief A hybrid evolver which can only handle deterministic systems
+//! i.e. systems with only \a urgent or \a impact events.
 class DeterministicHybridEvolver
-    : public SimpleHybridEvolver
+    : public HybridEvolverBase
 {
   public:
     DeterministicHybridEvolver* clone() const { return new DeterministicHybridEvolver(*this); }
@@ -421,6 +401,35 @@ class DeterministicHybridEvolver
 
 };
 
+
+//! \brief A hybrid evolver which can only handle deterministic systems for which crossings
+//! with the guard sets are transverse.
+//! \sa DeterministicHybridEvolver TransverseHybridEvolver
+class DeterministicTransverseHybridEvolver
+    : public HybridEvolverBase
+{
+  public:
+    DeterministicTransverseHybridEvolver* clone() const { return new DeterministicTransverseHybridEvolver(*this); }
+  protected:
+    virtual
+    TimingData
+    _compute_timing(Set<DiscreteEvent> const& active_events,
+                    Real final_time,
+                    VectorIntervalFunction const& flow,
+                    Map<DiscreteEvent,CrossingData> const& crossings,
+                    HybridEnclosure const& initial_set) const;
+
+    virtual void
+    _apply_time_step(EvolutionData& evolution_data,
+                     HybridEnclosure const& starting_set,
+                     VectorIntervalFunction const& flow,
+                     TimingData const& timing_data,
+                     Map<DiscreteEvent,CrossingData> const& crossing_data,
+                     VectorFunction const& dynamic,
+                     Map<DiscreteEvent,TransitionData> const& transitions) const;
+
+};
+
 } // namespace Ariadne
 
-#endif // ARIADNE_HYBRID_EVOLVER_SIMPLE_H
+#endif // ARIADNE_HYBRID_EVOLVER_WORKING_H

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank-verify.cc
+ *            watertank-aasap.cc
  *
  *  Copyright  2010  Luca Geretti
  *
@@ -30,17 +30,19 @@ int main()
     /// Set the system parameters
 	RealConstant a("a",0.02);
 	RealConstant b("b",0.3);
-	RealConstant T("T",4.0);
+	RealConstant Ta("Ta",4.0);
+	RealConstant T("T",0.01);
 	RealConstant hmin("hmin",5.5); 
 	RealConstant hmax("hmax",8.0);
-	RealConstant delta("Delta",0.05);	
 
     // System variables
     RealVariable x("x");    // water level
     RealVariable y("y");    // valve aperture
+    RealVariable t_out("t_out");    // valve aperture
 
 	// The parameter to modify, its interval and the tolerance
-	RealConstant parameter = delta;
+    RealConstant Delta("Delta",0.00);
+    RealConstant parameter = Delta;
 	Interval parameter_interval(0.0,0.0);
 	Float tolerance = 1e-2;
 
@@ -73,9 +75,9 @@ int main()
 		valve.add_output_var(y);
 
 		// Two input events (open and close) and one internal event
-		DiscreteEvent e_open("open");
+		DiscreteEvent e_open("OPEN");
 		valve.add_input_event(e_open);
-		DiscreteEvent e_close("close");
+		DiscreteEvent e_close("CLOSE");
 		valve.add_input_event(e_close);
 		DiscreteEvent e_idle("idle");
 		valve.add_internal_event(e_idle);
@@ -91,13 +93,13 @@ int main()
 		valve.new_mode(opening);
 		//valve.new_invariant(opening, -y);
 		//valve.new_invariant(opening, y-1.0);
-		RealExpression dynopening = 1.0/T;
+		RealExpression dynopening = 1.0/Ta;
 		valve.set_dynamics(opening, y, dynopening);
 		// Closing (valve is closing)
 		valve.new_mode(closing);
 		//valve.new_invariant(closing, -y);
 		//valve.new_invariant(closing, y-1.0);
-		RealExpression dynclosing = -1.0/T;
+		RealExpression dynclosing = -1.0/Ta;
 		valve.set_dynamics(closing, y, dynclosing);
 		
 		// Transitions
@@ -113,10 +115,10 @@ int main()
 		// when open is received, go to opening
 		valve.new_unforced_transition(e_open, idle, opening, reset_y_identity);
 		valve.new_unforced_transition(e_open, opening, opening, reset_y_identity);
-		//valve.new_unforced_transition(e_open, closing, opening, res);
+		valve.new_unforced_transition(e_open, closing, opening, reset_y_identity);
 		 // when closed is received, go to closing
 		valve.new_unforced_transition(e_close, idle, closing, reset_y_identity);
-		//valve.new_unforced_transition(e_close, opening, closing, res);
+		valve.new_unforced_transition(e_close, opening, closing, reset_y_identity);
 		valve.new_unforced_transition(e_close, closing, closing, reset_y_identity);
 		// when the valve is fully opened go from opening to idle
 		RealExpression y_geq_one = y - 1.0;
@@ -125,47 +127,88 @@ int main()
 		RealExpression y_leq_zero = - y;
 		valve.new_forced_transition(e_idle, closing, idle, reset_y_identity, y_leq_zero);
 
+	// Create the evaluator automaton
+
+		    HybridIOAutomaton evaluator("evaluator");
+
+			// States
+			DiscreteState deep("deep");
+			DiscreteState shallow("shallow");
+
+			// The evaluator has two output events
+			DiscreteEvent e_high("HIGH");
+			evaluator.add_output_event(e_high);
+			DiscreteEvent e_low("LOW");
+			evaluator.add_output_event(e_low);
+
+			// An high event has been issued
+			evaluator.new_mode(deep);
+			// A low event has been issued;
+			evaluator.new_mode(shallow);
+
+			// Transitions
+			// When the water is greater than hmax, send a high event
+			RealExpression x_geq_hmax = x - hmax;
+			evaluator.new_forced_transition(e_high, shallow, deep, x_geq_hmax);
+			// When the water is lower than hmin, send a open command
+			RealExpression x_leq_hmin = hmin - x;
+			evaluator.new_forced_transition(e_low, deep, shallow, x_leq_hmin);
+
+
 	// Create the controller automaton
 
 	    HybridIOAutomaton controller("controller");
 
 		// States
-		DiscreteState rising("rising");
-		DiscreteState falling("falling");
+		DiscreteState increase("increase");
+		DiscreteState decrease("decrease");
+		DiscreteState nothing("nothing");
+
+		// Involved variables
+		controller.add_internal_var(t_out);
  
-		// The valve has one input var (the water level)
-		controller.add_input_var(x);
+		// Two input events (high and low)
+		controller.add_input_event(e_high);
+		controller.add_input_event(e_low);
 		// Two output events (open and close)
 		controller.add_output_event(e_open); 
 		controller.add_output_event(e_close);
 		
 		// Two states:
-		// Rising (water level is increasing)
-		controller.new_mode(rising);
-		 // Falling (water level is decreasing)
-		controller.new_mode(falling);
+		// The controller is about to increase the level by opening the valve
+		controller.new_mode(increase);
+		controller.set_dynamics(increase, t_out, 1.0);
+		// The controller is about to decrease the level by closing the valve
+		controller.new_mode(decrease);
+		controller.set_dynamics(decrease, t_out, 1.0);
+		// The controller does nothing
+		controller.new_mode(nothing);
+		controller.set_dynamics(nothing, t_out, 0.0);
+
+		// Resets
+
+			// Reset t_out to zero
+			std::map< RealVariable, RealExpression> reset_t_out_zero;
+			reset_t_out_zero[t_out] = 0.0;
 
 		// Transitions
-		// when the water is greater than hmax, send a close command
-		RealExpression x_geq_hmax = x - hmax + delta;
-		controller.new_unforced_transition(e_close, rising, falling, x_geq_hmax);
-		// Add the invariant x < hmax + delta to rising
-		RealExpression x_leq_hmax = x - hmax - delta;
-		controller.new_invariant(rising, x_leq_hmax);
-		
-		// when the water is lower than hmin, send a open command
-		RealExpression x_leq_hmin = hmin + delta - x;
-		controller.new_unforced_transition(e_open, falling, rising, x_leq_hmin);
-		// Add the invariant x > hmin - delta to falling
-		RealExpression x_geq_hmin = hmin - delta - x;
-		controller.new_invariant(falling, x_geq_hmin);
+
+		// When the water level is high, wait before issuing the close command
+		controller.new_unforced_transition(e_high, nothing, decrease, reset_t_out_zero);
+		// When the water level is low, wait before issuing the open command
+		controller.new_unforced_transition(e_low, nothing, increase, reset_t_out_zero);
+		// When the clock period has expired, issue the open command
+		controller.new_forced_transition(e_open, increase, nothing, reset_t_out_zero, t_out-T);
+		// When the clock period has expired, issue the close command
+		controller.new_forced_transition(e_close, decrease, nothing, reset_t_out_zero, t_out-T);
 
 	/// Compose the automata
 	HybridIOAutomaton tank_valve = compose("tank,valve",tank,valve,flow,idle);
-	HybridIOAutomaton system_io = compose("watertank-io",tank_valve,controller,DiscreteState("flow,idle"),rising);
+	HybridIOAutomaton tank_valve_evaluator = compose("tank,valve,evaluator",tank_valve,evaluator,DiscreteState("flow,idle"),shallow);
+	HybridIOAutomaton system_io = compose("watertank-aasap",tank_valve_evaluator,controller,DiscreteState("flow,idle,shallow"),nothing);
 
 	/// Create the monolithic automaton
-	HybridAutomaton system("watertank");
+	HybridAutomaton system;
 	RealSpace space;
 	make_lpair<HybridAutomaton,RealSpace>(system,space) = make_monolithic_automaton(system_io);
 
@@ -173,13 +216,33 @@ int main()
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState("flow,idle,rising")] = Box(2, 6.0,6.0, 1.0,1.0);
+	initial_set[DiscreteState("flow,idle,shallow,nothing")] = Box(3, 0.0,0.0, 6.0,6.0, 1.0,1.0);
 
 	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.43, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(3, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
+																      5.25, 8.25,
+																	  -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
 	// The domain
-	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,5.25,8.25,0.0,1.0));
+	HybridBoxes domain;
+
+	// The level is rising
+	domain[DiscreteState("flow,idle,shallow,nothing")] = Box(3, 0.0,0.01, 4.5,8.0, 0.99,1.0);
+	// A CLOSE command will be issued
+	domain[DiscreteState("flow,idle,deep,decrease")] = Box(3, 0.0,0.01, 8.0,8.01, 0.99,1.0);
+	// The valve is closing
+	domain[DiscreteState("flow,closing,deep,nothing")] = Box(3, 0.0,0.01, 7.5,9.0, 0.0,1.0);
+	// The level is falling
+	domain[DiscreteState("flow,idle,deep,nothing")] = Box(3, 0.0,0.01, 5.5,8.5, 0.0,0.01);
+	// An OPEN command will be issued
+	domain[DiscreteState("flow,idle,shallow,increase")] = Box(3, 0.0,0.01, 5.49,5.5, 0.0,0.01);
+	// The valve is opening
+	domain[DiscreteState("flow,opening,shallow,nothing")] = Box(3, 0.0,0.01, 4.5,6.0, 0.0,1.0);
+
+	// Spurious: the valve is closing but an OPEN command will be issued
+	domain[DiscreteState("flow,closing,shallow,increase")] = Box(3, 0.0,0.01, 7.5,9.0, 0.0,1.0);
+	// Spurious: the valve is opening but a CLOSE command will be issued
+	domain[DiscreteState("flow,opening,deep,decrease")] = Box(3, 0.0,0.01, 4.5,6.0, 0.0,1.0);
 
 	/// Verification
 
@@ -205,34 +268,46 @@ int main()
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
+    analyser.verify_iterative(system, initial_set, safe_box, domain);
+
 /*
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
     typedef HybridEvolver::OrbitType OrbitType;
 
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,opening,rising")] = 0.25;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,closing,falling")] = 0.25;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,falling")] = 0.961538;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,rising")] = 0.961538;
-	evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,5.0);
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,closing,deep,nothing")] = 0.5;
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,closing,shallow,increase")] = 0.00125;
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,deep,decrease")] = 0.00125;
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,deep,nothing")] = 2.34375;
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,shallow,increase")] = 0.00125;
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,shallow,nothing")] = 2.1875;
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,opening,deep,decrease")] = 0.00125;
+	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,opening,shallow,nothing")] = 0.5;
 
-    Box initial_box(2, 6.0,6.00, 1.0,1.0);
-    HybridEnclosureType initial_enclosure(DiscreteState("flow,idle,rising"),initial_box);
-    Box bounding_box(2, 5.35,8.25, 0.0,1.0);
-    HybridTime evolution_time(1e10,8);
+	evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,0.0011875,0.415625,0.11875);
+
+    Box initial_box(3, 0.0,0.0, 6.0,6.00, 1.0,1.0);
+    HybridEnclosureType initial_enclosure(DiscreteState("flow,idle,shallow,nothing"),initial_box);
+    Box bounding_box(2, -2.0,15, -1.0,2.0);
+    HybridTime evolution_time(30.0,7);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     std::cout << "Plotting orbit... "<<std::flush;
-    plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-    std::cout << "done." << std::endl;
+    Figure fig;
+	array<uint> xy(2,1,2);
+	fig.set_projection_map(ProjectionFunction(xy,3));
+	fig.set_bounding_box(bounding_box);
+    // Draws and creates file
+    fig.set_fill_colour(Colour(0.0,0.5,1.0));
+    draw(fig,orbit);
+    fig.write("watertank-aasap-orbit");
+
+
 */
-
-	analyser.verify_iterative(system, initial_set, safe_box, domain);
-
 	/*
 	// Perform the analysis
 	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, parameter_interval, tolerance);

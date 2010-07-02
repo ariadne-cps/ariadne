@@ -198,8 +198,8 @@ void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
 }
 
 //! \brief Plots figures for each couple of coordinates, with graphic box automatically chosen as the bounding box of the set. Also, saves the figures on a given folder under the current path.
-template<class SET> 
-void plot(const string& foldername, const string& filename, const SET& set)  
+template<class SET>
+void plot(const string& foldername, const string& filename, const SET& set)
 {
 	// If a set exists
 	if (set.size()>0)
@@ -246,7 +246,7 @@ void plot(const string& foldername, const string& filename, const SET& set)
 					}
 				}
 	
-				// Plots the result
+				// Plots the global result
 
 				// Assigns local variables
 				Figure fig; 
@@ -265,6 +265,33 @@ void plot(const string& foldername, const string& filename, const SET& set)
 					sprintf(num_char,"[%u,%u]",x,y);
 				// Writes the figure file
 				fig.write((foldername+"/"+filename+num_char).c_str()); 
+
+				// Plot the result for each location, using the global bounds
+				for (std::map<DiscreteState,Box>::const_iterator loc_it = set_bounds.begin(); loc_it != set_bounds.end(); loc_it++) {
+					// If the set is non-empty
+					if (set[loc_it->first].size() > 0)
+					{
+						// Assigns local variables
+						Figure fig;
+						array<uint> xy(2,x,y);
+
+						fig.set_projection_map(ProjectionFunction(xy,numvar));
+						fig.set_bounding_box(graphics_box);
+
+						// Appends the set, with the desired fill color
+						fig.set_fill_colour(Colour(1.0,0.75,0.0));
+						draw(fig,set[loc_it->first]);
+
+						// If there are more than two variables, prints the variable numbers
+						char num_char[6] = "";
+						if (numvar>2)
+							sprintf(num_char,"[%u,%u]",x,y);
+						// Writes the figure file
+						fig.write((foldername+"/"+filename+"-"+loc_it->first.name()+"-"+num_char).c_str());
+					}
+				}
+
+
 			}
 		} 
 	}

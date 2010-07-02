@@ -136,6 +136,48 @@ _split_initial_set(const HybridImageSet initial_set,
 	return initial_enclosures;
 }
 
+
+void
+HybridReachabilityAnalyser::
+_splitAndCreateTargetEnclosures(bool& isValid,
+								std::list<EnclosureType>& initial_enclosures,
+								const ContinuousEnclosureType& encl,
+								const Vector<Float>& minTargetCellWidths,
+								const Box& target_bounding,
+								const DiscreteTransition& trans,
+								const TaylorCalculus& tc) const
+{
+	// Get the target enclosure
+	ContinuousEnclosureType target_encl = tc.reset_step(trans.reset(),encl);
+
+	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
+	// of the target location, ignore it and notify
+	if (!target_encl.bounding_box().inside(target_bounding) &&
+		target_encl.bounding_box().disjoint(target_bounding)) {
+		ARIADNE_LOG(7,"Discarding target enclosure being outside the domain.\n");
+		isValid = false;
+		return;
+	}
+
+	// Otherwise try splitting the enclosure
+	bool hasSplit = false;
+	for (uint i=0; i < minTargetCellWidths.size(); i++) {
+		// If the enclosure has width larger than that of the minimum cell, split on that dimension
+		if (encl.bounding_box()[i].width() > minTargetCellWidths[i]) {
+			hasSplit = true;
+			std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = encl.split(i);
+			// Call recursively on the two enclosures
+			_splitAndCreateTargetEnclosures(isValid,initial_enclosures,split_sets.first,minTargetCellWidths,target_bounding,trans,tc);
+			_splitAndCreateTargetEnclosures(isValid,initial_enclosures,split_sets.second,minTargetCellWidths,target_bounding,trans,tc);
+		}
+	}
+
+	// If we could not split, we put the hybrid enclosure into the new initial_enclosures
+	if (!hasSplit)
+		initial_enclosures.push_back(EnclosureType(trans.target(),target_encl));
+}
+
+
 // Helper functions for operators on lists of sets.
 HybridGridTreeSet
 HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
@@ -524,6 +566,9 @@ upper_chain_reach(const SystemType& system,
     int lock_to_grid_steps = _parameters->lock_to_grid_steps;
     int maximum_grid_depth = _parameters->maximum_grid_depth;
 
+    // The number of divisions to a cell
+    long numCellDivisions = (1<<maximum_grid_depth);
+
     Gr grid=system.grid();
     GTS new_final(grid), new_reach(grid), reach(grid), intermediate(grid);
 
@@ -608,12 +653,124 @@ upper_chain_reach(const SystemType& system,
 				currentLocationsInUse[loc_it->first] = !loc_it->second.empty();
 	    }
 
-        ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
-        ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
+	    ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
+	    ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
+
+		/* Check the reached cells for transitions: we should check the largest enclosures possible, but also provide target
+		 * enclosures that are smaller than the smallest cell of the target location.
+		 * (NOTE ON SPLITTING: it is consequently done in respect to the smallest cell of the target location:
+		 *  we allow splitting as long as there is any dimension having width larger than the width of the smallest cell)
+		 * Procedure:
+		 * a) Recombine the reach cells, in order to start from the largest enclosures;
+		 * b) For each cell:
+		 * 	  i) Create the hybrid enclosure from it and push-front its continuous component into a split_list (initially empty);
+		 * 	  ii) For each transition of the involved location:
+		 * 		   *) While the split_list is not empty;
+		 * 				1) Pop-back an enclosure from the split_list;
+		 * 		   		2) If the transition is not active, drop the enclosure;
+		 * 		   		3) If the transition is definitely active,
+		 * 					x) split the enclosures as finely as possible;
+		 * 					xx) on each enclosure of minimum size, apply the reset and create the target enclosure;
+		 * 		   		4) If the transition is possibly active, try splitting the enclosure:
+		 * 			  		x) if a splitting is possible, push-front the split enclosures into the split_list;
+		 * 		   			xx) if no splitting is possible, apply the reset and create the target enclosure.
+		 */
+
+		// Recombine to have the largest enclosures available at the original location
+		new_reach.recombine();
+		ARIADNE_LOG(6,"Reach size after recombining = "<<new_reach.size()<<"\n");
+		for (GTS::const_iterator cell_it = new_reach.begin(); cell_it != new_reach.end(); cell_it++)
+		{
+			// Get the location
+			const DiscreteState& loc = cell_it->first;
+			// Get the box
+			const Box& bx = cell_it->second.box();
+
+			// Initialize the split list
+			std::list<ContinuousEnclosureType> split_list;
+			// Push the continuous enclosure of the cell into the list
+			split_list.push_front(ContinuousEnclosureType(bx));
+
+			// Get the transitions for the corresponding location
+			list<DiscreteTransition> transitions = system.transitions(loc);
+
+			ARIADNE_LOG(7,"Checking transitions for box "<< bx <<" in location " << loc.name() << "\n");
+
+			// For each transition
+			for (list<DiscreteTransition>::const_iterator trans_it = transitions.begin(); trans_it != transitions.end(); trans_it++)
+			{
+				ARIADNE_LOG(8,"Transition = "<<*trans_it<<"\n");
+
+				// Get the minimum cell widths in the target location
+				Vector<Float> minTargetCellWidths = grid[trans_it->target()].lengths()/numCellDivisions;
+				// Get the target bounding domain
+				const Box& target_bounding = _parameters->bounding_domain[trans_it->target()];
+
+				// While there is an enclosure into the split list
+				while (!split_list.empty()) {
+
+					// Get an enclosure and remove it from the list
+					ContinuousEnclosureType encl = split_list.back();
+					split_list.pop_back();
+
+					// Get the time model of the guard
+					TaylorModel guard_time_model = apply(trans_it->activation(),encl)[0];
+
+					ARIADNE_LOG(9,"Guard time model = "<<guard_time_model<<" (range: " << guard_time_model.range() << ")\n");
+
+					// If definitely active, add the target enclosure on the splittings of the enclosure
+					// If possibly active, split the enclosure if possible, otherwise create the target enclosure
+					// (if otherwise the transition is not active, do nothing)
+					if (guard_time_model.range().lower()>0) {
+
+						// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the original enclosure
+						_splitAndCreateTargetEnclosures(isValid,initial_enclosures,encl,minTargetCellWidths,target_bounding,*trans_it,tc);
+
+						// Set the in-use value for the target location as true
+						currentLocationsInUse[trans_it->target()] = true;
+
+					} else if (!(guard_time_model.range().upper()<0)) {
+
+						// Try splitting the enclosure
+						bool hasSplit = false;
+						for (uint i=0; i < minTargetCellWidths.size(); i++) {
+							// If the enclosure has width larger than that of the minimum cell, split on that dimension
+							if (encl.bounding_box()[i].width() > minTargetCellWidths[i]) {
+								hasSplit = true;
+								std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = encl.split(i);
+								split_list.push_front(split_sets.first);
+								split_list.push_front(split_sets.second);
+								break;
+							}
+						}
+						// If we could not split
+						if (!hasSplit) {
+
+							// Get the target continuous enclosure
+							ContinuousEnclosureType target_encl = tc.reset_step(trans_it->reset(),encl);
+
+							// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
+							// of the target location, ignore it and notify
+							if (!target_encl.bounding_box().inside(target_bounding) &&
+								target_encl.bounding_box().disjoint(target_bounding)) {
+								ARIADNE_LOG(7,"Discarding target enclosure being outside the domain.\n");
+								isValid = false;
+							} else {
+								// We apply the reset and put the hybrid enclosure into the new initial_enclosures
+								initial_enclosures.push_back(EnclosureType(trans_it->target(),target_encl));
+								// Set the in-use value for the target location as true
+								currentLocationsInUse[trans_it->target()] = true;
+							}
+						}
+					}
+				}
+			}
+		}
 
 		/* Mince the final cells, then for each of them add the enclosure into the new initial enclosures
 		 * if their bounding box is not outside (i.e. inside, or not inside but not disjoint) the bounding domain */
 		new_final.mince(maximum_grid_depth);
+		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
 		for (GTS::const_iterator cell_it = new_final.begin(); cell_it != new_final.end(); cell_it++) {
 			// Get the location
 			const DiscreteState& loc = cell_it->first;
@@ -628,6 +785,7 @@ upper_chain_reach(const SystemType& system,
 
 		}
 
+		/*
 		// Mince the reach cells, then for each of them and for each transition, check the activation:
 		// If it is possibly active, create the enclosure, apply the reset and put the result into the new initial enclosures
 		new_reach.mince(maximum_grid_depth);
@@ -665,9 +823,10 @@ upper_chain_reach(const SystemType& system,
                 	TaylorSet jump_set_model= tc.reset_step(trans_it->reset(),encl.continuous_state_set());
                 	initial_enclosures.push_back(EnclosureType(trans_it->target(),jump_set_model));
                 	currentLocationsInUse[trans_it->target()] = true; // Set the in-use value for the target location as true
-            	}	
+            	}
 			}
 		}
+		*/
 
 		// Adjoin to the accumulated reach and intermediate cells
         reach.adjoin(new_reach);
@@ -805,7 +964,7 @@ lower_chain_reach(const SystemType& system,
 			 * domain is not proper and an error should be thrown. */
 			if (!encl.continuous_state_set().bounding_box().inside(_parameters->bounding_domain[loc]) &&
 				encl.continuous_state_set().bounding_box().disjoint(_parameters->bounding_domain[loc])) {
-				ARIADNE_FAIL_MSG("Found an enclosure with bounding box " << encl.continuous_state_set().bounding_box() <<
+				ARIADNE_FAIL_MSG("Found an enclosure in location " << loc.name() << " with bounding box " << encl.continuous_state_set().bounding_box() <<
 								 " lying outside the domain in lower semantics: the domain is incorrect.\n");
 			}
 

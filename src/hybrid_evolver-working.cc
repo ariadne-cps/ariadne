@@ -430,61 +430,6 @@ _compute_timing(Set<DiscreteEvent> const& active_events,
 
 
 
-HybridEnclosure
-HybridEvolverBase::
-_compute_transverse_jump_set(HybridEnclosure const& starting_set,
-                             DiscreteEvent const& event,
-                             VectorIntervalFunction const& flow,
-                             ScalarIntervalFunction const& evolution_time,
-                             Float const& final_time,
-                             Set<DiscreteEvent> const& active_events,
-                             Map<DiscreteEvent,TransitionData> const& transitions,
-                             Map<DiscreteEvent,CrossingData> const& crossing_data) const
-{
-    Map<DiscreteEvent,CrossingKind> crossing_kinds;
-    Map<DiscreteEvent,ScalarIntervalFunction> crossing_times;
-    HybridEnclosure jump_set=starting_set;
-    switch(transitions[event].event_kind) {
-        case permissive:
-            jump_set.apply_flow(flow,evolution_time);
-            jump_set.new_activation(event,transitions[event].guard_function);
-            break;
-        case urgent: case impact:
-            jump_set.apply_flow_step(flow,crossing_times[event]);
-            break;
-        default:
-            ARIADNE_FAIL_MSG("Invalid event kind "<<transitions[event].event_kind<<" for transition.");
-    }
-
-    // Apply blocking conditions for other active events
-    for(Set<DiscreteEvent>::const_iterator other_event_iter=active_events.begin();
-        other_event_iter!=active_events.end(); ++other_event_iter)
-    {
-        DiscreteEvent other_event=*other_event_iter;
-        if(other_event!=event) {
-            switch(crossing_kinds[*other_event_iter]) {
-                case DEGENERATE:
-                case CONCAVE:
-                    ARIADNE_FAIL_MSG("Case of degenerate or concave other crossing not handled."); break;
-                    // follow-through
-                case INCREASING: case CONVEX:
-                    jump_set.new_invariant(other_event,transitions[other_event].guard_function);
-                    break;
-                case NEGATIVE: case DECREASING:
-                    // no additional constraints needed
-                case POSITIVE:
-                    // set should be empty
-                    ARIADNE_FAIL_MSG("Case of no crossing due to positive guard not handled.");
-                    break;
-            }
-        }
-    }
-
-    jump_set.apply_reset(event,transitions[event].target,transitions[event].reset_function);
-    return jump_set;
-}
-
-
 
 
 /*

@@ -37,7 +37,11 @@ using std::pair;
 template<class ES> class ListSet;
 template<class ES> class Orbit;
 
-enum Semantics { LOWER_SEMANTICS, UPPER_SEMANTICS };
+//! \brief The semantics used to determine the trajectories of the system.
+enum Semantics { 
+	LOWER_SEMANTICS, //!< Under-approximation with trajectories terminating at spacial discontinuities.
+	UPPER_SEMANTICS  //!< Over-approximations with all possibilities included as spacial discontinuities.
+};
 
 
 /*! \brief Interface for evolving a dynamic system.

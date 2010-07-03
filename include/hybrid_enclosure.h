@@ -79,11 +79,13 @@ typedef VectorTaylorFunction VectorIntervalFunction;
 //! The set is represented as the image of a box \f$D\f$ under a function model \f$\hat{f}(s)\f$, under the constraints
 //! \f$\hat{c}(s) \leq 0\f$ and \f$\hat{e}(s)=0\f$. Also keeps track of the current time \f$\hat{t}(s)\f$.
 //!
-//! In other words, \f[ S=\{ \hat{f}(s);\  \hat{t}(s) \mid s\in D \mid \hat{c}(s) \leq 0 \ \wedge \hat{e}(s)=0 \} . \f]
+//! In other words, 
+//! \f[ S=\{ \hat{f}(s);\  \hat{t}(s) \mid s\in D \mid \hat{c}(s) \leq 0 \ \wedge \hat{e}(s)=0 \} . \f]
 //! In the following documentation, we sometimes write \f$\xi(s)\f$ for \f$\hat{f}(s)\f$ and \f$\tau(s)\f$ for \f$\hat{t}(s)\f$.
+//! yielding \f[ S=\{ \xi(s);\  \tau(s) \mid s\in D \mid \rho(s) \in C \} . \f]
 //!
-//! \rationale
-//! <b>Parameterisation of the time specifier
+//! <b>Rationale:</b><\par>
+//! <b>Parameterisation of the time specifier</b>
 //! When computing a flow step, the evolution time can be given either as a
 //! function \f$\varepsilon(x)\f$ of the state, or as an absolute final time
 //! \f$\varomega(s)\f$ of the parameters.
@@ -224,8 +226,10 @@ class HybridEnclosure
     //! \brief \deprecated
     void new_time_step_bound(DiscreteEvent e, ScalarIntervalFunction tau);
 
-    //! \brief Introduces a new constraint \f$C\f$ on \f$x\f$.
+    //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
     void new_constraint(DiscreteEvent e, NonlinearConstraint c);
+    //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
+    void new_state_constraint(DiscreteEvent e, NonlinearConstraint c);
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
     void new_parameter_constraint(DiscreteEvent e, NonlinearConstraint c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.

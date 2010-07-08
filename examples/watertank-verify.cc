@@ -31,9 +31,9 @@ int main()
 	RealConstant a("a",0.02);
 	RealConstant b("b",0.3);
 	RealConstant T("T",4.0);
-	RealConstant hmin("hmin",5.5); 
+	RealConstant hmin("hmin",5.5);
 	RealConstant hmax("hmax",8.0);
-	RealConstant delta("Delta",0.05);	
+	RealConstant delta("Delta",0.05);
 
     // System variables
     RealVariable x("x");    // water level
@@ -176,10 +176,16 @@ int main()
 	initial_set[DiscreteState("flow,idle,rising")] = Box(2, 6.0,6.0, 1.0,1.0);
 
 	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.43, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.2, 8.3, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
 	// The domain
-	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,5.25,8.25,0.0,1.0));
+	//HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
+
+	HybridBoxes domain;
+	domain[DiscreteState("flow,opening,rising")] = Box(2,4.5,6.5,-0.1,1.1);
+	domain[DiscreteState("flow,closing,falling")] = Box(2,7.0,9.0,-0.1,1.1);
+	domain[DiscreteState("flow,idle,falling")] = Box(2,5.0,9.0,-0.1,0.1);
+	domain[DiscreteState("flow,idle,rising")] = Box(2,5.0,9.0,0.9,1.1);
 
 	/// Verification
 
@@ -189,15 +195,14 @@ int main()
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = 6;
 	evolver.parameters().enable_subdivisions = false;
-	evolver.parameters().enable_set_model_reduction = true;
+	evolver.parameters().enable_set_model_reduction = false;
 	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().lowest_maximum_grid_depth = 0;
+	analyser.parameters().lowest_maximum_grid_depth = 4;
 	analyser.parameters().highest_maximum_grid_depth = 8;
 	analyser.parameters().transient_time = 1e10;
 	analyser.parameters().transient_steps = 1;
 	analyser.parameters().lock_to_grid_time = 1e10;		
 	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.parameters().skip_if_disproved = true;
 	analyser.plot_verify_results = true;
 	analyser.free_cores = 0;
 	analyser.chain_reach_dumping = false;

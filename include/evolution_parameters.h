@@ -78,7 +78,7 @@ class ContinuousEvolutionParameters {
 	//! \details In the case of upper semantics, if true and no subdivisions are present, the set is put into the final sets. In the case of lower semantics, the set is discarded.
     bool enable_premature_termination;
 
-	//! \brief Reduces a set model to the equivalent of its bounding box, every set_model_events_size_interleaving events (false by default).
+	//! \brief Reduce a set model to the equivalent of its bounding box, every set_model_events_size_interleaving events (false by default).
 	bool enable_set_model_reduction;
 
 };
@@ -216,17 +216,21 @@ class DiscreteEvolutionParameters {
 	//! This parameters is only used in the chain_reach() routines.
     HybridBoxes safe_region;
 
-	//! \brief Enables the pruning of the trajectories when too large (false by default).
+	//! \brief Enable the pruning of the trajectories when too large (false by default).
     //! \details The pruning is done probabilistically.
 	//! <br>
     //! This parameter is used only under lower semantics.
 	bool enable_lower_pruning;
 
-	//! \brief Skips further evolution if the system is disproved.
+	//! \brief Skip further proving for the current iteration is the outer approximation lies outside the domain
+	//! <br>
+	//! This parameter is used only for upper_chain_reach.
+	bool skip_if_unprovable;
+
+	//! \brief Skip further evolution if the system is disproved.
 	//! <br>
 	//! This parameter is used only for lower_chain_reach and underlying evolution routines.
 	bool skip_if_disproved;
-
 };
 
 //! \brief Parameters for controlling the accuracy of evolution methods and reachability analysis.
@@ -262,6 +266,7 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
 	  highest_maximum_grid_depth(9),
       maximum_grid_height(16),
 	  enable_lower_pruning(false),
+	  skip_if_unprovable(true),
 	  skip_if_disproved(true)
 { }
 
@@ -306,6 +311,7 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  safe_region=" << p.safe_region
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
+       << ",\n  skip_if_unprovable=" << p.skip_if_unprovable
        << ",\n  skip_if_disproved=" << p.skip_if_disproved
        << "\n)\n";
     return os;
@@ -340,6 +346,7 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  safe_region=" << p.safe_region
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
+       << ",\n  skip_if_unprovable=" << p.skip_if_unprovable
        << ",\n  skip_if_disproved=" << p.skip_if_disproved
 
        << "\n)\n";

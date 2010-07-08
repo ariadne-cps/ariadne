@@ -265,6 +265,13 @@ class HybridReachabilityAnalyser
     									 const DiscreteTransition& trans_it,
     									 const TaylorCalculus& tc) const;
 
+    void _splitTargetEnclosures(bool& isValid,
+							    std::list<EnclosureType>& initial_enclosures,
+							    const DiscreteState& target_loc,
+							    const ContinuousEnclosureType& target_encl,
+							    const Vector<Float>& minTargetCellWidths,
+							    const Box& target_bounding) const;
+
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
@@ -295,7 +302,12 @@ class HybridReachabilityAnalyser
 	/*! \brief Set the maximum enclosure cell from the hybrid grid \a hgrid. */
 	void _setMaximumEnclosureCell(const HybridGrid& hgrid);
 
-	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.*/
+	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.
+	 * \details The grid is chosen to that each cell is included into the domain corresponding to its location. */
+	HybridGrid _getLooselyConstrainedHybridGrid(const HybridFloatVector& hmad) const;
+
+	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.
+	 * \details The grid is chosen to that each cell is included into the domains for all locations. */
 	HybridGrid _getHybridGrid(const HybridFloatVector& hmad) const;
 
 	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen equally for all locations.*/

@@ -149,12 +149,15 @@ _splitAndCreateTargetEnclosures(bool& isValid,
 {
 	// Get the target enclosure
 	ContinuousEnclosureType target_encl = tc.reset_step(trans.reset(),encl);
+	// Get its box
+	const Box& target_encl_box = target_encl.bounding_box();
 
 	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
 	// of the target location, ignore it and notify
-	if (!target_encl.bounding_box().inside(target_bounding) &&
-		target_encl.bounding_box().disjoint(target_bounding)) {
-		ARIADNE_LOG(7,"Discarding target enclosure being outside the domain.\n");
+	if (!target_encl_box.inside(target_bounding) &&
+		target_encl_box.disjoint(target_bounding)) {
+		ARIADNE_LOG(7,"Discarding target enclosure " << target_encl_box <<
+					  " being outside the domain in location " << trans.target().name() << ".\n");
 		isValid = false;
 		return;
 	}
@@ -176,6 +179,47 @@ _splitAndCreateTargetEnclosures(bool& isValid,
 	if (!hasSplit)
 		initial_enclosures.push_back(EnclosureType(trans.target(),target_encl));
 }
+
+void
+HybridReachabilityAnalyser::
+_splitTargetEnclosures(bool& isValid,
+					   std::list<EnclosureType>& initial_enclosures,
+					   const DiscreteState& target_loc,
+					   const ContinuousEnclosureType& target_encl,
+					   const Vector<Float>& minTargetCellWidths,
+					   const Box& target_bounding) const
+{
+	// Get the target enclosure box
+	const Box& target_encl_box = target_encl.bounding_box();
+
+	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
+	// of the target location, ignore it and notify
+	if (!target_encl_box.inside(target_bounding) &&
+		target_encl_box.disjoint(target_bounding)) {
+		ARIADNE_LOG(7,"Discarding target enclosure " << target_encl_box <<
+					  " being outside the domain in location " << target_loc.name() << ".\n");
+		isValid = false;
+		return;
+	}
+
+	// Otherwise try splitting the enclosure
+	bool hasSplit = false;
+	for (uint i=0; i < minTargetCellWidths.size(); i++) {
+		// If the enclosure has width larger than that of the minimum cell, split on that dimension
+		if (target_encl_box[i].width() > minTargetCellWidths[i]) {
+			hasSplit = true;
+			std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = target_encl.split(i);
+			// Call recursively on the two enclosures
+			_splitTargetEnclosures(isValid,initial_enclosures,target_loc,split_sets.first,minTargetCellWidths,target_bounding);
+			_splitTargetEnclosures(isValid,initial_enclosures,target_loc,split_sets.second,minTargetCellWidths,target_bounding);
+		}
+	}
+
+	// If we could not split, we put the hybrid enclosure into the new initial_enclosures
+	if (!hasSplit)
+		initial_enclosures.push_back(EnclosureType(target_loc,target_encl));
+}
+
 
 
 // Helper functions for operators on lists of sets.
@@ -686,6 +730,19 @@ upper_chain_reach(const SystemType& system,
 			// Get the box
 			const Box& bx = cell_it->second.box();
 
+			// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
+			// of the target location, ignore it and notify
+			if (!bx.inside(_parameters->bounding_domain[loc]) &&
+				bx.disjoint(_parameters->bounding_domain[loc])) {
+				ARIADNE_LOG(7,"Discarding reach enclosure " << bx <<
+							  " being outside the domain in location " << loc.name() << ".\n");
+				isValid = false;
+
+				// Return false if we skip when the system is unprovable
+				if (_parameters->skip_if_unprovable)
+					return make_pair<GTS,bool>(HybridGridTreeSet(),false);
+			}
+
 			// Initialize the split list
 			std::list<ContinuousEnclosureType> split_list;
 			// Push the continuous enclosure of the cell into the list
@@ -721,11 +778,26 @@ upper_chain_reach(const SystemType& system,
 					// If definitely active, add the target enclosure on the splittings of the enclosure
 					// If possibly active, split the enclosure if possible, otherwise create the target enclosure
 					// (if otherwise the transition is not active, do nothing)
+
 					if (guard_time_model.range().lower()>0) {
 
-						// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the original enclosure
-						_splitAndCreateTargetEnclosures(isValid,initial_enclosures,encl,minTargetCellWidths,target_bounding,*trans_it,tc);
+						time_t t1,t2;
+						time(&t1);
 
+						// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the original enclosure
+						//_splitAndCreateTargetEnclosures(isValid,initial_enclosures,encl,minTargetCellWidths,target_bounding,*trans_it,tc);
+
+						// Get the target continuous enclosure
+						ContinuousEnclosureType target_encl = tc.reset_step(trans_it->reset(),encl);
+						// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the target enclosure
+						_splitTargetEnclosures(isValid,initial_enclosures,trans_it->target(),target_encl,minTargetCellWidths,target_bounding);
+
+						// Return false if we skip when the system is unprovable
+						if (!isValid && _parameters->skip_if_unprovable)
+							return make_pair<GTS,bool>(HybridGridTreeSet(),false);
+
+						time(&t2);
+						ARIADNE_LOG(7,"Time required for splitting and creating: " << difftime(t2,t1) << ".\n");
 						// Set the in-use value for the target location as true
 						currentLocationsInUse[trans_it->target()] = true;
 
@@ -748,13 +820,20 @@ upper_chain_reach(const SystemType& system,
 
 							// Get the target continuous enclosure
 							ContinuousEnclosureType target_encl = tc.reset_step(trans_it->reset(),encl);
+							// Get its bounding box
+							const Box& target_encl_box = target_encl.bounding_box();
 
 							// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
 							// of the target location, ignore it and notify
-							if (!target_encl.bounding_box().inside(target_bounding) &&
-								target_encl.bounding_box().disjoint(target_bounding)) {
-								ARIADNE_LOG(7,"Discarding target enclosure being outside the domain.\n");
+							if (!target_encl_box.inside(target_bounding) &&
+								target_encl_box.disjoint(target_bounding)) {
+								ARIADNE_LOG(7,"Discarding target enclosure " << target_encl_box <<
+											  " being outside the domain in location " << trans_it->target().name() << ".\n");
 								isValid = false;
+
+								// Return false if we skip when the system is unprovable
+								if (_parameters->skip_if_unprovable)
+									return make_pair<GTS,bool>(HybridGridTreeSet(),false);
 							} else {
 								// We apply the reset and put the hybrid enclosure into the new initial_enclosures
 								initial_enclosures.push_back(EnclosureType(trans_it->target(),target_encl));
@@ -780,53 +859,16 @@ upper_chain_reach(const SystemType& system,
 			} else if (!cell_it->second.box().disjoint(_parameters->bounding_domain[loc])) {
 				initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
 			} else {
-				ARIADNE_LOG(7,"Discarding enclosure from final cell outside the domain.\n");
-			}
-
-		}
-
-		/*
-		// Mince the reach cells, then for each of them and for each transition, check the activation:
-		// If it is possibly active, create the enclosure, apply the reset and put the result into the new initial enclosures
-		new_reach.mince(maximum_grid_depth);
-		ARIADNE_LOG(6,"Reach size after mincing = "<<new_reach.size()<<"\n");
-		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
-		for (GTS::const_iterator cell_it = new_reach.begin(); cell_it != new_reach.end(); cell_it++)
-		{
-			// If the cell lies outside the bounding domain (i.e. not inside and disjoint), ignore it and notify
-			if (!cell_it->second.box().inside(_parameters->bounding_domain[cell_it->first]) &&
-				cell_it->second.box().disjoint(_parameters->bounding_domain[cell_it->first])) {
-				ARIADNE_LOG(7,"Discarding enclosure from reach cell outside the domain.\n");
+				ARIADNE_LOG(7,"Discarding enclosure " << cell_it->second.box() <<
+							" from final cell outside the domain in location " << loc.name() <<".\n");
 				isValid = false;
-				continue;
+
+				// Return false if we skip when the system is unprovable
+				if (_parameters->skip_if_unprovable)
+					return make_pair<GTS,bool>(HybridGridTreeSet(),false);
 			}
 
-			// Get the enclosure of the cell
-			EnclosureType encl = _discretiser->enclosure(*cell_it);
-
-			ARIADNE_LOG(7,"Checking transitions for enclosure "<<encl<<"\n");
-
-			// Get the transitions for the corresponding location
-			list<DiscreteTransition> transitions = system.transitions(cell_it->first);
-
-			// For each transition
-			for (list<DiscreteTransition>::const_iterator trans_it = transitions.begin(); trans_it != transitions.end(); trans_it++)
-			{
-				ARIADNE_LOG(8,"Transition = "<<*trans_it<<"\n");
-				// Get the time model of the guard
-    			TaylorModel guard_time_model = apply(trans_it->activation(),encl.continuous_state_set())[0];
-
-    			ARIADNE_LOG(8,"Guard time model = "<<guard_time_model<<" (range: " << guard_time_model.range() << ")\n");
-
-				// If possibly active, get the set model after the reset, enclose it and add it to the initial enclosures
-            	if (!(guard_time_model.range().upper()<0)) {
-                	TaylorSet jump_set_model= tc.reset_step(trans_it->reset(),encl.continuous_state_set());
-                	initial_enclosures.push_back(EnclosureType(trans_it->target(),jump_set_model));
-                	currentLocationsInUse[trans_it->target()] = true; // Set the in-use value for the target location as true
-            	}
-			}
 		}
-		*/
 
 		// Adjoin to the accumulated reach and intermediate cells
         reach.adjoin(new_reach);
@@ -1014,9 +1056,6 @@ _prove(const SystemType& system,
 	bool isValid;
 
 	make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set); // Perform the chain reachability analysis
-
-	// Get the bounds of the reach set
-	HybridBoxes bounds = reach.bounding_box();
 
 	// If the reached region is valid (i.e. it has not been restricted), perform checking, otherwise return false
 	if (isValid) {
@@ -1222,7 +1261,7 @@ _setHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid
 
 HybridGrid 
 HybridReachabilityAnalyser::
-_getHybridGrid(const HybridFloatVector& hmad) const
+_getLooselyConstrainedHybridGrid(const HybridFloatVector& hmad) const
 {
 	// Get the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = hmad.begin()->second.size();
@@ -1305,6 +1344,91 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 
 HybridGrid 
 HybridReachabilityAnalyser::
+_getHybridGrid(const HybridFloatVector& hmad) const
+{
+	// Get the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = hmad.begin()->second.size();
+
+	// Initialize the hybrid grid
+	HybridGrid hg;
+
+	// Initialize the hybrid grid lengths
+	std::map<DiscreteState,Vector<Float> > hybridgridlengths;
+
+	// Get the minimum domain length for each variable
+	Vector<Float> minDomainLengths(css);
+	// Initialize the values to infinity
+	for (uint i=0;i<css;i++) {
+		minDomainLengths[i] = std::numeric_limits<double>::infinity();
+	}
+	// Get the actual values
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) {
+		for (uint i=0;i<css;i++) {
+			minDomainLengths[i] = min(minDomainLengths[i], _parameters->bounding_domain.find(hfv_it->first)->second[i].width());
+		}
+	}
+
+	// Initialize the minimum non-zero length for each variable as the minimum domain lengths
+	Vector<Float> minNonZeroLengths = minDomainLengths;
+
+	// Get the maximum derivative/domainlength ratio among variables and locations
+	Float maxratio = 0.0;
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) {
+		for (uint i=0;i<css;i++) {
+			maxratio = max(maxratio,hfv_it->second[i]/minDomainLengths[i]);
+		}
+	}
+
+	// Update the minimum non zero lengths
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) {
+		for (uint i=0;i<css;i++) {
+			if (hfv_it->second[i] > 0) {
+				minNonZeroLengths[i] = min(minNonZeroLengths[i],hfv_it->second[i]/maxratio);
+			}
+		}
+	}
+
+	// Get the grid lengths from the derivatives
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
+	{
+		// Initialize the lengths
+		Vector<Float> gridlengths(css);
+
+		// Assign the lengths
+		for (uint i=0;i<css;i++) {
+			gridlengths[i] = (hfv_it->second[i] > 0) ? hfv_it->second[i]/maxratio : minNonZeroLengths[i];
+		}
+
+		// Add the pair to the hybrid lengths
+		hybridgridlengths.insert(make_pair<DiscreteState,Vector<Float> >(hfv_it->first,gridlengths));
+	}
+
+	// We complete the construction of the hybrid grid by defining the grid center
+	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) {
+
+		// Keep the location
+		const DiscreteState& loc = hfv_it->first;
+
+		/* Choose the center for the grid: the center of the reached region, if a non-empty reached region exists,
+		 * otherwise the center of the domain box */
+		Vector<Float> centre(css);
+		if (_statistics->upper().reach.has_location(loc) && !_statistics->upper().reach[loc].empty()) {
+			centre = _statistics->upper().reach[loc].bounding_box().centre();
+		} else {
+			centre = _parameters->bounding_domain.find(loc)->second.centre();
+		}
+
+		// Add the related grid
+		hg[loc] = Grid(centre,hybridgridlengths[loc]);
+	}
+
+	// Return
+	return hg;
+}
+
+
+HybridGrid
+HybridReachabilityAnalyser::
 _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 {
 	// Get the size of the space (NOTE: taken as equal for all locations)
@@ -1348,7 +1472,7 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 } 
 
 
-void 
+void
 HybridReachabilityAnalyser::
 _setInitialParameters(SystemType& system, const HybridBoxes& domain, const HybridBoxes& safe_region)
 {

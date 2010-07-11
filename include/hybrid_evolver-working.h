@@ -79,11 +79,13 @@ struct FinalData;
 struct EvolutionData;
 
 
-//! \brief Base routines for hybrid evolution.
-//!
+//! \brief Base routines for hybrid evolution.  
 //! Includes routines for extracting system information in a mode,
 //! applying initial events, computing crossing times,
 //! computing the evolution time, and applying a time step.
+//!
+//! \sa The \link hybrid_evolution_page Hybrid Evolution Methods \endlink page
+//! for details of the basic algorithm.
 //!
 //! NOTE: This class currently contains both a skeleton for hybrid evolution,
 //! and default implementations of many of the routines. It would be cleaner

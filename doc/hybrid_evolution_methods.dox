@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+//! \file hybrid_evolution_methods.dox
+//! \brief Documentation on methods for evolution of hybrid systems
+
+namespace Ariadne {
+
 /*!
-
-\file hybrid_evolution_methods.dox
-\brief Documentation on methods for evolution of hybrid systems
-
-
 
 \page hybrid_evolution_page Hybrid Evolution Methods (Version 0.5)
 
@@ -36,7 +36,7 @@ Given an initial state \f$x_0\f$, we wish to compute the set of all points
 reachable at times up to time \f$t\f$, and all points reached at exactly time \f$t\f$.
 We denote by \f$\Psi(x_0,t)\f$ the set of points reached starting at \f$x_0\f$ at time \f$t\f$.
 
-Suppose we start at a given initial state \f$x_0\f$ at time \f$t_0\f$ (which may depend on \f$x_0\f$), and undergo a sequence of events
+Suppose we start at a given initial state \f$(q_0,x_0)\f$ at time \f$t_0\f$ (which may depend on \f$x_0\f$), and undergo a sequence of events
 \f$e_{i}\f$ with guards \f$g_i\f$ and resets \f$r_i\f$.
 Let \f$\phi_i(x,t)\f$ denote the solution of the differential equation \f$\dot{x}=f_i(x)\f$ valid after the \f$i^\mathrm{th}\f$ event.
 Let \f$t_i\f$ be the time of the \f$i^\mathrm{th}\f$ event.
@@ -65,7 +65,7 @@ with constraints
         g_{m}\circ\phi(x_{m-1},[0,\delta_m]) &\leq 0 \\
         g_{m}\circ\phi(x_{m-1},\delta_m) &= 0 .
 \end{aligned} \f]
-This is useful, as a constraint of the form \f$\delta_m\geq0\f$ can be encoded directly in the domain of a ConstrainedImageSet, but a constraint of the form \f$t_{m+1}\geq t_m\f$ cannot be.
+This is useful, as a constraint of the form \f$\delta_m\geq0\f$ can be encoded directly in the domain of a %ConstrainedImageSet, but a constraint of the form \f$t_{m+1}\geq t_m\f$ cannot be.
 
 In the case of two events, both of which are urgent, and maximum time \f$T\f$, we can expand the conditions
 \f[ y(t) = \phi_2\bigl(r_2\circ\phi_1\bigl(r_1\circ\phi_0(x_0,\delta_0),\delta_1\bigr),t-(t_0(x_0)+\delta_0+\delta_1)\bigr) \f]
@@ -99,22 +99,35 @@ In general, if we can solve for \f$t_{m+1}\f$ in terms of \f$x_{m}\f$, we have
 \f[ x_{m+1} = \phi_m(x_m,\delta_m(x_m)) = \phi_{m}(x_{m}(x_0,\ldots),\delta_m(x_0,\ldots)) . \f]
 
 
-\section hybrid_evolution_constraint_set The ConstrainedImageSet class
+\section hybrid_evolution_constrained_image_set The ConstrainedImageSet class
 
-An \link ImageSet ImageSet\endlink in \f$\R^n\f$ is the image of a compact box \f$C\f$ under a continuous function \f$h:\R^p\rightarrow\R^n\f$, and is given by \f[ S = \{ x\in\R^n \mid \exists\,s\in C,\ h(s)=x \} = \{ h(s) \mid s\in C \} = h(C) . \f]
-An ImageSet is \em overt (even if \f$C\f$ were allowed to be unbounded), and \em compact.
-A \link ConstraintSet ConstraintSet\endlink in \f$\R^n\f$ is the preimage of a box \f$D\f$ under a continuous function \f$g:\R^n\rightarrow\R^m\f$, and is given by \f[ S = \{ x\in\R^n \mid g(x) \in D \} = g^{-1}(D) . \f]
-A ConstraintSet is open if \f$D\f$ is open, and closed if \f$D\f$ is closed.
+A ConstrainedImageSet is the image of a restricted subset of a compact box under a continuous function.
+\f[ S = \{ h(s) \mid s\in D \mid g(s) \in C \} . \f]
+Alternatively, expressing the set in terms of inequality and equality constraints,
+we have
+\f[ S = \{ h(s) \mid s\in D \mid c(s)\leq0 \wedge e(s)=0 \} . \f]
 
-In general, ImageSets are useful for representing enclosures in the evolution of a system, and ConstraintSets for regions used in the specification. However, for hybrid system evolution, we often need the properties of both kinds of set, which leads us to use ConstrainedImageSets.
+\subsection hybrid_evolution_constrained_image_set_operations Operations on constrained image sets
 
-A \c ConstrainedImageSet is the image of a restricted subset of a compact box under a continuous function.
-\f[ S = \{ h(s) \mid s\in C \wedge g(s) \in D \} . \f]
-The intersection of \f$S\f$ with \f$\{ x\mid e(x) \in E \}\f$ is then
-\f[  \{ h(s) \mid s\in C \wedge g(s) \in D \wedge e\circ h(s) \in E \} . \f]
+The intersection of \f$S=\{ h(s) \mid s\in D \mid g(s) \in C \}\f$ 
+with \f$R=\{ x\mid f(x) \in B \}\f$ is then
+\f[  S\cap R = \{ h(s) \mid s\in D \mid g(s) \in C \wedge (f\!\circ\! h)(s) \in B \} . \f]
 The image of \f$S\f$ under a continuous function \f$f\f$ is then
-\f[ f(S) = \{ (f\circ h)(s) \mid s\in C \wedge g(s) \in D \} . \f]
+\f[ f(S) = \{ (f\circ h)(s) \mid s\in D \mid g(s) \in C \} . \f]
 However, the preimage cannot be easily computed.
+
+\subsection hybrid_evolution_timed_constrained_image_set Timed constrained image sets
+
+When computing the evolution of a hybrid system, we have two additional considerations.
+Firstly, the functions describing the sets might not be know exactly, 
+so are represented by an interval extension of the exact function.
+Secondly, the evolution time as well as the evolved point may depend on the parameter,
+and so the set needs to be described as a \em timed constrained image set.
+We write a timed constrained image set as 
+\f[ S = \{ \xi(s);\;\tau(s) \mid s\in D \mid \rho(s)\in C \} \f]
+where \f$x=\xi(s)\f$ and \f$t=\tau(s)\f$.
+
+\subsection hybrid_evolution_extended_predicates Extended predicates for constrained image sets
 
 It is sometimes useful to extend the class of predicates allowed to simplify the representation of guards and invariants.
 Suppose \f$T=[0,t_{\max}]\f$ is a time interval, \f$D\f$ is an initial state set, and \f$\phi(x,t)\f$ denotes the flow.
@@ -131,11 +144,100 @@ We therefore order the independent variables of a constrained image set represen
 Then, if a constraint function depends on \f$n+j\f$ variables, these are assumed to be \f$x_{0,1},\ldots,x_{0,n},\delta_0,\ldots,\delta_j\f$.
 Note that in practice, some of the dwell-times \f$\delta_i\f$ may be missing if they can be solved for explicitly.
 
+\note The extended constrained image set type is not currently available in %Ariadne.
+This is due to the complexity of computing the maximum of the guard functions over
+the time interval.
+
+\subsection hybrid_evolution_simplifying Simplifying constrained image sets
+
+\section hybrid_evolution_initial_events Processing initial events
+
+At the beginning of the evolution, or immediately after a jump, 
+it may be the case that some events are possible immediately, or that some
+invariants are unsatisfied. 
+Before computing the continuous evolution, we first process these initial events
+starting from the initial set
+  \f$ S = \{ \xi(s),\,\tau(s)\mid s\in D \mid \rho(s)\in C \} \f$ .
+ -# Restrict by invariants \f$i_e\leq0\f$: 
+	\f[ R = S \cap i^{-1}(\R^-) = \{ \xi(s),\,\tau(s) \mid s\in D \mid \rho(s)\in C \wedge i(\xi(s))\leq 0 \} \f]
+ -# Apply initially active events \f$x'=r_e(x)\f$ when \f$a_e(x)\geq0\f$.
+	\f[ J_e  = r_e(R\cap a^{-1}(\R^+) = \{ r_e(\xi(s)),\,\tau(s) \mid s\in D \mid 
+			\rho(s)\in C \wedge i(\xi(s))\leq 0 \wedge a_e(\xi(s)) \geq 0 \} \f]
+ -# Restrict by progress predicates \f$p_e\leq 0\f$ (including guards \f$g_e\leq0\f$).
+	 \f[ F = R\cap p^{-1}(\R^-) = \{ \xi(s),\,\tau(s) \mid s\in D \mid \rho(s)\in C \wedge 
+	    i(\xi(s))\leq 0 \wedge p(\xi(s))\leq 0 \} \f]
+ .
+This functionality is provided by the HybridEvolverBase::_process_initial_events() method.
+           
+Note that 
+ - hitting events should be treated as invariants for the initial state,
+but during the evolution the identity \f$h_e(x)\geq0\f$ always holds after a reset.
+ - urgent events do not prevent other events occuring instantaneously, and
+   are treated as introducing a progress predicate \f$p_e(x)\leq0\f$ and an
+   activation \f$g_e(x)\geq0\f$.
+
+Once the initial set the been processed, the resulting <em>flowable set</em>
+is such that all points in the interior can undergo continuous evolution for a
+strictly positive time (assuming nondegeneracy of invariant/progress predicates).
 
 
+	   
+\section hybrid_evolution_evolution_step A hybrid evolution step
 
+\image html hybridevolution.jpg
+\image latex hybridevolution.eps
 
+In principle, the evolution of a hybrid system can be represented by the formula
+\f[ x(t) = \phi_{q_m}(t-t_m,r_{q_{m-1},e_{m}}(\phi_{q_{m-1}}(t_m-t_{m-1},\cdots
+             \phi_{q_1}(t_2-t_1,r_{q_0,e_1}(\phi_{q_0}(t_1-t_0,x_0)))\cdots))) \f]
+under the constraints
+\f[ p(x(t,n))\leq 0 \text{ whenever } t<t_n \text{ and } 
+      a_{q_n,e_n}(x(t,n))\geq0 \text{ whenever } t=t_{n+1} \f]
+Computing the evolution over a set of points is not so straightforward since 
+different initial points in the set may have qualitatively different trajectories,
+and it may not be possible to effectively compute the flow over an entire inter-
+event time interval.
+Further, in order to avoid unnecessary growth in the number of enclosure sets
+used, it is advantageous to ensure that events occur over a single time step
+wherever possible.
 
+ -# Compute the flow \f$\phi:D\times[0,h]\rightarrow \R^n\f$ of \f$\dot{x}=f_{q}(x)\f$
+	where \f$S\subset D\subset\R^n\f$. 
+	Let box \f$B\f$ be such that \f$\phi(D,[0,h])\subset B\f$.
+    <br>
+	This functionality is implemented in the HybridEvolverBase::_compute_flow() method.
+ -# Compute the possibly active events. 
+    An event \f$e\f$ is active if \f$c_e(\phi(x,t))\geq0\f$
+    for some \f$x\in S\f$ and \f$t\in[0,h]\f$; the set of possibly active events
+    must include the set of active events, but may be larger.
+    <br> 
+    This functionality is implemented in the HybridEvolverBase::_compute_active_events() method.
+ -# For each possibly active event, determine how the guard function \f$c_e\f$
+    varies over trajectories. 
+ -# If a guard function of an urgent or hitting event is strictly increasing 
+    at crossings with the guard set, attempt to compute the crossing time 
+    function \f$\gamma_e(x)\f$ satisfying \f$g_e(x,\phi(\gamma_e(x))) = 0\f$.
+    The crossing time function \f$\gamma_e\f$ must be a continuous function 
+    such that
+     - If \f$g_e(\phi(x,t))=0\f$ for \f$x\in S\f$ and \f$t\in[0,h]\f$, then 
+       \f$\gamma_e(x)=t\f$.
+     - If \f$x\in S\f$ and \f$\gamma(x)\in[0,h]\f$, then \f$g_e(\phi(x,\gamma(x)))=0\f$ and
+       \f$(\nabla g\!\cdot\!f)(\phi(x,\gamma(x)))>0\f$.
+     .
+    In particular, \f$\gamma_e\f$ must represent crossing times over the entire
+    set \f$S\f$. For points not in \f$S\f$, the value of \f$\gamma_e\f$ is
+    arbritrary (since these points are prohibited by other constraints).
+    <br>
+    This functionality is implemented in the HybridEvolverBase::_compute_crossing_times() method. 
+ -# Compute the timing information of the continuous evolution.
+    <br>
+    This functionality is provided by the HybridEvolverBase::_compute_timing() method.
+ -# Apply the computed transitions to find the 
+    \em jump, \em reach, \em intermediate and \em evolve sets.
+    This functionality is provided by the HybridEvolverBase::_apply_transitions() method.
+  .
+
+        
 \page hybrid_evolution_page_4 Hybrid Evolution Methods (Version 0.4)
 
 The evolution of a hybrid system takes place in a number of steps.
@@ -277,3 +379,5 @@ If we additionally wish to flow forward a time \f$h\f$, then
 For more information, see the documentation at <A HREF="../doc/evolution_step.pdf">evolution_step.pdf</A>.
 
 */
+
+} // namespace Ariadne

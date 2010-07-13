@@ -46,7 +46,7 @@ class InfeasibleProblemException : public std::exception { };
 class DegenerateFeasibilityProblemException : public std::exception { };
 class NearBoundaryOfFeasibleDomainException : public std::exception { };
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationModule EvaluationModule
 //! Interface for nonlinear programming solvers.
 class OptimiserInterface {
   public:

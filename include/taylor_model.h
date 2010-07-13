@@ -102,7 +102,7 @@ TaylorModel derivative(const TaylorModel& x, uint k);
 //! \relates TaylorModel \brief Replace the variale x[k] with a*x[k]+b
 TaylorModel preaffine(const TaylorModel&, uint k, const Interval& a, const Interval& b);
 //! \relates TaylorModel \brief Restricts the range of the variable x[k] to the interval d.
-//! \precondition -1 <= d.lower() <= d.upper() <= 1 .
+//! \pre -1 <= d.lower() <= d.upper() <= 1 .
 TaylorModel restrict(const TaylorModel&, uint k, const Interval& d);
 
 //! \relates TaylorModel

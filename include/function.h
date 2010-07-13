@@ -76,7 +76,8 @@ typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
 class ScalarFunction;
 class VectorFunction;
 
-//! A scalar function \f$f:\R^n\rightarrow\R\f$.
+//! \ingroup FunctionModule
+//! \brief A scalar function \f$f:\R^n\rightarrow\R\f$.
 class ScalarFunction
 {
     typedef uint Nat;
@@ -194,7 +195,9 @@ struct VectorFunctionElementReference {
     template<class X> X operator()(const Vector<X> & x) const;
 };
 
-//! A vector function \f$f:\R^n\rightarrow\R^m\f$.
+
+//! \ingroup FunctionModule
+//! \brief A vector function \f$f:\R^n\rightarrow\R^m\f$.
 class VectorFunction
 {
     typedef uint Nat;
@@ -327,12 +330,38 @@ inline std::ostream& operator<<(std::ostream& os, const VectorFunction& f) { ret
 
 
 
+//! \ingroup FunctionModule
+//! \brief A scalar function of the form \f$f(x)=c\f$.
+class ScalarConstantFunction
+    : public ScalarFunction
+{
+  public:
+    //! \brief Construct the constant function \f$f(x)=\sum a_ix_i+b\f$.
+    ScalarConstantFunction(uint n, const Real& c);
+  protected:
+    virtual void _check_type(const ScalarFunctionInterface* ptr) const;
+};
+
+//! \ingroup FunctionModule
+//! \brief A scalar function of the form \f$f(x)=\sum_{i=1}^{n}a_ix_i+b\f$.
 class ScalarAffineFunction
     : public ScalarFunction
 {
   public:
     //! \brief Construct the affine function \f$f(x)=\sum a_ix_i+b\f$.
     ScalarAffineFunction(const Vector<Real>& a, const Real& b);
+  protected:
+    virtual void _check_type(const ScalarFunctionInterface* ptr) const;
+};
+
+//! \ingroup FunctionModule
+//! \brief A scalar function of the form \f$f(x)=\sum_{\alpha} c_\alpha x_1^{\alpha_1}\cdots x_n^{\alpha_n}\f$.
+class ScalarPolynomialFunction
+    : public ScalarFunction
+{
+  public:
+    //! \brief Construct the affine function \f$f(x)=\sum a_ix_i+b\f$.
+    ScalarPolynomialFunction(const Polynomial<Real>& p);
   protected:
     virtual void _check_type(const ScalarFunctionInterface* ptr) const;
 };
@@ -362,6 +391,8 @@ class VectorAffineFunction
 
 
 
+//! \ingroup FunctionModule
+//! \brief The identiy function on \f$\R^n\f$.
 class IdentityFunction
     : public VectorFunction
 {

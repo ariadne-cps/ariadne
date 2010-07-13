@@ -78,9 +78,9 @@ const Interval pi_ivl = Ariadne::pi<Interval>();
 
 CompositeHybridAutomaton create_heating_system()
 {
-    // Set the system dynamic parameters
     RealConstant pi("pi",Ariadne::pi<Real>());
 
+    // Set the system dynamic parameters
     RealConstant P("P",4.0);
     RealConstant K("K",1.0);
     RealConstant Tav("Tav",16.0);
@@ -89,12 +89,12 @@ CompositeHybridAutomaton create_heating_system()
     // Set the system control parameters
     RealConstant Tmax("Tmax",22.0);
     RealConstant Tmin("Tmin",15.0);
-    Real Toff=22.0;
-    Real Ton=15.0;
-    Real Ton_upper=15.125;
-    Real Ton_lower=14.875;
+    RealConstant Toff("Toff",22.0);
+    RealConstant Ton("Ton",15.0);
+    RealConstant Ton_upper("Ton_upper",15.125);
+    RealConstant Ton_lower("Ton_lower",14.875);
 
-    // Create the two discrete state
+    // Create the discrete states
     AtomicDiscreteLocation on("on");
     AtomicDiscreteLocation off("off");
     AtomicDiscreteLocation ok("ok");
@@ -104,10 +104,11 @@ CompositeHybridAutomaton create_heating_system()
     DiscreteEvent switch_off("switch_off");
     DiscreteEvent midnight("midnight");
 
+    // Declare the system variables.
     RealVariable T("T");
     RealVariable t("t");
 
-    // Create the system modes
+    // Create the heater subsystem
     AtomicHybridAutomaton heater;
     heater.new_mode( on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
     heater.new_mode( off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
@@ -116,6 +117,7 @@ CompositeHybridAutomaton create_heating_system()
     heater.new_transition( off, switch_on, T<=Tmin, on, next(T)=T );
     heater.new_transition( on, switch_off, T>=Tmax, off, next(T)=T );
 
+    // Create the clock subsystem
     AtomicHybridAutomaton clock;
     clock.new_mode( ok, (dot(t)=1.0) );
     clock.new_transition( ok, midnight, t>=1.0, ok, next(t)=0.0, urgent );

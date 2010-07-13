@@ -54,6 +54,7 @@ static const EventKind urgent = URGENT;
 static const EventKind impact = IMPACT;
 
 
+//! \ingroup SystemModule
 //! \brief Base interface for hybrid systems, to allow different types to be used in evolution routines.
 class HybridAutomatonInterface {
   public:

@@ -61,13 +61,14 @@ More information on the mathematical foundations of %Ariadne can be found on the
  - \ref numeric_page
  - \ref linear_algebra_page
  - \ref linear_programming_page
- - \ref nonlinear_programming_page
  - \ref function_evaluation_page
  - \ref function_models_page
  - \ref algebraic_equations_page
+ - \ref integration_methods_page
+ - \ref nonlinear_programming_page
+ - \ref constraint_satisfaction_page
  - \ref geometry_page
  - \ref evolution_page
- - \ref integration_page
  - \ref hybrid_systems_page
  - \ref hybrid_evolution_page
  - \ref model_checking_page

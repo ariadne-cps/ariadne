@@ -58,16 +58,16 @@ class VectorFunction;
 class Grid;
 
 
-/*! \brief A discrete transition of a hybrid automaton, representing an instantaneous
- * jump from one discrete mode to another, governed by an activation set and a reset map.
- *
- * A %AtomicDiscreteTransition can only be created using the new_transition() method in
- * the %AtomicHybridAutomaton class.
- *
- * An invariant is modelled by a discrete transition with negative event id and null reset pointer.
- *
- * \sa \link Ariadne::AtomicHybridAutomaton \c AtomicHybridAutomaton \endlink, \link Ariadne::AtomicDiscreteMode \c AtomicDiscreteMode \endlink
- */
+//! \related AtomicHybridAutomaton
+//! \brief A discrete transition of a hybrid automaton, representing an instantaneous
+//! jump from one discrete mode to another, governed by an activation set and a reset map.
+//!
+//! A %AtomicDiscreteTransition can only be created using the new_transition() method in
+//! the %AtomicHybridAutomaton class.
+//!
+//! An invariant is modelled by a discrete transition with negative event id and null reset pointer.
+//!
+//! \sa \ref AtomicHybridAutomaton, \ref AtomicDiscreteMode
 class AtomicDiscreteTransition
 {
     friend class AtomicDiscreteMode;
@@ -127,14 +127,14 @@ inline std::ostream& operator<<(std::ostream& os, const AtomicDiscreteTransition
 
 
 
-/*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
- * within and invariant constraint set.
- *
- * A %AtomicDiscreteMode can only be created using the new_mode() method in
- * the %AtomicHybridAutomaton class.
- *
- * \sa \link Ariadne::AtomicHybridAutomaton \c AtomicHybridAutomaton \endlink, \link Ariadne::AtomicDiscreteTransition \c AtomicDiscreteTransition \endlink
- */
+//! \related AtomicHybridAutomaton
+//! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
+//! within and invariant constraint set.
+//!
+//! A %AtomicDiscreteMode can only be created using the new_mode() method in
+//! the %AtomicHybridAutomaton class.
+//!
+//! \sa \ref AtomicHybridAutomaton, \ref AtomicDiscreteTransition
 class AtomicDiscreteMode {
     friend class AtomicDiscreteTransition;
     friend class AtomicHybridAutomaton;
@@ -188,39 +188,37 @@ inline bool operator<(const AtomicDiscreteTransition& transition1, const AtomicD
 
 
 
-
-/*! \brief A hybrid automaton, comprising continuous-time behaviour
- *  at each discrete mode, coupled by instantaneous discrete transitions.
- *  The state space is given by a hybrid set.
- *
- * A hybrid automaton is a dynamic system with evolution in both
- * continuous time and discrete time.
- * The state space is a product \f$X=\bigcup\{q\}\times X_q\f$
- * where \f$q\f$ is the <em>discrete state</em> and \f$X_q\f$
- * is the <em>continuous state space</em> of corresponding to
- * each discrete state.
- *
- * For each %AtomicDiscreteMode, the dynamics is given by a
- * %VectorField describing the continuous dynamics,
- * and a %Set giving an invariants which must be satisified at
- * all times.
- *
- * The discrete time behaviour is specified by %AtomicDiscreteTransition
- * objects.
- * Each discrete transition represents an jump from a \a source
- * mode to a \a target mode.
- * There can be at most one discrete transition in an automaton
- * with the same event and source.
- *
- * A discrete transision can either be \em forced or \em unforced.
- * A forced transition much occur as soon as it is activated.
- * An unforced transition may occur at any time it is activated,
- * but is only forced to occur if the continuous evolution is
- * blocked by an invariant.
- *
- * \sa \link Ariadne::AtomicDiscreteMode \c AtomicDiscreteMode \endlink, \link Ariadne::AtomicDiscreteTransition \c AtomicDiscreteTransition \endlink, \link Ariadne::CompositeHybridAutomaton \c CompositeHybridAutomaton \endlink
-
- */
+//! \ingroup SystemModule
+//! \brief A hybrid automaton, comprising continuous-time behaviour
+//! at each discrete mode, coupled by instantaneous discrete transitions.
+//!  The state space is given by a hybrid set.
+//!
+//! A hybrid automaton is a dynamic system with evolution in both
+//! continuous time and discrete time.
+//! The state space is a product \f$X=\bigcup\{q\}\times X_q\f$
+//! where \f$q\f$ is the <em>discrete state</em> and \f$X_q\f$
+//! is the <em>continuous state space</em> of corresponding to
+//! each discrete state.
+//!
+//! For each %AtomicDiscreteMode, the dynamics is given by a
+//! %VectorField describing the continuous dynamics,
+//! and a %Set giving an invariants which must be satisified at
+//! all times.
+//!
+//! The discrete time behaviour is specified by %AtomicDiscreteTransition
+//! objects.
+//! Each discrete transition represents an jump from a \a source
+//! mode to a \a target mode.
+//! There can be at most one discrete transition in an automaton
+//! with the same event and source.
+//!
+//! A discrete transision can either be \em forced or \em unforced.
+//! A forced transition much occur as soon as it is activated.
+//! An unforced transition may occur at any time it is activated,
+//! but is only forced to occur if the continuous evolution is
+//! blocked by an invariant.
+//!
+//! \sa \ref AtomicDiscreteMode, \ref AtomicDiscreteTransition, \ref CompositeHybridAutomaton
 class AtomicHybridAutomaton
     : public Loggable
 {
@@ -309,6 +307,7 @@ class AtomicHybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
+    //!    \param urgency is a flag indicating whether the transition is urgent i.e. occurs as soon as it is activated.
     void new_transition(AtomicDiscreteLocation source,
                         DiscreteEvent event,
                         const ContinuousPredicate& guard,
@@ -323,6 +322,7 @@ class AtomicHybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
+    //!    \param urgency is a flag indicating whether the transition is urgent i.e. occurs as soon as it is activated.
     void new_transition(AtomicDiscreteLocation source,
                         DiscreteEvent event,
                         AtomicDiscreteLocation target,
@@ -336,7 +336,6 @@ class AtomicHybridAutomaton
     //!    \param source is the transition's source location.
     //!    \param event is the transition's event.
     //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
     void new_transition(AtomicDiscreteLocation source,
                         DiscreteEvent event,
@@ -447,10 +446,10 @@ inline std::ostream& operator<<(std::ostream& os, const AtomicHybridAutomaton& h
 
 
 
-/*! \brief A hybrid automaton, formed by running a finite number of AtomicHybridAutomaton classes in parallel.
- *
- * \sa \link Ariadne::AtomicHybridAutomaton \c AtomicHybridAutomaton \endlink
- */
+//! \ingroup SystemModule
+//! \brief A hybrid automaton, formed by running a finite number of AtomicHybridAutomaton classes in parallel.
+//!
+//! \sa \ref AtomicHybridAutomaton
 class CompositeHybridAutomaton
     : public HybridAutomatonInterface
     , public Loggable

@@ -142,7 +142,7 @@ template<class X> inline Affine<X> operator*(const X& c, const Affine<X>& f) {
 //! \relates Affine
 //! \brief Scalar multiplication of an affine expression.
 template<class X> inline Affine<X> operator*(const Affine<X>& f, const X& c) { return c*f; }
-//! \relates Affine<X>
+//! \relates Affine
 //! \brief Scalar division of an affine expression.
 template<class X> inline Affine<X> operator/(const Affine<X>& f, const X& c) { return (1/c)*f; }
 //! \relates Affine

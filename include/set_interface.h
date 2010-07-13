@@ -2,7 +2,7 @@
  *            set_interface.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file set_interface.h
  *  \brief Interfaces for open, closed, overt and compact subsets of Euclidean space.
  */
@@ -48,7 +48,7 @@ class RegularSetInterface;
 class LocatedSetInterface;
 
 //! \brief Base class for sets described by predicates involving boxes.
-class SetInterfaceBase 
+class SetInterfaceBase
 {
   public:
     //! \brief Virtual destructor.
@@ -61,7 +61,8 @@ class SetInterfaceBase
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
-//! \brief Interface for bounded sets. 
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for bounded sets.
 class BoundedSetInterface
     : public virtual SetInterfaceBase {
   public:
@@ -69,14 +70,15 @@ class BoundedSetInterface
     //! \brief Tests if the set is a inside of \a bx.
     virtual tribool inside(const Box& bx) const = 0;
     //! \brief Returns a bounding box for the set.
-    //! If the set is empty, then the first component of the result should be empty. 
+    //! If the set is empty, then the first component of the result should be empty.
     virtual Box bounding_box() const = 0;
 };
 
 
-//! \brief Interface for overt sets. 
-class OvertSetInterface 
-    : public virtual SetInterfaceBase 
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for overt sets, for which intersection with an open box is verifiable.
+class OvertSetInterface
+    : public virtual SetInterfaceBase
 {
   public:
     virtual OvertSetInterface* clone() const = 0;
@@ -86,9 +88,10 @@ class OvertSetInterface
     friend tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
 };
 
-//! \brief Interface for open sets. 
-class OpenSetInterface 
-    : public virtual OvertSetInterface 
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for open sets.
+class OpenSetInterface
+    : public virtual OvertSetInterface
 {
   public:
     virtual OpenSetInterface* clone() const = 0;
@@ -100,9 +103,10 @@ class OpenSetInterface
     friend tribool inside(const CompactSetInterface& ls, const OpenSetInterface& rs, const Float& eps);
 };
 
-//! \brief Interface for closed sets. 
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for closed sets.
 class ClosedSetInterface
-    : public virtual SetInterfaceBase 
+    : public virtual SetInterfaceBase
 {
   public:
     virtual ClosedSetInterface* clone() const = 0;
@@ -112,10 +116,11 @@ class ClosedSetInterface
     friend tribool disjoint(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
 };
 
-//! \brief Interface for compact (closed and bounded) sets. 
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for compact (closed and bounded) sets.
 class CompactSetInterface
     : public virtual BoundedSetInterface,
-      public virtual ClosedSetInterface 
+      public virtual ClosedSetInterface
 {
   public:
     virtual CompactSetInterface* clone() const = 0;
@@ -127,8 +132,9 @@ class CompactSetInterface
 
 };
 
-//! \brief Interface for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure. 
-class RegularSetInterface 
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
+class RegularSetInterface
     : public virtual OpenSetInterface,
       public virtual ClosedSetInterface
 {
@@ -146,8 +152,9 @@ class RegularSetInterface
 class GridTreeSet;
 
 
-//! \brief Interface for located (overt and compact) sets. 
-class LocatedSetInterface 
+//! \ingroup GeometryModule SetInterfaceSubModule
+//! \brief Interface for located (overt and compact) sets.
+class LocatedSetInterface
     : public virtual OvertSetInterface,
       public virtual CompactSetInterface
 {
@@ -161,22 +168,23 @@ class LocatedSetInterface
     friend tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 };
 
+//! \ingroup GeometryModule SetInterfaceSubModule
 //! \brief Complete set interface for bounded regular sets.
-class SetInterface 
+class SetInterface
     : public virtual RegularSetInterface,
       public virtual LocatedSetInterface
 {
     virtual SetInterface* clone() const = 0;
 };
-    
+
 
 inline std::ostream& operator<<(std::ostream& os, const SetInterfaceBase& s) {
-    return s.write(os); 
+    return s.write(os);
 }
 
 
 //! \brief A Euclidean space \f$\R^d\f$ of dimension \a d.
-class EuclideanSpace 
+class EuclideanSpace
 {
   public:
     //! \brief The interface satisified by bounded sets in the space.

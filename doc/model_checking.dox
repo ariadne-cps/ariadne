@@ -32,9 +32,9 @@
 \section model_checking_discrete_time Model Checking Discrete-Time Systems using Counterexample-Based Abstraction Refinement
 
 In this section, we consider the model checking problem for discrete time systems without control or noise, as defined by a continuous function \f$f:\R^n\rightarrow \R^n\f$.
-We assume that the system has a set of initial points \f$X_0\subset \R^n\f$ and a safe set \f$S\subset\R^n\f$. Further, we assume that the set of initial points is \emph{located}, which means that is supports predicates \c intersects, \c separated and \c inside, and that the safe set supports predicates \c covers, \c separated and \c inside.
+We assume that the system has a set of initial points \f$X_0\subset \R^n\f$ and a safe set \f$S\subset\R^n\f$. Further, we assume that the set of initial points is <em>located</em>, which means that is supports predicates \c intersects, \c separated and \c inside, and that the safe set supports predicates \c covers, \c separated and \c inside.
 
-We need a collection of \emph{basic sets}, which for simplicity we assume to be boxes, and \emph{enclosure sets}, which may, for example, be zonotopes.
+We need a collection of <em>basic sets</em>, which for simplicity we assume to be boxes, and <em>enclosure sets</em>, which may, for example, be zonotopes.
 
 The model checking problem for continuous-state-space systems differs from that of finite-state-space systems in that
  - We cannot consider states directly. Instead, we can only work with finite abstractions of the system.
@@ -56,7 +56,7 @@ For simplicity, we use boxes as the abstract states, and form a topological part
 \par Abstraction data
 
 Given an initial partition of the state space, we compute, for each box \f$B\f$:
- - A set \f$[f](B)\f$ of \emph{successor} boxes such that \f$B'\cap f(B)\neq\emptyset \implies B'\in [f](B)\f$.
+ - A set \f$[f](B)\f$ of <em>successor</em> boxes such that \f$B'\cap f(B)\neq\emptyset \implies B'\in [f](B)\f$.
  - Whether \f$B\f$ is a subset of \f$S\f$ (\f$s=\top\f$), disjoint from \f$S\f$ (\f$s=\bot\f$) or unknown/undecidable (\f$s=\uparrow\f$).
  - Whether \f$B\f$ is a disjoint from \f$X_0\f$ (\f$i=\bot\f$), a (small) neighbourhood of \f$B\f$ intersects \f$X_0\f$ (\f$i=\top\f$) or unknown/undecidable (\f$i=\uparrow\f$).
 
@@ -99,7 +99,7 @@ To split the box:
 To update the system:
  - Compute the abstract image of the new boxes
  - Update the abstract image of all boxes mapping to the old box
- - Update the \tt safe, \tt initial and \tt validated properties. It may be possible to do this locally.
+ - Update the \c safe, \c initial and \c validated properties. It may be possible to do this locally.
 
 \par Counterexample checking
 

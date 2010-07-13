@@ -48,8 +48,9 @@ class VectorFunction;
 
 static const int SMOOTH=255;
 
+//! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$.
-//! See also VectorFunctionInterface.
+//! \sa \ref VectorFunctionInterface.
 class ScalarFunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.
@@ -92,8 +93,9 @@ inline std::ostream& operator<<(std::ostream& os, const ScalarFunctionInterface&
 }
 
 
+//! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\R^n\rightarrow\R^m\f$ whose derivatives can be computed.
-//! See also ScalarFunctionInterface
+//! \sa \ref ScalarFunctionInterface
 class VectorFunctionInterface {
   public:
     //! \brief The type used to describe the number of argument variables.

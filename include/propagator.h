@@ -56,14 +56,14 @@ class Propagator {
     Propagator(double c);
     Propagator(const Real& c);
     Propagator(const X& c);
-    Propagator(Operator op, const Propagator& a);
-    Propagator(Operator op, const Propagator& a1, const Propagator& a2);
+    Propagator(Operator op, const Propagator<X>& a);
+    Propagator(Operator op, const Propagator<X>& a1, const Propagator<X>& a2);
 
     Propagator<X>& operator=(const int& c);
     Propagator<X>& operator=(const Real& c);
 
-    static Vector<Propagator<X> > variables(uint n);
-    static Propagator<X> variable(uint i);
+    static Vector<Propagator<X> > variables(VariableType n);
+    static Propagator<X> variable(VariableType i);
 
     Operator op() const;
     const X& value() const;
@@ -73,15 +73,15 @@ class Propagator {
     const Propagator<X>& arg2() const;
     Propagator<X>& arg2();
 
-    ValuationType reduce(const ValuationType& x);
+    Vector<X> reduce(const Vector<X>& x);
 
     std::ostream& repr(std::ostream& os) const;
     std::ostream& write(std::ostream& os) const;
 
   public:
     Propagator(PropagatorBody<X>* ptr);
-    Propagator<X>& assign(const ValuationType& x);
-    Propagator<X>& propagate(ValuationType& x);
+    Propagator<X>& assign(const Vector<X>& x);
+    Propagator<X>& propagate(Vector<X>& x);
   public:
     shared_ptr< PropagatorBody<X> > _ptr;
 };
@@ -175,7 +175,7 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Propag
     return p.write(os); }
 
 template<class X>
-Propagator<X>& Propagator<X>::assign(const ValuationType& x)
+Propagator<X>& Propagator<X>::assign(const Vector<X>& x)
 {
     //Interval& v=this->value();
     Propagator<X>& a1=this->arg1();

@@ -89,17 +89,17 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
 
 template<class X> Expression<X> simplify(const Expression<X>& e);
 
-/*! \brief A simple expression in named variables.
- *
- *  Ariadne supports expressions of type Bool, Tribool, String, Integer and Real.
- *  The class Real is a dummy type which can be implemented in many different ways.
- *
- *  The independent variables are given string names, rather than an integer index.
- *  Formulae in different variables may be combined; the variables of the resulting formula
- *  are all variables occuring in all formulae.
- *  Formulae may be manipulated symbolically.
- *  \sa Variable, ScalarFunction
- */
+//! \ingroup ExpressionModule
+//! \brief A simple expression in named variables.
+//!
+//! Ariadne supports expressions of type Bool, Tribool, String, Integer and Real.
+//! The class Real is a dummy type which can be implemented in many different ways.
+//!
+//! The independent variables are given string names, rather than an integer index.
+//! Formulae in different variables may be combined; the variables of the resulting formula
+//! are all variables occuring in all formulae.
+//! Formulae may be manipulated symbolically.
+//! \sa Variable, ScalarFunction
 template<class R>
 class Expression {
   public:
@@ -195,103 +195,106 @@ bool operator==(const Expression<Tribool>&, bool);
 
 Expression<Real> function(const Expression<Real>& e, const Space<Real>& s);
 
-//! \related Expression \brief .
+//! \related Expression \brief Logical disjunction.
 Expression<Boolean> operator&&(Expression<Boolean> e1, Expression<Boolean> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Logical conjunction.
 Expression<Boolean> operator||(Expression<Boolean> e1, Expression<Boolean> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Logical negation.
 Expression<Boolean> operator!(Expression<Boolean> e);
 
-//! \related Expression \brief .
+//! \related Expression \brief Fuzzy logical disjunction.
 Expression<Tribool> operator&&(Expression<Tribool> e1, Expression<Tribool> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Fuzzy logical conjunction.
 Expression<Tribool> operator||(Expression<Tribool> e1, Expression<Tribool> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Fuzzy logical negation.
 Expression<Tribool> operator!(Expression<Tribool> e);
 
-//! \related Expression \brief .
+//! \related Expression \brief String equality.
 Expression<Boolean> operator==(Variable<String> v1, const String& s2);
-//! \related Expression \brief .
+//! \related Expression \brief String inequality.
 Expression<Boolean> operator!=(Variable<String> v1, const String& s2);
 
 
-//! \related Expression \brief .
+//! \related Expression \brief Equality predicate.
 Expression<Boolean> operator==(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Inequality predicate.
 Expression<Boolean> operator!=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Integer comparison predicate (greater or equal).
 Expression<Boolean> operator>=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Integer comparison (less or equal)..
 Expression<Boolean> operator<=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Integer comparison (greater).
 Expression<Boolean> operator> (Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Integer comparison (less)..
 Expression<Boolean> operator< (Expression<Integer> e1, Expression<Integer> e2);
 
-//! \related Expression \brief .
+//! \related Expression \brief Integer unary plus expression (identity).
 Expression<Integer> operator+(Expression<Integer> e);
-//! \related Expression \brief .
+//! \related Expression \brief Integer unary minus expression.
 Expression<Integer> operator-(Expression<Integer> e);
-//! \related Expression \brief .
+//! \related Expression \brief Integer addition expression.
 Expression<Integer> operator+(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Integer subtraction expression.
 Expression<Integer> operator-(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Integer multiplication expression.
 Expression<Integer> operator*(Expression<Integer> e1, Expression<Integer> e2);
 
 
 
-//! \related Expression
+//! \related Expression \brief Positivity test.
+//! Returns \c indeterminate if the value cannot be distinguished from zero.
 Expression<Tribool> sgn(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Fuzzy inequality comparison predicate (less) of real expressions.
 Expression<Tribool> operator<=(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
 Expression<Tribool> operator>=(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Fuzzy inequality comparison predicate (less) of real expressions.
 Expression<Tribool> operator< (Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
 Expression<Tribool> operator> (Expression<Real> e1, Expression<Real> e2);
 
-//! \related Expression \brief .
+//! \related Expression \brief Real unary plus expression.
 Expression<Real> operator+(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real unary minus expression.
 Expression<Real> operator-(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real addition expression.
 Expression<Real> operator+(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Real subtraction expression.
 Expression<Real> operator-(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Real multiplication expression.
 Expression<Real> operator*(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Real division expression.
 Expression<Real> operator/(Expression<Real> e1, Expression<Real> e2);
 
-//! \related Expression \brief .
+//! \related Expression \brief Real integer power expression.
 Expression<Real> pow(Expression<Real> e, int n);
 
-//! \related Expression \brief .
+//! \related Expression \brief Real negation expression.
+//! Equivalent to -\a e.
 Expression<Real> neg(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real reciprocal expression.
+//! Equivalent to 1/\a e.
 Expression<Real> rec(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real square expression.
 Expression<Real> sqr(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real square root expression.
 Expression<Real> sqrt(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real exponential expression.
 Expression<Real> exp(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real natural logarithm expression.
 Expression<Real> log(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real sine expression.
 Expression<Real> sin(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real cosine expression.
 Expression<Real> cos(Expression<Real> e);
-//! \related Expression \brief .
+//! \related Expression \brief Real tangent expression.
 Expression<Real> tan(Expression<Real> e);
 
-//! \related Expression \brief .
+//! \related Expression \brief Real maximum expression.
 Expression<Real> max(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Real minimum expression.
 Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief .
+//! \related Expression \brief Real absolute value expression.
 Expression<Real> abs(Expression<Real> e);
 
 enum Sign { positive=+1, negative=-1, zero=0 };

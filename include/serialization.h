@@ -47,7 +47,9 @@ namespace Ariadne {
 using boost::archive::text_oarchive;
 using boost::archive::text_iarchive;
 
+//! \brief Restore classes from a text archive.
 class InputArchive : public text_iarchive { };
+//! \brief Serialize classes to a text archive.
 class OutputArchive : public text_oarchive { };
 
 }

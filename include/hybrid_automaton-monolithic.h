@@ -60,14 +60,13 @@ class VectorFunction;
 class Grid;
 
 
-/*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
- * within and invariant constraint set.
- *
- * A %DiscreteMode can only be created using the new_mode() method in
- * the %MonolithicHybridAutomaton class.
- *
- * \sa \link Ariadne::MonolithicHybridAutomaton \c MonolithicHybridAutomaton \endlink, \link Ariadne::DiscreteTransition \c DiscreteTransition \endlink
- */
+//! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
+//! within and invariant constraint set.
+//!
+//! A %DiscreteMode can only be created using the new_mode() method in
+//! the %MonolithicHybridAutomaton class.
+//!
+//! \sa MonolithicHybridAutomaton, DiscreteTransition
 class DiscreteMode {
     friend class MonolithicHybridAutomaton;
   private:
@@ -134,16 +133,15 @@ inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 
 
 
-/*! \brief A discrete transition of a hybrid automaton, representing an instantaneous
- * jump from one discrete mode to another, governed by an activation set and a reset map.
- *
- * A %DiscreteTransition can only be created using the new_transition() method in
- * the %MonolithicHybridAutomaton class.
- *
- * An invariant is modelled by a discrete transition with negative event id and null reset pointer.
- *
- * \sa \link Ariadne::MonolithicHybridAutomaton \c MonolithicHybridAutomaton \endlink, \link Ariadne::DiscreteMode \c DiscreteMode \endlink
- */
+//! \brief A discrete transition of a hybrid automaton, representing an instantaneous
+//! jump from one discrete mode to another, governed by an activation set and a reset map.
+//!
+//! A %DiscreteTransition can only be created using the new_transition() method in
+//! the %MonolithicHybridAutomaton class.
+//!
+//! An invariant is modelled by a discrete transition with negative event id and null reset pointer.
+//!
+//! \sa MonolithicHybridAutomaton, DiscreteMode
 class DiscreteTransition
 {
     friend class MonolithicHybridAutomaton;
@@ -240,38 +238,37 @@ inline bool operator<(const DiscreteTransition& transition1, const DiscreteTrans
 
 
 
-/*! \brief A hybrid automaton, comprising continuous-time behaviour
- *  at each discrete mode, coupled by instantaneous discrete transitions.
- *  The state space is given by a hybrid set.
- *
- * A hybrid automaton is a dynamic system with evolution in both
- * continuous time and discrete time.
- * The state space is a product \f$X=\bigcup\{q\}\times X_q\f$
- * where \f$q\f$ is the <em>discrete state</em> and \f$X_q\f$
- * is the <em>continuous state space</em> of corresponding to
- * each discrete state.
- *
- * For each %DiscreteMode, the dynamics is given by a
- * %VectorField describing the continuous dynamics,
- * and a %Set giving an invariants which must be satisified at
- * all times.
- *
- * The discrete time behaviour is specified by %DiscreteTransition
- * objects.
- * Each discrete transition represents an jump from a \a source
- * mode to a \a target mode.
- * There can be at most one discrete transition in an automaton
- * with the same event and source.
- *
- * A discrete transision can either be \em forced or \em unforced.
- * A forced transition much occur as soon as it is activated.
- * An unforced transition may occur at any time it is activated,
- * but is only forced to occur if the continuous evolution is
- * blocked by an invariant.
- *
- * \sa \link Ariadne::DiscreteMode \c DiscreteMode \endlink, \link Ariadne::DiscreteTransition \c DiscreteTransition \endlink
-
- */
+//! \ingroup SystemModule
+//! \brief A hybrid automaton, comprising continuous-time behaviour
+//! at each discrete mode, coupled by instantaneous discrete transitions.
+//! The state space is given by a hybrid set.
+//!
+//! A hybrid automaton is a dynamic system with evolution in both
+//! continuous time and discrete time.
+//! The state space is a product \f$X=\bigcup\{q\}\times X_q\f$
+//! where \f$q\f$ is the <em>discrete state</em> and \f$X_q\f$
+//! is the <em>continuous state space</em> of corresponding to
+//! each discrete state.
+//!
+//! For each %DiscreteMode, the dynamics is given by a
+//! %VectorField describing the continuous dynamics,
+//! and a %Set giving an invariants which must be satisified at
+//! all times.
+//!
+//! The discrete time behaviour is specified by %DiscreteTransition
+//! objects.
+//! Each discrete transition represents an jump from a \a source
+//! mode to a \a target mode.
+//! There can be at most one discrete transition in an automaton
+//! with the same event and source.
+//!
+//! A discrete transision can either be \em forced or \em unforced.
+//! A forced transition much occur as soon as it is activated.
+//! An unforced transition may occur at any time it is activated,
+//! but is only forced to occur if the continuous evolution is
+//! blocked by an invariant.
+//!
+//! \sa \link Ariadne::DiscreteMode \c DiscreteMode \endlink, \link Ariadne::DiscreteTransition \c DiscreteTransition \endlink
 class MonolithicHybridAutomaton
     : public HybridAutomatonInterface
 {
@@ -356,7 +353,7 @@ class MonolithicHybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param activation is the transition's activation region.
-    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
+    //!    \param urgency determines whether the transision is urgent or permissive.
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              DiscreteLocation source,
                                              DiscreteLocation target,
@@ -365,13 +362,14 @@ class MonolithicHybridAutomaton
                                              Urgency urgency);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    //!   \deprecated
     //!
     //!    \param event is the transition's event.
     //!    \param source is the transition's source location.
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
+    //!    \param activation defines the transition's activation region. Must have a one-dimensional codomain.
+    //!    \param urgency determines whether the transision is urgent or permissive.
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              DiscreteLocation source,
                                              DiscreteLocation target,
@@ -381,6 +379,7 @@ class MonolithicHybridAutomaton
 
     //! \brief Adds a forced (urgent) discrete transition to the automaton
     //! using the discrete states to specify the source and target modes.
+    //!   \deprecated
     //!
     //!    \param event is the transition's event.
     //!    \param source is the transition's source location.
@@ -395,6 +394,7 @@ class MonolithicHybridAutomaton
 
     //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
     //! using the discrete states to specify the source and target modes.
+    //!   \deprecated
     //!
     //!    \param event is the transition's event.
     //!    \param source is the transition's source location.
@@ -406,22 +406,6 @@ class MonolithicHybridAutomaton
                                                       DiscreteLocation target,
                                                       const VectorFunction& reset,
                                                       const VectorFunction& activation);
-/*
-    //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
-    //!
-    //!    \param event is the discrete transition's discrete event.
-    //!    \param source is the discrete transition's source mode.
-    //!    \param target is the discrete transition's target mode.
-    //!    \param reset is the discrete transition's reset.
-    //!    \param activation is the discrete transition's activation region.
-    //!    \param forced determines whether the transition is forced or unforced.
-    const DiscreteTransition& new_transition(DiscreteEvent event,
-                                             const DiscreteMode& source,
-                                             const DiscreteMode& target,
-                                             const VectorFunction& reset,
-                                             const VectorFunction& activation,
-                                             bool forced);
-*/
 
     //! \brief Set the grid controlling relative scaling in the mode.
     void set_grid(DiscreteLocation location, const Grid& grid);

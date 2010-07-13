@@ -35,6 +35,10 @@
 
 namespace Ariadne {
 
+//! \ingroup NumericModule
+//! \brief Computable real numbers.
+//!
+//! Support over-approximation by an Interval and approximation by a Float.
 class Real : public Interval {
   public:
     explicit Real() : Interval() { }

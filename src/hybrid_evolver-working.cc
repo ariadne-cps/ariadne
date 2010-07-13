@@ -47,13 +47,13 @@ typedef Vector<Interval> IntervalVector;
 
 std::ostream& operator<<(std::ostream& os, const CrossingKind& crk) {
     switch(crk) {
-        case DEGENERATE: os<<"degenerate"; break;
-        case POSITIVE: os<<"positive"; break;
-        case NEGATIVE: os<<"negative"; break;
-        case INCREASING: os<<"increasing"; break;
-        case DECREASING: os<<"decreasing"; break;
-        case CONVEX: os<<"convex"; break;
-        case CONCAVE: os<<"concave"; break;
+        case DEGENERATE_CROSSING: os<<"degenerate"; break;
+        case POSITIVE_CROSSING: os<<"positive"; break;
+        case NEGATIVE_CROSSING: os<<"negative"; break;
+        case INCREASING_CROSSING: os<<"increasing"; break;
+        case DECREASING_CROSSING: os<<"decreasing"; break;
+        case CONVEX_CROSSING: os<<"convex"; break;
+        case CONCAVE_CROSSING: os<<"concave"; break;
         default: os << "unknown"; break;
     } return os;
 }
@@ -360,31 +360,31 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             ScalarIntervalFunction crossing_time;
             try {
                 crossing_time=implicit(compose(guard,flow));
-                crossing_data[event]=CrossingData(INCREASING,crossing_time);
+                crossing_data[event]=CrossingData(INCREASING_CROSSING,crossing_time);
             }
             catch(const ImplicitFunctionException& e) {
                 ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
-                crossing_data[event]=CrossingData(CONVEX);
+                crossing_data[event]=CrossingData(CONVEX_CROSSING);
             }
         } else if(derivative_range.upper()<0.0) {
-            crossing_data[event]=CrossingData(DECREASING);
+            crossing_data[event]=CrossingData(DECREASING_CROSSING);
         } else {
             ScalarFunction second_derivative=lie_derivative(derivative,dynamic);
             Interval second_derivative_range=second_derivative.evaluate(flow_bounds);
             if(second_derivative_range.lower()>0.0) {
-                crossing_data[event]=CrossingData(CONVEX);
+                crossing_data[event]=CrossingData(CONVEX_CROSSING);
             } else if(second_derivative_range.upper()<0.0) {
                 try {
                     ScalarIntervalFunction critical_time=implicit(compose(derivative,flow));
-                    crossing_data[event]=CrossingData(CONCAVE,critical_time);
+                    crossing_data[event]=CrossingData(CONCAVE_CROSSING,critical_time);
                 }
                 catch(const ImplicitFunctionException& e) {
                     ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
-                    crossing_data[event]=CrossingData(DEGENERATE);
+                    crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
                 }
-                    crossing_data[event]=CONCAVE;
+                    crossing_data[event]=CONCAVE_CROSSING;
             } else {
-                crossing_data[event]=CrossingData(DEGENERATE);
+                crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
             }
         }
     }
@@ -630,9 +630,9 @@ _apply_time_step(EvolutionData& evolution_data,
                 break;
             case URGENT: case IMPACT:
                 switch(crossing_data[event].crossing_kind) {
-                    case INCREASING:
+                    case INCREASING_CROSSING:
                         jump_set.apply_flow_step(flow,crossing_data[event].crossing_time); break;
-                    case CONVEX:
+                    case CONVEX_CROSSING:
                         jump_set.apply_flow(flow,step_size);
                         jump_set.new_guard(event,transition.guard_function);
                         jump_set.new_invariant(event,lie_derivative(transition.guard_function,dynamic));
@@ -652,16 +652,16 @@ _apply_time_step(EvolutionData& evolution_data,
             DiscreteEvent other_event=*other_event_iter;
             if(other_event!=event) {
                 switch(crossing_data[*other_event_iter].crossing_kind) {
-                        case DEGENERATE:
-                        case CONCAVE:
+                        case DEGENERATE_CROSSING:
+                        case CONCAVE_CROSSING:
                         ARIADNE_FAIL_MSG("Case of concave or degenerate crossing not handled.");
                         // follow-through
-                    case INCREASING: case CONVEX:
+                    case INCREASING_CROSSING: case CONVEX_CROSSING:
                         jump_set.new_invariant(other_event,transitions[other_event].guard_function);
                         break;
-                    case NEGATIVE: case DECREASING:
+                    case NEGATIVE_CROSSING: case DECREASING_CROSSING:
                         // no additional constraints needed
-                    case POSITIVE:
+                    case POSITIVE_CROSSING:
                         // set should be empty
                         ARIADNE_FAIL_MSG("Case of no crossing due to positive guard not handled.");
                         break;
@@ -683,24 +683,24 @@ _apply_time_step(EvolutionData& evolution_data,
     {
         DiscreteEvent event=*event_iter;
         switch(crossing_data[*event_iter].crossing_kind) {
-            case DEGENERATE:
+            case DEGENERATE_CROSSING:
                 ARIADNE_FAIL_MSG("Case of degenerate crossing not handled.");
                 break;
-            case CONCAVE: {
+            case CONCAVE_CROSSING: {
                 ARIADNE_LOG(2,"Concave crossing\n");
                 reach_set.new_invariant(event,critical_function.function());
                 evolve_set.new_invariant(event,critical_function.function());
                 break;
             }
-            case INCREASING: case CONVEX:
+            case INCREASING_CROSSING: case CONVEX_CROSSING:
                 // Only need constraints at final time
                 reach_set.new_invariant(event,transitions[event].guard_function);
                 evolve_set.new_invariant(event,transitions[event].guard_function);
                 break;
-            case NEGATIVE: case DECREASING:
+            case NEGATIVE_CROSSING: case DECREASING_CROSSING:
                 // no additional constraints needed
                 break;
-            case POSITIVE:
+            case POSITIVE_CROSSING:
                 // set should be empty
                 ARIADNE_FAIL_MSG("Case of no crossing due to positive guard not handled.");
                 break;
@@ -989,11 +989,11 @@ _apply_blocking(HybridEnclosure& set,
 {
     if(is_blocking(transition.event_kind)) {
         switch(crossing.kind) {
-            case INCREASING: case CONVEX:
+            case INCREASING_CROSSING: case CONVEX_CROSSING:
                 set.new_invariant(transition.guard_function; break;
-            case NEGATIVE: case DECREASING:
+            case NEGATIVE_CROSSING: case DECREASING_CROSSING:
                 break;
-            case CONCAVE: case DEGENERATE:
+            case CONCAVE_CROSSING: case DEGENERATE_CROSSING:
                 ARIADNE_FAIL_MESSAGE("TransverseHybridEvolver cannot handle "<<crossing.kind<<" crossing.";
             default:
                 ARIADNE_FAIL_MSG("CrossingKind "<<crossing.kind<<" not recognised by TransverseHybridEvolver.");
@@ -1022,11 +1022,11 @@ _apply_time_step(EvolutionData& evolution_data,
         CrossingKind crossing_kind=crossing.crossing_kind;
         if(is_blocking(transition.event_kind)) {
             switch(crossing.crossing_kind) {
-                case INCREASING: case CONVEX:
+                case INCREASING_CROSSING: case CONVEX_CROSSING:
                     reach_set.new_invariant(event,transition.guard_function); break;
-                case NEGATIVE: case DECREASING:
+                case NEGATIVE_CROSSING: case DECREASING_CROSSING:
                     break;
-                case CONCAVE: case DEGENERATE:
+                case CONCAVE_CROSSING: case DEGENERATE_CROSSING:
                     ARIADNE_FAIL_MSG("TransverseHybridEvolver cannot handle "<<crossing_kind<<" crossing.");
                 default:
                     ARIADNE_FAIL_MSG("CrossingKind "<<crossing_kind<<" not recognised by TransverseHybridEvolver.");

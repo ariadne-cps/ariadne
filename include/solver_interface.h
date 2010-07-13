@@ -63,9 +63,8 @@ class NoSolutionException : public SolverException
 
 
 
-/*! \ingroup EvaluatorInterfaces \ingroup Solvers
- *  \brief %Interface for solving (nonlinear) equations.
- */
+//! \ingroup SolverModule EvaluationModule
+//! \brief %Interface for solving (nonlinear) equations.
 class SolverInterface
     : public Loggable
 {

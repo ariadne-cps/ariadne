@@ -71,12 +71,11 @@ template<class k, class V> class Map;
 
 
 
-/*! \brief A hybrid system, comprising continuous-time behaviour
- *  at each discrete mode, coupled by instantaneous discrete transitions.
- *  The state space is given by a hybrid set.
- * \sa \link Ariadne::MonolithicHybridAutomaton \c MonolithicHybridAutomaton \endlink.
-
- */
+//! \brief A hybrid system, comprising continuous-time behaviour
+//! at each discrete mode, coupled by instantaneous discrete transitions.
+//! The state space is given by a hybrid set.
+//! UNDER DEVELOPMENT
+//! \sa \ref MonolithicHybridAutomaton.
 class HybridSystem
     : public Loggable
 {
@@ -218,60 +217,71 @@ class HybridSystem
     //@{
     //! \name Data access and queries.
 
-    //! \brief .
+    //! \brief The set of all discrete events.
     EventSet events() const;
-    //! \brief .
+    //! \brief The set of all discrete (string and integer) variables.
     VariableSet discrete_variables() const;
-    //! \brief .
+    //! \brief The set of all variables which are specified in the given discrete \a state.
     VariableSet result_variables(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The set of all variables which are used in the given discrete \a state, but have no defining equation.
     VariableSet argument_variables(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The set of all continuous variables which occur as result or argument variables in the discrete \a state.
     VariableSet continuous_variables(const DiscreteValuation& state) const;
-    //! \brief .
-    VariableSet state_variables(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The set of all <em>state</em> variables in the discrete \a state,
+    //!   which are those continuous variables defined by.a differential equation.
+    VariableSet state_variables(const DiscreteValuation& location) const;
+    //! \brief The set of all continuous variables defined by algebraic equations.
     VariableSet algebraic_variables(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The set of all continuous variables defined by algebraic equations which are not output variables.
     VariableSet auxiliary_variables(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The set of all external continuous variables which are
+    //!   not defined by an algebraic or differential equation.
     VariableSet input_variables(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The set of external continuous variables with a defining equatioin.
     VariableSet output_variables(const DiscreteValuation& state) const;
 
-    //! \brief .
+    //! \brief Check that the continuous dynamics in \a location is valid, which
+    //!   means that every continuous variable has exactly one defining equation.
     bool check_dynamic(const DiscreteValuation& location) const;
-    //! \brief .
+    //! \brief Check that the guards in \a location are well-defined, which means
+    //!   that they only use continuous variables defined in the given \a location.
     bool check_guards(const DiscreteValuation& location) const;
-    //! \brief .
+    //! \brief Check that the reset map for the transition
+    //!   from the \a source location to the \a target location when the \a event occurs
+    //!   only uses variables defined in the source location,
+    //!   and specifies exactly the state variables in the target location.
     bool check_reset(const Event& event, const DiscreteValuation& source, const DiscreteValuation& target) const;
 
 
-    //! \brief .
+    //! \brief The set of all events which can occur in the discrete \a location.
     EventSet events(const DiscreteValuation& location) const;
-    //! \brief .
+    //! \brief The vector field describing the continuous dynamic in the discrete \a location, defined as
+    //!   a function on the space of state variables.
     VectorFunction dynamic(const DiscreteValuation& location) const;
-    //! \brief .
+    //! \brief The target location for the transition when \a event occurs in the \a source location.
     DiscreteValuation target(const Event& event, const DiscreteValuation& source) const;
-    //! \brief .
+    //! \brief The reset map for the transition when \a event occurs in the \a source location,
+    //!  defined as a function between the spaces of state variables.
     VectorFunction reset(const Event& event, const DiscreteValuation& source) const;
-    //! \brief .
+    //! \brief The guard \f$g(x)\geq0\f$ for the for the transition when \a event occurs in the \a source location,
+    //!  defined as a function on the space of state variables.
     ScalarFunction guard(const Event& event, const DiscreteValuation& source) const;
 
-    //! \brief .
+    //! \brief The algebraic equations valid in the given discrete \a state in arbitrary order.
     Set<RealAssignment> unordered_equations(const DiscreteValuation& state) const;
 
-    //! \brief .
+    //! \brief The algebraic equations valid in the given discrete \a state, ordered so that
+    //!   variables defined in an equation are only used in subsequent equations
     List<RealAssignment> equations(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The differential equations valid in the given discrete \a state.
     List<RealDynamic> dynamics(const DiscreteValuation& state) const;
-    //! \brief .
-    List<StringUpdate> switching(const Event& event, const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The discrete part of the transition when \a event occurs in the given \a source location.
+    List<StringUpdate> switching(const Event& event, const DiscreteValuation& source) const;
+    //! \brief The continuous part of the transition when \a event occurs in the given \a source location.
     List<RealUpdate> resets(const Event& event, const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The guard conditions valid in the given discrete \a state.
     Map<Event,ContinuousPredicate> guards(const DiscreteValuation& state) const;
-    //! \brief .
+    //! \brief The guard condition for \a event to occur in the discrete \a state.
     ContinuousPredicate guard_predicate(const Event& event, const DiscreteValuation& state) const;
 
     //@}

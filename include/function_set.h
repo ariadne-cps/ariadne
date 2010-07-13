@@ -54,6 +54,7 @@ class BoundedConstraintSet;
 class ConstrainedImageSet;
 
 
+//! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the image of a box under a continuous function.
 //! The set is described as \f$S=h(D) = \{ h(s) \mid s \in D\}\f$ where \f$D\f$ is the domain and \f$h\f$ the function.
 class ImageSet
@@ -90,6 +91,7 @@ class ImageSet
 
 
 
+//! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the preimage of a box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=g^{-1}(C) = \{ x \mid g(x)\in C\}\f$ where \f$C\f$ is the codomain and \f$g\f$ the function.
 //!
@@ -128,6 +130,7 @@ class ConstraintSet
 };
 
 
+//! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of a box with preimage of a box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 //!
@@ -165,8 +168,9 @@ class BoundedConstraintSet
 };
 
 
-//! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\$.
-//! In other words, \f$S=f(D\cap g^{-1}(C))$.
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
+//! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
 class ConstrainedImageSet
     : public LocatedSetInterface, public DrawableInterface
 {

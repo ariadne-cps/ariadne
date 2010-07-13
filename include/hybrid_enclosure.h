@@ -79,7 +79,7 @@ typedef VectorTaylorFunction VectorIntervalFunction;
 //! The set is represented as the image of a box \f$D\f$ under a function model \f$\hat{f}(s)\f$, under the constraints
 //! \f$\hat{c}(s) \leq 0\f$ and \f$\hat{e}(s)=0\f$. Also keeps track of the current time \f$\hat{t}(s)\f$.
 //!
-//! In other words, 
+//! In other words,
 //! \f[ S=\{ \hat{f}(s);\  \hat{t}(s) \mid s\in D \mid \hat{c}(s) \leq 0 \ \wedge \hat{e}(s)=0 \} . \f]
 //! In the following documentation, we sometimes write \f$\xi(s)\f$ for \f$\hat{f}(s)\f$ and \f$\tau(s)\f$ for \f$\hat{t}(s)\f$.
 //! yielding \f[ S=\{ \xi(s);\  \tau(s) \mid s\in D \mid \rho(s) \in C \} . \f]
@@ -88,7 +88,7 @@ typedef VectorTaylorFunction VectorIntervalFunction;
 //! <b>Parameterisation of the time specifier</b>
 //! When computing a flow step, the evolution time can be given either as a
 //! function \f$\varepsilon(x)\f$ of the state, or as an absolute final time
-//! \f$\varomega(s)\f$ of the parameters.
+//! \f$\omega(s)\f$ of the parameters.
 //! The rationale for this difference is that we often use the
 //! \f$\varepsilon\f$ form when computing the flow up to a crossing with a
 //! guard, in which case the time depends purely on the state, and it may
@@ -98,7 +98,7 @@ typedef VectorTaylorFunction VectorIntervalFunction;
 //! The rationale for using a parameterised form with independent variable
 //! \f$s\f$ is that this is needed to distinguished different states based on
 //! crossings with the guard sets. The rationale for using a final time
-//! \f$\varomega(s)\f$ as a final time is that this allows us to remove
+//! \f$\omega(s)\f$ as a final time is that this allows us to remove
 //! errors in the elapsed time \f$\tau(s)\f$.
 //!
 //! A possible extension would be to allow \f$\omega(s)\f$ to depend on
@@ -173,7 +173,7 @@ class HybridEnclosure
     //! \f$(s,t)\mapsto\phi(\xi(s),t)\f$, and \f$\tau\f$ with \f$(s,t)\mapsto\tau(s)+t\f$.
     void apply_flow(VectorIntervalFunction phi, Float h);
     //! \brief Apply the flow \a phi over the time interval ending at \a eps, i.e. \f$[0,\varepsilon(x)]\f$.
-    //! Assume that \f$\eps(x)\in[0,h]\f$ for all \f$x\in S\f$.
+    //! Assume that \f$\varepsilon(x)\in[0,h]\f$ for all \f$x\in S\f$.
     //! Corresponds to replacing \f$D\f$ with \f$D\times T\f$, \f$f\f$ with
     //! \f$(s,t)\mapsto\phi(f(s),t)\f$, and introducing a new constraint \f$t\leq \epsilon(f(s))\f$.
     //! The rationale for keeping the flow time in terms of the current state is to allow for an incremental

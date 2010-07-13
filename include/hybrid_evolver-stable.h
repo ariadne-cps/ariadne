@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file stable_hybrid_evolver.h
+/*! \file hybrid_evolver-stable.h
  *  \brief The most stable evolver for hybrid systems.
  */
 

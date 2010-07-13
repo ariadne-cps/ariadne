@@ -51,7 +51,7 @@ class SingularMatrixException {
 //!
 //! \par Python interface
 //!
-//! In the Python interface, %Ariadne matrices can be constructed from Python literals of the form \br
+//! In the Python interface, %Ariadne matrices can be constructed from Python literals of the form <br>
 //! \c   [[a11,a12,...,a1n],[a21,a22,...,a2n],...,[am1,am2,...,amn]].
 //!
 template<class X>
@@ -229,9 +229,9 @@ class DiagonalMatrix {
   public:
     DiagonalMatrix(const Vector<X>& x) : _x(x) { }
     const Vector<X>& diagonal() const { return _x; }
-    template<class XX> Vector<XX> operator*(const Vector<XX>& v) { 
+    template<class XX> Vector<XX> operator*(const Vector<XX>& v) {
         Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=_x[i]*v[i]; } return result; }
-    template<class XX> Vector<XX> solve(const Vector<XX>& v) { 
+    template<class XX> Vector<XX> solve(const Vector<XX>& v) {
         Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=v[i]/_x[i]; } return result; }
 };
 

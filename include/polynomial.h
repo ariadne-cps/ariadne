@@ -55,6 +55,7 @@ class Monomial
     Monomial(const ExpansionValue<X>& v) : ExpansionValue<X>(v) { }
 };
 
+//! \ingroup FunctionModule
 //! \brief A polynomial with coefficients of some type \a X.
 template<class X>
 class Polynomial
@@ -149,11 +150,11 @@ class Polynomial
     //@{
     //! \name Modifying operations
 
-    //! \brief Append the term \f$c x^{a_1+a_2}\f$ to the list of terms.\f$
+    //! \brief Append the term \f$c x^{a_1+a_2}\f$ to the list of terms.
     void append(const MultiIndex& a1, const MultiIndex& a2, const X& c) { this->_expansion.append(a1,a2,c); }
-    //! \brief Append the term \f$c x^{a_1}\f$ to the list of terms.\f$
+    //! \brief Append the term \f$c x^{a_1}\f$ to the list of terms.
     void append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
-    //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.\f$
+    //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
     void insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
     //! \brief Reserve space for a total of \a n terms.
     void reserve(size_type n) { this->_expansion.reserve(n); }
@@ -268,51 +269,51 @@ void Polynomial<X>::check() const
     this->_expansion.check();
 }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Unary plus.
 template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p) {
     return p; }
-//! \relates Polynomial<X> \brief .
+//! \relates Polynomial \brief Negation.
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p) {
     Polynomial<X> r(p.argument_size());  typedef typename Polynomial<X>::const_iterator Iter;
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { r[iter->key()]-=iter->data(); } return r; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Addition of a scalar.
 template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p, const X& c) {
     Polynomial<X> r(p); r[MultiIndex(p.argument_size())]+=c; return r; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Subtraction of a scalar.
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p, const X& c) {
     Polynomial<X> r(p); r[MultiIndex(p.argument_size())]-=c; return r; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Multiplication by a scalar.
 template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p, const X& c) {
     if(c==0) { return Polynomial<X>(p.argument_size()); }
     Polynomial<X> r(p); typedef typename Polynomial<X>::iterator Iter;
     for(Iter iter=r.begin(); iter!=r.end(); ++iter) { iter->data()*=c; } return r; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Division by a scalar.
 template<class X> inline Polynomial<X> operator/(const Polynomial<X>& p, const X& c) {
     Polynomial<X> r(p); typedef typename Polynomial<X>::iterator Iter;
     for(Iter iter=r.begin(); iter!=r.end(); ++iter) { iter->data()/=c; } return r; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Addition of a scalar.
 template<class X> inline Polynomial<X> operator+(const X& c, const Polynomial<X>& p) {
     return p+c; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Substraction from a scalar.
 template<class X> inline Polynomial<X> operator-(const X& c, const Polynomial<X>& p) {
     return (-p)+c; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Multiplication by a scalar.
 template<class X> inline Polynomial<X> operator*(const X& c, const Polynomial<X>& p) {
     return p*c; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Addition.
 template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     Polynomial<X> r(p1);  typedef typename Polynomial<X>::const_iterator Iter;
     for(Iter iter=p2.begin(); iter!=p2.end(); ++iter) { r[iter->key()]+=iter->data(); } return r; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Subtraction.
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     Polynomial<X> r(p1);  typedef typename Polynomial<X>::const_iterator Iter;
     for(Iter iter=p2.begin(); iter!=p2.end(); ++iter) { r[iter->key()]-=iter->data(); } return r; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Multiplication.
 template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     Polynomial<X> r(p1.argument_size());
@@ -322,43 +323,43 @@ template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const 
             MultiIndex a=iter1->key()+iter2->key();
             r[a]+=iter1->data()*iter2->data(); } } return r; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Square.
 template<class X> inline Polynomial<X> sqr(const Polynomial<X>& p) {
     return p*p; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Power.
 template<class X> inline Polynomial<X> pow(const Polynomial<X>& p, unsigned int m) {
     Polynomial<X> r=Polynomial<X>::constant(p.argument_size(),1.0); Polynomial<X> q(p);
     while(m) { if(m%2) { r=r*q; } q=q*q; m/=2; } return r; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Inplace addition.
 template<class X, class XX> inline Polynomial<X>& operator+=(Polynomial<X>& p, const Polynomial<XX>& q) {
     ARIADNE_ASSERT(p.argument_size()==q.argument_size());
     typedef typename Polynomial<X>::const_iterator Iter;
     for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->key()]+=iter->data(); } return p; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Inplace subtraction.
 template<class X, class XX> inline Polynomial<X>& operator-=(Polynomial<X>& p, const Polynomial<XX>& q) {
     ARIADNE_ASSERT(p.argument_size()==q.argument_size());
     typedef typename Polynomial<X>::const_iterator Iter;
     for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->key()]-=iter->data(); } return p; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Inplace addition of a scalar.
 template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c; return p; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Inplace subtraction of a scalar.
 template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, const X& c) {
     p[MultiIndex(p.argument_size())]-=c; return p; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Inplace multiplication by a scaler.
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const X& c) {
     typedef typename Polynomial<X>::iterator Iter;
     if(c==0) { p.clear(); }
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()*=c; } return p; }
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Inplace division by a scalar.
 template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const X& c) {
     typedef typename Polynomial<X>::iterator Iter;
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()/=c; } return p; }
 
-//! \relates Polynomial \brief .
+//! \relates Polynomial \brief Inplace multiplication by a monomial.
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monomial<X>& m) {
     typedef typename Polynomial<X>::iterator Iter;
     if(m.data()==0) { p.clear(); }

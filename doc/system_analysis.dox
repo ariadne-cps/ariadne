@@ -30,18 +30,26 @@ namespace Ariadne {
 
 /*!
 
-\page system_analysis_page Analysing a Dynamic System (version 0.4)
+\page system_analysis_page Analysing a Dynamic System
 
-Analysis of dynamic systems in %Ariadne is performed via \e evaluator classes, which perform certain tasks.
-%Ariadne currently supports three kinds of evaluators: 
+\todo This page has yet to be written. See the \ref system_analysis_page_0_4 page for how to analyse a dynamic system using %Ariadne 0.4.
+
+*/
+
+/*!
+
+\page system_analysis_page_0_4 Analysing a Dynamic System (version 0.4)
+
+Analysis of dynamic systems in %Ariadne is performed via \em evaluator classes, which perform certain tasks.
+%Ariadne currently supports three kinds of evaluators:
  - \ref EvolverInterface "Evolver" Compute time evolution.
- - \ref DiscretiserInterface "Discretiser" Discreteise sets and orbits on a grid. 
+ - \ref DiscretiserInterface "Discretiser" Discreteise sets and orbits on a grid.
  - \ref ReachabilityAnalyserInterface "ReachabilityAnalyser" Compute finite- and infinite-time reachable sets on a grid.
 
 System evolution is performed starting from an initial point or set of points. There are a number of ways of defining initial sets in %Ariadne, but the most general is using the \ref ImageSet class. Commonly used sets are provided for convenience, such as \ref Box and \ref Polytope classes.
 For analysing hybrid systems, a \ref HybridImageSet class is also provided.
 
-Safety specifications are also defined by means of sets. The \ref ConstraintSet class is the most general way of given a specification, but the \ref Box and \ref Polyhedron classes can also be used. For hybrid systems, a \ref HybridConstraintSet is also provided.
+Safety specifications are also defined by means of sets. The \ref ConstraintSet class is the most general way of given a specification, but the \ref Box and \ref Polyhedron classes can also be used. For hybrid systems, a \ref HybridEnclosure is also provided.
 
 \section system_analysis_evolution Evolution of systems
 
@@ -51,7 +59,7 @@ Safety specifications are also defined by means of sets. The \ref ConstraintSet 
 Currently there are no facilities for simulation, but an approximation of the trajectory can be computed using the method
  - <c>EvolverInterface::lower_reach(system, point, time, semantics)</c>
 
-\sa Ariadne::MapEvolver, Ariadne::VectorFieldEvolver, Ariadne::HybridEvolver
+\sa \ref MapEvolver, \ref VectorFieldEvolver, \ref HybridEvolverInterface
 
 
 
@@ -63,24 +71,24 @@ The DiscretiserInterface is mostly provided for interfacing with other systems t
 \section system_analysis_reachability Reachability analysis
 
 Reachability analysis in %Ariadne is performed using the ReachabilityAnalyserInterface. %Ariadne can perform a number of analyses of system behaviour. The following core functionality is provided:
- - \ref ReachabilityAnalyserInterface::lower_evolve "lower_evolve(system, initial_set, time)": 
+ - \ref ReachabilityAnalyserInterface::lower_evolve "lower_evolve(system, initial_set, time)":
     Compute the set of states which the system can reach at the specified time from the given initial set.
- - \ref ReachabilityAnalyserInterface::upper_evolve "upper_evolve(system, initial_set, time)": 
+ - \ref ReachabilityAnalyserInterface::upper_evolve "upper_evolve(system, initial_set, time)":
     Compute the set of states which the system can reach at the specified time from the given initial set.
 
- - <c>\ref ReachabilityAnalyserInterface::lower_reach "lower_reach(system, initial_set, time)"</c>: 
+ - <c>\ref ReachabilityAnalyserInterface::lower_reach "lower_reach(system, initial_set, time)"</c>:
     Compute the set of states which the system can reach at times up to and including the specified time from the given initial set.
- - \ref ReachabilityAnalyserInterface::upper_reach "upper_reach(system, initial_set, time)": 
+ - \ref ReachabilityAnalyserInterface::upper_reach "upper_reach(system, initial_set, time)":
     Compute the set of all states which the system can reach from the given initial set.
- - <c>\ref ReachabilityAnalyserInterface::chain_reach "chain_reach(system, initial_set)"</c>: 
+ - <c>\ref ReachabilityAnalyserInterface::chain_reach "chain_reach(system, initial_set)"</c>:
     Compute an over-approximation to the set of all states which the system can reach from the given initial set.
 
- - <c>\ref ReachabilityAnalyserInterface::viable "viable(system, bounding_set)"</c>: 
+ - <c>\ref ReachabilityAnalyserInterface::viable "viable(system, bounding_set)"</c>:
     Compute the set of states for which the evolution remains in the bounding set for all times.
- - <c>\ref ReachabilityAnalyserInterface::verify "verify(system, initial_set, bounding_set)"</c>: 
+ - <c>\ref ReachabilityAnalyserInterface::verify "verify(system, initial_set, bounding_set)"</c>:
     Attempts to decide whether any evolution starting in the initial set remains in the bounding set for all times.
 
-The \c evolve, \c reach and \c viable operators each come in two flavours \c lower_ and \c upper_ , representing different "semantics of evolution". Hence \c lower_evolve computes a lower-approximation to the evolution, and \c upper_evolve computes an outer approximation. An outer approximation to the reachable set is also called \c chain_reach or \c chainreach, since the approximations need not converge to the reachable set itself. 
+The \c evolve, \c reach and \c viable operators each come in two flavours \c lower_ and \c upper_ , representing different "semantics of evolution". Hence \c lower_evolve computes a lower-approximation to the evolution, and \c upper_evolve computes an outer approximation. An outer approximation to the reachable set is also called \c chain_reach or \c chainreach, since the approximations need not converge to the reachable set itself.
 
 Currently, only lower and upper approximations to the evolution can be computed. In a future version, we hope to combine these computations to give an approximation to the evolved set with a known accuracy.
 
@@ -94,14 +102,14 @@ All evolution methods rely on a number of core components:
  - Methods for accurately computing the image of a basic set under a map or flow.
  - Methods for checking satisfiability of constraints and for detecting crossings with guard sets (for hybrid systems).
  - Methods for performing geometric operations on basic sets, such as subdividing into smaller pieces, or approximating basic sets which have a complex or numerically ill-conditioned description by simpler sets.
- - Methods for converting between basic sets and finite approximations based on grids, polyhedral partitions or covers 
-Additionally, for hybrid systems, we may wish to use different evolution methods, approximations or even different representations of sets in different modes of the system. 
+ - Methods for converting between basic sets and finite approximations based on grids, polyhedral partitions or covers
+Additionally, for hybrid systems, we may wish to use different evolution methods, approximations or even different representations of sets in different modes of the system.
 
 In the current version of %Ariadne, different "plugin" classes can be used to provide different services. Each plugin is packaged to provide related services, which are combined in the evolution. The exact services provided by the plugins are not currently stable.
 
 Core evolution paramters which are common to (most) evolution routines are given in the class \c EvolutionParameters.
 
-\sa Ariadne::EvolutionParameters
+\sa \ref EvolutionParameters
 
 
 
@@ -117,8 +125,8 @@ initial_set = RectangularSet( [0,0] )
 initial_set = ConstraintSet( IdentityFunction(2), Box([0,0]) )
 
 # Use default evolution parameters
-paramrters=EvolutionParameters() 
-print parameters 
+paramrters=EvolutionParameters()
+print parameters
 
 #Use Kuhn's algorithm for computing the image of sets
 applicator=KuhnApplicator(3)
@@ -129,7 +137,7 @@ evolver = MapEvolver(parameters,applicator)
 # Compute the chain-reachable set
 chain_reachable_set = evolver.chain_reach(henon,initial_set)
 
-# Write the set to a postscript output 
+# Write the set to a postscript output
 eps = EpsPlot()
 eps.open( "henon_chainreach.eps", chain_reachable_set.bounding_box() )
 eps.set_fill_colour(cyan)

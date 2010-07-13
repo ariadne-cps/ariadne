@@ -39,12 +39,12 @@ namespace Ariadne {
 
 template<class SYS> class ReachabilityAnalyserInterface;
 
-/*! \brief Interface for computing (chain) reachable sets of a dynamic system.
- *
- * \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink
- */
+//! \ingroup EvaluationModule
+//! \brief Interface for computing (chain) reachable sets of a dynamic system.
+//!
+//! \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink
 template<class SYS> class ReachabilityAnalyserInterface {
-  public:  
+  public:
     //! \brief The type of the system.
     typedef SYS SystemType;
     //! \brief The type used to define the elapsed evolution time for the system type.
@@ -66,55 +66,55 @@ template<class SYS> class ReachabilityAnalyserInterface {
   public:
     //! \brief Virtual destructor.
     virtual ~ReachabilityAnalyserInterface() { }
-    
+
     //@{
     //! \name Evaluation of maps on abstract sets
-    
+
     //! \brief Compute an approximation to the set obtained by iterating \a steps times \a system starting in \a initial_set.
-    virtual SetApproximationType 
-    lower_evolve(const SystemType& system, 
-                 const OvertSetInterfaceType& initial_set, 
+    virtual SetApproximationType
+    lower_evolve(const SystemType& system,
+                 const OvertSetInterfaceType& initial_set,
                  const TimeType& steps) const = 0;
-    
+
     //! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a steps times.
     virtual SetApproximationType
-    lower_reach(const SystemType& system, 
-                const OvertSetInterfaceType& initial_set, 
+    lower_reach(const SystemType& system,
+                const OvertSetInterfaceType& initial_set,
                 const TimeType& steps) const = 0;
-    
+
     //! \brief Compute an approximation to the set obtained by iterating \a steps times \a system starting in \a initial_set.
     virtual SetApproximationType
-    upper_evolve(const SystemType& system, 
-                 const CompactSetInterfaceType& initial_set, 
+    upper_evolve(const SystemType& system,
+                 const CompactSetInterfaceType& initial_set,
                  const TimeType& steps) const = 0;
-    
-    //! \brief Compute an approximation to the reachable set 
+
+    //! \brief Compute an approximation to the reachable set
     //! of \a system starting in \a initial_set iterating at most \a steps times.
     virtual SetApproximationType
-    upper_reach(const SystemType& system, 
-                const CompactSetInterfaceType& initial_set, 
+    upper_reach(const SystemType& system,
+                const CompactSetInterfaceType& initial_set,
                 const TimeType& steps) const = 0;
-    
-    //! \brief Compute an outer-approximation to the chain-reachable set 
+
+    //! \brief Compute an outer-approximation to the chain-reachable set
     //! of \a system starting in \a initial_set.
     virtual SetApproximationType
-    chain_reach(const SystemType& system, 
+    chain_reach(const SystemType& system,
                 const CompactSetInterfaceType& initial_set) const = 0;
-    
-    //! \brief Compute an outer-approximation to the viability kernel 
+
+    //! \brief Compute an outer-approximation to the viability kernel
     //! of \a system within \a bounding_set.
     virtual SetApproximationType
-    viable(const SystemType& system, 
+    viable(const SystemType& system,
            const CompactSetInterfaceType& bounding_set) const = 0;
-    
-    //! \brief Attempt to verify that the reachable set 
+
+    //! \brief Attempt to verify that the reachable set
     //! of \a system starting in \a initial_set remains in \a safe_set.
-    virtual tribool 
-    verify(const SystemType& system, 
-           const LocatedSetInterfaceType& initial_set, 
+    virtual tribool
+    verify(const SystemType& system,
+           const LocatedSetInterfaceType& initial_set,
            const RegularSetInterfaceType& safe_set) const = 0;
     //@}
-    
+
 };
 
 

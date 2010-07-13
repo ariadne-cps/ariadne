@@ -38,9 +38,8 @@ template<class X> class Vector;
 class VectorFunction;
 class VectorTaylorFunction;
 
-/*! \ingroup \ingroup Solvers
- *  \brief %Common functionality for solving (nonlinear) equations.
- */
+//! \ingroup SolverModule EvaluationModule
+//! \brief Interface for integrating differential equations of the form \f$\dot{x}=f(x)\f$.
 class IntegratorInterface
 {
   protected:

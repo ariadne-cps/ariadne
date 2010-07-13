@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+//! \file hybrid_systems.dox
+//! \brief Documentation on hybrid systems.
+
+namespace Ariadne {
+
 /*!
-
-\file hybrid_systems.dox
-\brief Documentation on hybrid systems.
-
-
 
 \page hybrid_systems_page Hybrid Systems
 
@@ -41,7 +41,7 @@ A <em>hybrid automaton</em> is a tuple \f$H=(Q,E,\gamma,f_q,I_q,r_{q,e},G_{q,e})
    - \f$\gamma:\subset Q\times E\rightarrow Q\f$ is a partial function giving the <em>discrete transitions</em>
 
  - For each \f$q\in Q\f$,
-   - \f$f_q:\R^{n_q}\rightarrow \R^{n_q}\f$ defines the <em>continuous dynamics</em> by \f$\dot{x}=f_q(x)\f$.
+   - \f$f_q:\R^{n_q}\rightarrow \R^{n_q}\f$ defines the <em>continuous dynamics</em> by \f$\dt{x}=f_q(x)\f$.
    - \f$I_q\subset \R^{n_q}\f$ is the <em>invariant</em> which must hold for continuous dynamics to be possible in mode \f$q\f$.
 
  - For each \f$(q,e)\in\mathrm{dom}(\gamma)\subset Q\times E\f$,
@@ -50,7 +50,7 @@ A <em>hybrid automaton</em> is a tuple \f$H=(Q,E,\gamma,f_q,I_q,r_{q,e},G_{q,e})
 
 The <em>standard operational semantics</em> of a hybrid automaton $H$ is as follows.
  - The <em>state</em> of the system is a pair \f$(q,x)\f$ with \f$q\in Q\f$ and \f$x\in\R^{n_q}\f$.
- - The state may evolve according to the differential equation \f$\dot{x}=f_q(x)\f$ as long as \f$x\in I_q\f$.
+ - The state may evolve according to the differential equation \f$\dt{x}=f_q(x)\f$ as long as \f$x\in I_q\f$.
  - The state may evolve according to the discrete transition \f$(q',x')=(\gamma(q,e),r_{q,e}(x))\f$ as long as \f$x\in R_{q,e}\f$.
 
 
@@ -61,7 +61,7 @@ The hybrid automaton data type in %Ariadne is equivalent to the standard mathema
 
 A <em>DiscreteMode</em> is a triple \f$(q,f_q,I_q)\f$ where
  - \f$q\f$ is a DiscreteState.
- - \f$f_q\f$ is a Function giving the dynamic \f$\dot{x}=f_q(x)\f$.
+ - \f$f_q\f$ is a Function giving the dynamic \f$\dt{x}=f_q(x)\f$.
  - \f$I_q\f$ is a List of Functions with each \f$i_j:\R^{n_q}\rightarrow \R\f$ giving the invariants \f$i_j(x)\lesssim 0\f$.
 
 A <em>DiscreteTransition</em> is a triple \f$(e,s,t,r,g,u)\f$ where
@@ -76,11 +76,7 @@ A <em>HybridAutomaton</em> is a pair \f$(M,T)\f$ where
  - \f$T\f$ is a set of discrete transitions such that
     - for every transition, the source \f$s\f$ and target \f$t\f$ correspond to modes in \f$M\f$, and
     - for every event \f$e\f$, there is at most one transition with a given source \f$s\f$.
-
 */
-
-
-namespace Ariadne {
 
 /*!
 
@@ -116,7 +112,7 @@ Each rule is valid given a predicate \c p(q) on the discrete state. Rules relati
 Note that if no continuous or differential assignment is given to a continuous variable, then the value of that variable is arbitrary during time transitions. To ensure that a continuous variable remains constant, use
 <tt> dot(x) = 0 </tt>. Discrete variables cannot change during time transitions, so there is no need to provide a behaviour.
 
-Note that the guard condition <tt> p(q) & s(e) \implies g(x<sub>1</sub>,...,x<sub>k</sub>) </tt> only implies a restriction on the conditions under which event \c e can occur if \c p(q) is true. For other states, the guard conditions places <em>no restriction</em> on when \c e can occur. Hence if \c e can \em only occur when \c e is true, then both the guard conditions
+Note that the guard condition <tt> p(q) & s(e) \f$\implies\f$ g(x<sub>1</sub>,...,x<sub>k</sub>) </tt> only implies a restriction on the conditions under which event \c e can occur if \c p(q) is true. For other states, the guard conditions places <em>no restriction</em> on when \c e can occur. Hence if \c e can \em only occur when \c e is true, then both the guard conditions
 <tt> p(q) & s(e) -> g(x) </tt> and <tt> ~p(q) & s(e) -> false </tt>
 need to be used.
 

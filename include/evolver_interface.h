@@ -38,17 +38,18 @@ template<class ES> class ListSet;
 template<class ES> class Orbit;
 
 //! \brief The semantics used to determine the trajectories of the system.
-enum Semantics { 
+//! \relates EvolverInterface
+enum Semantics {
 	LOWER_SEMANTICS, //!< Under-approximation with trajectories terminating at spacial discontinuities.
 	UPPER_SEMANTICS  //!< Over-approximations with all possibilities included as spacial discontinuities.
 };
 
 
-/*! \brief Interface for evolving a dynamic system.
- *
- * \sa \link Ariadne::CalculusInterface \c CalculusInterface<S,M,F> \endlink
- *   , \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink
- */
+//! \ingroup EvaluationModule
+//! \brief Interface for evolving a dynamic system.
+//!
+//! \sa \link Ariadne::CalculusInterface \c CalculusInterface<S,M,F> \endlink
+//! \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink
 template<class SYS, class ES>
 class EvolverInterface
 {

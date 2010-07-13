@@ -42,7 +42,8 @@ class Box;
 
 Box widen(const Box& bx);
 
-//! A box in Euclidean space.
+//! \ingroup BasicSetSubModule GeometryModule
+//! \brief A box in Euclidean space.
 class Box
     : public SetInterface,
       public DrawableInterface,

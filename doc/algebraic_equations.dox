@@ -40,7 +40,7 @@ where \f$f:\R^n\rightarrow \R^n\f$ and \f$D\f$ is a compact box in \f$\R^n\f$.
 The interval Newton method is a direct intervalisation of the standard Newton method. Suppose \f$[x]\f$ is a box and \f$x\in[x]\f$.
 Suppose further that there is a zero of \f$f\f$ at \f$x^*\in[x]\f$. Then by Taylor's theorem we have
 \f[ 0 = f_i(x^*) = f_i(x) + Df_i(\xi_i) (x^*-x)  \f]
-for some \f$\xi\in[x]\f$. Denoting the matrix formed by the gradients of \f$Df_i(\xi_i)\f$ by \f$Df(\xi)\f$ (note that this is \emph{not} \f$Df\f$ evaluated at a single point \f$\xi\f$, we obtain
+for some \f$\xi\in[x]\f$. Denoting the matrix formed by the gradients of \f$Df_i(\xi_i)\f$ by \f$Df(\xi)\f$ (note that this is <em>not</em> \f$Df\f$ evaluated at a single point \f$\xi\f$, we obtain
 \f[ 0 = f(x^*) = f(x) + Df(\xi) (x^*-x)  \f]
 and by rearranging,
 \f[ x^* = x - Df(\xi)^{-1} f(x) . \f]

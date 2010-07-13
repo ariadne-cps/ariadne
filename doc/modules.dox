@@ -76,7 +76,15 @@ namespace Ariadne {
  */
 
 
-/*! \defgroup Function Function Module
+/*! \defgroup ExpressionModule Expression Module
+ *  \ingroup CoreModules
+ *  \brief Expressions in named variables.
+ *
+ * In this module, expressions in named variables can defined. These form the
+ * building blocks for defining hybrid systems.
+ */
+
+/*! \defgroup FunctionModule Function Module
  *  \ingroup CoreModules
  *  \brief Functions on Euclidean space.
  *
@@ -85,7 +93,7 @@ namespace Ariadne {
  */
 
 
-/*!\defgroup Geometry Geometry Module
+/*!\defgroup GeometryModule Geometry Module
  * \ingroup CoreModules
  * \brief Geometric calculus module.
  *
@@ -117,8 +125,20 @@ namespace Ariadne {
  *
  * See \ref geometry_page for more information.
  *
- * \defgroup BasicSet Basic Sets
- * \ingroup Geometry
+ * \defgroup SetInterfaceSubModule Set interfaces
+ * \ingroup GeometryModule
+ * \brief Interfaces for various classes of sets.
+ *
+ * \defgroup ExactSetSubModule Exact sets
+ * \ingroup GeometryModule
+ * \brief Sets which can be defined exactly.
+ *
+ * Any set can be uniquely specified by the results geometric predicates involving
+ * rectangles. Exact sets are defined by an interface in which these predicates are
+ * defined.
+ *
+ * \defgroup BasicSetSubModule Basic Sets
+ * \ingroup GeometryModule
  * \brief Basic set classes.
  *
  * Basic sets are so-called because they form a base for the topology of the
@@ -131,24 +151,12 @@ namespace Ariadne {
  * rectangles) or may need to be represented by a fuzzy set (e.g. Minkowski sum
  * of two rectangles).
  *
- * \defgroup List List Sets
- * \ingroup Geometry
+ * \defgroup ListSetSubModule List Sets
+ * \ingroup GeometryModule
  * \brief Denotable sets based on arbitrary lists of elements.
  *
- * \defgroup SetInterface Set interfaces
- * \ingroup Geometry
- * \brief Interfaces for various classes of sets.
- *
- * \defgroup ExactSet Exact sets
- * \ingroup Geometry
- * \brief Sets which can be defined exactly.
- *
- * Any set can be uniquely specified by the results geometric predicates involving
- * rectangles. Exact sets are defined by an interface in which these predicates are
- * defined.
- *
- * \defgroup HybridSet Hybrid sets
- * \ingroup Geometry
+ * \defgroup HybridSetSubModule Hybrid sets
+ * \ingroup GeometryModule
  * \brief Sets in spaces with many components.
  *
  * The state space of a hybrid system consists of many disconnected components,
@@ -157,7 +165,7 @@ namespace Ariadne {
  */
 
 
-/*!\defgroup Storage Storage Module
+/*!\defgroup StorageModule Storage Module
  * \ingroup CoreModules
  * \brief Classes for representing discretised sets
  *

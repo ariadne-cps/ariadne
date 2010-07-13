@@ -265,8 +265,8 @@ class TaylorConstrainedImageSet
     //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
     tribool satisfies(ScalarFunction g) const;
-    //! \brief Tests if the set satisfies the constraint \a c. Returns \tt true if all points in the set satisfy
-    //! the constraint, and \tt false if no points in the set satisfy the constraint.
+    //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
+    //! the constraint, and \c false if no points in the set satisfy the constraint.
     virtual tribool satisfies(NonlinearConstraint c) const;
 
     uint dimension() const;

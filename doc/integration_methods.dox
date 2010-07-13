@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! 
+/*! \file integration_methods.dox
+ *  \brief Documentation on  methods for integration
+ */
 
-\file integration_methods.dox
-\brief Documentation on  methods for integration
+/*!
 
-
-\page integration_page Integration Methods
+\page integration_methods_page Integration Methods
 
 Integration in %Ariadne is performed using <em>integration steps</em> and <em>reachability steps</em> on <em>basic sets</em>, typically cuboids or zonotopes.
 From time-to-time, the basic set may be <em>regularised</em> or <em>subdivided</em> to prevent loss of accuracy.
@@ -48,13 +48,13 @@ The second spacial derivative \f$d^2y/dx^2\f$ of the solution satisfies
 \f[ \begin{aligned}
  \frac{d}{dt}     \frac{d^2y}{dx^2} &= D^2f(y)\frac{dy}{dx} + Df(y)\frac{d^2y}{dx^2} \\[\jot]
  \frac{d^2}{dt^2} \frac{d^2y}{dx^2} &= \bigl( D^3f(y)\,f(y) + 3D^2f(y)Df(y) \bigr) \, \left(\frac{dy}{dx}\right)^2
-                                         + \bigl( D^2f(y)f(y)+Df(y)^2 \bigr) \frac{d^2y}{dx^2} 
+                                         + \bigl( D^2f(y)f(y)+Df(y)^2 \bigr) \frac{d^2y}{dx^2}
 \end{aligned} \f]
 
 If we define functions \f$f^{(i)}:\mathbb{R}^n\rightarrow\mathbb{R}^{n}\f$ by \f$f^{(0)}(y)=y\f$ and \f$f^{(i+1)}(y)={\displaystyle Df^{(i)}(y)\cdot f(y)}\f$,
-then 
+then
 \f[ \frac{d^ny}{dt^n}   = f^{(n)}(y); \qquad \frac{d^n}{dt^n} \frac{dy}{dx} = Df^{(n)}(y) \frac{dy}{dx} \f]
- 
+
 
 
 \section boundingenclosure Bounding enclosures
@@ -67,15 +67,15 @@ If \f$B\f$ is an enclosure for \f$\Phi([0,h],X)\f$, then \f[ B' = X+[0,h]f(B)\f]
 
 To compute approximations to the spacial derivative \f$\frac{dy}{dx} = D\Phi(x,t)\f$, it is necessary to find a rough enclosure for \f$ \frac{dy}{dx}\f$.
 
-Suppose \f$V(t)\f$ is a matrix-valued function satisfying \f$ \dot{V}(t) = A(t) V(t) \f$.
+Suppose \f$V(t)\f$ is a matrix-valued function satisfying \f$ \dt{V}(t) = A(t) V(t) \f$.
 Then we have
 \f[ ||V(t)-V(0)|| \leq ||V(0)|| \bigl( e^{L(t)} -1  \bigr) \text{ where } L(t) = \int_0^t ||A(\tau)|| \,d\tau \f]
-Additionally, 
+Additionally,
 \f[ ||V(t)|| \leq e^{l(t)} \, ||V(0)|| \text{ where } l(t) = \int_0^t \lambda(A(\tau))\,d\tau \text{ and } \lambda(A) = \lim_{h\to0} \frac{||I+Ah||-1}{h} \f]
 The quantity \f$\lambda(A)\f$ is the <em>logarithmic derivative</em>. In %Ariadne, we use the supremum norm, yielding
 \f[ ||v||_\infty = \max_{i}|v_i|; \quad ||A||_\infty = \max_i\sum_j |a_{ij}|; \quad \lambda_\infty(A) = \max_{i} \bigl( a_{ii} + \sum_{j\neq i} |a_{ij} | \bigr)   . \f]
 
-Hence if \f$B\f$ is a bounding enclosure for \f$\Phi([0,h],x)\f$, then 
+Hence if \f$B\f$ is a bounding enclosure for \f$\Phi([0,h],x)\f$, then
 \f[ \begin{array}{c} ||D\Phi(x,t)-I||_\infty \leq e^{Lt} - 1 \quad \text{where} \quad L = ||Df(B)||_\infty \\[\jot]
                    ||D\Phi(x,t)||_\infty \leq e^{lt} \quad \text{where} \quad l=\lambda_\infty(Df(B)) \end{array}  \f]
 A bounding eclosure for \f$ D\Phi(x,t)\f$ is given by the matrix \f$W\f$, where
@@ -83,20 +83,20 @@ A bounding eclosure for \f$ D\Phi(x,t)\f$ is given by the matrix \f$W\f$, where
 
 \section affineintegrator Affine Integrator
 
-An affine vector field \f$ \dot{y}=Ay+b \f$ can be integrated directly using the formula
-\f[ \begin{aligned} y(x,t) &=e^{At}x + A^{-1}(e^{At}-I)b \\ 
+An affine vector field \f$ \dt{y}=Ay+b \f$ can be integrated directly using the formula
+\f[ \begin{aligned} y(x,t) &=e^{At}x + A^{-1}(e^{At}-I)b \\
                          &= x+ t \sum_{n=0}^{\infty} \frac{A^nt^n}{(n+1)!} \bigl(Ax+b\bigr) \end{aligned} \f]
 The spacial derivative \f$Dy(x,t)\f$ is given by
 \f[  Dy(x,t) = e^{At} \f]
 When applied to a zonotope \f$c_0+G_0e\f$, the the centre and generators of the integrated zonotope become
-\f[ c_1 = e^{Ah}c_0 + A^{-1}(e^{Ah}-I)b; \qquad  G_1 = e^{Ah} G_0, \f] 
-which are easily computed using interval arithmetic.                         
+\f[ c_1 = e^{Ah}c_0 + A^{-1}(e^{Ah}-I)b; \qquad  G_1 = e^{Ah} G_0, \f]
+which are easily computed using interval arithmetic.
 
 
 
 \section eulerintegrator Euler method
 
-The classical Euler method is 
+The classical Euler method is
 \f$ y_1 = y_0 + hf(y_0) \approx y(h) \f$
 with one-step error bound
 \f$ ||y_1-y(h)|| = h ||f(y_0)-f(\eta)|| = \frac{h^2}{2} || Df(\eta)f(\eta) || . \f$
@@ -112,13 +112,13 @@ The accuracy is usually too poor for this method to be useful.
 
 The classical Lohner integrator is a first-order in space integration scheme. To compute \f$y(x,t)=\Phi(x,t)\f$, we use
 \f[ \begin{aligned} y(x,t) &= y(x,t)-y(x,0) + y(x,0) \\
-                           &= t\dot{y}(x,0)+\frac{t^2}{2}\ddot{y}(x,\tau) + x \\
-                           &= t\bigl(\dot{y}(c,0) + \dot{y}'(\xi,0)\cdot(x-c) \bigr) + \frac{t^2}{2}\ddot{y}(x,\tau) + (x-c) + c \\
+                           &= t\dt{y}(x,0)+\frac{t^2}{2}\ddot{y}(x,\tau) + x \\
+                           &= t\bigl(\dt{y}(c,0) + \dt{y}'(\xi,0)\cdot(x-c) \bigr) + \frac{t^2}{2}\ddot{y}(x,\tau) + (x-c) + c \\
                            &= c+tf(c)+\frac{t^2}{2} Df(y(x,\tau))f(y(x,\tau)) + \bigl(I+t\,Df(\xi)\bigr)\cdot(x-c) \\[\jot]
                            &\in c+tf(c)+\frac{t^2}{2} Df(B)f(B) + \bigl(I+t\,Df(X)\bigr)\cdot(x-c) \end{aligned} \f]
 
 A reachability step over the interval \f$[0,h]\f$ is most easily obtained using an Euler step from the time \f$h/2\f$ flow.
-\f[ \begin{aligned} y(x,t) &= y(x,h/2) + (t-h/2) \, \dot{y}(x,\tau) \\
+\f[ \begin{aligned} y(x,t) &= y(x,h/2) + (t-h/2) \, \dt{y}(x,\tau) \\
                            &\in y(x,h/2) + \frac{h}{2}\,f(B)\,[-1,1] \end{aligned} \f]
 
 
@@ -132,7 +132,7 @@ The first- and second- order updates are
 
 
 
-If the initial set is a zonotope with centre \f$c_0\f$ and generators \f$G_0\f$, 
+If the initial set is a zonotope with centre \f$c_0\f$ and generators \f$G_0\f$,
 then the new centre and generators can be computed with the classical method by
 \f[ c_1 = c_0 + h f(c_0) + \frac{h^2}{2} Df(B) f(B) ;  \qquad  G_1 = \bigl(I  + h Df(X_0) \bigr)\, G_0. \f]
 These schemes may be easily implemented using interval arithmetic.
@@ -140,19 +140,19 @@ These schemes may be easily implemented using interval arithmetic.
 To reduce the wrapping effect in the generator matrix, the interval matrix \f$G\f$ may be replaced by its average \f$\widetilde{G}\f$, and the error absorbed into the centre \f$\tilde{c} = c+(G-\tilde{G})e\f$, where \f$e\f$ is the interval vector with elements \f$[-1,1]\f$.
 
 The Lohner integration step is usually used in conjunction with an orthogonal regularisation scheme.
-The generator matrix is factorised \f$ G = QR \f$ where \f$Q\f$ is orthonormal and \f$R\f$ is upper-triangular, 
+The generator matrix is factorised \f$ G = QR \f$ where \f$Q\f$ is orthonormal and \f$R\f$ is upper-triangular,
 and the new generators \f$G'\f$ are given by \f$ G' = QD \f$, where \f$D\f$ is diagonal with \f$D_{ii}=\sum_{j} |R_{ij}|\f$.
 
 \section c1lohnerintegrator C1 Lohner Integrator
 
 Alternatively, by computing bounds on the Jacobian derivative \f$y'(x,t)=D\Phi(x,t)\f$, we obtain a C<sup>1</sup> Lohner integrator
 \f[ \begin{aligned} y(x,t) &= y(x,t)-y(c,t) + y(c,t) \\
-                           &= y'(\xi,t)\cdot(x-c) + y(c,0) + t\dot{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
-                           &= t\dot{y}'(\xi,\tau)\cdot(x-c) + t\dot{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
+                           &= y'(\xi,t)\cdot(x-c) + y(c,0) + t\dt{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
+                           &= t\dt{y}'(\xi,\tau)\cdot(x-c) + t\dt{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
                            &= c+tf(c)+\frac{t^2}{2}\,Df(y(c,\tau))\,f(y(c,\tau)) + \bigl(I+t\,Df(y(\xi,\tau))\,y'(\xi,\tau)\bigr)\cdot(x-c) \\[\jot]
                            &\in c+tf(c)+\frac{t^2}{2}\,Df(B_c)\,f(B_c) + \bigl(I+t\,Df(B)\,W\bigr)\cdot(x-c) \end{aligned} \f]
 The Jacobian derivative itself is obtained by
-\f[ \begin{aligned} y'(x,t) &= y'(x,0) + t \dot{y}'(x,\tau) \\
+\f[ \begin{aligned} y'(x,t) &= y'(x,0) + t \dt{y}'(x,\tau) \\
                             &= I + t\,Df(y(x,\tau))\,y'(x,\tau) \\[\jot]
                             &\in I + t\,Df(B)\,W \end{aligned} \f]
 
@@ -168,15 +168,15 @@ If the initial set is a zonotope, the new centre and generators can be computed 
 \section taylorintegrator Taylor methods
 
 Methods based on higher-order Taylor expansions can be devised. A second-order in time and first-order in space integrator for zonotopes is given by
-\f[ \begin{aligned} 
+\f[ \begin{aligned}
       c_1 &= c_0 \;+\; h\,f(c_0) \;+\; \frac{h^2}{2}\,Df(c_0)\,f(c_0) \;+\; \frac{h^3}{6}\,\bigl( D^2f(B_c)\,f(B_c) + (Df(B_c))^2 \bigr)\,f(B_c); \\[\jot]
-      G_1 &= G_0 \;+\; h\,Df(c_0) \;+\; \frac{h^2}{2}\,\bigl( D^2f(B)\,f(B) + (Df(B))^2 \bigr) 
+      G_1 &= G_0 \;+\; h\,Df(c_0) \;+\; \frac{h^2}{2}\,\bigl( D^2f(B)\,f(B) + (Df(B))^2 \bigr)
     \end{aligned} \f]
 For higher order in space, Taylor sets must be used.
 
 \section evolutionerror Error bounds for integration methods
 
-The growth rate of the difference of two solutions of a differential equation \f$\dot{x}(t)=f(x(t))\f$ is governed by the logarithmic norm \f$l\f$ of \f$Df\f$.
+The growth rate of the difference of two solutions of a differential equation \f$\dt{x}(t)=f(x(t))\f$ is governed by the logarithmic norm \f$l\f$ of \f$Df\f$.
 \f[ ||x(t) - y(t) || \leq e^{lt} || x(0)-y(0) || . \f]
 The error of a C<sup>0</sup> integrator, such as the Euler integrator, or the uniform part of a Taylor integrator, is bound by the Lipschitz constant \f$L\f$ of \f$f\f$, which is equal to the norm of \f$Df\f$.
 \f[ ||x(t) - y(t) || \leq e^{Lt} || x(0)-y(0) || . \f]
@@ -191,7 +191,7 @@ The error in the constant term may be alleviated by reincorporating the zero-ord
 If the initial set is based on a grid with sets of order \f$r\f$, and \f$t\f$ is the lock-to-grid time, then at each lock-to grid step an additional error of order approximately \f$r\f$ is incurred. The error bound is then approximately
 \f[ \varepsilon(t) \leq \epsilon_0 e^{k_0Lt} + (1+e^{k_1lt}) r . \f]
 
-\page Time-varying Integration Methods
+\section Time-varying Integration Methods
 
 Suppose the integration time depends on \f$x\f$. We therefore want to compute \f$y(x,s(x)) := \Phi(x,s(x))\f$.
 We have

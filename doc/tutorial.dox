@@ -20,6 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <stdlib.h>
 
 /*!
 
@@ -49,64 +50,39 @@ The heater is turned on whenever the temperature falls below \f$T_{\textsc{On}}\
 
 \section tutorial_building_system Building the Ariadne Hybrid Automaton
 
-First, choose an ordering for the parameters and variables in each mode.
-In this example, the same parameters and variables are used in each mode, so this is easy.
-
-\skipline // System variables
-\until p[6]
-
-Now define the nonlinear functions used in the system definition.
-
-\skipline // System dynamic
-\until };
-\until };
-
-Next define the function creating the system.
-
-\skipline create_
+Define a function to create the hybrid automaton
+\skipline create_heating_system
 \until {
 
-Create the HybridAutomaton object.
+Declare the constants which are used by the system.
+\skipline // Set the system dynamic parameters
+\until RealConstant Ton_lower
 
-\skipline //
-\until HybridAutomaton
+Declare the discrete states of the components
+\until AtomicDiscreteLocation ok
 
-Set the system parameters.
+Create the discrete events which occur during the evolution
+\until DiscreteEvent midnight
 
-\skipline //
-\until Ton_lower
+Declare the system variables.
+\until RealVariable t
 
-Define the discrete states and discrete events.
+Create the heater subsystem
+\until AtomicHybridAutomaton heater
+Create the two modes of evolution
+\until heater.new_mode
+\until heater.new_mode
+Create the two invariants which the evolution must satisfy
+\until heater.new_invariant
+\until heater.new_invariant
+Create the two transitions which determine the switching
+\until heater.new_transition
+\until heater.new_transition
 
-\skipline //
-\until heater_off
-\until midnight
+Create the clock subsystem
 
-Create the nonlinear system dynamics.
+\until clock.new_transition
 
-\skipline //
-\until heater_off_dynamic
-
-Create the affine reset maps. Note that an affine function has the form \f$x\mapsto Ax+b\f$.
-
-\skipline //
-\until midnight_reset
-
-Create the affine guard functions. Note that continuous dynamics is possible when \f$g(x)\leq0\f$, and discrete transitions are possible for \f$g(x)\geq0\f$.
-
-\skipline //
-\until midnight_guard
-
-Create the system modes.
-
-\skipline //
-\until heater_off_dynamic
-
-Create the system transitions
-
-\skipline //
-\until heater_turn_off_guard
-\until heater_off
 
 
 End of function

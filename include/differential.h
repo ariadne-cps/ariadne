@@ -101,11 +101,13 @@ template<class X> Vector< Differential<X> > compose(const Vector< Differential<X
 
 
 
-/*! \brief A class representing the partial derivatives of a scalar quantity
- *  depending on multiple arguments.
- *  Based on a power series Expansion, centred on the point at which the partial derivatives are
- *  being evaluated.
- */
+//! \ingroup CalculusModule
+//! \brief A class representing the partial derivatives of a scalar quantity
+//! depending on multiple arguments.
+//!
+//! Based on a power series Expansion, centred on the point at which the partial derivatives are
+//! being evaluated.
+//!
 template<class X>
 class Differential
 {

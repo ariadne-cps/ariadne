@@ -22,7 +22,7 @@
  */
 
 
-/*! \file formala.h
+/*! \file formula.h
  *  \brief Formulae over variables
  */
 

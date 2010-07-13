@@ -61,6 +61,8 @@ template<class R> class Expression;
 template<class LHS,class RHS> class Assignment;
 
 
+//! \ingroup ExpressionModule
+//! A named constant of type \a T.
 template<class T> class Constant
 {
   public:
@@ -80,6 +82,8 @@ template<class T> class Constant
 enum VariableType { type_bool, type_tribool, type_enumerated, type_string, type_integer, type_real };
 enum VariableCategory { simple, dotted, primed };
 
+//! \ingroup ExpressionModule
+//! A named variable of unknown type.
 class UntypedVariable {
   public:
     const String& name() const { return *_name_ptr; }
@@ -133,6 +137,9 @@ inline std::ostream& operator<<(std::ostream& os, const UntypedVariable& var) {
 
 
 
+//! \ingroup ExpressionModule
+//! A named variable of type \a T, possibly decorated by a "dot" or "prime"
+//! representing a time derivative or updated value.
 template<class T> class ExtendedVariable
     : public UntypedVariable
 {
@@ -143,6 +150,8 @@ template<class T> class ExtendedVariable
         : UntypedVariable(nm, variable_type<T>(), cat) { }
 };
 
+//! \ingroup ExpressionModule
+//! A named variable of type \a T.
 template<class T> class Variable
     : public ExtendedVariable<T>
 {

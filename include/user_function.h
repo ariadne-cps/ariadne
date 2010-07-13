@@ -48,6 +48,8 @@
 namespace Ariadne {
 
 
+//! \related ScalarUserFunction
+//! \brief Template structure containing scalar function meta-information.
 template<uint AS, uint PS=0u, uint SM=255u>
 struct ScalarFunctionData
 {

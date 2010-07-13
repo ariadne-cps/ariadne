@@ -51,15 +51,18 @@ typedef unsigned long ulong;
 namespace Ariadne {
 
 #ifdef DOXYGEN
+//! \ingroup NumericModule
 //! \brief Integers of arbitrary size with exact arithmetic.
 //! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
 //! \details
 //! Unlike C++ and the Python 2, integer division is performed exactly and returns a rational.
 //! The operations \c quot(Integer,Integer) and \c rem(Integer,Integer) can be used to perform integer division.
 class Integer { };
+//! \ingroup NumericModule
 //! \brief %Rational numbers with exact arithmetic.
 //! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
 class Rational { };
+//! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
 //! \details
 //! The \c Float class represents floating-point numbers. Since most arithmetic operations on floating-point numbers can only be performed approximately, %Ariadne uses <em>interval arithmetic</em> to represent the results of floating-point computations. The result of any floating-point computation is represented as an interval \f$[l,u]\f$ enclosing the exact value of the result. In this way, round-off errors can be propagated automatically.
@@ -257,6 +260,7 @@ inline Float rad_up(Float x, Float y) {
 
 
 
+//! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
 //! Note that <c>%Interval(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%Interval("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.

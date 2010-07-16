@@ -549,9 +549,6 @@ inline ScalarTaylorFunction atan(const ScalarTaylorFunction& x) {
 
 
 
-inline Interval evaluate(const ScalarTaylorFunction& tv, const Vector<Interval>& x) {
-    return tv.evaluate(x); }
-
 inline ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k) {
     Interval sf=rad_ivl(x.domain()[k]);
     return ScalarTaylorFunction(x.domain(),antiderivative(x.model(),k)*sf); }
@@ -595,6 +592,8 @@ Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
 Float distance(const VectorTaylorFunction& f1, const VectorFunction& f2);
 
 
+Interval unchecked_evaluate(const ScalarTaylorFunction&, const Vector<Interval>&);
+Vector<Interval> unchecked_evaluate(const VectorTaylorFunction&, const Vector<Interval>&);
 ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction unchecked_implicit(const VectorTaylorFunction&);

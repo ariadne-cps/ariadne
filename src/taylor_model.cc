@@ -140,7 +140,16 @@ void mul_op(Float& te, ApproxFloat& r, const Float& sl, const Float& sm, const F
 Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d) {
     Vector<Interval> r(x);
     for(uint i=0; i!=r.size(); ++i) {
-        (r[i]-=med_ivl(d[i]))/=rad_ivl(d[i]); }
+        if(d[i].lower()==d[i].upper()) {
+            if(x==d) {
+                r[i]=Interval(0.0,0.0);
+            } else {
+                r[i]=Interval(-inf<Float>(),+inf<Float>());
+            }
+        } else {
+            r[i]=(2*r[i]-add_ivl(d[i].lower(),d[i].upper()))/sub_ivl(d[i].upper(),d[i].lower());
+        }
+    }
     return r;
 }
 
@@ -2006,15 +2015,20 @@ TaylorModel& TaylorModel::rescale(const Interval& ocd, const Interval& ncd)
 
     // Scale the interval [a,b] onto [c,d]
     // The function is given by x:-> alpha*x+beta where
-    //alpha=(d-c)/(b-a) and beta=(cb-ad)/(b-a)
+    // alpha=(d-c)/(b-a) and beta=(cb-ad)/(b-a)
+    // If a==b, return a TaylorModel with unbounded error
 
-    ARIADNE_ASSERT_MSG(ocd.radius()>0,"Illegal scaling from interval "<<ocd<<" with zero radius to interval "<<ncd);
-    Interval tmp=1.0/sub_ivl(b,a);
-    Interval alpha=sub_ivl(d,c)*tmp;
-    Interval beta=(mul_ivl(c,b)-mul_ivl(a,d))*tmp;
-
-    x*=alpha;
-    x+=beta;
+    ARIADNE_ASSERT_MSG(ocd.radius()>=0,"Illegal scaling from interval "<<ocd<<" with zero radius to interval "<<ncd);
+    if(ocd.lower()==ocd.upper()) {
+        x.clear();
+        x.set_error(+inf<Float>());
+    } else {
+        Interval tmp=1.0/sub_ivl(b,a);
+        Interval alpha=sub_ivl(d,c)*tmp;
+        Interval beta=(mul_ivl(c,b)-mul_ivl(a,d))*tmp;
+        x*=alpha;
+        x+=beta;
+    }
 
     return x;
 }
@@ -2485,16 +2499,32 @@ unscale(const TaylorModel& tv, const Interval& ivl)
     // Scale tv so that the interval ivl maps into [-1,1]
     // The result is given by  (tv-c)*s where c is the centre
     // and s the reciprocal of the radius of ivl
+
+    // If the radius of ivl is less than a constant, then
+    // there are three possible policies. We can either map to zero or to
+    // everything, or map a constant to zero and other models to everything.
+    // The motivation for mapping to zero is that the domain is
+    // restricted to the point and this is
+    // The motivation for mapping to everything is that any function on the
+    // resulting interval should be independent of the unneeded component
+
     const Float& l=ivl.lower();
     const Float& u=ivl.upper();
+    ARIADNE_ASSERT_MSG(l<=u,"Cannot unscale TaylorModel "<<tv<<" from empty interval "<<ivl);
 
-    TaylorModel r=tv;
-    Interval c=Interval(l/2)+Interval(u/2);
-    Interval s=2/(Interval(u)-Interval(l));
-    r-=c;
-    r*=s;
+    if(l==u) {
+        TaylorModel r=TaylorModel::zero(tv.argument_size());
+        r.set_error(+inf<Float>());
+        return r;
+    } else {
+        TaylorModel r=tv;
+        Interval c=Interval(l/2)+Interval(u/2);
+        Interval s=2/(Interval(u)-Interval(l));
+        r-=c;
+        r*=s;
 
-    return r;
+        return r;
+    }
 }
 
 
@@ -2573,8 +2603,18 @@ TaylorModel embed(uint as, const TaylorModel& x)
 
 std::ostream&
 operator<<(std::ostream& os, const TaylorModel& tm) {
+    // Set the variable names to be 'parameter' s0,s1,..
+    array<std::string> variable_names(tm.argument_size());
+    for(uint j=0; j!=tm.argument_size(); ++j) {
+        std::stringstream sstr;
+        sstr << 's' << j;
+        variable_names[j]=sstr.str();
+    }
+
     //os << "TaylorModel";
-    return os << "TM["<<tm.argument_size()<<"](" << tm.expansion() << "+/-" << tm.error() << ")";
+    os << "TM["<<tm.argument_size()<<"](";
+    tm.expansion().write(os,variable_names);
+    return os << "+/-" << tm.error() << ")";
 }
 
 

@@ -232,15 +232,15 @@ void TestScalarTaylorFunction::test_conversion() {
     ScalarFunction f=(1-x[0]*x[0]-0.5*x[1]);
     ScalarTaylorFunction tf(D,f);
     ScalarFunction cf=tf.function();
-    
+
     ARIADNE_TEST_PRINT(f);
     ARIADNE_TEST_PRINT(tf);
     ARIADNE_TEST_PRINT(cf);
-    
+
     // Conversion to TaylorFunction should be exact in second component
     ARIADNE_TEST_BINARY_PREDICATE(subset,f(ipt),tf(ipt));
     ARIADNE_TEST_BINARY_PREDICATE(subset,tf(ipt),f(ipt)+Interval(-1e-15,1e-15));
-    
+
     // Conversion from TaylorFunction should preserve exact computation
     ARIADNE_TEST_EQUAL(tf(ipt),cf(ipt));
 }
@@ -269,6 +269,7 @@ class TestVectorTaylorFunction
     void test_combine();
     void test_flow();
     void test_conversion();
+    void test_domain();
 };
 
 
@@ -292,6 +293,7 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_join());
     ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_conversion());
+    ARIADNE_TEST_CALL(test_domain());
 }
 
 
@@ -663,21 +665,59 @@ void TestVectorTaylorFunction::test_conversion()
     VectorFunction h=VectorFunction((1-x[0]*x[0]-0.5*x[1],x[0]+Real(0)));
      VectorTaylorFunction th(D,h);
     VectorFunction ch=th.function();
-    
+
     ARIADNE_TEST_PRINT(h);
     ARIADNE_TEST_PRINT(th);
     ARIADNE_TEST_PRINT(ch);
-    
+
     // Conversion to TaylorFunction should be exact in second component
     ARIADNE_TEST_EQUAL(th(pt)[1],h(pt)[1]);
     ARIADNE_TEST_EQUAL(th(ipt)[1],h(ipt)[1]);
     ARIADNE_TEST_BINARY_PREDICATE(subset,h[0](ipt),th[0](ipt));
-    
+
     // Conversion from TaylorFunction should preserve exact computation
     ARIADNE_TEST_EQUAL(th(ipt),ch(ipt));
-    
+
 }
 
+// Regression test for domain with empty interior
+void TestVectorTaylorFunction::test_domain()
+{
+    ScalarFunction z=ScalarFunction::constant(2,0.0);
+    ScalarFunction o=ScalarFunction::constant(2,1.0);
+    ScalarFunction x0=ScalarFunction::coordinate(2,0);
+    ScalarFunction x1=ScalarFunction::coordinate(2,1);
+
+    Vector<Interval> D1(2, -1.0,1.0, -1.0,1.0);
+    VectorTaylorFunction t1(D1, (o,x0+x1));
+    ARIADNE_TEST_PRINT(t1);
+    ARIADNE_TEST_PRINT(t1.codomain());
+    Vector<Interval> D2(2, 1.0,1.0, -2.0,2.0);
+    ScalarTaylorFunction t2(D2,2*x0+x1*x1);
+    ARIADNE_TEST_PRINT(t2.domain());
+    ARIADNE_TEST_PRINT(t2.model());
+    ARIADNE_TEST_PRINT(t2.codomain());
+
+    ARIADNE_TEST_PRINT(t2);
+    ARIADNE_TEST_PRINT(compose(t2,t1));
+    ScalarTaylorFunction t3(D1,2+(x0+x1)*(x0+x1));
+    ARIADNE_TEST_EQUAL(compose(t2,t1),t3);
+
+    Vector<Interval> x(2, 1.0,1.0, 0.5,1.5);
+    ARIADNE_TEST_PRINT(x);
+    ARIADNE_TEST_EQUAL(evaluate(t2,x),Interval(2.25,4.25));
+
+    // Ensure evaluation and composition throw errors when expected
+    Vector<Interval> xe(2, 0.875,1.125, 0.5,1.5);
+    ARIADNE_TEST_THROWS(evaluate(t2,xe),DomainException);
+
+    VectorTaylorFunction te1=t1; te1[0]=te1[0]+Interval(-0.125,+0.125);
+    ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
+
+    ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),Interval(2.25,4.25));
+
+
+}
 
 int main() {
     TestScalarTaylorFunction().test();

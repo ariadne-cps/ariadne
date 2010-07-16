@@ -190,8 +190,11 @@ ScalarTaylorFunction::polynomial() const
 
     Vector<Polynomial<Interval> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].radius()<=0) { std::cerr<<"WARNING: zero radius in domain "<<this->domain()<<" of VectorTaylorFunction"<<std::endl; }
-        else { s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
+        if(this->domain()[j].radius()<=0) {
+            s[j]=Polynomial<Interval>::constant(this->argument_size(),this->domain()[j].lower());
+        } else {
+            s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j]));
+        }
     }
 
     return compose(p,s);
@@ -287,21 +290,19 @@ ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunct
 Interval
 ScalarTaylorFunction::evaluate(const Vector<Float>& x) const
 {
-    return this->evaluate(Vector<Interval>(x));
+    return Ariadne::evaluate(*this,Vector<Interval>(x));
 }
 
 Interval
 ScalarTaylorFunction::evaluate(const Vector<Interval>& x) const
 {
-    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::unscalings(this->_domain),x);
-    return Ariadne::evaluate(this->_model,sx);
+    return Ariadne::evaluate(*this,x);
 }
 
 Interval
 ScalarTaylorFunction::operator()(const Vector<Interval>& x) const
 {
-    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::unscalings(this->_domain),x);
-    return Ariadne::evaluate(this->_model,sx);
+    return Ariadne::evaluate(*this,x);
 }
 
 
@@ -324,18 +325,39 @@ ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Vector<Interva
     return ScalarTaylorFunction(d,tv._model);
 }
 
+Interval
+evaluate(const ScalarTaylorFunction& f, const Vector<Interval>& x) {
+    if(!subset(x,f.domain())) {
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+    }
+    return unchecked_evaluate(f,x);
+}
+
+Interval
+unchecked_evaluate(const ScalarTaylorFunction& f, const Vector<Interval>& x) {
+    return evaluate(f.model(),unscale(x,f.domain()));
+}
+
+
+ScalarTaylorFunction
+compose(const ScalarFunction& g, const VectorTaylorFunction& f)
+{
+    return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
+}
 
 ScalarTaylorFunction
 compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
 {
-    ARIADNE_ASSERT_MSG(subset(f.range(),g.domain()),"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain());
-    return ScalarTaylorFunction(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
+    if(!subset(f.codomain(),g.domain())) {
+        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+    }
+    return unchecked_compose(g,f);
 }
 
 ScalarTaylorFunction
 unchecked_compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
 {
-        return ScalarTaylorFunction(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
+    return ScalarTaylorFunction(f.domain(),compose(g.model(),unscale(f.models(),g.domain())));
 }
 
 
@@ -1111,15 +1133,18 @@ VectorTaylorFunction::evaluate(const Vector<Float>& x) const
 Vector<Interval>
 VectorTaylorFunction::evaluate(const Vector<Interval>& x) const
 {
-    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::unscalings(this->_domain),x);
-    return Ariadne::evaluate(this->_models,sx);
+    const VectorTaylorFunction& f=*this;
+    if(!subset(x,f.domain())) {
+        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+    }
+    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::unscalings(f._domain),x);
+    return Ariadne::evaluate(f._models,sx);
 }
 
 Vector<Interval>
 VectorTaylorFunction::operator()(const Vector<Interval>& x) const
 {
-    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::unscalings(this->_domain),x);
-    return Ariadne::evaluate(this->_models,sx);
+    return this->evaluate(x);
 }
 
 Matrix<Interval>
@@ -1402,12 +1427,6 @@ operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f)
 
 
 
-Vector<Interval>
-evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x)
-{
-    return f.evaluate(x);
-}
-
 VectorTaylorFunction
 partial_evaluate(const VectorTaylorFunction& tf, uint k, const Interval& c)
 {
@@ -1445,10 +1464,17 @@ restrict(const VectorTaylorFunction& tf, uint k, const Interval& c)
 }
 
 
-ScalarTaylorFunction
-compose(const ScalarFunction& g, const VectorTaylorFunction& f)
-{
-    return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
+Vector<Interval>
+evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x) {
+    if(!subset(x,f.domain())) {
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+    }
+    return unchecked_evaluate(f,x);
+}
+
+Vector<Interval>
+unchecked_evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x) {
+    return evaluate(f.models(),unscale(x,f.domain()));
 }
 
 VectorTaylorFunction
@@ -1460,15 +1486,17 @@ compose(const VectorFunction& g, const VectorTaylorFunction& f)
 VectorTaylorFunction
 compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
 {
-    ARIADNE_ASSERT_MSG(subset(f.range(),g.domain()),"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain());
-    return VectorTaylorFunction(f.domain(),Ariadne::compose(g.models(),unscale(f.models(),g.domain())));
+    if(!subset(f.codomain(),g.domain())) {
+        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+    }
+    return unchecked_compose(g,f);
 }
 
 
 VectorTaylorFunction
 unchecked_compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
 {
-        return VectorTaylorFunction(f.domain(),Ariadne::unchecked_compose(g.models(),unscale(f.models(),g.domain())));
+    return VectorTaylorFunction(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
 }
 
 

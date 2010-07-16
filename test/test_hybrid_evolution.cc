@@ -81,8 +81,8 @@ TestHybridEvolution::TestHybridEvolution(const HybridEvolverInterface& _evolver)
     : evolver(*_evolver.clone()) { }
 
 void TestHybridEvolution::test() const {
-    test_bouncing_ball();
-    test_water_tank();
+    ARIADNE_TEST_CALL(test_bouncing_ball());
+    ARIADNE_TEST_CALL(test_water_tank());
 };
 
 void TestHybridEvolution::test_bouncing_ball() const {
@@ -107,8 +107,12 @@ void TestHybridEvolution::test_bouncing_ball() const {
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
 
-    ARIADNE_TEST_PRINT(HybridEnclosure(*orbit.final().begin()).bounding_box());
-    ARIADNE_TEST_ASSERT(HybridEnclosure(*orbit.final().begin()).subset(HybridBox(q,Box(2, 0.12,0.13, -0.01,0.13))));
+    HybridEnclosure orbit_final_set=*orbit.final().begin();
+    HybridBox expected_orbit_final_bounding_box=HybridBox(q,Box(2, 0.12,0.13, -0.04,0.04));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,orbit_final_set,expected_orbit_final_bounding_box);
+    ARIADNE_TEST_PRINT(orbit.final().size());
+    ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
+    ARIADNE_TEST_PRINT(expected_orbit_final_bounding_box);
 
     Box bounding_box(2, -0.5,+2.5, -4.0, +4.0);
     plot("test_hybrid_evolution-bouncing_ball",bounding_box,
@@ -172,7 +176,7 @@ void TestHybridEvolution::test_water_tank() const {
     }
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
-    ARIADNE_TEST_ASSERT(final_enclosure.subset(HybridBox(open,Box(2, 7.7,8.0, 0.999,1.001))));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,final_enclosure,HybridBox(open,Box(2, 7.7,8.0, 0.999,1.001)));
 
     Box bounding_box(2, -0.1,9.1, -0.3,1.3);
     plot("test_hybrid_evolution-water_tank",bounding_box,
@@ -188,7 +192,7 @@ int main(int argc, const char* argv[])
 {
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
     TaylorModel::set_default_sweep_threshold(1e-12);
-    DeterministicTransverseHybridEvolver evolver;
+    GeneralHybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=0.125;
     TestHybridEvolution(evolver).test();

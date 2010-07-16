@@ -183,6 +183,30 @@ void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
+void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
+    ARIADNE_ASSERT_MSG(constraint.function().argument_size()==parameter_domain().size(),
+                       "constraint "<<constraint<<" is incompatible with parameter domain "<<parameter_domain());
+    ScalarIntervalFunction function(this->_domain,constraint.function());
+    const Interval bounds=constraint.bounds();
+    if(bounds.singleton()) {
+        this->_zero_constraints.append(function-bounds.upper());
+    } else {
+        if(bounds.upper()!=+inf<Float>()) {
+            this->_negative_constraints.append(function-bounds.upper());
+        }
+        if(bounds.lower()!=-inf<Float>()) {
+            this->_negative_constraints.append(bounds.lower()-function);
+        }
+    }
+}
+
+void HybridEnclosure::new_state_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
+    ARIADNE_ASSERT_MSG(constraint.function().argument_size()==dimension(),
+                       "constraint "<<constraint<<" is incompatible with dimension "<<dimension());
+    NonlinearConstraint parameter_constraint(compose(constraint.function(),this->_state).function(),constraint.bounds());
+    this->new_parameter_constraint(event,parameter_constraint);
+}
+
 
 
 

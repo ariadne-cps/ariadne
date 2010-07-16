@@ -212,10 +212,18 @@ template<class Op> struct BinaryFunctionBody
 
     virtual ScalarFunction derivative(uint j) const {
         switch(_op.code()) {
-            case ADD: return _arg1.derivative(j)+_arg2.derivative(j);
-            case SUB: return _arg1.derivative(j)-_arg2.derivative(j);
-            case MUL: return _arg1.derivative(j)*_arg2+_arg1*_arg2.derivative(j);
-            case DIV: return _arg1.derivative(j)/_arg2-_arg2.derivative(j)*_arg1/sqr(_arg2);
+            case ADD: 
+                return _arg1.derivative(j)+_arg2.derivative(j);
+            case SUB: 
+                return _arg1.derivative(j)-_arg2.derivative(j);
+            case MUL: 
+                return _arg1.derivative(j)*_arg2+_arg1*_arg2.derivative(j);
+            case DIV: 
+                if(dynamic_cast<const ScalarConstantFunctionBody*>(_arg2.pointer())) {
+                    return _arg1.derivative(j)/_arg2;
+                } else {
+                    return _arg1.derivative(j)/_arg2-_arg2.derivative(j)*_arg1/sqr(_arg2);
+                }
             default: ARIADNE_FAIL_MSG("Unknown binary function "<<this->_op);
         }
     }
@@ -707,7 +715,7 @@ class CombinedFunctionBody
 
 ScalarFunction ScalarFunction::constant(Nat n, double c)
 {
-    //return ScalarFunction(new ScalarConstantFunctionBody(n,c));
+    return ScalarFunction(new ScalarConstantFunctionBody(n,Real(c)));
 
     Polynomial<Interval> p(n);
     p[MultiIndex::zero(n)]=c;
@@ -716,7 +724,7 @@ ScalarFunction ScalarFunction::constant(Nat n, double c)
 
 ScalarFunction ScalarFunction::constant(Nat n, Real c)
 {
-    //return ScalarFunction(new ScalarConstantFunctionBody(n,c));
+    return ScalarFunction(new ScalarConstantFunctionBody(n,c));
 
     Polynomial<Interval> p(n);
     p[MultiIndex::zero(n)]=c;
@@ -934,6 +942,11 @@ ScalarFunction operator/(const ScalarFunction& f1, const Real& s2)
     const ScalarExpressionFunctionBody* e1=dynamic_cast<const ScalarExpressionFunctionBody*>(f1.pointer());
     if(e1) { return ScalarFunction(e1->_expression/s2,e1->_space); }
     return f1/ScalarFunction::constant(f1.argument_size(),s2);
+}
+
+ScalarFunction operator/(const ScalarFunction& f1, int s2)
+{
+    return f1/Real(s2);
 }
 
 ScalarFunction operator+(const Real& s1, const ScalarFunction& f2)
@@ -1246,9 +1259,6 @@ ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f) 
     ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
-
-    for(uint i=0; i!=g.argument_size(); ++i) {
-    }
 
     try {
         ScalarFunction r=g.derivative(0)*f[0];

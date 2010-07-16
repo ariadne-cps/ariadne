@@ -386,7 +386,7 @@ void _acc(TaylorModel& r, const Float& c)
         set_rounding_to_nearest();
         rv+=c;
     }
-    ARIADNE_ASSERT(r.error()>=0);
+    ARIADNE_ASSERT_MSG(r.error()>=0,"c="<<c<<" r="<<r);
     return;
 }
 

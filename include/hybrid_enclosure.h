@@ -226,7 +226,7 @@ class HybridEnclosure
     //! \brief \deprecated
     void new_time_step_bound(DiscreteEvent e, ScalarIntervalFunction tau);
 
-    //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
+    //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
     void new_constraint(DiscreteEvent e, NonlinearConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
     void new_state_constraint(DiscreteEvent e, NonlinearConstraint c);
@@ -243,6 +243,9 @@ class HybridEnclosure
     void new_guard(DiscreteEvent e, ScalarFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e, with computed crossing time \f$\tau(s)\f$.
     void new_guard(DiscreteEvent e, ScalarFunction g, ScalarIntervalFunction ct);
+
+    //! \brief Introduce a new independent variable with domain \a ivl.
+    void new_variable(Interval ivl);
 
     //! \brief The dimension of the set.
     uint dimension() const;
@@ -303,6 +306,8 @@ class ListSet<HybridEnclosure>
 inline std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls) {
     return os << static_cast<const HybridListSet<HybridEnclosure::ContinuousStateSetType>&>(hls);
 }
+
+inline tribool subset(const HybridEnclosure& e, const HybridBox& b) { return e.subset(b); }
 
 } // namespace Ariadne
 

@@ -44,13 +44,6 @@ class TestConstrainedImageSet
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
         ARIADNE_TEST_CALL(test_draw());
-        ARIADNE_TEST_CALL(test_constructor());
-        ARIADNE_TEST_CALL(test_geometry());
-        ARIADNE_TEST_CALL(test_disjoint());
-        ARIADNE_TEST_CALL(test_approximation());
-        ARIADNE_TEST_CALL(test_affine_approximation());
-        ARIADNE_TEST_CALL(test_split());
-        ARIADNE_TEST_CALL(test_draw());
     }
 
     void test_constructor() {
@@ -206,14 +199,52 @@ class TestConstrainedImageSet
 
     void test_draw(const std::string& str, const ConstrainedImageSet& set, uint acc) {
         figure.clear();
+        figure.set_bounding_box(Box(2, -1.75,+1.75,-1.5,+2.0));
         GridTreeSet paving(set.dimension());
-        set.adjoin_outer_approximation_to(paving,acc);
+        set.adjoin_outer_approximation_to(paving,acc+3);
         figure.set_fill_opacity(1.0);
         figure.set_fill_colour(red);
+        paving.recombine();
         figure.draw(paving);
         figure.set_fill_colour(green);
         figure.set_fill_opacity(0.5);
-        figure.draw(set);
+        typedef ConstrainedImageSet CIS;
+        CIS s1,s2,s3,s4,s5,s6,s7,s8, s9,s10,s11,s12,s13,s14,s15,s16;;
+        make_lpair(s1,s2)=set.split(); 
+        make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
+        make_lpair(s7,s8)=s4.split(); make_lpair(s5,s6)=s3.split(); make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
+        make_lpair(s15,s16)=s8.split(); make_lpair(s13,s14)=s7.split(); make_lpair(s11,s12)=s6.split(); make_lpair(s9,s10)=s5.split();
+        make_lpair(s7,s8)=s4.split(); make_lpair(s5,s6)=s3.split(); make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
+        figure.draw(s1); figure.draw(s2); figure.draw(s3); figure.draw(s4);
+        figure.draw(s5); figure.draw(s6); figure.draw(s7); figure.draw(s8); 
+        figure.draw(s9); figure.draw(s10); figure.draw(s11); figure.draw(s12); 
+        figure.draw(s13); figure.draw(s14); figure.draw(s15); figure.draw(s16);
+        figure.write((std::string("test_function_set-draw-")+str).c_str());
+        figure.clear();
+    }
+
+    void test_draw2(const std::string& str, const ConstrainedImageSet& set, uint acc) {
+        figure.clear();
+        figure.set_bounding_box(Box(2, -1.75,+1.75,-1.5,+2.0));
+        GridTreeSet paving(set.dimension());
+        set.adjoin_outer_approximation_to(paving,acc+3);
+        figure.set_fill_opacity(1.0);
+        figure.set_fill_colour(red);
+        paving.recombine();
+        figure.draw(paving);
+        figure.set_fill_colour(green);
+        figure.set_fill_opacity(0.5);
+        typedef ConstrainedImageSet CIS;
+        CIS s1,s2,s3,s4,s5,s6,s7,s8, s9,s10,s11,s12,s13,s14,s15,s16;;
+        make_lpair(s1,s2)=set.split(); 
+        make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
+        make_lpair(s7,s8)=s4.split(); make_lpair(s5,s6)=s3.split(); make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
+        make_lpair(s15,s16)=s8.split(); make_lpair(s13,s14)=s7.split(); make_lpair(s11,s12)=s6.split(); make_lpair(s9,s10)=s5.split();
+        make_lpair(s7,s8)=s4.split(); make_lpair(s5,s6)=s3.split(); make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
+        figure.draw(s1); figure.draw(s2); figure.draw(s3); figure.draw(s4);
+        figure.draw(s5); figure.draw(s6); figure.draw(s7); figure.draw(s8); 
+        figure.draw(s9); figure.draw(s10); figure.draw(s11); figure.draw(s12); 
+        figure.draw(s13); figure.draw(s14); figure.draw(s15); figure.draw(s16);
         figure.write((std::string("test_function_set-draw-")+str).c_str());
         figure.clear();
     }
@@ -225,13 +256,8 @@ class TestConstrainedImageSet
         ScalarFunction y=ScalarFunction::coordinate(2,1);
         uint acc = 2u;
 
-        test_draw("box",ConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t)),acc);
-        test_draw("polytope",ConstrainedImageSet(Box(2,-2.05,2.05,-1.05,1.05),(s,t),(s+t<=1.5)),acc);
-        test_draw("dome",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t<=0.251)),acc);
-        test_draw("disc",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t*t<=0.751)),acc);
-        test_draw("parallelotope",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t)),acc);
-        test_draw("ellipse",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),acc);
-        test_draw("concave",ConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(2*s+0.25*s*s+t-0.5<=0)),acc);
+        //test_draw("ellipse",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
+        test_draw("concave",ConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
     }
 };
 

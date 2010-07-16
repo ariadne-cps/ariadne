@@ -283,7 +283,7 @@ class HybridEvolverBase
 	//! the final conditions latex, or
 	virtual
     TimingData
-    _compute_timing(Set<DiscreteEvent> const& active_events,
+    _compute_timing(Set<DiscreteEvent>& active_events,
                     Real final_time,
                     VectorIntervalFunction const& flow,
                     Map<DiscreteEvent,CrossingData> const& crossings,
@@ -422,6 +422,7 @@ struct CrossingData
     ScalarIntervalFunction crossing_time;
     ScalarIntervalFunction critical_time;
 };
+std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
 
 //! \brief The kind of step taken in the evolution
 //! \relates HybridEvolverInterface
@@ -438,10 +439,14 @@ std::ostream& operator<<(std::ostream& os, const StepKind& crk);
 struct TimingData
 {
     StepKind step_kind; //!< The kind of step taken in the evolution
-    Float step_size; //!< The step size used in a \a FULL_STEP time step.
-    ScalarIntervalFunction evolution_time; //!< The evolution time \f$\varepsilon(x)\f$ used in a \a CREEP_STEP time step.
+    Float final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace, and used in a \a FINAL_STEP step.
+    Float step_size; //!< The step size \f$h\f$ used in a \a FULL_STEP time step.
+    ScalarIntervalFunction spacial_evolution_time; //!< The evolution time \f$\varepsilon(x)\f$ used in a \a CREEP_STEP time step.
     ScalarIntervalFunction finishing_time; //!< The time \f$\omega(s)\f$ reached after an \a UNWIND_STEP as a function of the parameters.
-    Float final_time; //!< The time specified as the final time of the evolution trace, and used in a \a FINAL_STEP step.
+    ScalarIntervalFunction evolution_time; //!< The time \f$\delta(s)\f$ used in an evolution step. Equal to \f$\varepsilon(\xi(s))\f$ for a \a CREEP_STEP and \f$\omega(s)-\varepsilon(s)\f$ for an \a UNWIND_STEP.
+    ScalarIntervalFunction remaining_time; //!< The time \f$\rho(s)\f$ remaining in the evolution. Equal to \f$t_{\max}-\tau(s)\f$.
+    Interval time_domain; //!< The time domain, equal to \f$[0,h]\f$.
+    ScalarIntervalFunction time_coordinate; //!< The time coordinate function, equal to the identity on \f$[0,h]\f$.
 };
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
@@ -579,7 +584,7 @@ class DeterministicTransverseHybridEvolver
   protected:
     virtual
     TimingData
-    _compute_timing(Set<DiscreteEvent> const& active_events,
+    _compute_timing(Set<DiscreteEvent>& active_events,
                     Real final_time,
                     VectorIntervalFunction const& flow,
                     Map<DiscreteEvent,CrossingData> const& crossings,

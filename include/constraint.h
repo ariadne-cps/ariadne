@@ -30,6 +30,7 @@
 
 #include "numeric.h"
 #include "function.h"
+#include "taylor_function.h"
 
 namespace Ariadne {
 
@@ -61,6 +62,22 @@ inline NonlinearConstraint operator==(const ScalarFunction& f, const Float& c) {
 
 inline NonlinearConstraint operator==(const ScalarFunction& f, const Interval& c) {
     return NonlinearConstraint(f,Interval(c));
+}
+
+inline NonlinearConstraint operator<=(const ScalarTaylorFunction& f, const Float& c) {
+    return NonlinearConstraint(f.function(),Interval(-inf<Float>(),c));
+}
+
+inline NonlinearConstraint operator>=(const ScalarTaylorFunction& f, const Float& c) {
+    return NonlinearConstraint(f.function(),Interval(c,+inf<Float>()));
+}
+
+inline NonlinearConstraint operator<=(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g) {
+    return NonlinearConstraint((f-g).function(),Interval(-inf<Float>(),0.0));
+}
+
+inline NonlinearConstraint operator>=(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g) {
+    return NonlinearConstraint((f-g).function(),Interval(0.0,inf<Float>()));
 }
 
 inline NonlinearConstraint operator<=(const NonlinearConstraint& nc, const Float& c) {

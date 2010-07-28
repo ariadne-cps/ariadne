@@ -707,6 +707,19 @@ Vector<Interval> error(const TaylorImageSet& ts) {
     return r;
 }
 
+TaylorImageSet product(const TaylorImageSet& set, const Interval& ivl) {
+    return product(set,TaylorImageSet(Box(1u,ivl)));
+}
+
+TaylorImageSet product(const TaylorImageSet& set, const Box& bx) {
+    return product(set,TaylorImageSet(bx));
+}
+
+TaylorImageSet product(const TaylorImageSet& set1, const TaylorImageSet& set2) {
+    return TaylorImageSet(combine(set1.models(),set2.models()));
+}
+
+
 
 void box_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     if(!ts.empty()) { ts.bounding_box().draw(fig); }
@@ -1761,6 +1774,32 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const In
     }
     for(const_iterator iter=set._equations.begin(); iter!=set._equations.end(); ++iter) {
         result._equations.append(embed(*iter,ivl));
+    }
+
+    return result;
+}
+
+TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Box& bx) {
+    return product(set,TaylorConstrainedImageSet(bx));
+}
+
+TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const TaylorConstrainedImageSet& set2) {
+    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+
+    VectorTaylorFunction new_function=combine(set1.taylor_function(),set2.taylor_function());
+
+    TaylorConstrainedImageSet result(new_function);
+    for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
+        result._constraints.append(embed(*iter,set2.domain()));
+    }
+    for(const_iterator iter=set2._constraints.begin(); iter!=set2._constraints.end(); ++iter) {
+        result._constraints.append(embed(set1.domain(),*iter));
+    }
+    for(const_iterator iter=set1._equations.begin(); iter!=set1._equations.end(); ++iter) {
+        result._equations.append(embed(*iter,set2.domain()));
+    }
+    for(const_iterator iter=set2._equations.begin(); iter!=set2._equations.end(); ++iter) {
+        result._equations.append(embed(set1.domain(),*iter));
     }
 
     return result;

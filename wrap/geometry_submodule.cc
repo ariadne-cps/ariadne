@@ -300,6 +300,10 @@ void export_taylor_set()
     def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorImageSet&,uint)) &adjoin_outer_approximation);
     def("zonotope", (Zonotope(*)(const TaylorImageSet&)) &zonotope);
 
+    def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Interval&)) &product);
+    def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Box&)) &product);
+    def("product", (TaylorImageSet(*)(const TaylorImageSet&,const TaylorImageSet&)) &product);
+
     def("apply",(TaylorModel(*)(const ScalarFunction&,const TaylorImageSet&)) &apply);
     def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorImageSet&)) &apply);
     def("apply",(TaylorImageSet(*)(const VectorFunction&,const TaylorImageSet&)) &apply);

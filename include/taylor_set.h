@@ -182,6 +182,10 @@ GridTreeSet outer_approximation(const TaylorImageSet& set, const Grid& grid, uin
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth);
 Zonotope zonotope(const TaylorImageSet& ts);
 
+TaylorImageSet product(const TaylorImageSet& set, const Interval& ivl);
+TaylorImageSet product(const TaylorImageSet& set, const Box& bx);
+TaylorImageSet product(const TaylorImageSet& set1, const TaylorImageSet& set2);
+
 void standard_draw(CanvasInterface& g, const TaylorImageSet& ts);
 void box_draw(CanvasInterface& g, const TaylorImageSet& ts);
 void affine_draw(CanvasInterface& g, const TaylorImageSet& ts);
@@ -303,9 +307,15 @@ class TaylorConstrainedImageSet
     void _solve_zero_constraints();
   private:
     friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const Interval&);
+    friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const Box&);
+    friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const TaylorConstrainedImageSet&);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const TaylorConstrainedImageSet& s) { return s.write(os); }
+
+TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Interval& bx);
+TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Box& bx);
+TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const TaylorConstrainedImageSet& set2);
 
 
 } //namespace Ariadne

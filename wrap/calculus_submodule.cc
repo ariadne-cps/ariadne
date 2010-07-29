@@ -119,6 +119,13 @@ struct from_python<VectorTaylorFunction> {
     }
 };
 
+List<MultiIndex> keys(const TaylorModel& tm) {
+    List<MultiIndex> r;
+    for(TaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        r.append(iter->key());
+    }
+    return r;
+}
 
 
 
@@ -128,6 +135,7 @@ Interval _range3(const TaylorModel&);
 
 
 } // namespace Ariadne
+
 
 
 void export_taylor_model()
@@ -148,9 +156,16 @@ void export_taylor_model()
     typedef Polynomial<Interval> IP;
     typedef ScalarFunction FI;
 
+    class_< ExpansionValue<Float> > expansion_value_class("ExpansionValue", init<MultiIndex,Float>());
+    // TODO: Add get/set for data
+    // TODO: Use property for key
+    //expansion_value_class.add_property("key", (MultiIndex const&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key);
+    expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key, return_value_policy<copy_const_reference>());
+    expansion_value_class.def(self_ns::str(self));
 
     class_<TaylorModel> taylor_model_class("TaylorModel", init<TaylorModel>());
     taylor_model_class.def( init< N >());
+    taylor_model_class.def("keys", (List<MultiIndex>(*)(const TaylorModel&))&keys);
     taylor_model_class.def("error", (const Float&(TaylorModel::*)()const) &TaylorModel::error, return_value_policy<copy_const_reference>());
     taylor_model_class.def("set_error", (void(TaylorModel::*)(const Float&)) &TaylorModel::set_error);
     taylor_model_class.def("argument_size", &TaylorModel::argument_size);
@@ -162,6 +177,8 @@ void export_taylor_model()
     taylor_model_class.def("get_maximum_degree", &TaylorModel::maximum_degree);
     taylor_model_class.def("__getitem__", &__getitem__<TaylorModel,A,Float>);
     taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,A,D>);
+    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,A,D>);
+    taylor_model_class.def("__iter__", iterator<TaylorModel>()); // TODO: TaylorModel iterator does not fit in general Python iterator scheme
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
     taylor_model_class.def(self+self);

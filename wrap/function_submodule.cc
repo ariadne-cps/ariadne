@@ -233,6 +233,7 @@ void export_multi_index()
     multi_index_class.def(self_ns::str(self));
 
     from_python<MultiIndex>();
+    to_python< List<MultiIndex> >();
 }
 
 template<class X>

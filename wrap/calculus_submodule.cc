@@ -105,6 +105,19 @@ struct from_python< Expansion<T> > {
 
 
 template<>
+struct from_python< Vector<TaylorModel> > {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<TaylorModel> >()); }
+    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        boost::python::list lst=extract<boost::python::list>(obj_ptr);
+        Vector<TaylorModel>* tms_ptr = new (storage) Vector<TaylorModel>(len(lst));
+        for(int i=0; i!=len(lst); ++i) { (*tms_ptr)[i]=extract<TaylorModel>(lst[i]); }
+        data->convertible = storage;
+    }
+};
+
+template<>
 struct from_python<VectorTaylorFunction> {
     from_python() {
         boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<VectorTaylorFunction>()); }
@@ -252,10 +265,15 @@ void export_taylor_model()
 
     def("split",(TaylorModel(*)(const TaylorModel&,uint,tribool)) &split);
 
+    from_python< Vector<TaylorModel> >();
+    to_python< Vector<TaylorModel> >();
 
+/*
     class_< TMV > taylor_model_vector_class("TaylorModelVector");
     taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,int,TaylorModel>);
+    taylor_model_vector_class.def("__setitem__", &__setitem__<TMV,int,TaylorModel>);
     taylor_model_vector_class.def(self_ns::str(self));
+*/
 }
 
 void export_scalar_taylor_function()

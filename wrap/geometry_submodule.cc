@@ -288,7 +288,10 @@ void export_taylor_set()
     class_<TaylorImageSet,bases<CompactSetInterface,DrawableInterface> > taylor_set_class("TaylorImageSet",init<TaylorImageSet>());
     taylor_set_class.def(init<uint>());
     taylor_set_class.def(init<Box>());
+    taylor_set_class.def(init< Vector<TaylorModel> >());
     //taylor_set_class.def(init<Zonotope>());
+    taylor_set_class.def("domain", &TaylorImageSet::domain);
+    taylor_set_class.def("models", &TaylorImageSet::models,return_value_policy<copy_const_reference>());
     taylor_set_class.def("bounding_box", &TaylorImageSet::bounding_box);
     taylor_set_class.def("range", &TaylorImageSet::bounding_box);
     taylor_set_class.def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)()const) &TaylorImageSet::split);

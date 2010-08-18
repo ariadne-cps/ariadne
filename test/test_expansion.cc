@@ -105,7 +105,7 @@ void TestExpansion::test_concept()
     //e=Expansion<Float>::variable(3u,0u);
     //e=Expansion<Float>::variables(3u)[0u];
 
-    e=x;
+    //e=x;
 
     e.reserve(2u);
     e.insert(a,x);

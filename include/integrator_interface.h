@@ -32,7 +32,7 @@
 namespace Ariadne {
 
 template<class T1,class T2> class Pair;
-typedef double Float;
+class Float;
 class Interval;
 template<class X> class Vector;
 class VectorFunction;
@@ -57,7 +57,8 @@ class IntegratorInterface
     /*! \brief Set the temporal order (if appropriate). */
     virtual void set_temporal_order(unsigned int) = 0;
 
-    //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt.
+    //! \brief Compute a pair \a (h,B) consisting of a bound \a B for the flow 
+    //! starting in the \a state_domain for time step \a h.
     virtual Pair<Float,IVector> flow_bounds(const VectorFunction& vector_field,
                                             const IVector& parameter_domain,
                                             const IVector& state_domain,

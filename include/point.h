@@ -50,7 +50,7 @@ class Point
     template<class T1, class T2> Point(const T1& t1, const T2& t2) : Vector<Float>(t1,t2) { }
     //! Construct from an integer giving the dimension and a list of floating-point values
     //! giving the values.
-    explicit Point(uint d, const Float& x0, ...);
+    explicit Point(uint d, double x0, ...);
     //! The origin in \a n dimensions.
     static Point origin(uint n) { return Point(n,0.0); }
     //! A dynamically-allocated copy.

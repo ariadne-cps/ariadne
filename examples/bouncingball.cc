@@ -32,11 +32,11 @@ int main()
     typedef ImageSetHybridEvolver HybridEvolverType;
 
     /// Set the system parameters
-    Float a = 0.5;
-    Float g = 9.8;
+    double a = 0.5;
+    double g = 9.8;
 
-    Float A[4]={0,1.0,0,0};
-    Float b[2]={0,-g};
+    double A[4]={0,1.0,0,0};
+    double b[2]={0,-g};
 
     /// Build the Hybrid System
 
@@ -52,16 +52,16 @@ int main()
     cout << "event = " << bounce << endl << endl;
 
     /// Create the dynamics
-    VectorAffineFunction dynamic(Matrix<Float>(2,2,A),Vector<Float>(2,b));
+    VectorAffineFunction dynamic(Matrix<Real>(2,2,A),Vector<Real>(2,b));
     cout << "dynamic = " << dynamic << endl << endl;
 
     /// Create the resets
-    VectorAffineFunction reset(Matrix<Float>(2,2,1.0,0.0,0.0,-a),Vector<Float>(2,0.0,0.0));
+    VectorAffineFunction reset(Matrix<Real>(2,2,1.0,0.0,0.0,-a),Vector<Real>(2,0.0,0.0));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    ScalarAffineFunction guard(Vector<Float>(2,-1.0,0.0),Float(0.0));
+    ScalarAffineFunction guard(Vector<Real>(2,-1.0,0.0),Real(0.0));
     cout << "guard=" << guard << endl << endl;
 
     /// Build the automaton

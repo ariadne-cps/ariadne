@@ -100,7 +100,7 @@ TestFloat::test_concept()
     x=n; x=m; x=d; x=x; 
   
     // Conversion
-    d=x;
+    d=numeric_cast<double>(x);
 
     // Maximum and minimum
     x=max(x,x); x=min(x,x);
@@ -131,7 +131,7 @@ TestFloat::test_concept()
     x=mul_approx(d,x); x=mul_approx(x,d); x=div_approx(x,d); 
 
     // Reset x to 1
-    x=1;
+    x=1; x=1.0;
 
     // Comparisons
     b=(x==n); b=(x!=n); b=(x<=n); b=(x>=n); b=(x<n); b=(x>n);
@@ -426,7 +426,16 @@ TestFloat::test_arithmetic()
     f4=add_up(f1,f2);
     cout << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=3.5); ARIADNE_TEST_ASSERT(f4>=3.5);
-  
+    // Addition 
+    Float one_add_down_epsilon=add_down(Float(1.0),Float(1e-18));
+    ARIADNE_TEST_COMPARE(add_up(Float(1.0),Float(1e-18)),>,1.0);
+    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(1e-18)),==,Float(1.0));
+    ARIADNE_TEST_COMPARE(one_add_down_epsilon,==,Float(1.0));
+    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(1e-36)),==,Float(1.0));
+    ARIADNE_TEST_EQUAL(Float(1.0),1.0);
+    ARIADNE_TEST_COMPARE(Float(1.0),==,1.0);
+    
+    
     // Subtraction (this should remain exact here)
     f3=sub_down(f1,f2);
     f4=sub_up(f1,f2);
@@ -445,6 +454,7 @@ TestFloat::test_arithmetic()
     f5=div_approx(f1,f2);
     cout << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<f4); ARIADNE_TEST_ASSERT(f3<=f5); ARIADNE_TEST_ASSERT(f4>=f5);
+    ARIADNE_TEST_ASSERT(div_down(f1,f2)<div_up(f1,f2)); // Regression test for non-assignment to variable
     //ARIADNE_TEST_ASSERT(Rational(f3)<=Rational(5,9));
     //ARIADNE_TEST_ASSERT(Rational(f4)>=Rational(5,9));
   
@@ -474,12 +484,12 @@ TestFloat::test_arithmetic()
   
     // Conversion to integer types
     int i3,i4;
-    i3=int(floor(f1));
-    i4=int(ceil(f1));
+    i3=numeric_cast<int>(floor(f1));
+    i4=numeric_cast<int>(ceil(f1));
     cout << i3 << " < " << f1 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==1); ARIADNE_TEST_ASSERT(i4==2);
-    i3=int(floor(f2));
-    i4=int(ceil(f2));
+    i3=numeric_cast<int>(floor(f2));
+    i4=numeric_cast<int>(ceil(f2));
     cout << i3 << " < " << f2 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==-4); ARIADNE_TEST_ASSERT(i4==-3);
   
@@ -489,24 +499,29 @@ TestFloat::test_arithmetic()
   
     cout << "o/t=" << Interval(o/t) << endl;
 
-    Interval iao=(o/t)*t;
+    Interval iao=Interval((o/t)*t);
     cout << "(o/t)*t=" << iao << endl;
     cout << iao.lower() << " " << iao.upper() << endl;
 
+    Float odtd=div_down(o,t);
+    Float odtu=div_up(o,t);
+    cout << odtd << " <= 1/3 <= " << odtu << endl;
+    ARIADNE_TEST_COMPARE(odtd,<,odtu);
+    // Regression test to catch errors when Float result is not assigned to a variable
     cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
-    ARIADNE_TEST_ASSERT(div_down(o,t)<div_up(o,t));
+    ARIADNE_TEST_COMPARE(div_down(o,t),<,div_up(o,t));
     cout << Interval(o/t) << endl; 
     ARIADNE_TEST_ASSERT(contains(iao,o));
     Interval iaz=iao-io;
-    Interval iz=Float(1)-Float(1);
+    Interval iz=Interval(Float(1)-Float(1));
     cout << iaz << endl;
     ARIADNE_TEST_ASSERT(contains(iaz,z)); 
     ARIADNE_TEST_ASSERT(!bool(!subset(iz,iaz)));
     cout << endl;
 
-    ARIADNE_TEST_ASSERT(med_approx(Float(2),Float(3))==2.5);
-    ARIADNE_TEST_ASSERT(rad_up(Float(2),Float(3))>=0.5);
-    ARIADNE_TEST_ASSERT(rad_up(Float(2),Float(3))<=0.5000000000000002);
+    ARIADNE_TEST_COMPARE(med_approx(Float(2),Float(3)),==,2.5);
+    ARIADNE_TEST_COMPARE(rad_up(Float(2),Float(3)),>=,0.5);
+    ARIADNE_TEST_COMPARE(rad_up(Float(2),Float(3)),<=,0.5000000000000002);
 
     // The following line should not compile
     // f5=f1+f2;
@@ -561,8 +576,6 @@ TestFloat::test_cosine()
     static const double sqrt_half_down=0.70710678118654746;
     //static const double sqrt_half_approx=0.70710678118654757;
     static const double sqrt_half_up=0.70710678118654757;
-
-    cout << __PRETTY_FUNCTION__ << endl;
 
     set_rounding_mode(upward);
     ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);

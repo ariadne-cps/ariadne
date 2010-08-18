@@ -90,12 +90,12 @@ void TestHybridEvolution::test_bouncing_ball() const {
     ScalarFunction c=ScalarFunction::constant(2,1.0);
     ScalarFunction x=ScalarFunction::coordinate(2,0);
     ScalarFunction v=ScalarFunction::coordinate(2,1);
-    Float lambda=0.5;
+    double lambda=0.5;
     bouncing_ball.new_mode(q,(v,-c));
     bouncing_ball.new_transition(e,q,q,(x+0.000001,-lambda*v),-x,impact);
 
-    Float height=2.0;
-    Float radius=1.0/64;
+    double height=2.0;
+    double radius=1.0/64;
     HybridBox initial(q,Box(2, height-radius,height+radius, -radius,+radius));
     HybridTime time(4.5,3);
 

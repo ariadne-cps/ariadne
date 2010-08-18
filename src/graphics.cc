@@ -256,7 +256,7 @@ class CairoCanvas
 
 
 
-std::string str(double x) {
+std::string str(Float x) {
     std::stringstream ss;
     ss << x;
     return ss.str();
@@ -353,15 +353,15 @@ void Figure::_paint_all(CanvasInterface& canvas)
     cairo_clip (cr);
     cairo_new_path (cr);
 
-    cairo_set_line_width (cr,0.002*min(bbox[0].width(),bbox[1].width()));
+    cairo_set_line_width (cr,approx_cast<double>(0.002*min(bbox[0].width(),bbox[1].width())));
 
     // compute user to canvas coordinate transformation
     double ctr0=left_margin;
     double ctr1=top_margin;
-    double sc0=(canvas_width-left_margin-right_margin)/lbbox[0].width();
-    double sc1=-(canvas_height-top_margin-bottom_margin)/lbbox[1].width();
-    double utr0=-lbbox[0].lower();
-    double utr1=-lbbox[1].upper();
+    double sc0=(canvas_width-left_margin-right_margin)/approx_cast<double>(lbbox[0].width());
+    double sc1=-(canvas_height-top_margin-bottom_margin)/approx_cast<double>(lbbox[1].width());
+    double utr0=approx_cast<double>(-lbbox[0].lower());
+    double utr1=approx_cast<double>(-lbbox[1].upper());
 
     // Scale to user coordinates
     cairo_translate(cr, ctr0, ctr1);

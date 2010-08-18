@@ -200,7 +200,7 @@ void export_point()
 {
     class_<Point> point_class("Point",init<Point>());
     point_class.def(init<uint>());
-    point_class.def("__getitem__", &__getitem__<Point,int,double>);
+    point_class.def("__getitem__", &__getitem__<Point,int,Float>);
     point_class.def(self_ns::str(self));
 
     from_python<Point>();

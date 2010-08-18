@@ -224,7 +224,7 @@ void export_taylor_model()
     taylor_model_class.def(self/=Interval());
     taylor_model_class.def(self+=self);
     taylor_model_class.def(self-=self);
-    taylor_model_class.def(self>Float());
+    taylor_model_class.def(self>double());
     taylor_model_class.def(self>self);
     taylor_model_class.def(self<self);
     taylor_model_class.def(self_ns::str(self));

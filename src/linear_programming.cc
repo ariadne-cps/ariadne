@@ -1358,12 +1358,13 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
     return fs;
 }
 
-
+template<class X> struct RigorousNumericsTraits { typedef X Type; };
+template<> struct RigorousNumericsTraits<Float> { typedef Interval Type; };
 
 template<class X> tribool
 SimplexSolver<X>::verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const array<Slackness>& vt)
 {
-    typedef Interval XX;
+    typedef typename RigorousNumericsTraits<X>::Type XX;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
@@ -1419,7 +1420,7 @@ template<class X> tribool
 SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<Slackness>& vt)
 {
     ARIADNE_LOG(9,"verify_dual_feasibility(Matrix A, Vector c, VariableTypeArray vt):\n");
-    typedef Interval XX;
+    typedef typename RigorousNumericsTraits<X>::Type XX;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     ARIADNE_ASSERT(c.size()==n);

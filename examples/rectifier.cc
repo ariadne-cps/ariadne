@@ -20,7 +20,7 @@ struct offoff_df : VectorFunctionData<3,3,5> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[0]*2.0*pi<Float>()*p[1]*Ariadne::cos(2.0*pi<Float>()*p[1]*x[0]);
+        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
 	    r[2] = -x[2]/(p[4]*p[3]);
 //        r[2] = -x[2]/(p[4]*p[3]) - 2e-12/p[3];
     }
@@ -83,9 +83,9 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 	// Gets the number of times each variable interval would be divided by 2
         int numDivisions = MAX_GRID_DEPTH / numVariables;
 	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-	double step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+	Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
 	// Initiates the x position to the bounding box left bound
-        double pos_x = bbox[0].lower();
+        Float pos_x = bbox[0].lower();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
 	rect[yaxis] = bbox[1];
         // While between the interval
@@ -97,8 +97,8 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        double pos_y = bbox[1].lower();
+	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        Float pos_y = bbox[1].lower();
 	rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
         {
@@ -115,23 +115,26 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 
 int main()
 {
+    double amplitude=4.0;
+    double frequency=50.0;
+    
     /// Introduces the dynamics parameters
-    Vector<Float> dp(5);
-    dp[0] = 4.0; /// Amplitude of the input voltage, Vi
-    dp[1] = 50.0; /// Sinusoid frequency, f
+    Vector<double> dp(5);
+    dp[0] = amplitude; /// Amplitude of the input voltage, Vi
+    dp[1] = frequency; /// Sinusoid frequency, f
     dp[2] = 10.0; /// Diode resistance when on, Ron
     dp[3] = 0.0001; /// Load capacitance, Cl
     dp[4] = 1000.0; /// Load resistance, Rl
 
     /// Introduces the global parameters
-    float TIME_LIMIT = 1.0/dp[1];
+    Real TIME_LIMIT = 1.0/frequency;
 //    float TIME_LIMIT = 0.0042;
     int TRAN_LIMIT = 1;
-    float MAX_ENCL_RADIUS = 1.0;
-    float MAX_STEP_SIZE = 1e-5/dp[1];
-//    float LOCK_TOGRID_TIME = 2.0/dp[1];
-    float LOCK_TOGRID_TIME = 0.25/dp[1];
-    float MAX_GRID_DEPTH = 7;
+    double MAX_ENCL_RADIUS = 1.0;
+    double MAX_STEP_SIZE = 1e-5/frequency;
+//    float LOCK_TOGRID_TIME = 2.0/frequency;
+    double LOCK_TOGRID_TIME = 0.25/frequency;
+    int MAX_GRID_DEPTH = 7;
     int VERBOSITY=3;
     bool ENABLE_SUBDIV=false;
 
@@ -153,31 +156,31 @@ int main()
     /// Create the resets
 
     /// Reset the time (t^=0,vi^=vi,vo^=vo)
-    VectorAffineFunction resettime_r(Matrix<Float>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
-                               Vector<Float>(3,0.0,0.0,0.0));
+    VectorAffineFunction resettime_r(Matrix<Real>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
+                               Vector<Real>(3,0.0,0.0,0.0));
     /// Do nothing (t^=t,vi^=vi,vo^=vo)
     IdentityFunction noop_r(3);
 
     /// Create the guards
 
     /// Guard for the reset of time (t>=1/f)
-    VectorAffineFunction resettime_g(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1,-1/dp[1]));
+    VectorAffineFunction resettime_g(Matrix<Real>(1,3,1.0,0.0,0.0),Vector<Real>(1,-1/dp[1]));
     /// Guard for the jump from onoff to offoff (vi-vo<=0)
-    VectorAffineFunction onoff_offoff_g(Matrix<Float>(1,3,0.0,-1.0,1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction onoff_offoff_g(Matrix<Real>(1,3,0.0,-1.0,1.0),Vector<Real>(1,0.0));
     /// Guard for the jump from offon to offoff (-vi-vo<=0)
-    VectorAffineFunction offon_offoff_g(Matrix<Float>(1,3,0.0,1.0,1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction offon_offoff_g(Matrix<Real>(1,3,0.0,1.0,1.0),Vector<Real>(1,0.0));
     /// Guard for the jump from offoff to onoff (vi-vo>=0)
-    VectorAffineFunction offoff_onoff_g(Matrix<Float>(1,3,0.0,1.0,-1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction offoff_onoff_g(Matrix<Real>(1,3,0.0,1.0,-1.0),Vector<Real>(1,0.0));
     /// Guard for the jump from onon to onoff (-vi-vo<=0)
-    VectorAffineFunction onon_onoff_g(Matrix<Float>(1,3,0.0,1.0,1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction onon_onoff_g(Matrix<Real>(1,3,0.0,1.0,1.0),Vector<Real>(1,0.0));
     /// Guard for the jump from offoff to offon (-vi-vo>=0)
-    VectorAffineFunction offoff_offon_g(Matrix<Float>(1,3,0.0,-1.0,-1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction offoff_offon_g(Matrix<Real>(1,3,0.0,-1.0,-1.0),Vector<Real>(1,0.0));
     /// Guard for the jump from onon to offon (vi-vo<=0)
-    VectorAffineFunction onon_offon_g(Matrix<Float>(1,3,0.0,-1.0,1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction onon_offon_g(Matrix<Real>(1,3,0.0,-1.0,1.0),Vector<Real>(1,0.0));
     /// Guard for the jump from offon to onon (vi-vo>=0)
-    VectorAffineFunction offon_onon_g(Matrix<Float>(1,3,0.0,1.0,-1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction offon_onon_g(Matrix<Real>(1,3,0.0,1.0,-1.0),Vector<Real>(1,0.0));
     /// Guard for the jump from onoff to onon (-vi-vo>=0)
-    VectorAffineFunction onoff_onon_g(Matrix<Float>(1,3,0.0,-1.0,-1.0),Vector<Float>(1,0.0));
+    VectorAffineFunction onoff_onon_g(Matrix<Real>(1,3,0.0,-1.0,-1.0),Vector<Real>(1,0.0));
 
     /// Create the dynamics
     VectorUserFunction<offoff_df> offoff_d(dp);

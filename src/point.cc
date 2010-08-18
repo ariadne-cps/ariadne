@@ -33,7 +33,7 @@
 namespace Ariadne {
 
 
-Point::Point(uint d, const double& x0,  ...)
+Point::Point(uint d, double x0,  ...)
     : Vector<Float>(d)
 {
     assert(d>=1); 
@@ -58,7 +58,7 @@ Point* Point::clone() const {
 
 Box Point::bounding_box() const {
     Box r(this->dimension());
-    double e=eps();
+    Float e=eps();
     for(uint i=0; i!=this->dimension(); ++i) {
         r[i]=(*this)[i]+Interval(-e,+e); }
     return r;
@@ -67,7 +67,7 @@ Box Point::bounding_box() const {
 void Point::draw(CanvasInterface& canv) const {
     uint ix=canv.x_coordinate();
     uint iy=canv.y_coordinate();
-    canv.dot((*this)[ix],(*this)[iy]);
+    canv.dot(approx_cast<double>((*this)[ix]),approx_cast<double>((*this)[iy]));
 }
 
 Point make_point(const std::string& str)

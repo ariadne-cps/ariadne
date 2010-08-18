@@ -134,7 +134,7 @@ Float Grid::subdivision_coordinate(uint d, integer_type n) const
 int Grid::subdivision_index(uint d, const real_type& x) const
 {
     Float half=0.5;
-    int n=int(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
+    int n=integer_cast<int>(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
     Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
     if(sc == x) {
         return n;
@@ -149,7 +149,7 @@ int Grid::subdivision_index(uint d, const real_type& x) const
 
 int Grid::subdivision_lower_index(uint d, const real_type& x) const
 {
-    int n=int(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
+    int n=integer_cast<int>(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
         return n+1;
     } else {
@@ -159,7 +159,7 @@ int Grid::subdivision_lower_index(uint d, const real_type& x) const
 
 int Grid::subdivision_upper_index(uint d, const real_type& x) const
 {
-    int n=int(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
+    int n=integer_cast<int>(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
         return n-1;
     } else {
@@ -217,7 +217,7 @@ Vector<Float> Grid::point(const array<int>& a) const
 
 Vector<Float> Grid::point(const array<double>& a) const
 {
-    Vector<float> res(a.size());
+    Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
         res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
     }
@@ -971,7 +971,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     //5. When this entry in the word is found from that point on we have to inverse the path in such
     //   a way that every component in the dimension from this point till the end of the word is
     //   inverted. This will provide us with the path to the neighborind cell in the given dimension
-    for( int index = position; index < theBaseCellWord.size(); index++){
+    for( int index = position; index < static_cast<int>(theBaseCellWord.size()); index++){
         if( index % dimensions == dim ) {
             //If this element of the path corresponds to the needed dimension then we need to invert it
             theBaseCellWord[index] = !theBaseCellWord[index];
@@ -1178,7 +1178,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
     //04. Since now all the inversion positions are found, we need to go through the path again and
     //    inverse it in the needed dimesnions starting from (corresponding) the found positions on.
     //    This will provide us with the path to the neighborind cell in the given dimension
-    for( int index = firstInversePosition; index < theNeighborCellWord.size(); index++ ) {
+    for( int index = firstInversePosition; index < static_cast<int>(theNeighborCellWord.size()); index++ ) {
         int dimension = index % num_dimensions;
         if( cellPosition[ dimension ] && ( index >= invert_position[ dimension ] ) ) {
             theNeighborCellWord[index] = !theNeighborCellWord[index];
@@ -1327,11 +1327,11 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
 }
 
 double GridTreeSubset::measure() const {
-    double result=0.0;
+    Float result=0.0;
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         result+=iter->box().measure();
     }
-    return result;
+    return approx_cast<double>(result);
 }
 
 

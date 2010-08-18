@@ -19,7 +19,7 @@ struct running_df : VectorFunctionData<3,3,5> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
 	r[0] = 1.0;
-        r[1] = p[0]*2.0*pi<Float>()*p[1]*Ariadne::cos(2.0*pi<Float>()*p[1]*x[0]);
+        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
 	r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035) + Ariadne::exp((-x[1]-x[2])/0.035)-2.0);
     }
 };
@@ -44,9 +44,9 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 	// Gets the number of times each variable interval would be divided by 2
         int numDivisions = MAX_GRID_DEPTH / numVariables;
 	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-	double step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+	Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
 	// Initiates the x position to the bounding box left bound
-        double pos_x = bbox[0].lower();
+        Float pos_x = bbox[0].lower();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
 	rect[yaxis] = bbox[1];
         // While between the interval
@@ -58,8 +58,8 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        double pos_y = bbox[1].lower();
+	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        Float pos_y = bbox[1].lower();
 	rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
         {
@@ -77,7 +77,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 int main()
 {
     /// Introduces the dynamics parameters
-    Vector<Float> dp(5);
+    Vector<double> dp(5);
     dp[0] = 4.0; /// Amplitude of the input voltage, Vi
     dp[1] = 50.0; /// Sinusoid frequency, f
     dp[2] = 0.1; /// Diode resistance when on, Ron
@@ -106,13 +106,13 @@ int main()
     /// Create the resets
 
     /// Reset the time (t^=0,vi^=vi,vo^=vo)
-    VectorAffineFunction resettime_r(Matrix<Float>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
-                               Vector<Float>(3,0.0,0.0,0.0));
+    VectorAffineFunction resettime_r(Matrix<Real>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
+                               Vector<Real>(3,0.0,0.0,0.0));
 
     /// Create the guards
 
     /// Guard for the reset of time (t>=1/f)
-    VectorAffineFunction resettime_g(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1,-1/dp[1]));
+    VectorAffineFunction resettime_g(Matrix<Real>(1,3,1.0,0.0,0.0),Vector<Float>(1,-1/dp[1]));
 
     /// Create the dynamics
     VectorUserFunction<running_df> running_d(dp);

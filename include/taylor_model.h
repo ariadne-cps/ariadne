@@ -221,6 +221,10 @@ class TaylorModel
 
     //@{
     /*! \name Assignment to constant values. */
+    //! \brief Set equal to a builtin, keeping the same number of arguments.
+    TaylorModel& operator=(double c);
+    //! \brief Set equal to a constant, keeping the same number of arguments.
+    TaylorModel& operator=(const Real& c);
     //! \brief Set equal to a constant, keeping the same number of arguments.
     TaylorModel& operator=(const Float& c);
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
@@ -234,6 +238,9 @@ class TaylorModel
     //! \brief Construct the zero quantity in \a as independent variables.
     static TaylorModel zero(uint as) {
         TaylorModel r(as); return r; }
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorModel constant(uint as, double c) {
+        TaylorModel r(as); r.set_value(static_cast<Float>(c)); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorModel constant(uint as, const Float& c) {
         TaylorModel r(as); r.set_value(c); return r; }
@@ -293,10 +300,10 @@ class TaylorModel
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
-    tribool operator<(const Float& c) const {
+    tribool operator<(double c) const {
         return this->range()<c; }
     //! \brief Comparison with a scalar.
-    tribool operator>(const Float& c) const {
+    tribool operator>(double c) const {
         return this->range()>c; }
     //@}
 
@@ -479,20 +486,36 @@ class TaylorModel
     friend TaylorModel& operator/=(TaylorModel& x, const TaylorModel& y);
     //! \brief Inplace addition of a product of two variables.
     friend TaylorModel& operator+=(TaylorModel& x, const Product<TaylorModel,TaylorModel>& y);
+    //! \brief Inplace addition of a built-in floating-point constant.
+    friend TaylorModel& operator+=(TaylorModel& x, double c);
+    //! \brief Inplace subtraction of a built-in floating-point constant.
+    friend TaylorModel& operator-=(TaylorModel& x, double c);
+    //! \brief Inplace multiplication by a builting scalar.
+    friend TaylorModel& operator*=(TaylorModel& x, double c);
+    //! \brief Inplace division by an built-in scalar.
+    friend TaylorModel& operator/=(TaylorModel& x, double c);
+    //! \brief Inplace addition of an exact real number.
+    friend TaylorModel& operator+=(TaylorModel& x, const Real& c);
+    //! \brief Inplace subtraction of an exact real number.
+    friend TaylorModel& operator-=(TaylorModel& x, const Real& c);
+    //! \brief Inplace multiplication by an exact real number.
+    friend TaylorModel& operator*=(TaylorModel& x, const Real& c);
+    //! \brief Inplace division by an exact real number.
+    friend TaylorModel& operator/=(TaylorModel& x, const Real& c);
     //! \brief Inplace addition of an exact floating-point constant.
     friend TaylorModel& operator+=(TaylorModel& x, const Float& c);
-    //! \brief Inplace addition of an interval constant.
-    friend TaylorModel& operator+=(TaylorModel& x, const Interval& c);
     //! \brief Inplace subtraction of an exact floating-point constant.
     friend TaylorModel& operator-=(TaylorModel& x, const Float& c);
-    //! \brief Inplace subtraction of an interval constant.
-    friend TaylorModel& operator-=(TaylorModel& x, const Interval& c);
     //! \brief Inplace multiplication by an exact scalar.
     friend TaylorModel& operator*=(TaylorModel& x, const Float& c);
-    //! \brief Inplace multiplication by an approximate scalar.
-    friend TaylorModel& operator*=(TaylorModel& x, const Interval& c);
     //! \brief Inplace division by an exact scalar.
     friend TaylorModel& operator/=(TaylorModel& x, const Float& c);
+    //! \brief Inplace addition of an interval constant.
+    friend TaylorModel& operator+=(TaylorModel& x, const Interval& c);
+    //! \brief Inplace subtraction of an interval constant.
+    friend TaylorModel& operator-=(TaylorModel& x, const Interval& c);
+    //! \brief Inplace multiplication by an approximate scalar.
+    friend TaylorModel& operator*=(TaylorModel& x, const Interval& c);
     //! \brief Inplace division by an approximate scalar.
     friend TaylorModel& operator/=(TaylorModel& x, const Interval& c);
 
@@ -509,35 +532,67 @@ class TaylorModel
     //! \brief Division.
     friend TaylorModel operator/(const TaylorModel& x, const TaylorModel& y);
 
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a scalar.
+    friend TaylorModel operator+(const TaylorModel& x, double c);
+    //! \brief Subtraction of a scalar.
+    friend TaylorModel operator-(const TaylorModel& x, double c);
+    //! \brief Multiplication by a scalar.
+    friend TaylorModel operator*(const TaylorModel& x, double c);
+    //! \brief Division by a scalar.
+    friend TaylorModel operator/(const TaylorModel& x, double c);
+    //! \brief Addition of a scalar.
+    friend TaylorModel operator+(const TaylorModel& x, const Real& c);
+    //! \brief Addition of a scalar.
+    friend TaylorModel operator-(const TaylorModel& x, const Real& c);
+    //! \brief Addition of a scalar.
+    friend TaylorModel operator*(const TaylorModel& x, const Real& c);
+    //! \brief Addition of a scalar.
+    friend TaylorModel operator/(const TaylorModel& x, const Real& c);
+    //! \brief Addition of a scalar.
     friend TaylorModel operator+(const TaylorModel& x, const Float& c);
-    //! \brief Subtraction of a scakar.
+    //! \brief Subtraction of a scalar.
     friend TaylorModel operator-(const TaylorModel& x, const Float& c);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend TaylorModel operator*(const TaylorModel& x, const Float& c);
-    //! \brief Division by a scakar.
+    //! \brief Division by a scalar.
     friend TaylorModel operator/(const TaylorModel& x, const Float& c);
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a scalar.
     friend TaylorModel operator+(const TaylorModel& x, const Interval& c);
-    //! \brief Subtraction of a scakar.
+    //! \brief Subtraction of a scalar.
     friend TaylorModel operator-(const TaylorModel& x, const Interval& c);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend TaylorModel operator*(const TaylorModel& x, const Interval& c);
-    //! \brief Division by a scakar.
+    //! \brief Division by a scalar.
     friend TaylorModel operator/(const TaylorModel& x, const Interval& c);
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a built-in scalar.
+    friend TaylorModel operator+(double c, const TaylorModel& x);
+    //! \brief Subtraction from a built-in scalar.
+    friend TaylorModel operator-(double c, const TaylorModel& x);
+    //! \brief Multiplication by a built-in scalar.
+    friend TaylorModel operator*(double c, const TaylorModel& x);
+    //! \brief Division through a built-in scalar.
+    friend TaylorModel operator/(double c, const TaylorModel& x);
+    //! \brief Addition of a scalar.
+    friend TaylorModel operator+(const Real& c, const TaylorModel& x);
+    //! \brief Subtraction from a scalar.
+    friend TaylorModel operator-(const Real& c, const TaylorModel& x);
+    //! \brief Multiplication by a scalar.
+    friend TaylorModel operator*(const Real& c, const TaylorModel& x);
+    //! \brief Division through a scalar.
+    friend TaylorModel operator/(const Real& c, const TaylorModel& x);
+    //! \brief Addition of a scalar.
     friend TaylorModel operator+(const Float& c, const TaylorModel& x);
-    //! \brief Subtraction from a scakar.
+    //! \brief Subtraction from a scalar.
     friend TaylorModel operator-(const Float& c, const TaylorModel& x);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend TaylorModel operator*(const Float& c, const TaylorModel& x);
     //! \brief Division through a scalar.
     friend TaylorModel operator/(const Float& c, const TaylorModel& x);
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a scalar.
     friend TaylorModel operator+(const Interval& c, const TaylorModel& x);
-    //! \brief Subtraction from a scakar.
+    //! \brief Subtraction from a scalar.
     friend TaylorModel operator-(const Interval& c, const TaylorModel& x);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend TaylorModel operator*(const Interval& c, const TaylorModel& x);
     //! \brief Division through a scalar.
     friend TaylorModel operator/(const Interval& c, const TaylorModel& x);

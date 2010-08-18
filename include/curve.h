@@ -121,6 +121,9 @@ class InterpolatedCurve
     InterpolatedCurve(const Point& pt) 
         : _points() { this->insert(0,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
+    InterpolatedCurve(double s, const Point& pt) 
+        : _points() { this->insert(s,pt); }
+    /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
     InterpolatedCurve(const Float& s, const Point& pt) 
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */

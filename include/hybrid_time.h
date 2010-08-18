@@ -28,6 +28,7 @@
 #ifndef ARIADNE_HYBRID_TIME_H
 #define ARIADNE_HYBRID_TIME_H
 
+#include "real.h"
 
 namespace Ariadne {
 
@@ -41,7 +42,7 @@ namespace Ariadne {
 struct HybridTime
 {
     //! \brief The type used for continuous (real, physical) time.
-    typedef double ContinuousTimeType;
+    typedef Real ContinuousTimeType;
     //! \brief The type used for discrete time (steps).
     typedef int DiscreteTimeType;
 
@@ -55,6 +56,10 @@ struct HybridTime
     //! \brief The number of discrete steps taken.
     DiscreteTimeType _discrete_time;
   public:
+    HybridTime(Real t, int n)
+      : _continuous_time(t), _discrete_time(n) { }
+    HybridTime(Float t, int n)
+      : _continuous_time(t), _discrete_time(n) { }
     HybridTime(double t, int n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(int n, double t)

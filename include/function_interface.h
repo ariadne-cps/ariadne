@@ -34,7 +34,7 @@
 
 namespace Ariadne {
 
-typedef double Float;
+class Float;
 class Interval;
 class TaylorModel;
 

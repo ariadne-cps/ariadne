@@ -99,7 +99,7 @@ class IntervalNewtonSolver
 {
   public:
     /*! \brief Constructor. */
-    IntervalNewtonSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    IntervalNewtonSolver(double max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual IntervalNewtonSolver* clone() const { return new IntervalNewtonSolver(*this); }
 
@@ -125,7 +125,7 @@ class KrawczykSolver
 {
   public:
     /*! \brief Constructor. */
-    KrawczykSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    KrawczykSolver(double max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual KrawczykSolver* clone() const { return new KrawczykSolver(*this); }
 
@@ -149,7 +149,7 @@ class FactoredKrawczykSolver
 {
   public:
     /*! \brief Constructor. */
-    FactoredKrawczykSolver(Float max_error, uint max_steps) : KrawczykSolver(max_error,max_steps) { }
+    FactoredKrawczykSolver(double max_error, uint max_steps) : KrawczykSolver(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual FactoredKrawczykSolver* clone() const { return new FactoredKrawczykSolver(*this); }
   public:

@@ -51,7 +51,7 @@ struct EColi : VectorFunctionData<4,4,17> {
     compute(R& r, const A& x, const P& p)
     {
         typedef typename A::value_type X;
-        typedef Float C;
+        typedef Real C;
 
         X& dx_CRP=r[0]; X& dx_Fis=r[1]; X& dx_GyrAB=r[2]; X& dx_rrn=r[3];
         const X& x_CRP=x[0]; const X& x_Fis=x[1]; const X& x_GyrAB=x[2]; const X& x_rrn=x[3];

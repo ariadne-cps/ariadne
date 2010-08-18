@@ -83,7 +83,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the evolution parameters and grid
     uint steps(6);
-    Float maximum_step_size(0.125);
+    double maximum_step_size(0.125);
     int depth=8;
 
     EvolutionParameters parameters;
@@ -96,7 +96,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
 
     // Set up the vector field
-    Float a=1.5; Float b=0.375;
+    Real a=1.5; Real b=0.375;
     ScalarFunction x=ScalarFunction::variable(2,0);
     ScalarFunction y=ScalarFunction::variable(2,1);
     VectorFunction henon=join(a-x*x+b*y,x);
@@ -179,8 +179,8 @@ void TestDiscretisedEvolution::test_continuous_time() const
     cout << __PRETTY_FUNCTION__ << endl;
 
     // Set up the evolution parameters and grid
-    Float time(1.0);
-    Float maximum_step_size(0.125);
+    Real time(1.0);
+    double maximum_step_size(0.125);
     int depth=8;
 
     EvolutionParameters parameters;
@@ -271,9 +271,9 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     cout << __PRETTY_FUNCTION__ << endl;
 
     // Set up the evolution parameters and grid
-    Float time(1.0);
+    Real time(1.0);
     uint steps(6);
-    Float maximum_step_size(0.125);
+    double maximum_step_size(0.125);
     int depth=8;
     DiscreteLocation location(1);
     DiscreteEvent event(1);
@@ -331,7 +331,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach()[location];
     ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
     ListSet<EnclosureType> const& final_set=evolve_orbit.final()[location];
-    HybridGrid hagrid(ha.state_space(),Float(1.0));
+    HybridGrid hagrid(ha.state_space(),1.0);
 
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;

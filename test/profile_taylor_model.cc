@@ -166,7 +166,7 @@ void profile(uint ntries, const char* name, const T& run)
 
     double total_time = tm.elapsed();
     double average_time_in_microseconds = 1000000*(total_time/ntries);
-    double error = res.error();
+    Float error = res.error();
     unsigned int size = res.number_of_nonzeros();
 
     std::cout << std::setw(20) << std::left << name << std::right

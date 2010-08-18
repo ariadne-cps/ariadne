@@ -871,9 +871,9 @@ void plot(const char* filename, const Box& bbx, const TaylorImageSet& set)
         for(double y=-1; y< +1; y+=rad) {
             v[0]=x; v[1]=y;
             w=midpoint(evaluate(set,v));
-            i=((w[0]-bb[0].lower())/2/bb[0].radius())*(width-1);
+            i=integer_cast<int>(((w[0]-bb[0].lower())/2/bb[0].radius())*(width-1));
             assert(0<=i); assert(i<=width); //assert(i<width);
-            j=(height-1)-((w[1]-bb[1].lower())/2/bb[1].radius())*(height-1);
+            j=integer_cast<int>((height-1)-((w[1]-bb[1].lower())/2/bb[1].radius())*(height-1));
             assert(0<=j); assert(j<=height); //assert(j<height);
             data[j*height+i]=blue;
         }
@@ -883,13 +883,13 @@ void plot(const char* filename, const Box& bbx, const TaylorImageSet& set)
         for(double y=-1; y<=+1; y+=2) {
             v[0]=x; v[1]=y;
             w=midpoint(evaluate(set,v));
-            i=((w[0]-bb[0].lower())/2/bb[0].radius())*(width-1);
-            j=(height-1)-((w[1]-bb[1].lower())/2/bb[1].radius())*(height-1);
+            i=integer_cast<int>(((w[0]-bb[0].lower())/2/bb[0].radius())*(width-1));
+            j=integer_cast<int>((height-1)-((w[1]-bb[1].lower())/2/bb[1].radius())*(height-1));
             data[j*height+i]=black;
             v[0]=y; v[1]=x;
             w=midpoint(evaluate(set,v));
-            i=((w[0]-bb[0].lower())/2/bb[0].radius())*(width-1);
-            j=(height-1)-((w[1]-bb[1].lower())/2/bb[1].radius())*(height-1);
+            i=integer_cast<int>(((w[0]-bb[0].lower())/2/bb[0].radius())*(width-1));
+            j=integer_cast<int>((height-1)-((w[1]-bb[1].lower())/2/bb[1].radius())*(height-1));
             data[j*height+i]=black;
         }
     }
@@ -1023,13 +1023,13 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction fun
     for(uint i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(box.size()==constraints[i].function().argument_size(),"domain="<<box<<", constraint="<<constraints[i]);
         if(constraints[i].bounds().singleton()) {
-            this->new_equality_constraint(constraints[i].function()-constraints[i].bounds().midpoint());
+            this->new_equality_constraint(constraints[i].function()-Real(constraints[i].bounds().midpoint()));
         } else {
             if(constraints[i].bounds().lower()>-inf<Float>()) {
-                this->new_negative_constraint(constraints[i].bounds().lower()-constraints[i].function());
+                this->new_negative_constraint(Real(constraints[i].bounds().lower())-constraints[i].function());
             }
             if(constraints[i].bounds().upper()<+inf<Float>()) {
-                this->new_negative_constraint(constraints[i].function()-constraints[i].bounds().upper());
+                this->new_negative_constraint(constraints[i].function()-Real(constraints[i].bounds().upper()));
             }
         }
     }
@@ -1137,12 +1137,6 @@ void TaylorConstrainedImageSet::apply_flow_step(VectorTaylorFunction flow, Float
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_function=compose(flow,join(this->_function,ScalarTaylorFunction::constant(this->_function.domain(),time)));
-    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        *iter=embed(*iter,time);
-    }
-    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-        *iter=embed(*iter,time);
-    }
     this->_check();
 }
 
@@ -1383,11 +1377,11 @@ void adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorFun
         ScalarFunction xg=ScalarFunction::constant(m,0);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - (Real(x[j])-x[n+j])*fg[j];
+            xg = xg - Real(x[j]-x[n+j])*fg[j];
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarFunction::coordinate(m,i);
+            xg = xg - Real(x[2*n+i]-x[2*n+m+i])*ScalarFunction::coordinate(m,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = Real(cnst) + xg;

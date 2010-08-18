@@ -438,7 +438,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
     // over part of the parameter domain.
     if(remaining_time_range.upper()<=result.step_size) {
         result.step_kind=FINAL_STEP;
-        result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),final_time);
+        result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),numeric_cast<Interval>(final_time));
         result.evolution_time=result.final_time-initial_set.time_function();
     } else if(remaining_time_range.lower()<=result.step_size) {
         result.step_kind=UNWIND_STEP;
@@ -787,7 +787,7 @@ _upper_evolution_flow(EvolutionData& evolution_data,
     typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
     typedef Set<DiscreteEvent>::const_iterator event_iterator;
 
-    const Float final_time=maximum_hybrid_time.continuous_time();
+    const Real final_time=maximum_hybrid_time.continuous_time();
     const uint maximum_steps=maximum_hybrid_time.discrete_time();
 
     // Routine check for emptiness
@@ -962,8 +962,8 @@ _compute_timing(Set<DiscreteEvent>& active_events,
     // over part of the parameter domain.
     if(remaining_time_range.upper()<=result.step_size) {
         result.step_kind=FINAL_STEP;
-        result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),final_time);
-        result.evolution_time=final_time-initial_set.time_function();
+        result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),numeric_cast<Interval>(final_time));
+        result.evolution_time=numeric_cast<Interval>(final_time)-initial_set.time_function();
     } else if(remaining_time_range.lower()<=result.step_size) {
         result.step_kind=UNWIND_STEP;
         if(remaining_time_range.width()<result.step_size) {
@@ -973,7 +973,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
             // FIXME: The finishing time may need to be adjusted
             result.finishing_time=0.5*(result.step_size+initial_set.time_function());
         }
-        result.evolution_time=final_time-initial_set.time_function();
+        result.evolution_time=numeric_cast<Interval>(final_time)-initial_set.time_function();
     } else if(false) { // Don't handle CREEP_STEP yet
         result.step_kind=CREEP_STEP;
         result.spacial_evolution_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),result.step_size);

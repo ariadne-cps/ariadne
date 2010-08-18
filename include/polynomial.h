@@ -74,15 +74,15 @@ class Polynomial
     //! \name Constructors
 
     //! \brief The zero polynomial in \a as variables.
-    Polynomial(unsigned int as=0u) : _expansion(as) { }
+    explicit Polynomial(unsigned int as=0u) : _expansion(as) { }
     //! \brief Copy/conversion constructor.
     template<class XX> Polynomial(const Polynomial<XX>& p) : _expansion(p._expansion) { }
     //! \brief Copy/conversion constructor.
     template<class XX> explicit Polynomial(const Expansion<XX>& e) : _expansion(e) { }
     //! \brief A dense polynomial with coefficients given by a list of doubles.
-    Polynomial(unsigned int as, unsigned int deg, double c0, ...);
+    explicit Polynomial(unsigned int as, unsigned int deg, double c0, ...);
     //! \brief A sparse polynomial with coefficients given by a list of indices and coefficients.
-    Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
+    explicit Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
     //@}
 
     //! \brief Create a constant polynomial in \a as variables with value \a c.
@@ -95,7 +95,8 @@ class Polynomial
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
     static Vector< Polynomial<X> > variables(unsigned int as) {
         Vector< Polynomial<X> > r(as); for(unsigned int i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
-
+    Polynomial<X>& operator=(const X& x) { this->_expansion.clear(); this->_expansion.insert(MultiIndex(this->argument_size()),x); return *this; }
+    
     //@{
     //! \name Comparisons
 
@@ -365,10 +366,17 @@ template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monom
     if(m.data()==0) { p.clear(); }
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->key()+=m.key(); iter->data()*=m.data(); } return p; }
 
-template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const int& c) {
-    p+=X(c); return p; }
-template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const int& c) {
-    p*=X(c); return p; }
+template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p, double c) { return p+X(c); }
+template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p, double c) { return p-X(c); }
+template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p, double c) { return p*X(c); }
+template<class X> inline Polynomial<X> operator/(const Polynomial<X>& p, double c) { return p/X(c); }
+template<class X> inline Polynomial<X> operator+(double c, const Polynomial<X>& p) { return X(c)+p; }
+template<class X> inline Polynomial<X> operator-(double c, const Polynomial<X>& p) { return X(c)-p; }
+template<class X> inline Polynomial<X> operator*(double c, const Polynomial<X>& p) { return X(c)*p; }
+template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, double c) { return p+=X(c); }
+template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, double c) { return p-=X(c); }
+template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, double c) { return p*=X(c); }
+template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) { return p/=X(c); }
 
 inline Polynomial<Float> midpoint(const Polynomial<Interval>& p) {
     Polynomial<Float> r(p.argument_size());
@@ -583,7 +591,7 @@ template<class X>
 Vector< Polynomial<X> > flow(const Vector< Polynomial<X> >& p, uint order)
 {
     uint n=p.size();
-    Vector< Polynomial<X> > p0(n,n+1);
+    Vector< Polynomial<X> > p0(n,Polynomial<X>(n+1));
     for(uint i=0; i!=n; ++i) { p0[i][MultiIndex::unit(n+1,i)]=1.0; }
 
     Vector< Polynomial<X> > r=p0;
@@ -601,37 +609,12 @@ Vector< Polynomial<X> > flow(const Vector< Polynomial<X> >& p, uint order)
 }
 
 
-template<class X> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, const Vector<Float> e) {
+template<class X, class Y> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, const Vector<Y> e) {
     Vector< Polynomial<X> > r(e.size(),Polynomial<X>(p.argument_size()));
     for(uint i=0; i!=r.size(); ++i) { r[i]=p; r[i]*=X(e[i]); }
     return r;
 }
 
-
-
-inline Polynomial<Interval> operator+(const Polynomial<Interval>& p, const Float& c) {
-    return p+Interval(c); }
-inline Polynomial<Interval> operator-(const Polynomial<Interval>& p, const Float& c) {
-    return p-Interval(c); }
-inline Polynomial<Interval> operator*(const Polynomial<Interval>& p, const Float& c) {
-    return p*Interval(c); }
-inline Polynomial<Interval> operator/(const Polynomial<Interval>& p, const Float& c) {
-    return p/Interval(c); }
-inline Polynomial<Interval> operator+(const Float& c, const Polynomial<Interval>& p) {
-    return Interval(c)+p; }
-inline Polynomial<Interval> operator-(const Float& c, const Polynomial<Interval>& p) {
-    return Interval(c)-p; }
-inline Polynomial<Interval> operator*(const Float& c, const Polynomial<Interval>& p) {
-    return Interval(c)*p; }
-
-inline Polynomial<Interval>& operator+=(Polynomial<Interval>& p, const Float& c) {
-    return p+=Interval(c); }
-inline Polynomial<Interval>& operator-=(Polynomial<Interval>& p, const Float& c) {
-    return p-=Interval(c); }
-inline Polynomial<Interval>& operator*=(Polynomial<Interval>& p, const Float& c) {
-    return p*=Interval(c); }
-inline Polynomial<Interval>& operator/=(Polynomial<Interval>& p, const Float& c) {
-    return p/=Interval(c); }
 
 
 /*

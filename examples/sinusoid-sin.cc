@@ -11,8 +11,8 @@ using namespace Ariadne;
 struct GenSinusoid : VectorFunctionData<2,2,0> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-	      r[0] = 1.0;
-        r[1] = Ariadne::sin(x[0]+pi<Float>()/2);
+	    r[0] = 1.0;
+        r[1] = Ariadne::sin(x[0]+pi<Real>()/2);
     }
 };
 
@@ -32,12 +32,12 @@ int main()
     DiscreteEvent e1(1);
 
     /// Create the resets
-    VectorAffineFunction reset(Matrix<Float>(2,2,0.0,0.0,0.0,1.0),Vector<Float>(2,0.0,0.0));
+    VectorAffineFunction reset(Matrix<Real>(2,2,0.0,0.0,0.0,1.0),Vector<Real>(2,0.0,0.0));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    VectorAffineFunction guard(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1,-2*pi<Float>()));
+    VectorAffineFunction guard(Matrix<Real>(1,2,1.0,0.0),Vector<Real>(1,-2*pi<Real>()));
     cout << "guard=" << guard << endl << endl;
 
     /// Create the dynamics
@@ -83,7 +83,7 @@ int main()
     //std::cout << "Orbit="<<orbit<<std::endl;
 
     Figure g;
-    Box graphic_box(2, -0.01,2*pi<Float>()+0.01, -1.1,1.6);
+    Box graphic_box(2, -0.01,2*3.14159+0.01, -1.1,1.6);
     g.set_bounding_box(graphic_box);
     array<uint> p(2,1,0);
     g.set_projection_map(ProjectionFunction(p,3));

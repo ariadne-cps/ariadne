@@ -95,7 +95,7 @@ void TestContinuousEvolution::simple_test() const
     VectorAffineFunction vector_field(Matrix<Float>(1,1,0.0),Vector<Float>(1,1.0));
     Vector<Interval> initial_box(1,Interval(-0.01,0.01));
     TaylorImageSet initial_set(initial_box);
-    double step_size;
+    Float step_size;
     Box bounding_box(2);
     make_lpair(step_size,bounding_box)=calculus.flow_bounds(vector_field,initial_box,0.5,1.0);
     step_size=0.25;
@@ -104,7 +104,7 @@ void TestContinuousEvolution::simple_test() const
     VectorTaylorFunction vector_field_model=calculus.map_model(vector_field,bounding_box);
     VectorTaylorFunction flow_model=calculus.flow_model(vector_field,initial_box,step_size,bounding_box);
     TaylorImageSet evolve_set=calculus.integration_step(flow_model,initial_set,step_size);
-    TaylorImageSet reach_set=calculus.reachability_step(flow_model,initial_set,0.0,step_size);
+    TaylorImageSet reach_set=calculus.reachability_step(flow_model,initial_set,Float(0.0),step_size);
     std::cout <<"vector_field="<<vector_field<<std::endl;
     std::cout <<"vector_field_expansion="<<vector_field_expansion<<std::endl;
     std::cout <<"step_size="<<step_size<<std::endl;
@@ -126,8 +126,8 @@ void TestContinuousEvolution::test() const
 
     // Set up the evolution parameters and grid
     Float time(5.0);
-    Float step_size(0.125);
-    Float enclosure_radius(0.25);
+    double step_size(0.125);
+    double enclosure_radius(0.25);
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=enclosure_radius;
@@ -198,8 +198,8 @@ void TestContinuousEvolution::failure_test() const
 
     // Set up the evolution parameters and grid
     Float time(0.5);
-    Float step_size(0.01);
-    Float enclosure_radius(0.25);
+    double step_size(0.01);
+    double enclosure_radius(0.25);
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=enclosure_radius;

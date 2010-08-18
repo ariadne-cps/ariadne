@@ -37,7 +37,7 @@
 namespace Ariadne {
 
 
-typedef double Float;
+class Float;
 class ScalarFunction;
 class VectorFunction;
 class Point;

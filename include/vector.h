@@ -70,10 +70,10 @@ class Vector
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     Vector(size_t n, const X& t)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
-        //! \brief Construct a vector of size \a n, with values initialised from the C-style array beginning at \a ptr.
-        template<class XX> Vector(size_t n, const XX* ptr)
+    //! \brief Construct a vector of size \a n, with values initialised from the C-style array beginning at \a ptr.
+    template<class XX> Vector(size_t n, const XX* ptr)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
-    //! \brief Construct a list..
+    //! \brief Construct a list.
     template<class XX> explicit Vector(const std::vector<XX>& lst)
         : ublas::vector<X>(lst.size()) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=lst[i]; } }
     //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .

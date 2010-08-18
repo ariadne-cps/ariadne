@@ -519,7 +519,7 @@ AffineSet::boundary(uint xc, uint yc) const
 
     SimplexSolver<Float> lpsolver;
 
-    static const double EQUATION_WIDENING = 1e-8;
+    static const Float EQUATION_WIDENING = 1e-8;
     List< Affine<Float> > constraints=this->_constraints;
     for(uint i=0; i!=this->_equations.size(); ++i) {
         constraints.append(this->_equations[i]-EQUATION_WIDENING);

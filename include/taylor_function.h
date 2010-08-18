@@ -52,6 +52,7 @@ class VectorTaylorFunction;
 ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
 
 // Set the value of the \a kth variable to c
+ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const Float& c);
 ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const Interval& c);
 // Evaluate a scalar Taylor function on a vector.
 Interval evaluate(const ScalarTaylorFunction& x, const Vector<Interval>& sy);
@@ -156,6 +157,8 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Assignment to constant values. */
+    //! \brief Set equal to a built-in constant, keeping the same number of arguments.
+    ScalarTaylorFunction& operator=(double c) { this->_model=c; return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
     ScalarTaylorFunction& operator=(const Float& c) { this->_model=c; return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
@@ -166,6 +169,8 @@ class ScalarTaylorFunction
     /*! \name Named constructors. */
     //! \brief Construct the quantity \f$x_0\f$ over the one-dimensional domain \a d.
     static ScalarTaylorFunction identity(const Interval& d);
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static ScalarTaylorFunction constant(const DomainType& d, double c);
     //! \brief Construct a constant quantity in \a as independent variables.
     static ScalarTaylorFunction constant(const DomainType& d, const Float& c);
     //! \brief Construct a constant quantity in \a as independent variables.
@@ -331,20 +336,28 @@ class ScalarTaylorFunction
     friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
     //! \brief Inplace addition of a product of two variables.
     friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Product<ScalarTaylorFunction,ScalarTaylorFunction>& y);
+    //! \brief Inplace addition of a builtin floating-point constant.
+    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, double c);
+    //! \brief Inplace subtraction of a builtin floating-point constant.
+    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, double c);
+    //! \brief Inplace multiplication by a builtin scalar.
+    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, double c);
+    //! \brief Inplace division by a builtin scalar.
+    friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, double c);
     //! \brief Inplace addition of an exact floating-point constant.
     friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Float& c);
-    //! \brief Inplace addition of an interval constant.
-    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Interval& c);
     //! \brief Inplace subtraction of an exact floating-point constant.
     friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Float& c);
-    //! \brief Inplace subtraction of an interval constant.
-    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Interval& c);
     //! \brief Inplace multiplication by an exact scalar.
     friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Float& c);
-    //! \brief Inplace multiplication by an approximate scalar.
-    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Interval& c);
     //! \brief Inplace division by an exact scalar.
     friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const Float& c);
+    //! \brief Inplace addition of an interval constant.
+    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Interval& c);
+    //! \brief Inplace subtraction of an interval constant.
+    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Interval& c);
+    //! \brief Inplace multiplication by an approximate scalar.
+    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Interval& c);
     //! \brief Inplace division by an approximate scalar.
     friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const Interval& c);
 
@@ -361,35 +374,51 @@ class ScalarTaylorFunction
     //! \brief Division.
     friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a scalar.
+    friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, double c);
+    //! \brief Subtraction of a scalar.
+    friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, double c);
+    //! \brief Multiplication by a scalar.
+    friend ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, double c);
+    //! \brief Division by a scalar.
+    friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, double c);
+    //! \brief Addition of a scalar.
     friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const Float& c);
-    //! \brief Subtraction of a scakar.
+    //! \brief Subtraction of a scalar.
     friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const Float& c);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const Float& c);
-    //! \brief Division by a scakar.
+    //! \brief Division by a scalar.
     friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const Float& c);
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a scalar.
     friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const Interval& c);
-    //! \brief Subtraction of a scakar.
+    //! \brief Subtraction of a scalar.
     friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const Interval& c);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const Interval& c);
-    //! \brief Division by a scakar.
+    //! \brief Division by a scalar.
     friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const Interval& c);
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a scalar.
+    friend ScalarTaylorFunction operator+(double c, const ScalarTaylorFunction& x);
+    //! \brief Subtraction from a scalar.
+    friend ScalarTaylorFunction operator-(double c, const ScalarTaylorFunction& x);
+    //! \brief Multiplication by a scalar.
+    friend ScalarTaylorFunction operator*(double c, const ScalarTaylorFunction& x);
+    //! \brief Division through a scalar.
+    friend ScalarTaylorFunction operator/(double c, const ScalarTaylorFunction& x);
+    //! \brief Addition of a scalar.
     friend ScalarTaylorFunction operator+(const Float& c, const ScalarTaylorFunction& x);
-    //! \brief Subtraction from a scakar.
+    //! \brief Subtraction from a scalar.
     friend ScalarTaylorFunction operator-(const Float& c, const ScalarTaylorFunction& x);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend ScalarTaylorFunction operator*(const Float& c, const ScalarTaylorFunction& x);
     //! \brief Division through a scalar.
     friend ScalarTaylorFunction operator/(const Float& c, const ScalarTaylorFunction& x);
-    //! \brief Addition of a scakar.
+    //! \brief Addition of a scalar.
     friend ScalarTaylorFunction operator+(const Interval& c, const ScalarTaylorFunction& x);
-    //! \brief Subtraction from a scakar.
+    //! \brief Subtraction from a scalar.
     friend ScalarTaylorFunction operator-(const Interval& c, const ScalarTaylorFunction& x);
-    //! \brief Multiplication by a scakar.
+    //! \brief Multiplication by a scalar.
     friend ScalarTaylorFunction operator*(const Interval& c, const ScalarTaylorFunction& x);
     //! \brief Division through a scalar.
     friend ScalarTaylorFunction operator/(const Interval& c, const ScalarTaylorFunction& x);
@@ -456,6 +485,15 @@ inline tribool operator<(const ScalarTaylorFunction& x, const Float& c) {
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
 
+inline ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, double c) {
+    x._model+=c; return x; }
+inline ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, double c) {
+    x._model-=c; return x; }
+inline ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, double c) {
+    x._model*=c; return x; }
+inline ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, double c) {
+    x._model*=c; return x; }
+
 inline ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Float& c) {
     x._model+=c; return x; }
 inline ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Float& c) {
@@ -480,6 +518,14 @@ inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& x) {
 inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& x) {
     return ScalarTaylorFunction(x._domain,-x._model); }
 
+inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, double c) {
+    return ScalarTaylorFunction(x._domain,x._model+c); }
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, double c) {
+    return ScalarTaylorFunction(x._domain,x._model-c); }
+inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, double c) {
+    return ScalarTaylorFunction(x._domain,x._model*c); }
+inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, double c) {
+    return ScalarTaylorFunction(x._domain,x._model/c); }
 inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const Float& c) {
     return ScalarTaylorFunction(x._domain,x._model+c); }
 inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const Float& c) {
@@ -496,6 +542,14 @@ inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const Inter
     return ScalarTaylorFunction(x._domain,x._model*c); }
 inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const Interval& c) {
     return ScalarTaylorFunction(x._domain,x._model/c); }
+inline ScalarTaylorFunction operator+(double c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c+x._model); }
+inline ScalarTaylorFunction operator-(double c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c-x._model); }
+inline ScalarTaylorFunction operator*(double c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c*x._model); }
+inline ScalarTaylorFunction operator/(double c, const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,c/x._model); }
 inline ScalarTaylorFunction operator+(const Float& c, const ScalarTaylorFunction& x) {
     return ScalarTaylorFunction(x._domain,c+x._model); }
 inline ScalarTaylorFunction operator-(const Float& c, const ScalarTaylorFunction& x) {
@@ -568,6 +622,7 @@ inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTayl
 
 
 Vector<Interval> evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x);
+VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Float& c);
 VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);
 VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Vector<Interval>& d2);
 VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Interval& d2);

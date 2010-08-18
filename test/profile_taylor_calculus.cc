@@ -85,7 +85,7 @@ struct ProfileCrossing {
 
 
 template<class T>
-double error(const T& f) {
+Float error(const T& f) {
     Float max_error=0.0;
     for(uint i=0; i!=f.size(); ++i) {
         max_error=std::max(max_error,f.models()[i].error());
@@ -102,9 +102,9 @@ unsigned int number_of_nonzeros(const T& f) {
     return nnz;
 }
 
-template<> double error(const ScalarTaylorFunction& t) { return t.model().error(); }
+template<> Float error(const ScalarTaylorFunction& t) { return t.model().error(); }
 template<> unsigned int number_of_nonzeros(const ScalarTaylorFunction& t) { return t.model().number_of_nonzeros(); }
-template<> double error(const TaylorModel& t) { return t.error(); }
+template<> Float error(const TaylorModel& t) { return t.error(); }
 template<> unsigned int number_of_nonzeros(const TaylorModel& t) { return t.number_of_nonzeros(); }
 
 template<class Test>
@@ -116,7 +116,7 @@ void profile(const char* name, const Test& test, unsigned int tries)
     typename Test::Result res=test();
     //VectorTaylorFunction res=static_cast<VectorTaylorFunction>(test(calc,args1,args2));
     unsigned int nnz=number_of_nonzeros(res);
-    double err=error(res);
+    Float err=error(res);
 
     tm.restart();
     for(uint i=0; i!=tries; ++i) {
@@ -167,7 +167,7 @@ int main(int argc, const char* argv[]) {
     make_lpair(spiral_step_size,spiral_bounding_box) =
         TaylorCalculus().flow_bounds(spiral_vector_field,spiral_domain,maximum_step_size,maximum_domain_extent);
 
-    Float g=9.8;
+    Real g=9.8;
     VectorFunction c1=y*e0;
     ScalarFunction c2=(g+0.0*x);
     VectorFunction c3=c2*e1;

@@ -92,9 +92,9 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 	// Gets the number of times each variable interval would be divided by 2
         int numDivisions = MAX_GRID_DEPTH / numVariables;
 	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-	double step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+	Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
 	// Initiates the x position to the bounding box left bound
-        double pos_x = bbox[0].lower();
+        Float pos_x = bbox[0].lower();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
 	rect[yaxis] = bbox[1];
         // While between the interval
@@ -106,8 +106,8 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	double step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        double pos_y = bbox[1].lower();
+	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        Float pos_y = bbox[1].lower();
 	rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
         {
@@ -138,7 +138,7 @@ int main()
     double tmax = 64.0;
     int jmax = 1;
 
-    Vector<Interval> system_parameters(3);
+    Vector<Real> system_parameters(3);
     system_parameters[0] = a;
     system_parameters[1] = Interval(bmin,bmax);        // Now parameters can be given as intervals !!
     system_parameters[2] = T;
@@ -173,29 +173,29 @@ int main()
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
     /// Create the resets
-    VectorAffineFunction reset_y_zero(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,0.0,0.0));
+    VectorAffineFunction reset_y_zero(Matrix<Real>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Real>(3, 0.0,0.0,0.0));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    VectorAffineFunction reset_y_one(Matrix<Float>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Float>(3, 0.0,1.0,0.0));
+    VectorAffineFunction reset_y_one(Matrix<Real>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Real>(3, 0.0,1.0,0.0));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    VectorAffineFunction guard12(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,-1.0));
+    VectorAffineFunction guard12(Matrix<Real>(1,3,0.0,1.0,0.0),Vector<Real>(1,-1.0));
     cout << "guard12=" << guard12 << endl << endl;
-    VectorAffineFunction guard23(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax + Delta));
+    VectorAffineFunction guard23(Matrix<Real>(1,3,1.0,0.0,0.0),Vector<Real>(1, - hmax + Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    VectorAffineFunction guard34(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,0.0));
+    VectorAffineFunction guard34(Matrix<Real>(1,3,0.0,-1.0,0.0),Vector<Real>(1,0.0));
     cout << "guard34=" << guard34 << endl << endl;
-    VectorAffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
+    VectorAffineFunction guard41(Matrix<Real>(1,3,-1.0,0.0,0.0),Vector<Real>(1,hmin + Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
     /// forced transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    VectorAffineFunction inv2(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax - Delta));//
+    VectorAffineFunction inv2(Matrix<Real>(1,3,1.0,0.0,0.0),Vector<Real>(1, - hmax - Delta));//
     cout << "inv2=" << inv2 << endl << endl;
-    VectorAffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
+    VectorAffineFunction inv4(Matrix<Real>(1,3,-1.0,0.0,0.0),Vector<Real>(1, hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton

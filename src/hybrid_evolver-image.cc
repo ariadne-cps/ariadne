@@ -232,7 +232,7 @@ _evolution(EnclosureListType& final_sets,
         ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
         SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
+        TimeModelType initial_time_model=this->_toolbox->time_model(Float(0.0),Box(initial_set_model.argument_size()));
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
@@ -496,12 +496,12 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(2,"flow_range = "<<flow_set_model.range()<<"\n");
     ARIADNE_LOG(2,"starting_set_range = "<<set_model.range()<<"\n");
     // Partial evaluation on flow set model to obtain final set must take scaled time equal to 1.0
-    SetModelType finishing_set=partial_evaluate(flow_set_model.models(),set_model.argument_size(),1.0);
+    SetModelType finishing_set=partial_evaluate(flow_set_model.models(),set_model.argument_size(),Float(1.0));
     ARIADNE_LOG(2,"finishing_set_range = "<<finishing_set.range()<<"\n")
 
     // Set special events and times; note that the time step is scaled to [0,1]
-    TimeModelType zero_time_model = this->_toolbox->time_model(0.0,Box(time_model.argument_size()));
-    TimeModelType time_step_model = this->_toolbox->time_model(1.0,Box(time_model.argument_size()));
+    TimeModelType zero_time_model = this->_toolbox->time_model(Float(0.0),Box(time_model.argument_size()));
+    TimeModelType time_step_model = this->_toolbox->time_model(Float(1.0),Box(time_model.argument_size()));
     TimeModelType remaining_time_model = (maximum_hybrid_time.continuous_time()-time_model)/time_step;
     ARIADNE_LOG(2,"remaining_time = "<<remaining_time_model.range()<<"\n\n")
 
@@ -746,7 +746,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
                 // Use 1.0 as upper bound above since flow set model has time interval normalised to [-1,+1]
                 ARIADNE_LOG(3,"touching_time_interval="<<touching_time_interval<<"\n");
                 if(touching_time_interval.upper()>=0.0 && touching_time_interval.lower()<=1.0) {
-                    SetModelType finishing_set_model=partial_evaluate(flow_set_model.models(),dimension,1.0);
+                    SetModelType finishing_set_model=partial_evaluate(flow_set_model.models(),dimension,Float(1.0));
                     tribool finishing_set_active=this->_toolbox->active(guard,finishing_set_model);
                     if(definitely(finishing_set_active)) {
                         ARIADNE_LOG(3,"Event is definitely finally active, inserting it into blocking times.\n");
@@ -826,8 +826,8 @@ void ImageSetHybridEvolver::
 compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >& activation_events,
                           const std::map<DiscreteEvent,ScalarFunction>& activations, const FlowSetModelType& flow_set_model) const
 {
-    SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,0.0);
-    SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
+    SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,Float(0.0));
+    SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,Float(1.0));
     for(std::map<DiscreteEvent,ScalarFunction>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
         DiscreteEvent event=iter->first;
         ScalarFunction activation=iter->second;
@@ -850,8 +850,8 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
                          const TimeModelType& blocking_time_model,
                          const Semantics semantics) const
 {
-    SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,0.0);
-    SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
+    SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,Float(0.0));
+    SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,Float(1.0));
     TimeModelType zero_time_model=blocking_time_model*0.0;
 
     for(std::map<DiscreteEvent,ScalarFunction>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {

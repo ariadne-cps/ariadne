@@ -121,14 +121,6 @@ inline bool operator> (const Integer& z1, const Integer& z2) {
 
 #endif // HAVE_GMPXX_H
 
-
-typedef double Float;
-
-
-using std::min;
-using std::max;
-using std::abs;
-
 uint32_t fac(uint8_t n);
 uint16_t fac(uint16_t n);
 uint32_t fac(uint32_t n);
@@ -138,6 +130,163 @@ uint16_t bin(uint16_t n, uint16_t k);
 uint32_t bin(uint32_t n, uint32_t k);
 uint64_t bin(uint64_t n, uint64_t k);
 
+using std::min;
+using std::max;
+
+class Real;
+
+class Float {
+  public:
+    double v;
+  public:
+    typedef Float ScalarType;
+  public:
+    Float() : v() { }
+    Float(unsigned int m) : v(m) { }
+    Float(int n) : v(n) { }
+    Float(double x) : v(x) { }
+    Float(const Float& x) : v(x.v) { }
+    Float(Float& x) : v(x.v) { }
+    Float(volatile Float& x) : v(x.v) { }
+    Float(const Real& x);
+    Float& operator=(double x) { v=x; return *this; }
+    //volatile Float& operator=(double x) volatile { v=x; return *this; }
+    Float& operator=(const Float& x) { v=x.v; return *this; }
+    volatile Float& operator=(const Float& x) volatile { v=x.v; return *this; }
+    Float& operator=(const Real& x);
+    double get_d() const { return this->v; }
+};
+
+template<class R, class A> inline R internal_cast(const A& a) { return static_cast<R>(a); }
+template<> inline const double& internal_cast(const Float& x) { return const_cast<const double&>(x.v); }
+template<> inline double& internal_cast(const Float& x) { return const_cast<double&>(x.v); }
+template<> inline volatile double& internal_cast(const Float& x) { return const_cast<volatile double&>(x.v); }
+template<class R, class A> inline R internal_cast(A& a) { return static_cast<R>(a); }
+template<> inline const double& internal_cast(Float& x) { return const_cast<const double&>(x.v); }
+template<> inline double& internal_cast(Float& x) { return const_cast<double&>(x.v); }
+template<> inline volatile double& internal_cast(Float& x) { return const_cast<volatile double&>(x.v); }
+
+template<class R, class A> inline R integer_cast(const A& a);
+template<> inline int integer_cast(const Float& a) { return static_cast<int>(a.v); }
+template<> inline uint integer_cast(const Float& a) { return static_cast<uint>(a.v); }
+
+template<class R, class A> inline R approx_cast(const A& a);
+template<> inline double approx_cast(const Float& a) { return a.v; }
+
+
+inline std::ostream& operator<<(std::ostream& os, const Float& x) { return os << x.v; }
+inline std::istream& operator>>(std::istream& is, Float& x) { return is >> x.v; }
+
+inline bool operator==(const Float& x1, const Float& x2) { return x1.v==x2.v; }
+inline bool operator!=(const Float& x1, const Float& x2) { return x1.v!=x2.v; }
+inline bool operator<=(const Float& x1, const Float& x2) { return x1.v<=x2.v; }
+inline bool operator>=(const Float& x1, const Float& x2) { return x1.v>=x2.v; }
+inline bool operator< (const Float& x1, const Float& x2) { return x1.v< x2.v; }
+inline bool operator> (const Float& x1, const Float& x2) { return x1.v> x2.v; }
+
+inline Float pos(const Float& x) { return +x.v; }
+inline Float neg(const Float& x) { return -x.v; }
+inline Float add(const Float& x1, const Float& x2) { return x1.v+x2.v; }
+inline Float sub(const Float& x1, const Float& x2) { return x1.v-x2.v; }
+inline Float mul(const Float& x1, const Float& x2) { return x1.v*x2.v; }
+inline Float div(const Float& x1, const Float& x2) { return x1.v/x2.v; }
+
+/* // Code below is seems slower than C style casting 
+inline Float neg_rnd(Float x) { return -internal_cast<volatile double&>(x); }
+inline Float rec_rnd(Float x) { return 1.0/internal_cast<volatile double&>(x); }
+inline Float add_rnd(Float x, Float y) { return internal_cast<volatile double&>(x)+internal_cast<volatile double&>(y); }
+inline Float sub_rnd(Float x, Float y) { return (volatile double&)x.v-(volatile double&)y.v; }
+inline Float mul_rnd(Float x, Float y) { return (volatile double&)x.v*(volatile double&)y.v; }
+inline Float div_rnd(Float x, Float y) { return (volatile double&)x.v/(volatile double&)y.v; }
+*/
+
+inline Float neg_rnd(const Float& x) { return -(volatile double&)x.v; }
+inline Float rec_rnd(const Float& x) { return 1.0/(volatile double&)x.v; }
+inline Float add_rnd(const Float& x, const Float& y) { return (volatile double&)x.v+(volatile double&)y.v; }
+inline Float sub_rnd(const Float& x, const Float& y) { return (volatile double&)x.v-(volatile double&)y.v; }
+inline Float mul_rnd(const Float& x, const Float& y) { return (volatile double&)x.v*(volatile double&)y.v; }
+inline Float div_rnd(const Float& x, const Float& y) { return (volatile double&)x.v/(volatile double&)y.v; }
+
+inline Float add_rnd(Float& x, const Float& y) { return (volatile double&)x.v+(volatile double&)y.v; }
+inline Float add_rnd(volatile Float& x, const Float& y) { return (volatile double&)x.v+(volatile double&)y.v; }
+inline Float add_rnd(volatile Float& x, volatile Float& y) { return (volatile double&)x.v+(volatile double&)y.v; }
+
+/*
+inline Float neg_rnd(const Float& x) { return -internal_cast<volatile double&>(x); }
+inline Float rec_rnd(const Float& x) { return 1.0/internal_cast<volatile double&>(x); }
+inline Float add_rnd(const Float& x, const Float& y) { return internal_cast<volatile double&>(x)+internal_cast<volatile double&>(y); }
+inline Float sub_rnd(const Float& x, const Float& y) { return internal_cast<volatile double&>(x)-internal_cast<volatile double&>(y); }
+inline Float mul_rnd(const Float& x, const Float& y) { return internal_cast<volatile double&>(x)*internal_cast<volatile double&>(y); }
+inline Float div_rnd(const Float& x, const Float& y) { return internal_cast<volatile double&>(x)/internal_cast<volatile double&>(y); }
+*/
+
+inline Float add_opp(Float x, Float y) { volatile double t=(-x.v)-y.v; return -t; }
+inline Float sub_opp(Float x, Float y) { volatile double t=(-x.v)+y.v; return -t; }
+inline Float mul_opp(Float x, Float y) { volatile double t=(-x.v)*y.v; return -t; }
+inline Float div_opp(Float x, Float y) { volatile double t=(-x.v)/y.v; return -t; }
+
+Float pow(Float x, int n);
+Float pow_rnd(Float x, int n);
+Float pow_opp(Float x, int n);
+
+inline Float operator+(const Float& x) { return pos(x); }
+inline Float operator-(const Float& x) { return neg(x); }
+inline Float operator+(const Float& x1, const Float& x2) { return add_rnd(x1,x2); }
+inline Float operator-(const Float& x1, const Float& x2) { return sub_rnd(x1,x2); }
+inline Float operator*(const Float& x1, const Float& x2) { return mul_rnd(x1,x2); }
+inline Float operator/(const Float& x1, const Float& x2) { return div_rnd(x1,x2); }
+
+//inline Float operator*(const Float& x1, Float& x2) { return x1.v*x2.v; }
+//inline Float operator*(const Float& x1, volatile Float& x2) { return x1.v*x2.v; }
+
+inline Float& operator+=(Float& x, const Float& y) { x.v+=y.v; return x; }
+inline Float& operator-=(Float& x, const Float& y) { x.v-=y.v; return x; }
+inline Float& operator*=(Float& x, const Float& y) { x.v*=y.v; return x; }
+inline Float& operator/=(Float& x, const Float& y) { x.v/=y.v; return x; }
+
+inline Float operator+(Float x1, double x2) { return x1.v+x2; }
+inline Float operator+(double x1, Float x2) { return x1+x2.v; }
+inline Float operator-(Float x1, double x2) { return x1.v-x2; }
+inline Float operator-(double x1, Float x2) { return x1-x2.v; }
+inline Float operator*(Float x1, double x2) { return x1.v*x2; }
+inline Float operator*(double x1, Float x2) { return x1*x2.v; }
+inline Float operator/(Float x1, double x2) { return x1.v/x2; }
+inline Float operator/(double x1, Float x2) { return x1/x2.v; }
+
+inline Float& operator+=(Float& x1, double x2) { x1.v+=x2; return x1; }
+inline Float& operator-=(Float& x1, double x2) { x1.v-=x2; return x1; }
+inline Float& operator*=(Float& x1, double x2) { x1.v*=x2; return x1; }
+inline Float& operator/=(Float& x1, double x2) { x1.v/=x2; return x1; }
+
+inline bool operator==(const Float& x1, double x2) { return x1.v==x2; }
+inline bool operator!=(const Float& x1, double x2) { return x1.v!=x2; }
+inline bool operator<=(const Float& x1, double x2) { return x1.v<=x2; }
+inline bool operator>=(const Float& x1, double x2) { return x1.v>=x2; }
+inline bool operator< (const Float& x1, double x2) { return x1.v< x2; }
+inline bool operator> (const Float& x1, double x2) { return x1.v> x2; }
+
+inline bool operator==(double x1, const Float& x2) { return x1==x2.v; }
+inline bool operator!=(double x1, const Float& x2) { return x1!=x2.v; }
+inline bool operator<=(double x1, const Float& x2) { return x1<=x2.v; }
+inline bool operator>=(double x1, const Float& x2) { return x1>=x2.v; }
+inline bool operator< (double x1, const Float& x2) { return x1< x2.v; }
+inline bool operator> (double x1, const Float& x2) { return x1> x2.v; }
+
+#ifdef HAVE_GMPXX_H
+inline bool operator==(const Float& x, const Rational& q) { return x.v==q; }
+inline bool operator!=(const Float& x, const Rational& q) { return x.v!=q; }
+inline bool operator<=(const Float& x, const Rational& q) { return x.v<=q; }
+inline bool operator>=(const Float& x, const Rational& q) { return x.v>=q; }
+inline bool operator< (const Float& x, const Rational& q) { return x.v< q; }
+inline bool operator> (const Float& x, const Rational& q) { return x.v> q; }
+
+inline bool operator==(const Rational& q, const Float& x) { return q==x.v; }
+inline bool operator!=(const Rational& q, const Float& x) { return q!=x.v; }
+inline bool operator<=(const Rational& q, const Float& x) { return q<=x.v; }
+inline bool operator>=(const Rational& q, const Float& x) { return q>=x.v; }
+inline bool operator< (const Rational& q, const Float& x) { return q< x.v; }
+inline bool operator> (const Rational& q, const Float& x) { return q> x.v; }
+#endif
 
 template<class X> X pi();
 template<class X> inline X inf();
@@ -156,44 +305,31 @@ inline Float up(Float x) { return x>0 ? x*(1+2e-16) : x*(1-2e-16); }
 
 // The magnitude of a quantity is the funciton norm; always a real
 //   Provided for consistency with other types for which mag and abs are different
-inline Float mag(Float x) { return abs(x); }
+inline Float mag(Float x) { return std::abs(x.v); }
+inline Float abs(Float x) { return std::abs(x.v); }
+inline Float max(Float x, Float y) { return std::max(x.v,y.v); }
+inline Float min(Float x, Float y) { return std::min(x.v,y.v); }
 
-inline Float neg(Float x) { return -x; }
+inline Float floor(Float x) { return std::floor(x.v); }
+inline Float ceil(Float x) { return std::ceil(x.v); }
+
 inline Float rec(Float x) { return 1.0/x; }
 
-inline Float add(Float x, Float y) { return x+y; }
-inline Float sub(Float x, Float y) { return x-y; }
-inline Float mul(Float x, Float y) { return x*y; }
-inline Float div(Float x, Float y) { return x/y; }
-
 inline Float sqr(Float x) { return x*x; }
-inline Float pow(Float x, int n) { return std::pow(x,Float(n)); }
-inline Float pow(Float x, uint n) { return std::pow(x,Float(n)); }
+inline Float pow(Float x, int n) { return std::pow(x.v,double(n)); }
+inline Float pow(Float x, uint n) { return std::pow(x.v,double(n)); }
 
-inline Float sqrt(Float x) { return std::sqrt(x); }
-inline Float exp(Float x) { return std::exp(x); }
-inline Float log(Float x) { return std::log(x); }
+inline Float sqrt(Float x) { return std::sqrt(x.v); }
+inline Float exp(Float x) { return std::exp(x.v); }
+inline Float log(Float x) { return std::log(x.v); }
 
 template<> inline Float pi<Float>() { return 3.1415926535897931; }
-inline Float sin(Float x) { return std::sin(x); }
-inline Float cos(Float x) { return std::cos(x); }
-inline Float tan(Float x) { return std::tan(x); }
-inline Float asin(Float x) { return std::asin(x); }
-inline Float acos(Float x) { return std::acos(x); }
-inline Float atan(Float x) { return std::atan(x); }
-
-inline Float add_rnd(Float x, Float y) { return (volatile double&)x+(volatile double&)y; }
-inline Float sub_rnd(Float x, Float y) { return (volatile double&)x-(volatile double&)y; }
-inline Float mul_rnd(Float x, Float y) { return (volatile double&)x*(volatile double&)y; }
-inline Float div_rnd(Float x, Float y) { return (volatile double&)x/(volatile double&)y; }
-
-inline Float add_opp(Float x, Float y) { volatile double t=(-x)-y; return -t; }
-inline Float sub_opp(Float x, Float y) { volatile double t=(-x)+y; return -t; }
-inline Float mul_opp(Float x, Float y) { volatile double t=(-x)*y; return -t; }
-inline Float div_opp(Float x, Float y) { volatile double t=(-x)/y; return -t; }
-
-Float pow_rnd(Float x, int n);
-Float pow_opp(Float x, int n);
+inline Float sin(Float x) { return std::sin(x.v); }
+inline Float cos(Float x) { return std::cos(x.v); }
+inline Float tan(Float x) { return std::tan(x.v); }
+inline Float asin(Float x) { return std::asin(x.v); }
+inline Float acos(Float x) { return std::acos(x.v); }
+inline Float atan(Float x) { return std::atan(x.v); }
 
 Float sqrt_rnd(Float x);
 Float exp_rnd(Float x);
@@ -204,58 +340,59 @@ Float tan_rnd(Float x);
 
 inline Float add_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+//    volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float sub_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float mul_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float div_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float pow_approx(Float x, int n) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+    Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
 inline Float add_up(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float sub_up(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float mul_up(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float div_up(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float pow_up(Float x, int n) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+    Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
 inline Float add_down(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float sub_down(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float mul_down(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float div_down(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
 inline Float pow_down(Float x, int n) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+    Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
 inline Float med_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    volatile Float r=(x+y)/2; set_rounding_mode(rounding_mode); return r; }
+    Float r=add_rnd(x,y)/2; set_rounding_mode(rounding_mode); return r; }
 inline Float rad_up(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    volatile Float r=(y-x)/2; set_rounding_mode(rounding_mode); return r; }
+    Float r=sub_rnd(y,x)/2; set_rounding_mode(rounding_mode); return r; }
 
 
 
@@ -291,12 +428,17 @@ inline Float rad_up(Float x, Float y) {
 //! \endcode
 class Interval {
   public:
+    typedef Interval ScalarType;
+  public:
     Interval() : l(0.0), u(0.0) { }
     Interval(uint m) : l(m), u(m) { }
     Interval(int n) : l(n), u(n) { }
-    Interval(Float x) : l(x), u(x) { }
+    Interval(double x) : l(x), u(x) { }
+    explicit Interval(const Float& x) : l(x), u(x) { }
     Interval(const Interval& i) : l(i.l), u(i.u) { }
+    Interval(const Real& x);
 
+    Interval(double lower, double upper) : l(lower), u(upper) { }
     Interval(Float lower, Float upper) : l(lower), u(upper) { }
         // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
 #ifdef HAVE_GMPXX_H
@@ -304,6 +446,10 @@ class Interval {
     Interval(Rational lower, Rational upper);
 #endif // HAVE_GMPXX_H
 
+    Interval& operator=(int n) { l=n; u=n; return *this; }
+    Interval& operator=(const Float& x) { l=x; u=x; return *this; }
+    Interval& operator=(const Real& x);
+   
     const Float& lower() const { return l; }
     const Float& upper() const { return u; }
     const Float midpoint() const { return add_approx(l,u)/2; }
@@ -321,8 +467,9 @@ class Interval {
     void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
         // ARIADNE_ASSERT(lower<=upper);
   public:
+    double get_d() const { return (this->l.get_d()+this->u.get_d())/2; }
   private:
-    double l, u;
+    Float l, u;
 };
 
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
@@ -361,6 +508,10 @@ inline Interval hull(Interval i1, Interval i2) {
     return Interval(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
 }
 
+inline Interval hull(Interval i1, Float x2) {
+    return Interval(min(i1.lower(),x2),max(i1.upper(),x2));
+}
+
 // An interval one ulp wider
 Interval widen(Interval);
 
@@ -378,6 +529,7 @@ inline Interval abs(Interval);
 inline Interval neg(Interval);
 inline Interval add(Interval, Interval);
 inline Interval add(Interval, Float);
+inline Interval add(Float, Interval);
 inline Interval sub(Interval, Interval);
 inline Interval sub(Interval, Float);
 inline Interval sub(Float, Interval);
@@ -386,9 +538,12 @@ Interval rec(Interval);
 Interval mul(Interval, Interval);
 Interval div(Interval, Interval);
 Interval mul(Interval, Float);
+Interval mul(Float,Interval);
 Interval div(Interval, Float);
 Interval div(Float, Interval);
 
+inline Interval neg_ivl(Float);
+inline Interval rec_ivl(Float);
 inline Interval add_ivl(Float, Float);
 inline Interval sub_ivl(Float, Float);
 inline Interval mul_ivl(Float, Float);
@@ -441,7 +596,7 @@ inline Interval abs(Interval i)
     } else if(i.upper()<=0) {
         return Interval(-i.upper(),-i.lower());
     } else {
-        return Interval(0.0,max(-i.lower(),i.upper()));
+        return Interval(static_cast<Float>(0.0),max(-i.lower(),i.upper()));
     }
 }
 
@@ -450,13 +605,32 @@ inline Interval neg(Interval i)
     return Interval(-i.upper(),-i.lower());
 }
 
+inline Interval neg_ivl(Float x)
+{
+    return Interval(-x,-x);
+}
+
+inline Interval rec_ivl(Float x)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double& xv=internal_cast<volatile double&>(x);
+    set_rounding_mode(downward);
+    volatile double rl=1.0/xv;
+    set_rounding_mode(upward);
+    volatile double ru=1.0/xv;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+
+
 inline Interval add(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
-    volatile double& i2l=const_cast<volatile double&>(i2.lower());
-    volatile double& i2u=const_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     set_rounding_mode(downward);
     volatile double rl=i1l+i2l;
     set_rounding_mode(upward);
@@ -468,9 +642,9 @@ inline Interval add(Interval i1, Interval i2)
 inline Interval add(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
-    volatile double& x2v=x2;
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=i1l+x2v;
     set_rounding_mode(upward);
@@ -479,11 +653,16 @@ inline Interval add(Interval i1, Float x2)
     return Interval(rl,ru);
 }
 
+inline Interval add(Float x1, Interval i2)
+{
+    return add(i2,x1); 
+}
+
 inline Interval add_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& x1v=x1;
-    volatile double& x2v=x2;
+    volatile double& x1v=internal_cast<volatile double&>(x1);
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=x1v+x2v;
     set_rounding_mode(upward);
@@ -495,10 +674,10 @@ inline Interval add_ivl(Float x1, Float x2)
 inline Interval sub(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
-    volatile double& i2l=const_cast<volatile double&>(i2.lower());
-    volatile double& i2u=const_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     set_rounding_mode(downward);
     volatile double rl=i1l-i2u;
     set_rounding_mode(upward);
@@ -510,9 +689,9 @@ inline Interval sub(Interval i1, Interval i2)
 inline Interval sub(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
-    volatile double& x2v=x2;
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=i1l-x2v;
     set_rounding_mode(upward);
@@ -524,9 +703,9 @@ inline Interval sub(Interval i1, Float x2)
 inline Interval sub(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& x1v=x1;
-    volatile double& i2l=const_cast<volatile double&>(i2.lower());
-    volatile double& i2u=const_cast<volatile double&>(i2.upper());
+    volatile double& x1v=internal_cast<volatile double&>(x1);
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     set_rounding_mode(downward);
     volatile double rl=x1v-i2u;
     set_rounding_mode(upward);
@@ -538,8 +717,8 @@ inline Interval sub(Float x1, Interval i2)
 inline Interval sub_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& x1v=x1;
-    volatile double& x2v=x2;
+    volatile double& x1v=internal_cast<volatile double&>(x1);
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=x1v-x2v;
     set_rounding_mode(upward);
@@ -551,8 +730,8 @@ inline Interval sub_ivl(Float x1, Float x2)
 inline Interval mul_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& x1v=x1;
-    volatile double& x2v=x2;
+    volatile double& x1v=internal_cast<volatile double&>(x1);
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=x1v*x2v;
     set_rounding_mode(upward);
@@ -564,8 +743,8 @@ inline Interval mul_ivl(Float x1, Float x2)
 inline Interval div_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& x1v=x1;
-    volatile double& x2v=x2;
+    volatile double& x1v=internal_cast<volatile double&>(x1);
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=x1v/x2v;
     set_rounding_mode(upward);
@@ -628,6 +807,23 @@ inline Interval& operator-=(Interval& i1, Float x2) { i1=sub(i1,x2); return i1; 
 inline Interval& operator*=(Interval& i1, Float x2) { i1=mul(i1,x2); return i1; }
 inline Interval& operator/=(Interval& i1, Float x2) { i1=div(i1,x2); return i1; }
 
+inline Interval operator+(Interval i1, double x2) { return add(i1,static_cast<Float>(x2)); }
+inline Interval operator+(double x1, Interval i2) { return add(i2,static_cast<Float>(x1)); }
+inline Interval operator-(Interval i1, double x2) { return sub(i1,static_cast<Float>(x2)); }
+inline Interval operator-(double x1, Interval i2) { return sub(static_cast<Float>(x1),i2); }
+inline Interval operator*(Interval i1, double x2) { return mul(i1,static_cast<Float>(x2)); }
+inline Interval operator*(double x1, Interval i2) { return mul(i2,static_cast<Float>(x1)); }
+inline Interval operator/(Interval i1, double x2) { return div(i1,static_cast<Float>(x2)); }
+inline Interval operator/(double x1, Interval i2) { return div(static_cast<Float>(x1),i2); }
+
+inline Interval& operator+=(Interval& i1, double x2) { i1=add(i1,static_cast<Float>(x2)); return i1; }
+inline Interval& operator-=(Interval& i1, double x2) { i1=sub(i1,static_cast<Float>(x2)); return i1; }
+inline Interval& operator*=(Interval& i1, double x2) { i1=mul(i1,static_cast<Float>(x2)); return i1; }
+inline Interval& operator/=(Interval& i1, double x2) { i1=div(i1,static_cast<Float>(x2)); return i1; }
+
+//inline Interval operator/(Interval i1, int n2) { return div(i1,Float(n2)); }
+//inline Interval operator/(Interval i1, double x2) { return div(i1,Float(x2)); }
+
 inline tribool operator==(Interval i1, Float x2) {
     if(i1.upper()<x2 || i1.lower()>x2) { return false; }
     else if(i1.lower()==x2 && i1.upper()==x2) { return true; }
@@ -664,6 +860,13 @@ inline tribool operator<=(Interval i1, Float x2) {
     else { return indeterminate; }
 }
 
+inline tribool operator==(Interval i1, double x2) { return i1==static_cast<Float>(x2); }
+inline tribool operator!=(Interval i1, double x2) { return i1!=static_cast<Float>(x2); }
+inline tribool operator<=(Interval i1, double x2) { return i1<=static_cast<Float>(x2); }
+inline tribool operator>=(Interval i1, double x2) { return i1>=static_cast<Float>(x2); }
+inline tribool operator< (Interval i1, double x2) { return i1< static_cast<Float>(x2); }
+inline tribool operator> (Interval i1, double x2) { return i1> static_cast<Float>(x2); }
+
 
 
 inline tribool operator> (Interval i1, Interval i2) {
@@ -695,6 +898,15 @@ template<class A> void serialize(A& a, Interval& ivl, const uint version) {
 
 std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);
+
+//! \brief Cast one Ariadne numerical type or builtin numerical type to another.
+template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
+template<> inline int numeric_cast(const Float& a) { return int(a.get_d()); }
+template<> inline double numeric_cast(const Float& a) { return a.get_d(); }
+template<> inline double numeric_cast(const Interval& a) { return a.get_d(); }
+template<> inline Float numeric_cast(const Interval& a) { return a.midpoint(); }
+template<> inline Interval numeric_cast(const Float& a) { return Interval(a); }
+ 
 
 } // namespace Ariadne
 

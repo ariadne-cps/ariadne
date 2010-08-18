@@ -432,7 +432,7 @@ struct VectorConstantFunctionBody
 
     SizeType result_size() const { return _c.size(); }
     SizeType argument_size() const { return _as; }
-    ScalarFunction operator[](uint i) const { return ScalarFunction(this->_c[i]); }
+    ScalarFunction operator[](uint i) const { return ScalarFunction::constant(this->_as,this->_c[i]); }
     std::ostream& write(std::ostream& os) const {
         return os << "VectorConstantFunctionBody( argument_size=" << this->argument_size()
                   << ", c=" << this->c() << " )"; }
@@ -727,7 +727,7 @@ ScalarFunction ScalarFunction::constant(Nat n, Real c)
     return ScalarFunction(new ScalarConstantFunctionBody(n,c));
 
     Polynomial<Interval> p(n);
-    p[MultiIndex::zero(n)]=c;
+    p[MultiIndex::zero(n)]=Interval(c);
     return ScalarFunction(p);
 }
 

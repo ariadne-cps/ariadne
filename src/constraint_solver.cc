@@ -145,11 +145,11 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
         ScalarFunction xg=ScalarFunction::constant(m,0);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - (Real(x[j])-x[n+j])*fn[j];
+            xg = xg - Real(x[j]-x[n+j])*fn[j];
             cnst += (c[j].upper()*x[j]-c[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarFunction::coordinate(m,i);
+            xg = xg - Real(x[2*n+i]-x[2*n+m+i])*ScalarFunction::coordinate(m,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = Real(cnst) + xg;

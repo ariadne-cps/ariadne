@@ -73,8 +73,8 @@ class ConstantExpression<Real>
 {
   public:
     ConstantExpression(const std::string& nm, const Real& c) : _name(nm), _c(c) { }
-    ConstantExpression(const Float& c) : _name(to_string(c)), _c(c) { }
-    ConstantExpression(const Interval& c) :  _name(to_string(c)), _c(c) { }
+    ConstantExpression(double c) : _name(to_string(c)), _c(c) { }
+    ConstantExpression(const Real& c) : _name(to_string(c)), _c(c) { }
     operator Real() const { return _c; }
     Real value() const { return _c; }
     virtual String name() const { return this->_name; }
@@ -301,7 +301,6 @@ template<class R> Expression<R>::Expression(const Variable<R>& v)
 }
 
 Expression<Real>::Expression(const double& c) : _ptr(new ConstantExpression<Real>(c)) { }
-Expression<Real>::Expression(const Interval& c) : _ptr(new ConstantExpression<Real>(c)) { }
 Expression<Real>::Expression(const Real& c) : _ptr(new ConstantExpression<Real>(c)) { }
 Expression<Real>::Expression(const Constant<Real>& c) : _ptr(new ConstantExpression<Real>(c.name(),c.value())) { }
 Expression<Real>::Expression(const Variable<Real>& v) : _ptr(new VariableExpression<Real>(v)) { }
@@ -934,7 +933,7 @@ Polynomial<X> polynomial(const Expression<Real>& e, const Space<Real>& s)
             bptr=static_cast<const BinaryExpression<Real>*>(eptr);
             cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2._raw_pointer());
             ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<e<<" to polynomial form.");
-            return polynomial<X>(bptr->_arg1,s)/cptr->value(); break;
+            return polynomial<X>(bptr->_arg1,s)/static_cast<X>(cptr->value()); break;
         default:
             ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to polynomial form.");
     }

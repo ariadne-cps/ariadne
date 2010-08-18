@@ -58,7 +58,7 @@ make_differential_variables(const uint& d, const Vector<Interval>& x)
 {
     boost::python::list result;
     for(uint i=0; i!=x.size(); ++i) {
-        result.append(DIFF::variable(x.size(),d,midpoint(x[i]),i));
+        result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::scalar_type>(x[i]),i));
     }
     return result;
 }
@@ -188,30 +188,20 @@ export_differential_vector(const char* name)
 
 template void export_differential< Differential<Float> >(const char*);
 template void export_differential< Differential<Interval> >(const char*);
-template void export_differential< Differential<TaylorModel> >(const char*);
+//template void export_differential< Differential<TaylorModel> >(const char*);
 
 template void export_differential_vector< Differential<Float> >(const char*);
 template void export_differential_vector< Differential<Interval> >(const char*);
-template void export_differential_vector< Differential<TaylorModel> >(const char*);
+//template void export_differential_vector< Differential<TaylorModel> >(const char*);
 
 void differentiation_submodule() 
 {
-    //export_differential< DenseDifferential<Float> >("DenseDifferential");
-    //export_differential< DenseDifferential<Interval> >("IDenseDifferential");
-    //export_differential< SparseDifferential<Float> >("SparseDifferential");
-    //export_differential< SparseDifferential<Interval> >("ISparseDifferential");
-
-    //export_differential_vector< DenseDifferential<Float> >("DenseDifferentialVector");
-    //export_differential_vector< DenseDifferential<Interval> >("IDenseDifferentialVector");
-    //export_differential_vector< SparseDifferential<Float> >("SparseDifferentialVector");
-    //export_differential_vector< SparseDifferential<Interval> >("ISpareDifferentialVector");
-
     export_differential< Differential<Float> >("Differential");
     export_differential< Differential<Interval> >("IntervalDifferential");
-    export_differential< Differential<TaylorModel> >("TaylorModelDifferential");
+    //export_differential< Differential<TaylorModel> >("TaylorModelDifferential");
 
     export_differential_vector< Differential<Float> >("DifferentialVector");
     export_differential_vector< Differential<Interval> >("IntervalDifferentialVector");
-    export_differential_vector< Differential<TaylorModel> >("TaylorModelDifferentialVector");
+    //export_differential_vector< Differential<TaylorModel> >("TaylorModelDifferentialVector");
 }
 

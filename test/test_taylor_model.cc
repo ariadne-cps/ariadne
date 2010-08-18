@@ -333,7 +333,7 @@ void TestTaylorModel::test_implicit()
     ARIADNE_TEST_BINARY_PREDICATE(refines,hh,h);
     ARIADNE_TEST_BINARY_PREDICATE(refines,z,c);
     ARIADNE_TEST_BINARY_PREDICATE(refines,s,h);
-    double he=h.error(); h.set_error(0);
+    Float he=h.error(); h.set_error(0);
     std::cerr<<"\n\n";
     std::cerr<<"hh="<<hh<<"\nh="<<h<<"\n";
     TaylorModel d=h-hh;

@@ -287,12 +287,14 @@ class Expansion
     typedef ExpansionIterator<X,ExpansionValue<X>&, ExpansionValue<X>* > iterator;
     typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > const_iterator;
   public:
-    Expansion() : _argument_size() { }
-    Expansion(unsigned int as) : _argument_size(as) { }
-    Expansion(unsigned int as, unsigned int deg, double c0, ...);
-    Expansion(unsigned int as, unsigned int nnz, int a00, ...);
+    explicit Expansion() : _argument_size() { }
+    explicit Expansion(unsigned int as) : _argument_size(as) { }
+    explicit Expansion(unsigned int as, unsigned int deg, double c0, ...);
+    explicit Expansion(unsigned int as, unsigned int nnz, int a00, ...);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
     template<class XX> Expansion(const Expansion<XX>& p);
+
+    Expansion<X>& operator=(const X& x);
 
     static Expansion<X> variable(unsigned int as, unsigned int i);
 
@@ -491,6 +493,12 @@ Expansion<X>::Expansion(const Expansion<XX>& p)
 }
 
 
+template<class X> Expansion<X>& Expansion<X>::operator=(const X& c) {
+    this->clear();
+    (*this)[MultiIndex::zero(this->argument_size())]=c; 
+    return *this;
+}
+
 template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned int i) {
     Expansion<X> p(n); p[MultiIndex::zero(n)]=0.0; p[MultiIndex::unit(n,i)]=X(1);
     return p;
@@ -622,7 +630,7 @@ template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const 
 
 
 inline Vector< Expansion<Float> > midpoint(const Vector< Expansion<Interval> >& pse) {
-    Vector< Expansion<Float> > r(pse.size());
+    Vector< Expansion<Float> > r(pse.size(),Expansion<Float>());
     for(uint i=0; i!=pse.size(); ++i) {
         r[i]=midpoint(pse[i]); }
     return r;

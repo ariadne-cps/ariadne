@@ -257,7 +257,7 @@ upper_evolve(const SystemType& system,
     Float real_time=time.continuous_time();
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
-    uint time_steps=uint(real_time/lock_to_grid_time);
+    uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
@@ -298,7 +298,7 @@ upper_reach(const SystemType& system,
     Float real_time=time.continuous_time();
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
-    uint time_steps=uint(real_time/lock_to_grid_time);
+    uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
@@ -351,7 +351,7 @@ upper_reach_evolve(const SystemType& system,
     Float real_time=time.continuous_time();
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
-    uint time_steps=uint(real_time/lock_to_grid_time);
+    uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);

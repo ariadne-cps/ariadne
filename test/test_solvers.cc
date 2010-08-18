@@ -84,7 +84,7 @@ class TestSolver
         r=IntervalVector(1, Interval(0.25,1.25));
         f=VectorFunction(1u,(x*x+1)*x-a);
         h=solver->implicit(f,p,r);
-        bb=ScalarFunction(aa-p[0].midpoint())/p[0].radius();
+        bb=ScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
         e=VectorTaylorFunction( p, VectorFunction( 1u, 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) ) );
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
@@ -93,7 +93,7 @@ class TestSolver
         r=IntervalVector(1, Interval(0.25,2.0));
         f=VectorFunction(1u,4*x+x*x-a-4);
         h=solver->implicit(f,p,r);
-        bb=ScalarFunction(aa-p[0].midpoint())/p[0].radius();
+        bb=ScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
         e=VectorTaylorFunction( p, VectorFunction( 1u, 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) ) );
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
     }

@@ -149,7 +149,7 @@ jacobian2_value(const Vector<TaylorModel>& f)
     MultiIndex a(fas);
     for(uint i=0; i!=rs; ++i) {
         for(uint j=0; j!=rs; ++j) {
-            a[has+j]=1; const double x=f[i][a]; J[i][j]=x; a[has+j]=0;
+            a[has+j]=1; const Float x=f[i][a]; J[i][j]=x; a[has+j]=0;
         }
     }
     return J;
@@ -168,7 +168,7 @@ jacobian2_range(const Vector<TaylorModel>& f)
             for(uint k=0; k!=rs; ++k) {
                 const uint c=iter->key()[has+k];
                 if(c>0) {
-                    const double& x=iter->data();
+                    const Float& x=iter->data();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=Interval(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
@@ -648,7 +648,7 @@ IntervalNewtonSolver::implicit(const ScalarFunction& f,
     Interval x=ix;
     bool validated=false;
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
-        Interval mx=midpoint(x);
+        Interval mx=Interval(midpoint(x));
         Interval nx=mx-f(join(mp,mx))/df(join(mp,x));
         if(disjoint(nx,x)) {
             ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","No solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix);

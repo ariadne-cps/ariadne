@@ -151,19 +151,19 @@ Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
     set_rounding_mode(upward);
     Vector<Float> c(n,0.0);
     for(size_t i=0; i!=n; ++i) {
-        volatile double& ci=c[i];
+        Float ci=c[i];
         for(size_t j=0; j!=n; ++j) {
             if(j!=i) {
-                ci+=mag(A[i][j]);
+                ci=add_rnd(ci,mag(A[i][j]));
             }
         }
-        ci=ci-mig(A[i][i]);
+        ci=sub_rnd(ci,mig(A[i][i]));
         ci=-ci;
         if(ci<=0.0) {
             ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Interval> A, Matrix<Interval> B)",
                           "Interval matrix A="<<A<<" is not diagonally-dominant.");
         }
-        ci=1.0/ci;
+        ci=rec_rnd(ci);
     }
     set_rounding_mode(rounding_mode);
 

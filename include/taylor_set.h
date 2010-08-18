@@ -39,7 +39,7 @@
 
 namespace Ariadne {
 
-typedef double Float;
+class Float;
 class Interval;
 template<class X> class Vector;
 template<class X> class Matrix;

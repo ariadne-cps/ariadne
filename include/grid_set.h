@@ -2030,7 +2030,7 @@ inline uint GridTreeSubset::compute_number_subdiv( Float theWidth, const Float t
     uint result = 0;
     if ( theWidth > theMaxWidth ){
         //result = (uint) ceil( div_approx( log_approx( div_approx( theWidth, theMaxWidth ) ) , log_approx( R(2.0) ) ) );
-        result = (uint) ceil( Ariadne::div( Ariadne::log( Ariadne::div( theWidth, theMaxWidth ) ) , Ariadne::log( 2.0 ) ) );
+        result = integer_cast<uint>(ceil( Ariadne::div( Ariadne::log( Ariadne::div( theWidth, theMaxWidth ) ) , Ariadne::log( Float(2.0) ) ) ) );
     }
     return result;
 }

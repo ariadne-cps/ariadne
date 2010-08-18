@@ -56,6 +56,14 @@ inline NonlinearConstraint operator>=(const ScalarFunction& f, const Float& c) {
     return NonlinearConstraint(f,Interval(c,+inf<Float>()));
 }
 
+inline NonlinearConstraint operator==(const ScalarFunction& f, double c) {
+    return NonlinearConstraint(f,Interval(c));
+}
+
+inline NonlinearConstraint operator==(const ScalarFunction& f, const Real& c) {
+    return NonlinearConstraint(f,Interval(c));
+}
+
 inline NonlinearConstraint operator==(const ScalarFunction& f, const Float& c) {
     return NonlinearConstraint(f,Interval(c));
 }

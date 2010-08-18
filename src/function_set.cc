@@ -39,8 +39,8 @@ typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
 
 Interval emulrng(const FloatVector& x, const FloatVector& z) {
-    Interval r=x[0]*z[0];
-    for(uint i=0; i!=x.size(); ++i) { r=hull(Interval(x[i]*z[i]),r); }
+    Interval r=mul_ivl(x[0],z[0]);
+    for(uint i=0; i!=x.size(); ++i) { r=hull(mul_ivl(x[i],z[i]),r); }
     return r;
 }
 
@@ -434,7 +434,7 @@ void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving,
         iter!=constraints.end(); ++iter)
     {
         Interval constraint_range=iter->function().evaluate(subdomain);
-        if(constraint_range.lower() > iter->bounds().upper() || iter->bounds().lower() ) { return; }
+        if(constraint_range.lower() > iter->bounds().upper() || constraint_range.upper() < iter->bounds().lower() ) { return; }
     }
 
     Box range=evaluate(function,subdomain);
@@ -562,11 +562,11 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         ScalarFunction xg=ScalarFunction::constant(m,0);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - (Real(x[j])-x[n+j])*fg[j];
+            xg = xg - (Real(x[j])-Real(x[n+j]))*fg[j];
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarFunction::coordinate(m,i);
+            xg = xg - (Real(x[2*n+i])-Real(x[2*n+m+i]))*ScalarFunction::coordinate(m,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = Real(cnst) + xg;

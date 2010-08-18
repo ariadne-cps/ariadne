@@ -282,8 +282,8 @@ TestInterval::test_constructors()
 #ifdef HAVE_GMPXX_H
     Interval ivld3(Rational(21,10),Rational(16,5));
     cout<<ivld3<<std::endl;
-    ARIADNE_TEST_ASSERT(ivld3.lower()<Rational(21,10));
-    ARIADNE_TEST_ASSERT(ivld3.upper()>Rational(16,5));
+    ARIADNE_TEST_COMPARE(ivld3.lower(),<,Rational(21,10));
+    ARIADNE_TEST_COMPARE(ivld3.upper(),>,Rational(16,5));
 #else
     Interval ivld3(2.1,3.2);
 #endif // HAVE_GMPXX_H

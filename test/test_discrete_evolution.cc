@@ -69,7 +69,7 @@ void TestMapEvolver::test() const
 
     // Set up the evolution parameters and grid
     IteratedMap::TimeType time(3);
-    Float enclosure_radius(0.25);
+    double enclosure_radius(0.25);
 
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=enclosure_radius;

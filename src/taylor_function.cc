@@ -36,6 +36,8 @@
 #include "function.h"
 #include "taylor_function.h"
 
+#define VOLATILE ;
+
 namespace Ariadne {
 
 typedef unsigned int uint;
@@ -48,12 +50,12 @@ void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
 {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
-    const double& l=ivl.lower();
-    const double& u=ivl.upper();
-    volatile double pc=u; pc+=l;
-    volatile double nc=-u; nc-=l;
-    volatile double pg=u; pg-=l;
-    volatile double ng=l; ng-=u;
+    const Float& l=ivl.lower();
+    const Float& u=ivl.upper();
+    VOLATILE Float pc=u; pc+=l;
+    VOLATILE Float nc=-u; nc-=l;
+    VOLATILE Float pg=u; pg-=l;
+    VOLATILE Float ng=l; ng-=u;
     x.error()=(pc+nc+pg+ng)/4;
     set_rounding_mode(to_nearest);
     MultiIndex a(x.argument_size());
@@ -119,6 +121,11 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial
     this->_model=Ariadne::evaluate(p,x);
 }
 
+
+ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, double c)
+{
+    return ScalarTaylorFunction(d,TaylorModel::constant(d.size(),c));
+}
 
 ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, const Float& c)
 {
@@ -191,7 +198,8 @@ ScalarTaylorFunction::polynomial() const
     Vector<Polynomial<Interval> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
         if(this->domain()[j].radius()<=0) {
-            s[j]=Polynomial<Interval>::constant(this->argument_size(),this->domain()[j].lower());
+            ARIADNE_ASSERT(this->domain()[j].radius()==0);
+            s[j]=Polynomial<Interval>::constant(this->argument_size(),this->domain()[j]);
         } else {
             s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j]));
         }
@@ -361,6 +369,12 @@ unchecked_compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
 }
 
 
+
+ScalarTaylorFunction
+partial_evaluate(const ScalarTaylorFunction& tf, uint k, const Float& c)
+{
+    return partial_evaluate(tf,k,Interval(c));
+}
 
 ScalarTaylorFunction
 partial_evaluate(const ScalarTaylorFunction& te, uint k, const Interval& c)
@@ -679,8 +693,8 @@ jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<Interval>& x)
     Vector< Differential<Interval> > s(n,n,1u);
     for(uint j=0; j!=n; ++j) {
         Interval dj=dom[j];
-        s[j].set_value((x[j]-dj.midpoint())/dj.radius());
-        s[j].set_gradient(j,1/dj.radius());
+        s[j].set_value((x[j]-med_ivl(dj))/rad_ivl(dj));
+        s[j].set_gradient(j,rec(rad_ivl(dj)));
     }
     Vector< Expansion<Float> > p=expansion(tv);
     Vector< Differential<Interval> > d=evaluate(p,s);
@@ -1426,6 +1440,12 @@ operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f)
 
 
 
+
+VectorTaylorFunction
+partial_evaluate(const VectorTaylorFunction& tf, uint k, const Float& c)
+{
+    return partial_evaluate(tf,k,Interval(c));
+}
 
 VectorTaylorFunction
 partial_evaluate(const VectorTaylorFunction& tf, uint k, const Interval& c)

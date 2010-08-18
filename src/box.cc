@@ -71,7 +71,7 @@ void make_vertices_down(const Box& bx, uint i, uint n, Point& pt, std::vector<Po
 }
 
 
-Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
+Box::Box(uint d, double x0l, double x0u, ...)
     : Vector<Interval>(d)
 {
     assert(d>=1);
@@ -79,8 +79,8 @@ Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
     va_start(args,x0u);
     (*this)[0]=Interval(x0l,x0u);
     for(uint i=1; i!=d; ++i) {
-        Float xil=va_arg(args,Float);
-        Float xiu=va_arg(args,Float);
+        double xil=va_arg(args,double);
+        double xiu=va_arg(args,double);
         (*this)[i]=Interval(xil,xiu);
     }
     va_end(args);
@@ -125,11 +125,11 @@ void Box::draw(CanvasInterface& c) const
 {
     uint ix=c.x_coordinate(); uint iy=c.y_coordinate();
     Interval x=(*this)[ix]; Interval y=(*this)[iy];
-    c.move_to(x.lower(),y.lower());
-    c.line_to(x.upper(),y.lower());
-    c.line_to(x.upper(),y.upper());
-    c.line_to(x.lower(),y.upper());
-    c.line_to(x.lower(),y.lower());
+    c.move_to(approx_cast<double>(x.lower()),approx_cast<double>(y.lower()));
+    c.line_to(approx_cast<double>(x.upper()),approx_cast<double>(y.lower()));
+    c.line_to(approx_cast<double>(x.upper()),approx_cast<double>(y.upper()));
+    c.line_to(approx_cast<double>(x.lower()),approx_cast<double>(y.upper()));
+    c.line_to(approx_cast<double>(x.lower()),approx_cast<double>(y.lower()));
     c.fill();
 }
 

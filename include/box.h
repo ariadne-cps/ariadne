@@ -56,7 +56,7 @@ class Box
     Box() : Vector<Interval>() { }
     //! Construct from an integer giving the dimension and a list of floating-point values
     //! giving alternately lower and upper bounds.
-    explicit Box(uint d, const Float& x0l, const Float& x0u, ...);
+    explicit Box(uint d, double x0l, double x0u, ...);
 
     // Templated constructor; useful for automatic conversion from vector expressions
     template<class T> Box(const T& t) : Vector<Interval>(t) { }

@@ -44,12 +44,12 @@ void build_automaton() {
     float P0 = 0.57;    // Default value for the period
 
     // Gets the values for S 
-    Vector<Float> S(NH+1);
+    Vector<float> S(NH+1);
     S[NH] = 1494.128;
     for (int n=NH-1;n>=1;n--)
 		S[n] = S[n+1]/1.18;
     // Gets the values of the output voltages
-    Vector<Float> Vo(NH+1);
+    Vector<float> Vo(NH+1);
     Vo[0] = 0.0;
     for (int n=NH;n>=1;n--)
     {

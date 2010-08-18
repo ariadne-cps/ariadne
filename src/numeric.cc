@@ -229,7 +229,7 @@ double pow_rnd(double x, uint m)
     if(x==0) { return 0.0; }
     //if(x>=0.0 || (m%2==0)) { double r,p; r=1.0; p=(x>=0)?x:-x; while(m) { if(m%2) { r=mul_rnd(r,p); } p=mul_rnd(p,p); m/=2; } return r; }
     //else { double r,p r=-1.0; p=x; while(m) { if(m%2) { r=mul_rnd(-r,p); } p=mul_rnd(-p,p); m/=2; } return r; }
-    if(x>0.0 || (m%2==0)) { volatile double r,p; r=1.0; p=abs(x); while(m) { if(m%2) { r=r*p; } p=p*p; m/=2; } return r; }
+    if(x>0.0 || (m%2==0)) { volatile double r,p; r=1.0; p=std::abs(x); while(m) { if(m%2) { r=r*p; } p=p*p; m/=2; } return r; }
     else { volatile double r,p; r=-1.0; p=x; while(m) { if(m%2) { r=(-r)*p; } p=(-p)*p; m/=2; } return r; }
 }
 
@@ -262,6 +262,7 @@ double sqrt_rnd(double x)
     return ldexp(b,n/2);
 }
 
+
 double pos_sin_rnd_series(double x);
 double neg_sin_rnd_series(double x);
 double pos_cos_rnd_series(double x);
@@ -293,7 +294,7 @@ double exp_rnd(double x)
     // and dy/dw = -2r/(w-r)^2, so if r<0 we need to under-approximate w
 
     if(x==0.0) { return 1.0; }
-    double n=floor(x/log2_approx+0.5);
+    double n=std::floor(x/log2_approx+0.5);
     volatile double r,s,t,w,y;
     volatile double log2;
     log2=(n>0.0) ? next_opp(log2_approx) : next_rnd(log2_approx);
@@ -430,6 +431,18 @@ double sin_rnd(double x) {
 
     return s;
 }
+
+inline double max(double x1, double x2) { return std::max(x1,x2); }
+
+inline double add_rnd(double x1, double x2) { return (volatile double&)x1+(volatile double&)x2; }
+inline double sub_rnd(double x1, double x2) { return (volatile double&)x1-(volatile double&)x2; }
+inline double mul_rnd(double x1, double x2) { return (volatile double&)x1*(volatile double&)x2; }
+inline double div_rnd(double x1, double x2) { return (volatile double&)x1/(volatile double&)x2; }
+
+inline double add_opp(double x, double y) { volatile double t=(-x)-y; return -t; }
+inline double sub_opp(double x, double y) { volatile double t=(-x)+y; return -t; }
+inline double mul_opp(double x, double y) { volatile double t=(-x)*y; return -t; }
+inline double div_opp(double x, double y) { volatile double t=(-x)/y; return -t; }
 
 
 double cos_rnd(double x) {
@@ -669,11 +682,50 @@ inline double _mul_up(volatile double x, volatile double y) { set_rounding_upwar
 inline double _div_down(volatile double x, volatile double y) { set_rounding_downward(); return x/y; }
 inline double _div_up(volatile double x, volatile double y) { set_rounding_upward(); return x/y; }
 
+
+
+Float pow_rnd(Float x, int n) 
+{ 
+    return pow_rnd(x.v,n);
+}
+
+Float sqrt_rnd(Float x) 
+{ 
+    return sqrt_rnd(x.v);
+}
+
+Float exp_rnd(Float x) 
+{ 
+    return exp_rnd(x.v);
+}
+
+Float log_rnd(Float x) 
+{ 
+    return log_rnd(x.v);
+}
+
+Float sin_rnd(Float x) 
+{ 
+    return sin_rnd(x.v);
+}
+
+Float cos_rnd(Float x) 
+{ 
+    return cos_rnd(x.v);
+}
+
+Float tan_rnd(Float x) 
+{ 
+    return tan_rnd(x.v);
+}
+
+
+
 Interval widen(Interval x)
 {
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=x.lower();
-    const double& xu=x.upper();
+    const double& xl=internal_cast<const double&>(x.lower());
+    const double& xu=internal_cast<const double&>(x.upper());
     const double m=std::numeric_limits<float>::min();
     set_rounding_upward();
     volatile double wu=xu+m;
@@ -688,8 +740,8 @@ Interval trunc(Interval x)
 {
 
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=x.lower();
-    const double& xu=x.upper();
+    const double& xl=internal_cast<const double&>(x.lower());
+    const double& xu=internal_cast<const double&>(x.upper());
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
@@ -703,15 +755,15 @@ Interval trunc(Interval x)
 
 Interval trunc(Interval x, uint n)
 {
-    Interval e=Interval(pow(2.0,52-n));
+    Interval e=Interval(std::pow(2.0,52-n));
     Interval y=x+e;
     return y-e;
 }
 
 Interval rec(Interval i)
 {
-    volatile double& il=const_cast<volatile double&>(i.lower());
-    volatile double& iu=const_cast<volatile double&>(i.upper());
+    volatile double& il=internal_cast<volatile double&>(i.lower());
+    volatile double& iu=internal_cast<volatile double&>(i.upper());
     volatile double rl,ru;
     if(il>0 || iu<0) {
         rounding_mode_t rnd=get_rounding_mode();
@@ -719,8 +771,8 @@ Interval rec(Interval i)
         ru=_div_up(1.0,il);
         set_rounding_mode(rnd);
     } else {
-        rl=-inf<Float>();
-        ru=+inf<Float>();
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
         ARIADNE_THROW(DivideByZeroException,"Interval rec(Interval ivl)","ivl="<<i);
     }
     return Interval(rl,ru);
@@ -729,10 +781,10 @@ Interval rec(Interval i)
 
 Interval mul(Interval i1, Interval i2)
 {
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
-    volatile double& i2l=const_cast<volatile double&>(i2.lower());
-    volatile double& i2u=const_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
     if(i1l>=0) {
@@ -759,9 +811,9 @@ Interval mul(Interval i1, Interval i2)
             rl=_mul_down(i1u,i2l); ru=_mul_up(i1l,i2l);
         } else {
             set_rounding_mode(downward);
-            rl=min(i1u*i2l,i1l*i2u);
+            rl=std::min(i1u*i2l,i1l*i2u);
             set_rounding_mode(upward);
-            ru=max(i1l*i2l,i1u*i2u);
+            ru=std::max(i1l*i2l,i1u*i2u);
         }
     }
     set_rounding_mode(rnd);
@@ -772,26 +824,33 @@ Interval mul(Interval i1, Interval i2)
 Interval mul(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     volatile double rl,ru;
     if(x2>=0) {
-        rl=_mul_down(i1l,x2); ru=_mul_up(i1u,x2);
+        rl=_mul_down(i1l,x2v); ru=_mul_up(i1u,x2v);
     } else {
-        rl=_mul_down(i1u,x2); ru=_mul_up(i1l,x2);
+        rl=_mul_down(i1u,x2v); ru=_mul_up(i1l,x2v);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
 
 
+Interval mul(Float x1, Interval i2)
+{
+    return mul(i2,x1);
+}
+
+
 Interval div(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
-    volatile double& i2l=const_cast<volatile double&>(i2.lower());
-    volatile double& i2u=const_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     if(i2l>0) {
         if(i1l>=0) {
@@ -813,7 +872,8 @@ Interval div(Interval i1, Interval i2)
     }
     else {
         // ARIADNE_THROW(DivideByZeroException,"Interval div(Interval ivl1, Interval ivl2)","ivl1="<<i1<<", ivl2="<<i2);
-        rl=-inf<Float>(); ru=+inf<Float>();
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -824,15 +884,17 @@ Interval div(Interval i1, Interval i2)
 Interval div(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=const_cast<volatile double&>(i1.lower());
-    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& x2v=internal_cast<volatile double&>(x2);
     volatile double rl,ru;
-    if(x2>0) {
-        rl=_div_down(i1l,x2); ru=_div_up(i1u,x2);
-    } else if(x2<0) {
-        rl=_div_down(i1u,x2); ru=_div_up(i1l,x2);
+    if(x2v>0) {
+        rl=_div_down(i1l,x2v); ru=_div_up(i1u,x2v);
+    } else if(x2v<0) {
+        rl=_div_down(i1u,x2v); ru=_div_up(i1l,x2v);
     } else {
-        rl=-inf<Float>(); ru=+inf<Float>();
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -842,16 +904,18 @@ Interval div(Interval i1, Float x2)
 Interval div(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i2l=const_cast<volatile double&>(i2.lower());
-    volatile double& i2u=const_cast<volatile double&>(i2.upper());
+    volatile double& x1v=internal_cast<volatile double&>(x1);
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
-        rl=-inf<Float>(); ru=+inf<Float>();
-    } else if(x1>=0) {
-        rl=_div_down(x1,i2u); ru=_div_up(x1,i2l);
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
+    } else if(x1v>=0) {
+        rl=_div_down(x1v,i2u); ru=_div_up(x1v,i2l);
     } else {
-        rl=_div_down(x1,i2l); ru=_div_up(x1,i2u);
+        rl=_div_down(x1v,i2l); ru=_div_up(x1v,i2u);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -860,8 +924,8 @@ Interval div(Float x1, Interval i2)
 Interval sqr(Interval i)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& il=const_cast<volatile double&>(i.lower());
-    volatile double& iu=const_cast<volatile double&>(i.upper());
+    volatile double& il=internal_cast<volatile double&>(i.lower());
+    volatile double& iu=internal_cast<volatile double&>(i.upper());
     volatile double rl,ru;
     if(il>=0) {
         rl=_mul_down(il,il); ru=_mul_up(iu,iu);
@@ -888,11 +952,13 @@ Interval pow(Interval i, uint m)
 {
     const Interval& nvi=i;
     if(m%2==0) { i=abs(nvi); }
+    volatile double& il=internal_cast<volatile double&>(i.lower());
+    volatile double& iu=internal_cast<volatile double&>(i.upper());
     volatile double rl,ru;
     set_rounding_mode(downward);
-    rl=pow_rnd(i.lower(),m);
+    rl=pow_rnd(il,m);
     set_rounding_mode(upward);
-    ru=pow_rnd(i.upper(),m);
+    ru=pow_rnd(iu,m);
     return Interval(rl,ru);
 }
 
@@ -952,7 +1018,7 @@ Interval cos(Interval i)
     static const Interval pi(pi_down,pi_up);
     if(i.radius()>2*pi_down) { return Interval(-1.0,+1.0); }
 
-    double n=std::floor(i.lower()/(2*pi_approx)+0.5);
+    Float n=floor(i.lower()/(2*pi_approx)+0.5);
     i=i-2*n*pi;
 
     ARIADNE_ASSERT(i.lower()>=-pi_up);
@@ -1020,18 +1086,18 @@ Rational pow(const Rational& q, int n) {
 Interval::Interval(Rational q) : l(q.get_d()), u(l) {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
-    while(l>q) { l-=std::numeric_limits<double>::min(); }
+    while(numeric_cast<double>(l)>q) { l-=std::numeric_limits<double>::min(); }
     set_rounding_mode(upward);
-    while(u<q) { u+=std::numeric_limits<double>::min(); }
+    while(numeric_cast<double>(u)<q) { u+=std::numeric_limits<double>::min(); }
     set_rounding_mode(rounding_mode);
 }
 
 Interval::Interval(Rational ql, Rational qu) : l(ql.get_d()), u(qu.get_d())  {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
-    while(l>ql) { l-=std::numeric_limits<double>::min(); }
+    while(internal_cast<const double&>(l)>ql) { l-=std::numeric_limits<double>::min(); }
     set_rounding_mode(upward);
-    while(u<qu) { u+=std::numeric_limits<double>::min(); }
+    while(internal_cast<const double&>(u)<qu) { u+=std::numeric_limits<double>::min(); }
     set_rounding_mode(rounding_mode);
 }
 

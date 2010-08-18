@@ -42,7 +42,6 @@ uint32_t fac(uint8_t);
 uint32_t bin(uint8_t,uint8_t);
 
 typedef unsigned char uchar;
-typedef double Float;
 
 class MultiIndex;
 class MultiIndexValueReference;

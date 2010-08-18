@@ -181,7 +181,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
 template<class X, class Y>
 void export_vector_conversion(class_<Vector<X> >& vector_class)
 {
-    vector_class.def(init<int,Y>());
+    //vector_class.def(init<int,Y>());
     vector_class.def(init< Vector<Y> >());
 }
 
@@ -205,9 +205,7 @@ template<class X> void export_vector()
     class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
     export_vector_class<X>(vector_class);
     export_vector_conversion<X,X>(vector_class);
-    export_vector_conversion<X,Float>(vector_class);
     export_vector_arithmetic<X,X,X>(vector_class);
-    export_vector_arithmetic<X,X,Float>(vector_class);
 }
 
 
@@ -296,10 +294,9 @@ template<class X> void export_matrix()
 {
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init< Matrix<X> >());
     export_matrix_class<X>(matrix_class);
-    export_matrix_conversion<X,Float>(matrix_class);
     export_matrix_conversion<X,X>(matrix_class);
     export_matrix_arithmetic<X,X,X>(matrix_class);
-    export_matrix_arithmetic<X,X,Float>(matrix_class);
+    export_matrix_arithmetic<X,X,double>(matrix_class);
 
 
 }

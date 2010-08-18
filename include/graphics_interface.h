@@ -50,15 +50,22 @@ class FigureInterface;
 class CanvasInterface;
 class PlanarProjectionMap;
 
+template<class R, class A> inline R numeric_cast(const A&);
 
-struct Vector2d { double x,y; Vector2d(double xx, double yy) : x(xx), y(yy) { } };
+struct Vector2d { 
+    double x,y; Vector2d(double xx, double yy) : x(xx), y(yy) { } 
+    template<class X, class Y> Vector2d(const X& xx, const Y& yy) : x(numeric_cast<double>(xx)), y(numeric_cast<double>(yy)) { } 
+};
 inline Vector2d operator-(const Vector2d& v) { return Vector2d(-v.x,-v.y); }
 inline Vector2d operator+(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x+v2.x,v1.y+v2.y); }
 inline Vector2d operator-(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x-v2.x,v1.y-v2.y); }
 inline Vector2d operator*(const double& s1, const Vector2d& v2) { return Vector2d(s1*v2.x,s1*v2.y); }
 inline std::ostream& operator<<(std::ostream& os, const Vector2d& v) { return os << "["<<v.x<<","<<v.y<<"]"; }
 
-struct Point2d { double x,y; Point2d(double xx, double yy) : x(xx), y(yy) { } };
+struct Point2d { 
+    double x,y; Point2d(double xx, double yy) : x(xx), y(yy) { }
+    template<class X, class Y> Point2d(const X& xx, const Y& yy) : x(numeric_cast<double>(xx)), y(numeric_cast<double>(yy)) { } 
+};
 inline bool operator==(Point2d& pt1, const Point2d& pt2) { return pt1.x==pt2.x && pt1.y==pt2.y; }
 inline Point2d& operator+=(Point2d& pt, const Vector2d& v) { pt.x+=v.x; pt.y+=v.y; return pt; }
 inline Point2d& operator-=(Point2d& pt, const Vector2d& v) { pt.x-=v.x; pt.y-=v.y; return pt; }
@@ -108,6 +115,9 @@ class CanvasInterface {
     virtual void set_fill_colour(double r, double g, double b) = 0;
     virtual void set_bounding_box(double xl, double xu, double yl, double yu) = 0;
     virtual void get_bounding_box(double& xl, double& xu, double& yl, double& yu) = 0;
+  public:
+    template<class X, class Y> void move_to(X x, Y y) { this->move_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
+    template<class X, class Y> void line_to(X x, Y y) { this->line_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
 };
 
 

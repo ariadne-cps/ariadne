@@ -70,7 +70,7 @@ subdivide(const BS& bs, const Float& r)
 void
 accumulate(Float& value, Float& error, uint n, const Float* aptr, const Float* bptr)
 {
-    Interval v=value;
+    Interval v=Interval(value);
     for(uint i=0; i!=n; ++i) {
         v+=aptr[i]*bptr[i];
     }
@@ -583,7 +583,7 @@ cascade_over_approximation(const Zonotope& z, uint cs)
     for(uint i=0; i!=d; ++i) {
         Float& err=rG(i,d*(nnb-1)+i);
         for(uint j=d*(nnb-1); j!=G.column_size(); ++j) {
-            err=add_up(err,std::abs(G(i,j)));
+            err=add_up(err,abs(G(i,j)));
         }
     }
     return Zonotope(z.centre(),rG);

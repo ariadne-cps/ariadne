@@ -141,4 +141,5 @@ int main(int argc, const char **argv) {
     taylor_integrator.verbosity=verbosity;
     TestIntegrator(taylor_integrator).test();
     std::cerr<<"INCOMPLETE "<<std::flush;
+    return ARIADNE_TEST_FAILURES;
 }

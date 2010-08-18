@@ -75,6 +75,7 @@ class TestScalarTaylorFunction
 
 void TestScalarTaylorFunction::test()
 {
+    std::clog<<std::setprecision(17);
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
@@ -318,6 +319,7 @@ void TestVectorTaylorFunction::test_constructors()
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain);
     //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
     VectorTaylorFunction variables_model(ScalarTaylorFunction(1.5-t[0]*t[0]+0.25*t[1])*e0+ScalarTaylorFunction(t[0])*e1);
+    variables_model.sweep();
     ARIADNE_TEST_EQUAL(variables_model,VectorTaylorFunction(domain,expansion));
 
 }

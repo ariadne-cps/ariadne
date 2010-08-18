@@ -205,7 +205,7 @@ class TestReachabilityAnalysis
 
 int main(int nargs, const char* args[])
 {
-    std::cerr<<"SKIPPED "; return 0u;
+    std::cerr<<"SKIPPED "; return 1u;
     TestReachabilityAnalysis().test();
     if(ARIADNE_TEST_SKIPPED) { cerr << "INCOMPLETE "; }
     return ARIADNE_TEST_FAILURES;

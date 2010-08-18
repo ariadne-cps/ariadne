@@ -103,6 +103,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const ScalarFunc
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_model=f.evaluate(x);
+    this->_model.clean();
 }
 
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p)
@@ -111,6 +112,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial
     ARIADNE_ASSERT_MSG(d.size()==p.argument_size(),"d="<<d<<" p="<<p);
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_model=Ariadne::evaluate(p,x);
+    this->_model.clean();
 }
 
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial<Interval>& p)
@@ -782,6 +784,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
     ARIADNE_ASSERT(d.size()==f.argument_size());
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_models=f.evaluate(x);
+    this->sweep();
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
@@ -794,6 +797,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     for(uint i=0; i!=x.size(); ++i) { x[i].accuracy_ptr()=accuracy_ptr; }
     this->_models=f.evaluate(x);
+    this->sweep();
 }
 
 
@@ -805,6 +809,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_models=Ariadne::evaluate(p,x);
+    this->sweep();
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,

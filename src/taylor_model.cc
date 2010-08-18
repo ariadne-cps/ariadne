@@ -176,16 +176,19 @@ TaylorModel::TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e)
 {
     ARIADNE_ASSERT(!d.empty());
     ARIADNE_ASSERT_MSG(this->_error>=0,"e="<<e);
+    this->clean();
 }
 
 TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e)
     : _expansion(f), _error(e), _accuracy_ptr(new Accuracy())
 {
+    this->clean();
 }
 
 TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e, shared_ptr<Accuracy> a)
     : _expansion(f), _error(e), _accuracy_ptr(a)
 {
+    this->clean();
 }
 
 

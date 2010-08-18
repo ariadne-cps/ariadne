@@ -575,17 +575,15 @@ std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& va
         for(const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
             MultiIndex a=iter->key();
             X v=iter->data();
-            if(v!=0) {
-                if(v>0 && !first_term) { os<<"+"; }
-                first_term=false;
-                bool first_factor=true;
-                if(v<0) { os<<"-"; }
-                if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
-                for(uint j=0; j!=a.size(); ++j) {
-                    if(a[j]!=0) {
-                        if(first_factor) { first_factor=false; } else { os <<"*"; }
-                        os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); }
-                    }
+            if(v>=0 && !first_term) { os<<"+"; }
+            first_term=false;
+            bool first_factor=true;
+            if(v<0) { os<<"-"; }
+            if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
+            for(uint j=0; j!=a.size(); ++j) {
+                if(a[j]!=0) {
+                    if(first_factor) { first_factor=false; } else { os <<"*"; }
+                    os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); }
                 }
             }
         }

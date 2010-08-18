@@ -22,7 +22,6 @@
 
 
 from ariadne import *
-Float=float
 x=Float(2.25)
     
 n=2

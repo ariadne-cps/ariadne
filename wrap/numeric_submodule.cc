@@ -139,6 +139,28 @@ void export_tribool() {
 
 void export_float()
 {
+    class_< Float > float_class("Float");
+    float_class.def(init<double>());
+    float_class.def(init<Float>());
+    float_class.def(boost::python::self_ns::str(self));
+
+    float_class.def(+self);
+    float_class.def(-self);
+    float_class.def(self + self);
+    float_class.def(self - self);
+    float_class.def(self * self);
+    float_class.def(self / self);
+    float_class.def(self + double());
+    float_class.def(self - double());
+    float_class.def(self * double());
+    float_class.def(self / double());
+    float_class.def(double() + self);
+    float_class.def(double() - self);
+    float_class.def(double() * self);
+    float_class.def(double() / self);
+ 
+    implicitly_convertible<double,Float>();
+
     def("set_output_precision", &set_output_precision);
 
     def("rec",(Float(*)(Float)) &Ariadne::rec);
@@ -245,6 +267,14 @@ void export_interval()
     interval_class.def(double() - self);
     interval_class.def(double() * self);
     interval_class.def(double() / self);
+    interval_class.def(self + Float());
+    interval_class.def(self - Float());
+    interval_class.def(self * Float());
+    interval_class.def(self / Float());
+    interval_class.def(Float() + self);
+    interval_class.def(Float() - self);
+    interval_class.def(Float() * self);
+    interval_class.def(Float() / self);
     interval_class.def("lower", &Interval::lower, return_value_policy<copy_const_reference>());
     interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
     interval_class.def("midpoint", &Interval::midpoint);

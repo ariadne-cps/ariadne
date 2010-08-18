@@ -215,7 +215,7 @@ template<> void export_vector<Float>()
     export_vector_class<Float>(float_vector_class);
     export_vector_conversion<Float,Float>(float_vector_class);
     export_vector_arithmetic<Float,Float,Float>(float_vector_class);
-    //export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
+    export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
 }
 
 template<> void export_vector<Interval>()
@@ -307,7 +307,7 @@ template<> void export_matrix<Float>()
     export_matrix_class<Float>(matrix_class);
     export_matrix_conversion<Float,Float>(matrix_class);
     export_matrix_arithmetic<Float,Float,Float>(matrix_class);
-    //export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
+    export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
 
     def("triangular_decomposition",&triangular_decomposition);
     def("orthogonal_decomposition", &orthogonal_decomposition);

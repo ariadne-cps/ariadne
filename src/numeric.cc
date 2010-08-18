@@ -968,9 +968,9 @@ Interval sqrt(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    volatile Float rl=sqrt_rnd(i.lower());
+    Float rl=sqrt_rnd(i.lower());
     set_rounding_upward();
-    volatile Float ru=sqrt_rnd(i.upper());
+    Float ru=sqrt_rnd(i.upper());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -979,9 +979,9 @@ Interval exp(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    volatile Float rl=exp_rnd(i.lower());
+    Float rl=exp_rnd(i.lower());
     set_rounding_upward();
-    volatile Float ru=exp_rnd(i.upper());
+    Float ru=exp_rnd(i.upper());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -990,9 +990,9 @@ Interval log(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    volatile Float rl=log_rnd(i.lower());
+    Float rl=log_rnd(i.lower());
     set_rounding_upward();
-    volatile Float ru=log_rnd(i.upper());
+    Float ru=log_rnd(i.upper());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }

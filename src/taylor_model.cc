@@ -415,8 +415,8 @@ inline void _scal_approx1(TaylorModel& rr, const Float& cc)
 inline void _scal_approx0(TaylorModel& rr, const Float& cc)
 {
     Expansion<double>& r=reinterpret_cast<Expansion<double>&>(rr.expansion());
-    double& re=rr.error().v;
-    const double& c=cc.v;
+    volatile double& re=rr.error().v;
+    const volatile double& c=cc.v;
     //const double& c=cc.v;
     
     set_rounding_upward();

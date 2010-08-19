@@ -951,9 +951,14 @@ class VectorTaylorFunctionElementReference
     operator ScalarTaylorFunction () const { return this->_c->get(this->_i); }
     void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
+    const TaylorModel& model() const { return this->_c->_models[this->_i]; }
     void set_error(const Float& e) { this->_c->_models[this->_i].set_error(e); }
+    void sweep() { this->_c->_models[this->_i].sweep(); }
+    void set_sweep_threshold(double sw) { this->_c->_models[this->_i].set_sweep_threshold(sw); }
+    double sweep_threshold() { return this->_c->_models[this->_i].sweep_threshold(); }
     template<class X> X evaluate(const Vector<X>& x) const { return this->_c->get(this->_i).evaluate(x); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
+    friend std::ostream& operator<<(std::ostream& os, const VectorTaylorFunctionElementReference& t) { return os<<ScalarTaylorFunction(t); }
   private:
     VectorTaylorFunction* _c; uint _i;
 };

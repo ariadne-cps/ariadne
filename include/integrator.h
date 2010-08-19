@@ -1,7 +1,7 @@
 /***************************************************************************
  *            integrator.h
  *
- *  Copyright  2006-9  Pieter Collins
+ *  Copyright  2006-10  Pieter Collins
  *
  ****************************************************************************/
 
@@ -47,27 +47,37 @@ class IntegratorBase
     , public Loggable
 {
   public:
-      IntegratorBase(uint to, double e) : _temporal_order(to), _maximum_error(e) { assert(e>0.0); }
+    IntegratorBase(uint to, double e) : _temporal_order(to), _maximum_error(e) { assert(e>0.0); }
     virtual void set_temporal_order(uint m) { this->_temporal_order=m; }
     virtual void set_maximum_error(double e) { assert(e>0.0); this->_maximum_error=e; }
     uint temporal_order() const { return this->_temporal_order; }
     double maximum_error() const  { return this->_maximum_error; }
 
-    virtual Pair<Float,IVector> flow_bounds(const VectorFunction& vector_field,
-                                            const IVector& parameter_domain,
-                                            const IVector& state_domain,
-                                            const Float& suggested_time_step) const;
+    virtual Pair<Float,IntervalVector>
+    flow_bounds(const VectorFunction& vector_field,
+                const IntervalVector& state_domain,
+                const Float& suggested_time_step) const;
 
-    virtual VectorTaylorFunction time_step(const VectorFunction& vector_field,
-                                     const IVector& parameter_domain,
-                                     const IVector& state_domain,
-                                     const Float& suggested_time_step) const;
+    virtual VectorTaylorFunction
+    flow_step(const VectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& suggested_time_step) const;
 
-    virtual VectorTaylorFunction flow(const VectorFunction& vector_field,
-                                const Vector<Interval>& state_domain,
-                                const Float& suggested_time_step) const;
+    virtual VectorTaylorFunction
+    flow(const VectorFunction& vector_field,
+         const IntervalVector& state_domain,
+         const Real& time) const;
 
-    using IntegratorInterface::flow;
+    virtual VectorTaylorFunction
+    flow(const VectorFunction& vector_field,
+         const IntervalVector& state_domain,
+         const Interval& time_domain) const;
+
+    virtual VectorTaylorFunction
+    flow_step(const VectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& suggested_time_step,
+              const IntervalVector& bounding_box) const = 0;
 
   public:
     uint _temporal_order;
@@ -78,16 +88,19 @@ class IntegratorBase
 class TaylorIntegrator
     : public IntegratorBase
 {
+    double _sweep_threshold;
   public:
-    TaylorIntegrator(uint to, double e) : IntegratorBase(to,e) { }
+    TaylorIntegrator(uint to, double e, double sw=0.0) : IntegratorBase(to,e), _sweep_threshold(sw) {
+        if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
     virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }
 
-    virtual VectorTaylorFunction flow(const VectorFunction& vector_field,
-                                const Vector<Interval>& parameter_domain,
-                                const Vector<Interval>& state_domain,
-                                const Float& suggested_time_step) const;
+    virtual VectorTaylorFunction
+    flow_step(const VectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& time_step,
+              const IntervalVector& bounding_box) const;
 
-    using IntegratorBase::flow;
+    using IntegratorBase::flow_step;
 };
 
 

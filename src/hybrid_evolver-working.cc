@@ -313,7 +313,7 @@ _compute_flow(VectorFunction dynamic,
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
     // Compute flow and actual time step size used
     TaylorIntegrator integrator(32,this->parameters().flow_accuracy);
-    VectorIntervalFunction flow_model=integrator.flow(dynamic,initial_box,maximum_step_size);
+    VectorIntervalFunction flow_model=integrator.flow_step(dynamic,initial_box,maximum_step_size);
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
     IntervalVector flow_domain=flow_model.domain();
     Float step_size=flow_domain[flow_domain.size()-1u].upper();

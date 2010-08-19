@@ -1,7 +1,7 @@
 /***************************************************************************
  *            integrator_interface.h
  *
- *  Copyright  2006-9  Pieter Collins
+ *  Copyright  2006-10  Pieter Collins
  *
  ****************************************************************************/
 
@@ -32,9 +32,11 @@
 namespace Ariadne {
 
 template<class T1,class T2> class Pair;
+class Real;
 class Float;
 class Interval;
 template<class X> class Vector;
+typedef Vector<Interval> IntervalVector;
 class VectorFunction;
 class VectorTaylorFunction;
 
@@ -42,8 +44,6 @@ class VectorTaylorFunction;
 //! \brief Interface for integrating differential equations of the form \f$\dot{x}=f(x)\f$.
 class IntegratorInterface
 {
-  protected:
-    typedef Vector<Interval> IVector;
   public:
     //! \brief Virtual destructor.
     virtual ~IntegratorInterface() { };
@@ -57,30 +57,30 @@ class IntegratorInterface
     /*! \brief Set the temporal order (if appropriate). */
     virtual void set_temporal_order(unsigned int) = 0;
 
-    //! \brief Compute a pair \a (h,B) consisting of a bound \a B for the flow 
+    //! \brief Compute a pair \a (h,B) consisting of a bound \a B for the flow
     //! starting in the \a state_domain for time step \a h.
-    virtual Pair<Float,IVector> flow_bounds(const VectorFunction& vector_field,
-                                            const IVector& parameter_domain,
-                                            const IVector& state_domain,
-                                            const Float& suggested_time_step) const = 0;
+    virtual Pair<Float,IntervalVector>
+    flow_bounds(const VectorFunction& vector_field,
+                const IntervalVector& state_domain,
+                const Float& suggested_time_step) const = 0;
+
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is a time step based on \a suggested_time_step.
+    virtual VectorTaylorFunction
+    flow_step(const VectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
-    virtual VectorTaylorFunction flow(const VectorFunction& vector_field,
-                                const IVector& state_domain,
-                                const Float& time_domain) const = 0;
+    virtual VectorTaylorFunction
+    flow(const VectorFunction& vector_field,
+         const IntervalVector& state_domain,
+         const Real& time) const = 0;
 
-
-    //! \brief Solve \f$\dot{\phi}(a,x,t)=f(a,\phi(a,x,t))\f$.
-    virtual VectorTaylorFunction flow(const VectorFunction& vector_field,
-                                              const IVector& parameter_domain,
-                                              const IVector& state_domain,
-                                              const Float& time_domain) const = 0;
-
-    //! \brief Compute \f$\phi(a,x,h)\f$, where \f$\dot{\phi}(a,x,t)=f(a,\phi(a,x,t))\f$.
-    virtual VectorTaylorFunction time_step(const VectorFunction& vector_field,
-                                     const IVector& parameter_domain,
-                                     const IVector& state_domain,
-                                     const Float& time_domain) const = 0;
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
+    virtual VectorTaylorFunction
+    flow(const VectorFunction& vector_field,
+         const IntervalVector& state_domain,
+         const Interval& time_domain) const = 0;
 
 };
 

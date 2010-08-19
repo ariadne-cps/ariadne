@@ -128,7 +128,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     TaylorIntegrator integrator(32,this->_parameters->flow_accuracy);
     Float maximum_step_size=this->_parameters->maximum_step_size;
 
-    const Float maximum_time=maximum_hybrid_time.continuous_time();
+    const Real maximum_time=maximum_hybrid_time.continuous_time();
     const uint maximum_steps=maximum_hybrid_time.discrete_time();
 
     // Take the first pending set and
@@ -223,7 +223,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     // Compute flow and actual time step size used
     IntervalVector flow_spacial_domain(starting_set.continuous_state_set().bounding_box());
     ARIADNE_LOG(4,"flow_spacial_domain="<<flow_spacial_domain<<"\n");
-    VectorTaylorFunction flow_model=integrator.flow(dynamic,flow_spacial_domain,min(maximum_step_size,maximum_time));
+    VectorTaylorFunction flow_model=integrator.flow_step(dynamic,flow_spacial_domain,min(maximum_step_size,maximum_time));
     ARIADNE_LOG(4,"twosided_flow_model:"<<flow_model<<"\n");
     Box flow_domain=Box(flow_model.domain());
     Float step_size=flow_domain[n].upper();

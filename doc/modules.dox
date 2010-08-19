@@ -194,8 +194,8 @@ namespace Ariadne {
  * \brief Numerical types and intervals.
  * \details In this module, we define %Ariadne's base numerical types, and interval
  * arithmetic. The main classes are \ref Ariadne::Integer "Integer",
- * \ref Ariadne::Rational "Rational", \ref Ariadne::Float "Float"  and
- * \ref Ariadne::Interval "Interval" classes.
+ * \ref Ariadne::Rational "Rational", \ref Ariadne::Float "Float",
+ * \ref Ariadne::Interval "Interval" and \ref Ariadne::Real "Real" classes.
  *
  * Rounded operations on \ref Ariadne::Float "Float" are provided using the \c _down
  * and \c _up suffixes. Approximate arithmetic without control of the
@@ -204,22 +204,16 @@ namespace Ariadne {
  * rounding type.
  *
  * Note that to prevent accidental calls to approximate functions, all
- * non-exact operations must be explicitly qualified. This means that the
- * operation operator*(Float64,Float64) generates an error at compile-time,
- * even though Float64 is based on the C++ double type, which has an
- * (approximate) multiplication operator. Use
- * mul(Float64,Float64,RoundApproximate) instead.
+ * non-exact operations must yield a \a Float value.
  *
  * We use the following abbreviations for template parameters
  * for classes and concepts in this module:
  *  - \b Q: Rational
  *  - \b F: Float
- *  - \b I: Interval<Float>
- *  - \b A: Rational, Interval<Float>
+ *  - \b I: Interval
+ *  - \b A: Rational, Interval
  *  - \b R: Rational, Float
- *  - \b X: Rational, Float, Interval<Float>
- *
- * Here, Float refers to any floating-point type, such as Float64 or FloatMP.
+ *  - \b X: Rational, Float, Interval
  *
  * \internal The above template names are currently not used consistently
  *

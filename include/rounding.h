@@ -2,7 +2,7 @@
  *            rounding.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,9 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file rounding.h
- *  \brief Functions to set and retrieve the processor rounding mode. 
+ *  \brief Functions to set and retrieve the processor rounding mode.
  *  May be platform-dependent.
  */
 
@@ -91,7 +91,9 @@ inline void set_rounding_downward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);  }
 inline void set_rounding_upward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_UP);  }
 inline void set_rounding_toward_zero() { _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);  }
 
+//! \ingroup NumericModule \brief Set the active rounding mode.
 inline void set_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd); }
+//! \ingroup NumericModule \brief Get the active rounding mode.
 inline rounding_mode_t get_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
 
 } // namespace Ariadne

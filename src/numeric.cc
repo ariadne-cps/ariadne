@@ -684,38 +684,38 @@ inline double _div_up(volatile double x, volatile double y) { set_rounding_upwar
 
 
 
-Float pow_rnd(Float x, int n) 
-{ 
+Float pow_rnd(Float x, int n)
+{
     return pow_rnd(x.v,n);
 }
 
-Float sqrt_rnd(Float x) 
-{ 
+Float sqrt_rnd(Float x)
+{
     return sqrt_rnd(x.v);
 }
 
-Float exp_rnd(Float x) 
-{ 
+Float exp_rnd(Float x)
+{
     return exp_rnd(x.v);
 }
 
-Float log_rnd(Float x) 
-{ 
+Float log_rnd(Float x)
+{
     return log_rnd(x.v);
 }
 
-Float sin_rnd(Float x) 
-{ 
+Float sin_rnd(Float x)
+{
     return sin_rnd(x.v);
 }
 
-Float cos_rnd(Float x) 
-{ 
+Float cos_rnd(Float x)
+{
     return cos_rnd(x.v);
 }
 
-Float tan_rnd(Float x) 
-{ 
+Float tan_rnd(Float x)
+{
     return tan_rnd(x.v);
 }
 
@@ -927,18 +927,27 @@ Interval sqr(Interval i)
     volatile double& il=internal_cast<volatile double&>(i.lower());
     volatile double& iu=internal_cast<volatile double&>(i.upper());
     volatile double rl,ru;
-    if(il>=0) {
-        rl=_mul_down(il,il); ru=_mul_up(iu,iu);
-    } else if(iu<=0) {
-        rl=_mul_down(iu,iu); ru=_mul_up(il,il);
+    if(il>0.0) {
+        set_rounding_mode(downward);
+        rl=il*il;
+        set_rounding_mode(upward);
+        ru=iu*iu;
+    } else if(iu<0.0) {
+        set_rounding_mode(downward);
+        rl=iu*iu;
+        set_rounding_mode(upward);
+        ru=il*il;
     } else {
         rl=0.0;
         set_rounding_mode(upward);
-        ru=max(il*il,iu*iu);
+        volatile double ru1=il*il;
+        volatile double ru2=iu*iu;
+        ru=max(ru1,ru2);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
+
 
 
 
@@ -1083,7 +1092,7 @@ Rational pow(const Rational& q, int n) {
 }
 
 
-Interval::Interval(Rational q) : l(q.get_d()), u(l) {
+Interval::Interval(const Rational& q) : l(q.get_d()), u(l) {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
     while(numeric_cast<double>(l)>q) { l-=std::numeric_limits<double>::min(); }
@@ -1092,7 +1101,7 @@ Interval::Interval(Rational q) : l(q.get_d()), u(l) {
     set_rounding_mode(rounding_mode);
 }
 
-Interval::Interval(Rational ql, Rational qu) : l(ql.get_d()), u(qu.get_d())  {
+Interval::Interval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
     while(internal_cast<const double&>(l)>ql) { l-=std::numeric_limits<double>::min(); }

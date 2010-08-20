@@ -41,9 +41,9 @@ FloatVector
 RungeKutta4Integrator::step(const VectorFunctionInterface& f, const FloatVector& x, const Float& h) const
 {
     FloatVector k1=f.evaluate(x);
-    FloatVector k2=f.evaluate(FloatVector(x+h*k1));
+    FloatVector k2=f.evaluate(FloatVector(x+(h/2)*k1));
     FloatVector k3=f.evaluate(FloatVector(x+(h/2)*k2));
-    FloatVector k4=f.evaluate(FloatVector(x+(h/2)*k3));
+    FloatVector k4=f.evaluate(FloatVector(x+h*k3));
     //std::cerr<<"k1,2,3,4="<<k1<<k2<<k3<<k4<<"\n";
     return x+(h/6)*(k1+2.0*k3+2.0*k4+k2);
 }

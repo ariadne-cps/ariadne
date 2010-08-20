@@ -86,26 +86,31 @@ inline Interval::Interval(const Real& x) : l(x._ivl.l), u(x._ivl.u) { }
 inline Float& Float::operator=(const Real& x) { *this=Float(x); return *this; }
 inline Interval& Interval::operator=(const Real& x) { *this=Interval(x); return *this; }
 
-//! \related Real \brief Unary plus operator.
+//@{
+//! \related Real \name Arithmetic Operators
+
+//!  \brief Unary plus operator.
 inline Real operator+(const Real& x) { return Real(+static_cast<Interval>(x)); }
-//! \related Real \brief Unary negation operator.
+//!  \brief Unary negation operator.
 inline Real operator-(const Real& x) { return Real(-static_cast<Interval>(x)); }
-//! \related Real \brief Binary addition operator.
+//!  \brief Binary addition operator.
 inline Real operator+(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)+static_cast<Interval>(y)); }
-//! \related Real \brief Subtraction operator.
+//!  \brief Subtraction operator.
 inline Real operator-(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)-static_cast<Interval>(y)); }
-//! \related Real \brief Binary multiplication operator.
+//! \brief Binary multiplication operator.
 inline Real operator*(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)*static_cast<Interval>(y)); }
-//! \related Real \brief Division operator.
+//! \brief Division operator.
 inline Real operator/(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)/static_cast<Interval>(y)); }
-//! \related Real \brief Inplace addition operator.
+//!  \brief Inplace addition operator.
 inline Real& operator+=(Real& x, const Real& y) { return x=x+y; }
-//! \related Real \brief Inplace subtraction operator.
+//!  \brief Inplace subtraction operator.
 inline Real& operator-=(Real& x, const Real& y) { return x=x-y; }
-//! \related Real \brief Inplace multiplication operator.
+//!  \brief Inplace multiplication operator.
 inline Real& operator*=(Real& x, const Real& y) { return x=x*y; }
-//! \related Real \brief Inplace division operator.
+//!  \brief Inplace division operator.
 inline Real& operator/=(Real& x, const Real& y) { return x=x/y; }
+
+//@}
 
 inline Real operator+(const Real& x, double y) { return x+static_cast<Real>(y); }
 inline Real operator-(const Real& x, double y) { return x-static_cast<Real>(y); }
@@ -142,24 +147,28 @@ inline Interval& operator-=(Interval& x, const Real& y) { return x-=static_cast<
 inline Interval& operator*=(Interval& x, const Real& y) { return x*=static_cast<Interval>(y); }
 inline Interval& operator/=(Interval& x, const Real& y) { return x/=static_cast<Interval>(y); }
 
-//! \related Real \brief Equality operator.
+//@{
+//! \related Real \name Comparison Operators
+
+//! \brief Equality operator.
 //! Returns \c true if the numbers have the same representation or can be evaluated exactly to the same value.
 //! Returns \c false if the numbers can be evalated to different values.
 //! Returns \c indeterminate if the numbers cannot be shown to be the same or different. Implementation dependent.
 inline tribool operator==(const Real& x, const Real& y) { return static_cast<Interval>(x)==static_cast<Interval>(y); }
-//! \related Real \brief Inequality operator.
+//! \brief Inequality operator.
 //! Returns \c true if the numbers have been proved to be different, such as by evaluation to different values.
 //! Returns \c false if the numbers have the same representation or can be evaluated exactly to the same value.
 //! Returns \c indeterminate if the numbers cannot be shown to be the same or different. Implementation dependent.
 inline tribool operator!=(const Real& x, const Real& y) { return static_cast<Interval>(x)!=static_cast<Interval>(y); }
-//! \related Real \brief Greater-than-or-equal-to comparison operator.
+//! \brief Greater-than-or-equal-to comparison operator.
 inline tribool operator>=(const Real& x, const Real& y) { return static_cast<Interval>(x)>=static_cast<Interval>(y); }
-//! \related Real \brief Less-than-or-equal-to comparison operator.
+//! \brief Less-than-or-equal-to comparison operator.
 inline tribool operator<=(const Real& x, const Real& y) { return static_cast<Interval>(x)<=static_cast<Interval>(y); }
-//! \related Real \brief Strictly-greater-than comparison operator.
+//! \brief Strictly-greater-than comparison operator.
 inline tribool operator> (const Real& x, const Real& y) { return static_cast<Interval>(x)> static_cast<Interval>(y); }
-//! \related Real \brief Strictly-less-than comparison operator.
+//! \brief Strictly-less-than comparison operator.
 inline tribool operator< (const Real& x, const Real& y) { return static_cast<Interval>(x)< static_cast<Interval>(y); }
+//@}
 
 inline tribool operator==(const Real& x, double y) { return static_cast<Interval>(x)==static_cast<Interval>(y); }
 inline tribool operator!=(const Real& x, double y) { return static_cast<Interval>(x)!=static_cast<Interval>(y); }
@@ -168,44 +177,54 @@ inline tribool operator<=(const Real& x, double y) { return static_cast<Interval
 inline tribool operator> (const Real& x, double y) { return static_cast<Interval>(x)> static_cast<Interval>(y); }
 inline tribool operator< (const Real& x, double y) { return static_cast<Interval>(x)< static_cast<Interval>(y); }
 
-//! \related Real \brief The absolute value function \c |x|.
+//@{
+//! \related Real \name Arithmetical, algebraic and transcendental functions
+
+//!  \brief The absolute value function \c |x|.
 inline Real abs(const Real& x) { return Real(abs(static_cast<Interval>(x))); }
-//! \related Real \brief The unary plus function \c +x.
+//!  \brief The unary plus function \c +x.
 inline Real pos(const Real& x) { return Real(pos(static_cast<Interval>(x))); }
-//! \related Real \brief The unary negation function \c -x.
+//!  \brief The unary negation function \c -x.
 inline Real neg(const Real& x) { return Real(neg(static_cast<Interval>(x))); }
-//! \related Real \brief The reciprocal function \c 1/x.
+//!  \brief The reciprocal function \c 1/x.
 inline Real sqr(const Real& x) { return Real(sqr(static_cast<Interval>(x))); }
-//! \related Real \brief The reciprocal function \c 1/x.
+//!  \brief The reciprocal function \c 1/x.
 inline Real rec(const Real& x) { return Real(rec(static_cast<Interval>(x))); }
-//! \related Real \brief The binary addition function \c x+y.
+//!  \brief The binary addition function \c x+y.
 inline Real add(const Real& x, const Real& y) { return Real(add(static_cast<Interval>(x),static_cast<Interval>(y))); }
-//! \related Real \brief The subtraction function \c x-y.
+//!  \brief The subtraction function \c x-y.
 inline Real sub(const Real& x, const Real& y) { return Real(sub(static_cast<Interval>(x),static_cast<Interval>(y))); }
-//! \related Real \brief The binary multiplication function \c x*y.
+//!  \brief The binary multiplication function \c x*y.
 inline Real mul(const Real& x, const Real& y) { return Real(mul(static_cast<Interval>(x),static_cast<Interval>(y))); }
-//! \related Real \brief The division function \c x/y.
+//!  \brief The division function \c x/y.
 inline Real div(const Real& x, const Real& y) { return Real(div(static_cast<Interval>(x),static_cast<Interval>(y))); }
-//! \related Real \brief The integer power function \c x^n.
+//!  \brief The integer power function \c x^n.
 inline Real pow(const Real& x, int n) { return Real(pow(static_cast<Interval>(x),n)); }
-//! \related Real \brief The square-root function.
+//!  \brief The square-root function.
 inline Real sqrt(const Real& x) { return Real(sqrt(static_cast<Interval>(x))); }
-//! \related Real \brief The exponential function.
+//!  \brief The exponential function.
 inline Real exp(const Real& x) { return Real(exp(static_cast<Interval>(x))); }
-//! \related Real \brief The natural logarithm function.
+//!  \brief The natural logarithm function.
 inline Real log(const Real& x) { return Real(log(static_cast<Interval>(x))); }
-//! \related Real \brief The constant \a pi.
+//!  \brief The constant \a pi.
 template<> inline Real pi<>() { return Real(pi<Interval>()); }
-//! \related Real \brief The sine function.
+//!  \brief The sine function.
 inline Real sin(const Real& x) { return Real(sin(static_cast<Interval>(x))); }
-//! \related Real \brief The cosine function.
+//!  \brief The cosine function.
 inline Real cos(const Real& x) { return Real(cos(static_cast<Interval>(x))); }
-//! \related Real \brief The tangent function.
+//!  \brief The tangent function.
 inline Real tan(const Real& x) { return Real(tan(static_cast<Interval>(x))); }
+
+//@}
+
+//@{
+//! \related Real \name Input/output operators
 
 //! \related Real \brief Write to an output stream.
 inline std::ostream& operator<<(std::ostream& os, const Real& x) {
     Interval ivl=static_cast<Interval>(x); return os << "Real(" << ivl.lower() <<',' << ivl.upper() << ")"; }
+
+//@}
 
 template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }

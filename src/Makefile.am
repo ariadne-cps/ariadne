@@ -28,6 +28,7 @@ SRC = \
 	taylor_calculus.cc \
 	solver.cc \
 	integrator.cc \
+	runge_kutta_integrator.cc \
 	point.cc \
 	box.cc \
 	zonotope.cc \

@@ -857,6 +857,8 @@ class Vector< Differential<X> >
         for(uint i=0; i!=rs; ++i) { (*this)[i]=Differential<X>(as,d); } }
     Vector(uint rs, const Differential<X>& sd) : ublas::vector< Differential<X> >(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=sd; } }
+    Vector(uint rs, const Differential<X>* p) : ublas::vector< Differential<X> >(rs) {
+        for(uint i=0; i!=rs; ++i) { (*this)[i]=p[i]; } }
     template<class XX> Vector(const Vector< Differential<XX> > dv) : ublas::vector< Differential<X> >(dv) { }
     template<class XX> Vector(uint rs, uint as, uint d, const XX* ptr);
     Vector(uint rs, uint as, uint d,const Vector<X>& v, const Matrix<X>& A);

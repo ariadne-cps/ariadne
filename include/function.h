@@ -216,6 +216,8 @@ class VectorFunction
     VectorFunction(VectorFunctionInterface*);
     const VectorFunctionInterface* pointer() const { return this->_ptr.operator->(); }
 
+    operator const VectorFunctionInterface& () { return *this->_ptr; }
+        
     VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s);
     VectorFunction(const List< Expression<Real> >& e, const List< Variable<Real> >& v);
     VectorFunction(const List<ExtendedRealVariable>& rs, const Map<ExtendedRealVariable,RealExpression>& e, const List<RealVariable>& as);

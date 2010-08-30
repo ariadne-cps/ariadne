@@ -6,7 +6,7 @@ AM_LDFLAGS = $(EXEC_LDFLAGS)
 LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS= watertank-aasap \
-			  pss-revised watertank-verify test-transition \
+			  pss-revised watertank-verify \
 			  tutorial \
               boost_power_converter \
               watertank bouncingball ecoli \
@@ -36,7 +36,6 @@ watertank_nonlinear_verify_SOURCES=watertank-nonlinear-verify.cc
 pss_revised_SOURCES = pss-revised.cc
 coconut_final_demo_SOURCES=coconut-final-demo.cc
 coconut_demo_SOURCES=coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
-test_transition_SOURCES = test-transition.cc
 watertank_aasap_SOURCES = watertank-aasap.cc
 
 examples: $(bin_PROGRAMS)

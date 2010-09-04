@@ -8,6 +8,11 @@ AC_CONFIG_HEADER([config.h])
 # Checks for programs.
 AC_PROG_CXX
 
+# C++ flags to be used for all files
+#   Add -fno-strict-aliasing because of code in Expansion class which uses
+#   reinterpret_cast in a way that breaks strict anti-aliasing rules.
+AC_SUBST([ARIADNE_CXXFLAGS],["-Wall -fno-strict-aliasing"])
+
 # Checks for libraries.
 AC_LANG(C++)
 

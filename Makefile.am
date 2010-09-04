@@ -2,11 +2,12 @@ SUBDIRS = include src test wrap examples
 
 EXTRA_DIST = Doxyfile
 
-AM_CXXFLAGS = -Wall
-
 .PHONY: shiny doc all lib wrap examples profiles check-lib check-python
 
 all: lib wrap tests examples profiles
+
+# No point in setting AM_CXXFLAGS here as these do not propagate to subdirectories
+# Global CXXFLAGS are defined in configure.ac in the ARIADNE_CXXFLAGS variable.
 
 # Show the values of the environment variables
 evn:

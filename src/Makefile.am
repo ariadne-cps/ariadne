@@ -1,10 +1,8 @@
-#AM_CXXFLAGS = -O2 -Wall
-
 phony: lib
 
 lib: libariadne.la libcalculus.la
 
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS =  $(CAIRO_LIBS) $(GTK_LIBS)
@@ -70,10 +68,6 @@ CALCULUS_SRC = \
 	taylor_set.cc  \
 	taylor_function.cc  \
 	taylor_calculus.cc
-
-#	hybrid_simulator.cc
-#	hybrid_system.cc
-
 
 lib_LTLIBRARIES = libariadne.la libcalculus.la
 libariadne_la_SOURCES = $(SRC)

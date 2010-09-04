@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 
 INCLUDES = -I$(top_srcdir)/include
 LIBS +=  $(BOOST_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)

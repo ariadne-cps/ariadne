@@ -3,11 +3,10 @@ all: tests profiles
 profile-lib: $(bin_PROGRAMS)
 	for file in $(bin_PROGRAMS); do ./run_profile.sh $$file; done
 
-#TESTS_ENVIRONMENT = (function run_tst { $1 > $1.log; }; run_tst )
 TESTS_ENVIRONMENT = ./run_test.sh
 PROFILES_ENVIRONMENT = ./run_profile.sh
 
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS += $(CAIRO_LIBS) $(GTK_LIBS)
@@ -54,8 +53,6 @@ check_PROGRAMS = \
 	test_graphics \
 	test_textplot \
 	test_misc
-
-#	test_hybrid_simulator
 
 tests: $(check_PROGRAMS)
 profiles: $(bin_PROGRAMS)

@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -Wall -fpic
+AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = -module
 
 INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)

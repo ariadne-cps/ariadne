@@ -24,7 +24,7 @@
 /*! \file polyhedron.h
  *  \brief Polyhedra.
  */
- 
+
 #ifndef ARIADNE_POLYHEDRON_H
 #define ARIADNE_POLYHEDRON_H
 
@@ -39,13 +39,13 @@
 #include "set_interface.h"
 #include "function_set.h"
 
-namespace Ariadne {  
-  
+namespace Ariadne {
+
 
 class Box;
 class Polytope;
 class Polyhedron;
-    
+
 
 
 
@@ -54,52 +54,52 @@ class Polyhedron;
  *  The set is described as
  *  \f$ \{ x\in\mathbb{R}^d \mid Ax \leq b \} \f$
  *  where \f$A\f$ is a \f$n\times d\f$ matrix and \f$b\f$ is a vector of size \f$n\f$.
- */ 
-class Polyhedron 
+ */
+class Polyhedron
     : public RegularSetInterface
 {
   public:
-    //@{ 
+    //@{
     //! \name Constructors and destructor
 
     //! \brief Default constructor constructs a polytope in zero dimensions with no constraints.
     explicit Polyhedron();
-  
+
     //! \brief Construct full Euclidean space of dimension \a n.
     explicit Polyhedron(uint n=0u);
-  
+
     //! \brief Construct a polyhedron of dimension \a d with \a nc constraints from the data in the
-    //! array beginning at \a data. The jth element of the ith constraint is stored in position i*(d+1)+j, 
+    //! array beginning at \a data. The jth element of the ith constraint is stored in position i*(d+1)+j,
     //! and the ith inhomogeneous term is stored in position i*(d+1)+d.
     template<class XX> Polyhedron(uint d, uint nc, const XX* data);
-  
+
     //! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
     explicit Polyhedron(const Matrix<Float>& A, const Vector<Float>& b);
-  
-    //! \brief Convert from a box. 
+
+    //! \brief Convert from a box.
     explicit Polyhedron(const Box& bx);
-  
-    //! \brief Convert from a polytope. 
+
+    //! \brief Convert from a polytope.
     explicit Polyhedron(const Polytope& p);
-  
+
     //! \brief Create a dynamically-allocated copy.
     virtual Polyhedron* clone() const;
 
     //@}
-  
-  
+
+
     //@{
     //! \name Data access
 
-    //! \brief The number of constraints. 
+    //! \brief The number of constraints.
     size_t number_of_constraints() const { return this->b().size(); }
-    //! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. 
+    //! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$.
     Matrix<Float> A() const;
     //! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$.
     Vector<Float> b() const;
     //@}
-  
-  
+
+
     //@{
     //! \name Geometric operations
 
@@ -121,22 +121,22 @@ class Polyhedron
     //! \brief Tests if the polyhedron is disjoint from a box. (Not currently implemented.)
     virtual tribool disjoint(const Box& bx) const;
 
-    //! \brief The \a i<sup>th</sup> defining halfspace. 
+    //! \brief The \a i<sup>th</sup> defining halfspace.
     Polyhedron halfspace(size_t i) const;
 
-    //! \brief Convert to a polytope. 
+    //! \brief Convert to a polytope.
     operator Polytope () const ;
 
-    //! \brief The intersection of two polyhedra. 
+    //! \brief The intersection of two polyhedra.
     friend Polyhedron intersection(const Polyhedron& p1, const Polyhedron& p2);
 
-    //! \brief Convert a box to a polyhedron. 
+    //! \brief Convert a box to a polyhedron.
     friend Polyhedron polyhedron(const Box& p);
 
-    //! \brief Convert a polytope to a polyhedron. (Not currently implemented) 
+    //! \brief Convert a polytope to a polyhedron. (Not currently implemented)
     friend Polyhedron polyhedron(const Polytope& p);
 
-    //! \brief Convert a polyhedron to a polytope. (Not currently implemented) 
+    //! \brief Convert a polyhedron to a polytope. (Not currently implemented)
     friend Polytope polytope(const Polyhedron& p);
 
     //@}
@@ -144,7 +144,7 @@ class Polyhedron
     //@{
     //! \name Input/output.
 
-    //! \brief Write to an output stream. 
+    //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
     //@}
   private:
@@ -152,12 +152,10 @@ class Polyhedron
     Vector<Float> _b;
 };
 
-  
+
 inline std::ostream& operator<<(std::ostream& os, const Polyhedron& p) {
     return p.write(os);
 }
-
-std::ostream& operator<<(std::ostream& os, const Polytope& p);
 
 
 } // namespace Ariadne

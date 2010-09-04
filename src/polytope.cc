@@ -35,26 +35,26 @@
 
 #include "polytope.h"
 
-namespace Ariadne { 
+namespace Ariadne {
 
 Zonotope zonotope(const TaylorImageSet& ts);
 
-tribool 
+tribool
 Polytope::disjoint(const Box& bx) const {
     return this->bounding_box().disjoint(bx) || indeterminate;
 }
 
-tribool 
+tribool
 Polytope::overlaps(const Box& bx) const {
     return bx.covers(baricentre(*this)) || indeterminate;
 }
 
-tribool 
+tribool
 Polytope::inside(const Box& bx) const {
     return this->bounding_box().inside(bx) || indeterminate;
 }
 
-Box 
+Box
 Polytope::bounding_box() const
 {
     const Polytope& p=*this;
@@ -66,10 +66,10 @@ Polytope::bounding_box() const
 }
 
 
-std::ostream& 
-operator<<(std::ostream& os, const Polytope& p)
+std::ostream&
+Polytope::write(std::ostream& os) const
 {
-    return os << "Polytope( vertices=" << p.vertices() << " )";
+    return os << "Polytope( vertices=" << this->vertices() << " )";
 }
 
 
@@ -77,8 +77,8 @@ operator<<(std::ostream& os, const Polytope& p)
 
 
 
-Float 
-slope2d(const Point& pt1, const Point& pt2) 
+Float
+slope2d(const Point& pt1, const Point& pt2)
 {
     ARIADNE_ASSERT(pt1.dimension()==2 && pt2.dimension()==2);
     return (pt2[1]-pt1[1])/(pt2[0]-pt1[0]);
@@ -86,13 +86,13 @@ slope2d(const Point& pt1, const Point& pt2)
 
 
 
-Polytope polytope(const Box& bx) 
+Polytope polytope(const Box& bx)
 {
     return Polytope(bx.vertices());
 }
 
 
-Polytope polytope(const Zonotope& z) 
+Polytope polytope(const Zonotope& z)
 {
     //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     Polytope res;
@@ -117,7 +117,7 @@ Polytope polytope(const Zonotope& z)
 }
 
 
-Polytope polytope(const Polytope& p) 
+Polytope polytope(const Polytope& p)
 {
     Polytope r=p;
     if(r.dimension()==2) {
@@ -128,13 +128,13 @@ Polytope polytope(const Polytope& p)
 }
 
 
-Polytope polytope(const TaylorImageSet& ts) 
+Polytope polytope(const TaylorImageSet& ts)
 {
-    return polytope(zonotope(ts)); 
+    return polytope(zonotope(ts));
 }
 
 
-Polytope& reduce2d(Polytope& p) 
+Polytope& reduce2d(Polytope& p)
 {
     ARIADNE_ASSERT(p.dimension()==2);
     //std::cerr << this->_vertices << std::endl;
@@ -143,11 +143,11 @@ Polytope& reduce2d(Polytope& p)
 
     const std::vector<Point>& old_vertices=p.vertices();
     std::vector<Point> new_vertices;
-  
+
     // Sweep lower boundary from bottom-left to top right
     size_t min_size=1;
     for(std::vector<Point>::const_iterator vertex_iter=old_vertices.begin();
-        vertex_iter!=old_vertices.end(); ++vertex_iter) 
+        vertex_iter!=old_vertices.end(); ++vertex_iter)
         {
             const Point& vertex=*vertex_iter;
             while(new_vertices.size()>min_size) {
@@ -166,12 +166,12 @@ Polytope& reduce2d(Polytope& p)
             new_vertices.push_back(vertex);
         }
     new_vertices.pop_back();
-  
+
     // Upper sweep
     //std::cerr << "Forward pass\n";
     min_size=new_vertices.size()+1;
     for(std::vector<Point>::const_reverse_iterator vertex_iter=old_vertices.rbegin();
-        vertex_iter!=old_vertices.rend(); ++vertex_iter) 
+        vertex_iter!=old_vertices.rend(); ++vertex_iter)
         {
             const Point& vertex=*vertex_iter;
             while(new_vertices.size()>min_size) {
@@ -190,18 +190,18 @@ Polytope& reduce2d(Polytope& p)
             new_vertices.push_back(vertex);
         }
     new_vertices.pop_back();
-  
+
     new_vertices.swap(p.vertices());
     return p;
 }
 
 
-Point 
-baricentre(const Polytope& p) 
+Point
+baricentre(const Polytope& p)
 {
     const std::vector<Point>& vertices=p.vertices();
     Point baricentre(p.dimension());
-  
+
     for (size_t j=0; j!=vertices.size(); ++j) {
         for (size_t i=0; i<2; i++) {
             baricentre[i]=baricentre[i]+vertices[j][i];
@@ -221,14 +221,14 @@ baricentre(const Polytope& p)
 
 
 Vector<Float>
-apply(const ProjectionFunction& map, const Vector<Float>& v)  
+apply(const ProjectionFunction& map, const Vector<Float>& v)
 {
     ARIADNE_ASSERT(v.size()==map.argument_size());
     return map.evaluate(v);
 }
 
 Point
-apply(const ProjectionFunction& map, const Point& pt)  
+apply(const ProjectionFunction& map, const Point& pt)
 {
     ARIADNE_ASSERT(pt.dimension()==map.argument_size());
     return Point(map.evaluate(pt));
@@ -236,15 +236,15 @@ apply(const ProjectionFunction& map, const Point& pt)
 
 
 Box
-apply(const ProjectionFunction& map, const Box& bx)  
+apply(const ProjectionFunction& map, const Box& bx)
 {
     ARIADNE_ASSERT(bx.dimension()==map.argument_size());
     return Box(map.evaluate(bx));
 }
 
 
-Zonotope 
-apply(const ProjectionFunction& map, const Zonotope& z)  
+Zonotope
+apply(const ProjectionFunction& map, const Zonotope& z)
 {
     Point new_centre=apply(map,z.centre());
     Matrix<Float> new_generators(2u,z.number_of_generators());
@@ -256,7 +256,7 @@ apply(const ProjectionFunction& map, const Zonotope& z)
 
 
 Polytope
-apply(const ProjectionFunction& map, const Polytope& p)  
+apply(const ProjectionFunction& map, const Polytope& p)
 {
     Polytope result(map.result_size());
     for(size_t i=0; i!=p.number_of_vertices(); ++i) {
@@ -265,7 +265,7 @@ apply(const ProjectionFunction& map, const Polytope& p)
         result.new_vertex(pt);
     }
     if(result.dimension()==2) {
-        return reduce2d(result); 
+        return reduce2d(result);
     } else {
         return result;
     }
@@ -273,7 +273,7 @@ apply(const ProjectionFunction& map, const Polytope& p)
 
 
 InterpolatedCurve
-apply(const ProjectionFunction& map, const InterpolatedCurve& curve) 
+apply(const ProjectionFunction& map, const InterpolatedCurve& curve)
 {
     InterpolatedCurve::const_iterator iter=curve.begin();
     InterpolatedCurve::const_iterator end=curve.end();

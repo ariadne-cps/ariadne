@@ -2,7 +2,7 @@
  *            test_graphics.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "test.h"
 
 #include "function.h"
@@ -45,10 +45,10 @@ struct RadiusSquare : VectorFunctionData<1,2,1> {
         r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
     }
 };
-                   
 
 
-int main(int argc, char **argv) 
+
+int main(int argc, char **argv)
 {
 
     Box bx1(2); bx1[0]=Interval(-0.2,0.2); bx1[1]=Interval(-0.1,0.10);
@@ -62,10 +62,11 @@ int main(int argc, char **argv)
     Matrix<Float> z1g(2,3,z1gdata);
     Zonotope z1(z1c,z1g);
     Polytope p1=polytope(z1);
-    Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
+    Vector<Float> ts1c=z1c;
     Matrix<Float> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
     TaylorImageSet ts1(afn1,Box::unit_box(3));
+    Box bbx1=z1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
@@ -98,30 +99,27 @@ int main(int argc, char **argv)
     g.draw(bx3d);
     g.write("test_graphics-bx3");
     g.clear();
+
     g.set_projection_map(PlanarProjectionMap(2,0,1));
+    g.set_bounding_box(bbx1);
 
     ARIADNE_TEST_PRINT(z1);
-    g.set_bounding_box(z1.bounding_box());
     g << fill_colour(0.0,0.5,0.5)
       << z1;
     g.write("test_graphics-z");
     g.clear();
 
     ARIADNE_TEST_PRINT(ts1);
-    g.set_bounding_box(ts1.bounding_box());
     g << fill_colour(0.0,0.5,0.5)
       << ts1;
     g.write("test_graphics-ts");
     g.clear();
 
-    ARIADNE_TEST_WARN("Skipping output of polytope\n");
-/*
-    std::cerr<<"p1="<<p1<<"\n";
+    ARIADNE_TEST_PRINT(p1);
     g << fill_colour(0.0,0.5,0.5)
       << p1;
     g.write("test_graphics-pltp");
     g.clear();
-*/
 
     InterpolatedCurve cv(Point(2,0.0));
     for(int i=1; i<=10; ++i) {
@@ -137,11 +135,11 @@ int main(int argc, char **argv)
     g.clear();
 
     GridTreeSet gts(2);
-    gts.adjoin_outer_approximation(ImageSet(bx1), 6);
-    gts.adjoin_outer_approximation(ImageSet(bx2), 7);
-    gts.adjoin_outer_approximation(ImageSet(bx3), 8);
-    gts.adjoin_outer_approximation(ImageSet(bx4), 9);
-    gts.adjoin_outer_approximation(ImageSet(bx5),10);
+    gts.adjoin_outer_approximation(bx1, 4);
+    gts.adjoin_outer_approximation(bx2, 5);
+    gts.adjoin_outer_approximation(bx3, 6);
+    gts.adjoin_outer_approximation(bx4, 7);
+    gts.adjoin_outer_approximation(bx5, 8);
     gts.recombine();
 
     Box bbox(2); bbox[0]=Interval(-2,2); bbox[1]=Interval(-2,2);

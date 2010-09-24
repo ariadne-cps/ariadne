@@ -399,13 +399,13 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             } else if(second_derivative_range.upper()<0.0) {
                 try {
                     ScalarIntervalFunction critical_time=implicit(compose(derivative,flow));
-                    crossing_data[event]=CrossingData(CONCAVE_CROSSING,critical_time);
+                    crossing_data[event]=CrossingData(CONCAVE_CROSSING);
+                    crossing_data[event].critical_time=critical_time;
                 }
                 catch(const ImplicitFunctionException& e) {
                     ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                     crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
                 }
-                    crossing_data[event]=CONCAVE_CROSSING;
             } else {
                 crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
             }
@@ -733,6 +733,7 @@ _apply_time_step(EvolutionData& evolution_data,
                         jump_set.new_invariant(event,lie_derivative(transition.guard_function,dynamic));
                         jump_step_time=reach_step_time;
                         jump_starting_state=embedded_starting_state;
+                        break;
                     case NEGATIVE_CROSSING:
                     case POSITIVE_CROSSING:
                     case DECREASING_CROSSING:

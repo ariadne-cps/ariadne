@@ -213,7 +213,7 @@ int test_case_counter = 0;
     }                                                                   \
 
 
-/*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
+/*! \brief Evaluates \a expression1 and expression2 and checks if the results are equal. */
 #define ARIADNE_TEST_EQUAL(expression1,expression2)                         \
     {                                                                   \
         std::cout << #expression1 << " == " << #expression2 << ": " << std::flush; \
@@ -230,6 +230,36 @@ int test_case_counter = 0;
 
 
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
+#define ARIADNE_TEST_EQUALS(expression,expected)                         \
+    {                                                                   \
+        std::cout << #expression << " == " << #expected << ": " << std::flush; \
+        bool ok = (expression) == (expected);                       \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: " << #expression << ":\n           " << (expression) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " == " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+/*! \brief Evaluates \a expression and checks if the result is less than \a expected. */
+#define ARIADNE_TEST_LESS(expression,expected)                         \
+    {                                                                   \
+        std::cout << #expression << " < " << #expected << ": " << std::flush; \
+        bool ok = (expression) < (expected);                       \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: " << #expression << ":\n           " << (expression) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " < " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+/*! \brief Evaluates \a predicate(\a argument) and checks if the result is \tt true. */
 #define ARIADNE_TEST_UNARY_PREDICATE(predicate,argument)    \
     {                                                                   \
         std::cout << #predicate << "(" << #argument << ") with " << #argument << "=" << (argument) << ": " << std::flush; \
@@ -244,7 +274,7 @@ int test_case_counter = 0;
     }
 
 
-/*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
+/*! \brief Evaluates \a predicate(argument1,argument2) and checks if the result is \tt true. */
 #define ARIADNE_TEST_BINARY_PREDICATE(predicate,argument1,argument2)    \
     {                                                                   \
         std::cout << #predicate << "(" << (#argument1) << "," << (#argument2) << ") with " << #argument1 << "=" << (argument1) << ", " << #argument2 << "=" << (argument2) << ": " << std::flush; \
@@ -274,10 +304,10 @@ int test_case_counter = 0;
     }                                                                   \
 
 
-/*! \brief Evaluates \a expression and checks if the result compares correctly with \a expected. */
-#define ARIADNE_TEST_RESULT_COMPARE(type,expression,comparison,expected) \
+/*! \brief Evaluates \a expression, converts to \a Type, and checks if the result compares correctly with \a expected. */
+#define ARIADNE_TEST_RESULT_COMPARE(Type,expression,comparison,expected) \
     {                                                                   \
-        type result=(expression);                                       \
+        Type result=(expression);                                       \
         std::cout << #expression << ": " << result << std::flush; \
         bool ok = result comparison (expected);               \
         if(ok) {                                                        \
@@ -290,43 +320,43 @@ int test_case_counter = 0;
     }                                                                   \
 
 
-/*! \brief Declares an object \a variable of type \a class (uses the default constructor). */
-#define ARIADNE_TEST_DECLARE(class,variable)                            \
+/*! \brief Declares an object \a variable of type \a Class (uses the default constructor). */
+#define ARIADNE_TEST_DECLARE(Class,variable)                            \
     {                                                                   \
-        std::cout << #class << " " << #variable << ": " << std::flush;  \
+        std::cout << #Class << " " << #variable << ": " << std::flush;  \
         try {                                                           \
-            class variable;                                             \
+            Class variable;                                             \
             std::cout << #variable << "==" << variable << "\n" << std::endl; \
         }                                                               \
-        ARIADNE_TEST_CATCH("Constructor `" << #class << "" << #variable << "'") \
+        ARIADNE_TEST_CATCH("Constructor `" << #Class << "" << #variable << "'") \
     }                                                                   \
-    class variable;                                                     \
+    Class variable;                                                     \
 
 
-/*! \brief Constructs object \a variable of type \a class from \a expression. */
-#define ARIADNE_TEST_CONSTRUCT(class,variable,expression)               \
+/*! \brief Constructs object \a variable of type \a Class from \a expression. */
+#define ARIADNE_TEST_CONSTRUCT(Class,variable,expression)               \
     {                                                                   \
-        std::cout << #class << " " << #variable << "" << #expression << ": " << std::flush; \
+        std::cout << #Class << " " << #variable << "" << #expression << ": " << std::flush; \
         try {                                                           \
-            class variable expression;                                  \
+            Class variable expression;                                  \
             std::cout << #variable << "==" << variable << "\n" << std::endl; \
         }                                                               \
-        ARIADNE_TEST_CATCH("Constructor `" << #class << "" << #variable << "" << #expression << "'") \
+        ARIADNE_TEST_CATCH("Constructor `" << #Class << "" << #variable << "" << #expression << "'") \
     }                                                                   \
-    class variable expression;                                          \
+    Class variable expression;                                          \
 
 
-/*! \brief Constructs object \a variable of type \a class from \a expression. */
-#define ARIADNE_TEST_NAMED_CONSTRUCT(class,variable,expression)               \
+/*! \brief Constructs object \a variable of type \a Class from \a expression. */
+#define ARIADNE_TEST_NAMED_CONSTRUCT(Class,variable,expression)               \
     {                                                                   \
-        std::cout << #class << " " << #variable << "=" << #class << "::" << #expression << ": " << std::flush; \
+        std::cout << #Class << " " << #variable << "=" << #Class << "::" << #expression << ": " << std::flush; \
         try {                                                           \
-            class variable = class :: expression;                                  \
+            Class variable = Class :: expression;                                  \
             std::cout << #variable << "==" << variable << "\n" << std::endl; \
         }                                                               \
-        ARIADNE_TEST_CATCH("Named constructor `" << #class << "" << #variable << "=" << #class << "::" << #expression << "'") \
+        ARIADNE_TEST_CATCH("Named constructor `" << #Class << "" << #variable << "=" << #Class << "::" << #expression << "'") \
     }                                                                   \
-    class variable = class :: expression;                                          \
+    Class variable = Class :: expression;                                          \
 
 
 /*! \brief Assigns object \a variable from \a expression. */

@@ -29,6 +29,7 @@
 #include "constraint.h"
 #include "zonotope.h"
 #include "taylor_set.h"
+#include "affine_set.h"
 #include "grid_set.h"
 #include "graphics.h"
 
@@ -295,6 +296,28 @@ compute_outer_approximation(const TaylorImageSet& set, const Grid& grid, uint su
     return gts;
 }
 
+/*
+typedef Vector<Float> FloatVector;
+List<FloatVector> scatter(const Box& D, const VectorFunction& f, const List<ScalarFunction>& g) {
+    ARIADNE_ASSERT(D.size()==2);
+    List<FloatVector> res;
+    const uint N=16;
+    FloatVector s(2);
+    for(uint i=0; i<=N; ++i) {
+        s[0]=((N-i)*D[0].lower()+i*D[0].upper())/N;
+        for(uint j=0; j<=N; ++j) {
+            s[1]=((N-j)*D[1].lower()+j*D[1].upper())/N;
+            bool valid=true;
+            for(uint k=0; k!=g.size(); ++k) {
+                const ScalarFunction& gk=g[k];
+                if(gk(s)>0.0) { valid=false; break; }
+            }
+            if(valid) { res.append(s); }
+        }
+    }
+    return res;
+}
+*/
 
 class TestTaylorConstrainedImageSet
 {
@@ -303,7 +326,106 @@ class TestTaylorConstrainedImageSet
   public:
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        ARIADNE_TEST_CALL(test_affine_approximation());
+        ARIADNE_TEST_CALL(test_disjoint());
+        ARIADNE_TEST_CALL(test_outer_approximation());
         ARIADNE_TEST_CALL(test_draw());
+    }
+
+    void test_affine_approximation() {
+        ScalarFunction s=ScalarFunction::coordinate(2,0);
+        ScalarFunction t=ScalarFunction::coordinate(2,1);
+        ScalarFunction x=ScalarFunction::coordinate(2,0);
+        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        //Box domain(2, -0.5,1.5, -0.5,0.5);
+        Box domain(2, -1.0,+1.0, -1.0,+1.0);
+
+        TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)));
+        set.new_negative_constraint(s+t-0.25);
+        GridTreeSet paving(set.dimension());
+        set.subdivision_adjoin_outer_approximation_to(paving,5u);
+        paving.recombine();
+
+        figure.set_fill_colour(1.0,0.0,0.0);
+        figure.draw(set.affine_over_approximation());
+        figure.set_fill_colour(0.25,0.75,0.75);
+        figure.draw(paving);
+        figure.set_fill_colour(0.0,1.0,1.0);
+        figure.draw(set);
+        figure.set_fill_colour(1.0,1.0,0.0);
+        figure.draw(set.affine_approximation());
+        figure.write("test_taylor_set-affine_approximation");
+        figure.clear();
+    }
+
+
+    void test_disjoint() {
+        ScalarFunction s=ScalarFunction::coordinate(2,0);
+        ScalarFunction t=ScalarFunction::coordinate(2,1);
+        ScalarFunction x=ScalarFunction::coordinate(2,0);
+        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        Box domain(2, -0.5,1.5, -0.5,0.5);
+
+        TaylorConstrainedImageSet set(domain,(s,t+sqr(s)));
+        set.new_negative_constraint(s+t);
+        ARIADNE_TEST_PRINT(set);
+        Box bx1(2, 1.0,2.0, 0.0,1.0);
+        ARIADNE_TEST_PRINT(bx1);
+        ARIADNE_TEST_ASSERT(set.disjoint(bx1));
+    }
+
+    void test_outer_approximation() {
+        ScalarFunction s=ScalarFunction::coordinate(2,0);
+        ScalarFunction t=ScalarFunction::coordinate(2,1);
+        ScalarFunction x=ScalarFunction::coordinate(2,0);
+        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        //Box domain(2, -0.5,1.5, -0.5,0.5);
+        Box domain(2, -1.0,+1.0, -1.0,+1.0);
+        uint accuracy = 4u;
+        uint high_accuracy = accuracy+1u;
+
+        TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)));
+        //TaylorConstrainedImageSet set(domain,(s,t));
+        set.new_negative_constraint(s+t-0.25);
+        ARIADNE_TEST_PRINT(set);
+
+        GridTreeSet subdivision_paving(set.dimension());
+        std::cerr<<"Computing subdivision paving... ";
+        set.subdivision_adjoin_outer_approximation_to(subdivision_paving,high_accuracy);
+        std::cerr<<"done\n";
+        subdivision_paving.recombine();
+        ARIADNE_TEST_EQUALS(subdivision_paving.measure(),3.375);
+
+        figure.set_bounding_box(Box(2, -2.0,+2.0, -2.0,+2.0));
+        figure.set_fill_colour(0.0,0.5,1.0);
+        figure.draw(subdivision_paving);
+        figure.write("test_taylor_set-subdivision_paving");
+        figure.clear();
+
+
+        GridTreeSet affine_paving(set.dimension());
+        set.affine_adjoin_outer_approximation_to(affine_paving,accuracy);
+        affine_paving.recombine();
+
+        ARIADNE_TEST_ASSERT(subset(subdivision_paving,affine_paving));
+        if(affine_paving.measure()/subdivision_paving.measure() > 1.10) {
+            ARIADNE_TEST_WARN("TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(...) yields poor approximation");
+        }
+
+        GridTreeSet constraint_paving(set.dimension());
+        std::cerr<<"Computing constraint paving... ";
+        set.constraint_adjoin_outer_approximation_to(constraint_paving,accuracy);
+        std::cerr<<"done\n";
+        constraint_paving.recombine();
+        figure.set_fill_colour(1.0,0.0,0.0);
+        figure.draw(constraint_paving);
+        figure.set_fill_colour(0.0,0.5,1.0);
+        figure.draw(subdivision_paving);
+        figure.write("test_taylor_set-constraint_paving");
+        figure.clear();
+
+        ARIADNE_TEST_ASSERT(subset(subdivision_paving,constraint_paving));
+        ARIADNE_TEST_LESS(constraint_paving.measure()/subdivision_paving.measure() , 1.10);
     }
 
     void test_draw(const std::string& str, const TaylorConstrainedImageSet& set, uint acc) {
@@ -326,15 +448,39 @@ class TestTaylorConstrainedImageSet
         ScalarFunction t=ScalarFunction::coordinate(2,1);
         ScalarFunction x=ScalarFunction::coordinate(2,0);
         ScalarFunction y=ScalarFunction::coordinate(2,1);
-        uint acc = 2u;
+        uint accuracy = 3u;
+        uint high_accuracy = 5u;
 
-        test_draw("box",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t)),acc);
-        test_draw("polytope",TaylorConstrainedImageSet(Box(2,-2.05,2.05,-1.05,1.05),(s,t),(s+t<=1.5)),acc);
-        test_draw("dome",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t<=0.251)),acc);
-        test_draw("disc",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t*t<=0.751)),acc);
-        test_draw("parallelotope",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t)),acc);
-        test_draw("ellipse",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),acc);
-        test_draw("concave",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(2*s+0.25*s*s+t-0.5<=0)),acc);
+        // Test drawing with outer approximation computed using domain subdivision
+        Box domain(2, -1.0,+1.0, -1.0,+1.0);
+        TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)));
+        set.new_negative_constraint(s+t-0.25);
+        GridTreeSet paving(set.dimension());
+        set.subdivision_adjoin_outer_approximation_to(paving,high_accuracy);
+        paving.recombine();
+
+        figure.set_bounding_box(Box(2, -2.0,+2.0, -2.0,+2.0));
+        figure.set_fill_opacity(1.0);
+        figure.set_fill_colour(0.0,0.5,1.0);
+        figure.draw(paving);
+        figure.set_fill_colour(green);
+        figure.set_fill_opacity(0.5);
+        figure.draw(set);
+        figure.write("test_taylor_set-draw");
+        figure.clear();
+
+
+        // Draw a variety of shapes
+        figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        test_draw("box",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t)),accuracy);
+        test_draw("polytope",TaylorConstrainedImageSet(Box(2,-2.05,2.05,-1.05,1.05),(s,t),(s+t<=1.5)),accuracy);
+        test_draw("dome",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t<=0.251)),accuracy);
+        test_draw("disc",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t*t<=0.751)),accuracy);
+        test_draw("parallelotope",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t)),accuracy);
+        test_draw("ellipse",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),accuracy);
+        test_draw("concave",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(2*s+0.25*s*s+t-0.5<=0)),accuracy);
+
+
     }
 };
 

@@ -1,6 +1,6 @@
 # Pretty-printers for Ariadne
 #  Copyright (C) 2010 Pieter Collins
- 
+
 # Some of these are based on pretty-printers for libstc++.
 #  Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
@@ -189,7 +189,7 @@ class SetPrinter:
             sep = ', '
         return res + ' }'
 
-    
+
 
 
 class FloatPrinter:
@@ -223,7 +223,7 @@ class NumericVectorPrinter:
         for i in range(int(size)):
             if(i!=0): res=res+","
             res=res+str((begin+i).dereference())
-        res = res + "}"        
+        res = res + "}"
         return res
 
 
@@ -263,7 +263,7 @@ class ArrayVectorPrinter:
         res = 'Vector<%s>' % element_typename
         res = res + '[%d]' % size
         return res
-        
+
     def display_hint(self):
         return 'array'
 
@@ -277,7 +277,7 @@ class ExpansionPrinter:
         data_type=self.val.type.template_argument(0)
         byte_pointer = byte_type.pointer()
         data_pointer = data_type.pointer()
-        
+
         argument_size = self.val['_argument_size']
         sizeof_word = self.val['sizeof_word']
         sizeof_index = ((argument_size+sizeof_word)/sizeof_word)*sizeof_word
@@ -287,10 +287,10 @@ class ExpansionPrinter:
         coefficients_start = self.val['_coefficients']['_M_impl']['_M_start'].cast(byte_pointer)
         coefficients_finish = self.val['_coefficients']['_M_impl']['_M_finish'].cast(byte_pointer)
         coefficients_size = coefficients_finish - coefficients_start
-        
+
         number_of_elements = coefficients_size / sizeof_element
         res = ''
-        #res = res + 'Expansion<'+strip_namespace(data_type)+">" 
+        #res = res + 'Expansion<'+strip_namespace(data_type)+">"
         #res = res + "{ argument_size = " + str(argument_size) + ", number_of_nonzeros = " + str(number_of_elements) + " } "
         res = res + '{'
         for i in range(0,number_of_elements):
@@ -302,10 +302,9 @@ class ExpansionPrinter:
             res = res + ':' + str((element_start+sizeof_index).cast(data_pointer).dereference())
         res = res + '}'
         return res
-        
+
 class TaylorModelPrinter:
-    def __init__(self, typename, val):
-        self.typename = typename
+    def __init__(self, val):
         self.val = val
 
     def children(self):
@@ -317,7 +316,7 @@ class TaylorModelPrinter:
                   ('_error',self.val['_error']), \
                   ('_accuracy',self.val['_accuracy_ptr']['px'].dereference()) ]
         return iter(items)
-            
+
     def to_string(self):
         return 'TaylorModel'
 
@@ -328,7 +327,45 @@ class TaylorModelAccuracyPrinter:
     def to_string(self):
         return '{ _sweep_threshold=%s, _maximum_degree=%d }' % (self.val['_sweep_threshold'], int(self.val['_maximum_degree']) )
 
-                      
+class ScalarTaylorFunctionPrinter:
+    def __init__(self, val):
+        self.val = val
+
+    def children(self):
+        items = [ ('_domain',self.val['_domain']), \
+                  ('_expansion',self.val['_model']['_expansion']), \
+                  ('_error',self.val['_model']['_error']), \
+                  ('_accuracy',self.val['_model']['_accuracy_ptr']['px'].dereference()) ]
+        return iter(items)
+
+    def to_string(self):
+        return 'ScalarTaylorFunction'
+
+class TaylorModelPrinter:
+    def __init__(self, val):
+        self.val = val
+
+    def children(self):
+        #items = [ ('_expansion',self.val['_expansion']), \
+        #          ('_error',self.val['_error']), \
+        #          ('_sweep_threshold',self.val['_accuracy_ptr']['px'].dereference()['_sweep_threshold']), \
+        #          ('_maximum_degree',self.val['_accuracy_ptr']['px'].dereference()['_maximum_degree']) ]
+        items = [ ('_expansion',self.val['_expansion']), \
+                  ('_error',self.val['_error']), \
+                  ('_accuracy',self.val['_accuracy_ptr']['px'].dereference()) ]
+        return iter(items)
+
+    def to_string(self):
+        return 'TaylorModel'
+
+class DiscreteEventPrinter:
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return self.val['_id']
+
+
 def register_ariadne_printers (obj):
     "Register Ariadne pretty-printers with objfile Obj."
 
@@ -350,7 +387,7 @@ def lookup_function (val):
     # Get the unqualified type, stripped of typedefs.
     type = type.unqualified ().strip_typedefs ()
 
-    # Get the type name.    
+    # Get the type name.
     typename = type.tag
     if typename == None:
         return None
@@ -361,22 +398,25 @@ def lookup_function (val):
     for function in pretty_printers_dict:
         if function.search (typename):
             return pretty_printers_dict[function] (val)
-        
+
     # Cannot find a pretty printer.  Return None.
     return None
 
 def build_ariadne_dictionary ():
+    pretty_printers_dict[re.compile('^Ariadne::List<.*>$')] = lambda val: ListPrinter("List", val)
+    pretty_printers_dict[re.compile('^Ariadne::Set<.*>$')] = lambda val: SetPrinter("Set", val)
+    pretty_printers_dict[re.compile('^Ariadne::Map<.*>$')] = lambda val: MapPrinter("Map", val)
     pretty_printers_dict[re.compile('^Ariadne::Float$')] = lambda val: FloatPrinter(val)
     pretty_printers_dict[re.compile('^Ariadne::Interval$')] = lambda val: IntervalPrinter(val)
     pretty_printers_dict[re.compile('^Ariadne::Vector<Ariadne::Float>$')] = lambda val: NumericVectorPrinter("Vector", val)
     pretty_printers_dict[re.compile('^Ariadne::Vector<Ariadne::Interval>$')] = lambda val: NumericVectorPrinter("Vector", val)
-    pretty_printers_dict[re.compile('^Ariadne::Vector<.*>$')] = lambda val: ArrayVectorPrinter("Vector", val)
+    pretty_printers_dict[re.compile('^Ariadne::Vector<Ariadne::TaylorModel>$')] = lambda val: ArrayVectorPrinter("Vector", val)
     pretty_printers_dict[re.compile('^Ariadne::Expansion<.*>$')] = lambda val: ExpansionPrinter("Expansion", val)
-    pretty_printers_dict[re.compile('^Ariadne::TaylorModel$')] = lambda val: TaylorModelPrinter("TaylorModel", val)
+    pretty_printers_dict[re.compile('^Ariadne::TaylorModel$')] = lambda val: TaylorModelPrinter(val)
     pretty_printers_dict[re.compile('^Ariadne::TaylorModel::Accuracy$')] = lambda val: TaylorModelAccuracyPrinter(val)
-    pretty_printers_dict[re.compile('^Ariadne::List<.*>$')] = lambda val: ListPrinter("List", val)
-    pretty_printers_dict[re.compile('^Ariadne::Set<.*>$')] = lambda val: SetPrinter("Set", val)
-    pretty_printers_dict[re.compile('^Ariadne::Map<.*>$')] = lambda val: MapPrinter("Map", val)
+    pretty_printers_dict[re.compile('^Ariadne::ScalarTaylorFunction$')] = lambda val: ScalarTaylorFunctionPrinter(val)
+    pretty_printers_dict[re.compile('^Ariadne::Box')] = lambda val: NumericVectorPrinter("Box",val)
+    pretty_printers_dict[re.compile('^Ariadne::DiscreteEvent$')] = lambda val: DiscreteEventPrinter(val)
 
 pretty_printers_dict = {}
 

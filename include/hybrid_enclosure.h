@@ -130,9 +130,9 @@ class HybridEnclosure
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
-    //! \brief A box in location \a q
+    //! \brief An enclosure corresponding to a box \a s in location \a q.
     HybridEnclosure(const DiscreteLocation& q, const Box& s);
-    //! \brief Construct from a continuous state set.
+    //! \brief An enclosure constructed from a continuous state set and a location.
     HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>&);
     ////! \brief A set in location \a q, constructed from a continuous state set.
     //HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
@@ -143,7 +143,7 @@ class HybridEnclosure
 
     //! \brief The current location.
     const DiscreteLocation& location() const;
-    //! \brief The current location.
+    //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
     uint number_of_parameters() const;
@@ -151,12 +151,12 @@ class HybridEnclosure
     uint number_of_constraints() const;
     //! \brief The continuous state set.
     const IntervalVector& parameter_domain() const;
-    //! \brief The continuous state set.
+    //! \brief The function related to space.
     const VectorIntervalFunction& space_function() const;
-    //! \brief The continuous state set.
+    //! \brief The function related to time.
     const ScalarIntervalFunction& time_function() const;
 
-    //! \brief A bounding box for the
+    //! \brief A bounding box for the space.
     IntervalVector space_bounding_box() const;
     //! \brief The range of times since the starting time that the set represents.
     Interval time_range() const;
@@ -185,7 +185,7 @@ class HybridEnclosure
     void apply_flow_and_bound_time(VectorIntervalFunction phi, ScalarIntervalFunction omega);
     //! \brief Apply the flow \a phi over the time interval \f$[0,t_{\max}-\tau(s)]\f$ so that the final time bounded by a constant \a tmax.
     //! Corresponds to replacing \f$D\f$ with \f$D\times T\f$, \f$\xi\f$ with
-    //! \f$(s,t)\mapsto\phi(\xi(s),t)\f$, \f$\tau\f$ by \f$(s,t)\mapsto\tau(s)+t\f$ and constraint \f$\tau(s)+t\leq\omega(s)\f$.
+    //! \f$(s,t)\mapsto\phi(\xi(s),t)\f$, \f$\tau\f$ by \f$(s,t)\mapsto\tau(s)+t\f$ and constraint \f$\tau(s)+t\leq\tmax\f$.
     void apply_flow_and_bound_time(VectorIntervalFunction phi, Float tmax);
 
     //! \brief Apply the flow \a phi at the time \f$h\f$.
@@ -195,27 +195,27 @@ class HybridEnclosure
     //! Corresponds to replacing \f$f\f$ with
     //! \f$s\mapsto\phi(\xi(s),\varepsilon(\xi(s)))\f$ and \f$\tau'(s) = \tau(s)+\varepsilon(\xi(s))\f$.
     //! The function \f$\varepsilon\f$ is required to satisfy \f$\varepsilon(x)\in[0,h]\f$ whenever \f$x\in S\f$.
-    void apply_flow_step(VectorIntervalFunction, ScalarIntervalFunction eps);
+    void apply_flow_step(VectorIntervalFunction phi, ScalarIntervalFunction eps);
     //! \brief Apply the flow \a phi until the total elapsed time equals \a omega, a function on the parameter domain.
     //! Corresponds to replacing \f$\xi\f$ with
     //! \f$s\mapsto\phi(\xi(s),\omega(s)-\tau(s))\f$ and setting \f$\tau'(s)=\omega(s)\f$.
-    void apply_flow_and_set_time(VectorIntervalFunction, ScalarIntervalFunction omega);
+    void apply_flow_and_set_time(VectorIntervalFunction phi, ScalarIntervalFunction omega);
     //! \brief Apply the flow \a phi until the total elapsed time equals a constant \a tmax.
     //! Corresponds to replacing \f$\xi\f$ with
     //! \f$s\mapsto\phi(\xi(s),t_{\max}-\tau(s))\f$ and setting \f$\tau'(s)=t_{\max}\f$.
-    void apply_flow_and_set_time(VectorIntervalFunction, Float tmax);
+    void apply_flow_and_set_time(VectorIntervalFunction phi, Float tmax);
 
     //! \brief Set the time of evolution to \a tmax.
-    //! Corresponds to introducting the constraint \f$\tau(s) = t\f$.
-    void set_time(Float t);
-    //! \brief Set the time of evolution to \a tmax.
+    //! Corresponds to introducting the constraint \f$\tau(s) = tmax\f$.
+    void set_time(Float tmax);
+    //! \brief Set the time of evolution to \a omega.
     //! Corresponds to introducting the constraint \f$\tau(s) = \omega(s)\f$.
     void set_time(ScalarFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq \omega(s)\f$.
     void bound_time(ScalarIntervalFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq \omega(s)\f$.
     void bound_time(ScalarFunction omega);
-    //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}(s)\f$.
+    //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}\f$.
     void bound_time(Float tmax);
 
     //! \brief Set the maximum time of evolution to \a tmax. \deprecated

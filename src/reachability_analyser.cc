@@ -599,6 +599,30 @@ HybridReachabilityAnalyser::
 upper_chain_reach(const SystemType& system,
             const HybridImageSet& initial_set) const
 {
+	/* General procedure:
+		1) Build the working sets from the initial enclosures
+		2) While a working set exists, evolve the current working set for a step, where the following exceptions are handled:
+			a) If the evolution time limit is reached, adjoin both the reached set and the final set
+			b) If the enclosure of the initial set is larger than the maximum enclosure allowed, skip the evolution and adjoin the final set
+			c) If a blocking event is definitely initially active, or definitely finally active due to flow, adjoin the reached set only and discard the final set
+			d) If the bounding box of the final set is not a subset of the domain box, adjoin the reached set only and discard the final set (would be plausible to discard the reached set also)
+		3) Discretise the reached and final sets into cells
+		4) Remove the previous intermediate cells from the final cells and remove the previous reached cells from the reached cells
+		5) Mince the resulting final cells and put their enclosures into the new initial enclosures
+		6) Check activations of transitions for each cell (NOTE: the maximum allowed depth is related to the cells of the target location):
+			a) If a transition is definitely active for a cell: mince the cell, then for each resulting cell
+				i) enclose it
+				ii) apply the transition
+				iii) put the resulting enclosure into the new initial enclosures
+			b) If a transition is possibly active at the maximum allowed depth:
+				i) enclose it
+				ii) apply the transition
+				iii) put the resulting enclosure into the new initial enclosures
+			c) If a transition is possibly active at a depth lesser than the maximum allowed: split the cell and repeat a) for each of the two cells
+		7) Adjoin the reached cells into the previous reached cells, adjoin the final cells into the intermediate cells, then recombine both the resulting cells sets
+		8) If new initial enclosures exist, restart from 1), otherwise terminate.
+	*/
+
 	// Initialize the validity flag (will be invalidated if any restriction of the reached region is performed)
 	bool isValid = true;
 

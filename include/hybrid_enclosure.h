@@ -183,9 +183,9 @@ class HybridEnclosure
     //! Corresponds to replacing \f$D\f$ with \f$D\times T\f$, \f$\xi\f$ with
     //! \f$(s,t)\mapsto\phi(\xi(s),\omega(s)-\tau(s))\f$, and \f$\tau\f$ by \f$(s,t)\mapsto\tau(s)+t\f$.
     void apply_flow_and_bound_time(VectorIntervalFunction phi, ScalarIntervalFunction omega);
-    //! \brief Apply the flow \a phi over the time interval \f$[0,t_{\max}-\tau(s)]\f$ so that the final time bounded by a constant \a tmax.
+    //! \brief Apply the flow \a phi over the time interval \f$[0,t_{\max}-\tau(s)]\f$ so that the final time bounded by a constant \a \f$t_{\max}\f$.
     //! Corresponds to replacing \f$D\f$ with \f$D\times T\f$, \f$\xi\f$ with
-    //! \f$(s,t)\mapsto\phi(\xi(s),t)\f$, \f$\tau\f$ by \f$(s,t)\mapsto\tau(s)+t\f$ and constraint \f$\tau(s)+t\leq\tmax\f$.
+    //! \f$(s,t)\mapsto\phi(\xi(s),t)\f$, \f$\tau\f$ by \f$(s,t)\mapsto\tau(s)+t\f$ and constraint \f$\tau(s)+t\leq t_{\max}\f$.
     void apply_flow_and_bound_time(VectorIntervalFunction phi, Float tmax);
 
     //! \brief Apply the flow \a phi at the time \f$h\f$.
@@ -200,13 +200,13 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ with
     //! \f$s\mapsto\phi(\xi(s),\omega(s)-\tau(s))\f$ and setting \f$\tau'(s)=\omega(s)\f$.
     void apply_flow_and_set_time(VectorIntervalFunction phi, ScalarIntervalFunction omega);
-    //! \brief Apply the flow \a phi until the total elapsed time equals a constant \a tmax.
+    //! \brief Apply the flow \a phi until the total elapsed time equals a constant \a \f$t_{\max}\f$.
     //! Corresponds to replacing \f$\xi\f$ with
     //! \f$s\mapsto\phi(\xi(s),t_{\max}-\tau(s))\f$ and setting \f$\tau'(s)=t_{\max}\f$.
     void apply_flow_and_set_time(VectorIntervalFunction phi, Float tmax);
 
-    //! \brief Set the time of evolution to \a tmax.
-    //! Corresponds to introducting the constraint \f$\tau(s) = tmax\f$.
+    //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
+    //! Corresponds to introducting the constraint \f$\tau(s) = t_{\max}\f$.
     void set_time(Float tmax);
     //! \brief Set the time of evolution to \a omega.
     //! Corresponds to introducting the constraint \f$\tau(s) = \omega(s)\f$.
@@ -218,7 +218,7 @@ class HybridEnclosure
     //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}\f$.
     void bound_time(Float tmax);
 
-    //! \brief Set the maximum time of evolution to \a tmax. \deprecated
+    //! \brief Set the maximum time of evolution to \a \f$t_{\max}\f$. \deprecated
     //! Corresponds to introducting the constraint \f$\tau(s)\leq t_{\max}\f$.
     void set_maximum_time(DiscreteEvent event, Float tmax);
     //! \brief Set the current time-step to \f$h\f$. \deprecated

@@ -51,7 +51,7 @@ If \f$p_m(x)\leq0\f$ is a progress (time-can-pass,tcp) predicate valid in mode \
 and if \f$a_m(x)\geq0\f$ is the activation predicate of the \f$m^\mathrm{th}\f$ event, then we must have
 \f[ a_{m}( \phi_{m-1}(x_{m-1},t_{m}-t_{m-1}) ) \geq 0 . \f]
 If the event \f$e_{m}\f$ is urgent, then we have
-\f[ g_{m}( \phi(x_{m-1}(x_{m-1},[0,t_{m}-t_{m-1}]))\leq 0 \wedge g_{m}( \phi(x_{m-1}(x_{m-1},0,t_{m}-t_{m-1}) = 0 . \f]
+\f[ g_{m}( \phi(x_{m-1},[0,t_{m}-t_{m-1}]))\leq 0 \wedge g_{m}( \phi(x_{m-1},t_{m}-t_{m-1})) = 0 . \f]
 
 If we set \f$\delta_m=t_{m+1}-t_m\f$, then the equations reduce to
 \f[ \begin{aligned}
@@ -62,8 +62,8 @@ with constraints
 \f[ \begin{aligned}
         \delta_i &\geq 0; \\
         t-(t_0+\delta_0+\cdots+\delta_n) &\geq 0; \\[\jot]
-        g_{m}\circ\phi(x_{m-1},[0,\delta_m]) &\leq 0 \\
-        g_{m}\circ\phi(x_{m-1},\delta_m) &= 0 .
+        g_{m}\circ\phi(x_{m-1},[0,\delta_{m-1}]) &\leq 0 \\
+        g_{m}\circ\phi(x_{m-1},\delta_{m-1}) &= 0 .
 \end{aligned} \f]
 This is useful, as a constraint of the form \f$\delta_m\geq0\f$ can be encoded directly in the domain of a %ConstrainedImageSet, but a constraint of the form \f$t_{m+1}\geq t_m\f$ cannot be.
 

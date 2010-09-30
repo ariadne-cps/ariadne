@@ -216,7 +216,7 @@ wherever possible.
     varies over trajectories.
  -# If a guard function of an urgent or hitting event is strictly increasing
     at crossings with the guard set, attempt to compute the crossing time
-    function \f$\gamma_e(x)\f$ satisfying \f$g_e(x,\phi(\gamma_e(x))) = 0\f$.
+    function \f$\gamma_e(x)\f$ satisfying \f$g_e(\phi(x,\gamma_e(x))) = 0\f$.
     The crossing time function \f$\gamma_e\f$ must be a continuous function
     such that
      - If \f$g_e(\phi(x,t))=0\f$ for \f$x\in S\f$ and \f$t\in[0,h]\f$, then
@@ -228,7 +228,7 @@ wherever possible.
     set \f$S\f$. For points not in \f$S\f$, the value of \f$\gamma_e\f$ is
     arbritrary (since these points are prohibited by other constraints).
     <br>
-    This functionality is implemented in the HybridEvolverBase::_compute_crossing_times() method.
+    This functionality is implemented in the HybridEvolverBase::_compute_crossings() method.
  -# Compute the timing information of the continuous evolution.
     <br>
     The straightforward choice is to use the step size \a h of the flow

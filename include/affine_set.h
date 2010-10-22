@@ -55,6 +55,12 @@ class DiscreteEvent;
 class Figure;
 class CanvasInterface;
 
+//! \brief A constrained image set defined by affine functions.
+//!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$
+//!  where \f$f\f$, \f$g\f$ and \f$h\f$ are vector-valued affine functions on \f$\R^n\f$ and \f$D\f$ is a box in \f$\R^n\f$.
+//!
+//! Includes the class of zonotopes \f$Z=\{ f(x) \mid x\in D\}\f$, polyhedra \f$\{ f(x) \mid x\in\R^n \mid g(x)\leq 0\}\f$ and polytopes \f$\{ f(x) \mid x\in[0,\infty)^n \mid \sum_{i=1}^{n} x_i -1 = 0\}\f$.
+//! \sa ConstrainedImageSet
 class AffineSet
     : public DrawableInterface, public Loggable
 {

@@ -36,12 +36,13 @@ Given an initial state \f$x_0\f$, we wish to compute the set of all points
 reachable at times up to time \f$t\f$, and all points reached at exactly time \f$t\f$.
 We denote by \f$\Psi(x_0,t)\f$ the set of points reached starting at \f$x_0\f$ at time \f$t\f$.
 
-Suppose we start at a given initial state \f$(q_0,x_0)\f$ at time \f$t_0\f$ (which may depend on \f$x_0\f$), and undergo a sequence of events
+Suppose we start at a given initial state \f$(q_0,x_0)\f$ at time \f$t_0\f$ (which may depend on \f$x_0\f$), and undergo a sequence of \f$n\f$ events
 \f$e_{i}\f$ with guards \f$g_i\f$ and resets \f$r_i\f$.
 Let \f$\phi_i(x,t)\f$ denote the solution of the differential equation \f$ \dot{x}=f_i(x) \f$ valid after the \f$i^\mathrm{th}\f$ event.
-Let \f$t_i\f$ be the time of the \f$i^\mathrm{th}\f$ event.
-Then the state at time \f$t\f$ assuming that there are \f$n\f$ events is given by
-\f[ y(t) = y_n(t) = \phi_{n}(x_n,t-t_n) \f]
+Let \f$t_i\f$ be the time of the \f$i^\mathrm{th}\f$ event, and \f$x_i\f$ the state immediately after the \f$i^\mathrm{th}\f$ event.
+
+Then the state at time \f$t\f$ is given by
+\f[ y(t) = \phi_{n}(x_n,t-t_n) \f]
 where
 \f[ x_{m+1} = r_{m+1}(\phi_{m}(x_m,t_{m+1}-t_m)  \f]
 and the times \f$t_m\f$ satisfy
@@ -53,7 +54,9 @@ and if \f$a_m(x)\geq0\f$ is the activation predicate of the \f$m^\mathrm{th}\f$ 
 If the event \f$e_{m}\f$ is urgent, then we have
 \f[ g_{m}( \phi(x_{m-1},[0,t_{m}-t_{m-1}]))\leq 0 \wedge g_{m}( \phi(x_{m-1},t_{m}-t_{m-1})) = 0 . \f]
 
-If we set \f$\delta_m=t_{m+1}-t_m\f$, then the equations reduce to
+\subsection hybrid_evolution_dwell_time Dwell time
+
+If we set \f$\delta_m=t_{m+1}-t_m\f$, the dwell time in the \f$i^\mathrm{th}\f$ location, then the equations reduce to
 \f[ \begin{aligned}
         y_n(t) &= \phi_{n}(x_n,t-(t_0+\delta_0+\cdots+\delta_n)) \\
         x_{m+1} &= r_{m+1}(\phi_{m}(x_m,\delta_m)) \\
@@ -62,7 +65,7 @@ with constraints
 \f[ \begin{aligned}
         \delta_i &\geq 0; \\
         t-(t_0+\delta_0+\cdots+\delta_n) &\geq 0; \\[\jot]
-        g_{m}\circ\phi(x_{m-1},[0,\delta_{m-1}]) &\leq 0 \\
+        p_m\circ\phi_m(x_m,[0,\delta_{m}]) &\leq 0 \\
         g_{m}\circ\phi(x_{m-1},\delta_{m-1}) &= 0 .
 \end{aligned} \f]
 This is useful, as a constraint of the form \f$\delta_m\geq0\f$ can be encoded directly in the domain of a %ConstrainedImageSet, but a constraint of the form \f$t_{m+1}\geq t_m\f$ cannot be.

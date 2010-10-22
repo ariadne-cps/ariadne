@@ -348,6 +348,20 @@ void TestSimpleHybridEvolver::test_tangency() const {
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
+    ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
+    ARIADNE_TEST_PRINT(orbit);
+
+/*
+    const uint depth = 2u;
+    GridTreeSet reach_paving(2);
+    for(uint i=0; i!=orbit.reach().size(); ++i) {
+        orbit.reach()[q][i].adjoin_outer_approximation_to(reach_paving,depth);
+    }
+    GridTreeSet final_paving(2);
+    for(uint i=0; i!=orbit.final().size(); ++i) {
+        orbit.final()[q][i].adjoin_outer_approximation_to(final_paving,depth);
+    }
+*/
 
     plot(cstr("test_"+evolver_name+"-tangency"),Box(2, -2.0,+2.0, -2.0, +1.0),
          //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),

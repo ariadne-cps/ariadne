@@ -230,6 +230,7 @@ _extract_transitions(DiscreteLocation const& location,
                      HybridAutomatonInterface const& system) const
 {
     Map<DiscreteEvent,TransitionData> transitions;
+    //FIXME: Should extract ALL transitions
     Set<DiscreteEvent> events = system.urgent_events(location);
     for(Set<DiscreteEvent>::const_iterator event_iter=events.begin();
         event_iter!=events.end(); ++event_iter)
@@ -371,6 +372,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_crossings(...)\n");
     Map<DiscreteEvent,CrossingData> crossing_data;
+    crossing_data.clear();
+    uint crossing_data_size=crossing_data.size();
+
     Box flow_bounds=flow.range();
     for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
         event_iter!=active_events.end(); ++event_iter)
@@ -655,6 +659,7 @@ _apply_time_step(EvolutionData& evolution_data,
     final_set.new_parameter_constraint(step_event,timing_data.remaining_time<=timing_data.evolution_time);
 
     // Apply constraints on reach, evolve and final sets due to events
+    // FIXME: If there is a discrete transition, the guard may be
     for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
         event_iter!=blocking_events.end(); ++event_iter)
     {

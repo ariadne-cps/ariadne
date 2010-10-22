@@ -92,6 +92,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     ScalarFunction v=ScalarFunction::coordinate(2,1);
     double lambda=0.5;
     bouncing_ball.new_mode(q,(v,-c));
+    ARIADNE_TEST_WARN("IMPACT case not tested properly; instead adding small constant");
     bouncing_ball.new_transition(e,q,q,(x+0.000001,-lambda*v),-x,impact);
 
     double height=2.0;

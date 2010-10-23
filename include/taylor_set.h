@@ -290,6 +290,7 @@ class TaylorConstrainedImageSet
     void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
     void affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
     void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
 
     AffineSet affine_approximation() const;
     AffineSet affine_over_approximation() const;
@@ -300,6 +301,7 @@ class TaylorConstrainedImageSet
     void draw(CanvasInterface&) const;
     void box_draw(CanvasInterface&) const;
     void affine_draw(CanvasInterface&, uint=1u) const;
+    void grid_draw(CanvasInterface&, uint=1u) const;
     std::ostream& write(std::ostream&) const;
   private:
     void _check() const;

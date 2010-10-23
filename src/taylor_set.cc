@@ -833,6 +833,7 @@ void TaylorImageSet::draw(CanvasInterface& fig) const {
 #ifdef HAVE_CAIRO_H
 
 #include <cairo/cairo.h>
+#include <dense_differential.h>
 
 namespace Ariadne {
 
@@ -1334,7 +1335,7 @@ ScalarFunction make_function(const ScalarTaylorFunction& stf) {
     return ScalarFunction(stf.polynomial())+Real(Interval(-stf.error(),+stf.error()));
 }
 
-void adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
+void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
 {
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
@@ -1413,10 +1414,10 @@ void adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorFun
         Pair<Box,Box> sd=d.split();
         Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         Point ny = midpoint(sd.first);
-        adjoin_outer_approximation_to(r, sd.first, fg, c, b, nx, ny, e);
+        optimal_constraint_adjoin_outer_approximation_to(r, sd.first, fg, c, b, nx, ny, e);
         nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
-        adjoin_outer_approximation_to(r, sd.second, fg, c, b, x, ny, e);
+        optimal_constraint_adjoin_outer_approximation_to(r, sd.second, fg, c, b, x, ny, e);
     }
 
     if(b.tree_depth()>=e*int(b.dimension())) {
@@ -1427,10 +1428,89 @@ void adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorFun
         Pair<GridCell,GridCell> sb = b.split();
         Point sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         Point sy = y;
-        adjoin_outer_approximation_to(r,d,fg,c,sb.first,sx,sy,e);
+        optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.first,sx,sy,e);
         sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         sy = y;
-        adjoin_outer_approximation_to(r,d,fg,c,sb.second,sx,sy,e);
+        optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.second,sx,sy,e);
+    }
+
+
+}
+
+
+Float widths(const IntervalVector& bx) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        res+=(bx[i].width());
+    }
+    return res;
+}
+
+// Adjoin an over-approximation to the solution of $f(D)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
+void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, const VectorFunction& f, const VectorFunction& g, const Box& c, const GridCell& b, int e)
+{
+    uint verbosity=0u;
+
+    const uint m=d.size();
+    const uint nf=f.result_size();
+    const uint ng=g.result_size();
+    ARIADNE_LOG(2,"\nconstraint_adjoin_outer_approximation(...)\n");
+    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
+
+    ConstraintSolver constraint_solver;
+
+    if(subset(b,p)) {
+        return;
+    }
+
+    // Try to prove disjointness
+    const Box& old_domain=d;
+    Box new_domain=old_domain;
+    Box bx=b.box();
+
+    ARIADNE_LOG(6,"  dom="<<old_domain<<"\n");
+    for(uint i=0; i!=nf; ++i) {
+        constraint_solver.hull_reduce(f[i]==bx[i],new_domain);
+    }
+    for(uint i=0; i!=ng; ++i) {
+        constraint_solver.hull_reduce(g[i]==c[i],new_domain);
+    }
+    ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
+    if(new_domain.empty()) {
+        ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
+        return;
+    }
+
+    for(uint i=0; i!=nf; ++i) {
+        constraint_solver.hull_reduce(f[i]==bx[i],new_domain);
+    }
+    for(uint i=0; i!=ng; ++i) {
+        constraint_solver.hull_reduce(g[i]==c[i],new_domain);
+    }
+    ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
+    if(new_domain.empty()) {
+        ARIADNE_LOG(4,"  Proved disjointness using box reduce\n");
+        return;
+    }
+    ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
+
+    Box fd=f(new_domain);
+    if(fd.disjoint(bx)) { return; }
+
+    if(4*widths(fd)>widths(bx)) {
+        //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
+        ARIADNE_LOG(4,"  Splitting domain\n");
+        Pair<Box,Box> sd=new_domain.split();
+        constraint_adjoin_outer_approximation_to(p, sd.first, f, g, c, b, e);
+        constraint_adjoin_outer_approximation_to(p, sd.second, f, g, c, b, e);
+    } else if(b.tree_depth()>=e*int(b.dimension())) {
+        ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
+        p.adjoin(b);
+    } else {
+        ARIADNE_LOG(4,"  Splitting cell "<<b.box()<<"\n");
+        Pair<GridCell,GridCell> sb = b.split();
+        constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.first,e);
+        constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.second,e);
     }
 
 
@@ -1441,7 +1521,8 @@ void adjoin_outer_approximation_to(GridTreeSet&, const Box& domain, const Vector
 
 void TaylorConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
-    this->affine_adjoin_outer_approximation_to(paving,depth);
+    //this->affine_adjoin_outer_approximation_to(paving,depth);
+    this->constraint_adjoin_outer_approximation_to(paving,depth);
     //this->this->_adjoin_outer_approximation_to(paving,this->bounding_box(),depth);
 }
 
@@ -1465,6 +1546,31 @@ void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTre
     const Box& d=this->domain();
     const VectorFunction& f=this->function();
 
+    VectorFunction g(this->_constraints.size()+this->_equations.size(),d.size());
+    uint i=0;
+    for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
+        g.set(i,make_function(*citer));
+        ++i;
+    }
+    for(List<ScalarTaylorFunction>::const_iterator eiter=this->_equations.begin(); eiter!=this->_equations.end(); ++eiter) {
+        g.set(i,make_function(*eiter));
+        ++i;
+    }
+    GridCell b=GridCell::smallest_enclosing_primary_cell(f(d),p.grid());
+    IntervalVector cc(this->_constraints.size(),Interval(-inf<Float>(),0.0));
+    IntervalVector ce(this->_equations.size(),Interval(0.0,0.0));
+    Box c=intersection(Box(g(d)),Box(join(cc,ce)));
+
+    Ariadne::constraint_adjoin_outer_approximation_to(p,d,f,g,c,b,e);
+    p.recombine();
+}
+
+void TaylorConstrainedImageSet::optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& p, int e) const
+{
+    ARIADNE_ASSERT(p.dimension()==this->dimension());
+    const Box& d=this->domain();
+    const VectorFunction& f=this->function();
+
     VectorFunction g(this->_constraints.size(),d.size());
     uint i=0;
     for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
@@ -1481,7 +1587,7 @@ void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTre
 
     VectorFunction fg=join(f,g);
 
-    Ariadne::adjoin_outer_approximation_to(p,d,fg,c,b,x,y,e);
+    Ariadne::optimal_constraint_adjoin_outer_approximation_to(p,d,fg,c,b,x,y,e);
 
 }
 
@@ -1533,8 +1639,11 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
 
 
 void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
-    //this->box_draw(canvas);
-    this->affine_draw(canvas,0u);
+    if(this->number_of_zero_constraints()==0) {
+        this->affine_draw(canvas,2u);
+    } else {
+        this->box_draw(canvas);
+    }
 }
 
 void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {
@@ -1542,7 +1651,7 @@ void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {
 }
 
 void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accuracy) const {
-    static const int depth=accuracy;
+    const int depth=accuracy;
     List<Box> subdomains;
     List<Box> splitdomains;
     subdomains.append(this->domain());
@@ -1569,6 +1678,10 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
     }
 };
 
+void TaylorConstrainedImageSet::grid_draw(CanvasInterface& canvas, uint accuracy) const {
+    // TODO: Project to grid first
+    this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas);
+}
 
 Map<List<DiscreteEvent>,ScalarFunction> pretty(const Map<List<DiscreteEvent>,ScalarTaylorFunction>& constraints) {
     Map<List<DiscreteEvent>,ScalarFunction> result;

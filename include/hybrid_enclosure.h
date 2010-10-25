@@ -271,6 +271,8 @@ class HybridEnclosure
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
   private:
+    // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
+    void _apply_flow(VectorIntervalFunction phi, Float step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
     void _apply_flow(VectorIntervalFunction phi, Float step, ScalarIntervalFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)

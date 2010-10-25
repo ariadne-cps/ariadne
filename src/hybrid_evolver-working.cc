@@ -486,10 +486,8 @@ _compute_timing(Set<DiscreteEvent>& active_events,
 
 
 
-
-
-
-
+// Apply guard to a single set without splitting.
+// In the case of concave crossings, this can lead to major over-approximation.
 void
 _apply_guard(HybridEnclosure& set,
              const VectorIntervalFunction& starting_state,
@@ -540,7 +538,9 @@ _apply_guard(HybridEnclosure& set,
             // we approximate based on the semantics
             // TODO: Support splitting the set.
             switch(semantics) {
-                case UPPER_SEMANTICS: set.new_parameter_constraint(event,final_guard<=0.0); break;
+                case UPPER_SEMANTICS:
+                    set.new_parameter_constraint(event,final_guard<=0.0);
+                    break;
                 case LOWER_SEMANTICS: set.new_parameter_constraint(event,maximal_guard<=0.0); break;
                 default: assert(false);
             }
@@ -575,6 +575,117 @@ _apply_guard(HybridEnclosure& set,
 
 
 
+
+// Apply guard to a single set.
+// In the case of concave crossings, splits the set into two, one part
+// corresponding to points which actually hit the set (and stop on first crossing)
+// the other part corresponding to points which miss the set.
+void
+_apply_guard(HybridEnclosure& set,
+             HybridEnclosure& extra_set,
+             const VectorIntervalFunction& starting_state,
+             const VectorIntervalFunction& flow,
+             const ScalarIntervalFunction& elapsed_time,
+             const DiscreteEvent event,
+             const ScalarFunction& guard_function,
+             const CrossingData crossing_data,
+             const Semantics semantics)
+{
+    static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
+    switch(crossing_data.crossing_kind) {
+        case INCREASING_CROSSING:
+            //set.new_state_constraint(event, guard_function <= 0.0);
+            set.new_invariant(event, guard_function);
+            // Alternatively:
+            // set.new_parameter_constraint(event, elapsed_time <= compose(crossing_data.crossing_time,starting_state) );
+            break;
+        case CONVEX_CROSSING:
+            //set.new_state_constraint(event, guard_function <= 0.0);
+            set.new_invariant(event, guard_function);
+            break;
+        case CONCAVE_CROSSING: {
+            ScalarIntervalFunction critical_time = compose(crossing_data.critical_time,starting_state);
+            ScalarIntervalFunction final_guard
+                = compose( guard_function, compose( flow, join(starting_state, elapsed_time) ) );
+            ScalarIntervalFunction maximal_guard
+                = compose( guard_function, compose( flow, join(starting_state, critical_time) ) );
+            // If no points in the set arise from trajectories which will later leave the progress set,
+            // then we only need to look at the maximum value of the guard.
+            HybridEnclosure eventually_hitting_set=set;
+            eventually_hitting_set.new_parameter_constraint( event, elapsed_time <= critical_time );
+            eventually_hitting_set.new_parameter_constraint( event, maximal_guard >= 0.0);
+            if(definitely(eventually_hitting_set.empty())) {
+                set.new_parameter_constraint(event, maximal_guard <= 0.0);
+                break;
+            }
+            // If no points in the set arise from trajectories which leave the progress set and
+            // later return, then we only need to look at the guard at the final value
+            HybridEnclosure returning_set=set;
+            returning_set.new_parameter_constraint( event, elapsed_time >= critical_time );
+            returning_set.new_parameter_constraint( event, final_guard <= 0.0 );
+            if(definitely(returning_set.empty())) {
+                set.new_parameter_constraint(event, final_guard <= 0.0);
+                break;
+            }
+            // Split the set into two components, one corresponding to
+            // points which miss the guard completely, the other to points which
+            // eventually hit the guard, ensuring that the set stops at the first crossing
+            extra_set=set;
+            set.new_parameter_constraint(event,maximal_guard<=0.0);
+            extra_set.new_parameter_constraint( event, elapsed_time <= critical_time );
+            extra_set.new_state_constraint(event,guard_function<=0.0);
+            break;
+            // Code below is always exact, but uses two sets
+            // set1.new_parameter_constraint(event,final_guard <= 0);
+            // set2.new_parameter_constraint(event, elapsed_time <= critical_time);
+            // set1.new_parameter_constraint(event, maximal_guard <= 0.0);
+            // set2.new_parameter_constraint(event, elapsed_time >= critical_time);
+        }
+        case DEGENERATE_CROSSING: {
+            // The crossing with the guard set is not one of the kinds handles above.
+            // We obtain an over-appproximation by testing at finitely many time points
+            // TODO: Handle lower semantics
+            ARIADNE_ASSERT(semantics==UPPER_SEMANTICS);
+            const uint n=SUBDIVISIONS_FOR_DEGENERATE_CROSSING;
+            for(uint i=0; i!=n; ++i) {
+                Float alpha=Float(i+1)/n;
+                ScalarIntervalFunction intermediate_guard
+                    = compose( guard_function, compose( flow, join(starting_state, alpha*elapsed_time) ) );
+                set.new_parameter_constraint(event, intermediate_guard <= 0);
+            }
+            // FIXME: Lower semantics
+            break;
+        }
+        case POSITIVE_CROSSING:
+        case NEGATIVE_CROSSING:
+        case DECREASING_CROSSING:
+            break;
+    }
+}
+
+
+void
+_apply_guard(List<HybridEnclosure>& sets,
+             const VectorIntervalFunction& starting_state,
+             const VectorIntervalFunction& flow,
+             const ScalarIntervalFunction& elapsed_time,
+             const DiscreteEvent event,
+             const ScalarFunction& guard_function,
+             const CrossingData crossing_data,
+             const Semantics semantics)
+{
+    List<HybridEnclosure>::iterator end=sets.end();
+    for(List<HybridEnclosure>::iterator iter=sets.begin(); iter!=end; ++iter) {
+        HybridEnclosure& set=*iter;
+        HybridEnclosure extra_set;
+        _apply_guard(set,extra_set,starting_state,flow,elapsed_time,event,guard_function,crossing_data,semantics);
+        if(extra_set.dimension()!=0) {
+            sets.append(extra_set);
+        }
+    }
+}
+
+
 DiscreteEvent step_time_event("step_time");
 
 void GeneralHybridEvolver::
@@ -588,6 +699,8 @@ _apply_time_step(EvolutionData& evolution_data,
 {
     // FIXME: Make semantics function argument
     static const Semantics semantics = UPPER_SEMANTICS;
+    static const DiscreteEvent final_event("_tmax_");
+    static const DiscreteEvent step_event("_h_");
 
     ARIADNE_LOG(2,"GeneralHybridEvolver::_apply_time_step(...)\n");
     //ARIADNE_LOG(4,"evolution_time="<<evolution_time.range()<<" final_time="<<final_time<<"\n");
@@ -614,40 +727,7 @@ _apply_time_step(EvolutionData& evolution_data,
     ARIADNE_LOG(6,"transition_events="<<transition_events<<"\n");
     ARIADNE_LOG(6,"blocking_events="<<blocking_events<<"\n");
 
-    // Compute reach and evolve sets
-    // TODO: This should probably be a separate function
-    HybridEnclosure reach_set=starting_set;
-    HybridEnclosure evolve_set=starting_set;
-    HybridEnclosure final_set=starting_set;
-
-    // Apply the flow to the reach and evolve sets
-    switch(timing_data.step_kind) {
-        case FULL_STEP:
-            reach_set.apply_flow_for(flow,timing_data.step_size);
-            evolve_set.apply_flow_step_for(flow,timing_data.step_size);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
-            break;
-        case CREEP_STEP:
-            // TODO: Use parameterised time here
-            reach_set.apply_flow_for(flow,timing_data.spacial_evolution_time);
-            evolve_set.apply_flow_step_for(flow,timing_data.spacial_evolution_time);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
-            break;
-        case UNWIND_STEP:
-            reach_set.apply_flow_to(flow,timing_data.finishing_time);
-            evolve_set.apply_flow_step_to(flow,timing_data.finishing_time);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
-            break;
-        case FINAL_STEP:
-            reach_set.apply_flow_to(flow,timing_data.final_time);
-            evolve_set.apply_flow_step_to(flow,timing_data.final_time);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
-            break;
-    }
-    ARIADNE_LOG(6,"flowed_set="<<reach_set<<"\n");
-
-    // Apply evolution time constraints to reach and final sets
-    DiscreteEvent step_event("_h_");
+    // Cache starting state and time functions
     VectorIntervalFunction starting_state=starting_set.space_function();
     VectorIntervalFunction embedded_starting_state=embed(starting_set.space_function(),timing_data.time_domain);
     ScalarIntervalFunction embedded_reach_time=embed(starting_set.parameter_domain(),timing_data.time_coordinate);
@@ -655,7 +735,82 @@ _apply_time_step(EvolutionData& evolution_data,
     ScalarIntervalFunction reach_step_time=embedded_reach_time;
     ARIADNE_LOG(8,"embedded_reach_time="<<embedded_reach_time<<"\n")
     ARIADNE_LOG(8,"embedded_evolution_time="<<embedded_evolution_time<<"\n")
-    reach_set.new_parameter_constraint(step_event,embedded_reach_time<=embedded_evolution_time);
+
+
+    {
+        // Compute the reach set, allowing for possibility of splitting
+        // due to non-transverse guards
+        List<HybridEnclosure> reach_sets;
+        reach_sets.append(starting_set);
+        HybridEnclosure& reach_set=reach_sets.front();
+
+        ARIADNE_LOG(4,"\n");
+
+        switch(timing_data.step_kind) {
+            case FULL_STEP:
+                reach_set.apply_flow_for(flow,timing_data.step_size);
+                break;
+            case CREEP_STEP:
+                reach_set.apply_flow_for(flow,timing_data.spacial_evolution_time);
+                break;
+            case UNWIND_STEP:
+                reach_set.apply_flow_to(flow,timing_data.finishing_time);
+                break;
+            case FINAL_STEP:
+                reach_set.apply_flow_to(flow,timing_data.final_time);
+                break;
+        }
+        ARIADNE_LOG(6,"unconstrained_reach_set="<<reach_set<<"\n");
+
+        if(timing_data.step_kind!=FINAL_STEP) {
+            reach_set.new_parameter_constraint(step_event,embedded_reach_time<=embedded_evolution_time);
+        }
+
+        // Apply constraints on reach set due to events
+        for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
+            event_iter!=blocking_events.end(); ++event_iter)
+        {
+            DiscreteEvent event=*event_iter;
+            const ScalarFunction& event_guard_function=transitions[event].guard_function;
+            const CrossingData& event_crossing_data=crossing_data[event];
+            _apply_guard(reach_sets,embedded_starting_state,flow,embedded_reach_time,
+                         event,event_guard_function,event_crossing_data,semantics);
+        }
+
+        evolution_data.reach_sets.append(reach_sets);
+
+    } // Done computing reach sets
+
+
+
+
+    // Compute evolve and final sets
+    // TODO: This should probably be a separate function
+    HybridEnclosure evolve_set=starting_set;
+    HybridEnclosure final_set=starting_set;
+
+    // Apply the flow to the reach and evolve sets
+    ARIADNE_LOG(6,"step_kind="<<timing_data.step_kind<<"\n");
+    switch(timing_data.step_kind) {
+        case FULL_STEP:
+            evolve_set.apply_flow_step_for(flow,timing_data.step_size);
+            final_set.apply_flow_step_to(flow,timing_data.final_time);
+            break;
+        case CREEP_STEP:
+            // TODO: Use parameterised time here
+            evolve_set.apply_flow_step_for(flow,timing_data.spacial_evolution_time);
+            final_set.apply_flow_step_to(flow,timing_data.final_time);
+            break;
+        case UNWIND_STEP:
+            evolve_set.apply_flow_step_to(flow,timing_data.finishing_time);
+            final_set.apply_flow_step_to(flow,timing_data.final_time);
+            break;
+        case FINAL_STEP:
+            evolve_set.apply_flow_step_to(flow,timing_data.final_time);
+            final_set.apply_flow_step_to(flow,timing_data.final_time);
+            break;
+    }
+
     final_set.new_parameter_constraint(step_event,timing_data.remaining_time<=timing_data.evolution_time);
 
     // Apply constraints on reach, evolve and final sets due to events
@@ -666,18 +821,11 @@ _apply_time_step(EvolutionData& evolution_data,
         DiscreteEvent event=*event_iter;
         const ScalarFunction& event_guard_function=transitions[event].guard_function;
         const CrossingData& event_crossing_data=crossing_data[event];
-        _apply_guard(reach_set,embedded_starting_state,flow,embedded_reach_time,
-                     event,event_guard_function,event_crossing_data,semantics);
         _apply_guard(evolve_set,starting_state,flow,timing_data.evolution_time,
                      event,event_guard_function,event_crossing_data,semantics);
         _apply_guard(final_set,starting_state,flow,timing_data.remaining_time,
                      event,event_guard_function,event_crossing_data,semantics);
     }
-
-    // Apply final timing constraints to reach and evolve sets
-    DiscreteEvent final_event("_tmax_");
-    reach_set.new_parameter_constraint(final_event,reach_set.time_function()<=timing_data.final_time);
-    evolve_set.new_parameter_constraint(final_event,evolve_set.time_function()<=timing_data.final_time);
 
     // Compute final set, and apply constraints to reach and evolve set
     // if necessary
@@ -695,9 +843,6 @@ _apply_time_step(EvolutionData& evolution_data,
             evolution_data.working_sets.append(evolve_set);
         }
     }
-
-    ARIADNE_LOG(4,"reach_set="<<reach_set<<"\n");
-    evolution_data.reach_sets.append(reach_set);
 
 
     // Compute jump sets

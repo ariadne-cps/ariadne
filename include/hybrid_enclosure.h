@@ -171,39 +171,39 @@ class HybridEnclosure
     //! \brief Apply the flow \a phi over the time interval up to time \a h, i.e. over \f$[0,h]\f$.
     //! Corresponds to replacing \f$D\f$ with \f$D\times [0,h]\f$, \f$\xi\f$ with
     //! \f$(s,t)\mapsto\phi(\xi(s),t)\f$, and \f$\tau\f$ with \f$(s,t)\mapsto\tau(s)+t\f$.
-    void apply_flow(VectorIntervalFunction phi, Float h);
+    void apply_flow_for(VectorIntervalFunction phi, Float h);
     //! \brief Apply the flow \a phi over the time interval ending at \a eps, i.e. \f$[0,\varepsilon(x)]\f$.
     //! Assume that \f$\varepsilon(x)\in[0,h]\f$ for all \f$x\in S\f$.
     //! Corresponds to replacing \f$D\f$ with \f$D\times T\f$, \f$f\f$ with
     //! \f$(s,t)\mapsto\phi(f(s),t)\f$, and introducing a new constraint \f$t\leq \epsilon(f(s))\f$.
     //! The rationale for keeping the flow time in terms of the current state is to allow for an incremental
     //! approach to constructing the constraints.
-    void apply_flow(VectorIntervalFunction phi, ScalarIntervalFunction eps);
+    void apply_flow_for(VectorIntervalFunction phi, ScalarIntervalFunction eps);
     //! \brief Apply the flow \a phi over the time interval \f$[0,\omega(s)-\tau(s)]\f$ so that the final time is \a omega.
     //! Corresponds to replacing \f$D\f$ with \f$D\times T\f$, \f$\xi\f$ with
     //! \f$(s,t)\mapsto\phi(\xi(s),\omega(s)-\tau(s))\f$, and \f$\tau\f$ by \f$(s,t)\mapsto\tau(s)+t\f$.
-    void apply_flow_and_bound_time(VectorIntervalFunction phi, ScalarIntervalFunction omega);
+    void apply_flow_to(VectorIntervalFunction phi, ScalarIntervalFunction omega);
     //! \brief Apply the flow \a phi over the time interval \f$[0,t_{\max}-\tau(s)]\f$ so that the final time bounded by a constant \a \f$t_{\max}\f$.
     //! Corresponds to replacing \f$D\f$ with \f$D\times T\f$, \f$\xi\f$ with
     //! \f$(s,t)\mapsto\phi(\xi(s),t)\f$, \f$\tau\f$ by \f$(s,t)\mapsto\tau(s)+t\f$ and constraint \f$\tau(s)+t\leq t_{\max}\f$.
-    void apply_flow_and_bound_time(VectorIntervalFunction phi, Float tmax);
+    void apply_flow_to(VectorIntervalFunction phi, Float tmax);
 
     //! \brief Apply the flow \a phi at the time \f$h\f$.
     //! Corresponds to setting \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s) = \tau(s)+h\f$.
-    void apply_flow_step(VectorIntervalFunction phi, Float h);
+    void apply_flow_step_for(VectorIntervalFunction phi, Float h);
     //! \brief Apply the flow \a phi for the time \a eps.
     //! Corresponds to replacing \f$f\f$ with
     //! \f$s\mapsto\phi(\xi(s),\varepsilon(\xi(s)))\f$ and \f$\tau'(s) = \tau(s)+\varepsilon(\xi(s))\f$.
     //! The function \f$\varepsilon\f$ is required to satisfy \f$\varepsilon(x)\in[0,h]\f$ whenever \f$x\in S\f$.
-    void apply_flow_step(VectorIntervalFunction phi, ScalarIntervalFunction eps);
+    void apply_flow_step_for(VectorIntervalFunction phi, ScalarIntervalFunction eps);
     //! \brief Apply the flow \a phi until the total elapsed time equals \a omega, a function on the parameter domain.
     //! Corresponds to replacing \f$\xi\f$ with
     //! \f$s\mapsto\phi(\xi(s),\omega(s)-\tau(s))\f$ and setting \f$\tau'(s)=\omega(s)\f$.
-    void apply_flow_and_set_time(VectorIntervalFunction phi, ScalarIntervalFunction omega);
+    void apply_flow_step_to(VectorIntervalFunction phi, ScalarIntervalFunction omega);
     //! \brief Apply the flow \a phi until the total elapsed time equals a constant \a \f$t_{\max}\f$.
     //! Corresponds to replacing \f$\xi\f$ with
     //! \f$s\mapsto\phi(\xi(s),t_{\max}-\tau(s))\f$ and setting \f$\tau'(s)=t_{\max}\f$.
-    void apply_flow_and_set_time(VectorIntervalFunction phi, Float tmax);
+    void apply_flow_step_to(VectorIntervalFunction phi, Float tmax);
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
     //! Corresponds to introducting the constraint \f$\tau(s) = t_{\max}\f$.

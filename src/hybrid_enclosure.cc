@@ -241,18 +241,18 @@ void HybridEnclosure::_apply_flow(VectorIntervalFunction phi, Float h, ScalarInt
     this->_negative_constraints.append(time_step_function-embed(elps,time_domain));
 }
 
-void HybridEnclosure::apply_flow(VectorIntervalFunction phi, Float h)
+void HybridEnclosure::apply_flow_for(VectorIntervalFunction phi, Float h)
 {
     this->_apply_flow(phi,h,ScalarIntervalFunction::constant(this->_domain,h));
 }
 
-void HybridEnclosure::apply_flow(VectorIntervalFunction phi, ScalarIntervalFunction eps)
+void HybridEnclosure::apply_flow_for(VectorIntervalFunction phi, ScalarIntervalFunction eps)
 {
     Float h=phi.domain()[phi.domain().size()-1].upper();
     this->_apply_flow(phi,h,unchecked_compose(eps,this->_state));
 }
 
-void HybridEnclosure::apply_flow_and_bound_time(VectorIntervalFunction phi, ScalarIntervalFunction omega)
+void HybridEnclosure::apply_flow_to(VectorIntervalFunction phi, ScalarIntervalFunction omega)
 {
     ARIADNE_ASSERT_MSG(phi.argument_size()==this->dimension()+1,
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
@@ -263,7 +263,7 @@ void HybridEnclosure::apply_flow_and_bound_time(VectorIntervalFunction phi, Scal
     this->bound_time(embed(omega,Interval(0,h)));
 }
 
-void HybridEnclosure::apply_flow_and_bound_time(VectorIntervalFunction phi, Float tmax)
+void HybridEnclosure::apply_flow_to(VectorIntervalFunction phi, Float tmax)
 {
     ARIADNE_ASSERT_MSG(phi.argument_size()==this->dimension()+1,
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
@@ -283,7 +283,7 @@ void HybridEnclosure::_apply_flow_step(VectorIntervalFunction phi, ScalarInterva
     this->_state=unchecked_compose(phi,join(this->_state,elps));
 }
 
-void HybridEnclosure::apply_flow_step(VectorIntervalFunction phi, Float h)
+void HybridEnclosure::apply_flow_step_for(VectorIntervalFunction phi, Float h)
 {
     // xi'(s) = phi(xi(s),eps(s)) where range(eps) in [0,h]
     // tau'(s) = tau(s)+eps(s)
@@ -292,7 +292,7 @@ void HybridEnclosure::apply_flow_step(VectorIntervalFunction phi, Float h)
     this->_apply_flow_step(phi,ScalarIntervalFunction::constant(this->_domain,h));
 }
 
-void HybridEnclosure::apply_flow_step(VectorIntervalFunction phi, ScalarIntervalFunction eps)
+void HybridEnclosure::apply_flow_step_for(VectorIntervalFunction phi, ScalarIntervalFunction eps)
 {
     ARIADNE_ASSERT_MSG(phi.argument_size()==this->dimension()+1,
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
@@ -301,7 +301,7 @@ void HybridEnclosure::apply_flow_step(VectorIntervalFunction phi, ScalarInterval
     this->_apply_flow_step(phi,unchecked_compose(eps,this->_state));
 }
 
-void HybridEnclosure::apply_flow_and_set_time(VectorIntervalFunction phi, ScalarIntervalFunction omega)
+void HybridEnclosure::apply_flow_step_to(VectorIntervalFunction phi, ScalarIntervalFunction omega)
 {
     ARIADNE_ASSERT_MSG(phi.argument_size()==this->dimension()+1,
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
@@ -311,7 +311,7 @@ void HybridEnclosure::apply_flow_and_set_time(VectorIntervalFunction phi, Scalar
     this->_time=omega;
 }
 
-void HybridEnclosure::apply_flow_and_set_time(VectorIntervalFunction phi, Float tmax)
+void HybridEnclosure::apply_flow_step_to(VectorIntervalFunction phi, Float tmax)
 {
     ARIADNE_ASSERT_MSG(phi.argument_size()==this->dimension()+1,
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");

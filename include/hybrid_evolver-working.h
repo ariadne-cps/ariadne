@@ -427,6 +427,7 @@ std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
 //! \brief The kind of step taken in the evolution
 //! \relates HybridEvolverInterface
 enum StepKind {
+    // DOCUMENTATION: Explain step kinds
     FULL_STEP, //!< The step is taken for a fixed time \a h. The actual step length depends only on the starting state.
     CREEP_STEP, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
     UNWIND_STEP, //!< The step is taken up to a time \f$\omega(s)\f$ depending on the parameterisation of the starting set.

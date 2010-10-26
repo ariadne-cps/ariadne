@@ -313,6 +313,7 @@ _compute_flow(VectorFunction dynamic,
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
     // Compute flow and actual time step size used
+    // DOCUMENTATION: Why do we restrict to a subdomain?
     TaylorIntegrator integrator(32,this->parameters().flow_accuracy);
     VectorIntervalFunction flow_model=integrator.flow_step(dynamic,initial_box,maximum_step_size);
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
@@ -373,8 +374,8 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_crossings(...)\n");
     Map<DiscreteEvent,CrossingData> crossing_data;
     crossing_data.clear();
-    uint crossing_data_size=crossing_data.size();
 
+    // DOCUMENTATION: Explain why certain computations are performed in different cases.
     Box flow_bounds=flow.range();
     for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
         event_iter!=active_events.end(); ++event_iter)
@@ -429,6 +430,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
                 Map<DiscreteEvent,CrossingData> const& crossings,
                 HybridEnclosure const& initial_set) const
 {
+    // DOCUMENTATION: Why are different cases handled differently
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_timing(...)\n");
     TimingData result;
     result.step_size=flow.domain()[flow.domain().size()-1].upper();
@@ -450,7 +452,9 @@ _compute_timing(Set<DiscreteEvent>& active_events,
             Float constant_finishing_time=result.final_time-remaining_time_range.upper()+result.step_size;
             result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),constant_finishing_time);
         } else {
-            // FIXME: The finishing time may need to be adjusted
+            // If the time can't be unwound to a constant, try to reduce range.
+            // HACK: The formula below may still yield a range above the range of the flow time
+            // and need to be adjusted.
             result.finishing_time=0.5*(result.step_size+initial_set.time_function());
         }
         result.evolution_time=result.finishing_time-initial_set.time_function();
@@ -489,7 +493,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
 // Apply guard to a single set without splitting.
 // In the case of concave crossings, this can lead to major over-approximation.
 void
-_apply_guard(HybridEnclosure& set,
+_simple_apply_guard(HybridEnclosure& set,
              const VectorIntervalFunction& starting_state,
              const VectorIntervalFunction& flow,
              const ScalarIntervalFunction& elapsed_time,
@@ -581,90 +585,6 @@ _apply_guard(HybridEnclosure& set,
 // corresponding to points which actually hit the set (and stop on first crossing)
 // the other part corresponding to points which miss the set.
 void
-_apply_guard(HybridEnclosure& set,
-             HybridEnclosure& extra_set,
-             const VectorIntervalFunction& starting_state,
-             const VectorIntervalFunction& flow,
-             const ScalarIntervalFunction& elapsed_time,
-             const DiscreteEvent event,
-             const ScalarFunction& guard_function,
-             const CrossingData crossing_data,
-             const Semantics semantics)
-{
-    static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
-    switch(crossing_data.crossing_kind) {
-        case INCREASING_CROSSING:
-            //set.new_state_constraint(event, guard_function <= 0.0);
-            set.new_invariant(event, guard_function);
-            // Alternatively:
-            // set.new_parameter_constraint(event, elapsed_time <= compose(crossing_data.crossing_time,starting_state) );
-            break;
-        case CONVEX_CROSSING:
-            //set.new_state_constraint(event, guard_function <= 0.0);
-            set.new_invariant(event, guard_function);
-            break;
-        case CONCAVE_CROSSING: {
-            ScalarIntervalFunction critical_time = compose(crossing_data.critical_time,starting_state);
-            ScalarIntervalFunction final_guard
-                = compose( guard_function, compose( flow, join(starting_state, elapsed_time) ) );
-            ScalarIntervalFunction maximal_guard
-                = compose( guard_function, compose( flow, join(starting_state, critical_time) ) );
-            // If no points in the set arise from trajectories which will later leave the progress set,
-            // then we only need to look at the maximum value of the guard.
-            HybridEnclosure eventually_hitting_set=set;
-            eventually_hitting_set.new_parameter_constraint( event, elapsed_time <= critical_time );
-            eventually_hitting_set.new_parameter_constraint( event, maximal_guard >= 0.0);
-            if(definitely(eventually_hitting_set.empty())) {
-                set.new_parameter_constraint(event, maximal_guard <= 0.0);
-                break;
-            }
-            // If no points in the set arise from trajectories which leave the progress set and
-            // later return, then we only need to look at the guard at the final value
-            HybridEnclosure returning_set=set;
-            returning_set.new_parameter_constraint( event, elapsed_time >= critical_time );
-            returning_set.new_parameter_constraint( event, final_guard <= 0.0 );
-            if(definitely(returning_set.empty())) {
-                set.new_parameter_constraint(event, final_guard <= 0.0);
-                break;
-            }
-            // Split the set into two components, one corresponding to
-            // points which miss the guard completely, the other to points which
-            // eventually hit the guard, ensuring that the set stops at the first crossing
-            extra_set=set;
-            set.new_parameter_constraint(event,maximal_guard<=0.0);
-            extra_set.new_parameter_constraint( event, elapsed_time <= critical_time );
-            extra_set.new_state_constraint(event,guard_function<=0.0);
-            break;
-            // Code below is always exact, but uses two sets
-            // set1.new_parameter_constraint(event,final_guard <= 0);
-            // set2.new_parameter_constraint(event, elapsed_time <= critical_time);
-            // set1.new_parameter_constraint(event, maximal_guard <= 0.0);
-            // set2.new_parameter_constraint(event, elapsed_time >= critical_time);
-        }
-        case DEGENERATE_CROSSING: {
-            // The crossing with the guard set is not one of the kinds handles above.
-            // We obtain an over-appproximation by testing at finitely many time points
-            // TODO: Handle lower semantics
-            ARIADNE_ASSERT(semantics==UPPER_SEMANTICS);
-            const uint n=SUBDIVISIONS_FOR_DEGENERATE_CROSSING;
-            for(uint i=0; i!=n; ++i) {
-                Float alpha=Float(i+1)/n;
-                ScalarIntervalFunction intermediate_guard
-                    = compose( guard_function, compose( flow, join(starting_state, alpha*elapsed_time) ) );
-                set.new_parameter_constraint(event, intermediate_guard <= 0);
-            }
-            // FIXME: Lower semantics
-            break;
-        }
-        case POSITIVE_CROSSING:
-        case NEGATIVE_CROSSING:
-        case DECREASING_CROSSING:
-            break;
-    }
-}
-
-
-void
 _apply_guard(List<HybridEnclosure>& sets,
              const VectorIntervalFunction& starting_state,
              const VectorIntervalFunction& flow,
@@ -674,17 +594,84 @@ _apply_guard(List<HybridEnclosure>& sets,
              const CrossingData crossing_data,
              const Semantics semantics)
 {
+    static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     List<HybridEnclosure>::iterator end=sets.end();
     for(List<HybridEnclosure>::iterator iter=sets.begin(); iter!=end; ++iter) {
         HybridEnclosure& set=*iter;
-        HybridEnclosure extra_set;
-        _apply_guard(set,extra_set,starting_state,flow,elapsed_time,event,guard_function,crossing_data,semantics);
-        if(extra_set.dimension()!=0) {
-            sets.append(extra_set);
+
+        switch(crossing_data.crossing_kind) {
+            case INCREASING_CROSSING:
+                //set.new_state_constraint(event, guard_function <= 0.0);
+                set.new_invariant(event, guard_function);
+                // Alternatively:
+                // set.new_parameter_constraint(event, elapsed_time <= compose(crossing_data.crossing_time,starting_state) );
+                break;
+            case CONVEX_CROSSING:
+                //set.new_state_constraint(event, guard_function <= 0.0);
+                set.new_invariant(event, guard_function);
+                break;
+            case CONCAVE_CROSSING: {
+                ScalarIntervalFunction critical_time = compose(crossing_data.critical_time,starting_state);
+                ScalarIntervalFunction final_guard
+                    = compose( guard_function, compose( flow, join(starting_state, elapsed_time) ) );
+                ScalarIntervalFunction maximal_guard
+                    = compose( guard_function, compose( flow, join(starting_state, critical_time) ) );
+                // If no points in the set arise from trajectories which will later leave the progress set,
+                // then we only need to look at the maximum value of the guard.
+                HybridEnclosure eventually_hitting_set=set;
+                eventually_hitting_set.new_parameter_constraint( event, elapsed_time <= critical_time );
+                eventually_hitting_set.new_parameter_constraint( event, maximal_guard >= 0.0);
+                if(definitely(eventually_hitting_set.empty())) {
+                    set.new_parameter_constraint(event, maximal_guard <= 0.0);
+                    break;
+                }
+                // If no points in the set arise from trajectories which leave the progress set and
+                // later return, then we only need to look at the guard at the final value
+                HybridEnclosure returning_set=set;
+                returning_set.new_parameter_constraint( event, elapsed_time >= critical_time );
+                returning_set.new_parameter_constraint( event, final_guard <= 0.0 );
+                if(definitely(returning_set.empty())) {
+                    set.new_parameter_constraint(event, final_guard <= 0.0);
+                    break;
+                }
+                // Split the set into two components, one corresponding to
+                // points which miss the guard completely, the other to points which
+                // eventually hit the guard, ensuring that the set stops at the first crossing
+                HybridEnclosure extra_set=set;
+                set.new_parameter_constraint(event,maximal_guard<=0.0);
+                extra_set.new_parameter_constraint( event, elapsed_time <= critical_time );
+                extra_set.new_state_constraint(event,guard_function<=0.0);
+                sets.append(extra_set);
+                break;
+                // Code below is always exact, but uses two sets
+                // set1.new_parameter_constraint(event,final_guard <= 0);
+                // set2.new_parameter_constraint(event, elapsed_time <= critical_time);
+                // set1.new_parameter_constraint(event, maximal_guard <= 0.0);
+                // set2.new_parameter_constraint(event, elapsed_time >= critical_time);
+            }
+            case DEGENERATE_CROSSING: {
+                // The crossing with the guard set is not one of the kinds handles above.
+                // We obtain an over-appproximation by testing at finitely many time points
+                // TODO: Handle lower semantics
+                ARIADNE_ASSERT(semantics==UPPER_SEMANTICS);
+                const uint n=SUBDIVISIONS_FOR_DEGENERATE_CROSSING;
+                for(uint i=0; i!=n; ++i) {
+                    Float alpha=Float(i+1)/n;
+                    ScalarIntervalFunction intermediate_guard
+                        = compose( guard_function, compose( flow, join(starting_state, alpha*elapsed_time) ) );
+                    set.new_parameter_constraint(event, intermediate_guard <= 0);
+                }
+                // FIXME: Lower semantics
+                break;
+            }
+            // DOCUMENTATION: Explain why these cases con't need to be handled
+            case POSITIVE_CROSSING:
+            case NEGATIVE_CROSSING:
+            case DECREASING_CROSSING:
+                break;
         }
     }
 }
-
 
 DiscreteEvent step_time_event("step_time");
 
@@ -777,6 +764,7 @@ _apply_time_step(EvolutionData& evolution_data,
                          event,event_guard_function,event_crossing_data,semantics);
         }
 
+        ARIADNE_LOG(4,"reach_sets="<<reach_sets<<"\n");
         evolution_data.reach_sets.append(reach_sets);
 
     } // Done computing reach sets
@@ -786,8 +774,10 @@ _apply_time_step(EvolutionData& evolution_data,
 
     // Compute evolve and final sets
     // TODO: This should probably be a separate function
-    HybridEnclosure evolve_set=starting_set;
-    HybridEnclosure final_set=starting_set;
+    List<HybridEnclosure> evolve_sets((starting_set));
+    HybridEnclosure& evolve_set=evolve_sets.front();
+    List<HybridEnclosure> final_sets(1u,starting_set);
+    HybridEnclosure& final_set=final_sets.front();
 
     // Apply the flow to the reach and evolve sets
     ARIADNE_LOG(6,"step_kind="<<timing_data.step_kind<<"\n");
@@ -813,7 +803,7 @@ _apply_time_step(EvolutionData& evolution_data,
 
     final_set.new_parameter_constraint(step_event,timing_data.remaining_time<=timing_data.evolution_time);
 
-    // Apply constraints on reach, evolve and final sets due to events
+    // Apply constraints on evolve and final sets due to events
     // FIXME: If there is a discrete transition, the guard may be
     for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
         event_iter!=blocking_events.end(); ++event_iter)
@@ -821,26 +811,30 @@ _apply_time_step(EvolutionData& evolution_data,
         DiscreteEvent event=*event_iter;
         const ScalarFunction& event_guard_function=transitions[event].guard_function;
         const CrossingData& event_crossing_data=crossing_data[event];
-        _apply_guard(evolve_set,starting_state,flow,timing_data.evolution_time,
+        _apply_guard(evolve_sets,starting_state,flow,timing_data.evolution_time,
                      event,event_guard_function,event_crossing_data,semantics);
-        _apply_guard(final_set,starting_state,flow,timing_data.remaining_time,
+        _apply_guard(final_sets,starting_state,flow,timing_data.remaining_time,
                      event,event_guard_function,event_crossing_data,semantics);
     }
 
     // Compute final set, and apply constraints to reach and evolve set
     // if necessary
-    if(timing_data.step_kind==FINAL_STEP || !definitely(final_set.empty())) {
-        ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
-    }
-    if(!definitely(final_set.empty())) {
-        evolution_data.evolve_sets.append(final_set);
+    for(List<HybridEnclosure>::const_iterator final_set_iter=final_sets.begin(); final_set_iter!=final_sets.end(); ++final_set_iter) {
+        HybridEnclosure const& final_set=*final_set_iter;
+        if(!definitely(final_set.empty())) {
+            ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+            evolution_data.evolve_sets.append(final_set);
+        }
     }
 
     if(timing_data.step_kind!=FINAL_STEP) {
-        ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
-        if(!definitely(evolve_set.empty())) {
-            evolution_data.intermediate_sets.append(evolve_set);
-            evolution_data.working_sets.append(evolve_set);
+        for(List<HybridEnclosure>::const_iterator evolve_set_iter=evolve_sets.begin(); evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter) {
+            HybridEnclosure const& evolve_set=*evolve_set_iter;
+            if(!definitely(evolve_set.empty())) {
+                ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
+                evolution_data.intermediate_sets.append(evolve_set);
+                evolution_data.working_sets.append(evolve_set);
+            }
         }
     }
 
@@ -853,7 +847,8 @@ _apply_time_step(EvolutionData& evolution_data,
         TransitionData const & transition = transitions[event];
 
         // Compute active set
-        HybridEnclosure jump_set=starting_set;
+        List<HybridEnclosure> jump_sets((starting_set));
+        HybridEnclosure& jump_set=jump_sets.front();
 
         // Compute flow to guard set up to evolution time.
         ScalarIntervalFunction jump_step_time;
@@ -897,9 +892,12 @@ _apply_time_step(EvolutionData& evolution_data,
                 ARIADNE_FAIL_MSG("Invalid event kind "<<transitions[event].event_kind<<" for transition.");
         }
 
-        // Apply maximum time
-        if(jump_set.time_function().range().upper() > Float(timing_data.final_time)) {
-            jump_set.bound_time(timing_data.final_time);
+        // NOTE: Should be no need to apply maximum time bound, as this will be applied after the next flow step
+        for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
+            HybridEnclosure& jump_set=*jump_set_iter;
+            if(jump_set.time_function().range().upper() > Float(timing_data.final_time)) {
+                jump_set.bound_time(timing_data.final_time);
+            }
         }
 
         // Apply blocking conditions for other active events
@@ -910,18 +908,20 @@ _apply_time_step(EvolutionData& evolution_data,
             if(other_event!=event) {
                 const ScalarFunction& other_event_guard_function=transitions[other_event].guard_function;
                 const CrossingData& other_event_crossing_data=crossing_data[other_event];
-                _apply_guard(jump_set,jump_starting_state,flow,jump_step_time,
+                _apply_guard(jump_sets,jump_starting_state,flow,jump_step_time,
                              other_event,other_event_guard_function,other_event_crossing_data,semantics);
             }
         }
 
         // Apply reset
-        if(!definitely(jump_set.empty())) {
-            jump_set.apply_reset(event,transitions[event].target,transitions[event].reset_function);
-            evolution_data.working_sets.append(jump_set);
+        for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
+            HybridEnclosure& jump_set=*jump_set_iter;
+            if(!definitely(jump_set.empty())) {
+                jump_set.apply_reset(event,transitions[event].target,transitions[event].reset_function);
+                evolution_data.working_sets.append(jump_set);
+                ARIADNE_LOG(6, "jump_set="<<jump_set<<"\n");
+            }
         }
-
-        ARIADNE_LOG(6, "jump_set="<<jump_set<<"\n");
     }
 
 }
@@ -933,6 +933,8 @@ _upper_evolution_flow(EvolutionData& evolution_data,
                       HybridAutomatonInterface const& system,
                       HybridTime const& maximum_hybrid_time) const
 {
+    // DOCUMENTATION: Explain new flow of control (why is initial processing needed)
+    // Think of some more descriptive names!!!
     ARIADNE_LOG(3,"HybridEvolverBase::_upper_evolution_flow\n");
 
     typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;

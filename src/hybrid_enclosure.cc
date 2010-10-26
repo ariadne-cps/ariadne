@@ -274,7 +274,6 @@ void HybridEnclosure::apply_flow_for(VectorIntervalFunction phi, ScalarIntervalF
     ScalarIntervalFunction evolve_time=embed(compose(eps,this->_state),Interval(0,h));
     ScalarIntervalFunction time_step_function=embed(this->_domain,ScalarIntervalFunction::identity(Interval(0,h)));
     this->_apply_flow(phi,h,unchecked_compose(eps,this->_state));
-    this->_negative_constraints.push_back(evolve_time-time_step_function);
 }
 
 void HybridEnclosure::apply_flow_to(VectorIntervalFunction phi, ScalarIntervalFunction omega)

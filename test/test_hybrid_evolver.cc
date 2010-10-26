@@ -76,7 +76,6 @@ class TestSimpleHybridEvolver
   public:
     TestSimpleHybridEvolver(const HybridEvolverInterface& evolver, const String& name);
     void test_all() const;
-    void test_transverse_only() const;
     void test_flow() const;
     void test_exact_final_time() const;
     void test_urgent_event() const;
@@ -100,11 +99,6 @@ TestSimpleHybridEvolver::TestSimpleHybridEvolver(const HybridEvolverInterface& e
 }
 
 void TestSimpleHybridEvolver::test_all() const {
-    test_transverse_only();
-    ARIADNE_TEST_CALL(test_tangency());
-}
-
-void TestSimpleHybridEvolver::test_transverse_only() const {
     ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_exact_final_time());
     ARIADNE_TEST_CALL(test_urgent_event());
@@ -117,6 +111,7 @@ void TestSimpleHybridEvolver::test_transverse_only() const {
     ARIADNE_TEST_CALL(test_impact());
     ARIADNE_TEST_CALL(test_creep());
     ARIADNE_TEST_CALL(test_unwind());
+    ARIADNE_TEST_CALL(test_tangency());
 }
 
 void TestSimpleHybridEvolver::test_flow() const {
@@ -411,8 +406,11 @@ void TestSimpleHybridEvolver::test_creep() const {
     evolver_ptr->parameters().maximum_step_size=1.0;
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_PRINT(*orbit.reach().begin());
     ARIADNE_TEST_PRINT(HybridEnclosure(*orbit.final().begin()).bounding_box());
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
+    ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
     ARIADNE_TEST_BINARY_PREDICATE(subset,HybridEnclosure(*orbit.final().begin()),HybridBox(q,Box(2, 0.24,0.635, 1.365,1.76)));
 
     plot(cstr("test_"+evolver_name+"-creep"),Box(2, -1.5,+1.5, -0.5, +3.5),

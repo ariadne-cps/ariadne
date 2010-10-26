@@ -118,6 +118,7 @@ template<class T> class List
     List(const std::vector<T>& l) : std::vector<T>(l) { }
     template<class X> List(const List<X>& l) : std::vector<T>(l.begin(),l.end()) { }
     template<class I> List(const I& b, const I& e) : std::vector<T>(b,e) { }
+    explicit List(const T& t) : std::vector<T>(1u,t) { }
     void append(const T& t) { this->push_back(t); }
     void append(const List<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
 };

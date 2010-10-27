@@ -390,14 +390,14 @@ struct TransitionData
 
 
 //! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\dot{x}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
-//! The way in which the value of the guard function changes along flow lines is given by
+//! The rate of change of the guard function changes along flow lines is given by
 //! \f$d g(x(t))/dt = L_{f}g(x(t))\f$ where the Lie derivative \f$L_{f}g\f$ is defined by \f$L_{f}g(x) = (\nabla g\cdot f)(x)\f$.
 //!
 //! Defaults to DEGENERATE_CROSSING whenever the crossing kind has not been resolved;
 //! this need not necessarily mean that the crossing is degenerate, but may
 //! also imply that the crossing information is too expensive or sensitive to
 //! compute.
-//! \relates HybridEvolverInterface
+//! \relates HybridEvolverInterface \relates CrossingData
 enum CrossingKind {
     DEGENERATE_CROSSING, //!< The crossing may be degenerate to second order.
     NEGATIVE_CROSSING, //!< The guard function is negative on the flow domain. No event occurs.
@@ -426,7 +426,11 @@ struct CrossingData
     //! \brief The way in which the guard function changes along trajectories
 	//! during a crossing. e.g. INCREASING_CROSSING
 	CrossingKind crossing_kind;
+    //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
+    //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
     ScalarIntervalFunction crossing_time;
+    //! \brief The time \f$\mu(x)\f$ at which the guard function reaches a maximum or minimum
+    //! i.e. \f$L_{f}g(\phi(x,\mu(x))) = 0\f$.
     ScalarIntervalFunction critical_time;
 };
 std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
@@ -436,12 +440,14 @@ std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
 //! where \f$s\in D\f$ is a parameter, \f$x=\xi(s)\f$ is the state corresponding to parameter \f$s\f$, and \f$t=\tau(s)\f$
 //! is the time the point has so far been evolved for. Assumes that the flow is given by a function \f$x'=\phi(x,t)\f$,
 //! typically only defined over a bounded set of space and time.
-//! \relates HybridEvolverInterface
+//! \relates TimingData
 enum StepKind {
     FULL_STEP, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     CREEP_STEP, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\varepsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\varepsilon(\xi(s))\f$.
+    PARTIAL_STEP, //!< The step is taken for a time \f$\delta(s)\f$ depending on the parameterisation of the set.
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\delta(s))\f$ and \f$\tau'(s)=\tau(s)+\delta(s)\f$.
     UNWIND_STEP, //!< The step is taken up to a time \f$\omega(s)\f$ depending on the parameterisation of the starting set.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
     FINAL_STEP, //!< The step is taken up to the specified evolution time \f$t_{\max}\f$. The actual step length depends on the parameterisation.
@@ -454,7 +460,7 @@ std::ostream& operator<<(std::ostream& os, const StepKind& crk);
 struct TimingData
 {
     StepKind step_kind; //!< The kind of step taken in the evolution
-    Float final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace, and used in a \a FINAL_STEP step.
+    Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace, and used in a \a FINAL_STEP step.
     Float step_size; //!< The step size \f$h\f$ used in a \a FULL_STEP time step.
     ScalarIntervalFunction spacial_evolution_time; //!< The evolution time \f$\varepsilon(x)\f$ used in a \a CREEP_STEP time step.
     ScalarIntervalFunction finishing_time; //!< The time \f$\omega(s)\f$ reached after an \a UNWIND_STEP as a function of the parameters.
@@ -487,6 +493,9 @@ struct EvolutionData
     //! \brief Intermediate sets reached after each time step. Not relevant for
 	//! the result, but useful for plotting, especially for debugging.
 	List<HybridEnclosure> intermediate_sets;
+
+    //! \brief The semantics used to compute the evolution. Defaults to UPPER_SEMANTICS.
+    Semantics semantics;
 };
 
 //! \brief A class for computing the evolution of a general hybrid system as

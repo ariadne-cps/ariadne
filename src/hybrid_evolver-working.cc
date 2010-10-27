@@ -312,9 +312,14 @@ _compute_flow(VectorFunction dynamic,
               const Float& maximum_step_size) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
-    // Compute flow and actual time step size used
-    // DOCUMENTATION: Why do we restrict to a subdomain?
     TaylorIntegrator integrator(32,this->parameters().flow_accuracy);
+    // Compute flow and actual time step size used
+    //
+    // The Integrator classes compute the flow as a function on a symmetrical
+    // time domain [-h,+h], since this means the time is centred at 0.
+    // We then restrict to the time domain [0,h] since this can make evaluation
+    // more accurate, and the time domain might be used explicitly for the domain
+    // of the resulting set.
     VectorIntervalFunction flow_model=integrator.flow_step(dynamic,initial_box,maximum_step_size);
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
     IntervalVector flow_domain=flow_model.domain();
@@ -375,33 +380,92 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     Map<DiscreteEvent,CrossingData> crossing_data;
     crossing_data.clear();
 
-    // DOCUMENTATION: Explain why certain computations are performed in different cases.
     Box flow_bounds=flow.range();
     for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
         event_iter!=active_events.end(); ++event_iter)
     {
         const DiscreteEvent event=*event_iter;
         ScalarFunction const& guard=guards[event];
+
+        // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
+        // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
         ScalarFunction derivative=lie_derivative(guard,dynamic);
         Interval derivative_range=derivative.evaluate(flow_bounds);
         if(derivative_range.lower()>0.0) {
+            // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
+            // then the guard function is strictly increasing.
+            // There is at most one crossing with the guard, and the time of this
+            // crossing must be the time of the event along the trajectory.
+            // The crossing time $\gamma(x_0)$ given the initial state can usually be computed
+            // by solving the equation $g(\phi(x_0,\gamma(x_0))) = 0$
             ScalarIntervalFunction crossing_time;
             try {
                 crossing_time=implicit(compose(guard,flow));
                 crossing_data[event]=CrossingData(INCREASING_CROSSING,crossing_time);
             }
             catch(const ImplicitFunctionException& e) {
+                // If the crossing time cannot be computed, then we can still
+                // use the fact that the crossing occurs as soon as $g(x(t))=0$.
+                // Since this is the same condition as for convex guard function
+                // along flow lines (L_{f}^{2} g > 0$, we set the crossing type
+                // as CONVEX_CROSSING
                 ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 crossing_data[event]=CrossingData(CONVEX_CROSSING);
             }
         } else if(derivative_range.upper()<0.0) {
+            // If the derivative is strictly negative over the bounding box for the flow,
+            // then the guard function is strictly decreasing.
+            // This means that the event is either initially active, or does not occur.
+            // There is no need to compute a crossing time.
             crossing_data[event]=CrossingData(DECREASING_CROSSING);
         } else {
+            // If the derivative of the guard function along flow lines cannot be shown
+            // to have a definite sign over the entire flow box, then try to compute
+            // the sign of the second derivative $L_{f}^{2}g(x)=L_{f}L_{f}g(x)$.\
             ScalarFunction second_derivative=lie_derivative(derivative,dynamic);
             Interval second_derivative_range=second_derivative.evaluate(flow_bounds);
             if(second_derivative_range.lower()>0.0) {
+                // If the second derivative is positive, then either
+                //    (i) the event is immediately active
+                //   (ii) the event is never active, or
+                //  (iii) the event is initially inactive, but becomes active
+                //        due to a transverse crossing.
+                //   (iv) the initial state is on the boundary of the guard
+                //        set, possibly with the flow tangent to this set
+                // We cannot compute the crossing time, even in case (iii),
+                // due to the singularity due to the tangency in (iv). However,
+                // we do know that in (iii), the event occurs when $t>0$ and
+                // $g(\phi(x_0,t))=0$. The crossing time is not computed.
                 crossing_data[event]=CrossingData(CONVEX_CROSSING);
             } else if(second_derivative_range.upper()<0.0) {
+                // If the second derivative is negative, then the guard
+                // values $g(x(t))$ are concave along flow lines. There are
+                // four main cases:
+                //   (i) The event is initially active.
+                //  (ii) The event is not initially active, but later becomes active.
+                // (iii) The event is never active, but would become active if
+                //       flowing backwards in time.
+                //  (iv) The event is never active, and the maximum value of
+                //       the guard along the flow lines is zero.
+                // Additionally, there is the degenerate case
+                //   (v) At some point in the (forward) flow, the state touches
+                //       the guard set at a point of tangency.
+                // Due to the presence of the tangency, the event time is
+                // not a smooth function of the initial state. Further, since
+                // some trajectories cross the boundary of the guard set twice,
+                // the condition $g(x(t))=0$ is not sufficient for determining
+                // the jump time. A necessary and sufficient condition,
+                // assuming the event is not initially active, is that
+                // $g(x)=0$ and $L_{f}g(x)\geq 0$. Alternatively, we can compute
+                // the <em>critical time</em> $|mu(x_0) at which the guard value
+                // reaches a maximum. A necessary and sufficient condition
+                // is then $g(\phi(x_0,t))=0$ and $t<= \mu(x_0)$.
+                //   Note that while $g(\phi(x_0,t))=0$ and $L_{f}f(\phi(x_0,t))\geq0$ is a
+                // necessary and sufficient condition for a crossing, there
+                // is no necessary and sufficient condition for no crossing
+                // which does not involve the critical time. A necessary and
+                // sufficient condition for no crossing involving the critical
+                // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
                     ScalarIntervalFunction critical_time=implicit(compose(derivative,flow));
                     crossing_data[event]=CrossingData(CONCAVE_CROSSING);
@@ -412,6 +476,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
                 }
             } else {
+                // The crossing cannot be shown to be one of the kinds mentioned
+                // above. A theoretically exact expression for the crossing
+                // set is generally not available.
                 crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
             }
         }
@@ -430,7 +497,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
                 Map<DiscreteEvent,CrossingData> const& crossings,
                 HybridEnclosure const& initial_set) const
 {
-    // DOCUMENTATION: Why are different cases handled differently
+    // Compute the evolution time for the given step.
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_timing(...)\n");
     TimingData result;
     result.step_size=flow.domain()[flow.domain().size()-1].upper();
@@ -442,11 +509,24 @@ _compute_timing(Set<DiscreteEvent>& active_events,
     Interval remaining_time_range=result.remaining_time.range();
     // NOTE: The time function may be negative or greater than the final time
     // over part of the parameter domain.
+
     if(remaining_time_range.upper()<=result.step_size) {
+        // The rest of the evolution can be computed within a single time step.
+        // The step kind is given as FINAL_STEP so that the evolution algorithm
+        // knows that the evolved set does not need to be evolved further.
+        // This knowledge is required to be given combinarially, since
+        // specifying the final time as a constant TaylorFunction is not
+        // exact if the final_time parameter is not exactly representable as
+        // a Float
         result.step_kind=FINAL_STEP;
         result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),numeric_cast<Interval>(final_time));
         result.evolution_time=result.final_time-initial_set.time_function();
     } else if(remaining_time_range.lower()<=result.step_size) {
+        // Some of the evolved points can be evolved to the final time in a single step
+        // The evolution is performed over a step size which preserves points
+        // which are past the final_time, but moves other points closer.
+
+        // FIXME: The formulae used here may need to be modified
         result.step_kind=UNWIND_STEP;
         if(remaining_time_range.width()<result.step_size) {
             Float constant_finishing_time=result.final_time-remaining_time_range.upper()+result.step_size;
@@ -459,6 +539,11 @@ _compute_timing(Set<DiscreteEvent>& active_events,
         }
         result.evolution_time=result.finishing_time-initial_set.time_function();
     } else {
+        // If an event is possible, but only some points reach the guard set
+        // after a full time step, then terminating the evolution here will
+        // cause a splitting of the enclosure set. To prevent this, attempt
+        // to "creep" up to the event guard boundary, so that in the next step,
+        // all points can be made to cross.
         ARIADNE_LOG(8,"\ntesting for partially active events\n");
         bool creep=false;
         ScalarIntervalFunction evolution_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),result.step_size);
@@ -480,6 +565,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
             result.spacial_evolution_time=evolution_time;
             result.evolution_time=compose(result.spacial_evolution_time,initial_set.space_function());
         } else {
+            // Perform the evolution over a full time step
             result.step_kind=FULL_STEP;
             result.spacial_evolution_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),result.step_size);
             result.evolution_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),result.step_size);
@@ -584,7 +670,7 @@ _simple_apply_guard(HybridEnclosure& set,
 // In the case of concave crossings, splits the set into two, one part
 // corresponding to points which actually hit the set (and stop on first crossing)
 // the other part corresponding to points which miss the set.
-void
+void GeneralHybridEvolver::
 _apply_guard(List<HybridEnclosure>& sets,
              const VectorIntervalFunction& starting_state,
              const VectorIntervalFunction& flow,
@@ -592,7 +678,7 @@ _apply_guard(List<HybridEnclosure>& sets,
              const DiscreteEvent event,
              const ScalarFunction& guard_function,
              const CrossingData crossing_data,
-             const Semantics semantics)
+             const Semantics semantics) const
 {
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     List<HybridEnclosure>::iterator end=sets.end();
@@ -650,7 +736,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 // set2.new_parameter_constraint(event, elapsed_time >= critical_time);
             }
             case DEGENERATE_CROSSING: {
-                // The crossing with the guard set is not one of the kinds handles above.
+                // The crossing with the guard set is not one of the kinds handled above.
                 // We obtain an over-appproximation by testing at finitely many time points
                 // TODO: Handle lower semantics
                 ARIADNE_ASSERT(semantics==UPPER_SEMANTICS);
@@ -664,10 +750,15 @@ _apply_guard(List<HybridEnclosure>& sets,
                 // FIXME: Lower semantics
                 break;
             }
-            // DOCUMENTATION: Explain why these cases con't need to be handled
             case POSITIVE_CROSSING:
+                // No need to do anything since all points are initially
+                // active and should have been handled already
             case NEGATIVE_CROSSING:
+                // No points are active
             case DECREASING_CROSSING:
+                // No need to do anything, since only initially active points
+                // become active during the evolution, and these have been
+                // handled already.
                 break;
         }
     }
@@ -933,8 +1024,11 @@ _upper_evolution_flow(EvolutionData& evolution_data,
                       HybridAutomatonInterface const& system,
                       HybridTime const& maximum_hybrid_time) const
 {
-    // DOCUMENTATION: Explain new flow of control (why is initial processing needed)
-    // Think of some more descriptive names!!!
+    //  Select a working set and evolve this in the current location until either
+    // all initial points have undergone a discrete transition (possibly to
+    // the same location) or the final time is reached.
+    //   Evolving within one location avoids having to re-extract event sets,
+    // and means that initially active events are tested for only once.
     ARIADNE_LOG(3,"HybridEvolverBase::_upper_evolution_flow\n");
 
     typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
@@ -947,21 +1041,21 @@ _upper_evolution_flow(EvolutionData& evolution_data,
     if(evolution_data.working_sets.empty()) { return; }
 
     // Get the starting set for this round of evolution
-    HybridEnclosure initial_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
-    ARIADNE_LOG(2,"initial_set="<<initial_set<<"\n\n");
+    HybridEnclosure starting_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
+    ARIADNE_LOG(2,"starting_set="<<starting_set<<"\n\n");
 
     // Test if maximum number of steps has been reached
-    if(initial_set.previous_events().size()>maximum_steps) {
-        evolution_data.evolve_sets.append(initial_set); return;
+    if(starting_set.previous_events().size()>maximum_steps) {
+        evolution_data.evolve_sets.append(starting_set); return;
     }
 
-    if(initial_set.time_range().lower()>=final_time) {
-        ARIADNE_WARN("starting_set.time_range()="<<initial_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
+    if(starting_set.time_range().lower()>=final_time) {
+        ARIADNE_WARN("starting_set.time_range()="<<starting_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
         return;
     }
 
     // Extract starting location
-    const DiscreteLocation location=initial_set.location();
+    const DiscreteLocation location=starting_set.location();
 
     // Cache dynamic and constraint functions
     VectorFunction dynamic=system.dynamic_function(location);
@@ -972,7 +1066,7 @@ _upper_evolution_flow(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"transitions="<<transitions<<"\n\n");
 
     // Process the initially active events; cut out active points to leave initial flowable set.
-    this->_process_initial_events(evolution_data, initial_set,transitions);
+    this->_process_initial_events(evolution_data, starting_set,transitions);
     ARIADNE_ASSERT(evolution_data.starting_sets.size()<=1);
 
     while(!evolution_data.starting_sets.empty()) {

@@ -250,8 +250,9 @@ class HybridEvolverBase
 	//! will often be computed over the entire bounding box.
 	//!
 	//! If the crossing is #INCREASING_CROSSING, then the \a crossing_time \f$\gamma\f$
-	//! should be computed, satisfying \f$g(\phi(x,\gamma(t)))=0\f$.
-	//! If the crossing is #CONCAVE_CROSSING, the the \a
+	//! should be computed, satisfying \f$g(\phi(x,\gamma(x)))=0\f$.
+	//! If the crossing is #CONCAVE_CROSSING, the the \a critical_time (\a maximum_time) \f$\mu\f$
+    //! should be computed, satisfying \f$L_{f}g(\phi(x,\mu(x)))=0\f$.
     virtual
     Map<DiscreteEvent,CrossingData>
     _compute_crossings(Set<DiscreteEvent> const& active_events,
@@ -388,10 +389,10 @@ struct TransitionData
 };
 
 
-//! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ cross the guard set \f$g(x)=0\f$.
+//! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\dot{x}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
+//! The way in which the value of the guard function changes along flow lines is given by
+//! \f$d g(x(t))/dt = L_{f}g(x(t))\f$ where the Lie derivative \f$L_{f}g\f$ is defined by \f$L_{f}g(x) = (\nabla g\cdot f)(x)\f$.
 //!
-//! For example, INCREASING_CROSSING means that \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$
-//! whenever \f$g(\phi(x_0,t))=0\f$.
 //! Defaults to DEGENERATE_CROSSING whenever the crossing kind has not been resolved;
 //! this need not necessarily mean that the crossing is degenerate, but may
 //! also imply that the crossing information is too expensive or sensitive to
@@ -401,10 +402,16 @@ enum CrossingKind {
     DEGENERATE_CROSSING, //!< The crossing may be degenerate to second order.
     NEGATIVE_CROSSING, //!< The guard function is negative on the flow domain. No event occurs.
     POSITIVE_CROSSING, //!< The guard function is negative on the domain. The event occurs immediately (if urgent) or at all times (if permissive).
-    INCREASING_CROSSING, //!< The guard function is strictly increasing along flow lines.
+    INCREASING_CROSSING, //!< The guard function is strictly increasing along flow lines at a crossing point.
+        //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$ whenever \f$g(\phi(x_0,t))=0\f$.
+        //! Implied by \f$L_{f}g \geq 0\f$.
+        //! Given an initial point \f$x_0\f$, the crossing time \f$\gamma(x_0)\f$.
     DECREASING_CROSSING, //!< The guard function is strictly decreasing along flow lines.
-    CONCAVE_CROSSING, //!< The guard function is positive over at most an interval. Implied by concavity along flow lines.
+    CONCAVE_CROSSING, //!< The guard function is positive over at most an interval.
+        //! Implied by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
+        //! The time at which the guard function reaches a maximum for the evolution starting at \f$x_0\f$ is denoted by \f$\mu(x_0)\f$
     CONVEX_CROSSING //!< The guard function is negative over at most an interval. Implied by convexity along flow lines.
+        //! Implied by convexity along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$ within the reached set.
 };
 std::ostream& operator<<(std::ostream& os, const CrossingKind& crk);
 
@@ -424,14 +431,21 @@ struct CrossingData
 };
 std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
 
-//! \brief The kind of step taken in the evolution
+//! \brief The kind of step taken in the evolution. Determines how the evolution time is specified.
+//! \details Assumes that the starting set and time is given as a subset of \f$\{ \xi(s); \tau(s) \mid s\in D\}\f$
+//! where \f$s\in D\f$ is a parameter, \f$x=\xi(s)\f$ is the state corresponding to parameter \f$s\f$, and \f$t=\tau(s)\f$
+//! is the time the point has so far been evolved for. Assumes that the flow is given by a function \f$x'=\phi(x,t)\f$,
+//! typically only defined over a bounded set of space and time.
 //! \relates HybridEvolverInterface
 enum StepKind {
-    // DOCUMENTATION: Explain step kinds
-    FULL_STEP, //!< The step is taken for a fixed time \a h. The actual step length depends only on the starting state.
+    FULL_STEP, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     CREEP_STEP, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\varepsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\varepsilon(\xi(s))\f$.
     UNWIND_STEP, //!< The step is taken up to a time \f$\omega(s)\f$ depending on the parameterisation of the starting set.
-    FINAL_STEP, //!< The step is taken up to the specified evolution time t<sub>max</sub>. The actual step length depends on the parameterisation.
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
+    FINAL_STEP, //!< The step is taken up to the specified evolution time \f$t_{\max}\f$. The actual step length depends on the parameterisation.
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),t_{\max}-\tau(s))\f$ and \f$\tau'(s)=t_{\max}\f$.
 };
 std::ostream& operator<<(std::ostream& os, const StepKind& crk);
 
@@ -499,6 +513,24 @@ class GeneralHybridEvolver
                      Map<DiscreteEvent,CrossingData> const& crossing_data,
                      VectorFunction const& dynamic,
                      Map<DiscreteEvent,TransitionData> const& transitions) const;
+
+
+    //! \brief Apply \a guard_function for \a event to each set in \a sets, using the computed \a crossing_data.
+    //! \callgraph
+    //! \details The sets are updated with the extra constraints in-place for efficiency.
+    //! In the case of a concave tangency, it may be necessary to split the enclosure in two,
+    //! one part containing points which eventually cross the guard, the other points which miss the guard.
+    //! The extra sets are adjoined to the end of the list of sets to be constrained.
+    virtual
+    void
+    _apply_guard(List<HybridEnclosure>& sets,
+                 const VectorIntervalFunction& starting_state,
+                 const VectorIntervalFunction& flow,
+                 const ScalarIntervalFunction& elapsed_time,
+                 const DiscreteEvent event,
+                 const ScalarFunction& guard_function,
+                 const CrossingData crossing_data,
+                 const Semantics semantics) const;
 
 };
 

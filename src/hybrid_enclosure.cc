@@ -65,13 +65,12 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location("")
+    : _location(""), _events(), _set(), _time(ScalarIntervalFunction::constant(_set._domain,0.0))
 {
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box)
-    : _location(location), _events(), _domain(box), _state(VectorIntervalFunction::identity(box)),
-      _time(ScalarIntervalFunction::constant(box,0.0)), _reduced_domain(_domain)
+    : _location(location), _events(), _set(box), _time(ScalarIntervalFunction::constant(_set._domain,0.0))
 {
 }
 
@@ -84,11 +83,8 @@ HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Continu
 */
 
 HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>& hpair)
-    : _location(hpair.first), _events(), _domain(hpair.second.domain()), _state(_domain,hpair.second.function()),
-      _time(ScalarIntervalFunction::constant(_domain,0.0)), _reduced_domain(_domain)
+    : _location(hpair.first), _events(), _set(hpair.second), _time(ScalarIntervalFunction::constant(_set._domain,0.0))
 {
-    _negative_constraints=hpair.second.negative_constraints();
-    _zero_constraints=hpair.second.zero_constraints();
 }
 
 
@@ -105,7 +101,7 @@ HybridEnclosure::previous_events() const
 VectorIntervalFunction const&
 HybridEnclosure::space_function() const
 {
-    return this->_state;
+    return this->_set._function;
 }
 
 ScalarIntervalFunction const&
@@ -117,7 +113,7 @@ HybridEnclosure::time_function() const
 IntervalVector
 HybridEnclosure::space_bounding_box() const
 {
-    return this->_state.codomain();
+    return this->_set._function.codomain();
 }
 
 Interval
@@ -129,19 +125,19 @@ HybridEnclosure::time_range() const
 uint
 HybridEnclosure::number_of_constraints() const
 {
-    return this->_negative_constraints.size()+this->_zero_constraints.size();
+    return this->_set.number_of_constraints();
 }
 
 uint
 HybridEnclosure::number_of_parameters() const
 {
-    return this->_domain.size();
+    return this->_set.number_of_parameters();
 }
 
 const IntervalVector&
 HybridEnclosure::parameter_domain() const
 {
-    return this->_domain;
+    return this->_set._domain;
 }
 
 HybridBox
@@ -152,31 +148,31 @@ HybridEnclosure::bounding_box() const
 
 
 void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarFunction constraint) {
-    ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_state);
-    Interval range=constraint_wrt_params.evaluate(this->_domain);
+    ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_set._function);
+    Interval range=constraint_wrt_params.evaluate(this->_set._domain);
     if(range.upper()>=0.0) {
         //this->_constraint_events.push_back((this->_events,event));
-        this->_negative_constraints.append(constraint_wrt_params);
+        this->_set._constraints.append(constraint_wrt_params);
     }
 }
 
 void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarIntervalFunction constraint) {
-    ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_state);
-    Interval range=constraint_wrt_params.evaluate(this->_domain);
+    ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_set._function);
+    Interval range=constraint_wrt_params.evaluate(this->_set._domain);
     if(range.upper()>=0.0) {
         //this->_constraint_events.push_back((this->_events,event));
-        this->_negative_constraints.append(constraint_wrt_params);
+        this->_set._constraints.append(constraint_wrt_params);
     }
 }
 
 void HybridEnclosure::new_activation(DiscreteEvent event, ScalarFunction constraint) {
     //this->_constraint_events.push_back((this->_events,event));
-    this->_negative_constraints.append(compose(-constraint,this->_state));
+    this->_set._constraints.append(compose(-constraint,this->_set._function));
 }
 
 void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint) {
     //this->_constraint_events.push_back((this->_events,event));
-    this->_zero_constraints.append(compose(constraint,this->_state));
+    this->_set._equations.append(compose(constraint,this->_set._function));
 }
 
 void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, ScalarIntervalFunction crossing_time) {
@@ -186,16 +182,16 @@ void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, 
 void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==parameter_domain().size(),
                        "constraint "<<constraint<<" is incompatible with parameter domain "<<parameter_domain());
-    ScalarIntervalFunction function(this->_domain,constraint.function());
+    ScalarIntervalFunction function(this->_set._domain,constraint.function());
     const Interval bounds=constraint.bounds();
     if(bounds.singleton()) {
-        this->_zero_constraints.append(function-bounds.upper());
+        this->_set._equations.append(function-bounds.upper());
     } else {
         if(bounds.upper()!=+inf<Float>()) {
-            this->_negative_constraints.append(function-bounds.upper());
+            this->_set._constraints.append(function-bounds.upper());
         }
         if(bounds.lower()!=-inf<Float>()) {
-            this->_negative_constraints.append(bounds.lower()-function);
+            this->_set._constraints.append(bounds.lower()-function);
         }
     }
 }
@@ -203,7 +199,7 @@ void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearCon
 void HybridEnclosure::new_state_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==dimension(),
                        "constraint "<<constraint<<" is incompatible with dimension "<<dimension());
-    NonlinearConstraint parameter_constraint(compose(constraint.function(),this->_state).function(),constraint.bounds());
+    NonlinearConstraint parameter_constraint(compose(constraint.function(),this->_set._function).function(),constraint.bounds());
     this->new_parameter_constraint(event,parameter_constraint);
 }
 
@@ -215,7 +211,7 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     ARIADNE_ASSERT(map.argument_size()==this->dimension());
     this->_events.append(event);
     this->_location=target;
-    this->_state=compose(map,this->_state);
+    this->_set._function=compose(map,this->_set._function);
 }
 
 void HybridEnclosure::_apply_flow(VectorIntervalFunction phi, Float h, ScalarIntervalFunction elps)
@@ -226,19 +222,19 @@ void HybridEnclosure::_apply_flow(VectorIntervalFunction phi, Float h, ScalarInt
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
     Interval time_domain=Interval(0,h);
-    IntervalVector new_domain=join(this->_domain,time_domain);
-    this->_domain=new_domain;
-    this->_reduced_domain=join(this->_reduced_domain,time_domain);
+    IntervalVector new_domain=join(this->_set._domain,time_domain);
+    this->_set._domain=new_domain;
+    this->_set._reduced_domain=join(this->_set._reduced_domain,time_domain);
     ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u);
     this->_time=embed(this->_time,time_domain)+time_step_function;
-    this->_state=unchecked_compose(phi,join(embed(this->_state,time_domain),time_step_function));
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        this->_negative_constraints[i]=embed(this->_negative_constraints[i],time_domain);
+    this->_set._function=unchecked_compose(phi,join(embed(this->_set._function,time_domain),time_step_function));
+    for(uint i=0; i!=this->_set._constraints.size(); ++i) {
+        this->_set._constraints[i]=embed(this->_set._constraints[i],time_domain);
     }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        this->_zero_constraints[i]=embed(this->_zero_constraints[i],time_domain);
+    for(uint i=0; i!=this->_set._equations.size(); ++i) {
+        this->_set._equations[i]=embed(this->_set._equations[i],time_domain);
     }
-    this->_negative_constraints.append(time_step_function-embed(elps,time_domain));
+    this->_set._constraints.append(time_step_function-embed(elps,time_domain));
 }
 
 void HybridEnclosure::_apply_flow(VectorIntervalFunction phi, Float h)
@@ -248,32 +244,32 @@ void HybridEnclosure::_apply_flow(VectorIntervalFunction phi, Float h)
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     Interval time_domain=Interval(0,h);
-    IntervalVector new_domain=join(this->_domain,time_domain);
-    this->_domain=new_domain;
-    this->_reduced_domain=join(this->_reduced_domain,time_domain);
+    IntervalVector new_domain=join(this->_set._domain,time_domain);
+    this->_set._domain=new_domain;
+    this->_set._reduced_domain=join(this->_set._reduced_domain,time_domain);
     ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u);
     this->_time=embed(this->_time,time_domain)+time_step_function;
-    this->_state=unchecked_compose(phi,join(embed(this->_state,time_domain),time_step_function));
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        this->_negative_constraints[i]=embed(this->_negative_constraints[i],time_domain);
+    this->_set._function=unchecked_compose(phi,join(embed(this->_set._function,time_domain),time_step_function));
+    for(uint i=0; i!=this->_set._constraints.size(); ++i) {
+        this->_set._constraints[i]=embed(this->_set._constraints[i],time_domain);
     }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        this->_zero_constraints[i]=embed(this->_zero_constraints[i],time_domain);
+    for(uint i=0; i!=this->_set._equations.size(); ++i) {
+        this->_set._equations[i]=embed(this->_set._equations[i],time_domain);
     }
 }
 
 void HybridEnclosure::apply_flow_for(VectorIntervalFunction phi, Float h)
 {
-    this->_apply_flow(phi,h,ScalarIntervalFunction::constant(this->_domain,h));
+    this->_apply_flow(phi,h,ScalarIntervalFunction::constant(this->_set._domain,h));
 }
 
 void HybridEnclosure::apply_flow_for(VectorIntervalFunction phi, ScalarIntervalFunction eps)
 {
     Float h=phi.domain()[phi.domain().size()-1].upper();
     // Pre-compute the evolved time in the new domain
-    ScalarIntervalFunction evolve_time=embed(compose(eps,this->_state),Interval(0,h));
-    ScalarIntervalFunction time_step_function=embed(this->_domain,ScalarIntervalFunction::identity(Interval(0,h)));
-    this->_apply_flow(phi,h,unchecked_compose(eps,this->_state));
+    ScalarIntervalFunction evolve_time=embed(compose(eps,this->_set._function),Interval(0,h));
+    ScalarIntervalFunction time_step_function=embed(this->_set._domain,ScalarIntervalFunction::identity(Interval(0,h)));
+    this->_apply_flow(phi,h,unchecked_compose(eps,this->_set._function));
 }
 
 void HybridEnclosure::apply_flow_to(VectorIntervalFunction phi, ScalarIntervalFunction omega)
@@ -293,7 +289,7 @@ void HybridEnclosure::apply_flow_to(VectorIntervalFunction phi, Float tmax)
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
     Float h=phi.domain()[phi.domain().size()-1].upper();
     this->_apply_flow(phi,h);
-    this->bound_time(ScalarIntervalFunction::constant(this->_domain,tmax));
+    this->bound_time(ScalarIntervalFunction::constant(this->_set._domain,tmax));
 }
 
 void HybridEnclosure::_apply_flow_step(VectorIntervalFunction phi, ScalarIntervalFunction elps)
@@ -304,7 +300,7 @@ void HybridEnclosure::_apply_flow_step(VectorIntervalFunction phi, ScalarInterva
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
     this->_time=this->_time+elps;
-    this->_state=unchecked_compose(phi,join(this->_state,elps));
+    this->_set._function=unchecked_compose(phi,join(this->_set._function,elps));
 }
 
 void HybridEnclosure::apply_flow_step_for(VectorIntervalFunction phi, Float h)
@@ -313,7 +309,7 @@ void HybridEnclosure::apply_flow_step_for(VectorIntervalFunction phi, Float h)
     // tau'(s) = tau(s)+eps(s)
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
-    this->_apply_flow_step(phi,ScalarIntervalFunction::constant(this->_domain,h));
+    this->_apply_flow_step(phi,ScalarIntervalFunction::constant(this->_set._domain,h));
 }
 
 void HybridEnclosure::apply_flow_step_for(VectorIntervalFunction phi, ScalarIntervalFunction eps)
@@ -322,7 +318,7 @@ void HybridEnclosure::apply_flow_step_for(VectorIntervalFunction phi, ScalarInte
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
     ARIADNE_ASSERT_MSG(eps.argument_size()==this->dimension(),
                        "Evolved time "<<eps<<" must be a function of "<<this->dimension()<<" variables");
-    this->_apply_flow_step(phi,unchecked_compose(eps,this->_state));
+    this->_apply_flow_step(phi,unchecked_compose(eps,this->_set._function));
 }
 
 void HybridEnclosure::apply_flow_step_to(VectorIntervalFunction phi, ScalarIntervalFunction omega)
@@ -331,7 +327,7 @@ void HybridEnclosure::apply_flow_step_to(VectorIntervalFunction phi, ScalarInter
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
     ARIADNE_ASSERT_MSG(omega.argument_size()==this->number_of_parameters(),
                        "Final time "<<omega<<" must be a function of "<<this->number_of_parameters()<<" parameterisation variables");
-    this->_state=unchecked_compose(phi,join(this->_state,omega-this->_time));
+    this->_set._function=unchecked_compose(phi,join(this->_set._function,omega-this->_time));
     this->_time=omega;
 }
 
@@ -339,37 +335,37 @@ void HybridEnclosure::apply_flow_step_to(VectorIntervalFunction phi, Float tmax)
 {
     ARIADNE_ASSERT_MSG(phi.argument_size()==this->dimension()+1,
                        "Flow "<<phi<<" must be a function of "<<this->dimension()<<"+1 variables");
-    this->_state=unchecked_compose(phi,join(this->_state,tmax-this->_time));
+    this->_set._function=unchecked_compose(phi,join(this->_set._function,tmax-this->_time));
     this->_time=tmax;
 }
 
 
 void HybridEnclosure::bound_time(Float tmax) {
-    this->_negative_constraints.append(this->_time-tmax);
+    this->_set._constraints.append(this->_time-tmax);
 }
 
 void HybridEnclosure::bound_time(ScalarFunction tmax) {
-    this->_negative_constraints.append(this->_time-ScalarIntervalFunction(this->_domain,tmax));
+    this->_set._constraints.append(this->_time-ScalarIntervalFunction(this->_set._domain,tmax));
 }
 
 void HybridEnclosure::bound_time(ScalarIntervalFunction tmax) {
-    this->_negative_constraints.append(this->_time-tmax);
+    this->_set._constraints.append(this->_time-tmax);
 }
 
 void HybridEnclosure::set_time(Float time)
 {
-    this->_zero_constraints.append(this->_time-time);
+    this->_set._equations.append(this->_time-time);
 }
 
 void HybridEnclosure::set_time(ScalarFunction time)
 {
-    this->_zero_constraints.append(this->_time-ScalarIntervalFunction(this->_domain,time));
+    this->_set._equations.append(this->_time-ScalarIntervalFunction(this->_set._domain,time));
 }
 
 
 void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
 {
-    this->_negative_constraints.append(this->_time-final_time); // Deprecated
+    this->_set._constraints.append(this->_time-final_time); // Deprecated
 }
 
 void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ScalarIntervalFunction constraint) {
@@ -389,78 +385,33 @@ const DiscreteLocation& HybridEnclosure::location() const {
 
 /*
 ConstrainedImageSet HybridEnclosure::continuous_state_set() const {
-    return ConstrainedImageSet(this->_domain,this->_state,this->_constraints);
+    return ConstrainedImageSet(this->_set._domain,this->_set._function,this->_constraints);
 }
 */
 
 
-TaylorConstrainedImageSet HybridEnclosure::continuous_state_set() const {
-    TaylorConstrainedImageSet set(this->_state);
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        set.new_negative_constraint(this->_negative_constraints[i]);
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        set.new_zero_constraint(this->_zero_constraints[i]);
-    }
-    return set;
+const TaylorConstrainedImageSet&
+HybridEnclosure::continuous_state_set() const {
+    return this->_set;
 }
 
 
 uint HybridEnclosure::dimension() const {
-    return this->_state.result_size();
+    return this->_set._function.result_size();
 }
 
 tribool HybridEnclosure::empty() const {
-    List<NonlinearConstraint> constraints=this->constraints();
-    if(constraints.empty()) { return this->parameter_domain().empty(); }
-    for(uint i=0; i!=constraints.size(); ++i) {
-        if(Ariadne::disjoint(constraints[i].function().evaluate(this->_reduced_domain),constraints[i].bounds())) {
-            return true;
-        }
-    }
-    ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(constraints,this->_reduced_domain);
-    if(this->_reduced_domain.empty()) { return true; }
-    else { return indeterminate; }
+    return this->_set.empty();
 }
 
 tribool HybridEnclosure::subset(const HybridBox& hbx) const {
-    const Box& bx = hbx.continuous_state_set();
-    ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"HybridEnclosure::subset(HybridBox): self="<<*this<<", box="<<hbx);
-    List<NonlinearConstraint> constraints=this->constraints();
-    ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(constraints,this->_reduced_domain);
-
-    if(_reduced_domain.empty()) { return true; }
-    if(this->_location!=hbx.location()) { return indeterminate; }
-
-    for(uint i=0; i!=bx.dimension(); ++i) {
-        const Box test_domain=this->_reduced_domain;
-        constraints.append(ScalarIntervalFunction(this->_state[i]).function() <= bx[i].lower());
-        if(possibly(contractor.feasible(constraints,test_domain).first)) { return indeterminate; }
-        constraints.back()=(ScalarIntervalFunction(this->_state[i]).function() >= bx[i].upper());
-        if(possibly(contractor.feasible(constraints,test_domain).first)) { return indeterminate; }
-        constraints.pop_back();
-    }
-    return true;
+    if(this->_location==hbx.location()) { return this->continuous_state_set().subset(hbx.continuous_state_set()); }
+    else { return this->continuous_state_set().empty(); }
 }
 
 tribool HybridEnclosure::disjoint(const HybridBox& hbx) const {
-    const Box& bx = hbx.continuous_state_set();
-    ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"HybridEnclosure::subset(HybridBox): self="<<*this<<", box="<<hbx);
-    List<NonlinearConstraint> constraints=this->constraints();
-    ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(constraints,this->_reduced_domain);
-
-    if(_reduced_domain.empty()) { return true; }
-    if(this->_location!=hbx.location()) { return indeterminate; }
-
-    const Box test_domain=this->_reduced_domain;
-    for(uint i=0; i!=bx.dimension(); ++i) {
-        constraints.append(ScalarIntervalFunction(this->_state[i]).function() >= bx[i].lower());
-        constraints.append(ScalarIntervalFunction(this->_state[i]).function() <= bx[i].upper());
-    }
-    return !contractor.feasible(constraints,test_domain).first;
+    if(this->_location==hbx.location()) { return this->continuous_state_set().disjoint(hbx.continuous_state_set()); }
+    else { return true; }
 }
 
 tribool HybridEnclosure::satisfies(NonlinearConstraint c) const
@@ -470,14 +421,7 @@ tribool HybridEnclosure::satisfies(NonlinearConstraint c) const
 
 
 List<NonlinearConstraint> HybridEnclosure::constraints() const {
-    List<NonlinearConstraint> result;
-    for(List<ScalarIntervalFunction>::const_iterator iter=_negative_constraints.begin(); iter!=_negative_constraints.end(); ++iter) {
-        result.append(iter->function()<=0);
-    }
-    for(List<ScalarIntervalFunction>::const_iterator iter=_zero_constraints.begin(); iter!=_zero_constraints.end(); ++iter) {
-        result.append(iter->function()==0);
-    }
-    return result;
+    return this->continuous_state_set().constraints();
 }
 
 
@@ -491,15 +435,15 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
 {
     return os << "HybridEnclosure"
               << "( events=" << this->_events
-              << ", range=" << this->_state(this->_domain)
+              << ", range=" << this->_set._function(this->_set._domain)
               << ", location=" << this->_location
-              << ", domain=" << this->_domain
-              << ", range=" << this->_state(this->_domain)
-              << ", subdomain=" << this->_reduced_domain
+              << ", domain=" << this->_set._domain
+              << ", range=" << this->_set._function(this->_set._domain)
+              << ", subdomain=" << this->_set._reduced_domain
               << ", empty=" << this->empty()
-              << ", state=" << polynomial(this->_state)
-              << ", negative=" << polynomials(this->_negative_constraints)
-              << ", zero=" << polynomials(this->_zero_constraints)
+              << ", state=" << polynomial(this->_set._function)
+              << ", negative=" << polynomials(this->_set._constraints)
+              << ", zero=" << polynomials(this->_set._equations)
               << ", time="<<polynomial(this->_time) << ")";
 }
 

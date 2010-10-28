@@ -37,11 +37,14 @@
 #include "taylor_model.h"
 #include "taylor_function.h"
 
+#include "box.h"
+
 namespace Ariadne {
 
 class Float;
 class Interval;
 template<class X> class Vector;
+typedef Vector<Interval> IntervalVector;
 template<class X> class Matrix;
 
 class ScalarFunction;
@@ -198,28 +201,42 @@ class HybridEnclosure;
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class TaylorConstrainedImageSet
     : public DrawableInterface
+    , public CompactSetInterface
 {
     friend class HybridEnclosure;
-    Vector<Interval> _domain;
+    Box _domain;
     VectorTaylorFunction _function;
     List<ScalarTaylorFunction> _constraints;
     List<ScalarTaylorFunction> _equations;
 
+    mutable Box _reduced_domain;
   public:
+    //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     TaylorConstrainedImageSet();
-    TaylorConstrainedImageSet(Box);
-    TaylorConstrainedImageSet(Box, VectorFunction);
-    TaylorConstrainedImageSet(Box, VectorFunction, List<NonlinearConstraint>);
-    TaylorConstrainedImageSet(Box, VectorFunction, NonlinearConstraint);
-    TaylorConstrainedImageSet(Box, const List<ScalarFunction>&);
+    //! \brief Construct a representation of the box \a bx.
+    TaylorConstrainedImageSet(const Box& bx);
+    //! \brief Construct the set with parameter domain \a d and image function \a f.
+    TaylorConstrainedImageSet(const IntervalVector& d, const VectorFunction& f);
+    //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
+    TaylorConstrainedImageSet(const IntervalVector& d, const VectorFunction& f, const List<NonlinearConstraint>& c);
+    //! \brief Construct the set with domain \a d, image function \a f, negative constraints \a g and equality constraints \a h.
+    TaylorConstrainedImageSet(const IntervalVector& d, const VectorFunction& f, const List<ScalarFunction>& g, List<ScalarFunction>& h);
+    //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
+    TaylorConstrainedImageSet(const IntervalVector& d, const VectorFunction& f, const NonlinearConstraint& c);
 
-    TaylorConstrainedImageSet(const VectorTaylorFunction&);
+    //! \brief Construct the set with domain equal to the natural domain of \a f.
+    explicit TaylorConstrainedImageSet(const VectorTaylorFunction& f);
+    //! \brief Create a dynamically-allocated copy.
     TaylorConstrainedImageSet* clone() const;
 
+    //! \brief The parameter domain \f$D\f$.
     Vector<Interval> domain() const;
+    //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
     Vector<Interval> codomain() const;
-    VectorFunction function() const;
-    VectorTaylorFunction const& taylor_function() const;
+    //! \brief The image function \f$f\f$.
+    VectorTaylorFunction const& function() const;
+    VectorTaylorFunction taylor_function() const;
+    VectorFunction real_function() const;
 
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
@@ -244,14 +261,17 @@ class TaylorConstrainedImageSet
     void new_negative_constraint(ScalarFunction g);
     void new_negative_constraint(ScalarTaylorFunction g);
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
-    void new_equality_constraint(ScalarFunction h);
     void new_zero_constraint(ScalarFunction h);
     void new_zero_constraint(ScalarTaylorFunction h);
+    //! \brief Introduces the constraint \f$h(s) = 0\f$. \deprecated
+    void new_equality_constraint(ScalarFunction h);
 
-    //! \brief The negative constraints.
+    //! \brief The functions \f$g\f$ defining the inequality constraints \f$g(x) \leq 0\f$.
     const List<ScalarTaylorFunction>& negative_constraints() const;
-    //! \brief The zero constraints.
+    //! \brief The functions \f$h\f$ defining the equality constraints \f$h(x) = 0\f$.
     const List<ScalarTaylorFunction>& zero_constraints() const;
+    //! \brief All equality and inequality constraints.
+    List<NonlinearConstraint> constraints() const;
 
     //! \brief The number of negative constraints.
     uint number_of_constraints() const;
@@ -273,35 +293,93 @@ class TaylorConstrainedImageSet
     //! the constraint, and \c false if no points in the set satisfy the constraint.
     virtual tribool satisfies(NonlinearConstraint c) const;
 
+    //! \brief The dimension of the set.
     uint dimension() const;
+    //! \brief The number of parameters i.e. the dimension of the parameter domain.
     uint number_of_parameters() const;
+    //! \brief A bounding box for the set.
     Box bounding_box() const;
+    //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
     Point centre() const;
+    //! \brief An over-approximation to the radius of the set.
     Float radius() const;
+    //! \brief Returns \c true if the set is definitely bounded.
     tribool bounded() const;
+    //! \brief Returns \c true if the set is provably empty.
+    //! May return \c false if the set can (easily) be proved to be nonempty.
     tribool empty() const;
-    tribool disjoint(Box bx) const;
+    //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
+    tribool disjoint(const Box& bx) const;
+    //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
+    tribool inside(const Box& bx) const;
+    //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
+    tribool subset(const Box& bx) const;
 
+    //! \brief Reduces the size of the effective parameter domain
+    //! by pruning away infeasible points.
+    void reduce() const;
+
+    //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreeSet outer_approximation(const Grid& grid, int depth) const;
+    //! \brief Compute an outer approximation on the \a grid to the given \a depth
+    //! by subdividing the parameter domain. Does not require constraint propagation,
+    //! but may be inefficient.
     GridTreeSet subdivision_outer_approximation(const Grid& grid, int depth) const;
+    //! \brief Compute an outer approximation on the \a grid to the given \a depth
+    //! by first computing affine over-approximations of the set.
     GridTreeSet affine_outer_approximation(const Grid& grid, int depth) const;
 
+    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
     void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    //! by subdividing the parameter domain. Does not require constraint propagation,
+    //! but may be inefficient.
     void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    //! by first computing affine over-approximations of the set.
     void affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    //! by using constraint propagation.
     void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    //! by using an interior point method to try to find good barrier functions
+    //! and using constraint propagation to prove disjointness with cells.
+    //! \details Potentially very efficient, but may be unreliable due to the
+    //! use of nonlinear programming to find good Lyapounov multipliers for
+    //! the constraints.
     void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
 
+    //! \brief An approximation as an affine set.
+    //! \details Most easily computed by dropping all nonlinear terms in the
+    //! image and constraint functions. Potentially a very poor approximation.
     AffineSet affine_approximation() const;
+    //! \brief An over-approximation as an affine set.
+    //! \details Most easily computed by sweeping all nonlinear terms in the
+    //! image and constraint function to constant error terms.
+    //! Potentially a very poor approximation, but guaranteed to be an over-
+    //! approximation.
     AffineSet affine_over_approximation() const;
 
-    Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split(uint dim) const;
+    //! \brief Split into two by splitting the parameter domain along
+    //! the \a k<sup>th</sup> direction.
+    Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split(uint k) const;
+    //! \brief Restrict the parameter domain to \a subdomain.
+    //! \details May also restrict the domain of the defining function models,
+    //! resulting in more accurate computations.
     TaylorConstrainedImageSet restriction(const Vector<Interval>& subdomain) const;
 
+    //! \brief Draw to a canvas.
     void draw(CanvasInterface&) const;
+    //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
+    //! image or when all else fails.
     void box_draw(CanvasInterface&) const;
+    //! \brief Draw the to a canvas by splitting into small enough pieces that
+    //! affine over-approximations yield a good image.
     void affine_draw(CanvasInterface&, uint=1u) const;
+    //! \brief Draw the to a canvas by over-approximating on a grid.
     void grid_draw(CanvasInterface&, uint=1u) const;
+
+    //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
   private:
     void _check() const;
@@ -313,10 +391,14 @@ class TaylorConstrainedImageSet
     friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const TaylorConstrainedImageSet&);
 };
 
+//! \related TaylorConstrainedImageSet \brief Stream output operator.
 inline std::ostream& operator<<(std::ostream& os, const TaylorConstrainedImageSet& s) { return s.write(os); }
 
-TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Interval& bx);
+//! \related TaylorConstrainedImageSet \brief The Cartesian product of a constrained image set with an interval in one dimension.
+TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Interval& ivl);
+//! \related TaylorConstrainedImageSet \brief The Cartesian product of a constrained image set with a box.
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Box& bx);
+//! \related TaylorConstrainedImageSet \brief The Cartesian product of two constrained image sets.
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const TaylorConstrainedImageSet& set2);
 
 

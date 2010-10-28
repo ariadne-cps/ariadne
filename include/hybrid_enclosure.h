@@ -120,13 +120,8 @@ class HybridEnclosure
   private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
-    IntervalVector _domain;
-    VectorIntervalFunction _state;
+    TaylorConstrainedImageSet _set;
     ScalarIntervalFunction _time;
-    List<ScalarIntervalFunction> _negative_constraints;
-    List<ScalarIntervalFunction> _zero_constraints;
-
-    mutable Box _reduced_domain;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
@@ -162,7 +157,7 @@ class HybridEnclosure
     Interval time_range() const;
 
     //! \brief The continuous state set.
-    ContinuousStateSetType continuous_state_set() const;
+    const ContinuousStateSetType& continuous_state_set() const;
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.

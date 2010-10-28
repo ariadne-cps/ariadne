@@ -978,7 +978,7 @@ void TaylorConstrainedImageSet::_solve_zero_constraints() {
 
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet()
-    : _domain(), _function()
+    : _domain(), _function(), _reduced_domain()
 {
 }
 
@@ -987,42 +987,45 @@ TaylorConstrainedImageSet* TaylorConstrainedImageSet::clone() const
     return new TaylorConstrainedImageSet(*this);
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& domain)
 {
     // Ensure domain elements have nonempty radius
     const double min=std::numeric_limits<double>::min();
-    IntervalVector domain=box;
-    for(uint i=0; i!=domain.size(); ++i) {
-        if(domain[i].radius()==0) {
-            domain[i]+=Interval(-min,+min);
-            domain[i]=widen(domain(i));
+    this->_domain=domain;
+    for(uint i=0; i!=this->_domain.size(); ++i) {
+        if(this->_domain[i].radius()==0) {
+            this->_domain[i]+=Interval(-min,+min);
+            this->_domain[i]=widen(this->_domain(i));
         }
     }
-    this->_function=VectorTaylorFunction::identity(domain);
+    this->_function=VectorTaylorFunction::identity(this->_domain);
+    this->_reduced_domain=this->_domain;
 }
 
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const VectorFunction& function)
 {
-    ARIADNE_ASSERT_MSG(box.size()==function.argument_size(),"domain="<<box<<", function="<<function);
-    this->_function=VectorTaylorFunction(box,function);
+    ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
+    this->_domain=domain;
+    this->_function=VectorTaylorFunction(this->_domain,function);
+    this->_reduced_domain=this->_domain;
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function, List<NonlinearConstraint> constraints)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const VectorFunction& function, const List<NonlinearConstraint>& constraints)
 {
-    ARIADNE_ASSERT_MSG(box.size()==function.argument_size(),"domain="<<box<<", function="<<function);
+    ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     const double min=std::numeric_limits<double>::min();
-    IntervalVector domain=box;
-    for(uint i=0; i!=domain.size(); ++i) {
-        if(domain[i].radius()==0) {
-            domain[i]+=Interval(-min,+min);
+    this->_domain=domain;
+    for(uint i=0; i!=this->_domain.size(); ++i) {
+        if(this->_domain[i].radius()==0) {
+            this->_domain[i]+=Interval(-min,+min);
         }
     }
 
-    this->_function=VectorTaylorFunction(domain,function);
+    this->_function=VectorTaylorFunction(this->_domain,function);
 
     for(uint i=0; i!=constraints.size(); ++i) {
-        ARIADNE_ASSERT_MSG(box.size()==constraints[i].function().argument_size(),"domain="<<box<<", constraint="<<constraints[i]);
+        ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
         if(constraints[i].bounds().singleton()) {
             this->new_equality_constraint(constraints[i].function()-Real(constraints[i].bounds().midpoint()));
         } else {
@@ -1035,35 +1038,23 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction fun
         }
     }
 
+    this->_reduced_domain=domain;
+    this->reduce();
+
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, VectorFunction function, NonlinearConstraint constraint)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const VectorFunction& function, const NonlinearConstraint& constraint)
 {
-    *this=TaylorConstrainedImageSet(box,function,make_list(constraint));
+    *this=TaylorConstrainedImageSet(domain,function,make_list(constraint));
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(Box box, const List<ScalarFunction>& components)
-{
-    const double min=std::numeric_limits<double>::min();
-    IntervalVector domain=box;
-    for(uint i=0; i!=domain.size(); ++i) {
-        if(domain[i].radius()==0) {
-            domain[i]+=Interval(-min,+min);
-        }
-    }
-
-    this->_function=VectorTaylorFunction(components.size(),domain);
-    for(uint i=0; i!=components.size(); ++i) {
-        this->_function.set(i,ScalarTaylorFunction(domain,components[i]));
-    }
-
-    this->_check();
-}
 
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(const VectorTaylorFunction& function)
 {
+    this->_domain=function.domain();
     this->_function=function;
+    this->_reduced_domain=this->_domain;
 }
 
 
@@ -1202,6 +1193,18 @@ TaylorConstrainedImageSet::zero_constraints() const {
     return this->_equations;
 }
 
+List<NonlinearConstraint>
+TaylorConstrainedImageSet::constraints() const {
+    List<NonlinearConstraint> result;
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        result.append(this->_constraints[i].function()<=0.0);
+    }
+    for(uint i=0; i!=this->_equations.size(); ++i) {
+        result.append(this->_equations[i].function()==0.0);
+    }
+    return result;
+}
+
 uint TaylorConstrainedImageSet::number_of_constraints() const {
     return this->_constraints.size()+this->_equations.size();
 }
@@ -1226,19 +1229,23 @@ ScalarTaylorFunction TaylorConstrainedImageSet::zero_constraint(uint i) const {
 
 
 IntervalVector TaylorConstrainedImageSet::domain() const {
-    return this->_function.domain();
+    return this->_domain;
 }
 
 IntervalVector TaylorConstrainedImageSet::codomain() const {
     return Box(this->_function.range()).bounding_box();
 }
 
-VectorFunction TaylorConstrainedImageSet::function() const {
-    return VectorFunction(Vector< Polynomial<Real> >(this->_function.polynomial()));
+VectorTaylorFunction const&  TaylorConstrainedImageSet::function() const {
+    return this->_function;
 }
 
-VectorTaylorFunction const& TaylorConstrainedImageSet::taylor_function() const {
+VectorTaylorFunction TaylorConstrainedImageSet::taylor_function() const {
     return this->_function;
+}
+
+VectorFunction TaylorConstrainedImageSet::real_function() const {
+    return VectorFunction(Vector< Polynomial<Real> >(this->_function.polynomial()));
 }
 
 uint TaylorConstrainedImageSet::dimension() const {
@@ -1271,26 +1278,72 @@ TaylorConstrainedImageSet::satisfies(NonlinearConstraint c) const
     else { return indeterminate; }
 }
 
-tribool TaylorConstrainedImageSet::bounded() const {
+tribool TaylorConstrainedImageSet::bounded() const
+{
     return Box(this->domain()).bounded() || indeterminate;
 }
 
-tribool TaylorConstrainedImageSet::empty() const {
-    static bool warn=true;
-    if(warn) {
-        ARIADNE_WARN("TaylorConstrainedImageSet::empty() is not correctly implemented");
-        warn=false;
+tribool TaylorConstrainedImageSet::empty() const
+{
+    List<NonlinearConstraint> constraints=this->constraints();
+    if(constraints.empty()) { return this->domain().empty(); }
+    for(uint i=0; i!=constraints.size(); ++i) {
+        if(Ariadne::disjoint(constraints[i].function().evaluate(this->_reduced_domain),constraints[i].bounds())) {
+            return true;
+        }
     }
-    return this->disjoint(this->bounding_box());
+    ConstraintSolver contractor=ConstraintSolver();
+    contractor.reduce(constraints,this->_reduced_domain);
+    if(this->_reduced_domain.empty()) { return true; }
+    else { return indeterminate; }
 }
 
-tribool TaylorConstrainedImageSet::disjoint(Box bx) const {
-    static bool warn=true;
-    if(warn) {
-        ARIADNE_WARN("TaylorConstrainedImageSet::disjoint(Box) is not correctly implemented");
-        warn=false;
+tribool TaylorConstrainedImageSet::inside(const Box& bx) const
+{
+    return Ariadne::subset(this->_function.evaluate(this->_reduced_domain),bx);
+}
+
+tribool TaylorConstrainedImageSet::subset(const Box& bx) const
+{
+    List<NonlinearConstraint> constraints=this->constraints();
+    ConstraintSolver contractor=ConstraintSolver();
+    contractor.reduce(constraints,this->_reduced_domain);
+
+    if(_reduced_domain.empty()) { return true; }
+
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        const Box test_domain=this->_reduced_domain;
+        constraints.append(ScalarTaylorFunction(this->_function[i]).function() <= bx[i].lower());
+        if(possibly(contractor.feasible(constraints,test_domain).first)) { return indeterminate; }
+        constraints.back()=(ScalarTaylorFunction(this->_function[i]).function() >= bx[i].upper());
+        if(possibly(contractor.feasible(constraints,test_domain).first)) { return indeterminate; }
+        constraints.pop_back();
     }
-    return this->affine_approximation().disjoint(bx);
+    return true;
+}
+
+tribool TaylorConstrainedImageSet::disjoint(const Box& bx) const
+{
+    ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"TaylorConstrainedImageSet::subset(Box): self="<<*this<<", box="<<bx);
+    List<NonlinearConstraint> constraints=this->constraints();
+    ConstraintSolver contractor=ConstraintSolver();
+    contractor.reduce(constraints,this->_reduced_domain);
+
+    if(_reduced_domain.empty()) { return true; }
+
+    const Box test_domain=this->_reduced_domain;
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        constraints.append(ScalarTaylorFunction(this->_function[i]).function() >= bx[i].lower());
+        constraints.append(ScalarTaylorFunction(this->_function[i]).function() <= bx[i].upper());
+    }
+    return !contractor.feasible(constraints,test_domain).first;
+}
+
+void TaylorConstrainedImageSet::reduce() const
+{
+    List<NonlinearConstraint> constraints=this->constraints();
+    ConstraintSolver contractor=ConstraintSolver();
+    contractor.reduce(constraints,this->_reduced_domain);
 }
 
 
@@ -1549,7 +1602,7 @@ void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTre
 {
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
-    const VectorFunction& f=this->function();
+    const VectorFunction& f=this->real_function();
 
     VectorFunction g(this->_constraints.size()+this->_equations.size(),d.size());
     uint i=0;
@@ -1574,7 +1627,7 @@ void TaylorConstrainedImageSet::optimal_constraint_adjoin_outer_approximation_to
 {
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
-    const VectorFunction& f=this->function();
+    VectorFunction f=this->real_function();
 
     VectorFunction g(this->_constraints.size(),d.size());
     uint i=0;
@@ -1622,7 +1675,7 @@ GridTreeSet TaylorConstrainedImageSet::affine_outer_approximation(const Grid& gr
 TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<Interval>& subdomain) const
 {
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
-    ARIADNE_ASSERT_MSG(subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
+    ARIADNE_ASSERT_MSG(Ariadne::subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
     TaylorConstrainedImageSet result(*this);
     result._function=Ariadne::restrict(result._function,subdomain);
     ScalarTaylorFunction new_constraint;

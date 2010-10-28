@@ -90,10 +90,12 @@ void TestHybridEvolution::test_bouncing_ball() const {
     ScalarFunction c=ScalarFunction::constant(2,1.0);
     ScalarFunction x=ScalarFunction::coordinate(2,0);
     ScalarFunction v=ScalarFunction::coordinate(2,1);
-    double lambda=0.5;
+
+    TaylorModel::set_default_maximum_degree(4);
+
+    Real lambda=0.5;
     bouncing_ball.new_mode(q,(v,-c));
-    ARIADNE_TEST_WARN("IMPACT case not tested properly; instead adding small constant");
-    bouncing_ball.new_transition(e,q,q,(x+0.000001,-lambda*v),-x,impact);
+    bouncing_ball.new_transition(e,q,q,(x,-lambda*v),-x,impact);
 
     double height=2.0;
     double radius=1.0/64;
@@ -195,8 +197,10 @@ int main(int argc, const char* argv[])
     TaylorModel::set_default_sweep_threshold(1e-12);
     GeneralHybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
-    evolver.parameters().maximum_step_size=0.125;
-    TestHybridEvolution(evolver).test();
+    evolver.parameters().maximum_step_size=1./32;
+    evolver.parameters().maximum_enclosure_radius = 1./16;
+
+   TestHybridEvolution(evolver).test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }

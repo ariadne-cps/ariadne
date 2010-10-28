@@ -23,20 +23,29 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include "hybrid_evolver-working.h"
 
 using namespace Ariadne;
 
+VectorFunction operator,(const ScalarFunction& f1, const Real& c2) {
+    ScalarFunction f2=ScalarFunction::constant(f1.argument_size(),c2);
+    return (f1,f2);
+}
 
-int main()
+int main(int argc, const char* argv[])
 {
-    typedef ImageSetHybridEvolver HybridEvolverType;
+    uint evolver_verbosity=0;
+    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+
+    typedef GeneralHybridEvolver HybridEvolverType;
 
     /// Set the system parameters
-    double a = 0.5;
-    double g = 9.8;
+    Real a = 0.5;  // Coefficient of restitution
+    Real g = 9.8;
 
-    double A[4]={0,1.0,0,0};
-    double b[2]={0,-g};
+    /// Set the position and velocity functions.
+    ScalarFunction x=ScalarFunction::coordinate(2,0);
+    ScalarFunction v=ScalarFunction::coordinate(2,1);
 
     /// Build the Hybrid System
 
@@ -52,21 +61,21 @@ int main()
     cout << "event = " << bounce << endl << endl;
 
     /// Create the dynamics
-    VectorAffineFunction dynamic(Matrix<Real>(2,2,A),Vector<Real>(2,b));
+    VectorFunction dynamic((v,-g));
     cout << "dynamic = " << dynamic << endl << endl;
 
     /// Create the resets
-    VectorAffineFunction reset(Matrix<Real>(2,2,1.0,0.0,0.0,-a),Vector<Real>(2,0.0,0.0));
+    VectorFunction reset((x,-a*v));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.
-    /// Guards are true when f(x) = Ax + b > 0
-    ScalarAffineFunction guard(Vector<Real>(2,-1.0,0.0),Real(0.0));
+    /// Guards are true when g(x) > 0
+    ScalarFunction guard(-x);
     cout << "guard=" << guard << endl << endl;
 
     /// Build the automaton
     ball.new_mode(freefall,dynamic);
-    ball.new_transition(bounce,freefall,freefall,reset,guard,urgent);
+    ball.new_transition(bounce,freefall,freefall,reset,guard,impact);
     /// Finished building the automaton
 
     cout << "Automaton = " << ball << endl << endl;
@@ -74,7 +83,9 @@ int main()
 
     /// Create a HybridEvolver object
     HybridEvolverType evolver;
+    evolver.verbosity=evolver_verbosity;
 
+    TaylorModel::set_default_maximum_degree(5);
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
     evolver.parameters().maximum_step_size = 1.0/32;
@@ -87,7 +98,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
-    Box initial_box(2, 1.999,2.0, 0.0,0.001);
+    Box initial_box(2, 1.99,2.0, 0.0,0.01);
     EnclosureType initial_enclosure(freefall,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
 
@@ -97,8 +108,9 @@ int main()
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit="<<orbit<<std::endl;
-    plot("ball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    //std::cout << "Orbit="<<orbit<<std::endl;
+    std::cout << "Orbit.final()="<<orbit.final()<<std::endl;
+    plot("bouncingball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
 
     //textplot("ball-orbit.txt",orbit);
 

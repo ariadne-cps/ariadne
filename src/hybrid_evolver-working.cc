@@ -231,8 +231,7 @@ _extract_transitions(DiscreteLocation const& location,
                      HybridAutomatonInterface const& system) const
 {
     Map<DiscreteEvent,TransitionData> transitions;
-    //FIXME: Should extract ALL transitions
-    Set<DiscreteEvent> events = system.urgent_events(location);
+    Set<DiscreteEvent> events = system.events(location);
     for(Set<DiscreteEvent>::const_iterator event_iter=events.begin();
         event_iter!=events.end(); ++event_iter)
     {
@@ -279,13 +278,22 @@ _process_initial_events(EvolutionData& evolution_data,
     {
         DiscreteEvent event=transition_iter->first;
         TransitionData const & transition=transition_iter->second;
-        if(transition.event_kind!=INVARIANT) {
+        // Assume that an impact cannot occur immediately after any other event.
+        // This is true after the impact, since $L_{f}g$ changes sign.
+        // After a different event, this is not so clear, though it should be
+        // a modelling error for the set to intersect the interior of the guard
+        // TODO: The condition for an impact to occur is $L_{f}g>0$.
+        //       However, $f$ is not available to this method; maybe it should be.
+        // FIXME: Need to consider impact which really can occur immediately due to mapping to boundary.
+        // FIXME: Maybe need to consider impact as invariant.
+        if(transition.event_kind!=INVARIANT && transition.event_kind!=IMPACT) {
             if(possibly(initial_set.satisfies(transition.guard_function>=0))) {
-                if(transition.event_kind!=PERMISSIVE) {
+                if(transition.event_kind!=PROGRESS) {
                     HybridEnclosure immediate_jump_set=invariant_set;
                     immediate_jump_set.new_activation(event,transition.guard_function);
                     if(!definitely(immediate_jump_set.empty())) {
                         // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
+                        ARIADNE_LOG(1,"  "<<event<<": "<<transition.event_kind<<", immediate\n");
                         evolution_data.reach_sets.append(immediate_jump_set);
                         immediate_jump_set.apply_reset(event,transition.target,transition.reset_function);
                         ARIADNE_LOG(4,"immediate_jump_set="<<immediate_jump_set<<"\n");
@@ -293,7 +301,7 @@ _process_initial_events(EvolutionData& evolution_data,
                         evolution_data.working_sets.append(immediate_jump_set);
                     }
                 }
-                if(transition_iter->second.event_kind!=PROGRESS) {
+                if(transition_iter->second.event_kind!=PERMISSIVE) {
                     flowable_set.new_invariant(event,transition.guard_function);
                 }
             }
@@ -527,16 +535,15 @@ _compute_timing(Set<DiscreteEvent>& active_events,
         // The evolution is performed over a step size which preserves points
         // which are past the final_time, but moves other points closer.
 
-        // FIXME: The formulae used here may need to be modified
         result.step_kind=UNWIND_STEP;
         if(remaining_time_range.width()<result.step_size) {
             Float constant_finishing_time=result.final_time-remaining_time_range.upper()+result.step_size;
             result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),constant_finishing_time);
         } else {
-            // If the time can't be unwound to a constant, try to reduce range.
-            // HACK: The formula below may still yield a range above the range of the flow time
-            // and need to be adjusted.
-            result.finishing_time=0.5*(result.step_size+initial_set.time_function());
+            // FIXME: The formulae used here may need to be modified to take into accout the finishing time
+            Float sf=1.0;
+            while(remaining_time_range.width()*sf>result.step_size) { sf /= 2; }
+            result.finishing_time=(1-sf)*initial_set.time_function()+sf*initial_set.time_function().range().lower()+result.step_size;
         }
         result.evolution_time=result.finishing_time-initial_set.time_function();
     } else {
@@ -739,13 +746,15 @@ _apply_time_step(EvolutionData& evolution_data,
         // due to non-transverse guards
         List<HybridEnclosure> reach_sets;
         reach_sets.append(starting_set);
+        // WARNING: Reach set reference is invalidated on List reallocation on resize
         HybridEnclosure& reach_set=reach_sets.front();
 
         ARIADNE_LOG(4,"\n");
-
+        ARIADNE_ASSERT(!definitely(reach_set.empty()));
         switch(timing_data.step_kind) {
             case FULL_STEP:
                 reach_set.apply_flow_for(flow,timing_data.step_size);
+                ARIADNE_ASSERT(!definitely(reach_set.empty()));
                 break;
             case CREEP_STEP:
                 reach_set.apply_flow_for(flow,timing_data.spacial_evolution_time);
@@ -761,8 +770,9 @@ _apply_time_step(EvolutionData& evolution_data,
         }
         ARIADNE_LOG(6,"unconstrained_reach_set="<<reach_set<<"\n");
 
+        // Apply constraints on reach set due to final time, if necessary
         if(timing_data.step_kind!=FINAL_STEP) {
-            reach_set.new_parameter_constraint(step_event,embedded_reach_time<=embedded_evolution_time);
+            //reach_set.new_parameter_constraint(step_event,embedded_reach_time<=embedded_evolution_time);
         }
 
         // Apply constraints on reach set due to events
@@ -782,42 +792,38 @@ _apply_time_step(EvolutionData& evolution_data,
     } // Done computing reach sets
 
 
+    ARIADNE_LOG(4,"Done computing reach sets\n");
 
-
-    // Compute evolve and final sets
+    // Compute evolve set
     // TODO: This should probably be a separate function
     List<HybridEnclosure> evolve_sets((starting_set));
     HybridEnclosure& evolve_set=evolve_sets.front();
-    List<HybridEnclosure> final_sets(1u,starting_set);
-    HybridEnclosure& final_set=final_sets.front();
 
-    // Apply the flow to the reach and evolve sets
-    ARIADNE_LOG(6,"step_kind="<<timing_data.step_kind<<"\n");
+    // Apply the flow to the evolve set
+    if(timing_data.step_kind!=FULL_STEP) { ARIADNE_LOG(1,"  step_kind="<<timing_data.step_kind<<"\n"); }
+
+    uint nc=evolve_set.number_of_constraints();
     switch(timing_data.step_kind) {
         case FULL_STEP:
             evolve_set.apply_flow_step_for(flow,timing_data.step_size);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
             break;
         case CREEP_STEP:
-            // TODO: Use parameterised time here
             evolve_set.apply_flow_step_for(flow,timing_data.spacial_evolution_time);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
             break;
         case PARTIAL_STEP:
             ARIADNE_ASSERT(false); break; // Not currently implemented
         case UNWIND_STEP:
             evolve_set.apply_flow_step_to(flow,timing_data.finishing_time);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
             break;
         case FINAL_STEP:
             evolve_set.apply_flow_step_to(flow,timing_data.final_time);
-            final_set.apply_flow_step_to(flow,timing_data.final_time);
             break;
     }
+    ARIADNE_ASSERT(nc==evolve_set.number_of_constraints());
 
-    final_set.new_parameter_constraint(step_event,timing_data.remaining_time<=timing_data.evolution_time);
+    // final_set.new_parameter_constraint(step_event,timing_data.remaining_time<=timing_data.evolution_time);
 
-    // Apply constraints on evolve and final sets due to events
+    // Apply constraints on evolve set due to events
     // FIXME: If there is a discrete transition, the guard may be
     for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
         event_iter!=blocking_events.end(); ++event_iter)
@@ -827,20 +833,10 @@ _apply_time_step(EvolutionData& evolution_data,
         const CrossingData& event_crossing_data=crossing_data[event];
         _apply_guard(evolve_sets,starting_state,flow,timing_data.evolution_time,
                      event,event_guard_function,event_crossing_data,semantics);
-        _apply_guard(final_sets,starting_state,flow,timing_data.remaining_time,
-                     event,event_guard_function,event_crossing_data,semantics);
     }
 
-    // Compute final set, and apply constraints to reach and evolve set
+    // Compute final set, and apply constraints to evolve set
     // if necessary
-    for(List<HybridEnclosure>::const_iterator final_set_iter=final_sets.begin(); final_set_iter!=final_sets.end(); ++final_set_iter) {
-        HybridEnclosure const& final_set=*final_set_iter;
-        if(!definitely(final_set.empty())) {
-            ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
-            evolution_data.evolve_sets.append(final_set);
-        }
-    }
-
     if(timing_data.step_kind!=FINAL_STEP) {
         for(List<HybridEnclosure>::const_iterator evolve_set_iter=evolve_sets.begin(); evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter) {
             HybridEnclosure const& evolve_set=*evolve_set_iter;
@@ -848,6 +844,14 @@ _apply_time_step(EvolutionData& evolution_data,
                 ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
                 evolution_data.intermediate_sets.append(evolve_set);
                 evolution_data.working_sets.append(evolve_set);
+            }
+        }
+    } else {
+        for(List<HybridEnclosure>::const_iterator final_set_iter=evolve_sets.begin(); final_set_iter!=evolve_sets.end(); ++final_set_iter) {
+            HybridEnclosure const& final_set=*final_set_iter;
+            if(!definitely(final_set.empty())) {
+                ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+                evolution_data.evolve_sets.append(final_set);
             }
         }
     }
@@ -859,6 +863,8 @@ _apply_time_step(EvolutionData& evolution_data,
     {
         DiscreteEvent event=*event_iter;
         TransitionData const & transition = transitions[event];
+
+        ARIADNE_LOG(2,"  "<<event<<": "<<transition.event_kind<<", "<<crossing_data[event].crossing_kind<<"\n");
 
         // Compute active set
         List<HybridEnclosure> jump_sets((starting_set));
@@ -876,7 +882,10 @@ _apply_time_step(EvolutionData& evolution_data,
                 switch(crossing_data[event].crossing_kind) {
                     case INCREASING_CROSSING:
                         jump_starting_state=starting_state; jump_step_time=compose(crossing_data[event].crossing_time,starting_set.space_function());
-                        jump_set.new_parameter_constraint(step_event,jump_step_time<=timing_data.evolution_time);
+                        // If the jump step might occur after the final evolution time, then introduce constraint that this does not happen
+                        if(timing_data.step_kind!=FULL_STEP && (jump_step_time-timing_data.evolution_time).range().upper()>0.0) {
+                            jump_set.new_parameter_constraint(step_event,jump_step_time<=timing_data.evolution_time);
+                        }
                         jump_set.apply_flow_step_for(flow,crossing_data[event].crossing_time);
                         break;
                     case CONVEX_CROSSING:
@@ -927,6 +936,7 @@ _apply_time_step(EvolutionData& evolution_data,
             }
         }
 
+        ARIADNE_LOG(1, "  "<<event<<": "<<transition.event_kind<<", "<<crossing_data[event].crossing_kind<<"\n");
         // Apply reset
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;

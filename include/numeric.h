@@ -520,6 +520,7 @@ class Interval {
     Interval(const Rational& lower, const Rational& upper);
 #endif // HAVE_GMPXX_H
 
+    Interval& operator=(uint m) { l=m; u=m; return *this; }
     Interval& operator=(int n) { l=n; u=n; return *this; }
     Interval& operator=(double c) { l=c; u=c; return *this; }
     Interval& operator=(const Float& x) { l=x; u=x; return *this; }

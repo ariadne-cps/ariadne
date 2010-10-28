@@ -1276,6 +1276,11 @@ tribool TaylorConstrainedImageSet::bounded() const {
 }
 
 tribool TaylorConstrainedImageSet::empty() const {
+    static bool warn=true;
+    if(warn) {
+        ARIADNE_WARN("TaylorConstrainedImageSet::empty() is not correctly implemented");
+        warn=false;
+    }
     return this->disjoint(this->bounding_box());
 }
 

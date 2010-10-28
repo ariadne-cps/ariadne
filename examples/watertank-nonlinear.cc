@@ -26,52 +26,6 @@
 
 using namespace Ariadne;
 
-//
-// Definition of the dynamics
-//
-// the parameters of the functions are a, b and T
-//
-struct Opening : VectorFunctionData<3,3,3> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-        typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1];
-        r[1] = 1.0/p[2];
-        r[2] = 1.0;
-    }
-};
-
-struct Closing : VectorFunctionData<3,3,3> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-        typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1];
-        r[1] = -1.0/p[2];
-        r[2] = 1.0;
-    }
-};
-
-
-struct OpenValve : VectorFunctionData<3,3,3> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-        typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1];
-        r[1] = 0.0;
-        r[2] = 1.0;
-    }
-};
-
-struct ClosedValve : VectorFunctionData<3,3,3> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-        typename R::value_type x0 = x[0];
-        r[0] = - p[0] * Ariadne::sqrt(x0);
-        r[1] = 0;
-        r[2] = 1.0;
-    }
-};
-
 /// Function for plotting the orbit and reachability set
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
@@ -128,20 +82,14 @@ int main()
 
     /// Set the system parameters
     double a = 0.065;
-    double bmin = 0.3;
-    double bmax = 0.34;
+    double b = 0.3;
     double T = 4.0;
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
 
-    double tmax = 64.0;
-    int jmax = 1;
-
-    Vector<Real> system_parameters(3);
-    system_parameters[0] = a;
-    system_parameters[1] = Interval(bmin,bmax);        // Now parameters can be given as intervals !!
-    system_parameters[2] = T;
+    double tmax = 80.0;
+    int jmax = 6;
 
 
     /// Build the Hybrid System
@@ -161,16 +109,29 @@ int main()
     DiscreteEvent e34(34);
     DiscreteEvent e41(41);
 
-    /// Create the dynamics
-    VectorUserFunction<Opening> dynamic1(system_parameters);
-    VectorUserFunction<OpenValve> dynamic2(system_parameters);
-    VectorUserFunction<Closing> dynamic3(system_parameters);
-    VectorUserFunction<ClosedValve> dynamic4(system_parameters);
+    /// Coordinates
+    ScalarFunction x=ScalarFunction::coordinate(3,0);
+    ScalarFunction y=ScalarFunction::coordinate(3,1);
+    ScalarFunction t=ScalarFunction::coordinate(3,2);
 
-    cout << "dynamic1 = " << dynamic1 << endl << endl;
-    cout << "dynamic2 = " << dynamic2 << endl << endl;
-    cout << "dynamic3 = " << dynamic3 << endl << endl;
-    cout << "dynamic4 = " << dynamic4 << endl << endl;
+    /// Create the dynamics
+
+    ScalarFunction zero=ScalarFunction::constant(3,0.0);
+    ScalarFunction one=ScalarFunction::constant(3,1.0);
+
+    /// The dynamic for an opening valve
+    VectorFunction opening_d((-a*Ariadne::sqrt(x)+b*y,one/T,one));
+    /// The dynamic for a closing valve
+    VectorFunction closing_d((-a*Ariadne::sqrt(x)+b*y,-one/T,one));
+    /// The dynamic for an opened valve
+    VectorFunction opened_d((-a*Ariadne::sqrt(x)+b,zero,one));
+    /// The dynamic for an opened valve
+    VectorFunction closed_d((-a*Ariadne::sqrt(x),zero,one));
+
+    cout << "opening dynamic = " << opening_d << endl << endl;
+    cout << "closing dynamic = " << closing_d << endl << endl;
+    cout << "opened dynamic = " << opened_d << endl << endl;
+    cout << "closed dynamic = " << closed_d << endl << endl;
 
     /// Create the resets
     VectorAffineFunction reset_y_zero(Matrix<Real>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Real>(3, 0.0,0.0,0.0));
@@ -199,16 +160,16 @@ int main()
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton
-    watertank_system.new_mode(l1,dynamic1);
-    watertank_system.new_mode(l2,dynamic2);
-    watertank_system.new_mode(l3,dynamic3);
-    watertank_system.new_mode(l4,dynamic4);
+    watertank_system.new_mode(l1,opening_d);
+    watertank_system.new_mode(l2,opened_d);
+    watertank_system.new_mode(l3,closing_d);
+    watertank_system.new_mode(l4,closed_d);
 
     watertank_system.new_invariant(l2,inv2);
     watertank_system.new_invariant(l4,inv4);
 
     watertank_system.new_forced_transition(e12,l1,l2,reset_y_one,guard12);
-    //watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
+    watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
     watertank_system.new_forced_transition(e34,l3,l4,reset_y_zero,guard34);
     watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
 
@@ -236,7 +197,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(3, 1.00001,1.00001, 1.00000,1.00001, 0.0000,0.0000);
+    Box initial_box(3, 6.0,6.0, 1.0,1.0, 0.0000,0.0000);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
 

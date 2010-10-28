@@ -7,62 +7,6 @@
 
 using namespace Ariadne;
 
-/// Control variables:
-/// t: time
-/// vi: input (sinusoidal) voltage
-/// vo: output (rectified) voltage
-
-/// Non-affine dynamics
-
-/// Dynamics for the case of both diodes being off
-/// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
-struct offoff_df : VectorFunctionData<3,3,5> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
-	    r[2] = -x[2]/(p[4]*p[3]);
-//        r[2] = -x[2]/(p[4]*p[3]) - 2e-12/p[3];
-    }
-};
-
-/// Dynamics for the case of the first diode being on, the second being off
-/// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-struct onoff_df : VectorFunctionData<3,3,5> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
-	r[2] = -x[2]/(p[4]*p[3]) + (x[1]-x[2])/(p[2]*p[3]);
-	// r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035)-2);
-    }
-};
-
-/// Dynamics for the case of the first diode being off, the second being on
-/// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-struct offon_df : VectorFunctionData<3,3,5> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
-	r[2] = -x[2]/(p[4]*p[3]) - (x[1]+x[2])/(p[2]*p[3]);
-	// r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((-x[1]-x[2])/0.035)-2);
-    }
-};
-
-/// Dynamics for the case of both diodes being on
-/// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-struct onon_df : VectorFunctionData<3,3,5> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        std::cerr<<p[0]*2.0*pi<Real>()<<"\n";
-        r[1] = p[0]*2.0*pi<Real>()*p[1]*Ariadne::cos(2.0*pi<Real>()*p[1]*x[0]);
-	r[2] = -x[2]/(p[4]*p[3]) -2*x[2]/(p[2]*p[3]);
-	//r[2] = -x[2]/(p[4]*p[3]) + 1e-12/p[3]*(Ariadne::exp((x[1]-x[2])/0.035) + Ariadne::exp((-x[1]-x[2])/0.035)-2);
-    }
-};
-
 /// Function for plotting the orbit and reachability set
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
@@ -117,7 +61,10 @@ int main()
 {
     double amplitude=4.0;
     double frequency=50.0;
-    
+    double Ron = 10.0;
+    double Cl = 0.0001;
+    double Rl = 1000.0;
+
     /// Introduces the dynamics parameters
     Vector<double> dp(5);
     dp[0] = amplitude; /// Amplitude of the input voltage, Vi
@@ -142,6 +89,13 @@ int main()
 
     /// Create a MonolithicHybridAutomaton object
     MonolithicHybridAutomaton rectifier;
+
+    // Create the coordinates
+    ScalarFunction t=ScalarFunction::coordinate(3,0); // Time // Input voltage
+    ScalarFunction vi=ScalarFunction::coordinate(3,1); // Input voltage
+    ScalarFunction vo=ScalarFunction::coordinate(3,2); // Output voltage
+
+    ScalarFunction one=ScalarFunction::constant(3,1.0);
 
     /// Create the discrete states
     AtomicDiscreteLocation offoff(1);
@@ -182,13 +136,22 @@ int main()
     /// Guard for the jump from onoff to onon (-vi-vo>=0)
     VectorAffineFunction onoff_onon_g(Matrix<Real>(1,3,0.0,-1.0,-1.0),Vector<Real>(1,0.0));
 
-    /// Create the dynamics
-    VectorUserFunction<offoff_df> offoff_d(dp);
-    VectorUserFunction<onoff_df> onoff_d(dp);
-    VectorUserFunction<offon_df> offon_d(dp);
-    VectorUserFunction<onon_df> onon_d(dp);
-
     /// Build the automaton
+
+    /// Create the dynamics
+
+    /// Dynamics for the case of both diodes being off
+    /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
+    VectorFunction offoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)));
+    /// Dynamics for the case of the first diode being on, the second being off
+    /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
+    VectorFunction onoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
+    /// Dynamics for the case of the first diode being off, the second being on
+    /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
+    VectorFunction offon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
+    /// Dynamics for the case of both diodes being on
+    /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
+    VectorFunction onon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
 
     /// Locations
     rectifier.new_mode(offoff,offoff_d);

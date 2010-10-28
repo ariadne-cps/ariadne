@@ -13,102 +13,6 @@
 
 using namespace Ariadne;
 
-/// Variables:
-/*
- t: absolute time;
- Vi: input voltage, consequently gate-source voltage for the nMOS, while Vdd-Vi is the gate-source voltage for the pMOS;
- Vo: output voltage, consequently drain-source voltage for the nMOS, while Vdd-Vo is the drain-source voltage for the
-
-*/
-
-/// Function for the behavior of the system in the nMOS linear mode, pMOS subthreshold mode (Vi >= Vth, Vo <= Vi-Vth)
-/// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-struct nl_pt_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3] * ((x[1]-p[1])*x[2] - x[2]*x[2]/2.0) + p[0]/p[3] * Ariadne::exp((-x[1]-p[1]+p[4])/p[2]);
-    }
-};
-
-/// Function for the behavior of the system in the nMOS saturation mode, pMOS subthreshold mode (Vi >= Vdd-Vth, Vo >= Vi-Vth)
-/// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-struct ns_pt_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3]/2.0 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[0]/p[3] * Ariadne::exp((-x[1]-p[1]+p[4])/p[2]);
-    }
-};
-
-/// Function for the behavior of the system in the nMOS subthreshold mode, pMOS linear mode (Vi <= Vth, Vo >= Vi+Vth)
-/// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-struct nt_pl_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
-        r[2] = -p[0]/p[3] * Ariadne::exp((x[1]-p[1])/p[2]) + p[6]*p[8]/p[3] * ((x[1]-p[4]+p[1])*(x[2]-p[4]) - (x[2]-p[4])*(x[2]-p[4])/2.0);
-    }
-};
-
-/// Function for the behavior of the system in the nMOS subthreshold mode, pMOS saturation mode (Vi <= Vth, Vo <= Vi+Vth)
-/// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-struct nt_ps_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
-        r[2] = -p[0]/p[3] * Ariadne::exp((x[1]-p[1])/p[2]) + p[6]*p[8]/p[3]/2.0 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
-    }
-};
-
-/// Function for the behavior of the system in the nMOS linear mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vo <= Vi-Vth)
-/// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-struct nl_ps_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3] * ((x[1]-p[1])*x[2] - x[2]*x[2]/2.0) + p[6]*p[8]/p[3]/2.0 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
-    }
-};
-
-/// Function for the behavior of the system in the nMOS saturation mode, pMOS linear mode (Vth <= Vi <= Vdd-Vth, Vo >= Vi+Vth)
-/// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-struct ns_pl_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3]/2.0 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[6]*p[8]/p[3] * ((x[1]-p[4]+p[1])*(x[2]-p[4]) - (x[2]-p[4])*(x[2]-p[4])/2.0);
-    }
-};
-
-/// Function for the behavior of the system in the nMOS saturation mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vi-Vth <= Vo <= Vi+Vth)
-/// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-struct ns_ps_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 1.0;
-        r[1] = p[4]*2.0*pi<Real>()*p[10]*Ariadne::cos(2.0*pi<Real>()*p[10]*x[0]);
-        r[2] = -p[5]*p[7]/p[3]/2.0 * (x[1]-p[1]) * (x[1]-p[1]) * (1.0 + p[9]*x[2]) + p[6]*p[8]/p[3]/2.0 * (x[1]-p[4]+p[1]) * (x[1]-p[4]+p[1]) * (1.0 - p[9]*(x[2]-p[4]));
-    }
-};
-
-/// Function for the behavior of the system in the "rising" or "falling" support locations
-/// (t' = 0; Vi' = 0; Vo'=0 )
-struct support_df : VectorFunctionData<3,3,11> {
-    template<class R, class A, class P> static void
-    compute(R& r, const A& x, const P& p) {
-	r[0] = 0.0;
-        r[1] = 0.0;
-        r[2] = 0.0;
-    }
-};
-
 /// Function for plotting the orbit and reachability set
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
@@ -165,30 +69,37 @@ int main()
     /// Dynamics parameters
     Vector<double> dp(11);
 
-    dp[0] = 1e-6; /// Subthreshold current, Id0
-    dp[1] = 0.15; /// Threshold voltage, Vth
-    dp[2] = 0.035; /// n-Thermal voltage, n*VT
-    dp[3] = 1e-3; /// Load capacitance, Cl
-    dp[4] = 1.0; /// Operating voltage, Vdd
-    dp[5] = 1.0e-2; /// Beta of the nMOS, beta_n = mu_n * Cox
-    dp[6] = 0.5e-2; /// Beta of the pMOS, beta_p = mu_p * Cox
-    dp[7] = 1.0; /// Shape factor of the nMOS, Sn
-    dp[8] = 2.0; /// Shape factor of the pMOS, Sp
-    dp[9] = 0.01; /// Early effect constant, lambda
-    dp[10] = 0.25; /// Frequency, f
+    double Id0 = 1e-6; /// Subthreshold current
+    double Vth = 0.15; /// Threshold voltage
+    double nVT = 0.035; /// n-Thermal voltage, n*VT
+    double Cl = 1e-3; /// Load capacitance
+    double Vdd = 1.0; /// Operating voltage
+    double beta_n = 1.0e-2; /// Beta of the nMOS, beta_n = mu_n * Cox
+    double beta_p = 0.5e-2; /// Beta of the pMOS, beta_p = mu_p * Cox
+    double Sn = 1.0; /// Shape factor of the nMOS
+    double Sp = 2.0; /// Shape factor of the pMOS
+    double lambda = 0.01; /// Early effect constant
+    double freq = 0.25; /// Frequency, f
 
     /// Constants
-    float EVOL_TIME = 2.0/dp[10];   /// Evolution time
+    float EVOL_TIME = 2.0/freq;   /// Evolution time
     int EVOL_TRANS = 22;            /// Evolution transitions
     float MAX_ENCL_RADIUS = 0.1;   /// Maximum enclosure radius
     float MAX_STEP_SIZE = 1e-3;     /// Maximum step size
     int VERBOSITY = 1;              /// Verbosity of the GeneralHybridEvolver
 
-    // std::cout << "Enter Maximum number of discrete transitions:";
-    // std::cin >> EVOL_TRANS;
-    // std::cout << std::endl << "Maximum discrete transitions = "<< EVOL_TRANS << std::endl;
+
+
 
     /// Build the Hybrid System
+
+    /// Coordinates
+    ScalarFunction t=ScalarFunction::coordinate(3,0); // Time
+    ScalarFunction vi=ScalarFunction::coordinate(3,1); // Input voltage, consequently gate-source voltage for the nMOS, while Vdd-vi is the gate-source voltage for the pMOS
+    ScalarFunction vo=ScalarFunction::coordinate(3,2); // Output voltage, consequently drain-source voltage for the nMOS, while Vdd-vo is the drain-source voltage for the pMOS
+
+    ScalarFunction zero=ScalarFunction::constant(3,0.0);
+    ScalarFunction one=ScalarFunction::constant(3,1.0);
 
     /// Create a MonolithicHybridAutomaton object
     MonolithicHybridAutomaton inverter;
@@ -220,14 +131,38 @@ int main()
     DiscreteEvent to_rising_ps(11);
 
     /// Create the dynamics
-    VectorUserFunction<nt_pl_df> nt_pl_d(dp);
-    VectorUserFunction<nt_ps_df> nt_ps_d(dp);
-    VectorUserFunction<nl_pt_df> nl_pt_d(dp);
-    VectorUserFunction<ns_pt_df> ns_pt_d(dp);
-    VectorUserFunction<nl_ps_df> nl_ps_d(dp);
-    VectorUserFunction<ns_pl_df> ns_pl_d(dp);
-    VectorUserFunction<ns_ps_df> ns_ps_d(dp);
-    VectorUserFunction<support_df> support_d(dp);
+
+    /// Function for the behavior of the system in the nMOS linear mode, pMOS subthreshold mode (Vi >= Vth, Vo <= Vi-Vth)
+    /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
+    VectorFunction nl_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
+
+    /// Function for the behavior of the system in the nMOS saturation mode, pMOS subthreshold mode (Vi >= Vdd-Vth, Vo >= Vi-Vth)
+    /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
+    VectorFunction ns_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*((vi-Vth)*(vi-Vth))+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
+
+    /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS linear mode (Vi <= Vth, Vo >= Vi+Vth)
+    /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
+    VectorFunction nt_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl*((vi-Vdd+Vth)*(vo-Vdd)-(vo-Vdd)*(vo-Vdd)/2)));
+
+    /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS saturation mode (Vi <= Vth, Vo <= Vi+Vth)
+    /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
+    VectorFunction nt_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+
+    /// Function for the behavior of the system in the nMOS linear mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vo <= Vi-Vth)
+    /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
+    VectorFunction nl_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+
+    /// Function for the behavior of the system in the nMOS saturation mode, pMOS linear mode (Vth <= Vi <= Vdd-Vth, Vo >= Vi+Vth)
+    /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
+    VectorFunction ns_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+
+    /// Function for the behavior of the system in the nMOS saturation mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vi-Vth <= Vo <= Vi+Vth)
+    /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
+    VectorFunction ns_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+
+    /// Function for the behavior of the system in the "rising" or "falling" support locations
+    /// (t' = 0; Vi' = 0; Vo'=0 )
+    VectorFunction support_d((zero,zero,zero));
 
     /// Build the automaton
     inverter.new_mode(nt_pl,nt_pl_d);

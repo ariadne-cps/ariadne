@@ -22,12 +22,7 @@
  */
 
 #include <cstdarg>
-#include "real.h"
-#include "expression.h"
-#include "orbit.h"
-#include "hybrid_automaton.h"
-#include "hybrid_evolver.h"
-#include "hybrid_set.h"
+#include "ariadne.h"
 
 
 using namespace Ariadne;
@@ -119,7 +114,7 @@ int main()
     // Compute the system evolution
 
     // Create a HybridEvolver object
-    ConstraintHybridEvolver evolver;
+    GeneralHybridEvolver evolver;
     evolver.verbosity = 1;
 
     // Set the evolution parameters
@@ -128,9 +123,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef ConstraintHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef ConstraintHybridEvolver::OrbitType OrbitType;
-    typedef ConstraintHybridEvolver::EnclosureListType EnclosureListType;
+    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef GeneralHybridEvolver::OrbitType OrbitType;
+    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
@@ -139,17 +134,15 @@ int main()
     HybridEnclosureType initial_enclosure(DiscreteLocation((draining,opening)),initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
 
-    //HybridTime evolution_time(80.0,5);
-    HybridTime evolution_time(2.0,5);
+    HybridTime evolution_time(80.0,5);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    //std::cout << "Plotting orbit... "<<std::flush;
-    //plot("watertank_compositional-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    std::cout << "Plotting orbit... "<<std::flush;
+    plot("watertank_compositional-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
 }

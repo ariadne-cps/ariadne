@@ -22,6 +22,7 @@ boost_power_converter_SOURCES=boost_power_converter.cc
 watertank_SOURCES=watertank.cc
 watertank_compositional_SOURCES=watertank-compositional.cc
 bouncingball_SOURCES = bouncingball.cc
+bouncingball_compositional_SOURCES=bouncingball-compositional.cc
 ecoli_SOURCES=ecoli.cc
 watertank_nonlinear_SOURCES=watertank-nonlinear.cc
 watertank_time_SOURCES=watertank-time.cc

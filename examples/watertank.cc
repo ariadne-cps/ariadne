@@ -29,7 +29,7 @@ using namespace Ariadne;
 
 int main()
 {
-    typedef ImageSetHybridEvolver HybridEvolverType;
+    typedef GeneralHybridEvolver HybridEvolverType;
 
     /// Set the system parameters
     double a = -0.02;

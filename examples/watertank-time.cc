@@ -151,8 +151,8 @@ int main()
 
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    /// Create a GeneralHybridEvolver object
+    GeneralHybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.1;
@@ -161,9 +161,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef GeneralHybridEvolver::OrbitType OrbitType;
+    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution starting from location l2, x = 5.0, y = 1.0, t = 0.0" << std::endl;
 
@@ -172,7 +172,7 @@ int main()
     Box bounding_box(3, -0.1,9.1, -0.1,1.1, -0.1,tmax+0.1);
 
     HybridTime evolution_time(tmax,dmax);
-/*
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -187,15 +187,15 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;
     g.write("watertank-time-orbit");
-
-    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
+/*
+    std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit="<<reach<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-*/
+
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
@@ -224,6 +224,6 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << lower_reach_set;
     g.write("watertank-time-lower");
-
+*/
 
 }

@@ -9,6 +9,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include "hybrid_evolver-working.h"
 
 using namespace Ariadne;
 
@@ -181,7 +182,7 @@ int main()
     int EVOL_TRANS = 22;            /// Evolution transitions
     float MAX_ENCL_RADIUS = 0.1;   /// Maximum enclosure radius
     float MAX_STEP_SIZE = 1e-3;     /// Maximum step size
-    int VERBOSITY = 1;              /// Verbosity of the HybridEvolver
+    int VERBOSITY = 1;              /// Verbosity of the GeneralHybridEvolver
 
     // std::cout << "Enter Maximum number of discrete transitions:";
     // std::cin >> EVOL_TRANS;
@@ -335,8 +336,8 @@ int main()
 
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    /// Create a GeneralHybridEvolver object
+    GeneralHybridEvolver evolver;
     evolver.verbosity = VERBOSITY;
 
     /// Set the evolution parameters
@@ -345,9 +346,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef GeneralHybridEvolver::OrbitType OrbitType;
+    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     Box initial_box(3, 0.0,0.0, 0.0,0.0, 0.0,0.0);
     HybridEnclosureType initial_enclosure(nt_ps,initial_box);

@@ -5,13 +5,35 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADER([config.h])
 
+# Save the user-given value of CXXFLAGS for later use
+CXXFLAGS_EARLY=${CXXFLAGS}
+
 # Checks for programs.
 AC_PROG_CXX
+
+# this macro is used to get the arguments supplied
+# to the configure script (./configure --enable-debug)
+# Check if we have enable debug support.
+AC_MSG_CHECKING(whether to enable debugging)
+AC_ARG_ENABLE(debug, [AS_HELP_STRING([--enable-debug=(yes/no)], [turn on debugging (default no)])],
+              enable_debug=${enableval}, enable_debug="no")
+# If enable_debug is yes, then put the correct CXXFLAGS
+if test "x$enable_debug" = "xyes"; then
+    # If user provided a custom value for CXXFLAGS, do no change it
+    if test "x$CXXFLAGS_EARLY" = "x"; then
+        ARIADNE_CXXFLAGS="-g3 -O0"
+    else
+        ARIADNE_CXXFLAGS=${CXX_FLAGS_EARLY}   
+    fi
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
 
 # C++ flags to be used for all files
 #   Add -fno-strict-aliasing because of code in Expansion class which uses
 #   reinterpret_cast in a way that breaks strict anti-aliasing rules.
-AC_SUBST([ARIADNE_CXXFLAGS],["-Wall -fno-strict-aliasing"])
+ARIADNE_CXXFLAGS="${ARIADNE_CXXFLAGS} -Wall -fno-strict-aliasing"
 
 # Checks for libraries.
 AC_LANG(C++)
@@ -94,6 +116,22 @@ AC_ARG_ENABLE(mp,[AS_HELP_STRING([--enable-mp],[enable compilation of FloatMP ty
               [AC_DEFINE([ENABLE_MULTIPLE_PRECISION],[1],[Define to 1 if you want to use multiple-precision floating-point numbers.])],
               [AC_MSG_RESULT([no])],[AC_MSG_RESULT([yes])])
 
+# this macro is used to get the arguments supplied
+# to the configure script (./configure --with-static-exec)
+# Check if we have to link executables statically 
+# (needed to allow debugging in Eclipse).
+AC_MSG_CHECKING(whether to to link executables statically)
+AC_ARG_ENABLE(static-exec, [AS_HELP_STRING([--enable-static-exec(=yes/no)],[link statically executable files (default no)])],
+            static_exec=${enableval}, static_exec="no")
+# If static_exec is yes, then put the correct EXEC_LDFLAGS
+if test "x$static_exec" = "xyes"; then
+    EXEC_LDFLAGS="-static"
+    AC_MSG_RESULT(yes)
+else
+    EXEC_LDFLAGS=""
+    AC_MSG_RESULT(no)
+fi
+
 AC_MSG_NOTICE([LIBS=$LIBS])
 AC_MSG_NOTICE([GTK_LIBS=$GTK_LIBS])
 AC_MSG_NOTICE([CAIRO_LIBS=$CAIRO_LIBS])
@@ -102,8 +140,12 @@ AC_MSG_NOTICE([BOOST_PYTHON_LIB=$BOOST_PYTHON_LIB])
 AC_MSG_NOTICE([HAVE_BOOST_PYTHON_HPP='$HAVE_BOOST_PYTHON_HPP'])
 AC_MSG_NOTICE([HAVE_LIBBOOST_PYTHON='$HAVE_LIBBOOST_PYTHON'])
 AC_MSG_NOTICE([WANT_PYTHON_INTERFACE=$WANT_PYTHON_INTERFACE])
+AC_MSG_NOTICE([ARIADNE_CXXFLAGS=$ARIADNE_CXXFLAGS])
+AC_MSG_NOTICE([EXEC_LDFLAGS=$EXEC_LDFLAGS])
 
 AC_SUBST(BOOST_PYTHON_LIB)
+AC_SUBST(EXEC_LDFLAGS)
+AC_SUBST(ARIADNE_CXXFLAGS)    
 
 # Declare which Makefiles need to be built
 AC_CONFIG_FILES([Makefile include/Makefile src/Makefile wrap/Makefile python/Makefile test/Makefile examples/Makefile])

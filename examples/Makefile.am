@@ -9,7 +9,7 @@ bin_PROGRAMS= \
 	bouncingball bouncingball-compositional \
 	watertank watertank-compositional \
 	watertank-nonlinear watertank-time \
-	3bouncingballs \
+	watertank-proportional 3bouncingballs \
 	rectifier cmos_inverter_analoginput \
 	grid-refinement multipleguards\
 	coconut-demo 
@@ -22,6 +22,7 @@ bouncingball_SOURCES = bouncingball.cc
 bouncingball_compositional_SOURCES=bouncingball-compositional.cc
 watertank_nonlinear_SOURCES=watertank-nonlinear.cc
 watertank_time_SOURCES=watertank-time.cc
+watertank_proportional_SOURCES=watertank-proportional.cc
 3bouncingballs_SOURCES=3bouncingballs.cc
 rectifier_SOURCES=rectifier.cc
 cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc

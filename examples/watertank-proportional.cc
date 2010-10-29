@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank.cc
+ *            watertank-proportional.cc
  *
  *  Copyright  2008  Davide Bresolin
  *
@@ -39,7 +39,7 @@ outer_approximation(const EnclosureListType& hls,
     for(EnclosureListType::const_iterator 
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
-            AtomicDiscreteLocation loc=iter->first;
+            DiscreteLocation loc=iter->first;
             const ContinuousEnclosureType& es=iter->second;
             if(result.find(loc)==result.locations_end()) {
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
@@ -52,78 +52,39 @@ outer_approximation(const EnclosureListType& hls,
 }
 
 
-//
-// Definition of the nonlinear dynamics for locations Opening and Closing
-// the parameters are a and T
-//
-struct ZeroSaturated : VectorFunctionData<5,5,4> {
-    template<class R, class A, class P> static void 
-    compute(R& r, const A& x, const P& p) {
-        r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
-        r[1] = - x[1] / p[1];                 // ydot = -1/r y
-        r[2] = 0.0;                           // b and Delta are constant
-        r[3] = 0.0;
-        r[4] = 1.0;
-    }
-};
-
-struct NotSaturated : VectorFunctionData<5,5,4> {
-    template<class R, class A, class P> static void 
-    compute(R& r, const A& x, const P& p) {
-        r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
-        r[1] = ( p[3] * ( p[2] - x[0] - x[3] ) - x[1] ) / p[1];  // ydot = 1/r (Kp(R-x-Delta)-y)
-        r[2] = 0.0;                         // b and Delta are constant
-        r[3] = 0.0;
-        r[4] = 1.0;
-    }
-};
-
-struct OneSaturated : VectorFunctionData<5,5,4> {
-    template<class R, class A, class P> static void 
-    compute(R& r, const A& x, const P& p) {
-        r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
-        r[1] = (1.0 - x[1]) / p[1];                 // ydot = (1 - y)/r
-        r[2] = 0.0;                         // b and Delta are constant
-        r[3] = 0.0;
-        r[4] = 1.0;
-    }
-};
-
-
 int main(int argc,char *argv[]) 
 {
     if(argc != 3) {
-      std::cerr << "Usage: watertank-dominante bmin bmax" <<std::endl;
+      std::cerr << "Usage: watertank-proportional bmin bmax" <<std::endl;
       return 1;
     }
     
     /// Set the system parameters
     double a = 0.02;
-    double bmin = atoi(argv[1])*0.0001;
-    double bmax = atoi(argv[2])*0.0001;
-//    double bmax = 0.29999;
     double r = 1.25;
     double Rif = 5.67;
-//    double Delta = 0.001;
-    double Delta = 0.05;
     double Kp = 15;
+
+    double bmin = atoi(argv[1])*0.0001;
+    double bmax = atoi(argv[2])*0.0001;
+
     double bstep = 0.0025;
     double dstep = 0.01;
-    
+    double Delta = 0.05;
+
     std::cout << "bmin = " << bmin <<", bmax = "<< bmax << std::endl << std::flush;
-
-    Vector<Interval> system_parameters(4);
-    system_parameters[0] = a;
-    system_parameters[1] = r;
-    system_parameters[2] = Rif;
-    system_parameters[3] = Kp;
     
 
-    // System variables:
-    // x: water level
-    // y: valve level
-    // b: input pressure
-    // Delta: sensor error
+    // System variables
+    ScalarFunction x=ScalarFunction::coordinate(5,0); // water level
+    ScalarFunction y=ScalarFunction::coordinate(5,1); // valve level
+    ScalarFunction b=ScalarFunction::coordinate(5,2); // input pressure
+    ScalarFunction delta=ScalarFunction::coordinate(5,3); // sensor error
+    ScalarFunction t=ScalarFunction::coordinate(5,4); // time
+
+    // Constants
+    ScalarFunction one=ScalarFunction::constant(5,1.0);
+    ScalarFunction zero=ScalarFunction::constant(5,0.0);
 
     /// Build the Hybrid System
   
@@ -131,9 +92,9 @@ int main(int argc,char *argv[])
     MonolithicHybridAutomaton watertank_system;
   
     /// Create four discrete states
-    AtomicDiscreteLocation l1(1);      // Zero saturated
-    AtomicDiscreteLocation l2(2);      // Not saturated
-    AtomicDiscreteLocation l3(3);      // One saturated
+    DiscreteLocation l1(1);      // Zero saturated
+    DiscreteLocation l2(2);      // Not saturated
+    DiscreteLocation l3(3);      // One saturated
   
     /// Create the discrete events
     DiscreteEvent e12(12);
@@ -142,13 +103,14 @@ int main(int argc,char *argv[])
     DiscreteEvent e32(32);
   
     /// Create the dynamics
-    VectorUserFunction<ZeroSaturated> dynamic1(system_parameters);
-    VectorUserFunction<NotSaturated> dynamic2(system_parameters);
-    VectorUserFunction<OneSaturated> dynamic3(system_parameters);
     
-    cout << "dynamic1 = " << dynamic1 << endl << endl;
-    cout << "dynamic2 = " << dynamic2 << endl << endl;
-    cout << "dynamic3 = " << dynamic3 << endl << endl;
+    VectorFunction zerosaturated_d((-a*x+b*y,-y/r,zero,zero,one));
+    VectorFunction notsaturated_d((-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one));
+    VectorFunction onesaturated_d((-a*x+b*y,(1-y)/r,zero,zero,one));
+
+    cout << "zero-saturated dynamic = " << zerosaturated_d << "\n\n";
+    cout << "not-saturated dynamic = " << notsaturated_d << "\n\n";
+    cout << "one-saturated dynamic = " << onesaturated_d << "\n\n";
 
     /// Create the resets
     IdentityFunction reset_id(5);
@@ -179,9 +141,9 @@ int main(int argc,char *argv[])
     /// hence we do not need invariants
   
     /// Build the automaton
-    watertank_system.new_mode(l1,dynamic1);
-    watertank_system.new_mode(l2,dynamic2);
-    watertank_system.new_mode(l3,dynamic3);
+    watertank_system.new_mode(l1,zerosaturated_d);
+    watertank_system.new_mode(l2,notsaturated_d);
+    watertank_system.new_mode(l3,onesaturated_d);
 
     watertank_system.new_forced_transition(e12,l1,l2,reset_id,guard12);
     watertank_system.new_forced_transition(e21,l2,l1,reset_id,guard21);
@@ -195,7 +157,7 @@ int main(int argc,char *argv[])
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    GeneralHybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
@@ -205,11 +167,10 @@ int main(int argc,char *argv[])
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
-    typedef ListSet<HybridEvolver::ContinuousEnclosureType> ListSetType;
-    typedef HybridEvolver::TimedEnclosureListType TimedEnclosureListType;
+    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef GeneralHybridEvolver::OrbitType OrbitType;
+    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
+    typedef ListSet<GeneralHybridEvolver::ContinuousEnclosureType> ListSetType;
 
     double time_step = 0.25;
     double total_time = 35.0;
@@ -220,7 +181,12 @@ int main(int argc,char *argv[])
     array<uint> tx(2,4,0);
 
     Vector<Float> lengths(5, 0.25, 1.0, 1.0, 1.0, 1.0);
-    HybridGridTreeSet hgts(watertank_system.state_space(), lengths);
+    Grid grid(lengths);
+    HybridGrid hg;
+    hg.insert(l1,grid);
+    hg.insert(l2,grid);
+    hg.insert(l3,grid);
+    HybridGridTreeSet hgts(hg);
     uint grid_depth = 9;
     uint grid_height = 8;
     
@@ -232,7 +198,7 @@ int main(int argc,char *argv[])
             HybridEnclosureType initial_enclosure(l3,initial_box);
             OrbitType result = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
             cout<<"Orbit.final=" << result.final() << endl;
-            cout<<"Adjoining result to the grid..."<<std::flush;
+            /*cout<<"Adjoining result to the grid..."<<std::flush;
             hgts.adjoin(outer_approximation(result.reach(),hgts.grid(),grid_depth));
             cout<<"done:"<<hgts.size()<<" total cells."<<std::endl;
             char filename[30];
@@ -244,7 +210,7 @@ int main(int argc,char *argv[])
             g2 << fill_colour(Colour(0.9,0.9,0.0));
             g2 << hgts;
             g2.write(filename);
-            g2.clear();
+            g2.clear();*/
             cout<<"done."<<endl<<std::flush;
         }
     }

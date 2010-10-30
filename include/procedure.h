@@ -87,11 +87,13 @@ template<class X>
 class Vector< Procedure<X> > {
   public:
     explicit Vector(const Vector< Formula<X> >& f);
+    explicit Vector(const Procedure<X>& p);
   public:
     List<X> _constants;
     List<ProcedureInstruction> _instructions;
     Vector<Nat> _results;
   public:
+    Nat result_size() const { return _results.size(); }
     void new_instruction(Operator o, Nat a) { _instructions.append(ProcedureInstruction(o,a)); }
     void new_instruction(Operator o, Nat a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
     void new_instruction(Operator o, Nat a1, Nat a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
@@ -123,30 +125,63 @@ template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruc
             case SIN:  v.append(sin(v[instruction.arg])); break;
             case COS:  v.append(cos(v[instruction.arg])); break;
             case TAN:  v.append(tan(v[instruction.arg])); break;
+            case ATAN:  v.append(atan(v[instruction.arg])); break;
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }
     }
 }
 
-//! \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
-template<class X, class T> T evaluate(const Procedure<X>& f, const Vector<T>& x)
+template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
-    List<T> v; v.reserve(f._instructions.size());
-    _execute(v,f._instructions,f._constants,x);
-    return v.back();
+    static const Float inf=Ariadne::inf<Float>();
+    ARIADNE_ASSERT(v.size()==p.size());
+    for(uint r=p.size()-1u; r!=-1u; --r) {
+        uint a=p[r].arg; uint a1=p[r].arg1; uint a2=p[r].arg2;
+        switch(p[r].op) {
+            case CNST: break;
+            case IND: restrict(x[a],v[r]); break;
+            case ADD: restrict(v[a1],v[r]-v[a2]); restrict(v[a2],v[r]-v[a1]); break;
+            case SUB: restrict(v[a1],v[a2]+v[r]); restrict(v[a2],v[a1]-v[r]); break;
+            case MUL: restrict(v[a1],v[r]/v[a2]); restrict(v[a2],v[r]/v[a1]); break;
+            case DIV: restrict(v[a1],v[a2]*v[r]); restrict(v[a2],v[a1]/v[r]); break;
+            case MAX: restrict(v[a1],max(v[r],v[a2])); restrict(v[a2],max(v[r],v[a1])); break;
+            case POS: restrict(v[a],v[r]); break;
+            case NEG: restrict(v[a],neg(v[r])); break;
+            case REC: restrict(v[a],rec(v[r])); break;
+            case SQR: restrict(v[a],sqrt(v[r])); break;
+            case POW: restrict(v[a],exp(log(v[r])/p[r].np)); break;
+            case SQRT: restrict(v[a],sqr(v[r])); break;
+            case EXP: restrict(v[a],log(v[r])); break;
+            case LOG: restrict(v[a],exp(v[r])); break;
+            case SIN: restrict(v[a],asin(v[r])); break;
+            case COS: restrict(v[a],acos(v[r])); break;
+            case TAN: restrict(v[a],atan(v[r])); break;
+            case ATAN: restrict(v[a],tan(v[r])); break;
+            case EQ: restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
+            case LEQ: restrict(v[a1],Interval(-inf,v[a2].upper())); restrict(v[a1],Interval(v[a2].lower(),+inf)); break;
+            default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op);
+        }
+    }
 }
 
-//! \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
-template<class X, class T> Vector<T> evaluate(const Vector< Procedure<X> >& f, const Vector<T>& x)
-{
-    List<T> v; v.reserve(f._instructions.size());
-    _execute(v,f._instructions,f._constants,x);
-    T z=x[0]*0;
-    Vector<T> r(f.result_size(),z);
-    for(uint i=0; i!=f.result_size(); ++i) {
-        r[i]=v[f._results[i]];
+template<class X> uint _convert(List<ProcedureInstruction>& p, List<X>& c, const FormulaNode<X>* f, Map<const FormulaNode<X>*,uint>& ind) {
+    typedef ProcedureInstruction PI;
+    if(ind.has_key(f)) { return ind[f]; }
+    switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
+        case CNST: p.append(PI(CNST,c.size())); c.append(*f->val); break;
+        case IND: p.append(PI(IND,f->ind)); break;
+        case ADD: case SUB: case MUL: case DIV:
+            p.append(PI(f->op,_convert(p,c,f->arg1,ind),_convert(p,c,f->arg2,ind))); break;
+        case POW:
+            p.append(PI(f->op,_convert(p,c,f->arg,ind),f->np)); break;
+        case NEG: case REC: case SQR: case SQRT:
+        case EXP: case LOG: case SIN: case COS: case TAN: case ATAN:
+            p.append(PI(f->op,_convert(p,c,f->arg,ind))); break;
+        default: assert(false);
     }
-    return r;
+    const uint num=p.size()-1;
+    ind.insert(f,num);
+    return num;
 }
 
 template<class X>
@@ -176,51 +211,6 @@ void _write(std::ostream& os, const List<ProcedureInstruction>& p, const List<X>
     }
 }
 
-template<class X> Procedure<X>& operator+=(Procedure<X>& f, const X& c) {
-    f._constants.append(c);
-    f.new_instruction(CNST,f._constants.size()-1);
-    f.new_instruction(ADD,f._instructions.size()-1,f._instructions.size()-2);
-    return f;
-}
-
-template<class X>
-std::ostream& operator<<(std::ostream& os, const Procedure<X> f) {
-    os<<"Procedure( ";
-    _write(os,f._instructions,f._constants);
-    os << "r=v[" << f._instructions.size()-1u << "] )";
-    return os;
-}
-
-template<class X>
-std::ostream& operator<<(std::ostream& os, const Vector< Procedure<X> > f) {
-    os<<"Procedure( ";
-    _write(os,f._instructions,f._constants);
-    os << "r=v" << f._results << " )";
-    return os;
-}
-
-
-
-
-template<class X> uint _convert(List<ProcedureInstruction>& p, List<X>& c, const FormulaNode<X>* f, Map<const FormulaNode<X>*,uint>& ind) {
-    typedef ProcedureInstruction PI;
-    if(ind.has_key(f)) { return ind[f]; }
-    switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-        case CNST: p.append(PI(CNST,c.size())); c.append(*f->val); break;
-        case IND: p.append(PI(IND,f->ind)); break;
-        case ADD: case SUB: case MUL: case DIV:
-            p.append(PI(f->op,_convert(p,c,f->arg1,ind),_convert(p,c,f->arg2,ind))); break;
-        case POW:
-            p.append(PI(f->op,_convert(p,c,f->arg,ind),f->np)); break;
-        case NEG: case REC: case SQR: case SQRT:
-        case EXP: case LOG: case SIN: case COS: case TAN: case ATAN:
-            p.append(PI(f->op,_convert(p,c,f->arg,ind))); break;
-        default: assert(false);
-    }
-    const uint num=p.size()-1;
-    ind.insert(f,num);
-    return num;
-}
 
 template<class X>
 Procedure<X>::Procedure()
@@ -256,8 +246,55 @@ Vector< Procedure<X> >::Vector(const Vector< Formula<X> >& f)
     }
 }
 
+template<class X>
+Vector< Procedure<X> >::Vector(const Procedure<X>& f)
+    : _instructions(f._instructions)
+    , _constants(f._constants)
+    , _results(1u,f._instructions.size()-1u)
+{
+}
 
 
+} // namespace Ariadne
+
+
+#include "numeric.h"
+
+namespace Ariadne {
+
+inline
+void restrict(Interval& r, const Interval& x) {
+    r.set_lower(max(r.lower(),x.lower()));
+    r.set_upper(min(r.upper(),x.upper()));
+};
+
+template<class X>
+void simple_hull_reduce(Vector<Interval>& dom, const Procedure<X>& f, Interval codom)
+{
+    const List<ProcedureInstruction>& p=f._instructions;
+    const List<X>& c=f._constants;
+    List<Interval> v; v.reserve(p.size());
+
+    _execute(v,p,c,dom);
+    restrict(v.back(),codom);
+    _propagate(dom,v,p);
+}
+
+template<class X>
+void simple_hull_reduce(Vector<Interval>& dom, const Vector< Procedure<X> >& f, Vector<Interval> codom)
+{
+    const List<ProcedureInstruction>& p=f._instructions;
+    const List<X>& c=f._constants;
+    List<Interval> v; v.reserve(p.size());
+
+    ARIADNE_ASSERT(codom.size()==f._results.size());
+
+    _execute(v,p,c,dom);
+    for(uint i=0; i!=codom.size(); ++i) {
+        restrict(v[f._results[i]],codom[i]);
+    }
+    _propagate(dom,v,p);
+}
 
 } // namespace Ariadne
 

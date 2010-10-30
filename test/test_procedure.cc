@@ -52,6 +52,7 @@ class TestProcedure
     void test_construct_from_formula();
     void test_construct_from_expansion();
     void test_evaluate();
+    void test_propagate();
 };
 
 //Formula<Float> TestProcedure::o(Formula<Float>::constant(1.0));
@@ -69,6 +70,7 @@ void TestProcedure::test()
     ARIADNE_TEST_CALL(test_construct_from_formula());
     ARIADNE_TEST_CALL(test_construct_from_expansion());
     ARIADNE_TEST_CALL(test_evaluate());
+    ARIADNE_TEST_CALL(test_propagate());
 }
 
 void TestProcedure::test_formula()
@@ -131,6 +133,43 @@ void TestProcedure::test_evaluate()
     ARIADNE_TEST_PRINT(x);
 
     ARIADNE_TEST_EQUALS(evaluate(p,x),5.0);
+}
+
+void TestProcedure::test_propagate()
+{
+    {
+        Procedure<Float> p;
+        p.new_instruction(IND,0u);
+        p.new_instruction(IND,1u);
+        p.new_instruction(SQR,0u);
+        p.new_instruction(SQR,1u);
+        p.new_instruction(ADD,2u,3u);
+        p.new_instruction(SQRT,4u);
+        ARIADNE_TEST_PRINT(p);
+
+        Vector<Interval> x(2, 0.25,2.0, 0.5,3.0);
+        ARIADNE_TEST_PRINT(x);
+
+        simple_hull_reduce(x,p,Interval(1,1));
+        ARIADNE_TEST_PRINT(x);
+        simple_hull_reduce(x,p,Interval(1,1));
+        ARIADNE_TEST_PRINT(x);
+    }
+
+    Formula<Float> x(Formula<Float>::coordinate(0));
+    Formula<Float> y(Formula<Float>::coordinate(1));
+
+    Vector< Formula<Float> > ff((sqrt(sqr(x)+sqr(y)),2*x-y));
+    ARIADNE_TEST_PRINT(ff);
+    Vector< Procedure<Float> > pp(ff);
+    ARIADNE_TEST_PRINT(pp);
+    Vector<Interval> xx(2, 0.125,2.0, 0.25,3.0);
+    Vector<Interval> cc(2, 1.0,1.0, 1.0,1.0);
+    ARIADNE_TEST_PRINT(xx);
+    ARIADNE_TEST_PRINT(evaluate(pp,xx));
+    simple_hull_reduce(xx,pp,cc);
+    ARIADNE_TEST_PRINT(xx);
+
 }
 
 

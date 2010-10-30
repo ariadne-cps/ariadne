@@ -47,7 +47,6 @@ typedef tribool Tribool;
 typedef std::string String;
 class Integer;
 class Real;
-class EnumeratedValue;
 
 typedef String Identifier;
 
@@ -57,9 +56,20 @@ template<class T> class Variable;
 template<class T> class DottedVariable;
 template<class T> class PrimedVariable;
 
-template<class R> class Expression;
+template<class T> class Constant;
+template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
 
+// Simplifying typedefs
+typedef Variable<String> StringVariable;
+typedef PrimedVariable<String> PrimedStringVariable;
+typedef Variable<Integer> IntegerVariable;
+typedef PrimedVariable<Integer> PrimedIntegerVariable;
+typedef ExtendedVariable<Real> ExtendedRealVariable;
+typedef DottedVariable<Real> DottedRealVariable;
+typedef PrimedVariable<Real> PrimedRealVariable;
+typedef Variable<Real> RealVariable;
+typedef Constant<Real> RealConstant;
 
 //! \ingroup ExpressionModule
 //! A named constant of type \a T.
@@ -220,7 +230,6 @@ template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {
 
 template<class T> inline List< Variable<T> > operator,(const Variable<T>& v1, const Variable<T>& v2) {
     List< Variable<T> > r; r.append(v1); r.append(v2); return r; }
-
 
 
 } // namespace Ariadne

@@ -46,7 +46,6 @@
 
 namespace Ariadne {
 
-class Enumeration;
 class Integer;
 class Real;
 
@@ -55,23 +54,19 @@ typedef std::string String;
 
 class StateSpace;
 
-class EnumeratedType;
-class EnumeratedValue;
-
-
+template<class T> class Constant;
 template<class T> class Variable;
 template<class T> class Expression;
+template<class T> class Space;
 
 typedef Constant<Real> RealConstant;
 
-typedef Variable<EnumeratedValue> EnumeratedVariable;
 typedef Variable<String> StringVariable;
 typedef Variable<Integer> IntegerVariable;
 typedef Variable<Real> RealVariable;
 
 typedef Space<Real> RealSpace;
 
-typedef Expression<EnumeratedValue> EnumeratedExpression;
 typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
@@ -177,14 +172,7 @@ DottedVariable<T>::operator=(const Expression<T>& expr) const {
 
 
 
-typedef DottedVariable<Real> DottedRealVariable;
-typedef PrimedVariable<Real> PrimedRealVariable;
-typedef PrimedVariable<String> PrimedStringVariable;
-typedef PrimedVariable<Integer> PrimedIntegerVariable;
-typedef PrimedVariable<EnumeratedValue> PrimedEnumeratedVariable;
-
-typedef Assignment<EnumeratedVariable,EnumeratedExpression> EnumeratedAssignment;
-typedef Assignment<PrimedEnumeratedVariable,EnumeratedExpression> EnumeratedUpdate;
+// Simplifying typedefs
 typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;
 typedef Assignment<PrimedIntegerVariable,IntegerExpression> IntegerUpdate;
 typedef Assignment<StringVariable,StringExpression> StringAssignment;

@@ -37,7 +37,8 @@
 #include "function.h"
 #include "discrete_location.h"
 #include "discrete_event.h"
-#include "formula.h"
+#include "assignment.h"
+#include "expression.h"
 #include "logging.h"
 
 #include "hybrid_automaton_interface.h"

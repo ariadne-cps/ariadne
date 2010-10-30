@@ -38,6 +38,8 @@
 #include "constraint.h"
 #include "function.h"
 #include "expression.h"
+#include "space.h"
+#include "assignment.h"
 #include "formula.h"
 #include "constraint_solver.h"
 

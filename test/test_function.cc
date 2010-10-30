@@ -30,7 +30,8 @@
 #include <fenv.h>
 
 #include "taylor_model.h"
-#include "formula.h"
+#include "expression.h"
+#include "assignment.h"
 #include "function.h"
 #include "predicate.h"
 

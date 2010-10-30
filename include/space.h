@@ -45,6 +45,8 @@ namespace Ariadne {
 template<class T> class Space;
 template<class T> std::ostream& operator<<(std::ostream& os, const Space<T>& spc);
 
+class Real;
+typedef Space<Real> RealSpace;
 
 /*! \brief A space defined as a list of named variables of type \a T
  *  \details \sa Variable

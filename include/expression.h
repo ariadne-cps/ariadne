@@ -33,12 +33,15 @@
 #include <iosfwd>
 #include <iostream>
 
+#include <boost/pool/singleton_pool.hpp>
+
 #include "macros.h"
 #include "pointer.h"
 #include "container.h"
 
 #include "operators.h"
 #include "variables.h"
+#include "vector.h"
 
 namespace Ariadne {
 
@@ -66,6 +69,12 @@ template<class X> class Vector;
 
 class Substitution;
 
+typedef Expression<Boolean> DiscretePredicate;
+typedef Expression<Tribool> ContinuousPredicate;
+typedef Expression<String> StringExpression;
+typedef Expression<Integer> IntegerExpression;
+typedef Expression<Real> RealExpression;
+
 template<class T>
 class ExpressionInterface
 {
@@ -74,7 +83,7 @@ class ExpressionInterface
     virtual ~ExpressionInterface() { }
     virtual ExpressionInterface<T>* clone() const = 0;
     virtual Set<UntypedVariable> arguments() const = 0;
-    virtual Operator type() const = 0;
+    virtual Operator op() const = 0;
     virtual std::ostream& write(std::ostream& os) const = 0;
   protected:
     virtual ExpressionInterface<T>* simplify() const = 0;
@@ -88,6 +97,86 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
 template<class X> Expression<X> simplify(const Expression<X>& e);
+
+
+struct ExpressionNode
+{
+    void* operator new(size_t) { return boost::singleton_pool<ExpressionNode,sizeof(ExpressionNode)>::malloc(); }
+    void operator delete(void* ptr) { boost::singleton_pool<ExpressionNode,sizeof(ExpressionNode)>::free(ptr); }
+
+    unsigned int _count;
+    Operator _operator;
+    Float _constant;
+    union {
+        void* _variable;
+        unsigned int _coordinate;
+        ExpressionNode* _arg;
+        struct { ExpressionNode* _arg1; ExpressionNode* _arg2; };
+        //struct { ExpressionNode* _arg; int _power; };
+    };
+};
+
+/*
+template<class R, class A>
+R _evaluate(ExpressionNode* e, const Vector<A>& x)
+{
+    switch(e->_operator) {
+        case CNST: return static_cast<R>(e->_constant);
+        case IND: return x[e->_coordinate];
+        case ADD: return add(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case SUB: return sub(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case MUL: return mul(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case DIV: return div(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case MAX: return max(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case MIN: return min(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        //case POW: return pow(_evaluate<R>(e->_arg,x),e->_power);
+        case POS: return pos(_evaluate<R>(e->_arg,x));
+        case NEG: return neg(_evaluate<R>(e->_arg,x));
+        case ABS: return abs(_evaluate<R>(e->_arg,x));
+        case SQR: return sqr(_evaluate<R>(e->_arg,x));
+        case SQRT: return sqrt(_evaluate<R>(e->_arg,x));
+        case EXP: return exp(_evaluate<R>(e->_arg,x));
+        case LOG: return log(_evaluate<R>(e->_arg,x));
+        case SIN: return sin(_evaluate<R>(e->_arg,x));
+        case COS: return cos(_evaluate<R>(e->_arg,x));
+        case TAN: return tan(_evaluate<R>(e->_arg,x));
+        case ASIN: return asin(_evaluate<R>(e->_arg,x));
+        case ACOS: return acos(_evaluate<R>(e->_arg,x));
+        case ATAN: return atan(_evaluate<R>(e->_arg,x));
+        default: assert(false);
+    }
+}
+*/
+
+template<class R, class A>
+R _evaluate(ExpressionNode* e, const ContinuousValuation<A>& x)
+{
+    switch(e->_operator) {
+        case CNST: return static_cast<R>(e->_constant);
+        case VAR: return x[e->_variable];
+        case ADD: return add(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case SUB: return sub(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case MUL: return mul(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case DIV: return div(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case MAX: return max(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        case MIN: return min(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+        //case POW: return pow(_evaluate<R>(e->_arg,x),e->_power);
+        case POS: return pos(_evaluate<R>(e->_arg,x));
+        case NEG: return neg(_evaluate<R>(e->_arg,x));
+        case ABS: return abs(_evaluate<R>(e->_arg,x));
+        case SQR: return sqr(_evaluate<R>(e->_arg,x));
+        case SQRT: return sqrt(_evaluate<R>(e->_arg,x));
+        case EXP: return exp(_evaluate<R>(e->_arg,x));
+        case LOG: return log(_evaluate<R>(e->_arg,x));
+        case SIN: return sin(_evaluate<R>(e->_arg,x));
+        case COS: return cos(_evaluate<R>(e->_arg,x));
+        case TAN: return tan(_evaluate<R>(e->_arg,x));
+        case ASIN: return asin(_evaluate<R>(e->_arg,x));
+        case ACOS: return acos(_evaluate<R>(e->_arg,x));
+        case ATAN: return atan(_evaluate<R>(e->_arg,x));
+        default: assert(false);
+    }
+}
 
 //! \ingroup ExpressionModule
 //! \brief A simple expression in named variables.
@@ -104,7 +193,7 @@ template<class R>
 class Expression {
   public:
     explicit Expression(const ExpressionInterface<R>& e) : _ptr(e.clone()) { }
-    explicit Expression(ExpressionInterface<R>* eptr) : _ptr(eptr) { }
+    explicit Expression(const ExpressionInterface<R>* eptr) : _ptr(eptr) { }
     explicit Expression(shared_ptr< const ExpressionInterface<R> > eptr) : _ptr(eptr) { }
     Expression() { R z; *this=Expression(z); }
     Expression(const R& c);
@@ -113,7 +202,7 @@ class Expression {
     //! \brief The variables used in the formula.
     Set<UntypedVariable> arguments() const { return _ptr->arguments(); }
     //! \brief The operator used to construct the expression from subexpressions.
-    Operator op() const { return _ptr->type(); }
+    Operator op() const { return _ptr->op(); }
     //! \brief The immediate subexpressions used in the formula.
     List< Expression<R> > subexpressions() const;
      //! \brief Substitute the constant \a c for the variable \a v.
@@ -151,7 +240,7 @@ class Expression<Real> {
     //! \brief The variables used in the formula.
     Set<UntypedVariable> arguments() const { return _ptr->arguments(); }
     //! \brief The operator used to construct the expression from subexpressions.
-    Operator op() const { return _ptr->type(); }
+    Operator op() const { return _ptr->op(); }
     //! \brief The immediate subexpressions used in the formula.
     List< Expression<R> > subexpressions() const;
     //! \brief Substitute the constant \a c for the variable \a v.

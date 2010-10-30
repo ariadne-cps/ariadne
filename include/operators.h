@@ -73,6 +73,8 @@ enum Operator {
     XOR,   // Logical exclusive or
     IMPL,  // Logical implication
     ITOR,   // Conversion of Int to Real
+    PUSH,
+    PULL,
     EQ=-1,    // Equal
     NEQ=-2,   // Not equal
     GEQ=-3,   // Greater or equal
@@ -138,6 +140,8 @@ inline const char* name(const Operator& op) {
         case COS:  return "cos"; break;
         case TAN:  return "tan"; break;
         case ITOR:  return "itor"; break;
+        case PULL: return "pull"; break;
+        case PUSH: return "push"; break;
         case SGN:  return "sgn"; break;
         case EQ:   return "eq"; break;
         case NEQ:  return "neq"; break;
@@ -202,6 +206,9 @@ struct Pow {
     Operator code() const { return DIV; } };
 //struct Pow { Pow(int n) : n(n) { } template<class T> T operator()(const T& a) const { return Ariadne::pow(a,n); } int n; };
 
+struct Pos {
+    template<class T> T operator()(const T& a) const { return a; }
+    Operator code() const { return POS; } };
 struct Neg {
     template<class T> T operator()(const T& a) const { return neg(a); }
     Operator code() const { return NEG; } };

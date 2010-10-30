@@ -30,6 +30,7 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 
 namespace Ariadne {
@@ -37,6 +38,7 @@ namespace Ariadne {
 
 using boost::scoped_ptr;
 using boost::shared_ptr;
+using boost::intrusive_ptr;
 
 template<class T>
 class copy_on_write_ptr

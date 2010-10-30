@@ -27,9 +27,10 @@
 
 #include "function.h"
 #include "real.h"
-#include "formula.h"
+#include "expression.h"
+#include "space.h"
+#include "discrete_event.h"
 #include "hybrid_automaton.h"
-#include "hybrid_system.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 
@@ -64,17 +65,17 @@ struct from_python< Space<T> > {
 };
 
 template<>
-struct from_python< EventSet > {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id< EventSet >()); }
+struct from_python< Set<DiscreteEvent> > {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Set<DiscreteEvent> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage<EventSet>*)data)->storage.bytes;
+        void* storage = ((converter::rvalue_from_python_storage< Set<DiscreteEvent> >*)data)->storage.bytes;
         boost::python::list elements=extract<boost::python::list>(obj_ptr);
-        EventSet* evnts_ptr = new (storage) EventSet();
+        Set<DiscreteEvent>* evnts_ptr = new (storage) Set<DiscreteEvent>();
         for(int i=0; i!=len(elements); ++i) {
             extract<String> xs(elements[i]);
-            if(xs.check()) { evnts_ptr->insert(Event(xs())); }
-            else { Event e=extract< Event >(elements[i]); evnts_ptr->insert(e); }
+            if(xs.check()) { evnts_ptr->insert(DiscreteEvent(xs())); }
+            else { DiscreteEvent e=extract< DiscreteEvent >(elements[i]); evnts_ptr->insert(e); }
         }
         data->convertible = storage;
     }

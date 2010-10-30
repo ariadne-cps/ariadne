@@ -31,6 +31,7 @@
 
 #include <cstdarg>
 #include <iostream>
+#include <iomanip>
 #include <string>
 
 
@@ -40,254 +41,220 @@
 #include "stlio.h"
 
 #include "operators.h"
-#include "variables.h"
 #include "expression.h"
-#include "assignment.h"
-#include "space.h"
-
-#include "numeric.h"
+#include "expansion.h"
+#include "real.h"
+#include "vector.h"
+#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 
+template<class X> class FormulaNode;
 
-
-
-
-class Enumeration;
-class Integer;
-class Real;
-
-//! \brief An ASCII string.
-typedef std::string String;
-
-class StateSpace;
-
-class EnumeratedType;
-class EnumeratedValue;
-
-
-
-template<class T> class Variable;
-template<class R> class Expression;
-
-typedef Constant<Real> RealConstant;
-
-typedef Variable<EnumeratedValue> EnumeratedVariable;
-typedef Variable<String> StringVariable;
-typedef Variable<Integer> IntegerVariable;
-typedef Variable<Real> RealVariable;
-
-typedef Space<Real> RealSpace;
-
-typedef Expression<EnumeratedValue> EnumeratedExpression;
-typedef Expression<String> StringExpression;
-typedef Expression<Integer> IntegerExpression;
-typedef Expression<Real> RealExpression;
-
-typedef Expression<bool> DiscretePredicate;
-typedef Expression<tribool> ContinuousPredicate;
-
-typedef String Identifier;
-typedef Set<UntypedVariable> VariableSet;
-typedef Set< Variable<Real> > RealVariableSet;
-
-
-
-//! \brief A discrete event.
-struct Event {
+//! \brief A formula defining a real function.
+//!
+//! The Formula class is implemented as a directed acyclic graph, with
+//! each node being an atomic operation.
+template<class X>
+class Formula {
   public:
-    Event() {  } // Constructs an invalid event.
-    Event(const std::string& name) { _names.push_back(name); this->_id=_names.size()-1; }
-    Event(int n) { std::stringstream ss; ss<<"e"<<n; _names.push_back(ss.str()); this->_id=_names.size()-1; ; }
-    int id() const { return this->_id; }
-    const std::string& name() const { return _names[this->_id]; }
-    bool operator==(const Event& other) const { return this->id()==other.id(); }
-    bool operator!=(const Event& other) const { return this->id()!=other.id(); }
-    bool operator<(const Event& other) const { return this->id()<other.id(); }
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const Event& self) { return os << self.name(); }
-  private:
-    uint _id;
-  private:
-    static std::vector<std::string> _names;
+    explicit Formula(const Expression<Real>& e, const Map<std::string,uint> s);
+    explicit Formula(Operator op, const Formula& a);
+    explicit Formula(Operator op, const Formula& a1, const Formula& a2);
+    explicit Formula() : _root() { }
+    explicit Formula(const FormulaNode<X>* ptr) : _root(ptr) { }
+    explicit Formula(const intrusive_ptr< FormulaNode<X> >& ptr) : _root(ptr) { }
+    Formula(const X& c) { *this=Formula::constant(c); }
+    Formula<X>& operator=(const X& c) { *this=Formula::constant(c); return *this; }
+    static Formula constant(const X& c);
+    static Formula constant(double c);
+    static Formula coordinate(uint j);
+    static Formula identity(uint n);
+    const FormulaNode<X>* ptr() const { return _root.operator->(); }
+  public:
+    boost::intrusive_ptr< const FormulaNode<X> > _root;
 };
 
+//! \related Procedure \brief Evaluate a function \a f defined by a formula.
+template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& v);
 
-//! \brief A finite or cofinite set of discrete events.
-struct EventSet {
-  public:
-    EventSet() : _events(), _is_complement(false) { }
-    EventSet(const std::set<Event>& s) : _events(s), _is_complement(false) { }
-    EventSet(const std::vector<Event>& v) : _events(v.begin(),v.end()), _is_complement(false) { }
-    EventSet(const Event& e) : _events(), _is_complement(false) { this-> _events.insert(e); }
+// Class for which an object x produces coordinate \f$x_j\f$ when calling \c x[j].
+struct Coordinate { Formula<Real> operator[](uint j) { return Formula<Real>::coordinate(j); } };
 
-    static EventSet none() { EventSet r; return r; }
-    static EventSet all() { EventSet r; r._is_complement=true; return r; }
-
-    bool operator==(const EventSet& other) const {
-        return this->_events==other._events && this->_is_complement==other._is_complement; }
-    bool empty() const { return !_is_complement && _events.empty(); }
-    bool finite() const { return !_is_complement; }
-    uint size() const { ARIADNE_ASSERT_MSG(this->finite(),"EventSet "<<*this<<" is infinite"); return _events.size(); }
-    const Event& front() const { ARIADNE_ASSERT_MSG(this->finite(),"EventSet "<<*this<<" is infinite"); return *this->_events.begin(); }
-
-    bool contains(const Event& e) const {
-        return Ariadne::contains(this->_events,e) xor this->_is_complement; }
-    EventSet& insert(const Event& e) {
-        if(_is_complement) { this->_events.erase(e); } else { this->_events.insert(e); } return *this; }
-    EventSet& erase(const Event& e) {
-        if(_is_complement) { this->_events.insert(e); } else { this->_events.erase(e); } return *this; }
-    EventSet& adjoin(const EventSet& s) { assert(!_is_complement && !s._is_complement);
-        Ariadne::adjoin(this->_events,s._events);
-        return *this; }
-
-    EventSet& restrict(const EventSet& s) {
-        if(this->_is_complement) {
-            if(s._is_complement) { Ariadne::adjoin(this->_events,s._events); }
-            else { this->_events=difference(s._events,this->_events); this->_is_complement=false; }
-        } else {
-            if(s._is_complement) { Ariadne::restrict(this->_events,s._events); }
-            else { Ariadne::remove(this->_events,s._events); }
-        }
-        return *this; }
-
-    EventSet& remove(const EventSet& s) {
-        if(this->_is_complement) {
-            if(s._is_complement) { this->_events=difference(s._events,this->_events); this->_is_complement=false; }
-            else { Ariadne::adjoin(this->_events,s._events); }
-        } else {
-            if(s._is_complement) { Ariadne::remove(this->_events,s._events); }
-            else { Ariadne::restrict(this->_events,s._events); }
-        } return *this; }
-    friend EventSet operator!(const Event& e);
-    friend EventSet operator!(const EventSet& s);
-    friend EventSet operator!(const std::set<Event>& s);
-
-    friend std::ostream& operator<<(std::ostream& os, const EventSet& self);
-  private:
-    std::set<Event> _events;
-    bool _is_complement;
+template<class X>
+struct FormulaNode {
+    ~FormulaNode() {
+        switch(op) { case CNST: delete val; case IND: break;
+            default: if(arg2) { --arg2->count; if(arg2->count==0) { delete arg2; } } --arg1->count; if(arg1->count==0) { delete arg1; } } }
+    explicit FormulaNode(Operator o, const FormulaNode<X>* a) : op(o), arg(a), arg2(0) { ++arg->count; }
+    explicit FormulaNode(Operator o, const FormulaNode<X>* a1, const FormulaNode<X>* a2) : op(o), arg1(a1), arg2(a2) { ++arg1->count; ++arg2->count; }
+    explicit FormulaNode(const X& x) : op(CNST), val(new X(x)) { }
+    explicit FormulaNode(double x) : op(CNST), val(new X(x)) { }
+    explicit FormulaNode(uint i) : op(IND), ind(i) { }
+    mutable uint count;
+    Operator op;
+    union {
+        uint ind; X* val;
+        struct { const FormulaNode* arg; uint np; };
+        struct { const FormulaNode* arg1; const FormulaNode* arg2; };
+    };
 };
 
-inline EventSet operator!(const Event& e) { return !(EventSet(e)); }
-inline EventSet operator!(const EventSet& s) { EventSet r; r._events=s._events; r._is_complement=!s._is_complement; return r; };
-inline EventSet operator!(const std::set<Event>& s) { return !EventSet(s); }
+template<class X> inline void intrusive_ptr_add_ref(const FormulaNode<X>* nodeptr) { ++nodeptr->count; }
+template<class X> inline void intrusive_ptr_release(const FormulaNode<X>* nodeptr) { --nodeptr->count; if(nodeptr->count==0) { delete nodeptr; } }
 
-inline EventSet join(const EventSet& s1, const EventSet& s2) { EventSet r(s1); r.adjoin(s2); return r; }
-inline EventSet intersection(const EventSet& s1, const EventSet& s2) { EventSet r(s1); r.restrict(s2); return r; }
-inline EventSet difference(const EventSet& s1, const EventSet& s2) { EventSet r(s1); r.remove(s2); return r; }
-
-inline std::ostream& operator<<(std::ostream& os, const EventSet& self) {
-    if(self._is_complement) { os<<"!"; } return os << self._events; }
+template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f) {
+    return Formula<X>(new FormulaNode<X>(op,f.ptr())); }
+template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f1, const Formula<X>& f2) {
+    return Formula<X>(new FormulaNode<X>(op,f1.ptr(),f2.ptr())); }
 
 
+template<class X> inline Formula<X>::Formula(Operator op, const Formula<X>& a)
+    : _root(new FormulaNode<X>(op,a._root.operator->())) { }
+template<class X> inline Formula<X>::Formula(Operator op, const Formula<X>& a1, const Formula<X>& a2)
+    : _root(new FormulaNode<X>(op,a1._root.operator->(),a2._root.operator->())) { }
+
+template<class X> inline Formula<X> Formula<X>::constant(const X& c) { return Formula<X>(new FormulaNode<X>(c)); }
+template<class X> inline Formula<X> Formula<X>::constant(double c) { return Formula<X>(new FormulaNode<X>(c)); }
+template<class X> inline Formula<X> Formula<X>::coordinate(uint j) { return Formula<X>(new FormulaNode<X>(j)); }
+template<class X> inline Formula<X> Formula<X>::identity(uint n) {
+    Vector< Formula<X> > r(n); for(uint i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
+
+template<class X> inline Formula<X> operator+(const Formula<X>& f) { return make_formula(POS,f); }
+template<class X> inline Formula<X> operator-(const Formula<X>& f) { return make_formula(NEG,f); }
+template<class X> inline Formula<X> operator+(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(ADD,f1,f2); }
+template<class X> inline Formula<X> operator-(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(SUB,f1,f2); }
+template<class X> inline Formula<X> operator*(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(MUL,f1,f2); }
+template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(DIV,f1,f2); }
+template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(NEG,f); }
+template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(REC,f); }
+template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(SQR,f); }
+template<class X> inline Formula<X> sqrt(const Formula<X>& f) { return make_formula(SQRT,f); }
+template<class X> inline Formula<X> exp(const Formula<X>& f) { return make_formula(EXP,f); }
+template<class X> inline Formula<X> log(const Formula<X>& f) { return make_formula(LOG,f); }
+template<class X> inline Formula<X> sin(const Formula<X>& f) { return make_formula(SIN,f); }
+template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formula(COS,f); }
+template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(TAN,f); }
+
+template<class X> inline Formula<X> operator+(double c, Formula<X> f) { return Formula<X>::constant(c) + f; }
+template<class X> inline Formula<X> operator-(double c, Formula<X> f) { return Formula<X>::constant(c) - f; }
+template<class X> inline Formula<X> operator*(double c, Formula<X> f) { return Formula<X>::constant(c) * f; }
+template<class X> inline Formula<X> operator/(double c, Formula<X> f) { return Formula<X>::constant(c) / f; }
+template<class X> inline Formula<X> operator+(Formula<X> f, double c) { return f + Formula<X>::constant(c); }
+template<class X> inline Formula<X> operator-(Formula<X> f, double c) { return f - Formula<X>::constant(c); }
+template<class X> inline Formula<X> operator*(Formula<X> f, double c) { return f * Formula<X>::constant(c); }
+template<class X> inline Formula<X> operator/(Formula<X> f, double c) { return f / Formula<X>::constant(c); }
+
+template<class X> inline Formula<X> operator+(Formula<X> f, const X& c) { return f + Formula<X>::constant(c); }
+template<class X> inline Formula<X> operator+(const X& c, Formula<X> f) { return Formula<X>::constant(c) + f; }
+
+template<class X> inline Formula<X> operator*(Formula<X> f, int c) {
+    if(c==0) { return Formula<X>::constant(0.0); }
+    else { return f * Formula<X>::constant(c); }
+}
+
+template<class X> inline Formula<X> operator+(Formula<X> f, int c) {
+    if(f.ptr()->op==CNST) { return Formula<X>::constant(*f.ptr()->val+c); }
+    else { return f + Formula<X>::constant(c); }
+}
+
+template<class X> inline std::ostream& operator<<(std::ostream& os, const FormulaNode<X>* f) {
+    switch(f->op) {
+        //case CNST: return os << std::fixed << std::setprecision(4) << f->val;
+        case CNST:
+            if(*f->val==0.0) { return os << 0.0; } if(abs(*f->val)<1e-4) { os << std::fixed << *f->val; } else { os << *f->val; } return os;
+        case IND:
+            return os << "x[" << f->ind << "]";
+        case ADD:
+            return os << f->arg1 << '+' << f->arg2;
+        case SUB:
+            os << f->arg1 << '-';
+            switch(f->arg2->op) { case ADD: case SUB: os << '(' << f->arg2 << ')'; break; default: os << f->arg2; }
+            return os;
+        case MUL:
+            switch(f->arg1->op) { case ADD: case SUB: case DIV: os << '(' << f->arg1 << ')'; break; default: os << f->arg1; }
+            os << '*';
+            switch(f->arg2->op) { case ADD: case SUB: os << '(' << f->arg2 << ')'; break; default: os << f->arg2; }
+            return os;
+        case DIV:
+            switch(f->arg1->op) { case ADD: case SUB: case DIV: os << '(' << f->arg1 << ')'; break; default: os << f->arg1; }
+            os << '/';
+            switch(f->arg2->op) { case ADD: case SUB: case MUL: case DIV: os << '(' << f->arg2 << ')'; break; default: os << f->arg2; }
+            return os;
+        //case EXP: return os << "exp(" << f->arg << ")";
+        default: return os << f->op << "(" << f->arg << ")";
+    }
+}
+
+template<class X> inline std::ostream& operator<<(std::ostream& os, const Formula<X>& f) {
+    if(f._root) { return os << f.ptr(); } else { return  os << "NULL"; }
+}
+
+template<class X, class T> inline T evaluate(const FormulaNode<X>* f, const T* a) {
+    switch(f->op) {
+        //case CNST: return os << std::fixed << std::setprecision(4) << f->val;
+        case CNST: return static_cast<T>(*f->val);
+        case IND: return a[f->ind];
+        case ADD: return evaluate<T>(f->arg1,a) + evaluate<T>(f->arg2,a);
+        case SUB: return evaluate<T>(f->arg1,a) - evaluate<T>(f->arg2,a);
+        case MUL: return evaluate<T>(f->arg1,a) * evaluate<T>(f->arg2,a);
+        case DIV: return evaluate<T>(f->arg1,a) / evaluate<T>(f->arg2,a);
+        case NEG: return neg(evaluate<T>(f->arg,a));
+        case REC: return rec(evaluate<T>(f->arg,a));
+        case SQR: return sqr(evaluate<T>(f->arg,a));
+        case SQRT: return sqrt(evaluate<T>(f->arg,a));
+        case EXP: return exp(evaluate<T>(f->arg,a));
+        case LOG: return log(evaluate<T>(f->arg,a));
+        case SIN: return sin(evaluate<T>(f->arg,a));
+        case COS: return cos(evaluate<T>(f->arg,a));
+        case TAN: return tan(evaluate<T>(f->arg,a));
+        default: assert(false);
+    }
+}
+
+template<class X, class T> inline T& evaluate(const FormulaNode<X>* f, const T* a, Map<const void*,T>& tmp) {
+    if(tmp.has_key(f)) { return tmp[f]; }
+    switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
+        case CNST: return tmp[f]=f->val;
+        case IND: return tmp[f]=a[f->ind];
+        case ADD: return tmp[f]=evaluate<T>(f->arg1,a,tmp) + evaluate<T>(f->arg2,a,tmp);
+        case SUB: return tmp[f]=evaluate<T>(f->arg1,a,tmp) - evaluate<T>(f->arg2,a,tmp);
+        case MUL: return tmp[f]=evaluate<T>(f->arg1,a,tmp) * evaluate<T>(f->arg2,a,tmp);
+        case DIV: return tmp[f]=evaluate<T>(f->arg1,a,tmp) / evaluate<T>(f->arg2,a,tmp);
+        case NEG: return tmp[f]=neg(evaluate<T>(f->arg,a,tmp));
+        case REC: return tmp[f]=rec(evaluate<T>(f->arg,a,tmp));
+        case SQRT: return tmp[f]=sqrt(evaluate<T>(f->arg,a,tmp));
+        case EXP: return tmp[f]=exp(evaluate<T>(f->arg,a,tmp));
+        case LOG: return tmp[f]=log(evaluate<T>(f->arg,a,tmp));
+        case SIN: return tmp[f]=sin(evaluate<T>(f->arg,a,tmp));
+        case COS: return tmp[f]=cos(evaluate<T>(f->arg,a,tmp));
+        case TAN: return tmp[f]=tan(evaluate<T>(f->arg,a,tmp));
+        default: assert(false);
+    }
+}
+
+template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& v) {
+    return evaluate(f.ptr(),&v[0]);
+}
+
+template<class X, class T> T map_evaluate(const Formula<X>& f, const Vector<T>& v) {
+    Map<const void*,T> tmp;
+    return evaluate(f.ptr(),&v[0],tmp);
+}
 
 
-
-/*! \brief An internal enumerated type, suitable for use when a finite type is needed.
- *  \sa EnumeratedType, EnumeratedVariable, DiscretePredicate
- */
-struct EnumeratedType {
-  public:
-    //! \brief Create a new enumerated type with name \a name and values \a values.
-    EnumeratedType(const std::string& name, const std::vector<std::string>& values) : _name(name), _values(values) {
-        for(uint i=0; i!=this->_values.size(); ++i) {
-            assert(this->_values[i]!="");
-            for(uint j=i+1; j!=this->_values.size(); ++j) {
-                assert(this->_values[i]!=this->_values[j]); } } }
-    //! \brief The name of the type.
-    const std::string& name() const { return this->_name; }
-    //! \brief The number of values the type can take.
-    uint size() const { return _values.size(); }
-    //! \brief Returns \c true  if \a str is a valid value for the type.
-    bool has_value(const std::string& str) const {
-        for(uint i=0; i!=_values.size(); ++i) { if(_values[i]==str) { return true; } } return false; }
-    //! \brief The \a i<sup>th</sup> value the type can take.
-    const std::string& value(uint i) const { return _values.at(i); }
-    int index(const std::string& str) const {
-        for(uint i=0; i!=_values.size(); ++i) { if(_values[i]==str) { return i; } } assert(false); }
-    //! \brief Test if two type variables describe the same type.
-    bool operator==(const EnumeratedType& other) const;
-    //! \brief Test if two types are different.
-    bool operator!=(const EnumeratedType& other) const;
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const EnumeratedType& self) {
-        os << self.name() << "=";
-        for(uint i=0; i!=self._values.size(); ++i) { os<<(i==0?'{':',')<<self._values[i]; } return os << '}'; }
-  private:
-    std::string _name;
-    std::vector<std::string> _values;
-};
-
-//! \brief A predicate over some discrete variables.
-//! \details \sa EnumeratedValue, EnumeratedVariable, DiscretePredicate
-struct EnumeratedValue {
-  public:
-    //! \brief Construct a discrete value based on the string \a str.
-    EnumeratedValue(const String& str) : _value(str) { }
-    //! \brief The string representation of the value.
-    operator const String& () const { return this->_value; }
-    //! \brief Equality operator.
-    bool operator==(const EnumeratedValue& s) const { return this->_value==s._value; }
-    //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const EnumeratedValue& self) {
-        return os << self._value; }
-  private:
-    std::string _value;
-};
-
-
-
-
-
-template<class R> class ExpressionInterface;
-template<class R> class VariableExpression;
-template<class R> class ConstantExpression;
-template<class R, class Op, class A> class UnaryExpression;
-template<class R, class Op, class A1, class A2> class BinaryExpression;
-template<class R> class Expression;
-template<class R> std::ostream& operator<<(std::ostream&, const Expression<R>& f);
-template<class R> std::ostream& operator<<(std::ostream&, const ExpressionInterface<R>& f);
-
-
-
-
-
-
-
-
-
-typedef ExtendedVariable<Real> ExtendedRealVariable;
-typedef DottedVariable<Real> DottedRealVariable;
-typedef PrimedVariable<Real> PrimedRealVariable;
-typedef PrimedVariable<String> PrimedStringVariable;
-typedef PrimedVariable<Integer> PrimedIntegerVariable;
-typedef PrimedVariable<EnumeratedValue> PrimedEnumeratedVariable;
-
-typedef Assignment<EnumeratedVariable,EnumeratedExpression> EnumeratedAssignment;
-typedef Assignment<PrimedEnumeratedVariable,EnumeratedExpression> EnumeratedUpdate;
-typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;
-typedef Assignment<PrimedIntegerVariable,IntegerExpression> IntegerUpdate;
-typedef Assignment<StringVariable,StringExpression> StringAssignment;
-typedef Assignment<PrimedStringVariable,StringExpression> StringUpdate;
-typedef Assignment<RealVariable,RealExpression> RealAssignment;
-typedef Assignment<PrimedRealVariable,RealExpression> RealUpdate;
-typedef Assignment<DottedRealVariable,RealExpression> RealDynamic;
-
-typedef Assignment<RealVariable,RealExpression> RealAlgebraicAssignment;
-typedef Assignment<PrimedRealVariable,RealExpression> RealUpdateAssignment;
-typedef Assignment<DottedRealVariable,RealExpression> RealDifferentialAssignment;
-typedef Assignment<ExtendedRealVariable,RealExpression> ExtendedRealAssignment;
-typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
-typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
-
-
-
-
-
-
-
+//! \ingroup FunctionModule
+//! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
+//! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
+//!
+template<class X> Formula<X> formula(const Expansion<X>& e)
+{
+    Vector< Formula<X> > identity(e.argument_size());
+    for(uint i=0; i!=identity.size(); ++i) { identity[i]=Formula<X>::coordinate(i); }
+    return horner_evaluate(e,identity);
+}
 
 } // namespace Ariadne
+
 
 #endif // ARIADNE_FORMULA_H

@@ -30,6 +30,7 @@ check_PROGRAMS = \
 	test_expansion \
 	test_polynomial \
 	test_differential \
+    test_procedure \
     test_function \
     test_expression \
 	test_taylor_model \

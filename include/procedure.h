@@ -35,9 +35,12 @@
 #include "vector.h"
 
 #include "operators.h"
+#include "formula.h"
+#include "expansion.h"
 
 namespace Ariadne {
 
+typedef uint Nat;
 template<class X> class Formula;
 
 struct ProcedureInstruction
@@ -61,7 +64,9 @@ struct ProcedureInstruction
 template<class X>
 class Procedure {
   public:
+    explicit Procedure();
     explicit Procedure(const Formula<X>& f);
+    explicit Procedure(const Expansion<X>& f);
   public:
     List<X> _constants;
     List<ProcedureInstruction> _instructions;
@@ -72,15 +77,35 @@ class Procedure {
   public:
 };
 
-//! \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
-template<class X, class T> T evaluate(const Procedure<X>& f, const Vector<T>& x)
+//! \brief An algorithmic procedure for computing a function.
+//!
+//! A Procedure is more efficient to compute than a Formula, since common
+//! subexpressions have already been removed. However, it is also more
+//! difficult to manipulate, so it should usually only be used when no further
+//! manipulations of the function are possible.
+template<class X>
+class Vector< Procedure<X> > {
+  public:
+    explicit Vector(const Vector< Formula<X> >& f);
+  public:
+    List<X> _constants;
+    List<ProcedureInstruction> _instructions;
+    Vector<Nat> _results;
+  public:
+    void new_instruction(Operator o, Nat a) { _instructions.append(ProcedureInstruction(o,a)); }
+    void new_instruction(Operator o, Nat a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    void new_instruction(Operator o, Nat a1, Nat a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    void set_return(Nat i, Nat a) { _results[i]=a; }
+};
+
+// \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
+template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
     T z=x[0]*0;
-    List<T> v; v.reserve(f._instructions.size());
-    for(uint i=0; i!=f._instructions.size(); ++i) {
-        const ProcedureInstruction& instruction=f._instructions[i];
+    for(uint i=0; i!=p.size(); ++i) {
+        const ProcedureInstruction& instruction=p[i];
         switch(instruction.op) {
-            case CNST: v.append(z+f._constants[instruction.arg]); break;
+            case CNST: v.append(z+c[instruction.arg]); break;
             case IND:  v.append(x[instruction.arg]); break;
             case ADD:  v.append(v[instruction.arg1]+v[instruction.arg2]); break;
             case SUB:  v.append(v[instruction.arg1]-v[instruction.arg2]); break;
@@ -101,18 +126,38 @@ template<class X, class T> T evaluate(const Procedure<X>& f, const Vector<T>& x)
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }
     }
+}
+
+//! \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
+template<class X, class T> T evaluate(const Procedure<X>& f, const Vector<T>& x)
+{
+    List<T> v; v.reserve(f._instructions.size());
+    _execute(v,f._instructions,f._constants,x);
     return v.back();
 }
 
+//! \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
+template<class X, class T> Vector<T> evaluate(const Vector< Procedure<X> >& f, const Vector<T>& x)
+{
+    List<T> v; v.reserve(f._instructions.size());
+    _execute(v,f._instructions,f._constants,x);
+    T z=x[0]*0;
+    Vector<T> r(f.result_size(),z);
+    for(uint i=0; i!=f.result_size(); ++i) {
+        r[i]=v[f._results[i]];
+    }
+    return r;
+}
+
 template<class X>
-std::ostream& operator<<(std::ostream& os, const Procedure<X> f) {
-    os<<"Procedure( ";
-    for(uint i=0; i!=f._instructions.size(); ++i) {
-        const ProcedureInstruction& instruction=f._instructions[i];
+void _write(std::ostream& os, const List<ProcedureInstruction>& p, const List<X>& c)
+{
+    for(uint i=0; i!=p.size(); ++i) {
+        const ProcedureInstruction& instruction=p[i];
         os << "v[" << i << "]=";
         switch(instruction.op) {
             case CNST:
-                os << f._constants[instruction.arg]; break;
+                os << c[instruction.arg]; break;
             case IND:
                 os << "x[" << instruction.arg << "]"; break;
             case ADD: case SUB: case MUL: case DIV:
@@ -123,39 +168,92 @@ std::ostream& operator<<(std::ostream& os, const Procedure<X> f) {
                 os << symbol(instruction.op) << "v[" << instruction.arg << "]"; break;
             case ABS: case REC: case SQR: case SQRT:
             case EXP: case LOG: case SIN: case COS: case TAN:
+            case ASIN: case ACOS: case ATAN:
                 os << instruction.op << "(v[" << instruction.arg << "])"; break;
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }
         os << "; ";
     }
-    os << "r=v["<<f._instructions.size()-1<<"] )";
+}
+
+template<class X> Procedure<X>& operator+=(Procedure<X>& f, const X& c) {
+    f._constants.append(c);
+    f.new_instruction(CNST,f._constants.size()-1);
+    f.new_instruction(ADD,f._instructions.size()-1,f._instructions.size()-2);
+    return f;
+}
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const Procedure<X> f) {
+    os<<"Procedure( ";
+    _write(os,f._instructions,f._constants);
+    os << "r=v[" << f._instructions.size()-1u << "] )";
     return os;
 }
 
-template<class X> uint _convert(Procedure<X>& p, const FormulaNode<X>* f, Map<const FormulaNode<X>*,uint>& ind) {
+template<class X>
+std::ostream& operator<<(std::ostream& os, const Vector< Procedure<X> > f) {
+    os<<"Procedure( ";
+    _write(os,f._instructions,f._constants);
+    os << "r=v" << f._results << " )";
+    return os;
+}
+
+
+
+
+template<class X> uint _convert(List<ProcedureInstruction>& p, List<X>& c, const FormulaNode<X>* f, Map<const FormulaNode<X>*,uint>& ind) {
+    typedef ProcedureInstruction PI;
     if(ind.has_key(f)) { return ind[f]; }
     switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-        case CNST: p.new_instruction(CNST,p._constants.size()); p._constants.append(*f->val); break;
-        case IND: p.new_instruction(IND,f->ind); break;
+        case CNST: p.append(PI(CNST,c.size())); c.append(*f->val); break;
+        case IND: p.append(PI(IND,f->ind)); break;
         case ADD: case SUB: case MUL: case DIV:
-            p.new_instruction(f->op,_convert(p,f->arg1,ind),_convert(p,f->arg2,ind)); break;
+            p.append(PI(f->op,_convert(p,c,f->arg1,ind),_convert(p,c,f->arg2,ind))); break;
         case POW:
-            p.new_instruction(f->op,_convert(p,f->arg,ind),f->np); break;
+            p.append(PI(f->op,_convert(p,c,f->arg,ind),f->np)); break;
         case NEG: case REC: case SQR: case SQRT:
-        case EXP: case LOG: case SIN: case COS: case TAN:
-            p.new_instruction(f->op,_convert(p,f->arg,ind)); break;
+        case EXP: case LOG: case SIN: case COS: case TAN: case ATAN:
+            p.append(PI(f->op,_convert(p,c,f->arg,ind))); break;
         default: assert(false);
     }
-    const uint num=p._instructions.size()-1;
+    const uint num=p.size()-1;
     ind.insert(f,num);
     return num;
+}
+
+template<class X>
+Procedure<X>::Procedure()
+{
 }
 
 template<class X>
 Procedure<X>::Procedure(const Formula<X>& f)
 {
     Map<const FormulaNode<X>*, uint> ind;
-    _convert(*this,f._root.operator->(), ind);
+    _convert(this->_instructions,this->_constants,f._root.operator->(), ind);
+}
+
+template<class X>
+Procedure<X>::Procedure(const Expansion<X>& e)
+{
+    Vector< Formula<X> > id=Formula<X>::identity(e.argument_size());
+    Formula<X> f=horner_evaluate(e,id);
+    Map<const FormulaNode<X>*, uint> ind;
+    _convert(this->_instructions,this->_constants,f._root.operator->(), ind);
+}
+
+template<class X>
+Vector< Procedure<X> >::Vector(const Vector< Formula<X> >& f)
+    : _results(f.size(),0u)
+{
+    Map<const FormulaNode<X>*, uint> ind;
+    for(uint i=0; i!=f.size(); ++i) {
+        _convert(this->_instructions,this->_constants,f[i]._root.operator->(), ind);
+    }
+    for(Nat i=0; i!=f.size(); ++i) {
+        this->_results[i]=ind[f[i]._root.operator->()];
+    }
 }
 
 

@@ -66,10 +66,10 @@ class Formula {
     explicit Formula(const intrusive_ptr< FormulaNode<X> >& ptr) : _root(ptr) { }
     Formula(const X& c) { *this=Formula::constant(c); }
     Formula<X>& operator=(const X& c) { *this=Formula::constant(c); return *this; }
-    static Formula constant(const X& c);
-    static Formula constant(double c);
-    static Formula coordinate(uint j);
-    static Formula identity(uint n);
+    static Formula<X> constant(const X& c);
+    static Formula<X> constant(double c);
+    static Formula<X> coordinate(uint j);
+    static Vector< Formula<X> > identity(uint n);
     const FormulaNode<X>* ptr() const { return _root.operator->(); }
   public:
     boost::intrusive_ptr< const FormulaNode<X> > _root;
@@ -84,9 +84,12 @@ struct Coordinate { Formula<Real> operator[](uint j) { return Formula<Real>::coo
 template<class X>
 struct FormulaNode {
     ~FormulaNode() {
-        switch(op) { case CNST: delete val; case IND: break;
+        switch(op) {
+            case CNST: delete val; case IND: break;
+            case POW: --arg->count; if(arg->count==0) { delete arg; } break;
             default: if(arg2) { --arg2->count; if(arg2->count==0) { delete arg2; } } --arg1->count; if(arg1->count==0) { delete arg1; } } }
     explicit FormulaNode(Operator o, const FormulaNode<X>* a) : op(o), arg(a), arg2(0) { ++arg->count; }
+    explicit FormulaNode(Operator o, const FormulaNode<X>* a, int n) : op(o), arg(a), np(n) { ++arg->count; }
     explicit FormulaNode(Operator o, const FormulaNode<X>* a1, const FormulaNode<X>* a2) : op(o), arg1(a1), arg2(a2) { ++arg1->count; ++arg2->count; }
     explicit FormulaNode(const X& x) : op(CNST), val(new X(x)) { }
     explicit FormulaNode(double x) : op(CNST), val(new X(x)) { }
@@ -95,7 +98,7 @@ struct FormulaNode {
     Operator op;
     union {
         uint ind; X* val;
-        struct { const FormulaNode* arg; uint np; };
+        struct { const FormulaNode* arg; int np; };
         struct { const FormulaNode* arg1; const FormulaNode* arg2; };
     };
 };
@@ -105,6 +108,8 @@ template<class X> inline void intrusive_ptr_release(const FormulaNode<X>* nodept
 
 template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f) {
     return Formula<X>(new FormulaNode<X>(op,f.ptr())); }
+template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f, int n) {
+    return Formula<X>(new FormulaNode<X>(op,f.ptr(),n)); }
 template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f1, const Formula<X>& f2) {
     return Formula<X>(new FormulaNode<X>(op,f1.ptr(),f2.ptr())); }
 
@@ -117,7 +122,7 @@ template<class X> inline Formula<X>::Formula(Operator op, const Formula<X>& a1, 
 template<class X> inline Formula<X> Formula<X>::constant(const X& c) { return Formula<X>(new FormulaNode<X>(c)); }
 template<class X> inline Formula<X> Formula<X>::constant(double c) { return Formula<X>(new FormulaNode<X>(c)); }
 template<class X> inline Formula<X> Formula<X>::coordinate(uint j) { return Formula<X>(new FormulaNode<X>(j)); }
-template<class X> inline Formula<X> Formula<X>::identity(uint n) {
+template<class X> inline Vector< Formula<X> > Formula<X>::identity(uint n) {
     Vector< Formula<X> > r(n); for(uint i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
 
 template<class X> inline Formula<X> operator+(const Formula<X>& f) { return make_formula(POS,f); }
@@ -129,12 +134,14 @@ template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formul
 template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(NEG,f); }
 template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(REC,f); }
 template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(SQR,f); }
+template<class X> inline Formula<X> pow(const Formula<X>& f, int n) { return make_formula(POW,f,n); }
 template<class X> inline Formula<X> sqrt(const Formula<X>& f) { return make_formula(SQRT,f); }
 template<class X> inline Formula<X> exp(const Formula<X>& f) { return make_formula(EXP,f); }
 template<class X> inline Formula<X> log(const Formula<X>& f) { return make_formula(LOG,f); }
 template<class X> inline Formula<X> sin(const Formula<X>& f) { return make_formula(SIN,f); }
 template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formula(COS,f); }
 template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(TAN,f); }
+template<class X> inline Formula<X> atan(const Formula<X>& f) { return make_formula(ATAN,f); }
 
 template<class X> inline Formula<X> operator+(double c, Formula<X> f) { return Formula<X>::constant(c) + f; }
 template<class X> inline Formula<X> operator-(double c, Formula<X> f) { return Formula<X>::constant(c) - f; }
@@ -181,7 +188,10 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Formul
             os << '/';
             switch(f->arg2->op) { case ADD: case SUB: case MUL: case DIV: os << '(' << f->arg2 << ')'; break; default: os << f->arg2; }
             return os;
-        //case EXP: return os << "exp(" << f->arg << ")";
+        case POW:
+            return os << "pow" << '(' << f->arg << ',' << f->np << ')';
+        case EXP:
+            return os << "exp(" << f->arg << ")";
         default: return os << f->op << "(" << f->arg << ")";
     }
 }

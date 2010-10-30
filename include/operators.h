@@ -139,6 +139,9 @@ inline const char* name(const Operator& op) {
         case SIN:  return "sin"; break;
         case COS:  return "cos"; break;
         case TAN:  return "tan"; break;
+        case ASIN:  return "asin"; break;
+        case ACOS:  return "acos"; break;
+        case ATAN:  return "atan"; break;
         case ITOR:  return "itor"; break;
         case PULL: return "pull"; break;
         case PUSH: return "push"; break;
@@ -150,7 +153,7 @@ inline const char* name(const Operator& op) {
         case GT:   return "lt"; break;
         case LT:   return "gt"; break;
         case SUBS:   return "subs"; break;
-        default: assert(false);
+        default: return "UNKNOWN";
     }
 }
 

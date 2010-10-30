@@ -265,12 +265,13 @@ class TestVectorTaylorFunction
     void test_jacobian();
     void test_compose();
     void test_antiderivative();
-    void test_implicit();
     void test_join();
     void test_combine();
-    void test_flow();
     void test_conversion();
     void test_domain();
+
+    void test_implicit();
+    void test_flow();
 };
 
 
@@ -290,11 +291,13 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_jacobian());
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
-    ARIADNE_TEST_CALL(test_implicit());
     ARIADNE_TEST_CALL(test_join());
-    ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_conversion());
     ARIADNE_TEST_CALL(test_domain());
+
+    //ARIADNE_TEST_CALL(test_implicit());
+    //ARIADNE_TEST_CALL(test_flow());
+
 }
 
 
@@ -303,6 +306,7 @@ void TestVectorTaylorFunction::test_constructors()
     Vector< Expansion<Float> > expansion(2);
     expansion[0]=Expansion<Float>(2,4, 0,0,1.125, 1,0,-0.75, 0,1,0.0625, 2,0,-0.25);
     expansion[1]=Expansion<Float>(2,2, 0,0,0.750, 1,0,0.50);
+    expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
 
     Vector<Interval> domain(2,0.25,1.25,0.5,1.0);
     HenonFunction henon_function(Vector<Float>(2,1.5,0.25));

@@ -53,7 +53,7 @@ class TestExpansion
     void test_equality();
     void test_cleanup();
     void test_constructors();
-    void test_indexing();
+    //void test_indexing();
     void test_find();
     void test_embed();
 };
@@ -66,7 +66,7 @@ void TestExpansion::test()
     ARIADNE_TEST_CALL(test_equality());
     ARIADNE_TEST_CALL(test_cleanup());
     ARIADNE_TEST_CALL(test_constructors());
-    ARIADNE_TEST_CALL(test_indexing());
+    //ARIADNE_TEST_CALL(test_indexing());
     ARIADNE_TEST_CALL(test_find());
     ARIADNE_TEST_CALL(test_embed());
 }
@@ -108,14 +108,16 @@ void TestExpansion::test_concept()
     //e=x;
 
     e.reserve(2u);
-    e.insert(a,x);
+    //e.insert(a,x);
     e.prepend(a,x);
     e.append(a,x);
     e.append(a,a,x);
     e.clear();
 
+    e.graded_sort();
+    e.reverse_lexicographic_sort();
+
     x=ce[a];
-    e[a]=1.0;
 
     ce.number_of_nonzeros();
     ce.argument_size();
@@ -123,7 +125,6 @@ void TestExpansion::test_concept()
     e.erase(e.begin());
 
     ce.check();
-    e.cleanup();
 }
 
 void TestExpansion::test_iterator_concept()
@@ -207,17 +208,6 @@ void TestExpansion::test_data_access()
     ARIADNE_TEST_ASSERT(a2==aref);
     ARIADNE_TEST_ASSERT(x1==xref);
 
-    // Test finding lower bound of multi index
-    ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_EXECUTE(iter=e.lower_bound(MI(3,1,0,0)));
-    ARIADNE_TEST_PRINT(iter);
-    ARIADNE_TEST_EQUAL(iter->key(),MI(3,1,0,0));
-    ARIADNE_TEST_EQUAL(iter->data(),3.0);
-    ARIADNE_TEST_EXECUTE(iter=e.lower_bound(MI(3,1,1,0)));
-    ARIADNE_TEST_EQUAL(iter->key(),MI(3,1,0,1));
-    ARIADNE_TEST_EQUAL(iter->data(),7.0);
-
-
     // Test finding of values of iterators
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EXECUTE(iter=e.find(MI(3,1,0,0)));
@@ -249,15 +239,20 @@ void TestExpansion::test_equality()
     MI a(2);
     MI b(2); ++b;
     Expansion<Float> e1(2),e2(2);
-    e1[a]=1.0; e1[a]=0.0;
-    e1[b]=2.0;
-    e2[b]=2.0;
-    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by explicit zeros are considered nonequal."); }
-    e1[a]=0.0;
-    e2[a]=-0.0;
-    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by +0 versus -0 coefficients are considered nonequal."); }
-    e1[a]=-0.0;
+    e1.append(a,1.0); e1.append(b,2.0);
+    e2.append(a,1.0); e2.append(b,3.0);
+    ARIADNE_TEST_COMPARE(e1,!=,e2);
+    e2.clear(); e2.append(a,1.0); e2.append(b,2.0);
     ARIADNE_TEST_EQUAL(e1,e2);
+    e1.clear(); e1.append(b,2.0);
+    e2.clear(); e2.append(a,0.0); e2.append(b,2.0);
+    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by explicit zeros are considered nonequal."); }
+    e1.clear(); e1.append(a,-0.0);
+    e1.clear(); e1.append(a,+0.0);
+    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by +0 versus -0 coefficients are considered nonequal."); }
+    e1.clear(); e1.append(a,1.0); e1.append(b,2.0);
+    e2.clear(); e2.append(b,2.0); e2.append(a,1.0);
+    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by order of set operators are considered nonequal."); }
 }
 
 
@@ -278,7 +273,7 @@ void TestExpansion::test_cleanup()
     }
 
     ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_EXECUTE(e.sort());
+    ARIADNE_TEST_EXECUTE(e.graded_sort());
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EXECUTE(e.remove_zeros());
     ARIADNE_TEST_PRINT(e);
@@ -305,10 +300,9 @@ void TestExpansion::test_constructors()
     ARIADNE_TEST_EQUAL(p3[MI(2, 0,0)],2.0);
 
     // Unordered indices
-    ARIADNE_TEST_EQUAL(E(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 3,0,7.0, 0,1,11.0),E(2,5, 0,0,2.0, 1,0,3.0, 0,1,11.0, 3,0,7.0, 1,2,5.0));
+    ARIADNE_TEST_COMPARE(E(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 3,0,7.0, 0,1,11.0),!=,E(2,5, 0,0,2.0, 1,0,3.0, 0,1,11.0, 3,0,7.0, 1,2,5.0));
     // Repeated indices; do not sum in expansion class
-    ARIADNE_TEST_ASSERT(E(2,3, 1,0,2.0, 0,2,7.0, 1,0,3.0)==E(2,3, 1,0,2.0, 1,0,3.0, 0,2,7.0)
-        || E(2,3, 1,0,2.0, 0,2,7.0, 1,0,3.0)==E(2,3, 1,0,3.0, 1,0,2.0, 0,2,7.0));
+    ARIADNE_TEST_COMPARE(E(2,3, 1,0,2.0, 1,0,3.0, 0,2,7.0),!=,E(2,2, 1,0,5.0, 0,2,7.0));
 
     // Regression tests for expansions with only zeroes
     ARIADNE_TEST_CONSTRUCT(Expansion<Float>,pr2,(3,0, 0.0));
@@ -321,6 +315,7 @@ void TestExpansion::test_constructors()
 
 
 
+/* Not needed since we cannot look up by index without order
 void TestExpansion::test_indexing()
 {
     Expansion<Float> e(3,4, 0,0,0,2.0,  1,0,0,3.0, 1,0,1,5.0, 2,1,0,7.0);
@@ -358,11 +353,6 @@ void TestExpansion::test_indexing()
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EQUAL(e.number_of_nonzeros(),4);
     Expansion<Float>::const_iterator iter=e.begin();
-    ARIADNE_TEST_EQUAL(iter->key(),MI(3, 0,0,0));
-    ARIADNE_TEST_EQUAL(iter->data(),7.0);
-    ++iter;
-    if(iter->key()==MI(3, 2,1,0)) {
-        std::cerr<<"Error in Expansion<X>::insert(MultiIndex,X) probably due to incorrect compiler optimization. Please inform the developers."; }
     ARIADNE_TEST_EQUAL(iter->key(),MI(3, 0,1,0));
     ARIADNE_TEST_EQUAL(iter->data(),2.0);
     ++iter;
@@ -371,10 +361,12 @@ void TestExpansion::test_indexing()
     ++iter;
     ARIADNE_TEST_EQUAL(iter->key(),MI(3, 2,1,0));
     ARIADNE_TEST_EQUAL(iter->data(),5.0);
-
-
-
+    ++iter;
+    ARIADNE_TEST_EQUAL(iter->key(),MI(3, 0,0,0));
+    ARIADNE_TEST_EQUAL(iter->data(),7.0);
 }
+*/
+
 
 void TestExpansion::test_find()
 {
@@ -393,7 +385,7 @@ void TestExpansion::test_find()
 
 void TestExpansion::test_embed()
 {
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float>,e,(2,5, 0,0,2.0, 1,0,3.0, 0,1,11.0, 3,0,7.0, 1,2,5.0));
+    ARIADNE_TEST_CONSTRUCT(Expansion<Float>,e,(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 3,0,7.0, 0,1,11.0));
     ARIADNE_TEST_EQUAL(embed(0,e,2),Expansion<Float>(4,5, 1,2,0,0,5.0, 0,0,0,0,2.0, 1,0,0,0,3.0, 3,0,0,0,7.0, 0,1,0,0,11.0));
     ARIADNE_TEST_EQUAL(embed(1,e,0),Expansion<Float>(3,5, 0,1,2,5.0, 0,0,0,2.0, 0,1,0,3.0, 0,3,0,7.0, 0,0,1,11.0));
     ARIADNE_TEST_EQUAL(embed(1,e,2),Expansion<Float>(5,5, 0,1,2,0,0,5.0, 0,0,0,0,0,2.0, 0,1,0,0,0,3.0, 0,3,0,0,0,7.0, 0,0,1,0,0,11.0));

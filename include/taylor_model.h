@@ -173,6 +173,7 @@ class TaylorModel
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
     typedef Expansion<Float> ExpansionType;
+    typedef ReverseLexicographicKeyLess ComparisonType;
   public:
     class Accuracy;
   private:
@@ -331,15 +332,15 @@ class TaylorModel
         ARIADNE_ASSERT(ne>=0); this->_error=ne; }
     //! \brief Set the constant term in the expansion.
     void set_value(const Float& c) {
-        this->_expansion[MultiIndex::zero(this->argument_size())]=c; }
+        this->_expansion.set(MultiIndex::zero(this->argument_size()),c,ReverseLexicographicKeyLess()); }
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
     void set_gradient(uint j, const Float& c) {
-        this->_expansion[MultiIndex::unit(this->argument_size(),j)]=c; }
+        this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c,ReverseLexicographicKeyLess()); }
 
     //! \brief The coefficient of the term in $x^a$.
     const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
-    Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
+    Float& operator[](const MultiIndex& a) { return this->_expansion.at(a,ReverseLexicographicKeyLess()); }
 
     //! \brief The coefficient of the term \f$df/dx_j\f$.
     const Float& operator[](uint j) const {
@@ -364,13 +365,15 @@ class TaylorModel
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The maximum degree of terms in the expansion.
-    uint degree() const { if(this->_expansion.empty()) { return 0; } else { return (--this->_expansion.end())->key().degree(); } }
+    uint degree() const;
     //! \brief The number of nonzero terms in the expansion.
     uint number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
     //@}
 
     //@{
     /*! \name Function evaluation. */
+    //! \brief An over-approximation to the supremum norm.
+    Float norm() const;
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
     Vector<Interval> domain() const;
     //! \brief An over-approximation to the range of the quantity.

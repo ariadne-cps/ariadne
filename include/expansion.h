@@ -52,18 +52,6 @@ template<class X> Expansion<X> embed(unsigned int, const Expansion<X>&, unsigned
 
 
 
-template<class V, class K=typename V::key_type> struct key_equals {
-    bool operator()(const V& v, const K& k) const { return v.key()==k; }
-};
-
-template<class V, class K=typename V::key_type> struct key_less {
-    bool operator()(const V& v, const K& k) const { return v.key()<k; }
-};
-
-template<class V> struct data_is_zero {
-    bool operator()(const V& v) const { return v.data()==0; }
-};
-
 template<class FwdIter, class Op>
 FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
     FwdIter curr=first;
@@ -170,20 +158,48 @@ struct ExpansionValue {
 };
 
 
-template<class X> struct key_less<ExpansionValue<X>,MultiIndex> {
-    bool operator()(const ExpansionValue<X>& v, const MultiIndex& k) const { return v.key()<k; }
+struct DataLess {
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.data()<v2.data(); }
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const X& d2) { return v1.data()<d2; }
 };
 
+struct DataIsZero {
+    template<class X> bool operator()(const ExpansionValue<X>& v) { return v.data()==0; }
+};
 
-template<class X>
-inline bool operator<(const ExpansionValue<X>& dv1, const ExpansionValue<X>& dv2) {
-    return dv1.key()<dv2.key();
-}
+struct KeyEquals {
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.key()==v2.key(); }
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) { return v1.key()==k2; }
+    bool operator()(const MultiIndex& k1, const MultiIndex& k2) { return k2==k2; }
+};
 
-template<class X>
-inline bool data_less(const ExpansionValue<X>& dv1, const ExpansionValue<X>& dv2) {
-    return dv1.data()<dv2.data();
-}
+struct GradedKeyLess {
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
+        return graded_less(v1.key(),v2.key()); }
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
+        return graded_less(v1.key(),k2); }
+    bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
+        return graded_less(k1,k2); }
+};
+
+struct LexicographicKeyLess {
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
+        return lexicographic_less(v1.key(),v2.key()); }
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
+        return lexicographic_less(v1.key(),k2);; }
+    bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
+        return lexicographic_less(k1,k2); }
+};
+
+struct ReverseLexicographicKeyLess {
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
+        return reverse_lexicographic_less(v1.key(),v2.key()); }
+    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
+        return reverse_lexicographic_less(v1.key(),k2);; }
+    bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
+        return reverse_lexicographic_less(k1,k2); }
+};
+
 
 
 template<class X>
@@ -275,6 +291,7 @@ class Expansion
     typedef int difference_type;
     typedef MultiIndex key_type;
     typedef X data_type;
+
     static const unsigned int sizeof_byte=sizeof(byte_type);
     static const unsigned int sizeof_word=sizeof(word_type);
     static const unsigned int sizeof_data=sizeof(data_type);
@@ -289,6 +306,7 @@ class Expansion
   public:
     explicit Expansion() : _argument_size() { }
     explicit Expansion(unsigned int as) : _argument_size(as) { }
+    template<class XX> explicit Expansion(unsigned int as, unsigned int deg, const XX* c0, ...);
     explicit Expansion(unsigned int as, unsigned int deg, double c0, ...);
     explicit Expansion(unsigned int as, unsigned int nnz, int a00, ...);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
@@ -298,16 +316,26 @@ class Expansion
 
     static Expansion<X> variable(unsigned int as, unsigned int i);
 
-    void swap(Expansion<X>& p) {
-        std::swap(this->_argument_size,p._argument_size);
-        std::swap(this->_coefficients,p._coefficients); }
+    void swap(Expansion<X>& other) {
+        std::swap(this->_argument_size,other._argument_size);
+        std::swap(this->_coefficients,other._coefficients); }
 
-    bool operator==(const Expansion<X>& p) const { return this->_coefficients == p._coefficients; }
-    bool operator!=(const Expansion<X>& p) const { return this->_coefficients != p._coefficients; }
+    bool operator==(const Expansion<X>& other) const {
+        if(this->argument_size()!=other.argument_size()) { return false; }
+        if(this->number_of_nonzeros()!=other.number_of_nonzeros()) { return false; }
+        const_iterator self_iter=this->begin(); const_iterator other_iter=other.begin();
+        while(self_iter!=this->end()) {
+            if(self_iter->key()!=other_iter->key() || self_iter->data()!=other_iter->data()) { return false; }
+            ++self_iter; ++other_iter; }
+        return true;
+    }
+    bool operator!=(const Expansion<X>& other) const { return !this->operator==(other); }
 
     unsigned int argument_size() const { return this->_argument_size; }
     unsigned int number_of_nonzeros() const { return _coefficients.size()/_element_size(); }
-    unsigned int degree() const { if(this->empty()) { return 0u; } return (--this->end())->key().degree(); }
+    unsigned int degree() const {
+        unsigned char deg=0u; for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+            deg=std::max(deg,iter->key().degree()); } return deg; }
     const std::vector<word_type>& coefficients() const { return this->_coefficients; }
 
     bool empty() const { return this->_coefficients.empty(); }
@@ -315,7 +343,17 @@ class Expansion
     void reserve(size_type nnz) { this->_coefficients.reserve(nnz*_element_size()); }
     void resize(size_type nnz) { this->_coefficients.resize(nnz*_element_size()); }
 
-    void insert(const MultiIndex& a, const RealType& c); // Non-inline user function
+    template<class CMP> void insert(const MultiIndex& a, const RealType& c, const CMP& cmp) {
+        this->_insert(a,c,cmp); }
+    template<class CMP> void set(const MultiIndex& a, const RealType& c, const CMP& cmp) {
+        this->_at(a,cmp)=c; }
+    template<class CMP> RealType& at(const MultiIndex& a, const CMP& cmp) {
+        return this->_at(a,cmp); }
+    template<class CMP> iterator find(const MultiIndex& a, const CMP& cmp) {
+        iterator iter=std::lower_bound(this->begin(),this->end(),a,cmp); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
+    template<class CMP> const_iterator find(const MultiIndex& a, const CMP& cmp) const {
+        iterator iter=std::lower_bound(this->begin(),this->end(),a,cmp); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
+
     void append(const MultiIndex& a, const RealType& c) {
         this->_append(a,c); }
     void prepend(const MultiIndex& a, const RealType& c) {
@@ -323,44 +361,49 @@ class Expansion
     void append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c) {
         this->_append(a1,a2,c); }
 
-    RealType& operator[](const MultiIndex& a) {
-        iterator iter=this->lower_bound(a);
-        if(iter==this->end() || iter->key()!=a) { iter=this->_insert(iter,a,static_cast<RealType>(0.0)); }
-        return iter->data(); }
+    //RealType& operator[](const MultiIndex& a) {
+    //    iterator iter=this->find(a);
+    //    if(iter==this->end()) { iter=this->_insert(iter,a,static_cast<RealType>(0.0)); }
+    //    return iter->data(); }
     const RealType& operator[](const MultiIndex& a) const {
-        const_iterator iter=this->lower_bound(a);
-        if(iter==this->end() || iter->key()!=a) { return _zero; }
+        const_iterator iter=this->find(a);
+        if(iter==this->end()) { return _zero; }
         else { return iter->data(); } }
 
     iterator begin() { return iterator(_argument_size,_index_size(),_begin_ptr()); }
     iterator end() { return iterator(_argument_size,_index_size(),_end_ptr()); }
-    iterator lower_bound(const MultiIndex& a) {
-        return std::lower_bound(this->begin(),this->end(),a,key_less<value_type,key_type>()); }
     iterator find(const MultiIndex& a) {
-        iterator iter=this->lower_bound(a); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
+        iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end(); }
 
     const_iterator begin() const { return const_iterator(_argument_size,_index_size(),const_cast<word_type*>(_begin_ptr())); }
     const_iterator end() const { return const_iterator(_argument_size,_index_size(),const_cast<word_type*>(_end_ptr())); }
-    const_iterator lower_bound(const MultiIndex& a) const {
-        return std::lower_bound(this->begin(),this->end(),a,key_less<value_type,key_type>()); }
     const_iterator find(const MultiIndex& a) const {
-        const_iterator iter=this->lower_bound(a); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
+        const_iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end(); }
 
     void erase(iterator iter) { iter->data()=0.0; }
     void clear() { _coefficients.clear(); }
 
-    void sort() {
-        //std::cerr<<"sorting... "<<std::flush;
-        std::sort(this->begin(),this->end());
-    }
     void remove_zeros() {
-        //std::cerr<<"remove_zeros... "<<std::flush;
-        iterator new_end=std::remove_if(this->begin(),this->end(),data_is_zero<value_type>());
-        this->resize(new_end-this->begin());
+        this->resize(std::remove_if(this->begin(),this->end(),DataIsZero())-this->begin()); }
+    void combine_terms() {
+        iterator curr=this->begin(); const_iterator adv=this->begin(); const_iterator end=this->end();
+        while(adv!=end) { curr->key()=adv->key(); curr->data()=adv->data(); ++adv;
+            while(adv!=end && curr->key()==adv->key()) { curr->data()+=adv->data(); ++adv; } ++curr; }
+        this->resize(curr-this->begin()); }
+
+    template<class CMP> void sort(const CMP& cmp) {
+        std::sort(this->begin(),this->end(),cmp);
     }
 
-
-    void cleanup() { this->sort(); this->remove_zeros(); }
+    void graded_sort() {
+        std::sort(this->begin(),this->end(),GradedKeyLess());
+    }
+    void lexicographic_sort() {
+        std::sort(this->begin(),this->end(),LexicographicKeyLess());
+    }
+    void reverse_lexicographic_sort() {
+        std::sort(this->begin(),this->end(),ReverseLexicographicKeyLess());
+    }
 
     void check() const { }
 
@@ -377,6 +420,16 @@ class Expansion
     const word_type* _end_ptr() const { return _coefficients.end().operator->(); }
     word_type* _begin_ptr() { return _coefficients.begin().operator->(); }
     word_type* _end_ptr() { return _coefficients.end().operator->(); }
+    template<class CMP> RealType& _at(const MultiIndex& a,const CMP& cmp) {
+        iterator p=std::lower_bound(this->begin(),this->end(),a,cmp);
+        if(p!=this->end() && p->key()==a) { return p->data(); }
+        else { p=this->_insert(p,a,0.0); return p->data(); }
+    }
+    template<class CMP> iterator _insert(const MultiIndex& a, const RealType& x,const CMP& cmp) {
+        //std::cerr<<"_insert "<<*this<<" "<<a<<" "<<x<<std::endl;
+        _coefficients.resize(_coefficients.size()+_element_size());
+        iterator p=std::lower_bound(this->begin(),this->end()-1,a,cmp);
+        return _allocated_insert(p,a,x); }
     iterator _insert(iterator p, const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_insert "<<*this<<" "<<p._ptr()<<" "<<a<<" "<<x<<std::endl;
         if(_coefficients.size()+_element_size()>_coefficients.capacity()) {
@@ -386,11 +439,6 @@ class Expansion
         } else {
             _coefficients.resize(_coefficients.size()+_element_size());
         }
-        return _allocated_insert(p,a,x); }
-    iterator _insert(const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_insert "<<*this<<" "<<a<<" "<<x<<std::endl;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        iterator p=std::lower_bound(this->begin(),this->end()-1,a,key_less<value_type,key_type>());
         return _allocated_insert(p,a,x); }
     iterator _allocated_insert(iterator p, const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_allocated_insert "<<*this<<" "<<p<<" "<<p-begin()<<" "<<a<<" "<<x<<std::endl;
@@ -423,12 +471,6 @@ class Expansion
     std::vector<word_type> _coefficients;
 };
 
-template<class X>
-void
-Expansion<X>::insert(const MultiIndex& a, const X& x) {
-    this->_insert(a,x);
-}
-
 // Disable construction of Expansion<Rational> since above implementation only
 // works for "plain old data" types
 #if defined HAVE_GMPXX_H and defined ARIADNE_NUMERIC_H
@@ -436,6 +478,17 @@ template<> class Expansion<Rational>;
 #endif
 
 template<class X> X Expansion<X>::_zero = 0.0;
+
+template<class X> template<class XX>
+Expansion<X>::Expansion(unsigned int as, unsigned int deg, const XX* p, ...)
+    : _argument_size(as)
+{
+    MultiIndex a(as);
+    while(a.degree()<=deg) {
+        if(*p!=0) { this->insert(a,*p); }
+        ++a; ++p;
+    }
+}
 
 template<class X>
 Expansion<X>::Expansion(unsigned int as, unsigned int deg, double c0, ...)
@@ -446,11 +499,10 @@ Expansion<X>::Expansion(unsigned int as, unsigned int deg, double c0, ...)
     while(a.degree()<=deg) {
         if(a.degree()==0) { x=c0; }
         else { x=va_arg(args,double); }
-        if(x!=0) { this->insert(a,x); }
+        if(x!=0) { this->append(a,x); }
         ++a;
     }
     va_end(args);
-    this->cleanup();
 }
 
 template<class X>
@@ -470,7 +522,6 @@ Expansion<X>::Expansion(unsigned int as, unsigned int nnz, int a00, ...)
         if(x!=0) { this->append(a,x); }
     }
     va_end(args);
-    this->cleanup();
 }
 
 template<class X> template<class XX>
@@ -481,7 +532,6 @@ Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
     for(typename std::map<MultiIndex,XX>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
         this->append(iter->first,X(iter->second));
     }
-    this->remove_zeros();
 }
 
 template<class X> template<class XX> inline
@@ -495,33 +545,116 @@ Expansion<X>::Expansion(const Expansion<XX>& p)
 
 template<class X> Expansion<X>& Expansion<X>::operator=(const X& c) {
     this->clear();
-    (*this)[MultiIndex::zero(this->argument_size())]=c; 
+    this->append(MultiIndex::zero(this->argument_size()),c);
     return *this;
 }
 
 template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned int i) {
-    Expansion<X> p(n); p[MultiIndex::zero(n)]=0.0; p[MultiIndex::unit(n,i)]=X(1);
+    Expansion<X> p(n); p.append(MultiIndex::unit(n,i),X(1));
     return p;
 }
 
 
 
 
+//! \ingroup FunctionModule
+//! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
+//!
+//! For a polynomial in \f$n\f$ variables, Horner's rule is a recursive formula
+//! \f[ p(x) = \bigl( \bigl(  x^{d_k-d_{k-1}} q_k(\hat{x})x^{d_0} + \cdots + q_1(\hat{x}) \bigr) x^{d_1-d_0} + q_0(\hat{x}) \bigr) x^{d_0} \f]
+//! where \f$\hat{x}=(x_1,\ldots,x_{n-1})\f$ and \f$q_i\f$ is the polynomial of terms in \f$x_n^{d_i}\f$.
+//! To evaluate a polynomial using Horner's rule without using recursive function calls, we maintain registers \f$r_k\f$ containing
+//! the current evaluation of a polynomial in \f$(x_1,\ldots,x_k)\f$.
+//!
+//! We list the terms in reverse lexicographic order, defined as \f$\alpha \prec \beta\f$ if \f$\alpha_j>\beta_j\f$,
+//! where \f$j=\max\{i\mid \alpha_i\neq\beta_i\}$.\f$c_\alpha\f$.
+//! For a given term \f$c_\alpha x^\alpha\f$, let \f$k=\max\{j\mid \alpha_j\neq\beta_j\}\f$, where \f$\beta\f$ is the next multi-index.
+//! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
+//! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
+//! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
+template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x)
+{
+    typedef typename Expansion<X>::const_iterator const_iterator;
+
+    const uint n=e.argument_size();
+    Y z=x[0]*0; // The zero element of the ring Y
+    array< Y > r(e.argument_size(),z); // An array of "registers" containing working p(x[0],...,x[k])
+    const_iterator iter=e.begin();
+    const_iterator end=e.end();
+    uint k=n;   // The current working register
+    const uchar* na=iter->key().begin(); // The values of the next multi-index
+    uint j=k;   // The lowest register containing a non-zero value
+    X c=iter->data();
+    const uchar* a=na;
+    ++iter;
+    while(iter!=end) {
+        na=iter->key().begin();
+        k=n-1;
+        while(a[k]==na[k]) { --k; }
+        // Since terms are ordered reverse-lexicographically,
+        // previous index must have higher kth value
+        assert(a[k]>na[k]);
+        // Set r[k]=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[k])*x[k]^(a[k]-na[k])
+        // Omit zero terms where possible
+        Y t=c;
+        for(uint i=0; i!=min(j,k); ++i) {
+            for(uint ii=0; ii!=a[i]; ++ii) {
+                t=t*x[i];
+            }
+        }
+        for(uint i=min(j,k); i!=k; ++i) {
+            t=t+r[i];
+            for(uint ii=0; ii!=a[i]; ++ii) {
+                t=t*x[i];
+            }
+            r[i]=z;
+        }
+        if(j<=k) {
+            t=t+r[k];
+        }
+        for(uint ii=na[k]; ii!=a[k]; ++ii) {
+            t=t*x[k];
+        }
+        r[k]=t;
+        //std::cerr<<"a="<<MultiIndex(n,a)<<" c="<<c<<" k="<<k<<" r="<<r<<"\n";
+        j=k;
+        c=iter->data();
+        a=na;
+        ++iter;
+    }
+    // Set r=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[n-1])*x[n-1]^(a[n-1])
+    Y t=c;
+    for(uint i=0; i!=j; ++i) {
+        for(uint ii=0; ii!=a[i]; ++ii) {
+            t=t*x[i];
+        }
+    }
+    for(uint i=j; i!=n; ++i) {
+        t=t+r[i];
+        for(uint ii=0; ii!=a[i]; ++ii) {
+            t=t*x[i];
+        }
+    }
+    //std::cerr<<"a="<<MultiIndex(n,a)<<" c="<<c<<" k="<<n<<"\n";
+    //std::cerr<<"  r="<<t<<"\n";
+    return t;
+}
+
 template<class X, class Y>
-Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
+Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
 {
     Y zero = y[0]; zero*=0;
     Y one = zero; one+=1;
 
     Y r=zero;
     Y t=zero;
-    for(typename Expansion<X>::const_iterator iter=x.begin();
-        iter!=x.end(); ++iter)
+    for(typename Expansion<X>::const_iterator iter=e.begin();
+        iter!=e.end(); ++iter)
     {
         const MultiIndex& j=iter->key();
         const X& c=iter->data();
         t=one;
-        for(uint k=0; k!=x.argument_size(); ++k) {
+        for(uint k=0; k!=e.argument_size(); ++k) {
             for(uint l=0; l!=j[k]; ++l) {
                 t=t*y[k];
             }
@@ -534,6 +667,17 @@ Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
 }
 
 
+template<class X, class Y>
+Y evaluate(const Expansion<X>& e, const Vector<Y>& y)
+{
+    return power_evaluate(e,y);
+}
+
+template<class X, class Y>
+Y simple_evaluate(const Expansion<X>& e, const Vector<Y>& y)
+{
+    return power_evaluate(e,y);
+}
 
 template<class X>
 Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int after_size)

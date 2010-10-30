@@ -41,6 +41,13 @@
 
 namespace Ariadne {
 
+namespace {
+
+bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
+    return reverse_lexicographic_less(a1,a2); }
+
+} // namespace
+
 
 const double em=2.2204460492503131e-16;
 const double ec=em/2;
@@ -176,18 +183,21 @@ TaylorModel::TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e)
 {
     ARIADNE_ASSERT(!d.empty());
     ARIADNE_ASSERT_MSG(this->_error>=0,"e="<<e);
+    this->unique_sort();
     this->clean();
 }
 
 TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e)
     : _expansion(f), _error(e), _accuracy_ptr(new Accuracy())
 {
+    this->unique_sort();
     this->clean();
 }
 
 TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e, shared_ptr<Accuracy> a)
     : _expansion(f), _error(e), _accuracy_ptr(a)
 {
+    this->unique_sort();
     this->clean();
 }
 
@@ -206,7 +216,15 @@ TaylorModel::clear()
     this->_error=0.0;
 }
 
-
+uint
+TaylorModel::degree() const
+{
+    uchar deg=0u;
+    for(TaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        deg=std::max(deg,iter->key().degree());
+    }
+    return deg;
+}
 
 TaylorModel&
 TaylorModel::operator=(double c)
@@ -390,7 +408,7 @@ inline void _scal_approx1(TaylorModel& rr, const Float& cc)
     Expansion<double>& r=reinterpret_cast<Expansion<double>&>(rr.expansion());
     double& re=reinterpret_cast<double&>(rr.error());
     const double& c=reinterpret_cast<const double&>(cc);
-    
+
     set_rounding_upward();
     volatile double u,ml;
     double te=0; // Twice the maximum accumulated error
@@ -421,7 +439,7 @@ inline void _scal_approx0(TaylorModel& rr, const Float& cc)
     volatile double& re=rr.error().v;
     const volatile double& c=cc.v;
     //const double& c=cc.v;
-    
+
     set_rounding_upward();
     volatile double u,ml;
     double te=0; // Twice the maximum accumulated error
@@ -554,10 +572,10 @@ void _acc(TaylorModel& r, const Float& c)
     if(c==0) { return; }
     if(r.expansion().empty()) {
         r.expansion().append(MultiIndex(r.argument_size()),c);
-    } else if(r.begin()->key().degree()>0) {
-        r.expansion().prepend(MultiIndex(r.argument_size()),c);
+    } else if((r.end()-1)->key().degree()>0) {
+        r.expansion().append(MultiIndex(r.argument_size()),c);
     } else {
-        Float& rv=r.begin()->data();
+        Float& rv=(r.end()-1)->data();
         Float& re=r.error();
         set_rounding_upward();
         VOLATILE Float rvu=rv+c;
@@ -584,13 +602,13 @@ void _acc(TaylorModel& r, const Interval& c)
         set_rounding_to_nearest();
         return;
     }
-    if(r.expansion().empty()) { // Append a constant term zero (slightly faster than prepend)
+    if(r.expansion().empty()) { // Append a constant term zero
         r.expansion().append(MultiIndex(r.argument_size()),0.0);
-    } else if(r.begin()->key().degree()>0) { // Prepend a constant term zero
-        r.expansion().prepend(MultiIndex(r.argument_size()),0.0);
+    } else if((r.end()-1)->key().degree()>0) { // Append a constant term zero
+        r.expansion().append(MultiIndex(r.argument_size()),0.0);
     }
 
-    Float& rv=r.begin()->data();
+    Float& rv=(r.end()-1)->data();
     Float& re=r.error();
     set_rounding_upward();
     VOLATILE Float rvu=rv+c.upper();
@@ -772,6 +790,7 @@ inline void _sub(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 
 struct Ivl { Float u; Float ml; };
 
+/*
 inline void _mul1(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 {
     // Compute r+=x*y
@@ -828,6 +847,7 @@ inline void _mul1(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 
     return;
 }
+*/
 
 
 // Compute r+=x*y
@@ -1033,7 +1053,7 @@ void _mul_clear(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 TaylorModel&
 TaylorModel::unique_sort()
 {
-    this->_expansion.sort();
+    this->_expansion.reverse_lexicographic_sort();
 
     TaylorModel::const_iterator advanced =this->begin();
     TaylorModel::const_iterator end =this->end();
@@ -1052,9 +1072,11 @@ TaylorModel::unique_sort()
             ml-=xv;
             set_rounding_to_nearest();
             v+=xv;
+            ++advanced;
         }
         current->data()=v;
         te+=(u+ml);
+        ++current;
     }
     set_rounding_upward();
     this->error()+=te;
@@ -2850,14 +2872,18 @@ rescale(const TaylorModel& tv, const Interval& ivl)
 
 
 
-Float norm(const TaylorModel& h) {
+Float TaylorModel::norm() const {
     set_rounding_mode(upward);
-    Float r=h.error();
-    for(TaylorModel::const_iterator iter=h.begin(); iter!=h.end(); ++iter) {
+    Float r=this->error();
+    for(TaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         r+=abs(iter->data());
     }
     set_rounding_mode(to_nearest);
     return r;
+}
+
+Float norm(const TaylorModel& tv) {
+    return tv.norm();
 }
 
 bool
@@ -2915,7 +2941,9 @@ operator<<(std::ostream& os, const TaylorModel& tm) {
 
     //os << "TaylorModel";
     os << "TM["<<tm.argument_size()<<"](";
-    tm.expansion().write(os,variable_names);
+    Expansion<Float> e=tm.expansion();
+    e.graded_sort();
+    e.write(os,variable_names);
     return os << "+/-" << tm.error() << ")";
 }
 

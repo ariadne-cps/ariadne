@@ -64,7 +64,8 @@ template<> class Reference<const MultiIndex>;
 class MultiIndex {
   public:
     typedef unsigned int size_type;
-    typedef unsigned char byte_type;    typedef unsigned int word_type;
+    typedef unsigned char byte_type;
+    typedef unsigned int word_type;
 
     typedef byte_type index_type;
     typedef MultiIndexValueReference reference;
@@ -80,6 +81,8 @@ class MultiIndex {
     explicit MultiIndex(size_type nv);
     //! \brief Construct a multi index with \a nv variables from the array \a ary.
     explicit MultiIndex(size_type nv, const int* ary);
+    //! \brief Construct a multi index with \a nv variables from the array \a ary.
+    explicit MultiIndex(size_type nv, const unsigned char* ary);
     //! \brief Construct a multi index with \a nv variables from variable arguments.
     explicit MultiIndex(size_type nv, int a1, ...);
 
@@ -124,8 +127,6 @@ class MultiIndex {
     friend bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
     //! \brief Inequality operator.
     friend bool operator!=(const MultiIndex& a1, const MultiIndex& a2); // inline
-    //! \brief Comparison operator.
-    friend bool operator<(const MultiIndex& a1, const MultiIndex& a2); // inline
 
     //! \brief Increment. No post-increment operator as we sometimes pass MultiIndex by reference.
     MultiIndex& operator++(); // inline
@@ -222,6 +223,14 @@ inline MultiIndex::MultiIndex(size_type n)
     : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     std::fill(this->word_begin(),this->word_end(),0);
+}
+
+inline MultiIndex::MultiIndex(size_type n, const unsigned char* ary)
+    : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
+{
+    for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
+    index_type* p=reinterpret_cast<index_type*>(_p);
+    p[n]=0; for(size_type i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
 }
 
 inline MultiIndex::MultiIndex(size_type n, const int* ary)
@@ -347,9 +356,9 @@ inline bool operator!=(const MultiIndex& a1, const MultiIndex& a2) {
     return !(a1==a2);
 }
 
-inline bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
+inline bool graded_less(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) {
-        throw std::runtime_error("operator<(MultiIndex,MultiIndex): number of variables must match");
+        throw std::runtime_error("graded_less(MultiIndex,MultiIndex): number of variables must match");
     }
 
     if(a1.degree()!=a2.degree()) {
@@ -371,6 +380,33 @@ inline bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     }
 }
 
+inline bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
+    if(a1.size()!=a2.size()) {
+        throw std::runtime_error("lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
+    }
+
+    for(MultiIndex::size_type i=0; i!=a1.size(); ++i) {
+        if(a1[i]!=a2[i]) {
+            return a1[i]<a2[i];
+        }
+    }
+    return false;
+}
+
+inline bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
+    if(a1.size()!=a2.size()) {
+        throw std::runtime_error("reverse_lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
+    }
+
+    MultiIndex::size_type i=a1.size();
+    while(i!=0) {
+        --i;
+        if(a1[i]!=a2[i]) {
+            return a1[i]>a2[i];
+        }
+    }
+    return false;
+}
 
 inline
 unsigned int MultiIndex::number() const

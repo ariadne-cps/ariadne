@@ -112,7 +112,7 @@ TaylorImageSet::TaylorImageSet(uint rs, uint as, uint deg, double x0, ...)
         }
         (*this)[i].error()=x;
         x=va_arg(args,double);
-        (*this)[i].expansion().cleanup();
+        (*this)[i].unique_sort();
         (*this)[i].clean();
     }
     va_end(args);

@@ -41,7 +41,7 @@ using namespace Ariadne;
 using namespace std;
 
 template<class R, class A, class P>
-void henon(R& r, const A& x, const P& p) 
+void henon(R& r, const A& x, const P& p)
 {
     r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
     r[1]=x[0];
@@ -75,7 +75,7 @@ class TestDifferential {
         x1=DifferentialType(2,4,a1);
         x2=DifferentialType(2,4,a2);
         x3=DifferentialType(1,4,a3);
-    
+
         ARIADNE_TEST_CALL(test_degree());
         ARIADNE_TEST_CALL(test_neg());
         ARIADNE_TEST_CALL(test_add());
@@ -92,21 +92,21 @@ class TestDifferential {
     }
 
     void test_neg() {
-        cout << -x1 << " = " << -x1 << std::endl;
-        //assert((x1+x2)==DifferentialType("[3,2,0,0]"));
+        DifferentialType nx1(2,4, 3, 0,0,-2.0, 1,0,-1.0, 2,0,-0.5);
+        ARIADNE_TEST_EQUALS(-x1,nx1);
     }
 
     void test_add() {
-        cout << x1 << "+" << x2 << " = " << x1+x2 << std::endl;
-        ARIADNE_TEST_EVALUATE(x1+x2);
+        DifferentialType x1px2(2,4, 3, 0,0,5.0, 1,0,2.0, 2,0,0.75);
+        ARIADNE_TEST_EQUALS(x1+x2,x1px2);
         ARIADNE_TEST_EVALUATE(x1+c1);
         ARIADNE_TEST_EVALUATE(c1+x1);
         //assert((x1+x2)==DifferentialType("[3,2,0,0]"));
     }
 
     void test_sub() {
-        cout << x1 << "-" << x2 << " = " << x1-x2 << std::endl;
-        ARIADNE_TEST_EVALUATE(x1-x2);
+         DifferentialType x1mx2(2,4, 3, 0,0,-1.0, 1,0,0.0, 2,0,0.25);
+        ARIADNE_TEST_EQUALS(x1-x2,x1mx2);
         ARIADNE_TEST_EVALUATE(x1-c1);
         ARIADNE_TEST_EVALUATE(c1-x1);
         //assert((x1-x2)==DifferentialType("[-1,0,0,0]"));
@@ -192,7 +192,7 @@ class TestDifferentialVector {
         x1=DifferentialVectorType(1,2,4,a1);
         x2=DifferentialVectorType(1,2,4,a2);
         x3=DifferentialVectorType(1,1,4,a3);
-    
+
         ARIADNE_TEST_CALL(test_degree());
         ARIADNE_TEST_CALL(test_add());
         ARIADNE_TEST_CALL(test_sub());
@@ -232,7 +232,7 @@ class TestDifferentialVector {
 
     void test_evaluate() {
         Float ac[2]={1,2}; Float adv[10]={1,2,3,4,5,6,7,8,9,10};
-        Vector<X> c(2u,ac); 
+        Vector<X> c(2u,ac);
         DifferentialVectorType dv(1u,2u,3u,adv);
         std::cout << "c=" << c << std::endl;
         std::cout << "dv="<< dv << std::endl;
@@ -269,8 +269,8 @@ class TestDifferentialVector {
     }
 
     void test_mapping() {
-        DifferentialVectorType x(2,2,2); 
-        x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1; 
+        DifferentialVectorType x(2,2,2);
+        x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1;
         cout << "x=" << x << endl;
         Vector<Float> p(2); p[0]=1.5; p[1]=0.375;
         double ahxp[12]={ 1.5, 0.0, -0.375, -1.0, 0.0, 0.0,   0.0, 1.0, 0.0, 0.0, 0.0, 0.0 };

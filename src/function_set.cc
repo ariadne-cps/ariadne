@@ -489,7 +489,6 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
     static const double TERR=-1.0/((1<<e)*1024.0);
     static const double XZMIN=1.0/(1<<16);
 
-
     // Set up the classes used for constraint propagation and
     // optimisation using the Kuhn-Tucker conditions
     ConstraintSolver solver;
@@ -512,6 +511,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
 
     Box bx=join(static_cast<const IntervalVector&>(b.box()),static_cast<const IntervalVector&>(c));
 
+    ARIADNE_LOG(2,"  fg(d)="<<fg(d)<<", bx="<<bx<<"\n");
     if(disjoint(fg(d),bx)) {
         ARIADNE_LOG(2,"  Proved disjointness using direct evaluation\n");
         return;
@@ -554,6 +554,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
     //assert(t>=-1000);
 
     if(t<TERR) {
+
         // Probably disjoint, so try to prove this
         Box nd=d;
 
@@ -599,8 +600,9 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");
             return;
         }
+    }
 
-        //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
+    if(t<=0.0 && Box(f(d)).radius()>b.box().radius()) {
         ARIADNE_LOG(2,"  Splitting domain\n");
         Pair<Box,Box> sd=d.split();
         x = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
@@ -611,7 +613,10 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         return;
     }
 
-    ARIADNE_LOG(2,"  Intersection point: parameter="<<y<<"\n");
+    if(t>0.0) {
+        ARIADNE_LOG(2,"  Intersection point: parameter="<<y<<"\n");
+    }
+
     if(b.tree_depth()>=e*int(b.dimension())) {
         ARIADNE_LOG(2,"  Adjoining cell "<<b.box()<<"\n");
         r.adjoin(b);

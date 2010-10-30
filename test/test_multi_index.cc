@@ -2,7 +2,7 @@
  *            test_multi_index.cc
  *
  *  Copyright  2007-9  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -91,7 +91,7 @@ class TestMultiIndex
         int n=0;
         while(a.degree()<=5) {
             MultiIndex b=a; ++a; ++n;
-            ARIADNE_TEST_BINARY_PREDICATE(operator<,b,a);
+            ARIADNE_TEST_BINARY_PREDICATE(graded_less,b,a);
             MultiIndex::index_type d=0; for(MultiIndex::size_type i=0; i!=a.size(); ++i) { d+=a[i]; }
             ARIADNE_TEST_EQUAL(a.degree(),d);
         }

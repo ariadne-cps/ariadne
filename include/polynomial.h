@@ -95,8 +95,8 @@ class Polynomial
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
     static Vector< Polynomial<X> > variables(unsigned int as) {
         Vector< Polynomial<X> > r(as); for(unsigned int i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
-    Polynomial<X>& operator=(const X& x) { this->_expansion.clear(); this->_expansion.insert(MultiIndex(this->argument_size()),x); return *this; }
-    
+    Polynomial<X>& operator=(const X& x) { this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),x); return *this; }
+
     //@{
     //! \name Comparisons
 
@@ -121,7 +121,7 @@ class Polynomial
     //! \brief The value of the polynomial at zero.
     const X& value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
     //! \brief A reference to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
-    X& operator[](const MultiIndex& a) { return this->_expansion[a]; }
+    X& operator[](const MultiIndex& a) { return this->_expansion.at(a,ReverseLexicographicKeyLess()); }
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
     const X& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
     //! \brief A constant reference to the raw data expansion.
@@ -156,14 +156,14 @@ class Polynomial
     //! \brief Append the term \f$c x^{a_1}\f$ to the list of terms.
     void append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
     //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
-    void insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
+    void insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c,ReverseLexicographicKeyLess()); }
     //! \brief Reserve space for a total of \a n terms.
     void reserve(size_type n) { this->_expansion.reserve(n); }
     //! \brief Remove the term pointed to by \a iter. May be expensive if the term is near the beginning of the list of terms.
     void erase(iterator iter) { this->_expansion.erase(iter); }
     //! \brief Set the polynomial to zero.
     void clear() { this->_expansion.clear(); }
-    //! \brief Remove all zero terms from the expansion, and order the expansion lexicographically by term.
+    //! \brief Remove all zero terms from the expansion, and order the expansion reverse lexicographically by term.
     void cleanup();
     //@}
 
@@ -259,7 +259,7 @@ template<class X>
 void Polynomial<X>::cleanup()
 {
     Polynomial<X>* self=const_cast<Polynomial<X>*>(this);
-    std::sort(self->_expansion.begin(), self->_expansion.end());
+    self->_expansion.reverse_lexicographic_sort();
     iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
     self->_expansion.resize(new_end-self->_expansion.begin());
 }

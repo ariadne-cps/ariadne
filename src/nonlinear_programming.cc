@@ -221,15 +221,15 @@ template<class Mx, class Diff> void set_hessian(Mx& H, const Diff& D) {
 
 template<class Mx, class S, class Diff> void add_hessian(Mx& H, const S& s, const Diff& D) {
     typedef typename Diff::scalar_type X;
-    uint i=0; uint j=1;
     typename Diff::const_iterator iter=D.begin();
     while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
-    while(iter!=D.end() && iter->key().degree()<=2) {
+    while(iter!=D.end() && iter->key().degree()==2) {
         const MultiIndex& a=iter->key();
         const X& c=iter->data();
-        while(a[i]==0) { ++i; j=i+1; }
+        uint i=0;
+        while(a[i]==0) { ++i; }
         if(a[i]==2) { H[i][i]+=s*c; }
-        else { while(a[j]==0) { ++j; } H[i][j]+=s*c; H[j][i]+=s*c; }
+        else { uint j=i+1; while(a[j]==0) { ++j; } H[i][j]+=s*c; H[j][i]+=s*c; }
         ++iter;
     }
 }

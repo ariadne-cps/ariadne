@@ -279,6 +279,9 @@ class HybridEnclosure
 
 inline std::ostream& operator<<(std::ostream& os, const HybridEnclosure& s) { return s.write(os); }
 
+inline tribool subset(const HybridEnclosure& e, const HybridBox& b) { return e.subset(b); }
+
+
 }
 
 #include "hybrid_set.h"
@@ -304,7 +307,7 @@ inline std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>
     return os << static_cast<const HybridListSet<HybridEnclosure::ContinuousStateSetType>&>(hls);
 }
 
-inline tribool subset(const HybridEnclosure& e, const HybridBox& b) { return e.subset(b); }
+HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, uint d);
 
 } // namespace Ariadne
 

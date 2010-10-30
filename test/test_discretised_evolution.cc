@@ -77,7 +77,7 @@ void TestDiscretisedEvolution::test() const
 
 void TestDiscretisedEvolution::test_discrete_time() const
 {
-    typedef TaylorImageSet EnclosureType;
+    typedef MapEvolver::EnclosureType EnclosureType;
 
     cout << __PRETTY_FUNCTION__ << endl;
 
@@ -92,6 +92,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the evaluators
     MapEvolver evolver(parameters);
+
     Discretiser< IteratedMap, EnclosureType > discrete_evolver(evolver);
 
 
@@ -265,8 +266,9 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
 void TestDiscretisedEvolution::test_hybrid_time() const
 {
-    typedef TaylorImageSet EnclosureType;
-    typedef HybridBasicSet<EnclosureType> HybridEnclosureType;
+    typedef HybridEvolver EvolverType;
+    typedef EvolverType::EnclosureType EnclosureType;
+    typedef EnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
     cout << __PRETTY_FUNCTION__ << endl;
 
@@ -320,17 +322,17 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
     // evolver.verbosity=1;
-    Orbit<HybridEnclosureType> evolve_orbit
-        = evolver.orbit(ha,HybridEnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
+    Orbit<EnclosureType> evolve_orbit
+        = evolver.orbit(ha,EnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     cout << "enclosure_orbit="<<evolve_orbit<<endl;
     cout << evolve_orbit.reach()<<endl;
 
-    EnclosureType const& initial_set=evolve_orbit.initial().second.range();
-    ListSet<EnclosureType> const& reach_set=evolve_orbit.reach()[location];
-    ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
-    ListSet<EnclosureType> const& final_set=evolve_orbit.final()[location];
+    ContinuousEnclosureType const& initial_set=evolve_orbit.initial().continuous_state_set();
+    ListSet<ContinuousEnclosureType> const& reach_set=evolve_orbit.reach()[location];
+    ListSet<ContinuousEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
+    ListSet<ContinuousEnclosureType> const& final_set=evolve_orbit.final()[location];
     HybridGrid hagrid(ha.state_space(),1.0);
 
     // Compute the reachable sets
@@ -345,7 +347,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate()[location];
     GridTreeSet const& final_cells=discrete_orbit.final()[location];
 
-    cout << "initial_set=" << initial_set.range() << endl << endl;
+    cout << "initial_set=" << initial_set << endl << endl;
     cout << "initial_cell=" << initial_cell.box() << endl << endl;
     cout << "reach_set=" << reach_set << endl << endl;
     cout << "reach_cells=" << reach_cells << endl << endl;

@@ -22,10 +22,13 @@
  */
 
 #include "hybrid_set.h"
+#include "hybrid_automaton_interface.h"
 
 namespace Ariadne {
 
-HybridGrid::HybridGrid() : _grids() { }
+HybridGrid::HybridGrid() : _grids(), _system_ptr() { }
+
+HybridGrid::HybridGrid(const HybridAutomatonInterface& ha) : _grids(),  _system_ptr(&ha) { }
 
 HybridGrid::HybridGrid(const HybridSpace& hs, double l) {
     for(HybridSpace::const_iterator iter=hs.begin(); iter!=hs.end(); ++iter) {
@@ -38,11 +41,13 @@ void HybridGrid::insert(DiscreteLocation q, const Grid& g) {
 }
 
 Grid HybridGrid::operator[](const DiscreteLocation& loc) const {
-    return this->_grids[loc];
+    if(_system_ptr) { return _system_ptr->grid(loc); }
+    else { return this->_grids[loc]; }
 }
 
 Grid& HybridGrid::operator[](const DiscreteLocation& loc) {
-    return this->_grids[loc];
+    if(_system_ptr) { this->_grids[loc]=this->_system_ptr->grid(loc); return this->_grids[loc]; }
+    else { return this->_grids[loc]; }
 }
 
 bool HybridGrid::has_location(const DiscreteLocation& q) const {

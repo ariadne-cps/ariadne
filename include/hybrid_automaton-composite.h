@@ -545,6 +545,7 @@ class CompositeHybridAutomaton
     ScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
 
     Grid grid(DiscreteLocation) const;
+    HybridGrid grid() const;
 
     //@{
     //! \name Methods for checking the validity of the automaton.

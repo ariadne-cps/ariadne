@@ -38,6 +38,7 @@
 #include "tuple.h"
 
 #include "hybrid_set.h"
+#include "hybrid_time.h"
 
 #include "hybrid_enclosure.h"
 #include "hybrid_automaton_interface.h"
@@ -58,19 +59,20 @@ class ConstraintHybridEvolver
     : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
     , public Loggable
 {
+    typedef int IntegerType;
+    typedef Real RealType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomatonInterface::TimeType TimeType;
-    typedef int IntegerType;
-    typedef Float RealType;
-    typedef std::vector<DiscreteEvent> EventListType;
     typedef HybridAutomatonInterface SystemType;
-    typedef TaylorImageSet ContinuousEnclosureType;
-    typedef HybridEnclosure HybridEnclosureType;
-    typedef HybridEnclosureType EnclosureType;
+    typedef SystemType::TimeType TimeType;
+    typedef HybridTime::ContinuousTimeType ContinuousTimeType;
+    //typedef TimeType::ContinuousTimeType ContinuousTimeType;
+    typedef List<DiscreteEvent> EventListType;
+    typedef HybridEnclosure EnclosureType;
+    typedef EnclosureType HybridEnclosureType;
+    typedef HybridEnclosureType::ContinuousStateSetType ContinuousEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<HybridEnclosure> EnclosureListType;
-    typedef Float ContinuousTimeType;
   public:
 
     //! \brief Default constructor.

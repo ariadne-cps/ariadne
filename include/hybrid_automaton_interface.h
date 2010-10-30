@@ -36,6 +36,8 @@ namespace Ariadne {
 
 
 class HybridTime;
+class HybridSpace;
+class HybridGrid;
 class DiscreteEvent;
 class DiscreteLocation;
 
@@ -58,7 +60,11 @@ static const EventKind impact = IMPACT;
 //! \brief Base interface for hybrid systems, to allow different types to be used in evolution routines.
 class HybridAutomatonInterface {
   public:
+    //! \brief The type used to represent time.
     typedef HybridTime TimeType;
+    //! \brief The type used to describe the state space.
+    typedef HybridSpace StateSpaceType;
+
   public:
     //@{
     //! \name Data access and queries.
@@ -104,6 +110,10 @@ class HybridAutomatonInterface {
 
     //! \brief The natural grid to use in the \a location.
     virtual Grid grid(DiscreteLocation location) const = 0;
+
+    //! \brief A hybrid grid, comprising a Grid for each (reachable) location of the automaton.
+    //! \deprecated Only used to support current reachability analysis routines.
+    virtual HybridGrid grid() const = 0;
 
     //@}
 

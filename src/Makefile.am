@@ -48,7 +48,6 @@ SRC = \
 	map_evolver.cc \
 	vector_field_evolver.cc \
 	hybrid_evolver-stable.cc \
-	hybrid_evolver-image.cc \
 	hybrid_evolver-constrained.cc \
 	hybrid_evolver-working.cc \
 	discretiser.cc \

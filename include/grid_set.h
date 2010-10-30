@@ -974,6 +974,11 @@ class GridTreeSubset : public DrawableInterface {
  *  4. Cells [-1, -1]*[1, 0] and [-1, 0]*[1, 1] are rooted to [-1, -1]*[1, 1].
  */
 class GridTreeSet : public GridTreeSubset {
+
+  public:
+
+    typedef GridCell CellType;
+
   protected:
 
     friend class GridTreeCursor;

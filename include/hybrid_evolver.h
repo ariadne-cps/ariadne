@@ -28,20 +28,20 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_H
 #define ARIADNE_HYBRID_EVOLVER_H
 
-#include "hybrid_automaton.h"
+#include "hybrid_automaton_interface.h"
 
 #include "hybrid_evolver-stable.h"
-#include "hybrid_evolver-image.h"
+#include "hybrid_evolver-working.h"
 #include "hybrid_evolver-constrained.h"
 
 namespace Ariadne {
 
 class HybridEvolver
-    : public ImageSetHybridEvolver
+    : public GeneralHybridEvolver
 {
   public:
-    HybridEvolver() : ImageSetHybridEvolver() { }
-    HybridEvolver(const EvolutionParameters& p) : ImageSetHybridEvolver(p) { }
+    HybridEvolver() : GeneralHybridEvolver() { }
+    HybridEvolver(const EvolutionParameters& p) : GeneralHybridEvolver(p) { }
 };
 
 } // namespace Ariadne

@@ -448,8 +448,13 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
 }
 
 
-
-
+HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, uint d) {
+    HybridGridTreeSet result(g);
+    for(ListSet<HybridEnclosure>::const_iterator iter=hls.begin(); iter!=hls.end(); ++iter) {
+        result[iter->first].adjoin_outer_approximation(iter->second,d);
+    }
+    return result;
+}
 
 
 

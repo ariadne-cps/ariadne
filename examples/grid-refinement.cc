@@ -27,9 +27,10 @@
 using namespace Ariadne;
 
 
-int main() 
+int main()
 {
-  
+    typedef GeneralHybridEvolver HybridEvolverType;
+
     /// Set the system parameters
     double a = -0.02;
     double b = 0.3;
@@ -37,11 +38,11 @@ int main()
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
-    
+
     // Initial grid depth and maximum grid depth
     int min_grid_depth = 2;
     int max_grid_depth = 7;
-    
+
     // System is verified safe at the 4th iteration
     double minsafe=5.25;
     double maxsafe=8.25;
@@ -52,7 +53,7 @@ int main()
     // System's safety cannot be verified
     //double maxsafe=8.2;
 
-    
+
     double A1[4]={a,b,0,0};
     double b1[2]={0,1.0/T};
 
@@ -66,28 +67,28 @@ int main()
     double b4[2]={0.0,0.0};
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomton object
     MonolithicHybridAutomaton watertank_system;
-  
+
     /// Create four discrete states
     AtomicDiscreteLocation l1(1);
     AtomicDiscreteLocation l2(2);
     AtomicDiscreteLocation l3(3);
     AtomicDiscreteLocation l4(4);
-  
+
     /// Create the discrete events
     DiscreteEvent e12(12);
     DiscreteEvent e23(23);
     DiscreteEvent e34(34);
     DiscreteEvent e41(41);
-  
+
     /// Create the dynamics
     VectorAffineFunction dynamic1(Matrix<Real>(2,2,A1),Vector<Real>(2,b1));
     VectorAffineFunction dynamic2(Matrix<Real>(2,2,A2),Vector<Real>(2,b2));
     VectorAffineFunction dynamic3(Matrix<Real>(2,2,A3),Vector<Real>(2,b3));
     VectorAffineFunction dynamic4(Matrix<Real>(2,2,A4),Vector<Real>(2,b4));
-    
+
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
     cout << "dynamic3 = " << dynamic3 << endl << endl;
@@ -112,13 +113,13 @@ int main()
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
-    /// forced transitions do not need an explicit invariant, 
+    /// forced transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
     VectorAffineFunction inv2(Matrix<Real>(1,2,1.0,0.0),Vector<Real>(1, - hmax - Delta));//
     cout << "inv2=" << inv2 << endl << endl;
     VectorAffineFunction inv4(Matrix<Real>(1,2,-1.0,0.0),Vector<Real>(1, hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
-  
+
     /// Build the automaton
     watertank_system.new_mode(l1,dynamic1);
     watertank_system.new_mode(l2,dynamic2);
@@ -141,7 +142,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    HybridEvolverType evolver;
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
@@ -150,15 +151,15 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef HybridEvolverType::EnclosureType HybridEnclosureType;
+    typedef HybridEvolverType::OrbitType OrbitType;
+    typedef HybridEvolverType::EnclosureListType EnclosureListType;
 
     Box initial_continuous_box(2, 6.0,6.00, 1.0,1.00);
     HybridImageSet initial_set;
     initial_set[l2]=initial_continuous_box;
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
-  
+
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
@@ -179,7 +180,7 @@ int main()
     //      3. If the result is safe, exit with success.
     //      4. If the result is not safe, compute a lower-approximation
     //      5. Check if the lower-approx is not safe (i.e. water lever below minsafe-eps or above maxsafe+eps)
-    //      6. If the lower-approx is not safe, exit with false, 
+    //      6. If the lower-approx is not safe, exit with false,
     //      7. Otherwise, increade grid_depth by 1 and repeat.
     //
     std::cout << "Starting verification loop. Water level should be kept between "<< minsafe<< " and "<< maxsafe<<std::endl<<std::endl;
@@ -193,22 +194,22 @@ int main()
         sprintf(filename, "watertank-upper_reach-%d", grid_depth);
         plot(filename,bounding_box, Colour(0.0,0.5,1.0), upper_reach_set);
         textplot(filename, upper_reach_set);
-        
+
         Box check_box(2, minsafe,maxsafe, -1.0,2.0);
         HybridBoxes hcheck_box;
         hcheck_box[l1]=check_box;
         hcheck_box[l2]=check_box;
         hcheck_box[l3]=check_box;
         hcheck_box[l4]=check_box;
-        
+
         Box lcheck_box(2, minsafe-eps,maxsafe+eps, -1.0,2.0);
         HybridBoxes hlcheck_box;
         hlcheck_box[l1]=lcheck_box;
         hlcheck_box[l2]=lcheck_box;
         hlcheck_box[l3]=lcheck_box;
         hlcheck_box[l4]=lcheck_box;
-        
-            
+
+
         if(upper_reach_set.subset(hcheck_box)) {
             std::cout << "Result is safe, exiting refinement loop." << std::endl;
             break;
@@ -219,13 +220,13 @@ int main()
             sprintf(filename, "watertank-lower_reach-%d", grid_depth);
             plot(filename,bounding_box, Colour(0.0,0.5,1.0), lower_reach_set);
             textplot(filename,lower_reach_set);
-            
+
             if(!lower_reach_set.subset(hlcheck_box)) {
                 std::cout << "Lower reach set is not safe, exiting." << std::endl;
                 break;
             }
             std::cout << "Lower reach set is safe, refining the grid." << std::endl;
-        } 
+        }
         eps = eps/2.0;
     }
 

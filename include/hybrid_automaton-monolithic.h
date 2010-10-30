@@ -275,8 +275,6 @@ class MonolithicHybridAutomaton
   public:
     //! \brief The type used to represent time.
     typedef HybridTime TimeType;
-    //! \brief The type used to represent real numbers.
-    typedef double RealType ;
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 

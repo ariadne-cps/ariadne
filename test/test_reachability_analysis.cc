@@ -50,15 +50,16 @@ using Ariadne::Models::Henon;
 class TestReachabilityAnalysis
 {
 
+    typedef HybridEvolver HybridEvolverType;
+    typedef HybridEvolverType::EnclosureType HybridEnclosureType;
+    typedef HybridEnclosureType::ContinuousStateSetType ContinuousEnclosureType;
+
     HybridReachabilityAnalyser analyser;
     MonolithicHybridAutomaton system;
     Grid grid;
     Interval bound;
     HybridImageSet initial_set;
     HybridTime reach_time;
-
-    typedef TaylorImageSet EnclosureType;
-    typedef HybridBasicSet<TaylorImageSet> HybridEnclosureType;
 
   public:
     static HybridReachabilityAnalyser build_analyser()
@@ -70,7 +71,7 @@ class TestReachabilityAnalysis
 
         Grid grid(2);
         HybridEvolver evolver(parameters);
-        EvolverInterface<MonolithicHybridAutomaton,HybridEnclosureType>& evolver_interface
+        EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver_interface
             =evolver;
         //HybridDiscretiser<EnclosureType> discretiser(evolver);
         HybridReachabilityAnalyser analyser(parameters,evolver_interface);

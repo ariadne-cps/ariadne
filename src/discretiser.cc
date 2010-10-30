@@ -180,9 +180,9 @@ template class Discretiser<IteratedMap,TaylorImageSet>;
 
 
 
-template<class ES>
+template<class HES>
 Orbit<HybridGridCell>
-HybridDiscretiser<ES>::
+HybridDiscretiser<HES>::
 evolution(const SystemType& system,
           const BasicSetType& initial_set,
           const TimeType& time,
@@ -204,9 +204,9 @@ evolution(const SystemType& system,
 }
 
 
-template<class ES>
+template<class HES>
 HybridGridTreeSet
-HybridDiscretiser<ES>::
+HybridDiscretiser<HES>::
 reach(const SystemType& system,
             const BasicSetType& initial_set,
             const TimeType& time,
@@ -217,9 +217,9 @@ reach(const SystemType& system,
                              initial_set,system.grid(),accuracy);
 }
 
-template<class ES>
+template<class HES>
 HybridGridTreeSet
-HybridDiscretiser<ES>::
+HybridDiscretiser<HES>::
 evolve(const SystemType& system,
              const BasicSetType& initial_set,
              const TimeType& time,
@@ -232,9 +232,9 @@ evolve(const SystemType& system,
     return this->_discretise(final_enclosures,initial_set,grid,accuracy);
 }
 
-template<class ES>
+template<class HES>
 Orbit<HybridGridCell>
-HybridDiscretiser<ES>::
+HybridDiscretiser<HES>::
 lower_evolution(const SystemType& system,
                 const BasicSetType& initial_set,
                 const TimeType& time,
@@ -243,9 +243,9 @@ lower_evolution(const SystemType& system,
     return this->evolution(system, initial_set, time, accuracy, LOWER_SEMANTICS);
 }
 
-template<class ES>
+template<class HES>
 Orbit<HybridGridCell>
-HybridDiscretiser<ES>::
+HybridDiscretiser<HES>::
 upper_evolution(const SystemType& system,
                 const BasicSetType& initial_set,
                 const TimeType& time,
@@ -255,23 +255,23 @@ upper_evolution(const SystemType& system,
 }
 
 
-template<class ES>
-typename HybridDiscretiser<ES>::EnclosureType
-HybridDiscretiser<ES>::
+template<class HES>
+typename HybridDiscretiser<HES>::EnclosureType
+HybridDiscretiser<HES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-    return EnclosureType(initial_set.first,ES(initial_set.second.box()));
+    return EnclosureType(initial_set.first,initial_set.second.box());
 }
 
-template<class ES>
-Orbit<typename HybridDiscretiser<ES>::BasicSetType>
-HybridDiscretiser<ES>::
+template<class HES>
+Orbit<typename HybridDiscretiser<HES>::BasicSetType>
+HybridDiscretiser<HES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial,
             const HybridGrid& grid,
             const int accuracy) const
 {
-    ARIADNE_LOG(3,"HybridDiscretiser<ES>::_discretise(...)"<<"\n");
+    ARIADNE_LOG(3,"HybridDiscretiser<HES>::_discretise(...)"<<"\n");
     ARIADNE_LOG(6,"continuous_orbit="<<continuous_orbit<<"\n");
     ARIADNE_LOG(6,"initial="<<initial<<"\n");
     ARIADNE_LOG(6,"grid="<<grid<<"\n");
@@ -295,9 +295,9 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
 
 }
 
-template<class ES>
+template<class HES>
 HybridGridTreeSet
-HybridDiscretiser<ES>::
+HybridDiscretiser<HES>::
 _discretise(const ListSet<EnclosureType>& enclosure_list_set,
             const BasicSetType& initial_set,
             const HybridGrid& hgrid,
@@ -313,8 +313,8 @@ _discretise(const ListSet<EnclosureType>& enclosure_list_set,
 }
 
 
-template class HybridDiscretiser<TaylorImageSet>;
-template class HybridDiscretiser<TaylorConstrainedImageSet>;
+template class HybridDiscretiser<HybridTaylorImageSet>;
+template class HybridDiscretiser<HybridEnclosure>;
 
 } // namespace Ariadne
 

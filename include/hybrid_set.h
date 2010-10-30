@@ -306,13 +306,20 @@ operator<<(std::ostream& os,
     return os << "HybridListSet" << hls;
 }
 
-class HybridAutomaton;
+class HybridAutomatonInterface;
 
 class HybridGrid
 {
     Map<DiscreteLocation,Grid> _grids;
+    // NOTE: The use of the system is to allow the "Grid" of a compositional
+    // hybrid automaton to be computed on-the-fly since it might not be
+    // feasible to compute the reachable states.
+    // TODO: There should be a better way of doing this, but this might
+    // involve changing the HybridReachabilityAnalyser or HybridDiscretiser code.
+    const HybridAutomatonInterface* _system_ptr;
   public:
     HybridGrid();
+    HybridGrid(const HybridAutomatonInterface& ha);
     HybridGrid(const HybridSpace& hs, double l);
     void insert(DiscreteLocation q, const Grid& g);
     Grid operator[](const DiscreteLocation& loc) const;

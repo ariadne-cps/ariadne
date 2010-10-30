@@ -87,20 +87,21 @@ class StableHybridEvolver
     typedef TaylorImageSet SetModelType;
     typedef TaylorImageSet TimedSetModelType;
   public:
-    typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
-    typedef std::vector<DiscreteEvent> EventListType;
+  public:
+    typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef MonolithicHybridAutomaton SystemType;
-    typedef TaylorImageSet ContinuousEnclosureType;
-    typedef HybridBasicSet<TaylorImageSet> HybridEnclosureType;
-    typedef HybridEnclosureType EnclosureType;
-    typedef pair< Interval , EnclosureType > TimedEnclosureType;
+    typedef SystemType::TimeType TimeType;
+    typedef Float ContinuousTimeType;
+    typedef List<DiscreteEvent> EventListType;
+    typedef HybridTaylorImageSet EnclosureType;
+    typedef EnclosureType HybridEnclosureType;
+    typedef HybridEnclosureType::ContinuousStateSetType ContinuousEnclosureType;
+    typedef Pair< Interval , EnclosureType > TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef std::vector<TimedEnclosureType> TimedEnclosureListType;
-    typedef Float ContinuousTimeType;
+    typedef List<TimedEnclosureType> TimedEnclosureListType;
   public:
 
     //! \brief Default constructor.

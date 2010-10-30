@@ -37,6 +37,7 @@
 
 #include "tuple.h"
 
+#include "hybrid_time.h"
 #include "hybrid_set.h"
 
 #include "hybrid_enclosure.h"
@@ -99,17 +100,14 @@ class HybridEvolverBase
 {
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
-    typedef HybridAutomatonInterface::TimeType TimeType;
-    typedef int IntegerType;
-    typedef Float RealType;
-    typedef std::vector<DiscreteEvent> EventListType;
     typedef HybridAutomatonInterface SystemType;
-    typedef ConstrainedImageSet ContinuousEnclosureType;
-    typedef HybridEnclosure HybridEnclosureType;
-    typedef HybridEnclosureType EnclosureType;
+    typedef SystemType::TimeType TimeType;
+    typedef TimeType::ContinuousTimeType ContinuousTimeType;
+    typedef List<DiscreteEvent> EventListType;
+    typedef HybridEnclosure EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<HybridEnclosure> EnclosureListType;
-    typedef Float ContinuousTimeType;
+
   public:
 
     //@{

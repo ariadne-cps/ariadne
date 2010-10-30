@@ -931,6 +931,12 @@ CompositeHybridAutomaton::grid(DiscreteLocation location) const
     return Grid(this->state_variables(location).size());
 }
 
+HybridGrid
+CompositeHybridAutomaton::grid() const
+{
+    return HybridGrid(*this);
+}
+
 std::ostream&
 CompositeHybridAutomaton::write(std::ostream& os) const
 {

@@ -233,6 +233,30 @@ Procedure<X>::Procedure(const Expansion<X>& e)
     _convert(this->_instructions,this->_constants,f._root.operator->(), ind);
 }
 
+// \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
+template<class X, class T> inline T evaluate(const Procedure<X>& f, const Vector<T>& x)
+{
+    List<T> e;
+    _execute(e,f._instructions,f._constants,x);
+    return e.back();
+}
+
+template<class X> Procedure<X>& operator+=(Procedure<X>& f, const X& c) {
+    f._constants.append(c);
+    f.new_instruction(CNST,f._constants.size()-1);
+    f.new_instruction(ADD,f._instructions.size()-1,f._instructions.size()-2);
+    return f;
+}
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const Procedure<X> f) {
+    os<<"Procedure( ";
+    _write(os,f._instructions,f._constants);
+    os << "r=v[" << f._instructions.size()-1u << "] )";
+    return os;
+}
+
+
 template<class X>
 Vector< Procedure<X> >::Vector(const Vector< Formula<X> >& f)
     : _results(f.size(),0u)
@@ -252,6 +276,26 @@ Vector< Procedure<X> >::Vector(const Procedure<X>& f)
     , _constants(f._constants)
     , _results(1u,f._instructions.size()-1u)
 {
+}
+
+// \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
+template<class X, class T> inline Vector<T> evaluate(const Vector< Procedure<X> >& f, const Vector<T>& x)
+{
+    List<T> v;
+    _execute(v,f._instructions,f._constants,x);
+    Vector<T> r(f.result_size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=v[f._results[i]];
+    }
+    return r;
+}
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const Vector< Procedure<X> > f) {
+    os<<"Procedure( ";
+    _write(os,f._instructions,f._constants);
+    os << "r=v" << f._results << " )";
+    return os;
 }
 
 

@@ -987,19 +987,42 @@ TaylorConstrainedImageSet* TaylorConstrainedImageSet::clone() const
     return new TaylorConstrainedImageSet(*this);
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& domain)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
 {
     // Ensure domain elements have nonempty radius
-    const double min=std::numeric_limits<double>::min();
-    this->_domain=domain;
-    for(uint i=0; i!=this->_domain.size(); ++i) {
-        if(this->_domain[i].radius()==0) {
-            this->_domain[i]+=Interval(-min,+min);
-            this->_domain[i]=widen(this->_domain(i));
+    const float min_float=std::numeric_limits<float>::min();
+    List<uint> proper_coordinates;
+    proper_coordinates.reserve(box.dimension());
+    for(uint i=0; i!=box.dimension(); ++i) {
+        if(box[i].radius()>=min_float) {
+            proper_coordinates.append(i);
         }
     }
-    this->_function=VectorTaylorFunction::identity(this->_domain);
+    this->_domain=IntervalVector(proper_coordinates.size());
+    for(uint j=0; j!=this->_domain.size(); ++j) {
+        this->_domain[j]=box[proper_coordinates[j]];
+    }
+
+    // HACK: Make a dummy variable for the domain to avoid bugs which occur
+    // with a zero-dimensional domain.
+    // FIXME: Fix issues with TaylorFunction on zero-dimensional domain.
+    if(proper_coordinates.size()==0) { this->_domain=IntervalVector(1u,Interval(-1,+1)); }
+
+
+    this->_function=VectorTaylorFunction(box.dimension(),this->_domain);
+    uint j=0;
+    proper_coordinates.append(box.dimension());
+    for(uint i=0; i!=box.dimension(); ++i) {
+        if(proper_coordinates[j]==i) {
+            this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j);
+            ++j;
+        } else {
+            this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i]);
+        }
+    }
     this->_reduced_domain=this->_domain;
+
+    std::cerr<<box<<" "<<this->_domain<<" "<<this->_function<<"\n";
 }
 
 

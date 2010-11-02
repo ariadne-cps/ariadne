@@ -121,12 +121,12 @@ void TestProcedure::test_construct_from_expansion()
 void TestProcedure::test_evaluate()
 {
     Procedure<Float> p;
-    p.new_instruction(IND,0u);
-    p.new_instruction(IND,1u);
-    p.new_instruction(POW,0u,2);
-    p.new_instruction(SQR,1u);
-    p.new_instruction(ADD,2u,3u);
-    p.new_instruction(SQRT,4u);
+    p.new_unary_instruction(IND,0u);
+    p.new_unary_instruction(IND,1u);
+    p.new_power_instruction(POW,0u,2);
+    p.new_unary_instruction(SQR,1u);
+    p.new_binary_instruction(ADD,2ul,3ul);
+    p.new_unary_instruction(SQRT,4u);
     ARIADNE_TEST_PRINT(p);
 
     Vector<Float> x(2, 3.0, 4.0);
@@ -139,12 +139,12 @@ void TestProcedure::test_propagate()
 {
     {
         Procedure<Float> p;
-        p.new_instruction(IND,0u);
-        p.new_instruction(IND,1u);
-        p.new_instruction(SQR,0u);
-        p.new_instruction(SQR,1u);
-        p.new_instruction(ADD,2u,3u);
-        p.new_instruction(SQRT,4u);
+        p.new_unary_instruction(IND,0u);
+        p.new_unary_instruction(IND,1u);
+        p.new_unary_instruction(SQR,0u);
+        p.new_unary_instruction(SQR,1u);
+        p.new_binary_instruction(ADD,2u,3u);
+        p.new_unary_instruction(SQRT,4u);
         ARIADNE_TEST_PRINT(p);
 
         Vector<Interval> x(2, 0.25,2.0, 0.5,3.0);

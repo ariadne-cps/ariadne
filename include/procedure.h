@@ -45,13 +45,13 @@ template<class X> class Formula;
 
 struct ProcedureInstruction
 {
-    explicit ProcedureInstruction(Operator o, uint a) : op(o), arg(a) { }
-    explicit ProcedureInstruction(Operator o, uint a1, uint a2) : op(o), arg1(a1), arg2(a2) { }
-    explicit ProcedureInstruction(Operator o, uint a, int n) : op(o), arg(a), np(n) { }
+    explicit ProcedureInstruction(Operator o, size_t a) : op(o), arg(a) { }
+    explicit ProcedureInstruction(Operator o, size_t a1, size_t a2) : op(o), arg1(a1), arg2(a2) { }
+    explicit ProcedureInstruction(Operator o, size_t a, int n) : op(o), arg(a), np(n) { }
     Operator op;
     union {
-        struct { uint arg; int np; };
-        struct { uint arg1; uint arg2; };
+        struct { size_t arg; int np; };
+        struct { size_t arg1; size_t arg2; };
     };
 };
 
@@ -71,9 +71,9 @@ class Procedure {
     List<X> _constants;
     List<ProcedureInstruction> _instructions;
   public:
-    void new_instruction(Operator o, uint a) { _instructions.append(ProcedureInstruction(o,a)); }
-    void new_instruction(Operator o, uint a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
-    void new_instruction(Operator o, uint a1, uint a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    void new_unary_instruction(Operator o, size_t a) { _instructions.append(ProcedureInstruction(o,a)); }
+    void new_binary_instruction(Operator o, size_t a1, size_t a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    void new_power_instruction(Operator o, size_t a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
   public:
 };
 
@@ -104,7 +104,7 @@ class Vector< Procedure<X> > {
 template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
     T z=x[0]*0;
-    for(uint i=0; i!=p.size(); ++i) {
+    for(size_t i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
         switch(instruction.op) {
             case CNST: v.append(z+c[instruction.arg]); break;
@@ -135,8 +135,8 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
 {
     static const Float inf=Ariadne::inf<Float>();
     ARIADNE_ASSERT(v.size()==p.size());
-    for(uint r=p.size()-1u; r!=-1u; --r) {
-        uint a=p[r].arg; uint a1=p[r].arg1; uint a2=p[r].arg2;
+    for(size_t r=p.size()-1u; r!=-1u; --r) {
+        size_t a=p[r].arg; size_t a1=p[r].arg1; size_t a2=p[r].arg2;
         switch(p[r].op) {
             case CNST: break;
             case IND: restrict(x[a],v[r]); break;
@@ -164,7 +164,7 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
     }
 }
 
-template<class X> uint _convert(List<ProcedureInstruction>& p, List<X>& c, const FormulaNode<X>* f, Map<const FormulaNode<X>*,uint>& ind) {
+template<class X> size_t _convert(List<ProcedureInstruction>& p, List<X>& c, const FormulaNode<X>* f, Map<const FormulaNode<X>*,size_t>& ind) {
     typedef ProcedureInstruction PI;
     if(ind.has_key(f)) { return ind[f]; }
     switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
@@ -179,7 +179,7 @@ template<class X> uint _convert(List<ProcedureInstruction>& p, List<X>& c, const
             p.append(PI(f->op,_convert(p,c,f->arg,ind))); break;
         default: assert(false);
     }
-    const uint num=p.size()-1;
+    const size_t num=p.size()-1;
     ind.insert(f,num);
     return num;
 }
@@ -187,7 +187,7 @@ template<class X> uint _convert(List<ProcedureInstruction>& p, List<X>& c, const
 template<class X>
 void _write(std::ostream& os, const List<ProcedureInstruction>& p, const List<X>& c)
 {
-    for(uint i=0; i!=p.size(); ++i) {
+    for(size_t i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
         os << "v[" << i << "]=";
         switch(instruction.op) {
@@ -220,7 +220,7 @@ Procedure<X>::Procedure()
 template<class X>
 Procedure<X>::Procedure(const Formula<X>& f)
 {
-    Map<const FormulaNode<X>*, uint> ind;
+    Map<const FormulaNode<X>*, size_t> ind;
     _convert(this->_instructions,this->_constants,f._root.operator->(), ind);
 }
 
@@ -229,7 +229,7 @@ Procedure<X>::Procedure(const Expansion<X>& e)
 {
     Vector< Formula<X> > id=Formula<X>::identity(e.argument_size());
     Formula<X> f=horner_evaluate(e,id);
-    Map<const FormulaNode<X>*, uint> ind;
+    Map<const FormulaNode<X>*, size_t> ind;
     _convert(this->_instructions,this->_constants,f._root.operator->(), ind);
 }
 
@@ -243,8 +243,8 @@ template<class X, class T> inline T evaluate(const Procedure<X>& f, const Vector
 
 template<class X> Procedure<X>& operator+=(Procedure<X>& f, const X& c) {
     f._constants.append(c);
-    f.new_instruction(CNST,f._constants.size()-1);
-    f.new_instruction(ADD,f._instructions.size()-1,f._instructions.size()-2);
+    f.new_unary_instruction(CNST,f._constants.size()-1);
+    f.new_binary_instruction(ADD,f._instructions.size()-1,f._instructions.size()-2);
     return f;
 }
 
@@ -261,8 +261,8 @@ template<class X>
 Vector< Procedure<X> >::Vector(const Vector< Formula<X> >& f)
     : _results(f.size(),0u)
 {
-    Map<const FormulaNode<X>*, uint> ind;
-    for(uint i=0; i!=f.size(); ++i) {
+    Map<const FormulaNode<X>*, size_t> ind;
+    for(size_t i=0; i!=f.size(); ++i) {
         _convert(this->_instructions,this->_constants,f[i]._root.operator->(), ind);
     }
     for(Nat i=0; i!=f.size(); ++i) {
@@ -284,7 +284,7 @@ template<class X, class T> inline Vector<T> evaluate(const Vector< Procedure<X> 
     List<T> v;
     _execute(v,f._instructions,f._constants,x);
     Vector<T> r(f.result_size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(size_t i=0; i!=r.size(); ++i) {
         r[i]=v[f._results[i]];
     }
     return r;
@@ -334,7 +334,7 @@ void simple_hull_reduce(Vector<Interval>& dom, const Vector< Procedure<X> >& f, 
     ARIADNE_ASSERT(codom.size()==f._results.size());
 
     _execute(v,p,c,dom);
-    for(uint i=0; i!=codom.size(); ++i) {
+    for(size_t i=0; i!=codom.size(); ++i) {
         restrict(v[f._results[i]],codom[i]);
     }
     _propagate(dom,v,p);

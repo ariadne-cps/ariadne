@@ -513,9 +513,9 @@ _compute_timing(Set<DiscreteEvent>& active_events,
     result.final_time=final_time;
     result.time_domain=Interval(0.0,result.step_size);
     result.time_coordinate=ScalarIntervalFunction::coordinate(Vector<Interval>(1u,result.time_domain),0u);
-    result.remaining_time=Interval(result.final_time)-initial_set.time_function();
+    ScalarIntervalFunction remaining_time=Interval(result.final_time)-initial_set.time_function();
     Interval starting_time_range=initial_set.time_function().range();
-    Interval remaining_time_range=result.remaining_time.range();
+    Interval remaining_time_range=remaining_time.range();
     // NOTE: The time function may be negative or greater than the final time
     // over part of the parameter domain.
 
@@ -977,10 +977,19 @@ _upper_evolution_flow(EvolutionData& evolution_data,
     HybridEnclosure starting_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
     ARIADNE_LOG(2,"starting_set="<<starting_set<<"\n\n");
 
-    // Test if maximum number of steps has been reached
+    // Test if maximum number of steps has been exceeded; if so, the set should be discarded.
+    // NOTE: We could also place a test for the maximum number of steps being reaches which computing jump sets
+    // This is not done since the maximum_steps information is not passed to the _apply_time_step(...) method.
     if(starting_set.previous_events().size()>maximum_steps) {
-        evolution_data.evolve_sets.append(starting_set); return;
+        ARIADNE_LOG(4,"starting_set "<<starting_set<<" has undergone more than maximum number of events "<<maximum_steps<<"\n");
+        return;
     }
+
+    // NOTE: Uncomment the lines below to stop evolution immediately after the maximum event, without further flow
+    //if(starting_set.previous_events().size()>maximum_steps) {
+    //    evolution_data.evolve_sets.append(starting_set);
+    //    return;
+    //}
 
     if(starting_set.time_range().lower()>=final_time) {
         ARIADNE_WARN("starting_set.time_range()="<<starting_set.time_range()<<" which exceeds final time="<<final_time<<"\n");

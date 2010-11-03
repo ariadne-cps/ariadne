@@ -34,41 +34,59 @@ namespace Ariadne {
 
 A traditional mathematical definition of a hybrid automaton is as follows:
 
-A <em>hybrid automaton</em> is a tuple \f$H=(Q,E,\gamma,f_q,I_q,r_{q,e},G_{q,e})\f$ where
+A <em>hybrid automaton</em> is a tuple \f$H=(Q,E,\gamma,n_q,f_q,I_q,r_{q,e},G_{q,e})\f$ where
  - The discrete behaviour is
-   - Q is a finite set of <em>discrete states</em>
-   - E is a finite set of <em>discrete events</em>
+   - \f$Q\f$ is a finite set of <em>discrete states</em>
+   - \f$E\f$ is a finite set of <em>discrete events</em>
    - \f$\gamma:\subset Q\times E\rightarrow Q\f$ is a partial function giving the <em>discrete transitions</em>
 
  - For each \f$q\in Q\f$,
+   - \f$n_q\f$ defines the <em>dimension</em> of the continuous state space \f$\R^{n_q}\f$.
    - \f$f_q:\R^{n_q}\rightarrow \R^{n_q}\f$ defines the <em>continuous dynamics</em> by \f$\dt{x}=f_q(x)\f$.
-   - \f$I_q\subset \R^{n_q}\f$ is the <em>invariant</em> which must hold for continuous dynamics to be possible in mode \f$q\f$.
+   - \f$I_q\subset \R^{n_q}\f$ is the <em>invariant</em> which must hold throughout the evolution in mode \f$q\f$.
 
  - For each \f$(q,e)\in\mathrm{dom}(\gamma)\subset Q\times E\f$,
    - \f$r_{q,e}:\R^{n_q}\rightarrow \R^{n_\gamma(q,e)}\f$ defines the <em>reset</em> by \f$x'=r_{q,e}(x)\f$.
-   - \f$G_{q,e}\subset \R^{n_q}\f$ is the <em>invariant</em> which must hold for event \f$e\f$ to be possible.
+   - \f$G_{q,e}\subset \R^{n_q}\f$ is the <em>guard</em> which must hold for event \f$e\f$ to be possible.
 
-The <em>standard operational semantics</em> of a hybrid automaton $H$ is as follows.
+The <em>standard operational semantics</em> of a hybrid automaton \f$H\f$ is as follows.
  - The <em>state</em> of the system is a pair \f$(q,x)\f$ with \f$q\in Q\f$ and \f$x\in\R^{n_q}\f$.
  - The state may evolve according to the differential equation \f$\dt{x}=f_q(x)\f$ as long as \f$x\in I_q\f$.
  - The state may evolve according to the discrete transition \f$(q',x')=(\gamma(q,e),r_{q,e}(x))\f$ as long as \f$x\in R_{q,e}\f$.
 
+This definition has some disadvantages:
+ -# The main disadvantage concerns the modelling of <em>urgent transitions</em>.
+    These are transitions which occur as soon as the guard set is entered, for example, as soon as \f$g(x)\geq0\f$.
+    The traditional way of modelling these transitions is to introduce the constraint \f$g(x)\leq 0\f$ into the invariant.
+    However, the condition that the event occurs exactly when \f$g(x)=0\f$ is lost,
+    and this is often very useful in computing the evolution.
+ -# The invariant and guards in a mode determining the coupling between continuous
+    and discrete dynamics. During the evolution, we usually need to consider both
+    simultaneously. For this reason, it is preferable to consider invariant and guard sets
+    at the same level.
+ -# An invariant may prevent a transition from occurring by being violated in the new state.
+    This entails some "look-ahead" in the definition of the evolution.
+    Some systems e.g. CIF introduce "progress predicates" to prevent continuous evolution without preventing a jump into the point.
+ -# There is no "concrete" format for sets. Although this is not strictly necessary,
+    many numerical operations can be efficiently computed on sets defined by inequality
+    constraints \f$c(x)\leq 0\f$ and equality constraints \f$e(x)=0\f$.
 
-\section hybrid_automaton_data The Ariadne Hybrid Automaton Data Type
+More generally, there are many different ways of specifying when continuous evolution is allowed, and when discrete transitions are allowed.
+ - Invariant/Guard Set: Continuous evolution allowed when \f$x\in I_q\f$; discrete transtions allowed when \f$x\in G_{q,e}\f$.
 
-The hybrid automaton data type in %Ariadne is equivalent to the standard mathematical definition given above, but the data is organised slightly differently. The dynamic, reset, guards and invariants are defined using the FunctionInterface class, which models a continuous or differentiable function \f$f:\R^m\rightarrow\R^n\f$.
+\section monolithic_hybrid_automaton_old The Ariadne Hybrid Automaton Data Type (Version 0.4)
 
-
+The hybrid automaton interface in %Ariadne is essentially equivalent to the enhanced mathematical definition given above. The dynamic and resets are defined using the VectorFunction class. The guards and invariants are defined using the class ScalarFunction class, with invariants \f$i(x)\leq0\f$ and guards \f$g(x)\geq0\f$.
 A <em>DiscreteMode</em> is a triple \f$(q,f_q,I_q)\f$ where
  - \f$q\f$ is a DiscreteState.
- - \f$f_q\f$ is a Function giving the dynamic \f$\dt{x}=f_q(x)\f$.
- - \f$I_q\f$ is a List of Functions with each \f$i_j:\R^{n_q}\rightarrow \R\f$ giving the invariants \f$i_j(x)\lesssim 0\f$.
+ - \f$f_q\f$ is a VectorFunction giving the dynamic \f$\dt{x}=f_q(x)\f$.
+ - \f$I_q\f$ is a List of ScalarFunction with each \f$i_j:\R^{n_q}\rightarrow \R\f$ giving the invariants \f$i_j(x)\lesssim 0\f$.
 
 A <em>DiscreteTransition</em> is a triple \f$(e,s,t,r,g,u)\f$ where
  - \f$e\f$ is a DiscreteEvent.
  - \f$s\f$ and \f$t\f$ are the <em>source</em> and <em>target</em> DiscreteState.
- - \f$r:\R^{n_s}\rightarrow\R^{n_t}\f$ is a Function giving the reset \f$x'=r(x)\f$.
- - \f$g:\R^{n_s}\rightarrow\R\f$ is a Function giving the guard \f$g(x)\gtrsim 0\f$.
+ - \f$r:\R^{n_s}\rightarrow\R^{n_t}\f$ is a VectorFunction giving the reset \f$x'=r(x)\f$.
+ - \f$g:\R^{n_s}\rightarrow\R\f$ is a ScalarFunction giving the guard \f$g(x)\gtrsim 0\f$.
  - \f$u\in\{\top,\bot\}\f$ is a flag determining whether the transition is <em>urgent</em> or not.
 
 A <em>HybridAutomaton</em> is a pair \f$(M,T)\f$ where
@@ -76,7 +94,108 @@ A <em>HybridAutomaton</em> is a pair \f$(M,T)\f$ where
  - \f$T\f$ is a set of discrete transitions such that
     - for every transition, the source \f$s\f$ and target \f$t\f$ correspond to modes in \f$M\f$, and
     - for every event \f$e\f$, there is at most one transition with a given source \f$s\f$.
+
+
+\section monolithic_hybrid_automaton The Ariadne Hybrid Automaton Framework
+
+A <em>Mode</em> is a tuple \f$(q,f_q)\f$ where
+ - \f$q\f$ is a DiscreteLocation.
+ - \f$f_q\f$ is a VectorFunction giving the dynamic \f$\dt{x}=f_q(x)\f$.
+
+A <em>Guard</em> is a tuple \f$(q,e,c,k)\f$ where
+ - \f$q\f$ is a DiscreteLocation.
+ - \f$e\in E\f$ is an Event label.
+ - \f$c:\R^{n_s}\rightarrow\R^{n_t}\f$ is a ScalarFunction giving the condition \f$c(x)\geq0\f$.
+ - \f$k\in K\f$ determines the action to be taken when \f$c(x)\geq 0\f$ is satisfied.
+    For example, in an urgent event, the transition corresponding to event \f$e\f$ in location \f$q\f$
+    must be taken as soon as the condition is satisfied, whereas for an invariant, the evolution is
+    terminated (unless a transition corresponding to another event is activated.
+
+A <em>Transition</em> is a tuple \f$(s,e,t,r)\f$ where
+ - \f$s\f$ is the <em>source</em> DiscreteLocation.
+ - \f$e\f$ is the DiscreteEvent.
+ - \f$t\f$ is the <em>target</em> DiscreteLocation.
+ - \f$r:\R^{n_s}\rightarrow\R^{n_t}\f$ is a VectorFunction giving the guard \f$g(x)\gtrsim 0\f$.
+
+
+\section hybrid_sytem_interface The Ariadne Interface for Hybrid Systems
+
+So that the evolution routines in %Ariadne are independent of the class of hybrid system used,
+all hybrid systems need to correspond to the HybridAutomatonInterface,
+which specifies a minimal set of operators which the system must provide.
+
+A hybrid automaton is defined by the data
+  \f[ \bigl( Q, E, \{ n_q, f_q \mid q\in Q\}, \{ c_{q,e},k_{q,e} \} , \{t_{q,a},r_{q,a}\} \bigr) \f]
+where
+ - \f$n_{q}\in \N\f$ is the dimension of the continuous state space in location \f$q\f$.
+ - \f$f_{q}:\R^{n_q}\rightarrow\R^{n_q}\f$ defines the continuous dynamics \f$\dot{x}=f(x)\f$ in location \f$q\f$.
+ - \f$c_{q,e}:\R^{n_q}\rightarrow \R\f$ defines the activation condition \f$c_{q,e}(x)\geq0\f$ for the event \f$e\f$ in location \f$q\f$.
+ - \f$k_{q,e}\f$ is the kind of the event \f$e\f$ in location \f$q\f$.
+ - \f$t_{q,e}\in Q\f$ is the target of the transition \f$a\f$ in location \f$q\f$.
+ - \f$r_{q,e}:\R^{n_q}\rightarrow\R^{n_{t_{q,e}}}\f$ is the reset map for the transition \f$a\f$ in location \f$q\f$.
+
+Additionally, we provide the data \f$G_q\f$ defining a "grid" in location \f$q\f$.
+
+
+
+Possible future extensions:
+ - Extend the range of continuous dynamics beyond vector fields \f$\dot{x}=f(x)\f$
+   to allow more general systems e.g. explicit flows \f$x(t)=\phi(x_0,t-t_0)\f$
+   or differential inclusions \f$\dot{x}(t) = f(x(t),v(t));\ v(t)\in V\f$.
+ - Extend the range of discrete dynamics beyond continuous maps
+   e.g. multivalued maps \f$x' \in \{ r(x,w) \mid w\in W\}\f$.
+ - Extend the activation conditions to allow non-smooth functions or logical predicates.
+   e.g. \f$\min(c_1(x),c_2(x)) \geq 0\f$ or \f$c_1(x)\geq 0\wedge c_2(x)\geq 0\f$.
+
+
+
+\section hybrid_system_glossary Glossary of Terms describing Hybrid Systems
+
+There are many terms used to describe features of a hybrid system in the literature.
+However, the precise use of these terms is non-standard.
+In order to fix the terminology used in %Ariadne, we use the following definitions.
+Some of these definitions may be different from what is "common" in the literature;
+this will usually be due to internal considerations (e.g. labelling),
+or the fact that existing frameworks typically do not consider computability issues,
+and hence blur concepts which should be kept separate.
+
+ - <b>(Discrete) Event</b>: A label for any behaviour of the system other than continuous evolution.
+   - <b>Action</b>: An event causing a change in the state of the system.
+ - <b>(Discrete) Location</b>: A value of the discrete state of the system.
+ - <b>(Discrete) Mode</b>: The specification of the (continuous) behaviour in a discrete location.
+ - <b>Condition</b>: A predicate \f$X\fto \{\top,\bot\}\f$ determining when an event is active.
+      Typically defined using a constraint function \f$c:X\rightarrow\R\f$ as \f$c(x)\geq0\f$; may also be defined as \f$x\in C\f$ for some set \f$C\f$.
+   - <b>Invariant Condition</b>: A predicate \f$\mathrm{inv}_q(x)\f$ which must hold at all states reached by the system evolution.
+   - <b>(Time-Can-)Progress Condition/Predicate</b>: A predicate \f$\mathrm{tcp}_q(x)\f$ which must hold whenever continuous evolution is possible. Given by a function \f$p_{q,e}(x)\leq0\f$
+   - <b>Guard Condition</b>: A condition \f$\mathrm{act}_q(x)\f$, usually given by a function \f$g_{q,e}(x)\geq0\f$, such that the event \a e only occurs when the condition is satisfied.
+      - <b>Urgent Guard</b>: A condition \f$\mathrm{act}_q(x)\f$, usually given by a function \f$g_{q,e}(x)\geq0\f$ which implies that event \a e occurs as soon as the condition is satisfied. Formally equivalent to introducing the progress predicate \f$g_{q,e}(x)\leq0\f$.
+      - <b>Permissive Guard</b>: A condition \f$\mathrm{act}_q(x)\f$, usually given by a function \f$g_{q,e}(x)\geq0\f$ which implies that event \a e occurs as soon as the condition is satisfied. Note that if another event is also possible, then although an event <em>must</em> occcur, both the event with the urgent guard and the other event <em>may</em> occur.
+   - <b>Activation Condition</b>: A synonym for a permissive guard.
+ - <b>Active</b>: An event is active when its constraint condition is satisfied.
+ - <b>Update</b>: A rule governing how the state changes upon an event. For a given \em source location, comprises a \em target location and \em reset map.
+   - <b>Target</b>: The location forming the discrete state after a transition.
+   - <b>Reset</b>: A function mapping continuous states in the source location to continuous states in the target location upon a discrete transition.
+    \internal I don't like the use of the term "event" to describe a progress predicate
+ - <b>(Discrete) Transition</b>:
+    - A rule for determining when and how the state changes for a given event in a given location. Comprises a guard predicate, an event kind, a target location and a reset map. Also, the act of updating the state.
+ - <b>Jump</b> An instantaneous change in the state of the system.
+
+ - <b>State</b>: The information about the system needed to determine the future evolution.
+   - <b>Discrete State</b>: The part of the state determined by discrete (e.g. String or Integer) variables. The operation of testing whether two points have the same discrete state must be decidable.
+   - <b>Continuous State</b>: The part of the state described by continuous (e.g. Real) variables. The
+   - <b>Hybrid State</b>: Synonym for <b>State</b> (if the state is described by the discrete and continuous states). Used to emphasise the distinction with Discrete State or Continuous State.
+
+\internal <b>QUESTIONS</b>
+
+ - Should we always/never/sometimes use the word "Discrete" in "Discrete Event", "Discrete Location" etc?
+ - Should the meaning of "(Discrete) Transition" more closely mirror that of "Jump" or "Update"?
+ - Should the meaning of "(Discrete) Mode" contain the invariants/guards?
+ - Should switch the meanings of the words "Event" and "Action"?
+
+
+
 */
+
 
 /*!
 

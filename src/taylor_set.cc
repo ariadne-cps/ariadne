@@ -1021,8 +1021,6 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
         }
     }
     this->_reduced_domain=this->_domain;
-
-    std::cerr<<box<<" "<<this->_domain<<" "<<this->_function<<"\n";
 }
 
 

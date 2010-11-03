@@ -235,10 +235,13 @@ _extract_transitions(DiscreteLocation const& location,
     for(Set<DiscreteEvent>::const_iterator event_iter=events.begin();
         event_iter!=events.end(); ++event_iter)
     {
-        DiscreteLocation target=system.target(location,*event_iter);
         EventKind event_kind=system.event_kind(location,*event_iter);
         ScalarFunction guard_function=system.guard_function(location,*event_iter);
-        VectorFunction reset_function=system.reset_function(location,*event_iter);
+        VectorFunction reset_function; DiscreteLocation target;
+        if(is_activating(event_kind)) {
+            reset_function=system.reset_function(location,*event_iter);
+            target=system.target(location,*event_iter);
+        }
         TransitionData transition_data={event_kind,guard_function,target,reset_function};
         transitions.insert(*event_iter,transition_data);
     }
@@ -364,6 +367,7 @@ _compute_active_events(VectorFunction const& dynamic,
             HybridEnclosure test_set=reach_set;
             test_set.new_activation(event,guard_function);
             if(!definitely(test_set.empty())) {
+                // FIXME: Need to allow permissive events with strictly decreasing guard.
                 // Test direction of guard increase
                 ScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
                 Interval flow_derivative_range = flow_derivative(flow_bounds);
@@ -572,6 +576,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
             result.step_kind=CREEP_STEP;
             result.spacial_evolution_time=evolution_time;
             result.evolution_time=compose(result.spacial_evolution_time,initial_set.space_function());
+            // TODO: Remove all definitely non-active events
         } else {
             // Perform the evolution over a full time step
             result.step_kind=FULL_STEP;

@@ -108,13 +108,22 @@ void TestProcedure::test_construct_from_formula()
 
 void TestProcedure::test_construct_from_expansion()
 {
-    Expansion<Float> e(2, 4, 0,0,1.0, 1,0,2.0, 0,2,3.0, 1,4,4.0);
-    ARIADNE_TEST_PRINT(e);
-    e.reverse_lexicographic_sort();
-    Procedure<Float> p(e);
-    ARIADNE_TEST_PRINT(p);
-    Vector<Float> x(2, 2.0,3.0);
-    ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
+    {
+        Expansion<Float> e(2, 4, 0,0,1.0, 1,0,2.0, 0,2,3.0, 1,4,4.0);
+        ARIADNE_TEST_PRINT(e);
+        e.reverse_lexicographic_sort();
+        Procedure<Float> p(e);
+        ARIADNE_TEST_PRINT(p);
+        Vector<Float> x(2, 2.0,3.0);
+        ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
+    }
+
+    {
+        Expansion<Float> e(2, 6, 0,0,1.0, 1,0,2.0, 0,1,3.0, 2,0,4.0, 1,1,5.0, 0,2,6.0);
+        e.reverse_lexicographic_sort();
+        Procedure<Float> p(e);
+        ARIADNE_TEST_PRINT(p);
+    }
 }
 
 

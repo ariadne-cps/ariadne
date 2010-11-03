@@ -207,6 +207,8 @@ template<class K, class V> class Map
         assert(iter!=this->end()); return iter->second; }
     void insert(const K& k, const V& v) {
         this->std::map<K,V>::insert(std::make_pair(k,v)); }
+    void adjoin(const std::map<K,V>& m) {
+        for(typename std::map<K,V>::const_iterator i=m.begin(); i!=m.end(); ++i) { this->insert(*i); } }
     void remove_keys(const Set<K>& s) {
         for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) { this->erase(*iter); } }
     Set<K> keys() const {

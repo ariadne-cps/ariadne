@@ -208,7 +208,7 @@ void HybridEnclosure::new_state_constraint(DiscreteEvent event, NonlinearConstra
 
 void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, VectorFunction map)
 {
-    ARIADNE_ASSERT(map.argument_size()==this->dimension());
+    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", target="<<target<<", map="<<map);
     this->_events.append(event);
     this->_location=target;
     this->_set._function=compose(map,this->_set._function);

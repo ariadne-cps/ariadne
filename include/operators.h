@@ -50,6 +50,7 @@ enum Operator {
     SUB,   // Subtraction
     MUL,   // Multiplication
     DIV,   // Division
+    FMA,   // Fused multiply-and-add
     POW,   // Integer power
     POS,   // Unary plus
     NEG,   // Unary negation
@@ -64,6 +65,9 @@ enum Operator {
     ASIN,   // ArcSine
     ACOS,   // ArcCosine
     ATAN,   // ArcTangent
+    SADD,  // Addition of a scalar constant
+    SMUL,  // Multiplication by a scalar constant
+    SFMA,   // Fused multiply-and-add with scalar constants
     ABS,   // Absolute value
     MAX,   // Maximum
     MIN,   // Minimum
@@ -98,6 +102,8 @@ inline const char* symbol(const Operator& op) {
         case MUL:  return "*"; break;
         case DIV:  return "/"; break;
         case POW:  return "^"; break;
+        case SADD: return "+"; break;
+        case SMUL: return "*"; break;
         case NOT:  return "!"; break;
         case AND:  return "&"; break;
         case OR:   return "|"; break;
@@ -208,6 +214,10 @@ struct Pow {
     template<class T, class N> T operator()(const T& a, const N& n) const { return pow(a,n); }
     Operator code() const { return DIV; } };
 //struct Pow { Pow(int n) : n(n) { } template<class T> T operator()(const T& a) const { return Ariadne::pow(a,n); } int n; };
+
+struct Fma {
+    template<class T, class S> T operator()(const T& a1, const S& a2, const S& a3) const { return a1*a2+a3; }
+    Operator code() const { return FMA; } };
 
 struct Pos {
     template<class T> T operator()(const T& a) const { return a; }

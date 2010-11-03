@@ -134,20 +134,33 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 
 const DiscreteMode&
 MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
-                               const ScalarFunction& invariant)
+										 DiscreteEvent event,
+		                                 const ScalarFunction& invariant)
 {
     if(!this->has_mode(location)) {
         throw std::runtime_error("The location of the invariant must be in the automaton.");
     }
     DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
     if(invariant.argument_size()!=mode.dimension()) {
-        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,invariant)",
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,label,invariant)",
             "The invariant has argument size " << invariant.argument_size()
                 << " but the mode has state-space dimension " << mode.dimension());
     }
-    DiscreteEvent invariant_event(-8-mode._invariants.size());
-    mode._invariants[invariant_event]=invariant;
+    mode._invariants[event]=invariant;
     return mode;
+}
+
+
+const DiscreteMode&
+MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
+                               const ScalarFunction& invariant)
+{
+    if(!this->has_mode(location)) {
+        throw std::runtime_error("The location of the invariant must be in the automaton.");
+    }
+    DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
+    DiscreteEvent event(-1-mode._invariants.size());
+    return this->new_invariant(location,event,invariant);
 }
 
 
@@ -651,6 +664,10 @@ MonolithicHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent
 ScalarFunction
 MonolithicHybridAutomaton::guard_function(DiscreteLocation source, DiscreteEvent event) const
 {
+    if(this->mode(source)._invariants.has_key(event)) {
+    	return this->invariant_function(source,event);
+    }
+
     return this->transition(source,event).activation();
 }
 

@@ -322,6 +322,17 @@ class MonolithicHybridAutomaton
     //! \brief Adds an invariant to a mode of the automaton.
     //!
     //!   \param state is the mode's discrete state.
+    //!   \param label is a discrete event labelling the invariant;
+    //!            must be different from all transition events
+    //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
+
+    const DiscreteMode& new_invariant(DiscreteLocation state,
+									  DiscreteEvent label,
+    		                          const ScalarFunction& invariant);
+
+    //! \brief Adds an invariant to a mode of the automaton.
+    //!
+    //!   \param state is the mode's discrete state.
     //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
 
     const DiscreteMode& new_invariant(DiscreteLocation state,

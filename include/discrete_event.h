@@ -37,7 +37,7 @@ template<class T> std::string to_str(const T& t);
 class DiscreteEvent {
   public:
     DiscreteEvent() : _id("e?") { }
-    DiscreteEvent(int n) : _id(std::string("e"+to_str(n))) { }
+    DiscreteEvent(int n) : _id(std::string("e"+to_str(n))) { if(n<0) { _id=std::string("i"+to_str(-n)); } }
     DiscreteEvent(const std::string& s) : _id(s) { }
     std::string name() const { return this->_id; }
     bool operator==(const DiscreteEvent& e) const { return this->_id==e._id; }

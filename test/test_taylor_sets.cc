@@ -390,9 +390,7 @@ class TestTaylorConstrainedImageSet
         ARIADNE_TEST_PRINT(set);
 
         GridTreeSet subdivision_paving(set.dimension());
-        std::cerr<<"Computing subdivision paving... ";
         set.subdivision_adjoin_outer_approximation_to(subdivision_paving,high_accuracy);
-        std::cerr<<"done\n";
         subdivision_paving.recombine();
         ARIADNE_TEST_EQUALS(subdivision_paving.measure(),3.375);
 
@@ -413,9 +411,7 @@ class TestTaylorConstrainedImageSet
         }
 
         GridTreeSet constraint_paving(set.dimension());
-        std::cerr<<"Computing constraint paving... ";
         set.constraint_adjoin_outer_approximation_to(constraint_paving,accuracy);
-        std::cerr<<"done\n";
         constraint_paving.recombine();
         figure.set_fill_colour(1.0,0.0,0.0);
         figure.draw(constraint_paving);

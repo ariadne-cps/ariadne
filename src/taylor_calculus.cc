@@ -387,7 +387,7 @@ crossing_time(const PredicateModelType& guard_model,
     } catch(const ImplicitFunctionException& e) {
         throw DegenerateCrossingException(e.what());
     } catch(const std::runtime_error& e) {
-        std::cerr<<"WARNING: "<<e.what()<<"\n";
+        ARIADNE_WARN(""<<e.what()<<"\n");
         throw e;
     }
 
@@ -417,7 +417,7 @@ scaled_crossing_time(const BaseModelType& guard_flow_set_model) const
     } catch(const ImplicitFunctionException& e) {
         throw DegenerateCrossingException(e.what());
     } catch(const std::runtime_error& e) {
-        std::cerr<<"WARNING: "<<e.what()<<"\n";
+        ARIADNE_WARN(""<<e.what()<<"\n");
         throw e;
     }
     return hitting_time_model;
@@ -622,7 +622,7 @@ TaylorCalculus::flow_model(VectorFunction const& vf, Vector<Interval> const& ibx
     for(uint i=0; i!=bx.size(); ++i) {
         static const Float EPS=1e-8;
         if(bx[i].lower()==bx[i].upper()) {
-            //std::cerr<<"WARNING: expanding initial box "<<bx<<std::endl;
+            //ARIADNE_WARN("expanding initial box "<<bx<<std::endl);
             bx[i]+=Interval(-EPS,+EPS); }
     }
 

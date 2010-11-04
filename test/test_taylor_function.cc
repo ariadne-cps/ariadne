@@ -615,7 +615,6 @@ void TestVectorTaylorFunction::test_flow()
             VectorTaylorFunction flow_model=unchecked_flow(vector_field_model,flow_domain,Interval(0.0,step_size),6);
             final_set_model=apply(flow_model,TaylorImageSet(join(initial_set_model.models(),integration_time_model)));
             initial_set_model=final_set_model;
-            std::cerr<<final_set_model<<"\n";
         }
         ARIADNE_TEST_PRINT(final_set_model);
     }

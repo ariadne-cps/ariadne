@@ -119,7 +119,6 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
                       HybridAutomatonInterface const& system,
                       HybridTime const& maximum_hybrid_time) const
 {
-    std::cerr<<"_upper_evolution_step: verbosity="<<verbosity<<"\n";
     // working sets are those for which we do not have to check initial activation
     // pending sets are those for which we do; they are typically jump sets or initial sets
     typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
@@ -208,7 +207,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     ARIADNE_LOG(4,"starting_time:"<<starting_time<<"\n");
 
     if(starting_time.argument_size()>5) {
-        std::cerr<< "ABORTING: Too many independent parameters ("<<starting_time.argument_size()<<")\n"; return; }
+        ARIADNE_ERROR("Too many independent parameters ("<<starting_time.argument_size()<<")\n"); return; }
 
     // Set the dimension
     const uint n=starting_set.dimension();
@@ -332,7 +331,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
                     jump_set.new_guard(event,guard,crossing_time_model);
                 }
                 catch(const ImplicitFunctionException& e) {
-                    std::cerr<<"WARNING: "<<e.what()<<"\n";
+                    ARIADNE_WARN(""<<e.what()<<"\n");
                     jump_set.new_guard(event,guard);
                 }
             } else {
@@ -381,7 +380,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
                     jump_set.new_guard(event,guard,crossing_time_model);
                 }
                 catch(const ImplicitFunctionException& e) {
-                    std::cerr<<"WARNING: "<<e.what()<<"\n";
+                    ARIADNE_WARN(""<<e.what()<<"\n");
                     jump_set.new_guard(event,guard);
                 }
             } else {

@@ -572,7 +572,7 @@ void NonlinearInteriorPointOptimiser::feasibility_step(const IntervalVector& d, 
 
     Float mu=dot(x,z)/o;
     if(!egtr(emul(x,z),gamma*mu)) {
-        if(verbosity>=1) { std::cerr<<"WARNING: Near-degeneracy in Lyapunov multipliers in interior-point solver:\n  x="<<x<<", y="<<y<<", z="<<z<<"\n"; }
+        if(verbosity>=1) { ARIADNE_WARN("Near-degeneracy in Lyapunov multipliers in interior-point solver:\n  x="<<x<<", y="<<y<<", z="<<z<<"\n"); }
         x=(1-sigma)*x+FloatVector(x.size(),sigma/x.size());
         mu=dot(x,z)/o;
     }
@@ -1270,7 +1270,7 @@ void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const VectorFu
         JE=inverse(midpoint(SE));
     }
     catch(const SingularMatrixException& e) {
-        std::cerr<<"WARNING: Matrix S="<<midpoint(SE)<<" is not invertible";
+        ARIADNE_WARN("Matrix S="<<midpoint(SE)<<" is not invertible");
         ARIADNE_LOG(1,"WARNING: Matrix S="<<midpoint(SE)<<" is not invertible");
         throw e;
     }

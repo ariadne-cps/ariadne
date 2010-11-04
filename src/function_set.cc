@@ -553,7 +553,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
             break;
         }
         catch(std::runtime_error e) {
-            std::cerr<<"ERROR: "<<e.what()<<"\n";
+            ARIADNE_ERROR(""<<e.what()<<"\n");
             break;
         }
         ARIADNE_LOG(6,", x="<<x<<", y="<<y<<", z="<<z<<"\n");
@@ -565,7 +565,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
     ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<"\n");
 
     if(!(t<=1e10)) {
-        std::cerr<<"WARNING: feasibility failed\n";
+        ARIADNE_WARN("feasibility failed\n");
         char c; cin >> c;
         t=0.0;
         y=midpoint(d);

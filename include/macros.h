@@ -84,12 +84,17 @@
     static bool first_time=true; \
     if(first_time) { \
         first_time=false; \
-        std::cerr<<"WARNING: Function" << #fn << " is deprecated. " << #msg << std::endl; \
+        std::cerr << "WARNING: Function" << #fn << " is deprecated. " << #msg << std::endl; \
     } \
 
 #define ARIADNE_WARN(msg)          \
     {                                                                \
         std::cerr << "WARNING: " << msg << "" << std::endl;                \
+    }
+                                                                  \
+#define ARIADNE_ERROR(msg)          \
+    {                                                                \
+        std::cerr << "ERROR: " << msg << "" << std::endl;                \
     }
                                                                   \
 #if defined(linux) || defined(__linux) || defined(__linux__)

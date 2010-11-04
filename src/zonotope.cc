@@ -620,7 +620,7 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
     // FIXME: Subdivide in zero order as well!
     static bool warn=true;
     if(warn) {
-        std::cerr << std::endl << "WARNING: orthogonal_over_approximation(Zonotope<I,R>) does not over-approximate roundoff errors." << std::endl;
+        ARIADNE_WARN("orthogonal_over_approximation(Zonotope<I,R>) does not over-approximate roundoff errors.\n);
         warn=false;
     }
     Zonotope<R,R> oaz=over_approximation(z);

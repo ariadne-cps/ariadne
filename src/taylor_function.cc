@@ -881,7 +881,7 @@ VectorTaylorFunction::polynomial() const
 
     Vector<Polynomial<Interval> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].radius()<=0) { std::cerr<<"WARNING: zero radius in domain of VectorTaylorFunction"<<std::endl; }
+        if(this->domain()[j].radius()<=0) { ARIADNE_WARN("zero radius in domain of VectorTaylorFunction"<<std::endl); }
         else { s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
     }
 
@@ -1636,8 +1636,8 @@ parameterised_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, co
 
     // Sanity check that vector field domain has nonempty interior
     for(uint i=0; i!=nx; ++i) { ARIADNE_ASSERT_MSG(bx[i].radius()>0.0,"Domain of vector field "<<bx<<" has non-empty interior."); }
-    for(uint i=0; i!=nx; ++i) { if(dx[i].radius()<=0) { std::cerr<<"WARNING: Initial set "<<dx<<" has non-empty interior.\n";  } }
-    for(uint i=0; i!=np; ++i) { if(dp[i].radius()<=0) { std::cerr<<"WARNING: Parameter set "<<dp<<" has non-empty interior.\n";  } }
+    for(uint i=0; i!=nx; ++i) { if(dx[i].radius()<=0) { ARIADNE_WARN("Initial set "<<dx<<" has non-empty interior.\n");  } }
+    for(uint i=0; i!=np; ++i) { if(dp[i].radius()<=0) { ARIADNE_WARN("Parameter set "<<dp<<" has non-empty interior.\n");  } }
 
     // Scale multiply models by inverse reciprocal of radius
     Vector<TaylorModel> unit_scaled_vf(nx);
@@ -1679,7 +1679,7 @@ unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const 
 
     // Sanity check that vector field domain has nonempty interior
     for(uint i=0; i!=n; ++i) { ARIADNE_ASSERT_MSG(b[i].radius()>0.0,"WARNING: Domain of vector field "<<b<<" has non-empty interior."); }
-    for(uint i=0; i!=n; ++i) { if(d[i].radius()<=0) { std::cerr<<"WARNING: Initial set "<<d<<" has non-empty interior.\n";  } }
+    for(uint i=0; i!=n; ++i) { if(d[i].radius()<=0) { ARIADNE_WARN("Initial set "<<d<<" has non-empty interior.\n");  } }
 
 
     // Scale multiply models by inverse reciprocal of radius

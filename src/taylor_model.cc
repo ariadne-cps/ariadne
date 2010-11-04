@@ -1961,8 +1961,8 @@ _compose1(const series_function_pointer& fn, const TaylorModel& tm, double eps)
 
     Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
-        std::cerr<<"WARNING: Truncation error estimate "<<truncation_error_estimate
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
+                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
     }
 
     TaylorModel x=tm-c;
@@ -1998,8 +1998,8 @@ _compose2(const series_function_pointer& fn, const TaylorModel& tm, double eps)
     Float truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
-        std::cerr<<"WARNING: Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
     }
 
     TaylorModel x=tm-c;
@@ -2041,8 +2041,8 @@ _compose3(const series_function_pointer& fn, const TaylorModel& tm, Float eps)
     Float truncation_error=max(se.lower()*p.lower(),se.upper()*p.upper());
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
-        std::cerr<<"WARNING: Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
     }
 
     TaylorModel x=tm;
@@ -4042,7 +4042,7 @@ unchecked_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0, uin
                 new_y[i]=intersection(y[i],new_y[i]);
             }
             catch(const IntersectionException& e) {
-                std::cerr<<"WARNING: "<<e.what()<<"\n";
+                ARIADNE_WARN(e.what()<<"\n");
             }
         }
 
@@ -4113,7 +4113,7 @@ parameterised_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0,
                 new_y[i]=intersection(y[i],new_y[i]);
             }
             catch(const IntersectionException& e) {
-                std::cerr<<"WARNING: "<<e.what()<<"\n";
+                ARIADNE_WARN(e.what()<<"\n");
             }
         }
 

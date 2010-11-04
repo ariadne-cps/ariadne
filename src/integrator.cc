@@ -212,7 +212,7 @@ TaylorIntegrator::flow_step(const VectorFunction& f, const IntervalVector& dx, c
     }
 
     if(phi.error()>this->maximum_error()) {
-        std::cerr<<"WARNING: Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->temporal_order()<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n";
+        ARIADNE_WARN("Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->temporal_order()<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
     VectorTaylorFunction res(nx,ScalarTaylorFunction(dom));

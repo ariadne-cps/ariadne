@@ -139,10 +139,6 @@ int Grid::subdivision_index(uint d, const real_type& x) const
     if(sc == x) {
         return n;
     } else {
-        std::cerr << std::setprecision(20) << std::boolalpha
-                  << "sc=" << sc << " x=" << x << " sc-x=" << Interval(sc-x) << "\n"
-                  << "sc==x=" << (sc==x) << " sc!=x=" << (sc!=x)
-                  << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl;
         ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
@@ -816,6 +812,7 @@ BinaryWord GridAbstractCell::primary_cell_path( const uint dimensions, const uin
     //ones. Even primary cell height indicates the the first subsequence will consis
     //of all zeroes. This is due to the way we do the space subdivisions.
     if( topPCellHeight > bottomPCellHeight ){
+
         for( uint i = topPCellHeight; i > bottomPCellHeight; i-- ){
             bool odd_height = (i % 2) != 0;
             for( uint j = 0; j < dimensions; j++ ){
@@ -2270,7 +2267,7 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
     const uint thisPavingPCellHeight = this->cell().height();
 
     if( thisPavingPCellHeight > theHeight){
-        std::cerr << "WARNING: restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n";
+        ARIADNE_WARN("restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n");
 
         BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellHeight, theHeight );
 

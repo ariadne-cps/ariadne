@@ -313,7 +313,7 @@ HybridSystem::events(const DiscreteValuation& location) const
                 events.adjoin(iter->evnts);
             }
             else {
-                std::cerr<<"WARNING: Reset "<<*iter<<" is implicitly trivial.";
+                ARIADNE_WARN("Reset "<<*iter<<" is implicitly trivial.");
             }
         }
     }

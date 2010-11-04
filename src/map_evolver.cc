@@ -172,8 +172,8 @@ _evolution(EnclosureListType& final_sets,
                 working_sets.push_back(make_tuple(initial_time,subdivided_set_model));
             }
         } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
-            std::cerr << "WARNING: Terminating lower evolution at time " << initial_time
-                      << " and set " << initial_set_model << " due to maximum radius being exceeded.";
+            ARIADNE_WARN("Terminating lower evolution at time " << initial_time
+                         << " and set " << initial_set_model << " due to maximum radius being exceeded.");
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,

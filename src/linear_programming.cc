@@ -1204,9 +1204,9 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
         ++steps;
         if(steps>=MAX_STEPS) {
             if(verbosity>0) {
-                std::cerr<<"WARNING: Maximum number of steps reached in constrained feasibility problem. "
-                         <<"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
-                         <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<Vector<X>(prod(compute_y(cc,p,B),A));
+                ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
+                             <<"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
+                             <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<Vector<X>(prod(compute_y(cc,p,B),A))<<"\n");
             }
             throw DegenerateFeasibilityProblemException();
         }

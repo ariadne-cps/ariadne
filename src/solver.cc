@@ -80,11 +80,11 @@ solve_all(Set< Vector<Interval> >& r,
             need_to_split=false;
         }
         catch(const NoSolutionException& e) {
-            //std::cerr<<"WARNING: NoSolutionException exception: "<<e.what()<<"\n";
+            //ARIADNE_WARN("NoSolutionException exception: "<<e.what()<<"\n");
             need_to_split=false;
         }
         catch(const SolverException& e) {
-            std::cerr<<"WARNING: SolverException exception: "<<e.what()<<"\n";
+            ARIADNE_WARN("SolverException exception: "<<e.what()<<"\n");
             need_to_split=true;
             // No solution found, try splitting
         }
@@ -96,11 +96,11 @@ solve_all(Set< Vector<Interval> >& r,
         // If radius is too small, assume solution is not verified
         if(radius(ix)<s.maximum_error()) {
             if(!invertible_jacobian) {
-                std::cerr<<"WARNING: Cannot verify solution in "<<ix<<" with f="<<f(ix)<<"; "
-                         <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
-                         <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n";
+                ARIADNE_WARN("Cannot verify solution in "<<ix<<" with f="<<f(ix)<<"); "
+                             <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
+                             <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n");
             } else {
-                std::cerr<<"WARNING: Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(ix)<<".\n";
+                ARIADNE_WARN("Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(ix)<<".\n");
             }
             return;
         }

@@ -248,8 +248,8 @@ _evolution(EnclosureListType& final_sets,
         } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
                   this->_parameters->enable_premature_termination &&
                   initial_set_radius>this->_parameters->maximum_enclosure_radius) {
-            std::cerr << "\nWARNING: Terminating evolution at time " << initial_time_model.value()
-                      << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n";
+            ARIADNE_WARN("WARNING: Terminating evolution at time " << initial_time_model.value()
+                         << " and set " << initial_set_model.centre() << " due to maximum radius being exceeded.\n");
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,
@@ -780,8 +780,8 @@ timed_evolution(const SystemType& system,
             Interval final_time(initial_time_model.range());
             EnclosureType final_enclosure(initial_location,this->_toolbox->enclosure(initial_set_model));
             result.push_back(TimedEnclosureType(final_time,final_enclosure));
-            std::cerr << "WARNING: Terminating evolution at time " << initial_time_model
-                      << " and set " << initial_set_model << " due to maximum radius being exceeded.";
+            ARIADNE_WARN("WARNING: Terminating evolution at time " << initial_time_model
+                         << " and set " << initial_set_model << " due to maximum radius being exceeded.");
         } else {
             // insert current working set into result
             Interval current_time(initial_time_model.range());

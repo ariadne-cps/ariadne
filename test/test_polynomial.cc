@@ -146,16 +146,13 @@ void TestPolynomial::test_cleanup()
         for(uint i=0; i!=20; ++i) {
             if(i%2) { v.push_back(ValueType(a,1/(1.+i)));  ++b; ++b; a=b; ++b; } else { v.push_back(ValueType(b,1/(1.+i)));}
         }
-        std::cerr<<v<<"\n\n";
         std::sort(v.begin(),v.end());
-        std::cerr<<v<<"\n\n";
     }
     {
         std::vector<int> v;
         const int element_size=3;
         const int index_size=1;
         const int data_size=2;
-        std::cerr<<"\n";
         for(uint i=0; i!=20; ++i) {
             int word= ( i%2 ? (3*i-2)/2 : (3*i+2)/2 );
             double value=1/(2.+i);
@@ -167,9 +164,7 @@ void TestPolynomial::test_cleanup()
             int word; double value;
             word=v[3*i];
             value=reinterpret_cast<double&>(v[3*i+1]);
-            std::cerr<<word<<":"<<value<<", ";
         }
-        std::cerr<<"\n\n\n";
 
         typedef Expansion<Float>::iterator iterator;
         iterator iter1(3,&*v.begin());
@@ -180,9 +175,7 @@ void TestPolynomial::test_cleanup()
             int word; double value;
             word=v[3*i];
             value=reinterpret_cast<double&>(v[3*i+1]);
-            std::cerr<<word<<":"<<value<<", ";
         }
-        std::cerr<<"\n\n\n";
 
     }
 */

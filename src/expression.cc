@@ -327,7 +327,7 @@ template<class R> List< Expression<R> > Expression<R>::subexpressions() const {
             res.append(bptr->_arg2);
         }
         else {
-            std::cerr<<"WARNING: subexpressions of "<<*this<<"\n";
+            ARIADNE_WARN("subexpressions of "<<*this<<"\n");
         }
     }
     return res;

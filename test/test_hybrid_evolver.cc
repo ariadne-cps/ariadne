@@ -994,6 +994,9 @@ void TestHybridEvolver::test() {
 int main(int argc, const char* argv[])
 {
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+
+    DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 2u;
+
     GeneralHybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
     //TestSimpleHybridEvolver(evolver,"general_hybrid_evolver").test_unwind();

@@ -26,13 +26,15 @@
 
 using namespace Ariadne;
 
-
 int main(int argc, const char* argv[])
 {
     uint evolver_verbosity = 0;
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
 
     typedef GeneralHybridEvolver HybridEvolverType;
+
+    DRAWING_METHOD = AFFINE_DRAW;
+    DRAWING_ACCURACY = 0;
 
     /// Set the system parameters
     Real a = -0.02;
@@ -56,8 +58,10 @@ int main(int argc, const char* argv[])
     /// Create the discrete events
     DiscreteEvent e12(12);
     DiscreteEvent e23(23);
+    DiscreteEvent i2("i2");
     DiscreteEvent e34(34);
     DiscreteEvent e41(41);
+    DiscreteEvent i4("i4");
 
     // Create coordinate functions in two variables.
     ScalarFunction x0=ScalarFunction::coordinate(2,0);
@@ -105,8 +109,8 @@ int main(int argc, const char* argv[])
     watertank_system.new_mode(l3,dynamic3);
     watertank_system.new_mode(l4,dynamic4);
 
-    watertank_system.new_invariant(l2,inv2);
-    watertank_system.new_invariant(l4,inv4);
+    watertank_system.new_invariant(l2,i2,inv2);
+    watertank_system.new_invariant(l4,i4,inv4);
 
     watertank_system.new_transition(e12,l1,l2,reset_y_one,guard12,urgent);
     watertank_system.new_transition(e23,l2,l3,reset_y_one,guard23,permissive);
@@ -140,8 +144,9 @@ int main(int argc, const char* argv[])
     EnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
-    HybridTime evolution_time(90.0,6);
-    
+    //HybridTime evolution_time(90.0,6);
+    HybridTime evolution_time(80.0,10);
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;

@@ -54,6 +54,9 @@
 
 namespace Ariadne {
 
+DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
+unsigned int DRAWING_ACCURACY=1u;
+
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
 typedef Vector<Float> FloatVector;
@@ -798,7 +801,7 @@ void curve_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
 
 void grid_draw(CanvasInterface& fig, const TaylorImageSet& ts)
 {
-    uint depth=12;
+    uint depth=DRAWING_ACCURACY;
     Float rad=1./8;
     GridTreeSet gts(Grid(2));
     for(Float i=-1; i!=+1; i+=rad) {
@@ -816,8 +819,23 @@ void standard_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     //box_draw(fig,ts);
 }
 
-void TaylorImageSet::draw(CanvasInterface& fig) const {
-    Ariadne::standard_draw(fig,*this);
+void TaylorImageSet::draw(CanvasInterface& canvas) const {
+    switch(DRAWING_METHOD) {
+        case CURVE_DRAW:
+            Ariadne::curve_draw(canvas,*this);
+            break;
+        case BOX_DRAW:
+            Ariadne::box_draw(canvas,*this);
+            break;
+        case AFFINE_DRAW:
+            Ariadne::affine_draw(canvas,*this);
+            break;
+        case GRID_DRAW:
+            Ariadne::grid_draw(canvas,*this);
+            break;
+        default:
+            ARIADNE_WARN("Unknown drawing method\n");
+    }
 }
 
 
@@ -1718,11 +1736,22 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
 
 
 void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
-    static const uint DEPTH=2u;
-    if(this->number_of_zero_constraints()==0) {
-        this->affine_draw(canvas,DEPTH);
-    } else {
-        this->box_draw(canvas);
+    switch(DRAWING_METHOD) {
+        case BOX_DRAW:
+            this->box_draw(canvas);
+            break;
+        case AFFINE_DRAW:
+            if(this->number_of_zero_constraints()==0) {
+                this->affine_draw(canvas,DRAWING_ACCURACY);
+            } else {
+                this->box_draw(canvas);
+            }
+            break;
+        case GRID_DRAW:
+            this->grid_draw(canvas);
+            break;
+        default:
+            ARIADNE_WARN("Unknown drawing method\n");
     }
 }
 

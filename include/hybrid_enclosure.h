@@ -144,6 +144,10 @@ class HybridEnclosure
     uint number_of_parameters() const;
     //! \brief The number of constraints.
     uint number_of_constraints() const;
+    //! \brief The number of constraints.
+    uint number_of_inequality_constraints() const;
+    //! \brief The number of constraints.
+    uint number_of_equality_constraints() const;
     //! \brief The continuous state set.
     const IntervalVector& parameter_domain() const;
     //! \brief The function related to space.

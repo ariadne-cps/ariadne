@@ -136,6 +136,18 @@ HybridEnclosure::number_of_constraints() const
 }
 
 uint
+HybridEnclosure::number_of_inequality_constraints() const
+{
+    return this->_set._constraints.size();
+}
+
+uint
+HybridEnclosure::number_of_equality_constraints() const
+{
+    return this->_set._equations.size();
+}
+
+uint
 HybridEnclosure::number_of_parameters() const
 {
     return this->_set.number_of_parameters();

@@ -285,7 +285,7 @@ class HybridEvolverBase
     _compute_timing(Set<DiscreteEvent>& active_events,
                     Real final_time,
                     VectorIntervalFunction const& flow,
-                    Map<DiscreteEvent,CrossingData> const& crossings,
+                    Map<DiscreteEvent,CrossingData>& crossings,
                     HybridEnclosure const& initial_set) const;
 
 

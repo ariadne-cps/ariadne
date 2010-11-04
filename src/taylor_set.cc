@@ -1718,8 +1718,9 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
 
 
 void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
+    static const uint DEPTH=2u;
     if(this->number_of_zero_constraints()==0) {
-        this->affine_draw(canvas,2u);
+        this->affine_draw(canvas,DEPTH);
     } else {
         this->box_draw(canvas);
     }

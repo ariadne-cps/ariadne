@@ -136,6 +136,18 @@ ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const VectorFunction
     ARIADNE_ASSERT(codom.size()==fn.result_size());
 }
 
+ConstraintSet::ConstraintSet(const List<NonlinearConstraint>& c)
+    : _codomain(c.size()), _function(c.size())
+{
+    uint d=0u;
+    if(!c.empty()) { d=c[0].function().argument_size(); }
+    for(uint i=0; i!=c.size(); ++i) {
+        ARIADNE_ASSERT(c[i].function().argument_size()==d);
+        _function[i]=c[i].function();
+        _codomain[i]=c[i].bounds();
+    }
+}
+
 ConstraintSet*
 ConstraintSet::clone() const
 {
@@ -189,6 +201,16 @@ BoundedConstraintSet::BoundedConstraintSet(const Vector<Interval>& dom, const Ve
 {
     ARIADNE_ASSERT(codom.size()==fn.result_size());
     ARIADNE_ASSERT(dom.size()==fn.argument_size());
+}
+
+BoundedConstraintSet::BoundedConstraintSet(const Vector<Interval>& dom, const List<NonlinearConstraint>& c)
+    : _domain(dom), _function(c.size(),dom.size()), _codomain(c.size())
+{
+    for(uint i=0; i!=c.size(); ++i) {
+        ARIADNE_ASSERT(_domain.size()==c[i].function().argument_size());
+        _function[i]=c[i].function();
+        _codomain[i]=c[i].bounds();
+    }
 }
 
 BoundedConstraintSet*
@@ -614,7 +636,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
     }
 
     if(t>0.0) {
-        ARIADNE_LOG(2,"  Intersection point: parameter="<<y<<"\n");
+        ARIADNE_LOG(2," Intersection point: parameter="<<y<<"\n");
     }
 
     if(b.tree_depth()>=e*int(b.dimension())) {

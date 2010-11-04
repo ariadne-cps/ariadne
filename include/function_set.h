@@ -106,6 +106,8 @@ class ConstraintSet
     ConstraintSet(const Vector<Interval>& C, const VectorFunction& g);
     //! \brief Construct from a polyhedron.
     ConstraintSet(const Polyhedron& p);
+    //! \brief Construct from a list of constraints.
+    ConstraintSet(const List<NonlinearConstraint>& c);
     //! \brief The codomain of the set.
     const Vector<Interval>& codomain() const { return this->_codomain; }
     //! \brief The function used to define the set.
@@ -145,6 +147,8 @@ class BoundedConstraintSet
   public:
     //! \brief Construct the preimage of \a C under \a g.
     BoundedConstraintSet(const Vector<Interval>& D, const VectorFunction& g, const Vector<Interval>& C);
+    //! \brief Construct the restriction of \a D under the constraints \a c.
+    BoundedConstraintSet(const Vector<Interval>& D, const List<NonlinearConstraint>& c);
     //! \brief The domain of the set.
     const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The codomain of the set.

@@ -35,24 +35,12 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolver HybridEvolverType;
 
     /// Set the system parameters
-    double a = -0.02;
-    double b = 0.3;
-    double T = 4.0;
-    double hmin = 5.5;
-    double Delta = 0.05;
-    double hmax = 8.0;
-
-    double A1[4]={a,b,0,0};
-    double b1[2]={0,1.0/T};
-
-    double A2[4]={a,0.0,0.0,0.0};
-    double b2[2]={b,0.0};
-
-    double A3[4]={a,b,0,0};
-    double b3[2]={0,-1.0/T};
-
-    double A4[4]={a,0.0,0.0,0.0};
-    double b4[2]={0.0,0.0};
+    Real a = -0.02;
+    Real b = 0.3;
+    Real T = 4.0;
+    Real hmin = 5.5;
+    Real Delta = 0.05;
+    Real hmax = 8.0;
 
     /// Build the Hybrid System
 
@@ -71,53 +59,44 @@ int main(int argc, const char* argv[])
     DiscreteEvent e34(34);
     DiscreteEvent e41(41);
 
-    /// Create the dynamics
-    VectorAffineFunction dynamic1(Matrix<Real>(2,2,A1),Vector<Real>(2,b1));
-    VectorAffineFunction dynamic2(Matrix<Real>(2,2,A2),Vector<Real>(2,b2));
-    VectorAffineFunction dynamic3(Matrix<Real>(2,2,A3),Vector<Real>(2,b3));
-    VectorAffineFunction dynamic4(Matrix<Real>(2,2,A4),Vector<Real>(2,b4));
+    // Create coordinate functions in two variables.
+    ScalarFunction x0=ScalarFunction::coordinate(2,0);
+    ScalarFunction x1=ScalarFunction::coordinate(2,1);
 
+    /// Create the dynamics
+    VectorFunction dynamic1((a*x0+b*x1,1/T));
     cout << "dynamic1 = " << dynamic1 << endl << endl;
+    VectorFunction dynamic2((a*x0+b,0));
     cout << "dynamic2 = " << dynamic2 << endl << endl;
+    VectorFunction dynamic3((a*x0+b*x1,-1/T));
     cout << "dynamic3 = " << dynamic3 << endl << endl;
+    VectorFunction dynamic4((a*x0,0));
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
     /// Create the resets
-    VectorAffineFunction reset_y_zero(Matrix<Real>(2,2,1.0,0.0,0.0,0.0),Vector<Real>(2,0.0,0.0));
+    VectorFunction reset_y_zero((x0,0));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    VectorAffineFunction reset_y_one(Matrix<Real>(2,2,1.0,0.0,0.0,0.0),Vector<Real>(2,0.0,1.0));
+    VectorFunction reset_y_one((x0,1));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
-/*
     /// Create the guards.
-    /// Guards are true when f(x) = Ax + b > 0
-    VectorAffineFunction guard12(Matrix<Real>(1,2,0.0,1.0),Vector<Real>(1,-1.0));
+    /// Guards are true when g(x) >= 0
+    ScalarFunction guard12(x1-1);
     cout << "guard12=" << guard12 << endl << endl;
-    VectorAffineFunction guard23(Matrix<Real>(1,2,1.0,0.0),Vector<Real>(1, - hmax + Delta));
+    ScalarFunction guard23(x0+(-hmax+Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    VectorAffineFunction guard34(Matrix<Real>(1,2,0.0,-1.0),Vector<Real>(1,0.0));
+    ScalarFunction guard34(-x1);
     cout << "guard34=" << guard34 << endl << endl;
-    VectorAffineFunction guard41(Matrix<Real>(1,2,-1.0,0.0),Vector<Real>(1,hmin + Delta));
-    cout << "guard41=" << guard41 << endl << endl;
-*/
-    /// Create the guards.
-    /// Guards are true when f(x) = Ax + b > 0
-    ScalarAffineFunction guard12(Vector<Real>(2,0.0,1.0),Real(-1.0));
-    cout << "guard12=" << guard12 << endl << endl;
-    ScalarAffineFunction guard23(Vector<Real>(2,1.0,0.0),Real( - hmax + Delta));
-    cout << "guard23=" << guard23 << endl << endl;
-    ScalarAffineFunction guard34(Vector<Real>(2,0.0,-1.0),Real(0.0));
-    cout << "guard34=" << guard34 << endl << endl;
-    ScalarAffineFunction guard41(Vector<Real>(2,-1.0,0.0),Real(hmin + Delta));
+    ScalarFunction guard41(-x0+(hmin+Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
-    /// Invariants are true when f(x) = Ax + b < 0
-    /// forced transitions do not need an explicit invariant,
+    /// Invariants are true when c(x) <= 0
+    /// Urgent transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    ScalarAffineFunction inv2(Vector<Real>(2,1.0,0.0),Real(-hmax - Delta));
+    ScalarFunction inv2(x0+(-hmax - Delta));
     cout << "inv2=" << inv2 << endl << endl;
-    ScalarAffineFunction inv4(Vector<Real>(2,-1.0,0.0),Real(hmin - Delta));
+    ScalarFunction inv4(-x0+(hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton
@@ -134,10 +113,10 @@ int main(int argc, const char* argv[])
     watertank_system.new_transition(e34,l3,l4,reset_y_zero,guard34,urgent);
     watertank_system.new_transition(e41,l4,l1,reset_y_zero,guard41,permissive);
 
-
     /// Finished building the automaton
 
     cout << "Automaton = " << watertank_system << endl << endl;
+
 
     /// Compute the system evolution
 
@@ -146,7 +125,7 @@ int main(int argc, const char* argv[])
     evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 1.0;
+    evolver.parameters().maximum_enclosure_radius = 0.25;
     evolver.parameters().maximum_step_size = 2.5;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -157,12 +136,12 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
-    Box initial_box(2, 6.0,6.001, 0.0,0.001);
-    EnclosureType initial_enclosure(l4,initial_box);
+    Box initial_box(2, 0.0,0.001, 0.0,0.001);
+    EnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
     HybridTime evolution_time(90.0,6);
-
+    
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;

@@ -327,6 +327,13 @@ ScalarFunction compose(const ScalarFunction& f, const VectorFunction& g);
 VectorFunction compose(const VectorFunction& f, const VectorFunction& g);
 ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f);
 
+inline VectorFunction operator,(const Real& c1, const ScalarFunction& sf2) { return join(ScalarFunction::constant(sf2.argument_size(),c1),sf2); }
+inline VectorFunction operator,(const ScalarFunction& sf1, const Real& c2) { return join(sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
+inline VectorFunction operator,(const ScalarFunction& sf1, double c2) { return join(sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
+inline VectorFunction operator,(const ScalarFunction& sf1, const ScalarFunction& sf2) { return join(sf1,sf2); }
+inline VectorFunction operator,(const VectorFunction& vf1, const Real& c2) { return join(vf1,ScalarFunction::constant(vf1.argument_size(),c2)); }
+inline VectorFunction operator,(const VectorFunction& vf1, const ScalarFunction& sf2) { return join(vf1,sf2); }
+
 inline std::ostream& operator<<(std::ostream& os, const VectorFunction& f) { return f.write(os); }
 
 

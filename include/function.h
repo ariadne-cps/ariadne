@@ -217,7 +217,7 @@ class VectorFunction
     const VectorFunctionInterface* pointer() const { return this->_ptr.operator->(); }
 
     operator const VectorFunctionInterface& () { return *this->_ptr; }
-        
+
     VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s);
     VectorFunction(const List< Expression<Real> >& e, const List< Variable<Real> >& v);
     VectorFunction(const List<ExtendedRealVariable>& rs, const Map<ExtendedRealVariable,RealExpression>& e, const List<RealVariable>& as);
@@ -327,12 +327,10 @@ ScalarFunction compose(const ScalarFunction& f, const VectorFunction& g);
 VectorFunction compose(const VectorFunction& f, const VectorFunction& g);
 ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f);
 
-inline VectorFunction operator,(const Real& c1, const ScalarFunction& sf2) { return join(ScalarFunction::constant(sf2.argument_size(),c1),sf2); }
-inline VectorFunction operator,(const ScalarFunction& sf1, const Real& c2) { return join(sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
-inline VectorFunction operator,(const ScalarFunction& sf1, double c2) { return join(sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
-inline VectorFunction operator,(const ScalarFunction& sf1, const ScalarFunction& sf2) { return join(sf1,sf2); }
-inline VectorFunction operator,(const VectorFunction& vf1, const Real& c2) { return join(vf1,ScalarFunction::constant(vf1.argument_size(),c2)); }
-inline VectorFunction operator,(const VectorFunction& vf1, const ScalarFunction& sf2) { return join(vf1,sf2); }
+inline List<ScalarFunction> operator,(const Real& c1, const ScalarFunction& sf2) { return (ScalarFunction::constant(sf2.argument_size(),c1),sf2); }
+inline List<ScalarFunction> operator,(const ScalarFunction& sf1, const Real& c2) { return (sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
+inline List<ScalarFunction> operator,(const ScalarFunction& sf1, double c2) { return (sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
+inline List<ScalarFunction> operator,(const List<ScalarFunction>& vf1, const Real& c2) { return (vf1,ScalarFunction::constant(vf1.back().argument_size(),c2)); }
 
 inline std::ostream& operator<<(std::ostream& os, const VectorFunction& f) { return f.write(os); }
 

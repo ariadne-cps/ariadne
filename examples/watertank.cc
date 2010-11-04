@@ -27,8 +27,11 @@
 using namespace Ariadne;
 
 
-int main()
+int main(int argc, const char* argv[])
 {
+    uint evolver_verbosity = 0;
+    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+
     typedef GeneralHybridEvolver HybridEvolverType;
 
     /// Set the system parameters
@@ -140,10 +143,10 @@ int main()
 
     /// Create a HybridEvolver object
     HybridEvolverType evolver;
-    evolver.verbosity = 1;
+    evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
+    evolver.parameters().maximum_enclosure_radius = 1.0;
     evolver.parameters().maximum_step_size = 2.5;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -154,8 +157,8 @@ int main()
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.001, 0.0,0.001);
-    EnclosureType initial_enclosure(l1,initial_box);
+    Box initial_box(2, 6.0,6.001, 0.0,0.001);
+    EnclosureType initial_enclosure(l4,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
     HybridTime evolution_time(90.0,6);

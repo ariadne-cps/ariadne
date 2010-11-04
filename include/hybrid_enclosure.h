@@ -151,6 +151,9 @@ class HybridEnclosure
     //! \brief The function related to time.
     const ScalarIntervalFunction& time_function() const;
 
+    //! \brief Set the evolution time function to \a omega.
+    void set_time_function(const ScalarIntervalFunction& omega);
+
     //! \brief A bounding box for the space.
     IntervalVector space_bounding_box() const;
     //! \brief The range of times since the starting time that the set represents.
@@ -162,6 +165,10 @@ class HybridEnclosure
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     void apply_reset(DiscreteEvent e, DiscreteLocation q, VectorFunction r);
+    //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
+    void apply_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
+    // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
+    void apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps);
 
     //! \brief Apply the flow \a phi over the time interval up to time \a h, i.e. over \f$[0,h]\f$.
     //! Corresponds to replacing \f$D\f$ with \f$D\times [0,h]\f$, \f$\xi\f$ with
@@ -221,6 +228,10 @@ class HybridEnclosure
     //! \brief \deprecated
     void new_time_step_bound(DiscreteEvent e, ScalarIntervalFunction tau);
 
+    //! \brief Introduces a new parameter with domain \a ivl.
+    void new_parameter(Interval ivl);
+    //! \brief Introduce a new independent variable with domain \a ivl.
+    void new_variable(Interval ivl);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
     void new_constraint(DiscreteEvent e, NonlinearConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
@@ -239,8 +250,6 @@ class HybridEnclosure
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e, with computed crossing time \f$\tau(s)\f$.
     void new_guard(DiscreteEvent e, ScalarFunction g, ScalarIntervalFunction ct);
 
-    //! \brief Introduce a new independent variable with domain \a ivl.
-    void new_variable(Interval ivl);
 
     //! \brief The dimension of the set.
     uint dimension() const;
@@ -266,6 +275,7 @@ class HybridEnclosure
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
   private:
+  public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
     void _apply_flow(VectorIntervalFunction phi, Float step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .

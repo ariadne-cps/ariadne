@@ -144,6 +144,8 @@ Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& tr
 
 
 
+static const DiscreteEvent final_event("_tmax_");
+static const DiscreteEvent step_event("_h_");
 
 
 Orbit<HybridEnclosure>
@@ -390,8 +392,8 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                    HybridEnclosure const& initial_set) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_crossings(...)\n");
-    Map<DiscreteEvent,CrossingData> crossing_data;
-    crossing_data.clear();
+    Map<DiscreteEvent,CrossingData> crossings;
+    crossings.clear();
 
     Box flow_bounds=flow.range();
     for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
@@ -414,7 +416,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             ScalarIntervalFunction crossing_time;
             try {
                 crossing_time=implicit(compose(guard,flow));
-                crossing_data[event]=CrossingData(INCREASING_CROSSING,crossing_time);
+                crossings[event]=CrossingData(INCREASING_CROSSING,crossing_time);
             }
             catch(const ImplicitFunctionException& e) {
                 // If the crossing time cannot be computed, then we can still
@@ -423,14 +425,14 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // along flow lines (L_{f}^{2} g > 0$, we set the crossing type
                 // as CONVEX_CROSSING
                 ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
-                crossing_data[event]=CrossingData(CONVEX_CROSSING);
+                crossings[event]=CrossingData(CONVEX_CROSSING);
             }
         } else if(derivative_range.upper()<0.0) {
             // If the derivative is strictly negative over the bounding box for the flow,
             // then the guard function is strictly decreasing.
             // This means that the event is either initially active, or does not occur.
             // There is no need to compute a crossing time.
-            crossing_data[event]=CrossingData(DECREASING_CROSSING);
+            crossings[event]=CrossingData(DECREASING_CROSSING);
         } else {
             // If the derivative of the guard function along flow lines cannot be shown
             // to have a definite sign over the entire flow box, then try to compute
@@ -449,7 +451,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // due to the singularity due to the tangency in (iv). However,
                 // we do know that in (iii), the event occurs when $t>0$ and
                 // $g(\phi(x_0,t))=0$. The crossing time is not computed.
-                crossing_data[event]=CrossingData(CONVEX_CROSSING);
+                crossings[event]=CrossingData(CONVEX_CROSSING);
             } else if(second_derivative_range.upper()<0.0) {
                 // If the second derivative is negative, then the guard
                 // values $g(x(t))$ are concave along flow lines. There are
@@ -481,22 +483,22 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
                     ScalarIntervalFunction critical_time=implicit(compose(derivative,flow));
-                    crossing_data[event]=CrossingData(CONCAVE_CROSSING);
-                    crossing_data[event].critical_time=critical_time;
+                    crossings[event]=CrossingData(CONCAVE_CROSSING);
+                    crossings[event].critical_time=critical_time;
                 }
                 catch(const ImplicitFunctionException& e) {
                     ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
-                    crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
+                    crossings[event]=CrossingData(DEGENERATE_CROSSING);
                 }
             } else {
                 // The crossing cannot be shown to be one of the kinds mentioned
                 // above. A theoretically exact expression for the crossing
                 // set is generally not available.
-                crossing_data[event]=CrossingData(DEGENERATE_CROSSING);
+                crossings[event]=CrossingData(DEGENERATE_CROSSING);
             }
         }
     }
-    return crossing_data;
+    return crossings;
 }
 
 
@@ -697,26 +699,146 @@ _apply_guard(List<HybridEnclosure>& sets,
 
 DiscreteEvent step_time_event("step_time");
 
+void
+HybridEvolverBase::
+_apply_reach_step(HybridEnclosure& set,
+                  VectorIntervalFunction const& flow,
+                  TimingData const& timing_data) const
+{
+    switch(timing_data.step_kind) {
+        case FULL_STEP:
+            set.apply_flow_for(flow,timing_data.step_size);
+            break;
+        case CREEP_STEP:
+            set.apply_flow_for(flow,timing_data.spacial_evolution_time);
+            break;
+        case PARTIAL_STEP:
+            set.apply_reach_step(flow,timing_data.evolution_time);
+            ARIADNE_ASSERT(false); break; // Not currently implemented
+        case UNWIND_STEP:
+            set.apply_flow_to(flow,timing_data.finishing_time);
+            break;
+        case FINAL_STEP:
+            set.apply_flow_to(flow,timing_data.final_time);
+            break;
+    }
+}
+
+void
+HybridEvolverBase::
+_apply_evolve_step(HybridEnclosure& set,
+                  VectorIntervalFunction const& flow,
+                  TimingData const& timing_data) const
+{
+    switch(timing_data.step_kind) {
+        case FULL_STEP:
+            set.apply_evolve_step(flow,timing_data.evolution_time);
+            break;
+        case CREEP_STEP:
+            set.apply_evolve_step(flow,timing_data.evolution_time);
+            break;
+        case PARTIAL_STEP:
+            set.apply_evolve_step(flow,timing_data.evolution_time);
+            break;
+        case UNWIND_STEP:
+            set.apply_evolve_step(flow,timing_data.evolution_time);
+            set.set_time_function(timing_data.finishing_time);
+            break;
+        case FINAL_STEP:
+            set.apply_evolve_step(flow,timing_data.evolution_time);
+            set.set_time_function(timing_data.finishing_time);
+            break;
+    }
+}
+
+void
+HybridEvolverBase::
+_apply_guard_step(HybridEnclosure& set,
+                  VectorIntervalFunction& jump_starting_state,
+                  ScalarIntervalFunction& jump_step_time,
+                  VectorFunction const& dynamic,
+                  VectorIntervalFunction const& flow,
+                  TimingData const& timing_data,
+                  DiscreteEvent event,
+                  TransitionData const& transition_data,
+                  CrossingData const& crossing_data) const
+{
+    // Compute flow to guard set up to evolution time.
+    HybridEnclosure& jump_set=set;
+    HybridEnclosure starting_set=set;
+    VectorIntervalFunction starting_state=set.space_function();
+    VectorIntervalFunction reach_starting_state=embed(starting_set.space_function(),timing_data.time_domain);
+    ScalarIntervalFunction reach_step_time=embed(starting_set.parameter_domain(),timing_data.time_coordinate);
+
+    switch(transition_data.event_kind) {
+        case PERMISSIVE:
+            // The continuous evolution is just the same as a reachability step,
+            // so we need to embed the starting state and the step time function into one higher dimension.
+            jump_starting_state=embed(set.space_function(),timing_data.time_domain);
+            jump_step_time=embed(set.parameter_domain(),timing_data.time_coordinate);
+            jump_set.apply_reach_step(flow,timing_data.evolution_time);
+            jump_set.new_activation(event,transition_data.guard_function);
+            break;
+        case URGENT: case IMPACT:
+            switch(crossing_data.crossing_kind) {
+                case INCREASING_CROSSING:
+                    jump_starting_state=set.space_function();
+                    jump_step_time=compose(crossing_data.crossing_time,set.space_function());
+                    // If the jump step might occur after the final evolution time, then introduce constraint that this does not happen
+                    if(timing_data.step_kind!=FULL_STEP && (jump_step_time-timing_data.evolution_time).range().upper()>0.0) {
+                        jump_set.new_parameter_constraint(step_event,jump_step_time<=timing_data.evolution_time);
+                    }
+                    jump_set.apply_flow_step_for(flow,crossing_data.crossing_time);
+                    break;
+                case CONVEX_CROSSING:
+                    jump_starting_state=embed(set.space_function(),timing_data.time_domain);
+                    jump_step_time=embed(set.parameter_domain(),timing_data.time_coordinate);
+                    jump_set.apply_flow_to(flow,timing_data.evolution_time);
+                    jump_set.new_guard(event,transition_data.guard_function);
+                    break;
+                case CONCAVE_CROSSING:
+                case DEGENERATE_CROSSING: // Just check positive derivative in this case; NOT EXACT
+                    jump_starting_state=embed(set.space_function(),timing_data.time_domain);
+                    jump_step_time=embed(set.parameter_domain(),timing_data.time_coordinate);
+                    jump_set.apply_flow_to(flow,timing_data.evolution_time);
+                    jump_set.new_guard(event,transition_data.guard_function);
+                    jump_set.new_invariant(event,lie_derivative(transition_data.guard_function,dynamic));
+                    break;
+                case NEGATIVE_CROSSING:
+                case POSITIVE_CROSSING:
+                case DECREASING_CROSSING:
+                    ARIADNE_ASSERT(false);
+                default:
+                    assert(false); // No remaining cases
+            }
+            break;
+            // FIXME: Switch on step kind
+        default:
+            ARIADNE_FAIL_MSG("Invalid event kind "<<transition_data.event_kind<<" for transition.");
+    }
+
+}
+
 void GeneralHybridEvolver::
 _apply_time_step(EvolutionData& evolution_data,
                  HybridEnclosure const& starting_set,
                  VectorIntervalFunction const& flow,
                  TimingData const& timing_data,
-                 Map<DiscreteEvent,CrossingData> const& crossing_data,
+                 Map<DiscreteEvent,CrossingData> const& crossings,
                  VectorFunction const& dynamic,
                  Map<DiscreteEvent,TransitionData> const& transitions) const
 {
     // FIXME: Make semantics function argument
-    static const DiscreteEvent final_event("_tmax_");
-    static const DiscreteEvent step_event("_h_");
 
     ARIADNE_LOG(2,"GeneralHybridEvolver::_apply_time_step(...)\n");
     //ARIADNE_LOG(4,"evolution_time="<<evolution_time.range()<<" final_time="<<final_time<<"\n");
 
+    ARIADNE_ASSERT(!definitely(starting_set.empty()));
+
     ScalarIntervalFunction critical_function;
 
     // Compute events enabling transitions and events blocking continuous evolution
-    Set<DiscreteEvent> active_events=crossing_data.keys();
+    Set<DiscreteEvent> active_events=crossings.keys();
     Set<DiscreteEvent> transition_events;
     Set<DiscreteEvent> blocking_events;
     for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
@@ -747,37 +869,18 @@ _apply_time_step(EvolutionData& evolution_data,
 
 
     {
-        // Compute the reach set, allowing for possibility of splitting
-        // due to non-transverse guards
-        List<HybridEnclosure> reach_sets;
-        reach_sets.append(starting_set);
-        // WARNING: Reach set reference is invalidated on List reallocation on resize
+        // Compute the reach set, allowing for possibility of splitting due to non-transverse guards
+        List<HybridEnclosure> reach_sets(starting_set);
         HybridEnclosure& reach_set=reach_sets.front();
+        _apply_reach_step(reach_set,flow,timing_data);
+        ARIADNE_LOG(6,"unconstrained_reach_set="<<reach_sets.front()<<"\n");
 
-        ARIADNE_LOG(4,"\n");
-        ARIADNE_ASSERT(!definitely(reach_set.empty()));
-        switch(timing_data.step_kind) {
-            case FULL_STEP:
-                reach_set.apply_flow_for(flow,timing_data.step_size);
-                ARIADNE_ASSERT(!definitely(reach_set.empty()));
-                break;
-            case CREEP_STEP:
-                reach_set.apply_flow_for(flow,timing_data.spacial_evolution_time);
-                break;
-            case PARTIAL_STEP:
-                ARIADNE_ASSERT(false); break; // Not currently implemented
-            case UNWIND_STEP:
-                reach_set.apply_flow_to(flow,timing_data.finishing_time);
-                break;
-            case FINAL_STEP:
-                reach_set.apply_flow_to(flow,timing_data.final_time);
-                break;
-        }
-        ARIADNE_LOG(6,"unconstrained_reach_set="<<reach_set<<"\n");
-
-        // Apply constraints on reach set due to final time, if necessary
+        // Apply constraints on reach set due to final time.
         if(timing_data.step_kind!=FINAL_STEP) {
-            //reach_set.new_parameter_constraint(step_event,embedded_reach_time<=embedded_evolution_time);
+            if(reach_set.time_range().upper()>timing_data.final_time) {
+                //reach_set.new_parameter_constraint(step_event,embedded_reach_time<=embedded_evolution_time);
+                reach_set.new_parameter_constraint(final_event,reach_set.time_function()<=timing_data.final_time);
+            }
         }
 
         // Apply constraints on reach set due to events
@@ -786,7 +889,7 @@ _apply_time_step(EvolutionData& evolution_data,
         {
             DiscreteEvent event=*event_iter;
             const ScalarFunction& event_guard_function=transitions[event].guard_function;
-            const CrossingData& event_crossing_data=crossing_data[event];
+            const CrossingData& event_crossing_data=crossings[event];
             _apply_guard(reach_sets,embedded_starting_state,flow,embedded_reach_time,
                          event,event_guard_function,event_crossing_data,semantics);
         }
@@ -795,7 +898,6 @@ _apply_time_step(EvolutionData& evolution_data,
         evolution_data.reach_sets.append(reach_sets);
 
     } // Done computing reach sets
-
 
     ARIADNE_LOG(4,"Done computing reach sets\n");
 
@@ -808,22 +910,7 @@ _apply_time_step(EvolutionData& evolution_data,
     if(timing_data.step_kind!=FULL_STEP) { ARIADNE_LOG(1,"  step_kind="<<timing_data.step_kind<<"\n"); }
 
     uint nc=evolve_set.number_of_constraints();
-    switch(timing_data.step_kind) {
-        case FULL_STEP:
-            evolve_set.apply_flow_step_for(flow,timing_data.step_size);
-            break;
-        case CREEP_STEP:
-            evolve_set.apply_flow_step_for(flow,timing_data.spacial_evolution_time);
-            break;
-        case PARTIAL_STEP:
-            ARIADNE_ASSERT(false); break; // Not currently implemented
-        case UNWIND_STEP:
-            evolve_set.apply_flow_step_to(flow,timing_data.finishing_time);
-            break;
-        case FINAL_STEP:
-            evolve_set.apply_flow_step_to(flow,timing_data.final_time);
-            break;
-    }
+    _apply_evolve_step(evolve_sets.front(),flow,timing_data);
     ARIADNE_ASSERT(nc==evolve_set.number_of_constraints());
 
     // final_set.new_parameter_constraint(step_event,timing_data.remaining_time<=timing_data.evolution_time);
@@ -835,7 +922,7 @@ _apply_time_step(EvolutionData& evolution_data,
     {
         DiscreteEvent event=*event_iter;
         const ScalarFunction& event_guard_function=transitions[event].guard_function;
-        const CrossingData& event_crossing_data=crossing_data[event];
+        const CrossingData& event_crossing_data=crossings[event];
         _apply_guard(evolve_sets,starting_state,flow,timing_data.evolution_time,
                      event,event_guard_function,event_crossing_data,semantics);
     }
@@ -867,58 +954,16 @@ _apply_time_step(EvolutionData& evolution_data,
         event_iter!=transition_events.end(); ++event_iter)
     {
         DiscreteEvent event=*event_iter;
-        TransitionData const & transition = transitions[event];
 
-        ARIADNE_LOG(2,"  "<<event<<": "<<transition.event_kind<<", "<<crossing_data[event].crossing_kind<<"\n");
 
         // Compute active set
         List<HybridEnclosure> jump_sets((starting_set));
         HybridEnclosure& jump_set=jump_sets.front();
-
-        // Compute flow to guard set up to evolution time.
-        ScalarIntervalFunction jump_step_time;
         VectorIntervalFunction jump_starting_state;
-        switch(transitions[event].event_kind) {
-            case PERMISSIVE:
-                jump_set.apply_flow_to(flow,timing_data.evolution_time);
-                jump_set.new_activation(event,transition.guard_function);
-                break;
-            case URGENT: case IMPACT:
-                switch(crossing_data[event].crossing_kind) {
-                    case INCREASING_CROSSING:
-                        jump_starting_state=starting_state; jump_step_time=compose(crossing_data[event].crossing_time,starting_set.space_function());
-                        // If the jump step might occur after the final evolution time, then introduce constraint that this does not happen
-                        if(timing_data.step_kind!=FULL_STEP && (jump_step_time-timing_data.evolution_time).range().upper()>0.0) {
-                            jump_set.new_parameter_constraint(step_event,jump_step_time<=timing_data.evolution_time);
-                        }
-                        jump_set.apply_flow_step_for(flow,crossing_data[event].crossing_time);
-                        break;
-                    case CONVEX_CROSSING:
-                        jump_set.apply_flow_to(flow,timing_data.evolution_time);
-                        jump_set.new_guard(event,transition.guard_function);
-                        jump_step_time=reach_step_time;
-                        jump_starting_state=embedded_starting_state;
-                        break;
-                    case CONCAVE_CROSSING:
-                    case DEGENERATE_CROSSING: // Just check positive derivative in this case; NOT EXACT
-                        jump_set.apply_flow_to(flow,timing_data.evolution_time);
-                        jump_set.new_guard(event,transition.guard_function);
-                        jump_set.new_invariant(event,lie_derivative(transition.guard_function,dynamic));
-                        jump_step_time=reach_step_time;
-                        jump_starting_state=embedded_starting_state;
-                        break;
-                    case NEGATIVE_CROSSING:
-                    case POSITIVE_CROSSING:
-                    case DECREASING_CROSSING:
-                        ARIADNE_ASSERT(false);
-                    default:
-                        assert(false); // No remaining cases
-                }
-                break;
-                // FIXME: Switch on step kind
-            default:
-                ARIADNE_FAIL_MSG("Invalid event kind "<<transitions[event].event_kind<<" for transition.");
-        }
+        ScalarIntervalFunction jump_step_time;
+        ARIADNE_LOG(2,"  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
+        _apply_guard_step(jump_set,jump_starting_state,jump_step_time,
+                          dynamic,flow,timing_data,event,transitions[event],crossings[event]);
 
         // NOTE: Should be no need to apply maximum time bound, as this will be applied after the next flow step
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
@@ -935,13 +980,13 @@ _apply_time_step(EvolutionData& evolution_data,
             DiscreteEvent other_event=*other_event_iter;
             if(other_event!=event) {
                 const ScalarFunction& other_event_guard_function=transitions[other_event].guard_function;
-                const CrossingData& other_event_crossing_data=crossing_data[other_event];
+                const CrossingData& other_event_crossing_data=crossings[other_event];
                 _apply_guard(jump_sets,jump_starting_state,flow,jump_step_time,
                              other_event,other_event_guard_function,other_event_crossing_data,semantics);
             }
         }
 
-        ARIADNE_LOG(1, "  "<<event<<": "<<transition.event_kind<<", "<<crossing_data[event].crossing_kind<<"\n");
+        ARIADNE_LOG(1, "  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         // Apply reset
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;
@@ -1066,17 +1111,17 @@ _upper_evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"active_events="<<active_events<<"\n");
 
     // Compute the kind of crossing (increasing, convex, etc);
-    Map<DiscreteEvent,CrossingData> crossing_data =
+    Map<DiscreteEvent,CrossingData> crossings =
         this->_compute_crossings(active_events,dynamic,guard_functions,flow_model,starting_set);
-    ARIADNE_LOG(4,"crossing_data="<<crossing_data<<"\n");
+    ARIADNE_LOG(4,"crossings="<<crossings<<"\n");
 
     // Compute end conditions for flow
-    TimingData timing_data = this->_compute_timing(active_events,Real(final_time),flow_model,crossing_data,starting_set);
+    TimingData timing_data = this->_compute_timing(active_events,Real(final_time),flow_model,crossings,starting_set);
     ARIADNE_LOG(4,"timing_data="<<timing_data<<"\n");
 
     // Apply the time step
     HybridEnclosure reach_set, evolve_set;
-    this->_apply_time_step(evolution_data,starting_set,flow_model,timing_data,crossing_data,dynamic,transitions);
+    this->_apply_time_step(evolution_data,starting_set,flow_model,timing_data,crossings,dynamic,transitions);
 }
 
 

@@ -110,6 +110,13 @@ HybridEnclosure::time_function() const
     return this->_time;
 }
 
+void HybridEnclosure::set_time_function(const ScalarIntervalFunction& time_function)
+{
+    ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
+                       "Domain of "<<time_function<<" does not contain parameter domain "<<this->parameter_domain());
+    this->_time=time_function;
+}
+
 IntervalVector
 HybridEnclosure::space_bounding_box() const
 {
@@ -146,6 +153,21 @@ HybridEnclosure::bounding_box() const
     return HybridBox(this->_location,this->space_bounding_box());
 }
 
+
+void HybridEnclosure::new_parameter(Interval ivl)
+{
+    IntervalVector new_domain=join(this->_set._domain,ivl);
+    this->_set._domain=new_domain;
+    this->_set._reduced_domain=join(this->_set._reduced_domain,ivl);
+    this->_time=embed(this->_time,ivl);
+    this->_set._function=embed(this->_set._function,ivl);
+    for(uint i=0; i!=this->_set._constraints.size(); ++i) {
+        this->_set._constraints[i]=embed(this->_set._constraints[i],ivl);
+    }
+    for(uint i=0; i!=this->_set._equations.size(); ++i) {
+        this->_set._equations[i]=embed(this->_set._equations[i],ivl);
+    }
+}
 
 void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarFunction constraint) {
     ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_set._function);
@@ -213,6 +235,36 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_location=target;
     this->_set._function=compose(map,this->_set._function);
 }
+
+void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+{
+    // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
+    // tau'(s) = tau(s)+t
+    ARIADNE_ASSERT(phi.result_size()==this->dimension());
+    ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
+    ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
+    Interval time_domain=phi.domain()[phi.domain().size()-1];
+    this->new_parameter(time_domain);
+    const IntervalVector& new_domain=this->parameter_domain();
+    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u);
+    this->_time=this->_time+time_step_function;
+    this->_set._function=unchecked_compose(phi,join(this->_set._function,time_step_function));
+    if(elps.range().upper()>time_domain.upper()) {
+        this->_set._constraints.append(time_step_function-embed(elps,time_domain));
+    }
+}
+
+void HybridEnclosure::apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+{
+    // xi'(s) = phi(xi(s),eps(s)) where range(eps) in [0,h]
+    // tau'(s) = tau(s)+eps(s)
+    ARIADNE_ASSERT(phi.result_size()==this->dimension());
+    ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
+    ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
+    this->_time=this->_time+elps;
+    this->_set._function=unchecked_compose(phi,join(this->_set._function,elps));
+}
+
 
 void HybridEnclosure::_apply_flow(VectorIntervalFunction phi, Float h, ScalarIntervalFunction elps)
 {

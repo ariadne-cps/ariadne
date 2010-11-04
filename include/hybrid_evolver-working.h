@@ -309,6 +309,36 @@ class HybridEvolverBase
                             HybridEnclosure const& initial_set,
                             Map<DiscreteEvent,TransitionData> const& transitions) const;
 
+    //! \brief Apply the \a flow to the \a set up to the time specified by \a timing_data
+    //! to obtain the single-step unconstrained reachable set.
+    virtual
+    void
+    _apply_reach_step(HybridEnclosure& set,
+                      VectorIntervalFunction const& flow,
+                      TimingData const& timing_data) const;
+
+    //! \brief Apply the \a flow to the \a set for the time specified by \a timing_data
+    //! to obtain the single-step unconstrained evolved set.
+    virtual
+    void
+    _apply_evolve_step(HybridEnclosure& set,
+                       VectorIntervalFunction const& flow,
+                       TimingData const& timing_data) const;
+
+    //! \brief Apply the \a flow to the \a set for to reach the
+    //! guard specified by \a transition_data using guidelines provided by \a crossing_data.
+    virtual
+    void
+    _apply_guard_step(HybridEnclosure& set,
+                      VectorIntervalFunction& jump_starting_state,
+                      ScalarIntervalFunction& jump_step_time,
+                      VectorFunction const& dynamic,
+                      VectorIntervalFunction const& flow,
+                      TimingData const& timing_data,
+                      DiscreteEvent event,
+                      TransitionData const& transition_data,
+                      CrossingData const& crossing_data) const;
+
     //! \brief Process the \a starting_set \f$S\f$
 	//! based on the previously computed \a flow, \a timing_data
 	//! and \a crossing_data to compute the successor sets in the evolution.

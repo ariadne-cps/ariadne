@@ -327,17 +327,35 @@ class HybridEvolverBase
 
     //! \brief Apply the \a flow to the \a set for to reach the
     //! guard specified by \a transition_data using guidelines provided by \a crossing_data.
+    //!
+    //! \details
+    //! NOTE: The \a dynamic is used to compute the Lie derivative of
+    //! the flow to ensure positive crossing in the degenerate case. It should not really be necessary.
     virtual
     void
     _apply_guard_step(HybridEnclosure& set,
-                      VectorIntervalFunction& jump_starting_state,
-                      ScalarIntervalFunction& jump_step_time,
                       VectorFunction const& dynamic,
                       VectorIntervalFunction const& flow,
                       TimingData const& timing_data,
-                      DiscreteEvent event,
                       TransitionData const& transition_data,
                       CrossingData const& crossing_data) const;
+
+    //! \brief Apply \a guard_function for \a event to each set in \a sets, using the computed \a crossing_data.
+    //! \callgraph
+    //! \details The sets are updated with the extra constraints in-place for efficiency.
+    //! In the case of a concave tangency, it may be necessary to split the enclosure in two,
+    //! one part containing points which eventually cross the guard, the other points which miss the guard.
+    //! The extra sets are adjoined to the end of the list of sets to be constrained.
+    //! NOTE: The \a evolve_time should probably be in crossing_data, and should not really be necessary.
+    virtual
+    void
+    _apply_guard(List<HybridEnclosure>& sets,
+                 const HybridEnclosure& starting_set,
+                 const VectorIntervalFunction& flow,
+                 const ScalarIntervalFunction& evolve_time,
+                 const TransitionData& transition_data,
+                 const CrossingData crossing_data,
+                 const Semantics semantics) const;
 
     //! \brief Process the \a starting_set \f$S\f$
 	//! based on the previously computed \a flow, \a timing_data
@@ -401,9 +419,11 @@ bool is_activating(EventKind evk);
 //! \relates HybridEvolverInterface
 struct TransitionData
 {
+    //! \brief The event label.
+    DiscreteEvent event;
     //! \brief The kind of event (invariant, urgent, etc) determining what
-	//! happens when the event is active.
-	EventKind event_kind;
+    //! happens when the event is active.
+    EventKind event_kind;
     //! \brief The guard function of the event, the event being active when
 	//! \f$g(x)\geq0\f$.
 	ScalarFunction guard_function;
@@ -546,27 +566,10 @@ class GeneralHybridEvolver
                      HybridEnclosure const& starting_set,
                      VectorIntervalFunction const& flow,
                      TimingData const& timing_data,
-                     Map<DiscreteEvent,CrossingData> const& crossing_data,
+                     Map<DiscreteEvent,CrossingData> const& crossings,
                      VectorFunction const& dynamic,
                      Map<DiscreteEvent,TransitionData> const& transitions) const;
 
-
-    //! \brief Apply \a guard_function for \a event to each set in \a sets, using the computed \a crossing_data.
-    //! \callgraph
-    //! \details The sets are updated with the extra constraints in-place for efficiency.
-    //! In the case of a concave tangency, it may be necessary to split the enclosure in two,
-    //! one part containing points which eventually cross the guard, the other points which miss the guard.
-    //! The extra sets are adjoined to the end of the list of sets to be constrained.
-    virtual
-    void
-    _apply_guard(List<HybridEnclosure>& sets,
-                 const VectorIntervalFunction& starting_state,
-                 const VectorIntervalFunction& flow,
-                 const ScalarIntervalFunction& elapsed_time,
-                 const DiscreteEvent event,
-                 const ScalarFunction& guard_function,
-                 const CrossingData crossing_data,
-                 const Semantics semantics) const;
 
 };
 

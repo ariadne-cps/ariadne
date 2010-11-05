@@ -238,7 +238,7 @@ _upper_evolution_step(List<HybridEnclosure>& working_sets,
     ARIADNE_LOG(4,"flow:"<<flow<<"\n");
     ARIADNE_LOG(4,"starting_set:"<<starting_set<<"\n");
     HybridEnclosure reached_set=starting_set;
-    reached_set.apply_flow_for(flow_model,flow_domain[n].upper());
+    reached_set.apply_full_reach_step(flow_model);
     ARIADNE_LOG(4,"flowed_set:"<<reached_set<<"\n");
 
     ARIADNE_LOG(4,"\n");

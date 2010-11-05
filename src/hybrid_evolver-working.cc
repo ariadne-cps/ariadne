@@ -362,7 +362,7 @@ _compute_active_events(VectorFunction const& dynamic,
     Set<DiscreteEvent> active_events;
     HybridEnclosure reach_set=starting_set;
     IntervalVector flow_bounds=flow.range();
-    reach_set.apply_flow_for(flow,flow.domain()[flow.domain().size()-1].upper());
+    reach_set.apply_full_reach_step(flow);
     for(Set<DiscreteEvent>::iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
         const DiscreteEvent event=*event_iter;
         const ScalarFunction& guard_function=guards[event];
@@ -791,19 +791,20 @@ _apply_reach_step(HybridEnclosure& set,
 {
     switch(timing_data.step_kind) {
         case FULL_STEP:
-            set.apply_flow_for(flow,timing_data.step_size);
+            set.apply_reach_step(flow,timing_data.evolution_time);
             break;
         case CREEP_STEP:
-            set.apply_flow_for(flow,timing_data.spacial_evolution_time);
+            set.apply_reach_step(flow,timing_data.evolution_time);
             break;
         case PARTIAL_STEP:
             set.apply_reach_step(flow,timing_data.evolution_time);
             ARIADNE_ASSERT(false); break; // Not currently implemented
         case UNWIND_STEP:
-            set.apply_flow_to(flow,timing_data.finishing_time);
+            set.apply_reach_step(flow,timing_data.evolution_time);
             break;
         case FINAL_STEP:
-            set.apply_flow_to(flow,timing_data.final_time);
+            set.apply_reach_step(flow,timing_data.evolution_time);
+            set.bound_time(timing_data.final_time);
             break;
     }
 }
@@ -867,15 +868,15 @@ _apply_guard_step(HybridEnclosure& set,
                     if(timing_data.step_kind!=FULL_STEP && (step_time-timing_data.evolution_time).range().upper()>0.0) {
                         jump_set.new_parameter_constraint(step_event,step_time<=timing_data.evolution_time);
                     }
-                    jump_set.apply_flow_step_for(flow,crossing_data.crossing_time);
+                    jump_set.apply_evolve_step(flow,unchecked_compose(crossing_data.crossing_time,starting_state));
                     break;
                 case CONVEX_CROSSING:
-                    jump_set.apply_flow_to(flow,timing_data.evolution_time);
+                    jump_set.apply_reach_step(flow,timing_data.evolution_time);
                     jump_set.new_guard(event,transition_data.guard_function);
                     break;
                 case CONCAVE_CROSSING:
                 case DEGENERATE_CROSSING: // Just check positive derivative in this case; NOT EXACT
-                    jump_set.apply_flow_to(flow,timing_data.evolution_time);
+                    jump_set.apply_reach_step(flow,timing_data.evolution_time);
                     jump_set.new_guard(event,transition_data.guard_function);
                     jump_set.new_invariant(event,lie_derivative(transition_data.guard_function,dynamic));
                     break;

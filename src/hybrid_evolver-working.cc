@@ -530,10 +530,10 @@ _compute_timing(Set<DiscreteEvent>& active_events,
     // NOTE: The starting time function may be negative or greater than the final time
     // over part of the parameter domain.
     ScalarIntervalFunction const& starting_time=initial_set.time_function();
-    Interval starting_time_range=initial_set.time_function().range();
+    Interval starting_time_range=initial_set.time_range();
 
     ScalarIntervalFunction remaining_time=Interval(final_time)-starting_time;
-    Interval remaining_time_range=remaining_time.range();
+    Interval remaining_time_range=Interval(final_time)-starting_time_range;
     if(remaining_time_range.upper()<=result.step_size) {
         // The rest of the evolution can be computed within a single time step.
         // The step kind is given as FINAL_STEP so that the evolution algorithm
@@ -651,7 +651,7 @@ _compute_timing(Set<DiscreteEvent>& active_events,
             ARIADNE_LOG(6,"Creep step: evolution_time="<<evolution_time<<"\n");
             result.step_kind=CREEP_STEP;
             result.spacial_evolution_time=evolution_time;
-            result.evolution_time=compose(result.spacial_evolution_time,initial_set.space_function());
+            result.evolution_time=unchecked_compose(result.spacial_evolution_time,initial_set.space_function());
             // TODO: Remove all definitely non-active events
         } else {
             // Perform the evolution over a full time step
@@ -709,11 +709,11 @@ _apply_guard(List<HybridEnclosure>& sets,
                 set.new_invariant(event, guard_function);
                 break;
             case CONCAVE_CROSSING: {
-                ScalarIntervalFunction critical_time = compose(crossing_data.critical_time,starting_state);
+                ScalarIntervalFunction critical_time = unchecked_compose(crossing_data.critical_time,starting_state);
                 ScalarIntervalFunction final_guard
-                    = compose( guard_function, compose( flow, join(starting_state, elapsed_time) ) );
+                    = compose( guard_function, unchecked_compose( flow, join(starting_state, elapsed_time) ) );
                 ScalarIntervalFunction maximal_guard
-                    = compose( guard_function, compose( flow, join(starting_state, critical_time) ) );
+                    = compose( guard_function, unchecked_compose( flow, join(starting_state, critical_time) ) );
                 // If no points in the set arise from trajectories which will later leave the progress set,
                 // then we only need to look at the maximum value of the guard.
                 HybridEnclosure eventually_hitting_set=set;
@@ -756,7 +756,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                         for(uint i=0; i!=n; ++i) {
                             Float alpha=Float(i+1)/n;
                             ScalarIntervalFunction intermediate_guard
-                                = compose( guard_function, compose( flow, join(starting_state, alpha*elapsed_time) ) );
+                                = compose( guard_function, unchecked_compose( flow, join(starting_state, alpha*elapsed_time) ) );
                             set.new_parameter_constraint(event, intermediate_guard <= 0);
                         }
                         break;
@@ -862,7 +862,7 @@ _apply_guard_step(HybridEnclosure& set,
         case URGENT: case IMPACT:
             switch(crossing_data.crossing_kind) {
                 case INCREASING_CROSSING:
-                    step_time=compose(crossing_data.crossing_time,starting_state);
+                    step_time=unchecked_compose(crossing_data.crossing_time,starting_state);
                     // If the jump step might occur after the final evolution time, then introduce constraint that this does not happen
                     if(timing_data.step_kind!=FULL_STEP && (step_time-timing_data.evolution_time).range().upper()>0.0) {
                         jump_set.new_parameter_constraint(step_event,step_time<=timing_data.evolution_time);
@@ -988,7 +988,7 @@ _apply_time_step(EvolutionData& evolution_data,
     _apply_evolve_step(evolve_sets.front(),flow,timing_data);
     ARIADNE_ASSERT(nc==evolve_set.number_of_constraints());
 
-    if(evolve_set.time_function().range().upper()>timing_data.final_time) {
+    if(evolve_set.time_range().upper()>timing_data.final_time) {
         evolve_set.bound_time(timing_data.final_time);
     }
 
@@ -1043,7 +1043,7 @@ _apply_time_step(EvolutionData& evolution_data,
                 jump_step_time=reach_step_time;
                 break;
             case INCREASING_CROSSING:
-                jump_step_time=compose(crossings[event].crossing_time,starting_set.space_function());
+                jump_step_time=unchecked_compose(crossings[event].crossing_time,starting_set.space_function());
                 break;
             case DECREASING_CROSSING: case POSITIVE_CROSSING: case NEGATIVE_CROSSING:
                 // No need to set jump set time;
@@ -1055,7 +1055,7 @@ _apply_time_step(EvolutionData& evolution_data,
         // Apply maximum time bound, as this will be applied after the next flow step
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;
-            if(jump_set.time_function().range().upper() > Float(timing_data.final_time)) {
+            if(jump_set.time_range().upper() > Float(timing_data.final_time)) {
                 jump_set.bound_time(timing_data.final_time);
             }
         }

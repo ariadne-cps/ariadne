@@ -112,6 +112,7 @@ typedef VectorTaylorFunction VectorIntervalFunction;
 //! replace it with the constraint \f$g_e(x_i)\leq 0\f$.
 class HybridEnclosure
     : public DrawableInterface
+    , public Loggable
 {
     friend class SimpleHybridEvolver;
     friend class ConstraintHybridEvolver;

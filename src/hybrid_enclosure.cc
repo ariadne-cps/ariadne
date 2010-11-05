@@ -120,13 +120,17 @@ void HybridEnclosure::set_time_function(const ScalarIntervalFunction& time_funct
 IntervalVector
 HybridEnclosure::space_bounding_box() const
 {
-    return this->_set._function.codomain();
+    ARIADNE_LOG(8,"space_codomain="<<this->_set._function.codomain()<<" space_range="<<this->_set._function(this->_set._reduced_domain)<<"\n");
+    //xreturn this->_set._function.codomain();
+    return this->_set._function(this->_set._reduced_domain);
 }
 
 Interval
 HybridEnclosure::time_range() const
 {
-    return this->_time.codomain();
+    ARIADNE_LOG(8,"time_codomain="<<this->_time.codomain()<<" time_range="<<this->_time(this->_set._reduced_domain)<<"\n");
+    //return this->_time.codomain();
+    return this->_time(this->_set._reduced_domain);
 }
 
 uint
@@ -191,7 +195,7 @@ void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarFunction constrai
 }
 
 void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarIntervalFunction constraint) {
-    ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_set._function);
+    ScalarIntervalFunction constraint_wrt_params=unchecked_compose(constraint,this->_set._function);
     Interval range=constraint_wrt_params.evaluate(this->_set._domain);
     if(range.upper()>=0.0) {
         //this->_constraint_events.push_back((this->_events,event));
@@ -331,7 +335,7 @@ void HybridEnclosure::apply_flow_for(VectorIntervalFunction phi, ScalarIntervalF
 {
     Float h=phi.domain()[phi.domain().size()-1].upper();
     // Pre-compute the evolved time in the new domain
-    ScalarIntervalFunction evolve_time=embed(compose(eps,this->_set._function),Interval(0,h));
+    ScalarIntervalFunction evolve_time=embed(unchecked_compose(eps,this->_set._function),Interval(0,h));
     ScalarIntervalFunction time_step_function=embed(this->_set._domain,ScalarIntervalFunction::identity(Interval(0,h)));
     this->_apply_flow(phi,h,unchecked_compose(eps,this->_set._function));
 }

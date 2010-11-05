@@ -96,6 +96,8 @@ TestSimpleHybridEvolver::TestSimpleHybridEvolver(const HybridEvolverInterface& e
     , evolver_name(name)
 {
     TaylorModel::set_default_sweep_threshold(1e-6);
+    DRAWING_METHOD = AFFINE_DRAW;
+    DRAWING_ACCURACY = 1;
 }
 
 void TestSimpleHybridEvolver::test_all() const {

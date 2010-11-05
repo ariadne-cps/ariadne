@@ -1203,7 +1203,7 @@ void TaylorConstrainedImageSet::new_negative_constraint(ScalarFunction constrain
 }
 
 void TaylorConstrainedImageSet::new_negative_constraint(ScalarTaylorFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),"domain="<<this->domain()<<", constraint="<<constraint);
+    ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),std::setprecision(17)<<"domain="<<this->domain()<<", constraint="<<constraint);
     this->_constraints.append(constraint);
 }
 
@@ -1223,7 +1223,7 @@ TaylorConstrainedImageSet::negative_constraints() const {
 }
 
 void TaylorConstrainedImageSet::new_zero_constraint(ScalarTaylorFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),std::setprecision(17)<<"domain="<<this->domain()<<", constraint="<<constraint);
     this->_equations.append(constraint);
 }
 
@@ -1333,6 +1333,14 @@ tribool TaylorConstrainedImageSet::empty() const
     }
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(constraints,this->_reduced_domain);
+    for(uint i=0; i!=this->number_of_parameters(); ++i) {
+        double l=this->_reduced_domain[i].lower().get_d();
+        double u=this->_reduced_domain[i].upper().get_d();
+        if(isnan(l) || isnan(u)) {
+            ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
+            _reduced_domain[i]=_domain[i];
+        }
+    }
     if(this->_reduced_domain.empty()) { return true; }
     else { return indeterminate; }
 }
@@ -1383,6 +1391,15 @@ void TaylorConstrainedImageSet::reduce() const
     List<NonlinearConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(constraints,this->_reduced_domain);
+
+    for(uint i=0; i!=this->number_of_parameters(); ++i) {
+        double l=this->_reduced_domain[i].lower().get_d();
+        double u=this->_reduced_domain[i].upper().get_d();
+        if(isnan(l) || isnan(u)) {
+            ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
+            _reduced_domain[i]=_domain[i];
+        }
+    }
 }
 
 
@@ -1716,6 +1733,8 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
     ARIADNE_ASSERT_MSG(Ariadne::subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
     TaylorConstrainedImageSet result(*this);
+    result._domain=subdomain;
+    result._reduced_domain=Ariadne::intersection(static_cast<const Vector<Interval>&>(result._reduced_domain),subdomain);
     result._function=Ariadne::restrict(result._function,subdomain);
     ScalarTaylorFunction new_constraint;
     for(List<ScalarTaylorFunction>::iterator iter=result._constraints.begin();
@@ -1756,14 +1775,16 @@ void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
 }
 
 void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {
-    this->bounding_box().draw(canvas);
+    this->reduce();
+    Box(this->_function(this->_reduced_domain)).draw(canvas);
 }
 
 void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accuracy) const {
+    ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
     const int depth=accuracy;
     List<Box> subdomains;
     List<Box> splitdomains;
-    subdomains.append(this->domain());
+    subdomains.append(this->_reduced_domain);
     Box splitdomain1,splitdomain2;
     for(int i=0; i!=depth; ++i) {
         for(uint k=0; k!=this->number_of_parameters(); ++k) {

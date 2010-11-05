@@ -171,7 +171,9 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     void apply_reset(DiscreteEvent e, DiscreteLocation q, VectorFunction r);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    void apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps);
+    void apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
+    // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
+    void apply_finishing_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
     void apply_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].

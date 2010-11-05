@@ -114,6 +114,8 @@ void HybridEnclosure::set_time_function(const ScalarIntervalFunction& time_funct
 {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
                        "Domain of "<<time_function<<" does not contain parameter domain "<<this->parameter_domain());
+    ARIADNE_ASSERT_MSG(this->parameter_domain()==time_function.domain(),
+                       "Domain of "<<time_function<<" does not equal parameter domain "<<this->parameter_domain());
     this->_time=time_function;
 }
 
@@ -121,16 +123,16 @@ IntervalVector
 HybridEnclosure::space_bounding_box() const
 {
     ARIADNE_LOG(8,"space_codomain="<<this->_set._function.codomain()<<" space_range="<<this->_set._function(this->_set._reduced_domain)<<"\n");
-    //xreturn this->_set._function.codomain();
-    return this->_set._function(this->_set._reduced_domain);
+    //return this->_set._function(this->_set._reduced_domain);
+    return this->_set.bounding_box();
 }
 
 Interval
 HybridEnclosure::time_range() const
 {
     ARIADNE_LOG(8,"time_codomain="<<this->_time.codomain()<<" time_range="<<this->_time(this->_set._reduced_domain)<<"\n");
-    //return this->_time.codomain();
-    return this->_time(this->_set._reduced_domain);
+    return this->_time.codomain();
+    //return this->_time(this->_set._reduced_domain);
 }
 
 uint
@@ -263,6 +265,17 @@ void HybridEnclosure::apply_evolve_step(const VectorIntervalFunction& phi, const
     this->_set._function=unchecked_compose(phi,join(this->_set._function,elps));
 }
 
+void HybridEnclosure::apply_finishing_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& omega)
+{
+    // xi'(s) = phi(xi(s),omega(s)-tau(s)) where range(omega-tau) in [0,h]
+    // tau'(s) = tau(s)+eps(s)
+    ARIADNE_ASSERT(phi.result_size()==this->dimension());
+    ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
+    ARIADNE_ASSERT(omega.argument_size()==this->number_of_parameters());
+    this->_set._function=unchecked_compose(phi,join(this->_set._function,omega-this->_time));
+    this->_time=omega;
+}
+
 
 void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
 {
@@ -277,7 +290,7 @@ void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const 
     ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u);
     this->_time=this->_time+time_step_function;
     this->_set._function=unchecked_compose(phi,join(this->_set._function,time_step_function));
-    if(elps.range().upper()>time_domain.upper()) {
+    if(elps.range().lower()<time_domain.upper()) {
         this->_set._constraints.append(time_step_function-embed(elps,time_domain));
     }
 }
@@ -299,7 +312,9 @@ void HybridEnclosure::apply_full_reach_step(const VectorIntervalFunction& phi)
 
 
 void HybridEnclosure::bound_time(Real tmax) {
-    this->_set._constraints.append(this->_time-Interval(tmax));
+    if(this->time_range().upper()>Interval(tmax).lower()) {
+        this->_set._constraints.append(this->_time-Interval(tmax));
+    }
 }
 
 void HybridEnclosure::bound_time(ScalarFunction tmax) {

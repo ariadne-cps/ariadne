@@ -338,7 +338,8 @@ class HybridEvolverBase
                       VectorIntervalFunction const& flow,
                       TimingData const& timing_data,
                       TransitionData const& transition_data,
-                      CrossingData const& crossing_data) const;
+                      CrossingData const& crossing_data,
+                      const Semantics semantics) const;
 
     //! \brief Apply \a guard_function for \a event to each set in \a sets, using the computed \a crossing_data.
     //! \callgraph
@@ -370,7 +371,7 @@ class HybridEvolverBase
 	//!
 	//! The evolution time (in terms of the flow parameters) is given by
 	//! \f$\delta(s)=\varepsilon(\xi(s))\f$ for a \a CREEP_STEP
-	//! or \f$\delta(s)=\omega(s)-\tau(s)\f$ for a \a FLOW_STEP.
+	//! or \f$\delta(s)=\omega(s)-\tau(s)\f$ for an \a UNWIND_STEP.
 	//!
 	//! Let \f$E_\mathrm{blk}\f$ be set set of events \em blocking
 	//! continuous evolution.

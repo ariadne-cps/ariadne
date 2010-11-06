@@ -34,6 +34,7 @@
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
+#include "integrator.h"
 #include "map_evolver.h"
 #include "vector_field_evolver.h"
 #include "hybrid_evolver.h"
@@ -189,7 +190,8 @@ void TestDiscretisedEvolution::test_continuous_time() const
     Grid grid(2);
 
     // Set up the evaluators
-    VectorFieldEvolver evolver(parameters);
+    TaylorIntegrator integrator(4,1e-4);
+    VectorFieldEvolver evolver(parameters,integrator);
     Discretiser< VectorField, EnclosureType > discretiser(evolver);
 
 

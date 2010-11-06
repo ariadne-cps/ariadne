@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file map_evolver.h
  *  \brief Evolver for map systems.
  */
@@ -44,8 +44,8 @@
 
 #include "logging.h"
 
-namespace Ariadne {  
-  
+namespace Ariadne {
+
 template<class Sys, class BS> class Evolver;
 
 class TaylorImageSet;
@@ -53,13 +53,10 @@ class IteratedMap;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-class TaylorModel;
-template<class Var> class CalculusInterface;
-
 class EvolutionProfiler;
 
 
-/*! \brief A class for computing the evolution of a map system. 
+/*! \brief A class for computing the evolution of a map system.
  *
  * The actual evolution steps are performed by the MapEvolver class.
  */
@@ -72,18 +69,18 @@ class MapEvolver
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef IteratedMap::TimeType TimeType;
     typedef IteratedMap SystemType;
-    typedef TaylorImageSet SetModelType;
     typedef TaylorImageSet EnclosureType;
+    typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
   public:
-    
+
     //! \brief Default constructor.
     MapEvolver();
-  
+
     //! \brief Construct from parameters using a default integrator.
     MapEvolver(const EvolutionParametersType& parameters);
-  
+
     /*! \brief Make a dynamically-allocated copy. */
     MapEvolver* clone() const { return new MapEvolver(*this); }
 
@@ -94,45 +91,43 @@ class MapEvolver
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
     //@}
-  
+
 
     //@{
     //! \name Evolution using abstract sets.
-    //! \brief Compute an approximation to the orbit set using upper semantics. 
+    //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
-    //! \brief Compute an approximation to the evolution set using upper semantics. 
+    //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
         return final; }
 
-    //! \brief Compute an approximation to the evolution set under upper semantics. 
+    //! \brief Compute an approximation to the evolution set under upper semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
         return intermediate; }
 
   protected:
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time, 
+    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<TimeType, SetModelType> TimedSetType;
-    virtual void _evolution_step(std::vector< TimedSetType >& working_sets, 
-                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                 const SystemType& system, const TimedSetType& current_set, const TimeType& time, 
+    virtual void _evolution_step(List< TimedEnclosureType >& working_sets,
+                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                                 const SystemType& system, const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics, bool reach) const;
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
 
-  
+
 } // namespace Ariadne
 
 #endif // ARIADNE_MAP_EVOLVER_H

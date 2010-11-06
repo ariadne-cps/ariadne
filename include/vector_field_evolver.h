@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file vector_field_evolver.h
  *  \brief Evolver for vector_field systems.
  */
@@ -39,27 +39,26 @@
 
 #include "vector_field.h"
 #include "function_interface.h"
+#include "integrator_interface.h"
 #include "evolver_base.h"
 #include "evolution_parameters.h"
 
 #include "logging.h"
 
-namespace Ariadne {  
-  
+namespace Ariadne {
+
 template<class Sys, class BS> class Evolver;
 
 class VectorField;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-class TaylorModel;
 class TaylorImageSet;
-template<class Var> class CalculusInterface;
 
 class EvolutionProfiler;
 
 
-/*! \brief A class for computing the evolution of a vector_field system. 
+/*! \brief A class for computing the evolution of a vector_field system.
  *
  * The actual evolution steps are performed by the VectorFieldEvolver class.
  */
@@ -72,16 +71,15 @@ class VectorFieldEvolver
     typedef VectorField::TimeType TimeType;
     typedef VectorField SystemType;
     typedef TaylorImageSet EnclosureType;
+    typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
   public:
-    
-    //! \brief Default constructor.
-    VectorFieldEvolver();
-  
-    //! \brief Construct from parameters using a default integrator.
-    VectorFieldEvolver(const EvolutionParametersType& parameters);
-  
+
+    //! \brief Construct from parameters and an integrator to compute the flow.
+    VectorFieldEvolver(const EvolutionParametersType& parameters,
+                       const IntegratorInterface& integrator);
+
     /*! \brief Make a dynamically-allocated copy. */
     VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
@@ -92,11 +90,11 @@ class VectorFieldEvolver
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
     //@}
-  
+
 
     //@{
     //! \name Evolution using abstract sets.
-    //! \brief Compute an approximation to the orbit set using upper semantics. 
+    //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
     using EvolverBase< VectorField, TaylorImageSet >::evolve;
@@ -104,35 +102,34 @@ class VectorFieldEvolver
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
         return final; }
 
     //! \brief Compute an approximation to the reachable set under upper semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
         return reachable; }
 
   protected:
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time, 
+    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<TimeType, EnclosureType> TimedSetType;
-    virtual void _evolution_step(std::vector< TimedSetType >& working_sets, 
-                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                 const SystemType& system, const TimedSetType& current_set, const TimeType& time, 
+    virtual void _evolution_step(List< TimedEnclosureType >& working_sets,
+                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                                 const SystemType& system, const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics, bool reach) const;
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
+    boost::shared_ptr< IntegratorInterface > _integrator;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
 
-  
+
 } // namespace Ariadne
 
 #endif // ARIADNE_VECTOR_FIELD_EVOLVER_H

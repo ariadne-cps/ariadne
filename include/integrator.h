@@ -90,6 +90,7 @@ class TaylorIntegrator
 {
     double _sweep_threshold;
   public:
+    TaylorIntegrator() : IntegratorBase(4,1e-4), _sweep_threshold(1e-8) { }
     TaylorIntegrator(uint to, double e, double sw=0.0) : IntegratorBase(to,e), _sweep_threshold(sw) {
         if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
     virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }

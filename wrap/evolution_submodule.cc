@@ -52,7 +52,7 @@ void export_orbit(const char* name)
 }
 
 
-template<class Ev>
+template<class Ev, class Init>
 void export_evolver(const char* name)
 {
     typedef typename Ev::SystemType Sys;
@@ -60,8 +60,7 @@ void export_evolver(const char* name)
     typedef typename Ev::TimeType Tm;
     typedef typename Ev::OrbitType Orb;
 
-    class_<Ev> evolver_class(name);
-    evolver_class.def(init<>());
+    class_<Ev> evolver_class(name,Init());
     evolver_class.def("orbit",(Orb(Ev::*)(const Sys&,const ES&,const Tm&)) &Ev::orbit);
     evolver_class.def(self_ns::str(self));
 }
@@ -70,6 +69,6 @@ void evolution_submodule()
 {
     export_orbit< Orbit<TaylorImageSet> >("ContinuousOrbit");
     export_orbit< Orbit<HybridTaylorImageSet> >("HybridOrbit");
-    export_evolver<VectorFieldEvolver>("VectorFieldEvolver");
-    export_evolver<GeneralHybridEvolver>("GeneralHybridEvolver");
+    //export_evolver<VectorFieldEvolver, init<ContinuousEvolutionParameters> >("VectorFieldEvolver");
+    export_evolver<GeneralHybridEvolver, init<> >("GeneralHybridEvolver");
 }

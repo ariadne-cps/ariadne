@@ -27,12 +27,12 @@
 using namespace Ariadne;
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
-    Figure fig; 
+    Figure fig;
     array<uint> xy(2,xaxis,yaxis);
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_bounding_box(bbox);
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -59,7 +59,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
 	// Repeats for the rectangles in the y direction
-	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         Float pos_y = bbox[1].lower();
 	rect[0] = bbox[0];
         while (pos_y < bbox[1].upper())
@@ -70,9 +70,9 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc); 
-    draw(fig,set); 
-    fig.write(filename); 
+    fig.set_fill_colour(fc);
+    draw(fig,set);
+    fig.write(filename);
 }
 
 /* Variables:
@@ -91,8 +91,8 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 *	vy3: y-component of the speed of the third ball
 */
 
-int main() 
-{ 
+int main()
+{
     /// Sets the system parameters
     int numVariables = 12; // The number of variables involved
     double m1 = 1.0; // Mass of the first ball
@@ -117,17 +117,17 @@ int main()
     int MAX_GRID_DEPTH = 2;
 
     /// Builds the Hybrid System
-  
+
     /// Creates a MonolithicHybridAutomaton object
     MonolithicHybridAutomaton balls;
-  
+
     /// Creates discrete states
-    AtomicDiscreteLocation all_on_pre12collision(1);
-    AtomicDiscreteLocation all_on_pre23collision(2);
-    AtomicDiscreteLocation all_on_postcollisions(3);
-    AtomicDiscreteLocation firstsecond_on_third_off(4);
-    AtomicDiscreteLocation first_on_secondthird_off(5);
-    AtomicDiscreteLocation all_off(6);   
+    DiscreteLocation all_on_pre12collision(1);
+    DiscreteLocation all_on_pre23collision(2);
+    DiscreteLocation all_on_postcollisions(3);
+    DiscreteLocation firstsecond_on_third_off(4);
+    DiscreteLocation first_on_secondthird_off(5);
+    DiscreteLocation all_off(6);
 
     /// Creates the discrete events
     DiscreteEvent collide12_e(1);
@@ -138,7 +138,7 @@ int main()
     DiscreteEvent first_bounce_e(6);
     DiscreteEvent second_bounce_e(7);
     DiscreteEvent third_bounce_e(8);
-  
+
     /// Creates the dynamics
 
     /// All rolling
@@ -149,10 +149,10 @@ int main()
     A1[3][9] = 1.0;
     A1[4][10] = 1.0;
     A1[5][11] = 1.0;
-    VectorAffineFunction all_rolling_d(A1,Vector<Float>(12));   
+    VectorAffineFunction all_rolling_d(A1,Vector<Float>(12));
 
     /// First and second rolling, third bouncing
-    double b2[12]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-g};    
+    double b2[12]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-g};
     VectorAffineFunction firstsecond_rolling_third_bouncing_d(A1,Vector<Float>(12,b2));
 
     /// First rolling, second and third bouncing
@@ -161,7 +161,7 @@ int main()
 
     /// All bouncing
     double b4[12]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,-g,0.0,-g,0.0,-g};
-    VectorAffineFunction all_bouncing_d(A1,Vector<Float>(12,b4));    
+    VectorAffineFunction all_bouncing_d(A1,Vector<Float>(12,b4));
 
     /// Creates the resets
 
@@ -174,10 +174,10 @@ int main()
     A2[4][4] = 1.0;
     A2[5][5] = 1.0;
     A2[6][6] = (m1 - eps*m2)/(m1+m2);
-    A2[6][8] = m2*(1.0+eps)/(m1+m2);	
+    A2[6][8] = m2*(1.0+eps)/(m1+m2);
     A2[7][7] = 1.0;
     A2[8][6] = m1*(1.0+eps)/(m1+m2);
-    A2[8][8] = (m2 - eps*m1)/(m1+m2);	
+    A2[8][8] = (m2 - eps*m1)/(m1+m2);
     A2[9][9] = 1.0;
     A2[10][10] = 1.0;
     A2[11][11] = 1.0;
@@ -194,10 +194,10 @@ int main()
     A3[6][6] = 1.0;
     A3[7][7] = 1.0;
     A3[8][8] = (m2 - eps*m3)/(m2+m3);
-    A3[8][10] = m3*(1.0+eps)/(m2+m3);	
+    A3[8][10] = m3*(1.0+eps)/(m2+m3);
     A3[9][9] = 1.0;
     A3[10][8] = m2*(1.0+eps)/(m2+m3);
-    A3[10][10] = (m3 - eps*m2)/(m2+m3);	
+    A3[10][10] = (m3 - eps*m2)/(m2+m3);
     A3[11][11] = 1.0;
     VectorAffineFunction collision23_r(A3,Vector<Float>(12));
 
@@ -216,7 +216,7 @@ int main()
     A4[9][9] = 1.0;
     A4[10][10] = 1.0;
     A4[11][11] = 1.0;
-    VectorAffineFunction first_bouncing_r(A4,Vector<Float>(12));   
+    VectorAffineFunction first_bouncing_r(A4,Vector<Float>(12));
 
     /// Second bouncing
     Matrix<Float> A5 = Matrix<Float>(12,12);
@@ -232,7 +232,7 @@ int main()
     A5[9][9] = -ky;
     A5[10][10] = 1.0;
     A5[11][11] = 1.0;
-    VectorAffineFunction second_bouncing_r(A5,Vector<Float>(12));   
+    VectorAffineFunction second_bouncing_r(A5,Vector<Float>(12));
 
     /// Third bouncing
     Matrix<Float> A6 = Matrix<Float>(12,12);
@@ -248,7 +248,7 @@ int main()
     A6[9][9] = 1.0;
     A6[10][10] = kx;
     A6[11][11] = -ky;
-    VectorAffineFunction third_bouncing_r(A6,Vector<Float>(12));   
+    VectorAffineFunction third_bouncing_r(A6,Vector<Float>(12));
 
     /// Drop from table
     IdentityFunction drop_from_table_r(12);
@@ -256,21 +256,21 @@ int main()
     /// Creates the guards
 
     /// Collision between the first and the second ball (x1 >= x2)
-    VectorAffineFunction collide12_g(Matrix<Float>(1,12, 1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    ScalarAffineFunction collide12_g(Vector<Float>(12, 1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),0.0);
     /// Collision between the second and the third ball (x2 >= x3)
-    VectorAffineFunction collide23_g(Matrix<Float>(1,12, 0.0,0.0,1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    ScalarAffineFunction collide23_g(Vector<Float>(12, 0.0,0.0,1.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),0.0);
     /// First reaching the table extension (x1 >= table_x)
-    VectorAffineFunction first_reaching_table_extension_g(Matrix<Float>(1,12, 1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
+    ScalarAffineFunction first_reaching_table_extension_g(Vector<Float>(12, 1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),-table_x);
     /// Second reaching the table extension (x2 >= table_x)
-    VectorAffineFunction second_reaching_table_extension_g(Matrix<Float>(1,12, 0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
+    ScalarAffineFunction second_reaching_table_extension_g(Vector<Float>(12, 0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),-table_x);
     /// Third reaching the table extension (x3 >= table_x)
-    VectorAffineFunction third_reaching_table_extension_g(Matrix<Float>(1,12, 0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,-table_x));
+    ScalarAffineFunction third_reaching_table_extension_g(Vector<Float>(12, 0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),-table_x);
     /// First touching the floor (y1 <= 0)
-    VectorAffineFunction first_touching_floor_g(Matrix<Float>(1,12, 0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    ScalarAffineFunction first_touching_floor_g(Vector<Float>(12, 0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),0.0);
     /// Second touching the floor (y2 <= 0)
-    VectorAffineFunction second_touching_floor_g(Matrix<Float>(1,12, 0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    ScalarAffineFunction second_touching_floor_g(Vector<Float>(12, 0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0),0.0);
     /// Third touching the floor (y3 <= 0)
-    VectorAffineFunction third_touching_floor_g(Matrix<Float>(1,12, 0.0,0.0,0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0),Vector<Float>(1,0.0));
+    ScalarAffineFunction third_touching_floor_g(Vector<Float>(12, 0.0,0.0,0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,0.0,0.0),0.0);
 
     /// Builds the automaton
     balls.new_mode(all_on_pre12collision,all_rolling_d);
@@ -283,31 +283,31 @@ int main()
     /// Creates the transitions
 
     /// When the first and second balls collide
-    balls.new_forced_transition(collide12_e,all_on_pre12collision,all_on_pre23collision,collision12_r,collide12_g);
+    balls.new_transition(all_on_pre12collision,collide12_e,all_on_pre23collision,collision12_r,collide12_g,urgent);
     /// When the second and third balls collide
-    balls.new_forced_transition(collide23_e,all_on_pre23collision,all_on_postcollisions,collision23_r,collide23_g);
+    balls.new_transition(all_on_pre23collision,collide23_e,all_on_postcollisions,collision23_r,collide23_g,urgent);
 
     /// When the third ball leaves the extension of the table, while the first and second are on the table
-    balls.new_forced_transition(third_rollover_e,all_on_postcollisions,firstsecond_on_third_off,drop_from_table_r,third_reaching_table_extension_g);
+    balls.new_transition(all_on_postcollisions,third_rollover_e,firstsecond_on_third_off,drop_from_table_r,third_reaching_table_extension_g,urgent);
     /// When the second ball leaves the extension of the table, the third is already off the table, and the first is still on the table
-    balls.new_forced_transition(second_rollover_e,firstsecond_on_third_off,first_on_secondthird_off,drop_from_table_r,second_reaching_table_extension_g);
+    balls.new_transition(firstsecond_on_third_off,second_rollover_e,first_on_secondthird_off,drop_from_table_r,second_reaching_table_extension_g,urgent);
     /// When the first ball leaves the extension of the table, while the second and third are already off the table
-    balls.new_forced_transition(third_rollover_e,first_on_secondthird_off,all_off,drop_from_table_r,first_reaching_table_extension_g);
+    balls.new_transition(first_on_secondthird_off,third_rollover_e,all_off,drop_from_table_r,first_reaching_table_extension_g,urgent);
 
     /// When the third ball touches the floor, while the first and second are still on the table
-    balls.new_forced_transition(third_bounce_e,firstsecond_on_third_off,firstsecond_on_third_off,third_bouncing_r,third_touching_floor_g);
+    balls.new_transition(firstsecond_on_third_off,third_bounce_e,firstsecond_on_third_off,third_bouncing_r,third_touching_floor_g,urgent);
     /// When the third ball touches the floor, while the first is on the table and the second is off the table
-    balls.new_forced_transition(third_bounce_e,first_on_secondthird_off,first_on_secondthird_off,third_bouncing_r,third_touching_floor_g);
+    balls.new_transition(first_on_secondthird_off,third_bounce_e,first_on_secondthird_off,third_bouncing_r,third_touching_floor_g,urgent);
     /// When the third ball touches the floor, while the first and the second are off the table
-    balls.new_forced_transition(third_bounce_e,all_off,all_off,third_bouncing_r,third_touching_floor_g);
+    balls.new_transition(all_off,third_bounce_e,all_off,third_bouncing_r,third_touching_floor_g,urgent);
 
     /// When the second ball touches the floor, while the first is on the table and the third is off the table
-    balls.new_forced_transition(second_bounce_e,first_on_secondthird_off,first_on_secondthird_off,second_bouncing_r,second_touching_floor_g);
+    balls.new_transition(first_on_secondthird_off,second_bounce_e,first_on_secondthird_off,second_bouncing_r,second_touching_floor_g,urgent);
     /// When the second ball touches the floor, while the first and the third are off the table
-    balls.new_forced_transition(second_bounce_e,all_off,all_off,second_bouncing_r,second_touching_floor_g);
+    balls.new_transition(all_off,second_bounce_e,all_off,second_bouncing_r,second_touching_floor_g,urgent);
 
     /// When the first ball touches the floor and all balls are off the table
-    balls.new_forced_transition(first_bounce_e,all_off,all_off,first_bouncing_r,first_touching_floor_g);
+    balls.new_transition(all_off,first_bounce_e,all_off,first_bouncing_r,first_touching_floor_g,urgent);
 
     /// Initial parameters
 
@@ -338,22 +338,22 @@ int main()
     evolver.parameters().maximum_enclosure_radius = MAX_ENCLOSURE_RADIUS;
     evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
     std::cout <<  evolver.parameters() << std::endl;
-  
+
     HybridTime evol_limits(EVOL_TIME,EVOL_TRANS);
- 
+
     std::cout << "Computing orbit... " << std::flush;
     GeneralHybridEvolver::OrbitType orbit = evolver.orbit(balls,initial_enclosure,evol_limits,UPPER_SEMANTICS);
 
     std::cout << std::endl << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
 
     std::cout << "Plotting result to text file..." << std::flush;
-    
+
 //    textplot("3balls_orbit.txt", orbit);
-    
+
     std::cout << " done." << std::endl;
 
     std::cout << "Plotting result to png files..." << std::flush;
-    
+
     plot("3balls-x1y1_orbit", 0, 1, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x2y2_orbit", 2, 3, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x3y3_orbit", 4, 5, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);

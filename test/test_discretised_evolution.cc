@@ -300,7 +300,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
 
     MonolithicHybridAutomaton ha("Decay");
     ha.new_mode(location,(one,-y));
-    ha.new_transition(event,location,location,(x-1,y),(x-1),urgent);
+    ha.new_transition(location,event,location,(x-1,y),(x-1),urgent);
 
     // Define a bounding box for the evolution
     std::cout<<"making bounding_box"<<std::endl;
@@ -335,7 +335,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     ListSet<ContinuousEnclosureType> const& reach_set=evolve_orbit.reach()[location];
     ListSet<ContinuousEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
     ListSet<ContinuousEnclosureType> const& final_set=evolve_orbit.final()[location];
-    HybridGrid hagrid(ha.state_space(),1.0);
+    HybridGrid hagrid(ha.grid());
 
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;

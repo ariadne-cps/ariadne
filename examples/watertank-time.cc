@@ -39,7 +39,7 @@ int main()
     double hmax = 5.70;
     double tmax = 20.0;
     int dmax = 15;
-    
+
     double A1[9]={a,b,0,
                   0,0,0,
                   0,0,0};
@@ -66,24 +66,31 @@ int main()
     MonolithicHybridAutomaton watertank_system;
 
     /// Create four discrete states
-    AtomicDiscreteLocation l1(1);
-    AtomicDiscreteLocation l2(2);
-    AtomicDiscreteLocation l3(3);
-    AtomicDiscreteLocation l4(4);
+    DiscreteLocation l1("q1");
+    DiscreteLocation l2("q2");
+    DiscreteLocation l3("q4");
+    DiscreteLocation l4("q5");
 
     /// Create the discrete events
-    DiscreteEvent e12(12);
-    DiscreteEvent e13(13);
-    DiscreteEvent e23(23);
-    DiscreteEvent e34(34);
-    DiscreteEvent e31(31);
-    DiscreteEvent e41(41);
+    DiscreteEvent e12("e12");
+    DiscreteEvent e13("e13");
+    DiscreteEvent e23("e23");
+    DiscreteEvent e34("e34");
+    DiscreteEvent e31("e31");
+    DiscreteEvent e41("e41");
+    DiscreteEvent i2("i2");
+    DiscreteEvent i4("i4");
+
+    /// Coordinates
+    ScalarFunction x=ScalarFunction::coordinate(3,0);
+    ScalarFunction y=ScalarFunction::coordinate(3,1);
+    ScalarFunction t=ScalarFunction::coordinate(3,2);
 
     /// Create the dynamics
-    VectorAffineFunction dynamic1(Matrix<Float>(3,3,A1),Vector<Float>(3,b1));
-    VectorAffineFunction dynamic2(Matrix<Float>(3,3,A2),Vector<Float>(3,b2));
-    VectorAffineFunction dynamic3(Matrix<Float>(3,3,A3),Vector<Float>(3,b3));
-    VectorAffineFunction dynamic4(Matrix<Float>(3,3,A4),Vector<Float>(3,b4));
+    VectorFunction dynamic1((a*x+b*y,1/T,1));
+    VectorFunction dynamic2((a*x+b,0,1));
+    VectorFunction dynamic3((a*x+b*y,-1/T,1));
+    VectorFunction dynamic4((a*x,0,1));
 
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
@@ -91,39 +98,31 @@ int main()
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
     /// Create the resets
-    IdentityFunction reset_id(3);
-    VectorAffineFunction reset_y_zero(Matrix<Float>(3,3,
-                        1.0,0.0,0.0,
-                        0.0,0.0,0.0,
-                        0.0,0.0,1.0),
-                        Vector<Float>(3,0.0,0.0,0.0));
+    VectorFunction reset_id((x,y,t));
+    VectorFunction reset_y_zero((x,0,t));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    VectorAffineFunction reset_y_one(Matrix<Float>(3,3,
-                        1.0,0.0,0.0,
-                        0.0,0.0,0.0,
-                        0.0,0.0,1.0),
-                        Vector<Float>(3,0.0,1.0,0.0));
+    VectorFunction reset_y_one((x,1,t));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
-    /// Guards are true when f(x) = Ax + b > 0
-    VectorAffineFunction guard12(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,-1.0));
+    /// Guards are true when f(x) > 0
+    ScalarFunction guard12(y-1);
     cout << "guard12=" << guard12 << endl << endl;
-    VectorAffineFunction guard23(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax + Delta));
+    ScalarFunction guard23(x-(hmax-Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    VectorAffineFunction guard34(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,0.0));
+    ScalarFunction guard34(-y);
     cout << "guard34=" << guard34 << endl << endl;
-    VectorAffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
+    ScalarFunction guard41(-x+(hmin+Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
-    /// Invariants are true when f(x) = Ax + b < 0
+    /// Invariants are true when f(x) < 0
     /// forced transitions do not need an explicit invariant
     /// x < hmax + Delta
-    VectorAffineFunction inv2(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1, - hmax - Delta));//
+    ScalarFunction inv2(x-(hmax+Delta));
     cout << "inv2=" << inv2 << endl << endl;
     /// x > hmin - Delta
-    VectorAffineFunction inv4(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmin - Delta));
+    ScalarFunction inv4(-x+(hmin-Delta));
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton
@@ -132,17 +131,17 @@ int main()
     watertank_system.new_mode(l3,dynamic3);
     watertank_system.new_mode(l4,dynamic4);
 
-    watertank_system.new_invariant(l1,inv2);
-    watertank_system.new_invariant(l2,inv2);
-    watertank_system.new_invariant(l3,inv4);
-    watertank_system.new_invariant(l4,inv4);
+    watertank_system.new_invariant(l1,i2,inv2);
+    watertank_system.new_invariant(l2,i2,inv2);
+    watertank_system.new_invariant(l3,i4,inv4);
+    watertank_system.new_invariant(l4,i4,inv4);
 
-    watertank_system.new_forced_transition(e12,l1,l2,reset_y_one,guard12);
-    watertank_system.new_unforced_transition(e13,l1,l3,reset_id,guard23);
-    watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
-    watertank_system.new_forced_transition(e34,l3,l4,reset_y_zero,guard34);
-    watertank_system.new_unforced_transition(e31,l3,l1,reset_id,guard41);
-    watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
+    watertank_system.new_transition(l1,e12,l2,reset_y_one,guard12,urgent);
+    watertank_system.new_transition(l1,e13,l3,reset_id,guard23,permissive);
+    watertank_system.new_transition(l2,e23,l3,reset_y_one,guard23,permissive);
+    watertank_system.new_transition(l3,e34,l4,reset_y_zero,guard34,urgent);
+    watertank_system.new_transition(l3,e31,l1,reset_id,guard41,permissive);
+    watertank_system.new_transition(l4,e41,l1,reset_y_zero,guard41,permissive);
 
 
     /// Finished building the automaton

@@ -112,10 +112,10 @@ int main(int argc, const char* argv[])
     watertank_system.new_invariant(l2,i2,inv2);
     watertank_system.new_invariant(l4,i4,inv4);
 
-    watertank_system.new_transition(e12,l1,l2,reset_y_one,guard12,urgent);
-    watertank_system.new_transition(e23,l2,l3,reset_y_one,guard23,permissive);
-    watertank_system.new_transition(e34,l3,l4,reset_y_zero,guard34,urgent);
-    watertank_system.new_transition(e41,l4,l1,reset_y_zero,guard41,permissive);
+    watertank_system.new_transition(l1,e12,l2,reset_y_one,guard12,urgent);
+    watertank_system.new_transition(l2,e23,l3,reset_y_one,guard23,permissive);
+    watertank_system.new_transition(l3,e34,l4,reset_y_zero,guard34,urgent);
+    watertank_system.new_transition(l4,e41,l1,reset_y_zero,guard41,permissive);
 
     /// Finished building the automaton
 

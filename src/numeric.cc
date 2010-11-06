@@ -1195,6 +1195,17 @@ operator>>(std::istream& is, Interval& ivl)
 }
 
 
+std::ostream& operator<<(std::ostream& os, const Real& x)
+{
+    Interval ivl=static_cast<Interval>(x);
+    if(ivl.lower()==ivl.upper()) { return os << ivl.lower(); }
+    else { return os << ivl; }
+    return os << "Real(" << ivl.lower() <<',' << ivl.upper() << ")";
+
+}
+
+
+
 #ifdef HAVE_GMPXX_H
 
 Real::Real(const std::string& str)

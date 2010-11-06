@@ -98,16 +98,18 @@ int main()
     MonolithicHybridAutomaton watertank_system;
 
     /// Create four discrete states
-    AtomicDiscreteLocation l1(1);
-    AtomicDiscreteLocation l2(2);
-    AtomicDiscreteLocation l3(3);
-    AtomicDiscreteLocation l4(4);
+    DiscreteLocation l1("q1");
+    DiscreteLocation l2("q2");
+    DiscreteLocation l3("q3");
+    DiscreteLocation l4("q4");
 
     /// Create the discrete events
-    DiscreteEvent e12(12);
-    DiscreteEvent e23(23);
-    DiscreteEvent e34(34);
-    DiscreteEvent e41(41);
+    DiscreteEvent e12("e12");
+    DiscreteEvent e23("e23");
+    DiscreteEvent e34("e34");
+    DiscreteEvent e41("e41");
+    DiscreteEvent i2("i2");
+    DiscreteEvent i4("i4");
 
     /// Coordinates
     ScalarFunction x=ScalarFunction::coordinate(3,0);
@@ -134,29 +136,29 @@ int main()
     cout << "closed dynamic = " << closed_d << endl << endl;
 
     /// Create the resets
-    VectorAffineFunction reset_y_zero(Matrix<Real>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Real>(3, 0.0,0.0,0.0));
+    VectorFunction reset_y_zero((x,0,t));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    VectorAffineFunction reset_y_one(Matrix<Real>(3,3, 1.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,1.0),Vector<Real>(3, 0.0,1.0,0.0));
+    VectorFunction reset_y_one((x,1,t));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    VectorAffineFunction guard12(Matrix<Real>(1,3,0.0,1.0,0.0),Vector<Real>(1,-1.0));
+    ScalarFunction guard12(y-1);
     cout << "guard12=" << guard12 << endl << endl;
-    VectorAffineFunction guard23(Matrix<Real>(1,3,1.0,0.0,0.0),Vector<Real>(1, - hmax + Delta));
+    ScalarFunction guard23(x-(hmax-Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    VectorAffineFunction guard34(Matrix<Real>(1,3,0.0,-1.0,0.0),Vector<Real>(1,0.0));
+    ScalarFunction guard34(-y);
     cout << "guard34=" << guard34 << endl << endl;
-    VectorAffineFunction guard41(Matrix<Real>(1,3,-1.0,0.0,0.0),Vector<Real>(1,hmin + Delta));
+    ScalarFunction guard41(-x+(hmin+Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
     /// forced transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    VectorAffineFunction inv2(Matrix<Real>(1,3,1.0,0.0,0.0),Vector<Real>(1, - hmax - Delta));//
+    ScalarFunction inv2(x-(hmax+Delta));
     cout << "inv2=" << inv2 << endl << endl;
-    VectorAffineFunction inv4(Matrix<Real>(1,3,-1.0,0.0,0.0),Vector<Real>(1, hmin - Delta));
+    ScalarFunction inv4(-x+(hmin-Delta));
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton
@@ -165,13 +167,13 @@ int main()
     watertank_system.new_mode(l3,closing_d);
     watertank_system.new_mode(l4,closed_d);
 
-    watertank_system.new_invariant(l2,inv2);
-    watertank_system.new_invariant(l4,inv4);
+    watertank_system.new_invariant(l2,i2,inv2);
+    watertank_system.new_invariant(l4,i2,inv4);
 
-    watertank_system.new_forced_transition(e12,l1,l2,reset_y_one,guard12);
-    watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
-    watertank_system.new_forced_transition(e34,l3,l4,reset_y_zero,guard34);
-    watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
+    watertank_system.new_transition(l1,e12,l2,reset_y_one,guard12,urgent);
+    watertank_system.new_transition(l2,e23,l3,reset_y_one,guard23,permissive);
+    watertank_system.new_transition(l3,e34,l4,reset_y_zero,guard34,urgent);
+    watertank_system.new_transition(l4,e41,l1,reset_y_zero,guard41,permissive);
 
 
     /// Finished building the automaton

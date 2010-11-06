@@ -292,9 +292,9 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
                                       AtomicDiscreteLocation target,
                                       const List<RealUpdateAssignment>& reset,
                                       const ContinuousPredicate& guard,
-                                      Urgency urgency)
+                                      EventKind kind)
 {
-    switch(urgency) {
+    switch(kind) {
         case urgent: this->new_urgent_guard(source,event,guard); break;
         case permissive: this->new_permissive_guard(source,event,guard); break;
         default: assert(false);
@@ -310,7 +310,7 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
                                       const ContinuousPredicate& guard,
                                       AtomicDiscreteLocation target,
                                       const List<RealUpdateAssignment>& reset,
-                                      Urgency urgency)
+                                      EventKind kind)
 {
     return this->new_transition(source,event,target,reset,guard);
 }
@@ -419,6 +419,12 @@ AtomicHybridAutomaton::has_invariant(AtomicDiscreteLocation source, DiscreteEven
    return this->_modes.has_key(source) && this->_modes[source]._invariant_predicates.has_key(event);
 }
 
+
+bool
+AtomicHybridAutomaton::has_guard(AtomicDiscreteLocation source, DiscreteEvent event) const
+{
+   return this->has_invariant(source,event) || this->has_transition(source,event);
+}
 
 
 
@@ -686,6 +692,17 @@ CompositeHybridAutomaton::has_mode(DiscreteLocation location) const {
 }
 
 bool
+CompositeHybridAutomaton::has_guard(DiscreteLocation location, DiscreteEvent event) const
+{
+    for(uint i=0; i!=this->_components.size(); ++i) {
+        if(this->_components[i].has_guard(location[i],event)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
 CompositeHybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const {
     for(uint i=0; i!=this->_components.size(); ++i) {
         if(this->_components[i].has_transition(source[i],event)) {
@@ -872,6 +889,11 @@ CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent 
         }
     }
     return VectorFunction(next(state_variables(target)),update,state_variables(source));
+}
+
+ScalarFunction
+CompositeHybridAutomaton::constraint_function(DiscreteLocation location, DiscreteEvent event) const {
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 ScalarFunction

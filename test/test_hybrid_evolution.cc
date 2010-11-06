@@ -94,7 +94,8 @@ void TestHybridEvolution::test_bouncing_ball() const {
 
     Real lambda=0.5;
     bouncing_ball.new_mode(q,(v,-c));
-    bouncing_ball.new_transition(e,q,q,(x,-lambda*v),-x,impact);
+    bouncing_ball.new_transition(q,e,q,(x,-lambda*v),-x,impact);
+    ARIADNE_TEST_PRINT(bouncing_ball);
 
     double height=2.0;
     double radius=1.0/64;
@@ -152,15 +153,17 @@ void TestHybridEvolution::test_water_tank() const {
     // Create the tank object
     MonolithicHybridAutomaton watertank("Watertank");
 
-    watertank.new_mode(open,(-lambda*height+rate*aperture,zero));
-    watertank.new_mode(closed,(-lambda*height+rate*aperture,zero));
-    watertank.new_mode(opening,(-lambda*height+rate*aperture,one/T));
-    watertank.new_mode(closing,(-lambda*height+rate*aperture,-one/T));
+    watertank.new_mode(open,(-lambda*height+rate*aperture,0));
+    watertank.new_mode(closed,(-lambda*height+rate*aperture,0));
+    watertank.new_mode(opening,(-lambda*height+rate*aperture,1/T));
+    watertank.new_mode(closing,(-lambda*height+rate*aperture,-1/T));
 
-    watertank.new_transition(start_opening,closed,opening,(height,aperture),hmin-height,urgent);
-    watertank.new_transition(start_closing,open,closing,(height,aperture),height-hmax,urgent);
-    watertank.new_transition(finished_opening,opening,open,(height,aperture),aperture-1,urgent);
-    watertank.new_transition(finished_closing,closing,closed,(height,aperture),-aperture,urgent);
+    watertank.new_transition(closed,start_opening,opening,(height,aperture),hmin-height,urgent);
+    watertank.new_transition(open,start_closing,closing,(height,aperture),height-hmax,urgent);
+    watertank.new_transition(opening,finished_opening,open,(height,aperture),aperture-1,urgent);
+    watertank.new_transition(closing,finished_closing,closed,(height,aperture),-aperture,urgent);
+
+    ARIADNE_TEST_PRINT(watertank);
 
     DiscreteLocation initial_location=opening;
     Box initial_box(2, 0.0,0.05, 0.0,0.01);

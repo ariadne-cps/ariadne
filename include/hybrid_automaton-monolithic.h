@@ -44,15 +44,11 @@ namespace Ariadne {
 
 
 
-
-
 class HybridTime;
 class HybridSpace;
 class HybridSet;
 class HybridGrid;
 
-class DiscreteMode;
-class DiscreteTransition;
 class MonolithicHybridAutomaton;
 
 class ScalarFunction;
@@ -60,7 +56,8 @@ class VectorFunction;
 class Grid;
 
 
-//! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
+/*
+ * //! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
 //! within and invariant constraint set.
 //!
 //! A %DiscreteMode can only be created using the new_mode() method in
@@ -78,7 +75,7 @@ class DiscreteMode {
     VectorFunction _dynamic;
 
     // The discrete mode's invariants.
-    Map< DiscreteEvent, ScalarFunction > _invariants;
+    Map< DiscreteEvent, Pair<EventKind,ScalarFunction> _invariants;
 
     // The discrete mode's grid for reachability analysis.
     boost::shared_ptr< const Grid > _grid;
@@ -117,124 +114,12 @@ class DiscreteMode {
     DiscreteMode(DiscreteLocation location,
                  const VectorFunction& dynamic);
 
-    // Construct from objects managed by shared pointers (for internal use)
-    DiscreteMode(DiscreteLocation location,
-                 const VectorFunction dynamic,
-                 const std::vector< ScalarFunction >& invariants);
-
 };
 
 
 std::ostream& operator<<(std::ostream& os, const DiscreteMode& dm);
 
-inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
-    return mode1.location() < mode2.location(); }
-
-
-
-
-//! \brief A discrete transition of a hybrid automaton, representing an instantaneous
-//! jump from one discrete mode to another, governed by an activation set and a reset map.
-//!
-//! A %DiscreteTransition can only be created using the new_transition() method in
-//! the %MonolithicHybridAutomaton class.
-//!
-//! An invariant is modelled by a discrete transition with negative event id and null reset pointer.
-//!
-//! \sa MonolithicHybridAutomaton, DiscreteMode
-class DiscreteTransition
-{
-    friend class MonolithicHybridAutomaton;
-  private:
-    // \brief The discrete transition's identificator.
-    DiscreteEvent _event;
-
-    // \brief The source of the discrete transition.
-    const DiscreteMode* _source;
-
-    // \brief The target of the discrete transition.
-    const DiscreteMode* _target;
-
-    // \brief The activation region of the discrete transition.
-    ScalarFunction _activation;
-
-    // \brief The reset of the discrete transition.
-    VectorFunction _reset;
-
-    // \brief Whether or not the transition is urgent or permissive.
-    Urgency _urgency;
-
-  public:
-
-    //! \brief The discrete event associated with the discrete transition.
-    DiscreteEvent event() const {
-        return this->_event; }
-
-    //! \brief The source mode of the discrete transition.
-    const DiscreteMode& source_mode() const {
-        return *this->_source; }
-
-    //! \brief The target of the discrete transition.
-    const DiscreteMode& target_mode() const {
-        return *this->_target; }
-
-
-    //! \brief The source mode of the discrete transition.
-    DiscreteLocation source() const {
-        return this->_source->location(); }
-
-    //! \brief The target of the discrete transition.
-    DiscreteLocation target() const {
-        return this->_target->location(); }
-
-
-    //! \brief The activation constraint function of the discrete transition.
-    const ScalarFunction& activation() const {
-        return this->_activation;
-    }
-
-    //! \brief The guard/activation constraint function of the discrete transition.
-    const ScalarFunction& guard() const {
-        return this->_activation;
-    }
-
-    //! \brief The reset map of the discrete transition.
-    const VectorFunction& reset() const {
-        return this->_reset;
-    }
-
-    //! \brief True if the transition is forced (occurs as soon as it is activated).
-    bool forced() const {
-        return this->_urgency;
-    }
-
-    //! \brief True if the transition is forced (occurs as soon as it is activated).
-    Urgency urgency() const {
-        return this->_urgency;
-    }
-
-  private:
-
-
-    // Construct from shared pointers (for internal use).
-    DiscreteTransition(DiscreteEvent event,
-                       const DiscreteMode& source,
-                       const DiscreteMode& target,
-                       const VectorFunction& reset,
-                       const ScalarFunction& activation,
-                       Urgency urgency);
-
-};
-
-std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt);
-
-inline bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
-    return transition1.event() < transition2.event()
-        || (transition1.event() == transition2.event()
-            && transition1.source() < transition2.source());
-}
-
-
+*/
 
 
 
@@ -272,25 +157,43 @@ inline bool operator<(const DiscreteTransition& transition1, const DiscreteTrans
 class MonolithicHybridAutomaton
     : public HybridAutomatonInterface
 {
+    struct Invariant {
+        Invariant(DiscreteLocation q, DiscreteEvent e, ScalarFunction g, EventKind k)
+            : _location(q), _event(e), _guard(g), _kind(k) { }
+        DiscreteLocation _location;
+        DiscreteEvent _event;
+        ScalarFunction _guard;
+        EventKind _kind;
+    };
+    struct Transition {
+        Transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, VectorFunction r, ScalarFunction g, EventKind k)
+            : _source(s), _event(e), _target(t), _reset(r), _guard(g), _kind(k) { }
+        DiscreteLocation _source;
+        DiscreteEvent _event;
+        DiscreteLocation _target;
+        VectorFunction _reset;
+        ScalarFunction _guard;
+        EventKind _kind;
+    };
+    struct Mode {
+        Mode(DiscreteLocation q, VectorFunction f)
+            : _location(q), _dynamic(f) { }
+        DiscreteLocation _location;
+        VectorFunction _dynamic;
+        Map< DiscreteEvent, Invariant >  _invariants;
+        Map< DiscreteEvent, Transition >  _transitions;
+        boost::shared_ptr< const Grid > _grid_ptr;
+        uint dimension() const { return _dynamic.result_size(); }
+    };
+    friend std::ostream& operator<<(std::ostream&, const MonolithicHybridAutomaton&);
   public:
     //! \brief The type used to represent time.
     typedef HybridTime TimeType;
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
-
-
-    typedef Map<DiscreteEvent,VectorFunction>::const_iterator invariant_const_iterator;
-    typedef Set<DiscreteTransition>::const_iterator discrete_transition_const_iterator;
-    typedef Set<DiscreteMode>::const_iterator discrete_mode_const_iterator;
   private:
-    //! \brief The hybrid automaton's name.
-    std::string _name;
-
     //! \brief The list of the hybrid automaton's discrete modes.
-    Set< DiscreteMode > _modes;
-
-    //! \brief The hybrid automaton's transitions.
-    Set< DiscreteTransition > _transitions;
+    Map< DiscreteLocation, Mode > _modes;
 
   public:
     //@{
@@ -299,11 +202,8 @@ class MonolithicHybridAutomaton
     //! \brief Construct an empty automaton with no name
     MonolithicHybridAutomaton();
 
-    //! \brief Construct an empty automaton with the given name
+    //! \brief Construct an empty automaton with the given name (Deprecated)
     MonolithicHybridAutomaton(const std::string& name);
-
-    //! \brief Construct dynamically-allocated copy. (Not currently implemented)
-    MonolithicHybridAutomaton* clone() const;
 
     //! \brief  Destructor.
     ~MonolithicHybridAutomaton();
@@ -316,8 +216,8 @@ class MonolithicHybridAutomaton
     //!
     //!   \param state is the mode's discrete state.
     //!   \param dynamic is the mode's vector field.
-    const DiscreteMode& new_mode(DiscreteLocation state,
-                                 const VectorFunction& dynamic);
+    void new_mode(DiscreteLocation state,
+                  VectorFunction dynamic);
 
     //! \brief Adds an invariant to a mode of the automaton.
     //!
@@ -325,96 +225,29 @@ class MonolithicHybridAutomaton
     //!   \param label is a discrete event labelling the invariant;
     //!            must be different from all transition events
     //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
+    //!   \param kind determines whether the constraint is a true invariant, or a progress predicate.
 
-    const DiscreteMode& new_invariant(DiscreteLocation state,
-									  DiscreteEvent label,
-    		                          const ScalarFunction& invariant);
-
-    //! \brief Adds an invariant to a mode of the automaton.
-    //!
-    //!   \param state is the mode's discrete state.
-    //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
-
-    const DiscreteMode& new_invariant(DiscreteLocation state,
-                                      const ScalarFunction& invariant);
-
-    //! \brief Adds an invariants to a mode of the automaton.
-    //!
-    //!   \param state is the mode's discrete state.
-    //!   \param invariants is the new invariants condition.
-
-    const DiscreteMode& new_invariant(DiscreteLocation state,
-                                      const VectorFunction& invariants);
-
-    //! \brief Adds an invariants to a mode of the automaton.
-    //!
-    //!    \param mode is the discrete mode.
-    //!    \param invariants is the new invariants condition.
-
-    const DiscreteMode& new_invariant(const DiscreteMode& mode,
-                                      const VectorFunction& invariants);
+    void new_invariant(DiscreteLocation state,
+                       DiscreteEvent label,
+                       ScalarFunction invariant,
+                       EventKind kind=PROGRESS
+                      );
 
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
-    //!    \param event is the transition's event.
     //!    \param source is the transition's source location.
+    //!    \param event is the transition's event.
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    //!    \param urgency determines whether the transision is urgent or permissive.
-    const DiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteLocation source,
-                                             DiscreteLocation target,
-                                             const VectorFunction& reset,
-                                             const ScalarFunction& activation,
-                                             Urgency urgency);
-
-    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
-    //!   \deprecated
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation defines the transition's activation region. Must have a one-dimensional codomain.
-    //!    \param urgency determines whether the transision is urgent or permissive.
-    const DiscreteTransition& new_transition(DiscreteEvent event,
-                                             DiscreteLocation source,
-                                             DiscreteLocation target,
-                                             const VectorFunction& reset,
-                                             const VectorFunction& activation,
-                                             Urgency urgency);
-
-    //! \brief Adds a forced (urgent) discrete transition to the automaton
-    //! using the discrete states to specify the source and target modes.
-    //!   \deprecated
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    const DiscreteTransition& new_forced_transition(DiscreteEvent event,
-                                                    DiscreteLocation source,
-                                                    DiscreteLocation target,
-                                                    const VectorFunction& reset,
-                                                    const VectorFunction& activation);
-
-    //! \brief Adds an unforced (non-urgent) discrete transition to the automaton
-    //! using the discrete states to specify the source and target modes.
-    //!   \deprecated
-    //!
-    //!    \param event is the transition's event.
-    //!    \param source is the transition's source location.
-    //!    \param target is the transition's target location.
-    //!    \param reset is the transition's reset.
-    //!    \param activation is the transition's activation region.
-    const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
-                                                      DiscreteLocation source,
-                                                      DiscreteLocation target,
-                                                      const VectorFunction& reset,
-                                                      const VectorFunction& activation);
+    //!    \param guard is the transition's guard function. The transition may occur when \f$g(x)\geq0\f$.
+    //!    \param kind determines whether the transision is an impact, urgent or permissive.
+    void new_transition(DiscreteLocation source,
+                        DiscreteEvent event,
+                        DiscreteLocation target,
+                        VectorFunction reset,
+                        ScalarFunction guard,
+                        EventKind kind);
 
     //! \brief Set the grid controlling relative scaling in the mode.
     void set_grid(DiscreteLocation location, const Grid& grid);
@@ -429,86 +262,61 @@ class MonolithicHybridAutomaton
     //@{
     //! \name Data access and queries.
 
-    //! \brief Returns the hybrid automaton's name.
-    const std::string& name() const;
-
     //! \brief Test if the hybrid automaton has a discrete mode \a location.
     bool has_mode(DiscreteLocation location) const;
 
+    //! \brief Test if the hybrid automaton has an action (corresponding to an invariant or guard) in \a location labelled by \a event.
+    bool has_guard(DiscreteLocation location, DiscreteEvent event) const;
+
+    //! \brief Test if the hybrid automaton has an invariant in \a location labelled by \a event.
+    bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
+
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
     bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
-    bool has_transition(DiscreteEvent event, DiscreteLocation source) const;
-
-    //! \brief The discrete mode with location \a location. \deprecated
-    const DiscreteMode& mode(DiscreteLocation location) const;
-
-    //! \brief The discrete transition with given \a event and \a source location. \deprecated
-    const DiscreteTransition& transition(DiscreteLocation source, DiscreteEvent event) const;
-    const DiscreteTransition& transition(DiscreteEvent event, DiscreteLocation source) const;
 
     //! \brief The dimension of the state space of in the mode \a location.
     uint dimension(DiscreteLocation location) const;
 
     //! \brief The dynamic valid in the mode \a location.
-    VectorFunction dynamic(DiscreteLocation location) const;
-
-    //! \brief The invariants valid in the mode \a location.
-    Map<DiscreteEvent,ScalarFunction> invariants(DiscreteLocation location) const;
-
-    //! \brief The guards active in the mode \a location.
-    Map<DiscreteEvent,ScalarFunction> guards(DiscreteLocation location) const;
-    Map<DiscreteEvent,ScalarFunction> activations(DiscreteLocation location) const;
-
-    //! \brief The target location of \a event starting in the \a source location.
-    DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const;
-    Map<DiscreteEvent,DiscreteLocation> targets(DiscreteLocation source) const;
-
-    //! \brief The dynamic valid in the mode \a location.
-    VectorFunction reset(DiscreteLocation source, DiscreteEvent event) const;
-    Map<DiscreteEvent,VectorFunction> resets(DiscreteLocation source) const;
-
-    //! \brief The set of discrete modes. (Not available in Python interface)
-    const Set< DiscreteMode >& modes() const;
-
-    //! \brief The set of discrete transitions. (Not available in Python interface)
-    const Set< DiscreteTransition >& transitions() const;
-
-    //! \brief The discrete transitions from location \a source.
-    Set< DiscreteTransition > transitions(DiscreteLocation source) const;
+    virtual VectorFunction dynamic_function(DiscreteLocation location) const;
 
     //! \brief The set of all events possible in the given \a location.
-    Set<DiscreteEvent> events(DiscreteLocation location) const;
+    virtual Set<DiscreteEvent> events(DiscreteLocation location) const;
 
     //! \brief The kind (permissive, urgent etc) of the event.
-    EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 
-    //! \brief The blocking events (invariants and urgent transitions) in \a location.
-    Map<DiscreteEvent,ScalarFunction> blocking_guards(DiscreteLocation location) const;
+    //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs or progress is interrupted.
+    virtual ScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
 
-    //! \brief The permissive events (invariants and urgent transitions) in \a location.
-    Map<DiscreteEvent,ScalarFunction> permissive_guards(DiscreteLocation location) const;
+    //! \brief The target location of \a event starting in the \a source location.
+    virtual DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const;
 
-    //! \brief The state space of the system.
+    //! \brief The dynamic valid in the mode \a location.
+    virtual VectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+
+    //! \brief The natural grid to use in the \a location.
+    virtual Grid grid(DiscreteLocation location) const;
+
+    //! \brief A hybrid grid, comprising a Grid for each (reachable) location of the automaton. (Deprecated)
+    //! \deprecated Only used to support current reachability analysis routines.
+    virtual HybridGrid grid() const;
+
+    //! \brief A hybrid space, comprising a dimension for each (reachable) location of the automaton. (Deprecated)
+    //! \deprecated Only used to support current reachability analysis routines.
     HybridSpace state_space() const;
 
-    //! \brief The hybrid set giving the invariants for each discrete location.
-    HybridSet invariant() const;
+    //! \brief The set of all locations.
+    Set<DiscreteLocation> locations() const;
 
-    //! \brief The natural grid to use in the specified location.
-    Grid grid(DiscreteLocation location) const;
+    //! \brief The discrete mode for the given \a location.
+    const Mode& mode(DiscreteLocation source) const;
 
-    //! \brief The natural grid to use in the over all locations.
-    HybridGrid grid() const;
+    //! \brief The invariant in the given \a location with the given \a event label.
+    const Invariant& invariant(DiscreteLocation location, DiscreteEvent event) const;
 
-    virtual Set<DiscreteEvent> urgent_events(DiscreteLocation) const;
-    virtual Set<DiscreteEvent> permissive_events(DiscreteLocation) const;
-    virtual Set<DiscreteEvent> blocking_events(DiscreteLocation) const;
-    virtual Set<DiscreteEvent> invariant_events(DiscreteLocation) const;
-    virtual Set<DiscreteEvent> transition_events(DiscreteLocation) const;
-    virtual VectorFunction dynamic_function(DiscreteLocation) const;
-    virtual VectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
-    virtual ScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
-    virtual ScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
+    //! \brief The discrete transition with given \a source location and \a event.
+    const Transition& transition(DiscreteLocation source, DiscreteEvent event) const;
     //@}
 
 };

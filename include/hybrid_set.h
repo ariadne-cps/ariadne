@@ -63,7 +63,7 @@ template<class HDS> class HybridDenotableSetExpression { };
 
 //! \brief A hybrid space \f$\bigsqcup_{q\in Q} \R^{d_q}\f$ with discrete states \f$Q\f$.
 class HybridSpace
-    : public std::map<DiscreteLocation,uint>
+    : public Map<DiscreteLocation,uint>
 {
   public:
     //! \brief The interface satisified by bounded sets in the space.
@@ -83,11 +83,11 @@ class HybridSpace
     //! \brief The type of approximations to sets in the space.
     typedef HybridGridTreeSet SetApproximationType;
 
-    typedef std::map<DiscreteLocation,uint>::const_iterator
+    typedef Map<DiscreteLocation,uint>::const_iterator
     locations_const_iterator;
 
-    HybridSpace() : std::map<DiscreteLocation,uint>() { }
-    template<class SET> HybridSpace(const std::map<DiscreteLocation,SET>& qsmap) {
+    HybridSpace() : Map<DiscreteLocation,uint>() { }
+    template<class SET> HybridSpace(const Map<DiscreteLocation,SET>& qsmap) {
         for(typename std::map<DiscreteLocation,SET>::const_iterator loc_iter
                 =qsmap.begin(); loc_iter!=qsmap.end(); ++loc_iter) {
             this->insert(make_pair(loc_iter->first,loc_iter->second.dimension())); }
@@ -99,9 +99,9 @@ class HybridSpace
     }
 
     locations_const_iterator locations_begin() const {
-        return this->std::map<DiscreteLocation,uint>::begin(); }
+        return this->Map<DiscreteLocation,uint>::begin(); }
     locations_const_iterator locations_end() const {
-        return this->std::map<DiscreteLocation,uint>::end(); }
+        return this->Map<DiscreteLocation,uint>::end(); }
 };
 
 inline

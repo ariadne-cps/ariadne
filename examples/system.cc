@@ -72,13 +72,13 @@ void build_automaton() {
     DiscreteEvent to_unsafe(6); // Switches to the unsafe location
 
     /// Create the discrete states
-    AtomicDiscreteLocation states[NH+1][2];
+    DiscreteLocation states[NH+1][2];
     for (int i=0;i<=NH;i++)
     {
-        states[i][0] = AtomicDiscreteLocation(10*i+1);
-        states[i][1] = AtomicDiscreteLocation(10*i+2);		
+        states[i][0] = DiscreteLocation(10*i+1);
+        states[i][1] = DiscreteLocation(10*i+2);		
     }
-    AtomicDiscreteLocation end(1000);
+    DiscreteLocation end(1000);
 
     /// Create the dynamics 
 
@@ -126,29 +126,29 @@ void build_automaton() {
     VectorAffineFunction unsafe_g(Matrix<Float>(1,4,0.0,0.0,1.0),Vector<Float>(1,-Vlow));
 
     /// Create the transitions
-    automaton.new_forced_transition(to_safe,end,safe,IdentityFunction(4),safe_g);
-    automaton.new_forced_transition(to_unsafe,end,unsafe,IdentityFunction(4),unsafe_g);
+    automaton.new_transition(end,to_safe,safe,IdentityFunction(4),safe_g,urgent);
+    automaton.new_transition(end,to_unsafe,unsafe,IdentityFunction(4),unsafe_g,urgent);
     // NH
-    automaton.new_forced_transition(chk,states[NH][0],states[NH][1],IdentityFunction(4),chkdiff_g);
-	automaton.new_forced_transition(up,states[NH][1],states[NH][0],*vo_r[NH],posdiff_g);
-	automaton.new_forced_transition(down,states[NH][1],states[NH-1][0],*vo_r[NH-1],negdiff_g);
+    automaton.new_transition(states[NH][0],chk,states[NH][1],IdentityFunction(4),chkdiff_g,urgent);
+	automaton.new_transition(states[NH][1],up,states[NH][0],*vo_r[NH],posdiff_g,urgent);
+	automaton.new_transition(states[NH][1],down,states[NH-1][0],*vo_r[NH-1],negdiff_g,urgent);
 	   
 	// From NH-1 downto 1
 	for (int n=NH-1;n>0;n--)
 	{
-	  	automaton.new_forced_transition(chk,states[n][0],states[n][1],IdentityFunction(4),chkdiff_g);
-	   	automaton.new_forced_transition(up,states[n][1],states[n+1][0],*vo_r[n+1],posdiff_g);
-	   	automaton.new_forced_transition(down,states[n][1],states[n-1][0],*vo_r[n-1],negdiff_g);
-       	automaton.new_forced_transition(to_end,states[n][0],end,IdentityFunction(4),end_g);
+	  	automaton.new_transition(states[n][0],chk,states[n][1],IdentityFunction(4),chkdiff_g,urgent);
+	   	automaton.new_transition(states[n][1],up,states[n+1][0],*vo_r[n+1],posdiff_g,urgent);
+	   	automaton.new_transition(states[n][1],down,states[n-1][0],*vo_r[n-1],negdiff_g,urgent);
+       	automaton.new_transition(states[n][0],to_end,end,IdentityFunction(4),end_g,urgent);
 	}
 
 	// 0
-	automaton.new_forced_transition(chk,states[0][0],states[0][1],IdentityFunction(4),chkdiff_g);
-	automaton.new_forced_transition(up,states[0][1],states[1][0],*vo_r[1],posdiff_g);
-	automaton.new_forced_transition(down,states[0][1],states[0][0],IdentityFunction(4),negdiff_g);
-    automaton.new_forced_transition(to_end,states[0][0],end,IdentityFunction(4),end_g);
-    automaton.new_forced_transition(to_safe,states[0][0],safe,IdentityFunction(4),safe_g);
-    automaton.new_forced_transition(to_unsafe,states[0][0],unsafe,IdentityFunction(4),unsafe_g);
+	automaton.new_transition(states[0][0],chk,states[0][1],IdentityFunction(4),chkdiff_g,urgent);
+	automaton.new_transition(states[0][1],up,states[1][0],*vo_r[1],posdiff_g,urgent);
+	automaton.new_transition(states[0][1],down,states[0][0],IdentityFunction(4),negdiff_g,urgent);
+    automaton.new_transition(states[0][0],to_end,end,IdentityFunction(4),end_g,urgent);
+    automaton.new_transition(states[0][0],to_safe,safe,IdentityFunction(4),safe_g,urgent);
+    automaton.new_transition(states[0][0],to_unsafe,unsafe,IdentityFunction(4),unsafe_g,urgent);
 
     /// Finished building the automaton    
 

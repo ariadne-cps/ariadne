@@ -69,7 +69,7 @@ int main(int argc, const char* argv[])
 
     /// Build the automaton
     ball.new_mode(freefall,dynamic);
-    ball.new_transition(bounce,freefall,freefall,reset,guard,impact);
+    ball.new_transition(freefall,bounce,freefall,reset,guard,impact);
     /// Finished building the automaton
 
     cout << "Automaton = " << ball << endl << endl;

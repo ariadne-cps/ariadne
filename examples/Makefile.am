@@ -12,8 +12,7 @@ bin_PROGRAMS= \
 	watertank-nonlinear watertank-time \
 	watertank-proportional 3bouncingballs \
 	rectifier cmos_inverter_analoginput \
-	grid-refinement multipleguards\
-	coconut-demo 
+	grid-refinement
 
 
 tutorial_SOURCES = tutorial.cc verify.py

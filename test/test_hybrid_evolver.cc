@@ -31,7 +31,6 @@
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "box.h"
-#include "zonotope.h"
 #include "list_set.h"
 #include "evolution_parameters.h"
 #include "orbit.h"
@@ -165,7 +164,7 @@ void TestSimpleHybridEvolver::test_exact_final_time() const {
 void TestSimpleHybridEvolver::test_urgent_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-    automaton.new_transition(e,q,q,(x0-1.5,x1),x0+x1/16-0.5,urgent);
+    automaton.new_transition(q,e,q,(x0-1.5,x1),x0+x1/16-0.5,urgent);
     //automaton.new_transition(e,q,q,(x0-1.5,x1),x0-0.5,urgent);
     // FIXME: Change so that hitting coordinate guard is not an error.
 
@@ -193,9 +192,9 @@ void TestSimpleHybridEvolver::test_urgent_event() const {
 void TestSimpleHybridEvolver::test_partial_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-    automaton.new_transition(e,q,q,(x0-2,x1),x0-x1/1024-2,urgent);
+    automaton.new_transition(q,e,q,(x0-2,x1),x0-x1/1024-2,urgent);
     //FIXME: Need to allow domain of TaylorFunction to have empty interior
-    //automaton.new_transition(e,q,q,(x0-2,x1),x0-2,urgent);
+    //automaton.new_transition(q,e,q,(x0-2,x1),x0-2,urgent);
 
     HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(2.0,3);
@@ -222,7 +221,7 @@ void TestSimpleHybridEvolver::test_partial_event() const {
 void TestSimpleHybridEvolver::test_step_size_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-    automaton.new_transition(e,q,q,(x0-2,x1),x0-2.0,urgent);
+    automaton.new_transition(q,e,q,(x0-2,x1),x0-2.0,urgent);
 
     HybridBox initial(q,Box(2, -0.125,0.125, -0.125,0.125));
     HybridTime time(1.0,3);
@@ -246,7 +245,7 @@ void TestSimpleHybridEvolver::test_step_size_event() const {
 void TestSimpleHybridEvolver::test_initially_active_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c));
-    automaton.new_transition(e,q,q,(x0+1,x1),-x0,urgent);
+    automaton.new_transition(q,e,q,(x0+1,x1),-x0,urgent);
 
     HybridBox initial(q,Box(2, -1.625,-1.375, -0.125,0.125));
     HybridTime time(1.0,4);
@@ -272,7 +271,7 @@ void TestSimpleHybridEvolver::test_initially_active_event() const {
 void TestSimpleHybridEvolver::test_initially_active_attracting_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(-0.5*c,c));
-    automaton.new_transition(e,q,q,(x0+1.0,x1),-x0-x1*1.0/256,urgent);
+    automaton.new_transition(q,e,q,(x0+1.0,x1),-x0-x1*1.0/256,urgent);
 
     HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(1.0,4);
@@ -294,7 +293,7 @@ void TestSimpleHybridEvolver::test_initially_active_attracting_event() const {
 void TestSimpleHybridEvolver::test_initially_active_repelling_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(+0.5*c,c));
-    automaton.new_transition(e,q,q,(x0+1,x1),-x0,urgent);
+    automaton.new_transition(q,e,q,(x0+1,x1),-x0,urgent);
 
     HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(1.0,2);
@@ -314,8 +313,8 @@ void TestSimpleHybridEvolver::test_initially_active_repelling_event() const {
 void TestSimpleHybridEvolver::test_impact() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(x1,Real(0)*c));
-    automaton.new_transition(e,q,q,(x0,x1-2),x0-1,impact);
-    //automaton.new_transition(e,q,q,(x0+0.001*x1-0.0004,x1-2),x0-1,urgent);
+    automaton.new_transition(q,e,q,(x0,x1-2),x0-1,impact);
+    //automaton.new_transition(q,e,q,(x0+0.001*x1-0.0004,x1-2),x0-1,urgent);
 
     HybridBox initial(q,Box(2, 0.4375,0.5625, 0.9375,1.0625));
     HybridTime time(2.0,3);
@@ -336,7 +335,7 @@ void TestSimpleHybridEvolver::test_impact() const {
 void TestSimpleHybridEvolver::test_tangency() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,z));
-    automaton.new_transition(e,q,q,(x0,x1-1),x1-sqr(x0),urgent);
+    automaton.new_transition(q,e,q,(x0,x1-1),x1-sqr(x0),urgent);
 
     HybridBox initial(q,Box(2, -1.125,-0.875, -0.25,0.25));
     HybridTime time(2.0,3);
@@ -375,8 +374,8 @@ void TestSimpleHybridEvolver::test_simultaneous_events() const {
     DiscreteEvent e1("e1");
     DiscreteEvent e2("e2");
     automaton.new_mode(q,(c,c));
-    automaton.new_transition(e1,q,q,(x0-1,x1-2),x0-1.0,urgent);
-    automaton.new_transition(e2,q,q,(x0-2,x1-1),x1-1.0,urgent);
+    automaton.new_transition(q,e1,q,(x0-1,x1-2),x0-1.0,urgent);
+    automaton.new_transition(q,e2,q,(x0-2,x1-1),x1-1.0,urgent);
 
     HybridBox initial(q,Box(2, -0.25,0.125, -0.125,0.25));
     HybridTime time(2.5,4);
@@ -400,7 +399,7 @@ void TestSimpleHybridEvolver::test_creep() const {
     MonolithicHybridAutomaton automaton;
     DiscreteEvent e("e");
     automaton.new_mode(q,(c,c));
-    automaton.new_transition(e,q,q,(x0-1,x1),x0-1.0,urgent);
+    automaton.new_transition(q,e,q,(x0-1,x1),x0-1.0,urgent);
 
     HybridBox initial(q,Box(2, -0.25,0.125, -0.125,0.25));
     HybridTime time(1.5,4);
@@ -426,8 +425,8 @@ void TestSimpleHybridEvolver::test_creep() const {
 void TestSimpleHybridEvolver::test_unwind() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c));
-    //automaton.new_transition(e,q,q,(x0-3,x1-1),x0-1,urgent);
-    automaton.new_transition(e,q,q,(x0-3,x1-1),x0-x1/16-1,urgent);
+    //automaton.new_transition(q,e,q,(x0-3,x1-1),x0-1,urgent);
+    automaton.new_transition(q,e,q,(x0-3,x1-1),x0-x1/16-1,urgent);
 
     HybridBox initial(q,Box(2, -0.25,0.125, -0.125,0.25));
     HybridTime time(3.0,4);

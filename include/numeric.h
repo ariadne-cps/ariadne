@@ -1269,11 +1269,7 @@ inline Real tan(const Real& x) { return Real(tan(static_cast<Interval>(x))); }
 //! \related Real \name Input/output operators
 
 //! \related Real \brief Write to an output stream.
-inline std::ostream& operator<<(std::ostream& os, const Real& x) {
-    Interval ivl=static_cast<Interval>(x);
-    if(ivl.lower()==ivl.upper()) { return os << ivl.lower(); }
-    else { return os << ivl; }
-    return os << "Real(" << ivl.lower() <<',' << ivl.upper() << ")"; }
+std::ostream& operator<<(std::ostream& os, const Real& x);
 //@}
 
 template<class R, class A> inline R numeric_cast(const A& a);

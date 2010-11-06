@@ -314,7 +314,7 @@ class AtomicHybridAutomaton
                         const ContinuousPredicate& guard,
                         AtomicDiscreteLocation target,
                         const List<RealUpdateAssignment>& reset,
-                        Urgency urgency=urgent);
+                        EventKind kind=urgent);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
@@ -329,7 +329,7 @@ class AtomicHybridAutomaton
                         AtomicDiscreteLocation target,
                         const List<RealUpdateAssignment>& reset,
                         const ContinuousPredicate& guard,
-                        Urgency urgency=urgent);
+                        EventKind urgency=urgent);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
@@ -383,14 +383,14 @@ class AtomicHybridAutomaton
     //! \brief Test if the hybrid automaton has a discrete mode with the given \a location.
     bool has_mode(AtomicDiscreteLocation location) const;
 
+    //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
+    bool has_guard(AtomicDiscreteLocation, DiscreteEvent) const;
+
     //! \brief Test if the hybrid automaton has a discrete transition starting from the given location with the given event.
     bool has_transition(AtomicDiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
     bool has_invariant(AtomicDiscreteLocation location, DiscreteEvent event) const;
-
-    //! \brief Test if the hybrid automaton has a guard (urgent or permissive) with \a event_id and \a source_id.
-    bool has_guard(AtomicDiscreteLocation location, DiscreteEvent event) const;
 
 
     //! \brief The discrete modes of the automaton.
@@ -487,6 +487,10 @@ class CompositeHybridAutomaton
 
     //! \brief Tests if the automaton has a mode corresponding to the given location.
     bool has_mode(DiscreteLocation) const;
+    //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
+    bool has_guard(DiscreteLocation, DiscreteEvent) const;
+    //! \brief Tests if the automaton has an invariant corresponding to the given location and event.
+    bool has_invariant(DiscreteLocation, DiscreteEvent) const;
     //! \brief Tests if the automaton has a transition corresponding to the given location and event.
     bool has_transition(DiscreteLocation, DiscreteEvent) const;
 
@@ -542,6 +546,7 @@ class CompositeHybridAutomaton
     VectorFunction output_function(DiscreteLocation) const;
     VectorFunction dynamic_function(DiscreteLocation) const;
     VectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
+    ScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
     ScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
     ScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
 

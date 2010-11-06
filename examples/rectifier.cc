@@ -118,23 +118,23 @@ int main()
     /// Create the guards
 
     /// Guard for the reset of time (t>=1/f)
-    VectorAffineFunction resettime_g(Matrix<Real>(1,3,1.0,0.0,0.0),Vector<Real>(1,-1/dp[1]));
+    ScalarAffineFunction resettime_g(Vector<Real>(3,1.0,0.0,0.0),-1/dp[1]);
     /// Guard for the jump from onoff to offoff (vi-vo<=0)
-    VectorAffineFunction onoff_offoff_g(Matrix<Real>(1,3,0.0,-1.0,1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction onoff_offoff_g(Vector<Real>(3,0.0,-1.0,1.0),0.0);
     /// Guard for the jump from offon to offoff (-vi-vo<=0)
-    VectorAffineFunction offon_offoff_g(Matrix<Real>(1,3,0.0,1.0,1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction offon_offoff_g(Vector<Real>(3,0.0,1.0,1.0),0.0);
     /// Guard for the jump from offoff to onoff (vi-vo>=0)
-    VectorAffineFunction offoff_onoff_g(Matrix<Real>(1,3,0.0,1.0,-1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction offoff_onoff_g(Vector<Real>(3,0.0,1.0,-1.0),0.0);
     /// Guard for the jump from onon to onoff (-vi-vo<=0)
-    VectorAffineFunction onon_onoff_g(Matrix<Real>(1,3,0.0,1.0,1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction onon_onoff_g(Vector<Real>(3,0.0,1.0,1.0),0.0);
     /// Guard for the jump from offoff to offon (-vi-vo>=0)
-    VectorAffineFunction offoff_offon_g(Matrix<Real>(1,3,0.0,-1.0,-1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction offoff_offon_g(Vector<Real>(3,0.0,-1.0,-1.0),0.0);
     /// Guard for the jump from onon to offon (vi-vo<=0)
-    VectorAffineFunction onon_offon_g(Matrix<Real>(1,3,0.0,-1.0,1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction onon_offon_g(Vector<Real>(3,0.0,-1.0,1.0),0.0);
     /// Guard for the jump from offon to onon (vi-vo>=0)
-    VectorAffineFunction offon_onon_g(Matrix<Real>(1,3,0.0,1.0,-1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction offon_onon_g(Vector<Real>(3,0.0,1.0,-1.0),0.0);
     /// Guard for the jump from onoff to onon (-vi-vo>=0)
-    VectorAffineFunction onoff_onon_g(Matrix<Real>(1,3,0.0,-1.0,-1.0),Vector<Real>(1,0.0));
+    ScalarAffineFunction onoff_onon_g(Vector<Real>(3,0.0,-1.0,-1.0),0.0);
 
     /// Build the automaton
 
@@ -159,21 +159,21 @@ int main()
     rectifier.new_mode(offon,offon_d);
     rectifier.new_mode(onon,onon_d);
     /// OffOff events
-    rectifier.new_forced_transition(resettime,offoff,offoff,resettime_r,resettime_g);
-    rectifier.new_forced_transition(jump1,offoff,onoff,noop_r,offoff_onoff_g);
-    rectifier.new_forced_transition(jump2,offoff,offon,noop_r,offoff_offon_g);
+    rectifier.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,urgent);
+    rectifier.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,urgent);
+    rectifier.new_transition(offoff,jump2,offon,noop_r,offoff_offon_g,urgent);
     /// OnOff events
-    rectifier.new_forced_transition(resettime,onoff,onoff,resettime_r,resettime_g);
-    rectifier.new_forced_transition(jump1,onoff,offoff,noop_r,onoff_offoff_g);
-    rectifier.new_forced_transition(jump3,onoff,onon,noop_r,onoff_onon_g);
+    rectifier.new_transition(onoff,resettime,onoff,resettime_r,resettime_g,urgent);
+    rectifier.new_transition(onoff,jump1,offoff,noop_r,onoff_offoff_g,urgent);
+    rectifier.new_transition(onoff,jump3,onon,noop_r,onoff_onon_g,urgent);
     /// OffOn events
-    rectifier.new_forced_transition(resettime,offon,offon,resettime_r,resettime_g);
-    rectifier.new_forced_transition(jump1,offon,offoff,noop_r,offon_offoff_g);
-    rectifier.new_forced_transition(jump3,offon,onon,noop_r,offon_onon_g);
+    rectifier.new_transition(offon,resettime,offon,resettime_r,resettime_g,urgent);
+    rectifier.new_transition(offon,jump1,offoff,noop_r,offon_offoff_g,urgent);
+    rectifier.new_transition(offon,jump3,onon,noop_r,offon_onon_g,urgent);
     /// OnOn events
-    rectifier.new_forced_transition(resettime,onon,onon,resettime_r,resettime_g);
-    rectifier.new_forced_transition(jump2,onon,onoff,noop_r,onon_onoff_g);
-    rectifier.new_forced_transition(jump3,onon,offon,noop_r,onon_offon_g);
+    rectifier.new_transition(onon,resettime,onon,resettime_r,resettime_g,urgent);
+    rectifier.new_transition(onon,jump2,onoff,noop_r,onon_onoff_g,urgent);
+    rectifier.new_transition(onon,jump3,offon,noop_r,onon_offon_g,urgent);
 
 
     /// Finished building the automaton

@@ -30,7 +30,7 @@
 #include "hybrid_set.h"
 #include "map.h"
 #include "vector_field.h"
-#include "hybrid_automaton.h"
+#include "hybrid_automaton_interface.h"
 
 namespace Ariadne {
 

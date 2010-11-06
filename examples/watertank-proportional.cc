@@ -120,20 +120,16 @@ int main(int argc,char *argv[])
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
     /// x <= Rif - Delta
-    VectorAffineFunction guard12(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
-                          Vector<Float>(1,Rif));
+    ScalarAffineFunction guard12(Vector<Float>(5, -1.0,0.0,0.0,-1.0,0.0),Rif);
     cout << "guard12=" << guard12 << endl << endl;
     /// x >= Rif - Delta
-    VectorAffineFunction guard21(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
-                          Vector<Float>(1,-Rif));
+    ScalarAffineFunction guard21(Vector<Float>(5, 1.0,0.0,0.0,1.0,0.0),-Rif);
     cout << "guard21=" << guard21 << endl << endl;
     /// x <= Rif - 1/Kp - Delta
-    VectorAffineFunction guard23(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
-                          Vector<Float>(1,(Rif-1.0/Kp)));
+    ScalarAffineFunction guard23(Vector<Float>(5, -1.0,0.0,0.0,-1.0,0.0),(Rif-1.0/Kp));
     cout << "guard23=" << guard23 << endl << endl;
     /// x >= Rif - 1/Kp - Delta
-    VectorAffineFunction guard32(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
-                          Vector<Float>(1,(1.0/Kp - Rif)));
+    ScalarAffineFunction guard32(Vector<Float>(5, 1.0,0.0,0.0,1.0,0.0),(1.0/Kp - Rif));
     cout << "guard32=" << guard32 << endl << endl;
 
     /// Create the invariants.
@@ -146,10 +142,10 @@ int main(int argc,char *argv[])
     watertank_system.new_mode(l2,notsaturated_d);
     watertank_system.new_mode(l3,onesaturated_d);
 
-    watertank_system.new_forced_transition(e12,l1,l2,reset_id,guard12);
-    watertank_system.new_forced_transition(e21,l2,l1,reset_id,guard21);
-    watertank_system.new_forced_transition(e23,l2,l3,reset_id,guard23);
-    watertank_system.new_forced_transition(e32,l3,l2,reset_id,guard32);
+    watertank_system.new_transition(l1,e12,l2,reset_id,guard12,urgent);
+    watertank_system.new_transition(l2,e21,l1,reset_id,guard21,urgent);
+    watertank_system.new_transition(l2,e23,l3,reset_id,guard23,urgent);
+    watertank_system.new_transition(l3,e32,l2,reset_id,guard32,urgent);
 
     /// Finished building the automaton
 

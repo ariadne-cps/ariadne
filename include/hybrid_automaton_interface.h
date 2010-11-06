@@ -50,7 +50,8 @@ template<class T> class Set;
 enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline std::ostream& operator<<(std::ostream&, const EventKind& evk);
 
-typedef EventKind Urgency;
+static const EventKind invariant = INVARIANT;
+static const EventKind progress = PROGRESS;
 static const EventKind permissive = PERMISSIVE;
 static const EventKind urgent = URGENT;
 static const EventKind impact = IMPACT;
@@ -75,17 +76,14 @@ class HybridAutomatonInterface {
     //! \brief Test if the hybrid automaton has a discrete mode \a location.
     virtual bool has_mode(DiscreteLocation location) const = 0;
 
-    //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
+    //! \brief Test if the hybrid automaton has an invariant or guard constraint in the \a location labelled by \a event.
+    virtual bool has_guard(DiscreteLocation location, DiscreteEvent event) const = 0;
+
+    //! \brief Test if the hybrid automaton has a discrete transition in \a source due to \a event.
     virtual bool has_transition(DiscreteLocation source, DiscreteEvent event) const = 0;
 
     //! \brief The dimension of the state spacec in the given \a location.
     virtual uint dimension(DiscreteLocation location) const = 0;
-
-    //! \brief The set of urgent events possible in the given \a location.
-    virtual Set<DiscreteEvent> urgent_events(DiscreteLocation location) const = 0;
-
-    //! \brief The set of permissive events possible in the given \a location.
-    virtual Set<DiscreteEvent> permissive_events(DiscreteLocation location) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
     virtual VectorFunction dynamic_function(DiscreteLocation location) const = 0;
@@ -96,10 +94,7 @@ class HybridAutomatonInterface {
     //! \brief The kind (permissive, urgent etc) of the event.
     virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const = 0;
 
-    //! \brief The invariants valid in the mode \a location.
-    virtual ScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const = 0;
-
-    //! \brief The guards active in the mode \a location.
+    //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs or progress is interrupted.
     virtual ScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The target location of \a event starting in the \a source location.
@@ -111,17 +106,11 @@ class HybridAutomatonInterface {
     //! \brief The natural grid to use in the \a location.
     virtual Grid grid(DiscreteLocation location) const = 0;
 
-    //! \brief A hybrid grid, comprising a Grid for each (reachable) location of the automaton.
+    //! \brief A hybrid grid, comprising a Grid for each (reachable) location of the automaton. (Deprecated)
     //! \deprecated Only used to support current reachability analysis routines.
     virtual HybridGrid grid() const = 0;
 
     //@}
-
-  public:
-    virtual Set<DiscreteEvent> blocking_events(DiscreteLocation location) const = 0;
-    virtual Set<DiscreteEvent> invariant_events(DiscreteLocation location) const = 0;
-    virtual Set<DiscreteEvent> transition_events(DiscreteLocation location) const = 0;
-    void reset(DiscreteEvent arg1);
 
 };
 

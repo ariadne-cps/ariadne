@@ -22,8 +22,6 @@ SRC = \
 	function.cc \
 	nonlinear_programming.cc \
 	taylor_function.cc  \
-	simulation_toolbox.cc \
-	taylor_calculus.cc \
 	solver.cc \
 	integrator.cc \
 	runge_kutta_integrator.cc \
@@ -63,8 +61,7 @@ CALCULUS_SRC = \
 	differential.cc \
 	taylor_model.cc  \
 	taylor_set.cc  \
-	taylor_function.cc  \
-	taylor_calculus.cc
+	taylor_function.cc
 
 lib_LTLIBRARIES = libariadne.la libcalculus.la
 libariadne_la_SOURCES = $(SRC)

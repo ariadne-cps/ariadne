@@ -30,7 +30,6 @@
 #include "taylor_function.h"
 #include "taylor_set.h"
 #include "orbit.h"
-#include "taylor_calculus.h"
 #include "evolution_parameters.h"
 
 #include "logging.h"

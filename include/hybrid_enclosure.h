@@ -123,6 +123,7 @@ class HybridEnclosure
     List<DiscreteEvent> _events;
     TaylorConstrainedImageSet _set;
     ScalarIntervalFunction _time;
+    ScalarIntervalFunction _dwell_time;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
@@ -155,6 +156,8 @@ class HybridEnclosure
     const VectorIntervalFunction& space_function() const;
     //! \brief The function related to time.
     const ScalarIntervalFunction& time_function() const;
+    //! \brief The function giving the time since the last event.
+    const ScalarIntervalFunction& dwell_time_function() const;
 
     //! \brief Set the evolution time function to \a omega.
     void set_time_function(const ScalarIntervalFunction& omega);
@@ -163,6 +166,8 @@ class HybridEnclosure
     IntervalVector space_bounding_box() const;
     //! \brief The range of times since the starting time that the set represents.
     Interval time_range() const;
+    //! \brief The range of times since the last event.
+    Interval dwell_time_range() const;
 
     //! \brief The continuous state set.
     const ContinuousStateSetType& continuous_state_set() const;

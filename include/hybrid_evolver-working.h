@@ -178,30 +178,25 @@ class HybridEvolverBase
 
 	//! \brief Compute the evolution within a single discrete mode.
 	//!
-	//! Takes a set from evolution_data.working_sets and processes the initial
+	//! Takes a set from evolution_data.initial_sets and processes the initial
 	//! events using _process_initial_events.
 	//! The resulting set is then evolved using _upper_evolution_step until
 	//! either the maximum continuous time is reached, or no furter continuous
 	//! evolution is possible.
     virtual
     void
-    _upper_evolution_flow(EvolutionData& evolution_data,
-                          SystemType const& system,
-                          TimeType const& maximum_time) const;
+    _evolution_in_mode(EvolutionData& evolution_data,
+                       SystemType const& system,
+                       TimeType const& maximum_time) const;
 
 	//! \brief Performs an evolution step on one of the sets listed in \a
-	//! evolution_date.starting_sets.
+	//! evolution_data.initial_sets.
     virtual
     void
-    _upper_evolution_step(EvolutionData& evolution_data,
-                          VectorFunction const& dynamic,
-                          Map<DiscreteEvent,TransitionData> const& transitions,
-                          Real const& final_time) const;
-
-    //! \brief Output a one-line summary of the current evolution state to the logging stream.
-    virtual
-    void
-    _log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const;
+    _evolution_step(EvolutionData& evolution_data,
+                    VectorFunction const& dynamic,
+                    Map<DiscreteEvent,TransitionData> const& transitions,
+                    Real const& final_time) const;
 
     //! \brief Extracts the transitions valid in \a location of \a system.
 	//! \details For some systems, extracting the information about the
@@ -264,29 +259,29 @@ class HybridEvolverBase
 	//! final time which should be attained at the end of the evolution.
 	//!
 	//! \post
-	//! If the step_kind is CREEP_STEP, then the evolution_time must evaluate
+	//! If the step_kind is SPACE_DEPENDENT_EVOLUTION_TIME, then the evolution_time must evaluate
 	//!   a value in [0,h] over the initial_set, where \f$h\f$ is
 	//!   the \a step_size. In other words, \f$\varepsilon(\xi(s))\in[0,h]\f$
 	//!   whenever \f$s\f$ is a valid parameter.
-    //! If the step_kind is UNWIND_STEP, then \f$(\omega(s)-\tau(s))\in[0,h]\f$
+    //! If the step_kind is PARAMETER_DEPENDENT_FINISHING_TIME, then \f$(\omega(s)-\tau(s))\in[0,h]\f$
 	//!   whenever \f$s\f$ is a valid parameter.
-	//! If the step_kind is FINAL_STEP, then \f$t_{\max}-\tau(s)\leq h\f$
+	//! If the step_kind is CONSTANT_FINISHING_TIME, then \f$t_{\max}-\tau(s)\leq h\f$
 	//!   whenever \f$s\f$ is a valid parameter.
 	//!
 	//! TODO: By reducing the step time, some events may become inactive.
 	//! It should be possible to reflect this in the output.
 	//!
-	//! TODO: The FINAL_STEP choice might be inappropriate; maybe this should
+	//! TODO: The CONSTANT_FINISHING_TIME choice might be inappropriate; maybe this should
 	//! be replaced with an extra flag representing whether the final time
 	//! could possibly be reached. However, it might be simpler to just check
 	//! the final conditions latex, or
 	virtual
     TimingData
-    _compute_timing(Set<DiscreteEvent>& active_events,
-                    Real final_time,
-                    VectorIntervalFunction const& flow,
-                    Map<DiscreteEvent,CrossingData>& crossings,
-                    HybridEnclosure const& initial_set) const;
+    _estimate_timing(Set<DiscreteEvent>& active_events,
+                     Real final_time,
+                     VectorIntervalFunction const& flow,
+                     Map<DiscreteEvent,CrossingData>& crossings,
+                     HybridEnclosure const& initial_set) const;
 
 
     //! \brief Process the \a initial_set to find any
@@ -370,8 +365,8 @@ class HybridEvolverBase
 	//! parameters satisfies \f$\delta(s)\in[0,h]\f$ whenever \f$\rho(s)\in C\f$.
 	//!
 	//! The evolution time (in terms of the flow parameters) is given by
-	//! \f$\delta(s)=\varepsilon(\xi(s))\f$ for a \a CREEP_STEP
-	//! or \f$\delta(s)=\omega(s)-\tau(s)\f$ for an \a UNWIND_STEP.
+	//! \f$\delta(s)=\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
+	//! or \f$\delta(s)=\omega(s)-\tau(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
 	//!
 	//! Let \f$E_\mathrm{blk}\f$ be set set of events \em blocking
 	//! continuous evolution.
@@ -399,13 +394,18 @@ class HybridEvolverBase
 	//! TODO: This method might be better split into even simpler events.
 	virtual
     void
-    _apply_time_step(EvolutionData& evolution_data,
-                     HybridEnclosure const& starting_set,
-                     VectorIntervalFunction const& flow,
-                     TimingData const& timing_data,
-                     Map<DiscreteEvent,CrossingData> const& crossing_data,
-                     VectorFunction const& dynamic,
-                     Map<DiscreteEvent,TransitionData> const& transitions) const = 0;
+    _apply_evolution_step(EvolutionData& evolution_data,
+                          HybridEnclosure const& starting_set,
+                          VectorIntervalFunction const& flow,
+                          TimingData const& timing_data,
+                          Map<DiscreteEvent,CrossingData> const& crossing_data,
+                          VectorFunction const& dynamic,
+                          Map<DiscreteEvent,TransitionData> const& transitions) const;
+
+    //! \brief Output a one-line summary of the current evolution state to the logging stream.
+    virtual
+    void
+    _log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const;
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
@@ -426,8 +426,10 @@ struct TransitionData
     //! happens when the event is active.
     EventKind event_kind;
     //! \brief The guard function of the event, the event being active when
-	//! \f$g(x)\geq0\f$.
-	ScalarFunction guard_function;
+    //! \f$g(x)\geq0\f$.
+    ScalarFunction guard_function;
+    //! \brief The Lie derivative of the guard function along the flow.
+    ScalarFunction guard_flow_derivative_function;
     //! \brief The target location of the transition.
 	DiscreteLocation target;
     //! \brief The reset function \f$x'=r(x)\f$ of the transition.
@@ -454,13 +456,15 @@ enum CrossingKind {
     INCREASING_CROSSING, //!< The guard function is strictly increasing along flow lines at a crossing point.
         //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$ whenever \f$g(\phi(x_0,t))=0\f$.
         //! Implied by \f$L_{f}g \geq 0\f$.
-        //! Given an initial point \f$x_0\f$, the crossing time \f$\gamma(x_0)\f$.
     DECREASING_CROSSING, //!< The guard function is strictly decreasing along flow lines.
     CONCAVE_CROSSING, //!< The guard function is positive over at most an interval.
         //! Implied by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
-        //! The time at which the guard function reaches a maximum for the evolution starting at \f$x_0\f$ is denoted by \f$\mu(x_0)\f$
-    CONVEX_CROSSING //!< The guard function is negative over at most an interval. Implied by convexity along flow lines.
+    CONVEX_CROSSING, //!< The guard function is negative over at most an interval. Implied by convexity along flow lines.
         //! Implied by convexity along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$ within the reached set.
+    TRANSVERSE_CROSSING, //!< The crossing time can be computed as a smooth function of the initial state.
+        //! Given an initial point \f$x_0\f$, the crossing time \f$\gamma(x_0)\f$.
+    GRAZING_CROSSING //!< The time at which the guard function reaches a maximum along flow lines is a smooth function \f$\mu(x_0)\f$ of the initial state \f$x_0\f$.
+        //! Implies by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
 };
 std::ostream& operator<<(std::ostream& os, const CrossingKind& crk);
 
@@ -491,29 +495,51 @@ std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
 //! typically only defined over a bounded set of space and time.
 //! \relates TimingData
 enum StepKind {
-    FULL_STEP, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
+    CONSTANT_EVOLUTION_TIME, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
-    CREEP_STEP, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
+    SPACE_DEPENDENT_EVOLUTION_TIME, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\varepsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\varepsilon(\xi(s))\f$.
-    PARTIAL_STEP, //!< The step is taken for a time \f$\delta(s)\f$ depending on the parameterisation of the set.
+    TIME_DEPENDENT_EVOLUTION_TIME, //!< The step is taken for a time \f$\varepsilon(t)\f$ depending only on the starting time.
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\varepsilon(\tau(s)))\f$ and \f$\tau'(s)=\tau(s)+\varepsilon(\tau(s))\f$.
+    SPACETIME_DEPENDENT_EVOLUTION_TIME, //!< The step is taken for a time \f$\varepsilon(x,t)\f$ depending only on the current state (space and time).
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\varepsilon(\xi(s),\tau(s)))\f$ and \f$\tau'(s)=\tau(s)+\varepsilon(\xi(s),\tau(s))\f$.
+    PARAMETER_DEPENDENT_EVOLUTION_TIME, //!< The step is taken for a time \f$\delta(s)\f$ depending on the parameterisation of the set.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\delta(s))\f$ and \f$\tau'(s)=\tau(s)+\delta(s)\f$.
-    UNWIND_STEP, //!< The step is taken up to a time \f$\omega(s)\f$ depending on the parameterisation of the starting set.
+    PARAMETER_DEPENDENT_FINISHING_TIME, //!< The step is taken up to a time \f$\omega(s)\f$ depending on the parameterisation of the starting set.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
-    FINAL_STEP, //!< The step is taken up to the specified evolution time \f$t_{\max}\f$. The actual step length depends on the parameterisation.
+    CONSTANT_FINISHING_TIME, //!< The step is taken up to the specified evolution time \f$t_{\max}\f$. The actual step length depends on the parameterisation.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),t_{\max}-\tau(s))\f$ and \f$\tau'(s)=t_{\max}\f$.
 };
 std::ostream& operator<<(std::ostream& os, const StepKind& crk);
+
+//! \brief The way in which the step interacts with the final evolution time.
+//! \details Used to control whether final time constraints need to be added,
+//! whether further evolution is possible, and whether and how sets should be put in the list of final sets.
+//! Needed since the final time may be an arbitrary real number, at it may not be possible to determine
+//! whether a given enclosure is exactly at the final time or not
+//! \relates TimingData
+enum FinishingKind {
+    BEFORE_FINAL_TIME, //!< At the end of the step, the final time has definitely not been reached by any point.
+    AT_FINAL_TIME, //!< At the end of the step, the final time is reached exactly. No more evolution is possible.
+    AFTER_FINAL_TIME, //!< At the end of the step, the final time has definitely been passed by every point. No more evolution is possible.
+    STRADDLE_FINAL_TIME, //!< At the end of the step, some points may have passed the final time, and some may not reached it.
+        //!< Usable as a default value.
+};
+std::ostream& operator<<(std::ostream& os, const FinishingKind& crk);
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
 //! \relates HybridEvolverInterface
 struct TimingData
 {
     StepKind step_kind; //!< The kind of step taken in the evolution
-    Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace, and used in a \a FINAL_STEP step.
-    Float step_size; //!< The step size \f$h\f$ used in a \a FULL_STEP time step.
-    ScalarIntervalFunction spacial_evolution_time; //!< The evolution time \f$\varepsilon(x)\f$ used in a \a CREEP_STEP time step.
-    ScalarIntervalFunction finishing_time; //!< The time \f$\omega(s)\f$ reached after an \a UNWIND_STEP as a function of the parameters.
-    ScalarIntervalFunction evolution_time; //!< The time \f$\delta(s)\f$ used in an evolution step. Equal to \f$\varepsilon(\xi(s))\f$ for a \a CREEP_STEP and \f$\omega(s)-\varepsilon(s)\f$ for an \a UNWIND_STEP.
+    FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
+    Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
+    Float step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
+    ScalarIntervalFunction spacial_evolution_time; //!< The evolution time \f$\varepsilon(x)\f$ used in a \a SPACE_DEPENDENT_EVOLUTION_TIME step.
+    ScalarIntervalFunction finishing_time; //!< The time \f$\omega(s)\f$ reached after an \a PARAMETER_DEPENDENT_FINISHING_TIME as a function of the parameters.
+    ScalarIntervalFunction evolution_time; //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
+        //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
+        //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
     Interval time_domain; //!< The time domain, equal to \f$[0,h]\f$.
     ScalarIntervalFunction time_coordinate; //!< The time coordinate function, equal to the identity on \f$[0,h]\f$.
 };
@@ -522,22 +548,21 @@ struct TimingData
 //! \relates HybridEvolverInterface
 struct EvolutionData
 {
-	//! Sets which need to be processed, typically by finding initially active
-	//! events, and moving the set into starting_sets.
-	//! Typically, the initial set and any jump sets should be placed in this
-	//! list.
-    List<HybridEnclosure> working_sets;
+	//! \brief Sets for which the evolution starts in a new mode, initially or after a jump.
+	//! The set needs to be processed by finding initially active events,
+	//! and moving the set into working_sets.
+    List<HybridEnclosure> initial_sets;
     //! \brief Sets which have been processed for initially active events.
     //! Sets in this list can be assumed to satisfy all invariants and progress
     //! predicates.
-    List<HybridEnclosure> starting_sets;
+    List<HybridEnclosure> working_sets;
 
     //! \brief Sets which have been computed as reach sets for the current
 	//! evolution.
 	List<HybridEnclosure> reach_sets;
     //! \brief Sets which have been computed as final sets (i.e. satisfying
 	//! either the final time or the maximum number of stesp).
-	List<HybridEnclosure> evolve_sets;
+	List<HybridEnclosure> final_sets;
     //! \brief Intermediate sets reached after each time step. Not relevant for
 	//! the result, but useful for plotting, especially for debugging.
 	List<HybridEnclosure> intermediate_sets;
@@ -562,15 +587,12 @@ class GeneralHybridEvolver
 
   protected:
     virtual
-    void
-    _apply_time_step(EvolutionData& evolution_data,
-                     HybridEnclosure const& starting_set,
+    TimingData
+    _estimate_timing(Set<DiscreteEvent>& active_events,
+                     Real final_time,
                      VectorIntervalFunction const& flow,
-                     TimingData const& timing_data,
-                     Map<DiscreteEvent,CrossingData> const& crossings,
-                     VectorFunction const& dynamic,
-                     Map<DiscreteEvent,TransitionData> const& transitions) const;
-
+                     Map<DiscreteEvent,CrossingData>& crossings,
+                     HybridEnclosure const& initial_set) const;
 
 };
 

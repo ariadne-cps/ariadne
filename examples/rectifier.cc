@@ -182,8 +182,8 @@ int main()
 
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    /// Create a GeneralHybridEvolver object
+    GeneralHybridEvolver evolver;
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
@@ -193,9 +193,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef GeneralHybridEvolver::OrbitType OrbitType;
+    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution..." << std::endl;
 

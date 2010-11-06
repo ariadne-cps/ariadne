@@ -9,7 +9,6 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-#include "hybrid_evolver-working.h"
 
 using namespace Ariadne;
 

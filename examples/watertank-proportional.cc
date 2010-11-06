@@ -26,8 +26,8 @@
 
 using namespace Ariadne;
 
-typedef HybridEvolver::EnclosureListType EnclosureListType;
-typedef HybridEvolver::EnclosureType EnclosureType;
+typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
+typedef GeneralHybridEvolver::EnclosureType EnclosureType;
 typedef EnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
 
@@ -157,7 +157,7 @@ int main(int argc,char *argv[])
 
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
+    /// Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver;
     evolver.verbosity = 1;
 
@@ -347,7 +347,7 @@ int main(int argc,char *argv[])
     g.write("watertank-dominato-orbit");
 
 
-    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
+    std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 

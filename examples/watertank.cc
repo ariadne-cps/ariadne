@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     uint evolver_verbosity = 0;
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
 
-    typedef GeneralHybridEvolver HybridEvolverType;
+    typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     DRAWING_METHOD = AFFINE_DRAW;
     DRAWING_ACCURACY = 0;
@@ -124,8 +124,8 @@ int main(int argc, const char* argv[])
 
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
-    HybridEvolverType evolver;
+    /// Create a GeneralHybridEvolver object
+    GeneralHybridEvolverType evolver;
     evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
@@ -134,9 +134,9 @@ int main(int argc, const char* argv[])
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolverType::EnclosureType EnclosureType;
-    typedef HybridEvolverType::EnclosureListType EnclosureListType;
-    typedef HybridEvolverType::OrbitType OrbitType;
+    typedef GeneralHybridEvolverType::EnclosureType EnclosureType;
+    typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
+    typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
@@ -159,7 +159,7 @@ int main(int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
 /*
-    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
+    std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 

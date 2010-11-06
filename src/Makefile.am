@@ -47,9 +47,7 @@ SRC = \
 	constraint_solver.cc \
 	map_evolver.cc \
 	vector_field_evolver.cc \
-	hybrid_evolver-stable.cc \
-	hybrid_evolver-constrained.cc \
-	hybrid_evolver-working.cc \
+	hybrid_evolver.cc \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \

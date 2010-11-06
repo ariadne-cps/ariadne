@@ -50,7 +50,7 @@ using Ariadne::Models::Henon;
 class TestReachabilityAnalysis
 {
 
-    typedef HybridEvolver HybridEvolverType;
+    typedef GeneralHybridEvolver HybridEvolverType;
     typedef HybridEvolverType::EnclosureType HybridEnclosureType;
     typedef HybridEnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
@@ -70,7 +70,7 @@ class TestReachabilityAnalysis
         parameters.lock_to_grid_time=1.0;
 
         Grid grid(2);
-        HybridEvolver evolver(parameters);
+        HybridEvolverType evolver(parameters);
         EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver_interface
             =evolver;
         //HybridDiscretiser<EnclosureType> discretiser(evolver);

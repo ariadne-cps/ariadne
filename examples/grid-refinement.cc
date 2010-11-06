@@ -29,7 +29,7 @@ using namespace Ariadne;
 
 int main()
 {
-    typedef GeneralHybridEvolver HybridEvolverType;
+    typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters
     double a = -0.02;
@@ -141,8 +141,8 @@ int main()
 
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
-    HybridEvolverType evolver;
+    /// Create a GeneralHybridEvolver object
+    GeneralHybridEvolverType evolver;
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
@@ -151,9 +151,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolverType::EnclosureType HybridEnclosureType;
-    typedef HybridEvolverType::OrbitType OrbitType;
-    typedef HybridEvolverType::EnclosureListType EnclosureListType;
+    typedef GeneralHybridEvolverType::EnclosureType HybridEnclosureType;
+    typedef GeneralHybridEvolverType::OrbitType OrbitType;
+    typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
 
     Box initial_continuous_box(2, 6.0,6.00, 1.0,1.00);
     HybridImageSet initial_set;

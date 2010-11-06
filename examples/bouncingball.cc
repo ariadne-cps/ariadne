@@ -23,7 +23,6 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-#include "hybrid_evolver-working.h"
 
 using namespace Ariadne;
 
@@ -32,7 +31,7 @@ int main(int argc, const char* argv[])
     uint evolver_verbosity=0;
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
 
-    typedef GeneralHybridEvolver HybridEvolverType;
+    typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters
     Real a = 0.5;  // Coefficient of restitution
@@ -76,8 +75,8 @@ int main(int argc, const char* argv[])
     cout << "Automaton = " << ball << endl << endl;
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
-    HybridEvolverType evolver;
+    /// Create a GeneralHybridEvolver object
+    GeneralHybridEvolverType evolver;
     evolver.verbosity=evolver_verbosity;
 
     TaylorModel::set_default_maximum_degree(5);
@@ -87,9 +86,9 @@ int main(int argc, const char* argv[])
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolverType::EnclosureType EnclosureType;
-    typedef HybridEvolverType::EnclosureListType EnclosureListType;
-    typedef HybridEvolverType::OrbitType OrbitType;
+    typedef GeneralHybridEvolverType::EnclosureType EnclosureType;
+    typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
+    typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
@@ -110,7 +109,7 @@ int main(int argc, const char* argv[])
     //textplot("ball-orbit.txt",orbit);
 
 /*
-    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
+    std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(ball,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 

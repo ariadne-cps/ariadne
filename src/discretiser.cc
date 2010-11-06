@@ -31,7 +31,6 @@
 #include "hybrid_set.h"
 #include "map.h"
 #include "hybrid_automaton.h"
-#include "hybrid_evolver-constrained.h"
 
 namespace Ariadne {
 

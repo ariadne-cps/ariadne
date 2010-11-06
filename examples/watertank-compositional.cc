@@ -113,7 +113,7 @@ int main()
 
     // Compute the system evolution
 
-    // Create a HybridEvolver object
+    // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver;
     evolver.verbosity = 1;
 

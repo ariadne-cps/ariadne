@@ -27,7 +27,7 @@
 #include "ariadne.h"
 
 #include "hybrid_automaton-composite.h"
-#include "hybrid_evolver-constrained.h"
+#include "hybrid_evolver.h"
 
 template<class T> void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();
@@ -35,6 +35,7 @@ template<class T> void write(const char* filename, const T& t) {
 
 using namespace Ariadne;
 
+typedef GeneralHybridEvolver HybridEvolverType;
 
 const Float pi_flt = Ariadne::pi<Float>();
 const Interval pi_ivl = Ariadne::pi<Interval>();
@@ -127,10 +128,10 @@ CompositeHybridAutomaton create_heating_system()
     return heating_system;
 }
 
-ConstraintHybridEvolver create_evolver()
+HybridEvolverType create_evolver()
 {
-    // Create a HybridEvolver object
-    ConstraintHybridEvolver evolver;
+    // Create a GeneralHybridEvolver object
+    HybridEvolverType evolver;
 
     // Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
@@ -142,7 +143,7 @@ ConstraintHybridEvolver create_evolver()
 }
 
 
-void compute_evolution(const CompositeHybridAutomaton& heating_system, const ConstraintHybridEvolver& evolver)
+void compute_evolution(const CompositeHybridAutomaton& heating_system, const GeneralHybridEvolver& evolver)
 {
 
     // Redefine the two discrete states
@@ -151,9 +152,9 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Con
     AtomicDiscreteLocation off("off");
 
     // Declare the type to be used for the system evolution
-    typedef ConstraintHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef ConstraintHybridEvolver::EnclosureListType HybridEnclosureListType;
-    typedef ConstraintHybridEvolver::OrbitType OrbitType;
+    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef GeneralHybridEvolver::EnclosureListType HybridEnclosureListType;
+    typedef GeneralHybridEvolver::OrbitType OrbitType;
 
     // Define the initial set
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
@@ -191,7 +192,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Con
 }
 
 
-void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, const ConstraintHybridEvolver& evolver)
+void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, const GeneralHybridEvolver& evolver)
 {
 /*
     // Create a ReachabilityAnalyser object
@@ -301,7 +302,7 @@ int main()
     std::cerr<<heating_system<<"\n";
 
     // Create the analyser classes
-    ConstraintHybridEvolver evolver=create_evolver();
+    HybridEvolverType evolver=create_evolver();
     HybridReachabilityAnalyser reachability_analysier();//evolver);
     std::cerr<<evolver<<"\n";
 

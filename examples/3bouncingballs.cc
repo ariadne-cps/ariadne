@@ -23,7 +23,6 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-#include "hybrid_evolver-working.h"
 
 using namespace Ariadne;
 
@@ -314,7 +313,7 @@ int main()
 
     /// Sets the initial state parameters
 //    Box initial_box(12, 2.0,2.0, table_y,table_y, 4.0,4.0,table_y,table_y, 6.0,6.0,table_y,table_y, 4.0,4.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0);
-//    HybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
+//    GeneralHybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
     Box initial_box(12, 1.0,1.0, table_y,table_y, 2.0,2.0, table_y,table_y, 3.0,3.0,table_y,table_y, 9.0,9.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0);
     GeneralHybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
 
@@ -331,7 +330,7 @@ int main()
 
     /// Computes the system evolution
 
-    /// Creates a HybridEvolver object
+    /// Creates a GeneralHybridEvolver object
     GeneralHybridEvolver evolver;
     evolver.verbosity = VERBOSITY;
 

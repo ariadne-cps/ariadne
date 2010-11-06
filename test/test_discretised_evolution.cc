@@ -266,7 +266,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
 void TestDiscretisedEvolution::test_hybrid_time() const
 {
-    typedef HybridEvolver EvolverType;
+    typedef GeneralHybridEvolver EvolverType;
     typedef EvolverType::EnclosureType EnclosureType;
     typedef EnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
@@ -285,7 +285,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     Grid grid(2);
 
     // Set up the evaluators
-    HybridEvolver evolver(parameters);
+    EvolverType evolver(parameters);
     HybridDiscretiser< EnclosureType > discrete_evolver(evolver);
 
 

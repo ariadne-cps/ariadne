@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver-working.cc
+ *            hybrid_evolver.cc
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -28,8 +28,8 @@
 #include "taylor_function.h"
 #include "grid_set.h"
 #include "hybrid_time.h"
-#include "hybrid_automaton.h"
-#include "hybrid_evolver-working.h"
+#include "hybrid_automaton_interface.h"
+#include "hybrid_evolver.h"
 #include "orbit.h"
 
 #include "integrator.h"

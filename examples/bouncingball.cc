@@ -27,11 +27,6 @@
 
 using namespace Ariadne;
 
-VectorFunction operator,(const ScalarFunction& f1, const Real& c2) {
-    ScalarFunction f2=ScalarFunction::constant(f1.argument_size(),c2);
-    return (f1,f2);
-}
-
 int main(int argc, const char* argv[])
 {
     uint evolver_verbosity=0;

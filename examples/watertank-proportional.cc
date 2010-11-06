@@ -27,16 +27,17 @@
 using namespace Ariadne;
 
 typedef HybridEvolver::EnclosureListType EnclosureListType;
-typedef HybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
+typedef HybridEvolver::EnclosureType EnclosureType;
+typedef EnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
 
-HybridGridTreeSet 
+HybridGridTreeSet
 outer_approximation(const EnclosureListType& hls,
                     const HybridGrid& hgr,
                     const int accuracy)
 {
     HybridGridTreeSet result;
-    for(EnclosureListType::const_iterator 
+    for(EnclosureListType::const_iterator
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
             DiscreteLocation loc=iter->first;
@@ -45,20 +46,20 @@ outer_approximation(const EnclosureListType& hls,
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
             }
             GridTreeSet& gts=result[loc];
-            gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
+            gts.adjoin_outer_approximation(ImageSet(es.bounding_box()),accuracy);
             //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
         }
     return result;
 }
 
 
-int main(int argc,char *argv[]) 
+int main(int argc,char *argv[])
 {
     if(argc != 3) {
       std::cerr << "Usage: watertank-proportional bmin bmax" <<std::endl;
       return 1;
     }
-    
+
     /// Set the system parameters
     double a = 0.02;
     double r = 1.25;
@@ -73,7 +74,7 @@ int main(int argc,char *argv[])
     double Delta = 0.05;
 
     std::cout << "bmin = " << bmin <<", bmax = "<< bmax << std::endl << std::flush;
-    
+
 
     // System variables
     ScalarFunction x=ScalarFunction::coordinate(5,0); // water level
@@ -87,23 +88,23 @@ int main(int argc,char *argv[])
     ScalarFunction zero=ScalarFunction::constant(5,0.0);
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomton object
     MonolithicHybridAutomaton watertank_system;
-  
+
     /// Create four discrete states
     DiscreteLocation l1(1);      // Zero saturated
     DiscreteLocation l2(2);      // Not saturated
     DiscreteLocation l3(3);      // One saturated
-  
+
     /// Create the discrete events
     DiscreteEvent e12(12);
     DiscreteEvent e21(21);
     DiscreteEvent e23(23);
     DiscreteEvent e32(32);
-  
+
     /// Create the dynamics
-    
+
     VectorFunction zerosaturated_d((-a*x+b*y,-y/r,zero,zero,one));
     VectorFunction notsaturated_d((-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one));
     VectorFunction onesaturated_d((-a*x+b*y,(1-y)/r,zero,zero,one));
@@ -137,9 +138,9 @@ int main(int argc,char *argv[])
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
-    /// forced transitions do not need an explicit invariant, 
+    /// forced transitions do not need an explicit invariant,
     /// hence we do not need invariants
-  
+
     /// Build the automaton
     watertank_system.new_mode(l1,zerosaturated_d);
     watertank_system.new_mode(l2,notsaturated_d);
@@ -147,7 +148,7 @@ int main(int argc,char *argv[])
 
     watertank_system.new_forced_transition(e12,l1,l2,reset_id,guard12);
     watertank_system.new_forced_transition(e21,l2,l1,reset_id,guard21);
-    watertank_system.new_forced_transition(e23,l2,l3,reset_id,guard23);    
+    watertank_system.new_forced_transition(e23,l2,l3,reset_id,guard23);
     watertank_system.new_forced_transition(e32,l3,l2,reset_id,guard32);
 
     /// Finished building the automaton
@@ -170,7 +171,6 @@ int main(int argc,char *argv[])
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
-    typedef ListSet<GeneralHybridEvolver::ContinuousEnclosureType> ListSetType;
 
     double time_step = 0.25;
     double total_time = 35.0;
@@ -189,7 +189,7 @@ int main(int argc,char *argv[])
     HybridGridTreeSet hgts(hg);
     uint grid_depth = 9;
     uint grid_height = 8;
-    
+
     std::cout << "Computing timed evolution starting from location l3, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
         for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
@@ -204,9 +204,9 @@ int main(int argc,char *argv[])
             char filename[30];
             sprintf(filename,"wt-best-%d-%d",int(b*10000),int(d*10000));
             cout<<"Saving result to "<<filename<<"..."<<std::flush;
-            Figure g2;            
+            Figure g2;
             g2.set_bounding_box(graphic_box);
-            g2.set_projection_map(ProjectionFunction(tx,5));        
+            g2.set_projection_map(ProjectionFunction(tx,5));
             g2 << fill_colour(Colour(0.9,0.9,0.0));
             g2 << hgts;
             g2.write(filename);
@@ -241,26 +241,25 @@ int main(int argc,char *argv[])
     Figure g1;
     array<uint> tx(2,4,0);
     g1.set_bounding_box(graphic_box);
-    g1.set_projection_map(ProjectionFunction(tx,5));    
+    g1.set_projection_map(ProjectionFunction(tx,5));
     g1 << Box(2, 18,32, hmax - Delta, hmax + Delta);
     g1 << fill_colour(Colour(0.0,1.0,1.0));
     g1 << Box(2, 18,32, hmin - Delta, hmin + Delta);
 
     g1 << fill_colour(Colour(0.0,0.5,1.0));
     g1 << result;
-    
+
     g1 << fill_colour(Colour(1.0,1.0,0.0));
     g1 << result.final();
-    
+
     g1 << fill_colour(Colour(0.0,1.0,1.0));
     g1 << *lower_reach_set_ptr;
 
     g1.write("watertank-dominato-time");
 //    g2.write("watertank-dominato-time-l2");
 
-/*  
     OrbitType orbit = evolver.timed_evolution(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS,true);
-    EnclosureListType final = orbit.final();        
+    EnclosureListType final = orbit.final();
     typedef EnclosureListType::const_iterator const_iterator;
     double xmin=100.0;
     double xmax=-100.0;
@@ -270,7 +269,7 @@ int main(int argc,char *argv[])
         if(x.upper() > xmax) xmax = x.upper();
     }
     cout << " xmin = " << xmin << ", xmax = " << xmax << endl << endl;
-      
+
     evolution_time.continuous_time=time_step;
 
     Box graphic_box(2, skip_time-0.1,skip_time+total_time+0.1, -0.1,6.1);
@@ -281,13 +280,13 @@ int main(int argc,char *argv[])
     g << fill_colour(Colour(0.0,0.5,1.0));
 
     std::cout << "Computing upper reach timed set... " << std::flush;
- 
+
     std::cout << "t = " << skip_time << std::endl;
     std::cout << "final set = " << final << endl << endl;
-    
+
     final = orbit.initial();
     skip_time = 0.0;
- 
+
     for(double t = time_step; t <= total_time; t = t + time_step) {
         std::cout << "t = " << skip_time + t << flush;
         EnclosureListType reach;
@@ -296,7 +295,7 @@ int main(int argc,char *argv[])
         reach.adjoin(orbit.final());
         std::cout << "." << flush;
         }
-//        std::cout << endl << "final set before clearing = " << reach  << endl; 
+//        std::cout << endl << "final set before clearing = " << reach  << endl;
         final.clear();
         // Remove redundant elements from final set
         int i = 0;
@@ -311,11 +310,11 @@ int main(int argc,char *argv[])
                         // cout << "is a subset of iter2 = " << iter1->second << endl;
                         flag = 1;
                         i++;
-                    }                 
+                    }
                 }
-             }  
+             }
             if (flag == 0) final.adjoin(*iter1);
-        }        
+        }
 //        cout << i << " elements removed. " << endl;
         cout << " final set after clearing = " << final << endl << endl;
         reach.clear();
@@ -331,7 +330,7 @@ int main(int argc,char *argv[])
         cout << " xmin = " << xmin << ", xmax = " << xmax << endl << endl;
         g << Box(2, skip_time+t,skip_time+t+time_step, xmin,xmax);
     }
-      
+
     std::cout << "done." << std::endl;
 
     g.write("watertank-dominato-orbit");

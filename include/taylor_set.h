@@ -68,7 +68,6 @@ class AffineSet;
 
 template<class BS> class ListSet;
 
-class Zonotope;
 class Grid;
 class GridTreeSet;
 
@@ -192,7 +191,6 @@ TaylorImageSet unchecked_apply(const VectorTaylorFunction& f, const TaylorImageS
 
 GridTreeSet outer_approximation(const TaylorImageSet& set, const Grid& grid, uint depth);
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth);
-Zonotope zonotope(const TaylorImageSet& ts);
 
 TaylorImageSet product(const TaylorImageSet& set, const Interval& ivl);
 TaylorImageSet product(const TaylorImageSet& set, const Box& bx);

@@ -27,8 +27,6 @@
 #include "graphics.h"
 #include "point.h"
 #include "box.h"
-#include "zonotope.h"
-#include "polytope.h"
 #include "curve.h"
 #include "taylor_set.h"
 #include "function_set.h"
@@ -60,13 +58,13 @@ int main(int argc, char **argv)
     double z1cdata[]={0.15,0.6}; double z1gdata[]={0.05,0.0,0.05, 0.0,0.05,0.05};
     Vector<Float> z1c(2,z1cdata);
     Matrix<Float> z1g(2,3,z1gdata);
-    Zonotope z1(z1c,z1g);
-    Polytope p1=polytope(z1);
+    //Zonotope z1(z1c,z1g);
+    //Polytope p1=polytope(z1);
     Vector<Float> ts1c=z1c;
     Matrix<Float> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
     TaylorImageSet ts1(afn1,Box::unit_box(3));
-    Box bbx1=z1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
+    Box bbx1=ts1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
@@ -103,22 +101,10 @@ int main(int argc, char **argv)
     g.set_projection_map(PlanarProjectionMap(2,0,1));
     g.set_bounding_box(bbx1);
 
-    ARIADNE_TEST_PRINT(z1);
-    g << fill_colour(0.0,0.5,0.5)
-      << z1;
-    g.write("test_graphics-z");
-    g.clear();
-
     ARIADNE_TEST_PRINT(ts1);
     g << fill_colour(0.0,0.5,0.5)
       << ts1;
     g.write("test_graphics-ts");
-    g.clear();
-
-    ARIADNE_TEST_PRINT(p1);
-    g << fill_colour(0.0,0.5,0.5)
-      << p1;
-    g.write("test_graphics-pltp");
     g.clear();
 
     InterpolatedCurve cv(Point(2,0.0));

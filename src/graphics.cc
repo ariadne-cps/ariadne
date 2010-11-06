@@ -27,13 +27,9 @@
 #include "macros.h"
 #include "stlio.h"
 #include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
 #include "function.h"
 #include "point.h"
 #include "box.h"
-#include "curve.h"
-#include "polytope.h"
 #include "graphics.h"
 
 #ifdef HAVE_GTK_H
@@ -52,12 +48,6 @@ static const int DEFAULT_WIDTH = 1600;
 static const int DEFAULT_HEIGHT = 1600;
 
 
-
-
-std::vector<Point> extremal(const std::vector<Point> & points) {
-    Polytope polytope(points);
-    return reduce2d(polytope).vertices();
-}
 
 
 struct GraphicsProperties {
@@ -574,19 +564,6 @@ const Colour blue=Colour("blue",0.0,0.0,1.0);
 const Colour yellow=Colour("yellow",1.0,1.0,0.0);
 const Colour cyan=Colour("cyan",0.0,1.0,1.0);
 const Colour magenta=Colour("magenta",1.0,0.0,1.0);
-
-} // namespace Ariadne
-
-#include "box.h"
-#include "zonotope.h"
-
-namespace Ariadne {
-
-
-
-
-
-
 
 } // namespace Ariadne
 

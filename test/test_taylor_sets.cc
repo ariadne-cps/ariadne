@@ -27,7 +27,6 @@
 #include "taylor_model.h"
 #include "function.h"
 #include "constraint.h"
-#include "zonotope.h"
 #include "taylor_set.h"
 #include "affine_set.h"
 #include "grid_set.h"
@@ -83,6 +82,7 @@ TestTaylorImageSet::test_subsume()
 void
 TestTaylorImageSet::test_linearise()
 {
+/*
     TaylorImageSet ts(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.0, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
 
     Zonotope z=zonotope(ts);
@@ -93,6 +93,7 @@ TestTaylorImageSet::test_linearise()
     Box bounding_box=ts.bounding_box()+Vector<Interval>(2,Interval(-1,1));
     plot("test_taylor_set-linearise",PlanarProjectionMap(2,0,1),bounding_box,
          Colour(1,0,0),b,Colour(1,0,1),z,Colour(0,0,1),ts);
+*/
 }
 
 void plot(const char* filename, const TaylorImageSet& set) {
@@ -115,7 +116,6 @@ TestTaylorImageSet::test_discretise()
     GridTreeSet grid_discretisation=ts.discretise(grid,depth);
 
     TaylorImageSet tsz(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.031251, 0.0,0.5,1.0,1.0,0.0,0.0, 0.00001);
-    Zonotope zonotope_over_approximation=zonotope(tsz);
     ListSet<Box> rough_boxes_approximation=ts.discretise(1.0/(1<<(depth-2)));
     ListSet<Box> boxes_approximation=ts.discretise(1.0/(1<<(depth-2)));
     ListSet<Box> fine_boxes_approximation=ts.discretise(1.0/(1<<(depth+3)));

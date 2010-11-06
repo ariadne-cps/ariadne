@@ -22,7 +22,6 @@
  */
 
 
-#include "vector.h"
 #include "polynomial.h"
 
 namespace Ariadne {

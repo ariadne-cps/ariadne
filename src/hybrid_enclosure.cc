@@ -26,8 +26,6 @@
 #include "operators.h"
 #include "function.h"
 #include "constraint.h"
-#include "propagator.h"
-#include "taylor_model.h"
 #include "taylor_function.h"
 #include "box.h"
 #include "grid_set.h"
@@ -40,13 +38,10 @@
 #include "constraint_solver.h"
 #include "taylor_set.h"
 #include "affine_set.h"
-#include "polytope.h"
-#include "polyhedron.h"
 
 #include "graphics_interface.h"
 #include "hybrid_enclosure.h"
 #include "hybrid_set.h"
-#include <expression.h>
 
 
 namespace Ariadne {

@@ -26,10 +26,10 @@
 #include "taylor_set.h"
 #include "orbit.h"
 #include "function_set.h"
-#include "polytope.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
 #include "map.h"
+#include "vector_field.h"
 #include "hybrid_automaton.h"
 
 namespace Ariadne {

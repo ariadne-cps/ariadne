@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iomanip>
+
 #include "macros.h"
 #include "exceptions.h"
 #include "numeric.h"
@@ -30,13 +32,10 @@
 #include "differential.h"
 #include "function.h"
 
-#include "geometry.h"
 #include "taylor_model.h"
 #include "taylor_function.h"
 
 #include "box.h"
-#include "zonotope.h"
-#include "polytope.h"
 
 #include "function_set.h"
 #include "taylor_set.h"
@@ -319,36 +318,6 @@ TaylorImageSet unchecked_apply(const VectorTaylorFunction& tf, const TaylorImage
 {
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }
-
-
-Zonotope
-zonotope(const TaylorImageSet& ts)
-{
-    uint d=ts.dimension();
-    uint ng=ts.generators_size();
-    Vector<Float> c(d);
-    Matrix<Float> G(d,ng);
-    Vector<Float> e(d);
-    for(uint i=0; i!=d; ++i) {
-        c[i]=ts[i].value();
-        for(uint j=0; j!=ng; ++j) {
-            G[i][j]=ts[i][MultiIndex::unit(ng,j)];
-        }
-        e[i]=ts[i].error();
-    }
-
-    set_rounding_upward();
-    for(uint i=0; i!=d; ++i) {
-        for(TaylorModel::const_iterator iter=ts[i].begin(); iter!=ts[i].end(); ++iter) {
-            if(iter->key().degree()>=2) {
-                e[i]+=abs(iter->data());
-            }
-        }
-    }
-    set_rounding_to_nearest();
-    return Zonotope(c,G,e);
-}
-
 
 
 
@@ -741,34 +710,8 @@ void boxes_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
     //fig.set_line_style(true);
 }
 
-void zonotopes_draw_subdivide(ListSet<Zonotope>& zonotopes, const TaylorImageSet& set, const double resolution)
-{
-    if(set.bounding_box().radius()>=resolution) {
-        std::pair<TaylorImageSet,TaylorImageSet> subdivisions=set.split();
-        zonotopes_draw_subdivide(zonotopes,subdivisions.first,resolution);
-        zonotopes_draw_subdivide(zonotopes,subdivisions.second,resolution);
-    } else {
-        zonotopes.adjoin(zonotope(set));
-    }
-}
-
-void zonotopes_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
-    static const double resolution=1.0/8;
-    //double old_line_width=fig.get_line_width();
-    //Colour old_line_colour=fig.get_line_colour();
-    //fig.set_line_width(0.0);
-    //fig.set_line_style(false);
-    //fig.set_line_colour(fig.get_fill_colour());
-    ListSet<Zonotope> zonotopes;
-    zonotopes_draw_subdivide(zonotopes,ts,resolution);
-    for(uint i=0; i!=zonotopes.size(); ++i) { zonotopes[i].draw(fig); }
-    //fig.set_line_colour(old_line_colour);
-    //fig.set_line_width(old_line_width);
-    //fig.set_line_style(true);
-}
-
 void affine_draw(CanvasInterface& fig, const TaylorImageSet& ts) {
-    zonotope(ts).draw(fig);
+    TaylorConstrainedImageSet(VectorTaylorFunction(ts.domain(),ts.models())).affine_draw(fig);
 }
 
 void curve_draw(CanvasInterface& fig, const TaylorImageSet& ts) {

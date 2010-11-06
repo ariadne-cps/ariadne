@@ -58,14 +58,12 @@ using std::ofstream; using std::ifstream;
 
 #include "point.h"
 #include "box.h"
-#include "polytope.h"
-#include "polyhedron.h"
-
-#include "hybrid_time.h"
+#include "curve.h"
 #include "orbit.h"
 
 #include "discrete_location.h"
 #include "discrete_event.h"
+#include "hybrid_time.h"
 #include "hybrid_automaton.h"
 
 #include "vector_field_evolver.h"

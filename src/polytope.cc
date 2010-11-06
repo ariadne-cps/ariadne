@@ -31,13 +31,9 @@
 #include "curve.h"
 #include "function.h"
 
-#include "taylor_set.h"
-
 #include "polytope.h"
 
 namespace Ariadne {
-
-Zonotope zonotope(const TaylorImageSet& ts);
 
 tribool
 Polytope::disjoint(const Box& bx) const {
@@ -125,12 +121,6 @@ Polytope polytope(const Polytope& p)
     } else {
         return r;
     }
-}
-
-
-Polytope polytope(const TaylorImageSet& ts)
-{
-    return polytope(zonotope(ts));
 }
 
 

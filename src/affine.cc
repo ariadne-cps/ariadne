@@ -22,11 +22,6 @@
  */
 
 
-#include "numeric.h"
-#include "vector.h"
-#include "taylor_model.h"
-#include "differential.h"
-
 #include "affine.h"
 
 namespace Ariadne {

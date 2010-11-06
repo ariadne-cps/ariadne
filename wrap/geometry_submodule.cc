@@ -301,7 +301,6 @@ void export_taylor_image_set()
     def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)()const) &TaylorImageSet::split);
     def("outer_approximation", (GridTreeSet(*)(const TaylorImageSet&,const Grid&,uint)) &outer_approximation);
     def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorImageSet&,uint)) &adjoin_outer_approximation);
-    def("zonotope", (Zonotope(*)(const TaylorImageSet&)) &zonotope);
 
     def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Interval&)) &product);
     def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Box&)) &product);

@@ -35,7 +35,6 @@
 #include "polynomial.h"
 #include "affine.h"
 
-#include "real.h"
 #include "formula.h"
 
 namespace Ariadne {

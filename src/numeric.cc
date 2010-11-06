@@ -53,7 +53,6 @@
 #endif
 
 #include "numeric.h"
-#include "real.h"
 
 namespace Ariadne {
 
@@ -1075,8 +1074,6 @@ Interval atan(Interval i)
 
 #ifdef HAVE_GMPXX_H
 
-typedef mpq_class Rational;
-
 Rational sqr(const Rational& q) { return q*q; }
 
 Rational pow(const Rational& q, uint n) {
@@ -1108,6 +1105,10 @@ Interval::Interval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu
     set_rounding_mode(upward);
     while(internal_cast<const double&>(u)<qu) { u+=std::numeric_limits<double>::min(); }
     set_rounding_mode(rounding_mode);
+}
+
+Interval& Interval::operator=(const Rational& q) {
+    return *this = Interval(q);
 }
 
 

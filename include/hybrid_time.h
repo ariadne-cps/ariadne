@@ -28,7 +28,7 @@
 #ifndef ARIADNE_HYBRID_TIME_H
 #define ARIADNE_HYBRID_TIME_H
 
-#include "real.h"
+#include "numeric.h"
 
 namespace Ariadne {
 

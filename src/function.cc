@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric.h"
 #include "function.h"
 #include "function_template.h"
-#include "real.h"
 #include "polynomial.h"
 #include "differential.h"
 #include "taylor_model.h"

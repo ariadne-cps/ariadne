@@ -22,7 +22,7 @@
  */
 
 #include <cstdarg>
-#include "real.h"
+#include "numeric.h"
 #include "expression.h"
 #include "hybrid_automaton.h"
 

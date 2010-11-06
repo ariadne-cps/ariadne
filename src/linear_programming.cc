@@ -1711,6 +1711,12 @@ SimplexSolver<X>::constrained_feasible_by_enumeration(const Matrix<X>& A, const 
 template class SimplexSolver<Float>;
 
 #ifdef HAVE_GMPXX_H
+inline Interval operator+(const Interval& ivl, const Rational& q) { return ivl+Interval(q); }
+inline Interval operator+(const Rational& q, const Interval& ivl) { return Interval(q)+ivl; }
+inline Interval operator-(const Interval& ivl, const Rational& q) { return ivl-Interval(q); }
+inline Interval operator-(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
+inline Interval operator*(const Interval& ivl, const Rational& q) { return ivl*Interval(q); }
+inline Interval operator*(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
 template class SimplexSolver<Rational>;
 #endif // HAVE_GMPXX_H
 

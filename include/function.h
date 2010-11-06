@@ -38,6 +38,7 @@
 #include "pointer.h"
 #include "container.h"
 
+#include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
 #include "polynomial.h"
@@ -45,7 +46,6 @@
 #include "taylor_model.h"
 #include "differential.h"
 #include "propagator.h"
-#include "real.h"
 
 namespace Ariadne {
 

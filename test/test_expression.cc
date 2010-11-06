@@ -22,8 +22,9 @@
  */
 
 #include <iostream>
-#include "formula.h"
-#include "real.h"
+
+#include "numeric.h"
+#include "expression.h"
 
 #include "test.h"
 

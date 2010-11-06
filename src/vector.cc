@@ -23,7 +23,6 @@
 
 #include "macros.h"
 #include "numeric.h"
-#include "real.h"
 #include "vector.h"
 
 template class boost::numeric::ublas::vector<Ariadne::Float>;

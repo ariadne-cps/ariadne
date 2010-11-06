@@ -25,8 +25,8 @@
 #include <iomanip>
 #include <functional>
 
+#include "numeric.h"
 #include "function.h"
-#include "real.h"
 #include "expression.h"
 #include "space.h"
 #include "discrete_event.h"

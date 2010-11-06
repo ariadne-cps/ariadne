@@ -32,7 +32,6 @@
 
 #include "operators.h"
 #include "numeric.h"
-#include "real.h"
 #include "vector.h"
 
 namespace Ariadne {

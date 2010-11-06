@@ -43,7 +43,7 @@
 #include "operators.h"
 #include "expression.h"
 #include "expansion.h"
-#include "real.h"
+#include "numeric.h"
 #include "vector.h"
 #include <boost/concept_check.hpp>
 

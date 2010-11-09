@@ -85,6 +85,7 @@ class TestDifferential {
         ARIADNE_TEST_CALL(test_rec());
         ARIADNE_TEST_CALL(test_pow());
         ARIADNE_TEST_CALL(test_compose());
+        ARIADNE_TEST_CALL(test_gradient());
     }
 
     void test_degree() {
@@ -167,6 +168,18 @@ class TestDifferential {
         ARIADNE_TEST_CONSTRUCT(SeriesType,id,(3,aid));
         ARIADNE_TEST_EQUAL(compose(y,x),DifferentialType(2,3,ayx));
         ARIADNE_TEST_EQUAL(compose(id,x),x);
+    }
+
+    void test_gradient() {
+        // Regression test based on errors in Henon evaluation.
+        Vector<Float> x(2, 0.875,-0.125);
+        Vector< Differential<Float> > dx=Differential<Float>::variables(1u,x);
+        Differential<Float> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
+        ARIADNE_TEST_PRINT(dfx);
+        Vector<Float> g = dfx.gradient();
+        ARIADNE_TEST_PRINT(g);
+        ARIADNE_TEST_EQUALS(g[0],-1.75);
+        ARIADNE_TEST_EQUALS(g[1],-0.25);
     }
 
 

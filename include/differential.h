@@ -110,12 +110,13 @@ template<class X> Vector< Differential<X> > compose(const Vector< Differential<X
 //! being evaluated.
 //!
 //! \invariant The expansion is sorted using graded_sort(). In particular, the
-//! total degree of the terms is increasing.
+//! total degree of the terms is increasing, and the linear terms appear in coordinate order.
 template<class X>
 class Differential
 {
     static const uint MAX_DEGREE=65535;
     static const X _zero;
+    static const X _one;
   public:
     //! \brief The type of a coefficient.
     typedef X ScalarType;
@@ -128,7 +129,7 @@ class Differential
 
     //! \brief Default constructor constructs a differential with degree zero in no variables.
     explicit Differential() : _expansion(0), _degree(0) { }
-    //! \brief Constructs a differential with degree zero in \a as variables.
+    //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
     explicit Differential(uint as) : _expansion(as), _degree(MAX_DEGREE) { }
     //! \brief Constructs a differential with degree \a deg in \a as variables.
     explicit Differential(uint as, uint deg) : _expansion(as),_degree(deg) { }
@@ -155,11 +156,13 @@ class Differential
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
     static Differential<X> constant(uint as, uint deg, const X& c) {
-        Differential<X> r(as,deg); r.set_value(c); return r; }
+        Differential<X> r(as,deg); r._expansion.append(MultiIndex(as),c); return r; }
     //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
     static Differential<X> variable(uint as, uint deg, const X& v, uint j) {
-        Differential<X> r(as,deg); r._expansion.append(MultiIndex::zero(as),v);
-        r._expansion.append(MultiIndex::unit(as,j),1.0); return r; }
+        Differential<X> r(as,deg);
+        MultiIndex a(as);
+        r._expansion.append(a,v);
+        a[j]=1; r._expansion.append(a,_one); return r; }
 
     //! \brief A vector of \a rs constant differentials of degree \a deg in \a as arguments with values \a c[j].
     static Vector< Differential<X> > constants(uint rs, uint as, uint deg, const Vector<X>& c) {
@@ -170,17 +173,19 @@ class Differential
     }
     //! \brief A vector of \a rs differentials of degree \a deg in \a as arguments with values \f$v_i+x_i\f$.
     //! \pre \a rs == \a as == c.size().
-    static Vector< Differential<X> > variables(uint rs, uint as, uint deg, const Vector<X>& v) {
-        ARIADNE_ASSERT(v.size()==rs);  ARIADNE_ASSERT(as==v.size());
-        Vector< Differential<X> > result(rs,Differential<X>(as,deg));
-        for(uint i=0; i!=rs; ++i) { result[i]=v[i]; result[i][i]=X(1.0); }
-        return result;
+    static Vector< Differential<X> > variables(uint rs, uint as, uint deg, const Vector<X>& x) {
+        ARIADNE_ASSERT(x.size()==rs);  ARIADNE_ASSERT(as==x.size());
+        return variables(deg,x);
     }
 
     //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$.
     static Vector< Differential<X> > variables(uint deg, const Vector<X>& x) {
         Vector< Differential<X> > result(x.size(),Differential<X>(x.size(),deg));
-        for(uint i=0; i!=x.size(); ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
+        MultiIndex a(x.size());
+        for(uint i=0; i!=x.size(); ++i) {
+            result[i]._expansion.append(a,x[i]);
+            a[i]=1; result[i]._expansion.append(a,_one); a[i]=0;
+        }
         return result;
     }
 
@@ -314,6 +319,9 @@ class Differential
 
 template<class X>
 const X Differential<X>::_zero=X(0);
+
+template<class X>
+const X Differential<X>::_one=X(1);
 
 template<class X>
 Differential<X>::Differential(unsigned int as, unsigned int deg, unsigned int nnz, int a00, ...)
@@ -627,7 +635,9 @@ Differential<X> operator+(const Differential<X>& x, const Differential<X>& y)
     Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
     typename Differential<X>::const_iterator xiter=x.begin();
     typename Differential<X>::const_iterator yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end()) {
+    // Only need to check one of the degrees below, yiter->key().degree() will be below
+    // xiter->key().degree() if used.
+    while(xiter!=x.end() && yiter!=y.end() && xiter->key().degree()<=r.degree()) {
         if(xiter->key()==yiter->key()) {
             r.expansion().append(xiter->key(),xiter->data()+yiter->data());
             ++xiter; ++yiter;
@@ -643,10 +653,11 @@ Differential<X> operator+(const Differential<X>& x, const Differential<X>& y)
         r.expansion().append(xiter->key(),xiter->data());
         ++xiter;
     }
-    while(yiter!=y.end() && xiter->key().degree()<=r.degree()) {
+    while(yiter!=y.end() && yiter->key().degree()<=r.degree()) {
         r.expansion().append(yiter->key(),yiter->data());
         ++yiter;
     }
+    //std::cerr<<"x="<<x<<" y="<<y<<" x+y="<<r<<"\n";
     return r;
 }
 
@@ -657,7 +668,7 @@ Differential<X> operator-(const Differential<X>& x, const Differential<X>& y)
     Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
     typename Differential<X>::const_iterator xiter=x.begin();
     typename Differential<X>::const_iterator yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end()) {
+    while(xiter!=x.end() && yiter!=y.end() && xiter->key().degree()<=r.degree()) {
         if(xiter->key()==yiter->key()) {
             r.expansion().append(xiter->key(),xiter->data()-yiter->data());
             ++xiter; ++yiter;
@@ -673,10 +684,11 @@ Differential<X> operator-(const Differential<X>& x, const Differential<X>& y)
         r.expansion().append(xiter->key(),xiter->data());
         ++xiter;
     }
-    while(yiter!=y.end() && xiter->key().degree()<=r.degree()) {
+    while(yiter!=y.end() && yiter->key().degree()<=r.degree()) {
         r.expansion().append(yiter->key(),-yiter->data());
         ++yiter;
     }
+    //std::cerr<<"x="<<x<<" y="<<y<<" x-y="<<r<<"\n";
     return r;
 }
 
@@ -698,6 +710,7 @@ Differential<X> operator*(const Differential<X>& x, const Differential<X>& y)
         }
     }
     r.cleanup();
+    //std::cerr<<"x="<<x<<" y="<<y<<" x*y="<<r<<"\n";
     return r;
 }
 

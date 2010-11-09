@@ -188,9 +188,9 @@ void export_taylor_model()
     taylor_model_class.def("get_sweep_threshold", &TaylorModel::sweep_threshold);
     taylor_model_class.def("set_maximum_degree", &TaylorModel::set_maximum_degree);
     taylor_model_class.def("get_maximum_degree", &TaylorModel::maximum_degree);
-    taylor_model_class.def("__getitem__", &__getitem__<TaylorModel,A,Float>);
-    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,A,D>);
-    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,A,D>);
+    taylor_model_class.def("__getitem__", &__getitem__<TaylorModel,MultiIndex,Float>);
+    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,MultiIndex,Float>);
+    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,MultiIndex,double>);
     taylor_model_class.def("__iter__", iterator<TaylorModel>()); // TODO: TaylorModel iterator does not fit in general Python iterator scheme
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
@@ -286,7 +286,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def(init< IntervalVector >());
     scalar_taylor_function_class.def(init< IntervalVector, const ScalarFunction& >());
     scalar_taylor_function_class.def("error", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
-    scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const double&)) &ScalarTaylorFunction::set_error);
+    scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const Float&)) &ScalarTaylorFunction::set_error);
     scalar_taylor_function_class.def("argument_size", &ScalarTaylorFunction::argument_size);
     scalar_taylor_function_class.def("domain", &ScalarTaylorFunction::domain, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("codomain", &ScalarTaylorFunction::codomain);

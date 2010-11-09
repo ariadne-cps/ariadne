@@ -55,7 +55,7 @@ struct from_python_dict<Interval> {
         boost::python::list lst=dct.items();
         assert(boost::python::len(lst)==1);
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        new (storage) Interval(boost::python::extract<double>(lst[0][0]),boost::python::extract<double>(lst[0][1]));
+        new (storage) Interval(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
         data->convertible = storage;
     }
 };
@@ -69,7 +69,7 @@ struct from_python_list<Interval> {
         boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
         assert(boost::python::len(lst)==2);
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        new (storage) Interval(boost::python::extract<double>(lst[0]),boost::python::extract<double>(lst[1]));
+        new (storage) Interval(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
         data->convertible = storage;
     }
 };
@@ -245,8 +245,8 @@ void export_interval()
     def("up",&up);
 
     class_< Interval > interval_class("Interval");
-    interval_class.def(init<double,double>());
-    interval_class.def(init<double>());
+    interval_class.def(init<Float,Float>());
+    interval_class.def(init<Float>());
     interval_class.def(init<Interval>());
 #ifdef HAVE_GMPXX_H
     interval_class.def(init<Rational>());

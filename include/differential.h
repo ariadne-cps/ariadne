@@ -635,9 +635,9 @@ Differential<X> operator+(const Differential<X>& x, const Differential<X>& y)
     Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
     typename Differential<X>::const_iterator xiter=x.begin();
     typename Differential<X>::const_iterator yiter=y.begin();
-    // Only need to check one of the degrees below, yiter->key().degree() will be below
-    // xiter->key().degree() if used.
-    while(xiter!=x.end() && yiter!=y.end() && xiter->key().degree()<=r.degree()) {
+    // No need to check if maximum degree has been reached below,
+    // since if one iterator is above the maximum degree, the other is at the end.
+    while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()==yiter->key()) {
             r.expansion().append(xiter->key(),xiter->data()+yiter->data());
             ++xiter; ++yiter;
@@ -668,7 +668,9 @@ Differential<X> operator-(const Differential<X>& x, const Differential<X>& y)
     Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
     typename Differential<X>::const_iterator xiter=x.begin();
     typename Differential<X>::const_iterator yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end() && xiter->key().degree()<=r.degree()) {
+    // No need to check if maximum degree has been reached below,
+    // since if one iterator is above the maximum degree, the other is at the end.
+    while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()==yiter->key()) {
             r.expansion().append(xiter->key(),xiter->data()-yiter->data());
             ++xiter; ++yiter;

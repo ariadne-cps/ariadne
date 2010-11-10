@@ -209,6 +209,8 @@ class Box
     }
 };
 
+//! \relates Box \brief The cartesian product of two boxes.
+Box product(const Box& bx1, const Box& bx2);
 //! \relates Box \brief The smallest box containing the two boxes.
 Box hull(const Box& bx1, const Box& bx2);
 //! \relates Box \brief The intersection of the two boxes.

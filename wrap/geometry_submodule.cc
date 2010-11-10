@@ -233,6 +233,7 @@ void export_box()
     def("disjoint", (bool(*)(const IVector&,const IVector&)) &disjoint);
     def("subset", (bool(*)(const IVector&,const IVector&)) &subset);
 
+    def("product", (Box(*)(const Box&,const Box&)) &product);
     def("hull", (Box(*)(const Box&,const Box&)) &hull);
     def("intersection", (Box(*)(const Box&,const Box&)) &intersection);
 
@@ -313,8 +314,6 @@ void export_taylor_image_set()
 
     def("unchecked_apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &unchecked_apply);
 
-    implicitly_convertible<Box,TaylorImageSet>();
-
     to_python< std::pair<TaylorImageSet,TaylorImageSet> >();
 }
 
@@ -355,8 +354,6 @@ void export_taylor_constrained_image_set()
     def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const Interval&)) &product);
     def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const Box&)) &product);
     def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const TaylorConstrainedImageSet&)) &product);
-
-    implicitly_convertible<Box,TaylorConstrainedImageSet>();
 
     to_python< std::pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> >();
 
@@ -430,8 +427,6 @@ void export_hybrid_taylor_set()
     hybrid_taylor_set_class.def(init<DiscreteLocation,Box>());
     hybrid_taylor_set_class.def(init<DiscreteLocation,TaylorImageSet>());
     hybrid_taylor_set_class.def(self_ns::str(self));
-
-    implicitly_convertible<HybridBox,HybridTaylorImageSet>();
 }
 
 void export_hybrid_constrained_image_set()
@@ -443,8 +438,6 @@ void export_hybrid_constrained_image_set()
     hybrid_constrained_image_set_class.def(init<DiscreteLocation,Box>());
     //hybrid_constrained_image_set_class.def(init<DiscreteLocation,ConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(self_ns::str(self));
-
-    implicitly_convertible<HybridBox,HybridConstrainedImageSet>();
 }
 
 

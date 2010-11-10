@@ -101,6 +101,10 @@ std::vector<Point> Box::vertices() const {
     return v;
 }
 
+Box product(const Box& bx1, const Box& bx2) {
+    return Box(Ariadne::join(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
+}
+
 Box hull(const Box& bx1, const Box& bx2) {
     return Box(Ariadne::hull(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
 }

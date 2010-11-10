@@ -56,23 +56,30 @@ IntegratorBase::flow_bounds(const VectorFunction& vf, const IntervalVector& dx, 
 
     // Set up constants of the method.
     // TODO: Better estimates of constants
-    const double INITIAL_MULTIPLIER=2;
+    const double INITIAL_MULTIPLIER=2.0;
     const double MULTIPLIER=1.125;
-    const double BOX_RADIUS_MULTIPLIER=1.03125;
+    const double BOX_RADIUS_MULTIPLIER=1.25;
     const uint EXPANSION_STEPS=8;
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
+    const double LIPSCHITZ_CONSTANT_FRACTION=0.25;
 
     IntervalVector delta=(dx-midpoint(dx))*(BOX_RADIUS_MULTIPLIER-1);
 
-    Float h=hmax;
+    // Compute the Lipschitz constant over the initial box
+    Float lip = norm(vf.jacobian(dx)).upper();
+    Float hlip = LIPSCHITZ_CONSTANT_FRACTION/lip;
+
     Float hmin=hmax/(1<<REDUCTION_STEPS);
+    Float h=max(hmin,min(hmax,hlip));
+    ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
+
     bool success=false;
     IntervalVector bx,nbx,df;
     Interval ih(0,h);
 
     while(!success) {
-        ARIADNE_ASSERT_MSG(h>hmin," h="<<h<<", hmin="<<hmin);
+        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
         bx=dx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
         for(uint i=0; i!=EXPANSION_STEPS; ++i) {
             df=vf.evaluate(bx);

@@ -140,8 +140,8 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.001, 0.0,0.001);
-    EnclosureType initial_enclosure(l1,initial_box);
+    Box initial_box(2, 6.0,6.001, 1.0,1.001);
+    EnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
     //HybridTime evolution_time(90.0,6);

@@ -57,8 +57,11 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     fig.write(filename);
 }
 
-int main()
+int main(int argc, const char* argv[])
 {
+    uint evolver_verbosity = 0;
+    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+
     double amplitude=4.0;
     double frequency=50.0;
     double Ron = 10.0;
@@ -78,7 +81,7 @@ int main()
 //    float TIME_LIMIT = 0.0042;
     int TRAN_LIMIT = 1;
     double MAX_ENCL_RADIUS = 1.0;
-    double MAX_STEP_SIZE = 1e-5/frequency;
+    double MAX_STEP_SIZE = 1e-2/frequency;
 //    float LOCK_TOGRID_TIME = 2.0/frequency;
     double LOCK_TOGRID_TIME = 0.25/frequency;
     int MAX_GRID_DEPTH = 7;
@@ -184,7 +187,7 @@ int main()
 
     /// Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver;
-    evolver.verbosity = 0;
+    evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;
@@ -209,26 +212,24 @@ int main()
 
     HybridTime evolution_time(TIME_LIMIT,TRAN_LIMIT);
 
-/*
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(rectifier,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
-*/
+
     Box graphic_box(2,0.0,1.0/dp[1],-dp[0],dp[0]);
     Box graphic_box2(2,-dp[0],dp[0],2.0,dp[0]);
 
     std::cout << "Plotting results..." << std::flush;
-/*
-    textplot("rectifier_orbit.txt", orbit);
 
     plot("rectifier_orbit_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("rectifier_orbit_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("rectifier_orbit_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), orbit, -1);
 
-    std::cout << "done." << std::endl;
-*/
+
+/*
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
@@ -249,5 +250,5 @@ int main()
     plot("rectifier_reach_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
     plot("rectifier_reach_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
     plot("rectifier_reach_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), reach, -1);
-
+*/
 }

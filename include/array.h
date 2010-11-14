@@ -34,6 +34,10 @@
 
 namespace Ariadne {
 
+template<class T> T* uninitialized_new(size_t n) { 
+    return reinterpret_cast<T*>(new char[n*sizeof(T)]); 
+}
+
 template<class T> 
 class array {
   public:
@@ -51,23 +55,31 @@ class array {
     ~array() { delete[] _ptr; }
   
     /*! \brief Default constructor. Constructs an empty array. */
-    array() : _size(0), _ptr(new value_type[_size]) { }
+    array() : _size(0), _ptr(0) { }
     /*! \brief Constructs an array of size \a n with uninitialised elements. */
-    explicit array(const size_type n) : _size(n), _ptr(new value_type[_size]) { }
+    explicit array(const size_type n) : _size(n), _ptr(uninitialized_new<T>(n)) { }
     /*! \brief Constructs an array of size \a n with elements initialised to \a x. */
-    array(const size_type n, const value_type& x) : _size(n), _ptr(new value_type[_size]) { fill(x); }
+    array(const size_type n, const value_type& x) : _size(n), _ptr(uninitialized_new<T>(n)) {
+        for(size_type i=0; i!=n; ++i) { new (_ptr+i) T(x); } }
     /*! \brief Constructs an array of size \a n with elements initialised by the variable argument list x0,x1,... . */
-    array(const size_type n, const value_type& x0, const value_type& x1, ...) : _size(n), _ptr(new value_type[_size]) {
+    array(const size_type n, const value_type& x0, const value_type& x1, ...)
+        : _size(n), _ptr(uninitialized_new<T>(n)) 
+    {
         if(n<2) { throw std::out_of_range("array: size is less than number of arguments"); } 
-        va_list args; va_start(args,x1); _ptr[0]=x0; _ptr[1]=x1; for(size_t i=2; i!=n; ++i) { _ptr[i]=va_arg(args,T); } va_end(args); }
+        va_list args; va_start(args,x1); new (_ptr) T(x0); new (_ptr+1u) T(x1); 
+        for(size_t i=2; i!=n; ++i) { new (_ptr+i) T(va_arg(args,T)); } va_end(args); }
     /*! \brief Constructs an array from the range \a first to \a last. */
     template<class ForwardIterator> array(ForwardIterator first, ForwardIterator last)
-        : _size(std::distance(first,last)), _ptr(new value_type[_size]) { fill(first); }
-  
+        : _size(std::distance(first,last)), _ptr(uninitialized_new<T>(_size))
+    {
+        this->_uninitialized_fill(first); 
+    }
     /*! \brief Conversion constructor. */
-    template<class T1> array(const array<T1>& a) : _size(a.size()), _ptr(new value_type[_size]) { fill(a.begin()); }
+    template<class T1> array(const array<T1>& a) : _size(a.size()), _ptr(uninitialized_new<T>(_size)) {
+        this->_uninitialized_fill(a.begin()); }
     /*! \brief Copy constructor. */
-    array(const array<T>& a) : _size(a.size()), _ptr(new value_type[_size]) { fill(a.begin()); }
+    array(const array<T>& a) : _size(a.size()), _ptr(uninitialized_new<T>(_size)) {
+        this->_uninitialized_fill(a.begin()); }
     /*! \brief Copy assignment. */ 
     array<T>& operator=(const array<T>& a) { resize(a.size()); fill(a.begin()); return *this; }
   
@@ -130,6 +142,10 @@ class array {
     /*! \brief Assigns the sequence from \a first to \a last. */
     template<class ForwardIterator> void assign(ForwardIterator first, ForwardIterator last) { 
         resize(std::distance(first,last)); fill(first); }
+  private:
+    template<class InputIterator> void _uninitialized_fill(InputIterator first) { 
+        pointer curr=_ptr; pointer this_end=_ptr+_size; 
+        while(curr!=this_end) { new (curr) T(*first); ++curr; ++first; } }
   private:
     size_type _size; 
     pointer _ptr; 

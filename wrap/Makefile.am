@@ -38,7 +38,7 @@ differentiation_la_SOURCES=$(DIFFERENTIATION_SRC)
 differentiation_la_LIBADD = ../src/numeric.lo ../src/vector.lo ../src/matrix.lo
 
 ariadne_la_SOURCES=$(ARIADNE_SRC)
-ariadne_la_LIBADD = ../src/libariadne.la ../src/libariadne-extra.la
+ariadne_la_LIBADD = ../src/libariadne.la ../src/libariadne-extras.la
 
 INTERVAL_SRC = interval_module.cc numeric_submodule.cc linear_algebra_submodule.cc
 

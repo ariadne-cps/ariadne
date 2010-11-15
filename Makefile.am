@@ -2,9 +2,9 @@ SUBDIRS = include src test wrap examples
 
 EXTRA_DIST = Doxyfile
 
-.PHONY: shiny doc all lib wrap examples profiles check-lib check-python
+.PHONY: shiny doc all lib lib-extras wrap examples profiles check-lib check-python
 
-all: lib wrap tests examples profiles
+all: lib lib-extras wrap tests examples profiles
 
 # No point in setting AM_CXXFLAGS here as these do not propagate to subdirectories
 # Global CXXFLAGS are defined in configure.ac in the ARIADNE_CXXFLAGS variable.
@@ -32,16 +32,19 @@ doc:
 lib:
 	(cd src; make lib)
 
-wrap: lib
+lib-extras:
+	(cd src; make lib-extras)
+
+wrap: lib lib-extras
 	(cd wrap; make wrap)
 
-python: lib
+python: lib lib-extras
 	(cd wrap; make python)
 
 tests: lib
 	(cd test; make tests)
 
-examples: lib
+examples: lib lib-extras
 	(cd examples; make examples)
 
 profiles: lib

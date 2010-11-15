@@ -7,22 +7,29 @@ LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS= \
 	tutorial \
-	bouncingball bouncingball-compositional \
-	watertank watertank-compositional \
-	watertank-nonlinear watertank-time \
-	watertank-proportional 3bouncingballs \
-	rectifier cmos_inverter_analoginput \
+	bouncingball \
+	bouncingball-compositional \
+	watertank \ 
+	watertank-time \
+	watertank-proportional \
+	watertank-nonlinear \
+	watertank-compositional \
+	3bouncingballs \
+	rectifier \
+	cmos_inverter_analoginput \
 	grid-refinement
 
+#    multipleguards
+#    coconut_demo
 
-tutorial_SOURCES = tutorial.cc verify.py
-watertank_SOURCES=watertank.cc
-watertank_compositional_SOURCES=watertank-compositional.cc
+tutorial_SOURCES = tutorial.cc
 bouncingball_SOURCES = bouncingball.cc
 bouncingball_compositional_SOURCES=bouncingball-compositional.cc
-watertank_nonlinear_SOURCES=watertank-nonlinear.cc
+watertank_SOURCES=watertank.cc
 watertank_time_SOURCES=watertank-time.cc
 watertank_proportional_SOURCES=watertank-proportional.cc
+watertank_nonlinear_SOURCES=watertank-nonlinear.cc
+watertank_compositional_SOURCES=watertank-compositional.cc
 3bouncingballs_SOURCES=3bouncingballs.cc
 rectifier_SOURCES=rectifier.cc
 cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc

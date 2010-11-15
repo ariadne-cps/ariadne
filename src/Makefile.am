@@ -1,7 +1,7 @@
-phony: lib extra
+phony: lib lib-extras
 
 lib: libariadne.la libcalculus.la
-extra: libariadne-extra.la
+lib-extras: libariadne-extras.la
 
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 
@@ -46,7 +46,7 @@ ARIADNE_SRC = \
 	logging.cc \
 	graphics.cc
 
-EXTRA_SRC = \
+EXTRAS_SRC = \
 	geometry.cc \
 	zonotope.cc \
 	polytope.cc \
@@ -64,9 +64,9 @@ CALCULUS_SRC = \
 	taylor_set.cc  \
 	taylor_function.cc
 
-lib_LTLIBRARIES = libariadne.la libariadne-extra.la libcalculus.la
+lib_LTLIBRARIES = libariadne.la libariadne-extras.la libcalculus.la
 libariadne_la_SOURCES = $(ARIADNE_SRC)
-libariadne_extra_la_SOURCES = $(EXTRA_SRC)
+libariadne_extras_la_SOURCES = $(EXTRAS_SRC)
 libcalculus_la_SOURCES = $(CALCULUS_SRC)
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 

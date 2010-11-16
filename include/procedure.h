@@ -135,7 +135,9 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
 {
     static const Float inf=Ariadne::inf<Float>();
     ARIADNE_ASSERT(v.size()==p.size());
-    for(size_t r=p.size()-1u; r!=-1u; --r) {
+    size_t r=p.size();
+    while(r!=0u) {
+        --r;
         size_t a=p[r].arg; size_t a1=p[r].arg1; size_t a2=p[r].arg2;
         switch(p[r].op) {
             case CNST: break;
@@ -159,7 +161,7 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
             case ATAN: restrict(v[a],tan(v[r])); break;
             case EQ: restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
             case LEQ: restrict(v[a1],Interval(-inf,v[a2].upper())); restrict(v[a1],Interval(v[a2].lower(),+inf)); break;
-            default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op);
+            default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op<<" at instruction "<<r<<"\n");
         }
     }
 }

@@ -23,13 +23,13 @@
 
 #include "config.h"
 
+#include <boost/python.hpp>
+
 #include "graphics_interface.h"
 #include "graphics.h"
 #include "point.h"
 #include "box.h"
 #include "function.h"
-
-#include <boost/python.hpp>
 
 using namespace boost::python;
 

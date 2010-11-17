@@ -23,6 +23,8 @@
 
 #include "config.h"
 
+#include <boost/python.hpp>
+
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
@@ -36,10 +38,7 @@
 
 #include "utilities.h"
 
-#include <boost/python.hpp>
-
 using namespace boost::python;
-
 using namespace Ariadne;
 
 

@@ -25,15 +25,15 @@
 #include <iomanip>
 
 #include "config.h"
-#include "utilities.h"
+
+#include <boost/python.hpp>
 
 #include "tribool.h"
 #include "numeric.h"
 
-#include <boost/python.hpp>
+#include "utilities.h"
 
 using namespace boost::python;
-
 using namespace Ariadne;
 
 
@@ -86,7 +86,7 @@ struct interval_from_python_str {
     }
 };
 */
-}
+} // namespace Ariadne
 
 
 std::string __str__(tribool tb) {

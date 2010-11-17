@@ -21,8 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <boost/python.hpp>
+
 #include <iostream>
 #include <iomanip>
+
 #include "array.h"
 #include "container.h"
 #include "numeric.h"
@@ -44,9 +47,6 @@
 
 #include "utilities.h"
 
-
-
-#include <boost/python.hpp>
 using namespace boost::python;
 
 namespace Ariadne {

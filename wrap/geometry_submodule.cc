@@ -23,6 +23,8 @@
 
 #include "config.h"
 
+#include <boost/python.hpp>
+
 #include "geometry.h"
 #include "point.h"
 #include "curve.h"
@@ -40,10 +42,8 @@
 
 #include "utilities.h"
 
-#include <boost/python.hpp>
 
 using namespace boost::python;
-
 using namespace Ariadne;
 
 namespace Ariadne {

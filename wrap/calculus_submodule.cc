@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <boost/python.hpp>
+
 #include "function_interface.h"
 #include "polynomial.h"
 #include "function.h"
 #include "taylor_function.h"
 
-#include <boost/python.hpp>
-using namespace boost::python;
-
-using namespace Ariadne;
-
 #include "utilities.h"
+
+using namespace boost::python;
+using namespace Ariadne;
 
 namespace Ariadne {
 

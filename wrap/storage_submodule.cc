@@ -22,6 +22,8 @@
  */
 
 
+#include <boost/python.hpp>
+
 #include "numeric.h"
 #include "function_set.h"
 #include "grid_set.h"
@@ -29,10 +31,8 @@
 
 #include "utilities.h"
 
-using namespace Ariadne;
-
-#include <boost/python.hpp>
 using namespace boost::python;
+using namespace Ariadne;
 
 
 

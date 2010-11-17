@@ -25,6 +25,8 @@
 #include <iomanip>
 #include <functional>
 
+#include <boost/python.hpp>
+
 #include "numeric.h"
 #include "function.h"
 #include "expression.h"
@@ -36,15 +38,11 @@
 
 #include "utilities.h"
 
-#include <boost/python.hpp>
 using namespace boost::python;
-
 using namespace Ariadne;
 
+
 namespace Ariadne {
-
-
-
 
 
 template<class T>

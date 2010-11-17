@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <boost/python.hpp>
+
 #include "orbit.h"
 #include "vector_field_evolver.h"
 #include "taylor_set.h"
@@ -30,16 +32,11 @@
 #include "hybrid_set.h"
 #include "hybrid_time.h"
 
-#include <boost/python.hpp>
-using namespace boost::python;
-
-using namespace Ariadne;
-
 #include "utilities.h"
 
-namespace Ariadne {
+using namespace boost::python;
+using namespace Ariadne;
 
-}
 
 template<class Orb>
 void export_orbit(const char* name)

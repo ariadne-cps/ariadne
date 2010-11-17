@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <boost/python.hpp>
+
 #include "array.h"
 #include "numeric.h"
 #include "taylor_model.h"
 #include "differential.h"
 
-#include <boost/python.hpp>
 using namespace boost::python;
-
 using namespace Ariadne;
 
 template<class X> void read_array(array<X>&, const boost::python::object& obj) { }

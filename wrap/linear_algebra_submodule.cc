@@ -23,21 +23,20 @@
 
 #include "config.h"
 
+#include <boost/python.hpp>
+#include <boost/python/slice.hpp>
+
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
 
 #include "utilities.h"
 
-#include <boost/python.hpp>
-#include <boost/python/slice.hpp>
-
 using namespace boost::python;
-
 using namespace Ariadne;
 
-namespace Ariadne {
 
+namespace Ariadne {
 
 #ifdef HAVE_GMPXX_H
 template<> const char* python_name<Rational>(const char* name) {
@@ -142,7 +141,7 @@ struct from_python< Matrix<X> >
 };
 
 
-}
+} // namespace Ariadne
 
 
 template<class X>

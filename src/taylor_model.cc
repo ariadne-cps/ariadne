@@ -4130,6 +4130,184 @@ parameterised_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0,
 
 
 
+
+
+ApproximateTaylorModel::ApproximateTaylorModel(uint as)
+    : _expansion(as)
+{
+}
+
+void ApproximateTaylorModel::iadd(const Float& c)
+{
+    // Compute self+=c
+    ApproximateTaylorModel& x=*this;
+    if(c==0) { return; }
+    if(x._expansion.empty()) {
+        x._expansion.append(MultiIndex(x.argument_size()),c);
+    } else if((x._expansion.end()-1)->key().degree()>0) {
+        x._expansion.append(MultiIndex(x.argument_size()),c);
+    } else {
+        Float& rv=(x._expansion.end()-1)->data();
+        rv+=c;
+    }
+}
+
+void ApproximateTaylorModel::imul(const Float& c)
+{
+    // Compute self*=c
+    if(c==0) { this->clear(); return; }
+    if(c==1) { return; }
+    for(ExpansionType::iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
+        iter->data() *= c;
+    }
+}
+
+
+ApproximateTaylorModel ApproximateTaylorModel::sma(const Float& c, const ApproximateTaylorModel& y) const
+{
+    const ApproximateTaylorModel& x=*this;
+    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<", y="<<y);
+    ApproximateTaylorModel r(x.argument_size());
+
+    const_iterator xiter=x._expansion.begin();
+    const_iterator yiter=y._expansion.begin();
+    while(xiter!=x._expansion.end() && yiter!=y._expansion.end()) {
+        if(xiter->key()<yiter->key()) {
+            r._expansion.append(xiter->key(),xiter->data());
+            ++xiter;
+        } else if(yiter->key()<xiter->key()) {
+            r._expansion.append(yiter->key(),c*yiter->data());
+            ++yiter;
+        } else {
+            r._expansion.append(xiter->key(),xiter->data()+c*yiter->data());
+            ++xiter; ++yiter;
+        }
+    }
+    while(xiter!=x._expansion.end()) {
+        r._expansion.append(xiter->key(),xiter->data());
+        ++xiter;
+    }
+    while(yiter!=y._expansion.end()) {
+        r._expansion.append(yiter->key(),c*yiter->data());
+        ++yiter;
+    }
+
+    return r;
+}
+
+void ApproximateTaylorModel::isma(const Float& c, const ApproximateTaylorModel& y)
+{
+    ApproximateTaylorModel r=this->sma(c,y);
+    this->swap(r);
+}
+
+
+void ApproximateTaylorModel::ifma(const ApproximateTaylorModel& x, const ApproximateTaylorModel& y)
+{
+    ApproximateTaylorModel& r(*this);
+    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<",y="<<y);
+
+    ApproximateTaylorModel t(x.argument_size());
+    MultiIndex sa;
+    for(ExpansionType::const_iterator xiter=x._expansion.begin(); xiter!=x._expansion.end(); ++xiter) {
+        ExpansionType::const_iterator yiter=y._expansion.begin();
+        ExpansionType::const_iterator riter=r._expansion.begin();
+        while(riter!=r._expansion.end() && yiter!=y._expansion.end()) {
+            const MultiIndex& ra=riter->key();
+            sa=xiter->key()+yiter->key();
+            if(sa==ra) {
+                t._expansion.append(sa,riter->data()+xiter->data()*yiter->data());
+                ++riter; ++yiter;
+            } else if(sa<ra) {
+                t._expansion.append(sa,xiter->data()*yiter->data());
+                ++yiter;
+            } else {
+                t._expansion.append(ra,riter->data());
+                ++riter;
+            }
+        }
+        while(riter!=r._expansion.end()) {
+            t._expansion.append(riter->key(),riter->data());
+            ++riter;
+        }
+        while(yiter!=y._expansion.end()) {
+            t._expansion.append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
+            ++yiter;
+
+        }
+
+        r._expansion.swap(t._expansion);
+        t._expansion.clear();
+    }
+}
+
+
+
+
+ApproximateTaylorModel* ApproximateTaylorModel::create() const {
+    return new ApproximateTaylorModel(this->argument_size());
+}
+
+ApproximateTaylorModel* ApproximateTaylorModel::clone() const {
+    return new ApproximateTaylorModel(*this);
+}
+
+Float ApproximateTaylorModel::average() const {
+    return (*this)[MultiIndex(this->argument_size())];
+}
+
+Float ApproximateTaylorModel::norm() const {
+    return (*this)[MultiIndex(this->argument_size())];
+}
+
+Float ApproximateTaylorModel::tolerance() const {
+    return this->_accuracy_ptr->_sweep_threshold;
+}
+
+std::ostream& ApproximateTaylorModel::write(std::ostream& os) const {
+    return os << "TM["<<this->argument_size()<<"](" << this->_expansion << ")";
+}
+
+
+ApproximateTaylorModel neg(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel rec(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel sqr(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel sqrt(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel exp(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel log(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel sin(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel cos(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+ApproximateTaylorModel tan(const ApproximateTaylorModel& t) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+std::ostream& ApproximateTaylorModel::str(std::ostream& os) const {
+    return os << this->_expansion;
+}
 } //namespace Ariadne
 
 

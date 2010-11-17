@@ -682,6 +682,7 @@ std::ostream& operator<<(std::ostream&, const TaylorModel::Accuracy&);
 
 struct TaylorModel::Accuracy {
     friend class TaylorModel;
+    friend class ApproximateTaylorModel;
     friend class TaylorCalculus;
 
     Accuracy();
@@ -712,6 +713,237 @@ struct FlowBoundsException : public std::runtime_error {
 };
 
 
+/*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
+ *
+ * See also Expansion, Polynomila, TaylorModel<Interval>.
+ */
+class ApproximateTaylorModel
+{
+    typedef TaylorModel::Accuracy Accuracy;
+    typedef Expansion<Float> ExpansionType;
+  private:
+    mutable shared_ptr<Accuracy> _accuracy_ptr;
+    ExpansionType _expansion;
+  private:
+    static const Float _zero;
+
+  public:
+    //! \brief The type used for the coefficients.
+    typedef Float ScalarType;
+    //! \brief The type used to index the coefficients.
+    typedef MultiIndex IndexType;
+    //! \brief The type used for the coefficients.
+    typedef Float ValueType;
+
+    //! \brief An iterator through the (index,coefficient) pairs of the expansion.
+    typedef ExpansionType::iterator iterator;
+    //! \brief A constant iterator through the (index,coefficient) pairs of the expansion.
+    typedef ExpansionType::const_iterator const_iterator;
+
+  public:
+    //@{
+    /*! \name Constructors and destructors. */
+    //! \brief Construct a IntervalTaylorModel in \a as arguments.
+    ApproximateTaylorModel(uint as = 0u);
+    //! \brief Fast swap with another Taylor model.
+    void swap(ApproximateTaylorModel& other) { this->_expansion.swap(other._expansion); }
+    //! \brief Set to zero.
+    void clear() { this->_expansion.clear(); }
+    //! \brief A zero element with the same parameters.
+    ApproximateTaylorModel null() const { return ApproximateTaylorModel(this->argument_size()); }
+    //@}
+
+    //@{
+    /*! \name Assignment to constant values. */
+    //! \brief Set equal to a built-in, keeping the same number of arguments.
+    ApproximateTaylorModel& operator=(double c) {
+        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),Float(c)); return *this; }
+    //! \brief Set equal to a constant, keeping the same number of arguments.
+    ApproximateTaylorModel& operator=(const Float& c) {
+        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
+    //! \brief Set equal to an interval constant, keeping the same number of arguments.
+    ApproximateTaylorModel& operator=(const Interval& c) { return (*this)=midpoint(c); }
+    //! \brief Set equal to a real constant, keeping the same number of arguments.
+    ApproximateTaylorModel& operator=(const Real& c) { return (*this)=Float(c); }
+    //@}
+
+    //@{
+    /*! \name Comparison operators. */
+    //! \brief Equality operator. Tests equality of representation, including error term.
+    bool operator==(const ApproximateTaylorModel& other) const {
+        return this->_expansion==other._expansion; }
+    //! \brief Inequality operator.
+    bool operator!=(const ApproximateTaylorModel& other) const {
+        return !(*this==other); }
+    //@}
+
+    //@{
+    /*! \name Data access */
+    //! \brief The number of variables in the argument of the quantity.
+    uint argument_size() const { return this->_expansion.argument_size(); }
+    //! \brief The coefficient of the term in $x^a$.
+    const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    //! \brief The error of the expansion over the domain.
+    const Float& error() const { return _zero; }
+    //@}
+
+    //@{
+    /*! \name Function evaluation. */
+    //! \brief A coarse over-approximation to the range of the quantity.
+    Interval codomain() const;
+    //! \brief An over-approximation to the range of the quantity.
+    Interval range() const;
+    //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
+    Interval gradient_range(uint j) const;
+    //! \brief Evaluate the quantity at the point \a x.
+    Float evaluate(const Vector<Float>& x) const;
+    //@}
+
+    //@{
+    /*! \name Inplace modifications. */
+    //! \brief Scale so that the old codomain maps into the unit interval.
+    void unscale(const Interval& codomain);
+    //! \brief Compute the antiderivative (in place).
+    void antidifferentiate(uint k);
+    //! \brief Compute the derivative (in place).
+    void differentiate(uint k);
+    //@}
+
+    //@{
+    /*! \name Simplification operations. */
+    //! \brief Truncate to the default maximum degree of the quantity.
+    ApproximateTaylorModel& truncate();
+    //! \brief Remove all terms whose coefficient has magnitude
+    //! lower than the cutoff threshold of the quantity.
+    ApproximateTaylorModel& sweep();
+    //! \brief Remove all terms which have high degree or small magnitude.
+    ApproximateTaylorModel& clean();
+    //! \brief Sort the terms in index order and combine terms with the same index.
+    ApproximateTaylorModel& unique_sort();
+    //@}
+
+  public:
+    //@{
+    /*! \name Standard algebra interface. */
+    //! \brief Create a dynamically-allocated model which is the zero constant.
+    virtual ApproximateTaylorModel* create() const;
+    //! \brief Create a dynamically-allocated copy.
+    virtual ApproximateTaylorModel* clone() const;
+    //! \brief An approximation to the norm of the function.
+    virtual Float norm() const;
+    //! \brief An approximation to the average value of the function.
+    virtual Float average() const;
+    //! \brief The tolerance to which analytic functions should be computed.
+    virtual Float tolerance() const;
+    //! \brief Write to an output stream.
+    virtual std::ostream& write(std::ostream&) const;
+    //! \brief Inplace addition of a scalar constant.
+    virtual void iadd(const Float& c);
+    //! \brief Inplace multiplication of a scalar constant.
+    virtual void imul(const Float& c);
+    //! \brief Inplace addition of a scalar multiple of a Taylor model.
+    virtual void isma(const Float& c, const ApproximateTaylorModel& x);
+    //! \brief Inplace addition of a product of Taylor models.
+    virtual void ifma(const ApproximateTaylorModel& x1, const ApproximateTaylorModel& x2);
+    //! \brief Addition of a scalar multiple of a Taylor model.
+    ApproximateTaylorModel sma(const Float& c, const ApproximateTaylorModel& x) const;
+
+
+    //@{
+    /*! \name Stream input/output operators. */
+    //! \brief Write to an output stream.
+    friend std::ostream& operator<<(std::ostream& os, const ApproximateTaylorModel& x);
+    //@}
+
+  public:
+    std::ostream& str(std::ostream&) const;
+    std::ostream& repr(std::ostream&) const;
+};
+
+ApproximateTaylorModel neg(const ApproximateTaylorModel& t);
+ApproximateTaylorModel rec(const ApproximateTaylorModel& t);
+ApproximateTaylorModel sqr(const ApproximateTaylorModel& t);
+ApproximateTaylorModel sqrt(const ApproximateTaylorModel& t);
+ApproximateTaylorModel exp(const ApproximateTaylorModel& t);
+ApproximateTaylorModel log(const ApproximateTaylorModel& t);
+ApproximateTaylorModel sin(const ApproximateTaylorModel& t);
+ApproximateTaylorModel cos(const ApproximateTaylorModel& t);
+ApproximateTaylorModel tan(const ApproximateTaylorModel& t);
+
+inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t) {
+    ApproximateTaylorModel r=t; return r; }
+inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t) {
+    ApproximateTaylorModel r=t; r.imul(-1); return r; }
+inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+    ApproximateTaylorModel r(t1); r.isma(+1,t2); return r; }
+inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+    ApproximateTaylorModel r(t1); r.isma(-1,t2); return r; }
+inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+    ApproximateTaylorModel r=t1.null(); r.ifma(t1,t2); return r; }
+inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+    return t1*rec(t2); }
+inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+    t1.isma(+1,t2); return t1; }
+inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+    t1.isma(+1,t2); return t1; }
+inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t, const Float& c) {
+    ApproximateTaylorModel r=t; r.iadd(c); return r; }
+inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t, const Float& c) {
+    ApproximateTaylorModel r=t; r.iadd(-c); return r; }
+inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t, const Float& c) {
+    ApproximateTaylorModel r=t; r.imul(c); return r; }
+inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t, const Float& c) {
+    ApproximateTaylorModel r=t; r.imul(static_cast<Float>(1)/c); return r; }
+inline ApproximateTaylorModel operator+(const Float& c, const ApproximateTaylorModel& t) {
+    ApproximateTaylorModel r=t; r.iadd(c); return r; }
+inline ApproximateTaylorModel operator-(const Float& c, const ApproximateTaylorModel& t) {
+    ApproximateTaylorModel r=neg(t); r.iadd(c); return r; }
+inline ApproximateTaylorModel operator*(const Float& c, const ApproximateTaylorModel& t) {
+    ApproximateTaylorModel r=t; r.imul(c); return r; }
+inline ApproximateTaylorModel operator/(const Float& c, const ApproximateTaylorModel& t) {
+    ApproximateTaylorModel r=rec(t); r.imul(c); return r; }
+inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t, const Float& c) {
+    t.iadd(c); return t; }
+inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t, const Float& c) {
+    t.iadd(-c); return t; }
+inline ApproximateTaylorModel& operator*=(ApproximateTaylorModel& t, const Float& c) {
+    t.imul(c); return t; }
+inline ApproximateTaylorModel& operator/=(ApproximateTaylorModel& t, const Float& c) {
+    t.imul(static_cast<Float>(1)/c); return t; }
+
+
+// FIXME: These should not need to be given explicitly
+inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t, const Real& c) { return t+=Float(c); }
+inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t, const Real& c) { return t-=Float(c); }
+inline ApproximateTaylorModel& operator*=(ApproximateTaylorModel& t, const Real& c) { return t*=Float(c); }
+inline ApproximateTaylorModel& operator/=(ApproximateTaylorModel& t, const Real& c) { return t/=Float(c); }
+inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t, const Real& c) { return t+Float(c); }
+inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t, const Real& c) { return t-Float(c); }
+inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t, const Real& c) { return t*Float(c); }
+inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t, const Real& c) { return t/Float(c); }
+inline ApproximateTaylorModel operator+(const Real& c, const ApproximateTaylorModel& t) { return Float(c)+t; }
+inline ApproximateTaylorModel operator-(const Real& c, const ApproximateTaylorModel& t) { return Float(c)-t; }
+inline ApproximateTaylorModel operator*(const Real& c, const ApproximateTaylorModel& t) { return Float(c)*t; }
+inline ApproximateTaylorModel operator/(const Real& c, const ApproximateTaylorModel& t) { return Float(c)/t; }
+
+inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t, double c) { return t+=Float(c); }
+inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t, double c) { return t-=Float(c); }
+inline ApproximateTaylorModel& operator*=(ApproximateTaylorModel& t, double c) { return t*=Float(c); }
+inline ApproximateTaylorModel& operator/=(ApproximateTaylorModel& t, double c) { return t/=Float(c); }
+inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t, double c) { return t+Float(c); }
+inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t, double c) { return t-Float(c); }
+inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t, double c) { return t*Float(c); }
+inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t, double c) { return t/Float(c); }
+inline ApproximateTaylorModel operator+(double c, const ApproximateTaylorModel& t) { return Float(c)+t; }
+inline ApproximateTaylorModel operator-(double c, const ApproximateTaylorModel& t) { return Float(c)-t; }
+inline ApproximateTaylorModel operator*(double c, const ApproximateTaylorModel& t) { return Float(c)*t; }
+inline ApproximateTaylorModel operator/(double c, const ApproximateTaylorModel& t) { return Float(c)/t; }
+
+inline std::ostream& operator<<(std::ostream& os, const ApproximateTaylorModel& x) {
+    x.str(os); return os; }
+
+inline Vector<Interval> codomain(const Vector< ApproximateTaylorModel >& t) {
+    Vector<Interval> r(t.size()); for(uint i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
 } // namespace Ariadne
 
 #endif // ARIADNE_TAYLOR_MODEL_H

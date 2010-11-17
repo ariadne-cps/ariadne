@@ -48,11 +48,16 @@ template<class X> class Vector;
 
 template<class X> class ScalarFunction;
 typedef ScalarFunction<Real> RealScalarFunction;
+typedef ScalarFunction<Interval> IntervalScalarFunction;
 template<class X> class VectorFunction;
 typedef VectorFunction<Real> RealVectorFunction;
 
 class VectorTaylorFunction;
 class ScalarTaylorFunction;
+
+struct ImplicitFunctionException : public std::runtime_error {
+    ImplicitFunctionException(const std::string& what) : std::runtime_error(what) { }
+};
 
 class SolverException : public std::runtime_error
 {

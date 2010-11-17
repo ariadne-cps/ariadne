@@ -28,6 +28,7 @@
 #ifndef ARIADNE_INTEGRATOR_INTERFACE_H
 #define ARIADNE_INTEGRATOR_INTERFACE_H
 
+#include <string>
 
 namespace Ariadne {
 
@@ -41,6 +42,10 @@ typedef Vector<Interval> IntervalVector;
 template<class X> class VectorFunction;
 typedef VectorFunction<Real> RealVectorFunction;
 class VectorTaylorFunction;
+
+struct FlowBoundsException : public std::runtime_error {
+    FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
+};
 
 //! \ingroup SolverModule EvaluationModule
 //! \brief Interface for integrating differential equations of the form \f$\dot{x}=f(x)\f$.

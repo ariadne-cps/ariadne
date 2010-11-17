@@ -56,8 +56,6 @@ typedef TaylorModel<Float> FloatTaylorModel;
 typedef TaylorModel<Interval> IntervalTaylorModel;
 
 class IntersectionException;
-class ImplicitFunctionException;
-class FlowBoundsException;
 
 // Rescale the vector x from the domain d to the unit domain.
 Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
@@ -125,13 +123,6 @@ TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector< Tayl
 // Compose an array of Taylor variables with another, after scaling by the interval vectors
 TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector<Interval>& bx, const Vector< TaylorModel<Interval> >& y);
 
-// Compute the implicit function f(x,h(x))=0
-TaylorModel<Interval> implicit(const TaylorModel<Interval>& f);
-TaylorModel<Interval> implicit_step(const TaylorModel<Interval>& f, const TaylorModel<Interval>& h);
-
-// Solve the equation f(x)=0
-Interval solve(const TaylorModel<Interval>& f);
-
 // Vector operations which can be evaluated componentwise
 bool refines(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
 bool disjoint(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
@@ -156,17 +147,9 @@ Vector< TaylorModel<Interval> > combine(const TaylorModel<Interval>& x1, const T
 Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& g);
 Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& g);
 
-//Vector operations which cannot be computed componentwise
-Vector<Interval> solve(const Vector< TaylorModel<Interval> >& f);
-Vector< TaylorModel<Interval> > implicit(const Vector< TaylorModel<Interval> >& f);
-Vector< TaylorModel<Interval> > implicit_step(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& h);
-Vector< TaylorModel<Interval> > flow(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y0, uint order);
-Vector< TaylorModel<Interval> > parameterised_flow(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y0, uint order);
-
 TaylorModel<Interval> unchecked_compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
 Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y);
 Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& y);
-Vector< TaylorModel<Interval> > unchecked_flow(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y0, uint order);
 
 Float norm(const Vector< TaylorModel<Interval> >& tv);
 
@@ -417,16 +400,8 @@ class TaylorModel<Interval>
     friend Float norm(const TaylorModel<Interval>& tm);
     //@{
     /*! \name Vectoral function operators. */
-    //! \brief Solve the equation \f$f(x)=0\f$ in the unit box.
-    friend Vector<Interval> solve(const Vector< TaylorModel<Interval> >& f);
     //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
     friend Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& g);
-    //! \brief Compute the implicit function h satisfying f(x,h(x))=0.
-    friend Vector< TaylorModel<Interval> > implicit(const Vector< TaylorModel<Interval> >& f);
-    //! \brief Compute the flow of the vector field \a vf, starting from the box \a d,
-    //! over the time interval \a h, using temporal order \a o.
-    friend Vector< TaylorModel<Interval> > flow(const Vector< TaylorModel<Interval> >& vf,
-                                    const Vector<Interval>& d, const Interval& h, uint o);
     //@}
 
     //@{
@@ -709,14 +684,6 @@ struct TaylorModel<Interval>::Accuracy {
 
 struct IntersectionException : public std::runtime_error {
     IntersectionException(const std::string& what) : std::runtime_error(what) { }
-};
-
-struct ImplicitFunctionException : public std::runtime_error {
-    ImplicitFunctionException(const std::string& what) : std::runtime_error(what) { }
-};
-
-struct FlowBoundsException : public std::runtime_error {
-    FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
 };
 
 

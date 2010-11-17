@@ -424,9 +424,15 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                    HybridEnclosure const& initial_set) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_crossings(...)\n");
+    // Construct crossing solver with
+    // TODO: Choose default parameters based on evolver parameters,
+    // or pass Solver to Evolver.
+    IntervalNewtonSolver solver(1e-8,12);
     Map<DiscreteEvent,CrossingData> crossings;
     crossings.clear();
 
+    IntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+    Interval flow_time_domain=flow.domain()[flow.argument_size()-1u];
     Box flow_bounds=flow.range();
     for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
         event_iter!=active_events.end(); ++event_iter)
@@ -447,7 +453,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // by solving the equation $g(\phi(x_0,\gamma(x_0))) = 0$
             ScalarIntervalFunction crossing_time;
             try {
-                crossing_time=implicit(compose(guard,flow));
+                crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,flow_time_domain);
                 crossings[event]=CrossingData(TRANSVERSE_CROSSING,crossing_time);
             }
             catch(const ImplicitFunctionException& e) {
@@ -515,7 +521,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // sufficient condition for no crossing involving the critical
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
-                    ScalarIntervalFunction critical_time=implicit(compose(derivative,flow));
+                    ScalarIntervalFunction critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
                     crossings[event]=CrossingData(GRAZING_CROSSING);
                     crossings[event].critical_time=critical_time;
                 }

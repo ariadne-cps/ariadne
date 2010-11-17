@@ -499,7 +499,6 @@ SolverBase::implicit(const RealVectorFunction& f,
 
 }
 
-
 ScalarTaylorFunction
 SolverBase::implicit(const RealScalarFunction& f,
                       const Vector<Interval>& ip,
@@ -510,6 +509,88 @@ SolverBase::implicit(const RealScalarFunction& f,
 }
 
 
+ScalarTaylorFunction implicit(const ScalarTaylorFunction& f);
+IntervalTaylorModel implicit(const IntervalTaylorModel& f);
+
+
+ScalarTaylorFunction
+SolverBase::implicit(const IntervalScalarFunction& f,
+                      const Vector<Interval>& ip,
+                      const Interval& ix) const
+{
+    ScalarTaylorFunction tf(join(ip,ix),f);
+    return Ariadne::implicit(tf);
+}
+
+ScalarTaylorFunction
+SolverBase::implicit(const ScalarTaylorFunction& tf,
+                      const Vector<Interval>& ip,
+                      const Interval& ix) const
+{
+    ARIADNE_ASSERT(subset(join(ip,ix),tf.domain()));
+    return Ariadne::implicit(tf);
+}
+
+
+
+ScalarTaylorFunction implicit(const ScalarTaylorFunction& f) {
+    Vector<Interval> h_domain=project(f.domain(),range(0u,f.argument_size()-1u));
+    Interval h_codomain=f.domain()[f.argument_size()-1u];
+    IntervalTaylorModel h_model=implicit(f.model());
+    ARIADNE_ASSERT(h_model.argument_size()+1==f.model().argument_size());
+    IntervalTaylorModel hrs_model=h_model.rescale(Interval(-1,+1),h_codomain);
+    ARIADNE_ASSERT(hrs_model.argument_size()+1==f.model().argument_size());
+    return ScalarTaylorFunction(h_domain,hrs_model);
+}
+
+IntervalTaylorModel
+implicit(const IntervalTaylorModel& f) {
+
+    // Check that the arguments are suitable
+    ARIADNE_ASSERT(f.argument_size()>1);
+
+    // Set some useful size constants
+    const uint fas=f.argument_size();
+    const uint has=fas-1u;
+
+    // Check to see if a solution exists
+    IntervalTaylorModel g=derivative(f,has);
+    Interval g_range=g.range();
+    if(g_range.lower()<=0 && g_range.upper()>=0) {
+        ARIADNE_THROW(ImplicitFunctionException,
+                      "implicit(IntervalTaylorModel)",
+                      "derivative "<<g_range<<" is not invertible");
+    }
+
+    uint number_of_steps=10;
+    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has);
+    //IntervalTaylorModel h=IntervalTaylorModel::constant(has,Interval(-1,+1));
+    IntervalTaylorModel h=IntervalTaylorModel::constant(has,Interval(0));
+    Vector<IntervalTaylorModel> idh=join(id,h);
+    // Perform proper Newton step improvements
+    //std::cerr<<"\nf="<<f<<"\n";
+    //std::cerr<<"g="<<g<<"\n";
+    //std::cerr<<"id="<<id<<"\n";
+    //std::cerr<<"h="<<h<<"\n";
+    for(uint i=0; i!=number_of_steps; ++i) {
+        IntervalTaylorModel& h=idh[has];
+        IntervalTaylorModel gidh=compose(g,idh);
+        h.clobber();
+        IntervalTaylorModel fidh=compose(f,idh);
+        IntervalTaylorModel dh=fidh/gidh;
+        IntervalTaylorModel nh=h-dh;
+        h=nh;
+        //std::cerr<<"fh["<<i<<"]="<<fidh<<"\n";
+        //std::cerr<<"gh["<<i<<"]="<<gidh<<"\n";
+        //std::cerr<<"dh["<<i<<"]="<<dh<<"\n";
+        //std::cerr<<"nh["<<i<<"]="<<idh[has]<<"\n";
+    }
+    //std::cerr<<"err="<<compose(f,idh)<<"\n\n";
+    //std::cerr<<"res="<<idh[has]<<"\n\n";
+    return idh[has];
+    //std::cerr<<"IMPLICIT(IntervalTaylorModel f="<<f<<")\n";
+    //return implicit(Vector<IntervalTaylorModel>(1u,f))[0];
+}
 
 
 Vector<Interval>

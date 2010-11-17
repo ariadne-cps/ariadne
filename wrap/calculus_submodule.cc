@@ -517,19 +517,10 @@ void export_vector_taylor_function()
     def("compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &compose);
     def("compose",(ScalarTaylorFunction(*)(const RealScalarFunction&,const VectorTaylorFunction&)) &compose);
     def("compose",(VectorTaylorFunction(*)(const RealVectorFunction&,const VectorTaylorFunction&)) &compose);
-    def("implicit",(ScalarTaylorFunction(*)(const RealScalarFunction&,const IntervalVector&)) &implicit);
-    def("implicit",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&)) &implicit);
-    def("implicit",(VectorTaylorFunction(*)(const VectorTaylorFunction&)) &implicit);
     def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat)) &antiderivative);
-    def("flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Interval&, Nat)) &flow);
-    def("flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &flow);
-    def("flow",(VectorTaylorFunction(*)(const RealVectorFunction&,const IntervalVector&,const Float&, Nat)) &flow);
-    def("parameterised_flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &parameterised_flow);
 
     def("unchecked_compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &unchecked_compose);
     def("unchecked_compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &unchecked_compose);
-    def("unchecked_flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Interval&, Nat)) &unchecked_flow);
-    def("unchecked_flow",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&,const Float&, Nat)) &unchecked_flow);
 
     from_python<VectorTaylorFunction>();
 }

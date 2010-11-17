@@ -42,8 +42,10 @@ template<class X> class Polynomial;
 
 template<class X> class ScalarFunction;
 typedef ScalarFunction<Real> RealScalarFunction;
+typedef ScalarFunction<Interval> IntervalScalarFunction;
 template<class X> class VectorFunction;
 typedef VectorFunction<Real> RealVectorFunction;
+typedef VectorFunction<Interval> IntervalVectorFunction;
 
 class MultiIndex;
 template<class X> class TaylorModel;
@@ -93,14 +95,7 @@ ScalarTaylorFunction embed(const Vector<Interval>& d1, const ScalarTaylorFunctio
 ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k);
 ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k);
 
-// Implicit function solver; solves f(x,h(x))=0 on dom1(f)
-ScalarTaylorFunction implicit(const ScalarTaylorFunction& f);
-// Implicit function solver solves f(g(x),h(x))=0 on dom(g)
-ScalarTaylorFunction implicit(const RealScalarFunction& f, const VectorTaylorFunction& g);
-// Implicit function solver solves f(x,h(x))=0 on d
-ScalarTaylorFunction implicit(const RealScalarFunction& f, const Vector<Interval>& d);
 
-ScalarTaylorFunction crossing_time(const RealScalarFunction& g, const RealVectorFunction& f, const Vector<Interval>& d);
 
 class VectorTaylorFunctionElementReference;
 
@@ -152,6 +147,7 @@ class ScalarTaylorFunction
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the expression \a f.
     explicit ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f);
+    explicit ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the polynomial \a p.
     explicit ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the interval polynomial \a p.
@@ -639,12 +635,6 @@ ScalarTaylorFunction compose(const ScalarTaylorFunction&, const VectorTaylorFunc
 VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const RealVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
-VectorTaylorFunction implicit(const VectorTaylorFunction&);
-ScalarTaylorFunction implicit(const RealScalarFunction&, const VectorTaylorFunction&);
-VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
-VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
-VectorTaylorFunction flow(const RealVectorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
-VectorTaylorFunction parameterised_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 Float norm(const ScalarTaylorFunction& f);
 Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
 Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2);
@@ -654,9 +644,6 @@ Interval unchecked_evaluate(const ScalarTaylorFunction&, const Vector<Interval>&
 Vector<Interval> unchecked_evaluate(const VectorTaylorFunction&, const Vector<Interval>&);
 ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
-VectorTaylorFunction unchecked_implicit(const VectorTaylorFunction&);
-VectorTaylorFunction unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
-VectorTaylorFunction unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 
 /*! \brief A taylor_model with multivalued output using the TaylorModel class.
@@ -857,16 +844,6 @@ class VectorTaylorFunction {
     friend VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
     //! \brief Antiderivative of \a f with respect to variable \a k.
     friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, uint k);
-    //! \brief The flow of the vector field \a vf defined over a space domain \a d over a time interval \a t.
-    friend VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
-    //! \brief Compute the implicit function of \a f satisfying \f$f(c,h(c))=0\f$,
-    //! where \f$c\f$ is the centre of the domain of \f$f\f$.
-    friend VectorTaylorFunction implicit(const VectorTaylorFunction& f);
-    //! \brief Compute the inverse function of \a f based at the centre of the domain. */
-    friend VectorTaylorFunction inverse(const VectorTaylorFunction& f);
-    //! \brief Compute the inverse function of \a f based at \f$f(c)\f$. */
-    friend VectorTaylorFunction inverse(const VectorTaylorFunction& f, const Vector<Float>& c);
-    //! \brief Compute the function \f$(f,g)(x)=(f(x),g(x))\f$.
     friend VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
     friend VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
     friend VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);

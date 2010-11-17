@@ -87,8 +87,11 @@ typedef VectorFunction<Real> RealVectorFunction;
 template<>
 class ScalarFunction<Float>
 {
+  public:
     ScalarFunction<Float>(ScalarFunctionInterface<Float>* fptr) : _ptr(fptr) { }
     operator const ScalarFunctionInterface<Float>& () const { return *this->_ptr; }
+
+    uint argument_size() const { return this->_ptr->argument_size(); }
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
@@ -108,8 +111,19 @@ class ScalarFunction<Float>
 template<>
 class ScalarFunction<Interval>
 {
+  public:
     ScalarFunction<Interval>(ScalarFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
     operator const ScalarFunctionInterface<Interval>& () const { return *this->_ptr; }
+
+    uint argument_size() const { return this->_ptr->argument_size(); }
+
+    Float evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+    Interval evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }

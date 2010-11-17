@@ -77,6 +77,10 @@ class SolverBase
     virtual VectorTaylorFunction implicit(const RealVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
     virtual ScalarTaylorFunction implicit(const RealScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    virtual ScalarTaylorFunction implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
+    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. (Temporary fix unitil implicit can use IntervalScalarFunction) */
+    virtual ScalarTaylorFunction implicit(const ScalarTaylorFunction& f, const Vector<Interval>& par, const Interval& ix) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
     virtual Set< Vector<Interval> > solve_all(const RealVectorFunction& f,const Vector<Interval>& pt) const;
@@ -102,6 +106,8 @@ class IntervalNewtonSolver
     IntervalNewtonSolver(double max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual IntervalNewtonSolver* clone() const { return new IntervalNewtonSolver(*this); }
+
+    using SolverBase::implicit;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual VectorTaylorFunction implicit_step(const RealVectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;

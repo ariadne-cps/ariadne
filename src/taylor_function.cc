@@ -106,6 +106,15 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const RealScalar
     this->_model.clean();
 }
 
+ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f)
+    : _domain(d), _model(f.argument_size())
+{
+    ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
+    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
+    this->_model=f.evaluate(x);
+    this->_model.clean();
+}
+
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p)
     : _domain(d), _model(p.argument_size())
 {
@@ -518,102 +527,6 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
     for(uint i=0; i!=g.size(); ++i) { gmodels[i]=g[i].model(); }
 
     return ScalarTaylorFunction(gdomain,f.evaluate(gmodels));
-}
-
-
-Vector<ScalarTaylorFunction>
-implicit(const Vector<ScalarTaylorFunction>& f)
-{
-    ARIADNE_ASSERT(f.size()>0);
-    ARIADNE_ASSERT(f.size()<=f[0].argument_size());
-    // Solve the equation f(x,h(x))=0
-    // Use D1f + D2f Dh = 0, so Dh=-D2f^-1 D1f
-    uint rs=f.size();
-    uint fas=f[0].argument_size();
-    uint has=fas-rs;
-
-    Vector<Interval> h_domain=project(f[0].domain(),range(0u,has));
-    Vector<Interval> h_range=project(f[0].domain(),range(has,fas));
-    Vector<ScalarTaylorFunction> id=ScalarTaylorFunction::variables(h_domain);
-    Vector<ScalarTaylorFunction> h=ScalarTaylorFunction::constants(h_domain,h_range);
-
-    for(uint k=0; k!=10; ++k) {
-        Vector<Interval> ih_range=join(h_domain,h_range);
-        Matrix<Interval> Df=jacobian(f,ih_range);
-        //std::cerr<<"  Df="<<Df<<std::endl;
-        Matrix<Interval> D2f=project(Df,range(0,rs),range(has,fas));
-        //std::cerr<<"  D2f="<<J<<std::endl;
-        Matrix<Interval> D2finv=inverse(D2f);
-
-        for(uint i=0; i!=rs; ++i) {
-            h[i].set_error(0);
-        }
-        Vector<ScalarTaylorFunction> idh=join(id,h);
-        Vector<ScalarTaylorFunction> fidxhx=compose(f,idh);
-        //std::cerr<<"  f(x,h(x))="<<fh<<std::endl;
-        Vector<ScalarTaylorFunction> dh=prod(D2finv,fidxhx);
-        //std::cerr<<"  dh="<<dh<<std::endl;
-        h=h-dh;
-    }
-    //std::cerr<<"\n  f="<<f<<"\n  h[0]="<<h0<<"\n  h[1]="<<h1<<"\n\n";
-    ARIADNE_ASSERT(h.size()==f.size());
-    ARIADNE_ASSERT(h[0].argument_size()+h.size()==f[0].argument_size());
-    return h;
-
-}
-
-ScalarTaylorFunction implicit(const ScalarTaylorFunction& f) {
-    Vector<Interval> h_domain=project(f.domain(),range(0u,f.argument_size()-1u));
-    Interval h_codomain=f.domain()[f.argument_size()-1u];
-    IntervalTaylorModel h_model=implicit(f.model());
-    ARIADNE_ASSERT(h_model.argument_size()+1==f.model().argument_size());
-    IntervalTaylorModel hrs_model=h_model.rescale(Interval(-1,+1),h_codomain);
-    ARIADNE_ASSERT(hrs_model.argument_size()+1==f.model().argument_size());
-    return ScalarTaylorFunction(h_domain,hrs_model);
-}
-
-
-IntervalTaylorModel implicit(const RealScalarFunction& f, const Vector<IntervalTaylorModel>& g);
-
-ScalarTaylorFunction
-implicit(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
-{
-    ARIADNE_ASSERT(f.argument_size()>g.size());
-    ARIADNE_ASSERT(g.size()>0);
-    for(uint i=1; i!=g.size(); ++i) {
-        ARIADNE_ASSERT(g[i].domain()==g[0].domain());
-    }
-
-    Vector<Interval> domain=g[0].domain();
-    Vector<IntervalTaylorModel> models(g.size());
-    for(uint i=0; i!=g.size(); ++i) {
-        models[i]=g[i].model();
-    }
-
-    return ScalarTaylorFunction(domain,implicit(f,models));
-}
-
-ScalarTaylorFunction
-implicit(const RealScalarFunction& f, const Vector<Interval>& d)
-{
-    ARIADNE_ASSERT(f.argument_size()>=1u);
-    ARIADNE_ASSERT(d.size()+1u==f.argument_size());
-
-    Vector<ScalarTaylorFunction> id=ScalarTaylorFunction::variables(d);
-    //for(uint i=0; i!=d.size(); ++i) { id[i].model().set_accuracy(a); }
-    return implicit(f,id);
-}
-
-
-ScalarTaylorFunction
-crossing_time(const RealScalarFunction& g, const VectorTaylorFunction& phi)
-{
-    Vector<Interval> d=project(phi.domain(),range(0,phi.result_size()));
-    Interval h=phi.domain()[phi.result_size()];
-
-    ScalarTaylorFunction gphi(phi.domain(),g.evaluate(phi.models()));
-
-    return implicit(gphi);
 }
 
 
@@ -1539,64 +1452,7 @@ antiderivative(const VectorTaylorFunction& f, uint k)
     return g;
 }
 
-ScalarTaylorFunction
-implicit(const RealScalarFunction& f, const VectorTaylorFunction& g)
-{
-    return ScalarTaylorFunction(g.domain(),implicit(f,g.models()));
-}
 
-VectorTaylorFunction
-implicit(const VectorTaylorFunction& f)
-{
-    ARIADNE_ASSERT_MSG(f.argument_size()>f.result_size(),"f.argument_size()<=f.result_size() in implicit(f): f="<<f);
-    uint fas=f.argument_size();
-    uint has=f.argument_size()-f.result_size();
-    Vector<Interval> hdom=project(f.domain(),range(0,has));
-    Vector<Interval> hcodom=project(f.domain(),range(has,fas));
-    return VectorTaylorFunction(hdom,scale(implicit(f.models()),hcodom));
-}
-
-VectorTaylorFunction
-flow(const RealVectorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
-{
-    VectorTaylorFunction phi0=embed(VectorTaylorFunction::identity(d),Vector<Interval>(1u,Interval(-h,+h)));
-    Vector<Interval> hvfd=0*h*vf(d);
-    VectorTaylorFunction phi=phi0+hvfd;
-
-    for(uint i=0; i!=10; ++i) {
-        phi=phi0+antiderivative(compose(vf,phi),vf.result_size())*h;
-    }
-
-    return phi;
-}
-
-VectorTaylorFunction
-flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
-{
-    return flow(vf,d,Interval(-h,+h),o);
-}
-
-VectorTaylorFunction
-unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
-{
-    return unchecked_flow(vf,d,Interval(-h,+h),o);
-}
-
-VectorTaylorFunction
-flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, const uint o)
-{
-    ARIADNE_ASSERT(subset(d,vf.domain()));
-    Vector<Interval> vf_range=vf.range();
-    Vector<Interval> euler_step=d+h*vf_range;
-    if(!subset(euler_step,vf.domain())) {
-        ARIADNE_THROW(FlowBoundsException,"flow(VectorTaylorFunction,Box,Interval,Nat)",
-                      std::setprecision(20)<<"Euler step "<<euler_step<<" of vector field "<<vf<<
-                      " with range "<<vf_range<<" starting in domain "<<d<<
-                      " over time interval "<<h<<" does not remain in domain of vector field.");
-    }
-
-    return unchecked_flow(vf,d,h,o);
-}
 
 
 template<class X> inline Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
@@ -1608,103 +1464,6 @@ template<class X> inline Vector<X> join(const Vector<X>& v1, const Vector<X>& v2
 }
 
 
-VectorTaylorFunction
-parameterised_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
-{
-    ARIADNE_ASSERT(vf.result_size()<=vf.argument_size());
-    ARIADNE_ASSERT(d.size()==vf.result_size());
-    ARIADNE_ASSERT(h>0.0);
-
-    uint np=vf.argument_size()-vf.result_size();
-    uint nx=vf.result_size();
-
-    Vector<Interval> const bp=project(vf.domain(),range(0,np)); // The bounding box of the parameters
-    Vector<Interval> const bx=project(vf.domain(),range(np,np+nx)); // The bounding box of the variables
-    Vector<Interval> const& dp=bp;  // The domain of the parameters
-    Vector<Interval> const& dx=d;  // The domain of the variables
-
-    //std::cerr<<"dx="<<dx<<"\nbx="<<bx<<"\ndp="<<dp<<"\n";
-    ARIADNE_ASSERT(subset(dx,bx));
-    Vector<Interval> vf_range=vf.range();
-    Vector<Interval> euler_step=dx+Interval(0,+h)*vf_range;
-    if(!subset(euler_step,bx)) {
-        ARIADNE_THROW(FlowBoundsException,"parameterised_flow(VectorTaylorFunction,Box,Float,Nat)",
-                      std::setprecision(20)<<"Euler step "<<euler_step<<" of vector field "<<vf<<
-                      " with range "<<vf_range<<" starting in domain "<<d<<
-                      " over time interval "<<h<<" does not remain in domain of vector field.");
-    }
-
-    // Sanity check that vector field domain has nonempty interior
-    for(uint i=0; i!=nx; ++i) { ARIADNE_ASSERT_MSG(bx[i].radius()>0.0,"Domain of vector field "<<bx<<" has non-empty interior."); }
-    for(uint i=0; i!=nx; ++i) { if(dx[i].radius()<=0) { ARIADNE_WARN("Initial set "<<dx<<" has non-empty interior.\n");  } }
-    for(uint i=0; i!=np; ++i) { if(dp[i].radius()<=0) { ARIADNE_WARN("Parameter set "<<dp<<" has non-empty interior.\n");  } }
-
-    // Scale multiply models by inverse reciprocal of radius
-    Vector<IntervalTaylorModel> unit_scaled_vf(nx);
-    for(uint i=0; i!=nx; ++i) { unit_scaled_vf[i]=vf.models()[i]*(h/rad_ivl(bx[i])); }
-    //std::cerr<<"unit_scaled_vf="<<unit_scaled_vf<<std::endl;
-
-    Vector<IntervalTaylorModel> y0=embed(np,IntervalTaylorModel::scalings(d));
-    //std::cerr<<"y0="<<y0<<std::endl;
-    Vector<IntervalTaylorModel> unit_scaled_y0=unscale(y0,bx);
-    //std::cerr<<"unit_scaled_y0"<<unit_scaled_y0<<std::endl;
-
-    Vector<IntervalTaylorModel> unit_scaled_flow=parameterised_flow(unit_scaled_vf,unit_scaled_y0,o);
-    //std::cerr<<"unit_scaled_flow="<<unit_scaled_flow<<std::endl;
-
-    Vector<IntervalTaylorModel> model_flow=scale(unit_scaled_flow,bx);
-    //std::cerr<<"model_flow="<<model_flow<<std::endl;
-
-    // Check if flow is only positive
-    if(0.0==0) { model_flow=split(model_flow,np+nx,true); }
-    //std::cerr<<"split_model_flow="<<model_flow<<std::endl;
-
-    VectorTaylorFunction flow(join(dp,dx,Interval(0,+h)),model_flow);
-    //std::cerr<<"\nflow="<<flow<<"\n"<<std::endl;
-
-    return flow;
-}
-
-// This method should be used if we know already that the flow over time h remains in
-// the domain of the vector field approximation, for example, if this has been
-// checked for the original flow
-VectorTaylorFunction
-unchecked_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, const uint o)
-{
-    uint n=vf.size();
-    Float hmag=mag(h);
-    const Vector<Interval>& b=vf.domain();
-
-    assert(h.lower()==-h.upper() || h.lower()==0);
-
-    // Sanity check that vector field domain has nonempty interior
-    for(uint i=0; i!=n; ++i) { ARIADNE_ASSERT_MSG(b[i].radius()>0.0,"WARNING: Domain of vector field "<<b<<" has non-empty interior."); }
-    for(uint i=0; i!=n; ++i) { if(d[i].radius()<=0) { ARIADNE_WARN("Initial set "<<d<<" has non-empty interior.\n");  } }
-
-
-    // Scale multiply models by inverse reciprocal of radius
-    Vector<IntervalTaylorModel> unit_scaled_vf(vf.size());
-    for(uint i=0; i!=vf.size(); ++i) { unit_scaled_vf[i]=vf.models()[i]*(hmag/rad_ivl(b[i])); }
-    //std::cerr<<"unit_scaled_vf="<<unit_scaled_vf<<std::endl;
-
-    Vector<IntervalTaylorModel> y0=IntervalTaylorModel::scalings(d);
-    //std::cerr<<"y0="<<y0<<std::endl;
-    Vector<IntervalTaylorModel> unit_scaled_y0=embed(unscale(y0,b),1u);
-    //std::cerr<<"unit_scaled_y0"<<unit_scaled_y0<<std::endl;
-
-    Vector<IntervalTaylorModel> unit_scaled_flow=unchecked_flow(unit_scaled_vf,unit_scaled_y0,o);
-    //std::cerr<<"unit_scaled_flow="<<unit_scaled_flow<<std::endl;
-
-    Vector<IntervalTaylorModel> model_flow=scale(unit_scaled_flow,b);
-    //std::cerr<<"model_flow="<<model_flow<<std::endl;
-
-    if(h.lower()==0) { model_flow=split(model_flow,d.size(),true); }
-
-    VectorTaylorFunction flow(join(d,h),model_flow);
-    //std::cerr<<"\nflow="<<flow<<"\n"<<std::endl;
-
-    return flow;
-}
 
 Float norm(const VectorTaylorFunction& f) {
     Float res=0.0;

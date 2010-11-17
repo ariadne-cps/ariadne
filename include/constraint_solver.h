@@ -37,14 +37,18 @@
 
 namespace Ariadne {
 
+class Real;
 class Interval;
 typedef tribool Tribool;
 class Point;
 class Box;
-class ScalarFunction;
-class VectorFunction;
 class NonlinearConstraint;
 class GridTreeSet;
+
+template<class X> class ScalarFunction;
+typedef ScalarFunction<Real> RealScalarFunction;
+template<class X> class VectorFunction;
+typedef VectorFunction<Real> RealVectorFunction;
 
 template<class X> struct FeasibilityState {
     X t;
@@ -61,9 +65,9 @@ class ConstraintSolverInterface {
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns a feasible point if the result is true.
     virtual Pair<Tribool,Point> feasible(const List<NonlinearConstraint>& constraints, const Box& domain) const = 0;
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const VectorFunction& function, const Box& codomain) const = 0;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const RealVectorFunction& function, const Box& codomain) const = 0;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Tribool check_feasibility(const Box& domain, const VectorFunction& function, const Box& codomain, const Point& point) const = 0;
+    virtual Tribool check_feasibility(const Box& domain, const RealVectorFunction& function, const Box& codomain, const Point& point) const = 0;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
     virtual void reduce(const List<NonlinearConstraint>& constraints, Box& domain) const = 0;
 
@@ -82,10 +86,10 @@ class ConstraintSolver
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns a feasible point if the result is true.
     virtual Pair<Tribool,Point> feasible(const List<NonlinearConstraint>& constraints, const Box& domain) const;
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const VectorFunction& function, const Box& codomain) const;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const RealVectorFunction& function, const Box& codomain) const;
 
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Tribool check_feasibility(const Box& domain, const VectorFunction& function, const Box& codomain, const Point& point) const;
+    virtual Tribool check_feasibility(const Box& domain, const RealVectorFunction& function, const Box& codomain, const Point& point) const;
 
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
     virtual void reduce(const List<NonlinearConstraint>& constraints, Box& domain) const;

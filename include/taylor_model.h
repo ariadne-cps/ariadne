@@ -44,8 +44,8 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Expansion;
 
-class ScalarFunction;
-class VectorFunction;
+template<class X> class ScalarFunction;
+template<class X> class VectorFunction;
 class TaylorModel;
 class TaylorCalculus;
 

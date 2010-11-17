@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file vector_field.h
  *  \brief Main continuous dynamics system class.
  */
@@ -34,34 +34,32 @@
 #include "set_interface.h"
 #include "grid.h"
 
-namespace Ariadne {  
-
-class VectorFunction;
+namespace Ariadne {
 
 /*! \brief A vector field in Euclidean space.
  */
 class VectorField
 {
   public:
-    //! \brief The type used to represent time. 
+    //! \brief The type used to represent time.
     typedef Float TimeType;
-    //! \brief The type used to represent real numbers. 
+    //! \brief The type used to represent real numbers.
     typedef Float RealType ;
-    //! \brief The type used to describe the state space. 
+    //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
   public:
-    VectorField(const VectorFunction& f) : _function(f) { }
-    const VectorFunction& function() const { return _function; }
+    VectorField(const RealVectorFunction& f) : _function(f) { }
+    const RealVectorFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
   private:
-    VectorFunction _function;
+    RealVectorFunction _function;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const VectorField& vf) { 
-    return os << "VectorField( " << vf.function() << " )"; 
+inline std::ostream& operator<<(std::ostream& os, const VectorField& vf) {
+    return os << "VectorField( " << vf.function() << " )";
 }
 
 
 } // namespace Ariadne
 
-#endif // ARIADNE_VECTOR_FIELD_H 
+#endif // ARIADNE_VECTOR_FIELD_H

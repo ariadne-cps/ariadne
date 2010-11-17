@@ -57,7 +57,7 @@ ImageSet::ImageSet(const Vector<Interval>& dom)
 }
 
 
-ImageSet::ImageSet(const Vector<Interval>& dom, const VectorFunction& fn)
+ImageSet::ImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn)
     : _domain(dom), _function(fn)
 {
     ARIADNE_ASSERT(dom.size()==fn.argument_size());
@@ -130,7 +130,7 @@ ImageSet::write(std::ostream& os) const
 
 
 
-ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const VectorFunction& fn)
+ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const RealVectorFunction& fn)
     : _codomain(codom), _function(fn)
 {
     ARIADNE_ASSERT(codom.size()==fn.result_size());
@@ -196,7 +196,7 @@ BoundedConstraintSet intersection(const ConstraintSet& set, const Box& bound) {
 
 
 
-BoundedConstraintSet::BoundedConstraintSet(const Vector<Interval>& dom, const VectorFunction& fn, const Vector<Interval>& codom)
+BoundedConstraintSet::BoundedConstraintSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const Vector<Interval>& codom)
     : _domain(dom), _function(fn), _codomain(codom)
 {
     ARIADNE_ASSERT(codom.size()==fn.result_size());
@@ -278,7 +278,7 @@ BoundedConstraintSet::draw(CanvasInterface& os) const
     return ConstrainedImageSet(*this).draw(os);
 }
 
-ConstrainedImageSet image(const BoundedConstraintSet& set, const VectorFunction& function) {
+ConstrainedImageSet image(const BoundedConstraintSet& set, const RealVectorFunction& function) {
     ARIADNE_ASSERT(set.dimension()==function.argument_size());
     ConstrainedImageSet result(set.domain(),function);
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
@@ -329,7 +329,7 @@ ConstrainedImageSet::affine_approximation() const
     for(List<NonlinearConstraint>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        ScalarFunction function=iter->function();
+        RealScalarFunction function=iter->function();
         Interval bounds=iter->bounds();
         a=function.gradient(m);
         b=function(m)-dot(a,m);
@@ -358,7 +358,7 @@ tribool ConstrainedImageSet::satisfies(const NonlinearConstraint& nc) const
     ConstraintSolver solver;
     const Box& domain=this->_domain;
     List<NonlinearConstraint> all_constraints=this->_constraints;
-    ScalarFunction composed_function = compose(nc.function(),this->_function);
+    RealScalarFunction composed_function = compose(nc.function(),this->_function);
     const Interval& bounds = nc.bounds();
 
     Tribool result;
@@ -384,7 +384,7 @@ tribool ConstrainedImageSet::disjoint(const Box& bx) const
 /*
     // Set up constraints as f(D)\cap C\neq\emptyset
     const Box& codomain(this->dimension()+this->number_of_constraints());
-    VectorFunction function(codomain.size(),domain.size());
+    RealVectorFunction function(codomain.size(),domain.size());
     for(uint i=0; i!=this->dimension(); ++i) {
         function.set(i,this->_function[i]);
         codomain[i]=bx[i];
@@ -446,7 +446,7 @@ ConstrainedImageSet::split(uint j) const
 namespace {
 
 void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving,
-                                               const Vector<Interval>& subdomain, const VectorFunction& function, const List<NonlinearConstraint>& constraints,
+                                               const Vector<Interval>& subdomain, const RealVectorFunction& function, const List<NonlinearConstraint>& constraints,
                                                uint depth, const Vector<Float>& errors)
 {
     // How small an over-approximating box needs to be relative to the cell size
@@ -501,7 +501,7 @@ subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 
 namespace {
 
-void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorFunction& f, const VectorFunction& g, const Box& c, const GridCell& b, Point x, Point y, int e)
+void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const RealVectorFunction& f, const RealVectorFunction& g, const Box& c, const GridCell& b, Point x, Point y, int e)
 {
     uint verbosity=0;
 
@@ -515,7 +515,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
     // optimisation using the Kuhn-Tucker conditions
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
-    VectorFunction fg=join(f,g);
+    RealVectorFunction fg=join(f,g);
 
     const uint m=fg.argument_size();
     const uint n=fg.result_size();
@@ -582,14 +582,14 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarFunction xg=ScalarFunction::constant(m,0);
+        RealScalarFunction xg=RealScalarFunction::constant(m,0);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
             xg = xg - (Real(x[j])-Real(x[n+j]))*fg[j];
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - (Real(x[2*n+i])-Real(x[2*n+m+i]))*ScalarFunction::coordinate(m,i);
+            xg = xg - (Real(x[2*n+i])-Real(x[2*n+m+i]))*RealScalarFunction::coordinate(m,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = Real(cnst) + xg;
@@ -598,7 +598,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         ScalarTaylorFunction txg(d,xg);
         ARIADNE_LOG(6,"    txg="<<txg.polynomial()<<"\n");
 
-        xg=ScalarFunction(txg.polynomial());
+        xg=RealScalarFunction(txg.polynomial());
         NonlinearConstraint constraint=(xg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
@@ -658,8 +658,8 @@ void ConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& 
 {
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
-    const VectorFunction& f=this->function();
-    VectorFunction g(this->number_of_constraints(),d.size());
+    const RealVectorFunction& f=this->function();
+    RealVectorFunction g(this->number_of_constraints(),d.size());
     Box c(this->number_of_constraints());
 
     for(uint i=0; i!=this->number_of_constraints(); ++i) {

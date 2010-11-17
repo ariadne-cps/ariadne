@@ -94,11 +94,11 @@ int main(int argc, const char* argv[])
     MonolithicHybridAutomaton rectifier;
 
     // Create the coordinates
-    ScalarFunction t=ScalarFunction::coordinate(3,0); // Time // Input voltage
-    ScalarFunction vi=ScalarFunction::coordinate(3,1); // Input voltage
-    ScalarFunction vo=ScalarFunction::coordinate(3,2); // Output voltage
+    RealScalarFunction t=RealScalarFunction::coordinate(3,0); // Time // Input voltage
+    RealScalarFunction vi=RealScalarFunction::coordinate(3,1); // Input voltage
+    RealScalarFunction vo=RealScalarFunction::coordinate(3,2); // Output voltage
 
-    ScalarFunction one=ScalarFunction::constant(3,1.0);
+    RealScalarFunction one=RealScalarFunction::constant(3,1.0);
 
     /// Create the discrete states
     AtomicDiscreteLocation offoff(1);
@@ -145,16 +145,16 @@ int main(int argc, const char* argv[])
 
     /// Dynamics for the case of both diodes being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
-    VectorFunction offoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)));
+    RealVectorFunction offoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)));
     /// Dynamics for the case of the first diode being on, the second being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-    VectorFunction onoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
+    RealVectorFunction onoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
     /// Dynamics for the case of the first diode being off, the second being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-    VectorFunction offon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
+    RealVectorFunction offon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
     /// Dynamics for the case of both diodes being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-    VectorFunction onon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
+    RealVectorFunction onon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
 
     /// Locations
     rectifier.new_mode(offoff,offoff_d);

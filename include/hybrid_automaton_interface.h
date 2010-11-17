@@ -41,8 +41,6 @@ class HybridGrid;
 class DiscreteEvent;
 class DiscreteLocation;
 
-class ScalarFunction;
-class VectorFunction;
 class Grid;
 
 template<class T> class Set;
@@ -86,7 +84,7 @@ class HybridAutomatonInterface {
     virtual uint dimension(DiscreteLocation location) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual VectorFunction dynamic_function(DiscreteLocation location) const = 0;
+    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const = 0;
 
     //! \brief The set of all events possible in the given \a location.
     virtual Set<DiscreteEvent> events(DiscreteLocation location) const = 0;
@@ -95,13 +93,13 @@ class HybridAutomatonInterface {
     virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs or progress is interrupted.
-    virtual ScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const = 0;
+    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The target location of \a event starting in the \a source location.
     virtual DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual VectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const = 0;
+    virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The natural grid to use in the \a location.
     virtual Grid grid(DiscreteLocation location) const = 0;

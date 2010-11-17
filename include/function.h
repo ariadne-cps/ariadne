@@ -73,35 +73,89 @@ typedef Assignment<ExtendedRealVariable,RealExpression> ExtendedRealAssignment;
 typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
 typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
 
-class ScalarFunction;
-class VectorFunction;
+template<class X> class ScalarFunction;
+typedef ScalarFunction<Float> FloatScalarFunction;
+typedef ScalarFunction<Interval> IntervalScalarFunction;
+typedef ScalarFunction<Real> RealScalarFunction;
+
+template<class X> class VectorFunction;
+typedef VectorFunction<Float> FloatVectorFunction;
+typedef VectorFunction<Interval> IntervalVectorFunction;
+typedef VectorFunction<Real> RealVectorFunction;
+
+//! \ingroup FunctionModule
+//! \brief A scalar function which can only be evaluated approximately, \f$f:\F^n\rightarrow\F\f$.
+template<>
+class ScalarFunction<Float>
+{
+    ScalarFunction<Float>(ScalarFunctionInterface<Float>* fptr) : _ptr(fptr) { }
+    operator const ScalarFunctionInterface<Float>& () const { return *this->_ptr; }
+
+    Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+    Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+
+    Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+
+    std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
+
+  private:
+    shared_ptr< ScalarFunctionInterface<Float> > _ptr;
+};
+
+//! \ingroup FunctionModule
+//! \brief A scalar function which can only be evaluated approximately or on intervals, \f$f:\I^n\rightarrow\I\f$.
+template<>
+class ScalarFunction<Interval>
+{
+    ScalarFunction<Interval>(ScalarFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
+    operator const ScalarFunctionInterface<Interval>& () const { return *this->_ptr; }
+
+    Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+    Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Differential<Interval> operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel operator()(const Vector< TaylorModel >& x) const { return this->_ptr->evaluate(x); }
+
+    Vector<Float> gradient(const Vector<Float>& x) const {
+        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    Vector<Interval> gradient(const Vector<Interval>& x) const {
+        return this->_ptr->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+
+    std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
+
+  private:
+    shared_ptr< ScalarFunctionInterface<Interval> > _ptr;
+};
+
 
 //! \ingroup FunctionModule
 //! \brief A scalar function \f$f:\R^n\rightarrow\R\f$.
-class ScalarFunction
+template<>
+class ScalarFunction<Real>
 {
     typedef uint Nat;
     typedef uint SizeType;
     typedef std::ostream OStream;
   public:
-    static ScalarFunction constant(Nat n, double c);
-    static ScalarFunction constant(Nat n, Real c);
-    static ScalarFunction variable(Nat n, uint i);
-    static ScalarFunction coordinate(Nat n, uint i);
-    static List<ScalarFunction> coordinates(Nat n);
+    static ScalarFunction<Real> constant(Nat n, double c);
+    static ScalarFunction<Real> constant(Nat n, Real c);
+    static ScalarFunction<Real> variable(Nat n, uint i);
+    static ScalarFunction<Real> coordinate(Nat n, uint i);
+    static List< ScalarFunction<Real> > coordinates(Nat n);
 
-    explicit ScalarFunction(Nat n=0u);
-    ScalarFunction(const Expression<Real>& e, const Space<Real>& s);
-    ScalarFunction(const Expression<Real>& e, const List< Variable<Real> >& s);
-    ScalarFunction(const Expression<tribool>& e, const List< Variable<Real> >& s);
-    ScalarFunction(const Polynomial<Real>& p);
-    ScalarFunction(const Expansion<Float>& p);
+    explicit ScalarFunction<Real>(Nat n=0u);
+    ScalarFunction<Real>(const Expression<Real>& e, const Space<Real>& s);
+    ScalarFunction<Real>(const Expression<Real>& e, const List< Variable<Real> >& s);
+    ScalarFunction<Real>(const Expression<tribool>& e, const List< Variable<Real> >& s);
+    ScalarFunction<Real>(const Polynomial<Real>& p);
+    ScalarFunction<Real>(const Expansion<Float>& p);
 
-    ScalarFunction(ScalarFunctionInterface* fptr) : _ptr(fptr) { }
-    const ScalarFunctionInterface* pointer() const { return this->_ptr.operator->(); }
-    operator const ScalarFunctionInterface& () const { return *this->_ptr; }
+    ScalarFunction<Real>(ScalarFunctionInterface<Real>* fptr) : _ptr(fptr) { }
+    const ScalarFunctionInterface<Real>* pointer() const { return this->_ptr.operator->(); }
+    operator const ScalarFunctionInterface<Real>& () const { return *this->_ptr; }
 
-    ScalarFunction& operator=(const ScalarFunction& f) {
+    ScalarFunction<Real>& operator=(const ScalarFunction<Real>& f) {
         this->_check_type(f.pointer()); this->_ptr=f._ptr; return *this; }
 
     Nat argument_size() const { return this->_ptr->argument_size(); }
@@ -130,115 +184,173 @@ class ScalarFunction
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
   public:
-    ScalarFunction derivative(Nat j) const;
+    ScalarFunction<Real> derivative(Nat j) const;
     Polynomial<Real> polynomial() const;
   public:
-    friend ScalarFunction compose(const ScalarFunction&, const VectorFunction&);
-    friend Real evaluate(const ScalarFunction&, const Vector<Real>&);
+    friend ScalarFunction<Real> compose(const ScalarFunction<Real>&, const VectorFunction<Real>&);
+    friend Real evaluate(const ScalarFunction<Real>&, const Vector<Real>&);
 
-    friend ScalarFunction operator+(const ScalarFunction&);
-    friend ScalarFunction operator-(const ScalarFunction&);
-    friend ScalarFunction operator+(const ScalarFunction&, const ScalarFunction&);
-    friend ScalarFunction operator-(const ScalarFunction&, const ScalarFunction&);
-    friend ScalarFunction operator*(const ScalarFunction&, const ScalarFunction&);
-    friend ScalarFunction operator/(const ScalarFunction&, const ScalarFunction&);
+    friend ScalarFunction<Real> operator+(const ScalarFunction<Real>&);
+    friend ScalarFunction<Real> operator-(const ScalarFunction<Real>&);
+    friend ScalarFunction<Real> operator+(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+    friend ScalarFunction<Real> operator-(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+    friend ScalarFunction<Real> operator*(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+    friend ScalarFunction<Real> operator/(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
   public:
-    const ScalarFunctionInterface* _raw_pointer() const { return this->_ptr.operator->(); }
+    const ScalarFunctionInterface<Real>* _raw_pointer() const { return this->_ptr.operator->(); }
   protected:
-    virtual void _check_type(const ScalarFunctionInterface*) { }
+    virtual void _check_type(const ScalarFunctionInterface<Real>*) { }
   private:
-    shared_ptr<ScalarFunctionInterface> _ptr;
+    shared_ptr< ScalarFunctionInterface<Real> > _ptr;
 };
 
-inline Float evaluate_approx(const ScalarFunction& f, const Vector<Float>& x) { return f(x); }
-inline Interval evaluate(const ScalarFunction& f, const Vector<Interval>& x) { return f(x); }
-inline TaylorModel compose(const ScalarFunction& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
-inline Vector<Float> gradient_approx(const ScalarFunction& f, const Vector<Float>& x) { return f.gradient(x); }
-inline Vector<Interval> gradient(const ScalarFunction& f, const Vector<Interval>& x) { return f.gradient(x); }
-inline std::ostream& operator<<(std::ostream& os, const ScalarFunction& f) { return f.write(os); }
+inline Float evaluate_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
+inline Interval evaluate(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
+inline TaylorModel compose(const ScalarFunction<Real>& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
+inline Vector<Float> gradient_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f.gradient(x); }
+inline Vector<Interval> gradient(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f.gradient(x); }
+inline std::ostream& operator<<(std::ostream& os, const ScalarFunction<Real>& f) { return f.write(os); }
 
-ScalarFunction embed(const ScalarFunction&, uint i);
+ScalarFunction<Real> embed(const ScalarFunction<Real>&, uint i);
 
-ScalarFunction operator+(const ScalarFunction&);
-ScalarFunction operator-(const ScalarFunction&);
-ScalarFunction operator+(const ScalarFunction&, const ScalarFunction&);
-ScalarFunction operator-(const ScalarFunction&, const ScalarFunction&);
-ScalarFunction operator*(const ScalarFunction&, const ScalarFunction&);
-ScalarFunction operator/(const ScalarFunction&, const ScalarFunction&);
-ScalarFunction operator+(const ScalarFunction&, const Real&);
-ScalarFunction operator-(const ScalarFunction&, const Real&);
-ScalarFunction operator*(const ScalarFunction&, const Real&);
-ScalarFunction operator/(const ScalarFunction&, const Real&);
-ScalarFunction operator+(const Real&, const ScalarFunction&);
-ScalarFunction operator-(const Real&, const ScalarFunction&);
-ScalarFunction operator*(const Real&, const ScalarFunction&);
-ScalarFunction operator/(const Real&, const ScalarFunction&);
+ScalarFunction<Real> operator+(const ScalarFunction<Real>&);
+ScalarFunction<Real> operator-(const ScalarFunction<Real>&);
+ScalarFunction<Real> operator+(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+ScalarFunction<Real> operator-(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+ScalarFunction<Real> operator*(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+ScalarFunction<Real> operator/(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+ScalarFunction<Real> operator+(const ScalarFunction<Real>&, const Real&);
+ScalarFunction<Real> operator-(const ScalarFunction<Real>&, const Real&);
+ScalarFunction<Real> operator*(const ScalarFunction<Real>&, const Real&);
+ScalarFunction<Real> operator/(const ScalarFunction<Real>&, const Real&);
+ScalarFunction<Real> operator+(const Real&, const ScalarFunction<Real>&);
+ScalarFunction<Real> operator-(const Real&, const ScalarFunction<Real>&);
+ScalarFunction<Real> operator*(const Real&, const ScalarFunction<Real>&);
+ScalarFunction<Real> operator/(const Real&, const ScalarFunction<Real>&);
 
-ScalarFunction pow(const ScalarFunction&, int);
-ScalarFunction rec(const ScalarFunction&);
-ScalarFunction sqr(const ScalarFunction&);
-ScalarFunction sqrt(const ScalarFunction&);
-ScalarFunction exp(const ScalarFunction&);
-ScalarFunction log(const ScalarFunction&);
-ScalarFunction sin(const ScalarFunction&);
-ScalarFunction cos(const ScalarFunction&);
-ScalarFunction tan(const ScalarFunction&);
+ScalarFunction<Real> pow(const ScalarFunction<Real>&, int);
+ScalarFunction<Real> rec(const ScalarFunction<Real>&);
+ScalarFunction<Real> sqr(const ScalarFunction<Real>&);
+ScalarFunction<Real> sqrt(const ScalarFunction<Real>&);
+ScalarFunction<Real> exp(const ScalarFunction<Real>&);
+ScalarFunction<Real> log(const ScalarFunction<Real>&);
+ScalarFunction<Real> sin(const ScalarFunction<Real>&);
+ScalarFunction<Real> cos(const ScalarFunction<Real>&);
+ScalarFunction<Real> tan(const ScalarFunction<Real>&);
 
 
+//! \ingroup FunctionModule
+//! \brief A vector function which can only be evaluated approximately, \f$f:\F^n\rightarrow\F^m\f$.
+template<>
+class VectorFunction<Float>
+{
+  public:
+    VectorFunction<Float>(VectorFunctionInterface<Float>* fptr) : _ptr(fptr) { }
+    VectorFunction<Float>(shared_ptr< VectorFunctionInterface<Float> > fptr) : _ptr(fptr) { }
+    operator const VectorFunctionInterface<Float>& () const { return *this->_ptr; }
+
+    Vector<Float> operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+    Vector< Differential<Float> > operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+
+    Matrix<Float> jacobian(const Vector<Float>& x) const {
+        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+
+    std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
+
+  private:
+    shared_ptr< VectorFunctionInterface<Float> > _ptr;
+};
+
+//! \ingroup FunctionModule
+//! \brief A scalar function which can only be evaluated approximately or on intervals, \f$f:\I^n\rightarrow\I\f$.
+template<>
+class VectorFunction<Interval>
+{
+    friend class VectorFunction<Float>;
+  public:
+    VectorFunction<Interval>(VectorFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
+    VectorFunction<Interval>(shared_ptr< VectorFunctionInterface<Interval> > fptr) : _ptr(fptr) { }
+    operator const VectorFunctionInterface<Interval>& () const { return *this->_ptr; }
+    operator VectorFunction<Float> () const { return VectorFunction<Float>(this->_ptr); }
+
+    Vector<Float> operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+    Vector<Interval> operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    Vector< Differential<Float> > operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Vector< Differential<Interval> > operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    Vector<TaylorModel> operator()(const Vector< TaylorModel >& x) const { return this->_ptr->evaluate(x); }
+
+    Matrix<Float> jacobian(const Vector<Float>& x) const {
+        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+    Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+        return this->_ptr->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+
+    std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
+
+  private:
+    shared_ptr< VectorFunctionInterface<Interval> > _ptr;
+};
+
+
+template<class X>
 struct VectorFunctionElementReference {
-    VectorFunction& _vf; uint _i;
-    VectorFunctionElementReference(VectorFunction& vf, uint i) : _vf(vf), _i(i) { }
-    operator ScalarFunction() const;
-    void operator=(const ScalarFunction& sf);
-    VectorFunctionElementReference& operator=(const VectorFunctionElementReference& sfr);
-    template<class X> X evaluate(const Vector<X> & x) const;
-    template<class X> X operator()(const Vector<X> & x) const;
+    VectorFunction<X>& _vf; uint _i;
+    VectorFunctionElementReference<X>(VectorFunction<X>& vf, uint i) : _vf(vf), _i(i) { }
+    operator ScalarFunction<X>() const;
+    void operator=(const ScalarFunction<X>& sf);
+    VectorFunctionElementReference<X>& operator=(const VectorFunctionElementReference<X>& sfr);
+    template<class XX> XX evaluate(const Vector<XX> & x) const;
+    template<class XX> XX operator()(const Vector<XX> & x) const;
 };
 
 
 //! \ingroup FunctionModule
 //! \brief A vector function \f$f:\R^n\rightarrow\R^m\f$.
-class VectorFunction
+template<>
+class VectorFunction<Real>
 {
+    friend class VectorFunction<Float>;
+    friend class VectorFunction<Interval>;
     typedef uint Nat;
     typedef uint SizeType;
     typedef ushort SmoothnessType;
     typedef std::ostream OStream;
   public:
-    static VectorFunction constant(const Vector<Real>& c, Nat as);
-    static VectorFunction identity(Nat n);
+    static VectorFunction<Real> constant(const Vector<Real>& c, Nat as);
+    static VectorFunction<Real> identity(Nat n);
 
-    VectorFunction();
-    VectorFunction(Nat rs, Nat as);
-    VectorFunction(Nat rs, const ScalarFunction& sf);
-    VectorFunction(const List<ScalarFunction>& lsf);
-    VectorFunction(const Vector< Polynomial<Real> >& p);
-    VectorFunction(VectorFunctionInterface*);
-    const VectorFunctionInterface* pointer() const { return this->_ptr.operator->(); }
+    VectorFunction<Real>();
+    VectorFunction<Real>(Nat rs, Nat as);
+    VectorFunction<Real>(Nat rs, const ScalarFunction<Real>& sf);
+    VectorFunction<Real>(const List< ScalarFunction<Real> >& lsf);
+    VectorFunction<Real>(const Vector< Polynomial<Real> >& p);
+    VectorFunction<Real>(VectorFunctionInterface<Real>*);
+    const VectorFunctionInterface<Real>* pointer() const { return this->_ptr.operator->(); }
 
-    operator const VectorFunctionInterface& () { return *this->_ptr; }
+    operator const VectorFunctionInterface<Real>& () { return *this->_ptr; }
+    operator const VectorFunction<Float> () { return VectorFunction<Float>(this->_ptr); }
+    operator const VectorFunction<Interval> () { return VectorFunction<Interval>(this->_ptr); }
 
-    VectorFunction(const List< Expression<Real> >& e, const Space<Real>& s);
-    VectorFunction(const List< Expression<Real> >& e, const List< Variable<Real> >& v);
-    VectorFunction(const List<ExtendedRealVariable>& rs, const Map<ExtendedRealVariable,RealExpression>& e, const List<RealVariable>& as);
+    VectorFunction<Real>(const List< Expression<Real> >& e, const Space<Real>& s);
+    VectorFunction<Real>(const List< Expression<Real> >& e, const List< Variable<Real> >& v);
+    VectorFunction<Real>(const List<ExtendedRealVariable>& rs, const Map<ExtendedRealVariable,RealExpression>& e, const List<RealVariable>& as);
 
-    VectorFunction(const List<RealVariable>& rv,
+    VectorFunction<Real>(const List<RealVariable>& rv,
                    const List<RealAssignment>& eq,
                    const List<RealVariable>& av);
 
-    VectorFunction(const List<ExtendedRealVariable>& rv,
+    VectorFunction<Real>(const List<ExtendedRealVariable>& rv,
                    const List<ExtendedRealAssignment>& eq,
                    const List<RealVariable>& av);
 
-    VectorFunction(const List<DottedRealVariable>& rv,
+    VectorFunction<Real>(const List<DottedRealVariable>& rv,
                    const List<DottedRealAssignment>& eq,
                    const List<RealVariable>& av);
 
-    VectorFunction(const List<PrimedRealVariable>& rv,
+    VectorFunction<Real>(const List<PrimedRealVariable>& rv,
                    const List<PrimedRealAssignment>& eq,
                    const List<RealVariable>& av);
 
-    VectorFunction& operator=(const VectorFunction& f) {
+    VectorFunction<Real>& operator=(const VectorFunction<Real>& f) {
         this->_check_type(f._raw_pointer()); this->_ptr=f._ptr; return *this; }
 
     Nat result_size() const { return this->_ptr->result_size(); }
@@ -269,131 +381,134 @@ class VectorFunction
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
   public:
-    ScalarFunction operator[](Nat i) const;
-    VectorFunctionElementReference operator[](Nat i) { return VectorFunctionElementReference(*this,i); }
+    ScalarFunction<Real> operator[](Nat i) const;
+    VectorFunctionElementReference<Real> operator[](Nat i) { return VectorFunctionElementReference<Real>(*this,i); }
 
-    ScalarFunction get(Nat) const;
-    void set(Nat,ScalarFunction);
+    ScalarFunction<Real> get(Nat) const;
+    void set(Nat,ScalarFunction<Real>);
 
-    VectorFunction polynomial() const;
+    VectorFunction<Real> polynomial() const;
   public:
-    friend VectorFunction join(const ScalarFunction&, const ScalarFunction&);
-    friend VectorFunction join(const ScalarFunction&, const VectorFunction&);
-    friend VectorFunction join(const VectorFunction&, const ScalarFunction&);
-    friend VectorFunction join(const VectorFunction&, const VectorFunction&);
+    friend VectorFunction<Real> join(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+    friend VectorFunction<Real> join(const ScalarFunction<Real>&, const VectorFunction<Real>&);
+    friend VectorFunction<Real> join(const VectorFunction<Real>&, const ScalarFunction<Real>&);
+    friend VectorFunction<Real> join(const VectorFunction<Real>&, const VectorFunction<Real>&);
 
-    friend VectorFunction compose(const VectorFunction&, const VectorFunction&);
-    friend Vector<Real> evaluate(const VectorFunction&, const Vector<Real>&);
+    friend VectorFunction<Real> compose(const VectorFunction<Real>&, const VectorFunction<Real>&);
+    friend Vector<Real> evaluate(const VectorFunction<Real>&, const Vector<Real>&);
 
-    friend VectorFunction operator+(const VectorFunction&, const VectorFunction&);
-    friend VectorFunction operator-(const VectorFunction&, const VectorFunction&);
-    friend VectorFunction operator*(const VectorFunction&, const ScalarFunction&);
-    friend VectorFunction operator*(const ScalarFunction&, const VectorFunction&);
+    friend VectorFunction<Real> operator+(const VectorFunction<Real>&, const VectorFunction<Real>&);
+    friend VectorFunction<Real> operator-(const VectorFunction<Real>&, const VectorFunction<Real>&);
+    friend VectorFunction<Real> operator*(const VectorFunction<Real>&, const ScalarFunction<Real>&);
+    friend VectorFunction<Real> operator*(const ScalarFunction<Real>&, const VectorFunction<Real>&);
   public:
-    const VectorFunctionInterface* _raw_pointer() const { return this->_ptr.operator->(); }
+    const VectorFunctionInterface<Real>* _raw_pointer() const { return this->_ptr.operator->(); }
   protected:
-    virtual void _check_type(const VectorFunctionInterface*) { }
+    virtual void _check_type(const VectorFunctionInterface<Real>*) { }
   private:
-    shared_ptr<VectorFunctionInterface> _ptr;
+    shared_ptr< VectorFunctionInterface<Real> > _ptr;
 };
 
-inline VectorFunctionElementReference::operator ScalarFunction() const { return _vf.get(_i); }
-inline void VectorFunctionElementReference::operator=(const ScalarFunction& sf) { _vf.set(_i,sf); }
-inline VectorFunctionElementReference& VectorFunctionElementReference::operator=(const VectorFunctionElementReference& sfr) {
-    _vf.set(_i,static_cast<ScalarFunction>(sfr)); return *this; }
-template<class X> inline X VectorFunctionElementReference::evaluate(const Vector<X> & x) const {
-    return static_cast<ScalarFunction>(*this).evaluate(x); }
-template<class X> inline X VectorFunctionElementReference::operator()(const Vector<X> & x) const {
-    return static_cast<ScalarFunction>(*this).evaluate(x); }
+template<> inline VectorFunctionElementReference<Real>::operator ScalarFunction<Real>() const { return _vf.get(_i); }
+template<> inline void VectorFunctionElementReference<Real>::operator=(const ScalarFunction<Real>& sf) { _vf.set(_i,sf); }
+template<> inline VectorFunctionElementReference<Real>& VectorFunctionElementReference<Real>::operator=(const VectorFunctionElementReference<Real>& sfr) {
+    _vf.set(_i,static_cast< ScalarFunction<Real> >(sfr)); return *this; }
+template<class X> template<class XX> inline XX VectorFunctionElementReference<X>::evaluate(const Vector<XX> & x) const {
+    return static_cast< ScalarFunction<X> >(*this).evaluate(x); }
+template<class X> template<class XX> inline XX VectorFunctionElementReference<X>::operator()(const Vector<XX> & x) const {
+    return static_cast< ScalarFunction<X> >(*this).evaluate(x); }
 
-inline Vector<Float> evaluate_approx(const VectorFunction& f, const Vector<Float>& x) { return f(x); }
-inline Vector<Interval> evaluate(const VectorFunction& f, const Vector<Interval>& x) { return f(x); }
-inline Vector<TaylorModel> compose(const VectorFunction& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
-inline Matrix<Float> jacobian_approx(const VectorFunction& f, const Vector<Float>& x);
-inline Matrix<Interval> jacobian(const VectorFunction& f, const Vector<Interval>& x);
+inline Vector<Float> evaluate_approx(const VectorFunction<Real>& f, const Vector<Float>& x) { return f(x); }
+inline Vector<Interval> evaluate(const VectorFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
+inline Vector<TaylorModel> compose(const VectorFunction<Real>& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
+inline Matrix<Float> jacobian_approx(const VectorFunction<Real>& f, const Vector<Float>& x);
+inline Matrix<Interval> jacobian(const VectorFunction<Real>& f, const Vector<Interval>& x);
 
-VectorFunction operator*(const ScalarFunction& sf, const Vector<Real>& e);
-VectorFunction operator+(const VectorFunction& f1, const VectorFunction& f2);
-VectorFunction operator-(const VectorFunction& f1, const VectorFunction& f2);
-VectorFunction operator*(const VectorFunction& vf, const ScalarFunction& sf);
-VectorFunction operator*(const ScalarFunction& sf, const VectorFunction& vf);
+VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const Vector<Real>& e);
+VectorFunction<Real> operator+(const VectorFunction<Real>& f1, const VectorFunction<Real>& f2);
+VectorFunction<Real> operator-(const VectorFunction<Real>& f1, const VectorFunction<Real>& f2);
+VectorFunction<Real> operator*(const VectorFunction<Real>& vf, const ScalarFunction<Real>& sf);
+VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const VectorFunction<Real>& vf);
 
-VectorFunction join(const ScalarFunction&, const ScalarFunction&);
-VectorFunction join(const ScalarFunction&, const VectorFunction&);
-VectorFunction join(const VectorFunction&, const ScalarFunction&);
-VectorFunction join(const VectorFunction&, const VectorFunction&);
+VectorFunction<Real> join(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
+VectorFunction<Real> join(const ScalarFunction<Real>&, const VectorFunction<Real>&);
+VectorFunction<Real> join(const VectorFunction<Real>&, const ScalarFunction<Real>&);
+VectorFunction<Real> join(const VectorFunction<Real>&, const VectorFunction<Real>&);
 
-ScalarFunction compose(const ScalarFunction& f, const VectorFunction& g);
-VectorFunction compose(const VectorFunction& f, const VectorFunction& g);
-ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f);
+ScalarFunction<Real> compose(const ScalarFunction<Real>& f, const VectorFunction<Real>& g);
+VectorFunction<Real> compose(const VectorFunction<Real>& f, const VectorFunction<Real>& g);
+ScalarFunction<Real> lie_derivative(const ScalarFunction<Real>& g, const VectorFunction<Real>& f);
 
-inline List<ScalarFunction> operator,(const Real& c1, const ScalarFunction& sf2) { return (ScalarFunction::constant(sf2.argument_size(),c1),sf2); }
-inline List<ScalarFunction> operator,(const ScalarFunction& sf1, const Real& c2) { return (sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
-inline List<ScalarFunction> operator,(const ScalarFunction& sf1, double c2) { return (sf1,ScalarFunction::constant(sf1.argument_size(),c2)); }
-inline List<ScalarFunction> operator,(const List<ScalarFunction>& vf1, const Real& c2) { return (vf1,ScalarFunction::constant(vf1.back().argument_size(),c2)); }
+inline List< ScalarFunction<Real> > operator,(const Real& c1, const ScalarFunction<Real>& sf2) {
+    return (ScalarFunction<Real>::constant(sf2.argument_size(),c1),sf2); }
+inline List< ScalarFunction<Real> > operator,(const ScalarFunction<Real>& sf1, const Real& c2) {
+    return (sf1,ScalarFunction<Real>::constant(sf1.argument_size(),c2)); }
+inline List< ScalarFunction<Real> > operator,(const ScalarFunction<Real>& sf1, double c2) {
+    return (sf1,ScalarFunction<Real>::constant(sf1.argument_size(),c2)); }
+inline List< ScalarFunction<Real> > operator,(const List< ScalarFunction<Real> >& vf1, const Real& c2) {
+    return (vf1,ScalarFunction<Real>::constant(vf1.back().argument_size(),c2)); }
 
-inline std::ostream& operator<<(std::ostream& os, const VectorFunction& f) { return f.write(os); }
-
+inline std::ostream& operator<<(std::ostream& os, const VectorFunction<Real>& f) { return f.write(os); }
 
 
 
 //! \ingroup FunctionModule
 //! \brief A scalar function of the form \f$f(x)=c\f$.
 class ScalarConstantFunction
-    : public ScalarFunction
+    : public ScalarFunction<Real>
 {
   public:
     //! \brief Construct the constant function \f$f(x)=\sum a_ix_i+b\f$.
     ScalarConstantFunction(uint n, const Real& c);
   protected:
-    virtual void _check_type(const ScalarFunctionInterface* ptr) const;
+    virtual void _check_type(const ScalarFunctionInterface<Real>* ptr) const;
 };
 
 //! \ingroup FunctionModule
 //! \brief A scalar function of the form \f$f(x)=\sum_{i=1}^{n}a_ix_i+b\f$.
 class ScalarAffineFunction
-    : public ScalarFunction
+    : public ScalarFunction<Real>
 {
   public:
     //! \brief Construct the affine function \f$f(x)=\sum a_ix_i+b\f$.
     ScalarAffineFunction(const Vector<Real>& a, const Real& b);
   protected:
-    virtual void _check_type(const ScalarFunctionInterface* ptr) const;
+    virtual void _check_type(const ScalarFunctionInterface<Real>* ptr) const;
 };
 
 //! \ingroup FunctionModule
 //! \brief A scalar function of the form \f$f(x)=\sum_{\alpha} c_\alpha x_1^{\alpha_1}\cdots x_n^{\alpha_n}\f$.
 class ScalarPolynomialFunction
-    : public ScalarFunction
+    : public ScalarFunction<Real>
 {
   public:
     //! \brief Construct the affine function \f$f(x)=\sum a_ix_i+b\f$.
     ScalarPolynomialFunction(const Polynomial<Real>& p);
   protected:
-    virtual void _check_type(const ScalarFunctionInterface* ptr) const;
+    virtual void _check_type(const ScalarFunctionInterface<Real>* ptr) const;
 };
 
 
 
 class VectorConstantFunction
-    : public VectorFunction
+    : public VectorFunction<Real>
 {
   public:
     VectorConstantFunction(const Vector<Real>& c, uint as);
   protected:
-    virtual void _check_type(const VectorFunctionInterface* ptr) const;
+    virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
 };
 
 
 class VectorAffineFunction
-    : public VectorFunction
+    : public VectorFunction<Real>
 {
   public:
     VectorAffineFunction(const Matrix<Real>& A, const Vector<Real>& b);
     const Matrix<Real> A() const;
     const Vector<Real> b() const;
   protected:
-    virtual void _check_type(const VectorFunctionInterface* ptr) const;
+    virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
 };
 
 
@@ -401,18 +516,18 @@ class VectorAffineFunction
 //! \ingroup FunctionModule
 //! \brief The identiy function on \f$\R^n\f$.
 class IdentityFunction
-    : public VectorFunction
+    : public VectorFunction<Real>
 {
   public:
     //! \brief Construct the identity function in dimension \a n.
     IdentityFunction(uint n);
   protected:
-    virtual void _check_type(const VectorFunctionInterface* ptr) const;
+    virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
 };
 
 
 class ProjectionFunction
-    : public VectorFunction
+    : public VectorFunction<Real>
 {
   public:
     //! \brief Construct the identity function in dimension \a n.
@@ -427,17 +542,17 @@ class ProjectionFunction
     const array<uint>& p() const;
     const uint p(uint i) const;
   protected:
-    virtual void _check_type(const VectorFunctionInterface* ptr) const;
+    virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
 };
 
 class VectorUnscalingFunction
-: public VectorFunction
+: public VectorFunction<Real>
 {
     public:
         //! \brief Construct the function which maps the box \a bx to the unit box.
         VectorUnscalingFunction(const Vector<Interval>& bx);
     protected:
-        virtual void _check_type(const VectorFunctionInterface* ptr) const;
+        virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
 };
 
 

@@ -3942,7 +3942,7 @@ implicit(const Vector<TaylorModel>& f)
 
 
 TaylorModel
-implicit(const ScalarFunction& f, const Vector<TaylorModel>& g)
+implicit(const RealScalarFunction& f, const Vector<TaylorModel>& g)
 {
 
     // Check that the arguments are suitable
@@ -3957,7 +3957,7 @@ implicit(const ScalarFunction& f, const Vector<TaylorModel>& g)
     const uint gas=g[0].argument_size();
     const uint grs=g.size();
 
-    ScalarFunction df=f.derivative(gas);
+    RealScalarFunction df=f.derivative(gas);
 
     TaylorModel h0(gas);
     Vector<TaylorModel> jgh=join(g,h0);

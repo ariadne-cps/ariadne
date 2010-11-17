@@ -298,7 +298,7 @@ compute_outer_approximation(const TaylorImageSet& set, const Grid& grid, uint su
 
 /*
 typedef Vector<Float> FloatVector;
-List<FloatVector> scatter(const Box& D, const VectorFunction& f, const List<ScalarFunction>& g) {
+List<FloatVector> scatter(const Box& D, const RealVectorFunction& f, const List<RealScalarFunction>& g) {
     ARIADNE_ASSERT(D.size()==2);
     List<FloatVector> res;
     const uint N=16;
@@ -309,7 +309,7 @@ List<FloatVector> scatter(const Box& D, const VectorFunction& f, const List<Scal
             s[1]=((N-j)*D[1].lower()+j*D[1].upper())/N;
             bool valid=true;
             for(uint k=0; k!=g.size(); ++k) {
-                const ScalarFunction& gk=g[k];
+                const RealScalarFunction& gk=g[k];
                 if(gk(s)>0.0) { valid=false; break; }
             }
             if(valid) { res.append(s); }
@@ -333,10 +333,10 @@ class TestTaylorConstrainedImageSet
     }
 
     void test_affine_approximation() {
-        ScalarFunction s=ScalarFunction::coordinate(2,0);
-        ScalarFunction t=ScalarFunction::coordinate(2,1);
-        ScalarFunction x=ScalarFunction::coordinate(2,0);
-        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        RealScalarFunction s=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction t=RealScalarFunction::coordinate(2,1);
+        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         //Box domain(2, -0.5,1.5, -0.5,0.5);
         Box domain(2, -1.0,+1.0, -1.0,+1.0);
 
@@ -360,10 +360,10 @@ class TestTaylorConstrainedImageSet
 
 
     void test_disjoint() {
-        ScalarFunction s=ScalarFunction::coordinate(2,0);
-        ScalarFunction t=ScalarFunction::coordinate(2,1);
-        ScalarFunction x=ScalarFunction::coordinate(2,0);
-        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        RealScalarFunction s=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction t=RealScalarFunction::coordinate(2,1);
+        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         Box domain(2, -0.5,1.5, -0.5,0.5);
 
         TaylorConstrainedImageSet set(domain,(s,t+sqr(s)));
@@ -375,10 +375,10 @@ class TestTaylorConstrainedImageSet
     }
 
     void test_outer_approximation() {
-        ScalarFunction s=ScalarFunction::coordinate(2,0);
-        ScalarFunction t=ScalarFunction::coordinate(2,1);
-        ScalarFunction x=ScalarFunction::coordinate(2,0);
-        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        RealScalarFunction s=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction t=RealScalarFunction::coordinate(2,1);
+        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         //Box domain(2, -0.5,1.5, -0.5,0.5);
         Box domain(2, -1.0,+1.0, -1.0,+1.0);
         uint accuracy = 4u;
@@ -440,10 +440,10 @@ class TestTaylorConstrainedImageSet
     }
 
     void test_draw() {
-        ScalarFunction s=ScalarFunction::coordinate(2,0);
-        ScalarFunction t=ScalarFunction::coordinate(2,1);
-        ScalarFunction x=ScalarFunction::coordinate(2,0);
-        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        RealScalarFunction s=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction t=RealScalarFunction::coordinate(2,1);
+        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         uint accuracy = 3u;
         uint high_accuracy = 5u;
 

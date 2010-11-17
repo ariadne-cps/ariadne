@@ -62,18 +62,18 @@ class ImageSet
     , public DrawableInterface
 {
     Vector<Interval> _domain;
-    VectorFunction _function;
+    RealVectorFunction _function;
   public:
     //! \brief Default constructor constructs the singleton in \f$\R^0\f$.
     ImageSet();
     //! \brief Construct the image of \a dom under the identity function.
     ImageSet(const Vector<Interval>& dom);
     //! \brief Construct the image of \a dom under the function \a fn.
-    ImageSet(const Vector<Interval>& dom, const VectorFunction& fn);
+    ImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn);
     //! \brief The box used to define the set.
     const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
-    const VectorFunction& function() const { return this->_function; }
+    const RealVectorFunction& function() const { return this->_function; }
     //! \brief Equality operator. Compares functions by referential equality.
     bool operator==(const ImageSet& ims) const {
         return this->_domain==ims._domain && this->_function.pointer()==ims._function.pointer(); }
@@ -100,10 +100,10 @@ class ConstraintSet
     : public RegularSetInterface
 {
     Vector<Interval> _codomain;
-    VectorFunction _function;
+    RealVectorFunction _function;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    ConstraintSet(const Vector<Interval>& C, const VectorFunction& g);
+    ConstraintSet(const Vector<Interval>& C, const RealVectorFunction& g);
     //! \brief Construct from a polyhedron.
     ConstraintSet(const Polyhedron& p);
     //! \brief Construct from a list of constraints.
@@ -111,7 +111,7 @@ class ConstraintSet
     //! \brief The codomain of the set.
     const Vector<Interval>& codomain() const { return this->_codomain; }
     //! \brief The function used to define the set.
-    const VectorFunction& function() const { return this->_function; };
+    const RealVectorFunction& function() const { return this->_function; };
     //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
     NonlinearConstraint constraint(uint i) const { return NonlinearConstraint(this->_function[i],this->_codomain[i]); }
     //! \brief The number of constraints.
@@ -127,7 +127,7 @@ class ConstraintSet
     friend BoundedConstraintSet intersection(const ConstraintSet& set, const Box& bound);
     //! \brief Compute the preimage of the set $S=g^{-1}(C)\f$ under \f$h\$.
     //! The resulting set is the constraint set \f$h^{-1}(S)=(g\circ h)^{-1}(C)\f$.
-    friend ConstraintSet preimage(const VectorFunction& h, const ConstraintSet& s) {
+    friend ConstraintSet preimage(const RealVectorFunction& h, const ConstraintSet& s) {
         return ConstraintSet(s.codomain(),compose(s.function(),h)); }
 };
 
@@ -142,11 +142,11 @@ class BoundedConstraintSet
     , public DrawableInterface
 {
     Vector<Interval> _domain;
-    VectorFunction _function;
+    RealVectorFunction _function;
     Vector<Interval> _codomain;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    BoundedConstraintSet(const Vector<Interval>& D, const VectorFunction& g, const Vector<Interval>& C);
+    BoundedConstraintSet(const Vector<Interval>& D, const RealVectorFunction& g, const Vector<Interval>& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
     BoundedConstraintSet(const Vector<Interval>& D, const List<NonlinearConstraint>& c);
     //! \brief The domain of the set.
@@ -154,7 +154,7 @@ class BoundedConstraintSet
     //! \brief The codomain of the set.
     const Vector<Interval>& codomain() const { return this->_codomain; }
     //! \brief The function used to define the set.
-    const VectorFunction& function() const { return this->_function; };
+    const RealVectorFunction& function() const { return this->_function; };
     //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
     NonlinearConstraint constraint(uint i) const { return NonlinearConstraint(this->_function[i],this->_codomain[i]); }
     //! \brief The number of constraints.
@@ -179,26 +179,26 @@ class ConstrainedImageSet
     : public LocatedSetInterface, public DrawableInterface
 {
     Box _domain;
-    VectorFunction _function;
+    RealVectorFunction _function;
     List< NonlinearConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    ConstrainedImageSet(const Vector<Interval>& dom) : _domain(dom), _function(VectorFunction::identity(dom.size())) { }
+    ConstrainedImageSet(const Vector<Interval>& dom) : _domain(dom), _function(RealVectorFunction::identity(dom.size())) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ConstrainedImageSet(const Vector<Interval>& dom, const VectorFunction& fn) : _domain(dom), _function(fn) {
+    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraint \a c.
-    ConstrainedImageSet(const Vector<Interval>& dom, const VectorFunction& fn, const NonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
+    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const NonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
         ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
     }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
-    ConstrainedImageSet(const Vector<Interval>& dom, const VectorFunction& fn, const List<NonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
+    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const List<NonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
-    ConstrainedImageSet(const List<Interval>& dom, const List<ScalarFunction>& fn) : _domain(dom), _function(fn) {
+    ConstrainedImageSet(const List<Interval>& dom, const List<RealScalarFunction>& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(_domain.size()==_function.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a bounded constraint set.
     ConstrainedImageSet(const BoundedConstraintSet& set);
@@ -207,7 +207,7 @@ class ConstrainedImageSet
     //! \brief The domain of the set.
     const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
-    const VectorFunction& function() const { return this->_function; };
+    const RealVectorFunction& function() const { return this->_function; };
     //! \brief The function used to define the set.
     const List<NonlinearConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
@@ -218,7 +218,7 @@ class ConstrainedImageSet
     NonlinearConstraint const& constraint(uint i) const { return this->_constraints[i]; }
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
-    void apply(const VectorFunction& h) {
+    void apply(const RealVectorFunction& h) {
         this->_function=compose(h,this->_function);
     }
 
@@ -233,12 +233,12 @@ class ConstrainedImageSet
         this->_constraints.append(NonlinearConstraint(compose(c.function(),_function),c.bounds())); }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    void new_parameter_constraint(const ScalarFunction& g, const Interval& C) {
+    void new_parameter_constraint(const RealScalarFunction& g, const Interval& C) {
         ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g<<" in "<<C);
         this->_constraints.append(NonlinearConstraint(g,C)); }
 
     //! \brief Introduce a new constraint of the form \f$g(x)\in [c_l,c_u]\f$.
-    void new_space_constraint(const ScalarFunction& g, const Interval& C) {
+    void new_space_constraint(const RealScalarFunction& g, const Interval& C) {
         ARIADNE_ASSERT_MSG(g.argument_size()==this->_function.result_size(),*this<<", "<<g<<" in "<<C);
         this->_constraints.append(NonlinearConstraint(compose(g,_function),C)); }
 

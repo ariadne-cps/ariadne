@@ -54,8 +54,6 @@ class AtomicDiscreteMode;
 class AtomicDiscreteTransition;
 class AtomicHybridAutomaton;
 
-class ScalarFunction;
-class VectorFunction;
 class Grid;
 
 
@@ -543,12 +541,12 @@ class CompositeHybridAutomaton
 
 
     EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
-    VectorFunction output_function(DiscreteLocation) const;
-    VectorFunction dynamic_function(DiscreteLocation) const;
-    VectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
-    ScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
-    ScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
-    ScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
+    RealVectorFunction output_function(DiscreteLocation) const;
+    RealVectorFunction dynamic_function(DiscreteLocation) const;
+    RealVectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
+    RealScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
+    RealScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
+    RealScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
 
     Grid grid(DiscreteLocation) const;
     HybridGrid grid() const;

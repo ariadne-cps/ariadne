@@ -481,16 +481,16 @@ AtomicHybridAutomaton::guard(AtomicDiscreteLocation state, DiscreteEvent action)
 
 
 /*
-Map<DiscreteEvent,ScalarFunction>
+Map<DiscreteEvent,RealScalarFunction>
 AtomicHybridAutomaton::blocking_guards(AtomicDiscreteLocation source) const
 {
-    std::map<DiscreteEvent,ScalarFunction> result;
+    std::map<DiscreteEvent,RealScalarFunction> result;
     const AtomicDiscreteMode& mode=this->mode(source);
     for(invariant_const_iterator invariant_iter=mode._invariants.begin();
         invariant_iter!=mode._invariants.end(); ++invariant_iter)
     {
         const DiscreteEvent event=invariant_iter->first;
-        const ScalarFunction invariant=invariant_iter->second;
+        const RealScalarFunction invariant=invariant_iter->second;
         result[event]=invariant;
     }
 
@@ -499,7 +499,7 @@ AtomicHybridAutomaton::blocking_guards(AtomicDiscreteLocation source) const
     {
         if(transition_iter->source().location()==source && transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
-            const ScalarFunction guard=transition_iter->activation();
+            const RealScalarFunction guard=transition_iter->activation();
             result[event]=guard;
         }
     }
@@ -507,17 +507,17 @@ AtomicHybridAutomaton::blocking_guards(AtomicDiscreteLocation source) const
 }
 
 
-std::map<DiscreteEvent,ScalarFunction>
+std::map<DiscreteEvent,RealScalarFunction>
 AtomicHybridAutomaton::permissive_guards(AtomicDiscreteLocation source) const
 {
-    std::map<DiscreteEvent,ScalarFunction> result;
+    std::map<DiscreteEvent,RealScalarFunction> result;
 
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
         transition_iter!=this->_transitions.end(); ++transition_iter)
     {
         if(transition_iter->source().location()==source && !transition_iter->forced()) {
             const DiscreteEvent event=transition_iter->event();
-            const ScalarFunction guard=transition_iter->activation();
+            const RealScalarFunction guard=transition_iter->activation();
             result[event]=guard;
         }
     }
@@ -861,12 +861,12 @@ CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEve
 
 
 
-VectorFunction
+RealVectorFunction
 CompositeHybridAutomaton::output_function(DiscreteLocation location) const {
-    return VectorFunction(auxiliary_variables(location),algebraic_assignments(location),state_variables(location));
+    return RealVectorFunction(auxiliary_variables(location),algebraic_assignments(location),state_variables(location));
 }
 
-VectorFunction
+RealVectorFunction
 CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
     List<RealDifferentialAssignment> differential=this->differential_assignments(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
@@ -875,10 +875,10 @@ CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
             differential[j].rhs=substitute(differential[j].rhs,algebraic[i].lhs,algebraic[i].rhs);
         }
     }
-    return VectorFunction(dot(state_variables(location)),differential,state_variables(location));
+    return RealVectorFunction(dot(state_variables(location)),differential,state_variables(location));
 }
 
-VectorFunction
+RealVectorFunction
 CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation target=this->target(source,event);
     List<RealUpdateAssignment> update=this->update_assignments(source,event);
@@ -888,22 +888,22 @@ CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent 
             update[j].rhs=substitute(update[j].rhs,algebraic[i].lhs,algebraic[i].rhs);
         }
     }
-    return VectorFunction(next(state_variables(target)),update,state_variables(source));
+    return RealVectorFunction(next(state_variables(target)),update,state_variables(source));
 }
 
-ScalarFunction
+RealScalarFunction
 CompositeHybridAutomaton::constraint_function(DiscreteLocation location, DiscreteEvent event) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-ScalarFunction
+RealScalarFunction
 CompositeHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
-    return ScalarFunction(indicator(substitute(invariant_predicate(location,event),algebraic_assignments(location)),negative),state_variables(location));
+    return RealScalarFunction(indicator(substitute(invariant_predicate(location,event),algebraic_assignments(location)),negative),state_variables(location));
 }
 
-ScalarFunction
+RealScalarFunction
 CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
-    return ScalarFunction(indicator(substitute(guard_predicate(location,event),algebraic_assignments(location))),state_variables(location));
+    return RealScalarFunction(indicator(substitute(guard_predicate(location,event),algebraic_assignments(location))),state_variables(location));
 }
 
 

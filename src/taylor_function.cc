@@ -97,7 +97,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const ExpansionT
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const ScalarFunction& f)
+ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f)
     : _domain(d), _model(f.argument_size())
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
@@ -210,12 +210,12 @@ ScalarTaylorFunction::polynomial() const
     return compose(p,s);
 }
 
-ScalarFunction
+RealScalarFunction
 ScalarTaylorFunction::function() const
 {
-    VectorFunction unscaling=VectorUnscalingFunction(this->domain());
-    ScalarFunction polynomial=ScalarFunction(this->expansion());
-    ScalarFunction error=ScalarFunction::constant(this->argument_size(),Real(Interval(-this->error(),+this->error())));
+    RealVectorFunction unscaling=VectorUnscalingFunction(this->domain());
+    RealScalarFunction polynomial=RealScalarFunction(this->expansion());
+    RealScalarFunction error=RealScalarFunction::constant(this->argument_size(),Real(Interval(-this->error(),+this->error())));
     return compose(polynomial+error,unscaling);
 }
 
@@ -350,7 +350,7 @@ unchecked_evaluate(const ScalarTaylorFunction& f, const Vector<Interval>& x) {
 
 
 ScalarTaylorFunction
-compose(const ScalarFunction& g, const VectorTaylorFunction& f)
+compose(const RealScalarFunction& g, const VectorTaylorFunction& f)
 {
     return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
@@ -467,7 +467,7 @@ Float distance(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2) {
     return norm(f1-f2);
 }
 
-Float distance(const ScalarTaylorFunction& f1, const ScalarFunction& f2) {
+Float distance(const ScalarTaylorFunction& f1, const RealScalarFunction& f2) {
     return distance(f1,ScalarTaylorFunction(f1.domain(),f2));
 }
 
@@ -506,7 +506,7 @@ midpoint(const ScalarTaylorFunction& f)
 
 
 ScalarTaylorFunction
-compose(const ScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
+compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 {
     ARIADNE_ASSERT(f.argument_size()==g.size());
     for(uint i=0; i!=g.size(); ++i) {
@@ -573,10 +573,10 @@ ScalarTaylorFunction implicit(const ScalarTaylorFunction& f) {
 }
 
 
-TaylorModel implicit(const ScalarFunction& f, const Vector<TaylorModel>& g);
+TaylorModel implicit(const RealScalarFunction& f, const Vector<TaylorModel>& g);
 
 ScalarTaylorFunction
-implicit(const ScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
+implicit(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 {
     ARIADNE_ASSERT(f.argument_size()>g.size());
     ARIADNE_ASSERT(g.size()>0);
@@ -594,7 +594,7 @@ implicit(const ScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 }
 
 ScalarTaylorFunction
-implicit(const ScalarFunction& f, const Vector<Interval>& d)
+implicit(const RealScalarFunction& f, const Vector<Interval>& d)
 {
     ARIADNE_ASSERT(f.argument_size()>=1u);
     ARIADNE_ASSERT(d.size()+1u==f.argument_size());
@@ -606,7 +606,7 @@ implicit(const ScalarFunction& f, const Vector<Interval>& d)
 
 
 ScalarTaylorFunction
-crossing_time(const ScalarFunction& g, const VectorTaylorFunction& phi)
+crossing_time(const RealScalarFunction& g, const VectorTaylorFunction& phi)
 {
     Vector<Interval> d=project(phi.domain(),range(0,phi.result_size()));
     Interval h=phi.domain()[phi.result_size()];
@@ -777,7 +777,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const VectorFunction& f)
+                               const RealVectorFunction& f)
     : _domain(d), _models(f.result_size())
 {
     ARIADNE_ASSERT(f.result_size()>0);
@@ -788,7 +788,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const VectorFunction& f,
+                               const RealVectorFunction& f,
                                const shared_ptr<TaylorModel::Accuracy> accuracy_ptr)
     : _domain(d), _models(f.result_size())
 {
@@ -908,20 +908,20 @@ VectorTaylorFunction::error() const
     return e;
 }
 
-VectorFunction
+RealVectorFunction
 VectorTaylorFunction::function() const
 {
-    VectorFunction unscaling=VectorUnscalingFunction(this->domain());
-    VectorFunction polynomials(this->result_size(),this->argument_size());
+    RealVectorFunction unscaling=VectorUnscalingFunction(this->domain());
+    RealVectorFunction polynomials(this->result_size(),this->argument_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        polynomials[i]=ScalarFunction(this->_models[i].expansion())+Real(Interval(-this->_models[i].error(),+this->_models[i].error()));
+        polynomials[i]=RealScalarFunction(this->_models[i].expansion())+Real(Interval(-this->_models[i].error(),+this->_models[i].error()));
     }
     return compose(polynomials,unscaling);
 
     Vector< Polynomial<Interval> > polynomial=this->polynomial();
-    VectorFunction result(this->result_size(),this->argument_size());
+    RealVectorFunction result(this->result_size(),this->argument_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        result.set(i,ScalarFunction(polynomial[i]));
+        result.set(i,RealScalarFunction(polynomial[i]));
     }
     return result;
 }
@@ -1503,7 +1503,7 @@ unchecked_evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x) {
 }
 
 VectorTaylorFunction
-compose(const VectorFunction& g, const VectorTaylorFunction& f)
+compose(const RealVectorFunction& g, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
@@ -1540,7 +1540,7 @@ antiderivative(const VectorTaylorFunction& f, uint k)
 }
 
 ScalarTaylorFunction
-implicit(const ScalarFunction& f, const VectorTaylorFunction& g)
+implicit(const RealScalarFunction& f, const VectorTaylorFunction& g)
 {
     return ScalarTaylorFunction(g.domain(),implicit(f,g.models()));
 }
@@ -1557,7 +1557,7 @@ implicit(const VectorTaylorFunction& f)
 }
 
 VectorTaylorFunction
-flow(const VectorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
+flow(const RealVectorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
 {
     VectorTaylorFunction phi0=embed(VectorTaylorFunction::identity(d),Vector<Interval>(1u,Interval(-h,+h)));
     Vector<Interval> hvfd=0*h*vf(d);
@@ -1718,7 +1718,7 @@ Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     return norm(f1-f2);
 }
 
-Float distance(const VectorTaylorFunction& f1, const VectorFunction& f2) {
+Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {
     return distance(f1,VectorTaylorFunction(f1.domain(),f2));
 }
 

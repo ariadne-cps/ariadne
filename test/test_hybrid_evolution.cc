@@ -52,9 +52,9 @@ using namespace std;
 int evolver_verbosity=0;
 
 
-ScalarFunction c=ScalarFunction::constant(2,1.0);
-ScalarFunction x0=ScalarFunction::coordinate(2,0);
-ScalarFunction x1=ScalarFunction::coordinate(2,1);
+RealScalarFunction c=RealScalarFunction::constant(2,1.0);
+RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
+RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 DiscreteLocation q("q");
 DiscreteEvent e("e");
 
@@ -86,9 +86,9 @@ void TestHybridEvolution::test() const {
 
 void TestHybridEvolution::test_bouncing_ball() const {
     MonolithicHybridAutomaton bouncing_ball;
-    ScalarFunction c=ScalarFunction::constant(2,1.0);
-    ScalarFunction x=ScalarFunction::coordinate(2,0);
-    ScalarFunction v=ScalarFunction::coordinate(2,1);
+    RealScalarFunction c=RealScalarFunction::constant(2,1.0);
+    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction v=RealScalarFunction::coordinate(2,1);
 
     TaylorModel::set_default_maximum_degree(4);
 
@@ -135,10 +135,10 @@ void TestHybridEvolution::test_water_tank() const {
     Real lambda(0.02);
     Real rate(0.3);
 
-    ScalarFunction height=ScalarFunction::coordinate(2,0);
-    ScalarFunction aperture=ScalarFunction::coordinate(2,1);
-    ScalarFunction zero=ScalarFunction::constant(2,0.0);
-    ScalarFunction one=ScalarFunction::constant(2,1.0);
+    RealScalarFunction height=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction aperture=RealScalarFunction::coordinate(2,1);
+    RealScalarFunction zero=RealScalarFunction::constant(2,0.0);
+    RealScalarFunction one=RealScalarFunction::constant(2,1.0);
 
     DiscreteLocation open("open");
     DiscreteLocation opening("opening");

@@ -51,10 +51,10 @@ using namespace std;
 int evolver_verbosity=0;
 
 
-ScalarFunction z=ScalarFunction::constant(2,0.0);
-ScalarFunction c=ScalarFunction::constant(2,1.0);
-ScalarFunction x0=ScalarFunction::coordinate(2,0);
-ScalarFunction x1=ScalarFunction::coordinate(2,1);
+RealScalarFunction z=RealScalarFunction::constant(2,0.0);
+RealScalarFunction c=RealScalarFunction::constant(2,1.0);
+RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
+RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 DiscreteLocation q("q");
 DiscreteEvent e("e");
 
@@ -878,11 +878,11 @@ class TestHybridEvolver
     AtomicDiscreteLocation q1,q2;
     DiscreteEvent e;
     HybridEvolver evolver;
-    ScalarFunction z,o,x,y;
-    ScalarFunction x0,y0,t;
+    RealScalarFunction z,o,x,y;
+    RealScalarFunction x0,y0,t;
   public:
     TestHybridEvolver();
-    MonolithicHybridAutomaton make_hybrid_automaton(const ScalarFunction& guard);
+    MonolithicHybridAutomaton make_hybrid_automaton(const RealScalarFunction& guard);
 
     void test();
     void test_transverse_linear_crossing();
@@ -899,21 +899,21 @@ TestHybridEvolver::TestHybridEvolver()
     q2=AtomicDiscreteLocation(2);
     e=DiscreteEvent(3);
 
-    z=ScalarFunction::constant(2,0.0);
-    o=ScalarFunction::constant(2,1.0);
-    x=ScalarFunction::variable(2,0);
-    y=ScalarFunction::variable(2,1);
-    x0=ScalarFunction::variable(3,0);
-    y0=ScalarFunction::variable(3,1);
-    t=ScalarFunction::variable(3,2);
+    z=RealScalarFunction::constant(2,0.0);
+    o=RealScalarFunction::constant(2,1.0);
+    x=RealScalarFunction::variable(2,0);
+    y=RealScalarFunction::variable(2,1);
+    x0=RealScalarFunction::variable(3,0);
+    y0=RealScalarFunction::variable(3,1);
+    t=RealScalarFunction::variable(3,2);
 }
 
-MonolithicHybridAutomaton TestHybridEvolver::make_hybrid_automaton(const ScalarFunction& guard)
+MonolithicHybridAutomaton TestHybridEvolver::make_hybrid_automaton(const RealScalarFunction& guard)
 {
     MonolithicHybridAutomaton system;
-    system.new_mode(q1,VectorFunction(join(o,z)));
-    system.new_mode(q2,VectorFunction(join(z,o)));
-    system.new_transition(e,q1,q2,IdentityFunction(2),VectorFunction(1u,guard),true);
+    system.new_mode(q1,RealVectorFunction(join(o,z)));
+    system.new_mode(q2,RealVectorFunction(join(z,o)));
+    system.new_transition(e,q1,q2,IdentityFunction(2),RealVectorFunction(1u,guard),true);
     return system;
 }
 
@@ -921,7 +921,7 @@ void TestHybridEvolver::test_transverse_linear_crossing()
 {
     Float r=1.0/8;
     Float tol=1e-5;
-    ScalarFunction guard=x+y/2-1;
+    RealScalarFunction guard=x+y/2-1;
     MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorImageSet initial_set(q1,initial_box);
@@ -929,8 +929,8 @@ void TestHybridEvolver::test_transverse_linear_crossing()
 
     ListSet<HybridTaylorImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
-    ScalarFunction ct=-guard; // Crossing time
-    VectorFunction f=join(x+ct,y+2-ct);
+    RealScalarFunction ct=-guard; // Crossing time
+    RealVectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorImageSet expected_evolved_set(f,initial_box);
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
@@ -944,7 +944,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
 {
     Float r=1.0/8;
     Float tol=1e-5;
-    ScalarFunction guard=x-(1+y/2+y*y*y);
+    RealScalarFunction guard=x-(1+y/2+y*y*y);
     MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorImageSet initial_set(q1,initial_box);
@@ -952,9 +952,9 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
 
     ListSet<HybridTaylorImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
-    ScalarFunction ct=-guard; // Crossing time
+    RealScalarFunction ct=-guard; // Crossing time
 
-    VectorFunction f=join(x+ct,y+2-ct);
+    RealVectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorImageSet expected_evolved_set(f,initial_box);
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
@@ -967,14 +967,14 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
 {
     Float r=1.0/32;
     Float tol=1e-5;
-    ScalarFunction guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
+    RealScalarFunction guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
     MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorImageSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
-    ScalarFunction ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
-    VectorFunction f=join(x+ct,y+2-ct);
+    RealScalarFunction ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
+    RealVectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorImageSet expected_evolved_set(f,initial_box);
 

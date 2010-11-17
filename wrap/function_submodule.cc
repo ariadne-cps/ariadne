@@ -70,16 +70,16 @@ struct from_python< MultiIndex >
 
 
 template<>
-struct from_python<VectorFunction>
+struct from_python<RealVectorFunction>
 {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<VectorFunction>()); }
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<RealVectorFunction>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         list lst=extract<list>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage< VectorFunction >*)   data)->storage.bytes;
-        VectorFunction res(len(lst),0);
-        for(uint i=0; i!=res.result_size(); ++i) { res.set(i,extract<ScalarFunction>(lst[i])); }
-        new (storage) VectorFunction(res);
+        void* storage = ((converter::rvalue_from_python_storage< RealVectorFunction >*)   data)->storage.bytes;
+        RealVectorFunction res(len(lst),0);
+        for(uint i=0; i!=res.result_size(); ++i) { res.set(i,extract<RealScalarFunction>(lst[i])); }
+        new (storage) RealVectorFunction(res);
         data->convertible = storage;
     }
 };
@@ -102,7 +102,7 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
 
 
 class ScalarPythonFunction
-    : public ScalarFunctionInterface
+    : public RealScalarFunctionInterface
 {
   public:
     ScalarPythonFunction(std::string& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
@@ -136,7 +136,7 @@ class ScalarPythonFunction
     virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
         return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
-    virtual ScalarFunction derivative (uint j) const {
+    virtual RealScalarFunction derivative (uint j) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
     virtual std::ostream& repr(std::ostream& os) const { return os; }
     virtual std::ostream& write(std::ostream& os) const {
@@ -152,7 +152,7 @@ class ScalarPythonFunction
 
 
 class VectorPythonFunction
-    : public VectorFunctionInterface
+    : public RealVectorFunctionInterface
 {
   public:
     VectorPythonFunction(std::string& nm, uint rs, uint as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
@@ -186,7 +186,7 @@ class VectorPythonFunction
     virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const {
         return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
 
-    virtual ScalarFunction operator[](uint i) const {
+    virtual RealScalarFunction operator[](uint i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
 
     virtual std::ostream& write(std::ostream& os) const {
@@ -284,64 +284,64 @@ void export_polynomial()
 
 void export_scalar_function()
 {
-    class_<ScalarFunction>
-        scalar_function_class("ScalarFunction", init<ScalarFunction>());
+    class_<RealScalarFunction>
+        scalar_function_class("RealScalarFunction", init<RealScalarFunction>());
     scalar_function_class.def(init<uint>());
     scalar_function_class.def(init<RealExpression,RealSpace>());
     scalar_function_class.def(init< Polynomial<Real> >());
-    scalar_function_class.def("argument_size", &ScalarFunction::argument_size);
-    scalar_function_class.def("derivative", &ScalarFunction::derivative);
-    scalar_function_class.def("polynomial", &ScalarFunction::polynomial);
-    scalar_function_class.def("__call__", (Interval(ScalarFunction::*)(const Vector<Interval>&)const)&ScalarFunction::operator() );
-    scalar_function_class.def("__call__", (Float(ScalarFunction::*)(const Vector<Float>&)const)&ScalarFunction::operator() );
-    scalar_function_class.def("gradient", (Vector<Interval>(ScalarFunction::*)(const Vector<Interval>&)const)&ScalarFunction::gradient );
-    scalar_function_class.def("gradient", (Vector<Interval>(ScalarFunction::*)(const Vector<Interval>&)const)&ScalarFunction::gradient );
-    scalar_function_class.def("__pos__", &__pos__<ScalarFunction,ScalarFunction>);
-    scalar_function_class.def("__neg__", &__neg__<ScalarFunction,ScalarFunction>);
-    scalar_function_class.def("__add__", &__add__<ScalarFunction,ScalarFunction,ScalarFunction>);
-    scalar_function_class.def("__sub__", &__sub__<ScalarFunction,ScalarFunction,ScalarFunction>);
-    scalar_function_class.def("__mul__", &__mul__<ScalarFunction,ScalarFunction,ScalarFunction>);
-    scalar_function_class.def("__div__", &__div__<ScalarFunction,ScalarFunction,ScalarFunction>);
-    scalar_function_class.def("__add__", &__add__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__sub__", &__sub__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__mul__", &__mul__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__div__", &__div__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__radd__", &__radd__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__rsub__", &__rsub__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__rmul__", &__rmul__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__rdiv__", &__rdiv__<ScalarFunction,ScalarFunction,Real>);
-    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,ScalarFunction,Interval>);
-    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,ScalarFunction,Real>);
-    scalar_function_class.def("__le__", &__le__<NonlinearConstraint,ScalarFunction,Real>);
-    scalar_function_class.def("__ge__", &__ge__<NonlinearConstraint,ScalarFunction,Real>);
+    scalar_function_class.def("argument_size", &RealScalarFunction::argument_size);
+    scalar_function_class.def("derivative", &RealScalarFunction::derivative);
+    scalar_function_class.def("polynomial", &RealScalarFunction::polynomial);
+    scalar_function_class.def("__call__", (Interval(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::operator() );
+    scalar_function_class.def("__call__", (Float(RealScalarFunction::*)(const Vector<Float>&)const)&RealScalarFunction::operator() );
+    scalar_function_class.def("gradient", (Vector<Interval>(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::gradient );
+    scalar_function_class.def("gradient", (Vector<Interval>(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::gradient );
+    scalar_function_class.def("__pos__", &__pos__<RealScalarFunction,RealScalarFunction>);
+    scalar_function_class.def("__neg__", &__neg__<RealScalarFunction,RealScalarFunction>);
+    scalar_function_class.def("__add__", &__add__<RealScalarFunction,RealScalarFunction,RealScalarFunction>);
+    scalar_function_class.def("__sub__", &__sub__<RealScalarFunction,RealScalarFunction,RealScalarFunction>);
+    scalar_function_class.def("__mul__", &__mul__<RealScalarFunction,RealScalarFunction,RealScalarFunction>);
+    scalar_function_class.def("__div__", &__div__<RealScalarFunction,RealScalarFunction,RealScalarFunction>);
+    scalar_function_class.def("__add__", &__add__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__sub__", &__sub__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__mul__", &__mul__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__div__", &__div__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__radd__", &__radd__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__rsub__", &__rsub__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__rmul__", &__rmul__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__rdiv__", &__rdiv__<RealScalarFunction,RealScalarFunction,Real>);
+    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,RealScalarFunction,Interval>);
+    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__le__", &__le__<NonlinearConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__ge__", &__ge__<NonlinearConstraint,RealScalarFunction,Real>);
     scalar_function_class.def(self_ns::str(self));
 
-    scalar_function_class.def("constant", (ScalarFunction(*)(uint,Real)) &ScalarFunction::constant);
-    scalar_function_class.def("coordinate", (ScalarFunction(*)(uint,uint)) &ScalarFunction::coordinate);
+    scalar_function_class.def("constant", (RealScalarFunction(*)(uint,Real)) &RealScalarFunction::constant);
+    scalar_function_class.def("coordinate", (RealScalarFunction(*)(uint,uint)) &RealScalarFunction::coordinate);
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("coordinate");
 
-    def("evaluate_approx", (Float(*)(const ScalarFunction&,const Vector<Float>&)) &evaluate_approx);
-    def("evaluate", (Interval(*)(const ScalarFunction&,const Vector<Interval>&)) &evaluate);
-    def("gradient_approx",(Vector<Float>(*)(const ScalarFunction&,const Vector<Float>&)) &gradient_approx);
-    def("gradient",(Vector<Interval>(*)(const ScalarFunction&,const Vector<Interval>&)) &gradient);
+    def("evaluate_approx", (Float(*)(const RealScalarFunction&,const Vector<Float>&)) &evaluate_approx);
+    def("evaluate", (Interval(*)(const RealScalarFunction&,const Vector<Interval>&)) &evaluate);
+    def("gradient_approx",(Vector<Float>(*)(const RealScalarFunction&,const Vector<Float>&)) &gradient_approx);
+    def("gradient",(Vector<Interval>(*)(const RealScalarFunction&,const Vector<Interval>&)) &gradient);
 
-    def("derivative", (ScalarFunction(ScalarFunction::*)(uint)const) &ScalarFunction::derivative);
+    def("derivative", (RealScalarFunction(RealScalarFunction::*)(uint)const) &RealScalarFunction::derivative);
 
-    def("pow", (ScalarFunction(*)(const ScalarFunction&,int)) &pow);
-    def("rec", (ScalarFunction(*)(const ScalarFunction&)) &rec);
-    def("sqr", (ScalarFunction(*)(const ScalarFunction&)) &sqr);
-    def("sqrt", (ScalarFunction(*)(const ScalarFunction&)) &sqrt);
-    def("exp", (ScalarFunction(*)(const ScalarFunction&)) &exp);
-    def("log", (ScalarFunction(*)(const ScalarFunction&)) &log);
-    def("sin", (ScalarFunction(*)(const ScalarFunction&)) &sin);
-    def("cos", (ScalarFunction(*)(const ScalarFunction&)) &cos);
-    def("tan", (ScalarFunction(*)(const ScalarFunction&)) &tan);
+    def("pow", (RealScalarFunction(*)(const RealScalarFunction&,int)) &pow);
+    def("rec", (RealScalarFunction(*)(const RealScalarFunction&)) &rec);
+    def("sqr", (RealScalarFunction(*)(const RealScalarFunction&)) &sqr);
+    def("sqrt", (RealScalarFunction(*)(const RealScalarFunction&)) &sqrt);
+    def("exp", (RealScalarFunction(*)(const RealScalarFunction&)) &exp);
+    def("log", (RealScalarFunction(*)(const RealScalarFunction&)) &log);
+    def("sin", (RealScalarFunction(*)(const RealScalarFunction&)) &sin);
+    def("cos", (RealScalarFunction(*)(const RealScalarFunction&)) &cos);
+    def("tan", (RealScalarFunction(*)(const RealScalarFunction&)) &tan);
 
-    def("embed",(ScalarFunction(*)(const ScalarFunction&,uint)) &embed);
+    def("embed",(RealScalarFunction(*)(const RealScalarFunction&,uint)) &embed);
 
     typedef Polynomial<Real> RealPolynomial;
-    implicitly_convertible<RealPolynomial,ScalarFunction>();
+    implicitly_convertible<RealPolynomial,RealScalarFunction>();
 }
 
 void export_vector_function()
@@ -361,52 +361,52 @@ void export_vector_function()
     from_python< List<ExtendedRealAssignment> >();
 
 
-    class_<VectorFunction>
-        vector_function_class("VectorFunction", init<VectorFunction>());
+    class_<RealVectorFunction>
+        vector_function_class("RealVectorFunction", init<RealVectorFunction>());
     vector_function_class.def(init<uint,uint>());
 
     vector_function_class.def(init< List<ExtendedRealVariable>, List<ExtendedRealAssignment>, List<RealVariable> >());
     //vector_function_class.def(init< List<RealVariable>, List<RealAssignment>, List<RealVariable> >());
 
-    vector_function_class.def("result_size", &VectorFunction::result_size);
-    vector_function_class.def("argument_size", &VectorFunction::argument_size);
-    vector_function_class.def("__getitem__", &VectorFunction::get);
-    vector_function_class.def("__setitem__", &VectorFunction::set);
-    vector_function_class.def("__call__", (Vector<Interval>(VectorFunction::*)(const Vector<Interval>&)const)&VectorFunction::operator() );
-    vector_function_class.def("__call__", (Vector<Float>(VectorFunction::*)(const Vector<Float>&)const)&VectorFunction::operator() );
-    vector_function_class.def("jacobian", (Matrix<Interval>(VectorFunction::*)(const Vector<Interval>&)const) &VectorFunction::jacobian);
-    vector_function_class.def("jacobian", (Matrix<Float>(VectorFunction::*)(const Vector<Float>&)const) &VectorFunction::jacobian);
+    vector_function_class.def("result_size", &RealVectorFunction::result_size);
+    vector_function_class.def("argument_size", &RealVectorFunction::argument_size);
+    vector_function_class.def("__getitem__", &RealVectorFunction::get);
+    vector_function_class.def("__setitem__", &RealVectorFunction::set);
+    vector_function_class.def("__call__", (Vector<Interval>(RealVectorFunction::*)(const Vector<Interval>&)const)&RealVectorFunction::operator() );
+    vector_function_class.def("__call__", (Vector<Float>(RealVectorFunction::*)(const Vector<Float>&)const)&RealVectorFunction::operator() );
+    vector_function_class.def("jacobian", (Matrix<Interval>(RealVectorFunction::*)(const Vector<Interval>&)const) &RealVectorFunction::jacobian);
+    vector_function_class.def("jacobian", (Matrix<Float>(RealVectorFunction::*)(const Vector<Float>&)const) &RealVectorFunction::jacobian);
     vector_function_class.def(self_ns::str(self));
 
-    vector_function_class.def("constant", (VectorFunction(*)(uint,Vector<Real>)) &VectorFunction::constant);
-    vector_function_class.def("identity", (VectorFunction(*)(uint)) &VectorFunction::identity);
+    vector_function_class.def("constant", (RealVectorFunction(*)(uint,Vector<Real>)) &RealVectorFunction::constant);
+    vector_function_class.def("identity", (RealVectorFunction(*)(uint)) &RealVectorFunction::identity);
     vector_function_class.staticmethod("constant");
     vector_function_class.staticmethod("identity");
 
-    def("evaluate_approx", (Vector<Float>(*)(const VectorFunction&,const Vector<Float>&)) &evaluate_approx);
-    def("evaluate", (Vector<Interval>(*)(const VectorFunction&,const Vector<Interval>&)) &evaluate);
+    def("evaluate_approx", (Vector<Float>(*)(const RealVectorFunction&,const Vector<Float>&)) &evaluate_approx);
+    def("evaluate", (Vector<Interval>(*)(const RealVectorFunction&,const Vector<Interval>&)) &evaluate);
 
-    def("join", (VectorFunction(*)(const ScalarFunction&, const ScalarFunction&)) &join);
-    def("join", (VectorFunction(*)(const VectorFunction&, const ScalarFunction&)) &join);
-    def("join", (VectorFunction(*)(const ScalarFunction&, const VectorFunction&)) &join);
-    def("join", (VectorFunction(*)(const VectorFunction&, const VectorFunction&)) &join);
+    def("join", (RealVectorFunction(*)(const RealScalarFunction&, const RealScalarFunction&)) &join);
+    def("join", (RealVectorFunction(*)(const RealVectorFunction&, const RealScalarFunction&)) &join);
+    def("join", (RealVectorFunction(*)(const RealScalarFunction&, const RealVectorFunction&)) &join);
+    def("join", (RealVectorFunction(*)(const RealVectorFunction&, const RealVectorFunction&)) &join);
 
-    def("compose", (ScalarFunction(*)(const ScalarFunction&,const VectorFunction&)) &compose);
-    def("compose", (VectorFunction(*)(const VectorFunction&,const VectorFunction&)) &compose);
+    def("compose", (RealScalarFunction(*)(const RealScalarFunction&,const RealVectorFunction&)) &compose);
+    def("compose", (RealVectorFunction(*)(const RealVectorFunction&,const RealVectorFunction&)) &compose);
 
-    from_python<VectorFunction>();
+    from_python<RealVectorFunction>();
 }
 
 
 void export_scalar_python_function()
 {
-    class_<ScalarPythonFunction, bases< ScalarFunctionInterface > > scalar_python_function_class("ScalarUserFunction", init<object>());
+    class_<ScalarPythonFunction, bases< RealScalarFunctionInterface > > scalar_python_function_class("ScalarUserFunction", init<object>());
     scalar_python_function_class.def(init<uint,object>());
 }
 
 void export_vector_python_function()
 {
-    class_<VectorPythonFunction, bases< VectorFunctionInterface > > vector_python_function_class("VectorUserFunction", init<object>());
+    class_<VectorPythonFunction, bases< RealVectorFunctionInterface > > vector_python_function_class("VectorUserFunction", init<object>());
     vector_python_function_class.def(init<uint,uint,object>());
 }
 

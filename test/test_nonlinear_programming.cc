@@ -50,8 +50,8 @@ class TestOptimiser
 
     void test_linear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
-        List<ScalarFunction> x=ScalarFunction::coordinates(2);
-        VectorFunction g=VectorFunction(1u, 2*x[0]+x[1]);
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        RealVectorFunction g=RealVectorFunction(1u, 2*x[0]+x[1]);
         ARIADNE_TEST_PRINT(g);
         Box D(2, 0.0,2.0, 0.0,2.0);
         Box C(1, -2.0,1.0);

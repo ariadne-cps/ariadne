@@ -179,7 +179,7 @@ template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const
 }
 
 
-template<class X> Vector< Differential<X> > second_derivative(const VectorFunction& f, const Vector<X>& x) {
+template<class X> Vector< Differential<X> > second_derivative(const RealVectorFunction& f, const Vector<X>& x) {
     Vector< Differential<X> > d=Differential<X>::variables(f.result_size(),f.argument_size(),2);
     return f.evaluate(d);
 }
@@ -356,7 +356,7 @@ class ConstrainedFeasibilityMatrix {
 
 
 Bool OptimiserBase::
-is_feasible_point(IntervalVector d, VectorFunction g, IntervalVector c, FloatVector y) const
+is_feasible_point(IntervalVector d, RealVectorFunction g, IntervalVector c, FloatVector y) const
 {
     if(!contains(d,y)) { return false; }
     IntervalVector gy=g(IntervalVector(y));
@@ -365,7 +365,7 @@ is_feasible_point(IntervalVector d, VectorFunction g, IntervalVector c, FloatVec
 
 
 Bool OptimiserBase::
-is_infeasibility_certificate(IntervalVector d, VectorFunction g, IntervalVector c, FloatVector x) const
+is_infeasibility_certificate(IntervalVector d, RealVectorFunction g, IntervalVector c, FloatVector x) const
 {
     // Try to prove x.g(y) > 0
     const uint m=d.size();
@@ -391,16 +391,16 @@ is_infeasibility_certificate(IntervalVector d, VectorFunction g, IntervalVector 
 
 
 IntervalVector NonlinearInteriorPointOptimiser::
-optimise(ScalarFunction f, IntervalVector b, VectorFunction g, IntervalVector c) const
+optimise(RealScalarFunction f, IntervalVector b, RealVectorFunction g, IntervalVector c) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 Tribool NonlinearInteriorPointOptimiser::
-feasible(IntervalVector d, VectorFunction g, IntervalVector c) const
+feasible(IntervalVector d, RealVectorFunction g, IntervalVector c) const
 {
-    ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(IntervalVector d, VectorFunction g, IntervalVector c)\n");
+    ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(IntervalVector d, RealVectorFunction g, IntervalVector c)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
 
     ARIADNE_ASSERT(g.argument_size()==d.size());
@@ -430,7 +430,7 @@ feasible(IntervalVector d, VectorFunction g, IntervalVector c) const
 
 
 void NonlinearInteriorPointOptimiser::feasibility_step (
-        const VectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
+        const RealVectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
 {
     const uint m=y.size();
     const uint n=x.size();
@@ -489,7 +489,7 @@ void NonlinearInteriorPointOptimiser::feasibility_step (
 
 
 void NonlinearInteriorPointOptimiser::
-optimization_step(const ScalarFunction& f, const VectorFunction& g,
+optimization_step(const RealScalarFunction& f, const RealVectorFunction& g,
                   FloatVector& x, FloatVector& y, FloatVector& z) const
 {
     const uint m=y.size();
@@ -553,7 +553,7 @@ optimization_step(const ScalarFunction& f, const VectorFunction& g,
 
 
 
-void NonlinearInteriorPointOptimiser::feasibility_step(const IntervalVector& d, const VectorFunction& g, const IntervalVector& c,
+void NonlinearInteriorPointOptimiser::feasibility_step(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
                                         FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
 {
     static const double gamma=1.0/1024;
@@ -677,7 +677,7 @@ void NonlinearInteriorPointOptimiser::feasibility_step(const IntervalVector& d, 
     x=nx; y=project(nyt,range(0,m)); z=nz; t=nyt[m];
 }
 
-void NonlinearInteriorPointOptimiser::linearised_feasibility_step(const IntervalVector& d, const VectorFunction& g, const IntervalVector& c,
+void NonlinearInteriorPointOptimiser::linearised_feasibility_step(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
                                                    FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
 {
     static const double gamma=1.0/1024;
@@ -795,7 +795,7 @@ void NonlinearInteriorPointOptimiser::linearised_feasibility_step(const Interval
 
 
 void NonlinearInteriorPointOptimiser::
-setup_feasibility(const IntervalVector& d, const VectorFunction& g, const IntervalVector& b,
+setup_feasibility(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b,
                   FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
 {
     const uint l=2*(d.size()+b.size());
@@ -807,7 +807,7 @@ setup_feasibility(const IntervalVector& d, const VectorFunction& g, const Interv
 
 
 void NonlinearInteriorPointOptimiser::
-compute_tz(const IntervalVector& d, const VectorFunction& g, const IntervalVector& b,
+compute_tz(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b,
            const FloatVector& y, Float& t, FloatVector& z) const
 {
     static const double ZMIN=0.5;
@@ -843,7 +843,7 @@ compute_tz(const IntervalVector& d, const VectorFunction& g, const IntervalVecto
     }
 }
 
-void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const VectorFunction& g, const IntervalVector& b,
+void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b,
                                                 const FloatVector& y, const Float& t, FloatVector& z) const
 {
     const uint m=g.argument_size();
@@ -873,12 +873,12 @@ void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const V
 
 struct KuhnTuckerFunctionBody : VectorFunctionTemplate<KuhnTuckerFunctionBody>
 {
-    ScalarFunction f;
-    Array<ScalarFunction> g;
-    Array<ScalarFunction> df;
-    Array<Array<ScalarFunction> > dg;
+    RealScalarFunction f;
+    Array<RealScalarFunction> g;
+    Array<RealScalarFunction> df;
+    Array<Array<RealScalarFunction> > dg;
 
-    KuhnTuckerFunctionBody(ScalarFunction _f, VectorFunction _g) {
+    KuhnTuckerFunctionBody(RealScalarFunction _f, RealVectorFunction _g) {
         ARIADNE_ASSERT(_f.argument_size()==_g.argument_size());
         const uint m=_g.argument_size();
         const uint n=_g.result_size();
@@ -891,7 +891,7 @@ struct KuhnTuckerFunctionBody : VectorFunctionTemplate<KuhnTuckerFunctionBody>
 
     uint result_size() const { return g.size()*2+f.argument_size(); }
     uint argument_size() const { return g.size()*2+f.argument_size(); }
-    ScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    RealScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
     std::ostream& write(std::ostream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -912,10 +912,10 @@ struct KuhnTuckerFunctionBody : VectorFunctionTemplate<KuhnTuckerFunctionBody>
 
 struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<FeasibilityKuhnTuckerFunctionBody>
 {
-    Array<ScalarFunction> g;
-    Array<Array<ScalarFunction> > dg;
+    Array<RealScalarFunction> g;
+    Array<Array<RealScalarFunction> > dg;
 
-    FeasibilityKuhnTuckerFunctionBody(VectorFunction _g) {
+    FeasibilityKuhnTuckerFunctionBody(RealVectorFunction _g) {
         const uint m=_g.argument_size();
         const uint n=_g.result_size();
         g.resize(n); dg.resize(n); for(uint j=0; j!=n; ++j) { dg[j].resize(m); }
@@ -924,7 +924,7 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<FeasibilityKuh
 
     uint result_size() const { return g.size()*2+g[0].argument_size()+1; }
     uint argument_size() const { return g.size()*2+g[0].argument_size()+1; }
-    ScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    RealScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
     std::ostream& write(std::ostream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -953,11 +953,11 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<Fea
     uint m;
     uint n;
     IntervalVector d;
-    Array<ScalarFunction> g;
+    Array<RealScalarFunction> g;
     IntervalVector c;
-    Array<Array<ScalarFunction> > dg;
+    Array<Array<RealScalarFunction> > dg;
 
-    ConstrainedFeasibilityKuhnTuckerFunctionBody(IntervalVector D, VectorFunction _g, IntervalVector C) {
+    ConstrainedFeasibilityKuhnTuckerFunctionBody(IntervalVector D, RealVectorFunction _g, IntervalVector C) {
         m=_g.argument_size();
         n=_g.result_size();
         d=D; c=C;
@@ -967,7 +967,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<Fea
 
     uint result_size() const { return 5*m+4*n+1u; }
     uint argument_size() const { return 5*m+4*n+1u; }
-    ScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    RealScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
     std::ostream& write(std::ostream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -1002,16 +1002,16 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<Fea
 
 
 IntervalVector KrawczykOptimiser::
-optimise(ScalarFunction f, IntervalVector d, VectorFunction g, IntervalVector c) const
+optimise(RealScalarFunction f, IntervalVector d, RealVectorFunction g, IntervalVector c) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 Tribool KrawczykOptimiser::
-feasible(IntervalVector d, VectorFunction g, IntervalVector c) const
+feasible(IntervalVector d, RealVectorFunction g, IntervalVector c) const
 {
-    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(IntervalVector d, VectorFunction g, IntervalVector c)\n");
+    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(IntervalVector d, RealVectorFunction g, IntervalVector c)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
 
     ARIADNE_ASSERT(g.argument_size()==d.size());
@@ -1054,7 +1054,7 @@ feasible(IntervalVector d, VectorFunction g, IntervalVector c) const
 
 
 
-void KrawczykOptimiser::setup_feasibility(const IntervalVector& d, const VectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::setup_feasibility(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
                                           IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const
 {
     const uint m=g.argument_size();
@@ -1067,7 +1067,7 @@ void KrawczykOptimiser::setup_feasibility(const IntervalVector& d, const VectorF
 }
 
 
-void KrawczykOptimiser::compute_tz(const IntervalVector& d, const VectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::compute_tz(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
                                    const IntervalVector& y, Interval& t, IntervalVector& z) const
 {
     ARIADNE_ASSERT(d.size()>0u);
@@ -1142,7 +1142,7 @@ void KrawczykOptimiser::compute_tz(const IntervalVector& d, const VectorFunction
 
 
 void KrawczykOptimiser::
-optimisation_step(const ScalarFunction& f, const VectorFunction& g,
+optimisation_step(const RealScalarFunction& f, const RealVectorFunction& g,
                   IntervalVector& x, IntervalVector& y, IntervalVector& z) const
 {
     const uint m=f.argument_size();
@@ -1167,7 +1167,7 @@ optimisation_step(const ScalarFunction& f, const VectorFunction& g,
 
 
 
-void KrawczykOptimiser::feasibility_step(const VectorFunction& g,
+void KrawczykOptimiser::feasibility_step(const RealVectorFunction& g,
                                          IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -1211,7 +1211,7 @@ void KrawczykOptimiser::feasibility_step(const VectorFunction& g,
 // Feasibility step for dual (inequality constrained) problem without using slack variables
 // FIXME: Do we need a slackness parameter mu? Probably not; hopefully the infinities are kept in check...
 // This method has the advantage of not needing to update the primal variables
-void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const VectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
                                          IntervalVector& y, Interval& t) const
 {
     const uint m=d.size();
@@ -1290,7 +1290,7 @@ void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const VectorFu
 
 
 
-void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const VectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
                                          IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const
 {
     const uint m=d.size();

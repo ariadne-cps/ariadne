@@ -34,7 +34,7 @@ void reduce(Vector<Interval>& x, Propagator<Interval>& p) {
     p.propagate(x);
 }
 
-void reduce(const ScalarFunction& f, Vector<Interval>& x) {
+void reduce(const ScalarFunction<Real>& f, Vector<Interval>& x) {
     Propagator<Interval> r=f.propagator();
     r.assign(x);
     r.propagate(x);

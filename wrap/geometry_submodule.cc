@@ -307,9 +307,9 @@ void export_taylor_image_set()
     def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Box&)) &product);
     def("product", (TaylorImageSet(*)(const TaylorImageSet&,const TaylorImageSet&)) &product);
 
-    def("apply",(TaylorModel(*)(const ScalarFunction&,const TaylorImageSet&)) &apply);
+    def("apply",(TaylorModel(*)(const RealScalarFunction&,const TaylorImageSet&)) &apply);
     def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorImageSet&)) &apply);
-    def("apply",(TaylorImageSet(*)(const VectorFunction&,const TaylorImageSet&)) &apply);
+    def("apply",(TaylorImageSet(*)(const RealVectorFunction&,const TaylorImageSet&)) &apply);
     def("apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &apply);
 
     def("unchecked_apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &unchecked_apply);
@@ -323,7 +323,7 @@ void export_taylor_constrained_image_set()
     class_<TaylorConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> > taylor_set_class("TaylorConstrainedImageSet",init<TaylorConstrainedImageSet>());
     taylor_set_class.def(init<uint>());
     taylor_set_class.def(init<Box>());
-    taylor_set_class.def(init<IntervalVector,VectorFunction>());
+    taylor_set_class.def(init<IntervalVector,RealVectorFunction>());
     //taylor_set_class.def(init<IntervalVector,VectorTaylorFunction>());
     taylor_set_class.def(init<VectorTaylorFunction>());
 
@@ -338,11 +338,11 @@ void export_taylor_constrained_image_set()
     taylor_set_class.def("number_of_constraints", &TaylorConstrainedImageSet::number_of_constraints);
     taylor_set_class.def("number_of_negative_constraints", &TaylorConstrainedImageSet::number_of_constraints);
     taylor_set_class.def("number_of_zero_constraints", &TaylorConstrainedImageSet::number_of_constraints);
-    taylor_set_class.def("apply_map", (void(TaylorConstrainedImageSet::*)(VectorFunction))&TaylorConstrainedImageSet::apply_map);
+    taylor_set_class.def("apply_map", (void(TaylorConstrainedImageSet::*)(RealVectorFunction))&TaylorConstrainedImageSet::apply_map);
     taylor_set_class.def("apply_map", (void(TaylorConstrainedImageSet::*)(VectorTaylorFunction))&TaylorConstrainedImageSet::apply_map);
-    taylor_set_class.def("new_negative_constraint", (void(TaylorConstrainedImageSet::*)(ScalarFunction))&TaylorConstrainedImageSet::new_negative_constraint);
+    taylor_set_class.def("new_negative_constraint", (void(TaylorConstrainedImageSet::*)(RealScalarFunction))&TaylorConstrainedImageSet::new_negative_constraint);
     taylor_set_class.def("new_negative_constraint", (void(TaylorConstrainedImageSet::*)(ScalarTaylorFunction))&TaylorConstrainedImageSet::new_negative_constraint);
-    taylor_set_class.def("new_zero_constraint", (void(TaylorConstrainedImageSet::*)(ScalarFunction))&TaylorConstrainedImageSet::new_zero_constraint);
+    taylor_set_class.def("new_zero_constraint", (void(TaylorConstrainedImageSet::*)(RealScalarFunction))&TaylorConstrainedImageSet::new_zero_constraint);
     taylor_set_class.def("new_zero_constraint", (void(TaylorConstrainedImageSet::*)(ScalarTaylorFunction))&TaylorConstrainedImageSet::new_zero_constraint);
     taylor_set_class.def("affine_over_approximation", &TaylorConstrainedImageSet::affine_over_approximation);
     taylor_set_class.def("outer_approximation", &TaylorConstrainedImageSet::outer_approximation);
@@ -387,7 +387,7 @@ void export_constrained_image_set()
     class_<ConstrainedImageSet,bases<DrawableInterface> >
     constrained_image_set_class("ConstrainedImageSet",init<ConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
-    constrained_image_set_class.def(init<Box,VectorFunction>());
+    constrained_image_set_class.def(init<Box,RealVectorFunction>());
     constrained_image_set_class.def("domain", &ConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("function", &ConstrainedImageSet::function,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("constraint", &ConstrainedImageSet::constraint,return_value_policy<copy_const_reference>());

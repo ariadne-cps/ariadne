@@ -51,8 +51,6 @@ class HybridGrid;
 
 class MonolithicHybridAutomaton;
 
-class ScalarFunction;
-class VectorFunction;
 class Grid;
 
 
@@ -72,10 +70,10 @@ class DiscreteMode {
     DiscreteLocation _location;
 
     // The discrete mode's vector field.
-    VectorFunction _dynamic;
+    RealVectorFunction _dynamic;
 
     // The discrete mode's invariants.
-    Map< DiscreteEvent, Pair<EventKind,ScalarFunction> _invariants;
+    Map< DiscreteEvent, Pair<EventKind,RealScalarFunction> _invariants;
 
     // The discrete mode's grid for reachability analysis.
     boost::shared_ptr< const Grid > _grid;
@@ -85,14 +83,14 @@ class DiscreteMode {
         return this->_location; }
 
     //! \brief The discrete mode's dynamic (a vector field).
-    const VectorFunction& dynamic() const {
+    const RealVectorFunction& dynamic() const {
         return this->_dynamic; }
 
     //! \brief The discrete mode's invariants.
-    const Map< DiscreteEvent, ScalarFunction >& invariants() const {
+    const Map< DiscreteEvent, RealScalarFunction >& invariants() const {
         return this->_invariants; }
 
-    const ScalarFunction& invariant(const DiscreteEvent& event) const {
+    const RealScalarFunction& invariant(const DiscreteEvent& event) const {
         return this->_invariants.find(event)->second; }
 
     //! \brief The discrete mode's default spacial grid.
@@ -112,7 +110,7 @@ class DiscreteMode {
     // \param dynamic is the mode's vector field.
     // \param invariants is the mode's invariants.
     DiscreteMode(DiscreteLocation location,
-                 const VectorFunction& dynamic);
+                 const RealVectorFunction& dynamic);
 
 };
 
@@ -158,28 +156,28 @@ class MonolithicHybridAutomaton
     : public HybridAutomatonInterface
 {
     struct Invariant {
-        Invariant(DiscreteLocation q, DiscreteEvent e, ScalarFunction g, EventKind k)
+        Invariant(DiscreteLocation q, DiscreteEvent e, RealScalarFunction g, EventKind k)
             : _location(q), _event(e), _guard(g), _kind(k) { }
         DiscreteLocation _location;
         DiscreteEvent _event;
-        ScalarFunction _guard;
+        RealScalarFunction _guard;
         EventKind _kind;
     };
     struct Transition {
-        Transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, VectorFunction r, ScalarFunction g, EventKind k)
+        Transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, RealVectorFunction r, RealScalarFunction g, EventKind k)
             : _source(s), _event(e), _target(t), _reset(r), _guard(g), _kind(k) { }
         DiscreteLocation _source;
         DiscreteEvent _event;
         DiscreteLocation _target;
-        VectorFunction _reset;
-        ScalarFunction _guard;
+        RealVectorFunction _reset;
+        RealScalarFunction _guard;
         EventKind _kind;
     };
     struct Mode {
-        Mode(DiscreteLocation q, VectorFunction f)
+        Mode(DiscreteLocation q, RealVectorFunction f)
             : _location(q), _dynamic(f) { }
         DiscreteLocation _location;
-        VectorFunction _dynamic;
+        RealVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;
         Map< DiscreteEvent, Transition >  _transitions;
         boost::shared_ptr< const Grid > _grid_ptr;
@@ -217,7 +215,7 @@ class MonolithicHybridAutomaton
     //!   \param state is the mode's discrete state.
     //!   \param dynamic is the mode's vector field.
     void new_mode(DiscreteLocation state,
-                  VectorFunction dynamic);
+                  RealVectorFunction dynamic);
 
     //! \brief Adds an invariant to a mode of the automaton.
     //!
@@ -229,7 +227,7 @@ class MonolithicHybridAutomaton
 
     void new_invariant(DiscreteLocation state,
                        DiscreteEvent label,
-                       ScalarFunction invariant,
+                       RealScalarFunction invariant,
                        EventKind kind=PROGRESS
                       );
 
@@ -245,8 +243,8 @@ class MonolithicHybridAutomaton
     void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
-                        VectorFunction reset,
-                        ScalarFunction guard,
+                        RealVectorFunction reset,
+                        RealScalarFunction guard,
                         EventKind kind);
 
     //! \brief Set the grid controlling relative scaling in the mode.
@@ -278,7 +276,7 @@ class MonolithicHybridAutomaton
     uint dimension(DiscreteLocation location) const;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual VectorFunction dynamic_function(DiscreteLocation location) const;
+    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const;
 
     //! \brief The set of all events possible in the given \a location.
     virtual Set<DiscreteEvent> events(DiscreteLocation location) const;
@@ -287,13 +285,13 @@ class MonolithicHybridAutomaton
     virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs or progress is interrupted.
-    virtual ScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The target location of \a event starting in the \a source location.
     virtual DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual VectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The natural grid to use in the \a location.
     virtual Grid grid(DiscreteLocation location) const;

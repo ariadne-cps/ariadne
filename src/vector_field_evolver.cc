@@ -116,7 +116,7 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    typedef VectorFunction FunctionType;
+    typedef RealVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction FunctionModelType;
     typedef VectorTaylorFunction FlowModelType;
@@ -193,7 +193,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Semantics semantics,
                 bool reach) const
 {
-    typedef VectorFunction FunctionType;
+    typedef RealVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction MapModelType;
     typedef VectorTaylorFunction FlowModelType;

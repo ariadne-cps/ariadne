@@ -118,7 +118,7 @@ _evolution(EnclosureListType& final_sets,
 {
     verbosity=0;
 
-    typedef VectorFunction FunctionType;
+    typedef RealVectorFunction FunctionType;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 

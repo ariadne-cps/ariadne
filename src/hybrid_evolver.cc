@@ -261,7 +261,7 @@ HybridEvolverBase::
 _extract_transitions(DiscreteLocation const& location,
                      HybridAutomatonInterface const& system) const
 {
-    const VectorFunction& dynamic=system.dynamic_function(location);
+    const RealVectorFunction& dynamic=system.dynamic_function(location);
 
     Map<DiscreteEvent,TransitionData> transitions;
     Set<DiscreteEvent> events = system.events(location);
@@ -270,9 +270,9 @@ _extract_transitions(DiscreteLocation const& location,
     {
         DiscreteEvent event=*event_iter;
         EventKind event_kind=system.event_kind(location,event);
-        ScalarFunction guard_function=system.guard_function(location,event);
-        ScalarFunction guard_flow_derivative_function=lie_derivative(guard_function,dynamic);
-        VectorFunction reset_function; DiscreteLocation target;
+        RealScalarFunction guard_function=system.guard_function(location,event);
+        RealScalarFunction guard_flow_derivative_function=lie_derivative(guard_function,dynamic);
+        RealVectorFunction reset_function; DiscreteLocation target;
         if(is_activating(event_kind)) {
             reset_function=system.reset_function(location,event);
             target=system.target(location,event);
@@ -353,7 +353,7 @@ _process_initial_events(EvolutionData& evolution_data,
 
 VectorIntervalFunction
 HybridEvolverBase::
-_compute_flow(VectorFunction dynamic,
+_compute_flow(RealVectorFunction dynamic,
               Box const& initial_box,
               const Float& maximum_step_size) const
 {
@@ -378,8 +378,8 @@ _compute_flow(VectorFunction dynamic,
 
 Set<DiscreteEvent>
 HybridEvolverBase::
-_compute_active_events(VectorFunction const& dynamic,
-                       Map<DiscreteEvent,ScalarFunction> const& guards,
+_compute_active_events(RealVectorFunction const& dynamic,
+                       Map<DiscreteEvent,RealScalarFunction> const& guards,
                        VectorIntervalFunction const& flow,
                        HybridEnclosure const& starting_set) const
 {
@@ -391,7 +391,7 @@ _compute_active_events(VectorFunction const& dynamic,
     reach_set.apply_full_reach_step(flow);
     for(Set<DiscreteEvent>::iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
         const DiscreteEvent event=*event_iter;
-        const ScalarFunction& guard_function=guards[event];
+        const RealScalarFunction& guard_function=guards[event];
         ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<lie_derivative(guard_function,dynamic)<<"\n");
         // First try a simple test based on the bounding box
         if(guard_function(reach_set.space_bounding_box()).upper()>=0.0) {
@@ -403,7 +403,7 @@ _compute_active_events(VectorFunction const& dynamic,
             if(!definitely(test_set.empty())) {
                 // FIXME: Need to allow permissive events with strictly decreasing guard.
                 // Test direction of guard increase
-                ScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
+                RealScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
                 Interval flow_derivative_range = flow_derivative(flow_bounds);
                 if(flow_derivative_range.upper()>0.0) {
                     active_events.insert(*event_iter);
@@ -418,8 +418,8 @@ _compute_active_events(VectorFunction const& dynamic,
 Map<DiscreteEvent,CrossingData>
 HybridEvolverBase::
 _compute_crossings(Set<DiscreteEvent> const& active_events,
-                   VectorFunction const& dynamic,
-                   Map<DiscreteEvent,ScalarFunction> const& guards,
+                   RealVectorFunction const& dynamic,
+                   Map<DiscreteEvent,RealScalarFunction> const& guards,
                    VectorIntervalFunction const& flow,
                    HybridEnclosure const& initial_set) const
 {
@@ -432,11 +432,11 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         event_iter!=active_events.end(); ++event_iter)
     {
         const DiscreteEvent event=*event_iter;
-        ScalarFunction const& guard=guards[event];
+        RealScalarFunction const& guard=guards[event];
 
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
-        ScalarFunction derivative=lie_derivative(guard,dynamic);
+        RealScalarFunction derivative=lie_derivative(guard,dynamic);
         Interval derivative_range=derivative.evaluate(flow_bounds);
         if(derivative_range.lower()>0.0) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
@@ -470,7 +470,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // If the derivative of the guard function along flow lines cannot be shown
             // to have a definite sign over the entire flow box, then try to compute
             // the sign of the second derivative $L_{f}^{2}g(x)=L_{f}L_{f}g(x)$.
-            ScalarFunction second_derivative=lie_derivative(derivative,dynamic);
+            RealScalarFunction second_derivative=lie_derivative(derivative,dynamic);
             Interval second_derivative_range=second_derivative.evaluate(flow_bounds);
             if(second_derivative_range.lower()>0.0) {
                 // If the second derivative is positive, then either
@@ -575,7 +575,7 @@ _apply_evolve_step(HybridEnclosure& set,
 void
 HybridEvolverBase::
 _apply_guard_step(HybridEnclosure& set,
-                  VectorFunction const& dynamic,
+                  RealVectorFunction const& dynamic,
                   VectorIntervalFunction const& flow,
                   TimingData const& timing_data,
                   TransitionData const& transition_data,
@@ -656,7 +656,7 @@ _apply_guard(List<HybridEnclosure>& sets,
 {
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
-    const ScalarFunction& guard_function=transition_data.guard_function;
+    const RealScalarFunction& guard_function=transition_data.guard_function;
     VectorIntervalFunction starting_state=starting_set.space_function();
     if(elapsed_time.argument_size()>starting_state.argument_size()) {
         starting_state=embed(starting_state,elapsed_time.domain()[elapsed_time.domain().size()-1]);
@@ -768,7 +768,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     // and means that initially active events are tested for only once.
     ARIADNE_LOG(3,"HybridEvolverBase::_evolution_in_mode\n");
 
-    typedef Map<DiscreteEvent,ScalarFunction>::const_iterator constraint_iterator;
+    typedef Map<DiscreteEvent,RealScalarFunction>::const_iterator constraint_iterator;
     typedef Set<DiscreteEvent>::const_iterator event_iterator;
 
     const Real final_time=maximum_hybrid_time.continuous_time();
@@ -804,7 +804,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     const DiscreteLocation location=initial_set.location();
 
     // Cache dynamic and constraint functions
-    VectorFunction dynamic=system.dynamic_function(location);
+    RealVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,TransitionData> transitions = this->_extract_transitions(location,system);
     Set<DiscreteEvent> events = transitions.keys();
 
@@ -823,7 +823,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
 void
 HybridEvolverBase::
 _evolution_step(EvolutionData& evolution_data,
-                VectorFunction const& dynamic,
+                RealVectorFunction const& dynamic,
                 Map<DiscreteEvent,TransitionData> const& transitions,
                 Real const& final_time) const
 {
@@ -844,7 +844,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     if(verbosity==1) { _log_summary(evolution_data.initial_sets.size(),evolution_data.reach_sets.size(),starting_set); }
 
-    Map<DiscreteEvent,ScalarFunction> guard_functions;
+    Map<DiscreteEvent,RealScalarFunction> guard_functions;
     for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
@@ -885,7 +885,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                       VectorIntervalFunction const& flow,
                       TimingData const& timing_data,
                       Map<DiscreteEvent,CrossingData> const& crossings,
-                      VectorFunction const& dynamic,
+                      RealVectorFunction const& dynamic,
                       Map<DiscreteEvent,TransitionData> const& transitions) const
 {
     ARIADNE_LOG(2,"GeneralHybridEvolver::_apply_evolution_step(...)\n");

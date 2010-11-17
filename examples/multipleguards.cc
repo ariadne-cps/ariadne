@@ -13,28 +13,28 @@
 
 using namespace Ariadne;
 
-struct mg_gg : VectorFunctionData<1,3,2> {
+struct mg_gg : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         r[0] = min(x[0]-p[0],x[1]-p[1]);
     }
 };
 
-struct mg_ll : VectorFunctionData<1,3,2> {
+struct mg_ll : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         r[0] = min(p[0]-x[0],p[1]-x[1]);
     }
 };
 
-struct mg_gl : VectorFunctionData<1,3,2> {
+struct mg_gl : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         r[0] = min(x[0]-p[0],p[1]-x[1]);
     }
 };
 
-struct mg_lg : VectorFunctionData<1,3,2> {
+struct mg_lg : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
         r[0] = min(p[0]-x[0],x[1]-p[1]);

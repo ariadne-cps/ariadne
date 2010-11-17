@@ -82,15 +82,15 @@ int main()
     DiscreteEvent i4("i4");
 
     /// Coordinates
-    ScalarFunction x=ScalarFunction::coordinate(3,0);
-    ScalarFunction y=ScalarFunction::coordinate(3,1);
-    ScalarFunction t=ScalarFunction::coordinate(3,2);
+    RealScalarFunction x=RealScalarFunction::coordinate(3,0);
+    RealScalarFunction y=RealScalarFunction::coordinate(3,1);
+    RealScalarFunction t=RealScalarFunction::coordinate(3,2);
 
     /// Create the dynamics
-    VectorFunction dynamic1((a*x+b*y,1/T,1));
-    VectorFunction dynamic2((a*x+b,0,1));
-    VectorFunction dynamic3((a*x+b*y,-1/T,1));
-    VectorFunction dynamic4((a*x,0,1));
+    RealVectorFunction dynamic1((a*x+b*y,1/T,1));
+    RealVectorFunction dynamic2((a*x+b,0,1));
+    RealVectorFunction dynamic3((a*x+b*y,-1/T,1));
+    RealVectorFunction dynamic4((a*x,0,1));
 
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
@@ -98,31 +98,31 @@ int main()
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
     /// Create the resets
-    VectorFunction reset_id((x,y,t));
-    VectorFunction reset_y_zero((x,0,t));
+    RealVectorFunction reset_id((x,y,t));
+    RealVectorFunction reset_y_zero((x,0,t));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    VectorFunction reset_y_one((x,1,t));
+    RealVectorFunction reset_y_one((x,1,t));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) > 0
-    ScalarFunction guard12(y-1);
+    RealScalarFunction guard12(y-1);
     cout << "guard12=" << guard12 << endl << endl;
-    ScalarFunction guard23(x-(hmax-Delta));
+    RealScalarFunction guard23(x-(hmax-Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    ScalarFunction guard34(-y);
+    RealScalarFunction guard34(-y);
     cout << "guard34=" << guard34 << endl << endl;
-    ScalarFunction guard41(-x+(hmin+Delta));
+    RealScalarFunction guard41(-x+(hmin+Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when f(x) < 0
     /// forced transitions do not need an explicit invariant
     /// x < hmax + Delta
-    ScalarFunction inv2(x-(hmax+Delta));
+    RealScalarFunction inv2(x-(hmax+Delta));
     cout << "inv2=" << inv2 << endl << endl;
     /// x > hmin - Delta
-    ScalarFunction inv4(-x+(hmin-Delta));
+    RealScalarFunction inv4(-x+(hmin-Delta));
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton

@@ -64,43 +64,43 @@ int main(int argc, const char* argv[])
     DiscreteEvent i4("i4");
 
     // Create coordinate functions in two variables.
-    ScalarFunction x0=ScalarFunction::coordinate(2,0);
-    ScalarFunction x1=ScalarFunction::coordinate(2,1);
+    RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 
     /// Create the dynamics
-    VectorFunction dynamic1((a*x0+b*x1,1/T));
+    RealVectorFunction dynamic1((a*x0+b*x1,1/T));
     cout << "dynamic1 = " << dynamic1 << endl << endl;
-    VectorFunction dynamic2((a*x0+b,0));
+    RealVectorFunction dynamic2((a*x0+b,0));
     cout << "dynamic2 = " << dynamic2 << endl << endl;
-    VectorFunction dynamic3((a*x0+b*x1,-1/T));
+    RealVectorFunction dynamic3((a*x0+b*x1,-1/T));
     cout << "dynamic3 = " << dynamic3 << endl << endl;
-    VectorFunction dynamic4((a*x0,0));
+    RealVectorFunction dynamic4((a*x0,0));
     cout << "dynamic4 = " << dynamic4 << endl << endl;
 
     /// Create the resets
-    VectorFunction reset_y_zero((x0,0));
+    RealVectorFunction reset_y_zero((x0,0));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    VectorFunction reset_y_one((x0,1));
+    RealVectorFunction reset_y_one((x0,1));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
     /// Guards are true when g(x) >= 0
-    ScalarFunction guard12(x1-1);
+    RealScalarFunction guard12(x1-1);
     cout << "guard12=" << guard12 << endl << endl;
-    ScalarFunction guard23(x0+(-hmax+Delta));
+    RealScalarFunction guard23(x0+(-hmax+Delta));
     cout << "guard23=" << guard23 << endl << endl;
-    ScalarFunction guard34(-x1);
+    RealScalarFunction guard34(-x1);
     cout << "guard34=" << guard34 << endl << endl;
-    ScalarFunction guard41(-x0+(hmin+Delta));
+    RealScalarFunction guard41(-x0+(hmin+Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when c(x) <= 0
     /// Urgent transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    ScalarFunction inv2(x0+(-hmax - Delta));
+    RealScalarFunction inv2(x0+(-hmax - Delta));
     cout << "inv2=" << inv2 << endl << endl;
-    ScalarFunction inv4(-x0+(hmin - Delta));
+    RealScalarFunction inv4(-x0+(hmin - Delta));
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton

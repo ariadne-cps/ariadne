@@ -39,7 +39,7 @@ typedef unsigned int uint;
 void
 solve_all(Set< Vector<Interval> >& r,
           const SolverInterface& s,
-          const VectorFunction& f,
+          const RealVectorFunction& f,
           const Vector<Interval>& ix)
 {
     uint verbosity=s.verbosity;
@@ -306,7 +306,7 @@ newton_implicit(const VectorTaylorFunction& f)
 
 namespace Ariadne {
 
-VectorTaylorFunction evaluate(const VectorFunction& f,const VectorTaylorFunction& x) {
+VectorTaylorFunction evaluate(const RealVectorFunction& f,const VectorTaylorFunction& x) {
     for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
     Vector<TaylorModel> m(x.size());
     for(uint i=0; i!=m.size(); ++i) { m[i]=x[i].model(); }
@@ -354,7 +354,7 @@ class DifferenceFunction
     : public VectorFunctionTemplate<DifferenceFunction>
 {
   public:
-    DifferenceFunction(const VectorFunction& f) : fptr(f.clone()) { }
+    DifferenceFunction(const RealVectorFunction& f) : fptr(f.clone()) { }
     virtual DifferenceFunction* clone() const { return new DifferenceFunction(*this); }
     virtual uint result_size() const { return fptr->result_size(); }
     virtual uint argument_size() const { return fptr->argument_size(); }
@@ -362,7 +362,7 @@ class DifferenceFunction
     template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
     template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
   private:
-    boost::shared_ptr<VectorFunction> fptr;
+    boost::shared_ptr<RealVectorFunction> fptr;
 };
 */
 
@@ -374,7 +374,7 @@ SolverBase::SolverBase(double max_error, uint max_steps)
 
 
 Vector<Interval>
-SolverBase::solve(const VectorFunction& f,
+SolverBase::solve(const RealVectorFunction& f,
                   const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
@@ -384,7 +384,7 @@ SolverBase::solve(const VectorFunction& f,
 }
 
 Set< Vector<Interval> >
-SolverBase::solve_all(const VectorFunction& f,
+SolverBase::solve_all(const RealVectorFunction& f,
                       const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
@@ -395,7 +395,7 @@ SolverBase::solve_all(const VectorFunction& f,
 
 
 Vector<Interval>
-SolverBase::zero(const VectorFunction& f,
+SolverBase::zero(const RealVectorFunction& f,
                  const Vector<Interval>& ix) const
 {
     const double& e=this->maximum_error();
@@ -437,7 +437,7 @@ SolverBase::zero(const VectorFunction& f,
 
 
 Vector<Interval>
-SolverBase::fixed_point(const VectorFunction& f, const Vector<Interval>& pt) const
+SolverBase::fixed_point(const RealVectorFunction& f, const Vector<Interval>& pt) const
 {
     ARIADNE_NOT_IMPLEMENTED;
     //return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
@@ -445,7 +445,7 @@ SolverBase::fixed_point(const VectorFunction& f, const Vector<Interval>& pt) con
 
 
 VectorTaylorFunction
-SolverBase::implicit(const VectorFunction& f,
+SolverBase::implicit(const RealVectorFunction& f,
                       const Vector<Interval>& ip,
                       const Vector<Interval>& ix) const
 {
@@ -501,11 +501,11 @@ SolverBase::implicit(const VectorFunction& f,
 
 
 ScalarTaylorFunction
-SolverBase::implicit(const ScalarFunction& f,
+SolverBase::implicit(const RealScalarFunction& f,
                       const Vector<Interval>& ip,
                       const Interval& ix) const
 {
-    VectorTaylorFunction res=this->implicit(VectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
+    VectorTaylorFunction res=this->implicit(RealVectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
     return res[0];
 }
 
@@ -513,7 +513,7 @@ SolverBase::implicit(const ScalarFunction& f,
 
 
 Vector<Interval>
-IntervalNewtonSolver::step(const VectorFunction& f,
+IntervalNewtonSolver::step(const RealVectorFunction& f,
                            const Vector<Interval>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -535,7 +535,7 @@ IntervalNewtonSolver::step(const VectorFunction& f,
 }
 
 Vector<Interval>
-KrawczykSolver::step(const VectorFunction& f,
+KrawczykSolver::step(const RealVectorFunction& f,
                      const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -561,7 +561,7 @@ KrawczykSolver::step(const VectorFunction& f,
 
 
 Vector<Interval>
-FactoredKrawczykSolver::step(const VectorFunction& f,
+FactoredKrawczykSolver::step(const RealVectorFunction& f,
                              const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -588,7 +588,7 @@ FactoredKrawczykSolver::step(const VectorFunction& f,
 
 
 VectorTaylorFunction
-IntervalNewtonSolver::implicit_step(const VectorFunction& f,
+IntervalNewtonSolver::implicit_step(const RealVectorFunction& f,
                             const VectorTaylorFunction& p,
                             const VectorTaylorFunction& x) const
 {
@@ -596,7 +596,7 @@ IntervalNewtonSolver::implicit_step(const VectorFunction& f,
 }
 
 VectorTaylorFunction
-KrawczykSolver::implicit_step(const VectorFunction& f,
+KrawczykSolver::implicit_step(const RealVectorFunction& f,
                               const VectorTaylorFunction& p,
                               const VectorTaylorFunction& x) const
 {
@@ -630,13 +630,13 @@ KrawczykSolver::implicit_step(const VectorFunction& f,
 
 
 ScalarTaylorFunction
-IntervalNewtonSolver::implicit(const ScalarFunction& f,
+IntervalNewtonSolver::implicit(const RealScalarFunction& f,
                                const Vector<Interval>& ip,
                                const Interval& ix) const
 {
     ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", ip="<<ip<<", ix="<<ix<<"\n");
     const uint n=ip.size();
-    ScalarFunction df=f.derivative(n);
+    RealScalarFunction df=f.derivative(n);
 
     Vector<Interval> mp=midpoint(ip);
     Interval dfmpix=df(join(mp,ix));

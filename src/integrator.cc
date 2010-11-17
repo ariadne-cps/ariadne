@@ -47,7 +47,7 @@ template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const
 
 
 Pair<Float,IntervalVector>
-IntegratorBase::flow_bounds(const VectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
 {
 
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
@@ -129,7 +129,7 @@ IntegratorBase::flow_bounds(const VectorFunction& vf, const IntervalVector& dx, 
 
 
 VectorTaylorFunction
-IntegratorBase::flow(const VectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
+IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
 {
     const uint n=dx0.size(); // Dimension of the state space
     VectorTaylorFunction flow=VectorTaylorFunction::identity(dx0);
@@ -149,7 +149,7 @@ IntegratorBase::flow(const VectorFunction& vf, const IntervalVector& dx0, const 
 
 
 VectorTaylorFunction
-IntegratorBase::flow(const VectorFunction& vf, const IntervalVector& dx0, const Interval& dt) const
+IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, const Interval& dt) const
 {
     Real dtl=Real(dt.lower());
     VectorTaylorFunction evolve=this->flow(vf,dx0,dtl);
@@ -168,7 +168,7 @@ IntegratorBase::flow(const VectorFunction& vf, const IntervalVector& dx0, const 
 
 
 VectorTaylorFunction
-IntegratorBase::flow_step(const VectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+IntegratorBase::flow_step(const RealVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
 {
     Float h;
     IntervalVector bx;
@@ -177,7 +177,7 @@ IntegratorBase::flow_step(const VectorFunction& vf, const IntervalVector& dx, co
 }
 
 VectorTaylorFunction
-TaylorIntegrator::flow_step(const VectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
 {
     ARIADNE_LOG(2,"f="<<f<<" dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();

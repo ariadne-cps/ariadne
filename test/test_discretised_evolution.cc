@@ -99,9 +99,9 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the vector field
     Real a=1.5; Real b=0.375;
-    ScalarFunction x=ScalarFunction::variable(2,0);
-    ScalarFunction y=ScalarFunction::variable(2,1);
-    VectorFunction henon=join(a-x*x+b*y,x);
+    RealScalarFunction x=RealScalarFunction::variable(2,0);
+    RealScalarFunction y=RealScalarFunction::variable(2,1);
+    RealVectorFunction henon=join(a-x*x+b*y,x);
     cout << "henon=" << henon << endl;
     IteratedMap system(henon);
 
@@ -293,10 +293,10 @@ void TestDiscretisedEvolution::test_hybrid_time() const
 
     // Set up the vector field
     Real a=1.5; Real b=0.375;
-    ScalarFunction zero=ScalarFunction::constant(2,0.0);
-    ScalarFunction one=ScalarFunction::constant(2,1.0);
-    ScalarFunction x=ScalarFunction::coordinate(2,0);
-    ScalarFunction y=ScalarFunction::coordinate(2,1);
+    RealScalarFunction zero=RealScalarFunction::constant(2,0.0);
+    RealScalarFunction one=RealScalarFunction::constant(2,1.0);
+    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction y=RealScalarFunction::coordinate(2,1);
 
     MonolithicHybridAutomaton ha("Decay");
     ha.new_mode(location,(one,-y));

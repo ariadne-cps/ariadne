@@ -40,8 +40,11 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Polynomial;
 
-class ScalarFunction;
-class VectorFunction;
+template<class X> class ScalarFunction;
+typedef ScalarFunction<Real> RealScalarFunction;
+template<class X> class VectorFunction;
+typedef VectorFunction<Real> RealVectorFunction;
+
 class MultiIndex;
 class TaylorModel;
 class ScalarTaylorFunction;
@@ -65,7 +68,7 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const Vector<Interv
 ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const Vector<Interval>& d);
 
 // Compose with an expression.
-ScalarTaylorFunction compose(const ScalarFunction& x, const VectorTaylorFunction& y);
+ScalarTaylorFunction compose(const RealScalarFunction& x, const VectorTaylorFunction& y);
 
 // Substitute \a h into the \a k<sup>th</sup> argument of \a f.
 ScalarTaylorFunction substitute(const ScalarTaylorFunction& f, uint k, const ScalarTaylorFunction& h);
@@ -93,11 +96,11 @@ ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k);
 // Implicit function solver; solves f(x,h(x))=0 on dom1(f)
 ScalarTaylorFunction implicit(const ScalarTaylorFunction& f);
 // Implicit function solver solves f(g(x),h(x))=0 on dom(g)
-ScalarTaylorFunction implicit(const ScalarFunction& f, const VectorTaylorFunction& g);
+ScalarTaylorFunction implicit(const RealScalarFunction& f, const VectorTaylorFunction& g);
 // Implicit function solver solves f(x,h(x))=0 on d
-ScalarTaylorFunction implicit(const ScalarFunction& f, const Vector<Interval>& d);
+ScalarTaylorFunction implicit(const RealScalarFunction& f, const Vector<Interval>& d);
 
-ScalarTaylorFunction crossing_time(const ScalarFunction& g, const VectorFunction& f, const Vector<Interval>& d);
+ScalarTaylorFunction crossing_time(const RealScalarFunction& g, const RealVectorFunction& f, const Vector<Interval>& d);
 
 class VectorTaylorFunctionElementReference;
 
@@ -148,7 +151,7 @@ class ScalarTaylorFunction
     explicit ScalarTaylorFunction(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the expression \a f.
-    explicit ScalarTaylorFunction(const DomainType& d, const ScalarFunction& f);
+    explicit ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the polynomial \a p.
     explicit ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the interval polynomial \a p.
@@ -221,7 +224,7 @@ class ScalarTaylorFunction
     //! \brief A polynomial representation.
     Polynomial<Interval> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
-    ScalarFunction function() const;
+    RealScalarFunction function() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) { this->_model.set_error(ne); }
@@ -631,20 +634,20 @@ VectorTaylorFunction restrict(const VectorTaylorFunction&, const Vector<Interval
 bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
 bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction intersection(const VectorTaylorFunction&, const VectorTaylorFunction&);
-ScalarTaylorFunction compose(const ScalarFunction&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const RealScalarFunction&, const VectorTaylorFunction&);
 ScalarTaylorFunction compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
-VectorTaylorFunction compose(const VectorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const RealVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
 VectorTaylorFunction implicit(const VectorTaylorFunction&);
-ScalarTaylorFunction implicit(const ScalarFunction&, const VectorTaylorFunction&);
+ScalarTaylorFunction implicit(const RealScalarFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
 VectorTaylorFunction flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
-VectorTaylorFunction flow(const VectorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
+VectorTaylorFunction flow(const RealVectorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 VectorTaylorFunction parameterised_flow(const VectorTaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 Float norm(const ScalarTaylorFunction& f);
 Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-Float distance(const VectorTaylorFunction& f1, const VectorFunction& f2);
+Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2);
 
 
 Interval unchecked_evaluate(const ScalarTaylorFunction&, const Vector<Interval>&);
@@ -692,11 +695,11 @@ class VectorTaylorFunction {
 
     /*! \brief Construct from a domain and a function. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const VectorFunction& function);
+                   const RealVectorFunction& function);
 
     /*! \brief Construct from a domain, a function, and accuracy paramters. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const VectorFunction& function,
+                   const RealVectorFunction& function,
                    shared_ptr<TaylorModel::Accuracy> accuracy_ptr);
 
     /*! \brief Construct from a domain and a polynomial. */
@@ -793,7 +796,7 @@ class VectorTaylorFunction {
     /*! \brief The maximum roundoff/truncation error of the components. */
     Float error() const;
     //! \brief A multivalued function equal to the model on the domain.
-    VectorFunction function() const;
+    RealVectorFunction function() const;
 
     /*! \brief Truncate terms higher than \a bd. */
     VectorTaylorFunction& truncate(const MultiIndexBound& bd);
@@ -847,7 +850,7 @@ class VectorTaylorFunction {
     friend VectorTaylorFunction operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f);
 
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend VectorTaylorFunction compose(const VectorFunction& f, const VectorTaylorFunction& g);
+    friend VectorTaylorFunction compose(const RealVectorFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend ScalarTaylorFunction compose(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
@@ -909,7 +912,7 @@ VectorTaylorFunction extend(const VectorTaylorFunction& f, const Vector<Interval
 // The argument size of the result is the same as that of \a e, and must be either the same as that of \a f, or one less.
 VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& e);
 // Compose a vector function with a Taylor function.
-VectorTaylorFunction compose(const VectorFunction& f, const VectorTaylorFunction& e);
+VectorTaylorFunction compose(const RealVectorFunction& f, const VectorTaylorFunction& e);
 
 // Substitute \a h into the \a k<sup>th</sup> argument of \a f.
 VectorTaylorFunction substitute(const VectorTaylorFunction& f, uint k, const ScalarTaylorFunction& h);

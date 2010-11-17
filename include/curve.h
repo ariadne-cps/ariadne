@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file curve.h
  *  \brief A arbitraty curve in Euclidean space.
  */
@@ -36,14 +36,14 @@
 #include "graphics_interface.h"
 
 namespace Ariadne {
-  
-    
+
+
 template<class X> class Vector;
-    
+
 class Point;
 class Box;
 
-  
+
 // Forward declarations for friends
 class CurveInterface;
 
@@ -60,7 +60,7 @@ class CurveInterface
     virtual uint dimension() const = 0;
     /*! \brief The smoothness of the curve. */
     virtual ushort smoothness() const = 0;
-  
+
     /*! \brief The point on the curve at a parameter value. */
     virtual Point value(const Float& s) const = 0;
     /*! \brief The tangent vector to the curve at a parameter value. */
@@ -69,10 +69,10 @@ class CurveInterface
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
-    
+
 inline std::ostream& operator<<(std::ostream& os, const CurveInterface& c) {
     return c.write(os); }
-    
+
 
 
 /*! \brief A curve in Euclidean space
@@ -84,7 +84,7 @@ class Curve
     /*! \brief Destructor. */
     virtual ~Curve();
     /*! \brief Constructor. */
-    Curve(const VectorFunction& f);
+    Curve(const RealVectorFunction& f);
     /*! \brief Copy constructor. */
     Curve(const Curve& c);
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -93,7 +93,7 @@ class Curve
     virtual uint dimension() const;
     /*! \brief The smoothness of the curve. */
     virtual ushort smoothness() const;
-  
+
     /*! \brief The value at a point. */
     virtual Point value(const Float& s) const;
     /*! \brief The tangent at a point. */
@@ -102,38 +102,38 @@ class Curve
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;
   private:
-    VectorFunction _function;
+    RealVectorFunction _function;
 };
-    
-  
+
+
 
 /*!\brief A line segment in Euclidean space. */
-class InterpolatedCurve 
+class InterpolatedCurve
     : public DrawableInterface
 {
   public:
     typedef std::map< Float, Point >::const_iterator const_iterator;
-  
+
   public:
     /*! \brief Create an empty curve. */
     InterpolatedCurve() : _points() { }
     /*! \brief Create a curve with a single point \a pt at parameter value 0. */
-    InterpolatedCurve(const Point& pt) 
+    InterpolatedCurve(const Point& pt)
         : _points() { this->insert(0,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(double s, const Point& pt) 
+    InterpolatedCurve(double s, const Point& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(const Float& s, const Point& pt) 
+    InterpolatedCurve(const Float& s, const Point& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
-    InterpolatedCurve(const Point& pt0, const Point& pt1) 
+    InterpolatedCurve(const Point& pt0, const Point& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     void insert(const Float& s, const Point& pt) {
         if(!this->_points.empty()) { ARIADNE_ASSERT(pt.dimension()==this->dimension()); }
         this->_points.insert(std::pair< Float, Point >(s,pt)); }
-       
+
     /*! \brief The number of segments in the curve. */
     size_t size() const { return this->_points.size(); }
     /*! \brief The dimension of the Euclidean space the line segment lies in. */
@@ -161,7 +161,7 @@ class InterpolatedCurve
 
 inline
 std::ostream& operator<<(std::ostream& os, const InterpolatedCurve& curve) {
-    return os << "InterpolatedCurve( size=" << curve.size() << ", points=" << curve._points << " )"; 
+    return os << "InterpolatedCurve( size=" << curve.size() << ", points=" << curve._points << " )";
 }
 
 

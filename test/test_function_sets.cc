@@ -47,8 +47,8 @@ class TestConstrainedImageSet
     }
 
     void test_constructor() {
-        List<ScalarFunction> s=ScalarFunction::coordinates(3);
-        List<ScalarFunction> x=ScalarFunction::coordinates(2);
+        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
         Box d(3,Interval(-1,+2));
         ConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
@@ -58,9 +58,9 @@ class TestConstrainedImageSet
     }
 
     void test_geometry() {
-        List<ScalarFunction> p=ScalarFunction::coordinates(1);
-        List<ScalarFunction> s=ScalarFunction::coordinates(3);
-        List<ScalarFunction> x=ScalarFunction::coordinates(2);
+        List<RealScalarFunction> p=RealScalarFunction::coordinates(1);
+        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
         // Test the polytope
         ConstrainedImageSet polytope((Interval(-2,+2),Interval(-2,+2)),(x[0],x[1]));
@@ -83,8 +83,8 @@ class TestConstrainedImageSet
 
         // Test whether the second iterate of the Henon map intersects a box
         Box d(2,Interval(-0.5,+0.5));
-        VectorFunction h((1.5-x[0]*x[0]-0.375*x[1],x[0]));
-        VectorFunction f=compose(h,h);
+        RealVectorFunction h((1.5-x[0]*x[0]-0.375*x[1],x[0]));
+        RealVectorFunction f=compose(h,h);
         ConstrainedImageSet set(d,f);
         //set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
@@ -95,8 +95,8 @@ class TestConstrainedImageSet
     }
 
     void test_disjoint() {
-        List<ScalarFunction> s=ScalarFunction::coordinates(3);
-        List<ScalarFunction> x=ScalarFunction::coordinates(2);
+        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
         Box d(3,Interval(-1.1,+2.1));
         ConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
@@ -126,8 +126,8 @@ class TestConstrainedImageSet
     }
 
     void test_approximation() {
-        List<ScalarFunction> s=ScalarFunction::coordinates(3);
-        List<ScalarFunction> x=ScalarFunction::coordinates(2);
+        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
         Box d(3,Interval(-1,+2));
         ConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
@@ -143,12 +143,12 @@ class TestConstrainedImageSet
 
 
     void test_split() {
-        ScalarFunction o=ScalarFunction::constant(3,1.0);
-        ScalarFunction s0=ScalarFunction::coordinate(3,0);
-        ScalarFunction s1=ScalarFunction::coordinate(3,1);
-        ScalarFunction s2=ScalarFunction::coordinate(3,2);
-        ScalarFunction x0=ScalarFunction::coordinate(2,0);
-        ScalarFunction x1=ScalarFunction::coordinate(2,1);
+        RealScalarFunction o=RealScalarFunction::constant(3,1.0);
+        RealScalarFunction s0=RealScalarFunction::coordinate(3,0);
+        RealScalarFunction s1=RealScalarFunction::coordinate(3,1);
+        RealScalarFunction s2=RealScalarFunction::coordinate(3,2);
+        RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
         Box d(3,Interval(-1,+1));
         ConstrainedImageSet set(d,(s0,s1+0.5*s2*s2));
         set.new_parameter_constraint(s0+0.75*s1+s2<=0.0);
@@ -164,10 +164,10 @@ class TestConstrainedImageSet
         make_lpair(subset11,subset12)=subset1.split(0);
         make_lpair(subset21,subset22)=subset2.split(0);
         ARIADNE_TEST_PRINT(subset11);
-        subset11.apply(VectorFunction((x0+2.5,x1)));
+        subset11.apply(RealVectorFunction((x0+2.5,x1)));
         ARIADNE_TEST_PRINT(subset11);
 
-        set.apply(VectorFunction((x0-2.5,x1)));
+        set.apply(RealVectorFunction((x0-2.5,x1)));
         Figure figure;
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
         figure.set_fill_colour(1.0,1.0,1.0);
@@ -187,7 +187,7 @@ class TestConstrainedImageSet
 
     void test_affine_approximation() {
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
-        List<ScalarFunction> s=ScalarFunction::coordinates(2);
+        List<RealScalarFunction> s=RealScalarFunction::coordinates(2);
         Box d(2, -2.0,1.0, 0.0,2.0);
         ConstrainedImageSet set(d,(s[0],s[1]));
         set.new_parameter_constraint(3*s[0]+s[1]<=1);
@@ -250,10 +250,10 @@ class TestConstrainedImageSet
     }
 
     void test_draw() {
-        ScalarFunction s=ScalarFunction::coordinate(2,0);
-        ScalarFunction t=ScalarFunction::coordinate(2,1);
-        ScalarFunction x=ScalarFunction::coordinate(2,0);
-        ScalarFunction y=ScalarFunction::coordinate(2,1);
+        RealScalarFunction s=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction t=RealScalarFunction::coordinate(2,1);
+        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         uint acc = 2u;
 
         //test_draw("ellipse",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);

@@ -45,7 +45,7 @@ Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 ScalarTaylorFunction t(Vector<Interval> d, uint j) { return ScalarTaylorFunction::variable(d,j); }
 
 namespace Ariadne {
-std::pair<Float, Vector<Interval> > flow_bounds(VectorFunction const&,Vector<Interval> const&,Float const&);
+std::pair<Float, Vector<Interval> > flow_bounds(RealVectorFunction const&,Vector<Interval> const&,Float const&);
 typedef VectorUserFunction<Henon> HenonFunction;
 }
 
@@ -228,11 +228,11 @@ void TestScalarTaylorFunction::test_conversion() {
     Vector<Interval> D(2, -0.5,0.5, -1.0,2.0);
     Vector<Float> pt(2, -0.25,0.25);
     Vector<Interval> ipt(pt);
-    VectorFunction x=VectorFunction::identity(2);
+    RealVectorFunction x=RealVectorFunction::identity(2);
 
-    ScalarFunction f=(1-x[0]*x[0]-0.5*x[1]);
+    RealScalarFunction f=(1-x[0]*x[0]-0.5*x[1]);
     ScalarTaylorFunction tf(D,f);
-    ScalarFunction cf=tf.function();
+    RealScalarFunction cf=tf.function();
 
     ARIADNE_TEST_PRINT(f);
     ARIADNE_TEST_PRINT(tf);
@@ -665,11 +665,11 @@ void TestVectorTaylorFunction::test_conversion()
     Vector<Interval> D(2, -0.5,0.5, -1.0,2.0);
     Vector<Float> pt(2, -0.25,0.25);
     Vector<Interval> ipt(pt);
-    VectorFunction x=VectorFunction::identity(2);
+    RealVectorFunction x=RealVectorFunction::identity(2);
 
-    VectorFunction h=VectorFunction((1-x[0]*x[0]-0.5*x[1],x[0]+Real(0)));
+    RealVectorFunction h=RealVectorFunction((1-x[0]*x[0]-0.5*x[1],x[0]+Real(0)));
      VectorTaylorFunction th(D,h);
-    VectorFunction ch=th.function();
+    RealVectorFunction ch=th.function();
 
     ARIADNE_TEST_PRINT(h);
     ARIADNE_TEST_PRINT(th);
@@ -688,10 +688,10 @@ void TestVectorTaylorFunction::test_conversion()
 // Regression test for domain with empty interior
 void TestVectorTaylorFunction::test_domain()
 {
-    ScalarFunction z=ScalarFunction::constant(2,0.0);
-    ScalarFunction o=ScalarFunction::constant(2,1.0);
-    ScalarFunction x0=ScalarFunction::coordinate(2,0);
-    ScalarFunction x1=ScalarFunction::coordinate(2,1);
+    RealScalarFunction z=RealScalarFunction::constant(2,0.0);
+    RealScalarFunction o=RealScalarFunction::constant(2,1.0);
+    RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 
     Vector<Interval> D1(2, -1.0,1.0, -1.0,1.0);
     VectorTaylorFunction t1(D1, (o,x0+x1));

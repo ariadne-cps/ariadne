@@ -34,7 +34,7 @@ namespace Ariadne {
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
 class ScalarFunctionTemplate
-    : public ScalarFunctionInterface
+    : public ScalarFunctionInterface<Real>
 {
   private:
     template<class R, class A> void _base_compute(R& r, const A& a) const {
@@ -69,7 +69,7 @@ class ScalarFunctionTemplate
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
 class VectorFunctionTemplate
-    : public VectorFunctionInterface
+    : public VectorFunctionInterface<Real>
 {
   private:
     template<class R, class A> void _base_compute(R& r, const A& a) const {

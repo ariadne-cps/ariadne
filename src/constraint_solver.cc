@@ -88,7 +88,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
 
     // Convert constraints to a vector function
     Box codomain(constraints.size());
-    VectorFunction function(constraints.size(),domain.size());
+    RealVectorFunction function(constraints.size(),domain.size());
     for(uint i=0; i!=constraints.size(); ++i) {
         function[i]=constraints[i].function();
         codomain[i]=constraints[i].bounds();
@@ -113,7 +113,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
     Point slack(l); // The slack between the test point and the violated constraints
 
     Float& t=violation; Point& x=multipliers; Point& y=point; Point& z=slack; // Aliases for the main quantities used
-    const Box& d=domain; const VectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
+    const Box& d=domain; const RealVectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
 
     point=midpoint(d);
     for(uint k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
@@ -142,14 +142,14 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarFunction xg=ScalarFunction::constant(m,0);
+        RealScalarFunction xg=RealScalarFunction::constant(m,0);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
             xg = xg - Real(x[j]-x[n+j])*fn[j];
             cnst += (c[j].upper()*x[j]-c[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - Real(x[2*n+i]-x[2*n+m+i])*ScalarFunction::coordinate(m,i);
+            xg = xg - Real(x[2*n+i]-x[2*n+m+i])*RealScalarFunction::coordinate(m,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = Real(cnst) + xg;
@@ -158,7 +158,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
         ScalarTaylorFunction txg(d,xg);
         ARIADNE_LOG(4,"    txg="<<txg.polynomial()<<"\n");
 
-        xg=ScalarFunction(txg.polynomial());
+        xg=RealScalarFunction(txg.polynomial());
         NonlinearConstraint constraint=(xg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
@@ -192,7 +192,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
 }
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const VectorFunction& function, const Box& codomain) const
+Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const RealVectorFunction& function, const Box& codomain) const
 {
     List<NonlinearConstraint> constraints;
     for(uint i=0; i!=codomain.size(); ++i) {
@@ -238,7 +238,7 @@ void ConstraintSolver::reduce(const List<NonlinearConstraint>& constraints, Box&
 
 void ConstraintSolver::hull_reduce(const NonlinearConstraint& constraint, Box& domain) const
 {
-    const ScalarFunction& function=constraint.function();
+    const RealScalarFunction& function=constraint.function();
     const Interval& bounds=constraint.bounds();
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -252,8 +252,8 @@ void ConstraintSolver::hull_reduce(const NonlinearConstraint& constraint, Box& d
 
 void ConstraintSolver::monotone_reduce(const NonlinearConstraint& constraint, Box& domain, uint variable) const
 {
-    const ScalarFunction& function=constraint.function();
-    ScalarFunction derivative=function.derivative(variable);
+    const RealScalarFunction& function=constraint.function();
+    RealScalarFunction derivative=function.derivative(variable);
     const Interval& bounds=constraint.bounds();
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
@@ -292,7 +292,7 @@ void ConstraintSolver::monotone_reduce(const NonlinearConstraint& constraint, Bo
 
 void ConstraintSolver::box_reduce(const NonlinearConstraint& constraint, Box& domain, uint variable) const
 {
-    const ScalarFunction& function=constraint.function();
+    const RealScalarFunction& function=constraint.function();
     const Interval& bounds=constraint.bounds();
 
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
@@ -353,7 +353,7 @@ Pair<Box,Box> ConstraintSolver::split(const List<NonlinearConstraint>& constrain
 }
 
 
-tribool ConstraintSolver::check_feasibility(const Box& d, const VectorFunction& f, const Box& c, const Point& y) const
+tribool ConstraintSolver::check_feasibility(const Box& d, const RealVectorFunction& f, const Box& c, const Point& y) const
 {
     for(uint i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

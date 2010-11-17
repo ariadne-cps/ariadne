@@ -36,39 +36,39 @@ namespace Ariadne {
 
 class NonlinearConstraint {
   public:
-    NonlinearConstraint(ScalarFunction const& f, Interval const& b) : _function(f), _bounds(b) { }
-    ScalarFunction const& function() const { return this->_function; }
+    NonlinearConstraint(RealScalarFunction const& f, Interval const& b) : _function(f), _bounds(b) { }
+    RealScalarFunction const& function() const { return this->_function; }
     Interval const& bounds() const { return this->_bounds; }
   private:
-    ScalarFunction _function;
+    RealScalarFunction _function;
     Interval _bounds;
 };
 
-inline NonlinearConstraint operator<=(const Float& c, const ScalarFunction& f) {
+inline NonlinearConstraint operator<=(const Float& c, const RealScalarFunction& f) {
     return NonlinearConstraint(f,Interval(c,inf<Float>()));
 }
 
-inline NonlinearConstraint operator<=(const ScalarFunction& f, const Float& c) {
+inline NonlinearConstraint operator<=(const RealScalarFunction& f, const Float& c) {
     return NonlinearConstraint(f,Interval(-inf<Float>(),c));
 }
 
-inline NonlinearConstraint operator>=(const ScalarFunction& f, const Float& c) {
+inline NonlinearConstraint operator>=(const RealScalarFunction& f, const Float& c) {
     return NonlinearConstraint(f,Interval(c,+inf<Float>()));
 }
 
-inline NonlinearConstraint operator==(const ScalarFunction& f, double c) {
+inline NonlinearConstraint operator==(const RealScalarFunction& f, double c) {
     return NonlinearConstraint(f,Interval(c));
 }
 
-inline NonlinearConstraint operator==(const ScalarFunction& f, const Real& c) {
+inline NonlinearConstraint operator==(const RealScalarFunction& f, const Real& c) {
     return NonlinearConstraint(f,Interval(c));
 }
 
-inline NonlinearConstraint operator==(const ScalarFunction& f, const Float& c) {
+inline NonlinearConstraint operator==(const RealScalarFunction& f, const Float& c) {
     return NonlinearConstraint(f,Interval(c));
 }
 
-inline NonlinearConstraint operator==(const ScalarFunction& f, const Interval& c) {
+inline NonlinearConstraint operator==(const RealScalarFunction& f, const Interval& c) {
     return NonlinearConstraint(f,Interval(c));
 }
 

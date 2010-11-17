@@ -197,7 +197,7 @@ void HybridEnclosure::new_parameter(Interval ivl)
     }
 }
 
-void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarFunction constraint) {
+void HybridEnclosure::new_invariant(DiscreteEvent event, RealScalarFunction constraint) {
     ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_set._function);
     Interval range=constraint_wrt_params.evaluate(this->_set._domain);
     if(range.upper()>=0.0) {
@@ -215,17 +215,17 @@ void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarIntervalFunction 
     }
 }
 
-void HybridEnclosure::new_activation(DiscreteEvent event, ScalarFunction constraint) {
+void HybridEnclosure::new_activation(DiscreteEvent event, RealScalarFunction constraint) {
     //this->_constraint_events.push_back((this->_events,event));
     this->_set._constraints.append(compose(-constraint,this->_set._function));
 }
 
-void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint) {
+void HybridEnclosure::new_guard(DiscreteEvent event, RealScalarFunction constraint) {
     //this->_constraint_events.push_back((this->_events,event));
     this->_set._equations.append(compose(constraint,this->_set._function));
 }
 
-void HybridEnclosure::new_guard(DiscreteEvent event, ScalarFunction constraint, ScalarIntervalFunction crossing_time) {
+void HybridEnclosure::new_guard(DiscreteEvent event, RealScalarFunction constraint, ScalarIntervalFunction crossing_time) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -256,7 +256,7 @@ void HybridEnclosure::new_state_constraint(DiscreteEvent event, NonlinearConstra
 
 
 
-void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, VectorFunction map)
+void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealVectorFunction map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", target="<<target<<", map="<<map);
     this->_events.append(event);
@@ -332,7 +332,7 @@ void HybridEnclosure::bound_time(Real tmax) {
     }
 }
 
-void HybridEnclosure::bound_time(ScalarFunction tmax) {
+void HybridEnclosure::bound_time(RealScalarFunction tmax) {
     this->_set._constraints.append(this->_time-ScalarIntervalFunction(this->_set._domain,tmax));
 }
 
@@ -345,7 +345,7 @@ void HybridEnclosure::set_time(Real time)
     this->_set._equations.append(this->_time-Interval(time));
 }
 
-void HybridEnclosure::set_time(ScalarFunction time)
+void HybridEnclosure::set_time(RealScalarFunction time)
 {
     this->_set._equations.append(this->_time-ScalarIntervalFunction(this->_set._domain,time));
 }

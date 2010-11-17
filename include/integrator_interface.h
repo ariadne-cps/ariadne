@@ -37,7 +37,9 @@ class Float;
 class Interval;
 template<class X> class Vector;
 typedef Vector<Interval> IntervalVector;
-class VectorFunction;
+
+template<class X> class VectorFunction;
+typedef VectorFunction<Real> RealVectorFunction;
 class VectorTaylorFunction;
 
 //! \ingroup SolverModule EvaluationModule
@@ -60,25 +62,25 @@ class IntegratorInterface
     //! \brief Compute a pair \a (h,B) consisting of a bound \a B for the flow
     //! starting in the \a state_domain for time step \a h.
     virtual Pair<Float,IntervalVector>
-    flow_bounds(const VectorFunction& vector_field,
+    flow_bounds(const RealVectorFunction& vector_field,
                 const IntervalVector& state_domain,
                 const Float& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is a time step based on \a suggested_time_step.
     virtual VectorTaylorFunction
-    flow_step(const VectorFunction& vector_field,
+    flow_step(const RealVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
     virtual VectorTaylorFunction
-    flow(const VectorFunction& vector_field,
+    flow(const RealVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& time) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
     virtual VectorTaylorFunction
-    flow(const VectorFunction& vector_field,
+    flow(const RealVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Interval& time_domain) const = 0;
 

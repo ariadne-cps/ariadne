@@ -194,7 +194,7 @@ class HybridEvolverBase
     virtual
     void
     _evolution_step(EvolutionData& evolution_data,
-                    VectorFunction const& dynamic,
+                    RealVectorFunction const& dynamic,
                     Map<DiscreteEvent,TransitionData> const& transitions,
                     Real const& final_time) const;
 
@@ -214,7 +214,7 @@ class HybridEvolverBase
 	//! box for the set, and \f$h\f$ is the step size actually used.
     virtual
     VectorIntervalFunction
-    _compute_flow(VectorFunction vector_field,
+    _compute_flow(RealVectorFunction vector_field,
                   Box const& initial_set,
                   const Float& maximum_step_size) const;
 
@@ -227,8 +227,8 @@ class HybridEvolverBase
 	//! compute.
 	virtual
     Set<DiscreteEvent>
-    _compute_active_events(VectorFunction const& dynamic,
-                           Map<DiscreteEvent,ScalarFunction> const& guards,
+    _compute_active_events(RealVectorFunction const& dynamic,
+                           Map<DiscreteEvent,RealScalarFunction> const& guards,
                            VectorIntervalFunction const& flow,
                            HybridEnclosure const& starting_set) const;
 
@@ -249,8 +249,8 @@ class HybridEvolverBase
     virtual
     Map<DiscreteEvent,CrossingData>
     _compute_crossings(Set<DiscreteEvent> const& active_events,
-                       VectorFunction const& dynamic,
-                       Map<DiscreteEvent,ScalarFunction> const& guards,
+                       RealVectorFunction const& dynamic,
+                       Map<DiscreteEvent,RealScalarFunction> const& guards,
                        VectorIntervalFunction const& flow,
                        HybridEnclosure const& initial_set) const;
 
@@ -329,7 +329,7 @@ class HybridEvolverBase
     virtual
     void
     _apply_guard_step(HybridEnclosure& set,
-                      VectorFunction const& dynamic,
+                      RealVectorFunction const& dynamic,
                       VectorIntervalFunction const& flow,
                       TimingData const& timing_data,
                       TransitionData const& transition_data,
@@ -399,7 +399,7 @@ class HybridEvolverBase
                           VectorIntervalFunction const& flow,
                           TimingData const& timing_data,
                           Map<DiscreteEvent,CrossingData> const& crossing_data,
-                          VectorFunction const& dynamic,
+                          RealVectorFunction const& dynamic,
                           Map<DiscreteEvent,TransitionData> const& transitions) const;
 
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
@@ -427,15 +427,15 @@ struct TransitionData
     EventKind event_kind;
     //! \brief The guard function of the event, the event being active when
     //! \f$g(x)\geq0\f$.
-    ScalarFunction guard_function;
+    RealScalarFunction guard_function;
     //! \brief The Lie derivative of the guard function along the flow.
-    ScalarFunction guard_flow_derivative_function;
+    RealScalarFunction guard_flow_derivative_function;
     //! \brief The target location of the transition.
 	DiscreteLocation target;
     //! \brief The reset function \f$x'=r(x)\f$ of the transition.
-	VectorFunction reset_function;
+	RealVectorFunction reset_function;
     //TransitionData() { }
-    //TransitionData(DiscreteLocation t, ScalarFunction g, VectorFunction r)
+    //TransitionData(DiscreteLocation t, RealScalarFunction g, RealVectorFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }
 };
 

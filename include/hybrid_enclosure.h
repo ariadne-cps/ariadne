@@ -47,8 +47,10 @@ namespace Ariadne {
 class Interval;
 template<class X> class Vector;
 template<class X> class LinearProgram;
-class ScalarFunction;
-class VectorFunction;
+template<class X> class ScalarFunction;
+typedef ScalarFunction<Real> RealScalarFunction;
+template<class X> class VectorFunction;
+typedef VectorFunction<Real> RealVectorFunction;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorConstrainedImageSet;
@@ -174,7 +176,7 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-    void apply_reset(DiscreteEvent e, DiscreteLocation q, VectorFunction r);
+    void apply_reset(DiscreteEvent e, DiscreteLocation q, RealVectorFunction r);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     void apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
@@ -190,11 +192,11 @@ class HybridEnclosure
     void set_time(Real tmax);
     //! \brief Set the time of evolution to \a omega.
     //! Corresponds to introducting the constraint \f$\tau(s) = \omega(s)\f$.
-    void set_time(ScalarFunction omega);
+    void set_time(RealScalarFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq \omega(s)\f$.
     void bound_time(ScalarIntervalFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq \omega(s)\f$.
-    void bound_time(ScalarFunction omega);
+    void bound_time(RealScalarFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}\f$.
     void bound_time(Real tmax);
 
@@ -217,16 +219,16 @@ class HybridEnclosure
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
     void new_parameter_constraint(DiscreteEvent e, NonlinearConstraint c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
-    void new_invariant(DiscreteEvent e, ScalarFunction c);
+    void new_invariant(DiscreteEvent e, RealScalarFunction c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
     void new_invariant(DiscreteEvent e, ScalarIntervalFunction c);
     //! \brief Introduces the new activation condition \f$g(x)\geq0\f$ for the event \a e.
-    void new_activation(DiscreteEvent e,ScalarFunction g);
+    void new_activation(DiscreteEvent e,RealScalarFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e.
     //! More precisely, the continuous dynamics is restricted to \f$c(x)\leq0\f$, and the event happens when \f$c(x)\geq0\f$.
-    void new_guard(DiscreteEvent e, ScalarFunction g);
+    void new_guard(DiscreteEvent e, RealScalarFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e, with computed crossing time \f$\tau(s)\f$.
-    void new_guard(DiscreteEvent e, ScalarFunction g, ScalarIntervalFunction ct);
+    void new_guard(DiscreteEvent e, RealScalarFunction g, ScalarIntervalFunction ct);
 
 
     //! \brief The dimension of the set.

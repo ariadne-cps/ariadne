@@ -44,10 +44,6 @@ namespace Ariadne {
 class Interval;
 template<class X> class Vector;
 template<class X> class LinearProgram;
-class ScalarFunction;
-class VectorFunction;
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
 class Box;
 class Grid;
 class GridTreeSet;

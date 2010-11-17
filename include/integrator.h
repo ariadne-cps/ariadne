@@ -54,27 +54,27 @@ class IntegratorBase
     double maximum_error() const  { return this->_maximum_error; }
 
     virtual Pair<Float,IntervalVector>
-    flow_bounds(const VectorFunction& vector_field,
+    flow_bounds(const RealVectorFunction& vector_field,
                 const IntervalVector& state_domain,
                 const Float& suggested_time_step) const;
 
     virtual VectorTaylorFunction
-    flow_step(const VectorFunction& vector_field,
+    flow_step(const RealVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& suggested_time_step) const;
 
     virtual VectorTaylorFunction
-    flow(const VectorFunction& vector_field,
+    flow(const RealVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& time) const;
 
     virtual VectorTaylorFunction
-    flow(const VectorFunction& vector_field,
+    flow(const RealVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Interval& time_domain) const;
 
     virtual VectorTaylorFunction
-    flow_step(const VectorFunction& vector_field,
+    flow_step(const RealVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& suggested_time_step,
               const IntervalVector& bounding_box) const = 0;
@@ -96,7 +96,7 @@ class TaylorIntegrator
     virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }
 
     virtual VectorTaylorFunction
-    flow_step(const VectorFunction& vector_field,
+    flow_step(const RealVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;

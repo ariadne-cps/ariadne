@@ -61,7 +61,7 @@ MonolithicHybridAutomaton::MonolithicHybridAutomaton(const String& name)
 
 void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
-                                    VectorFunction dynamic)
+                                    RealVectorFunction dynamic)
 {
     if(this->has_mode(location)) {
         ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
@@ -79,7 +79,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 void
 MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
                                          DiscreteEvent event,
-                                         ScalarFunction invariant,
+                                         RealScalarFunction invariant,
                                          EventKind kind)
 {
     if(!this->has_mode(location)) {
@@ -105,8 +105,8 @@ void
 MonolithicHybridAutomaton::new_transition(DiscreteLocation source,
                                           DiscreteEvent event,
                                           DiscreteLocation target,
-                                          VectorFunction reset,
-                                          ScalarFunction guard,
+                                          RealVectorFunction reset,
+                                          RealScalarFunction guard,
                                           EventKind kind)
 {
     if(!this->has_mode(source)) {
@@ -241,7 +241,7 @@ MonolithicHybridAutomaton::dimension(DiscreteLocation location) const
     return this->mode(location).dimension();
 }
 
-VectorFunction
+RealVectorFunction
 MonolithicHybridAutomaton::dynamic_function(DiscreteLocation location) const
 {
     return this->mode(location)._dynamic;
@@ -268,7 +268,7 @@ MonolithicHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent e
     else { return mode._transitions[event]._kind; }
 }
 
-ScalarFunction
+RealScalarFunction
 MonolithicHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const
 {
     ARIADNE_ASSERT(this->has_guard(location,event));
@@ -284,7 +284,7 @@ MonolithicHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) 
     return this->transition(source,event)._target;
 }
 
-VectorFunction
+RealVectorFunction
 MonolithicHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const
 {
     return this->transition(source,event)._reset;

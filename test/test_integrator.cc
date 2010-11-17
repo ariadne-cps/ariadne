@@ -44,17 +44,17 @@ class TestIntegrator
     typedef Vector<Interval> IntervalVector;
   private:
     scoped_ptr<IntegratorInterface> integrator;
-    ScalarFunction o,x,y,x0,y0,t;
+    RealScalarFunction o,x,y,x0,y0,t;
   public:
     TestIntegrator(const IntegratorInterface& i)
         : integrator(i.clone())
     {
-        o=ScalarFunction::constant(2,1.0);
-        x=ScalarFunction::coordinate(2,0);
-        y=ScalarFunction::coordinate(2,1);
-        x0=ScalarFunction::coordinate(3,0);
-        y0=ScalarFunction::coordinate(3,1);
-        t=ScalarFunction::coordinate(3,2);
+        o=RealScalarFunction::constant(2,1.0);
+        x=RealScalarFunction::coordinate(2,0);
+        y=RealScalarFunction::coordinate(2,1);
+        x0=RealScalarFunction::coordinate(3,0);
+        y0=RealScalarFunction::coordinate(3,1);
+        t=RealScalarFunction::coordinate(3,2);
     }
 
     int test() {
@@ -67,7 +67,7 @@ class TestIntegrator
     }
 
     void test_constant_derivative() {
-        VectorFunction f=(o*2,o*3);
+        RealVectorFunction f=(o*2,o*3);
         IntervalVector d=(Interval(0.0,1.0),Interval(-0.5,1.5));
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
@@ -80,7 +80,7 @@ class TestIntegrator
     }
 
     void test_quadratic_flow() {
-        VectorFunction f=(o,x);
+        RealVectorFunction f=(o,x);
         IntervalVector d=(Interval(0.0,1.0),Interval(-0.5,1.5));
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
@@ -93,7 +93,7 @@ class TestIntegrator
     }
 
     void test_linear() {
-        VectorFunction f=(x,-y);
+        RealVectorFunction f=(x,-y);
         IntervalVector d=(Interval(-0.25,0.25),Interval(-0.25,0.25));
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
@@ -106,7 +106,7 @@ class TestIntegrator
     };
 
     void test_spiral() {
-        VectorFunction f=(-0.5*x-y,x-0.5*y);
+        RealVectorFunction f=(-0.5*x-y,x-0.5*y);
         IntervalVector d=(Interval(0.75,1.25),Interval(-0.25,0.25));
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
@@ -120,7 +120,7 @@ class TestIntegrator
     };
 
     void test_logistic() {
-        VectorFunction f=(x*(o-x),o);
+        RealVectorFunction f=(x*(o-x),o);
         IntervalVector d=(Interval(0.25,0.5),Interval(-0.25,0.25));
         Float h=0.5;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);

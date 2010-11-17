@@ -94,8 +94,8 @@ void export_interior_point_solver()
 
 void export_constraint_solver()
 {
-    class_<NonlinearConstraint> nonlinear_constraint_class("NonlinearConstraint",init<ScalarFunction,Interval>());
-    nonlinear_constraint_class.def("__eq__",(NonlinearConstraint(*)(const ScalarFunction&,const Float&)) operator==);
+    class_<NonlinearConstraint> nonlinear_constraint_class("NonlinearConstraint",init<RealScalarFunction,Interval>());
+    nonlinear_constraint_class.def("__eq__",(NonlinearConstraint(*)(const RealScalarFunction&,const Float&)) operator==);
     nonlinear_constraint_class.def(self_ns::str(self));
 
 

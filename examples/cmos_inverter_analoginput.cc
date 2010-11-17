@@ -93,12 +93,12 @@ int main()
     /// Build the Hybrid System
 
     /// Coordinates
-    ScalarFunction t=ScalarFunction::coordinate(3,0); // Time
-    ScalarFunction vi=ScalarFunction::coordinate(3,1); // Input voltage, consequently gate-source voltage for the nMOS, while Vdd-vi is the gate-source voltage for the pMOS
-    ScalarFunction vo=ScalarFunction::coordinate(3,2); // Output voltage, consequently drain-source voltage for the nMOS, while Vdd-vo is the drain-source voltage for the pMOS
+    RealScalarFunction t=RealScalarFunction::coordinate(3,0); // Time
+    RealScalarFunction vi=RealScalarFunction::coordinate(3,1); // Input voltage, consequently gate-source voltage for the nMOS, while Vdd-vi is the gate-source voltage for the pMOS
+    RealScalarFunction vo=RealScalarFunction::coordinate(3,2); // Output voltage, consequently drain-source voltage for the nMOS, while Vdd-vo is the drain-source voltage for the pMOS
 
-    ScalarFunction zero=ScalarFunction::constant(3,0.0);
-    ScalarFunction one=ScalarFunction::constant(3,1.0);
+    RealScalarFunction zero=RealScalarFunction::constant(3,0.0);
+    RealScalarFunction one=RealScalarFunction::constant(3,1.0);
 
     /// Create a MonolithicHybridAutomaton object
     MonolithicHybridAutomaton inverter;
@@ -133,35 +133,35 @@ int main()
 
     /// Function for the behavior of the system in the nMOS linear mode, pMOS subthreshold mode (Vi >= Vth, Vo <= Vi-Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-    VectorFunction nl_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
+    RealVectorFunction nl_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
 
     /// Function for the behavior of the system in the nMOS saturation mode, pMOS subthreshold mode (Vi >= Vdd-Vth, Vo >= Vi-Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-    VectorFunction ns_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*((vi-Vth)*(vi-Vth))+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
+    RealVectorFunction ns_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*((vi-Vth)*(vi-Vth))+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
 
     /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS linear mode (Vi <= Vth, Vo >= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-    VectorFunction nt_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl*((vi-Vdd+Vth)*(vo-Vdd)-(vo-Vdd)*(vo-Vdd)/2)));
+    RealVectorFunction nt_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl*((vi-Vdd+Vth)*(vo-Vdd)-(vo-Vdd)*(vo-Vdd)/2)));
 
     /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS saturation mode (Vi <= Vth, Vo <= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-    VectorFunction nt_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction nt_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the nMOS linear mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vo <= Vi-Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-    VectorFunction nl_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction nl_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the nMOS saturation mode, pMOS linear mode (Vth <= Vi <= Vdd-Vth, Vo >= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-    VectorFunction ns_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction ns_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the nMOS saturation mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vi-Vth <= Vo <= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-    VectorFunction ns_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction ns_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the "rising" or "falling" support locations
     /// (t' = 0; Vi' = 0; Vo'=0 )
-    VectorFunction support_d((zero,zero,zero));
+    RealVectorFunction support_d((zero,zero,zero));
 
     /// Build the automaton
     inverter.new_mode(nt_pl,nt_pl_d);

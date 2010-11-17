@@ -112,9 +112,9 @@ void TestContinuousEvolution::test() const
 
     // Set up the vector field
     Real mu=0.5;
-    ScalarFunction x=ScalarFunction::coordinate(2,0);
-    ScalarFunction xp=ScalarFunction::coordinate(2,1);
-    VectorFunction vdp((x,mu*(1-x*x)*xp-x));
+    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction xp=RealScalarFunction::coordinate(2,1);
+    RealVectorFunction vdp((x,mu*(1-x*x)*xp-x));
 
     VectorField vanderpol(vdp);
 

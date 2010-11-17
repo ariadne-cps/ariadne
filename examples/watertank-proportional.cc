@@ -77,15 +77,15 @@ int main(int argc,char *argv[])
 
 
     // System variables
-    ScalarFunction x=ScalarFunction::coordinate(5,0); // water level
-    ScalarFunction y=ScalarFunction::coordinate(5,1); // valve level
-    ScalarFunction b=ScalarFunction::coordinate(5,2); // input pressure
-    ScalarFunction delta=ScalarFunction::coordinate(5,3); // sensor error
-    ScalarFunction t=ScalarFunction::coordinate(5,4); // time
+    RealScalarFunction x=RealScalarFunction::coordinate(5,0); // water level
+    RealScalarFunction y=RealScalarFunction::coordinate(5,1); // valve level
+    RealScalarFunction b=RealScalarFunction::coordinate(5,2); // input pressure
+    RealScalarFunction delta=RealScalarFunction::coordinate(5,3); // sensor error
+    RealScalarFunction t=RealScalarFunction::coordinate(5,4); // time
 
     // Constants
-    ScalarFunction one=ScalarFunction::constant(5,1.0);
-    ScalarFunction zero=ScalarFunction::constant(5,0.0);
+    RealScalarFunction one=RealScalarFunction::constant(5,1.0);
+    RealScalarFunction zero=RealScalarFunction::constant(5,0.0);
 
     /// Build the Hybrid System
 
@@ -105,9 +105,9 @@ int main(int argc,char *argv[])
 
     /// Create the dynamics
 
-    VectorFunction zerosaturated_d((-a*x+b*y,-y/r,zero,zero,one));
-    VectorFunction notsaturated_d((-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one));
-    VectorFunction onesaturated_d((-a*x+b*y,(1-y)/r,zero,zero,one));
+    RealVectorFunction zerosaturated_d((-a*x+b*y,-y/r,zero,zero,one));
+    RealVectorFunction notsaturated_d((-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one));
+    RealVectorFunction onesaturated_d((-a*x+b*y,(1-y)/r,zero,zero,one));
 
     cout << "zero-saturated dynamic = " << zerosaturated_d << "\n\n";
     cout << "not-saturated dynamic = " << notsaturated_d << "\n\n";

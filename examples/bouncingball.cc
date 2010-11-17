@@ -38,8 +38,8 @@ int main(int argc, const char* argv[])
     Real g = 9.8;
 
     /// Set the position and velocity functions.
-    ScalarFunction x=ScalarFunction::coordinate(2,0);
-    ScalarFunction v=ScalarFunction::coordinate(2,1);
+    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction v=RealScalarFunction::coordinate(2,1);
 
     /// Build the Hybrid System
 
@@ -55,16 +55,16 @@ int main(int argc, const char* argv[])
     cout << "event = " << bounce << endl << endl;
 
     /// Create the dynamics
-    VectorFunction dynamic((v,-g));
+    RealVectorFunction dynamic((v,-g));
     cout << "dynamic = " << dynamic << endl << endl;
 
     /// Create the resets
-    VectorFunction reset((x,-a*v));
+    RealVectorFunction reset((x,-a*v));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.
     /// Guards are true when g(x) > 0
-    ScalarFunction guard(-x);
+    RealScalarFunction guard(-x);
     cout << "guard=" << guard << endl << endl;
 
     /// Build the automaton

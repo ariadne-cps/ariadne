@@ -70,17 +70,17 @@ TaylorImageSet::TaylorImageSet(uint d, uint ng)
 TaylorImageSet::TaylorImageSet(const RealVectorFunction& f, const Vector<Interval>& d)
     : _models(f.result_size())
 {
-    Vector<TaylorModel> x=TaylorModel::scalings(d);
+    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
     this->_models=f.evaluate(x);
 }
 
 TaylorImageSet::TaylorImageSet(const Vector<Interval>& bx)
-    : _models(TaylorModel::scalings(bx))
+    : _models(IntervalTaylorModel::scalings(bx))
 {
 }
 
 
-TaylorImageSet::TaylorImageSet(const Vector<TaylorModel>& tvs)
+TaylorImageSet::TaylorImageSet(const Vector<IntervalTaylorModel>& tvs)
     : _models(tvs)
 {
     if(this->_models.size()>0) {
@@ -96,7 +96,7 @@ TaylorImageSet::TaylorImageSet(const Vector< Expansion<Float> >& f, const Vector
 {
     ARIADNE_ASSERT(f.size()==e.size());
     if(f.size()>0) {
-        for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorModel(f[i],e[i]); }
+        for(uint i=0; i!=f.size(); ++i) { (*this)[i]=IntervalTaylorModel(f[i],e[i]); }
     }
 }
 
@@ -107,7 +107,7 @@ TaylorImageSet::TaylorImageSet(uint rs, uint as, uint deg, double x0, ...)
     va_list args;
     va_start(args,x0);
     for(uint i=0; i!=rs; ++i) {
-        (*this)[i]=TaylorModel(as);
+        (*this)[i]=IntervalTaylorModel(as);
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
             if(x!=0.0) { (*this)[i].expansion().append(j,x); }
             x=va_arg(args,double);
@@ -128,14 +128,14 @@ operator==(const TaylorImageSet& ts1,const TaylorImageSet& ts2)
 
 
 void
-TaylorImageSet::set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr)
+TaylorImageSet::set_accuracy(shared_ptr<IntervalTaylorModel::Accuracy> acc_ptr)
 {
     for(uint i=0; i!=this->dimension(); ++i) {
         this->_models[i].set_accuracy(acc_ptr);
     }
 }
 
-shared_ptr<TaylorModel::Accuracy>
+shared_ptr<IntervalTaylorModel::Accuracy>
 TaylorImageSet::accuracy_ptr() const
 {
     return this->_models[0].accuracy_ptr();
@@ -243,7 +243,7 @@ TaylorImageSet::linearise() const
 
 
 void
-_discretise_step(ListSet<Box>& result, const Vector<TaylorModel>& models, const Vector<Interval>& errors, const Box& domain, const Float& eps)
+_discretise_step(ListSet<Box>& result, const Vector<IntervalTaylorModel>& models, const Vector<Interval>& errors, const Box& domain, const Float& eps)
 {
     Box range=evaluate(models,domain);
     if(range.radius()<eps) {
@@ -261,7 +261,7 @@ TaylorImageSet::discretise(const Float& eps) const
     ListSet<Box> result;
     Box domain=this->domain();
     Vector<Interval> errors(this->dimension());
-    Vector<TaylorModel> models=this->models();
+    Vector<IntervalTaylorModel> models=this->models();
     for(uint i=0; i!=errors.size(); ++i) {
         errors[i]=models[i].error()*Interval(-1,+1);
         models[i].set_error(0.0);
@@ -286,7 +286,7 @@ TaylorImageSet::discretise(GridTreeSet& gts, uint d) const
 }
 
 
-TaylorModel apply(const RealScalarFunction& f, const TaylorImageSet& ts)
+IntervalTaylorModel apply(const RealScalarFunction& f, const TaylorImageSet& ts)
 {
     return f.evaluate(ts.models());
 }
@@ -296,7 +296,7 @@ TaylorImageSet apply(const RealVectorFunction& f, const TaylorImageSet& ts)
     return f.evaluate(ts.models());
 }
 
-TaylorModel apply(const ScalarTaylorFunction& tf, const TaylorImageSet& ts)
+IntervalTaylorModel apply(const ScalarTaylorFunction& tf, const TaylorImageSet& ts)
 {
     ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),"tf="<<tf<<" ts="<<ts);
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
@@ -309,7 +309,7 @@ TaylorImageSet apply(const VectorTaylorFunction& tf, const TaylorImageSet& ts)
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorModel unchecked_apply(const ScalarTaylorFunction& tf, const TaylorImageSet& ts)
+IntervalTaylorModel unchecked_apply(const ScalarTaylorFunction& tf, const TaylorImageSet& ts)
 {
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
 }
@@ -324,7 +324,7 @@ TaylorImageSet unchecked_apply(const VectorTaylorFunction& tf, const TaylorImage
 pair<TaylorImageSet,TaylorImageSet>
 TaylorImageSet::split(uint j) const
 {
-    pair< Vector<TaylorModel>, Vector<TaylorModel> > s=Ariadne::split(this->_models,j);
+    pair< Vector<IntervalTaylorModel>, Vector<IntervalTaylorModel> > s=Ariadne::split(this->_models,j);
     return make_pair( TaylorImageSet(s.first),
                       TaylorImageSet(s.second) );
 }
@@ -359,8 +359,8 @@ TaylorImageSet::split() const
 
     if(emax>rmax) {
         pair<TaylorImageSet,TaylorImageSet> result=make_pair(*this,*this);
-        TaylorModel& model1=result.first._models[aemax];
-        TaylorModel& model2=result.second._models[aemax];
+        IntervalTaylorModel& model1=result.first._models[aemax];
+        IntervalTaylorModel& model2=result.second._models[aemax];
         model1.set_error(emax/2);
         model1-=emax/2;
         model2.set_error(emax/2);
@@ -375,7 +375,7 @@ TaylorImageSet::split() const
 
 void
 _adjoin_outer_approximation1(GridTreeSet& grid_set,
-                             const Vector<TaylorModel>& models, const Vector<Interval>& errors,
+                             const Vector<IntervalTaylorModel>& models, const Vector<Interval>& errors,
                              const Box& domain, Float eps, uint depth)
 {
     uint d=models.size();
@@ -397,7 +397,7 @@ adjoin_outer_approximation1(GridTreeSet& grid_set, const TaylorImageSet& set, ui
 {
     Box domain(set.generators_size(),Interval(-1,+1));
     Float eps=1.0/(1<<(depth/set.dimension()));
-    Vector<TaylorModel> models=set.models();
+    Vector<IntervalTaylorModel> models=set.models();
     Vector<Interval> errors(models.size());
     for(uint i=0; i!=models.size(); ++i) {
         errors[i]=models[i].error()*Interval(-1,+1);
@@ -432,7 +432,7 @@ adjoin_outer_approximation2(GridTreeSet& grid_set, const TaylorImageSet& set, ui
     Vector<Interval> errors(set.dimension());
     for(uint i=0; i!=set.dimension(); ++i) {
         errors[i]=set.models()[i].error()*Interval(-1,+1);
-        const_cast<TaylorModel&>(error_free_set.models()[i]).set_error(0.0);
+        const_cast<IntervalTaylorModel&>(error_free_set.models()[i]).set_error(0.0);
     }
     _adjoin_outer_approximation2(grid_set,error_free_set,errors,eps,depth);
     grid_set.recombine();
@@ -635,7 +635,7 @@ TaylorImageSet
 TaylorImageSet::recondition() const
 {
     Matrix<Float> T=triangular_multiplier(this->jacobian());
-    Vector<TaylorModel> scal(T.row_size(),T.column_size());
+    Vector<IntervalTaylorModel> scal(T.row_size(),T.column_size());
     for(uint i=0; i!=T.row_size(); ++i) {
         for(uint j=0; j!=T.column_size(); ++j) {
             scal[i][MultiIndex::unit(this->generators_size(),j)]=T[i][j];
@@ -865,8 +865,8 @@ void plot(const char* filename, const Box& bbx, const TaylorImageSet& set)
 }
 
 
-TaylorModel& operator-=(TaylorModel& tm, const MultiIndex& a) {
-    for(TaylorModel::iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+IntervalTaylorModel& operator-=(IntervalTaylorModel& tm, const MultiIndex& a) {
+    for(IntervalTaylorModel::iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         iter->key()-=a;
     }
     return tm;
@@ -893,15 +893,15 @@ void TaylorConstrainedImageSet::_solve_zero_constraints() {
     this->_check();
     for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ) {
         const Vector<Interval>& domain=this->domain();
-        const TaylorModel& model=iter->model();
+        const IntervalTaylorModel& model=iter->model();
         const uint k=model.argument_size()-1u;
-        TaylorModel zeroth_order(k);
-        TaylorModel first_order(k);
+        IntervalTaylorModel zeroth_order(k);
+        IntervalTaylorModel first_order(k);
         bool is_zeroth_order=true;
         bool is_first_order=true;
         MultiIndex r(k);
         // Try linear approach in last coefficient
-        for(TaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
+        for(IntervalTaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
             if(tmiter->key()[k]==0) {
                 assign_all_but_last(r,tmiter->key());
                 zeroth_order.expansion().append(r,tmiter->data());
@@ -915,7 +915,7 @@ void TaylorConstrainedImageSet::_solve_zero_constraints() {
         }
         if(is_first_order && !is_zeroth_order) {
             const Vector<Interval> new_domain=project(domain,range(0,k));
-            TaylorModel substitution_model=-zeroth_order/first_order;
+            IntervalTaylorModel substitution_model=-zeroth_order/first_order;
             this->_function=VectorTaylorFunction(new_domain,Ariadne::substitute(this->_function.models(),k,substitution_model));
             for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_constraints.begin();
                     constraint_iter!=this->_constraints.end(); ++constraint_iter) {
@@ -1907,7 +1907,7 @@ TaylorConstrainedImageSet::affine_over_approximation() const
     this->_check();
 
     for(uint i=0; i!=nx; ++i) {
-        const_cast<TaylorModel&>(set._function.models()[i]).truncate(1u);
+        const_cast<IntervalTaylorModel&>(set._function.models()[i]).truncate(1u);
     }
 
     Vector<Float> h(nx);

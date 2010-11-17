@@ -49,7 +49,6 @@
 
 namespace Ariadne {
 
-class Real;
 template<class X> class Vector;
 template<class X> class Polynomial;
 template<class LHS, class RHS> class Assignment;
@@ -93,6 +92,7 @@ class ScalarFunction<Float>
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Float> operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
 
     Vector<Float> gradient(const Vector<Float>& x) const {
         return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
@@ -112,10 +112,11 @@ class ScalarFunction<Interval>
     operator const ScalarFunctionInterface<Interval>& () const { return *this->_ptr; }
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
-    Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Float> operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel operator()(const Vector< TaylorModel >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Interval> operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Vector<Float> gradient(const Vector<Float>& x) const {
         return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
@@ -161,7 +162,8 @@ class ScalarFunction<Real>
     Nat argument_size() const { return this->_ptr->argument_size(); }
     Float evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Interval evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel evaluate(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
@@ -174,7 +176,8 @@ class ScalarFunction<Real>
     Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel operator()(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Float> operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    TaylorModel<Interval> operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Vector<Float> gradient(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
@@ -206,7 +209,8 @@ class ScalarFunction<Real>
 
 inline Float evaluate_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Interval evaluate(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
-inline TaylorModel compose(const ScalarFunction<Real>& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
+inline TaylorModel<Float> compose(const ScalarFunction<Real>& f, const Vector< TaylorModel<Float> >& x) { return f.evaluate(x); }
+inline TaylorModel<Interval> compose(const ScalarFunction<Real>& f, const Vector< TaylorModel<Interval> >& x) { return f.evaluate(x); }
 inline Vector<Float> gradient_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f.gradient(x); }
 inline Vector<Interval> gradient(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f.gradient(x); }
 inline std::ostream& operator<<(std::ostream& os, const ScalarFunction<Real>& f) { return f.write(os); }
@@ -251,6 +255,7 @@ class VectorFunction<Float>
 
     Vector<Float> operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Vector< Differential<Float> > operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Vector< TaylorModel<Float> > operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
 
     Matrix<Float> jacobian(const Vector<Float>& x) const {
         return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
@@ -277,7 +282,8 @@ class VectorFunction<Interval>
     Vector<Interval> operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
     Vector< Differential<Float> > operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Vector< Differential<Interval> > operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    Vector<TaylorModel> operator()(const Vector< TaylorModel >& x) const { return this->_ptr->evaluate(x); }
+    Vector< TaylorModel<Float> > operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Vector< TaylorModel<Interval> > operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Matrix<Float> jacobian(const Vector<Float>& x) const {
         return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
@@ -358,7 +364,8 @@ class VectorFunction<Real>
 
     Vector<Float> evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Vector<Interval> evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
-    Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
+    Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
@@ -376,7 +383,8 @@ class VectorFunction<Real>
     Vector< Differential<Float> > operator() (const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Vector< Differential<Interval> > operator() (const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
-    Vector<TaylorModel> operator()(const Vector<TaylorModel>& x) const { return this->_ptr->evaluate(x); }
+    Vector< TaylorModel<Float> > operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    Vector< TaylorModel<Interval> > operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -420,7 +428,8 @@ template<class X> template<class XX> inline XX VectorFunctionElementReference<X>
 
 inline Vector<Float> evaluate_approx(const VectorFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Vector<Interval> evaluate(const VectorFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
-inline Vector<TaylorModel> compose(const VectorFunction<Real>& f, const Vector<TaylorModel>& x) { return f.evaluate(x); }
+inline Vector< TaylorModel<Float> > compose(const VectorFunction<Real>& f, const Vector< TaylorModel<Float> >& x) { return f.evaluate(x); }
+inline Vector< TaylorModel<Interval> > compose(const VectorFunction<Real>& f, const Vector< TaylorModel<Interval> >& x) { return f.evaluate(x); }
 inline Matrix<Float> jacobian_approx(const VectorFunction<Real>& f, const Vector<Float>& x);
 inline Matrix<Interval> jacobian(const VectorFunction<Real>& f, const Vector<Interval>& x);
 

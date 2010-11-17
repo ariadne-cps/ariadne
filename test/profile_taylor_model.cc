@@ -93,62 +93,62 @@ bind(const F& f,const A1& a1,const A2& a2) {
 
 
 namespace Ariadne {
-void _mul_clear(TaylorModel& r, const TaylorModel& x, const TaylorModel& y);
-void _mul_full(TaylorModel& r, const TaylorModel& x, const TaylorModel& y);
+void _mul_clear(IntervalTaylorModel& r, const IntervalTaylorModel& x, const IntervalTaylorModel& y);
+void _mul_full(IntervalTaylorModel& r, const IntervalTaylorModel& x, const IntervalTaylorModel& y);
 }
 
 
-TaylorModel copy(const TaylorModel& x) {
+IntervalTaylorModel copy(const IntervalTaylorModel& x) {
     return x;
 }
 
-TaylorModel& iclean(TaylorModel& x) {
+IntervalTaylorModel& iclean(IntervalTaylorModel& x) {
     x.clean(); return x;
 }
 
-TaylorModel& ivladd(TaylorModel& x, const Interval& ivl) {
+IntervalTaylorModel& ivladd(IntervalTaylorModel& x, const Interval& ivl) {
     return x+=ivl;
 }
 
-TaylorModel& ivlscal(TaylorModel& x, const Interval& ivl) {
+IntervalTaylorModel& ivlscal(IntervalTaylorModel& x, const Interval& ivl) {
     return x*=ivl;
 }
 
-TaylorModel& fscal(TaylorModel& x, const Float& c) {
+IntervalTaylorModel& fscal(IntervalTaylorModel& x, const Float& c) {
     return x*=c;
 }
 
-TaylorModel& isum(TaylorModel& x, const TaylorModel& y) {
+IntervalTaylorModel& isum(IntervalTaylorModel& x, const IntervalTaylorModel& y) {
     return x+=y;
 }
 
-TaylorModel sum(const TaylorModel x1, const TaylorModel& x2) {
+IntervalTaylorModel sum(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
     return x1+x2;
 }
 
-TaylorModel prod(const TaylorModel x1, const TaylorModel& x2) {
+IntervalTaylorModel prod(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
     return x1*x2;
 }
 
-TaylorModel prod_full(const TaylorModel x1, const TaylorModel& x2) {
-    TaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r; 
+IntervalTaylorModel prod_full(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
+    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r; 
 }
 
-TaylorModel prod_clear(const TaylorModel x1, const TaylorModel& x2) {
-    TaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_clear(r,x1,x2); return r;
+IntervalTaylorModel prod_clear(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
+    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_clear(r,x1,x2); return r;
 }
 
 
-TaylorModel exp_cos(const TaylorModel x, const TaylorModel& y) {
+IntervalTaylorModel exp_cos(const IntervalTaylorModel x, const IntervalTaylorModel& y) {
     return exp(x)*cos(y);
 }
 
-TaylorModel sigmoid(const TaylorModel x, const TaylorModel& y) {
+IntervalTaylorModel sigmoid(const IntervalTaylorModel x, const IntervalTaylorModel& y) {
     const double a=10;
     return exp(-x/a);
 }
 
-typedef TaylorModel(*TaylorFunctionPtr)(const Vector<TaylorModel>&);
+typedef IntervalTaylorModel(*TaylorFunctionPtr)(const Vector<IntervalTaylorModel>&);
 
 
 template<class T>
@@ -183,12 +183,12 @@ int main(int argc, const char* argv[]) {
     Vector<Float> c(2, 1.0,2.0);
     int i;
 
-    Vector<TaylorModel> v(2,TaylorModel(2));
-    v[0]=TaylorModel::variable(2,0);
-    v[1]=TaylorModel::constant(2,1.0);
+    Vector<IntervalTaylorModel> v(2,IntervalTaylorModel(2));
+    v[0]=IntervalTaylorModel::variable(2,0);
+    v[1]=IntervalTaylorModel::constant(2,1.0);
 
     // Use in clean()
-    TaylorModel w(3);
+    IntervalTaylorModel w(3);
     i=0;
     for(MultiIndex a(3); a.degree()<=9; ++a) {
         if(i%7<3) { w.expansion().append(a,1/(1.0+i*i*i*i*i)); }
@@ -201,8 +201,8 @@ int main(int argc, const char* argv[]) {
 
     Interval ivl(0.33,0.49);
     Float cnst=0.41;
-    TaylorModel x(3);
-    TaylorModel y(3);
+    IntervalTaylorModel x(3);
+    IntervalTaylorModel y(3);
 
     for(MultiIndex a(3); a.degree()<=7; ++a) {
         if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
@@ -216,7 +216,7 @@ int main(int argc, const char* argv[]) {
     y.set_maximum_degree(9);
     y.set_sweep_threshold(1e-3);
 
-    TaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0);
+    IntervalTaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0);
 
     std::cout << std::setw(20) << std::left << "name" << std::right
               << std::setw(11) << "time(us)"
@@ -224,7 +224,7 @@ int main(int argc, const char* argv[]) {
               << std::setw(8) << "size"
               << std::endl;
     
-    typedef TaylorModel TM;
+    typedef IntervalTaylorModel TM;
     //std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
     //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";
 

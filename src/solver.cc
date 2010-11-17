@@ -113,16 +113,16 @@ solve_all(Set< Vector<Interval> >& r,
 
 }
 
-Vector<Interval> ranges(const Vector<TaylorModel>& f) {
+Vector<Interval> ranges(const Vector<IntervalTaylorModel>& f) {
     Vector<Interval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
-Vector<TaylorModel>& clobber(Vector<TaylorModel>& h) {
+Vector<IntervalTaylorModel>& clobber(Vector<IntervalTaylorModel>& h) {
     for(uint i=0; i!=h.size(); ++i) { h[i].set_error(0.0); } return h; }
 
 // Compute the Jacobian over an arbitrary domain
 Matrix<Interval>
-jacobian2(const Vector<TaylorModel>& f, const Vector<Interval>& x)
+jacobian2(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& x)
 {
     Vector< Differential<Interval> > dx(x.size());
     for(uint i=0; i!=x.size()-f.size(); ++i) {
@@ -140,7 +140,7 @@ jacobian2(const Vector<TaylorModel>& f, const Vector<Interval>& x)
 
 // Compute the Jacobian over the unit domain
 Matrix<Float>
-jacobian2_value(const Vector<TaylorModel>& f)
+jacobian2_value(const Vector<IntervalTaylorModel>& f)
 {
     const uint rs=f.size();
     const uint fas=f[0].argument_size();
@@ -157,14 +157,14 @@ jacobian2_value(const Vector<TaylorModel>& f)
 
 // Compute the Jacobian over the unit domain
 Matrix<Interval>
-jacobian2_range(const Vector<TaylorModel>& f)
+jacobian2_range(const Vector<IntervalTaylorModel>& f)
 {
     uint rs=f.size();
     uint fas=f[0].argument_size();
     uint has=fas-rs;
     Matrix<Interval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
-        for(TaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=rs; ++k) {
                 const uint c=iter->key()[has+k];
                 if(c>0) {
@@ -182,21 +182,21 @@ jacobian2_range(const Vector<TaylorModel>& f)
 //Compute the implicit function by preconditioning f by the inverse
 // of the Jacobian value matrix and using a Gauss-Seidel iteration scheme
 // on the system y=g(y)
-Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
+Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uint n)
 {
     //std::cerr<<__FUNCTION__<<std::endl;
     uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
 
     Vector<Interval> domain_h(rs,Interval(-1,+1));
-    Vector<TaylorModel> id=TaylorModel::variables(has);
-    Vector<TaylorModel> h=TaylorModel::constants(has,domain_h);
-    Vector<TaylorModel> idh=join(id,h);
+    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has);
+    Vector<IntervalTaylorModel> h=IntervalTaylorModel::constants(has,domain_h);
+    Vector<IntervalTaylorModel> idh=join(id,h);
 
     // Compute the Jacobian of f with respect to the second arguments at the centre of the domain
     Matrix<Float> D2f=jacobian2_value(f);
 
     // Compute g=-D2finv*(f-D2f*y) = -D2finv*f-y
-    Vector<TaylorModel> g=-f;
+    Vector<IntervalTaylorModel> g=-f;
     for(uint i=0; i!=rs; ++i) {
         for(uint j=has; j!=fas; ++j) {
             g[i][MultiIndex::unit(fas,j)]=0;
@@ -209,7 +209,7 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
     }
 
     // Iterate h'=h(g(x,h(x)))
-    Vector<TaylorModel> h_new;
+    Vector<IntervalTaylorModel> h_new;
     uint number_non_contracting=rs;
     array<bool> contracting(rs,false);
     for(uint k=0; k!=n; ++k) {
@@ -221,7 +221,7 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
                     --number_non_contracting;
                 }
                 if(disjoint(h_new,h)) {
-                    ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel> f)",
+                    ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel> f)",
                                 "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
                                 " which is disjoint. No solution");
                 }
@@ -235,13 +235,13 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
     if(number_non_contracting==0) {
         return h;
     } else {
-        ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel>)",
+        ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel>)",
                       "Could not verify solution of implicit function to "<<h<<"\n");
     }
 }
 
-Vector<TaylorModel>
-newton_implicit(const Vector<TaylorModel>& f)
+Vector<IntervalTaylorModel>
+newton_implicit(const Vector<IntervalTaylorModel>& f)
 {
     // Check that the arguments are suitable
     ARIADNE_ASSERT(f.size()>0);
@@ -260,21 +260,21 @@ newton_implicit(const Vector<TaylorModel>& f)
     }
     catch(...) {
         ARIADNE_THROW(ImplicitFunctionException,
-                      "implicit(Vector<TaylorModel>)",
+                      "implicit(Vector<IntervalTaylorModel>)",
                       "Jacobian "<<D2f<<" is not invertible");
     }
 
     uint number_of_steps=6;
-    Vector<TaylorModel> id=TaylorModel::variables(has);
-    Vector<TaylorModel> h=_implicit5(f,number_of_steps);
+    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has);
+    Vector<IntervalTaylorModel> h=_implicit5(f,number_of_steps);
 
     // Perform proper Newton step improvements
     Vector<Interval> domain_h(h[0].argument_size(),Interval(-1,+1));
     for(uint i=0; i!=3; ++i) {
         D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
         clobber(h);
-        Vector<TaylorModel> fidh=compose(f,join(id,h));
-        Vector<TaylorModel> dh=prod(D2finv,fidh);
+        Vector<IntervalTaylorModel> fidh=compose(f,join(id,h));
+        Vector<IntervalTaylorModel> dh=prod(D2finv,fidh);
         h-=dh;
     }
 
@@ -308,7 +308,7 @@ namespace Ariadne {
 
 VectorTaylorFunction evaluate(const RealVectorFunction& f,const VectorTaylorFunction& x) {
     for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
-    Vector<TaylorModel> m(x.size());
+    Vector<IntervalTaylorModel> m(x.size());
     for(uint i=0; i!=m.size(); ++i) { m[i]=x[i].model(); }
     m=f.evaluate(m);
     VectorTaylorFunction r(m.size());

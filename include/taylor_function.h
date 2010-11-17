@@ -46,7 +46,7 @@ template<class X> class VectorFunction;
 typedef VectorFunction<Real> RealVectorFunction;
 
 class MultiIndex;
-class TaylorModel;
+template<class X> class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 
@@ -127,7 +127,7 @@ class VectorTaylorFunctionElementReference;
 class ScalarTaylorFunction
 {
     typedef Vector<Interval> DomainType;
-    typedef TaylorModel ModelType;
+    typedef TaylorModel<Interval> ModelType;
     typedef Expansion<Float> ExpansionType;
     typedef Float ErrorType;
     static const Float _zero;
@@ -146,7 +146,7 @@ class ScalarTaylorFunction
     //! \brief Construct a ScalarTaylorFunction over the domain \a d.
     explicit ScalarTaylorFunction(const DomainType& d);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
-    explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel& m);
+    explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<Interval>& m);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, with scaled power series expansion \a f and error \a e.
     explicit ScalarTaylorFunction(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
 
@@ -294,7 +294,7 @@ class ScalarTaylorFunction
     ScalarTaylorFunction& sweep(double eps) { this->_model.sweep(eps); return *this; }
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    ScalarTaylorFunction& clean(const TaylorModel::Accuracy& acc) { this->_model.clean(acc); return *this; }
+    ScalarTaylorFunction& clean(const TaylorModel<Interval>::Accuracy& acc) { this->_model.clean(acc); return *this; }
     //! \brief Remove all terms which have high degree or small magnitude.
     ScalarTaylorFunction& clean() { this->_model.clean(); return *this; }
     //@}
@@ -307,11 +307,11 @@ class ScalarTaylorFunction
     void set_maximum_degree(uint md) { this->_model.set_maximum_degree(md); }
     //! \brief Specify the minimum absolute value \a me for coefficients of terms which may be present in the expansion.
     void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_model.set_sweep_threshold(me); }
-    //! \copydoc TaylorModel::maximum_index()
+    //! \copydoc TaylorModel<Interval>::maximum_index()
     MultiIndexBound maximum_index() const { return this->_model.maximum_index(); }
-    //! \copydoc TaylorModel::maximum_degree()
+    //! \copydoc TaylorModel<Interval>::maximum_degree()
     uint maximum_degree() const { return this->_model.maximum_degree(); }
-    //! \copydoc TaylorModel::sweep_threshold()
+    //! \copydoc TaylorModel<Interval>::sweep_threshold()
     double sweep_threshold() const { return this->_model.sweep_threshold(); }
     //@}
 
@@ -691,7 +691,7 @@ class VectorTaylorFunction {
                    const Vector<Float>& error);
 
     /*! \brief Construct from a domain and the models. */
-    explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector<TaylorModel>& variables);
+    explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector< TaylorModel<Interval> >& variables);
 
     /*! \brief Construct from a domain and a function. */
     VectorTaylorFunction(const Vector<Interval>& domain,
@@ -700,7 +700,7 @@ class VectorTaylorFunction {
     /*! \brief Construct from a domain, a function, and accuracy paramters. */
     VectorTaylorFunction(const Vector<Interval>& domain,
                    const RealVectorFunction& function,
-                   shared_ptr<TaylorModel::Accuracy> accuracy_ptr);
+                   shared_ptr<TaylorModel<Interval>::Accuracy> accuracy_ptr);
 
     /*! \brief Construct from a domain and a polynomial. */
     VectorTaylorFunction(const Vector<Interval>& domain,
@@ -723,9 +723,9 @@ class VectorTaylorFunction {
 
     // Data access
     /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
-    shared_ptr<TaylorModel::Accuracy> accuracy_ptr() const;
+    shared_ptr<TaylorModel<Interval>::Accuracy> accuracy_ptr() const;
     /*! \brief Set the accuracy parameter used to control approximation of the Taylor function. */
-    void set_accuracy(shared_ptr<TaylorModel::Accuracy> acc);
+    void set_accuracy(shared_ptr<TaylorModel<Interval>::Accuracy> acc);
     /*! \brief The data used to define the domain of the Taylor model. */
     const Vector<Interval>& domain() const;
     /*! \brief A rough bound for the range of the function. */
@@ -735,12 +735,12 @@ class VectorTaylorFunction {
     /*! \brief The range of the Taylor model. */
     const Vector<Interval> range() const;
     /*! \brief The data used to define the centre of the Taylor model. */
-    const Vector<TaylorModel>& models() const;
+    const Vector< TaylorModel<Interval> >& models() const;
 
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    const TaylorModel& model(uint i) const;
+    const TaylorModel<Interval>& model(uint i) const;
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    TaylorModel& model(uint i);
+    TaylorModel<Interval>& model(uint i);
 
     /*! \brief The size of the argument. */
     uint argument_size() const;
@@ -894,7 +894,7 @@ class VectorTaylorFunction {
   private:
     /* Domain of definition. */
     Vector<Interval> _domain;
-    Vector<TaylorModel> _models;
+    Vector< TaylorModel<Interval> > _models;
 };
 
 // Set the value of the \a kth variable to c
@@ -954,7 +954,7 @@ class VectorTaylorFunctionElementReference
     operator ScalarTaylorFunction () const { return this->_c->get(this->_i); }
     void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
-    const TaylorModel& model() const { return this->_c->_models[this->_i]; }
+    const TaylorModel<Interval>& model() const { return this->_c->_models[this->_i]; }
     void set_error(const Float& e) { this->_c->_models[this->_i].set_error(e); }
     void sweep() { this->_c->_models[this->_i].sweep(); }
     void set_sweep_threshold(double sw) { this->_c->_models[this->_i].set_sweep_threshold(sw); }

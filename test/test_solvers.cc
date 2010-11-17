@@ -61,7 +61,7 @@ class TestSolver
     }
 
     void test_implicit() {
-        TaylorModel::set_default_sweep_threshold(1e-12);
+        IntervalTaylorModel::set_default_sweep_threshold(1e-12);
 
         RealScalarFunction aa=RealScalarFunction::coordinate(1,0);
         RealScalarFunction a=RealScalarFunction::coordinate(2,0);

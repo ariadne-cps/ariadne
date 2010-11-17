@@ -193,8 +193,8 @@ class TestReachabilityAnalysis
     }
 
     void test() {
-        //TaylorModel::set_default_sweep_threshold(1e-6);
-        //TaylorModel::set_default_maximum_degree(6u);
+        //IntervalTaylorModel::set_default_sweep_threshold(1e-6);
+        //IntervalTaylorModel::set_default_maximum_degree(6u);
 
         ARIADNE_TEST_CALL(test_lower_reach_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_evolve());

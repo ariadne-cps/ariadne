@@ -44,7 +44,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
 template<class X> class Propagator;
-class TaylorModel;
+template<class X> class TaylorModel;
 
 static const int SMOOTH=255;
 
@@ -99,6 +99,8 @@ class ScalarFunctionInterface<Float>
     virtual Float evaluate(const Vector<Float>& x) const = 0;
     //! \brief Evaluate the function over a vector of differentials.
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of approximate Taylor models.
+    virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -116,11 +118,10 @@ class ScalarFunctionInterface<Interval>
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Interval evaluate(const Vector<Interval>& x) const = 0;
-
-    //! \brief Evaluate the function over a vector of Taylor variables.
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const = 0;
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of Taylor models with interval error.
+    virtual TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const = 0;
 
     //! \brief Evaluate the function over a vector of constraint propagators.
     virtual Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const = 0;
@@ -180,6 +181,8 @@ class VectorFunctionInterface<Float>
     virtual Vector<Float> evaluate(const Vector<Float>& x) const = 0;
     //! \brief Evaluate the function over a vector of differentials.
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of approximate Taylor models.
+    virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -194,11 +197,10 @@ class VectorFunctionInterface<Interval>
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
-
-    //! \brief Evaluate the function over a vector of Taylor variables.
-    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const = 0;
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of Taylor models with interval error.
+    virtual Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const = 0;
 
     //! \brief Evaluate the function over a vector of constraint propagators.
     virtual Vector< Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const = 0;

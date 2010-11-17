@@ -524,9 +524,8 @@ inline void _set_constant(Float& r, const Interval& c) { r=midpoint(c); }
 inline void _set_constant(Interval& r, const Interval& c) { r=c; }
 inline void _set_constant(Real& r, const Interval& c) { r=Real(c); }
 inline void _set_constant(Real& r, const Real& c) { r=c; }
-//inline void _set_constant(TaylorModel<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
-//inline void _set_constant(TaylorModel<Interval>& r, const Interval& c) { r.clear(); r+=c; }
-inline void _set_constant(TaylorModel& r, const Interval& c) { r.clear(); r+=c; }
+inline void _set_constant(TaylorModel<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
+inline void _set_constant(TaylorModel<Interval>& r, const Interval& c) { r.clear(); r+=c; }
 inline void _set_constant(Differential<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
 inline void _set_constant(Differential<Interval>& r, const Interval& c) { r.clear(); r+=c; }
 inline void _set_constant(Propagator<Interval>& r, const Interval& c) { r=c; }
@@ -721,9 +720,8 @@ template Interval evaluate(const Expression<Real>& e, const Map<ExtendedRealVari
 template Real evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Real>& x);
 template Differential<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Float> >& x);
 template Differential<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Interval> >& x);
-//template TaylorModel<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Float> >& x);
-//template TaylorModel<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Interval> >& x);
-template TaylorModel evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel >& x);
+template TaylorModel<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Float> >& x);
+template TaylorModel<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Interval> >& x);
 template Propagator<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Propagator<Interval> >& x);
 
 

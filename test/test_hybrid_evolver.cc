@@ -94,7 +94,7 @@ TestSimpleHybridEvolver::TestSimpleHybridEvolver(const HybridEvolverInterface& e
     : evolver_ptr(dynamic_cast<HybridEvolverBase*>(evolver.clone()))
     , evolver_name(name)
 {
-    TaylorModel::set_default_sweep_threshold(1e-6);
+    IntervalTaylorModel::set_default_sweep_threshold(1e-6);
     DRAWING_METHOD = AFFINE_DRAW;
     DRAWING_ACCURACY = 1;
 }
@@ -465,7 +465,7 @@ TestContraintHybridEvolver::TestContraintHybridEvolver(const HybridEvolverInterf
     : evolver_ptr(dynamic_cast<HybridEvolverBase*>(evolver.clone()))
     , evolver_name(name)
 {
-    TaylorModel::set_default_sweep_threshold(1e-6);
+    IntervalTaylorModel::set_default_sweep_threshold(1e-6);
 }
 
 CompositeHybridAutomaton

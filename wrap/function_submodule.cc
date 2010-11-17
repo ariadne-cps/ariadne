@@ -120,14 +120,16 @@ class ScalarPythonFunction
         return boost::python::extract<Float>(this->_pyf(x)); }
     virtual Interval evaluate (const Vector<Interval>& x) const {
         return boost::python::extract<Interval>(this->_pyf(x)); }
-    virtual TaylorModel evaluate (const Vector<TaylorModel>& x) const {
-        return boost::python::extract<TaylorModel>(this->_pyf(x)); }
+    virtual TaylorModel<Float> evaluate (const Vector< TaylorModel<Float> >& x) const {
+        return boost::python::extract< TaylorModel<Float> >(this->_pyf(x)); }
+    virtual TaylorModel<Interval> evaluate (const Vector< TaylorModel<Interval> >& x) const {
+        return boost::python::extract< TaylorModel<Interval> >(this->_pyf(x)); }
     virtual Differential<Float> evaluate (const Vector< Differential<Float> >& x) const {
         return boost::python::extract< Differential<Float> >(this->_pyf(x)); }
     virtual Differential<Interval> evaluate (const Vector< Differential<Interval> >& x) const {
         return boost::python::extract< Differential<Interval> >(this->_pyf(x)); }
-    virtual Differential<TaylorModel> evaluate (const Vector< Differential<TaylorModel> >& x) const {
-        return boost::python::extract< Differential<TaylorModel> >(this->_pyf(x)); }
+    virtual Differential<IntervalTaylorModel> evaluate (const Vector< Differential<IntervalTaylorModel> >& x) const {
+        return boost::python::extract< Differential<IntervalTaylorModel> >(this->_pyf(x)); }
     virtual Propagator<Interval> evaluate (const Vector< Propagator<Interval> >& x) const {
         return boost::python::extract< Propagator<Interval> >(this->_pyf(x)); }
 
@@ -172,8 +174,10 @@ class VectorPythonFunction
         return boost::python::extract< Vector<Float> >(this->_pyf(x)); }
     virtual Vector<Interval> evaluate (const Vector<Interval>& x) const {
         return boost::python::extract< Vector<Interval> >(this->_pyf(x)); }
-    virtual Vector<TaylorModel> evaluate (const Vector<TaylorModel>& x) const {
-        return boost::python::extract< Vector<TaylorModel> >(this->_pyf(x)); }
+    virtual Vector< TaylorModel<Float> > evaluate (const Vector< TaylorModel<Float> >& x) const {
+        return boost::python::extract< Vector< TaylorModel<Float> > >(this->_pyf(x)); }
+    virtual Vector< TaylorModel<Interval> > evaluate (const Vector< TaylorModel<Interval> >& x) const {
+        return boost::python::extract< Vector< TaylorModel<Interval> > >(this->_pyf(x)); }
     virtual Vector< Differential<Float> > evaluate (const Vector< Differential<Float> >& x) const {
         return boost::python::extract< Vector< Differential<Float> > >(this->_pyf(x)); }
     virtual Vector< Differential<Interval> > evaluate (const Vector< Differential<Interval> >& x) const {
@@ -216,9 +220,9 @@ typedef Matrix<Float> FMx;
 typedef Matrix<Interval> IMx;
 typedef Vector< Differential<Float> > FSDV;
 typedef Vector< Differential<Interval> > ISDV;
-typedef Vector<TaylorModel> TMV;
+typedef Vector<IntervalTaylorModel> TMV;
 typedef VectorTaylorFunction TFM;
-typedef TaylorModel TM;
+typedef IntervalTaylorModel TM;
 
 
 
@@ -285,7 +289,7 @@ void export_polynomial()
 void export_scalar_function()
 {
     class_<RealScalarFunction>
-        scalar_function_class("RealScalarFunction", init<RealScalarFunction>());
+        scalar_function_class("ScalarFunction", init<RealScalarFunction>());
     scalar_function_class.def(init<uint>());
     scalar_function_class.def(init<RealExpression,RealSpace>());
     scalar_function_class.def(init< Polynomial<Real> >());
@@ -362,7 +366,7 @@ void export_vector_function()
 
 
     class_<RealVectorFunction>
-        vector_function_class("RealVectorFunction", init<RealVectorFunction>());
+        vector_function_class("VectorFunction", init<RealVectorFunction>());
     vector_function_class.def(init<uint,uint>());
 
     vector_function_class.def(init< List<ExtendedRealVariable>, List<ExtendedRealAssignment>, List<RealVariable> >());

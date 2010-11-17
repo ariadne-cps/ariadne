@@ -64,7 +64,7 @@ class MapEvolver
     : public EvolverBase< IteratedMap, TaylorImageSet>
     , public Loggable
 {
-    typedef TaylorModel VariableType;
+    typedef IntervalTaylorModel VariableType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef IteratedMap::TimeType TimeType;

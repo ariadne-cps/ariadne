@@ -115,12 +115,12 @@ void TestFunction::test_vector_function()
 void TestFunction::test_expression()
 {
     // Test to ensure that constants are handled correctly.
-    TaylorModel tc=TaylorModel::constant(3,5.0);
-    TaylorModel tx=TaylorModel::variable(3,0);
-    TaylorModel ty=TaylorModel::variable(3,1);
-    TaylorModel tz=TaylorModel::variable(3,2);
+    IntervalTaylorModel tc=IntervalTaylorModel::constant(3,5.0);
+    IntervalTaylorModel tx=IntervalTaylorModel::variable(3,0);
+    IntervalTaylorModel ty=IntervalTaylorModel::variable(3,1);
+    IntervalTaylorModel tz=IntervalTaylorModel::variable(3,2);
 
-    Vector<TaylorModel> tv=TaylorModel::variables(3);
+    Vector<IntervalTaylorModel> tv=IntervalTaylorModel::variables(3);
 
     RealConstant c("5",5.0);
     RealVariable x("x");

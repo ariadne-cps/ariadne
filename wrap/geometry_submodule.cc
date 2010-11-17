@@ -289,7 +289,7 @@ void export_taylor_image_set()
     class_<TaylorImageSet,bases<CompactSetInterface,DrawableInterface> > taylor_set_class("TaylorImageSet",init<TaylorImageSet>());
     taylor_set_class.def(init<uint>());
     taylor_set_class.def(init<Box>());
-    taylor_set_class.def(init< Vector<TaylorModel> >());
+    taylor_set_class.def(init< Vector<IntervalTaylorModel> >());
     //taylor_set_class.def(init<Zonotope>());
     taylor_set_class.def("domain", &TaylorImageSet::domain);
     taylor_set_class.def("models", &TaylorImageSet::models,return_value_policy<copy_const_reference>());
@@ -307,8 +307,8 @@ void export_taylor_image_set()
     def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Box&)) &product);
     def("product", (TaylorImageSet(*)(const TaylorImageSet&,const TaylorImageSet&)) &product);
 
-    def("apply",(TaylorModel(*)(const RealScalarFunction&,const TaylorImageSet&)) &apply);
-    def("apply",(TaylorModel(*)(const ScalarTaylorFunction&,const TaylorImageSet&)) &apply);
+    def("apply",(IntervalTaylorModel(*)(const RealScalarFunction&,const TaylorImageSet&)) &apply);
+    def("apply",(IntervalTaylorModel(*)(const ScalarTaylorFunction&,const TaylorImageSet&)) &apply);
     def("apply",(TaylorImageSet(*)(const RealVectorFunction&,const TaylorImageSet&)) &apply);
     def("apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &apply);
 

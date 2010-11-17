@@ -333,7 +333,8 @@ inline void add_error(Float& x, const Float& e) { }
 inline void add_error(Interval& x, const Float& e) { x+=Interval(-e,+e); }
 inline void add_error(Differential<Float>& x, const Float& e) { }
 inline void add_error(Differential<Interval>& x, const Float& e) { x+=Interval(-e,+e); }
-inline void add_error(TaylorModel& x, const Float& e) { x+=Interval(-e,+e); }
+inline void add_error(TaylorModel<Float>& x, const Float& e) { }
+inline void add_error(TaylorModel<Interval>& x, const Float& e) { x+=Interval(-e,+e); }
 inline void add_error(Propagator<Interval>& x, const Float& e) { x=x+Propagator<Interval>(Interval(-e,+e)); }
 
 /*

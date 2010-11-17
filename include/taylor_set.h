@@ -62,7 +62,7 @@ template<class X> class VectorFunction;
 typedef VectorFunction<Real> RealVectorFunction;
 
 class NonlinearConstraint;
-class TaylorModel;
+template<class X> class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorImageSet;
@@ -83,14 +83,14 @@ class TaylorImageSet
     , public DrawableInterface
 {
   private:
-    Vector<TaylorModel> _models;
+    Vector<IntervalTaylorModel> _models;
   public:
     //! \brief Construct the origin in dimension \a d with \a ng generators.
     TaylorImageSet(uint d=0, uint ng=0);
     //! \brief Construct the image of the box \a d under the function \a f.
     TaylorImageSet(const RealVectorFunction& f, const Vector<Interval>& d);
     //! \brief Construct from a list of models giving set as the image of a unit box.
-    TaylorImageSet(const Vector<TaylorModel>& tv);
+    TaylorImageSet(const Vector<IntervalTaylorModel>& tv);
     //! \brief The box \a bx.
     TaylorImageSet(const Vector<Interval>& bx);
 
@@ -100,15 +100,15 @@ class TaylorImageSet
     TaylorImageSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
 
     template<class E> TaylorImageSet(const ublas::vector_expression<E>& e) {
-        *this = TaylorImageSet(Vector<TaylorModel>(e())); }
+        *this = TaylorImageSet(Vector<IntervalTaylorModel>(e())); }
 
     //! \brief Equality operator.
     friend bool operator==(const TaylorImageSet& ts1, const TaylorImageSet& ts2);
 
     //! \brief Set the accuracy parameters.
-    void set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr);
+    void set_accuracy(shared_ptr<IntervalTaylorModel::Accuracy> acc_ptr);
     //! \brief Get the accuracy parameters.
-    shared_ptr<TaylorModel::Accuracy> accuracy_ptr() const;
+    shared_ptr<IntervalTaylorModel::Accuracy> accuracy_ptr() const;
 
     //! \brief The dimension the space lies in.
     uint dimension() const { return this->_models.size(); }
@@ -116,7 +116,7 @@ class TaylorImageSet
     uint generators_size() const { assert(this->_models.size()>0); return this->_models[0].argument_size(); }
 
     //! \brief The Taylor models used to define the set.
-    const Vector<TaylorModel>& models() const { return this->_models; }
+    const Vector<IntervalTaylorModel>& models() const { return this->_models; }
     //! \brief The domain of which the set is an image.
     Vector<Interval> domain() const { return Vector<Interval>(this->generators_size(),Interval(-1,+1)); }
     //! \brief A box bounding the range of the generating function.
@@ -129,8 +129,8 @@ class TaylorImageSet
     uint size() const { return this->_models.size(); }
     uint result_size() const { return this->_models.size(); }
     uint argument_size() const { return this->_models[0].argument_size(); }
-    const TaylorModel& operator[](uint i) const { return this->_models[i]; }
-    TaylorModel& operator[](uint i) { return this->_models[i]; }
+    const IntervalTaylorModel& operator[](uint i) const { return this->_models[i]; }
+    IntervalTaylorModel& operator[](uint i) { return this->_models[i]; }
 
 
     //! \brief Create a dynamically-allocated copy.
@@ -184,12 +184,12 @@ class TaylorImageSet
     Matrix<Float> jacobian() const;
 };
 
-TaylorModel apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
+IntervalTaylorModel apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
 TaylorImageSet apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
-TaylorModel apply(const RealScalarFunction& f, const TaylorImageSet& s);
+IntervalTaylorModel apply(const RealScalarFunction& f, const TaylorImageSet& s);
 TaylorImageSet apply(const RealVectorFunction& f, const TaylorImageSet& s);
 
-TaylorModel unchecked_apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
+IntervalTaylorModel unchecked_apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
 TaylorImageSet unchecked_apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
 
 GridTreeSet outer_approximation(const TaylorImageSet& set, const Grid& grid, uint depth);

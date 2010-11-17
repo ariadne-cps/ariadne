@@ -54,7 +54,7 @@ VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, int start, int
     if(stop<0) { stop+=tf.result_size(); }
     ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&uint(stop)<=tf.result_size(),
             "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
-    return VectorTaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
+    return VectorTaylorFunction(tf.domain(),Vector<IntervalTaylorModel>(project(tf.models(),range(start,stop))));
 }
 
 
@@ -105,14 +105,14 @@ struct from_python< Expansion<T> > {
 
 
 template<>
-struct from_python< Vector<TaylorModel> > {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<TaylorModel> >()); }
+struct from_python< Vector<IntervalTaylorModel> > {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<IntervalTaylorModel> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
         boost::python::list lst=extract<boost::python::list>(obj_ptr);
-        Vector<TaylorModel>* tms_ptr = new (storage) Vector<TaylorModel>(len(lst));
-        for(int i=0; i!=len(lst); ++i) { (*tms_ptr)[i]=extract<TaylorModel>(lst[i]); }
+        Vector<IntervalTaylorModel>* tms_ptr = new (storage) Vector<IntervalTaylorModel>(len(lst));
+        for(int i=0; i!=len(lst); ++i) { (*tms_ptr)[i]=extract<IntervalTaylorModel>(lst[i]); }
         data->convertible = storage;
     }
 };
@@ -132,9 +132,9 @@ struct from_python<VectorTaylorFunction> {
     }
 };
 
-List<MultiIndex> keys(const TaylorModel& tm) {
+List<MultiIndex> keys(const IntervalTaylorModel& tm) {
     List<MultiIndex> r;
-    for(TaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         r.append(iter->key());
     }
     return r;
@@ -142,9 +142,9 @@ List<MultiIndex> keys(const TaylorModel& tm) {
 
 
 
-Interval _range1(const TaylorModel&);
-Interval _range2(const TaylorModel&);
-Interval _range3(const TaylorModel&);
+Interval _range1(const IntervalTaylorModel&);
+Interval _range2(const IntervalTaylorModel&);
+Interval _range3(const IntervalTaylorModel&);
 
 
 } // namespace Ariadne
@@ -162,8 +162,8 @@ void export_taylor_model()
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
-    typedef TaylorModel TaylorModel;
-    typedef Vector<TaylorModel> TMV;
+    typedef IntervalTaylorModel IntervalTaylorModel;
+    typedef Vector<IntervalTaylorModel> TMV;
     typedef VectorTaylorFunction VectorTaylorFunction;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
@@ -176,22 +176,22 @@ void export_taylor_model()
     expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key, return_value_policy<copy_const_reference>());
     expansion_value_class.def(self_ns::str(self));
 
-    class_<TaylorModel> taylor_model_class("TaylorModel", init<TaylorModel>());
+    class_<IntervalTaylorModel> taylor_model_class("IntervalTaylorModel", init<IntervalTaylorModel>());
     taylor_model_class.def( init< N >());
-    taylor_model_class.def("keys", (List<MultiIndex>(*)(const TaylorModel&))&keys);
-    taylor_model_class.def("error", (const Float&(TaylorModel::*)()const) &TaylorModel::error, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("set_error", (void(TaylorModel::*)(const Float&)) &TaylorModel::set_error);
-    taylor_model_class.def("argument_size", &TaylorModel::argument_size);
-    taylor_model_class.def("domain", &TaylorModel::domain);
-    taylor_model_class.def("range", &TaylorModel::range);
-    taylor_model_class.def("set_sweep_threshold", &TaylorModel::set_sweep_threshold);
-    taylor_model_class.def("get_sweep_threshold", &TaylorModel::sweep_threshold);
-    taylor_model_class.def("set_maximum_degree", &TaylorModel::set_maximum_degree);
-    taylor_model_class.def("get_maximum_degree", &TaylorModel::maximum_degree);
-    taylor_model_class.def("__getitem__", &__getitem__<TaylorModel,MultiIndex,Float>);
-    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,MultiIndex,Float>);
-    taylor_model_class.def("__setitem__",&__setitem__<TaylorModel,MultiIndex,double>);
-    taylor_model_class.def("__iter__", iterator<TaylorModel>()); // TODO: TaylorModel iterator does not fit in general Python iterator scheme
+    taylor_model_class.def("keys", (List<MultiIndex>(*)(const IntervalTaylorModel&))&keys);
+    taylor_model_class.def("error", (const Float&(IntervalTaylorModel::*)()const) &IntervalTaylorModel::error, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("set_error", (void(IntervalTaylorModel::*)(const Float&)) &IntervalTaylorModel::set_error);
+    taylor_model_class.def("argument_size", &IntervalTaylorModel::argument_size);
+    taylor_model_class.def("domain", &IntervalTaylorModel::domain);
+    taylor_model_class.def("range", &IntervalTaylorModel::range);
+    taylor_model_class.def("set_sweep_threshold", &IntervalTaylorModel::set_sweep_threshold);
+    taylor_model_class.def("get_sweep_threshold", &IntervalTaylorModel::sweep_threshold);
+    taylor_model_class.def("set_maximum_degree", &IntervalTaylorModel::set_maximum_degree);
+    taylor_model_class.def("get_maximum_degree", &IntervalTaylorModel::maximum_degree);
+    taylor_model_class.def("__getitem__", &__getitem__<IntervalTaylorModel,MultiIndex,Float>);
+    taylor_model_class.def("__setitem__",&__setitem__<IntervalTaylorModel,MultiIndex,Float>);
+    taylor_model_class.def("__setitem__",&__setitem__<IntervalTaylorModel,MultiIndex,double>);
+    taylor_model_class.def("__iter__", iterator<IntervalTaylorModel>()); // TODO: IntervalTaylorModel iterator does not fit in general Python iterator scheme
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
     taylor_model_class.def(self+self);
@@ -229,49 +229,49 @@ void export_taylor_model()
     taylor_model_class.def(self<self);
     taylor_model_class.def(self_ns::str(self));
 
-    taylor_model_class.def("constant",(TaylorModel(*)(N, const Interval&))&TaylorModel::constant);
-    taylor_model_class.def("variable",(TaylorModel(*)(N, N))&TaylorModel::variable);
+    taylor_model_class.def("constant",(IntervalTaylorModel(*)(N, const Interval&))&IntervalTaylorModel::constant);
+    taylor_model_class.def("variable",(IntervalTaylorModel(*)(N, N))&IntervalTaylorModel::variable);
 
     taylor_model_class.staticmethod("constant");
     taylor_model_class.staticmethod("variable");
     //taylor_model_class.staticmethod("variables");
 
-    taylor_model_class.def("restrict", (TaylorModel&(TaylorModel::*)(const Vector<Interval>&))&TaylorModel::restrict, return_value_policy<reference_existing_object>());
-    taylor_model_class.def("restrict", (TaylorModel(*)(const TaylorModel&,uint,const Interval&))&restrict);
-    taylor_model_class.def("preaffine", (TaylorModel(*)(const TaylorModel&,uint,const Interval&,const Interval&))&preaffine);
+    taylor_model_class.def("restrict", (IntervalTaylorModel&(IntervalTaylorModel::*)(const Vector<Interval>&))&IntervalTaylorModel::restrict, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("restrict", (IntervalTaylorModel(*)(const IntervalTaylorModel&,uint,const Interval&))&restrict);
+    taylor_model_class.def("preaffine", (IntervalTaylorModel(*)(const IntervalTaylorModel&,uint,const Interval&,const Interval&))&preaffine);
 
-    taylor_model_class.def("evaluate", (Interval(TaylorModel::*)(const Vector<Interval>&)const)&TaylorModel::evaluate);
-    taylor_model_class.def("set",(TaylorModel(*)(const TaylorModel&,uint,Interval))&partial_evaluate);
+    taylor_model_class.def("evaluate", (Interval(IntervalTaylorModel::*)(const Vector<Interval>&)const)&IntervalTaylorModel::evaluate);
+    taylor_model_class.def("set",(IntervalTaylorModel(*)(const IntervalTaylorModel&,uint,Interval))&partial_evaluate);
 
-    def("max",(TaylorModel(*)(const TaylorModel&,const TaylorModel&))&max);
-    def("min",(TaylorModel(*)(const TaylorModel&,const TaylorModel&))&min);
-    def("abs",(TaylorModel(*)(const TaylorModel&))&abs);
+    def("max",(IntervalTaylorModel(*)(const IntervalTaylorModel&,const IntervalTaylorModel&))&max);
+    def("min",(IntervalTaylorModel(*)(const IntervalTaylorModel&,const IntervalTaylorModel&))&min);
+    def("abs",(IntervalTaylorModel(*)(const IntervalTaylorModel&))&abs);
 
-    def("neg",(TaylorModel(*)(const TaylorModel&))&neg);
-    def("rec",(TaylorModel(*)(const TaylorModel&))&rec);
-    def("sqr",(TaylorModel(*)(const TaylorModel&))&sqr);
-    def("pow",(TaylorModel(*)(const TaylorModel&, int))&pow);
+    def("neg",(IntervalTaylorModel(*)(const IntervalTaylorModel&))&neg);
+    def("rec",(IntervalTaylorModel(*)(const IntervalTaylorModel&))&rec);
+    def("sqr",(IntervalTaylorModel(*)(const IntervalTaylorModel&))&sqr);
+    def("pow",(IntervalTaylorModel(*)(const IntervalTaylorModel&, int))&pow);
 
-    def("sqrt", (TaylorModel(*)(const TaylorModel&))&sqrt);
-    def("exp", (TaylorModel(*)(const TaylorModel&))&exp);
-    def("log", (TaylorModel(*)(const TaylorModel&))&log);
-    def("sin", (TaylorModel(*)(const TaylorModel&))&sin);
-    def("cos", (TaylorModel(*)(const TaylorModel&))&cos);
-    def("tan", (TaylorModel(*)(const TaylorModel&))&tan);
+    def("sqrt", (IntervalTaylorModel(*)(const IntervalTaylorModel&))&sqrt);
+    def("exp", (IntervalTaylorModel(*)(const IntervalTaylorModel&))&exp);
+    def("log", (IntervalTaylorModel(*)(const IntervalTaylorModel&))&log);
+    def("sin", (IntervalTaylorModel(*)(const IntervalTaylorModel&))&sin);
+    def("cos", (IntervalTaylorModel(*)(const IntervalTaylorModel&))&cos);
+    def("tan", (IntervalTaylorModel(*)(const IntervalTaylorModel&))&tan);
 
-    taylor_model_class.def("range1", (Interval(*)(const TaylorModel&)) &_range1);
-    taylor_model_class.def("range2", (Interval(*)(const TaylorModel&)) &_range2);
-    taylor_model_class.def("range3", (Interval(*)(const TaylorModel&)) &_range3);
+    taylor_model_class.def("range1", (Interval(*)(const IntervalTaylorModel&)) &_range1);
+    taylor_model_class.def("range2", (Interval(*)(const IntervalTaylorModel&)) &_range2);
+    taylor_model_class.def("range3", (Interval(*)(const IntervalTaylorModel&)) &_range3);
 
-    def("split",(TaylorModel(*)(const TaylorModel&,uint,tribool)) &split);
+    def("split",(IntervalTaylorModel(*)(const IntervalTaylorModel&,uint,tribool)) &split);
 
-    from_python< Vector<TaylorModel> >();
-    to_python< Vector<TaylorModel> >();
+    from_python< Vector<IntervalTaylorModel> >();
+    to_python< Vector<IntervalTaylorModel> >();
 
 /*
     class_< TMV > taylor_model_vector_class("TaylorModelVector");
-    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,int,TaylorModel>);
-    taylor_model_vector_class.def("__setitem__", &__setitem__<TMV,int,TaylorModel>);
+    taylor_model_vector_class.def("__getitem__", &__getitem__<TMV,int,IntervalTaylorModel>);
+    taylor_model_vector_class.def("__setitem__", &__setitem__<TMV,int,IntervalTaylorModel>);
     taylor_model_vector_class.def(self_ns::str(self));
 */
 }
@@ -282,7 +282,7 @@ void export_scalar_taylor_function()
     typedef Vector<Interval> IntervalVector;
 
     class_<ScalarTaylorFunction> scalar_taylor_function_class("ScalarTaylorFunction",init<ScalarTaylorFunction>());
-    scalar_taylor_function_class.def(init<IntervalVector,TaylorModel>());
+    scalar_taylor_function_class.def(init<IntervalVector,IntervalTaylorModel>());
     scalar_taylor_function_class.def(init< IntervalVector >());
     scalar_taylor_function_class.def(init< IntervalVector, const RealScalarFunction& >());
     scalar_taylor_function_class.def("error", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
@@ -292,7 +292,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("codomain", &ScalarTaylorFunction::codomain);
     scalar_taylor_function_class.def("centre", &ScalarTaylorFunction::centre);
     scalar_taylor_function_class.def("range", &ScalarTaylorFunction::range);
-    scalar_taylor_function_class.def("model", (const TaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("model", (const IntervalTaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("__getitem__", &__getitem__<ScalarTaylorFunction,MultiIndex,Float>);
     scalar_taylor_function_class.def("__setitem__",&__setitem__<ScalarTaylorFunction,MultiIndex,Float>);
     scalar_taylor_function_class.def(+self);

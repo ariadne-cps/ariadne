@@ -66,7 +66,7 @@ class MonolithicHybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-class TaylorModel;
+template<class X> class TaylorModel;
 template<class MDL> class CalculusInterface;
 
 class EvolutionProfiler;

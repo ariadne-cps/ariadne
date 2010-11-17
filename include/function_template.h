@@ -47,8 +47,11 @@ class ScalarFunctionTemplate
     virtual Interval evaluate(const Vector<Interval>& x) const {
         Interval r; _base_compute(r,x); return r; }
 
-    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
-        TaylorModel r(TaylorModel(x[0].argument_size(),x[0].accuracy_ptr()));
+    virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const {
+        TaylorModel<Float> r(TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));
+        _base_compute(r,x); return r; }
+    virtual TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const {
+        TaylorModel<Interval> r(TaylorModel<Interval>(x[0].argument_size(),x[0].accuracy_ptr()));
         _base_compute(r,x); return r; }
 
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
@@ -82,8 +85,11 @@ class VectorFunctionTemplate
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->result_size()); _base_compute(r,x); return r; }
 
-    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        Vector<TaylorModel> r(this->result_size(),TaylorModel(x[0].argument_size(),x[0].accuracy_ptr()));
+    virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const {
+        Vector< TaylorModel<Float> > r(this->result_size(),TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));
+        _base_compute(r,x); return r; }
+    virtual Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const {
+        Vector< TaylorModel<Interval> > r(this->result_size(),TaylorModel<Interval>(x[0].argument_size(),x[0].accuracy_ptr()));
         _base_compute(r,x); return r; }
 
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {

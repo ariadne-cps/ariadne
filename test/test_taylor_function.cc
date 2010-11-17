@@ -531,8 +531,8 @@ void TestVectorTaylorFunction::test_flow()
         ARIADNE_TEST_PRINT(expected_flow);
 
 
-        ARIADNE_TEST_PRINT(norm(Vector<TaylorModel>(expected_flow.models()-computed_flow.models())));
-        for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(computed_flow.models()[i]).sweep(1e-6); }
+        ARIADNE_TEST_PRINT(norm(Vector<IntervalTaylorModel>(expected_flow.models()-computed_flow.models())));
+        for(uint i=0; i!=2; ++i) { const_cast<IntervalTaylorModel&>(computed_flow.models()[i]).sweep(1e-6); }
         ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
     }
 /*
@@ -594,7 +594,7 @@ void TestVectorTaylorFunction::test_flow()
         TaylorImageSet initial_set_model(VectorPolynomialFunction((0.264+0.0005*x)*ex+(0.046+0.0005*y)*ey), Vector<Interval>(2,Interval(-1,+1)));
         VectorPolynomialFunction vector_field((0.3-0.02*x)*ex+(0.0*y)*ey);
         double step_size=0.125;
-        TaylorModel integration_time_model=TaylorModel::constant(2,step_size);
+        IntervalTaylorModel integration_time_model=IntervalTaylorModel::constant(2,step_size);
 
         Vector<Interval> flow_domain=initial_set_model.range();
         Vector<Interval> flow_bound(2, 0.263538,0.264482, 0.0458876,0.0468876);

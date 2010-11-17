@@ -39,6 +39,10 @@
 
 namespace Ariadne {
 
+class Float;
+class Interval;
+class Real;
+
 template<class T1, class T2> class Product;
 template<class X> class Vector;
 template<class X> class Matrix;
@@ -46,8 +50,10 @@ template<class X> class Expansion;
 
 template<class X> class ScalarFunction;
 template<class X> class VectorFunction;
-class TaylorModel;
-class TaylorCalculus;
+
+template<class X> class TaylorModel;
+typedef TaylorModel<Float> FloatTaylorModel;
+typedef TaylorModel<Interval> IntervalTaylorModel;
 
 class IntersectionException;
 class ImplicitFunctionException;
@@ -56,119 +62,120 @@ class FlowBoundsException;
 // Rescale the vector x from the domain d to the unit domain.
 Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
 
-//! \relates TaylorModel \brief The magnitude of the variable
-Float mag(const TaylorModel& tm);
-//! \relates TaylorModel \brief Split the variable over two domains, subdividing along the independent variable j.
-pair<TaylorModel,TaylorModel> split(const TaylorModel& x, uint j);
-//! \relates TaylorModel
+//! \relates TaylorModel<Interval> \brief The magnitude of the variable
+Float mag(const TaylorModel<Interval>& tm);
+//! \relates TaylorModel<Interval> \brief Split the variable over two domains, subdividing along the independent variable j.
+pair< TaylorModel<Interval>, TaylorModel<Interval> > split(const TaylorModel<Interval>& x, uint j);
+//! \relates TaylorModel<Interval>
 //!\brief Split the variable, subdividing along the independent variable j
 //! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
-TaylorModel split(const TaylorModel& x, uint j, tribool half);
+TaylorModel<Interval> split(const TaylorModel<Interval>& x, uint j, tribool half);
 
-//! \relates TaylorModel \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
-TaylorModel scale(const TaylorModel& x, const Interval& ivl);
-//! \relates TaylorModel \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
-TaylorModel unscale(const TaylorModel& x, const Interval& ivl);
-//! \relates TaylorModel \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
-TaylorModel rescale(const TaylorModel& x, const Interval& ivl1, const Interval& ivl2);
+//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
+TaylorModel<Interval> scale(const TaylorModel<Interval>& x, const Interval& ivl);
+//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
+TaylorModel<Interval> unscale(const TaylorModel<Interval>& x, const Interval& ivl);
+//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
+TaylorModel<Interval> rescale(const TaylorModel<Interval>& x, const Interval& ivl1, const Interval& ivl2);
 
-//! \relates TaylorModel \brief Evaluate an array of Taylor variables on a vector.
-Interval evaluate(const TaylorModel& x, const Vector<Interval>& sy);
-//! \relates TaylorModel \brief Evaluate an array of Taylor variables on a vector.
-TaylorModel partial_evaluate(const TaylorModel& x, uint k, Float c);
-//! \relates TaylorModel \brief Evaluate an array of Taylor variables on a vector.
-TaylorModel partial_evaluate(const TaylorModel& x, uint k, Interval c);
-//! \relates TaylorModel
-//! Substitute the TaylorModel y in the  kth variable of \a x.
+//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+Interval evaluate(const TaylorModel<Interval>& x, const Vector<Interval>& sy);
+//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Float c);
+//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Interval c);
+//! \relates TaylorModel<Interval>
+//! Substitute the TaylorModel<Interval> y in the  kth variable of \a x.
 //! Precondition: x.argument_size()==y.argument_size()+1
-TaylorModel substitute(const TaylorModel& x, uint k, const TaylorModel& y);
+TaylorModel<Interval> substitute(const TaylorModel<Interval>& x, uint k, const TaylorModel<Interval>& y);
 
-//! \relates TaylorModel \brief Embed the model in a space of higher dimension
-TaylorModel embed(const TaylorModel& tv, uint as);
-//! \relates TaylorModel \brief Embed the model in a space of higher dimension
-TaylorModel embed(uint as, const TaylorModel& tv);
+//! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
+TaylorModel<Interval> embed(const TaylorModel<Interval>& tv, uint as);
+//! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
+TaylorModel<Interval> embed(uint as, const TaylorModel<Interval>& tv);
 
-//! \relates TaylorModel \brief Test if a model refines another
-bool refines(const TaylorModel& tv1, const TaylorModel& tv2);
-//! \relates TaylorModel \brief Test if a model is disjoint from
-bool disjoint(const TaylorModel& tv1, const TaylorModel& tv2);
+//! \relates TaylorModel<Interval> \brief Test if a model refines another
+bool refines(const TaylorModel<Interval>& tv1, const TaylorModel<Interval>& tv2);
+//! \relates TaylorModel<Interval> \brief Test if a model is disjoint from
+bool disjoint(const TaylorModel<Interval>& tv1, const TaylorModel<Interval>& tv2);
 
-//! \relates TaylorModel \brief Antidifferentiation operator
-TaylorModel antiderivative(const TaylorModel& x, uint k);
+//! \relates TaylorModel<Interval> \brief Antidifferentiation operator
+TaylorModel<Interval> antiderivative(const TaylorModel<Interval>& x, uint k);
 
-//! \relates TaylorModel \brief Differentiation operator; discards error term
-TaylorModel derivative(const TaylorModel& x, uint k);
+//! \relates TaylorModel<Interval> \brief Differentiation operator; discards error term
+TaylorModel<Interval> derivative(const TaylorModel<Interval>& x, uint k);
 
-//! \relates TaylorModel \brief Replace the variale x[k] with a*x[k]+b
-TaylorModel preaffine(const TaylorModel&, uint k, const Interval& a, const Interval& b);
-//! \relates TaylorModel \brief Restricts the range of the variable x[k] to the interval d.
+//! \relates TaylorModel<Interval> \brief Replace the variale x[k] with a*x[k]+b
+TaylorModel<Interval> preaffine(const TaylorModel<Interval>&, uint k, const Interval& a, const Interval& b);
+//! \relates TaylorModel<Interval> \brief Restricts the range of the variable x[k] to the interval d.
 //! \pre -1 <= d.lower() <= d.upper() <= 1 .
-TaylorModel restrict(const TaylorModel&, uint k, const Interval& d);
+TaylorModel<Interval> restrict(const TaylorModel<Interval>&, uint k, const Interval& d);
 
-//! \relates TaylorModel
+//! \relates TaylorModel<Interval>
 //! An over-approximation to the intersection of two Taylor models.
 //! Since the intersection cannot be represented exactly in the class of
 //! TaylorModels, truncation errors as well as roundoff errors may be present.
 //! In the absence of roundoff errors, the result is a subset of both arguments,
 //! and is guaranteed to contain any function contained in both arguments.
-TaylorModel intersection(const TaylorModel& x1, const TaylorModel& x2);
+TaylorModel<Interval> intersection(const TaylorModel<Interval>& x1, const TaylorModel<Interval>& x2);
 
 // Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain
-TaylorModel compose(const TaylorModel& x, const Vector<TaylorModel>& y);
+TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
 
 // Compose an array of Taylor variables with another, after scaling by the interval vectors
-TaylorModel compose(const TaylorModel& x, const Vector<Interval>& bx, const Vector<TaylorModel>& y);
+TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector<Interval>& bx, const Vector< TaylorModel<Interval> >& y);
 
 // Compute the implicit function f(x,h(x))=0
-TaylorModel implicit(const TaylorModel& f);
-TaylorModel implicit_step(const TaylorModel& f, const TaylorModel& h);
+TaylorModel<Interval> implicit(const TaylorModel<Interval>& f);
+TaylorModel<Interval> implicit_step(const TaylorModel<Interval>& f, const TaylorModel<Interval>& h);
 
 // Solve the equation f(x)=0
-Interval solve(const TaylorModel& f);
+Interval solve(const TaylorModel<Interval>& f);
 
 // Vector operations which can be evaluated componentwise
-bool refines(const Vector<TaylorModel>&,const Vector<TaylorModel>&);
-bool disjoint(const Vector<TaylorModel>&,const Vector<TaylorModel>&);
-pair< Vector<TaylorModel>, Vector<TaylorModel> > split(const Vector<TaylorModel>& x, uint j);
-Vector<TaylorModel> split(const Vector<TaylorModel>& x, uint j, bool half);
-Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
-Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
-Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
-Vector<TaylorModel> partial_evaluate(const Vector<TaylorModel>& x, uint k, Float sy);
-Vector<TaylorModel> partial_evaluate(const Vector<TaylorModel>& x, uint k, Interval sy);
-Vector<TaylorModel> substitute(const Vector<TaylorModel>& x, uint k, const TaylorModel& y);
-Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, uint k);
-Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);
-Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
-Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& d);
-//Matrix<Interval> jacobian(const Vector<TaylorModel>& x);
-bool refines(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
-Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
-Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2);
-Vector<TaylorModel> combine(const TaylorModel& x1, const Vector<TaylorModel>& x2);
-Vector<TaylorModel> combine(const TaylorModel& x1, const TaylorModel& x2);
-Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<TaylorModel>& g);
-Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<Interval>& d, const Vector<TaylorModel>& g);
+bool refines(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
+bool disjoint(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
+pair< Vector< TaylorModel<Interval> >, Vector< TaylorModel<Interval> > > split(const Vector< TaylorModel<Interval> >& x, uint j);
+Vector< TaylorModel<Interval> > split(const Vector< TaylorModel<Interval> >& x, uint j, bool half);
+Vector< TaylorModel<Interval> > unscale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);
+Vector< TaylorModel<Interval> > scale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);
+Vector<Interval> evaluate(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& sy);
+Vector< TaylorModel<Interval> > partial_evaluate(const Vector< TaylorModel<Interval> >& x, uint k, Float sy);
+Vector< TaylorModel<Interval> > partial_evaluate(const Vector< TaylorModel<Interval> >& x, uint k, Interval sy);
+Vector< TaylorModel<Interval> > substitute(const Vector< TaylorModel<Interval> >& x, uint k, const TaylorModel<Interval>& y);
+Vector< TaylorModel<Interval> > antiderivative(const Vector< TaylorModel<Interval> >& x, uint k);
+Vector< TaylorModel<Interval> > embed(const Vector< TaylorModel<Interval> >& x, uint as);
+Vector< TaylorModel<Interval> > embed(uint as, const Vector< TaylorModel<Interval> >& x);
+Matrix<Interval> jacobian(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d);
+//Matrix<Interval> jacobian(const Vector< TaylorModel<Interval> >& x);
+bool refines(const Vector< TaylorModel<Interval> >& x1, const Vector< TaylorModel<Interval> >& x2);
+Vector< TaylorModel<Interval> > combine(const Vector< TaylorModel<Interval> >& x1, const Vector< TaylorModel<Interval> >& x2);
+Vector< TaylorModel<Interval> > combine(const Vector< TaylorModel<Interval> >& x1, const TaylorModel<Interval>& x2);
+Vector< TaylorModel<Interval> > combine(const TaylorModel<Interval>& x1, const Vector< TaylorModel<Interval> >& x2);
+Vector< TaylorModel<Interval> > combine(const TaylorModel<Interval>& x1, const TaylorModel<Interval>& x2);
+Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& g);
+Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& g);
 
 //Vector operations which cannot be computed componentwise
-Vector<Interval> solve(const Vector<TaylorModel>& f);
-Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
-Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
-Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
-Vector<TaylorModel> parameterised_flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
+Vector<Interval> solve(const Vector< TaylorModel<Interval> >& f);
+Vector< TaylorModel<Interval> > implicit(const Vector< TaylorModel<Interval> >& f);
+Vector< TaylorModel<Interval> > implicit_step(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& h);
+Vector< TaylorModel<Interval> > flow(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y0, uint order);
+Vector< TaylorModel<Interval> > parameterised_flow(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y0, uint order);
 
-TaylorModel unchecked_compose(const TaylorModel& x, const Vector<TaylorModel>& y);
-Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y);
-Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Vector<TaylorModel>& y);
-Vector<TaylorModel> unchecked_flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
+TaylorModel<Interval> unchecked_compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
+Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y);
+Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& y);
+Vector< TaylorModel<Interval> > unchecked_flow(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y0, uint order);
 
-Float norm(const Vector<TaylorModel>& tv);
+Float norm(const Vector< TaylorModel<Interval> >& tv);
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
  * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorImageSet.
  */
-class TaylorModel
+template<>
+class TaylorModel<Interval>
 {
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
@@ -204,100 +211,100 @@ class TaylorModel
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
-    TaylorModel();
-    //! \brief Construct a TaylorModel in \a as arguments.
-    TaylorModel(uint as);
-    //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
-    TaylorModel(uint as, shared_ptr<Accuracy> acc);
+    TaylorModel<Interval>();
+    //! \brief Construct a TaylorModel<Interval> in \a as arguments.
+    TaylorModel<Interval>(uint as);
+    //! \brief Construct a TaylorModel<Interval> in \a as arguments with the given accuracy control.
+    TaylorModel<Interval>(uint as, shared_ptr<Accuracy> acc);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e);
+    TaylorModel<Interval>(const std::map<MultiIndex,Float>& d, const Float& e);
     //! \brief Construct from a map giving the expansion, and a constant giving the error.
-    TaylorModel(const Expansion<Float>& f, const Float& e=0.0);
+    TaylorModel<Interval>(const Expansion<Float>& f, const Float& e=0.0);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel(const Expansion<Float>& f, const Float& e, shared_ptr<Accuracy> a);
+    TaylorModel<Interval>(const Expansion<Float>& f, const Float& e, shared_ptr<Accuracy> a);
     //! \brief Fast swap with another Taylor model.
-    void swap(TaylorModel& tm);
+    void swap(TaylorModel<Interval>& tm);
     //! \brief Set to zero.
     void clear();
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a builtin, keeping the same number of arguments.
-    TaylorModel& operator=(double c);
+    TaylorModel<Interval>& operator=(double c);
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel& operator=(const Real& c);
+    TaylorModel<Interval>& operator=(const Real& c);
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel& operator=(const Float& c);
+    TaylorModel<Interval>& operator=(const Float& c);
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel& operator=(const Interval& c);
+    TaylorModel<Interval>& operator=(const Interval& c);
     //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
-    bool refines(const TaylorModel& t);
+    bool refines(const TaylorModel<Interval>& t);
     //@}
 
     //@{
     /*! \name Named constructors. */
     //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorModel zero(uint as) {
-        TaylorModel r(as); return r; }
+    static TaylorModel<Interval> zero(uint as) {
+        TaylorModel<Interval> r(as); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel constant(uint as, double c) {
-        TaylorModel r(as); r.set_value(static_cast<Float>(c)); return r; }
+    static TaylorModel<Interval> constant(uint as, double c) {
+        TaylorModel<Interval> r(as); r.set_value(static_cast<Float>(c)); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel constant(uint as, const Float& c) {
-        TaylorModel r(as); r.set_value(c); return r; }
+    static TaylorModel<Interval> constant(uint as, const Float& c) {
+        TaylorModel<Interval> r(as); r.set_value(c); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel constant(uint as, const Interval& d) {
-        TaylorModel r(as); r.set_value(1.0); r*=d; return r; }
+    static TaylorModel<Interval> constant(uint as, const Interval& d) {
+        TaylorModel<Interval> r(as); r.set_value(1.0); r*=d; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel variable(uint as, uint j) {
-        TaylorModel r(as); r.set_gradient(j,1.0); return r; }
+    static TaylorModel<Interval> variable(uint as, uint j) {
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); return r; }
     //! \brief Construct the quantity which scales the unit interval into the domain \a d.
-    static TaylorModel scaling(uint as, uint j, const Interval& d) {
-        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
+    static TaylorModel<Interval> scaling(uint as, uint j, const Interval& d) {
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
     //! \brief Construct the quantity which scales the codomain \a cd into the unit interval.
-    static TaylorModel unscaling(uint as, uint j, const Interval& d) {
-        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
+    static TaylorModel<Interval> unscaling(uint as, uint j, const Interval& d) {
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
     //! \brief Construct the quantity which scales the interval \a cd onto the interval \a d.
-    static TaylorModel rescaling(uint as, uint j, const Interval& cd, const Interval& d) {
-        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(cd,d); return r; }
+    static TaylorModel<Interval> rescaling(uint as, uint j, const Interval& cd, const Interval& d) {
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(cd,d); return r; }
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$.
-    static TaylorModel affine(const Float& c, const Vector<Float>& g) {
-        TaylorModel r(g.size()); r.set_value(c);
+    static TaylorModel<Interval> affine(const Float& c, const Vector<Float>& g) {
+        TaylorModel<Interval> r(g.size()); r.set_value(c);
         for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$.
-    static TaylorModel affine(const Float& x, const Vector<Float>& g, const Float& e) {
-        TaylorModel r(g.size()); r.set_value(x); r.set_error(e);
+    static TaylorModel<Interval> affine(const Float& x, const Vector<Float>& g, const Float& e) {
+        TaylorModel<Interval> r(g.size()); r.set_value(x); r.set_error(e);
         for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
-    static Vector<TaylorModel> zeros(uint rs, uint as);
+    static Vector< TaylorModel<Interval> > zeros(uint rs, uint as);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel> constants(uint as, const Vector<Float>& c);
+    static Vector< TaylorModel<Interval> > constants(uint as, const Vector<Float>& c);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel> constants(uint as, const Vector<Interval>& c);
+    static Vector< TaylorModel<Interval> > constants(uint as, const Vector<Interval>& c);
     //! \brief Return the vector of variables on the unit domain.
-    static Vector<TaylorModel> variables(uint as);
+    static Vector< TaylorModel<Interval> > variables(uint as);
     //! \brief Return the vector scaling the unit interval onto the domain \a d.
-    static Vector<TaylorModel> scalings(const Vector<Interval>& d);
+    static Vector< TaylorModel<Interval> > scalings(const Vector<Interval>& d);
     //! \brief Return the vector scaling the unit interval onto the codomain \a cd.
-    static Vector<TaylorModel> unscalings(const Vector<Interval>& d);
+    static Vector< TaylorModel<Interval> > unscalings(const Vector<Interval>& d);
     //! \brief Return the vector scaling the codomain \a cd onto the domain \a d.
-    static Vector<TaylorModel> rescalings(const Vector<Interval>& cd, const Vector<Interval>& d);
+    static Vector< TaylorModel<Interval> > rescalings(const Vector<Interval>& cd, const Vector<Interval>& d);
     //@}
 
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    bool operator==(const TaylorModel& sd) const {
+    bool operator==(const TaylorModel<Interval>& sd) const {
         return this->_expansion==sd._expansion && this->_error == sd._error; }
     //! \brief Inequality operator.
-    bool operator!=(const TaylorModel& sd) const {
+    bool operator!=(const TaylorModel<Interval>& sd) const {
         return !(*this==sd); }
     //! \brief Comparison with another Taylor model.
-    tribool operator<(const TaylorModel& sd) const {
+    tribool operator<(const TaylorModel<Interval>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
-    tribool operator>(const TaylorModel& sd) const {
+    tribool operator>(const TaylorModel<Interval>& sd) const {
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
@@ -389,61 +396,61 @@ class TaylorModel
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scale so that the old codomain maps into the new codomain.
-    TaylorModel& rescale(const Interval& old_codomain, const Interval& new_codomain);
+    TaylorModel<Interval>& rescale(const Interval& old_codomain, const Interval& new_codomain);
     //! \brief Restrict to a subdomain.
-    TaylorModel& restrict(const Vector<Interval>& new_domain);
+    TaylorModel<Interval>& restrict(const Vector<Interval>& new_domain);
     //! \brief Compute the antiderivative (in place).
-    TaylorModel& antidifferentiate(uint k);
+    TaylorModel<Interval>& antidifferentiate(uint k);
     //@}
 
     //@{
     /*! \name Set-based operations. */
     //! \brief Test if one model refines (is a subset of) another.
-    friend bool refines(const TaylorModel& tm1, const TaylorModel& tm2);
+    friend bool refines(const TaylorModel<Interval>& tm1, const TaylorModel<Interval>& tm2);
     //! \brief Test if one model is disjoint from (is incompatible with) another.
-    friend bool disjoint(const TaylorModel& tm1, const TaylorModel& tm2);
+    friend bool disjoint(const TaylorModel<Interval>& tm1, const TaylorModel<Interval>& tm2);
     //! \brief An over-approximation of the intersection of the sets of functions
     //! allowed by the two models. It is guaranteed that any function represented
     //! by both models is also represented by the result.
-    friend TaylorModel intersection(const TaylorModel& tm1, const TaylorModel& tm2);
+    friend TaylorModel<Interval> intersection(const TaylorModel<Interval>& tm1, const TaylorModel<Interval>& tm2);
     //! \brief The supremum norm of the model, given by \f$|e|+\sum_\alpha |c_\alpha|\f$.
-    friend Float norm(const TaylorModel& tm);
+    friend Float norm(const TaylorModel<Interval>& tm);
     //@{
     /*! \name Vectoral function operators. */
     //! \brief Solve the equation \f$f(x)=0\f$ in the unit box.
-    friend Vector<Interval> solve(const Vector<TaylorModel>& f);
+    friend Vector<Interval> solve(const Vector< TaylorModel<Interval> >& f);
     //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
-    friend Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<TaylorModel>& g);
+    friend Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& g);
     //! \brief Compute the implicit function h satisfying f(x,h(x))=0.
-    friend Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
+    friend Vector< TaylorModel<Interval> > implicit(const Vector< TaylorModel<Interval> >& f);
     //! \brief Compute the flow of the vector field \a vf, starting from the box \a d,
     //! over the time interval \a h, using temporal order \a o.
-    friend Vector<TaylorModel> flow(const Vector<TaylorModel>& vf,
+    friend Vector< TaylorModel<Interval> > flow(const Vector< TaylorModel<Interval> >& vf,
                                     const Vector<Interval>& d, const Interval& h, uint o);
     //@}
 
     //@{
     /*! \name Simplification operations. */
     //! \brief Truncate to the default maximum degree of the quantity.
-    TaylorModel& truncate();
+    TaylorModel<Interval>& truncate();
     //! \brief Truncate to degree \a deg.
-    TaylorModel& truncate(uint deg);
+    TaylorModel<Interval>& truncate(uint deg);
     //! \brief Truncate all terms with any coefficient higher than \a a.
-    TaylorModel& truncate(const MultiIndex& a);
+    TaylorModel<Interval>& truncate(const MultiIndex& a);
     //! \brief Truncate all terms with any coefficient higher than those given by \a a.
-    TaylorModel& truncate(const MultiIndexBound& a);
+    TaylorModel<Interval>& truncate(const MultiIndexBound& a);
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    TaylorModel& sweep();
+    TaylorModel<Interval>& sweep();
     //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
-    TaylorModel& sweep(double eps);
+    TaylorModel<Interval>& sweep(double eps);
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    TaylorModel& clean(const Accuracy& accuracy);
+    TaylorModel<Interval>& clean(const Accuracy& accuracy);
     //! \brief Remove all terms which have high degree or small magnitude.
-    TaylorModel& clean();
+    TaylorModel<Interval>& clean();
     //! \brief Sort the terms in index order and combine terms with the same index.
-    TaylorModel& unique_sort();
+    TaylorModel<Interval>& unique_sort();
     //@}
 
     //@{
@@ -480,125 +487,125 @@ class TaylorModel
     //@{
     /*! \name Arithmetic operations. */
     //! \brief Inplace addition of another variable.
-    friend TaylorModel& operator+=(TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval>& operator+=(TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Inplace subtraction of another variable.
-    friend TaylorModel& operator-=(TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval>& operator-=(TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Inplace multiplication of another variable. Not any more efficient than ordinary multiplication.
-    friend TaylorModel& operator*=(TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval>& operator*=(TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Inplace division of another variable. Not any more efficient than ordinary division.
-    friend TaylorModel& operator/=(TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval>& operator/=(TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Inplace addition of a product of two variables.
-    friend TaylorModel& operator+=(TaylorModel& x, const Product<TaylorModel,TaylorModel>& y);
+    friend TaylorModel<Interval>& operator+=(TaylorModel<Interval>& x, const Product< TaylorModel<Interval>, TaylorModel<Interval> >& y);
     //! \brief Inplace addition of a built-in floating-point constant.
-    friend TaylorModel& operator+=(TaylorModel& x, double c);
+    friend TaylorModel<Interval>& operator+=(TaylorModel<Interval>& x, double c);
     //! \brief Inplace subtraction of a built-in floating-point constant.
-    friend TaylorModel& operator-=(TaylorModel& x, double c);
+    friend TaylorModel<Interval>& operator-=(TaylorModel<Interval>& x, double c);
     //! \brief Inplace multiplication by a builting scalar.
-    friend TaylorModel& operator*=(TaylorModel& x, double c);
+    friend TaylorModel<Interval>& operator*=(TaylorModel<Interval>& x, double c);
     //! \brief Inplace division by an built-in scalar.
-    friend TaylorModel& operator/=(TaylorModel& x, double c);
+    friend TaylorModel<Interval>& operator/=(TaylorModel<Interval>& x, double c);
     //! \brief Inplace addition of an exact real number.
-    friend TaylorModel& operator+=(TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval>& operator+=(TaylorModel<Interval>& x, const Real& c);
     //! \brief Inplace subtraction of an exact real number.
-    friend TaylorModel& operator-=(TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval>& operator-=(TaylorModel<Interval>& x, const Real& c);
     //! \brief Inplace multiplication by an exact real number.
-    friend TaylorModel& operator*=(TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval>& operator*=(TaylorModel<Interval>& x, const Real& c);
     //! \brief Inplace division by an exact real number.
-    friend TaylorModel& operator/=(TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval>& operator/=(TaylorModel<Interval>& x, const Real& c);
     //! \brief Inplace addition of an exact floating-point constant.
-    friend TaylorModel& operator+=(TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval>& operator+=(TaylorModel<Interval>& x, const Float& c);
     //! \brief Inplace subtraction of an exact floating-point constant.
-    friend TaylorModel& operator-=(TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval>& operator-=(TaylorModel<Interval>& x, const Float& c);
     //! \brief Inplace multiplication by an exact scalar.
-    friend TaylorModel& operator*=(TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval>& operator*=(TaylorModel<Interval>& x, const Float& c);
     //! \brief Inplace division by an exact scalar.
-    friend TaylorModel& operator/=(TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval>& operator/=(TaylorModel<Interval>& x, const Float& c);
     //! \brief Inplace addition of an interval constant.
-    friend TaylorModel& operator+=(TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval>& operator+=(TaylorModel<Interval>& x, const Interval& c);
     //! \brief Inplace subtraction of an interval constant.
-    friend TaylorModel& operator-=(TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval>& operator-=(TaylorModel<Interval>& x, const Interval& c);
     //! \brief Inplace multiplication by an approximate scalar.
-    friend TaylorModel& operator*=(TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval>& operator*=(TaylorModel<Interval>& x, const Interval& c);
     //! \brief Inplace division by an approximate scalar.
-    friend TaylorModel& operator/=(TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval>& operator/=(TaylorModel<Interval>& x, const Interval& c);
 
     //! \brief Unary plus.
-    friend TaylorModel operator+(const TaylorModel& x);
+    friend TaylorModel<Interval> operator+(const TaylorModel<Interval>& x);
     //! \brief Unary minus.
-    friend TaylorModel operator-(const TaylorModel& x);
+    friend TaylorModel<Interval> operator-(const TaylorModel<Interval>& x);
     //! \brief Addition.
-    friend TaylorModel operator+(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> operator+(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Subtraction.
-    friend TaylorModel operator-(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> operator-(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Multiplication.
-    friend TaylorModel operator*(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> operator*(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Division.
-    friend TaylorModel operator/(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> operator/(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
 
     //! \brief Addition of a scalar.
-    friend TaylorModel operator+(const TaylorModel& x, double c);
+    friend TaylorModel<Interval> operator+(const TaylorModel<Interval>& x, double c);
     //! \brief Subtraction of a scalar.
-    friend TaylorModel operator-(const TaylorModel& x, double c);
+    friend TaylorModel<Interval> operator-(const TaylorModel<Interval>& x, double c);
     //! \brief Multiplication by a scalar.
-    friend TaylorModel operator*(const TaylorModel& x, double c);
+    friend TaylorModel<Interval> operator*(const TaylorModel<Interval>& x, double c);
     //! \brief Division by a scalar.
-    friend TaylorModel operator/(const TaylorModel& x, double c);
+    friend TaylorModel<Interval> operator/(const TaylorModel<Interval>& x, double c);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator+(const TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval> operator+(const TaylorModel<Interval>& x, const Real& c);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator-(const TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval> operator-(const TaylorModel<Interval>& x, const Real& c);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator*(const TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval> operator*(const TaylorModel<Interval>& x, const Real& c);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator/(const TaylorModel& x, const Real& c);
+    friend TaylorModel<Interval> operator/(const TaylorModel<Interval>& x, const Real& c);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator+(const TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval> operator+(const TaylorModel<Interval>& x, const Float& c);
     //! \brief Subtraction of a scalar.
-    friend TaylorModel operator-(const TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval> operator-(const TaylorModel<Interval>& x, const Float& c);
     //! \brief Multiplication by a scalar.
-    friend TaylorModel operator*(const TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval> operator*(const TaylorModel<Interval>& x, const Float& c);
     //! \brief Division by a scalar.
-    friend TaylorModel operator/(const TaylorModel& x, const Float& c);
+    friend TaylorModel<Interval> operator/(const TaylorModel<Interval>& x, const Float& c);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator+(const TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval> operator+(const TaylorModel<Interval>& x, const Interval& c);
     //! \brief Subtraction of a scalar.
-    friend TaylorModel operator-(const TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval> operator-(const TaylorModel<Interval>& x, const Interval& c);
     //! \brief Multiplication by a scalar.
-    friend TaylorModel operator*(const TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval> operator*(const TaylorModel<Interval>& x, const Interval& c);
     //! \brief Division by a scalar.
-    friend TaylorModel operator/(const TaylorModel& x, const Interval& c);
+    friend TaylorModel<Interval> operator/(const TaylorModel<Interval>& x, const Interval& c);
     //! \brief Addition of a built-in scalar.
-    friend TaylorModel operator+(double c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator+(double c, const TaylorModel<Interval>& x);
     //! \brief Subtraction from a built-in scalar.
-    friend TaylorModel operator-(double c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator-(double c, const TaylorModel<Interval>& x);
     //! \brief Multiplication by a built-in scalar.
-    friend TaylorModel operator*(double c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator*(double c, const TaylorModel<Interval>& x);
     //! \brief Division through a built-in scalar.
-    friend TaylorModel operator/(double c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator/(double c, const TaylorModel<Interval>& x);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator+(const Real& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator+(const Real& c, const TaylorModel<Interval>& x);
     //! \brief Subtraction from a scalar.
-    friend TaylorModel operator-(const Real& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator-(const Real& c, const TaylorModel<Interval>& x);
     //! \brief Multiplication by a scalar.
-    friend TaylorModel operator*(const Real& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator*(const Real& c, const TaylorModel<Interval>& x);
     //! \brief Division through a scalar.
-    friend TaylorModel operator/(const Real& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator/(const Real& c, const TaylorModel<Interval>& x);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator+(const Float& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator+(const Float& c, const TaylorModel<Interval>& x);
     //! \brief Subtraction from a scalar.
-    friend TaylorModel operator-(const Float& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator-(const Float& c, const TaylorModel<Interval>& x);
     //! \brief Multiplication by a scalar.
-    friend TaylorModel operator*(const Float& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator*(const Float& c, const TaylorModel<Interval>& x);
     //! \brief Division through a scalar.
-    friend TaylorModel operator/(const Float& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator/(const Float& c, const TaylorModel<Interval>& x);
     //! \brief Addition of a scalar.
-    friend TaylorModel operator+(const Interval& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator+(const Interval& c, const TaylorModel<Interval>& x);
     //! \brief Subtraction from a scalar.
-    friend TaylorModel operator-(const Interval& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator-(const Interval& c, const TaylorModel<Interval>& x);
     //! \brief Multiplication by a scalar.
-    friend TaylorModel operator*(const Interval& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator*(const Interval& c, const TaylorModel<Interval>& x);
     //! \brief Division through a scalar.
-    friend TaylorModel operator/(const Interval& c, const TaylorModel& x);
+    friend TaylorModel<Interval> operator/(const Interval& c, const TaylorModel<Interval>& x);
     //@}
 
     //@{
@@ -606,83 +613,83 @@ class TaylorModel
 
     //! \brief Maximum. Throws an error if one variable is not greater than the other
     //! over the entire domain.
-    friend TaylorModel max(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> max(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Minimum. Throws an error if one variable is not greater than the other
     //! over the entire domain.
-    friend TaylorModel min(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> min(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Addition.
-    friend TaylorModel add(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> add(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Multiplication.
-    friend TaylorModel mul(const TaylorModel& x, const TaylorModel& y);
+    friend TaylorModel<Interval> mul(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
     //! \brief Absolute value. Throws an error if one variable is neither greater than
     //! zero over the entire domain, nor less than zero over the entire domain.
-    friend TaylorModel abs(const TaylorModel& x);
+    friend TaylorModel<Interval> abs(const TaylorModel<Interval>& x);
     //! \brief Negation.
-    friend TaylorModel neg(const TaylorModel& x);
+    friend TaylorModel<Interval> neg(const TaylorModel<Interval>& x);
     //! \brief Reciprocal.
-    friend TaylorModel rec(const TaylorModel& x);
+    friend TaylorModel<Interval> rec(const TaylorModel<Interval>& x);
     //! \brief Square.
-    friend TaylorModel sqr(const TaylorModel& x);
+    friend TaylorModel<Interval> sqr(const TaylorModel<Interval>& x);
     //! \brief Power.
-    friend TaylorModel pow(const TaylorModel& x, int n);
+    friend TaylorModel<Interval> pow(const TaylorModel<Interval>& x, int n);
     //! \brief Square root.
-    friend TaylorModel sqrt(const TaylorModel& x);
+    friend TaylorModel<Interval> sqrt(const TaylorModel<Interval>& x);
     //! \brief Natural exponent.
-    friend TaylorModel exp(const TaylorModel& x);
+    friend TaylorModel<Interval> exp(const TaylorModel<Interval>& x);
     //! \brief Natural logarithm.
-    friend TaylorModel log(const TaylorModel& x);
+    friend TaylorModel<Interval> log(const TaylorModel<Interval>& x);
     //! \brief Sine.
-    friend TaylorModel sin(const TaylorModel& x);
+    friend TaylorModel<Interval> sin(const TaylorModel<Interval>& x);
     //! \brief Cosine.
-    friend TaylorModel cos(const TaylorModel& x);
+    friend TaylorModel<Interval> cos(const TaylorModel<Interval>& x);
     //! \brief Tangent.
-    friend TaylorModel tan(const TaylorModel& x);
+    friend TaylorModel<Interval> tan(const TaylorModel<Interval>& x);
     //! \brief Inverse sine.
-    friend TaylorModel asin(const TaylorModel& x);
+    friend TaylorModel<Interval> asin(const TaylorModel<Interval>& x);
     //! \brief Inverse cosine.
-    friend TaylorModel acos(const TaylorModel& x);
+    friend TaylorModel<Interval> acos(const TaylorModel<Interval>& x);
     //! \brief Inverse tangent.
-    friend TaylorModel atan(const TaylorModel& x);
+    friend TaylorModel<Interval> atan(const TaylorModel<Interval>& x);
     //@}
 
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const TaylorModel& x);
+    friend std::ostream& operator<<(std::ostream& os, const TaylorModel<Interval>& x);
     //@}
 
   public:
     std::ostream& str(const std::ostream&) const;
     std::ostream& repr(const std::ostream&) const;
 
-    TaylorModel& clobber();
-    TaylorModel& clobber(uint o);
-    TaylorModel& clobber(uint so, uint to);
+    TaylorModel<Interval>& clobber();
+    TaylorModel<Interval>& clobber(uint o);
+    TaylorModel<Interval>& clobber(uint so, uint to);
 };
 
-TaylorModel max(const TaylorModel& x, const TaylorModel& y);
-TaylorModel min(const TaylorModel& x, const TaylorModel& y);
-TaylorModel abs(const TaylorModel& x);
-TaylorModel neg(const TaylorModel& x);
-TaylorModel rec(const TaylorModel& x);
-TaylorModel sqr(const TaylorModel& x);
-TaylorModel pow(const TaylorModel& x, int n);
-TaylorModel sqrt(const TaylorModel& x);
-TaylorModel exp(const TaylorModel& x);
-TaylorModel log(const TaylorModel& x);
-TaylorModel sin(const TaylorModel& x);
-TaylorModel cos(const TaylorModel& x);
-TaylorModel tan(const TaylorModel& x);
-TaylorModel asin(const TaylorModel& x);
-TaylorModel acos(const TaylorModel& x);
-TaylorModel atan(const TaylorModel& x);
+TaylorModel<Interval> max(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
+TaylorModel<Interval> min(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
+TaylorModel<Interval> abs(const TaylorModel<Interval>& x);
+TaylorModel<Interval> neg(const TaylorModel<Interval>& x);
+TaylorModel<Interval> rec(const TaylorModel<Interval>& x);
+TaylorModel<Interval> sqr(const TaylorModel<Interval>& x);
+TaylorModel<Interval> pow(const TaylorModel<Interval>& x, int n);
+TaylorModel<Interval> sqrt(const TaylorModel<Interval>& x);
+TaylorModel<Interval> exp(const TaylorModel<Interval>& x);
+TaylorModel<Interval> log(const TaylorModel<Interval>& x);
+TaylorModel<Interval> sin(const TaylorModel<Interval>& x);
+TaylorModel<Interval> cos(const TaylorModel<Interval>& x);
+TaylorModel<Interval> tan(const TaylorModel<Interval>& x);
+TaylorModel<Interval> asin(const TaylorModel<Interval>& x);
+TaylorModel<Interval> acos(const TaylorModel<Interval>& x);
+TaylorModel<Interval> atan(const TaylorModel<Interval>& x);
 
-std::ostream& operator<<(std::ostream&, const TaylorModel::Accuracy&);
+std::ostream& operator<<(std::ostream&, const TaylorModel<Interval>::Accuracy&);
 
 
-struct TaylorModel::Accuracy {
-    friend class TaylorModel;
-    friend class ApproximateTaylorModel;
+struct TaylorModel<Interval>::Accuracy {
+    friend class TaylorModel<Interval>;
+    friend class TaylorModel<Float>;
     friend class TaylorCalculus;
 
     Accuracy();
@@ -715,15 +722,16 @@ struct FlowBoundsException : public std::runtime_error {
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomila, TaylorModel<Interval>.
+ * See also Expansion, Polynomila, TaylorModel<Interval><Interval>.
  */
-class ApproximateTaylorModel
+template<>
+class TaylorModel<Float>
 {
-    typedef TaylorModel::Accuracy Accuracy;
+    typedef TaylorModel<Interval>::Accuracy Accuracy;
     typedef Expansion<Float> ExpansionType;
   private:
-    mutable shared_ptr<Accuracy> _accuracy_ptr;
     ExpansionType _expansion;
+    mutable shared_ptr<Accuracy> _accuracy_ptr;
   private:
     static const Float _zero;
 
@@ -744,41 +752,43 @@ class ApproximateTaylorModel
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Construct a IntervalTaylorModel in \a as arguments.
-    ApproximateTaylorModel(uint as = 0u);
+    TaylorModel<Float>(uint as = 0u);
+    TaylorModel<Float>(uint as, shared_ptr<Accuracy> acc);
     //! \brief Fast swap with another Taylor model.
-    void swap(ApproximateTaylorModel& other) { this->_expansion.swap(other._expansion); }
+    void swap(TaylorModel<Float>& other) { this->_expansion.swap(other._expansion); }
     //! \brief Set to zero.
     void clear() { this->_expansion.clear(); }
     //! \brief A zero element with the same parameters.
-    ApproximateTaylorModel null() const { return ApproximateTaylorModel(this->argument_size()); }
+    TaylorModel<Float> null() const { return TaylorModel<Float>(this->argument_size()); }
     //@}
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a built-in, keeping the same number of arguments.
-    ApproximateTaylorModel& operator=(double c) {
+    TaylorModel<Float>& operator=(double c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),Float(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    ApproximateTaylorModel& operator=(const Float& c) {
+    TaylorModel<Float>& operator=(const Float& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    ApproximateTaylorModel& operator=(const Interval& c) { return (*this)=midpoint(c); }
+    TaylorModel<Float>& operator=(const Interval& c) { return (*this)=midpoint(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
-    ApproximateTaylorModel& operator=(const Real& c) { return (*this)=Float(c); }
+    TaylorModel<Float>& operator=(const Real& c) { return (*this)=Float(c); }
     //@}
 
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    bool operator==(const ApproximateTaylorModel& other) const {
+    bool operator==(const TaylorModel<Float>& other) const {
         return this->_expansion==other._expansion; }
     //! \brief Inequality operator.
-    bool operator!=(const ApproximateTaylorModel& other) const {
+    bool operator!=(const TaylorModel<Float>& other) const {
         return !(*this==other); }
     //@}
 
     //@{
     /*! \name Data access */
+    shared_ptr<Accuracy> accuracy_ptr() const { return this->_accuracy_ptr; }
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The coefficient of the term in $x^a$.
@@ -812,23 +822,23 @@ class ApproximateTaylorModel
     //@{
     /*! \name Simplification operations. */
     //! \brief Truncate to the default maximum degree of the quantity.
-    ApproximateTaylorModel& truncate();
+    TaylorModel<Float>& truncate();
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    ApproximateTaylorModel& sweep();
+    TaylorModel<Float>& sweep();
     //! \brief Remove all terms which have high degree or small magnitude.
-    ApproximateTaylorModel& clean();
+    TaylorModel<Float>& clean();
     //! \brief Sort the terms in index order and combine terms with the same index.
-    ApproximateTaylorModel& unique_sort();
+    TaylorModel<Float>& unique_sort();
     //@}
 
   public:
     //@{
     /*! \name Standard algebra interface. */
     //! \brief Create a dynamically-allocated model which is the zero constant.
-    virtual ApproximateTaylorModel* create() const;
+    virtual TaylorModel<Float>* create() const;
     //! \brief Create a dynamically-allocated copy.
-    virtual ApproximateTaylorModel* clone() const;
+    virtual TaylorModel<Float>* clone() const;
     //! \brief An approximation to the norm of the function.
     virtual Float norm() const;
     //! \brief An approximation to the average value of the function.
@@ -842,17 +852,17 @@ class ApproximateTaylorModel
     //! \brief Inplace multiplication of a scalar constant.
     virtual void imul(const Float& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    virtual void isma(const Float& c, const ApproximateTaylorModel& x);
+    virtual void isma(const Float& c, const TaylorModel<Float>& x);
     //! \brief Inplace addition of a product of Taylor models.
-    virtual void ifma(const ApproximateTaylorModel& x1, const ApproximateTaylorModel& x2);
+    virtual void ifma(const TaylorModel<Float>& x1, const TaylorModel<Float>& x2);
     //! \brief Addition of a scalar multiple of a Taylor model.
-    ApproximateTaylorModel sma(const Float& c, const ApproximateTaylorModel& x) const;
+    TaylorModel<Float> sma(const Float& c, const TaylorModel<Float>& x) const;
 
 
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const ApproximateTaylorModel& x);
+    friend std::ostream& operator<<(std::ostream& os, const TaylorModel<Float>& x);
     //@}
 
   public:
@@ -860,89 +870,90 @@ class ApproximateTaylorModel
     std::ostream& repr(std::ostream&) const;
 };
 
-ApproximateTaylorModel neg(const ApproximateTaylorModel& t);
-ApproximateTaylorModel rec(const ApproximateTaylorModel& t);
-ApproximateTaylorModel sqr(const ApproximateTaylorModel& t);
-ApproximateTaylorModel sqrt(const ApproximateTaylorModel& t);
-ApproximateTaylorModel exp(const ApproximateTaylorModel& t);
-ApproximateTaylorModel log(const ApproximateTaylorModel& t);
-ApproximateTaylorModel sin(const ApproximateTaylorModel& t);
-ApproximateTaylorModel cos(const ApproximateTaylorModel& t);
-ApproximateTaylorModel tan(const ApproximateTaylorModel& t);
+TaylorModel<Float> neg(const TaylorModel<Float>& t);
+TaylorModel<Float> rec(const TaylorModel<Float>& t);
+TaylorModel<Float> sqr(const TaylorModel<Float>& t);
+TaylorModel<Float> pow(const TaylorModel<Float>& t, int n);
+TaylorModel<Float> sqrt(const TaylorModel<Float>& t);
+TaylorModel<Float> exp(const TaylorModel<Float>& t);
+TaylorModel<Float> log(const TaylorModel<Float>& t);
+TaylorModel<Float> sin(const TaylorModel<Float>& t);
+TaylorModel<Float> cos(const TaylorModel<Float>& t);
+TaylorModel<Float> tan(const TaylorModel<Float>& t);
 
-inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t) {
-    ApproximateTaylorModel r=t; return r; }
-inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t) {
-    ApproximateTaylorModel r=t; r.imul(-1); return r; }
-inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
-    ApproximateTaylorModel r(t1); r.isma(+1,t2); return r; }
-inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
-    ApproximateTaylorModel r(t1); r.isma(-1,t2); return r; }
-inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
-    ApproximateTaylorModel r=t1.null(); r.ifma(t1,t2); return r; }
-inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+inline TaylorModel<Float> operator+(const TaylorModel<Float>& t) {
+    TaylorModel<Float> r=t; return r; }
+inline TaylorModel<Float> operator-(const TaylorModel<Float>& t) {
+    TaylorModel<Float> r=t; r.imul(-1); return r; }
+inline TaylorModel<Float> operator+(const TaylorModel<Float>& t1, const TaylorModel<Float>& t2) {
+    TaylorModel<Float> r(t1); r.isma(+1,t2); return r; }
+inline TaylorModel<Float> operator-(const TaylorModel<Float>& t1, const TaylorModel<Float>& t2) {
+    TaylorModel<Float> r(t1); r.isma(-1,t2); return r; }
+inline TaylorModel<Float> operator*(const TaylorModel<Float>& t1, const TaylorModel<Float>& t2) {
+    TaylorModel<Float> r=t1.null(); r.ifma(t1,t2); return r; }
+inline TaylorModel<Float> operator/(const TaylorModel<Float>& t1, const TaylorModel<Float>& t2) {
     return t1*rec(t2); }
-inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+inline TaylorModel<Float>& operator+=(TaylorModel<Float>& t1, const TaylorModel<Float>& t2) {
     t1.isma(+1,t2); return t1; }
-inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t1, const ApproximateTaylorModel& t2) {
+inline TaylorModel<Float>& operator-=(TaylorModel<Float>& t1, const TaylorModel<Float>& t2) {
     t1.isma(+1,t2); return t1; }
-inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t, const Float& c) {
-    ApproximateTaylorModel r=t; r.iadd(c); return r; }
-inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t, const Float& c) {
-    ApproximateTaylorModel r=t; r.iadd(-c); return r; }
-inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t, const Float& c) {
-    ApproximateTaylorModel r=t; r.imul(c); return r; }
-inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t, const Float& c) {
-    ApproximateTaylorModel r=t; r.imul(static_cast<Float>(1)/c); return r; }
-inline ApproximateTaylorModel operator+(const Float& c, const ApproximateTaylorModel& t) {
-    ApproximateTaylorModel r=t; r.iadd(c); return r; }
-inline ApproximateTaylorModel operator-(const Float& c, const ApproximateTaylorModel& t) {
-    ApproximateTaylorModel r=neg(t); r.iadd(c); return r; }
-inline ApproximateTaylorModel operator*(const Float& c, const ApproximateTaylorModel& t) {
-    ApproximateTaylorModel r=t; r.imul(c); return r; }
-inline ApproximateTaylorModel operator/(const Float& c, const ApproximateTaylorModel& t) {
-    ApproximateTaylorModel r=rec(t); r.imul(c); return r; }
-inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t, const Float& c) {
+inline TaylorModel<Float> operator+(const TaylorModel<Float>& t, const Float& c) {
+    TaylorModel<Float> r=t; r.iadd(c); return r; }
+inline TaylorModel<Float> operator-(const TaylorModel<Float>& t, const Float& c) {
+    TaylorModel<Float> r=t; r.iadd(-c); return r; }
+inline TaylorModel<Float> operator*(const TaylorModel<Float>& t, const Float& c) {
+    TaylorModel<Float> r=t; r.imul(c); return r; }
+inline TaylorModel<Float> operator/(const TaylorModel<Float>& t, const Float& c) {
+    TaylorModel<Float> r=t; r.imul(static_cast<Float>(1)/c); return r; }
+inline TaylorModel<Float> operator+(const Float& c, const TaylorModel<Float>& t) {
+    TaylorModel<Float> r=t; r.iadd(c); return r; }
+inline TaylorModel<Float> operator-(const Float& c, const TaylorModel<Float>& t) {
+    TaylorModel<Float> r=neg(t); r.iadd(c); return r; }
+inline TaylorModel<Float> operator*(const Float& c, const TaylorModel<Float>& t) {
+    TaylorModel<Float> r=t; r.imul(c); return r; }
+inline TaylorModel<Float> operator/(const Float& c, const TaylorModel<Float>& t) {
+    TaylorModel<Float> r=rec(t); r.imul(c); return r; }
+inline TaylorModel<Float>& operator+=(TaylorModel<Float>& t, const Float& c) {
     t.iadd(c); return t; }
-inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t, const Float& c) {
+inline TaylorModel<Float>& operator-=(TaylorModel<Float>& t, const Float& c) {
     t.iadd(-c); return t; }
-inline ApproximateTaylorModel& operator*=(ApproximateTaylorModel& t, const Float& c) {
+inline TaylorModel<Float>& operator*=(TaylorModel<Float>& t, const Float& c) {
     t.imul(c); return t; }
-inline ApproximateTaylorModel& operator/=(ApproximateTaylorModel& t, const Float& c) {
+inline TaylorModel<Float>& operator/=(TaylorModel<Float>& t, const Float& c) {
     t.imul(static_cast<Float>(1)/c); return t; }
 
 
 // FIXME: These should not need to be given explicitly
-inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t, const Real& c) { return t+=Float(c); }
-inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t, const Real& c) { return t-=Float(c); }
-inline ApproximateTaylorModel& operator*=(ApproximateTaylorModel& t, const Real& c) { return t*=Float(c); }
-inline ApproximateTaylorModel& operator/=(ApproximateTaylorModel& t, const Real& c) { return t/=Float(c); }
-inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t, const Real& c) { return t+Float(c); }
-inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t, const Real& c) { return t-Float(c); }
-inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t, const Real& c) { return t*Float(c); }
-inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t, const Real& c) { return t/Float(c); }
-inline ApproximateTaylorModel operator+(const Real& c, const ApproximateTaylorModel& t) { return Float(c)+t; }
-inline ApproximateTaylorModel operator-(const Real& c, const ApproximateTaylorModel& t) { return Float(c)-t; }
-inline ApproximateTaylorModel operator*(const Real& c, const ApproximateTaylorModel& t) { return Float(c)*t; }
-inline ApproximateTaylorModel operator/(const Real& c, const ApproximateTaylorModel& t) { return Float(c)/t; }
+inline TaylorModel<Float>& operator+=(TaylorModel<Float>& t, const Real& c) { return t+=Float(c); }
+inline TaylorModel<Float>& operator-=(TaylorModel<Float>& t, const Real& c) { return t-=Float(c); }
+inline TaylorModel<Float>& operator*=(TaylorModel<Float>& t, const Real& c) { return t*=Float(c); }
+inline TaylorModel<Float>& operator/=(TaylorModel<Float>& t, const Real& c) { return t/=Float(c); }
+inline TaylorModel<Float> operator+(const TaylorModel<Float>& t, const Real& c) { return t+Float(c); }
+inline TaylorModel<Float> operator-(const TaylorModel<Float>& t, const Real& c) { return t-Float(c); }
+inline TaylorModel<Float> operator*(const TaylorModel<Float>& t, const Real& c) { return t*Float(c); }
+inline TaylorModel<Float> operator/(const TaylorModel<Float>& t, const Real& c) { return t/Float(c); }
+inline TaylorModel<Float> operator+(const Real& c, const TaylorModel<Float>& t) { return Float(c)+t; }
+inline TaylorModel<Float> operator-(const Real& c, const TaylorModel<Float>& t) { return Float(c)-t; }
+inline TaylorModel<Float> operator*(const Real& c, const TaylorModel<Float>& t) { return Float(c)*t; }
+inline TaylorModel<Float> operator/(const Real& c, const TaylorModel<Float>& t) { return Float(c)/t; }
 
-inline ApproximateTaylorModel& operator+=(ApproximateTaylorModel& t, double c) { return t+=Float(c); }
-inline ApproximateTaylorModel& operator-=(ApproximateTaylorModel& t, double c) { return t-=Float(c); }
-inline ApproximateTaylorModel& operator*=(ApproximateTaylorModel& t, double c) { return t*=Float(c); }
-inline ApproximateTaylorModel& operator/=(ApproximateTaylorModel& t, double c) { return t/=Float(c); }
-inline ApproximateTaylorModel operator+(const ApproximateTaylorModel& t, double c) { return t+Float(c); }
-inline ApproximateTaylorModel operator-(const ApproximateTaylorModel& t, double c) { return t-Float(c); }
-inline ApproximateTaylorModel operator*(const ApproximateTaylorModel& t, double c) { return t*Float(c); }
-inline ApproximateTaylorModel operator/(const ApproximateTaylorModel& t, double c) { return t/Float(c); }
-inline ApproximateTaylorModel operator+(double c, const ApproximateTaylorModel& t) { return Float(c)+t; }
-inline ApproximateTaylorModel operator-(double c, const ApproximateTaylorModel& t) { return Float(c)-t; }
-inline ApproximateTaylorModel operator*(double c, const ApproximateTaylorModel& t) { return Float(c)*t; }
-inline ApproximateTaylorModel operator/(double c, const ApproximateTaylorModel& t) { return Float(c)/t; }
+inline TaylorModel<Float>& operator+=(TaylorModel<Float>& t, double c) { return t+=Float(c); }
+inline TaylorModel<Float>& operator-=(TaylorModel<Float>& t, double c) { return t-=Float(c); }
+inline TaylorModel<Float>& operator*=(TaylorModel<Float>& t, double c) { return t*=Float(c); }
+inline TaylorModel<Float>& operator/=(TaylorModel<Float>& t, double c) { return t/=Float(c); }
+inline TaylorModel<Float> operator+(const TaylorModel<Float>& t, double c) { return t+Float(c); }
+inline TaylorModel<Float> operator-(const TaylorModel<Float>& t, double c) { return t-Float(c); }
+inline TaylorModel<Float> operator*(const TaylorModel<Float>& t, double c) { return t*Float(c); }
+inline TaylorModel<Float> operator/(const TaylorModel<Float>& t, double c) { return t/Float(c); }
+inline TaylorModel<Float> operator+(double c, const TaylorModel<Float>& t) { return Float(c)+t; }
+inline TaylorModel<Float> operator-(double c, const TaylorModel<Float>& t) { return Float(c)-t; }
+inline TaylorModel<Float> operator*(double c, const TaylorModel<Float>& t) { return Float(c)*t; }
+inline TaylorModel<Float> operator/(double c, const TaylorModel<Float>& t) { return Float(c)/t; }
 
-inline std::ostream& operator<<(std::ostream& os, const ApproximateTaylorModel& x) {
+inline std::ostream& operator<<(std::ostream& os, const TaylorModel<Float>& x) {
     x.str(os); return os; }
 
-inline Vector<Interval> codomain(const Vector< ApproximateTaylorModel >& t) {
+inline Vector<Interval> codomain(const Vector< TaylorModel<Float> >& t) {
     Vector<Interval> r(t.size()); for(uint i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
 } // namespace Ariadne
 

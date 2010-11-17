@@ -794,7 +794,6 @@ void TaylorImageSet::draw(CanvasInterface& canvas) const {
 #ifdef HAVE_CAIRO_H
 
 #include <cairo/cairo.h>
-#include <dense_differential.h>
 
 namespace Ariadne {
 

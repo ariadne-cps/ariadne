@@ -1,6 +1,6 @@
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -iquote$(top_srcdir)/include
 LIBS +=  $(BOOST_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 AM_LDFLAGS = $(EXEC_LDFLAGS)
 LDADD = ../src/libariadne.la $(LIBS)

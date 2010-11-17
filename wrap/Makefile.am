@@ -1,7 +1,7 @@
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = -module
 
-INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
+INCLUDES = -iquote$(top_srcdir)/include $(PYTHON_INCLUDES)
 LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
 
 pythondir=${pkgpyexecdir}

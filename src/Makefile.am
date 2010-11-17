@@ -5,7 +5,7 @@ lib-extras: libariadne-extras.la
 
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 
-INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
+INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS =  $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD =  $(LIBS)
 

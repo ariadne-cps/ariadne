@@ -52,29 +52,29 @@ bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
 const double em=2.2204460492503131e-16;
 const double ec=em/2;
 
-double IntervalTaylorModel::_default_sweep_threshold=1e-18;
-uint IntervalTaylorModel::_default_maximum_degree=16;
+double TaylorModelAccuracy::_default_sweep_threshold=1e-18;
+uint TaylorModelAccuracy::_default_maximum_degree=16;
 
-IntervalTaylorModel::Accuracy::Accuracy() : _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
-IntervalTaylorModel::Accuracy::Accuracy(double st, uint md) : _sweep_threshold(st), _maximum_degree(md) { }
+TaylorModelAccuracy::TaylorModelAccuracy() : _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
+TaylorModelAccuracy::TaylorModelAccuracy(double st, uint md) : _sweep_threshold(st), _maximum_degree(md) { }
 
-IntervalTaylorModel::Accuracy
-max(const IntervalTaylorModel::Accuracy& acc1, const IntervalTaylorModel::Accuracy& acc2) {
-    return IntervalTaylorModel::Accuracy(std::min(acc1._sweep_threshold,acc1._sweep_threshold),
+TaylorModelAccuracy
+max(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2) {
+    return TaylorModelAccuracy(std::min(acc1._sweep_threshold,acc1._sweep_threshold),
         std::max(acc1._maximum_degree,acc2._maximum_degree));
 }
 
-IntervalTaylorModel::Accuracy
-min(const IntervalTaylorModel::Accuracy& acc1, const IntervalTaylorModel::Accuracy& acc2) {
-    return IntervalTaylorModel::Accuracy(std::max(acc1._sweep_threshold,acc1._sweep_threshold),
+TaylorModelAccuracy
+min(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2) {
+    return TaylorModelAccuracy(std::max(acc1._sweep_threshold,acc1._sweep_threshold),
         std::min(acc1._maximum_degree,acc2._maximum_degree));
 }
 
-inline bool IntervalTaylorModel::Accuracy::discard(const Float& x) const { return abs(x)<this->_sweep_threshold; }
-inline bool IntervalTaylorModel::Accuracy::discard(const MultiIndex& a) const { return a.degree()>this->_maximum_degree; }
-inline bool IntervalTaylorModel::Accuracy::discard(const MultiIndex& a, const Float& x) const { return this->discard(x) || this->discard(a); }
+inline bool TaylorModelAccuracy::discard(const Float& x) const { return abs(x)<this->_sweep_threshold; }
+inline bool TaylorModelAccuracy::discard(const MultiIndex& a) const { return a.degree()>this->_maximum_degree; }
+inline bool TaylorModelAccuracy::discard(const MultiIndex& a, const Float& x) const { return this->discard(x) || this->discard(a); }
 
-std::ostream& operator<<(std::ostream& os, const IntervalTaylorModel::Accuracy& acc) {
+std::ostream& operator<<(std::ostream& os, const TaylorModelAccuracy& acc) {
     return os<<"( sweep_threshold="<<acc._sweep_threshold<<", maximum_degree="<<acc._maximum_degree<<" )";
 }
 
@@ -1329,25 +1329,6 @@ IntervalTaylorModel::clobber(uint so, uint to)
 ///////////////////////////////////////////////////////////////////////////////
 
 // Accuracy control
-
-void IntervalTaylorModel::set_default_maximum_degree(uint d) {
-    ARIADNE_ASSERT(d<128);
-    _default_maximum_degree=d;
-}
-
-void IntervalTaylorModel::set_default_sweep_threshold(double me) {
-    ARIADNE_ASSERT(me>0.0);
-    _default_sweep_threshold=me;
-}
-
-uint IntervalTaylorModel::default_maximum_degree() {
-    return _default_maximum_degree;
-}
-
-double IntervalTaylorModel::default_sweep_threshold() {
-    return _default_sweep_threshold;
-}
-
 
 void IntervalTaylorModel::set_maximum_degree(uint d) {
     this->_accuracy_ptr->_maximum_degree=d;

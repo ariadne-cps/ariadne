@@ -57,101 +57,34 @@ typedef TaylorModel<Interval> IntervalTaylorModel;
 
 class IntersectionException;
 
-// Rescale the vector x from the domain d to the unit domain.
-Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
+struct IntersectionException : public std::runtime_error {
+    IntersectionException(const std::string& what) : std::runtime_error(what) { }
+};
 
-//! \relates TaylorModel<Interval> \brief The magnitude of the variable
-Float mag(const TaylorModel<Interval>& tm);
-//! \relates TaylorModel<Interval> \brief Split the variable over two domains, subdividing along the independent variable j.
-pair< TaylorModel<Interval>, TaylorModel<Interval> > split(const TaylorModel<Interval>& x, uint j);
-//! \relates TaylorModel<Interval>
-//!\brief Split the variable, subdividing along the independent variable j
-//! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
-TaylorModel<Interval> split(const TaylorModel<Interval>& x, uint j, tribool half);
+class TaylorModelAccuracy
+{
+    friend class TaylorModel<Interval>;
+    friend class TaylorModel<Float>;
 
-//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
-TaylorModel<Interval> scale(const TaylorModel<Interval>& x, const Interval& ivl);
-//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
-TaylorModel<Interval> unscale(const TaylorModel<Interval>& x, const Interval& ivl);
-//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
-TaylorModel<Interval> rescale(const TaylorModel<Interval>& x, const Interval& ivl1, const Interval& ivl2);
+    TaylorModelAccuracy();
+    TaylorModelAccuracy(double st, uint md);
 
-//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
-Interval evaluate(const TaylorModel<Interval>& x, const Vector<Interval>& sy);
-//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
-TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Float c);
-//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
-TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Interval c);
-//! \relates TaylorModel<Interval>
-//! Substitute the TaylorModel<Interval> y in the  kth variable of \a x.
-//! Precondition: x.argument_size()==y.argument_size()+1
-TaylorModel<Interval> substitute(const TaylorModel<Interval>& x, uint k, const TaylorModel<Interval>& y);
-
-//! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
-TaylorModel<Interval> embed(const TaylorModel<Interval>& tv, uint as);
-//! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
-TaylorModel<Interval> embed(uint as, const TaylorModel<Interval>& tv);
-
-//! \relates TaylorModel<Interval> \brief Test if a model refines another
-bool refines(const TaylorModel<Interval>& tv1, const TaylorModel<Interval>& tv2);
-//! \relates TaylorModel<Interval> \brief Test if a model is disjoint from
-bool disjoint(const TaylorModel<Interval>& tv1, const TaylorModel<Interval>& tv2);
-
-//! \relates TaylorModel<Interval> \brief Antidifferentiation operator
-TaylorModel<Interval> antiderivative(const TaylorModel<Interval>& x, uint k);
-
-//! \relates TaylorModel<Interval> \brief Differentiation operator; discards error term
-TaylorModel<Interval> derivative(const TaylorModel<Interval>& x, uint k);
-
-//! \relates TaylorModel<Interval> \brief Replace the variale x[k] with a*x[k]+b
-TaylorModel<Interval> preaffine(const TaylorModel<Interval>&, uint k, const Interval& a, const Interval& b);
-//! \relates TaylorModel<Interval> \brief Restricts the range of the variable x[k] to the interval d.
-//! \pre -1 <= d.lower() <= d.upper() <= 1 .
-TaylorModel<Interval> restrict(const TaylorModel<Interval>&, uint k, const Interval& d);
-
-//! \relates TaylorModel<Interval>
-//! An over-approximation to the intersection of two Taylor models.
-//! Since the intersection cannot be represented exactly in the class of
-//! TaylorModels, truncation errors as well as roundoff errors may be present.
-//! In the absence of roundoff errors, the result is a subset of both arguments,
-//! and is guaranteed to contain any function contained in both arguments.
-TaylorModel<Interval> intersection(const TaylorModel<Interval>& x1, const TaylorModel<Interval>& x2);
-
-// Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain
-TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
-
-// Compose an array of Taylor variables with another, after scaling by the interval vectors
-TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector<Interval>& bx, const Vector< TaylorModel<Interval> >& y);
-
-// Vector operations which can be evaluated componentwise
-bool refines(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
-bool disjoint(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
-pair< Vector< TaylorModel<Interval> >, Vector< TaylorModel<Interval> > > split(const Vector< TaylorModel<Interval> >& x, uint j);
-Vector< TaylorModel<Interval> > split(const Vector< TaylorModel<Interval> >& x, uint j, bool half);
-Vector< TaylorModel<Interval> > unscale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);
-Vector< TaylorModel<Interval> > scale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);
-Vector<Interval> evaluate(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& sy);
-Vector< TaylorModel<Interval> > partial_evaluate(const Vector< TaylorModel<Interval> >& x, uint k, Float sy);
-Vector< TaylorModel<Interval> > partial_evaluate(const Vector< TaylorModel<Interval> >& x, uint k, Interval sy);
-Vector< TaylorModel<Interval> > substitute(const Vector< TaylorModel<Interval> >& x, uint k, const TaylorModel<Interval>& y);
-Vector< TaylorModel<Interval> > antiderivative(const Vector< TaylorModel<Interval> >& x, uint k);
-Vector< TaylorModel<Interval> > embed(const Vector< TaylorModel<Interval> >& x, uint as);
-Vector< TaylorModel<Interval> > embed(uint as, const Vector< TaylorModel<Interval> >& x);
-Matrix<Interval> jacobian(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d);
-//Matrix<Interval> jacobian(const Vector< TaylorModel<Interval> >& x);
-bool refines(const Vector< TaylorModel<Interval> >& x1, const Vector< TaylorModel<Interval> >& x2);
-Vector< TaylorModel<Interval> > combine(const Vector< TaylorModel<Interval> >& x1, const Vector< TaylorModel<Interval> >& x2);
-Vector< TaylorModel<Interval> > combine(const Vector< TaylorModel<Interval> >& x1, const TaylorModel<Interval>& x2);
-Vector< TaylorModel<Interval> > combine(const TaylorModel<Interval>& x1, const Vector< TaylorModel<Interval> >& x2);
-Vector< TaylorModel<Interval> > combine(const TaylorModel<Interval>& x1, const TaylorModel<Interval>& x2);
-Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& g);
-Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& g);
-
-TaylorModel<Interval> unchecked_compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
-Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y);
-Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& y);
-
-Float norm(const Vector< TaylorModel<Interval> >& tv);
+    static void set_default_sweep_threshold(double dst) { ARIADNE_ASSERT(dst>=0.0); _default_sweep_threshold=dst; }
+    static void set_default_maximum_degree(int dmd) { ARIADNE_ASSERT(dmd>=0); _default_maximum_degree=dmd; }
+    friend TaylorModelAccuracy max(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
+    friend TaylorModelAccuracy min(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
+    friend std::ostream& operator<<(std::ostream& os, const TaylorModelAccuracy& acc);
+  public:
+    bool discard(const Float& x) const;
+    bool discard(const MultiIndex& a) const;
+    bool discard(const MultiIndex& a, const Float& x) const;
+  private:
+    static double _default_sweep_threshold;
+    static uint _default_maximum_degree;
+  private:
+    double _sweep_threshold;
+    uint _maximum_degree;
+};
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
@@ -165,7 +98,7 @@ class TaylorModel<Interval>
     typedef Expansion<Float> ExpansionType;
     typedef ReverseLexicographicKeyLess ComparisonType;
   public:
-    class Accuracy;
+    typedef TaylorModelAccuracy Accuracy;
   private:
     ExpansionType _expansion;
     Float _error;
@@ -642,6 +575,74 @@ class TaylorModel<Interval>
     TaylorModel<Interval>& clobber(uint so, uint to);
 };
 
+// Rescale the vector x from the domain d to the unit domain.
+Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
+
+//! \relates TaylorModel<Interval> \brief The magnitude of the variable
+Float mag(const TaylorModel<Interval>& tm);
+//! \relates TaylorModel<Interval> \brief Split the variable over two domains, subdividing along the independent variable j.
+pair< TaylorModel<Interval>, TaylorModel<Interval> > split(const TaylorModel<Interval>& x, uint j);
+//! \relates TaylorModel<Interval>
+//!\brief Split the variable, subdividing along the independent variable j
+//! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
+TaylorModel<Interval> split(const TaylorModel<Interval>& x, uint j, tribool half);
+
+//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
+TaylorModel<Interval> scale(const TaylorModel<Interval>& x, const Interval& ivl);
+//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
+TaylorModel<Interval> unscale(const TaylorModel<Interval>& x, const Interval& ivl);
+//! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
+TaylorModel<Interval> rescale(const TaylorModel<Interval>& x, const Interval& ivl1, const Interval& ivl2);
+
+//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+Interval evaluate(const TaylorModel<Interval>& x, const Vector<Interval>& sy);
+//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Float c);
+//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Interval c);
+//! \relates TaylorModel<Interval>
+//! Substitute the TaylorModel<Interval> y in the  kth variable of \a x.
+//! Precondition: x.argument_size()==y.argument_size()+1
+TaylorModel<Interval> substitute(const TaylorModel<Interval>& x, uint k, const TaylorModel<Interval>& y);
+
+//! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
+TaylorModel<Interval> embed(const TaylorModel<Interval>& tv, uint as);
+//! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
+TaylorModel<Interval> embed(uint as, const TaylorModel<Interval>& tv);
+
+//! \relates TaylorModel<Interval> \brief Test if a model refines another
+bool refines(const TaylorModel<Interval>& tv1, const TaylorModel<Interval>& tv2);
+//! \relates TaylorModel<Interval> \brief Test if a model is disjoint from
+bool disjoint(const TaylorModel<Interval>& tv1, const TaylorModel<Interval>& tv2);
+
+//! \relates TaylorModel<Interval> \brief Antidifferentiation operator
+TaylorModel<Interval> antiderivative(const TaylorModel<Interval>& x, uint k);
+
+//! \relates TaylorModel<Interval> \brief Differentiation operator; discards error term
+TaylorModel<Interval> derivative(const TaylorModel<Interval>& x, uint k);
+
+//! \relates TaylorModel<Interval> \brief Replace the variale x[k] with a*x[k]+b
+TaylorModel<Interval> preaffine(const TaylorModel<Interval>&, uint k, const Interval& a, const Interval& b);
+//! \relates TaylorModel<Interval> \brief Restricts the range of the variable x[k] to the interval d.
+//! \pre -1 <= d.lower() <= d.upper() <= 1 .
+TaylorModel<Interval> restrict(const TaylorModel<Interval>&, uint k, const Interval& d);
+
+//! \relates TaylorModel<Interval>
+//! An over-approximation to the intersection of two Taylor models.
+//! Since the intersection cannot be represented exactly in the class of
+//! TaylorModels, truncation errors as well as roundoff errors may be present.
+//! In the absence of roundoff errors, the result is a subset of both arguments,
+//! and is guaranteed to contain any function contained in both arguments.
+TaylorModel<Interval> intersection(const TaylorModel<Interval>& x1, const TaylorModel<Interval>& x2);
+
+// Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain
+TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
+
+// Compose an array of Taylor variables with another, after scaling by the interval vectors
+TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector<Interval>& bx, const Vector< TaylorModel<Interval> >& y);
+
+Float norm(const Vector< TaylorModel<Interval> >& tv);
+
 TaylorModel<Interval> max(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
 TaylorModel<Interval> min(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
 TaylorModel<Interval> abs(const TaylorModel<Interval>& x);
@@ -662,29 +663,36 @@ TaylorModel<Interval> atan(const TaylorModel<Interval>& x);
 std::ostream& operator<<(std::ostream&, const TaylorModel<Interval>::Accuracy&);
 
 
-struct TaylorModel<Interval>::Accuracy {
-    friend class TaylorModel<Interval>;
-    friend class TaylorModel<Float>;
-    friend class TaylorCalculus;
 
-    Accuracy();
-    Accuracy(double st, uint md);
+// Vector operations which can be evaluated componentwise
+bool refines(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
+bool disjoint(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
+pair< Vector< TaylorModel<Interval> >, Vector< TaylorModel<Interval> > > split(const Vector< TaylorModel<Interval> >& x, uint j);
+Vector< TaylorModel<Interval> > split(const Vector< TaylorModel<Interval> >& x, uint j, bool half);
+Vector< TaylorModel<Interval> > unscale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);
+Vector< TaylorModel<Interval> > scale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);
+Vector<Interval> evaluate(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& sy);
+Vector< TaylorModel<Interval> > partial_evaluate(const Vector< TaylorModel<Interval> >& x, uint k, Float sy);
+Vector< TaylorModel<Interval> > partial_evaluate(const Vector< TaylorModel<Interval> >& x, uint k, Interval sy);
+Vector< TaylorModel<Interval> > substitute(const Vector< TaylorModel<Interval> >& x, uint k, const TaylorModel<Interval>& y);
+Vector< TaylorModel<Interval> > antiderivative(const Vector< TaylorModel<Interval> >& x, uint k);
+Vector< TaylorModel<Interval> > embed(const Vector< TaylorModel<Interval> >& x, uint as);
+Vector< TaylorModel<Interval> > embed(uint as, const Vector< TaylorModel<Interval> >& x);
+Matrix<Interval> jacobian(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d);
+//Matrix<Interval> jacobian(const Vector< TaylorModel<Interval> >& x);
+bool refines(const Vector< TaylorModel<Interval> >& x1, const Vector< TaylorModel<Interval> >& x2);
+Vector< TaylorModel<Interval> > combine(const Vector< TaylorModel<Interval> >& x1, const Vector< TaylorModel<Interval> >& x2);
+Vector< TaylorModel<Interval> > combine(const Vector< TaylorModel<Interval> >& x1, const TaylorModel<Interval>& x2);
+Vector< TaylorModel<Interval> > combine(const TaylorModel<Interval>& x1, const Vector< TaylorModel<Interval> >& x2);
+Vector< TaylorModel<Interval> > combine(const TaylorModel<Interval>& x1, const TaylorModel<Interval>& x2);
+Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector< TaylorModel<Interval> >& g);
+Vector< TaylorModel<Interval> > compose(const Vector< TaylorModel<Interval> >& f, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& g);
 
-    friend Accuracy max(const Accuracy& acc1, const Accuracy& acc2);
-    friend Accuracy min(const Accuracy& acc1, const Accuracy& acc2);
-    friend std::ostream& operator<<(std::ostream& os, const Accuracy& acc);
-  public:
-    bool discard(const Float& x) const;
-    bool discard(const MultiIndex& a) const;
-    bool discard(const MultiIndex& a, const Float& x) const;
-  private:
-    double _sweep_threshold;
-    uint _maximum_degree;
-};
+TaylorModel<Interval> unchecked_compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
+Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y);
+Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& y);
 
-struct IntersectionException : public std::runtime_error {
-    IntersectionException(const std::string& what) : std::runtime_error(what) { }
-};
+
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
@@ -694,7 +702,7 @@ struct IntersectionException : public std::runtime_error {
 template<>
 class TaylorModel<Float>
 {
-    typedef TaylorModel<Interval>::Accuracy Accuracy;
+    typedef TaylorModelAccuracy Accuracy;
     typedef Expansion<Float> ExpansionType;
   private:
     ExpansionType _expansion;
@@ -922,6 +930,9 @@ inline std::ostream& operator<<(std::ostream& os, const TaylorModel<Float>& x) {
 
 inline Vector<Interval> codomain(const Vector< TaylorModel<Float> >& t) {
     Vector<Interval> r(t.size()); for(uint i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
+
+
+
 } // namespace Ariadne
 
 #endif // ARIADNE_TAYLOR_MODEL_H

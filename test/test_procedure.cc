@@ -112,6 +112,7 @@ void TestProcedure::test_construct_from_expansion()
         Expansion<Float> e(2, 4, 0,0,1.0, 1,0,2.0, 0,2,3.0, 1,4,4.0);
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
+        ARIADNE_TEST_PRINT(e);
         Procedure<Float> p(e);
         ARIADNE_TEST_PRINT(p);
         Vector<Float> x(2, 2.0,3.0);

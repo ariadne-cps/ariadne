@@ -386,11 +386,11 @@ Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
 //! \related Expression \brief Real absolute value expression.
 Expression<Real> abs(Expression<Real> e);
 
-enum Sign { positive=+1, negative=-1, zero=0 };
+enum Sign { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
 
 //! \related Expression \brief Try to compute a real expression which has the
 //! given \a sign when the predicate \a p is true.
-Expression<Real> indicator(Expression<tribool> p, Sign sign=positive);
+Expression<Real> indicator(Expression<tribool> p, Sign sign=POSITIVE);
 
 //! \related Expression \brief Returns true if the expressions are mutual negations.
 //!

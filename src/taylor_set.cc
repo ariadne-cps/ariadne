@@ -1274,7 +1274,7 @@ tribool TaylorConstrainedImageSet::empty() const
         }
     }
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(constraints,this->_reduced_domain);
+    contractor.reduce(this->_reduced_domain,constraints);
     for(uint i=0; i!=this->number_of_parameters(); ++i) {
         double l=this->_reduced_domain[i].lower().get_d();
         double u=this->_reduced_domain[i].upper().get_d();
@@ -1296,16 +1296,16 @@ tribool TaylorConstrainedImageSet::subset(const Box& bx) const
 {
     List<NonlinearConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(constraints,this->_reduced_domain);
+    contractor.reduce(this->_reduced_domain,constraints);
 
     if(_reduced_domain.empty()) { return true; }
 
     for(uint i=0; i!=bx.dimension(); ++i) {
         const Box test_domain=this->_reduced_domain;
         constraints.append(ScalarTaylorFunction(this->_function[i]).function() <= bx[i].lower());
-        if(possibly(contractor.feasible(constraints,test_domain).first)) { return indeterminate; }
+        if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
         constraints.back()=(ScalarTaylorFunction(this->_function[i]).function() >= bx[i].upper());
-        if(possibly(contractor.feasible(constraints,test_domain).first)) { return indeterminate; }
+        if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
         constraints.pop_back();
     }
     return true;
@@ -1316,7 +1316,7 @@ tribool TaylorConstrainedImageSet::disjoint(const Box& bx) const
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"TaylorConstrainedImageSet::subset(Box): self="<<*this<<", box="<<bx);
     List<NonlinearConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(constraints,this->_reduced_domain);
+    contractor.reduce(this->_reduced_domain,constraints);
 
     if(_reduced_domain.empty()) { return true; }
 
@@ -1325,14 +1325,14 @@ tribool TaylorConstrainedImageSet::disjoint(const Box& bx) const
         constraints.append(ScalarTaylorFunction(this->_function[i]).function() >= bx[i].lower());
         constraints.append(ScalarTaylorFunction(this->_function[i]).function() <= bx[i].upper());
     }
-    return !contractor.feasible(constraints,test_domain).first;
+    return !contractor.feasible(test_domain,constraints).first;
 }
 
 void TaylorConstrainedImageSet::reduce() const
 {
     List<NonlinearConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(constraints,this->_reduced_domain);
+    contractor.reduce(this->_reduced_domain,constraints);
 
     for(uint i=0; i!=this->number_of_parameters(); ++i) {
         double l=this->_reduced_domain[i].lower().get_d();
@@ -1451,7 +1451,7 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
         NonlinearConstraint constraint=(xg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        solver.hull_reduce(constraint,nd);
+        solver.hull_reduce(nd,constraint);
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         if(nd.empty()) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
@@ -1459,7 +1459,7 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
         }
 
         for(uint i=0; i!=m; ++i) {
-            solver.box_reduce(constraint,nd,i);
+            solver.box_reduce(nd,constraint,i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
             if(nd.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
@@ -1526,10 +1526,10 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, cons
 
     ARIADNE_LOG(6,"  dom="<<old_domain<<"\n");
     for(uint i=0; i!=nf; ++i) {
-        constraint_solver.hull_reduce(f[i]==bx[i],new_domain);
+        constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
     }
     for(uint i=0; i!=ng; ++i) {
-        constraint_solver.hull_reduce(g[i]==c[i],new_domain);
+        constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
     }
     ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
     if(new_domain.empty()) {
@@ -1538,10 +1538,10 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, cons
     }
 
     for(uint i=0; i!=nf; ++i) {
-        constraint_solver.hull_reduce(f[i]==bx[i],new_domain);
+        constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
     }
     for(uint i=0; i!=ng; ++i) {
-        constraint_solver.hull_reduce(g[i]==c[i],new_domain);
+        constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
     }
     ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
     if(new_domain.empty()) {

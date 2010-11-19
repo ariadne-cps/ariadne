@@ -43,6 +43,7 @@
 #include "matrix.h"
 #include "taylor_model.h"
 #include "differential.h"
+#include "formula.h"
 
 namespace Ariadne {
 
@@ -101,6 +102,8 @@ template<class T> class ScalarUserFunction
 
         virtual Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const {
             Propagator<Interval> r; T::compute(r,x,_p); return r; }
+        virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const {
+            Formula<Interval> r; T::compute(r,x,_p); return r; }
 
         virtual RealScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
@@ -192,6 +195,8 @@ template<class T> class VectorUserFunction
 
         virtual Vector<Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const {
             Vector<Propagator<Interval> >  r(this->result_size()); T::compute(r,x,_p); return r; }
+        virtual Vector<Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const {
+            Vector<Formula<Interval> >  r(this->result_size()); T::compute(r,x,_p); return r; }
 
         virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }

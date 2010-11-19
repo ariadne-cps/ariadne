@@ -64,7 +64,7 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.reduce(c,D));
+        ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
         ARIADNE_TEST_ASSERT(D.empty());
     }
@@ -78,7 +78,7 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.reduce(c,D));
+        ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
         ARIADNE_TEST_ASSERT(D.empty());
     }
@@ -93,7 +93,7 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.reduce(c,D));
+        ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
         ARIADNE_TEST_ASSERT(D.empty());
     }
@@ -108,8 +108,8 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(c[0],D));
-        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(c[1],D));
+        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
+        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[1]));
         ARIADNE_TEST_PRINT(D);
         ARIADNE_TEST_ASSERT(D.empty());
     }
@@ -124,12 +124,12 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c[0],D,0));
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c[1],D,0));
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c[0],D,1));
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c[1],D,1));
-        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(c[0],D));
-        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(c[1],D));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c[0],0));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c[1],0));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c[0],1));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c[1],1));
+        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
+        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[1]));
         ARIADNE_TEST_PRINT(D);
         ARIADNE_TEST_ASSERT(D.empty());
     }
@@ -143,7 +143,7 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(c[0],D));
+        ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
         ARIADNE_TEST_EQUAL(D,Box(2,0.0,0.5, 0.0,1.0));
     }
 
@@ -155,9 +155,9 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c,D,0));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
         ARIADNE_TEST_EQUAL(D,Box(2,0.0,0.75, 0.0,2.0));
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c,D,1));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
         ARIADNE_TEST_EQUAL(D,Box(2,0.0,0.75, 0.0,1.25));
     }
 
@@ -170,9 +170,9 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c,D,0));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
         ARIADNE_TEST_EQUAL(D,Box(2,0.0,0.75, 0.0,2.0));
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(c,D,1));
+        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
         ARIADNE_TEST_EQUAL(D,Box(2,0.0,0.75, 0.0,1.25));
     }
 

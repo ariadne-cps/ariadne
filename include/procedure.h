@@ -223,7 +223,7 @@ template<class X>
 Procedure<X>::Procedure(const Formula<X>& f)
 {
     Map<const FormulaNode<X>*, size_t> ind;
-    _convert(this->_instructions,this->_constants,f._root.operator->(), ind);
+    _convert(this->_instructions,this->_constants,f.ptr(), ind);
 }
 
 template<class X>
@@ -232,7 +232,7 @@ Procedure<X>::Procedure(const Expansion<X>& e)
     Vector< Formula<X> > id=Formula<X>::identity(e.argument_size());
     Formula<X> f=horner_evaluate(e,id);
     Map<const FormulaNode<X>*, size_t> ind;
-    _convert(this->_instructions,this->_constants,f._root.operator->(), ind);
+    _convert(this->_instructions,this->_constants,f.ptr(), ind);
 }
 
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
@@ -265,10 +265,10 @@ Vector< Procedure<X> >::Vector(const Vector< Formula<X> >& f)
 {
     Map<const FormulaNode<X>*, size_t> ind;
     for(size_t i=0; i!=f.size(); ++i) {
-        _convert(this->_instructions,this->_constants,f[i]._root.operator->(), ind);
+        _convert(this->_instructions,this->_constants,f[i].ptr(), ind);
     }
     for(Nat i=0; i!=f.size(); ++i) {
-        this->_results[i]=ind[f[i]._root.operator->()];
+        this->_results[i]=ind[f[i].ptr()];
     }
 }
 

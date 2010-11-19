@@ -45,6 +45,7 @@ class Box;
 class NonlinearConstraint;
 class GridTreeSet;
 
+template<class X> class Procedure;
 template<class X> class ScalarFunction;
 typedef ScalarFunction<Real> RealScalarFunction;
 template<class X> class VectorFunction;
@@ -63,13 +64,13 @@ template<class X> struct FeasibilityState {
 class ConstraintSolverInterface {
   public:
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns a feasible point if the result is true.
-    virtual Pair<Tribool,Point> feasible(const List<NonlinearConstraint>& constraints, const Box& domain) const = 0;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const List<NonlinearConstraint>& constraints) const = 0;
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
     virtual Pair<Tribool,Point> feasible(const Box& domain, const RealVectorFunction& function, const Box& codomain) const = 0;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
     virtual Tribool check_feasibility(const Box& domain, const RealVectorFunction& function, const Box& codomain, const Point& point) const = 0;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
-    virtual void reduce(const List<NonlinearConstraint>& constraints, Box& domain) const = 0;
+    virtual void reduce(Box& domain, const List<NonlinearConstraint>& constraints) const = 0;
 
 };
 
@@ -84,7 +85,7 @@ class ConstraintSolver
     typedef Vector<Interval> IntervalVector;
   public:
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns a feasible point if the result is true.
-    virtual Pair<Tribool,Point> feasible(const List<NonlinearConstraint>& constraints, const Box& domain) const;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const List<NonlinearConstraint>& constraints) const;
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
     virtual Pair<Tribool,Point> feasible(const Box& domain, const RealVectorFunction& function, const Box& codomain) const;
 
@@ -92,19 +93,19 @@ class ConstraintSolver
     virtual Tribool check_feasibility(const Box& domain, const RealVectorFunction& function, const Box& codomain, const Point& point) const;
 
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
-    virtual void reduce(const List<NonlinearConstraint>& constraints, Box& domain) const;
+    virtual void reduce(Box& domain, const List<NonlinearConstraint>& constraints) const;
 
     //! \brief Try to enforce hull consistency by propagating interval constraints.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    void hull_reduce(const NonlinearConstraint& constraint, Box& bx) const;
+    void hull_reduce(Box& bx, const NonlinearConstraint& constraint) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
-    void box_reduce(const NonlinearConstraint& constraint, Box& bx, uint j) const;
+    void box_reduce(Box& bx, const NonlinearConstraint& constraint, uint j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    void monotone_reduce(const NonlinearConstraint& constraint, Box& bx, uint j) const;
+    void monotone_reduce(Box& bx, const NonlinearConstraint& constraint, uint j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
-    Pair<Box,Box> split(const List<NonlinearConstraint>& constraints, const Box& domain) const;
+    Pair<Box,Box> split(const Box& domain, const List<NonlinearConstraint>& constraints) const;
 
 };
 

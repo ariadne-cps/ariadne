@@ -41,7 +41,6 @@
 #include "stlio.h"
 
 #include "operators.h"
-#include "expression.h"
 #include "expansion.h"
 #include "numeric.h"
 #include "vector.h"
@@ -49,6 +48,7 @@
 
 namespace Ariadne {
 
+template<class X> class Expression;
 template<class X> class FormulaNode;
 
 //! \brief A formula defining a real function.
@@ -58,21 +58,22 @@ template<class X> class FormulaNode;
 template<class X>
 class Formula {
   public:
+    ~Formula() { --_root->count; if(_root->count==0) { delete _root; } }
     explicit Formula(const Expression<Real>& e, const Map<std::string,uint> s);
-    explicit Formula(Operator op, const Formula& a);
-    explicit Formula(Operator op, const Formula& a1, const Formula& a2);
-    explicit Formula() : _root() { }
-    explicit Formula(const FormulaNode<X>* ptr) : _root(ptr) { }
-    explicit Formula(const intrusive_ptr< FormulaNode<X> >& ptr) : _root(ptr) { }
-    Formula(const X& c) { *this=Formula::constant(c); }
-    Formula<X>& operator=(const X& c) { *this=Formula::constant(c); return *this; }
+    explicit Formula() : _root(new FormulaNode<X>(0.0)) { ++_root->count; }
+    explicit Formula(const FormulaNode<X>* ptr) : _root(ptr) { assert(ptr); ++_root->count; }
+    Formula(const Formula<X>& f) : _root(f._root) { ++_root->count; }
+    Formula(const X& c) : _root(new FormulaNode<X>(c)) { ++_root->count; }
+    Formula<X>& operator=(const Formula<X>& f) { if(this != &f) { --_root->count; if(_root->count==0) { delete _root; } _root=f._root; ++_root->count; } return *this; }
+    Formula<X>& operator=(const X& c) { --_root->count; if(_root->count==0) { delete _root; } _root=new FormulaNode<X>(c); ++_root->count; return *this; }
     static Formula<X> constant(const X& c);
     static Formula<X> constant(double c);
     static Formula<X> coordinate(uint j);
     static Vector< Formula<X> > identity(uint n);
-    const FormulaNode<X>* ptr() const { return _root.operator->(); }
+    const FormulaNode<X>* ptr() const { return _root; }
   public:
-    boost::intrusive_ptr< const FormulaNode<X> > _root;
+    const FormulaNode<X>* _root;
+    //boost::intrusive_ptr< const FormulaNode<X> > _root;
 };
 
 //! \related Procedure \brief Evaluate a function \a f defined by a formula.
@@ -88,12 +89,12 @@ struct FormulaNode {
             case CNST: delete val; case IND: break;
             case POW: --arg->count; if(arg->count==0) { delete arg; } break;
             default: if(arg2) { --arg2->count; if(arg2->count==0) { delete arg2; } } --arg1->count; if(arg1->count==0) { delete arg1; } } }
-    explicit FormulaNode(Operator o, const FormulaNode<X>* a) : op(o), arg(a), arg2(0) { ++arg->count; }
-    explicit FormulaNode(Operator o, const FormulaNode<X>* a, int n) : op(o), arg(a), np(n) { ++arg->count; }
-    explicit FormulaNode(Operator o, const FormulaNode<X>* a1, const FormulaNode<X>* a2) : op(o), arg1(a1), arg2(a2) { ++arg1->count; ++arg2->count; }
-    explicit FormulaNode(const X& x) : op(CNST), val(new X(x)) { }
-    explicit FormulaNode(double x) : op(CNST), val(new X(x)) { }
-    explicit FormulaNode(uint i) : op(IND), ind(i) { }
+    explicit FormulaNode(Operator o, const FormulaNode<X>* a) : count(0u), op(o), arg(a), arg2(0) { ++arg->count; }
+    explicit FormulaNode(Operator o, const FormulaNode<X>* a, int n) : count(0u), op(o), arg(a), np(n) { ARIADNE_ASSERT(o==POW); ++arg->count; }
+    explicit FormulaNode(Operator o, const FormulaNode<X>* a1, const FormulaNode<X>* a2) : count(0u), op(o), arg1(a1), arg2(a2) { ARIADNE_ASSERT(a2); ++arg1->count; ++arg2->count; }
+    explicit FormulaNode(const X& x) : count(0u), op(CNST), val(new X(x)) { }
+    explicit FormulaNode(double x) : count(0u), op(CNST), val(new X(x)) { }
+    explicit FormulaNode(uint i) : count(0u), op(IND), ind(i) { }
     mutable uint count;
     Operator op;
     union {
@@ -113,11 +114,6 @@ template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& 
 template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f1, const Formula<X>& f2) {
     return Formula<X>(new FormulaNode<X>(op,f1.ptr(),f2.ptr())); }
 
-
-template<class X> inline Formula<X>::Formula(Operator op, const Formula<X>& a)
-    : _root(new FormulaNode<X>(op,a._root.operator->())) { }
-template<class X> inline Formula<X>::Formula(Operator op, const Formula<X>& a1, const Formula<X>& a2)
-    : _root(new FormulaNode<X>(op,a1._root.operator->(),a2._root.operator->())) { }
 
 template<class X> inline Formula<X> Formula<X>::constant(const X& c) { return Formula<X>(new FormulaNode<X>(c)); }
 template<class X> inline Formula<X> Formula<X>::constant(double c) { return Formula<X>(new FormulaNode<X>(c)); }
@@ -152,8 +148,19 @@ template<class X> inline Formula<X> operator-(Formula<X> f, double c) { return f
 template<class X> inline Formula<X> operator*(Formula<X> f, double c) { return f * Formula<X>::constant(c); }
 template<class X> inline Formula<X> operator/(Formula<X> f, double c) { return f / Formula<X>::constant(c); }
 
-template<class X> inline Formula<X> operator+(Formula<X> f, const X& c) { return f + Formula<X>::constant(c); }
-template<class X> inline Formula<X> operator+(const X& c, Formula<X> f) { return Formula<X>::constant(c) + f; }
+template<class X> inline Formula<X> operator+(Real c, Formula<X> f) { return Formula<X>::constant(c) + f; }
+template<class X> inline Formula<X> operator-(Real c, Formula<X> f) { return Formula<X>::constant(c) - f; }
+template<class X> inline Formula<X> operator*(Real c, Formula<X> f) { return Formula<X>::constant(c) * f; }
+template<class X> inline Formula<X> operator/(Real c, Formula<X> f) { return Formula<X>::constant(c) / f; }
+template<class X> inline Formula<X> operator+(Formula<X> f, Real c) { return f + Formula<X>::constant(c); }
+template<class X> inline Formula<X> operator-(Formula<X> f, Real c) { return f - Formula<X>::constant(c); }
+template<class X> inline Formula<X> operator*(Formula<X> f, Real c) { return f * Formula<X>::constant(c); }
+template<class X> inline Formula<X> operator/(Formula<X> f, Real c) { return f / Formula<X>::constant(c); }
+
+template<class X> inline Formula<X>& operator+=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1+f2; return f1=r; }
+template<class X> inline Formula<X>& operator*=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1*f2; return f1=r; }
+template<class X> inline Formula<X>& operator+=(Formula<X>& f, const Real& c) { Formula<X> r=f+Formula<X>::constant(c); return f=r; }
+template<class X> inline Formula<X>& operator*=(Formula<X>& f, const Real& c) { Formula<X> r=f*Formula<X>::constant(c); return f=r; }
 
 template<class X> inline Formula<X> operator*(Formula<X> f, int c) {
     if(c==0) { return Formula<X>::constant(0.0); }

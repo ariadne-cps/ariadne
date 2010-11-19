@@ -69,11 +69,12 @@ class TaylorModelAccuracy
     TaylorModelAccuracy();
     TaylorModelAccuracy(double st, uint md);
 
-    static void set_default_sweep_threshold(double dst) { ARIADNE_ASSERT(dst>=0.0); _default_sweep_threshold=dst; }
-    static void set_default_maximum_degree(int dmd) { ARIADNE_ASSERT(dmd>=0); _default_maximum_degree=dmd; }
     friend TaylorModelAccuracy max(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
     friend TaylorModelAccuracy min(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
     friend std::ostream& operator<<(std::ostream& os, const TaylorModelAccuracy& acc);
+  public:
+    static void set_default_sweep_threshold(double dst) { ARIADNE_ASSERT(dst>=0.0); _default_sweep_threshold=dst; }
+    static void set_default_maximum_degree(int dmd) { ARIADNE_ASSERT(dmd>=0); _default_maximum_degree=dmd; }
   public:
     bool discard(const Float& x) const;
     bool discard(const MultiIndex& a) const;
@@ -359,18 +360,6 @@ class TaylorModel<Interval>
     TaylorModel<Interval>& clean();
     //! \brief Sort the terms in index order and combine terms with the same index.
     TaylorModel<Interval>& unique_sort();
-    //@}
-
-    //@{
-    /*! \name Default accuracy parameters. */
-    //! \brief Set the default maximum degree.
-    static void set_default_maximum_degree(uint md);
-    //! \brief Set the default sweep threshold.
-    static void set_default_sweep_threshold(double me);
-    //! \brief The default maximum degree.
-    static uint default_maximum_degree();
-    //! \brief The default sweep threshold.
-    static double default_sweep_threshold();
     //@}
 
     //@{

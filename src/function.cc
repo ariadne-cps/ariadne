@@ -33,6 +33,7 @@
 #include "expression.h"
 #include "assignment.h"
 #include "space.h"
+#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 
@@ -308,7 +309,7 @@ struct ScalarPolynomialFunctionBody
     virtual std::ostream& write(std::ostream& os) const { return
         os << "PF["<<this->argument_size()<<"]("<<Polynomial<Float>(_polynomial)<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const {
-        r=x[0]*0; r=Ariadne::evaluate(_polynomial,x); }
+        r=Ariadne::evaluate(_polynomial,x); }
     Polynomial<Real> _polynomial;
 };
 

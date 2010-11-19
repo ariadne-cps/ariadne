@@ -529,6 +529,8 @@ inline void _set_constant(TaylorModel<Interval>& r, const Interval& c) { r.clear
 inline void _set_constant(Differential<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
 inline void _set_constant(Differential<Interval>& r, const Interval& c) { r.clear(); r+=c; }
 inline void _set_constant(Propagator<Interval>& r, const Interval& c) { r=c; }
+inline void _set_constant(Formula<Interval>& r, const Interval& c) { r=c; }
+inline void _set_constant(Formula<Real>& r, const Interval& c) { r=Real(c); }
 
 Boolean _compare(Operator cmp, const String& s1, const String& s2) {
     switch(cmp) {
@@ -723,6 +725,8 @@ template Differential<Interval> evaluate(const Expression<Real>& e, const Map< E
 template TaylorModel<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Float> >& x);
 template TaylorModel<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Interval> >& x);
 template Propagator<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Propagator<Interval> >& x);
+template Formula<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Formula<Interval> >& x);
+template Formula<Real> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Formula<Real> >& x);
 
 
 template<class X, class Y> Expression<X> substitute_variable(const VariableExpression<X>& e, const Variable<Y>& v, const Y& c) {
@@ -1045,19 +1049,19 @@ Expression<Real> indicator(Expression<tribool> e, Sign sign) {
     switch(eptr->op()) {
         case CNST:
             cnptr=dynamic_cast<ConstantExpression<Tribool>*>(eptr);
-            value=( sign==positive ? cnptr->value() : !cnptr->value() );
+            value=( sign==POSITIVE ? cnptr->value() : !cnptr->value() );
             if(value==true) { return RealExpression(+1.0); }
             else if(value==false) {  return RealExpression(-1.0); }
             else { return RealExpression(0.0); }
         case GEQ: case GT:
             cptr=dynamic_cast<BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
             assert(cptr);
-            if(sign==positive) { return cptr->_arg1-cptr->_arg2; }
+            if(sign==POSITIVE) { return cptr->_arg1-cptr->_arg2; }
             else { return cptr->_arg2-cptr->_arg1; }
         case LEQ: case LT:
             cptr=dynamic_cast<BinaryExpression<Tribool,Operator,Real,Real>*>(eptr);
             assert(cptr);
-            if(sign==positive) { return cptr->_arg2-cptr->_arg1; }
+            if(sign==POSITIVE) { return cptr->_arg2-cptr->_arg1; }
             else { return cptr->_arg1-cptr->_arg2; }
         case AND:
             bptr=dynamic_cast<BinaryExpression<Tribool,Operator,Tribool,Tribool>*>(eptr);

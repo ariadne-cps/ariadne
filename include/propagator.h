@@ -36,11 +36,7 @@
 
 namespace Ariadne {
 
-inline
-void restrict(Interval& r, const Interval& x) {
-    r.set_lower(max(r.lower(),x.lower()));
-    r.set_upper(min(r.upper(),x.upper()));
-};
+inline void restrict(Interval& r, const Interval& x);
 
 template<class X> class PropagatorBody;
 typedef int Int;

@@ -898,7 +898,7 @@ CompositeHybridAutomaton::constraint_function(DiscreteLocation location, Discret
 
 RealScalarFunction
 CompositeHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
-    return RealScalarFunction(indicator(substitute(invariant_predicate(location,event),algebraic_assignments(location)),negative),state_variables(location));
+    return RealScalarFunction(indicator(substitute(invariant_predicate(location,event),algebraic_assignments(location)),NEGATIVE),state_variables(location));
 }
 
 RealScalarFunction

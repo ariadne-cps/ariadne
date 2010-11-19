@@ -364,13 +364,13 @@ tribool ConstrainedImageSet::satisfies(const NonlinearConstraint& nc) const
     Tribool result;
     if(bounds.upper()<+infty) {
         all_constraints.append( composed_function >= bounds.upper() );
-        result=solver.feasible(all_constraints,domain).first;
+        result=solver.feasible(domain,all_constraints).first;
         all_constraints.pop_back();
         if(definitely(result)) { return false; }
     }
     if(bounds.lower()>-infty) {
         all_constraints.append(composed_function <= bounds.lower());
-        result = result || solver.feasible(all_constraints,domain).first;
+        result = result || solver.feasible(domain,all_constraints).first;
     }
     return !result;
 }
@@ -402,7 +402,7 @@ tribool ConstrainedImageSet::disjoint(const Box& bx) const
         all_constraints.append(NonlinearConstraint(this->_function[i],bx[i]));
     }
     all_constraints.append(this->_constraints);
-    Pair<Tribool,FloatVector> result=ConstraintSolver().feasible(all_constraints,domain);
+    Pair<Tribool,FloatVector> result=ConstraintSolver().feasible(domain,all_constraints);
     return !result.first;
 }
 
@@ -602,7 +602,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         NonlinearConstraint constraint=(xg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        solver.hull_reduce(constraint,nd);
+        solver.hull_reduce(nd,constraint);
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         if(nd.empty()) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");
@@ -610,13 +610,13 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         }
 
         for(uint i=0; i!=m; ++i) {
-            solver.box_reduce(constraint,nd,i);
+            solver.box_reduce(nd,constraint,i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
             if(nd.empty()) { ARIADNE_LOG(2,"  Proved disjointness using box reduce\n"); return; }
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 
-        solver.hull_reduce(constraint,nd);
+        solver.hull_reduce(nd,constraint);
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         if(nd.empty()) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");

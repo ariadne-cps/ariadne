@@ -32,6 +32,8 @@
 #include "box.h"
 #include "grid_set.h"
 #include "function.h"
+#include "formula.h"
+#include "procedure.h"
 #include "constraint.h"
 #include "nonlinear_programming.h"
 #include "function_template.h"
@@ -78,7 +80,7 @@ std::ostream& operator<<(std::ostream& os, const NonlinearConstraint& c) {
 
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& constraints, const Box& domain) const
+Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<NonlinearConstraint>& constraints) const
 {
 
     static const double XSIGMA=0.125;
@@ -162,7 +164,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
         NonlinearConstraint constraint=(xg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
-        this->hull_reduce(constraint,subdomain);
+        this->hull_reduce(subdomain,constraint);
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         if(subdomain.empty()) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
@@ -170,7 +172,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const List<NonlinearConstraint>& 
         }
 
         for(uint i=0; i!=m; ++i) {
-            this->box_reduce(constraint,subdomain,i);
+            this->box_reduce(subdomain,constraint,i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
             if(subdomain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,Point()); }
         }
@@ -198,11 +200,11 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const RealVect
     for(uint i=0; i!=codomain.size(); ++i) {
         constraints.append(NonlinearConstraint(function[i],codomain[i]));
     }
-    return this->feasible(constraints,domain);
+    return this->feasible(domain,constraints);
 }
 
 
-void ConstraintSolver::reduce(const List<NonlinearConstraint>& constraints, Box& domain) const
+void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& constraints) const
 {
     const double MINIMUM_REDUCTION = 0.75;
 
@@ -216,13 +218,13 @@ void ConstraintSolver::reduce(const List<NonlinearConstraint>& constraints, Box&
 
     do {
         for(uint i=0; i!=constraints.size(); ++i) {
-            this->hull_reduce(constraints[i],domain);
+            this->hull_reduce(domain,constraints[i]);
         }
         if(domain.empty()) { return; }
 
         for(uint i=0; i!=constraints.size(); ++i) {
             for(uint j=0; j!=domain.size(); ++j) {
-                this->box_reduce(constraints[i],domain,j);
+                this->box_reduce(domain,constraints[i],j);
             }
         }
         if(domain.empty()) { return; }
@@ -236,21 +238,29 @@ void ConstraintSolver::reduce(const List<NonlinearConstraint>& constraints, Box&
 }
 
 
-void ConstraintSolver::hull_reduce(const NonlinearConstraint& constraint, Box& domain) const
+void ConstraintSolver::hull_reduce(Box& domain, const NonlinearConstraint& constraint) const
 {
     const RealScalarFunction& function=constraint.function();
     const Interval& bounds=constraint.bounds();
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
+    Formula<Interval> formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
+    Procedure<Interval> procedure(formula);
+    Box reducing_domain(domain);
+    Ariadne::simple_hull_reduce(reducing_domain, procedure, bounds);
+    domain = reducing_domain;
+
+/*
     Propagator<Interval> propagator = constraint.function().propagator() == constraint.bounds();
     ARIADNE_LOG(4,"propagator="<<propagator<<"\n");
     Box new_domain=propagator.reduce(domain);
     ARIADNE_LOG(6,"  old_box="<<domain<<" new_box="<<new_domain<<"\n");
     domain=new_domain;
+*/
 }
 
-void ConstraintSolver::monotone_reduce(const NonlinearConstraint& constraint, Box& domain, uint variable) const
+void ConstraintSolver::monotone_reduce(Box& domain, const NonlinearConstraint& constraint, uint variable) const
 {
     const RealScalarFunction& function=constraint.function();
     RealScalarFunction derivative=function.derivative(variable);
@@ -290,7 +300,7 @@ void ConstraintSolver::monotone_reduce(const NonlinearConstraint& constraint, Bo
 
 
 
-void ConstraintSolver::box_reduce(const NonlinearConstraint& constraint, Box& domain, uint variable) const
+void ConstraintSolver::box_reduce(Box& domain, const NonlinearConstraint& constraint, uint variable) const
 {
     const RealScalarFunction& function=constraint.function();
     const Interval& bounds=constraint.bounds();
@@ -332,7 +342,7 @@ void ConstraintSolver::box_reduce(const NonlinearConstraint& constraint, Box& do
 
 namespace {
 
-void compute_monotonicity(const NonlinearConstraint& constraint, Box& domain) {
+void compute_monotonicity(Box& domain, const NonlinearConstraint& constraint) {
 /*
     static const uint n = domain.size();
 
@@ -347,7 +357,7 @@ void compute_monotonicity(const NonlinearConstraint& constraint, Box& domain) {
 } // namespace
 
 
-Pair<Box,Box> ConstraintSolver::split(const List<NonlinearConstraint>& constraints, const Box& d) const
+Pair<Box,Box> ConstraintSolver::split(const Box& d, const List<NonlinearConstraint>& constraints) const
 {
     return d.split();
 }

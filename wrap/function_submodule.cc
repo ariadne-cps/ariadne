@@ -132,6 +132,8 @@ class ScalarPythonFunction
         return boost::python::extract< Differential<IntervalTaylorModel> >(this->_pyf(x)); }
     virtual Propagator<Interval> evaluate (const Vector< Propagator<Interval> >& x) const {
         return boost::python::extract< Propagator<Interval> >(this->_pyf(x)); }
+    virtual Formula<Interval> evaluate (const Vector< Formula<Interval> >& x) const {
+        return boost::python::extract< Formula<Interval> >(this->_pyf(x)); }
 
     virtual Vector<Float> gradient(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
@@ -184,6 +186,8 @@ class VectorPythonFunction
         return boost::python::extract< Vector< Differential<Interval> > >(this->_pyf(x)); }
     virtual Vector< Propagator<Interval> > evaluate (const Vector< Propagator<Interval> >& x) const {
         return boost::python::extract< Vector< Propagator<Interval> > >(this->_pyf(x)); }
+    virtual Vector< Formula<Interval> > evaluate (const Vector< Formula<Interval> >& x) const {
+        return boost::python::extract< Vector< Formula<Interval> > >(this->_pyf(x)); }
 
     virtual Matrix<Float> jacobian (const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }

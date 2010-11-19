@@ -46,6 +46,7 @@
 #include "taylor_model.h"
 #include "differential.h"
 #include "propagator.h"
+#include "formula.h"
 
 namespace Ariadne {
 
@@ -124,6 +125,7 @@ class ScalarFunction<Interval>
     Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
     Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
@@ -183,6 +185,7 @@ class ScalarFunction<Real>
     Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Propagator<Interval> propagator() const { return this->_ptr->evaluate(Propagator<Interval>::variables(this->argument_size())); }
 
@@ -385,6 +388,7 @@ class VectorFunction<Real>
     Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Vector< Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Matrix<Float> jacobian(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }

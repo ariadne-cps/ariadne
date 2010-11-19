@@ -26,6 +26,7 @@
 #include "differential.h"
 #include "taylor_model.h"
 #include "propagator.h"
+#include "formula.h"
 
 namespace Ariadne {
 
@@ -63,6 +64,8 @@ class ScalarFunctionTemplate
 
     virtual Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const {
         Propagator<Interval> r; _base_compute(r,x); return r; }
+    virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const {
+        Formula<Interval> r; _base_compute(r,x); return r; }
 
     virtual std::ostream& repr(std::ostream& os) const {
         return this->write(os); }
@@ -101,6 +104,8 @@ class VectorFunctionTemplate
 
     virtual Vector< Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const {
         Vector< Propagator<Interval> > r(this->result_size(),Propagator<Interval>()); _base_compute(r,x); return r; }
+    virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const {
+        Vector< Formula<Interval> > r(this->result_size(),Formula<Interval>()); _base_compute(r,x); return r; }
 
 };
 

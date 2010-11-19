@@ -88,7 +88,7 @@ class AtomicDiscreteTransition
     ContinuousPredicate _guard_predicate;
 
     //  The reset assignments of the discrete transition.
-    List<RealUpdateAssignment> _update_assignments;
+    List<PrimedRealAssignment> _update_assignments;
 
     //  Whether or not the transition is forced (Deprecated)
     bool _forced;
@@ -110,13 +110,13 @@ class AtomicDiscreteTransition
     AtomicDiscreteTransition(DiscreteEvent event,
                              const AtomicDiscreteMode& source_mode,
                              const AtomicDiscreteMode& target_mode,
-                             const List<RealUpdateAssignment>& reset,
+                             const List<PrimedRealAssignment>& reset,
                              const ContinuousPredicate& guard);
 
     AtomicDiscreteTransition(DiscreteEvent event,
                              AtomicDiscreteLocation source,
                              AtomicDiscreteLocation target,
-                             const List<RealUpdateAssignment>& reset,
+                             const List<PrimedRealAssignment>& reset,
                              const ContinuousPredicate& guard);
 };
 
@@ -142,10 +142,10 @@ class AtomicDiscreteMode {
     AtomicDiscreteLocation _location;
 
     // The algebraic equations
-    List<RealAlgebraicAssignment> _algebraic_assignments;
+    List<RealAssignment> _algebraic_assignments;
 
     // The algebraic equations
-    List<RealDifferentialAssignment> _differential_assignments;
+    List<DottedRealAssignment> _differential_assignments;
 
     // The discrete mode's invariants.
     Map<DiscreteEvent,ContinuousPredicate> _invariant_predicates;
@@ -160,9 +160,9 @@ class AtomicDiscreteMode {
     Map<DiscreteEvent,AtomicDiscreteLocation> _targets;
 
     // The update assignments for the doscrete transitions.
-    Map<DiscreteEvent, List<RealUpdateAssignment> > _update_assignments;
+    Map<DiscreteEvent, List<PrimedRealAssignment> > _update_assignments;
   private:
-    AtomicDiscreteMode(AtomicDiscreteLocation, const List<RealAlgebraicAssignment>&,const List<RealDifferentialAssignment>&);
+    AtomicDiscreteMode(AtomicDiscreteLocation, const List<RealAssignment>&,const List<DottedRealAssignment>&);
   public:
     //! \brief The mode's discrete state.
     AtomicDiscreteLocation location() const { return this->_location; }
@@ -258,16 +258,16 @@ class AtomicHybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     void new_mode(AtomicDiscreteLocation state,
-                  const List<RealAlgebraicAssignment>& equations,
-                  const List<RealDifferentialAssignment>& dynamic);
+                  const List<RealAssignment>& equations,
+                  const List<DottedRealAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
     void new_mode(AtomicDiscreteLocation state,
-                  const List<RealDifferentialAssignment>& dynamic);
+                  const List<DottedRealAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
     void new_mode(AtomicDiscreteLocation state,
-                  const List<RealAlgebraicAssignment>& equations);
+                  const List<RealAssignment>& equations);
 
 
     //! \brief Adds a discrete mode to the automaton.
@@ -289,7 +289,7 @@ class AtomicHybridAutomaton
     void new_reset(AtomicDiscreteLocation state,
                    DiscreteEvent event,
                    AtomicDiscreteLocation target,
-                   const List<RealUpdateAssignment>& reset);
+                   const List<PrimedRealAssignment>& reset);
 
 
     //! \brief Adds an unguarded transition to the automaton.
@@ -297,7 +297,7 @@ class AtomicHybridAutomaton
     void new_transition(AtomicDiscreteLocation state,
                         DiscreteEvent event,
                         AtomicDiscreteLocation target,
-                        const List<RealUpdateAssignment>& reset);
+                        const List<PrimedRealAssignment>& reset);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
@@ -311,7 +311,7 @@ class AtomicHybridAutomaton
                         DiscreteEvent event,
                         const ContinuousPredicate& guard,
                         AtomicDiscreteLocation target,
-                        const List<RealUpdateAssignment>& reset,
+                        const List<PrimedRealAssignment>& reset,
                         EventKind kind=urgent);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
@@ -325,7 +325,7 @@ class AtomicHybridAutomaton
     void new_transition(AtomicDiscreteLocation source,
                         DiscreteEvent event,
                         AtomicDiscreteLocation target,
-                        const List<RealUpdateAssignment>& reset,
+                        const List<PrimedRealAssignment>& reset,
                         const ContinuousPredicate& guard,
                         EventKind urgency=urgent);
 
@@ -405,7 +405,7 @@ class AtomicHybridAutomaton
     AtomicDiscreteLocation target(AtomicDiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The target for \a event from location \a source. Returns the identity if \a event is not present.
-    List<RealUpdateAssignment> reset(AtomicDiscreteLocation location, DiscreteEvent event) const;
+    List<PrimedRealAssignment> reset(AtomicDiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The invariant for action label \a event in \a location.
     const ContinuousPredicate& invariant(AtomicDiscreteLocation location, DiscreteEvent event) const;

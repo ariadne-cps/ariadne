@@ -25,15 +25,8 @@
 #include "assignment.h"
 #include "space.h"
 #include "valuation.h"
-#include "vector.h"
 
 #include "numeric.h"
-#include "taylor_model.h"
-#include "differential.h"
-
-#include "polynomial.h"
-#include "affine.h"
-
 #include "formula.h"
 
 namespace Ariadne {
@@ -519,16 +512,8 @@ Expression<Real> abs(Expression<Real> e) {
 
 
 
-inline void _set_constant(Float& r, const Interval& c) { r=midpoint(c); }
-inline void _set_constant(Interval& r, const Interval& c) { r=c; }
-inline void _set_constant(Real& r, const Interval& c) { r=Real(c); }
 inline void _set_constant(Real& r, const Real& c) { r=c; }
-inline void _set_constant(TaylorModel<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
-inline void _set_constant(TaylorModel<Interval>& r, const Interval& c) { r.clear(); r+=c; }
-inline void _set_constant(Differential<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
-inline void _set_constant(Differential<Interval>& r, const Interval& c) { r.clear(); r+=c; }
-inline void _set_constant(Formula<Interval>& r, const Interval& c) { r=c; }
-inline void _set_constant(Formula<Real>& r, const Interval& c) { r=Real(c); }
+inline void _set_constant(Formula<Real>& r, const Real& c) { r=c; }
 
 Boolean _compare(Operator cmp, const String& s1, const String& s2) {
     switch(cmp) {
@@ -711,18 +696,11 @@ template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedRealVa
 }
 
 
-template Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<Float>& x);
-template Float evaluate(const Expression<Real>& e, const ContinuousValuation<Float>& x);
+template Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<Real>& x);
+template Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& x);
 
 
-template Float evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Float>& x);
-template Interval evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Interval>& x);
 template Real evaluate(const Expression<Real>& e, const Map<ExtendedRealVariable,Real>& x);
-template Differential<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Float> >& x);
-template Differential<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Interval> >& x);
-template TaylorModel<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Float> >& x);
-template TaylorModel<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Interval> >& x);
-template Formula<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Formula<Interval> >& x);
 template Formula<Real> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Formula<Real> >& x);
 
 
@@ -877,122 +855,6 @@ template Expression<Real> simplify(const Expression<Real>& e);
 template Expression<Tribool> simplify(const Expression<Tribool>& e);
 
 
-template<class X>
-Polynomial<X> polynomial(const Expression<Real>& e, const Space<Real>& s)
-{
-    const ExpressionInterface<Real>* const eptr=e._raw_pointer();
-    const Operator op=eptr->op();
-
-    const ConstantExpression<Real>* cptr;
-    const VariableExpression<Real>* vptr;
-    const CoordinateExpression<Real>* iptr;
-    const UnaryExpression<Real,Operator>* uptr;
-    const BinaryExpression<Real,Operator>* bptr;
-
-    switch(op) {
-        case CNST:
-            cptr=static_cast<const ConstantExpression<Real>*>(eptr);
-            return Polynomial<X>::constant(s.size(),cptr->value()); break;
-        case VAR:
-            vptr=static_cast<const VariableExpression<Real>*>(eptr);
-            return Polynomial<X>::variable(s.size(),s.index(vptr->variable())); break;
-        case IND:
-            iptr=static_cast<const CoordinateExpression<Real>*>(eptr);
-            return Polynomial<X>::variable(s.size(),iptr->index()); break;
-        case NEG:
-            uptr=static_cast<const UnaryExpression<Real>*>(eptr);
-            return -polynomial<X>(uptr->_arg,s); break;
-        case ADD:
-            bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            return polynomial<X>(bptr->_arg1,s)+polynomial<X>(bptr->_arg2,s); break;
-        case SUB:
-            bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            return polynomial<X>(bptr->_arg1,s)-polynomial<X>(bptr->_arg2,s); break;
-        case MUL:
-            bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            return polynomial<X>(bptr->_arg1,s)*polynomial<X>(bptr->_arg2,s); break;
-        case DIV:
-            bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2._raw_pointer());
-            ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<e<<" to polynomial form.");
-            return polynomial<X>(bptr->_arg1,s)/static_cast<X>(cptr->value()); break;
-        default:
-            ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to polynomial form.");
-    }
-}
-
-
-template<class X>
-Affine<X> affine(const Expression<Real>& e, const Space<Real>& s) {
-
-    const ExpressionInterface<Real>* eptr=e._raw_pointer();
-    Operator op=eptr->op();
-
-    const ConstantExpression<Real>* cptr;
-    const VariableExpression<Real>* vptr;
-    const CoordinateExpression<Real>* iptr;
-    const UnaryExpression<Real,Operator>* uptr;
-    const BinaryExpression<Real,Operator>* bptr;
-    const ConstantExpression<Real>* cptr1;
-    const ConstantExpression<Real>* cptr2;
-
-    switch(op) {
-        case CNST:
-            cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
-            return Affine<X>::constant(s.size(),cptr->value()); break;
-        case VAR:
-            vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
-            return Affine<X>::variable(s.size(),s.index(vptr->variable())); break;
-        case IND:
-            iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-            return Affine<X>::variable(s.size(),iptr->coordinate()); break;
-        case NEG:
-            uptr=static_cast<const UnaryExpression<Real>*>(eptr);
-            return -affine<X>(uptr->_arg,s); break;
-        case ADD:
-            bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            return affine<X>(bptr->_arg1,s)+affine<X>(bptr->_arg2,s); break;
-        case SUB:
-            bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            return affine<X>(bptr->_arg1,s)-affine<X>(bptr->_arg2,s); break;
-        case DIV:
-            bptr=dynamic_cast<const BinaryExpression<Real>*>(eptr);
-            cptr=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2._raw_pointer());
-            ARIADNE_ASSERT_MSG(cptr,"Cannot convert expression "<<e<<" to affine form.");
-            return affine<X>(bptr->_arg1,s)/static_cast<X>(cptr->value()); break;
-        case MUL:
-            bptr=static_cast<const BinaryExpression<Real>*>(eptr);
-            cptr1=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg1._raw_pointer());
-            cptr2=dynamic_cast<const ConstantExpression<Real>*>(bptr->_arg2._raw_pointer());
-            ARIADNE_ASSERT_MSG(cptr1 || cptr2,"Cannot convert expression "<<e<<" to affine form.");
-            if(cptr1) { return static_cast<X>(cptr1->value()) * affine<X>(bptr->_arg2,s); }
-            else { return affine<X>(bptr->_arg1,s) * static_cast<X>(cptr2->value()); }
-            break;
-        default:
-            ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to affine form.");
-    }
-}
-
-template Affine<Interval> affine(const Expression<Real>&, const Space<Real>&);
-template Polynomial<Interval> polynomial(const Expression<Real>&, const Space<Real>&);
-template Polynomial<Real> polynomial(const Expression<Real>&, const Space<Real>&);
-
-Expression<Real> function(const Expression<Real>& e,  const Space<Real>& s)
-{
-    const ExpressionInterface<Real>* eptr=e._raw_pointer();
-    const BinaryExpression<Real,Operator>* bptr=dynamic_cast<const BinaryExpression<Real,Operator>*>(eptr);
-    if(bptr) { return make_expression<Real>(bptr->_op,function(bptr->_arg1,s),function(bptr->_arg2,s)); }
-    const UnaryExpression<Real,Operator>* uptr=dynamic_cast<const UnaryExpression<Real,Operator>*>(eptr);
-    if(uptr) { return make_expression<Real>(uptr->_op,function(uptr->_arg,s)); }
-    const ConstantExpression<Real>* cptr=dynamic_cast<const ConstantExpression<Real>*>(eptr);
-    if(cptr) { return Expression<Real>(*cptr); }
-    const VariableExpression<Real>* vptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
-    if(vptr) { return Expression<Real>(new CoordinateExpression<Real>(s.index(vptr->variable()))); }
-    const CoordinateExpression<Real>* iptr=dynamic_cast<const CoordinateExpression<Real>*>(eptr);
-    if(iptr) { return e; }
-    ARIADNE_FAIL_MSG("Cannot convert numbered variable");
-}
-
 Expression<Real> derivative(const Expression<Real>& e, const Variable<Real>& v)
 {
     const ExpressionInterface<Real>* eptr=e._raw_pointer();
@@ -1125,7 +987,18 @@ tribool opposite(Expression<tribool> e1, Expression<tribool> e2) {
 
 }
 
-Formula<Real> formula(const Expression<Real>& e, const Map<std::string,uint> spc)
+uint dimension(const Space<Real>& spc)
+{
+    return spc.size();
+}
+
+uint len(const List< Variable<Real> >& vars)
+{
+    return vars.size();
+}
+
+
+Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc)
 {
     const ExpressionInterface<Real>* eptr=e._raw_pointer();
     const ConstantExpression<Real>* cptr=static_cast<const ConstantExpression<Real>*>(eptr);
@@ -1136,7 +1009,7 @@ Formula<Real> formula(const Expression<Real>& e, const Map<std::string,uint> spc
         case CNST:
             return Formula<Real>::constant(cptr->value());
         case VAR:
-            return Formula<Real>::coordinate(uint(spc[vptr->variable().name()]));
+            return Formula<Real>::coordinate(uint(spc.index(vptr->variable())));
         case ADD:
             return formula(bptr->_arg1,spc)+formula(bptr->_arg2,spc);
         case SUB:
@@ -1162,16 +1035,28 @@ Formula<Real> formula(const Expression<Real>& e, const Map<std::string,uint> spc
         case TAN:
             return tan(formula(uptr->_arg,spc));
         default:
-            ARIADNE_THROW(std::runtime_error,"derivative(RealExpression,RealVariable)",
-                          "Cannot compute derivative of "<<e<<"\n");
+            ARIADNE_THROW(std::runtime_error,"formula(RealExpression,RealSpace)",
+                          "Cannot compute formula for "<<e<<"\n");
     }
 }
 
-
-template<>
-Formula<Real>::Formula(const Expression<Real>& e, const Map<std::string,uint> s)
+Formula<Real> formula(const Expression<Real>& e, const List< Variable<Real> >& vars)
 {
-    *this=formula(e,s);
+    return formula(e,Space<Real>(vars));
+}
+
+Formula<Real> formula(const Expression<Real>& out, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc)
+{
+    return formula(substitute(out,aux),spc);
+}
+
+List< Formula<Real> > formula(const List< Expression<Real> >& out, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc)
+{
+    List< Formula<Real> > res;
+    for(uint i=0; i!=out.size(); ++i) {
+        res.append(formula(out[i],aux,spc));
+    }
+    return res;
 }
 
 

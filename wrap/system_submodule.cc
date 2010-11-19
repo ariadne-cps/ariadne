@@ -214,13 +214,13 @@ void export_formula()
     real_variable_class.def(self_ns::str(self));
 
     class_<DottedRealVariable> real_dotted_variable_class("DottedRealVariable", no_init);
-    real_dotted_variable_class.def("__lshift__", (RealDynamic(DottedRealVariable::*)(const RealExpression&)const) &DottedRealVariable::operator=);
+    real_dotted_variable_class.def("__lshift__", (DottedRealAssignment(DottedRealVariable::*)(const RealExpression&)const) &DottedRealVariable::operator=);
     real_dotted_variable_class.def(self_ns::str(self));
 
     def("dot", (DottedRealVariable(*)(const RealVariable&)) &dot);
 
     class_<PrimedRealVariable> real_next_variable_class("PrimedRealVariable", no_init);
-    real_next_variable_class.def("__lshift__", (RealUpdate(PrimedRealVariable::*)(const RealExpression&)const) &PrimedRealVariable::operator=);
+    real_next_variable_class.def("__lshift__", (PrimedRealAssignment(PrimedRealVariable::*)(const RealExpression&)const) &PrimedRealVariable::operator=);
     real_next_variable_class.def(self_ns::str(self));
 
     def("next", (PrimedRealVariable(*)(const RealVariable&)) &next);
@@ -270,16 +270,16 @@ void export_formula()
 
     class_<RealAssignment> real_assignment_class("RealAssignment",no_init);
     real_assignment_class.def(self_ns::str(self));
-    class_<RealDynamic> real_dynamic_class("RealDynamic",no_init);
-    real_dynamic_class.def(self_ns::str(self));
-    class_<RealUpdate> real_update_class("RealUpdate",no_init);
-    real_update_class.def(self_ns::str(self));
-    class_<StringUpdate> string_update_class("StringUpdate",no_init);
-    string_update_class.def(self_ns::str(self));
+    class_<DottedRealAssignment> dotted_real_assignment_class("DottedRealAssignment",no_init);
+    dotted_real_assignment_class.def(self_ns::str(self));
+    class_<PrimedRealAssignment> primed_real_assignment_class("PrimedRealAssignment",no_init);
+    primed_real_assignment_class.def(self_ns::str(self));
+    class_<StringUpdate> primed_string_assignment_class("PrimedStringAssignment",no_init);
+    primed_string_assignment_class.def(self_ns::str(self));
     class_<IntegerAssignment> integer_assignment_class("IntegerAssignment",no_init);
     integer_assignment_class.def(self_ns::str(self));
-    class_<IntegerUpdate> integer_update_class("IntegerUpdate",no_init);
-    integer_update_class.def(self_ns::str(self));
+    class_<IntegerUpdate> primed_integer_assignment_class("PrimedIntegerAssignment",no_init);
+    primed_integer_assignment_class.def(self_ns::str(self));
 
     typedef Variable<Tribool> TriboolVariable;
     typedef Expression<Tribool> TriboolExpression;

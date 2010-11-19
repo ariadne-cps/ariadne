@@ -51,26 +51,6 @@ namespace Ariadne {
 
 template<class X> class Vector;
 template<class X> class Polynomial;
-template<class LHS, class RHS> class Assignment;
-template<class T> class ExtendedVariable;
-template<class T> class Variable;
-template<class T> class DottedVariable;
-template<class T> class PrimedVariable;
-template<class T> class Expression;
-template<class T> class Space;
-
-typedef ExtendedVariable<Real> ExtendedRealVariable;
-typedef Variable<Real> RealVariable;
-typedef DottedVariable<Real> DottedRealVariable;
-typedef PrimedVariable<Real> PrimedRealVariable;
-typedef Variable<Real> RealVariable;
-typedef Expression<Real> RealExpression;
-typedef Space<Real> RealSpace;
-
-typedef Assignment<RealVariable,RealExpression> RealAssignment;
-typedef Assignment<ExtendedRealVariable,RealExpression> ExtendedRealAssignment;
-typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
-typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
 
 template<class X> class ScalarFunction;
 typedef ScalarFunction<Float> FloatScalarFunction;
@@ -160,9 +140,7 @@ class ScalarFunction<Real>
     static List< ScalarFunction<Real> > coordinates(Nat n);
 
     explicit ScalarFunction<Real>(Nat n=0u);
-    ScalarFunction<Real>(const Expression<Real>& e, const Space<Real>& s);
-    ScalarFunction<Real>(const Expression<Real>& e, const List< Variable<Real> >& s);
-    ScalarFunction<Real>(const Expression<tribool>& e, const List< Variable<Real> >& s);
+    ScalarFunction<Real>(Nat as, const Formula<Real>& e);
     ScalarFunction<Real>(const Polynomial<Real>& p);
     ScalarFunction<Real>(const Expansion<Float>& p);
 
@@ -176,6 +154,7 @@ class ScalarFunction<Real>
     Nat argument_size() const { return this->_ptr->argument_size(); }
     Float evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Interval evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    Real evaluate(const Vector<Real>& x) const { return this->_ptr->evaluate(x); }
     TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
     TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
@@ -186,6 +165,7 @@ class ScalarFunction<Real>
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    Real operator() (const Vector<Real>& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
     TaylorModel<Float> operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
@@ -221,6 +201,7 @@ class ScalarFunction<Real>
 
 inline Float evaluate_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Interval evaluate(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
+inline Real evaluate(const ScalarFunction<Real>& f, const Vector<Real>& x) { return f(x); }
 inline TaylorModel<Float> compose(const ScalarFunction<Real>& f, const Vector< TaylorModel<Float> >& x) { return f.evaluate(x); }
 inline TaylorModel<Interval> compose(const ScalarFunction<Real>& f, const Vector< TaylorModel<Interval> >& x) { return f.evaluate(x); }
 inline Vector<Float> gradient_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f.gradient(x); }
@@ -340,6 +321,7 @@ class VectorFunction<Real>
     VectorFunction<Real>(Nat rs, Nat as);
     VectorFunction<Real>(Nat rs, const ScalarFunction<Real>& sf);
     VectorFunction<Real>(const List< ScalarFunction<Real> >& lsf);
+    VectorFunction<Real>(Nat as, const List< Formula<Real> >& e);
     VectorFunction<Real>(const Vector< Polynomial<Real> >& p);
     VectorFunction<Real>(VectorFunctionInterface<Real>*);
     const VectorFunctionInterface<Real>* pointer() const { return this->_ptr.operator->(); }
@@ -347,26 +329,6 @@ class VectorFunction<Real>
     operator const VectorFunctionInterface<Real>& () { return *this->_ptr; }
     operator const VectorFunction<Float> () { return VectorFunction<Float>(this->_ptr); }
     operator const VectorFunction<Interval> () { return VectorFunction<Interval>(this->_ptr); }
-
-    VectorFunction<Real>(const List< Expression<Real> >& e, const Space<Real>& s);
-    VectorFunction<Real>(const List< Expression<Real> >& e, const List< Variable<Real> >& v);
-    VectorFunction<Real>(const List<ExtendedRealVariable>& rs, const Map<ExtendedRealVariable,RealExpression>& e, const List<RealVariable>& as);
-
-    VectorFunction<Real>(const List<RealVariable>& rv,
-                   const List<RealAssignment>& eq,
-                   const List<RealVariable>& av);
-
-    VectorFunction<Real>(const List<ExtendedRealVariable>& rv,
-                   const List<ExtendedRealAssignment>& eq,
-                   const List<RealVariable>& av);
-
-    VectorFunction<Real>(const List<DottedRealVariable>& rv,
-                   const List<DottedRealAssignment>& eq,
-                   const List<RealVariable>& av);
-
-    VectorFunction<Real>(const List<PrimedRealVariable>& rv,
-                   const List<PrimedRealAssignment>& eq,
-                   const List<RealVariable>& av);
 
     VectorFunction<Real>& operator=(const VectorFunction<Real>& f) {
         this->_check_type(f._raw_pointer()); this->_ptr=f._ptr; return *this; }
@@ -376,6 +338,7 @@ class VectorFunction<Real>
 
     Vector<Float> evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Vector<Interval> evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
+    Vector<Real> evaluate(const Vector<Real>& x) const { return this->_ptr->evaluate(x); }
     Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
     Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
@@ -391,6 +354,7 @@ class VectorFunction<Real>
 
     Vector<Float> operator()(const Vector<Float>& x) const { return this->evaluate(x); }
     Vector<Interval> operator()(const Vector<Interval>& x) const { return this->evaluate(x); };
+    Vector<Real> operator()(const Vector<Real>& x) const { return this->evaluate(x); };
 
     Vector< Differential<Float> > operator() (const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Vector< Differential<Interval> > operator() (const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
@@ -440,6 +404,7 @@ template<class X> template<class XX> inline XX VectorFunctionElementReference<X>
 
 inline Vector<Float> evaluate_approx(const VectorFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Vector<Interval> evaluate(const VectorFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
+inline Vector<Real> evaluate(const VectorFunction<Real>& f, const Vector<Real>& x) { return f(x); }
 inline Vector< TaylorModel<Float> > compose(const VectorFunction<Real>& f, const Vector< TaylorModel<Float> >& x) { return f.evaluate(x); }
 inline Vector< TaylorModel<Interval> > compose(const VectorFunction<Real>& f, const Vector< TaylorModel<Interval> >& x) { return f.evaluate(x); }
 inline Matrix<Float> jacobian_approx(const VectorFunction<Real>& f, const Vector<Float>& x);

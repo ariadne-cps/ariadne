@@ -39,6 +39,7 @@
 #include "taylor_function.h"
 #include "constraint.h"
 #include "function.h"
+#include "function_template.h"
 #include "expression.h"
 #include "space.h"
 #include "assignment.h"
@@ -102,8 +103,11 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
 
 
 class ScalarPythonFunction
-    : public RealScalarFunctionInterface
+    : public ScalarFunctionTemplate<ScalarPythonFunction>
 {
+    friend class ScalarFunctionTemplate<ScalarPythonFunction>;
+    template<class T> void _compute(T& r, const Vector<T>& a) const {
+        r=boost::python::extract<T>(this->_pyf(a)); }
   public:
     ScalarPythonFunction(std::string& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
     ScalarPythonFunction(uint as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
@@ -114,24 +118,6 @@ class ScalarPythonFunction
 
     ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
     virtual uint argument_size() const { return this->_argument_size; }
-    virtual ushort smoothness() const { return 255; }
-
-    virtual Float evaluate (const Vector<Float>& x) const {
-        return boost::python::extract<Float>(this->_pyf(x)); }
-    virtual Interval evaluate (const Vector<Interval>& x) const {
-        return boost::python::extract<Interval>(this->_pyf(x)); }
-    virtual TaylorModel<Float> evaluate (const Vector< TaylorModel<Float> >& x) const {
-        return boost::python::extract< TaylorModel<Float> >(this->_pyf(x)); }
-    virtual TaylorModel<Interval> evaluate (const Vector< TaylorModel<Interval> >& x) const {
-        return boost::python::extract< TaylorModel<Interval> >(this->_pyf(x)); }
-    virtual Differential<Float> evaluate (const Vector< Differential<Float> >& x) const {
-        return boost::python::extract< Differential<Float> >(this->_pyf(x)); }
-    virtual Differential<Interval> evaluate (const Vector< Differential<Interval> >& x) const {
-        return boost::python::extract< Differential<Interval> >(this->_pyf(x)); }
-    virtual Differential<IntervalTaylorModel> evaluate (const Vector< Differential<IntervalTaylorModel> >& x) const {
-        return boost::python::extract< Differential<IntervalTaylorModel> >(this->_pyf(x)); }
-    virtual Formula<Interval> evaluate (const Vector< Formula<Interval> >& x) const {
-        return boost::python::extract< Formula<Interval> >(this->_pyf(x)); }
 
     virtual Vector<Float> gradient(const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
@@ -154,8 +140,11 @@ class ScalarPythonFunction
 
 
 class VectorPythonFunction
-    : public RealVectorFunctionInterface
+    : public VectorFunctionTemplate<VectorPythonFunction>
 {
+    friend class VectorFunctionTemplate<VectorPythonFunction>;
+    template<class T> void _compute(Vector<T>& r, const Vector<T>& a) const {
+        r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
   public:
     VectorPythonFunction(std::string& nm, uint rs, uint as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(uint rs, uint as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
@@ -168,22 +157,6 @@ class VectorPythonFunction
     VectorPythonFunction* clone() const { return new VectorPythonFunction(*this); }
     virtual uint result_size() const { return this->_result_size; }
     virtual uint argument_size() const { return this->_argument_size; }
-    virtual ushort smoothness() const { return 255; }
-
-    virtual Vector<Float> evaluate (const Vector<Float>& x) const {
-        return boost::python::extract< Vector<Float> >(this->_pyf(x)); }
-    virtual Vector<Interval> evaluate (const Vector<Interval>& x) const {
-        return boost::python::extract< Vector<Interval> >(this->_pyf(x)); }
-    virtual Vector< TaylorModel<Float> > evaluate (const Vector< TaylorModel<Float> >& x) const {
-        return boost::python::extract< Vector< TaylorModel<Float> > >(this->_pyf(x)); }
-    virtual Vector< TaylorModel<Interval> > evaluate (const Vector< TaylorModel<Interval> >& x) const {
-        return boost::python::extract< Vector< TaylorModel<Interval> > >(this->_pyf(x)); }
-    virtual Vector< Differential<Float> > evaluate (const Vector< Differential<Float> >& x) const {
-        return boost::python::extract< Vector< Differential<Float> > >(this->_pyf(x)); }
-    virtual Vector< Differential<Interval> > evaluate (const Vector< Differential<Interval> >& x) const {
-        return boost::python::extract< Vector< Differential<Interval> > >(this->_pyf(x)); }
-    virtual Vector< Formula<Interval> > evaluate (const Vector< Formula<Interval> >& x) const {
-        return boost::python::extract< Vector< Formula<Interval> > >(this->_pyf(x)); }
 
     virtual Matrix<Float> jacobian (const Vector<Float>& x) const {
         return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
@@ -291,7 +264,6 @@ void export_scalar_function()
     class_<RealScalarFunction>
         scalar_function_class("ScalarFunction", init<RealScalarFunction>());
     scalar_function_class.def(init<uint>());
-    scalar_function_class.def(init<RealExpression,RealSpace>());
     scalar_function_class.def(init< Polynomial<Real> >());
     scalar_function_class.def("argument_size", &RealScalarFunction::argument_size);
     scalar_function_class.def("derivative", &RealScalarFunction::derivative);
@@ -350,27 +322,10 @@ void export_scalar_function()
 
 void export_vector_function()
 {
-    implicitly_convertible<RealAssignment,ExtendedRealAssignment>();
-    implicitly_convertible<PrimedRealAssignment,ExtendedRealAssignment>();
-    implicitly_convertible<DottedRealAssignment,ExtendedRealAssignment>();
-
-    implicitly_convertible<RealVariable,ExtendedRealVariable>();
-    implicitly_convertible<PrimedRealVariable,ExtendedRealVariable>();
-    implicitly_convertible<DottedRealVariable,ExtendedRealVariable>();
-
-    from_python< List<RealVariable> >();
-    from_python< List<RealAssignment> >();
-
-    from_python< List<ExtendedRealVariable> >();
-    from_python< List<ExtendedRealAssignment> >();
-
 
     class_<RealVectorFunction>
         vector_function_class("VectorFunction", init<RealVectorFunction>());
     vector_function_class.def(init<uint,uint>());
-
-    vector_function_class.def(init< List<ExtendedRealVariable>, List<ExtendedRealAssignment>, List<RealVariable> >());
-    //vector_function_class.def(init< List<RealVariable>, List<RealAssignment>, List<RealVariable> >());
 
     vector_function_class.def("result_size", &RealVectorFunction::result_size);
     vector_function_class.def("argument_size", &RealVectorFunction::argument_size);

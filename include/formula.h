@@ -48,7 +48,6 @@
 
 namespace Ariadne {
 
-template<class X> class Expression;
 template<class X> class FormulaNode;
 
 //! \brief A formula defining a real function.
@@ -59,9 +58,8 @@ template<class X>
 class Formula {
   public:
     ~Formula() { --_root->count; if(_root->count==0) { delete _root; } }
-    explicit Formula(const Expression<Real>& e, const Map<std::string,uint> s);
     explicit Formula() : _root(new FormulaNode<X>(0.0)) { ++_root->count; }
-    explicit Formula(const FormulaNode<X>* ptr) : _root(ptr) { assert(ptr); ++_root->count; }
+    explicit Formula(const FormulaNode<X>* fptr) : _root(fptr) { assert(fptr); ++_root->count; }
     Formula(const Formula<X>& f) : _root(f._root) { ++_root->count; }
     Formula(const X& c) : _root(new FormulaNode<X>(c)) { ++_root->count; }
     Formula<X>& operator=(const Formula<X>& f) { if(this != &f) { --_root->count; if(_root->count==0) { delete _root; } _root=f._root; ++_root->count; } return *this; }
@@ -70,10 +68,14 @@ class Formula {
     static Formula<X> constant(double c);
     static Formula<X> coordinate(uint j);
     static Vector< Formula<X> > identity(uint n);
-    const FormulaNode<X>* ptr() const { return _root; }
+    const FormulaNode<X>* raw_ptr() const { return _root; }
+  public:
+    Formula<X> _arg() const { return Formula<X>(_root->arg); }
+    Formula<X> _arg1() const { return Formula<X>(_root->arg1); }
+    Formula<X> _arg2() const { return Formula<X>(_root->arg2); }
   public:
     const FormulaNode<X>* _root;
-    //boost::intrusive_ptr< const FormulaNode<X> > _root;
+    //boost::intrusive_fptr< const FormulaNode<X> > _root;
 };
 
 //! \related Procedure \brief Evaluate a function \a f defined by a formula.
@@ -104,15 +106,15 @@ struct FormulaNode {
     };
 };
 
-template<class X> inline void intrusive_ptr_add_ref(const FormulaNode<X>* nodeptr) { ++nodeptr->count; }
-template<class X> inline void intrusive_ptr_release(const FormulaNode<X>* nodeptr) { --nodeptr->count; if(nodeptr->count==0) { delete nodeptr; } }
+template<class X> inline void intrusive_fptr_add_ref(const FormulaNode<X>* nodefptr) { ++nodefptr->count; }
+template<class X> inline void intrusive_fptr_release(const FormulaNode<X>* nodefptr) { --nodefptr->count; if(nodefptr->count==0) { delete nodefptr; } }
 
 template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f) {
-    return Formula<X>(new FormulaNode<X>(op,f.ptr())); }
+    return Formula<X>(new FormulaNode<X>(op,f.raw_ptr())); }
 template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f, int n) {
-    return Formula<X>(new FormulaNode<X>(op,f.ptr(),n)); }
+    return Formula<X>(new FormulaNode<X>(op,f.raw_ptr(),n)); }
 template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& f1, const Formula<X>& f2) {
-    return Formula<X>(new FormulaNode<X>(op,f1.ptr(),f2.ptr())); }
+    return Formula<X>(new FormulaNode<X>(op,f1.raw_ptr(),f2.raw_ptr())); }
 
 
 template<class X> inline Formula<X> Formula<X>::constant(const X& c) { return Formula<X>(new FormulaNode<X>(c)); }
@@ -168,95 +170,148 @@ template<class X> inline Formula<X> operator*(Formula<X> f, int c) {
 }
 
 template<class X> inline Formula<X> operator+(Formula<X> f, int c) {
-    if(f.ptr()->op==CNST) { return Formula<X>::constant(*f.ptr()->val+c); }
+    if(f.raw_ptr()->op==CNST) { return Formula<X>::constant(*f.raw_ptr()->val+c); }
     else { return f + Formula<X>::constant(c); }
 }
 
-template<class X> inline std::ostream& operator<<(std::ostream& os, const FormulaNode<X>* f) {
-    switch(f->op) {
-        //case CNST: return os << std::fixed << std::setprecision(4) << f->val;
+template<class X> inline std::ostream& operator<<(std::ostream& os, const FormulaNode<X>* fptr) {
+    switch(fptr->op) {
+        //case CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
         case CNST:
-            if(*f->val==0.0) { return os << 0.0; } if(abs(*f->val)<1e-4) { os << std::fixed << *f->val; } else { os << *f->val; } return os;
+            if(*fptr->val==0.0) { return os << 0.0; } if(abs(*fptr->val)<1e-4) { os << std::fixed << *fptr->val; } else { os << *fptr->val; } return os;
         case IND:
-            return os << "x[" << f->ind << "]";
+            return os << "x[" << fptr->ind << "]";
         case ADD:
-            return os << f->arg1 << '+' << f->arg2;
+            return os << fptr->arg1 << '+' << fptr->arg2;
         case SUB:
-            os << f->arg1 << '-';
-            switch(f->arg2->op) { case ADD: case SUB: os << '(' << f->arg2 << ')'; break; default: os << f->arg2; }
+            os << fptr->arg1 << '-';
+            switch(fptr->arg2->op) { case ADD: case SUB: os << '(' << fptr->arg2 << ')'; break; default: os << fptr->arg2; }
             return os;
         case MUL:
-            switch(f->arg1->op) { case ADD: case SUB: case DIV: os << '(' << f->arg1 << ')'; break; default: os << f->arg1; }
+            switch(fptr->arg1->op) { case ADD: case SUB: case DIV: os << '(' << fptr->arg1 << ')'; break; default: os << fptr->arg1; }
             os << '*';
-            switch(f->arg2->op) { case ADD: case SUB: os << '(' << f->arg2 << ')'; break; default: os << f->arg2; }
+            switch(fptr->arg2->op) { case ADD: case SUB: os << '(' << fptr->arg2 << ')'; break; default: os << fptr->arg2; }
             return os;
         case DIV:
-            switch(f->arg1->op) { case ADD: case SUB: case DIV: os << '(' << f->arg1 << ')'; break; default: os << f->arg1; }
+            switch(fptr->arg1->op) { case ADD: case SUB: case DIV: os << '(' << fptr->arg1 << ')'; break; default: os << fptr->arg1; }
             os << '/';
-            switch(f->arg2->op) { case ADD: case SUB: case MUL: case DIV: os << '(' << f->arg2 << ')'; break; default: os << f->arg2; }
+            switch(fptr->arg2->op) { case ADD: case SUB: case MUL: case DIV: os << '(' << fptr->arg2 << ')'; break; default: os << fptr->arg2; }
             return os;
         case POW:
-            return os << "pow" << '(' << f->arg << ',' << f->np << ')';
+            return os << "pow" << '(' << fptr->arg << ',' << fptr->np << ')';
         case EXP:
-            return os << "exp(" << f->arg << ")";
-        default: return os << f->op << "(" << f->arg << ")";
+            return os << "exp(" << fptr->arg << ")";
+        default: return os << fptr->op << "(" << fptr->arg << ")";
     }
 }
 
 template<class X> inline std::ostream& operator<<(std::ostream& os, const Formula<X>& f) {
-    if(f._root) { return os << f.ptr(); } else { return  os << "NULL"; }
+    if(f._root) { return os << f.raw_ptr(); } else { return  os << "NULL"; }
 }
 
-template<class X, class T> inline T evaluate(const FormulaNode<X>* f, const T* a) {
-    switch(f->op) {
-        //case CNST: return os << std::fixed << std::setprecision(4) << f->val;
-        case CNST: return static_cast<T>(*f->val);
-        case IND: return a[f->ind];
-        case ADD: return evaluate<T>(f->arg1,a) + evaluate<T>(f->arg2,a);
-        case SUB: return evaluate<T>(f->arg1,a) - evaluate<T>(f->arg2,a);
-        case MUL: return evaluate<T>(f->arg1,a) * evaluate<T>(f->arg2,a);
-        case DIV: return evaluate<T>(f->arg1,a) / evaluate<T>(f->arg2,a);
-        case NEG: return neg(evaluate<T>(f->arg,a));
-        case REC: return rec(evaluate<T>(f->arg,a));
-        case SQR: return sqr(evaluate<T>(f->arg,a));
-        case SQRT: return sqrt(evaluate<T>(f->arg,a));
-        case EXP: return exp(evaluate<T>(f->arg,a));
-        case LOG: return log(evaluate<T>(f->arg,a));
-        case SIN: return sin(evaluate<T>(f->arg,a));
-        case COS: return cos(evaluate<T>(f->arg,a));
-        case TAN: return tan(evaluate<T>(f->arg,a));
+template<class X, class T> T _evaluate(const FormulaNode<X>* fptr, const T* a, const T& z) {
+    switch(fptr->op) {
+        //case CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
+        case CNST: return z+*fptr->val;
+        case IND: return a[fptr->ind];
+        case ADD: return _evaluate(fptr->arg1,a,z) + _evaluate(fptr->arg2,a,z);
+        case SUB: return _evaluate(fptr->arg1,a,z) - _evaluate(fptr->arg2,a,z);
+        case MUL: return _evaluate(fptr->arg1,a,z) * _evaluate(fptr->arg2,a,z);
+        case DIV: return _evaluate(fptr->arg1,a,z) / _evaluate(fptr->arg2,a,z);
+        case NEG: return neg(_evaluate(fptr->arg,a,z));
+        case REC: return rec(_evaluate(fptr->arg,a,z));
+        case SQR: return sqr(_evaluate(fptr->arg,a,z));
+        case SQRT: return sqrt(_evaluate(fptr->arg,a,z));
+        case EXP: return exp(_evaluate(fptr->arg,a,z));
+        case LOG: return log(_evaluate(fptr->arg,a,z));
+        case SIN: return sin(_evaluate(fptr->arg,a,z));
+        case COS: return cos(_evaluate(fptr->arg,a,z));
+        case TAN: return tan(_evaluate(fptr->arg,a,z));
         default: assert(false);
     }
 }
 
-template<class X, class T> inline T& evaluate(const FormulaNode<X>* f, const T* a, Map<const void*,T>& tmp) {
-    if(tmp.has_key(f)) { return tmp[f]; }
-    switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-        case CNST: return tmp[f]=f->val;
-        case IND: return tmp[f]=a[f->ind];
-        case ADD: return tmp[f]=evaluate<T>(f->arg1,a,tmp) + evaluate<T>(f->arg2,a,tmp);
-        case SUB: return tmp[f]=evaluate<T>(f->arg1,a,tmp) - evaluate<T>(f->arg2,a,tmp);
-        case MUL: return tmp[f]=evaluate<T>(f->arg1,a,tmp) * evaluate<T>(f->arg2,a,tmp);
-        case DIV: return tmp[f]=evaluate<T>(f->arg1,a,tmp) / evaluate<T>(f->arg2,a,tmp);
-        case NEG: return tmp[f]=neg(evaluate<T>(f->arg,a,tmp));
-        case REC: return tmp[f]=rec(evaluate<T>(f->arg,a,tmp));
-        case SQRT: return tmp[f]=sqrt(evaluate<T>(f->arg,a,tmp));
-        case EXP: return tmp[f]=exp(evaluate<T>(f->arg,a,tmp));
-        case LOG: return tmp[f]=log(evaluate<T>(f->arg,a,tmp));
-        case SIN: return tmp[f]=sin(evaluate<T>(f->arg,a,tmp));
-        case COS: return tmp[f]=cos(evaluate<T>(f->arg,a,tmp));
-        case TAN: return tmp[f]=tan(evaluate<T>(f->arg,a,tmp));
+template<class X, class T> T& _evaluate(const FormulaNode<X>* fptr, const T* a, const T& z, Map<const void*,T>& tmp) {
+    if(tmp.has_key(fptr)) { return tmp[fptr]; }
+    switch(fptr->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
+        case CNST: return tmp[fptr]=z+(*fptr->val);
+        case IND: return tmp[fptr]=a[fptr->ind];
+        case ADD: return tmp[fptr]=_evaluate(fptr->arg1,a,z,tmp) + _evaluate(fptr->arg2,a,z,tmp);
+        case SUB: return tmp[fptr]=_evaluate(fptr->arg1,a,z,tmp) - _evaluate(fptr->arg2,a,z,tmp);
+        case MUL: return tmp[fptr]=_evaluate(fptr->arg1,a,z,tmp) * _evaluate(fptr->arg2,a,z,tmp);
+        case DIV: return tmp[fptr]=_evaluate(fptr->arg1,a,z,tmp) / _evaluate(fptr->arg2,a,z,tmp);
+        case NEG: return tmp[fptr]=neg(_evaluate(fptr->arg,a,z,tmp));
+        case REC: return tmp[fptr]=rec(_evaluate(fptr->arg,a,z,tmp));
+        case SQRT: return tmp[fptr]=sqrt(_evaluate(fptr->arg,a,z,tmp));
+        case EXP: return tmp[fptr]=exp(_evaluate(fptr->arg,a,z,tmp));
+        case LOG: return tmp[fptr]=log(_evaluate(fptr->arg,a,z,tmp));
+        case SIN: return tmp[fptr]=sin(_evaluate(fptr->arg,a,z,tmp));
+        case COS: return tmp[fptr]=cos(_evaluate(fptr->arg,a,z,tmp));
+        case TAN: return tmp[fptr]=tan(_evaluate(fptr->arg,a,z,tmp));
         default: assert(false);
     }
 }
 
 template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& v) {
-    return evaluate(f.ptr(),&v[0]);
+    assert(v.size()!=0);
+    const T z=v[0]*0.0;
+    return _evaluate(f.raw_ptr(),&v[0],z);
 }
 
 template<class X, class T> T map_evaluate(const Formula<X>& f, const Vector<T>& v) {
+    assert(v.size()!=0);
+    const T z=v[0]*0.0;
     Map<const void*,T> tmp;
-    return evaluate(f.ptr(),&v[0],tmp);
+    return _evaluate(f.raw_ptr(),&v[0],z,tmp);
+}
+
+template<class X, class T> Vector<T> map_evaluate(const Vector< Formula<X> >& f, const Vector<T>& v) {
+    assert(v.size()!=0);
+    Vector<T> r(f.size());
+    const T z=v[0]*0.0;
+    Map<const void*,T> tmp;
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=_evaluate(f[i].raw_ptr(),&v[0],z,tmp);
+    }
+    return r;
+}
+
+template<class X> Formula<X> derivative(const Formula<X>& f, uint j)
+{
+    switch(f.raw_ptr()->op) {
+        case CNST:
+            return Formula<X>(0.0);
+        case IND:
+            if(f.raw_ptr()->ind==j) { return Formula<Real>(1.0); }
+            else { return Formula<Real>(0.0); }
+        case ADD:
+            return derivative(f._arg1(),j)+derivative(f._arg2(),j);
+        case SUB:
+            return derivative(f._arg1(),j)-derivative(f._arg2(),j);
+        case MUL:
+            return f._arg1()*derivative(f._arg2(),j)+derivative(f._arg1(),j)*f._arg2();
+        case DIV:
+            return derivative(f._arg1() * rec(f._arg2()),j);
+        case NEG:
+            return  - derivative(f._arg(),j);
+        case REC:
+            return  - derivative(f._arg(),j) * rec(sqr(f._arg()));
+        case SQR:
+            return 2 * derivative(f._arg(),j) * f._arg();
+        case EXP:
+            return derivative(f._arg(),j) * f._arg();
+        case LOG:
+            return derivative(f._arg(),j) * rec(f._arg());
+        case SIN:
+            return derivative(f._arg(),j) * cos(f._arg());
+        case COS:
+            return -derivative(f._arg(),j) * sin(f._arg());
+        case TAN:
+            return derivative(f._arg(),j) * (1-sqr(f._arg()));
+        default:
+            ARIADNE_THROW(std::runtime_error,"derivative(Formual<X>,Nat)",
+                          "Cannot compute derivative of "<<f<<"\n");
+    }
 }
 
 

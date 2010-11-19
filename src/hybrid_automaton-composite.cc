@@ -26,6 +26,7 @@
 #include "macros.h"
 #include "stlio.h"
 #include "expression.h"
+#include "space.h"
 #include "function.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"
@@ -47,8 +48,8 @@ class SystemSpecificationError : public std::runtime_error {
 
 AtomicDiscreteMode::
 AtomicDiscreteMode(AtomicDiscreteLocation location,
-                   const List<RealAlgebraicAssignment>& equations,
-                   const List<RealDifferentialAssignment>& dynamic)
+                   const List<RealAssignment>& equations,
+                   const List<DottedRealAssignment>& dynamic)
     : _location(location), _algebraic_assignments(equations), _differential_assignments(dynamic)
 {
 }
@@ -95,7 +96,7 @@ AtomicDiscreteTransition::
 AtomicDiscreteTransition(DiscreteEvent event,
                    const AtomicDiscreteMode& source_mode,
                    const AtomicDiscreteMode& target_mode,
-                   const List<RealUpdateAssignment>& reset,
+                   const List<PrimedRealAssignment>& reset,
                    const ContinuousPredicate& guard)
     : _event(event), _source(source_mode.location()), _target(target_mode.location()),
       _guard_predicate(guard), _update_assignments(reset)
@@ -106,7 +107,7 @@ AtomicDiscreteTransition::
 AtomicDiscreteTransition(DiscreteEvent event,
                          AtomicDiscreteLocation source,
                          AtomicDiscreteLocation target,
-                         const List<RealUpdateAssignment>& reset,
+                         const List<PrimedRealAssignment>& reset,
                          const ContinuousPredicate& guard)
     : _event(event), _source(source), _target(target),
       _guard_predicate(guard), _update_assignments(reset)
@@ -147,8 +148,8 @@ AtomicHybridAutomaton::AtomicHybridAutomaton(const std::string& name)
 
 void
 AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
-                          const List<RealAlgebraicAssignment>& equations,
-                          const List<RealDifferentialAssignment>& dynamic)
+                          const List<RealAssignment>& equations,
+                          const List<DottedRealAssignment>& dynamic)
 {
     if(this->has_mode(location)) {
         throw SystemSpecificationError("The hybrid automaton already has a mode with the given id");
@@ -182,16 +183,16 @@ AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
 
 void
 AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
-                          const List<RealDifferentialAssignment>& dynamic)
+                          const List<DottedRealAssignment>& dynamic)
 {
-    return this->new_mode(location,List<RealAlgebraicAssignment>(),dynamic);
+    return this->new_mode(location,List<RealAssignment>(),dynamic);
 }
 
 void
 AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
-                          const List<RealAlgebraicAssignment>& equations)
+                          const List<RealAssignment>& equations)
 {
-    return this->new_mode(location,equations,List<RealDifferentialAssignment>());
+    return this->new_mode(location,equations,List<DottedRealAssignment>());
 }
 
 
@@ -247,7 +248,7 @@ void
 AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
                                       DiscreteEvent event,
                                       AtomicDiscreteLocation target,
-                                      const List<RealUpdateAssignment>& reset)
+                                      const List<PrimedRealAssignment>& reset)
 {
     if(!this->has_mode(source)) {
         ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_reset",
@@ -280,7 +281,7 @@ void
 AtomicHybridAutomaton::new_reset(AtomicDiscreteLocation source,
                                  DiscreteEvent event,
                                  AtomicDiscreteLocation target,
-                                 const List<RealUpdateAssignment>& reset)
+                                 const List<PrimedRealAssignment>& reset)
 {
     this->new_transition(source,event,target,reset);
 }
@@ -290,7 +291,7 @@ void
 AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
                                       DiscreteEvent event,
                                       AtomicDiscreteLocation target,
-                                      const List<RealUpdateAssignment>& reset,
+                                      const List<PrimedRealAssignment>& reset,
                                       const ContinuousPredicate& guard,
                                       EventKind kind)
 {
@@ -309,7 +310,7 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
                                       DiscreteEvent event,
                                       const ContinuousPredicate& guard,
                                       AtomicDiscreteLocation target,
-                                      const List<RealUpdateAssignment>& reset,
+                                      const List<PrimedRealAssignment>& reset,
                                       EventKind kind)
 {
     return this->new_transition(source,event,target,reset,guard);
@@ -323,7 +324,7 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
                                       AtomicDiscreteLocation target,
                                       const ContinuousPredicate& guard)
 {
-    return this->new_transition(source,event,target,List<RealUpdateAssignment>(),guard);
+    return this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard);
 }
 
 
@@ -863,32 +864,34 @@ CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEve
 
 RealVectorFunction
 CompositeHybridAutomaton::output_function(DiscreteLocation location) const {
-    return RealVectorFunction(auxiliary_variables(location),algebraic_assignments(location),state_variables(location));
+    Space<Real> space=this->state_variables(location);
+    List<RealAssignment> algebraic=this->algebraic_assignments(location);
+    List<RealExpression> results(algebraic.size(),RealExpression(0.0));
+    for(uint i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].lhs; }
+    return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
 
 RealVectorFunction
 CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
-    List<RealDifferentialAssignment> differential=this->differential_assignments(location);
+    Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
-    for(uint i=0; i!=algebraic.size(); ++i) {
-        for(uint j=0; j!=differential.size(); ++j) {
-            differential[j].rhs=substitute(differential[j].rhs,algebraic[i].lhs,algebraic[i].rhs);
-        }
-    }
-    return RealVectorFunction(dot(state_variables(location)),differential,state_variables(location));
+    List<DottedRealAssignment> differential=this->differential_assignments(location);
+    List<RealExpression> results(differential.size(),RealExpression(0.0));
+    for(uint i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
+
+    return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
 
 RealVectorFunction
 CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation target=this->target(source,event);
-    List<RealUpdateAssignment> update=this->update_assignments(source,event);
+    Space<Real> source_space=this->state_variables(source);
+    Space<Real> target_space=this->state_variables(target);
     List<RealAssignment> algebraic=this->algebraic_assignments(source);
-    for(uint i=0; i!=algebraic.size(); ++i) {
-        for(uint j=0; j!=update.size(); ++j) {
-            update[j].rhs=substitute(update[j].rhs,algebraic[i].lhs,algebraic[i].rhs);
-        }
-    }
-    return RealVectorFunction(next(state_variables(target)),update,state_variables(source));
+    List<PrimedRealAssignment> update=this->update_assignments(source,event);
+    List<RealExpression> results(update.size(),RealExpression(0.0));
+    for(uint i=0; i!=update.size(); ++i) { results[target_space.index(update[i].lhs.base())]=update[i].rhs; }
+    return RealVectorFunction(Ariadne::dimension(source_space),Ariadne::formula(results,algebraic,source_space));
 }
 
 RealScalarFunction
@@ -898,12 +901,18 @@ CompositeHybridAutomaton::constraint_function(DiscreteLocation location, Discret
 
 RealScalarFunction
 CompositeHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
-    return RealScalarFunction(indicator(substitute(invariant_predicate(location,event),algebraic_assignments(location)),NEGATIVE),state_variables(location));
+    Space<Real> space=this->state_variables(location);
+    List<RealAssignment> algebraic=this->algebraic_assignments(location);
+    RealExpression invariant=indicator(invariant_predicate(location,event),NEGATIVE);
+    return RealScalarFunction(Ariadne::dimension(space),Ariadne::formula(invariant,algebraic,space));
 }
 
 RealScalarFunction
 CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
-    return RealScalarFunction(indicator(substitute(guard_predicate(location,event),algebraic_assignments(location))),state_variables(location));
+    Space<Real> space=this->state_variables(location);
+    List<RealAssignment> algebraic=this->algebraic_assignments(location);
+    RealExpression guard=indicator(guard_predicate(location,event),POSITIVE);
+    return RealScalarFunction(Ariadne::dimension(space),Ariadne::formula(guard,algebraic,space));
 }
 
 
@@ -1143,7 +1152,7 @@ CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
         DiscreteEvent event=*event_iter;
         DiscreteLocation target=this->target(location,event);
         ContinuousPredicate guard=this->guard_predicate(location,event);
-        List<RealUpdateAssignment> reset=this->update_assignments(location,event);
+        List<PrimedRealAssignment> reset=this->update_assignments(location,event);
 
         Set<RealVariable> target_state_variables=make_set(this->state_variables(target));
         List<RealVariable> reset_variables=base(assigned(reset));

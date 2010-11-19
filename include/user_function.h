@@ -32,7 +32,7 @@
 #include <iosfwd>
 
 #include "function_interface.h"
-#include "function.h"
+#include "function_template.h"
 
 #include "macros.h"
 #include "pointer.h"
@@ -71,7 +71,7 @@ struct ScalarFunctionData
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class T> class ScalarUserFunction
-    : public RealScalarFunction
+    : public ScalarFunctionTemplate< ScalarUserFunction<T> >
 {
   private:
     class Representation : public RealScalarFunctionInterface {
@@ -89,6 +89,8 @@ template<class T> class ScalarUserFunction
             Float r=0; T::compute(r,x,_p); return r; }
         virtual Interval evaluate(const Vector<Interval>& x) const {
             Interval r=0; T::compute(r,x,_p); return r; }
+        virtual Real evaluate(const Vector<Real>& x) const {
+            Real r=0; T::compute(r,x,_p); return r; }
 
         virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const {
             TaylorModel<Float> r(x[0].argument_size(),x[0].accuracy_ptr()); T::compute(r,x,_p); return r; }
@@ -176,6 +178,8 @@ template<class T> class VectorUserFunction
             Vector<Float> r(this->result_size(),0.0); T::compute(r,x,_p); return r; }
         virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
             Vector<Interval> r(this->result_size(),0.0); T::compute(r,x,_p); return r; }
+        virtual Vector<Real> evaluate(const Vector<Real>& x) const {
+            Vector<Real> r(this->result_size(),0.0); T::compute(r,x,_p); return r; }
 
         virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const {
             Vector< TaylorModel<Float> > r(this->result_size(),TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));

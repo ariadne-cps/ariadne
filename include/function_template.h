@@ -46,6 +46,8 @@ class ScalarFunctionTemplate
         Float r; _base_compute(r,x); return r; }
     virtual Interval evaluate(const Vector<Interval>& x) const {
         Interval r; _base_compute(r,x); return r; }
+    virtual Real evaluate(const Vector<Real>& x) const {
+        Real r; _base_compute(r,x); return r; }
 
     virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const {
         TaylorModel<Float> r(TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));
@@ -84,6 +86,8 @@ class VectorFunctionTemplate
         Vector<Float> r(this->result_size()); _base_compute(r,x); return r; }
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->result_size()); _base_compute(r,x); return r; }
+    virtual Vector<Real> evaluate(const Vector<Real>& x) const {
+        Vector<Real> r(this->result_size()); _base_compute(r,x); return r; }
 
     virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const {
         Vector< TaylorModel<Float> > r(this->result_size(),TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));

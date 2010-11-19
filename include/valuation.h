@@ -113,15 +113,13 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Valuat
 }
 
 
- 
+
 String evaluate(const Expression<String>&, const DiscreteValuation&);
 Integer evaluate(const Expression<Integer>&, const DiscreteValuation&);
 Boolean evaluate(const Expression<Boolean>&, const DiscreteValuation&);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
 template<class X> Tribool evaluate(const Expression<Tribool>&, const ContinuousValuation<X>&);
 
-template<class X> X evaluate(const Expression<Real>&, const Vector<X>&);
-template<class X> Tribool evaluate(const Expression<Tribool>&, const Vector<X>&);
 
 
 } // namespace Ariadne

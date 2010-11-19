@@ -29,11 +29,9 @@
 #include <stdexcept>
 #include <fenv.h>
 
-#include "taylor_model.h"
-#include "expression.h"
-#include "assignment.h"
+#include "numeric.h"
 #include "function.h"
-#include "predicate.h"
+#include "taylor_model.h"
 
 #include "test.h"
 
@@ -48,7 +46,6 @@ class TestFunction
     void test_concept();
     void test_scalar_function();
     void test_vector_function();
-    void test_expression();
     void test_conversions();
     void test_differentiation();
 };
@@ -57,7 +54,6 @@ void TestFunction::test()
 {
     ARIADNE_TEST_CALL(test_scalar_function());
     ARIADNE_TEST_CALL(test_vector_function());
-    ARIADNE_TEST_CALL(test_expression());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_differentiation());
 }
@@ -111,49 +107,6 @@ void TestFunction::test_vector_function()
     ARIADNE_TEST_EQUAL(f[0](Vector<Float>(3, 2.0,3.0,5.0)),3.0);
 }
 
-
-void TestFunction::test_expression()
-{
-    // Test to ensure that constants are handled correctly.
-    IntervalTaylorModel tc=IntervalTaylorModel::constant(3,5.0);
-    IntervalTaylorModel tx=IntervalTaylorModel::variable(3,0);
-    IntervalTaylorModel ty=IntervalTaylorModel::variable(3,1);
-    IntervalTaylorModel tz=IntervalTaylorModel::variable(3,2);
-
-    Vector<IntervalTaylorModel> tv=IntervalTaylorModel::variables(3);
-
-    RealConstant c("5",5.0);
-    RealVariable x("x");
-    RealVariable y("y");
-    RealVariable z("z");
-
-    RealExpression e1=c;
-    RealScalarFunction f1(e1,(x,y,z));
-    ARIADNE_TEST_PRINT(f1);
-    ARIADNE_TEST_EQUAL(f1.evaluate(tv), tc);
-
-    RealExpression e2=c+x;
-    RealScalarFunction f2(e2,(x,y,z));
-    ARIADNE_TEST_PRINT(f2);
-    ARIADNE_TEST_EQUAL(f2.evaluate(tv), tc+tx);
-
-    RealExpression e3=c+x+c*y;
-    RealScalarFunction f3(e3,(x,y,z));
-    ARIADNE_TEST_PRINT(f3);
-    ARIADNE_TEST_EQUAL(f3.evaluate(tv), tc+tx+tc*ty);
-
-    RealScalarFunction df3=f3.derivative(1);
-    ARIADNE_TEST_EQUAL(df3.evaluate(tv), tc);
-
-    ARIADNE_TEST_EVALUATE(RealScalarFunction(c+x+2*y*z*z,(x,y,z)).derivative(1));
-    //ARIADNE_TEST_EQUAL(RealScalarFunction(c+x+2*y*z*z,(x,y,z)).derivative(1),RealScalarFunction(2*z*z,(x,y,z)));
-
-    ARIADNE_TEST_EVALUATE(RealVectorFunction((x+y,y+z*z),(x,y,z))[0]);
-    //ARIADNE_TEST_EQUAL(RealVectorFunction((x+y,y+z*z),(x,y,z))[0],RealScalarFunction(x+y,(x,y,z)));
-
-    ARIADNE_TEST_EVALUATE(RealVectorFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
-    //ARIADNE_TEST_EQUAL(RealVectorFunction((x+y,y+z*z),(x,y,z))[0],RealScalarFunction(x+y,(x,y,z)));
-}
 
 
 

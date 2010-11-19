@@ -41,7 +41,6 @@
 
 #include "operators.h"
 #include "variables.h"
-#include "vector.h"
 
 namespace Ariadne {
 
@@ -65,7 +64,16 @@ template<class LHS,class RHS> class Assignment;
 
 class DiscreteValuation;
 template<class X> class ContinuousValuation;
-template<class X> class Vector;
+
+template<class X> class Formula;
+template<class X> class ScalarFunction;
+
+ScalarFunction<Real> make_function(const Expression<Real>&, const Space<Real>&);
+ScalarFunction<Real> make_function(const Expression<Real>&, const List< Variable<Real> >&);
+Formula<Real> formula(const Expression<Real>& e, const List< Variable<Real> >& vars);
+Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc);
+Formula<Real> formula(const Expression<Real>& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
+List< Formula<Real> > formula(const List< Expression<Real> >& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
 
 class Substitution;
 
@@ -115,38 +123,6 @@ struct ExpressionNode
         //struct { ExpressionNode* _arg; int _power; };
     };
 };
-
-/*
-template<class R, class A>
-R _evaluate(ExpressionNode* e, const Vector<A>& x)
-{
-    switch(e->_operator) {
-        case CNST: return static_cast<R>(e->_constant);
-        case IND: return x[e->_coordinate];
-        case ADD: return add(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case SUB: return sub(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case MUL: return mul(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case DIV: return div(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case MAX: return max(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case MIN: return min(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        //case POW: return pow(_evaluate<R>(e->_arg,x),e->_power);
-        case POS: return pos(_evaluate<R>(e->_arg,x));
-        case NEG: return neg(_evaluate<R>(e->_arg,x));
-        case ABS: return abs(_evaluate<R>(e->_arg,x));
-        case SQR: return sqr(_evaluate<R>(e->_arg,x));
-        case SQRT: return sqrt(_evaluate<R>(e->_arg,x));
-        case EXP: return exp(_evaluate<R>(e->_arg,x));
-        case LOG: return log(_evaluate<R>(e->_arg,x));
-        case SIN: return sin(_evaluate<R>(e->_arg,x));
-        case COS: return cos(_evaluate<R>(e->_arg,x));
-        case TAN: return tan(_evaluate<R>(e->_arg,x));
-        case ASIN: return asin(_evaluate<R>(e->_arg,x));
-        case ACOS: return acos(_evaluate<R>(e->_arg,x));
-        case ATAN: return atan(_evaluate<R>(e->_arg,x));
-        default: assert(false);
-    }
-}
-*/
 
 template<class R, class A>
 R _evaluate(ExpressionNode* e, const ContinuousValuation<A>& x)
@@ -274,15 +250,10 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Continuou
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,X>& x);
 
-template<class X> Tribool evaluate(const Expression<Tribool>& e, const Vector<X>& x);
-template<class X> X evaluate(const Expression<Real>& e, const Vector<X>& x);
-
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
 template<class X> Expression<X> simplify(const Expression<X>& e);
 
 bool operator==(const Expression<Tribool>&, bool);
-
-Expression<Real> function(const Expression<Real>& e, const Space<Real>& s);
 
 //! \related Expression \brief Logical disjunction.
 Expression<Boolean> operator&&(Expression<Boolean> e1, Expression<Boolean> e2);

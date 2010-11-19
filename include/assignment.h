@@ -178,12 +178,8 @@ typedef Assignment<PrimedIntegerVariable,IntegerExpression> IntegerUpdate;
 typedef Assignment<StringVariable,StringExpression> StringAssignment;
 typedef Assignment<PrimedStringVariable,StringExpression> StringUpdate;
 typedef Assignment<RealVariable,RealExpression> RealAssignment;
-typedef Assignment<PrimedRealVariable,RealExpression> RealUpdate;
-typedef Assignment<DottedRealVariable,RealExpression> RealDynamic;
-
-typedef Assignment<RealVariable,RealExpression> RealAlgebraicAssignment;
-typedef Assignment<PrimedRealVariable,RealExpression> RealUpdateAssignment;
-typedef Assignment<DottedRealVariable,RealExpression> RealDifferentialAssignment;
+typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
+typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
 
 
 

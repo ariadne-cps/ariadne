@@ -138,6 +138,9 @@ class ScalarFunctionInterface<Real>
   public:
     using ScalarFunctionInterface<Interval>::evaluate;
 
+    //! \brief Evaluate over computable reals.
+    virtual Real evaluate(const Vector<Real>& x) const = 0;
+
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     virtual ScalarFunction<Real> derivative(uint i) const = 0;
 };
@@ -215,6 +218,10 @@ class VectorFunctionInterface<Real>
     : public VectorFunctionInterface<Interval>
 {
   public:
+    using VectorFunctionInterface<Interval>::evaluate;
+
+    //! \brief Evaluate over computable reals.
+    virtual Vector<Real> evaluate(const Vector<Real>& x) const = 0;
     //! \brief Get the \a i<sup>th</sup> component function.
     virtual ScalarFunction<Real> operator[](uint i) const = 0;
 };

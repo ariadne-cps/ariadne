@@ -23,8 +23,13 @@
 
 #include <iostream>
 
+#include "container.h"
+#include "stlio.h"
 #include "numeric.h"
 #include "expression.h"
+#include "assignment.h"
+#include "space.h"
+#include "function.h"
 
 #include "test.h"
 
@@ -63,9 +68,46 @@ class TestExpression {
         //ARIADNE_TEST_EQUAL(derivative(g,z),6*y*z);
     }
 
+    void test_function()
+    {
+        // Test to ensure that constants are handled correctly.
+        Real tc=5.0;
+        Real tx=1.125;
+        Real ty=2.375;
+        Real tz=3.750;
+
+        Vector<Real> tv=Vector<Real>((tx,ty,tz));
+
+        RealConstant c("5",5.0);
+        RealVariable x("x");
+        RealVariable y("y");
+        RealVariable z("z");
+
+        RealExpression e1=c;
+        RealScalarFunction f1=make_function(e1,RealSpace((x,y,z)));
+        ARIADNE_TEST_PRINT(f1);
+        ARIADNE_TEST_EQUAL(f1.evaluate(tv), tc);
+
+        RealExpression e2=c+x;
+        RealScalarFunction f2=make_function(e2,RealSpace((x,y,z)));
+        ARIADNE_TEST_PRINT(f2);
+        ARIADNE_TEST_EQUAL(f2.evaluate(tv), tc+tx);
+
+        RealExpression e3=c+x+c*y;
+        RealScalarFunction f3=make_function(e3,(x,y,z));
+        ARIADNE_TEST_PRINT(f3);
+        ARIADNE_TEST_EQUAL(f3.evaluate(tv), tc+tx+tc*ty);
+
+        //ARIADNE_TEST_EVALUATE(RealVectorFunction((x+y,y+z*z),(x,y,z))[0]);
+        //ARIADNE_TEST_EQUAL(RealVectorFunction((x+y,y+z*z),(x,y,z))[0],RealScalarFunction(x+y,(x,y,z)));
+
+        //ARIADNE_TEST_EVALUATE(RealVectorFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
+        //ARIADNE_TEST_EQUAL(RealVectorFunction((x+y,y+z*z),(x,y,z))[0],RealScalarFunction(x+y,(x,y,z)));
+    }
+
     void test() {
         test_variables();
-        test_derivative();
+        test_function();
     }
 };
 

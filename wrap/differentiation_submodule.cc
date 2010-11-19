@@ -2,7 +2,7 @@
  *            differentiation_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <boost/python.hpp>
 
 #include "array.h"
@@ -36,9 +36,9 @@ inline uint compute_polynomial_data_size(uint rs, uint as, uint d) { return rs*A
 
 template<class DIFF>
 DIFF*
-make_differential(const uint& as, const uint& d, const boost::python::object& obj) 
+make_differential(const uint& as, const uint& d, const boost::python::object& obj)
 {
-    typedef typename DIFF::scalar_type X;
+    typedef typename DIFF::ValueType X;
     DIFF* result=new DIFF(as,d);
     array<X> data;
     read_array(data,obj);
@@ -54,11 +54,11 @@ make_differential(const uint& as, const uint& d, const boost::python::object& ob
 
 template<class DIFF>
 boost::python::list
-make_differential_variables(const uint& d, const Vector<Interval>& x) 
+make_differential_variables(const uint& d, const Vector<Interval>& x)
 {
     boost::python::list result;
     for(uint i=0; i!=x.size(); ++i) {
-        result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::scalar_type>(x[i]),i));
+        result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::ValueType>(x[i]),i));
     }
     return result;
 }
@@ -66,9 +66,9 @@ make_differential_variables(const uint& d, const Vector<Interval>& x)
 
 template<class DIFF>
 Vector<DIFF>*
-make_differential_vector(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj) 
+make_differential_vector(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj)
 {
-    typedef typename DIFF::scalar_type X;
+    typedef typename DIFF::ValueType X;
     array<X> data;
     read_array(data,obj);
     ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
@@ -77,25 +77,25 @@ make_differential_vector(const uint& rs, const uint& as, const uint& d, const bo
 }
 
 
-template<class C, class I, class X> inline 
+template<class C, class I, class X> inline
 X get_item(const C& c, const I& i) { return c[i]; }
 
-template<class C, class I, class J, class X> inline 
+template<class C, class I, class J, class X> inline
 X matrix_get_item(const C& c, const I& i, const J& j) { return c[i][j]; }
 
-template<class C, class I, class X> inline 
+template<class C, class I, class X> inline
 void set_item(C& c, const I& i, const X& x) { c[i]=x; }
 
-template<class C, class I, class J, class X> inline 
+template<class C, class I, class J, class X> inline
 void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
 
 
 template<class DIFF>
-void export_differential(const char* name) 
+void export_differential(const char* name)
 {
-    typedef typename DIFF::scalar_type X;
+    typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
     typedef Series<X> S;
     typedef DIFF D;
@@ -121,7 +121,7 @@ void export_differential(const char* name)
     differential_class.def(self*=X());
     differential_class.def(self/=X());
     differential_class.def(self_ns::str(self));
-  
+
     differential_class.def("constant",(D(*)(uint, ushort, const X&))&D::constant);
     differential_class.def("variable",(D(*)(uint, ushort, const X&, uint))&D::variable);
     differential_class.def("variables",&make_differential_variables<D>);
@@ -151,11 +151,11 @@ void export_differential(const char* name)
 */
 }
 
-template<class DIFF> 
+template<class DIFF>
 void
 export_differential_vector(const char* name)
 {
-    typedef typename DIFF::scalar_type X;
+    typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
     typedef Series<X> S;
     typedef DIFF D;
@@ -194,7 +194,7 @@ template void export_differential_vector< Differential<Float> >(const char*);
 template void export_differential_vector< Differential<Interval> >(const char*);
 //template void export_differential_vector< Differential<IntervalTaylorModel> >(const char*);
 
-void differentiation_submodule() 
+void differentiation_submodule()
 {
     export_differential< Differential<Float> >("Differential");
     export_differential< Differential<Interval> >("IntervalDifferential");

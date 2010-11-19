@@ -34,6 +34,9 @@
 #include "vector.h"
 #include "taylor_model.h"
 
+#include "function_interface.h"
+#include "function_template.h"
+
 namespace Ariadne {
 
 template<class X> class Vector;
@@ -52,6 +55,20 @@ template<class X> class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 
+
+template<class X> inline X unscale(const X& x, const Interval& d) {
+    Real c(add_ivl(d.lower()/2,d.upper()/2));
+    Real r(sub_ivl(d.upper()/2,d.lower()/2));
+    return (x-c)/r;
+}
+
+template<class X> Vector<X> unscale(const Vector<X>& x, const Vector<Interval>& d) {
+    Vector<X> r(x.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=unscale(x[i],d[i]);
+    }
+    return r;
+}
 
 // Remove the error term
 ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
@@ -120,7 +137,9 @@ class VectorTaylorFunctionElementReference;
  * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorImageSet.
  */
 class ScalarTaylorFunction
+    : public IntervalScalarFunctionTemplate<ScalarTaylorFunction>
 {
+    typedef Interval NumericType;
     typedef Vector<Interval> DomainType;
     typedef TaylorModel<Interval> ModelType;
     typedef Expansion<Float> ExpansionType;
@@ -266,7 +285,7 @@ class ScalarTaylorFunction
     //! \brief An over-approximation to the range of the quantity.
     Interval range() const { return this->_model.range(); }
     //! \brief Evaluate the quantity at the point \a x.
-    Interval evaluate(const Vector<Float>& x) const;
+    Float evaluate(const Vector<Float>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
     Interval evaluate(const Vector<Interval>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
@@ -466,6 +485,8 @@ class ScalarTaylorFunction
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
+    std::ostream& write(std::ostream& os) const;
+    //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const ScalarTaylorFunction& x);
     //@}
 
@@ -473,6 +494,11 @@ class ScalarTaylorFunction
     ScalarTaylorFunction& clobber() { this->_model.clobber(); return *this; }
     ScalarTaylorFunction& clobber(uint o) { this->_model.clobber(o); return *this; }
     ScalarTaylorFunction& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
+  private:
+    friend class IntervalScalarFunctionTemplate<ScalarTaylorFunction>;
+    template<class T> void _compute(T& r, const Vector<T>& a) const {
+        r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain)); // FIXME: +Interval(-this->_model.error(),+this->_model.error());
+    }
 };
 
 
@@ -650,7 +676,9 @@ VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const Vector
  *
  *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */
-class VectorTaylorFunction {
+class VectorTaylorFunction
+    : public IntervalVectorFunctionTemplate<VectorTaylorFunction>
+{
     friend class VectorTaylorFunctionElementReference;
 
     typedef Float R;
@@ -747,7 +775,7 @@ class VectorTaylorFunction {
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> operator()(const Vector<Interval>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
-    Vector<Interval> evaluate(const Vector<Float>& x) const;
+    Vector<Float> evaluate(const Vector<Float>& x) const;
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
@@ -867,7 +895,9 @@ class VectorTaylorFunction {
     void _set_argument_size(uint n);
     uint _compute_maximum_component_size() const;
     void _resize(uint rs, uint as, ushort d, ushort s);
-
+  private:
+    friend class IntervalVectorFunctionTemplate<VectorTaylorFunction>;
+    template<class X> void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */
     Vector<Interval> _domain;

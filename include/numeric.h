@@ -156,7 +156,7 @@ class Float {
   public:
     volatile double v;
   public:
-    typedef Float ScalarType;
+    typedef Float NumericType;
   public:
     //! \brief Default constructor creates an uninitialised number.
     Float() : v() { }
@@ -494,7 +494,7 @@ inline Interval med_ivl(Float x, Float y);
 //! \endcode
 class Interval {
   public:
-    typedef Interval ScalarType;
+    typedef Interval NumericType;
   public:
     //! \brief Default constructor yields the singleton zero interval \a [0,0].
     Interval() : l(0.0), u(0.0) { }
@@ -1090,7 +1090,7 @@ std::istream& operator>>(std::istream&, Interval&);
 class Real {
     Interval _ivl;
   public:
-    typedef Real ScalarType;
+    typedef Real NumericType;
   public:
     //! Default constructor yields the exact value \a 0.
     Real() : _ivl() { }

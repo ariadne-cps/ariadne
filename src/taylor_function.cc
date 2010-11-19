@@ -306,10 +306,10 @@ ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunct
 
 
 
-Interval
+Float
 ScalarTaylorFunction::evaluate(const Vector<Float>& x) const
 {
-    return Ariadne::evaluate(*this,Vector<Interval>(x));
+    return Ariadne::evaluate(this->_model.expansion(),x);
 }
 
 Interval
@@ -531,8 +531,15 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 
 
 std::ostream&
-operator<<(std::ostream& os, const ScalarTaylorFunction& tv) {
-    return os << "ScalarTaylorFunction( domain=" << tv.domain() << ", polynomial=" << midpoint(tv.polynomial()) << "+/-" << tv.error() << ", model=" << tv.model() << ")";
+ScalarTaylorFunction::write(std::ostream& os) const
+{
+    return os << "ScalarTaylorFunction( domain=" << this->domain() << ", polynomial=" << midpoint(this->polynomial()) << "+/-" << this->error() << ", model=" << this->model() << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& os, const ScalarTaylorFunction& tf)
+{
+    return tf.write(os);
 }
 
 
@@ -988,6 +995,12 @@ VectorTaylorFunction::set(uint i, const ScalarTaylorFunction& e)
 
 
 
+template<class T>
+void
+VectorTaylorFunction::_compute(Vector<T>& r, const Vector<T>& a) const
+{
+    r=a;
+}
 
 
 
@@ -1055,10 +1068,19 @@ VectorTaylorFunction::clobber()
 
 
 
-Vector<Interval>
+Vector<Float>
 VectorTaylorFunction::evaluate(const Vector<Float>& x) const
 {
-    return this->evaluate(Vector<Interval>(x));
+    const VectorTaylorFunction& f=*this;
+    if(!contains(f.domain(),x)) {
+        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+    }
+    Vector<Float> sx=Ariadne::unscale(x,f._domain);
+    Vector<Float> r(this->result_size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=Ariadne::evaluate(this->_models[i].expansion(),sx);
+    }
+    return r;
 }
 
 

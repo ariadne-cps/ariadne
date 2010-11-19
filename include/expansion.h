@@ -577,7 +577,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
     typedef typename Expansion<X>::const_iterator const_iterator;
 
     const uint n=e.argument_size();
-    Y z=x[0]*0; // The zero element of the ring Y
+    const Y z=x[0]*0; // The zero element of the ring Y
     array< Y > r(e.argument_size(),z); // An array of "registers" containing working p(x[0],...,x[k])
     const_iterator iter=e.begin();
     const_iterator end=e.end();
@@ -585,6 +585,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
     const uchar* na=iter->key().begin(); // The values of the next multi-index
     uint j=k;   // The lowest register containing a non-zero value
     X c=iter->data();
+    Y t=z;
     const uchar* a=na;
     ++iter;
     while(iter!=end) {
@@ -596,7 +597,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
         assert(a[k]>na[k]);
         // Set r[k]=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[k])*x[k]^(a[k]-na[k])
         // Omit zero terms where possible
-        Y t=c;
+        t=numeric_cast<typename Y::NumericType>(c);
         for(uint i=0; i!=min(j,k); ++i) {
             for(uint ii=0; ii!=a[i]; ++ii) {
                 t=t*x[i];
@@ -623,7 +624,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
         ++iter;
     }
     // Set r=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[n-1])*x[n-1]^(a[n-1])
-    Y t=c;
+    t=numeric_cast<typename Y::NumericType>(c);
     for(uint i=0; i!=j; ++i) {
         for(uint ii=0; ii!=a[i]; ++ii) {
             t=t*x[i];

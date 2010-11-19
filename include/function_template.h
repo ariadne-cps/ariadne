@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef ARIADNE_FUNCTION_TEMPLATE_H
+#define ARIADNE_FUNCTION_TEMPLATE_H
+
 #include "function.h"
 #include "polynomial.h"
 #include "differential.h"
@@ -30,6 +33,43 @@
 namespace Ariadne {
 
 
+
+// A wrapper for classes with non-static _compute and _compute_approx methods
+template<class F>
+class IntervalScalarFunctionTemplate
+    : public ScalarFunctionInterface<Interval>
+{
+  private:
+    template<class R, class A> void _base_compute(R& r, const A& a) const {
+        static_cast<const F*>(this)->_compute(r,a); }
+  protected:
+    IntervalScalarFunctionTemplate() { }
+  public:
+    virtual Float evaluate(const Vector<Float>& x) const {
+        Float r; _base_compute(r,x); return r; }
+    virtual Interval evaluate(const Vector<Interval>& x) const {
+        Interval r; _base_compute(r,x); return r; }
+
+    virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const {
+        TaylorModel<Float> r(TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));
+        _base_compute(r,x); return r; }
+    virtual TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const {
+        TaylorModel<Interval> r(TaylorModel<Interval>(x[0].argument_size(),x[0].accuracy_ptr()));
+        _base_compute(r,x); return r; }
+
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
+        Differential<Float> r(Differential<Float>(x[0].argument_size(),x[0].degree()));
+        _base_compute(r,x); return r; }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
+        Differential<Interval> r(Differential<Interval>(x[0].argument_size(),x[0].degree()));
+        _base_compute(r,x); return r; }
+
+    virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const {
+        Formula<Interval> r; _base_compute(r,x); return r; }
+
+    virtual std::ostream& repr(std::ostream& os) const {
+        return this->write(os); }
+};
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
@@ -73,6 +113,41 @@ class ScalarFunctionTemplate
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
+class IntervalVectorFunctionTemplate
+    : public VectorFunctionInterface<Interval>
+{
+  private:
+    template<class R, class A> void _base_compute(R& r, const A& a) const {
+        static_cast<const F*>(this)->_compute(r,a); }
+  protected:
+    IntervalVectorFunctionTemplate() { }
+  public:
+    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
+        Vector<Float> r(this->result_size()); _base_compute(r,x); return r; }
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
+        Vector<Interval> r(this->result_size()); _base_compute(r,x); return r; }
+
+    virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const {
+        Vector< TaylorModel<Float> > r(this->result_size(),TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));
+        _base_compute(r,x); return r; }
+    virtual Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const {
+        Vector< TaylorModel<Interval> > r(this->result_size(),TaylorModel<Interval>(x[0].argument_size(),x[0].accuracy_ptr()));
+        _base_compute(r,x); return r; }
+
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        Vector< Differential<Float> > r(this->result_size(),Differential<Float>(x[0].argument_size(),x[0].degree()));
+        _base_compute(r,x); return r; }
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
+        Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
+        _base_compute(r,x); return r; }
+
+    virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const {
+        Vector< Formula<Interval> > r(this->result_size(),Formula<Interval>()); _base_compute(r,x); return r; }
+
+};
+
+// A wrapper for classes with non-static _compute and _compute_approx methods
+template<class F>
 class VectorFunctionTemplate
     : public VectorFunctionInterface<Real>
 {
@@ -110,3 +185,5 @@ class VectorFunctionTemplate
 
 
 } // namespace Ariadne
+
+#endif // ARIADNE_FUNCTION_TEMPLATE_H

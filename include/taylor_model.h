@@ -100,6 +100,7 @@ class TaylorModel<Interval>
     typedef ReverseLexicographicKeyLess ComparisonType;
   public:
     typedef TaylorModelAccuracy Accuracy;
+    typedef Interval NumericType;
   private:
     ExpansionType _expansion;
     Float _error;
@@ -701,7 +702,7 @@ class TaylorModel<Float>
 
   public:
     //! \brief The type used for the coefficients.
-    typedef Float ScalarType;
+    typedef Float NumericType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.

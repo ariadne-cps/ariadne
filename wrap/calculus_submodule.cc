@@ -350,9 +350,9 @@ void export_scalar_taylor_function()
     //scalar_taylor_function_class.def("set_default_sweep_threshold",&ScalarTaylorFunction::set_default_sweep_threshold);
     //scalar_taylor_function_class.def("default_maximum_degree",&ScalarTaylorFunction::default_maximum_degree);
     //scalar_taylor_function_class.def("default_sweep_threshold",&ScalarTaylorFunction::default_sweep_threshold);
-    scalar_taylor_function_class.def("__call__", (Interval(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
+    scalar_taylor_function_class.def("__call__", (Float(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("__call__", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
-    scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
+    scalar_taylor_function_class.def("evaluate", (Float(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("function", (RealScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<Interval>(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::polynomial);
@@ -471,9 +471,9 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def(self-=self);
     vector_taylor_function_class.def(self_ns::str(self));
     vector_taylor_function_class.def("clobber", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::clobber,return_value_policy<reference_existing_object>());
-    vector_taylor_function_class.def("__call__", (IntervalVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
+    vector_taylor_function_class.def("__call__", (FloatVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("__call__", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
-    vector_taylor_function_class.def("evaluate", (IntervalVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
+    vector_taylor_function_class.def("evaluate", (FloatVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("evaluate", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("polynomial", (Vector< Polynomial<Interval> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomial);
     vector_taylor_function_class.def("function", (RealVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
@@ -509,7 +509,7 @@ void export_vector_taylor_function()
 
     def("split", (std::pair<VectorTaylorFunction,VectorTaylorFunction>(*)(const VectorTaylorFunction&,uint)) &Ariadne::split);
 
-    def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const FloatVector&)const) &VectorTaylorFunction::evaluate);
+    def("evaluate",(FloatVector(VectorTaylorFunction::*)(const FloatVector&)const) &VectorTaylorFunction::evaluate);
     def("evaluate",(IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
     def("partial_evaluate",(VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &partial_evaluate);
     //def("compose",(ScalarTaylorFunction(*)(const RP&,const VectorTaylorFunction&)) &compose);

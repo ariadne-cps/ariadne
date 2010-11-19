@@ -185,7 +185,7 @@ template<class X> Vector< Differential<X> > second_derivative(const RealVectorFu
 }
 
 template<class Vec, class Diff> void set_gradient(Vec& g, const Diff& D) {
-    typedef typename Diff::scalar_type X;
+    typedef typename Diff::ValueType X;
     uint i=0;
     typename Diff::const_iterator iter=D.begin();
     if(iter!=D.end() && iter->key().degree()==0) { ++iter; }
@@ -205,7 +205,7 @@ template<class Mx, class Diff> void set_jacobian_transpose(Mx& A, const Vector<D
 }
 
 template<class Mx, class Diff> void set_hessian(Mx& H, const Diff& D) {
-    typedef typename Diff::scalar_type X;
+    typedef typename Diff::ValueType X;
     uint i=0; uint j=1;
     typename Diff::const_iterator iter=D.begin();
     while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
@@ -220,7 +220,7 @@ template<class Mx, class Diff> void set_hessian(Mx& H, const Diff& D) {
 }
 
 template<class Mx, class S, class Diff> void add_hessian(Mx& H, const S& s, const Diff& D) {
-    typedef typename Diff::scalar_type X;
+    typedef typename Diff::ValueType X;
     typename Diff::const_iterator iter=D.begin();
     while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
     while(iter!=D.end() && iter->key().degree()==2) {

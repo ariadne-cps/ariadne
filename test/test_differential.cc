@@ -49,7 +49,7 @@ void henon(R& r, const A& x, const P& p)
 
 template<class DF>
 Vector<DF>
-henon(const Vector<DF>& x, const Vector<typename DF::scalar_type>& p)
+henon(const Vector<DF>& x, const Vector<typename DF::NumericType>& p)
 {
     Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
 }
@@ -58,7 +58,7 @@ henon(const Vector<DF>& x, const Vector<typename DF::scalar_type>& p)
 
 template<class DF>
 class TestDifferential {
-    typedef typename DF::scalar_type X;
+    typedef typename DF::ValueType X;
     typedef X ScalarType;
     typedef Series<X> SeriesType;
     typedef DF DifferentialType;
@@ -189,7 +189,7 @@ class TestDifferential {
 
 template<class DF>
 class TestDifferentialVector {
-    typedef typename DF::scalar_type X;
+    typedef typename DF::ValueType X;
     typedef X ScalarType;
     typedef Vector<X> VectorType;
     typedef Series<X> SeriesType;

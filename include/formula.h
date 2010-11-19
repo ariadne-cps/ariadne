@@ -57,6 +57,8 @@ template<class X> class FormulaNode;
 template<class X>
 class Formula {
   public:
+    typedef typename X::NumericType NumericType;
+  public:
     ~Formula() { --_root->count; if(_root->count==0) { delete _root; } }
     explicit Formula() : _root(new FormulaNode<X>(0.0)) { ++_root->count; }
     explicit Formula(const FormulaNode<X>* fptr) : _root(fptr) { assert(fptr); ++_root->count; }

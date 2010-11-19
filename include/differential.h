@@ -118,10 +118,10 @@ class Differential
     static const X _zero;
     static const X _one;
   public:
-    //! \brief The type of a coefficient.
-    typedef X ScalarType;
-    //! \brief The type of a coefficient.
-    typedef X scalar_type;
+    //! \brief The type of used to represent numbers in the coefficient.
+    typedef typename X::NumericType NumericType;
+    //! \brief The type of used to represent the coefficients.
+    typedef X ValueType;
     //! \brief The type of an iterator through (index,coefficient) pairs..
     typedef typename Expansion<X>::iterator iterator;
     //! \brief The type of a constant iterator through (index,coefficient) pairs..

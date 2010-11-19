@@ -16,7 +16,6 @@ ARIADNE_SRC = \
 	differential.cc \
 	affine.cc \
 	polynomial.cc \
-	propagator.cc \
 	expression.cc \
 	function.cc \
 	taylor_model.cc  \

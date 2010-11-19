@@ -30,7 +30,6 @@
 #include "numeric.h"
 #include "taylor_model.h"
 #include "differential.h"
-#include "propagator.h"
 
 #include "polynomial.h"
 #include "affine.h"
@@ -528,7 +527,6 @@ inline void _set_constant(TaylorModel<Float>& r, const Interval& c) { r.clear();
 inline void _set_constant(TaylorModel<Interval>& r, const Interval& c) { r.clear(); r+=c; }
 inline void _set_constant(Differential<Float>& r, const Interval& c) { r.clear(); r+=midpoint(c); }
 inline void _set_constant(Differential<Interval>& r, const Interval& c) { r.clear(); r+=c; }
-inline void _set_constant(Propagator<Interval>& r, const Interval& c) { r=c; }
 inline void _set_constant(Formula<Interval>& r, const Interval& c) { r=c; }
 inline void _set_constant(Formula<Real>& r, const Interval& c) { r=Real(c); }
 
@@ -724,7 +722,6 @@ template Differential<Float> evaluate(const Expression<Real>& e, const Map< Exte
 template Differential<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Differential<Interval> >& x);
 template TaylorModel<Float> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Float> >& x);
 template TaylorModel<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, TaylorModel<Interval> >& x);
-template Propagator<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Propagator<Interval> >& x);
 template Formula<Interval> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Formula<Interval> >& x);
 template Formula<Real> evaluate(const Expression<Real>& e, const Map< ExtendedRealVariable, Formula<Real> >& x);
 

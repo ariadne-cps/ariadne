@@ -43,7 +43,6 @@ class Real;
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
-template<class X> class Propagator;
 template<class X> class TaylorModel;
 template<class X> class Formula;
 
@@ -127,8 +126,6 @@ class ScalarFunctionInterface<Interval>
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
     virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const = 0;
 
-    //! \brief Evaluate the function over a vector of constraint propagators.
-    virtual Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -206,9 +203,7 @@ class VectorFunctionInterface<Interval>
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
     virtual Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const = 0;
 
-    //! \brief Evaluate the function over a vector of constraint propagators.
-    virtual Vector< Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of constraint propagators.
+    //! \brief Evaluate the function over a vector of formulae.
     virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const = 0;
 };
 

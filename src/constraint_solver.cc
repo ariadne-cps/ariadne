@@ -250,14 +250,6 @@ void ConstraintSolver::hull_reduce(Box& domain, const NonlinearConstraint& const
     Box reducing_domain(domain);
     Ariadne::simple_hull_reduce(reducing_domain, procedure, bounds);
     domain = reducing_domain;
-
-/*
-    Propagator<Interval> propagator = constraint.function().propagator() == constraint.bounds();
-    ARIADNE_LOG(4,"propagator="<<propagator<<"\n");
-    Box new_domain=propagator.reduce(domain);
-    ARIADNE_LOG(6,"  old_box="<<domain<<" new_box="<<new_domain<<"\n");
-    domain=new_domain;
-*/
 }
 
 void ConstraintSolver::monotone_reduce(Box& domain, const NonlinearConstraint& constraint, uint variable) const

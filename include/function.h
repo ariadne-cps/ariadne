@@ -45,7 +45,6 @@
 #include "affine.h"
 #include "taylor_model.h"
 #include "differential.h"
-#include "propagator.h"
 #include "formula.h"
 
 namespace Ariadne {
@@ -124,7 +123,6 @@ class ScalarFunction<Interval>
     TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const { return this->_ptr->evaluate(x); }
     Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
@@ -184,10 +182,7 @@ class ScalarFunction<Real>
     Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
-    Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const { return this->_ptr->evaluate(x); }
     Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
-    Propagator<Interval> propagator() const { return this->_ptr->evaluate(Propagator<Interval>::variables(this->argument_size())); }
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
@@ -387,7 +382,6 @@ class VectorFunction<Real>
     Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
     Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
-    Vector< Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const { return this->_ptr->evaluate(x); }
     Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
     Matrix<Float> jacobian(const Vector<Float>& x) const {

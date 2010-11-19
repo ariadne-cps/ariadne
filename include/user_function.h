@@ -100,8 +100,6 @@ template<class T> class ScalarUserFunction
         virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
             Differential<Interval> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,_p); return r; }
 
-        virtual Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const {
-            Propagator<Interval> r; T::compute(r,x,_p); return r; }
         virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const {
             Formula<Interval> r; T::compute(r,x,_p); return r; }
 
@@ -193,8 +191,6 @@ template<class T> class VectorUserFunction
             Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
             T::compute(r,x,_p); return r; }
 
-        virtual Vector<Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const {
-            Vector<Propagator<Interval> >  r(this->result_size()); T::compute(r,x,_p); return r; }
         virtual Vector<Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const {
             Vector<Formula<Interval> >  r(this->result_size()); T::compute(r,x,_p); return r; }
 

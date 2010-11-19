@@ -25,7 +25,6 @@
 #include "polynomial.h"
 #include "differential.h"
 #include "taylor_model.h"
-#include "propagator.h"
 #include "formula.h"
 
 namespace Ariadne {
@@ -62,8 +61,6 @@ class ScalarFunctionTemplate
         Differential<Interval> r(Differential<Interval>(x[0].argument_size(),x[0].degree()));
         _base_compute(r,x); return r; }
 
-    virtual Propagator<Interval> evaluate(const Vector< Propagator<Interval> >& x) const {
-        Propagator<Interval> r; _base_compute(r,x); return r; }
     virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const {
         Formula<Interval> r; _base_compute(r,x); return r; }
 
@@ -102,8 +99,6 @@ class VectorFunctionTemplate
         Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
         _base_compute(r,x); return r; }
 
-    virtual Vector< Propagator<Interval> > evaluate(const Vector< Propagator<Interval> >& x) const {
-        Vector< Propagator<Interval> > r(this->result_size(),Propagator<Interval>()); _base_compute(r,x); return r; }
     virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const {
         Vector< Formula<Interval> > r(this->result_size(),Formula<Interval>()); _base_compute(r,x); return r; }
 

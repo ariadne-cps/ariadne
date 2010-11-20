@@ -126,7 +126,7 @@ class ScalarPythonFunction
     virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
         return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
-    virtual RealScalarFunction derivative (uint j) const {
+    virtual RealScalarFunctionInterface* _derivative (uint j) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
     virtual std::ostream& repr(std::ostream& os) const { return os; }
     virtual std::ostream& write(std::ostream& os) const {
@@ -134,6 +134,7 @@ class ScalarPythonFunction
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
         os << "argument_size="<<this->_argument_size;
         return os << " )"; }
+    RealScalarFunction derivative(uint j) const { return this->_derivative(j); }
   private:
     std::string _name;
     uint _argument_size;
@@ -303,8 +304,6 @@ void export_scalar_function()
 
     def("evaluate_approx", (Float(*)(const RealScalarFunction&,const Vector<Float>&)) &evaluate_approx);
     def("evaluate", (Interval(*)(const RealScalarFunction&,const Vector<Interval>&)) &evaluate);
-    def("gradient_approx",(Vector<Float>(*)(const RealScalarFunction&,const Vector<Float>&)) &gradient_approx);
-    def("gradient",(Vector<Interval>(*)(const RealScalarFunction&,const Vector<Interval>&)) &gradient);
 
     def("derivative", (RealScalarFunction(RealScalarFunction::*)(uint)const) &RealScalarFunction::derivative);
 
@@ -317,8 +316,6 @@ void export_scalar_function()
     def("sin", (RealScalarFunction(*)(const RealScalarFunction&)) &sin);
     def("cos", (RealScalarFunction(*)(const RealScalarFunction&)) &cos);
     def("tan", (RealScalarFunction(*)(const RealScalarFunction&)) &tan);
-
-    def("embed",(RealScalarFunction(*)(const RealScalarFunction&,uint)) &embed);
 
     typedef Polynomial<Real> RealPolynomial;
     implicitly_convertible<RealPolynomial,RealScalarFunction>();

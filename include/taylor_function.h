@@ -35,7 +35,7 @@
 #include "taylor_model.h"
 
 #include "function_interface.h"
-#include "function_template.h"
+#include "function_mixin.h"
 
 namespace Ariadne {
 
@@ -137,7 +137,7 @@ class VectorTaylorFunctionElementReference;
  * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorImageSet.
  */
 class ScalarTaylorFunction
-    : public IntervalScalarFunctionTemplate<ScalarTaylorFunction>
+    : public ScalarFunctionMixin<ScalarTaylorFunction, Interval>
 {
     typedef Interval NumericType;
     typedef Vector<Interval> DomainType;
@@ -239,7 +239,9 @@ class ScalarTaylorFunction
     //! \brief A polynomial representation.
     Polynomial<Interval> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
-    RealScalarFunction function() const;
+    IntervalScalarFunction function() const;
+    //! \brief A multivalued function equal to the model on the domain.
+    RealScalarFunction real_function() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) { this->_model.set_error(ne); }
@@ -495,10 +497,11 @@ class ScalarTaylorFunction
     ScalarTaylorFunction& clobber(uint o) { this->_model.clobber(o); return *this; }
     ScalarTaylorFunction& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
   private:
-    friend class IntervalScalarFunctionTemplate<ScalarTaylorFunction>;
+    friend class ScalarFunctionMixin<ScalarTaylorFunction, Interval>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain)); // FIXME: +Interval(-this->_model.error(),+this->_model.error());
     }
+    ScalarTaylorFunction* _derivative(uint j) const { return new ScalarTaylorFunction(Ariadne::derivative(*this,j)); }
 };
 
 
@@ -677,7 +680,7 @@ VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const Vector
  *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */
 class VectorTaylorFunction
-    : public IntervalVectorFunctionTemplate<VectorTaylorFunction>
+    : public VectorFunctionMixin<VectorTaylorFunction,Interval>
 {
     friend class VectorTaylorFunctionElementReference;
 
@@ -811,7 +814,7 @@ class VectorTaylorFunction
     /*! \brief The maximum roundoff/truncation error of the components. */
     Float error() const;
     //! \brief A multivalued function equal to the model on the domain.
-    RealVectorFunction function() const;
+    IntervalVectorFunction function() const;
 
     /*! \brief Truncate terms higher than \a bd. */
     VectorTaylorFunction& truncate(const MultiIndexBound& bd);
@@ -895,8 +898,9 @@ class VectorTaylorFunction
     void _set_argument_size(uint n);
     uint _compute_maximum_component_size() const;
     void _resize(uint rs, uint as, ushort d, ushort s);
+    virtual ScalarTaylorFunction* _get(uint i) const { return new ScalarTaylorFunction(this->_domain,this->_models[i]); }
   private:
-    friend class IntervalVectorFunctionTemplate<VectorTaylorFunction>;
+    friend class VectorFunctionMixin<VectorTaylorFunction,Interval>;
     template<class X> void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */

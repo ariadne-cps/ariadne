@@ -25,6 +25,7 @@
 
 #include "vector.h"
 #include "matrix.h"
+#include "differential.h"
 #include "point.h"
 #include "box.h"
 

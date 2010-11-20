@@ -36,6 +36,8 @@
 #include "function.h"
 #include "taylor_function.h"
 
+#include "../src/function_mixin.tcc"
+
 #define VOLATILE ;
 
 namespace Ariadne {
@@ -219,13 +221,16 @@ ScalarTaylorFunction::polynomial() const
     return compose(p,s);
 }
 
-RealScalarFunction
+IntervalScalarFunction
 ScalarTaylorFunction::function() const
 {
-    RealVectorFunction unscaling=VectorUnscalingFunction(this->domain());
-    RealScalarFunction polynomial=RealScalarFunction(this->expansion());
-    RealScalarFunction error=RealScalarFunction::constant(this->argument_size(),Real(Interval(-this->error(),+this->error())));
-    return compose(polynomial+error,unscaling);
+    return new ScalarTaylorFunction(*this);
+}
+
+RealScalarFunction
+ScalarTaylorFunction::real_function() const
+{
+    return RealScalarFunction(Polynomial<Real>(this->polynomial()));
 }
 
 
@@ -828,22 +833,10 @@ VectorTaylorFunction::error() const
     return e;
 }
 
-RealVectorFunction
+IntervalVectorFunction
 VectorTaylorFunction::function() const
 {
-    RealVectorFunction unscaling=VectorUnscalingFunction(this->domain());
-    RealVectorFunction polynomials(this->result_size(),this->argument_size());
-    for(uint i=0; i!=this->result_size(); ++i) {
-        polynomials[i]=RealScalarFunction(this->_models[i].expansion())+Real(Interval(-this->_models[i].error(),+this->_models[i].error()));
-    }
-    return compose(polynomials,unscaling);
-
-    Vector< Polynomial<Interval> > polynomial=this->polynomial();
-    RealVectorFunction result(this->result_size(),this->argument_size());
-    for(uint i=0; i!=this->result_size(); ++i) {
-        result.set(i,RealScalarFunction(polynomial[i]));
-    }
-    return result;
+    return new VectorTaylorFunction(*this);
 }
 
 bool

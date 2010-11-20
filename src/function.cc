@@ -23,13 +23,16 @@
 
 #include "numeric.h"
 #include "function.h"
-#include "function_template.h"
+#include "affine.h"
 #include "polynomial.h"
 #include "differential.h"
 #include "taylor_model.h"
 #include "operators.h"
 #include "formula.h"
-#include <boost/concept_check.hpp>
+
+#include "function_mixin.h"
+#include "function_mixin.tcc"
+
 
 namespace Ariadne {
 
@@ -58,47 +61,51 @@ ScalarFunction<Real> make_function(const Expression<Real>& expr, const List< Var
 
 
 //! A function defined by a formula
-struct ScalarFormulaFunctionBody
-    : ScalarFunctionTemplate<ScalarFormulaFunctionBody>
+template<class X>
+struct ScalarFormulaFunction
+    : ScalarFunctionMixin<ScalarFormulaFunction<X>,X>
 {
     SizeType _argument_size;
-    Formula<Real> _formula;
+    Formula<X> _formula;
 
-    ScalarFormulaFunctionBody(uint as, const Formula<Real>& f) : _argument_size(as), _formula(f) { }
-    operator Formula<Real>() const { return _formula; }
+    ScalarFormulaFunction(SizeType as, const Formula<X>& f) : _argument_size(as), _formula(f) { }
+    operator Formula<X>() const { return _formula; }
 
     virtual SizeType argument_size() const { return _argument_size; }
-    virtual RealScalarFunction derivative(uint j) const { return new ScalarFormulaFunctionBody(_argument_size,Ariadne::derivative(_formula,j)); }
+    virtual ScalarFunctionInterface<X>* _derivative(uint j) const { return new ScalarFormulaFunction<X>(_argument_size,Ariadne::derivative(_formula,j)); }
     virtual std::ostream& repr(std::ostream& os) const { return os << this->_formula; }
     virtual std::ostream& write(std::ostream& os) const { return os << "F["<<this->_argument_size<<"]("<<this->_formula<<")"; }
-    template<class X> void _compute(X& r, const Vector<X>& x) const { r=Ariadne::evaluate(_formula,x); }
+    template<class Y> void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
-inline ScalarFunction<Real> function(uint n, Formula<Real> f) { return new ScalarFormulaFunctionBody(n,f); }
+inline ScalarFunction<Real> function(Nat n, Formula<Real> f) { return new ScalarFormulaFunction<Real>(n,f); }
+
+typedef ScalarFormulaFunction<Real> RealScalarFormulaFunction;
 
 //! A vector function defined by formulae
-struct VectorFormulaFunctionBody
-    : VectorFunctionTemplate<VectorFormulaFunctionBody>
+template<class X>
+struct VectorFormulaFunction
+    : VectorFunctionMixin<VectorFormulaFunction<X>,X>
 {
     SizeType _argument_size;
-    Vector< Formula<Real> > _formulae;
+    Vector< Formula<X> > _formulae;
 
-    VectorFormulaFunctionBody(uint as, const List< Formula<Real> >& f) : _argument_size(as), _formulae(f) { }
-    VectorFormulaFunctionBody(uint as, const Vector< Formula<Real> >& f) : _argument_size(as), _formulae(f) { }
+    VectorFormulaFunction(uint as, const List< Formula<X> >& f) : _argument_size(as), _formulae(f) { }
+    VectorFormulaFunction(uint as, const Vector< Formula<X> >& f) : _argument_size(as), _formulae(f) { }
 
     virtual SizeType result_size() const { return this->_formulae.size(); }
     virtual SizeType argument_size() const { return this->_argument_size; }
-    virtual RealScalarFunction operator[](uint i) const { return new ScalarFormulaFunctionBody(this->_argument_size,this->_formulae[i]); }
+    virtual ScalarFormulaFunction<X>* _get(uint i) const { return new ScalarFormulaFunction<X>(this->_argument_size,this->_formulae[i]); }
     virtual std::ostream& write(std::ostream& os) const { return os << "F[R"<<this->argument_size()<<"->R"<<this->result_size()<<"]("<<this->_formulae<<")"; }
-    template<class X> void _compute(Vector<X>& r, const Vector<X>& x) const { r=Ariadne::map_evaluate(this->_formulae,x); }
+    template<class Y> void _compute(Vector<Y>& r, const Vector<Y>& x) const { r=Ariadne::map_evaluate(this->_formulae,x); }
 };
 
-inline VectorFunction<Real> function(uint n, List< Formula<Real> > f) { return new VectorFormulaFunctionBody(n,f); }
+inline VectorFunction<Real> function(uint n, List< Formula<Real> > f) { return new VectorFormulaFunction<Real>(n,f); }
 
 
 //! A constant function f(x)=c
 struct ScalarConstantFunctionBody
-    : ScalarFunctionTemplate<ScalarConstantFunctionBody>
+    : ScalarFunctionMixin<ScalarConstantFunctionBody,Real>
 {
     SizeType _argument_size;
     Real _value;
@@ -107,7 +114,7 @@ struct ScalarConstantFunctionBody
     operator Real() const { return _value; }
 
     virtual SizeType argument_size() const { return _argument_size; }
-    virtual RealScalarFunction derivative(uint j) const { return RealScalarFunction::constant(_argument_size,0.0); }
+    virtual RealScalarFunctionInterface* _derivative(uint j) const { return new ScalarConstantFunctionBody(_argument_size,0.0); }
     virtual std::ostream& repr(std::ostream& os) const { return os << this->_value; }
     virtual std::ostream& write(std::ostream& os) const { return os << "CF["<<this->_argument_size<<"]("<<Float(this->_value)<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const {
@@ -117,7 +124,7 @@ struct ScalarConstantFunctionBody
 
 //! A coordinate function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=x_i\f$.
 struct ScalarCoordinateFunctionBody
-    : ScalarFunctionTemplate<ScalarCoordinateFunctionBody>
+    : ScalarFunctionMixin<ScalarCoordinateFunctionBody,Real>
 {
     SizeType _argument_size;
     SizeType _index;
@@ -126,9 +133,9 @@ struct ScalarCoordinateFunctionBody
     SizeType index() const { return _index; }
 
     virtual SizeType argument_size() const { return _argument_size; }
-    virtual RealScalarFunction derivative(uint j) const {
-        if(j==_index) { return RealScalarFunction::constant(_argument_size,1.0); }
-        else { return RealScalarFunction::constant(_argument_size,0.0); } }
+    virtual RealScalarFunctionInterface* _derivative(uint j) const {
+        if(j==_index) { return new ScalarConstantFunctionBody(_argument_size,1.0); }
+        else { return new ScalarConstantFunctionBody(_argument_size,0.0); } }
     virtual std::ostream& repr(std::ostream& os) const { return os << "x"<<this->_index; }
     virtual std::ostream& write(std::ostream& os) const { return os << "F["<<this->_argument_size<<"](x"<<this->_index<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const { r=x[_index]; }
@@ -137,7 +144,7 @@ struct ScalarCoordinateFunctionBody
 
 //! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
 template<class Op> struct UnaryFunctionBody
-    : ScalarFunctionTemplate< UnaryFunctionBody<Op> >
+    : ScalarFunctionMixin< UnaryFunctionBody<Op>, Real >
 {
   public:
     UnaryFunctionBody(const Op& op, const RealScalarFunction& arg)
@@ -145,6 +152,10 @@ template<class Op> struct UnaryFunctionBody
     virtual UnaryFunctionBody* clone() const { return new UnaryFunctionBody<Op>(*this); }
     virtual SizeType argument_size() const {
         return this->_arg.argument_size(); }
+
+    virtual RealScalarFunctionInterface* _derivative(uint j) const {
+        ARIADNE_NOT_IMPLEMENTED;
+    }
 
     virtual RealScalarFunction derivative(uint j) const {
         switch(_op.code()) {
@@ -162,7 +173,7 @@ template<class Op> struct UnaryFunctionBody
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << _op << "(" << _arg._raw_pointer() << ")"; }
+        return os << _op << "(" << _arg.raw_pointer() << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
         return os << "F["<<this->argument_size()<<"](" << this <<")"; }
 
@@ -175,7 +186,7 @@ template<class Op> struct UnaryFunctionBody
 
 
 template<class Op> struct BinaryFunctionBody
-    : ScalarFunctionTemplate< BinaryFunctionBody<Op> >
+    : ScalarFunctionMixin< BinaryFunctionBody<Op>, Real >
 {
   public:
     BinaryFunctionBody(const Op& op, const RealScalarFunction& arg1, const RealScalarFunction& arg2)
@@ -183,6 +194,10 @@ template<class Op> struct BinaryFunctionBody
     virtual BinaryFunctionBody<Op>* clone() const { return new BinaryFunctionBody<Op>(*this); }
     virtual SizeType argument_size() const {
         return this->_arg1.argument_size(); }
+
+    virtual RealScalarFunctionInterface* _derivative(uint j) const {
+        ARIADNE_NOT_IMPLEMENTED;
+    }
 
     virtual RealScalarFunction derivative(uint j) const {
         switch(_op.code()) {
@@ -193,7 +208,7 @@ template<class Op> struct BinaryFunctionBody
             case MUL:
                 return _arg1.derivative(j)*_arg2+_arg1*_arg2.derivative(j);
             case DIV:
-                if(dynamic_cast<const ScalarConstantFunctionBody*>(_arg2.pointer())) {
+                if(dynamic_cast<const ScalarConstantFunctionBody*>(_arg2.raw_pointer())) {
                     return _arg1.derivative(j)/_arg2;
                 } else {
                     return _arg1.derivative(j)/_arg2-_arg2.derivative(j)*_arg1/sqr(_arg2);
@@ -203,7 +218,7 @@ template<class Op> struct BinaryFunctionBody
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << _arg1._raw_pointer() << symbol(_op.code()) << _arg2._raw_pointer(); }
+        return os << _arg1.raw_pointer() << symbol(_op.code()) << _arg2.raw_pointer(); }
     virtual std::ostream& write(std::ostream& os) const {
         return os << "F["<<this->argument_size()<<"]("<< this <<")"; }
 
@@ -217,7 +232,7 @@ template<class Op> struct BinaryFunctionBody
 
 // \brief The power function \f$(x,n)\mapsto x^n\f$.
 template<> struct BinaryFunctionBody<Pow>
-    : ScalarFunctionTemplate< BinaryFunctionBody<Pow> >
+    : ScalarFunctionMixin< BinaryFunctionBody<Pow>, Real >
 {
   public:
     BinaryFunctionBody(const Pow& op, const RealScalarFunction& arg1, const Int& arg2)
@@ -225,6 +240,10 @@ template<> struct BinaryFunctionBody<Pow>
     virtual BinaryFunctionBody<Pow>* clone() const { return new BinaryFunctionBody<Pow>(*this); }
     virtual SizeType argument_size() const {
         return this->_arg1.argument_size(); }
+
+    virtual RealScalarFunctionInterface* _derivative(uint j) const {
+        ARIADNE_NOT_IMPLEMENTED;
+    }
 
     virtual RealScalarFunction derivative(uint j) const {
         if(_arg2==0) { return RealScalarFunction::constant(this->argument_size(),0.0); }
@@ -234,7 +253,7 @@ template<> struct BinaryFunctionBody<Pow>
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << "pow(" << _arg1._raw_pointer() << "," << _arg2 << ")"; }
+        return os << "pow(" << _arg1.raw_pointer() << "," << _arg2 << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
         return os << "F["<<this->argument_size()<<"]("<< this <<")"; }
 
@@ -252,15 +271,15 @@ template<> struct BinaryFunctionBody<Pow>
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
 struct ScalarAffineFunctionBody
-    : ScalarFunctionTemplate<ScalarAffineFunctionBody>
+    : ScalarFunctionMixin<ScalarAffineFunctionBody,Real>
 {
     explicit ScalarAffineFunctionBody(uint n) : _affine(n) { }
     ScalarAffineFunctionBody(const Affine<Real>& aff) : _affine(aff) { }
     ScalarAffineFunctionBody(const Vector<Real>& g, const Real& c) : _affine(g,c) { }
 
     virtual SizeType argument_size() const { return _affine.argument_size(); }
-    virtual RealScalarFunction derivative(uint j) const {
-        return RealScalarFunction::constant(_affine.argument_size(),_affine.gradient(j)); }
+    virtual RealScalarFunctionInterface* _derivative(uint j) const {
+        return new ScalarConstantFunctionBody(_affine.argument_size(),_affine.gradient(j)); }
     virtual std::ostream& repr(std::ostream& os) const { return os << Affine<Float>(_affine); }
     virtual std::ostream& write(std::ostream& os) const { return os << "AF["<<this->argument_size()<<"]("<<Affine<Float>(_affine)<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const {
@@ -270,13 +289,13 @@ struct ScalarAffineFunctionBody
 
 
 struct ScalarPolynomialFunctionBody
-    : ScalarFunctionTemplate<ScalarPolynomialFunctionBody>
+    : ScalarFunctionMixin<ScalarPolynomialFunctionBody,Real>
 {
     explicit ScalarPolynomialFunctionBody(uint n) : _polynomial(n) { }
     ScalarPolynomialFunctionBody(const Polynomial<Real>& p) : _polynomial(p) { }
 
     virtual SizeType argument_size() const { return _polynomial.argument_size(); }
-    virtual RealScalarFunction derivative(uint j) const { return RealScalarFunction(Ariadne::derivative(_polynomial,j)); }
+    virtual RealScalarFunctionInterface* _derivative(uint j) const { return new ScalarPolynomialFunctionBody(Ariadne::derivative(_polynomial,j)); }
     virtual std::ostream& repr(std::ostream& os) const {
         return os << Polynomial<Float>(_polynomial); }
     virtual std::ostream& write(std::ostream& os) const { return
@@ -288,71 +307,24 @@ struct ScalarPolynomialFunctionBody
 
 inline ScalarFunction<Real> function(const Polynomial<Real>& p) { return new ScalarPolynomialFunctionBody(p); }
 
-struct ScalarExpansionFunctionBody
-: ScalarFunctionTemplate<ScalarExpansionFunctionBody>
-{
-    explicit ScalarExpansionFunctionBody(uint n) : _expansion(n) { }
-    ScalarExpansionFunctionBody(const Expansion<Real>& p) : _expansion(p) { }
-
-    virtual SizeType argument_size() const { return _expansion.argument_size(); }
-    virtual RealScalarFunction derivative(uint j) const { return RealScalarFunction(Ariadne::derivative(Polynomial<Real>(_expansion),j)); }
-    virtual std::ostream& repr(std::ostream& os) const {
-        return os << Expansion<Float>(_expansion); }
-    virtual std::ostream& write(std::ostream& os) const { return
-        os << "EF["<<this->argument_size()<<"]("<<Polynomial<Float>(_expansion)<<")"; }
-    template<class X> void _compute(X& r, const Vector<X>& x) const {
-        r=x[0]*0; r=Ariadne::evaluate(_expansion,x); }
-        Expansion<Real> _expansion;
-};
-
-inline void add_error(Float& x, const Float& e) { }
-inline void add_error(Interval& x, const Float& e) { x+=Interval(-e,+e); }
-inline void add_error(Differential<Float>& x, const Float& e) { }
-inline void add_error(Differential<Interval>& x, const Float& e) { x+=Interval(-e,+e); }
-inline void add_error(TaylorModel<Float>& x, const Float& e) { }
-inline void add_error(TaylorModel<Interval>& x, const Float& e) { x+=Interval(-e,+e); }
-
-/*
-
-class ScalarTaylorFunction;
-
-//! An Taylor function expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=p(s^{-1}(x)\f$.
-struct ScalarTaylorFunctionBody
-    : ScalarFunctionTemplate<ScalarTaylorFunctionBody>
-{
-    explicit ScalarTaylorFunctionBody(uint n) : _domain(n,Interval(-1,+1)), _polynomial(n), _error(0.0) { }
-    ScalarTaylorFunctionBody(const ScalarTaylorFunction& tm) : _domain(tm._domain), _polynomial(tm._polynomial), _error(tm._error) { }
-
-    virtual SizeType argument_size() const { return _polynomial.argument_size(); }
-    virtual RealScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-    virtual std::ostream& write(std::ostream& os) const { return os << _polynomial; }
-    virtual std::ostream& repr(std::ostream& os) const { return os << "TF["<<this->argument_size()<<"]("<<_polynomial<<")"; }
-    template<class X> void _compute(X& r, const Vector<X>& x) const {
-        Vector<X> u=x; for(uint i=0; i!=n; ++i) { u[i]/=_domain[i].radius(); u[i]-=_domain[i].centre(); }
-        r=evaluate(_polynomial,u); add_error(r,_error); }
-
-    Vector<Interval> _domain;
-    Polynomial<Float> _polynomial;
-    Float _error;
-};
-
-*/
 
 
 
+
+template<class X>
 struct VectorOfScalarFunctionBody
-    : VectorFunctionTemplate<VectorOfScalarFunctionBody>
+    : VectorFunctionMixin<VectorOfScalarFunctionBody<X>,X>
 {
     VectorOfScalarFunctionBody(uint rs, uint as)
-        : _as(as), _vec(rs,RealScalarFunction(as)) { }
-    VectorOfScalarFunctionBody(uint rs, const RealScalarFunction& f)
+        : _as(as), _vec(rs,ScalarFunction<X>(as)) { }
+    VectorOfScalarFunctionBody(uint rs, const ScalarFunction<X>& f)
         : _as(f.argument_size()), _vec(rs,f) { }
 
-    void set(uint i, const RealScalarFunction& f) {
+    void set(uint i, const ScalarFunction<X>& f) {
         if(this->argument_size()==0u) { this->_as=f.argument_size(); }
         ARIADNE_ASSERT(f.argument_size()==this->argument_size());
         this->_vec[i]=f; }
-    RealScalarFunction get(uint i) const {
+    ScalarFunction<X> get(uint i) const {
         return this->_vec[i]; }
 
     virtual uint result_size() const {
@@ -360,23 +332,25 @@ struct VectorOfScalarFunctionBody
     virtual uint argument_size() const {
         return _as; }
 
-    virtual RealScalarFunction operator[](uint i) const {
-        return RealScalarFunction(this->_vec[i]); }
+    virtual ScalarFunctionInterface<X>* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
+
+    ScalarFunction<X> operator[](uint i) const {
+        return this->_vec[i]; }
 
     virtual std::ostream& write(std::ostream& os) const {
         os << "F[" << this->result_size() << "," << this->argument_size() << "][";
         for(uint i=0; i!=this->_vec.size(); ++i) {
             if(i!=0) { os << ","; }
-            this->_vec[i]._raw_pointer()->repr(os); }
+            this->_vec[i].raw_pointer()->repr(os); }
         return os << "]"; }
 
-    template<class X> void _compute(Vector<X>& r, const Vector<X>& x) const {
-        r=Vector<X>(this->_vec.size());
+    template<class Y> void _compute(Vector<Y>& r, const Vector<Y>& x) const {
+        r=Vector<Y>(this->_vec.size());
         for(uint i=0; i!=r.size(); ++i) {
             r[i]=_vec[i].evaluate(x); } }
 
     uint _as;
-    Vector<RealScalarFunction> _vec;
+    Vector< ScalarFunction<X> > _vec;
 
 };
 
@@ -386,7 +360,7 @@ struct VectorOfScalarFunctionBody
 
 //! A constant function \f$ x\mapsto c\f$ from \f$R^m\f$ to \f$R^n\f$.
 struct VectorConstantFunctionBody
-    : VectorFunctionTemplate<VectorConstantFunctionBody>
+    : VectorFunctionMixin<VectorConstantFunctionBody,Real>
 {
     VectorConstantFunctionBody(uint rs, double c0, ...) : _as(), _c(rs) {
         ARIADNE_ASSERT(rs>0); va_list args; va_start(args,c0);
@@ -408,7 +382,7 @@ struct VectorConstantFunctionBody
 
     SizeType result_size() const { return _c.size(); }
     SizeType argument_size() const { return _as; }
-    RealScalarFunction operator[](uint i) const { return RealScalarFunction::constant(this->_as,this->_c[i]); }
+    RealScalarFunctionInterface* _get(uint i) const { return new ScalarConstantFunctionBody(this->_as,this->_c[i]); }
     std::ostream& write(std::ostream& os) const {
         return os << "VectorConstantFunctionBody( argument_size=" << this->argument_size()
                   << ", c=" << this->c() << " )"; }
@@ -423,7 +397,7 @@ struct VectorConstantFunctionBody
 
 // An affine function \f$x\mapsto Ax+b\f$.
 struct VectorAffineFunctionBody
-    : public VectorFunctionTemplate<VectorAffineFunctionBody>
+    : public VectorFunctionMixin<VectorAffineFunctionBody,Real>
 {
 
     VectorAffineFunctionBody(const Matrix<Real>& A, const Vector<Real>& b)
@@ -446,6 +420,11 @@ struct VectorAffineFunctionBody
     template<class X> void _compute(Vector<X>& r, const Vector<X>& x) const { r=prod(_A,x)+_b; }
 
     virtual Matrix<Real> jacobian(const Vector<Real>& x) const { return this->_A; }
+
+    virtual RealScalarFunctionInterface* _get(unsigned int i) const  {
+        ARIADNE_ASSERT(i<this->result_size());
+        Vector<Real> g(this->argument_size()); for(unsigned int j=0; j!=g.size(); ++j) { g[j]=this->_A[i][j]; }
+        return new ScalarAffineFunctionBody(g,_b[i]); }
 
     virtual RealScalarFunction operator[](unsigned int i) const  {
         ARIADNE_ASSERT(i<this->result_size());
@@ -498,7 +477,7 @@ struct VectorPolynomialFunctionBody
 
 // \brief A projection function \f$ x'_i= x_{p(i)}\f$.
 struct ProjectionFunctionBody
-    : VectorFunctionTemplate<ProjectionFunctionBody>
+    : VectorFunctionMixin<ProjectionFunctionBody,Real>
 {
 
     // \brief Construct the identity function in dimension \a n.
@@ -519,7 +498,7 @@ struct ProjectionFunctionBody
     SizeType p(unsigned int j) const { return this->_p[j]; }
     SizeType result_size() const { return this->_p.size(); }
     SizeType argument_size() const { return this->_as; }
-    RealScalarFunction operator[](uint i) const { return RealScalarFunction::coordinate(_as,_p[i]); }
+    RealScalarFunctionInterface* _get(uint i) const { return new ScalarConstantFunctionBody(_as,_p[i]); }
     std::ostream& write(std::ostream& os) const {
         return os << "ProjectionFunctionBody( p=" << this->_p << " )"; }
 
@@ -535,12 +514,12 @@ struct ProjectionFunctionBody
 
 //! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
 struct IdentityFunctionBody
-    : VectorFunctionTemplate<IdentityFunctionBody>
+    : VectorFunctionMixin<IdentityFunctionBody,Real>
 {
     IdentityFunctionBody(uint n) : _n(n) { }
     SizeType result_size() const { return this->_n; }
     SizeType argument_size() const { return this->_n; }
-    RealScalarFunction operator[](uint i) const { return RealScalarFunction::coordinate(_n,i); }
+    RealScalarFunctionInterface* _get(uint i) const { return new ScalarCoordinateFunctionBody(_n,i); }
     std::ostream& write(std::ostream& os) const {
         return os << "IdentityFunctionBody( size=" << this->result_size() << " )"; }
 
@@ -549,29 +528,12 @@ struct IdentityFunctionBody
     uint _n;
 };
 
-//! \brief The unscaling function \f$ x_i\mapsto (x_i-c_i)/r_i\f$ in \f$\R^n\f$.
-struct VectorUnscalingFunctionBody
-: VectorFunctionTemplate<VectorUnscalingFunctionBody>
-{
-    VectorUnscalingFunctionBody(const Vector<Interval>& bx) : _bx(bx) { }
-    SizeType result_size() const { return this->_bx.size(); }
-    SizeType argument_size() const { return this->_bx.size(); }
-    RealScalarFunction operator[](uint i) const { return (RealScalarFunction::coordinate(_bx.size(),i)-Real(med_ivl(_bx[i])))/Real(rad_ivl(_bx[i])); }
-    std::ostream& write(std::ostream& os) const {
-        return os << "VectorUnscalingFunction( domain=" << this->_bx << " )"; }
-
-    template<class R, class A> void _compute(R& r, const A& x) const {
-        for(uint i=0; i!=result_size(); ++i) {
-            r[i]=(x[i]-Real(med_ivl(_bx[i])))/Real(rad_ivl(_bx[i])); } }
-
-    Vector<Interval> _bx;
-};
 
 
 
 // A Lie deriviative \f$\nabla g\cdot f\f$.
 struct LieDerivativeFunctionBody
-    : ScalarFunctionTemplate<LieDerivativeFunctionBody>
+    : ScalarFunctionMixin<LieDerivativeFunctionBody,Real>
 {
     //! \brief Construct the identity function in dimension \a n.
     LieDerivativeFunctionBody(const RealScalarFunction& g, const RealVectorFunction& f) {
@@ -596,7 +558,7 @@ struct LieDerivativeFunctionBody
 
 
 struct FunctionElementBody
-    : ScalarFunctionTemplate<FunctionElementBody>
+    : ScalarFunctionMixin<FunctionElementBody,Real>
 {
     FunctionElementBody(const RealVectorFunction& f, SizeType i)
         : _f(f), _i(i) { ARIADNE_ASSERT(i<f.result_size()); }
@@ -616,12 +578,12 @@ struct FunctionElementBody
 
 
 struct ScalarComposedFunctionBody
-    : ScalarFunctionTemplate<ScalarComposedFunctionBody>
+    : ScalarFunctionMixin<ScalarComposedFunctionBody,Real>
 {
     ScalarComposedFunctionBody(const RealScalarFunction& f, const RealVectorFunction& g)
         : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
     virtual SizeType argument_size() const { return _g.argument_size(); }
-    virtual RealScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual RealScalarFunctionInterface* _derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual std::ostream& write(std::ostream& os) const { return os << "ScalarComposedFunctionBody( f="<<_f<<", g="<<_g<<" )"; }
 
     template<class X> inline void _compute(X& r, const Vector<X>& x) const {
@@ -633,13 +595,13 @@ struct ScalarComposedFunctionBody
 
 
 struct VectorComposedFunctionBody
-    :  VectorFunctionTemplate<VectorComposedFunctionBody>
+    :  VectorFunctionMixin<VectorComposedFunctionBody,Real>
 {
     VectorComposedFunctionBody(RealVectorFunction f, RealVectorFunction g)
         : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
     virtual SizeType result_size() const { return _f.result_size(); }
     virtual SizeType argument_size() const { return _g.argument_size(); }
-    virtual RealScalarFunction operator[](uint i) const { return compose(_f[i],_g); }
+    virtual RealScalarFunctionInterface* _get(uint i) const { return new ScalarComposedFunctionBody(_f[i],_g); }
     virtual std::ostream& write(std::ostream& os) const { return os << "ComposedFunctionBody( f="<<_f<<", g="<<_g<<" )"; }
 
     template<class X> inline void _compute(Vector<X>& r, const Vector<X>& x) const {
@@ -650,7 +612,7 @@ struct VectorComposedFunctionBody
 };
 
 struct JoinedFunctionBody
-    : VectorFunctionTemplate<JoinedFunctionBody>
+    : VectorFunctionMixin<JoinedFunctionBody,Real>
 {
     JoinedFunctionBody(RealVectorFunction f1, RealVectorFunction f2)
         : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1.argument_size()==f2.argument_size()); }
@@ -666,7 +628,7 @@ struct JoinedFunctionBody
 };
 
 class CombinedFunctionBody
-    : VectorFunctionTemplate<JoinedFunctionBody>
+    : VectorFunctionMixin<JoinedFunctionBody,Real>
 {
     CombinedFunctionBody(RealVectorFunction f1, RealVectorFunction f2)
         : _f1(f1), _f2(f2) { }
@@ -689,30 +651,12 @@ class CombinedFunctionBody
 
 //------------------------ RealScalarFunction -----------------------------------//
 
-RealScalarFunction RealScalarFunction::constant(Nat n, double c)
-{
-    return RealScalarFunction(new ScalarConstantFunctionBody(n,Real(c)));
-
-    Polynomial<Interval> p(n);
-    p[MultiIndex::zero(n)]=c;
-    return RealScalarFunction(p);
-}
-
 RealScalarFunction RealScalarFunction::constant(Nat n, Real c)
 {
     return RealScalarFunction(new ScalarConstantFunctionBody(n,c));
 
     Polynomial<Interval> p(n);
     p[MultiIndex::zero(n)]=Interval(c);
-    return RealScalarFunction(p);
-}
-
-RealScalarFunction RealScalarFunction::variable(Nat n, Nat j)
-{
-    ARIADNE_DEPRECATED("RealScalarFunction::variable","Use RealScalarFunction::coordinate instead");
-    //return RealScalarFunction(new ScalarCoordinateFunctionBody(n,j));
-    Polynomial<Interval> p(n);
-    p[MultiIndex::unit(n,j)]=1.0;
     return RealScalarFunction(p);
 }
 
@@ -744,14 +688,9 @@ RealScalarFunction::ScalarFunction(const Polynomial<Real>& p)
 {
 }
 
-RealScalarFunction::ScalarFunction(const Expansion<Float>& e)
-{
-    *this = RealScalarFunction(new ScalarExpansionFunctionBody(e));
-}
-
 RealScalarFunction::ScalarFunction(Nat as, const Formula<Real>& e)
 {
-    *this = RealScalarFunction(new ScalarFormulaFunctionBody(as,e));
+    *this = RealScalarFunction(new ScalarFormulaFunction<Real>(as,e));
 }
 
 
@@ -759,13 +698,13 @@ RealScalarFunction::ScalarFunction(Nat as, const Formula<Real>& e)
 
 RealScalarFunction RealScalarFunction::derivative(Nat j) const
 {
-    return this->pointer()->derivative(j);
+    return this->raw_pointer()->derivative(j);
 }
 
 
 Polynomial<Real> RealScalarFunction::polynomial() const
 {
-    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(this->pointer());
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(this->raw_pointer());
     if(p) { return p->_polynomial; }
     ARIADNE_THROW(std::runtime_error,"RealScalarFunction::polynomial()","FunctionBody "<<*this<<" is not a polynomial.");
 }
@@ -787,7 +726,7 @@ RealScalarFunction make_binary_function(Pow op, const RealScalarFunction& f1, co
 RealScalarFunction operator+(const RealScalarFunction& f)
 {
     //std::cerr<<"+f1, f1="<<f1<<"\n";
-    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.raw_pointer());
     if(p) { return RealScalarFunction( +p->_polynomial ); }
     return f;
 }
@@ -795,9 +734,9 @@ RealScalarFunction operator+(const RealScalarFunction& f)
 RealScalarFunction operator-(const RealScalarFunction& f)
 {
     //std::cerr<<"-f1, f1="<<f1<<"\n";
-    const ScalarPolynomialFunctionBody* pf=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    const ScalarPolynomialFunctionBody* pf=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.raw_pointer());
     if(pf) { return RealScalarFunction( -pf->_polynomial ); }
-    const ScalarFormulaFunctionBody* ff=dynamic_cast<const ScalarFormulaFunctionBody*>(f.pointer());
+    const RealScalarFormulaFunction* ff=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
     if(ff) { return function(ff->_argument_size,-ff->_formula); }
     return make_unary_function(Neg(),f);
 }
@@ -805,13 +744,13 @@ RealScalarFunction operator-(const RealScalarFunction& f)
 RealScalarFunction operator+(const RealScalarFunction& f1, const RealScalarFunction& f2)
 {
     //std::cerr<<"f1+f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
-    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.raw_pointer());
     if(p1 && p2) {
         return function(p1->_polynomial + p2->_polynomial );
     }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
-    const ScalarFormulaFunctionBody* e2=dynamic_cast<const ScalarFormulaFunctionBody*>(f2.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
+    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
         return function(e1->_argument_size,e1->_formula+e2->_formula);
     }
@@ -821,13 +760,13 @@ RealScalarFunction operator+(const RealScalarFunction& f1, const RealScalarFunct
 RealScalarFunction operator-(const RealScalarFunction& f1, const RealScalarFunction& f2)
 {
     //std::cerr<<"f1-f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
-    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.raw_pointer());
     if(p1 && p2) {
         return RealScalarFunction(p1->_polynomial - p2->_polynomial );
     }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
-    const ScalarFormulaFunctionBody* e2=dynamic_cast<const ScalarFormulaFunctionBody*>(f2.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
+    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
         return function(e1->_argument_size,e1->_formula-e2->_formula);
     }
@@ -837,13 +776,13 @@ RealScalarFunction operator-(const RealScalarFunction& f1, const RealScalarFunct
 RealScalarFunction operator*(const RealScalarFunction& f1, const RealScalarFunction& f2)
 {
     //std::cerr<<"f1*f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
-    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.raw_pointer());
     if(p1 && p2) {
         return RealScalarFunction(p1->_polynomial * p2->_polynomial );
     }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
-    const ScalarFormulaFunctionBody* e2=dynamic_cast<const ScalarFormulaFunctionBody*>(f2.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
+    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
         return function(e1->_argument_size,e1->_formula*e2->_formula);
     }
@@ -853,15 +792,15 @@ RealScalarFunction operator*(const RealScalarFunction& f1, const RealScalarFunct
 RealScalarFunction operator/(const RealScalarFunction& f1, const RealScalarFunction& f2)
 {
     //std::cerr<<"f1/f2, f1="<<f1<<", f2="<<f2<<"\n";
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
-    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.raw_pointer());
     if(p1 && p2) {
         if(p2->_polynomial.degree()==0) {
             return RealScalarFunction(p1->_polynomial/p2->_polynomial);
         }
     }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
-    const ScalarFormulaFunctionBody* e2=dynamic_cast<const ScalarFormulaFunctionBody*>(f2.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
+    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
         return function(e1->_argument_size,e1->_formula/e2->_formula);
     }
@@ -871,36 +810,36 @@ RealScalarFunction operator/(const RealScalarFunction& f1, const RealScalarFunct
 
 RealScalarFunction operator+(const RealScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
     if(p1) { return RealScalarFunction(p1->_polynomial + static_cast<Real>(s2) ); }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula+s2); }
     return f1+RealScalarFunction::constant(f1.argument_size(),s2);
 }
 
 RealScalarFunction operator-(const RealScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
     if(p1) { return RealScalarFunction(p1->_polynomial - static_cast<Real>(s2) ); }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula-s2); }
     return f1-RealScalarFunction::constant(f1.argument_size(),s2);
 }
 
 RealScalarFunction operator*(const RealScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
     if(p1) { return RealScalarFunction(p1->_polynomial * static_cast<Real>(s2) ); }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula*s2); }
     return f1*RealScalarFunction::constant(f1.argument_size(),s2);
 }
 
 RealScalarFunction operator/(const RealScalarFunction& f1, const Real& s2)
 {
-    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.pointer());
+    const ScalarPolynomialFunctionBody* p1=dynamic_cast<const ScalarPolynomialFunctionBody*>(f1.raw_pointer());
     if(p1) { return RealScalarFunction(p1->_polynomial / static_cast<Real>(s2) ); }
-    const ScalarFormulaFunctionBody* e1=dynamic_cast<const ScalarFormulaFunctionBody*>(f1.pointer());
+    const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula/s2); }
     return f1/RealScalarFunction::constant(f1.argument_size(),s2);
 }
@@ -917,9 +856,9 @@ RealScalarFunction operator+(const Real& s1, const RealScalarFunction& f2)
 
 RealScalarFunction operator-(const Real& s1, const RealScalarFunction& f2)
 {
-    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.pointer());
+    const ScalarPolynomialFunctionBody* p2=dynamic_cast<const ScalarPolynomialFunctionBody*>(f2.raw_pointer());
     if(p2) { return RealScalarFunction( static_cast<Real>(s1) - p2->_polynomial ); }
-    const ScalarFormulaFunctionBody* e2=dynamic_cast<const ScalarFormulaFunctionBody*>(f2.pointer());
+    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e2) { return function(e2->_argument_size,s1-e2->_formula); }
     return RealScalarFunction::constant(f2.argument_size(),s1)-f2;
 }
@@ -931,16 +870,16 @@ RealScalarFunction operator*(const Real& s1, const RealScalarFunction& f2)
 
 RealScalarFunction operator/(const Real& s1, const RealScalarFunction& f2)
 {
-    const ScalarFormulaFunctionBody* e2=dynamic_cast<const ScalarFormulaFunctionBody*>(f2.pointer());
+    const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e2) { return function(e2->_argument_size,s1/e2->_formula); }
     return RealScalarFunction::constant(f2.argument_size(),s1)/f2;
 }
 
 RealScalarFunction pow(const RealScalarFunction& f, Nat m)
 {
-    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.raw_pointer());
     if(p) { return RealScalarFunction(pow(p->_polynomial,m)); }
-    const ScalarFormulaFunctionBody* e=dynamic_cast<const ScalarFormulaFunctionBody*>(f.pointer());
+    const RealScalarFormulaFunction* e=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
     if(e) { return function(e->_argument_size,pow(e->_formula,m)); }
     return make_binary_function(Pow(),f,m);
 }
@@ -948,9 +887,9 @@ RealScalarFunction pow(const RealScalarFunction& f, Nat m)
 
 RealScalarFunction pow(const RealScalarFunction& f, Int n)
 {
-    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.raw_pointer());
     if(p && n>=0) { return function(pow(p->_polynomial,Nat(n))); }
-    const ScalarFormulaFunctionBody* e=dynamic_cast<const ScalarFormulaFunctionBody*>(f.pointer());
+    const RealScalarFormulaFunction* e=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
     if(e) { return function(e->_argument_size, pow(e->_formula,n)); }
     return make_binary_function(Pow(),f,n);
 }
@@ -982,13 +921,13 @@ RealScalarFunction tan(const RealScalarFunction& f) {
 
 
 RealScalarFunction embed(const RealScalarFunction& f, uint k) {
-    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.pointer());
+    const ScalarPolynomialFunctionBody* p=dynamic_cast<const ScalarPolynomialFunctionBody*>(f.raw_pointer());
     if(p) {
         return RealScalarFunction(new ScalarPolynomialFunctionBody(embed(0u,p->_polynomial,k)));
     }
-    const ScalarFormulaFunctionBody* e=dynamic_cast<const ScalarFormulaFunctionBody*>(f.pointer());
+    const RealScalarFormulaFunction* e=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
     if(e) {
-        return new ScalarFormulaFunctionBody(e->_argument_size+k,e->_formula);
+        return new RealScalarFormulaFunction(e->_argument_size+k,e->_formula);
     }
     ARIADNE_FAIL_MSG("Cannot embed function "<<f<<" in a different space.");
 }
@@ -998,31 +937,33 @@ RealScalarFunction embed(const RealScalarFunction& f, uint k) {
 
 //------------------------ Vector Function ----------------------------------//
 
+typedef VectorOfScalarFunctionBody<Real> VectorOfRealScalarFunction;
+
 RealVectorFunction::VectorFunction(VectorFunctionInterface<Real>* fptr)
     : _ptr(fptr)
 {
 }
 
 RealVectorFunction::VectorFunction()
-    : _ptr(new VectorOfScalarFunctionBody(0u,RealScalarFunction()))
+    : _ptr(new VectorOfRealScalarFunction(0u,RealScalarFunction()))
 {
 }
 
 RealVectorFunction::VectorFunction(Nat rs, Nat as)
-    : _ptr(new VectorOfScalarFunctionBody(rs,RealScalarFunction::constant(as,Real(0.0))))
+    : _ptr(new VectorOfRealScalarFunction(rs,RealScalarFunction::constant(as,Real(0.0))))
 {
 }
 
 RealVectorFunction::VectorFunction(Nat rs, const RealScalarFunction& sf)
-    : _ptr(new VectorOfScalarFunctionBody(rs,sf))
+    : _ptr(new VectorOfRealScalarFunction(rs,sf))
 {
 }
 
 RealVectorFunction::VectorFunction(const List<RealScalarFunction>& lsf)
 {
     ARIADNE_ASSERT(lsf.size()>0);
-    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfScalarFunctionBody(lsf.size(),lsf[0].argument_size()));
-    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(lsf.size(),lsf[0].argument_size()));
+    VectorOfRealScalarFunction* vec = static_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=lsf.size(); ++i) {
         vec->set(i,lsf[i]);
     }
@@ -1031,8 +972,8 @@ RealVectorFunction::VectorFunction(const List<RealScalarFunction>& lsf)
 RealVectorFunction::VectorFunction(Nat as, const List< Formula<Real> >& le)
 {
     ARIADNE_ASSERT(le.size()>0);
-    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfScalarFunctionBody(le.size(),as));
-    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(le.size(),as));
+    VectorOfRealScalarFunction* vec = static_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=le.size(); ++i) {
         vec->set(i,function(as,le[i]));
     }
@@ -1041,8 +982,8 @@ RealVectorFunction::VectorFunction(Nat as, const List< Formula<Real> >& le)
 RealVectorFunction::VectorFunction(const Vector< Polynomial<Real> >& p)
 {
     ARIADNE_ASSERT(p.size()>0);
-    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfScalarFunctionBody(p.size(),p[0].argument_size()));
-    VectorOfScalarFunctionBody* vec = static_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(p.size(),p[0].argument_size()));
+    VectorOfRealScalarFunction* vec = static_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=p.size(); ++i) {
         vec->set(i,RealScalarFunction(p[i]));
     }
@@ -1055,7 +996,7 @@ RealVectorFunction::VectorFunction(const Vector< Polynomial<Real> >& p)
 RealVectorFunction RealVectorFunction::constant(const Vector<Real>& c, Nat as)
 {
     const Nat rs=c.size();
-    VectorOfScalarFunctionBody* res = new VectorOfScalarFunctionBody(rs,as);
+    VectorOfRealScalarFunction* res = new VectorOfRealScalarFunction(rs,as);
     for(uint i=0; i!=rs; ++i) {
         res->_vec[i]=RealScalarFunction::constant(as,c[i]);
     }
@@ -1064,7 +1005,7 @@ RealVectorFunction RealVectorFunction::constant(const Vector<Real>& c, Nat as)
 
 RealVectorFunction RealVectorFunction::identity(Nat n)
 {
-    VectorOfScalarFunctionBody* res = new VectorOfScalarFunctionBody(n,n);
+    VectorOfRealScalarFunction* res = new VectorOfRealScalarFunction(n,n);
     for(uint i=0; i!=n; ++i) {
         res->_vec[i]=RealScalarFunction::coordinate(n,i);
     }
@@ -1078,7 +1019,7 @@ RealScalarFunction RealVectorFunction::get(Nat i) const
 
 void RealVectorFunction::set(Nat i, RealScalarFunction f)
 {
-    VectorOfScalarFunctionBody* vptr=dynamic_cast<VectorOfScalarFunctionBody*>(this->_ptr.operator->());
+    VectorOfRealScalarFunction* vptr=dynamic_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     ARIADNE_ASSERT_MSG(vptr,"Can only set component of a vector of scalar functions.");
     vptr->set(i,f);
 }
@@ -1221,12 +1162,12 @@ void VectorAffineFunction::_check_type(const RealVectorFunctionInterface* pointe
 
 const Matrix<Real> VectorAffineFunction::A() const
 {
-    return static_cast<const VectorAffineFunctionBody*>(this->pointer())->A();
+    return static_cast<const VectorAffineFunctionBody*>(this->raw_pointer())->A();
 }
 
 const Vector<Real> VectorAffineFunction::b() const
 {
-    return static_cast<const VectorAffineFunctionBody*>(this->pointer())->b();
+    return static_cast<const VectorAffineFunctionBody*>(this->raw_pointer())->b();
 }
 
 
@@ -1259,20 +1200,12 @@ ProjectionFunction::ProjectionFunction(uint m, uint n, const array<uint>& p)
 
 const uint ProjectionFunction::p(uint i) const
 {
-    return static_cast<const ProjectionFunctionBody*>(this->pointer())->p(i);
+    return static_cast<const ProjectionFunctionBody*>(this->raw_pointer())->p(i);
 }
 
 void ProjectionFunction::_check_type(const RealVectorFunctionInterface* pointer) const {
     ARIADNE_ASSERT(dynamic_cast<const ProjectionFunctionBody*>(pointer)); }
 
-
-VectorUnscalingFunction::VectorUnscalingFunction(const Vector<Interval>& bx)
-    : RealVectorFunction(new VectorUnscalingFunctionBody(bx))
-{
-}
-
-void VectorUnscalingFunction::_check_type(const RealVectorFunctionInterface* pointer) const {
-    ARIADNE_ASSERT(dynamic_cast<const VectorUnscalingFunction*>(pointer)); }
 
 
 

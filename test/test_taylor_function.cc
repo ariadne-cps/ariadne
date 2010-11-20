@@ -30,9 +30,10 @@
 #include "expansion.h"
 #include "taylor_model.h"
 #include "taylor_function.h"
+#include "differential.h"
+#include "polynomial.h"
 #include "function.h"
 #include "models.h"
-#include "polynomial.h"
 
 #include "test.h"
 
@@ -232,7 +233,7 @@ void TestScalarTaylorFunction::test_conversion() {
 
     RealScalarFunction f=(1-x[0]*x[0]-0.5*x[1]);
     ScalarTaylorFunction tf(D,f);
-    RealScalarFunction cf=tf.function();
+    RealScalarFunction cf=tf.real_function();
 
     ARIADNE_TEST_PRINT(f);
     ARIADNE_TEST_PRINT(tf);
@@ -451,20 +452,16 @@ void TestVectorTaylorFunction::test_conversion()
     RealVectorFunction x=RealVectorFunction::identity(2);
 
     RealVectorFunction h=RealVectorFunction((1-x[0]*x[0]-0.5*x[1],x[0]+Real(0)));
-     VectorTaylorFunction th(D,h);
-    RealVectorFunction ch=th.function();
+    VectorTaylorFunction th(D,h);
 
     ARIADNE_TEST_PRINT(h);
     ARIADNE_TEST_PRINT(th);
-    ARIADNE_TEST_PRINT(ch);
 
     // Conversion to TaylorFunction should be exact in second component
     ARIADNE_TEST_EQUAL(th(pt)[1],h(pt)[1]);
     ARIADNE_TEST_EQUAL(th(ipt)[1],h(ipt)[1]);
     ARIADNE_TEST_BINARY_PREDICATE(subset,h[0](ipt),th[0](ipt));
 
-    // Conversion from TaylorFunction should preserve exact computation
-    ARIADNE_TEST_EQUAL(th(ipt),ch(ipt));
 
 }
 

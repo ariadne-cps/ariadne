@@ -39,12 +39,14 @@
 #include "taylor_function.h"
 #include "constraint.h"
 #include "function.h"
-#include "function_template.h"
+#include "function_mixin.h"
 #include "expression.h"
 #include "space.h"
 #include "assignment.h"
 #include "formula.h"
 #include "constraint_solver.h"
+
+#include "../src/function_mixin.tcc"
 
 #include "utilities.h"
 
@@ -103,9 +105,9 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
 
 
 class ScalarPythonFunction
-    : public ScalarFunctionTemplate<ScalarPythonFunction>
+    : public ScalarFunctionMixin<ScalarPythonFunction,Real>
 {
-    friend class ScalarFunctionTemplate<ScalarPythonFunction>;
+    friend class ScalarFunctionMixin<ScalarPythonFunction,Real>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
         r=boost::python::extract<T>(this->_pyf(a)); }
   public:
@@ -140,9 +142,9 @@ class ScalarPythonFunction
 
 
 class VectorPythonFunction
-    : public VectorFunctionTemplate<VectorPythonFunction>
+    : public VectorFunctionMixin<VectorPythonFunction,Real>
 {
-    friend class VectorFunctionTemplate<VectorPythonFunction>;
+    friend class VectorFunctionMixin<VectorPythonFunction,Real>;
     template<class T> void _compute(Vector<T>& r, const Vector<T>& a) const {
         r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
   public:
@@ -163,6 +165,8 @@ class VectorPythonFunction
     virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const {
         return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
 
+    virtual RealScalarFunctionInterface* _get(uint i) const {
+        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
     virtual RealScalarFunction operator[](uint i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
 

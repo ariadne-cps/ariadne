@@ -26,6 +26,7 @@
 #include "operators.h"
 #include "function.h"
 #include "constraint.h"
+#include "polynomial.h"
 #include "taylor_function.h"
 #include "box.h"
 #include "grid_set.h"
@@ -249,7 +250,7 @@ void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearCon
 void HybridEnclosure::new_state_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==dimension(),
                        "constraint "<<constraint<<" is incompatible with dimension "<<dimension());
-    NonlinearConstraint parameter_constraint(compose(constraint.function(),this->_set._function).function(),constraint.bounds());
+    NonlinearConstraint parameter_constraint(compose(constraint.function(),this->_set._function).real_function(),constraint.bounds());
     this->new_parameter_constraint(event,parameter_constraint);
 }
 

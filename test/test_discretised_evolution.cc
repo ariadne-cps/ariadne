@@ -99,8 +99,8 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the vector field
     Real a=1.5; Real b=0.375;
-    RealScalarFunction x=RealScalarFunction::variable(2,0);
-    RealScalarFunction y=RealScalarFunction::variable(2,1);
+    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction y=RealScalarFunction::coordinate(2,1);
     RealVectorFunction henon=join(a-x*x+b*y,x);
     cout << "henon=" << henon << endl;
     IteratedMap system(henon);

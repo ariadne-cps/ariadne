@@ -72,24 +72,29 @@ inline NonlinearConstraint operator==(const RealScalarFunction& f, const Interva
     return NonlinearConstraint(f,Interval(c));
 }
 
-inline NonlinearConstraint operator<=(const ScalarTaylorFunction& f, const Float& c) {
-    return NonlinearConstraint(f.function(),Interval(-inf<Float>(),c));
-}
-
-inline NonlinearConstraint operator>=(const ScalarTaylorFunction& f, const Float& c) {
-    return NonlinearConstraint(f.function(),Interval(c,+inf<Float>()));
-}
-
-inline NonlinearConstraint operator<=(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g) {
-    return NonlinearConstraint((f-g).function(),Interval(-inf<Float>(),0.0));
-}
-
-inline NonlinearConstraint operator>=(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g) {
-    return NonlinearConstraint((f-g).function(),Interval(0.0,inf<Float>()));
-}
-
 inline NonlinearConstraint operator<=(const NonlinearConstraint& nc, const Float& c) {
     return NonlinearConstraint(nc.function(),intersection(nc.bounds(),Interval(-inf<Float>(),c)));
+}
+
+
+inline NonlinearConstraint operator<=(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction& tf2) {
+    return (tf1-tf2).real_function() <= 0;
+}
+
+inline NonlinearConstraint operator>=(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction& tf2) {
+    return (tf1-tf2).real_function() >= 0;
+}
+
+inline NonlinearConstraint operator>=(const ScalarTaylorFunction& tf, Float c) {
+    return tf.real_function() >= c;
+}
+
+inline NonlinearConstraint operator<=(const ScalarTaylorFunction& tf, Float c) {
+    return tf.real_function() <= c;
+}
+
+inline NonlinearConstraint operator==(const ScalarTaylorFunction& tf, Float c) {
+    return tf.real_function() == c;
 }
 
 std::ostream& operator<<(std::ostream& os, const NonlinearConstraint& c);

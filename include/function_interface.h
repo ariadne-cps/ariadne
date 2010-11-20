@@ -101,6 +101,8 @@ class ScalarFunctionInterface<Float>
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
     virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of formulae to create the composed function.
+    virtual Formula<Float> evaluate(const Vector< Formula<Float> >& x) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -126,6 +128,11 @@ class ScalarFunctionInterface<Interval>
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
     virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const = 0;
 
+    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
+    ScalarFunction<Interval> derivative(uint i) const;
+  private:
+    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
+    virtual ScalarFunctionInterface<Interval>* _derivative(uint i) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -140,9 +147,16 @@ class ScalarFunctionInterface<Real>
 
     //! \brief Evaluate over computable reals.
     virtual Real evaluate(const Vector<Real>& x) const = 0;
+    //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
+    virtual Formula<Real> evaluate(const Vector< Formula<Real> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunction<Real> derivative(uint i) const = 0;
+    //! FIXME: Declared virtual so it can be overridden by classes not _derivative(...) returning a new pointer
+    //! This should not be necessary, but simplifies and uniformises some of the implementation.
+    virtual ScalarFunction<Real> derivative(uint i) const;
+  private:
+    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
+    virtual ScalarFunctionInterface<Real>* _derivative(uint i) const = 0;
 };
 
 //! \relates ScalarFunctionInterface
@@ -187,6 +201,8 @@ class VectorFunctionInterface<Float>
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
     virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of formulae to create the composed function.
+    virtual Vector< Formula<Float> > evaluate(const Vector< Formula<Float> >& x) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -208,6 +224,12 @@ class VectorFunctionInterface<Interval>
 
     //! \brief Evaluate the function over a vector of formulae.
     virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const = 0;
+
+    //! \brief Get the \a i<sup>th</sup> component function.
+    ScalarFunction<Interval> operator[](uint i) const;
+  private:
+    virtual ScalarFunctionInterface<Interval>* _get(uint i) const = 0;
+
 };
 
 //! \ingroup FunctionModule
@@ -222,8 +244,14 @@ class VectorFunctionInterface<Real>
 
     //! \brief Evaluate over computable reals.
     virtual Vector<Real> evaluate(const Vector<Real>& x) const = 0;
+    //! \brief Evaluate the function over a vector of formulae.
+    virtual Vector< Formula<Real> > evaluate(const Vector< Formula<Real> >& x) const = 0;
     //! \brief Get the \a i<sup>th</sup> component function.
-    virtual ScalarFunction<Real> operator[](uint i) const = 0;
+    //! FIXME: Declared virtual so it can be overridden by classes not supporting _get(...) returning a new pointer
+    //! This should not be necessary, but I can't think of a way around it without introducing a clone() operator.
+    virtual ScalarFunction<Real> operator[](uint i) const;
+  private:
+    virtual ScalarFunctionInterface<Real>* _get(uint i) const = 0;
 };
 
 //! \relates VectorFunctionInterface

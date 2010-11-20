@@ -23,6 +23,7 @@
 
 #include "numeric.h"
 #include "vector.h"
+#include "polynomial.h"
 #include "function.h"
 #include "taylor_model.h"
 #include "taylor_function.h"

@@ -32,7 +32,7 @@
 #include <iosfwd>
 
 #include "function_interface.h"
-#include "function_template.h"
+#include "function_mixin.h"
 
 #include "macros.h"
 #include "pointer.h"
@@ -44,6 +44,8 @@
 #include "taylor_model.h"
 #include "differential.h"
 #include "formula.h"
+
+#include "../src/function_mixin.tcc"
 
 namespace Ariadne {
 
@@ -71,39 +73,24 @@ struct ScalarFunctionData
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class T> class ScalarUserFunction
-    : public ScalarFunctionTemplate< ScalarUserFunction<T> >
+    : public RealScalarFunction
 {
   private:
-    class Representation : public RealScalarFunctionInterface {
+    class Representation
+        : public ScalarFunctionMixin< ScalarUserFunction<T>::Representation, Real >
+    {
       private:
         Vector<Real> _p;
       public:
         Representation(const Vector<Real>& p) : _p(p) { }
+
+        template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
 
         virtual Representation* clone() const { return new Representation(*this); }
 
         virtual SizeType argument_size() const { return T::argument_size(); }
         virtual SizeType parameter_size() const { return T::parameter_size(); }
 
-        virtual Float evaluate(const Vector<Float>& x) const {
-            Float r=0; T::compute(r,x,_p); return r; }
-        virtual Interval evaluate(const Vector<Interval>& x) const {
-            Interval r=0; T::compute(r,x,_p); return r; }
-        virtual Real evaluate(const Vector<Real>& x) const {
-            Real r=0; T::compute(r,x,_p); return r; }
-
-        virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const {
-            TaylorModel<Float> r(x[0].argument_size(),x[0].accuracy_ptr()); T::compute(r,x,_p); return r; }
-        virtual TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const {
-            TaylorModel<Interval> r(x[0].argument_size(),x[0].accuracy_ptr()); T::compute(r,x,_p); return r; }
-
-        virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
-            Differential<Float> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,_p); return r; }
-        virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
-            Differential<Interval> r(x[0].argument_size(),x[0].degree()); T::compute(r,x,_p); return r; }
-
-        virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const {
-            Formula<Interval> r; T::compute(r,x,_p); return r; }
 
         virtual RealScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
@@ -164,7 +151,9 @@ template<class T> class VectorUserFunction
     : public RealVectorFunction
 {
   private:
-    class Representation : public RealVectorFunctionInterface {
+    class Representation
+        : public VectorFunctionMixin< VectorUserFunction<T>::Representation, Real >
+    {
       public:
         Representation(const Vector<Real>& p) : _p(p) { }
 
@@ -174,35 +163,14 @@ template<class T> class VectorUserFunction
         virtual SizeType argument_size() const { return T::argument_size(); }
         virtual SizeType parameter_size() const { return T::parameter_size(); }
 
-        virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-            Vector<Float> r(this->result_size(),0.0); T::compute(r,x,_p); return r; }
-        virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-            Vector<Interval> r(this->result_size(),0.0); T::compute(r,x,_p); return r; }
-        virtual Vector<Real> evaluate(const Vector<Real>& x) const {
-            Vector<Real> r(this->result_size(),0.0); T::compute(r,x,_p); return r; }
-
-        virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const {
-            Vector< TaylorModel<Float> > r(this->result_size(),TaylorModel<Float>(x[0].argument_size(),x[0].accuracy_ptr()));
-            T::compute(r,x,_p); return r; }
-        virtual Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const {
-            Vector< TaylorModel<Interval> > r(this->result_size(),TaylorModel<Interval>(x[0].argument_size(),x[0].accuracy_ptr()));
-            T::compute(r,x,_p); return r; }
-
-        virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
-            Vector< Differential<Float> > r(this->result_size(),Differential<Float>(x[0].argument_size(),x[0].degree()));
-            T::compute(r,x,_p); return r; }
-        virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
-            Vector< Differential<Interval> > r(this->result_size(),Differential<Interval>(x[0].argument_size(),x[0].degree()));
-            T::compute(r,x,_p); return r; }
-
-        virtual Vector<Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const {
-            Vector<Formula<Interval> >  r(this->result_size()); T::compute(r,x,_p); return r; }
+        template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
 
         virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
         virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
 
+        virtual RealScalarFunctionInterface* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
         virtual RealScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a
@@ -217,7 +185,7 @@ template<class T> class VectorUserFunction
     //VectorUserFunction(const Vector<Float>& p) : VectorFunction(new Representation(Vector<Real>(p))) { }
     //VectorUserFunction(const Vector<Interval>& p) : VectorFunction(new Representation(Vector<Real>(p))) { }
     VectorUserFunction(const Vector<Real>& p) : RealVectorFunction(new Representation(p)) { }
-    const Vector<Real>& parameters() const { return dynamic_cast<const Representation*>(this->pointer())->_p; }
+    const Vector<Real>& parameters() const { return dynamic_cast<const Representation*>(this->raw_pointer())->_p; }
 };
 
 

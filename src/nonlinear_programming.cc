@@ -33,7 +33,7 @@
 #include "matrix.h"
 #include "differential.h"
 #include "function.h"
-#include "function_template.h"
+#include "function_mixin.h"
 #include "taylor_function.h"
 
 #include "nonlinear_programming.h"
@@ -435,7 +435,7 @@ void NonlinearInteriorPointOptimiser::feasibility_step (
     const uint m=y.size();
     const uint n=x.size();
 
-    Vector< Differential<Float> > ddg=g(Differential<Float>::variables(2,y));
+    Vector< Differential<Float> > ddg=g.evaluate(Differential<Float>::variables(2,y));
 
     // A is the transpose derivative matrix aij=dgj/dyi
     FloatMatrix A(m,n);
@@ -495,8 +495,8 @@ optimization_step(const RealScalarFunction& f, const RealVectorFunction& g,
     const uint m=y.size();
     const uint n=x.size();
 
-    Differential<Float> ddf=f(Differential<Float>::variables(2,y));
-    Vector< Differential<Float> > ddg=g(Differential<Float>::variables(2,y));
+    Differential<Float> ddf=f.evaluate(Differential<Float>::variables(2,y));
+    Vector< Differential<Float> > ddg=g.evaluate(Differential<Float>::variables(2,y));
 
     // A is the transpose derivative matrix aij=dgj/dyi
     FloatMatrix A(m,n);
@@ -581,7 +581,7 @@ void NonlinearInteriorPointOptimiser::feasibility_step(const IntervalVector& d, 
     ARIADNE_LOG(9,"m="<<m<<" n="<<n<<"\n");
     ARIADNE_LOG(9,"x="<<x<<" yt="<<yt<<" z="<<z<<"\n");
 
-    Vector< Differential<Float> > ddg=g(Differential<Float>::variables(2,y));
+    Vector< Differential<Float> > ddg=g.evaluate(Differential<Float>::variables(2,y));
     ARIADNE_LOG(9,"  ddg="<<ddg<<"\n");
 
     // gy is the vector of values of g(y)
@@ -700,7 +700,7 @@ void NonlinearInteriorPointOptimiser::linearised_feasibility_step(const Interval
 
     Float mu=dot(x,z)/o;
 
-    Vector< Differential<Float> > dg=g(Differential<Float>::variables(1,y));
+    Vector< Differential<Float> > dg=g.evaluate(Differential<Float>::variables(1,y));
     ARIADNE_LOG(9,"  dg="<<dg<<"\n");
 
     // gy is the vector of values of g(y)
@@ -871,7 +871,7 @@ void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const R
 
 
 
-struct KuhnTuckerFunctionBody : VectorFunctionTemplate<KuhnTuckerFunctionBody>
+struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Real>
 {
     RealScalarFunction f;
     Array<RealScalarFunction> g;
@@ -910,7 +910,7 @@ struct KuhnTuckerFunctionBody : VectorFunctionTemplate<KuhnTuckerFunctionBody>
     }
 };
 
-struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<FeasibilityKuhnTuckerFunctionBody>
+struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,Real>
 {
     Array<RealScalarFunction> g;
     Array<Array<RealScalarFunction> > dg;
@@ -948,7 +948,7 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<FeasibilityKuh
 
 
 
-struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionTemplate<FeasibilityKuhnTuckerFunctionBody>
+struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,Real>
 {
     uint m;
     uint n;
@@ -1148,8 +1148,8 @@ optimisation_step(const RealScalarFunction& f, const RealVectorFunction& g,
     const uint m=f.argument_size();
     const uint n=g.result_size();
 
-    Differential<Interval> ddf=f(Differential<Interval>::variables(2,y));
-    Vector< Differential<Interval> > ddg=g(Differential<Interval>::variables(2,y));
+    Differential<Interval> ddf=f.evaluate(Differential<Interval>::variables(2,y));
+    Vector< Differential<Interval> > ddg=g.evaluate(Differential<Interval>::variables(2,y));
 
     IntervalMatrix H(m,m);
     set_hessian(H,ddf);
@@ -1174,7 +1174,7 @@ void KrawczykOptimiser::feasibility_step(const RealVectorFunction& g,
     const uint m=y.size();
     const uint n=x.size();
 
-    Vector< Differential<Interval> > ddg=g(Differential<Interval>::variables(2,y));
+    Vector< Differential<Interval> > ddg=g.evaluate(Differential<Interval>::variables(2,y));
 
     // A is the transpose derivative matrix aij=dgj/dyi
     IntervalMatrix A(m,n);
@@ -1218,7 +1218,7 @@ void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const RealVect
     const uint n=c.size();
 
     // Compute function values
-    Vector< Differential<Interval> > ddg=g(Differential<Interval>::variables(2,y));
+    Vector< Differential<Interval> > ddg=g.evaluate(Differential<Interval>::variables(2,y));
 
     // gy is the vector of values of g(y)
     IntervalVector gy(n);
@@ -1307,7 +1307,7 @@ void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const RealVect
     ARIADNE_LOG(9,"m="<<m<<" n="<<n<<"\n");
     ARIADNE_LOG(9,"x="<<x<<" yt="<<yt<<" z="<<z<<"\n");
 
-    Vector< Differential<Interval> > ddg=g(Differential<Interval>::variables(2,y));
+    Vector< Differential<Interval> > ddg=g.evaluate(Differential<Interval>::variables(2,y));
     ARIADNE_LOG(9,"  ddg="<<ddg<<"\n");
 
     // gy is the vector of values of g(y)

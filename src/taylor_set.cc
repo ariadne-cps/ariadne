@@ -30,6 +30,7 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "differential.h"
+#include "polynomial.h"
 #include "function.h"
 
 #include "taylor_model.h"
@@ -1178,10 +1179,10 @@ List<NonlinearConstraint>
 TaylorConstrainedImageSet::constraints() const {
     List<NonlinearConstraint> result;
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        result.append(this->_constraints[i].function()<=0.0);
+        result.append(this->_constraints[i]<=0.0);
     }
     for(uint i=0; i!=this->_equations.size(); ++i) {
-        result.append(this->_equations[i].function()==0.0);
+        result.append(this->_equations[i]==0.0);
     }
     return result;
 }
@@ -1302,9 +1303,9 @@ tribool TaylorConstrainedImageSet::subset(const Box& bx) const
 
     for(uint i=0; i!=bx.dimension(); ++i) {
         const Box test_domain=this->_reduced_domain;
-        constraints.append(ScalarTaylorFunction(this->_function[i]).function() <= bx[i].lower());
+        constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].lower());
         if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
-        constraints.back()=(ScalarTaylorFunction(this->_function[i]).function() >= bx[i].upper());
+        constraints.back()=(ScalarTaylorFunction(this->_function[i]) >= bx[i].upper());
         if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
         constraints.pop_back();
     }
@@ -1322,8 +1323,8 @@ tribool TaylorConstrainedImageSet::disjoint(const Box& bx) const
 
     const Box test_domain=this->_reduced_domain;
     for(uint i=0; i!=bx.dimension(); ++i) {
-        constraints.append(ScalarTaylorFunction(this->_function[i]).function() >= bx[i].lower());
-        constraints.append(ScalarTaylorFunction(this->_function[i]).function() <= bx[i].upper());
+        constraints.append(ScalarTaylorFunction(this->_function[i]) >= bx[i].lower());
+        constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].upper());
     }
     return !contractor.feasible(test_domain,constraints).first;
 }
@@ -1759,7 +1760,7 @@ Map<List<DiscreteEvent>,RealScalarFunction> pretty(const Map<List<DiscreteEvent>
     Map<List<DiscreteEvent>,RealScalarFunction> result;
     for(Map<List<DiscreteEvent>,ScalarTaylorFunction>::const_iterator iter=constraints.begin();
     iter!=constraints.end(); ++iter) {
-        result.insert(iter->first,iter->second.function());
+        result.insert(iter->first,iter->second.real_function());
     }
     return result;
 }

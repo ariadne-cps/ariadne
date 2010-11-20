@@ -40,17 +40,18 @@
 
 #include "numeric.h"
 #include "vector.h"
-#include "matrix.h"
-#include "polynomial.h"
-#include "affine.h"
-#include "taylor_model.h"
-#include "differential.h"
-#include "formula.h"
+//#include "matrix.h"
 
 namespace Ariadne {
 
+typedef uint Nat;
+typedef int Int;
+
 template<class X> class Vector;
+template<class X> class Matrix;
+
 template<class X> class Polynomial;
+template<class X> class Formula;
 
 template<class X> class ScalarFunction;
 typedef ScalarFunction<Float> FloatScalarFunction;
@@ -69,16 +70,18 @@ class ScalarFunction<Float>
 {
   public:
     ScalarFunction<Float>(ScalarFunctionInterface<Float>* fptr) : _ptr(fptr) { }
+    ScalarFunction<Float>(shared_ptr< ScalarFunctionInterface<Float> > fptr) : _ptr(fptr) { }
+
+    const ScalarFunctionInterface<Float>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const ScalarFunctionInterface<Float>& () const { return *this->_ptr; }
 
     uint argument_size() const { return this->_ptr->argument_size(); }
 
+    template<class X> X evaluate(const Vector<X>& x) const { return this->_ptr->evaluate(x); }
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
-    Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Float> operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
 
-    Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+    template<class X> Vector<X> gradient(const Vector<X>& x) const {
+        return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -93,29 +96,21 @@ class ScalarFunction<Interval>
 {
   public:
     ScalarFunction<Interval>(ScalarFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
+    ScalarFunction<Interval>(shared_ptr< ScalarFunctionInterface<Interval> > fptr) : _ptr(fptr) { }
+
+    const ScalarFunctionInterface<Interval>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const ScalarFunctionInterface<Interval>& () const { return *this->_ptr; }
+    operator ScalarFunction<Float> () const { return ScalarFunction<Float>(this->_ptr); }
 
     uint argument_size() const { return this->_ptr->argument_size(); }
-
-    Float evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
-    Interval evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
+    template<class X> X evaluate(const Vector<X>& x) const { return this->_ptr->evaluate(x); }
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
-    Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Float> operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
     Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
-    Differential<Interval> operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Interval> operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
-    Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->_ptr->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+    template<class X> Vector<X> gradient(const Vector<X>& x) const {
+        return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
+
+    ScalarFunction<Interval> derivative(uint j) const;
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -133,48 +128,30 @@ class ScalarFunction<Real>
     typedef uint SizeType;
     typedef std::ostream OStream;
   public:
-    static ScalarFunction<Real> constant(Nat n, double c);
     static ScalarFunction<Real> constant(Nat n, Real c);
-    static ScalarFunction<Real> variable(Nat n, uint i);
     static ScalarFunction<Real> coordinate(Nat n, uint i);
     static List< ScalarFunction<Real> > coordinates(Nat n);
 
     explicit ScalarFunction<Real>(Nat n=0u);
     ScalarFunction<Real>(Nat as, const Formula<Real>& e);
     ScalarFunction<Real>(const Polynomial<Real>& p);
-    ScalarFunction<Real>(const Expansion<Float>& p);
 
     ScalarFunction<Real>(ScalarFunctionInterface<Real>* fptr) : _ptr(fptr) { }
-    const ScalarFunctionInterface<Real>* pointer() const { return this->_ptr.operator->(); }
+    const ScalarFunctionInterface<Real>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const ScalarFunctionInterface<Real>& () const { return *this->_ptr; }
 
-    ScalarFunction<Real>& operator=(const ScalarFunction<Real>& f) {
-        this->_check_type(f.pointer()); this->_ptr=f._ptr; return *this; }
+    operator ScalarFunction<Float> () const { return ScalarFunction<Float>(this->_ptr); }
+    operator ScalarFunction<Interval> () const { return ScalarFunction<Interval>(this->_ptr); }
 
     Nat argument_size() const { return this->_ptr->argument_size(); }
-    Float evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
-    Interval evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
-    Real evaluate(const Vector<Real>& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
-    Differential<Float> evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
-    Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    template<class X> X evaluate(const Vector<X>& x) const { return this->_ptr->evaluate(x); }
 
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
     Real operator() (const Vector<Real>& x) const { return this->_ptr->evaluate(x); }
-    Differential<Float> operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Differential<Interval> operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Float> operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
-    TaylorModel<Interval> operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
-    Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-    Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+    template<class X> Vector<X> gradient(const Vector<X>& x) const {
+        return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -184,31 +161,31 @@ class ScalarFunction<Real>
   public:
     friend ScalarFunction<Real> compose(const ScalarFunction<Real>&, const VectorFunction<Real>&);
     friend Real evaluate(const ScalarFunction<Real>&, const Vector<Real>&);
-
+    friend ScalarFunction<Real> embed(const ScalarFunction<Real>&, uint i);
+  public:
     friend ScalarFunction<Real> operator+(const ScalarFunction<Real>&);
     friend ScalarFunction<Real> operator-(const ScalarFunction<Real>&);
     friend ScalarFunction<Real> operator+(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
     friend ScalarFunction<Real> operator-(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
     friend ScalarFunction<Real> operator*(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
     friend ScalarFunction<Real> operator/(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
-  public:
-    const ScalarFunctionInterface<Real>* _raw_pointer() const { return this->_ptr.operator->(); }
   protected:
     virtual void _check_type(const ScalarFunctionInterface<Real>*) { }
   private:
     shared_ptr< ScalarFunctionInterface<Real> > _ptr;
 };
 
+
+// FIXME: This conversion to a RealScalarFunction is a hack. The kind of derivative available should
+// depend on the function type, and not require casting.
+inline ScalarFunction<Interval> ScalarFunction<Interval>::derivative(uint j) const {
+    return ScalarFunction<Interval>(boost::dynamic_pointer_cast< ScalarFunctionInterface<Real> >(_ptr)->derivative(j)); }
+
 inline Float evaluate_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Interval evaluate(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
 inline Real evaluate(const ScalarFunction<Real>& f, const Vector<Real>& x) { return f(x); }
-inline TaylorModel<Float> compose(const ScalarFunction<Real>& f, const Vector< TaylorModel<Float> >& x) { return f.evaluate(x); }
-inline TaylorModel<Interval> compose(const ScalarFunction<Real>& f, const Vector< TaylorModel<Interval> >& x) { return f.evaluate(x); }
-inline Vector<Float> gradient_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f.gradient(x); }
-inline Vector<Interval> gradient(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f.gradient(x); }
 inline std::ostream& operator<<(std::ostream& os, const ScalarFunction<Real>& f) { return f.write(os); }
 
-ScalarFunction<Real> embed(const ScalarFunction<Real>&, uint i);
 
 ScalarFunction<Real> operator+(const ScalarFunction<Real>&);
 ScalarFunction<Real> operator-(const ScalarFunction<Real>&);
@@ -244,14 +221,17 @@ class VectorFunction<Float>
   public:
     VectorFunction<Float>(VectorFunctionInterface<Float>* fptr) : _ptr(fptr) { }
     VectorFunction<Float>(shared_ptr< VectorFunctionInterface<Float> > fptr) : _ptr(fptr) { }
+    const VectorFunctionInterface<Float>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const VectorFunctionInterface<Float>& () const { return *this->_ptr; }
 
-    Vector<Float> operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
-    Vector< Differential<Float> > operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< TaylorModel<Float> > operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
+    uint result_size() const { return this->_ptr->result_size(); }
+    uint argument_size() const { return this->_ptr->argument_size(); }
 
-    Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+    template<class X> Vector<X> evaluate(const Vector<X>& x) const { return this->_ptr->evaluate(x); }
+    Vector<Float> operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
+
+    template<class X> Matrix<X> jacobian(const Vector<X>& x) const {
+        return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -266,22 +246,25 @@ class VectorFunction<Interval>
 {
     friend class VectorFunction<Float>;
   public:
+    VectorFunction<Interval>(const List<ScalarFunction<Interval> >& lf);
+
     VectorFunction<Interval>(VectorFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
     VectorFunction<Interval>(shared_ptr< VectorFunctionInterface<Interval> > fptr) : _ptr(fptr) { }
+    const VectorFunctionInterface<Interval>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const VectorFunctionInterface<Interval>& () const { return *this->_ptr; }
     operator VectorFunction<Float> () const { return VectorFunction<Float>(this->_ptr); }
 
+    uint result_size() const { return this->_ptr->result_size(); }
+    uint argument_size() const { return this->_ptr->argument_size(); }
+
+    template<class X> Vector<X> evaluate(const Vector<X>& x) const { return this->_ptr->evaluate(x); }
     Vector<Float> operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
     Vector<Interval> operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
-    Vector< Differential<Float> > operator()(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< Differential<Interval> > operator()(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< TaylorModel<Float> > operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< TaylorModel<Interval> > operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
 
-    Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->_ptr->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
-    Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return this->_ptr->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+    template<class X> Matrix<X> jacobian(const Vector<X>& x) const {
+        return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
+
+    ScalarFunction<Interval> operator[](uint i) const { return _ptr->operator[](i); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -309,7 +292,6 @@ class VectorFunction<Real>
 {
     friend class VectorFunction<Float>;
     friend class VectorFunction<Interval>;
-    typedef uint Nat;
     typedef uint SizeType;
     typedef ushort SmoothnessType;
     typedef std::ostream OStream;
@@ -323,12 +305,14 @@ class VectorFunction<Real>
     VectorFunction<Real>(const List< ScalarFunction<Real> >& lsf);
     VectorFunction<Real>(Nat as, const List< Formula<Real> >& e);
     VectorFunction<Real>(const Vector< Polynomial<Real> >& p);
-    VectorFunction<Real>(VectorFunctionInterface<Real>*);
-    const VectorFunctionInterface<Real>* pointer() const { return this->_ptr.operator->(); }
 
-    operator const VectorFunctionInterface<Real>& () { return *this->_ptr; }
-    operator const VectorFunction<Float> () { return VectorFunction<Float>(this->_ptr); }
-    operator const VectorFunction<Interval> () { return VectorFunction<Interval>(this->_ptr); }
+    VectorFunction<Real>(VectorFunctionInterface<Real>*);
+    VectorFunction<Real>(shared_ptr< VectorFunctionInterface<Real> > fptr) : _ptr(fptr) { }
+
+    const VectorFunctionInterface<Real>* raw_pointer() const { return this->_ptr.operator->(); }
+    operator const VectorFunctionInterface<Real>& () const { return *this->_ptr; }
+    operator const VectorFunction<Float> () const { return VectorFunction<Float>(this->_ptr); }
+    operator const VectorFunction<Interval> () const { return VectorFunction<Interval>(this->_ptr); }
 
     VectorFunction<Real>& operator=(const VectorFunction<Real>& f) {
         this->_check_type(f._raw_pointer()); this->_ptr=f._ptr; return *this; }
@@ -336,31 +320,13 @@ class VectorFunction<Real>
     Nat result_size() const { return this->_ptr->result_size(); }
     Nat argument_size() const { return this->_ptr->argument_size(); }
 
-    Vector<Float> evaluate(const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
-    Vector<Interval> evaluate(const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
-    Vector<Real> evaluate(const Vector<Real>& x) const { return this->_ptr->evaluate(x); }
-    Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
-    Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
-    Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
-    Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
-    Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
-
+    template<class X> Vector<X> evaluate(const Vector<X>& x) const { return this->_ptr->evaluate(x); }
     Vector<Float> operator()(const Vector<Float>& x) const { return this->evaluate(x); }
     Vector<Interval> operator()(const Vector<Interval>& x) const { return this->evaluate(x); };
     Vector<Real> operator()(const Vector<Real>& x) const { return this->evaluate(x); };
 
-    Vector< Differential<Float> > operator() (const Vector< Differential<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< Differential<Interval> > operator() (const Vector< Differential<Interval> >& x) const { return this->_ptr->evaluate(x); }
-
-    Vector< TaylorModel<Float> > operator()(const Vector< TaylorModel<Float> >& x) const { return this->_ptr->evaluate(x); }
-    Vector< TaylorModel<Interval> > operator()(const Vector< TaylorModel<Interval> >& x) const { return this->_ptr->evaluate(x); }
+    template<class X> Matrix<X> jacobian(const Vector<X>& x) const {
+        return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -378,6 +344,7 @@ class VectorFunction<Real>
     friend VectorFunction<Real> join(const VectorFunction<Real>&, const ScalarFunction<Real>&);
     friend VectorFunction<Real> join(const VectorFunction<Real>&, const VectorFunction<Real>&);
 
+    friend VectorFunction<Real> embed(const VectorFunction<Real>& f1, Nat n2);
     friend VectorFunction<Real> compose(const VectorFunction<Real>&, const VectorFunction<Real>&);
     friend Vector<Real> evaluate(const VectorFunction<Real>&, const Vector<Real>&);
 
@@ -405,10 +372,13 @@ template<class X> template<class XX> inline XX VectorFunctionElementReference<X>
 inline Vector<Float> evaluate_approx(const VectorFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Vector<Interval> evaluate(const VectorFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
 inline Vector<Real> evaluate(const VectorFunction<Real>& f, const Vector<Real>& x) { return f(x); }
-inline Vector< TaylorModel<Float> > compose(const VectorFunction<Real>& f, const Vector< TaylorModel<Float> >& x) { return f.evaluate(x); }
-inline Vector< TaylorModel<Interval> > compose(const VectorFunction<Real>& f, const Vector< TaylorModel<Interval> >& x) { return f.evaluate(x); }
 inline Matrix<Float> jacobian_approx(const VectorFunction<Real>& f, const Vector<Float>& x);
 inline Matrix<Interval> jacobian(const VectorFunction<Real>& f, const Vector<Interval>& x);
+
+inline ScalarFunction<Interval> ScalarFunctionInterface<Interval>::derivative(Nat j) const { return this->_derivative(j); }
+inline ScalarFunction<Real> ScalarFunctionInterface<Real>::derivative(Nat j) const { return this->_derivative(j); }
+inline ScalarFunction<Interval> VectorFunctionInterface<Interval>::operator[](Nat i) const { return this->_get(i); }
+inline ScalarFunction<Real> VectorFunctionInterface<Real>::operator[](Nat i) const { return this->_get(i); }
 
 VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const Vector<Real>& e);
 VectorFunction<Real> operator+(const VectorFunction<Real>& f1, const VectorFunction<Real>& f2);
@@ -530,17 +500,6 @@ class ProjectionFunction
   protected:
     virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
 };
-
-class VectorUnscalingFunction
-: public VectorFunction<Real>
-{
-    public:
-        //! \brief Construct the function which maps the box \a bx to the unit box.
-        VectorUnscalingFunction(const Vector<Interval>& bx);
-    protected:
-        virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
-};
-
 
 
 } // namespace Ariadne

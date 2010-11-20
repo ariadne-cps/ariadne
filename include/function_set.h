@@ -76,7 +76,7 @@ class ImageSet
     const RealVectorFunction& function() const { return this->_function; }
     //! \brief Equality operator. Compares functions by referential equality.
     bool operator==(const ImageSet& ims) const {
-        return this->_domain==ims._domain && this->_function.pointer()==ims._function.pointer(); }
+        return this->_domain==ims._domain && this->_function.raw_pointer()==ims._function.raw_pointer(); }
 
     ImageSet* clone() const;
     uint dimension() const;

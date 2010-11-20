@@ -25,6 +25,7 @@
 
 #include "macros.h"
 #include "stlio.h"
+#include "formula.h"
 #include "expression.h"
 #include "space.h"
 #include "function.h"

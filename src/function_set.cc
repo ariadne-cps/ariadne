@@ -25,6 +25,7 @@
 
 #include "macros.h"
 #include "logging.h"
+#include "polynomial.h"
 #include "function.h"
 #include "function_set.h"
 #include "affine_set.h"

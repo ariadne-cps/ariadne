@@ -30,6 +30,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+#include "differential.h"
 #include "function.h"
 #include "taylor_function.h"
 

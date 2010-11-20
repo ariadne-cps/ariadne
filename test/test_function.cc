@@ -30,8 +30,8 @@
 #include <fenv.h>
 
 #include "numeric.h"
+#include "polynomial.h"
 #include "function.h"
-#include "taylor_model.h"
 
 #include "test.h"
 

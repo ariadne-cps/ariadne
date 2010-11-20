@@ -198,6 +198,8 @@ inline std::istream& operator>>(std::istream& is, Float& x) { double v; is >> v;
 
 // Constants related to numerical limits
 inline Float mx() { return std::numeric_limits<double>::max(); }
+
+
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 
 // General constants
@@ -1286,6 +1288,14 @@ template<> inline double numeric_cast(const Interval& a) { return a.get_d(); }
 template<> inline Float numeric_cast(const Interval& a) { return a.midpoint(); }
 template<> inline Interval numeric_cast(const Float& a) { return Interval(a); }
 
+//! \ingroup NumericModule \related Float 
+//! \brief Converts \a e to an object of type \a X, which may either be an
+//! \c Float or \c Interval, with the semantics that \a e denotes and error bound.
+//! Returns the float 0.0 (since floating-point computations do not keep track of errors)
+//! and the interval [-e,+e].
+template<class X> inline X convert_error(const Float& e);
+template<> inline Float convert_error<Float>(const Float& e) { return 0.0; }
+template<> inline Interval convert_error<Interval>(const Float& e) { return Interval(-e,+e); }
 
 } // namespace Ariadne
 

@@ -47,7 +47,6 @@ typedef unsigned int uint;
 typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
-
 void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
 {
     rounding_mode_t rounding_mode=get_rounding_mode();
@@ -309,6 +308,10 @@ ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunct
 
 
 
+ScalarTaylorFunction* ScalarTaylorFunction::_derivative(uint j) const 
+{ 
+    return new ScalarTaylorFunction(Ariadne::derivative(*this,j)); 
+}
 
 
 Float
@@ -987,12 +990,18 @@ VectorTaylorFunction::set(uint i, const ScalarTaylorFunction& e)
 
 
 
-
 template<class T>
 void
 VectorTaylorFunction::_compute(Vector<T>& r, const Vector<T>& a) const
 {
-    r=a;
+    typedef typename T::NumericType X;
+    const VectorTaylorFunction& f=*this;
+    Vector<T> sx=Ariadne::unscale(a,f._domain);
+    for(uint i=0; i!=r.size(); ++i) {
+        T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);
+        X e=convert_error<X>(this->_models[i].error());
+        r[i]=ri+e;
+    }
 }
 
 

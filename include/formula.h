@@ -125,12 +125,16 @@ template<class X> inline Formula<X> Formula<X>::coordinate(uint j) { return Form
 template<class X> inline Vector< Formula<X> > Formula<X>::identity(uint n) {
     Vector< Formula<X> > r(n); for(uint i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
 
+template<class X> inline Formula<X>& operator+=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1+f2; return f1=r; }
+template<class X> inline Formula<X>& operator*=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1*f2; return f1=r; }
+
 template<class X> inline Formula<X> operator+(const Formula<X>& f) { return make_formula(POS,f); }
 template<class X> inline Formula<X> operator-(const Formula<X>& f) { return make_formula(NEG,f); }
 template<class X> inline Formula<X> operator+(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(ADD,f1,f2); }
 template<class X> inline Formula<X> operator-(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(SUB,f1,f2); }
 template<class X> inline Formula<X> operator*(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(MUL,f1,f2); }
 template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(DIV,f1,f2); }
+
 template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(NEG,f); }
 template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(REC,f); }
 template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(SQR,f); }
@@ -143,29 +147,28 @@ template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formu
 template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(TAN,f); }
 template<class X> inline Formula<X> atan(const Formula<X>& f) { return make_formula(ATAN,f); }
 
-template<class X> inline Formula<X> operator+(double c, Formula<X> f) { return Formula<X>::constant(c) + f; }
-template<class X> inline Formula<X> operator-(double c, Formula<X> f) { return Formula<X>::constant(c) - f; }
-template<class X> inline Formula<X> operator*(double c, Formula<X> f) { return Formula<X>::constant(c) * f; }
-template<class X> inline Formula<X> operator/(double c, Formula<X> f) { return Formula<X>::constant(c) / f; }
-template<class X> inline Formula<X> operator+(Formula<X> f, double c) { return f + Formula<X>::constant(c); }
-template<class X> inline Formula<X> operator-(Formula<X> f, double c) { return f - Formula<X>::constant(c); }
-template<class X> inline Formula<X> operator*(Formula<X> f, double c) { return f * Formula<X>::constant(c); }
-template<class X> inline Formula<X> operator/(Formula<X> f, double c) { return f / Formula<X>::constant(c); }
+// Use 'enable_if' style template to restrict allowable instances. See the Boost documentation
+// for enable_if to see how this works.
+template<class X, class T> struct enable_if_numeric { };
+template<class T> struct enable_if_numeric<unsigned int,T> { typedef T type; };
+template<class T> struct enable_if_numeric<int,T> { typedef T type; };
+template<class T> struct enable_if_numeric<double,T> { typedef T type; };
+template<class T> struct enable_if_numeric<Float,T> { typedef T type; };
+template<class T> struct enable_if_numeric<Interval,T> { typedef T type; };
+template<class T> struct enable_if_numeric<Real,T> { typedef T type; };
 
-template<class X> inline Formula<X> operator+(Real c, Formula<X> f) { return Formula<X>::constant(c) + f; }
-template<class X> inline Formula<X> operator-(Real c, Formula<X> f) { return Formula<X>::constant(c) - f; }
-template<class X> inline Formula<X> operator*(Real c, Formula<X> f) { return Formula<X>::constant(c) * f; }
-template<class X> inline Formula<X> operator/(Real c, Formula<X> f) { return Formula<X>::constant(c) / f; }
-template<class X> inline Formula<X> operator+(Formula<X> f, Real c) { return f + Formula<X>::constant(c); }
-template<class X> inline Formula<X> operator-(Formula<X> f, Real c) { return f - Formula<X>::constant(c); }
-template<class X> inline Formula<X> operator*(Formula<X> f, Real c) { return f * Formula<X>::constant(c); }
-template<class X> inline Formula<X> operator/(Formula<X> f, Real c) { return f / Formula<X>::constant(c); }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator+(Formula<X> f, R c) { return f + Formula<X>::constant(numeric_cast<X>(c)); }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator-(Formula<X> f, R c) { return f - Formula<X>::constant(numeric_cast<X>(c)); }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator*(Formula<X> f, R c) { return f * Formula<X>::constant(numeric_cast<X>(c)); }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator/(Formula<X> f, R c) { return f / Formula<X>::constant(numeric_cast<X>(c)); }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator+(R c, Formula<X> f) { return Formula<X>::constant(numeric_cast<X>(c)) + f; }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator-(R c, Formula<X> f) { return Formula<X>::constant(numeric_cast<X>(c)) - f; }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator*(R c, Formula<X> f) { return Formula<X>::constant(numeric_cast<X>(c)) * f; }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator/(R c, Formula<X> f) { return Formula<X>::constant(numeric_cast<X>(c)) / f; }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type& operator+=(Formula<X>& f, const R& c) { return f+=Formula<X>::constant(numeric_cast<X>(c)); }
+template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type& operator*=(Formula<X>& f, const R& c) { return f*=Formula<X>::constant(numeric_cast<X>(c)); }
 
-template<class X> inline Formula<X>& operator+=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1+f2; return f1=r; }
-template<class X> inline Formula<X>& operator*=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1*f2; return f1=r; }
-template<class X> inline Formula<X>& operator+=(Formula<X>& f, const Real& c) { Formula<X> r=f+Formula<X>::constant(c); return f=r; }
-template<class X> inline Formula<X>& operator*=(Formula<X>& f, const Real& c) { Formula<X> r=f*Formula<X>::constant(c); return f=r; }
-
+/*
 template<class X> inline Formula<X> operator*(Formula<X> f, int c) {
     if(c==0) { return Formula<X>::constant(0.0); }
     else { return f * Formula<X>::constant(c); }
@@ -175,6 +178,7 @@ template<class X> inline Formula<X> operator+(Formula<X> f, int c) {
     if(f.raw_ptr()->op==CNST) { return Formula<X>::constant(*f.raw_ptr()->val+c); }
     else { return f + Formula<X>::constant(c); }
 }
+*/
 
 template<class X> inline std::ostream& operator<<(std::ostream& os, const FormulaNode<X>* fptr) {
     switch(fptr->op) {

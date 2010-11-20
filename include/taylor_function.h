@@ -499,9 +499,11 @@ class ScalarTaylorFunction
   private:
     friend class ScalarFunctionMixin<ScalarTaylorFunction, Interval>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
-        r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain)); // FIXME: +Interval(-this->_model.error(),+this->_model.error());
+        typedef typename T::NumericType R;
+        r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
+            + convert_error<R>(this->_model.error());
     }
-    ScalarTaylorFunction* _derivative(uint j) const { return new ScalarTaylorFunction(Ariadne::derivative(*this,j)); }
+    ScalarTaylorFunction* _derivative(uint j) const ;
 };
 
 

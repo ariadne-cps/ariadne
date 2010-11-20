@@ -69,6 +69,8 @@ class Polynomial
     typedef typename Expansion<X>::const_reference const_reference;
     typedef typename Expansion<X>::iterator iterator;
     typedef typename Expansion<X>::const_iterator const_iterator;
+    
+    typedef typename X::NumericType NumericType;
   public:
     //@{
     //! \name Constructors

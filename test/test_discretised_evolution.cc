@@ -141,7 +141,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate();
     GridTreeSet const& final_cells=discrete_orbit.final();
 
-    cout << "initial_set=" << initial_set.range() << endl << endl;
+    cout << "initial_set=" << initial_set.bounding_box() << endl << endl;
     cout << "initial_cell=" << initial_cell.box() << endl << endl;
     cout << "reach_set=" << reach_set << endl << endl;
     cout << "reach_cells=" << reach_cells << endl << endl;
@@ -176,7 +176,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
 void TestDiscretisedEvolution::test_continuous_time() const
 {
-    typedef TaylorImageSet EnclosureType;
+    typedef TaylorConstrainedImageSet EnclosureType;
 
     cout << __PRETTY_FUNCTION__ << endl;
 
@@ -232,7 +232,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate();
     GridTreeSet const& final_cells=discrete_orbit.final();
 
-    cout << "initial_set=" << initial_set.range() << endl << endl;
+    cout << "initial_set_bounding_box=" << initial_set.bounding_box() << endl << endl;
     cout << "initial_cell=" << initial_cell.box() << endl << endl;
     cout << "final_set=" << final_set << endl << endl;
     cout << "final_cells=" << final_cells << endl << endl;

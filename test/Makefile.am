@@ -15,8 +15,7 @@ LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS = \
 	profile_arithmetic \
-	profile_taylor_model \
-	profile_taylor_set
+	profile_taylor_model
 
 #test_misc_LDADD = $(LDADD) -lboost_python -lpython2.5
 
@@ -66,7 +65,6 @@ profiles: $(bin_PROGRAMS)
 # Explicitly list profile sources
 profile_arithmetic_SOURCES=profile_arithmetic.cc
 profile_taylor_model_SOURCES=profile_taylor_model.cc
-profile_taylor_set_SOURCES=	profile_taylor_set.cc
 
 # Explicitly list test sources
 test_float_SOURCES=test_float.cc

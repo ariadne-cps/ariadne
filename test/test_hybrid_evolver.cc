@@ -697,8 +697,8 @@ void TestHybridEvolution::test_constant_derivative_system() const
     automaton.new_mode(q2,d);
     automaton.new_transition(e,q1,q2,r,g,urgent);
 
-    TaylorImageSet initial_enclosure(Box(2, -0.0625,0.0625, -0.0625,+0.0625));
-    HybridTaylorImageSet initial_set(q1,initial_enclosure);
+    TaylorConstrainedImageSet initial_enclosure(Box(2, -0.0625,0.0625, -0.0625,+0.0625));
+    HybridTaylorConstrainedImageSet initial_set(q1,initial_enclosure);
 
     HybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
@@ -710,11 +710,11 @@ void TestHybridEvolution::test_constant_derivative_system() const
         // Test continuous evolution without any jumps
         HybridTime evolution_time(0.5,1);
         ARIADNE_TEST_PRINT(evolution_time);
-        Orbit<HybridTaylorImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+        Orbit<HybridTaylorConstrainedImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
         ARIADNE_TEST_PRINT(orbit);
-        ListSet<HybridTaylorImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
+        ListSet<HybridTaylorConstrainedImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
         ARIADNE_TEST_PRINT(final_set);
-        HybridTaylorImageSet expected_final_set(q1,Box(2, +0.4375,+0.5625, -0.0625,+0.0625));
+        HybridTaylorConstrainedImageSet expected_final_set(q1,Box(2, +0.4375,+0.5625, -0.0625,+0.0625));
         ARIADNE_TEST_PRINT(expected_final_set);
         ARIADNE_TEST_COMPARE(norm(final_set[q1][0].models()-expected_final_set.second.models()),<,1e-15);
     }
@@ -724,12 +724,12 @@ void TestHybridEvolution::test_constant_derivative_system() const
         HybridTime evolution_time(2.0,2);
         ARIADNE_TEST_PRINT(evolution_time);
 
-        Orbit<HybridTaylorImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+        Orbit<HybridTaylorConstrainedImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
         ARIADNE_TEST_PRINT(orbit);
 
-        ListSet<HybridTaylorImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
+        ListSet<HybridTaylorConstrainedImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
         ARIADNE_TEST_PRINT(final_set);
-        HybridTaylorImageSet expected_final_set(q2,Box(2, -0.0625,+0.0625, -0.0625,+0.0625));
+        HybridTaylorConstrainedImageSet expected_final_set(q2,Box(2, -0.0625,+0.0625, -0.0625,+0.0625));
         ARIADNE_TEST_PRINT(expected_final_set);
 
         ARIADNE_TEST_COMPARE(norm(final_set[q2][0].models()-expected_final_set.second.models()),<,1e-14);
@@ -762,9 +762,9 @@ void TestHybridEvolution::test_bouncing_ball() const
     automaton.new_mode(q2,dynamic);
     automaton.new_transition(e12,q1,q2,reset,guard,urgent);
 
-    //TaylorImageSet initial_enclosure(Box(3, x0-r0,x0+r0, -r0,+r0, 0.0,0.0));
-    TaylorImageSet initial_enclosure(Box(2, x0-r0,x0+r0, -r0,+r0));
-    HybridTaylorImageSet initial_set(q1,initial_enclosure);
+    //TaylorConstrainedImageSet initial_enclosure(Box(3, x0-r0,x0+r0, -r0,+r0, 0.0,0.0));
+    TaylorConstrainedImageSet initial_enclosure(Box(2, x0-r0,x0+r0, -r0,+r0));
+    HybridTaylorConstrainedImageSet initial_set(q1,initial_enclosure);
 
     HybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
@@ -776,7 +776,7 @@ void TestHybridEvolution::test_bouncing_ball() const
     // Test continuous evolution without any jumps
     HybridTime evolution_time(1.5,2);
     ARIADNE_TEST_PRINT(evolution_time);
-    Orbit<HybridTaylorImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+    Orbit<HybridTaylorConstrainedImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EVALUATE(orbit.intermediate()[q2]);
     ARIADNE_TEST_EVALUATE(orbit.reach()[q2]);
@@ -797,8 +797,8 @@ void TestHybridEvolution::test_affine_system() const
     const DiscreteEvent event3(3);
     const DiscreteEvent event4(4);
 
-    typedef TaylorImageSet EnclosureType;
-    typedef HybridBasicSet<TaylorImageSet> HybridEnclosureType;
+    typedef TaylorConstrainedImageSet EnclosureType;
+    typedef HybridBasicSet<TaylorConstrainedImageSet> HybridEnclosureType;
 
     // Set up the evolution parameters and grid
     Float step_size(0.5);
@@ -820,7 +820,7 @@ void TestHybridEvolution::test_affine_system() const
     // Define the initial box
     Box initial_box(2, -0.01,0.01, 0.49,0.51);
     cout << "initial_box=" << initial_box << endl;
-    EnclosureType initial_set=TaylorImageSet(initial_box);
+    EnclosureType initial_set=TaylorConstrainedImageSet(initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
     HybridEnclosureType initial_hybrid_set(location1,initial_set);
     HybridTime hybrid_evolution_time(0.25,1);
@@ -924,15 +924,15 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     RealScalarFunction guard=x+y/2-1;
     MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
-    HybridTaylorImageSet initial_set(q1,initial_box);
+    HybridTaylorConstrainedImageSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
-    ListSet<HybridTaylorImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
+    ListSet<HybridTaylorConstrainedImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
     RealScalarFunction ct=-guard; // Crossing time
     RealVectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
-    TaylorImageSet expected_evolved_set(f,initial_box);
+    TaylorConstrainedImageSet expected_evolved_set(f,initial_box);
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
     ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
 
@@ -947,16 +947,16 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
     RealScalarFunction guard=x-(1+y/2+y*y*y);
     MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
-    HybridTaylorImageSet initial_set(q1,initial_box);
+    HybridTaylorConstrainedImageSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
-    ListSet<HybridTaylorImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
+    ListSet<HybridTaylorConstrainedImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
     RealScalarFunction ct=-guard; // Crossing time
 
     RealVectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
-    TaylorImageSet expected_evolved_set(f,initial_box);
+    TaylorConstrainedImageSet expected_evolved_set(f,initial_box);
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
     ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
     plot("test_hybrid_evolution-transverse_cubic_crossing",Box(2, -1.0,3.0, -1.0,3.0),
@@ -970,15 +970,15 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
     RealScalarFunction guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
     MonolithicHybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
-    HybridTaylorImageSet initial_set(q1,initial_box);
+    HybridTaylorConstrainedImageSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
     RealScalarFunction ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
     RealVectorFunction f=join(x+ct,y+2-ct);
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
-    TaylorImageSet expected_evolved_set(f,initial_box);
+    TaylorConstrainedImageSet expected_evolved_set(f,initial_box);
 
-    ListSet<HybridTaylorImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
+    ListSet<HybridTaylorConstrainedImageSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
     //ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
     ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);

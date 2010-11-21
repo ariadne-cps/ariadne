@@ -141,7 +141,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         TimeType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
-        Float current_set_radius=radius(current_set_model.range());
+        Float current_set_radius=radius(current_set_model.bounding_box());
         if(current_time>=maximum_time) {
             final_sets.adjoin(current_set_model);
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
@@ -197,7 +197,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     typedef Vector<Interval> BoxType;
     typedef VectorTaylorFunction MapModelType;
     typedef VectorTaylorFunction FlowModelType;
-    typedef TaylorImageSet EnclosureType;
+    typedef TaylorConstrainedImageSet EnclosureType;
 
     EnclosureType current_set_model;
     TimeType current_time;
@@ -207,8 +207,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG(4,"current_time = "<<current_time<<"");
     ARIADNE_LOG(6,"current_set_model = "<<current_set_model<<"\n");
 
-    ARIADNE_LOG(2,"box = "<<current_set_model.range()<<" ");
-    ARIADNE_LOG(2,"radius = "<<radius(current_set_model.range())<<"\n\n");
+    ARIADNE_LOG(2,"box = "<<current_set_model.bounding_box()<<" ");
+    ARIADNE_LOG(2,"radius = "<<radius(current_set_model.bounding_box())<<"\n\n");
     //const uint nd=initial_set_model.result_size();
     //const uint ng=initial_set_model.argument_size();
 
@@ -221,11 +221,11 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
     const Float zero_time=0.0;
 
-    // Get bounding boxes for time and space range
-    Vector<Interval> current_set_bounds=current_set_model.range();
+    // Get bounding boxes for time and space bounding_box
+    Vector<Interval> current_set_bounds=current_set_model.bounding_box();
     ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
 
-    //ARIADNE_ASSERT(initial_time_range.width() <= maximum_step_size);
+    //ARIADNE_ASSERT(initial_time_bounding_box.width() <= maximum_step_size);
 
 
     // Compute flow bounds and find flow bounding box

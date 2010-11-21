@@ -284,38 +284,6 @@ void export_curve()
 
 }
 
-void export_taylor_image_set()
-{
-    class_<TaylorImageSet,bases<CompactSetInterface,DrawableInterface> > taylor_set_class("TaylorImageSet",init<TaylorImageSet>());
-    taylor_set_class.def(init<uint>());
-    taylor_set_class.def(init<Box>());
-    taylor_set_class.def(init< Vector<IntervalTaylorModel> >());
-    //taylor_set_class.def(init<Zonotope>());
-    taylor_set_class.def("domain", &TaylorImageSet::domain);
-    taylor_set_class.def("models", &TaylorImageSet::models,return_value_policy<copy_const_reference>());
-    taylor_set_class.def("bounding_box", &TaylorImageSet::bounding_box);
-    taylor_set_class.def("range", &TaylorImageSet::bounding_box);
-    taylor_set_class.def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)()const) &TaylorImageSet::split);
-    taylor_set_class.def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)(uint)const) &TaylorImageSet::split);
-    taylor_set_class.def(self_ns::str(self));
-
-    def("split", (std::pair<TaylorImageSet,TaylorImageSet>(TaylorImageSet::*)()const) &TaylorImageSet::split);
-    def("outer_approximation", (GridTreeSet(*)(const TaylorImageSet&,const Grid&,uint)) &outer_approximation);
-    def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorImageSet&,uint)) &adjoin_outer_approximation);
-
-    def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Interval&)) &product);
-    def("product", (TaylorImageSet(*)(const TaylorImageSet&,const Box&)) &product);
-    def("product", (TaylorImageSet(*)(const TaylorImageSet&,const TaylorImageSet&)) &product);
-
-    def("apply",(IntervalTaylorModel(*)(const RealScalarFunction&,const TaylorImageSet&)) &apply);
-    def("apply",(IntervalTaylorModel(*)(const ScalarTaylorFunction&,const TaylorImageSet&)) &apply);
-    def("apply",(TaylorImageSet(*)(const RealVectorFunction&,const TaylorImageSet&)) &apply);
-    def("apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &apply);
-
-    def("unchecked_apply",(TaylorImageSet(*)(const VectorTaylorFunction&,const TaylorImageSet&)) &unchecked_apply);
-
-    to_python< std::pair<TaylorImageSet,TaylorImageSet> >();
-}
 
 void export_taylor_constrained_image_set()
 {
@@ -330,8 +298,8 @@ void export_taylor_constrained_image_set()
     taylor_set_class.def("domain", &TaylorConstrainedImageSet::domain);
     taylor_set_class.def("function", &TaylorConstrainedImageSet::domain);
     taylor_set_class.def("bounding_box", &TaylorConstrainedImageSet::bounding_box);
-    taylor_set_class.def("split", (std::pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)()const) &TaylorConstrainedImageSet::split);
-    taylor_set_class.def("split", (std::pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)(uint)const) &TaylorConstrainedImageSet::split);
+    taylor_set_class.def("split", (Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)()const) &TaylorConstrainedImageSet::split);
+    taylor_set_class.def("split", (Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)(uint)const) &TaylorConstrainedImageSet::split);
     taylor_set_class.def(self_ns::str(self));
 
     taylor_set_class.def("number_of_parameters", &TaylorConstrainedImageSet::number_of_parameters);
@@ -348,8 +316,7 @@ void export_taylor_constrained_image_set()
     taylor_set_class.def("outer_approximation", &TaylorConstrainedImageSet::outer_approximation);
     taylor_set_class.def("adjoin_outer_approximation_to", &TaylorConstrainedImageSet::adjoin_outer_approximation_to);
 
-    def("split", (std::pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)()const) &TaylorConstrainedImageSet::split);
-    def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorConstrainedImageSet&,uint)) &adjoin_outer_approximation);
+    def("split", (Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)()const) &TaylorConstrainedImageSet::split);
 
     def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const Interval&)) &product);
     def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const Box&)) &product);
@@ -419,16 +386,6 @@ void export_hybrid_box()
     hybrid_box_class.def(self_ns::str(self));
 }
 
-void export_hybrid_taylor_set()
-{
-    typedef HybridBasicSet<TaylorImageSet> HybridTaylorImageSet;
-
-    class_<HybridTaylorImageSet> hybrid_taylor_set_class("HybridTaylorImageSet",init<HybridTaylorImageSet>());
-    hybrid_taylor_set_class.def(init<DiscreteLocation,Box>());
-    hybrid_taylor_set_class.def(init<DiscreteLocation,TaylorImageSet>());
-    hybrid_taylor_set_class.def(self_ns::str(self));
-}
-
 void export_hybrid_constrained_image_set()
 {
     typedef HybridBasicSet<ConstrainedImageSet> HybridConstrainedImageSet;
@@ -452,16 +409,14 @@ void geometry_submodule() {
     export_curve();
 
     export_affine_set();
-    export_taylor_image_set();
     export_taylor_constrained_image_set();
     export_constrained_image_set();
 
     export_hybrid_box();
-    export_hybrid_taylor_set();
     export_hybrid_constrained_image_set();
 
-    typedef HybridBasicSet<TaylorImageSet> HybridTaylorImageSet;
-    to_python< ListSet<TaylorImageSet> >();
-    to_python< ListSet<HybridTaylorImageSet> >();
+    typedef HybridBasicSet<TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
+    to_python< ListSet<TaylorConstrainedImageSet> >();
+    to_python< ListSet<HybridTaylorConstrainedImageSet> >();
 }
 

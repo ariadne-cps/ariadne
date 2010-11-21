@@ -36,8 +36,6 @@
 using namespace Ariadne;
 using namespace std;
 
-typedef Vector<Interval> IntervalVector;
-
 class TestSolver
 {
   private:

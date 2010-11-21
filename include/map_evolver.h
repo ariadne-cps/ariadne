@@ -48,7 +48,7 @@ namespace Ariadne {
 
 template<class Sys, class BS> class Evolver;
 
-class TaylorImageSet;
+class TaylorConstrainedImageSet;
 class IteratedMap;
 template<class ES> class Orbit;
 
@@ -61,7 +61,7 @@ class EvolutionProfiler;
  * The actual evolution steps are performed by the MapEvolver class.
  */
 class MapEvolver
-    : public EvolverBase< IteratedMap, TaylorImageSet>
+    : public EvolverBase< IteratedMap, TaylorConstrainedImageSet>
     , public Loggable
 {
     typedef IntervalTaylorModel VariableType;
@@ -69,7 +69,7 @@ class MapEvolver
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef IteratedMap::TimeType TimeType;
     typedef IteratedMap SystemType;
-    typedef TaylorImageSet EnclosureType;
+    typedef TaylorConstrainedImageSet EnclosureType;
     typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;

@@ -89,7 +89,7 @@ class TaylorModelAccuracy
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorImageSet.
+ * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorConstrainedImageSet.
  */
 template<>
 class TaylorModel<Interval>

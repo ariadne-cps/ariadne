@@ -121,6 +121,7 @@ template<class T> class List
     explicit List(const T& t) : std::vector<T>(1u,t) { }
     void append(const T& t) { this->push_back(t); }
     void append(const List<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
+    void concatenate(const List<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
 };
 
 template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) {

@@ -86,8 +86,8 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const Vector<Interv
 // Extend to a larger domain. REQUIRED
 ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const Vector<Interval>& d);
 
-// Compose with an expression.
-ScalarTaylorFunction compose(const RealScalarFunction& x, const VectorTaylorFunction& y);
+// Compose with an function.
+ScalarTaylorFunction compose(const IntervalScalarFunction& x, const VectorTaylorFunction& y);
 
 // Substitute \a h into the \a k<sup>th</sup> argument of \a f.
 ScalarTaylorFunction substitute(const ScalarTaylorFunction& f, uint k, const ScalarTaylorFunction& h);
@@ -134,7 +134,7 @@ class VectorTaylorFunctionElementReference;
  * Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
  * for but there are a number of techniques available.
  *
- * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorImageSet.
+ * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorConstrainedImageSet.
  */
 class ScalarTaylorFunction
     : public ScalarFunctionMixin<ScalarTaylorFunction, Interval>
@@ -292,6 +292,8 @@ class ScalarTaylorFunction
     Interval evaluate(const Vector<Interval>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
     Interval operator()(const Vector<Interval>& x) const;
+    using ScalarFunctionMixin< ScalarTaylorFunction, Interval>::evaluate;
+
     //@}
 
     //@{
@@ -662,8 +664,10 @@ bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
 bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction intersection(const VectorTaylorFunction&, const VectorTaylorFunction&);
 ScalarTaylorFunction compose(const RealScalarFunction&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const IntervalScalarFunctionInterface&, const VectorTaylorFunction&);
 ScalarTaylorFunction compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const IntervalVectorFunctionInterface&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const RealVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
 Float norm(const ScalarTaylorFunction& f);
@@ -733,6 +737,9 @@ class VectorTaylorFunction
     /*! \brief Construct from a vector of scalar Taylor functions. */
     explicit VectorTaylorFunction(const Vector<ScalarTaylorFunction>& components);
 
+    /*! \brief Construct from a list of scalar Taylor functions. */
+    explicit VectorTaylorFunction(const List<ScalarTaylorFunction>& components);
+
     /*! \brief Construct from a vector expression. */
     template<class E> explicit VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve);
 
@@ -777,6 +784,9 @@ class VectorTaylorFunction
     VectorTaylorFunctionElementReference operator[](uint i);
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Interval>& x) const;
+
+    using VectorFunctionMixin< VectorTaylorFunction, Interval>::evaluate;
+
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> operator()(const Vector<Interval>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */

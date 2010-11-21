@@ -172,8 +172,8 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
 
 }
 
-template class Discretiser<VectorField,TaylorImageSet>;
-template class Discretiser<IteratedMap,TaylorImageSet>;
+template class Discretiser<VectorField,TaylorConstrainedImageSet>;
+template class Discretiser<IteratedMap,TaylorConstrainedImageSet>;
 
 
 
@@ -312,7 +312,7 @@ _discretise(const ListSet<EnclosureType>& enclosure_list_set,
 }
 
 
-template class HybridDiscretiser<HybridTaylorImageSet>;
+template class HybridDiscretiser<HybridTaylorConstrainedImageSet>;
 template class HybridDiscretiser<HybridEnclosure>;
 
 } // namespace Ariadne

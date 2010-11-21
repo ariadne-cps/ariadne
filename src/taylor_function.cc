@@ -373,6 +373,12 @@ compose(const RealScalarFunction& g, const VectorTaylorFunction& f)
 }
 
 ScalarTaylorFunction
+compose(const IntervalScalarFunctionInterface& g, const VectorTaylorFunction& f)
+{
+    return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
+}
+
+ScalarTaylorFunction
 compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
 {
     if(!subset(f.codomain(),g.domain())) {
@@ -751,6 +757,17 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v)
+    : _domain(), _models(v.size())
+{
+    ARIADNE_ASSERT(v.size()>0);
+    for(uint i=1; i!=v.size(); ++i) { ARIADNE_ASSERT(v[i].domain()==v[0].domain()); }
+    this->_domain=v[0].domain();
+    for(uint i=0; i!=v.size(); ++i) {
+        this->_models[i]=v[i].model();
+    }
+}
+
+VectorTaylorFunction::VectorTaylorFunction(const List<ScalarTaylorFunction>& v)
     : _domain(), _models(v.size())
 {
     ARIADNE_ASSERT(v.size()>0);
@@ -1441,6 +1458,12 @@ unchecked_evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x) {
 
 VectorTaylorFunction
 compose(const RealVectorFunction& g, const VectorTaylorFunction& f)
+{
+    return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
+}
+
+VectorTaylorFunction
+compose(const IntervalVectorFunctionInterface& g, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
 }

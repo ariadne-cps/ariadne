@@ -348,6 +348,14 @@ inline Vector<Interval> box(size_t d, Float* ptr) {
     return bx;
 }
 
+class Float;
+class Interval;
+class Real;
+
+// Useful typedef's
+typedef Vector<Float> FloatVector;
+typedef Vector<Interval> IntervalVector;
+typedef Vector<Real> RealVector;
 
 
 } // namespace Ariadne

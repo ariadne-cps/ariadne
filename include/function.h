@@ -246,6 +246,8 @@ class VectorFunction<Interval>
 {
     friend class VectorFunction<Float>;
   public:
+    static VectorFunction<Interval> identity(Nat n);
+
     VectorFunction<Interval>(const List<ScalarFunction<Interval> >& lf);
 
     VectorFunction<Interval>(VectorFunctionInterface<Interval>* fptr) : _ptr(fptr) { }

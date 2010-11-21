@@ -38,6 +38,7 @@
 #include "taylor_function.h"
 
 #include "box.h"
+#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 
@@ -65,7 +66,6 @@ class NonlinearConstraint;
 template<class X> class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
-class TaylorImageSet;
 
 class AffineSet;
 
@@ -73,137 +73,6 @@ template<class BS> class ListSet;
 
 class Grid;
 class GridTreeSet;
-
-/*! \brief Sets expressed as the image of a box under a polynomial with error bounds.
- *
- *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
- */
-class TaylorImageSet
-    : public LocatedSetInterface
-    , public DrawableInterface
-{
-  private:
-    Vector<IntervalTaylorModel> _models;
-  public:
-    //! \brief Construct the origin in dimension \a d with \a ng generators.
-    TaylorImageSet(uint d=0, uint ng=0);
-    //! \brief Construct the image of the box \a d under the function \a f.
-    TaylorImageSet(const RealVectorFunction& f, const Vector<Interval>& d);
-    //! \brief Construct from a list of models giving set as the image of a unit box.
-    TaylorImageSet(const Vector<IntervalTaylorModel>& tv);
-    //! \brief The box \a bx.
-    TaylorImageSet(const Vector<Interval>& bx);
-
-    //! \brief Construct from raw data in the form of dense polynomial expansions with errors.
-    TaylorImageSet(uint rs, uint as, uint deg, double x0, ...);
-    //! \brief Construct from raw data in the form of a polynomial expansion with errors.
-    TaylorImageSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
-
-    template<class E> TaylorImageSet(const ublas::vector_expression<E>& e) {
-        *this = TaylorImageSet(Vector<IntervalTaylorModel>(e())); }
-
-    //! \brief Equality operator.
-    friend bool operator==(const TaylorImageSet& ts1, const TaylorImageSet& ts2);
-
-    //! \brief Set the accuracy parameters.
-    void set_accuracy(shared_ptr<IntervalTaylorModel::Accuracy> acc_ptr);
-    //! \brief Get the accuracy parameters.
-    shared_ptr<IntervalTaylorModel::Accuracy> accuracy_ptr() const;
-
-    //! \brief The dimension the space lies in.
-    uint dimension() const { return this->_models.size(); }
-    //! \brief The number of generators of the set.
-    uint generators_size() const { assert(this->_models.size()>0); return this->_models[0].argument_size(); }
-
-    //! \brief The Taylor models used to define the set.
-    const Vector<IntervalTaylorModel>& models() const { return this->_models; }
-    //! \brief The domain of which the set is an image.
-    Vector<Interval> domain() const { return Vector<Interval>(this->generators_size(),Interval(-1,+1)); }
-    //! \brief A box bounding the range of the generating function.
-    Vector<Interval> range() const {
-        Vector<Interval> result(this->_models.size());
-        for(uint i=0; i!=this->_models.size(); ++i) {
-            result[i]=this->_models[i].range(); }
-        return result; }
-
-    uint size() const { return this->_models.size(); }
-    uint result_size() const { return this->_models.size(); }
-    uint argument_size() const { return this->_models[0].argument_size(); }
-    const IntervalTaylorModel& operator[](uint i) const { return this->_models[i]; }
-    IntervalTaylorModel& operator[](uint i) { return this->_models[i]; }
-
-
-    //! \brief Create a dynamically-allocated copy.
-    virtual TaylorImageSet* clone() const { return new TaylorImageSet(*this); }
-    //! \brief Tests if the set is empty.
-    virtual tribool empty() const;
-    //! \brief Tests if the set is disjoint from a box.
-    virtual tribool disjoint(const Box&) const;
-    //! \brief Tests if the set overlaps a box.
-    virtual tribool overlaps(const Box&) const;
-    //! \brief Tests if the set is a subset of a box.
-    virtual tribool inside(const Box&) const;
-    //! \brief A bounding box for the set.
-    virtual Box bounding_box() const;
-    //! \brief Draw on a two-dimensional canvas.
-    virtual void draw(CanvasInterface& c) const;
-    //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const;
-
-    //! \brief The centre of the set.
-    Vector<Float> centre() const;
-    //! \brief The radius of the set.
-    Float radius() const;
-    //! \brief An over-approximation in the form of a zonotope.
-    TaylorImageSet linearise() const;
-    //! \brief An over-approximation in the form of a list of boxes.
-    ListSet<Box> discretise(const Float& eps) const;
-    //! \brief An outer-approximation on a grid.
-    GridTreeSet discretise(const Grid& grid, uint depth) const;
-    //! \brief Adjoin an outer-approximation on a grid to an existing set.
-    GridTreeSet& discretise(GridTreeSet& grid_set, uint depth) const;
-    //! \brief An over-approximation with better numerical conditioning;
-    //! currently implemented as the orthogonal part of a QR factorisation.
-    TaylorImageSet recondition() const;
-    //! \brief Subsume the constant error terms in new generators.
-    TaylorImageSet subsume() const;
-    //! \brief Subsume constant error terms of magnitude greater than \a e in new generators.
-    TaylorImageSet subsume(double e) const;
-    //! \brief Split by subdividing along generator \a g.
-    pair<TaylorImageSet,TaylorImageSet> split(uint g) const;
-    //! \brief Split by subdividing along a judiciously-chosen generator.
-    pair<TaylorImageSet,TaylorImageSet> split() const;
-    //! \brief Subdivide into sets of maximum radius \a rad.
-    ListSet<TaylorImageSet> subdivide(Float rad) const;
-
-    //! \brief Compute an over-approximation to the image under a function.
-    friend TaylorImageSet apply(const RealVectorFunction& f, const TaylorImageSet& s);
-    //! \brief Compute an over-approximation to the image under a Taylor function approximation.
-    friend TaylorImageSet apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
-  private:
-    Matrix<Float> jacobian() const;
-};
-
-IntervalTaylorModel apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
-TaylorImageSet apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
-IntervalTaylorModel apply(const RealScalarFunction& f, const TaylorImageSet& s);
-TaylorImageSet apply(const RealVectorFunction& f, const TaylorImageSet& s);
-
-IntervalTaylorModel unchecked_apply(const ScalarTaylorFunction& f, const TaylorImageSet& s);
-TaylorImageSet unchecked_apply(const VectorTaylorFunction& f, const TaylorImageSet& s);
-
-GridTreeSet outer_approximation(const TaylorImageSet& set, const Grid& grid, uint depth);
-void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorImageSet& set, uint depth);
-
-TaylorImageSet product(const TaylorImageSet& set, const Interval& ivl);
-TaylorImageSet product(const TaylorImageSet& set, const Box& bx);
-TaylorImageSet product(const TaylorImageSet& set1, const TaylorImageSet& set2);
-
-void standard_draw(CanvasInterface& g, const TaylorImageSet& ts);
-void box_draw(CanvasInterface& g, const TaylorImageSet& ts);
-void affine_draw(CanvasInterface& g, const TaylorImageSet& ts);
-void curve_draw(CanvasInterface& g, const TaylorImageSet& ts);
-void grid_draw(CanvasInterface& g, const TaylorImageSet& ts);
 
 
 class HybridEnclosure;
@@ -241,6 +110,8 @@ class TaylorConstrainedImageSet
 
     //! \brief The parameter domain \f$D\f$.
     Vector<Interval> domain() const;
+    //! \brief A subset of the parameter domain containing all feasible points.
+    Vector<Interval> reduced_domain() const;
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
     Vector<Interval> codomain() const;
     //! \brief The image function \f$f\f$.
@@ -255,6 +126,8 @@ class TaylorConstrainedImageSet
     void substitute(uint j, Float c);
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     void apply_map(RealVectorFunction r);
+    //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
+    void apply_map(const IntervalVectorFunctionInterface& r);
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     void apply_map(VectorTaylorFunction r);
     //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
@@ -371,6 +244,9 @@ class TaylorConstrainedImageSet
     AffineSet affine_over_approximation() const;
 
     //! \brief Split into two by splitting the parameter domain along
+    //! a chosen directions
+    Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split() const;
+    //! \brief Split into two by splitting the parameter domain along
     //! the \a k<sup>th</sup> direction.
     Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split(uint k) const;
     //! \brief Restrict the parameter domain to \a subdomain.
@@ -411,6 +287,8 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Bo
 //! \related TaylorConstrainedImageSet \brief The Cartesian product of two constrained image sets.
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const TaylorConstrainedImageSet& set2);
 
+//! \related TaylorConstrainedImageSet \brief The image of the \a set under the \a function.
+TaylorConstrainedImageSet apply(const IntervalVectorFunctionInterface& function, const TaylorConstrainedImageSet& set);
 
 } //namespace Ariadne
 

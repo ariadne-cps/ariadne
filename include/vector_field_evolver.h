@@ -53,7 +53,7 @@ class VectorField;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-class TaylorImageSet;
+class TaylorConstrainedImageSet;
 
 class EvolutionProfiler;
 
@@ -63,14 +63,14 @@ class EvolutionProfiler;
  * The actual evolution steps are performed by the VectorFieldEvolver class.
  */
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, TaylorImageSet >
+    : public EvolverBase< VectorField, TaylorConstrainedImageSet >
     , public Loggable
 {
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef VectorField::TimeType TimeType;
     typedef VectorField SystemType;
-    typedef TaylorImageSet EnclosureType;
+    typedef TaylorConstrainedImageSet EnclosureType;
     typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -97,8 +97,8 @@ class VectorFieldEvolver
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
-    using EvolverBase< VectorField, TaylorImageSet >::evolve;
-    using EvolverBase< VectorField, TaylorImageSet >::reach;
+    using EvolverBase< VectorField, TaylorConstrainedImageSet >::evolve;
+    using EvolverBase< VectorField, TaylorConstrainedImageSet >::reach;
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {

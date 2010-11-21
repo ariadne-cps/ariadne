@@ -47,7 +47,7 @@ class Box;
 class Polytope;
 class InterpolatedCurve;
 class Zonotope;
-class TaylorImageSet;
+class TaylorConstrainedImageSet;
 class GridTreeSubset;
 
 

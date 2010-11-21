@@ -64,8 +64,8 @@ void export_evolver(const char* name)
 
 void evolution_submodule()
 {
-    export_orbit< Orbit<TaylorImageSet> >("ContinuousOrbit");
-    export_orbit< Orbit<HybridTaylorImageSet> >("HybridOrbit");
+    export_orbit< Orbit<TaylorConstrainedImageSet> >("ContinuousOrbit");
+    export_orbit< Orbit<HybridTaylorConstrainedImageSet> >("HybridOrbit");
     //export_evolver<VectorFieldEvolver, init<ContinuousEvolutionParameters> >("VectorFieldEvolver");
     export_evolver<GeneralHybridEvolver, init<> >("GeneralHybridEvolver");
 }

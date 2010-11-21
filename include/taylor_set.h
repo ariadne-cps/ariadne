@@ -244,7 +244,13 @@ class TaylorConstrainedImageSet
     AffineSet affine_over_approximation() const;
 
     //! \brief Split into two by splitting the parameter domain along
-    //! a chosen directions
+    //! the direction which reduces the size of the bounding box.
+    Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split_zeroth_order() const;
+    //! \brief Split into two by splitting the parameter domain along
+    //! the direction which reduces the nonlinearity of the set.
+    Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split_first_order() const;
+    //! \brief Split into two by splitting the parameter domain along a suitably-chosed direction.
+    //! Currently defaults to split_zeroth_order().
     Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split() const;
     //! \brief Split into two by splitting the parameter domain along
     //! the \a k<sup>th</sup> direction.
@@ -262,6 +268,7 @@ class TaylorConstrainedImageSet
     //! \brief Draw the to a canvas by splitting into small enough pieces that
     //! affine over-approximations yield a good image.
     void affine_draw(CanvasInterface&, uint=1u) const;
+    void old_affine_draw(CanvasInterface&, uint=1u) const;
     //! \brief Draw the to a canvas by over-approximating on a grid.
     void grid_draw(CanvasInterface&, uint=1u) const;
 

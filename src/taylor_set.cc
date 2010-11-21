@@ -567,18 +567,192 @@ void TaylorConstrainedImageSet::reduce() const
 
 
 Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
-TaylorConstrainedImageSet::split() const
+TaylorConstrainedImageSet::split_zeroth_order() const
 {
+    Matrix<Interval> jacobian=this->function().jacobian(this->reduced_domain());
+
+    // Compute the column of the matrix which has the norm
+    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     uint jmax=this->number_of_parameters();
-    Float rmax=0.0;
+    Float max_column_norm=0.0;
     for(uint j=0; j!=this->number_of_parameters(); ++j) {
-        if(this->_reduced_domain[j].radius()>rmax) {
-            rmax=this->_reduced_domain[j].radius();
+        Float column_norm=0.0;
+        for(uint i=0; i!=this->dimension(); ++i) {
+            column_norm+=mag(jacobian[i][j]);
+        }
+        column_norm *= this->reduced_domain()[j].radius();
+        if(column_norm>max_column_norm) {
+            max_column_norm=column_norm;
             jmax=j;
         }
     }
-    ARIADNE_ASSERT(jmax!=this->number_of_parameters());
     return this->split(jmax);
+}
+
+
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom)
+{
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    VectorTaylorFunction g=restrict(f,dom);
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    MultiIndex a;
+    for(uint i=0; i!=m; ++i) {
+        const IntervalTaylorModel& tm=g.model(i);
+        for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()>1) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                }
+            }
+        }
+    }
+
+    return nonlinearities;
+}
+
+Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+{
+    //std::cerr<<"\n\nf="<<f<<"\n";
+    //std::cerr<<"dom="<<dom<<"\n";
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
+    MultiIndex a(n);
+    for(uint i=0; i!=n; ++i) {
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
+    }
+    //std::cerr<<"dx="<<ivl_dx<<"\n";
+    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    //std::cerr<<"df="<<df<<"\n";
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    for(uint i=0; i!=m; ++i) {
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==1) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
+                }
+            }
+        }
+    }
+    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
+
+    return nonlinearities;
+}
+
+Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+{
+    //std::cerr<<"\n\nf="<<f<<"\n";
+    //std::cerr<<"dom="<<dom<<"\n";
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
+    MultiIndex a(n);
+    for(uint i=0; i!=n; ++i) {
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
+    }
+    //std::cerr<<"dx="<<ivl_dx<<"\n";
+    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    //std::cerr<<"df="<<df<<"\n";
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    for(uint i=0; i!=m; ++i) {
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==2) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                }
+            }
+        }
+    }
+    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
+
+    return nonlinearities;
+}
+
+Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const IntervalVector domain) {
+    Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
+
+    // Compute the row of the nonlinearities array which has the highest norm
+    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
+    uint imax=nonlinearities.row_size();
+    uint jmax_in_row_imax=nonlinearities.column_size();
+    Float max_row_sum=0.0;
+    for(uint i=0; i!=nonlinearities.row_size(); ++i) {
+        uint jmax=nonlinearities.column_size();
+        Float row_sum=0.0;
+        Float max_mag_j_in_i=0.0;
+        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
+            row_sum+=mag(nonlinearities[i][j]);
+            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+                jmax=j;
+                max_mag_j_in_i=mag(nonlinearities[i][j]);
+            }
+        }
+        if(row_sum>max_row_sum) {
+            imax=i;
+            max_row_sum=row_sum;
+            jmax_in_row_imax=jmax;
+        }
+    }
+
+    return make_pair(jmax_in_row_imax,numeric_cast<double>(max_row_sum));
+}
+
+
+Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
+TaylorConstrainedImageSet::split_first_order() const
+{
+    Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_function,this->_reduced_domain);
+
+    // Compute the row of the nonlinearities array which has the highest norm
+    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
+    uint imax=nonlinearities.row_size();
+    uint jmax_in_row_imax=nonlinearities.column_size();
+    Float max_row_sum=0.0;
+    for(uint i=0; i!=nonlinearities.row_size(); ++i) {
+        uint jmax=nonlinearities.column_size();
+        Float row_sum=0.0;
+        Float max_mag_j_in_i=0.0;
+        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
+            row_sum+=mag(nonlinearities[i][j]);
+            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+                jmax=j;
+                max_mag_j_in_i=mag(nonlinearities[i][j]);
+            }
+        }
+        if(row_sum>max_row_sum) {
+            imax=i;
+            max_row_sum=row_sum;
+            jmax_in_row_imax=jmax;
+        }
+    }
+
+    if(jmax_in_row_imax==nonlinearities.column_size()) { ARIADNE_THROW(std::runtime_error, "split_first_order", "No need to split"); }
+
+    //std::cerr<<"nonlinearities="<<nonlinearities<<"\nsplit_on_parameter="<<jmax_in_row_imax<<"\n\n\n";
+
+    return this->split(jmax_in_row_imax);
+}
+
+
+Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
+TaylorConstrainedImageSet::split() const
+{
+    return this->split_zeroth_order();
 }
 
 
@@ -960,6 +1134,61 @@ void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {
 
 void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accuracy) const {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
+
+    // Bound the maximum number of splittings allowed to draw a particular set.
+    // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
+    static const int MAXIMUM_DEPTH = 16;
+
+    // The basic approximation error when plotting with accuracy=0
+    static const double BASIC_ERROR = 0.0625;
+
+    const double max_error=BASIC_ERROR/(1<<accuracy);
+
+    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain());
+    for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_function[i]; }
+    for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()]=this->_constraints[i]; }
+    for(uint i=0; i!=this->_equations.size(); ++i) { fg[i+this->dimension()+this->_constraints.size()]=this->_equations[i]; }
+
+    List<Box> subdomains;
+    List<Box> unsplitdomains;
+    List<Box> splitdomains;
+    unsplitdomains.append(this->_reduced_domain);
+    Box splitdomain1,splitdomain2;
+    for(int i=0; i!=MAXIMUM_DEPTH; ++i) {
+        //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
+        for(uint n=0; n!=unsplitdomains.size(); ++n) {
+            uint k; double err;
+            make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
+            //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
+            if(k==this->number_of_parameters() || err < max_error) {
+                subdomains.append(unsplitdomains[n]);
+            } else {
+                make_lpair(splitdomain1,splitdomain2)=unsplitdomains[n].split(k);
+                splitdomains.append(splitdomain1);
+                splitdomains.append(splitdomain2);
+            }
+        }
+        unsplitdomains.swap(splitdomains);
+        splitdomains.clear();
+        if(unsplitdomains.empty()) { break; }
+    }
+    subdomains.concatenate(unsplitdomains);
+    if(!unsplitdomains.empty()) {
+        ARIADNE_WARN("Cannot obtain desired accuracy in drawing "<<*this<<" without excessive splitting.");
+    }
+
+    for(uint n=0; n!=subdomains.size(); ++n) {
+        try {
+            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+            //this->restriction(subdomains[n]).affine_approximation().draw(canvas);
+        } catch(...) {
+            this->restriction(subdomains[n]).box_draw(canvas);
+        }
+    }
+};
+
+void TaylorConstrainedImageSet::old_affine_draw(CanvasInterface& canvas, uint accuracy) const {
+    ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
     const int depth=accuracy;
     List<Box> subdomains;
     List<Box> splitdomains;
@@ -979,8 +1208,8 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
 
     for(uint n=0; n!=subdomains.size(); ++n) {
         try {
-            //this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
-            this->restriction(subdomains[n]).affine_approximation().draw(canvas);
+            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+            //this->restriction(subdomains[n]).affine_approximation().draw(canvas);
         } catch(...) {
             this->restriction(subdomains[n]).box_draw(canvas);
         }

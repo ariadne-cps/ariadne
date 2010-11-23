@@ -38,23 +38,14 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
+static const int DEFAULT_WIDTH = 1200;
+static const int DEFAULT_HEIGHT = 1200;
+
 class Point;
 class Box;
 class Polytope;
 class InterpolatedCurve;
 class ProjectionFunction;
-
-struct PlanarProjectionMap {
-  public:
-    PlanarProjectionMap(uint nn, uint ii, uint jj) : n(nn), i(ii), j(jj) { }
-    uint argument_size() const { return this->n; }
-
-    uint n, i, j;
-};
-
-inline std::ostream& operator<<(std::ostream& os, const PlanarProjectionMap& p) {
-    return os << "PlanarProjectionMap( argument_size="<<p.argument_size()<<", x="<<p.i<<", y="<<p.j<<" )";
-}
 
 
 struct LineStyle { explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } private: bool _style; };
@@ -111,7 +102,7 @@ class Figure
 
     void clear();
     void display();
-    void write(const char* filename);
+    void write(const char* filename, uint nx=DEFAULT_WIDTH, uint ny=DEFAULT_HEIGHT);
   public:
     class Data;
   public:

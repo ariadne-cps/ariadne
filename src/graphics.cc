@@ -42,12 +42,13 @@
 
 namespace Ariadne {
 
-// static const int DEFAULT_WIDTH = 800;
-// static const int DEFAULT_HEIGHT = 800;
-static const int DEFAULT_WIDTH = 1600;
-static const int DEFAULT_HEIGHT = 1600;
+//static const int DEFAULT_WIDTH = 1200;
+//static const int DEFAULT_HEIGHT = 800;
 
-
+static const int LEFT_MARGIN = 160;
+static const int BOTTOM_MARGIN = 40;
+static const int TOP_MARGIN = 10;
+static const int RIGHT_MARGIN = 10;
 
 
 struct GraphicsProperties {
@@ -217,26 +218,35 @@ class CairoCanvas
 {
     friend class Figure;
   private:
-    cairo_t *cr; uint ix; uint iy;
-    Colour lc,fc; double fo;
+    cairo_t *cr;
+    uint ix; uint iy; // The indices of the variables plotted on the x and y axes
+    Colour lc,fc; // The line and fill colours
+    double fo; // The fill opacity
   public:
     CairoCanvas(cairo_t *c, uint i, uint j) : cr(c), ix(i), iy(j), lc(0,0,0), fc(1,1,1), fo(1.0) { }
     uint x_coordinate() const { return ix; }
     uint y_coordinate() const { return iy; }
+    uint x_size_in_pixels() const { return cairo_image_surface_get_width(cairo_get_target(cr))-(LEFT_MARGIN+RIGHT_MARGIN); }
+    uint y_size_in_pixels() const { return cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN); }
     void move_to(double x, double y) { cairo_move_to (this->cr, x, y); }
     void line_to(double x, double y) { cairo_line_to (this->cr, x, y); }
     void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
     void dot(double x, double y) { static const double RADIUS=0.01; cairo_arc (cr, x, y, RADIUS, 0, 2*M_PI); }
     void stroke() { cairo_set_source_rgb(cr, lc.red,lc.green,lc.blue); cairo_stroke (this->cr); }
     void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fo); cairo_fill_preserve (this->cr); this->stroke(); }
-    //void fill() { cairo_set_source_rgb(cr, fc.red,fc.green,fc.blue); cairo_fill_preserve (this->cr); this->stroke(); }
     void clip() { cairo_clip (this->cr); }
     void set_line_width(double lw) { cairo_set_line_width (cr,0.01*lw); }
     void set_line_colour(double r, double g, double b) { lc=Colour(r,g,b); }
     void set_fill_opacity(double o) { fo=o; }
     void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b); }
-    void set_bounding_box(double xl, double xu, double yl, double yu) { ARIADNE_NOT_IMPLEMENTED; }
-    void get_bounding_box(double& xl, double& xu, double& yl, double& yu) { ARIADNE_NOT_IMPLEMENTED; }
+    void get_bounding_box(double& xl, double& xu, double& yl, double& yu) const {
+        xl=LEFT_MARGIN; yu=TOP_MARGIN;
+        xu=x_size_in_pixels()+LEFT_MARGIN; yl=y_size_in_pixels()+TOP_MARGIN;
+        std::cerr<<"Device: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
+        cairo_device_to_user(cr,&xl,&yu);
+        cairo_device_to_user(cr,&xu,&yl);
+        std::cerr<<"User: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
+    }
     double get_line_width() const { return cairo_get_line_width (cr); }
 
 };
@@ -296,36 +306,31 @@ void Figure::_paint_all(CanvasInterface& canvas)
     // Check projection and bounding box have same values.
     // If the bounding box dimension is 2, assume these are the bounds on the projected variables.
     // Project the bounding box onto the canvas
-    Box bbox(2);
-    if(bounding_box.dimension()==2) {
-        bbox=bounding_box;
-    } else {
-        ARIADNE_ASSERT_MSG(bounding_box.dimension()==proj.argument_size(),"bounding_box="<<static_cast<const DrawableInterface&>(bounding_box)<<", projection="<<proj);
-        ARIADNE_ASSERT(bounding_box.dimension()>proj.i);
-        ARIADNE_ASSERT(bounding_box.dimension()>proj.j);
-        bbox[0]=bounding_box[proj.i];
-        bbox[1]=bounding_box[proj.j];
-    }
+    Box2d bbox;
+    //if(bounding_box.dimension()==2) {
+    //    proj=PlanarProjectionMap(2,0,1);
+    //}
 
-    //std::cerr << "bbox="<<bbox<<"\n";
-
-    // The bounding box for the actual used area
-    Box lbbox=bbox;
-    lbbox[0]+=Interval(-1,1)*(bbox[0].radius()/25);
-    lbbox[1]+=Interval(-1,1)*(bbox[1].radius()/25);
-
-    //std::cerr << "lbbox="<<bbox<<"\n";
-
+    ARIADNE_ASSERT_MSG(bounding_box.dimension()==proj.argument_size(),"bounding_box="<<static_cast<const DrawableInterface&>(bounding_box)<<", projection="<<proj);
+    ARIADNE_ASSERT(bounding_box.dimension()>proj.i);
+    ARIADNE_ASSERT(bounding_box.dimension()>proj.j);
+    bbox.xl=numeric_cast<double>(bounding_box[proj.i].lower());
+    bbox.xu=numeric_cast<double>(bounding_box[proj.i].upper());
+    bbox.yl=numeric_cast<double>(bounding_box[proj.j].lower());
+    bbox.yu=numeric_cast<double>(bounding_box[proj.j].upper());
 
     cairo_t *cr=static_cast<CairoCanvas&>(canvas).cr;
 
-    const int canvas_height=DEFAULT_HEIGHT;
-    const int canvas_width=DEFAULT_WIDTH;
+    const int drawing_width = canvas.x_size_in_pixels();
+    const int drawing_height = canvas.y_size_in_pixels();
 
-    const int left_margin=160;
-    const int bottom_margin=40;
-    const int top_margin=10;
-    const int right_margin=10;
+    const int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
+    const int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
+
+    const int left_margin = LEFT_MARGIN;
+    const int right_margin = RIGHT_MARGIN;
+    const int bottom_margin = BOTTOM_MARGIN;
+    const int top_margin = TOP_MARGIN;
 
     // clear background
     cairo_set_source_rgb (cr, 1,1,1);
@@ -334,30 +339,37 @@ void Figure::_paint_all(CanvasInterface& canvas)
     // Save unclipped state and canvas coordinates
     cairo_save (cr);
 
+    cairo_set_line_width (cr,0.002*min(bbox.xu-bbox.xl,bbox.yu-bbox.yl));
+
     // Set clipping region
-    cairo_move_to (cr, left_margin, canvas_height-bottom_margin);
-    cairo_line_to (cr, canvas_width-right_margin, canvas_height-bottom_margin);
-    cairo_line_to (cr, canvas_width-right_margin, top_margin);
+    cairo_move_to (cr, left_margin, top_margin+drawing_height);
+    cairo_line_to (cr, left_margin+drawing_width, top_margin+drawing_height);
+    cairo_line_to (cr, left_margin+drawing_width, top_margin);
     cairo_line_to (cr, left_margin, top_margin);
-    cairo_line_to (cr, left_margin, canvas_height-bottom_margin);
+    cairo_line_to (cr, left_margin, top_margin+drawing_height);
+
+    // Fill clipping region with a very light colour to indicate where figure
+    // should be drawn
+    cairo_set_source_rgb(cr, 0.95,1.00,0.95);
+    cairo_fill_preserve (cr);
     cairo_clip (cr);
     cairo_new_path (cr);
 
-    cairo_set_line_width (cr,approx_cast<double>(0.002*min(bbox[0].width(),bbox[1].width())));
+    std::cerr<<"cw="<<canvas_width<<" lm="<<left_margin<<" dw="<<drawing_width<<" rm="<<right_margin<<" xl="<<bbox.xl<<" xu="<<bbox.xu<<"\n";
+    std::cerr<<"ch="<<canvas_height<<"tm="<<top_margin<<" dw="<<drawing_height<<" bm="<<bottom_margin<<" yl="<<bbox.yl<<" yu="<<bbox.yu<<"\n";
 
-    // compute user to canvas coordinate transformation
+    // compute device to user coordinate transformation
     double ctr0=left_margin;
     double ctr1=top_margin;
-    double sc0=(canvas_width-left_margin-right_margin)/approx_cast<double>(lbbox[0].width());
-    double sc1=-(canvas_height-top_margin-bottom_margin)/approx_cast<double>(lbbox[1].width());
-    double utr0=approx_cast<double>(-lbbox[0].lower());
-    double utr1=approx_cast<double>(-lbbox[1].upper());
+    double sc0=(drawing_width)/(bbox.xu-bbox.xl);
+    double sc1=-(drawing_height)/(bbox.yu-bbox.yl);
+    double utr0=(-bbox.xl);
+    double utr1=(-bbox.yu);
 
     // Scale to user coordinates
     cairo_translate(cr, ctr0, ctr1);
     cairo_scale (cr, sc0,sc1);
     cairo_translate(cr, utr0, utr1);
-
 
 
     // Draw shapes
@@ -368,7 +380,7 @@ void Figure::_paint_all(CanvasInterface& canvas)
                            "Shape "<<*shape_ptr<<", dimension="<<shape_ptr->dimension()<<", bounding_box="<<static_cast<const DrawableInterface&>(bounding_box));
         //const double& lw=objects[i].line_width;
         //canvas.set_line_width(lw);
-        canvas.set_line_width(objects[i].properties.line_width);
+        //canvas.set_line_width(objects[i].properties.line_width);
         canvas.set_fill_opacity(objects[i].properties.fill_opacity);
         const Colour& lc=objects[i].properties.line_colour;
         const Colour& fc=objects[i].properties.fill_colour;
@@ -389,22 +401,22 @@ void Figure::_paint_all(CanvasInterface& canvas)
     cairo_set_source_rgb (cr, 0., 0., 0.);
 
     // Get axis label text
-    std::string text_xl=str(bbox[0].lower());
-    std::string text_xu=str(bbox[0].upper());
-    std::string text_yl=str(bbox[1].lower());
-    std::string text_yu=str(bbox[1].upper());
+    std::string text_xl=str(bbox.xl);
+    std::string text_xu=str(bbox.xu);
+    std::string text_yl=str(bbox.yl);
+    std::string text_yu=str(bbox.yu);
 
     // Write axis labels
     cairo_text_extents_t te;
     cairo_text_extents (cr, text_xl.c_str(), &te);
-    cairo_move_to(cr, left_margin-2, canvas_height-bottom_margin+4+te.height);
+    cairo_move_to(cr, left_margin-2, top_margin+drawing_height+4+te.height);
     cairo_show_text (cr, text_xl.c_str());
     cairo_text_extents (cr, text_xu.c_str(), &te);
-    cairo_move_to(cr, canvas_width-te.width-4, canvas_height-bottom_margin+4+te.height);
+    cairo_move_to(cr, left_margin+drawing_width-te.width-4, top_margin+drawing_height+4+te.height);
     cairo_show_text (cr, text_xu.c_str());
 
     cairo_text_extents (cr, text_yl.c_str(), &te);
-    cairo_move_to(cr, left_margin-te.width-6, canvas_width-bottom_margin+2);
+    cairo_move_to(cr, left_margin-te.width-6, top_margin+drawing_height+2);
     cairo_show_text (cr, text_yl.c_str());
     cairo_text_extents (cr, text_yu.c_str(), &te);
     cairo_move_to(cr, left_margin-te.width-6, top_margin+te.height+2);
@@ -413,11 +425,11 @@ void Figure::_paint_all(CanvasInterface& canvas)
     // Draw bounding box
     cairo_set_line_width (cr, 2.0);
     cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-    cairo_move_to (cr, left_margin, canvas_height-bottom_margin);
-    cairo_line_to (cr, canvas_width-right_margin, canvas_height-bottom_margin);
-    cairo_line_to (cr, canvas_width-right_margin, top_margin);
+    cairo_move_to (cr, left_margin, top_margin+drawing_height);
+    cairo_line_to (cr, left_margin+drawing_width, top_margin+drawing_height);
+    cairo_line_to (cr, left_margin+drawing_width, top_margin);
     cairo_line_to (cr, left_margin, top_margin);
-    cairo_line_to (cr, left_margin, canvas_height-bottom_margin);
+    cairo_line_to (cr, left_margin, top_margin+drawing_height);
     cairo_stroke (cr);
 
     cairo_destroy (cr);
@@ -425,14 +437,14 @@ void Figure::_paint_all(CanvasInterface& canvas)
 
 
 void
-Figure::write(const char* cfilename)
+Figure::write(const char* cfilename, uint drawing_width, uint drawing_height)
 {
     //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    const int canvas_width = DEFAULT_WIDTH;
-    const int canvas_height = DEFAULT_HEIGHT;
+    const int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
+    const int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
 
     const Box& bounding_box=this->_data->bounding_box;
     const PlanarProjectionMap& projection=this->_data->projection;

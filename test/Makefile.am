@@ -49,10 +49,10 @@ check_PROGRAMS = \
 	test_hybrid_evolution \
 	test_discretised_evolution \
 	test_reachability_analysis \
+	test_graphics \
 	test_serialization
 
 EXTRA_TESTS = \
-	test_graphics \
 	test_textplot \
 	test_misc
 

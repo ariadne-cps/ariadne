@@ -37,7 +37,7 @@
 using namespace Ariadne;
 
 
-struct RadiusSquare : RealVectorFunctionData<1,2,1> {
+struct RadiusSquare : VectorFunctionData<1,2,1> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
         r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
@@ -63,11 +63,20 @@ int main(int argc, char **argv)
     Vector<Float> ts1c=z1c;
     Matrix<Float> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
-    TaylorConstrainedImageSet ts1(afn1,Box::unit_box(3));
+    TaylorConstrainedImageSet ts1(Box::unit_box(3),afn1);
     Box bbx1=ts1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
+
+    {
+        Figure g;
+        g.set_bounding_box(Box(2, -1.,+1., -1.,+1.));
+        g<<bx1;
+        g.write("test_graphics-bx1");
+
+        //return 0;
+    }
 
     Figure g;
     g << fill_colour(0.5,1.0,1.0)

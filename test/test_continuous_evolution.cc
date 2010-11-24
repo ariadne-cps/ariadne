@@ -127,17 +127,14 @@ void TestContinuousEvolution::test() const
 
     // Compute the reachable sets
     ListSet<EnclosureType> evolve_set,reach_set;
-    std::cerr<<"Computing orbit...";
     Orbit<EnclosureType> orbit = evolver.orbit(vanderpol,initial_set,time,semantics);
-    std::cerr<<" done\n";
 
-    cout << "\norbit=\n" << orbit << endl << endl;
+    ARIADNE_TEST_PRINT(orbit);
 
     // Print the intial, evolve and reach sets
     // cout << "Plotting sets" << endl;
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
-    std::cout << "Plotting...";
     Figure fig;
     fig.set_bounding_box(Box(2, -1.0,+21.0, -1.125,+1.125));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();

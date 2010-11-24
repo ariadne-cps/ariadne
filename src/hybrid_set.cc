@@ -26,11 +26,11 @@
 
 namespace Ariadne {
 
-HybridGrid::HybridGrid() : _grids(), _system_ptr() { }
+HybridGrid::HybridGrid() : _grids(), _system_ptr(0) { }
 
 HybridGrid::HybridGrid(const HybridAutomatonInterface& ha) : _grids(),  _system_ptr(&ha) { }
 
-HybridGrid::HybridGrid(const HybridSpace& hs, double l) {
+HybridGrid::HybridGrid(const HybridSpace& hs, double l) : _grids(), _system_ptr(0)  {
     for(HybridSpace::const_iterator iter=hs.begin(); iter!=hs.end(); ++iter) {
         this->_grids.insert(iter->first,Grid(iter->second,l));
     }
@@ -41,12 +41,12 @@ void HybridGrid::insert(DiscreteLocation q, const Grid& g) {
 }
 
 Grid HybridGrid::operator[](const DiscreteLocation& loc) const {
-    if(_system_ptr) { return _system_ptr->grid(loc); }
+    if(_system_ptr!=0) { return _system_ptr->grid(loc); }
     else { return this->_grids[loc]; }
 }
 
 Grid& HybridGrid::operator[](const DiscreteLocation& loc) {
-    if(_system_ptr) { this->_grids[loc]=this->_system_ptr->grid(loc); return this->_grids[loc]; }
+    if(_system_ptr!=0) { this->_grids[loc]=this->_system_ptr->grid(loc); return this->_grids[loc]; }
     else { return this->_grids[loc]; }
 }
 

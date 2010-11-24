@@ -20,45 +20,45 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file binary_word.h
  *  \brief Binary words and sets of binary words.
  *
- * Binary words are generally useful objects. 
- * This file provides a class of binary words of 
+ * Binary words are generally useful objects.
+ * This file provides a class of binary words of
  * arbitrary size, complementing the STL bitset and
- * Vector<bool> classes. The main purpose of giving 
- * this class is to have a known implementation of 
+ * Vector<bool> classes. The main purpose of giving
+ * this class is to have a known implementation of
  * binary words which may help in giving efficient
  * implementations of the list classes described below.
  * The most efficient implementation may, in fact, be an
  * STL Vector<bool>. Hence another purpose of this class
  * is to provide a known interface for binary words.
  *
- * We give a number of classes representing sets of binary words. 
- * These classes have been designed to be optimised for storage, and for 
+ * We give a number of classes representing sets of binary words.
+ * These classes have been designed to be optimised for storage, and for
  * sequential iteration through the elements. Hence the preferred method of
  * access is through iterators, which need only conform to the requirements
- * of an InputIterator. These  classes may be immutable. 
+ * of an InputIterator. These  classes may be immutable.
  * The fundamental operations are to join two sets,
  * and to convert between different representations.
- * 
- * A special class is given representing prefix-free sets of words
- * using a binary tree representation. 
  *
- * The main intended use of these classes in Ariadne is to represent 
+ * A special class is given representing prefix-free sets of words
+ * using a binary tree representation.
+ *
+ * The main intended use of these classes in Ariadne is to represent
  * sets as unions of rectangles on a grid. See the file grid_box.h
- * for the implementation of this representation. 
- * The basic idea is that a inside of Euclidean space contained in some 
+ * for the implementation of this representation.
+ * The basic idea is that a inside of Euclidean space contained in some
  * cuboid R can be represented by a union of sets obtained by repeatedly
- * subdividing R in two along the coordinate axes. 
- * The nth subdivision occurs along a coordinate specified by the Grid 
- * class, and whether the lower or upper set is taken depends the value 
- * of the nth element of a BinaryWord. 
+ * subdividing R in two along the coordinate axes.
+ * The nth subdivision occurs along a coordinate specified by the Grid
+ * class, and whether the lower or upper set is taken depends the value
+ * of the nth element of a BinaryWord.
  * In this way, sets of points can be represented efficiently by just listing
  * in which half of the remaining rectangle the subdivision occurs in.
  *
- * NOTE TO ALBERTO : This describes the basic ideas. Hope it's comprehensible. 
+ * NOTE TO ALBERTO : This describes the basic ideas. Hope it's comprehensible.
  * I haven't finished the implementation of all features. There are loose ends
  * in how we choose subdivision directions. I hope all this effort will result
  * in a better implementation than "pointer-based" quad trees; it should be
@@ -89,28 +89,28 @@ class BinaryWord : public std::vector<bool> {
   public:
     typedef std::vector<bool>::const_iterator const_iterator;
 
-    //! \brief Default constructor makes an empty word. 
+    //! \brief Default constructor makes an empty word.
     BinaryWord() : std::vector<bool>() { }
 
-    //! \brief Construct from a string literal consisting of zeros and ones. 
+    //! \brief Construct from a string literal consisting of zeros and ones.
     explicit BinaryWord(const std::string& str);
 
-    //! Comparison operator. 
+    //! Comparison operator.
     bool operator<(const BinaryWord& w) const;
 
-    //! \brief The number of machine bytes the word takes up. 
+    //! \brief The number of machine bytes the word takes up.
     size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
 
-    //! \brief Sets the last bit to \a x.  
+    //! \brief Sets the last bit to \a x.
     void set_back (bool x) { (*this)[this->size()-1]=x; }
-            
+
     //! \brief Erases the prefix of the word of size \a prefix_size
     void erase_prefix(const int prefix_size);
-            
+
     //! \brief true if this word is a prefix of the other word \a b.
     bool is_prefix(const BinaryWord& b) const;
 
-    //! \brief true if the word is a subword of the other word. 
+    //! \brief true if the word is a subword of the other word.
     bool is_subword(const BinaryWord& b) const;
 
     //! \brief appends the binary word \a binaryWord
@@ -124,14 +124,14 @@ inline void BinaryWord::erase_prefix(const int prefix_size) {
         erase( begin() );
     }
 }
-    
-inline bool  BinaryWord::operator<(const BinaryWord& w) const { 
+
+inline bool  BinaryWord::operator<(const BinaryWord& w) const {
     for( size_type i = 0; i != std::min( this->size(),w.size() ); ++i ) {
         if( (*this)[i] != w[i] ) {
             return (*this)[i] < w[i];
         }
     }
-    return this->size() < w.size(); 
+    return this->size() < w.size();
 }
 
 inline bool BinaryWord::is_prefix( const BinaryWord& b ) const {
@@ -150,7 +150,7 @@ inline bool BinaryWord::is_subword(const BinaryWord& b) const {
     if( this->size() > b.size() ) {
         return false;
     }
-    for( size_type i = 0; i != ( b.size() - this->size() + 1 ); ++i ) { 
+    for( size_type i = 0; i != ( b.size() - this->size() + 1 ); ++i ) {
         size_type j=0;
         while( j != this->size() && (*this)[j] == b[i+j] ) {
             ++j;
@@ -204,7 +204,7 @@ inline BinaryWord make_binary_word(const std::string& string_data) {
     string_input_stream >> binary_word;
     return binary_word;
 }
-    
+
 inline BinaryWord::BinaryWord(const std::string& str) {
     *this=make_binary_word(str); }
 
@@ -215,12 +215,14 @@ inline std::ostream& operator<<(std::ostream& os, const BinaryWord& bw) {
     if( bw.empty() ) {
         return os << 'e';
     }
+    os << std::noboolalpha;
     for(size_t i=0; i!=bw.size(); ++i) {
         os << bw[i];
     }
+    os << std::boolalpha;
     return os;
 }
 
 } // namespace Ariadne
-  
+
 #endif /* ARIADNE_BINARY_WORD_H */

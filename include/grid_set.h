@@ -30,6 +30,7 @@
 #define ARIADNE_GRID_SET_H
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 
 #include <boost/iterator/iterator_facade.hpp>

@@ -174,8 +174,7 @@ class MonolithicHybridAutomaton
         EventKind _kind;
     };
     struct Mode {
-        Mode(DiscreteLocation q, RealVectorFunction f)
-            : _location(q), _dynamic(f) { }
+        Mode(DiscreteLocation q, RealVectorFunction f);
         DiscreteLocation _location;
         RealVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;

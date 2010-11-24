@@ -40,6 +40,10 @@ class HybridSet {};
 
 
 
+MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealVectorFunction f)
+    : _location(q), _dynamic(f), _grid_ptr(new Grid(f.result_size()))
+{
+}
 
 
 MonolithicHybridAutomaton::~MonolithicHybridAutomaton()

@@ -64,15 +64,16 @@ class TestDiscretisedEvolution
 
 int main()
 {
+    std::cerr<<"SKIPPED "; return 1u;
     TestDiscretisedEvolution().test();
     return ARIADNE_TEST_FAILURES;
 }
 
 void TestDiscretisedEvolution::test() const
 {
-    ARIADNE_TEST_CALL(test_hybrid_time());
     //ARIADNE_TEST_CALL(test_discrete_time());
     //ARIADNE_TEST_CALL(test_continuous_time());
+    ARIADNE_TEST_CALL(test_hybrid_time());
 }
 
 
@@ -150,7 +151,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     cout << "final_set=" << final_set << endl << endl;
     cout << "final_cells=" << final_cells << endl << endl;
 
-    // Print the intial, evolve and reach sets
+    // Plot the intial, evolve and reach sets
     {
         Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
@@ -162,7 +163,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
         fig.write("test_discretised_evolution-henon-cells");
     }
 
-    // Print the intial, evolve and reach sets
+    // Plot the intial, evolve and reach sets
     {
         Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
@@ -237,7 +238,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     cout << "final_set=" << final_set << endl << endl;
     cout << "final_cells=" << final_cells << endl << endl;
 
-    // Print the intial, evolve and reach sets
+    // Plot the intial, evolve and reach sets
     {
         Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
@@ -250,7 +251,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
         fig.write("test_discretised_evolution-vdp-cells");
     }
 
-    // Print the intial, evolve and reach sets
+    // Plot the intial, evolve and reach sets
     {
         Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
@@ -309,17 +310,17 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     //Box eps_bounding_box=bounding_box.neighbourhood(0.1);
 
     // Define the initial cell
-    Box box=make_box("[1.0001,1.0002]x[0.5001,0.5002]");
-    cout << "box=" << box << endl;
-    GridTreeSet approx_tree_set=outer_approximation(box,grid,depth);
+    Box initial_box=make_box("[1.0001,1.0002]x[0.5001,0.5002]");
+    ARIADNE_TEST_PRINT(initial_box);
+    GridTreeSet approx_tree_set=outer_approximation(initial_box,grid,depth);
     GridCell initial_cell=*approx_tree_set.begin();
     HybridGridCell hybrid_initial_cell(location,initial_cell);
-    cout << "hybrid_initial_cell=" << hybrid_initial_cell << endl << endl;
+    ARIADNE_TEST_PRINT(hybrid_initial_cell);
     HybridBox hybrid_initial_set=hybrid_initial_cell.box();
-    cout << "hybrid_initial_set=" << hybrid_initial_set << endl << endl;
+    ARIADNE_TEST_PRINT(hybrid_initial_set);
     //[1.00098:1.00122],
     HybridTime htime(time,steps);
-    cout << "hybrid_time=" << htime << endl << endl;
+    ARIADNE_TEST_PRINT(htime);
 
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
@@ -328,37 +329,40 @@ void TestDiscretisedEvolution::test_hybrid_time() const
         = evolver.orbit(ha,EnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
     cout << "done." << endl;
 
-    cout << "enclosure_orbit="<<evolve_orbit<<endl;
-    cout << evolve_orbit.reach()<<endl;
+    ARIADNE_TEST_PRINT(evolve_orbit);
+
+    cout << "Extracting grid... " << flush;
+    HybridGrid hagrid=ha.grid();
+    cout << "done." << endl;
+
+    // Compute the reachable sets
+    cout << "Computing discretised evolution... " << flush;
+    Orbit<HybridGridCell> discrete_orbit
+        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
+    cout << "done." << endl;
 
     ContinuousEnclosureType const& initial_set=evolve_orbit.initial().continuous_state_set();
     ListSet<ContinuousEnclosureType> const& reach_set=evolve_orbit.reach()[location];
     ListSet<ContinuousEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
     ListSet<ContinuousEnclosureType> const& final_set=evolve_orbit.final()[location];
-    HybridGrid hagrid(ha.grid());
-
-    // Compute the reachable sets
-    cout << "Computing discretised evolution... " << flush;
-    //Orbit<HybridGridCell> discrete_orbit
-    //    = discrete_evolver.upper_evolution(ha,hybrid_initial_cell,htime,depth);
-    Orbit<HybridGridCell> discrete_orbit
-        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
-    cout << "done." << endl;
 
     GridTreeSet const& reach_cells=discrete_orbit.reach()[location];
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate()[location];
     GridTreeSet const& final_cells=discrete_orbit.final()[location];
 
-    cout << "initial_set=" << initial_set << endl << endl;
-    cout << "initial_cell=" << initial_cell.box() << endl << endl;
-    cout << "reach_set=" << reach_set << endl << endl;
-    cout << "reach_cells=" << reach_cells << endl << endl;
-    cout << "intermediate_set=" << intermediate_set << endl << endl;
-    cout << "intermediate_cells=" << intermediate_cells << endl << endl;
-    cout << "final_set=" << final_set << endl << endl;
-    cout << "final_cells=" << final_cells << endl << endl;
 
-    // Print the intial, evolve and reach sets
+    ARIADNE_TEST_PRINT(initial_set);
+    ARIADNE_TEST_PRINT(initial_cell);
+    ARIADNE_TEST_PRINT(reach_set);
+    ARIADNE_TEST_PRINT(reach_cells);
+    ARIADNE_TEST_PRINT(intermediate_set);
+    ARIADNE_TEST_PRINT(intermediate_cells);
+    ARIADNE_TEST_PRINT(final_set);
+    ARIADNE_TEST_PRINT(final_cells);
+
+
+
+    // Plot the intial, evolve and reach sets
     {
         Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
@@ -371,7 +375,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
         fig.write("test_discrete_evolver-hybrid-cells");
     }
 
-    // Print the intial, evolve and reach sets
+    // Plot the intial, evolve and reach sets
     {
         Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
@@ -382,5 +386,6 @@ void TestDiscretisedEvolution::test_hybrid_time() const
         fig << fill_colour(green) << final_set;
         fig.write("test_discrete_evolver-hybrid-sets");
     }
+
 }
 

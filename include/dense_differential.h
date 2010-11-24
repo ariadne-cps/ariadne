@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dense_differential.h
+ *      dense_differential.h
  *
  *  Copyright 2008  Pieter Collins
  * 
@@ -225,7 +225,7 @@ DenseDifferential<X>::DenseDifferential(uint a, uint d, const XX* ptr)
     : _argument_size(a), _degree(d), _data(compute_polynomial_data_size(1,a,d)) 
 {
     for(uint i=0; i!=this->_data.size(); ++i) {
-        this->_data[i]=ptr[i];
+     this->_data[i]=ptr[i];
     }
 }
 
@@ -244,7 +244,7 @@ DenseDifferential<X>::operator=(const X& c)
 {
     this->_data[0]=c;
     for(uint i=1; i!=this->_data.size(); ++i) {
-        this->_data[i]=0;
+     this->_data[i]=0;
     }
     return *this;
 }
@@ -255,8 +255,8 @@ bool
 DenseDifferential<X>::operator==(const DenseDifferential<X>& other) const
 {
     return this->_argument_size==other._argument_size
-        && this->_degree==other._degree
-        && this->_data==other._data;
+     && this->_degree==other._degree
+     && this->_data==other._data;
 }
 
 
@@ -288,21 +288,21 @@ evaluate(const DenseDifferential<X>& y, const Vector<X>& x)
     // Use inefficient brute-force approach with lots of storage...
     array< array< X > > val(ms, array< X >(d+1));
     for(uint j=0; j!=ms; ++j) {
-        val[j][0]=one;
-        val[j][1]=x[j];
-        for(uint k=2; k<=d; ++k) {
-            val[j][k]=val[j][k-1]*x[j];
-        }
+     val[j][0]=one;
+     val[j][1]=x[j];
+     for(uint k=2; k<=d; ++k) {
+      val[j][k]=val[j][k-1]*x[j];
+     }
     }
 
     X r(zero);
     for(MultiIndex j(ms); j.degree()<=d; ++j) {
-        X t=one;
-        for(uint k=0; k!=ms; ++k) {
-            t=t*val[k][j[k]];
-        }
-        t*=y[j];
-        r+=t;
+     X t=one;
+     for(uint k=0; k!=ms; ++k) {
+      t=t*val[k][j[k]];
+     }
+     t*=y[j];
+     r+=t;
     }
     return r;
 }
@@ -326,22 +326,22 @@ evaluate(const DenseDifferential<X>& y, const Vector<Y>& x)
     // Use inefficient brute-force approach with lots of storage...
     array< array< Y > > val(ms, array< Y >(d+1));
     for(uint j=0; j!=ms; ++j) {
-        val[j][0]=one;
-        val[j][1]=x[j];
-        for(uint k=2; k<=d; ++k) {
-            val[j][k]=val[j][k-1]*x[j];
-        }
+     val[j][0]=one;
+     val[j][1]=x[j];
+     for(uint k=2; k<=d; ++k) {
+      val[j][k]=val[j][k-1]*x[j];
+     }
     }
 
     Y r(zero);
     for(MultiIndex j(ms); j.degree()<=d; ++j) {
-        Y sf=fac(j);
-        Y t=one;
-        for(uint k=0; k!=ms; ++k) {
-            t=t*val[k][j[k]];
-        }
-        t*=y[j];
-        r+=t;
+     Y sf=fac(j);
+     Y t=one;
+     for(uint k=0; k!=ms; ++k) {
+      t=t*val[k][j[k]];
+     }
+     t*=y[j];
+     r+=t;
     }
     return r;
 }
@@ -355,7 +355,7 @@ DenseDifferential<X>
 min(const DenseDifferential<X>& x1, const DenseDifferential<X>& x2) 
 {
     if(x1.value()==x2.value()) {
-        ARIADNE_THROW(std::runtime_error,"min(DenseDifferential<X> x1, DenseDifferential<X> x2)","x1[0]==x2[0]");
+     ARIADNE_THROW(std::runtime_error,"min(DenseDifferential<X> x1, DenseDifferential<X> x2)","x1[0]==x2[0]");
     }
     return x1.value()<x2.value() ? x1 : x2;
 }
@@ -366,7 +366,7 @@ DenseDifferential<X>
 max(const DenseDifferential<X>& x1,const DenseDifferential<X>& x2) 
 {
     if(x1.value()==x2.value()) { 
-        ARIADNE_THROW(std::runtime_error,"max(DenseDifferential<X> x1, DenseDifferential<X> x2)","x1[0]==x2[0]"); 
+     ARIADNE_THROW(std::runtime_error,"max(DenseDifferential<X> x1, DenseDifferential<X> x2)","x1[0]==x2[0]"); 
     }
     return x1.value()>x2.value() ? x1 : x2;
 }
@@ -386,7 +386,7 @@ neg(const DenseDifferential<X>& x)
 {
     DenseDifferential<X> y(x.argument_size(),x.degree());
     for(uint n=0; n<y.data().size(); ++n) {
-        y.data()[n] = -x.data()[n];
+     y.data()[n] = -x.data()[n];
     }
     return y;
 }
@@ -397,7 +397,7 @@ DenseDifferential<X>
 abs(const DenseDifferential<X>& x) 
 {
     if(x.value()==0) { 
-        ARIADNE_THROW(std::runtime_error,"abs(DenseDifferential<X> x)","x[0]==0"); 
+     ARIADNE_THROW(std::runtime_error,"abs(DenseDifferential<X> x)","x[0]==0"); 
     }
     return x.value()>0 ? pos(x) : neg(x); 
 }
@@ -410,7 +410,7 @@ add(const DenseDifferential<X>& x, const DenseDifferential<X>& y)
     assert(x.argument_size()==y.argument_size());
     DenseDifferential<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
     for(uint n=0; n<z.data().size(); ++n) {
-        z.data()[n] = x.data()[n]+y.data()[n];
+     z.data()[n] = x.data()[n]+y.data()[n];
     }
     return z;
 }
@@ -423,7 +423,7 @@ sub(const DenseDifferential<X>& x, const DenseDifferential<X>& y)
     assert(x.argument_size()==y.argument_size());
     DenseDifferential<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
     for(uint n=0; n<z.data().size(); ++n) {
-        z.data()[n] = x.data()[n]-y.data()[n];
+     z.data()[n] = x.data()[n]-y.data()[n];
     }
     return z;
 }
@@ -766,10 +766,10 @@ acc(DenseDifferential<X>& r, const DenseDifferential<X>& x1, const DenseDifferen
     ARIADNE_ASSERT(r.argument_size()==x1.argument_size());
     ARIADNE_ASSERT(r.argument_size()==x2.argument_size());
     for(MultiIndex i1(x1.argument_size()); i1.degree() <= std::min(r.degree(),x1.degree()); ++i1) {
-        for(MultiIndex i2(x2.argument_size()); i2.degree() <= std::min(x2.degree(),uint(r.degree()-i1.degree())); ++i2) {
-            MultiIndex i0=i1+i2;
-            r[i0]+=x1[i1]*x2[i2];
-        }
+     for(MultiIndex i2(x2.argument_size()); i2.degree() <= std::min(x2.degree(),uint(r.degree()-i1.degree())); ++i2) {
+      MultiIndex i0=i1+i2;
+      r[i0]+=x1[i1]*x2[i2];
+     }
     }
     return r;
 }
@@ -782,7 +782,7 @@ acc(DenseDifferential<X>& r, const X& c, const DenseDifferential<X>& x)
     ARIADNE_ASSERT(r.argument_size()==x.argument_size());
     uint n=std::max(r.data().size(),x.data().size());
     for(uint i=0; i!=n; ++i) {
-        r.data()[i]+=c*x.data()[i];
+     r.data()[i]+=c*x.data()[i];
     }
     return r;
 }
@@ -796,7 +796,7 @@ DenseDifferential<X>::assign(const DenseDifferential<X>& x)
     ARIADNE_ASSERT(this->argument_size()==x.argument_size());
     ARIADNE_ASSERT(this->degree()>=x.degree());
     for(uint i=0; i!=x.data().size(); ++i) {
-        this->_data[i]=x.data()[i]; 
+     this->_data[i]=x.data()[i]; 
     }
     return *this;
 }
@@ -810,7 +810,7 @@ operator+=(DenseDifferential<X>& r, const DenseDifferential<X>& x)
     ARIADNE_ASSERT(r.argument_size()==x.argument_size());
     ARIADNE_ASSERT(r.degree()==x.degree());
     for(uint i=0; i!=r.data().size(); ++i) {
-        r.data()[i]+=x.data()[i];
+     r.data()[i]+=x.data()[i];
     }
     //reinterpret_cast<LinearAlgebra::Vector&>(r._data)
     //  += reinterpret_cast<LinearAlgebra::Vectorconst&>(x._data);
@@ -821,8 +821,8 @@ operator+=(DenseDifferential<X>& r, const DenseDifferential<X>& x)
 template<class X>
 void 
 compute_composition(DenseDifferential<X>& z, 
-                    const Series<X>& y, 
-                    const DenseDifferential<X>& x)
+     const Series<X>& y, 
+     const DenseDifferential<X>& x)
 {
     uint as=x.argument_size();
     uint d=z.degree();
@@ -832,9 +832,9 @@ compute_composition(DenseDifferential<X>& z,
     DenseDifferential<X> t(as,d);
     t.value()=y[d];
     for(uint n=1; n<=d; ++n) {
-        DenseDifferential<X> u(as,d);
-        acc(u,t,w);
-        t=u; t+=y[d-n];
+     DenseDifferential<X> u(as,d);
+     acc(u,t,w);
+     t=u; t+=y[d-n];
     }
     z=t;
     return;
@@ -858,7 +858,7 @@ reduce(const DenseDifferential<X>& x, const uint& d)
     assert(x.degree()>=d);
     DenseDifferential<X> r(x.argument_size(),d);
     for(MultiIndex i(x.argument_size()); i.degree() <= x.degree(); ++i) {
-        r[i]=x[i];
+     r[i]=x[i];
     }
     return r;
 }
@@ -889,10 +889,10 @@ DenseDifferential<X> derivative(const DenseDifferential<X>& x, uint i)
     MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
     MultiIndex a=MultiIndex::zero(x.argument_size());
     while(a.degree()<=d) {
-        da=a+ai;
-        const X& xj=x[da];
-        uint dai=da[i]; r[a]=xj*dai;
-        ++a;
+     da=a+ai;
+     const X& xj=x[da];
+     uint dai=da[i]; r[a]=xj*dai;
+     ++a;
     }
     return r;
 }
@@ -906,10 +906,10 @@ DenseDifferential<X> antiderivative(const DenseDifferential<X>& x, uint i)
     MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
     MultiIndex a=MultiIndex::zero(x.argument_size());
     while(a.degree()<=d) {
-        const X& xj=x[a];
-        da=a+ai;
-        uint dai=da[i]; r[da]=xj/dai;
-        ++a;
+     const X& xj=x[a];
+     da=a+ai;
+     uint dai=da[i]; r[da]=xj/dai;
+     ++a;
     }
     return r;
 }
@@ -926,15 +926,15 @@ operator<<(std::ostream& os, const DenseDifferential<X>& x) {
     os << "D("<<x.argument_size()<<","<<x.degree()<<")";
     uint degree=0;
     for(MultiIndex i(x.argument_size()); i.degree()<=x.degree(); ++i) {
-        if(i.degree()==0) {
-            os << '[';
-        } else if(i.degree()==degree) {
-            os << ',';
-        } else {
-            degree=i.degree();
-            os << ';';
-        }
-        os << x[i];
+     if(i.degree()==0) {
+      os << '[';
+     } else if(i.degree()==degree) {
+      os << ',';
+     } else {
+      degree=i.degree();
+      os << ';';
+     }
+     os << x[i];
     }
     os << ']';
     //os << ")";

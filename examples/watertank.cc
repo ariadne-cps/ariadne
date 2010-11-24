@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank.cc
+ *      watertank.cc
  *
  *  Copyright  2008  Davide Bresolin
  *

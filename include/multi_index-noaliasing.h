@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *            multi_index.h
+ *      multi_index.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -210,7 +210,7 @@ class MultiIndexValueReference {
 
 inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
     if(_p[_i]==0) {
-        ARIADNE_THROW(std::runtime_error,"--MultiIndexReference[i]"," decrementing zero value at "<<_i<<" in "<<MultiIndexReference(_n,_p)); }
+     ARIADNE_THROW(std::runtime_error,"--MultiIndexReference[i]"," decrementing zero value at "<<_i<<" in "<<MultiIndexReference(_n,_p)); }
     --_p[_n]; --_p[_i]; return *this;
 }
 
@@ -251,8 +251,8 @@ inline MultiIndex::MultiIndex(size_type n, int a0, ...)
     p[0]=a0; p[n]=a0;
     va_list args; va_start(args,a0);
     for(size_type i=1; i!=n; ++i) {
-        p[i]=va_arg(args,int);
-        p[n]+=p[i];
+     p[i]=va_arg(args,int);
+     p[n]+=p[i];
     }
     va_end(args);
 }
@@ -362,7 +362,7 @@ inline bool operator==(const MultiIndexReference& a1, const MultiIndexReference&
     if(a1.size()!=a2.size()) { return false; }
     //return memcmp(a1.begin(),a2.begin(),a1.size());
     for(MultiIndexReference::size_type i=0; i!=a1.size(); ++i) {
-        if(a1.at(i)!=a2.at(i)) { return false; } }
+     if(a1.at(i)!=a2.at(i)) { return false; } }
     return true;
     //for(MultiIndexReference::size_type j=0; j!=a1.word_size(); ++j) {
     //    if(a1.word_at(j)!=a2.word_at(j)) { return false; } }
@@ -375,18 +375,18 @@ inline bool operator!=(const MultiIndexReference& a1, const MultiIndexReference&
 
 inline bool operator<(const MultiIndexReference& a1, const MultiIndexReference& a2) {
     if(a1.size()!=a2.size()) {
-        throw std::runtime_error("operator<(MultiIndexReference,MultiIndexReference): number of variables must match");
+     throw std::runtime_error("operator<(MultiIndexReference,MultiIndexReference): number of variables must match");
     }
 
     if(a1.degree()!=a2.degree()) {
-        return a1.degree()<a2.degree();
+     return a1.degree()<a2.degree();
     } else {
-        for(MultiIndexReference::size_type i=0; i!=a1.size(); ++i) {
-            if(a1[i]!=a2[i]) {
-                return a1[i]>a2[i];
-            }
-        }
-        return false;
+     for(MultiIndexReference::size_type i=0; i!=a1.size(); ++i) {
+      if(a1[i]!=a2[i]) {
+    return a1[i]>a2[i];
+      }
+     }
+     return false;
     }
 }
 
@@ -396,7 +396,7 @@ unsigned int MultiIndexReference::number() const
 {
     unsigned int result=fac(this->degree());
     for(unsigned int k=0; k!=this->size(); ++k) {
-        result/=fac((*this)[k]);
+     result/=fac((*this)[k]);
     }
     return result;
 }
@@ -406,7 +406,7 @@ unsigned int MultiIndexReference::factorial() const
 {
     unsigned int result=1;
     for(unsigned int k=0; k!=this->size(); ++k) {
-        result*=fac((*this)[k]);
+     result*=fac((*this)[k]);
     }
     return result;
 }
@@ -418,9 +418,9 @@ unsigned int MultiIndexReference::position() const
     unsigned int nvar=this->size();
     unsigned int result=bin(deg+nvar,nvar);
     for(unsigned int k=0; k!=this->size()-1; ++k) {
-        --nvar;
-        deg-=(*this)[k];
-        result+=bin(deg+nvar,nvar);
+     --nvar;
+     deg-=(*this)[k];
+     result+=bin(deg+nvar,nvar);
     }
     return result;
 }
@@ -436,26 +436,26 @@ MultiIndexReference& MultiIndexReference::operator++()
     index_type* const p=this->_p;
 
     if(n==1) {
-        ++p[0];
-        ++p[n];
-        return *this;
+     ++p[0];
+     ++p[n];
+     return *this;
     }
     if(p[n-2]!=0) {
-        --p[n-2];
-        ++p[n-1];
-        return *this;
+     --p[n-2];
+     ++p[n-1];
+     return *this;
     } else {
-        index_type li=p[n-1];
-        p[n-1]=0;
-        for(size_type k=n-1; k!=0; --k) {
-            if(p[k-1]!=0) {
-                --p[k-1];
-                p[k]=li+1;
-                return *this;
-            }
-        }
-        p[0]=li+1;
-        ++p[n];
+     index_type li=p[n-1];
+     p[n-1]=0;
+     for(size_type k=n-1; k!=0; --k) {
+      if(p[k-1]!=0) {
+    --p[k-1];
+    p[k]=li+1;
+    return *this;
+      }
+     }
+     p[0]=li+1;
+     ++p[n];
     }
     return *this;
 }
@@ -468,7 +468,7 @@ MultiIndexReference& MultiIndexReference::operator+=(const MultiIndexReference& 
     //}
     //return *this;
     for(size_type i=0; i!=this->size()+1; ++i) {
-        this->_p[i]+=a._p[i];
+     this->_p[i]+=a._p[i];
     }
     return *this;
 }
@@ -476,8 +476,8 @@ MultiIndexReference& MultiIndexReference::operator+=(const MultiIndexReference& 
 inline
 MultiIndexReference& MultiIndexReference::operator-=(const MultiIndexReference& a) {
     for(size_type i=0; i!=this->size()+1; ++i) {
-        ARIADNE_ASSERT(this->_p[i]>=a._p[i]);
-        this->_p[i]-=a._p[i];
+     ARIADNE_ASSERT(this->_p[i]>=a._p[i]);
+     this->_p[i]-=a._p[i];
     }
     return *this;
 }
@@ -489,7 +489,7 @@ MultiIndexReference& MultiIndexReference::operator*=(const index_type& s) {
     //}
     //return *this;
     for(size_type i=0; i!=this->size()+1; ++i) {
-        this->_p[i]*=s;
+     this->_p[i]*=s;
     }
     return *this;
 }
@@ -497,7 +497,7 @@ MultiIndexReference& MultiIndexReference::operator*=(const index_type& s) {
 inline
 void iadd(MultiIndexReference& r, const MultiIndexReference& a1, const MultiIndexReference& a2) {
     for(MultiIndexReference::size_type j=0; j!=r.size(); ++j) {
-        r.at(j)=a1.at(j)+a2.at(j);
+     r.at(j)=a1.at(j)+a2.at(j);
     }
 }
 
@@ -528,7 +528,7 @@ number(const MultiIndexReference& i)
 {
     unsigned int result=fac(i.degree());
     for(unsigned int k=0; k!=i.size(); ++k) {
-        result/=fac(i[k]);
+     result/=fac(i[k]);
     }
     return result;
 }
@@ -539,7 +539,7 @@ fac(const MultiIndexReference& i)
 {
     unsigned int result=1;
     for(unsigned int k=0; k!=i.size(); ++k) {
-        result*=fac(i[k]);
+     result*=fac(i[k]);
     }
     return result;
 }
@@ -551,7 +551,7 @@ bin(const MultiIndexReference& n, const MultiIndexReference& k)
     assert(n.size()==k.size());
     unsigned int result=1;
     for(unsigned int i=0; i!=n.size(); ++i) {
-        result*=bin(n[i],k[i]);
+     result*=bin(n[i],k[i]);
     }
     return result;
 }
@@ -590,7 +590,7 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type d)
     : _groups(as), _max_degrees(1u)
 {
     for(size_type i=0; i!=as; ++i) {
-        _groups[i]=0u;
+     _groups[i]=0u;
     }
     _max_degrees[0]=d;
 }
@@ -600,8 +600,8 @@ inline MultiIndexBound::MultiIndexBound(const MultiIndexReference& a)
     : _groups(a.size()), _max_degrees(a.size())
 {
     for(size_type i=0; i!=a.size(); ++i) {
-        _groups[i]=i;
-        _max_degrees[i]=a[i];
+     _groups[i]=i;
+     _max_degrees[i]=a[i];
     }
 }
 
@@ -612,15 +612,15 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1
     va_list args; va_start(args,g1d);
     size_type k=0;
     for( ; k!=g1s; ++k) {
-        _groups[k]=0;
+     _groups[k]=0;
     }
     _max_degrees[0]=g1d;
     for(size_type i=1; i!=ng; ++i) {
-        size_type nk=k+va_arg(args,int);
-        for( ; k!=nk; ++k) {
-            _groups[k]=i;
-        }
-        _max_degrees[i]=va_arg(args,int);
+     size_type nk=k+va_arg(args,int);
+     for( ; k!=nk; ++k) {
+      _groups[k]=i;
+     }
+     _max_degrees[i]=va_arg(args,int);
     }
     va_end(args);
     ARIADNE_ASSERT(k==as);
@@ -630,12 +630,12 @@ inline bool operator<=(const MultiIndexReference& a, const MultiIndexBound& b) {
     typedef MultiIndexReference::size_type size_type;
     array<size_type> degrees(b._max_degrees.size());
     for(size_type j=0; j!=a.size(); ++j) {
-        degrees[b._groups[j]]+=a[j];
+     degrees[b._groups[j]]+=a[j];
     }
     for(size_type k=0; k!=degrees.size(); ++k) {
-        if(degrees[k]>b._max_degrees[k]) {
-            return false;
-        }
+     if(degrees[k]>b._max_degrees[k]) {
+      return false;
+     }
     }
     return true;
 }
@@ -662,7 +662,7 @@ class MultiIndexListIterator
     void advance(int m) { _ref._p+=m*(_ref._n+1); }
 
     friend std::ostream& operator<<(std::ostream& os, const MultiIndexListIterator& iter) {
-        return os << "<" << &iter._ref[0] << ">" << iter._ref << "\n";
+     return os << "<" << &iter._ref[0] << ">" << iter._ref << "\n";
     }
 };
 
@@ -686,7 +686,7 @@ class MultiIndexListConstIterator
     void advance(int m) { _ref._p+=m*(_ref._n+1); }
 
     friend std::ostream& operator<<(std::ostream& os, const MultiIndexListConstIterator& iter) {
-        return os << "<" << &iter._ref[0] << ">" << iter._ref << "\n";
+     return os << "<" << &iter._ref[0] << ">" << iter._ref << "\n";
     }
 };
 

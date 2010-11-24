@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_linear_programming.cc
+ *      test_linear_programming.cc
  *
  *  Copyright  2009  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_submodule.cc
+ *      function_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -60,12 +60,12 @@ struct from_python< MultiIndex >
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<MultiIndex>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        boost::python::tuple tup=extract<boost::python::tuple>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
-        MultiIndex res(len(tup));
-        for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<uint>(tup[i])); }
-        new (storage) MultiIndex(res);
-        data->convertible = storage;
+     boost::python::tuple tup=extract<boost::python::tuple>(obj_ptr);
+     void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
+     MultiIndex res(len(tup));
+     for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<uint>(tup[i])); }
+     new (storage) MultiIndex(res);
+     data->convertible = storage;
     }
 };
 
@@ -78,12 +78,12 @@ struct from_python<RealVectorFunction>
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<RealVectorFunction>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        list lst=extract<list>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage< RealVectorFunction >*)   data)->storage.bytes;
-        RealVectorFunction res(len(lst),0);
-        for(uint i=0; i!=res.result_size(); ++i) { res.set(i,extract<RealScalarFunction>(lst[i])); }
-        new (storage) RealVectorFunction(res);
-        data->convertible = storage;
+     list lst=extract<list>(obj_ptr);
+     void* storage = ((converter::rvalue_from_python_storage< RealVectorFunction >*)   data)->storage.bytes;
+     RealVectorFunction res(len(lst),0);
+     for(uint i=0; i!=res.result_size(); ++i) { res.set(i,extract<RealScalarFunction>(lst[i])); }
+     new (storage) RealVectorFunction(res);
+     data->convertible = storage;
     }
 };
 
@@ -95,9 +95,9 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
     const uint rs=d.size(); const uint as=d[0].argument_size();
     Matrix<X> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
-        for(uint j=0; j!=as; ++j) {
-            J[i][j]=d[i][j];
-        }
+     for(uint j=0; j!=as; ++j) {
+      J[i][j]=d[i][j];
+     }
     }
     return J;
 }
@@ -109,31 +109,31 @@ class ScalarPythonFunction
 {
     friend class ScalarFunctionMixin<ScalarPythonFunction,Real>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
-        r=boost::python::extract<T>(this->_pyf(a)); }
+     r=boost::python::extract<T>(this->_pyf(a)); }
   public:
     ScalarPythonFunction(std::string& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
     ScalarPythonFunction(uint as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
     ScalarPythonFunction(const object& pyf)
-        : _name(),
-          _argument_size(extract<int>(pyf.attr("argument_size"))),
-          _pyf(pyf) { }
+     : _name(),
+    _argument_size(extract<int>(pyf.attr("argument_size"))),
+    _pyf(pyf) { }
 
     ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
     virtual uint argument_size() const { return this->_argument_size; }
 
     virtual Vector<Float> gradient(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+     return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
     virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+     return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
     virtual RealScalarFunctionInterface* _derivative (uint j) const {
-        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
+     ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
     virtual std::ostream& repr(std::ostream& os) const { return os; }
     virtual std::ostream& write(std::ostream& os) const {
-        os << "ScalarUserFunction( ";
-        if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
-        os << "argument_size="<<this->_argument_size;
-        return os << " )"; }
+     os << "ScalarUserFunction( ";
+     if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
+     os << "argument_size="<<this->_argument_size;
+     return os << " )"; }
     RealScalarFunction derivative(uint j) const { return this->_derivative(j); }
   private:
     std::string _name;
@@ -147,36 +147,36 @@ class VectorPythonFunction
 {
     friend class VectorFunctionMixin<VectorPythonFunction,Real>;
     template<class T> void _compute(Vector<T>& r, const Vector<T>& a) const {
-        r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
+     r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
   public:
     VectorPythonFunction(std::string& nm, uint rs, uint as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(uint rs, uint as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(const object& pyf)
-        : _name(),
-          _result_size(extract<int>(pyf.attr("result_size"))),
-          _argument_size(extract<int>(pyf.attr("argument_size"))),
-          _pyf(pyf) { }
+     : _name(),
+    _result_size(extract<int>(pyf.attr("result_size"))),
+    _argument_size(extract<int>(pyf.attr("argument_size"))),
+    _pyf(pyf) { }
 
     VectorPythonFunction* clone() const { return new VectorPythonFunction(*this); }
     virtual uint result_size() const { return this->_result_size; }
     virtual uint argument_size() const { return this->_argument_size; }
 
     virtual Matrix<Float> jacobian (const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+     return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
     virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+     return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
 
     virtual RealScalarFunctionInterface* _get(uint i) const {
-        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
+     ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
     virtual RealScalarFunction operator[](uint i) const {
-        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
+     ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
 
     virtual std::ostream& write(std::ostream& os) const {
-        os << "VectorUserFunction( ";
-        if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
-        os << "result_size="<<this->_result_size;
-        os << ", argument_size="<<this->_argument_size;
-        return os << " )"; }
+     os << "VectorUserFunction( ";
+     if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
+     os << "result_size="<<this->_result_size;
+     os << ", argument_size="<<this->_argument_size;
+     return os << " )"; }
   private:
     std::string _name;
     uint _result_size;
@@ -267,7 +267,7 @@ void export_polynomial()
 void export_scalar_function()
 {
     class_<RealScalarFunction>
-        scalar_function_class("ScalarFunction", init<RealScalarFunction>());
+     scalar_function_class("ScalarFunction", init<RealScalarFunction>());
     scalar_function_class.def(init<uint>());
     scalar_function_class.def(init< Polynomial<Real> >());
     scalar_function_class.def("argument_size", &RealScalarFunction::argument_size);
@@ -325,7 +325,7 @@ void export_vector_function()
 {
 
     class_<RealVectorFunction>
-        vector_function_class("VectorFunction", init<RealVectorFunction>());
+     vector_function_class("VectorFunction", init<RealVectorFunction>());
     vector_function_class.def(init<uint,uint>());
 
     vector_function_class.def("result_size", &RealVectorFunction::result_size);

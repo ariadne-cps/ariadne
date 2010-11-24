@@ -1,5 +1,5 @@
 /***************************************************************************
- *            coconut-demo.h
+ *      coconut-demo.h
  *
  *  Copyright 2009  Davide Bresolin
  *

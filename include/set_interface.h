@@ -1,5 +1,5 @@
 /***************************************************************************
- *            set_interface.h
+ *      set_interface.h
  *
  *  Copyright 2008  Pieter Collins
  *

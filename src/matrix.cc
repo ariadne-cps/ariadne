@@ -1,5 +1,5 @@
 /***************************************************************************
- *            matrix.cc
+ *      matrix.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  *
@@ -42,9 +42,9 @@ Matrix<Float>
 midpoint(const Matrix<Interval>& A) {
     Matrix<Float> R(A.row_size(),A.column_size());
     for(size_t i=0; i!=A.row_size(); ++i) {
-        for(size_t j=0; j!=A.column_size(); ++j) {
-            R[i][j]=A[i][j].midpoint();
-        }
+     for(size_t j=0; j!=A.column_size(); ++j) {
+      R[i][j]=A[i][j].midpoint();
+     }
     }
     return R;
 }
@@ -68,63 +68,63 @@ lu_inverse(const Matrix<X>& M)
 
 
     for(size_t k=0; k!=std::min(m,n); ++k) {
-        // Choose a pivot row
-        size_t iamax=k;
-        X amax=0;
-        for(size_t i=k; i!=m; ++i) {
-            if(abs(A[i][k])>amax) {
-                iamax=i;
-                amax=abs(A[i][k]);
-            }
-        }
+     // Choose a pivot row
+     size_t iamax=k;
+     X amax=0;
+     for(size_t i=k; i!=m; ++i) {
+      if(abs(A[i][k])>amax) {
+    iamax=i;
+    amax=abs(A[i][k]);
+      }
+     }
 
-        // Set pivot row
-        size_t i=iamax;
-        p[k]=i;
+     // Set pivot row
+     size_t i=iamax;
+     p[k]=i;
 
-        // Swap rows of both A and B
-        for(size_t j=k; j!=n; ++j) {
-            X tmp=A[k][j];
-            A[k][j]=A[i][j];
-            A[i][j]=tmp;
-        }
+     // Swap rows of both A and B
+     for(size_t j=k; j!=n; ++j) {
+      X tmp=A[k][j];
+      A[k][j]=A[i][j];
+      A[i][j]=tmp;
+     }
 
-        for(size_t j=0; j!=n; ++j) {
-            X tmp=B[k][j];
-            B[k][j]=B[i][j];
-            B[i][j]=tmp;
-        }
+     for(size_t j=0; j!=n; ++j) {
+      X tmp=B[k][j];
+      B[k][j]=B[i][j];
+      B[i][j]=tmp;
+     }
 
-        RealType r  = 1/A[k][k];
-        for(size_t i=k+1; i!=n; ++i) {
-            RealType s=A[i][k] * r;
-            for(size_t j=0; j!=n; ++j) {
-                B[i][j] -= s * B[k][j];
-            }
-            for(size_t j=k+1; j!=n; ++j) {
-                A[i][j] -= s * A[k][j];
-            }
-            A[i][k] = 0;
-        }
-        for(size_t j=0; j!=n; ++j) {
-            B[k][j] *= r;
-        }
-        for(size_t j=k+1; j!=n; ++j) {
-            A[k][j] *= r;
-        }
-        A[k][k] = 1;
+     RealType r  = 1/A[k][k];
+     for(size_t i=k+1; i!=n; ++i) {
+      RealType s=A[i][k] * r;
+      for(size_t j=0; j!=n; ++j) {
+    B[i][j] -= s * B[k][j];
+      }
+      for(size_t j=k+1; j!=n; ++j) {
+    A[i][j] -= s * A[k][j];
+      }
+      A[i][k] = 0;
+     }
+     for(size_t j=0; j!=n; ++j) {
+      B[k][j] *= r;
+     }
+     for(size_t j=k+1; j!=n; ++j) {
+      A[k][j] *= r;
+     }
+     A[k][k] = 1;
     }
 
     // Backsubstitute to find inverse
     for(size_t k=n; k!=0; ) {
-        --k;
-        for(size_t i=0; i!=k; ++i) {
-            RealType s=A[i][k];
-            for(size_t j=0; j!=n; ++j) {
-                B[i][j] -= s * B[k][j];
-            }
-            A[i][k] = 0;
-        }
+     --k;
+     for(size_t i=0; i!=k; ++i) {
+      RealType s=A[i][k];
+      for(size_t j=0; j!=n; ++j) {
+    B[i][j] -= s * B[k][j];
+      }
+      A[i][k] = 0;
+     }
     }
 
     // No need to repivot!
@@ -151,29 +151,29 @@ Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
     set_rounding_mode(upward);
     Vector<Float> c(n,0.0);
     for(size_t i=0; i!=n; ++i) {
-        Float ci=c[i];
-        for(size_t j=0; j!=n; ++j) {
-            if(j!=i) {
-                ci=add_rnd(ci,mag(A[i][j]));
-            }
-        }
-        ci=sub_rnd(ci,mig(A[i][i]));
-        ci=-ci;
-        if(ci<=0.0) {
-            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Interval> A, Matrix<Interval> B)",
-                          "Interval matrix A="<<A<<" is not diagonally-dominant.");
-        }
-        ci=rec_rnd(ci);
+     Float ci=c[i];
+     for(size_t j=0; j!=n; ++j) {
+      if(j!=i) {
+    ci=add_rnd(ci,mag(A[i][j]));
+      }
+     }
+     ci=sub_rnd(ci,mig(A[i][i]));
+     ci=-ci;
+     if(ci<=0.0) {
+      ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Interval> A, Matrix<Interval> B)",
+     "Interval matrix A="<<A<<" is not diagonally-dominant.");
+     }
+     ci=rec_rnd(ci);
     }
     set_rounding_mode(rounding_mode);
 
     // Compute initial solution
     Matrix<Interval> R(n,m);
     for(size_t i=0; i!=n; ++i) {
-        Interval ci(-c[i],+c[i]);
-        for(size_t j=0; j!=m; ++j) {
-            R[i][j]=B[i][j]*ci;
-        }
+     Interval ci(-c[i],+c[i]);
+     for(size_t j=0; j!=m; ++j) {
+      R[i][j]=B[i][j]*ci;
+     }
     }
 
     return R;
@@ -200,21 +200,21 @@ template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Int
     // Perform Gauss-Seidel iteration
     size_t step=0;
     while(step<1) {
-        for(size_t i=0; i!=n; ++i) {
-            for(size_t j=0; j!=m; ++j) {
-                // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-                Interval Rij=JB[i][j];
-                for(size_t k=0; k!=n; ++k) {
-                    if(k!=i) {
-                        Rij-=JA[i][k]*R[k][j];
-                    }
-                }
-                Rij/=JA[i][i];
-                R[i][j]=intersection(R[i][j],Rij);
-            }
-        }
-        ++step;
-        //std::cerr<<"R="<<R<<"\n";
+     for(size_t i=0; i!=n; ++i) {
+      for(size_t j=0; j!=m; ++j) {
+    // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
+    Interval Rij=JB[i][j];
+    for(size_t k=0; k!=n; ++k) {
+     if(k!=i) {
+      Rij-=JA[i][k]*R[k][j];
+     }
+    }
+    Rij/=JA[i][i];
+    R[i][j]=intersection(R[i][j],Rij);
+      }
+     }
+     ++step;
+     //std::cerr<<"R="<<R<<"\n";
     }
 
     return R;
@@ -231,9 +231,9 @@ template<class X> Matrix<X> inverse(const Matrix<X>& A) {
 
 template<> Matrix<Interval> inverse<Interval>(const Matrix<Interval>& A) {
     try {
-        return lu_inverse(A);
+     return lu_inverse(A);
     } catch(const DivideByZeroException& e) {
-        throw SingularMatrixException();
+     throw SingularMatrixException();
     }
 }
 
@@ -276,37 +276,37 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
 
     // PivotMatrix rows of B
     for(size_t k=0; k!=n; ++k) {
-        size_t i=P[k];
-        for(size_t j=0; j!=m; ++j) {
-            X tmp=R[i][j];
-            R[i][k]=R[k][j];
-            R[k][j]=tmp;
-        }
+     size_t i=P[k];
+     for(size_t j=0; j!=m; ++j) {
+      X tmp=R[i][j];
+      R[i][k]=R[k][j];
+      R[k][j]=tmp;
+     }
     }
 
     // Backsubstitute on L
     for(size_t k=0; k!=n; ++k) {
-        for(size_t i=k+1; i!=n; ++i) {
-            X s=L[i][k];
-            for(size_t j=0; j!=n; ++j) {
-                R[i][j] -= s * R[k][j];
-            }
-        }
+     for(size_t i=k+1; i!=n; ++i) {
+      X s=L[i][k];
+      for(size_t j=0; j!=n; ++j) {
+    R[i][j] -= s * R[k][j];
+      }
+     }
     }
 
     // Backsubstitute on U with row scaling
     for(size_t k=n; k!=0; ) {
-        --k;
-        X s=1/U[k][k];
-        for(size_t j=0; j!=m; ++j) {
-            R[k][j] *= s;
-        }
-        for(size_t i=0; i!=k; ++i) {
-            X s=U[i][k];
-            for(size_t j=0; j!=m; ++j) {
-                R[i][j] -= s * R[k][j];
-            }
-        }
+     --k;
+     X s=1/U[k][k];
+     for(size_t j=0; j!=m; ++j) {
+      R[k][j] *= s;
+     }
+     for(size_t i=0; i!=k; ++i) {
+      X s=U[i][k];
+      for(size_t j=0; j!=m; ++j) {
+    R[i][j] -= s * R[k][j];
+      }
+     }
     }
 
 }
@@ -323,10 +323,10 @@ row_norms(const Matrix<Float>& A)
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
     for(size_t i=0; i!=m; ++i) {
-        r[i]=0.0;
-        for(size_t j=0; j!=n; ++j) {
-            r[i]+=abs(A[i][j]);
-        }
+     r[i]=0.0;
+     for(size_t j=0; j!=n; ++j) {
+      r[i]+=abs(A[i][j]);
+     }
     }
     set_rounding_mode(prev_rounding_mode);
 
@@ -348,16 +348,16 @@ normalise_rows(const Matrix<Float>& A)
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
     for(size_t i=0; i!=m; ++i) {
-        row_asums[i]=0.0;
-        for(size_t j=0; j!=n; ++j) {
-            row_asums[i]+=abs(A[i][j]);
-        }
+     row_asums[i]=0.0;
+     for(size_t j=0; j!=n; ++j) {
+      row_asums[i]+=abs(A[i][j]);
+     }
     }
     set_rounding_mode(toward_zero);
     for(size_t i=0; i!=m; ++i) {
-        for(size_t j=0; j!=n; ++j) {
-            R[i][j]/=row_asums[i];
-        }
+     for(size_t j=0; j!=n; ++j) {
+      R[i][j]/=row_asums[i];
+     }
     }
     set_rounding_mode(prev_rounding_mode);
 
@@ -384,42 +384,42 @@ triangular_decomposition(const Matrix<Float>& A)
     for(size_t k=0; k!=m; ++k) { P[k]=k; }
 
     for(size_t k=0; k!=std::min(m,n); ++k) {
-        // Choose a pivot row
-        size_t iamax=k;
-        RealType amax=0;
-        for(size_t i=k; i!=m; ++i) {
-            if(abs(A[i][k])>amax) {
-                iamax=i;
-                amax=abs(A[i][k]);
-            }
-        }
+     // Choose a pivot row
+     size_t iamax=k;
+     RealType amax=0;
+     for(size_t i=k; i!=m; ++i) {
+      if(abs(A[i][k])>amax) {
+    iamax=i;
+    amax=abs(A[i][k]);
+      }
+     }
 
-        // Set pivot row
-        size_t l=iamax;
-        P[k]=l;
+     // Set pivot row
+     size_t l=iamax;
+     P[k]=l;
 
-        // Swap rows of L and U
-        for(size_t j=0; j!=k; ++j) {
-            RealType tmp=L[k][j];
-            L[k][j]=L[l][j];
-            L[l][j]=tmp;
-        }
+     // Swap rows of L and U
+     for(size_t j=0; j!=k; ++j) {
+      RealType tmp=L[k][j];
+      L[k][j]=L[l][j];
+      L[l][j]=tmp;
+     }
 
-        for(size_t j=k; j!=n; ++j) {
-            RealType tmp=U[k][j];
-            U[k][j]=U[l][j];
-            U[l][j]=tmp;
-        }
+     for(size_t j=k; j!=n; ++j) {
+      RealType tmp=U[k][j];
+      U[k][j]=U[l][j];
+      U[l][j]=tmp;
+     }
 
-        RealType r  = 1/U[k][k];
-        for(size_t i=k+1; i!=m; ++i) {
-            RealType s=U[i][k] * r;
-            for(size_t j=k+1; j!=n; ++j) {
-                U[i][j] -= s * U[k][j];
-            }
-            U[i][k] = 0;
-            L[i][k] = s;
-        }
+     RealType r  = 1/U[k][k];
+     for(size_t i=k+1; i!=m; ++i) {
+      RealType s=U[i][k] * r;
+      for(size_t j=k+1; j!=n; ++j) {
+    U[i][j] -= s * U[k][j];
+      }
+      U[i][k] = 0;
+      L[i][k] = s;
+     }
 
     }
 
@@ -449,75 +449,75 @@ triangular_factor(const Matrix<Float>& A)
     Vector<Float> u(m);
 
     for(size_t k=0; k!=min(m,n); ++k) {
-        //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
+     //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
 
-        bool pivoting=true;
-        if(pivoting) {
-            // Compute column norms
-            for(size_t j=k; j!=n; ++j) {
-                cns[j]=0.0;
-                for(size_t i=k; i!=m; ++i) {
-                    cns[j]+=sqr(R[i][j]);
-                }
-            }
+     bool pivoting=true;
+     if(pivoting) {
+      // Compute column norms
+      for(size_t j=k; j!=n; ++j) {
+    cns[j]=0.0;
+    for(size_t i=k; i!=m; ++i) {
+     cns[j]+=sqr(R[i][j]);
+    }
+      }
 
-            // Find largest column norm
-            size_t l=k; Float cnsmax=cns[k];
-            for(size_t j=k+1; j!=n; ++j) {
-                if(cns[j]>cnsmax) {
-                    l=j; cnsmax=cns[j];
-                }
-            }
+      // Find largest column norm
+      size_t l=k; Float cnsmax=cns[k];
+      for(size_t j=k+1; j!=n; ++j) {
+    if(cns[j]>cnsmax) {
+     l=j; cnsmax=cns[j];
+    }
+      }
 
-            // Swap columns l and k
-            for(size_t i=0; i!=m; ++i) {
-                Float tmp=R[i][k];
-                R[i][k]=R[i][l];
-                R[i][l]=tmp;
-            }
+      // Swap columns l and k
+      for(size_t i=0; i!=m; ++i) {
+    Float tmp=R[i][k];
+    R[i][k]=R[i][l];
+    R[i][l]=tmp;
+      }
 
-            // Set pivot element to pivot column
-            P[k]=l;
-        }
+      // Set pivot element to pivot column
+      P[k]=l;
+     }
 
-        // Compute |a| where a is the working column
-        Float nrmas=0.0;
-        for(size_t i=k; i!=m; ++i) {
-            nrmas+=R[i][k]*R[i][k];
-        }
-        Float nrma=sqrt(nrmas);
+     // Compute |a| where a is the working column
+     Float nrmas=0.0;
+     for(size_t i=k; i!=m; ++i) {
+      nrmas+=R[i][k]*R[i][k];
+     }
+     Float nrma=sqrt(nrmas);
 
-        // Compute u=a +/- |a|e
-        for(size_t i=k; i!=m; ++i) {
-            u[i]=R[i][k];
-        }
-        if(u[k]>=0) { u[k]+=nrma; }
-        else { u[k]-=nrma; }
+     // Compute u=a +/- |a|e
+     for(size_t i=k; i!=m; ++i) {
+      u[i]=R[i][k];
+     }
+     if(u[k]>=0) { u[k]+=nrma; }
+     else { u[k]-=nrma; }
 
-        // Compute -2/u.u
-        Float nrmus=0.0;
-        for(size_t i=k; i!=m; ++i) {
-            nrmus+=sqr(u[i]);
-        }
-        Float mtdnu=(-2)/nrmus;
+     // Compute -2/u.u
+     Float nrmus=0.0;
+     for(size_t i=k; i!=m; ++i) {
+      nrmus+=sqr(u[i]);
+     }
+     Float mtdnu=(-2)/nrmus;
 
-        // For each column b, compute b-=2u(u.b)/u.u
-        for(size_t j=k; j!=n; ++j) {
-            Float udtb=0.0;
-            for(size_t i=k; i!=m; ++i) {
-                udtb+=u[i]*R[i][j];
-            }
-            Float scl=udtb*mtdnu;
-            for(size_t i=k; i!=m; ++i) {
-                R[i][j]+=scl*u[i];
-            }
-        }
+     // For each column b, compute b-=2u(u.b)/u.u
+     for(size_t j=k; j!=n; ++j) {
+      Float udtb=0.0;
+      for(size_t i=k; i!=m; ++i) {
+    udtb+=u[i]*R[i][j];
+      }
+      Float scl=udtb*mtdnu;
+      for(size_t i=k; i!=m; ++i) {
+    R[i][j]+=scl*u[i];
+      }
+     }
 
-        // For the kth column, set R[k][k]=-/+ |a|
-        // and R[i][k]=0 for i>k
-        for(size_t i=k+1; i!=m; ++i) {
-            R[i][k]=0.0;
-        }
+     // For the kth column, set R[k][k]=-/+ |a|
+     // and R[i][k]=0 for i>k
+     for(size_t i=k+1; i!=m; ++i) {
+      R[i][k]=0.0;
+     }
 
     } // end of loop on working column k
 
@@ -525,15 +525,15 @@ triangular_factor(const Matrix<Float>& A)
 
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     for(size_t i=0; i!=m; ++i) {
-        set_rounding_mode(upward);
-        Float rsum=0.0;
-        for(size_t j=i; j!=n; ++j) {
-            rsum+=abs(R[i][j]);
-        }
-        set_rounding_mode(toward_zero);
-        for(size_t j=i; j!=n; ++j) {
-            R[i][j]/=rsum;
-        }
+     set_rounding_mode(upward);
+     Float rsum=0.0;
+     for(size_t j=i; j!=n; ++j) {
+      rsum+=abs(R[i][j]);
+     }
+     set_rounding_mode(toward_zero);
+     for(size_t j=i; j!=n; ++j) {
+      R[i][j]/=rsum;
+     }
     }
     set_rounding_mode(prev_rounding_mode);
 
@@ -560,23 +560,23 @@ triangular_multiplier(const Matrix<Float>& A)
     for(size_t i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
 
     for(size_t k=m-1; k!=size_t(-1); --k) {
-        Float r=1.0/R[k][k];
-        for(size_t i=0; i!=k; ++i) {
-            Float s=R[i][k]*r;
-            for(size_t j=k; j!=m; ++j) {
-                T[i][j]-=s*T[k][j];
-            }
-        }
-        for(size_t j=k; j!=m; ++j) {
-            T[k][j]*=r;
-        }
+     Float r=1.0/R[k][k];
+     for(size_t i=0; i!=k; ++i) {
+      Float s=R[i][k]*r;
+      for(size_t j=k; j!=m; ++j) {
+    T[i][j]-=s*T[k][j];
+      }
+     }
+     for(size_t j=k; j!=m; ++j) {
+      T[k][j]*=r;
+     }
     }
 
     for(size_t k=m-1; k!=size_t(-1); --k) {
-        size_t p=P[k];
-        for(size_t i=0; i!=m; ++i) {
-            Float tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
-        }
+     size_t p=P[k];
+     for(size_t i=0; i!=m; ++i) {
+      Float tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
+     }
     }
 
     return T;
@@ -589,11 +589,11 @@ Matrix<Float> pivot_matrix(const array<size_t>& pv)
     const size_t n=pv.size();
     array<size_t> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
     for(size_t i=0; i!=n; ++i) {
-        std::swap(perm[i],perm[pv[i]]);
+     std::swap(perm[i],perm[pv[i]]);
     }
     Matrix<Float> P(n,n);
     for(size_t i=0; i!=n; ++i) {
-        P[i][perm[i]]=1;
+     P[i][perm[i]]=1;
     }
     return P;
 }
@@ -617,100 +617,100 @@ orthogonal_decomposition(const Matrix<Float>& A)
     Vector<X> u(m);
 
     for(size_t i=0; i!=m; ++i) {
-        for(size_t j=0; j!=m; ++j) {
-            Q[i][j]=0.0;
-        }
-        Q[i][i]=1.0;
+     for(size_t j=0; j!=m; ++j) {
+      Q[i][j]=0.0;
+     }
+     Q[i][i]=1.0;
     }
 
     for(size_t k=0; k!=min(m,n); ++k) {
-        //std::cerr<<"k="<<k<<" Q="<<Q<<" R="<<R<<std::flush;
+     //std::cerr<<"k="<<k<<" Q="<<Q<<" R="<<R<<std::flush;
 
-        bool pivoting=true;
-        if(pivoting) {
-            // Find a pivot column
-            size_t pivot_column=k;
-            X max_column_norm=0.0;
-            for(size_t j=k; j!=n; ++j) {
-                X column_norm=0.0;
-                for(size_t i=k; i!=m; ++i) {
-                    column_norm+=abs(R[i][j]);
-                }
-                if(column_norm>max_column_norm) {
-                    pivot_column=j;
-                    max_column_norm=column_norm;
-                }
-            }
-            size_t l=pivot_column;
+     bool pivoting=true;
+     if(pivoting) {
+      // Find a pivot column
+      size_t pivot_column=k;
+      X max_column_norm=0.0;
+      for(size_t j=k; j!=n; ++j) {
+    X column_norm=0.0;
+    for(size_t i=k; i!=m; ++i) {
+     column_norm+=abs(R[i][j]);
+    }
+    if(column_norm>max_column_norm) {
+     pivot_column=j;
+     max_column_norm=column_norm;
+    }
+      }
+      size_t l=pivot_column;
 
-            // Swap working column and pivot column
-            for(size_t i=0; i!=m; ++i) {
-                std::swap(R[i][l],R[i][k]);
-            }
+      // Swap working column and pivot column
+      for(size_t i=0; i!=m; ++i) {
+    std::swap(R[i][l],R[i][k]);
+      }
 
-            // Set pivot column in result
-            P[k]=l;
-        }
+      // Set pivot column in result
+      P[k]=l;
+     }
 
-        // Compute |a| where a is the working column
-        Float nrmas=0.0;
-        for(size_t i=k; i!=m; ++i) {
-            nrmas+=R[i][k]*R[i][k];
-        }
-        Float nrma=sqrt(nrmas);
+     // Compute |a| where a is the working column
+     Float nrmas=0.0;
+     for(size_t i=k; i!=m; ++i) {
+      nrmas+=R[i][k]*R[i][k];
+     }
+     Float nrma=sqrt(nrmas);
 
-        // Compute u=a +/- |a|e
-        for(size_t i=0; i!=k; ++i) {
-            u[i]=0.0;
-        }
-        for(size_t i=k; i!=m; ++i) {
-            u[i]=R[i][k];
-        }
-        if(u[k]>=0) { u[k]+=nrma; }
-        else { u[k]-=nrma; }
+     // Compute u=a +/- |a|e
+     for(size_t i=0; i!=k; ++i) {
+      u[i]=0.0;
+     }
+     for(size_t i=k; i!=m; ++i) {
+      u[i]=R[i][k];
+     }
+     if(u[k]>=0) { u[k]+=nrma; }
+     else { u[k]-=nrma; }
 
-        // Compute -2/u.u
-        Float nrmus=0.0;
-        for(size_t i=k; i!=m; ++i) {
-            nrmus+=sqr(u[i]);
-        }
-        Float mtdnu=(-2)/nrmus;
+     // Compute -2/u.u
+     Float nrmus=0.0;
+     for(size_t i=k; i!=m; ++i) {
+      nrmus+=sqr(u[i]);
+     }
+     Float mtdnu=(-2)/nrmus;
 
-        // Compute H=(1-2uu'/u'u)
-        // Matrix<Float> H(n,n); for(size_t i=0; i!=n; ++i) {
-        // H[i][i]=1.0; for(size_t j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
+     // Compute H=(1-2uu'/u'u)
+     // Matrix<Float> H(n,n); for(size_t i=0; i!=n; ++i) {
+     // H[i][i]=1.0; for(size_t j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
 
-        // For each column b of R, compute b-=2u(u.b)/u.u
-        for(size_t j=k; j!=n; ++j) {
-            Float udtb=0.0;
-            for(size_t i=k; i!=m; ++i) {
-                udtb+=u[i]*R[i][j];
-            }
-            Float scl=udtb*mtdnu;
-            for(size_t i=k; i!=m; ++i) {
-                R[i][j]+=scl*u[i];
-            }
-        }
+     // For each column b of R, compute b-=2u(u.b)/u.u
+     for(size_t j=k; j!=n; ++j) {
+      Float udtb=0.0;
+      for(size_t i=k; i!=m; ++i) {
+    udtb+=u[i]*R[i][j];
+      }
+      Float scl=udtb*mtdnu;
+      for(size_t i=k; i!=m; ++i) {
+    R[i][j]+=scl*u[i];
+      }
+     }
 
-        // For the kth column, set R[k][k]=-/+ |a|
-        // and R[i][k]=0 for i>k
-        for(size_t i=k+1; i!=m; ++i) {
-            R[i][k]=0.0;
-        }
-        if(u[k]>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
+     // For the kth column, set R[k][k]=-/+ |a|
+     // and R[i][k]=0 for i>k
+     for(size_t i=k+1; i!=m; ++i) {
+      R[i][k]=0.0;
+     }
+     if(u[k]>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
 
-        // Update Q'=QH = Q(I-2uu'/u'u)
-        // For each row q, compute q-=2u(u.q)/(u.u)
-        for(size_t i=0; i!=m; ++i) {
-            Float qdtu=0.0;
-            for(size_t j=k; j!=m; ++j) {
-                qdtu+=Q[i][j]*u[j];
-            }
-            Float scl=qdtu*mtdnu;
-            for(size_t j=k; j!=m; ++j) {
-                Q[i][j]+=scl*u[j];
-            }
-        }
+     // Update Q'=QH = Q(I-2uu'/u'u)
+     // For each row q, compute q-=2u(u.q)/(u.u)
+     for(size_t i=0; i!=m; ++i) {
+      Float qdtu=0.0;
+      for(size_t j=k; j!=m; ++j) {
+    qdtu+=Q[i][j]*u[j];
+      }
+      Float scl=qdtu*mtdnu;
+      for(size_t j=k; j!=m; ++j) {
+    Q[i][j]+=scl*u[j];
+      }
+     }
 
     }
 
@@ -732,56 +732,56 @@ orthogonal_decomposition(const Matrix<Float>& A)
 
     for(size_t c=0; c!=min(m,n); ++c) {
 
-        // Find a pivot column
-        size_t pivot_column=c;
-        X max_column_norm=0.0;
-        for(size_t j=c; j!=n; ++j) {
-            X column_norm=0.0;
-            for(size_t i=c; i!=m; ++i) {
-                column_norm+=abs(R[i][j]);
-            }
-            if(column_norm>max_column_norm) {
-                pivot_column=j;
-                max_column_norm=column_norm;
-            }
-        }
-        size_t j=pivot_column;
+     // Find a pivot column
+     size_t pivot_column=c;
+     X max_column_norm=0.0;
+     for(size_t j=c; j!=n; ++j) {
+      X column_norm=0.0;
+      for(size_t i=c; i!=m; ++i) {
+    column_norm+=abs(R[i][j]);
+      }
+      if(column_norm>max_column_norm) {
+    pivot_column=j;
+    max_column_norm=column_norm;
+      }
+     }
+     size_t j=pivot_column;
 
-        // Swap first column and pivot column
-        // FIXME: We do not keep track of column pivoting here.
-        for(size_t i=c; i!=m; ++i) {
-            std::swap(R[i][j],R[i][c]);
-        }
+     // Swap first column and pivot column
+     // FIXME: We do not keep track of column pivoting here.
+     for(size_t i=c; i!=m; ++i) {
+      std::swap(R[i][j],R[i][c]);
+     }
 
-        // Compute inner product of pivot column with remaining columns
-        X pivot_norm_square=0.0;
-        for(size_t i=c; i!=m; ++i) {
-            pivot_norm_square += R[i][c]*R[i][c];
-        }
+     // Compute inner product of pivot column with remaining columns
+     X pivot_norm_square=0.0;
+     for(size_t i=c; i!=m; ++i) {
+      pivot_norm_square += R[i][c]*R[i][c];
+     }
 
-        X inner_product_sum=0.0;
-        for(size_t j=c; j!=n; ++j) {
-            X inner_product=0.0;
-            for(size_t i=c; i!=m; ++i) {
-                inner_product += R[i][c]*R[i][j];
-            }
-            p[j]=inner_product / pivot_norm_square;
-            inner_product_sum += inner_product;
-        }
+     X inner_product_sum=0.0;
+     for(size_t j=c; j!=n; ++j) {
+      X inner_product=0.0;
+      for(size_t i=c; i!=m; ++i) {
+    inner_product += R[i][c]*R[i][j];
+      }
+      p[j]=inner_product / pivot_norm_square;
+      inner_product_sum += inner_product;
+     }
 
-        X scale_factor = inner_product_sum / pivot_norm_square;
-        for(size_t i=c; i!=m; ++i) {
-            O[i][c]=scale_factor * R[i][c];
-        }
+     X scale_factor = inner_product_sum / pivot_norm_square;
+     for(size_t i=c; i!=m; ++i) {
+      O[i][c]=scale_factor * R[i][c];
+     }
 
-        for(size_t j=c+1; j!=n; ++j) {
-            for(size_t i=c; i!=m; ++i) {
-                R[i][j] -= R[c][j] * p[j];
-            }
-        }
-        for(size_t i=c; i!=m; ++i) {
-            R[i][c] /= pivot_norm_square;
-        }
+     for(size_t j=c+1; j!=n; ++j) {
+      for(size_t i=c; i!=m; ++i) {
+    R[i][j] -= R[c][j] * p[j];
+      }
+     }
+     for(size_t i=c; i!=m; ++i) {
+      R[i][c] /= pivot_norm_square;
+     }
 
     }
 

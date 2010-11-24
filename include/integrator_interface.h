@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator_interface.h
+ *      integrator_interface.h
  *
  *  Copyright  2006-10  Pieter Collins
  *
@@ -68,26 +68,26 @@ class IntegratorInterface
     //! starting in the \a state_domain for time step \a h.
     virtual Pair<Float,IntervalVector>
     flow_bounds(const RealVectorFunction& vector_field,
-                const IntervalVector& state_domain,
-                const Float& suggested_time_step) const = 0;
+    const IntervalVector& state_domain,
+    const Float& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is a time step based on \a suggested_time_step.
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
-              const IntervalVector& state_domain,
-              const Float& suggested_time_step) const = 0;
+     const IntervalVector& state_domain,
+     const Float& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
     virtual VectorTaylorFunction
     flow(const RealVectorFunction& vector_field,
-         const IntervalVector& state_domain,
-         const Real& time) const = 0;
+      const IntervalVector& state_domain,
+      const Real& time) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
     virtual VectorTaylorFunction
     flow(const RealVectorFunction& vector_field,
-         const IntervalVector& state_domain,
-         const Interval& time_domain) const = 0;
+      const IntervalVector& state_domain,
+      const Interval& time_domain) const = 0;
 
 };
 

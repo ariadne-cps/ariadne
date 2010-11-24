@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_polynomial.cc
+ *      test_polynomial.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -139,43 +139,43 @@ void TestPolynomial::test_cleanup()
     typedef Expansion<Float>::word_type WordType;
 /*
     {
-        MultiIndex a(3);
-        MultiIndex b(3); ++b;
-        std::vector<ValueType> v;
+     MultiIndex a(3);
+     MultiIndex b(3); ++b;
+     std::vector<ValueType> v;
 
-        for(uint i=0; i!=20; ++i) {
-            if(i%2) { v.push_back(ValueType(a,1/(1.+i)));  ++b; ++b; a=b; ++b; } else { v.push_back(ValueType(b,1/(1.+i)));}
-        }
-        std::sort(v.begin(),v.end());
+     for(uint i=0; i!=20; ++i) {
+      if(i%2) { v.push_back(ValueType(a,1/(1.+i)));  ++b; ++b; a=b; ++b; } else { v.push_back(ValueType(b,1/(1.+i)));}
+     }
+     std::sort(v.begin(),v.end());
     }
     {
-        std::vector<int> v;
-        const int element_size=3;
-        const int index_size=1;
-        const int data_size=2;
-        for(uint i=0; i!=20; ++i) {
-            int word= ( i%2 ? (3*i-2)/2 : (3*i+2)/2 );
-            double value=1/(2.+i);
-            v.resize(v.size()+3);
-            v[v.size()-3]=word;
-            reinterpret_cast<double&>(v[v.size()-2])=value;
-        }
-        for(uint i=0; i!=v.size()/3; ++i) {
-            int word; double value;
-            word=v[3*i];
-            value=reinterpret_cast<double&>(v[3*i+1]);
-        }
+     std::vector<int> v;
+     const int element_size=3;
+     const int index_size=1;
+     const int data_size=2;
+     for(uint i=0; i!=20; ++i) {
+      int word= ( i%2 ? (3*i-2)/2 : (3*i+2)/2 );
+      double value=1/(2.+i);
+      v.resize(v.size()+3);
+      v[v.size()-3]=word;
+      reinterpret_cast<double&>(v[v.size()-2])=value;
+     }
+     for(uint i=0; i!=v.size()/3; ++i) {
+      int word; double value;
+      word=v[3*i];
+      value=reinterpret_cast<double&>(v[3*i+1]);
+     }
 
-        typedef Expansion<Float>::iterator iterator;
-        iterator iter1(3,&*v.begin());
-        iterator iter2(3,&*v.end());
-        std::sort(iter1,iter2);
+     typedef Expansion<Float>::iterator iterator;
+     iterator iter1(3,&*v.begin());
+     iterator iter2(3,&*v.end());
+     std::sort(iter1,iter2);
 
-        for(uint i=0; i!=v.size()/3; ++i) {
-            int word; double value;
-            word=v[3*i];
-            value=reinterpret_cast<double&>(v[3*i+1]);
-        }
+     for(uint i=0; i!=v.size()/3; ++i) {
+      int word; double value;
+      word=v[3*i];
+      value=reinterpret_cast<double&>(v[3*i+1]);
+     }
 
     }
 */
@@ -186,7 +186,7 @@ void TestPolynomial::test_cleanup()
     MultiIndex b(3); ++b;
     Polynomial<Float> p(3);
     for(uint i=0; i!=2; ++i) {
-        if(i%2) { p.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { p.append(b,1/(1.+i));}
+     if(i%2) { p.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { p.append(b,1/(1.+i));}
     }
     ARIADNE_TEST_PRINT(p);
     ARIADNE_TEST_EXECUTE(p.cleanup());

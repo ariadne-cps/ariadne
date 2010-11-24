@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver.h
+ *      hybrid_evolver.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -69,7 +69,7 @@ class HybridEvolverInterface
 {
   public:
     /*! \brief Make a dynamically-allocated copy. */
-	virtual HybridEvolverInterface* clone() const = 0;
+    virtual HybridEvolverInterface* clone() const = 0;
 };
 
 struct TransitionData;
@@ -111,9 +111,9 @@ class HybridEvolverBase
   public:
 
     //@{
-	//! \name Constructors and descructors
+    //! \name Constructors and descructors
 
-	//! \brief Default constructor.
+    //! \brief Default constructor.
     HybridEvolverBase();
 
     //! \brief Construct from parameters using a default integrator.
@@ -124,13 +124,13 @@ class HybridEvolverBase
 
     //@}
 
-	//@{
+    //@{
     //! \name Parameters controlling the evolution.
 
-	//! \brief A reference to the parameters controlling the evolution.
+    //! \brief A reference to the parameters controlling the evolution.
     EvolutionParametersType& parameters() { return *this->_parameters; }
-	//! \brief A constant reference to the parameters controlling the evolution.
-	const EvolutionParametersType& parameters() const { return *this->_parameters; }
+    //! \brief A constant reference to the parameters controlling the evolution.
+    const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
     //@}
 
@@ -144,15 +144,15 @@ class HybridEvolverBase
 
     //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false);
-        return final; }
+     EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+     this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false);
+     return final; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
-        return reachable; }
+     EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+     this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
+     return reachable; }
     //@}
 
   protected:
@@ -163,162 +163,162 @@ class HybridEvolverBase
     //! \param intermediate Output parameter containing the intermediate sets
     //!   attained after every time step.
     //! \param system The hybrid system under consideration.
-	//! \param initial The inital set of the evolution.
-	//! \param time The maximum time of evolution; either specifies the stopping time
+    //! \param initial The inital set of the evolution.
+    //! \param time The maximum time of evolution; either specifies the stopping time
     //!   or the maximum number of steps.
-	//! \param semantics The semantics used for the solution trajectories.
+    //! \param semantics The semantics used for the solution trajectories.
     //!   Either \a #LOWER_SEMANTICS, in which case trajectories terminate at
     //!   discontinuities, or #UPPER_SEMANTICS, in which case all branches
-	//!   are taken.
-	//! \param reach A flag indicating whether the reachable sets should
-	//!   be computed.
-	virtual void _evolution(ListSet<HybridEnclosure>& final, ListSet<HybridEnclosure>& reachable, ListSet<HybridEnclosure>& intermediate,
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics, bool reach) const;
+    //!   are taken.
+    //! \param reach A flag indicating whether the reachable sets should
+    //!   be computed.
+    virtual void _evolution(ListSet<HybridEnclosure>& final, ListSet<HybridEnclosure>& reachable, ListSet<HybridEnclosure>& intermediate,
+    const SystemType& system, const EnclosureType& initial, const TimeType& time,
+    Semantics semantics, bool reach) const;
 
-	//! \brief Compute the evolution within a single discrete mode.
-	//!
-	//! Takes a set from evolution_data.initial_sets and processes the initial
-	//! events using _process_initial_events.
-	//! The resulting set is then evolved using _upper_evolution_step until
-	//! either the maximum continuous time is reached, or no furter continuous
-	//! evolution is possible.
+    //! \brief Compute the evolution within a single discrete mode.
+    //!
+    //! Takes a set from evolution_data.initial_sets and processes the initial
+    //! events using _process_initial_events.
+    //! The resulting set is then evolved using _upper_evolution_step until
+    //! either the maximum continuous time is reached, or no furter continuous
+    //! evolution is possible.
     virtual
     void
     _evolution_in_mode(EvolutionData& evolution_data,
-                       SystemType const& system,
-                       TimeType const& maximum_time) const;
+     SystemType const& system,
+     TimeType const& maximum_time) const;
 
-	//! \brief Performs an evolution step on one of the sets listed in \a
-	//! evolution_data.initial_sets.
+    //! \brief Performs an evolution step on one of the sets listed in \a
+    //! evolution_data.initial_sets.
     virtual
     void
     _evolution_step(EvolutionData& evolution_data,
-                    RealVectorFunction const& dynamic,
-                    Map<DiscreteEvent,TransitionData> const& transitions,
-                    Real const& final_time) const;
+     RealVectorFunction const& dynamic,
+     Map<DiscreteEvent,TransitionData> const& transitions,
+     Real const& final_time) const;
 
     //! \brief Extracts the transitions valid in \a location of \a system.
-	//! \details For some systems, extracting the information about the
-	//! guard and reset functions may be expensive. This routine collects all
-	//! information in one place
-	virtual
+    //! \details For some systems, extracting the information about the
+    //! guard and reset functions may be expensive. This routine collects all
+    //! information in one place
+    virtual
     Map<DiscreteEvent,TransitionData>
     _extract_transitions(DiscreteLocation const& location,
-                         HybridAutomatonInterface const& system) const;
+    HybridAutomatonInterface const& system) const;
 
-	//! \brief Compute the flow of the \a vector_field, starting in the
-	//! given \a initial_set, and with a time step as large as
-	//! \a maximum_time_set if possible. The result is a function patch
-	//! defined on a domain \f$B\times [0,h]\f$, where \f$B\f$ is the bounding
-	//! box for the set, and \f$h\f$ is the step size actually used.
+    //! \brief Compute the flow of the \a vector_field, starting in the
+    //! given \a initial_set, and with a time step as large as
+    //! \a maximum_time_set if possible. The result is a function patch
+    //! defined on a domain \f$B\times [0,h]\f$, where \f$B\f$ is the bounding
+    //! box for the set, and \f$h\f$ is the step size actually used.
     virtual
     VectorIntervalFunction
     _compute_flow(RealVectorFunction vector_field,
-                  Box const& initial_set,
-                  const Float& maximum_step_size) const;
+      Box const& initial_set,
+      const Float& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
     //! time step \f$h\f$ starting in the given \a starting_set \f$S\f$.
-	//! A event \f$e\f$ is \em active if \f$g_e(\phi(x,t))\geq0\f$
-	//! for some \f$x\in S\f$ and \f$t\in[0,h]\f$.
-	//! The result is allowed to contain events which are not active
-	//! during the time step, since the exact set may be too difficult to
-	//! compute.
-	virtual
+    //! A event \f$e\f$ is \em active if \f$g_e(\phi(x,t))\geq0\f$
+    //! for some \f$x\in S\f$ and \f$t\in[0,h]\f$.
+    //! The result is allowed to contain events which are not active
+    //! during the time step, since the exact set may be too difficult to
+    //! compute.
+    virtual
     Set<DiscreteEvent>
     _compute_active_events(RealVectorFunction const& dynamic,
-                           Map<DiscreteEvent,RealScalarFunction> const& guards,
-                           VectorIntervalFunction const& flow,
-                           HybridEnclosure const& starting_set) const;
+      Map<DiscreteEvent,RealScalarFunction> const& guards,
+      VectorIntervalFunction const& flow,
+      HybridEnclosure const& starting_set) const;
 
     //! \brief Compute data on how trajectories of the \a flow
-	//! cross the given \a guards.
-	//! For example, trajectories may have a #INCREASING_CROSSING crossing with
-	//! a given crossing_time as a function of the initial state.
-	//!
-	//! \details The \a dynamic is given explicitly to facilitate computation
-	//! of crossing times.
-	//! A crossing_time computed must be valid over the \a initial_set, though
-	//! will often be computed over the entire bounding box.
-	//!
-	//! If the crossing is #INCREASING_CROSSING, then the \a crossing_time \f$\gamma\f$
-	//! should be computed, satisfying \f$g(\phi(x,\gamma(x)))=0\f$.
-	//! If the crossing is #CONCAVE_CROSSING, the the \a critical_time (\a maximum_time) \f$\mu\f$
+    //! cross the given \a guards.
+    //! For example, trajectories may have a #INCREASING_CROSSING crossing with
+    //! a given crossing_time as a function of the initial state.
+    //!
+    //! \details The \a dynamic is given explicitly to facilitate computation
+    //! of crossing times.
+    //! A crossing_time computed must be valid over the \a initial_set, though
+    //! will often be computed over the entire bounding box.
+    //!
+    //! If the crossing is #INCREASING_CROSSING, then the \a crossing_time \f$\gamma\f$
+    //! should be computed, satisfying \f$g(\phi(x,\gamma(x)))=0\f$.
+    //! If the crossing is #CONCAVE_CROSSING, the the \a critical_time (\a maximum_time) \f$\mu\f$
     //! should be computed, satisfying \f$L_{f}g(\phi(x,\mu(x)))=0\f$.
     virtual
     Map<DiscreteEvent,CrossingData>
     _compute_crossings(Set<DiscreteEvent> const& active_events,
-                       RealVectorFunction const& dynamic,
-                       Map<DiscreteEvent,RealScalarFunction> const& guards,
-                       VectorIntervalFunction const& flow,
-                       HybridEnclosure const& initial_set) const;
+     RealVectorFunction const& dynamic,
+     Map<DiscreteEvent,RealScalarFunction> const& guards,
+     VectorIntervalFunction const& flow,
+     HybridEnclosure const& initial_set) const;
 
     //! \brief Compute data related to the time of evolution related to the
-	//! maximum time step allowed by the flow, the event times, and the
-	//! final time which should be attained at the end of the evolution.
-	//!
-	//! \post
-	//! If the step_kind is SPACE_DEPENDENT_EVOLUTION_TIME, then the evolution_time must evaluate
-	//!   a value in [0,h] over the initial_set, where \f$h\f$ is
-	//!   the \a step_size. In other words, \f$\varepsilon(\xi(s))\in[0,h]\f$
-	//!   whenever \f$s\f$ is a valid parameter.
+    //! maximum time step allowed by the flow, the event times, and the
+    //! final time which should be attained at the end of the evolution.
+    //!
+    //! \post
+    //! If the step_kind is SPACE_DEPENDENT_EVOLUTION_TIME, then the evolution_time must evaluate
+    //!   a value in [0,h] over the initial_set, where \f$h\f$ is
+    //!   the \a step_size. In other words, \f$\varepsilon(\xi(s))\in[0,h]\f$
+    //!   whenever \f$s\f$ is a valid parameter.
     //! If the step_kind is PARAMETER_DEPENDENT_FINISHING_TIME, then \f$(\omega(s)-\tau(s))\in[0,h]\f$
-	//!   whenever \f$s\f$ is a valid parameter.
-	//! If the step_kind is CONSTANT_FINISHING_TIME, then \f$t_{\max}-\tau(s)\leq h\f$
-	//!   whenever \f$s\f$ is a valid parameter.
-	//!
-	//! TODO: By reducing the step time, some events may become inactive.
-	//! It should be possible to reflect this in the output.
-	//!
-	//! TODO: The CONSTANT_FINISHING_TIME choice might be inappropriate; maybe this should
-	//! be replaced with an extra flag representing whether the final time
-	//! could possibly be reached. However, it might be simpler to just check
-	//! the final conditions latex, or
-	virtual
+    //!   whenever \f$s\f$ is a valid parameter.
+    //! If the step_kind is CONSTANT_FINISHING_TIME, then \f$t_{\max}-\tau(s)\leq h\f$
+    //!   whenever \f$s\f$ is a valid parameter.
+    //!
+    //! TODO: By reducing the step time, some events may become inactive.
+    //! It should be possible to reflect this in the output.
+    //!
+    //! TODO: The CONSTANT_FINISHING_TIME choice might be inappropriate; maybe this should
+    //! be replaced with an extra flag representing whether the final time
+    //! could possibly be reached. However, it might be simpler to just check
+    //! the final conditions latex, or
+    virtual
     TimingData
     _estimate_timing(Set<DiscreteEvent>& active_events,
-                     Real final_time,
-                     VectorIntervalFunction const& flow,
-                     Map<DiscreteEvent,CrossingData>& crossings,
-                     HybridEnclosure const& initial_set) const;
+      Real final_time,
+      VectorIntervalFunction const& flow,
+      Map<DiscreteEvent,CrossingData>& crossings,
+      HybridEnclosure const& initial_set) const;
 
 
     //! \brief Process the \a initial_set to find any
-	//!  <em>initially active</em> events, and compute the relevant \em jump sets
-	//!  and the <em>flowable</em> or <em>progress</em> set.
-	//!
-	//! First, and \em invariants \f$i_e(x)\leq0\f$ are processed to give
-	//! an \em allowable or \em invariant
-	//! \f$I=\{ x\in S \mid \forall e\in E_{\mathrm{inv}},\ i_e(x)\leq0\}\f$.
-	//! Then for each urgent or permissive transition, the \em active set
-	//! \f$A_e = \{ x\in I \mid g_e(x)\geq 0\}\f$ and jump set
-	//! \f$ _e = r_e(A_e)\f$ are computed.
-	//! Finally, any progress predicates \f$p_e(x)\leq0\f$ are processed
-	//! (including those derived from urgent events),
-	//! to give the flowable set
-	//! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
-	virtual
+    //!  <em>initially active</em> events, and compute the relevant \em jump sets
+    //!  and the <em>flowable</em> or <em>progress</em> set.
+    //!
+    //! First, and \em invariants \f$i_e(x)\leq0\f$ are processed to give
+    //! an \em allowable or \em invariant
+    //! \f$I=\{ x\in S \mid \forall e\in E_{\mathrm{inv}},\ i_e(x)\leq0\}\f$.
+    //! Then for each urgent or permissive transition, the \em active set
+    //! \f$A_e = \{ x\in I \mid g_e(x)\geq 0\}\f$ and jump set
+    //! \f$ _e = r_e(A_e)\f$ are computed.
+    //! Finally, any progress predicates \f$p_e(x)\leq0\f$ are processed
+    //! (including those derived from urgent events),
+    //! to give the flowable set
+    //! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
+    virtual
     void
     _process_initial_events(EvolutionData& evolution_data,
-                            HybridEnclosure const& initial_set,
-                            Map<DiscreteEvent,TransitionData> const& transitions) const;
+    HybridEnclosure const& initial_set,
+    Map<DiscreteEvent,TransitionData> const& transitions) const;
 
     //! \brief Apply the \a flow to the \a set up to the time specified by \a timing_data
     //! to obtain the single-step unconstrained reachable set.
     virtual
     void
     _apply_reach_step(HybridEnclosure& set,
-                      VectorIntervalFunction const& flow,
-                      TimingData const& timing_data) const;
+    VectorIntervalFunction const& flow,
+    TimingData const& timing_data) const;
 
     //! \brief Apply the \a flow to the \a set for the time specified by \a timing_data
     //! to obtain the single-step unconstrained evolved set.
     virtual
     void
     _apply_evolve_step(HybridEnclosure& set,
-                       VectorIntervalFunction const& flow,
-                       TimingData const& timing_data) const;
+     VectorIntervalFunction const& flow,
+     TimingData const& timing_data) const;
 
     //! \brief Apply the \a flow to the \a set for to reach the
     //! guard specified by \a transition_data using guidelines provided by \a crossing_data.
@@ -329,12 +329,12 @@ class HybridEvolverBase
     virtual
     void
     _apply_guard_step(HybridEnclosure& set,
-                      RealVectorFunction const& dynamic,
-                      VectorIntervalFunction const& flow,
-                      TimingData const& timing_data,
-                      TransitionData const& transition_data,
-                      CrossingData const& crossing_data,
-                      const Semantics semantics) const;
+    RealVectorFunction const& dynamic,
+    VectorIntervalFunction const& flow,
+    TimingData const& timing_data,
+    TransitionData const& transition_data,
+    CrossingData const& crossing_data,
+    const Semantics semantics) const;
 
     //! \brief Apply \a guard_function for \a event to each set in \a sets, using the computed \a crossing_data.
     //! \callgraph
@@ -346,61 +346,61 @@ class HybridEvolverBase
     virtual
     void
     _apply_guard(List<HybridEnclosure>& sets,
-                 const HybridEnclosure& starting_set,
-                 const VectorIntervalFunction& flow,
-                 const ScalarIntervalFunction& evolve_time,
-                 const TransitionData& transition_data,
-                 const CrossingData crossing_data,
-                 const Semantics semantics) const;
+     const HybridEnclosure& starting_set,
+     const VectorIntervalFunction& flow,
+     const ScalarIntervalFunction& evolve_time,
+     const TransitionData& transition_data,
+     const CrossingData crossing_data,
+     const Semantics semantics) const;
 
     //! \brief Process the \a starting_set \f$S\f$
-	//! based on the previously computed \a flow, \a timing_data
-	//! and \a crossing_data to compute the successor sets in the evolution.
-	//! Compute the resulting \a jump, \a finishing, \a final and \a reach
-	//! sets after a single time step.
-	//!
-	//! \pre \f$p_e(x)\leq0\f$ for any invariant or progress predicate
-	//! and any \f$x\in S\f$
-	//! \pre The step time \f$\delta(s)\f$ in terms of the flow
-	//! parameters satisfies \f$\delta(s)\in[0,h]\f$ whenever \f$\rho(s)\in C\f$.
-	//!
-	//! The evolution time (in terms of the flow parameters) is given by
-	//! \f$\delta(s)=\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
-	//! or \f$\delta(s)=\omega(s)-\tau(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
-	//!
-	//! Let \f$E_\mathrm{blk}\f$ be set set of events \em blocking
-	//! continuous evolution.
-	//! - The \em reach set is given by
-	//!   \f[ R=\{ \phi(\xi(s),t);\;\tau(s)+t \mid (x,t)\in D\times[0,h]
-	//!       \mid \rho(s)\in C \ \wedge\ t\leq\delta(s)
-	//!       \ \wedge\ \tau(s)+t\leq t_{\max}
-	//!	      \ \wedge\ \forall e\in E_{\mathrm{blk}},
-	//!         \,\max_{u\in[0,t]} g_e(\phi(x,u))\leq 0 \} \f]
-	//! - The \em finishing set \f$E\f$ is given by the additional constraint
-	//!   \f$t=\delta(s)\f$ on the reach set,
-	//!   or equivalently, \f$\tau(s)+t=\omega(s)\f$.
-	//! - The \em final set \f$F\f$ is given by the additional constraint
-	//!   \f$\tau(s)+t=t_{\max}\f$ on the reach set.
-	//! - The \em active sets \f$A_e\f$ are given by the additional constraint
-	//!   \f$g(\phi(\xi(s),t))=0\f$, and the jump sets by \f$J_e=r_e(A_e)\f$.
-	//! In the implementation, these sets are simplified to reduce the number
-	//! of extra variables and the number of constraints.
-	//!
-	//! \note The \a jump, \a finishing, \a final and \a reach sets may need to
-	//! be constructed as unions of Enclosure sets. The is because when dealing
-	//! with #CONCAVE_CROSSING events, it may be the case that these sets are split into
-	//! two.
-	//!
-	//! TODO: This method might be better split into even simpler events.
-	virtual
+    //! based on the previously computed \a flow, \a timing_data
+    //! and \a crossing_data to compute the successor sets in the evolution.
+    //! Compute the resulting \a jump, \a finishing, \a final and \a reach
+    //! sets after a single time step.
+    //!
+    //! \pre \f$p_e(x)\leq0\f$ for any invariant or progress predicate
+    //! and any \f$x\in S\f$
+    //! \pre The step time \f$\delta(s)\f$ in terms of the flow
+    //! parameters satisfies \f$\delta(s)\in[0,h]\f$ whenever \f$\rho(s)\in C\f$.
+    //!
+    //! The evolution time (in terms of the flow parameters) is given by
+    //! \f$\delta(s)=\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
+    //! or \f$\delta(s)=\omega(s)-\tau(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
+    //!
+    //! Let \f$E_\mathrm{blk}\f$ be set set of events \em blocking
+    //! continuous evolution.
+    //! - The \em reach set is given by
+    //!   \f[ R=\{ \phi(\xi(s),t);\;\tau(s)+t \mid (x,t)\in D\times[0,h]
+    //!    \mid \rho(s)\in C \ \wedge\ t\leq\delta(s)
+    //!    \ \wedge\ \tau(s)+t\leq t_{\max}
+    //!    \ \wedge\ \forall e\in E_{\mathrm{blk}},
+    //!      \,\max_{u\in[0,t]} g_e(\phi(x,u))\leq 0 \} \f]
+    //! - The \em finishing set \f$E\f$ is given by the additional constraint
+    //!   \f$t=\delta(s)\f$ on the reach set,
+    //!   or equivalently, \f$\tau(s)+t=\omega(s)\f$.
+    //! - The \em final set \f$F\f$ is given by the additional constraint
+    //!   \f$\tau(s)+t=t_{\max}\f$ on the reach set.
+    //! - The \em active sets \f$A_e\f$ are given by the additional constraint
+    //!   \f$g(\phi(\xi(s),t))=0\f$, and the jump sets by \f$J_e=r_e(A_e)\f$.
+    //! In the implementation, these sets are simplified to reduce the number
+    //! of extra variables and the number of constraints.
+    //!
+    //! \note The \a jump, \a finishing, \a final and \a reach sets may need to
+    //! be constructed as unions of Enclosure sets. The is because when dealing
+    //! with #CONCAVE_CROSSING events, it may be the case that these sets are split into
+    //! two.
+    //!
+    //! TODO: This method might be better split into even simpler events.
+    virtual
     void
     _apply_evolution_step(EvolutionData& evolution_data,
-                          HybridEnclosure const& starting_set,
-                          VectorIntervalFunction const& flow,
-                          TimingData const& timing_data,
-                          Map<DiscreteEvent,CrossingData> const& crossing_data,
-                          RealVectorFunction const& dynamic,
-                          Map<DiscreteEvent,TransitionData> const& transitions) const;
+     HybridEnclosure const& starting_set,
+     VectorIntervalFunction const& flow,
+     TimingData const& timing_data,
+     Map<DiscreteEvent,CrossingData> const& crossing_data,
+     RealVectorFunction const& dynamic,
+     Map<DiscreteEvent,TransitionData> const& transitions) const;
 
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
@@ -431,9 +431,9 @@ struct TransitionData
     //! \brief The Lie derivative of the guard function along the flow.
     RealScalarFunction guard_flow_derivative_function;
     //! \brief The target location of the transition.
-	DiscreteLocation target;
+    DiscreteLocation target;
     //! \brief The reset function \f$x'=r(x)\f$ of the transition.
-	RealVectorFunction reset_function;
+    RealVectorFunction reset_function;
     //TransitionData() { }
     //TransitionData(DiscreteLocation t, RealScalarFunction g, RealVectorFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }
@@ -454,17 +454,17 @@ enum CrossingKind {
     NEGATIVE_CROSSING, //!< The guard function is negative on the flow domain. No event occurs.
     POSITIVE_CROSSING, //!< The guard function is negative on the domain. The event occurs immediately (if urgent) or at all times (if permissive).
     INCREASING_CROSSING, //!< The guard function is strictly increasing along flow lines at a crossing point.
-        //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$ whenever \f$g(\phi(x_0,t))=0\f$.
-        //! Implied by \f$L_{f}g \geq 0\f$.
+     //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$ whenever \f$g(\phi(x_0,t))=0\f$.
+     //! Implied by \f$L_{f}g \geq 0\f$.
     DECREASING_CROSSING, //!< The guard function is strictly decreasing along flow lines.
     CONCAVE_CROSSING, //!< The guard function is positive over at most an interval.
-        //! Implied by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
+     //! Implied by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
     CONVEX_CROSSING, //!< The guard function is negative over at most an interval. Implied by convexity along flow lines.
-        //! Implied by convexity along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$ within the reached set.
+     //! Implied by convexity along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$ within the reached set.
     TRANSVERSE_CROSSING, //!< The crossing time can be computed as a smooth function of the initial state.
-        //! Given an initial point \f$x_0\f$, the crossing time \f$\gamma(x_0)\f$.
+     //! Given an initial point \f$x_0\f$, the crossing time \f$\gamma(x_0)\f$.
     GRAZING_CROSSING //!< The time at which the guard function reaches a maximum along flow lines is a smooth function \f$\mu(x_0)\f$ of the initial state \f$x_0\f$.
-        //! Implies by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
+     //! Implies by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
 };
 std::ostream& operator<<(std::ostream& os, const CrossingKind& crk);
 
@@ -475,10 +475,10 @@ struct CrossingData
     CrossingData() : crossing_kind() { }
     CrossingData(CrossingKind crk) : crossing_kind(crk) { }
     CrossingData(CrossingKind crk, const ScalarIntervalFunction& crt)
-        : crossing_kind(crk), crossing_time(crt) { }
+     : crossing_kind(crk), crossing_time(crt) { }
     //! \brief The way in which the guard function changes along trajectories
-	//! during a crossing. e.g. INCREASING_CROSSING
-	CrossingKind crossing_kind;
+    //! during a crossing. e.g. INCREASING_CROSSING
+    CrossingKind crossing_kind;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
     ScalarIntervalFunction crossing_time;
@@ -523,7 +523,7 @@ enum FinishingKind {
     AT_FINAL_TIME, //!< At the end of the step, the final time is reached exactly. No more evolution is possible.
     AFTER_FINAL_TIME, //!< At the end of the step, the final time has definitely been passed by every point. No more evolution is possible.
     STRADDLE_FINAL_TIME, //!< At the end of the step, some points may have passed the final time, and some may not reached it.
-        //!< Usable as a default value.
+     //!< Usable as a default value.
 };
 std::ostream& operator<<(std::ostream& os, const FinishingKind& crk);
 
@@ -538,8 +538,8 @@ struct TimingData
     ScalarIntervalFunction spacial_evolution_time; //!< The evolution time \f$\varepsilon(x)\f$ used in a \a SPACE_DEPENDENT_EVOLUTION_TIME step.
     ScalarIntervalFunction finishing_time; //!< The time \f$\omega(s)\f$ reached after an \a PARAMETER_DEPENDENT_FINISHING_TIME as a function of the parameters.
     ScalarIntervalFunction evolution_time; //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
-        //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
-        //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
+     //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
+     //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
     Interval time_domain; //!< The time domain, equal to \f$[0,h]\f$.
     ScalarIntervalFunction time_coordinate; //!< The time coordinate function, equal to the identity on \f$[0,h]\f$.
 };
@@ -548,9 +548,9 @@ struct TimingData
 //! \relates HybridEvolverInterface
 struct EvolutionData
 {
-	//! \brief Sets for which the evolution starts in a new mode, initially or after a jump.
-	//! The set needs to be processed by finding initially active events,
-	//! and moving the set into working_sets.
+    //! \brief Sets for which the evolution starts in a new mode, initially or after a jump.
+    //! The set needs to be processed by finding initially active events,
+    //! and moving the set into working_sets.
     List<HybridEnclosure> initial_sets;
     //! \brief Sets which have been processed for initially active events.
     //! Sets in this list can be assumed to satisfy all invariants and progress
@@ -558,14 +558,14 @@ struct EvolutionData
     List<HybridEnclosure> working_sets;
 
     //! \brief Sets which have been computed as reach sets for the current
-	//! evolution.
-	List<HybridEnclosure> reach_sets;
+    //! evolution.
+    List<HybridEnclosure> reach_sets;
     //! \brief Sets which have been computed as final sets (i.e. satisfying
-	//! either the final time or the maximum number of stesp).
-	List<HybridEnclosure> final_sets;
+    //! either the final time or the maximum number of stesp).
+    List<HybridEnclosure> final_sets;
     //! \brief Intermediate sets reached after each time step. Not relevant for
-	//! the result, but useful for plotting, especially for debugging.
-	List<HybridEnclosure> intermediate_sets;
+    //! the result, but useful for plotting, especially for debugging.
+    List<HybridEnclosure> intermediate_sets;
 
     //! \brief The semantics used to compute the evolution. Defaults to UPPER_SEMANTICS.
     Semantics semantics;
@@ -589,10 +589,10 @@ class GeneralHybridEvolver
     virtual
     TimingData
     _estimate_timing(Set<DiscreteEvent>& active_events,
-                     Real final_time,
-                     VectorIntervalFunction const& flow,
-                     Map<DiscreteEvent,CrossingData>& crossings,
-                     HybridEnclosure const& initial_set) const;
+      Real final_time,
+      VectorIntervalFunction const& flow,
+      Map<DiscreteEvent,CrossingData>& crossings,
+      HybridEnclosure const& initial_set) const;
 
 };
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polyhedron.cc
+ *      polyhedron.cc
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -88,10 +88,10 @@ Polyhedron::Polyhedron(const Box& bx)
 {
     const uint n=bx.dimension();
     for(uint i=0; i!=n; ++i) {
-        _A[i][i]=-1;
-        _b[i]=-bx[i].lower();
-        _A[i+n][i]=+1;
-        _b[i+n]=+bx[i].upper();
+     _A[i][i]=-1;
+     _b[i]=-bx[i].lower();
+     _A[i+n][i]=+1;
+     _b[i+n]=+bx[i].upper();
     }
 }
 
@@ -217,12 +217,12 @@ Polyhedron::write(std::ostream& os) const
     uint d=this->dimension();
     size_t nc=this->number_of_constraints();
     for(size_t i=0; i!=nc; ++i) {
-        os << ( i==0 ? "[" : "," );
-        for(size_t j=0; j!=d; ++j) {
-            os << ( j==0 ? "(" : ",");
-            os << A[i][j];
-        }
-        os << ":" << b[i] << ")";
+     os << ( i==0 ? "[" : "," );
+     for(size_t j=0; j!=d; ++j) {
+      os << ( j==0 ? "(" : ",");
+      os << A[i][j];
+     }
+     os << ":" << b[i] << ")";
     }
     os << "] )";
     return os;
@@ -243,13 +243,13 @@ operator>>(std::istream& is, Polyhedron& p)
 
     c=is.peek();
     while(c=='[') {
-        // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
-        read_sequence(is,a,'[',';',',');
-        is >> b;
-        is >> c;
-        assert(c==']');
-        Alst.push_back(a);
-        Blst.push_back(b);
+     // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
+     read_sequence(is,a,'[',';',',');
+     is >> b;
+     is >> c;
+     assert(c==']');
+     Alst.push_back(a);
+     Blst.push_back(b);
     }
 
     size_t m=Alst.size();
@@ -257,10 +257,10 @@ operator>>(std::istream& is, Polyhedron& p)
     Matrix<Float> A(m,n);
     Vector<Float> B(m);
     for(uint i=0; i!=m; ++i) {
-        for(size_t j=0; j!=n; ++j) {
-            A[i][j]=Alst[i][j];
-        }
-        B[i]=Blst[i];
+     for(size_t j=0; j!=n; ++j) {
+      A[i][j]=Alst[i][j];
+     }
+     B[i]=Blst[i];
     }
 
     p=Polyhedron(A,B);

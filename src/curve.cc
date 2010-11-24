@@ -1,5 +1,5 @@
 /***************************************************************************
- *            curve.code.h
+ *      curve.code.h
  *
  *  Copyright  2007  Pieter Collins
  *  pieter.collins@cwi.nl
@@ -112,7 +112,7 @@ InterpolatedCurve::bounding_box() const
 {
     Box bx(this->_points.begin()->second);
     for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
-        bx=hull(bx,iter->second);
+     bx=hull(bx,iter->second);
     }
     return bx;
 }
@@ -125,14 +125,14 @@ InterpolatedCurve::draw(CanvasInterface& c) const
     const Point& pt=iter->second;
     c.move_to(pt[xi],pt[yi]);
     while(iter!=this->end()) {
-        ++iter;
-        const Point& pt=iter->second;
-        c.line_to(pt[xi],pt[yi]);
+     ++iter;
+     const Point& pt=iter->second;
+     c.line_to(pt[xi],pt[yi]);
     }
     if(this->begin()->second==(this->end())->second) {
-        c.fill();
+     c.fill();
     } else {
-        c.stroke();
+     c.stroke();
     }
 }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            orbit.h
+ *      orbit.h
  *
  *  Copyright 2007  Pieter Collins
  *
@@ -124,7 +124,7 @@ class Orbit<GridCell>
     Orbit(const Grid&, const GridCell&);
     Orbit(const GridTreeSet&);
     Orbit(const GridTreeSet&, const GridTreeSet&,
-          const GridTreeSet&, const GridTreeSet&);
+    const GridTreeSet&, const GridTreeSet&);
     Grid const& grid() const;
     GridTreeSet const& initial() const;
     GridTreeSet const& reach() const;
@@ -145,7 +145,7 @@ class Orbit<HybridGridCell>
     Orbit(const HybridGrid&, const HybridGridCell&);
     Orbit(const HybridGridTreeSet&);
     Orbit(const HybridGridTreeSet&, const HybridGridTreeSet&,
-          const HybridGridTreeSet&, const HybridGridTreeSet&);
+    const HybridGridTreeSet&, const HybridGridTreeSet&);
     HybridGrid const& grid() const;
     HybridGridTreeSet const& initial() const;
     HybridGridTreeSet const& reach() const;
@@ -191,10 +191,10 @@ std::ostream&
 operator<<(std::ostream& os, const Orbit< ES >& orb)
 {
     os << "Orbit(\n  initial=" << orb.initial()
-       << "\n  intermediate=" << orb.intermediate()
-       << "\n  reach=" << orb.reach()
-       << "\n  final=" << orb.final()
-       << ")\n";
+    << "\n  intermediate=" << orb.intermediate()
+    << "\n  reach=" << orb.reach()
+    << "\n  final=" << orb.final()
+    << ")\n";
     return os;
 }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.cc
+ *      hybrid_set.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -32,7 +32,7 @@ HybridGrid::HybridGrid(const HybridAutomatonInterface& ha) : _grids(),  _system_
 
 HybridGrid::HybridGrid(const HybridSpace& hs, double l) : _grids(), _system_ptr(0)  {
     for(HybridSpace::const_iterator iter=hs.begin(); iter!=hs.end(); ++iter) {
-        this->_grids.insert(iter->first,Grid(iter->second,l));
+     this->_grids.insert(iter->first,Grid(iter->second,l));
     }
 }
 

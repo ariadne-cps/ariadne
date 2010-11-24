@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver.h
+ *      solver.h
  *
  *  Copyright  2006-9  Pieter Collins
  *
@@ -116,7 +116,7 @@ class IntervalNewtonSolver
   public:
     virtual Vector<Interval>
     step(const RealVectorFunction& f,
-         const Vector<Interval>& pt) const;
+      const Vector<Interval>& pt) const;
 
 
 };
@@ -142,7 +142,7 @@ class KrawczykSolver
     /*! \brief A single step of the Krawczyk contractor. */
     virtual Vector<Interval>
     step(const RealVectorFunction& f,
-          const Vector<Interval>& pt) const;
+    const Vector<Interval>& pt) const;
 };
 
 
@@ -162,7 +162,7 @@ class FactoredKrawczykSolver
     /*! \brief A single step of the modified Krawczyk contractor. */
     virtual Vector<Interval>
     step(const RealVectorFunction& f,
-          const Vector<Interval>& pt) const;
+    const Vector<Interval>& pt) const;
 };
 
 

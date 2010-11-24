@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver.cc
+ *      solver.cc
  *
  *  Copyright  2006-9  Pieter Collins
  *
@@ -39,9 +39,9 @@ typedef unsigned int uint;
 
 void
 solve_all(Set< Vector<Interval> >& r,
-          const SolverInterface& s,
-          const RealVectorFunction& f,
-          const Vector<Interval>& ix)
+    const SolverInterface& s,
+    const RealVectorFunction& f,
+    const Vector<Interval>& ix)
 {
     uint verbosity=s.verbosity;
     ARIADNE_LOG(5,"solve_all(f,ix): f="<<f<<", ix="<<ix<<"\n");
@@ -49,67 +49,67 @@ solve_all(Set< Vector<Interval> >& r,
     // Test for no solution
     const Vector<Interval> z(ix.size());
     if(disjoint(f.evaluate(ix),z)) {
-        return;
+     return;
     }
 
     bool invertible_jacobian=true;
     //Vector<Interval> nx=2*ix-midpoint(ix);
     Vector<Interval> nx=ix;
     try {
-        Matrix<Interval> Jinv=inverse(f.jacobian(nx));
+     Matrix<Interval> Jinv=inverse(f.jacobian(nx));
     }
     catch(const SingularMatrixException& e) {
-        invertible_jacobian=false;
+     invertible_jacobian=false;
     }
 
     bool need_to_split=true;
 
     if(invertible_jacobian) {
-        //std::cerr<<"Nonsingular matrix -- applying contractor\n";
-        try {
-            Vector<Interval> y=s.zero(f,nx);
-            bool is_new=true;
-            for(Set<Vector<Interval> >::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
-                if(!disjoint(y,*iter)) {
-                    is_new=false;
-                    break;
-                }
-            }
-            if(is_new) {
-                r.insert(y);
-            }
-            need_to_split=false;
-        }
-        catch(const NoSolutionException& e) {
-            //ARIADNE_WARN("NoSolutionException exception: "<<e.what()<<"\n");
-            need_to_split=false;
-        }
-        catch(const SolverException& e) {
-            ARIADNE_WARN("SolverException exception: "<<e.what()<<"\n");
-            need_to_split=true;
-            // No solution found, try splitting
-        }
+     //std::cerr<<"Nonsingular matrix -- applying contractor\n";
+     try {
+      Vector<Interval> y=s.zero(f,nx);
+      bool is_new=true;
+      for(Set<Vector<Interval> >::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    if(!disjoint(y,*iter)) {
+     is_new=false;
+     break;
+    }
+      }
+      if(is_new) {
+    r.insert(y);
+      }
+      need_to_split=false;
+     }
+     catch(const NoSolutionException& e) {
+      //ARIADNE_WARN("NoSolutionException exception: "<<e.what()<<"\n");
+      need_to_split=false;
+     }
+     catch(const SolverException& e) {
+      ARIADNE_WARN("SolverException exception: "<<e.what()<<"\n");
+      need_to_split=true;
+      // No solution found, try splitting
+     }
     } else {
-        need_to_split=true;
+     need_to_split=true;
     }
 
     if(need_to_split) {
-        // If radius is too small, assume solution is not verified
-        if(radius(ix)<s.maximum_error()) {
-            if(!invertible_jacobian) {
-                ARIADNE_WARN("Cannot verify solution in "<<ix<<" with f="<<f(ix)<<"); "
-                             <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
-                             <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n");
-            } else {
-                ARIADNE_WARN("Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(ix)<<".\n");
-            }
-            return;
-        }
+     // If radius is too small, assume solution is not verified
+     if(radius(ix)<s.maximum_error()) {
+      if(!invertible_jacobian) {
+    ARIADNE_WARN("Cannot verify solution in "<<ix<<" with f="<<f(ix)<<"); "
+     <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
+     <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n");
+      } else {
+    ARIADNE_WARN("Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(ix)<<".\n");
+      }
+      return;
+     }
 
-        //std::cerr<<"  Splitting "<<ix<<"\n";
-        std::pair< Vector<Interval>, Vector<Interval> > splt=split(ix);
-        solve_all(r,s,f,splt.first);
-        solve_all(r,s,f,splt.second);
+     //std::cerr<<"  Splitting "<<ix<<"\n";
+     std::pair< Vector<Interval>, Vector<Interval> > splt=split(ix);
+     solve_all(r,s,f,splt.first);
+     solve_all(r,s,f,splt.second);
     }
 
 }
@@ -127,13 +127,13 @@ jacobian2(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& x)
 {
     Vector< Differential<Interval> > dx(x.size());
     for(uint i=0; i!=x.size()-f.size(); ++i) {
-        dx[i]=Differential<Interval>::constant(f.size(),1u,x[i]); }
+     dx[i]=Differential<Interval>::constant(f.size(),1u,x[i]); }
     for(uint i=0; i!=f.size(); ++i) {
-        uint j=i+(x.size()-f.size());
-        dx[j]=Differential<Interval>::variable(f.size(),1u,x[j],i); }
+     uint j=i+(x.size()-f.size());
+     dx[j]=Differential<Interval>::variable(f.size(),1u,x[j],i); }
     Vector< Differential<Interval> > df(f.size());
     for(uint i=0; i!=f.size(); ++i) {
-        df[i]=evaluate(f[i].expansion(),dx);
+     df[i]=evaluate(f[i].expansion(),dx);
     }
     Matrix<Interval> J=jacobian(df);
     return J;
@@ -149,9 +149,9 @@ jacobian2_value(const Vector<IntervalTaylorModel>& f)
     Matrix<Float> J(rs,rs);
     MultiIndex a(fas);
     for(uint i=0; i!=rs; ++i) {
-        for(uint j=0; j!=rs; ++j) {
-            a[has+j]=1; const Float x=f[i][a]; J[i][j]=x; a[has+j]=0;
-        }
+     for(uint j=0; j!=rs; ++j) {
+      a[has+j]=1; const Float x=f[i][a]; J[i][j]=x; a[has+j]=0;
+     }
     }
     return J;
 }
@@ -165,17 +165,17 @@ jacobian2_range(const Vector<IntervalTaylorModel>& f)
     uint has=fas-rs;
     Matrix<Interval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
-        for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-            for(uint k=0; k!=rs; ++k) {
-                const uint c=iter->key()[has+k];
-                if(c>0) {
-                    const Float& x=iter->data();
-                    if(iter->key().degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=Interval(-1,1)*x*c; }
-                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
-                }
-            }
-        }
+     for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+      for(uint k=0; k!=rs; ++k) {
+    const uint c=iter->key()[has+k];
+    if(c>0) {
+     const Float& x=iter->data();
+     if(iter->key().degree()==1) { J[i][k]+=x; }
+     else { J[i][k]+=Interval(-1,1)*x*c; }
+     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
+    }
+      }
+     }
     }
     return J;
 }
@@ -199,14 +199,14 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
     // Compute g=-D2finv*(f-D2f*y) = -D2finv*f-y
     Vector<IntervalTaylorModel> g=-f;
     for(uint i=0; i!=rs; ++i) {
-        for(uint j=has; j!=fas; ++j) {
-            g[i][MultiIndex::unit(fas,j)]=0;
-        }
+     for(uint j=has; j!=fas; ++j) {
+      g[i][MultiIndex::unit(fas,j)]=0;
+     }
     }
     Matrix<Float> J=inverse(D2f);
     g=prod(J,g);
     for(uint i=0; i!=rs; ++i) {
-        g[i].clean();
+     g[i].clean();
     }
 
     // Iterate h'=h(g(x,h(x)))
@@ -214,30 +214,30 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
     uint number_non_contracting=rs;
     array<bool> contracting(rs,false);
     for(uint k=0; k!=n; ++k) {
-        h_new=compose(g,join(id,h));
-        for(uint i=0; i!=rs; ++i) {
-            if(!contracting[i]) {
-                if(refines(h_new,h)) {
-                    contracting[i]=true;
-                    --number_non_contracting;
-                }
-                if(disjoint(h_new,h)) {
-                    ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel> f)",
-                                "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
-                                " which is disjoint. No solution");
-                }
-            }
-        }
-        for(uint i=0; i!=rs; ++i) {
-            h[i]=intersection(h[i],h_new[i]);
-        }
+     h_new=compose(g,join(id,h));
+     for(uint i=0; i!=rs; ++i) {
+      if(!contracting[i]) {
+    if(refines(h_new,h)) {
+     contracting[i]=true;
+     --number_non_contracting;
+    }
+    if(disjoint(h_new,h)) {
+     ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel> f)",
+     "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
+     " which is disjoint. No solution");
+    }
+      }
+     }
+     for(uint i=0; i!=rs; ++i) {
+      h[i]=intersection(h[i],h_new[i]);
+     }
     }
 
     if(number_non_contracting==0) {
-        return h;
+     return h;
     } else {
-        ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel>)",
-                      "Could not verify solution of implicit function to "<<h<<"\n");
+     ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel>)",
+    "Could not verify solution of implicit function to "<<h<<"\n");
     }
 }
 
@@ -257,12 +257,12 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
     Matrix<Interval> D2f=jacobian2_range(f);
     Matrix<Interval> D2finv;
     try {
-        D2finv=inverse(D2f);
+     D2finv=inverse(D2f);
     }
     catch(...) {
-        ARIADNE_THROW(ImplicitFunctionException,
-                      "implicit(Vector<IntervalTaylorModel>)",
-                      "Jacobian "<<D2f<<" is not invertible");
+     ARIADNE_THROW(ImplicitFunctionException,
+    "implicit(Vector<IntervalTaylorModel>)",
+    "Jacobian "<<D2f<<" is not invertible");
     }
 
     uint number_of_steps=6;
@@ -272,17 +272,17 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
     // Perform proper Newton step improvements
     Vector<Interval> domain_h(h[0].argument_size(),Interval(-1,+1));
     for(uint i=0; i!=3; ++i) {
-        D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
-        clobber(h);
-        Vector<IntervalTaylorModel> fidh=compose(f,join(id,h));
-        Vector<IntervalTaylorModel> dh=prod(D2finv,fidh);
-        h-=dh;
+     D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+     clobber(h);
+     Vector<IntervalTaylorModel> fidh=compose(f,join(id,h));
+     Vector<IntervalTaylorModel> dh=prod(D2finv,fidh);
+     h-=dh;
     }
 
     // Check that the result has the correct sizes.
     ARIADNE_ASSERT(h.size()==f.size());
     for(uint i=0; i!=h.size(); ++i) {
-        ARIADNE_ASSERT(h[0].argument_size()+f.size()==f[i].argument_size());
+     ARIADNE_ASSERT(h[0].argument_size()+f.size()==f[i].argument_size());
     }
 
     return h;
@@ -320,11 +320,11 @@ VectorTaylorFunction evaluate(const RealVectorFunction& f,const VectorTaylorFunc
 VectorTaylorFunction product(const Matrix<Float>& A,const VectorTaylorFunction& v) {
     VectorTaylorFunction r(A.row_size());
     for(uint i=0; i!=r.size(); ++i) {
-        ScalarTaylorFunction t(v[0].domain());
-        for(uint j=0; j!=v.size(); ++j) {
-            t+=A[i][j]*v[j];
-        }
-        r[i]=t;
+     ScalarTaylorFunction t(v[0].domain());
+     for(uint j=0; j!=v.size(); ++j) {
+      t+=A[i][j]*v[j];
+     }
+     r[i]=t;
     }
     return r;
 }
@@ -332,11 +332,11 @@ VectorTaylorFunction product(const Matrix<Float>& A,const VectorTaylorFunction& 
 VectorTaylorFunction product(const Matrix<Interval>& A,const VectorTaylorFunction& v) {
     VectorTaylorFunction r(A.row_size());
     for(uint i=0; i!=r.size(); ++i) {
-        ScalarTaylorFunction t(v[0].domain());
-        for(uint j=0; j!=v.size(); ++j) {
-            t+=A[i][j]*v[j];
-        }
-        r[i]=t;
+     ScalarTaylorFunction t(v[0].domain());
+     for(uint j=0; j!=v.size(); ++j) {
+      t+=A[i][j]*v[j];
+     }
+     r[i]=t;
     }
     return r;
 }
@@ -376,7 +376,7 @@ SolverBase::SolverBase(double max_error, uint max_steps)
 
 Vector<Interval>
 SolverBase::solve(const RealVectorFunction& f,
-                  const Vector<Interval>& ix) const
+      const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
     ::solve_all(r,*this,f,ix);
@@ -386,7 +386,7 @@ SolverBase::solve(const RealVectorFunction& f,
 
 Set< Vector<Interval> >
 SolverBase::solve_all(const RealVectorFunction& f,
-                      const Vector<Interval>& ix) const
+    const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
     ::solve_all(r,*this,f,ix);
@@ -397,7 +397,7 @@ SolverBase::solve_all(const RealVectorFunction& f,
 
 Vector<Interval>
 SolverBase::zero(const RealVectorFunction& f,
-                 const Vector<Interval>& ix) const
+     const Vector<Interval>& ix) const
 {
     const double& e=this->maximum_error();
     uint n=this->maximum_number_of_steps();
@@ -406,32 +406,32 @@ SolverBase::zero(const RealVectorFunction& f,
     Vector<Interval> nr(r.size());
     bool has_solution=false;
     while(n>0) {
-        nr=this->step(f,r);
-        ARIADNE_LOG(5,"  nr="<<nr<<"\n");
+     nr=this->step(f,r);
+     ARIADNE_LOG(5,"  nr="<<nr<<"\n");
 
-        if(!has_solution && subset(nr,r)) {
-            has_solution=true;
-        }
+     if(!has_solution && subset(nr,r)) {
+      has_solution=true;
+     }
 
-        if(has_solution && radius(nr) < e) {
-            return nr;
-        }
+     if(has_solution && radius(nr) < e) {
+      return nr;
+     }
 
-        if(disjoint(nr,r)) {
-            ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; "<<nr<<" is disjoint from "<<r);
-        }
-        r=intersection(nr,r);
-        n=n-1;
+     if(disjoint(nr,r)) {
+      ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; "<<nr<<" is disjoint from "<<r);
+     }
+     r=intersection(nr,r);
+     n=n-1;
     }
     if(disjoint(f.evaluate(r),Vector<Interval>(f.result_size()))) {
-        ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; f("<<r<<") is disjoint from zero");
+     ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; f("<<r<<") is disjoint from zero");
     } else {
-        r+=(eps()+radius(r))*Vector<Interval>(r.size(),Interval(-1,+1));
-        nr=this->step(f,r);
-        if(subset(nr,r)) {
-            return nr;
-        }
-        ARIADNE_THROW(SolverException,"SolverBase::zero","No result verified in "<<ix<<"; maximum number of steps reached with approximation "<<r<<" which cannot be robustly checked");
+     r+=(eps()+radius(r))*Vector<Interval>(r.size(),Interval(-1,+1));
+     nr=this->step(f,r);
+     if(subset(nr,r)) {
+      return nr;
+     }
+     ARIADNE_THROW(SolverException,"SolverBase::zero","No result verified in "<<ix<<"; maximum number of steps reached with approximation "<<r<<" which cannot be robustly checked");
     }
 }
 
@@ -447,8 +447,8 @@ SolverBase::fixed_point(const RealVectorFunction& f, const Vector<Interval>& pt)
 
 VectorTaylorFunction
 SolverBase::implicit(const RealVectorFunction& f,
-                      const Vector<Interval>& ip,
-                      const Vector<Interval>& ix) const
+    const Vector<Interval>& ip,
+    const Vector<Interval>& ix) const
 {
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
@@ -469,30 +469,30 @@ SolverBase::implicit(const RealVectorFunction& f,
     array<bool> refinement(nx,false);
 
     while(steps_remaining>0) {
-        nwx=this->implicit_step(f,p,x);
-        fnwx=compose(f,join(p,nwx));
-        ARIADNE_LOG(5,"\n  step="<<this->maximum_number_of_steps()-steps_remaining<<"\n");
-        ARIADNE_LOG(5,"  nwx="<<nwx<<"\n");
-        ARIADNE_LOG(5,"  fnwx="<<fnwx<<"\n");
-        ARIADNE_LOG(6,"\n");
+     nwx=this->implicit_step(f,p,x);
+     fnwx=compose(f,join(p,nwx));
+     ARIADNE_LOG(5,"\n  step="<<this->maximum_number_of_steps()-steps_remaining<<"\n");
+     ARIADNE_LOG(5,"  nwx="<<nwx<<"\n");
+     ARIADNE_LOG(5,"  fnwx="<<fnwx<<"\n");
+     ARIADNE_LOG(6,"\n");
 
-        for(uint i=0; i!=nx; ++i) {
-            if(!refinement[i]) {
-                if(refines(nwx[i],x[i])) {
-                    refinement[i]=true;
-                    --number_unrefined;
-                } else if(disjoint(nwx[i],x[i])) {
-                    ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; "<<nwx<<" is disjoint from "<<x);
-                }
-            }
-        }
+     for(uint i=0; i!=nx; ++i) {
+      if(!refinement[i]) {
+    if(refines(nwx[i],x[i])) {
+     refinement[i]=true;
+     --number_unrefined;
+    } else if(disjoint(nwx[i],x[i])) {
+     ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; "<<nwx<<" is disjoint from "<<x);
+    }
+      }
+     }
 
-        if( (number_unrefined==0) && (radius(nwx)<err) && (radius(fnwx)<err) ) {
-            return VectorTaylorFunction(nwx);
-        }
+     if( (number_unrefined==0) && (radius(nwx)<err) && (radius(fnwx)<err) ) {
+      return VectorTaylorFunction(nwx);
+     }
 
-        x=intersection(nwx,x);
-        steps_remaining=steps_remaining-1;
+     x=intersection(nwx,x);
+     steps_remaining=steps_remaining-1;
     }
 
     ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","Could not prove existence of a solution in "<<ix<<".");
@@ -502,8 +502,8 @@ SolverBase::implicit(const RealVectorFunction& f,
 
 ScalarTaylorFunction
 SolverBase::implicit(const RealScalarFunction& f,
-                      const Vector<Interval>& ip,
-                      const Interval& ix) const
+    const Vector<Interval>& ip,
+    const Interval& ix) const
 {
     VectorTaylorFunction res=this->implicit(RealVectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
     return res[0];
@@ -516,8 +516,8 @@ IntervalTaylorModel implicit(const IntervalTaylorModel& f);
 
 ScalarTaylorFunction
 SolverBase::implicit(const IntervalScalarFunction& f,
-                      const Vector<Interval>& ip,
-                      const Interval& ix) const
+    const Vector<Interval>& ip,
+    const Interval& ix) const
 {
     ScalarTaylorFunction tf(join(ip,ix),f);
     return Ariadne::implicit(tf);
@@ -525,8 +525,8 @@ SolverBase::implicit(const IntervalScalarFunction& f,
 
 ScalarTaylorFunction
 SolverBase::implicit(const ScalarTaylorFunction& tf,
-                      const Vector<Interval>& ip,
-                      const Interval& ix) const
+    const Vector<Interval>& ip,
+    const Interval& ix) const
 {
     ARIADNE_ASSERT(subset(join(ip,ix),tf.domain()));
     return Ariadne::implicit(tf);
@@ -558,9 +558,9 @@ implicit(const IntervalTaylorModel& f) {
     IntervalTaylorModel g=derivative(f,has);
     Interval g_range=g.range();
     if(g_range.lower()<=0 && g_range.upper()>=0) {
-        ARIADNE_THROW(ImplicitFunctionException,
-                      "implicit(IntervalTaylorModel)",
-                      "derivative "<<g_range<<" is not invertible");
+     ARIADNE_THROW(ImplicitFunctionException,
+    "implicit(IntervalTaylorModel)",
+    "derivative "<<g_range<<" is not invertible");
     }
 
     uint number_of_steps=10;
@@ -574,17 +574,17 @@ implicit(const IntervalTaylorModel& f) {
     //std::cerr<<"id="<<id<<"\n";
     //std::cerr<<"h="<<h<<"\n";
     for(uint i=0; i!=number_of_steps; ++i) {
-        IntervalTaylorModel& h=idh[has];
-        IntervalTaylorModel gidh=compose(g,idh);
-        h.clobber();
-        IntervalTaylorModel fidh=compose(f,idh);
-        IntervalTaylorModel dh=fidh/gidh;
-        IntervalTaylorModel nh=h-dh;
-        h=nh;
-        //std::cerr<<"fh["<<i<<"]="<<fidh<<"\n";
-        //std::cerr<<"gh["<<i<<"]="<<gidh<<"\n";
-        //std::cerr<<"dh["<<i<<"]="<<dh<<"\n";
-        //std::cerr<<"nh["<<i<<"]="<<idh[has]<<"\n";
+     IntervalTaylorModel& h=idh[has];
+     IntervalTaylorModel gidh=compose(g,idh);
+     h.clobber();
+     IntervalTaylorModel fidh=compose(f,idh);
+     IntervalTaylorModel dh=fidh/gidh;
+     IntervalTaylorModel nh=h-dh;
+     h=nh;
+     //std::cerr<<"fh["<<i<<"]="<<fidh<<"\n";
+     //std::cerr<<"gh["<<i<<"]="<<gidh<<"\n";
+     //std::cerr<<"dh["<<i<<"]="<<dh<<"\n";
+     //std::cerr<<"nh["<<i<<"]="<<idh[has]<<"\n";
     }
     //std::cerr<<"err="<<compose(f,idh)<<"\n\n";
     //std::cerr<<"res="<<idh[has]<<"\n\n";
@@ -596,7 +596,7 @@ implicit(const IntervalTaylorModel& f) {
 
 Vector<Interval>
 IntervalNewtonSolver::step(const RealVectorFunction& f,
-                           const Vector<Interval>& x) const
+      const Vector<Interval>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
@@ -618,7 +618,7 @@ IntervalNewtonSolver::step(const RealVectorFunction& f,
 
 Vector<Interval>
 KrawczykSolver::step(const RealVectorFunction& f,
-                     const Vector<Interval>& x) const
+      const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -644,7 +644,7 @@ KrawczykSolver::step(const RealVectorFunction& f,
 
 Vector<Interval>
 FactoredKrawczykSolver::step(const RealVectorFunction& f,
-                             const Vector<Interval>& x) const
+     const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -671,16 +671,16 @@ FactoredKrawczykSolver::step(const RealVectorFunction& f,
 
 VectorTaylorFunction
 IntervalNewtonSolver::implicit_step(const RealVectorFunction& f,
-                            const VectorTaylorFunction& p,
-                            const VectorTaylorFunction& x) const
+    const VectorTaylorFunction& p,
+    const VectorTaylorFunction& x) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 VectorTaylorFunction
 KrawczykSolver::implicit_step(const RealVectorFunction& f,
-                              const VectorTaylorFunction& p,
-                              const VectorTaylorFunction& x) const
+      const VectorTaylorFunction& p,
+      const VectorTaylorFunction& x) const
 {
     const uint np=p.size();
     const uint nx=x.size();
@@ -713,8 +713,8 @@ KrawczykSolver::implicit_step(const RealVectorFunction& f,
 
 ScalarTaylorFunction
 IntervalNewtonSolver::implicit(const RealScalarFunction& f,
-                               const Vector<Interval>& ip,
-                               const Interval& ix) const
+    const Vector<Interval>& ip,
+    const Interval& ix) const
 {
     ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", ip="<<ip<<", ix="<<ix<<"\n");
     const uint n=ip.size();
@@ -724,24 +724,24 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
     Interval dfmpix=df(join(mp,ix));
 
     if(dfmpix.lower()<=0.0 && dfmpix.upper()>=0.0) {
-        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","df(x,[y])="<<dfmpix<<" which contains zero.");
+     ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","df(x,[y])="<<dfmpix<<" which contains zero.");
     }
 
     Interval x=ix;
     bool validated=false;
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
-        Interval mx=Interval(midpoint(x));
-        Interval nx=mx-f(join(mp,mx))/df(join(mp,x));
-        if(disjoint(nx,x)) {
-            ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","No solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix);
-        }
-        if(subset(nx,x)) {
-            validated=true;
-            x=nx;
-            if(x.radius()<this->maximum_error()) { break; }
-        } else {
-            x=intersection(x,nx);
-        }
+     Interval mx=Interval(midpoint(x));
+     Interval nx=mx-f(join(mp,mx))/df(join(mp,x));
+     if(disjoint(nx,x)) {
+      ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","No solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix);
+     }
+     if(subset(nx,x)) {
+      validated=true;
+      x=nx;
+      if(x.radius()<this->maximum_error()) { break; }
+     } else {
+      x=intersection(x,nx);
+     }
     }
 
     ScalarTaylorFunction h=ScalarTaylorFunction::constant(ip,midpoint(x));
@@ -749,20 +749,20 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
     ScalarTaylorFunction dh;
 
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
-        dh=compose(f,join(id,h))/df(join(mp,Interval(h.value())));
-        h=h-dh;
-        h.clobber();
-        Float herr=norm(dh);
-        ARIADNE_LOG(6,"  dh="<<dh.range()<<"\n h="<<h<<"\n");
-        if(herr<this->maximum_error()/2) { break; }
+     dh=compose(f,join(id,h))/df(join(mp,Interval(h.value())));
+     h=h-dh;
+     h.clobber();
+     Float herr=norm(dh);
+     ARIADNE_LOG(6,"  dh="<<dh.range()<<"\n h="<<h<<"\n");
+     if(herr<this->maximum_error()/2) { break; }
     }
     ARIADNE_LOG(4," happrox="<<h<<"\n");
 
     h.error()+=mag(dh.range())*4;
     Interval dfipix=df(join(ip,h.range()));
     if(dfipix.lower()<=0.0 && dfipix.upper()>=0.0) {
-        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
-                      "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
+     ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
+    "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
     }
 
     // Try to verify implicit function
@@ -790,8 +790,8 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
     hnew=hnew-dh+dherr;
 
     if(!refines(hnew,h)) {
-        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
-                      "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
+     ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
+    "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
     }
     return hnew;
 }

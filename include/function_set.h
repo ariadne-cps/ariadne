@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_set.h
+ *      function_set.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -76,7 +76,7 @@ class ImageSet
     const RealVectorFunction& function() const { return this->_function; }
     //! \brief Equality operator. Compares functions by referential equality.
     bool operator==(const ImageSet& ims) const {
-        return this->_domain==ims._domain && this->_function.raw_pointer()==ims._function.raw_pointer(); }
+     return this->_domain==ims._domain && this->_function.raw_pointer()==ims._function.raw_pointer(); }
 
     ImageSet* clone() const;
     uint dimension() const;
@@ -128,7 +128,7 @@ class ConstraintSet
     //! \brief Compute the preimage of the set $S=g^{-1}(C)\f$ under \f$h\$.
     //! The resulting set is the constraint set \f$h^{-1}(S)=(g\circ h)^{-1}(C)\f$.
     friend ConstraintSet preimage(const RealVectorFunction& h, const ConstraintSet& s) {
-        return ConstraintSet(s.codomain(),compose(s.function(),h)); }
+     return ConstraintSet(s.codomain(),compose(s.function(),h)); }
 };
 
 
@@ -188,18 +188,18 @@ class ConstrainedImageSet
     ConstrainedImageSet(const Vector<Interval>& dom) : _domain(dom), _function(RealVectorFunction::identity(dom.size())) { }
     //! \brief Construct the image of \a dom under \a fn.
     ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
-        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
+     ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraint \a c.
     ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const NonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
-        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
-        ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
+     ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
+     ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
     }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
     ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const List<NonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
-        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
+     ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
     ConstrainedImageSet(const List<Interval>& dom, const List<RealScalarFunction>& fn) : _domain(dom), _function(fn) {
-        ARIADNE_ASSERT_MSG(_domain.size()==_function.argument_size(),"dom="<<dom<<", fn="<<fn); }
+     ARIADNE_ASSERT_MSG(_domain.size()==_function.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a bounded constraint set.
     ConstrainedImageSet(const BoundedConstraintSet& set);
     //! \brief Convert from an image set.
@@ -219,28 +219,28 @@ class ConstrainedImageSet
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
     void apply(const RealVectorFunction& h) {
-        this->_function=compose(h,this->_function);
+     this->_function=compose(h,this->_function);
     }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
     void new_parameter_constraint(const NonlinearConstraint& c) {
-        ARIADNE_ASSERT_MSG(c.function().argument_size()==this->domain().size(),*this<<", "<<c);
-        this->_constraints.append(c); }
+     ARIADNE_ASSERT_MSG(c.function().argument_size()==this->domain().size(),*this<<", "<<c);
+     this->_constraints.append(c); }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
     void new_space_constraint(const NonlinearConstraint& c) {
-        ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
-        this->_constraints.append(NonlinearConstraint(compose(c.function(),_function),c.bounds())); }
+     ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
+     this->_constraints.append(NonlinearConstraint(compose(c.function(),_function),c.bounds())); }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
     void new_parameter_constraint(const RealScalarFunction& g, const Interval& C) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g<<" in "<<C);
-        this->_constraints.append(NonlinearConstraint(g,C)); }
+     ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g<<" in "<<C);
+     this->_constraints.append(NonlinearConstraint(g,C)); }
 
     //! \brief Introduce a new constraint of the form \f$g(x)\in [c_l,c_u]\f$.
     void new_space_constraint(const RealScalarFunction& g, const Interval& C) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->_function.result_size(),*this<<", "<<g<<" in "<<C);
-        this->_constraints.append(NonlinearConstraint(compose(g,_function),C)); }
+     ARIADNE_ASSERT_MSG(g.argument_size()==this->_function.result_size(),*this<<", "<<g<<" in "<<C);
+     this->_constraints.append(NonlinearConstraint(compose(g,_function),C)); }
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
     uint dimension() const { return this->_function.result_size(); }

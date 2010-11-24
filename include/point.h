@@ -1,5 +1,5 @@
 /***************************************************************************
- *            point.h
+ *      point.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  *
@@ -64,7 +64,7 @@ class Point
 
     //! Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const {
-        return os << static_cast<const Vector<Float>&>(*this); }
+     return os << static_cast<const Vector<Float>&>(*this); }
 
     virtual void draw(CanvasInterface& c) const;
     virtual Box bounding_box() const;

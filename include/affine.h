@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine.h
+ *      affine.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -63,19 +63,19 @@ class Affine
     explicit Affine(uint n) : _c(0), _g(n) { }
     explicit Affine(const Vector<X>& g, const X& c) : _c(c), _g(g) { }
     explicit Affine(uint as, double c, double g0, ...) : _c(static_cast<X>(c)), _g(as) {
-        _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
-        for(uint i=1; i!=as; ++i) { _g[i]=static_cast<X>(va_arg(args,double)); } }
+     _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
+     for(uint i=1; i!=as; ++i) { _g[i]=static_cast<X>(va_arg(args,double)); } }
     template<class XX> explicit Affine(const Affine<XX>& aff)
-        : _c(aff.b()), _g(aff.a()) { }
+     : _c(aff.b()), _g(aff.a()) { }
 
     Affine<X>& operator=(const X& c) {
-        this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=static_cast<X>(0); } return *this; }
+     this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=static_cast<X>(0); } return *this; }
     static Affine<X> constant(uint n, X c) {
-        return Affine<X>(Vector<X>(n),c); }
+     return Affine<X>(Vector<X>(n),c); }
     static Affine<X> variable(uint n, uint j) {
-        return Affine<X>(Vector<X>::unit(n,j),X(0)); }
+     return Affine<X>(Vector<X>::unit(n,j),X(0)); }
     static Vector< Affine<X> > variables(uint n) {
-        Vector< Affine<X> > r(n,Affine<X>(n)); for(uint i=0; i!=n; ++i) { r[i]._g[i]=static_cast<X>(1); } return r; }
+     Vector< Affine<X> > r(n,Affine<X>(n)); for(uint i=0; i!=n; ++i) { r[i]._g[i]=static_cast<X>(1); } return r; }
 
     const X& operator[](uint i) const { return this->_g[i]; }
     X& operator[](uint i) { return this->_g[i]; }
@@ -91,7 +91,7 @@ class Affine
     uint argument_size() const { return this->_g.size(); }
 
     template<class Y> Y evaluate(const Vector<Y>& x) const {
-        Y r=this->_c+x[0]*0; for(uint j=0; j!=this->_g.size(); ++j) { r+=this->_g[j]*x[j]; } return r; }
+     Y r=this->_c+x[0]*0; for(uint j=0; j!=this->_g.size(); ++j) { r+=this->_g[j]*x[j]; } return r; }
 
     const X& derivative(uint j) const { return this->_g[j]; }
   private:
@@ -176,13 +176,13 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f)
     bool zero=true;
     if(f.b()!=0) { os<<f.b(); zero=false; }
     for(uint j=0; j!=f.argument_size(); ++j) {
-        if(f.a()[j]!=0) {
-            if(f.a()[j]>0) { if(!zero) { os<<"+"; } } else { os<<"-"; }
-            if(abs(f.a()[j])!=1) { os<<abs(f.a()[j])<<"*"; }
-            //ss<<char('x'+j);
-            os<<"x"<<j;
-            zero=false;
-        }
+     if(f.a()[j]!=0) {
+      if(f.a()[j]>0) { if(!zero) { os<<"+"; } } else { os<<"-"; }
+      if(abs(f.a()[j])!=1) { os<<abs(f.a()[j])<<"*"; }
+      //ss<<char('x'+j);
+      os<<"x"<<j;
+      zero=false;
+     }
     }
     if(zero) { os << "0"; }
     return os;

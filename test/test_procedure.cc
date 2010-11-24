@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_procedure.cc
+ *      test_procedure.cc
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -109,21 +109,21 @@ void TestProcedure::test_construct_from_formula()
 void TestProcedure::test_construct_from_expansion()
 {
     {
-        Expansion<Float> e(2, 4, 0,0,1.0, 1,0,2.0, 0,2,3.0, 1,4,4.0);
-        ARIADNE_TEST_PRINT(e);
-        e.reverse_lexicographic_sort();
-        ARIADNE_TEST_PRINT(e);
-        Procedure<Float> p(e);
-        ARIADNE_TEST_PRINT(p);
-        Vector<Float> x(2, 2.0,3.0);
-        ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
+     Expansion<Float> e(2, 4, 0,0,1.0, 1,0,2.0, 0,2,3.0, 1,4,4.0);
+     ARIADNE_TEST_PRINT(e);
+     e.reverse_lexicographic_sort();
+     ARIADNE_TEST_PRINT(e);
+     Procedure<Float> p(e);
+     ARIADNE_TEST_PRINT(p);
+     Vector<Float> x(2, 2.0,3.0);
+     ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 
     {
-        Expansion<Float> e(2, 6, 0,0,1.0, 1,0,2.0, 0,1,3.0, 2,0,4.0, 1,1,5.0, 0,2,6.0);
-        e.reverse_lexicographic_sort();
-        Procedure<Float> p(e);
-        ARIADNE_TEST_PRINT(p);
+     Expansion<Float> e(2, 6, 0,0,1.0, 1,0,2.0, 0,1,3.0, 2,0,4.0, 1,1,5.0, 0,2,6.0);
+     e.reverse_lexicographic_sort();
+     Procedure<Float> p(e);
+     ARIADNE_TEST_PRINT(p);
     }
 }
 
@@ -148,22 +148,22 @@ void TestProcedure::test_evaluate()
 void TestProcedure::test_propagate()
 {
     {
-        Procedure<Float> p;
-        p.new_unary_instruction(IND,0u);
-        p.new_unary_instruction(IND,1u);
-        p.new_unary_instruction(SQR,0u);
-        p.new_unary_instruction(SQR,1u);
-        p.new_binary_instruction(ADD,2u,3u);
-        p.new_unary_instruction(SQRT,4u);
-        ARIADNE_TEST_PRINT(p);
+     Procedure<Float> p;
+     p.new_unary_instruction(IND,0u);
+     p.new_unary_instruction(IND,1u);
+     p.new_unary_instruction(SQR,0u);
+     p.new_unary_instruction(SQR,1u);
+     p.new_binary_instruction(ADD,2u,3u);
+     p.new_unary_instruction(SQRT,4u);
+     ARIADNE_TEST_PRINT(p);
 
-        Vector<Interval> x(2, 0.25,2.0, 0.5,3.0);
-        ARIADNE_TEST_PRINT(x);
+     Vector<Interval> x(2, 0.25,2.0, 0.5,3.0);
+     ARIADNE_TEST_PRINT(x);
 
-        simple_hull_reduce(x,p,Interval(1,1));
-        ARIADNE_TEST_PRINT(x);
-        simple_hull_reduce(x,p,Interval(1,1));
-        ARIADNE_TEST_PRINT(x);
+     simple_hull_reduce(x,p,Interval(1,1));
+     ARIADNE_TEST_PRINT(x);
+     simple_hull_reduce(x,p,Interval(1,1));
+     ARIADNE_TEST_PRINT(x);
     }
 
     Formula<Float> x(Formula<Float>::coordinate(0));

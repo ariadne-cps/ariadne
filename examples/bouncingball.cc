@@ -1,5 +1,5 @@
 /***************************************************************************
- *            bouncingball.cc
+ *      bouncingball.cc
  *
  *  Copyright  2008  Davide Bresolin
  *

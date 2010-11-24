@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential.cc
+ *      differential.cc
  *
  *  Copyright 2008  Pieter Collins
  *

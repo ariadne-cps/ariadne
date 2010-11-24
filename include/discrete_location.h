@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_location.h
+ *      discrete_location.h
  *
  *  Copyright  2004-9  Alberto Casagrande, Pieter Collins
  *

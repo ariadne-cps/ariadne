@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test.h
+ *      test.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl, ivan.zapreev@gmail.com
@@ -46,13 +46,13 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 
 inline int get_verbosity(int argc, const char* argv[]) {
     if(argc>1) {
-        if(std::strcmp(argv[1],"-v")==0) {
-            if(argc>2) {
-                return std::atoi(argv[2]);
-            }
-        } else {
-            std::cerr << "Unrecognised command-line option \"" << argv[1] << "\"\n";
-        }
+     if(std::strcmp(argv[1],"-v")==0) {
+      if(argc>2) {
+    return std::atoi(argv[2]);
+      }
+     } else {
+      std::cerr << "Unrecognised command-line option \"" << argv[1] << "\"\n";
+     }
     }
     return 0;
 }
@@ -62,350 +62,350 @@ inline int get_verbosity(int argc, const char* argv[]) {
 int test_case_counter = 0;
 
 /*! \brief Print the title for the test case */
-#define ARIADNE_PRINT_TEST_CASE_TITLE( pTitle )                         \
-    {                                                                   \
-        cout << endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << endl; \
-        cout.flush();                                                   \
-    }                                                                   \
+#define ARIADNE_PRINT_TEST_CASE_TITLE( pTitle )    \
+    {    \
+     cout << endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << endl; \
+     cout.flush();      \
+    }    \
 
 
 /*! \brief Print the comment for the test */
-#define ARIADNE_PRINT_TEST_COMMENT( pComment )                          \
-    {                                                                   \
-        cout << "* COMMENT: " << pComment << "" << endl;                \
-        cout.flush();                                                   \
-    }                                                                   \
+#define ARIADNE_PRINT_TEST_COMMENT( pComment )     \
+    {    \
+     cout << "* COMMENT: " << pComment << "" << endl;    \
+     cout.flush();      \
+    }    \
 
 
 /*! \brief Print the comment for the test */
-#define ARIADNE_TEST_WARN( message )                                    \
-    {                                                                   \
-        cout << "WARNING: " << message << "" << endl;                \
-        cerr << "WARNING: " << message << "" << endl;                \
-    }                                                                   \
+#define ARIADNE_TEST_WARN( message )      \
+    {    \
+     cout << "WARNING: " << message << "" << endl;    \
+     cerr << "WARNING: " << message << "" << endl;    \
+    }    \
 
 
 /*! \brief Catches an exception and writes a diagnostic to standard output and standard error. */
-#define ARIADNE_TEST_CATCH(message)                                     \
-    catch(const std::exception& e) {                                    \
-        ++ARIADNE_TEST_FAILURES;                                        \
-        std::cout << "exception: \"" << e.what() << "\"\n" << std::endl; \
-        std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed \"" << e.what() << "\"." << std::endl;     \
-    }                                                                   \
-    catch(...) {                                                        \
-        ++ARIADNE_TEST_FAILURES;                                        \
-        std::cout << "unknown exception\n" << std::endl;                \
-        std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed an unknown exception." << std::endl;       \
-    }                                                                   \
+#define ARIADNE_TEST_CATCH(message)    \
+    catch(const std::exception& e) {      \
+     ++ARIADNE_TEST_FAILURES;    \
+     std::cout << "exception: \"" << e.what() << "\"\n" << std::endl; \
+     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed \"" << e.what() << "\"." << std::endl;     \
+    }    \
+    catch(...) {     \
+     ++ARIADNE_TEST_FAILURES;    \
+     std::cout << "unknown exception\n" << std::endl;    \
+     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed an unknown exception." << std::endl;    \
+    }    \
 
 
 /*! \brief Calls a function */
-#define ARIADNE_TEST_CALL(function)                                     \
-    {                                                                   \
-        std::cout << "****************************************\n"       \
-                  << "CALLING " << #function << "\n"                    \
-                  << "****************************************\n" << std::endl; \
-        try {                                                           \
-            function;                                                   \
-        } catch(const std::exception& e) {                              \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "ERROR: exception in " << #function << ": "    \
-                      << e.what() << std::endl;                         \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": calling " \
-                      << #function << ": " << e.what() << std::endl; \
-            std::cout << std::endl;                                     \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_CALL(function)    \
+    {    \
+     std::cout << "****************************************\n"    \
+      << "CALLING " << #function << "\n"     \
+      << "****************************************\n" << std::endl; \
+     try {     \
+      function;      \
+     } catch(const std::exception& e) {      \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "ERROR: exception in " << #function << ": "    \
+    << e.what() << std::endl;    \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": calling " \
+    << #function << ": " << e.what() << std::endl; \
+      std::cout << std::endl;    \
+     }      \
+    }    \
 
 
 /*! \brief Omits a test, with a warning message */
-#define ARIADNE_TEST_SKIP(function)                                     \
-    {                                                                   \
-        std::cout << "****************************************\n"       \
-                  << "SKIPPING " << #function << "\n"                   \
-                  << "****************************************\n" << std::endl; \
-        ++ARIADNE_TEST_SKIPPED;                                         \
-        std::cout << std::endl;                                         \
-    }                                                                   \
+#define ARIADNE_TEST_SKIP(function)    \
+    {    \
+     std::cout << "****************************************\n"    \
+      << "SKIPPING " << #function << "\n"    \
+      << "****************************************\n" << std::endl; \
+     ++ARIADNE_TEST_SKIPPED;     \
+     std::cout << std::endl;     \
+    }    \
 
 
 /*! \brief Executes \a statement, writing the statement to standard output. Does not check for any errors. */
-#define ARIADNE_TEST_EXECUTE(statement)                                 \
-    {                                                                   \
-        std::cout << #statement << ": " << std::flush;                  \
-        statement;                                                      \
-        std::cout << " (ok)\n" << std::endl;                            \
-    }                                                                   \
+#define ARIADNE_TEST_EXECUTE(statement)      \
+    {    \
+     std::cout << #statement << ": " << std::flush;      \
+     statement;      \
+     std::cout << " (ok)\n" << std::endl;    \
+    }    \
 
 
 /*! \brief Tries to execute \a statement, writing the statement to standard output. Writes a diagnostic report to standard error if an exception is thrown. <br> <b>Important:</b> Use the ARIADNE_TEST_CONSTRUCT() macro if \a statement declares a variable and calls a constructor. */
-#define ARIADNE_TEST_TRY(statement)                                     \
-    {                                                                   \
-        std::cout << #statement << ": " << std::flush;                  \
-        try {                                                           \
-            statement;                                                  \
-            std::cout << " (ok)\n" << std::endl;                        \
-        }                                                               \
-            ARIADNE_TEST_CATCH("Statement `" << #statement << "'")      \
-        }                                                               \
+#define ARIADNE_TEST_TRY(statement)    \
+    {    \
+     std::cout << #statement << ": " << std::flush;      \
+     try {     \
+      statement;     \
+      std::cout << " (ok)\n" << std::endl;      \
+     }      \
+      ARIADNE_TEST_CATCH("Statement `" << #statement << "'")      \
+     }      \
 
 
 /*! \brief Writes the expression to the output. Does not catch errors. */
-#define ARIADNE_TEST_PRINT(expression)                                  \
-    {                                                                   \
-        std::cout << #expression << " = " << std::flush;                \
-        std::cout << (expression) << "\n" << std::endl;                 \
-    }                                                                   \
+#define ARIADNE_TEST_PRINT(expression)    \
+    {    \
+     std::cout << #expression << " = " << std::flush;    \
+     std::cout << (expression) << "\n" << std::endl;     \
+    }    \
 
 
 /*! \brief Tries to evaluate \a expression, writing the expression and the result to standard ouput. Writes a diagnostic report to standard error if an exception is thrown., prints the result and gives a diagnostic if an exception is thrown. */
-#define ARIADNE_TEST_EVALUATE(expression)                               \
-    {                                                                   \
-        std::cout << #expression << ": " << std::flush;                 \
-        try {                                                           \
-            std::cout << (expression) << "\n" << std::endl;             \
-        }                                                               \
-            ARIADNE_TEST_CATCH("Expression `" << #expression << "'")    \
-        }                                                               \
+#define ARIADNE_TEST_EVALUATE(expression)    \
+    {    \
+     std::cout << #expression << ": " << std::flush;     \
+     try {     \
+      std::cout << (expression) << "\n" << std::endl;    \
+     }      \
+      ARIADNE_TEST_CATCH("Expression `" << #expression << "'")    \
+     }      \
 
 
 /*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
-#define ARIADNE_TEST_ASSERT(expression)                                 \
-    {                                                                   \
-        std::cout << #expression << ": " << std::flush;                 \
-        bool result = (expression);                                     \
-        if(result) {                                                    \
-            std::cout << "true\n" << std::endl;                         \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: false" << std::endl;                 \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed." << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_ASSERT(expression)      \
+    {    \
+     std::cout << #expression << ": " << std::flush;     \
+     bool result = (expression);    \
+     if(result) {    \
+      std::cout << "true\n" << std::endl;    \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: false" << std::endl;     \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed." << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
-#define ARIADNE_TEST_CHECK_WARN(expression,expected)                         \
-    {                                                                   \
-        std::cout << #expression << ": " << std::flush; \
-        bool ok = ariadne_check(std::cout,expression,expected);         \
-        if(ok) {                                                        \
-            std::cout << "\n" << std::endl;                             \
-        } else {                                                        \
-            std::cout << "\nWARNING: expected " << #expression << " = " << #expected << " == " << (expected) << " \n" << std::endl; \
-            std::cerr << "WARNING: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed; obtained " << (expression) << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_CHECK_WARN(expression,expected)    \
+    {    \
+     std::cout << #expression << ": " << std::flush; \
+     bool ok = ariadne_check(std::cout,expression,expected);      \
+     if(ok) {     \
+      std::cout << "\n" << std::endl;     \
+     } else {     \
+      std::cout << "\nWARNING: expected " << #expression << " = " << #expected << " == " << (expected) << " \n" << std::endl; \
+      std::cerr << "WARNING: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed; obtained " << (expression) << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
-#define ARIADNE_TEST_CHECK(expression,expected)                         \
-    {                                                                   \
-        std::cout << #expression << ": " << std::flush; \
-        bool ok = ariadne_check(std::cout,expression,expected);         \
-        if(ok) {                                                        \
-            std::cout << "\n" << std::endl;                             \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: expected " << #expression << " = " << #expected << " == " << (expected) << " \n" << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed; obtained " << (expression) << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_CHECK(expression,expected)    \
+    {    \
+     std::cout << #expression << ": " << std::flush; \
+     bool ok = ariadne_check(std::cout,expression,expected);      \
+     if(ok) {     \
+      std::cout << "\n" << std::endl;     \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: expected " << #expression << " = " << #expected << " == " << (expected) << " \n" << std::endl; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed; obtained " << (expression) << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates \a expression1 and expression2 and checks if the results are equal. */
-#define ARIADNE_TEST_EQUAL(expression1,expression2)                         \
-    {                                                                   \
-        std::cout << #expression1 << " == " << #expression2 << ": " << std::flush; \
-        bool ok = (expression1) == (expression2);                       \
-        if(ok) {                                                        \
-            std::cout << "true\n" << std::endl;                         \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: " << #expression1 << ":\n           " << (expression1) \
-                      << "\n     : " << #expression2 << ":\n           " << (expression2) << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression1 << " == " << #expression2 << "' failed; " << #expression1 << "=" << (expression1) << "; " << #expression2 << "=" << (expression2) << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_EQUAL(expression1,expression2)    \
+    {    \
+     std::cout << #expression1 << " == " << #expression2 << ": " << std::flush; \
+     bool ok = (expression1) == (expression2);     \
+     if(ok) {     \
+      std::cout << "true\n" << std::endl;    \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: " << #expression1 << ":\n     " << (expression1) \
+    << "\n     : " << #expression2 << ":\n     " << (expression2) << std::endl; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression1 << " == " << #expression2 << "' failed; " << #expression1 << "=" << (expression1) << "; " << #expression2 << "=" << (expression2) << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
-#define ARIADNE_TEST_EQUALS(expression,expected)                         \
-    {                                                                   \
-        std::cout << #expression << " == " << #expected << ": " << std::flush; \
-        bool ok = (expression) == (expected);                       \
-        if(ok) {                                                        \
-            std::cout << "true\n" << std::endl;                         \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: " << #expression << ":\n           " << (expression) << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " == " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_EQUALS(expression,expected)    \
+    {    \
+     std::cout << #expression << " == " << #expected << ": " << std::flush; \
+     bool ok = (expression) == (expected);     \
+     if(ok) {     \
+      std::cout << "true\n" << std::endl;    \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: " << #expression << ":\n     " << (expression) << std::endl; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " == " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates \a expression and checks if the result is less than \a expected. */
-#define ARIADNE_TEST_LESS(expression,expected)                         \
-    {                                                                   \
-        std::cout << #expression << " < " << #expected << ": " << std::flush; \
-        bool ok = (expression) < (expected);                       \
-        if(ok) {                                                        \
-            std::cout << "true\n" << std::endl;                         \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: " << #expression << ":\n           " << (expression) << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " < " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_LESS(expression,expected)    \
+    {    \
+     std::cout << #expression << " < " << #expected << ": " << std::flush; \
+     bool ok = (expression) < (expected);     \
+     if(ok) {     \
+      std::cout << "true\n" << std::endl;    \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: " << #expression << ":\n     " << (expression) << std::endl; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " < " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates \a predicate(\a argument) and checks if the result is \tt true. */
 #define ARIADNE_TEST_UNARY_PREDICATE(predicate,argument)    \
-    {                                                                   \
-        std::cout << #predicate << "(" << #argument << ") with " << #argument << "=" << (argument) << ": " << std::flush; \
-        bool ok = predicate((argument));                  \
-        if(ok) {                                                        \
-            std::cout << "true\n" << std::endl;                         \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: false" << std::endl;                 \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Predicate `" << #predicate << "(" << #argument << ")' with " << #argument << "=" << (argument) << " is false." << std::endl; \
-        }                                                               \
+    {    \
+     std::cout << #predicate << "(" << #argument << ") with " << #argument << "=" << (argument) << ": " << std::flush; \
+     bool ok = predicate((argument));      \
+     if(ok) {     \
+      std::cout << "true\n" << std::endl;    \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: false" << std::endl;     \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Predicate `" << #predicate << "(" << #argument << ")' with " << #argument << "=" << (argument) << " is false." << std::endl; \
+     }      \
     }
 
 
 /*! \brief Evaluates \a predicate(argument1,argument2) and checks if the result is \tt true. */
 #define ARIADNE_TEST_BINARY_PREDICATE(predicate,argument1,argument2)    \
-    {                                                                   \
-        std::cout << #predicate << "(" << (#argument1) << "," << (#argument2) << ") with " << #argument1 << "=" << (argument1) << ", " << #argument2 << "=" << (argument2) << ": " << std::flush; \
-        bool ok = predicate((argument1),(argument2));                  \
-        if(ok) {                                                        \
-            std::cout << "true\n" << std::endl;                         \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: false" << std::endl;                 \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Predicate `" << #predicate << "(" << #argument1 << "," << #argument2 << ")' with " << #argument1 << "=" << (argument1) << "; " << #argument2 << "=" << (argument2) << " is false." << std::endl; \
-        }                                                               \
+    {    \
+     std::cout << #predicate << "(" << (#argument1) << "," << (#argument2) << ") with " << #argument1 << "=" << (argument1) << ", " << #argument2 << "=" << (argument2) << ": " << std::flush; \
+     bool ok = predicate((argument1),(argument2));      \
+     if(ok) {     \
+      std::cout << "true\n" << std::endl;    \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: false" << std::endl;     \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Predicate `" << #predicate << "(" << #argument1 << "," << #argument2 << ")' with " << #argument1 << "=" << (argument1) << "; " << #argument2 << "=" << (argument2) << " is false." << std::endl; \
+     }      \
     }
 
 
 /*! \brief Evaluates \a expression and checks if the result compares correctly with \a expected. */
-#define ARIADNE_TEST_COMPARE(expression,comparison,expected)           \
-    {                                                                   \
-        std::cout << #expression << ": " << (expression) << std::flush; \
-        bool ok = ((expression) comparison (expected));               \
-        if(ok) {                                                        \
-            std::cout << " " << #comparison << " " << (expected) << ": true\n" << std::endl; \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << "=" << (expected) << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected) << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_COMPARE(expression,comparison,expected)     \
+    {    \
+     std::cout << #expression << ": " << (expression) << std::flush; \
+     bool ok = ((expression) comparison (expected));      \
+     if(ok) {     \
+      std::cout << " " << #comparison << " " << (expected) << ": true\n" << std::endl; \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << "=" << (expected) << std::endl; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected) << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates \a expression, converts to \a Type, and checks if the result compares correctly with \a expected. */
 #define ARIADNE_TEST_RESULT_COMPARE(Type,expression,comparison,expected) \
-    {                                                                   \
-        Type result=(expression);                                       \
-        std::cout << #expression << ": " << result << std::flush; \
-        bool ok = result comparison (expected);               \
-        if(ok) {                                                        \
-            std::cout << " " << #comparison << " " << (expected) << "\n" << std::endl; \
-        } else {                                                        \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << result << "; " << #expected << "=" << (expected) << std::endl; \
-        }                                                               \
-    }                                                                   \
+    {    \
+     Type result=(expression);      \
+     std::cout << #expression << ": " << result << std::flush; \
+     bool ok = result comparison (expected);      \
+     if(ok) {     \
+      std::cout << " " << #comparison << " " << (expected) << "\n" << std::endl; \
+     } else {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << std::endl; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << result << "; " << #expected << "=" << (expected) << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Declares an object \a variable of type \a Class (uses the default constructor). */
-#define ARIADNE_TEST_DECLARE(Class,variable)                            \
-    {                                                                   \
-        std::cout << #Class << " " << #variable << ": " << std::flush;  \
-        try {                                                           \
-            Class variable;                                             \
-            std::cout << #variable << "==" << variable << "\n" << std::endl; \
-        }                                                               \
-        ARIADNE_TEST_CATCH("Constructor `" << #Class << "" << #variable << "'") \
-    }                                                                   \
-    Class variable;                                                     \
+#define ARIADNE_TEST_DECLARE(Class,variable)    \
+    {    \
+     std::cout << #Class << " " << #variable << ": " << std::flush;  \
+     try {     \
+      Class variable;      \
+      std::cout << #variable << "==" << variable << "\n" << std::endl; \
+     }      \
+     ARIADNE_TEST_CATCH("Constructor `" << #Class << "" << #variable << "'") \
+    }    \
+    Class variable;     \
 
 
 /*! \brief Constructs object \a variable of type \a Class from \a expression. */
-#define ARIADNE_TEST_CONSTRUCT(Class,variable,expression)               \
-    {                                                                   \
-        std::cout << #Class << " " << #variable << "" << #expression << ": " << std::flush; \
-        try {                                                           \
-            Class variable expression;                                  \
-            std::cout << #variable << "==" << variable << "\n" << std::endl; \
-        }                                                               \
-        ARIADNE_TEST_CATCH("Constructor `" << #Class << "" << #variable << "" << #expression << "'") \
-    }                                                                   \
-    Class variable expression;                                          \
+#define ARIADNE_TEST_CONSTRUCT(Class,variable,expression)      \
+    {    \
+     std::cout << #Class << " " << #variable << "" << #expression << ": " << std::flush; \
+     try {     \
+      Class variable expression;    \
+      std::cout << #variable << "==" << variable << "\n" << std::endl; \
+     }      \
+     ARIADNE_TEST_CATCH("Constructor `" << #Class << "" << #variable << "" << #expression << "'") \
+    }    \
+    Class variable expression;      \
 
 
 /*! \brief Constructs object \a variable of type \a Class from \a expression. */
-#define ARIADNE_TEST_NAMED_CONSTRUCT(Class,variable,expression)               \
-    {                                                                   \
-        std::cout << #Class << " " << #variable << "=" << #Class << "::" << #expression << ": " << std::flush; \
-        try {                                                           \
-            Class variable = Class :: expression;                                  \
-            std::cout << #variable << "==" << variable << "\n" << std::endl; \
-        }                                                               \
-        ARIADNE_TEST_CATCH("Named constructor `" << #Class << "" << #variable << "=" << #Class << "::" << #expression << "'") \
-    }                                                                   \
-    Class variable = Class :: expression;                                          \
+#define ARIADNE_TEST_NAMED_CONSTRUCT(Class,variable,expression)      \
+    {    \
+     std::cout << #Class << " " << #variable << "=" << #Class << "::" << #expression << ": " << std::flush; \
+     try {     \
+      Class variable = Class :: expression;    \
+      std::cout << #variable << "==" << variable << "\n" << std::endl; \
+     }      \
+     ARIADNE_TEST_CATCH("Named constructor `" << #Class << "" << #variable << "=" << #Class << "::" << #expression << "'") \
+    }    \
+    Class variable = Class :: expression;      \
 
 
 /*! \brief Assigns object \a variable from \a expression. */
-#define ARIADNE_TEST_ASSIGN(variable, expression)                       \
-    {                                                                   \
-        std::cout << #variable << "=" << #expression << ": " << std::flush; \
-        try {                                                           \
-            variable=(expression);                                      \
-            std::cout << variable << "\n" << std::endl;                 \
-        }                                                               \
-        ARIADNE_TEST_CATCH("Assignment `" << #variable << "=" << #expression << "'") \
-            }                                                           \
+#define ARIADNE_TEST_ASSIGN(variable, expression)     \
+    {    \
+     std::cout << #variable << "=" << #expression << ": " << std::flush; \
+     try {     \
+      variable=(expression);     \
+      std::cout << variable << "\n" << std::endl;     \
+     }      \
+     ARIADNE_TEST_CATCH("Assignment `" << #variable << "=" << #expression << "'") \
+      }     \
 
 
 /*! \brief Evaluates expression and expects an exception. */
-#define ARIADNE_TEST_THROWS(statement,error)                             \
-    {                                                                   \
-        std::cout << #statement << ": " << std::flush;                  \
-        try {                                                           \
-            statement;                                                  \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: expected " << #error << "; no exception thrown\n"; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected " << #error << "; no exception thrown." << std::endl; \
-        }                                                               \
-        catch(const error& e) {                                         \
-            std::cout << "caught " << #error << " as expected\n" << std::endl; \
-        }                                                               \
-        catch(const std::exception& e) {                                \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: caught exception " << e.what() << "; expected " << #error << "\n"; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": caught exception " << e.what() << "; expected " << #error << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_THROWS(statement,error)     \
+    {    \
+     std::cout << #statement << ": " << std::flush;      \
+     try {     \
+      statement;     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: expected " << #error << "; no exception thrown\n"; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected " << #error << "; no exception thrown." << std::endl; \
+     }      \
+     catch(const error& e) {     \
+      std::cout << "caught " << #error << " as expected\n" << std::endl; \
+     }      \
+     catch(const std::exception& e) {     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: caught exception " << e.what() << "; expected " << #error << "\n"; \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": caught exception " << e.what() << "; expected " << #error << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Evaluates expression and expects an exception. */
-#define ARIADNE_TEST_FAIL(statement)                                    \
-    {                                                                   \
-        std::cout << #statement << ": " << std::flush;                  \
-        try {                                                           \
-            statement;                                                  \
-            ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: expected exception; none thrown\n";  \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected exception; no exception thrown." << std::endl; \
-        }                                                               \
-        catch(...) {                                                    \
-            std::cout << "caught exception as expected\n" << std::endl; \
-        }                                                               \
-    }                                                                   \
+#define ARIADNE_TEST_FAIL(statement)      \
+    {    \
+     std::cout << #statement << ": " << std::flush;      \
+     try {     \
+      statement;     \
+      ++ARIADNE_TEST_FAILURES;      \
+      std::cout << "\nERROR: expected exception; none thrown\n";  \
+      std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected exception; no exception thrown." << std::endl; \
+     }      \
+     catch(...) {    \
+      std::cout << "caught exception as expected\n" << std::endl; \
+     }      \
+    }    \
 
 
 /*! \brief Check the iterator of the GridTreeSudset by iterating through all it's values and
@@ -413,27 +413,27 @@ int test_case_counter = 0;
  * elements should coincide with the value of \a expected_number_elements
  */
 #define ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridTreeSubset, expected_number_elements ) \
-    {                                                                   \
-        int elements_count = 0;                                         \
-        for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) { \
-            if( elements_count < expected_number_elements ) {           \
-                ARIADNE_PRINT_TEST_COMMENT("The next iterator node is: "); \
-                ARIADNE_TEST_COMPARE( (*expected_result[elements_count]), == , (*it) ); \
-            }                                                           \
-        }                                                               \
-        ARIADNE_PRINT_TEST_COMMENT("Test that we iterated through the right number of nodes"); \
-        ARIADNE_TEST_EQUAL( elements_count , expected_number_elements ); \
-    }                                                                   \
+    {    \
+     int elements_count = 0;     \
+     for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) { \
+      if( elements_count < expected_number_elements ) {     \
+    ARIADNE_PRINT_TEST_COMMENT("The next iterator node is: "); \
+    ARIADNE_TEST_COMPARE( (*expected_result[elements_count]), == , (*it) ); \
+      }     \
+     }      \
+     ARIADNE_PRINT_TEST_COMMENT("Test that we iterated through the right number of nodes"); \
+     ARIADNE_TEST_EQUAL( elements_count , expected_number_elements ); \
+    }    \
 
 
 /*! \brief clean std::vector, i.e. delete memory of it's non NULL elements and set them to NULL in the vector */
 #define ARIADNE_CLEAN_TEST_VECTOR( vector ) \
     { \
-        for(uint i = 0; i < vector.size(); i++ ) { \
-            if( vector[i] != NULL ) { \
-                delete vector[i]; vector[i] = NULL; \
-            } \
-        } \
+     for(uint i = 0; i < vector.size(); i++ ) { \
+      if( vector[i] != NULL ) { \
+    delete vector[i]; vector[i] = NULL; \
+      } \
+     } \
     } \
 
 

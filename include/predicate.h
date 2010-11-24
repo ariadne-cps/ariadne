@@ -1,8 +1,8 @@
 /***************************************************************************
- *            predicate.h
+ *      predicate.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file predicate.h
  *  \brief Predicates.
  */
@@ -59,29 +59,29 @@ class ExpressionPredicate
     friend ExpressionPredicate operator!(const ExpressionPredicate&);
   public:
     ExpressionPredicate(const RealScalarFunction& expression)
-        : _expression(expression), _sign(+1) { }
+     : _expression(expression), _sign(+1) { }
     const RealScalarFunction& expression() const { return _expression; }
     int sign() const { return _sign; }
 
     bool same(const ExpressionPredicate& ep2) const {
-        const ExpressionPredicate& ep1=*this;
-        return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign==ep2._sign; }
+     const ExpressionPredicate& ep1=*this;
+     return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign==ep2._sign; }
     bool opposite(const ExpressionPredicate& ep2) const {
-        const ExpressionPredicate& ep1=*this;
-        return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign!=ep2._sign; }
+     const ExpressionPredicate& ep1=*this;
+     return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign!=ep2._sign; }
     bool operator<(const ExpressionPredicate& p) const {
-        return (_expression.pointer()) < (const void*)(p._expression.pointer()); }
+     return (_expression.pointer()) < (const void*)(p._expression.pointer()); }
     size_type argument_size() const { return _expression.argument_size(); }
     tribool evaluate(const Vector<Float>& x) const {
-        Float value=_expression.evaluate(x)*_sign;
-        if(value<0) { return true; }
-        else if(value>0) { return false; }
-        else { return indeterminate; } }
+     Float value=_expression.evaluate(x)*_sign;
+     if(value<0) { return true; }
+     else if(value>0) { return false; }
+     else { return indeterminate; } }
     tribool evaluate(const Vector<Interval>& x) const {
-        Interval range=_expression.evaluate(x)*_sign;
-        if(range.upper()<0) { return true; }
-        else if(range.lower()>0) { return false; }
-        else { return indeterminate; } }
+     Interval range=_expression.evaluate(x)*_sign;
+     if(range.upper()<0) { return true; }
+     else if(range.lower()>0) { return false; }
+     else { return indeterminate; } }
   private:
     RealScalarFunction _expression;
     int _sign;
@@ -100,17 +100,17 @@ class DisjunctivePredicate
     bool tautologous() const { return _tautology; }
 
     DisjunctivePredicate& operator|=(ExpressionPredicate p) {
-        if(_tautology) { return *this; }
-        for(uint i=0; i!=_predicates.size(); ++i) {
-            if(p.same(_predicates[i])) { return *this; }
-            if(p.opposite(_predicates[i])) { _predicates.clear(); _tautology=true; return *this; }
-        }
-        _predicates.push_back(p);
-        return *this;
+     if(_tautology) { return *this; }
+     for(uint i=0; i!=_predicates.size(); ++i) {
+      if(p.same(_predicates[i])) { return *this; }
+      if(p.opposite(_predicates[i])) { _predicates.clear(); _tautology=true; return *this; }
+     }
+     _predicates.push_back(p);
+     return *this;
     }
 
     DisjunctivePredicate& operator|=(const DisjunctivePredicate& p) {
-        for(uint i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
+     for(uint i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
 
     virtual size_type argument_size() const;
     virtual tribool evaluate(const Vector<Float>& x) const;
@@ -128,14 +128,14 @@ class ConjunctiveNormalFormPredicate
     : public PredicateInterface
 {
     friend ConjunctiveNormalFormPredicate
-        operator&&(const ConjunctiveNormalFormPredicate& p1, const ConjunctiveNormalFormPredicate& p2);
-    friend ConjunctiveNormalFormPredicate 
-        operator||(const ConjunctiveNormalFormPredicate& p1, const ConjunctiveNormalFormPredicate& p2);
+     operator&&(const ConjunctiveNormalFormPredicate& p1, const ConjunctiveNormalFormPredicate& p2);
+    friend ConjunctiveNormalFormPredicate
+     operator||(const ConjunctiveNormalFormPredicate& p1, const ConjunctiveNormalFormPredicate& p2);
   public:
     ConjunctiveNormalFormPredicate& operator&=(DisjunctivePredicate p) {
-        _cnf.push_back(p); return *this; }
+     _cnf.push_back(p); return *this; }
     ConjunctiveNormalFormPredicate& operator|=(DisjunctivePredicate p) {
-        for(uint i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
+     for(uint i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
 
     virtual size_type argument_size() const;
     virtual tribool evaluate(const Vector<Float>& x) const;

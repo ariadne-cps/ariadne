@@ -1,5 +1,5 @@
 /***************************************************************************
- *            system_submodule.cc
+ *      system_submodule.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -50,15 +50,15 @@ struct from_python< Space<T> > {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        boost::python::list elements=extract<boost::python::list>(obj_ptr);
-        Space<T>* spc_ptr = new (storage) Space<T>();
-        for(int i=0; i!=len(elements); ++i) {
-            extract<String> xs(elements[i]);
-            if(xs.check()) { spc_ptr->append(Variable<T>(xs())); }
-            else { Variable<T> v=extract< Variable<T> >(elements[i]); spc_ptr->append(v); }
-        }
-        data->convertible = storage;
+     void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+     boost::python::list elements=extract<boost::python::list>(obj_ptr);
+     Space<T>* spc_ptr = new (storage) Space<T>();
+     for(int i=0; i!=len(elements); ++i) {
+      extract<String> xs(elements[i]);
+      if(xs.check()) { spc_ptr->append(Variable<T>(xs())); }
+      else { Variable<T> v=extract< Variable<T> >(elements[i]); spc_ptr->append(v); }
+     }
+     data->convertible = storage;
     }
 };
 
@@ -67,15 +67,15 @@ struct from_python< Set<DiscreteEvent> > {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Set<DiscreteEvent> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage< Set<DiscreteEvent> >*)data)->storage.bytes;
-        boost::python::list elements=extract<boost::python::list>(obj_ptr);
-        Set<DiscreteEvent>* evnts_ptr = new (storage) Set<DiscreteEvent>();
-        for(int i=0; i!=len(elements); ++i) {
-            extract<String> xs(elements[i]);
-            if(xs.check()) { evnts_ptr->insert(DiscreteEvent(xs())); }
-            else { DiscreteEvent e=extract< DiscreteEvent >(elements[i]); evnts_ptr->insert(e); }
-        }
-        data->convertible = storage;
+     void* storage = ((converter::rvalue_from_python_storage< Set<DiscreteEvent> >*)data)->storage.bytes;
+     boost::python::list elements=extract<boost::python::list>(obj_ptr);
+     Set<DiscreteEvent>* evnts_ptr = new (storage) Set<DiscreteEvent>();
+     for(int i=0; i!=len(elements); ++i) {
+      extract<String> xs(elements[i]);
+      if(xs.check()) { evnts_ptr->insert(DiscreteEvent(xs())); }
+      else { DiscreteEvent e=extract< DiscreteEvent >(elements[i]); evnts_ptr->insert(e); }
+     }
+     data->convertible = storage;
     }
 };
 

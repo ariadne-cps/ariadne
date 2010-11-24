@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tutorial.cc
+ *      tutorial.cc
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -170,11 +170,11 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     cout << "done." << endl;
     cout << "Plotting reach and evolve sets... " << flush;
     plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve);
+      Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve);
     plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
+      Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
     plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
+      Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
     cout << "done." << endl;
 
     // Compute the orbit.
@@ -223,9 +223,9 @@ void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, cons
     std::cout << "done." << std::endl;
 
     plot("tutorial-lower_reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), lower_reach_set,
-         Colour(0.0,0.25,0.5), initial_set,
-         Colour(0.25,0.0,0.5), lower_evolve_set);
+      Colour(0.0,0.5,1.0), lower_reach_set,
+      Colour(0.0,0.25,0.5), initial_set,
+      Colour(0.25,0.0,0.5), lower_evolve_set);
 
     // Compute over-approximation to finite-time evolved set using upper semantics.
     // Subdivision is used as necessary to keep the local errors reasonable.
@@ -240,9 +240,9 @@ void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, cons
     std::cout << "done." << std::endl;
 
     plot("tutorial-upper_reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), upper_reach_set,
-         Colour(0.0,0.25,0.5), initial_set,
-         Colour(0.25,0.0,0.5), upper_evolve_set);
+      Colour(0.0,0.5,1.0), upper_reach_set,
+      Colour(0.0,0.25,0.5), initial_set,
+      Colour(0.25,0.0,0.5), upper_evolve_set);
 
     // Compute over-approximation to infinite-time chain-reachable set using upper semantics.
     std::cout << "Computing chain reach set... " << std::flush;

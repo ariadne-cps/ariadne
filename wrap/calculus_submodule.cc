@@ -1,5 +1,5 @@
 /***************************************************************************
- *            calculus_submodule.cc
+ *      calculus_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -53,7 +53,7 @@ VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, int start, int
     if(start<0) { start+=tf.result_size(); }
     if(stop<0) { stop+=tf.result_size(); }
     ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&uint(stop)<=tf.result_size(),
-            "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
+      "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
     return VectorTaylorFunction(tf.domain(),Vector<IntervalTaylorModel>(project(tf.models(),range(start,stop))));
 }
 
@@ -61,21 +61,21 @@ VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, int start, int
 template<>
 struct from_python<MultiIndex> {
     from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<MultiIndex>()); }
+     boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<MultiIndex>()); }
     static void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+     if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
-        boost::python::extract<boost::python::tuple> xtup(obj_ptr);
-        boost::python::extract<boost::python::list> xlst(obj_ptr);
-        if(xlst.check()) {
-            MultiIndex a(len(xlst)); for(uint i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<uint>(xlst()[i]); }
-            new (storage) MultiIndex(a);
-        } else {
-            MultiIndex a(len(xtup)); for(uint i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<uint>(xtup()[i]); }
-            new (storage) MultiIndex(a);
-        }
-        data->convertible = storage;
+     void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+     boost::python::extract<boost::python::tuple> xtup(obj_ptr);
+     boost::python::extract<boost::python::list> xlst(obj_ptr);
+     if(xlst.check()) {
+      MultiIndex a(len(xlst)); for(uint i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<uint>(xlst()[i]); }
+      new (storage) MultiIndex(a);
+     } else {
+      MultiIndex a(len(xtup)); for(uint i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<uint>(xtup()[i]); }
+      new (storage) MultiIndex(a);
+     }
+     data->convertible = storage;
     }
 };
 
@@ -83,23 +83,23 @@ struct from_python<MultiIndex> {
 template<class T>
 struct from_python< Expansion<T> > {
     from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Expansion<T> >()); }
+     boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Expansion<T> >()); }
     static void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+     if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
-        Expansion<T> r;
-        boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
-        boost::python::list lst=dct.values();
-        for(int i=0; i!=len(lst); ++i) {
-            boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[i]);
-            MultiIndex a=boost::python::extract<MultiIndex>(tup[0]);
-            T c=extract<T>(tup[1]);
-            r.append(a,c);
-        }
-        new (storage) Expansion<T>(r);
-        r.unique_sort();
-        data->convertible = storage;
+     void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+     Expansion<T> r;
+     boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
+     boost::python::list lst=dct.values();
+     for(int i=0; i!=len(lst); ++i) {
+      boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[i]);
+      MultiIndex a=boost::python::extract<MultiIndex>(tup[0]);
+      T c=extract<T>(tup[1]);
+      r.append(a,c);
+     }
+     new (storage) Expansion<T>(r);
+     r.unique_sort();
+     data->convertible = storage;
     }
 };
 
@@ -109,33 +109,33 @@ struct from_python< Vector<IntervalTaylorModel> > {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<IntervalTaylorModel> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        boost::python::list lst=extract<boost::python::list>(obj_ptr);
-        Vector<IntervalTaylorModel>* tms_ptr = new (storage) Vector<IntervalTaylorModel>(len(lst));
-        for(int i=0; i!=len(lst); ++i) { (*tms_ptr)[i]=extract<IntervalTaylorModel>(lst[i]); }
-        data->convertible = storage;
+     void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+     boost::python::list lst=extract<boost::python::list>(obj_ptr);
+     Vector<IntervalTaylorModel>* tms_ptr = new (storage) Vector<IntervalTaylorModel>(len(lst));
+     for(int i=0; i!=len(lst); ++i) { (*tms_ptr)[i]=extract<IntervalTaylorModel>(lst[i]); }
+     data->convertible = storage;
     }
 };
 
 template<>
 struct from_python<VectorTaylorFunction> {
     from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<VectorTaylorFunction>()); }
+     boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id<VectorTaylorFunction>()); }
     static void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+     if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
-        list lst=extract<boost::python::list>(obj_ptr);
-        VectorTaylorFunction* tf_ptr = new (storage) VectorTaylorFunction(len(lst));
-        for(uint i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,extract<ScalarTaylorFunction>(lst[i])); }
-        data->convertible = storage;
+     void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+     list lst=extract<boost::python::list>(obj_ptr);
+     VectorTaylorFunction* tf_ptr = new (storage) VectorTaylorFunction(len(lst));
+     for(uint i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,extract<ScalarTaylorFunction>(lst[i])); }
+     data->convertible = storage;
     }
 };
 
 List<MultiIndex> keys(const IntervalTaylorModel& tm) {
     List<MultiIndex> r;
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        r.append(iter->key());
+     r.append(iter->key());
     }
     return r;
 }

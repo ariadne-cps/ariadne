@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_enclosure.h
+ *      hybrid_enclosure.h
  *
  *  Copyright  2009-10  Pieter Collins
  *
@@ -286,7 +286,7 @@ class ListSet<HybridEnclosure>
     ListSet() { }
     ListSet(const HybridEnclosure& hes) { this->adjoin(hes); }
     ListSet(const List<HybridEnclosure>& hel) {
-        for(List<HybridEnclosure>::const_iterator iter=hel.begin(); iter!=hel.end(); ++iter) { this->adjoin(*iter); } }
+     for(List<HybridEnclosure>::const_iterator iter=hel.begin(); iter!=hel.end(); ++iter) { this->adjoin(*iter); } }
     using HybridListSet<HybridEnclosure::ContinuousStateSetType>::adjoin;
     void adjoin(const HybridEnclosure& hes) { this->adjoin(hes.location(),hes.continuous_state_set()); }
     void append(const HybridEnclosure& hes) { this->adjoin(hes.location(),hes.continuous_state_set()); }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            box.h
+ *      box.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  *
@@ -67,12 +67,12 @@ class Box
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box unit_box(uint n) {
-        return Box(n,Interval(-1,1));
+     return Box(n,Interval(-1,1));
     }
 
     //! The upper quadrant box \f$[0,infty]^n\f$ in \a n dimensions.
     static Box upper_quadrant(uint n) {
-        return Box(n,Interval(0,inf<Float>()));
+     return Box(n,Interval(0,inf<Float>()));
     }
 
     //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.
@@ -83,60 +83,60 @@ class Box
 
     //! An approximation to the centre of the box.
     Point centre() const {
-        return Point(midpoint(static_cast<const Vector<Interval>&>(*this)));
+     return Point(midpoint(static_cast<const Vector<Interval>&>(*this)));
     }
 
     //! The radius of the box in the supremum norm.
     Float radius() const {
-        Float dmax=0;
-        for(uint i=0; i!=this->size(); ++i) {
-            dmax = max( dmax, (*this)[i].width() );
-        }
-        return up(dmax/2);
+     Float dmax=0;
+     for(uint i=0; i!=this->size(); ++i) {
+      dmax = max( dmax, (*this)[i].width() );
+     }
+     return up(dmax/2);
     }
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
     Float measure() const {
-        Float meas=1;
-        for(uint i=0; i!=this->size(); ++i) {
-            meas *= (*this)[i].width();
-        }
-        return meas;
+     Float meas=1;
+     for(uint i=0; i!=this->size(); ++i) {
+      meas *= (*this)[i].width();
+     }
+     return meas;
     }
 
     //! \brief Test if the box is empty.
     bool empty() const {
-        return Ariadne::empty(*this);
+     return Ariadne::empty(*this);
     }
 
     //! \brief Test if the box is bounded.
     bool bounded() const {
-        for(uint i=0; i!=this->Vector<Interval>::size(); ++i) {
-            if(!Ariadne::bounded((*this)[i])) {
-                return false;
-            }
-        }
-        return true;
+     for(uint i=0; i!=this->Vector<Interval>::size(); ++i) {
+      if(!Ariadne::bounded((*this)[i])) {
+    return false;
+      }
+     }
+     return true;
     }
 
     //! \brief Make a dynamically-allocated copy.
     virtual Box* clone() const {
-        return new Box(*this);
+     return new Box(*this);
     }
 
     //! \brief Test if the box is a superset of another box.
     bool contains(const Point& pt) const {
-        return Ariadne::contains(this->vector(),pt.vector());
+     return Ariadne::contains(this->vector(),pt.vector());
     }
 
     //! \brief Test if the box is a subset of another box.
     bool subset(const Box& bx) const {
-        return Ariadne::subset(this->vector(),bx.vector());
+     return Ariadne::subset(this->vector(),bx.vector());
     }
 
     //! \brief Test if the box is a superset of another box.
     bool superset(const Box& bx) const {
-        return Ariadne::subset(bx.vector(),this->vector());
+     return Ariadne::subset(bx.vector(),this->vector());
     }
 
     //! \brief Test if the box intersects another box. Returns true even
@@ -144,55 +144,55 @@ class Box
     //! Use Box::overlaps(const Box& bx) to test robust intersection
     //! of the interiors.
     bool intersects(const Box& bx) const {
-        return Ariadne::intersect(this->vector(),bx.vector());
+     return Ariadne::intersect(this->vector(),bx.vector());
     }
 
     //! \brief The dimension of the space the box lies in.
     virtual uint dimension() const {
-        return this->size();
+     return this->size();
     }
 
     //! \brief Tests if the box is disjoint from another box.
     //! Only returns true if the closures are disjoint.
     virtual tribool disjoint(const Box& other) const {
-        return Ariadne::disjoint(this->vector(), other.vector());
+     return Ariadne::disjoint(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box overlaps another box.
     //! Only returns true if the interior of one box intersects the other.
     virtual tribool overlaps(const Box& other) const {
-        return Ariadne::overlap(this->vector(), other.vector());
+     return Ariadne::overlap(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box covers another box.
     //! Only returns true if the interior of the box is a superset
     //! of the closure of the other.
     virtual tribool covers(const Box& other) const {
-        return Ariadne::inside(other.vector(), this->vector());
+     return Ariadne::inside(other.vector(), this->vector());
     }
 
     //! \brief Tests if the box covers another box.
     //! Only returns true if the closure of the box is a subset
     //! of the interior of the other.
     virtual tribool inside(const Box& other) const {
-        return Ariadne::inside(this->vector(), other.vector());
+     return Ariadne::inside(this->vector(), other.vector());
     }
 
     //! \brief Returns an enclosing bounding box for the set.
     //! The result is guaranteed to have nonempty interior, and floating-point
     //! boundary coefficients so the centre and radius are exactly computable.
     virtual Box bounding_box() const {
-        return Ariadne::widen(*this);
+     return Ariadne::widen(*this);
     }
 
     //! \brief Widens the box by the minimal floating-point increment.
     //! The result is guaranteed to contain the box in its interior.
     Box widen() const {
-        Box result(this->dimension());
-        for(uint i=0; i!=result.dimension(); ++i) {
-            result[i]=Ariadne::widen((*this)[i]);
-        }
-        return result;
+     Box result(this->dimension());
+     for(uint i=0; i!=result.dimension(); ++i) {
+      result[i]=Ariadne::widen((*this)[i]);
+     }
+     return result;
     }
 
     //! \brief Split into two along the largest side.
@@ -205,7 +205,7 @@ class Box
 
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const {
-        return os << *static_cast<const Vector<Interval>*>(this);
+     return os << *static_cast<const Vector<Interval>*>(this);
     }
 };
 

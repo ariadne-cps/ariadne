@@ -1,5 +1,5 @@
 /***************************************************************************
- *            array.h
+ *      array.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -62,28 +62,28 @@ class array {
     array(const size_type n, const value_type& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }
     /*! \brief Constructs an array of size \a n with elements initialised by the variable argument list x0,x1,... . */
     array(const size_type n, const value_type& x0, const value_type& x1, ...)
-        : _size(n), _ptr(uninitialized_new(n))
+     : _size(n), _ptr(uninitialized_new(n))
     {
-        if(n<2) { throw std::out_of_range("array: size is less than number of arguments"); }
-        va_list args; va_start(args,x1); new (_ptr) T(x0); new (_ptr+1u) T(x1);
-        for(size_t i=2; i!=n; ++i) { new (_ptr+i) T(va_arg(args,T)); } va_end(args); }
+     if(n<2) { throw std::out_of_range("array: size is less than number of arguments"); }
+     va_list args; va_start(args,x1); new (_ptr) T(x0); new (_ptr+1u) T(x1);
+     for(size_t i=2; i!=n; ++i) { new (_ptr+i) T(va_arg(args,T)); } va_end(args); }
     /*! \brief Constructs an array from the range \a first to \a last. */
     template<class ForwardIterator> array(ForwardIterator first, ForwardIterator last)
-        : _size(std::distance(first,last)), _ptr(uninitialized_new(_size))
+     : _size(std::distance(first,last)), _ptr(uninitialized_new(_size))
     {
-        this->_uninitialized_fill(first);
+     this->_uninitialized_fill(first);
     }
     /*! \brief Conversion constructor. */
     template<class T1> array(const array<T1>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
-        this->_uninitialized_fill(a.begin()); }
+     this->_uninitialized_fill(a.begin()); }
     /*! \brief Copy constructor. */
     array(const array<T>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
-        this->_uninitialized_fill(a.begin()); }
+     this->_uninitialized_fill(a.begin()); }
     /*! \brief Copy assignment. */
     array<T>& operator=(const array<T>& a) {
-        if(this->size()==a.size()) { fill(a.begin()); }
-        else { this->_destroy_elements(); uninitialized_delete(_ptr); _size=a.size(); _ptr=uninitialized_new(_size); this->_uninitialized_fill(a.begin()); }
-        return *this; }
+     if(this->size()==a.size()) { fill(a.begin()); }
+     else { this->_destroy_elements(); uninitialized_delete(_ptr); _size=a.size(); _ptr=uninitialized_new(_size); this->_uninitialized_fill(a.begin()); }
+     return *this; }
 
     /*! \brief True if the array's size is 0. */
     bool empty() const { return _size==0u; }
@@ -93,13 +93,13 @@ class array {
     size_type max_size() const { return (size_type) (-1); }
     /*! \brief Resizes the array to hold \a n elements. If \a n is larger than the current size, the extra elements are default initialised. */
     void resize(size_type n) {
-        if(size()!=n) {
-            pointer _new_ptr=uninitialized_new(n);
-            for(size_type i=0; i!=n; ++i) { if(i<_size) { new (_new_ptr+i) T(_ptr[i]); } else { new (_new_ptr+i) T(); } }
-            this->_destroy_elements(); uninitialized_delete(_ptr); _size=n; _ptr=_new_ptr; } }
+     if(size()!=n) {
+      pointer _new_ptr=uninitialized_new(n);
+      for(size_type i=0; i!=n; ++i) { if(i<_size) { new (_new_ptr+i) T(_ptr[i]); } else { new (_new_ptr+i) T(); } }
+      this->_destroy_elements(); uninitialized_delete(_ptr); _size=n; _ptr=_new_ptr; } }
     /*! \brief Reallocates the array to hold \a n elements. The new elements are default-constructed. */
     void reallocate(size_type n) { if(size()!=n) { this->_destroy_elements(); uninitialized_delete(_ptr);
-        _size=n; _ptr=uninitialized_new(_size); for(size_type i=0; i!=_size; ++i) { new (_ptr+i) T(); } } }
+     _size=n; _ptr=uninitialized_new(_size); for(size_type i=0; i!=_size; ++i) { new (_ptr+i) T(); } } }
     /*! \brief Efficiently swap two arrays.  */
     void swap(array<T>& a) { std::swap(_size,a._size); std::swap(_ptr,a._ptr); }
 
@@ -132,28 +132,28 @@ class array {
 
     /*! \brief Tests two arrays for equality */
     bool operator==(const array& other) const {
-        if(size()!=other.size()) return false;
-        const_iterator first=begin(); const_iterator last=end(); const_iterator curr=other.begin();
-        while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; } return true; }
+     if(size()!=other.size()) return false;
+     const_iterator first=begin(); const_iterator last=end(); const_iterator curr=other.begin();
+     while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; } return true; }
     /*! \brief Tests two arrays for inequality */
     bool operator!=(const array& other) const { return !((*this)==other); }
 
     /*! \brief Fills the array with copies of \a x. */
     void fill(const value_type& x) {
-        iterator curr=begin(); iterator end=this->end(); while(curr!=end) { *curr=x; ++curr; } }
+     iterator curr=begin(); iterator end=this->end(); while(curr!=end) { *curr=x; ++curr; } }
     /*! \brief Fills the array from the sequence starting at \a first. */
     template<class InputIterator> void fill(InputIterator first) {
-        iterator curr=begin(); iterator end=this->end(); while(curr!=end) { *curr=*first; ++curr; ++first; } }
+     iterator curr=begin(); iterator end=this->end(); while(curr!=end) { *curr=*first; ++curr; ++first; } }
     /*! \brief Assigns the sequence from \a first to \a last. */
     template<class ForwardIterator> void assign(ForwardIterator first, ForwardIterator last) {
-        resize(std::distance(first,last)); fill(first); }
+     resize(std::distance(first,last)); fill(first); }
   private:
     void _destroy_elements() { pointer curr=_ptr+_size; while(curr!=_ptr) { --curr; curr->~T(); } }
     void _uninitialized_fill(const value_type& x) {
-        pointer curr=_ptr; pointer end=_ptr+_size; while(curr!=end) { new (curr) T(x); ++curr; } }
+     pointer curr=_ptr; pointer end=_ptr+_size; while(curr!=end) { new (curr) T(x); ++curr; } }
      template<class InputIterator> void _uninitialized_fill(InputIterator first) {
-        pointer curr=_ptr; pointer end=_ptr+_size;
-        while(curr!=end) { new (curr) T(*first); ++curr; ++first; } }
+     pointer curr=_ptr; pointer end=_ptr+_size;
+     while(curr!=end) { new (curr) T(*first); ++curr; ++first; } }
   private:
     size_type _size;
     pointer _ptr;

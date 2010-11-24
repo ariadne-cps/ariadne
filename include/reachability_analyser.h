@@ -1,5 +1,5 @@
 /***************************************************************************
- *            reachability_analyser.h
+ *      reachability_analyser.h
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -97,7 +97,7 @@ class HybridReachabilityAnalyser
     /*! \brief Construct from evolution parameters and a method for evolving basic sets. */
     template<class HybridEnclosureType>
     HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
-                               const EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver);
+    const EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver);
 
     template<class HybridEnclosureType>
     HybridReachabilityAnalyser(const EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver);
@@ -119,54 +119,54 @@ class HybridReachabilityAnalyser
     //! \name Evaluation of systems on abstract sets
     /*! \brief Compute a lower-approximation to the set obtained by evolving \a system for \a time starting in \a initial_set. */
     virtual SetApproximationType lower_evolve(const SystemType& system,
-                                            const OvertSetInterfaceType& initial_set,
-                                            const TimeType& time) const;
+     const OvertSetInterfaceType& initial_set,
+     const TimeType& time) const;
 
     /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time. */
     virtual SetApproximationType
     lower_reach(const SystemType& system,
-                const OvertSetInterfaceType& initial_set,
-                const TimeType& time) const;
+    const OvertSetInterfaceType& initial_set,
+    const TimeType& time) const;
 
     /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. */
     virtual std::pair<SetApproximationType,SetApproximationType>
     lower_reach_evolve(const SystemType& system,
-                       const OvertSetInterfaceType& initial_set,
-                       const TimeType& time) const;
+     const OvertSetInterfaceType& initial_set,
+     const TimeType& time) const;
 
     /*! \brief Compute an approximation to the set obtained by iterating \a time times \a system starting in \a initial_set. */
     virtual SetApproximationType upper_evolve(const SystemType& system,
-                                            const CompactSetInterfaceType& initial_set,
-                                            const TimeType& time) const;
+     const CompactSetInterfaceType& initial_set,
+     const TimeType& time) const;
 
     /*! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a time times. */
     virtual SetApproximationType upper_reach(const SystemType& system,
-                                           const CompactSetInterfaceType& initial_set,
-                                           const TimeType& timeType) const;
+    const CompactSetInterfaceType& initial_set,
+    const TimeType& timeType) const;
 
     /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. */
     virtual std::pair<SetApproximationType,SetApproximationType>
     upper_reach_evolve(const SystemType& system,
-                       const CompactSetInterfaceType& initial_set,
-                       const TimeType& time) const;
+     const CompactSetInterfaceType& initial_set,
+     const TimeType& time) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
     virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const CompactSetInterfaceType& initial_set) const;
+      const CompactSetInterfaceType& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
     virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const CompactSetInterfaceType& initial_set,
-                                             const BoundingSetType& bounding_domain) const;
+      const CompactSetInterfaceType& initial_set,
+      const BoundingSetType& bounding_domain) const;
 
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
     virtual SetApproximationType viable(const HybridAutomatonInterface& system,
-                                        const HybridCompactSetInterface& bounding_set) const;
+    const HybridCompactSetInterface& bounding_set) const;
 
     /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_set. */
     virtual tribool verify(const HybridAutomatonInterface& system,
-                           const HybridLocatedSetInterface& initial_set,
-                           const HybridRegularSetInterface& safe_set) const;
+      const HybridLocatedSetInterface& initial_set,
+      const HybridRegularSetInterface& safe_set) const;
     //@}
 
   public:
@@ -202,7 +202,7 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomatonInterface,Hybri
 template<class HybridEnclosureType>
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
-                           const EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver)
+      const EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType(parameters))
     , _discretiser(new HybridDiscretiser<HybridEnclosureType>(evolver))
 {

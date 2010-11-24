@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_enclosure.cc
+ *      hybrid_enclosure.cc
  *
  *  Copyright  2009-10  Pieter Collins
  *
@@ -115,9 +115,9 @@ HybridEnclosure::dwell_time_function() const
 void HybridEnclosure::set_time_function(const ScalarIntervalFunction& time_function)
 {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
-                       "Domain of "<<time_function<<" does not contain parameter domain "<<this->parameter_domain());
+     "Domain of "<<time_function<<" does not contain parameter domain "<<this->parameter_domain());
     ARIADNE_ASSERT_MSG(this->parameter_domain()==time_function.domain(),
-                       "Domain of "<<time_function<<" does not equal parameter domain "<<this->parameter_domain());
+     "Domain of "<<time_function<<" does not equal parameter domain "<<this->parameter_domain());
     this->_time=time_function;
 }
 
@@ -191,10 +191,10 @@ void HybridEnclosure::new_parameter(Interval ivl)
     this->_dwell_time=embed(this->_dwell_time,ivl);
     this->_set._function=embed(this->_set._function,ivl);
     for(uint i=0; i!=this->_set._constraints.size(); ++i) {
-        this->_set._constraints[i]=embed(this->_set._constraints[i],ivl);
+     this->_set._constraints[i]=embed(this->_set._constraints[i],ivl);
     }
     for(uint i=0; i!=this->_set._equations.size(); ++i) {
-        this->_set._equations[i]=embed(this->_set._equations[i],ivl);
+     this->_set._equations[i]=embed(this->_set._equations[i],ivl);
     }
 }
 
@@ -202,8 +202,8 @@ void HybridEnclosure::new_invariant(DiscreteEvent event, RealScalarFunction cons
     ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_set._function);
     Interval range=constraint_wrt_params.evaluate(this->_set._domain);
     if(range.upper()>=0.0) {
-        //this->_constraint_events.push_back((this->_events,event));
-        this->_set._constraints.append(constraint_wrt_params);
+     //this->_constraint_events.push_back((this->_events,event));
+     this->_set._constraints.append(constraint_wrt_params);
     }
 }
 
@@ -211,8 +211,8 @@ void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarIntervalFunction 
     ScalarIntervalFunction constraint_wrt_params=unchecked_compose(constraint,this->_set._function);
     Interval range=constraint_wrt_params.evaluate(this->_set._domain);
     if(range.upper()>=0.0) {
-        //this->_constraint_events.push_back((this->_events,event));
-        this->_set._constraints.append(constraint_wrt_params);
+     //this->_constraint_events.push_back((this->_events,event));
+     this->_set._constraints.append(constraint_wrt_params);
     }
 }
 
@@ -232,24 +232,24 @@ void HybridEnclosure::new_guard(DiscreteEvent event, RealScalarFunction constrai
 
 void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==parameter_domain().size(),
-                       "constraint "<<constraint<<" is incompatible with parameter domain "<<parameter_domain());
+     "constraint "<<constraint<<" is incompatible with parameter domain "<<parameter_domain());
     ScalarIntervalFunction function(this->_set._domain,constraint.function());
     const Interval bounds=constraint.bounds();
     if(bounds.singleton()) {
-        this->_set._equations.append(function-bounds.upper());
+     this->_set._equations.append(function-bounds.upper());
     } else {
-        if(bounds.upper()!=+inf<Float>()) {
-            this->_set._constraints.append(function-bounds.upper());
-        }
-        if(bounds.lower()!=-inf<Float>()) {
-            this->_set._constraints.append(bounds.lower()-function);
-        }
+     if(bounds.upper()!=+inf<Float>()) {
+      this->_set._constraints.append(function-bounds.upper());
+     }
+     if(bounds.lower()!=-inf<Float>()) {
+      this->_set._constraints.append(bounds.lower()-function);
+     }
     }
 }
 
 void HybridEnclosure::new_state_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==dimension(),
-                       "constraint "<<constraint<<" is incompatible with dimension "<<dimension());
+     "constraint "<<constraint<<" is incompatible with dimension "<<dimension());
     NonlinearConstraint parameter_constraint(compose(constraint.function(),this->_set._function).real_function(),constraint.bounds());
     this->new_parameter_constraint(event,parameter_constraint);
 }
@@ -306,7 +306,7 @@ void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const 
     this->_dwell_time=this->_dwell_time+time_step_function;
     this->_set._function=unchecked_compose(phi,join(this->_set._function,time_step_function));
     if(elps.range().lower()<time_domain.upper()) {
-        this->_set._constraints.append(time_step_function-embed(elps,time_domain));
+     this->_set._constraints.append(time_step_function-embed(elps,time_domain));
     }
 }
 
@@ -329,7 +329,7 @@ void HybridEnclosure::apply_full_reach_step(const VectorIntervalFunction& phi)
 
 void HybridEnclosure::bound_time(Real tmax) {
     if(this->time_range().upper()>Interval(tmax).lower()) {
-        this->_set._constraints.append(this->_time-Interval(tmax));
+     this->_set._constraints.append(this->_time-Interval(tmax));
     }
 }
 
@@ -423,24 +423,24 @@ void HybridEnclosure::draw(CanvasInterface& canvas) const
 std::ostream& HybridEnclosure::write(std::ostream& os) const
 {
     return os << "HybridEnclosure"
-              << "( events=" << this->_events
-              << ", range=" << this->_set._function(this->_set._domain)
-              << ", location=" << this->_location
-              << ", domain=" << this->_set._domain
-              << ", range=" << this->_set._function(this->_set._domain)
-              << ", subdomain=" << this->_set._reduced_domain
-              << ", empty=" << this->empty()
-              << ", state=" << polynomial(this->_set._function)
-              << ", negative=" << polynomials(this->_set._constraints)
-              << ", zero=" << polynomials(this->_set._equations)
-              << ", time="<<polynomial(this->_time) << ")";
+     << "( events=" << this->_events
+     << ", range=" << this->_set._function(this->_set._domain)
+     << ", location=" << this->_location
+     << ", domain=" << this->_set._domain
+     << ", range=" << this->_set._function(this->_set._domain)
+     << ", subdomain=" << this->_set._reduced_domain
+     << ", empty=" << this->empty()
+     << ", state=" << polynomial(this->_set._function)
+     << ", negative=" << polynomials(this->_set._constraints)
+     << ", zero=" << polynomials(this->_set._equations)
+     << ", time="<<polynomial(this->_time) << ")";
 }
 
 
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, uint d) {
     HybridGridTreeSet result(g);
     for(ListSet<HybridEnclosure>::const_iterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result[iter->first].adjoin_outer_approximation(iter->second,d);
+     result[iter->first].adjoin_outer_approximation(iter->second,d);
     }
     return result;
 }

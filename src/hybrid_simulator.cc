@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_simulator.cc
+ *      hybrid_simulator.cc
  *
  *  Copyright  2008  Alberto Casagrande, Pieter Collins
  *
@@ -82,7 +82,7 @@ HybridPoint& operator+=(HybridPoint& hpt, const HybridVector& hv) {
     Map<Identifier,Float>& ptmp=hpt.real_values();
     const Map<Identifier,Float>& vmp=hv.real_values();
     for(Map<Identifier,Float>::const_iterator iter=vmp.begin(); iter!=vmp.end(); ++iter) {
-        ptmp[iter->first]+=iter->second;
+     ptmp[iter->first]+=iter->second;
     }
     return hpt;
 }
@@ -90,7 +90,7 @@ HybridPoint& operator+=(HybridPoint& hpt, const HybridVector& hv) {
 HybridVector& operator+=(HybridVector& hv1, const HybridVector& hv2) {
     Map<Identifier,Float>& v1mp=hv1.real_values();
     for(Map<Identifier,Float>::const_iterator iter=hv2.real_values().begin(); iter!=hv2.real_values().end(); ++iter) {
-        v1mp[iter->first]+=iter->second;
+     v1mp[iter->first]+=iter->second;
     }
     return hv1;
 }
@@ -98,7 +98,7 @@ HybridVector& operator+=(HybridVector& hv1, const HybridVector& hv2) {
 HybridVector& operator*=(HybridVector& hv, const Float& s) {
     Map<Identifier,Float>& vmp=hv.real_values();
     for(Map<Identifier,Float>::iterator iter=vmp.begin(); iter!=vmp.end(); ++iter) {
-        iter->second*=s;
+     iter->second*=s;
     }
     return hv;
 }
@@ -125,14 +125,14 @@ HybridVector operator*(const Float& s, const HybridVector& hv) {
 HybridVector evaluate(const std::vector<RealDynamic>& dyn, const HybridPoint& pt) {
     HybridVector r;
     for(std::vector<RealDynamic>::const_iterator dyn_iter=dyn.begin(); dyn_iter!=dyn.end(); ++dyn_iter) {
-        r[dyn_iter->lhs.base()]=evaluate(dyn_iter->rhs,pt);
+     r[dyn_iter->lhs.base()]=evaluate(dyn_iter->rhs,pt);
     }
     return r;
 }
 
 void evaluate(const std::vector<RealAssignment>& alg, HybridPoint& pt) {
     for(std::vector<RealAssignment>::const_iterator alg_iter=alg.begin(); alg_iter!=alg.end(); ++alg_iter) {
-        pt[alg_iter->lhs]=evaluate(alg_iter->rhs,pt);
+     pt[alg_iter->lhs]=evaluate(alg_iter->rhs,pt);
     }
     return;
 }
@@ -155,54 +155,54 @@ Simulator<HybridSystem>::orbit(const HybridSystem& sys, const HybridPoint& init_
 
     while(t<tmax) {
 
-        bool enabled=false;
-        Event event;
-        for(std::map<Event,ContinuousPredicate>::const_iterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
-            if(evaluate(guard_iter->second,pt)) {
-                enabled=true;
-                event=guard_iter->first;
-                break;
-            }
-        }
+     bool enabled=false;
+     Event event;
+     for(std::map<Event,ContinuousPredicate>::const_iterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
+      if(evaluate(guard_iter->second,pt)) {
+    enabled=true;
+    event=guard_iter->first;
+    break;
+      }
+     }
 
-        if(enabled) {
-            std::vector<StringUpdate> switchings=sys.switching(event,pt);
-            for(std::vector<StringUpdate>::const_iterator iter=switchings.begin(); iter!=switchings.end(); ++iter) {
-                next_pt.set(iter->lhs.base(),evaluate(iter->rhs,pt));
-            }
-            std::vector<RealUpdate> real_updates=sys.resets(event,pt);
-            for(std::vector<RealUpdate>::const_iterator iter=real_updates.begin(); iter!=real_updates.end(); ++iter) {
-                next_pt.set(iter->lhs.base(),evaluate(iter->rhs,pt));
-            }
-            algebraic_assignments=sys.equations(pt);
-            for(std::vector<RealAssignment>::const_iterator iter=algebraic_assignments.begin(); iter!=algebraic_assignments.end(); ++iter) {
-                next_pt.set(iter->lhs,evaluate(iter->rhs,next_pt));
-            }
-            differential_assignments=sys.dynamics(next_pt);
-            guards=sys.guards(next_pt);
-            t._discrete_time+=1;
-        } else {
-            HybridVector k1,k2,k3,k4;
-            HybridPoint pt1,pt2,pt3,pt4;
-            k1=evaluate(differential_assignments,pt);
-            pt1=pt+h*k1;
-            evaluate(algebraic_assignments,pt1);
+     if(enabled) {
+      std::vector<StringUpdate> switchings=sys.switching(event,pt);
+      for(std::vector<StringUpdate>::const_iterator iter=switchings.begin(); iter!=switchings.end(); ++iter) {
+    next_pt.set(iter->lhs.base(),evaluate(iter->rhs,pt));
+      }
+      std::vector<RealUpdate> real_updates=sys.resets(event,pt);
+      for(std::vector<RealUpdate>::const_iterator iter=real_updates.begin(); iter!=real_updates.end(); ++iter) {
+    next_pt.set(iter->lhs.base(),evaluate(iter->rhs,pt));
+      }
+      algebraic_assignments=sys.equations(pt);
+      for(std::vector<RealAssignment>::const_iterator iter=algebraic_assignments.begin(); iter!=algebraic_assignments.end(); ++iter) {
+    next_pt.set(iter->lhs,evaluate(iter->rhs,next_pt));
+      }
+      differential_assignments=sys.dynamics(next_pt);
+      guards=sys.guards(next_pt);
+      t._discrete_time+=1;
+     } else {
+      HybridVector k1,k2,k3,k4;
+      HybridPoint pt1,pt2,pt3,pt4;
+      k1=evaluate(differential_assignments,pt);
+      pt1=pt+h*k1;
+      evaluate(algebraic_assignments,pt1);
 
-            k2=evaluate(differential_assignments,pt1);
-            pt2=pt1+(h/2)*k2;
-            evaluate(algebraic_assignments,pt2);
+      k2=evaluate(differential_assignments,pt1);
+      pt2=pt1+(h/2)*k2;
+      evaluate(algebraic_assignments,pt2);
 
-            k3=evaluate(differential_assignments,pt2);
-            pt3=pt1+(h/2)*k3;
-            evaluate(algebraic_assignments,pt3);
+      k3=evaluate(differential_assignments,pt2);
+      pt3=pt1+(h/2)*k3;
+      evaluate(algebraic_assignments,pt3);
 
-            k4=evaluate(differential_assignments,pt3);
+      k4=evaluate(differential_assignments,pt3);
 
-            next_pt=pt+(h/6)*(k1+2*(k2+k3)+k4);
-            t._continuous_time+=h;
-        }
-        pt=next_pt;
-        orbit[t]=pt;
+      next_pt=pt+(h/6)*(k1+2*(k2+k3)+k4);
+      t._continuous_time+=h;
+     }
+     pt=next_pt;
+     orbit[t]=pt;
     }
 
     return orbit;

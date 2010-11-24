@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_taylor_function.cc
+ *      test_taylor_function.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -328,7 +328,7 @@ void TestVectorTaylorFunction::test_restrict()
     Expansion<Float> expansion1(2,3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0);
     Vector<Interval> subdomain1(2, -0.25,0.75, -0.5,0.0);
     Expansion<Float> subexpansion1(2,3, 1.031250, 1.812500,0.625000, 1.812500,0.562500,0.0468750,
-                                             0.875000,0.500000,0.281250,0.156250);
+      0.875000,0.500000,0.281250,0.156250);
     VectorTaylorFunction function1(domain1,expansion1*e(1,0));
     VectorTaylorFunction restricted_function1(subdomain1,subexpansion1*e(1,0));
     ARIADNE_TEST_EQUAL(restrict(function1,subdomain1),restricted_function1);
@@ -367,8 +367,8 @@ void TestVectorTaylorFunction::test_compose()
     Polynomial<Float> y=p(2,1);
     Vector< Polynomial<Float> > henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
     Vector< Polynomial<Float> > henon_square_polynomial=
-        (a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x)*e(2,0)
-            + (a-x*x+b*y)*e(2,1);
+     (a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x)*e(2,0)
+      + (a-x*x+b*y)*e(2,1);
     //    compose(henon_polynomial,henon_polynomial);
     Vector<Interval> domain1(2,0.25,1.25,0.5,1.0);
     VectorTaylorFunction function1(domain1,henon_polynomial);
@@ -418,7 +418,7 @@ void TestVectorTaylorFunction::test_join()
     Vector< Polynomial<Float> > polynomial1 = (p(2,0)*p(2,0)+2.0*p(2,0)*p(2,1)+3.0*p(2,1)*p(2,1))*e(1,0);
     Vector< Polynomial<Float> > polynomial2 = (4.0*p(2,0)*p(2,0)+5.0*p(2,0)*p(2,1)+6.0*p(2,1)*p(2,1))*e(2,1);
     Vector< Polynomial<Float> > polynomial3 = (p(2,0)*p(2,0)+2.0*p(2,0)*p(2,1)+3.0*p(2,1)*p(2,1))*e(3,0)
-        + (4.0*p(2,0)*p(2,0)+5.0*p(2,0)*p(2,1)+6.0*p(2,1)*p(2,1))*e(3,2);
+     + (4.0*p(2,0)*p(2,0)+5.0*p(2,0)*p(2,1)+6.0*p(2,1)*p(2,1))*e(3,2);
     VectorTaylorFunction function1(domain,polynomial1);
     VectorTaylorFunction function2(domain,polynomial2);
     VectorTaylorFunction function3(domain,polynomial3);
@@ -435,7 +435,7 @@ void TestVectorTaylorFunction::test_combine()
     Vector< Polynomial<Float> > polynomial1 = (p(2,0)*p(2,0)+2.0*p(2,0)*p(2,1)+3.0*p(2,1)*p(2,1))*e(1,0);
     Vector< Polynomial<Float> > polynomial2 = (4.0*p(3,0)*p(3,0)+5.0*p(3,0)*p(3,1)+6.0*p(3,1)*p(3,2))*e(2,1);
     Vector< Polynomial<Float> > polynomial3 = (p(5,0)*p(5,0)+2.0*p(5,0)*p(5,1)+3.0*p(5,1)*p(5,1))*e(3,0)
-        + (4.0*p(5,2)*p(5,2)+5.0*p(5,2)*p(5,3)+6.0*p(5,3)*p(5,4))*e(3,2);
+     + (4.0*p(5,2)*p(5,2)+5.0*p(5,2)*p(5,3)+6.0*p(5,3)*p(5,4))*e(3,2);
     VectorTaylorFunction function1(domain1,polynomial1);
     VectorTaylorFunction function2(domain2,polynomial2);
     VectorTaylorFunction function3(domain3,polynomial3);

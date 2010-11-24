@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression.h
+ *      expression.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -116,11 +116,11 @@ struct ExpressionNode
     Operator _operator;
     Float _constant;
     union {
-        void* _variable;
-        unsigned int _coordinate;
-        ExpressionNode* _arg;
-        struct { ExpressionNode* _arg1; ExpressionNode* _arg2; };
-        //struct { ExpressionNode* _arg; int _power; };
+     void* _variable;
+     unsigned int _coordinate;
+     ExpressionNode* _arg;
+     struct { ExpressionNode* _arg1; ExpressionNode* _arg2; };
+     //struct { ExpressionNode* _arg; int _power; };
     };
 };
 
@@ -128,29 +128,29 @@ template<class R, class A>
 R _evaluate(ExpressionNode* e, const ContinuousValuation<A>& x)
 {
     switch(e->_operator) {
-        case CNST: return static_cast<R>(e->_constant);
-        case VAR: return x[e->_variable];
-        case ADD: return add(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case SUB: return sub(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case MUL: return mul(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case DIV: return div(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case MAX: return max(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        case MIN: return min(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
-        //case POW: return pow(_evaluate<R>(e->_arg,x),e->_power);
-        case POS: return pos(_evaluate<R>(e->_arg,x));
-        case NEG: return neg(_evaluate<R>(e->_arg,x));
-        case ABS: return abs(_evaluate<R>(e->_arg,x));
-        case SQR: return sqr(_evaluate<R>(e->_arg,x));
-        case SQRT: return sqrt(_evaluate<R>(e->_arg,x));
-        case EXP: return exp(_evaluate<R>(e->_arg,x));
-        case LOG: return log(_evaluate<R>(e->_arg,x));
-        case SIN: return sin(_evaluate<R>(e->_arg,x));
-        case COS: return cos(_evaluate<R>(e->_arg,x));
-        case TAN: return tan(_evaluate<R>(e->_arg,x));
-        case ASIN: return asin(_evaluate<R>(e->_arg,x));
-        case ACOS: return acos(_evaluate<R>(e->_arg,x));
-        case ATAN: return atan(_evaluate<R>(e->_arg,x));
-        default: assert(false);
+     case CNST: return static_cast<R>(e->_constant);
+     case VAR: return x[e->_variable];
+     case ADD: return add(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+     case SUB: return sub(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+     case MUL: return mul(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+     case DIV: return div(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+     case MAX: return max(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+     case MIN: return min(_evaluate<R>(e->_arg1,x),_evaluate<R>(e->_arg2,x));
+     //case POW: return pow(_evaluate<R>(e->_arg,x),e->_power);
+     case POS: return pos(_evaluate<R>(e->_arg,x));
+     case NEG: return neg(_evaluate<R>(e->_arg,x));
+     case ABS: return abs(_evaluate<R>(e->_arg,x));
+     case SQR: return sqr(_evaluate<R>(e->_arg,x));
+     case SQRT: return sqrt(_evaluate<R>(e->_arg,x));
+     case EXP: return exp(_evaluate<R>(e->_arg,x));
+     case LOG: return log(_evaluate<R>(e->_arg,x));
+     case SIN: return sin(_evaluate<R>(e->_arg,x));
+     case COS: return cos(_evaluate<R>(e->_arg,x));
+     case TAN: return tan(_evaluate<R>(e->_arg,x));
+     case ASIN: return asin(_evaluate<R>(e->_arg,x));
+     case ACOS: return acos(_evaluate<R>(e->_arg,x));
+     case ATAN: return atan(_evaluate<R>(e->_arg,x));
+     default: assert(false);
     }
 }
 
@@ -183,10 +183,10 @@ class Expression {
     List< Expression<R> > subexpressions() const;
      //! \brief Substitute the constant \a c for the variable \a v.
     template<class X> Expression<R> substitute(const Variable<X>& v, const X& c) const {
-        return Ariadne::substitute(*this,v,c); };
+     return Ariadne::substitute(*this,v,c); };
     //! \brief Simplify the expression (e.g. by evaluating constants).
     Expression<R> simplify() const {
-        return Ariadne::simplify(*this); }
+     return Ariadne::simplify(*this); }
     //! \brief Convert to a list of expressions
     operator List< Expression<R> >() const { return List< Expression<R> >(1u,*this); }
     //! \brief Write to an output stream.
@@ -221,10 +221,10 @@ class Expression<Real> {
     List< Expression<R> > subexpressions() const;
     //! \brief Substitute the constant \a c for the variable \a v.
     template<class X> Expression<R> substitute(const Variable<X>& v, const X& c) const {
-        return Ariadne::substitute(*this,v,c); }
+     return Ariadne::substitute(*this,v,c); }
     //! \brief Simplify the expression (e.g. by evaluating constants).
     Expression<R> simplify() const {
-        return Ariadne::simplify(*this); }
+     return Ariadne::simplify(*this); }
     //! \brief Convert to a list of expressions
     operator List< Expression<R> >() const { return List< Expression<R> >(1u,*this); }
     //! \brief Write to an output stream.

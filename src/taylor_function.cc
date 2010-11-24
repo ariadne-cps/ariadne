@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_function.cc
+ *      taylor_function.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -176,7 +176,7 @@ Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const Vector<Interv
     ARIADNE_DEPRECATED("ScalarTaylorFunction::constants","Use VectorTaylorFunction::constant instead");
     Vector<ScalarTaylorFunction> x(c.size(),ScalarTaylorFunction(d));
     for(uint i=0; i!=c.size(); ++i) {
-        x[i]=c[i];
+     x[i]=c[i];
     }
     return x;
 }
@@ -195,7 +195,7 @@ Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Vector<Interv
 
     Vector<ScalarTaylorFunction> x(imax-imin);
     for(uint i=imin; i!=imax; ++i) {
-        x[i-imin]=ScalarTaylorFunction::variable(d,i);
+     x[i-imin]=ScalarTaylorFunction::variable(d,i);
     }
     return x;
 }
@@ -211,12 +211,12 @@ ScalarTaylorFunction::polynomial() const
 
     Vector<Polynomial<Interval> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].radius()<=0) {
-            ARIADNE_ASSERT(this->domain()[j].radius()==0);
-            s[j]=Polynomial<Interval>::constant(this->argument_size(),this->domain()[j]);
-        } else {
-            s[j]=Ariadne::polynomial(IntervalTaylorModel::unscaling(this->argument_size(),j,this->domain()[j]));
-        }
+     if(this->domain()[j].radius()<=0) {
+      ARIADNE_ASSERT(this->domain()[j].radius()==0);
+      s[j]=Polynomial<Interval>::constant(this->argument_size(),this->domain()[j]);
+     } else {
+      s[j]=Ariadne::polynomial(IntervalTaylorModel::unscaling(this->argument_size(),j,this->domain()[j]));
+     }
     }
 
     return compose(p,s);
@@ -258,34 +258,34 @@ ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunc
 
 ScalarTaylorFunction operator+(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
     if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model+x2._model); }
+     return ScalarTaylorFunction(x1._domain,x1._model+x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model+restrict(x2,domain)._model);}
+     ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+     return ScalarTaylorFunction(domain,restrict(x1,domain)._model+restrict(x2,domain)._model);}
 }
 
 ScalarTaylorFunction operator-(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
     if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model-x2._model); }
+     return ScalarTaylorFunction(x1._domain,x1._model-x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model-restrict(x2,domain)._model);}
+     ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+     return ScalarTaylorFunction(domain,restrict(x1,domain)._model-restrict(x2,domain)._model);}
 }
 
 ScalarTaylorFunction operator*(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
     if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model*x2._model); }
+     return ScalarTaylorFunction(x1._domain,x1._model*x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model*restrict(x2,domain)._model);}
+     ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+     return ScalarTaylorFunction(domain,restrict(x1,domain)._model*restrict(x2,domain)._model);}
 }
 
 ScalarTaylorFunction operator/(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
     if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model/x2._model); }
+     return ScalarTaylorFunction(x1._domain,x1._model/x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
+     ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+     return ScalarTaylorFunction(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
 }
 
 
@@ -294,18 +294,18 @@ ScalarTaylorFunction operator/(const ScalarTaylorFunction& x1, const ScalarTaylo
 
 ScalarTaylorFunction max(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
     if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,max(x1._model,x2._model)); }
+     return ScalarTaylorFunction(x1._domain,max(x1._model,x2._model)); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,max(restrict(x1,domain)._model,restrict(x2,domain)._model));}
+     ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+     return ScalarTaylorFunction(domain,max(restrict(x1,domain)._model,restrict(x2,domain)._model));}
 }
 
 ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
     if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,min(x1._model,x2._model)); }
+     return ScalarTaylorFunction(x1._domain,min(x1._model,x2._model)); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,min(restrict(x1,domain)._model,restrict(x2,domain)._model));}
+     ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+     return ScalarTaylorFunction(domain,min(restrict(x1,domain)._model,restrict(x2,domain)._model));}
 }
 
 
@@ -340,7 +340,7 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const Vector<Inter
     const Vector<Interval>& od=tv.domain();
     ScalarTaylorFunction r=tv;
     for(uint j=0; j!=d.size(); ++j) {
-        if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }
+     if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }
     }
     return r;
 }
@@ -349,7 +349,7 @@ ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Vector<Interva
     const Vector<Interval>& domain=tv.domain();
     ARIADNE_ASSERT(subset(domain,d));
     for(uint i=0; i!=d.size(); ++i) {
-        ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
+     ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
     }
     return ScalarTaylorFunction(d,tv._model);
 }
@@ -357,7 +357,7 @@ ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Vector<Interva
 Interval
 evaluate(const ScalarTaylorFunction& f, const Vector<Interval>& x) {
     if(!subset(x,f.domain())) {
-        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+     ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
@@ -384,7 +384,7 @@ ScalarTaylorFunction
 compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
 {
     if(!subset(f.codomain(),g.domain())) {
-        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+     ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
     }
     return unchecked_compose(g,f);
 }
@@ -457,7 +457,7 @@ split(const ScalarTaylorFunction& tv, uint j)
     pair<IntervalTaylorModel,IntervalTaylorModel> models=split(tv.model(),j);
     pair<Box,Box> subdomains=split(tv.domain(),j);
     return make_pair(ScalarTaylorFunction(subdomains.first,models.first),
-                     ScalarTaylorFunction(subdomains.second,models.second));
+      ScalarTaylorFunction(subdomains.second,models.second));
 
 }
 
@@ -471,10 +471,10 @@ bool refines(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
 bool disjoint(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
 {
     if(tv1.domain()==tv2.domain()) {
-        return disjoint(tv1.model(),tv2.model());
+     return disjoint(tv1.model(),tv2.model());
     } else {
-        Vector<Interval> domain=intersection(tv1.domain(),tv2.domain());
-        return disjoint(restrict(tv1,domain).model(),restrict(tv2,domain).model());
+     Vector<Interval> domain=intersection(tv1.domain(),tv2.domain());
+     return disjoint(restrict(tv1,domain).model(),restrict(tv2,domain).model());
     }
 }
 
@@ -511,9 +511,9 @@ prod(const Matrix<Interval>& A,
 
     Vector<ScalarTaylorFunction> r(A.row_size(),ScalarTaylorFunction(x[0].domain()));
     for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint j=0; j!=A.column_size(); ++j) {
-            r[i]+=A[i][j]*x[j];
-        }
+     for(uint j=0; j!=A.column_size(); ++j) {
+      r[i]+=A[i][j]*x[j];
+     }
     }
     return r;
 }
@@ -535,7 +535,7 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 {
     ARIADNE_ASSERT(f.argument_size()==g.size());
     for(uint i=0; i!=g.size(); ++i) {
-        ARIADNE_ASSERT(g[0].domain()==g[i].domain());
+     ARIADNE_ASSERT(g[0].domain()==g[i].domain());
     }
 
     Vector<Interval> gdomain=g[0].domain();
@@ -564,7 +564,7 @@ std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
     os << "ScalarTaylorFunction"<< this->domain()
-       << "(" << midpoint(this->polynomial());
+    << "(" << midpoint(this->polynomial());
     if(this->error()>0.0) { os << "+/-" << this->error(); }
     os <<  ")";
     return os;
@@ -584,7 +584,7 @@ bool
 check(const Vector<ScalarTaylorFunction>& tv)
 {
     for(uint i=0; i!=tv.size(); ++i) {
-        if(tv[0].domain()!=tv[i].domain()) { return false; }
+     if(tv[0].domain()!=tv[i].domain()) { return false; }
     }
     return true;
 }
@@ -594,7 +594,7 @@ expansion(const Vector<ScalarTaylorFunction>& x)
 {
     Vector< Expansion<Float> > r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=x[i].expansion();
+     r[i]=x[i].expansion();
     }
     return r;
 }
@@ -604,7 +604,7 @@ error(const Vector<ScalarTaylorFunction>& x)
 {
     Vector<Float> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=x[i].error();
+     r[i]=x[i].error();
     }
     return r;
 }
@@ -614,7 +614,7 @@ value(const Vector<ScalarTaylorFunction>& x)
 {
     Vector<Float> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=x[i].value();
+     r[i]=x[i].value();
     }
     return r;
 }
@@ -624,7 +624,7 @@ ranges(const Vector<ScalarTaylorFunction>& x)
 {
     Vector<Interval> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=x[i].range();
+     r[i]=x[i].range();
     }
     return r;
 }
@@ -635,7 +635,7 @@ evaluate(const Vector<ScalarTaylorFunction>& tv, const Vector<Interval>& x)
 {
     Vector<Interval> r(tv.size());
     for(uint i=0; i!=tv.size(); ++i) {
-        r[i]=evaluate(tv[i],x);
+     r[i]=evaluate(tv[i],x);
     }
     return r;
 }
@@ -648,9 +648,9 @@ jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<Interval>& x)
     const uint n=dom.size();
     Vector< Differential<Interval> > s(n,n,1u);
     for(uint j=0; j!=n; ++j) {
-        Interval dj=dom[j];
-        s[j].set_value((x[j]-med_ivl(dj))/rad_ivl(dj));
-        s[j].set_gradient(j,rec(rad_ivl(dj)));
+     Interval dj=dom[j];
+     s[j].set_value((x[j]-med_ivl(dj))/rad_ivl(dj));
+     s[j].set_gradient(j,rec(rad_ivl(dj)));
     }
     Vector< Expansion<Float> > p=expansion(tv);
     Vector< Differential<Interval> > d=evaluate(p,s);
@@ -698,40 +698,40 @@ ScalarTaylorFunction substitute(const ScalarTaylorFunction& f, uint k, const Sca
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const Vector<IntervalTaylorModel>& f)
+    const Vector<IntervalTaylorModel>& f)
     : _domain(d), _models(f)
 {
     for(uint i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT_MSG(d.size()==f[i].argument_size(),"d="<<d<<"f="<<f);
+     ARIADNE_ASSERT_MSG(d.size()==f[i].argument_size(),"d="<<d<<"f="<<f);
     }
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const Vector< Expansion<Float> >& f)
+    const Vector< Expansion<Float> >& f)
     : _domain(d), _models(f.size())
 {
     for(uint i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT(d.size()==f[i].argument_size());
-        _models[i]=IntervalTaylorModel(f[i],0.0);
+     ARIADNE_ASSERT(d.size()==f[i].argument_size());
+     _models[i]=IntervalTaylorModel(f[i],0.0);
     }
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const Vector< Expansion<Float> >& f,
-                               const Vector<Float>& e)
+    const Vector< Expansion<Float> >& f,
+    const Vector<Float>& e)
     : _domain(d), _models(f.size())
 {
     ARIADNE_ASSERT(f.size()==e.size());
     for(uint i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT(d.size()==f[i].argument_size());
-        _models[i]=IntervalTaylorModel(f[i],e[i]);
+     ARIADNE_ASSERT(d.size()==f[i].argument_size());
+     _models[i]=IntervalTaylorModel(f[i],e[i]);
     }
 }
 
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const RealVectorFunction& f)
+    const RealVectorFunction& f)
     : _domain(d), _models(f.result_size())
 {
     ARIADNE_ASSERT(f.result_size()>0);
@@ -742,8 +742,8 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const RealVectorFunction& f,
-                               const shared_ptr<IntervalTaylorModel::Accuracy> accuracy_ptr)
+    const RealVectorFunction& f,
+    const shared_ptr<IntervalTaylorModel::Accuracy> accuracy_ptr)
     : _domain(d), _models(f.result_size())
 {
     ARIADNE_ASSERT(f.result_size()>0);
@@ -756,7 +756,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const Vector< Polynomial<Float> >& p)
+    const Vector< Polynomial<Float> >& p)
     : _domain(d), _models(p.size())
 {
     for(uint i=0; i!=p.size(); ++i) { ARIADNE_ASSERT(d.size()==p[i].argument_size()); }
@@ -767,7 +767,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const Vector< Polynomial<Interval> >& p)
+    const Vector< Polynomial<Interval> >& p)
     : _domain(d), _models(p.size())
 {
     for(uint i=0; i!=p.size(); ++i) { ARIADNE_ASSERT(d.size()==p[i].argument_size()); }
@@ -783,7 +783,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v
     for(uint i=1; i!=v.size(); ++i) { ARIADNE_ASSERT(v[i].domain()==v[0].domain()); }
     this->_domain=v[0].domain();
     for(uint i=0; i!=v.size(); ++i) {
-        this->_models[i]=v[i].model();
+     this->_models[i]=v[i].model();
     }
 }
 
@@ -794,7 +794,7 @@ VectorTaylorFunction::VectorTaylorFunction(const List<ScalarTaylorFunction>& v)
     for(uint i=1; i!=v.size(); ++i) { ARIADNE_ASSERT(v[i].domain()==v[0].domain()); }
     this->_domain=v[0].domain();
     for(uint i=0; i!=v.size(); ++i) {
-        this->_models[i]=v[i].model();
+     this->_models[i]=v[i].model();
     }
 }
 
@@ -841,13 +841,13 @@ VectorTaylorFunction::polynomial() const
 {
     Vector<Polynomial<Interval> > p(this->result_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        p[i]=Ariadne::polynomial(this->models()[i]);
+     p[i]=Ariadne::polynomial(this->models()[i]);
     }
 
     Vector<Polynomial<Interval> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].radius()<=0) { ARIADNE_WARN("zero radius in domain of VectorTaylorFunction"<<std::endl); }
-        else { s[j]=Ariadne::polynomial(IntervalTaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
+     if(this->domain()[j].radius()<=0) { ARIADNE_WARN("zero radius in domain of VectorTaylorFunction"<<std::endl); }
+     else { s[j]=Ariadne::polynomial(IntervalTaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
     }
 
     return compose(p,s);
@@ -858,7 +858,7 @@ VectorTaylorFunction::errors() const
 {
     Vector<Float> e(this->result_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        e[i]=this->models()[i].error();
+     e[i]=this->models()[i].error();
     }
     return e;
 }
@@ -868,7 +868,7 @@ VectorTaylorFunction::error() const
 {
     Float e=0.0;
     for(uint i=0; i!=this->result_size(); ++i) {
-        e=max(e,this->models()[i].error());
+     e=max(e,this->models()[i].error());
     }
     return e;
 }
@@ -906,7 +906,7 @@ void
 VectorTaylorFunction::set_accuracy(shared_ptr<IntervalTaylorModel::Accuracy> acc_ptr)
 {
     for(uint i=0; i!=this->result_size(); ++i) {
-        this->_models[i].set_accuracy(acc_ptr);
+     this->_models[i].set_accuracy(acc_ptr);
     }
 }
 
@@ -921,7 +921,7 @@ VectorTaylorFunction::codomain() const
 {
     Vector<Interval> result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
-        result[i]=this->_models[i].range();
+     result[i]=this->_models[i].range();
     }
     return result;
 }
@@ -932,7 +932,7 @@ VectorTaylorFunction::centre() const
 {
     Vector<Float> result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
-        result[i]=this->_models[i].value();
+     result[i]=this->_models[i].value();
     }
     return result;
 }
@@ -942,7 +942,7 @@ VectorTaylorFunction::range() const
 {
     Vector<Interval> result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
-        result[i]=this->_models[i].range();
+     result[i]=this->_models[i].range();
     }
     return result;
 }
@@ -1007,9 +1007,9 @@ VectorTaylorFunction::set(uint i, const ScalarTaylorFunction& e)
 {
     ARIADNE_ASSERT_MSG(this->size()>i,"Cannot set "<<i<<"th element of VectorTaylorFunction "<<(*this));
     if(this->domain().size()!=0) {
-        ARIADNE_ASSERT_MSG(e.domain()==this->domain(),"Domain of "<<e<<" conflicts with existing domain "<<this->domain());
+     ARIADNE_ASSERT_MSG(e.domain()==this->domain(),"Domain of "<<e<<" conflicts with existing domain "<<this->domain());
     } else {
-        this->_domain=e.domain();
+     this->_domain=e.domain();
     }
     this->_models[i]=e.model();
 }
@@ -1035,9 +1035,9 @@ VectorTaylorFunction::_compute(Vector<T>& r, const Vector<T>& a) const
     const VectorTaylorFunction& f=*this;
     Vector<T> sx=Ariadne::unscale(a,f._domain);
     for(uint i=0; i!=r.size(); ++i) {
-        T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);
-        X e=convert_error<X>(this->_models[i].error());
-        r[i]=ri+e;
+     T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);
+     X e=convert_error<X>(this->_models[i].error());
+     r[i]=ri+e;
     }
 }
 
@@ -1048,7 +1048,7 @@ VectorTaylorFunction&
 VectorTaylorFunction::sweep()
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].sweep();
+     this->_models[i].sweep();
     }
     return *this;
 }
@@ -1057,7 +1057,7 @@ VectorTaylorFunction&
 VectorTaylorFunction::truncate()
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].truncate();
+     this->_models[i].truncate();
     }
     return *this;
 }
@@ -1066,7 +1066,7 @@ VectorTaylorFunction&
 VectorTaylorFunction::sweep(double threshold)
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].sweep(threshold);
+     this->_models[i].sweep(threshold);
     }
     return *this;
 }
@@ -1075,7 +1075,7 @@ VectorTaylorFunction&
 VectorTaylorFunction::truncate(uint degree)
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].truncate(degree);
+     this->_models[i].truncate(degree);
     }
     return *this;
 }
@@ -1084,7 +1084,7 @@ void
 VectorTaylorFunction::set_sweep_threshold(double threshold)
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].set_sweep_threshold(threshold);
+     this->_models[i].set_sweep_threshold(threshold);
     }
 }
 
@@ -1092,7 +1092,7 @@ void
 VectorTaylorFunction::set_maximum_degree(uint degree)
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].set_maximum_degree(degree);
+     this->_models[i].set_maximum_degree(degree);
     }
 }
 
@@ -1100,7 +1100,7 @@ VectorTaylorFunction&
 VectorTaylorFunction::clobber()
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].clobber();
+     this->_models[i].clobber();
     }
     return *this;
 }
@@ -1112,12 +1112,12 @@ VectorTaylorFunction::evaluate(const Vector<Float>& x) const
 {
     const VectorTaylorFunction& f=*this;
     if(!contains(f.domain(),x)) {
-        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+     ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
     }
     Vector<Float> sx=Ariadne::unscale(x,f._domain);
     Vector<Float> r(this->result_size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=Ariadne::evaluate(this->_models[i].expansion(),sx);
+     r[i]=Ariadne::evaluate(this->_models[i].expansion(),sx);
     }
     return r;
 }
@@ -1128,7 +1128,7 @@ VectorTaylorFunction::evaluate(const Vector<Interval>& x) const
 {
     const VectorTaylorFunction& f=*this;
     if(!subset(x,f.domain())) {
-        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+     ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     Vector<Interval> sx=Ariadne::evaluate(IntervalTaylorModel::unscalings(f._domain),x);
     return Ariadne::evaluate(f._models,sx);
@@ -1145,10 +1145,10 @@ VectorTaylorFunction::jacobian(const Vector<Interval>& x) const
 {
     Matrix<Interval> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
     for(uint j=0; j!=J.column_size(); ++j) {
-        Interval rad=rad_ivl(this->_domain[j]);
-        for(uint i=0; i!=J.row_size(); ++i) {
-            J[i][j]/=rad;
-        }
+     Interval rad=rad_ivl(this->_domain[j]);
+     for(uint i=0; i!=J.row_size(); ++i) {
+      J[i][j]/=rad;
+     }
     }
     return J;
 }
@@ -1232,7 +1232,7 @@ restrict(const VectorTaylorFunction& f, const Vector<Interval>& d)
     if(d==f.domain()) { return f; }
     VectorTaylorFunction r(f.result_size(),d);
     for(uint i=0; i!=r.result_size(); ++i) {
-        r.set(i,restrict(f[i],d));
+     r.set(i,restrict(f[i],d));
     }
     r.set_accuracy(f.accuracy_ptr());
     return r;
@@ -1244,7 +1244,7 @@ split(const VectorTaylorFunction& tf, uint j)
     pair< Vector<IntervalTaylorModel>,Vector<IntervalTaylorModel> > models=split(tf.models(),j);
     pair<Box,Box> subdomains=split(tf.domain(),j);
     return make_pair(VectorTaylorFunction(subdomains.first,models.first),
-                     VectorTaylorFunction(subdomains.second,models.second));
+      VectorTaylorFunction(subdomains.second,models.second));
 
 }
 
@@ -1252,7 +1252,7 @@ bool
 refines(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     for(uint i=0; i!=f1.result_size(); ++i) {
-        if(!refines(f1[i],f2[i])) { return false; }
+     if(!refines(f1[i],f2[i])) { return false; }
     }
     return true;
 }
@@ -1261,7 +1261,7 @@ bool
 disjoint(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     for(uint i=0; i!=f1.result_size(); ++i) {
-        if(disjoint(f1[i],f2[i])) { return true; }
+     if(disjoint(f1[i],f2[i])) { return true; }
     }
     return false;
 }
@@ -1271,7 +1271,7 @@ intersection(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     VectorTaylorFunction r(f1.result_size());
     for(uint i=0; i!=r.result_size(); ++i) {
-        r[i]=intersection(f1[i],f2[i]);
+     r[i]=intersection(f1[i],f2[i]);
     }
     return r;
 }
@@ -1331,13 +1331,13 @@ VectorTaylorFunction
 operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 {
     ARIADNE_ASSERT_MSG(!intersection(f1.domain(),f2.domain()).empty(),
-                       "operator+(VectorTaylorFunction f1, VectorTaylorFunction f2) with f1="<<f1<<" f2="<<f2<<
-                       ": domains are disjoint");
+     "operator+(VectorTaylorFunction f1, VectorTaylorFunction f2) with f1="<<f1<<" f2="<<f2<<
+     ": domains are disjoint");
     if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<IntervalTaylorModel>(f1.models()+f2.models()));
+     return VectorTaylorFunction(f1.domain(),Vector<IntervalTaylorModel>(f1.models()+f2.models()));
     } else {
-        Box new_domain=intersection(f1.domain(),f2.domain());
-        return operator+(restrict(f1,new_domain),restrict(f2,new_domain));
+     Box new_domain=intersection(f1.domain(),f2.domain());
+     return operator+(restrict(f1,new_domain),restrict(f2,new_domain));
     }
 }
 
@@ -1347,10 +1347,10 @@ operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 {
     ARIADNE_ASSERT(!intersection(f1.domain(),f2.domain()).empty());
     if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<IntervalTaylorModel>(f1.models()-f2.models()));
+     return VectorTaylorFunction(f1.domain(),Vector<IntervalTaylorModel>(f1.models()-f2.models()));
     } else {
-        Box new_domain=intersection(f1.domain(),f2.domain());
-        return operator-(restrict(f1,new_domain),restrict(f2,new_domain));
+     Box new_domain=intersection(f1.domain(),f2.domain());
+     return operator-(restrict(f1,new_domain),restrict(f2,new_domain));
     }
 }
 
@@ -1451,7 +1451,7 @@ partial_restrict(const VectorTaylorFunction& tf, uint k, const Interval& c)
 {
     VectorTaylorFunction r(tf.result_size(),tf.domain());
     for(uint i=0; i!=tf.result_size(); ++i) {
-        r[i]=partial_restrict(tf[i],k,c);
+     r[i]=partial_restrict(tf[i],k,c);
     }
     return r;
 }
@@ -1466,7 +1466,7 @@ restrict(const VectorTaylorFunction& tf, uint k, const Interval& c)
 Vector<Interval>
 evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x) {
     if(!subset(x,f.domain())) {
-        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+     ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
@@ -1492,7 +1492,7 @@ VectorTaylorFunction
 compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
 {
     if(!subset(f.codomain(),g.domain())) {
-        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+     ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
     }
     return unchecked_compose(g,f);
 }
@@ -1513,8 +1513,8 @@ antiderivative(const VectorTaylorFunction& f, uint k)
     Interval fdomkrad=rad_ivl(f.domain()[k].lower(),f.domain()[k].upper());
     VectorTaylorFunction g=f;
     for(uint i=0; i!=g.size(); ++i) {
-        g._models[i].antidifferentiate(k);
-        g._models[i]*=fdomkrad;
+     g._models[i].antidifferentiate(k);
+     g._models[i]*=fdomkrad;
     }
     return g;
 }
@@ -1535,7 +1535,7 @@ template<class X> inline Vector<X> join(const Vector<X>& v1, const Vector<X>& v2
 Float norm(const VectorTaylorFunction& f) {
     Float res=0.0;
     for(uint i=0; i!=f.result_size(); ++i) {
-        res=max(res,norm(f[i]));
+     res=max(res,norm(f[i]));
     }
     return res;
 }
@@ -1565,8 +1565,8 @@ VectorTaylorFunction::repr(std::ostream& os) const
 {
     os << "[";
     for(uint i=0; i!=this->result_size(); ++i) {
-        if(i!=0) { os << ","; }
-        (*this)[i].repr(os);
+     if(i!=0) { os << ","; }
+     (*this)[i].repr(os);
     }
     return os << "]";
 }
@@ -1590,7 +1590,7 @@ Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn) {
 List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns) {
     List< Polynomial<Interval> > result;
     for(uint i=0; i!=tfns.size(); ++i) {
-        result.append(polynomial(tfns[i]));
+     result.append(polynomial(tfns[i]));
     }
     return result;
 }
@@ -1607,28 +1607,28 @@ operator<<(Output::latexstream& texs, const VectorTaylorFunction& p)
     texs << "\\left( \\begin{array}{c}\n";
     char var='x';
     for(uint i=0; i!=p.result_size(); ++i) {
-        bool first = true;
-        if(i!=0) { texs << "\\\\"; }
-        for(MultiIndex j(p.argument_size()); j.degree()<=p.order(); ++j) {
-            const Interval& a=p.centre_derivatives()[i][j];
-            if(a!=0) {
-                if(first) { first=false; }
-                else { if(a>0) { texs << '+'; } }
-                if(a==1) { if(j.degree()==0) { texs << a; } }
-                else if(a==-1) { if(j.degree()==0) { texs << a; } else { texs << '-'; } }
-                else { texs << a << ' '; }
-                for(uint k=0; k!=p.argument_size(); ++k) {
-                    if(j[k]!=0) {
-                        texs << var << "_{ " << k+1 << "}";
-                        if(j[k]!=1) {
-                            texs << "^{" << j[k] << "}";
-                        }
-                    }
-                    texs << " ";
-                }
-            }
-        }
-        texs << "\n";
+     bool first = true;
+     if(i!=0) { texs << "\\\\"; }
+     for(MultiIndex j(p.argument_size()); j.degree()<=p.order(); ++j) {
+      const Interval& a=p.centre_derivatives()[i][j];
+      if(a!=0) {
+    if(first) { first=false; }
+    else { if(a>0) { texs << '+'; } }
+    if(a==1) { if(j.degree()==0) { texs << a; } }
+    else if(a==-1) { if(j.degree()==0) { texs << a; } else { texs << '-'; } }
+    else { texs << a << ' '; }
+    for(uint k=0; k!=p.argument_size(); ++k) {
+     if(j[k]!=0) {
+      texs << var << "_{ " << k+1 << "}";
+      if(j[k]!=1) {
+    texs << "^{" << j[k] << "}";
+      }
+     }
+     texs << " ";
+    }
+      }
+     }
+     texs << "\n";
     }
     texs << "\\end{array}\\right)\n}\n";
     return texs;

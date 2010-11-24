@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_serialization.cc
+ *      test_serialization.cc
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -39,34 +39,34 @@ class TestSerialization
 {
   public:
     int test() {
-        test_array();
-        return 0;
+     test_array();
+     return 0;
     }
 
     int test_array() {
-        double data[]={5,23,42,111,242};
-        const array<double> oary1(data,data+5);
-        const array<double> oary2(data,data+3);
-        ofstream ofs("test_serialization-array.txt");
-        text_oarchive txtoa(ofs);
-        txtoa << oary1 << oary2;
-        ofs.close();
-    
-        array<double> iary1(100),iary2(1);
-        ifstream ifs("test_serialization-array.txt");
-        text_iarchive txtia(ifs);
-        txtia >> iary1 >> iary2;
-        ofs.close();
-    
-        ARIADNE_TEST_EQUAL(oary1,iary1);
-        ARIADNE_TEST_EQUAL(oary2,iary2);
+     double data[]={5,23,42,111,242};
+     const array<double> oary1(data,data+5);
+     const array<double> oary2(data,data+3);
+     ofstream ofs("test_serialization-array.txt");
+     text_oarchive txtoa(ofs);
+     txtoa << oary1 << oary2;
+     ofs.close();
 
-        return 0;
+     array<double> iary1(100),iary2(1);
+     ifstream ifs("test_serialization-array.txt");
+     text_iarchive txtia(ifs);
+     txtia >> iary1 >> iary2;
+     ofs.close();
+
+     ARIADNE_TEST_EQUAL(oary1,iary1);
+     ARIADNE_TEST_EQUAL(oary2,iary2);
+
+     return 0;
     }
 
 };
 
-  
+
 int main() {
     return TestSerialization().test();
 }

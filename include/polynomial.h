@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polynomial.h
+ *      polynomial.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -69,7 +69,7 @@ class Polynomial
     typedef typename Expansion<X>::const_reference const_reference;
     typedef typename Expansion<X>::iterator iterator;
     typedef typename Expansion<X>::const_iterator const_iterator;
-    
+
     typedef typename X::NumericType NumericType;
   public:
     //@{
@@ -89,14 +89,14 @@ class Polynomial
 
     //! \brief Create a constant polynomial in \a as variables with value \a c.
     static Polynomial<X> constant(unsigned int as, const X& c) {
-        Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r; }
+     Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r; }
     //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
     static Polynomial<X> variable(unsigned int as, unsigned int j) {
-        ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
+     ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
     //! \brief Create an array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
     static Vector< Polynomial<X> > variables(unsigned int as) {
-        Vector< Polynomial<X> > r(as); for(unsigned int i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
+     Vector< Polynomial<X> > r(as); for(unsigned int i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
     Polynomial<X>& operator=(const X& x) { this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),x); return *this; }
 
     //@{
@@ -104,11 +104,11 @@ class Polynomial
 
     //! \brief Equality operator.
     template<class XX> bool operator==(const Polynomial<XX>& p) const {
-        const_cast<Polynomial<X>*>(this)->cleanup(); const_cast<Polynomial<XX>&>(p).cleanup();
-        return this->_expansion==p._expansion; }
+     const_cast<Polynomial<X>*>(this)->cleanup(); const_cast<Polynomial<XX>&>(p).cleanup();
+     return this->_expansion==p._expansion; }
     //! \brief Inequality operator.
     template<class XX> bool operator!=(const Polynomial<XX>& p) const {
-        return !(*this==p); }
+     return !(*this==p); }
     //@}
 
     //@{
@@ -192,10 +192,10 @@ Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, double c0, ...)
     MultiIndex a(as); double x;
     va_list args; va_start(args,c0);
     while(a.degree()<=deg) {
-        if(a.degree()==0) { x=c0; }
-        else { x=va_arg(args,double); }
-        if(x!=0) { this->_expansion.append(a,x); }
-        ++a;
+     if(a.degree()==0) { x=c0; }
+     else { x=va_arg(args,double); }
+     if(x!=0) { this->_expansion.append(a,x); }
+     ++a;
     }
     va_end(args);
     this->cleanup();
@@ -210,12 +210,12 @@ Polynomial<X>::Polynomial(unsigned int as, unsigned int nnz, int a00, ...)
     va_list args;
     va_start(args,a00);
     for(unsigned int i=0; i!=nnz; ++i) {
-        for(unsigned int j=0; j!=as; ++j) {
-            if(i==0 && j==0) { a[j]=a00; }
-            else { a[j]=va_arg(args,int); }
-        }
-        x=va_arg(args,double);
-        if(x!=0) { this->_expansion.append(a,x); }
+     for(unsigned int j=0; j!=as; ++j) {
+      if(i==0 && j==0) { a[j]=a00; }
+      else { a[j]=va_arg(args,int); }
+     }
+     x=va_arg(args,double);
+     if(x!=0) { this->_expansion.append(a,x); }
     }
     va_end(args);
     this->cleanup();
@@ -225,10 +225,10 @@ template<class X>
 Polynomial<X>&
 Polynomial<X>::differentiate(size_type j) {
     for(typename Polynomial<X>::iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        MultiIndex& a=iter->key();
-        X& c=iter->data();
-        c*=a[j];
-        if(a[j]!=0u) { ++a[j]; }
+     MultiIndex& a=iter->key();
+     X& c=iter->data();
+     c*=a[j];
+     if(a[j]!=0u) { ++a[j]; }
     }
     return *this;
 }
@@ -237,10 +237,10 @@ template<class X>
 Polynomial<X>&
 Polynomial<X>::antidifferentiate(size_type j) {
     for(typename Polynomial<X>::iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        MultiIndex& a=iter->key();
-        X& c=iter->data();
-        ++a[j];
-        c/=a[j];
+     MultiIndex& a=iter->key();
+     X& c=iter->data();
+     ++a[j];
+     c/=a[j];
     }
     return *this;
 }
@@ -249,9 +249,9 @@ template<class X>
 Polynomial<X>& Polynomial<X>::truncate(smoothness_type d) {
     Polynomial<X> r(this->argument_size());
     for(typename Polynomial<X>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        if(iter->key().degree()<=d && iter->data()!=0) {
-            r.append(iter->key(),iter->data());
-        }
+     if(iter->key().degree()<=d && iter->data()!=0) {
+      r.append(iter->key(),iter->data());
+     }
     }
     this->swap(r);
     return *this;
@@ -322,9 +322,9 @@ template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const 
     Polynomial<X> r(p1.argument_size());
     typedef typename Polynomial<X>::const_iterator Iter;
     for(Iter iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
-        for(Iter iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
-            MultiIndex a=iter1->key()+iter2->key();
-            r[a]+=iter1->data()*iter2->data(); } } return r; }
+     for(Iter iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
+      MultiIndex a=iter1->key()+iter2->key();
+      r[a]+=iter1->data()*iter2->data(); } } return r; }
 
 //! \relates Polynomial \brief Square.
 template<class X> inline Polynomial<X> sqr(const Polynomial<X>& p) {
@@ -383,14 +383,14 @@ template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) {
 inline Polynomial<Float> midpoint(const Polynomial<Interval>& p) {
     Polynomial<Float> r(p.argument_size());
     for(Polynomial<Interval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        r.append(iter->key(),midpoint(iter->data())); }
+     r.append(iter->key(),midpoint(iter->data())); }
     return r;
 }
 
 inline Vector< Polynomial<Float> > midpoint(const Vector< Polynomial<Interval> >& p) {
     Vector< Polynomial<Float> > r(p.size());
     for(uint i=0; i!=p.size(); ++i) {
-        r[i]=midpoint(p[i]); }
+     r[i]=midpoint(p[i]); }
     return r;
 }
 
@@ -409,7 +409,7 @@ Vector<Y> evaluate(const Vector< Polynomial<X> >& p, const Vector<Y>& x)
     Y zero = x[0]; zero*=0;
     Vector<Y> r(p.size(),zero);
     for(uint i=0; i!=p.size(); ++i) {
-        r[i]=evaluate(p[i],x);
+     r[i]=evaluate(p[i],x);
     }
     return r;
 }
@@ -422,62 +422,62 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
     Polynomial<X> r(x.argument_size()-1);
     MultiIndex ra(r.argument_size());
     if(c==0) {
-        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            const MultiIndex& xa=xiter->key();
-            MultiIndex::index_type xak=xa[k];
-            if(xak==0) {
-                const X& xv=xiter->data();
-                for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-                for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
-                r.expansion().append(ra,xv);
-            }
-        }
+     for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+      const MultiIndex& xa=xiter->key();
+      MultiIndex::index_type xak=xa[k];
+      if(xak==0) {
+    const X& xv=xiter->data();
+    for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+    for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+    r.expansion().append(ra,xv);
+      }
+     }
     } else if(c==1) {
-        Polynomial<X> s(x.argument_size()-1);
-        array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+     Polynomial<X> s(x.argument_size()-1);
+     array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
 
-        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            const MultiIndex& xa=xiter->key();
-            const X& xv=xiter->data();
-            MultiIndex::index_type xak=xa[k];
-            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
-            assert(ra.degree()+xak==xa.degree());
-            p[xak].expansion().append(ra,xv);
-        }
+     for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+      const MultiIndex& xa=xiter->key();
+      const X& xv=xiter->data();
+      MultiIndex::index_type xak=xa[k];
+      for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+      for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+      assert(ra.degree()+xak==xa.degree());
+      p[xak].expansion().append(ra,xv);
+     }
 
-        r=p[0];
-        for(uint i=1; i!=p.size(); ++i) {
-            r+=p[i];
-        }
+     r=p[0];
+     for(uint i=1; i!=p.size(); ++i) {
+      r+=p[i];
+     }
     } else {
-        Polynomial<X> s(x.argument_size()-1);
-        array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+     Polynomial<X> s(x.argument_size()-1);
+     array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
 
-        array<X> cpowers(x.degree()+1);
-        cpowers[0]=static_cast<X>(1); cpowers[1]=c;
-        if(x.degree()>=2) { cpowers[2]=sqr(c); }
-        for(uint j=3; j<=x.degree(); ++j) {
-            cpowers[j]=cpowers[j-2]*cpowers[2];
-        }
+     array<X> cpowers(x.degree()+1);
+     cpowers[0]=static_cast<X>(1); cpowers[1]=c;
+     if(x.degree()>=2) { cpowers[2]=sqr(c); }
+     for(uint j=3; j<=x.degree(); ++j) {
+      cpowers[j]=cpowers[j-2]*cpowers[2];
+     }
 
-        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            const MultiIndex& xa=xiter->key();
-            const X& xv=xiter->data();
-            MultiIndex::index_type xak=xa[k];
-            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
-            assert(ra.degree()+xak==xa.degree());
-            p[xak].expansion().append(ra,xv);
-        }
-        for(uint i=1; i!=p.size(); ++i) {
-            p[i]*=cpowers[i];
-        }
+     for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+      const MultiIndex& xa=xiter->key();
+      const X& xv=xiter->data();
+      MultiIndex::index_type xak=xa[k];
+      for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+      for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+      assert(ra.degree()+xak==xa.degree());
+      p[xak].expansion().append(ra,xv);
+     }
+     for(uint i=1; i!=p.size(); ++i) {
+      p[i]*=cpowers[i];
+     }
 
-        r=p[0];
-        for(uint i=1; i!=p.size(); ++i) {
-            r+=p[i];
-        }
+     r=p[0];
+     for(uint i=1; i!=p.size(); ++i) {
+      r+=p[i];
+     }
     }
 
     return r;
@@ -509,13 +509,13 @@ derivative(const Polynomial<X>& p, uint j) {
     Polynomial<X> r(p.argument_size());
     MultiIndex ar(p.argument_size());
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        const MultiIndex& ap=iter->key();
-        if(ap[j]>0) {
-            const X& val=iter->data();
-            ar=ap;
-            ar[j]-=1;
-            r.append(ar,val*static_cast<X>(ap[j]));
-        }
+     const MultiIndex& ap=iter->key();
+     if(ap[j]>0) {
+      const X& val=iter->data();
+      ar=ap;
+      ar[j]-=1;
+      r.append(ar,val*static_cast<X>(ap[j]));
+     }
     }
     return r;
 }
@@ -525,7 +525,7 @@ Vector< Polynomial<X> >
 derivative(const Polynomial<X>& p) {
     Vector< Polynomial<X> > r(p.argument_size(), Polynomial<X>(p.argument_size()) );
     for(uint j=0; j!=r.size(); ++j) {
-        r[j]=derivative(p,j);
+     r[j]=derivative(p,j);
     }
     return r;
 }
@@ -535,7 +535,7 @@ Vector< Polynomial<X> >
 derivative(const Vector< Polynomial<X> >& p, uint j) {
     Vector< Polynomial<X> > r(p.size());
     for(uint i=0; i!=p.size(); ++i) {
-        r[i]=derivative(p[i],j);
+     r[i]=derivative(p[i],j);
     }
     return r;
 }
@@ -546,11 +546,11 @@ antiderivative(const Polynomial<X>& p, uint j) {
     Polynomial<X> r(p.argument_size());
     MultiIndex ar(p.argument_size());
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        const MultiIndex& ap=iter->key();
-        const X& val=iter->data();
-        ar=ap;
-        ++ar[j];
-        r.append(ar,val/ar[j]);
+     const MultiIndex& ap=iter->key();
+     const X& val=iter->data();
+     ar=ap;
+     ++ar[j];
+     r.append(ar,val/ar[j]);
     }
     return r;
 }
@@ -560,7 +560,7 @@ Vector< Polynomial<X> >
 antiderivative(const Vector< Polynomial<X> >& p, uint j) {
     Vector< Polynomial<X> > r(p.size());
     for(uint i=0; i!=p.size(); ++i) {
-        r[i]=antiderivative(p[i],j);
+     r[i]=antiderivative(p[i],j);
     }
     return r;
 }
@@ -570,9 +570,9 @@ Polynomial<X>
 truncate(const Polynomial<X>& p, unsigned short d) {
     Polynomial<X> r(p.argument_size());
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        if(iter->key().degree()<=d && iter->data()!=0) {
-            r.append(iter->key(),iter->data());
-        }
+     if(iter->key().degree()<=d && iter->data()!=0) {
+      r.append(iter->key(),iter->data());
+     }
     }
     return r;
 }
@@ -582,7 +582,7 @@ Vector< Polynomial<X> >
 truncate(const Vector< Polynomial<X> >& p, uint d) {
     Vector< Polynomial<X> > r(p.size());
     for(uint i=0; i!=p.size(); ++i) {
-        r[i]=truncate(p[i],d);
+     r[i]=truncate(p[i],d);
     }
     return r;
 }
@@ -598,13 +598,13 @@ Vector< Polynomial<X> > flow(const Vector< Polynomial<X> >& p, uint order)
 
     Vector< Polynomial<X> > r=p0;
     for(uint k=0; k!=order; ++k) {
-        r=compose(p,r);
-        for(uint i=0; i!=n; ++i) {
-            r[i].cleanup();
-            r[i]=truncate(r[i],k+1);
-            r[i]=antiderivative(r[i],n);
-            r[i]+=p0[i];
-        }
+     r=compose(p,r);
+     for(uint i=0; i!=n; ++i) {
+      r[i].cleanup();
+      r[i]=truncate(r[i],k+1);
+      r[i]=antiderivative(r[i],n);
+      r[i]+=p0[i];
+     }
     }
 
     return r;
@@ -623,14 +623,14 @@ template<class X, class Y> Vector< Polynomial<X> > operator*(const Polynomial<X>
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
     if(p.begin()==p.end()) {
-        return os << "{"<<MultiIndex::zero(p.argument_size())<<":0.0}"; }
+     return os << "{"<<MultiIndex::zero(p.argument_size())<<":0.0}"; }
 
     os << "{";
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        os << (iter==p.begin() ? "" : ",");
-        for(unsigned int i=0; i!=iter->key().size(); ++i) {
-            os << (i==0?" ":",") << int(iter->key()[i]); }
-        os << ":" << iter->data(); }
+     os << (iter==p.begin() ? "" : ",");
+     for(unsigned int i=0; i!=iter->key().size(); ++i) {
+      os << (i==0?" ":",") << int(iter->key()[i]); }
+     os << ":" << iter->data(); }
     return os << " }";
 }
 */
@@ -640,21 +640,21 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
     bool first_term=true;
     bool zero=true;
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        MultiIndex a=iter->key();
-        X v=iter->data();
-        if(v!=0) {
-            zero=false;
-            if(v>0 && !first_term) { os<<"+"; }
-            first_term=false;
-            bool first_factor=true;
-            if(v<0) { os<<"-"; }
-            if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
-            for(uint j=0; j!=a.size(); ++j) {
-                if(a[j]!=0) {
-                    if(first_factor) { first_factor=false; } else { os <<"*"; }
-                    os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
-            }
-        }
+     MultiIndex a=iter->key();
+     X v=iter->data();
+     if(v!=0) {
+      zero=false;
+      if(v>0 && !first_term) { os<<"+"; }
+      first_term=false;
+      bool first_factor=true;
+      if(v<0) { os<<"-"; }
+      if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
+      for(uint j=0; j!=a.size(); ++j) {
+    if(a[j]!=0) {
+     if(first_factor) { first_factor=false; } else { os <<"*"; }
+     os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
+      }
+     }
     }
     if(zero) { os << "0"; }
     return os;

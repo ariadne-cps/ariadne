@@ -1,5 +1,5 @@
 /***************************************************************************
- *            reachability_analyser.cc
+ *      reachability_analyser.cc
  *
  *  Copyright  2006-9  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *
@@ -83,16 +83,16 @@ HybridReachabilityAnalyser(const DiscretiserInterface<HybridAutomatonInterface,H
 // Helper functions for operators on lists of sets.
 HybridGridTreeSet
 HybridReachabilityAnalyser::_upper_reach(const HybridAutomatonInterface& sys,
-                                         const HybridGridTreeSet& set,
-                                         const HybridTime& time,
-                                         const int accuracy) const
+     const HybridGridTreeSet& set,
+     const HybridTime& time,
+     const int accuracy) const
 {
     HybridGrid grid=sys.grid();
     HybridGridTreeSet result(grid);
     HybridGridTreeSet cells=set;
     cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        result.adjoin(this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS).reach());
+     result.adjoin(this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS).reach());
     }
     return result;
 }
@@ -100,15 +100,15 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomatonInterface& sys,
 
 HybridGridTreeSet
 HybridReachabilityAnalyser::_upper_evolve(const HybridAutomatonInterface& sys,
-                                          const HybridGridTreeSet& set,
-                                          const HybridTime& time,
-                                          const int accuracy) const
+      const HybridGridTreeSet& set,
+      const HybridTime& time,
+      const int accuracy) const
 {
     HybridGrid grid=sys.grid();
     HybridGridTreeSet result(grid); HybridGridTreeSet cells=set; cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        ARIADNE_LOG(5,"Evolving cell = "<<*iter<<"\n");
-        result.adjoin(this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS).final());
+     ARIADNE_LOG(5,"Evolving cell = "<<*iter<<"\n");
+     result.adjoin(this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS).final());
     }
     ARIADNE_LOG(4,"_upper_evolve result size = "<<result.size()<<"\n");
     return result;
@@ -117,9 +117,9 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomatonInterface& sys,
 
 std::pair<HybridGridTreeSet,HybridGridTreeSet>
 HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomatonInterface& sys,
-                                                const HybridGridTreeSet& set,
-                                                const HybridTime& time,
-                                                const int accuracy) const
+      const HybridGridTreeSet& set,
+      const HybridTime& time,
+      const int accuracy) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::_upper_reach_evolve(...)\n");
     HybridGrid grid=sys.grid();
@@ -138,11 +138,11 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomatonInterface& 
     */
 
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        Orbit<HybridGridCell> evolution=this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS);
-        ARIADNE_LOG(4,"  evolution reach size= "<<evolution.reach().size()<<"\n");
-        ARIADNE_LOG(4,"  evolution final size= "<<evolution.final().size()<<"\n");
-        reach.adjoin(evolution.reach());
-        evolve.adjoin(evolution.final());
+     Orbit<HybridGridCell> evolution=this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS);
+     ARIADNE_LOG(4,"  evolution reach size= "<<evolution.reach().size()<<"\n");
+     ARIADNE_LOG(4,"  evolution final size= "<<evolution.final().size()<<"\n");
+     reach.adjoin(evolution.reach());
+     evolve.adjoin(evolution.final());
     }
     ARIADNE_LOG(3,"  final reach size = "<<reach.size()<<"\n");
     ARIADNE_LOG(3,"  final evolve size = "<<evolve.size()<<"\n");
@@ -156,8 +156,8 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomatonInterface& 
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 lower_evolve(const SystemType& system,
-             const OvertSetInterfaceType& initial_set,
-             const TimeType& time) const
+    const OvertSetInterfaceType& initial_set,
+    const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_evolve(...)\n");
     int grid_depth = this->_parameters->maximum_grid_depth;
@@ -170,10 +170,10 @@ lower_evolve(const SystemType& system,
     ARIADNE_LOG(3,"initial.size()="<<initial.size()<<"\n");
     ARIADNE_LOG(3,"computing lower evolution.");
     for(HybridGridTreeSet::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        ARIADNE_LOG(3,".");
-        HybridGridCell cell=*bs_iter;
-        HybridGridTreeSet cell_final=this->_discretiser->evolution(system,cell,time,grid_depth,LOWER_SEMANTICS).final();
-        final.adjoin(cell_final);
+     ARIADNE_LOG(3,".");
+     HybridGridCell cell=*bs_iter;
+     HybridGridTreeSet cell_final=this->_discretiser->evolution(system,cell,time,grid_depth,LOWER_SEMANTICS).final();
+     final.adjoin(cell_final);
     }
     ARIADNE_LOG(3,"\n");
     return final;
@@ -184,8 +184,8 @@ lower_evolve(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 lower_reach(const SystemType& system,
-            const OvertSetInterfaceType& initial_set,
-            const TimeType& time) const
+      const OvertSetInterfaceType& initial_set,
+      const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach(...)\n");
     int grid_depth = this->_parameters->maximum_grid_depth;
@@ -199,11 +199,11 @@ lower_reach(const SystemType& system,
     ARIADNE_LOG(3,"initial.size()="<<initial.size()<<"\n");
     ARIADNE_LOG(3,"Computing lower reach set...");
     for(HybridGridTreeSet::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        ARIADNE_LOG(3,".");
-        GC cell=*bs_iter;
-        Orbit<GC> orbit = this->_discretiser->evolution(system,cell,time,grid_depth,LOWER_SEMANTICS);
-        reach.adjoin(orbit.reach());
-        reach.adjoin(orbit.final());
+     ARIADNE_LOG(3,".");
+     GC cell=*bs_iter;
+     Orbit<GC> orbit = this->_discretiser->evolution(system,cell,time,grid_depth,LOWER_SEMANTICS);
+     reach.adjoin(orbit.reach());
+     reach.adjoin(orbit.final());
     }
     ARIADNE_LOG(3,"\n");
     return reach;
@@ -214,8 +214,8 @@ lower_reach(const SystemType& system,
 std::pair<HybridReachabilityAnalyser::SetApproximationType,HybridReachabilityAnalyser::SetApproximationType>
 HybridReachabilityAnalyser::
 lower_reach_evolve(const SystemType& system,
-                   const OvertSetInterfaceType& initial_set,
-                   const TimeType& time) const
+    const OvertSetInterfaceType& initial_set,
+    const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach_evolve(...)\n");
     int grid_depth = this->_parameters->maximum_grid_depth;
@@ -232,10 +232,10 @@ lower_reach_evolve(const SystemType& system,
     ARIADNE_LOG(3,"initial.size()="<<initial.size()<<"\n");
     ARIADNE_LOG(3,"computing lower evolution.");
     for(HybridGridTreeSet::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        ARIADNE_LOG(3,".");
-        Orbit<GC> orbit = this->_discretiser->evolution(system,*bs_iter,time,grid_depth,LOWER_SEMANTICS);
-        reach.adjoin(orbit.reach());
-        evolve.adjoin(orbit.final());
+     ARIADNE_LOG(3,".");
+     Orbit<GC> orbit = this->_discretiser->evolution(system,*bs_iter,time,grid_depth,LOWER_SEMANTICS);
+     reach.adjoin(orbit.reach());
+     evolve.adjoin(orbit.final());
     }
     ARIADNE_LOG(3,"\n");
     return make_pair(reach,evolve);
@@ -245,8 +245,8 @@ lower_reach_evolve(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 upper_evolve(const SystemType& system,
-             const CompactSetInterfaceType& initial_set,
-             const TimeType& time) const
+    const CompactSetInterfaceType& initial_set,
+    const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
     HybridGrid grid=system.grid();
@@ -264,13 +264,13 @@ upper_evolve(const SystemType& system,
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     for(uint i=0; i!=time_steps; ++i) {
-        ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
-        evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
+     ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
+     evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
-        ARIADNE_LOG(3,"computing evolution for remainder time...\n");
-        evolve=this->_upper_evolve(system,evolve,hybrid_remainder_time,grid_depth);
+     ARIADNE_LOG(3,"computing evolution for remainder time...\n");
+     evolve=this->_upper_evolve(system,evolve,hybrid_remainder_time,grid_depth);
     }
     evolve.recombine();
     ARIADNE_LOG(4,"final_evolve.size()="<<evolve.size()<<"\n");
@@ -282,8 +282,8 @@ upper_evolve(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 upper_reach(const SystemType& system,
-            const CompactSetInterfaceType& initial_set,
-            const TimeType& time) const
+      const CompactSetInterfaceType& initial_set,
+      const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
@@ -307,21 +307,21 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(3,"discrete_steps="<<discrete_steps<<"\n");
     HybridGridTreeSet found(grid);
     for(uint i=0; i!=time_steps; ++i) {
-        ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
-        make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
-        ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
-        ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
-        evolve.remove(reach);
-        reach.adjoin(found);
-        ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
-        if(evolve.empty()) break;
-        ARIADNE_LOG(6,"evolve="<<evolve<<"\n");
+     ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
+     make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
+     ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
+     ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
+     evolve.remove(reach);
+     reach.adjoin(found);
+     ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
+     if(evolve.empty()) break;
+     ARIADNE_LOG(6,"evolve="<<evolve<<"\n");
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
-        ARIADNE_LOG(3,"computing evolution for remainder time...\n");
-        make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
-        reach.adjoin(found);
+     ARIADNE_LOG(3,"computing evolution for remainder time...\n");
+     make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
+     reach.adjoin(found);
     }
     // This last step is necessary to add the final set to the result.
     reach.adjoin(evolve);
@@ -335,8 +335,8 @@ upper_reach(const SystemType& system,
 std::pair<HybridReachabilityAnalyser::SetApproximationType,HybridReachabilityAnalyser::SetApproximationType>
 HybridReachabilityAnalyser::
 upper_reach_evolve(const SystemType& system,
-                   const CompactSetInterfaceType& initial_set,
-                   const TimeType& time) const
+    const CompactSetInterfaceType& initial_set,
+    const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
@@ -359,18 +359,18 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     HybridGridTreeSet found(grid);
     for(uint i=0; i!=time_steps; ++i) {
-        ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
-        make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
-        ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
-        ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
-        reach.adjoin(found);
-        ARIADNE_LOG(3,"  found "<<found.size()<<" cells.\n");
+     ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
+     make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
+     ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
+     ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
+     reach.adjoin(found);
+     ARIADNE_LOG(3,"  found "<<found.size()<<" cells.\n");
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
-        ARIADNE_LOG(3,"computing evolution for remainder time...\n");
-        make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
-        reach.adjoin(found);
+     ARIADNE_LOG(3,"computing evolution for remainder time...\n");
+     make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
+     reach.adjoin(found);
     }
     reach.recombine();
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
@@ -387,7 +387,7 @@ upper_reach_evolve(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system,
-            const CompactSetInterfaceType& initial_set) const
+      const CompactSetInterfaceType& initial_set) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::chain_reach(system,set)\n");
     Float transient_time = this->_parameters->transient_time;
@@ -411,23 +411,23 @@ chain_reach(const SystemType& system,
 
     HybridGridTreeSet reach = HybridGridTreeSet(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
-        ARIADNE_LOG(3,"Computing transient evolution...\n");
-        make_lpair(reach,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_transient_time,maximum_grid_depth);
-        ARIADNE_LOG(5,"transient_reach_size="<<reach.size()<<"\n");
-        ARIADNE_LOG(5,"evolve_size="<<evolve.size()<<"\n");
-        ARIADNE_LOG(3,"  found "<<reach.size()<<" cells.\n");
+     ARIADNE_LOG(3,"Computing transient evolution...\n");
+     make_lpair(reach,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_transient_time,maximum_grid_depth);
+     ARIADNE_LOG(5,"transient_reach_size="<<reach.size()<<"\n");
+     ARIADNE_LOG(5,"evolve_size="<<evolve.size()<<"\n");
+     ARIADNE_LOG(3,"  found "<<reach.size()<<" cells.\n");
     }
     HybridGridTreeSet found(grid);
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
     while(!evolve.empty()) {
-        make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
-        ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
-        ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
-        evolve.remove(reach);
-        found.restrict_to_height(maximum_grid_height);
-        reach.adjoin(found);
-        ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
-        // ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
+     make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
+     ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
+     ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
+     evolve.remove(reach);
+     found.restrict_to_height(maximum_grid_height);
+     reach.adjoin(found);
+     ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
+     // ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
     }
     reach.recombine();
     return reach;
@@ -437,8 +437,8 @@ chain_reach(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system,
-            const CompactSetInterfaceType& initial_set,
-            const BoundingSetType& bounding_set) const
+      const CompactSetInterfaceType& initial_set,
+      const BoundingSetType& bounding_set) const
 {
     // FIXME: Use tree sets throughout
 
@@ -470,25 +470,25 @@ chain_reach(const SystemType& system,
 
     HybridGridTreeSet reach(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
-        ARIADNE_LOG(3,"Computing transient evolution...\n");
-        make_lpair(reach,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_transient_time,maximum_grid_depth);
-        evolve.restrict(bounding);
-        ARIADNE_LOG(5,"transient_reach_size="<<reach.size()<<"\n");
-        ARIADNE_LOG(5,"evolve_size="<<evolve.size()<<"\n");
-        ARIADNE_LOG(3,"  found "<<reach.size()<<" cells.\n");
+     ARIADNE_LOG(3,"Computing transient evolution...\n");
+     make_lpair(reach,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_transient_time,maximum_grid_depth);
+     evolve.restrict(bounding);
+     ARIADNE_LOG(5,"transient_reach_size="<<reach.size()<<"\n");
+     ARIADNE_LOG(5,"evolve_size="<<evolve.size()<<"\n");
+     ARIADNE_LOG(3,"  found "<<reach.size()<<" cells.\n");
     }
     HybridGridTreeSet found(grid);
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
 
     while(!evolve.empty()) {
-        make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
-        ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
-        ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
-        evolve.remove(reach);
-        evolve.restrict(bounding);
-        reach.adjoin(found);
-        ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
-        // ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
+     make_lpair(found,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_lock_to_grid_time,maximum_grid_depth);
+     ARIADNE_LOG(5,"found.size()="<<found.size()<<"\n");
+     ARIADNE_LOG(5,"evolve.size()="<<evolve.size()<<"\n");
+     evolve.remove(reach);
+     evolve.restrict(bounding);
+     reach.adjoin(found);
+     ARIADNE_LOG(3,"  found "<<found.size()<<" cells, of which "<<evolve.size()<<" are new.\n");
+     // ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
     }
     reach.recombine();
     reach.restrict(bounding);
@@ -502,7 +502,7 @@ chain_reach(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 viable(const SystemType& system,
-       const CompactSetInterfaceType& bounding_set) const
+    const CompactSetInterfaceType& bounding_set) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -512,8 +512,8 @@ viable(const SystemType& system,
 tribool
 HybridReachabilityAnalyser::
 verify(const SystemType& system,
-       const LocatedSetInterfaceType& initial_set,
-       const RegularSetInterfaceType& safe_set) const
+    const LocatedSetInterfaceType& initial_set,
+    const RegularSetInterfaceType& safe_set) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

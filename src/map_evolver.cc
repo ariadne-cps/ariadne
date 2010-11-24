@@ -1,5 +1,5 @@
 /***************************************************************************
- *            map_evolver.cc
+ *      map_evolver.cc
  *
  *  Copyright  2008  Alberto Casagrande, Pieter Collins
  *
@@ -90,7 +90,7 @@ orbit(const SystemType& system,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false);
+      system,initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -108,13 +108,13 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 void
 MapEvolver::
 _evolution(EnclosureListType& final_sets,
-           EnclosureListType& reach_sets,
-           EnclosureListType& intermediate_sets,
-           const SystemType& system,
-           const EnclosureType& initial_set,
-           const TimeType& maximum_time,
-           Semantics semantics,
-           bool reach) const
+     EnclosureListType& reach_sets,
+     EnclosureListType& intermediate_sets,
+     const SystemType& system,
+     const EnclosureType& initial_set,
+     const TimeType& maximum_time,
+     Semantics semantics,
+     bool reach) const
 {
     verbosity=0;
 
@@ -125,42 +125,42 @@ _evolution(EnclosureListType& final_sets,
     List< TimedEnclosureType > working_sets;
 
     {
-        // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        EnclosureType initial_enclosure(initial_set);
-        ARIADNE_LOG(6,"initial_enclosure = "<<initial_enclosure<<"\n");
-        TimeType initial_time = 0;
-        ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
-        working_sets.push_back(make_pair(initial_time,initial_enclosure));
+     // Set up initial timed set models
+     ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
+     EnclosureType initial_enclosure(initial_set);
+     ARIADNE_LOG(6,"initial_enclosure = "<<initial_enclosure<<"\n");
+     TimeType initial_time = 0;
+     ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
+     working_sets.push_back(make_pair(initial_time,initial_enclosure));
     }
 
 
     while(!working_sets.empty()) {
-        TimedEnclosureType current_set=working_sets.back();
-        working_sets.pop_back();
-        EnclosureType initial_enclosure=current_set.second;
-        TimeType initial_time=current_set.first;
-        Float initial_set_radius=radius(initial_enclosure.bounding_box());
-        if(initial_time>=maximum_time) {
-            final_sets.adjoin(EnclosureType(initial_enclosure));
-        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
-                  && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
-            // Subdivide
-            List<EnclosureType> subdivisions=subdivide(initial_enclosure);
-            for(uint i=0; i!=subdivisions.size(); ++i) {
-                EnclosureType const& subdivided_enclosure=subdivisions[i];
-                working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
-            }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
-            ARIADNE_WARN("Terminating lower evolution at time " << initial_time
-                         << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
-        } else {
-            // Compute evolution
-            this->_evolution_step(working_sets,
-                                  final_sets,reach_sets,intermediate_sets,
-                                  system,current_set,maximum_time,
-                                  semantics,reach);
-        }
+     TimedEnclosureType current_set=working_sets.back();
+     working_sets.pop_back();
+     EnclosureType initial_enclosure=current_set.second;
+     TimeType initial_time=current_set.first;
+     Float initial_set_radius=radius(initial_enclosure.bounding_box());
+     if(initial_time>=maximum_time) {
+      final_sets.adjoin(EnclosureType(initial_enclosure));
+     } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+      && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
+      // Subdivide
+      List<EnclosureType> subdivisions=subdivide(initial_enclosure);
+      for(uint i=0; i!=subdivisions.size(); ++i) {
+    EnclosureType const& subdivided_enclosure=subdivisions[i];
+    working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
+      }
+     } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+      ARIADNE_WARN("Terminating lower evolution at time " << initial_time
+    << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
+     } else {
+      // Compute evolution
+      this->_evolution_step(working_sets,
+    final_sets,reach_sets,intermediate_sets,
+    system,current_set,maximum_time,
+    semantics,reach);
+     }
     }
 
 }
@@ -172,14 +172,14 @@ _evolution(EnclosureListType& final_sets,
 void
 MapEvolver::
 _evolution_step(List< TimedEnclosureType >& working_sets,
-                EnclosureListType& final_sets,
-                EnclosureListType& reach_sets,
-                EnclosureListType& intermediate_sets,
-                const SystemType& system,
-                const TimedEnclosureType& current_set,
-                const TimeType& maximum_time,
-                Semantics semantics,
-                bool reach) const
+    EnclosureListType& final_sets,
+    EnclosureListType& reach_sets,
+    EnclosureListType& intermediate_sets,
+    const SystemType& system,
+    const TimedEnclosureType& current_set,
+    const TimeType& maximum_time,
+    Semantics semantics,
+    bool reach) const
 {
     EnclosureType initial_enclosure;
     TimeType initial_time;

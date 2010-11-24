@@ -1,5 +1,5 @@
 /***************************************************************************
- *            macros.h
+ *      macros.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -33,29 +33,29 @@
 
 #include "exceptions.h"
 
-#define ARIADNE_THROW(except,func,msg)          \
+#define ARIADNE_THROW(except,func,msg)    \
     { \
-        std::stringstream ss; \
-        ss << #except " in " << func << ": " << msg;    \
-        throw except(ss.str()); \
+     std::stringstream ss; \
+     ss << #except " in " << func << ": " << msg;    \
+     throw except(ss.str()); \
     } \
 
 #define ARIADNE_ASSERT(expression) \
     { \
-        bool result = (expression); \
-        if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
-        } \
+     bool result = (expression); \
+     if(!result) { \
+      ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+     } \
     } \
 
 
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_ASSERT(expression) \
     { \
-        bool result = (expression); \
-        if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
-        } \
+     bool result = (expression); \
+     if(!result) { \
+      ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+     } \
     } \
 
 #else
@@ -64,55 +64,55 @@
 #endif
 
 
-#define ARIADNE_PRECONDITION(expression,error)             \
+#define ARIADNE_PRECONDITION(expression,error)    \
     { \
-        bool result = (expression); \
-        if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
-        } \
+     bool result = (expression); \
+     if(!result) { \
+      ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+     } \
     } \
 
-#define ARIADNE_FAIL_MSG(error)             \
+#define ARIADNE_FAIL_MSG(error)    \
     { \
-        ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Error "<<error<<"\n"); \
+     ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Error "<<error<<"\n"); \
     } \
 
-#define ARIADNE_ASSERT_MSG(expression,error)             \
+#define ARIADNE_ASSERT_MSG(expression,error)    \
     { \
-        bool result = (expression); \
-        if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
-        } \
+     bool result = (expression); \
+     if(!result) { \
+      ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+     } \
     } \
 
 #define ARIADNE_ASSERT_EQUAL(expression1,expression2)    \
     { \
-        bool result = ((expression1) == (expression2));       \
-        if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
-        } \
+     bool result = ((expression1) == (expression2));    \
+     if(!result) { \
+      ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
+     } \
     } \
 
-#define ARIADNE_NOT_IMPLEMENTED                 \
+#define ARIADNE_NOT_IMPLEMENTED     \
     throw NotImplemented(ARIADNE_PRETTY_FUNCTION);
 
-#define ARIADNE_DEPRECATED(fn,msg)          \
+#define ARIADNE_DEPRECATED(fn,msg)    \
     static bool first_time=true; \
     if(first_time) { \
-        first_time=false; \
-        std::cerr << "WARNING: Function" << #fn << " is deprecated. " << #msg << std::endl; \
+     first_time=false; \
+     std::cerr << "WARNING: Function" << #fn << " is deprecated. " << #msg << std::endl; \
     } \
 
-#define ARIADNE_WARN(msg)          \
-    {                                                                \
-        std::cerr << "WARNING: " << msg << "" << std::endl;                \
+#define ARIADNE_WARN(msg)    \
+    {    \
+     std::cerr << "WARNING: " << msg << "" << std::endl;    \
     }
-                                                                  \
-#define ARIADNE_ERROR(msg)          \
-    {                                                                \
-        std::cerr << "ERROR: " << msg << "" << std::endl;                \
+      \
+#define ARIADNE_ERROR(msg)    \
+    {    \
+     std::cerr << "ERROR: " << msg << "" << std::endl;    \
     }
-                                                                  \
+      \
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)

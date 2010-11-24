@@ -1,5 +1,5 @@
 /****************************************************************************
- *            serialization.h
+ *      serialization.h
  *
  *  Copyright  2008  Pieter Collins
  *

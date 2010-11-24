@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton.cc
+ *      hybrid_automaton.cc
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *
@@ -49,8 +49,8 @@ class SystemSpecificationError : public std::runtime_error {
 
 AtomicDiscreteMode::
 AtomicDiscreteMode(AtomicDiscreteLocation location,
-                   const List<RealAssignment>& equations,
-                   const List<DottedRealAssignment>& dynamic)
+    const List<RealAssignment>& equations,
+    const List<DottedRealAssignment>& dynamic)
     : _location(location), _algebraic_assignments(equations), _differential_assignments(dynamic)
 {
 }
@@ -63,7 +63,7 @@ Map<K,Pair<T1,T2> > merge(const Map<K,T1>& m1, const Map<K,T2>& m2) {
     Map<K,Pair<T1,T2> > r;
     Set<K> keys=m1.keys();
     for(typename Set<K>::const_iterator iter=keys.begin(); iter!=keys.end(); ++iter) {
-        r.insert(*iter,make_pair(m1[*iter],m2[*iter]));
+     r.insert(*iter,make_pair(m1[*iter],m2[*iter]));
     }
     return r;
 }
@@ -74,19 +74,19 @@ AtomicDiscreteMode::write(std::ostream& os) const
 {
     const AtomicDiscreteMode& mode=*this;
     os << "AtomicDiscreteMode( "
-       << "location=" << mode._location;
+    << "location=" << mode._location;
     if(mode._algebraic_assignments.size()>0) {
-        os << ", algebraic_equations="<<mode._algebraic_assignments; }
+     os << ", algebraic_equations="<<mode._algebraic_assignments; }
     if(mode._differential_assignments.size()>0) {
-        os << ", differential_equations="<<mode._differential_assignments; }
+     os << ", differential_equations="<<mode._differential_assignments; }
     if(mode._invariant_predicates.size()>0) {
-        os << ", invariants="<<mode._invariant_predicates; }
+     os << ", invariants="<<mode._invariant_predicates; }
     if(mode._urgent_guard_predicates.size()>0) {
-        os << ", guards="<<mode._urgent_guard_predicates; }
+     os << ", guards="<<mode._urgent_guard_predicates; }
     if(mode._permissive_guard_predicates.size()>0) {
-        os << ", activations="<<mode._permissive_guard_predicates; }
+     os << ", activations="<<mode._permissive_guard_predicates; }
     if(mode._targets.size()>0) {
-        os << ", transitions="<<merge(mode._targets,mode._update_assignments); }
+     os << ", transitions="<<merge(mode._targets,mode._update_assignments); }
     return os << " )";
 }
 
@@ -95,10 +95,10 @@ AtomicDiscreteMode::write(std::ostream& os) const
 
 AtomicDiscreteTransition::
 AtomicDiscreteTransition(DiscreteEvent event,
-                   const AtomicDiscreteMode& source_mode,
-                   const AtomicDiscreteMode& target_mode,
-                   const List<PrimedRealAssignment>& reset,
-                   const ContinuousPredicate& guard)
+    const AtomicDiscreteMode& source_mode,
+    const AtomicDiscreteMode& target_mode,
+    const List<PrimedRealAssignment>& reset,
+    const ContinuousPredicate& guard)
     : _event(event), _source(source_mode.location()), _target(target_mode.location()),
       _guard_predicate(guard), _update_assignments(reset)
 {
@@ -106,10 +106,10 @@ AtomicDiscreteTransition(DiscreteEvent event,
 
 AtomicDiscreteTransition::
 AtomicDiscreteTransition(DiscreteEvent event,
-                         AtomicDiscreteLocation source,
-                         AtomicDiscreteLocation target,
-                         const List<PrimedRealAssignment>& reset,
-                         const ContinuousPredicate& guard)
+    AtomicDiscreteLocation source,
+    AtomicDiscreteLocation target,
+    const List<PrimedRealAssignment>& reset,
+    const ContinuousPredicate& guard)
     : _event(event), _source(source), _target(target),
       _guard_predicate(guard), _update_assignments(reset)
 {
@@ -120,11 +120,11 @@ AtomicDiscreteTransition::write(std::ostream& os) const
 {
     const AtomicDiscreteTransition& transition=*this;
     return os << "AtomicDiscreteTransition( "
-              << "event=" << transition._event << ", "
-              << "source=" << transition._source << ", "
-              << "target=" << transition._target << ", "
-              << "reset=" << transition._update_assignments << ", "
-              << "guard=" << transition._guard_predicate << " )";
+     << "event=" << transition._event << ", "
+     << "source=" << transition._source << ", "
+     << "target=" << transition._target << ", "
+     << "reset=" << transition._update_assignments << ", "
+     << "guard=" << transition._guard_predicate << " )";
 }
 
 
@@ -149,11 +149,11 @@ AtomicHybridAutomaton::AtomicHybridAutomaton(const std::string& name)
 
 void
 AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
-                          const List<RealAssignment>& equations,
-                          const List<DottedRealAssignment>& dynamic)
+     const List<RealAssignment>& equations,
+     const List<DottedRealAssignment>& dynamic)
 {
     if(this->has_mode(location)) {
-        throw SystemSpecificationError("The hybrid automaton already has a mode with the given id");
+     throw SystemSpecificationError("The hybrid automaton already has a mode with the given id");
     }
 
     Set<UntypedVariable> defined_variables;
@@ -161,19 +161,19 @@ AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
 
     // Compute the auxiliary variables ordered by the given equations
     for(uint i=0; i!=equations.size(); ++i) {
-        if(defined_variables.contains(equations[i].lhs)) {
-            ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_mode",
-                          "Variable "<<equations[i].lhs<<" is defined twice by the algebraic equations "<<equations<<" for mode "<<location);
-        }
+     if(defined_variables.contains(equations[i].lhs)) {
+      ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_mode",
+     "Variable "<<equations[i].lhs<<" is defined twice by the algebraic equations "<<equations<<" for mode "<<location);
+     }
     }
 
     // Compute the state variables ordered by the given differential equations
     for(uint i=0; i!=dynamic.size(); ++i) {
-        if(defined_variables.contains(dynamic[i].lhs.base())) {
-            ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_mode",
-                          "Variable "<<dynamic[i].lhs.base()<<" is defined by the differential equations "<<dynamic<<" for mode "<<location<<" is already defined");
-        }
-        argument_variables.adjoin(dynamic[i].rhs.arguments());
+     if(defined_variables.contains(dynamic[i].lhs.base())) {
+      ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_mode",
+     "Variable "<<dynamic[i].lhs.base()<<" is defined by the differential equations "<<dynamic<<" for mode "<<location<<" is already defined");
+     }
+     argument_variables.adjoin(dynamic[i].rhs.arguments());
     }
 
     // TODO: Compute function
@@ -184,14 +184,14 @@ AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
 
 void
 AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
-                          const List<DottedRealAssignment>& dynamic)
+     const List<DottedRealAssignment>& dynamic)
 {
     return this->new_mode(location,List<RealAssignment>(),dynamic);
 }
 
 void
 AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
-                          const List<RealAssignment>& equations)
+     const List<RealAssignment>& equations)
 {
     return this->new_mode(location,equations,List<DottedRealAssignment>());
 }
@@ -200,12 +200,12 @@ AtomicHybridAutomaton::new_mode(AtomicDiscreteLocation location,
 
 void
 AtomicHybridAutomaton::new_invariant(AtomicDiscreteLocation location,
-                                     DiscreteEvent action,
-                                     const ContinuousPredicate& constraint)
+    DiscreteEvent action,
+    const ContinuousPredicate& constraint)
 {
     if(!this->has_mode(location)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_invariant",
-                      "mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_invariant",
+    "mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
     }
     AtomicDiscreteMode& mode=this->_modes.value(location);
     mode._invariant_predicates.insert(action,constraint);
@@ -214,12 +214,12 @@ AtomicHybridAutomaton::new_invariant(AtomicDiscreteLocation location,
 
 void
 AtomicHybridAutomaton::new_urgent_guard(AtomicDiscreteLocation location,
-                                        DiscreteEvent event,
-                                        const ContinuousPredicate& guard)
+    DiscreteEvent event,
+    const ContinuousPredicate& guard)
 {
     if(!this->has_mode(location)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_urgent_guard",
-                      "Source mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_urgent_guard",
+    "Source mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
     }
 
 
@@ -230,12 +230,12 @@ AtomicHybridAutomaton::new_urgent_guard(AtomicDiscreteLocation location,
 
 void
 AtomicHybridAutomaton::new_permissive_guard(AtomicDiscreteLocation location,
-                                        DiscreteEvent event,
-                                        const ContinuousPredicate& guard)
+    DiscreteEvent event,
+    const ContinuousPredicate& guard)
 {
     if(!this->has_mode(location)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_permissive_guard",
-                      "Source mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_permissive_guard",
+    "Source mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
     }
 
     AtomicDiscreteMode& mode=this->mode(location); // Get non-constant mode
@@ -247,30 +247,30 @@ AtomicHybridAutomaton::new_permissive_guard(AtomicDiscreteLocation location,
 
 void
 AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
-                                      DiscreteEvent event,
-                                      AtomicDiscreteLocation target,
-                                      const List<PrimedRealAssignment>& reset)
+     DiscreteEvent event,
+     AtomicDiscreteLocation target,
+     const List<PrimedRealAssignment>& reset)
 {
     if(!this->has_mode(source)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_reset",
-                      "Source mode "<<source<<" is not a location of the automaton with locations "<<this->locations());
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_reset",
+    "Source mode "<<source<<" is not a location of the automaton with locations "<<this->locations());
     }
 
     if(!this->has_mode(target)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_reset",
-                      "Target mode "<<target<<" is not a location of the automaton with locations "<<this->locations());
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_reset",
+    "Target mode "<<target<<" is not a location of the automaton with locations "<<this->locations());
     }
 
     AtomicDiscreteMode& source_mode=this->mode(source); // Non-constant since we may wish to update input variables
     Set<RealVariable> target_state_variables(this->state_variables(target));
 
     for(uint i=0; i!=reset.size(); ++i) {
-        if(!target_state_variables.contains(reset[i].lhs.base())) {
-            ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_transition",
-                          "reset "<<reset<<" for event "<<event<<" in source "<<source<<
-                          " specifies variable "<<reset[i].lhs.base().name()<<
-                          " which is not a state variable "<<this->state_variables(target)<<" of the target location "<<target);
-        }
+     if(!target_state_variables.contains(reset[i].lhs.base())) {
+      ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::new_transition",
+     "reset "<<reset<<" for event "<<event<<" in source "<<source<<
+     " specifies variable "<<reset[i].lhs.base().name()<<
+     " which is not a state variable "<<this->state_variables(target)<<" of the target location "<<target);
+     }
     }
 
     source_mode._targets.insert(event,target);
@@ -280,9 +280,9 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
 
 void
 AtomicHybridAutomaton::new_reset(AtomicDiscreteLocation source,
-                                 DiscreteEvent event,
-                                 AtomicDiscreteLocation target,
-                                 const List<PrimedRealAssignment>& reset)
+      DiscreteEvent event,
+      AtomicDiscreteLocation target,
+      const List<PrimedRealAssignment>& reset)
 {
     this->new_transition(source,event,target,reset);
 }
@@ -290,16 +290,16 @@ AtomicHybridAutomaton::new_reset(AtomicDiscreteLocation source,
 
 void
 AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
-                                      DiscreteEvent event,
-                                      AtomicDiscreteLocation target,
-                                      const List<PrimedRealAssignment>& reset,
-                                      const ContinuousPredicate& guard,
-                                      EventKind kind)
+     DiscreteEvent event,
+     AtomicDiscreteLocation target,
+     const List<PrimedRealAssignment>& reset,
+     const ContinuousPredicate& guard,
+     EventKind kind)
 {
     switch(kind) {
-        case urgent: this->new_urgent_guard(source,event,guard); break;
-        case permissive: this->new_permissive_guard(source,event,guard); break;
-        default: assert(false);
+     case urgent: this->new_urgent_guard(source,event,guard); break;
+     case permissive: this->new_permissive_guard(source,event,guard); break;
+     default: assert(false);
     }
 
     this->new_reset(source,event,target,reset);
@@ -308,11 +308,11 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
 
 void
 AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
-                                      DiscreteEvent event,
-                                      const ContinuousPredicate& guard,
-                                      AtomicDiscreteLocation target,
-                                      const List<PrimedRealAssignment>& reset,
-                                      EventKind kind)
+     DiscreteEvent event,
+     const ContinuousPredicate& guard,
+     AtomicDiscreteLocation target,
+     const List<PrimedRealAssignment>& reset,
+     EventKind kind)
 {
     return this->new_transition(source,event,target,reset,guard);
 }
@@ -321,9 +321,9 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
 
 void
 AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
-                                      DiscreteEvent event,
-                                      AtomicDiscreteLocation target,
-                                      const ContinuousPredicate& guard)
+     DiscreteEvent event,
+     AtomicDiscreteLocation target,
+     const ContinuousPredicate& guard)
 {
     return this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard);
 }
@@ -333,7 +333,7 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
 
 void
 AtomicHybridAutomaton::set_grid(AtomicDiscreteLocation location,
-                                const Grid& grid)
+     const Grid& grid)
 {
     ARIADNE_DEPRECATED("AtomicHybridAutomaton::set_grid(...)","Use RealVariable::set_resolution(...) instead.");
     ARIADNE_NOT_IMPLEMENTED;
@@ -440,8 +440,8 @@ AtomicDiscreteMode&
 AtomicHybridAutomaton::mode(AtomicDiscreteLocation state)
 {
     if(!this->_modes.has_key(state)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::mode(AtomicDiscreteLocation)",
-                      state<<"is not a location of the automaton with locations "<<this->locations());
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::mode(AtomicDiscreteLocation)",
+    state<<"is not a location of the automaton with locations "<<this->locations());
     }
     return this->_modes.find(state)->second;
 }
@@ -450,8 +450,8 @@ const AtomicDiscreteMode&
 AtomicHybridAutomaton::mode(AtomicDiscreteLocation state) const
 {
     if(!this->_modes.has_key(state)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::mode(AtomicDiscreteLocation)",
-                      state<<"is not a location of the automaton with locations "<<this->locations());
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::mode(AtomicDiscreteLocation)",
+    state<<"is not a location of the automaton with locations "<<this->locations());
     }
     return this->_modes[state];
 }
@@ -463,8 +463,8 @@ const ContinuousPredicate&
 AtomicHybridAutomaton::invariant(AtomicDiscreteLocation state, DiscreteEvent action) const
 {
     if(!this->has_invariant(state,action)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::invariant(AtomicDiscreteLocation,DiscreteEvent)",
-                      "The automaton "<<*this<<" has no invariant corresponding to "<<action<<" in location "<<state);
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::invariant(AtomicDiscreteLocation,DiscreteEvent)",
+    "The automaton "<<*this<<" has no invariant corresponding to "<<action<<" in location "<<state);
     }
     return this->_modes[state]._invariant_predicates[action];
 }
@@ -473,8 +473,8 @@ const ContinuousPredicate&
 AtomicHybridAutomaton::guard(AtomicDiscreteLocation state, DiscreteEvent action) const
 {
     if(!this->has_invariant(state,action)) {
-        ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::invariant(AtomicDiscreteLocation,DiscreteEvent)",
-                      "The automaton "<<*this<<" has no invariant corresponding to "<<action<<" in location "<<state);
+     ARIADNE_THROW(SystemSpecificationError,"AtomicHybridAutomaton::invariant(AtomicDiscreteLocation,DiscreteEvent)",
+    "The automaton "<<*this<<" has no invariant corresponding to "<<action<<" in location "<<state);
     }
     return this->_modes[state]._permissive_guard_predicates[action];
 }
@@ -489,21 +489,21 @@ AtomicHybridAutomaton::blocking_guards(AtomicDiscreteLocation source) const
     std::map<DiscreteEvent,RealScalarFunction> result;
     const AtomicDiscreteMode& mode=this->mode(source);
     for(invariant_const_iterator invariant_iter=mode._invariants.begin();
-        invariant_iter!=mode._invariants.end(); ++invariant_iter)
+     invariant_iter!=mode._invariants.end(); ++invariant_iter)
     {
-        const DiscreteEvent event=invariant_iter->first;
-        const RealScalarFunction invariant=invariant_iter->second;
-        result[event]=invariant;
+     const DiscreteEvent event=invariant_iter->first;
+     const RealScalarFunction invariant=invariant_iter->second;
+     result[event]=invariant;
     }
 
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
-        transition_iter!=this->_transitions.end(); ++transition_iter)
+     transition_iter!=this->_transitions.end(); ++transition_iter)
     {
-        if(transition_iter->source().location()==source && transition_iter->forced()) {
-            const DiscreteEvent event=transition_iter->event();
-            const RealScalarFunction guard=transition_iter->activation();
-            result[event]=guard;
-        }
+     if(transition_iter->source().location()==source && transition_iter->forced()) {
+      const DiscreteEvent event=transition_iter->event();
+      const RealScalarFunction guard=transition_iter->activation();
+      result[event]=guard;
+     }
     }
     return result;
 }
@@ -515,13 +515,13 @@ AtomicHybridAutomaton::permissive_guards(AtomicDiscreteLocation source) const
     std::map<DiscreteEvent,RealScalarFunction> result;
 
     for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
-        transition_iter!=this->_transitions.end(); ++transition_iter)
+     transition_iter!=this->_transitions.end(); ++transition_iter)
     {
-        if(transition_iter->source().location()==source && !transition_iter->forced()) {
-            const DiscreteEvent event=transition_iter->event();
-            const RealScalarFunction guard=transition_iter->activation();
-            result[event]=guard;
-        }
+     if(transition_iter->source().location()==source && !transition_iter->forced()) {
+      const DiscreteEvent event=transition_iter->event();
+      const RealScalarFunction guard=transition_iter->activation();
+      result[event]=guard;
+     }
     }
     return result;
 }
@@ -542,9 +542,9 @@ AtomicHybridAutomaton::grid() const
 {
     HybridGrid result;
     for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
-        mode_iter!=this->_modes.end(); ++mode_iter)
+     mode_iter!=this->_modes.end(); ++mode_iter)
     {
-        result[mode_iter->location()]=mode_iter->grid();
+     result[mode_iter->location()]=mode_iter->grid();
     }
     return result;
 }
@@ -558,9 +558,9 @@ AtomicHybridAutomaton::write(std::ostream& os) const
     os << "\nHybridAutomaton( \n  modes=\n";
     Set<AtomicDiscreteMode> modes=ha.modes();
     for(Set<AtomicDiscreteMode>::const_iterator mode_iter=modes.begin();
-            mode_iter!=modes.end(); ++mode_iter)
+      mode_iter!=modes.end(); ++mode_iter)
     {
-        os << "    " <<*mode_iter<<",\n";
+     os << "    " <<*mode_iter<<",\n";
     }
     return os << ")\n";
 }
@@ -572,7 +572,7 @@ AtomicHybridAutomaton::state_variables(AtomicDiscreteLocation location) const {
     List<RealVariable> result;
     const AtomicDiscreteMode& mode=this->mode(location);
     for(uint i=0; i!=mode._differential_assignments.size(); ++i) {
-        result.append(mode._differential_assignments[i].lhs.base());
+     result.append(mode._differential_assignments[i].lhs.base());
     }
     return result;
 }
@@ -582,7 +582,7 @@ AtomicHybridAutomaton::auxiliary_variables(AtomicDiscreteLocation location) cons
     List<RealVariable> result;
     const AtomicDiscreteMode& mode=this->mode(location);
     for(uint i=0; i!=mode._algebraic_assignments.size(); ++i) {
-        result.append(mode._algebraic_assignments[i].lhs);
+     result.append(mode._algebraic_assignments[i].lhs);
     }
     return result;
 }
@@ -591,9 +591,9 @@ AtomicHybridAutomaton::auxiliary_variables(AtomicDiscreteLocation location) cons
 AtomicDiscreteLocation
 AtomicHybridAutomaton::target(AtomicDiscreteLocation source, DiscreteEvent event) const {
     if(this->has_transition(source,event)) {
-        return this->_modes[source]._targets[event];
+     return this->_modes[source]._targets[event];
     } else {
-        return source;
+     return source;
     }
 }
 
@@ -610,14 +610,14 @@ AtomicHybridAutomaton::differential_assignments(AtomicDiscreteLocation location)
 List<PrimedRealAssignment>
 AtomicHybridAutomaton::update_assignments(AtomicDiscreteLocation source, DiscreteEvent event) const {
     if(this->has_transition(source,event)) {
-        return this->_modes[source]._update_assignments[event];
+     return this->_modes[source]._update_assignments[event];
     } else {
-        List<PrimedRealAssignment> nonjump_assignments;
-        List<RealVariable> state_variables=this->state_variables(source);
-        for(uint i=0; i!=state_variables.size(); ++i) {
-            nonjump_assignments.append(next(state_variables[i])=state_variables[i]);
-        }
-        return nonjump_assignments;
+     List<PrimedRealAssignment> nonjump_assignments;
+     List<RealVariable> state_variables=this->state_variables(source);
+     for(uint i=0; i!=state_variables.size(); ++i) {
+      nonjump_assignments.append(next(state_variables[i])=state_variables[i]);
+     }
+     return nonjump_assignments;
     }
 }
 
@@ -625,11 +625,11 @@ ContinuousPredicate
 AtomicHybridAutomaton::invariant_predicate(AtomicDiscreteLocation location, DiscreteEvent action) const {
     const AtomicDiscreteMode& mode=this->mode(location);
     if(mode._invariant_predicates.has_key(action)) {
-        return mode._invariant_predicates[action];
+     return mode._invariant_predicates[action];
     } else if(mode._urgent_guard_predicates.has_key(action)) {
-        return !mode._urgent_guard_predicates[action];
+     return !mode._urgent_guard_predicates[action];
     } else {
-        return ContinuousPredicate(true);
+     return ContinuousPredicate(true);
     }
 }
 
@@ -637,11 +637,11 @@ ContinuousPredicate
 AtomicHybridAutomaton::guard_predicate(AtomicDiscreteLocation source, DiscreteEvent event) const {
     const AtomicDiscreteMode& mode=this->mode(source);
     if(mode._permissive_guard_predicates.has_key(event)) {
-        return mode._permissive_guard_predicates[event];
+     return mode._permissive_guard_predicates[event];
     } else if(mode._urgent_guard_predicates.has_key(event)) {
-        return mode._urgent_guard_predicates[event];
+     return mode._urgent_guard_predicates[event];
     } else {
-        return ContinuousPredicate(true);
+     return ContinuousPredicate(true);
     }
 }
 
@@ -686,9 +686,9 @@ List<PrimedRealVariable> next(const List<RealVariable>& v) {
 bool
 CompositeHybridAutomaton::has_mode(DiscreteLocation location) const {
     for(uint i=0; i!=this->_components.size(); ++i) {
-        if(!this->_components[i].has_mode(location[i])) {
-            return false;
-        }
+     if(!this->_components[i].has_mode(location[i])) {
+      return false;
+     }
     }
     return true;
 }
@@ -697,9 +697,9 @@ bool
 CompositeHybridAutomaton::has_guard(DiscreteLocation location, DiscreteEvent event) const
 {
     for(uint i=0; i!=this->_components.size(); ++i) {
-        if(this->_components[i].has_guard(location[i],event)) {
-            return true;
-        }
+     if(this->_components[i].has_guard(location[i],event)) {
+      return true;
+     }
     }
     return false;
 }
@@ -707,9 +707,9 @@ CompositeHybridAutomaton::has_guard(DiscreteLocation location, DiscreteEvent eve
 bool
 CompositeHybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const {
     for(uint i=0; i!=this->_components.size(); ++i) {
-        if(this->_components[i].has_transition(source[i],event)) {
-            return true;
-        }
+     if(this->_components[i].has_transition(source[i],event)) {
+      return true;
+     }
     }
     return false;
 }
@@ -720,7 +720,7 @@ CompositeHybridAutomaton::transition_events(DiscreteLocation source) const
 {
     Set< DiscreteEvent > result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        result.adjoin(this->_components[i].transition_events(source[i]));
+     result.adjoin(this->_components[i].transition_events(source[i]));
     }
     return result;
 }
@@ -730,7 +730,7 @@ CompositeHybridAutomaton::invariant_events(DiscreteLocation source) const
 {
     Set< DiscreteEvent > result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        result.adjoin(this->_components[i].invariant_events(source[i]));
+     result.adjoin(this->_components[i].invariant_events(source[i]));
     }
     return result;
 }
@@ -758,12 +758,12 @@ DiscreteLocation
 CompositeHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        if(this->_components[i].has_transition(source[i],event)) {
-            AtomicDiscreteLocation target=this->_components[i].target(source[i],event);
-            result.append(target);
-        } else {
-            result.append(source[i]);
-        }
+     if(this->_components[i].has_transition(source[i],event)) {
+      AtomicDiscreteLocation target=this->_components[i].target(source[i],event);
+      result.append(target);
+     } else {
+      result.append(source[i]);
+     }
     }
     return result;
 }
@@ -783,9 +783,9 @@ List<RealVariable>
 CompositeHybridAutomaton::state_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        ARIADNE_ASSERT(this->_components[i].has_mode(location[i]));
-        // Append state space in mode i; note that this automatically checks whether a variable is already present
-        result.append(this->_components[i].state_variables(location[i]));
+     ARIADNE_ASSERT(this->_components[i].has_mode(location[i]));
+     // Append state space in mode i; note that this automatically checks whether a variable is already present
+     result.append(this->_components[i].state_variables(location[i]));
     }
     return result;
 }
@@ -794,9 +794,9 @@ List<RealVariable>
 CompositeHybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
     List<RealVariable> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        ARIADNE_ASSERT(this->_components[i].has_mode(location[i]));
-        // Append state space in mode i; note that this automatically checks whether a variable is already present
-        result.append(this->_components[i].auxiliary_variables(location[i]));
+     ARIADNE_ASSERT(this->_components[i].has_mode(location[i]));
+     // Append state space in mode i; note that this automatically checks whether a variable is already present
+     result.append(this->_components[i].auxiliary_variables(location[i]));
     }
     return result;
 }
@@ -806,7 +806,7 @@ List<RealAssignment>
 CompositeHybridAutomaton::algebraic_assignments(DiscreteLocation location) const {
     List<RealAssignment> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        result.append(this->_components[i].algebraic_assignments(location[i]));
+     result.append(this->_components[i].algebraic_assignments(location[i]));
     }
     // TODO: Sort the result to eliminate algebraic loops
     // sort(result);
@@ -817,7 +817,7 @@ List<DottedRealAssignment>
 CompositeHybridAutomaton::differential_assignments(DiscreteLocation location) const {
     List<DottedRealAssignment> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        result.append(this->_components[i].differential_assignments(location[i]));
+     result.append(this->_components[i].differential_assignments(location[i]));
     }
     // No need to sort result since dotted variables cannot appear in the right-hand side (currently)
     return result;
@@ -828,7 +828,7 @@ List<PrimedRealAssignment>
 CompositeHybridAutomaton::update_assignments(DiscreteLocation location, DiscreteEvent event) const {
     List<PrimedRealAssignment> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        result.append(this->_components[i].update_assignments(location[i],event));
+     result.append(this->_components[i].update_assignments(location[i],event));
     }
     return result;
 }
@@ -838,10 +838,10 @@ ContinuousPredicate
 CompositeHybridAutomaton::invariant_predicate(DiscreteLocation location, DiscreteEvent event) const {
     ContinuousPredicate result(true);
     for(uint i=0; i!=this->_components.size(); ++i) {
-        ContinuousPredicate guard=this->_components[i].invariant_predicate(location[i],event);
-        if(result==true || guard==false) { result=guard; }
-        else if(guard==true || result==false) { }
-        else { result = result && guard; }
+     ContinuousPredicate guard=this->_components[i].invariant_predicate(location[i],event);
+     if(result==true || guard==false) { result=guard; }
+     else if(guard==true || result==false) { }
+     else { result = result && guard; }
     }
     return result;
 }
@@ -851,10 +851,10 @@ ContinuousPredicate
 CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEvent event) const {
     ContinuousPredicate result(true);
     for(uint i=0; i!=this->_components.size(); ++i) {
-        ContinuousPredicate guard=this->_components[i].guard_predicate(location[i],event);
-        if(result==true || guard==false) { result=guard; }
-        else if(guard==true || result==false) { }
-        else { result = result && guard; }
+     ContinuousPredicate guard=this->_components[i].guard_predicate(location[i],event);
+     if(result==true || guard==false) { result=guard; }
+     else if(guard==true || result==false) { }
+     else { result = result && guard; }
     }
     return result;
 }
@@ -923,7 +923,7 @@ CompositeHybridAutomaton::blocking_events(DiscreteLocation location) const
 {
     Set<DiscreteEvent> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        result.adjoin(this->_components[i].blocking_events(location[i]));
+     result.adjoin(this->_components[i].blocking_events(location[i]));
     }
     return result;
 }
@@ -934,13 +934,13 @@ CompositeHybridAutomaton::urgent_events(DiscreteLocation location) const
     Set<DiscreteEvent> result;
     Set<DiscreteEvent> duplicates;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        Set<DiscreteEvent> found=this->_components[i].urgent_events(location[i]);
-        duplicates.adjoin(intersection(result,found));
-        result.adjoin(found);
+     Set<DiscreteEvent> found=this->_components[i].urgent_events(location[i]);
+     duplicates.adjoin(intersection(result,found));
+     result.adjoin(found);
     }
     if(!duplicates.empty()) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::urgent_events",
-                      "Events "<<duplicates<<" are urgent in more than one component in location "<<location);
+     ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::urgent_events",
+    "Events "<<duplicates<<" are urgent in more than one component in location "<<location);
     }
     return result;
 }
@@ -951,7 +951,7 @@ CompositeHybridAutomaton::permissive_events(DiscreteLocation location) const
 {
     Set<DiscreteEvent> result;
     for(uint i=0; i!=this->_components.size(); ++i) {
-        result.adjoin(this->_components[i].permissive_events(location[i]));
+     result.adjoin(this->_components[i].permissive_events(location[i]));
     }
     return result;
 }
@@ -985,7 +985,7 @@ template<class LHS, class RHS>
 List<LHS> assigned(const List< Assignment<LHS,RHS> >& assignments) {
     List<LHS> result; result.reserve(assignments.size());
     for(uint i=0; i!=assignments.size(); ++i) {
-        result.append(assignments[i].lhs);
+     result.append(assignments[i].lhs);
     }
     return result;
 }
@@ -995,9 +995,9 @@ Set<RealVariable> real_arguments(const Expression<T>& expression) {
     Set<RealVariable> result;
     Set<UntypedVariable> args=expression.arguments();
     for(Set<UntypedVariable>::const_iterator iter=args.begin(); iter!=args.end(); ++iter) {
-        if(iter->type()==variable_type<Real>()) {
-            result.insert(RealVariable(iter->name()));
-        }
+     if(iter->type()==variable_type<Real>()) {
+      result.insert(RealVariable(iter->name()));
+     }
     }
     return result;
 }
@@ -1011,7 +1011,7 @@ template<class LHS, class RHS>
 Set<RealVariable> real_arguments(const List< Assignment<LHS,RHS> >& assignments) {
     Set<RealVariable> result;
     for(uint i=0; i!=assignments.size(); ++i) {
-        result.adjoin(real_arguments(assignments[i]));
+     result.adjoin(real_arguments(assignments[i]));
     }
     return result;
 }
@@ -1020,7 +1020,7 @@ template<class Tp, template<class> class Dec>
 List< Variable<Tp> > base(const List< Dec<Tp> >& variables) {
     List< Variable<Tp> > result;
     for(uint i=0; i!=variables.size(); ++i) {
-        result.append(variables[i].base());
+     result.append(variables[i].base());
     }
     return result;
 }
@@ -1034,11 +1034,11 @@ template<class Var>
 bool unique(const List<Var>& variables) {
     Set<Var> found;
     for(uint i=0; i!=variables.size(); ++i) {
-        if(found.contains(variables[i])) {
-            return false;
-        } else {
-            found.insert(variables[i]);
-        }
+     if(found.contains(variables[i])) {
+      return false;
+     } else {
+      found.insert(variables[i]);
+     }
     }
     return true;
 }
@@ -1048,11 +1048,11 @@ Set<Var> duplicates(const List<Var>& variables) {
     Set<Var> result;
     Set<Var> found;
     for(uint i=0; i!=variables.size(); ++i) {
-        if(found.contains(variables[i])) {
-            result.insert(variables[i]);
-        } else {
-            found.insert(variables[i]);
-        }
+     if(found.contains(variables[i])) {
+      result.insert(variables[i]);
+     } else {
+      found.insert(variables[i]);
+     }
     }
     return result;
 }
@@ -1067,33 +1067,33 @@ List<RealAssignment> order(const List<RealAssignment>& assignments, const Set<Re
     Map< RealVariable, uint > assignment_table;
 
     for(uint i=0; i!=assignments.size(); ++i) {
-        unresolved_dependencies.insert(assignments[i].lhs,difference(real_arguments(assignments[i].rhs),inputs));
-        assignment_table.insert(assignments[i].lhs,i);
+     unresolved_dependencies.insert(assignments[i].lhs,difference(real_arguments(assignments[i].rhs),inputs));
+     assignment_table.insert(assignments[i].lhs,i);
     }
 
     while(!unresolved_dependencies.empty()) {
-        // Check for an which has been resolved and add to list of ok equations
-        bool found=false;
-        for(Map< RealVariable, Set<RealVariable> >::iterator iter=unresolved_dependencies.begin();
-            iter!=unresolved_dependencies.end(); ++iter)
-        {
-            if(iter->second.empty()) {
-                RealVariable variable=iter->first;
-                result.append(assignments[assignment_table[variable]]);
-                for(Map< RealVariable, Set<RealVariable> >::iterator rem_iter=unresolved_dependencies.begin();
-                        rem_iter!=unresolved_dependencies.end(); ++rem_iter) {
-                    rem_iter->second.erase(variable);
-                }
-                unresolved_dependencies.erase(iter);
-                found=true;
-                break;
-            }
-        }
+     // Check for an which has been resolved and add to list of ok equations
+     bool found=false;
+     for(Map< RealVariable, Set<RealVariable> >::iterator iter=unresolved_dependencies.begin();
+      iter!=unresolved_dependencies.end(); ++iter)
+     {
+      if(iter->second.empty()) {
+    RealVariable variable=iter->first;
+    result.append(assignments[assignment_table[variable]]);
+    for(Map< RealVariable, Set<RealVariable> >::iterator rem_iter=unresolved_dependencies.begin();
+      rem_iter!=unresolved_dependencies.end(); ++rem_iter) {
+     rem_iter->second.erase(variable);
+    }
+    unresolved_dependencies.erase(iter);
+    found=true;
+    break;
+      }
+     }
 
-        if(!found) {
-            ARIADNE_THROW(SystemSpecificationError,"order(List<Assignment>,Set<Variable>)","Cannot order assignments "<<assignments
-                            <<" with inputs "<<inputs<<" due to algebraic loops or undefined variables.");
-        }
+     if(!found) {
+      ARIADNE_THROW(SystemSpecificationError,"order(List<Assignment>,Set<Variable>)","Cannot order assignments "<<assignments
+    <<" with inputs "<<inputs<<" due to algebraic loops or undefined variables.");
+     }
     }
 
     assert(result.size()==assignments.size());
@@ -1111,22 +1111,22 @@ CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
     List<RealVariable> location_variables=catenate(state_variables,auxiliary_variables);
 
     if(!unique(location_variables)) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                      "Variables "<<duplicates(location_variables)<<" in location "<<location<<" with defining equations "<<equations<<" and "<<dynamics<<" have more than one defining equation.");
+     ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+    "Variables "<<duplicates(location_variables)<<" in location "<<location<<" with defining equations "<<equations<<" and "<<dynamics<<" have more than one defining equation.");
     }
 
     Set<RealVariable> result_variables=make_set(location_variables);
 
     Set<RealVariable> undefined_variables=difference(real_arguments(equations),result_variables);
     if(!undefined_variables.empty()) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                      "Variables "<<undefined_variables<<" are used in the definition of the algebraic equations "<<equations<<" in location "<<location<<" with state variables "<<state_variables<<", but are not defined.");
+     ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+    "Variables "<<undefined_variables<<" are used in the definition of the algebraic equations "<<equations<<" in location "<<location<<" with state variables "<<state_variables<<", but are not defined.");
     }
 
     undefined_variables=difference(real_arguments(dynamics),result_variables);
     if(!undefined_variables.empty()) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                      "Variables "<<undefined_variables<<" are used in the definition of the differential equations "<<dynamics<<" in location "<<location<<" with state variables "<<state_variables<<", but are not defined.");
+     ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+    "Variables "<<undefined_variables<<" are used in the definition of the differential equations "<<dynamics<<" in location "<<location<<" with state variables "<<state_variables<<", but are not defined.");
     }
 
     List<RealAssignment> ordered_equations=Ariadne::order(equations,make_set(state_variables));
@@ -1135,62 +1135,62 @@ CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
 /*
     Map<DiscreteEvent,ContinuousPredicate> const& invariants=this->invariant_predicates(location);
     for(Map<DiscreteEvent,ContinuousPredicate>::const_iterator invariant_iter=invariants.begin();
-        invariant_iter!=invariants.end(); ++invariant_iter)
+     invariant_iter!=invariants.end(); ++invariant_iter)
     {
-        DiscreteEvent action=invariant_iter->first;
-        const ContinuousPredicate& invariant=invariant_iter->second;
-        if(!subset(real_arguments(invariant),result_variables)) {
-            undefined_variables=difference(real_arguments(invariant),result_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                          "Variables "<<undefined_variables<<" are used in the invariant "<<invariant<<" with label \""<<action<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
-        }
+     DiscreteEvent action=invariant_iter->first;
+     const ContinuousPredicate& invariant=invariant_iter->second;
+     if(!subset(real_arguments(invariant),result_variables)) {
+      undefined_variables=difference(real_arguments(invariant),result_variables);
+      ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+     "Variables "<<undefined_variables<<" are used in the invariant "<<invariant<<" with label \""<<action<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
+     }
     }
 
     Set<DiscreteEvent> events=this->events(location);
     for(Set<DiscreteEvent>::const_iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
 
-        // Get transition information
-        DiscreteEvent event=*event_iter;
-        DiscreteLocation target=this->target(location,event);
-        ContinuousPredicate guard=this->guard_predicate(location,event);
-        List<PrimedRealAssignment> reset=this->update_assignments(location,event);
+     // Get transition information
+     DiscreteEvent event=*event_iter;
+     DiscreteLocation target=this->target(location,event);
+     ContinuousPredicate guard=this->guard_predicate(location,event);
+     List<PrimedRealAssignment> reset=this->update_assignments(location,event);
 
-        Set<RealVariable> target_state_variables=make_set(this->state_variables(target));
-        List<RealVariable> reset_variables=base(assigned(reset));
+     Set<RealVariable> target_state_variables=make_set(this->state_variables(target));
+     List<RealVariable> reset_variables=base(assigned(reset));
 
-        // Check arguments of guard
-        if(!subset(real_arguments(guard),result_variables)) {
-            undefined_variables=difference(real_arguments(guard),result_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                          "Variables "<<undefined_variables<<" are used in the guard "<<guard<<" for event \""<<event<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
-        }
+     // Check arguments of guard
+     if(!subset(real_arguments(guard),result_variables)) {
+      undefined_variables=difference(real_arguments(guard),result_variables);
+      ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+     "Variables "<<undefined_variables<<" are used in the guard "<<guard<<" for event \""<<event<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
+     }
 
-        // Check arguments of reset
-        if(!subset(real_arguments(reset),result_variables)) {
-            undefined_variables=difference(real_arguments(reset),result_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                          "Variables "<<undefined_variables<<" are used in the reset "<<reset<<" for event \""<<event<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
-        }
+     // Check arguments of reset
+     if(!subset(real_arguments(reset),result_variables)) {
+      undefined_variables=difference(real_arguments(reset),result_variables);
+      ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+     "Variables "<<undefined_variables<<" are used in the reset "<<reset<<" for event \""<<event<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
+     }
 
-        // Check duplication of reset
-        if(!unique(reset_variables)) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                      "Variables "<<duplicates(reset_variables)<<" have more than one defining equation in resets "<<reset<<" for event \""<<event<<"\" in location "<<location<<".");
-        }
+     // Check duplication of reset
+     if(!unique(reset_variables)) {
+     ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+    "Variables "<<duplicates(reset_variables)<<" have more than one defining equation in resets "<<reset<<" for event \""<<event<<"\" in location "<<location<<".");
+     }
 
-        Set<RealVariable> updated_variables=make_set(reset_variables);
+     Set<RealVariable> updated_variables=make_set(reset_variables);
 
-        if(!subset(updated_variables,target_state_variables)) {
-            Set<RealVariable> extra_variables=difference(updated_variables,target_state_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                          "Variables "<<extra_variables<<" are defined in the reset "<<reset<<" for event \""<<event<<"\" in location "<<location<<", but are not state variables "<<target_state_variables<<" in the target "<<target<<".");
-        }
+     if(!subset(updated_variables,target_state_variables)) {
+      Set<RealVariable> extra_variables=difference(updated_variables,target_state_variables);
+      ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+     "Variables "<<extra_variables<<" are defined in the reset "<<reset<<" for event \""<<event<<"\" in location "<<location<<", but are not state variables "<<target_state_variables<<" in the target "<<target<<".");
+     }
 
-        if(!subset(target_state_variables,updated_variables)) {
-            undefined_variables=difference(target_state_variables,updated_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                          "Variables "<<undefined_variables<<" are state variables in location "<<target<<", but are not defined in the reset "<<reset<<" for the transition \""<<event<<"\" from location "<<location<<".");
-        }
+     if(!subset(target_state_variables,updated_variables)) {
+      undefined_variables=difference(target_state_variables,updated_variables);
+      ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+     "Variables "<<undefined_variables<<" are state variables in location "<<target<<", but are not defined in the reset "<<reset<<" for the transition \""<<event<<"\" from location "<<location<<".");
+     }
 
     } // Finished checking transitions
 */
@@ -1212,7 +1212,7 @@ CompositeHybridAutomaton::check_reachable_modes(const Set<DiscreteLocation>& ini
 {
     Set<DiscreteLocation> reachable_locations=this->discrete_reachability(initial_locations);
     for(Set<DiscreteLocation>::const_iterator iter=reachable_locations.begin(); iter!=reachable_locations.end(); ++iter) {
-        this->check_mode(*iter);
+     this->check_mode(*iter);
     }
 }
 
@@ -1239,51 +1239,51 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
     Nat step=0u;
 
     for(Set<DiscreteLocation>::const_iterator initial_iter=initial_locations.begin(); initial_iter!=initial_locations.end(); ++initial_iter) {
-        steps.insert(*initial_iter,step);
+     steps.insert(*initial_iter,step);
     }
 
     while(!working.empty()) {
-        ++step;
-        for(Set<DiscreteLocation>::const_iterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
-            ARIADNE_LOG(5,"new_mode\n");
-            DiscreteLocation location=*source_iter;
-            ARIADNE_LOG(5,"  mode: "<<location<<":\n");
-            ARIADNE_LOG(7,"      output="<<automaton.algebraic_assignments(location)<<"\n");
-            ARIADNE_LOG(7,"          function="<<automaton.output_function(location)<<"\n");
-            ARIADNE_LOG(7,"      dynamic="<<automaton.differential_assignments(location)<<"\n");
-            ARIADNE_LOG(7,"          function="<<automaton.dynamic_function(location)<<"\n");
+     ++step;
+     for(Set<DiscreteLocation>::const_iterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
+      ARIADNE_LOG(5,"new_mode\n");
+      DiscreteLocation location=*source_iter;
+      ARIADNE_LOG(5,"  mode: "<<location<<":\n");
+      ARIADNE_LOG(7,"      output="<<automaton.algebraic_assignments(location)<<"\n");
+      ARIADNE_LOG(7,"    function="<<automaton.output_function(location)<<"\n");
+      ARIADNE_LOG(7,"      dynamic="<<automaton.differential_assignments(location)<<"\n");
+      ARIADNE_LOG(7,"    function="<<automaton.dynamic_function(location)<<"\n");
 
 /*
-            Map<DiscreteEvent,ContinuousPredicate> invariants=automaton.invariant_predicates(location);
-            for(Map<DiscreteEvent,ContinuousPredicate>::const_iterator invariant_iter=invariants.begin();
-                    invariant_iter!=invariants.end(); ++invariant_iter) {
-                ARIADNE_LOG(7,"    invariant: "<<invariant_iter->second<<"\n");
-                ARIADNE_LOG(7,"      function: "<<automaton.invariant_function(location,invariant_iter->first)<<"\n");
-                ARIADNE_LOG(7,"        action: "<<invariant_iter->first<<"\n");
-            }
+      Map<DiscreteEvent,ContinuousPredicate> invariants=automaton.invariant_predicates(location);
+      for(Map<DiscreteEvent,ContinuousPredicate>::const_iterator invariant_iter=invariants.begin();
+     invariant_iter!=invariants.end(); ++invariant_iter) {
+    ARIADNE_LOG(7,"    invariant: "<<invariant_iter->second<<"\n");
+    ARIADNE_LOG(7,"      function: "<<automaton.invariant_function(location,invariant_iter->first)<<"\n");
+    ARIADNE_LOG(7,"     action: "<<invariant_iter->first<<"\n");
+      }
 */
-            Set<DiscreteEvent> events=automaton.transition_events(location);
-            ARIADNE_LOG(5,"  events: "<<events<<"\n");
-            for(Set<DiscreteEvent>::const_iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
-                DiscreteEvent event=*event_iter;
-                ARIADNE_LOG(7,"    event:"<<event<<"\n");
-                DiscreteLocation target=automaton.target(location,event);
-                ARIADNE_LOG(7,"    transition: "<<event<<" -> "<<target<<"\n");
-                ARIADNE_LOG(7,"        reset="<<automaton.update_assignments(location,event)<<"\n");
-                ARIADNE_LOG(7,"          function="<<automaton.reset_function(location,event)<<"\n");
-                ARIADNE_LOG(7,"        guard="<<automaton.guard_predicate(location,event)<<"\n");
-                ARIADNE_LOG(7,"          function="<<automaton.guard_function(location,event)<<"\n");
-                if(!reached.contains(target)) {
-                    found.insert(target);
-                    reached.insert(target);
-                    steps.insert(target,step);
-                }
-           }
+      Set<DiscreteEvent> events=automaton.transition_events(location);
+      ARIADNE_LOG(5,"  events: "<<events<<"\n");
+      for(Set<DiscreteEvent>::const_iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
+    DiscreteEvent event=*event_iter;
+    ARIADNE_LOG(7,"    event:"<<event<<"\n");
+    DiscreteLocation target=automaton.target(location,event);
+    ARIADNE_LOG(7,"    transition: "<<event<<" -> "<<target<<"\n");
+    ARIADNE_LOG(7,"     reset="<<automaton.update_assignments(location,event)<<"\n");
+    ARIADNE_LOG(7,"    function="<<automaton.reset_function(location,event)<<"\n");
+    ARIADNE_LOG(7,"     guard="<<automaton.guard_predicate(location,event)<<"\n");
+    ARIADNE_LOG(7,"    function="<<automaton.guard_function(location,event)<<"\n");
+    if(!reached.contains(target)) {
+     found.insert(target);
+     reached.insert(target);
+     steps.insert(target,step);
+    }
+     }
 
-        }
-        ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n\n");
-        working.clear();
-        working.swap(found);
+     }
+     ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n\n");
+     working.clear();
+     working.swap(found);
     }
 
     return reached;

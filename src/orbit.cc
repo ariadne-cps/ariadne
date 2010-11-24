@@ -1,5 +1,5 @@
 /***************************************************************************
- *            orbit.cc
+ *      orbit.cc
  *
  *  Copyright 2007-8  Pieter Collins
  *
@@ -70,9 +70,9 @@ Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
 {
     ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
     if(this->size()==ht.discrete_time()) {
-        this->_curves->push_back(make_pair(hpt.location(),InterpolatedCurve(hpt.continuous_state_set())));
+     this->_curves->push_back(make_pair(hpt.location(),InterpolatedCurve(hpt.continuous_state_set())));
     } else {
-        (*this->_curves)[ht.discrete_time()].second.insert(ht.continuous_time(),hpt.continuous_state_set());
+     (*this->_curves)[ht.discrete_time()].second.insert(ht.continuous_time(),hpt.continuous_state_set());
     }
 }
 
@@ -149,7 +149,7 @@ final() const
 
 struct Orbit<HybridGridCell>::Data {
     Data(const HybridGrid& grid)
-        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+     : initial(grid), reach(grid), intermediate(grid), final(grid) { }
     HybridGridTreeSet initial;
     HybridGridTreeSet reach;
     HybridGridTreeSet intermediate;
@@ -210,7 +210,7 @@ final() const
 void draw(CanvasInterface& graphic, const Orbit<HybridPoint>& orbit)
 {
     for(uint i=0; i<=orbit.size(); ++i) {
-        orbit.curve(i).draw(graphic);
+     orbit.curve(i).draw(graphic);
     }
 }
 

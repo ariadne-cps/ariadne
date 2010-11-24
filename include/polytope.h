@@ -1,5 +1,5 @@
 /****************************************************************************
- *            polytope.h
+ *      polytope.h
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -78,8 +78,8 @@ class Polytope
 
     //! \brief Add a new vertex \a v to the current vertices.
     void new_vertex(const Point& v) {
-        ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension());
-        this->_vertices.push_back(v); }
+     ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension());
+     this->_vertices.push_back(v); }
     //! \brief The number of points defining the polytope. Note that an interior point is counted by this method.
     size_t number_of_vertices() const { return this->_vertices.size(); }
     //! \brief The \a i<sup>th</sup> vertex.

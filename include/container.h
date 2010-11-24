@@ -1,5 +1,5 @@
 /***************************************************************************
- *            container.h
+ *      container.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -55,10 +55,10 @@ template<class T> inline bool contains(const std::set<T>& s, const T& t) {
     return s.find(t)!=s.end(); }
 template<class T> inline bool subset(const std::set<T>& s1, const std::set<T>& s2) {
     for(typename std::set<T>::iterator iter=s1.begin(); iter!=s1.end(); ++iter) {
-        if(!contains(s2,*iter)) { return false; } } return true; }
+     if(!contains(s2,*iter)) { return false; } } return true; }
 template<class T> inline bool disjoint(const std::set<T>& s1, const std::set<T>& s2) {
     for(typename std::set<T>::iterator iter=s1.begin(); iter!=s1.end(); ++iter) {
-        if(contains(s2,*iter)) { return false; } } return true; }
+     if(contains(s2,*iter)) { return false; } } return true; }
 template<class T> inline std::set<T>& insert(std::set<T>& r, const T& t) {
     r.insert(t); return r; }
 template<class T> inline std::set<T>& adjoin(std::set<T>& r, const std::set<T>& s) {
@@ -128,7 +128,7 @@ template<class T> class List
 template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) {
     List<T> r(l1);
     for(typename List<T>::const_iterator iter=l2.begin(); iter!=l2.end(); ++iter) {
-        r.append(*iter);
+     r.append(*iter);
     }
     return r;
 }
@@ -151,7 +151,7 @@ template<class T> class Set
     : public std::set<T>
 {
     template<class TT, class KK> class KeyEqual {
-        bool operator()(const TT& t, const KK& k) { return t.key()==k; } };
+     bool operator()(const TT& t, const KK& k) { return t.key()==k; } };
   public:
     Set() : std::set<T>() { }
     Set(const std::set<T>& s) : std::set<T>(s) { }
@@ -159,23 +159,23 @@ template<class T> class Set
     template<class I> Set(const I& b, const I& e) : std::set<T>(b,e) { }
 
     bool contains(const T& t) {
-        return this->find(t)!=this->end(); }
+     return this->find(t)!=this->end(); }
     bool subset(const std::set<T>& s) {
-        for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
-            if(!this->contains(*iter)) { return false; } } return true; }
+     for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
+      if(!this->contains(*iter)) { return false; } } return true; }
     bool disjoint(const std::set<T>& s) {
-        for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
-            if(this->contains(*iter)) { return false; } } return true; }
+     for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
+      if(this->contains(*iter)) { return false; } } return true; }
     Set<T>& adjoin(const std::set<T>& s) {
-        for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) { this->insert(*iter); } return *this; }
+     for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) { this->insert(*iter); } return *this; }
     Set<T>& remove(const std::set<T>& s) {
-        typename std::set<T>::iterator iter=this->begin();
-        while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
-        return *this; }
+     typename std::set<T>::iterator iter=this->begin();
+     while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
+     return *this; }
     Set<T>& restrict(const std::set<T>& s) {
-        typename std::set<T>::iterator iter=this->begin();
-        while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
-        return *this; }
+     typename std::set<T>::iterator iter=this->begin();
+     while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
+     return *this; }
 };
 
 template<class T> inline Set<T> join(const Set<T>& s1, const Set<T>& s2) {
@@ -189,36 +189,36 @@ template<class K, class V> class Map
 {
   public:
     Map<K,V>()
-        : std::map<K,V>() { }
+     : std::map<K,V>() { }
     Map<K,V>(const std::map<K,V>& m)
-        : std::map<K,V>(m) { }
+     : std::map<K,V>(m) { }
     template<class W> explicit Map<K,V>(const std::map<K,W>& m) {
-        for(typename std::map<K,W>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
-            this->insert(iter->first,V(iter->second)); } }
+     for(typename std::map<K,W>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
+      this->insert(iter->first,V(iter->second)); } }
     V& operator[](const K& k) {
-        return this->std::map<K,V>::operator[](k); }
+     return this->std::map<K,V>::operator[](k); }
     const V& operator[](const K& k) const { typename std::map<K,V>::const_iterator p=this->find(k);
-        assert(p!=this->end()); return p->second; }
+     assert(p!=this->end()); return p->second; }
     bool has_key(const K& k) const {
-        return this->find(k)!=this->end(); }
+     return this->find(k)!=this->end(); }
     V& value(const K& k) {
-        typename std::map<K,V>::iterator iter=this->find(k);
-        assert(iter!=this->end()); return iter->second; }
+     typename std::map<K,V>::iterator iter=this->find(k);
+     assert(iter!=this->end()); return iter->second; }
     const V& value(const K& k) const {
-        typename std::map<K,V>::const_iterator iter=this->find(k);
-        assert(iter!=this->end()); return iter->second; }
+     typename std::map<K,V>::const_iterator iter=this->find(k);
+     assert(iter!=this->end()); return iter->second; }
     void insert(const K& k, const V& v) {
-        this->std::map<K,V>::insert(std::make_pair(k,v)); }
+     this->std::map<K,V>::insert(std::make_pair(k,v)); }
     void adjoin(const std::map<K,V>& m) {
-        for(typename std::map<K,V>::const_iterator i=m.begin(); i!=m.end(); ++i) { this->insert(*i); } }
+     for(typename std::map<K,V>::const_iterator i=m.begin(); i!=m.end(); ++i) { this->insert(*i); } }
     void remove_keys(const Set<K>& s) {
-        for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) { this->erase(*iter); } }
+     for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) { this->erase(*iter); } }
     Set<K> keys() const {
-        Set<K> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-            res.insert(iter->first); } return res; }
+     Set<K> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+      res.insert(iter->first); } return res; }
     List<V> values() const {
-        List<V> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-            res.append(iter->second); } return res; }
+     List<V> res; for(typename std::map<K,V>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+      res.append(iter->second); } return res; }
     using std::map<K,V>::insert;
 };
 template<class K,class V> inline Map<K,V> join(const Map<K,V>& m1, const Map<K,V>& m2) {

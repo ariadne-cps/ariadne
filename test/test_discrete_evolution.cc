@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_discrete_evolution.cc
+ *      test_discrete_evolution.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *

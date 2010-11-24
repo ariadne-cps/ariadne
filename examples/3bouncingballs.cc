@@ -1,5 +1,5 @@
 /***************************************************************************
- *            3bouncingballs.cc
+ *      3bouncingballs.cc
  *
  *  Copyright  2008  Davide Bresolin
  *
@@ -37,37 +37,37 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
     {
-	// The rectangle to be drawn
-	Box rect = Box(4);
-	// Chooses the fill colour
-        fig << fill_colour(Colour(1.0,1.0,1.0));
+    // The rectangle to be drawn
+    Box rect = Box(4);
+    // Chooses the fill colour
+     fig << fill_colour(Colour(1.0,1.0,1.0));
 
-	// Gets the number of times each variable interval would be divided by 2
-        int numDivisions = MAX_GRID_DEPTH / numVariables;
-	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-	Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
-	// Initiates the x position to the bounding box left bound
-        Float pos_x = bbox[0].lower();
-        // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
-	rect[1] = bbox[1];
-        // While between the interval
-        while (pos_x < bbox[0].upper())
-        {
-	    rect[0] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
-	    pos_x += step_x; // Shifts the x position
-	    fig << rect; // Appends the rectangle
-        }
+    // Gets the number of times each variable interval would be divided by 2
+     int numDivisions = MAX_GRID_DEPTH / numVariables;
+    // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
+    Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+    // Initiates the x position to the bounding box left bound
+     Float pos_x = bbox[0].lower();
+     // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
+    rect[1] = bbox[1];
+     // While between the interval
+     while (pos_x < bbox[0].upper())
+     {
+     rect[0] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+     pos_x += step_x; // Shifts the x position
+     fig << rect; // Appends the rectangle
+     }
 
-	// Repeats for the rectangles in the y direction
-	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        Float pos_y = bbox[1].lower();
-	rect[0] = bbox[0];
-        while (pos_y < bbox[1].upper())
-        {
-	    rect[1] = Interval(pos_y,pos_y+step_y);
-   	    fig << rect;
-	    pos_y += step_y;
-        }
+    // Repeats for the rectangles in the y direction
+    Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+     Float pos_y = bbox[1].lower();
+    rect[0] = bbox[0];
+     while (pos_y < bbox[1].upper())
+     {
+     rect[1] = Interval(pos_y,pos_y+step_y);
+     fig << rect;
+     pos_y += step_y;
+     }
     }
     // Draws and creates file
     fig.set_fill_colour(fc);
@@ -77,18 +77,18 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 
 /* Variables:
 *
-*	x1: x coordinate of the first ball
-*	y1: y coordinate of the first ball
-*	x2: x coordinate of the second ball
-*	y2: y coordinate of the second ball
-*	x3: x coordinate of the third ball
-*	y3: y coordinate of the third ball
-*	vx1: x-component of the speed of the first ball
-*	vy1: y-component of the speed of the first ball
-*	vx2: x-component of the speed of the second ball
-*	vy2: y-component of the speed of the second ball
-*	vx3: x-component of the speed of the third ball
-*	vy3: y-component of the speed of the third ball
+*    x1: x coordinate of the first ball
+*    y1: y coordinate of the first ball
+*    x2: x coordinate of the second ball
+*    y2: y coordinate of the second ball
+*    x3: x coordinate of the third ball
+*    y3: y coordinate of the third ball
+*    vx1: x-component of the speed of the first ball
+*    vy1: y-component of the speed of the first ball
+*    vx2: x-component of the speed of the second ball
+*    vy2: y-component of the speed of the second ball
+*    vx3: x-component of the speed of the third ball
+*    vy3: y-component of the speed of the third ball
 */
 
 int main()

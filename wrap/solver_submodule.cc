@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver_submodule.cc
+ *      solver_submodule.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -49,17 +49,17 @@ class SolverWrapper
     void set_maximum_number_of_steps(uint) { this->get_override("set_maximum_number_of_steps")(); }
     uint maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
     IntervalVector zero(const RealVectorFunction& f, const IntervalVector& bx) const {
-        return this->get_override("zero")(); }
+     return this->get_override("zero")(); }
     IntervalVector fixed_point(const RealVectorFunction& f, const IntervalVector& bx) const {
-        return this->get_override("fixed_point")(); }
+     return this->get_override("fixed_point")(); }
     IntervalVector solve(const RealVectorFunction& f, const IntervalVector& bx) const {
-        return this->get_override("solve")(); }
+     return this->get_override("solve")(); }
     VectorTaylorFunction implicit(const RealVectorFunction& f, const IntervalVector& pd, const IntervalVector& bx) const {
-        return this->get_override("implicit")(); }
+     return this->get_override("implicit")(); }
     ScalarTaylorFunction implicit(const RealScalarFunction& f, const IntervalVector& pd, const Interval& ivl) const {
-        return this->get_override("implicit")(); }
+     return this->get_override("implicit")(); }
     Set< IntervalVector > solve_all(const RealVectorFunction& f, const IntervalVector& bx) const {
-        return this->get_override("solve_all")(); }
+     return this->get_override("solve_all")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -69,23 +69,23 @@ class IntegratorWrapper
 {
   public:
     IntegratorInterface* clone() const {
-        return this->get_override("clone")(); }
+     return this->get_override("clone")(); }
     void set_temporal_order(uint) {
-        this->get_override("set_temporal_order")(); }
+     this->get_override("set_temporal_order")(); }
     void set_maximum_error(double) {
-        this->get_override("set_maximum_error")(); }
+     this->get_override("set_maximum_error")(); }
     Pair<Float,IntervalVector> flow_bounds(const RealVectorFunction&,const IntervalVector&,const Float&) const {
-        return this->get_override("flow_bounds")(); }
+     return this->get_override("flow_bounds")(); }
     VectorTaylorFunction flow_step(const RealVectorFunction&,const IntervalVector&,const Float&) const {
-        return this->get_override("flow_step")(); }
+     return this->get_override("flow_step")(); }
     VectorTaylorFunction flow_step(const RealVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&) const {
-        return this->get_override("flow_step")(); }
+     return this->get_override("flow_step")(); }
     VectorTaylorFunction flow(const RealVectorFunction& vector_field,const IntervalVector&,const Real&) const {
-        return this->get_override("flow")(); }
+     return this->get_override("flow")(); }
     VectorTaylorFunction flow(const RealVectorFunction&,const IntervalVector&,const Interval&) const {
-        return this->get_override("flow")(); }
+     return this->get_override("flow")(); }
 //    std::ostream& write(std::ostream&) const {
-//        return this->get_override("write")(); }
+//     return this->get_override("write")(); }
 };
 
 

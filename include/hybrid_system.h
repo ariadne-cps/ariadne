@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_system.h
+ *      hybrid_system.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -147,45 +147,45 @@ class HybridSystem
     // Methods for rules valid in certain modes
     //! \brief Adds a algebraic equation to the system.
     void new_equation(DiscretePredicate q, RealAssignment a) {
-        AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
+     AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
     //! \brief Adds a differential equation to the system.
     void new_dynamic(DiscretePredicate q, RealDynamic d) {
-        DifferentialEquation eqn={q,d.lhs.base(),d.rhs}; _differential_equations.push_back(eqn); };
+     DifferentialEquation eqn={q,d.lhs.base(),d.rhs}; _differential_equations.push_back(eqn); };
     //! \brief Adds a discrete reset to the system.
     void new_transition(EventSet e, DiscretePredicate q, StringUpdate a) {
-        DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
+     DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
     void new_transition(DiscretePredicate q, EventSet e, StringUpdate a) {
-        DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
+     DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
     //! \brief Adds a reset equation to the system.
     void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
-        ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
+     ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
     void new_reset(DiscretePredicate q, EventSet e, RealUpdate a) {
-        ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
+     ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
     //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate p) {
-        GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
+     GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
     void new_guard(DiscretePredicate q, EventSet e, ContinuousPredicate p) {
-        GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
+     GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
     //! \brief Adds a guard predicate and invariant to the system.
     void new_guard(EventSet e, DiscretePredicate q,  ContinuousPredicate a, ContinuousPredicate i) {
-        GuardPredicate aeqn={e,q,a}; _guard_predicates.push_back(aeqn);
-        InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
+     GuardPredicate aeqn={e,q,a}; _guard_predicates.push_back(aeqn);
+     InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
     void new_guard(DiscretePredicate q, EventSet e, ContinuousPredicate a, ContinuousPredicate i) {
-        GuardPredicate aeqn={e,q,a}; _guard_predicates.push_back(aeqn);
-        InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
+     GuardPredicate aeqn={e,q,a}; _guard_predicates.push_back(aeqn);
+     InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
     //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, bool p) {
-        GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }
+     GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }
     void new_guard(DiscretePredicate q, EventSet e, bool p) {
-        GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }
+     GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }
     //! \brief Adds an invariant to the system.
     void new_invariant(DiscretePredicate q, ContinuousPredicate p) {
-        InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
+     InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
     //! \brief Disables events in a given set of locations.
     void new_disabled_events(EventSet e, DiscretePredicate q) {
-        DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
+     DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
     void new_disabled_events(DiscretePredicate q, EventSet e) {
-        DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
+     DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
 
     // Methods for rules valid in all modes.
     //! \brief Adds a algebraic equation to the system, valid in all modes.

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton.h
+ *      hybrid_automaton.h
  *
  *  Copyright  2004-9  Alberto Casagrande, Pieter Collins
  *

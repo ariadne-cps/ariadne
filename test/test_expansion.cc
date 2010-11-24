@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_expansion.cc
+ *      test_expansion.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -268,8 +268,8 @@ void TestExpansion::test_cleanup()
     Expansion<Float> e(3);
     ARIADNE_TEST_PRINT(e);
     for(uint i=0; i!=2; ++i) {
-        if(i%2) { e.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { e.append(b,1/(1.+i));}
-        ARIADNE_TEST_PRINT(e);
+     if(i%2) { e.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { e.append(b,1/(1.+i));}
+     ARIADNE_TEST_PRINT(e);
     }
 
     ARIADNE_TEST_PRINT(e);
@@ -286,7 +286,7 @@ void TestExpansion::test_constructors()
     ARIADNE_TEST_CONSTRUCT(Expansion<Float>,e1,(3));
     // Expansion with all entries; useful for checking ordering of indices
     ARIADNE_TEST_CONSTRUCT(Expansion<Float>,e2,(3,4, 1., 2.,3.,4., 5.,6.,7.,8.,9.,10.,
-        11.,12.,13.,14.,15.,16.,17.,18.,19.,20., 21.,22.,23.,24.,25.,26.,27.,28.,29.,30.,31.,32.,33.,34.,35));
+     11.,12.,13.,14.,15.,16.,17.,18.,19.,20., 21.,22.,23.,24.,25.,26.,27.,28.,29.,30.,31.,32.,33.,34.,35));
 
     // Dense expansion
     ARIADNE_TEST_CONSTRUCT(Expansion<Float>,e3,(3,2, 0., 0.,0.,0., 5.,2.,0.,0.,3.,0.));

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_function.h
+ *      taylor_function.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -65,7 +65,7 @@ template<class X> inline X unscale(const X& x, const Interval& d) {
 template<class X> Vector<X> unscale(const Vector<X>& x, const Vector<Interval>& d) {
     Vector<X> r(x.size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=unscale(x[i],d[i]);
+     r[i]=unscale(x[i],d[i]);
     }
     return r;
 }
@@ -503,9 +503,9 @@ class ScalarTaylorFunction
   private:
     friend class ScalarFunctionMixin<ScalarTaylorFunction, Interval>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
-        typedef typename T::NumericType R;
-        r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
-            + convert_error<R>(this->_model.error());
+     typedef typename T::NumericType R;
+     r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
+      + convert_error<R>(this->_model.error());
     }
     ScalarTaylorFunction* _derivative(uint j) const ;
 };
@@ -709,32 +709,32 @@ class VectorTaylorFunction
 
     /*! \brief Construct from a domain and the expansion. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Expansion<Float> >& expansion);
+    const Vector< Expansion<Float> >& expansion);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Expansion<Float> >& expansion,
-                   const Vector<Float>& error);
+    const Vector< Expansion<Float> >& expansion,
+    const Vector<Float>& error);
 
     /*! \brief Construct from a domain and the models. */
     explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector< TaylorModel<Interval> >& variables);
 
     /*! \brief Construct from a domain and a function. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const RealVectorFunction& function);
+    const RealVectorFunction& function);
 
     /*! \brief Construct from a domain, a function, and accuracy paramters. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const RealVectorFunction& function,
-                   shared_ptr<TaylorModel<Interval>::Accuracy> accuracy_ptr);
+    const RealVectorFunction& function,
+    shared_ptr<TaylorModel<Interval>::Accuracy> accuracy_ptr);
 
     /*! \brief Construct from a domain and a polynomial. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Polynomial<Float> >& polynomial);
+    const Vector< Polynomial<Float> >& polynomial);
 
     /*! \brief Construct from a domain and a n interval polynomial. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Polynomial<Interval> >& polynomial);
+    const Vector< Polynomial<Interval> >& polynomial);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */
     explicit VectorTaylorFunction(const Vector<ScalarTaylorFunction>& components);
@@ -966,7 +966,7 @@ Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn);
 List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns);
 
 
-template<class E> VectorTaylorFunction::VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve)            : _domain(), _models(ve().size())
+template<class E> VectorTaylorFunction::VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve)      : _domain(), _models(ve().size())
 {
     if(ve().size()!=0) { this->_domain=ve()[0].domain(); }
     for(uint i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }

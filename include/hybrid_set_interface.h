@@ -1,8 +1,8 @@
 /***************************************************************************
- *            hybrid_set_interface.h
+ *      hybrid_set_interface.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file hybrid_set_interface.h
  *  \brief Interfaces for open, closed, overt and compact subsets of hybrid spaces.
  */
@@ -50,7 +50,7 @@ typedef HybridBasicSet<Box> HybridBox;
 typedef std::map<DiscreteLocation,Box> HybridBoxes;
 
 //! \brief Base class for sets in a hybrid space.
-class HybridSetInterfaceBase 
+class HybridSetInterfaceBase
 {
   public:
     virtual ~HybridSetInterfaceBase() { };
@@ -61,9 +61,9 @@ class HybridSetInterfaceBase
     friend std::ostream& operator<<(std::ostream& os, const HybridSetInterfaceBase& hs);
 };
 
-//! \brief Interface for bounded sets in a hybrid space. 
-class HybridBoundedSetInterface 
-    : public virtual HybridSetInterfaceBase 
+//! \brief Interface for bounded sets in a hybrid space.
+class HybridBoundedSetInterface
+    : public virtual HybridSetInterfaceBase
 {
   public:
     virtual HybridBoundedSetInterface* clone() const = 0;
@@ -72,9 +72,9 @@ class HybridBoundedSetInterface
     virtual BoundedSetInterface const& operator[](DiscreteLocation) const = 0;
 };
 
-//! \brief Interface for overt sets in a hybrid space. 
-class HybridOvertSetInterface 
-    : public virtual HybridSetInterfaceBase 
+//! \brief Interface for overt sets in a hybrid space.
+class HybridOvertSetInterface
+    : public virtual HybridSetInterfaceBase
 {
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
@@ -82,9 +82,9 @@ class HybridOvertSetInterface
     virtual OvertSetInterface const& operator[](DiscreteLocation) const = 0;
 };
 
-//! \brief Interface for open sets in a hybrid space. 
-class HybridOpenSetInterface 
-    : public virtual HybridOvertSetInterface 
+//! \brief Interface for open sets in a hybrid space.
+class HybridOpenSetInterface
+    : public virtual HybridOvertSetInterface
 {
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
@@ -92,9 +92,9 @@ class HybridOpenSetInterface
     virtual OpenSetInterface const& operator[](DiscreteLocation) const = 0;
 };
 
-//! \brief Interface for closed sets in a hybrid space. 
+//! \brief Interface for closed sets in a hybrid space.
 class HybridClosedSetInterface
-    : public virtual HybridSetInterfaceBase 
+    : public virtual HybridSetInterfaceBase
 {
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
@@ -102,18 +102,18 @@ class HybridClosedSetInterface
     virtual ClosedSetInterface const& operator[](DiscreteLocation) const = 0;
 };
 
-//! \brief Interface for compact (closed and bounded) sets in a hybrid space. 
+//! \brief Interface for compact (closed and bounded) sets in a hybrid space.
 class HybridCompactSetInterface
-    : public virtual HybridBoundedSetInterface 
-    , public virtual HybridClosedSetInterface 
+    : public virtual HybridBoundedSetInterface
+    , public virtual HybridClosedSetInterface
 {
   public:
     virtual HybridCompactSetInterface* clone() const = 0;
     virtual CompactSetInterface const& operator[](DiscreteLocation) const = 0;
 };
 
-//! \brief Interface for regular (open and closed) sets in a hybrid space. 
-class HybridRegularSetInterface 
+//! \brief Interface for regular (open and closed) sets in a hybrid space.
+class HybridRegularSetInterface
     : public virtual HybridOpenSetInterface,
       public virtual HybridClosedSetInterface
 {
@@ -121,8 +121,8 @@ class HybridRegularSetInterface
     virtual RegularSetInterface const& operator[](DiscreteLocation) const = 0;
 };
 
-//! \brief Interface for located (overt and compact) sets in a hybrid space. 
-class HybridLocatedSetInterface 
+//! \brief Interface for located (overt and compact) sets in a hybrid space.
+class HybridLocatedSetInterface
     : public virtual HybridOvertSetInterface,
       public virtual HybridCompactSetInterface
 {
@@ -131,17 +131,17 @@ class HybridLocatedSetInterface
 };
 
 //! \brief Complete set interface for bounded regular sets in a hybrid space.
-class HybridSetInterface 
+class HybridSetInterface
     : public virtual HybridRegularSetInterface,
       public virtual HybridLocatedSetInterface
 {
     virtual HybridSetInterface* clone() const = 0;
     virtual SetInterface const& operator[](DiscreteLocation) const = 0;
 };
-    
+
 
 inline std::ostream& operator<<(std::ostream& os, const HybridSetInterfaceBase& s) {
-    return s.write(os); 
+    return s.write(os);
 }
 
 

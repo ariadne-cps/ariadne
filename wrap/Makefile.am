@@ -13,7 +13,7 @@ python_MODULES = .libs/ariadne.so .libs/interval.so .libs/differentiation.so
 
 python_LTLIBRARIES =
 if WANT_PYTHON_INTERFACE
-  python_LTLIBRARIES += $(python_LIBS)
+	python_LTLIBRARIES += $(python_LIBS)
 endif
 
 wrap: python

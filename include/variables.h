@@ -1,5 +1,5 @@
 /***************************************************************************
- *            variables.h
+ *      variables.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -77,13 +77,13 @@ template<class T> class Constant
 {
   public:
     template<class X> explicit Constant(const String& str, const X& value)
-        : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
+     : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
     //explicit Constant(const String& str, const T& value)
     //    : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
     const String& name() const { return *_name_ptr; }
     const T& value() const { return *_value_ptr; }
     bool operator==(const Constant<T>& other) const {
-        if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
+     if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
   private:
     shared_ptr<String> _name_ptr;
     shared_ptr<T> _value_ptr;
@@ -99,26 +99,26 @@ class UntypedVariable {
     const String& name() const { return *_name_ptr; }
     const VariableType& type() const { return this->_type; }
     bool operator==(const UntypedVariable& other) const {
-        return (this->name()==other.name()) && (this->_category==other._category); }
+     return (this->name()==other.name()) && (this->_category==other._category); }
     bool operator!=(const UntypedVariable& other) const { return !(*this==other); }
     bool operator<(const UntypedVariable& other) const {
-        return this->name()<other.name() || (this->name()==other.name() && this->_type < other._type); }
+     return this->name()<other.name() || (this->name()==other.name() && this->_type < other._type); }
     virtual std::ostream& write(std::ostream&) const;
   public:
     static std::string name(const VariableType& tp) {
-        switch(tp) {
-            case type_bool: return "Bool";
-            case type_tribool: return "Tribool";
-            case type_enumerated: return "Enumerated";
-            case type_string: return "String";
-            case type_integer: return "Integer";
-            case type_real: return "Real";
-        }
-        return "Unknown";
+     switch(tp) {
+      case type_bool: return "Bool";
+      case type_tribool: return "Tribool";
+      case type_enumerated: return "Enumerated";
+      case type_string: return "String";
+      case type_integer: return "Integer";
+      case type_real: return "Real";
+     }
+     return "Unknown";
     }
   protected:
     explicit UntypedVariable(const std::string& nm, VariableType tp, VariableCategory cat=simple)
-        : _name_ptr(new std::string(nm)), _type(tp), _category(cat) { }
+     : _name_ptr(new std::string(nm)), _type(tp), _category(cat) { }
   private:
     shared_ptr<std::string> _name_ptr;
     VariableType _type;
@@ -134,9 +134,9 @@ template<> inline VariableType variable_type<Real>() { return type_real; }
 
 inline std::ostream& UntypedVariable::write(std::ostream& os) const {
     switch(this->_category) {
-        case simple: os << this->name(); break;
-        case dotted: os << "dot("<<this->name()<<")"; break;
-        case primed: os << "next("<<this->name()<<")"; break;
+     case simple: os << this->name(); break;
+     case dotted: os << "dot("<<this->name()<<")"; break;
+     case primed: os << "next("<<this->name()<<")"; break;
     }
     //os << ":" << name(this->_type);
     return os;
@@ -157,7 +157,7 @@ template<class T> class ExtendedVariable
     Assignment< ExtendedVariable<T>,Expression<T> > operator=(const Expression<T>& e) const;
   protected:
     explicit ExtendedVariable(const String& nm, VariableCategory cat=simple)
-        : UntypedVariable(nm, variable_type<T>(), cat) { }
+     : UntypedVariable(nm, variable_type<T>(), cat) { }
 };
 
 //! \ingroup ExpressionModule

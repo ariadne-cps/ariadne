@@ -1,5 +1,5 @@
 /****************************************************************************
- *            polytope.cc
+ *      polytope.cc
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -56,7 +56,7 @@ Polytope::bounding_box() const
     const Polytope& p=*this;
     Box res(p._vertices[0]);
     for(uint i=1; i!=p._vertices.size(); ++i) {
-        res=hull(res,p._vertices[i]);
+     res=hull(res,p._vertices[i]);
     }
     return res;
 }
@@ -95,20 +95,20 @@ Polytope polytope(const Zonotope& z)
     size_t ng=z.generators().column_size();
     size_t nv=1<<ng;
     for(size_t i=0; i!=nv; ++i) {
-        Point pt=z.centre();
-        for(size_t j=0; j!=ng; ++j) {
-            if(i & 1<<j) {
-                pt+=column(z.generators(),j);
-            } else {
-                pt-=column(z.generators(),j);
-            }
-        }
-        res.new_vertex(pt);
+     Point pt=z.centre();
+     for(size_t j=0; j!=ng; ++j) {
+      if(i & 1<<j) {
+    pt+=column(z.generators(),j);
+      } else {
+    pt-=column(z.generators(),j);
+      }
+     }
+     res.new_vertex(pt);
     }
     if(res.dimension()==2) {
-        return reduce2d(res);
+     return reduce2d(res);
     } else {
-        return res;
+     return res;
     }
 }
 
@@ -117,9 +117,9 @@ Polytope polytope(const Polytope& p)
 {
     Polytope r=p;
     if(r.dimension()==2) {
-        return reduce2d(r);
+     return reduce2d(r);
     } else {
-        return r;
+     return r;
     }
 }
 
@@ -137,48 +137,48 @@ Polytope& reduce2d(Polytope& p)
     // Sweep lower boundary from bottom-left to top right
     size_t min_size=1;
     for(std::vector<Point>::const_iterator vertex_iter=old_vertices.begin();
-        vertex_iter!=old_vertices.end(); ++vertex_iter)
-        {
-            const Point& vertex=*vertex_iter;
-            while(new_vertices.size()>min_size) {
-                const Point& penultimate=new_vertices[new_vertices.size()-2];
-                const Point& last=new_vertices[new_vertices.size()-1];
-                if(penultimate[0]==last[0]) {
-                    new_vertices.pop_back();
-                } else if(last[0]==vertex[0]) {
-                    break;
-                } else if(slope2d(penultimate,vertex) <= slope2d(penultimate,last)) {
-                    new_vertices.pop_back();
-                } else {
-                    break;
-                }
-            }
-            new_vertices.push_back(vertex);
-        }
+     vertex_iter!=old_vertices.end(); ++vertex_iter)
+     {
+      const Point& vertex=*vertex_iter;
+      while(new_vertices.size()>min_size) {
+    const Point& penultimate=new_vertices[new_vertices.size()-2];
+    const Point& last=new_vertices[new_vertices.size()-1];
+    if(penultimate[0]==last[0]) {
+     new_vertices.pop_back();
+    } else if(last[0]==vertex[0]) {
+     break;
+    } else if(slope2d(penultimate,vertex) <= slope2d(penultimate,last)) {
+     new_vertices.pop_back();
+    } else {
+     break;
+    }
+      }
+      new_vertices.push_back(vertex);
+     }
     new_vertices.pop_back();
 
     // Upper sweep
     //std::cerr << "Forward pass\n";
     min_size=new_vertices.size()+1;
     for(std::vector<Point>::const_reverse_iterator vertex_iter=old_vertices.rbegin();
-        vertex_iter!=old_vertices.rend(); ++vertex_iter)
-        {
-            const Point& vertex=*vertex_iter;
-            while(new_vertices.size()>min_size) {
-                const Point& penultimate=new_vertices[new_vertices.size()-2];
-                const Point& last=new_vertices[new_vertices.size()-1];
-                if(penultimate[0]==last[0]) {
-                    new_vertices.pop_back();
-                } else if(last[0]==vertex[0]) {
-                    break;
-                } else if(slope2d(penultimate,vertex) <= slope2d(penultimate,last)) {
-                    new_vertices.pop_back();
-                } else {
-                    break;
-                }
-            }
-            new_vertices.push_back(vertex);
-        }
+     vertex_iter!=old_vertices.rend(); ++vertex_iter)
+     {
+      const Point& vertex=*vertex_iter;
+      while(new_vertices.size()>min_size) {
+    const Point& penultimate=new_vertices[new_vertices.size()-2];
+    const Point& last=new_vertices[new_vertices.size()-1];
+    if(penultimate[0]==last[0]) {
+     new_vertices.pop_back();
+    } else if(last[0]==vertex[0]) {
+     break;
+    } else if(slope2d(penultimate,vertex) <= slope2d(penultimate,last)) {
+     new_vertices.pop_back();
+    } else {
+     break;
+    }
+      }
+      new_vertices.push_back(vertex);
+     }
     new_vertices.pop_back();
 
     new_vertices.swap(p.vertices());
@@ -193,12 +193,12 @@ baricentre(const Polytope& p)
     Point baricentre(p.dimension());
 
     for (size_t j=0; j!=vertices.size(); ++j) {
-        for (size_t i=0; i<2; i++) {
-            baricentre[i]=baricentre[i]+vertices[j][i];
-        }
+     for (size_t i=0; i<2; i++) {
+      baricentre[i]=baricentre[i]+vertices[j][i];
+     }
     }
     for (size_t i=0; i!=2; ++i) {
-        baricentre[i]/=vertices.size();
+     baricentre[i]/=vertices.size();
     }
     return baricentre;
 }
@@ -239,7 +239,7 @@ apply(const ProjectionFunction& map, const Zonotope& z)
     Point new_centre=apply(map,z.centre());
     Matrix<Float> new_generators(2u,z.number_of_generators());
     for(size_t i=0; i!=z.number_of_generators(); ++i) {
-        column(new_generators,i)=apply(map,Vector<Float>(column(z.generators(),i)));
+     column(new_generators,i)=apply(map,Vector<Float>(column(z.generators(),i)));
     }
     return Zonotope(new_centre,new_generators);
 }
@@ -250,14 +250,14 @@ apply(const ProjectionFunction& map, const Polytope& p)
 {
     Polytope result(map.result_size());
     for(size_t i=0; i!=p.number_of_vertices(); ++i) {
-        Point const& v=p.vertex(i);
-        Point pt=apply(map,v);
-        result.new_vertex(pt);
+     Point const& v=p.vertex(i);
+     Point pt=apply(map,v);
+     result.new_vertex(pt);
     }
     if(result.dimension()==2) {
-        return reduce2d(result);
+     return reduce2d(result);
     } else {
-        return result;
+     return result;
     }
 }
 
@@ -269,8 +269,8 @@ apply(const ProjectionFunction& map, const InterpolatedCurve& curve)
     InterpolatedCurve::const_iterator end=curve.end();
     InterpolatedCurve result(apply(map,iter->second));
     while(iter!=curve.end()) {
-        ++iter;
-        result.insert(iter->first,apply(map,iter->second));
+     ++iter;
+     result.insert(iter->first,apply(map,iter->second));
     }
     return result;
 }
@@ -285,9 +285,9 @@ void Polytope::draw(CanvasInterface& c) const {
 
     // Project polytope onto canvas coordinates
     for(uint i=0; i!=this->number_of_vertices(); ++i) {
-        const Point& v=this->vertex(i);
-        prv[0]=v[xi]; prv[1]=v[yi];
-        pr.new_vertex(prv);
+     const Point& v=this->vertex(i);
+     prv[0]=v[xi]; prv[1]=v[yi];
+     pr.new_vertex(prv);
     }
 
     // Reduce boundary of projected polytope
@@ -297,8 +297,8 @@ void Polytope::draw(CanvasInterface& c) const {
     prv=pr.vertex(pr.number_of_vertices()-1);
     c.move_to(prv[0],prv[1]);
     for(uint i=0; i!=pr.number_of_vertices(); ++i) {
-        prv=pr.vertex(i);
-        c.line_to(prv[0],prv[1]);
+     prv=pr.vertex(i);
+     c.line_to(prv[0],prv[1]);
     }
 
     c.fill();

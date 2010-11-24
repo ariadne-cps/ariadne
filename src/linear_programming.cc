@@ -1,5 +1,5 @@
 /***************************************************************************
- *            linear_programming.cc
+ *      linear_programming.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  *
@@ -71,8 +71,8 @@ const double BOUNDS_TOLERANCE=std::numeric_limits<double>::epsilon() * 4098;
 
 StandardLinearProgram
 feasibility_problem(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-                    const Matrix<Float>& C, const Vector<Float>& c,
-                    const Vector<Float>& dl, const Vector<Float>& du)
+     const Matrix<Float>& C, const Vector<Float>& c,
+     const Vector<Float>& dl, const Vector<Float>& du)
 {
     const uint nd=dl.size();
     const uint nc=C.column_size();
@@ -100,18 +100,18 @@ feasibility_problem(const Matrix<Float>& B, const Vector<Float>& bl, const Vecto
     Vector<Float> e(nc,1.0), Ce(prod(C,e));
 
     for(uint i=0; i!=nd; ++i) {
-        for(uint j=0; j!=nb; ++j) {
-            AA[i][j]=B[i][j];
-            AA[i][j+nb]=-B[i][j];
-        }
-        for(uint j=0; j!=nc; ++j) {
-            AA[i][j+2*nb]=C[i][j];
-        }
-        AA[i][i+2*nb+nc]=1.0;
-        AA[i][i+2*nb+nc+nd]=-1.0;
+     for(uint j=0; j!=nb; ++j) {
+      AA[i][j]=B[i][j];
+      AA[i][j+nb]=-B[i][j];
+     }
+     for(uint j=0; j!=nc; ++j) {
+      AA[i][j+2*nb]=C[i][j];
+     }
+     AA[i][i+2*nb+nc]=1.0;
+     AA[i][i+2*nb+nc+nd]=-1.0;
     }
     for(uint jj=0; jj!=2*nb+nc; ++jj) {
-        AA[nd][jj]=1.0;
+     AA[nd][jj]=1.0;
     }
 
     ARIADNE_LOG(2,"AA="<<AA<<"\n");
@@ -121,57 +121,57 @@ feasibility_problem(const Matrix<Float>& B, const Vector<Float>& bl, const Vecto
 
     // Set cc to be upper constraints
     for(uint j=0; j!=nb; ++j) {
-        cc[j]=bu[j];
-        cc[j+nb]=-bl[j];
+     cc[j]=bu[j];
+     cc[j+nb]=-bl[j];
     }
 
     for(uint j=0; j!=nc; ++j) {
-        cc[j+2*nb]=c[j];
+     cc[j+2*nb]=c[j];
     }
 
     for(uint j=0; j!=nd; ++j) {
-        cc[j+2*nb+nc]=du[j];
-        cc[j+2*nb+nc+nd]=-dl[j];
+     cc[j+2*nb+nc]=du[j];
+     cc[j+2*nb+nc+nd]=-dl[j];
     }
 
     ARIADNE_LOG(2,"bb="<<bb<<" cc="<<cc<<"\n");
 
     // Set xx to be constant vector plus whatever is needed to make constraints satisfied
     for(uint jj=0; jj!=ns; ++jj) {
-        xx[jj]=1.0/(2*nb+nc);
+     xx[jj]=1.0/(2*nb+nc);
     }
     ARIADNE_LOG(2,"C="<<C<<" Ce="<<Ce<<" xx="<<xx<<" AA*xx="<<prod(AA,xx)<<"\n");
     for(uint i=0; i!=nd; ++i) {
-        if(Ce[i]>0.0) { xx[i+2*nb+nc+nd]+=Ce[i]/(2*nb+nc); }
-        else { xx[i+2*nb+nc]-=Ce[i]/(2*nb+nc); }
+     if(Ce[i]>0.0) { xx[i+2*nb+nc+nd]+=Ce[i]/(2*nb+nc); }
+     else { xx[i+2*nb+nc]-=Ce[i]/(2*nb+nc); }
     }
     ARIADNE_LOG(2,"Ce="<<Ce<<" xx="<<xx<<" AA*xx="<<prod(AA,xx)<<"\n");
 
     // Set yy to be midpoint of domain
     for(uint i=0; i!=nd; ++i) {
-        yy[i]=y[i];
+     yy[i]=y[i];
     }
 
     // Set zz and t=yy[nd] to be midpoint of domain
     for(uint j=0; j!=nb; ++j) {
-        zz[j]=bu[j]-yB[j];
-        zz[j+nb]=yB[j]-bl[j];
+     zz[j]=bu[j]-yB[j];
+     zz[j+nb]=yB[j]-bl[j];
     }
     for(uint j=0; j!=nc; ++j) {
-        zz[j+2*nb]=c[j]-yC[j];
+     zz[j+2*nb]=c[j]-yC[j];
     }
     for(uint j=0; j!=nd; ++j) {
-        zz[j+2*nb+nc]=du[j]-y[j];
-        zz[j+2*nb+nc+nd]=y[j]-dl[j];
+     zz[j+2*nb+nc]=du[j]-y[j];
+     zz[j+2*nb+nc+nd]=y[j]-dl[j];
     }
     Float t=+inf<Float>();
     for(uint jj=0; jj!=2*nb+nc; ++jj) {
-        t=min(t,zz[jj]);
+     t=min(t,zz[jj]);
     }
     t-=1.0/ns;
     yy[nd]=t;
     for(uint jj=0; jj!=2*nb+nc; ++jj) {
-        zz[jj]-=t;
+     zz[jj]-=t;
     }
 
     ARIADNE_LOG(2,"xx="<<xx<<"\nyy="<<yy<<" zz="<<zz<<"\n");
@@ -186,8 +186,8 @@ feasibility_problem(const Matrix<Float>& B, const Vector<Float>& bl, const Vecto
 
 StandardLinearProgram
 feasibility_problem(const Vector< Affine<Float> >& f, const Vector<Interval>& b,
-                    const Vector< Affine<Float> >& g, const Vector<Float>& c,
-                    const Vector<Interval>& d)
+     const Vector< Affine<Float> >& g, const Vector<Float>& c,
+     const Vector<Interval>& d)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -197,12 +197,12 @@ feasibility_problem(const Vector< Affine<Float> >& f, const Vector<Interval>& b,
 
 struct SingularLinearProgram : std::runtime_error {
     SingularLinearProgram(const std::string& what)
-        : std::runtime_error(what) { };
+     : std::runtime_error(what) { };
 };
 
 struct UnboundedLinearProgram : std::runtime_error {
     UnboundedLinearProgram(const std::string& what)
-        : std::runtime_error(what) { }
+     : std::runtime_error(what) { }
 };
 
 std::ostream& operator<<(std::ostream& os, Slackness t) {
@@ -215,17 +215,17 @@ template<class X> inline Matrix<X> sprod(const Matrix<X>& A) {
     Matrix<X> S(A.row_size(),A.row_size());
     // Compute lower triangle
     for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint j=0; j!=i+1u; ++j) {
-            S[i][j]=0.0;
-            for(uint k=0; k!=A.column_size(); ++k) {
-                S[i][j]+=A[i][k]*A[j][k];
-            }
-        }
+     for(uint j=0; j!=i+1u; ++j) {
+      S[i][j]=0.0;
+      for(uint k=0; k!=A.column_size(); ++k) {
+    S[i][j]+=A[i][k]*A[j][k];
+      }
+     }
     }
     for(uint j=1; j!=A.row_size(); ++j) {
-        for(uint i=0; i!=j; ++i) {
-            S[i][j]=S[j][i];
-        }
+     for(uint i=0; i!=j; ++i) {
+      S[i][j]=S[j][i];
+     }
     }
     return S;
 }
@@ -236,16 +236,16 @@ template<class X> inline Matrix<X> sprod(const Matrix<X>& A) {
 template<class Mx, class X> bool operator==(const boost::numeric::ublas::matrix_range<Mx>& A, const boost::numeric::ublas::matrix<X>& B)
 {
     if(A.size1()!=B.size1() || A.size2()!=B.size2()) {
-        return false;
+     return false;
     }
 
 
     for(size_t i=0; i!=A.size1(); ++i) {
-        for(size_t j=0; j!=A.size1(); ++j) {
-            if(A(i,j)!=B(i,j)) {
-                return false;
-            }
-        }
+     for(size_t j=0; j!=A.size1(); ++j) {
+      if(A(i,j)!=B(i,j)) {
+    return false;
+      }
+     }
     }
     return true;
 }
@@ -262,23 +262,23 @@ extend_p(const array<size_t>& p, const size_t n)
     const size_t m=p.size();
     array<size_t> q(n);
     for(size_t j=0; j!=n; ++j) {
-        q[j]=n;
+     q[j]=n;
     }
     for(size_t k=0; k!=m; ++k) {
-        ARIADNE_ASSERT(p[k]<n);
-        ARIADNE_ASSERT(q[p[k]]==n);
-        q[p[k]]=k;
+     ARIADNE_ASSERT(p[k]<n);
+     ARIADNE_ASSERT(q[p[k]]==n);
+     q[p[k]]=k;
     }
     size_t k=m;
     for(size_t j=0; j!=n; ++j) {
-        if(q[j]==n) { q[j]=k; ++k; }
+     if(q[j]==n) { q[j]=k; ++k; }
     }
     array<size_t> r(n);
     for(size_t j=0; j!=n; ++j) {
-        r[q[j]]=j;
+     r[q[j]]=j;
     }
     for(size_t i=0; i!=m; ++i) {
-        ARIADNE_ASSERT(p[i]==r[i]);
+     ARIADNE_ASSERT(p[i]==r[i]);
     }
     return r;
 }
@@ -294,24 +294,24 @@ size_t
 consistency_check(const array<Slackness>& vt, const array<size_t>& p)
 {
     if(p.size()!=vt.size()) {
-        const size_t m=p.size();
-        const size_t n=vt.size();
-        ARIADNE_ASSERT(m<n);
-        for(size_t i=0; i!=m; ++i) {
-            ARIADNE_ASSERT_MSG(p[i]<n && vt[p[i]]==BASIS, "vt="<<vt<<" p="<<p);
-        }
-        return m;
+     const size_t m=p.size();
+     const size_t n=vt.size();
+     ARIADNE_ASSERT(m<n);
+     for(size_t i=0; i!=m; ++i) {
+      ARIADNE_ASSERT_MSG(p[i]<n && vt[p[i]]==BASIS, "vt="<<vt<<" p="<<p);
+     }
+     return m;
     } else {
-        const size_t n=vt.size();
-        size_t m=n;
-        for(size_t i=0; i!=m; ++i) {
-            ARIADNE_ASSERT_MSG(p[i]<n, "vt="<<vt<<" p="<<p);
-            if(vt[p[i]]!=BASIS) { m=n; break; }
-        }
-        for(size_t i=n; i!=n; ++i) {
-            ARIADNE_ASSERT_MSG(p[i]<n && vt[p[i]]==BASIS, "vt="<<vt<<" p="<<p);
-        }
-        return m;
+     const size_t n=vt.size();
+     size_t m=n;
+     for(size_t i=0; i!=m; ++i) {
+      ARIADNE_ASSERT_MSG(p[i]<n, "vt="<<vt<<" p="<<p);
+      if(vt[p[i]]!=BASIS) { m=n; break; }
+     }
+     for(size_t i=n; i!=n; ++i) {
+      ARIADNE_ASSERT_MSG(p[i]<n && vt[p[i]]==BASIS, "vt="<<vt<<" p="<<p);
+     }
+     return m;
     }
 }
 
@@ -331,16 +331,16 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const array<size_t>& p, 
     const size_t m=A.row_size();
     Matrix<X> A_B(m,m);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            A_B[i][k]=A[i][j];
-        }
+     size_t j=p[k];
+     for(size_t i=0; i!=m; ++i) {
+      A_B[i][k]=A[i][j];
+     }
     }
 
     array<size_t> p_B(p.begin(),p.begin()+m);
 
     Matrix<X> Z=prod(B,A_B);
-    ARIADNE_LOG(9,"        p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
+    ARIADNE_LOG(9,"     p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
     ARIADNE_ASSERT_MSG(norm(Z)<MAXIMUM_ERROR, "A="<<A<<"\np="<<p<<"\nB="<<B<<"\nZ=B*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
 }
@@ -350,21 +350,21 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const array<size_t>& p, 
 template<class X>
 void
 SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,
-                                    const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x)
+      const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x)
 {
     static const X MAXIMUM_ERROR=1e-8;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     Matrix<X> A_B(m,m);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            A_B[i][k]=A[i][j];
-        }
+     size_t j=p[k];
+     for(size_t i=0; i!=m; ++i) {
+      A_B[i][k]=A[i][j];
+     }
     }
 
     Matrix<X> Z=prod(B,A_B);
-    ARIADNE_LOG(9,"        B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
+    ARIADNE_LOG(9,"     B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
     ARIADNE_ASSERT_MSG(norm(Z)<MAXIMUM_ERROR, "A="<<A<<"p="<<p<<"\nB*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
 
@@ -379,37 +379,37 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,
 template<class X>
 void
 SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u,
-                                    const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x)
+      const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x)
 {
-    ARIADNE_LOG(9,"        Checking consistency of B and x\n");
+    ARIADNE_LOG(9,"     Checking consistency of B and x\n");
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
     Matrix<X> A_B(m,m);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            A_B[i][k]=A[i][j];
-        }
+     size_t j=p[k];
+     for(size_t i=0; i!=m; ++i) {
+      A_B[i][k]=A[i][j];
+     }
     }
 
     array<size_t> p_B(p.begin(),p.begin()+m);
 
     Matrix<X> I=prod(B,A_B);
-    ARIADNE_LOG(9,"          p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
+    ARIADNE_LOG(9,"    p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
     Matrix<X> Z=I;
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
     ARIADNE_ASSERT_MSG(norm(Z)<=1e-5,"vt="<<vt<<" p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
 
     Vector<X> Ax=prod(A,x);
-    ARIADNE_LOG(9,"          A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<Ax<<"\n");
+    ARIADNE_LOG(9,"    A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<Ax<<"\n");
 
     for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        ARIADNE_ASSERT_MSG(vt[j]==LOWER || vt[j]==UPPER,
-                           "vt["<<j<<"]="<<vt[j]<<"\n  A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
-        X xj = (vt[j]==LOWER ? l[j] : u[j]);
-        ARIADNE_ASSERT_MSG(x[j]==xj,"x["<<j<<"]="<<x[j]<<" xj="<<xj<<"\n  A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+     size_t j=p[k];
+     ARIADNE_ASSERT_MSG(vt[j]==LOWER || vt[j]==UPPER,
+      "vt["<<j<<"]="<<vt[j]<<"\n  A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+     X xj = (vt[j]==LOWER ? l[j] : u[j]);
+     ARIADNE_ASSERT_MSG(x[j]==xj,"x["<<j<<"]="<<x[j]<<" xj="<<xj<<"\n  A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     }
     Vector<X> Axmb = Ax-b;
     ARIADNE_ASSERT_MSG(norm(Axmb)<1e-5,"A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
@@ -425,9 +425,9 @@ compute_c(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const 
     const size_t n=x.size();
     Vector<X> c(n);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=l[j])) { c[j]=-1; }
-        if(possibly(x[j]>=u[j])) { c[j]=+1; }
+     size_t j=p[k];
+     if(possibly(x[j]<=l[j])) { c[j]=-1; }
+     if(possibly(x[j]>=u[j])) { c[j]=+1; }
     }
     return c;
 }
@@ -440,14 +440,14 @@ compute_vt(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const
     const size_t n=p.size();
     array<Slackness> vt(n);
     for(size_t k=0; k!=m; ++k) {
-        vt[p[k]]=BASIS;
+     vt[p[k]]=BASIS;
     }
     for(size_t k=m; k!=n; ++k) {
-        if(l[p[k]]==-inf<X>()) {
-            vt[p[k]] = UPPER;
-        } else {
-            vt[p[k]] = LOWER;
-        }
+     if(l[p[k]]==-inf<X>()) {
+      vt[p[k]] = UPPER;
+     } else {
+      vt[p[k]] = LOWER;
+     }
     }
     return vt;
 }
@@ -460,10 +460,10 @@ compute_p(const array<Slackness>& tv)
     array<size_t> p(n);
     size_t k=0;
     for(size_t j=0; j!=n; ++j) {
-        if(tv[j]==BASIS) { p[k]=j; ++k; }
+     if(tv[j]==BASIS) { p[k]=j; ++k; }
     }
     for(size_t j=0; j!=n; ++j) {
-        if(tv[j]!=BASIS) { p[k]=j; ++k; }
+     if(tv[j]!=BASIS) { p[k]=j; ++k; }
     }
     return p;
 }
@@ -488,81 +488,81 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A)
     Matrix<X> U=A;
 
     for(size_t k=0; k!=m; ++k) {
-        // Find a good pivot column j and swap entries of jth and kth columns
+     // Find a good pivot column j and swap entries of jth and kth columns
 
-        // Look for a column which is the unit vector ek below k
-        bool found_unit=false;
-        size_t j;
-        for(j=k; j!=n; ++j) {
-            if(U[k][j]==+1) {
-                found_unit=true;
-                for(uint i=k+1; i!=m; ++i) {
-                    if(U[i][j]!=0) { found_unit=false; break; }
-                }
-            }
-            if(found_unit) { break; }
-        }
+     // Look for a column which is the unit vector ek below k
+     bool found_unit=false;
+     size_t j;
+     for(j=k; j!=n; ++j) {
+      if(U[k][j]==+1) {
+    found_unit=true;
+    for(uint i=k+1; i!=m; ++i) {
+     if(U[i][j]!=0) { found_unit=false; break; }
+    }
+      }
+      if(found_unit) { break; }
+     }
 
-        // Look for a column with largest U[k][j]
-        if(!found_unit) {
-            X Ukjmax = abs(U[k][k]);
-            size_t jmax=k;
-            for(j=k+1; j!=n; ++j) {
-                X absUkj=abs(U[k][j]);
-                if(absUkj>Ukjmax) {
-                    Ukjmax=absUkj;
-                    jmax=j;
-                }
-            }
-            j=jmax;
-        }
+     // Look for a column with largest U[k][j]
+     if(!found_unit) {
+      X Ukjmax = abs(U[k][k]);
+      size_t jmax=k;
+      for(j=k+1; j!=n; ++j) {
+    X absUkj=abs(U[k][j]);
+    if(absUkj>Ukjmax) {
+     Ukjmax=absUkj;
+     jmax=j;
+    }
+      }
+      j=jmax;
+     }
 
-        if (abs(U[k][j]) < SINGULARITY_THRESHOLD) { ARIADNE_THROW(SingularLinearProgram,"compute_basis"," matrix A="<<A<<" is singular or very nearly singular"); }
+     if (abs(U[k][j]) < SINGULARITY_THRESHOLD) { ARIADNE_THROW(SingularLinearProgram,"compute_basis"," matrix A="<<A<<" is singular or very nearly singular"); }
 
-        if(j!=k) {
-            std::swap(p[k],p[j]);
-            for(size_t i=0; i!=m; ++i) {
-                std::swap(U[i][k],U[i][j]);
-            }
-        }
+     if(j!=k) {
+      std::swap(p[k],p[j]);
+      for(size_t i=0; i!=m; ++i) {
+    std::swap(U[i][k],U[i][j]);
+      }
+     }
 
-        ARIADNE_DEBUG_ASSERT(U[k][k]!=0);
+     ARIADNE_DEBUG_ASSERT(U[k][k]!=0);
 
-        if(!found_unit) {
-            // Update LU factorisation
-            X r  = 1/U[k][k];
-            for(size_t i=k+1; i!=m; ++i) {
-                X s=U[i][k] * r;
-                for(size_t j=0; j!=m; ++j) {
-                    L[i][j] -= s * L[k][j];
-                }
-                for(size_t j=k+1; j!=n; ++j) {
-                    U[i][j] -= s * U[k][j];
-                }
-                U[i][k] = 0;
-            }
-            for(size_t j=0; j!=m; ++j) {
-                L[k][j] *= r;
-            }
-            for(size_t j=k+1; j!=n; ++j) {
-                U[k][j] *= r;
-            }
-            U[k][k] = 1;
-        }
+     if(!found_unit) {
+      // Update LU factorisation
+      X r  = 1/U[k][k];
+      for(size_t i=k+1; i!=m; ++i) {
+    X s=U[i][k] * r;
+    for(size_t j=0; j!=m; ++j) {
+     L[i][j] -= s * L[k][j];
+    }
+    for(size_t j=k+1; j!=n; ++j) {
+     U[i][j] -= s * U[k][j];
+    }
+    U[i][k] = 0;
+      }
+      for(size_t j=0; j!=m; ++j) {
+    L[k][j] *= r;
+      }
+      for(size_t j=k+1; j!=n; ++j) {
+    U[k][j] *= r;
+      }
+      U[k][k] = 1;
+     }
 
     } // end loop on diagonal k
 
     // Backsubstitute to find inverse of pivot columns
 
     for(size_t k=m; k!=0; ) {
-        --k;
-        for(size_t i=0; i!=k; ++i) {
-            X s=U[i][k];
-            for(size_t j=0; j!=m; ++j) {
-                L[i][j] -= s * L[k][j];
-            }
-            U[i][k] = 0;
-        }
+     --k;
+     for(size_t i=0; i!=k; ++i) {
+      X s=U[i][k];
+      for(size_t j=0; j!=m; ++j) {
+    L[i][j] -= s * L[k][j];
+      }
+      U[i][k] = 0;
+     }
     }
 
     return make_pair(p,L);
@@ -577,10 +577,10 @@ SimplexSolver<X>::compute_B(const Matrix<X>& A, const array<size_t>& p)
     const size_t m=A.row_size();
     Matrix<XX> A_B(m,m);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            A_B[i][k]=A[i][j];
-        }
+     size_t j=p[k];
+     for(size_t i=0; i!=m; ++i) {
+      A_B[i][k]=A[i][j];
+     }
     }
 
     Matrix<XX> B=inverse(A_B);
@@ -596,7 +596,7 @@ compute_c(const Matrix<X>& A, const array<size_t>& p, const Vector<X>& x)
     const size_t n=A.column_size();
     Vector<X> c(n);
     for(size_t k=m; k!=n; ++k) {
-        if(x[p[k]]<0) { c[p[k]]=-1; }
+     if(x[p[k]]<0) { c[p[k]]=-1; }
     }
     return c;
 }
@@ -612,11 +612,11 @@ SimplexSolver<X>::compute_x(const Matrix<X>& A, const Vector<X>& b, const array<
     Vector<XX> x(n);
 
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        x[j]=0;
-        for(size_t i=0; i!=m; ++i) {
-            x[j]+=B[k][i]*b[i];
-        }
+     size_t j=p[k];
+     x[j]=0;
+     for(size_t i=0; i!=m; ++i) {
+      x[j]+=B[k][i]*b[i];
+     }
     }
 
     return x;
@@ -636,29 +636,29 @@ SimplexSolver<X>::compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector
 
     // Compute x_N
     for(size_t j=0; j!=n; ++j) {
-        if(vt[j]==LOWER) { x[j]=l[j]; }
-        else if(vt[j]==UPPER) { x[j]=u[j]; }
-        else { x[j]=0; }
+     if(vt[j]==LOWER) { x[j]=l[j]; }
+     else if(vt[j]==UPPER) { x[j]=u[j]; }
+     else { x[j]=0; }
     }
     ARIADNE_LOG(9,"  x_N="<<x);
 
     // Compute w=b-A_N x_N
     for(size_t i=0; i!=m; ++i) {
-        w[i]=b[i];
-        for(size_t k=m; k!=n; ++k) {
-            size_t j=p[k];
-            w[i]-=A[i][j]*x[j];
-        }
+     w[i]=b[i];
+     for(size_t k=m; k!=n; ++k) {
+      size_t j=p[k];
+      w[i]-=A[i][j]*x[j];
+     }
     }
     ARIADNE_LOG(9," w="<<w);
 
     // Compute x_B=B w
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        x[j]=0;
-        for(size_t i=0; i!=m; ++i) {
-            x[j]+=B[k][i]*w[i];
-        }
+     size_t j=p[k];
+     x[j]=0;
+     for(size_t i=0; i!=m; ++i) {
+      x[j]+=B[k][i]*w[i];
+     }
     }
 
     ARIADNE_LOG(9," x="<<x<<"\n");
@@ -682,29 +682,29 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vec
 
     // Compute x_N
     for(size_t j=0; j!=n; ++j) {
-        if(vt[j]==LOWER) { x[j]=l[j]; }
-        else if(vt[j]==UPPER) { x[j]=u[j]; }
-        else { x[j]=0; }
+     if(vt[j]==LOWER) { x[j]=l[j]; }
+     else if(vt[j]==UPPER) { x[j]=u[j]; }
+     else { x[j]=0; }
     }
     ARIADNE_LOG(9,"  x_N="<<x);
 
     // Compute w=b-A_N x_N
     for(size_t i=0; i!=m; ++i) {
-        w[i]=b[i];
-        for(size_t k=m; k!=n; ++k) {
-            size_t j=p[k];
-            w[i]-=A[i][j]*x[j];
-        }
+     w[i]=b[i];
+     for(size_t k=m; k!=n; ++k) {
+      size_t j=p[k];
+      w[i]-=A[i][j]*x[j];
+     }
     }
     ARIADNE_LOG(9," w="<<w);
 
     // Compute x_B=B w
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        x[j]=0;
-        for(size_t i=0; i!=m; ++i) {
-            x[j]+=B[k][i]*w[i];
-        }
+     size_t j=p[k];
+     x[j]=0;
+     for(size_t i=0; i!=m; ++i) {
+      x[j]+=B[k][i]*w[i];
+     }
     }
 
     ARIADNE_LOG(9," x="<<x<<"\n");
@@ -722,10 +722,10 @@ compute_y(const Vector<X>& c, const array<size_t>& p, const Matrix<XX>& B)
     const size_t m=B.row_size();
     Vector<XX> y(m);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            y[i]+=c[j]*B[k][i];
-        }
+     size_t j=p[k];
+     for(size_t i=0; i!=m; ++i) {
+      y[i]+=c[j]*B[k][i];
+     }
     }
     return y;
 }
@@ -739,17 +739,17 @@ compute_z(const Matrix<X>& A, const Vector<X>& c, const array<size_t>& p, const 
     const size_t n=A.column_size();
     Vector<XX> z(n);
     for(size_t k=0; k!=m; ++k) {
-        z[p[k]]=0;
+     z[p[k]]=0;
     }
     for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        z[j]=c[j];
-        for(size_t i=0; i!=m; ++i) {
-            z[j]-=y[i]*A[i][j];
-        }
-        if(abs(z[j])<CUTOFF_THRESHOLD) {
-            //z[j]=0;
-        }
+     size_t j=p[k];
+     z[j]=c[j];
+     for(size_t i=0; i!=m; ++i) {
+      z[j]-=y[i]*A[i][j];
+     }
+     if(abs(z[j])<CUTOFF_THRESHOLD) {
+      //z[j]=0;
+     }
     }
     return z;
 }
@@ -760,7 +760,7 @@ compute_s(const size_t m, const array<size_t>& p, const Vector<X>& z)
 {
     const size_t n=z.size();
     for(size_t k=0; k!=n; ++k) {
-        if(z[p[k]]< -PROGRESS_THRESHOLD) { return k; }
+     if(z[p[k]]< -PROGRESS_THRESHOLD) { return k; }
     }
     return n;
 }
@@ -781,8 +781,8 @@ compute_s_fast(const size_t m, const array<Slackness>& vt, const array<size_t>& 
 {
     const size_t n=z.size();
     for(size_t k=m; k!=n; ++k) {
-        if( (vt[p[k]]==LOWER && z[p[k]]< -PROGRESS_THRESHOLD)
-            || (vt[p[k]]==UPPER && z[p[k]]> +PROGRESS_THRESHOLD) ) { return k; }
+     if( (vt[p[k]]==LOWER && z[p[k]]< -PROGRESS_THRESHOLD)
+      || (vt[p[k]]==UPPER && z[p[k]]> +PROGRESS_THRESHOLD) ) { return k; }
     }
     return n;
 }
@@ -796,12 +796,12 @@ compute_s_best(const size_t m, const array<Slackness>& vt, const array<size_t>& 
     size_t kmax=n;
     X abszmax=0;
     for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        X posz=(vt[j]==LOWER ? -z[j] : z[j]);
-        if(posz>abszmax) {
-            kmax=k;
-            abszmax=posz;
-        }
+     size_t j=p[k];
+     X posz=(vt[j]==LOWER ? -z[j] : z[j]);
+     if(posz>abszmax) {
+      kmax=k;
+      abszmax=posz;
+     }
     }
     return kmax;
 }
@@ -813,13 +813,13 @@ compute_s_nocycling(const size_t m, const array<Slackness>& vt, const array<size
 {
     const size_t n=z.size();
     for(size_t j=0; j!=n; ++j) {
-        if( (vt[j]==LOWER && z[j]< -PROGRESS_THRESHOLD)
-                || (vt[j]==UPPER && z[j]> +PROGRESS_THRESHOLD) ) {
-            for(size_t k=m; k!=n; ++k) {
-                if(p[k]==j) { return k; }
-            }
-            ARIADNE_ASSERT(false); // Should not reach here
-        }
+     if( (vt[j]==LOWER && z[j]< -PROGRESS_THRESHOLD)
+    || (vt[j]==UPPER && z[j]> +PROGRESS_THRESHOLD) ) {
+      for(size_t k=m; k!=n; ++k) {
+    if(p[k]==j) { return k; }
+      }
+      ARIADNE_ASSERT(false); // Should not reach here
+     }
     }
     return n;
 }
@@ -834,9 +834,9 @@ compute_d(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B, const 
     size_t js=p[ks];
     Vector<X> d(m);
     for(size_t k=0; k!=m; ++k) {
-        for(size_t i=0; i!=m; ++i) {
-            d[k]-=B[k][i]*A[i][js];
-        }
+     for(size_t i=0; i!=m; ++i) {
+      d[k]-=B[k][i]*A[i][js];
+     }
     }
     return d;
 }
@@ -850,13 +850,13 @@ compute_rt(const array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
     X t=inf<X>();
     size_t r=m;
     for(size_t k=0; k!=m; ++k) {
-        if(d[k] < -CUTOFF_THRESHOLD && x[p[k]] >= CUTOFF_THRESHOLD) {
-            X tk=(x[p[k]])/(-d[k]);
-            if(r==m || tk<t) {
-                t=tk;
-                r=k;
-            }
-        }
+     if(d[k] < -CUTOFF_THRESHOLD && x[p[k]] >= CUTOFF_THRESHOLD) {
+      X tk=(x[p[k]])/(-d[k]);
+      if(r==m || tk<t) {
+    t=tk;
+    r=k;
+      }
+     }
     }
     return make_pair(r,t);
 }
@@ -881,27 +881,27 @@ compute_rt(const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, c
     ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" l[p[s]]="<<l[p[s]]<<" u[p[s]]="<<u[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if( d[k]*ds<-CUTOFF_THRESHOLD && x[j]>=l[j] && l[j] != -inf) {
-            tk=(l[j]-x[j])/(ds*d[k]);
-            //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
-            if( tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
-        } else if( d[k]*ds>CUTOFF_THRESHOLD && x[j]<=u[j] && u[j] != inf ) {
-            tk=(u[j]-x[j])/(ds*d[k]);
-            //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
-            if( tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
-        } else {
-            tk=inf;
-        }
-        ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
+     size_t j=p[k];
+     if( d[k]*ds<-CUTOFF_THRESHOLD && x[j]>=l[j] && l[j] != -inf) {
+      tk=(l[j]-x[j])/(ds*d[k]);
+      //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
+      if( tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
+     } else if( d[k]*ds>CUTOFF_THRESHOLD && x[j]<=u[j] && u[j] != inf ) {
+      tk=(u[j]-x[j])/(ds*d[k]);
+      //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
+      if( tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
+     } else {
+      tk=inf;
+     }
+     ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
     }
     t*=ds;
 
     if(r==n) {
-        // Problem is either highly degenerate or optimal do nothing.
-        ARIADNE_WARN("SimplexSolver<X>::compute_rt(...): "<<
-                     "Cannot find compute variable to exit basis\n"<<
-                     "  l="<<l<<" x="<<x<<" u="<<u<<" vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
+     // Problem is either highly degenerate or optimal do nothing.
+     ARIADNE_WARN("SimplexSolver<X>::compute_rt(...): "<<
+      "Cannot find compute variable to exit basis\n"<<
+      "  l="<<l<<" x="<<x<<" u="<<u<<" vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     }
     return make_pair(r,t);
 }
@@ -917,9 +917,9 @@ update_B(Matrix<X>& B, const Vector<X>& d, const size_t r)
     Vector<X> e(m); e[r]=1;
     Vector<X> Br(m); for(uint j=0; j!=m; ++j) { Br[j]=B[r][j]; }
     for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=m; ++j) {
-            B[i][j]-=(d[i]+e[i])*Br[j]*drr;
-        }
+     for(uint j=0; j!=m; ++j) {
+      B[i][j]-=(d[i]+e[i])*Br[j]*drr;
+     }
     }
     return;
 }
@@ -931,7 +931,7 @@ update_x(const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& 
 {
     const size_t m=d.size();
     for(size_t i=0; i!=m; ++i) {
-        x[p[i]]+=t*d[i];
+     x[p[i]]+=t*d[i];
     }
     x[p[r]] = 0.0;
     x[p[s]] = t;
@@ -952,7 +952,7 @@ update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<
     ARIADNE_ASSERT(s>=m);
     ARIADNE_ASSERT(s<n);
     for(size_t i=0; i!=m; ++i) {
-        x[p[i]]+=t*d[i];
+     x[p[i]]+=t*d[i];
     }
     x[p[s]] += t;
     if(t*d[r]<0) { x[p[r]]=l[p[r]]; }
@@ -970,7 +970,7 @@ update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<
     ARIADNE_ASSERT_MSG(s<x.size(),"x="<<x<<" d="<<d<<" s="<<s<<"\n");
     const size_t m=d.size();
     for(size_t i=0; i!=m; ++i) {
-        x[p[i]]+=t*d[i];
+     x[p[i]]+=t*d[i];
     }
 
     if(t>0) { x[p[s]]=u[p[s]]; }
@@ -997,8 +997,8 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
     size_t s=compute_s(m,p,z);
 
     if(s==n) {
-        ARIADNE_LOG(5,"  No improvement possible.\n");
-        return true;
+     ARIADNE_LOG(5,"  No improvement possible.\n");
+     return true;
     }
     ARIADNE_LOG(9,"  s="<<s<<" p[s]="<<p[s]<<"\n");
 
@@ -1018,8 +1018,8 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
     ARIADNE_LOG(7,"      r="<<r<<" s="<<s<<" t="<<t<<" d="<<d<<"\n");
 
     if(r==m) {
-        ARIADNE_LOG(5,"  Unbounded linear program.\n");
-        ARIADNE_THROW(UnboundedLinearProgram,"feasible","");
+     ARIADNE_LOG(5,"  Unbounded linear program.\n");
+     ARIADNE_THROW(UnboundedLinearProgram,"feasible","");
     }
 
 
@@ -1083,48 +1083,48 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
     size_t r; X t;
     make_lpair(r,t)=compute_rt(l,u,vt,p,x,d,s);
     if(r==n) {
-        ARIADNE_LOG(3,"   Cannot find variable to enter basis; no improvement can be made\n");
-        char c; std::cin>>c;
-        return r;
+     ARIADNE_LOG(3,"   Cannot find variable to enter basis; no improvement can be made\n");
+     char c; std::cin>>c;
+     return r;
     }
 
     ARIADNE_LOG(5,"  s="<<s<<" p[s]="<<p[s]<<" r="<<r<<" p[r]="<<p[r]<<" d="<<d<<" t="<<t<<"\n");
 
     if(r==s) {
-        Slackness nvts=(vt[p[s]]==LOWER ? UPPER : LOWER);
-        ARIADNE_LOG(5,"   Changing non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] from type "<<vt[p[s]]<<" to type "<<nvts<<"\n");
+     Slackness nvts=(vt[p[s]]==LOWER ? UPPER : LOWER);
+     ARIADNE_LOG(5,"   Changing non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] from type "<<vt[p[s]]<<" to type "<<nvts<<"\n");
     } else {
-        ARIADNE_LOG(5,"   Swapping non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] with basic variable x["<<p[r]<<"]=x[p["<<r<<"]]\n");
+     ARIADNE_LOG(5,"   Swapping non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] with basic variable x["<<p[r]<<"]=x[p["<<r<<"]]\n");
     }
 
     if(r==s) {
-        // Constraint is due to bounds on x_s
-        // No change in basic variables or inverse basis matrix
-        update_x(l,u,p,x,s,d,t);
+     // Constraint is due to bounds on x_s
+     // No change in basic variables or inverse basis matrix
+     update_x(l,u,p,x,s,d,t);
 
-        // Update variable type
-        if(vt[p[s]]==LOWER) { vt[p[s]]=UPPER; }
-        else { vt[p[s]]=LOWER; }
+     // Update variable type
+     if(vt[p[s]]==LOWER) { vt[p[s]]=UPPER; }
+     else { vt[p[s]]=LOWER; }
     } else {
-        // Variable p[r] should leave basis, and variable p[s] enter
-        ARIADNE_ASSERT(r<m);
+     // Variable p[r] should leave basis, and variable p[s] enter
+     ARIADNE_ASSERT(r<m);
 
-        update_B(B,d,r);
-        update_x(l,u,p,x,s,d,r,t);
+     update_B(B,d,r);
+     update_x(l,u,p,x,s,d,r,t);
 
-        // Update pivots and variable types
-        vt[p[s]] = BASIS;
-        if(d[r]*t>0) {
-            vt[p[r]] = UPPER;
-        } else if(d[r]*t<0) {
-            vt[p[r]] = LOWER;
-        } else {
-            size_t pr=p[r];
-            ARIADNE_ASSERT(x[pr]==l[pr] || x[pr]==u[pr]);
-            if(x[pr]==l[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
-        }
+     // Update pivots and variable types
+     vt[p[s]] = BASIS;
+     if(d[r]*t>0) {
+      vt[p[r]] = UPPER;
+     } else if(d[r]*t<0) {
+      vt[p[r]] = LOWER;
+     } else {
+      size_t pr=p[r];
+      ARIADNE_ASSERT(x[pr]==l[pr] || x[pr]==u[pr]);
+      if(x[pr]==l[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
+     }
 
-        std::swap(p[r],p[s]);
+     std::swap(p[r],p[s]);
     }
 
     const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
@@ -1132,21 +1132,21 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
     // Recompute B and x if it appears that there are problems with numerical degeneracy
     bool possible_degeneracy=false;
     for(uint i=0; i!=m; ++i) {
-        if(l[p[i]]>x[p[i]] || x[p[i]]>u[p[i]]) {
-            possible_degeneracy=true;
-            break;
-        }
+     if(l[p[i]]>x[p[i]] || x[p[i]]>u[p[i]]) {
+      possible_degeneracy=true;
+      break;
+     }
     }
     B=compute_B<X>(A,p);
     x=compute_x<X>(A,b,l,u, vt,p,B);
     for(uint i=0; i!=m; ++i) {
-        if(x[p[i]]<l[p[i]]) {
-            ARIADNE_ASSERT(x[p[i]]>l[p[i]]-ERROR_TOLERANCE);
-            x[p[i]]=l[p[i]];
-        } else if(x[p[i]]>u[p[i]]) {
-            ARIADNE_ASSERT(x[p[i]]<u[p[i]]+ERROR_TOLERANCE);
-            x[p[i]]=u[p[i]];
-        }
+     if(x[p[i]]<l[p[i]]) {
+      ARIADNE_ASSERT(x[p[i]]>l[p[i]]-ERROR_TOLERANCE);
+      x[p[i]]=l[p[i]];
+     } else if(x[p[i]]>u[p[i]]) {
+      ARIADNE_ASSERT(x[p[i]]<u[p[i]]+ERROR_TOLERANCE);
+      x[p[i]]=u[p[i]];
+     }
     }
 
     ARIADNE_LOG(7,"      vt="<<vt<<"\n      p="<<p<<"\n");
@@ -1185,36 +1185,36 @@ SimplexSolver<X>::_primal_feasible(const Matrix<X>& A, const Vector<X>& b, array
     Vector<X> c(n);
     bool infeasible=false;
     for(size_t j=0; j!=n; ++j) {
-        if(x[j]<0) { c[j]=-1; infeasible=true; }
-        else { c[j]=0; }
+     if(x[j]<0) { c[j]=-1; infeasible=true; }
+     else { c[j]=0; }
     }
 
     ARIADNE_LOG(5,"    x="<<x<<"\n    c="<<c<<"\n");
 
     while(infeasible) {
-        infeasible=false;
+     infeasible=false;
 
-        bool done=lpstep(A,b,c,p,B,x);
-        ARIADNE_LOG(5,"    p="<<p<<"\n    B="<<B<<"\n");
+     bool done=lpstep(A,b,c,p,B,x);
+     ARIADNE_LOG(5,"    p="<<p<<"\n    B="<<B<<"\n");
 
-        if(done) {
-            return false;
-        }
+     if(done) {
+      return false;
+     }
 
-        for(size_t j=0; j!=n; ++j) {
-            if(x[j]<0) { c[j]=-1; infeasible=true; }
-            else { c[j]=0; }
-        }
-        ARIADNE_LOG(5,"    x="<<x<<"\n    c="<<c<<"\n");
+     for(size_t j=0; j!=n; ++j) {
+      if(x[j]<0) { c[j]=-1; infeasible=true; }
+      else { c[j]=0; }
+     }
+     ARIADNE_LOG(5,"    x="<<x<<"\n    c="<<c<<"\n");
     }
 
     // Check solution
     for(size_t i=0; i!=n; ++i) {
-        ARIADNE_ASSERT(x[i]>=0.0);
+     ARIADNE_ASSERT(x[i]>=0.0);
     }
     Vector<X> Ax=prod(A,x);
     for(size_t i=0; i!=m; ++i) {
-         ARIADNE_ASSERT(Ax[i]==b[i]);
+      ARIADNE_ASSERT(Ax[i]==b[i]);
     }
 
     ARIADNE_LOG(9,"\nFeasible point x="<<x<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b<<"\n");
@@ -1242,10 +1242,10 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
 
     bool infeasible=false;
     for(size_t j=0; j!=n; ++j) {
-        // If x[j] is infeasible by way of being to low, relax constraint x[j]>=l[j] to x[j]>=-inf.
-        if(x[j]<l[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
-        else if(x[j]>u[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
-        else { cc[j]=0; }
+     // If x[j] is infeasible by way of being to low, relax constraint x[j]>=l[j] to x[j]>=-inf.
+     if(x[j]<l[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
+     else if(x[j]>u[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
+     else { cc[j]=0; }
     }
     ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
 
@@ -1253,50 +1253,50 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
     int steps=0;
     while(infeasible) {
 
-        bool done=lpstep(A,b,cc,ll,uu,vt,p,B,x);
-        ARIADNE_LOG(9,"  Done changing basis\n");
-        ARIADNE_LOG(9,"    p="<<p<<" B="<<B<<"\n");
-        ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<"\n");
+     bool done=lpstep(A,b,cc,ll,uu,vt,p,B,x);
+     ARIADNE_LOG(9,"  Done changing basis\n");
+     ARIADNE_LOG(9,"    p="<<p<<" B="<<B<<"\n");
+     ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<"\n");
 
-        if(done) {
-            ARIADNE_LOG(9,"  Cannot put infeasible variables into basis.");
-            Vector<X> y=compute_y(cc,p,B);
-            Vector<X> yA=prod(y,A);
-            X yb=dot(y,b);
-            ARIADNE_LOG(5,"\nCertificate of infeasibility:\n y="<<y<<"\n yA="<<yA<<" yb="<<yb<<"\n");
-            return false;
-        }
+     if(done) {
+      ARIADNE_LOG(9,"  Cannot put infeasible variables into basis.");
+      Vector<X> y=compute_y(cc,p,B);
+      Vector<X> yA=prod(y,A);
+      X yb=dot(y,b);
+      ARIADNE_LOG(5,"\nCertificate of infeasibility:\n y="<<y<<"\n yA="<<yA<<" yb="<<yb<<"\n");
+      return false;
+     }
 
-        infeasible=false;
-        for(size_t j=0; j!=n; ++j) {
-            if(vt[j]==LOWER) { ARIADNE_ASSERT(x[j]==l[j]); }
-            if(vt[j]==UPPER) { ARIADNE_ASSERT(x[j]==u[j]); }
-            if(x[j]<l[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
-            else if(x[j]>u[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
-            else { cc[j]=0; ll[j]=l[j]; uu[j]=u[j]; }
-        }
-        ARIADNE_LOG(9,"\n    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
+     infeasible=false;
+     for(size_t j=0; j!=n; ++j) {
+      if(vt[j]==LOWER) { ARIADNE_ASSERT(x[j]==l[j]); }
+      if(vt[j]==UPPER) { ARIADNE_ASSERT(x[j]==u[j]); }
+      if(x[j]<l[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
+      else if(x[j]>u[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
+      else { cc[j]=0; ll[j]=l[j]; uu[j]=u[j]; }
+     }
+     ARIADNE_LOG(9,"\n    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
 
-        ++steps;
-        if(steps>=MAX_STEPS) {
-            if(verbosity>0) {
-                ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
-                             <<"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
-                             <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<Vector<X>(prod(compute_y(cc,p,B),A))<<"\n");
-            }
-            throw DegenerateFeasibilityProblemException();
-        }
+     ++steps;
+     if(steps>=MAX_STEPS) {
+      if(verbosity>0) {
+    ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
+     <<"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
+     <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<Vector<X>(prod(compute_y(cc,p,B),A))<<"\n");
+      }
+      throw DegenerateFeasibilityProblemException();
+     }
     }
 
     ARIADNE_LOG(9,"  Checking solution\n");
     // Check solution
     for(size_t i=0; i!=n; ++i) {
-        ARIADNE_ASSERT_MSG(x[i]>=l[i]-BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" B="<<B<<" x="<<x );
-        ARIADNE_ASSERT_MSG(x[i]<=u[i]+BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" B="<<B<<" x="<<x );
+     ARIADNE_ASSERT_MSG(x[i]>=l[i]-BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" B="<<B<<" x="<<x );
+     ARIADNE_ASSERT_MSG(x[i]<=u[i]+BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" B="<<B<<" x="<<x );
     }
     Vector<X> Ax=prod(A,x);
     for(size_t i=0; i!=m; ++i) {
-        ARIADNE_ASSERT(abs(Ax[i]-b[i])<0.0001);
+     ARIADNE_ASSERT(abs(Ax[i]-b[i])<0.0001);
     }
 
     ARIADNE_LOG(5,"\nFeasible point x="<<x<<"; l="<<l<<" u="<<u<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b<<"\n");
@@ -1320,15 +1320,15 @@ SimplexSolver<X>::_dual_feasible(const Matrix<X>& A, const Vector<X>& c, array<s
 
     bool done;
     do {
-        lpstep(A,b,c,p,B,x);
-        y=compute_y(c,p,B);
-        z=compute_z(A,c,p,y);
+     lpstep(A,b,c,p,B,x);
+     y=compute_y(c,p,B);
+     z=compute_z(A,c,p,y);
 
-        done=true;
-        for(size_t i=0; i!=n; ++i) {
-            if(z[i]<0) { done=false; }
-        }
-        if(done) { return true; }
+     done=true;
+     for(size_t i=0; i!=n; ++i) {
+      if(z[i]<0) { done=false; }
+     }
+     if(done) { return true; }
     } while(true);
     return false;
 }
@@ -1412,12 +1412,12 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
     const size_t m=A.row_size();
     //const size_t n=A.column_size();
     if(vt.size()==0) {
-        make_lpair(p,B)=compute_basis(A);
-        vt=compute_vt(l,u,p,m);
+     make_lpair(p,B)=compute_basis(A);
+     vt=compute_vt(l,u,p,m);
     }
     if(p.size()==0) {
-        p=compute_p(vt);
-        B=compute_B<X>(A,p);
+     p=compute_p(vt);
+     B=compute_B<X>(A,p);
     }
     consistency_check(A,p,B);
 
@@ -1460,20 +1460,20 @@ SimplexSolver<X>::verify_primal_feasibility(const Matrix<X>& A, const Vector<X>&
 
     tribool fs=true;
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(!(0<x[j])) {
-            fs=indeterminate;
-            break;
-        }
+     size_t j=p[k];
+     if(!(0<x[j])) {
+      fs=indeterminate;
+      break;
+     }
     }
     if(fs==true) {
-        return true;
+     return true;
     }
 
     Vector<X> c(n);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=0)) { c[j]=-1; }
+     size_t j=p[k];
+     if(possibly(x[j]<=0)) { c[j]=-1; }
     }
     ARIADNE_LOG(9," c="<<midpoint(c)<<"\n");
 
@@ -1484,8 +1484,8 @@ SimplexSolver<X>::verify_primal_feasibility(const Matrix<X>& A, const Vector<X>&
     ARIADNE_LOG(9," z="<<midpoint(z)<<"\n");
 
     for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        if(not(z[j]<0)) { return indeterminate; }
+     size_t j=p[k];
+     if(not(z[j]<0)) { return indeterminate; }
     }
 
     return false;
@@ -1517,32 +1517,32 @@ SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c
     // Check feasibility of y
     tribool fs=true;
     for(size_t k=m; k!=n; ++k) {
-        if(possibly(z[k]<=0)) { fs=false; break; }
+     if(possibly(z[k]<=0)) { fs=false; break; }
     }
     if(fs==true) { return fs; }
 
     // Compute x_N
     Vector<XX> x(n);
     for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        if(definitely(z[j]<0)) { x[j]=+1; }
+     size_t j=p[k];
+     if(definitely(z[j]<0)) { x[j]=+1; }
     }
     // Compute w=-A_Nx_N
     Vector<XX> w(m);
     for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            w[i]-=A[i][j]*x[j];
-        }
+     size_t j=p[k];
+     for(size_t i=0; i!=m; ++i) {
+      w[i]-=A[i][j]*x[j];
+     }
     }
     ARIADNE_LOG(9," w="<<midpoint(w)<<"\n");
 
     // Compute x_B=A_B^{-1}*w
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            x[j]-=B[j][i]*w[i];
-        }
+     size_t j=p[k];
+     for(size_t i=0; i!=m; ++i) {
+      x[j]-=B[j][i]*w[i];
+     }
     }
 
     ARIADNE_LOG(9," x="<<x<<"\n");
@@ -1550,8 +1550,8 @@ SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c
 
     if(possibly(dot(Vector<XX>(c),x)>=0)) { return indeterminate; }
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=0)) { return indeterminate; }
+     size_t j=p[k];
+     if(possibly(x[j]<=0)) { return indeterminate; }
     }
     return false;
 }
@@ -1583,26 +1583,26 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
 
     tribool fs=true;
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        //if(possibly(x[j]<=l[j]) || possibly(x[j]>=u[j])) {
-        if(possibly(x[j]<l[j]) || possibly(x[j]>u[j])) {
-            ARIADNE_LOG(9," k="<<k<<" j="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<"\n");
-            fs=indeterminate;
-            break;
-        }
+     size_t j=p[k];
+     //if(possibly(x[j]<=l[j]) || possibly(x[j]>=u[j])) {
+     if(possibly(x[j]<l[j]) || possibly(x[j]>u[j])) {
+      ARIADNE_LOG(9," k="<<k<<" j="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<"\n");
+      fs=indeterminate;
+      break;
+     }
     }
     if(fs==true) {
-        ARIADNE_LOG(9," true\n");
-        return true;
+     ARIADNE_LOG(9," true\n");
+     return true;
     }
 
     Vector<X> c(n);
     for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        //if(possibly(x[j]<=l[j])) { c[j]=-1; }
-        //if(possibly(x[j]>=u[j])) { c[j]=+1; }
-        if(possibly(x[j]<l[j])) { c[j]=-1; }
-        if(possibly(x[j]>u[j])) { c[j]=+1; }
+     size_t j=p[k];
+     //if(possibly(x[j]<=l[j])) { c[j]=-1; }
+     //if(possibly(x[j]>=u[j])) { c[j]=+1; }
+     if(possibly(x[j]<l[j])) { c[j]=-1; }
+     if(possibly(x[j]>u[j])) { c[j]=+1; }
     }
     ARIADNE_LOG(9," c="<<midpoint(c)<<"\n");
 
@@ -1613,9 +1613,9 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
     ARIADNE_LOG(9," z="<<z<<"\n");
 
     for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        if(vt[j]==LOWER && possibly(z[j]<=0)) { ARIADNE_LOG(9," indeterminate\n"); return indeterminate; }
-        if(vt[j]==UPPER && possibly(z[j]>=0)) { ARIADNE_LOG(9," indeterminate\n"); return indeterminate; }
+     size_t j=p[k];
+     if(vt[j]==LOWER && possibly(z[j]<=0)) { ARIADNE_LOG(9," indeterminate\n"); return indeterminate; }
+     if(vt[j]==UPPER && possibly(z[j]>=0)) { ARIADNE_LOG(9," indeterminate\n"); return indeterminate; }
     }
 
     ARIADNE_LOG(9," false\n");
@@ -1702,9 +1702,9 @@ SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<
     const int MAX_STEPS=1024;
     int steps=0;
     while(not done) {
-        done=lpstep(A,b,c,l,u,vt,p,B,x);
-        ++steps;
-        ARIADNE_ASSERT_MSG(steps<MAX_STEPS,"Maximum number of steps reached for linear programming problem.");
+     done=lpstep(A,b,c,l,u,vt,p,B,x);
+     ++steps;
+     ARIADNE_ASSERT_MSG(steps<MAX_STEPS,"Maximum number of steps reached for linear programming problem.");
     }
     ARIADNE_LOG(3,"Optimal A="<<A<<" b="<<b<<" c="<<c<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" cx="<<dot(x,x)<<"\n");
 
@@ -1718,7 +1718,7 @@ SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<
 template<class X>
 tribool
 SimplexSolver<X>::constrained_feasible_by_enumeration(const Matrix<X>& A, const Vector<X>& b,
-                                                      const Vector<X>& l, const Vector<X>& u)
+      const Vector<X>& l, const Vector<X>& u)
 {
     bool fs=false;
     size_t m=A.row_size();
@@ -1726,59 +1726,59 @@ SimplexSolver<X>::constrained_feasible_by_enumeration(const Matrix<X>& A, const 
     array<size_t> pb(m);
     for(size_t i=0; i!=m; ++i) { pb[i]=i; }
     do {
-        array<size_t> p=extend_p(pb,n);
-        ARIADNE_LOG(9,"pb="<<pb<<" p="<<p<<"\n");
-        Matrix<X> B=compute_B<X>(A,p);
-        array<Slackness> vt(n);
-        for(size_t k=0; k!=m; ++k) { vt[p[k]]=BASIS; }
-        for(size_t k=m; k!=n; ++k) { vt[p[k]]=LOWER; }
-        for(size_t cnt=0; cnt!=1u<<(n-m); ++cnt) {
-            for(size_t k=m; k!=n; ++k) {
-                if(vt[p[k]]==LOWER) { vt[p[k]]=UPPER; break; }
-                else { vt[p[k]]=LOWER; }
-            }
-            ARIADNE_LOG(9," vt="<<vt);
-            // Compute position x
-            Vector<X> x(n);
-            for(size_t k=m; k!=n; ++k) {
-                x[p[k]]=(vt[p[k]]==LOWER ? l[p[k]] : u[p[k]]);
-            }
-            Vector<X> w(m);
-            for(size_t k=m; k!=n; ++k) {
-                for(size_t i=0; i!=m; ++i) {
-                    w[i]+=A[i][p[k]]*x[p[k]];
-                }
-            }
-            for(size_t k=0; k!=m; ++k) {
-                for(size_t i=0; i!=m; ++i) {
-                    x[p[k]]+=B[k][i]*w[i];
-                }
-            }
-            ARIADNE_LOG(9," x="<<x);
-            bool fsb=true;
-            for(size_t i=0; i!=n; ++i) {
-                if(l[i]>x[i] || x[i]>u[i]) {
-                    fsb=false;
-                    break;
-                }
-            }
-            fs = fs|fsb;
-            ARIADNE_LOG(9," fsb="<<std::boolalpha<<fsb<<"\n");
-        }
+     array<size_t> p=extend_p(pb,n);
+     ARIADNE_LOG(9,"pb="<<pb<<" p="<<p<<"\n");
+     Matrix<X> B=compute_B<X>(A,p);
+     array<Slackness> vt(n);
+     for(size_t k=0; k!=m; ++k) { vt[p[k]]=BASIS; }
+     for(size_t k=m; k!=n; ++k) { vt[p[k]]=LOWER; }
+     for(size_t cnt=0; cnt!=1u<<(n-m); ++cnt) {
+      for(size_t k=m; k!=n; ++k) {
+    if(vt[p[k]]==LOWER) { vt[p[k]]=UPPER; break; }
+    else { vt[p[k]]=LOWER; }
+      }
+      ARIADNE_LOG(9," vt="<<vt);
+      // Compute position x
+      Vector<X> x(n);
+      for(size_t k=m; k!=n; ++k) {
+    x[p[k]]=(vt[p[k]]==LOWER ? l[p[k]] : u[p[k]]);
+      }
+      Vector<X> w(m);
+      for(size_t k=m; k!=n; ++k) {
+    for(size_t i=0; i!=m; ++i) {
+     w[i]+=A[i][p[k]]*x[p[k]];
+    }
+      }
+      for(size_t k=0; k!=m; ++k) {
+    for(size_t i=0; i!=m; ++i) {
+     x[p[k]]+=B[k][i]*w[i];
+    }
+      }
+      ARIADNE_LOG(9," x="<<x);
+      bool fsb=true;
+      for(size_t i=0; i!=n; ++i) {
+    if(l[i]>x[i] || x[i]>u[i]) {
+     fsb=false;
+     break;
+    }
+      }
+      fs = fs|fsb;
+      ARIADNE_LOG(9," fsb="<<std::boolalpha<<fsb<<"\n");
+     }
 
-        // Increment basis elements
-        if(pb[m-1]+1<n) {
-            ++pb[m-1];
-        } else {
-            for(size_t i=1; i!=m; ++i) {
-                if(pb[m-i-1]+1<pb[m-i]) {
-                    ++pb[m-i-1];
-                    for(size_t j=m-i; j!=m; ++j) {
-                        pb[m-j]=pb[m-j-1]+1;
-                    }
-                }
-            }
-        }
+     // Increment basis elements
+     if(pb[m-1]+1<n) {
+      ++pb[m-1];
+     } else {
+      for(size_t i=1; i!=m; ++i) {
+    if(pb[m-i-1]+1<pb[m-i]) {
+     ++pb[m-i-1];
+     for(size_t j=m-i; j!=m; ++j) {
+      pb[m-j]=pb[m-j-1]+1;
+     }
+    }
+      }
+     }
     } while(pb[0]!=(n-m));
     ARIADNE_LOG(9,"fs="<<std::boolalpha<<fs<<"\n");
     return fs;
@@ -1807,9 +1807,9 @@ template class SimplexSolver<Rational>;
 void ldmul(Matrix<Float>& A, const Vector<Float>& x) {
     ARIADNE_ASSERT(A.row_size()==x.size());
     for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint j=0; j!=A.row_size(); ++j) {
-            A[i][j]*=x[i];
-        }
+     for(uint j=0; j!=A.row_size(); ++j) {
+      A[i][j]*=x[i];
+     }
     }
 }
 
@@ -1817,9 +1817,9 @@ void ldmul(Matrix<Float>& A, const Vector<Float>& x) {
 void rdmul(Matrix<Float>& A, const Vector<Float>& x) {
     ARIADNE_ASSERT(A.column_size()==x.size());
     for(uint j=0; j!=A.row_size(); ++j) {
-        for(uint i=0; i!=A.row_size(); ++i) {
-            A[i][j]*=x[j];
-        }
+     for(uint i=0; i!=A.row_size(); ++i) {
+      A[i][j]*=x[j];
+     }
     }
 }
 
@@ -1827,7 +1827,7 @@ void rdmul(Matrix<Float>& A, const Vector<Float>& x) {
 Vector<Float> esub(const Vector<Float>& x, const Float& c) {
     Vector<Float> r(x.size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=x[i]-c;
+     r[i]=x[i]-c;
     }
     return r;
 }
@@ -1835,7 +1835,7 @@ Vector<Float> esub(const Vector<Float>& x, const Float& c) {
 // Set r[i]=x[i]*y[i] for i=1,...,n
 void _emul(Vector<Float>& r, const Vector<Float>& x, const Vector<Float>& y) {
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=x[i]*y[i];
+     r[i]=x[i]*y[i];
     }
 }
 
@@ -1843,7 +1843,7 @@ void _emul(Vector<Float>& r, const Vector<Float>& x, const Vector<Float>& y) {
 Vector<Float> emul(const Vector<Float>& x, const Vector<Float>& y) {
     Vector<Float> r(x.size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=x[i]*y[i];
+     r[i]=x[i]*y[i];
     }
     return r;
 }
@@ -1851,7 +1851,7 @@ Vector<Float> emul(const Vector<Float>& x, const Vector<Float>& y) {
 // Return r[i]=x[i]/z[i] for i=1,...,n
 void _ediv(Vector<Float>& r, const Vector<Float>& x, const Vector<Float>& z) {
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=x[i]/z[i];
+     r[i]=x[i]/z[i];
     }
 }
 
@@ -1859,7 +1859,7 @@ void _ediv(Vector<Float>& r, const Vector<Float>& x, const Vector<Float>& z) {
 Vector<Float> ediv(const Vector<Float>& x, const Vector<Float>& z) {
     Vector<Float> r(x.size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=x[i]/z[i];
+     r[i]=x[i]/z[i];
     }
     return r;
 }
@@ -1868,7 +1868,7 @@ Vector<Float> ediv(const Vector<Float>& x, const Vector<Float>& z) {
 Vector<Float> erev(const Vector<Float>& v) {
     Vector<Float> r(v.size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=1.0/v[i];
+     r[i]=1.0/v[i];
     }
     return r;
 }
@@ -1879,19 +1879,19 @@ Matrix<Float> mdtmul(const Matrix<Float>& A, const Vector<Float>& D)
     Matrix<Float> R(A.row_size(),A.row_size());
     ARIADNE_ASSERT(D.size()==A.column_size());
     for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint k=0; k!=A.column_size(); ++k) {
-            Float ADik=A[i][k]*D[k];
-            for(uint j=0; j!=A.row_size(); ++j) {
-                R[i][j]+=ADik*A[j][k];
-            }
-        }
+     for(uint k=0; k!=A.column_size(); ++k) {
+      Float ADik=A[i][k]*D[k];
+      for(uint j=0; j!=A.row_size(); ++j) {
+    R[i][j]+=ADik*A[j][k];
+      }
+     }
     }
     return R;
 }
 
 bool all_greater(const Vector<Float>& x, const Float& e) {
     for(uint i=0; i!=x.size(); ++i) {
-        if(x[i]<=e) { return false; }
+     if(x[i]<=e) { return false; }
     }
     return true;
 }
@@ -1900,7 +1900,7 @@ bool all_greater(const Vector<Float>& x, const Float& e) {
 
 tuple<tribool,Vector<Float> >
 InteriorPointSolver::constrained_dual_feasible(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                                               const Vector<Float>& l, const Vector<Float>& u) const
+     const Vector<Float>& l, const Vector<Float>& u) const
 {
     // Solve the constraint problem b<=Ax<=c; l<=x<=u.
     ARIADNE_NOT_IMPLEMENTED;
@@ -1909,7 +1909,7 @@ InteriorPointSolver::constrained_dual_feasible(const Matrix<Float>& A, const Vec
 Interval dot(const Vector<Float>& c, const Vector<Interval>& x) {
     Interval r=0.0;
     for(uint i=0; i!=x.size(); ++i) {
-        r+=c[i]*x[i];
+     r+=c[i]*x[i];
     }
     return r;
 }
@@ -1930,17 +1930,17 @@ InteriorPointSolver::validate(const Matrix<Float>& A, const Vector<Float>& b, co
     Vector<Interval> Iy(y);
     Vector<Interval> Iz=prod(y,IA)-c;
     for(uint i=0; i!=Ix.size(); ++i) {
-        ARIADNE_ASSERT(Ix[i].lower()>=0.0);
+     ARIADNE_ASSERT(Ix[i].lower()>=0.0);
     }
     for(uint i=0; i!=Iz.size(); ++i) {
-        ARIADNE_ASSERT(Iz[i].lower()>=0.0);
+     ARIADNE_ASSERT(Iz[i].lower()>=0.0);
     }
     return hull(dot(c,Ix),dot(b,Iy));
 }
 
 tribool
 slow_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-              const Vector<Float>& l, const Vector<Float>& u)
+     const Vector<Float>& l, const Vector<Float>& u)
 {
     const uint m=A.row_size();
     const uint n=A.column_size();
@@ -1952,15 +1952,15 @@ slow_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Floa
 
     Matrix<Float> AA(mm,nn);
     for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=n; ++j) {
-            AA[i][j]=-A[i][j];
-            AA[i][j+n]=A[i][j];
-        }
-        AA[i][2*n+i]=-1;
-        AA[i][2*n+m+i]=+1;
+     for(uint j=0; j!=n; ++j) {
+      AA[i][j]=-A[i][j];
+      AA[i][j+n]=A[i][j];
+     }
+     AA[i][2*n+i]=-1;
+     AA[i][2*n+m+i]=+1;
     }
     for(uint jj=0; jj!=nn; ++jj) {
-        AA[m][jj]=1.0;
+     AA[m][jj]=1.0;
     }
 
     ARIADNE_LOG(2,"AA="<<AA<<"\n");
@@ -1972,12 +1972,12 @@ slow_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Floa
 
     Vector<Float> cc(nn);
     for(uint j=0; j!=n; ++j) {
-        cc[j]=-cl[j];
-        cc[n+j]=cu[j];
+     cc[j]=-cl[j];
+     cc[n+j]=cu[j];
     }
     for(uint i=0; i!=m; ++i) {
-        cc[2*n+i]=-l[i];
-        cc[2*n+m+i]=u[i];
+     cc[2*n+i]=-l[i];
+     cc[2*n+m+i]=u[i];
     }
 
     ARIADNE_LOG(2,"cc="<<cc<<"\n");
@@ -1987,17 +1987,17 @@ slow_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Floa
     Vector<Float> zz(nn);
 
     for(uint jj=0; jj!=nn; ++jj) {
-        xx[jj]=1.0/nn;
+     xx[jj]=1.0/nn;
     }
 
     ARIADNE_LOG(2,"xx="<<xx<<"\n");
 
     Vector<Float> y(m);
     for(uint i=0; i!=m; ++i) {
-        y[i]=(l[i]+u[i])/2;
-        yy[i]=y[i];
-        zz[2*n+i]=y[i]-l[i];
-        zz[2*n+m+i]=u[i]-y[i];
+     y[i]=(l[i]+u[i])/2;
+     yy[i]=y[i];
+     zz[2*n+i]=y[i]-l[i];
+     zz[2*n+m+i]=u[i]-y[i];
     }
 
     Vector<Float> yA=prod(y,A);
@@ -2005,15 +2005,15 @@ slow_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Floa
 
     Float t=+inf<Float>();
     for(uint j=0; j!=n; ++j) {
-        zz[j]=yA[j]-cl[j];
-        t=min(t,zz[j]);
-        zz[n+j]=cu[j]-yA[j];
-        t=min(t,zz[n+j]);
+     zz[j]=yA[j]-cl[j];
+     t=min(t,zz[j]);
+     zz[n+j]=cu[j]-yA[j];
+     t=min(t,zz[n+j]);
     }
 
     t-=1.0/nn;
     for(uint i=0; i!=nn; ++i) {
-        zz[i]-=t;
+     zz[i]-=t;
     }
     yy[m]=t;
 
@@ -2036,7 +2036,7 @@ slow_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Floa
 
 tribool
 InteriorPointSolver::feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-                              const Vector<Float>& l, const Vector<Float>& u) const
+      const Vector<Float>& l, const Vector<Float>& u) const
 {
     return slow_feasible(A,cl,cu,l,u);
 
@@ -2054,32 +2054,32 @@ InteriorPointSolver::feasible(const Matrix<Float>& A, const Vector<Float>& cl, c
     Vector<Float> y(m);
     Vector<Float> z(2*(m+n));
     for(uint i=0; i!=m; ++i) {
-        y[i]=(l[i]+u[i])/2;
-        z[2*n+i]=y[i]-l[i];
-        z[2*n+m+i]=u[i]-y[i];
+     y[i]=(l[i]+u[i])/2;
+     z[2*n+i]=y[i]-l[i];
+     z[2*n+m+i]=u[i]-y[i];
     }
 
     Vector<Float> yA=prod(y,A);
     Float t=+inf<Float>();
     for(uint j=0; j!=n; ++j) {
-        z[j]=yA[j]-cl[j];
-        z[n+j]=cu[j]-yA[j];
-        t=min(t,cu[j]-yA[j]);
-        t=min(t,yA[j]-cl[j]);
+     z[j]=yA[j]-cl[j];
+     z[n+j]=cu[j]-yA[j];
+     t=min(t,cu[j]-yA[j]);
+     t=min(t,yA[j]-cl[j]);
     }
     if(t>0) {
-        ARIADNE_LOG(2,"y="<<y<<" yA="<<yA<<" cl="<<cl<<" cu="<<cu<<"\n");
-        return true;
+     ARIADNE_LOG(2,"y="<<y<<" yA="<<yA<<" cl="<<cl<<" cu="<<cu<<"\n");
+     return true;
     }
     t-=1.0/(2*(m+n));
     for(uint i=0; i!=2*(m+n); ++i) {
-        z[i]-=t;
+     z[i]-=t;
     }
 
     // Find a vector x=(xcl,xcu,xl,xu) such that A(xcu-xcl)+(xu-xl) = 0 summing to 1
     Vector<Float> x(2*(m+n));
     for(uint i=0; i!=2*(m+n); ++i) {
-        x[i]=1.0/(2*(m+n));
+     x[i]=1.0/(2*(m+n));
     }
 
     Vector<Float> et(n,t);
@@ -2122,30 +2122,30 @@ void _set_es_matrix(Matrix<Float>& S, const Matrix<Float>& A, const Vector<Float
 
     //Clear matrix
     for(uint i=0; i!=(m+1u)*(m+1u); ++i) {
-        Sptr[i]=0.0;
+     Sptr[i]=0.0;
     }
 
     // Set upper-triangular values
     for(uint i=0; i!=m; ++i) {
-        for(uint k=0; k!=n; ++k) {
-            Float ADik=A[i][k]*(Db[k]+Dc[k]);
-            for(uint j=i; j!=m; ++j) {
-                S[i][j]+=ADik*A[j][k];
-            }
-            S[i][m]+=A[i][k]*(Dc[k]-Db[k]);
-        }
-        S[i][i]+=(Du[i]+Dl[i]);
-        S[i][m]+=(Du[i]-Dl[i]);
+     for(uint k=0; k!=n; ++k) {
+      Float ADik=A[i][k]*(Db[k]+Dc[k]);
+      for(uint j=i; j!=m; ++j) {
+    S[i][j]+=ADik*A[j][k];
+      }
+      S[i][m]+=A[i][k]*(Dc[k]-Db[k]);
+     }
+     S[i][i]+=(Du[i]+Dl[i]);
+     S[i][m]+=(Du[i]-Dl[i]);
     }
     for(uint h=0; h!=(2*(m+n)); ++h) {
-        S[m][m]+=D[h];
+     S[m][m]+=D[h];
     }
 
     // Set lower part
     for(uint i=1; i!=m+1; ++i) {
-        for(uint j=0; j!=i; ++j) {
-            S[i][j]=S[j][i];
-        }
+     for(uint j=0; j!=i; ++j) {
+      S[i][j]=S[j][i];
+     }
     }
 }
 
@@ -2164,24 +2164,24 @@ void _set_s_matrix(Matrix<Float>& S, const Matrix<Float>& A, const Vector<Float>
     //Clear matrix
     Float* Sptr=&S[0][0];
     for(uint i=0; i!=m*m; ++i) {
-        Sptr[i]=0.0;
+     Sptr[i]=0.0;
     }
 
     // Set upper-triangular values
     for(uint i=0; i!=m; ++i) {
-        S[i][i]=Dd[i];
-        for(uint k=0; k!=n; ++k) {
-            Float ADik=A[i][k]*Dc[k];
-            for(uint j=i; j!=m; ++j) {
-                S[i][j]+=ADik*A[j][k];
-            }
-        }
+     S[i][i]=Dd[i];
+     for(uint k=0; k!=n; ++k) {
+      Float ADik=A[i][k]*Dc[k];
+      for(uint j=i; j!=m; ++j) {
+    S[i][j]+=ADik*A[j][k];
+      }
+     }
     }
     // Set lower part
     for(uint i=1; i!=m; ++i) {
-        for(uint j=0; j!=i; ++j) {
-            S[i][j]=S[j][i];
-        }
+     for(uint j=0; j!=i; ++j) {
+      S[i][j]=S[j][i];
+     }
     }
 }
 
@@ -2192,8 +2192,8 @@ void _set_s_matrix(Matrix<Float>& S, const Matrix<Float>& A, const Vector<Float>
 // Augment system by considering b<=yA-te; yA+te<=c; max(t)
 tribool
 InteriorPointSolver::_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-                               const Vector<Float>& yl, const Vector<Float>& yu,
-                               Float& v, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
+    const Vector<Float>& yl, const Vector<Float>& yu,
+    Float& v, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
 {
     const uint m=A.row_size();
     const uint n=A.column_size();
@@ -2230,46 +2230,46 @@ InteriorPointSolver::_feasible(const Matrix<Float>& A, const Vector<Float>& cl, 
     FloatVectorRange dxbu=project(dx,range(2*n+m,2*(n+m)));
 
     for(uint i=0; i!=10; ++i) {
-        Float eps=0.01;
+     Float eps=0.01;
 
-        Vector<Float> res(2*(m+n));
-        for(uint i=0; i!=2*(m+n); ++i) {
-            res[i]=x[i]*z[i]-eps;
-        }
+     Vector<Float> res(2*(m+n));
+     for(uint i=0; i!=2*(m+n); ++i) {
+      res[i]=x[i]*z[i]-eps;
+     }
 
-        Dc=ediv(xcu,zcu)-ediv(xcl,zcl);
-        Db=ediv(xbu,zbu)-ediv(xbl,zbl);
-        Drzc=erec(zcu)-erec(zcl);
-        Drzb=erec(zbu)-erec(zbl);
+     Dc=ediv(xcu,zcu)-ediv(xcl,zcl);
+     Db=ediv(xbu,zbu)-ediv(xbl,zbl);
+     Drzc=erec(zcu)-erec(zcl);
+     Drzb=erec(zbu)-erec(zbl);
 
-        yf=prod(A,Drz)+Drzb;
-        _set_s_matrix(S,A,Dc,Db);
-        Sinv=inverse(S);
-        dy=prod(Sinv,yf);
-        dyA=prod(y,A);
-        dv=0.0;
+     yf=prod(A,Drz)+Drzb;
+     _set_s_matrix(S,A,Dc,Db);
+     Sinv=inverse(S);
+     dy=prod(Sinv,yf);
+     dyA=prod(y,A);
+     dv=0.0;
 
-        dzcl=dyA-dv*e;
-        dzcu=-dv*e-dyA;
-        dzyl=dy;
-        dzyu=-dy;
+     dzcl=dyA-dv*e;
+     dzcu=-dv*e-dyA;
+     dzyl=dy;
+     dzyu=-dy;
 
-        dx=ediv(-res-emul(x,dz),z);
+     dx=ediv(-res-emul(x,dz),z);
 
-        bool allpositive=false;
-        Float a=1/scale;
-        while(!allpositive) {
-            a=a*scale;
-            nx=midpoint(x+a*dx);
-            nz=midpoint(z+a*dz);
-            nxz=emul(nx,nz);
-            allpositive = all_greater(nx,0.0) && all_greater(nxz,eps);
-            ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" nt="<<nt<<" ny="<<ny<<" nz="<<nz<<"\n");
-        }
-        nt=midpoint(t+a*dt);
-        ny=midpoint(y+a*dy);
+     bool allpositive=false;
+     Float a=1/scale;
+     while(!allpositive) {
+      a=a*scale;
+      nx=midpoint(x+a*dx);
+      nz=midpoint(z+a*dz);
+      nxz=emul(nx,nz);
+      allpositive = all_greater(nx,0.0) && all_greater(nxz,eps);
+      ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" nt="<<nt<<" ny="<<ny<<" nz="<<nz<<"\n");
+     }
+     nt=midpoint(t+a*dt);
+     ny=midpoint(y+a*dy);
 
-        t=nt; y=ny; x=nx; z=nz;
+     t=nt; y=ny; x=nx; z=nz;
     }
 
     if(t>0.0) { return true; }
@@ -2282,8 +2282,8 @@ InteriorPointSolver::_feasible(const Matrix<Float>& A, const Vector<Float>& cl, 
 // Augment system by considering b<=yA-ve; yA+ve<=c; max(t)
 tribool
 InteriorPointSolver::feasible(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-                              const Matrix<Float>& C, const Vector<Float>& c,
-                              const Vector<Float>& dl, const Vector<Float>& du) const
+      const Matrix<Float>& C, const Vector<Float>& c,
+      const Vector<Float>& dl, const Vector<Float>& du) const
 {
     StandardLinearProgram lp=feasibility_problem(B,bl,bu,C,c,dl,du);
 
@@ -2300,8 +2300,8 @@ InteriorPointSolver::feasible(const Matrix<Float>& B, const Vector<Float>& bl, c
     yb=dot(yy,bb); cx=dot(cc,xx);
 
     while(yb<=0.0 && cx>=0.0 && (cx-yb)>max_error) {
-        this->_optimization_step(AA,bb,cc,xx,yy,zz);
-        yb=dot(yy,bb); cx=dot(cc,xx);
+     this->_optimization_step(AA,bb,cc,xx,yy,zz);
+     yb=dot(yy,bb); cx=dot(cc,xx);
     }
 
     ARIADNE_LOG(2,"cx="<<cx<<"\nyb="<<yb<<"\n");
@@ -2330,9 +2330,9 @@ InteriorPointSolver::feasible(const Matrix<Float>& B, const Vector<Float>& bl, c
 // Augment system by considering b<=yA-ve; yA+ve<=c; max(t)
 tribool
 InteriorPointSolver::_feasible(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-                               const Matrix<Float>& C, const Vector<Float>& c,
-                               const Vector<Float>& dl, const Vector<Float>& du,
-                               Float& t, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
+    const Matrix<Float>& C, const Vector<Float>& c,
+    const Vector<Float>& dl, const Vector<Float>& du,
+    Float& t, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
 {
     // For the linear system Ax+by=s; b^Tx+cy=t, a solution is given by
     // y=(t - b^T A^-1 s)/(c-b^T A^-1 b); x=A^-1 s - A^-1 b y
@@ -2394,69 +2394,69 @@ InteriorPointSolver::_feasible(const Matrix<Float>& B, const Vector<Float>& bl, 
     Float duality; // mu = dot(x,z)/n
     Float neighbourhood; // gamma = sigma mu
     while(steps<maxsteps && cx>=0.0 && yb<=0.0) {
-        duality=dot(x,z)/n; // mu
-        neighbourhood=gamma*duality;
-        _ediv(xdivz,x,z);
-        _ediv(xmulz,x,z);
-        _emul(tau,x,z);
-        for(uint i=0; i!=2*(m+n); ++i) { tau[i]-=centering*duality; }
-        for(uint i=0; i!=2*(m+n); ++i) { tau[i]/=z[i]; }
-        ARIADNE_LOG(2,"  x*z="<<xmulz<<"  x/z="<<xdivz<<" tau="<<tau<<"\n");
-        _set_es_matrix(S,A,xdivz);
-        Sinv=inverse(S);
-        ARIADNE_LOG(2,"  S="<<S<<"  inverse(S)="<<Sinv<<"\n");
+     duality=dot(x,z)/n; // mu
+     neighbourhood=gamma*duality;
+     _ediv(xdivz,x,z);
+     _ediv(xmulz,x,z);
+     _emul(tau,x,z);
+     for(uint i=0; i!=2*(m+n); ++i) { tau[i]-=centering*duality; }
+     for(uint i=0; i!=2*(m+n); ++i) { tau[i]/=z[i]; }
+     ARIADNE_LOG(2,"  x*z="<<xmulz<<"  x/z="<<xdivz<<" tau="<<tau<<"\n");
+     _set_es_matrix(S,A,xdivz);
+     Sinv=inverse(S);
+     ARIADNE_LOG(2,"  S="<<S<<"  inverse(S)="<<Sinv<<"\n");
 
-        //dy=Sinv*(rb-A*(iZ*(X*rc))-A*(iZ*t))
-        //dx=iZ*(X*(At*dy-rc)+t)
-        //dz=iX*(t-Z*dx)
+     //dy=Sinv*(rb-A*(iZ*(X*rc))-A*(iZ*t))
+     //dx=iZ*(X*(At*dy-rc)+t)
+     //dz=iX*(t-Z*dx)
 
-        // Compute the residuals on y
-        // The general formula is A*Zinv*tau, where tau is the residual for the slack variables
+     // Compute the residuals on y
+     // The general formula is A*Zinv*tau, where tau is the residual for the slack variables
 
-        Vector<Float> rzx=tau;
-        Vector<Float> ryt(m+1,0.0);
-        project(ryt,range(0,m))=prod(A,(project(rzx,range(n,n+n))-project(rzx,range(0,n))))
-            +(project(rzx,range(n+n+m,n+n+m+m))-project(rzx,range(n+n,n+n+m)));
-        for(uint i=0; i!=2*(m+n); ++i) { ryt[m]+=rzx[i]; }
-        Vector<Float> dyt=Sinv*ryt;
-        dy=project(dyt,range(0,m));
-        dt=dyt[m];
+     Vector<Float> rzx=tau;
+     Vector<Float> ryt(m+1,0.0);
+     project(ryt,range(0,m))=prod(A,(project(rzx,range(n,n+n))-project(rzx,range(0,n))))
+      +(project(rzx,range(n+n+m,n+n+m+m))-project(rzx,range(n+n,n+n+m)));
+     for(uint i=0; i!=2*(m+n); ++i) { ryt[m]+=rzx[i]; }
+     Vector<Float> dyt=Sinv*ryt;
+     dy=project(dyt,range(0,m));
+     dt=dyt[m];
 
-        FloatVector dyA(n);
-        FloatVectorRange dzb=project(dz,range(0,n));
-        FloatVectorRange dzc=project(dz,range(n,2*n));
-        FloatVectorRange dzl=project(dz,range(2*n,2*n+m));
-        FloatVectorRange dzu=project(dz,range(2*n+m,2*n+2*m));
+     FloatVector dyA(n);
+     FloatVectorRange dzb=project(dz,range(0,n));
+     FloatVectorRange dzc=project(dz,range(n,2*n));
+     FloatVectorRange dzl=project(dz,range(2*n,2*n+m));
+     FloatVectorRange dzu=project(dz,range(2*n+m,2*n+2*m));
 
-        dyA=dy*A;
+     dyA=dy*A;
 
-        dzb=dyA-dt*en;
-        dzc=-dyA-dt*en;
-        dzl=dy-dt*em;
-        dzu=-dy-dt*em;
+     dzb=dyA-dt*en;
+     dzc=-dyA-dt*en;
+     dzl=dy-dt*em;
+     dzu=-dy-dt*em;
 
-        dx=ediv(-tau-emul(x,dz),z);
+     dx=ediv(-tau-emul(x,dz),z);
 
-        ARIADNE_LOG(2,"  dx="<<dx<<" dy="<<dy<<" dz="<<dz<<"\n");
-        bool allpositive=false;
-        Float a=1/scale;
-        while(!allpositive) {
-            a=a*scale;
-            nt=midpoint(t+a*dt);
-            nx=midpoint(x+a*dx);
-            ny=midpoint(y+a*dy);
-            nz=midpoint(z+a*dz);
-            nxz=emul(nx,nz);
-            allpositive = all_greater(nx,0.0) && all_greater(nxz,neighbourhood);
-            ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" nt="<<nt<<" ny="<<ny<<" nz="<<nz<<"\n");
-           // ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" ny="<<ny<<" nz="<<nz<<" nxz="<<nxz<<"\n");
-        }
-        t=nt;
-        x=nx;
-        y=ny;
-        z=nz;
-        ARIADNE_LOG(2,"  cx="<<dot(c,x)<<" yb="<<t<<"\n");
-        ++steps;
+     ARIADNE_LOG(2,"  dx="<<dx<<" dy="<<dy<<" dz="<<dz<<"\n");
+     bool allpositive=false;
+     Float a=1/scale;
+     while(!allpositive) {
+      a=a*scale;
+      nt=midpoint(t+a*dt);
+      nx=midpoint(x+a*dx);
+      ny=midpoint(y+a*dy);
+      nz=midpoint(z+a*dz);
+      nxz=emul(nx,nz);
+      allpositive = all_greater(nx,0.0) && all_greater(nxz,neighbourhood);
+      ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" nt="<<nt<<" ny="<<ny<<" nz="<<nz<<"\n");
+     // ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" ny="<<ny<<" nz="<<nz<<" nxz="<<nxz<<"\n");
+     }
+     t=nt;
+     x=nx;
+     y=ny;
+     z=nz;
+     ARIADNE_LOG(2,"  cx="<<dot(c,x)<<" yb="<<t<<"\n");
+     ++steps;
     }
 
 
@@ -2470,7 +2470,7 @@ InteriorPointSolver::_feasible(const Matrix<Float>& B, const Vector<Float>& bl, 
 
 tuple< Vector<Float>, Vector<Float>, Vector<Float> >
 InteriorPointSolver::_optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                               Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
+    Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
 {
     ARIADNE_ASSERT(A.row_size()==b.size());
     ARIADNE_ASSERT(A.column_size()==c.size());
@@ -2491,8 +2491,8 @@ InteriorPointSolver::_optimize(const Matrix<Float>& A, const Vector<Float>& b, c
 
     uint steps=0;
     while(steps<maxsteps && (cx-yb)>maxerror) {
-        this->_optimization_step(A,b,c,x,y,z);
-        ++steps;
+     this->_optimization_step(A,b,c,x,y,z);
+     ++steps;
     }
 
     return make_tuple(x,y,z);
@@ -2501,7 +2501,7 @@ InteriorPointSolver::_optimize(const Matrix<Float>& A, const Vector<Float>& b, c
 
 void
 InteriorPointSolver::_optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                                        Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
+    Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
 {
     static const double gamma=1.0/1024;
     static const double sigma=1.0/8;
@@ -2536,11 +2536,11 @@ InteriorPointSolver::_optimization_step(const Matrix<Float>& A, const Vector<Flo
     bool allpositive=false;
     Float a=1/scale;
     while(!allpositive) {
-        a=a*scale;
-        nx=midpoint(x+a*dx);
-        nz=midpoint(z+a*dz);
-        allpositive = all_greater(nx,0.0) && all_greater(nz,0.0) && all_greater(emul(nx,nz),gamma*mu);
-        ARIADNE_LOG(6,"    a="<<a<<" e="<<eps<<" nx="<<nx<<" nz="<<nz<<"\n");
+     a=a*scale;
+     nx=midpoint(x+a*dx);
+     nz=midpoint(z+a*dz);
+     allpositive = all_greater(nx,0.0) && all_greater(nz,0.0) && all_greater(emul(nx,nz),gamma*mu);
+     ARIADNE_LOG(6,"    a="<<a<<" e="<<eps<<" nx="<<nx<<" nz="<<nz<<"\n");
     }
     ny=midpoint(y+a*dy);
 

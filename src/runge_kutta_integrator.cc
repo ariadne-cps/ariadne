@@ -1,5 +1,5 @@
 /***************************************************************************
- *            runge_kutta_integrator.cc
+ *      runge_kutta_integrator.cc
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iostream>
 
 #include "runge_kutta_integrator.h"
@@ -35,9 +35,9 @@ namespace Ariadne {
 RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
     : _step_size(step_size)
 {
-}        
+}
 
-FloatVector 
+FloatVector
 RungeKutta4Integrator::step(const VectorFunctionInterface& f, const FloatVector& x, const Float& h) const
 {
     FloatVector k1=f.evaluate(x);
@@ -47,21 +47,21 @@ RungeKutta4Integrator::step(const VectorFunctionInterface& f, const FloatVector&
     //std::cerr<<"k1,2,3,4="<<k1<<k2<<k3<<k4<<"\n";
     return x+(h/6)*(k1+2.0*k3+2.0*k4+k2);
 }
-        
-List< Pair<Float,FloatVector> > 
+
+List< Pair<Float,FloatVector> >
 RungeKutta4Integrator::evolve(const VectorFunctionInterface& f, const FloatVector& x0, const Float& tmax) const
 {
     static const Float h=this->_step_size;
-    
+
     List< Pair<Float,FloatVector> > res;
     Float t=0.0;
     FloatVector x=x0;
 
-    res.push_back(make_pair(t,x));   
+    res.push_back(make_pair(t,x));
     while(t<tmax) {
-        x=this->step(f,x,h);
-        t+=h;
-        res.push_back(make_pair(t,x));    
+     x=this->step(f,x,h);
+     t+=h;
+     res.push_back(make_pair(t,x));
     }
     return res;
 }

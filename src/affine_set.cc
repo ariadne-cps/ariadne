@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_set.cc
+ *      affine_set.cc
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -76,12 +76,12 @@ void AffineSet::construct(const Vector<Interval>& D, const Matrix<Float>& G, con
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
     for(uint i=0; i!=G.row_size(); ++i) {
-        Affine<Float> x(G.column_size());
-        x=h[i];
-        for(uint j=0; j!=G.column_size(); ++j) {
-            x[j]=G[i][j];
-        }
-        this->_function.append(x);
+     Affine<Float> x(G.column_size());
+     x=h[i];
+     for(uint j=0; j!=G.column_size(); ++j) {
+      x[j]=G[i][j];
+     }
+     this->_function.append(x);
     }
 }
 
@@ -93,7 +93,7 @@ AffineSet::new_inequality_constraint(const Vector<Float>& a, const Float& b)
     Affine<Float> c(a.size());
     c=-b;
     for(uint j=0; j!=a.size(); ++j) {
-        c[j]=a[j];
+     c[j]=a[j];
     }
     _constraints.append(c);
 }
@@ -106,7 +106,7 @@ AffineSet::new_equality_constraint(const Vector<Float>& a, const Float& b)
     Affine<Float> c(a.size());
     c=-b;
     for(uint j=0; j!=a.size(); ++j) {
-        c[j]=a[j];
+     c[j]=a[j];
     }
     _equations.append(c);
 }
@@ -129,9 +129,9 @@ AffineSet::new_equality_constraint(const Affine<Float>& a)
 
 bool AffineSet::operator==(const AffineSet& other) const {
     return this->_domain==other._domain
-        && this->_function==other._function
-        && this->_constraints==other._constraints
-        && this->_equations==other._equations;
+     && this->_function==other._function
+     && this->_constraints==other._constraints
+     && this->_equations==other._equations;
 }
 
 AffineSet*
@@ -173,8 +173,8 @@ Box AffineSet::bounding_box() const {
     Box result(this->dimension());
     Vector<Interval> domain=this->domain();
     for(uint i=0; i!=this->dimension(); ++i) {
-        //result[i]=evaluate(this->_function[i],domain);
-        result[i]=this->_function[i].evaluate(domain);
+     //result[i]=evaluate(this->_function[i],domain);
+     result[i]=this->_function[i].evaluate(domain);
     }
     return result;
 }
@@ -185,10 +185,10 @@ tribool AffineSet::disjoint(const Box& bx) const {
     this->construct_linear_program(lp);
     tribool feasible;
     try {
-        feasible=SimplexSolver<Float>().constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+     feasible=SimplexSolver<Float>().constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
     catch(DegenerateFeasibilityProblemException e) {
-        feasible=indeterminate;
+     feasible=indeterminate;
     }
     return !feasible;
 }
@@ -215,7 +215,7 @@ void _adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& l
 
     // No need to check if cell is already part of the set
     if(subset(cell,paving)) {
-        return;
+     return;
     }
 
     // Find concrete cell box
@@ -223,8 +223,8 @@ void _adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& l
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=cell.dimension(); ++i) {
-        lp.l[i]=bx[i].lower();
-        lp.u[i]=bx[i].upper();
+     lp.l[i]=bx[i].lower();
+     lp.u[i]=bx[i].upper();
     }
 
     int cell_tree_depth=(cell.depth()-cell.height());
@@ -240,12 +240,12 @@ void _adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& l
 
     // FIXME: The cell depth should be an absolute depth, so this conversion should not be needed
     if(cell_tree_depth>=maximum_tree_depth) {
-        paving.adjoin(cell);
+     paving.adjoin(cell);
     } else {
-        GridCell subcell1 = cell.split(0);
-        GridCell subcell2 = cell.split(1);
-        _adjoin_outer_approximation_to(paving,lp,subcell1,depth);
-        _adjoin_outer_approximation_to(paving,lp,subcell2,depth);
+     GridCell subcell1 = cell.split(0);
+     GridCell subcell2 = cell.split(1);
+     _adjoin_outer_approximation_to(paving,lp,subcell1,depth);
+     _adjoin_outer_approximation_to(paving,lp,subcell2,depth);
     }
 
 }
@@ -282,60 +282,60 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
     // Make part of linear program only dependent on set
     // Need to set all values since matrix is uninitialised
     for(uint i=0; i!=nx; ++i) {
-        for(uint j=0; j!=nx; ++j) {
-            lp.A[i][j]=0;
-        }
-        lp.A[i][i]=+1;
-        for(uint j=0; j!=ne; ++j) {
-            lp.A[i][nx+j]=-this->_function[i].gradient(j);
-        }
-        for(uint j=0; j!=nc; ++j) {
-            lp.A[i][nx+ne+j]=0;
-        }
-        lp.b[i]=this->_function[i].value();
+     for(uint j=0; j!=nx; ++j) {
+      lp.A[i][j]=0;
+     }
+     lp.A[i][i]=+1;
+     for(uint j=0; j!=ne; ++j) {
+      lp.A[i][nx+j]=-this->_function[i].gradient(j);
+     }
+     for(uint j=0; j!=nc; ++j) {
+      lp.A[i][nx+ne+j]=0;
+     }
+     lp.b[i]=this->_function[i].value();
     }
     for(uint i=0; i!=nc; ++i) {
-        for(uint j=0; j!=nx; ++j) {
-            lp.A[nx+i][j]=0;
-        }
-        for(uint j=0; j!=ne; ++j) {
-            lp.A[nx+i][nx+j]=this->_constraints[i].gradient(j);
-        }
-        for(uint j=0; j!=nc; ++j) {
-            lp.A[nx+i][nx+ne+j]=0;
-        }
-        lp.A[nx+i][ne+nx+i]=+1;
-        lp.b[nx+i]=-this->_constraints[i].value();
+     for(uint j=0; j!=nx; ++j) {
+      lp.A[nx+i][j]=0;
+     }
+     for(uint j=0; j!=ne; ++j) {
+      lp.A[nx+i][nx+j]=this->_constraints[i].gradient(j);
+     }
+     for(uint j=0; j!=nc; ++j) {
+      lp.A[nx+i][nx+ne+j]=0;
+     }
+     lp.A[nx+i][ne+nx+i]=+1;
+     lp.b[nx+i]=-this->_constraints[i].value();
     }
     for(uint i=0; i!=ne; ++i) {
-        lp.l[nx+i]=this->_domain[i].lower();
-        lp.u[nx+i]=this->_domain[i].upper();
+     lp.l[nx+i]=this->_domain[i].lower();
+     lp.u[nx+i]=this->_domain[i].upper();
     }
     for(uint i=0; i!=nc; ++i) {
-        lp.l[nx+ne+i]=0;
-        lp.u[nx+ne+i]=inf<Float>();
+     lp.l[nx+ne+i]=0;
+     lp.u[nx+ne+i]=inf<Float>();
     }
 
     // Take x and s variables to be basic, so the initial basis matrix is the
     // identity
     for(uint i=0; i!=nx; ++i) {
-        lp.vt[i]=BASIS;
-        lp.p[i]=i;
+     lp.vt[i]=BASIS;
+     lp.p[i]=i;
     }
     for(uint i=0; i!=ne; ++i) {
-        lp.vt[nx+i]=LOWER;
-        lp.p[nx+nc+i]=nx+i;
+     lp.vt[nx+i]=LOWER;
+     lp.p[nx+nc+i]=nx+i;
     }
     for(uint i=0; i!=nc; ++i) {
-        lp.vt[nx+ne+i]=BASIS;
-        lp.p[nx+i]=nx+ne+i;
+     lp.vt[nx+ne+i]=BASIS;
+     lp.p[nx+i]=nx+ne+i;
     }
     lp.B=Matrix<Float>::identity(nx+nc);
 
     // Make part of linear program dependent on cell be +/-infinity
     for(uint i=0; i!=nx; ++i) {
-        lp.l[i]=-inf<Float>();
-        lp.u[i]=+inf<Float>();
+     lp.l[i]=-inf<Float>();
+     lp.u[i]=+inf<Float>();
     }
 
 }
@@ -370,7 +370,7 @@ void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Fl
 
     // No need to check if cell is already part of the set
     if(subset(cell,paving)) {
-        return;
+     return;
     }
 
     // Find concrete cell box
@@ -378,8 +378,8 @@ void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Fl
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=nx; ++i) {
-        lp.l[ne+i]=bx[i].lower();
-        lp.u[ne+i]=bx[i].upper();
+     lp.l[ne+i]=bx[i].lower();
+     lp.u[ne+i]=bx[i].upper();
     }
 
     int cell_tree_depth=(cell.depth()-cell.height());
@@ -390,7 +390,7 @@ void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Fl
 
     bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
-        done=lpsolver.lpstep(lp.A,lp.b,lp.c,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x);
+     done=lpsolver.lpstep(lp.A,lp.b,lp.c,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x);
     }
     Matrix<Interval> B=lpsolver.compute_B<Interval>(lp.A,lp.p);
     Vector<Interval> x=lpsolver.compute_x(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,B);
@@ -404,12 +404,12 @@ void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Fl
 
     // FIXME: The cell depth should be an absolute depth, so this conversion should not be needed
     if(cell_tree_depth>=maximum_tree_depth) {
-        paving.adjoin(cell);
+     paving.adjoin(cell);
     } else {
-        GridCell subcell1 = cell.split(0);
-        GridCell subcell2 = cell.split(1);
-        _adjoin_outer_approximation_to(paving,lp,subcell1,depth);
-        _adjoin_outer_approximation_to(paving,lp,subcell2,depth);
+     GridCell subcell1 = cell.split(0);
+     GridCell subcell2 = cell.split(1);
+     _adjoin_outer_approximation_to(paving,lp,subcell1,depth);
+     _adjoin_outer_approximation_to(paving,lp,subcell2,depth);
     }
 
 }
@@ -454,47 +454,47 @@ AffineSet::robust_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) 
     // Make part of linear program only dependent on set
     // Need to set all values since matrix is uninitialised
     for(uint i=0; i!=nx; ++i) {
-        for(uint j=0; j!=ne; ++j) {
-            lp.A[i][j]=-this->_function[i].gradient(j);
-        }
-        for(uint j=0; j!=nx; ++j) {
-            lp.A[i][ne+j]=0;
-        }
-        lp.A[i][ne+i]=+1;
-        for(uint j=0; j!=nc; ++j) {
-            lp.A[i][ne+nx+j]=0;
-        }
-        lp.b[i]=this->_function[i].value();
+     for(uint j=0; j!=ne; ++j) {
+      lp.A[i][j]=-this->_function[i].gradient(j);
+     }
+     for(uint j=0; j!=nx; ++j) {
+      lp.A[i][ne+j]=0;
+     }
+     lp.A[i][ne+i]=+1;
+     for(uint j=0; j!=nc; ++j) {
+      lp.A[i][ne+nx+j]=0;
+     }
+     lp.b[i]=this->_function[i].value();
     }
     for(uint i=0; i!=nc; ++i) {
-        for(uint j=0; j!=ne; ++j) {
-            lp.A[nx+i][j]=this->_constraints[i].gradient(j);
-        }
-        for(uint j=0; j!=nx; ++j) {
-            lp.A[nx+i][ne+j]=0;
-        }
-        for(uint j=0; j!=nc; ++j) {
-            lp.A[nx+i][ne+nx+j]=0;
-        }
-        lp.A[nx+i][nx+ne+i]=+1;
-        lp.b[nx+i]=-this->_constraints[i].value();
+     for(uint j=0; j!=ne; ++j) {
+      lp.A[nx+i][j]=this->_constraints[i].gradient(j);
+     }
+     for(uint j=0; j!=nx; ++j) {
+      lp.A[nx+i][ne+j]=0;
+     }
+     for(uint j=0; j!=nc; ++j) {
+      lp.A[nx+i][ne+nx+j]=0;
+     }
+     lp.A[nx+i][nx+ne+i]=+1;
+     lp.b[nx+i]=-this->_constraints[i].value();
     }
     for(uint i=0; i!=ne; ++i) {
-        lp.l[i]=-1;
-        lp.u[i]=+1;
+     lp.l[i]=-1;
+     lp.u[i]=+1;
     }
     for(uint i=0; i!=nc; ++i) {
-        lp.l[ne+nx+i]=0;
-        lp.u[ne+nx+i]=inf<Float>();
+     lp.l[ne+nx+i]=0;
+     lp.u[ne+nx+i]=inf<Float>();
     }
 
 
     // Make part of linear program used for robustness
     for(uint i=0; i!=ne+nx+nc; ++i) {
-        lp.c[i]=0;
+     lp.c[i]=0;
     }
     for(uint i=0; i!=nx+nc; ++i) {
-        lp.A[i][ne+nx+nc]=1;
+     lp.A[i][ne+nx+nc]=1;
     }
     lp.c[ne+nx+nc]=-1;
     //lp.l[ne+nx+nc]=0;
@@ -507,19 +507,19 @@ AffineSet::robust_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) 
     // Make part of linear program dependent on cell
     const Box bx=bounding_cell.box();
     for(uint i=0; i!=nx; ++i) {
-        lp.l[ne+i]=bx[i].lower();
-        lp.u[ne+i]=bx[i].upper();
+     lp.l[ne+i]=bx[i].lower();
+     lp.u[ne+i]=bx[i].upper();
     }
 
     // Take x and s variables to be basic, so the initial basis matrix is the
     // identity
     for(uint i=0; i!=ne; ++i) {
-        lp.vt[i]=LOWER;
-        lp.p[nx+nc+i]=i;
+     lp.vt[i]=LOWER;
+     lp.p[nx+nc+i]=i;
     }
     for(uint i=0; i!=nx+nc; ++i) {
-        lp.vt[ne+i]=BASIS;
-        lp.p[i]=ne+i;
+     lp.vt[ne+i]=BASIS;
+     lp.p[i]=ne+i;
     }
     lp.B=Matrix<Float>::identity(nx+nc);
 
@@ -575,26 +575,26 @@ AffineSet::boundary(uint xind, uint yind) const
     Vector<Float> l(nx+nc);
     Vector<Float> u(nx+nc);
     for(uint i=0; i!=nc; ++i) {
-        for(uint j=0; j!=nx; ++j) {
-            A[i][j]=numeric_cast<float>(negative_constraints[i].gradient(j));
-        }
-        A[i][i+nx]=1.0;
-        b[i]=numeric_cast<float>(-negative_constraints[i].value());
+     for(uint j=0; j!=nx; ++j) {
+      A[i][j]=numeric_cast<float>(negative_constraints[i].gradient(j));
+     }
+     A[i][i+nx]=1.0;
+     b[i]=numeric_cast<float>(-negative_constraints[i].value());
     }
     for(uint i=0; i!=ne; ++i) {
-        for(uint j=0; j!=nx; ++j) {
-            A[i+nc][j]=numeric_cast<float>(zero_constraints[i].gradient(j));
-        }
-        b[i+nc]=numeric_cast<float>(-zero_constraints[i].value());
+     for(uint j=0; j!=nx; ++j) {
+      A[i+nc][j]=numeric_cast<float>(zero_constraints[i].gradient(j));
+     }
+     b[i+nc]=numeric_cast<float>(-zero_constraints[i].value());
     }
     for(uint j=0; j!=nx; ++j) {
-        l[j]=numeric_cast<float>(domain[j].lower());
-        u[j]=numeric_cast<float>(domain[j].upper());
+     l[j]=numeric_cast<float>(domain[j].lower());
+     u[j]=numeric_cast<float>(domain[j].upper());
     }
     for(uint i=0; i!=nc; ++i) {
-        l[nx+i]=0.0;
-        u[nx+i]=inf;
-        //u[n+i]=+std::numeric_limits<double>::max();
+     l[nx+i]=0.0;
+     u[nx+i]=inf;
+     //u[n+i]=+std::numeric_limits<double>::max();
     }
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n");
 
@@ -629,7 +629,7 @@ AffineSet::boundary(uint xind, uint yind) const
 
     Vector<Float> pt=prod(G,x)+h; // The current point in space
     Vector<Float> last_vec(2,0.0,-1.0); // The direction in space of the last step along the boundary
-                                        // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
+    // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
     Vector<Float> best_next_vec(2);
     Vector<Float> trial_vec(2);
     Vector<Float> Aj(nc+ne); // The jth column of A
@@ -640,73 +640,73 @@ AffineSet::boundary(uint xind, uint yind) const
     if(nx==ne) { vertices.push_back(Point2d(pt[0],pt[1])); return vertices; }
 
     do {
-        ++STEPS;
-        Float cot_theta_max=-inf;
-        uint s=nx+nc; // The index giving the variable x[p[s]] to enter the basis
+     ++STEPS;
+     Float cot_theta_max=-inf;
+     uint s=nx+nc; // The index giving the variable x[p[s]] to enter the basis
 
-        // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
-        // This direction is given by Gd where d_B=-A_B^{-1} A_N e_j and
-        //   di=+1/-1 depending on whether variable x[j] is at lower or upper bound
-        for(uint k=nc+ne; k!=nx+nc; ++k) {
-            // Test variable to enter basis; there are m to test, one for each dimension of the domain
-            uint j=p[k];
-            if(j!=last_exiting_variable || true) {
-                uint j=p[k];
-                Aj=column(A,j);
-                BAj=prod(B,Aj);
+     // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
+     // This direction is given by Gd where d_B=-A_B^{-1} A_N e_j and
+     //   di=+1/-1 depending on whether variable x[j] is at lower or upper bound
+     for(uint k=nc+ne; k!=nx+nc; ++k) {
+      // Test variable to enter basis; there are m to test, one for each dimension of the domain
+      uint j=p[k];
+      if(j!=last_exiting_variable || true) {
+    uint j=p[k];
+    Aj=column(A,j);
+    BAj=prod(B,Aj);
 
-                // Compute the direction the point in space moves for x[j] entering the basis
-                Vector<Float> d(nx+nc,0.0); // The direction x moves in in changing the basis
-                d[j] = (vt[j]==LOWER ? +1 : -1);
-                for(uint i=0; i!=nc+ne; ++i) {
-                    d[p[i]]=-BAj[i]*d[j];
-                }
-                trial_vec=prod(G,d);
+    // Compute the direction the point in space moves for x[j] entering the basis
+    Vector<Float> d(nx+nc,0.0); // The direction x moves in in changing the basis
+    d[j] = (vt[j]==LOWER ? +1 : -1);
+    for(uint i=0; i!=nc+ne; ++i) {
+     d[p[i]]=-BAj[i]*d[j];
+    }
+    trial_vec=prod(G,d);
 
-                // Compare the direction moved in this step with the last step.
-                // dot compares the direction of the two steps;
-                //   positive means an obtuse angle i.e. the same general direction.
-                // cross compares whether we turn to the left or the right.
-                // Since we traverse the boundary anticlockwise, cross should be positive.
-                Float dot=last_vec[0]*trial_vec[0]+last_vec[1]*trial_vec[1];
-                Float cross=last_vec[0]*trial_vec[1]-last_vec[1]*trial_vec[0];
-                Float cot_theta=dot/cross;
-                ARIADNE_LOG(5,"  k="<<k<<" p[k]="<<p[k]<<" d="<<d<<" trial_vec="<<trial_vec<<" last_vec="<<last_vec<<
-                              " dot="<<dot<<" cross="<<cross<<" cot="<<cot_theta<<"\n");
+    // Compare the direction moved in this step with the last step.
+    // dot compares the direction of the two steps;
+    //   positive means an obtuse angle i.e. the same general direction.
+    // cross compares whether we turn to the left or the right.
+    // Since we traverse the boundary anticlockwise, cross should be positive.
+    Float dot=last_vec[0]*trial_vec[0]+last_vec[1]*trial_vec[1];
+    Float cross=last_vec[0]*trial_vec[1]-last_vec[1]*trial_vec[0];
+    Float cot_theta=dot/cross;
+    ARIADNE_LOG(5,"  k="<<k<<" p[k]="<<p[k]<<" d="<<d<<" trial_vec="<<trial_vec<<" last_vec="<<last_vec<<
+      " dot="<<dot<<" cross="<<cross<<" cot="<<cot_theta<<"\n");
 
 
-                // Due to roundoff error, the computed cross-product may be negative.
-                // If this lies within a reasonable tolerance, set to zero,
-                // otherwise abort.
-                ARIADNE_ASSERT_MSG(cross >= -ERROR_TOLERANCE,
-                                   "AffineSet::boundary(...): cross product is="<<cross<<"; should be positive.");
+    // Due to roundoff error, the computed cross-product may be negative.
+    // If this lies within a reasonable tolerance, set to zero,
+    // otherwise abort.
+    ARIADNE_ASSERT_MSG(cross >= -ERROR_TOLERANCE,
+     "AffineSet::boundary(...): cross product is="<<cross<<"; should be positive.");
 
-                if(cross<=0.0 ) {
-                    cross=+0.0;
-                    cot_theta=(dot>0.0) ? +inf : -inf;
-                }
+    if(cross<=0.0 ) {
+     cross=+0.0;
+     cot_theta=(dot>0.0) ? +inf : -inf;
+    }
 
-                // Allow for equality; in particular, if cot_theta=-infty,
-                // then may turn round and go backwards.
-                if(cot_theta>=cot_theta_max) {
-                    cot_theta_max=cot_theta;
-                    best_next_vec=trial_vec;
-                    s=k;
-                }
-            } // k!=r
-        }
+    // Allow for equality; in particular, if cot_theta=-infty,
+    // then may turn round and go backwards.
+    if(cot_theta>=cot_theta_max) {
+     cot_theta_max=cot_theta;
+     best_next_vec=trial_vec;
+     s=k;
+    }
+      } // k!=r
+     }
 
-        ARIADNE_ASSERT_MSG(s<nc+nx,"Could not find direction to move along boundary of AffineSet.");
-        ARIADNE_DEBUG_ASSERT(vt[p[s]]!=BASIS);
-        ARIADNE_LOG(3,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
-        lpsolver.lpstep(A,b,l,u,vt,p,B,x,s);
-        last_exiting_variable=p[s];
-        pt=prod(G,x)+h;
-        last_vec=best_next_vec;
-        ARIADNE_LOG(5,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt<<"\n");
-        ARIADNE_LOG(3,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec<<"\n");
+     ARIADNE_ASSERT_MSG(s<nc+nx,"Could not find direction to move along boundary of AffineSet.");
+     ARIADNE_DEBUG_ASSERT(vt[p[s]]!=BASIS);
+     ARIADNE_LOG(3,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
+     lpsolver.lpstep(A,b,l,u,vt,p,B,x,s);
+     last_exiting_variable=p[s];
+     pt=prod(G,x)+h;
+     last_vec=best_next_vec;
+     ARIADNE_LOG(5,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt<<"\n");
+     ARIADNE_LOG(3,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec<<"\n");
 
-        vertices.push_back(Point2d(pt[0],pt[1]));
+     vertices.push_back(Point2d(pt[0],pt[1]));
 
     } while(STEPS<MAX_STEPS && vt!=initial_variable_type);
 
@@ -725,7 +725,7 @@ void AffineSet::draw(CanvasInterface& canvas) const {
     // Trace boundary
     canvas.move_to(boundary[0].x,boundary[0].y);
     for(uint i=1; i!=boundary.size(); ++i) {
-        canvas.line_to(boundary[i].x,boundary[i].y);
+     canvas.line_to(boundary[i].x,boundary[i].y);
     }
     canvas.line_to(boundary[0].x,boundary[0].y);
     canvas.fill();

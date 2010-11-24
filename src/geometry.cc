@@ -1,8 +1,8 @@
 /***************************************************************************
- *            geometry.cc
+ *      geometry.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,13 +20,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "geometry.h"
 
 namespace Ariadne {
 
 
-tribool 
+tribool
 disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     Box bb=ls.bounding_box();
@@ -35,7 +35,7 @@ disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Flo
 }
 
 
-tribool 
+tribool
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     Box bb=ls.bounding_box();
@@ -44,7 +44,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 }
 
 
-tribool 
+tribool
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     Box bb=ls.bounding_box();
@@ -53,139 +53,139 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float
 }
 
 
-tribool 
+tribool
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
 {
-    if(ls.disjoint(bx)) { 
-        return false; 
+    if(ls.disjoint(bx)) {
+     return false;
     }
-    if(rs.disjoint(bx)) { 
-        return false; 
+    if(rs.disjoint(bx)) {
+     return false;
     }
     else if(rs.covers(bx)) {
-        return true; 
+     return true;
     }
     else if(bx.radius()<eps) {
-        return indeterminate;
+     return indeterminate;
     } else {
-        Box bx1,bx2;
-        make_lpair(bx1,bx2)=split(bx);
-        if(ls.disjoint(bx1)) {
-            return overlap(ls,rs,bx2,eps);
-        } else if(ls.disjoint(bx2)) {
-            return overlap(ls,rs,bx1,eps);
-        } else {
-            return overlap(ls,rs,bx1,eps) || overlap(ls,rs,bx2,eps);
-        }
+     Box bx1,bx2;
+     make_lpair(bx1,bx2)=split(bx);
+     if(ls.disjoint(bx1)) {
+      return overlap(ls,rs,bx2,eps);
+     } else if(ls.disjoint(bx2)) {
+      return overlap(ls,rs,bx1,eps);
+     } else {
+      return overlap(ls,rs,bx1,eps) || overlap(ls,rs,bx2,eps);
+     }
     }
 }
-    
-  
-tribool 
+
+
+tribool
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
 {
-    if(ls.disjoint(bx) || rs.covers(bx)) { 
-        return true; 
+    if(ls.disjoint(bx) || rs.covers(bx)) {
+     return true;
     } else if(bx.radius()<eps) {
-        return indeterminate;
+     return indeterminate;
     } else {
-        Box bx1,bx2;
-        make_lpair(bx1,bx2)=split(bx);
-        if(ls.disjoint(bx1)) {
-            return inside(ls,rs,bx2,eps);
-        } else if(ls.disjoint(bx2)) {
-            return inside(ls,rs,bx1,eps);
-        } else {
-            return inside(ls,rs,bx1,eps) && inside(ls,rs,bx2,eps);
-        }
+     Box bx1,bx2;
+     make_lpair(bx1,bx2)=split(bx);
+     if(ls.disjoint(bx1)) {
+      return inside(ls,rs,bx2,eps);
+     } else if(ls.disjoint(bx2)) {
+      return inside(ls,rs,bx1,eps);
+     } else {
+      return inside(ls,rs,bx1,eps) && inside(ls,rs,bx2,eps);
+     }
     }
 }
- 
-   
-tribool 
+
+
+tribool
 disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
 {
-    if(ls.disjoint(bx) || rs.disjoint(bx)) { 
-        return true; 
+    if(ls.disjoint(bx) || rs.disjoint(bx)) {
+     return true;
     } else if(bx.radius()<eps) {
-        return indeterminate;
+     return indeterminate;
     } else {
-        Box bx1,bx2;
-        make_lpair(bx1,bx2)=split(bx);
-        if(ls.disjoint(bx1)) {
-            return disjoint(ls,rs,bx2,eps);
-        } else if(ls.disjoint(bx2)) {
-            return disjoint(ls,rs,bx1,eps);
-        } else {
-            return disjoint(ls,rs,bx1,eps) && disjoint(ls,rs,bx2,eps);
-        }
+     Box bx1,bx2;
+     make_lpair(bx1,bx2)=split(bx);
+     if(ls.disjoint(bx1)) {
+      return disjoint(ls,rs,bx2,eps);
+     } else if(ls.disjoint(bx2)) {
+      return disjoint(ls,rs,bx1,eps);
+     } else {
+      return disjoint(ls,rs,bx1,eps) && disjoint(ls,rs,bx2,eps);
+     }
     }
 }
-    
-  
 
 
-tribool 
+
+
+tribool
 overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Box& bx, const Float& eps)
 {
     if(ovs.overlaps(bx)) {
-        if(ops.covers(bx)) { 
-            return true; 
-        } else if(bx.radius()<eps) {
-            return indeterminate;
-        } else {
-            Box bx1,bx2;
-            make_lpair(bx1,bx2)=split(bx);
-            if(overlap(ovs,ops,bx1,eps)) {
-                return true;
-            } else {
-                return overlap(ovs,ops,bx2,eps);
-            }
-        }
+     if(ops.covers(bx)) {
+      return true;
+     } else if(bx.radius()<eps) {
+      return indeterminate;
+     } else {
+      Box bx1,bx2;
+      make_lpair(bx1,bx2)=split(bx);
+      if(overlap(ovs,ops,bx1,eps)) {
+    return true;
+      } else {
+    return overlap(ovs,ops,bx2,eps);
+      }
+     }
     } else {
-        return indeterminate;
-    }
-}
-    
-  
-tribool 
-inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const Box& bx, const Float& eps)
-{
-    if(cls.disjoint(bx) || ops.covers(bx)) { 
-        return true; 
-    } else if(bx.radius()<eps) {
-        return indeterminate;
-    } else {
-        Box bx1,bx2;
-        make_lpair(bx1,bx2)=split(bx);
-        if(inside(cls,ops,bx1,eps)) {
-            return inside(cls,ops,bx2,eps);
-        } else {
-            return indeterminate;
-        }
+     return indeterminate;
     }
 }
 
-    
-tribool 
+
+tribool
+inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const Box& bx, const Float& eps)
+{
+    if(cls.disjoint(bx) || ops.covers(bx)) {
+     return true;
+    } else if(bx.radius()<eps) {
+     return indeterminate;
+    } else {
+     Box bx1,bx2;
+     make_lpair(bx1,bx2)=split(bx);
+     if(inside(cls,ops,bx1,eps)) {
+      return inside(cls,ops,bx2,eps);
+     } else {
+      return indeterminate;
+     }
+    }
+}
+
+
+tribool
 disjoint(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const Box& bx, const Float& eps)
 {
     if(cls1.disjoint(bx) || cls2.disjoint(bx)) {
-        return true;
+     return true;
     } else if(bx.radius()<eps) {
-        return indeterminate;
+     return indeterminate;
     } else {
-        Box bx1,bx2;
-        make_lpair(bx1,bx2)=split(bx);
-        if(disjoint(cls1,cls2,bx1,eps)) {
-            return disjoint(cls1,cls2,bx2,eps);
-        } else {
-            return indeterminate;
-        }
+     Box bx1,bx2;
+     make_lpair(bx1,bx2)=split(bx);
+     if(disjoint(cls1,cls2,bx1,eps)) {
+      return disjoint(cls1,cls2,bx2,eps);
+     } else {
+      return indeterminate;
+     }
     }
 }
 
-    
+
 
 
 } // namespace Ariadne

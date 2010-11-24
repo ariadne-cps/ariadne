@@ -1,5 +1,5 @@
 /***************************************************************************
- *            binary_word.h
+ *      binary_word.h
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
  *
@@ -121,50 +121,50 @@ inline void BinaryWord::erase_prefix(const int prefix_size) {
     const int total_size = size();
     //Erase prefix elements until the word is empry or we erased prefix_size elements
     for( int i = 0; ( i < total_size ) && ( i < prefix_size ) ; i++ ) {
-        erase( begin() );
+     erase( begin() );
     }
 }
 
 inline bool  BinaryWord::operator<(const BinaryWord& w) const {
     for( size_type i = 0; i != std::min( this->size(),w.size() ); ++i ) {
-        if( (*this)[i] != w[i] ) {
-            return (*this)[i] < w[i];
-        }
+     if( (*this)[i] != w[i] ) {
+      return (*this)[i] < w[i];
+     }
     }
     return this->size() < w.size();
 }
 
 inline bool BinaryWord::is_prefix( const BinaryWord& b ) const {
     if( this->size() > b.size() ) {
-        return false;
+     return false;
     }
     for( size_type i=0; i != this->size(); ++i ) {
-        if( (*this)[i] != b[i] ) {
-            return false;
-        }
+     if( (*this)[i] != b[i] ) {
+      return false;
+     }
     }
     return true;
 }
 
 inline bool BinaryWord::is_subword(const BinaryWord& b) const {
     if( this->size() > b.size() ) {
-        return false;
+     return false;
     }
     for( size_type i = 0; i != ( b.size() - this->size() + 1 ); ++i ) {
-        size_type j=0;
-        while( j != this->size() && (*this)[j] == b[i+j] ) {
-            ++j;
-        }
-        if( j == this->size() ) {
-            return true;
-        }
+     size_type j=0;
+     while( j != this->size() && (*this)[j] == b[i+j] ) {
+      ++j;
+     }
+     if( j == this->size() ) {
+      return true;
+     }
     }
     return false;
 }
 
 inline void BinaryWord::append( const BinaryWord& binaryWord ) {
     for( size_t i = 0; i < binaryWord.size() ; i++ ){
-        this->push_back( binaryWord[i] );
+     this->push_back( binaryWord[i] );
     }
 }
 
@@ -179,18 +179,18 @@ inline std::istream& operator>>(std::istream& input_stream, BinaryWord& binary_w
     char symbol;
     input_stream >> symbol;
     if( symbol == '[' ) {
-        //If it is a standard std:vector input then put
-        //the symbol back and use it's input operator
-        std::vector<bool> & bool_vector = binary_word;
-        input_stream.putback( symbol );
-        input_stream >> bool_vector;
+     //If it is a standard std:vector input then put
+     //the symbol back and use it's input operator
+     std::vector<bool> & bool_vector = binary_word;
+     input_stream.putback( symbol );
+     input_stream >> bool_vector;
     } else {
-        //Otherwise read a sequence of 0 and 1.
-        while( input_stream && ( symbol =='0' || symbol =='1' ) ) {
-            binary_word.push_back( symbol == '0' ? 0 : 1);
-            input_stream.get( symbol );
-        }
-        input_stream.putback( symbol );
+     //Otherwise read a sequence of 0 and 1.
+     while( input_stream && ( symbol =='0' || symbol =='1' ) ) {
+      binary_word.push_back( symbol == '0' ? 0 : 1);
+      input_stream.get( symbol );
+     }
+     input_stream.putback( symbol );
     }
     return input_stream;
 }
@@ -213,11 +213,11 @@ inline BinaryWord::BinaryWord(const std::string& str) {
  */
 inline std::ostream& operator<<(std::ostream& os, const BinaryWord& bw) {
     if( bw.empty() ) {
-        return os << 'e';
+     return os << 'e';
     }
     os << std::noboolalpha;
     for(size_t i=0; i!=bw.size(); ++i) {
-        os << bw[i];
+     os << bw[i];
     }
     os << std::boolalpha;
     return os;

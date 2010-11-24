@@ -1,5 +1,5 @@
 /***************************************************************************
- *            ariadne_module.cc
+ *      ariadne_module.cc
  *
  *  Copyright  2007-8  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank-proportional.cc
+ *      watertank-proportional.cc
  *
  *  Copyright  2008  Davide Bresolin
  *
@@ -33,22 +33,22 @@ typedef EnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
 HybridGridTreeSet
 outer_approximation(const EnclosureListType& hls,
-                    const HybridGrid& hgr,
-                    const int accuracy)
+     const HybridGrid& hgr,
+     const int accuracy)
 {
     HybridGridTreeSet result;
     for(EnclosureListType::const_iterator
-            iter=hls.begin(); iter!=hls.end(); ++iter)
-        {
-            DiscreteLocation loc=iter->first;
-            const ContinuousEnclosureType& es=iter->second;
-            if(result.find(loc)==result.locations_end()) {
-                result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
-            }
-            GridTreeSet& gts=result[loc];
-            gts.adjoin_outer_approximation(ImageSet(es.bounding_box()),accuracy);
-            //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
-        }
+      iter=hls.begin(); iter!=hls.end(); ++iter)
+     {
+      DiscreteLocation loc=iter->first;
+      const ContinuousEnclosureType& es=iter->second;
+      if(result.find(loc)==result.locations_end()) {
+    result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
+      }
+      GridTreeSet& gts=result[loc];
+      gts.adjoin_outer_approximation(ImageSet(es.bounding_box()),accuracy);
+      //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
+     }
     return result;
 }
 
@@ -188,27 +188,27 @@ int main(int argc,char *argv[])
 
     std::cout << "Computing timed evolution starting from location l3, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
-        for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
-            cout << "b = "<< b <<", Delta = "<<d<<std::endl;
-            Box initial_box(5, 0.0,0.0, 1.0,1.0, b,b, d,d, 0.0,0.0);
-            HybridEnclosureType initial_enclosure(l3,initial_box);
-            OrbitType result = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
-            cout<<"Orbit.final=" << result.final() << endl;
-            /*cout<<"Adjoining result to the grid..."<<std::flush;
-            hgts.adjoin(outer_approximation(result.reach(),hgts.grid(),grid_depth));
-            cout<<"done:"<<hgts.size()<<" total cells."<<std::endl;
-            char filename[30];
-            sprintf(filename,"wt-best-%d-%d",int(b*10000),int(d*10000));
-            cout<<"Saving result to "<<filename<<"..."<<std::flush;
-            Figure g2;
-            g2.set_bounding_box(graphic_box);
-            g2.set_projection_map(ProjectionFunction(tx,5));
-            g2 << fill_colour(Colour(0.9,0.9,0.0));
-            g2 << hgts;
-            g2.write(filename);
-            g2.clear();*/
-            cout<<"done."<<endl<<std::flush;
-        }
+     for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
+      cout << "b = "<< b <<", Delta = "<<d<<std::endl;
+      Box initial_box(5, 0.0,0.0, 1.0,1.0, b,b, d,d, 0.0,0.0);
+      HybridEnclosureType initial_enclosure(l3,initial_box);
+      OrbitType result = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+      cout<<"Orbit.final=" << result.final() << endl;
+      /*cout<<"Adjoining result to the grid..."<<std::flush;
+      hgts.adjoin(outer_approximation(result.reach(),hgts.grid(),grid_depth));
+      cout<<"done:"<<hgts.size()<<" total cells."<<std::endl;
+      char filename[30];
+      sprintf(filename,"wt-best-%d-%d",int(b*10000),int(d*10000));
+      cout<<"Saving result to "<<filename<<"..."<<std::flush;
+      Figure g2;
+      g2.set_bounding_box(graphic_box);
+      g2.set_projection_map(ProjectionFunction(tx,5));
+      g2 << fill_colour(Colour(0.9,0.9,0.0));
+      g2 << hgts;
+      g2.write(filename);
+      g2.clear();*/
+      cout<<"done."<<endl<<std::flush;
+     }
     }
 
 /*
@@ -260,9 +260,9 @@ int main(int argc,char *argv[])
     double xmin=100.0;
     double xmax=-100.0;
     for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
-        Interval x = iter->second.bounding_box()[0];
-        if(x.lower() < xmin) xmin = x.lower();
-        if(x.upper() > xmax) xmax = x.upper();
+     Interval x = iter->second.bounding_box()[0];
+     if(x.lower() < xmin) xmin = x.lower();
+     if(x.upper() > xmax) xmax = x.upper();
     }
     cout << " xmin = " << xmin << ", xmax = " << xmax << endl << endl;
 
@@ -284,47 +284,47 @@ int main(int argc,char *argv[])
     skip_time = 0.0;
 
     for(double t = time_step; t <= total_time; t = t + time_step) {
-        std::cout << "t = " << skip_time + t << flush;
-        EnclosureListType reach;
-        for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
-        orbit = evolver.orbit(watertank_system,*iter,evolution_time,UPPER_SEMANTICS);
-        reach.adjoin(orbit.final());
-        std::cout << "." << flush;
-        }
-//        std::cout << endl << "final set before clearing = " << reach  << endl;
-        final.clear();
-        // Remove redundant elements from final set
-        int i = 0;
-        for(const_iterator iter1=reach.begin(); iter1 != reach.end(); ++iter1) {
-            bool flag = 0;
-            for(const_iterator iter2=iter1; iter2 != reach.end() && flag == 0; ++iter2) {
-                if( iter1!= iter2 && iter1->first == iter2->first ) {
-                    Box b1 = iter1->second.bounding_box();
-                    Box b2 = iter2->second.bounding_box();
-                    if(subset(b1,b2)) {
-                        // cout << "iter1 = " << iter1->second << endl ;
-                        // cout << "is a subset of iter2 = " << iter1->second << endl;
-                        flag = 1;
-                        i++;
-                    }
-                }
-             }
-            if (flag == 0) final.adjoin(*iter1);
-        }
-//        cout << i << " elements removed. " << endl;
-        cout << " final set after clearing = " << final << endl << endl;
-        reach.clear();
-        //     std::cout << "final set[l1] = " << final[l1] << endl;
-        // std::cout << "final set[l1][0] = " << final[l1][0].bounding_box() << endl  << endl;
-        xmin=100.0;
-        xmax=-100.0;
-        for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
-            Interval x = iter->second.bounding_box()[0];
-            if(x.lower() < xmin) xmin = x.lower();
-            if(x.upper() > xmax) xmax = x.upper();
-        }
-        cout << " xmin = " << xmin << ", xmax = " << xmax << endl << endl;
-        g << Box(2, skip_time+t,skip_time+t+time_step, xmin,xmax);
+     std::cout << "t = " << skip_time + t << flush;
+     EnclosureListType reach;
+     for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
+     orbit = evolver.orbit(watertank_system,*iter,evolution_time,UPPER_SEMANTICS);
+     reach.adjoin(orbit.final());
+     std::cout << "." << flush;
+     }
+//     std::cout << endl << "final set before clearing = " << reach  << endl;
+     final.clear();
+     // Remove redundant elements from final set
+     int i = 0;
+     for(const_iterator iter1=reach.begin(); iter1 != reach.end(); ++iter1) {
+      bool flag = 0;
+      for(const_iterator iter2=iter1; iter2 != reach.end() && flag == 0; ++iter2) {
+    if( iter1!= iter2 && iter1->first == iter2->first ) {
+     Box b1 = iter1->second.bounding_box();
+     Box b2 = iter2->second.bounding_box();
+     if(subset(b1,b2)) {
+      // cout << "iter1 = " << iter1->second << endl ;
+      // cout << "is a subset of iter2 = " << iter1->second << endl;
+      flag = 1;
+      i++;
+     }
+    }
+    }
+      if (flag == 0) final.adjoin(*iter1);
+     }
+//     cout << i << " elements removed. " << endl;
+     cout << " final set after clearing = " << final << endl << endl;
+     reach.clear();
+     //     std::cout << "final set[l1] = " << final[l1] << endl;
+     // std::cout << "final set[l1][0] = " << final[l1][0].bounding_box() << endl  << endl;
+     xmin=100.0;
+     xmax=-100.0;
+     for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
+      Interval x = iter->second.bounding_box()[0];
+      if(x.lower() < xmin) xmin = x.lower();
+      if(x.upper() > xmax) xmax = x.upper();
+     }
+     cout << " xmin = " << xmin << ", xmax = " << xmax << endl << endl;
+     g << Box(2, skip_time+t,skip_time+t+time_step, xmin,xmax);
     }
 
     std::cout << "done." << std::endl;

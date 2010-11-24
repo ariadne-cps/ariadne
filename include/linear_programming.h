@@ -1,5 +1,5 @@
 /***************************************************************************
- *            linear_programming.h
+ *      linear_programming.h
  *
  *  Copyright 2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -54,13 +54,13 @@ struct StandardLinearProgram {
 
 StandardLinearProgram
 feasibility_problem(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-                    const Matrix<Float>& C, const Vector<Float>& c,
-                    const Vector<Float>& dl, const Vector<Float>& du);
+     const Matrix<Float>& C, const Vector<Float>& c,
+     const Vector<Float>& dl, const Vector<Float>& du);
 
 StandardLinearProgram
 feasibility_problem(const Vector< Affine<Float> >& f, const Vector<Interval>& b,
-                    const Vector< Affine<Float> >& g, const Vector<Float>& c,
-                    const Vector<Interval>& d);
+     const Vector< Affine<Float> >& g, const Vector<Float>& c,
+     const Vector<Interval>& d);
 
 
 
@@ -77,7 +77,7 @@ class InteriorPointSolver
     //! before starting the problem.
     tuple<tribool,Vector<Float> >
     constrained_dual_feasible(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                              const Vector<Float>& l, const Vector<Float>& u) const;
+      const Vector<Float>& l, const Vector<Float>& u) const;
 
 
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
@@ -88,13 +88,13 @@ class InteriorPointSolver
     //! \brief Determine whether the problem \f$c_l \leq A^Ty \leq c_u;\ l\leq y\leq u\f$ is feasible.
     tribool
     feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-             const Vector<Float>& l, const Vector<Float>& u) const;
+    const Vector<Float>& l, const Vector<Float>& u) const;
 
     //! \brief Determine whether the problem \f$b_l \leq B^Ty \leq b_u;\ C^Ty \leq c; \ d_l\leq y\leq d_u\f$ is feasible.
     tribool
     feasible(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-             const Matrix<Float>& C, const Vector<Float>& c,
-             const Vector<Float>& dl, const Vector<Float>& du) const;
+    const Matrix<Float>& C, const Vector<Float>& c,
+    const Vector<Float>& dl, const Vector<Float>& du) const;
 
     //! \brief Validate that \a x is (approximately) primal feasible and \a y is dual feasible.
     //! Returns the interval of possible optimal values.
@@ -102,19 +102,19 @@ class InteriorPointSolver
   public:
     tribool
     _feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-              const Vector<Float>& l, const Vector<Float>& u,
-              Float& t, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
+     const Vector<Float>& l, const Vector<Float>& u,
+     Float& t, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
 
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
     tuple< Vector<Float>, Vector<Float>, Vector<Float> >
     _optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-              Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
+     Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
 
     //! \brief Perform a step of the optimization of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     void
     _optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                       Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
+     Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
 
 };
 
@@ -251,7 +251,7 @@ class SimplexSolver
     //!   - x[j]=l[j] if j==LOWER and x[j]=u[j] if j==UPPER
     //!   - Ax=b
     void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u,
-                           const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x);
+      const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x);
 
     void consistency_check(const Matrix<X>& A, const Vector<X>& b, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x);
     void consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B);

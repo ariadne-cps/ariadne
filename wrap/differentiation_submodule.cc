@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differentiation_submodule.cc
+ *      differentiation_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -46,7 +46,7 @@ make_differential(const uint& as, const uint& d, const boost::python::object& ob
     MultiIndex i(as);
     const X* ptr=data.begin();
     while(i.degree()<=d) {
-        result[i]=*ptr; ++i; ++ptr;
+     result[i]=*ptr; ++i; ++ptr;
     }
     return result;
 }
@@ -58,7 +58,7 @@ make_differential_variables(const uint& d, const Vector<Interval>& x)
 {
     boost::python::list result;
     for(uint i=0; i!=x.size(); ++i) {
-        result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::ValueType>(x[i]),i));
+     result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::ValueType>(x[i]),i));
     }
     return result;
 }

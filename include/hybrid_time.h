@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_time.h
+ *      hybrid_time.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -64,22 +64,22 @@ struct HybridTime
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(int n, double t)
       : _continuous_time(t), _discrete_time(n) {
-          ARIADNE_FAIL_MSG("HybridTime(int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
+    ARIADNE_FAIL_MSG("HybridTime(int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
 };
 
 inline bool operator==(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time==ht2._continuous_time &&
-        ht1._discrete_time==ht2._discrete_time;
+     ht1._discrete_time==ht2._discrete_time;
 }
 
 inline bool operator!=(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time!=ht2._continuous_time ||
-        ht1._discrete_time!=ht2._discrete_time;
+     ht1._discrete_time!=ht2._discrete_time;
 }
 
 inline bool operator<=(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time<=ht2._continuous_time &&
-        ht1._discrete_time<=ht2._discrete_time;
+     ht1._discrete_time<=ht2._discrete_time;
 }
 
 inline bool operator<(const HybridTime& ht1, const HybridTime& ht2) {

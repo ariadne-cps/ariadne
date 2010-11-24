@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field_evolver.cc
+ *      vector_field_evolver.cc
  *
  *  Copyright  2008  Alberto Casagrande, Pieter Collins
  *
@@ -90,7 +90,7 @@ orbit(const SystemType& system,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false);
+      system,initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -108,13 +108,13 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 void
 VectorFieldEvolver::
 _evolution(EnclosureListType& final_sets,
-           EnclosureListType& reach_sets,
-           EnclosureListType& intermediate_sets,
-           const SystemType& system,
-           const EnclosureType& initial_set,
-           const TimeType& maximum_time,
-           Semantics semantics,
-           bool reach) const
+     EnclosureListType& reach_sets,
+     EnclosureListType& intermediate_sets,
+     const SystemType& system,
+     const EnclosureType& initial_set,
+     const TimeType& maximum_time,
+     Semantics semantics,
+     bool reach) const
 {
     typedef RealVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
@@ -126,52 +126,52 @@ _evolution(EnclosureListType& final_sets,
     List< TimedEnclosureType > working_sets;
 
     {
-        // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        TimeType initial_time = 0.0;
-        ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
-        EnclosureType initial_set_model(initial_set);
-        ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        working_sets.push_back(make_pair(initial_time,initial_set_model));
+     // Set up initial timed set models
+     ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
+     TimeType initial_time = 0.0;
+     ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
+     EnclosureType initial_set_model(initial_set);
+     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
+     working_sets.push_back(make_pair(initial_time,initial_set_model));
     }
 
 
     while(!working_sets.empty()) {
-        TimedEnclosureType current_timed_set=working_sets.back();
-        working_sets.pop_back();
-        TimeType current_time=current_timed_set.first;
-        EnclosureType current_set_model=current_timed_set.second;
-        Float current_set_radius=radius(current_set_model.bounding_box());
-        if(current_time>=maximum_time) {
-            final_sets.adjoin(current_set_model);
-        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
-                  && (current_set_radius>this->_parameters->maximum_enclosure_radius)) {
-            // Subdivide
-            List< EnclosureType > subdivisions=subdivide(current_set_model);
-            for(uint i=0; i!=subdivisions.size(); ++i) {
-                EnclosureType const& subdivided_set_model=subdivisions[i];
-                working_sets.push_back(make_pair(current_time,subdivided_set_model));
-            }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && current_set_radius>this->_parameters->maximum_enclosure_radius) {
-            ARIADNE_WARN("Terminating lower evolution at time " << current_time
-                         << " and set " << current_set_model << " due to maximum radius being exceeded.");
-        } else {
-            // Compute evolution
-            this->_evolution_step(working_sets,
-                                  final_sets,reach_sets,intermediate_sets,
-                                  system,current_timed_set,maximum_time,
-                                  semantics,reach);
-        }
+     TimedEnclosureType current_timed_set=working_sets.back();
+     working_sets.pop_back();
+     TimeType current_time=current_timed_set.first;
+     EnclosureType current_set_model=current_timed_set.second;
+     Float current_set_radius=radius(current_set_model.bounding_box());
+     if(current_time>=maximum_time) {
+      final_sets.adjoin(current_set_model);
+     } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+      && (current_set_radius>this->_parameters->maximum_enclosure_radius)) {
+      // Subdivide
+      List< EnclosureType > subdivisions=subdivide(current_set_model);
+      for(uint i=0; i!=subdivisions.size(); ++i) {
+    EnclosureType const& subdivided_set_model=subdivisions[i];
+    working_sets.push_back(make_pair(current_time,subdivided_set_model));
+      }
+     } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && current_set_radius>this->_parameters->maximum_enclosure_radius) {
+      ARIADNE_WARN("Terminating lower evolution at time " << current_time
+    << " and set " << current_set_model << " due to maximum radius being exceeded.");
+     } else {
+      // Compute evolution
+      this->_evolution_step(working_sets,
+    final_sets,reach_sets,intermediate_sets,
+    system,current_timed_set,maximum_time,
+    semantics,reach);
+     }
 
-        if(verbosity==1) {
-            ARIADNE_LOG(1,"\r"
-                        <<"#w="<<std::setw(4)<<working_sets.size()
-                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                        <<" t="<<std::setw(7)<<std::fixed<<current_time
-                        <<" r="<<std::setw(7)<<current_set_model.radius()
-                        <<" c="<<current_set_model.centre()
-                        <<"                      ");
-        }
+     if(verbosity==1) {
+      ARIADNE_LOG(1,"\r"
+      <<"#w="<<std::setw(4)<<working_sets.size()
+      <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+      <<" t="<<std::setw(7)<<std::fixed<<current_time
+      <<" r="<<std::setw(7)<<current_set_model.radius()
+      <<" c="<<current_set_model.centre()
+      <<"    ");
+     }
 
     }
 
@@ -184,14 +184,14 @@ _evolution(EnclosureListType& final_sets,
 void
 VectorFieldEvolver::
 _evolution_step(List< TimedEnclosureType >& working_sets,
-                EnclosureListType& final_sets,
-                EnclosureListType& reach_sets,
-                EnclosureListType& intermediate_sets,
-                const SystemType& system,
-                const TimedEnclosureType& working_timed_set_model,
-                const TimeType& maximum_time,
-                Semantics semantics,
-                bool reach) const
+    EnclosureListType& final_sets,
+    EnclosureListType& reach_sets,
+    EnclosureListType& intermediate_sets,
+    const SystemType& system,
+    const TimedEnclosureType& working_timed_set_model,
+    const TimeType& maximum_time,
+    Semantics semantics,
+    bool reach) const
 {
     typedef RealVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;

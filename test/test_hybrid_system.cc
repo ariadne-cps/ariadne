@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_system.cc
+ *      test_hybrid_system.cc
  *
  *  Copyright  2008  Pieter Collins
  *

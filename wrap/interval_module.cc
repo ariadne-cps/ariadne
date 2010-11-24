@@ -1,5 +1,5 @@
 /***************************************************************************
- *            interval_module.cc
+ *      interval_module.cc
  *
  *  Copyright  2007-8  Pieter Collins
  *

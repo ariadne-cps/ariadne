@@ -47,6 +47,8 @@ typedef unsigned int uint;
 typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
+static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
+
 void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
 {
     rounding_mode_t rounding_mode=get_rounding_mode();
@@ -308,9 +310,9 @@ ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunct
 
 
 
-ScalarTaylorFunction* ScalarTaylorFunction::_derivative(uint j) const 
-{ 
-    return new ScalarTaylorFunction(Ariadne::derivative(*this,j)); 
+ScalarTaylorFunction* ScalarTaylorFunction::_derivative(uint j) const
+{
+    return new ScalarTaylorFunction(Ariadne::derivative(*this,j));
 }
 
 
@@ -545,9 +547,27 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 
 
 std::ostream&
+ScalarTaylorFunction::repr(std::ostream& os) const
+{
+    ScalarTaylorFunction truncated_function=*this;
+    truncated_function.set_error(0.0);
+    truncated_function.sweep(TAYLOR_FUNCTION_WRITING_ACCURACY);
+
+    os << midpoint(truncated_function.polynomial());
+    if(truncated_function.error()>0.0) { os << "+/-" << truncated_function.error(); }
+    if(this->error()>0.0) { os << "+/-" << this->error(); }
+    // TODO: Use Unicode +/- literal when this becomes avaialable in C++0x
+    return os;
+}
+
+std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
-    return os << "ScalarTaylorFunction( domain=" << this->domain() << ", polynomial=" << midpoint(this->polynomial()) << "+/-" << this->error() << ", model=" << this->model() << ")";
+    os << "ScalarTaylorFunction"<< this->domain()
+       << "(" << midpoint(this->polynomial());
+    if(this->error()>0.0) { os << "+/-" << this->error(); }
+    os <<  ")";
+    return os;
 }
 
 std::ostream&
@@ -1538,6 +1558,17 @@ VectorTaylorFunction::write(std::ostream& os) const
     //}
     //return os << "] )";
     return os << "VectorTaylorFunction(d=" << this->domain() << ", p~" << midpoint(this->polynomial()) << ", e=" << this->errors() << ", m=" << this->models() << ")";
+}
+
+std::ostream&
+VectorTaylorFunction::repr(std::ostream& os) const
+{
+    os << "[";
+    for(uint i=0; i!=this->result_size(); ++i) {
+        if(i!=0) { os << ","; }
+        (*this)[i].repr(os);
+    }
+    return os << "]";
 }
 
 

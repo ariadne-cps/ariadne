@@ -490,6 +490,8 @@ class ScalarTaylorFunction
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
+    //! \brief Write a shortened representation as a polynomial to an output stream.
+    std::ostream& repr(std::ostream& os) const;
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const ScalarTaylorFunction& x);
     //@}
@@ -833,6 +835,8 @@ class VectorTaylorFunction
 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
+    //! \brief Write a shortened representation as a polynomial function to an output stream.
+    std::ostream& repr(std::ostream& os) const;
 
     /*! \brief Inplace addition. */
     friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);

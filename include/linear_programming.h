@@ -28,6 +28,7 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_H
 #define ARIADNE_LINEAR_PROGRAMMING_H
 
+#include "logging.h"
 #include "vector.h"
 #include "matrix.h"
 #include "numeric.h"
@@ -65,7 +66,9 @@ feasibility_problem(const Vector< Affine<Float> >& f, const Vector<Interval>& b,
 
 //! \ingroup OptimisationModule
 //! Solver for linear programming problems using interior point methods.
-class InteriorPointSolver {
+class InteriorPointSolver
+    : public Loggable
+{
   public:
     //! \brief Test feasibility of the problem \f$b\leq A^Ty\leq c; l\leq y\leq u\f$.
     //! Returns the pair (r,y) where r is the result, and y the (potential) feasible point.
@@ -117,14 +120,16 @@ class InteriorPointSolver {
 
 
 
-//! \relates SimplexSolver \brief The type of variable; lower bounded, upper bounded, or basic.
-enum Slackness { LOWER=-1, BASIS=0, UPPER=+1 };
+//! \relates SimplexSolver \brief The type of variable; lower bounded, upper bounded, basic, or fixed (upper and lower bounded).
+enum Slackness { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
 std::ostream& operator<<(std::ostream& os, Slackness t);
 
 //! \ingroup OptimisationModule
 //! Solver for linear programming problems using the simplex algorithm.
 template<class X>
-class SimplexSolver {
+class SimplexSolver
+    : public Loggable
+{
   public:
 
     //! \ingroup LinearProgrammingModule
@@ -222,7 +227,9 @@ class SimplexSolver {
     //! The index s is with respect to the list of basic variables, and not the original variable list.
     //! The function to optimize is not needed for this procedure.
     //! The variable which left the basis is the new p[s]
-    void lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s);
+    //! Returns \a r where x[p[r]] was the variable entering the basis.
+    //!  If r=m, then no step performed
+    size_t lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s);
 
     //! \ingroup LinearProgrammingModule
     //! Compute the inverse of the matrix \a A<sub>B</sub> for basic variables given by the first m items of a p.
@@ -235,7 +242,20 @@ class SimplexSolver {
     //! Compute primal variables \a x for the constrained linear programming problem.
     template<class XX> Vector<XX> compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B);
 
+  public:
+    //! \brief Check that the feasibility problem data is consistent.
+    //! \details For an m-by-n matrix \a A, checks the following:
+    //!   - b has size m, B has size m-by-m, l,u,vt,p,x have size n
+    //!   - vt[p[i]]==BASIC if, and only if, i<m
+    //!   - B = inverse(A_B), where A_B is the mxm submatrix of A formed by columns for which vt[j]==BASIC
+    //!   - x[j]=l[j] if j==LOWER and x[j]=u[j] if j==UPPER
+    //!   - Ax=b
+    void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u,
+                           const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x);
 
+    void consistency_check(const Matrix<X>& A, const Vector<X>& b, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x);
+    void consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B);
+    size_t consistency_check(const array<Slackness>& vt, const array<size_t>& p);
   private:
     tribool _primal_feasible(const Matrix<X>& A, const Vector<X>& b, array<size_t>& p, Matrix<X>& B);
     tribool _dual_feasible(const Matrix<X>& A, const Vector<X>& c, array<size_t>& p, Matrix<X>& B);

@@ -355,8 +355,8 @@ void Figure::_paint_all(CanvasInterface& canvas)
     cairo_clip (cr);
     cairo_new_path (cr);
 
-    std::cerr<<"cw="<<canvas_width<<" lm="<<left_margin<<" dw="<<drawing_width<<" rm="<<right_margin<<" xl="<<bbox.xl<<" xu="<<bbox.xu<<"\n";
-    std::cerr<<"ch="<<canvas_height<<"tm="<<top_margin<<" dw="<<drawing_height<<" bm="<<bottom_margin<<" yl="<<bbox.yl<<" yu="<<bbox.yu<<"\n";
+    //std::cerr<<"cw="<<canvas_width<<" lm="<<left_margin<<" dw="<<drawing_width<<" rm="<<right_margin<<" xl="<<bbox.xl<<" xu="<<bbox.xu<<"\n";
+    //std::cerr<<"ch="<<canvas_height<<"tm="<<top_margin<<" dw="<<drawing_height<<" bm="<<bottom_margin<<" yl="<<bbox.yl<<" yu="<<bbox.yu<<"\n";
 
     // compute device to user coordinate transformation
     double ctr0=left_margin;

@@ -190,7 +190,9 @@ X sup_norm(const Vector<X>& v)
 {
     X r=0;
     for(size_t i=0; i!=v.size(); ++i) {
-        r=max(r,static_cast<X>(abs(v[i])));  // Need static cast for expression templates
+        X absvi=abs(v[i]);
+        // NOTE: The arguments must be this way round to propagate a nan row_sum
+        r=max(absvi,r);
     }
     return r;
 }

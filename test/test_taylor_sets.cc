@@ -38,7 +38,6 @@ using namespace Ariadne;
 
 
 
-
 class TestTaylorConstrainedImageSet
 {
   private:
@@ -46,6 +45,7 @@ class TestTaylorConstrainedImageSet
   public:
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        ARIADNE_TEST_CALL(test_affine_approximation()); return;
         ARIADNE_TEST_CALL(test_disjoint());
         ARIADNE_TEST_CALL(test_discretise());
         ARIADNE_TEST_CALL(test_affine_approximation());
@@ -170,14 +170,42 @@ class TestTaylorConstrainedImageSet
     }
 
     void test_affine_approximation() {
-        RealScalarFunction s=RealScalarFunction::coordinate(2,0);
-        RealScalarFunction t=RealScalarFunction::coordinate(2,1);
+        RealScalarFunction s=RealScalarFunction::coordinate(3,0);
+        RealScalarFunction t=RealScalarFunction::coordinate(3,1);
+        RealScalarFunction u=RealScalarFunction::coordinate(3,2);
         RealScalarFunction x=RealScalarFunction::coordinate(2,0);
         RealScalarFunction y=RealScalarFunction::coordinate(2,1);
+        Real e(Interval(-1,+1));
         //Box domain(2, -0.5,1.5, -0.5,0.5);
-        Box domain(2, -1.0,+1.0, -1.0,+1.0);
+        Box domain(3, -1.0,+1.0, -1.0,+1.0, -1.0,+1.0);
 
-        TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)));
+        //TaylorConstrainedImageSet set(domain,(s+0.5*t+(1.0/256)*s*t+t*t,t+0.375*sqr(s)+0.25*e),(0.625*s*s+t-1<=0, 0.25*s+0.5*t==0, -0.25*s+0.5*t+0.125*e==0));
+
+        //TaylorConstrainedImageSet set(domain,(s+0.5*t,t),(s+t<=1.0,t*t-s<=1.0,t+u+0.0625*e==0)); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
+        TaylorConstrainedImageSet set(domain,(s+t+0.25*s*s-0.25*s*t+0.125*t*t,-s+t),(u<=2,-s+t+u-1+0*e/16==0)); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
+
+        ARIADNE_TEST_PRINT(set);
+        AffineSet affine_set=set.affine_over_approximation();
+        ARIADNE_TEST_PRINT(affine_set);
+
+        Vector< Affine<Float> > a=Affine<Float>::variables(4);
+        AffineSet expected_affine_set(IntervalVector::unit_box(4),(a[0]+a[1]+0.625*a[3],-a[0]+a[1]));
+        expected_affine_set.new_inequality_constraint((-2.0)+a[2]);
+        expected_affine_set.new_equality_constraint(-a[0]+a[1]+a[2]-1.0);
+        ARIADNE_TEST_PRINT(expected_affine_set);
+
+        ARIADNE_TEST_EQUALS(affine_set,expected_affine_set);
+
+        DRAWING_ACCURACY=2;
+        figure.set_fill_colour(0.5,1.0,1.0);
+        figure.draw(affine_set);
+        figure.set_fill_colour(0.0,0.5,0.5);
+        figure.set_fill_opacity(0.5);
+        figure.draw(set);
+        figure.write("test_taylor_set-affine_approximation");
+
+        return;
+
         set.new_negative_constraint(s+t-0.25);
         GridTreeSet paving(set.dimension());
         set.subdivision_adjoin_outer_approximation_to(paving,5u);

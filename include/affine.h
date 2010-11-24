@@ -41,6 +41,7 @@
 namespace Ariadne {
 
 template<class X> class Affine;
+template<class X> bool operator==(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&);
 template<class X> Affine<X> operator+(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&, const Affine<X>&);
@@ -73,6 +74,8 @@ class Affine
         return Affine<X>(Vector<X>(n),c); }
     static Affine<X> variable(uint n, uint j) {
         return Affine<X>(Vector<X>::unit(n,j),X(0)); }
+    static Vector< Affine<X> > variables(uint n) {
+        Vector< Affine<X> > r(n,Affine<X>(n)); for(uint i=0; i!=n; ++i) { r[i]._g[i]=static_cast<X>(1); } return r; }
 
     const X& operator[](uint i) const { return this->_g[i]; }
     X& operator[](uint i) { return this->_g[i]; }
@@ -92,6 +95,7 @@ class Affine
 
     const X& derivative(uint j) const { return this->_g[j]; }
   private:
+    friend bool operator==<>(const Affine<X>&, const Affine<X>&);
     friend Affine<X> operator-<>(const Affine<X>&);
     friend Affine<X> operator+<>(const Affine<X>&, const Affine<X>&);
     friend Affine<X> operator-<>(const Affine<X>&, const Affine<X>&);
@@ -108,7 +112,11 @@ class Affine
 };
 
 //! \relates Affine
-//! \brief Negation of an Affine.
+//! \brief Test equality of two affine expressions.
+template<class X> inline bool operator==(const Affine<X>& f1, const Affine<X>& f2) {
+    return f1._c==f2._c && f1._g == f2._g; }
+//! \relates Affine
+//! \brief Negation of an affine expression.
 template<class X> inline Affine<X> operator-(const Affine<X>& f) {
     return Affine<X>(Vector<X>(-f._g),-f._c); }
 //! \relates Affine
@@ -149,15 +157,31 @@ template<class X> inline Affine<X> operator/(const Affine<X>& f, const X& c) { r
 //! \brief The derivative of an affine expression gives a constant.
 template<class X> inline X derivative(const Affine<X>& f, uint k) { return f.derivative(k); }
 
+template<class X> inline Affine<X> operator+(const Affine<X>& f, double c) {
+    return f+static_cast<X>(c); }
+template<class X> inline Affine<X> operator+(double c, const Affine<X>& f) {
+    return static_cast<X>(c)+f; }
+template<class X> inline Affine<X> operator-(const Affine<X>& f, double c) {
+    return f-static_cast<X>(c); }
+template<class X> inline Affine<X> operator-(double c, const Affine<X>& f) {
+    return static_cast<X>(c)-f; }
+template<class X> inline Affine<X> operator*(const Affine<X>& f, double c) {
+    return f*static_cast<X>(c); }
+template<class X> inline Affine<X> operator*(double c, const Affine<X>& f) {
+    return static_cast<X>(c)*f; }
+template<class X> inline Affine<X> operator/(const Affine<X>& f, double c) {
+    return f/static_cast<X>(c); }
+
 template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f) {
     bool zero=true;
     if(f.b()!=0) { os<<f.b(); zero=false; }
     for(uint j=0; j!=f.argument_size(); ++j) {
         if(f.a()[j]!=0) {
-            zero=false; if(f.a()[j]>0) { os<<"+"; } else { os<<"-"; }
+            if(f.a()[j]>0) { if(!zero) { os<<"+"; } } else { os<<"-"; }
             if(abs(f.a()[j])!=1) { os<<abs(f.a()[j])<<"*"; }
             //ss<<char('x'+j);
             os<<"x"<<j;
+            zero=false;
         }
     }
     if(zero) { os << "0"; }

@@ -132,6 +132,43 @@ To define a basic solution, we need to split the variables \f$x\f$ into three se
 A basic solution then satisfies
 \f[ x_L=l_L, \ x_U=u_U, \ x_B=A_B^{-1}(b-A_Ll_L-A_Uu_U); \quad y=c_B^{-1}A_B; \quad z_B=0,\ z_N=c_N-c_BA_B^{-1}A_N. \f]
 
+\section constraintboundedoptimisation  Lower and upper bounds on variables and constraints
+
+The most general form of the linear programming problem is
+\f[ \text{(GCP)} \qquad \min cx \text{ s.t. } b_L \leq A_Cx \leq b_U;\ A_E = b_E;\ d_L\leq x\leq d_U . \f]
+Define auxiliary variables \f$w = w_C = A_C x\f$, and \f$w_E=A_E x = b_E\f$.
+The primal and auxiliary variables can be either \emph basic , \emph lower, \emph upper  or \emph fixed.
+A lower or upper variable satisfies \f$x_N=d_{L/U}\f$ or \f$w_N=b_{L/U}\f$, and a fixed variable satisfies \f$w_E=b_E\f$ (alternatively, \f$w=b_L=b_U\f$.
+
+After the introduction of auxiliary variables, the system can be written in the form (CP) above, with equations
+\f[ \begin{pmatrix} A_C & -I \\ A_E & 0 \end{pmatrix} \begin{pmatrix} x \\ w \end{pmatrix} = \begin{pmatrix} 0 \\ b_E \end{pmatrix} \f]
+
+If there are \f$m\f$ variables, \f$n_C\f$ inequality constraints and \f$n_E\f$ equality constraints, then the total number of basic variables \f$#x_B+#w_B=n_C+n_E\f$, since there are \f$n_C+n_E\f$ equations \f$A_Cx=w_C\f$ and \f$A_Ex=b_E\f$.
+
+Given a basic solution, we can split the equations and variables into
+The basic variables \f$x_B\f$ are therefore given by
+\f[ \begin{pmatrix} A_{BB} & A_{BN} & -I & 0 \\ A_{NB} & A_{NN} & 0 & -I \\ A_{EB} & A_{EN} & 0 & 0 \end{pmatrix}
+       \begin{pmatrix} x_B \\ x_N \\ w_B \\ w_N \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \\b_E \end{pmatrix} \f]
+
+have the equations
+\f[ \begin{aligned} w_B &= A_{BB} x_B + A_{BN} x_N \\ A_{NB} x_B &= w_N - A_{NN} x_N \\ A_{EB} x_B &= b_E - A_{EN} x_N \end{aligned} \f]
+The basic variables \f$x_B\f$ are therefore given by
+\f[ x_B = {\begin{pmatrix}A_{NB}\\A_{EB}\end{pmatrix}}^{-1} \begin{pmatrix}w_N - A_{NN} x_N \\ b_E - A_{EN} x_N \end{pmatrix} \f]
+Write
+\f[  B = {\begin{pmatrix}A_{NB}\\A_{EB}\end{pmatrix}}^{-1} = \begin{pmatrix} B_{BN} & B_{BE} \end{pmatrix}
+        = {\begin{pmatrix}A^{-\dag}_{BN} & A^{-\dag}_{BE}\end{pmatrix}} \f]
+Since the objective function is given by \f$cx\f$, we have
+\f[ \begin{aligned} cx &= c_B x_B + c_N x_N = c_B A_{BN}^{-\dag} (w_N - A_{NN} x_N) + c_B A_{BE}^{-\dag}(b_E - A_{EN} x_N) \\
+       &= c_B A_{BE}^{\dag} b_E \ + \ c_B A_{BN}^{-\dag} w_N \ +\ \bigl(c_N - c_B (A_{BN}^{-\dag} A_{NN} + A_{BE}^{-\dag} A_{EN} ) \bigr) x_N \\
+       &= c_B A_{BE}^{\dag} b_E \ + \ c_B A_{BN}^{-\dag} w_N \ +\ (c_N - c_B A_{{}^N_E B}^{-1} A_{{}^N_E N} ) x_N \end{aligned} \f]
+Set dual variables
+\f[ \begin{aligned} y_N &= c_B A_{BN}^{-\dag}  \\ y_E &= c_B A_{BE}^{-\dag} \end{aligned} \f]
+Then
+\f[ \begin{aligned} cx &= c_B A_{BE}^{-\dag} b_E \ + \ y_N w_N \ +\ (c_N - (y_N A_{NN} + y_E A_{EN}) ) x_N \\
+                       &= c_B A_{BE}^{-\dag} b_E \ + \ y_N w_N \ +\ (c_N - y_{{}^N_E} A_{{}^N_EN} ) x_N \end{aligned} \f]
+This shows how the objective changes with changes in \f$x_N\f$ and \f$w_N\f$.
+The main difficulty performing an update is that the number of basic \f$x\f$ variables may change during an algorithm.
+
 
 \section feasibleprimaldual Primal and dual feasibility problems
 
@@ -141,7 +178,7 @@ A basic solution then satisfies
  - The dual feasibility problem is
    \f[ \text{(DF)} \qquad yA\leq c. \f]
 
- - The dual feasibility problem is
+ - The constrained feasibility problem is
    \f[ \text{(CF)} \qquad Ax=b; \ l\leq x\leq u. \f]
 
 \section dualcertificate Certificates of infeasibility / Farka's Lemma
@@ -285,6 +322,9 @@ Taking \f$\tilde{x} = x-p\f$, we obtain
      - Succinctly, \f$A_{B'}^{-1} := A_B^{-1} - (d-e_r) \delta^T / d_r\f$ where \f$d=A_B^{-1}a_s\f$ and \f$\delta^T=e_r^T A_B^{-1}\f$.
      <br>
      - The new value \f$x_s\f$ is given by \f$x_s'=x_s+t\f$. The other basic variables \f$x_i\f$ are given by \f$x_i'=x_i-t d_i\f$.
+
+In general, if \f$A' = A + a \alpha\f$, then
+\f[ (A')^{-1} = A^{-1} - \frac{ A^{-1} a \; \alpha A^{-1} }{1+\alpha A^{-1} a} \f]
 
 \section dualsimplexalgorithm The dual revised simplex algorithm
 

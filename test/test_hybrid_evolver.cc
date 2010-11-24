@@ -100,6 +100,7 @@ TestSimpleHybridEvolver::TestSimpleHybridEvolver(const HybridEvolverInterface& e
 }
 
 void TestSimpleHybridEvolver::test_all() const {
+    ARIADNE_TEST_CALL(test_tangency()); return;
     ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_exact_final_time());
     ARIADNE_TEST_CALL(test_urgent_event());
@@ -367,7 +368,7 @@ void TestSimpleHybridEvolver::test_tangency() const {
          initial_set_colour,orbit.initial());
 }
 
-
+#include "affine_set.h"
 
 void TestSimpleHybridEvolver::test_simultaneous_events() const {
     MonolithicHybridAutomaton automaton;

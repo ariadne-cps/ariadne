@@ -52,7 +52,7 @@
 
 #include "discrete_event.h"
 
-
+#include "logging.h"
 
 #include "config.h"
 #ifdef HAVE_CAIRO_H
@@ -61,6 +61,8 @@
 
 
 namespace Ariadne {
+
+static const uint verbosity = 0u;
 
 DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
 unsigned int DRAWING_ACCURACY=1u;
@@ -1113,11 +1115,8 @@ void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
             this->box_draw(canvas);
             break;
         case AFFINE_DRAW:
-            if(this->number_of_zero_constraints()==0) {
-                this->affine_draw(canvas,DRAWING_ACCURACY);
-            } else {
-                this->box_draw(canvas);
-            }
+            //if(this->number_of_zero_constraints()!=0) { this->box_draw(canvas); }
+            this->affine_draw(canvas,DRAWING_ACCURACY);
             break;
         case GRID_DRAW:
             this->grid_draw(canvas);
@@ -1180,41 +1179,12 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
     for(uint n=0; n!=subdomains.size(); ++n) {
         try {
             this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
-            //this->restriction(subdomains[n]).affine_approximation().draw(canvas);
         } catch(...) {
             this->restriction(subdomains[n]).box_draw(canvas);
         }
     }
 };
 
-void TaylorConstrainedImageSet::old_affine_draw(CanvasInterface& canvas, uint accuracy) const {
-    ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
-    const int depth=accuracy;
-    List<Box> subdomains;
-    List<Box> splitdomains;
-    subdomains.append(this->_reduced_domain);
-    Box splitdomain1,splitdomain2;
-    for(int i=0; i!=depth; ++i) {
-        for(uint k=0; k!=this->number_of_parameters(); ++k) {
-            for(uint n=0; n!=subdomains.size(); ++n) {
-                make_lpair(splitdomain1,splitdomain2)=subdomains[n].split(k);
-                splitdomains.append(splitdomain1);
-                splitdomains.append(splitdomain2);
-            }
-            subdomains.swap(splitdomains);
-            splitdomains.clear();
-        }
-    }
-
-    for(uint n=0; n!=subdomains.size(); ++n) {
-        try {
-            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
-            //this->restriction(subdomains[n]).affine_approximation().draw(canvas);
-        } catch(...) {
-            this->restriction(subdomains[n]).box_draw(canvas);
-        }
-    }
-};
 
 void TaylorConstrainedImageSet::grid_draw(CanvasInterface& canvas, uint accuracy) const {
     // TODO: Project to grid first
@@ -1240,6 +1210,13 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
     return r;
 }
 
+template<class T> struct Repr { const T& ref; Repr(const T& r) : ref(r) { } };
+template<class T> Repr<T> repr(const T& t) { return Repr<T>(t); }
+template<class T> std::ostream& operator<<(std::ostream& os, const Repr<T>& repr) { repr.ref.repr(os); return os; }
+
+template<class T> std::ostream& operator<<(std::ostream& os, const Repr< List<T> >& repr) {
+    const List<T>& lst=repr.ref; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
+
 std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
     const bool LONG_FORMAT=false;
 
@@ -1248,16 +1225,16 @@ std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
            << "(\n  domain=" << this->domain()
            << ",\n  range=" << this->bounding_box()
            << ",\n  function=" << this->taylor_function()
-           << ",\n  constraints=" << this->_constraints
-           << ",\n  equations=" << this->_equations
+           << ",\n  negative_constraints=" << this->_constraints
+           << ",\n  zero_constraints=" << this->_equations
            << "\n)\n";
     } else {
         os << "TaylorConstrainedImageSet"
            << "( domain=" << this->domain()
            << ", range=" << this->bounding_box()
-           << ", function=" << polynomial(this->taylor_function())
-           << ", constraints=" << polynomials(this->_constraints)
-           << ", equations=" << polynomials(this->_equations)
+           << ", function=" << repr(this->taylor_function())
+           << ", negative_constraints=" << repr(this->_constraints)
+           << ", zero_constraints=" << repr(this->_equations)
            << ")";
 
     } return os;
@@ -1355,6 +1332,27 @@ TaylorConstrainedImageSet::affine_approximation() const
     return result;
 }
 
+struct IntervalAffineModel {
+    Float _c; Vector<Float> _g; Float _e;
+    IntervalAffineModel(Float c, const Vector<Float>& g, Float e) : _c(c), _g(g), _e(e) { }
+};
+
+IntervalAffineModel _affine_model(const IntervalTaylorModel& tm) {
+    IntervalAffineModel result(0.0,Vector<Float>(tm.argument_size(),0.0),tm.error());
+    set_rounding_upward();
+    for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
+        else if(iter->key().degree()==0) {result. _c=iter->data(); }
+        else {
+            for(uint j=0; j!=tm.argument_size(); ++j) {
+                if(iter->key()[j]!=0) { result._g[j]=iter->data(); break; }
+            }
+        }
+    }
+    set_rounding_to_nearest();
+    return result;
+}
+
 AffineSet
 TaylorConstrainedImageSet::affine_over_approximation() const
 {
@@ -1362,38 +1360,51 @@ TaylorConstrainedImageSet::affine_over_approximation() const
     typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
 
     const uint nx=this->dimension();
+    const uint nc=this->_constraints.size();
+    const uint neq=this->_equations.size();
     const uint np=this->number_of_parameters();
 
     TaylorConstrainedImageSet set(*this);
-
-    if(set._equations.size()>0) {
-        set._solve_zero_constraints();
-    }
-    this->_check();
-
     for(uint i=0; i!=nx; ++i) {
         const_cast<IntervalTaylorModel&>(set._function.models()[i]).truncate(1u);
     }
+    for(uint i=0; i!=nc; ++i) {
+        const_cast<IntervalTaylorModel&>(set._constraints[i].model()).truncate(1u);
+    }
+    for(uint i=0; i!=neq; ++i) {
+        const_cast<IntervalTaylorModel&>(set._equations[i].model()).truncate(1u);
+        // Code below introduces artificial error into equality constraints to make them inequality constraints
+        //const_cast<IntervalTaylorModel&>(set._equations[i].model()).error()+=std::numeric_limits<float>::epsilon();
+    }
+
+    // Compute the number of values with a nonzero error
+    uint nerr=0;
+    for(uint i=0; i!=nx; ++i) { if(set.function()[i].error()>0.0) { ++nerr; } }
 
     Vector<Float> h(nx);
-    Matrix<Float> G(nx,np+nx);
+    Matrix<Float> G(nx,np+nerr);
+    uint ierr=0; // The index where the error bound should go
     for(uint i=0; i!=nx; ++i) {
         ScalarTaylorFunction component=set._function[i];
         h[i]=component.model().value();
         for(uint j=0; j!=np; ++j) {
             G[i][j]=component.model().gradient(j);
         }
-        G[i][np+i]=component.model().error();
+        if(component.model().error()>0.0) {
+            G[i][np+ierr]=component.model().error();
+            ++ierr;
+        }
     }
+
     AffineSet result(G,h);
 
-    Vector<Float> a(np+nx);
+    Vector<Float> a(np+nerr, 0.0);
     Float b;
 
     for(const_iterator iter=set._constraints.begin();
             iter!=set._constraints.end(); ++iter) {
         const ScalarTaylorFunction& constraint=*iter;
-        b=-constraint.model().value();
+        b=sub_up(constraint.model().error(),constraint.model().value());
         for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_inequality_constraint(a,b);
     }
@@ -1401,10 +1412,19 @@ TaylorConstrainedImageSet::affine_over_approximation() const
     for(const_iterator iter=set._equations.begin();
             iter!=set._equations.end(); ++iter) {
         const ScalarTaylorFunction& constraint=*iter;
-        b=-constraint.model().value();
         for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-        result.new_equality_constraint(a,b);
+        if(constraint.model().error()==0.0) {
+            b=-constraint.model().value();
+            result.new_equality_constraint(a,b);
+        } else {
+            b=sub_up(constraint.model().error(),constraint.model().value());
+            result.new_inequality_constraint(a,b);
+            b=add_up(constraint.model().error(),constraint.model().value());
+            result.new_inequality_constraint(-a,b);
+        }
     }
+
+    ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
     return result;
 }
 

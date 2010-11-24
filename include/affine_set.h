@@ -62,18 +62,34 @@ class AffineSet
 {
     Vector<Interval> _domain;
     List< Affine<Float> > _function;
-    List< Affine<Float> > _constraints;
-    List< Affine<Float> > _equations;
+    List< Affine<Float> > _constraints; // Negative constraints
+    List< Affine<Float> > _equations; // Equal to zero constraints
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
     AffineSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
     AffineSet(const Matrix<Float>& G, const Vector<Float>& c);
+    //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid g(s)\leq 0 \wedge h(s)=0\}\f$.
+    AffineSet(const IntervalVector& D, const List< Affine<Float> >& f, const List< Affine<Float> >& g, const List< Affine<Float> >& h)
+        : _domain(D), _function(f), _constraints(g), _equations(h) { }
+    AffineSet(const IntervalVector& D, const List< Affine<Float> >& f, const List< Affine<Float> >& g)
+        : _domain(D), _function(f), _constraints(g), _equations() { }
+    AffineSet(const IntervalVector& D, const List< Affine<Float> >& f)
+        : _domain(D), _function(f), _constraints(), _equations() { }
+
+    bool operator==(const AffineSet& other) const;
+
     AffineSet* clone() const;
     //!\brief The constraint \f$a\cdot y\leq b\f$.
     void new_inequality_constraint(const Vector<Float>& a, const Float& b);
     //!\brief The constraint \f$a\cdot y = b\f$.
     void new_equality_constraint(const Vector<Float>& a, const Float& b);
+
+    //!\brief The constraint \f$a(x) \leq 0\f$.
+    void new_inequality_constraint(const Affine<Float>& a);
+    //!\brief The constraint \f$a(x) = 0\f$.
+    void new_equality_constraint(const Affine<Float>& a);
+
 
     uint dimension() const;
     uint number_of_parameters() const;

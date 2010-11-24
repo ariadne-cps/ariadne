@@ -48,6 +48,22 @@
         } \
     } \
 
+
+#ifndef NDEBUG
+#define ARIADNE_DEBUG_ASSERT(expression) \
+    { \
+        bool result = (expression); \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+        } \
+    } \
+
+#else
+#define ARIADNE_DEBUG_ASSERT(expression) \
+    { }
+#endif
+
+
 #define ARIADNE_PRECONDITION(expression,error)             \
     { \
         bool result = (expression); \

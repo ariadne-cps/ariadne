@@ -268,7 +268,6 @@ class TaylorConstrainedImageSet
     //! \brief Draw the to a canvas by splitting into small enough pieces that
     //! affine over-approximations yield a good image.
     void affine_draw(CanvasInterface&, uint=1u) const;
-    void old_affine_draw(CanvasInterface&, uint=1u) const;
     //! \brief Draw the to a canvas by over-approximating on a grid.
     void grid_draw(CanvasInterface&, uint=1u) const;
 

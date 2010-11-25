@@ -52,7 +52,7 @@ class HybridEvolverPrototype:
 
     def __init__(self):
         pass
-    
+
     def possibly_touching(self,guard,set):
         guard_range=guard(set)
         if not isinstance(guard_range,Interval):
@@ -163,7 +163,7 @@ class HybridEvolverPrototype:
         h=h0
         id=TaylorFunction.identity(h_domain)[0:dimension]
         s1m=TaylorExpression.constant(h_domain,s1)
-        
+
         #print "\nComputing lower implicit function approximation"
         #print h.error(),h.range(),unchecked_compose(f,join(id,h)).range()
         for i in range(0,20):
@@ -176,7 +176,7 @@ class HybridEvolverPrototype:
             h.clobber()
             h0=unchecked_compose(h,join(id,s1m))
         #print
-        
+
         h_domain=f.domain()[0:dimension]
         id=TaylorFunction.identity(h_domain)
         s1=TaylorExpression.constant(h_domain,s1)
@@ -194,7 +194,7 @@ class HybridEvolverPrototype:
         h0=TaylorExpression.constant(h_domain,0.0)
         h=h0
         id=TaylorFunction.identity(h_domain)
-        
+
         #print "\nComputing lower implicit function approximation"
         #print h.error(),h.range(),unchecked_compose(f,join(id,h)).range()
         fh=unchecked_compose(f,join(id,h))
@@ -213,7 +213,7 @@ class HybridEvolverPrototype:
             fh=nfh
             #print "  ",s,h.error(),h.range(),fh.range()
         #print
-        
+
         return h
 
 
@@ -221,7 +221,7 @@ class HybridEvolverPrototype:
         """Compute a function h such that f(x,h(x))~0, and that f(x,h(x))*f(x,0)>=0."""
         dimension=f.argument_size()-1
         df=derivative(f,dimension)
-        
+
         s1=0.5
         h_domain=join(f.domain()[0:dimension],Interval(0,s1))
         h0=TaylorExpression.constant(h_domain,0.0)
@@ -253,7 +253,7 @@ class HybridEvolverPrototype:
             h=h0
             #print "  ",h.error(),h.range(),unchecked_compose(f,join(id,h)).range(),unchecked_compose(df,join(id,h)).range()
         #print
-        
+
         #Flow a small step past hitting time
         #print " ",h.error(),h.range(),unchecked_compose(f,join(id,h)).range(),unchecked_compose(df,join(id,h)).range()
         for i in range(0,9):
@@ -266,7 +266,7 @@ class HybridEvolverPrototype:
             h.clobber()
             h0=unchecked_compose(h,join(id,s1m))
         #print
-        
+
         #Flow backward to hitting time
         #print " ",h.error(),h.range(),unchecked_compose(f,join(id,h)).range()
         for i in range(0,18):
@@ -350,15 +350,15 @@ class HybridEvolverPrototype:
         """Compute a time interval such that any touching of any point of the initial
            set with the guard in [0,time_step] occurs in this interval."""
         guard_flow=compose(guard,flow_model)
-        
+
         # Test for the case of clearly no crossing
         if not self.possibly_touching(guard_flow,flow_model.domain()):
             print "No touching"
             return None
-        
+
         space_domain=flow_model.domain()[0:dimension]
         time_domain=Interval(0,flow_model.domain()[dimension].upper())
-        
+
         # Compute a lower bound for the crossing time
         lower_time=0.0
         upper_time=flow_model.domain()[dimension].upper()
@@ -374,7 +374,7 @@ class HybridEvolverPrototype:
                 if upper_time==flow_model.domain()[dimension].upper():
                     break
             lower_touching_time=lower_time
-        
+
         # Compute an upper bound for the crossing time
         lower_time=0.0
         upper_time=flow_model.domain()[dimension].upper()
@@ -388,7 +388,7 @@ class HybridEvolverPrototype:
                 else:
                     (lower_time,upper_time)=(2*lower_time-upper_time,lower_time)
             upper_touching_time=upper_time
-        
+
         if(lower_touching_time>=upper_touching_time):
             return None
         else:
@@ -404,7 +404,7 @@ class HybridEvolverPrototype:
         approx_guard_flow=midpoint(guard_flow)
         #print "guard_flow =",guard_flow.polynomial()
         #print "guard_flow_gradient =",guard_flow_gradient.polynomial(),guard_flow_gradient.range()
-        
+
         space_domain=flow_model.domain()[0:dimension]
         if touching_time_interval:
             time_domain=touching_time_interval
@@ -413,7 +413,7 @@ class HybridEvolverPrototype:
         id=TaylorFunction.identity(space_domain)
         tau=TaylorExpression.constant(space_domain,0.0)
         tau+=time_domain
-        
+
         self.implicit_step=self.krawczyk_implicit_step;
         self.implicit_step=self.newton_implicit_step;
         self.approximate_implicit_step=self.approxmate_newton_implicit_step;
@@ -421,7 +421,7 @@ class HybridEvolverPrototype:
         for i in range(0,7):
             tau=self.approximate_implicit_step(guard_flow,tau)
         tau=self.implicit_step(guard_flow,tau)
-        
+
         tau+=16*tau.error()*Interval(-1,+1)
         new_tau=self.implicit_step(guard_flow,tau)
         assert(refines(new_tau,tau))
@@ -440,17 +440,17 @@ class HybridEvolverPrototype:
     def crossing_time(self,guard,flow_model):
         domain=flow_model.domain()[0:flow_model.result_size()]
         id=TaylorFunction.identity(domain)
-        
+
         touching_time_interval=self.compute_touching_time_interval(guard,flow_model)
         if touching_time_interval==None:
             return None
-        
+
         try:
             crossing_time_model=self.compute_transverse_crossing_time(guard,flow_model,touching_time_interval)
         except:
             crossing_time_model=TaylorExpression.constant(domain,touching_time_interval)
-        
-        print 
+
+        print
         print "  crossing_time_error =",crossing_time_model.error()
         print "  crossing_time_range =",crossing_time_model.range()
         print "  crossing_time_guard_range =",unchecked_compose(compose(guard,flow_model),join(id,crossing_time_model)).range()
@@ -458,16 +458,16 @@ class HybridEvolverPrototype:
         lower_hitting_time_model=self.compute_lower_hitting_time(guard,flow_model)
         print "  lower_hitting_time_range =",lower_hitting_time_model.range()
         print "  lower_hitting_time_guard_range =", unchecked_compose(compose(guard,flow_model),join(id,lower_hitting_time_model)).range()
-        
+
         upper_hitting_time_model=self.compute_upper_hitting_time(guard,flow_model)
         print "  upper_hitting_time_range =",upper_hitting_time_model.range()
         print "  upper_hitting_time_guard_range =", unchecked_compose(compose(guard,flow_model),join(id,upper_hitting_time_model)).range()
         print
-        
+
         #print "(upper_hitting_time-lower_hitting_time).range() =",(upper_hitting_time_model-lower_hitting_time_model).range()
         #print "(crossing_time_model-lower_hitting_time_model).range() =",(crossing_time_model-lower_hitting_time_model).range()
         #print "(crossing_time_model-upper_hitting_time_model).range() =",(crossing_time_model-upper_hitting_time_model).range()
-        
+
         return crossing_time_model
 
 
@@ -487,17 +487,17 @@ class HybridEvolverPrototype:
             crossing_time_model=self.crossing_time(guard,flow_model)
             if crossing_time_model:
                 crossing_times[event]=crossing_time_model
-        
+
         ordered_crossing_times=[]
         for (event,time) in crossing_times.items():
             ordered_crossing_times.append((time,event))
         ordered_crossing_times.sort()
-        
+
         print "ordered_events = [",
         for (crossing_time,event) in ordered_crossing_times:
             print str(event)+":"+str(crossing_time.range())+",",
         print "]"
-        
+
         if(len(ordered_crossing_times)==2):
             # Just starting and finishing pseudo-events
             return {"finishing_event":time_step_model,"blocking_event":time_step_model}
@@ -508,16 +508,16 @@ class HybridEvolverPrototype:
     def evolution_step(self, dynamic, guards, resets, starting_set, starting_time, time_step):
         print "\nevolution_step:","t:",starting_time.range(),
         print "c:",starting_set.centre(), "r:",mag(norm(starting_set.range()-starting_set.centre()))
-        
-        
+
+
         # Change time to a model
         if(type(starting_time)==float):
             starting_time=starting_set[0]*0.0+starting_time
-        
+
         zero_time_model=starting_time*0+0
         time_step_model=zero_time_model+time_step
         finishing_time_model=starting_time+time_step
-        
+
         # If an urgent event is definitely initially_active, then there is
         # no continuous evolution.
         initially_active=self.initially_active(guards,starting_set)
@@ -525,7 +525,7 @@ class HybridEvolverPrototype:
             for event in initially_active.keys():
                 if possibly(initially_active[event]):
                     active_events[event]=(starting_set,starting_time,None)
-        
+
         # Compute the continuous evolution
         starting_box=starting_set.range()
         [time_step,flow_bounds]=self.flow_bounds(dynamic,starting_box,time_step)
@@ -538,10 +538,10 @@ class HybridEvolverPrototype:
         #print "\nflow =",flow_model
         print "flow_domain =",flow_model.domain()
         print "flow_polynomial =",flow_model.polynomial()
-        
+
         # Compute events
         ordered_event_times=self.evolution_events(guards,flow_model,starting_time*0.0)
-        
+
         # Compute the blocking time
         blocking_time_model=time_step_model
         blocking_events={}
@@ -560,11 +560,11 @@ class HybridEvolverPrototype:
         print "blocking_time_range:",blocking_time_model.range()
         print
         ordered_event_times.append((blocking_time_model,"blocking_event"))
-        
+
         #Apply events and continuous reach/evolve steps
         jumped_sets=[]
         for (crossing_time_model,event) in ordered_event_times:
-            
+
             if event=="blocking_event":
                 reachable_set=self.reachability_step(flow_model,starting_set,zero_time_model,crossing_time_model)
             elif event=="finishing_event":
@@ -578,7 +578,7 @@ class HybridEvolverPrototype:
                 active_set=self.integration_step(flow_model,starting_set,crossing_time_model)
                 jump_set=compose(reset,active_set)
                 jumped_sets.append((event,jump_set))
-        
+
         print "reachable_set =",reachable_set.range()
         print "evolved_set =",evolved_set.range()
         jumped_set_ranges=[]
@@ -586,7 +586,7 @@ class HybridEvolverPrototype:
             jumped_set_ranges.append((event,set.range()))
         print "jumped_sets =",jumped_set_ranges
         sys.exit()
-        
+
         jumped_sets.append(evolved_set)
         return ((reachable_set,),jumped_sets)
 
@@ -612,10 +612,10 @@ class Mode:
 
 def run_example(dynamic,guard,reset,domain,step_size=0.25):
     evolver=HybridEvolver()
-    
+
     initial_set=TaylorFunction.identity(domain)
     initial_time=TaylorExpression.constant(domain,0.0)
-    
+
     space_domain=domain
     flow_model=evolver.flow_model(dynamic,domain,step_size)
     time_domain=flow_model.domain()[dimension]
@@ -629,13 +629,13 @@ def run_example(dynamic,guard,reset,domain,step_size=0.25):
     print "\ninitial_guard =",initial_guard.range()
     final_guard=compose(guard,final_set)
     print "\nfinal_guard =",final_guard.range()
-    
+
     # Compute the gradient function; only works for affine functions at the moment
     guard_gradient=dynamic[0]*derivative(guard,0)
     for i in range(1,dimension):
         guard_gradient=guard_gradient+dynamic[i]*derivative(guard,i)
     print "\nguard_gradient =",guard_gradient
-    
+
     #touching_time_interval=evolver.compute_touching_time_interval(guard,flow_model)
     #print "\ntouching_time_interval =",touching_time_interval
     #crossing_time_model=evolver.compute_transverse_crossing_time(guard,flow_model)
@@ -645,7 +645,7 @@ def run_example(dynamic,guard,reset,domain,step_size=0.25):
     upper_hitting_time_model = evolver.compute_upper_hitting_time(guard,flow_model)
     #print "\nupper_hitting_time_model =",upper_hitting_time_model
     id=TaylorFunction.identity(space_domain)
-    
+
     (reachable_sets,evolved_sets)=evolver.evolution_step(dynamic,{"hit":(guard,True)},{"hit":reset},initial_set,initial_time,step_size)
     print "reachable_sets =",reachable_sets
     print "evolved_sets =",evolved_sets
@@ -669,7 +669,7 @@ if __name__=="__main__":
     y=TaylorExpression.variable(d,1)
     print x+1.2345667e-12*x*x+1.23241312e-13*y*x
     #sys.exit()
-    
+
     ball_dynamic=AffineFunction(Matrix([[0,1],[0,0]]),Vector([0,-g]))
     ball_guard=AffineFunction(Matrix([[-1,0]]),Vector([0]))
     ball_guard=AffineExpression(Vector([-1,0]),Float(0.0))
@@ -677,7 +677,7 @@ if __name__=="__main__":
     ball_domain=IVector([[0.1,0.11],[-0.5,-0.49]])
     print "ball_dynamic =",ball_dynamic,"\nball_guard =",ball_guard
     #run_example(ball_dynamic,ball_guard,ball_domain)
-    
+
     tangency_dynamic=AffineFunction(Matrix([[0,0],[-2,0]]),Vector([1,0]))
     tangency_guard=AffineExpression(Vector([0,1]),Float(0.0))
     tangency_reset=AffineFunction(Matrix([[1,0],[0,1]]),Vector([0,-2]))

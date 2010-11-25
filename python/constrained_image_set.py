@@ -53,7 +53,7 @@ class ConstrainedImageSet:
         # Default constructor computes empty set
         if domain==None and function==None:
             self._empty=True
-        
+
         #Copy constructor
         if function==None and isinstance(domain,ConstrainedImageSet):
             other=domain
@@ -96,12 +96,12 @@ class ConstrainedImageSet:
         composed_constraint=compose(constraint,self._function)
         constraint_range=composed_constraint(self._domain)
         return constraint_range
-    
+
     def empty(self):
         if self._empty == None:
             self._empty = self.grid_outer_approximation(Grid(self.dimension()),6).empty()
         return self._empty
-    
+
     def dimension(self):
         return self._function.result_size()
 
@@ -124,7 +124,7 @@ class ConstrainedImageSet:
         time_domain=Interval(flow.domain()[-1])
         self._domain=join(self._domain,time_domain)
         self._function=unchecked_compose(flow,combine(self._function,ScalarTaylorFunction.variable([time_domain],0)))
-        
+
     def new_activation(self,event,constraint,derivative):
         assert isinstance(constraint,ScalarFunction)
         composed_constraint=ComposedFunction(constraint,self._function)
@@ -194,7 +194,7 @@ class ConstrainedImageSet:
             self._empty=True
         else:
             self._zero[event]=composed_constraint
-       
+
     def new_raw_equation(self,event,constraint):
         print "new_raw_equation"
         assert isinstance(constraint,ScalarFunction)
@@ -209,7 +209,7 @@ class ConstrainedImageSet:
             self._empty=True
         else:
             self._zero[event]=constraint
-       
+
     def new_raw_invariant(self,event,constraint):
         print "new_raw_invariant"
         assert isinstance(constraint,ScalarFunction)
@@ -223,11 +223,11 @@ class ConstrainedImageSet:
             self._empty=True
         else:
             self._negative[event]=constraint
-       
+
     def new_termination(self,event,constraint):
         self.new_raw_invariant(event,constraint)
 
-    
+
 
     def __disjoint(self,domain,box,err):
         if False: #positive_constraints(domain)
@@ -248,7 +248,7 @@ class ConstrainedImageSet:
         for box in self.__outer_approximation(self._domain,depth):
             gts.adjoin_outer_approximation(box,depth+4)
         return gts
-        
+
     def box_outer_approximation(self,depth):
         return self.__outer_approximation(self._domain,depth)
 
@@ -345,7 +345,7 @@ class ConstrainedImageSet:
         res+=", equations="+str(self._zero)
         res+=" )"
         return res
-    
+
 def lie_derivative(g,f):
     assert(isinstance(g,ScalarFunction))
     assert(isinstance(f,VectorFunction))
@@ -356,7 +356,7 @@ def lie_derivative(g,f):
     return r
 
 if __name__=='__main__':
-    
+
     id=VectorFunction.identity(2)
     x=ScalarFunction.variable(2,0)
     y=ScalarFunction.variable(2,1)
@@ -366,12 +366,12 @@ if __name__=='__main__':
     d=Box([{-2:+2},{-2:+2}])
 
     print lie_derivative(g,f)
-    
+
     fig=Figure()
     ConstrainedImageSet.draw=ConstrainedImageSet.grid_draw
     ConstrainedImageSet.draw=ConstrainedImageSet.box_draw
     resolution=4
-    
+
     fig.set_bounding_box(f(d))
     set=ConstrainedImageSet(d,f,[],[],[('h',h)],[])
     fig.set_fill_colour(0.0,0.0,1.0)
@@ -382,8 +382,8 @@ if __name__=='__main__':
     for cell in set.grid_outer_approximation(resolution): fig.draw(cell.box())
     fig.write("constrained_image_set-1")
     fig.clear()
-    
-    
+
+
     fig.set_bounding_box(id(d))
     set=ConstrainedImageSet(d,id,[],[],[],[])
     fig.set_fill_colour(0.0,0.0,1.0)

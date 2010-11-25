@@ -23,7 +23,7 @@
 
 from ariadne import *
 x=Float(2.25)
-    
+
 n=2
 d=2.125
 z=Integer(3)

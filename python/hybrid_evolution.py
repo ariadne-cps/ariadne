@@ -66,7 +66,7 @@ def taylor_set(f,j,g):
     return compose(f,h)
 
 def taylor_substitute(f,j,g):
-    """Substitute the value of the jth variable with g. 
+    """Substitute the value of the jth variable with g.
        Either g is a constant, or g is a scalar variable with domain equal to the domain of f."""
     domain=Box(f.domain())
     if not isinstance(g,ScalarTaylorFunction):
@@ -118,7 +118,7 @@ class PrototypeHybridEvolver:
     def __init__(self):
         self.integrator=TaylorIntegrator(5)
         self.maximum_step_size=2.0
-    
+
     def constraint_nonnegative(self,constraint,image_set):
         return (compose(constraint,image_set.function())(image_set.domain())).upper()>=0
 
@@ -145,19 +145,19 @@ class PrototypeHybridEvolver:
 
 
     def upper_evolution_step(self,working_sets,reach_sets,evolve_sets,system,maximum_time):
-        
+
         (starting_events,starting_location,starting_set,starting_time)=working_sets[-1]
         assert isinstance(starting_time,ScalarFunction)
         working_sets.pop()
         # FIXME: Remove this!
         if len(starting_set.domain())>4: return
-    
+
         n=starting_set.dimension()
         m=starting_set._domain.dimension()
         np=starting_set.domain().size()
-        
+
         print "UPPER EVOLUTION STEP"
-        
+
         # Extract dynamic and constraints
         starting_mode=system.mode(starting_location)
         dynamic=starting_mode.dynamic()
@@ -180,7 +180,7 @@ class PrototypeHybridEvolver:
         print "\nstarting_set:",starting_set
         print "\nstarting_time:",starting_time
         print "\ninvariants:",invariants,"\nguards:",guards,"\nactivations:",activations,"\nresets:",resets
-        
+
         # Compute flow
         maximum_step_size=maximum_time
         flow=self.integrator.flow(dynamic,starting_set.bounding_box(),self.maximum_step_size)
@@ -311,7 +311,7 @@ def build_system():
     hsys.new_invariant(q2,x-4*pow(y-1,2)-1.5)
     hsys.new_transition(e12,q1,q2,[x,y+1],x-y-0.5,True)
     hsys.new_transition(e23,q2,q3,[x,y+1],x-4*pow(y-1,2)-1.5,False)
-    
+
     #hsys.new_mode(q1,[0.0*x+1.0,0.0*y+2.0])
     #sys.new_mode(q1,[0.5*x+y,-x-0.5*y])
     #hsys.new_transition(e12,q1,q2,[x+1,y-1],x-0.175,False)
@@ -341,10 +341,10 @@ if __name__=="__main__":
     watertank.initial_set=HybridBox(initial_location,initial_box)
     watertank.evolution_time=HybridTime(0.5,12)
     watertank.bounding_box=Box([{0:9},{-0.1:1.1}])
-    
+
     automaton=build_system()
     resolution=4
-    
+
     print
     print automaton
     print
@@ -356,14 +356,14 @@ if __name__=="__main__":
     print "computing evolution..."
     evolver=PrototypeHybridEvolver()
     (reached_sets,evolved_sets)=evolver.orbit(automaton,automaton.initial_set,automaton.evolution_time)
-    
+
     #evolver=HybridEvolver()
     #orbit = evolver.orbit(automaton,automaton.initial_set,automaton.evolution_time)
     #print orbit
     #reached_sets=orbit.reach()
     #evolved_sets=orbit.evolve()
-    
-    
+
+
     print "\nreached_sets:"
     for (events,reached_set) in reached_sets:
         print str(events+(reached_set._location,))+":\n"+str(reached_set)
@@ -371,8 +371,8 @@ if __name__=="__main__":
     for (events,evolved_set) in evolved_sets:
         print str(events)+":\n"+str(evolved_set)
     print
-    
-  
+
+
     bounding_box=automaton.bounding_box
     print "reach..."
     i=0;

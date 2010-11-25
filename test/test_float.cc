@@ -38,7 +38,7 @@ using namespace std;
 using namespace Ariadne;
 
 
-class TestFloat 
+class TestFloat
 {
   public:
     void test();
@@ -66,7 +66,7 @@ int main() {
 
 
 void
-TestFloat::test() 
+TestFloat::test()
 {
     //ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_class());
@@ -79,7 +79,7 @@ TestFloat::test()
     ARIADNE_TEST_CALL(test_function());
 }
 
- 
+
 
 
 // Test that the type implements all operations of
@@ -88,17 +88,17 @@ void
 TestFloat::test_concept()
 {
     bool b=true;
-    int n=1; 
+    int n=1;
     uint m=1;
     double d=1;
     Float x=1;
 
     // Constructors
     x=Float(); x=Float(n); x=Float(m); x=Float(d); x=Float(x);
-  
+
     // Assignment
-    x=n; x=m; x=d; x=x; 
-  
+    x=n; x=m; x=d; x=x;
+
     // Conversion
     d=numeric_cast<double>(x);
 
@@ -128,7 +128,7 @@ TestFloat::test_concept()
     x=div_approx(x,m); x=div_down(x,m); x=div_up(x,m); // x=div_chop(x,m);
 
     // Mixed Float/double arithmetic
-    x=mul_approx(d,x); x=mul_approx(x,d); x=div_approx(x,d); 
+    x=mul_approx(d,x); x=mul_approx(x,d); x=div_approx(x,d);
 
     // Reset x to 1
     x=1; x=1.0;
@@ -171,7 +171,7 @@ TestFloat::test_class()
     // Copy constructor
     Float f3(f2);
     ARIADNE_TEST_ASSERT(f3==f2);
-  
+
     // Assign from an int
     f1=3;
     ARIADNE_TEST_ASSERT(f1==3);
@@ -189,7 +189,7 @@ void
 TestFloat::test_conversion()
 {
     cout << __PRETTY_FUNCTION__ << endl;
- 
+
     // Convert from integers
     int n;
     n=std::numeric_limits<int>::min();
@@ -210,14 +210,14 @@ TestFloat::test_conversion()
     // Assign to a rational
     q=Rational(R(2.25));
     ARIADNE_TEST_ASSERT(q==2.25);
-  
+
     // Convert from a rational
-    q=Rational(1,3); 
-    R f1=R(q,round_down); 
+    q=Rational(1,3);
+    R f1=R(q,round_down);
     R f2=R(q,round_up);
     cout << f1 << " <= " << q << " <= " << f2 << endl;
     ARIADNE_TEST_ASSERT(f1<=q); ARIADNE_TEST_ASSERT(f2>=q); ARIADNE_TEST_ASSERT(f1<f2);
-  
+
     // Convert from a negative rational
     q=Rational(-2,5); cout << q << endl;
     f1.set(q,round_down); cout << f1 << endl;
@@ -250,22 +250,22 @@ TestFloat::test_stream()
         if(f4!=23.75) {
             throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.375e1");
         }
-    } 
+    }
     catch(std::exception& e) {
         cerr << e.what() << endl;;
     }
-  
+
     try {
         ss >> f5;
         cout << f5 << endl;
         if(f4!=23.5) {
             throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.35e1");
         }
-    } 
+    }
     catch(std::exception& e) {
         cerr << e.what() << endl;
     }
-  
+
 }
 
 
@@ -273,7 +273,7 @@ void
 TestFloat::test_comparison()
 {
     cout << __PRETTY_FUNCTION__ << endl;
-  
+
     Float f1(1.25); Float f2(-1.25); Float f3(-2.25); Float f4(1.25);
 
     // Test comparison of two equal numbers
@@ -281,52 +281,52 @@ TestFloat::test_comparison()
     ARIADNE_TEST_ASSERT(f1<=f4); ARIADNE_TEST_ASSERT(!(f1> f4));
     ARIADNE_TEST_ASSERT(f1>=f4); ARIADNE_TEST_ASSERT(!(f1< f4));
 
-  
+
     // Test comparison of two different numbers
-    ARIADNE_TEST_ASSERT(!(f1==f2)); ARIADNE_TEST_ASSERT(f1!=f2); 
+    ARIADNE_TEST_ASSERT(!(f1==f2)); ARIADNE_TEST_ASSERT(f1!=f2);
     ARIADNE_TEST_ASSERT(!(f1<=f2)); ARIADNE_TEST_ASSERT(f1> f2);
     ARIADNE_TEST_ASSERT(f1>=f2); ARIADNE_TEST_ASSERT(!(f1< f2));
-  
+
     // Test comparison of two negative numbers
     ARIADNE_TEST_ASSERT(!(f2==f3)); ARIADNE_TEST_ASSERT(f2!=f3);
     ARIADNE_TEST_ASSERT(!(f2<=f3)); ARIADNE_TEST_ASSERT(f2> f3);
     ARIADNE_TEST_ASSERT(f2>=f3); ARIADNE_TEST_ASSERT(!(f2< f3));
-  
+
     // Test comparison with in integer
     int i2=1;
-    ARIADNE_TEST_ASSERT(!(f1==i2)); ARIADNE_TEST_ASSERT(f1!=i2); 
+    ARIADNE_TEST_ASSERT(!(f1==i2)); ARIADNE_TEST_ASSERT(f1!=i2);
     ARIADNE_TEST_ASSERT(!(f1<=i2)); ARIADNE_TEST_ASSERT(f1> i2);
     ARIADNE_TEST_ASSERT(f1>=i2); ARIADNE_TEST_ASSERT(!(f1< i2));
-  
+
     int i1=1;
-    ARIADNE_TEST_ASSERT(!(i1==f2)); ARIADNE_TEST_ASSERT(i1!=f2); 
+    ARIADNE_TEST_ASSERT(!(i1==f2)); ARIADNE_TEST_ASSERT(i1!=f2);
     ARIADNE_TEST_ASSERT(!(i1<=f2)); ARIADNE_TEST_ASSERT(i1> f2);
     ARIADNE_TEST_ASSERT(i1>=f2); ARIADNE_TEST_ASSERT(!(i1< f2));
-  
+
     // Test comparison with a double
     double x2=1.0;
-    ARIADNE_TEST_ASSERT(!(f1==x2)); ARIADNE_TEST_ASSERT(f1!=x2); 
+    ARIADNE_TEST_ASSERT(!(f1==x2)); ARIADNE_TEST_ASSERT(f1!=x2);
     ARIADNE_TEST_ASSERT(!(f1<=x2)); ARIADNE_TEST_ASSERT(f1> x2);
     ARIADNE_TEST_ASSERT(f1>=x2); ARIADNE_TEST_ASSERT(!(f1< x2));
-  
+
     double x1=1.0;
-    ARIADNE_TEST_ASSERT(!(x1==f2)); ARIADNE_TEST_ASSERT(x1!=f2); 
+    ARIADNE_TEST_ASSERT(!(x1==f2)); ARIADNE_TEST_ASSERT(x1!=f2);
     ARIADNE_TEST_ASSERT(!(x1<=f2)); ARIADNE_TEST_ASSERT(x1> f2);
     ARIADNE_TEST_ASSERT(x1>=f2); ARIADNE_TEST_ASSERT(!(x1< f2));
-  
+
     // Test comparison with a rational
     //Rational q2=1;
-    //ARIADNE_TEST_ASSERT(!(f1==q2)); ARIADNE_TEST_ASSERT(f1!=q2); 
+    //ARIADNE_TEST_ASSERT(!(f1==q2)); ARIADNE_TEST_ASSERT(f1!=q2);
     //ARIADNE_TEST_ASSERT(!(f1<=q2)); ARIADNE_TEST_ASSERT(f1> q2);
     //ARIADNE_TEST_ASSERT(f1>=q2); ARIADNE_TEST_ASSERT(!(f1< q2));
-  
+
     //Rational q1=Rational(-5,4);
-    //ARIADNE_TEST_ASSERT(q1==f2)); ARIADNE_TEST_ASSERT(!(q1!=f2)); 
+    //ARIADNE_TEST_ASSERT(q1==f2)); ARIADNE_TEST_ASSERT(!(q1!=f2));
     //ARIADNE_TEST_ASSERT(q1<=f2)); ARIADNE_TEST_ASSERT(!(q1> f2));
     //ARIADNE_TEST_ASSERT(!(q1>=f2)); ARIADNE_TEST_ASSERT(q1< f2);
-  
+
 }
-  
+
 void
 TestFloat::test_rounding()
 {
@@ -342,7 +342,7 @@ TestFloat::test_rounding()
     const double twofifthsup     = 0.40000000000000002220;
     const double twofifthschop   = 0.39999999999999996669;
     const double twofifthsnearest= 0.40000000000000002220;
-    
+
     set_rounding_mode(downward);
     double onethirdrounddown=one/three;
     ARIADNE_TEST_EQUAL(onethirdrounddown, onethirddown);
@@ -374,47 +374,47 @@ void
 TestFloat::test_arithmetic()
 {
     cout << __PRETTY_FUNCTION__ << endl;
-  
+
     // Set up some variables
     Float f1(1.25); Float f2(2.25); Float f3(-3.25); Float f4; Float f5;
- 
+
     // Minimum (this should always remain exact)
     f4=min(f1,f2);
-    cout << "min(" << f1 << "," << f2 << ") = " << f4 << endl; 
+    cout << "min(" << f1 << "," << f2 << ") = " << f4 << endl;
     ARIADNE_TEST_ASSERT(f4==f1);
     f4=min(f1,f3);
-    cout << "min(" << f1 << "," << f3 << ") = " << f4 << endl; 
+    cout << "min(" << f1 << "," << f3 << ") = " << f4 << endl;
     ARIADNE_TEST_ASSERT(f4==f3);
-  
+
     // Maximum (this should always remain exact)
     f4=max(f1,f2);
-    cout << "max(" << f1 << "," << f2 << ") = " << f4 << endl; 
+    cout << "max(" << f1 << "," << f2 << ") = " << f4 << endl;
     ARIADNE_TEST_ASSERT(f4==f2);
     f4=max(f1,f3);
-    cout << "max(" << f1 << "," << f3 << ") = " << f4 << endl; 
+    cout << "max(" << f1 << "," << f3 << ") = " << f4 << endl;
     ARIADNE_TEST_ASSERT(f4==f1);
-  
+
     // Absolute value (this should always remain exact)
     f4=abs(f1);
-    cout << "abs(" << f1 << ") = " << f4 << endl; 
+    cout << "abs(" << f1 << ") = " << f4 << endl;
     ARIADNE_TEST_ASSERT(f4==1.25);
     f5=abs(f3);
-    cout << "abs(" << f3 << ") = " << f5 << endl; 
+    cout << "abs(" << f3 << ") = " << f5 << endl;
     ARIADNE_TEST_ASSERT(f5==3.25);
-   
+
     // Median (this should remain exact here)
     f3=med_approx(f1,f2);
     cout << f1 << " <= med(" << f1 << "," << f2 << ")=" << f3 << " <= " << f2 << endl;
-    ARIADNE_TEST_ASSERT(f1<=f3); ARIADNE_TEST_ASSERT(f3<=f2); 
+    ARIADNE_TEST_ASSERT(f1<=f3); ARIADNE_TEST_ASSERT(f3<=f2);
     ARIADNE_TEST_ASSERT(f3==1.75);
-  
+
     // Negation (this should always remain exact)
     f3=neg(f1);
-    cout << "neg(" << f1 << ") = " << f3 << endl; 
+    cout << "neg(" << f1 << ") = " << f3 << endl;
     f3=-f1;
-    cout << "- " << f1 << " = " << f3 << endl; 
+    cout << "- " << f1 << " = " << f3 << endl;
     ARIADNE_TEST_ASSERT(f3==-1.25);
-  
+
     // Rounding
     f3=down(f1);
     f4=up(f1);
@@ -426,7 +426,7 @@ TestFloat::test_arithmetic()
     f4=add_up(f1,f2);
     cout << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=3.5); ARIADNE_TEST_ASSERT(f4>=3.5);
-    // Addition 
+    // Addition
     Float one_add_down_epsilon=add_down(Float(1.0),Float(1e-18));
     ARIADNE_TEST_COMPARE(add_up(Float(1.0),Float(1e-18)),>,1.0);
     ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(1e-18)),==,Float(1.0));
@@ -434,20 +434,20 @@ TestFloat::test_arithmetic()
     ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(1e-36)),==,Float(1.0));
     ARIADNE_TEST_EQUAL(Float(1.0),1.0);
     ARIADNE_TEST_COMPARE(Float(1.0),==,1.0);
-    
-    
+
+
     // Subtraction (this should remain exact here)
     f3=sub_down(f1,f2);
     f4=sub_up(f1,f2);
     cout << f3 << " <= " << f1 << " - " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=-1); ARIADNE_TEST_ASSERT(f4>=-1);
-  
+
     // Multiplication (this should remain exact here)
     f3=mul_down(f1,f2);
     f4=mul_up(f1,f2);
     cout << f3 << " <= " << f1 << " * " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=2.8125); ARIADNE_TEST_ASSERT(f4>=2.8125);
-  
+
     // Division (not exact; should catch errors here)
     f3=div_down(f1,f2);
     f4=div_up(f1,f2);
@@ -457,31 +457,31 @@ TestFloat::test_arithmetic()
     ARIADNE_TEST_ASSERT(div_down(f1,f2)<div_up(f1,f2)); // Regression test for non-assignment to variable
     //ARIADNE_TEST_ASSERT(Rational(f3)<=Rational(5,9));
     //ARIADNE_TEST_ASSERT(Rational(f4)>=Rational(5,9));
-  
+
     // Check division my multipyling back
     cout << mul_down(f3,f2) << " <= (" << f1 << "/" << f2 << ")*" << f2 << " <= " << mul_up(f4,f2) << endl;
     ARIADNE_TEST_ASSERT(mul_down(f3,f2)<f1);
     ARIADNE_TEST_ASSERT(mul_up(f4,f2)>f1);
-  
+
     // Power (not exact; should catch errors here)
-    f3=pow_down(f1,3); 
+    f3=pow_down(f1,3);
     f4=pow_up(f1,3);
     cout << f3 << " <= pow(" << f1 << ",3) <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=1.953125); ARIADNE_TEST_ASSERT(f4>=1.953125);
-  
+
     f3=pow_down(f1,-2);
     f4=pow_up(f1,-2);
     cout << f3 << " <= pow(" << f1 << ",-2) <= " << f4 << endl;
-    //ARIADNE_TEST_ASSERT(Rational(f3)<Rational(16,25)); 
+    //ARIADNE_TEST_ASSERT(Rational(f3)<Rational(16,25));
     //ARIADNE_TEST_ASSERT(Rational(f4)>Rational(16,25));
-  
+
     // Floor and ceiling
     f2=Float(-3.25); f3=Float(-2);
-  
+
     ARIADNE_TEST_ASSERT(floor(f1)==1); ARIADNE_TEST_ASSERT(ceil(f1)==2);
     ARIADNE_TEST_ASSERT(floor(f2)==-4); ARIADNE_TEST_ASSERT(ceil(f2)==-3);
     ARIADNE_TEST_ASSERT(floor(f3)==-2); ARIADNE_TEST_ASSERT(ceil(f3)==-2);
-  
+
     // Conversion to integer types
     int i3,i4;
     i3=numeric_cast<int>(floor(f1));
@@ -492,11 +492,11 @@ TestFloat::test_arithmetic()
     i4=numeric_cast<int>(ceil(f2));
     cout << i3 << " < " << f2 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==-4); ARIADNE_TEST_ASSERT(i4==-3);
-  
+
     // Check interval conversions
     Float z(0); Float o(1); Float t(3);
     Interval io(1); Interval it(3);
-  
+
     cout << "o/t=" << Interval(o/t) << endl;
 
     Interval iao=Interval((o/t)*t);
@@ -510,12 +510,12 @@ TestFloat::test_arithmetic()
     // Regression test to catch errors when Float result is not assigned to a variable
     cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
     ARIADNE_TEST_COMPARE(div_down(o,t),<,div_up(o,t));
-    cout << Interval(o/t) << endl; 
+    cout << Interval(o/t) << endl;
     ARIADNE_TEST_ASSERT(contains(iao,o));
     Interval iaz=iao-io;
     Interval iz=Interval(Float(1)-Float(1));
     cout << iaz << endl;
-    ARIADNE_TEST_ASSERT(contains(iaz,z)); 
+    ARIADNE_TEST_ASSERT(contains(iaz,z));
     ARIADNE_TEST_ASSERT(!bool(!subset(iz,iaz)));
     cout << endl;
 
@@ -525,7 +525,7 @@ TestFloat::test_arithmetic()
 
     // The following line should not compile
     // f5=f1+f2;
-  
+
 }
 
 
@@ -533,12 +533,12 @@ void
 TestFloat::test_function()
 {
     cout << __PRETTY_FUNCTION__ << endl;
-  
+
     cout << setprecision(20);
-  
+
     // Set up some variables
     Float x; Float ra; Float rl; Float ru;
-  
+
     x=1;
     ra=Ariadne::exp(x);
     rl=down(ra);
@@ -548,7 +548,7 @@ TestFloat::test_function()
     ARIADNE_TEST_ASSERT(rl<ru);
     ARIADNE_TEST_ASSERT(2.71<rl);
     ARIADNE_TEST_ASSERT(ru<2.72);
-  
+
 
     //The following don't work as rounded operators not exported.
     //test_inverse_pair("sin",&sin_down,&sin_up,&asin_down,&asin_up);
@@ -564,15 +564,15 @@ TestFloat::test_function()
 void
 TestFloat::test_cosine()
 
-{   
+{
     //3.14159265358979323846264338327950288419716939937510
     static const double pi_down=3.1415926535897931;
     //static const double pi_approx=3.1415926535897931;
     static const double pi_up=3.1415926535897936;
-     
+
     static const double third_pi_down=1.0471975511965976;
     static const double third_pi_up=1.0471975511965979;
-    
+
     static const double sqrt_half_down=0.70710678118654746;
     //static const double sqrt_half_approx=0.70710678118654757;
     static const double sqrt_half_up=0.70710678118654757;

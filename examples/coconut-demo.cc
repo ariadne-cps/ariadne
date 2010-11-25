@@ -1,6 +1,6 @@
 /*******************************************************************************************************
  *            voltagetransition.cc
- *  
+ *
  *            by Luca Geretti
  *
  * Provides the verification of a transition between a Vhigh supply voltage and a Vlow supply voltage
@@ -14,13 +14,13 @@
 #include "coconut-demo.h"
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
-    Figure fig; 
+    Figure fig;
     array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_bounding_box(bbox);
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -47,7 +47,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
         // Repeats for the rectangles in the y direction
-        Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+        Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         Float pos_y = bbox[1].lower();
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
@@ -58,9 +58,9 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc); 
-    fig << set; 
-    fig.write(filename); 
+    fig.set_fill_colour(fc);
+    fig << set;
+    fig.write(filename);
 }
 
 int print_usage(string cmdname) {
@@ -69,14 +69,14 @@ int print_usage(string cmdname) {
     return 1;
 }
 
-int main(int argc, char** argv) 
-{   
+int main(int argc, char** argv)
+{
     string cmdname(argv[0]);
     cmdname = cmdname.substr( cmdname.find_last_of("/\\") +1 );
 
     // Check arguments
     if(argc < 3) return print_usage(cmdname);
-    
+
     enum { C_REACH, C_SYNTH } command;
     if(strcmp(argv[1], "REACH") == 0) {
         command = C_REACH;
@@ -85,14 +85,14 @@ int main(int argc, char** argv)
     } else {
         return print_usage(cmdname);
     }
-    
+
         MAX_GRID_DEPTH = atoi(argv[2]);
         if(MAX_GRID_DEPTH <= 0) return print_usage(cmdname);
-        
+
         int pvar = 2;
-        float pmin = -1.0;  
-        float pmax = 1.0; 
-        
+        float pmin = -1.0;
+        float pmax = 1.0;
+
         if(command == C_SYNTH) {
             if(argc < 6) return print_usage(cmdname);
             pvar = atoi(argv[3]);
@@ -100,13 +100,13 @@ int main(int argc, char** argv)
             pmin = atof(argv[4]);
             pmax = atof(argv[5]);
         }
-        
+
     std::cout << "command : " << command << std::endl;
     std::cout << "grid depth : " << MAX_GRID_DEPTH << std::endl;
     std::cout << "pvar : " << pvar << std::endl;
     std::cout << "pmin : " << pmin << std::endl;
     std::cout << "pmax : " << pmax << std::endl;
-    
+
     // Build the automaton and initialize evolution parameters
     build_automaton();
 
@@ -132,7 +132,7 @@ int main(int argc, char** argv)
     analyser.parameters().lock_to_grid_steps = LOCK_TOGRID_STEPS;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
     analyser.verbosity = 3;
-    automaton.set_grid(grid); 
+    automaton.set_grid(grid);
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
     initial_set[initial_state]=initial_box;
 
     std::cout << "Computing reach set... " << std::endl << std::flush;
-    HybridGridTreeSet reach = analyser.chain_reach(automaton,initial_set);        
+    HybridGridTreeSet reach = analyser.chain_reach(automaton,initial_set);
     std::cout << "done." << std::endl;
 
     plot("automaton_reach", 1, 2, 4, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
                 cout << std::endl << "The maximum value allowed for the parameter is " << min(lower_unsafe,(reach[safe].bounding_box())[pvar].upper()) << "." << std::endl;
             } else {
                 cout << std::endl << "The minimum value allowed for the parameter is " << max(lower_safe,(reach[unsafe].bounding_box())[pvar].upper()) << "." << std::endl;
-            }              
+            }
         }
     }
 

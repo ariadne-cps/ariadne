@@ -51,13 +51,13 @@ class TestSerialization
         text_oarchive txtoa(ofs);
         txtoa << oary1 << oary2;
         ofs.close();
-    
+
         array<double> iary1(100),iary2(1);
         ifstream ifs("test_serialization-array.txt");
         text_iarchive txtia(ifs);
         txtia >> iary1 >> iary2;
         ofs.close();
-    
+
         ARIADNE_TEST_EQUAL(oary1,iary1);
         ARIADNE_TEST_EQUAL(oary2,iary2);
 
@@ -66,7 +66,7 @@ class TestSerialization
 
 };
 
-  
+
 int main() {
     return TestSerialization().test();
 }

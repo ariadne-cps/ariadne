@@ -44,7 +44,7 @@ def damul(D,A):
         for j in range(A.column_size()):
             R[i,j]=D[i]*A[i,j]
     return S
-        
+
 def admul(A,D):
     R=A*0.0
     for i in range(A.row_size()):
@@ -52,7 +52,7 @@ def admul(A,D):
             R[i,j]=A[i,j]*D[j]
     return S
 
-    
+
 # The standard linear programming problem max cx; Ax = b, x>=0.
 class StandardLinearProgrammingProblem:
     def __init__(self, A,b,c):
@@ -85,7 +85,7 @@ class PyInteriorPointSolver:
         m=len(b); n=len(c)
         gamma=1.0/1024
         sigma=1.0/8
-        
+
         mu=dot(x,z)/n
 
         rb=A*x-b
@@ -96,7 +96,7 @@ class PyInteriorPointSolver:
 
         S=adat(A,ediv(x,z))
         Sinv=inverse(S)
-        
+
         dy=Sinv*ry
         dz=-rc-dy*A
         dx=-ediv((rs+emul(x,dz)),z)
@@ -112,7 +112,7 @@ class PyInteriorPointSolver:
 
         x=nx; y=ny; z=nz
 
-    
+
     def solve_lp_problem(self,A,b,c,x,y,z):
         max_error=1e-8
         max_steps=24
@@ -120,7 +120,7 @@ class PyInteriorPointSolver:
         # Ax=b yA+z=c
         cx=dot(c,x)
         yb=dot(y,b)
-        
+
         print "A:",A," b:",b," c:",c
         print "x:",x," y:",y," z:",z
         print "cx:",cx,"yb:",yb
@@ -156,4 +156,3 @@ if __name__=='__main__':
     (x,y,z)=InteriorPointSolver().optimize(A,b,c,x0,y0,z0)
 
     print x,y,z
-    

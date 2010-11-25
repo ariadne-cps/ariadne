@@ -131,7 +131,7 @@ IntervalTaylorModel prod(const IntervalTaylorModel x1, const IntervalTaylorModel
 }
 
 IntervalTaylorModel prod_full(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
-    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r; 
+    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r;
 }
 
 IntervalTaylorModel prod_clear(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
@@ -223,7 +223,7 @@ int main(int argc, const char* argv[]) {
               << std::setw(12) << "error"
               << std::setw(8) << "size"
               << std::endl;
-    
+
     typedef IntervalTaylorModel TM;
     //std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
     //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";

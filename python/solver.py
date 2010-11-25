@@ -54,7 +54,7 @@ def my_join(*args):
         for i in range(2,len(args)):
             r=join(r,args[i]);
         return r
-    
+
     if isinstance(args[0],Interval) or isinstance(args[0],IntervalVector):
         result=[]
         for arg in args:
@@ -197,7 +197,7 @@ def implicit_solve_zeroth_explicit(function, derivative, range, domain):
         h.set_error(h.error()*1.5)
     return h
 
-     
+
 def implicit_solve_zeroth_centre(function, derivative, range, domain):
     assert(type(domain)==Box)
     assert(domain.dimension()==1)
@@ -255,8 +255,8 @@ def draw_circle():
     fig.set_bounding_box(bbox)
     set.plot(fig,bbox)
     fig.write("circle")
-    
-    
+
+
 if __name__=="__main__":
     draw_circle()
 

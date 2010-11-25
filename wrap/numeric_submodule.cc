@@ -157,7 +157,7 @@ void export_float()
     float_class.def(double() - self);
     float_class.def(double() * self);
     float_class.def(double() / self);
- 
+
     implicitly_convertible<double,Float>();
 
     def("set_output_precision", &set_output_precision);

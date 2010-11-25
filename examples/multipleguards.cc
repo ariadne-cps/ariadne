@@ -43,13 +43,13 @@ struct mg_lg : RealVectorFunctionData<1,3,2> {
 
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
-    Figure fig; 
+    Figure fig;
     array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
-    fig.set_bounding_box(bbox); 
+    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_bounding_box(bbox);
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
@@ -76,7 +76,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
 
         // Repeats for the rectangles in the y direction
-        Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+        Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         Float pos_y = bbox[1].lower();
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
@@ -87,12 +87,12 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc); 
-    fig << set; 
-    fig.write(filename); 
+    fig.set_fill_colour(fc);
+    fig << set;
+    fig.write(filename);
 }
 
-int main() 
+int main()
 {
     double pi=numeric_cast<double>(Ariadne::pi<Real>());
     double f = 1.0; // Frequency
@@ -103,27 +103,27 @@ int main()
 
     /// Guards parameters
     Vector<double> dp(2);
-    
+
     double A[9]={0.0,w1,0.0, -w2,0.0,0.0, 0.0,0.0,0.0};
     double b[3]={0.0,0.0,1.0};
 
     float EVOL_TIME = 1.0/f;
     EVOL_TIME = 1.0;
     int EVOL_TRANS = 4;
-   
+
     float MAX_ENCL_RADIUS = 1e-1;
     float MAX_STEP_SIZE = 1e-2;
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomton object
     MonolithicHybridAutomaton multipleguards;
-  
+
     /// Create the discrete states
     AtomicDiscreteLocation pospos(1);
     AtomicDiscreteLocation posneg(2);
     AtomicDiscreteLocation negpos(3);
-    AtomicDiscreteLocation negneg(4);        
+    AtomicDiscreteLocation negneg(4);
 
     /// Create the discrete events
     DiscreteEvent pospos2posneg(12);
@@ -134,25 +134,25 @@ int main()
     DiscreteEvent negpos2negneg(34);
     DiscreteEvent negneg2posneg(42);
     DiscreteEvent negneg2negpos(43);
-  
+
     /// Create the dynamics
-    VectorAffineFunction dynamic(Matrix<Real>(3,3,A),Vector<Real>(3,b));        
-   
+    VectorAffineFunction dynamic(Matrix<Real>(3,3,A),Vector<Real>(3,b));
+
     /// Create the guards
     dp(0) = 0.0;
     dp(1) = 0.0;
-    VectorUserFunction<mg_gg> pospos_g(dp); 
-    VectorUserFunction<mg_gl> posneg_g(dp); 
-    VectorUserFunction<mg_lg> negpos_g(dp); 
-    VectorUserFunction<mg_ll> negneg_g(dp); 
- 
+    VectorUserFunction<mg_gg> pospos_g(dp);
+    VectorUserFunction<mg_gl> posneg_g(dp);
+    VectorUserFunction<mg_lg> negpos_g(dp);
+    VectorUserFunction<mg_ll> negneg_g(dp);
+
     /// Build the automaton
     multipleguards.new_mode(pospos,dynamic);
     multipleguards.new_mode(posneg,dynamic);
     multipleguards.new_mode(negpos,dynamic);
     multipleguards.new_mode(negneg,dynamic);
 
-    /// Automaton transitions in the case of multiple guards 
+    /// Automaton transitions in the case of multiple guards
 
     multipleguards.new_forced_transition(pospos2posneg,pospos,posneg,IdentityFunction(3),posneg_g);
     multipleguards.new_forced_transition(pospos2negpos,pospos,negpos,IdentityFunction(3),negpos_g);
@@ -201,7 +201,7 @@ int main()
     Box bounding_box1(2, -1.0,1.0, -1.0,1.0);
     Box bounding_box2(2, 0.0,EVOL_TIME,-1.0,1.0);
 
-    HybridTime evolution_time(EVOL_TIME,EVOL_TRANS); 
+    HybridTime evolution_time(EVOL_TIME,EVOL_TRANS);
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(multipleguards,initial_enclosure,evolution_time,UPPER_SEMANTICS);

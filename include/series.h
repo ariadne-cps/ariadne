@@ -2,7 +2,7 @@
  *            series.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file series.h
  *  \brief Taylor series in a single variable.
  */
@@ -85,8 +85,8 @@ template<class X> Series<X> sqrt(const Series<X>& x) {
 
 
 template<class X>
-Series<X> 
-Series<X>::rec(uint d, const X& c) 
+Series<X>
+Series<X>::rec(uint d, const X& c)
 {
     Series<X> y(d);
     X mr = (-1)/c;
@@ -97,7 +97,7 @@ Series<X>::rec(uint d, const X& c)
 }
 
 template<class X>
-Series<X> 
+Series<X>
 Series<X>::pow(uint d, const X& c, int k)
 {
 
@@ -111,7 +111,7 @@ Series<X>::pow(uint d, const X& c, int k)
 }
 
 template<class X>
-Series<X> 
+Series<X>
 Series<X>::sqrt(uint d, const X& c)
 {
     Series<X> y(d);
@@ -125,7 +125,7 @@ Series<X>::sqrt(uint d, const X& c)
 }
 
 template<class X>
-Series<X> 
+Series<X>
 Series<X>::exp(uint d, const X& c)
 {
     Series<X> y(d);
@@ -137,7 +137,7 @@ Series<X>::exp(uint d, const X& c)
 }
 
 template<class X>
-Series<X> 
+Series<X>
 Series<X>::log(uint d, const X& c)
 {
     Series<X> y(d);
@@ -150,8 +150,8 @@ Series<X>::log(uint d, const X& c)
 }
 
 template<class X>
-Series<X> 
-Series<X>::sin(uint d, const X& c) 
+Series<X>
+Series<X>::sin(uint d, const X& c)
 {
     Series<X> y(d);
     y[0]=Ariadne::sin(c);
@@ -165,8 +165,8 @@ Series<X>::sin(uint d, const X& c)
 }
 
 
-template<class X> 
-Series<X> 
+template<class X>
+Series<X>
 Series<X>::cos(uint d, const X& c)
 {
     Series<X> y(d);
@@ -180,16 +180,16 @@ Series<X>::cos(uint d, const X& c)
     return y;
 }
 
-template<class X> 
-Series<X> 
+template<class X>
+Series<X>
 Series<X>::tan(uint d, const X& c)
 {
     ARIADNE_NOT_IMPLEMENTED;
     //return sin(d,c)/cos(d,c);
 }
 
-template<class X>  
-Series<X> 
+template<class X>
+Series<X>
 Series<X>::asin(uint d, const X& c)
 {
     if(d==0) { Series<X> y(d); y[0]=Ariadne::asin(c); return y; }
@@ -198,8 +198,8 @@ Series<X>::asin(uint d, const X& c)
     return antiderivative(y,Ariadne::asin(c));
 }
 
-template<class X>  
-Series<X> 
+template<class X>
+Series<X>
 Series<X>::acos(uint d, const X& c)
 {
     if(d==0) { Series<X> y(d); y[0]=Ariadne::acos(c); return y; }
@@ -208,11 +208,11 @@ Series<X>::acos(uint d, const X& c)
     return antiderivative(y,Ariadne::acos(c));
 }
 
-template<class X>  
-Series<X> 
+template<class X>
+Series<X>
 Series<X>::atan(uint d, const X& c)
 {
-    if(d==0) { Series<X> y(d); y[0]=Ariadne::atan(c); return y; } 
+    if(d==0) { Series<X> y(d); y[0]=Ariadne::atan(c); return y; }
     Series<X> y(d-1); y[0]=c; y[1]=X(1);
     y = Ariadne::rec(Ariadne::sqrt(X(1)+Ariadne::sqr(y)));
     return antiderivative(y,Ariadne::atan(c));
@@ -235,8 +235,8 @@ antiderivative(const Series<X>& x, const X& c)
 
 
 template<class X>
-Series<X> 
-operator*(const Series<X>& x, const Series<X>& y) 
+Series<X>
+operator*(const Series<X>& x, const Series<X>& y)
 {
     //const Series<X>& x=*this;
     X zero=x[0]*y[0]*0.0;

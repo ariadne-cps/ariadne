@@ -74,7 +74,7 @@ class Validator:
         base_node.successors.insert(base_node)
         base_node.precessors.insert(base_node)
         self.partition.insert(base_node)
-        
+
     def __str__(self):
         result="Validator\n    initial="+str(self.initial_set)+"\n    safe="+str(self.safe_set)+"\n"
         for node in self.partition:
@@ -114,11 +114,11 @@ class Validator:
         new_nodes[1].set=new_boxes[1]
         new_nodes[0].code+='0'
         new_nodes[1].code+='1'
-        
+
         for new_node in new_nodes:
             #Compute image set
             new_node.image=self.system(new_node.set)
-            
+
             #Update precessor nodes
             for prec_node in Set(new_node.precessors):
                 if disjoint(prec_node.image,new_node.set):
@@ -128,7 +128,7 @@ class Validator:
             for succ_node in Set(new_node.successors):
                 if disjoint(new_node.image,succ_node.set):
                     self.remove_image(new_node,succ_node)
-            
+
             #Update whether node is an initial node
             if new_node.initial==False:
                 pass
@@ -137,7 +137,7 @@ class Validator:
                     new_node.initial=False
                 elif self.initial_set.overlaps(new_node.set):
                     new_node.initial=True
-            
+
             #Update whether node is safe
             if unknown(new_node.safe): #True: #new_node.safe==Indeterminate:
                 if self.safe_set.covers(new_node.set):
@@ -174,8 +174,8 @@ class Validator:
         print validity
         for node in self.partition:
             node.valid=validity[node]
-            
-            
+
+
     #Compute which nodes are safe or unsafe using depth first search
     def safety_visit(self,node,validity,visited,stack):
         visited.insert(node)
@@ -198,19 +198,19 @@ class Validator:
             validity[node]=Indeterminate
         stack.pop()
         return
-        
+
     def shortest_paths(self):
         """Returns a map of Node:(Node,Integer) tuples of the form node:(prev,len) where prev is the
            previous node along the path, and len is the lenght. prev is None if len is 0."""
-             
-    
-        
-        
+
+
+
+
         # Choose node to refine adaptively
     # This method just picks from a number of alternatives
     def find_node_to_subdivide(self):
         self.find_node_to_subdivide1()
-        
+
     # Choose node to refine adaptively
     # FIXME: This method is not finished
     def find_node_to_subdivide1(self):
@@ -262,7 +262,7 @@ if __name__=='__main__':
     validator=Validator(system,initial,safe,bound)
     print validator
     for node in validator.partition: print node,node.precessors,node.successors
-    
+
     for i in range(0,8):
         nodes=Set(validator.partition)
         for node in nodes:
@@ -271,4 +271,3 @@ if __name__=='__main__':
 
     validator.compute_safety()
     print validator
-    

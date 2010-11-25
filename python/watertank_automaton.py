@@ -104,13 +104,13 @@ if __name__=='__main__':
     initial_box=Box([1.0+err,0.125+err])
 
     initial_set=HybridBox(initial_location,initial_box)
-    
+
     evolution_time=HybridTime(101.0,12)
 
     orbit=evolver.orbit(watertank,initial_set,evolution_time)
     reach=orbit.reach()
     evolve=orbit.evolve()
-    
+
     print orbit
     print
     print reach
@@ -130,4 +130,4 @@ if __name__=='__main__':
         for set in sets:
             fig.draw(set.bounding_box()+IntervalVector([{-0.16:0.16},{-0.02:0.02}]))
     fig.write("watertank-automaton")
-    
+

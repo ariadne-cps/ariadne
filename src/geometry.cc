@@ -2,7 +2,7 @@
  *            geometry.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,13 +20,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "geometry.h"
 
 namespace Ariadne {
 
 
-tribool 
+tribool
 disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     Box bb=ls.bounding_box();
@@ -35,7 +35,7 @@ disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Flo
 }
 
 
-tribool 
+tribool
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     Box bb=ls.bounding_box();
@@ -44,7 +44,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 }
 
 
-tribool 
+tribool
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     Box bb=ls.bounding_box();
@@ -53,17 +53,17 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float
 }
 
 
-tribool 
+tribool
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
 {
-    if(ls.disjoint(bx)) { 
-        return false; 
+    if(ls.disjoint(bx)) {
+        return false;
     }
-    if(rs.disjoint(bx)) { 
-        return false; 
+    if(rs.disjoint(bx)) {
+        return false;
     }
     else if(rs.covers(bx)) {
-        return true; 
+        return true;
     }
     else if(bx.radius()<eps) {
         return indeterminate;
@@ -79,13 +79,13 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box&
         }
     }
 }
-    
-  
-tribool 
+
+
+tribool
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
 {
-    if(ls.disjoint(bx) || rs.covers(bx)) { 
-        return true; 
+    if(ls.disjoint(bx) || rs.covers(bx)) {
+        return true;
     } else if(bx.radius()<eps) {
         return indeterminate;
     } else {
@@ -100,13 +100,13 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& 
         }
     }
 }
- 
-   
-tribool 
+
+
+tribool
 disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
 {
-    if(ls.disjoint(bx) || rs.disjoint(bx)) { 
-        return true; 
+    if(ls.disjoint(bx) || rs.disjoint(bx)) {
+        return true;
     } else if(bx.radius()<eps) {
         return indeterminate;
     } else {
@@ -121,16 +121,16 @@ disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box
         }
     }
 }
-    
-  
 
 
-tribool 
+
+
+tribool
 overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Box& bx, const Float& eps)
 {
     if(ovs.overlaps(bx)) {
-        if(ops.covers(bx)) { 
-            return true; 
+        if(ops.covers(bx)) {
+            return true;
         } else if(bx.radius()<eps) {
             return indeterminate;
         } else {
@@ -146,13 +146,13 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Box& bx
         return indeterminate;
     }
 }
-    
-  
-tribool 
+
+
+tribool
 inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const Box& bx, const Float& eps)
 {
-    if(cls.disjoint(bx) || ops.covers(bx)) { 
-        return true; 
+    if(cls.disjoint(bx) || ops.covers(bx)) {
+        return true;
     } else if(bx.radius()<eps) {
         return indeterminate;
     } else {
@@ -166,8 +166,8 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const Box& bx
     }
 }
 
-    
-tribool 
+
+tribool
 disjoint(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const Box& bx, const Float& eps)
 {
     if(cls1.disjoint(bx) || cls2.disjoint(bx)) {
@@ -185,7 +185,7 @@ disjoint(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const B
     }
 }
 
-    
+
 
 
 } // namespace Ariadne

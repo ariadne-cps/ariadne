@@ -2,7 +2,7 @@
  *            predicate.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file predicate.h
  *  \brief Predicates.
  */
@@ -129,7 +129,7 @@ class ConjunctiveNormalFormPredicate
 {
     friend ConjunctiveNormalFormPredicate
         operator&&(const ConjunctiveNormalFormPredicate& p1, const ConjunctiveNormalFormPredicate& p2);
-    friend ConjunctiveNormalFormPredicate 
+    friend ConjunctiveNormalFormPredicate
         operator||(const ConjunctiveNormalFormPredicate& p1, const ConjunctiveNormalFormPredicate& p2);
   public:
     ConjunctiveNormalFormPredicate& operator&=(DisjunctivePredicate p) {

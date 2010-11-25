@@ -88,11 +88,11 @@ def rk4step(equations,dynamics,valuation,step_size):
         dxval[var]=(step_size/6.0)*(k1val[var]+2*k2val[var]+2*k3val[var]+k4val[var])
 
     dxval[RealVariable("time")]=step_size
-    
+
     nval=dict(valuation)
     for var in dxval:
         nval[var]+=dxval[var]
-    
+
     return nval
 
 
@@ -154,7 +154,7 @@ def simulate(system,initial_valuation,final_time,final_steps=6):
                     xval=compute_crossing(active_guard,equations,dynamics,pval,xval,last_time_step)
                     result.pop()
                     result.append(xval)
-            
+
             transitions=system.active_transitions(active_event,xval)
             resets=system.active_resets(active_event,xval)
             uval={}

@@ -97,6 +97,7 @@ class ScalarFunctionInterface<Float>
   public:
     //! \brief Compute an approximation to the value of the function at the point \a x.
     virtual Float evaluate(const Vector<Float>& x) const = 0;
+    inline Float operator() (const Vector<Float>& x) const;
     //! \brief Evaluate the function over a vector of differentials.
     virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
@@ -120,6 +121,7 @@ class ScalarFunctionInterface<Interval>
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Interval evaluate(const Vector<Interval>& x) const = 0;
+    inline Interval operator() (const Vector<Interval>& x) const;
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
@@ -147,6 +149,7 @@ class ScalarFunctionInterface<Real>
 
     //! \brief Evaluate over computable reals.
     virtual Real evaluate(const Vector<Real>& x) const = 0;
+    inline Real operator() (const Vector<Real>& x) const;
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
     virtual Formula<Real> evaluate(const Vector< Formula<Real> >& x) const = 0;
 

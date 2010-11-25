@@ -720,8 +720,8 @@ class VectorTaylorFunction
     explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector< TaylorModel<Interval> >& variables);
 
     /*! \brief Construct from a domain and a function. */
-    VectorTaylorFunction(const Vector<Interval>& domain,
-                   const RealVectorFunction& function);
+    VectorTaylorFunction(const Vector<Interval>& domain, const RealVectorFunction& function);
+    VectorTaylorFunction(const Vector<Interval>& domain, const IntervalVectorFunction& function);
 
     /*! \brief Construct from a domain, a function, and accuracy paramters. */
     VectorTaylorFunction(const Vector<Interval>& domain,

@@ -430,7 +430,7 @@ feasible(IntervalVector d, RealVectorFunction g, IntervalVector c) const
 
 
 void NonlinearInteriorPointOptimiser::feasibility_step (
-        const RealVectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
+        const FloatVectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
 {
     const uint m=y.size();
     const uint n=x.size();
@@ -489,7 +489,7 @@ void NonlinearInteriorPointOptimiser::feasibility_step (
 
 
 void NonlinearInteriorPointOptimiser::
-optimization_step(const RealScalarFunction& f, const RealVectorFunction& g,
+optimization_step(const FloatScalarFunction& f, const FloatVectorFunction& g,
                   FloatVector& x, FloatVector& y, FloatVector& z) const
 {
     const uint m=y.size();
@@ -553,7 +553,7 @@ optimization_step(const RealScalarFunction& f, const RealVectorFunction& g,
 
 
 
-void NonlinearInteriorPointOptimiser::feasibility_step(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
+void NonlinearInteriorPointOptimiser::feasibility_step(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
                                         FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
 {
     static const double gamma=1.0/1024;
@@ -795,7 +795,7 @@ void NonlinearInteriorPointOptimiser::linearised_feasibility_step(const Interval
 
 
 void NonlinearInteriorPointOptimiser::
-setup_feasibility(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b,
+setup_feasibility(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& b,
                   FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const
 {
     const uint l=2*(d.size()+b.size());
@@ -807,7 +807,7 @@ setup_feasibility(const IntervalVector& d, const RealVectorFunction& g, const In
 
 
 void NonlinearInteriorPointOptimiser::
-compute_tz(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b,
+compute_tz(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& b,
            const FloatVector& y, Float& t, FloatVector& z) const
 {
     static const double ZMIN=0.5;
@@ -843,7 +843,7 @@ compute_tz(const IntervalVector& d, const RealVectorFunction& g, const IntervalV
     }
 }
 
-void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b,
+void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& b,
                                                 const FloatVector& y, const Float& t, FloatVector& z) const
 {
     const uint m=g.argument_size();

@@ -83,26 +83,35 @@ std::ostream& operator<<(std::ostream& os, const NonlinearConstraint& c) {
 
 Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<NonlinearConstraint>& constraints) const
 {
+    if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
+
+    RealVectorFunction function(constraints.size());
+    Box bounds(constraints.size());
+
+    for(uint i=0; i!=constraints.size(); ++i) {
+        function.set(i,constraints[i].function());
+        bounds[i]=constraints[i].bounds();
+    }
+    return this->feasible(domain,function,bounds);
+}
+
+
+Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const IntervalVectorFunction& function, const Box& codomain) const
+{
 
     static const double XSIGMA=0.125;
     static const double TERR=-1.0/(1<<10);
+    static const Float inf = Ariadne::inf<Float>();
 
-    ARIADNE_LOG(4,"constraints="<<constraints<<"\ndomain="<<domain<<"\n");
-
-    // Convert constraints to a vector function
-    Box codomain(constraints.size());
-    RealVectorFunction function(constraints.size(),domain.size());
-    for(uint i=0; i!=constraints.size(); ++i) {
-        function[i]=constraints[i].function();
-        codomain[i]=constraints[i].bounds();
-    }
+    ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
 
     // Make codomain bounded
+    IntervalVector bounds=codomain;
     IntervalVector image=function(domain);
-    ARIADNE_LOG(4,"function="<<function<<"\ndomain="<<domain<<", codomain="<<codomain<<", image="<<image<<"\n");
+    ARIADNE_LOG(4,"image="<<image<<"\n");
     for(uint i=0; i!=image.size(); ++i) {
         if(disjoint(image[i],codomain[i])) { ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");  return make_pair(false,Point()); }
-        else codomain[i]=intersection(codomain[i],image[i]+Interval(-1,+1));
+        else bounds[i]=intersection(codomain[i],image[i]);
     }
 
 
@@ -116,13 +125,14 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Non
     Point slack(l); // The slack between the test point and the violated constraints
 
     Float& t=violation; Point& x=multipliers; Point& y=point; Point& z=slack; // Aliases for the main quantities used
-    const Box& d=domain; const RealVectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
+    const Box& d=domain; const IntervalVectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
+    VectorTaylorFunction tfn(d,fn);
 
     point=midpoint(d);
     for(uint k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
 
     NonlinearInteriorPointOptimiser optimiser;
-    optimiser.compute_tz(domain,function,codomain,point,violation,slack);
+    optimiser.compute_tz(domain,function,bounds,point,violation,slack);
 
     ARIADNE_LOG(4,"d="<<d<<", f="<<fn<<", c="<<c<<"\n");
 
@@ -145,27 +155,22 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Non
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        RealScalarFunction xg=RealScalarFunction::constant(m,0);
+        ScalarTaylorFunction txg=ScalarTaylorFunction::constant(d,0);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - Real(x[j]-x[n+j])*fn[j];
+            txg = txg - Interval(x[j]-x[n+j])*tfn[j];
             cnst += (c[j].upper()*x[j]-c[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - Real(x[2*n+i]-x[2*n+m+i])*RealScalarFunction::coordinate(m,i);
+            txg = txg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
-        xg = Real(cnst) + xg;
+        txg = cnst + txg;
 
-        ARIADNE_LOG(4,"    xg="<<xg<<"\n");
-        ScalarTaylorFunction txg(d,xg);
-        ARIADNE_LOG(4,"    txg="<<txg.polynomial()<<"\n");
-
-        xg=RealScalarFunction(txg.polynomial());
-        NonlinearConstraint constraint=(xg>=0.0);
+        ARIADNE_LOG(4,"    txg="<<txg<<"\n");
 
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
-        this->hull_reduce(subdomain,constraint);
+        this->hull_reduce(subdomain,txg,Interval(0,inf));
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         if(subdomain.empty()) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
@@ -173,7 +178,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Non
         }
 
         for(uint i=0; i!=m; ++i) {
-            this->box_reduce(subdomain,constraint,i);
+            this->box_reduce(subdomain,txg,Interval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
             if(subdomain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,Point()); }
         }
@@ -195,15 +200,38 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Non
 }
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const RealVectorFunction& function, const Box& codomain) const
+void ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const
 {
-    List<NonlinearConstraint> constraints;
-    for(uint i=0; i!=codomain.size(); ++i) {
-        constraints.append(NonlinearConstraint(function[i],codomain[i]));
-    }
-    return this->feasible(domain,constraints);
-}
+    const double MINIMUM_REDUCTION = 0.75;
+    ARIADNE_ASSERT(function.argument_size()==domain.size());
+    ARIADNE_ASSERT(function.result_size()==codomain.size());
 
+    if(domain.empty()) { return; }
+
+    Float domain_magnitude=0.0;
+    for(uint j=0; j!=domain.size(); ++j) {
+        domain_magnitude+=domain[j].width();
+    }
+    Float old_domain_magnitude=domain_magnitude;
+
+    do {
+        this->hull_reduce(domain,function,codomain);
+        if(domain.empty()) { return; }
+
+        for(uint i=0; i!=codomain.size(); ++i) {
+            for(uint j=0; j!=domain.size(); ++j) {
+                this->box_reduce(domain,function[i],codomain[i],j);
+            }
+        }
+        if(domain.empty()) { return; }
+
+        old_domain_magnitude=domain_magnitude;
+        domain_magnitude=0.0;
+        for(uint j=0; j!=domain.size(); ++j) {
+            domain_magnitude+=domain[j].width();
+        }
+    } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
+}
 
 void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& constraints) const
 {
@@ -219,13 +247,14 @@ void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& cons
 
     do {
         for(uint i=0; i!=constraints.size(); ++i) {
-            this->hull_reduce(domain,constraints[i]);
+            this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
         }
+
         if(domain.empty()) { return; }
 
         for(uint i=0; i!=constraints.size(); ++i) {
             for(uint j=0; j!=domain.size(); ++j) {
-                this->box_reduce(domain,constraints[i],j);
+                this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
             }
         }
         if(domain.empty()) { return; }
@@ -239,12 +268,22 @@ void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& cons
 }
 
 
-void ConstraintSolver::hull_reduce(Box& domain, const NonlinearConstraint& constraint) const
+void ConstraintSolver::hull_reduce(Box& domain, const IntervalVectorFunctionInterface& function, const IntervalVector& bounds) const
 {
-    const RealScalarFunction& function=constraint.function();
-    const Interval& bounds=constraint.bounds();
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalVectorFunction function, Box bounds): "
+                  "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
+    Vector< Formula<Interval> > formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
+    Vector< Procedure<Interval> > procedure(formula);
+    Box reducing_domain(domain);
+    Ariadne::simple_hull_reduce(reducing_domain, procedure, bounds);
+    domain = reducing_domain;
+}
+
+void ConstraintSolver::hull_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds) const
+{
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalScalarFunction function, Interval bounds): "
+                  "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Formula<Interval> formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
     Procedure<Interval> procedure(formula);
@@ -253,11 +292,9 @@ void ConstraintSolver::hull_reduce(Box& domain, const NonlinearConstraint& const
     domain = reducing_domain;
 }
 
-void ConstraintSolver::monotone_reduce(Box& domain, const NonlinearConstraint& constraint, uint variable) const
+void ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
-    const RealScalarFunction& function=constraint.function();
-    RealScalarFunction derivative=function.derivative(variable);
-    const Interval& bounds=constraint.bounds();
+    IntervalScalarFunction derivative=function.derivative(variable);
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
@@ -293,11 +330,8 @@ void ConstraintSolver::monotone_reduce(Box& domain, const NonlinearConstraint& c
 
 
 
-void ConstraintSolver::box_reduce(Box& domain, const NonlinearConstraint& constraint, uint variable) const
+void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
-    const RealScalarFunction& function=constraint.function();
-    const Interval& bounds=constraint.bounds();
-
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
     Interval interval=domain[variable];
@@ -350,13 +384,13 @@ void compute_monotonicity(Box& domain, const NonlinearConstraint& constraint) {
 } // namespace
 
 
-Pair<Box,Box> ConstraintSolver::split(const Box& d, const List<NonlinearConstraint>& constraints) const
+Pair<Box,Box> ConstraintSolver::split(const Box& d, const IntervalVectorFunction& f, const IntervalVector& c) const
 {
     return d.split();
 }
 
 
-tribool ConstraintSolver::check_feasibility(const Box& d, const RealVectorFunction& f, const Box& c, const Point& y) const
+tribool ConstraintSolver::check_feasibility(const Box& d, const IntervalVectorFunction& f, const Box& c, const Point& y) const
 {
     for(uint i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

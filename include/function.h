@@ -186,6 +186,9 @@ inline Interval evaluate(const ScalarFunction<Real>& f, const Vector<Interval>& 
 inline Real evaluate(const ScalarFunction<Real>& f, const Vector<Real>& x) { return f(x); }
 inline std::ostream& operator<<(std::ostream& os, const ScalarFunction<Real>& f) { return f.write(os); }
 
+inline Float ScalarFunctionInterface<Float>::operator() (const Vector<Float>& x) const { return this->evaluate(x); }
+inline Interval ScalarFunctionInterface<Interval>::operator() (const Vector<Interval>& x) const { return this->evaluate(x); }
+inline Real ScalarFunctionInterface<Real>::operator() (const Vector<Real>& x) const { return this->evaluate(x); }
 
 ScalarFunction<Real> operator+(const ScalarFunction<Real>&);
 ScalarFunction<Real> operator-(const ScalarFunction<Real>&);

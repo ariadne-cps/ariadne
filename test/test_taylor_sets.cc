@@ -45,9 +45,8 @@ class TestTaylorConstrainedImageSet
   public:
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
-        ARIADNE_TEST_CALL(test_affine_approximation()); return;
         ARIADNE_TEST_CALL(test_disjoint());
-        ARIADNE_TEST_CALL(test_discretise());
+        //ARIADNE_TEST_CALL(test_discretise());
         ARIADNE_TEST_CALL(test_affine_approximation());
         ARIADNE_TEST_CALL(test_outer_approximation());
         ARIADNE_TEST_CALL(test_split());
@@ -196,13 +195,14 @@ class TestTaylorConstrainedImageSet
 
         ARIADNE_TEST_EQUALS(affine_set,expected_affine_set);
 
-        DRAWING_ACCURACY=2;
+        DRAWING_ACCURACY=1;
         figure.set_fill_colour(0.5,1.0,1.0);
         figure.draw(affine_set);
         figure.set_fill_colour(0.0,0.5,0.5);
         figure.set_fill_opacity(0.5);
         figure.draw(set);
-        figure.write("test_taylor_set-affine_approximation");
+        figure.write("test_taylor_set-affine_over_approximation");
+        figure.clear();
 
         return;
 
@@ -247,49 +247,95 @@ class TestTaylorConstrainedImageSet
         //Box domain(2, -0.5,1.5, -0.5,0.5);
         Box domain(2, -1.0,+1.0, -1.0,+1.0);
         uint accuracy = 4u;
-        uint high_accuracy = accuracy+1u;
 
         TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)));
-        //TaylorConstrainedImageSet set(domain,(s,t));
         set.new_negative_constraint(s+t-0.25);
         ARIADNE_TEST_PRINT(set);
 
-        GridTreeSet subdivision_paving(set.dimension());
-        set.subdivision_adjoin_outer_approximation_to(subdivision_paving,high_accuracy);
-        subdivision_paving.recombine();
-        ARIADNE_TEST_EQUALS(subdivision_paving.measure(),3.375);
+        Grid grid(2);
+        int height(3);
+        BinaryWord tree(
+            "11010110111010101010101010101010011011010101010101010011011010101100011101010011000011101101100011100001110110001110000001110110110101010011010100111000011101011000111010011000001110110110001110000111011000111000000111111110100000000011101101101101101000000011111111101100001110100010110000111011010000111011000011101000101100001110110110100000111110110000111010001011000011101101000011101100001110100010110000111011011011010000001111111011000011101000101100001110110100001110110000111010001011000011101101101000001111101100001110100010110000111011010000111011000011101000101100010110110110110110110100000000111011011010101010101010101010010110110110110110000000001111111111011011011000111000011101100011100000111011010100100110101010011110010000001111111011001001000111110010001110000000001111011111101000111001000011100101100100000111111101100001011100100010110010110000101111101000101010001011101000100001010101101010110110011000110100010111010110100100111100000111011100001110100100001111111011011011000000111110101010001011101000101010001011111000101100001011010100001110110110111000000011111110110000111010001011000010111010100010111000101000101111110000101100001011110000101101000101101101101101100000001111101101010101100011101010100110101001110000111100000111011010101001101010011100001101011001100011110000011111110000000011111101011000111100000111101000111001000001111111001000111000001110101000101101000001111111101000111100000000001111111111010001011000110101001101000101101100001110110000111101001100010110001110100011010011000101101101100000111011011010000011111110000000000111111111111011000011101000101100001110110100001110110000111010001011000011101101101000001111101100001110100010110000111011010000111011000011101000101100001110110110110100000011111110110000111010001011000011101101000011101100001110100010110000111011011010000011111011000011101000101100001110110100001110110000111010001011000110111101010110100100101101110000111010010001111111000000001111010101001111000001110110011000100001110110101010100110101100011110100110000011101101010100110101001110000111010101001101010011100001111100000011111100000001111111100100011110000000001110110110110110100000001111111111100000000000000");
 
-        figure.set_bounding_box(Box(2, -2.0,+2.0, -2.0,+2.0));
-        figure.set_fill_colour(0.0,0.5,1.0);
+        BinaryWord leaves(
+            "000000000000001000000000100000110001011100011011100110111110000001000101110001100101111000110111001101111100111111110000010000001101101001101100100011011010011011000100001101101001101100100011011010011011000010000011011010011011001000110110100110110001000011011010011011001000110110100110100000001000000000000000000001000000100000000000110111001101111000010100001010111110010101101011011111111110110101110100101111001001010110010010101011010110101101111111111101001100111110101000011000110100000001000010101101011010110101001010010100111010111100100101100100101010101010101101011010110101101100000010000011111100111101110100010000111110111010001110100100001000000011100100001100101000010100101001010100100001100100000000010110010101010110001000010010110100100100101101000010000001000010000000001101101001101100100011011010011011000100001101101001101100100011011010011011000010000011011010011011001000110110100110110001000011011010011011001000110110100110111111101011100011010010000000111101000011010010001111110111001101000011111011101000111101110100010000010000001010010000000000000100000010000000000000");
+
+        GridTreeSet expected_very_high_accuracy_paving(grid,height,tree,leaves);
+
+        DRAWING_ACCURACY=3;
+        figure.set_bounding_box(Box(2, -2.0,+2.0, -1.5,+2.5));
+
+        figure.set_fill_opacity(0.5);
+        figure.set_fill_colour(1.0,0.5,0.5);
+        figure.draw(expected_very_high_accuracy_paving);
+        figure.set_fill_colour(0.0,1.0,1.0);
+        figure.draw(set);
+        figure.write("test_taylor_set-paving-expected");
+        figure.clear();
+
+
+        GridTreeSet subdivision_paving(set.dimension());
+        set.subdivision_adjoin_outer_approximation_to(subdivision_paving,accuracy);
+        subdivision_paving.recombine();
+        ARIADNE_TEST_PRINT(subdivision_paving);
+
+        ARIADNE_TEST_BINARY_PREDICATE(subset,expected_very_high_accuracy_paving,subdivision_paving);
+        if(subdivision_paving.measure()/expected_very_high_accuracy_paving.measure() > 1.15) {
+            ARIADNE_TEST_WARN("TaylorConstrainedImageSet::subdivision_outer_approximation(...) may yield poor approximation "<<
+                              "(factor "<<subdivision_paving.measure()/expected_very_high_accuracy_paving.measure()<<")");
+        }
+
+        DRAWING_ACCURACY=2;
+        figure.set_fill_colour(1.0,0.5,0.5);
         figure.draw(subdivision_paving);
-        figure.write("test_taylor_set-subdivision_paving");
+        figure.set_fill_colour(0.0,1.0,1.0);
+        figure.draw(set);
+        figure.write("test_taylor_set-paving-subdivision");
         figure.clear();
 
 
         GridTreeSet affine_paving(set.dimension());
         set.affine_adjoin_outer_approximation_to(affine_paving,accuracy);
         affine_paving.recombine();
+        ARIADNE_TEST_PRINT(affine_paving);
 
-        ARIADNE_TEST_ASSERT(subset(subdivision_paving,affine_paving));
-        if(affine_paving.measure()/subdivision_paving.measure() > 1.10) {
-            ARIADNE_TEST_WARN("TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(...) yields poor approximation");
+        ARIADNE_TEST_BINARY_PREDICATE(subset,expected_very_high_accuracy_paving,affine_paving);
+        if(affine_paving.measure()/expected_very_high_accuracy_paving.measure() > 1.20) {
+            ARIADNE_TEST_WARN("TaylorConstrainedImageSet::affine_outer_approximation(...) may yield poor approximation "<<
+                              "(factor "<<affine_paving.measure()/expected_very_high_accuracy_paving.measure()<<")");
         }
+
+        figure.set_fill_colour(1.0,0.5,0.5);
+        figure.draw(affine_paving);
+        figure.set_fill_colour(0.0,1.0,1.0);
+        figure.draw(set);
+        figure.set_fill_colour(0.0,1.0,1.0);
+        figure.write("test_taylor_set-paving-affine");
+        figure.clear();
+
 
         GridTreeSet constraint_paving(set.dimension());
         set.constraint_adjoin_outer_approximation_to(constraint_paving,accuracy);
         constraint_paving.recombine();
-        figure.set_fill_colour(1.0,0.0,0.0);
+        ARIADNE_TEST_PRINT(constraint_paving);
+
+        ARIADNE_TEST_BINARY_PREDICATE(subset,expected_very_high_accuracy_paving,constraint_paving);
+        if(constraint_paving.measure()/expected_very_high_accuracy_paving.measure() > 1.10) {
+            ARIADNE_TEST_WARN("TaylorConstrainedImageSet::constraint_outer_approximation(...) yields poor approximation "<<
+                              "(factor "<<constraint_paving.measure()/expected_very_high_accuracy_paving.measure()<<")");
+        }
+
+        figure.set_fill_colour(1.0,0.5,0.5);
         figure.draw(constraint_paving);
-        figure.set_fill_colour(0.0,0.5,1.0);
-        figure.draw(subdivision_paving);
-        figure.write("test_taylor_set-constraint_paving");
+        figure.set_fill_colour(0.0,1.0,1.0);
+        figure.draw(set);
+        figure.write("test_taylor_set-paving-constraint");
         figure.clear();
 
-        ARIADNE_TEST_ASSERT(subset(subdivision_paving,constraint_paving));
-        ARIADNE_TEST_LESS(constraint_paving.measure()/subdivision_paving.measure() , 1.10);
     }
 
-    void test_draw(const std::string& str, const TaylorConstrainedImageSet& set, uint acc) {
+
+void test_draw(const std::string& str, const TaylorConstrainedImageSet& set, uint acc) {
         ARIADNE_TEST_PRINT(set);
         figure.clear();
         GridTreeSet paving(set.dimension());

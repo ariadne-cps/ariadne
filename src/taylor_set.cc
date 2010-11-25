@@ -808,8 +808,9 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
 {
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
-    static const double XSIGMA=0.125;
-    static const double TERR=-1.0/((1<<e)*1024.0);
+    static const double XSIGMA = 0.125;
+    static const double TERR = -1.0/((1<<e)*1024.0);
+    static const Float inf = Ariadne::inf<Float>();
 
     uint verbosity=0u;
 
@@ -844,27 +845,23 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        RealScalarFunction xg=RealScalarFunction::constant(m,0);
+        ScalarTaylorFunction xg=ScalarTaylorFunction::constant(d,0);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - Real(x[j]-x[n+j])*fg[j];
+            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j]);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - Real(x[2*n+i]-x[2*n+m+i])*RealScalarFunction::coordinate(m,i);
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
-        xg = Real(cnst) + xg;
+        xg = (cnst) + xg;
 
         ARIADNE_LOG(4,"    xg="<<xg<<"\n");
-        ScalarTaylorFunction txg(d,xg);
-        ARIADNE_LOG(4,"    txg="<<txg.polynomial()<<"\n");
 
-        xg=RealScalarFunction(txg.polynomial());
-        NonlinearConstraint constraint=(xg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        solver.hull_reduce(nd,constraint);
+        solver.hull_reduce(nd,xg,Interval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         if(nd.empty()) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
@@ -872,7 +869,7 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
         }
 
         for(uint i=0; i!=m; ++i) {
-            solver.box_reduce(nd,constraint,i);
+            solver.box_reduce(nd,xg,Interval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
             if(nd.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
@@ -939,10 +936,10 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, cons
 
     ARIADNE_LOG(6,"  dom="<<old_domain<<"\n");
     for(uint i=0; i!=nf; ++i) {
-        constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
+        constraint_solver.hull_reduce(new_domain,f[i],bx[i]);
     }
     for(uint i=0; i!=ng; ++i) {
-        constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
+        constraint_solver.hull_reduce(new_domain,g[i],c[i]);
     }
     ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
     if(new_domain.empty()) {
@@ -951,10 +948,10 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, cons
     }
 
     for(uint i=0; i!=nf; ++i) {
-        constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
+        constraint_solver.hull_reduce(new_domain,f[i],bx[i]);
     }
     for(uint i=0; i!=ng; ++i) {
-        constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
+        constraint_solver.hull_reduce(new_domain,g[i],c[i]);
     }
     ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
     if(new_domain.empty()) {
@@ -1006,7 +1003,7 @@ void TaylorConstrainedImageSet::subdivision_adjoin_outer_approximation_to(GridTr
 
 void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
-    this->affine_approximation().adjoin_outer_approximation_to(paving,depth);
+    this->affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
 }
 
 void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int e) const

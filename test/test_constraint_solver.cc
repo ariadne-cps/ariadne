@@ -78,7 +78,7 @@ class TestConstraintSolver
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
 
-        ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
+        ARIADNE_TEST_EXECUTE(propagator.reduce(D,c.function(),c.bounds()));
         ARIADNE_TEST_PRINT(D);
         ARIADNE_TEST_ASSERT(D.empty());
     }

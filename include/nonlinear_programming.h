@@ -114,18 +114,18 @@ class NonlinearInteriorPointOptimiser
     Pair<Tribool,FloatVector> feasible(IntervalVector D, RealVectorFunction g, IntervalVector C,
                                        const Float& t0, const FloatVector& x0, const FloatVector& y0, const FloatVector& z0) const;
 
-    void feasibility_step(const RealVectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const;
-    void optimization_step(const RealScalarFunction& f, const RealVectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z) const;
-    void setup_feasibility(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
+    void feasibility_step(const FloatVectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const;
+    void optimization_step(const FloatScalarFunction& f, const FloatVectorFunction& g, FloatVector& x, FloatVector& y, FloatVector& z) const;
+    void setup_feasibility(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
                            FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const;
-    void feasibility_step(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
+    void feasibility_step(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
                                          FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const;
     void linearised_feasibility_step(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& c,
                                          FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const;
 
   public:
-    void compute_tz(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b, const FloatVector& y, Float& t, FloatVector& z) const;
-    void compute_z(const IntervalVector& d, const RealVectorFunction& g, const IntervalVector& b, const FloatVector& y, const Float& t, FloatVector& z) const;
+    void compute_tz(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& b, const FloatVector& y, Float& t, FloatVector& z) const;
+    void compute_z(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& b, const FloatVector& y, const Float& t, FloatVector& z) const;
   protected:
 /*
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.

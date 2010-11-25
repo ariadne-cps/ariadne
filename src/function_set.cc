@@ -508,9 +508,10 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
 
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
-    static const double XSIGMA=0.125;
-    static const double TERR=-1.0/((1<<e)*1024.0);
-    static const double XZMIN=1.0/(1<<16);
+    static const double XSIGMA = 0.125;
+    static const double TERR = -1.0/((1<<e)*1024.0);
+    static const double XZMIN = 1.0/(1<<16);
+    static const Float inf = Ariadne::inf<Float>();
 
     // Set up the classes used for constraint propagation and
     // optimisation using the Kuhn-Tucker conditions
@@ -603,7 +604,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         NonlinearConstraint constraint=(xg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        solver.hull_reduce(nd,constraint);
+        solver.hull_reduce(nd,xg,Interval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         if(nd.empty()) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");
@@ -611,13 +612,13 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         }
 
         for(uint i=0; i!=m; ++i) {
-            solver.box_reduce(nd,constraint,i);
+            solver.box_reduce(nd,xg,Interval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
             if(nd.empty()) { ARIADNE_LOG(2,"  Proved disjointness using box reduce\n"); return; }
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 
-        solver.hull_reduce(nd,constraint);
+        solver.hull_reduce(nd,xg,Interval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         if(nd.empty()) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");

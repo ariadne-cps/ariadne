@@ -731,6 +731,17 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
+                                           const IntervalVectorFunction& f)
+    : _domain(d), _models(f.result_size())
+{
+    ARIADNE_ASSERT(f.result_size()>0);
+    ARIADNE_ASSERT(d.size()==f.argument_size());
+    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
+    this->_models=f.evaluate(x);
+    this->sweep();
+}
+
+VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
                                const RealVectorFunction& f)
     : _domain(d), _models(f.result_size())
 {

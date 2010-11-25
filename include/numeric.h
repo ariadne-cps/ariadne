@@ -1,5 +1,5 @@
 /***************************************************************************
- *      numeric.h
+ *            numeric.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -516,7 +516,7 @@ class Interval {
     Interval(double lower, double upper) : l(lower), u(upper) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     Interval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
-     // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
+        // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
 #ifdef HAVE_GMPXX_H
     Interval(const Rational& q);
     Interval& operator=(const Rational& q);
@@ -548,11 +548,11 @@ class Interval {
     //! \brief Sets the interval to a "canonical" empty interval \a [1,0].
     void set_empty() { l=1.0; u=0.0; }
     void set_lower(const Float& lower) { l=lower; }
-     // ARIADNE_ASSERT(lower<=this->u);
+        // ARIADNE_ASSERT(lower<=this->u);
     void set_upper(const Float& upper) { u=upper; }
-     // ARIADNE_ASSERT(this->l<=upper);
+        // ARIADNE_ASSERT(this->l<=upper);
     void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
-     // ARIADNE_ASSERT(lower<=upper);
+        // ARIADNE_ASSERT(lower<=upper);
   public:
     //! \brief Extract a double-precision point approximation to the value represented by the interval.
     double get_d() const { return (this->l.get_d()+this->u.get_d())/2; }
@@ -728,11 +728,11 @@ inline Interval min(Interval i1, Interval i2)
 inline Interval abs(Interval i)
 {
     if(i.lower()>=0) {
-     return Interval(i.lower(),i.upper());
+        return Interval(i.lower(),i.upper());
     } else if(i.upper()<=0) {
-     return Interval(-i.upper(),-i.lower());
+        return Interval(-i.upper(),-i.lower());
     } else {
-     return Interval(static_cast<Float>(0.0),max(-i.lower(),i.upper()));
+        return Interval(static_cast<Float>(0.0),max(-i.lower(),i.upper()));
     }
 }
 

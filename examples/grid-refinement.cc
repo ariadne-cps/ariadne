@@ -1,5 +1,5 @@
 /***************************************************************************
- *      grid-refinement.cc
+ *            grid-refinement.cc
  *
  *  Copyright  2008  Davide Bresolin
  *
@@ -189,51 +189,51 @@ int main()
     std::cout << "Starting verification loop. Water level should be kept between "<< minsafe<< " and "<< maxsafe<<std::endl<<std::endl;
     int grid_depth;
     for(grid_depth = min_grid_depth; grid_depth <= max_grid_depth ; grid_depth+=1) {
-     std::cout << "Computing upper reach set with grid depth " << grid_depth <<" and cell size "<<eps<<"..." << std::flush;
-     analyser.parameters().maximum_grid_depth=grid_depth;
-     HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);
-     std::cout << "done." << std::endl;
-     char filename[30];
-     sprintf(filename, "watertank-upper_reach-%d", grid_depth);
-     plot(filename,bounding_box, Colour(0.0,0.5,1.0), upper_reach_set);
-     //textplot(filename, upper_reach_set);
+        std::cout << "Computing upper reach set with grid depth " << grid_depth <<" and cell size "<<eps<<"..." << std::flush;
+        analyser.parameters().maximum_grid_depth=grid_depth;
+        HybridGridTreeSet upper_reach_set = analyser.upper_reach(watertank_system,initial_set,reach_time);
+        std::cout << "done." << std::endl;
+        char filename[30];
+        sprintf(filename, "watertank-upper_reach-%d", grid_depth);
+        plot(filename,bounding_box, Colour(0.0,0.5,1.0), upper_reach_set);
+        //textplot(filename, upper_reach_set);
 
-     Box check_box(2, minsafe,maxsafe, -1.0,2.0);
-     HybridBoxes hcheck_box;
-     hcheck_box[l1]=check_box;
-     hcheck_box[l2]=check_box;
-     hcheck_box[l3]=check_box;
-     hcheck_box[l4]=check_box;
+        Box check_box(2, minsafe,maxsafe, -1.0,2.0);
+        HybridBoxes hcheck_box;
+        hcheck_box[l1]=check_box;
+        hcheck_box[l2]=check_box;
+        hcheck_box[l3]=check_box;
+        hcheck_box[l4]=check_box;
 
-     Box lcheck_box(2, minsafe-eps,maxsafe+eps, -1.0,2.0);
-     HybridBoxes hlcheck_box;
-     hlcheck_box[l1]=lcheck_box;
-     hlcheck_box[l2]=lcheck_box;
-     hlcheck_box[l3]=lcheck_box;
-     hlcheck_box[l4]=lcheck_box;
+        Box lcheck_box(2, minsafe-eps,maxsafe+eps, -1.0,2.0);
+        HybridBoxes hlcheck_box;
+        hlcheck_box[l1]=lcheck_box;
+        hlcheck_box[l2]=lcheck_box;
+        hlcheck_box[l3]=lcheck_box;
+        hlcheck_box[l4]=lcheck_box;
 
 
-     if(upper_reach_set.subset(hcheck_box)) {
-      std::cout << "Result is safe, exiting refinement loop." << std::endl;
-      break;
-     } else {
-      std::cout << "Upper reach set is not safe, computing lower reach set... " << std::flush;
-      HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
-      std::cout << "done." << std::endl;
-      sprintf(filename, "watertank-lower_reach-%d", grid_depth);
-      plot(filename,bounding_box, Colour(0.0,0.5,1.0), lower_reach_set);
-      //textplot(filename,lower_reach_set);
+        if(upper_reach_set.subset(hcheck_box)) {
+            std::cout << "Result is safe, exiting refinement loop." << std::endl;
+            break;
+        } else {
+            std::cout << "Upper reach set is not safe, computing lower reach set... " << std::flush;
+            HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
+            std::cout << "done." << std::endl;
+            sprintf(filename, "watertank-lower_reach-%d", grid_depth);
+            plot(filename,bounding_box, Colour(0.0,0.5,1.0), lower_reach_set);
+            //textplot(filename,lower_reach_set);
 
-      if(!lower_reach_set.subset(hlcheck_box)) {
-    std::cout << "Lower reach set is not safe, exiting." << std::endl;
-    break;
-      }
-      std::cout << "Lower reach set is safe, refining the grid." << std::endl;
-     }
-     eps = eps/2.0;
+            if(!lower_reach_set.subset(hlcheck_box)) {
+                std::cout << "Lower reach set is not safe, exiting." << std::endl;
+                break;
+            }
+            std::cout << "Lower reach set is safe, refining the grid." << std::endl;
+        }
+        eps = eps/2.0;
     }
 
     if(grid_depth > max_grid_depth) {
-     std::cout << "Maximum allowed grid depth reached, cannot verify the system."<<std::endl;
+        std::cout << "Maximum allowed grid depth reached, cannot verify the system."<<std::endl;
     }
 }

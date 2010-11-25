@@ -1,5 +1,5 @@
 /***************************************************************************
- *      hybrid_simulator.h
+ *            hybrid_simulator.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 /*! \file hybrid_simulator.h
  *  \brief Simulator for hybrid systems.
  */
@@ -42,7 +42,7 @@ template<class System> class Simulator;
 
 
 
-/*! \brief A class for computing the evolution of a hybrid system.
+/*! \brief A class for computing the evolution of a hybrid system. 
  */
 template<>
 class Simulator<HybridSystem>
@@ -51,17 +51,17 @@ class Simulator<HybridSystem>
 {
     typedef HybridPoint EnclosureType;
   public:
-
+    
     //! \brief Default constructor.
     Simulator();
-
+  
     /*! \brief Make a dynamically-allocated copy. */
     Simulator<HybridSystem>* clone() const;
 
 
     //@{
     //! \name Evolution using abstract sets.
-    //! \brief Compute an approximation to the orbit set using upper semantics.
+    //! \brief Compute an approximation to the orbit set using upper semantics. 
     Orbit<HybridPoint> orbit(const HybridSystem& system, const HybridPoint& initial_point, const HybridTime& time) const;
 };
 

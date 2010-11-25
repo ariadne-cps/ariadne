@@ -1,5 +1,5 @@
 /***************************************************************************
- *      taylor_model.h
+ *            taylor_model.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -163,36 +163,36 @@ class TaylorModel<Interval>
     /*! \name Named constructors. */
     //! \brief Construct the zero quantity in \a as independent variables.
     static TaylorModel<Interval> zero(uint as) {
-     TaylorModel<Interval> r(as); return r; }
+        TaylorModel<Interval> r(as); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorModel<Interval> constant(uint as, double c) {
-     TaylorModel<Interval> r(as); r.set_value(static_cast<Float>(c)); return r; }
+        TaylorModel<Interval> r(as); r.set_value(static_cast<Float>(c)); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorModel<Interval> constant(uint as, const Float& c) {
-     TaylorModel<Interval> r(as); r.set_value(c); return r; }
+        TaylorModel<Interval> r(as); r.set_value(c); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorModel<Interval> constant(uint as, const Interval& d) {
-     TaylorModel<Interval> r(as); r.set_value(1.0); r*=d; return r; }
+        TaylorModel<Interval> r(as); r.set_value(1.0); r*=d; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
     static TaylorModel<Interval> variable(uint as, uint j) {
-     TaylorModel<Interval> r(as); r.set_gradient(j,1.0); return r; }
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); return r; }
     //! \brief Construct the quantity which scales the unit interval into the domain \a d.
     static TaylorModel<Interval> scaling(uint as, uint j, const Interval& d) {
-     TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
     //! \brief Construct the quantity which scales the codomain \a cd into the unit interval.
     static TaylorModel<Interval> unscaling(uint as, uint j, const Interval& d) {
-     TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
     //! \brief Construct the quantity which scales the interval \a cd onto the interval \a d.
     static TaylorModel<Interval> rescaling(uint as, uint j, const Interval& cd, const Interval& d) {
-     TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(cd,d); return r; }
+        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(cd,d); return r; }
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$.
     static TaylorModel<Interval> affine(const Float& c, const Vector<Float>& g) {
-     TaylorModel<Interval> r(g.size()); r.set_value(c);
-     for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
+        TaylorModel<Interval> r(g.size()); r.set_value(c);
+        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$.
     static TaylorModel<Interval> affine(const Float& x, const Vector<Float>& g, const Float& e) {
-     TaylorModel<Interval> r(g.size()); r.set_value(x); r.set_error(e);
-     for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
+        TaylorModel<Interval> r(g.size()); r.set_value(x); r.set_error(e);
+        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector< TaylorModel<Interval> > zeros(uint rs, uint as);
@@ -214,23 +214,23 @@ class TaylorModel<Interval>
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
     bool operator==(const TaylorModel<Interval>& sd) const {
-     return this->_expansion==sd._expansion && this->_error == sd._error; }
+        return this->_expansion==sd._expansion && this->_error == sd._error; }
     //! \brief Inequality operator.
     bool operator!=(const TaylorModel<Interval>& sd) const {
-     return !(*this==sd); }
+        return !(*this==sd); }
     //! \brief Comparison with another Taylor model.
     tribool operator<(const TaylorModel<Interval>& sd) const {
-     return (sd-*this)>0; }
+        return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
     tribool operator>(const TaylorModel<Interval>& sd) const {
-     return (*this-sd)>0; }
+        return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
     tribool operator<(double c) const {
-     return this->range()<c; }
+        return this->range()<c; }
     //! \brief Comparison with a scalar.
     tribool operator>(double c) const {
-     return this->range()>c; }
+        return this->range()>c; }
     //@}
 
     //@{
@@ -254,13 +254,13 @@ class TaylorModel<Interval>
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) {
-     ARIADNE_ASSERT(ne>=0); this->_error=ne; }
+        ARIADNE_ASSERT(ne>=0); this->_error=ne; }
     //! \brief Set the constant term in the expansion.
     void set_value(const Float& c) {
-     this->_expansion.set(MultiIndex::zero(this->argument_size()),c,ReverseLexicographicKeyLess()); }
+        this->_expansion.set(MultiIndex::zero(this->argument_size()),c,ReverseLexicographicKeyLess()); }
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
     void set_gradient(uint j, const Float& c) {
-     this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c,ReverseLexicographicKeyLess()); }
+        this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c,ReverseLexicographicKeyLess()); }
 
     //! \brief The coefficient of the term in $x^a$.
     const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
@@ -269,10 +269,10 @@ class TaylorModel<Interval>
 
     //! \brief The coefficient of the term \f$df/dx_j\f$.
     const Float& operator[](uint j) const {
-     return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
+        return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
     //! \brief A reference to the coefficient of the term \f$df/dx_j\f$.
     Float& operator[](uint j) {
-     return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
+        return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
 
     //! \brief An iterator to the first term in the expansion.
     iterator begin() { return this->_expansion.begin(); }
@@ -731,10 +731,10 @@ class TaylorModel<Float>
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a built-in, keeping the same number of arguments.
     TaylorModel<Float>& operator=(double c) {
-     this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),Float(c)); return *this; }
+        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),Float(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
     TaylorModel<Float>& operator=(const Float& c) {
-     this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
+        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
     TaylorModel<Float>& operator=(const Interval& c) { return (*this)=midpoint(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
@@ -745,10 +745,10 @@ class TaylorModel<Float>
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
     bool operator==(const TaylorModel<Float>& other) const {
-     return this->_expansion==other._expansion; }
+        return this->_expansion==other._expansion; }
     //! \brief Inequality operator.
     bool operator!=(const TaylorModel<Float>& other) const {
-     return !(*this==other); }
+        return !(*this==other); }
     //@}
 
     //@{

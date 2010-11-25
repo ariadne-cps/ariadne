@@ -1,5 +1,5 @@
 /***************************************************************************
- *      discretiser.h
+ *            discretiser.h
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -79,7 +79,7 @@ class Discretiser
     //! \brief Construct from evolution parameters and a method for evolving basic sets,
     //!  and a scheme for approximating sets.
     Discretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
-     : _evolver(evolver.clone()) { }
+        : _evolver(evolver.clone()) { }
 
     /*! \brief Destructor. */
     virtual ~Discretiser() { }
@@ -96,33 +96,33 @@ class Discretiser
     //! of \a system starting in \a initial_set over \a time. */
     virtual Orbit<BasicSetType>
     evolution(const SystemType& system,
-     const BasicSetType& initial_set,
-     const TimeType& time,
-     const Grid& grid,
-     const AccuracyType accuracy,
-     const Semantics semantics) const;
+              const BasicSetType& initial_set,
+              const TimeType& time,
+              const Grid& grid,
+              const AccuracyType accuracy,
+              const Semantics semantics) const;
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType>
     lower_evolution(const SystemType& system,
-     const BasicSetType& initial_set,
-     const TimeType& time,
-     const Grid& grid,
-     const AccuracyType accuracy) const;
+                    const BasicSetType& initial_set,
+                    const TimeType& time,
+                    const Grid& grid,
+                    const AccuracyType accuracy) const;
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType>
     upper_evolution(const SystemType& system,
-     const BasicSetType& initial_set,
-     const TimeType& time,
-     const Grid& grid,
-     const AccuracyType accuracy) const;
+                    const BasicSetType& initial_set,
+                    const TimeType& time,
+                    const Grid& grid,
+                    const AccuracyType accuracy) const;
   private:
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
-      const BasicSetType& initial_set,
-      const Grid& grid,
-      const AccuracyType accuracy) const;
+                                    const BasicSetType& initial_set,
+                                    const Grid& grid,
+                                    const AccuracyType accuracy) const;
 
 };
 
@@ -153,7 +153,7 @@ class HybridDiscretiser
     //! \brief Construct from evolution parameters and a method for evolving basic sets,
     //!  and a scheme for approximating sets.
     HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
-     : _evolver(evolver.clone()) { }
+        : _evolver(evolver.clone()) { }
 
     //! \brief Make a dynamically-allocated copy.
     HybridDiscretiser<HES>* clone() const { return new HybridDiscretiser<HES>(*this); }
@@ -167,55 +167,55 @@ class HybridDiscretiser
     //! of \a system starting in \a initial_set over \a time. */
     virtual Orbit<BasicSetType>
     evolution(const SystemType& system,
-     const BasicSetType& initial_set,
-     const TimeType& time,
-     const AccuracyType accuracy,
-     const Semantics semantics) const;
+              const BasicSetType& initial_set,
+              const TimeType& time,
+              const AccuracyType accuracy,
+              const Semantics semantics) const;
 
     //! \brief Compute approximations to the reachable set
     //! of \a system starting in \a initial_set over \a time. */
     virtual DenotableSetType
     reach(const SystemType& system,
-    const BasicSetType& initial_set,
-    const TimeType& time,
-    const AccuracyType accuracy,
-    const Semantics semantics) const;
+                const BasicSetType& initial_set,
+                const TimeType& time,
+                const AccuracyType accuracy,
+                const Semantics semantics) const;
 
     //! \brief Compute approximations to the evolved set
     //! of \a system starting in \a initial_set over \a time. */
     virtual DenotableSetType
     evolve(const SystemType& system,
-     const BasicSetType& initial_set,
-     const TimeType& time,
-     const AccuracyType accuracy,
-     const Semantics semantics) const;
+                 const BasicSetType& initial_set,
+                 const TimeType& time,
+                 const AccuracyType accuracy,
+                 const Semantics semantics) const;
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType>
     lower_evolution(const SystemType& system,
-     const BasicSetType& initial_set,
-     const TimeType& time,
-     const AccuracyType accuracy) const;
+                    const BasicSetType& initial_set,
+                    const TimeType& time,
+                    const AccuracyType accuracy) const;
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType>
     upper_evolution(const SystemType& system,
-     const BasicSetType& initial_set,
-     const TimeType& time,
-     const AccuracyType accuracy) const;
+                    const BasicSetType& initial_set,
+                    const TimeType& time,
+                    const AccuracyType accuracy) const;
 
 
   private:
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
-      const BasicSetType& initial_set,
-      const HybridGrid& system_grid,
-      const AccuracyType accuracy) const;
+                                    const BasicSetType& initial_set,
+                                    const HybridGrid& system_grid,
+                                    const AccuracyType accuracy) const;
 
     DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
-      const BasicSetType& initial_set,
-      const HybridGrid& system_grid,
-      const AccuracyType accuracy) const;
+                                 const BasicSetType& initial_set,
+                                 const HybridGrid& system_grid,
+                                 const AccuracyType accuracy) const;
 };
 
 } // namespace Ariadne

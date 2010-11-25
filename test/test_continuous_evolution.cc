@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_continuous_evolution.cc
+ *            test_continuous_evolution.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -51,8 +51,8 @@ using namespace std;
 struct FailOne : VectorFunctionData<2,2,1> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-    r[0] = 1.0;
-    r[1] = -p[0] * x[1] + p[0];
+	      r[0] = 1.0;
+          r[1] = -p[0] * x[1] + p[0];
     }
 };
 
@@ -60,9 +60,9 @@ struct FailOne : VectorFunctionData<2,2,1> {
 struct FailTwo : VectorFunctionData<3,3,1> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-    r[0] = 1.0;
-    r[1] = x[1] * x[2]/p[0];
-    r[2] = 0.0;
+	      r[0] = 1.0;
+          r[1] = x[1] * x[2]/p[0];
+          r[2] = 0.0;
     }
 };
 

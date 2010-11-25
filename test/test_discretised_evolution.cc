@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_discretised_evolution.cc
+ *            test_discretised_evolution.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -124,7 +124,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
     Orbit<EnclosureType> evolve_orbit
-     = evolver.orbit(system,initial_box,steps,UPPER_SEMANTICS);
+        = evolver.orbit(system,initial_box,steps,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     EnclosureType const& initial_set=evolve_orbit.initial();
@@ -135,7 +135,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     Orbit<GridCell> discrete_orbit
-     = discrete_evolver.upper_evolution(system,initial_cell,steps,grid,depth);
+        = discrete_evolver.upper_evolution(system,initial_cell,steps,grid,depth);
     cout << "done." << endl;
 
     GridTreeSet const& reach_cells=discrete_orbit.reach();
@@ -153,25 +153,25 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Plot the intial, evolve and reach sets
     {
-     Figure fig;
-     fig.set_bounding_box(Box(2,Interval(-3,3)));
-     fig << line_style(true);
-     fig << line_style(true);
-     fig << fill_colour(cyan) << reach_cells;
-     fig << fill_colour(yellow) << initial_cell;
-     fig << fill_colour(green) << final_cells;
-     fig.write("test_discretised_evolution-henon-cells");
+        Figure fig;
+        fig.set_bounding_box(Box(2,Interval(-3,3)));
+        fig << line_style(true);
+        fig << line_style(true);
+        fig << fill_colour(cyan) << reach_cells;
+        fig << fill_colour(yellow) << initial_cell;
+        fig << fill_colour(green) << final_cells;
+        fig.write("test_discretised_evolution-henon-cells");
     }
 
     // Plot the intial, evolve and reach sets
     {
-     Figure fig;
-     fig.set_bounding_box(Box(2,Interval(-3,3)));
-     fig << line_style(true);
-     fig << fill_colour(cyan) << reach_set;
-     fig << fill_colour(yellow) << initial_set;
-     fig << fill_colour(green) << final_set;
-     fig.write("test_discretised_evolution-henon-sets");
+        Figure fig;
+        fig.set_bounding_box(Box(2,Interval(-3,3)));
+        fig << line_style(true);
+        fig << fill_colour(cyan) << reach_set;
+        fig << fill_colour(yellow) << initial_set;
+        fig << fill_colour(green) << final_set;
+        fig.write("test_discretised_evolution-henon-sets");
     }
 }
 
@@ -217,7 +217,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
     Orbit<EnclosureType> evolve_orbit
-     = evolver.orbit(system,initial_box,time,UPPER_SEMANTICS);
+        = evolver.orbit(system,initial_box,time,UPPER_SEMANTICS);
     cout << "done." << endl;
     EnclosureType const& initial_set=evolve_orbit.initial();
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach();
@@ -227,7 +227,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     Orbit<GridCell> discrete_orbit
-     = discretiser.upper_evolution(system,initial_cell,time,grid,depth);
+        = discretiser.upper_evolution(system,initial_cell,time,grid,depth);
     cout << "done." << endl;
     GridTreeSet const& reach_cells=discrete_orbit.reach();
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate();
@@ -240,27 +240,27 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Plot the intial, evolve and reach sets
     {
-     Figure fig;
-     fig.set_bounding_box(Box(2,Interval(-3,3)));
-     fig << line_style(true);
-     fig << line_style(true);
-     fig << fill_colour(cyan) << reach_cells;
-     fig << fill_colour(magenta) << intermediate_cells;
-     fig << fill_colour(blue) << initial_cell;
-     fig << fill_colour(blue) << final_cells;
-     fig.write("test_discretised_evolution-vdp-cells");
+        Figure fig;
+        fig.set_bounding_box(Box(2,Interval(-3,3)));
+        fig << line_style(true);
+        fig << line_style(true);
+        fig << fill_colour(cyan) << reach_cells;
+        fig << fill_colour(magenta) << intermediate_cells;
+        fig << fill_colour(blue) << initial_cell;
+        fig << fill_colour(blue) << final_cells;
+        fig.write("test_discretised_evolution-vdp-cells");
     }
 
     // Plot the intial, evolve and reach sets
     {
-     Figure fig;
-     fig.set_bounding_box(Box(2,Interval(-3,3)));
-     fig << line_style(true);
-     fig << fill_colour(cyan) << reach_set;
-     fig << fill_colour(magenta) << intermediate_set;
-     fig << fill_colour(blue) << initial_set;
-     fig << fill_colour(blue) << final_set;
-     fig.write("test_discretised_evolution-vdp-sets");
+        Figure fig;
+        fig.set_bounding_box(Box(2,Interval(-3,3)));
+        fig << line_style(true);
+        fig << fill_colour(cyan) << reach_set;
+        fig << fill_colour(magenta) << intermediate_set;
+        fig << fill_colour(blue) << initial_set;
+        fig << fill_colour(blue) << final_set;
+        fig.write("test_discretised_evolution-vdp-sets");
     }
 
 
@@ -326,7 +326,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     cout << "Computing evolution... " << flush;
     // evolver.verbosity=1;
     Orbit<EnclosureType> evolve_orbit
-     = evolver.orbit(ha,EnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
+        = evolver.orbit(ha,EnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     ARIADNE_TEST_PRINT(evolve_orbit);
@@ -338,7 +338,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     Orbit<HybridGridCell> discrete_orbit
-     = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
+        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     ContinuousEnclosureType const& initial_set=evolve_orbit.initial().continuous_state_set();
@@ -364,27 +364,27 @@ void TestDiscretisedEvolution::test_hybrid_time() const
 
     // Plot the intial, evolve and reach sets
     {
-     Figure fig;
-     fig.set_bounding_box(Box(2,Interval(-3,3)));
-     fig << line_style(true);
-     fig << line_style(true);
-     fig << fill_colour(cyan) << reach_cells;
-     fig << fill_colour(magenta) << intermediate_cells;
-     fig << fill_colour(yellow) << initial_cell;
-     fig << fill_colour(green) << final_cells;
-     fig.write("test_discrete_evolver-hybrid-cells");
+        Figure fig;
+        fig.set_bounding_box(Box(2,Interval(-3,3)));
+        fig << line_style(true);
+        fig << line_style(true);
+        fig << fill_colour(cyan) << reach_cells;
+        fig << fill_colour(magenta) << intermediate_cells;
+        fig << fill_colour(yellow) << initial_cell;
+        fig << fill_colour(green) << final_cells;
+        fig.write("test_discrete_evolver-hybrid-cells");
     }
 
     // Plot the intial, evolve and reach sets
     {
-     Figure fig;
-     fig.set_bounding_box(Box(2,Interval(-3,3)));
-     fig << line_style(true);
-     fig << fill_colour(cyan) << reach_set;
-     fig << fill_colour(magenta) << intermediate_set;
-     fig << fill_colour(yellow) << initial_set;
-     fig << fill_colour(green) << final_set;
-     fig.write("test_discrete_evolver-hybrid-sets");
+        Figure fig;
+        fig.set_bounding_box(Box(2,Interval(-3,3)));
+        fig << line_style(true);
+        fig << fill_colour(cyan) << reach_set;
+        fig << fill_colour(magenta) << intermediate_set;
+        fig << fill_colour(yellow) << initial_set;
+        fig << fill_colour(green) << final_set;
+        fig.write("test_discrete_evolver-hybrid-sets");
     }
 
 }

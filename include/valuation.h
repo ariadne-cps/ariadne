@@ -1,5 +1,5 @@
 /***************************************************************************
- *      valuation.h
+ *            valuation.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -91,9 +91,9 @@ template<class X> class Valuation
 inline std::ostream& operator<<(std::ostream& os, const DiscreteValuation& val) {
     char sep='{';
     for(Map<Identifier,DiscreteValuation::StringType>::const_iterator iter=val.string_values().begin(); iter!=val.string_values().end(); ++iter) {
-     os << sep << iter->first << ":" << iter->second; sep=','; }
+        os << sep << iter->first << ":" << iter->second; sep=','; }
     for(Map<Identifier,DiscreteValuation::IntegerType>::const_iterator iter=val.integer_values().begin(); iter!=val.integer_values().end(); ++iter) {
-     os << sep << iter->first << ":" << iter->second; }
+        os << sep << iter->first << ":" << iter->second; }
     return os << '}';
 }
 
@@ -104,11 +104,11 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Contin
 template<class X> inline std::ostream& operator<<(std::ostream& os, const Valuation<X>& val) {
     char sep='{';
     for(Map<Identifier,DiscreteValuation::StringType>::const_iterator iter=val._string_values.begin(); iter!=val._string_values.end(); ++iter) {
-     os << sep << iter->first << ":" << iter->second; sep=','; }
+        os << sep << iter->first << ":" << iter->second; sep=','; }
     for(Map<Identifier,DiscreteValuation::IntegerType>::const_iterator iter=val._integer_values.begin(); iter!=val._integer_values.end(); ++iter) {
-     os << sep << iter->first << ":" << iter->second; }
+        os << sep << iter->first << ":" << iter->second; }
     for(typename Map<Identifier,X>::const_iterator iter=val._real_values.begin(); iter!=val._real_values.end(); ++iter) {
-     os << sep << iter->first << ":" << iter->second; }
+        os << sep << iter->first << ":" << iter->second; }
     return os << '}';
 }
 

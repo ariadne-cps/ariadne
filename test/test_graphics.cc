@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_graphics.cc
+ *            test_graphics.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -40,7 +40,7 @@ using namespace Ariadne;
 struct RadiusSquare : VectorFunctionData<1,2,1> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
+        r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
     }
 };
 
@@ -70,12 +70,12 @@ int main(int argc, char **argv)
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
 
     {
-     Figure g;
-     g.set_bounding_box(Box(2, -1.,+1., -1.,+1.));
-     g<<bx1;
-     g.write("test_graphics-bx1");
+        Figure g;
+        g.set_bounding_box(Box(2, -1.,+1., -1.,+1.));
+        g<<bx1;
+        g.write("test_graphics-bx1");
 
-     //return 0;
+        //return 0;
     }
 
     Figure g;
@@ -118,8 +118,8 @@ int main(int argc, char **argv)
 
     InterpolatedCurve cv(Point(2,0.0));
     for(int i=1; i<=10; ++i) {
-     Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
-     cv.insert(i,pt);
+        Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
+        cv.insert(i,pt);
     }
 
     g.set_bounding_box(cv.bounding_box());

@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_taylor_model.cc
+ *            test_taylor_model.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -198,7 +198,7 @@ void TestTaylorModel::test_functions()
 
     // Test exponential based at log2
     ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,0.693147,0.5))),
-    T(E(1,6, 2.00000,1.00000,0.25000,0.04166,0.00520,0.00052,0.00004), 0.00006));
+                                  T(E(1,6, 2.00000,1.00000,0.25000,0.04166,0.00520,0.00052,0.00004), 0.00006));
 
 }
 
@@ -217,11 +217,11 @@ void TestTaylorModel::test_intersection()
 
     // Test intersection with no roundoff errors
     ARIADNE_TEST_EQUAL(intersection(T(E(1,4, 1.0,-0.75,0.0,3.0,3.25),0.5),T(E(1,4, 1.0,0.0,0.25,2.0,3.0),1.0)),
-     T(E(1,4, 1.0,-0.625,0.0,2.75,3.25),0.50));
+        T(E(1,4, 1.0,-0.625,0.0,2.75,3.25),0.50));
 
     // Test intersection with roundoff errors
     ARIADNE_TEST_EQUAL(intersection(T(E(1,0, 2./3),0.5),T(E(1,0, 6./5),0.25)),
-     T(E(1,0, 1.0583333333333331),0.10833333333333339));
+        T(E(1,0, 1.0583333333333331),0.10833333333333339));
 }
 
 void TestTaylorModel::test_split()

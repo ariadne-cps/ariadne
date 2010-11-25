@@ -1,5 +1,5 @@
 /***************************************************************************
- *      polynomial.cc
+ *            polynomial.cc
  *
  *  Copyright 2008  Pieter Collins
  *

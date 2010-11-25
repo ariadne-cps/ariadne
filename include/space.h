@@ -1,5 +1,5 @@
 /***************************************************************************
- *      space.h
+ *            space.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -73,43 +73,43 @@ template<class T> struct Space
 
     //! \brief A list giving ordered variables.
     List<String> variable_names() const {
-     List<String> res; for(uint i=0; i!=this->_variables.size(); ++i) { res.append(this->_variables[i].name()); } return res; }
+        List<String> res; for(uint i=0; i!=this->_variables.size(); ++i) { res.append(this->_variables[i].name()); } return res; }
     //! \brief A list giving ordered variables.
     List<VariableType> variables() const { return this->_variables; }
     //! \brief A map giving the index of a given variable.
     Map<VariableType,SizeType> indices() const {
-     Map<VariableType,SizeType> indices;
-     for(uint i=0; i!=this->_variables.size(); ++i) {
-      ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
-      indices.insert(this->_variables[i],i);
-     }
-     return indices; }
+        Map<VariableType,SizeType> indices;
+        for(uint i=0; i!=this->_variables.size(); ++i) {
+            ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
+            indices.insert(this->_variables[i],i);
+        }
+        return indices; }
 
     //! \brief Tests if the variable \a v is in the space.
     bool contains(const VariableType& v) const {
-     for(uint i=0; i!=_variables.size(); ++i) {
-      if(v==_variables[i]) { return true; } }
-     return false; }
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(v==_variables[i]) { return true; } }
+        return false; }
     //! \brief The index of the named variable \a v.
     SizeType index(const VariableType& v) const {
-     for(uint i=0; i!=_variables.size(); ++i) {
-      if(v==_variables[i]) { return i; } }
-     ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
-     return _variables.size(); }
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(v==_variables[i]) { return i; } }
+        ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
+        return _variables.size(); }
     //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
     Space<T>& insert(const VariableType& v) {
-     for(uint i=0; i!=_variables.size(); ++i) {
-      if(_variables[i]==v) { return *this; } }
-     _variables.push_back(v); return *this; }
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(_variables[i]==v) { return *this; } }
+        _variables.push_back(v); return *this; }
     //! \brief Adjoins the variables in \a spc.
     Space<T>& adjoin(const Space<T>& spc) {
-     for(uint i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
+        for(uint i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
     //! \brief Append the named variable \a v to the variables defining the space.
     Space<T>& append(const VariableType& v) {
-     for(uint i=0; i!=_variables.size(); ++i) {
-      ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
-     }
-     _variables.push_back(v); return *this; }
+        for(uint i=0; i!=_variables.size(); ++i) {
+            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
+        }
+        _variables.push_back(v); return *this; }
     //! \brief Append the named variable \a v to the variables defining the space.
     Space<T>& operator,(const String& v) { return this->append(VariableType(v)); }
   private:

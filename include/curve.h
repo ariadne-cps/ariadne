@@ -1,5 +1,5 @@
 /***************************************************************************
- *      curve.h
+ *            curve.h
  *
  *  Copyright  2007-8  Pieter Collins
  *
@@ -119,20 +119,20 @@ class InterpolatedCurve
     InterpolatedCurve() : _points() { }
     /*! \brief Create a curve with a single point \a pt at parameter value 0. */
     InterpolatedCurve(const Point& pt)
-     : _points() { this->insert(0,pt); }
+        : _points() { this->insert(0,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
     InterpolatedCurve(double s, const Point& pt)
-     : _points() { this->insert(s,pt); }
+        : _points() { this->insert(s,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
     InterpolatedCurve(const Float& s, const Point& pt)
-     : _points() { this->insert(s,pt); }
+        : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
     InterpolatedCurve(const Point& pt0, const Point& pt1)
-     : _points() { this->insert(0,pt0); this->insert(1,pt1); }
+        : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     void insert(const Float& s, const Point& pt) {
-     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.dimension()==this->dimension()); }
-     this->_points.insert(std::pair< Float, Point >(s,pt)); }
+        if(!this->_points.empty()) { ARIADNE_ASSERT(pt.dimension()==this->dimension()); }
+        this->_points.insert(std::pair< Float, Point >(s,pt)); }
 
     /*! \brief The number of segments in the curve. */
     size_t size() const { return this->_points.size(); }

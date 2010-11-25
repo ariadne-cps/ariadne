@@ -1,5 +1,5 @@
 /***************************************************************************
- *      numeric_submodule.cc
+ *            numeric_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -49,14 +49,14 @@ template<>
 struct from_python_dict<Interval> {
     from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
     static void* convertible(PyObject* obj_ptr) {
-     if (!PyDict_Check(obj_ptr) || len(extract<dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
+        if (!PyDict_Check(obj_ptr) || len(extract<dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-     boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
-     boost::python::list lst=dct.items();
-     assert(boost::python::len(lst)==1);
-     void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-     new (storage) Interval(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
-     data->convertible = storage;
+        boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
+        boost::python::list lst=dct.items();
+        assert(boost::python::len(lst)==1);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        new (storage) Interval(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
+        data->convertible = storage;
     }
 };
 
@@ -64,13 +64,13 @@ template<>
 struct from_python_list<Interval> {
     from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
     static void* convertible(PyObject* obj_ptr) {
-     if (!PyList_Check(obj_ptr) || len(extract<list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
+        if (!PyList_Check(obj_ptr) || len(extract<list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-     boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
-     assert(boost::python::len(lst)==2);
-     void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-     new (storage) Interval(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
-     data->convertible = storage;
+        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
+        assert(boost::python::len(lst)==2);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        new (storage) Interval(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
+        data->convertible = storage;
     }
 };
 
@@ -79,10 +79,10 @@ struct interval_from_python_str {
     interval_from_python_str() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyString_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-     std::string str = boost::python::extract<std::string>(obj_ptr);
-     void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-     storage = new Interval(str);
-     data->convertible = storage;
+        std::string str = boost::python::extract<std::string>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        storage = new Interval(str);
+        data->convertible = storage;
     }
 };
 */
@@ -157,7 +157,7 @@ void export_float()
     float_class.def(double() - self);
     float_class.def(double() * self);
     float_class.def(double() / self);
-
+ 
     implicitly_convertible<double,Float>();
 
     def("set_output_precision", &set_output_precision);

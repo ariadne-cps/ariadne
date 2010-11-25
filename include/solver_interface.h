@@ -1,5 +1,5 @@
 /***************************************************************************
- *      solver_interface.h
+ *            solver_interface.h
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *

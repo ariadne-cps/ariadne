@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_hybrid_evolution.cc
+ *            test_hybrid_evolution.cc
  *
  *  Copyright  2006-9  Pieter Collins
  *
@@ -131,10 +131,10 @@ void TestSimpleHybridEvolver::test_flow() const {
     ARIADNE_TEST_CHECK_WARN(orbit.intermediate().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-flow"),Box(2, -0.5,+3.5, -1.0, +3.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -153,10 +153,10 @@ void TestSimpleHybridEvolver::test_exact_final_time() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-exact_final_time"),Box(2, -0.5,+3.5, -1.0, +3.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -180,11 +180,11 @@ void TestSimpleHybridEvolver::test_urgent_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-urgent_event"),Box(2, -1.5,+2.5, -1.0, +3.0),
-      guard_set_colour,Box(2,0.5,8.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         guard_set_colour,Box(2,0.5,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -207,11 +207,11 @@ void TestSimpleHybridEvolver::test_partial_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-partial_event"),Box(2, -1.5,+2.5, -1.0, +3.0),
-      guard_set_colour,Box(2,2.0,8.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         guard_set_colour,Box(2,2.0,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -234,11 +234,11 @@ void TestSimpleHybridEvolver::test_step_size_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),1u);
 
     plot(cstr("test_"+evolver_name+"-step_size_event"),Box(2, -0.5,+2.5, -1.0, +3.0),
-      guard_set_colour,Box(2,2.0,8.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         guard_set_colour,Box(2,2.0,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -259,11 +259,11 @@ void TestSimpleHybridEvolver::test_initially_active_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
 
     plot(cstr("test_"+evolver_name+"-initially_active"),Box(2, -2.0,+2.0, -1.0, +2.0),
-      guard_set_colour,Box(2,-8.0,0.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         guard_set_colour,Box(2,-8.0,0.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 
 
 }
@@ -281,11 +281,11 @@ void TestSimpleHybridEvolver::test_initially_active_attracting_event() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
 
     plot(cstr("test_"+evolver_name+"-initially_active_attracting"),Box(2, -1.0,+2.0, -1.0, +2.0),
-      Colour(0.75,0.75,0.75),Box(2,-1.0,0.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         Colour(0.75,0.75,0.75),Box(2,-1.0,0.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 
 
 }
@@ -301,11 +301,11 @@ void TestSimpleHybridEvolver::test_initially_active_repelling_event() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
 
     plot(cstr("test_"+evolver_name+"-initially_active_repelling"),Box(2, -1.0,+2.0, -1.0, +2.0),
-      Colour(0.75,0.75,0.75),Box(2,-1.0,0.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         Colour(0.75,0.75,0.75),Box(2,-1.0,0.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -325,11 +325,11 @@ void TestSimpleHybridEvolver::test_impact() const {
     //ARIADNE_TEST_CHECK(orbit.final().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-impact"),Box(2, -3.0,+2.0, -4.0, +2.0),
-      guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 void TestSimpleHybridEvolver::test_tangency() const {
@@ -351,20 +351,20 @@ void TestSimpleHybridEvolver::test_tangency() const {
     const uint depth = 2u;
     GridTreeSet reach_paving(2);
     for(uint i=0; i!=orbit.reach().size(); ++i) {
-     orbit.reach()[q][i].adjoin_outer_approximation_to(reach_paving,depth);
+        orbit.reach()[q][i].adjoin_outer_approximation_to(reach_paving,depth);
     }
     GridTreeSet final_paving(2);
     for(uint i=0; i!=orbit.final().size(); ++i) {
-     orbit.final()[q][i].adjoin_outer_approximation_to(final_paving,depth);
+        orbit.final()[q][i].adjoin_outer_approximation_to(final_paving,depth);
     }
 */
 
     plot(cstr("test_"+evolver_name+"-tangency"),Box(2, -2.0,+2.0, -2.0, +1.0),
-      //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 #include "affine_set.h"
@@ -386,12 +386,12 @@ void TestSimpleHybridEvolver::test_simultaneous_events() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-simultaneous_events"),Box(2, -3.0,+2.0, -3.0, +2.0),
-      guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
-      guard_set_colour,Box(2,-8.0,+8.0,1.0,8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+         guard_set_colour,Box(2,-8.0,+8.0,1.0,8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -415,11 +415,11 @@ void TestSimpleHybridEvolver::test_creep() const {
     ARIADNE_TEST_BINARY_PREDICATE(subset,HybridEnclosure(*orbit.final().begin()),HybridBox(q,Box(2, 0.24,0.635, 1.365,1.76)));
 
     plot(cstr("test_"+evolver_name+"-creep"),Box(2, -1.5,+1.5, -0.5, +3.5),
-      guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 void TestSimpleHybridEvolver::test_unwind() const {
@@ -437,11 +437,11 @@ void TestSimpleHybridEvolver::test_unwind() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
 
     plot(cstr("test_"+evolver_name+"-unwind"),Box(2, -2.5,+1.5, -0.5, +2.5),
-      Colour(0.75,0.75,0.75),Box(2,1.0,8.0,-8.0,+8.0),
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         Colour(0.75,0.75,0.75),Box(2,1.0,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 class TestContraintHybridEvolver
@@ -707,32 +707,32 @@ void TestHybridEvolution::test_constant_derivative_system() const
     ARIADNE_TEST_PRINT(initial_set);
 
     {
-     // Test continuous evolution without any jumps
-     HybridTime evolution_time(0.5,1);
-     ARIADNE_TEST_PRINT(evolution_time);
-     Orbit<HybridTaylorConstrainedImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
-     ARIADNE_TEST_PRINT(orbit);
-     ListSet<HybridTaylorConstrainedImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
-     ARIADNE_TEST_PRINT(final_set);
-     HybridTaylorConstrainedImageSet expected_final_set(q1,Box(2, +0.4375,+0.5625, -0.0625,+0.0625));
-     ARIADNE_TEST_PRINT(expected_final_set);
-     ARIADNE_TEST_COMPARE(norm(final_set[q1][0].models()-expected_final_set.second.models()),<,1e-15);
+        // Test continuous evolution without any jumps
+        HybridTime evolution_time(0.5,1);
+        ARIADNE_TEST_PRINT(evolution_time);
+        Orbit<HybridTaylorConstrainedImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(orbit);
+        ListSet<HybridTaylorConstrainedImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(final_set);
+        HybridTaylorConstrainedImageSet expected_final_set(q1,Box(2, +0.4375,+0.5625, -0.0625,+0.0625));
+        ARIADNE_TEST_PRINT(expected_final_set);
+        ARIADNE_TEST_COMPARE(norm(final_set[q1][0].models()-expected_final_set.second.models()),<,1e-15);
     }
 
     {
-     // Test continuous evolution with a single transverse jump
-     HybridTime evolution_time(2.0,2);
-     ARIADNE_TEST_PRINT(evolution_time);
+        // Test continuous evolution with a single transverse jump
+        HybridTime evolution_time(2.0,2);
+        ARIADNE_TEST_PRINT(evolution_time);
 
-     Orbit<HybridTaylorConstrainedImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
-     ARIADNE_TEST_PRINT(orbit);
+        Orbit<HybridTaylorConstrainedImageSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(orbit);
 
-     ListSet<HybridTaylorConstrainedImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
-     ARIADNE_TEST_PRINT(final_set);
-     HybridTaylorConstrainedImageSet expected_final_set(q2,Box(2, -0.0625,+0.0625, -0.0625,+0.0625));
-     ARIADNE_TEST_PRINT(expected_final_set);
+        ListSet<HybridTaylorConstrainedImageSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(final_set);
+        HybridTaylorConstrainedImageSet expected_final_set(q2,Box(2, -0.0625,+0.0625, -0.0625,+0.0625));
+        ARIADNE_TEST_PRINT(expected_final_set);
 
-     ARIADNE_TEST_COMPARE(norm(final_set[q2][0].models()-expected_final_set.second.models()),<,1e-14);
+        ARIADNE_TEST_COMPARE(norm(final_set[q2][0].models()-expected_final_set.second.models()),<,1e-14);
     }
 
 }
@@ -783,7 +783,7 @@ void TestHybridEvolution::test_bouncing_ball() const
     ARIADNE_TEST_EVALUATE(orbit.final()[q2]);
 
     plot("test_hybrid_evolution-bouncing_ball-orbit",Box(2,-1.,6.,-12.,8.),
-      Colour(.99,.99,.99),Box(2,-2.,0.,-20.,+20.),Colour(0,0.5,1),orbit.reach()[q1],Colour(0,1,1),orbit.reach()[q2]);
+         Colour(.99,.99,.99),Box(2,-2.,0.,-20.,+20.),Colour(0,0.5,1),orbit.reach()[q1],Colour(0,1,1),orbit.reach()[q2]);
 }
 
 
@@ -937,7 +937,7 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
 
     plot("test_hybrid_evolution-transverse_linear_crossing",Box(2, -1.0,3.0, -1.0,3.0),
-      Colour(0,0,1),evolved_set[q2][0]);
+         Colour(0,0,1),evolved_set[q2][0]);
 }
 
 void TestHybridEvolver::test_transverse_cubic_crossing()
@@ -960,7 +960,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
     ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
     plot("test_hybrid_evolution-transverse_cubic_crossing",Box(2, -1.0,3.0, -1.0,3.0),
-      Colour(0,0,1),evolved_set[q2][0]);
+         Colour(0,0,1),evolved_set[q2][0]);
 }
 
 void TestHybridEvolver::test_transverse_cube_root_crossing()

@@ -1,5 +1,5 @@
 /***************************************************************************
- *      integrator.cc
+ *            integrator.cc
  *
  *  Copyright  2006-10  Pieter Collins
  *
@@ -80,22 +80,22 @@ IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& 
     Interval ih(0,h);
 
     while(!success) {
-     ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
-     bx=dx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
-     for(uint i=0; i!=EXPANSION_STEPS; ++i) {
-      df=vf.evaluate(bx);
-      nbx=dx+delta+ih*df;
-      if(subset(nbx,bx)) {
-    success=true;
-    break;
-      } else {
-    bx=dx+delta+MULTIPLIER*ih*df;
-      }
-     }
-     if(!success) {
-      h/=2;
-      ih=Interval(0,h);
-     }
+        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
+        bx=dx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
+        for(uint i=0; i!=EXPANSION_STEPS; ++i) {
+            df=vf.evaluate(bx);
+            nbx=dx+delta+ih*df;
+            if(subset(nbx,bx)) {
+                success=true;
+                break;
+            } else {
+                bx=dx+delta+MULTIPLIER*ih*df;
+            }
+        }
+        if(!success) {
+            h/=2;
+            ih=Interval(0,h);
+        }
     }
 
     ARIADNE_ASSERT(subset(nbx,bx));
@@ -104,10 +104,10 @@ IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& 
     vfbx=vf.evaluate(bx);
 
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
-     bx=nbx;
-     vfbx=vf.evaluate(bx);
-     nbx=dx+delta+ih*vfbx;
-     ARIADNE_ASSERT_MSG(subset(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
+        bx=nbx;
+        vfbx=vf.evaluate(bx);
+        nbx=dx+delta+ih*vfbx;
+        ARIADNE_ASSERT_MSG(subset(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
     }
 
 
@@ -121,7 +121,7 @@ IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& 
     ARIADNE_ASSERT(subset(dx,bx));
 
     ARIADNE_ASSERT_MSG(subset(dx+h*vf.evaluate(bx),bx),
-     "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+h*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
+        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+h*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(h,bx);
 }
@@ -136,14 +136,14 @@ IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, co
     VectorTaylorFunction flow=VectorTaylorFunction::identity(dx0);
     Float t=0.0;
     while(t<tmax) {
-     IntervalVector dx=flow.range();
-     Float h=tmax-t;
-     IntervalVector bx;
-     make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
-     VectorTaylorFunction step=this->flow_step(vf,dx,h,bx);
-     step=partial_evaluate(step,n,h);
-     flow=compose(step,flow);
-     t=t+h;
+        IntervalVector dx=flow.range();
+        Float h=tmax-t;
+        IntervalVector bx;
+        make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
+        VectorTaylorFunction step=this->flow_step(vf,dx,h,bx);
+        step=partial_evaluate(step,n,h);
+        flow=compose(step,flow);
+        t=t+h;
     }
     return flow;
 }
@@ -201,26 +201,26 @@ TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& d
 
     /*
     for(uint k=0; k!=this->_temporal_order; ++k) {
-     for(uint i=0; i!=nx; ++i) {
-      phi[np+i]=antiderivative(compose(vf[i],phi),np+nx)+phi0[i];
-     }
+        for(uint i=0; i!=nx; ++i) {
+            phi[np+i]=antiderivative(compose(vf[i],phi),np+nx)+phi0[i];
+        }
     }
     */
 
     ARIADNE_LOG(4,"phi="<<phi<<"\n");
     for(uint k=0; k!=this->temporal_order(); ++k) {
-     bool last_step=(phi.error()<this->maximum_error());
-     VectorTaylorFunction fphi=compose(f,phi);
-     ARIADNE_LOG(4,"fphi="<<fphi<<"\n");
-     for(uint i=0; i!=nx; ++i) {
-      phi[i]=antiderivative(fphi[i],nx)+phi0[i];
-     }
-     ARIADNE_LOG(3,"phi="<<phi<<"\n");
-     if(last_step) { break; }
+        bool last_step=(phi.error()<this->maximum_error());
+        VectorTaylorFunction fphi=compose(f,phi);
+        ARIADNE_LOG(4,"fphi="<<fphi<<"\n");
+        for(uint i=0; i!=nx; ++i) {
+            phi[i]=antiderivative(fphi[i],nx)+phi0[i];
+        }
+        ARIADNE_LOG(3,"phi="<<phi<<"\n");
+        if(last_step) { break; }
     }
 
     if(phi.error()>this->maximum_error()) {
-     ARIADNE_WARN("Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->temporal_order()<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
+        ARIADNE_WARN("Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->temporal_order()<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
     VectorTaylorFunction res(nx,ScalarTaylorFunction(dom));

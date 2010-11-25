@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_nonlinear_programming.cc
+ *            test_nonlinear_programming.cc
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -42,25 +42,25 @@ class TestOptimiser
     scoped_ptr<OptimiserInterface> optimiser;
   public:
     TestOptimiser(const OptimiserInterface& opt)
-     : optimiser(opt.clone()) { }
+        : optimiser(opt.clone()) { }
 
     void test() {
-     ARIADNE_TEST_CALL(test_linear_feasibility());
+        ARIADNE_TEST_CALL(test_linear_feasibility());
     }
 
     void test_linear_feasibility() {
-     // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
-     List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
-     RealVectorFunction g=RealVectorFunction(1u, 2*x[0]+x[1]);
-     ARIADNE_TEST_PRINT(g);
-     Box D(2, 0.0,2.0, 0.0,2.0);
-     Box C(1, -2.0,1.0);
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        RealVectorFunction g=RealVectorFunction(1u, 2*x[0]+x[1]);
+        ARIADNE_TEST_PRINT(g);
+        Box D(2, 0.0,2.0, 0.0,2.0);
+        Box C(1, -2.0,1.0);
 
-     ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-     C=Box(1, 1.0,1.5);
-     ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-     D=Box(2, 1.0,1.5,0.5,1.0);
-     ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        C=Box(1, 1.0,1.5);
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        D=Box(2, 1.0,1.5,0.5,1.0);
+        ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
 };

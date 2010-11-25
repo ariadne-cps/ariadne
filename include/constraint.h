@@ -1,5 +1,5 @@
 /***************************************************************************
- *      constraint.h
+ *            constraint.h
  *
  *  Copyright 2009  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *      grid_submodule.cc
+ *            grid_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *

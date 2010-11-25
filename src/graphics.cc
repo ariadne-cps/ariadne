@@ -1,5 +1,5 @@
 /***************************************************************************
- *      graphics.cc
+ *            graphics.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -53,9 +53,9 @@ static const int RIGHT_MARGIN = 10;
 
 struct GraphicsProperties {
     GraphicsProperties()
-     : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_opacity(1.0), fill_colour(white) { }
+        : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_opacity(1.0), fill_colour(white) { }
     GraphicsProperties(bool ls, double lw, Colour lc, bool fs, double fo, Colour fc)
-     : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_opacity(fo), fill_colour(fc) { }
+        : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_opacity(fo), fill_colour(fc) { }
     bool line_style;
     double line_width;
     Colour line_colour;
@@ -67,7 +67,7 @@ struct GraphicsProperties {
 
 struct GraphicsObject {
     GraphicsObject(const GraphicsProperties& gp, const DrawableInterface& sh)
-     : properties(gp), shape_ptr(sh.clone()) { }
+        : properties(gp), shape_ptr(sh.clone()) { }
     GraphicsProperties properties;
     shared_ptr<const DrawableInterface> shape_ptr;
 };
@@ -240,12 +240,12 @@ class CairoCanvas
     void set_fill_opacity(double o) { fo=o; }
     void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b); }
     void get_bounding_box(double& xl, double& xu, double& yl, double& yu) const {
-     xl=LEFT_MARGIN; yu=TOP_MARGIN;
-     xu=x_size_in_pixels()+LEFT_MARGIN; yl=y_size_in_pixels()+TOP_MARGIN;
-     std::cerr<<"Device: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
-     cairo_device_to_user(cr,&xl,&yu);
-     cairo_device_to_user(cr,&xu,&yl);
-     std::cerr<<"User: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
+        xl=LEFT_MARGIN; yu=TOP_MARGIN;
+        xu=x_size_in_pixels()+LEFT_MARGIN; yl=y_size_in_pixels()+TOP_MARGIN;
+        std::cerr<<"Device: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
+        cairo_device_to_user(cr,&xl,&yu);
+        cairo_device_to_user(cr,&xu,&yl);
+        std::cerr<<"User: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
     }
     double get_line_width() const { return cairo_get_line_width (cr); }
 
@@ -281,23 +281,23 @@ void Figure::_paint_all(CanvasInterface& canvas)
 
    // Test if there are no objects to be drawn
     if(objects.empty()) {
-     return;
+        return;
     }
 
     // Don't attempt to compute a bounding box, as this relies on
     // a drawable object having one. Instead, the bounding box must be
     // specified explicitly
     if(bounding_box.dimension()==0) {
-     bounding_box=Box(proj.n,Interval(-1,1));
+        bounding_box=Box(proj.n,Interval(-1,1));
 /*
-     if(objects.empty()) {
-      bounding_box=Box(proj.n,Interval(-1,1));
-     } else {
-      bounding_box=objects[0].shape_ptr->bounding_box();
-      for(uint i=1; i!=objects.size(); ++i) {
-    bounding_box=hull(bounding_box,objects[i].shape_ptr->bounding_box());
-      }
-     }
+        if(objects.empty()) {
+            bounding_box=Box(proj.n,Interval(-1,1));
+        } else {
+            bounding_box=objects[0].shape_ptr->bounding_box();
+            for(uint i=1; i!=objects.size(); ++i) {
+                bounding_box=hull(bounding_box,objects[i].shape_ptr->bounding_box());
+            }
+        }
 */
     }
 
@@ -374,19 +374,19 @@ void Figure::_paint_all(CanvasInterface& canvas)
 
     // Draw shapes
     for(uint i=0; i!=objects.size(); ++i) {
-     const DrawableInterface* shape_ptr=objects[i].shape_ptr.operator->();
-     if(shape_ptr->dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
-     ARIADNE_ASSERT_MSG(dimension==shape_ptr->dimension(),
-      "Shape "<<*shape_ptr<<", dimension="<<shape_ptr->dimension()<<", bounding_box="<<static_cast<const DrawableInterface&>(bounding_box));
-     //const double& lw=objects[i].line_width;
-     //canvas.set_line_width(lw);
-     //canvas.set_line_width(objects[i].properties.line_width);
-     canvas.set_fill_opacity(objects[i].properties.fill_opacity);
-     const Colour& lc=objects[i].properties.line_colour;
-     const Colour& fc=objects[i].properties.fill_colour;
-     canvas.set_fill_colour(fc.red, fc.green, fc.blue);
-     canvas.set_line_colour(lc.red, lc.green, lc.blue);
-     shape_ptr->draw(canvas);
+        const DrawableInterface* shape_ptr=objects[i].shape_ptr.operator->();
+        if(shape_ptr->dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
+        ARIADNE_ASSERT_MSG(dimension==shape_ptr->dimension(),
+                           "Shape "<<*shape_ptr<<", dimension="<<shape_ptr->dimension()<<", bounding_box="<<static_cast<const DrawableInterface&>(bounding_box));
+        //const double& lw=objects[i].line_width;
+        //canvas.set_line_width(lw);
+        //canvas.set_line_width(objects[i].properties.line_width);
+        canvas.set_fill_opacity(objects[i].properties.fill_opacity);
+        const Colour& lc=objects[i].properties.line_colour;
+        const Colour& fc=objects[i].properties.fill_colour;
+        canvas.set_fill_colour(fc.red, fc.green, fc.blue);
+        canvas.set_line_colour(lc.red, lc.green, lc.blue);
+        shape_ptr->draw(canvas);
     }
 
 
@@ -459,7 +459,7 @@ Figure::write(const char* cfilename, uint drawing_width, uint drawing_height)
     std::string filename(cfilename);
     if(filename.rfind(".") != std::string::npos) {
     } else {
-     filename=filename+".png";
+        filename=filename+".png";
     }
 
     cairo_surface_write_to_png (surface, filename.c_str());
@@ -471,8 +471,8 @@ Figure::write(const char* cfilename, uint drawing_width, uint drawing_height)
 
 void
 paint (GtkWidget      *widget,
-    GdkEventExpose *eev,
-    gpointer     gdata)
+       GdkEventExpose *eev,
+       gpointer        gdata)
 {
     cairo_t *cr;
 
@@ -506,7 +506,7 @@ void Figure::display()
     window   = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     // make the gtk terminate the process the close button is pressed
     g_signal_connect (G_OBJECT (window), "delete-event",
-    G_CALLBACK (gtk_main_quit), NULL);
+                      G_CALLBACK (gtk_main_quit), NULL);
 
     // create a new drawing area widget
     canvas = gtk_drawing_area_new ();
@@ -516,8 +516,8 @@ void Figure::display()
 
     // connect our drawing method to the "expose" signal
     g_signal_connect (G_OBJECT (canvas), "expose-event",
-    G_CALLBACK (paint),
-    const_cast<Figure*>(this));  //  here we can pass a pointer to a custom data structure
+                      G_CALLBACK (paint),
+                      const_cast<Figure*>(this));  //  here we can pass a pointer to a custom data structure
 
     // pack canvas widget into window
     gtk_container_add (GTK_CONTAINER (window), canvas);

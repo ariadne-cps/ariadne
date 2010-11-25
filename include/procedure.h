@@ -1,5 +1,5 @@
 /***************************************************************************
- *      procedure.h
+ *            procedure.h
  *
  *  Copyright 2010  Pieter Collins
  *
@@ -50,8 +50,8 @@ struct ProcedureInstruction
     explicit ProcedureInstruction(Operator o, size_t a, int n) : op(o), arg(a), np(n) { }
     Operator op;
     union {
-     struct { size_t arg; int np; };
-     struct { size_t arg1; size_t arg2; };
+        struct { size_t arg; int np; };
+        struct { size_t arg1; size_t arg2; };
     };
 };
 
@@ -105,29 +105,29 @@ template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruc
 {
     T z=x[0]*0;
     for(size_t i=0; i!=p.size(); ++i) {
-     const ProcedureInstruction& instruction=p[i];
-     switch(instruction.op) {
-      case CNST: v.append(z+c[instruction.arg]); break;
-      case IND:  v.append(x[instruction.arg]); break;
-      case ADD:  v.append(v[instruction.arg1]+v[instruction.arg2]); break;
-      case SUB:  v.append(v[instruction.arg1]-v[instruction.arg2]); break;
-      case MUL:  v.append(v[instruction.arg1]*v[instruction.arg2]); break;
-      case DIV:  v.append(v[instruction.arg1]/v[instruction.arg2]); break;
-      case POW:  v.append(pow(v[instruction.arg],instruction.np)); break;
-      case ABS:  v.append(abs(v[instruction.arg])); break;
-      case POS:  v.append(pos(v[instruction.arg])); break;
-      case NEG:  v.append(neg(v[instruction.arg])); break;
-      case REC:  v.append(rec(v[instruction.arg])); break;
-      case SQR:  v.append(sqr(v[instruction.arg])); break;
-      case SQRT: v.append(sqrt(v[instruction.arg])); break;
-      case EXP:  v.append(exp(v[instruction.arg])); break;
-      case LOG:  v.append(log(v[instruction.arg])); break;
-      case SIN:  v.append(sin(v[instruction.arg])); break;
-      case COS:  v.append(cos(v[instruction.arg])); break;
-      case TAN:  v.append(tan(v[instruction.arg])); break;
-      case ATAN:  v.append(atan(v[instruction.arg])); break;
-      default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
-     }
+        const ProcedureInstruction& instruction=p[i];
+        switch(instruction.op) {
+            case CNST: v.append(z+c[instruction.arg]); break;
+            case IND:  v.append(x[instruction.arg]); break;
+            case ADD:  v.append(v[instruction.arg1]+v[instruction.arg2]); break;
+            case SUB:  v.append(v[instruction.arg1]-v[instruction.arg2]); break;
+            case MUL:  v.append(v[instruction.arg1]*v[instruction.arg2]); break;
+            case DIV:  v.append(v[instruction.arg1]/v[instruction.arg2]); break;
+            case POW:  v.append(pow(v[instruction.arg],instruction.np)); break;
+            case ABS:  v.append(abs(v[instruction.arg])); break;
+            case POS:  v.append(pos(v[instruction.arg])); break;
+            case NEG:  v.append(neg(v[instruction.arg])); break;
+            case REC:  v.append(rec(v[instruction.arg])); break;
+            case SQR:  v.append(sqr(v[instruction.arg])); break;
+            case SQRT: v.append(sqrt(v[instruction.arg])); break;
+            case EXP:  v.append(exp(v[instruction.arg])); break;
+            case LOG:  v.append(log(v[instruction.arg])); break;
+            case SIN:  v.append(sin(v[instruction.arg])); break;
+            case COS:  v.append(cos(v[instruction.arg])); break;
+            case TAN:  v.append(tan(v[instruction.arg])); break;
+            case ATAN:  v.append(atan(v[instruction.arg])); break;
+            default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
+        }
     }
 }
 
@@ -137,32 +137,32 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
     ARIADNE_ASSERT(v.size()==p.size());
     size_t r=p.size();
     while(r!=0u) {
-     --r;
-     size_t a=p[r].arg; size_t a1=p[r].arg1; size_t a2=p[r].arg2;
-     switch(p[r].op) {
-      case CNST: break;
-      case IND: restrict(x[a],v[r]); break;
-      case ADD: restrict(v[a1],v[r]-v[a2]); restrict(v[a2],v[r]-v[a1]); break;
-      case SUB: restrict(v[a1],v[a2]+v[r]); restrict(v[a2],v[a1]-v[r]); break;
-      case MUL: restrict(v[a1],v[r]/v[a2]); restrict(v[a2],v[r]/v[a1]); break;
-      case DIV: restrict(v[a1],v[a2]*v[r]); restrict(v[a2],v[a1]/v[r]); break;
-      case MAX: restrict(v[a1],max(v[r],v[a2])); restrict(v[a2],max(v[r],v[a1])); break;
-      case POS: restrict(v[a],v[r]); break;
-      case NEG: restrict(v[a],neg(v[r])); break;
-      case REC: restrict(v[a],rec(v[r])); break;
-      case SQR: restrict(v[a],sqrt(v[r])); break;
-      case POW: restrict(v[a],exp(log(v[r])/p[r].np)); break;
-      case SQRT: restrict(v[a],sqr(v[r])); break;
-      case EXP: restrict(v[a],log(v[r])); break;
-      case LOG: restrict(v[a],exp(v[r])); break;
-      case SIN: restrict(v[a],asin(v[r])); break;
-      case COS: restrict(v[a],acos(v[r])); break;
-      case TAN: restrict(v[a],atan(v[r])); break;
-      case ATAN: restrict(v[a],tan(v[r])); break;
-      case EQ: restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
-      case LEQ: restrict(v[a1],Interval(-inf,v[a2].upper())); restrict(v[a1],Interval(v[a2].lower(),+inf)); break;
-      default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op<<" at instruction "<<r<<"\n");
-     }
+        --r;
+        size_t a=p[r].arg; size_t a1=p[r].arg1; size_t a2=p[r].arg2;
+        switch(p[r].op) {
+            case CNST: break;
+            case IND: restrict(x[a],v[r]); break;
+            case ADD: restrict(v[a1],v[r]-v[a2]); restrict(v[a2],v[r]-v[a1]); break;
+            case SUB: restrict(v[a1],v[a2]+v[r]); restrict(v[a2],v[a1]-v[r]); break;
+            case MUL: restrict(v[a1],v[r]/v[a2]); restrict(v[a2],v[r]/v[a1]); break;
+            case DIV: restrict(v[a1],v[a2]*v[r]); restrict(v[a2],v[a1]/v[r]); break;
+            case MAX: restrict(v[a1],max(v[r],v[a2])); restrict(v[a2],max(v[r],v[a1])); break;
+            case POS: restrict(v[a],v[r]); break;
+            case NEG: restrict(v[a],neg(v[r])); break;
+            case REC: restrict(v[a],rec(v[r])); break;
+            case SQR: restrict(v[a],sqrt(v[r])); break;
+            case POW: restrict(v[a],exp(log(v[r])/p[r].np)); break;
+            case SQRT: restrict(v[a],sqr(v[r])); break;
+            case EXP: restrict(v[a],log(v[r])); break;
+            case LOG: restrict(v[a],exp(v[r])); break;
+            case SIN: restrict(v[a],asin(v[r])); break;
+            case COS: restrict(v[a],acos(v[r])); break;
+            case TAN: restrict(v[a],atan(v[r])); break;
+            case ATAN: restrict(v[a],tan(v[r])); break;
+            case EQ: restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
+            case LEQ: restrict(v[a1],Interval(-inf,v[a2].upper())); restrict(v[a1],Interval(v[a2].lower(),+inf)); break;
+            default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op<<" at instruction "<<r<<"\n");
+        }
     }
 }
 
@@ -170,16 +170,16 @@ template<class X> size_t _convert(List<ProcedureInstruction>& p, List<X>& c, con
     typedef ProcedureInstruction PI;
     if(ind.has_key(f)) { return ind[f]; }
     switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-     case CNST: p.append(PI(CNST,c.size())); c.append(*f->val); break;
-     case IND: p.append(PI(IND,f->ind)); break;
-     case ADD: case SUB: case MUL: case DIV:
-      p.append(PI(f->op,_convert(p,c,f->arg1,ind),_convert(p,c,f->arg2,ind))); break;
-     case POW:
-      p.append(PI(f->op,_convert(p,c,f->arg,ind),f->np)); break;
-     case NEG: case REC: case SQR: case SQRT:
-     case EXP: case LOG: case SIN: case COS: case TAN: case ATAN:
-      p.append(PI(f->op,_convert(p,c,f->arg,ind))); break;
-     default: assert(false);
+        case CNST: p.append(PI(CNST,c.size())); c.append(*f->val); break;
+        case IND: p.append(PI(IND,f->ind)); break;
+        case ADD: case SUB: case MUL: case DIV:
+            p.append(PI(f->op,_convert(p,c,f->arg1,ind),_convert(p,c,f->arg2,ind))); break;
+        case POW:
+            p.append(PI(f->op,_convert(p,c,f->arg,ind),f->np)); break;
+        case NEG: case REC: case SQR: case SQRT:
+        case EXP: case LOG: case SIN: case COS: case TAN: case ATAN:
+            p.append(PI(f->op,_convert(p,c,f->arg,ind))); break;
+        default: assert(false);
     }
     const size_t num=p.size()-1;
     ind.insert(f,num);
@@ -190,26 +190,26 @@ template<class X>
 void _write(std::ostream& os, const List<ProcedureInstruction>& p, const List<X>& c)
 {
     for(size_t i=0; i!=p.size(); ++i) {
-     const ProcedureInstruction& instruction=p[i];
-     os << "v[" << i << "]=";
-     switch(instruction.op) {
-      case CNST:
-    os << c[instruction.arg]; break;
-      case IND:
-    os << "x[" << instruction.arg << "]"; break;
-      case ADD: case SUB: case MUL: case DIV:
-    os << "v[" << instruction.arg1 << "]" << symbol(instruction.op) << "v[" << instruction.arg2 << "]"; break;
-      case POW:
-    os<<"pow(v[" << instruction.arg << "],"<<instruction.np<<")"; break;
-      case POS: case NEG:
-    os << symbol(instruction.op) << "v[" << instruction.arg << "]"; break;
-      case ABS: case REC: case SQR: case SQRT:
-      case EXP: case LOG: case SIN: case COS: case TAN:
-      case ASIN: case ACOS: case ATAN:
-    os << instruction.op << "(v[" << instruction.arg << "])"; break;
-      default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
-     }
-     os << "; ";
+        const ProcedureInstruction& instruction=p[i];
+        os << "v[" << i << "]=";
+        switch(instruction.op) {
+            case CNST:
+                os << c[instruction.arg]; break;
+            case IND:
+                os << "x[" << instruction.arg << "]"; break;
+            case ADD: case SUB: case MUL: case DIV:
+                os << "v[" << instruction.arg1 << "]" << symbol(instruction.op) << "v[" << instruction.arg2 << "]"; break;
+            case POW:
+                os<<"pow(v[" << instruction.arg << "],"<<instruction.np<<")"; break;
+            case POS: case NEG:
+                os << symbol(instruction.op) << "v[" << instruction.arg << "]"; break;
+            case ABS: case REC: case SQR: case SQRT:
+            case EXP: case LOG: case SIN: case COS: case TAN:
+            case ASIN: case ACOS: case ATAN:
+                os << instruction.op << "(v[" << instruction.arg << "])"; break;
+            default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
+        }
+        os << "; ";
     }
 }
 
@@ -265,10 +265,10 @@ Vector< Procedure<X> >::Vector(const Vector< Formula<X> >& f)
 {
     Map<const FormulaNode<X>*, size_t> ind;
     for(size_t i=0; i!=f.size(); ++i) {
-     _convert(this->_instructions,this->_constants,f[i].raw_ptr(), ind);
+        _convert(this->_instructions,this->_constants,f[i].raw_ptr(), ind);
     }
     for(Nat i=0; i!=f.size(); ++i) {
-     this->_results[i]=ind[f[i].raw_ptr()];
+        this->_results[i]=ind[f[i].raw_ptr()];
     }
 }
 
@@ -287,7 +287,7 @@ template<class X, class T> inline Vector<T> evaluate(const Vector< Procedure<X> 
     _execute(v,f._instructions,f._constants,x);
     Vector<T> r(f.result_size());
     for(size_t i=0; i!=r.size(); ++i) {
-     r[i]=v[f._results[i]];
+        r[i]=v[f._results[i]];
     }
     return r;
 }
@@ -337,7 +337,7 @@ void simple_hull_reduce(Vector<Interval>& dom, const Vector< Procedure<X> >& f, 
 
     _execute(v,p,c,dom);
     for(size_t i=0; i!=codom.size(); ++i) {
-     restrict(v[f._results[i]],codom[i]);
+        restrict(v[f._results[i]],codom[i]);
     }
     _propagate(dom,v,p);
 }

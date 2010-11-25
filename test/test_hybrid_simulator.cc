@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_hybrid_simulator.cc
+ *            test_hybrid_simulator.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -54,7 +54,7 @@ class TestHybridSimulator
     void test() const;
 };
 
-int main()
+int main() 
 {
     TestHybridSimulator().test();
     std::cerr<<"INOMPLETE ";
@@ -77,7 +77,7 @@ TestHybridSimulator::system()
     VectorAffineFunction dynamic1(A,3*b);
     VectorAffineFunction dynamic2(A,-b);
     IdentityFunction reset(2);
-
+  
     Matrix<Float> c(1,2,bdata);
     Vector<Float> d(1,Float(1.0));
     VectorAffineFunction guard3(c,-d);
@@ -109,7 +109,7 @@ void TestHybridSimulator::test() const
     // Set up the simulator parameters and grid
     Float step_size(0.125);
     Float enclosure_radius(0.25);
-
+    
     EvolutionParameters parameters;
     parameters.maximum_step_size=step_size;
 
@@ -128,14 +128,14 @@ void TestHybridSimulator::test() const
     HybridPoint initial_hybrid_point(location1,initial_point);
     HybridTime simulation_time(0.25,1);
 
-
+  
     // Compute the reachable sets
     cout << "Computing orbit... "<<std::flush;
     Orbit<HybridPoint> hybrid_orbit=simulator.orbit(automaton,initial_hybrid_point,simulation_time);
     cout << "done"<<std::endl;
 
     ARIADNE_TEST_PRINT(hybrid_orbit);
-
+  
 
     cout << "Plotting orbit... " << flush;
     Figure fig;

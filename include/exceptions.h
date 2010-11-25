@@ -1,8 +1,8 @@
 /***************************************************************************
- *      exceptions.h
+ *            exceptions.h
  *
  *  Copyright 2008  Pieter Collins
- *
+ * 
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 /*! \file exceptions.h
  *  \brief Exception classes
  */

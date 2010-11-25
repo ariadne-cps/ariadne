@@ -1,5 +1,5 @@
 /***************************************************************************
- *      rounding.h
+ *            rounding.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -61,11 +61,11 @@ inline rounding_mode_t get_rounding_mode();
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
     #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
-     #define ARIADNE_SSE_ROUNDING
+        #define ARIADNE_SSE_ROUNDING
     #elif __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 3 )
-     #define ARIADNE_GCC_ROUNDING
+        #define ARIADNE_GCC_ROUNDING
     #else
-     #define ARIADNE_C99_ROUNDING
+        #define ARIADNE_C99_ROUNDING
     #endif
 #else
     #define ARIADNE_BOOST_ROUNDING
@@ -202,7 +202,7 @@ typedef unsigned short rounding_mode_t;
 
 const rounding_mode_t to_nearest   = ARIADNE_FENV_BASE;
 const rounding_mode_t downward     = ARIADNE_FENV_BASE + 1024;
-const rounding_mode_t upward    = ARIADNE_FENV_BASE + 2048;
+const rounding_mode_t upward       = ARIADNE_FENV_BASE + 2048;
 const rounding_mode_t toward_zero  = ARIADNE_FENV_BASE + 3072;
 
 inline void set_rounding_to_nearest() { __asm fldcw to_nearest; }
@@ -225,7 +225,7 @@ typedef unsigned short rounding_mode_t;
 
 const rounding_mode_t to_nearest   = 0000;
 const rounding_mode_t downward     = 1024;
-const rounding_mode_t upward    = 2048;
+const rounding_mode_t upward       = 2048;
 const rounding_mode_t toward_zero  = 3072;
 
 inline void set_rounding_to_nearest() { }

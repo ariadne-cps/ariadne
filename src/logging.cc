@@ -1,5 +1,5 @@
 /***************************************************************************
- *      logging.cc
+ *            logging.cc
  *
  *  Copyright  2007-8   Pieter Collins
  *
@@ -31,7 +31,7 @@ std::ofstream log_file_stream;
 void redirect_log(const char* filename)
 {
     if(log_file_stream.is_open()) {
-     log_file_stream.close();
+        log_file_stream.close();
     }
     log_file_stream.open(filename);
     std::clog.rdbuf( log_file_stream.rdbuf() );

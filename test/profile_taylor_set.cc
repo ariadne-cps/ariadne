@@ -1,5 +1,5 @@
 /***************************************************************************
- *      profile_taylor_set.cc
+ *            profile_taylor_set.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -61,9 +61,9 @@ struct ProfileBoxGridDiscretise {
     ProfileBoxGridDiscretise(TaylorImageSet& s_, double e_, Grid& g_, uint d_)  : s(s_), e(e_), g(g_), d(d_) { }
     TaylorImageSet s; double e; Grid g; uint d; typedef GridTreeSet Result;
     Result run() const {
-     ListSet<Box> ls = s.discretise(e);
-     GridTreeSet r=outer_approximation(ls,g,d);
-     return r; }
+        ListSet<Box> ls = s.discretise(e);
+        GridTreeSet r=outer_approximation(ls,g,d);
+        return r; }
 };
 
 
@@ -79,24 +79,24 @@ void profile(const char* name, const Test& test, unsigned int tries)
     //res.mince(13+res.cell().height());
     uint nc=res.size();
     plot(filename.c_str(),PlanarProjectionMap(2,0,1),bounding_box,
-      Colour(1,0,0),res);
+         Colour(1,0,0),res);
 
 
     tm.restart();
     for(uint i=0; i!=tries; ++i) {
-     test.run();
+        test.run();
     }
     t=tm.elapsed();
 
 
 
     std::cout << std::fixed
-     << std::setw(23) << std::left << name << std::right
-     << std::setw(11) << std::setprecision(1) << 1000*(t/tries)
-     << std::setw(6) << nc
-     << std::setw(9) << std::setprecision(4) << std::fixed << t
-     << "/"  << tries
-     << std::endl;
+              << std::setw(23) << std::left << name << std::right
+              << std::setw(11) << std::setprecision(1) << 1000*(t/tries)
+              << std::setw(6) << nc
+              << std::setw(9) << std::setprecision(4) << std::fixed << t
+              << "/"  << tries
+              << std::endl;
 }
 
 GridTreeSet discretise1(const TaylorImageSet&, const Grid&, const uint);
@@ -116,9 +116,9 @@ int main(int argc, const char* argv[])
     Grid grid(2);
 
     std::cout << std::setw(23) << std::left << "name" << std::right
-     << std::setw(11) << "time(ms)"
-     << std::setw(6) << "size"
-     << std::setw(9) << "time(s)" << "/" << "tries\n";
+              << std::setw(11) << "time(ms)"
+              << std::setw(6) << "size"
+              << std::setw(9) << "time(s)" << "/" << "tries\n";
 
 /*
     profile("discretise-box-02",ProfileBoxDiscretise(set,1.0/ 2),n*100);

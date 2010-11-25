@@ -1,5 +1,5 @@
 /***************************************************************************
- *      differentiation_module.cc
+ *            differentiation_module.cc
  *
  *  Copyright  2007-8  Pieter Collins
  *

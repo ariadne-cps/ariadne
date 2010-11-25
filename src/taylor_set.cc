@@ -1,5 +1,5 @@
 /***************************************************************************
- *      taylor_set.cc
+ *            taylor_set.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -77,7 +77,7 @@ typedef Vector<Interval> IntervalVector;
 
 IntervalTaylorModel& operator-=(IntervalTaylorModel& tm, const MultiIndex& a) {
     for(IntervalTaylorModel::iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-     iter->key()-=a;
+        iter->key()-=a;
     }
     return tm;
 }
@@ -91,10 +91,10 @@ inline void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
 void TaylorConstrainedImageSet::_check() const {
     ARIADNE_ASSERT_MSG(this->_function.argument_size()==this->domain().size(),*this);
     for(List<ScalarTaylorFunction>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-     ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
+        ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
     }
     for(List<ScalarTaylorFunction>::const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-     ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
+        ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
     }
 }
 
@@ -102,48 +102,48 @@ void TaylorConstrainedImageSet::_check() const {
 void TaylorConstrainedImageSet::_solve_zero_constraints() {
     this->_check();
     for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ) {
-     const Vector<Interval>& domain=this->domain();
-     const IntervalTaylorModel& model=iter->model();
-     const uint k=model.argument_size()-1u;
-     IntervalTaylorModel zeroth_order(k);
-     IntervalTaylorModel first_order(k);
-     bool is_zeroth_order=true;
-     bool is_first_order=true;
-     MultiIndex r(k);
-     // Try linear approach in last coefficient
-     for(IntervalTaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
-      if(tmiter->key()[k]==0) {
-    assign_all_but_last(r,tmiter->key());
-    zeroth_order.expansion().append(r,tmiter->data());
-      } else if(tmiter->key()[k]==1) {
-    is_zeroth_order=false;
-    assign_all_but_last(r,tmiter->key());
-    first_order.expansion().append(r,tmiter->data());
-      } else {
-    is_first_order=false; break;
-      }
-     }
-     if(is_first_order && !is_zeroth_order) {
-      const Vector<Interval> new_domain=project(domain,range(0,k));
-      IntervalTaylorModel substitution_model=-zeroth_order/first_order;
-      this->_function=VectorTaylorFunction(new_domain,Ariadne::substitute(this->_function.models(),k,substitution_model));
-      for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_constraints.begin();
-     constraint_iter!=this->_constraints.end(); ++constraint_iter) {
-    ScalarTaylorFunction& constraint=*constraint_iter;
-    constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
-      }
-      for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_equations.begin();
-     constraint_iter!=this->_equations.end(); ++constraint_iter) {
-    ScalarTaylorFunction& constraint=*constraint_iter;
-    constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
-      }
-      // Since we are using an std::vector, assign iterator to next element
-      iter=this->_equations.erase(iter);
-      this->_check();
-     } else {
-      ARIADNE_WARN("No method for solving constraint "<<*iter<<" currently implemented.");
-      ++iter;
-     }
+        const Vector<Interval>& domain=this->domain();
+        const IntervalTaylorModel& model=iter->model();
+        const uint k=model.argument_size()-1u;
+        IntervalTaylorModel zeroth_order(k);
+        IntervalTaylorModel first_order(k);
+        bool is_zeroth_order=true;
+        bool is_first_order=true;
+        MultiIndex r(k);
+        // Try linear approach in last coefficient
+        for(IntervalTaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
+            if(tmiter->key()[k]==0) {
+                assign_all_but_last(r,tmiter->key());
+                zeroth_order.expansion().append(r,tmiter->data());
+            } else if(tmiter->key()[k]==1) {
+                is_zeroth_order=false;
+                assign_all_but_last(r,tmiter->key());
+                first_order.expansion().append(r,tmiter->data());
+            } else {
+                is_first_order=false; break;
+            }
+        }
+        if(is_first_order && !is_zeroth_order) {
+            const Vector<Interval> new_domain=project(domain,range(0,k));
+            IntervalTaylorModel substitution_model=-zeroth_order/first_order;
+            this->_function=VectorTaylorFunction(new_domain,Ariadne::substitute(this->_function.models(),k,substitution_model));
+            for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_constraints.begin();
+                    constraint_iter!=this->_constraints.end(); ++constraint_iter) {
+                ScalarTaylorFunction& constraint=*constraint_iter;
+                constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
+            }
+            for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_equations.begin();
+                    constraint_iter!=this->_equations.end(); ++constraint_iter) {
+                ScalarTaylorFunction& constraint=*constraint_iter;
+                constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
+            }
+            // Since we are using an std::vector, assign iterator to next element
+            iter=this->_equations.erase(iter);
+            this->_check();
+        } else {
+            ARIADNE_WARN("No method for solving constraint "<<*iter<<" currently implemented.");
+            ++iter;
+        }
     }
 }
 
@@ -165,13 +165,13 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
     List<uint> proper_coordinates;
     proper_coordinates.reserve(box.dimension());
     for(uint i=0; i!=box.dimension(); ++i) {
-     if(box[i].radius()>=min_float) {
-      proper_coordinates.append(i);
-     }
+        if(box[i].radius()>=min_float) {
+            proper_coordinates.append(i);
+        }
     }
     this->_domain=IntervalVector(proper_coordinates.size());
     for(uint j=0; j!=this->_domain.size(); ++j) {
-     this->_domain[j]=box[proper_coordinates[j]];
+        this->_domain[j]=box[proper_coordinates[j]];
     }
 
     // HACK: Make a dummy variable for the domain to avoid bugs which occur
@@ -184,12 +184,12 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
     uint j=0;
     proper_coordinates.append(box.dimension());
     for(uint i=0; i!=box.dimension(); ++i) {
-     if(proper_coordinates[j]==i) {
-      this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j);
-      ++j;
-     } else {
-      this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i]);
-     }
+        if(proper_coordinates[j]==i) {
+            this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j);
+            ++j;
+        } else {
+            this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i]);
+        }
     }
     this->_reduced_domain=this->_domain;
 }
@@ -209,25 +209,25 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domai
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(uint i=0; i!=this->_domain.size(); ++i) {
-     if(this->_domain[i].radius()==0) {
-      this->_domain[i]+=Interval(-min,+min);
-     }
+        if(this->_domain[i].radius()==0) {
+            this->_domain[i]+=Interval(-min,+min);
+        }
     }
 
     this->_function=VectorTaylorFunction(this->_domain,function);
 
     for(uint i=0; i!=constraints.size(); ++i) {
-     ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
-     if(constraints[i].bounds().singleton()) {
-      this->new_equality_constraint(constraints[i].function()-Real(constraints[i].bounds().midpoint()));
-     } else {
-      if(constraints[i].bounds().lower()>-inf<Float>()) {
-    this->new_negative_constraint(Real(constraints[i].bounds().lower())-constraints[i].function());
-      }
-      if(constraints[i].bounds().upper()<+inf<Float>()) {
-    this->new_negative_constraint(constraints[i].function()-Real(constraints[i].bounds().upper()));
-      }
-     }
+        ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
+        if(constraints[i].bounds().singleton()) {
+            this->new_equality_constraint(constraints[i].function()-Real(constraints[i].bounds().midpoint()));
+        } else {
+            if(constraints[i].bounds().lower()>-inf<Float>()) {
+                this->new_negative_constraint(Real(constraints[i].bounds().lower())-constraints[i].function());
+            }
+            if(constraints[i].bounds().upper()<+inf<Float>()) {
+                this->new_negative_constraint(constraints[i].function()-Real(constraints[i].bounds().upper()));
+            }
+        }
     }
 
     this->_reduced_domain=domain;
@@ -264,26 +264,26 @@ tribool TaylorConstrainedImageSet::satisfies(RealScalarFunction constraint) cons
 void TaylorConstrainedImageSet::substitute(uint j, ScalarTaylorFunction v)
 {
     ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
-     "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
-     this->_function = Ariadne::substitute(this->_function,j,v);
-     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-      *iter = Ariadne::substitute(*iter,j,v);
-     }
-     for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-      *iter = Ariadne::substitute(*iter,j,v);
-     }
+                       "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
+                       this->_function = Ariadne::substitute(this->_function,j,v);
+                       for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+                           *iter = Ariadne::substitute(*iter,j,v);
+                       }
+                       for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+                           *iter = Ariadne::substitute(*iter,j,v);
+                       }
 
-     this->_check();
+                       this->_check();
 }
 
 void TaylorConstrainedImageSet::substitute(uint j, Float c)
 {
     this->_function = Ariadne::partial_evaluate(this->_function,j,c);
     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-     *iter = Ariadne::partial_evaluate(*iter,j,c);
+        *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
     for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-     *iter = Ariadne::partial_evaluate(*iter,j,c);
+        *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
     this->_check();
 }
@@ -317,10 +317,10 @@ void TaylorConstrainedImageSet::apply_flow(RealVectorFunction flow, Interval tim
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time))));
     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-     *iter=embed(*iter,time);
+        *iter=embed(*iter,time);
     }
     for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-     *iter=embed(*iter,time);
+        *iter=embed(*iter,time);
     }
     this->_check();
 }
@@ -337,10 +337,10 @@ void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Interval t
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_function=compose(flow,combine(this->_function,ScalarTaylorFunction::identity(time)));
     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-     *iter=embed(*iter,time);
+        *iter=embed(*iter,time);
     }
     for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-     *iter=embed(*iter,time);
+        *iter=embed(*iter,time);
     }
     this->_check();
 }
@@ -350,11 +350,11 @@ void TaylorConstrainedImageSet::new_state_constraint(NonlinearConstraint constra
     Interval interval=constraint.bounds();
     ScalarTaylorFunction composed_function=compose(constraint.function(),this->_function);
     if(interval.lower()==0.0 && interval.upper()==0.0) {
-     this->new_zero_constraint(composed_function);
+        this->new_zero_constraint(composed_function);
     } else if(interval.lower()==0.0 && interval.upper()==infty) {
-     this->new_negative_constraint(-composed_function);
+        this->new_negative_constraint(-composed_function);
     } else if(interval.lower()==-infty && interval.upper()==0.0) {
-     this->new_negative_constraint(composed_function);
+        this->new_negative_constraint(composed_function);
     }
 }
 
@@ -397,10 +397,10 @@ List<NonlinearConstraint>
 TaylorConstrainedImageSet::constraints() const {
     List<NonlinearConstraint> result;
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-     result.append(this->_constraints[i]<=0.0);
+        result.append(this->_constraints[i]<=0.0);
     }
     for(uint i=0; i!=this->_equations.size(); ++i) {
-     result.append(this->_equations[i]==0.0);
+        result.append(this->_equations[i]==0.0);
     }
     return result;
 }
@@ -492,19 +492,19 @@ tribool TaylorConstrainedImageSet::empty() const
     List<NonlinearConstraint> constraints=this->constraints();
     if(constraints.empty()) { return this->domain().empty(); }
     for(uint i=0; i!=constraints.size(); ++i) {
-     if(Ariadne::disjoint(constraints[i].function().evaluate(this->_reduced_domain),constraints[i].bounds())) {
-      return true;
-     }
+        if(Ariadne::disjoint(constraints[i].function().evaluate(this->_reduced_domain),constraints[i].bounds())) {
+            return true;
+        }
     }
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
     for(uint i=0; i!=this->number_of_parameters(); ++i) {
-     double l=this->_reduced_domain[i].lower().get_d();
-     double u=this->_reduced_domain[i].upper().get_d();
-     if(isnan(l) || isnan(u)) {
-      ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
-      _reduced_domain[i]=_domain[i];
-     }
+        double l=this->_reduced_domain[i].lower().get_d();
+        double u=this->_reduced_domain[i].upper().get_d();
+        if(isnan(l) || isnan(u)) {
+            ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
+            _reduced_domain[i]=_domain[i];
+        }
     }
     if(this->_reduced_domain.empty()) { return true; }
     else { return indeterminate; }
@@ -524,12 +524,12 @@ tribool TaylorConstrainedImageSet::subset(const Box& bx) const
     if(_reduced_domain.empty()) { return true; }
 
     for(uint i=0; i!=bx.dimension(); ++i) {
-     const Box test_domain=this->_reduced_domain;
-     constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].lower());
-     if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
-     constraints.back()=(ScalarTaylorFunction(this->_function[i]) >= bx[i].upper());
-     if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
-     constraints.pop_back();
+        const Box test_domain=this->_reduced_domain;
+        constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].lower());
+        if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
+        constraints.back()=(ScalarTaylorFunction(this->_function[i]) >= bx[i].upper());
+        if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
+        constraints.pop_back();
     }
     return true;
 }
@@ -545,8 +545,8 @@ tribool TaylorConstrainedImageSet::disjoint(const Box& bx) const
 
     const Box test_domain=this->_reduced_domain;
     for(uint i=0; i!=bx.dimension(); ++i) {
-     constraints.append(ScalarTaylorFunction(this->_function[i]) >= bx[i].lower());
-     constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].upper());
+        constraints.append(ScalarTaylorFunction(this->_function[i]) >= bx[i].lower());
+        constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].upper());
     }
     return !contractor.feasible(test_domain,constraints).first;
 }
@@ -558,12 +558,12 @@ void TaylorConstrainedImageSet::reduce() const
     contractor.reduce(this->_reduced_domain,constraints);
 
     for(uint i=0; i!=this->number_of_parameters(); ++i) {
-     double l=this->_reduced_domain[i].lower().get_d();
-     double u=this->_reduced_domain[i].upper().get_d();
-     if(isnan(l) || isnan(u)) {
-      ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
-      _reduced_domain[i]=_domain[i];
-     }
+        double l=this->_reduced_domain[i].lower().get_d();
+        double u=this->_reduced_domain[i].upper().get_d();
+        if(isnan(l) || isnan(u)) {
+            ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
+            _reduced_domain[i]=_domain[i];
+        }
     }
 }
 
@@ -578,15 +578,15 @@ TaylorConstrainedImageSet::split_zeroth_order() const
     uint jmax=this->number_of_parameters();
     Float max_column_norm=0.0;
     for(uint j=0; j!=this->number_of_parameters(); ++j) {
-     Float column_norm=0.0;
-     for(uint i=0; i!=this->dimension(); ++i) {
-      column_norm+=mag(jacobian[i][j]);
-     }
-     column_norm *= this->reduced_domain()[j].radius();
-     if(column_norm>max_column_norm) {
-      max_column_norm=column_norm;
-      jmax=j;
-     }
+        Float column_norm=0.0;
+        for(uint i=0; i!=this->dimension(); ++i) {
+            column_norm+=mag(jacobian[i][j]);
+        }
+        column_norm *= this->reduced_domain()[j].radius();
+        if(column_norm>max_column_norm) {
+            max_column_norm=column_norm;
+            jmax=j;
+        }
     }
     return this->split(jmax);
 }
@@ -601,15 +601,15 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const I
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     MultiIndex a;
     for(uint i=0; i!=m; ++i) {
-     const IntervalTaylorModel& tm=g.model(i);
-     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-      a=iter->key();
-      if(a.degree()>1) {
-    for(uint j=0; j!=n; ++j) {
-     if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
-    }
-      }
-     }
+        const IntervalTaylorModel& tm=g.model(i);
+        for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()>1) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                }
+            }
+        }
     }
 
     return nonlinearities;
@@ -624,10 +624,10 @@ Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& 
     Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
-     Float sf=dom[i].radius();
-     ++a[i];
-     ivl_dx[i].expansion().append(a,Interval(sf));
-     --a[i];
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
     Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
@@ -635,15 +635,15 @@ Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& 
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
-     const IntervalDifferential& d=df[i];
-     for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
-      a=iter->key();
-      if(a.degree()==1) {
-    for(uint j=0; j!=n; ++j) {
-     if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
-    }
-      }
-     }
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==1) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
+                }
+            }
+        }
     }
     //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
 
@@ -659,10 +659,10 @@ Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface&
     Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
-     Float sf=dom[i].radius();
-     ++a[i];
-     ivl_dx[i].expansion().append(a,Interval(sf));
-     --a[i];
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
     Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
@@ -670,15 +670,15 @@ Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface&
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
-     const IntervalDifferential& d=df[i];
-     for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
-      a=iter->key();
-      if(a.degree()==2) {
-    for(uint j=0; j!=n; ++j) {
-     if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
-    }
-      }
-     }
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==2) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                }
+            }
+        }
     }
     //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
 
@@ -694,21 +694,21 @@ Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& funct
     uint jmax_in_row_imax=nonlinearities.column_size();
     Float max_row_sum=0.0;
     for(uint i=0; i!=nonlinearities.row_size(); ++i) {
-     uint jmax=nonlinearities.column_size();
-     Float row_sum=0.0;
-     Float max_mag_j_in_i=0.0;
-     for(uint j=0; j!=nonlinearities.column_size(); ++j) {
-      row_sum+=mag(nonlinearities[i][j]);
-      if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
-    jmax=j;
-    max_mag_j_in_i=mag(nonlinearities[i][j]);
-      }
-     }
-     if(row_sum>max_row_sum) {
-      imax=i;
-      max_row_sum=row_sum;
-      jmax_in_row_imax=jmax;
-     }
+        uint jmax=nonlinearities.column_size();
+        Float row_sum=0.0;
+        Float max_mag_j_in_i=0.0;
+        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
+            row_sum+=mag(nonlinearities[i][j]);
+            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+                jmax=j;
+                max_mag_j_in_i=mag(nonlinearities[i][j]);
+            }
+        }
+        if(row_sum>max_row_sum) {
+            imax=i;
+            max_row_sum=row_sum;
+            jmax_in_row_imax=jmax;
+        }
     }
 
     return make_pair(jmax_in_row_imax,numeric_cast<double>(max_row_sum));
@@ -726,21 +726,21 @@ TaylorConstrainedImageSet::split_first_order() const
     uint jmax_in_row_imax=nonlinearities.column_size();
     Float max_row_sum=0.0;
     for(uint i=0; i!=nonlinearities.row_size(); ++i) {
-     uint jmax=nonlinearities.column_size();
-     Float row_sum=0.0;
-     Float max_mag_j_in_i=0.0;
-     for(uint j=0; j!=nonlinearities.column_size(); ++j) {
-      row_sum+=mag(nonlinearities[i][j]);
-      if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
-    jmax=j;
-    max_mag_j_in_i=mag(nonlinearities[i][j]);
-      }
-     }
-     if(row_sum>max_row_sum) {
-      imax=i;
-      max_row_sum=row_sum;
-      jmax_in_row_imax=jmax;
-     }
+        uint jmax=nonlinearities.column_size();
+        Float row_sum=0.0;
+        Float max_mag_j_in_i=0.0;
+        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
+            row_sum+=mag(nonlinearities[i][j]);
+            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+                jmax=j;
+                max_mag_j_in_i=mag(nonlinearities[i][j]);
+            }
+        }
+        if(row_sum>max_row_sum) {
+            imax=i;
+            max_row_sum=row_sum;
+            jmax_in_row_imax=jmax;
+        }
     }
 
     if(jmax_in_row_imax==nonlinearities.column_size()) { ARIADNE_THROW(std::runtime_error, "split_first_order", "No need to split"); }
@@ -774,22 +774,22 @@ TaylorConstrainedImageSet::split(uint d) const
 
     ScalarTaylorFunction constraint1,constraint2;
     for(List<ScalarTaylorFunction>::const_iterator iter=this->_constraints.begin();
-     iter!=this->_constraints.end(); ++iter)
+        iter!=this->_constraints.end(); ++iter)
     {
-     const ScalarTaylorFunction& constraint=*iter;
-     make_lpair(constraint1,constraint2)=Ariadne::split(constraint,d);
-     result1._constraints.append(constraint1);
-     result2._constraints.append(constraint2);
+        const ScalarTaylorFunction& constraint=*iter;
+        make_lpair(constraint1,constraint2)=Ariadne::split(constraint,d);
+        result1._constraints.append(constraint1);
+        result2._constraints.append(constraint2);
     }
 
     ScalarTaylorFunction equation1,equation2;
     for(List<ScalarTaylorFunction>::const_iterator iter=this->_equations.begin();
-     iter!=this->_equations.end(); ++iter)
+        iter!=this->_equations.end(); ++iter)
     {
-     const ScalarTaylorFunction& equation=*iter;
-     make_lpair(equation1,equation1)=Ariadne::split(equation,d);
-     result1._equations.append(equation1);
-     result2._equations.append(equation1);
+        const ScalarTaylorFunction& equation=*iter;
+        make_lpair(equation1,equation1)=Ariadne::split(equation,d);
+        result1._equations.append(equation1);
+        result2._equations.append(equation1);
     }
 
     return make_pair(result1,result2);
@@ -825,82 +825,82 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
     Point z(x.size());
 
     if(subset(b,r)) {
-     return;
+        return;
     }
 
     Box bx=join(static_cast<const IntervalVector&>(b.box()),static_cast<const IntervalVector&>(c));
 
     optimiser.compute_tz(d,fg,bx,y,t,z);
     for(uint i=0; i!=12; ++i) {
-     ARIADNE_LOG(4," t="<<t);
-     optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
-     if(t>0) { break; }
+        ARIADNE_LOG(4," t="<<t);
+        optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
+        if(t>0) { break; }
     }
     ARIADNE_LOG(4,"\n  t="<<t<<"\n  y="<<y<<"\n    x="<<x<<"\n    z="<<z<<"\n");
 
     if(t<TERR) {
-     // Probably disjoint, so try to prove this
-     Box nd=d;
+        // Probably disjoint, so try to prove this
+        Box nd=d;
 
-     // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
-     // This should be easier than using all constraints separately
-     RealScalarFunction xg=RealScalarFunction::constant(m,0);
-     Interval cnst=0.0;
-     for(uint j=0; j!=n; ++j) {
-      xg = xg - Real(x[j]-x[n+j])*fg[j];
-      cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
-     }
-     for(uint i=0; i!=m; ++i) {
-      xg = xg - Real(x[2*n+i]-x[2*n+m+i])*RealScalarFunction::coordinate(m,i);
-      cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
-     }
-     xg = Real(cnst) + xg;
+        // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
+        // This should be easier than using all constraints separately
+        RealScalarFunction xg=RealScalarFunction::constant(m,0);
+        Interval cnst=0.0;
+        for(uint j=0; j!=n; ++j) {
+            xg = xg - Real(x[j]-x[n+j])*fg[j];
+            cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
+        }
+        for(uint i=0; i!=m; ++i) {
+            xg = xg - Real(x[2*n+i]-x[2*n+m+i])*RealScalarFunction::coordinate(m,i);
+            cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
+        }
+        xg = Real(cnst) + xg;
 
-     ARIADNE_LOG(4,"    xg="<<xg<<"\n");
-     ScalarTaylorFunction txg(d,xg);
-     ARIADNE_LOG(4,"    txg="<<txg.polynomial()<<"\n");
+        ARIADNE_LOG(4,"    xg="<<xg<<"\n");
+        ScalarTaylorFunction txg(d,xg);
+        ARIADNE_LOG(4,"    txg="<<txg.polynomial()<<"\n");
 
-     xg=RealScalarFunction(txg.polynomial());
-     NonlinearConstraint constraint=(xg>=0.0);
+        xg=RealScalarFunction(txg.polynomial());
+        NonlinearConstraint constraint=(xg>=0.0);
 
-     ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-     solver.hull_reduce(nd,constraint);
-     ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-     if(nd.empty()) {
-      ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
-      return;
-     }
+        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
+        solver.hull_reduce(nd,constraint);
+        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
+        if(nd.empty()) {
+            ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
+            return;
+        }
 
-     for(uint i=0; i!=m; ++i) {
-      solver.box_reduce(nd,constraint,i);
-      ARIADNE_LOG(8,"  dom="<<nd<<"\n");
-      if(nd.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
-     }
-     ARIADNE_LOG(6,"  dom="<<nd<<"\n");
+        for(uint i=0; i!=m; ++i) {
+            solver.box_reduce(nd,constraint,i);
+            ARIADNE_LOG(8,"  dom="<<nd<<"\n");
+            if(nd.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+        }
+        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 
-     //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
-     ARIADNE_LOG(4,"  Splitting domain\n");
-     Pair<Box,Box> sd=d.split();
-     Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-     Point ny = midpoint(sd.first);
-     optimal_constraint_adjoin_outer_approximation_to(r, sd.first, fg, c, b, nx, ny, e);
-     nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-     ny = midpoint(sd.second);
-     optimal_constraint_adjoin_outer_approximation_to(r, sd.second, fg, c, b, x, ny, e);
+        //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
+        ARIADNE_LOG(4,"  Splitting domain\n");
+        Pair<Box,Box> sd=d.split();
+        Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        Point ny = midpoint(sd.first);
+        optimal_constraint_adjoin_outer_approximation_to(r, sd.first, fg, c, b, nx, ny, e);
+        nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        ny = midpoint(sd.second);
+        optimal_constraint_adjoin_outer_approximation_to(r, sd.second, fg, c, b, x, ny, e);
     }
 
     if(b.tree_depth()>=e*int(b.dimension())) {
-     ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
-     r.adjoin(b);
+        ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
+        r.adjoin(b);
     } else {
-     ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
-     Pair<GridCell,GridCell> sb = b.split();
-     Point sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-     Point sy = y;
-     optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.first,sx,sy,e);
-     sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-     sy = y;
-     optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.second,sx,sy,e);
+        ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
+        Pair<GridCell,GridCell> sb = b.split();
+        Point sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        Point sy = y;
+        optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.first,sx,sy,e);
+        sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        sy = y;
+        optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.second,sx,sy,e);
     }
 
 
@@ -910,7 +910,7 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
 Float widths(const IntervalVector& bx) {
     Float res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
-     res+=(bx[i].width());
+        res+=(bx[i].width());
     }
     return res;
 }
@@ -929,7 +929,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, cons
     ConstraintSolver constraint_solver;
 
     if(subset(b,p)) {
-     return;
+        return;
     }
 
     // Try to prove disjointness
@@ -939,27 +939,27 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, cons
 
     ARIADNE_LOG(6,"  dom="<<old_domain<<"\n");
     for(uint i=0; i!=nf; ++i) {
-     constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
+        constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
     }
     for(uint i=0; i!=ng; ++i) {
-     constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
+        constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
     }
     ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
     if(new_domain.empty()) {
-     ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
-     return;
+        ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
+        return;
     }
 
     for(uint i=0; i!=nf; ++i) {
-     constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
+        constraint_solver.hull_reduce(new_domain,f[i]==bx[i]);
     }
     for(uint i=0; i!=ng; ++i) {
-     constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
+        constraint_solver.hull_reduce(new_domain,g[i]==c[i]);
     }
     ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
     if(new_domain.empty()) {
-     ARIADNE_LOG(4,"  Proved disjointness using box reduce\n");
-     return;
+        ARIADNE_LOG(4,"  Proved disjointness using box reduce\n");
+        return;
     }
     ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
 
@@ -967,19 +967,19 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, cons
     if(fd.disjoint(bx)) { return; }
 
     if(4*widths(fd)>widths(bx)) {
-     //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
-     ARIADNE_LOG(4,"  Splitting domain\n");
-     Pair<Box,Box> sd=new_domain.split();
-     constraint_adjoin_outer_approximation_to(p, sd.first, f, g, c, b, e);
-     constraint_adjoin_outer_approximation_to(p, sd.second, f, g, c, b, e);
+        //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
+        ARIADNE_LOG(4,"  Splitting domain\n");
+        Pair<Box,Box> sd=new_domain.split();
+        constraint_adjoin_outer_approximation_to(p, sd.first, f, g, c, b, e);
+        constraint_adjoin_outer_approximation_to(p, sd.second, f, g, c, b, e);
     } else if(b.tree_depth()>=e*int(b.dimension())) {
-     ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
-     p.adjoin(b);
+        ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
+        p.adjoin(b);
     } else {
-     ARIADNE_LOG(4,"  Splitting cell "<<b.box()<<"\n");
-     Pair<GridCell,GridCell> sb = b.split();
-     constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.first,e);
-     constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.second,e);
+        ARIADNE_LOG(4,"  Splitting cell "<<b.box()<<"\n");
+        Pair<GridCell,GridCell> sb = b.split();
+        constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.first,e);
+        constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.second,e);
     }
 
 
@@ -999,7 +999,7 @@ void TaylorConstrainedImageSet::subdivision_adjoin_outer_approximation_to(GridTr
 {
     Vector<Float> errors(paving.dimension());
     for(uint i=0; i!=errors.size(); ++i) {
-     errors[i]=paving.grid().lengths()[i]/(1<<depth);
+        errors[i]=paving.grid().lengths()[i]/(1<<depth);
     }
     this->_subdivision_adjoin_outer_approximation_to(paving,this->domain(),depth,errors);
 }
@@ -1018,12 +1018,12 @@ void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTre
     RealVectorFunction g(this->_constraints.size()+this->_equations.size(),d.size());
     uint i=0;
     for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
-     g.set(i,make_function(*citer));
-     ++i;
+        g.set(i,make_function(*citer));
+        ++i;
     }
     for(List<ScalarTaylorFunction>::const_iterator eiter=this->_equations.begin(); eiter!=this->_equations.end(); ++eiter) {
-     g.set(i,make_function(*eiter));
-     ++i;
+        g.set(i,make_function(*eiter));
+        ++i;
     }
     GridCell b=GridCell::smallest_enclosing_primary_cell(f(d),p.grid());
     IntervalVector cc(this->_constraints.size(),Interval(-inf<Float>(),0.0));
@@ -1043,8 +1043,8 @@ void TaylorConstrainedImageSet::optimal_constraint_adjoin_outer_approximation_to
     RealVectorFunction g(this->_constraints.size(),d.size());
     uint i=0;
     for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
-     g.set(i,make_function(*citer));
-     ++i;
+        g.set(i,make_function(*citer));
+        ++i;
     }
 
     GridCell b=GridCell::smallest_enclosing_primary_cell(g(d),p.grid());
@@ -1093,16 +1093,16 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
     result._function=Ariadne::restrict(result._function,subdomain);
     ScalarTaylorFunction new_constraint;
     for(List<ScalarTaylorFunction>::iterator iter=result._constraints.begin();
-     iter!=result._constraints.end(); ++iter)
+        iter!=result._constraints.end(); ++iter)
     {
-     ScalarTaylorFunction& constraint=*iter;
-     constraint=Ariadne::restrict(constraint,subdomain);
+        ScalarTaylorFunction& constraint=*iter;
+        constraint=Ariadne::restrict(constraint,subdomain);
     }
     for(List<ScalarTaylorFunction>::iterator iter=result._equations.begin();
-     iter!=result._equations.end(); ++iter)
+        iter!=result._equations.end(); ++iter)
     {
-     ScalarTaylorFunction& equation=*iter;
-     equation=Ariadne::restrict(equation,subdomain);
+        ScalarTaylorFunction& equation=*iter;
+        equation=Ariadne::restrict(equation,subdomain);
     }
     return result;
 }
@@ -1111,18 +1111,18 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
 
 void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
     switch(DRAWING_METHOD) {
-     case BOX_DRAW:
-      this->box_draw(canvas);
-      break;
-     case AFFINE_DRAW:
-      //if(this->number_of_zero_constraints()!=0) { this->box_draw(canvas); }
-      this->affine_draw(canvas,DRAWING_ACCURACY);
-      break;
-     case GRID_DRAW:
-      this->grid_draw(canvas);
-      break;
-     default:
-      ARIADNE_WARN("Unknown drawing method\n");
+        case BOX_DRAW:
+            this->box_draw(canvas);
+            break;
+        case AFFINE_DRAW:
+            //if(this->number_of_zero_constraints()!=0) { this->box_draw(canvas); }
+            this->affine_draw(canvas,DRAWING_ACCURACY);
+            break;
+        case GRID_DRAW:
+            this->grid_draw(canvas);
+            break;
+        default:
+            ARIADNE_WARN("Unknown drawing method\n");
     }
 }
 
@@ -1154,34 +1154,34 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
     unsplitdomains.append(this->_reduced_domain);
     Box splitdomain1,splitdomain2;
     for(int i=0; i!=MAXIMUM_DEPTH; ++i) {
-     //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
-     for(uint n=0; n!=unsplitdomains.size(); ++n) {
-      uint k; double err;
-      make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
-      //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
-      if(k==this->number_of_parameters() || err < max_error) {
-    subdomains.append(unsplitdomains[n]);
-      } else {
-    make_lpair(splitdomain1,splitdomain2)=unsplitdomains[n].split(k);
-    splitdomains.append(splitdomain1);
-    splitdomains.append(splitdomain2);
-      }
-     }
-     unsplitdomains.swap(splitdomains);
-     splitdomains.clear();
-     if(unsplitdomains.empty()) { break; }
+        //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
+        for(uint n=0; n!=unsplitdomains.size(); ++n) {
+            uint k; double err;
+            make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
+            //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
+            if(k==this->number_of_parameters() || err < max_error) {
+                subdomains.append(unsplitdomains[n]);
+            } else {
+                make_lpair(splitdomain1,splitdomain2)=unsplitdomains[n].split(k);
+                splitdomains.append(splitdomain1);
+                splitdomains.append(splitdomain2);
+            }
+        }
+        unsplitdomains.swap(splitdomains);
+        splitdomains.clear();
+        if(unsplitdomains.empty()) { break; }
     }
     subdomains.concatenate(unsplitdomains);
     if(!unsplitdomains.empty()) {
-     ARIADNE_WARN("Cannot obtain desired accuracy in drawing "<<*this<<" without excessive splitting.");
+        ARIADNE_WARN("Cannot obtain desired accuracy in drawing "<<*this<<" without excessive splitting.");
     }
 
     for(uint n=0; n!=subdomains.size(); ++n) {
-     try {
-      this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
-     } catch(...) {
-      this->restriction(subdomains[n]).box_draw(canvas);
-     }
+        try {
+            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+        } catch(...) {
+            this->restriction(subdomains[n]).box_draw(canvas);
+        }
     }
 };
 
@@ -1195,7 +1195,7 @@ Map<List<DiscreteEvent>,RealScalarFunction> pretty(const Map<List<DiscreteEvent>
     Map<List<DiscreteEvent>,RealScalarFunction> result;
     for(Map<List<DiscreteEvent>,ScalarTaylorFunction>::const_iterator iter=constraints.begin();
     iter!=constraints.end(); ++iter) {
-     result.insert(iter->first,iter->second.real_function());
+        result.insert(iter->first,iter->second.real_function());
     }
     return result;
 }
@@ -1205,7 +1205,7 @@ Map<List<DiscreteEvent>,RealScalarFunction> pretty(const Map<List<DiscreteEvent>
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
     Map<K,V> r;
     for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) {
-     r.insert(*m.find(*iter));
+        r.insert(*m.find(*iter));
     }
     return r;
 }
@@ -1221,21 +1221,21 @@ std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
     const bool LONG_FORMAT=false;
 
     if(LONG_FORMAT) {
-     os << "TaylorConstrainedImageSet"
-     << "(\n  domain=" << this->domain()
-     << ",\n  range=" << this->bounding_box()
-     << ",\n  function=" << this->taylor_function()
-     << ",\n  negative_constraints=" << this->_constraints
-     << ",\n  zero_constraints=" << this->_equations
-     << "\n)\n";
+        os << "TaylorConstrainedImageSet"
+           << "(\n  domain=" << this->domain()
+           << ",\n  range=" << this->bounding_box()
+           << ",\n  function=" << this->taylor_function()
+           << ",\n  negative_constraints=" << this->_constraints
+           << ",\n  zero_constraints=" << this->_equations
+           << "\n)\n";
     } else {
-     os << "TaylorConstrainedImageSet"
-     << "( domain=" << this->domain()
-     << ", range=" << this->bounding_box()
-     << ", function=" << repr(this->taylor_function())
-     << ", negative_constraints=" << repr(this->_constraints)
-     << ", zero_constraints=" << repr(this->_equations)
-     << ")";
+        os << "TaylorConstrainedImageSet"
+           << "( domain=" << this->domain()
+           << ", range=" << this->bounding_box()
+           << ", function=" << repr(this->taylor_function())
+           << ", negative_constraints=" << repr(this->_constraints)
+           << ", zero_constraints=" << repr(this->_equations)
+           << ")";
 
     } return os;
 }
@@ -1244,7 +1244,7 @@ std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
 
 void TaylorConstrainedImageSet::
 _subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVector& subdomain,
-    uint depth, const FloatVector& errors) const
+                                           uint depth, const FloatVector& errors) const
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
@@ -1252,36 +1252,36 @@ _subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVecto
     typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
 
     for(const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-     const ScalarTaylorFunction& constraint=*iter;;
-     Interval constraint_range=constraint.evaluate(subdomain);
-     if(constraint_range.lower() > 0.0) {
-      return;
-     }
+        const ScalarTaylorFunction& constraint=*iter;;
+        Interval constraint_range=constraint.evaluate(subdomain);
+        if(constraint_range.lower() > 0.0) {
+            return;
+        }
     }
     for(const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-     const ScalarTaylorFunction& constraint=*iter;
-     Interval constraint_range=constraint.evaluate(subdomain);
-     if(constraint_range.lower() > 0.0 || constraint_range.upper() < 0.0 ) {
-      return;
-     }
+        const ScalarTaylorFunction& constraint=*iter;
+        Interval constraint_range=constraint.evaluate(subdomain);
+        if(constraint_range.lower() > 0.0 || constraint_range.upper() < 0.0 ) {
+            return;
+        }
     }
 
     Box range=evaluate(this->_function,subdomain);
     bool small=true;
     for(uint i=0; i!=range.size(); ++i) {
-     if(range[i].radius()>errors[i]*RELATIVE_SMALLNESS) {
-      small=false;
-      break;
-     }
+        if(range[i].radius()>errors[i]*RELATIVE_SMALLNESS) {
+            small=false;
+            break;
+        }
     }
 
     if(small) {
-     gts.adjoin_outer_approximation(range,depth);
+        gts.adjoin_outer_approximation(range,depth);
     } else {
-     Vector<Interval> subdomain1,subdomain2;
-     make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
-     this->_subdivision_adjoin_outer_approximation_to(gts,subdomain1,depth,errors);
-     this->_subdivision_adjoin_outer_approximation_to(gts,subdomain2,depth,errors);
+        Vector<Interval> subdomain1,subdomain2;
+        make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
+        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain1,depth,errors);
+        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain2,depth,errors);
     }
 }
 
@@ -1303,11 +1303,11 @@ TaylorConstrainedImageSet::affine_approximation() const
     Vector<Float> h(nx);
     Matrix<Float> G(nx,np);
     for(uint i=0; i!=nx; ++i) {
-     ScalarTaylorFunction component=set._function[i];
-     h[i]=component.model().value();
-     for(uint j=0; j!=np; ++j) {
-      G[i][j]=component.model().gradient(j);
-     }
+        ScalarTaylorFunction component=set._function[i];
+        h[i]=component.model().value();
+        for(uint j=0; j!=np; ++j) {
+            G[i][j]=component.model().gradient(j);
+        }
     }
     AffineSet result(G,h);
 
@@ -1315,19 +1315,19 @@ TaylorConstrainedImageSet::affine_approximation() const
     Float b;
 
     for(const_iterator iter=set._constraints.begin();
-      iter!=set._constraints.end(); ++iter) {
-     const ScalarTaylorFunction& constraint=*iter;
-     b=-constraint.model().value();
-     for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-     result.new_inequality_constraint(a,b);
+            iter!=set._constraints.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        b=-constraint.model().value();
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        result.new_inequality_constraint(a,b);
     }
 
     for(const_iterator iter=set._equations.begin();
-      iter!=set._equations.end(); ++iter) {
-     const ScalarTaylorFunction& constraint=*iter;
-     b=-constraint.model().value();
-     for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-     result.new_equality_constraint(a,b);
+            iter!=set._equations.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        b=-constraint.model().value();
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        result.new_equality_constraint(a,b);
     }
     return result;
 }
@@ -1341,13 +1341,13 @@ IntervalAffineModel _affine_model(const IntervalTaylorModel& tm) {
     IntervalAffineModel result(0.0,Vector<Float>(tm.argument_size(),0.0),tm.error());
     set_rounding_upward();
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-     if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
-     else if(iter->key().degree()==0) {result. _c=iter->data(); }
-     else {
-      for(uint j=0; j!=tm.argument_size(); ++j) {
-    if(iter->key()[j]!=0) { result._g[j]=iter->data(); break; }
-      }
-     }
+        if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
+        else if(iter->key().degree()==0) {result. _c=iter->data(); }
+        else {
+            for(uint j=0; j!=tm.argument_size(); ++j) {
+                if(iter->key()[j]!=0) { result._g[j]=iter->data(); break; }
+            }
+        }
     }
     set_rounding_to_nearest();
     return result;
@@ -1366,15 +1366,15 @@ TaylorConstrainedImageSet::affine_over_approximation() const
 
     TaylorConstrainedImageSet set(*this);
     for(uint i=0; i!=nx; ++i) {
-     const_cast<IntervalTaylorModel&>(set._function.models()[i]).truncate(1u);
+        const_cast<IntervalTaylorModel&>(set._function.models()[i]).truncate(1u);
     }
     for(uint i=0; i!=nc; ++i) {
-     const_cast<IntervalTaylorModel&>(set._constraints[i].model()).truncate(1u);
+        const_cast<IntervalTaylorModel&>(set._constraints[i].model()).truncate(1u);
     }
     for(uint i=0; i!=neq; ++i) {
-     const_cast<IntervalTaylorModel&>(set._equations[i].model()).truncate(1u);
-     // Code below introduces artificial error into equality constraints to make them inequality constraints
-     //const_cast<IntervalTaylorModel&>(set._equations[i].model()).error()+=std::numeric_limits<float>::epsilon();
+        const_cast<IntervalTaylorModel&>(set._equations[i].model()).truncate(1u);
+        // Code below introduces artificial error into equality constraints to make them inequality constraints
+        //const_cast<IntervalTaylorModel&>(set._equations[i].model()).error()+=std::numeric_limits<float>::epsilon();
     }
 
     // Compute the number of values with a nonzero error
@@ -1385,15 +1385,15 @@ TaylorConstrainedImageSet::affine_over_approximation() const
     Matrix<Float> G(nx,np+nerr);
     uint ierr=0; // The index where the error bound should go
     for(uint i=0; i!=nx; ++i) {
-     ScalarTaylorFunction component=set._function[i];
-     h[i]=component.model().value();
-     for(uint j=0; j!=np; ++j) {
-      G[i][j]=component.model().gradient(j);
-     }
-     if(component.model().error()>0.0) {
-      G[i][np+ierr]=component.model().error();
-      ++ierr;
-     }
+        ScalarTaylorFunction component=set._function[i];
+        h[i]=component.model().value();
+        for(uint j=0; j!=np; ++j) {
+            G[i][j]=component.model().gradient(j);
+        }
+        if(component.model().error()>0.0) {
+            G[i][np+ierr]=component.model().error();
+            ++ierr;
+        }
     }
 
     AffineSet result(G,h);
@@ -1402,26 +1402,26 @@ TaylorConstrainedImageSet::affine_over_approximation() const
     Float b;
 
     for(const_iterator iter=set._constraints.begin();
-      iter!=set._constraints.end(); ++iter) {
-     const ScalarTaylorFunction& constraint=*iter;
-     b=sub_up(constraint.model().error(),constraint.model().value());
-     for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-     result.new_inequality_constraint(a,b);
+            iter!=set._constraints.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        b=sub_up(constraint.model().error(),constraint.model().value());
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        result.new_inequality_constraint(a,b);
     }
 
     for(const_iterator iter=set._equations.begin();
-      iter!=set._equations.end(); ++iter) {
-     const ScalarTaylorFunction& constraint=*iter;
-     for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-     if(constraint.model().error()==0.0) {
-      b=-constraint.model().value();
-      result.new_equality_constraint(a,b);
-     } else {
-      b=sub_up(constraint.model().error(),constraint.model().value());
-      result.new_inequality_constraint(a,b);
-      b=add_up(constraint.model().error(),constraint.model().value());
-      result.new_inequality_constraint(-a,b);
-     }
+            iter!=set._equations.end(); ++iter) {
+        const ScalarTaylorFunction& constraint=*iter;
+        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        if(constraint.model().error()==0.0) {
+            b=-constraint.model().value();
+            result.new_equality_constraint(a,b);
+        } else {
+            b=sub_up(constraint.model().error(),constraint.model().value());
+            result.new_inequality_constraint(a,b);
+            b=add_up(constraint.model().error(),constraint.model().value());
+            result.new_inequality_constraint(-a,b);
+        }
     }
 
     ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
@@ -1435,10 +1435,10 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const In
 
     TaylorConstrainedImageSet result(new_function);
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
-     result._constraints.append(embed(*iter,ivl));
+        result._constraints.append(embed(*iter,ivl));
     }
     for(const_iterator iter=set._equations.begin(); iter!=set._equations.end(); ++iter) {
-     result._equations.append(embed(*iter,ivl));
+        result._equations.append(embed(*iter,ivl));
     }
 
     return result;
@@ -1455,16 +1455,16 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const T
 
     TaylorConstrainedImageSet result(new_function);
     for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
-     result._constraints.append(embed(*iter,set2.domain()));
+        result._constraints.append(embed(*iter,set2.domain()));
     }
     for(const_iterator iter=set2._constraints.begin(); iter!=set2._constraints.end(); ++iter) {
-     result._constraints.append(embed(set1.domain(),*iter));
+        result._constraints.append(embed(set1.domain(),*iter));
     }
     for(const_iterator iter=set1._equations.begin(); iter!=set1._equations.end(); ++iter) {
-     result._equations.append(embed(*iter,set2.domain()));
+        result._equations.append(embed(*iter,set2.domain()));
     }
     for(const_iterator iter=set2._equations.begin(); iter!=set2._equations.end(); ++iter) {
-     result._equations.append(embed(set1.domain(),*iter));
+        result._equations.append(embed(set1.domain(),*iter));
     }
 
     return result;

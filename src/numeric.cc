@@ -1,5 +1,5 @@
 /***************************************************************************
- *      numeric.cc
+ *            numeric.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -36,9 +36,9 @@
     #warning "Using standard fenv.h C header file for setting the rounding mode."
 #elif defined ARIADNE_BOOST_ROUNDING
     #if defined BOOST_NUMERIC_INTERVAL_DETAIL_C99_ROUNDING_CONTROL_HPP
-     #warning "Using Boost interval library standard fenv.h C header for setting the rounding mode."
+        #warning "Using Boost interval library standard fenv.h C header for setting the rounding mode."
     #else
-     #warning "Using Boost interval library hardware rounding for setting the rounding mode."
+        #warning "Using Boost interval library hardware rounding for setting the rounding mode."
     #endif
 #elif defined ARIADNE_GCC_ROUNDING
     #warning "Using ordinary GCC inline assembler for setting the rounding mode."
@@ -76,7 +76,7 @@ fac(uint8_t n)
     ARIADNE_ASSERT(n<13); // Maximum factorial in 32 bits
     uint32_t  r=1;
     for(uint8_t i=1; i<=n; ++i) {
-     r*=i;
+        r*=i;
     }
     return r;
 }
@@ -85,14 +85,14 @@ uint32_t
 bin(uint8_t n, uint8_t k)
 {
     ARIADNE_ASSERT(n<32);  // Maximum computable bin(n,n/2) using 32 bits
-      // Note that this is shorter than the maximum representable factorial
+                           // Note that this is shorter than the maximum representable factorial
     if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
     for(uint8_t i=1; i<=k; ++i) {
-     r*=(n+1-i);
-     r/=i;
+        r*=(n+1-i);
+        r/=i;
     }
     return r;
 }
@@ -103,7 +103,7 @@ fac(uint16_t n)
     ARIADNE_ASSERT(n<9); // Maximum factorial in 16 bits
     uint16_t  r=1;
     for(uint16_t i=1; i<=n; ++i) {
-     r*=i;
+        r*=i;
     }
     return r;
 }
@@ -113,14 +113,14 @@ uint16_t
 bin(uint16_t n, uint16_t k)
 {
     ARIADNE_ASSERT(n<16);  // Maximum computable bin(n,n/2) using 16 bits
-      // Note that this is shorter than the maximum representable factorial
+                           // Note that this is shorter than the maximum representable factorial
     if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint16_t r=1;
     for(uint16_t i=1; i<=k; ++i) {
-     r*=(n+1-i);
-     r/=i;
+        r*=(n+1-i);
+        r/=i;
     }
     return r;
 }
@@ -131,7 +131,7 @@ fac(uint32_t n)
     ARIADNE_ASSERT(n<13); // Maximum factorial in 32 bits
     uint32_t  r=1;
     for(uint32_t i=1; i<=n; ++i) {
-     r*=i;
+        r*=i;
     }
     return r;
 }
@@ -141,14 +141,14 @@ uint32_t
 bin(uint32_t n, uint32_t k)
 {
     ARIADNE_ASSERT(n<31);  // Maximum computable bin(n,n/2) using 32 bits
-      // Note that this is shorter than the maximum representable factorial
+                           // Note that this is shorter than the maximum representable factorial
     if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
     for(uint32_t i=1; i<=k; ++i) {
-     r*=(n+1-i);
-     r/=i;
+        r*=(n+1-i);
+        r/=i;
     }
     return r;
 }
@@ -161,7 +161,7 @@ fac(uint64_t n)
     ARIADNE_ASSERT(n<21); // Maximum factorial in 64 bits
     uint64_t  r=1;
     for(uint64_t i=1; i<=n; ++i) {
-     r*=i;
+        r*=i;
     }
     return r;
 }
@@ -171,14 +171,14 @@ uint64_t
 bin(uint64_t n, uint64_t k)
 {
     ARIADNE_ASSERT(n<63);  // Maximum computable bin(n,n/2) using 64 bits
-      // Note that this is shorter than the maximum representable factorial
+                           // Note that this is shorter than the maximum representable factorial
     if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint64_t r=1;
     for(uint64_t i=1; i<=k; ++i) {
-     r*=(n+1-i);
-     r/=i;
+        r*=(n+1-i);
+        r/=i;
     }
     return r;
 }
@@ -206,7 +206,7 @@ static inline double horner_rnd(int n, double x, const long long int* c)
 {
     volatile double y=1./c[n];
     for(int i=n-1; i>=0; --i) {
-     y=1.0/c[i]+x*y;
+        y=1.0/c[i]+x*y;
     }
     return y;
 }
@@ -215,7 +215,7 @@ static inline double horner_opp(int n, double x, const long long int* c)
 {
     volatile double y=-1./c[n];
     for(int i=n-1; i>=0; --i) {
-     y=-1.0/c[i]+x*y;
+        y=-1.0/c[i]+x*y;
     }
     return -y;
 }
@@ -254,8 +254,8 @@ double sqrt_rnd(double x)
 
     a=0.0; b=y;
     while(a!=b) {
-     a=b;
-     b=(a+y/a)/2;
+        a=b;
+        b=(a+y/a)/2;
     }
 
     return ldexp(b,n/2);
@@ -272,7 +272,7 @@ double tan_rnd_series(double x);
 double texp(double x) {
     double r=1.0; double t=1.0;
     for(uint i=1; i!=20; ++i) {
-     t*=x; t/=i; r+=t;
+        t*=x; t/=i; r+=t;
     }
     return r;
 }
@@ -303,17 +303,17 @@ double exp_rnd(double x)
     ARIADNE_ASSERT_MSG(r<=+0.4, " r = "<<r<<", x = "<<x);
 
     if(r<0) {
-     // Compute w by standard Horner's rule gives correct rounding since w is monotone increasing in s
-     s = r*r;
-     w = 1+horner_rnd(6,s,c);
-     //c[0] + s * (1./c[1] + s * (1./c[2] + s * (1./c[3] + s * (1./c[4] + s * (1./c[5] + s * (1./c[6]) ) ) ) ) );
+        // Compute w by standard Horner's rule gives correct rounding since w is monotone increasing in s
+        s = r*r;
+        w = 1+horner_rnd(6,s,c);
+        //c[0] + s * (1./c[1] + s * (1./c[2] + s * (1./c[3] + s * (1./c[4] + s * (1./c[5] + s * (1./c[6]) ) ) ) ) );
     } else {
-     // Compute -w by standard Horner's rule gives opposite rounding since w is monotone increasing in s
-     s = (-r)*r; s=-s;
-     w = horner_opp(6,s,c);
-     w = -1-w; w=-w;
-     //w = -c[0] + s * (-1./c[1] + s * (-1./c[2] + s * (-1./c[3] + s * (-1./c[4] + s * (-1./c[5] + s * (-1./c[6]) ) ) ) ) );
-     //w=-w;
+        // Compute -w by standard Horner's rule gives opposite rounding since w is monotone increasing in s
+        s = (-r)*r; s=-s;
+        w = horner_opp(6,s,c);
+        w = -1-w; w=-w;
+        //w = -c[0] + s * (-1./c[1] + s * (-1./c[2] + s * (-1./c[3] + s * (-1./c[4] + s * (-1./c[5] + s * (-1./c[6]) ) ) ) ) );
+        //w=-w;
     }
 
     t=r-w;
@@ -354,18 +354,18 @@ double log_rnd(double x) {
     if(y<sqrt2_approx) { y*=2; --n; }
 
     if(y>=1.0) {
-     t=-1-y;
-     z=(y-1)/(-t);
-     s=z*z;
-     w=horner_rnd(10,s,c);
-     ly=2*z*w;
+        t=-1-y;
+        z=(y-1)/(-t);
+        s=z*z;
+        w=horner_rnd(10,s,c);
+        ly=2*z*w;
     } else {
-     t=1-y;
-     z=(-t)/(1+y);
-     s=(-z)*z;
-     s=-s;
-     w=horner_opp(10,s,c);
-     ly=2*z*w;
+        t=1-y;
+        z=(-t)/(1+y);
+        s=(-z)*z;
+        s=-s;
+        w=horner_opp(10,s,c);
+        ly=2*z*w;
     }
 
     volatile double log2rnd=next_rnd(log2_approx);
@@ -376,19 +376,19 @@ double log_rnd(double x) {
 
 double pi_rnd() {
     switch(get_rounding_mode()) {
-     case to_nearest: return pi_approx;
-     case downward: return pi_down;
-     case upward: return pi_up;
-     default: return pi_approx;
+        case to_nearest: return pi_approx;
+        case downward: return pi_down;
+        case upward: return pi_up;
+        default: return pi_approx;
     }
 }
 
 double pi_opp() {
     switch(get_rounding_mode()) {
-     case to_nearest: return pi_approx;
-     case downward: return pi_up;
-     case upward: return pi_down;
-     default: return pi_approx;
+        case to_nearest: return pi_approx;
+        case downward: return pi_up;
+        case upward: return pi_down;
+        default: return pi_approx;
     }
 }
 
@@ -456,23 +456,23 @@ double cos_rnd(double x) {
     long int n_opp=(long int)(std::floor(div_opp(x,pi_rnd)));
 
     if(n_rnd!=n_opp) {
-     if(n_rnd>n_opp) {
-      // Rounding upwards
-      if(n_rnd%2==0) { return 1.0; }
-      volatile double y1=sub_rnd(pi_rnd*n_rnd,x);
-      volatile double y2=sub_rnd(x,pi_opp*n_rnd);
-      assert(y1>=0 && y2>=0);
-      volatile double w=std::max(y1,y2);
-      return neg_cos_rnd_series(w);
-     } else {
-      // Rounding downwards
-      if(n_rnd%2==0) { return -1.0; }
-      volatile double y1=sub_opp(pi_opp*n_opp,x);
-      volatile double y2=sub_opp(x,pi_rnd*n_opp);
-      assert(y1>=0 && y2>=0);
-      volatile double w=std::max(y1,y2);
-      return pos_cos_rnd_series(w);
-     }
+        if(n_rnd>n_opp) {
+            // Rounding upwards
+            if(n_rnd%2==0) { return 1.0; }
+            volatile double y1=sub_rnd(pi_rnd*n_rnd,x);
+            volatile double y2=sub_rnd(x,pi_opp*n_rnd);
+            assert(y1>=0 && y2>=0);
+            volatile double w=std::max(y1,y2);
+            return neg_cos_rnd_series(w);
+        } else {
+            // Rounding downwards
+            if(n_rnd%2==0) { return -1.0; }
+            volatile double y1=sub_opp(pi_opp*n_opp,x);
+            volatile double y2=sub_opp(x,pi_rnd*n_opp);
+            assert(y1>=0 && y2>=0);
+            volatile double w=std::max(y1,y2);
+            return pos_cos_rnd_series(w);
+        }
     }
 
 
@@ -480,9 +480,9 @@ double cos_rnd(double x) {
     // and to (n+1)*pi-x (with opposite rounding) if n is odd
     volatile double y;
     if(n_rnd%2==0) {
-     y=sub_opp(x,mul_rnd(n_rnd,pi_rnd));
+        y=sub_opp(x,mul_rnd(n_rnd,pi_rnd));
     } else {
-     y=sub_opp(mul_opp(n_rnd+1,pi_opp),x);
+        y=sub_opp(mul_opp(n_rnd+1,pi_opp),x);
     }
 
     int q = (long int)(std::floor(y/quarter_pi_approx)) % 8;
@@ -490,17 +490,17 @@ double cos_rnd(double x) {
 
     volatile double w,c;
     if(q==0) {
-     w=y;
-     c=pos_cos_rnd_series(w);
+        w=y;
+        c=pos_cos_rnd_series(w);
     } else if(q==1 || q==2) {
-     w=sub_rnd(pi_rnd/2,y);
-     if(w>=0.0) { c=pos_sin_rnd_series(w); }
-     else { c=neg_sin_rnd_series(-w); }
+        w=sub_rnd(pi_rnd/2,y);
+        if(w>=0.0) { c=pos_sin_rnd_series(w); }
+        else { c=neg_sin_rnd_series(-w); }
     } else if(q==3 || q==4) {
-     w=sub_opp(pi_opp,y);
-     c=neg_cos_rnd_series(w);
+        w=sub_opp(pi_opp,y);
+        c=neg_cos_rnd_series(w);
     } else {
-     assert(false);
+        assert(false);
     }
 
     return c;
@@ -605,17 +605,17 @@ double tan_rnd(double x) {
     q=y/4;
     r=tan_rnd_series(q);
     if(y>=0) {
-     u=r*r-1;
-     s=(2*r)/(-u);
-     v=s*s-1;
-     t=(2*s)/(-v);
+        u=r*r-1;
+        s=(2*r)/(-u);
+        v=s*s-1;
+        t=(2*s)/(-v);
     } else {
-     u=(-r)*r;
-     u=1+u;
-     s=(2*r)/u;
-     v=(-s)*s;
-     v=1+v;
-     t=(2*s)/v;
+        u=(-r)*r;
+        u=1+u;
+        s=(2*r)/u;
+        v=(-s)*s;
+        v=1+v;
+        t=(2*s)/v;
     }
     return t;
 }
@@ -627,13 +627,13 @@ double tan_rnd_series(double x) {
 
     // Numerators of Taylor coefficients
     static const int64_t cn[13]={
-     1LL, 1LL, 2LL, 17LL, 62LL, 1382LL, 21844LL, 929569LL, 6404582LL, 443861162LL,
-     18888466084LL, 113927491862LL, 58870668456604LL };
+        1LL, 1LL, 2LL, 17LL, 62LL, 1382LL, 21844LL, 929569LL, 6404582LL, 443861162LL,
+        18888466084LL, 113927491862LL, 58870668456604LL };
 
     // Denominators of Taylor coefficients
     static const int64_t cd[13]={
-     1LL, 3LL, 15LL, 315LL, 2835LL, 155925LL, 6081075LL, 638512875LL, 10854718875LL, 1856156927625LL,
-     194896477400625LL, 2900518163668125LL, 3698160658676859375LL };
+        1LL, 3LL, 15LL, 315LL, 2835LL, 155925LL, 6081075LL, 638512875LL, 10854718875LL, 1856156927625LL,
+        194896477400625LL, 2900518163668125LL, 3698160658676859375LL };
 
 
     // To get enough accuracy, we need |x|<pi/8
@@ -643,21 +643,21 @@ double tan_rnd_series(double x) {
 
     volatile double c,s,w,r;
     if(x>=0) {
-     s=x*x;
-     w=double(cn[12])/cd[12];
-     for(int i=11; i>=0; --i) {
-      c=double(cn[i])/cd[i];
-      w=c+s*w;
-     }
-     r=x*w;
+        s=x*x;
+        w=double(cn[12])/cd[12];
+        for(int i=11; i>=0; --i) {
+            c=double(cn[i])/cd[i];
+            w=c+s*w;
+        }
+        r=x*w;
     } else {
-     s=(-x)*x; s=-s;
-     w=double(-cn[12])/cd[12];
-     for(int i=12; i>=0; --i) {
-      c=double(-cn[i])/cd[i];
-      w=c+s*w;
-     }
-     r=x*(-w);
+        s=(-x)*x; s=-s;
+        w=double(-cn[12])/cd[12];
+        for(int i=12; i>=0; --i) {
+            c=double(-cn[i])/cd[i];
+            w=c+s*w;
+        }
+        r=x*(-w);
     }
     return r;
 }
@@ -765,14 +765,14 @@ Interval rec(Interval i)
     volatile double& iu=internal_cast<volatile double&>(i.upper());
     volatile double rl,ru;
     if(il>0 || iu<0) {
-     rounding_mode_t rnd=get_rounding_mode();
-     rl=_div_down(1.0,iu);
-     ru=_div_up(1.0,il);
-     set_rounding_mode(rnd);
+        rounding_mode_t rnd=get_rounding_mode();
+        rl=_div_down(1.0,iu);
+        ru=_div_up(1.0,il);
+        set_rounding_mode(rnd);
     } else {
-     rl=-std::numeric_limits<double>::infinity();
-     ru=+std::numeric_limits<double>::infinity();
-     ARIADNE_THROW(DivideByZeroException,"Interval rec(Interval ivl)","ivl="<<i);
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
+        ARIADNE_THROW(DivideByZeroException,"Interval rec(Interval ivl)","ivl="<<i);
     }
     return Interval(rl,ru);
 }
@@ -787,33 +787,33 @@ Interval mul(Interval i1, Interval i2)
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
     if(i1l>=0) {
-     if(i2l>=0) {
-      rl=_mul_down(i1l,i2l); ru=_mul_up(i1u,i2u);
-     } else if(i2u<=0) {
-      rl=_mul_down(i1u,i2l); ru=_mul_up(i1l,i2u);
-     } else {
-      rl=_mul_down(i1u,i2l); ru=_mul_up(i1u,i2u);
-     }
+        if(i2l>=0) {
+            rl=_mul_down(i1l,i2l); ru=_mul_up(i1u,i2u);
+        } else if(i2u<=0) {
+            rl=_mul_down(i1u,i2l); ru=_mul_up(i1l,i2u);
+        } else {
+            rl=_mul_down(i1u,i2l); ru=_mul_up(i1u,i2u);
+        }
     }
     else if(i1u<=0) {
-     if(i2l>=0) {
-      rl=_mul_down(i1l,i2u); ru=_mul_up(i1u,i2l);
-     } else if(i2u<=0) {
-      rl=_mul_down(i1u,i2u); ru=_mul_up(i1l,i2l);
-     } else {
-      rl=_mul_down(i1l,i2u); ru=_mul_up(i1l,i2l);
-     }
+        if(i2l>=0) {
+            rl=_mul_down(i1l,i2u); ru=_mul_up(i1u,i2l);
+        } else if(i2u<=0) {
+            rl=_mul_down(i1u,i2u); ru=_mul_up(i1l,i2l);
+        } else {
+            rl=_mul_down(i1l,i2u); ru=_mul_up(i1l,i2l);
+        }
     } else {
-     if(i2l>=0) {
-      rl=_mul_down(i1l,i2u); ru=_mul_up(i1u,i2u);
-     } else if(i2u<=0) {
-      rl=_mul_down(i1u,i2l); ru=_mul_up(i1l,i2l);
-     } else {
-      set_rounding_mode(downward);
-      rl=std::min(i1u*i2l,i1l*i2u);
-      set_rounding_mode(upward);
-      ru=std::max(i1l*i2l,i1u*i2u);
-     }
+        if(i2l>=0) {
+            rl=_mul_down(i1l,i2u); ru=_mul_up(i1u,i2u);
+        } else if(i2u<=0) {
+            rl=_mul_down(i1u,i2l); ru=_mul_up(i1l,i2l);
+        } else {
+            set_rounding_mode(downward);
+            rl=std::min(i1u*i2l,i1l*i2u);
+            set_rounding_mode(upward);
+            ru=std::max(i1l*i2l,i1u*i2u);
+        }
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -828,9 +828,9 @@ Interval mul(Interval i1, Float x2)
     volatile double& x2v=internal_cast<volatile double&>(x2);
     volatile double rl,ru;
     if(x2>=0) {
-     rl=_mul_down(i1l,x2v); ru=_mul_up(i1u,x2v);
+        rl=_mul_down(i1l,x2v); ru=_mul_up(i1u,x2v);
     } else {
-     rl=_mul_down(i1u,x2v); ru=_mul_up(i1l,x2v);
+        rl=_mul_down(i1u,x2v); ru=_mul_up(i1l,x2v);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -852,27 +852,27 @@ Interval div(Interval i1, Interval i2)
     volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     if(i2l>0) {
-     if(i1l>=0) {
-      rl=_div_down(i1l,i2u); ru=_div_up(i1u,i2l);
-     } else if(i1u<=0) {
-      rl=_div_down(i1l,i2l); ru=_div_up(i1u,i2u);
-     } else {
-      rl=_div_down(i1l,i2l); ru=_div_up(i1u,i2l);
-     }
+        if(i1l>=0) {
+            rl=_div_down(i1l,i2u); ru=_div_up(i1u,i2l);
+        } else if(i1u<=0) {
+            rl=_div_down(i1l,i2l); ru=_div_up(i1u,i2u);
+        } else {
+            rl=_div_down(i1l,i2l); ru=_div_up(i1u,i2l);
+        }
     }
     else if(i2u<0) {
-     if(i1l>=0) {
-      rl=_div_down(i1u,i2u); ru=_div_up(i1l,i2l);
-     } else if(i1u<=0) {
-      rl=_div_down(i1u,i2l); ru=_div_up(i1l,i2u);
-     } else {
-      rl=_div_down(i1u,i2u); ru=_div_up(i1l,i2u);
-     }
+        if(i1l>=0) {
+            rl=_div_down(i1u,i2u); ru=_div_up(i1l,i2l);
+        } else if(i1u<=0) {
+            rl=_div_down(i1u,i2l); ru=_div_up(i1l,i2u);
+        } else {
+            rl=_div_down(i1u,i2u); ru=_div_up(i1l,i2u);
+        }
     }
     else {
-     // ARIADNE_THROW(DivideByZeroException,"Interval div(Interval ivl1, Interval ivl2)","ivl1="<<i1<<", ivl2="<<i2);
-     rl=-std::numeric_limits<double>::infinity();
-     ru=+std::numeric_limits<double>::infinity();
+        // ARIADNE_THROW(DivideByZeroException,"Interval div(Interval ivl1, Interval ivl2)","ivl1="<<i1<<", ivl2="<<i2);
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -888,12 +888,12 @@ Interval div(Interval i1, Float x2)
     volatile double& x2v=internal_cast<volatile double&>(x2);
     volatile double rl,ru;
     if(x2v>0) {
-     rl=_div_down(i1l,x2v); ru=_div_up(i1u,x2v);
+        rl=_div_down(i1l,x2v); ru=_div_up(i1u,x2v);
     } else if(x2v<0) {
-     rl=_div_down(i1u,x2v); ru=_div_up(i1l,x2v);
+        rl=_div_down(i1u,x2v); ru=_div_up(i1l,x2v);
     } else {
-     rl=-std::numeric_limits<double>::infinity();
-     ru=+std::numeric_limits<double>::infinity();
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -908,13 +908,13 @@ Interval div(Float x1, Interval i2)
     volatile double& i2u=internal_cast<volatile double&>(i2.upper());
     volatile double rl,ru;
     if(i2l<=0 && i2u>=0) {
-     ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
-     rl=-std::numeric_limits<double>::infinity();
-     ru=+std::numeric_limits<double>::infinity();
+        ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
+        rl=-std::numeric_limits<double>::infinity();
+        ru=+std::numeric_limits<double>::infinity();
     } else if(x1v>=0) {
-     rl=_div_down(x1v,i2u); ru=_div_up(x1v,i2l);
+        rl=_div_down(x1v,i2u); ru=_div_up(x1v,i2l);
     } else {
-     rl=_div_down(x1v,i2l); ru=_div_up(x1v,i2u);
+        rl=_div_down(x1v,i2l); ru=_div_up(x1v,i2u);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -927,21 +927,21 @@ Interval sqr(Interval i)
     volatile double& iu=internal_cast<volatile double&>(i.upper());
     volatile double rl,ru;
     if(il>0.0) {
-     set_rounding_mode(downward);
-     rl=il*il;
-     set_rounding_mode(upward);
-     ru=iu*iu;
+        set_rounding_mode(downward);
+        rl=il*il;
+        set_rounding_mode(upward);
+        ru=iu*iu;
     } else if(iu<0.0) {
-     set_rounding_mode(downward);
-     rl=iu*iu;
-     set_rounding_mode(upward);
-     ru=il*il;
+        set_rounding_mode(downward);
+        rl=iu*iu;
+        set_rounding_mode(upward);
+        ru=il*il;
     } else {
-     rl=0.0;
-     set_rounding_mode(upward);
-     volatile double ru1=il*il;
-     volatile double ru2=iu*iu;
-     ru=max(ru1,ru2);
+        rl=0.0;
+        set_rounding_mode(upward);
+        volatile double ru1=il*il;
+        volatile double ru2=iu*iu;
+        ru=max(ru1,ru2);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -1034,15 +1034,15 @@ Interval cos(Interval i)
 
     Float rl,ru;
     if(i.lower()<=0.0) {
-     if(i.upper()<=0.0) { rl=cos_down(i.lower()); ru=cos_up(i.upper()); }
-     else if(i.upper()<=pi_down) { rl=cos_down(max(-i.lower(),i.upper())); ru=+1.0; }
-     else { return Interval(-1.0,+1.0); }
+        if(i.upper()<=0.0) { rl=cos_down(i.lower()); ru=cos_up(i.upper()); }
+        else if(i.upper()<=pi_down) { rl=cos_down(max(-i.lower(),i.upper())); ru=+1.0; }
+        else { return Interval(-1.0,+1.0); }
     } else if(i.lower()<=pi_up) {
-     if(i.upper()<=pi_down) { rl=cos_down(i.upper()); ru=cos_up(i.lower()); }
-     else if(i.upper()<=2*pi_down) { rl=-1.0; ru=cos_up(min(i.lower(),sub_down(2*pi_down,i.upper()))); }
-     else { return Interval(-1.0,+1.0); }
+        if(i.upper()<=pi_down) { rl=cos_down(i.upper()); ru=cos_up(i.lower()); }
+        else if(i.upper()<=2*pi_down) { rl=-1.0; ru=cos_up(min(i.lower(),sub_down(2*pi_down,i.upper()))); }
+        else { return Interval(-1.0,+1.0); }
     } else {
-     assert(false);
+        assert(false);
     }
 
     set_rounding_mode(rnd);
@@ -1135,7 +1135,7 @@ std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
 {
     if(ivl.lower()==ivl.upper()) {
-     return os << std::setprecision(18) << ivl.lower();
+        return os << std::setprecision(18) << ivl.lower();
     }
 
     std::stringstream iss,uss;
@@ -1148,32 +1148,32 @@ operator<<(std::ostream& os, const Interval& ivl)
     // Test if one endpoint is an integer and the other is not
     // If this is the case, append ".0" to to integer value
     if( (lstr.find('.')==lstr.size()) xor (ustr.find('.')==lstr.size()) ) {
-     if(lstr.find('.')==lstr.size()) {
-      lstr+=".0";
-     } else {
-      ustr+=".0";
-     }
+        if(lstr.find('.')==lstr.size()) {
+            lstr+=".0";
+        } else {
+            ustr+=".0";
+        }
     }
 
     // Write common head
     uint i;
     for(i=0; (i<std::min(lstr.size(),ustr.size()) && lstr[i]==ustr[i]); ++i) {
-     os << lstr[i];
+        os << lstr[i];
     }
 
     os << "[";
     if(i==lstr.size()) {
-     os << "0";
+        os << "0";
     }
     for(uint li=i; li != lstr.size(); ++li) {
-     os << lstr[li];
+        os << lstr[li];
     }
     os << ":";
     if(i==ustr.size()) {
-     os << "0";
+        os << "0";
     }
     for(uint ui=i; ui != ustr.size(); ++ui) {
-     os << ustr[ui];
+        os << ustr[ui];
     }
     os << "]";
     return os;
@@ -1215,26 +1215,26 @@ Real::Real(const std::string& str)
     uint decimal_places=0;
     const char* c_ptr=str.c_str();
     while(*c_ptr != 0) {
-     const char& c=*c_ptr;
-     if(c=='.') {
-      if(decimal_point) {
-    ARIADNE_THROW(std::runtime_error,"Real(String)","real literal \""<<str<<"\" has more than one decimal point.");
-      }
-      else {
-    decimal_point=true;
-      }
-     } else if(c>='0' && c<='9') {
-      q=q*10+(c-'0');
-      if(decimal_point) {
-    ++decimal_places;
-      }
-     } else {
-      ARIADNE_THROW(std::runtime_error,"Real(String)","invalid symbol '"<<c<<"' in string literal \""<<str<<"\"");
-     }
-     ++c_ptr;
+        const char& c=*c_ptr;
+        if(c=='.') {
+            if(decimal_point) {
+                ARIADNE_THROW(std::runtime_error,"Real(String)","real literal \""<<str<<"\" has more than one decimal point.");
+            }
+            else {
+                decimal_point=true;
+            }
+        } else if(c>='0' && c<='9') {
+            q=q*10+(c-'0');
+            if(decimal_point) {
+                ++decimal_places;
+            }
+        } else {
+            ARIADNE_THROW(std::runtime_error,"Real(String)","invalid symbol '"<<c<<"' in string literal \""<<str<<"\"");
+        }
+        ++c_ptr;
     }
     for(uint i=0; i!=decimal_places; ++i) {
-     q=q/10;
+        q=q/10;
     }
     *this=Real(q);
 }
@@ -1247,10 +1247,10 @@ Real::Real(const Rational& q)
     volatile double u=x;
     set_rounding_upward();
     while(-ml>q) {
-     ml+=std::numeric_limits<double>::min();
+        ml+=std::numeric_limits<double>::min();
     }
     while(u<q) {
-     u+=std::numeric_limits<double>::min();
+        u+=std::numeric_limits<double>::min();
     }
     *this=Real(-ml,x,u);
     set_rounding_mode(rnd);

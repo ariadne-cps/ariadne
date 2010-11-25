@@ -1,8 +1,8 @@
 /***************************************************************************
- *      point.cc
+ *            point.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- *
+ * 
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 #include <cstdarg>
 #include <sstream>
 #include <string>
@@ -36,14 +36,14 @@ namespace Ariadne {
 Point::Point(uint d, double x0,  ...)
     : Vector<Float>(d)
 {
-    assert(d>=1);
-    va_list args;
+    assert(d>=1); 
+    va_list args; 
     va_start(args,x0);
     (*this)[0]=x0;
-    for(uint i=1; i!=d; ++i) {
-     double xi=va_arg(args,double);
-     (*this)[i]=xi;
-    }
+    for(uint i=1; i!=d; ++i) { 
+        double xi=va_arg(args,double);
+        (*this)[i]=xi; 
+    } 
     va_end(args);
 }
 
@@ -60,7 +60,7 @@ Box Point::bounding_box() const {
     Box r(this->dimension());
     Float e=eps();
     for(uint i=0; i!=this->dimension(); ++i) {
-     r[i]=(*this)[i]+Interval(-e,+e); }
+        r[i]=(*this)[i]+Interval(-e,+e); }
     return r;
 }
 

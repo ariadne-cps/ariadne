@@ -1,8 +1,8 @@
 /***************************************************************************
- *      paving.h
+ *            paving.h
  *
  *  Copyright 2008  Pieter Collins
- *
+ * 
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 /*! \file paving.h
  *  \brief Sets based on paving an initial box.
  */
@@ -46,7 +46,7 @@ class Node;
 class Paving;
 
 typedef Node* Subpaving;  //makes Subpaving alias of
-     //pointer to a Node
+                          //pointer to a Node
 
 
 class Node {
@@ -55,36 +55,36 @@ class Node {
     tribool theValue;
     Subpaving leftChild;
     Subpaving rightChild;
-
+  
   public:
     //constructors
     Node(const IntervalVector& v, tribool tb); //initialized
     Node(const Node& n); //copy
-
+  
     //destructor
     ~Node();
-
+  
     //other Methods
     friend const IntervalVector& box(const Subpaving a);
-
+  
     friend bool is_empty(const Subpaving);
     friend bool is_full(const Subpaving);
     friend bool is_leaf(const Subpaving);
     friend bool is_null(const Subpaving);
-
+  
     friend uint size(const Subpaving a);
     friend double volume(const Subpaving a);
-
+  
     friend std::ostream& operator<< (std::ostream&, const Subpaving);
     friend std::ostream& write (std::ostream&, const Node*);
-
+  
     friend tribool inside(const IntervalVector&, const Subpaving);
-
+  
     friend Node* sivia(IntervalPredicate, const IntervalVector& box, double, tribool);
     friend void expand(Node*);
     friend void contract(Node*);
     friend Node* reunite(Node*, Node*, const IntervalVector&);
-
+  
     friend Node* image(IntervalFunction, Node*, double);
     friend void mince(Node*, double);
     friend void flatten(Node*, ImageList&);
@@ -108,9 +108,9 @@ class Paving {
     Paving(const Subpaving a) : _base(new Node(*a)) { }
     Paving(const IntervalVector& bx) : _base(new Node(bx,true)) { }
     Paving(const Paving& pv) : _base(new Node(*pv._base)) { }
-    Paving& operator=(const Paving& pv) {
-     if(this!=&pv) { delete this->_base; this->_base=new Node(*pv._base); }
-     return *this; }
+    Paving& operator=(const Paving& pv) { 
+        if(this!=&pv) { delete this->_base; this->_base=new Node(*pv._base); } 
+        return *this; }
     ~Paving() { delete this->_base; }
     Subpaving root() { return this->_base; }
     const Subpaving root() const { return this->_base; }

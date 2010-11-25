@@ -1,8 +1,8 @@
 /***************************************************************************
- *      grid_set.cc
+ *            grid_set.cc
  *
  *  Copyright  2008  Ivan S. Zapreev, Pieter Collins
- *      ivan.zapreev@gmail.com, pieter.collins@cwi.nl
+ *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/
 
@@ -90,7 +90,7 @@ Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
     : _data(new Data())
 {
     if(origin.size() != lengths.size()) {
-     throw IncompatibleSizes(ARIADNE_PRETTY_FUNCTION);
+        throw IncompatibleSizes(ARIADNE_PRETTY_FUNCTION);
     }
     this->_create(origin,lengths);
 }
@@ -137,9 +137,9 @@ int Grid::subdivision_index(uint d, const real_type& x) const
     int n=integer_cast<int>(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
     Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
     if(sc == x) {
-     return n;
+        return n;
     } else {
-     ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
 
@@ -147,9 +147,9 @@ int Grid::subdivision_lower_index(uint d, const real_type& x) const
 {
     int n=integer_cast<int>(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
-     return n+1;
+        return n+1;
     } else {
-     return n;
+        return n;
     }
 }
 
@@ -157,18 +157,18 @@ int Grid::subdivision_upper_index(uint d, const real_type& x) const
 {
     int n=integer_cast<int>(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
-     return n-1;
+        return n-1;
     } else {
-     return n;
+        return n;
     }
 }
 
 bool Grid::operator==(const Grid& g) const
 {
     if(this->_data==g._data) {
-     return true;
+        return true;
     } else {
-     return this->_data->_origin==g._data->_origin && this->_data->_lengths==g._data->_lengths;
+        return this->_data->_origin==g._data->_origin && this->_data->_lengths==g._data->_lengths;
     }
 }
 
@@ -181,7 +181,7 @@ array<double> Grid::index(const Vector<Float>& pt) const
 {
     array<double> res(pt.size());
     for(size_t i=0; i!=res.size(); ++i) {
-     res[i]=subdivision_index(i,pt[i]);
+        res[i]=subdivision_index(i,pt[i]);
     }
     return res;
 }
@@ -189,7 +189,7 @@ array<double> Grid::index(const Vector<Float>& pt) const
 array<double> Grid::lower_index(const Vector<Interval>& bx) const {
     array<double> res(bx.size());
     for(size_t i=0; i!=res.size(); ++i) {
-     res[i]=subdivision_lower_index(i,bx[i].lower());
+        res[i]=subdivision_lower_index(i,bx[i].lower());
     }
     return res;
 }
@@ -197,7 +197,7 @@ array<double> Grid::lower_index(const Vector<Interval>& bx) const {
 array<double> Grid::upper_index(const Vector<Interval>& bx) const {
     array<double> res(bx.size());
     for(size_type i=0; i!=res.size(); ++i) {
-     res[i]=subdivision_upper_index(i,bx[i].upper());
+        res[i]=subdivision_upper_index(i,bx[i].upper());
     }
     return res;
 }
@@ -206,7 +206,7 @@ Vector<Float> Grid::point(const array<int>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
-     res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
+        res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
     }
     return res;
 }
@@ -215,7 +215,7 @@ Vector<Float> Grid::point(const array<double>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
-     res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
+        res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
     }
     return res;
 }
@@ -224,8 +224,8 @@ Vector<Interval> Grid::box(const array<double>& lower, const array<double>& uppe
 {
     Vector<Interval> res(lower.size());
     for(size_type i=0; i!=res.size(); ++i) {
-     res[i]=Interval(this->subdivision_coordinate(i,lower[i]),
-      this->subdivision_coordinate(i,upper[i]));
+        res[i]=Interval(this->subdivision_coordinate(i,lower[i]),
+                        this->subdivision_coordinate(i,upper[i]));
     }
     return res;
 }
@@ -242,17 +242,17 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 bool BinaryTreeNode::has_enabled() const {
     if( is_leaf() ) {
-     return is_enabled();
+        return is_enabled();
     } else {
-     return ( left_node()->has_enabled() || right_node()->has_enabled() );
+        return ( left_node()->has_enabled() || right_node()->has_enabled() );
     }
 }
 
 bool BinaryTreeNode::all_enabled() const {
     if( is_leaf() ) {
-     return is_enabled();
+        return is_enabled();
     } else {
-     return ( left_node()->all_enabled() && right_node()->all_enabled() );
+        return ( left_node()->all_enabled() && right_node()->all_enabled() );
     }
 }
 
@@ -260,27 +260,27 @@ bool BinaryTreeNode::is_enabled( const BinaryWord & path, const uint position) c
     bool result = false ;
 
     if( this->is_leaf() ){
-     //If we are in an enabled leaf node then the answer is true.
-     //Since path.size() >= 0, the node defined by the path is a
-     //subnode of an enabled node, thus we return true.
-     result = is_enabled();
+        //If we are in an enabled leaf node then the answer is true.
+        //Since path.size() >= 0, the node defined by the path is a
+        //subnode of an enabled node, thus we return true.
+        result = is_enabled();
     } else {
-     if( position < path.size() ) {
-      //The path is not complete yet and we are in a
-      //non-leaf node, so we follow the path in the tree
-      if( path[ position ] ) {
-    result = right_node()->is_enabled( path, position + 1 );
-      } else {
-    result = left_node()->is_enabled( path, position + 1 );
-      }
-     } else {
-      //We are somewhere in the tree in a non-leaf node,
-      //this node corresponds to the node given by the path
-      //If both left and right sub trees are fully enabled,
-      //then the cell defined by the binary path is "enabled"
-      //in this tree otherwise it is not.
-      result = all_enabled();
-     }
+        if( position < path.size() ) {
+            //The path is not complete yet and we are in a
+            //non-leaf node, so we follow the path in the tree
+            if( path[ position ] ) {
+                result = right_node()->is_enabled( path, position + 1 );
+            } else {
+                result = left_node()->is_enabled( path, position + 1 );
+            }
+        } else {
+            //We are somewhere in the tree in a non-leaf node,
+            //this node corresponds to the node given by the path
+            //If both left and right sub trees are fully enabled,
+            //then the cell defined by the binary path is "enabled"
+            //in this tree otherwise it is not.
+            result = all_enabled();
+        }
     }
     return result;
 }
@@ -289,168 +289,168 @@ bool BinaryTreeNode::is_equal_nodes( const BinaryTreeNode * pFirstNode, const Bi
     bool result = true;
 
     if( pFirstNode != pSecondNode){
-     //If the pointers do not reference the same objects
-     if( ( pFirstNode != NULL ) && ( pSecondNode != NULL ) ){
-      //And both nodes are not null
-      if( ! ( (* pFirstNode) == ( * pSecondNode ) ) ){
-    //The objects referenced by the pointers do not contain equal data
-    result = false;
-      }
-     } else {
-      //One of the nodes is null and the other is not
-      result = false;
-     }
+        //If the pointers do not reference the same objects
+        if( ( pFirstNode != NULL ) && ( pSecondNode != NULL ) ){
+            //And both nodes are not null
+            if( ! ( (* pFirstNode) == ( * pSecondNode ) ) ){
+                //The objects referenced by the pointers do not contain equal data
+                result = false;
+            }
+        } else {
+            //One of the nodes is null and the other is not
+            result = false;
+        }
     }
     return result;
 }
 
 bool BinaryTreeNode::operator==(const BinaryTreeNode & otherNode ) const {
     return ( ( this->_isEnabled == otherNode._isEnabled ) ||
-    ( indeterminate( this->_isEnabled     ) &&
-      indeterminate( otherNode._isEnabled ) ) )      &&
-     is_equal_nodes( this->_pLeftNode , otherNode._pLeftNode )   &&
-     is_equal_nodes( this->_pRightNode , otherNode._pRightNode );
+             ( indeterminate( this->_isEnabled     ) &&
+               indeterminate( otherNode._isEnabled ) ) )            &&
+        is_equal_nodes( this->_pLeftNode , otherNode._pLeftNode )   &&
+        is_equal_nodes( this->_pRightNode , otherNode._pRightNode );
 }
 
 void BinaryTreeNode::restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode ){
     if( ( pThisNode != NULL ) && ( pOtherNode != NULL ) ){
-     if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
-      //Both nodes are leaf nodes: Make a regular AND
-      pThisNode->_isEnabled = (pThisNode->_isEnabled && pOtherNode->_isEnabled);
-     } else {
-      if( !pThisNode->is_leaf() && pOtherNode->is_leaf() ){
-    if( pOtherNode->is_enabled() ){
-     //DO NOTHING: The restriction will not affect pThisNode
-    } else {
-     //Turn the node a disabled leaf, since we do AND with false
-     pThisNode->make_leaf(false);
-    }
-      } else {
-    if( pThisNode->is_leaf() && !pOtherNode->is_leaf() ){
-     if( pThisNode->is_enabled() ){
-      //If this node is enabled then copy in the other node
-      //Since it will be their intersection any ways
-      pThisNode->copy_from( pOtherNode );
-     } else {
-      //DO NOTHING: The restriction is empty in this case
-      //because this node is a disabled leaf
-     }
-    } else {
-     //Both nodes are non-leaf nodes: Go recursively left and right
-     restrict( pThisNode->_pLeftNode, pOtherNode->_pLeftNode );
-     restrict( pThisNode->_pRightNode, pOtherNode->_pRightNode );
-    }
-      }
-     }
+        if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+            //Both nodes are leaf nodes: Make a regular AND
+            pThisNode->_isEnabled = (pThisNode->_isEnabled && pOtherNode->_isEnabled);
+        } else {
+            if( !pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+                if( pOtherNode->is_enabled() ){
+                    //DO NOTHING: The restriction will not affect pThisNode
+                } else {
+                    //Turn the node a disabled leaf, since we do AND with false
+                    pThisNode->make_leaf(false);
+                }
+            } else {
+                if( pThisNode->is_leaf() && !pOtherNode->is_leaf() ){
+                    if( pThisNode->is_enabled() ){
+                        //If this node is enabled then copy in the other node
+                        //Since it will be their intersection any ways
+                        pThisNode->copy_from( pOtherNode );
+                    } else {
+                        //DO NOTHING: The restriction is empty in this case
+                        //because this node is a disabled leaf
+                    }
+                } else {
+                    //Both nodes are non-leaf nodes: Go recursively left and right
+                    restrict( pThisNode->_pLeftNode, pOtherNode->_pLeftNode );
+                    restrict( pThisNode->_pRightNode, pOtherNode->_pRightNode );
+                }
+            }
+        }
     }
 }
 
 void BinaryTreeNode::remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode ) {
     if( ( pThisNode != NULL ) && ( pOtherNode != NULL ) ){
-     if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
-      if( pThisNode->is_enabled() && pOtherNode->is_enabled() ){
-    //Both nodes are enabled leaf nodes: Make a regular subtraction, i.e. set the false
-    pThisNode->_isEnabled = false;
-      } else {
-    //DO NOTHING: In all other cases there is nothing to be done
-      }
-     } else {
-      if( !pThisNode->is_leaf() && pOtherNode->is_leaf() ){
-    if( pOtherNode->is_enabled() ){
-     //Turn the node into a disabled leaf, since we subtract all below
-     pThisNode->make_leaf(false);
-    } else {
-     //DO NOTHING: We are trying to remove a disabled node
-    }
-      } else {
-    if( pThisNode->is_leaf() ) {
-     if( pThisNode->is_enabled() ){
-      //This is an enabled leaf node and so we might subtract smth from it
-      //The pOtherNode is not a leaf, due to previous checks so we split
-      //pThisNode and then do the recursion as in case on two non-leaf nodes
-      pThisNode->split();
-     } else {
-      //DO NOTHING: We are trying to remove from a disabled leaf node. Whatever
-      //we are trying to remove, will not have any effect on the result. We return
-      //because in all remaining cases we need to do recursion for sub trees.
-      return;
-     }
-    } else {
-     //We will have to do the recursion to remove the leaf nodes
-    }
-    //Both nodes are non-leaf nodes now: Go recursively left and right
-    remove( pThisNode->_pLeftNode, pOtherNode->_pLeftNode );
-    remove( pThisNode->_pRightNode, pOtherNode->_pRightNode );
-      }
-     }
+        if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+            if( pThisNode->is_enabled() && pOtherNode->is_enabled() ){
+                //Both nodes are enabled leaf nodes: Make a regular subtraction, i.e. set the false
+                pThisNode->_isEnabled = false;
+            } else {
+                //DO NOTHING: In all other cases there is nothing to be done
+            }
+        } else {
+            if( !pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+                if( pOtherNode->is_enabled() ){
+                    //Turn the node into a disabled leaf, since we subtract all below
+                    pThisNode->make_leaf(false);
+                } else {
+                    //DO NOTHING: We are trying to remove a disabled node
+                }
+            } else {
+                if( pThisNode->is_leaf() ) {
+                    if( pThisNode->is_enabled() ){
+                        //This is an enabled leaf node and so we might subtract smth from it
+                        //The pOtherNode is not a leaf, due to previous checks so we split
+                        //pThisNode and then do the recursion as in case on two non-leaf nodes
+                        pThisNode->split();
+                    } else {
+                        //DO NOTHING: We are trying to remove from a disabled leaf node. Whatever
+                        //we are trying to remove, will not have any effect on the result. We return
+                        //because in all remaining cases we need to do recursion for sub trees.
+                        return;
+                    }
+                } else {
+                    //We will have to do the recursion to remove the leaf nodes
+                }
+                //Both nodes are non-leaf nodes now: Go recursively left and right
+                remove( pThisNode->_pLeftNode, pOtherNode->_pLeftNode );
+                remove( pThisNode->_pRightNode, pOtherNode->_pRightNode );
+            }
+        }
     }
 }
 
 void BinaryTreeNode::restore_node( BinaryTreeNode * pCurrentNode, uint & arr_index, uint & leaf_counter,
-     const BooleanArray& theTree, const BooleanArray& theEnabledCells) {
+                                   const BooleanArray& theTree, const BooleanArray& theEnabledCells) {
     //If we are not done with the the tree yet
     if( arr_index < theTree.size() ) {
-     //If we are in a non-leaf node then go further
-     if( theTree[arr_index] ) {
-      pCurrentNode->split();
-      //IVAN S. ZAPREEV:
-      //NOTE: We assume a correct input, i.e. both children are present
-      //NOTE: We increase the arr_index before calling recursion for each
-      //      of the subnodes of the tree
-      restore_node( pCurrentNode->_pLeftNode, ++arr_index, leaf_counter, theTree, theEnabledCells );
-      restore_node( pCurrentNode->_pRightNode, ++arr_index, leaf_counter, theTree, theEnabledCells );
-     } else {
-      //If we are in a leaf node then chek if it needs to be enabled/disabled
-      pCurrentNode->_isEnabled = theEnabledCells[leaf_counter];
+        //If we are in a non-leaf node then go further
+        if( theTree[arr_index] ) {
+            pCurrentNode->split();
+            //IVAN S. ZAPREEV:
+            //NOTE: We assume a correct input, i.e. both children are present
+            //NOTE: We increase the arr_index before calling recursion for each
+            //      of the subnodes of the tree
+            restore_node( pCurrentNode->_pLeftNode, ++arr_index, leaf_counter, theTree, theEnabledCells );
+            restore_node( pCurrentNode->_pRightNode, ++arr_index, leaf_counter, theTree, theEnabledCells );
+        } else {
+            //If we are in a leaf node then chek if it needs to be enabled/disabled
+            pCurrentNode->_isEnabled = theEnabledCells[leaf_counter];
 
-      leaf_counter++;
-     }
+            leaf_counter++;
+        }
     }
 }
 
 void BinaryTreeNode::mince_node(BinaryTreeNode * pCurrentNode, const uint depth) {
     //If we need to mince further.
     if( depth > 0 ){
-     //If the node is present, i.e. the parent is not a disabled node.
-     if( pCurrentNode != NULL ){
-      //If the current node is not disabled: enabled (leaf) or
-      //indeterminate (non-leaf) then there is a work to do.
-      if( ! pCurrentNode->is_disabled() ){
-    pCurrentNode->split();
+        //If the node is present, i.e. the parent is not a disabled node.
+        if( pCurrentNode != NULL ){
+            //If the current node is not disabled: enabled (leaf) or
+            //indeterminate (non-leaf) then there is a work to do.
+            if( ! pCurrentNode->is_disabled() ){
+                pCurrentNode->split();
 
-    const int remaining_depth = depth - 1;
+                const int remaining_depth = depth - 1;
 
-    mince_node( pCurrentNode->_pLeftNode, remaining_depth );
-    mince_node( pCurrentNode->_pRightNode, remaining_depth );
-      }
-     } else {
-      throw std::runtime_error( ARIADNE_PRETTY_FUNCTION );
-     }
+                mince_node( pCurrentNode->_pLeftNode, remaining_depth );
+                mince_node( pCurrentNode->_pRightNode, remaining_depth );
+            }
+        } else {
+            throw std::runtime_error( ARIADNE_PRETTY_FUNCTION );
+        }
     }
 }
 
 void BinaryTreeNode::recombine_node(BinaryTreeNode * pCurrentNode) {
     //Just a safety check
     if( pCurrentNode != NULL ){
-     //If it is not a leaf node then it should have both of it's subnodes != NULL
-     if( ! pCurrentNode->is_leaf() ){
-      BinaryTreeNode * pLeftNode = pCurrentNode->_pLeftNode;
-      BinaryTreeNode * pRightNode = pCurrentNode->_pRightNode;
+        //If it is not a leaf node then it should have both of it's subnodes != NULL
+        if( ! pCurrentNode->is_leaf() ){
+            BinaryTreeNode * pLeftNode = pCurrentNode->_pLeftNode;
+            BinaryTreeNode * pRightNode = pCurrentNode->_pRightNode;
 
-      //This recursive calls ensure that we do recombination from the bottom up
-      recombine_node( pLeftNode );
-      recombine_node( pRightNode );
+            //This recursive calls ensure that we do recombination from the bottom up
+            recombine_node( pLeftNode );
+            recombine_node( pRightNode );
 
-      //Do the recombination for the leaf nodes rooted to pCurrentNode
-      if( pLeftNode->is_leaf() && pRightNode->is_leaf() ){
-    if( pLeftNode->_isEnabled == pRightNode->_isEnabled ){
-     //Make it the leaf node with the derived _isEnabled value
-     pCurrentNode->make_leaf( pLeftNode->_isEnabled );
-    }
-      }
-     }
+            //Do the recombination for the leaf nodes rooted to pCurrentNode
+            if( pLeftNode->is_leaf() && pRightNode->is_leaf() ){
+                if( pLeftNode->_isEnabled == pRightNode->_isEnabled ){
+                    //Make it the leaf node with the derived _isEnabled value
+                    pCurrentNode->make_leaf( pLeftNode->_isEnabled );
+                }
+            }
+        }
     } else {
-     throw std::runtime_error( ARIADNE_PRETTY_FUNCTION );
+        throw std::runtime_error( ARIADNE_PRETTY_FUNCTION );
     }
 }
 
@@ -459,12 +459,12 @@ uint BinaryTreeNode::depth() const {
     uint result;
 
     if( ! this->is_leaf() ){
-     //If the node is not a leaf, compute the depth of the sub-trees and take the maximum + 1
-     //Note that, both left and right sub-nodes must exist, by to the way we construct the tree
-     result = max(this->left_node()->depth(), this->right_node()->depth() ) + 1;
+        //If the node is not a leaf, compute the depth of the sub-trees and take the maximum + 1
+        //Note that, both left and right sub-nodes must exist, by to the way we construct the tree
+        result = max(this->left_node()->depth(), this->right_node()->depth() ) + 1;
     } else {
-     //If the node is a leaf then the depth of the sub-tree is zero
-     result = 0;
+        //If the node is a leaf then the depth of the sub-tree is zero
+        result = 0;
     }
 
     return result;
@@ -472,21 +472,21 @@ uint BinaryTreeNode::depth() const {
 
 size_t BinaryTreeNode::count_enabled_leaf_nodes( const BinaryTreeNode* pNode ) {
     if(pNode->is_leaf()) {
-     return pNode->is_enabled() ? 1u : 0u;
+        return pNode->is_enabled() ? 1u : 0u;
     } else {
-     return count_enabled_leaf_nodes(pNode->left_node())
-      + count_enabled_leaf_nodes(pNode->right_node());
+        return count_enabled_leaf_nodes(pNode->left_node())
+            + count_enabled_leaf_nodes(pNode->right_node());
     }
 }
 
 void BinaryTreeNode::tree_to_binary_words( BinaryWord & tree, BinaryWord & leaves ) const {
     if( is_leaf() ) {
-     tree.push_back( false );
-     leaves.push_back( definitely( _isEnabled ) );
+        tree.push_back( false );
+        leaves.push_back( definitely( _isEnabled ) );
     } else {
-     tree.push_back( true );
-     _pLeftNode->tree_to_binary_words( tree, leaves );
-     _pRightNode->tree_to_binary_words( tree, leaves );
+        tree.push_back( true );
+        _pLeftNode->tree_to_binary_words( tree, leaves );
+        _pRightNode->tree_to_binary_words( tree, leaves );
     }
 }
 
@@ -495,85 +495,85 @@ void BinaryTreeNode::add_enabled( const BinaryTreeNode * pOtherSubTree, const Bi
     BinaryTreeNode * pCurrentSubTree = this;
     uint position = 0;
     while( ( position < path.size() ) && ! pCurrentSubTree->is_enabled() ){
-     //Split the node, if it is not a leaf it will not be changed
-     pCurrentSubTree->split();
-     //Follow the path step
-     pCurrentSubTree = ( path[position] ? pCurrentSubTree->_pRightNode : pCurrentSubTree->_pLeftNode );
-     //Go to the next path element
-     position ++;
+        //Split the node, if it is not a leaf it will not be changed
+        pCurrentSubTree->split();
+        //Follow the path step
+        pCurrentSubTree = ( path[position] ? pCurrentSubTree->_pRightNode : pCurrentSubTree->_pLeftNode );
+        //Go to the next path element
+        position ++;
     }
     //2. Now we are in the right node of this tree or we have met an enabled node on the path,
     //   Thus, if this node is not enabled then we go on with adding subTree.
     if( ! pCurrentSubTree->is_enabled() ){
-     add_enabled( pCurrentSubTree, pOtherSubTree );
+        add_enabled( pCurrentSubTree, pOtherSubTree );
     }
 }
 
 void BinaryTreeNode::add_enabled( BinaryTreeNode* pToTreeRoot, const BinaryTreeNode* pFromTreeRoot ){
     if( pToTreeRoot->is_leaf() ){
-     //If we are adding something to a leaf node
-     if( pToTreeRoot->is_enabled() ){
-      //Do nothing, adding to an enabled leaf node (nothing new can be added)
-     } else {
-      if( pFromTreeRoot->is_leaf() ){
-    //If we are adding something to a disabled leaf node
-    if( pFromTreeRoot->is_enabled() ){
-     //Adding an enabled node: Enable the node of pToTreeRoot
-     pToTreeRoot->set_enabled();
+        //If we are adding something to a leaf node
+        if( pToTreeRoot->is_enabled() ){
+            //Do nothing, adding to an enabled leaf node (nothing new can be added)
+        } else {
+            if( pFromTreeRoot->is_leaf() ){
+                //If we are adding something to a disabled leaf node
+                if( pFromTreeRoot->is_enabled() ){
+                    //Adding an enabled node: Enable the node of pToTreeRoot
+                    pToTreeRoot->set_enabled();
+                } else {
+                    //Do nothing, adding a disabled leaf node to a disabled leaf node
+                }
+            } else {
+                //Adding a subtree pFromTreeRoot to a disabled leaf node pToTreeRoot
+                //Using copy constructors here, to avoid memory collisions
+                pToTreeRoot->_pLeftNode = new BinaryTreeNode( *pFromTreeRoot->_pLeftNode );
+                pToTreeRoot->_pRightNode = new BinaryTreeNode( *pFromTreeRoot->_pRightNode );
+                //Set the leaf node as unknown, since we do not know what is below
+                pToTreeRoot->set_unknown();
+            }
+        }
     } else {
-     //Do nothing, adding a disabled leaf node to a disabled leaf node
-    }
-      } else {
-    //Adding a subtree pFromTreeRoot to a disabled leaf node pToTreeRoot
-    //Using copy constructors here, to avoid memory collisions
-    pToTreeRoot->_pLeftNode = new BinaryTreeNode( *pFromTreeRoot->_pLeftNode );
-    pToTreeRoot->_pRightNode = new BinaryTreeNode( *pFromTreeRoot->_pRightNode );
-    //Set the leaf node as unknown, since we do not know what is below
-    pToTreeRoot->set_unknown();
-      }
-     }
-    } else {
-     //If we are adding something to a non-leaf node
-     if( pFromTreeRoot->is_leaf() ){
-      //Adding a leaf to a non-leaf node
-      if( pFromTreeRoot->is_enabled() ){
-    //Make the enabled leaf node
-    pToTreeRoot->make_leaf(true);
-      } else {
-    //Do nothing, adding a disabled node to a sub tree (nothing new can be added)
-      }
-     } else {
-      //Adding a non-leaf node to a non-leaf node, do recursion
-      add_enabled( pToTreeRoot->_pLeftNode, pFromTreeRoot->_pLeftNode );
-      add_enabled( pToTreeRoot->_pRightNode, pFromTreeRoot->_pRightNode );
-     }
+        //If we are adding something to a non-leaf node
+        if( pFromTreeRoot->is_leaf() ){
+            //Adding a leaf to a non-leaf node
+            if( pFromTreeRoot->is_enabled() ){
+                //Make the enabled leaf node
+                pToTreeRoot->make_leaf(true);
+            } else {
+                //Do nothing, adding a disabled node to a sub tree (nothing new can be added)
+            }
+        } else {
+            //Adding a non-leaf node to a non-leaf node, do recursion
+            add_enabled( pToTreeRoot->_pLeftNode, pFromTreeRoot->_pLeftNode );
+            add_enabled( pToTreeRoot->_pRightNode, pFromTreeRoot->_pRightNode );
+        }
     }
 }
 
 void BinaryTreeNode::add_enabled( BinaryTreeNode* pRootTreeNode, const BinaryWord& path, const uint position ) {
     if( position < path.size() ) {
-     //There is still something to do
-     if( pRootTreeNode->is_leaf() ){
-      if( pRootTreeNode->is_enabled() ) {
-    //This leaf is enabled so adding path will not change anything
-    return;
-      } else {
-    //Split the disabled node
-    pRootTreeNode->split();
-      }
-     }
-     //Go left-right depenting on the specified path
-     add_enabled( ( path[position] ? pRootTreeNode->_pRightNode : pRootTreeNode->_pLeftNode ), path, position + 1 );
+        //There is still something to do
+        if( pRootTreeNode->is_leaf() ){
+            if( pRootTreeNode->is_enabled() ) {
+                //This leaf is enabled so adding path will not change anything
+                return;
+            } else {
+                //Split the disabled node
+                pRootTreeNode->split();
+            }
+        }
+        //Go left-right depenting on the specified path
+        add_enabled( ( path[position] ? pRootTreeNode->_pRightNode : pRootTreeNode->_pLeftNode ), path, position + 1 );
     } else {
-     //We are at the destination node
-     if( pRootTreeNode->is_leaf() ){
-      //Mark the node as enabled
-      pRootTreeNode->set_enabled();
-     } else {
-      //If this is not a leaf node, then make it leaf
-      //The leafs below are not interesting any more
-      pRootTreeNode->make_leaf(true);
-     }
+        //We are at the destination node
+        if( pRootTreeNode->is_leaf() ){
+            //Mark the node as enabled
+            pRootTreeNode->set_enabled();
+        } else {
+            //If this is not a leaf node, then make it leaf
+            //The leafs below are not interesting any more
+            pRootTreeNode->make_leaf(true);
+        }
     }
 }
 
@@ -583,20 +583,20 @@ BinaryTreeNode * BinaryTreeNode::prepend_tree( const BinaryWord & rootNodePath, 
     uint i = 0;
     //Loop until the last path element, because it has to be treated in a different manner
     for( ; i < ( rootNodePath.size() - 1 ) ; i++ ){
-     //Split the node
-     pCurrentBinaryTreeNode->split();
-     //Move to the appropriate subnode
-     pCurrentBinaryTreeNode = (rootNodePath[i]) ? pCurrentBinaryTreeNode->_pRightNode : pCurrentBinaryTreeNode->_pLeftNode;
+        //Split the node
+        pCurrentBinaryTreeNode->split();
+        //Move to the appropriate subnode
+        pCurrentBinaryTreeNode = (rootNodePath[i]) ? pCurrentBinaryTreeNode->_pRightNode : pCurrentBinaryTreeNode->_pLeftNode;
     }
     //Split the node for the last time
     pCurrentBinaryTreeNode->split();
     //Substitute the new primary cell with the one we had before
     if( rootNodePath[i] ){
-     delete pCurrentBinaryTreeNode->_pRightNode;
-     pCurrentBinaryTreeNode->_pRightNode = oldRootNode;
+        delete pCurrentBinaryTreeNode->_pRightNode;
+        pCurrentBinaryTreeNode->_pRightNode = oldRootNode;
     } else {
-     delete pCurrentBinaryTreeNode->_pLeftNode;
-     pCurrentBinaryTreeNode->_pLeftNode = oldRootNode;
+        delete pCurrentBinaryTreeNode->_pLeftNode;
+        pCurrentBinaryTreeNode->_pLeftNode = oldRootNode;
     }
     return pRootBinaryTreeNode;
 }
@@ -608,25 +608,25 @@ bool BinaryTreeNode::overlap( const BinaryTreeNode * pRootNodeOne, const BinaryT
     bool isNodeTwoALeaf = pRootNodeTwo->is_leaf();
 
     if( isNodeOneALeaf && isNodeTwoALeaf ) {
-     //If both nodes are leaves, then the trees overlap if only both of the nodes are enabled
-     result = pRootNodeOne->is_enabled() && pRootNodeTwo->is_enabled();
+        //If both nodes are leaves, then the trees overlap if only both of the nodes are enabled
+        result = pRootNodeOne->is_enabled() && pRootNodeTwo->is_enabled();
     } else {
-     if( ! isNodeOneALeaf && isNodeTwoALeaf ){
-      //If the second node is a leaf then the trees overlap is it is enabled
-      //and the first node has an enabled sub-node
-      result = pRootNodeTwo->is_enabled() && pRootNodeOne->has_enabled();
-     } else {
-      if( isNodeOneALeaf && ! isNodeTwoALeaf ){
-    //If the first node is a leaf then the trees overlap is it is enabled
-    //and the second node has an enabled sub-node
-    result = pRootNodeOne->is_enabled() && pRootNodeTwo->has_enabled();
-      } else {
-    //Both nodes are non-lead nodes, then the trees overlap if
-    //either their left or right branches overlap
-    result = overlap( pRootNodeOne->left_node(), pRootNodeTwo->left_node() ) ||
-     overlap( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
-      }
-     }
+        if( ! isNodeOneALeaf && isNodeTwoALeaf ){
+            //If the second node is a leaf then the trees overlap is it is enabled
+            //and the first node has an enabled sub-node
+            result = pRootNodeTwo->is_enabled() && pRootNodeOne->has_enabled();
+        } else {
+            if( isNodeOneALeaf && ! isNodeTwoALeaf ){
+                //If the first node is a leaf then the trees overlap is it is enabled
+                //and the second node has an enabled sub-node
+                result = pRootNodeOne->is_enabled() && pRootNodeTwo->has_enabled();
+            } else {
+                //Both nodes are non-lead nodes, then the trees overlap if
+                //either their left or right branches overlap
+                result = overlap( pRootNodeOne->left_node(), pRootNodeTwo->left_node() ) ||
+                    overlap( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
+            }
+        }
     }
 
     return result;
@@ -639,30 +639,30 @@ bool BinaryTreeNode::subset( const BinaryTreeNode * pRootNodeOne, const BinaryTr
     bool isNodeTwoALeaf = pRootNodeTwo->is_leaf();
 
     if( isNodeOneALeaf && isNodeTwoALeaf ) {
-     //If both nodes are leaves, then pRootNodeOne is a subset of pRootNodeTwo if:
-     // 1. both of the nodes are enabled or
-     // 2. pRootNodeOne is disabled (represents an empty set)
-     result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->is_enabled();
+        //If both nodes are leaves, then pRootNodeOne is a subset of pRootNodeTwo if:
+        // 1. both of the nodes are enabled or
+        // 2. pRootNodeOne is disabled (represents an empty set)
+        result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->is_enabled();
     } else {
-     if( ! isNodeOneALeaf && isNodeTwoALeaf ){
-      //If pRootNodeTwo is a leaf then pRootNodeOne is a subset of pRootNodeTwo if:
-      // 1. pRootNodeTwo is enabled or
-      // 2. pRootNodeOne has no enabled sub-nodes
-      result = pRootNodeTwo->is_enabled() || ( ! pRootNodeOne->has_enabled() );
-     } else {
-      if( isNodeOneALeaf && ! isNodeTwoALeaf ){
-    //If pRootNodeOne is a leaf then pRootNodeOne is a subset of pRootNodeTwo if:
-    // 1. pRootNodeOne is disabled or
-    // 2. all of the pRootNodeTwo's leaf nodes are enabled
-    result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->all_enabled();
-      } else {
-    //Both nodes are non-lead nodes, then pRootNodeOne is a subset of pRootNodeTwo
-    //if sub-trees of pRootNodeOne are subsets of the subtrees of pRootNodeTwo
-    result = subset( pRootNodeOne->left_node(), pRootNodeTwo->left_node() )
-    &&
-    subset( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
-      }
-     }
+        if( ! isNodeOneALeaf && isNodeTwoALeaf ){
+            //If pRootNodeTwo is a leaf then pRootNodeOne is a subset of pRootNodeTwo if:
+            // 1. pRootNodeTwo is enabled or
+            // 2. pRootNodeOne has no enabled sub-nodes
+            result = pRootNodeTwo->is_enabled() || ( ! pRootNodeOne->has_enabled() );
+        } else {
+            if( isNodeOneALeaf && ! isNodeTwoALeaf ){
+                //If pRootNodeOne is a leaf then pRootNodeOne is a subset of pRootNodeTwo if:
+                // 1. pRootNodeOne is disabled or
+                // 2. all of the pRootNodeTwo's leaf nodes are enabled
+                result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->all_enabled();
+            } else {
+                //Both nodes are non-lead nodes, then pRootNodeOne is a subset of pRootNodeTwo
+                //if sub-trees of pRootNodeOne are subsets of the subtrees of pRootNodeTwo
+                result = subset( pRootNodeOne->left_node(), pRootNodeTwo->left_node() )
+                         &&
+                         subset( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
+            }
+        }
     }
 
     return result;
@@ -677,63 +677,63 @@ GridTreeConstIterator::GridTreeConstIterator(  ) : _pGridTreeCursor()  {
 
 void GridTreeConstIterator::find_next_enabled_leaf() {
     if( _pGridTreeCursor.is_left_child() ) {
-     //Move to the parent node
-     _pGridTreeCursor.move_up();
-     //The right node must exist, due to the way we allocate the tree
-     //Also, this node is the root of the branch which we did not investigate.
-     _pGridTreeCursor.move_right();
-     //Find the first enabled leaf on this sub-tree
-     if( ! navigate_to(true) ){
-      //If there are no enabled leafs in the subtree, then
-      //move up and check the remaining branches recursively.
-      find_next_enabled_leaf();
-     }
+        //Move to the parent node
+        _pGridTreeCursor.move_up();
+        //The right node must exist, due to the way we allocate the tree
+        //Also, this node is the root of the branch which we did not investigate.
+        _pGridTreeCursor.move_right();
+        //Find the first enabled leaf on this sub-tree
+        if( ! navigate_to(true) ){
+            //If there are no enabled leafs in the subtree, then
+            //move up and check the remaining branches recursively.
+            find_next_enabled_leaf();
+        }
     } else {
-     if( _pGridTreeCursor.is_right_child() ) {
-      //Move to the parent node
-      _pGridTreeCursor.move_up();
-      //Move up and check the remaining branches recursively.
-      find_next_enabled_leaf();
-     } else {
-      //Is the root node already and we've seen all the leaf nodes
-      _is_in_end_state = true;
-     }
+        if( _pGridTreeCursor.is_right_child() ) {
+            //Move to the parent node
+            _pGridTreeCursor.move_up();
+            //Move up and check the remaining branches recursively.
+            find_next_enabled_leaf();
+        } else {
+            //Is the root node already and we've seen all the leaf nodes
+            _is_in_end_state = true;
+        }
     }
 }
 
 bool GridTreeConstIterator::navigate_to(bool firstLast){
     bool isEnabledLeafFound = false;
     if( _pGridTreeCursor.is_leaf() ){
-     if ( _pGridTreeCursor.is_enabled() ) {
-      //If the leaf is enabled, then the search is over
-      isEnabledLeafFound = true;
-     }
+        if ( _pGridTreeCursor.is_enabled() ) {
+            //If the leaf is enabled, then the search is over
+            isEnabledLeafFound = true;
+        }
     } else {
-     //If it is not a leaf then we need to keep searching
-     if( firstLast ) {
-      //If we are looking for the first enabled
-      //node, then go to the left sub node
-      _pGridTreeCursor.move_left();
-     } else {
-      //Otherwise we go to the right
-      _pGridTreeCursor.move_right();
-     }
-     //Do recursive check of the newly visited node
-     isEnabledLeafFound = navigate_to( firstLast );
-     //If the leaf node is not found yet
-     if ( ! isEnabledLeafFound ) {
-      if( firstLast ) {
-    _pGridTreeCursor.move_right();
-      } else {
-    _pGridTreeCursor.move_left();
-      }
-      isEnabledLeafFound = navigate_to( firstLast );
-     }
+        //If it is not a leaf then we need to keep searching
+        if( firstLast ) {
+            //If we are looking for the first enabled
+            //node, then go to the left sub node
+            _pGridTreeCursor.move_left();
+        } else {
+            //Otherwise we go to the right
+            _pGridTreeCursor.move_right();
+        }
+        //Do recursive check of the newly visited node
+        isEnabledLeafFound = navigate_to( firstLast );
+        //If the leaf node is not found yet
+        if ( ! isEnabledLeafFound ) {
+            if( firstLast ) {
+                _pGridTreeCursor.move_right();
+            } else {
+                _pGridTreeCursor.move_left();
+            }
+            isEnabledLeafFound = navigate_to( firstLast );
+        }
     }
 
     //If the enabled leaf is not found and we are not in the root then we go back
     if( ! isEnabledLeafFound && ! _pGridTreeCursor.is_root() ){
-     _pGridTreeCursor.move_up();
+        _pGridTreeCursor.move_up();
     }
 
     return isEnabledLeafFound;
@@ -745,7 +745,7 @@ Vector<Interval> GridAbstractCell::primary_cell_lattice_box( const uint theHeigh
     int leftBottomCorner = 0, rightTopCorner = 1;
     //The zero level coordinates are known, so we need to iterate only for higher level primary cells
     for(uint i = 1; i <= theHeight; i++){
-     primary_cell_at_height(i, leftBottomCorner, rightTopCorner);
+        primary_cell_at_height(i, leftBottomCorner, rightTopCorner);
     }
     // 1.2 Constructing and return the box defining the primary cell (relative to the grid).
 
@@ -758,14 +758,14 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Vector<Inte
     uint height = 0;
     //The zero level coordinates are known, so we need to iterate only for higher level primary cells
     do{
-     //Check if the given box is a subset of a primary cell
-     Vector< Interval > primaryCellBox( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
-     if(  inside(theLatticeBox, primaryCellBox ) ) {
-      //If yes then we are done
-      break;
-     }
-     //Otherwise increase the height and recompute the new borders
-     primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
+        //Check if the given box is a subset of a primary cell
+        Vector< Interval > primaryCellBox( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
+        if(  inside(theLatticeBox, primaryCellBox ) ) {
+            //If yes then we are done
+            break;
+        }
+        //Otherwise increase the height and recompute the new borders
+        primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
     }while( true );
 
     return height;
@@ -775,7 +775,7 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Box& theBox
     Vector<Interval> theLatticeBox( theBox.size() );
     //Convert the box to theGrid coordinates
     for( uint i = 0; i != theBox.size(); ++i ) {
-     theLatticeBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
+        theLatticeBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
     }
     //Compute and return the smallest primary cell, enclosing this box on the grid
     return smallest_enclosing_primary_cell_height( theLatticeBox );
@@ -790,14 +790,14 @@ Box GridAbstractCell::lattice_box_to_space(const Vector<Interval> & theLatticeBo
     Vector<Float> theGridLengths( theGrid.lengths() );
 
     for(uint current_dimension = 0; current_dimension < dimensions; current_dimension ++){
-     const Float theDimLength = theGridLengths[current_dimension];
-     const Float theDimOrigin = theGridOrigin[current_dimension];
-     //Recompute the new dimension coordinates, detaching them from the grid
-     //Compute lower and upper bounds separately, and then set the box lower
-     //and upper values simultaneously to prevent lower temporarily higher than upper.
-     Float lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) );
-     Float upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) );
-     theTmpBox[current_dimension].set(lower,upper);
+        const Float theDimLength = theGridLengths[current_dimension];
+        const Float theDimOrigin = theGridOrigin[current_dimension];
+        //Recompute the new dimension coordinates, detaching them from the grid
+        //Compute lower and upper bounds separately, and then set the box lower
+        //and upper values simultaneously to prevent lower temporarily higher than upper.
+        Float lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) );
+        Float upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) );
+        theTmpBox[current_dimension].set(lower,upper);
     }
 
     return theTmpBox;
@@ -813,12 +813,12 @@ BinaryWord GridAbstractCell::primary_cell_path( const uint dimensions, const uin
     //of all zeroes. This is due to the way we do the space subdivisions.
     if( topPCellHeight > bottomPCellHeight ){
 
-     for( uint i = topPCellHeight; i > bottomPCellHeight; i-- ){
-      bool odd_height = (i % 2) != 0;
-      for( uint j = 0; j < dimensions; j++ ){
-    theBinaryPath.push_back( odd_height );
-      }
-     }
+        for( uint i = topPCellHeight; i > bottomPCellHeight; i-- ){
+            bool odd_height = (i % 2) != 0;
+            for( uint j = 0; j < dimensions; j++ ){
+                theBinaryPath.push_back( odd_height );
+            }
+        }
     }
 
     return theBinaryPath;
@@ -833,29 +833,29 @@ bool GridAbstractCell::compare_abstract_grid_cells(const GridAbstractCell * pCel
     BinaryWord rootNodePath;
 
     if( pCellLeft->_theHeight == cellRight._theHeight ) {
-     //if the primary cells are of the same height, then we just compare the original binary words.
-     pThisWord = & (pCellLeft->_theWord);
-     pOtherWord = & (cellRight._theWord);
+        //if the primary cells are of the same height, then we just compare the original binary words.
+        pThisWord = & (pCellLeft->_theWord);
+        pOtherWord = & (cellRight._theWord);
     } else {
-     //Otherwise we have to re-root the cell with the lowest primary cell
-     //to the highest primary cell and then compare the words again,
-     if( pCellLeft->_theHeight > cellRight._theHeight ){
-      rootNodePath = primary_cell_path( pCellLeft->_theGrid.dimension() , pCellLeft->_theHeight, cellRight._theHeight );
-      rootNodePath.append( cellRight._theWord );
-      pThisWord = & (pCellLeft->_theWord);
-      pOtherWord = & (rootNodePath);
-     } else {
-      rootNodePath = primary_cell_path( pCellLeft->_theGrid.dimension() , cellRight._theHeight, pCellLeft->_theHeight );
-      rootNodePath.append( pCellLeft->_theWord );
-      pThisWord = & (rootNodePath);
-      pOtherWord = & (cellRight._theWord);
-     }
+        //Otherwise we have to re-root the cell with the lowest primary cell
+        //to the highest primary cell and then compare the words again,
+        if( pCellLeft->_theHeight > cellRight._theHeight ){
+            rootNodePath = primary_cell_path( pCellLeft->_theGrid.dimension() , pCellLeft->_theHeight, cellRight._theHeight );
+            rootNodePath.append( cellRight._theWord );
+            pThisWord = & (pCellLeft->_theWord);
+            pOtherWord = & (rootNodePath);
+        } else {
+            rootNodePath = primary_cell_path( pCellLeft->_theGrid.dimension() , cellRight._theHeight, pCellLeft->_theHeight );
+            rootNodePath.append( pCellLeft->_theWord );
+            pThisWord = & (rootNodePath);
+            pOtherWord = & (cellRight._theWord);
+        }
     }
     switch( comparator ){
-     case COMPARE_EQUAL : return (*pThisWord) == (*pOtherWord);
-     case COMPARE_LESS : return (*pThisWord) < (*pOtherWord);
-     default:
-      throw InvalidInput("The method's comparator argument should be either GridAbstractCell::COMPARE_EQUAL or GridAbstractCell::COMPARE_LESS.");
+        case COMPARE_EQUAL : return (*pThisWord) == (*pOtherWord);
+        case COMPARE_LESS : return (*pThisWord) < (*pOtherWord);
+        default:
+            throw InvalidInput("The method's comparator argument should be either GridAbstractCell::COMPARE_EQUAL or GridAbstractCell::COMPARE_LESS.");
     }
 }
 
@@ -890,18 +890,18 @@ Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uin
     //2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
     uint current_dimension = 0;
     for(uint i = 0; i < theWord.size(); i++){
-     //We move through the dimensions in a linear fasshion
-     current_dimension = i % dimensions;
-     //Compute the middle point of the box's projection onto
-     //the dimension \a current_dimension (relative to the grid)
-     Float middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint();
-     if( theWord[i] ){
-      //Choose the right half
-      theResultLatticeBox[current_dimension].set_lower( middlePointInCurrDim );
-     } else {
-      //Choose the left half
-      theResultLatticeBox[current_dimension].set_upper( middlePointInCurrDim );
-     }
+        //We move through the dimensions in a linear fasshion
+        current_dimension = i % dimensions;
+        //Compute the middle point of the box's projection onto
+        //the dimension \a current_dimension (relative to the grid)
+        Float middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint();
+        if( theWord[i] ){
+            //Choose the right half
+            theResultLatticeBox[current_dimension].set_lower( middlePointInCurrDim );
+        } else {
+            //Choose the left half
+            theResultLatticeBox[current_dimension].set_upper( middlePointInCurrDim );
+        }
     }
     return theResultLatticeBox;
 }
@@ -912,7 +912,7 @@ Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uin
 GridOpenCell GridCell::interior() const {
     BinaryWord theOpenCellWord = _theWord;
     for( uint i = 0; i < _theGrid.dimension(); i++) {
-     theOpenCellWord.push_back(false);
+        theOpenCellWord.push_back(false);
     }
     //The open cell will be defined by the given new word, i.e. the path to the
     //left-bottom sub-quadrant cell but the box and the rest will be the same
@@ -934,12 +934,12 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     //NOTE: In fact, we only need to take about the upper border, because the lower border does not change.
     int leftBottomCorner = 0, rightTopCorner = 1; uint height = 0;
     do{
-     if( upperBorderOverlapping <= rightTopCorner ) {
-      //As soon as we fall into the primary cell we are done
-      break;
-     }
-     //Otherwise increase the height and recompute the new borders
-     primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
+        if( upperBorderOverlapping <= rightTopCorner ) {
+            //As soon as we fall into the primary cell we are done
+            break;
+        }
+        //Otherwise increase the height and recompute the new borders
+        primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
     } while(true);
 
     //3. If it can not then we take the lowest required primary cell to root this cell to and
@@ -947,10 +947,10 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     uint theBaseCellHeight = theHeight;
     BinaryWord theBaseCellWord = theWord;
     if( height > theBaseCellHeight ) {
-     //If we need a higher primary cell then extend the height and the word for the case cell
-     theBaseCellWord = primary_cell_path( dimensions, height, theBaseCellHeight );
-     theBaseCellWord.append( theWord );
-     theBaseCellHeight = height;
+        //If we need a higher primary cell then extend the height and the word for the case cell
+        theBaseCellWord = primary_cell_path( dimensions, height, theBaseCellHeight );
+        theBaseCellWord.append( theWord );
+        theBaseCellHeight = height;
     }
 
     //4. We need to start from the end of the new (extended) word representing the base cell. Then
@@ -959,20 +959,20 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     //   the first zero in the path to the base cell in dimension dim from the end of the path
     int position;
     for( position = ( theBaseCellWord.size() - 1 ); position >= 0; position-- ){
-     //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
-     if( ( position % dimensions == dim ) && !theBaseCellWord[position] ) {
-      break;
-     }
+        //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
+        if( ( position % dimensions == dim ) && !theBaseCellWord[position] ) {
+            break;
+        }
     }
 
     //5. When this entry in the word is found from that point on we have to inverse the path in such
     //   a way that every component in the dimension from this point till the end of the word is
     //   inverted. This will provide us with the path to the neighborind cell in the given dimension
     for( int index = position; index < static_cast<int>(theBaseCellWord.size()); index++){
-     if( index % dimensions == dim ) {
-      //If this element of the path corresponds to the needed dimension then we need to invert it
-      theBaseCellWord[index] = !theBaseCellWord[index];
-     }
+        if( index % dimensions == dim ) {
+            //If this element of the path corresponds to the needed dimension then we need to invert it
+            theBaseCellWord[index] = !theBaseCellWord[index];
+        }
     }
 
     return GridCell( theGrid, theBaseCellHeight, theBaseCellWord );
@@ -993,15 +993,15 @@ Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const B
 
     //Go through all the dimensions, and double the box size in the positive axis direction.
     for( uint dim = 0; dim < theGrid.dimension(); dim++){
-     Interval openCellBoxInLatticeDimInterval;
-     Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
-     Float lower = baseCellBoxInLatticeDimInterval.lower();
-     Float upper = baseCellBoxInLatticeDimInterval.upper() +
-      ( baseCellBoxInLatticeDimInterval.upper() -
-     baseCellBoxInLatticeDimInterval.lower() );
-     openCellBoxInLatticeDimInterval.set(lower,upper);
+        Interval openCellBoxInLatticeDimInterval;
+        Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
+        Float lower = baseCellBoxInLatticeDimInterval.lower();
+        Float upper = baseCellBoxInLatticeDimInterval.upper() +
+                        ( baseCellBoxInLatticeDimInterval.upper() -
+                          baseCellBoxInLatticeDimInterval.lower() );
+        openCellBoxInLatticeDimInterval.set(lower,upper);
 
-     openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
+        openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
     }
 
     return lattice_box_to_space( openCellBoxInLattice, theGrid );
@@ -1011,29 +1011,29 @@ GridOpenCell GridOpenCell::split(tribool isRight) const {
     BinaryWord theNewBaseCellPath = _theWord;
     uint theNewPrimaryCellHeight;
     if( indeterminate( isRight ) ) {
-     //Return the middle open cell (isRight == unknown)
-     theNewBaseCellPath.push_back( true );
-     theNewPrimaryCellHeight = _theHeight;
+        //Return the middle open cell (isRight == unknown)
+        theNewBaseCellPath.push_back( true );
+        theNewPrimaryCellHeight = _theHeight;
     } else {
-     if( definitely( isRight ) ) {
-      //Return the right-most open cell (isRight == true)
-      //1. First determine in which dimention we are going to split
-      //NOTE: We use theNewBaseCellPath.size() but not theNewBaseCellPath.size()-1 because
-      //we want to determine the dimension in which will be the next split, but not the
-      //dimension in which we had the last split.
-      const uint dim = theNewBaseCellPath.size() % _theGrid.dimension();
-      //2. Then get the neighboring cell in this dimension
-      GridCell neighboringCell = GridCell::neighboringCell( _theGrid, _theHeight, theNewBaseCellPath, dim );
-      //3. Get the neighboring's cell height and word, because heigh might change
-      theNewBaseCellPath = neighboringCell.word();
-      theNewPrimaryCellHeight = neighboringCell.height();
-      //4. Take the left half of the new base cell
-      theNewBaseCellPath.push_back( false );
-     } else {
-      //Return the left-most open cell (isRight == false)
-      theNewBaseCellPath.push_back( false );
-      theNewPrimaryCellHeight = _theHeight;
-     }
+        if( definitely( isRight ) ) {
+            //Return the right-most open cell (isRight == true)
+            //1. First determine in which dimention we are going to split
+            //NOTE: We use theNewBaseCellPath.size() but not theNewBaseCellPath.size()-1 because
+            //we want to determine the dimension in which will be the next split, but not the
+            //dimension in which we had the last split.
+            const uint dim = theNewBaseCellPath.size() % _theGrid.dimension();
+            //2. Then get the neighboring cell in this dimension
+            GridCell neighboringCell = GridCell::neighboringCell( _theGrid, _theHeight, theNewBaseCellPath, dim );
+            //3. Get the neighboring's cell height and word, because heigh might change
+            theNewBaseCellPath = neighboringCell.word();
+            theNewPrimaryCellHeight = neighboringCell.height();
+            //4. Take the left half of the new base cell
+            theNewBaseCellPath.push_back( false );
+        } else {
+            //Return the left-most open cell (isRight == false)
+            theNewBaseCellPath.push_back( false );
+            theNewPrimaryCellHeight = _theHeight;
+        }
     }
 
     //Construct the new open cell and return it
@@ -1044,22 +1044,22 @@ GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenC
     GridOpenCell * pSmallestOpenCell = NULL;
     //If the box of the givel open cell covers the given box
     if( theOpenCell.box().covers( theBox ) ) {
-     //First check the left sub cell
-     pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( false ), theBox );
-     if( pSmallestOpenCell == NULL ) {
-      //If the left sub cell does not cover theBox then check the middle sub cell
-      pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( indeterminate ), theBox );
-      if( pSmallestOpenCell == NULL ) {
-    //If the middle sub cell does not cover the box then check the right subcell
-    pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( true ), theBox );
-    if( pSmallestOpenCell == NULL ) {
-     //If the right sub cell does not cover the box then the open cell
-     //theOpenCell is the smallest GridOpenCell covering theBox.
-     pSmallestOpenCell = new GridOpenCell( theOpenCell.grid(), theOpenCell.height(),
-    theOpenCell.word(), theOpenCell.box() );
-    }
-      }
-     }
+        //First check the left sub cell
+        pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( false ), theBox );
+        if( pSmallestOpenCell == NULL ) {
+            //If the left sub cell does not cover theBox then check the middle sub cell
+            pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( indeterminate ), theBox );
+            if( pSmallestOpenCell == NULL ) {
+                //If the middle sub cell does not cover the box then check the right subcell
+                pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( true ), theBox );
+                if( pSmallestOpenCell == NULL ) {
+                    //If the right sub cell does not cover the box then the open cell
+                    //theOpenCell is the smallest GridOpenCell covering theBox.
+                    pSmallestOpenCell = new GridOpenCell( theOpenCell.grid(), theOpenCell.height(),
+                                                          theOpenCell.word(), theOpenCell.box() );
+                }
+            }
+        }
     }
 
     //Return the result, is null If the box of theOpenCell does not cover the given box
@@ -1087,9 +1087,9 @@ GridTreeSet GridOpenCell::closure() const {
     BinaryWord theBaseCellWord = _theWord;
     //If we need a higher primary cell then extend the height and the word for the base cell
     if( newHeight > theBaseCellHeight ) {
-     theBaseCellWord = primary_cell_path( _theGrid.dimension(), newHeight, theBaseCellHeight );
-     theBaseCellWord.append( _theWord );
-     theBaseCellHeight = newHeight;
+        theBaseCellWord = primary_cell_path( _theGrid.dimension(), newHeight, theBaseCellHeight );
+        theBaseCellWord.append( _theWord );
+        theBaseCellHeight = newHeight;
     }
 
     //03. Allocate the resulting GridTreeSet with the root at the needed height
@@ -1104,26 +1104,26 @@ GridTreeSet GridOpenCell::closure() const {
 }
 
 void GridOpenCell::neighboring_cells( const uint theHeight, const BinaryWord& theBaseCellWord,
-     BinaryWord& cellPosition, GridTreeSet& theResultSet ) const {
+                                      BinaryWord& cellPosition, GridTreeSet& theResultSet ) const {
     if( cellPosition.size() < _theGrid.dimension() ) {
-     //Choose the left direction in the current dimension
-     cellPosition.push_back( false );
-     GridOpenCell::neighboring_cells( theHeight, theBaseCellWord, cellPosition, theResultSet );
-     cellPosition.pop_back( );
-     //Choose the right direction in the current dimension
-     cellPosition.push_back( true );
-     GridOpenCell::neighboring_cells( theHeight, theBaseCellWord, cellPosition, theResultSet );
-     cellPosition.pop_back( );
+        //Choose the left direction in the current dimension
+        cellPosition.push_back( false );
+        GridOpenCell::neighboring_cells( theHeight, theBaseCellWord, cellPosition, theResultSet );
+        cellPosition.pop_back( );
+        //Choose the right direction in the current dimension
+        cellPosition.push_back( true );
+        GridOpenCell::neighboring_cells( theHeight, theBaseCellWord, cellPosition, theResultSet );
+        cellPosition.pop_back( );
     } else {
-     //We have constructed the cell position relative to the base cell
-     //for the case of _theGrid.dimension() dimensional space, now it
-     //is time to compute this cell and add it to theResultSet
-     theResultSet.adjoin( GridOpenCell::neighboring_cell( _theGrid, theHeight, theBaseCellWord, cellPosition ) );
+        //We have constructed the cell position relative to the base cell
+        //for the case of _theGrid.dimension() dimensional space, now it
+        //is time to compute this cell and add it to theResultSet
+        theResultSet.adjoin( GridOpenCell::neighboring_cell( _theGrid, theHeight, theBaseCellWord, cellPosition ) );
     }
 }
 
 GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeight,
-     const BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) {
+                                         const BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) {
     const uint num_dimensions = theGrid.dimension();
     //01. Allocate the array of size _theGrid.dimensions() in which we will store
     //    the position in the path theBaseCellWord, for each dimension, from which on
@@ -1135,8 +1135,8 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
     //count the required number of iverse dimensions
     int inverseDimensionsNumber = 0;
     for( uint i = 0; i < num_dimensions; i++ ) {
-     invert_position[ i ] = NO_INVERSE_POSITION;
-     inverseDimensionsNumber += cellPosition[i];
+        invert_position[ i ] = NO_INVERSE_POSITION;
+        inverseDimensionsNumber += cellPosition[i];
     }
 
     //02. Create the path to the neighboring cell and initialize it with the path to the base cell
@@ -1148,73 +1148,73 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
     //    suffix which has to be inverted to get the neighboring cell defined by cellPosition
     int firstInversePosition = NO_INVERSE_POSITION;
     if( inverseDimensionsNumber > 0 ) {
-     //If there is a need to do inverses, i.e. we are not adding the base cell itself
-     int foundNumberOfInverses = 0;
-     for( int position = ( theNeighborCellWord.size() - 1 ); position >= 0; position-- ){
-      //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
-      int dimension = position % num_dimensions;
-      //If we need to inverse in this dimension and this is the first found position in
-      //this dimension from which on we should inverse then save the position index.
-      if( cellPosition[ dimension ] && !theNeighborCellWord[ position ] &&
-    ( invert_position[ dimension ] == NO_INVERSE_POSITION ) ) {
-    invert_position[ dimension ] = position;
-    //Since it will typically be the case the the binary word to the base cell will be
-    //longer than the number of dimensions, we also find the first inverse positions.
-    if( position < firstInversePosition ) {
-     firstInversePosition = position;
-    }
-    //Incremenet the number of fount inverses and check if this is all we need, if yes then break
-    foundNumberOfInverses += 1;
-    if( foundNumberOfInverses == inverseDimensionsNumber ) {
-     break;
-    }
-      }
-     }
+        //If there is a need to do inverses, i.e. we are not adding the base cell itself
+        int foundNumberOfInverses = 0;
+        for( int position = ( theNeighborCellWord.size() - 1 ); position >= 0; position-- ){
+            //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
+            int dimension = position % num_dimensions;
+            //If we need to inverse in this dimension and this is the first found position in
+            //this dimension from which on we should inverse then save the position index.
+            if( cellPosition[ dimension ] && !theNeighborCellWord[ position ] &&
+                ( invert_position[ dimension ] == NO_INVERSE_POSITION ) ) {
+                invert_position[ dimension ] = position;
+                //Since it will typically be the case the the binary word to the base cell will be
+                //longer than the number of dimensions, we also find the first inverse positions.
+                if( position < firstInversePosition ) {
+                    firstInversePosition = position;
+                }
+                //Incremenet the number of fount inverses and check if this is all we need, if yes then break
+                foundNumberOfInverses += 1;
+                if( foundNumberOfInverses == inverseDimensionsNumber ) {
+                    break;
+                }
+            }
+        }
     }
 
     //04. Since now all the inversion positions are found, we need to go through the path again and
     //    inverse it in the needed dimesnions starting from (corresponding) the found positions on.
     //    This will provide us with the path to the neighborind cell in the given dimension
     for( int index = firstInversePosition; index < static_cast<int>(theNeighborCellWord.size()); index++ ) {
-     int dimension = index % num_dimensions;
-     if( cellPosition[ dimension ] && ( index >= invert_position[ dimension ] ) ) {
-      theNeighborCellWord[index] = !theNeighborCellWord[index];
-     }
+        int dimension = index % num_dimensions;
+        if( cellPosition[ dimension ] && ( index >= invert_position[ dimension ] ) ) {
+            theNeighborCellWord[index] = !theNeighborCellWord[index];
+        }
     }
 
     return GridCell( theGrid, theHeight, theNeighborCellWord );
 }
 
 void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
-    BinaryWord& cellPosition, std::vector<GridOpenCell>& result ) {
+                                  BinaryWord& cellPosition, std::vector<GridOpenCell>& result ) {
     const uint num_dimensions = theCell.grid().dimension();
     if( cellPosition.size() < num_dimensions ) {
-     //Choose the left direction in the current dimension
-     cellPosition.push_back( false );
-     cover_cell_and_borders( theCell, theSet, cellPosition, result );
-     cellPosition.pop_back( );
-     //Choose the right direction in the current dimension
-     cellPosition.push_back( true );
-     cover_cell_and_borders( theCell, theSet, cellPosition, result );
-     cellPosition.pop_back( );
+        //Choose the left direction in the current dimension
+        cellPosition.push_back( false );
+        cover_cell_and_borders( theCell, theSet, cellPosition, result );
+        cellPosition.pop_back( );
+        //Choose the right direction in the current dimension
+        cellPosition.push_back( true );
+        cover_cell_and_borders( theCell, theSet, cellPosition, result );
+        cellPosition.pop_back( );
     } else {
-     //We have constructed the cell position relative to the base cell
-     //for the case of _theGrid.dimension() dimensional space, now it
-     //is time to compute this cell and add it to result
-     GridCell neighborCell = GridOpenCell::neighboring_cell( theCell.grid(), theCell.height(), theCell.word(), cellPosition );
-     //Check if the found neighboring cell is in theSet
-     if( theSet.binary_tree()->is_enabled( neighborCell.word() ) ) {
-      //So this cell is the enabled neighbor of theCell therefore we need to cover the boundary
-      BinaryWord coverCellBaseWord = theCell.word();
-      //Take the given word theCell.word() and then add the directions from the cellPosition
-      //The latter start from the first axis till the last one, but the path in coverCellBaseWord
-      //currently ends at some other axis so we need to align them when appending cellPosition
-      for( uint i = 0; i < num_dimensions ; i++ ) {
-    coverCellBaseWord.push_back( cellPosition[ coverCellBaseWord.size() % num_dimensions ] );
-      }
-      //Add the resulting cover cell
-      result.push_back( GridOpenCell( theCell.grid(), theCell.height(), coverCellBaseWord ) );
-     }
+        //We have constructed the cell position relative to the base cell
+        //for the case of _theGrid.dimension() dimensional space, now it
+        //is time to compute this cell and add it to result
+        GridCell neighborCell = GridOpenCell::neighboring_cell( theCell.grid(), theCell.height(), theCell.word(), cellPosition );
+        //Check if the found neighboring cell is in theSet
+        if( theSet.binary_tree()->is_enabled( neighborCell.word() ) ) {
+            //So this cell is the enabled neighbor of theCell therefore we need to cover the boundary
+            BinaryWord coverCellBaseWord = theCell.word();
+            //Take the given word theCell.word() and then add the directions from the cellPosition
+            //The latter start from the first axis till the last one, but the path in coverCellBaseWord
+            //currently ends at some other axis so we need to align them when appending cellPosition
+            for( uint i = 0; i < num_dimensions ; i++ ) {
+                coverCellBaseWord.push_back( cellPosition[ coverCellBaseWord.size() % num_dimensions ] );
+            }
+            //Add the resulting cover cell
+            result.push_back( GridOpenCell( theCell.grid(), theCell.height(), coverCellBaseWord ) );
+        }
     }
 }
 
@@ -1223,34 +1223,34 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
 
     //01 First check if one open cell is a subset of another open cell or if they overlap
     if( theLeftOpenCell.box().covers( theRightOpenCell.box() ) ) {
-      //If theRightOpenCell is a subset of theLeftOpenCell
-     result.push_back( theRightOpenCell );
+            //If theRightOpenCell is a subset of theLeftOpenCell
+        result.push_back( theRightOpenCell );
     } else {
-     if( theRightOpenCell.box().covers( theLeftOpenCell.box() ) ) {
-      //If theLeftOpenCell is a subset of theRightOpenCell
-      result.push_back( theLeftOpenCell );
-     } else {
-      if( theRightOpenCell.box().overlaps( theLeftOpenCell.box() ) ) {
-    //02 If the open cells overlap then let us get the cells contained by the two open cells
-    GridTreeSet theLeftCellSet = theLeftOpenCell.closure();
-    GridTreeSet theRightCellSet = theRightOpenCell.closure();
+        if( theRightOpenCell.box().covers( theLeftOpenCell.box() ) ) {
+            //If theLeftOpenCell is a subset of theRightOpenCell
+            result.push_back( theLeftOpenCell );
+        } else {
+            if( theRightOpenCell.box().overlaps( theLeftOpenCell.box() ) ) {
+                //02 If the open cells overlap then let us get the cells contained by the two open cells
+                GridTreeSet theLeftCellSet = theLeftOpenCell.closure();
+                GridTreeSet theRightCellSet = theRightOpenCell.closure();
 
-    //03 Then we compute their intersection
-    GridTreeSet intersectionSet = ::intersection( theLeftCellSet, theRightCellSet );
-    //NOTE: It seems to me there is no need to recombine the resulting set, it will not reduce anything
+                //03 Then we compute their intersection
+                GridTreeSet intersectionSet = ::intersection( theLeftCellSet, theRightCellSet );
+                //NOTE: It seems to me there is no need to recombine the resulting set, it will not reduce anything
 
-    //04 Iterate through all the cells in the intersection and first add their interiors to the resulting set, second
-    //check if the two cells have common border and/or vertex and if they do then add extra open cells, lying withing
-    //the intersection and covering the common border and/or vertex.
-    for ( GridTreeSubset::const_iterator it = intersectionSet.begin(), end = intersectionSet.end(); it != end; it++) {
-     //Cover the interior of the cell and the borders with the cells bordered with
-     //the given one in each  positive direction in each dimension. The borders
-     //are covered only if the neighboring cell is also in the intersection set.
-     BinaryWord tmpWord;
-     cover_cell_and_borders( (*it), intersectionSet, tmpWord, result );
-    }
-      }
-     }
+                //04 Iterate through all the cells in the intersection and first add their interiors to the resulting set, second
+                //check if the two cells have common border and/or vertex and if they do then add extra open cells, lying withing
+                //the intersection and covering the common border and/or vertex.
+                for ( GridTreeSubset::const_iterator it = intersectionSet.begin(), end = intersectionSet.end(); it != end; it++) {
+                    //Cover the interior of the cell and the borders with the cells bordered with
+                    //the given one in each  positive direction in each dimension. The borders
+                    //are covered only if the neighboring cell is also in the intersection set.
+                    BinaryWord tmpWord;
+                    cover_cell_and_borders( (*it), intersectionSet, tmpWord, result );
+                }
+            }
+        }
     }
 
     return result;
@@ -1277,16 +1277,16 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
     uint max_num_subdiv_dim = 0, num_subdiv = 0, max_subdiv_dim = 0;
 
     for(uint i = 0; i < dimensions; i++){
-     //Get the number of required subdivisions in this dimension
-     //IVAN S ZAPREEV:
-     //NOTE: We compute sub_up because we do not want to have insufficient number of subdivisions
-     num_subdiv = compute_number_subdiv( sub_up( theRootCellBox[i].upper(), theRootCellBox[i].lower() ) , theMaxCellWidth );
+        //Get the number of required subdivisions in this dimension
+        //IVAN S ZAPREEV:
+        //NOTE: We compute sub_up because we do not want to have insufficient number of subdivisions
+        num_subdiv = compute_number_subdiv( sub_up( theRootCellBox[i].upper(), theRootCellBox[i].lower() ) , theMaxCellWidth );
 
-     //Compute the max number of subdivisions and the dimension where to do them
-     if( num_subdiv >= max_num_subdiv_dim ){
-      max_num_subdiv_dim = num_subdiv;
-      max_subdiv_dim = i;
-     }
+        //Compute the max number of subdivisions and the dimension where to do them
+        if( num_subdiv >= max_num_subdiv_dim ){
+            max_num_subdiv_dim = num_subdiv;
+            max_subdiv_dim = i;
+        }
     }
 
     //3. Let the maximum number of subdivisions M has to be done in dimension K  with the total number of
@@ -1294,29 +1294,29 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
     uint needed_num_tree_subdiv = 0;
     //If we need to subdivide in one of the dimensions then
     if( max_num_subdiv_dim != 0 ){
-     //3.1 Compute the dimension C for which we had the last split, we should start with the primary cell which is the root of
-     //the GridTreeSet because from this cell we begin subdividing in dimension one by one: 1,2,...,N, then again 1,2,...,N.
-     //The path to the root of the sub-paving is given by the binary word, its length gives the number of tree subdivisions:
-     const uint pathLength = _theGridCell.word().size();
-     //If pathLength == 0 then there were no subdivisions in the tree, so we assign last_subdiv_dim == -1
-     const int last_subdiv_dim = ( pathLength == 0 ) ? -1 : ( pathLength - 1 )  % dimensions;
+        //3.1 Compute the dimension C for which we had the last split, we should start with the primary cell which is the root of
+        //the GridTreeSet because from this cell we begin subdividing in dimension one by one: 1,2,...,N, then again 1,2,...,N.
+        //The path to the root of the sub-paving is given by the binary word, its length gives the number of tree subdivisions:
+        const uint pathLength = _theGridCell.word().size();
+        //If pathLength == 0 then there were no subdivisions in the tree, so we assign last_subdiv_dim == -1
+        const int last_subdiv_dim = ( pathLength == 0 ) ? -1 : ( pathLength - 1 )  % dimensions;
 
-     //3.2 Compute the needed number of tree subdivisions by first computing how many subdivisions in the tree
-     //we need to do to reach and split the dimension K one first time and then we should add the remaining
-     //( M - 1 )*N tree subdevisions which will make shure that the K'th dimension is subdivided M times.
-     uint first_subdiv_steps;
-     if( last_subdiv_dim == static_cast<int>(max_subdiv_dim) ) {
-      //If last_subdiv_dim == -1 then we will never get here
-      first_subdiv_steps = dimensions; // C == K
-     } else {
-      //If last_subdiv_dim == -1 then we will add a needed extra subdivision
-      first_subdiv_steps = max_subdiv_dim - last_subdiv_dim; // C < K
-      if( last_subdiv_dim > static_cast<int>(max_subdiv_dim) ) {
-    //If last_subdiv_dim == -1 then we will never get here
-    first_subdiv_steps = dimensions - first_subdiv_steps; // C > K
-      }
-     }
-     needed_num_tree_subdiv = first_subdiv_steps + ( max_num_subdiv_dim - 1 ) * dimensions;
+        //3.2 Compute the needed number of tree subdivisions by first computing how many subdivisions in the tree
+        //we need to do to reach and split the dimension K one first time and then we should add the remaining
+        //( M - 1 )*N tree subdevisions which will make shure that the K'th dimension is subdivided M times.
+        uint first_subdiv_steps;
+        if( last_subdiv_dim == static_cast<int>(max_subdiv_dim) ) {
+            //If last_subdiv_dim == -1 then we will never get here
+            first_subdiv_steps = dimensions; // C == K
+        } else {
+            //If last_subdiv_dim == -1 then we will add a needed extra subdivision
+            first_subdiv_steps = max_subdiv_dim - last_subdiv_dim; // C < K
+            if( last_subdiv_dim > static_cast<int>(max_subdiv_dim) ) {
+                //If last_subdiv_dim == -1 then we will never get here
+                first_subdiv_steps = dimensions - first_subdiv_steps; // C > K
+            }
+        }
+        needed_num_tree_subdiv = first_subdiv_steps + ( max_num_subdiv_dim - 1 ) * dimensions;
     }
 
     //Mince to the computed number of tree levels
@@ -1326,7 +1326,7 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
 double GridTreeSubset::measure() const {
     Float result=0.0;
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-     result+=iter->box().measure();
+        result+=iter->box().measure();
     }
     return approx_cast<double>(result);
 }
@@ -1341,14 +1341,14 @@ GridTreeSubset::operator ListSet<Box>() const {
     //in its turn uses std:vector to store boxes in it (via push_back method),
     //the latter stores the copies of the boxes, not the references to them.
     for (GridTreeSubset::const_iterator it = this->begin(), end = this->end(); it != end; it++ ) {
-     result.push_back((*it).box());
+        result.push_back((*it).box());
     }
 
     return result;
 }
 
 tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-     const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
 
     //Check if the current node's cell intersects with theBox
@@ -1356,69 +1356,69 @@ tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& 
     tribool doIntersect = theCellsBox.overlaps( theBox );
 
     if( ! doIntersect ) {
-     //If theBox does not intersect with the cell then for the covering relation
-     //is is not important if we add or remove this cell, so we return true
-     result = true;
+        //If theBox does not intersect with the cell then for the covering relation
+        //is is not important if we add or remove this cell, so we return true
+        result = true;
     } else {
-     //If the cell possibly intersects with theBox then
-     if( pCurrentNode->is_leaf() ) {
-      if( pCurrentNode->is_enabled() ){
-    //If this is an enabled node that possibly or definitely intersects
-    //with theBox then the covering property is fine, so we return true
-    result = true;
-      } else {
-    //If the node is disabled then if it definitely intersects with theBox
-    //we have to report false, as there is not covering, in case it is only
-    //possible intersecting with theBox then we return possibly. The latter
-    //is because we are not completely sure, if the intersection does not
-    //have place then the covering property is not broken.
-    result = ! doIntersect;
-      }
-     } else {
-      //The node is not a leaf so we need to go down and see if the cell
-      //falls into sub cells for which we can sort things out
-      theWord.push_back(false);
-      const tribool result_left = covers( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
-      theWord.pop_back();
+        //If the cell possibly intersects with theBox then
+        if( pCurrentNode->is_leaf() ) {
+            if( pCurrentNode->is_enabled() ){
+                //If this is an enabled node that possibly or definitely intersects
+                //with theBox then the covering property is fine, so we return true
+                result = true;
+            } else {
+                //If the node is disabled then if it definitely intersects with theBox
+                //we have to report false, as there is not covering, in case it is only
+                //possible intersecting with theBox then we return possibly. The latter
+                //is because we are not completely sure, if the intersection does not
+                //have place then the covering property is not broken.
+                result = ! doIntersect;
+            }
+        } else {
+            //The node is not a leaf so we need to go down and see if the cell
+            //falls into sub cells for which we can sort things out
+            theWord.push_back(false);
+            const tribool result_left = covers( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            theWord.pop_back();
 
-      if( ! result_left) {
-    //If there is definitely no covering property then this is all
-    //we need to know so there is not need to check the other branch.
-    result = false;
-      } else {
-    //If the covering property holds or is possible, then we still
-    //need to check the second branch because it can change the outcome.
-    theWord.push_back(true);
-    const tribool result_right = covers( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
-    theWord.pop_back();
+            if( ! result_left) {
+                //If there is definitely no covering property then this is all
+                //we need to know so there is not need to check the other branch.
+                result = false;
+            } else {
+                //If the covering property holds or is possible, then we still
+                //need to check the second branch because it can change the outcome.
+                theWord.push_back(true);
+                const tribool result_right = covers( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                theWord.pop_back();
 
-    if( !result_right ) {
-     //IF: The right sub-node reports false, then the result is false
-     //NOTE: We already sorted out the case of ( (!result_left) == true) before
-     result = false;
-    } else {
-     if( result_left && result_right ) {
-      //ELSE: If both sub-nodes report true then it is true
-      result = true;
-     } else {
-      if( indeterminate(result_left) || indeterminate(result_right) ) {
-    //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
-    result = indeterminate;
-      } else {
-    //ELSE: An impossible situation
-    ARIADNE_ASSERT( false );
-      }
-     }
-    }
-      }
-     }
+                if( !result_right ) {
+                    //IF: The right sub-node reports false, then the result is false
+                    //NOTE: We already sorted out the case of ( (!result_left) == true) before
+                    result = false;
+                } else {
+                    if( result_left && result_right ) {
+                        //ELSE: If both sub-nodes report true then it is true
+                        result = true;
+                    } else {
+                        if( indeterminate(result_left) || indeterminate(result_right) ) {
+                            //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
+                            result = indeterminate;
+                        } else {
+                            //ELSE: An impossible situation
+                            ARIADNE_ASSERT( false );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return result;
 }
 
 tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-     const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
 
     //Check if the current node overlaps with theBox
@@ -1426,70 +1426,70 @@ tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& 
     tribool isASubset = theCellsBox.subset( theBox );
 
     if( isASubset ){
-     //It does not matter if pCurrentNode has enableds leaves or not we already know that the cell
-     //corresponding to this node is geometrically a subset of theBox.
-     result = true;
+        //It does not matter if pCurrentNode has enableds leaves or not we already know that the cell
+        //corresponding to this node is geometrically a subset of theBox.
+        result = true;
     } else {
-     //If the cell corresponding to pCurrentNode is not a subset, then
-     if( pCurrentNode->is_leaf() && ! isASubset ) {
-      //If pCurrentNode is a leaf node and geometrically the cell (corresponding to the node theCellsBox) is not a
-      //subset of theBox, then: if it is enabled then pCurrentNode is not a subset of theBox but otherwise it is.
-      result = ! pCurrentNode->is_enabled();
-     } else {
-      if( pCurrentNode->is_leaf() && indeterminate( isASubset ) ) {
-    //If we are in a leaf node but we do not know for sure if the given cell
-    //is a subset of theBox then we can only check if it is enabled or not
-    if( pCurrentNode->is_enabled() ){
-     //For an enabled-leaf node (a filled cell) we do not know if it is a subset of theBox
-     result = indeterminate;
-    } else {
-     //The node is disabled, so it represents an empty set, which is a subset of any set
-     result = true;
-    }
-      } else {
-    //The node is not a leaf, and we either know that the cell of pCurrentNode is not a geometrical subset
-    //of theBox or we are not sure that it is, This means that we can do recursion to sort things out.
-    theWord.push_back(false);
-    const tribool result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
-    theWord.pop_back();
+        //If the cell corresponding to pCurrentNode is not a subset, then
+        if( pCurrentNode->is_leaf() && ! isASubset ) {
+            //If pCurrentNode is a leaf node and geometrically the cell (corresponding to the node theCellsBox) is not a
+            //subset of theBox, then: if it is enabled then pCurrentNode is not a subset of theBox but otherwise it is.
+            result = ! pCurrentNode->is_enabled();
+        } else {
+            if( pCurrentNode->is_leaf() && indeterminate( isASubset ) ) {
+                //If we are in a leaf node but we do not know for sure if the given cell
+                //is a subset of theBox then we can only check if it is enabled or not
+                if( pCurrentNode->is_enabled() ){
+                    //For an enabled-leaf node (a filled cell) we do not know if it is a subset of theBox
+                    result = indeterminate;
+                } else {
+                    //The node is disabled, so it represents an empty set, which is a subset of any set
+                    result = true;
+                }
+            } else {
+                //The node is not a leaf, and we either know that the cell of pCurrentNode is not a geometrical subset
+                //of theBox or we are not sure that it is, This means that we can do recursion to sort things out.
+                theWord.push_back(false);
+                const tribool result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+                theWord.pop_back();
 
-    if( !result_left ) {
-     //If the left branch is not a subset, then there is no need to check the right one
-     result = false;
-    } else {
-     //if we still do not know the answer, then we check the right branch
-     theWord.push_back(true);
-     const tribool result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
-     theWord.pop_back();
+                if( !result_left ) {
+                    //If the left branch is not a subset, then there is no need to check the right one
+                    result = false;
+                } else {
+                    //if we still do not know the answer, then we check the right branch
+                    theWord.push_back(true);
+                    const tribool result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                    theWord.pop_back();
 
-     if( !result_right ) {
-      //IF: The right sub-node reports false, then the result is false
-      //NOTE: We already sorted out the case of ( (!result_left) == true) before
-      result = false;
-     } else {
-      if( result_left && result_right ) {
-    //ELSE: If both sub-nodes report true then it is true
-    result = true;
-      } else {
-    if( indeterminate(result_left) || indeterminate(result_right) ) {
-     //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
-     result = indeterminate;
-    } else {
-     //ELSE: An impossible situation
-     ARIADNE_ASSERT( false );
-    }
-      }
-     }
-    }
-      }
-     }
+                    if( !result_right ) {
+                        //IF: The right sub-node reports false, then the result is false
+                        //NOTE: We already sorted out the case of ( (!result_left) == true) before
+                        result = false;
+                    } else {
+                        if( result_left && result_right ) {
+                            //ELSE: If both sub-nodes report true then it is true
+                            result = true;
+                        } else {
+                            if( indeterminate(result_left) || indeterminate(result_right) ) {
+                                //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
+                                result = indeterminate;
+                            } else {
+                                //ELSE: An impossible situation
+                                ARIADNE_ASSERT( false );
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return result;
 }
 
 tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-    const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                  const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool intersect;
 
     //Check if the current node overlaps with theBox
@@ -1497,66 +1497,66 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
     tribool doPossiblyIntersect = !theCellsBox.disjoint( theBox );
 
     if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
-     //If there is a possible intersection then we do the checking
-     if( pCurrentNode->is_leaf() ) {
-      //If this is a leaf node then
-      if( pCurrentNode->is_enabled() ){
-    //If the node is enabled, then we have a possible intersection
-    intersect = doPossiblyIntersect;
-      } else {
-    //Since the node is disabled, there can be no intersection
-    intersect = false;
-      }
-     } else {
-      //The node is not a leaf and the intersection is possible so check the left sub-node
-      theWord.push_back(false);
-      const tribool intersect_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
-      theWord.pop_back();
+        //If there is a possible intersection then we do the checking
+        if( pCurrentNode->is_leaf() ) {
+            //If this is a leaf node then
+            if( pCurrentNode->is_enabled() ){
+                //If the node is enabled, then we have a possible intersection
+                intersect = doPossiblyIntersect;
+            } else {
+                //Since the node is disabled, there can be no intersection
+                intersect = false;
+            }
+        } else {
+            //The node is not a leaf and the intersection is possible so check the left sub-node
+            theWord.push_back(false);
+            const tribool intersect_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            theWord.pop_back();
 
-      //
-      //WARNING: I know how to write a shorter code, like:
-      //    if( ! ( intersect = definitely( intersect_left ) ) ) {
-      //     ...
-      //    }
-      // I DO NOT DO THIS ON PERPOSE, KEEP THE CODE EASILY UNDERSTANDABLE!
-      //
-      if( intersect_left ) {
-    //If we definitely have intersection for the left branch then answer is true
-    intersect = true;
-      } else {
-    //If we still not sure/ or do not know then try to search further, i.e. check the right node
-    theWord.push_back(true);
-    const tribool intersect_right = overlaps( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
-    theWord.pop_back();
-    if( intersect_right ) {
-     //If we definitely have intersection for the right branch then answer is true
-     intersect = true;
+            //
+            //WARNING: I know how to write a shorter code, like:
+            //          if( ! ( intersect = definitely( intersect_left ) ) ) {
+            //              ...
+            //          }
+            // I DO NOT DO THIS ON PERPOSE, KEEP THE CODE EASILY UNDERSTANDABLE!
+            //
+            if( intersect_left ) {
+                //If we definitely have intersection for the left branch then answer is true
+                intersect = true;
+            } else {
+                //If we still not sure/ or do not know then try to search further, i.e. check the right node
+                theWord.push_back(true);
+                const tribool intersect_right = overlaps( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                theWord.pop_back();
+                if( intersect_right ) {
+                    //If we definitely have intersection for the right branch then answer is true
+                    intersect = true;
+                } else {
+                    //Now either we have indeterminate answers or we do not know, if one
+                    //if the answers for one of the branches was indeterminate then we
+                    //report indeterminate, otherwise it is definitely false.
+                    if( indeterminate( intersect_left ) || indeterminate( intersect_right )  ) {
+                        intersect = indeterminate;
+                    } else {
+                        intersect = false;
+                    }
+                    //ERROR: Substituting the above if statement with the following conditional assignement DOES NOT WORK:
+                    //    intersect = ( ( indeterminate( intersect_left ) || indeterminate( intersect_right ) ) ? indeterminate : false );
+                    //In this case, if we need to assign false, the proper branch of the conditional statement is executed,
+                    //but somehow the value of the "intersect" variable becomes indeterminate!
+                }
+            }
+        }
     } else {
-     //Now either we have indeterminate answers or we do not know, if one
-     //if the answers for one of the branches was indeterminate then we
-     //report indeterminate, otherwise it is definitely false.
-     if( indeterminate( intersect_left ) || indeterminate( intersect_right )  ) {
-      intersect = indeterminate;
-     } else {
-      intersect = false;
-     }
-     //ERROR: Substituting the above if statement with the following conditional assignement DOES NOT WORK:
-     //    intersect = ( ( indeterminate( intersect_left ) || indeterminate( intersect_right ) ) ? indeterminate : false );
-     //In this case, if we need to assign false, the proper branch of the conditional statement is executed,
-     //but somehow the value of the "intersect" variable becomes indeterminate!
-    }
-      }
-     }
-    } else {
-     //If there is no intersection then we just stop with a negative intersect
-     intersect = false;
+        //If there is no intersection then we just stop with a negative intersect
+        intersect = false;
     }
 
     return !intersect;
 }
 
 tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-    const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                  const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
 
     //Check if the current node overlaps with theBox
@@ -1564,59 +1564,59 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
     tribool doPossiblyIntersect = theCellsBox.overlaps( theBox );
 
     if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
-     //If there is a possible intersection then we do the checking
-     if( pCurrentNode->is_leaf() ) {
-      //If this is a leaf node then
-      if( pCurrentNode->is_enabled() ){
-    //If the node is enabled, then we have a possible intersection
-    result = doPossiblyIntersect;
-      } else {
-    //Since the node is disabled, there can be no intersection
-    result = false;
-      }
-     } else {
-      //The node is not a leaf and the intersection is possible so check the left sub-node
-      theWord.push_back(false);
-      const tribool result_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
-      theWord.pop_back();
+        //If there is a possible intersection then we do the checking
+        if( pCurrentNode->is_leaf() ) {
+            //If this is a leaf node then
+            if( pCurrentNode->is_enabled() ){
+                //If the node is enabled, then we have a possible intersection
+                result = doPossiblyIntersect;
+            } else {
+                //Since the node is disabled, there can be no intersection
+                result = false;
+            }
+        } else {
+            //The node is not a leaf and the intersection is possible so check the left sub-node
+            theWord.push_back(false);
+            const tribool result_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            theWord.pop_back();
 
-      //
-      //WARNING: I know how to write a shorter code, like:
-      //    if( ! ( result = definitely( result_left ) ) ) {
-      //     ...
-      //    }
-      // I DO NOT DO THIS ON PERPOSE, KEEP THE CODE EASILY UNDERSTANDABLE!
-      //
-      if( result_left ) {
-    //If we definitely have intersection for the left branch then answer is true
-    result = true;
-      } else {
-    //If we still not sure/ or do not know then try to search further, i.e. check the right node
-    theWord.push_back(true);
-    const tribool result_right = overlaps( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
-    theWord.pop_back();
-    if( result_right ) {
-     //If we definitely have intersection for the right branch then answer is true
-     result = true;
+            //
+            //WARNING: I know how to write a shorter code, like:
+            //          if( ! ( result = definitely( result_left ) ) ) {
+            //              ...
+            //          }
+            // I DO NOT DO THIS ON PERPOSE, KEEP THE CODE EASILY UNDERSTANDABLE!
+            //
+            if( result_left ) {
+                //If we definitely have intersection for the left branch then answer is true
+                result = true;
+            } else {
+                //If we still not sure/ or do not know then try to search further, i.e. check the right node
+                theWord.push_back(true);
+                const tribool result_right = overlaps( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                theWord.pop_back();
+                if( result_right ) {
+                    //If we definitely have intersection for the right branch then answer is true
+                    result = true;
+                } else {
+                    //Now either we have indeterminate answers or we do not know, if one
+                    //if the answers for one of the branches was indeterminate then we
+                    //report indeterminate, otherwise it is definitely false.
+                    if( indeterminate( result_left ) || indeterminate( result_right )  ) {
+                        result = indeterminate;
+                    } else {
+                        result = false;
+                    }
+                    //ERROR: Substituting the above if statement with the following conditional assignement DOES NOT WORK:
+                    //    result = ( ( indeterminate( result_left ) || indeterminate( result_right ) ) ? indeterminate : false );
+                    //In this case, if we need to assign false, the proper branch of the conditional statement is executed,
+                    //but somehow the value of the "result" variable becomes indeterminate!
+                }
+            }
+        }
     } else {
-     //Now either we have indeterminate answers or we do not know, if one
-     //if the answers for one of the branches was indeterminate then we
-     //report indeterminate, otherwise it is definitely false.
-     if( indeterminate( result_left ) || indeterminate( result_right )  ) {
-      result = indeterminate;
-     } else {
-      result = false;
-     }
-     //ERROR: Substituting the above if statement with the following conditional assignement DOES NOT WORK:
-     //    result = ( ( indeterminate( result_left ) || indeterminate( result_right ) ) ? indeterminate : false );
-     //In this case, if we need to assign false, the proper branch of the conditional statement is executed,
-     //but somehow the value of the "result" variable becomes indeterminate!
-    }
-      }
-     }
-    } else {
-     //If there is no intersection then we just stop with a negative result
-     result = false;
+        //If there is no intersection then we just stop with a negative result
+        result = false;
     }
 
     return result;
@@ -1624,7 +1624,7 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
 
 void GridTreeSubset::draw(CanvasInterface& theGraphic) const {
     for(GridTreeSubset::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-     iter->box().draw(theGraphic);
+        iter->box().draw(theGraphic);
     }
 }
 
@@ -1664,7 +1664,7 @@ GridTreeSet::GridTreeSet( const uint theDimension, const bool enable ) :
 
 GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theLatticeBox ) :
     GridTreeSubset( theGrid, GridCell::smallest_enclosing_primary_cell_height( theLatticeBox ),
-     BinaryWord(), new BinaryTreeNode( false ) ) {
+                    BinaryWord(), new BinaryTreeNode( false ) ) {
     //1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
     //2. This cell is defined by it's height and becomes the root of the GridTreeSet
     //3. Point 2. implies that the word to the root of GridTreeSubset should be set to
@@ -1678,20 +1678,20 @@ GridTreeSet::GridTreeSet( const Grid& theGrid, uint theHeight, const BooleanArra
 
 GridTreeSet::GridTreeSet( const GridTreeSet & theGridTreeSet ) :
     GridTreeSubset( theGridTreeSet._theGridCell.grid(), theGridTreeSet._theGridCell.height(),
-     theGridTreeSet._theGridCell.word(), new BinaryTreeNode( *theGridTreeSet._pRootTreeNode )) {
+                    theGridTreeSet._theGridCell.word(), new BinaryTreeNode( *theGridTreeSet._pRootTreeNode )) {
     //Call the super constructor: Create an exact copy of the tree, copy the bounding box
 }
 
 GridTreeSet& GridTreeSet::operator=( const GridTreeSet & theGridTreeSet ) {
     //Delete the old tree and make a new one
     if(this!=&theGridTreeSet) {
-     if( GridTreeSubset::_pRootTreeNode != NULL){
-      delete GridTreeSubset::_pRootTreeNode;
-      GridTreeSubset::_pRootTreeNode = NULL;
-     }
-     static_cast<GridTreeSubset&>(*this) =
-      GridTreeSubset( theGridTreeSet._theGridCell.grid(), theGridTreeSet._theGridCell.height(),
-    theGridTreeSet._theGridCell.word(), new BinaryTreeNode( *theGridTreeSet._pRootTreeNode ));
+        if( GridTreeSubset::_pRootTreeNode != NULL){
+            delete GridTreeSubset::_pRootTreeNode;
+            GridTreeSubset::_pRootTreeNode = NULL;
+        }
+        static_cast<GridTreeSubset&>(*this) =
+            GridTreeSubset( theGridTreeSet._theGridCell.grid(), theGridTreeSet._theGridCell.height(),
+                            theGridTreeSet._theGridCell.word(), new BinaryTreeNode( *theGridTreeSet._pRootTreeNode ));
     }
     return *this;
 }
@@ -1702,8 +1702,8 @@ GridTreeSet* GridTreeSet::clone() const {
 
 GridTreeSet::~GridTreeSet() {
     if( GridTreeSubset::_pRootTreeNode != NULL){
-     delete GridTreeSubset::_pRootTreeNode;
-     GridTreeSubset::_pRootTreeNode = NULL;
+        delete GridTreeSubset::_pRootTreeNode;
+        GridTreeSubset::_pRootTreeNode = NULL;
     }
 }
 
@@ -1721,7 +1721,7 @@ void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
 }
 
 BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled,
-    const bool stop_on_disabled, bool & has_stopped ) {
+                                              const bool stop_on_disabled, bool & has_stopped ) {
     const uint thisPavingPCellHeight = this->cell().height();
 
     //The current root node of the GridTreeSet
@@ -1729,79 +1729,79 @@ BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight,
 
     if( thisPavingPCellHeight > otherPavingPCellHeight ){
 
-     //The primary cell of this paving is higher then the one of the other paving.
-     //1. We locate the path to the primary cell node common with the other paving
-     BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), thisPavingPCellHeight, otherPavingPCellHeight );
+        //The primary cell of this paving is higher then the one of the other paving.
+        //1. We locate the path to the primary cell node common with the other paving
+        BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), thisPavingPCellHeight, otherPavingPCellHeight );
 
-     //2. Locate the binary tree node corresponding to this primnary cell
-     uint position = 0;
-     while( position < primaryCellPath.size() &&
-      !( has_stopped = ( ( pBinaryTreeNode->is_enabled() && stop_on_enabled ) ||
-    ( pBinaryTreeNode->is_disabled() && stop_on_disabled ) ) ) ){
-      //Split the node, if it is not a leaf it will not be changed
-      pBinaryTreeNode->split();
-      //Follow the next path step
-      pBinaryTreeNode = (primaryCellPath[position]) ? pBinaryTreeNode->right_node() : pBinaryTreeNode->left_node();
-      //Move to the next path element
-      position++;
-     }
+        //2. Locate the binary tree node corresponding to this primnary cell
+        uint position = 0;
+        while( position < primaryCellPath.size() &&
+               !( has_stopped = ( ( pBinaryTreeNode->is_enabled() && stop_on_enabled ) ||
+                                  ( pBinaryTreeNode->is_disabled() && stop_on_disabled ) ) ) ){
+            //Split the node, if it is not a leaf it will not be changed
+            pBinaryTreeNode->split();
+            //Follow the next path step
+            pBinaryTreeNode = (primaryCellPath[position]) ? pBinaryTreeNode->right_node() : pBinaryTreeNode->left_node();
+            //Move to the next path element
+            position++;
+        }
     } else {
-     if( thisPavingPCellHeight < otherPavingPCellHeight ) {
-      up_to_primary_cell( otherPavingPCellHeight );
-      pBinaryTreeNode = this->_pRootTreeNode;
-     } else {
-      //If we are rooted to the same primary cell, then there
-      //is nothing to be done, except adding the enabled cell
-     }
+        if( thisPavingPCellHeight < otherPavingPCellHeight ) {
+            up_to_primary_cell( otherPavingPCellHeight );
+            pBinaryTreeNode = this->_pRootTreeNode;
+        } else {
+            //If we are rooted to the same primary cell, then there
+            //is nothing to be done, except adding the enabled cell
+        }
     }
     return pBinaryTreeNode;
 }
 
 void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-     const uint max_mince_depth,  const CompactSetInterface& theSet, BinaryWord * pPath ){
+                                               const uint max_mince_depth,  const CompactSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
 
     if( bool( theSet.disjoint( theCurrentCell.box() ) ) ) {
-     //DO NOTHING: We are in the node whoes representation in the original space is
-     //disjoint from pSet and thus there will be nothing added to this cell.
+        //DO NOTHING: We are in the node whoes representation in the original space is
+        //disjoint from pSet and thus there will be nothing added to this cell.
     } else if( pOpenSet && bool( pOpenSet->covers( theCurrentCell.box() ) ) ) {
-     pBinaryTreeNode->make_leaf(true);
+        pBinaryTreeNode->make_leaf(true);
     } else {
-     //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
-     //of its outer approximation, unless this node is already and enabled leaf node.
-     if( pBinaryTreeNode->is_enabled() ){ //NOTE: A non-leaf node can not be enabled so this check suffices
-      //DO NOTHING: If it is enabled, then we can not add anything new to it.
-     } else {
-      //If the node is not enabled, so may be we can add something from the outer approximation of theSet.
-      if( pPath->size() < max_mince_depth ){
-    //Since we still do not have the finest cells for the outer approximation of theSet, we split
-    pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
-    //Check the left branch
-    pPath->push_back(false);
-    _adjoin_outer_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-    //Check the right branch
-    pPath->push_back(true);
-    _adjoin_outer_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-      } else {
-    //We should not mince any further, so since the node is a leaf and
-    //it's cell is not disjoint from theSet, we mark the node as enabled.
-    if( !pBinaryTreeNode->is_leaf() ){
-     //If the node is not leaf, then we make it an enabled one
-     pBinaryTreeNode->make_leaf(true);
-    } else {
-     //Just make the node enabled
-     pBinaryTreeNode->set_enabled();
-    }
-      }
-     }
+        //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
+        //of its outer approximation, unless this node is already and enabled leaf node.
+        if( pBinaryTreeNode->is_enabled() ){ //NOTE: A non-leaf node can not be enabled so this check suffices
+            //DO NOTHING: If it is enabled, then we can not add anything new to it.
+        } else {
+            //If the node is not enabled, so may be we can add something from the outer approximation of theSet.
+            if( pPath->size() < max_mince_depth ){
+                //Since we still do not have the finest cells for the outer approximation of theSet, we split
+                pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
+                //Check the left branch
+                pPath->push_back(false);
+                _adjoin_outer_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                //Check the right branch
+                pPath->push_back(true);
+                _adjoin_outer_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            } else {
+                //We should not mince any further, so since the node is a leaf and
+                //it's cell is not disjoint from theSet, we mark the node as enabled.
+                if( !pBinaryTreeNode->is_leaf() ){
+                    //If the node is not leaf, then we make it an enabled one
+                    pBinaryTreeNode->make_leaf(true);
+                } else {
+                    //Just make the node enabled
+                    pBinaryTreeNode->set_enabled();
+                }
+            }
+        }
     }
     //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
-     pPath->pop_back();
+        pPath->pop_back();
     }
 }
 
@@ -1813,80 +1813,80 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
 // TODO:Think of another representation in terms of covers but not pavings, then this problem
 // can be cured in a different fashion.
 void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-     const uint max_mince_depth,  const OvertSetInterface& theSet, BinaryWord * pPath ){
+                                               const uint max_mince_depth,  const OvertSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
     if( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
-     if( pPath->size() >= max_mince_depth ) {
-      //We should not mince any further.
-      //If the cell is not a leaf, then some subset is enabled,
-      //so the lower approximation does not add any information.
-      //If the cell is a leaf, we mark it as enabled.
-      if( ! pBinaryTreeNode->has_enabled() ) {
-    pBinaryTreeNode->make_leaf(true);
-      }
-     } else {
-      //If the node is no enabled, so may be we can add something from the lower approximation of theSet.
-      //Since we still do not have the finest cells for the lower approximation of theSet, we split
-      pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
-      //Check the left branch
-      pPath->push_back(false);
-      _adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-      //Check the right branch
-      pPath->push_back(true);
-      _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-     }
+        if( pPath->size() >= max_mince_depth ) {
+            //We should not mince any further.
+            //If the cell is not a leaf, then some subset is enabled,
+            //so the lower approximation does not add any information.
+            //If the cell is a leaf, we mark it as enabled.
+            if( ! pBinaryTreeNode->has_enabled() ) {
+                pBinaryTreeNode->make_leaf(true);
+            }
+        } else {
+            //If the node is no enabled, so may be we can add something from the lower approximation of theSet.
+            //Since we still do not have the finest cells for the lower approximation of theSet, we split
+            pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
+            //Check the left branch
+            pPath->push_back(false);
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            //Check the right branch
+            pPath->push_back(true);
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+        }
     }
     //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
-     pPath->pop_back();
+        pPath->pop_back();
     }
 }
 
 void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-     const uint max_mince_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
+                                               const uint max_mince_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
     if( bool( theSet.covers( theCurrentCell.box() ) ) ) {
-     pBinaryTreeNode->make_leaf(true);
-     pBinaryTreeNode->mince( max_mince_depth - pPath->size() );
+        pBinaryTreeNode->make_leaf(true);
+        pBinaryTreeNode->mince( max_mince_depth - pPath->size() );
     } else if ( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
-     if( pPath->size() >= max_mince_depth ) {
-      //We should not mince any further.
-      //If the cell is not a leaf, then some subset is enabled,
-      //so the lower approximation does not add any information.
-      //If the cell is a leaf, we mark it as enabled.
-      if( pBinaryTreeNode->is_leaf() ) {
-    pBinaryTreeNode->set_enabled();
-      }
-     } else {
-      //Since we still do not have the finest cells for the outer approximation of theSet, we split
-      pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
+        if( pPath->size() >= max_mince_depth ) {
+            //We should not mince any further.
+            //If the cell is not a leaf, then some subset is enabled,
+            //so the lower approximation does not add any information.
+            //If the cell is a leaf, we mark it as enabled.
+            if( pBinaryTreeNode->is_leaf() ) {
+                pBinaryTreeNode->set_enabled();
+            }
+        } else {
+            //Since we still do not have the finest cells for the outer approximation of theSet, we split
+            pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
 
-      //Check the left branch
-      pPath->push_back(false);
-      _adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-      //Check the right branch
-      pPath->push_back(true);
-      _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-     }
+            //Check the left branch
+            pPath->push_back(false);
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            //Check the right branch
+            pPath->push_back(true);
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+        }
     }
     //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
-     pPath->pop_back();
+        pPath->pop_back();
     }
 }
 
 void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint numSubdivInDim ) {
     // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
     for(size_t i=0; i!=theBox.dimension(); ++i) {
-     if(theBox[i].lower()>=theBox[i].upper()) {
-      ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(Box,uint)","Box "<<theBox<<" has empty interior.");
-     }
+        if(theBox[i].lower()>=theBox[i].upper()) {
+            ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(Box,uint)","Box "<<theBox<<" has empty interior.");
+        }
     }
     this->adjoin_outer_approximation( theBox, numSubdivInDim );
 }
@@ -1909,17 +1909,17 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
     //in an enabled cell of this paving, then there is nothing to be done. The latter
     //is because adjoining the outer approx of the set will not change this paving.
     if( ! has_stopped ){
-     //Compute the depth to which we must mince the outer approximation of the adjoining set.
-     //This depth is relative to the root of the constructed paving, which has been alligned
-     //with the binary tree node pBinaryTreeNode.
-     const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, outer_approx_primary_cell_height, 0 );
+        //Compute the depth to which we must mince the outer approximation of the adjoining set.
+        //This depth is relative to the root of the constructed paving, which has been alligned
+        //with the binary tree node pBinaryTreeNode.
+        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, outer_approx_primary_cell_height, 0 );
 
-     //Adjoin the outer approximation, computing it on the fly.
-     BinaryWord * pEmptyPath = new BinaryWord();
-     _adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, outer_approx_primary_cell_height,
-    max_mince_depth, theSet, pEmptyPath );
+        //Adjoin the outer approximation, computing it on the fly.
+        BinaryWord * pEmptyPath = new BinaryWord();
+        _adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, outer_approx_primary_cell_height,
+                                     max_mince_depth, theSet, pEmptyPath );
 
-     delete pEmptyPath;
+        delete pEmptyPath;
     }
 }
 
@@ -1941,23 +1941,23 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     //in an enabled cell of this paving, then there is nothing to be done. The latter
     //is because adjoining the outer approx of the set will not change this paving.
     if( ! has_stopped ){
-     //Compute the depth to which we must mince the outer approximation of the adjoining set.
-     //This depth is relative to the root of the constructed paving, which has been alligned
-     //with the binary tree node pBinaryTreeNode.
-     const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
+        //Compute the depth to which we must mince the outer approximation of the adjoining set.
+        //This depth is relative to the root of the constructed paving, which has been alligned
+        //with the binary tree node pBinaryTreeNode.
+        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
 
-     //Adjoin the outer approximation, computing it on the fly.
-     BinaryWord * pEmptyPath = new BinaryWord();
-     //const RegularSetInterface* theRegularVersionOfSet = dynamic_cast<const RegularSetInterface*>(&theSet);
-     const OpenSetInterface* theOpenVersionOfSet = dynamic_cast<const OpenSetInterface*>(&theSet);
-     //const LocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const LocatedSetInterface*>(&theSet);
-     const OvertSetInterface* theOvertVersionOfSet = dynamic_cast<const OvertSetInterface*>(&theSet);
-     if( theOpenVersionOfSet ) {
-      _adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOpenVersionOfSet, pEmptyPath );
-     } else {
-      _adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOvertVersionOfSet, pEmptyPath );
-     }
-     delete pEmptyPath;
+        //Adjoin the outer approximation, computing it on the fly.
+        BinaryWord * pEmptyPath = new BinaryWord();
+        //const RegularSetInterface* theRegularVersionOfSet = dynamic_cast<const RegularSetInterface*>(&theSet);
+        const OpenSetInterface* theOpenVersionOfSet = dynamic_cast<const OpenSetInterface*>(&theSet);
+        //const LocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const LocatedSetInterface*>(&theSet);
+        const OvertSetInterface* theOvertVersionOfSet = dynamic_cast<const OvertSetInterface*>(&theSet);
+        if( theOpenVersionOfSet ) {
+            _adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOpenVersionOfSet, pEmptyPath );
+        } else {
+            _adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOvertVersionOfSet, pEmptyPath );
+        }
+        delete pEmptyPath;
     }
 }
 
@@ -1974,48 +1974,48 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
 }
 
 void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-     const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath ) {
+                                               const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath ) {
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
     if( ! pBinaryTreeNode->is_enabled() ) {
-     //If this it is not an enabled leaf node then we can add something to it.
-     if( definitely( theSet.covers( theCurrentCell.box() ) ) ) {
-      //If this node's box is a subset of theSet then it belongs to the inner approximation
-      //Thus we need to make it an enabled leaf and then do the mincing to the maximum depth
-      pBinaryTreeNode->make_leaf( true );
-     } else if ( possibly( theSet.overlaps( theCurrentCell.box() ) ) ) {
-      //If theSet overlaps with the box corresponding to the given node in the original
-      //space, then there might be something to add from the inner approximation of theSet.
-      if( pPath->size() >= max_mince_depth ) {
-    //DO NOTHING: Since it is the maximum depth to which we were allowed to mince
-    //and we know that the node's box only overlaps with theSet but is not it's
-    //subset we have to exclude it from the inner approximation of theSet.
-      } else {
-    //Since we still do not have the finest cells for the outer approximation of theSet, we split
-    pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
+        //If this it is not an enabled leaf node then we can add something to it.
+        if( definitely( theSet.covers( theCurrentCell.box() ) ) ) {
+            //If this node's box is a subset of theSet then it belongs to the inner approximation
+            //Thus we need to make it an enabled leaf and then do the mincing to the maximum depth
+            pBinaryTreeNode->make_leaf( true );
+        } else if ( possibly( theSet.overlaps( theCurrentCell.box() ) ) ) {
+            //If theSet overlaps with the box corresponding to the given node in the original
+            //space, then there might be something to add from the inner approximation of theSet.
+            if( pPath->size() >= max_mince_depth ) {
+                //DO NOTHING: Since it is the maximum depth to which we were allowed to mince
+                //and we know that the node's box only overlaps with theSet but is not it's
+                //subset we have to exclude it from the inner approximation of theSet.
+            } else {
+                //Since we still do not have the finest cells for the outer approximation of theSet, we split
+                pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
 
-    //Check the left branch
-    pPath->push_back(false);
-    _adjoin_inner_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-    //Check the right branch
-    pPath->push_back(true);
-    _adjoin_inner_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
-      }
-     } else {
-      //DO NOTHING: the node's box is disjoint from theSet and thus it or it's
-      //sub nodes can not be the part of the inner approximation of theSet.
-     }
+                //Check the left branch
+                pPath->push_back(false);
+                _adjoin_inner_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                //Check the right branch
+                pPath->push_back(true);
+                _adjoin_inner_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            }
+        } else {
+            //DO NOTHING: the node's box is disjoint from theSet and thus it or it's
+            //sub nodes can not be the part of the inner approximation of theSet.
+        }
     } else {
-     //DO NOTHING: If this is an enabled leaf node we are in, then there is nothing to add to it
-     //TODO: We could mince the node until the depth (max_mince_depth - pPath->size()) but I do
-     //not know if it makes any sence to do this, since this does not change the result.
+        //DO NOTHING: If this is an enabled leaf node we are in, then there is nothing to add to it
+        //TODO: We could mince the node until the depth (max_mince_depth - pPath->size()) but I do
+        //not know if it makes any sence to do this, since this does not change the result.
     }
 
     //Return to the previous level, since the initial evaluate is made
     //with the empty word, we check that it is not yet empty.
     if( pPath->size() > 0 ) {
-     pPath->pop_back();
+        pPath->pop_back();
     }
 }
 
@@ -2031,15 +2031,15 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     //in an enabled cell of this paving, then there is nothing to be done. The latter
     //is because adjoining the inner approx of the set will not change this paving.
     if( ! has_stopped ){
-     //Compute the depth to which we must mince the inner approximation of the adjoining set.
-     //This depth is relative to the root of the constructed paving, which has been alligned
-     //with the binary tree node pBinaryTreeNode.
-     const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
+        //Compute the depth to which we must mince the inner approximation of the adjoining set.
+        //This depth is relative to the root of the constructed paving, which has been alligned
+        //with the binary tree node pBinaryTreeNode.
+        const uint max_mince_depth = zero_cell_subdivisions_to_tree_subdivisions( numSubdivInDim, height, 0 );
 
-     //Adjoin the inner approximation, computing it on the fly.
-     BinaryWord * pEmptyPath = new BinaryWord();
-     _adjoin_inner_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, theSet, pEmptyPath );
-     delete pEmptyPath;
+        //Adjoin the inner approximation, computing it on the fly.
+        BinaryWord * pEmptyPath = new BinaryWord();
+        _adjoin_inner_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, theSet, pEmptyPath );
+        delete pEmptyPath;
     }
 }
 
@@ -2078,52 +2078,52 @@ void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){
     BinaryTreeNode * pBranchToDisable = NULL;
     //Iterate the path, get to the root cell of theOtherSubPaving
     while( position < rootNodePath.size() ){
-     if( pBinaryTreeNode->is_leaf() ){
-      //If we are in the leaf node then
-      if( pBinaryTreeNode->is_disabled() ){
-    //if it is disabled, then the intersection with
-    //the other set is empty so we just return
-    return;
-      } else {
-    //If it is an enabled leaf node then, because we still need to go further to reach the root cell of
-    //theOtherSubPaving, we split this node and disable the leaf that does not intersect with the other set
-    pBinaryTreeNode->split();
-      }
-     } else {
-      //If this is not a leaf node then we need to follow the path and disable the child
-      //node that is not on the path, because it will not make it into the intersection
-     }
-     //Follow the path and diable the other branch
-     if( rootNodePath[position] ){
-      pBranchToDisable = pBinaryTreeNode->left_node();
-      pBinaryTreeNode = pBinaryTreeNode->right_node();
-     } else {
-      pBranchToDisable = pBinaryTreeNode->right_node();
-      pBinaryTreeNode = pBinaryTreeNode->left_node();
-     }
-     //Move the unused branch into a disabled leaf node
-     pBranchToDisable->make_leaf(false);
+        if( pBinaryTreeNode->is_leaf() ){
+            //If we are in the leaf node then
+            if( pBinaryTreeNode->is_disabled() ){
+                //if it is disabled, then the intersection with
+                //the other set is empty so we just return
+                return;
+            } else {
+                //If it is an enabled leaf node then, because we still need to go further to reach the root cell of
+                //theOtherSubPaving, we split this node and disable the leaf that does not intersect with the other set
+                pBinaryTreeNode->split();
+            }
+        } else {
+            //If this is not a leaf node then we need to follow the path and disable the child
+            //node that is not on the path, because it will not make it into the intersection
+        }
+        //Follow the path and diable the other branch
+        if( rootNodePath[position] ){
+            pBranchToDisable = pBinaryTreeNode->left_node();
+            pBinaryTreeNode = pBinaryTreeNode->right_node();
+        } else {
+            pBranchToDisable = pBinaryTreeNode->right_node();
+            pBinaryTreeNode = pBinaryTreeNode->left_node();
+        }
+        //Move the unused branch into a disabled leaf node
+        pBranchToDisable->make_leaf(false);
 
-     //Move to the next path element
-     position++;
+        //Move to the next path element
+        position++;
     }
     if( pBinaryTreeNode->is_enabled() ){
-     //If we ended up in a leaf node that is disabled, this meand that it is the only enabled node
-     //in this GridTreeSet. At this point it corresponds to the root node of the theOtherSubPaving
-     //and since we need to do the restriction to that set, we just need to copy it to this node.
-     pBinaryTreeNode->copy_from( theOtherSubPaving.binary_tree() );
-     //Return since there is nothing else we need to do
-     return;
+        //If we ended up in a leaf node that is disabled, this meand that it is the only enabled node
+        //in this GridTreeSet. At this point it corresponds to the root node of the theOtherSubPaving
+        //and since we need to do the restriction to that set, we just need to copy it to this node.
+        pBinaryTreeNode->copy_from( theOtherSubPaving.binary_tree() );
+        //Return since there is nothing else we need to do
+        return;
     } else {
-     if( pBinaryTreeNode->is_disabled() ){
-      //if we are in a disabled leaf node the the result of the
-      //restriction is an empty set and we just return
-      return;
-     } else {
-      //If it is two binary tree we have, then we need to restrict
-      //pBinaryTreeNode to theOtherSubPaving._pRootTreeNode
-      BinaryTreeNode::restrict( pBinaryTreeNode, theOtherSubPaving.binary_tree() );
-     }
+        if( pBinaryTreeNode->is_disabled() ){
+            //if we are in a disabled leaf node the the result of the
+            //restriction is an empty set and we just return
+            return;
+        } else {
+            //If it is two binary tree we have, then we need to restrict
+            //pBinaryTreeNode to theOtherSubPaving._pRootTreeNode
+            BinaryTreeNode::restrict( pBinaryTreeNode, theOtherSubPaving.binary_tree() );
+        }
     }
 }
 
@@ -2143,34 +2143,34 @@ void GridTreeSet::remove_from_lower( const GridTreeSubset& theOtherSubPaving ){
     uint position = 0;
     //Iterate the path, get to the root cell of theOtherSubPaving
     while( position < rootNodePath.size() ){
-     if( pBinaryTreeNode->is_leaf() ){
-      //If we are in the leaf node then
-      if( pBinaryTreeNode->is_disabled() ){
-    //if it is disabled, then we are removing from not-enabled cells
-    //so there is nothing to be done and thus we simply terminate
-    return;
-      } else {
-    //If it is an enabled leaf node then, because we still need to go further
-    //to reach the root cell of theOtherSubPaving, we split this node
-    pBinaryTreeNode->split();
-      }
-     } else {
-      //If this is not a leaf node then we need to follow the path and then do removal
-     }
-     //Follow the path and do the removal, the other branch stays intact
-     pBinaryTreeNode = (rootNodePath[position]) ? pBinaryTreeNode->right_node() : pBinaryTreeNode->left_node();
+        if( pBinaryTreeNode->is_leaf() ){
+            //If we are in the leaf node then
+            if( pBinaryTreeNode->is_disabled() ){
+                //if it is disabled, then we are removing from not-enabled cells
+                //so there is nothing to be done and thus we simply terminate
+                return;
+            } else {
+                //If it is an enabled leaf node then, because we still need to go further
+                //to reach the root cell of theOtherSubPaving, we split this node
+                pBinaryTreeNode->split();
+            }
+        } else {
+            //If this is not a leaf node then we need to follow the path and then do removal
+        }
+        //Follow the path and do the removal, the other branch stays intact
+        pBinaryTreeNode = (rootNodePath[position]) ? pBinaryTreeNode->right_node() : pBinaryTreeNode->left_node();
 
-     //Move to the next path element
-     position++;
+        //Move to the next path element
+        position++;
     }
     if( pBinaryTreeNode->is_disabled() ){
-     //If we are in a disabled leaf node the the result of the
-     //removal does not change this set and so we just return
-     return;
+        //If we are in a disabled leaf node the the result of the
+        //removal does not change this set and so we just return
+        return;
     } else {
-     //We have two aligned binary trees we have to subtract enabled
-     //nodes of theOtherSubPaving._pRootTreeNode from pBinaryTreeNode
-     BinaryTreeNode::remove( pBinaryTreeNode, theOtherSubPaving.binary_tree() );
+        //We have two aligned binary trees we have to subtract enabled
+        //nodes of theOtherSubPaving._pRootTreeNode from pBinaryTreeNode
+        BinaryTreeNode::remove( pBinaryTreeNode, theOtherSubPaving.binary_tree() );
     }
 }
 
@@ -2190,7 +2190,7 @@ void GridTreeSet::restrict( const GridTreeSubset& theOtherSubPaving ) {
     //In case theOtherSubPaving has the primary cell that is higher then this one
     //we extend it, i.e. reroot it to the same height primary cell.
     if( thisPavingPCellHeight < otherPavingPCellHeight ){
-     up_to_primary_cell( otherPavingPCellHeight );
+        up_to_primary_cell( otherPavingPCellHeight );
     }
 
     //Now it is simple to restrict this set to another, since this set's
@@ -2209,40 +2209,40 @@ void GridTreeSet::remove( const GridCell& theCell ) {
     BinaryTreeNode* pCurrentPrimaryCell = align_with_cell( theCell.height(), false, true, has_stopped );
 
     if( ! has_stopped ) {
-     //Follow theCell.word() path in the tree rooted to pCommonPrimaryCell,
-     //do that until we encounter a leaf node, then stop
-     BinaryWord path = theCell.word();
-     uint position = 0;
-     for(; position < path.size(); position++ ) {
-      //If we are in a leaf node then
-      if( pCurrentPrimaryCell->is_leaf() ) {
-    break;
-      }
-      pCurrentPrimaryCell = path[position] ? pCurrentPrimaryCell->right_node() : pCurrentPrimaryCell->left_node();
-     }
+        //Follow theCell.word() path in the tree rooted to pCommonPrimaryCell,
+        //do that until we encounter a leaf node, then stop
+        BinaryWord path = theCell.word();
+        uint position = 0;
+        for(; position < path.size(); position++ ) {
+            //If we are in a leaf node then
+            if( pCurrentPrimaryCell->is_leaf() ) {
+                break;
+            }
+            pCurrentPrimaryCell = path[position] ? pCurrentPrimaryCell->right_node() : pCurrentPrimaryCell->left_node();
+        }
 
-     //Check if we stopped because it was a leaf node
-     if( pCurrentPrimaryCell->is_leaf() ) {
-      if( pCurrentPrimaryCell->is_enabled() ) {
-    //If the node is a leaf and enabled then continue following the path by splitting nodes
-    for(; position < path.size(); position++ ) {
-     pCurrentPrimaryCell->split();
-     pCurrentPrimaryCell = path[position] ? pCurrentPrimaryCell->right_node() : pCurrentPrimaryCell->left_node();
-    }
-    //Disable the sub-tree rooted to the tree node we navigated to
-    pCurrentPrimaryCell->set_disabled();
-      } else {
-    //DO NOTHING: The leaf node turns out to be already off,
-    //so there is nothing to remove from
-      }
-     } else {
-      //We followed the path to the cell, but we are still in some non-leaf node at this
-      //point it does no matter what is below, and we just remove the entire sub-tree.
-      pCurrentPrimaryCell->make_leaf( false );
-     }
+        //Check if we stopped because it was a leaf node
+        if( pCurrentPrimaryCell->is_leaf() ) {
+            if( pCurrentPrimaryCell->is_enabled() ) {
+                //If the node is a leaf and enabled then continue following the path by splitting nodes
+                for(; position < path.size(); position++ ) {
+                    pCurrentPrimaryCell->split();
+                    pCurrentPrimaryCell = path[position] ? pCurrentPrimaryCell->right_node() : pCurrentPrimaryCell->left_node();
+                }
+                //Disable the sub-tree rooted to the tree node we navigated to
+                pCurrentPrimaryCell->set_disabled();
+            } else {
+                //DO NOTHING: The leaf node turns out to be already off,
+                //so there is nothing to remove from
+            }
+        } else {
+            //We followed the path to the cell, but we are still in some non-leaf node at this
+            //point it does no matter what is below, and we just remove the entire sub-tree.
+            pCurrentPrimaryCell->make_leaf( false );
+        }
     } else {
-     //DO NOTHING: If we stopped it means that we were in a
-     //disabled node, so there is nothing to remove from
+        //DO NOTHING: If we stopped it means that we were in a
+        //disabled node, so there is nothing to remove from
     }
 }
 
@@ -2255,7 +2255,7 @@ void GridTreeSet::remove( const GridTreeSubset& theOtherSubPaving ) {
     //In case theOtherSubPaving has the primary cell that is higher then this one
     //we extend it, i.e. reroot it to the same height primary cell.
     if( thisPavingPCellHeight < otherPavingPCellHeight ){
-     up_to_primary_cell( otherPavingPCellHeight );
+        up_to_primary_cell( otherPavingPCellHeight );
     }
 
     //Now it is simple to remove theOtherSubPaving elements from this set,
@@ -2267,37 +2267,37 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
     const uint thisPavingPCellHeight = this->cell().height();
 
     if( thisPavingPCellHeight > theHeight){
-     ARIADNE_WARN("restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n");
+        ARIADNE_WARN("restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n");
 
-     BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellHeight, theHeight );
+        BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellHeight, theHeight );
 
-     //Go throught the tree and disable all the leaves that
-     //are not rooted to the primary cell defined by this path
-     BinaryTreeNode * pCurrentNode = _pRootTreeNode;
-     for( uint i = 0; i < pathToPCell.size(); i++ ) {
-      if( pCurrentNode->is_leaf() ){
-    if( pCurrentNode->is_enabled() ){
-     //If we are in an enabled leaf node then we split.
-     //There are still cells to remove.
-     pCurrentNode->split();
-    } else {
-     //If we are in a disabled leaf node then we stop.
-     //There is nothing to be done, because there are
-     //no more enabled cells to remove
-     break;
-    }
-      }
-      //If we are here, then we are in a non-leaf node
-      if( pathToPCell[i] ){
-    //Go to the right, and remove anything on the left
-    pCurrentNode->left_node()->make_leaf(false);
-    pCurrentNode = pCurrentNode->right_node();
-      } else {
-    //Go to the left, and remove anything on the right
-    pCurrentNode->right_node()->make_leaf(false);
-    pCurrentNode = pCurrentNode->left_node();
-      }
-     }
+        //Go throught the tree and disable all the leaves that
+        //are not rooted to the primary cell defined by this path
+        BinaryTreeNode * pCurrentNode = _pRootTreeNode;
+        for( uint i = 0; i < pathToPCell.size(); i++ ) {
+            if( pCurrentNode->is_leaf() ){
+                if( pCurrentNode->is_enabled() ){
+                    //If we are in an enabled leaf node then we split.
+                    //There are still cells to remove.
+                    pCurrentNode->split();
+                } else {
+                    //If we are in a disabled leaf node then we stop.
+                    //There is nothing to be done, because there are
+                    //no more enabled cells to remove
+                    break;
+                }
+            }
+            //If we are here, then we are in a non-leaf node
+            if( pathToPCell[i] ){
+                //Go to the right, and remove anything on the left
+                pCurrentNode->left_node()->make_leaf(false);
+                pCurrentNode = pCurrentNode->right_node();
+            } else {
+                //Go to the left, and remove anything on the right
+                pCurrentNode->right_node()->make_leaf(false);
+                pCurrentNode = pCurrentNode->left_node();
+            }
+        }
     }
 }
 
@@ -2312,20 +2312,20 @@ bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord *
     //Test that the binary words are empty, otherwise the results of computations are undefined
     bool isDefault = false;
     if( ( pPathPrefixOne == NULL ) && ( pPathPrefixTwo == NULL ) ) {
-     //If both parameters are null, then the user does not
-     //need this data, so we allocate tepmorary objects
-     pPathPrefixOne = new BinaryWord();
-     pPathPrefixTwo = new BinaryWord();
-     isDefault = true;
+        //If both parameters are null, then the user does not
+        //need this data, so we allocate tepmorary objects
+        pPathPrefixOne = new BinaryWord();
+        pPathPrefixTwo = new BinaryWord();
+        isDefault = true;
     } else {
-     if( ( pPathPrefixOne == NULL ) || ( pPathPrefixTwo == NULL ) ) {
-      //TODO: Find some better way to notify the user that
-      //only one of the required pointers is not NULL.
-      ARIADNE_ASSERT( false );
-     } else {
-      //DO NOTHING: Both parameters are not NULL, so it
-      //is user data and isDefault should stay false.
-     }
+        if( ( pPathPrefixOne == NULL ) || ( pPathPrefixTwo == NULL ) ) {
+            //TODO: Find some better way to notify the user that
+            //only one of the required pointers is not NULL.
+            ARIADNE_ASSERT( false );
+        } else {
+            //DO NOTHING: Both parameters are not NULL, so it
+            //is user data and isDefault should stay false.
+        }
     }
 
     //Check if theCellOne is a subset of theCellTwo:
@@ -2333,18 +2333,18 @@ bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord *
     //01 Align the cell's primary cells by finding path prefixes
     uint primary_cell_height;
     if( theCellOne.height() < theCellTwo.height() ) {
-     primary_cell_height = theCellTwo.height();
-     pPathPrefixOne->append( GridCell::primary_cell_path( theCellOne.grid().dimension(), theCellTwo.height(), theCellOne.height() ) );
+        primary_cell_height = theCellTwo.height();
+        pPathPrefixOne->append( GridCell::primary_cell_path( theCellOne.grid().dimension(), theCellTwo.height(), theCellOne.height() ) );
     } else {
-     primary_cell_height = theCellOne.height();
-     if( theCellOne.height() > theCellTwo.height() ){
-      pPathPrefixTwo->append( GridCell::primary_cell_path( theCellOne.grid().dimension(), theCellOne.height(), theCellTwo.height() ) );
-     } else {
-      //DO NOTHING: The cells are rooted to the same primary cell
-     }
+        primary_cell_height = theCellOne.height();
+        if( theCellOne.height() > theCellTwo.height() ){
+            pPathPrefixTwo->append( GridCell::primary_cell_path( theCellOne.grid().dimension(), theCellOne.height(), theCellTwo.height() ) );
+        } else {
+            //DO NOTHING: The cells are rooted to the same primary cell
+        }
     }
     if( pPrimaryCellHeight != NULL ){
-     *pPrimaryCellHeight = primary_cell_height;
+        *pPrimaryCellHeight = primary_cell_height;
     }
 
     //02 Add the rest of the paths to the path prefixes to get the complete paths
@@ -2356,8 +2356,8 @@ bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord *
 
     //04 If working with default parameters, then release memory
     if( isDefault ) {
-     delete pPathPrefixOne;
-     delete pPathPrefixTwo;
+        delete pPathPrefixOne;
+        delete pPathPrefixTwo;
     }
 
     return result;
@@ -2375,17 +2375,17 @@ bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
     //if the cell can be a subset of the given tree.
     BinaryWord pathPrefixCell, pathPrefixSet;
     if( subset( theCell, theSet.cell(), &pathPrefixCell, &pathPrefixSet) ) {
-     //It can and thus pathPrefixSet is a prefix of pathPrefixCell. Both
-     //paths start in the same primary cell. Also note that pathPrefixSet
-     //is a path from primary_cell_height to the root node of the binary
-     //tree in theSet. Therefore, removing 0..pathPrefixSet.size() elements
-     //from pathPrefixCell will give us a path to theCell in the tree of theSet.
-     pathPrefixCell.erase( pathPrefixCell.begin(), pathPrefixCell.begin() + pathPrefixSet.size() );
+        //It can and thus pathPrefixSet is a prefix of pathPrefixCell. Both
+        //paths start in the same primary cell. Also note that pathPrefixSet
+        //is a path from primary_cell_height to the root node of the binary
+        //tree in theSet. Therefore, removing 0..pathPrefixSet.size() elements
+        //from pathPrefixCell will give us a path to theCell in the tree of theSet.
+        pathPrefixCell.erase( pathPrefixCell.begin(), pathPrefixCell.begin() + pathPrefixSet.size() );
 
-     //Check that the cell given by pathPrefixCell is enabled in the tree of theSet
-     result = theSet.binary_tree()->is_enabled( pathPrefixCell );
+        //Check that the cell given by pathPrefixCell is enabled in the tree of theSet
+        result = theSet.binary_tree()->is_enabled( pathPrefixCell );
     } else {
-     //DO NOTHING: the cell is a strict superset of the tree
+        //DO NOTHING: the cell is a strict superset of the tree
     }
     return result;
 }
@@ -2401,12 +2401,12 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
     const GridCell * pWorkGridCell;
     const uint theSetsPCellHeight = theSet.cell().height();
     if( theSetsPCellHeight > theCell.height() ) {
-     //Compute the path from the primary cell of theSet to the primary cell of theCell
-     BinaryWord pathFromSetsPCellToCell = GridCell::primary_cell_path( theCell.dimension(), theSetsPCellHeight, theCell.height() );
-     pathFromSetsPCellToCell.append( theCell.word() );
-     pWorkGridCell = new GridCell( theCell.grid(), theSetsPCellHeight, pathFromSetsPCellToCell );
+        //Compute the path from the primary cell of theSet to the primary cell of theCell
+        BinaryWord pathFromSetsPCellToCell = GridCell::primary_cell_path( theCell.dimension(), theSetsPCellHeight, theCell.height() );
+        pathFromSetsPCellToCell.append( theCell.word() );
+        pWorkGridCell = new GridCell( theCell.grid(), theSetsPCellHeight, pathFromSetsPCellToCell );
     } else {
-     pWorkGridCell = &theCell;
+        pWorkGridCell = &theCell;
     }
 
     //Compute the path for the primary cell of theCell to the primary cell of theSet
@@ -2416,53 +2416,53 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
 
     const BinaryWord & workCellWord = pWorkGridCell->word();
     if( workCellWord.is_prefix( pathFromPCellCellToSetsRootNode ) ) {
-     //If the path (from some primary cell) to the cell is a prefix
-     //of the path (from the same primary cell) to the root of the
-     //sub-paving, then theCell contains theSet
+        //If the path (from some primary cell) to the cell is a prefix
+        //of the path (from the same primary cell) to the root of the
+        //sub-paving, then theCell contains theSet
 
-     result = theSet.binary_tree()->has_enabled();
+        result = theSet.binary_tree()->has_enabled();
     } else {
-     if( pathFromPCellCellToSetsRootNode.is_prefix( workCellWord ) ) {
-      //If the path (from some primary cell) to the root of the
-      //binary tree node (defining theSet) is the prefix of the
-      //path (from the same primary cell) to the cell, then the
-      //cell might be somwhere within the tree and we should
-      //check if it overlaps with the tree
+        if( pathFromPCellCellToSetsRootNode.is_prefix( workCellWord ) ) {
+            //If the path (from some primary cell) to the root of the
+            //binary tree node (defining theSet) is the prefix of the
+            //path (from the same primary cell) to the cell, then the
+            //cell might be somwhere within the tree and we should
+            //check if it overlaps with the tree
 
-      const BinaryTreeNode *pCurrentNode = theSet.binary_tree();
-      //Note that, pathFromPCellCellToSetsRootNode.size() < workCellWord.size()
-      //Because we already checked for workCellWord.is_prefix( pathFromPCellCellToSetsRootNode )
-      //Here we try to find the node corresponding to theCell in the binary tree of theSet
-      //in case we encounter a leaf node then we just stop, because it is enough information for us
-      for( uint i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
-    if( pCurrentNode->is_leaf() ) {
-     //We reached the leaf node and theCell is it's subset, so we stop now
-     break;
-    } else {
-     //Follow the path to the node corresponding to theCell within the binary tree of theSet
-     pCurrentNode = ( workCellWord[i] ? pCurrentNode->right_node() : pCurrentNode->left_node() );
-    }
-      }
+            const BinaryTreeNode *pCurrentNode = theSet.binary_tree();
+            //Note that, pathFromPCellCellToSetsRootNode.size() < workCellWord.size()
+            //Because we already checked for workCellWord.is_prefix( pathFromPCellCellToSetsRootNode )
+            //Here we try to find the node corresponding to theCell in the binary tree of theSet
+            //in case we encounter a leaf node then we just stop, because it is enough information for us
+            for( uint i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
+                if( pCurrentNode->is_leaf() ) {
+                    //We reached the leaf node and theCell is it's subset, so we stop now
+                    break;
+                } else {
+                    //Follow the path to the node corresponding to theCell within the binary tree of theSet
+                    pCurrentNode = ( workCellWord[i] ? pCurrentNode->right_node() : pCurrentNode->left_node() );
+                }
+            }
 
-      //At this point we have the following cases:
-      // 1. pCurrentNode - is a leaf node, contains theCell as a subset, is an enabled node
-      // RESULT: theSet and theCell overlap
-      // 2. pCurrentNode - is a leaf node, contains theCell as a subset, is a disabled node
-      // RESULT: theSet and theCell do not overlap
-      // 3. pCurrentNode - is a non-leaf node, corresponds to theCell, contains enabled sub-nodes
-      // RESULT: theSet and theCell overlap
-      // 4. pCurrentNode - is a non-leaf node, corresponds to theCell, contains no enabled sub-nodes
-      // RESULT: theSet and theCell do not overlap
-      result = pCurrentNode->has_enabled();
-     } else {
-      //DO NOTHING: The pathes to the cell and to the root of
-      //the binary tree (from the same primary cell) diverge
-      //This means that theCell and theSet do not overlap
-     }
+            //At this point we have the following cases:
+            // 1. pCurrentNode - is a leaf node, contains theCell as a subset, is an enabled node
+            // RESULT: theSet and theCell overlap
+            // 2. pCurrentNode - is a leaf node, contains theCell as a subset, is a disabled node
+            // RESULT: theSet and theCell do not overlap
+            // 3. pCurrentNode - is a non-leaf node, corresponds to theCell, contains enabled sub-nodes
+            // RESULT: theSet and theCell overlap
+            // 4. pCurrentNode - is a non-leaf node, corresponds to theCell, contains no enabled sub-nodes
+            // RESULT: theSet and theCell do not overlap
+            result = pCurrentNode->has_enabled();
+        } else {
+            //DO NOTHING: The pathes to the cell and to the root of
+            //the binary tree (from the same primary cell) diverge
+            //This means that theCell and theSet do not overlap
+        }
     }
 
     if( theSetsPCellHeight > theCell.height() ) {
-     delete pWorkGridCell;
+        delete pWorkGridCell;
     }
 
     return result;
@@ -2482,17 +2482,17 @@ static void common_primary_cell_path(const GridTreeSubset& theSet1, const GridTr
     const int heightPC1 = rootCell1.height();
     const int heightPC2 = rootCell2.height();
     if( heightPC2 > heightPC1 ) {
-     //Compute the path from the common primary cell to the root cell of theSet1
-     pathCommonPCtoRC1 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC2, heightPC1 );
-     pathCommonPCtoRC1.append( rootCell1.word() );
-     //Compute the path from the common primary cell to the root cell of theSet2
-     pathCommonPCtoRC2 = rootCell2.word();
+        //Compute the path from the common primary cell to the root cell of theSet1
+        pathCommonPCtoRC1 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC2, heightPC1 );
+        pathCommonPCtoRC1.append( rootCell1.word() );
+        //Compute the path from the common primary cell to the root cell of theSet2
+        pathCommonPCtoRC2 = rootCell2.word();
     } else {
-     //Compute the path from the common primary cell to the root cell of theSet2
-     pathCommonPCtoRC1 = rootCell1.word();
-     //Compute the path from the common primary cell to the root cell of theSet1
-     pathCommonPCtoRC2 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC1, heightPC2 );
-     pathCommonPCtoRC2.append( rootCell2.word() );
+        //Compute the path from the common primary cell to the root cell of theSet2
+        pathCommonPCtoRC1 = rootCell1.word();
+        //Compute the path from the common primary cell to the root cell of theSet1
+        pathCommonPCtoRC2 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC1, heightPC2 );
+        pathCommonPCtoRC2.append( rootCell2.word() );
     }
 }
 
@@ -2503,13 +2503,13 @@ static const BinaryTreeNode * locate_node( const BinaryTreeNode * pSuperTreeRoot
     //Locate the node in the pSuperTreeRootNode such that it corresponds to pSubTreeRootNode
     const BinaryTreeNode * pCurrentSuperTreeNode = pSuperTreeRootNode;
     for( uint i = 0; i < pathFromSuperToSub.size(); i++ ) {
-     if( pCurrentSuperTreeNode->is_leaf() ) {
-      //We are in the leaf node and we have not yet reached the node
-      //corresponding to pSubTreeRootNode, because i < pathFromSuperToSub.size()
-      break;
-     } else {
-      pCurrentSuperTreeNode = ( pathFromSuperToSub[i] ? pCurrentSuperTreeNode->right_node() : pCurrentSuperTreeNode->left_node() );
-     }
+        if( pCurrentSuperTreeNode->is_leaf() ) {
+            //We are in the leaf node and we have not yet reached the node
+            //corresponding to pSubTreeRootNode, because i < pathFromSuperToSub.size()
+            break;
+        } else {
+            pCurrentSuperTreeNode = ( pathFromSuperToSub[i] ? pCurrentSuperTreeNode->right_node() : pCurrentSuperTreeNode->left_node() );
+        }
     }
     return pCurrentSuperTreeNode;
 }
@@ -2525,27 +2525,27 @@ static bool subset(const BinaryTreeNode * pSubTreeRootNode, const BinaryTreeNode
 
     //Check if both sets are not empty
     if( pSubTreeRootNode->has_enabled() ) {
-     if( pSuperTreeRootNode->has_enabled() ) {
-      //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
-      const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
+        if( pSuperTreeRootNode->has_enabled() ) {
+            //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
+            const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
 
-      if( pCurrentSuperTreeNode->is_leaf() ) {
-    //If we've reached the leaf node then pSubTreeRootNode is a subset of pSuperTreeRootNode if this
-    //node is enabled, otherwise not. This is because we know that pSubTreeRootNode is not empty.
-    result = pCurrentSuperTreeNode->is_enabled();
-      } else {
-    //At this point pCurrentSuperTreeNode corresponds to pSubTreeRootNode
-    //So the trees are aligned now and we can continue checking further.
-    result = BinaryTreeNode::subset( pSubTreeRootNode, pCurrentSuperTreeNode );
-      }
-     } else {
-      //Nothing is a subset of an empty set except for an empty
-      //set, but we know that pSubTreeRootNode is not empty.
-      result = false;
-     }
+            if( pCurrentSuperTreeNode->is_leaf() ) {
+                //If we've reached the leaf node then pSubTreeRootNode is a subset of pSuperTreeRootNode if this
+                //node is enabled, otherwise not. This is because we know that pSubTreeRootNode is not empty.
+                result = pCurrentSuperTreeNode->is_enabled();
+            } else {
+                //At this point pCurrentSuperTreeNode corresponds to pSubTreeRootNode
+                //So the trees are aligned now and we can continue checking further.
+                result = BinaryTreeNode::subset( pSubTreeRootNode, pCurrentSuperTreeNode );
+            }
+        } else {
+            //Nothing is a subset of an empty set except for an empty
+            //set, but we know that pSubTreeRootNode is not empty.
+            result = false;
+        }
     } else {
-     //An empty set is a subset of any set including the empty set itself
-     result = true;
+        //An empty set is a subset of any set including the empty set itself
+        result = true;
     }
 
     return result;
@@ -2569,53 +2569,53 @@ static bool subset( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
     bool areExtraLeavesDisabled = true;
     const BinaryTreeNode *pCurrentSuperTreeNode = pSuperTreeRootNode;
     while( ( path_element < pathFromSuperToSub.size() ) && areExtraLeavesDisabled ) {
-     if( pCurrentSuperTreeNode->is_leaf() ){
-      //We ended up in a leaf node so we have to stop iterating through the path
-      break;
-     } else {
-      if( pathFromSuperToSub[ path_element ] ) {
-    //The path goes right, check if the left branch has no enabled leaves
-    areExtraLeavesDisabled = ! pCurrentSuperTreeNode->left_node()->has_enabled();
-    pCurrentSuperTreeNode = pCurrentSuperTreeNode->right_node();
-      } else {
-    //The path goes left, check if the right branch has no enabled leaves
-    areExtraLeavesDisabled = ! pCurrentSuperTreeNode->right_node()->has_enabled();
-    pCurrentSuperTreeNode = pCurrentSuperTreeNode->left_node();
-      }
-     }
-     path_element++;
+        if( pCurrentSuperTreeNode->is_leaf() ){
+            //We ended up in a leaf node so we have to stop iterating through the path
+            break;
+        } else {
+            if( pathFromSuperToSub[ path_element ] ) {
+                //The path goes right, check if the left branch has no enabled leaves
+                areExtraLeavesDisabled = ! pCurrentSuperTreeNode->left_node()->has_enabled();
+                pCurrentSuperTreeNode = pCurrentSuperTreeNode->right_node();
+            } else {
+                //The path goes left, check if the right branch has no enabled leaves
+                areExtraLeavesDisabled = ! pCurrentSuperTreeNode->right_node()->has_enabled();
+                pCurrentSuperTreeNode = pCurrentSuperTreeNode->left_node();
+            }
+        }
+        path_element++;
     }
 
     if( areExtraLeavesDisabled ) {
-     //If pSuperTreeRootNode does not have enabled leaves that are outside the bounding cell of
-     //pSubTreeRootNode, this means that pSuperTreeRootNode can be a subset of pSubTreeRootNode.
-     //Now we have to check that:
-     if( pCurrentSuperTreeNode->is_leaf() ) {
-      //A) We reached a leaf node, when following the path, then
-      if( pCurrentSuperTreeNode->is_enabled() ) {
-    //1. If it is enabled then it depends on whether we followed the path to the end
-    if( path_element < pathFromSuperToSub.size() ) {
-     //1.1 If the path was not finished then pSuperTreeRootNode is a superset of pSubTreeRootNode
-     result = false;
+        //If pSuperTreeRootNode does not have enabled leaves that are outside the bounding cell of
+        //pSubTreeRootNode, this means that pSuperTreeRootNode can be a subset of pSubTreeRootNode.
+        //Now we have to check that:
+        if( pCurrentSuperTreeNode->is_leaf() ) {
+            //A) We reached a leaf node, when following the path, then
+            if( pCurrentSuperTreeNode->is_enabled() ) {
+                //1. If it is enabled then it depends on whether we followed the path to the end
+                if( path_element < pathFromSuperToSub.size() ) {
+                    //1.1 If the path was not finished then pSuperTreeRootNode is a superset of pSubTreeRootNode
+                    result = false;
+                } else {
+                    //1.2 If the path was ended, i.e. pCurrentSuperTreeNode and pSubTreeRootNode are
+                    //aligned, then we simply need to check if one tree is a subset of another:
+                    //     bool subset(const BinaryTreeNode *, const BinaryTreeNode * )
+                    result = BinaryTreeNode::subset( pCurrentSuperTreeNode, pSubTreeRootNode );
+                }
+            } else {
+                //2. if it is disabled then pSuperTreeRootNode is empty and thus is a subset of theSet2
+                result = true;
+            }
+        } else {
+            //B) We are in a non-leaf node, so we definitely reached the end of the path,
+            //thus proceed like in case A.1.2 (the root nodes of both trees are aligned )
+            result = BinaryTreeNode::subset( pCurrentSuperTreeNode, pSubTreeRootNode );
+        }
     } else {
-     //1.2 If the path was ended, i.e. pCurrentSuperTreeNode and pSubTreeRootNode are
-     //aligned, then we simply need to check if one tree is a subset of another:
-     //     bool subset(const BinaryTreeNode *, const BinaryTreeNode * )
-     result = BinaryTreeNode::subset( pCurrentSuperTreeNode, pSubTreeRootNode );
-    }
-      } else {
-    //2. if it is disabled then pSuperTreeRootNode is empty and thus is a subset of theSet2
-    result = true;
-      }
-     } else {
-      //B) We are in a non-leaf node, so we definitely reached the end of the path,
-      //thus proceed like in case A.1.2 (the root nodes of both trees are aligned )
-      result = BinaryTreeNode::subset( pCurrentSuperTreeNode, pSubTreeRootNode );
-     }
-    } else {
-     //If there are enabled leaf nodes in theSet1 that are outside of the bounding cell of
-     //pSubTreeRootNode, then clearly pSuperTreeRootNode is not a subset of pSubTreeRootNode.
-     result = false;
+        //If there are enabled leaf nodes in theSet1 that are outside of the bounding cell of
+        //pSubTreeRootNode, then clearly pSuperTreeRootNode is not a subset of pSubTreeRootNode.
+        result = false;
     }
     return result;
 }
@@ -2637,25 +2637,25 @@ bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     //the other one, then there is a chance that theSet1 is a subset of theSet2.
     //If not, then they definitely do not overlap.
     if( pathCommonPCtoRC1.is_prefix( pathCommonPCtoRC2 ) ) {
-     //In this case theSet2 is a subset of the bounding cell of theSet1. Still
-     //it is possible that theSet1 is a subset of theSet2 if all cells of theSet1
-     //outside the bounding box of theSet2 are disabled cells. This we check by
-     //following the path from the foor of theSet1 to the root of theSet2.
-     pathCommonPCtoRC2.erase_prefix( pathCommonPCtoRC1.size() );
-     result = subset( theSet1.binary_tree(), pathCommonPCtoRC2, theSet2.binary_tree() );
+        //In this case theSet2 is a subset of the bounding cell of theSet1. Still
+        //it is possible that theSet1 is a subset of theSet2 if all cells of theSet1
+        //outside the bounding box of theSet2 are disabled cells. This we check by
+        //following the path from the foor of theSet1 to the root of theSet2.
+        pathCommonPCtoRC2.erase_prefix( pathCommonPCtoRC1.size() );
+        result = subset( theSet1.binary_tree(), pathCommonPCtoRC2, theSet2.binary_tree() );
     } else {
-     if( pathCommonPCtoRC2.is_prefix( pathCommonPCtoRC1 ) ) {
-      //Since pathCommonPCtoRC2 is a prefix of pathCommonPCtoRC1,
-      //theSet1 can be a subset of theSet2. This is because theSet1
-      //lies within the bounding cell of theSet2
-      pathCommonPCtoRC1.erase_prefix( pathCommonPCtoRC2.size() );
-      result = subset( theSet1.binary_tree(), theSet2.binary_tree(), pathCommonPCtoRC1 );
-     } else {
-      //theSet1 is a definitely not a subset of theSet2 Since their bounding boxes
-      //are disjoint, due to paths (from the common primary cell to their root nodes)
-      //that have different suffixes.
-      result = false;
-     }
+        if( pathCommonPCtoRC2.is_prefix( pathCommonPCtoRC1 ) ) {
+            //Since pathCommonPCtoRC2 is a prefix of pathCommonPCtoRC1,
+            //theSet1 can be a subset of theSet2. This is because theSet1
+            //lies within the bounding cell of theSet2
+            pathCommonPCtoRC1.erase_prefix( pathCommonPCtoRC2.size() );
+            result = subset( theSet1.binary_tree(), theSet2.binary_tree(), pathCommonPCtoRC1 );
+        } else {
+            //theSet1 is a definitely not a subset of theSet2 Since their bounding boxes
+            //are disjoint, due to paths (from the common primary cell to their root nodes)
+            //that have different suffixes.
+            result = false;
+        }
     }
 
     return result;
@@ -2672,18 +2672,18 @@ static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
     //Check if both sets are not empty
     if( pSuperTreeRootNode->has_enabled() && pSubTreeRootNode->has_enabled() ) {
 
-     //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
-     const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
+        //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
+        const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
 
-     if( pCurrentSuperTreeNode->is_leaf() ) {
-      //If we've reached the leaf node then the sets overlap if this node is enabled,
-      //otherwise not. This is because we know that pSubTreeRootNode is not empty.
-      result = pCurrentSuperTreeNode->is_enabled();
-     } else {
-      //At this point pCurrentSuperTreeNode corresponds to pSubTreeRootNode
-      //So the trees are aligned now and we can continue checking further.
-      result = BinaryTreeNode::overlap( pCurrentSuperTreeNode, pSubTreeRootNode );
-     }
+        if( pCurrentSuperTreeNode->is_leaf() ) {
+            //If we've reached the leaf node then the sets overlap if this node is enabled,
+            //otherwise not. This is because we know that pSubTreeRootNode is not empty.
+            result = pCurrentSuperTreeNode->is_enabled();
+        } else {
+            //At this point pCurrentSuperTreeNode corresponds to pSubTreeRootNode
+            //So the trees are aligned now and we can continue checking further.
+            result = BinaryTreeNode::overlap( pCurrentSuperTreeNode, pSubTreeRootNode );
+        }
     }
 
     return result;
@@ -2706,18 +2706,18 @@ bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     //the other one, then there is a chance that the subsets overlap.
     //If not, then they definitely do not overlap.
     if( pathCommonPCtoRC1.is_prefix( pathCommonPCtoRC2 ) ){
-     //theSet2 is located somewhere within the bounding box of theSet1
-     pathCommonPCtoRC2.erase_prefix( pathCommonPCtoRC1.size() );
-     result = overlap( theSet1.binary_tree(), pathCommonPCtoRC2, theSet2.binary_tree() );
+        //theSet2 is located somewhere within the bounding box of theSet1
+        pathCommonPCtoRC2.erase_prefix( pathCommonPCtoRC1.size() );
+        result = overlap( theSet1.binary_tree(), pathCommonPCtoRC2, theSet2.binary_tree() );
     } else {
-     if( pathCommonPCtoRC2.is_prefix( pathCommonPCtoRC1 ) ){
-      //theSet1 is located somewhere within the bounding box of theSet2
-      pathCommonPCtoRC1.erase_prefix( pathCommonPCtoRC2.size() );
-      result = overlap( theSet2.binary_tree(), pathCommonPCtoRC1, theSet1.binary_tree() );
-     } else {
-      //The sets do not overlap
-      result = false;
-     }
+        if( pathCommonPCtoRC2.is_prefix( pathCommonPCtoRC1 ) ){
+            //theSet1 is located somewhere within the bounding box of theSet2
+            pathCommonPCtoRC1.erase_prefix( pathCommonPCtoRC2.size() );
+            result = overlap( theSet2.binary_tree(), pathCommonPCtoRC1, theSet1.binary_tree() );
+        } else {
+            //The sets do not overlap
+            result = false;
+        }
     }
 
     return result;
@@ -2801,7 +2801,7 @@ void draw(CanvasInterface& theGraphic, const GridCell& theGridCell) {
 
 void draw(CanvasInterface& theGraphic, const GridTreeSet& theGridTreeSet) {
     for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
-     iter->box().draw(theGraphic);
+        iter->box().draw(theGraphic);
     }
 }
 

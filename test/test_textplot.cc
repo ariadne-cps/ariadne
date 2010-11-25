@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_textplot.cc
+ *            test_textplot.cc
  *
  *  Copyright 2009  Davide Bresolin
  *
@@ -40,7 +40,7 @@ using namespace Ariadne;
 struct RadiusSquare : RealVectorFunctionData<1,2,1> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
+        r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
     }
 };
 
@@ -91,8 +91,8 @@ int main(int argc, char **argv)
     std::cout << "Testing interpolated curves.." << std::endl;
     InterpolatedCurve cv(Point(2,0.0));
     for(int i=1; i<=10; ++i) {
-     Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
-     cv.insert(i,pt);
+        Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
+        cv.insert(i,pt);
     }
 
     g.open("test_textplot-cv.txt");

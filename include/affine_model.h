@@ -1,5 +1,5 @@
 /***************************************************************************
- *      affine_model.h
+ *            affine_model.h
  *
  *  Copyright 2008-10  Pieter Collins
  *
@@ -52,15 +52,15 @@ class AffineModel<Interval>
     explicit AffineModel(uint n) : _c(0.0), _g(n,0.0), _e(0.0) { }
     explicit AffineModel(const Float& c, const Vector<Float>& g, const Float& e) : _c(c), _g(g), _e(e) { }
     explicit AffineModel(uint as, double c, double g0, ...) : _c(static_cast<X>(c)), _g(as), _e(0.0) {
-     _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
-     for(uint i=1; i!=as; ++i) { _g[i]=static_cast<X>(va_arg(args,double)); } }
+        _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
+        for(uint i=1; i!=as; ++i) { _g[i]=static_cast<X>(va_arg(args,double)); } }
 
     AffineModel<Interval>& operator=(const Float& c) {
-     this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } this->_e=0.0; return *this; }
+        this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } this->_e=0.0; return *this; }
     static AffineModel<Interval> constant(uint n, const Float& c) {
-     return AffineModel<Interval>(c,Vector<Float>(n,0.0)); }
+        return AffineModel<Interval>(c,Vector<Float>(n,0.0)); }
     static AffineModel<Interval> variable(uint n, uint j) {
-     return AffineModel<Interval>(0.0,Vector<Float>::unit(n,j)); }
+        return AffineModel<Interval>(0.0,Vector<Float>::unit(n,j)); }
 
 
     const Vector<Float>& a() const { return this->_g; }

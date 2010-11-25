@@ -1,5 +1,5 @@
 /***************************************************************************
- *      function.h
+ *            function.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -81,7 +81,7 @@ class ScalarFunction<Float>
     Float operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
 
     template<class X> Vector<X> gradient(const Vector<X>& x) const {
-     return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
+        return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -108,7 +108,7 @@ class ScalarFunction<Interval>
     Interval operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
 
     template<class X> Vector<X> gradient(const Vector<X>& x) const {
-     return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
+        return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
 
     ScalarFunction<Interval> derivative(uint j) const;
 
@@ -151,7 +151,7 @@ class ScalarFunction<Real>
     Real operator() (const Vector<Real>& x) const { return this->_ptr->evaluate(x); }
 
     template<class X> Vector<X> gradient(const Vector<X>& x) const {
-     return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
+        return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -231,7 +231,7 @@ class VectorFunction<Float>
     Vector<Float> operator() (const Vector<Float>& x) const { return this->_ptr->evaluate(x); }
 
     template<class X> Matrix<X> jacobian(const Vector<X>& x) const {
-     return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
+        return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -264,7 +264,7 @@ class VectorFunction<Interval>
     Vector<Interval> operator() (const Vector<Interval>& x) const { return this->_ptr->evaluate(x); }
 
     template<class X> Matrix<X> jacobian(const Vector<X>& x) const {
-     return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
+        return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
 
     ScalarFunction<Interval> operator[](uint i) const { return _ptr->operator[](i); }
 
@@ -317,7 +317,7 @@ class VectorFunction<Real>
     operator const VectorFunction<Interval> () const { return VectorFunction<Interval>(this->_ptr); }
 
     VectorFunction<Real>& operator=(const VectorFunction<Real>& f) {
-     this->_check_type(f._raw_pointer()); this->_ptr=f._ptr; return *this; }
+        this->_check_type(f._raw_pointer()); this->_ptr=f._ptr; return *this; }
 
     Nat result_size() const { return this->_ptr->result_size(); }
     Nat argument_size() const { return this->_ptr->argument_size(); }
@@ -328,7 +328,7 @@ class VectorFunction<Real>
     Vector<Real> operator()(const Vector<Real>& x) const { return this->evaluate(x); };
 
     template<class X> Matrix<X> jacobian(const Vector<X>& x) const {
-     return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
+        return this->_ptr->evaluate(Differential<X>::variables(1u,x)).jacobian(); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 

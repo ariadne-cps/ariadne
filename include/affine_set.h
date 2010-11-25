@@ -1,5 +1,5 @@
 /***************************************************************************
- *      affine_set.h
+ *            affine_set.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -71,11 +71,11 @@ class AffineSet
     AffineSet(const Matrix<Float>& G, const Vector<Float>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid g(s)\leq 0 \wedge h(s)=0\}\f$.
     AffineSet(const IntervalVector& D, const List< Affine<Float> >& f, const List< Affine<Float> >& g, const List< Affine<Float> >& h)
-     : _domain(D), _function(f), _constraints(g), _equations(h) { }
+        : _domain(D), _function(f), _constraints(g), _equations(h) { }
     AffineSet(const IntervalVector& D, const List< Affine<Float> >& f, const List< Affine<Float> >& g)
-     : _domain(D), _function(f), _constraints(g), _equations() { }
+        : _domain(D), _function(f), _constraints(g), _equations() { }
     AffineSet(const IntervalVector& D, const List< Affine<Float> >& f)
-     : _domain(D), _function(f), _constraints(), _equations() { }
+        : _domain(D), _function(f), _constraints(), _equations() { }
 
     bool operator==(const AffineSet& other) const;
 

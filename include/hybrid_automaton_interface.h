@@ -1,5 +1,5 @@
 /***************************************************************************
- *      hybrid_automaton_interface.h
+ *            hybrid_automaton_interface.h
  *
  *  Copyright  2010  Pieter Collins
  *
@@ -114,11 +114,11 @@ class HybridAutomatonInterface {
 
 inline std::ostream& operator<<(std::ostream& os, const EventKind& evk) {
     switch(evk) {
-     case INVARIANT: os<<"invariant"; break;
-     case PROGRESS: os<<"progress"; break;
-     case PERMISSIVE: os<<"permissive"; break;
-     case URGENT: os<<"urgent"; break;
-     case IMPACT: os<<"impact"; break;
+        case INVARIANT: os<<"invariant"; break;
+        case PROGRESS: os<<"progress"; break;
+        case PERMISSIVE: os<<"permissive"; break;
+        case URGENT: os<<"urgent"; break;
+        case IMPACT: os<<"impact"; break;
     } return os;
 }
 

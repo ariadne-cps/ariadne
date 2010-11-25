@@ -1,5 +1,5 @@
 /***************************************************************************
- *      discrete_event.h
+ *            discrete_event.h
  *
  *  Copyright  2004-9  Alberto Casagrande, Pieter Collins
  *

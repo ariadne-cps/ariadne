@@ -1,5 +1,5 @@
 /***************************************************************************
- *      map.h
+ *            map.h
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *

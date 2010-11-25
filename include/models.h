@@ -1,5 +1,5 @@
 /***************************************************************************
- *      models.h
+ *            models.h
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -43,21 +43,21 @@ static const uint SMOOTH=255;
  *  Variables: x, y
  *  Parameters: a,b
  *  System: x'=a-x*x+b*y
- *    x'=x
+ *          x'=x
  */
 struct Henon : VectorFunctionData<2,2,2> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=p[0]-x[0]*x[0]+p[1]*x[1];
-     r[1]=x[0];
+        r[0]=p[0]-x[0]*x[0]+p[1]*x[1];
+        r[1]=x[0];
     }
 };
 
 struct HenonInverse : VectorFunctionData<2,2,2> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=x[1];
-     r[1]=(p[0]-x[1]*x[1]+x[0])/p[1];
+        r[0]=x[1];
+        r[1]=(p[0]-x[1]*x[1]+x[0])/p[1];
     }
 };
 
@@ -67,14 +67,14 @@ struct HenonInverse : VectorFunctionData<2,2,2> {
  *  Variables: x, v, t
  *  Parameters: delta, beta, alpha, gamma, omega, phi
  *  System: dotx=v;
- *    dotv=-delta*v-x*(alpha+beta*x*x)+gamma*cos(omega*t+phi);
+ *          dotv=-delta*v-x*(alpha+beta*x*x)+gamma*cos(omega*t+phi);
  */
 struct Duffing : VectorFunctionData<3,3,6> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=x[1];
-     r[1]=-p[0]*x[1]-x[0]*(p[2]+p[1]*x[0]*x[0])+p[3]*cos(p[4]*x[2]+p[5]);
-     r[2]=1.0;
+        r[0]=x[1];
+        r[1]=-p[0]*x[1]-x[0]*(p[2]+p[1]*x[0]*x[0])+p[3]*cos(p[4]*x[2]+p[5]);
+        r[2]=1.0;
     }
 };
 
@@ -85,13 +85,13 @@ struct Duffing : VectorFunctionData<3,3,6> {
  *     Variables:  x, v
  *     Parameters: mu
  *     System:     dotx=v
- *     dotv=mu*(1-x*x)*v-x
+ *                 dotv=mu*(1-x*x)*v-x
  */
 struct VanDerPol : VectorFunctionData<2,2,1> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=x[1];
-     r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
+        r[0]=x[1];
+        r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
     }
 };
 
@@ -101,15 +101,15 @@ struct VanDerPol : VectorFunctionData<2,2,1> {
  *     Variables:  x, v, t
  *     Parameters: mu, a, omega
  *     System:     dotx=v
- *     dotv=mu*(1-x*x)*v-x+a*sin(omega*t)
- *     dott=1
+ *                 dotv=mu*(1-x*x)*v-x+a*sin(omega*t)
+ *                 dott=1
  */
 struct ForcedVanDerPol : VectorFunctionData<3,3,3> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=x[1];
-     r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
-     r[2]=1.0;
+        r[0]=x[1];
+        r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
+        r[2]=1.0;
     }
 };
 
@@ -119,16 +119,16 @@ struct ForcedVanDerPol : VectorFunctionData<3,3,3> {
  *     Variables: x, y, z
  *     Parameters: beta, rho, sigma
  *     System: dotx=sigma*(y-x)
- *    doty=rho*x-y-x*z
- *    dotz=-beta*z+x*y
+ *             doty=rho*x-y-x*z
+ *             dotz=-beta*z+x*y
  *  The standard parameters for the %Lorenz attractor are \f$\sigma=10\f$, \f$\beta = 8/3\f$ and \f$\rho=28\f$.
  */
 struct Lorenz : VectorFunctionData<3,3,3> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
-     r[0]=p[2]*(x[1]-x[0]);
-     r[1]=p[1]*x[0]-x[1]-x[0]*x[2];
-     r[2]=-p[0]*x[2]+x[0]*x[1];
+        r[0]=p[2]*(x[1]-x[0]);
+        r[1]=p[1]*x[0]-x[1]-x[0]*x[2];
+        r[2]=-p[0]*x[2]+x[0]*x[1];
     }
 };
 

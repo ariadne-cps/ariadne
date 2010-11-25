@@ -9,7 +9,7 @@ bin_PROGRAMS= \
 	tutorial \
 	bouncingball \
 	bouncingball-compositional \
-	watertank \
+	watertank \ 
 	watertank-time \
 	watertank-proportional \
 	watertank-nonlinear \

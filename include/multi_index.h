@@ -1,5 +1,5 @@
 /***************************************************************************
- *      multi_index.h
+ *            multi_index.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -173,11 +173,11 @@ class MultiIndex {
     const word_type* word_end() const { return _p+word_size(); }
   public:
     static size_type _word_size(size_type n) {
-     return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
+        return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
     static word_type* _allocate_words(size_type nw) {
-     word_type* p=new word_type[nw]; return p; }
+        word_type* p=new word_type[nw]; return p; }
     static void _deallocate_words(word_type* p) {
-     delete[] p; }
+        delete[] p; }
   private:
     size_type _n;
     size_type _nw;
@@ -203,7 +203,7 @@ class MultiIndexValueReference {
 
 inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
     if(_p[_i]==0) {
-     ARIADNE_THROW(std::runtime_error,"--MultiIndex[i]"," decrementing zero value at "<<_i<<" in "<<reinterpret_cast<const MultiIndex&>(*this)); }
+        ARIADNE_THROW(std::runtime_error,"--MultiIndex[i]"," decrementing zero value at "<<_i<<" in "<<reinterpret_cast<const MultiIndex&>(*this)); }
     --_p[_n]; --_p[_i]; return *this;
 }
 
@@ -249,8 +249,8 @@ inline MultiIndex::MultiIndex(size_type n, int a0, ...)
     p[0]=a0; p[_n]=a0;
     va_list args; va_start(args,a0);
     for(size_type i=1; i!=n; ++i) {
-     p[i]=va_arg(args,int);
-     p[_n]+=p[i];
+        p[i]=va_arg(args,int);
+        p[_n]+=p[i];
     }
     va_end(args);
 }
@@ -345,10 +345,10 @@ inline void MultiIndex::decrement(size_type i) {
 inline bool operator==(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) { return false; }
     for(MultiIndex::size_type i=0; i!=a1.size(); ++i) {
-     if(a1.at(i)!=a2.at(i)) { return false; } }
+        if(a1.at(i)!=a2.at(i)) { return false; } }
     return true;
     for(MultiIndex::size_type j=0; j!=a1.word_size(); ++j) {
-     if(a1.word_at(j)!=a2.word_at(j)) { return false; } }
+        if(a1.word_at(j)!=a2.word_at(j)) { return false; } }
     return true;
 }
 
@@ -358,52 +358,52 @@ inline bool operator!=(const MultiIndex& a1, const MultiIndex& a2) {
 
 inline bool graded_less(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) {
-     throw std::runtime_error("graded_less(MultiIndex,MultiIndex): number of variables must match");
+        throw std::runtime_error("graded_less(MultiIndex,MultiIndex): number of variables must match");
     }
 
     if(a1.degree()!=a2.degree()) {
-     return a1.degree()<a2.degree();
+        return a1.degree()<a2.degree();
     } else {
-     for(MultiIndex::size_type i=0; i!=a1.size(); ++i) {
-      if(a1[i]!=a2[i]) {
-    return a1[i]>a2[i];
-      }
-     }
-     return false;
-     //for(size_type j=0; j!=a1.word_size(); ++j) {
-     for(int j=a1.word_size()-1; j!=-1; --j) {
-      if(a1.word_at(j)!=a2.word_at(j)) {
-    return a1.word_at(j)<a2.word_at(j);
-      }
-     }
-     return false;
+        for(MultiIndex::size_type i=0; i!=a1.size(); ++i) {
+            if(a1[i]!=a2[i]) {
+                return a1[i]>a2[i];
+            }
+        }
+        return false;
+        //for(size_type j=0; j!=a1.word_size(); ++j) {
+        for(int j=a1.word_size()-1; j!=-1; --j) {
+            if(a1.word_at(j)!=a2.word_at(j)) {
+                return a1.word_at(j)<a2.word_at(j);
+            }
+        }
+        return false;
     }
 }
 
 inline bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) {
-     throw std::runtime_error("lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
+        throw std::runtime_error("lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
     }
 
     for(MultiIndex::size_type i=0; i!=a1.size(); ++i) {
-     if(a1[i]!=a2[i]) {
-      return a1[i]<a2[i];
-     }
+        if(a1[i]!=a2[i]) {
+            return a1[i]<a2[i];
+        }
     }
     return false;
 }
 
 inline bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) {
-     throw std::runtime_error("reverse_lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
+        throw std::runtime_error("reverse_lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
     }
 
     MultiIndex::size_type i=a1.size();
     while(i!=0) {
-     --i;
-     if(a1[i]!=a2[i]) {
-      return a1[i]>a2[i];
-     }
+        --i;
+        if(a1[i]!=a2[i]) {
+            return a1[i]>a2[i];
+        }
     }
     return false;
 }
@@ -413,7 +413,7 @@ unsigned int MultiIndex::number() const
 {
     unsigned int result=fac(this->degree());
     for(unsigned int k=0; k!=this->size(); ++k) {
-     result/=fac((*this)[k]);
+        result/=fac((*this)[k]);
     }
     return result;
 }
@@ -423,7 +423,7 @@ unsigned int MultiIndex::factorial() const
 {
     unsigned int result=1;
     for(unsigned int k=0; k!=this->size(); ++k) {
-     result*=fac((*this)[k]);
+        result*=fac((*this)[k]);
     }
     return result;
 }
@@ -435,9 +435,9 @@ unsigned int MultiIndex::position() const
     unsigned int nvar=this->size();
     unsigned int result=bin(deg+nvar,nvar);
     for(unsigned int k=0; k!=this->size()-1; ++k) {
-     --nvar;
-     deg-=(*this)[k];
-     result+=bin(deg+nvar,nvar);
+        --nvar;
+        deg-=(*this)[k];
+        result+=bin(deg+nvar,nvar);
     }
     return result;
 }
@@ -453,26 +453,26 @@ MultiIndex& MultiIndex::operator++()
     index_type* const p=reinterpret_cast<index_type*>(this->_p);
 
     if(n==1) {
-     ++p[0];
-     ++p[n];
-     return *this;
+        ++p[0];
+        ++p[n];
+        return *this;
     }
     if(p[n-2]!=0) {
-     --p[n-2];
-     ++p[n-1];
-     return *this;
+        --p[n-2];
+        ++p[n-1];
+        return *this;
     } else {
-     index_type li=p[n-1];
-     p[n-1]=0;
-     for(size_type k=n-1; k!=0; --k) {
-      if(p[k-1]!=0) {
-    --p[k-1];
-    p[k]=li+1;
-    return *this;
-      }
-     }
-     p[0]=li+1;
-     ++p[n];
+        index_type li=p[n-1];
+        p[n-1]=0;
+        for(size_type k=n-1; k!=0; --k) {
+            if(p[k-1]!=0) {
+                --p[k-1];
+                p[k]=li+1;
+                return *this;
+            }
+        }
+        p[0]=li+1;
+        ++p[n];
     }
     return *this;
 }
@@ -481,19 +481,19 @@ MultiIndex& MultiIndex::operator++()
 inline
 MultiIndex& MultiIndex::operator+=(const MultiIndex& a) {
     for(size_type j=0; j!=this->word_size(); ++j) {
-     this->word_at(j)+=a.word_at(j);
+        this->word_at(j)+=a.word_at(j);
     }
     return *this;
     for(size_type i=0; i!=this->size(); ++i) {
-     this->_p[i]+=a._p[i];
+        this->_p[i]+=a._p[i];
     }
 }
 
 inline
 MultiIndex& MultiIndex::operator-=(const MultiIndex& a) {
     for(size_type i=0; i!=this->size()+1; ++i) {
-     ARIADNE_ASSERT(this->_p[i]>=a._p[i]);
-     this->_p[i]-=a._p[i];
+        ARIADNE_ASSERT(this->_p[i]>=a._p[i]);
+        this->_p[i]-=a._p[i];
     }
     return *this;
 }
@@ -501,18 +501,18 @@ MultiIndex& MultiIndex::operator-=(const MultiIndex& a) {
 inline
 MultiIndex& MultiIndex::operator*=(const index_type& s) {
     for(size_type j=0; j!=this->word_size(); ++j) {
-     this->word_at(j)*=s;
+        this->word_at(j)*=s;
     }
     return *this;
     for(size_type i=0; i!=this->size()+1; ++i) {
-     this->_p[i]*=s;
+        this->_p[i]*=s;
     }
 }
 
 inline
 void iadd(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
     for(MultiIndex::size_type j=0; j!=r.word_size(); ++j) {
-     r.word_at(j)=a1.word_at(j)+a2.word_at(j);
+        r.word_at(j)=a1.word_at(j)+a2.word_at(j);
     }
 }
 
@@ -543,7 +543,7 @@ number(const MultiIndex& i)
 {
     unsigned int result=fac(i.degree());
     for(unsigned int k=0; k!=i.size(); ++k) {
-     result/=fac(i[k]);
+        result/=fac(i[k]);
     }
     return result;
 }
@@ -554,7 +554,7 @@ fac(const MultiIndex& i)
 {
     unsigned int result=1;
     for(unsigned int k=0; k!=i.size(); ++k) {
-     result*=fac(i[k]);
+        result*=fac(i[k]);
     }
     return result;
 }
@@ -566,7 +566,7 @@ bin(const MultiIndex& n, const MultiIndex& k)
     assert(n.size()==k.size());
     unsigned int result=1;
     for(unsigned int i=0; i!=n.size(); ++i) {
-     result*=bin(n[i],k[i]);
+        result*=bin(n[i],k[i]);
     }
     return result;
 }
@@ -606,7 +606,7 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type d)
     : _groups(as), _max_degrees(1u)
 {
     for(size_type i=0; i!=as; ++i) {
-     _groups[i]=0u;
+        _groups[i]=0u;
     }
     _max_degrees[0]=d;
 }
@@ -616,8 +616,8 @@ inline MultiIndexBound::MultiIndexBound(const MultiIndex& a)
     : _groups(a.size()), _max_degrees(a.size())
 {
     for(size_type i=0; i!=a.size(); ++i) {
-     _groups[i]=i;
-     _max_degrees[i]=a[i];
+        _groups[i]=i;
+        _max_degrees[i]=a[i];
     }
 }
 
@@ -628,15 +628,15 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1
     va_list args; va_start(args,g1d);
     size_type k=0;
     for( ; k!=g1s; ++k) {
-     _groups[k]=0;
+        _groups[k]=0;
     }
     _max_degrees[0]=g1d;
     for(size_type i=1; i!=ng; ++i) {
-     size_type nk=k+va_arg(args,int);
-     for( ; k!=nk; ++k) {
-      _groups[k]=i;
-     }
-     _max_degrees[i]=va_arg(args,int);
+        size_type nk=k+va_arg(args,int);
+        for( ; k!=nk; ++k) {
+            _groups[k]=i;
+        }
+        _max_degrees[i]=va_arg(args,int);
     }
     va_end(args);
     ARIADNE_ASSERT(k==as);
@@ -646,12 +646,12 @@ inline bool operator<=(const MultiIndex& a, const MultiIndexBound& b) {
     typedef MultiIndex::size_type size_type;
     array<size_type> degrees(b._max_degrees.size());
     for(size_type j=0; j!=a.size(); ++j) {
-     degrees[b._groups[j]]+=a[j];
+        degrees[b._groups[j]]+=a[j];
     }
     for(size_type k=0; k!=degrees.size(); ++k) {
-     if(degrees[k]>b._max_degrees[k]) {
-      return false;
-     }
+        if(degrees[k]>b._max_degrees[k]) {
+            return false;
+        }
     }
     return true;
 }

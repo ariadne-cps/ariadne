@@ -1,8 +1,8 @@
 /***************************************************************************
- *      geometry.h
+ *            geometry.h
  *
  *  Copyright 2008  Pieter Collins
- *
+ * 
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 /*! \file geometry.h
  *  \brief Geometric operations on abstract sets.
  */
@@ -41,15 +41,15 @@ uint irmax(const Box& bx) {
     Float dmax=0.0;
     uint imax=0;
     for(uint i=0; i!=bx.size(); ++i) {
-     Float d=bx[i].width();
-     if(d>dmax) {
-      imax=i;
-      dmax=d;
-     }
+        Float d=bx[i].width();
+        if(d>dmax) {
+            imax=i;
+            dmax=d;
+        }
     }
     return imax;
 }
-
+ 
 inline
 Box split(const Box& bx, uint i, Piece lr) {
     Box result(bx);
@@ -58,10 +58,10 @@ Box split(const Box& bx, uint i, Piece lr) {
     const Float& u=ivl.upper();
     Float c=med_approx(l,u);
     if(lr==middle) {
-     ivl.set(med_approx(l,c),med_approx(c,u));
-    } else {
-     if(lr==left) { ivl.set_upper(c); }
-     else { ivl.set_lower(c); }
+        ivl.set(med_approx(l,c),med_approx(c,u));
+    } else { 
+        if(lr==left) { ivl.set_upper(c); }
+        else { ivl.set_lower(c); }
     }
     return result;
 }
@@ -90,38 +90,38 @@ std::pair<Box,Box> split(const Box& bx) {
 
 
 template<class F>
-tribool
+tribool 
 disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
 {
     Box fd=f.evaluate(d);
     Box fc=f.evaluate(Box(midpoint(d)));
-    if(disjoint(fd,b)) {
-     return true;
+    if(disjoint(fd,b)) { 
+        return true;
     } else if(inside(fc,b)) {
-     return false;
+        return false;
     } else if(d.radius()<eps) {
-     return indeterminate;
+        return indeterminate;
     } else {
-     uint i=irmax(d);
-     return disjoint(split(d,i,left),f,b,eps) || disjoint(split(d,i,left),f,b,eps);
+        uint i=irmax(d);
+        return disjoint(split(d,i,left),f,b,eps) || disjoint(split(d,i,left),f,b,eps);
     }
 }
 
 template<class F>
-tribool
+tribool 
 inside(const Box& d, const F& f, const Box& b, const Float& eps)
 {
     Box fd=f(d);
     Box fc=f(Box(midpoint(d)));
-    if(inside(fc,b)) {
-     return true;
+    if(inside(fc,b)) { 
+        return true;
     } else if(disjoint(fd,b)) {
-     return false;
+        return false;
     } else if(d.radius()<eps) {
-     return indeterminate;
+        return indeterminate;
     } else {
-     uint i=irmax(d);
-     return inside(split(d,i,left),f,b,eps) && inside(split(d,i,right),f,b,eps);
+        uint i=irmax(d);
+        return inside(split(d,i,left),f,b,eps) && inside(split(d,i,right),f,b,eps);
     }
 }
 
@@ -130,12 +130,12 @@ DS remove_subsets(const DS& ls)
 {
     DS result;
     for(uint i=0; i!=ls.size(); ++i) {
-     for(uint j=0; j!=ls.size(); ++j) {
-      if(inside(ls[i],ls[j])) {
-    break;
-      }
-     }
-     result.adjoin(ls[i]);
+        for(uint j=0; j!=ls.size(); ++j) {
+            if(inside(ls[i],ls[j])) {
+                break; 
+            }
+        }
+        result.adjoin(ls[i]);
     }
 }
 
@@ -144,12 +144,12 @@ DS remove_supersets(const DS& ls)
 {
     DS result;
     for(uint i=0; i!=ls.size(); ++i) {
-     for(uint j=0; j!=ls.size(); ++j) {
-      if(inside(ls[j],ls[i])) {
-    break;
-      }
-     }
-     result.adjoin(ls[i]);
+        for(uint j=0; j!=ls.size(); ++j) {
+            if(inside(ls[j],ls[i])) {
+                break; 
+            }
+        }
+        result.adjoin(ls[i]);
     }
 }
 

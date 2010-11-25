@@ -23,7 +23,7 @@ if test "x$enable_debug" = "xyes"; then
     if test "x$CXXFLAGS_EARLY" = "x"; then
         ARIADNE_CXXFLAGS="-g3 -O0"
     else
-        ARIADNE_CXXFLAGS=${CXX_FLAGS_EARLY}
+        ARIADNE_CXXFLAGS=${CXX_FLAGS_EARLY}   
     fi
     AC_MSG_RESULT(yes)
 else
@@ -118,7 +118,7 @@ AC_ARG_ENABLE(mp,[AS_HELP_STRING([--enable-mp],[enable compilation of FloatMP ty
 
 # this macro is used to get the arguments supplied
 # to the configure script (./configure --with-static-exec)
-# Check if we have to link executables statically
+# Check if we have to link executables statically 
 # (needed to allow debugging in Eclipse).
 AC_MSG_CHECKING(whether to to link executables statically)
 AC_ARG_ENABLE(static-exec, [AS_HELP_STRING([--enable-static-exec(=yes/no)],[link statically executable files (default no)])],
@@ -145,7 +145,7 @@ AC_MSG_NOTICE([EXEC_LDFLAGS=$EXEC_LDFLAGS])
 
 AC_SUBST(BOOST_PYTHON_LIB)
 AC_SUBST(EXEC_LDFLAGS)
-AC_SUBST(ARIADNE_CXXFLAGS)
+AC_SUBST(ARIADNE_CXXFLAGS)    
 
 # Declare which Makefiles need to be built
 AC_CONFIG_FILES([Makefile include/Makefile src/Makefile wrap/Makefile python/Makefile test/Makefile examples/Makefile])

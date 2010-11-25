@@ -1,5 +1,5 @@
 /***************************************************************************
- *      polyhedron.h
+ *            polyhedron.h
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *

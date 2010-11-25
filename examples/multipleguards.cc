@@ -1,7 +1,7 @@
 /***************************************************************************
- *      multipleguards.cc
+ *            multipleguards.cc
  *
- *    Author: Luca Geretti
+ *	      Author: Luca Geretti
  *
  * Example for multiple guards: an X-Y clockwise rotation in which a transition
  * occurs as soon as a new quadrant is reached.
@@ -16,83 +16,83 @@ using namespace Ariadne;
 struct mg_gg : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-     r[0] = min(x[0]-p[0],x[1]-p[1]);
+        r[0] = min(x[0]-p[0],x[1]-p[1]);
     }
 };
 
 struct mg_ll : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-     r[0] = min(p[0]-x[0],p[1]-x[1]);
+        r[0] = min(p[0]-x[0],p[1]-x[1]);
     }
 };
 
 struct mg_gl : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-     r[0] = min(x[0]-p[0],p[1]-x[1]);
+        r[0] = min(x[0]-p[0],p[1]-x[1]);
     }
 };
 
 struct mg_lg : RealVectorFunctionData<1,3,2> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-     r[0] = min(p[0]-x[0],x[1]-p[1]);
+        r[0] = min(p[0]-x[0],x[1]-p[1]);
     }
 };
 
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) { 
     // Assigns local variables
-    Figure fig;
+    Figure fig; 
     array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables));
-    fig.set_bounding_box(bbox);
+    fig.set_projection_map(ProjectionFunction(xy,numVariables)); 
+    fig.set_bounding_box(bbox); 
 
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
     {
-    // The rectangle to be drawn
-    Box rect = Box(numVariables);
-    // Chooses the fill colour
-     fig << fill_colour(Colour(1.0,1.0,1.0));
+	// The rectangle to be drawn
+	Box rect = Box(numVariables);
+	// Chooses the fill colour
+        fig << fill_colour(Colour(1.0,1.0,1.0));
 
-    // Gets the number of times each variable interval would be divided by 2
-     int numDivisions = MAX_GRID_DEPTH / numVariables;
-    // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-    Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
-    // Initiates the x position to the bounding box left bound
-     Float pos_x = bbox[0].lower();
-     // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
-    rect[yaxis] = bbox[1];
-     // While between the interval
-     while (pos_x < bbox[0].upper())
-     {
-     rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
-     pos_x += step_x; // Shifts the x position
-     fig << rect; // Appends the rectangle
-     }
+	// Gets the number of times each variable interval would be divided by 2
+        int numDivisions = MAX_GRID_DEPTH / numVariables;
+	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
+	Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+	// Initiates the x position to the bounding box left bound
+        Float pos_x = bbox[0].lower();
+        // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
+	rect[yaxis] = bbox[1];
+        // While between the interval
+        while (pos_x < bbox[0].upper())
+        {
+	    rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+	    pos_x += step_x; // Shifts the x position
+	    fig << rect; // Appends the rectangle
+        }
 
-    // Repeats for the rectangles in the y direction
-    Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-     Float pos_y = bbox[1].lower();
-    rect[xaxis] = bbox[0];
-     while (pos_y < bbox[1].upper())
-     {
-     rect[yaxis] = Interval(pos_y,pos_y+step_y);
-     fig << rect;
-     pos_y += step_y;
-     }
+	// Repeats for the rectangles in the y direction
+	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+        Float pos_y = bbox[1].lower();
+	rect[xaxis] = bbox[0];
+        while (pos_y < bbox[1].upper())
+        {
+	    rect[yaxis] = Interval(pos_y,pos_y+step_y);
+   	    fig << rect;
+	    pos_y += step_y;
+        }
     }
     // Draws and creates file
-    fig.set_fill_colour(fc);
-    fig << set;
-    fig.write(filename);
+    fig.set_fill_colour(fc); 
+    fig << set; 
+    fig.write(filename); 
 }
 
-int main()
+int main() 
 {
     double pi=numeric_cast<double>(Ariadne::pi<Real>());
     double f = 1.0; // Frequency
@@ -103,27 +103,27 @@ int main()
 
     /// Guards parameters
     Vector<double> dp(2);
-
+    
     double A[9]={0.0,w1,0.0, -w2,0.0,0.0, 0.0,0.0,0.0};
     double b[3]={0.0,0.0,1.0};
 
     float EVOL_TIME = 1.0/f;
     EVOL_TIME = 1.0;
     int EVOL_TRANS = 4;
-
+   
     float MAX_ENCL_RADIUS = 1e-1;
     float MAX_STEP_SIZE = 1e-2;
 
     /// Build the Hybrid System
-
+  
     /// Create a HybridAutomton object
     MonolithicHybridAutomaton multipleguards;
-
+  
     /// Create the discrete states
     AtomicDiscreteLocation pospos(1);
     AtomicDiscreteLocation posneg(2);
     AtomicDiscreteLocation negpos(3);
-    AtomicDiscreteLocation negneg(4);    
+    AtomicDiscreteLocation negneg(4);	
 
     /// Create the discrete events
     DiscreteEvent pospos2posneg(12);
@@ -134,25 +134,25 @@ int main()
     DiscreteEvent negpos2negneg(34);
     DiscreteEvent negneg2posneg(42);
     DiscreteEvent negneg2negpos(43);
-
+  
     /// Create the dynamics
-    VectorAffineFunction dynamic(Matrix<Real>(3,3,A),Vector<Real>(3,b));    
-
+    VectorAffineFunction dynamic(Matrix<Real>(3,3,A),Vector<Real>(3,b));	
+   
     /// Create the guards
     dp(0) = 0.0;
     dp(1) = 0.0;
-    VectorUserFunction<mg_gg> pospos_g(dp);
-    VectorUserFunction<mg_gl> posneg_g(dp);
-    VectorUserFunction<mg_lg> negpos_g(dp);
-    VectorUserFunction<mg_ll> negneg_g(dp);
-
+    VectorUserFunction<mg_gg> pospos_g(dp); 
+    VectorUserFunction<mg_gl> posneg_g(dp); 
+    VectorUserFunction<mg_lg> negpos_g(dp); 
+    VectorUserFunction<mg_ll> negneg_g(dp); 
+ 
     /// Build the automaton
     multipleguards.new_mode(pospos,dynamic);
     multipleguards.new_mode(posneg,dynamic);
     multipleguards.new_mode(negpos,dynamic);
     multipleguards.new_mode(negneg,dynamic);
 
-    /// Automaton transitions in the case of multiple guards
+    /// Automaton transitions in the case of multiple guards 
 
     multipleguards.new_forced_transition(pospos2posneg,pospos,posneg,IdentityFunction(3),posneg_g);
     multipleguards.new_forced_transition(pospos2negpos,pospos,negpos,IdentityFunction(3),negpos_g);
@@ -201,7 +201,7 @@ int main()
     Box bounding_box1(2, -1.0,1.0, -1.0,1.0);
     Box bounding_box2(2, 0.0,EVOL_TIME,-1.0,1.0);
 
-    HybridTime evolution_time(EVOL_TIME,EVOL_TRANS);
+    HybridTime evolution_time(EVOL_TIME,EVOL_TRANS); 
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(multipleguards,initial_enclosure,evolution_time,UPPER_SEMANTICS);
@@ -214,11 +214,11 @@ int main()
     plot("multipleguards_ty", 2, 1, 3, bounding_box2, Colour(0.0,0.5,1.0), orbit, -1);
 
     if (orbit.reach().find(pospos)!=orbit.reach().locations_end())
-     plot("multipleguards_xy_pospos", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[pospos], -1);
+        plot("multipleguards_xy_pospos", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[pospos], -1);
     if (orbit.reach().find(posneg)!=orbit.reach().locations_end())
-     plot("multipleguards_xy_posneg", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[posneg], -1);
+        plot("multipleguards_xy_posneg", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[posneg], -1);
     if (orbit.reach().find(negpos)!=orbit.reach().locations_end())
-     plot("multipleguards_xy_negpos", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[negpos], -1);
+        plot("multipleguards_xy_negpos", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[negpos], -1);
     if (orbit.reach().find(negneg)!=orbit.reach().locations_end())
-     plot("multipleguards_xy_negneg", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[negneg], -1);
+        plot("multipleguards_xy_negneg", 0, 1, 3, bounding_box1, Colour(0.0,0.5,1.0), orbit.reach()[negneg], -1);
 }

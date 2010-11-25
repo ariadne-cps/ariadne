@@ -1,5 +1,5 @@
 /***************************************************************************
- *      zonotope.cc
+ *            zonotope.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  *
@@ -55,12 +55,12 @@ subdivide(const BS& bs, const Float& r)
     ListSet<BS> result;
     ListSet<BS> working(bs);
     while(!working.size()==0) {
-     BS set=working.pop();
-     if(set.radius()<r) {
-      result.adjoin(set);
-     } else {
-      working.adjoin(split(set));
-     }
+        BS set=working.pop();
+        if(set.radius()<r) {
+            result.adjoin(set);
+        } else {
+            working.adjoin(split(set));
+        }
     }
     return result;
 }
@@ -72,7 +72,7 @@ accumulate(Float& value, Float& error, uint n, const Float* aptr, const Float* b
 {
     Interval v=Interval(value);
     for(uint i=0; i!=n; ++i) {
-     v+=aptr[i]*bptr[i];
+        v+=aptr[i]*bptr[i];
     }
     value=v.midpoint();
     error=add_up(error,v.radius());
@@ -85,9 +85,9 @@ row_norms(const Matrix<Interval>& A)
     uint const& n=A.column_size();
     Vector<Float> e(m);
     for(uint i=0; i!=m; ++i) {
-     for(uint j=0; j!=n; ++j) {
-      e[i]=add_up(e[i],mag(A(i,j)));
-     }
+        for(uint j=0; j!=n; ++j) {
+            e[i]=add_up(e[i],mag(A(i,j)));
+        }
     }
     return e;
 }
@@ -99,9 +99,9 @@ row_errors(const Matrix<Interval>& A)
     uint const& n=A.column_size();
     Vector<Float> e(m);
     for(uint i=0; i!=m; ++i) {
-     for(uint j=0; j!=n; ++j) {
-      e[i]=add_up(e[i],A(i,j).radius());
-     }
+        for(uint j=0; j!=n; ++j) {
+            e[i]=add_up(e[i],A(i,j).radius());
+        }
     }
     return e;
 }
@@ -111,7 +111,7 @@ errors(const Vector<Interval>& pt)
 {
     Vector<Float> result(pt.size());
     for(uint i=0; i!=pt.size(); ++i) {
-     result[i]=pt[i].radius();
+        result[i]=pt[i].radius();
     }
     return result;
 }
@@ -123,10 +123,10 @@ row_errors(const Vector<Interval>& pt, const Matrix<Interval>& A)
     assert(pt.size()==A.row_size());
     Vector<Float> result(pt.size());
     for(uint i=0; i!=A.row_size(); ++i) {
-     result[i]=pt[i].radius();
-     for(uint j=0; j!=A.column_size(); ++j) {
-      result[i]=add_up(result[i],A(i,j).radius());
-     }
+        result[i]=pt[i].radius();
+        for(uint j=0; j!=A.column_size(); ++j) {
+            result[i]=add_up(result[i],A(i,j).radius());
+        }
     }
     return result;
 }
@@ -136,7 +136,7 @@ add_up(const Vector<Float>& v1, const Vector<Float>& v2)
 {
     Vector<Float> result;
     for(uint i=0; i!=v1.size(); ++i) {
-     result[i]=add_up(v1[i],v2[i]);
+        result[i]=add_up(v1[i],v2[i]);
     }
     return result;
 }
@@ -182,15 +182,15 @@ Zonotope::Zonotope(uint d, uint m, double x0, ...)
     va_list args;
     va_start(args,x0);
     for(uint i=0; i!=d; ++i) {
-     if(i!=0) { x=va_arg(args,double); }
-     this->_centre[i]=x0;
-     for(uint j=0; j!=m; ++j) {
-      x=va_arg(args,double);
-      this->_generators[i][j]=x;
-     }
-     x=va_arg(args,double);
-     this->_error[i]=x;
-     ARIADNE_ASSERT(this->_error[i]>=0);
+        if(i!=0) { x=va_arg(args,double); }
+        this->_centre[i]=x0;
+        for(uint j=0; j!=m; ++j) {
+            x=va_arg(args,double);
+            this->_generators[i][j]=x;
+        }
+        x=va_arg(args,double);
+        this->_error[i]=x;
+        ARIADNE_ASSERT(this->_error[i]>=0);
     }
     va_end(args);
 }
@@ -243,9 +243,9 @@ Zonotope&
 Zonotope::operator=(const Zonotope& z)
 {
     if(this!=&z) {
-     this->_centre=z._centre;
-     this->_generators=z._generators;
-     this->_error=z._error;
+        this->_centre=z._centre;
+        this->_generators=z._generators;
+        this->_error=z._error;
     }
     return *this;
 }
@@ -261,7 +261,7 @@ bool
 operator==(const Zonotope& z1, const Zonotope& z2)
 {
     return (z1._centre==z2._centre) && (z1._generators==z2._generators)
-     && (z1._error==z2._error);
+        && (z1._error==z2._error);
 }
 
 uint
@@ -410,46 +410,46 @@ split(const Zonotope& z)
 
     array<Float> norms(m,0);
     for(uint j=0; j!=m; ++j) {
-     norms[j]=norm(Vector<Float>(column(G,j)));
+        norms[j]=norm(Vector<Float>(column(G,j)));
     }
 
     Float max_norm=0;
     uint longest_generator=0;
     for(uint j=0; j<m; ++j) {
-     if(norms[j]>max_norm) {
-      max_norm=norms[j];
-      longest_generator=j;
-     }
+        if(norms[j]>max_norm) {
+            max_norm=norms[j];
+            longest_generator=j;
+        }
     }
     for(uint k=0; k<d; ++k) {
-     if(e[k]>max_norm) {
-      max_norm=e[k];
-      longest_generator=m+k;
-     }
+        if(e[k]>max_norm) {
+            max_norm=e[k];
+            longest_generator=m+k;
+        }
     }
 
     if(longest_generator<m) {
-     Matrix<Float> new_generators=z.generators();
-     uint j=longest_generator;
-     for(uint i=0; i!=d; ++i) {
-      new_generators(i,j)=div_up(new_generators(i,j),2);
-     }
+        Matrix<Float> new_generators=z.generators();
+        uint j=longest_generator;
+        for(uint i=0; i!=d; ++i) {
+            new_generators(i,j)=div_up(new_generators(i,j),2);
+        }
 
-     Vector<Float> v=column(new_generators,j);
-     Vector<Float> new_centre=sub_approx(c,v);
-     result.adjoin(Zonotope(new_centre,new_generators,e));
-     new_centre=add_approx(c,v);
-     result.adjoin(Zonotope(new_centre,new_generators,e));
+        Vector<Float> v=column(new_generators,j);
+        Vector<Float> new_centre=sub_approx(c,v);
+        result.adjoin(Zonotope(new_centre,new_generators,e));
+        new_centre=add_approx(c,v);
+        result.adjoin(Zonotope(new_centre,new_generators,e));
     } else {
-     uint k=longest_generator-m;
-     Vector<Float> new_centre = z.centre();
-     const Matrix<Float>& new_generators = z.generators();
-     Vector<Float> new_error=e;
-     new_error[k]=div_up(new_error[k],2);
-     new_centre[k]=add_approx(z.centre()[k],new_error[k]);
-     result.adjoin(Zonotope(new_centre,new_generators,new_error));
-     new_centre[k]=sub_approx(z.centre()[k],new_error[k]);
-     result.adjoin(Zonotope(new_centre,new_generators,new_error));
+        uint k=longest_generator-m;
+        Vector<Float> new_centre = z.centre();
+        const Matrix<Float>& new_generators = z.generators();
+        Vector<Float> new_error=e;
+        new_error[k]=div_up(new_error[k],2);
+        new_centre[k]=add_approx(z.centre()[k],new_error[k]);
+        result.adjoin(Zonotope(new_centre,new_generators,new_error));
+        new_centre[k]=sub_approx(z.centre()[k],new_error[k]);
+        result.adjoin(Zonotope(new_centre,new_generators,new_error));
     }
     return result;
 }
@@ -466,12 +466,12 @@ Zonotope::Zonotope(const Box& r)
     Matrix<Float>& G=this->_generators;
     Vector<Float>& e=this->_error;
     for(uint i=0; i!=d; ++i) {
-     c[i]=med_approx(r[i].lower(),r[i].upper());
-     for(uint j=0; j!=d; ++j) {
-      G(i,j)=0;
-     }
-     G(i,i)=rad_up(r[i].lower(),r[i].upper());
-     e(i)=0;
+        c[i]=med_approx(r[i].lower(),r[i].upper());
+        for(uint j=0; j!=d; ++j) {
+            G(i,j)=0;
+        }
+        G(i,i)=rad_up(r[i].lower(),r[i].upper());
+        e(i)=0;
     }
 }
 
@@ -504,17 +504,17 @@ error_free_over_approximation(const Zonotope& z)
     // Count number of nonzero error values
     uint e=0;
     for(uint i=0; i!=d; ++i) {
-     if(z.error()[i]!=0) { ++e; }
+        if(z.error()[i]!=0) { ++e; }
     }
     Matrix<Float> nG(d,m+e);
     project(nG,range(0,d),range(0,m))=z.generators();
 
     uint j=m;
     for(uint i=0; i!=d; ++i) {
-     if(z.error()[i]!=0) {
-      nG(i,j)=z.error()[i];
-      ++j;
-     }
+        if(z.error()[i]!=0) {
+            nG(i,j)=z.error()[i];
+            ++j;
+        }
     }
     return Zonotope(z.centre(),nG);
 }
@@ -564,27 +564,27 @@ cascade_over_approximation(const Zonotope& z, uint cs)
     const Matrix<Float>& G=z.generators();
     array<Float> norms(nb);
     for(uint i=0; i!=nb; ++i) {
-     norms[i]=Ariadne::norm(Matrix<Float>(project(G,range(0,d),range(i*d,(i+1)*d))));
+        norms[i]=Ariadne::norm(Matrix<Float>(project(G,range(0,d),range(i*d,(i+1)*d))));
     }
 
     // Compute the new number of blocks
     uint nnb=cs;
     Float sum=0;
     for(uint i=nb-1; i!=0; --i) {
-     sum=add_approx(sum,norms[i]);
-     if(sum>norms[i-1]) {
-      nnb=i;
-     }
+        sum=add_approx(sum,norms[i]);
+        if(sum>norms[i-1]) {
+            nnb=i;
+        }
     }
     nnb=min(nnb,cs);
     // Reduce generators
     Matrix<Float> rG(d,d*nnb);
     project(rG,range(0,d),range(0,d*(nnb-1)))=project(G,range(0,d),range(0,d*(nnb-1)));
     for(uint i=0; i!=d; ++i) {
-     Float& err=rG(i,d*(nnb-1)+i);
-     for(uint j=d*(nnb-1); j!=G.column_size(); ++j) {
-      err=add_up(err,abs(G(i,j)));
-     }
+        Float& err=rG(i,d*(nnb-1)+i);
+        for(uint j=d*(nnb-1); j!=G.column_size(); ++j) {
+            err=add_up(err,abs(G(i,j)));
+        }
     }
     return Zonotope(z.centre(),rG);
 }
@@ -620,8 +620,8 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
     // FIXME: Subdivide in zero order as well!
     static bool warn=true;
     if(warn) {
-     ARIADNE_WARN("orthogonal_over_approximation(Zonotope<I,R>) does not over-approximate roundoff errors.\n);
-     warn=false;
+        ARIADNE_WARN("orthogonal_over_approximation(Zonotope<I,R>) does not over-approximate roundoff errors.\n);
+        warn=false;
     }
     Zonotope<R,R> oaz=over_approximation(z);
 
@@ -632,15 +632,15 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
     Matrix< Interval > q=QR.Q();
     Matrix< Interval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
-     Interval a=0;
-     for(uint j=i; j!=z.number_of_generators(); ++j) {
-      a+=r(i,j);
-     }
-     for(uint k=0; k!=z.size(); ++k) {
-      Interval b=q(k,i)*a;
-      G(k,i)=b.midpoint();
-      c[k]+=(b-b.midpoint());
-     }
+        Interval a=0;
+        for(uint j=i; j!=z.number_of_generators(); ++j) {
+            a+=r(i,j);
+        }
+        for(uint k=0; k!=z.size(); ++k) {
+            Interval b=q(k,i)*a;
+            G(k,i)=b.midpoint();
+            c[k]+=(b-b.midpoint());
+        }
     }
     return Zonotope<R,R>(midpoint(c),G);
 }
@@ -658,15 +658,15 @@ orthogonal_over_approximation(const Zonotope<Interval,R>& z)
     Matrix< Interval > q=QR.Q();
     Matrix< Interval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
-     Interval a=0;
-     for(uint j=i; j!=z.number_of_generators(); ++j) {
-      a+=r(i,j);
-     }
-     for(uint k=0; k!=z.size(); ++k) {
-      Interval b=q(k,i)*a;
-      G(k,i)=b.midpoint();
-      c[k]+=(b-b.midpoint());
-     }
+        Interval a=0;
+        for(uint j=i; j!=z.number_of_generators(); ++j) {
+            a+=r(i,j);
+        }
+        for(uint k=0; k!=z.size(); ++k) {
+            Interval b=q(k,i)*a;
+            G(k,i)=b.midpoint();
+            c[k]+=(b-b.midpoint());
+        }
     }
     return Zonotope<Interval,R>(c,G);
 }
@@ -684,15 +684,15 @@ orthogonal_over_approximation(const Zonotope< Interval >& z)
     Matrix< Interval > q=QR.Q();
     Matrix< Interval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
-     Interval a=0;
-     for(uint j=i; j!=z.number_of_generators(); ++j) {
-      a+=r(i,j);
-     }
-     for(uint k=0; k!=z.size(); ++k) {
-      Interval b=q(k,i)*a;
-      G(k,i)=b.midpoint();
-      c[k]+=(b-b.midpoint());
-     }
+        Interval a=0;
+        for(uint j=i; j!=z.number_of_generators(); ++j) {
+            a+=r(i,j);
+        }
+        for(uint k=0; k!=z.size(); ++k) {
+            Interval b=q(k,i)*a;
+            G(k,i)=b.midpoint();
+            c[k]+=(b-b.midpoint());
+        }
     }
     return Zonotope< Interval >(c,G);
 }
@@ -708,17 +708,17 @@ operator<<(std::ostream& os, const Zonotope& z)
 {
     os << "[";
     for(uint i=0; i!=z.dimension(); ++i) {
-      os << (i==0 ? '(' : ',') << z.centre()[i];
+            os << (i==0 ? '(' : ',') << z.centre()[i];
     }
     os << "),";
     for(uint j=0; j!=z.number_of_generators(); ++j) {
-     for(uint i=0; i!=z.dimension(); ++i) {
-      os << (i==0 ? '[' : ',') << z.generators()[i][j];
-     }
-     os << "],";
+        for(uint i=0; i!=z.dimension(); ++i) {
+            os << (i==0 ? '[' : ',') << z.generators()[i][j];
+        }
+        os << "],";
     }
     for(uint i=0; i!=z.dimension(); ++i) {
-     os << (i==0 ? '{' : ',') << z.error()[i];
+        os << (i==0 ? '{' : ',') << z.error()[i];
     }
     os << '}';
     os << "]";
@@ -778,12 +778,12 @@ disjoint(const Zonotope& z, const Box& bx)
     project(A,range(0,d),range(d,d+ng))=zG;
     b=zc;
     for(size_t j=0; j!=d; ++j) {
-     l[j]=ebx[j].lower();
-     u[j]=ebx[j].upper();
+        l[j]=ebx[j].lower();
+        u[j]=ebx[j].upper();
     }
     for(size_t j=0; j!=ng; ++j) {
-     l[d+j]=-1;
-     u[d+j]=+1;
+        l[d+j]=-1;
+        u[d+j]=+1;
     }
 
     return ! SimplexSolver<Float>().constrained_feasible(A,b,l,u);
@@ -840,9 +840,9 @@ contains(const Zonotope& z, const Point& pt)
 
 struct angle_less {
     bool operator() (const Vector2d& v1, const Vector2d& v2) const {
-     if(v1.y==0) { return true; }
-     else if(v1.y==0) { return false; }
-     else { return (v1.y/v1.x) < (v2.y/v2.x); }
+        if(v1.y==0) { return true; }
+        else if(v1.y==0) { return false; }
+        else { return (v1.y/v1.x) < (v2.y/v2.x); }
     }
 };
 
@@ -857,9 +857,9 @@ void Zonotope::draw(CanvasInterface& c) const {
     Point2d pc(zc[ix],zc[iy]);
     std::vector< Vector2d > pg;
     for(uint j=0; j!=z.number_of_generators(); ++j) {
-     Vector2d g(zg[ix][j],zg[iy][j]);
-     if(g.x<0) { g=-g; }
-     pg.push_back(g);
+        Vector2d g(zg[ix][j],zg[iy][j]);
+        if(g.x<0) { g=-g; }
+        pg.push_back(g);
     }
     if(ze[ix]>0) { pg.push_back(Vector2d(ze[ix],0.0)); }
     if(ze[iy]>0) { pg.push_back(Vector2d(0.0,ze[iy])); }
@@ -869,17 +869,17 @@ void Zonotope::draw(CanvasInterface& c) const {
     const uint npg=pg.size();
     Point2d pt=pc;
     for(uint i=0; i!=npg; ++i) {
-     pt-=pg[i];
+        pt-=pg[i];
     }
 
     c.move_to(pt.x,pt.y);
     for(uint i=0; i!=npg; ++i) {
-     pt+=2*pg[i];
-     c.line_to(pt.x,pt.y);
+        pt+=2*pg[i];
+        c.line_to(pt.x,pt.y);
     }
     for(uint i=0; i!=npg; ++i) {
-     pt-=2*pg[i];
-     c.line_to(pt.x,pt.y);
+        pt-=2*pg[i];
+        c.line_to(pt.x,pt.y);
     }
     c.fill();
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *      geometry_submodule.cc
+ *            geometry_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -54,19 +54,19 @@ struct from_python<Point> {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<Point>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-     extract<boost::python::tuple> xtup(obj_ptr);
-     extract<boost::python::list> xlst(obj_ptr);
-     Point pt;
-     if(xtup.check()) {
-      boost::python::tuple tup=xtup(); pt=Point(len(tup));
-      for(int i=0; i!=len(tup); ++i) { pt[i]=extract<double>(tup[i]); }
-     } else if(xlst.check()) {
-      boost::python::list lst=xlst(); pt=Point(len(lst));
-      for(int i=0; i!=len(lst); ++i) { pt[i]=extract<double>(lst[i]); }
-     }
-     void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-     new (storage) Point(pt);
-     data->convertible = storage;
+        extract<boost::python::tuple> xtup(obj_ptr);
+        extract<boost::python::list> xlst(obj_ptr);
+        Point pt;
+        if(xtup.check()) {
+            boost::python::tuple tup=xtup(); pt=Point(len(tup));
+            for(int i=0; i!=len(tup); ++i) { pt[i]=extract<double>(tup[i]); }
+        } else if(xlst.check()) {
+            boost::python::list lst=xlst(); pt=Point(len(lst));
+            for(int i=0; i!=len(lst); ++i) { pt[i]=extract<double>(lst[i]); }
+        }
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        new (storage) Point(pt);
+        data->convertible = storage;
     }
 };
 
@@ -75,11 +75,11 @@ struct from_python<Box> {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<Box>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-     void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-     boost::python::list lst=extract<boost::python::list>(obj_ptr);
-     Box* bx_ptr = new (storage) Box(len(lst));
-     for(int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=extract<Interval>(lst[i]); }
-     data->convertible = storage;
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        boost::python::list lst=extract<boost::python::list>(obj_ptr);
+        Box* bx_ptr = new (storage) Box(len(lst));
+        for(int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=extract<Interval>(lst[i]); }
+        data->convertible = storage;
     }
 };
 
@@ -89,11 +89,11 @@ struct to_python< ListSet<ES> > {
     to_python() { boost::python::to_python_converter< ListSet<ES>, to_python< ListSet<ES> > >(); }
 
     static PyObject* convert(const ListSet<ES>& ls) {
-     boost::python::list result;
-     for(typename ListSet<ES>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-      result.append(boost::python::object(*iter));
-     }
-     return boost::python::incref(boost::python::list(result).ptr());
+        boost::python::list result;
+        for(typename ListSet<ES>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+            result.append(boost::python::object(*iter));
+        }
+        return boost::python::incref(boost::python::list(result).ptr());
     }
     static const PyTypeObject* get_pytype() { return &PyList_Type; }
 };
@@ -104,11 +104,11 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
     to_python() { boost::python::to_python_converter< SetType, to_python<SetType> >(); }
 
     static PyObject* convert(const SetType& hls) {
-     boost::python::dict result;
-     for(typename SetType::locations_const_iterator iter=hls.locations_begin(); iter!=hls.locations_end(); ++iter) {
-      result[iter->first]=iter->second;
-     }
-     return boost::python::incref(boost::python::dict(result).ptr());
+        boost::python::dict result;
+        for(typename SetType::locations_const_iterator iter=hls.locations_begin(); iter!=hls.locations_end(); ++iter) {
+            result[iter->first]=iter->second;
+        }
+        return boost::python::incref(boost::python::dict(result).ptr());
     }
     static const PyTypeObject* get_pytype() { return &PyDict_Type; }
 };
@@ -332,7 +332,7 @@ void export_affine_set()
 {
 
     class_<AffineSet,bases<DrawableInterface> >
-     affine_set_class("AffineSet",init<AffineSet>());
+        affine_set_class("AffineSet",init<AffineSet>());
     affine_set_class.def(init<Vector<Interval>, Matrix<Float>, Vector<Float> >());
     affine_set_class.def(init<Matrix<Float>, Vector<Float> >());
     affine_set_class.def("new_inequality_constraint", (void(AffineSet::*)(const Vector<Float>&,const Float&)) &AffineSet::new_inequality_constraint);
@@ -391,7 +391,7 @@ void export_hybrid_constrained_image_set()
     typedef HybridBasicSet<ConstrainedImageSet> HybridConstrainedImageSet;
 
     class_<HybridConstrainedImageSet>
-     hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
+        hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(init<DiscreteLocation,Box>());
     //hybrid_constrained_image_set_class.def(init<DiscreteLocation,ConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(self_ns::str(self));

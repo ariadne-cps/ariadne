@@ -1,8 +1,8 @@
 /***************************************************************************
- *      series.h
+ *            series.h
  *
  *  Copyright 2008  Pieter Collins
- *
+ * 
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 /*! \file series.h
  *  \brief Taylor series in a single variable.
  */
@@ -85,111 +85,111 @@ template<class X> Series<X> sqrt(const Series<X>& x) {
 
 
 template<class X>
-Series<X>
-Series<X>::rec(uint d, const X& c)
+Series<X> 
+Series<X>::rec(uint d, const X& c) 
 {
     Series<X> y(d);
     X mr = (-1)/c;
     for(uint i=0; i<=y.degree(); ++i) {
-     y[i]=-Ariadne::pow(mr,i+1u);
+        y[i]=-Ariadne::pow(mr,i+1u);
     }
     return y;
 }
 
 template<class X>
-Series<X>
+Series<X> 
 Series<X>::pow(uint d, const X& c, int k)
 {
 
     uint n=k;
     Series<X> y(d);
     for(uint i=0; i<=std::min(uint(d),n); ++i) {
-     uint j=n-i;
-     y[i]=X(bin(n,j))*Ariadne::pow(c,j);
+        uint j=n-i;
+        y[i]=X(bin(n,j))*Ariadne::pow(c,j);
     }
     return y;
 }
 
 template<class X>
-Series<X>
+Series<X> 
 Series<X>::sqrt(uint d, const X& c)
 {
     Series<X> y(d);
     y[0]=Ariadne::sqrt(c);
     X mhr=-0.5/c;
     for(uint i=1; i<=y.degree(); ++i) {
-     // Need to convert uint to int to prevent wraparound for 2*1u-3
-     y[i]=((2*int(i)-3)*mhr)/i*y[i-1];
+        // Need to convert uint to int to prevent wraparound for 2*1u-3
+        y[i]=((2*int(i)-3)*mhr)/i*y[i-1];
     }
     return y;
 }
 
 template<class X>
-Series<X>
+Series<X> 
 Series<X>::exp(uint d, const X& c)
 {
     Series<X> y(d);
     y[0]=Ariadne::exp(c);
     for(uint i=1; i<=y.degree(); ++i) {
-     y[i]=y[i-1]/i;
+        y[i]=y[i-1]/i;
     }
     return y;
 }
 
 template<class X>
-Series<X>
+Series<X> 
 Series<X>::log(uint d, const X& c)
 {
     Series<X> y(d);
     y[0]=Ariadne::log(c);
     X mr=(-1)/c;
     for(uint i=1; i<=y.degree();++i) {
-     y[i]=-Ariadne::pow(mr,i)/i;
+        y[i]=-Ariadne::pow(mr,i)/i;
     }
     return y;
 }
 
 template<class X>
-Series<X>
-Series<X>::sin(uint d, const X& c)
+Series<X> 
+Series<X>::sin(uint d, const X& c) 
 {
     Series<X> y(d);
     y[0]=Ariadne::sin(c);
     if(d>=1) {
-     y[1]=Ariadne::cos(c);
-     for(uint i=2; i<=d; ++i) {
-      y[i]=-y[i-2]/(i*(i-1));
-     }
+        y[1]=Ariadne::cos(c);
+        for(uint i=2; i<=d; ++i) {
+            y[i]=-y[i-2]/(i*(i-1));
+        }
     }
     return y;
 }
 
 
-template<class X>
-Series<X>
+template<class X> 
+Series<X> 
 Series<X>::cos(uint d, const X& c)
 {
     Series<X> y(d);
     y[0]=Ariadne::cos(c);
     if(d>=1) {
-     y[1]=-Ariadne::sin(c);
-     for(uint i=2; i<=d; ++i) {
-      y[i]=-y[i-2]/(i*(i-1));
-     }
+        y[1]=-Ariadne::sin(c);
+        for(uint i=2; i<=d; ++i) {
+            y[i]=-y[i-2]/(i*(i-1));
+        }
     }
     return y;
 }
 
-template<class X>
-Series<X>
+template<class X> 
+Series<X> 
 Series<X>::tan(uint d, const X& c)
 {
     ARIADNE_NOT_IMPLEMENTED;
     //return sin(d,c)/cos(d,c);
 }
 
-template<class X>
-Series<X>
+template<class X>  
+Series<X> 
 Series<X>::asin(uint d, const X& c)
 {
     if(d==0) { Series<X> y(d); y[0]=Ariadne::asin(c); return y; }
@@ -198,8 +198,8 @@ Series<X>::asin(uint d, const X& c)
     return antiderivative(y,Ariadne::asin(c));
 }
 
-template<class X>
-Series<X>
+template<class X>  
+Series<X> 
 Series<X>::acos(uint d, const X& c)
 {
     if(d==0) { Series<X> y(d); y[0]=Ariadne::acos(c); return y; }
@@ -208,11 +208,11 @@ Series<X>::acos(uint d, const X& c)
     return antiderivative(y,Ariadne::acos(c));
 }
 
-template<class X>
-Series<X>
+template<class X>  
+Series<X> 
 Series<X>::atan(uint d, const X& c)
 {
-    if(d==0) { Series<X> y(d); y[0]=Ariadne::atan(c); return y; }
+    if(d==0) { Series<X> y(d); y[0]=Ariadne::atan(c); return y; } 
     Series<X> y(d-1); y[0]=c; y[1]=X(1);
     y = Ariadne::rec(Ariadne::sqrt(X(1)+Ariadne::sqr(y)));
     return antiderivative(y,Ariadne::atan(c));
@@ -228,26 +228,26 @@ antiderivative(const Series<X>& x, const X& c)
     Series<X> r(n+1);
     r[0]=c;
     for(uint i=0; i<=n; ++i) {
-     r[i+1]=x[i]/(i+1);
+        r[i+1]=x[i]/(i+1);
     }
     return r;
 }
 
 
 template<class X>
-Series<X>
-operator*(const Series<X>& x, const Series<X>& y)
+Series<X> 
+operator*(const Series<X>& x, const Series<X>& y) 
 {
     //const Series<X>& x=*this;
     X zero=x[0]*y[0]*0.0;
     Series<X> r(std::min(x.degree(),y.degree()));
     for(uint k=0; k<=r.degree(); ++k) {
-     r[k]=zero;
+        r[k]=zero;
     }
     for(uint i=0; i<=r.degree(); ++i) {
-     for(uint j=0; j<=r.degree()-i; ++j) {
-      r[i+j]+=bin(i+j,i)*x[i]*y[j];
-     }
+        for(uint j=0; j<=r.degree()-i; ++j) {
+            r[i+j]+=bin(i+j,i)*x[i]*y[j];
+        }
     }
     return r;
 }
@@ -258,7 +258,7 @@ std::ostream& operator<<(std::ostream& os, const Series<X>& x)
 {
     os << "S";
     for(uint i=0; i<=x.degree(); ++i) {
-     os << (i==0 ? '[' : ',') << x[i];
+        os << (i==0 ? '[' : ',') << x[i];
     }
     return os << "]";
 }

@@ -1,7 +1,7 @@
 /*****************************************************************************************************
- *      cmos_inverter_analoginput.cc
+ *            cmos_inverter_analoginput.cc
  *
- *      by Luca Geretti
+ *            by Luca Geretti
  *
  * Provides the behavior of a CMOS inverter fed by a sinusoidal (thus analog) input.
  *
@@ -24,37 +24,37 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
     {
-    // The rectangle to be drawn
-    Box rect = Box(numVariables);
-    // Chooses the fill colour
-     fig << fill_colour(Colour(1.0,1.0,1.0));
+	// The rectangle to be drawn
+	Box rect = Box(numVariables);
+	// Chooses the fill colour
+        fig << fill_colour(Colour(1.0,1.0,1.0));
 
-    // Gets the number of times each variable interval would be divided by 2
-     int numDivisions = MAX_GRID_DEPTH / numVariables;
-    // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-    Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
-    // Initiates the x position to the bounding box left bound
-     Float pos_x = bbox[0].lower();
-     // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
-    rect[yaxis] = bbox[1];
-     // While between the interval
-     while (pos_x < bbox[0].upper())
-     {
-     rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
-     pos_x += step_x; // Shifts the x position
-     fig << rect; // Appends the rectangle
-     }
+	// Gets the number of times each variable interval would be divided by 2
+        int numDivisions = MAX_GRID_DEPTH / numVariables;
+	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
+	Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+	// Initiates the x position to the bounding box left bound
+        Float pos_x = bbox[0].lower();
+        // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
+	rect[yaxis] = bbox[1];
+        // While between the interval
+        while (pos_x < bbox[0].upper())
+        {
+	    rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+	    pos_x += step_x; // Shifts the x position
+	    fig << rect; // Appends the rectangle
+        }
 
-    // Repeats for the rectangles in the y direction
-    Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-     Float pos_y = bbox[1].lower();
-    rect[xaxis] = bbox[0];
-     while (pos_y < bbox[1].upper())
-     {
-     rect[yaxis] = Interval(pos_y,pos_y+step_y);
-     fig << rect;
-     pos_y += step_y;
-     }
+	// Repeats for the rectangles in the y direction
+	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        Float pos_y = bbox[1].lower();
+	rect[xaxis] = bbox[0];
+        while (pos_y < bbox[1].upper())
+        {
+	    rect[yaxis] = Interval(pos_y,pos_y+step_y);
+   	    fig << rect;
+	    pos_y += step_y;
+        }
     }
     // Draws and creates file
     fig.set_fill_colour(fc);
@@ -82,10 +82,10 @@ int main()
 
     /// Constants
     float EVOL_TIME = 2.0/freq;   /// Evolution time
-    int EVOL_TRANS = 22;      /// Evolution transitions
+    int EVOL_TRANS = 22;            /// Evolution transitions
     float MAX_ENCL_RADIUS = 0.1;   /// Maximum enclosure radius
     float MAX_STEP_SIZE = 1e-3;     /// Maximum step size
-    int VERBOSITY = 1;     /// Verbosity of the GeneralHybridEvolver
+    int VERBOSITY = 1;              /// Verbosity of the GeneralHybridEvolver
 
 
 
@@ -203,66 +203,66 @@ int main()
     /// Create the transitions
 
     /// From subthreshold nMOS, linear pMOS
-     /// To subthreshold nMOS, saturation pMOS
-     inverter.new_transition(nt_pl,to_nt_ps,nt_ps,noop_r,ps_g,urgent);
-     /// To saturation nMOS, linear pMOS
-     inverter.new_transition(nt_pl,to_ns_pl,ns_pl,noop_r,non_g,urgent);
+	    /// To subthreshold nMOS, saturation pMOS
+	    inverter.new_transition(nt_pl,to_nt_ps,nt_ps,noop_r,ps_g,urgent);
+	    /// To saturation nMOS, linear pMOS
+	    inverter.new_transition(nt_pl,to_ns_pl,ns_pl,noop_r,non_g,urgent);
     /// From subthreshold nMOS, saturation pMOS
-     /// To subthreshold nMOS, linear pMOS
-     inverter.new_transition(nt_ps,to_nt_pl,nt_pl,noop_r,pl_g,urgent);
-      /// To rising towards saturation pMOS
-      inverter.new_transition(nt_ps,to_rising_ps,rising_ps,noop_r,non_g,urgent);
+	    /// To subthreshold nMOS, linear pMOS
+	    inverter.new_transition(nt_ps,to_nt_pl,nt_pl,noop_r,pl_g,urgent);
+ 	    /// To rising towards saturation pMOS
+            inverter.new_transition(nt_ps,to_rising_ps,rising_ps,noop_r,non_g,urgent);
     /// From rising towards saturation pMOS
-      /// To linear nMOS, saturation pMOS
-     inverter.new_transition(rising_ps,to_nl_ps,nl_ps,noop_r,nl_g,urgent);
-      /// To saturation nMOS, saturation pMOS
-     inverter.new_transition(rising_ps,to_ns_ps,ns_ps,noop_r,ns_g,urgent);
+            /// To linear nMOS, saturation pMOS
+	    inverter.new_transition(rising_ps,to_nl_ps,nl_ps,noop_r,nl_g,urgent);
+            /// To saturation nMOS, saturation pMOS
+	    inverter.new_transition(rising_ps,to_ns_ps,ns_ps,noop_r,ns_g,urgent);
     /// From falling towards subthreshold nMOS
-      /// To subthreshold nMOS, linear pMOS
-     inverter.new_transition(falling_nt,to_nt_pl,nt_pl,noop_r,pl_g,urgent);
-      /// To subthreshold nMOS, saturation pMOS
-     inverter.new_transition(falling_nt,to_nt_ps,nt_ps,noop_r,ps_g,urgent);
+            /// To subthreshold nMOS, linear pMOS
+	    inverter.new_transition(falling_nt,to_nt_pl,nt_pl,noop_r,pl_g,urgent);
+            /// To subthreshold nMOS, saturation pMOS
+	    inverter.new_transition(falling_nt,to_nt_ps,nt_ps,noop_r,ps_g,urgent);
     /// From linear nMOS, saturation pMOS
-     /// To falling towards subthreshold nMOS
-     inverter.new_transition(nl_ps,to_falling_nt,falling_nt,noop_r,noff_g,urgent);
-      /// To saturation nMOS, saturation pMOS
-      inverter.new_transition(nl_ps,to_ns_ps,ns_ps,noop_r,ns_g,urgent);
-      /// To falling towards subthreshold pMOS
-      inverter.new_transition(nl_ps,to_falling_pt,falling_pt,noop_r,poff_g,urgent);
+	    /// To falling towards subthreshold nMOS
+	    inverter.new_transition(nl_ps,to_falling_nt,falling_nt,noop_r,noff_g,urgent);
+ 	    /// To saturation nMOS, saturation pMOS
+            inverter.new_transition(nl_ps,to_ns_ps,ns_ps,noop_r,ns_g,urgent);
+ 	    /// To falling towards subthreshold pMOS
+            inverter.new_transition(nl_ps,to_falling_pt,falling_pt,noop_r,poff_g,urgent);
     /// From saturation nMOS, linear pMOS
-     /// To falling towards subthreshold nMOS
-     inverter.new_transition(ns_pl,to_falling_nt,falling_nt,noop_r,noff_g,urgent);
-      /// To saturation nMOS, saturation pMOS
-      inverter.new_transition(ns_pl,to_ns_ps,ns_ps,noop_r,ps_g,urgent);
-      /// To falling towards subthreshold pMOS
-      inverter.new_transition(ns_pl,to_falling_pt,falling_pt,noop_r,poff_g,urgent);
+	    /// To falling towards subthreshold nMOS
+	    inverter.new_transition(ns_pl,to_falling_nt,falling_nt,noop_r,noff_g,urgent);
+ 	    /// To saturation nMOS, saturation pMOS
+            inverter.new_transition(ns_pl,to_ns_ps,ns_ps,noop_r,ps_g,urgent);
+ 	    /// To falling towards subthreshold pMOS
+            inverter.new_transition(ns_pl,to_falling_pt,falling_pt,noop_r,poff_g,urgent);
     /// From saturation nMOS, saturation pMOS
-     /// To falling towards subthreshold nMOS
-     inverter.new_transition(ns_ps,to_falling_nt,falling_nt,noop_r,noff_g,urgent);
-     /// To linear nMOS, saturation pMOS
-     inverter.new_transition(ns_ps,to_nl_ps,nl_ps,noop_r,nl_g,urgent);
-      /// To falling towards subthreshold pMOS
-      inverter.new_transition(ns_ps,to_falling_pt,falling_pt,noop_r,poff_g,urgent);
+	    /// To falling towards subthreshold nMOS
+	    inverter.new_transition(ns_ps,to_falling_nt,falling_nt,noop_r,noff_g,urgent);
+	    /// To linear nMOS, saturation pMOS
+	    inverter.new_transition(ns_ps,to_nl_ps,nl_ps,noop_r,nl_g,urgent);
+ 	    /// To falling towards subthreshold pMOS
+            inverter.new_transition(ns_ps,to_falling_pt,falling_pt,noop_r,poff_g,urgent);
     /// From falling towards subthreshold pMOS
-      /// To linear nMOS, subthreshold pMOS
-     inverter.new_transition(falling_pt,to_nl_pt,nl_pt,noop_r,nl_g,urgent);
-      /// To saturation nMOS, subthreshold pMOS
-     inverter.new_transition(falling_pt,to_ns_pt,ns_pt,noop_r,ns_g,urgent);
+            /// To linear nMOS, subthreshold pMOS
+	    inverter.new_transition(falling_pt,to_nl_pt,nl_pt,noop_r,nl_g,urgent);
+            /// To saturation nMOS, subthreshold pMOS
+	    inverter.new_transition(falling_pt,to_ns_pt,ns_pt,noop_r,ns_g,urgent);
     /// From rising towards saturation nMOS
-      /// To saturation nMOS, linear pMOS
-     inverter.new_transition(rising_ns,to_ns_pl,ns_pl,noop_r,pl_g,urgent);
-      /// To saturation nMOS, saturation pMOS
-     inverter.new_transition(rising_ns,to_ns_ps,ns_ps,noop_r,ps_g,urgent);
+            /// To saturation nMOS, linear pMOS
+	    inverter.new_transition(rising_ns,to_ns_pl,ns_pl,noop_r,pl_g,urgent);
+            /// To saturation nMOS, saturation pMOS
+	    inverter.new_transition(rising_ns,to_ns_ps,ns_ps,noop_r,ps_g,urgent);
     /// From linear nMOS, subthreshold pMOS
-      /// To linear nMOS, saturation pMOS
-     inverter.new_transition(nl_pt,to_nl_ps,nl_ps,noop_r,pon_g,urgent);
-      /// To saturation nMOS, subthreshold pMOS
-     inverter.new_transition(nl_pt,to_ns_pt,ns_pt,noop_r,ns_g,urgent);
+            /// To linear nMOS, saturation pMOS
+	    inverter.new_transition(nl_pt,to_nl_ps,nl_ps,noop_r,pon_g,urgent);
+            /// To saturation nMOS, subthreshold pMOS
+	    inverter.new_transition(nl_pt,to_ns_pt,ns_pt,noop_r,ns_g,urgent);
     /// From saturation nMOS, subthreshold pMOS
-      /// To rising towards saturation nMOS
-     inverter.new_transition(ns_pt,to_rising_ns,rising_ns,noop_r,pon_g,urgent);
-      /// To linear nMOS, subthreshold pMOS
-     inverter.new_transition(ns_pt,to_nl_pt,nl_pt,noop_r,nl_g,urgent);
+            /// To rising towards saturation nMOS
+	    inverter.new_transition(ns_pt,to_rising_ns,rising_ns,noop_r,pon_g,urgent);
+            /// To linear nMOS, subthreshold pMOS
+	    inverter.new_transition(ns_pt,to_nl_pt,nl_pt,noop_r,nl_g,urgent);
 
     /// Finished building the automaton
 
@@ -303,17 +303,17 @@ int main()
     plot("cmos_inverter_analoginput_orbit_t_vi", 0, 1, 3, graphic_box_vi, Colour(0.0,0.5,1.0), orbit, -1);
     plot("cmos_inverter_analoginput_orbit_t_vo", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit, -1);
     if (orbit.reach().find(nt_pl)!=orbit.reach().locations_end())
-     plot("cmos_inverter_analoginput_orbit_t_vo_nsubplin", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nt_pl], -1);
+        plot("cmos_inverter_analoginput_orbit_t_vo_nsubplin", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nt_pl], -1);
     if (orbit.reach().find(nt_ps)!=orbit.reach().locations_end())
-     plot("cmos_inverter_analoginput_orbit_t_vo_nsubpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nt_ps], -1);
+        plot("cmos_inverter_analoginput_orbit_t_vo_nsubpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nt_ps], -1);
     if (orbit.reach().find(nl_pt)!=orbit.reach().locations_end())
-     plot("cmos_inverter_analoginput_orbit_t_vo_nlinpsub", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nl_pt], -1);
+    	plot("cmos_inverter_analoginput_orbit_t_vo_nlinpsub", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nl_pt], -1);
     if (orbit.reach().find(ns_pt)!=orbit.reach().locations_end())
-     plot("cmos_inverter_analoginput_orbit_t_vo_nsatpsub", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_pt], -1);
+    	plot("cmos_inverter_analoginput_orbit_t_vo_nsatpsub", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_pt], -1);
     if (orbit.reach().find(nl_ps)!=orbit.reach().locations_end())
-     plot("cmos_inverter_analoginput_orbit_t_vo_nlinpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nl_ps], -1);
+    	plot("cmos_inverter_analoginput_orbit_t_vo_nlinpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nl_ps], -1);
     if (orbit.reach().find(ns_pl)!=orbit.reach().locations_end())
-     plot("cmos_inverter_analoginput_orbit_t_vo_nsatplin", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_pl], -1);
+    	plot("cmos_inverter_analoginput_orbit_t_vo_nsatplin", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_pl], -1);
     if (orbit.reach().find(ns_ps)!=orbit.reach().locations_end())
-     plot("cmos_inverter_analoginput_orbit_t_vo_nsatpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_ps], -1);
+    	plot("cmos_inverter_analoginput_orbit_t_vo_nsatpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[ns_ps], -1);
 }

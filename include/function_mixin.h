@@ -1,5 +1,5 @@
 /***************************************************************************
- *      function_mixin.h
+ *            function_mixin.h
  *
  *  Copyright 2008-10  Pieter Collins
  *
@@ -47,7 +47,7 @@ class ScalarFunctionMixin<F,Float>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
-     X r; static_cast<const F*>(this)->_compute(r,x); return r;}
+        X r; static_cast<const F*>(this)->_compute(r,x); return r;}
   protected:
     ScalarFunctionMixin() { }
   public:
@@ -66,7 +66,7 @@ class ScalarFunctionMixin<F,Interval>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
-     X r; static_cast<const F*>(this)->_compute(r,x); return r;}
+        X r; static_cast<const F*>(this)->_compute(r,x); return r;}
   protected:
     ScalarFunctionMixin() { }
   public:
@@ -89,7 +89,7 @@ class ScalarFunctionMixin<F,Real>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
-     X r; static_cast<const F*>(this)->_compute(r,x); return r;}
+        X r; static_cast<const F*>(this)->_compute(r,x); return r;}
   protected:
     ScalarFunctionMixin() { }
   public:
@@ -117,7 +117,7 @@ class VectorFunctionMixin<F,Float>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
-     Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
+        Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
   protected:
     VectorFunctionMixin() { }
   public:
@@ -133,7 +133,7 @@ class VectorFunctionMixin<F,Interval>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
-     Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
+        Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
   protected:
     VectorFunctionMixin() { }
   public:
@@ -154,7 +154,7 @@ class VectorFunctionMixin<F,Real>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
-     Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
+        Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
   protected:
     VectorFunctionMixin() { }
   public:

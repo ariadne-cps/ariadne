@@ -1,5 +1,5 @@
 /***************************************************************************
- *      utilities.cc
+ *            utilities.cc
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *

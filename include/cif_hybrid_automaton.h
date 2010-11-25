@@ -1,5 +1,5 @@
 /***************************************************************************
- *      cif_hybrid_automaton.h
+ *            cif_hybrid_automaton.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -66,9 +66,9 @@ class CIFAtomicInterchangeAutomaton
     //!
     //! Currently no invariant predicates are supported.
     void new_mode(AtomicDiscreteLocation location,
-      const List<RealAlgebraicAssignment>& algebraic_equations,
-      const List<RealDifferentialAssignment>& differential_equations,
-      const List<ContinuousPredicate>& progress_predicates);
+                  const List<RealAlgebraicAssignment>& algebraic_equations,
+                  const List<RealDifferentialAssignment>& differential_equations,
+                  const List<ContinuousPredicate>& progress_predicates);
 
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
@@ -80,11 +80,11 @@ class CIFAtomicInterchangeAutomaton
     //!    \param guard is the transition's activation region.
     //!    \param urgency is a flag giving whether the transition is urgent.
     void new_transition(AtomicDiscreteLocation source,
-      DiscreteEvent event,
-      AtomicDiscreteLocation target,
-      const List<RealUpdateAssignment>& reset,
-      const ContinuousPredicate& guard,
-      Urgency urgency=permissive);
+                        DiscreteEvent event,
+                        AtomicDiscreteLocation target,
+                        const List<RealUpdateAssignment>& reset,
+                        const ContinuousPredicate& guard,
+                        Urgency urgency=permissive);
 };
 
 
@@ -105,8 +105,8 @@ CIFAtomicInterchangeAutomaton::new_mode(
 {
     this->AtomicHybridAutomaton::new_mode(location,algebraic_equations,differential_equations);
     for(uint i=0; i!=progress_predicates.size(); ++i) {
-     String name=String(location.name())+".tcp"+to_string(i);
-     this->AtomicHybridAutomaton::new_invariant(location,DiscreteEvent(name),progress_predicates[i]);
+        String name=String(location.name())+".tcp"+to_string(i);
+        this->AtomicHybridAutomaton::new_invariant(location,DiscreteEvent(name),progress_predicates[i]);
     }
 }
 

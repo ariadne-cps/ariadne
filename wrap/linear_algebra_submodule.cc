@@ -1,5 +1,5 @@
 /***************************************************************************
- *      linear_algebra_submodule.cc
+ *            linear_algebra_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -93,22 +93,22 @@ template<class X>
 struct from_python< Vector<X> >
 {
     from_python() {
-     converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >());
+        converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >());
     }
 
     static void* convertible(PyObject* obj_ptr) {
-     if (!PyList_Check(obj_ptr)) { return 0; }
-     return obj_ptr;
+        if (!PyList_Check(obj_ptr)) { return 0; }
+        return obj_ptr;
     }
 
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
     {
-     list lst=extract<list>(obj_ptr);
-     void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
-     Vector<X> res(len(lst));
-     for(uint i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
-     new (storage) Vector<X>(res);
-     data->convertible = storage;
+        list lst=extract<list>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
+        Vector<X> res(len(lst));
+        for(uint i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
+        new (storage) Vector<X>(res);
+        data->convertible = storage;
     }
 };
 
@@ -117,26 +117,26 @@ template<class X>
 struct from_python< Matrix<X> >
 {
     from_python() {
-     converter::registry::push_back(&convertible,&construct,type_id< Matrix<X> >());
+        converter::registry::push_back(&convertible,&construct,type_id< Matrix<X> >());
     }
 
     static void* convertible(PyObject* obj_ptr) {
-     if (!PyList_Check(obj_ptr)) { return 0; }
-     return obj_ptr;
+        if (!PyList_Check(obj_ptr)) { return 0; }
+        return obj_ptr;
     }
 
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
     {
-     list rows=extract<list>(obj_ptr);
-     Matrix<X> res(len(rows),len(extract<list>(rows[0])));
-     for(uint i=0; i!=res.row_size(); ++i) {
-      list elmnts=extract<list>(rows[i]);
-      ARIADNE_ASSERT(uint(len(elmnts))==res.column_size());
-      for(uint j=0; j!=res.column_size(); ++j) {
-    res[i][j]=extract<X>(elmnts[j]); } }
-     void* storage = ((converter::rvalue_from_python_storage< Matrix<X> >*)   data)->storage.bytes;
-     new (storage) Matrix<X>(res);
-     data->convertible = storage;
+        list rows=extract<list>(obj_ptr);
+        Matrix<X> res(len(rows),len(extract<list>(rows[0])));
+        for(uint i=0; i!=res.row_size(); ++i) {
+            list elmnts=extract<list>(rows[i]);
+            ARIADNE_ASSERT(uint(len(elmnts))==res.column_size());
+            for(uint j=0; j!=res.column_size(); ++j) {
+                res[i][j]=extract<X>(elmnts[j]); } }
+        void* storage = ((converter::rvalue_from_python_storage< Matrix<X> >*)   data)->storage.bytes;
+        new (storage) Matrix<X>(res);
+        data->convertible = storage;
     }
 };
 

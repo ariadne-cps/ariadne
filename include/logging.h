@@ -1,5 +1,5 @@
 /***************************************************************************
- *      logging.h
+ *            logging.h
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -31,12 +31,12 @@
 #include <iostream>
 #include <fstream>
 
-//! Send a message to the global logging stream.
-#define ARIADNE_LOG(level,msg)    \
+//! Send a message to the global logging stream. 
+#define ARIADNE_LOG(level,msg)                                  \
     if(verbosity >= level) { std::clog << "[" << level << "] " << msg << std::flush; }
 
 namespace Ariadne {
-
+  
 struct Loggable {
   public:
     Loggable() : verbosity(0) { }
@@ -45,12 +45,12 @@ struct Loggable {
 
 // Global log output file
 extern std::ofstream log_file_stream;
-
+  
 //! \brief Redirect logging output to file \a filename.
 void redirect_log(const char* filename);
 
 extern int global_verbosity;
-
+   
 
 } // namespace Ariadne
 

@@ -1,8 +1,8 @@
 /***************************************************************************
- *      grid.h
+ *            grid.h
  *
  *  Copyright  2008-9  Ivan S. Zapreev, Pieter Collins
- *      ivan.zapreev@gmail.com, pieter.collins@cwi.nl
+ *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/
 
@@ -56,40 +56,40 @@ class Grid {
   public:
     //! Destructor.
     ~Grid();
-    
+                
     //! Default constructor constructs a grid from a null pointer. Needed for some iterators.
     explicit Grid();
-    
+                
     //! Construct from a dimension and a spacing in each direction. 
     explicit Grid(uint d);
-    
+                
     //! Construct from a dimension and a spacing in each direction. 
     explicit Grid(uint d, Float l);
-    
+                
     //! Construct from a vector of offsets.
     explicit Grid(const Vector<Float>& lengths);
-    
+                
     //! Construct from a centre point and a vector of offsets.
     explicit Grid(const Vector<Float>& origin, const Vector<Float>& lengths);
-    
+                
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);
-    
+                
     //! The underlying dimension of the grid.
     uint dimension() const;
-    
+                
     //! Tests equality of two grids. Tests equality of references first.
     bool operator==(const Grid& g) const;
-    
+                
     //! Tests inequality of two grids.
     bool operator!=(const Grid& g) const;
-    
+                
     //! The origin of the grid.
     const Vector<Float>& origin() const;
-    
+                
     //! The strides between successive integer points.
     const Vector<Float>& lengths() const;
-    
+                
     //! Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const Grid& g);
 

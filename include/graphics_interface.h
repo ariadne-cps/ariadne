@@ -1,5 +1,5 @@
 /***************************************************************************
- *      graphics_interface.h
+ *            graphics_interface.h
  *
  *  Copyright 2009  Davide Bresolin
  *

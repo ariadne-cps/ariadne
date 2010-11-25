@@ -1,5 +1,5 @@
 /***************************************************************************
- *      hybrid_automaton.cc
+ *            hybrid_automaton.cc
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *
@@ -65,16 +65,16 @@ MonolithicHybridAutomaton::MonolithicHybridAutomaton(const String& name)
 
 void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
-      RealVectorFunction dynamic)
+                                    RealVectorFunction dynamic)
 {
     if(this->has_mode(location)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
-    "The hybrid automaton already has a mode with location label "<<location<<"\n");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
+                      "The hybrid automaton already has a mode with location label "<<location<<"\n");
     }
     if(dynamic.result_size()!=dynamic.argument_size()) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
-      "The dynamic has argument size " << dynamic.argument_size()
-    << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
+            "The dynamic has argument size " << dynamic.argument_size()
+                << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
     }
     this->_modes.insert(location,Mode(location,dynamic));
 }
@@ -82,22 +82,22 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 
 void
 MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
-     DiscreteEvent event,
-     RealScalarFunction invariant,
-     EventKind kind)
+                                         DiscreteEvent event,
+                                         RealScalarFunction invariant,
+                                         EventKind kind)
 {
     if(!this->has_mode(location)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,label,invariant,kind)",
-    "The location "<<location<<" of the invariant must be in the automaton.");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,label,invariant,kind)",
+                      "The location "<<location<<" of the invariant must be in the automaton.");
     }
     if(this->has_guard(location,event)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,label,invariant,kind)",
-    "The automaton already has a guard or invariant in location "<<location<<" with event label "<<event<<"\n");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,label,invariant,kind)",
+                      "The automaton already has a guard or invariant in location "<<location<<" with event label "<<event<<"\n");
     }
     if(invariant.argument_size()!=this->dimension(location)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,label,invariant,kind)",
-      "The invariant has argument size " << invariant.argument_size()
-    << " but the mode has state-space dimension " << this->dimension(location));
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_invariant(location,label,invariant,kind)",
+            "The invariant has argument size " << invariant.argument_size()
+                << " but the mode has state-space dimension " << this->dimension(location));
     }
 
     this->_modes.value(location)._invariants.insert(event,Invariant(location,event,invariant,kind));
@@ -107,23 +107,23 @@ MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
 
 void
 MonolithicHybridAutomaton::new_transition(DiscreteLocation source,
-      DiscreteEvent event,
-      DiscreteLocation target,
-      RealVectorFunction reset,
-      RealScalarFunction guard,
-      EventKind kind)
+                                          DiscreteEvent event,
+                                          DiscreteLocation target,
+                                          RealVectorFunction reset,
+                                          RealScalarFunction guard,
+                                          EventKind kind)
 {
     if(!this->has_mode(source)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_transition(...)",
-    "The source location "<<source<<" of transition event "<<event<<" must be in the automaton\n");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_transition(...)",
+                      "The source location "<<source<<" of transition event "<<event<<" must be in the automaton\n");
     }
     if(!this->has_mode(target)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_transition(...)",
-    "The target location "<<target<<" of transition event "<<event<<" from "<<source<<" must be in the automaton\n");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_transition(...)",
+                      "The target location "<<target<<" of transition event "<<event<<" from "<<source<<" must be in the automaton\n");
     }
     if(this->has_guard(source,event)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_transition(...)",
-    "The automaton already has an invariant or transition in location "<<source<<" with event label "<<event<<"\n");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_transition(...)",
+                      "The automaton already has an invariant or transition in location "<<source<<" with event label "<<event<<"\n");
     }
 
     this->_modes.value(source)._transitions.insert(event,Transition(source,event,target,reset,guard,kind));
@@ -133,16 +133,16 @@ MonolithicHybridAutomaton::new_transition(DiscreteLocation source,
 
 void
 MonolithicHybridAutomaton::set_grid(DiscreteLocation location,
-      const Grid& grid)
+                                    const Grid& grid)
 {
     if(!this->has_mode(location)) {
-     ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(location,grid)",
-    "The automaton does not contain a mode with location label "<<location<<"\n");
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(location,grid)",
+                      "The automaton does not contain a mode with location label "<<location<<"\n");
     }
     Mode& mode=this->_modes.value(location);
     if(grid.dimension()!=mode.dimension()) {
-      ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(location,grid)",
-     "Mode "<<location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
+            ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(location,grid)",
+                          "Mode "<<location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
     }
     mode._grid_ptr=shared_ptr<Grid>(new Grid(grid));
 }
@@ -151,14 +151,14 @@ void
 MonolithicHybridAutomaton::set_grid(const Grid& grid)
 {
     for(Map<DiscreteLocation,Mode>::iterator mode_iter=this->_modes.begin();
-     mode_iter!=this->_modes.end(); ++mode_iter)
+        mode_iter!=this->_modes.end(); ++mode_iter)
     {
-     Mode& mode=mode_iter->second;
-     if(grid.dimension()!=mode.dimension()) {
-      ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(grid)",
-     "Mode "<<mode._location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
-     }
-     mode._grid_ptr=shared_ptr<Grid>(new Grid(grid));
+        Mode& mode=mode_iter->second;
+        if(grid.dimension()!=mode.dimension()) {
+            ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(grid)",
+                          "Mode "<<mode._location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
+        }
+        mode._grid_ptr=shared_ptr<Grid>(new Grid(grid));
     }
 }
 
@@ -166,16 +166,16 @@ void
 MonolithicHybridAutomaton::set_grid(const HybridGrid& hgrid)
 {
     for(Map<DiscreteLocation,Mode>::iterator mode_iter=this->_modes.begin();
-     mode_iter!=this->_modes.end(); ++mode_iter)
+        mode_iter!=this->_modes.end(); ++mode_iter)
     {
-     DiscreteLocation location=mode_iter->first;
-     Mode& mode=mode_iter->second;
-     const Grid grid=hgrid[location];
-     if(grid.dimension()!=mode.dimension()) {
-      ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(hybrid_grid)",
-     "Mode "<<mode._location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
-     }
-     mode._grid_ptr=shared_ptr<Grid>(new Grid(hgrid[mode._location]));
+        DiscreteLocation location=mode_iter->first;
+        Mode& mode=mode_iter->second;
+        const Grid grid=hgrid[location];
+        if(grid.dimension()!=mode.dimension()) {
+            ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(hybrid_grid)",
+                          "Mode "<<mode._location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
+        }
+        mode._grid_ptr=shared_ptr<Grid>(new Grid(hgrid[mode._location]));
     }
 }
 
@@ -311,9 +311,9 @@ MonolithicHybridAutomaton::grid() const
 {
     HybridGrid result;
     for(Map<DiscreteLocation,Mode>::const_iterator mode_iter=this->_modes.begin();
-     mode_iter!=this->_modes.end(); ++mode_iter)
+        mode_iter!=this->_modes.end(); ++mode_iter)
     {
-     result.insert(mode_iter->first,*mode_iter->second._grid_ptr);
+        result.insert(mode_iter->first,*mode_iter->second._grid_ptr);
     }
     return result;
 }
@@ -323,9 +323,9 @@ MonolithicHybridAutomaton::state_space() const
 {
     HybridSpace result;
     for(Map<DiscreteLocation,Mode>::const_iterator mode_iter=this->_modes.begin();
-     mode_iter!=this->_modes.end(); ++mode_iter)
+        mode_iter!=this->_modes.end(); ++mode_iter)
     {
-     result.insert(mode_iter->first,mode_iter->second.dimension());
+        result.insert(mode_iter->first,mode_iter->second.dimension());
     }
     return result;
 }
@@ -341,23 +341,23 @@ operator<<(std::ostream& os, const MonolithicHybridAutomaton& automaton)
 
     os << "MonolithicHybridAutomaton( \n";
     for(Map<DiscreteLocation,Mode>::const_iterator mode_iter=automaton._modes.begin();
-     mode_iter!=automaton._modes.end(); ++mode_iter)
+        mode_iter!=automaton._modes.end(); ++mode_iter)
     {
-     const Mode& mode = mode_iter->second;
-     os << "  " << mode._location << ": " << mode._dynamic << ";\n";
-     for(Map<DiscreteEvent,Invariant>::const_iterator invariant_iter=mode._invariants.begin();
-      invariant_iter!=mode._invariants.end(); ++invariant_iter)
-     {
-      const Invariant& invariant = invariant_iter->second;
-      os << "    " << invariant._event << ": "  << invariant._kind << ", " << invariant._guard << "<=0,\n";
-     }
-     for(Map<DiscreteEvent,Transition>::const_iterator transition_iter=mode._transitions.begin();
-      transition_iter!=mode._transitions.end(); ++transition_iter)
-     {
-      const Transition& transition = transition_iter->second;
-      os << "    " << transition._event << ": " << transition._kind << ", " << transition._guard << ">=0, "
-      << transition._target << ", " << transition._reset << ";\n";
-     }
+        const Mode& mode = mode_iter->second;
+        os << "  " << mode._location << ": " << mode._dynamic << ";\n";
+        for(Map<DiscreteEvent,Invariant>::const_iterator invariant_iter=mode._invariants.begin();
+            invariant_iter!=mode._invariants.end(); ++invariant_iter)
+        {
+            const Invariant& invariant = invariant_iter->second;
+            os << "    " << invariant._event << ": "  << invariant._kind << ", " << invariant._guard << "<=0,\n";
+        }
+        for(Map<DiscreteEvent,Transition>::const_iterator transition_iter=mode._transitions.begin();
+            transition_iter!=mode._transitions.end(); ++transition_iter)
+        {
+            const Transition& transition = transition_iter->second;
+            os << "    " << transition._event << ": " << transition._kind << ", " << transition._guard << ">=0, "
+               << transition._target << ", " << transition._reset << ";\n";
+        }
     }
     return os << ")\n";
 }

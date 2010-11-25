@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_hybrid_evolution.cc
+ *            test_hybrid_evolution.cc
  *
  *  Copyright  2006-9  Pieter Collins
  *
@@ -106,8 +106,8 @@ void TestHybridEvolution::test_bouncing_ball() const {
 
     ARIADNE_TEST_PRINT(orbit);
     if(orbit.final().size()!=1u) {
-     ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
-     "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
+        ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
+                          "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
 
     HybridEnclosure orbit_final_set=*orbit.final().begin();
@@ -119,10 +119,10 @@ void TestHybridEvolution::test_bouncing_ball() const {
 
     Box bounding_box(2, -0.5,+2.5, -4.0, +4.0);
     plot("test_hybrid_evolution-bouncing_ball",bounding_box,
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 }
 
 
@@ -176,8 +176,8 @@ void TestHybridEvolution::test_water_tank() const {
 
     Orbit<HybridEnclosure> orbit = evolver.orbit(watertank,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     if(orbit.final().size()!=1u) {
-     ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
-     "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
+        ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
+                          "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
@@ -185,10 +185,10 @@ void TestHybridEvolution::test_water_tank() const {
 
     Box bounding_box(2, -0.1,9.1, -0.3,1.3);
     plot("test_hybrid_evolution-water_tank",bounding_box,
-      reach_set_colour,orbit.reach(),
-      intermediate_set_colour,orbit.intermediate(),
-      final_set_colour,orbit.final(),
-      initial_set_colour,orbit.initial());
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
 
 }
 

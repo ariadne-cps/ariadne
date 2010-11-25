@@ -1,8 +1,8 @@
 /***************************************************************************
- *      zonotope.h
+ *            zonotope.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- *
+ * 
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 /*! \file zonotope.h
  *  \brief Zonotopes in Euclidean space.
  */
@@ -43,7 +43,7 @@ namespace Ariadne {
 
 template<class X> class Vector;
 template<class X> class Matrix;
-
+ 
 class Point;
 class Box;
 class Zonotope;
@@ -55,10 +55,10 @@ class Figure;
 
 
 /*!\brief A zonotope of arbitrary dimension.
- *
+ * 
  * A zonotope is a set of the form \f$c+Ge\f$, where \f$||e||_{\infty}\leq1\f$.
- * The columns of the matrix \f$G\f$ are the <em>generators</em> of the
- * zonotope.
+ * The columns of the matrix \f$G\f$ are the <em>generators</em> of the 
+ * zonotope. 
  *
  * Zonotopes are always bounded.
  * A zonotope always contains its centre point, so can never be empty.
@@ -66,8 +66,8 @@ class Figure;
  *
  *
  * The intersection and membership tests may be performed using algorithms from: <br>
- * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."
- * <i>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</i>
+ * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."  
+ * <i>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</i> 
  * (Baltimore, MD, 2003),  803--812, ACM, New York, 2003.
  *
  * \b Storage: A %Zonotope in dimension d with n generators is described by
@@ -77,7 +77,7 @@ class Figure;
  */
 
 
-class Zonotope
+class Zonotope 
     : public CompactSetInterface
     , public DrawableInterface
 {
@@ -96,7 +96,7 @@ class Zonotope
     explicit Zonotope(uint d);
     /*! \brief Construct a zonotope of dimension \a n with centre at the origin and \a m generators. */
     explicit Zonotope(uint d, uint m);
-
+  
     /*! \brief Construct from centre, generators, and a uniform error term. */
     explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e);
     /*! \brief Construct from centre and generators. */
@@ -107,16 +107,16 @@ class Zonotope
     explicit Zonotope(const Vector<Float>& c, const Matrix<Interval>& G);
     /*! \brief Construct from an interval centre and an interval generator matrix. */
     explicit Zonotope(const Vector<Interval>& c, const Matrix<Interval>& G);
-
-
+  
+  
     /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
     template<class XX> explicit Zonotope(uint d, uint m, const XX* ptr);
-
+  
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
      */
     explicit Zonotope(uint d, uint m, double x0, ...);
-
+  
 
     /*! \brief Convert from a box. */
     Zonotope(const Box& r);
@@ -127,51 +127,51 @@ class Zonotope
     /*! \brief Cloning operator. */
     Zonotope* clone() const;
     //@}
-
-
-    //@{
+  
+  
+    //@{ 
     //! \name Logical predicates
     /*! \brief Test for equality of representation. */
     friend bool operator==(const Zonotope& z1, const Zonotope& z2);
     //@}
-
-    //@{
+  
+    //@{ 
     //! \name Data access
     /*! \brief The dimension of the zonotope. */
     uint dimension() const;
-
+  
     /*! \brief The number of generators of the zonotope. */
     uint number_of_generators() const;
-
+  
     /*! \brief The domain. */
     Vector<Interval> domain() const;
-
+  
     /*! \brief The centre. */
     const Vector<Float>& centre() const;
-
+  
     /*! \brief The matrix of principle directions. */
     const Matrix<Float>& generators() const;
-
+  
     /*! \brief The uniform error bound. */
     const Vector<Float>& error() const;
-
+  
     /*! \brief A bounding box for the set. */
     Box bounding_box() const;
-
+  
     /*! \brief The radius of the set in the supremum norm. */
     Float radius() const;
-
+  
     /*! \brief Test if the set contains a point. */
     tribool contains(const Point& pt) const;
-
+  
     /*! \brief Test if the set is disjoint from a box. */
     tribool disjoint(const Box& bx) const;
     /*! \brief Test if the set is a inside of a box. */
     tribool inside(const Box& bx) const;
-
+  
     //@}
-
-
+  
+  
     //@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
@@ -183,7 +183,7 @@ class Zonotope
     /*! \brief Tests disjointness of \a r and \a z. */
     friend tribool disjoint(const Box& r, const Zonotope& z);
     //@}
-
+  
     //@{
     //! \name Approximation operations.
     /*! \brief Compute an simplified approximation of the zonotope \a z. */
@@ -199,13 +199,13 @@ class Zonotope
     /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a b blocks of \a d generators. */
     friend Zonotope cascade_over_approximation(const Zonotope& z, uint b);
     //@}
-
+  
     //@{
     //! \name Function operations.
     /*! \brief Compute the image of \a z under a function given by the concrete model \a am. */
     friend Zonotope apply(const AffineModel& am, const Zonotope& z);
     //@}
-
+  
     //@{
     //! \name Input/output.
     /*! \brief Write to an output stream. */

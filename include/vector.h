@@ -1,5 +1,5 @@
 /***************************************************************************
- *      vector.h
+ *            vector.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  *
@@ -51,7 +51,7 @@ namespace Ariadne {
 //! In the Python interface, classes \c FloatVector and \c IntervalVector are defined.
 //! Further, Ariadne vectors can be constructed from literals in the form of a Python list: <br><br>
 //! <code> FloatVector([1.1,2.3,4.2,5]) # Create a FloatVector from a list of Python \c int and \c float types. <br>
-//!     IntervalVector([{1:2.1},[-3,4],2.3,5,{-1.1:2.2}]) # Create an IntervalVector from a list of Python types convertible to Interal</code>
+//!        IntervalVector([{1:2.1},[-3,4],2.3,5,{-1.1:2.2}]) # Create an IntervalVector from a list of Python types convertible to Interal</code>
 
 template<class X>
 class Vector
@@ -63,35 +63,35 @@ class Vector
 
     //! \brief Default constructor constructs a vector with no elements.
     Vector()
-     : ublas::vector<X>() { }
+        : ublas::vector<X>() { }
     //! \brief Construct a vector of size \a n, with elements initialised to zero.
     explicit Vector(size_t n)
-     : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
+        : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     Vector(size_t n, const X& t)
-     : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
+        : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
     //! \brief Construct a vector of size \a n, with values initialised from the C-style array beginning at \a ptr.
     template<class XX> Vector(size_t n, const XX* ptr)
-     : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
+        : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
     //! \brief Construct a list.
     template<class XX> explicit Vector(const std::vector<XX>& lst)
-     : ublas::vector<X>(lst.size()) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=lst[i]; } }
+        : ublas::vector<X>(lst.size()) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=lst[i]; } }
     //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
     Vector(size_t n, const double& t0, const double& t1, ...);
     //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
     explicit Vector(const std::string& str)
-     : ublas::vector<X>() { std::stringstream ss(str); ss >> *this; }
+        : ublas::vector<X>() { std::stringstream ss(str); ss >> *this; }
     //! \brief Copy constructor allows conversion from a vector using another numerical type.
     template<class XX> Vector(const Vector<XX>& v)
-     : ublas::vector<X>(v) { }
+        : ublas::vector<X>(v) { }
 #ifdef DOXYGEN
     //! \brief Copy assignement allows conversion from a vector using another numerical type.
     template<class XX> Vector<X>& operator=(const Vector<XX> &v);
 #endif
     template<class E> Vector(const ublas::vector_expression<E> &ve)
-     : ublas::vector<X>(ve) { }
+        : ublas::vector<X>(ve) { }
     template<class E> Vector<X>& operator=(const ublas::vector_expression<E> &ve) {
-     this->ublas::vector<X>::operator=(ve); return *this; }
+        this->ublas::vector<X>::operator=(ve); return *this; }
     //@}
 
     //@{
@@ -103,12 +103,12 @@ class Vector
     static Vector<X> one(size_t n) { return Vector<Float>(n,1.0); }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static Vector<X> unit(size_t n,size_t i) {
-     ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0.0)); result[i]=1.0; return result; }
+        ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0.0)); result[i]=1.0; return result; }
     static Vector<X> unit_box(size_t n) {
-     Vector<X> result(n,Interval(-1,1)); return result; }
+        Vector<X> result(n,Interval(-1,1)); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static array< Vector<X> > basis(size_t n) {
-     array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
+        array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
     //@}
 
     //@{
@@ -190,9 +190,9 @@ X sup_norm(const Vector<X>& v)
 {
     X r=0;
     for(size_t i=0; i!=v.size(); ++i) {
-     X absvi=abs(v[i]);
-     // NOTE: The arguments must be this way round to propagate a nan row_sum
-     r=max(absvi,r);
+        X absvi=abs(v[i]);
+        // NOTE: The arguments must be this way round to propagate a nan row_sum
+        r=max(absvi,r);
     }
     return r;
 }
@@ -209,7 +209,7 @@ X dot(const Vector<X>& v1, const Vector<X>& v2)
     ARIADNE_ASSERT(v1.size()==v2.size());
     X r=0;
     for(size_t i=0; i!=v1.size(); ++i) {
-     r+=v1[i]*v2[i];
+        r+=v1[i]*v2[i];
     }
     return r;
 }
@@ -261,7 +261,7 @@ bool operator==(const Vector<X1>& v1, const Vector<X2>& v2)
 {
     if(v1.size()!=v2.size()) { return false; }
     for(size_t i=0; i!=v1.size(); ++i) {
-     if(v1[i]!=v2[i]) { return false; }
+        if(v1[i]!=v2[i]) { return false; }
     }
     return true;
 }
@@ -279,8 +279,8 @@ bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
 {
     if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
     for(size_t i=0; i!=v1.size(); ++i) {
-     if(v1[i]<v2[i]) { return true; }
-     else if(v1[i]>v2[i]) { return false; }
+        if(v1[i]<v2[i]) { return true; }
+        else if(v1[i]>v2[i]) { return false; }
     }
     return true;
 }
@@ -290,7 +290,7 @@ template<class X>
 bool operator<=(const Vector<X>& v, const X& c)
 {
     for(size_t i=0; i!=v.size(); ++i) {
-     if(v[i]>c) { return false; }
+        if(v[i]>c) { return false; }
     }
     return true;
 }
@@ -299,7 +299,7 @@ bool operator<=(const Vector<X>& v, const X& c)
 template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v) {
     if(v.size()==0) { os << '['; }
     for(size_t i=0; i!=v.size(); ++i) {
-     os << (i==0 ? '[' : ',') << v[i]; }
+        os << (i==0 ? '[' : ',') << v[i]; }
     return os << ']';
 }
 
@@ -346,7 +346,7 @@ inline Vector<Float> point(size_t d, Float* ptr) {
 inline Vector<Interval> box(size_t d, Float* ptr) {
     Vector<Interval> bx(d);
     for(size_t i=0; i!=d; ++i) {
-     bx[i]=Interval(ptr[2*i],ptr[2*i+1]); }
+        bx[i]=Interval(ptr[2*i],ptr[2*i+1]); }
     return bx;
 }
 

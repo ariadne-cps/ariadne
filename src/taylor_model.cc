@@ -1,5 +1,5 @@
 /***************************************************************************
- *      taylor_model.cc
+ *            taylor_model.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -61,13 +61,13 @@ TaylorModelAccuracy::TaylorModelAccuracy(double st, uint md) : _sweep_threshold(
 TaylorModelAccuracy
 max(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2) {
     return TaylorModelAccuracy(std::min(acc1._sweep_threshold,acc1._sweep_threshold),
-     std::max(acc1._maximum_degree,acc2._maximum_degree));
+        std::max(acc1._maximum_degree,acc2._maximum_degree));
 }
 
 TaylorModelAccuracy
 min(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2) {
     return TaylorModelAccuracy(std::max(acc1._sweep_threshold,acc1._sweep_threshold),
-     std::min(acc1._maximum_degree,acc2._maximum_degree));
+        std::min(acc1._maximum_degree,acc2._maximum_degree));
 }
 
 inline bool TaylorModelAccuracy::discard(const Float& x) const { return abs(x)<this->_sweep_threshold; }
@@ -133,11 +133,11 @@ void mul_op(Float& te, ApproxFloat& r, const Float& sl, const Float& sm, const F
     set_rounding_upward();
     VOLATILE Float u,ml;
     if(x>=0) {
-     u=xv*su;
-     ml=mxv*sl;
+        u=xv*su;
+        ml=mxv*sl;
     } else {
-     u=xv*sl;
-     ml=mxv*su;
+        u=xv*sl;
+        ml=mxv*su;
     }
     te+=(u+ml);
     set_rounding_to_nearest();
@@ -151,15 +151,15 @@ void mul_op(Float& te, ApproxFloat& r, const Float& sl, const Float& sm, const F
 Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d) {
     Vector<Interval> r(x);
     for(uint i=0; i!=r.size(); ++i) {
-     if(d[i].lower()==d[i].upper()) {
-      if(x==d) {
-    r[i]=Interval(0.0,0.0);
-      } else {
-    r[i]=Interval(-inf<Float>(),+inf<Float>());
-      }
-     } else {
-      r[i]=(2*r[i]-add_ivl(d[i].lower(),d[i].upper()))/sub_ivl(d[i].upper(),d[i].lower());
-     }
+        if(d[i].lower()==d[i].upper()) {
+            if(x==d) {
+                r[i]=Interval(0.0,0.0);
+            } else {
+                r[i]=Interval(-inf<Float>(),+inf<Float>());
+            }
+        } else {
+            r[i]=(2*r[i]-add_ivl(d[i].lower(),d[i].upper()))/sub_ivl(d[i].upper(),d[i].lower());
+        }
     }
     return r;
 }
@@ -221,7 +221,7 @@ IntervalTaylorModel::degree() const
 {
     uchar deg=0u;
     for(IntervalTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-     deg=std::max(deg,iter->key().degree());
+        deg=std::max(deg,iter->key().degree());
     }
     return deg;
 }
@@ -231,7 +231,7 @@ IntervalTaylorModel::operator=(double c)
 {
     this->_expansion.clear();
     if(c!=0) {
-     this->_expansion.append(MultiIndex::zero(this->argument_size()),static_cast<Float>(c));
+        this->_expansion.append(MultiIndex::zero(this->argument_size()),static_cast<Float>(c));
     }
     this->_error=0;
     return *this;
@@ -248,7 +248,7 @@ IntervalTaylorModel::operator=(const Float& c)
 {
     this->_expansion.clear();
     if(c!=0) {
-     this->_expansion.append(MultiIndex::zero(this->argument_size()),c);
+        this->_expansion.append(MultiIndex::zero(this->argument_size()),c);
     }
     this->_error=0;
     return *this;
@@ -260,7 +260,7 @@ IntervalTaylorModel::operator=(const Interval& c)
     this->_expansion.clear();
     Float m=c.midpoint();
     if(m!=0) {
-     this->_expansion.append(MultiIndex::zero(this->argument_size()),m);
+        this->_expansion.append(MultiIndex::zero(this->argument_size()),m);
     }
     this->_error=c.radius();
     return *this;
@@ -273,7 +273,7 @@ namespace { // Internal code for arithmetic
 void _neg(IntervalTaylorModel& r)
 {
     for(IntervalTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
-     iter->data()=-iter->data();
+        iter->data()=-iter->data();
     }
 }
 
@@ -282,7 +282,7 @@ inline void _scal_exact(IntervalTaylorModel& r, const Float& c)
     // Operation can be performed exactly
     register Float pc=c;
     for(IntervalTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
-     iter->data()*=pc;
+        iter->data()*=pc;
     }
     r.error()*=abs(pc);
     return;
@@ -301,10 +301,10 @@ inline void _scal_approx(IntervalTaylorModel& r, const Float& c)
     Float pc=c;
     Float mc=-c;
     for(IntervalTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     const Float& rv=riter->data();
-     u=rv*pc;
-     ml=rv*mc;
-     te+=(u+ml);
+        const Float& rv=riter->data();
+        u=rv*pc;
+        ml=rv*mc;
+        te+=(u+ml);
     }
     re*=abs(c);
     re+=te/2;
@@ -312,7 +312,7 @@ inline void _scal_approx(IntervalTaylorModel& r, const Float& c)
     set_rounding_to_nearest();
     Float m=c;
     for(IntervalTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     riter->data()*=m;
+        riter->data()*=m;
     }
     return;
 }
@@ -330,11 +330,11 @@ inline void _scal_approx4(IntervalTaylorModel& r, const Float& c)
     Float pc=c;
     Float mc=-pc;
     for(IntervalTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     const Float& rv=riter->data();
-     //volatile Float& rv=const_cast<volatile Float&>(riter->data());
-     u.v=rv.v*pc.v;
-     ml.v=rv.v*mc.v;
-     te.v+=u.v+ml.v;
+        const Float& rv=riter->data();
+        //volatile Float& rv=const_cast<volatile Float&>(riter->data());
+        u.v=rv.v*pc.v;
+        ml.v=rv.v*mc.v;
+        te.v+=u.v+ml.v;
     }
     re*=abs(pc);
     re+=te/2;
@@ -342,7 +342,7 @@ inline void _scal_approx4(IntervalTaylorModel& r, const Float& c)
     set_rounding_to_nearest();
     Float m=c;
     for(IntervalTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     riter->data()*=m;
+        riter->data()*=m;
     }
     return;
 }
@@ -357,10 +357,10 @@ inline void _scal_approx3(IntervalTaylorModel& r, const Float& c)
     register double pc=internal_cast<const double&>(c);
     register double mc=-pc;
     for(IntervalTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     const double& rv=internal_cast<const double&>(riter->data());
-     u=rv*pc;
-     ml=rv*mc;
-     te+=(u+ml);
+        const double& rv=internal_cast<const double&>(riter->data());
+        u=rv*pc;
+        ml=rv*mc;
+        te+=(u+ml);
     }
     re*=std::abs(pc);
     re+=te/2;
@@ -368,7 +368,7 @@ inline void _scal_approx3(IntervalTaylorModel& r, const Float& c)
     set_rounding_to_nearest();
     Float m=c;
     for(IntervalTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     riter->data()*=m;
+        riter->data()*=m;
     }
     return;
 }
@@ -385,10 +385,10 @@ inline void _scal_approx2(IntervalTaylorModel& r, const Float& c)
     register Float pc=c;
     register Float mc=-c;
     for(IntervalTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     const Float& rv=riter->data();
-     u=mul_rnd(rv,pc);
-     ml=mul_rnd(rv,mc);
-     te+=(u+ml);
+        const Float& rv=riter->data();
+        u=mul_rnd(rv,pc);
+        ml=mul_rnd(rv,mc);
+        te+=(u+ml);
     }
     re*=abs(pc);
     re+=te/2;
@@ -396,7 +396,7 @@ inline void _scal_approx2(IntervalTaylorModel& r, const Float& c)
     set_rounding_to_nearest();
     Float m=c;
     for(IntervalTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     riter->data()*=m;
+        riter->data()*=m;
     }
     return;
 }
@@ -415,10 +415,10 @@ inline void _scal_approx1(IntervalTaylorModel& rr, const Float& cc)
     register double pc=c;
     register double mc=-c;
     for(Expansion<double>::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     const double& rv=riter->data();
-     u=rv*pc;
-     ml=rv*mc;
-     te+=(u+ml);
+        const double& rv=riter->data();
+        u=rv*pc;
+        ml=rv*mc;
+        te+=(u+ml);
     }
     re*=std::abs(pc);
     re+=te/2;
@@ -426,7 +426,7 @@ inline void _scal_approx1(IntervalTaylorModel& rr, const Float& cc)
     set_rounding_to_nearest();
     double m=c;
     for(Expansion<double>::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     riter->data()*=m;
+        riter->data()*=m;
     }
     return;
 }
@@ -446,10 +446,10 @@ inline void _scal_approx0(IntervalTaylorModel& rr, const Float& cc)
     register double pc=c;
     register double mc=-c;
     for(Expansion<double>::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     const double& rv=riter->data();
-     u=rv*pc;
-     ml=rv*mc;
-     te+=(u+ml);
+        const double& rv=riter->data();
+        u=rv*pc;
+        ml=rv*mc;
+        te+=(u+ml);
     }
     re*=std::abs(c);
     re+=te/2;
@@ -457,7 +457,7 @@ inline void _scal_approx0(IntervalTaylorModel& rr, const Float& cc)
     set_rounding_to_nearest();
     double m=c;
     for(Expansion<double>::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     riter->data()*=m;
+        riter->data()*=m;
     }
     return;
 }
@@ -486,16 +486,16 @@ void _scal(IntervalTaylorModel& r, const Interval& c)
     register Float cu=c.upper();
     register Float mcl=-c.lower();
     for(IntervalTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     const Float& rv=riter->data();
-     if(rv>=0) {
-      u=rv*cu;
-      ml=rv*mcl;
-     } else {
-      Float mrv=-rv;
-      u=mrv*mcl;
-      ml=mrv*cu;
-     }
-     te+=(u+ml);
+        const Float& rv=riter->data();
+        if(rv>=0) {
+            u=rv*cu;
+            ml=rv*mcl;
+        } else {
+            Float mrv=-rv;
+            u=mrv*mcl;
+            ml=mrv*cu;
+        }
+        te+=(u+ml);
     }
     re*=mag(c);
     re+=te/2;
@@ -503,11 +503,11 @@ void _scal(IntervalTaylorModel& r, const Interval& c)
     set_rounding_to_nearest();
     Float m=(c.upper()+c.lower())/2;
     for(IntervalTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     riter->data()*=m;
+        riter->data()*=m;
     }
 
     if(r.error()<0) {
-     ARIADNE_ASSERT(r.error()>=0);
+        ARIADNE_ASSERT(r.error()>=0);
     }
     return;
 }
@@ -523,19 +523,19 @@ void _scal2(IntervalTaylorModel& r, const Interval& c)
     set_rounding_to_nearest();
     Float cm=(c.lower()+c.upper())/2;
     for(IntervalTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     Float& rv=riter->data();
-     set_rounding_upward();
-     if(rv>=0) {
-      u=rv*cu;
-      ml=rv*mcl;
-     } else {
-      Float mrv=-rv;
-      u=mrv*mcl;
-      ml=mrv*cu;
-     }
-     te+=(u+ml);
-     set_rounding_to_nearest();
-     rv*=cm;
+        Float& rv=riter->data();
+        set_rounding_upward();
+        if(rv>=0) {
+            u=rv*cu;
+            ml=rv*mcl;
+        } else {
+            Float mrv=-rv;
+            u=mrv*mcl;
+            ml=mrv*cu;
+        }
+        te+=(u+ml);
+        set_rounding_to_nearest();
+        rv*=cm;
     }
     set_rounding_upward();
     re*=mag(c);
@@ -553,14 +553,14 @@ struct UnitMultiIndex { uint argument_size; uint unit_index; };
 inline void _incr(IntervalTaylorModel& r, const MultiIndex& a)
 {
     for(IntervalTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
-     static_cast<MultiIndex&>(iter->key())+=a;
+        static_cast<MultiIndex&>(iter->key())+=a;
     }
 }
 
 inline void _incr(IntervalTaylorModel& r, uint j)
 {
     for(IntervalTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
-     ++static_cast<MultiIndex&>(iter->key())[j];
+        ++static_cast<MultiIndex&>(iter->key())[j];
     }
 }
 
@@ -571,20 +571,20 @@ void _acc(IntervalTaylorModel& r, const Float& c)
     // Compute self+=c
     if(c==0) { return; }
     if(r.expansion().empty()) {
-     r.expansion().append(MultiIndex(r.argument_size()),c);
+        r.expansion().append(MultiIndex(r.argument_size()),c);
     } else if((r.end()-1)->key().degree()>0) {
-     r.expansion().append(MultiIndex(r.argument_size()),c);
+        r.expansion().append(MultiIndex(r.argument_size()),c);
     } else {
-     Float& rv=(r.end()-1)->data();
-     Float& re=r.error();
-     set_rounding_upward();
-     VOLATILE Float rvu=rv+c;
-     VOLATILE Float mrvl=(-rv)-c;
-     //std::cerr<<"re="<<re.u<<" ";
-     re+=(rvu+mrvl)/2;
-     //std::cerr<<"nre="<<re.u<<"\n";
-     set_rounding_to_nearest();
-     rv+=c;
+        Float& rv=(r.end()-1)->data();
+        Float& re=r.error();
+        set_rounding_upward();
+        VOLATILE Float rvu=rv+c;
+        VOLATILE Float mrvl=(-rv)-c;
+        //std::cerr<<"re="<<re.u<<" ";
+        re+=(rvu+mrvl)/2;
+        //std::cerr<<"nre="<<re.u<<"\n";
+        set_rounding_to_nearest();
+        rv+=c;
     }
     ARIADNE_ASSERT_MSG(r.error()>=0,"c="<<c<<" r="<<r);
     return;
@@ -597,15 +597,15 @@ void _acc(IntervalTaylorModel& r, const Interval& c)
 {
     // Compute self+=c
     if(c.lower()==-c.upper()) { // The midpoint of the interval is zero, so no need to change constant term
-     set_rounding_upward();
-     r.error()+=c.upper();
-     set_rounding_to_nearest();
-     return;
+        set_rounding_upward();
+        r.error()+=c.upper();
+        set_rounding_to_nearest();
+        return;
     }
     if(r.expansion().empty()) { // Append a constant term zero
-     r.expansion().append(MultiIndex(r.argument_size()),0.0);
+        r.expansion().append(MultiIndex(r.argument_size()),0.0);
     } else if((r.end()-1)->key().degree()>0) { // Append a constant term zero
-     r.expansion().append(MultiIndex(r.argument_size()),0.0);
+        r.expansion().append(MultiIndex(r.argument_size()),0.0);
     }
 
     Float& rv=(r.end()-1)->data();
@@ -633,19 +633,19 @@ inline void _add1(IntervalTaylorModel& r, const IntervalTaylorModel& x, const In
     IntervalTaylorModel::const_iterator xiter=x.begin();
     IntervalTaylorModel::const_iterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
-     if(xiter->key()<yiter->key()) {
-      ++xiter;
-     } else if(yiter->key()<xiter->key()) {
-      ++yiter;
-     } else {
-      const Float& xv=xiter->data();
-      const Float& yv=yiter->data();
-      VOLATILE Float u=xv+yv;
-      VOLATILE Float t=-xv;
-      VOLATILE Float ml=t-yv;
-      te+=(u+ml);
-      ++xiter; ++yiter;
-     }
+        if(xiter->key()<yiter->key()) {
+            ++xiter;
+        } else if(yiter->key()<xiter->key()) {
+            ++yiter;
+        } else {
+            const Float& xv=xiter->data();
+            const Float& yv=yiter->data();
+            VOLATILE Float u=xv+yv;
+            VOLATILE Float t=-xv;
+            VOLATILE Float ml=t-yv;
+            te+=(u+ml);
+            ++xiter; ++yiter;
+        }
     }
     r.error()=x.error();
     r.error()+=y.error();
@@ -655,25 +655,25 @@ inline void _add1(IntervalTaylorModel& r, const IntervalTaylorModel& x, const In
     xiter=x.begin();
     yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
-     if(xiter->key()<yiter->key()) {
-      r.expansion().append(xiter->key(),xiter->data());
-      ++xiter;
-     } else if(yiter->key()<xiter->key()) {
-      r.expansion().append(yiter->key(),yiter->data());
-      ++yiter;
-     } else {
-      Float c=xiter->data()+yiter->data();
-      if(c!=0) { r.expansion().append(xiter->key(),c); }
-      ++xiter; ++yiter;
-     }
+        if(xiter->key()<yiter->key()) {
+            r.expansion().append(xiter->key(),xiter->data());
+            ++xiter;
+        } else if(yiter->key()<xiter->key()) {
+            r.expansion().append(yiter->key(),yiter->data());
+            ++yiter;
+        } else {
+            Float c=xiter->data()+yiter->data();
+            if(c!=0) { r.expansion().append(xiter->key(),c); }
+            ++xiter; ++yiter;
+        }
     }
     while(xiter!=x.end()) {
-     r.expansion().append(xiter->key(),xiter->data());
-     ++xiter;
+        r.expansion().append(xiter->key(),xiter->data());
+        ++xiter;
     }
     while(yiter!=y.end()) {
-     r.expansion().append(yiter->key(),yiter->data());
-     ++yiter;
+        r.expansion().append(yiter->key(),yiter->data());
+        ++yiter;
     }
 
 }
@@ -690,34 +690,34 @@ inline void _add2(IntervalTaylorModel& r, const IntervalTaylorModel& x, const In
     IntervalTaylorModel::const_iterator xiter=x.begin();
     IntervalTaylorModel::const_iterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
-     if(xiter->key()<yiter->key()) {
-      r.expansion().append(xiter->key(),xiter->data());
-      ++xiter;
-     } else if(yiter->key()<xiter->key()) {
-      r.expansion().append(yiter->key(),yiter->data());
-      ++yiter;
-     } else {
-      assert(xiter->key()==yiter->key());
-      VOLATILE Float& xv=const_cast<Float&>(static_cast<const Float&>(xiter->data()));
-      VOLATILE Float& yv=const_cast<Float&>(static_cast<const Float&>(yiter->data()));
-      set_rounding_upward();
-      VOLATILE Float u=xv+yv;
-      VOLATILE Float ml=-xv; ml-=yv;
-      te+=(u+ml);
-      set_rounding_to_nearest();
-      Float c=xiter->data()+yiter->data();
-      if(c!=0) { r.expansion().append(xiter->key(),xiter->data()+yiter->data()); }
-      ++xiter; ++yiter;
-     }
+        if(xiter->key()<yiter->key()) {
+            r.expansion().append(xiter->key(),xiter->data());
+            ++xiter;
+        } else if(yiter->key()<xiter->key()) {
+            r.expansion().append(yiter->key(),yiter->data());
+            ++yiter;
+        } else {
+            assert(xiter->key()==yiter->key());
+            VOLATILE Float& xv=const_cast<Float&>(static_cast<const Float&>(xiter->data()));
+            VOLATILE Float& yv=const_cast<Float&>(static_cast<const Float&>(yiter->data()));
+            set_rounding_upward();
+            VOLATILE Float u=xv+yv;
+            VOLATILE Float ml=-xv; ml-=yv;
+            te+=(u+ml);
+            set_rounding_to_nearest();
+            Float c=xiter->data()+yiter->data();
+            if(c!=0) { r.expansion().append(xiter->key(),xiter->data()+yiter->data()); }
+            ++xiter; ++yiter;
+        }
     }
 
     while(xiter!=x.end()) {
-     r.expansion().append(xiter->key(),xiter->data());
-     ++xiter;
+        r.expansion().append(xiter->key(),xiter->data());
+        ++xiter;
     }
     while(yiter!=y.end()) {
-     r.expansion().append(yiter->key(),yiter->data());
-     ++yiter;
+        r.expansion().append(yiter->key(),yiter->data());
+        ++yiter;
     }
 
     set_rounding_upward();
@@ -748,33 +748,33 @@ inline void _sub(IntervalTaylorModel& r, const IntervalTaylorModel& x, const Int
     IntervalTaylorModel::const_iterator xiter=x.begin();
     IntervalTaylorModel::const_iterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
-     if(xiter->key()<yiter->key()) {
-      r.expansion().append(xiter->key(),xiter->data());
-      ++xiter;
-     } else if(yiter->key()<xiter->key()) {
-      r.expansion().append(yiter->key(),yiter->data());
-      ++yiter;
-     } else {
-      set_rounding_upward();
-      const Float& xv=xiter->data();
-      const Float& yv=yiter->data();
-      VOLATILE Float u=xv-yv;
-      VOLATILE Float t=-xv;
-      VOLATILE Float ml=t+yv;
-      te+=(u+ml);
-      set_rounding_to_nearest();
-      r.expansion().append(xiter->key(),xiter->data()+yiter->data());
-      ++xiter; ++yiter;
-     }
+        if(xiter->key()<yiter->key()) {
+            r.expansion().append(xiter->key(),xiter->data());
+            ++xiter;
+        } else if(yiter->key()<xiter->key()) {
+            r.expansion().append(yiter->key(),yiter->data());
+            ++yiter;
+        } else {
+            set_rounding_upward();
+            const Float& xv=xiter->data();
+            const Float& yv=yiter->data();
+            VOLATILE Float u=xv-yv;
+            VOLATILE Float t=-xv;
+            VOLATILE Float ml=t+yv;
+            te+=(u+ml);
+            set_rounding_to_nearest();
+            r.expansion().append(xiter->key(),xiter->data()+yiter->data());
+            ++xiter; ++yiter;
+        }
     }
 
     while(xiter!=x.end()) {
-     r.expansion().append(xiter->key(),xiter->data());
-     ++xiter;
+        r.expansion().append(xiter->key(),xiter->data());
+        ++xiter;
     }
     while(yiter!=y.end()) {
-     r.expansion().append(yiter->key(),yiter->data());
-     ++yiter;
+        r.expansion().append(yiter->key(),yiter->data());
+        ++yiter;
     }
 
     set_rounding_upward();
@@ -801,37 +801,37 @@ inline void _mul1(IntervalTaylorModel& r, const IntervalTaylorModel& x, const In
 
     set_rounding_upward();
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-      const Float& xv=xiter->data();;
-      const Float& yv=yiter->data();;
-      Ivl& zv=z[xiter->key()+yiter->key()];
-      zv.u+=xv*yv;
-      VOLATILE Float t=-xv;
-      zv.ml+=t*yv;
-     }
+        for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            const Float& xv=xiter->data();;
+            const Float& yv=yiter->data();;
+            Ivl& zv=z[xiter->key()+yiter->key()];
+            zv.u+=xv*yv;
+            VOLATILE Float t=-xv;
+            zv.ml+=t*yv;
+        }
     }
 
     for(const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
-     Ivl& zv=z[riter->key()];
-     const Float& rv=riter->data();
-     zv.u+=rv; zv.ml-=rv;
+        Ivl& zv=z[riter->key()];
+        const Float& rv=riter->data();
+        zv.u+=rv; zv.ml-=rv;
     }
 
     VOLATILE Float te=0;
     for(ivl_const_iterator ziter=z.begin(); ziter!=z.end(); ++ziter) {
-     const Ivl& zv=ziter->second;
-     te+=(zv.u+zv.ml);
+        const Ivl& zv=ziter->second;
+        te+=(zv.u+zv.ml);
     }
     te/=2;
 
     Float xs=0;
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     xs+=abs(xiter->data());
+        xs+=abs(xiter->data());
     }
 
     Float ys=0;
     for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-     ys+=abs(yiter->data());
+        ys+=abs(yiter->data());
     }
 
     const Float& xe=x.error();
@@ -841,8 +841,8 @@ inline void _mul1(IntervalTaylorModel& r, const IntervalTaylorModel& x, const In
 
     set_rounding_to_nearest();
     for(ivl_const_iterator ziter=z.begin(); ziter!=z.end(); ++ziter) {
-     const Ivl& zv=ziter->second;
-     r[ziter->first]=(zv.u-zv.ml)/2;
+        const Ivl& zv=ziter->second;
+        r[ziter->first]=(zv.u-zv.ml)/2;
     }
 
     return;
@@ -859,38 +859,38 @@ void _mul2(IntervalTaylorModel& r, const IntervalTaylorModel& x, const IntervalT
     IntervalTaylorModel t(x.argument_size());
     IntervalTaylorModel s(x.argument_size());
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     set_rounding_upward();
-     Float te=0.0;
-     for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-      const Float& xv=xiter->data();
-      const Float& yv=yiter->data();
-      VOLATILE Float u=xv*yv;
-      VOLATILE Float ml=-xv; ml=ml*yv;
-      te+=(u+ml);
-     }
-     t.error()=te/2;
-     set_rounding_to_nearest();
-     for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-      t.expansion().append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
-     }
-     _add2(s,r,t);
-     r.expansion().swap(s.expansion());
-     r.error()=s.error();
-     s.expansion().clear();
-     s.error()=0.0;
-     t.expansion().clear();
-     t.error()=0.0;
+        set_rounding_upward();
+        Float te=0.0;
+        for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            const Float& xv=xiter->data();
+            const Float& yv=yiter->data();
+            VOLATILE Float u=xv*yv;
+            VOLATILE Float ml=-xv; ml=ml*yv;
+            te+=(u+ml);
+        }
+        t.error()=te/2;
+        set_rounding_to_nearest();
+        for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            t.expansion().append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
+        }
+        _add2(s,r,t);
+        r.expansion().swap(s.expansion());
+        r.error()=s.error();
+        s.expansion().clear();
+        s.error()=0.0;
+        t.expansion().clear();
+        t.error()=0.0;
     }
 
     set_rounding_upward();
     Float xs=0;
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     xs+=abs(xiter->data());
+        xs+=abs(xiter->data());
     }
 
     Float ys=0;
     for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-     ys+=abs(yiter->data());
+        ys+=abs(yiter->data());
     }
 
     Float& re=r.error();
@@ -912,31 +912,31 @@ inline void _mul3(IntervalTaylorModel& r, const IntervalTaylorModel& x, const In
 {
     IntervalTaylorModel t(x.argument_size());
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     VOLATILE Float pxv=xiter->data();
-     VOLATILE Float nxv=-pxv;
-     VOLATILE Float te=0.0;
-     for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-      set_rounding_upward();
-      const Float& yv=yiter->data();
-      te+=(pxv*yv)+(nxv*yv);
-      set_rounding_to_nearest();
-      t.expansion().append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
-     }
-     t.error()=te/2;
-     r+=t;
-     //std::cerr<<"  t="<<t<<"\n  r="<<r<<std::endl;
-     t.clear();
+        VOLATILE Float pxv=xiter->data();
+        VOLATILE Float nxv=-pxv;
+        VOLATILE Float te=0.0;
+        for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            set_rounding_upward();
+            const Float& yv=yiter->data();
+            te+=(pxv*yv)+(nxv*yv);
+            set_rounding_to_nearest();
+            t.expansion().append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
+        }
+        t.error()=te/2;
+        r+=t;
+        //std::cerr<<"  t="<<t<<"\n  r="<<r<<std::endl;
+        t.clear();
     }
 
     set_rounding_upward();
     Float xs=0;
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     xs+=abs(xiter->data());
+        xs+=abs(xiter->data());
     }
 
     Float ys=0;
     for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-     ys+=abs(yiter->data());
+        ys+=abs(yiter->data());
     }
 
     Float& re=r.error();
@@ -952,7 +952,7 @@ inline void _mul3(IntervalTaylorModel& r, const IntervalTaylorModel& x, const In
 
 inline void _add(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
     for(MultiIndex::size_type j=0; j!=r.word_size(); ++j) {
-     r.word_at(j)=a1.word_at(j)+a2.word_at(j);
+        r.word_at(j)=a1.word_at(j)+a2.word_at(j);
     }
 }
 
@@ -971,48 +971,48 @@ void _mul4(IntervalTaylorModel& r, const IntervalTaylorModel& x, const IntervalT
     VOLATILE Float u;
     VOLATILE Float ml;
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     Float tte=0.0; // trucation error
-     Float tre=0.0; // roundoff error
-     const MultiIndex& xa=xiter->key();
-     VOLATILE Float& xv=const_cast<Float&>(static_cast<const Float&>(xiter->data()));
-     VOLATILE Float mxv=-xv;
-     VOLATILE Float axv=abs(xv);
-     for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-      const MultiIndex& ya=yiter->key();
-      VOLATILE Float& yv=const_cast<Float&>(static_cast<const Float&>(yiter->data()));
-      set_rounding_to_nearest();
-      ta=xa+ya;
-      tv=xv*yv;
-      set_rounding_upward();
-      if(accuracy.discard(ta,tv)) {
-    tte+=axv*abs(yv);
-      } else {
-    t.expansion().append(ta,tv);
-    u=xv*yv;
-    ml=mxv*yv;
-    tre+=(u+ml);
-      }
-     }
-     t.error()=tte+(tte/2);
+        Float tte=0.0; // trucation error
+        Float tre=0.0; // roundoff error
+        const MultiIndex& xa=xiter->key();
+        VOLATILE Float& xv=const_cast<Float&>(static_cast<const Float&>(xiter->data()));
+        VOLATILE Float mxv=-xv;
+        VOLATILE Float axv=abs(xv);
+        for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            const MultiIndex& ya=yiter->key();
+            VOLATILE Float& yv=const_cast<Float&>(static_cast<const Float&>(yiter->data()));
+            set_rounding_to_nearest();
+            ta=xa+ya;
+            tv=xv*yv;
+            set_rounding_upward();
+            if(accuracy.discard(ta,tv)) {
+                tte+=axv*abs(yv);
+            } else {
+                t.expansion().append(ta,tv);
+                u=xv*yv;
+                ml=mxv*yv;
+                tre+=(u+ml);
+            }
+        }
+        t.error()=tte+(tte/2);
 
-     _add2(s,r,t);
-     r.expansion().swap(s.expansion());
-     r.error()=s.error();
-     s.expansion().clear();
-     s.error()=0.0;
-     t.expansion().clear();
-     t.error()=0.0;
+        _add2(s,r,t);
+        r.expansion().swap(s.expansion());
+        r.error()=s.error();
+        s.expansion().clear();
+        s.error()=0.0;
+        t.expansion().clear();
+        t.error()=0.0;
     }
 
     set_rounding_upward();
     Float xs=0;
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     xs+=abs(xiter->data());
+        xs+=abs(xiter->data());
     }
 
     Float ys=0;
     for(IntervalTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-     ys+=abs(yiter->data());
+        ys+=abs(yiter->data());
     }
 
     Float& re=r.error();
@@ -1060,23 +1060,23 @@ IntervalTaylorModel::unique_sort()
     IntervalTaylorModel::iterator current=this->begin();
     Float te=0.0;
     while(advanced!=end) {
-     current->key()=advanced->key();
-     VOLATILE Float u=advanced->data();
-     VOLATILE Float ml=-advanced->data();
-     VOLATILE Float v=advanced->data();
-     ++advanced;
-     while(advanced!=end && advanced->key()==current->key()) {
-      const Float& xv=advanced->data();
-      set_rounding_upward();
-      u+=xv;
-      ml-=xv;
-      set_rounding_to_nearest();
-      v+=xv;
-      ++advanced;
-     }
-     current->data()=v;
-     te+=(u+ml);
-     ++current;
+        current->key()=advanced->key();
+        VOLATILE Float u=advanced->data();
+        VOLATILE Float ml=-advanced->data();
+        VOLATILE Float v=advanced->data();
+        ++advanced;
+        while(advanced!=end && advanced->key()==current->key()) {
+            const Float& xv=advanced->data();
+            set_rounding_upward();
+            u+=xv;
+            ml-=xv;
+            set_rounding_to_nearest();
+            v+=xv;
+            ++advanced;
+        }
+        current->data()=v;
+        te+=(u+ml);
+        ++current;
     }
     set_rounding_upward();
     this->error()+=te;
@@ -1101,14 +1101,14 @@ inline IntervalTaylorModel& _clean1(IntervalTaylorModel& tm, const IntervalTaylo
     IntervalTaylorModel::iterator curr=tm.begin();
     IntervalTaylorModel::const_iterator adv=curr;
     while(adv!=tm.end()) {
-     //std::cerr<<"discard("<<adv->key()<<","<<adv->data()<<")="<<accuracy.discard(adv->key(),adv->data())<<"\n";
-     if(accuracy.discard(adv->key(),adv->data())) {
-      tm.error()+=abs(adv->data());
-     } else {
-      if(curr!=adv) { curr->key()=adv->key(); curr->data()=adv->data(); }
-      ++curr;
-     }
-     ++adv;
+        //std::cerr<<"discard("<<adv->key()<<","<<adv->data()<<")="<<accuracy.discard(adv->key(),adv->data())<<"\n";
+        if(accuracy.discard(adv->key(),adv->data())) {
+            tm.error()+=abs(adv->data());
+        } else {
+            if(curr!=adv) { curr->key()=adv->key(); curr->data()=adv->data(); }
+            ++curr;
+        }
+        ++adv;
     }
     set_rounding_to_nearest();
     tm.expansion().resize(curr-tm.begin());
@@ -1125,11 +1125,11 @@ inline IntervalTaylorModel& _clean2(IntervalTaylorModel& tm, const IntervalTaylo
 
     set_rounding_upward();
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-     if(accuracy.discard(iter->key(),iter->data())) {
-      r.error()+=abs(iter->data());
-     } else {
-      r.expansion().append(iter->key(),iter->data());
-     }
+        if(accuracy.discard(iter->key(),iter->data())) {
+            r.error()+=abs(iter->data());
+        } else {
+            r.expansion().append(iter->key(),iter->data());
+        }
     }
     set_rounding_to_nearest();
 
@@ -1159,12 +1159,12 @@ IntervalTaylorModel::sweep(Float m)
     IntervalTaylorModel r(this->argument_size(),this->_accuracy_ptr);
     r.expansion().reserve(this->expansion().size());
     for(IntervalTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-     Float av=abs(iter->data());
-     if(av>=m) {
-      r.expansion().append(iter->key(),iter->data());
-     } else {
-      r.error()+=av;
-     }
+        Float av=abs(iter->data());
+        if(av>=m) {
+            r.expansion().append(iter->key(),iter->data());
+        } else {
+            r.error()+=av;
+        }
     }
     this->expansion().swap(r.expansion());
     this->error()=r.error();
@@ -1180,12 +1180,12 @@ IntervalTaylorModel::sweep(double m)
     IntervalTaylorModel::iterator curr=this->begin();
     set_rounding_upward();
     while(adv!=end) {
-     if(abs(adv->data())>=m) {
-      *curr=*adv; ++curr;
-     } else {
-      this->error()+=abs(adv->data());
-     }
-     ++adv;
+        if(abs(adv->data())>=m) {
+            *curr=*adv; ++curr;
+        } else {
+            this->error()+=abs(adv->data());
+        }
+        ++adv;
     }
     this->expansion().resize(curr-this->begin());
     return *this;
@@ -1206,15 +1206,15 @@ IntervalTaylorModel::truncate(uint d)
     IntervalTaylorModel r(this->argument_size(),this->_accuracy_ptr);
     r.expansion().reserve(this->expansion().size());
     for(IntervalTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-     uchar adeg=iter->key().degree();
-     if(adeg<=d) {
-     //if(adeg<=byte_d) {
-     //if(a.degree()<=byte_d) {
+        uchar adeg=iter->key().degree();
+        if(adeg<=d) {
+        //if(adeg<=byte_d) {
+        //if(a.degree()<=byte_d) {
 
-      r.expansion().append(iter->key(),iter->data());
-     } else {
-      r.error()+=abs(iter->data());
-     }
+            r.expansion().append(iter->key(),iter->data());
+        } else {
+            r.error()+=abs(iter->data());
+        }
     }
     this->expansion().swap(r.expansion());
     this->error()=r.error();
@@ -1235,12 +1235,12 @@ IntervalTaylorModel::truncate(uint d)
     IntervalTaylorModel::iterator curr=this->begin();
     set_rounding_upward();
     while(adv!=end) {
-     if(adv->key().degree()<=d) {
-      *curr=*adv; ++curr;
-     } else {
-      this->error()+=abs(adv->data());
-     }
-     ++adv;
+        if(adv->key().degree()<=d) {
+            *curr=*adv; ++curr;
+        } else {
+            this->error()+=abs(adv->data());
+        }
+        ++adv;
     }
     this->expansion().resize(curr-this->begin());
     return *this;
@@ -1255,12 +1255,12 @@ IntervalTaylorModel::truncate(const MultiIndex& b)
     IntervalTaylorModel::iterator curr=this->begin();
     set_rounding_upward();
     while(adv!=end) {
-     if(adv->key()<=b) {
-      *curr=*adv; ++curr;
-     } else {
-      this->error()+=abs(adv->data());
-     }
-     ++adv;
+        if(adv->key()<=b) {
+            *curr=*adv; ++curr;
+        } else {
+            this->error()+=abs(adv->data());
+        }
+        ++adv;
     }
     this->expansion().resize(curr-this->begin());
     return *this;
@@ -1276,12 +1276,12 @@ IntervalTaylorModel::truncate(const MultiIndexBound& b)
     set_rounding_upward();
     Float e=0;
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
-     if(!(iter->key()<=b)) {
-      e+=abs(iter->data());
-      this->_expansion.erase(iter++);
-     } else {
-      ++iter;
-     }
+        if(!(iter->key()<=b)) {
+            e+=abs(iter->data());
+            this->_expansion.erase(iter++);
+        } else {
+            ++iter;
+        }
     }
     this->_error+=e;
     set_rounding_to_nearest();
@@ -1299,11 +1299,11 @@ IntervalTaylorModel&
 IntervalTaylorModel::clobber(uint o)
 {
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
-     if(iter->key().degree()>o) {
-     _expansion.erase(iter++);
-     } else {
-      ++iter;
-     }
+        if(iter->key().degree()>o) {
+           _expansion.erase(iter++);
+        } else {
+            ++iter;
+        }
     }
     this->_error=0;
     return *this;
@@ -1314,12 +1314,12 @@ IntervalTaylorModel::clobber(uint so, uint to)
 {
     uint n=this->argument_size()-1;
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
-     const MultiIndex& a=iter->key();
-     if(a[n]>to || a.degree()>so+a[n]) {
-      this->_expansion.erase(iter++);
-     } else {
-      ++iter;
-     }
+        const MultiIndex& a=iter->key();
+        if(a[n]>to || a.degree()>so+a[n]) {
+            this->_expansion.erase(iter++);
+        } else {
+            ++iter;
+        }
     }
     this->_error=0;
     return *this;
@@ -1428,7 +1428,7 @@ IntervalTaylorModel&
 operator/=(IntervalTaylorModel& x, const Float& c)
 {
     if(c==0) {
-     ARIADNE_THROW(DivideByZeroException,"operator/=(IntervalTaylorModel x,Float c)","x="<<x<<" c="<<c);
+        ARIADNE_THROW(DivideByZeroException,"operator/=(IntervalTaylorModel x,Float c)","x="<<x<<" c="<<c);
     }
     _scal(x,rec_ivl(c)); return x;
 }
@@ -1481,7 +1481,7 @@ IntervalTaylorModel&
 operator/=(IntervalTaylorModel& x, const Interval& c)
 {
     if(c.upper()>=0 && c.lower()<=0) {
-     ARIADNE_THROW(DivideByZeroException,"operator/=(IntervalTaylorModel x,Interval c)","x="<<x<<" c="<<c);
+        ARIADNE_THROW(DivideByZeroException,"operator/=(IntervalTaylorModel x,Interval c)","x="<<x<<" c="<<c);
     }
     _scal(x,1.0/c); return x;
 }
@@ -1505,7 +1505,7 @@ operator+(const IntervalTaylorModel& x, const IntervalTaylorModel& y) {
     if(x.argument_size()==0) { return x.range()+y; }
     if(y.argument_size()==0) { return x+y.range(); }
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),
-     "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
+        "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
     IntervalTaylorModel r(x.argument_size()); _add(r,x,y); return r;
 }
 
@@ -1514,7 +1514,7 @@ operator-(const IntervalTaylorModel& x, const IntervalTaylorModel& y) {
     if(x.argument_size()==0) { return x.range()-y; }
     if(y.argument_size()==0) { return x-y.range(); }
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),
-     "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
+        "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
     IntervalTaylorModel r=neg(y); _acc(r,x); return r;
 }
 
@@ -1523,7 +1523,7 @@ operator*(const IntervalTaylorModel& x, const IntervalTaylorModel& y) {
     if(x.argument_size()==0) { return x.range()*y; }
     if(y.argument_size()==0) { return x*y.range(); }
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),
-     "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
+        "x=T["<<x.argument_size()<<"]"<<x<<"; y=T["<<y.argument_size()<<"]"<<y);
     IntervalTaylorModel r(y.argument_size(),y.accuracy_ptr()); _mul(r,x,y); return r;
 }
 
@@ -1710,11 +1710,11 @@ IntervalTaylorModel max(const IntervalTaylorModel& x, const IntervalTaylorModel&
     Interval xr=x.range();
     Interval yr=y.range();
     if(xr.lower()>=yr.upper()) {
-     return x;
+        return x;
     } else if(yr.lower()>=xr.upper()) {
-     return y;
+        return y;
     } else {
-     return ((x+y)+abs(x-y))/Float(2);
+        return ((x+y)+abs(x-y))/Float(2);
     }
 }
 
@@ -1726,34 +1726,34 @@ IntervalTaylorModel min(const IntervalTaylorModel& x, const IntervalTaylorModel&
 IntervalTaylorModel abs(const IntervalTaylorModel& x) {
     Interval xr=x.range();
     if(xr.lower()>=0.0) {
-     return x;
+        return x;
     } else if(xr.upper()<=0.0) {
-     return -x;
+        return -x;
     } else {
-     // Use power series expansion $abs(x)=\sum_{i=0}^{7} p_i x^{2i} \pm e$ for $x\in[-1,+1]$ with
-     // p=[0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667] and e=0.035
-     // TODO: Find more accurate and stable formula
-     static const uint n=7u;
-     static const double p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
-     static const double err=0.035;
-     IntervalTaylorModel r(x.argument_size());
-     Float xmag=mag(xr);
-     IntervalTaylorModel s=x/xmag;
-     s=sqr(s);
-     r=p[n-1];
-     for(uint i=0; i!=(n-1); ++i) {
-      uint j=(n-2)-i;
-      r=s*r+p[j];
-     }
-     r+=Interval(-err,+err);
-     return r*xmag;
+        // Use power series expansion $abs(x)=\sum_{i=0}^{7} p_i x^{2i} \pm e$ for $x\in[-1,+1]$ with
+        // p=[0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667] and e=0.035
+        // TODO: Find more accurate and stable formula
+        static const uint n=7u;
+        static const double p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
+        static const double err=0.035;
+        IntervalTaylorModel r(x.argument_size());
+        Float xmag=mag(xr);
+        IntervalTaylorModel s=x/xmag;
+        s=sqr(s);
+        r=p[n-1];
+        for(uint i=0; i!=(n-1); ++i) {
+            uint j=(n-2)-i;
+            r=s*r+p[j];
+        }
+        r+=Interval(-err,+err);
+        return r*xmag;
     }
 }
 
 IntervalTaylorModel neg(const IntervalTaylorModel& x) {
     IntervalTaylorModel r(x.argument_size());
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     r.expansion().append(xiter->key(),-xiter->data());
+        r.expansion().append(xiter->key(),-xiter->data());
     }
     r.error()=x.error();
     return r;
@@ -1772,9 +1772,9 @@ IntervalTaylorModel pow(const IntervalTaylorModel& x, int n) {
     IntervalTaylorModel r(x.argument_size()); r+=1;
     IntervalTaylorModel p(x);
     while(n) {
-     if(n%2) { r=r*p; }
-     p=sqr(p);
-     n/=2;
+        if(n%2) { r=r*p; }
+        p=sqr(p);
+        n/=2;
     }
     return r;
 }
@@ -1791,11 +1791,11 @@ Interval _range1(const IntervalTaylorModel& tm) {
     VOLATILE Float t=tm.error();
     VOLATILE Float v=0.0;
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-     if(iter->key().degree()==0) {
-      v=iter->data();
-     } else {
-      t+=abs(iter->data());
-     }
+        if(iter->key().degree()==0) {
+            v=iter->data();
+        } else {
+            t+=abs(iter->data());
+        }
     }
     set_rounding_mode(to_nearest);
     return v+Interval(-t,t);
@@ -1805,11 +1805,11 @@ Interval _range1(const IntervalTaylorModel& tm) {
 Interval _range2(const IntervalTaylorModel& tm) {
     Interval r(-tm.error(),+tm.error());
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-     if(iter->key().degree()==0) {
-      r+=iter->data();
-     } else {
-      r+=abs(iter->data())*Interval(-1,1);
-     }
+        if(iter->key().degree()==0) {
+            r+=iter->data();
+        } else {
+            r+=abs(iter->data())*Interval(-1,1);
+        }
     }
     return r;
 }
@@ -1822,29 +1822,29 @@ Interval _range3(const IntervalTaylorModel& tm) {
     array<Float> quadratic_terms(as,0.0);
     Interval r(-tm.error(),+tm.error());
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-     if(iter->key().degree()==0) {
-      r+=iter->data();
-     } else if(iter->key().degree()==1) {
-      for(uint j=0; j!=tm.argument_size(); ++j) {
-    if(iter->key()[j]==1) { linear_terms[j]=iter->data(); break; }
-      }
-     } else if(iter->key().degree()==2) {
-      for(uint j=0; j!=tm.argument_size(); ++j) {
-    if(iter->key()[j]==2) { quadratic_terms[j]=iter->data(); break; }
-    if(iter->key()[j]==1) { r+=abs(iter->data())*Interval(-1,1); break; }
-      }
-     } else {
-      r+=abs(iter->data())*Interval(-1,1);
-     }
+        if(iter->key().degree()==0) {
+            r+=iter->data();
+        } else if(iter->key().degree()==1) {
+            for(uint j=0; j!=tm.argument_size(); ++j) {
+                if(iter->key()[j]==1) { linear_terms[j]=iter->data(); break; }
+            }
+        } else if(iter->key().degree()==2) {
+            for(uint j=0; j!=tm.argument_size(); ++j) {
+                if(iter->key()[j]==2) { quadratic_terms[j]=iter->data(); break; }
+                if(iter->key()[j]==1) { r+=abs(iter->data())*Interval(-1,1); break; }
+            }
+        } else {
+            r+=abs(iter->data())*Interval(-1,1);
+        }
     }
     for(uint j=0; j!=as; ++j) {
-     if(quadratic_terms[j]==0.0) {
-      r+=abs(linear_terms[j])*Interval(-1,1);
-     } else {
-      const Float& a=quadratic_terms[j];
-      const Float& b=linear_terms[j];
-      r+=a*(sqr(Interval(-1,+1)+Interval(b)/(2*a)))-sqr(Interval(b))/(4*a);
-     }
+        if(quadratic_terms[j]==0.0) {
+            r+=abs(linear_terms[j])*Interval(-1,1);
+        } else {
+            const Float& a=quadratic_terms[j];
+            const Float& b=linear_terms[j];
+            r+=a*(sqr(Interval(-1,+1)+Interval(b)/(2*a)))-sqr(Interval(b))/(4*a);
+        }
     }
     return r;
 }
@@ -1878,11 +1878,11 @@ IntervalTaylorModel::evaluate(const Vector<Interval>& v) const
     //ARIADNE_ASSERT(subset(v,this->domain()));
     Interval r=this->error()*Interval(-1,+1);
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-     Interval t(iter->data());
-     for(uint j=0; j!=iter->key().size(); ++j) {
-      t*=pow(v[j],iter->key()[j]);
-     }
-     r+=t;
+        Interval t(iter->data());
+        for(uint j=0; j!=iter->key().size(); ++j) {
+            t*=pow(v[j],iter->key()[j]);
+        }
+        r+=t;
     }
     return r;
 }
@@ -1907,10 +1907,10 @@ _compose(const TaylorSeries& ts, const IntervalTaylorModel& tv, double eps)
     IntervalTaylorModel r(tv.argument_size());
     r+=ts.expansion[ts.expansion.size()-1];
     for(uint i=1; i!=ts.expansion.size(); ++i) {
-     //std::cerr<<"    r="<<r<<std::endl;
-     r=r*tv;
-     r+=ts.expansion[ts.expansion.size()-i-1];
-     r.sweep(eps);
+        //std::cerr<<"    r="<<r<<std::endl;
+        r=r*tv;
+        r+=ts.expansion[ts.expansion.size()-i-1];
+        r.sweep(eps);
     }
     //std::cerr<<"    r="<<r<<std::endl;
     r+=ts.error;
@@ -1942,17 +1942,17 @@ _compose1(const series_function_pointer& fn, const IntervalTaylorModel& tm, doub
 
     Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
-     ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
-      <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
+                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
     }
 
     IntervalTaylorModel x=tm-c;
     IntervalTaylorModel res(tm.argument_size(),tm.accuracy_ptr());
     res+=range_series[d];
     for(uint i=0; i!=d; ++i) {
-     //std::cerr<<"i="<<i<<" r="<<res<<"\n";
-     res=centre_series[d-i-1]+x*res;
-     res.sweep(eps);
+        //std::cerr<<"i="<<i<<" r="<<res<<"\n";
+        res=centre_series[d-i-1]+x*res;
+        res.sweep(eps);
     }
     //std::cerr<<"i="<<d<<" r="<<res<<"\n";
     return res;
@@ -1979,16 +1979,16 @@ _compose2(const series_function_pointer& fn, const IntervalTaylorModel& tm, doub
     Float truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
-     ARIADNE_WARN("Truncation error estimate "<<truncation_error
-     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
     }
 
     IntervalTaylorModel x=tm-c;
     IntervalTaylorModel res(tm.argument_size(),tm.accuracy_ptr());
     res+=centre_series[d];
     for(uint i=0; i!=d; ++i) {
-     res=centre_series[d-i-1]+x*res;
-     res.sweep(eps);
+        res=centre_series[d-i-1]+x*res;
+        res.sweep(eps);
     }
     res+=truncation_error*Interval(-1,1);
     return res;
@@ -2022,16 +2022,16 @@ _compose3(const series_function_pointer& fn, const IntervalTaylorModel& tm, Floa
     Float truncation_error=max(se.lower()*p.lower(),se.upper()*p.upper());
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
-     ARIADNE_WARN("Truncation error estimate "<<truncation_error
-     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
     }
 
     IntervalTaylorModel x=tm;
     IntervalTaylorModel res(tm.argument_size(),tm.accuracy_ptr());
     res+=centre_series[d];
     for(uint i=0; i!=d; ++i) {
-     res=centre_series[d-i-1]+x*res;
-     //res.sweep(eps);
+        res=centre_series[d-i-1]+x*res;
+        //res.sweep(eps);
     }
     res+=truncation_error*Interval(-1,1);
     return res;
@@ -2066,7 +2066,7 @@ IntervalTaylorModel sqrt(const IntervalTaylorModel& x) {
     Interval r=x.range();
 
     if(r.lower()<=0) {
-     ARIADNE_THROW(DomainException,"sqrt",x.range());
+        ARIADNE_THROW(DomainException,"sqrt",x.range());
     }
 
     assert(r.lower()>0);
@@ -2086,9 +2086,9 @@ IntervalTaylorModel sqrt(const IntervalTaylorModel& x) {
     //std::cerr<<"y="<<y<<std::endl;
     z+=sqrt_series[d-1];
     for(uint i=0; i!=d; ++i) {
-     z=sqrt_series[d-i-1] + z * y;
-     z.clean();
-     //std::cerr<<"z="<<z<<std::endl;
+        z=sqrt_series[d-i-1] + z * y;
+        z.clean();
+        //std::cerr<<"z="<<z<<std::endl;
     }
     Float trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
     //std::cerr<<"te="<<trunc_err<<" te*[-1,+1]="<<trunc_err*Interval(-1,1)<<std::endl;
@@ -2107,7 +2107,7 @@ IntervalTaylorModel rec(const IntervalTaylorModel& x) {
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     if(r.upper()>=0 && r.lower()<=0) {
-     ARIADNE_THROW(DivideByZeroException,"rec(IntervalTaylorModel x)","x="<<x);
+        ARIADNE_THROW(DivideByZeroException,"rec(IntervalTaylorModel x)","x="<<x);
     }
     Float a=(r.lower()+r.upper())/2;
     set_rounding_upward();
@@ -2123,8 +2123,8 @@ IntervalTaylorModel rec(const IntervalTaylorModel& x) {
     //std::cerr<<"  y="<<y<<"\n";
     //std::cerr<<"  z="<<z<<"\n";
     for(uint i=0; i!=d; ++i) {
-     z=1.0 + z * y;
-     //std::cerr<<"  z="<<z<<"\n";
+        z=1.0 + z * y;
+        //std::cerr<<"  z="<<z<<"\n";
     }
 
     // Compute the truncation error
@@ -2146,7 +2146,7 @@ IntervalTaylorModel log(const IntervalTaylorModel& x) {
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     if(r.lower()<=0) {
-     ARIADNE_THROW(DomainException,"sqrt",x.range());
+        ARIADNE_THROW(DomainException,"sqrt",x.range());
     }
     Float a=(r.lower()+r.upper())/2;
     set_rounding_upward();
@@ -2158,8 +2158,8 @@ IntervalTaylorModel log(const IntervalTaylorModel& x) {
     IntervalTaylorModel z(x.argument_size(),x.accuracy_ptr());
     z+=Float(d%2?-1:+1)/d;
     for(uint i=1; i!=d; ++i) {
-     z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
-     z.clean();
+        z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
+        z.clean();
     }
     z=z*y;
     z.sweep();
@@ -2189,16 +2189,16 @@ IntervalTaylorModel exp(const IntervalTaylorModel& x) {
     IntervalTaylorModel res(x.argument_size(),x.accuracy_ptr());
     res.set_error(pow_up(yrad,degree+1));
     for(uint i=0; i!=degree; ++i) {
-     res/=(degree-i);
-     res=y*res+1.0;
+        res/=(degree-i);
+        res=y*res+1.0;
     }
 
     // Square r a total of sfp times
     IntervalTaylorModel square(x.argument_size(),x.accuracy_ptr());
     for(uint i=0; i!=sfp; ++i) {
-     _mul(square,res,res);
-     res.swap(square);
-     square.clear();
+        _mul(square,res,res);
+        res.swap(square);
+        square.clear();
     }
 
     // Multiply by exp(xv)
@@ -2222,24 +2222,24 @@ IntervalTaylorModel sin(const IntervalTaylorModel& x) {
     y=x-(n*2*Ariadne::pi<Interval>());
 
     if(y.error()>two_pi/2 || mag(y.range())*rec_fac_up(x.maximum_degree())>1) {
-     r.error()=1.0;
+        r.error()=1.0;
     } else {
-     _mul(s,y,y);
+        _mul(s,y,y);
 
-     int d=(x.maximum_degree()+3)/2;
-     Float srad=mag(s.range());
-     Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
+        int d=(x.maximum_degree()+3)/2;
+        Float srad=mag(s.range());
+        Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
-     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
-     r=1.0;
-     for(int i=0; i!=d; ++i) {
-      r/=Float(-2*(d-i)*(2*(d-i)+1));
-      _mul(t,s,r); r.swap(t); t.clear();
-      r+=1.0;
-     }
-     _mul(t,y,r); r.swap(t);
+        // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
+        r=1.0;
+        for(int i=0; i!=d; ++i) {
+            r/=Float(-2*(d-i)*(2*(d-i)+1));
+            _mul(t,s,r); r.swap(t); t.clear();
+            r+=1.0;
+        }
+        _mul(t,y,r); r.swap(t);
 
-     r.error()+=truncation_error;
+        r.error()+=truncation_error;
     }
 
     return r;
@@ -2260,23 +2260,23 @@ IntervalTaylorModel cos(const IntervalTaylorModel& x) {
     y=x-2*n*pi<Interval>();
 
     if(y.error()>two_pi/2 || mag(y.range())*rec_fac_up(x.maximum_degree())>1) {
-     r.error()=1.0;
+        r.error()=1.0;
     } else {
-     _mul(s,y,y);
+        _mul(s,y,y);
 
-     int d=(x.maximum_degree()+3)/2;
-     Float srad=mag(s.range());
-     Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
+        int d=(x.maximum_degree()+3)/2;
+        Float srad=mag(s.range());
+        Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
-     // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
-     r=1.0;
-     for(int i=0; i!=d; ++i) {
-      r/=double(-2*(d-i)*(2*(d-i)-1));
-      _mul(t,s,r); r.swap(t); t.clear();
-      r+=1.0;
-     }
+        // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
+        r=1.0;
+        for(int i=0; i!=d; ++i) {
+            r/=double(-2*(d-i)*(2*(d-i)-1));
+            _mul(t,s,r); r.swap(t); t.clear();
+            r+=1.0;
+        }
 
-     r.error()+=truncation_error;
+        r.error()+=truncation_error;
     }
 
     return r;
@@ -2289,19 +2289,19 @@ IntervalTaylorModel tan(const IntervalTaylorModel& x) {
 IntervalTaylorModel asin(const IntervalTaylorModel& x) {
     static const uint DEG=18;
     return compose(TaylorSeries(DEG,&Series<Interval>::asin,
-     x.value(),x.range()),x);
+                                x.value(),x.range()),x);
 }
 
 IntervalTaylorModel acos(const IntervalTaylorModel& x) {
     static const uint DEG=18;
     return compose(TaylorSeries(DEG,&Series<Interval>::acos,
-     x.value(),x.range()),x);
+                                x.value(),x.range()),x);
 }
 
 IntervalTaylorModel atan(const IntervalTaylorModel& x) {
     static const uint DEG=18;
     return compose(TaylorSeries(DEG,&Series<Interval>::atan,
-     x.value(),x.range()),x);
+                                x.value(),x.range()),x);
 }
 
 
@@ -2325,14 +2325,14 @@ IntervalTaylorModel& IntervalTaylorModel::rescale(const Interval& ocd, const Int
 
     ARIADNE_ASSERT_MSG(ocd.radius()>=0,"Illegal scaling from interval "<<ocd<<" with zero radius to interval "<<ncd);
     if(ocd.lower()==ocd.upper()) {
-     x.clear();
-     x.set_error(+inf<Float>());
+        x.clear();
+        x.set_error(+inf<Float>());
     } else {
-     Interval tmp=1.0/sub_ivl(b,a);
-     Interval alpha=sub_ivl(d,c)*tmp;
-     Interval beta=(mul_ivl(c,b)-mul_ivl(a,d))*tmp;
-     x*=alpha;
-     x+=beta;
+        Interval tmp=1.0/sub_ivl(b,a);
+        Interval alpha=sub_ivl(d,c)*tmp;
+        Interval beta=(mul_ivl(c,b)-mul_ivl(a,d))*tmp;
+        x*=alpha;
+        x+=beta;
     }
 
     return x;
@@ -2351,21 +2351,21 @@ IntervalTaylorModel preaffine(const IntervalTaylorModel& tm, uint k, const Inter
     // Create a temporary TaylorModels containing just terms x[k]^i
     array<IntervalTaylorModel> atm(d+1,IntervalTaylorModel(as));
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-     MultiIndex a=iter->key();
-     const Float& c=iter->data();
-     uint ak=a[k];
-     a[k]=0;
-     atm[ak].expansion().append(a,c);
+        MultiIndex a=iter->key();
+        const Float& c=iter->data();
+        uint ak=a[k];
+        a[k]=0;
+        atm[ak].expansion().append(a,c);
     }
 
     IntervalTaylorModel xk=IntervalTaylorModel::variable(as,k);
 
     for(uint i=0; i<=d; ++i) {
-     for(uint j=i; j<=d; ++j) {
-      Interval c=(Ariadne::bin(j,i)*Ariadne::pow(a,i)*Ariadne::pow(b,j-i));
-      r+=c*atm[j];
-      atm[j]*=xk;
-     }
+        for(uint j=i; j<=d; ++j) {
+            Interval c=(Ariadne::bin(j,i)*Ariadne::pow(a,i)*Ariadne::pow(b,j-i));
+            r+=c*atm[j];
+            atm[j]*=xk;
+        }
     }
     return r;
 }
@@ -2375,17 +2375,17 @@ IntervalTaylorModel restrict(const IntervalTaylorModel& tm, uint k, const Interv
     ARIADNE_ASSERT(k<tm.argument_size());
     ARIADNE_ASSERT(nd.lower()>=-1 && nd.upper()<=+1);
     if(nd.lower()==-1 && nd.upper()==1) {
-     return tm;
+        return tm;
     } else if(nd.lower()==-1 && nd.upper()==0) {
-     return split(tm,k,false);
+        return split(tm,k,false);
     } else if(nd.lower()==0 && nd.upper()==1) {
-     return split(tm,k,true);
+        return split(tm,k,true);
     } else if(nd.lower()==-0.5 && nd.upper()==0.5) {
-     return split(tm,k,indeterminate);
+        return split(tm,k,indeterminate);
     } else {
-     Interval a=sub_ivl(nd.upper()/2,nd.lower()/2);
-     Interval b=add_ivl(nd.upper()/2,nd.lower()/2);
-     return preaffine(tm,k,a,b);
+        Interval a=sub_ivl(nd.upper()/2,nd.lower()/2);
+        Interval b=add_ivl(nd.upper()/2,nd.lower()/2);
+        return preaffine(tm,k,a,b);
     }
 }
 
@@ -2400,24 +2400,24 @@ IntervalTaylorModel& IntervalTaylorModel::restrict(const Vector<Interval>& nd)
 
     array< array<Interval> > sf(as,array<Interval>(d+1u));
     for(uint j=0; j!=as; ++j) {
-     sf[j][0]=1.0;
-     sf[j][1]=rad_ivl(nd[j]);
-     for(uint k=2; k<=d; ++k) {
-      sf[j][k]=sf[j][k-1]*sf[j][1];
-     }
+        sf[j][0]=1.0;
+        sf[j][1]=rad_ivl(nd[j]);
+        for(uint k=2; k<=d; ++k) {
+            sf[j][k]=sf[j][k-1]*sf[j][1];
+        }
     }
 
     // TODO: separate into roundoff computation and value computation
     for(iterator iter=x.begin(); iter!=x.end(); ++iter) {
-     for(uint j=0; j!=as; ++j) {
-      Float& c=iter->data();
-      Interval ci=Interval(c);
-      for(uint j=0; j!=as; ++j) {
-    ci*=sf[j][iter->key()[j]];
-      }
-      iter->data()=ci.midpoint();
-      x._error=add_up(x._error,mag(ci-iter->data()));
-     }
+        for(uint j=0; j!=as; ++j) {
+            Float& c=iter->data();
+            Interval ci=Interval(c);
+            for(uint j=0; j!=as; ++j) {
+                ci*=sf[j][iter->key()[j]];
+            }
+            iter->data()=ci.midpoint();
+            x._error=add_up(x._error,mag(ci-iter->data()));
+        }
     }
 
     return x;
@@ -2437,22 +2437,22 @@ void _antidifferentiate1(IntervalTaylorModel& x, uint k)
     set_rounding_mode(upward);
     VOLATILE Float tre=0; // Twice the maximum accumulated roundoff error
     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     const uint c=xiter->key()[k]+1;
-     register Float xv=xiter->data();
-     register Float mxv=-xv;
-     assert(c>0);
-     //VOLATILE Float ml,u;
-     if(xv>=0) {
-      //VOLATILE Float u=xv/c;
-      //VOLATILE Float ml=mxv/c;
-      tre+=add_rnd(div_rnd(xv,c),div_rnd(mxv,c));
-     } else {
-      tre+=add_rnd(div_rnd(mxv,c),div_rnd(xv,c));
-      //VOLATILE Float u=mxv/c;
-      //VOLATILE Float ml=xv/c;
-      //te+=(u+ml);
-     }
-     //std::cerr<<"  te="<<te;;
+        const uint c=xiter->key()[k]+1;
+        register Float xv=xiter->data();
+        register Float mxv=-xv;
+        assert(c>0);
+        //VOLATILE Float ml,u;
+        if(xv>=0) {
+            //VOLATILE Float u=xv/c;
+            //VOLATILE Float ml=mxv/c;
+            tre+=add_rnd(div_rnd(xv,c),div_rnd(mxv,c));
+        } else {
+            tre+=add_rnd(div_rnd(mxv,c),div_rnd(xv,c));
+            //VOLATILE Float u=mxv/c;
+            //VOLATILE Float ml=xv/c;
+            //te+=(u+ml);
+        }
+        //std::cerr<<"  te="<<te;;
     }
     //std::cerr<<"  te="<<tre;;
     x.error()+=(tre/2);
@@ -2461,15 +2461,15 @@ void _antidifferentiate1(IntervalTaylorModel& x, uint k)
 
     set_rounding_to_nearest();
     for(IntervalTaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     MultiIndex& a=xiter->key();
-     Float& v=xiter->data();
+        MultiIndex& a=xiter->key();
+        Float& v=xiter->data();
 
-     // Use the following code as opposed to ++a[k]; c=a[k];
-     // as this seems to be safer against compiler optimisations through MultiIndexElementReference
-     a.increment(k);
-     const int& c=a.at(k);
-     assert(c>0);
-     v/=c;
+        // Use the following code as opposed to ++a[k]; c=a[k];
+        // as this seems to be safer against compiler optimisations through MultiIndexElementReference
+        a.increment(k);
+        const int& c=a.at(k);
+        assert(c>0);
+        v/=c;
     }
 }
 
@@ -2485,24 +2485,24 @@ void _antidifferentiate2(IntervalTaylorModel& x, uint k)
     VOLATILE Float u,ml;
     uint c;
     for(IntervalTaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     MultiIndex& xa=xiter->key();
-     Float& xv=xiter->data();
-     Float mxv=-xv;
-     c=xa.at(k)+1;
+        MultiIndex& xa=xiter->key();
+        Float& xv=xiter->data();
+        Float mxv=-xv;
+        c=xa.at(k)+1;
 
-     set_rounding_upward();
-     if(xv>=0) {
-      u=xv/c;
-      ml=mxv/c;
-     } else {
-      u=mxv/c;
-      ml=xv/c;
-     }
-     tre+=(u+ml);
+        set_rounding_upward();
+        if(xv>=0) {
+            u=xv/c;
+            ml=mxv/c;
+        } else {
+            u=mxv/c;
+            ml=xv/c;
+        }
+        tre+=(u+ml);
 
-     set_rounding_to_nearest();
-     xa.increment(k);
-     xv/=c;
+        set_rounding_to_nearest();
+        xa.increment(k);
+        xv/=c;
     }
 
     set_rounding_upward();
@@ -2532,23 +2532,23 @@ IntervalTaylorModel derivative(const IntervalTaylorModel& x, uint k)
     MultiIndex a(x.argument_size());
     uint c;
     for(IntervalTaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-     c=xiter->key().at(k);
-     if(c!=0) {
-      a=xiter->key();
-      xv=xiter->data();
-      mxv=-xv;
+        c=xiter->key().at(k);
+        if(c!=0) {
+            a=xiter->key();
+            xv=xiter->data();
+            mxv=-xv;
 
-      if(c!=1 && c!=2 && c!=4) {
-    set_rounding_upward();
-    u=xv*c;
-    ml=mxv*c;
-    tre+=(u+ml);
-    set_rounding_to_nearest();
-      }
-      --a[k];
-      xv*=c;
-      r.expansion().append(a,xv);
-     }
+            if(c!=1 && c!=2 && c!=4) {
+                set_rounding_upward();
+                u=xv*c;
+                ml=mxv*c;
+                tre+=(u+ml);
+                set_rounding_to_nearest();
+            }
+            --a[k];
+            xv*=c;
+            r.expansion().append(a,xv);
+        }
     }
     r.error()=(tre/2);
 
@@ -2573,7 +2573,7 @@ evaluate(const Vector<IntervalTaylorModel>& tv, const Vector<Interval>& x)
 {
     Vector<Interval> r(tv.size());
     for(uint i=0; i!=r.size(); ++i) {
-     r[i]=evaluate(tv[i],x);
+        r[i]=evaluate(tv[i],x);
     }
     return r;
 }
@@ -2593,10 +2593,10 @@ template<> class Powers<Interval> {
     explicit Powers(const Interval& t) { _values.push_back(Interval(1)); _values.push_back(t); }
     explicit Powers(const Interval& z, const Interval& t) { _values.push_back(z); _values.push_back(t); }
     const Interval& operator[](uint i) const {
-     while(_values.size()<=i) {
-      if(_values.size()%2==0) { _values.push_back(sqr(_values[_values.size()/2])); }
-      else { _values.push_back(_values[1]*_values.back()); } }
-     return _values[i]; }
+        while(_values.size()<=i) {
+            if(_values.size()%2==0) { _values.push_back(sqr(_values[_values.size()/2])); }
+            else { _values.push_back(_values[1]*_values.back()); } }
+        return _values[i]; }
   private:
     mutable std::vector<Interval> _values;
 };
@@ -2607,7 +2607,7 @@ IntervalTaylorModel substitute(const IntervalTaylorModel& x, uint k, const Inter
     const uint n=s.argument_size();
     Vector<IntervalTaylorModel> y(n+1);
     for(uint i=0; i!=n; ++i) {
-     y[i]=IntervalTaylorModel::variable(n,i);
+        y[i]=IntervalTaylorModel::variable(n,i);
     }
     y[n]=s;
     return compose(x,y);
@@ -2617,7 +2617,7 @@ Vector<IntervalTaylorModel> substitute(const Vector<IntervalTaylorModel>& x, uin
     const uint n=s.argument_size();
     Vector<IntervalTaylorModel> y(n+1);
     for(uint i=0; i!=n; ++i) {
-     y[i]=IntervalTaylorModel::variable(n,i);
+        y[i]=IntervalTaylorModel::variable(n,i);
     }
     y[n]=s;
     return compose(x,y);
@@ -2637,64 +2637,64 @@ partial_evaluate(const IntervalTaylorModel& x, uint k, Interval c)
     IntervalTaylorModel r(x.argument_size()-1,x.accuracy_ptr());
     MultiIndex ra(r.argument_size());
     if(c==0) {
-     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-      const MultiIndex& xa=xiter->key();
-      MultiIndex::index_type xak=xa[k];
-      if(xak==0) {
-    const Float& xv=xiter->data();
-    for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-    for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
-    r.expansion().append(ra,xv);
-      }
-     }
-     r.set_error(x.error());
+        for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            MultiIndex::index_type xak=xa[k];
+            if(xak==0) {
+                const Float& xv=xiter->data();
+                for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+                for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+                r.expansion().append(ra,xv);
+            }
+        }
+        r.set_error(x.error());
     } else if(c==1) {
-     IntervalTaylorModel s(x.argument_size()-1,x.accuracy_ptr());
-     array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
+        IntervalTaylorModel s(x.argument_size()-1,x.accuracy_ptr());
+        array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
 
-     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-      const MultiIndex& xa=xiter->key();
-      const Float& xv=xiter->data();
-      MultiIndex::index_type xak=xa[k];
-      for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-      for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
-      assert(ra.degree()+xak==xa.degree());
-      p[xak].expansion().append(ra,xv);
-     }
+        for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            const Float& xv=xiter->data();
+            MultiIndex::index_type xak=xa[k];
+            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            assert(ra.degree()+xak==xa.degree());
+            p[xak].expansion().append(ra,xv);
+        }
 
-     r=p[0];
-     r.set_error(x.error());
-     for(uint i=1; i!=p.size(); ++i) {
-      _add(s,r,p[i]);
-      r.swap(s);
-      s.clear();
-     }
+        r=p[0];
+        r.set_error(x.error());
+        for(uint i=1; i!=p.size(); ++i) {
+            _add(s,r,p[i]);
+            r.swap(s);
+            s.clear();
+        }
     } else {
-     IntervalTaylorModel s(x.argument_size()-1,x.accuracy_ptr());
-     array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
+        IntervalTaylorModel s(x.argument_size()-1,x.accuracy_ptr());
+        array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
 
-     Powers<Interval> cpowers(c);
+        Powers<Interval> cpowers(c);
 
-     for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-      const MultiIndex& xa=xiter->key();
-      const Float& xv=xiter->data();
-      MultiIndex::index_type xak=xa[k];
-      for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-      for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
-      assert(ra.degree()+xak==xa.degree());
-      p[xak].expansion().append(ra,xv);
-     }
-     for(uint i=1; i!=p.size(); ++i) {
-      p[i]*=cpowers[i];
-     }
+        for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            const Float& xv=xiter->data();
+            MultiIndex::index_type xak=xa[k];
+            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            assert(ra.degree()+xak==xa.degree());
+            p[xak].expansion().append(ra,xv);
+        }
+        for(uint i=1; i!=p.size(); ++i) {
+            p[i]*=cpowers[i];
+        }
 
-     r=p[0];
-     r.set_error(x.error());
-     for(uint i=1; i!=p.size(); ++i) {
-      _add(s,r,p[i]);
-      r.swap(s);
-      s.clear();
-     }
+        r=p[0];
+        r.set_error(x.error());
+        for(uint i=1; i!=p.size(); ++i) {
+            _add(s,r,p[i]);
+            r.swap(s);
+            s.clear();
+        }
     }
 
     return r;
@@ -2705,7 +2705,7 @@ partial_evaluate(const Vector<IntervalTaylorModel>& tv, uint k, Float c)
 {
     Vector<IntervalTaylorModel> r(tv.size());
     for(uint i=0; i!=r.size(); ++i) {
-     r[i]=partial_evaluate(tv[i],k,c);
+        r[i]=partial_evaluate(tv[i],k,c);
     }
     return r;
 }
@@ -2715,7 +2715,7 @@ partial_evaluate(const Vector<IntervalTaylorModel>& tv, uint k, Interval c)
 {
     Vector<IntervalTaylorModel> r(tv.size());
     for(uint i=0; i!=r.size(); ++i) {
-     r[i]=partial_evaluate(tv[i],k,c);
+        r[i]=partial_evaluate(tv[i],k,c);
     }
     return r;
 }
@@ -2752,9 +2752,9 @@ _split1(const IntervalTaylorModel& tm, uint k, tribool b)
     // Divide all coefficients by 2^a[k]
     // This can be done exactly
     for(IntervalTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
-     const uchar ak=iter->key()[k];
-     Float& c=iter->data();
-     c/=(1<<ak);
+        const uchar ak=iter->key()[k];
+        Float& c=iter->data();
+        c/=(1<<ak);
     }
 
     int tr=( indeterminate(b) ? 0 : definitely(b) ? +1 : -1 );
@@ -2766,11 +2766,11 @@ _split1(const IntervalTaylorModel& tm, uint k, tribool b)
     // Split variables by degree in x[k]
     array<IntervalTaylorModel> ary(deg+1,IntervalTaylorModel(as));
     for(IntervalTaylorModel::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
-     MultiIndex a=iter->key();
-     const Float& c=iter->data();
-     uchar ak=a[k];
-     a[k]=0u;
-     ary[ak].expansion().append(a,c);
+        MultiIndex a=iter->key();
+        const Float& c=iter->data();
+        uchar ak=a[k];
+        a[k]=0u;
+        ary[ak].expansion().append(a,c);
     }
 
     Float re=r.error();
@@ -2778,14 +2778,14 @@ _split1(const IntervalTaylorModel& tm, uint k, tribool b)
     r.set_error(re);
 
     for(uint i=0; i<=deg; ++i) {
-     for(uint j=i; j<=deg; ++j) {
-      int sf=bin(j,i);
-      if(tr==-1 && (j-i)%2==1) { sf=-sf; }
-      r+=ary[j]*sf;
-      for(IntervalTaylorModel::iterator iter=ary[j].begin(); iter!=ary[j].end(); ++iter) {
-    ++iter->key()[k];
-      }
-      }
+        for(uint j=i; j<=deg; ++j) {
+            int sf=bin(j,i);
+            if(tr==-1 && (j-i)%2==1) { sf=-sf; }
+            r+=ary[j]*sf;
+            for(IntervalTaylorModel::iterator iter=ary[j].begin(); iter!=ary[j].end(); ++iter) {
+                ++iter->key()[k];
+            }
+         }
     }
 
     return r;
@@ -2818,17 +2818,17 @@ unscale(const IntervalTaylorModel& tv, const Interval& ivl)
     ARIADNE_ASSERT_MSG(l<=u,"Cannot unscale IntervalTaylorModel "<<tv<<" from empty interval "<<ivl);
 
     if(l==u) {
-     IntervalTaylorModel r=IntervalTaylorModel::zero(tv.argument_size());
-     r.set_error(+inf<Float>());
-     return r;
+        IntervalTaylorModel r=IntervalTaylorModel::zero(tv.argument_size());
+        r.set_error(+inf<Float>());
+        return r;
     } else {
-     IntervalTaylorModel r=tv;
-     Interval c=Interval(l/2)+Interval(u/2);
-     Interval s=2/(Interval(u)-Interval(l));
-     r-=c;
-     r*=s;
+        IntervalTaylorModel r=tv;
+        Interval c=Interval(l/2)+Interval(u/2);
+        Interval s=2/(Interval(u)-Interval(l));
+        r-=c;
+        r*=s;
 
-     return r;
+        return r;
     }
 }
 
@@ -2857,7 +2857,7 @@ Float IntervalTaylorModel::norm() const {
     set_rounding_mode(upward);
     Float r=this->error();
     for(IntervalTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-     r+=abs(iter->data());
+        r+=abs(iter->data());
     }
     set_rounding_mode(to_nearest);
     return r;
@@ -2890,7 +2890,7 @@ disjoint(const IntervalTaylorModel& tv1, const IntervalTaylorModel& tv2)
     const_cast<IntervalTaylorModel&>(tv1).error()=tv1e;
     const_cast<IntervalTaylorModel&>(tv2).error()=tv2e;
     //std::cerr<<"\ntv1="<<tv1<<"\ntv2="<<tv2<<"\nd="<<d
-    //      <<"\n|d|="<<norm(d)<<" |e|="<<add_up(tv1.error(),tv2.error())<<"\n\n";
+    //         <<"\n|d|="<<norm(d)<<" |e|="<<add_up(tv1.error(),tv2.error())<<"\n\n";
     return norm(d)>add_up(tv1.error(),tv2.error());
 }
 
@@ -2915,9 +2915,9 @@ operator<<(std::ostream& os, const IntervalTaylorModel& tm) {
     // Set the variable names to be 'parameter' s0,s1,..
     array<std::string> variable_names(tm.argument_size());
     for(uint j=0; j!=tm.argument_size(); ++j) {
-     std::stringstream sstr;
-     sstr << 's' << j;
-     variable_names[j]=sstr.str();
+        std::stringstream sstr;
+        sstr << 's' << j;
+        variable_names[j]=sstr.str();
     }
 
     //os << "IntervalTaylorModel";
@@ -2938,7 +2938,7 @@ Vector<IntervalTaylorModel> IntervalTaylorModel::zeros(uint rs, uint as)
 {
     Vector<IntervalTaylorModel> result(rs);
     for(uint i=0; i!=rs; ++i) {
-     result[i]=IntervalTaylorModel::zero(as);
+        result[i]=IntervalTaylorModel::zero(as);
     }
     return result;
 }
@@ -2947,7 +2947,7 @@ Vector<IntervalTaylorModel> IntervalTaylorModel::constants(uint as, const Vector
 {
     Vector<IntervalTaylorModel> result(c.size());
     for(uint i=0; i!=c.size(); ++i) {
-     result[i]=IntervalTaylorModel::constant(as,c[i]);
+        result[i]=IntervalTaylorModel::constant(as,c[i]);
     }
     return result;
 }
@@ -2956,7 +2956,7 @@ Vector<IntervalTaylorModel> IntervalTaylorModel::constants(uint as, const Vector
 {
     Vector<IntervalTaylorModel> result(c.size());
     for(uint i=0; i!=c.size(); ++i) {
-     result[i]=IntervalTaylorModel::constant(as,c[i]);
+        result[i]=IntervalTaylorModel::constant(as,c[i]);
     }
     return result;
 }
@@ -2972,7 +2972,7 @@ Vector<IntervalTaylorModel> IntervalTaylorModel::scalings(const Vector<Interval>
 {
     Vector<IntervalTaylorModel> result(d.size());
     for(uint i=0; i!=d.size(); ++i) {
-     result[i]=IntervalTaylorModel::scaling(d.size(),i,d[i]);
+        result[i]=IntervalTaylorModel::scaling(d.size(),i,d[i]);
     }
     return result;
 }
@@ -2981,7 +2981,7 @@ Vector<IntervalTaylorModel> IntervalTaylorModel::unscalings(const Vector<Interva
 {
     Vector<IntervalTaylorModel> result(cd.size());
     for(uint i=0; i!=cd.size(); ++i) {
-     result[i]=IntervalTaylorModel::unscaling(cd.size(),i,cd[i]);
+        result[i]=IntervalTaylorModel::unscaling(cd.size(),i,cd[i]);
     }
     return result;
 }
@@ -2991,7 +2991,7 @@ Vector<IntervalTaylorModel> IntervalTaylorModel::rescalings(const Vector<Interva
     ARIADNE_ASSERT(cd.size()==d.size());
     Vector<IntervalTaylorModel> result(d.size());
     for(uint i=0; i!=d.size(); ++i) {
-     result[i]=IntervalTaylorModel::rescaling(d.size(),i,cd[i],d[i]);
+        result[i]=IntervalTaylorModel::rescaling(d.size(),i,cd[i],d[i]);
     }
     return result;
 }
@@ -3008,7 +3008,7 @@ Vector<IntervalTaylorModel> embed(const Vector<IntervalTaylorModel>& x, uint as)
 {
     Vector<IntervalTaylorModel> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-     r[i]=embed(x[i],as);
+        r[i]=embed(x[i],as);
     }
     return r;
 }
@@ -3017,7 +3017,7 @@ Vector<IntervalTaylorModel> embed(uint as, const Vector<IntervalTaylorModel>& x)
 {
     Vector<IntervalTaylorModel> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-     r[i]=embed(as,x[i]);
+        r[i]=embed(as,x[i]);
     }
     return r;
 }
@@ -3043,7 +3043,7 @@ refines(const Vector<IntervalTaylorModel>& tv1, const Vector<IntervalTaylorModel
 {
     ARIADNE_ASSERT(tv1.size()==tv2.size());
     for(uint i=0; i!=tv1.size(); ++i) {
-     if(!refines(tv1[i],tv2[i])) { return false; }
+        if(!refines(tv1[i],tv2[i])) { return false; }
     }
     return true;
 }
@@ -3053,7 +3053,7 @@ disjoint(const Vector<IntervalTaylorModel>& tv1, const Vector<IntervalTaylorMode
 {
     ARIADNE_ASSERT(tv1.size()==tv2.size());
     for(uint i=0; i!=tv1.size(); ++i) {
-     if(disjoint(tv1[i],tv2[i])) { return true; }
+        if(disjoint(tv1[i],tv2[i])) { return true; }
     }
     return false;
 }
@@ -3064,7 +3064,7 @@ split(const Vector<IntervalTaylorModel>& tv, uint j)
     Vector<IntervalTaylorModel> r1(tv.size());
     Vector<IntervalTaylorModel> r2(tv.size());
     for(uint i=0; i!=tv.size(); ++i) {
-     make_lpair(r1[i],r2[i])=split(tv[i],j);
+        make_lpair(r1[i],r2[i])=split(tv[i],j);
     }
     return make_pair(r1,r2);
 }
@@ -3074,7 +3074,7 @@ split(const Vector<IntervalTaylorModel>& tv, uint j, bool h)
 {
     Vector<IntervalTaylorModel> r(tv.size());
     for(uint i=0; i!=tv.size(); ++i) {
-     r[i]=split(tv[i],j,h);
+        r[i]=split(tv[i],j,h);
     }
     return r;
 }
@@ -3084,7 +3084,7 @@ unscale(const Vector<IntervalTaylorModel>& tvs, const Vector<Interval>& ivls)
 {
     Vector<IntervalTaylorModel> r(tvs.size());
     for(uint i=0; i!=r.size(); ++i) {
-     r[i]=unscale(tvs[i],ivls[i]);
+        r[i]=unscale(tvs[i],ivls[i]);
     }
     return r;
 }
@@ -3106,7 +3106,7 @@ rescale(const Vector<IntervalTaylorModel>& tvs, const Vector<Interval>& old_codo
 {
     Vector<IntervalTaylorModel> r(tvs.size());
     for(uint i=0; i!=r.size(); ++i) {
-     r[i]=rescale(tvs[i],old_codom[i],new_codom[i]);
+        r[i]=rescale(tvs[i],old_codom[i],new_codom[i]);
     }
     return r;
 }
@@ -3115,7 +3115,7 @@ Vector<IntervalTaylorModel>&
 rescale(Vector<IntervalTaylorModel>& tvs, const Vector<Interval>& old_codom, const Vector<Interval>& new_codom)
 {
     for(uint i=0; i!=tvs.size(); ++i) {
-     rescale(tvs[i],old_codom[i],new_codom[i]);
+        rescale(tvs[i],old_codom[i],new_codom[i]);
     }
     return tvs;
 }
@@ -3125,7 +3125,7 @@ scale(const Vector<IntervalTaylorModel>& tvs, const Vector<Interval>& new_codom)
 {
     Vector<IntervalTaylorModel> r(tvs);
     for(uint i=0; i!=tvs.size(); ++i) {
-     r[i].rescale(Interval(-1,+1),new_codom[i]);
+        r[i].rescale(Interval(-1,+1),new_codom[i]);
     }
     return r;
 }
@@ -3139,7 +3139,7 @@ IntervalTaylorModel antiderivative(const IntervalTaylorModel& x, uint k) {
 Vector<IntervalTaylorModel> antiderivative(const Vector<IntervalTaylorModel>& x, uint k) {
     Vector<IntervalTaylorModel> r(x);
     for(uint i=0; i!=x.size(); ++i) {
-     r[i].antidifferentiate(k);
+        r[i].antidifferentiate(k);
     }
     return r;
 }
@@ -3155,7 +3155,7 @@ IntervalTaylorModel antiderivative(const IntervalTaylorModel& x, const Interval&
 Vector<IntervalTaylorModel> antiderivative(const Vector<IntervalTaylorModel>& x, const Interval& dk, uint k) {
     Vector<IntervalTaylorModel> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-     r[i]=antiderivative(x[i],dk,k);
+        r[i]=antiderivative(x[i],dk,k);
     }
     return r;
 }
@@ -3173,59 +3173,59 @@ IntervalTaylorModel intersection(const IntervalTaylorModel& x, const IntervalTay
     IntervalTaylorModel::const_iterator xiter=x.begin();
     IntervalTaylorModel::const_iterator yiter=y.begin();
     while(xiter!=x.end() || yiter!=y.end()) {
-     // Can't use const MultiIndex& here since references change as the iterators change
-     // We would need to use a smart reference
-     //const MultiIndex& xa=xiter->key();
-     //const MultiIndex& ya=yiter->key();
-     if(xiter==x.end()) {
-      a=yiter->key();
-      yv=yiter->data();
-      xv=0.0;
-      ++yiter;
-     } else if(yiter==y.end()) {
-      a=xiter->key();
-      xv=xiter->data();
-      yv=0.0;
-      ++xiter;
-     } else if(xiter->key()==yiter->key()) {
-      a=xiter->key();
-      xv=xiter->data();
-      yv=yiter->data();
-      ++xiter;
-      ++yiter;
-     } else if(xiter->key()<yiter->key()) {
-      a=xiter->key();
-      xv=xiter->data();
-      yv=0.0;
-      ++xiter;
-     } else { // xa>ya
-      a=yiter->key();
-      yv=yiter->data();
-      xv=0.0;
-      ++yiter;
-     }
+        // Can't use const MultiIndex& here since references change as the iterators change
+        // We would need to use a smart reference
+        //const MultiIndex& xa=xiter->key();
+        //const MultiIndex& ya=yiter->key();
+        if(xiter==x.end()) {
+            a=yiter->key();
+            yv=yiter->data();
+            xv=0.0;
+            ++yiter;
+        } else if(yiter==y.end()) {
+            a=xiter->key();
+            xv=xiter->data();
+            yv=0.0;
+            ++xiter;
+        } else if(xiter->key()==yiter->key()) {
+            a=xiter->key();
+            xv=xiter->data();
+            yv=yiter->data();
+            ++xiter;
+            ++yiter;
+        } else if(xiter->key()<yiter->key()) {
+            a=xiter->key();
+            xv=xiter->data();
+            yv=0.0;
+            ++xiter;
+        } else { // xa>ya
+            a=yiter->key();
+            yv=yiter->data();
+            xv=0.0;
+            ++yiter;
+        }
 
-     set_rounding_upward();
-     xu=xv+xe;
-     yu=yv+ye;
-     mxl=xe-xv;
-     myl=ye-yv;
-     u=min(xu,yu);
-     ml=min(mxl,myl);
-     if(u+ml<0) {
-      ARIADNE_THROW(IntersectionException,"intersection(IntervalTaylorModel,IntervalTaylorModel)",x<<" and "<<y<<" are disjoint.");
-     }
-     twice_max_error=max(twice_max_error,(u+ml));
+        set_rounding_upward();
+        xu=xv+xe;
+        yu=yv+ye;
+        mxl=xe-xv;
+        myl=ye-yv;
+        u=min(xu,yu);
+        ml=min(mxl,myl);
+        if(u+ml<0) {
+            ARIADNE_THROW(IntersectionException,"intersection(IntervalTaylorModel,IntervalTaylorModel)",x<<" and "<<y<<" are disjoint.");
+        }
+        twice_max_error=max(twice_max_error,(u+ml));
 
-     set_rounding_to_nearest();
-     xu=xv+xe;
-     yu=yv+ye;
-     mxl=xe-xv;
-     myl=ye-yv;
-     u=min(xu,yu);
-     ml=min(mxl,myl);
-     rv=(u-ml)/2;
-     if(rv!=0.0) { r.expansion().append(a,(u-ml)/2); }
+        set_rounding_to_nearest();
+        xu=xv+xe;
+        yu=yv+ye;
+        mxl=xe-xv;
+        myl=ye-yv;
+        u=min(xu,yu);
+        ml=min(mxl,myl);
+        rv=(u-ml)/2;
+        if(rv!=0.0) { r.expansion().append(a,(u-ml)/2); }
     }
 
     r.error()=twice_max_error/2;
@@ -3262,7 +3262,7 @@ jacobian(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& x)
     Vector< Differential<Interval> > dx=Differential<Interval>::variables(1u,x);
     Vector< Differential<Interval> > df(f.size());
     for(uint i=0; i!=f.size(); ++i) {
-     df[i]=evaluate(f[i].expansion(),dx);
+        df[i]=evaluate(f[i].expansion(),dx);
     }
     return jacobian(df);
 }
@@ -3273,13 +3273,13 @@ jacobian2(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& x)
 {
     Vector< Differential<Interval> > dx(x.size());
     for(uint i=0; i!=x.size()-f.size(); ++i) {
-     dx[i]=Differential<Interval>::constant(f.size(),1u,x[i]); }
+        dx[i]=Differential<Interval>::constant(f.size(),1u,x[i]); }
     for(uint i=0; i!=f.size(); ++i) {
-     uint j=i+(x.size()-f.size());
-     dx[j]=Differential<Interval>::variable(f.size(),1u,x[j],i); }
+        uint j=i+(x.size()-f.size());
+        dx[j]=Differential<Interval>::variable(f.size(),1u,x[j],i); }
     Vector< Differential<Interval> > df(f.size());
     for(uint i=0; i!=f.size(); ++i) {
-     df[i]=evaluate(f[i].expansion(),dx);
+        df[i]=evaluate(f[i].expansion(),dx);
     }
     Matrix<Interval> J=jacobian(df);
     return J;
@@ -3294,27 +3294,27 @@ jacobian(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& d)
     uint as=f[0].argument_size();
     Matrix<Interval> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
-     for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-      const MultiIndex& a=iter->key();
-      const Float& x=iter->data();
-      for(uint k=0; k!=as; ++k) {
-    const uint c=a[k];
-    if(c>0) {
-     if(iter->key().degree()==1) {
-      J[i][k]+=x;
-     }
-     else {
-      Interval p(-x,+x);
-      p*=Float(c);
-      for(uint l=0; l!=as; ++l) {
-    if(l==k) { if(a[l]>1) { p*=pow(d[l],a[l]-1); } }
-    else { if(a[k]>0) { p*=pow(d[k],a[k]); } }
-      }
-      J[i][k]+=p;
-     }
-    }
-      }
-     }
+        for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+            const MultiIndex& a=iter->key();
+            const Float& x=iter->data();
+            for(uint k=0; k!=as; ++k) {
+                const uint c=a[k];
+                if(c>0) {
+                    if(iter->key().degree()==1) {
+                        J[i][k]+=x;
+                    }
+                    else {
+                        Interval p(-x,+x);
+                        p*=Float(c);
+                        for(uint l=0; l!=as; ++l) {
+                            if(l==k) { if(a[l]>1) { p*=pow(d[l],a[l]-1); } }
+                            else { if(a[k]>0) { p*=pow(d[k],a[k]); } }
+                        }
+                        J[i][k]+=p;
+                    }
+                }
+            }
+        }
     }
     return J;
 }
@@ -3329,9 +3329,9 @@ jacobian_value(const Vector<IntervalTaylorModel>& f)
     Matrix<Float> J(rs,as);
     MultiIndex a(as);
     for(uint i=0; i!=rs; ++i) {
-     for(uint j=0; j!=as; ++j) {
-      a[j]=1; const Float x=f[i][a]; J[i][j]=x; a[j]=0;
-     }
+        for(uint j=0; j!=as; ++j) {
+            a[j]=1; const Float x=f[i][a]; J[i][j]=x; a[j]=0;
+        }
     }
     return J;
 }
@@ -3346,9 +3346,9 @@ jacobian2_value(const Vector<IntervalTaylorModel>& f)
     Matrix<Float> J(rs,rs);
     MultiIndex a(fas);
     for(uint i=0; i!=rs; ++i) {
-     for(uint j=0; j!=rs; ++j) {
-      a[has+j]=1; const Float x=f[i][a]; J[i][j]=x; a[has+j]=0;
-     }
+        for(uint j=0; j!=rs; ++j) {
+            a[has+j]=1; const Float x=f[i][a]; J[i][j]=x; a[has+j]=0;
+        }
     }
     return J;
 }
@@ -3363,17 +3363,17 @@ jacobian_range(const Vector<IntervalTaylorModel>& f)
     uint as=f[0].argument_size();
     Matrix<Interval> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
-     for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-      for(uint k=0; k!=as; ++k) {
-    const uint c=iter->key()[k];
-    if(c>0) {
-     const Float& x=iter->data();
-     if(iter->key().degree()==1) { J[i][k]+=x; }
-     else { J[i][k]+=Interval(-1,1)*x*c; }
-     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
-    }
-      }
-     }
+        for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+            for(uint k=0; k!=as; ++k) {
+                const uint c=iter->key()[k];
+                if(c>0) {
+                    const Float& x=iter->data();
+                    if(iter->key().degree()==1) { J[i][k]+=x; }
+                    else { J[i][k]+=Interval(-1,1)*x*c; }
+                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
+                }
+            }
+        }
     }
     return J;
 }
@@ -3387,17 +3387,17 @@ jacobian2_range(const Vector<IntervalTaylorModel>& f)
     uint has=fas-rs;
     Matrix<Interval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
-     for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-      for(uint k=0; k!=rs; ++k) {
-    const uint c=iter->key()[has+k];
-    if(c>0) {
-     const Float& x=iter->data();
-     if(iter->key().degree()==1) { J[i][k]+=x; }
-     else { J[i][k]+=Interval(-1,1)*x*c; }
-     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
-    }
-      }
-     }
+        for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+            for(uint k=0; k!=rs; ++k) {
+                const uint c=iter->key()[has+k];
+                if(c>0) {
+                    const Float& x=iter->data();
+                    if(iter->key().degree()==1) { J[i][k]+=x; }
+                    else { J[i][k]+=Interval(-1,1)*x*c; }
+                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
+                }
+            }
+        }
     }
     return J;
 }
@@ -3431,7 +3431,7 @@ Interval jacobian2_range(const IntervalTaylorModel& f) {
 inline
 Vector<IntervalTaylorModel>
 _compose1(const Vector<IntervalTaylorModel>& x,
-    const Vector<IntervalTaylorModel>& ys)
+          const Vector<IntervalTaylorModel>& ys)
 {
     //std::cerr<<"compose1"<<std::endl;
     ARIADNE_ASSERT(x.size()>0);
@@ -3444,15 +3444,15 @@ _compose1(const Vector<IntervalTaylorModel>& x,
     Vector<IntervalTaylorModel> r(x.size(),IntervalTaylorModel(as));
     IntervalTaylorModel t(as);
     for(uint i=0; i!=x.size(); ++i) {
-     r[i].set_error(x[i].error());
-     for(IntervalTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
-      t=iter->data();
-      for(uint j=0; j!=iter->key().size(); ++j) {
-    IntervalTaylorModel p=pow(ys[j],iter->key()[j]);
-    t=t*p;
-      }
-      r[i]+=t;
-     }
+        r[i].set_error(x[i].error());
+        for(IntervalTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+            t=iter->data();
+            for(uint j=0; j!=iter->key().size(); ++j) {
+                IntervalTaylorModel p=pow(ys[j],iter->key()[j]);
+                t=t*p;
+            }
+            r[i]+=t;
+        }
     }
 
     return r;
@@ -3462,7 +3462,7 @@ _compose1(const Vector<IntervalTaylorModel>& x,
 inline
 Vector<IntervalTaylorModel>
 _compose2(const Vector<IntervalTaylorModel>& x,
-    const Vector<IntervalTaylorModel>& ys)
+          const Vector<IntervalTaylorModel>& ys)
 {
     //std::cerr<<"compose2"<<std::endl;
     uint yrs=ys.size();
@@ -3474,22 +3474,22 @@ _compose2(const Vector<IntervalTaylorModel>& x,
     for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
 
     for(uint i=0; i!=x.size(); ++i) {
-     for(IntervalTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
-      assert(xas==iter->key().size());
-      for(uint j=0; j!=iter->key().size(); ++j) {
-    max_power[j]=max(max_power[j],iter->key()[j]);
-      }
-     }
+        for(IntervalTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+            assert(xas==iter->key().size());
+            for(uint j=0; j!=iter->key().size(); ++j) {
+                max_power[j]=max(max_power[j],iter->key()[j]);
+            }
+        }
     }
 
     array< array< IntervalTaylorModel > > powers(yrs);
     for(uint j=0; j!=yrs; ++j) {
-     powers[j].resize(max_power[j]+1);
-     powers[j][0]=ys[j]*0;
-     powers[j][1]=ys[j];
-     for(uint k=2; k!=powers[j].size(); ++k) {
-      powers[j][k]=powers[j][k/2]*powers[j][(k+1)/2];
-     }
+        powers[j].resize(max_power[j]+1);
+        powers[j][0]=ys[j]*0;
+        powers[j][1]=ys[j];
+        for(uint k=2; k!=powers[j].size(); ++k) {
+            powers[j][k]=powers[j][k/2]*powers[j][(k+1)/2];
+        }
     }
 
     Vector<IntervalTaylorModel> r(x.size(),IntervalTaylorModel(as,accuracy_ptr));
@@ -3497,18 +3497,18 @@ _compose2(const Vector<IntervalTaylorModel>& x,
     MultiIndex a;
     Float c;
     for(uint i=0; i!=x.size(); ++i) {
-     r[i].set_error(x[i].error());
-     for(IntervalTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
-      a=iter->key();
-      c=iter->data();
-      t=c;
-      for(uint j=0; j!=a.size(); ++j) {
-    if(a[j]>0) {
-     t=t*powers[j][a[j]];
-    }
-      }
-      r[i]+=t;
-     }
+        r[i].set_error(x[i].error());
+        for(IntervalTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+            a=iter->key();
+            c=iter->data();
+            t=c;
+            for(uint j=0; j!=a.size(); ++j) {
+                if(a[j]>0) {
+                    t=t*powers[j][a[j]];
+                }
+            }
+            r[i]+=t;
+        }
     }
 
     ARIADNE_ASSERT(r[0].accuracy_ptr()==ys[0].accuracy_ptr());
@@ -3518,7 +3518,7 @@ _compose2(const Vector<IntervalTaylorModel>& x,
 
 Vector<IntervalTaylorModel>
 _compose(const Vector<IntervalTaylorModel>& x,
-      const Vector<IntervalTaylorModel>& ys)
+         const Vector<IntervalTaylorModel>& ys)
 {
     ARIADNE_ASSERT_MSG(x.size()>0,"x="<<x<<", ys="<<ys);
     ARIADNE_ASSERT_MSG(ys.size()==x[0].argument_size(),"x="<<x<<", ys="<<ys);
@@ -3531,52 +3531,52 @@ _compose(const Vector<IntervalTaylorModel>& x,
 
 Vector<IntervalTaylorModel>
 unchecked_compose(const Vector<IntervalTaylorModel>& x,
-      const Vector<IntervalTaylorModel>& ys)
+                  const Vector<IntervalTaylorModel>& ys)
 {
     return _compose(x,ys);
 }
 
 IntervalTaylorModel
 unchecked_compose(const IntervalTaylorModel& x,
-      const Vector<IntervalTaylorModel>& ys)
+                  const Vector<IntervalTaylorModel>& ys)
 {
     return _compose(Vector<IntervalTaylorModel>(1u,x),ys)[0];
 }
 
 Vector<IntervalTaylorModel>
 compose(const Vector<IntervalTaylorModel>& x,
-     const Vector<IntervalTaylorModel>& ys)
+        const Vector<IntervalTaylorModel>& ys)
 {
     return _compose(x,ys);
 }
 
 IntervalTaylorModel
 compose(const IntervalTaylorModel& x,
-     const Vector<IntervalTaylorModel>& ys)
+        const Vector<IntervalTaylorModel>& ys)
 {
     return _compose(Vector<IntervalTaylorModel>(1u,x),ys)[0];
 }
 
 IntervalTaylorModel
 compose(const IntervalTaylorModel& x,
-     const Vector<Interval>& d,
-     const Vector<IntervalTaylorModel>& y)
+        const Vector<Interval>& d,
+        const Vector<IntervalTaylorModel>& y)
 {
     return _compose(Vector<IntervalTaylorModel>(1u,x),unscale(y,d))[0];
 }
 
 Vector<IntervalTaylorModel>
 compose(const Vector<IntervalTaylorModel>& x,
-     const Vector<Interval>& d,
-     const Vector<IntervalTaylorModel>& y)
+        const Vector<Interval>& d,
+        const Vector<IntervalTaylorModel>& y)
 {
     return _compose(x,unscale(y,d));
 }
 
 Vector<IntervalTaylorModel>
 unchecked_compose(const Vector<IntervalTaylorModel>& x,
-     const Vector<Interval>& d,
-     const Vector<IntervalTaylorModel>& y)
+        const Vector<Interval>& d,
+        const Vector<IntervalTaylorModel>& y)
 {
     return _compose(x,unscale(y,d));
 }
@@ -3605,12 +3605,12 @@ void FloatTaylorModel::iadd(const Float& c)
     FloatTaylorModel& x=*this;
     if(c==0) { return; }
     if(x._expansion.empty()) {
-     x._expansion.append(MultiIndex(x.argument_size()),c);
+        x._expansion.append(MultiIndex(x.argument_size()),c);
     } else if((x._expansion.end()-1)->key().degree()>0) {
-     x._expansion.append(MultiIndex(x.argument_size()),c);
+        x._expansion.append(MultiIndex(x.argument_size()),c);
     } else {
-     Float& rv=(x._expansion.end()-1)->data();
-     rv+=c;
+        Float& rv=(x._expansion.end()-1)->data();
+        rv+=c;
     }
 }
 
@@ -3620,7 +3620,7 @@ void FloatTaylorModel::imul(const Float& c)
     if(c==0) { this->clear(); return; }
     if(c==1) { return; }
     for(ExpansionType::iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
-     iter->data() *= c;
+        iter->data() *= c;
     }
 }
 
@@ -3634,24 +3634,24 @@ FloatTaylorModel FloatTaylorModel::sma(const Float& c, const FloatTaylorModel& y
     const_iterator xiter=x._expansion.begin();
     const_iterator yiter=y._expansion.begin();
     while(xiter!=x._expansion.end() && yiter!=y._expansion.end()) {
-     if(xiter->key()<yiter->key()) {
-      r._expansion.append(xiter->key(),xiter->data());
-      ++xiter;
-     } else if(yiter->key()<xiter->key()) {
-      r._expansion.append(yiter->key(),c*yiter->data());
-      ++yiter;
-     } else {
-      r._expansion.append(xiter->key(),xiter->data()+c*yiter->data());
-      ++xiter; ++yiter;
-     }
+        if(xiter->key()<yiter->key()) {
+            r._expansion.append(xiter->key(),xiter->data());
+            ++xiter;
+        } else if(yiter->key()<xiter->key()) {
+            r._expansion.append(yiter->key(),c*yiter->data());
+            ++yiter;
+        } else {
+            r._expansion.append(xiter->key(),xiter->data()+c*yiter->data());
+            ++xiter; ++yiter;
+        }
     }
     while(xiter!=x._expansion.end()) {
-     r._expansion.append(xiter->key(),xiter->data());
-     ++xiter;
+        r._expansion.append(xiter->key(),xiter->data());
+        ++xiter;
     }
     while(yiter!=y._expansion.end()) {
-     r._expansion.append(yiter->key(),c*yiter->data());
-     ++yiter;
+        r._expansion.append(yiter->key(),c*yiter->data());
+        ++yiter;
     }
 
     return r;
@@ -3672,34 +3672,34 @@ void FloatTaylorModel::ifma(const FloatTaylorModel& x, const FloatTaylorModel& y
     FloatTaylorModel t(x.argument_size());
     MultiIndex sa;
     for(ExpansionType::const_iterator xiter=x._expansion.begin(); xiter!=x._expansion.end(); ++xiter) {
-     ExpansionType::const_iterator yiter=y._expansion.begin();
-     ExpansionType::const_iterator riter=r._expansion.begin();
-     while(riter!=r._expansion.end() && yiter!=y._expansion.end()) {
-      const MultiIndex& ra=riter->key();
-      sa=xiter->key()+yiter->key();
-      if(sa==ra) {
-    t._expansion.append(sa,riter->data()+xiter->data()*yiter->data());
-    ++riter; ++yiter;
-      } else if(sa<ra) {
-    t._expansion.append(sa,xiter->data()*yiter->data());
-    ++yiter;
-      } else {
-    t._expansion.append(ra,riter->data());
-    ++riter;
-      }
-     }
-     while(riter!=r._expansion.end()) {
-      t._expansion.append(riter->key(),riter->data());
-      ++riter;
-     }
-     while(yiter!=y._expansion.end()) {
-      t._expansion.append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
-      ++yiter;
+        ExpansionType::const_iterator yiter=y._expansion.begin();
+        ExpansionType::const_iterator riter=r._expansion.begin();
+        while(riter!=r._expansion.end() && yiter!=y._expansion.end()) {
+            const MultiIndex& ra=riter->key();
+            sa=xiter->key()+yiter->key();
+            if(sa==ra) {
+                t._expansion.append(sa,riter->data()+xiter->data()*yiter->data());
+                ++riter; ++yiter;
+            } else if(sa<ra) {
+                t._expansion.append(sa,xiter->data()*yiter->data());
+                ++yiter;
+            } else {
+                t._expansion.append(ra,riter->data());
+                ++riter;
+            }
+        }
+        while(riter!=r._expansion.end()) {
+            t._expansion.append(riter->key(),riter->data());
+            ++riter;
+        }
+        while(yiter!=y._expansion.end()) {
+            t._expansion.append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
+            ++yiter;
 
-     }
+        }
 
-     r._expansion.swap(t._expansion);
-     t._expansion.clear();
+        r._expansion.swap(t._expansion);
+        t._expansion.clear();
     }
 }
 

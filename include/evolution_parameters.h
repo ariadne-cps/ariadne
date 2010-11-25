@@ -1,5 +1,5 @@
 /***************************************************************************
- *      evolution_parameters.h
+ *            evolution_parameters.h
  *
  *  Copyright  2007-8  Davide Bresolim, Alberto Casagrande, Pieter Collins
  *
@@ -229,16 +229,16 @@ std::ostream&
 operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
 {
     os << "ContinuousEvolutionParameters"
-    << "(\n  spacial_order=" << p.spacial_order
-    << ",\n  temporal_order=" << p.temporal_order
-    << ",\n  flow_accuracy=" << p.flow_accuracy
-    << ",\n  minimum_step_size=" << p.minimum_step_size
-    << ",\n  maximum_step_size=" << p.maximum_step_size
-    << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
-    << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
-    << ",\n  enable_subdivisions=" << p.enable_subdivisions
-    << ",\n  enable_premature_termination=" << p.enable_premature_termination
-    << "\n)\n";
+       << "(\n  spacial_order=" << p.spacial_order
+       << ",\n  temporal_order=" << p.temporal_order
+       << ",\n  flow_accuracy=" << p.flow_accuracy
+       << ",\n  minimum_step_size=" << p.minimum_step_size
+       << ",\n  maximum_step_size=" << p.maximum_step_size
+       << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
+       << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
+       << ",\n  enable_subdivisions=" << p.enable_subdivisions
+       << ",\n  enable_premature_termination=" << p.enable_premature_termination
+       << "\n)\n";
     return os;
 }
 
@@ -248,20 +248,20 @@ std::ostream&
 operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
 {
     os << "DiscreteEvolutionParameters"
-    << "(\n  lock_to_grid_steps=" << p.lock_to_grid_steps
-    << ",\n  lock_to_grid_time=" << p.lock_to_grid_time
+       << "(\n  lock_to_grid_steps=" << p.lock_to_grid_steps
+       << ",\n  lock_to_grid_time=" << p.lock_to_grid_time
 
-    << ",\n  transient_time=" << p.transient_time
-    << ",\n  transient_steps=" << p.transient_steps
+       << ",\n  transient_time=" << p.transient_time
+       << ",\n  transient_steps=" << p.transient_steps
 
 
-    << ",\n  initial_grid_depth=" << p.initial_grid_depth
-    << ",\n  initial_grid_density=" << p.initial_grid_density
-    << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
-    << ",\n  maximum_grid_height=" << p.maximum_grid_height
+       << ",\n  initial_grid_depth=" << p.initial_grid_depth
+       << ",\n  initial_grid_density=" << p.initial_grid_density
+       << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
+       << ",\n  maximum_grid_height=" << p.maximum_grid_height
 
-    //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
-    << "\n)\n";
+       //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
+       << "\n)\n";
     return os;
 }
 
@@ -271,27 +271,27 @@ std::ostream&
 operator<<(std::ostream& os, const EvolutionParameters& p)
 {
     os << "EvolutionParameters"
-    << "(\n  spacial_order=" << p.spacial_order
-    << ",\n  temporal_order=" << p.temporal_order
-    << ",\n  flow_accuracy=" << p.flow_accuracy
-    << ",\n  minimum_step_size=" << p.minimum_step_size
-    << ",\n  maximum_step_size=" << p.maximum_step_size
-    << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
-    << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
+       << "(\n  spacial_order=" << p.spacial_order
+       << ",\n  temporal_order=" << p.temporal_order
+       << ",\n  flow_accuracy=" << p.flow_accuracy
+       << ",\n  minimum_step_size=" << p.minimum_step_size
+       << ",\n  maximum_step_size=" << p.maximum_step_size
+       << ",\n  minimum_enclosure_radius=" << p.minimum_enclosure_radius
+       << ",\n  maximum_enclosure_radius=" << p.maximum_enclosure_radius
 
-    << ",\n\n  lock_to_grid_steps=" << p.lock_to_grid_steps
-    << ",\n  lock_to_grid_time=" << p.lock_to_grid_time
+       << ",\n\n  lock_to_grid_steps=" << p.lock_to_grid_steps
+       << ",\n  lock_to_grid_time=" << p.lock_to_grid_time
 
-    << ",\n  transient_time=" << p.transient_time
-    << ",\n  transient_steps=" << p.transient_steps
+       << ",\n  transient_time=" << p.transient_time
+       << ",\n  transient_steps=" << p.transient_steps
 
-    << ",\n  initial_grid_depth=" << p.initial_grid_depth
-    << ",\n  initial_grid_density=" << p.initial_grid_density
-    << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
-    << ",\n  maximum_grid_height=" << p.maximum_grid_height
+       << ",\n  initial_grid_depth=" << p.initial_grid_depth
+       << ",\n  initial_grid_density=" << p.initial_grid_density
+       << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
+       << ",\n  maximum_grid_height=" << p.maximum_grid_height
 
-    //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
-    << "\n)\n";
+       //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
+       << "\n)\n";
     return os;
 }
 

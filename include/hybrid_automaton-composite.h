@@ -1,5 +1,5 @@
 /***************************************************************************
- *      hybrid_automaton.h
+ *            hybrid_automaton.h
  *
  *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *
@@ -108,16 +108,16 @@ class AtomicDiscreteTransition
     std::ostream& write(std::ostream& os) const;
   private:
     AtomicDiscreteTransition(DiscreteEvent event,
-     const AtomicDiscreteMode& source_mode,
-     const AtomicDiscreteMode& target_mode,
-     const List<PrimedRealAssignment>& reset,
-     const ContinuousPredicate& guard);
+                             const AtomicDiscreteMode& source_mode,
+                             const AtomicDiscreteMode& target_mode,
+                             const List<PrimedRealAssignment>& reset,
+                             const ContinuousPredicate& guard);
 
     AtomicDiscreteTransition(DiscreteEvent event,
-     AtomicDiscreteLocation source,
-     AtomicDiscreteLocation target,
-     const List<PrimedRealAssignment>& reset,
-     const ContinuousPredicate& guard);
+                             AtomicDiscreteLocation source,
+                             AtomicDiscreteLocation target,
+                             const List<PrimedRealAssignment>& reset,
+                             const ContinuousPredicate& guard);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const AtomicDiscreteTransition& dt) {
@@ -180,8 +180,8 @@ inline bool operator<(const AtomicDiscreteMode& mode1, const AtomicDiscreteMode&
 
 inline bool operator<(const AtomicDiscreteTransition& transition1, const AtomicDiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
-     || (transition1.event() == transition2.event()
-      && transition1.source() < transition2.source());
+        || (transition1.event() == transition2.event()
+            && transition1.source() < transition2.source());
 }
 
 
@@ -258,46 +258,46 @@ class AtomicHybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     void new_mode(AtomicDiscreteLocation state,
-      const List<RealAssignment>& equations,
-      const List<DottedRealAssignment>& dynamic);
+                  const List<RealAssignment>& equations,
+                  const List<DottedRealAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
     void new_mode(AtomicDiscreteLocation state,
-      const List<DottedRealAssignment>& dynamic);
+                  const List<DottedRealAssignment>& dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
     void new_mode(AtomicDiscreteLocation state,
-      const List<RealAssignment>& equations);
+                  const List<RealAssignment>& equations);
 
 
     //! \brief Adds a discrete mode to the automaton.
     void new_invariant(AtomicDiscreteLocation state,
-     DiscreteEvent event,
-     const ContinuousPredicate& constraint);
+                       DiscreteEvent event,
+                       const ContinuousPredicate& constraint);
 
     //! \brief Adds an urgent guard to the automaton.
     void new_urgent_guard(AtomicDiscreteLocation state,
-     DiscreteEvent event,
-     const ContinuousPredicate& constraint);
+                          DiscreteEvent event,
+                          const ContinuousPredicate& constraint);
 
     //! \brief Adds a permissive guard to the automaton.
     void new_permissive_guard(AtomicDiscreteLocation state,
-      DiscreteEvent event,
-      const ContinuousPredicate& constraint);
+                              DiscreteEvent event,
+                              const ContinuousPredicate& constraint);
 
     //! \brief Adds a reset to the automaton. (Same as new_transition.)
     void new_reset(AtomicDiscreteLocation state,
-    DiscreteEvent event,
-    AtomicDiscreteLocation target,
-    const List<PrimedRealAssignment>& reset);
+                   DiscreteEvent event,
+                   AtomicDiscreteLocation target,
+                   const List<PrimedRealAssignment>& reset);
 
 
     //! \brief Adds an unguarded transition to the automaton.
     //! The guard is the constant "True" i.e. the event is an input event.
     void new_transition(AtomicDiscreteLocation state,
-      DiscreteEvent event,
-      AtomicDiscreteLocation target,
-      const List<PrimedRealAssignment>& reset);
+                        DiscreteEvent event,
+                        AtomicDiscreteLocation target,
+                        const List<PrimedRealAssignment>& reset);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
@@ -308,11 +308,11 @@ class AtomicHybridAutomaton
     //!    \param guard is the transition's activation region.
     //!    \param urgency is a flag indicating whether the transition is urgent i.e. occurs as soon as it is activated.
     void new_transition(AtomicDiscreteLocation source,
-      DiscreteEvent event,
-      const ContinuousPredicate& guard,
-      AtomicDiscreteLocation target,
-      const List<PrimedRealAssignment>& reset,
-      EventKind kind=urgent);
+                        DiscreteEvent event,
+                        const ContinuousPredicate& guard,
+                        AtomicDiscreteLocation target,
+                        const List<PrimedRealAssignment>& reset,
+                        EventKind kind=urgent);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //!
@@ -323,11 +323,11 @@ class AtomicHybridAutomaton
     //!    \param guard is the transition's activation region.
     //!    \param urgency is a flag indicating whether the transition is urgent i.e. occurs as soon as it is activated.
     void new_transition(AtomicDiscreteLocation source,
-      DiscreteEvent event,
-      AtomicDiscreteLocation target,
-      const List<PrimedRealAssignment>& reset,
-      const ContinuousPredicate& guard,
-      EventKind urgency=urgent);
+                        DiscreteEvent event,
+                        AtomicDiscreteLocation target,
+                        const List<PrimedRealAssignment>& reset,
+                        const ContinuousPredicate& guard,
+                        EventKind urgency=urgent);
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
@@ -337,9 +337,9 @@ class AtomicHybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param guard is the transition's activation region.
     void new_transition(AtomicDiscreteLocation source,
-      DiscreteEvent event,
-      AtomicDiscreteLocation target,
-      const ContinuousPredicate& guard);
+                        DiscreteEvent event,
+                        AtomicDiscreteLocation target,
+                        const ContinuousPredicate& guard);
 
 
     //! \brief Set the grid controlling relative scaling in the mode. \deprecated

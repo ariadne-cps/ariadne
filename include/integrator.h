@@ -1,5 +1,5 @@
 /***************************************************************************
- *      integrator.h
+ *            integrator.h
  *
  *  Copyright  2006-10  Pieter Collins
  *
@@ -55,29 +55,29 @@ class IntegratorBase
 
     virtual Pair<Float,IntervalVector>
     flow_bounds(const RealVectorFunction& vector_field,
-    const IntervalVector& state_domain,
-    const Float& suggested_time_step) const;
+                const IntervalVector& state_domain,
+                const Float& suggested_time_step) const;
 
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
-     const IntervalVector& state_domain,
-     const Float& suggested_time_step) const;
+              const IntervalVector& state_domain,
+              const Float& suggested_time_step) const;
 
     virtual VectorTaylorFunction
     flow(const RealVectorFunction& vector_field,
-      const IntervalVector& state_domain,
-      const Real& time) const;
+         const IntervalVector& state_domain,
+         const Real& time) const;
 
     virtual VectorTaylorFunction
     flow(const RealVectorFunction& vector_field,
-      const IntervalVector& state_domain,
-      const Interval& time_domain) const;
+         const IntervalVector& state_domain,
+         const Interval& time_domain) const;
 
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
-     const IntervalVector& state_domain,
-     const Float& suggested_time_step,
-     const IntervalVector& bounding_box) const = 0;
+              const IntervalVector& state_domain,
+              const Float& suggested_time_step,
+              const IntervalVector& bounding_box) const = 0;
 
   public:
     uint _temporal_order;
@@ -92,14 +92,14 @@ class TaylorIntegrator
   public:
     TaylorIntegrator() : IntegratorBase(4,1e-4), _sweep_threshold(1e-8) { }
     TaylorIntegrator(uint to, double e, double sw=0.0) : IntegratorBase(to,e), _sweep_threshold(sw) {
-     if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
+        if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
     virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }
 
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
-     const IntervalVector& state_domain,
-     const Float& time_step,
-     const IntervalVector& bounding_box) const;
+              const IntervalVector& state_domain,
+              const Float& time_step,
+              const IntervalVector& bounding_box) const;
 
     using IntegratorBase::flow_step;
 };

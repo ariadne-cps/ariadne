@@ -1,5 +1,5 @@
 /***************************************************************************
- *      profile_taylor_variable.cc
+ *            profile_taylor_variable.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -131,7 +131,7 @@ IntervalTaylorModel prod(const IntervalTaylorModel x1, const IntervalTaylorModel
 }
 
 IntervalTaylorModel prod_full(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
-    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r;
+    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r; 
 }
 
 IntervalTaylorModel prod_clear(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
@@ -161,7 +161,7 @@ void profile(uint ntries, const char* name, const T& run)
 
     tm.restart();
     for(uint i=0; i!=ntries; ++i) {
-     res=run();
+        res=run();
     }
 
     double total_time = tm.elapsed();
@@ -170,10 +170,10 @@ void profile(uint ntries, const char* name, const T& run)
     unsigned int size = res.number_of_nonzeros();
 
     std::cout << std::setw(20) << std::left << name << std::right
-     << std::setw(10) << std::fixed << std::setprecision(2) << average_time_in_microseconds << " "
-     << std::setw(12) << std::scientific << std::setprecision(4) << error
-     << std::setw(8) << size
-     << std::endl;
+              << std::setw(10) << std::fixed << std::setprecision(2) << average_time_in_microseconds << " "
+              << std::setw(12) << std::scientific << std::setprecision(4) << error
+              << std::setw(8) << size
+              << std::endl;
 }
 
 int main(int argc, const char* argv[]) {
@@ -191,9 +191,9 @@ int main(int argc, const char* argv[]) {
     IntervalTaylorModel w(3);
     i=0;
     for(MultiIndex a(3); a.degree()<=9; ++a) {
-     if(i%7<3) { w.expansion().append(a,1/(1.0+i*i*i*i*i)); }
-     else if(i%7<4) { w.expansion().append(a,1/(1.0+i)); }
-     ++i;
+        if(i%7<3) { w.expansion().append(a,1/(1.0+i*i*i*i*i)); }
+        else if(i%7<4) { w.expansion().append(a,1/(1.0+i)); }
+        ++i;
     }
     w.set_maximum_degree(7);
     w.set_sweep_threshold(1e-5);
@@ -205,13 +205,13 @@ int main(int argc, const char* argv[]) {
     IntervalTaylorModel y(3);
 
     for(MultiIndex a(3); a.degree()<=7; ++a) {
-     if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
+        if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
     }
     i=0;
     for(MultiIndex a(3); a.degree()<=5; ++a) {
-     if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
-     if(i%3<2) { y.expansion().append(a,1/(2.0+i)); }
-     ++i;
+        if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
+        if(i%3<2) { y.expansion().append(a,1/(2.0+i)); }
+        ++i;
     }
     y.set_maximum_degree(9);
     y.set_sweep_threshold(1e-3);
@@ -219,11 +219,11 @@ int main(int argc, const char* argv[]) {
     IntervalTaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0);
 
     std::cout << std::setw(20) << std::left << "name" << std::right
-     << std::setw(11) << "time(us)"
-     << std::setw(12) << "error"
-     << std::setw(8) << "size"
-     << std::endl;
-
+              << std::setw(11) << "time(us)"
+              << std::setw(12) << "error"
+              << std::setw(8) << "size"
+              << std::endl;
+    
     typedef IntervalTaylorModel TM;
     //std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
     //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";

@@ -1,5 +1,5 @@
 /***************************************************************************
- *      python_hybrid_evolver.h
+ *            python_hybrid_evolver.h
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -133,23 +133,23 @@ class PythonHybridEvolver
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-     EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-     this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
-     return final; }
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
+        return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-     EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-     this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
-     return intermediate; }
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
+        return intermediate; }
 
   protected:
     typedef tuple<DiscreteLocation, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     // This is the only method which is called in Python
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-    const SystemType& system, const EnclosureType& initial, const TimeType& time,
-    Semantics semantics, bool reach) const;
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
+                            Semantics semantics, bool reach) const;
 
     void initialise_python();
 
@@ -170,7 +170,7 @@ orbit(const SystemType& system,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-      system,initial_set,time,semantics,false);
+                     system,initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -187,11 +187,11 @@ make_hybrid_list_set(const boost::python::list& pylst)
     ListSet< std::pair<DiscreteLocation,SET> >* result=new ListSet< std::pair<DiscreteLocation,SET> >();
     //boost::python::list pylst=boost::python::extract<boost::python::list>(pyobj);
     for(int i=0; i!=len(pylst); ++i) {
-     boost::python::tuple pytup=boost::python::extract<boost::python::tuple>(pylst[i]);
-     Ariadne::DiscreteLocation q(boost::python::extract<int>(pytup[0]));
-     SET s(boost::python::extract<SET>(pytup[1]));
-     //std::pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);
-     //result->adjoin(std::make_pair(q,s));
+        boost::python::tuple pytup=boost::python::extract<boost::python::tuple>(pylst[i]);
+        Ariadne::DiscreteLocation q(boost::python::extract<int>(pytup[0]));
+        SET s(boost::python::extract<SET>(pytup[1]));
+        //std::pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);
+        //result->adjoin(std::make_pair(q,s));
     }
     return result;
 }
@@ -199,57 +199,57 @@ make_hybrid_list_set(const boost::python::list& pylst)
 void
 PythonHybridEvolver::initialise_python()
 {
-     Py_Initialize();
+        Py_Initialize();
 
-     boost::python::object main_module(boost::python::handle<>(PyImport_ImportModule("__main__")));
-     boost::python::object main_namespace = main_module.attr("__dict__");
+        boost::python::object main_module(boost::python::handle<>(PyImport_ImportModule("__main__")));
+        boost::python::object main_namespace = main_module.attr("__dict__");
 
-     boost::python::object evolution_module(boost::python::handle<>(PyImport_ImportModule("hybrid_evolver")));
-     boost::python::object evolution_namespace = evolution_module.attr("__dict__");
-     main_namespace["hybrid_evolver"]=evolution_module;
+        boost::python::object evolution_module(boost::python::handle<>(PyImport_ImportModule("hybrid_evolver")));
+        boost::python::object evolution_namespace = evolution_module.attr("__dict__");
+        main_namespace["hybrid_evolver"]=evolution_module;
 
-     boost::python::class_< ListSet< std::pair<DiscreteLocation,TaylorConstrainedImageSet> > >
-      enclosure_list_class("HybridTaylorConstrainedImageSetList",boost::python::no_init);
-     enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorConstrainedImageSet>));
+        boost::python::class_< ListSet< std::pair<DiscreteLocation,TaylorConstrainedImageSet> > >
+            enclosure_list_class("HybridTaylorConstrainedImageSetList",boost::python::no_init);
+        enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorConstrainedImageSet>));
 
-     boost::python::class_<MonolithicHybridAutomaton>("MonolithicHybridAutomaton",boost::python::no_init);
-     boost::python::class_<EnclosureType>("HybridTaylorConstrainedImageSet",boost::python::no_init);
-     boost::python::class_<HybridTime>("HybridTime",boost::python::no_init);
-     //boost::python::enum_<Semantics>("Semantics")
-     //    .value("UPPER_SEMANTICS", UPPER_SEMANTICS).value("LOWER_SEMANTICS", LOWER_SEMANTICS);
+        boost::python::class_<MonolithicHybridAutomaton>("MonolithicHybridAutomaton",boost::python::no_init);
+        boost::python::class_<EnclosureType>("HybridTaylorConstrainedImageSet",boost::python::no_init);
+        boost::python::class_<HybridTime>("HybridTime",boost::python::no_init);
+        //boost::python::enum_<Semantics>("Semantics")
+        //    .value("UPPER_SEMANTICS", UPPER_SEMANTICS).value("LOWER_SEMANTICS", LOWER_SEMANTICS);
 
-     evolution_namespace["HybridTaylorConstrainedImageSetList"]=enclosure_list_class;
-     //main_namespace["TaylorConstrainedImageSetList"]=enclosure_list_class;
+        evolution_namespace["HybridTaylorConstrainedImageSetList"]=enclosure_list_class;
+        //main_namespace["TaylorConstrainedImageSetList"]=enclosure_list_class;
 }
 
 
 void
 PythonHybridEvolver::_evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-     const SystemType& system, const EnclosureType& initial, const TimeType& time,
-     Semantics semantics, bool reach) const
+                                const SystemType& system, const EnclosureType& initial, const TimeType& time,
+                                Semantics semantics, bool reach) const
 {
     try {
-     boost::python::object main_module(boost::python::handle<>(PyImport_ImportModule("__main__")));
-     boost::python::object main_namespace = main_module.attr("__dict__");
+        boost::python::object main_module(boost::python::handle<>(PyImport_ImportModule("__main__")));
+        boost::python::object main_namespace = main_module.attr("__dict__");
 
-     main_namespace["system"]=system;
-     main_namespace["initial"]=initial;
-     main_namespace["time"]=time;
-     main_namespace["semantics"]=int(semantics);
+        main_namespace["system"]=system;
+        main_namespace["initial"]=initial;
+        main_namespace["time"]=time;
+        main_namespace["semantics"]=int(semantics);
 
-     //PyRun_SimpleString("print\nprint \"Starting Python evaluate\"\nprint dir()\nprint\nprint dir(hybrid_evolver)\nprint\n");
-     PyRun_SimpleString("evolver=hybrid_evolver.HybridEvolverPrototype()");
-     PyRun_SimpleString("(final,reachable,intermediate)=evolver.orbit(system,initial,time,semantics)");
+        //PyRun_SimpleString("print\nprint \"Starting Python evaluate\"\nprint dir()\nprint\nprint dir(hybrid_evolver)\nprint\n");
+        PyRun_SimpleString("evolver=hybrid_evolver.HybridEvolverPrototype()");
+        PyRun_SimpleString("(final,reachable,intermediate)=evolver.orbit(system,initial,time,semantics)");
 
-     final=boost::python::extract<EnclosureListType>(main_namespace["final"]);
-     reachable=boost::python::extract<EnclosureListType>(main_namespace["reachable"]);
-     intermediate=boost::python::extract<EnclosureListType>(main_namespace["intermediate"]);
-     ARIADNE_LOG(2,"final.size()="<<final.size()<<", "<<
-    "reachable.size()="<<reachable.size()<<", "<<
-    "intermediate.size()="<<intermediate.size()<<"\n");
+        final=boost::python::extract<EnclosureListType>(main_namespace["final"]);
+        reachable=boost::python::extract<EnclosureListType>(main_namespace["reachable"]);
+        intermediate=boost::python::extract<EnclosureListType>(main_namespace["intermediate"]);
+        ARIADNE_LOG(2,"final.size()="<<final.size()<<", "<<
+                      "reachable.size()="<<reachable.size()<<", "<<
+                      "intermediate.size()="<<intermediate.size()<<"\n");
     }
     catch( boost::python::error_already_set ) {
-     PyErr_Print();
+        PyErr_Print();
     }
     return;
 }

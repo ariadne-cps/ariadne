@@ -1,5 +1,5 @@
 /***************************************************************************
- *      user_function.h
+ *            user_function.h
  *
  *  Copyright 2008-9  Pieter Collins
  *
@@ -77,32 +77,32 @@ template<class T> class ScalarUserFunction
 {
   private:
     class Representation
-     : public ScalarFunctionMixin< ScalarUserFunction<T>::Representation, Real >
+        : public ScalarFunctionMixin< ScalarUserFunction<T>::Representation, Real >
     {
       private:
-     Vector<Real> _p;
+        Vector<Real> _p;
       public:
-     Representation(const Vector<Real>& p) : _p(p) { }
+        Representation(const Vector<Real>& p) : _p(p) { }
 
-     template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
+        template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
 
-     virtual Representation* clone() const { return new Representation(*this); }
+        virtual Representation* clone() const { return new Representation(*this); }
 
-     virtual SizeType argument_size() const { return T::argument_size(); }
-     virtual SizeType parameter_size() const { return T::parameter_size(); }
+        virtual SizeType argument_size() const { return T::argument_size(); }
+        virtual SizeType parameter_size() const { return T::parameter_size(); }
 
 
-     virtual RealScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual RealScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
-     virtual Vector<Float> gradient(const Vector<Float>& x) const {
-      return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
-     virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-      return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+        virtual Vector<Float> gradient(const Vector<Float>& x) const {
+            return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
+        virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
+            return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
 
-      virtual std::ostream& repr(std::ostream& os) const  {
-      return os << "USER"; }
-    virtual std::ostream& write(std::ostream& os) const  {
-      return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
+         virtual std::ostream& repr(std::ostream& os) const  {
+            return os << "USER"; }
+       virtual std::ostream& write(std::ostream& os) const  {
+            return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
     };
   public:
     ScalarUserFunction() : RealScalarFunction(new Representation(Vector<Real>(this->parameter_size()))) { }
@@ -152,33 +152,33 @@ template<class T> class VectorUserFunction
 {
   private:
     class Representation
-     : public VectorFunctionMixin< VectorUserFunction<T>::Representation, Real >
+        : public VectorFunctionMixin< VectorUserFunction<T>::Representation, Real >
     {
       public:
-     Representation(const Vector<Real>& p) : _p(p) { }
+        Representation(const Vector<Real>& p) : _p(p) { }
 
-     virtual Representation* clone() const { return new Representation(*this); }
+        virtual Representation* clone() const { return new Representation(*this); }
 
-     virtual SizeType result_size() const { return T::result_size(); }
-     virtual SizeType argument_size() const { return T::argument_size(); }
-     virtual SizeType parameter_size() const { return T::parameter_size(); }
+        virtual SizeType result_size() const { return T::result_size(); }
+        virtual SizeType argument_size() const { return T::argument_size(); }
+        virtual SizeType parameter_size() const { return T::parameter_size(); }
 
-     template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
+        template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
 
-     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-      return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
-     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-      return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
+        virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
+            return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
+        virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+            return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
 
-     virtual RealScalarFunctionInterface* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
-     virtual RealScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual RealScalarFunctionInterface* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual RealScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }
 
-     // TODO: Find a better way for writing functions which can handle transformations which may not have a
-     // write() method or operator<<.
-     virtual std::ostream& write(std::ostream& os) const  {
-      return os << "VectorUserFunction( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
+        // TODO: Find a better way for writing functions which can handle transformations which may not have a
+        // write() method or operator<<.
+        virtual std::ostream& write(std::ostream& os) const  {
+            return os << "VectorUserFunction( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
 
-     Vector<Real> _p;
+        Vector<Real> _p;
     };
   public:
     //VectorUserFunction() : VectorFunction(new Representation(Vector<Real>(this->parameter_size()))) { }

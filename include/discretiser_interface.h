@@ -1,5 +1,5 @@
 /***************************************************************************
- *      discretiser_interface.h
+ *            discretiser_interface.h
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -59,17 +59,17 @@ class DiscretiserInterface
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType>
     evolution(const SystemType& system, const BasicSetType& set, const TimeType& time,
-     const AccuracyType accuracy, const Semantics semantics) const = 0;
+              const AccuracyType accuracy, const Semantics semantics) const = 0;
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType>
     lower_evolution(const SystemType& f, const BasicSetType& s, const TimeType& t, const int a) const {
-     return evolution(f,s,t,a,LOWER_SEMANTICS); }
+        return evolution(f,s,t,a,LOWER_SEMANTICS); }
 
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
     virtual Orbit<BasicSetType>
     upper_evolution(const SystemType& f, const BasicSetType& s, const TimeType& t, const int a) const  {
-     return evolution(f,s,t,a,UPPER_SEMANTICS); }
+        return evolution(f,s,t,a,UPPER_SEMANTICS); }
 };
 
 

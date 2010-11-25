@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_interval.cc
+ *            test_interval.cc
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -80,18 +80,18 @@ TestInterval::test()
 void
 TestInterval::test_concept()
 {
-    int n=1;
+    int n=1; 
     uint m=1;
     double d=1;
     Float x=1;
     Interval i=1;
     Interval j=1;
-
-
+ 
+  
     // Constructors
     j=I(); j=I(n); j=I(m); j=I(d); j=I(x); j=I(i);
     j=I(n,n); j=I(m,m); j=I(d,d); j=I(x,x);
-    j=I(n,m); j=I(m,d); j=I(d,n);
+    j=I(n,m); j=I(m,d); j=I(d,n); 
     // Assignment
     j=n; j=m; j=d; j=x; j=i;
 
@@ -117,7 +117,7 @@ TestInterval::test_concept()
       j=asin(i);
       j=acos(i);
       j=atan(i);
-
+  
       j=sinh(i);
       j=cosh(i);
       j=tanh(i);
@@ -169,7 +169,7 @@ TestInterval::test_accurate_rounded_arithmetic()
     ARIADNE_TEST_EQUAL(pow(Interval(3,5),-2),Interval(0.039999999999999986955,0.11111111111111114658));
 
     ARIADNE_TEST_EQUAL(rec(Interval(1+2*eps,1+5*eps)),Interval(1-11*eps/2,1-3*eps/2));
-
+        
 }
 
 
@@ -189,7 +189,7 @@ TestInterval::test_exact_rounded_arithmetic()
     ARIADNE_TEST_EQUAL(Interval(-7,-5)*Interval(2,4),Interval(-28,-10));
     ARIADNE_TEST_EQUAL(Interval(-7,-5)*Interval(-2,4),Interval(-28,14));
     ARIADNE_TEST_EQUAL(Interval(-7,-5)*Interval(-4,-2),Interval(10,28));
-
+    
     ARIADNE_TEST_EQUAL(Interval(5,7)/Interval(2,4),Interval(1.25,3.50));
     ARIADNE_TEST_EQUAL(Interval(5,7)/Interval(-4,-2),Interval(-3.50,-1.25));
     ARIADNE_TEST_EQUAL(Interval(-7,5)/Interval(2,4),Interval(-3.50,2.50));
@@ -266,16 +266,16 @@ TestInterval::test_constructors()
 
 
     Float zero=0;
-
+  
     // Construct from pair
     Interval ivld1(Float(1.125),Float(2.25));
     ARIADNE_TEST_ASSERT(ivld1.lower()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper()==2.25);
     // Default constructor
     Interval ivld2;
-    if(ivld2.lower()>ivld2.upper()) {
-     cerr << "Warning: Interval default constructor returns an empty set\n";
+    if(ivld2.lower()>ivld2.upper()) { 
+        cerr << "Warning: Interval default constructor returns an empty set\n"; 
     } else {
-     ARIADNE_TEST_ASSERT((bool)(ivld2==Interval(zero,zero)));
+        ARIADNE_TEST_ASSERT((bool)(ivld2==Interval(zero,zero)));
     }
 
     // Constructor with approximations
@@ -308,10 +308,10 @@ TestInterval::test_constructors()
     ARIADNE_TEST_EQUAL(ivld6.upper(),Float(1.25));
 }
 
-void TestInterval::test_class()
+void TestInterval::test_class() 
 {
     // Test lower, upper, midpoint, radius, width
-
+    
     // Tests for exact operations
     ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).lower(),-0.25);
     ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).upper(),0.5);
@@ -334,8 +334,8 @@ void TestInterval::test_class()
     ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).width(),1.000000000000000222);
 }
 
-void TestInterval::test_input()
-{
+void TestInterval::test_input() 
+{  
     Interval ivl1,ivl2;
     string input("[1.125,2.25] [0.4,0.6]");
     stringstream iss(input);
@@ -351,7 +351,7 @@ void TestInterval::test_input()
     iss >> ivl1;
     ivl2=Interval(0.39999999999999997,0.60000000000000009);
     if(!equal(ivl1,ivl2)) {
-     cerr << "Warning: Interval string constructor returns an approximate interval, not an outwardly rounded interval.\n";
+        cerr << "Warning: Interval string constructor returns an approximate interval, not an outwardly rounded interval.\n";
     }
 }
 
@@ -370,14 +370,14 @@ void TestInterval::test_comparison() {
 }
 
 void TestInterval::test_aliasing() {
-
+    
     Float x2=1.5;
     Float x3=2.25;
 
     Interval ivl1;
     Interval ivl2(1.5,2.25);
     Interval ivl3(3.125,4.0625);
-
+ 
     // Check to make sure aliases are handled correctly
     ivl1=ivl3; ivl1=ivl2-ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2-ivl3));
     ivl1=ivl3; ivl1=ivl2*ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2*ivl3));
@@ -418,44 +418,44 @@ void TestInterval::test_monotone_functions()
     ARIADNE_TEST_COMPARE(loge.upper(),<,1.000000000002);
 }
 
-void TestInterval::test_trigonometric_functions()
+void TestInterval::test_trigonometric_functions() 
 {
     try {
-     Interval x(6.283185307179586,6.283185307179587);
-     Interval sinx=sin(x);
-     ARIADNE_TEST_PRINT(x);
-     ARIADNE_TEST_COMPARE(sinx.lower(),<,0.0);
-     ARIADNE_TEST_COMPARE(sinx.lower(),>,-1e-14);
-     ARIADNE_TEST_COMPARE(sinx.upper(),>,0.0);
-     ARIADNE_TEST_COMPARE(sinx.upper(),<,+1e-14);
-     ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
+        Interval x(6.283185307179586,6.283185307179587);
+        Interval sinx=sin(x);
+        ARIADNE_TEST_PRINT(x);
+        ARIADNE_TEST_COMPARE(sinx.lower(),<,0.0);
+        ARIADNE_TEST_COMPARE(sinx.lower(),>,-1e-14);
+        ARIADNE_TEST_COMPARE(sinx.upper(),>,0.0);
+        ARIADNE_TEST_COMPARE(sinx.upper(),<,+1e-14);
+        ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
     }
     catch(...) { }
 
     try {
-     Interval x(7.0685834705770345);
-     Interval sinx=sin(x);
-     ARIADNE_TEST_PRINT(x);
-     ARIADNE_TEST_COMPARE(sinx.lower(),<,0.7071067811866);
-     ARIADNE_TEST_COMPARE(sinx.upper(),>,0.7071067811865);
-     ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
+        Interval x(7.0685834705770345);
+        Interval sinx=sin(x);
+        ARIADNE_TEST_PRINT(x);
+        ARIADNE_TEST_COMPARE(sinx.lower(),<,0.7071067811866);
+        ARIADNE_TEST_COMPARE(sinx.upper(),>,0.7071067811865);
+        ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
     }
     catch(...) { }
-
+  
 }
 
 void TestInterval::regression_tests() {
 
     // Regression test; fails dramatically on certain types of rounding
     {
-     Interval x(1.5707963267948966,1.5707963267948968);
-     Interval cosx=cos(x);
-     ARIADNE_TEST_PRINT(x);
-     ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0);
-     ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14);
-     ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0);
-     ARIADNE_TEST_COMPARE(cosx.upper(),<,+1e-14);
-     ARIADNE_TEST_ASSERT(cosx.lower()<cosx.upper());
+        Interval x(1.5707963267948966,1.5707963267948968);
+        Interval cosx=cos(x);
+        ARIADNE_TEST_PRINT(x);
+        ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0);
+        ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14);
+        ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0);
+        ARIADNE_TEST_COMPARE(cosx.upper(),<,+1e-14);
+        ARIADNE_TEST_ASSERT(cosx.lower()<cosx.upper());
     }
 
 }
@@ -466,7 +466,7 @@ int main() {
     std::cerr<<std::setprecision(20);
 
     TestInterval().test();
-
+   
     return ARIADNE_TEST_FAILURES;
 }
 

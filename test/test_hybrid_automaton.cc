@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_hybrid_automaton.cc
+ *            test_hybrid_automaton.cc
  *
  *  Copyright  2009  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *      textplot.cc
+ *            textplot.cc
  *
  *  Copyright 2009  Davide Bresolin
  *
@@ -56,7 +56,7 @@ TextPlot::TextPlot(const char* cfilename)
     std::string filename(cfilename);
     if(filename.rfind(".") != std::string::npos) {
     } else {
-     filename=filename+".txt";
+        filename=filename+".txt";
     }
     this->_fstream.open(filename.c_str(), ios::out | ios::trunc);
 }
@@ -67,7 +67,7 @@ TextPlot::TextPlot(const char* cfilename, ios_base::openmode mode)
     std::string filename(cfilename);
     if(filename.rfind(".") != std::string::npos) {
     } else {
-     filename=filename+".txt";
+        filename=filename+".txt";
     }
     this->_fstream.open(filename.c_str(), mode);
 }
@@ -78,7 +78,7 @@ void TextPlot::open(const char* cfilename)
     std::string filename(cfilename);
     if(filename.rfind(".") != std::string::npos) {
     } else {
-     filename=filename+".txt";
+        filename=filename+".txt";
     }
     this->_fstream.open(filename.c_str(), ios::out | ios::trunc);
 }
@@ -89,7 +89,7 @@ void TextPlot::open(const char* cfilename, ios_base::openmode mode)
     std::string filename(cfilename);
     if(filename.rfind(".") != std::string::npos) {
     } else {
-     filename=filename+".txt";
+        filename=filename+".txt";
     }
     this->_fstream.open(filename.c_str(), mode);
 }
@@ -99,30 +99,30 @@ inline std::ostream& operator<<(std::ostream& os, const DrawableInterface& sh) {
 
 void TextPlot::draw(const DrawableInterface& shape) {
     if(dynamic_cast<const Point*>(&shape)) {
-     this->draw(dynamic_cast<const Point&>(shape));
+        this->draw(dynamic_cast<const Point&>(shape));
     } else if(dynamic_cast<const Box*>(&shape)) {
-     this->draw(dynamic_cast<const Box&>(shape));
+        this->draw(dynamic_cast<const Box&>(shape));
     } else if(dynamic_cast<const Polytope*>(&shape)) {
-     this->draw(dynamic_cast<const Polytope&>(shape));
+        this->draw(dynamic_cast<const Polytope&>(shape));
     } else if(dynamic_cast<const InterpolatedCurve*>(&shape)) {
-     this->draw(dynamic_cast<const InterpolatedCurve&>(shape));
+        this->draw(dynamic_cast<const InterpolatedCurve&>(shape));
     } else if(dynamic_cast<const GridTreeSubset*>(&shape)) {
-     this->draw(dynamic_cast<const GridTreeSubset&>(shape));
+        this->draw(dynamic_cast<const GridTreeSubset&>(shape));
     } else {
-     ARIADNE_THROW(std::runtime_error,"TextPlot::draw(const DrawableInterface&)","Unrecognised shape "<<shape<<" "<<typeid(shape).name());
+        ARIADNE_THROW(std::runtime_error,"TextPlot::draw(const DrawableInterface&)","Unrecognised shape "<<shape<<" "<<typeid(shape).name());
     }
 }
 
 void TextPlot::_draw(const std::vector<Point>& pts) {
     for(std::vector<Point>::const_iterator iter = pts.begin() ; iter != pts.end() ; iter++) {
-     this->draw(*iter);
+        this->draw(*iter);
     }
     this->_fstream << std::endl;
 }
 
 void TextPlot::draw(const Point& pt) {
     for(int i = 0; i < pt.dimension(); i++) {
-     this->_fstream << approx_cast<double>(pt[i]) << " ";
+        this->_fstream << approx_cast<double>(pt[i]) << " ";
     }
     this->_fstream << std::endl;
 }
@@ -138,14 +138,14 @@ void TextPlot::draw(const Polytope& p) {
 
 void TextPlot::draw(const InterpolatedCurve& c) {
     for(InterpolatedCurve::const_iterator iter = c.begin() ; iter != c.end() ; ++iter) {
-     this->draw(iter->second);
+        this->draw(iter->second);
     }
     this->_fstream << std::endl;
 }
 
 void TextPlot::draw(const GridTreeSubset& gts) {
     for(GridTreeSubset::const_iterator iter = gts.begin() ; iter != gts.end() ; ++iter) {
-     this->draw(iter->box());
+        this->draw(iter->box());
     }
     this->_fstream << std::endl;
 }

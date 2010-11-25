@@ -1,5 +1,5 @@
 /***************************************************************************
- *      map_evolver.h
+ *            map_evolver.h
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -101,25 +101,25 @@ class MapEvolver
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-     EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-     this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
-     return final; }
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
+        return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-     EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-     this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
-     return intermediate; }
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
+        return intermediate; }
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-    const SystemType& system, const EnclosureType& initial, const TimeType& time,
-    Semantics semantics, bool reach) const;
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
+                            Semantics semantics, bool reach) const;
 
     virtual void _evolution_step(List< TimedEnclosureType >& working_sets,
-      EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-      const SystemType& system, const TimedEnclosureType& current_set, const TimeType& time,
-      Semantics semantics, bool reach) const;
+                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                                 const SystemType& system, const TimedEnclosureType& current_set, const TimeType& time,
+                                 Semantics semantics, bool reach) const;
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;

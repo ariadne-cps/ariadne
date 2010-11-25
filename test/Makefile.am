@@ -28,20 +28,20 @@ check_PROGRAMS = \
 	test_expansion \
 	test_polynomial \
 	test_differential \
-	test_procedure \
-	test_function \
-	test_expression \
+    test_procedure \
+    test_function \
+    test_expression \
 	test_taylor_model \
 	test_taylor_function \
-	test_function_sets \
-	test_affine_sets \
-	test_taylor_sets \
-	test_grid_set \
-	test_hybrid_set \
+    test_function_sets \
+    test_affine_sets \
+    test_taylor_sets \
+    test_grid_set \
+    test_hybrid_set \
 	test_hybrid_automaton \
-	test_nonlinear_programming \
-	test_integrator \
-	test_constraint_solver \
+    test_nonlinear_programming \
+    test_integrator \
+    test_constraint_solver \
 	test_solvers \
 	test_discrete_evolution \
 	test_continuous_evolution \

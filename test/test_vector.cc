@@ -1,5 +1,5 @@
 /***************************************************************************
- *      test_vector.cc
+ *            test_vector.cc
  *
  *  Copyright  2006  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -43,8 +43,8 @@ class TestVector {
     void test_misc();
 };
 
-void
-TestVector::test()
+void 
+TestVector::test() 
 {
     ARIADNE_TEST_CALL(test_concept());
 }
@@ -56,20 +56,20 @@ TestVector::test_concept()
     Interval ix;
     Vector<Float> fv;
     Vector<Interval> iv;
+  
+    fv=fv+fv; iv=fv+fv; iv=fv+iv; iv=iv+fv; iv=iv+iv; 
+    fv=fv-fv; iv=fv-fv; iv=fv-iv; iv=iv-fv; iv=iv-iv; 
 
-    fv=fv+fv; iv=fv+fv; iv=fv+iv; iv=iv+fv; iv=iv+iv;
-    fv=fv-fv; iv=fv-fv; iv=fv-iv; iv=iv-fv; iv=iv-iv;
-
-    fv=fx*fv; iv=fx*fv; iv=fx*iv; iv=ix*fv; iv=ix*iv;
-    fv=fv*fx; iv=fv*fx; iv=fv*ix; iv=iv*fx; iv=iv*ix;
-    fv=fv/fx; iv=fv/fx; iv=fv/ix; iv=iv/fx; iv=iv/ix;
+    fv=fx*fv; iv=fx*fv; iv=fx*iv; iv=ix*fv; iv=ix*iv; 
+    fv=fv*fx; iv=fv*fx; iv=fv*ix; iv=iv*fx; iv=iv*ix; 
+    fv=fv/fx; iv=fv/fx; iv=fv/ix; iv=iv/fx; iv=iv/ix; 
 }
 
 
 void
 TestVector::test_misc()
 {
-
+   
     int n=3;
     Float vptr[3]={-4.0,3.0,1.0};
     Float x=1.5;
@@ -90,7 +90,7 @@ TestVector::test_misc()
     Vector<Float> v4=v2;
     cout << "v4=" << v4 << endl;
     cout << endl;
-
+    
     Vector<Float> vf0;
     v1=Vector<Float>("[0.25,-1.5]");
     v2=Vector<Float>("[-0.5,2.25]");
@@ -107,7 +107,7 @@ TestVector::test_misc()
     vf0=Vector<Float>(v1)/x;
     cout << vf0 << " = " << v1 << " / " << x << endl;
     cout << endl;
-
+  
     Vector< Interval > iv1=Vector<Interval>("[[0.984375,1.015625],[2.25,2.375],[4.0,4.375],[-0.03125,0.015625]]");
     cout << "iv1=" << iv1 << endl;
     cout << "norm(iv1)=" << norm(iv1) << endl;
@@ -120,7 +120,7 @@ TestVector::test_misc()
     iv3=Vector<Interval>("[[4.25,4.25],[2.375,2.375]]");
     cout << "iv3=" << iv3 << endl;
     Interval ix=Interval(-2,1);
-
+ 
     Vector< Interval > iv0;
     cout << "iv0=" << iv0 << endl;
     iv1=iv0;
@@ -133,7 +133,7 @@ TestVector::test_misc()
     Interval ix3=iv3(0);
     Interval ix1=ix2+ix3;
     ix1=ix2+ix3;
-
+  
     cout << "iv2=" << iv2 << ", iv3=" << iv3 << endl;
     iv1=iv2+iv3;
     cout << iv1 << " = " << iv2 << " + " << iv3 << endl;
@@ -147,7 +147,7 @@ TestVector::test_misc()
     iv1=iv2/ix;
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
-
+   
     v1==Vector<Float>("[-1.25,0.75]");
     iv0=iv1+v1;
     cout << iv0 << " = " << iv1 << " + " << v1 << endl;
@@ -189,7 +189,7 @@ TestVector::test_misc()
       cout << vs1 << endl;
       VectorSlice<Float> vs2(2,v1.begin(),3);
       cout << vs2 << endl;
-
+  
       iv1=vs1+vs2;
       cout << iv1 << endl;
       iv1=vs1-vs2;
@@ -209,5 +209,5 @@ int main() {
     TestVector().test();
 
     return ARIADNE_TEST_FAILURES;
-}
+}  
 

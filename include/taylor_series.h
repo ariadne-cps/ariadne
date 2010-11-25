@@ -1,5 +1,5 @@
 /***************************************************************************
- *      taylor_series.h
+ *            taylor_series.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -46,20 +46,20 @@ class TaylorSeries {
   public:
     TaylorSeries(uint d) : expansion(d+1), error(0) { }
     TaylorSeries(uint degree, series_function_pointer function,
-     const Float& centre, const Interval& domain);
+                 const Float& centre, const Interval& domain);
     uint degree() const { return expansion.size()-1; }
     Float& operator[](uint i) { return expansion[i]; }
     array<Float> expansion;
     Interval error;
     void sweep(Float e) {
-     for(uint i=0; i<=degree(); ++i) {
-      if(abs(expansion[i])<=e) {
-    error+=expansion[i]*Interval(-1,1);
-    expansion[i]=0; } } }
+        for(uint i=0; i<=degree(); ++i) {
+            if(abs(expansion[i])<=e) {
+                error+=expansion[i]*Interval(-1,1);
+                expansion[i]=0; } } }
 };
 
 TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
-      const Float& c, const Interval& r)
+                           const Float& c, const Interval& r)
     : expansion(d+1), error(0)
 {
     Series<Interval> centre_series=fn(d,Interval(c));
@@ -69,9 +69,9 @@ TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
     //std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
     //std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
     for(uint i=0; i!=d; ++i) {
-     this->expansion[i]=midpoint(centre_series[i]);
-     this->error+=(centre_series[i]-this->expansion[i])*p;
-     p*=e;
+        this->expansion[i]=midpoint(centre_series[i]);
+        this->error+=(centre_series[i]-this->expansion[i])*p;
+        p*=e;
     }
     //this->expansion[d]=midpoint(centre_series[d]);
     this->expansion[d]=midpoint(range_series[d]);

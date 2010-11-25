@@ -1,8 +1,8 @@
 /***************************************************************************
- *      tribool.h
+ *            tribool.h
  *
  *  Copyright 2008  Pieter Collins
- *
+ * 
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
 /*! \file tribool.h
  *  \brief Three-valued logic variable.
  */
@@ -45,7 +45,7 @@ inline std::ostream& operator<<(std::ostream& os, tribool tb) {  return boost::l
 #ifdef DOXYGEN
 namespace Ariadne {
     //! \brief A three-valued logic type, with values \f$\top\f$ (true), \f$\bot\f$ (false) and \f$\uparrow\f$ (indeterminate).
-    class tribool {
+    class tribool { 
     //! \brief Returns \c true if \a tb is \c true, and \c false if \a tb is \c indeterminate or \c false.
     friend bool definitely(tribool tb);
     //! \brief Returns \c true if \a tb is \c true or \c indeteriminate, and \c false if \a tb is \c false.

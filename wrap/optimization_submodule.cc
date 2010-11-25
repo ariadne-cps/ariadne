@@ -1,5 +1,5 @@
 /***************************************************************************
- *      optimization_submodule.cc
+ *            optimization_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -50,7 +50,7 @@ python_compute_basis(const Matrix<X>& A) {
     make_lpair(p,B)=compute_basis(A);
     boost::python::list l;
     for(size_t i=0; i!=p.size(); ++i) {
-     l.append(p[i]);
+        l.append(p[i]);
     }
     return boost::python::make_tuple(l,B);
 }

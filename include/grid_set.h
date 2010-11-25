@@ -661,9 +661,9 @@ class GridOpenCell: public GridAbstractCell {
      */
     GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
 
-	/*! \brief Allows to split the given cell into two sub-cells. When isRight == true
-	 * then we return the right sub-cell, if false then the left one, otherwise the middle one */
-	GridOpenCell split(tribool isRight) const;
+    /*! \brief Allows to split the given cell into two sub-cells. When isRight == true
+     * then we return the right sub-cell, if false then the left one, otherwise the middle one */
+    GridOpenCell split(tribool isRight) const;
 
     /*! \brief The equality operator. */
     bool operator==(const GridOpenCell& otherCell) const;

@@ -25,36 +25,36 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     // If the grid must be shown
     if (MAX_GRID_DEPTH >= 0)
     {
-	// The rectangle to be drawn
-	Box rect = Box(numVariables);
-	// Chooses the fill colour
+        // The rectangle to be drawn
+        Box rect = Box(numVariables);
+        // Chooses the fill colour
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
-	// Gets the number of times each variable interval would be divided by 2
+        // Gets the number of times each variable interval would be divided by 2
         int numDivisions = MAX_GRID_DEPTH / numVariables;
-	// Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-	Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
-	// Initiates the x position to the bounding box left bound
+        // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
+        Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+        // Initiates the x position to the bounding box left bound
         Float pos_x = bbox[0].lower();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
-	rect[yaxis] = bbox[1];
+        rect[yaxis] = bbox[1];
         // While between the interval
         while (pos_x < bbox[0].upper())
         {
-	    rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
-	    pos_x += step_x; // Shifts the x position
-	    fig << rect; // Appends the rectangle
+            rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+            pos_x += step_x; // Shifts the x position
+            fig << rect; // Appends the rectangle
         }
 
-	// Repeats for the rectangles in the y direction
-	Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
+        // Repeats for the rectangles in the y direction
+        Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));  
         Float pos_y = bbox[1].lower();
-	rect[xaxis] = bbox[0];
+        rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper())
         {
-	    rect[yaxis] = Interval(pos_y,pos_y+step_y);
-   	    fig << rect;
-	    pos_y += step_y;
+            rect[yaxis] = Interval(pos_y,pos_y+step_y);
+            fig << rect;
+            pos_y += step_y;
         }
     }
     // Draws and creates file
@@ -86,21 +86,21 @@ int main(int argc, char** argv)
         return print_usage(cmdname);
     }
     
-	MAX_GRID_DEPTH = atoi(argv[2]);
-	if(MAX_GRID_DEPTH <= 0) return print_usage(cmdname);
-	
-	int pvar = 2;
-	float pmin = -1.0;  
-	float pmax = 1.0; 
-	
-	if(command == C_SYNTH) {
-	    if(argc < 6) return print_usage(cmdname);
-	    pvar = atoi(argv[3]);
-	    if(pvar < 0) return print_usage(cmdname);
-	    pmin = atof(argv[4]);
-	    pmax = atof(argv[5]);
-	}
-	
+        MAX_GRID_DEPTH = atoi(argv[2]);
+        if(MAX_GRID_DEPTH <= 0) return print_usage(cmdname);
+        
+        int pvar = 2;
+        float pmin = -1.0;  
+        float pmax = 1.0; 
+        
+        if(command == C_SYNTH) {
+            if(argc < 6) return print_usage(cmdname);
+            pvar = atoi(argv[3]);
+            if(pvar < 0) return print_usage(cmdname);
+            pmin = atof(argv[4]);
+            pmax = atof(argv[5]);
+        }
+        
     std::cout << "command : " << command << std::endl;
     std::cout << "grid depth : " << MAX_GRID_DEPTH << std::endl;
     std::cout << "pvar : " << pvar << std::endl;
@@ -140,16 +140,16 @@ int main(int argc, char** argv)
     initial_set[initial_state]=initial_box;
 
     std::cout << "Computing reach set... " << std::endl << std::flush;
-    HybridGridTreeSet reach = analyser.chain_reach(automaton,initial_set);	
+    HybridGridTreeSet reach = analyser.chain_reach(automaton,initial_set);        
     std::cout << "done." << std::endl;
 
     plot("automaton_reach", 1, 2, 4, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
 
     if(command == C_SYNTH) {
         if (reach[unsafe].empty())
-	        cout << std::endl << "The automaton is safe for any provided value of the parameter." << std::endl;
+                cout << std::endl << "The automaton is safe for any provided value of the parameter." << std::endl;
         else if (reach[safe].empty())
-        	cout << std::endl << "The automaton is unsafe for any provided value of the parameter." << std::endl;
+                cout << std::endl << "The automaton is unsafe for any provided value of the parameter." << std::endl;
         else {
             Float lower_unsafe = (reach[unsafe].bounding_box())[pvar].lower();
             Float lower_safe = (reach[safe].bounding_box())[pvar].lower();

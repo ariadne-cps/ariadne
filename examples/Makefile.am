@@ -9,7 +9,7 @@ bin_PROGRAMS= \
 	tutorial \
 	bouncingball \
 	bouncingball-compositional \
-	watertank \ 
+	watertank \
 	watertank-time \
 	watertank-proportional \
 	watertank-nonlinear \
@@ -19,8 +19,8 @@ bin_PROGRAMS= \
 	cmos_inverter_analoginput \
 	grid-refinement
 
-#    multipleguards
-#    coconut_demo
+#	multipleguards
+#	coconut_demo
 
 tutorial_SOURCES = tutorial.cc
 bouncingball_SOURCES = bouncingball.cc

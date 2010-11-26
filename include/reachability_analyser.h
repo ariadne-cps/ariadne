@@ -40,11 +40,13 @@
 #include "orbit.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
+#include "graphics.h"
 
 #include "discretiser.h"
 #include "hybrid_evolver.h"
 
 #include "logging.h"
+#include "parametric2d.h"
 
 namespace Ariadne {
  
@@ -210,8 +212,10 @@ class HybridReachabilityAnalyser
 							   const Float& tolerance);
 
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter inside the \a parameter_interval for the automaton 
-		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
-        \details The procedure returns the intervals of safety and unsafety. */
+		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
+        \details The tolerance in [0 1] is a percentage of the \a parameter_interval width and is used to provide a termination condition for the
+		bisection search beneath.
+        \return The intervals of safety and unsafety. */
 	std::pair<Interval,Interval> safety_unsafety_parametric(SystemType& system, 
 										 					const HybridImageSet& initial_set, 
 										 					const HybridBoxes& safe,
@@ -220,6 +224,23 @@ class HybridReachabilityAnalyser
 										 					const Interval& parameter_interval,
 										 					const Float& tolerance);
 
+	/**
+	 * \brief Performs a parametric analysis on two parameters \a xParam, \a yParam, with bounds \a xBounds and \a yBounds,
+	 * discretizing with \a numPointsPerAxis points for each axis.
+	 * \details Saves the results in a file called "<systemName>-<xName>-<yName>" and
+	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
+	 * <xName> is the name of xParam and <yName> is the name of yParam.
+	 */
+	void parametric_2d(SystemType& system,
+					   const HybridImageSet& initial_set,
+					   const HybridBoxes& safe,
+					   const HybridBoxes& domain,
+					   const RealConstant& xParam,
+					   const RealConstant& yParam,
+					   const Interval& xBounds,
+					   const Interval& yBounds,
+					   const unsigned& numPointsPerAxis,
+					   const Float& tolerance);
 
     //@}
 
@@ -348,8 +369,6 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
 	this->free_cores = 0;
 }
 
-
 } // namespace Ariadne
-
 
 #endif // ARIADNE_REACHABILITY_ANALYSER_H

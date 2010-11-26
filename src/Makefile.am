@@ -4,7 +4,7 @@ phony: lib
 
 lib: libariadne.la libcalculus.la
 
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = -Wall -fno-strict-aliasing
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS =  $(CAIRO_LIBS) $(GTK_LIBS)
@@ -50,7 +50,8 @@ SRC = \
 	reachability_analyser.cc \
 	logging.cc \
 	graphics.cc \
-	textplot.cc
+	textplot.cc \
+	parametric2d.cc 
 
 CALCULUS_SRC = \
 	numeric.cc \

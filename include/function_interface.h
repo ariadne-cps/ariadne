@@ -228,6 +228,8 @@ class VectorFunctionInterface<Interval>
     //! \brief Evaluate the function over a vector of formulae.
     virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const = 0;
 
+    Matrix<Interval> jacobian(const Vector<Interval>& x) const;
+
     //! \brief Get the \a i<sup>th</sup> component function.
     ScalarFunction<Interval> operator[](uint i) const;
   private:

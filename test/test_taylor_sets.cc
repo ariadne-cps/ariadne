@@ -305,6 +305,8 @@ class TestTaylorConstrainedImageSet
                               "(factor "<<affine_paving.measure()/expected_very_high_accuracy_paving.measure()<<")");
         }
 
+        figure.set_fill_colour(1.0,0.0,0.0);
+        figure.draw(difference(expected_very_high_accuracy_paving,affine_paving));
         figure.set_fill_colour(1.0,0.5,0.5);
         figure.draw(affine_paving);
         figure.set_fill_colour(0.0,1.0,1.0);

@@ -38,8 +38,8 @@ typedef Formula<Float> FloatFormula;
 typedef Formula<Interval> IntervalFormula;
 typedef Formula<Real> RealFormula;
 
-template<class T, class X> class ScalarFunctionMixin;
-template<class T, class X> class VectorFunctionMixin;
+template<class T, class X> class ScalarFunctionMixin { };
+template<class T, class X> class VectorFunctionMixin { };
 
 template<class F>
 class ScalarFunctionMixin<F,Float>

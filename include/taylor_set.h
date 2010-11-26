@@ -137,8 +137,10 @@ class TaylorConstrainedImageSet
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
     void apply_flow_step(VectorTaylorFunction phi, Float h);
 
-    //! \brief Introduces the constraint \f$c\f$ applied to \f$x=f(s)\f$.
+    //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
     void new_state_constraint(NonlinearConstraint c);
+    //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
+    void new_parameter_constraint(NonlinearConstraint c);
 
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
     void new_negative_constraint(RealScalarFunction g);
@@ -205,8 +207,8 @@ class TaylorConstrainedImageSet
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreeSet outer_approximation(const Grid& grid, int depth) const;
     //! \brief Compute an outer approximation on the \a grid to the given \a depth
-    //! by subdividing the parameter domain. Does not require constraint propagation,
-    //! but may be inefficient.
+    //! by subdividing the parameter domain. Does not require constraint propagation
+    //! or nonlinear programming, but may be inefficient.
     GridTreeSet subdivision_outer_approximation(const Grid& grid, int depth) const;
     //! \brief Compute an outer approximation on the \a grid to the given \a depth
     //! by first computing affine over-approximations of the set.

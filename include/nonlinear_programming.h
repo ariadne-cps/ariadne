@@ -61,7 +61,7 @@ class OptimiserInterface {
     virtual ~OptimiserInterface() { }
     //! \brief Create a dynamically-allocated copy.
     virtual OptimiserInterface* clone() const = 0;
-    //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    //! \brief Solve the nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual IntervalVector optimise(RealScalarFunction f, IntervalVector D, RealVectorFunction g, IntervalVector C) const = 0;
 
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.

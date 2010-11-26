@@ -32,6 +32,7 @@
 #include "differential.h"
 #include "polynomial.h"
 #include "function.h"
+#include "procedure.h"
 
 #include "taylor_model.h"
 #include "taylor_function.h"
@@ -71,6 +72,8 @@ template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; ret
 
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
+
+void constraint_adjoin_outer_approximation(GridTreeSet&, const Box& domain, const IntervalVectorFunction& function, const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
 
 
 
@@ -355,8 +358,26 @@ void TaylorConstrainedImageSet::new_state_constraint(NonlinearConstraint constra
         this->new_negative_constraint(-composed_function);
     } else if(interval.lower()==-infty && interval.upper()==0.0) {
         this->new_negative_constraint(composed_function);
+    } else {
+        ARIADNE_FAIL_MSG("TaylorConstrainedImageSet cannot currently handle constraints which are not of the form g(x) <=> 0");
     }
 }
+
+void TaylorConstrainedImageSet::new_parameter_constraint(NonlinearConstraint constraint) {
+    ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
+    Float infty=+inf<Float>();
+    Interval interval=constraint.bounds();
+    if(interval.lower()==0.0 && interval.upper()==0.0) {
+        this->new_zero_constraint(constraint.function());
+    } else if(interval.lower()==0.0 && interval.upper()==infty) {
+        this->new_negative_constraint(-constraint.function());
+    } else if(interval.lower()==-infty && interval.upper()==0.0) {
+        this->new_negative_constraint(constraint.function());
+    } else {
+        ARIADNE_FAIL_MSG("TaylorConstrainedImageSet cannot currently handle constraints which are not of the form g(x) <=> 0");
+    }
+}
+
 
 void TaylorConstrainedImageSet::new_negative_constraint(RealScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
@@ -378,14 +399,15 @@ void TaylorConstrainedImageSet::new_zero_constraint(RealScalarFunction constrain
     this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
 }
 
-List<ScalarTaylorFunction> const&
-TaylorConstrainedImageSet::negative_constraints() const {
-    return this->_constraints;
-}
-
 void TaylorConstrainedImageSet::new_zero_constraint(ScalarTaylorFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),std::setprecision(17)<<"domain="<<this->domain()<<", constraint="<<constraint);
     this->_equations.append(constraint);
+}
+
+
+List<ScalarTaylorFunction> const&
+TaylorConstrainedImageSet::negative_constraints() const {
+    return this->_constraints;
 }
 
 List<ScalarTaylorFunction> const&
@@ -404,6 +426,7 @@ TaylorConstrainedImageSet::constraints() const {
     }
     return result;
 }
+
 
 uint TaylorConstrainedImageSet::number_of_constraints() const {
     return this->_constraints.size()+this->_equations.size();
@@ -567,6 +590,28 @@ void TaylorConstrainedImageSet::reduce() const
     }
 }
 
+
+Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunctionInterface& function, const IntervalVector& domain)
+{
+    Matrix<Interval> jacobian=function.jacobian(domain);
+
+    // Compute the column of the matrix which has the norm
+    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
+    uint jmax=domain.size();
+    Float max_column_norm=0.0;
+    for(uint j=0; j!=domain.size(); ++j) {
+        Float column_norm=0.0;
+        for(uint i=0; i!=function.result_size(); ++i) {
+            column_norm+=mag(jacobian[i][j]);
+        }
+        column_norm *= domain[j].radius();
+        if(column_norm>max_column_norm) {
+            max_column_norm=column_norm;
+            jmax=j;
+        }
+    }
+    return make_pair(jmax,numeric_cast<double>(max_column_norm));
+}
 
 Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
 TaylorConstrainedImageSet::split_zeroth_order() const
@@ -912,78 +957,156 @@ Float widths(const IntervalVector& bx) {
     return res;
 }
 
-// Adjoin an over-approximation to the solution of $f(D)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
-void constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, const RealVectorFunction& f, const RealVectorFunction& g, const Box& c, const GridCell& b, int e)
+Float maximum_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        res=max(bx[i].width()/sf[i],res);
+    }
+    return res;
+}
+
+Float average_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        res+=(bx[i].width()/sf[i]);
+    }
+    return res/bx.size();
+}
+
+Float average_width(const IntervalVector& bx) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        if(bx[i].lower()>bx[i].upper()) { return -inf<Float>(); }
+        res+=bx[i].width();
+    }
+    return res/bx.size();
+}
+
+static uint COUNT_TESTS=0u;
+double IMAGE_MULTIPLE_OF_CELL = 1;
+
+typedef Procedure<Interval> IntervalProcedure;
+
+// Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
+void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& domain, const VectorTaylorFunction& f, const VectorTaylorFunction& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<IntervalProcedure>& procedures)
 {
     uint verbosity=0u;
 
-    const uint m=d.size();
+    const uint m=domain.size();
     const uint nf=f.result_size();
     const uint ng=g.result_size();
+
+    const Box& cell_box=cell.box();
+    const FloatVector scalings=paving.grid().lengths();
+
+    Box bbox = f(domain);
+
+    Float domwdth = average_width(domain);
+    Float bbxwdth = average_scaled_width(bbox,paving.grid().lengths());
+    Float clwdth = average_scaled_width(cell_box,paving.grid().lengths());
+
     ARIADNE_LOG(2,"\nconstraint_adjoin_outer_approximation(...)\n");
-    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
+    ARIADNE_LOG(2,"   splt="<<splt<<" dpth="<<cell.tree_depth()<<" max_dpth="<<max_dpth<<"\n");
+    ARIADNE_LOG(2,"     domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box()<<"\n");
 
     ConstraintSolver constraint_solver;
 
-    if(subset(b,p)) {
+    if(subset(cell,paving)) {
+        ARIADNE_LOG(4,"  Cell is already a subset of paving\n");
         return;
     }
 
-    // Try to prove disjointness
-    const Box& old_domain=d;
-    Box new_domain=old_domain;
-    Box bx=b.box();
+    ++COUNT_TESTS;
 
-    ARIADNE_LOG(6,"  dom="<<old_domain<<"\n");
+    // Try to prove disjointness
+    const Box& old_domain=domain;
+    Box new_domain=old_domain;
+    Float olddomwdth = average_width(domain);
+    Float newdomwdth = olddomwdth;
+
+    static const double ACCEPTABLE_REDUCTION_FACTOR = 0.75;
+
+/*
     for(uint i=0; i!=nf; ++i) {
-        constraint_solver.hull_reduce(new_domain,f[i],bx[i]);
+        for(uint j=0; j!=m; ++j) {
+            constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
+        }
     }
     for(uint i=0; i!=ng; ++i) {
-        constraint_solver.hull_reduce(new_domain,g[i],c[i]);
+        for(uint j=0; j!=m; ++j) {
+            constraint_solver.box_reduce(new_domain,g[i],codomain[i],j);
+        }
     }
-    ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
+    newdomwdth=average_width(new_domain);
+    ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce\n");
+
+    if(new_domain.empty()) {
+        ARIADNE_LOG(4,"  Proved disjointness using box reduce\n");
+        return;
+    }
+    ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
+*/
+
+    // Hull reduction steps
+    do {
+        olddomwdth=newdomwdth;
+        for(uint i=0; i!=nf; ++i) {
+            constraint_solver.hull_reduce(new_domain,procedures[i],cell_box[i]);
+            //constraint_solver.hull_reduce(new_domain,f[i],cell_box[i]);
+        }
+        for(uint i=0; i!=ng; ++i) {
+            constraint_solver.hull_reduce(new_domain,procedures[nf+i],codomain[i]);
+            //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
+        }
+        newdomwdth=average_width(new_domain);
+        ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" dom="<<new_domain<<"\n");
+    } while( !new_domain.empty() && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
+
     if(new_domain.empty()) {
         ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
         return;
     }
 
-    for(uint i=0; i!=nf; ++i) {
-        constraint_solver.hull_reduce(new_domain,f[i],bx[i]);
-    }
-    for(uint i=0; i!=ng; ++i) {
-        constraint_solver.hull_reduce(new_domain,g[i],c[i]);
-    }
-    ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
-    if(new_domain.empty()) {
-        ARIADNE_LOG(4,"  Proved disjointness using box reduce\n");
+
+    domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0));
+    bbox=f(new_domain);
+    bbxwdth=average_scaled_width(bbox,paving.grid().lengths());
+    if(bbox.disjoint(cell_box) || disjoint(g(new_domain),codomain)) {
+        ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
         return;
     }
-    ARIADNE_LOG(6,"  dom="<<new_domain<<"\n");
 
-    Box fd=f(new_domain);
-    if(fd.disjoint(bx)) { return; }
+    ARIADNE_LOG(4,"                 domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<new_domain<<" bbox="<<bbox<<" cell="<<cell.box()<<"\n");
 
-    if(4*widths(fd)>widths(bx)) {
-        //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
-        ARIADNE_LOG(4,"  Splitting domain\n");
-        Pair<Box,Box> sd=new_domain.split();
-        constraint_adjoin_outer_approximation_to(p, sd.first, f, g, c, b, e);
-        constraint_adjoin_outer_approximation_to(p, sd.second, f, g, c, b, e);
-    } else if(b.tree_depth()>=e*int(b.dimension())) {
-        ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
-        p.adjoin(b);
+    // Decide whether to split cell or split domain by comparing size of
+    // bounding box with the cell and splitting the larger.
+    // It seems that a more efficient algorithm results if the domain
+    // is only split if the bounding box is much larger, so we preferentiably
+    // split the cell unless the bounding box is 4 times as large
+    Float bbxmaxwdth = maximum_scaled_width(bbox,scalings);
+    Float clmaxwdth = maximum_scaled_width(cell_box,scalings);
+
+    if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
+        Pair<uint,double> lipsch = lipschitz_index_and_error(f,new_domain);
+        ARIADNE_LOG(4,"  Splitting domain on coordinate "<<lipsch.first<<"\n");
+        Pair<Box,Box> sd=new_domain.split(lipsch.first);
+        constraint_adjoin_outer_approximation_to(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
+        constraint_adjoin_outer_approximation_to(paving, sd.second, f, g, codomain, cell, max_dpth, splt+1, procedures);
+    } else if(cell.tree_depth()>=max_dpth) {
+        ARIADNE_LOG(4,"  Adjoining cell "<<cell_box<<"\n");
+        paving.adjoin(cell);
     } else {
-        ARIADNE_LOG(4,"  Splitting cell "<<b.box()<<"\n");
-        Pair<GridCell,GridCell> sb = b.split();
-        constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.first,e);
-        constraint_adjoin_outer_approximation_to(p,new_domain,f,g,c,sb.second,e);
+        ARIADNE_LOG(4,"  Splitting cell "<<cell_box<<"\n");
+        Pair<GridCell,GridCell> sb = cell.split();
+        constraint_adjoin_outer_approximation_to(paving,new_domain,f,g,codomain,sb.first, max_dpth, splt, procedures);
+        constraint_adjoin_outer_approximation_to(paving,new_domain,f,g,codomain,sb.second, max_dpth, splt, procedures);
     }
 
 
 }
 
 
-void adjoin_outer_approximation_to(GridTreeSet&, const Box& domain, const RealVectorFunction& function, const RealVectorFunction& negative_constraints, int depth);
+void adjoin_outer_approximation(GridTreeSet&, const Box& domain, const IntervalVectorFunction& function, const IntervalVectorFunction& negative_constraints, const IntervalVectorFunction& equality_constraints, int depth);
 
 void TaylorConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
@@ -1001,25 +1124,25 @@ void TaylorConstrainedImageSet::subdivision_adjoin_outer_approximation_to(GridTr
     this->_subdivision_adjoin_outer_approximation_to(paving,this->domain(),depth,errors);
 }
 
-void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
-{
-    this->affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
+IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f) {
+    Formula<Interval> e=f.evaluate(Formula<Interval>::identity(f.argument_size()));
+    return Procedure<Interval>(e);
 }
 
-void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int e) const
+void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int acc) const
 {
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
-    const RealVectorFunction& f=this->real_function();
+    const VectorTaylorFunction& f=this->function();
 
-    RealVectorFunction g(this->_constraints.size()+this->_equations.size(),d.size());
+    VectorTaylorFunction g(this->_constraints.size()+this->_equations.size(),d);
     uint i=0;
     for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
-        g.set(i,make_function(*citer));
+        g.set(i,*citer);
         ++i;
     }
     for(List<ScalarTaylorFunction>::const_iterator eiter=this->_equations.begin(); eiter!=this->_equations.end(); ++eiter) {
-        g.set(i,make_function(*eiter));
+        g.set(i,*eiter);
         ++i;
     }
     GridCell b=GridCell::smallest_enclosing_primary_cell(f(d),p.grid());
@@ -1027,7 +1150,16 @@ void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTre
     IntervalVector ce(this->_equations.size(),Interval(0.0,0.0));
     Box c=intersection(Box(g(d)),Box(join(cc,ce)));
 
-    Ariadne::constraint_adjoin_outer_approximation_to(p,d,f,g,c,b,e);
+    List<IntervalProcedure> procedures;
+    procedures.reserve(this->dimension()+this->_constraints.size()+this->_equations.size());
+    for(uint i=0; i!=this->dimension(); ++i) { procedures.append(make_procedure(this->_function[i])); }
+    for(uint i=0; i!=this->_constraints.size(); ++i) { procedures.append(make_procedure(this->_constraints[i])); }
+    for(uint i=0; i!=this->_equations.size(); ++i) { procedures.append(make_procedure(this->_equations[i])); }
+
+    COUNT_TESTS=0;
+    Ariadne::constraint_adjoin_outer_approximation_to(p,d,f,g,c,b,acc*p.dimension(),0, procedures);
+    //std::cerr<<"Computing outer approximation considered a total of "<<COUNT_TESTS<<" domains/cells\n";
+    //std::cerr<<"Measure of paving is "<<p.measure()<<"\n";
     p.recombine();
 }
 
@@ -1071,12 +1203,58 @@ GridTreeSet TaylorConstrainedImageSet::subdivision_outer_approximation(const Gri
     return paving;
 }
 
-GridTreeSet TaylorConstrainedImageSet::affine_outer_approximation(const Grid& grid, int depth) const
+void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
-    GridTreeSet paving(grid);
-    this->affine_adjoin_outer_approximation_to(paving,depth);
-    return paving;
+    ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
+
+    // Bound the maximum number of splittings allowed to draw a particular set.
+    // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
+    static const int MAXIMUM_DEPTH = 16;
+
+    // The basic approximation error when plotting with accuracy=0
+    static const double BASIC_ERROR = 0.0625;
+
+    const double max_error=BASIC_ERROR/(1<<depth);
+
+    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain());
+    for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_function[i]; }
+    for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()]=this->_constraints[i]; }
+    for(uint i=0; i!=this->_equations.size(); ++i) { fg[i+this->dimension()+this->_constraints.size()]=this->_equations[i]; }
+
+    List<Box> subdomains;
+    List<Box> unsplitdomains;
+    List<Box> splitdomains;
+    unsplitdomains.append(this->_reduced_domain);
+    Box splitdomain1,splitdomain2;
+    for(int i=0; i!=MAXIMUM_DEPTH; ++i) {
+        //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
+        for(uint n=0; n!=unsplitdomains.size(); ++n) {
+            uint k; double err;
+            make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
+            //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
+            if(k==this->number_of_parameters() || err < max_error) {
+                subdomains.append(unsplitdomains[n]);
+            } else {
+                make_lpair(splitdomain1,splitdomain2)=unsplitdomains[n].split(k);
+                splitdomains.append(splitdomain1);
+                splitdomains.append(splitdomain2);
+            }
+        }
+        unsplitdomains.swap(splitdomains);
+        splitdomains.clear();
+        if(unsplitdomains.empty()) { break; }
+    }
+    subdomains.concatenate(unsplitdomains);
+    if(!unsplitdomains.empty()) {
+        ARIADNE_WARN("Cannot obtain desired accuracy in outer approximation "<<*this<<" without excessive splitting.");
+    }
+
+    for(uint n=0; n!=subdomains.size(); ++n) {
+        this->restriction(subdomains[n]).affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
+    }
 }
+
+
 
 
 

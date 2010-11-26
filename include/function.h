@@ -40,7 +40,7 @@
 
 #include "numeric.h"
 #include "vector.h"
-//#include "matrix.h"
+#include "matrix.h"
 
 namespace Ariadne {
 
@@ -379,6 +379,7 @@ inline Vector<Interval> evaluate(const VectorFunction<Real>& f, const Vector<Int
 inline Vector<Real> evaluate(const VectorFunction<Real>& f, const Vector<Real>& x) { return f(x); }
 inline Matrix<Float> jacobian_approx(const VectorFunction<Real>& f, const Vector<Float>& x);
 inline Matrix<Interval> jacobian(const VectorFunction<Real>& f, const Vector<Interval>& x);
+
 
 inline ScalarFunction<Interval> ScalarFunctionInterface<Interval>::derivative(Nat j) const { return this->_derivative(j); }
 inline ScalarFunction<Real> ScalarFunctionInterface<Real>::derivative(Nat j) const { return this->_derivative(j); }

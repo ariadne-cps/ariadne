@@ -164,6 +164,7 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
             default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op<<" at instruction "<<r<<"\n");
         }
     }
+    // POSTCONDITION: No nan's get propagated to x
 }
 
 template<class X> size_t _convert(List<ProcedureInstruction>& p, List<X>& c, const FormulaNode<X>* f, Map<const FormulaNode<X>*,size_t>& ind) {
@@ -308,6 +309,8 @@ std::ostream& operator<<(std::ostream& os, const Vector< Procedure<X> > f) {
 
 namespace Ariadne {
 
+// NOTE: Ordering of r and x is important, since nan elements of r are preserved,
+// but nan elements of x do not affect r
 inline
 void restrict(Interval& r, const Interval& x) {
     r.set_lower(max(r.lower(),x.lower()));

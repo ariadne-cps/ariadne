@@ -268,16 +268,20 @@ void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& cons
 }
 
 
-void ConstraintSolver::hull_reduce(Box& domain, const IntervalVectorFunctionInterface& function, const IntervalVector& bounds) const
+void ConstraintSolver::hull_reduce(Box& domain, const IntervalProcedure& procedure, const Interval& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalVectorFunction function, Box bounds): "
-                  "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalProcedure procedure, Interval bounds): "
+                  "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Vector< Formula<Interval> > formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
-    Vector< Procedure<Interval> > procedure(formula);
-    Box reducing_domain(domain);
-    Ariadne::simple_hull_reduce(reducing_domain, procedure, bounds);
-    domain = reducing_domain;
+    Ariadne::simple_hull_reduce(domain, procedure, bounds);
+}
+
+void ConstraintSolver::hull_reduce(Box& domain, const Vector<IntervalProcedure>& procedure, const IntervalVector& bounds) const
+{
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, Vector<IntervalProcedure> procedure, Box bounds): "
+                  "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
+
+    Ariadne::simple_hull_reduce(domain, procedure, bounds);
 }
 
 void ConstraintSolver::hull_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds) const
@@ -287,9 +291,17 @@ void ConstraintSolver::hull_reduce(Box& domain, const IntervalScalarFunctionInte
 
     Formula<Interval> formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
     Procedure<Interval> procedure(formula);
-    Box reducing_domain(domain);
-    Ariadne::simple_hull_reduce(reducing_domain, procedure, bounds);
-    domain = reducing_domain;
+    this->hull_reduce(domain,procedure,bounds);
+}
+
+void ConstraintSolver::hull_reduce(Box& domain, const IntervalVectorFunctionInterface& function, const IntervalVector& bounds) const
+{
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalScalarFunction function, Interval bounds): "
+                  "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
+
+    Vector< Formula<Interval> > formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
+    Vector< Procedure<Interval> > procedure(formula);
+    this->hull_reduce(domain,procedure,bounds);
 }
 
 void ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const

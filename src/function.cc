@@ -59,6 +59,9 @@ ScalarFunction<Real> make_function(const Expression<Real>& expr, const List< Var
     return ScalarFunction<Real>(len(vars),formula(expr,vars)); }
 
 
+Matrix<Interval> VectorFunctionInterface<Interval>::jacobian(const Vector<Interval>& x) const {
+    return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
+
 
 //! A function defined by a formula
 template<class X>

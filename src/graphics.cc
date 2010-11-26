@@ -242,10 +242,10 @@ class CairoCanvas
     void get_bounding_box(double& xl, double& xu, double& yl, double& yu) const {
         xl=LEFT_MARGIN; yu=TOP_MARGIN;
         xu=x_size_in_pixels()+LEFT_MARGIN; yl=y_size_in_pixels()+TOP_MARGIN;
-        std::cerr<<"Device: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
+        //std::cerr<<"Device: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
         cairo_device_to_user(cr,&xl,&yu);
         cairo_device_to_user(cr,&xu,&yl);
-        std::cerr<<"User: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
+        //std::cerr<<"User: "<<xl<<" "<<xu<<" "<<yl<<" "<<yu<<"\n";
     }
     double get_line_width() const { return cairo_get_line_width (cr); }
 

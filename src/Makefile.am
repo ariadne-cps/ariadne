@@ -10,7 +10,11 @@ LIBS =  $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD =  $(LIBS)
 
 ARIADNE_SRC = \
-	numeric.cc \
+	integer.cc \
+	rational.cc \
+	float.cc \
+	interval.cc \
+	real.cc \
 	vector.cc \
 	matrix.cc \
 	differential.cc \
@@ -53,7 +57,9 @@ EXTRAS_SRC = \
 	textplot.cc
 
 CALCULUS_SRC = \
-	numeric.cc \
+	float.cc \
+	interval.cc \
+	real.cc \
 	vector.cc \
 	matrix.cc \
 	function.cc \

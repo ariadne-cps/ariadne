@@ -29,7 +29,8 @@
 #include <string>
 
 #include "config.h"
-#include "numeric.h"
+#include "rational.h"
+#include "interval.h"
 
 #include "test.h"
 

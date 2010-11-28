@@ -30,6 +30,7 @@
 #include <fenv.h>
 
 #include "rounding.h"
+#include "float.h"
 #include "numeric.h"
 
 #include "test.h"

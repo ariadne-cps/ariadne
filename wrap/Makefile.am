@@ -32,10 +32,10 @@ install-exec-local:
 
 
 interval_la_SOURCES=$(INTERVAL_SRC)
-interval_la_LIBADD = ../src/numeric.lo
+interval_la_LIBADD = ../src/float.lo ../src/interval.lo
 
 differentiation_la_SOURCES=$(DIFFERENTIATION_SRC)
-differentiation_la_LIBADD = ../src/numeric.lo ../src/vector.lo ../src/matrix.lo
+differentiation_la_LIBADD = ../src/float.lo ../src/interval.lo ../src/real.lo ../src/vector.lo ../src/matrix.lo
 
 ariadne_la_SOURCES=$(ARIADNE_SRC)
 ariadne_la_LIBADD = ../src/libariadne.la ../src/libariadne-extras.la

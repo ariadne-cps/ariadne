@@ -1318,6 +1318,11 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
 
     const double max_error=BASIC_ERROR/(1<<accuracy);
 
+    // If the reduced domain is empty, then the set is empty; abort
+    if(this->_reduced_domain.empty()) {
+        return;
+    }
+
     VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain());
     for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_function[i]; }
     for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()]=this->_constraints[i]; }

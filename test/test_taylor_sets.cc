@@ -83,7 +83,6 @@ class TestTaylorConstrainedImageSet
     void test_discretise()
     {
         Grid grid(2);
-        uint height(5);
         uint depth(4);
 
         Interval e(-1.0,+1.0);
@@ -337,7 +336,7 @@ class TestTaylorConstrainedImageSet
     }
 
 
-void test_draw(const std::string& str, const TaylorConstrainedImageSet& set, uint acc) {
+    void test_draw(const std::string& str, const TaylorConstrainedImageSet& set, uint acc) {
         ARIADNE_TEST_PRINT(set);
         figure.clear();
         GridTreeSet paving(set.dimension());
@@ -353,44 +352,24 @@ void test_draw(const std::string& str, const TaylorConstrainedImageSet& set, uin
     }
 
     void test_draw() {
+
         RealScalarFunction s=RealScalarFunction::coordinate(2,0);
         RealScalarFunction t=RealScalarFunction::coordinate(2,1);
-        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
-        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         uint accuracy = 3u;
-        uint high_accuracy = 5u;
-
-        // Test drawing with outer approximation computed using domain subdivision
-        Box domain(2, -1.0,+1.0, -1.0,+1.0);
-        TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)));
-        set.new_negative_constraint(s+t-0.25);
-        GridTreeSet paving(set.dimension());
-        set.subdivision_adjoin_outer_approximation_to(paving,high_accuracy);
-        paving.recombine();
-
-        figure.set_bounding_box(Box(2, -2.0,+2.0, -2.0,+2.0));
-        figure.set_fill_opacity(1.0);
-        figure.set_fill_colour(0.0,0.5,1.0);
-        figure.draw(paving);
-        figure.set_fill_colour(green);
-        figure.set_fill_opacity(0.5);
-        figure.draw(set);
-        figure.write("test_taylor_set-draw");
-        figure.clear();
-
 
         // Draw a variety of shapes
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
-        test_draw("box",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t)),accuracy);
-        test_draw("polytope",TaylorConstrainedImageSet(Box(2,-2.05,2.05,-1.05,1.05),(s,t),(s+t<=1.5)),accuracy);
-        test_draw("dome",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t<=0.251)),accuracy);
-        test_draw("disc",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t*t<=0.751)),accuracy);
-        test_draw("parallelotope",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t)),accuracy);
-        test_draw("ellipse",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),accuracy);
-        test_draw("concave",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(2*s+0.25*s*s+t-0.5<=0)),accuracy);
 
-        test_draw("empty",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(1.25+s+t*t<=0)),accuracy);
-        test_draw("curve",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t),(s*s-t==0)),accuracy);
+        ARIADNE_TEST_TRY( test_draw("box",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("polytope",TaylorConstrainedImageSet(Box(2,-2.05,2.05,-1.05,1.05),(s,t),(s+t<=1.5)),accuracy ));
+        ARIADNE_TEST_TRY( test_draw("dome",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t<=0.251)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("disc",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t*t<=0.751)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("parallelotope",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("ellipse",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("concave",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(2*s+0.25*s*s+t-0.5<=0)),accuracy) );
+
+        ARIADNE_TEST_TRY( test_draw("empty",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(1.25+s+t*t<=0)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("curve",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t),(s*s-t==0)),accuracy) );
 
 
     }

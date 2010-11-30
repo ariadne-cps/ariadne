@@ -26,6 +26,7 @@
 #include <boost/python.hpp>
 
 #include "geometry.h"
+#include "geometry2d.h"
 #include "point.h"
 #include "curve.h"
 #include "box.h"

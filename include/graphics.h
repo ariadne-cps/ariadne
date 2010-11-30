@@ -1,7 +1,7 @@
 /***************************************************************************
  *            graphics.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-10  Pieter Collins
  *
  ****************************************************************************/
 
@@ -32,21 +32,15 @@
 #include <string>
 #include <vector>
 
+#include "colour.h"
 #include "graphics_interface.h"
 
 typedef unsigned int uint;
 
 namespace Ariadne {
 
-static const int DEFAULT_WIDTH = 1200;
-static const int DEFAULT_HEIGHT = 1200;
-
-class Point;
 class Box;
-class Polytope;
-class InterpolatedCurve;
 class ProjectionFunction;
-
 
 struct LineStyle { explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } private: bool _style; };
 struct LineWidth { explicit LineWidth(double lw) : _width(lw) { } operator double() const { return this->_width; } private: double _width; };
@@ -101,12 +95,13 @@ class Figure
     void draw(const DrawableInterface& shape);
 
     void clear();
-    void display();
-    void write(const char* filename, uint nx=DEFAULT_WIDTH, uint ny=DEFAULT_HEIGHT);
+    void display() const;
+    void write(const char* filename, uint nx, uint ny) const;
+    void write(const char* filename) const;
   public:
     class Data;
   public:
-    void _paint_all(CanvasInterface& canvas); // Writes all shapes to the canvas
+    void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
   private:
     Data* _data;
 };
@@ -188,30 +183,30 @@ void plot(const char* filename, const Box& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
           const Colour& fc5, const SET5& set5)
-          {
-              Figure g; g.set_bounding_box(bbox);
-              g.set_fill_colour(fc1); draw(g,set1);
-              g.set_fill_colour(fc2); draw(g,set2);
-              g.set_fill_colour(fc3); draw(g,set3);
-              g.set_fill_colour(fc4); draw(g,set4);
-              g.set_fill_colour(fc5); draw(g,set5);
-              g.write(filename);
-          }
+{
+    Figure g; g.set_bounding_box(bbox);
+    g.set_fill_colour(fc1); draw(g,set1);
+    g.set_fill_colour(fc2); draw(g,set2);
+    g.set_fill_colour(fc3); draw(g,set3);
+    g.set_fill_colour(fc4); draw(g,set4);
+    g.set_fill_colour(fc5); draw(g,set5);
+    g.write(filename);
+}
 
-          template<class SET1, class SET2, class SET3, class SET4, class SET5>
-          void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
-                    const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-                    const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
-                    const Colour& fc5, const SET5& set5)
-                    {
-                        Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox);
-                        g.set_fill_colour(fc1); draw(g,set1);
-                        g.set_fill_colour(fc2); draw(g,set2);
-                        g.set_fill_colour(fc3); draw(g,set3);
-                        g.set_fill_colour(fc4); draw(g,set4);
-                        g.set_fill_colour(fc5); draw(g,set5);
-                        g.write(filename);
-                    }
+template<class SET1, class SET2, class SET3, class SET4, class SET5>
+void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
+        const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+        const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
+        const Colour& fc5, const SET5& set5)
+{
+    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox);
+    g.set_fill_colour(fc1); draw(g,set1);
+    g.set_fill_colour(fc2); draw(g,set2);
+    g.set_fill_colour(fc3); draw(g,set3);
+    g.set_fill_colour(fc4); draw(g,set4);
+    g.set_fill_colour(fc5); draw(g,set5);
+    g.write(filename);
+}
 
 template<class SET1, class SET2, class SET3, class SET4, class SET5, class SET6>
 void plot(const char* filename, const Box& bbox,

@@ -50,6 +50,7 @@ class GridTreeSet;
 class DiscreteEvent;
 class Figure;
 class CanvasInterface;
+class Point2d;
 
 //! \brief A constrained image set defined by affine functions.
 //!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$

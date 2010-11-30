@@ -35,6 +35,7 @@
 #include <iostream>
 
 #include "graphics_interface.h"
+#include "colour.h"
 
 typedef unsigned int uint;
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            graphics_interface.h
  *
- *  Copyright 2009  Davide Bresolin
+ *  Copyright 2009-10  Davide Bresolin, Pieter Collins
  *
  ****************************************************************************/
 
@@ -28,57 +28,33 @@
 #ifndef ARIADNE_GRAPHICS_INTERFACE_H
 #define ARIADNE_GRAPHICS_INTERFACE_H
 
-#include "macros.h"
-#include "colour.h"
-
 typedef unsigned int uint;
 
 namespace Ariadne {
 
-using namespace std;
+template<class R, class A> inline R numeric_cast(const A&);
 
-class Point;
+struct Vector2d;
+struct Point2d;
+struct Box2d;
+
 class Box;
-class Polytope;
-class InterpolatedCurve;
-class Zonotope;
-
 class Colour;
 
 class DrawableInterface;
 class FigureInterface;
 class CanvasInterface;
-class PlanarProjectionMap;
 
-template<class R, class A> inline R numeric_cast(const A&);
-
-struct Vector2d {
-    double x,y; Vector2d(double xx, double yy) : x(xx), y(yy) { }
-    template<class X, class Y> Vector2d(const X& xx, const Y& yy) : x(numeric_cast<double>(xx)), y(numeric_cast<double>(yy)) { }
+struct PlanarProjectionMap {
+    uint n, i, j;
+    PlanarProjectionMap(uint nn, uint ii, uint jj) : n(nn), i(ii), j(jj) { }
 };
-inline Vector2d operator-(const Vector2d& v) { return Vector2d(-v.x,-v.y); }
-inline Vector2d operator+(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x+v2.x,v1.y+v2.y); }
-inline Vector2d operator-(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x-v2.x,v1.y-v2.y); }
-inline Vector2d operator*(const double& s1, const Vector2d& v2) { return Vector2d(s1*v2.x,s1*v2.y); }
-inline std::ostream& operator<<(std::ostream& os, const Vector2d& v) { return os << "["<<v.x<<","<<v.y<<"]"; }
-
-struct Point2d {
-    double x,y; Point2d(double xx, double yy) : x(xx), y(yy) { }
-    template<class X, class Y> Point2d(const X& xx, const Y& yy) : x(numeric_cast<double>(xx)), y(numeric_cast<double>(yy)) { }
-};
-inline bool operator==(Point2d& pt1, const Point2d& pt2) { return pt1.x==pt2.x && pt1.y==pt2.y; }
-inline Point2d& operator+=(Point2d& pt, const Vector2d& v) { pt.x+=v.x; pt.y+=v.y; return pt; }
-inline Point2d& operator-=(Point2d& pt, const Vector2d& v) { pt.x-=v.x; pt.y-=v.y; return pt; }
-inline std::ostream& operator<<(std::ostream& os, const Point2d& pt) { return os << "("<<pt.x<<","<<pt.y<<")"; }
-
-struct Box2d { double xl,xu,yl,yu; Box2d() { } Box2d(double xxl, double xxu, double yyl, double yyu) : xl(xxl), xu(xxu), yl(yl), yu(yyu) { } };
-inline std::ostream& operator<<(std::ostream& os, const Box2d& bx) { return os << "["<<bx.xl<<","<<bx.xu<<"]x["<<bx.yl<<","<<bx.yu<<"]"; }
-
-struct PlanarProjectionMap { uint n, i, j; PlanarProjectionMap(uint nn, uint ii, uint jj) : n(nn), i(ii), j(jj) { } uint argument_size() const { return n; } };
 inline std::ostream& operator<<(std::ostream& os, const PlanarProjectionMap& p) {
-    return os << "PlanarProjectionMap( argument_size="<<p.n<<", x="<<p.i<<", y="<<p.j<<" )";
-}
+    return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
 
+typedef PlanarProjectionMap Projection2d;
+
+//! \ingroup GraphicsModule
 //! \brief Base interface for plotting and drawing classes.
 class FigureInterface {
   public:
@@ -100,43 +76,67 @@ class FigureInterface {
     virtual void draw(const DrawableInterface&) = 0;
 };
 
-inline void draw(FigureInterface& fig, const DrawableInterface& shape) {
-    fig.draw(shape);
-}
+inline void draw(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); }
 
+//! \ingroup GraphicsModule
+//! \brief Interface to two-dimensional drawing canvas with the ability to draw polyhedra.
 class CanvasInterface {
   public:
+    //! \brief Destructor
     virtual ~CanvasInterface() { };
-    virtual uint x_coordinate() const = 0;
-    virtual uint y_coordinate() const = 0;
-    virtual uint x_size_in_pixels() const = 0;
-    virtual uint y_size_in_pixels() const = 0;
+
+    //! The index of the variable used for the x-coordinate. (Deprecated)
+    uint x_coordinate() const;
+    //! The index of the variable used for the y-coordinate. (Deprecated)
+    uint y_coordinate() const;
+
+    //! \brief Move the current initial point for a line to the point \a (x,y).
     virtual void move_to(double x, double y) = 0;
+    //! \brief Create a line segment from the current point to the point \a (x,y).
     virtual void line_to(double x, double y) = 0;
+    //! \brief Draw a circle with centre \a (x,y) and radius \a r.
     virtual void circle(double x, double y, double r) = 0;
+    //! \brief Draw a dot with centre \a (x,y).
     virtual void dot(double x, double y) = 0;
+    //! \brief Draw the working line.
     virtual void stroke() = 0;
+    //! \brief Draw and fill the working line.
     virtual void fill() = 0;
-    virtual void clip() = 0;
-    virtual double get_line_width() const = 0;
+    //! Set the width of the lines bounding shapes, in pixels.
     virtual void set_line_width(double lw) = 0;
+    //! \brief Set the colour of subsequent line to be drawn. The \a r, \a g and \a b
+    //! arguments are intensities of red, green and blue on a scale of 0.0 to 1.0.
     virtual void set_line_colour(double r, double g, double b) = 0;
+    //! \brief  Set the colour of the next regions to be filled.
     virtual void set_fill_opacity(double fo) = 0;
+    //! \brief Set the colour of subsequent regions to be filled.
     virtual void set_fill_colour(double r, double g, double b) = 0;
-    virtual void get_bounding_box(double& xl, double& xu, double& yl, double& yu) const = 0;
+
+    //! \brief The projection giving the x- and y- variables.
+    virtual Projection2d projection() const = 0;
+    //! \brief The scaling of the figure, in user units per pixel.
+    virtual Vector2d scaling() const = 0;
+    //! brief The lower and upper bounds of the x- and y- coordinates of the drawing region.
+    virtual Box2d bounds() const = 0;
   public:
     template<class X, class Y> void move_to(X x, Y y) { this->move_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
     template<class X, class Y> void line_to(X x, Y y) { this->line_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
 };
 
 
+//! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
 class DrawableInterface {
   public:
+    //! brief Virtual destructor.
     virtual ~DrawableInterface() { }
+    //! brief Make a dynamically-allocated copy.
     virtual DrawableInterface* clone() const = 0;
+    //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
     virtual void draw(CanvasInterface& c) const = 0;
+    //! brief The dimension of the object in Euclidean space
     virtual uint dimension() const = 0;
+    //! brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
 };
 

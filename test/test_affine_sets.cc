@@ -29,6 +29,7 @@
 #include "affine_set.h"
 #include "function_set.h"
 #include "graphics.h"
+#include "geometry2d.h"
 
 #include "test.h"
 

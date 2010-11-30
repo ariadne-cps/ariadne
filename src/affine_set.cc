@@ -33,6 +33,7 @@
 #include "affine_set.h"
 
 #include "graphics_interface.h"
+#include "geometry2d.h"
 
 
 namespace Ariadne {

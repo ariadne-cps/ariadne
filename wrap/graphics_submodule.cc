@@ -27,6 +27,7 @@
 
 #include "graphics_interface.h"
 #include "graphics.h"
+#include "geometry2d.h"
 #include "point.h"
 #include "box.h"
 #include "function.h"
@@ -61,7 +62,8 @@ void export_figure()
     figure_class.def("draw",(void(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw);
     figure_class.def("clear",&Figure::clear);
     figure_class.def("display",&Figure::display);
-    figure_class.def("write",&Figure::write);
+    figure_class.def("write",(void(Figure::*)(const char*)const)&Figure::write);
+    figure_class.def("write",(void(Figure::*)(const char*,uint,uint)const)&Figure::write);
 }
 
 

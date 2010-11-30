@@ -37,6 +37,7 @@
 #include "list_set.h"
 
 #include "polytope.h"
+#include "geometry2d.h"
 
 
 namespace Ariadne {

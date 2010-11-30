@@ -213,6 +213,12 @@ void Figure::clear() {
 uint CanvasInterface::x_coordinate() const { return this->projection().i; }
 uint CanvasInterface::y_coordinate() const { return this->projection().j; }
 
+struct ImageSize2d {
+    uint nx,ny;
+    ImageSize2d(uint _nx,uint _ny) : nx(_nx), ny(_ny) { }
+};
+
+
 #ifdef HAVE_CAIRO_H
 
 class CairoCanvas
@@ -226,7 +232,9 @@ class CairoCanvas
     Colour lc,fc; // The line and fill colours
     double fo; // The fill opacity
   public:
-    CairoCanvas(cairo_t *c, uint i, uint j) : cr(c), ix(i), iy(j), lw(1.0), lc(0,0,0), fc(1,1,1), fo(1.0) { }
+    ~CairoCanvas();
+    CairoCanvas(const Projection2d& projection, const ImageSize2d& size, const Box2d& bounds);
+    CairoCanvas(cairo_t *c, uint i, uint j);
     void move_to(double x, double y) { cairo_move_to (cr, x, y); }
     void line_to(double x, double y) { cairo_line_to (cr, x, y); }
     void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
@@ -238,13 +246,40 @@ class CairoCanvas
     void set_fill_opacity(double o) { fo=o; }
     void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b); }
 
-    PlanarProjectionMap projection() const;
+    Projection2d projection() const;
     Vector2d scaling() const;
     Box2d bounds() const;
   public:
-    uint x_size_in_pixels() const { return cairo_image_surface_get_width(cairo_get_target(cr))-(LEFT_MARGIN+RIGHT_MARGIN); }
-    uint y_size_in_pixels() const { return cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN); }
+    ImageSize2d size_in_pixels() const {
+        return ImageSize2d(cairo_image_surface_get_width(cairo_get_target(cr))-(LEFT_MARGIN+RIGHT_MARGIN),
+                           cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN)); }
 };
+
+
+CairoCanvas::~CairoCanvas()
+{
+    cairo_surface_destroy(cairo_get_target(cr));
+    cairo_destroy(cr);
+}
+
+CairoCanvas::CairoCanvas(cairo_t *c, uint i, uint j)
+    : cr(c), ix(i), iy(j), lw(1.0), lc(0,0,0), fc(1,1,1), fo(1.0)
+{
+}
+
+// TODO: This function is incomplete and not ready for use
+CairoCanvas::CairoCanvas(const Projection2d& projection, const ImageSize2d& size, const Box2d& bounds)
+    : cr(0), ix(projection.i), iy(projection.j), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0), fo(1.0)
+{
+    //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
+    cairo_surface_t *surface;
+
+    const int canvas_width = size.nx+LEFT_MARGIN+RIGHT_MARGIN;
+    const int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;;
+
+    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
+    cr = cairo_create (surface);
+}
 
 PlanarProjectionMap CairoCanvas::projection() const
 {
@@ -253,15 +288,17 @@ PlanarProjectionMap CairoCanvas::projection() const
 
 Vector2d CairoCanvas::scaling() const
 {
-    uint xpix=x_size_in_pixels(); uint ypix=y_size_in_pixels();
+    ImageSize2d sz = this->size_in_pixels();
     Box2d bb=this->bounds();
-    return Vector2d((bb.xu-bb.xl)/xpix,(bb.yu-bb.yl)/ypix);
+    return Vector2d((bb.xu-bb.xl)/sz.nx,(bb.yu-bb.yl)/sz.ny);
 }
 
 Box2d CairoCanvas::bounds() const
 {
-    double xl=LEFT_MARGIN; double yu=TOP_MARGIN;
-    double xu=x_size_in_pixels()+LEFT_MARGIN; double yl=y_size_in_pixels()+TOP_MARGIN;
+    double xl=LEFT_MARGIN;
+    double yu=TOP_MARGIN;
+    double xu=cairo_image_surface_get_width(cairo_get_target(cr))-RIGHT_MARGIN;
+    double yl=cairo_image_surface_get_height(cairo_get_target(cr))-BOTTOM_MARGIN;
     cairo_device_to_user(cr,&xl,&yu);
     cairo_device_to_user(cr,&xu,&yl);
     return Box2d(xl,xu,yl,yu);
@@ -269,34 +306,16 @@ Box2d CairoCanvas::bounds() const
 
 void CairoCanvas::stroke()
 {
+    cairo_save(cr);
 
-    const int drawing_width = this->x_size_in_pixels();
-    const int drawing_height = this->y_size_in_pixels();
-
-    const int left_margin = LEFT_MARGIN;
-    const int top_margin = TOP_MARGIN;
-
-    Box2d bbox=this->bounds();
-    double ctr0=left_margin;
-    double ctr1=top_margin;
-    double sc0=(drawing_width)/(bbox.xu-bbox.xl);
-    double sc1=-(drawing_height)/(bbox.yu-bbox.yl);
-    double utr0=(-bbox.xl);
-    double utr1=(-bbox.yu);
-
-    cairo_restore(cr);
+    // Set user and device space identical so that the line width is interpreted as pixels
+    cairo_identity_matrix(cr);
 
     cairo_set_source_rgb(cr, lc.red,lc.green,lc.blue);
     cairo_set_line_width(cr, lw);
     cairo_stroke (this->cr);
 
-    cairo_save(cr);
-
-    cairo_translate(cr, ctr0, ctr1);
-    cairo_scale (cr, sc0,sc1);
-    cairo_translate(cr, utr0, utr1);
-
-    cairo_stroke (this->cr);
+    cairo_restore(cr);
 }
 
 
@@ -316,6 +335,8 @@ std::ostream& operator<<(std::ostream& os, const DrawableInterface& drawable) {
 }
 
 
+// TODO: Use generic canvas routines; move cairo-specific functionality
+// into CairoCanvas class.
 void Figure::_paint_all(CanvasInterface& canvas) const
 {
     //std::cerr<<"Figure::_paint_all(canvas)\n";
@@ -369,8 +390,9 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     CairoCanvas& cairo_canvas=dynamic_cast<CairoCanvas&>(canvas);
     cairo_t *cr=cairo_canvas.cr;
 
-    const int drawing_width = cairo_canvas.x_size_in_pixels();
-    const int drawing_height = cairo_canvas.y_size_in_pixels();
+    const ImageSize2d drawing_size = cairo_canvas.size_in_pixels();
+    const int drawing_width = drawing_size.nx;
+    const int drawing_height = drawing_size.ny;
 
     const int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
     const int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
@@ -386,8 +408,6 @@ void Figure::_paint_all(CanvasInterface& canvas) const
 
     // Save unclipped state and canvas coordinates
     cairo_save (cr);
-
-    cairo_set_line_width (cr,0.002*min(bbox.xu-bbox.xl,bbox.yu-bbox.yl));
 
     // Set clipping region
     cairo_move_to (cr, left_margin, top_margin+drawing_height);
@@ -479,8 +499,6 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     cairo_line_to (cr, left_margin, top_margin);
     cairo_line_to (cr, left_margin, top_margin+drawing_height);
     cairo_stroke (cr);
-
-    cairo_destroy (cr);
 }
 
 
@@ -518,7 +536,7 @@ Figure::write(const char* cfilename, uint drawing_width, uint drawing_height) co
     }
 
     cairo_surface_write_to_png (surface, filename.c_str());
-    cairo_surface_destroy (surface);
+    //cairo_surface_destroy (surface);
 }
 
 

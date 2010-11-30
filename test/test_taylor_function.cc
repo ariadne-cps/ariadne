@@ -77,6 +77,7 @@ class TestScalarTaylorFunction
 void TestScalarTaylorFunction::test()
 {
     std::clog<<std::setprecision(17);
+    std::cerr<<std::setprecision(17);
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
@@ -233,18 +234,13 @@ void TestScalarTaylorFunction::test_conversion() {
 
     RealScalarFunction f=(1-x[0]*x[0]-0.5*x[1]);
     ScalarTaylorFunction tf(D,f);
-    RealScalarFunction cf=tf.real_function();
 
     ARIADNE_TEST_PRINT(f);
     ARIADNE_TEST_PRINT(tf);
-    ARIADNE_TEST_PRINT(cf);
 
     // Conversion to TaylorFunction should be exact in second component
     ARIADNE_TEST_BINARY_PREDICATE(subset,f(ipt),tf(ipt));
     ARIADNE_TEST_BINARY_PREDICATE(subset,tf(ipt),f(ipt)+Interval(-1e-15,1e-15));
-
-    // Conversion from TaylorFunction should preserve exact computation
-    ARIADNE_TEST_EQUAL(tf(ipt),cf(ipt));
 }
 
 

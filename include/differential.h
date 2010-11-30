@@ -209,9 +209,10 @@ class Differential
     //! \brief The coefficient of \f$x_j\f$.
     const X& gradient(uint j) const { return this->operator[](MultiIndex::unit(this->argument_size(),j)); }
     //! \brief The vector of coefficients of \f$x_j\f$.
-    Vector<X> gradient() const { Vector<X> r(this->argument_size());
-        for(uint j=0; j!=r.size(); ++j) { r[j]=this->gradient(j); } return r; }
-
+    Vector<X> gradient() const { Vector<X> g(this->argument_size());
+        for(uint j=0; j!=g.size(); ++j) { g[j]=this->gradient(j); } return g; }
+    //! \brief The Hessian matrix.
+    Matrix<X> hessian() const;
 
 
     //! \brief A reference to the coefficient of \f$x_j\f$.
@@ -411,6 +412,22 @@ Differential<X>& Differential<X>::operator/=(const R& c)
 }
 */
 
+
+template<class X> Matrix<X> Differential<X>::hessian() const {
+    ARIADNE_PRECONDITION(this->degree()>=2,"Differential<X>::hessian(): degree="<<this->degree());
+    Matrix<X> H(this->argument_size(),this->argument_size());
+    const_iterator iter=this->begin();
+    while(iter!=this->end() && iter->key().degree()<=1) { ++iter; }
+    uint i=0; uint j=1;
+    while(iter!=this->end() && iter->key().degree()<=2) {
+        const MultiIndex& a=iter->key(); const X& c=iter->data();
+        while(a[i]==0) { ++i; j=i+1; }
+        if(a[i]==2) { H[i][i]=c; }
+        else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
+        ++iter;
+    }
+    return H;
+}
 
 template<class X> bool Differential<X>::operator==(const Differential<X>& other) const {
     Differential<X> const& self=*this;

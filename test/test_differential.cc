@@ -86,6 +86,7 @@ class TestDifferential {
         ARIADNE_TEST_CALL(test_pow());
         ARIADNE_TEST_CALL(test_compose());
         ARIADNE_TEST_CALL(test_gradient());
+        ARIADNE_TEST_CALL(test_hessian());
     }
 
     void test_degree() {
@@ -180,6 +181,22 @@ class TestDifferential {
         ARIADNE_TEST_PRINT(g);
         ARIADNE_TEST_EQUALS(g[0],-1.75);
         ARIADNE_TEST_EQUALS(g[1],-0.25);
+    }
+
+    void test_hessian() {
+        // Test Hessian matrix of
+        Float a00=1.5; Float a01=2.5; Float a11=3.5;
+        double x0=0.875; double x1=-1.25;
+        Vector<Float> x(2, x0,x1);
+        Vector< Differential<Float> > dx=Differential<Float>::variables(2u,x);
+        Differential<Float> dfx=a00*dx[0]*dx[0]+a01*dx[0]*dx[1]+a11*dx[1]*dx[1];
+        ARIADNE_TEST_PRINT(dfx);
+        Matrix<Float> H = dfx.hessian();
+        ARIADNE_TEST_PRINT(H);
+        ARIADNE_TEST_EQUAL(H[0][1],H[1][0]);
+        ARIADNE_TEST_EQUALS(H[0][0],a00);
+        ARIADNE_TEST_EQUALS(H[0][1],a01);
+        ARIADNE_TEST_EQUALS(H[1][1],a11);
     }
 
 

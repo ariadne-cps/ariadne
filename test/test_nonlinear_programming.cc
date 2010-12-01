@@ -45,13 +45,45 @@ class TestOptimiser
         : optimiser(opt.clone()) { }
 
     void test() {
-        ARIADNE_TEST_CALL(test_linear_feasibility());
+        //ARIADNE_TEST_CALL(test_unconstrained_optimisation());
+        //ARIADNE_TEST_CALL(test_linear_feasibility());
+        ARIADNE_TEST_CALL(test_nonlinear_feasibility());
+    }
+
+    void test_unconstrained_optimisation() {
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        RealScalarFunction x0s = sqr(x[0]);
+        RealScalarFunction f(x0s*(12+x0s*(6.3+x0s))+6*x[1]*(x[1]-x[0]));
+        ARIADNE_TEST_PRINT(f);
+        RealVectorFunction g(0u,2u);
+        ARIADNE_TEST_PRINT(g);
+        Box D(2, -1.0,2.0, -3.0,5.0);
+        Box C(0);
+
+        IntervalVector x_optimal=optimiser->optimise(f,D,g,C);
+        ARIADNE_TEST_ASSERT(norm(x_optimal)<1e-8);
     }
 
     void test_linear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         RealVectorFunction g=RealVectorFunction(1u, 2*x[0]+x[1]);
+        ARIADNE_TEST_PRINT(g);
+        Box D(2, 0.0,2.0, 0.0,2.0);
+        Box C(1, -2.0,1.0);
+
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        C=Box(1, 1.0,1.5);
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        D=Box(2, 1.0,1.5,0.5,1.0);
+        ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
+    }
+
+    void test_nonlinear_feasibility() {
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        RealVectorFunction g=RealVectorFunction(1u, 2*x[0]+x[1]+0.125*x[0]*x[1]);
         ARIADNE_TEST_PRINT(g);
         Box D(2, 0.0,2.0, 0.0,2.0);
         Box C(1, -2.0,1.0);

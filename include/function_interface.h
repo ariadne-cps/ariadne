@@ -85,6 +85,8 @@ class ScalarFunctionInterface<Void>
     virtual std::ostream& repr(std::ostream& os) const = 0;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
+  public:
+    virtual ScalarFunctionInterface<Void>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -95,6 +97,8 @@ class ScalarFunctionInterface<Float>
     : public ScalarFunctionInterface<Void>
 {
   public:
+    //! \brief Return a copy of the function.
+    inline ScalarFunction<Float> clone() const;
     //! \brief Compute an approximation to the value of the function at the point \a x.
     virtual Float evaluate(const Vector<Float>& x) const = 0;
     inline Float operator() (const Vector<Float>& x) const;
@@ -104,6 +108,13 @@ class ScalarFunctionInterface<Float>
     virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
     virtual Formula<Float> evaluate(const Vector< Formula<Float> >& x) const = 0;
+
+    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
+    inline ScalarFunction<Float> derivative(uint i) const;
+  private:
+    virtual ScalarFunctionInterface<Float>* _derivative(uint i) const = 0;
+  public:
+    virtual ScalarFunctionInterface<Float>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -116,6 +127,8 @@ class ScalarFunctionInterface<Interval>
   public:
     //! \brief The type used to describe the number of argument variables.
     typedef unsigned int SizeType;
+
+    inline ScalarFunction<Interval> clone() const;
 
     using ScalarFunctionInterface<Float>::evaluate;
 
@@ -131,10 +144,12 @@ class ScalarFunctionInterface<Interval>
     virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    ScalarFunction<Interval> derivative(uint i) const;
+    inline ScalarFunction<Interval> derivative(uint i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     virtual ScalarFunctionInterface<Interval>* _derivative(uint i) const = 0;
+  public:
+    virtual ScalarFunctionInterface<Interval>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -145,6 +160,8 @@ class ScalarFunctionInterface<Real>
     : public ScalarFunctionInterface<Interval>
 {
   public:
+    inline ScalarFunction<Real> clone() const;
+
     using ScalarFunctionInterface<Interval>::evaluate;
 
     //! \brief Evaluate over computable reals.
@@ -154,12 +171,12 @@ class ScalarFunctionInterface<Real>
     virtual Formula<Real> evaluate(const Vector< Formula<Real> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    //! FIXME: Declared virtual so it can be overridden by classes not _derivative(...) returning a new pointer
-    //! This should not be necessary, but simplifies and uniformises some of the implementation.
-    virtual ScalarFunction<Real> derivative(uint i) const;
+    inline ScalarFunction<Real> derivative(uint i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     virtual ScalarFunctionInterface<Real>* _derivative(uint i) const = 0;
+  public:
+    virtual ScalarFunctionInterface<Real>* _clone() const = 0;
 };
 
 //! \relates ScalarFunctionInterface
@@ -189,7 +206,10 @@ class VectorFunctionInterface<Void>
 
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
+  public:
+    virtual VectorFunctionInterface<Void>* _clone() const = 0;
 };
+
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
@@ -206,6 +226,12 @@ class VectorFunctionInterface<Float>
     virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
     virtual Vector< Formula<Float> > evaluate(const Vector< Formula<Float> >& x) const = 0;
+
+    //! \brief Get the \a i<sup>th</sup> component function.
+    inline ScalarFunction<Float> operator[](uint i) const;
+  public:
+    virtual ScalarFunctionInterface<Float>* _get(uint i) const = 0;
+    virtual VectorFunctionInterface<Float>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -231,9 +257,10 @@ class VectorFunctionInterface<Interval>
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    ScalarFunction<Interval> operator[](uint i) const;
-  private:
+    inline ScalarFunction<Interval> operator[](uint i) const;
+  public:
     virtual ScalarFunctionInterface<Interval>* _get(uint i) const = 0;
+    virtual VectorFunctionInterface<Interval>* _clone() const = 0;
 
 };
 
@@ -252,11 +279,11 @@ class VectorFunctionInterface<Real>
     //! \brief Evaluate the function over a vector of formulae.
     virtual Vector< Formula<Real> > evaluate(const Vector< Formula<Real> >& x) const = 0;
     //! \brief Get the \a i<sup>th</sup> component function.
-    //! FIXME: Declared virtual so it can be overridden by classes not supporting _get(...) returning a new pointer
-    //! This should not be necessary, but I can't think of a way around it without introducing a clone() operator.
-    virtual ScalarFunction<Real> operator[](uint i) const;
-  private:
+
+    inline ScalarFunction<Real> operator[](uint i) const;
+  public:
     virtual ScalarFunctionInterface<Real>* _get(uint i) const = 0;
+    virtual VectorFunctionInterface<Real>* _clone() const = 0;
 };
 
 //! \relates VectorFunctionInterface

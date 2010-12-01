@@ -89,6 +89,11 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d)
 {
 }
 
+ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, shared_ptr<TaylorModelAccuracy> acc_ptr)
+    : _domain(d), _model(d.size(),acc_ptr)
+{
+}
+
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalTaylorModel& m)
     : _domain(d), _model(m)
 {
@@ -199,6 +204,18 @@ Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Vector<Interv
     }
     return x;
 }
+
+
+ScalarTaylorFunction* ScalarTaylorFunction::_clone() const
+{
+    return new ScalarTaylorFunction(*this);
+}
+
+ScalarTaylorFunction* ScalarTaylorFunction::_create() const
+{
+    return new ScalarTaylorFunction(this->domain(),this->_model.accuracy_ptr());
+}
+
 
 
 Polynomial<Interval> polynomial(const IntervalTaylorModel& tm);
@@ -810,7 +827,15 @@ VectorTaylorFunction::VectorTaylorFunction(const List<ScalarTaylorFunction>& v)
 }
 
 
+VectorTaylorFunction* VectorTaylorFunction::_clone() const
+{
+    return new VectorTaylorFunction(*this);
+}
 
+VectorTaylorFunction* VectorTaylorFunction::_create() const
+{
+    return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->_models[0].accuracy_ptr()));
+}
 
 
 

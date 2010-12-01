@@ -57,6 +57,7 @@ class ScalarFunctionMixin<F,Float>
     virtual FloatTaylorModel evaluate(const Vector<FloatTaylorModel>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual ScalarFunctionInterface<Float>* _clone() const;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
@@ -80,6 +81,7 @@ class ScalarFunctionMixin<F,Interval>
     virtual IntervalTaylorModel evaluate(const Vector<IntervalTaylorModel>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual ScalarFunctionInterface<Interval>* _clone() const;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
@@ -105,6 +107,7 @@ class ScalarFunctionMixin<F,Real>
     virtual IntervalTaylorModel evaluate(const Vector<IntervalTaylorModel>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual ScalarFunctionInterface<Real>* _clone() const;
 
     Vector<Float> gradient(const Vector<Float>& v) const;
     Vector<Interval> gradient(const Vector<Interval>& v) const;
@@ -125,6 +128,7 @@ class VectorFunctionMixin<F,Float>
     virtual Vector<FloatDifferential> evaluate(const Vector<FloatDifferential>& x) const;
     virtual Vector<FloatTaylorModel> evaluate(const Vector<FloatTaylorModel>& x) const;
     virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
+    virtual VectorFunctionInterface<Float>* _clone() const;
 };
 
 template<class F>
@@ -145,6 +149,7 @@ class VectorFunctionMixin<F,Interval>
     virtual Vector<IntervalTaylorModel> evaluate(const Vector<IntervalTaylorModel>& x) const;
     virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
     virtual Vector<IntervalFormula> evaluate(const Vector<IntervalFormula>& x) const;
+    virtual VectorFunctionInterface<Interval>* _clone() const;
 };
 
 // A wrapper for classes with non-static _compute methods
@@ -168,6 +173,7 @@ class VectorFunctionMixin<F,Real>
     virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
     virtual Vector<IntervalFormula> evaluate(const Vector<IntervalFormula>& x) const;
     virtual Vector<RealFormula> evaluate(const Vector<RealFormula>& x) const;
+    virtual VectorFunctionInterface<Real>* _clone() const;
 };
 
 

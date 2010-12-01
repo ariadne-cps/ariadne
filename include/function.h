@@ -71,6 +71,7 @@ class ScalarFunction<Float>
   public:
     ScalarFunction<Float>(ScalarFunctionInterface<Float>* fptr) : _ptr(fptr) { }
     ScalarFunction<Float>(shared_ptr< ScalarFunctionInterface<Float> > fptr) : _ptr(fptr) { }
+    ScalarFunction<Float>(const ScalarFunctionInterface<Float>& fref) : _ptr(fref._clone()) { }
 
     const ScalarFunctionInterface<Float>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const ScalarFunctionInterface<Float>& () const { return *this->_ptr; }
@@ -97,6 +98,7 @@ class ScalarFunction<Interval>
   public:
     ScalarFunction<Interval>(ScalarFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
     ScalarFunction<Interval>(shared_ptr< ScalarFunctionInterface<Interval> > fptr) : _ptr(fptr) { }
+    ScalarFunction<Interval>(const ScalarFunctionInterface<Interval>& fref) : _ptr(fref._clone()) { }
 
     const ScalarFunctionInterface<Interval>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const ScalarFunctionInterface<Interval>& () const { return *this->_ptr; }
@@ -179,16 +181,24 @@ class ScalarFunction<Real>
 // FIXME: This conversion to a RealScalarFunction is a hack. The kind of derivative available should
 // depend on the function type, and not require casting.
 inline ScalarFunction<Interval> ScalarFunction<Interval>::derivative(uint j) const {
-    return ScalarFunction<Interval>(boost::dynamic_pointer_cast< ScalarFunctionInterface<Real> >(_ptr)->derivative(j)); }
+    return ScalarFunction<Interval>(static_cast<const ScalarFunction<Interval>&>(boost::dynamic_pointer_cast< ScalarFunctionInterface<Real> >(_ptr)->derivative(j))); }
 
 inline Float evaluate_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Interval evaluate(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
 inline Real evaluate(const ScalarFunction<Real>& f, const Vector<Real>& x) { return f(x); }
 inline std::ostream& operator<<(std::ostream& os, const ScalarFunction<Real>& f) { return f.write(os); }
 
+inline FloatScalarFunction ScalarFunctionInterface<Float>::clone() const { return this->_clone(); }
+inline IntervalScalarFunction ScalarFunctionInterface<Interval>::clone() const { return this->_clone(); }
+inline RealScalarFunction ScalarFunctionInterface<Real>::clone() const { return this->_clone(); }
+
 inline Float ScalarFunctionInterface<Float>::operator() (const Vector<Float>& x) const { return this->evaluate(x); }
 inline Interval ScalarFunctionInterface<Interval>::operator() (const Vector<Interval>& x) const { return this->evaluate(x); }
 inline Real ScalarFunctionInterface<Real>::operator() (const Vector<Real>& x) const { return this->evaluate(x); }
+
+inline FloatScalarFunction ScalarFunctionInterface<Float>::derivative(uint j) const { return this->_derivative(j); }
+inline IntervalScalarFunction ScalarFunctionInterface<Interval>::derivative(uint j) const { return this->_derivative(j); }
+inline RealScalarFunction ScalarFunctionInterface<Real>::derivative(uint j) const { return this->_derivative(j); }
 
 ScalarFunction<Real> operator+(const ScalarFunction<Real>&);
 ScalarFunction<Real> operator-(const ScalarFunction<Real>&);
@@ -224,6 +234,7 @@ class VectorFunction<Float>
   public:
     VectorFunction<Float>(VectorFunctionInterface<Float>* fptr) : _ptr(fptr) { }
     VectorFunction<Float>(shared_ptr< VectorFunctionInterface<Float> > fptr) : _ptr(fptr) { }
+    VectorFunction<Float>(const VectorFunctionInterface<Float>& fref) : _ptr(fref._clone()) { }
     const VectorFunctionInterface<Float>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const VectorFunctionInterface<Float>& () const { return *this->_ptr; }
 
@@ -255,6 +266,7 @@ class VectorFunction<Interval>
 
     VectorFunction<Interval>(VectorFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
     VectorFunction<Interval>(shared_ptr< VectorFunctionInterface<Interval> > fptr) : _ptr(fptr) { }
+    VectorFunction<Interval>(const VectorFunctionInterface<Interval>& fref) : _ptr(fref._clone()) { }
     const VectorFunctionInterface<Interval>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const VectorFunctionInterface<Interval>& () const { return *this->_ptr; }
     operator VectorFunction<Float> () const { return VectorFunction<Float>(this->_ptr); }
@@ -381,8 +393,7 @@ inline Matrix<Float> jacobian_approx(const VectorFunction<Real>& f, const Vector
 inline Matrix<Interval> jacobian(const VectorFunction<Real>& f, const Vector<Interval>& x);
 
 
-inline ScalarFunction<Interval> ScalarFunctionInterface<Interval>::derivative(Nat j) const { return this->_derivative(j); }
-inline ScalarFunction<Real> ScalarFunctionInterface<Real>::derivative(Nat j) const { return this->_derivative(j); }
+inline ScalarFunction<Float> VectorFunctionInterface<Float>::operator[](Nat i) const { return this->_get(i); }
 inline ScalarFunction<Interval> VectorFunctionInterface<Interval>::operator[](Nat i) const { return this->_get(i); }
 inline ScalarFunction<Real> VectorFunctionInterface<Real>::operator[](Nat i) const { return this->_get(i); }
 

@@ -159,6 +159,8 @@ class ScalarTaylorFunction
     explicit ScalarTaylorFunction();
     //! \brief Construct a ScalarTaylorFunction over the domain \a d.
     explicit ScalarTaylorFunction(const DomainType& d);
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d.
+    explicit ScalarTaylorFunction(const DomainType& d, shared_ptr<TaylorModelAccuracy> acc_ptr);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<Interval>& m);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, with scaled power series expansion \a f and error \a e.
@@ -507,7 +509,9 @@ class ScalarTaylorFunction
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
             + convert_error<R>(this->_model.error());
     }
-    ScalarTaylorFunction* _derivative(uint j) const ;
+    ScalarTaylorFunction* _derivative(uint j) const;
+    ScalarTaylorFunction* _clone() const;
+    ScalarTaylorFunction* _create() const;
 };
 
 
@@ -915,6 +919,8 @@ class VectorTaylorFunction
     uint _compute_maximum_component_size() const;
     void _resize(uint rs, uint as, ushort d, ushort s);
     virtual ScalarTaylorFunction* _get(uint i) const { return new ScalarTaylorFunction(this->_domain,this->_models[i]); }
+    virtual VectorTaylorFunction* _clone() const;
+    virtual VectorTaylorFunction* _create() const;
   private:
     friend class VectorFunctionMixin<VectorTaylorFunction,Interval>;
     template<class X> void _compute(Vector<X>& r, const Vector<X>& a) const;

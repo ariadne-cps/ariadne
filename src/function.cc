@@ -157,7 +157,7 @@ template<class Op> struct UnaryFunctionBody
         return this->_arg.argument_size(); }
 
     virtual RealScalarFunctionInterface* _derivative(uint j) const {
-        ARIADNE_NOT_IMPLEMENTED;
+        return static_cast<const RealScalarFunctionInterface&>(this->derivative(j))._clone();
     }
 
     virtual RealScalarFunction derivative(uint j) const {
@@ -199,7 +199,7 @@ template<class Op> struct BinaryFunctionBody
         return this->_arg1.argument_size(); }
 
     virtual RealScalarFunctionInterface* _derivative(uint j) const {
-        ARIADNE_NOT_IMPLEMENTED;
+        return static_cast<const RealScalarFunctionInterface&>(this->derivative(j))._clone();
     }
 
     virtual RealScalarFunction derivative(uint j) const {
@@ -335,7 +335,7 @@ struct VectorOfScalarFunctionBody
     virtual uint argument_size() const {
         return _as; }
 
-    virtual ScalarFunctionInterface<X>* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual ScalarFunctionInterface<X>* _get(uint i) const { return static_cast<const ScalarFunctionInterface<X>&>(this->_vec[i])._clone(); }
 
     ScalarFunction<X> operator[](uint i) const {
         return this->_vec[i]; }
@@ -544,6 +544,7 @@ struct LieDerivativeFunctionBody
         ARIADNE_ASSERT(f.result_size()==f.argument_size());
         _g=g; for(uint j=0; j!=g.argument_size(); ++j) { _dg[j]=g.derivative(j); } _f=f; }
     SizeType argument_size() const { return _g.argument_size(); }
+    virtual RealScalarFunctionInterface* _derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
     std::ostream& write(std::ostream& os) const { return os << "LieDerivative( g="<<_g<<", f="<<_f<<" )"; }
 
     template<class R, class A> void _compute(R& r, const A& x) const {
@@ -568,6 +569,7 @@ struct FunctionElementBody
 
     virtual SizeType argument_size() const { return _f.argument_size(); }
     virtual std::ostream& write(std::ostream& os) const { return os<<_f<<"["<<_i<<"]"; }
+    virtual RealScalarFunctionInterface* _derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class Y> inline void _compute(Y& r, const Vector<Y>& x) const {
         r=this->_f.evaluate(x)[_i]; }
@@ -622,7 +624,7 @@ struct JoinedFunctionBody
     virtual SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }
     virtual SizeType argument_size() const { return _f1.argument_size(); }
     virtual std::ostream& write(std::ostream& os) const { return os << "JoinedFunctionBody( f1="<<_f1<<", f2="<<_f2<<" )"; }
-
+    virtual RealScalarFunctionInterface* _get(uint i) const { return (i<_f1.result_size()) ? _f1._raw_pointer()->_get(i) : _f2._raw_pointer()->_get(i-_f1.result_size()); }
     template<class X> inline void _compute(Vector<X>& r, const Vector<X>& x) const {
         r=join(_f1.evaluate(x),_f2.evaluate(x)); }
 

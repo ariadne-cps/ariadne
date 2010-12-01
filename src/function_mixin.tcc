@@ -35,6 +35,7 @@ template<class F> Float ScalarFunctionMixin<F,Float>::evaluate(const Vector<Floa
 template<class F> FloatDifferential ScalarFunctionMixin<F,Float>::evaluate(const Vector<FloatDifferential>& x) const { return this->_base_evaluate(x); }
 template<class F> FloatTaylorModel ScalarFunctionMixin<F,Float>::evaluate(const Vector<FloatTaylorModel>& x) const { return this->_base_evaluate(x); }
 template<class F> FloatFormula ScalarFunctionMixin<F,Float>::evaluate(const Vector<FloatFormula>& x) const { return this->_base_evaluate(x); }
+template<class F> FloatScalarFunctionInterface* ScalarFunctionMixin<F,Float>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
 template<class F> Float ScalarFunctionMixin<F,Interval>::evaluate(const Vector<Float>& x) const { return this->_base_evaluate(x); }
 template<class F> Interval ScalarFunctionMixin<F,Interval>::evaluate(const Vector<Interval>& x) const { return this->_base_evaluate(x); }
@@ -44,6 +45,7 @@ template<class F> FloatTaylorModel ScalarFunctionMixin<F,Interval>::evaluate(con
 template<class F> IntervalTaylorModel ScalarFunctionMixin<F,Interval>::evaluate(const Vector<IntervalTaylorModel>& x) const { return this->_base_evaluate(x); }
 template<class F> FloatFormula ScalarFunctionMixin<F,Interval>::evaluate(const Vector<FloatFormula>& x) const { return this->_base_evaluate(x); }
 template<class F> IntervalFormula ScalarFunctionMixin<F,Interval>::evaluate(const Vector<IntervalFormula>& x) const { return this->_base_evaluate(x); }
+template<class F> IntervalScalarFunctionInterface* ScalarFunctionMixin<F,Interval>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
 template<class F> Float ScalarFunctionMixin<F,Real>::evaluate(const Vector<Float>& x) const { return this->_base_evaluate(x); }
 template<class F> Interval ScalarFunctionMixin<F,Real>::evaluate(const Vector<Interval>& x) const { return this->_base_evaluate(x); }
@@ -55,6 +57,7 @@ template<class F> IntervalTaylorModel ScalarFunctionMixin<F,Real>::evaluate(cons
 template<class F> FloatFormula ScalarFunctionMixin<F,Real>::evaluate(const Vector<FloatFormula>& x) const { return this->_base_evaluate(x); }
 template<class F> IntervalFormula ScalarFunctionMixin<F,Real>::evaluate(const Vector<IntervalFormula>& x) const { return this->_base_evaluate(x); }
 template<class F> RealFormula ScalarFunctionMixin<F,Real>::evaluate(const Vector<RealFormula>& x) const { return this->_base_evaluate(x); }
+template<class F> RealScalarFunctionInterface* ScalarFunctionMixin<F,Real>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
 template<class F> Vector<Float> ScalarFunctionMixin<F,Real>::gradient(const Vector<Float>& x) const {
     return this->_base_evaluate(FloatDifferential::variables(1u,x)).gradient(); }
@@ -65,6 +68,7 @@ template<class F> Vector<Float> VectorFunctionMixin<F,Float>::evaluate(const Vec
 template<class F> Vector<FloatDifferential> VectorFunctionMixin<F,Float>::evaluate(const Vector<FloatDifferential>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<FloatTaylorModel> VectorFunctionMixin<F,Float>::evaluate(const Vector<FloatTaylorModel>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<FloatFormula> VectorFunctionMixin<F,Float>::evaluate(const Vector<FloatFormula>& x) const { return this->_base_evaluate(x); }
+template<class F> FloatVectorFunctionInterface* VectorFunctionMixin<F,Float>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
 template<class F> Vector<Float> VectorFunctionMixin<F,Interval>::evaluate(const Vector<Float>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<Interval> VectorFunctionMixin<F,Interval>::evaluate(const Vector<Interval>& x) const { return this->_base_evaluate(x); }
@@ -74,6 +78,7 @@ template<class F> Vector<FloatTaylorModel> VectorFunctionMixin<F,Interval>::eval
 template<class F> Vector<IntervalTaylorModel> VectorFunctionMixin<F,Interval>::evaluate(const Vector<IntervalTaylorModel>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<FloatFormula> VectorFunctionMixin<F,Interval>::evaluate(const Vector<FloatFormula>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<IntervalFormula> VectorFunctionMixin<F,Interval>::evaluate(const Vector<IntervalFormula>& x) const { return this->_base_evaluate(x); }
+template<class F> IntervalVectorFunctionInterface* VectorFunctionMixin<F,Interval>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
 template<class F> Vector<Float> VectorFunctionMixin<F,Real>::evaluate(const Vector<Float>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<Interval> VectorFunctionMixin<F,Real>::evaluate(const Vector<Interval>& x) const { return this->_base_evaluate(x); }
@@ -85,6 +90,7 @@ template<class F> Vector<IntervalTaylorModel> VectorFunctionMixin<F,Real>::evalu
 template<class F> Vector<FloatFormula> VectorFunctionMixin<F,Real>::evaluate(const Vector<FloatFormula>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<IntervalFormula> VectorFunctionMixin<F,Real>::evaluate(const Vector<IntervalFormula>& x) const { return this->_base_evaluate(x); }
 template<class F> Vector<RealFormula> VectorFunctionMixin<F,Real>::evaluate(const Vector<RealFormula>& x) const { return this->_base_evaluate(x); }
+template<class F> RealVectorFunctionInterface* VectorFunctionMixin<F,Real>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
 
 } // namespace Ariadne

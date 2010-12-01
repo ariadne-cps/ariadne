@@ -301,6 +301,44 @@ class ScalarModelInterface {
 };
 
 
+//! \ingroup FunctionModule
+//! \brief An interface for classes which dynamically create functions.
+template<class X> class FunctionFactoryInterface
+{
+    typedef Vector<Interval> DomainType;
+  public:
+    //! \brief Create a function which is identically zero on the given domain.
+    ScalarFunction<X> create_zero(const DomainType& domain) const { return this->_create_zero(domain); }
+    //! \brief Create a function which is the identity on the given domain.
+    VectorFunction<X> create_identity(const DomainType& domain) const { return this->_create_identity(domain); }
+  private:
+    //! \brief A dynamically-allocated pointer to the zero function in some function class.
+    virtual ScalarFunctionInterface<X>* _create_zero(const DomainType& domain) const = 0;
+    //! \brief A dynamically-allocated pointer to the identity function in some function class.
+    virtual VectorFunctionInterface<X>* _create_identity(const DomainType& domain) const = 0;
+};
+
+template<> class FunctionFactoryInterface<Interval>
+{
+    typedef Vector<Interval> DomainType;
+  public:
+    //inline ScalarFunction<Interval> create_zero(const IntervalVector& domain) const { return this->_create_zero(domain); }
+    //inline VectorFunction<Interval> create_identity(const IntervalVector& domain) const { return this->_create_identity(domain); }
+  private:
+    virtual ScalarFunctionInterface<Interval>* _create_zero(const DomainType& domain) const = 0;
+    virtual VectorFunctionInterface<Interval>* _create_identity(const DomainType& domain) const = 0;
+};
+
+template<> class FunctionFactoryInterface<Real>
+{
+  public:
+    //inline ScalarFunction<Interval> create_zero(const IntervalVector& domain) const { return this->_create_zero(domain); }
+    //inline VectorFunction<Interval> create_identity(const IntervalVector& domain) const { return this->_create_identity(domain); }
+  private:
+    virtual ScalarFunctionInterface<Real>* _create_zero(uint argument_size) const = 0;
+    virtual VectorFunctionInterface<Real>* _create_identity(uint argument_size) const = 0;
+};
+
 } // namespace Ariadne
 
 #endif

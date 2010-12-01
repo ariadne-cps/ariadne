@@ -67,11 +67,13 @@ class TaylorModelAccuracy
     friend class TaylorModel<Float>;
 
     TaylorModelAccuracy();
-    TaylorModelAccuracy(double st, uint md);
 
     friend TaylorModelAccuracy max(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
     friend TaylorModelAccuracy min(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
+    friend bool operator==(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
     friend std::ostream& operator<<(std::ostream& os, const TaylorModelAccuracy& acc);
+  public:
+    TaylorModelAccuracy(double st, uint md);
   public:
     static void set_default_sweep_threshold(double dst) { ARIADNE_ASSERT(dst>=0.0); _default_sweep_threshold=dst; }
     static void set_default_maximum_degree(int dmd) { ARIADNE_ASSERT(dmd>=0); _default_maximum_degree=dmd; }

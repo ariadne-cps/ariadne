@@ -54,7 +54,7 @@ class MultiIndex;
 template<class X> class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
-
+class TaylorFunctionFactory;
 
 template<class X> inline X unscale(const X& x, const Interval& d) {
     Real c(add_ivl(d.lower()/2,d.upper()/2));
@@ -216,6 +216,8 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Data access */
+    /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
+    shared_ptr<TaylorModelAccuracy> accuracy_ptr() const;
     //! \brief The domain of the quantity.
     const DomainType& domain() const { return this->_domain; }
     //! \brief An over-approximation to the range of the quantity; not necessarily tight.
@@ -503,6 +505,7 @@ class ScalarTaylorFunction
     ScalarTaylorFunction& clobber(uint o) { this->_model.clobber(o); return *this; }
     ScalarTaylorFunction& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
   private:
+    friend class TaylorFunctionFactory;
     friend class ScalarFunctionMixin<ScalarTaylorFunction, Interval>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
         typedef typename T::NumericType R;
@@ -923,6 +926,7 @@ class VectorTaylorFunction
     virtual VectorTaylorFunction* _create() const;
   private:
     friend class VectorFunctionMixin<VectorTaylorFunction,Interval>;
+    friend class TaylorFunctionFactory;
     template<class X> void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */
@@ -998,6 +1002,23 @@ class VectorTaylorFunctionElementReference
   private:
     VectorTaylorFunction* _c; uint _i;
 };
+
+
+class TaylorFunctionFactory
+    : public FunctionFactoryInterface<Interval>
+{
+    shared_ptr<TaylorModelAccuracy> _acc_ptr;
+  public:
+    TaylorFunctionFactory(const TaylorModelAccuracy& accuracy)
+        : _acc_ptr(new TaylorModelAccuracy(accuracy)) { }
+    TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(*this->_acc_ptr); }
+    ScalarTaylorFunction create_zero(const IntervalVector& domain) const;
+    VectorTaylorFunction create_identity(const IntervalVector& domain) const;
+  private:
+    ScalarTaylorFunction* _create_zero(const IntervalVector& domain) const;
+    VectorTaylorFunction* _create_identity(const IntervalVector& domain) const;
+};
+
 
 
 } // namespace Ariadne

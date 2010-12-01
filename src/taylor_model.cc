@@ -74,6 +74,10 @@ inline bool TaylorModelAccuracy::discard(const Float& x) const { return abs(x)<t
 inline bool TaylorModelAccuracy::discard(const MultiIndex& a) const { return a.degree()>this->_maximum_degree; }
 inline bool TaylorModelAccuracy::discard(const MultiIndex& a, const Float& x) const { return this->discard(x) || this->discard(a); }
 
+bool operator==(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2) {
+    return acc1._sweep_threshold==acc2._sweep_threshold && acc1._maximum_degree==acc2._maximum_degree;
+}
+
 std::ostream& operator<<(std::ostream& os, const TaylorModelAccuracy& acc) {
     return os<<"( sweep_threshold="<<acc._sweep_threshold<<", maximum_degree="<<acc._maximum_degree<<" )";
 }

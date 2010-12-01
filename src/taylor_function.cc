@@ -218,6 +218,12 @@ ScalarTaylorFunction* ScalarTaylorFunction::_create() const
 
 
 
+shared_ptr<TaylorModelAccuracy> ScalarTaylorFunction::accuracy_ptr() const
+{
+    return this->_model.accuracy_ptr();
+}
+
+
 Polynomial<Interval> polynomial(const IntervalTaylorModel& tm);
 
 Polynomial<Interval>
@@ -1631,6 +1637,40 @@ List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns)
     return result;
 }
 
+
+ScalarTaylorFunction
+TaylorFunctionFactory::create_zero(const IntervalVector& domain) const
+{
+    return ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_acc_ptr));
+}
+
+ScalarTaylorFunction*
+TaylorFunctionFactory::_create_zero(const IntervalVector& domain) const
+{
+    return new ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_acc_ptr));
+}
+
+VectorTaylorFunction
+TaylorFunctionFactory::create_identity(const IntervalVector& domain) const
+{
+    VectorTaylorFunction result(domain.size(),domain);
+    for(uint i=0; i!=domain.size(); ++i) {
+        result._models[i]=ScalarTaylorFunction::coordinate(domain,i)._model;
+        result._models[i].set_accuracy(this->_acc_ptr);
+    }
+    return result;
+}
+
+VectorTaylorFunction*
+TaylorFunctionFactory::_create_identity(const IntervalVector& domain) const
+{
+    VectorTaylorFunction* result=new VectorTaylorFunction(domain.size(),domain);
+    for(uint i=0; i!=domain.size(); ++i) {
+        result->_models[i]=ScalarTaylorFunction::coordinate(domain,i)._model;
+        result->_models[i].set_accuracy(this->_acc_ptr);
+    }
+    return result;
+}
 
 
 /*

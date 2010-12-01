@@ -496,13 +496,55 @@ void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
 
     ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),Interval(2.25,4.25));
-
-
 }
+
+
+class TestTaylorFunctionFactory
+{
+  public:
+    TestTaylorFunctionFactory();
+    void test();
+  private:
+    void test_create();
+};
+
+TestTaylorFunctionFactory::TestTaylorFunctionFactory()
+{
+}
+
+void TestTaylorFunctionFactory::test()
+{
+    ARIADNE_TEST_CALL(test_create());
+}
+
+void TestTaylorFunctionFactory::test_create()
+{
+    TaylorModelAccuracy accuracy(1e-4,3u);
+    TaylorFunctionFactory factory(accuracy);
+
+    IntervalVector dom(2, -1,+1, 0.5,3.5);
+
+    ScalarTaylorFunction stf=factory.create_zero(dom);
+    ARIADNE_TEST_PRINT(stf);
+    ARIADNE_TEST_EQUALS(*stf.accuracy_ptr(),accuracy);
+    ARIADNE_TEST_EQUALS(stf.evaluate(dom),Interval(0.0));
+
+    VectorTaylorFunction vtf=factory.create_identity(dom);
+    ARIADNE_TEST_PRINT(vtf);
+
+    // Test evaluation gives a superset with small additional error
+    ARIADNE_TEST_BINARY_PREDICATE(subset,dom,vtf.evaluate(dom));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,vtf.evaluate(dom),dom+IntervalVector(2,Interval(-1e-15,+1e-15)));
+    IntervalVector pt(2); pt[0]=Interval(0.2); pt[1]=Interval(1.25);
+    ARIADNE_TEST_BINARY_PREDICATE(subset,pt,vtf.evaluate(pt));
+}
+
+
 
 int main() {
     TestScalarTaylorFunction().test();
     TestVectorTaylorFunction().test();
+    TestTaylorFunctionFactory().test();
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;
 }

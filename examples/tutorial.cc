@@ -88,10 +88,9 @@ CompositeHybridAutomaton create_heating_system()
     RealConstant Tamp("Tamp",8.0);
 
     // Set the system control parameters
-    RealConstant Tmax("Tmax",22.0);
-    RealConstant Tmin("Tmin",15.0);
+    RealConstant Tmax("Tmax",23.0);
+    RealConstant Tmin("Tmin",14.0);
     RealConstant Toff("Toff",22.0);
-    RealConstant Ton("Ton",15.0);
     RealConstant Ton_upper("Ton_upper",15.125);
     RealConstant Ton_lower("Ton_lower",14.875);
 
@@ -113,17 +112,16 @@ CompositeHybridAutomaton create_heating_system()
     AtomicHybridAutomaton heater;
     heater.new_mode( on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
     heater.new_mode( off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
-    heater.new_invariant( on, switch_off, T<=Tmin );
-    heater.new_invariant( off, switch_on, T>=Tmax );
-    heater.new_transition( off, switch_on, T<=Tmin, on, next(T)=T );
-    heater.new_transition( on, switch_off, T>=Tmax, off, next(T)=T );
+    heater.new_invariant( off, switch_on, T<=Ton_lower );
+    heater.new_transition( off, switch_on, T<=Ton_upper, on, next(T)=T );
+    heater.new_transition( on, switch_off, T>=Toff, off, next(T)=T, urgent );
 
     // Create the clock subsystem
     AtomicHybridAutomaton clock;
     clock.new_mode( ok, (dot(t)=1.0) );
     clock.new_transition( ok, midnight, t>=1.0, ok, next(t)=0.0, urgent );
 
-    CompositeHybridAutomaton heating_system((heater,clock));
+    CompositeHybridAutomaton heating_system((clock,heater));
 
     return heating_system;
 }
@@ -135,7 +133,8 @@ HybridEvolverType create_evolver()
 
     // Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.125;
+    //evolver.parameters().maximum_step_size = 0.125;
+    evolver.parameters().maximum_step_size = 0.5;
     evolver.verbosity=1;
     cout <<  evolver.parameters() << endl;
 
@@ -158,7 +157,8 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 
     // Define the initial set
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
-    HybridEnclosureType initial((off,ok),initial_box);
+    //Box initial_box(2, 0.0,0.015625, 18.0,18.0625);
+    HybridEnclosureType initial((ok,off),initial_box);
 
     // Set the maximum evolution time
     HybridTime evolution_time(1.5,4);
@@ -172,9 +172,9 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve);
     plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
+         Colour(0.0,0.5,1.0), reach[(ok,off)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
     plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[(off,ok)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
+         Colour(0.0,0.5,1.0), reach[(ok,on)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
     cout << "done." << endl;
 
     // Compute the orbit.

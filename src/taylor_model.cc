@@ -23,6 +23,7 @@
 
 
 #include <iomanip>
+#include <limits>
 
 #include "config.h"
 #include "rounding.h"
@@ -52,8 +53,8 @@ bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
 const double em=2.2204460492503131e-16;
 const double ec=em/2;
 
-double TaylorModelAccuracy::_default_sweep_threshold=1e-18;
-uint TaylorModelAccuracy::_default_maximum_degree=16;
+double TaylorModelAccuracy::_default_sweep_threshold=std::numeric_limits<float>::epsilon();
+uint TaylorModelAccuracy::_default_maximum_degree=8;
 
 TaylorModelAccuracy::TaylorModelAccuracy() : _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
 TaylorModelAccuracy::TaylorModelAccuracy(double st, uint md) : _sweep_threshold(st), _maximum_degree(md) { }

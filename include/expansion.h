@@ -567,7 +567,7 @@ template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned i
 //! the current evaluation of a polynomial in \f$(x_1,\ldots,x_k)\f$.
 //!
 //! We list the terms in reverse lexicographic order, defined as \f$\alpha \prec \beta\f$ if \f$\alpha_j>\beta_j\f$,
-//! where \f$j=\max\{i\mid \alpha_i\neq\beta_i\}$.\f$c_\alpha\f$.
+//! where \f$j=\max\{i\mid \alpha_i\neq\beta_i\}\f$.
 //! For a given term \f$c_\alpha x^\alpha\f$, let \f$k=\max\{j\mid \alpha_j\neq\beta_j\}\f$, where \f$\beta\f$ is the next multi-index.
 //! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
 //! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.

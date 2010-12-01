@@ -280,10 +280,10 @@ wherever possible.
 \section initialisation Initialisation
 
 \f[
-\begin{align}
+\begin{aligned}
  A_e &= \{ \xi(s); \tau(s) \mid s\in D \mid i_{e'}(x) \leq 0 \wedge g_e(x) \geq 0 \} \\
  F &= \{ \xi(s); \tau(s) \mid s\in D \mid i_{e}(x) \leq 0 \wedge p_e(x) \leq 0 \wedge g_e(x) \leq 0 \}
-\end{align}
+\end{aligned}
 \f]
 
 

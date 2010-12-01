@@ -143,7 +143,7 @@ A lower or upper variable satisfies \f$x_N=d_{L/U}\f$ or \f$w_N=b_{L/U}\f$, and 
 After the introduction of auxiliary variables, the system can be written in the form (CP) above, with equations
 \f[ \begin{pmatrix} A_C & -I \\ A_E & 0 \end{pmatrix} \begin{pmatrix} x \\ w \end{pmatrix} = \begin{pmatrix} 0 \\ b_E \end{pmatrix} \f]
 
-If there are \f$m\f$ variables, \f$n_C\f$ inequality constraints and \f$n_E\f$ equality constraints, then the total number of basic variables \f$#x_B+#w_B=n_C+n_E\f$, since there are \f$n_C+n_E\f$ equations \f$A_Cx=w_C\f$ and \f$A_Ex=b_E\f$.
+If there are \f$m\f$ variables, \f$n_C\f$ inequality constraints and \f$n_E\f$ equality constraints, then the total number of basic variables \f$\#x_B+\#w_B=n_C+n_E\f$, since there are \f$n_C+n_E\f$ equations \f$A_Cx=w_C\f$ and \f$A_Ex=b_E\f$.
 
 Given a basic solution, we can split the equations and variables into
 The basic variables \f$x_B\f$ are therefore given by

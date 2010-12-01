@@ -33,39 +33,78 @@
 \section nonlinear_optimisation Standard optimisation problem
 
 Consider the nonlinear programming problem
-\f[ \framebox{$\max f(y) \text{ s.t. } g_i(y)\leq 0,\ i=1,\ldots,k; y\in [y] . $} \f]
+\f[ \framebox{$\max f(x) \text{ s.t. } g_j(x)\leq 0,\ j=1,\ldots,m_c; \ h_j(x)\leq 0,\ j=1,\ldots,m_e; \underline{x}_i \leq x_i \leq \overline{x}_i . $} \f]
 The standard Karush-Kuhn-Tucker conditions for optimality are
-\f[ \framebox{$ \nabla f(y) - \sum_{i=1}^{n} x_i \nabla g_i(y) = 0; \ g_i(y) + z_i = 0; \ x_iz_i=0;\ x_i,z_i\geq 0,\ i=1,\ldots,n$}\f]
-Suppose \f$y_0\f$ is any point in \f$[y]\f$ (not necessarily feasible) and \f$x_0\geq0\f$.
-Then
-\f[ \begin{aligned}
-    f(y) &= f(y_0) + \nabla f([y]) (y-y_0) \\
-         &= f(y_0) + \nabla f(y_0) (y-y_0) + \bigl(\nabla f([y])-\nabla f(y_0)\bigr)(y-y_0) \\
-         &= f(y_0) + \bigl(\nabla f(y_0) - x_0\cdot \nabla g(y_0)\bigr)(y-y_0) + x_0\cdot\nabla g(y_0)(y-y_0) + \bigl(\nabla f([y])-\nabla f(y_0)\bigr)(y-y_0)
-\end{aligned}\f]
-Now
-\f[ g(y) = g(y_0) + \nabla g(y_0) (y-y_0) + \bigl(\nabla g([y])-\nabla g(y_0)\bigr) (y-y_0) \f]
-which upon rearranging yields
-\f[  \nabla g(y_0) (y-y_0) = g(y)-g(y_0) - \bigl(\nabla g([y])-\nabla g(y_0)\bigr) (y-y_0) \f]
-Substituting into the equation for \f$f(y)\f$ yields
-\f[ \begin{aligned}
-    f(y) &= f(y_0) + x_0\cdot\bigl(g(y)-g(y_0)\bigr) + \bigl(\nabla f(y_0) - x_0\cdot\nabla g(y_0)\bigr)(y-y_0)
-              + \bigl(\nabla f([y])-\nabla f(y_0)\bigr)(y-y_0) - \bigl(\nabla g([y])-\nabla g(y_0)\bigr) (y-y_0) \\
-         &= f(y_0) + x_0\cdot\bigl(g(y)-g(y_0)\bigr) + \bigl(\nabla f(y_0) - x_0\cdot\nabla g(y_0)\bigr)(y-y_0)
-              + \bigl( (\nabla f([y])-x_0\cdot\nabla g([y])) - (\nabla f(y_0)-x_0\cdot\nabla g(y_0)) \bigr) (y-y_0)
-\end{aligned}\f]
-Using the fact that \f$g(y)\leq 0\f$, we obtain
-\f[ \framebox{$ f(y) \leq f(y_0) - x_0\cdot g(y_0) + \bigl(\nabla f(y_0) - x_0\cdot\nabla g(y_0)\bigr)(y-y_0)
-              + \bigl( (\nabla f([y])-x_0\cdot\nabla g([y])) - (\nabla f(y_0)-x_0\cdot\nabla g(y_0)) \bigr) (y-y_0)$}
-\f]
-This equation can also be written as
-\f[ \framebox{$ f(y) \leq f(y_0) - x_0\cdot g(y_0) + \bigl( \nabla f(y_0)-x_0\cdot\nabla g(y_0) \bigr) (y-y_0) + \bigl( \nabla^2 f([y])-x_0\cdot\nabla^2 g([y]) \bigr) (y-y_0)^2$}
-\f]
-or
-\f[ \mbox{$ f(y) \leq f(y_0) - x_0\cdot g(y_0) + \bigl( \nabla f([y])-x_0\cdot\nabla g([y]) \bigr) (y-y_0)$}
-\f]
+\f[ \framebox{ $\begin{gathered} \nabla f(x) - \sum_{j=1}^{m_c} u_j \nabla g_j(x) + \sum_{j=1}^{m_e} v_j \nabla h_j(x) = 0; \\ \ u_j g_j(x)=0; \\ h_j(x)=0; \\ u_j,-g_j(x) \geq 0 \end{gathered}$ } \f]
 
-\subsection nonlinear_optimisation_newton Solving the Karush conditions by Newton-like methods
+
+
+\section constraints Handling constraints
+
+\subsection inequality_constraints Equality Constraints
+
+Consider the problem
+\f[ \max f(x) \text{ s.t } g(x) = 0 \f]
+The Karush-Kuhn-Tucker optimality conditions are
+\f[ \nabla f(x) - \lambda \nabla g(x) = 0; \quad g(x) = 0. \f]
+
+The problem can be relaxed by adding the penalty function \f$-g(x)^2/2\mu\f$.
+Then the optimality conditions are
+\f[ \nabla f(x) - \frac{g(x)}{\mu} \nabla g(x) = 0\f]
+Taking Lagrange multiplier \f$\lambda = g(x)/\mu\f$, we obtain
+\f[ \framebox{$ \begin{gathered} \nabla f(x) -  \lambda \nabla g(x) = 0; \\ g(x) - \mu \lambda = 0 \end{gathered} $} \f]
+which relaxes to \f$g(x)=0\f$ as \f$\mu\to0\f$.
+
+
+\subsection inequality_constraints Inequality Constraints
+
+Consider the problem
+\f[ \max f(x) \mid g(x) \geq 0 \f]
+With the penalty function \f$ - \mu \log g(x)\f$, we obtain a critical point when
+\f[ \nabla f(x) - \frac{\mu}{g(x)} \nabla g(x) = 0\f]
+Take Lagrange multiplier \f$\lambda = \mu/g(x)\f$ to obtain the Lagrangian equation \f$ \nabla f(x) - \lambda \nabla g(x) = 0\f$ with
+\f$ \lambda g(x) = \mu\f$.
+Taking \f$\mu\to 0\f$, we obtain the standard Karush-Kuhn-Tucker conditions
+\f[ \framebox{$ \begin{gathered}  \nabla f(x) - \lambda \nabla g(x) = 0; \\ \lambda g(x) = 0; \\ \lambda,\ g(x) \geq 0. \end{gathered} $} \f]
+
+\subsection bounded_constraints Bounded Constraints
+
+Consider the problem
+\f[ \max f(x) \text{ s.t. } |g(x)| \leq \delta \f]
+We can handle the problem in two ways; either by considering the smooth constraint \f$\delta^2-g(x)^2\geq0\f$ or the two constraints \f$\delta + g(x) \geq 0\f$ and \f$\delta - g(x)\geq 0\f$.
+
+In the former case, we obtain the conditions
+\f[ \begin{gathered} \nabla f(x) + 2 \lambda g(x) \nabla g(x) = 0; \\ \lambda (\delta^2 - g(x)^2) = \mu. \end{gathered} \f]
+Replacing the standard Lagrange multiplier \f$\lambda\f$ with \f$-2\lambda g(x)\f$, we obtain
+\f[ \begin{gathered} \nabla f(x) - \lambda \nabla g(x) = 0; \\ -\lambda (\delta^2 - g(x)^2) / 2g(x) = \mu. \end{gathered} \f]
+Rearranging the second formula gives
+\f[ \framebox{$ \begin{gathered} \nabla f(x) - \lambda \nabla g(x) = 0; \\ \bigl(\delta^2-g(x)^2\bigr) \lambda + 2 g(x) \mu = 0 . \end{gathered} $} \f]
+Differentiating gives
+\f[ (\delta^2-g(x)^2) {\Delta\lambda} + (2 \mu - 2 g(x) \lambda) \nabla g(x) {\Delta x} = 0\f]
+In order to solve for \f${\Delta x}\f$ in terms of \f${\Delta\lambda}\f$, we require
+\f$ \mu -  g(x) \lambda \neq 0\f$.
+Since the optimal \f$x^*,\lambda^*\f$ satisfy \f$(\delta^2-g(x^*)^2) \lambda^* + 2 g(x^*) \mu = 0\f$, we have \f$\lambda^* g(x^*) \geq 0\f$.
+Hence we can impose the feasibility constraint \f[g(x)\lambda \geq -\mu\f]
+
+In the former case, we obtain the conditions
+\f[ \begin{gathered} \nabla f(x) - \lambda^+ \nabla g(x) + \lambda^- \nabla g(x) = 0; \\ \lambda^+ (\delta + g(x)) = \mu; \\ \lambda^- (\delta - g(x)) = \mu \end{gathered} \f]
+Set \f$\lambda = \lambda^+ - \lambda^-\f$. Then we have
+\f[ \lambda = \mu \biggl( \frac{1}{\delta+g(x)} - \frac{1}{\delta-g(x)}\biggr) = \frac{-2\mu g(x)}{\delta^2-g(x)^2} . \f]
+Rearranging again gives
+\f[ (\delta^2-g(x)^2) \lambda + 2 g(x) \mu = 0\f]
+Note that \f$\lambda^+ + \lambda^- = 2\delta\mu/(\delta^2-g(x)^2) \geq \bigl|\lambda^+-\lambda^-\bigr| \f$
+
+\subsection state_constraints State constraints
+
+Setting \f$g(x)=x\f$, we obtain the state constraints
+\f[ \nabla f(x) - \lambda = 0; \quad \lambda = \frac{-2x\mu}{\delta^2-x^2} \f]
+Differentiating yields
+\f[ {\Delta\lambda} = -2\mu \frac{\delta^2+x^2}{(\delta^2-x^2)^2} {\Delta x} \f]
+which can be used to eliminate these Lagrange multipliers entirely.
+
+
+
+\section nonlinear_optimisation_newton Solving the Karush conditions by Newton-like methods
 
 In the linear case \f$f(y)=b^Ty\f$, \f$g(y) = A^T y -c \f$ we have \f$\nabla^2 f = \nabla^2 g_i = 0\f$. Take \f$x=x_0\f$, \f$y_0=0\f$.
 Then the condition \f$\nabla f(y_0) - x_0\cdot\nabla g(y_0) = 0\f$ becomes \f$b^T - x^T A^T = 0\f$ so \f$Ax=b\f$, and then \f$f(y) = b^T y \leq c^T x\f$, the usual duality bounds.
@@ -128,8 +167,43 @@ If we have upper and lower bounds on the constraints \f$c^l\leq g(y) \leq c^u\f$
 \f]
 
 
+\section nonlinear_optimisation_dual_bounds Bounds on the objective function.
 
-\section standard_nonlinear_feasibility Standard feasibility problem
+Consider the nonlinear programming problem without equality constraints,
+\f[ \max f(x) \text{ s.t. } g_j(x)\leq 0,\ j=1,\ldots,m;\ x\in[x] . \f]
+
+Suppose \f$x_0\f$ is any point in \f$[x]\f$ (not necessarily feasible) and \f$x_0\geq0\f$.
+Then
+\f[ \begin{aligned}
+    f(x) &= f(x_0) + \nabla f([x]) (x-x_0) \\
+         &= f(x_0) + \nabla f(x_0) (x-x_0) + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0) \\
+         &= f(x_0) + \bigl(\nabla f(x_0) - u_0\cdot \nabla g(x_0)\bigr)(x-x_0) + u_0\cdot\nabla g(x_0)(x-x_0) + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0)
+\end{aligned}\f]
+Now
+\f[ g(x) = g(x_0) + \nabla g(x_0) (x-x_0) + \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \f]
+which upon rearranging yields
+\f[  \nabla g(x_0) (x-x_0) = g(x)-g(x_0) - \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \f]
+Substituting into the equation for \f$f(x)\f$ yields
+\f[ \begin{aligned}
+    f(x) &= f(x_0) + u_0\cdot\bigl(g(x)-g(x_0)\bigr) + \bigl(\nabla f(x_0) - u_0\cdot\nabla g(x_0)\bigr)(x-x_0)
+              + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0) - \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \\
+         &= f(x_0) + u_0\cdot\bigl(g(x)-g(x_0)\bigr) + \bigl(\nabla f(x_0) - u_0\cdot\nabla g(x_0)\bigr)(x-x_0)
+              + \bigl( (\nabla f([x])-u_0\cdot\nabla g([x])) - (\nabla f(x_0)-u_0\cdot\nabla g(x_0)) \bigr) (x-x_0)
+\end{aligned}\f]
+Using the fact that \f$g(x)\leq 0\f$, we obtain
+\f[ \framebox{$ f(x) \leq f(x_0) - u_0\cdot g(x_0) + \bigl(\nabla f(x_0) - u_0\cdot\nabla g(x_0)\bigr)(x-x_0)
+              + \bigl( (\nabla f([x])-u_0\cdot\nabla g([x])) - (\nabla f(x_0)-u_0\cdot\nabla g(x_0)) \bigr) (x-x_0)$}
+\f]
+This equation can also be written as
+\f[ \framebox{$ f(x) \leq f(x_0) - u_0\cdot g(x_0) + \bigl( \nabla f(x_0)-u_0\cdot\nabla g(x_0) \bigr) (x-x_0) + \bigl( \nabla^2 f([x])-u_0\cdot\nabla^2 g([x]) \bigr) (x-x_0)^2$}
+\f]
+or
+\f[ \mbox{$ f(x) \leq f(x_0) - u_0\cdot g(x_0) + \bigl( \nabla f([x])-u_0\cdot\nabla g([x]) \bigr) (x-x_0)$}
+\f]
+
+
+
+\section nonlinear_feasibility Feasibility problems
 
 Consider the feasibility problem
 \f[ g_j(y) \leq 0,\ j=1,\ldots,n;\ y\in[y] . \f]
@@ -139,8 +213,6 @@ The Karush-Kuhn-Tucker conditions for optimality are
 \f[ \mbox{$ \sum_{j=1}^{n} x_j \nabla g_j(y) = 0; \ \sum_{j=1}^{n} x_j =1; \ g_j(y) + t + z_j = 0; \ x_jz_j=0;\ x_j,z_j\geq 0,\ j=1,\ldots,n$}\f]
 The problem has no solution if there exists \f$x^*\f$ such that
 \f[ x^*_j \cdot g_j([y]) > 0 . \f]
-
-\section general_nonlinear_feasibility General nonlinear feasibility problem
 
 If lower and upper bounds are used, and the variable \f$y\f$ is bounded, we have
 \f[ c^l_j \leq g_j(y) \leq c^u_j,\ j=1,\ldots,n; \qquad d^l_i \leq y_i \leq d^u_i;\ i=1,\ldots,m . \f]

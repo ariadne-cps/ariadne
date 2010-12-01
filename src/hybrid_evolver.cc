@@ -957,11 +957,27 @@ _apply_evolution_step(EvolutionData& evolution_data,
             evolve_set_iter!=final_sets.end(); ++evolve_set_iter)
         {
             HybridEnclosure& evolve_set=*evolve_set_iter;
-            evolve_set.bound_time(timing_data.final_time);
-            if(!definitely(evolve_set.empty())) {
-                ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
-                evolution_data.working_sets.append(evolve_set);
-                evolution_data.intermediate_sets.append(evolve_set);
+            Interval evolve_set_time_range=evolve_set.time_range();
+            if(evolve_set_time_range.lower()>timing_data.final_time) {
+                // Do nothing, since evolve set is definitely empty
+            } else if(evolve_set_time_range.upper()<=timing_data.final_time) {
+                // No need to introduce timing constraints
+                if(!definitely(evolve_set.empty())) {
+                    ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
+                    evolution_data.working_sets.append(evolve_set);
+                    evolution_data.intermediate_sets.append(evolve_set);
+                }
+            } else {
+                HybridEnclosure time_bounded_evolve_set=evolve_set;
+                time_bounded_evolve_set.bound_time(timing_data.final_time);
+                // Only continue evolution if the time-bounded evolve set is nonempty;
+                // However, continue evolution without adding time constraint,
+                // since this will be introduced in the next step
+                if(!definitely(time_bounded_evolve_set.empty())) {
+                    ARIADNE_LOG(4,"time_bounded_evolve_set="<<time_bounded_evolve_set<<"\n");
+                    evolution_data.working_sets.append(evolve_set);
+                    evolution_data.intermediate_sets.append(evolve_set);
+                }
             }
         }
         for(List<HybridEnclosure>::iterator reach_set_iter=reach_sets.begin();
@@ -1020,6 +1036,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             if(jump_set.time_range().upper()>timing_data.final_time) {
                 jump_set.bound_time(timing_data.final_time);
+                if(!jump_set.empty()) { ARIADNE_WARN("Explicitly bounding time in jump set\n"); }
             }
         }
 

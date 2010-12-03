@@ -37,8 +37,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters
-    Real a = 1.0;  // Coefficient of restitution (usually 1.0)
-    Real g = 9.0; // Attraction acceleration
+    Real ax = 0.75;  // Coefficient of restitution for bounces with vertical walls
+    Real ay = 0.5;  // Coefficient of restitution for bounces with horizontal walls
 
     /// Set the position and velocity functions.
     RealScalarFunction x=RealScalarFunction::coordinate(4,0); // X position
@@ -64,8 +64,8 @@ int main(int argc, const char* argv[])
     RealVectorFunction free_d((vx,0,vy,0));
 
     /// Create the resets
-    RealVectorFunction x_r((x,-a*vx,y,a*vy)); // Bounces on a boundary for x
-    RealVectorFunction y_r((x,a*vx,y,-a*vy)); // Bounces on a boundary for y
+    RealVectorFunction x_r((x,-ax*vx,y,vy)); // Bounces on a boundary for x
+    RealVectorFunction y_r((x,vx,y,-ay*vy)); // Bounces on a boundary for y
 
     /// Create the guards
     /// Guards are true when g(x) > 0
@@ -92,8 +92,10 @@ int main(int argc, const char* argv[])
 
     TaylorModelAccuracy::set_default_maximum_degree(5);
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.05;
-    evolver.parameters().maximum_step_size = 1.0/16;
+    evolver.parameters().maximum_enclosure_radius = 1.0;
+    evolver.parameters().maximum_step_size = 16.0;
+    //Uncomment out to use small time-steps
+    //evolver.parameters().maximum_step_size = 1.0/16;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -103,7 +105,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    Box initial_box(4, 0.49,0.51, 2.5,2.5, 0.79,0.81, 1.0,1.0);
+    Box initial_box(4, 0.48,0.52, 2.5,2.5, 0.78,0.81, 1.0,1.0);
     EnclosureType initial_enclosure(free,initial_box);
     Box bounding_box(4, -1.0,1.0, -10.0,10.0, -1.0,1.0, -10.0,10.0);
 

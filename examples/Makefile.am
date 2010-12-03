@@ -9,6 +9,7 @@ bin_PROGRAMS= \
 	tutorial \
 	bouncingball \
 	bouncingball-compositional \
+	ballinabox \
 	watertank \
 	watertank-time \
 	watertank-proportional \
@@ -25,6 +26,7 @@ bin_PROGRAMS= \
 tutorial_SOURCES = tutorial.cc
 bouncingball_SOURCES = bouncingball.cc
 bouncingball_compositional_SOURCES=bouncingball-compositional.cc
+ballinabox_SOURCES = ballinabox.cc
 watertank_SOURCES=watertank.cc
 watertank_time_SOURCES=watertank-time.cc
 watertank_proportional_SOURCES=watertank-proportional.cc

@@ -233,6 +233,15 @@ void ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& functio
     } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
 }
 
+inline bool is_nan(const Float& x) { return isnan(x.get_d()); }
+
+bool has_nan(const Box& domain) {
+    for(uint i=0; i!=domain.size(); ++i) {
+        if(is_nan(domain[i].lower()) || is_nan(domain[i].upper())) { return true; }
+    }
+    return false;
+}
+
 void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& constraints) const
 {
     const double MINIMUM_REDUCTION = 0.75;
@@ -249,15 +258,14 @@ void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& cons
         for(uint i=0; i!=constraints.size(); ++i) {
             this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
         }
-
         if(domain.empty()) { return; }
 
         for(uint i=0; i!=constraints.size(); ++i) {
             for(uint j=0; j!=domain.size(); ++j) {
                 this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
+                if(domain[j].empty()) { return; }
             }
         }
-        if(domain.empty()) { return; }
 
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0.0;
@@ -346,6 +354,8 @@ void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
+    // Try to reduce the size of the set by "shaving" off along a coordinate axis
+    //
     Interval interval=domain[variable];
     Float l=interval.lower();
     Float u=interval.upper();
@@ -353,27 +363,42 @@ void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
     Interval new_interval(+inf<Float>(),-inf<Float>());
     Vector<Interval> slice=domain;
 
-    static const uint MAX_STEPS=(1<<3);
-    const uint n=MAX_STEPS;
+    static const uint MAX_SLICES=(1<<3);
+    const uint n=MAX_SLICES;
+
+    // Look for empty slices from below
+    uint imax=n; // The first nonempty interval
     for(uint i=0; i!=n; ++i) {
         subinterval=Interval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
         Interval slice_image=function(slice);
         if(!intersection(slice_image,bounds).empty()) {
             new_interval.set_lower(subinterval.lower());
+            imax=i;
             break;
         }
     }
 
-    for(uint i=0; i!=n; ++i) {
-        subinterval=Interval((u*(n-i-1)+l*(i+1))/n,(u*(n-i)+l*i)/n);
+    // The set is proved to be empty
+    if(imax==n) {
+        domain[variable]=new_interval;
+        return;
+    }
+
+    // Look for empty slices from above; note that at least one nonempty slice has been found
+    for(uint j=n-1; j!=imax; --j) {
+        subinterval=Interval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
+        new_interval.set_upper(subinterval.upper());
         slice[variable]=subinterval;
         Interval slice_image=function(slice);
         if(!intersection(slice_image,bounds).empty()) {
-            new_interval.set_upper(subinterval.upper());
             break;
         }
     }
+
+    // The set cannot be empty, since a nonempty slice has been found in the upper pass.
+    ARIADNE_ASSERT(new_interval.upper()!=-inf<Float>());
+
     domain[variable]=new_interval;
 }
 

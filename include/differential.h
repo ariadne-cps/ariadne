@@ -212,6 +212,8 @@ class Differential
     Vector<X> gradient() const { Vector<X> g(this->argument_size());
         for(uint j=0; j!=g.size(); ++j) { g[j]=this->gradient(j); } return g; }
     //! \brief The Hessian matrix.
+    //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
+    //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.
     Matrix<X> hessian() const;
 
 
@@ -414,7 +416,7 @@ Differential<X>& Differential<X>::operator/=(const R& c)
 
 
 template<class X> Matrix<X> Differential<X>::hessian() const {
-    ARIADNE_PRECONDITION(this->degree()>=2,"Differential<X>::hessian(): degree="<<this->degree());
+    ARIADNE_PRECONDITION(this->degree()>=2);
     Matrix<X> H(this->argument_size(),this->argument_size());
     const_iterator iter=this->begin();
     while(iter!=this->end() && iter->key().degree()<=1) { ++iter; }
@@ -422,8 +424,8 @@ template<class X> Matrix<X> Differential<X>::hessian() const {
     while(iter!=this->end() && iter->key().degree()<=2) {
         const MultiIndex& a=iter->key(); const X& c=iter->data();
         while(a[i]==0) { ++i; j=i+1; }
-        if(a[i]==2) { H[i][i]=c; }
-        else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
+        if(a[i]==2) { H[i][i]=c*2; }
+        else { while(a[j]==0) { ++j; } H[i][j]=c*2; H[j][i]=c*2; }
         ++iter;
     }
     return H;
@@ -1021,8 +1023,8 @@ class Vector< Differential<X> >
 
 
     uint result_size() const { return this->size(); }
-    uint argument_size() const { return (*this)[0].argument_size(); }
-    uint degree() const { return (*this)[0].degree(); }
+    uint argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
+    uint degree() const { return (this->size()==0) ? 0 : (*this)[0].degree(); }
 
     Vector<X> value() const {
         Vector<X> r(this->result_size());

@@ -228,13 +228,21 @@ template<class X>
 class DiagonalMatrix {
     Vector<X> _x;
   public:
+    DiagonalMatrix(size_t n) : _x(n) { }
     DiagonalMatrix(const Vector<X>& x) : _x(x) { }
+    size_t size() const { return _x.size(); }
+    const X& operator[](size_t i) const { return _x[i]; }
+    X& operator[](size_t i) { return _x[i]; }
+    void set(size_t i, const X& x) { _x[i]=x; }
     const Vector<X>& diagonal() const { return _x; }
     template<class XX> Vector<XX> operator*(const Vector<XX>& v) {
         Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=_x[i]*v[i]; } return result; }
     template<class XX> Vector<XX> solve(const Vector<XX>& v) {
         Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=v[i]/_x[i]; } return result; }
 };
+template<class X> std::ostream& operator<<(std::ostream& os, const DiagonalMatrix<X>& D) {
+    return os << D.diagonal();
+}
 
 struct PivotMatrix : public array<size_t> {
     PivotMatrix(size_t n=0u) : array<size_t>(n) {

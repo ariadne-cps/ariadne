@@ -69,6 +69,7 @@ template<>
 class ScalarFunction<Float>
 {
   public:
+    explicit ScalarFunction<Float>(Nat n=0u);
     ScalarFunction<Float>(ScalarFunctionInterface<Float>* fptr) : _ptr(fptr) { }
     ScalarFunction<Float>(shared_ptr< ScalarFunctionInterface<Float> > fptr) : _ptr(fptr) { }
     ScalarFunction<Float>(const ScalarFunctionInterface<Float>& fref) : _ptr(fref._clone()) { }
@@ -96,6 +97,7 @@ template<>
 class ScalarFunction<Interval>
 {
   public:
+    explicit ScalarFunction<Interval>(Nat n=0u);
     ScalarFunction<Interval>(ScalarFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
     ScalarFunction<Interval>(shared_ptr< ScalarFunctionInterface<Interval> > fptr) : _ptr(fptr) { }
     ScalarFunction<Interval>(const ScalarFunctionInterface<Interval>& fref) : _ptr(fref._clone()) { }
@@ -263,6 +265,7 @@ class VectorFunction<Interval>
     static VectorFunction<Interval> identity(Nat n);
 
     VectorFunction<Interval>(const List<ScalarFunction<Interval> >& lf);
+    VectorFunction<Interval>(Nat n, const ScalarFunction<Interval>& f);
 
     VectorFunction<Interval>(VectorFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
     VectorFunction<Interval>(shared_ptr< VectorFunctionInterface<Interval> > fptr) : _ptr(fptr) { }

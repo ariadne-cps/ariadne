@@ -656,6 +656,17 @@ class CombinedFunctionBody
 
 //------------------------ RealScalarFunction -----------------------------------//
 
+FloatScalarFunction::ScalarFunction(Nat n)
+    : _ptr(new ScalarPolynomialFunctionBody(Polynomial<Float>::constant(n,Float(0.0))))
+{
+}
+
+
+IntervalScalarFunction::ScalarFunction(Nat n)
+    : _ptr(new ScalarPolynomialFunctionBody(Polynomial<Interval>::constant(n,Interval(0.0))))
+{
+}
+
 RealScalarFunction RealScalarFunction::constant(Nat n, Real c)
 {
     return RealScalarFunction(new ScalarConstantFunctionBody(n,c));
@@ -941,6 +952,11 @@ RealScalarFunction embed(const RealScalarFunction& f, uint k) {
 
 
 //------------------------ Vector Function ----------------------------------//
+
+IntervalVectorFunction::VectorFunction(Nat rs, const IntervalScalarFunction& sf)
+    : _ptr(new VectorOfScalarFunctionBody<Interval>(rs,sf))
+{
+}
 
 typedef VectorOfScalarFunctionBody<Real> VectorOfRealScalarFunction;
 

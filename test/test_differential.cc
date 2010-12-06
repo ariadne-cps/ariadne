@@ -194,9 +194,9 @@ class TestDifferential {
         Matrix<Float> H = dfx.hessian();
         ARIADNE_TEST_PRINT(H);
         ARIADNE_TEST_EQUAL(H[0][1],H[1][0]);
-        ARIADNE_TEST_EQUALS(H[0][0],a00);
-        ARIADNE_TEST_EQUALS(H[0][1],a01);
-        ARIADNE_TEST_EQUALS(H[1][1],a11);
+        ARIADNE_TEST_EQUALS(H[0][0],a00*2);
+        ARIADNE_TEST_EQUALS(H[0][1],a01*2);
+        ARIADNE_TEST_EQUALS(H[1][1],a11*2);
     }
 
 

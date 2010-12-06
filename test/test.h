@@ -173,9 +173,12 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_ASSERT(expression)                                 \
     {                                                                   \
         std::cout << #expression << ": " << std::flush;                 \
-        bool result = (expression);                                     \
+        tribool result = (expression);                                     \
         if(result) {                                                    \
             std::cout << "true\n" << std::endl;                         \
+        } else if(possibly(result)) {                                   \
+            std::cout << "\nWARNING: indeterminate" << std::endl;       \
+            std::cerr << "WARNING: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' is indeterminate." << std::endl; \
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
             std::cout << "\nERROR: false" << std::endl;                 \

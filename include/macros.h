@@ -64,13 +64,35 @@
 #endif
 
 
-#define ARIADNE_PRECONDITION(expression,error)             \
+#define ARIADNE_PRECONDITION_MSG(expression,error)             \
     { \
         bool result = (expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
     } \
+
+#define ARIADNE_PRECONDITION(expression)             \
+    { \
+        bool result = (expression); \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"); \
+        } \
+    } \
+
+#ifndef NDEBUG
+#define ARIADNE_DEBUG_PRECONDITION(expression) \
+    { \
+        bool result = (expression); \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Precondition `" << #expression << "' failed.\n"); \
+        } \
+    } \
+
+#else
+#define ARIADNE_DEBUG_PRECONDITION(expression) \
+    { }
+#endif
 
 #define ARIADNE_FAIL_MSG(error)             \
     { \

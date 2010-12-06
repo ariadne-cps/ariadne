@@ -49,6 +49,8 @@ template<class X> X inf();
 using std::min;
 using std::max;
 
+const double infty = std::numeric_limits<double>::infinity();
+
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
 //! \details
@@ -289,7 +291,6 @@ inline bool operator<=(double x1, const Float& x2) { return x1<=x2.v; }
 inline bool operator>=(double x1, const Float& x2) { return x1>=x2.v; }
 inline bool operator< (double x1, const Float& x2) { return x1< x2.v; }
 inline bool operator> (double x1, const Float& x2) { return x1> x2.v; }
-
 
 inline Float add_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);

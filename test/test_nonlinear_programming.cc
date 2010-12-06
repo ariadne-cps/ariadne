@@ -45,8 +45,11 @@ class TestOptimiser
         : optimiser(opt.clone()) { }
 
     void test() {
-        //ARIADNE_TEST_CALL(test_unconstrained_optimisation());
-        //ARIADNE_TEST_CALL(test_linear_feasibility());
+        ARIADNE_TEST_CALL(test_feasibility_check());
+        ARIADNE_TEST_CALL(test_unconstrained_optimisation());
+        ARIADNE_TEST_CALL(test_constrained_optimisation());
+        ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
+        ARIADNE_TEST_CALL(test_linear_feasibility());
         ARIADNE_TEST_CALL(test_nonlinear_feasibility());
     }
 
@@ -60,6 +63,35 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(g);
         Box D(2, -1.0,2.0, -3.0,5.0);
         Box C(0);
+
+        IntervalVector x_optimal=optimiser->optimise(f,D,g,C);
+        ARIADNE_TEST_ASSERT(norm(x_optimal)<1e-8);
+    }
+
+    void test_equality_constrained_optimisation() {
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        RealScalarFunction f(+(sqr(x[0])+sqr(x[1])));
+        ARIADNE_TEST_PRINT(f);
+        RealVectorFunction h( (1.5+x[0]+2*x[1]+0.25*x[0]*x[1]) );
+        ARIADNE_TEST_PRINT(h);
+
+        Box D(2, -1.0,2.0, -3.0,5.0);
+
+        NonlinearInteriorPointOptimiser optimiser;
+        IntervalVector x_optimal=optimiser.optimise(f,D,h);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(h(x_optimal)),1e-8);
+    }
+
+    void test_constrained_optimisation() {
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(3);
+        RealScalarFunction x0s = sqr(x[0]);
+        RealScalarFunction f(x0s*(12+x0s*(6.3+x0s))+6*x[1]*(x[1]-x[0])+x[2]);
+        ARIADNE_TEST_PRINT(f);
+        //RealVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
+        RealVectorFunction g( (2*x[1]+x[0], x[0]+x[1]*x[1]-0.875) );
+        ARIADNE_TEST_PRINT(g);
+        Box D(3, -1.0,2.0, -3.0,5.0, -3.0,5.0);
+        Box C(2, 0.0,infty, 0.0,infty, 3.0,3.0);
 
         IntervalVector x_optimal=optimiser->optimise(f,D,g,C);
         ARIADNE_TEST_ASSERT(norm(x_optimal)<1e-8);
@@ -95,17 +127,29 @@ class TestOptimiser
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
+    void test_feasibility_check() {
+        RealVectorFunction x=RealVectorFunction::identity(2);
+        ARIADNE_TEST_CONSTRUCT( RealVectorFunction, g,(sqr(x[0])+2*sqr(x[1])-1) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, D,(2, -1.0, 1.0, -1.0,1.0) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, C,(1, 0.0, 0.0) );
+
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, X1,(2, 0.30,0.40, 0.60,0.70) );
+        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
+
+        // The following test fails since it is difficult to find the feasible
+        // point in the box.
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, X2,(2, 0.30,0.40, 0.65,0.66) );
+        ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
+    }
+
 };
 
 int main(int argc, const char* argv[]) {
     NonlinearInteriorPointOptimiser nlo;
+    PenaltyFunctionOptimiser pfo;
     nlo.verbosity=get_verbosity(argc,argv);
-    TestOptimiser(nlo).test();
-
-    //KrawczykOptimiser kro;
-    //kro.verbosity=get_verbosity(argc,argv);
-    //TestOptimiser(kro).test();
-    std::cerr<<"WARNING: Interval-based Krawczyk optimiser does not work.\n";
+    pfo.verbosity=get_verbosity(argc,argv);
+    TestOptimiser(pfo).test();
 
     return ARIADNE_TEST_FAILURES;
 }

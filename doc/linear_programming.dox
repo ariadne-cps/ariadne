@@ -28,64 +28,6 @@
 \brief Documentation on linear programming
 
 
-\page interior_point_page Linear Programming using Interior Point Methods
-
-\section interiorfeasibility Feasibility using Interior Point Methods
-
-\subsection constraineddualfeasibility Constrained Dual Feasibility
-
-We shall be most concerned with the following problem:
-
- - Find \f$y\f$ such that \f$A^Ty \leq c\f$ and \f$l \leq y \leq u\f$, or show that such a \f$y\f$ does not exist.
-
-Without the bounds on \f$y\f$, it is easy to show that no solution exists if there exists \f$x\f$ such that \f$Ax=0\f$, \f$e^Tx=1\f$, \f$x\geq0\f$ and \f$c^Tx<0\f$.
-
-To solve the problem, introduce extended variables \f$x_L,x_U\f$, slack variables \f$s,s_L,s_U\f$ and a value \f$v\f$.
-The original (dual) feasibility problem becomes
-\f[ \max v \text{ s.t. } A^Ty + et + s = c; \ -y+t+s_L = -l; y+t+s_U = u; s,s_L,s_U \geq 0 \f]
-whereas the prime feasibility problem becomes
-\f[ \min c^Tx + l^Tx_L + u^Tx_U \text{ s.t. } Ax - x_L + x_U = 0; e^Tx+e^Tx_L+e^Tx_U = 1; x,x_L,x_U \geq 0\f].
-The original problem is feasible if the optimum value \f$t\f$ is positive, and infeasible if it is negative.
-
-Robust primal and dual basic feasible solutions are easily found.
-Take \f$x=1\f$, and \f$x_L,x_U>0\f$ such that \f$Ax=x_L-x_U\f$. Finally, scale so that the sum is equal to \f$1\f$.
-Take \f$y=0\f$, \f$t=\min(c_i,-l_i,u_i)-1\f$ and \f$s=c-et\f$, \f$s_L=-l-t\f$ and \f$s_U=u-t\f$
-
-We can now apply the standard interior point update.
-Although the matrix \f$A\f$ has been augmented, we can still recover a problem such that we only need to invert a matrix with only one extra row.
-Hence the dimension of the matrix inversion problem is equal to the dimension of the underlying space plus one.
-
-
-\subsection generalfeasibility General feasibility problem
-
-Consider feasibility of the linear programming problem
-\f[ Ax=b; \quad Cx\leq d . \f]
-Special cases of this occur in, for example testing whether the image of a constraint set intersects another constraint set.
-
-Introduce slack variables \f$r\f$ to transform the problem to
-\f[ Ax=b; \quad Cx+r=d; \quad r\geq 0 . \f]
-
-The duality conditions are
-\f[ A^T y + C^T s = 0 \f]
-and the value function is
-\f[ b^T y + d^T s . \f]
-The complementary slackness conditions are
-\f[ r\cdot s = 0; \quad r,s\geq 0 . \f]
-
-Consider a step updating the variables in an attempt to solve the complementarity system.
-The Newton equations are
-\f[ \left(\begin{matrix} A & 0 & 0 & 0 \\ C & 0 & I & 0 \\ 0 & A^T & 0 & C^T \\ 0 & 0 & S & R \end{matrix} \right) \left(\begin{matrix} \Delta x \\ \Delta y \\ \Delta r \\ \Delta s \end{matrix}\right) = \left(\begin{matrix} 0 \\  \rho_r \\ \rho_ s \\ \tau \end{matrix}\right)  \f]
-where \f$\rho_r\f$ and \f$\rho_s\f$ are the residuals \f$\rho_r=Cx+r-d\f$ and \f$\rho_s=A^Ty + C^T s\f$ which are typically zero.
-
-Assuming the residuals are zero, we have \f[\Delta r=-C\Delta x, \f] \f[\Delta s = R^{-1}(\tau-S\Delta r) = R^{-1}\tau + R^{-1}SC\Delta x\f] and
-hence \f$A^T\Delta y + C^T(R^{-1}\tau + R^{-1}SC\Delta x) = 0\f$ so \f$C^TR^{-1}SC\Delta x + A^T \Delta y = -C^TR^{-1}\tau \f$.
-Combined with the equation \f$A^T\Delta x=0\f$, we obtain the system
-\f[ \left(\begin{matrix} C^TR^{-1}SC & A^T \\ A & 0 \end{matrix}\right) \; \left(\begin{matrix} \Delta x \\ \Delta y \end{matrix}\right) = \left(\begin{matrix} -C^TR^{-1}\tau \\ 0 \end{matrix}\right) . \f]
-The left-hand matrix is symmetric, so can be (fairly) easily factorised. Further, the \f$A\f$ matrix is independent of the problem, so the initial part of the factorisation can be pre-computed.
-
-Indeed, it may be better to completely eliminate \f$A\f$ at the start of the problem by explicitly solving for some variables of \a x.
-If we have a square submatrix \f$A_B\f$ of \f$A\f$ which is invertible, then \f[x_B = A_B^{-1} (b-A_Nx_N)\f] and the inequalities for \f$x\f$ become \f[(C_N-C_BA_B^{-1}A_N)x_N \leq d-A_B^{-1}b\f].
-
 
 \page linear_programming_page Linear Programming
 
@@ -376,6 +318,43 @@ For a linear programming problem of standard form, with \f$A\f$ an \f$m\times n\
 
 
 
+\section homogeneousselfdualalgorithm The homogeneous self-dual algorithm
+
+The homogeneous self-dual algorithm is a method for simultaneously computing optimality and feasibility.
+Consider the primal and dual problems
+\f[ \text{(P)}\ \min c^T x \mid Ax=b,\ x\geq 0; \qquad \text{(D)}\max b^Ty \mid A^Ty\leq c \f]
+The homogeneous self-dual problem is
+\f[ \text{(HSD)} \begin{gathered}
+      \min (n+1)\theta \\ Ax - b\tau + (b-A\textbf{1})\theta = 0 \\ -A^Ty +c\tau - (c-\mathbf{1})\theta\geq 0 \\
+      b^Ty - c^T x + (c^T\mathbf{1}+1)\theta \geq 0 \\ -(b-A\mathbf{1})^Ty + (c-\mathbf{1})^Tx - (c^T\mathbf{1}+1)\tau = -(n+1) \\
+      x_j,\tau\geq 0; \ y_i,\theta\in\R .
+    \end{gathered} \f]
+A feasible point is always given by \f$x=\mathbf{1},\ y=0,\ \tau=1,\ \theta=1\f$.
+When \f$\tau=1,\ \theta=0\f$, the first three equations reduce to \f$Ax=b\f$, \f$A^Ty\leq c\f$ and \f$c^Tx=b^Ty\f$.
+If \f$z\f$ and \f$\kappa\f$ denote the slack variables, the final constraint becomes
+\f[ \mathbf{1}^Tx + \mathbf{1}^Tz + \tau + \kappa - (n+1)\theta = (n+1) \f]
+
+We have the following result:
+ - Problem (HSD) has an optimal solution, and the set of optimal points is bounded (compact).
+ - The optimal value is zero, and for any feasible point, we have \f$(n+1)\theta = x^Ts + \tau\kappa\f$.
+ - There is an optimal solution with \f$\theta^*=0\f$ such that \f$x^*+z^*>0\f$ and \f$\tau^*+\kappa^*>0\f$.
+
+To relate (HSD) to (P) and (D), we have:
+ - The primal problem has a bounded feasible solution if, and only if, \f$\tau^*>0\f$.
+   In this case, \f$x^* / \tau^*\f$ is primal optimal, and \f$y^* / \tau^*\f$ is dual optimal.
+ - There is no solution if, and only if, \f$\kappa^*>0\f$.
+   In this case, if \f$c^Tx^*<0\f$, then the dual problem is infeasible,
+   and if \f$b^Ty^*<0\f$, then the primal problem is infeasible,
+
+To related (HSD) to the central path, we have:
+ - For any \f$\mu>0\f$, there is a strictly feasible point such that \f$x_j  z_j = \mu\f$ and \f$\tau \kappa = \mu\f$.
+   The initial point \f$x=z=\mathbf{1}\f$, \f$y=\mathbf{0}\f$ and \f$\tau=\kappa=\theta=1\f$ is the solution for \f$\mu=1\f$.
+
+A potential function is given by
+\f[ \psi_{n+1+\rho}(x,\tau,z,\kappa) = (n+1+\rho)\log(x^Tz+\tau\kappa)-\sum_j \log(x_jz_j) -\log(\tau\kappa) \f]
+
+
+See: David G. Luenberger and Yinyu Ye "Linear and nonlinear programming".
 
 
 \section geometricfeasibility Feasibility problems for geometric operations
@@ -400,25 +379,63 @@ We notice that by introducing slack variables, we can convert all problems into 
 We can convert the standard dual feasibility problem into a primal linear programming problem \f$\min b^Ty\text{ s.t. } A^Ty=0\f$, but it is not so straightforward to convert a constrained dual feasibility problem into its dual. Instead we add slack variables and solve
 \f$ Ax+z=b;\ l\leq x\leq u\f$. We can use the reduced simplex algorithm to take advantage of sparseness.
 
-\section ariadnelpsolvers Linear programming solvers provided by Ariadne.
 
- - lpstp() Perform one step of the standard linear programming problem.
-      Input: \f$\mathrm{A},b,c\f$, InOut: \f$\pi,\mathrm{A}_B^{-1}\f$.
 
- - lpstpc() Perform one step of the standard linear programming problem with constraints \f$l\leq x\leq u\f$.
-     Any constraints which are violated are assumed to remain violated; this allows for constraints with infinities.
-     Input: \f$\mathrm{A},b,c\f$, InOut: \f$\pi,\mathrm{A}_B^{-1}\f$.
+\section interiorfeasibility Feasibility using Interior Point Methods
 
- - lpslv() Solve the standard linear programming problem \f$\min c^Tx \text{ s.t. }Ax=b;\ x\geq0\f$.
-      Input: \f$A,b,c\f$; Output: \f$\pi,\ \mathrm{A}_B^{-1},\ x^*,\ y^*,\ z^*\f$.
+\subsection constraineddualfeasibility Constrained Dual Feasibility
 
- - lpslvc() Solve the standard linear programming problem with constraints \f$\min c^Tx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
-      Input: \f$A,b,c\f$; Output: \f$\pi,\ \mathrm{A}_B^{-1},\ x^*\ \  (\text{maybe } y^*, z^*)\f$.
+We shall be most concerned with the following problem:
 
- - lprfsp() Solve the feasibility problem \f$Ax=b;\ x\geq0\f$.
+ - Find \f$y\f$ such that \f$A^Ty \leq c\f$ and \f$l \leq y \leq u\f$, or show that such a \f$y\f$ does not exist.
 
- - lprfsc() Solve the feasibility problem \f$Ax=b\f$ with \f$l\leq x\leq u\f$.
+Without the bounds on \f$y\f$, it is easy to show that no solution exists if there exists \f$x\f$ such that \f$Ax=0\f$, \f$e^Tx=1\f$, \f$x\geq0\f$ and \f$c^Tx<0\f$.
 
- - lprfsd() Solve the dual feasibility problem \f$Ax\leq b\f$.
+To solve the problem, introduce extended variables \f$x_L,x_U\f$, slack variables \f$s,s_L,s_U\f$ and a value \f$v\f$.
+The original (dual) feasibility problem becomes
+\f[ \max v \text{ s.t. } A^Ty + et + s = c; \ -y+t+s_L = -l; y+t+s_U = u; s,s_L,s_U \geq 0 \f]
+whereas the prime feasibility problem becomes
+\f[ \min c^Tx + l^Tx_L + u^Tx_U \text{ s.t. } Ax - x_L + x_U = 0; e^Tx+e^Tx_L+e^Tx_U = 1; x,x_L,x_U \geq 0\f].
+The original problem is feasible if the optimum value \f$t\f$ is positive, and infeasible if it is negative.
+
+Robust primal and dual basic feasible solutions are easily found.
+Take \f$x=1\f$, and \f$x_L,x_U>0\f$ such that \f$Ax=x_L-x_U\f$. Finally, scale so that the sum is equal to \f$1\f$.
+Take \f$y=0\f$, \f$t=\min(c_i,-l_i,u_i)-1\f$ and \f$s=c-et\f$, \f$s_L=-l-t\f$ and \f$s_U=u-t\f$
+
+We can now apply the standard interior point update.
+Although the matrix \f$A\f$ has been augmented, we can still recover a problem such that we only need to invert a matrix with only one extra row.
+Hence the dimension of the matrix inversion problem is equal to the dimension of the underlying space plus one.
+
+
+\subsection generalfeasibility General feasibility problem
+
+Consider feasibility of the linear programming problem
+\f[ Ax=b; \quad Cx\leq d . \f]
+Special cases of this occur in, for example testing whether the image of a constraint set intersects another constraint set.
+
+Introduce slack variables \f$r\f$ to transform the problem to
+\f[ Ax=b; \quad Cx+r=d; \quad r\geq 0 . \f]
+
+The duality conditions are
+\f[ A^T y + C^T s = 0 \f]
+and the value function is
+\f[ b^T y + d^T s . \f]
+The complementary slackness conditions are
+\f[ r\cdot s = 0; \quad r,s\geq 0 . \f]
+
+Consider a step updating the variables in an attempt to solve the complementarity system.
+The Newton equations are
+\f[ \left(\begin{matrix} A & 0 & 0 & 0 \\ C & 0 & I & 0 \\ 0 & A^T & 0 & C^T \\ 0 & 0 & S & R \end{matrix} \right) \left(\begin{matrix} \Delta x \\ \Delta y \\ \Delta r \\ \Delta s \end{matrix}\right) = \left(\begin{matrix} 0 \\  \rho_r \\ \rho_ s \\ \tau \end{matrix}\right)  \f]
+where \f$\rho_r\f$ and \f$\rho_s\f$ are the residuals \f$\rho_r=Cx+r-d\f$ and \f$\rho_s=A^Ty + C^T s\f$ which are typically zero.
+
+Assuming the residuals are zero, we have \f[\Delta r=-C\Delta x, \f] \f[\Delta s = R^{-1}(\tau-S\Delta r) = R^{-1}\tau + R^{-1}SC\Delta x\f] and
+hence \f$A^T\Delta y + C^T(R^{-1}\tau + R^{-1}SC\Delta x) = 0\f$ so \f$C^TR^{-1}SC\Delta x + A^T \Delta y = -C^TR^{-1}\tau \f$.
+Combined with the equation \f$A^T\Delta x=0\f$, we obtain the system
+\f[ \left(\begin{matrix} C^TR^{-1}SC & A^T \\ A & 0 \end{matrix}\right) \; \left(\begin{matrix} \Delta x \\ \Delta y \end{matrix}\right) = \left(\begin{matrix} -C^TR^{-1}\tau \\ 0 \end{matrix}\right) . \f]
+The left-hand matrix is symmetric, so can be (fairly) easily factorised. Further, the \f$A\f$ matrix is independent of the problem, so the initial part of the factorisation can be pre-computed.
+
+Indeed, it may be better to completely eliminate \f$A\f$ at the start of the problem by explicitly solving for some variables of \a x.
+If we have a square submatrix \f$A_B\f$ of \f$A\f$ which is invertible, then \f[x_B = A_B^{-1} (b-A_Nx_N)\f] and the inequalities for \f$x\f$ become \f[(C_N-C_BA_B^{-1}A_N)x_N \leq d-A_B^{-1}b\f].
+
 
 */

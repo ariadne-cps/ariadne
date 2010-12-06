@@ -30,18 +30,33 @@
 
 \page nonlinear_programming_page NonLinear Programming
 
-\section nonlinear_optimisation Standard optimisation problem
+
+\section standard_nonlinear_optimisation Standard optimisation problem
 
 Consider the nonlinear programming problem
-\f[ \framebox{$\max f(x) \text{ s.t. } g_j(x)\leq 0,\ j=1,\ldots,m_c; \ h_j(x)\leq 0,\ j=1,\ldots,m_e; \underline{x}_i \leq x_i \leq \overline{x}_i . $} \f]
+\f[ \framebox{$\max f(x) \text{ s.t. } g_j(x)\leq 0,\ j=1,\ldots,k; \ h_j(x)\leq 0,\ j=1,\ldots,l . $} \f]
 The standard Karush-Kuhn-Tucker conditions for optimality are
-\f[ \framebox{ $\begin{gathered} \nabla f(x) - \sum_{j=1}^{m_c} u_j \nabla g_j(x) + \sum_{j=1}^{m_e} v_j \nabla h_j(x) = 0; \\ \ u_j g_j(x)=0; \\ h_j(x)=0; \\ u_j,-g_j(x) \geq 0 \end{gathered}$ } \f]
+\f[ \framebox{ $\begin{gathered} \nabla f(x) - \sum_{j=1}^{l} \lambda_j \nabla g_j(x) - \sum_{j=1}^{m} \kappa_j \nabla h_j(x) = 0; \\ \lambda_j g_j(x)=0; \\ h_j(x)=0; \\ \lambda_j \geq 0; \ g_j(x) \leq 0 \end{gathered}$ } \f]
+The <em>central path</em> is defined by relaxation of the optimality conditions using
+\f[ \framebox{ $\begin{gathered} \ \lambda_j g_j(x)+\mu = 0; \\ h_j(x) + \kappa_j \mu = 0 . \end{gathered}$ } \f]
+
+\note Taking \f$f(x) = -cx\f$, \f$g(x)=-x\f$ and \f$h(x)=Ax-b\f$ yields the primal linear programming problem \f$\min cx \mid Ax=b,\ x\geq 0\f$.
+Taking \f$f(y)=yb\f$, \f$g(y) = yA-c\f$ yields the dual linear programming problem \f$\max yb \mid yA\leq c\f$.
+This means that the standard \em primal nonlinear programming problem with only affine inequality constraints more closely resembles the \em dual linear programming problem.
+Despite this, we shall use \c x for the primal variables of the standard primal nonlinear programming problem.
 
 
+\section general_nonlinear_optimisation General optimisation problem
+
+In %Ariadne, we wish to consider problems of a more general form, including bounds on the variables and constraints with upper and lower bounds.
+We henceforth consider the generalised problem:
+\f[ \framebox{$\max f(x) \text{ s.t. } \underline{w}_j \leq g_j(x)\leq  \overline{w}_j, \ j=1,\ldots,m; \  \underline{x}_i \leq x_i\leq  \overline{x}_i;\ i=1,\ldots,n. $} \f]
+The <em>Lagrangian</em> function is defined as
+\f[ L(x,\lambda) = f(x) - \sum_{j=1}^{m} \lambda_j g_j(x) = f(x) - \lambda \cdot g(x) \f]
 
 \section constraints Handling constraints
 
-\subsection inequality_constraints Equality Constraints
+\subsection nonlinear_equality_constraints Equality Constraints
 
 Consider the problem
 \f[ \max f(x) \text{ s.t } g(x) = 0 \f]
@@ -52,22 +67,26 @@ The problem can be relaxed by adding the penalty function \f$-g(x)^2/2\mu\f$.
 Then the optimality conditions are
 \f[ \nabla f(x) - \frac{g(x)}{\mu} \nabla g(x) = 0\f]
 Taking Lagrange multiplier \f$\lambda = g(x)/\mu\f$, we obtain
-\f[ \framebox{$ \begin{gathered} \nabla f(x) -  \lambda \nabla g(x) = 0; \\ g(x) - \mu \lambda = 0 \end{gathered} $} \f]
+\f[ \framebox{$ \begin{gathered} \nabla f(x) -  \lambda \nabla g(x) = 0; \\ g(x) - \lambda \mu = 0 \end{gathered} $} \f]
 which relaxes to \f$g(x)=0\f$ as \f$\mu\to0\f$.
 
 
-\subsection inequality_constraints Inequality Constraints
+\subsection nonlinear_inequality_constraints Inequality Constraints
 
 Consider the problem
 \f[ \max f(x) \mid g(x) \geq 0 \f]
 With the penalty function \f$ - \mu \log g(x)\f$, we obtain a critical point when
 \f[ \nabla f(x) - \frac{\mu}{g(x)} \nabla g(x) = 0\f]
-Take Lagrange multiplier \f$\lambda = \mu/g(x)\f$ to obtain the Lagrangian equation \f$ \nabla f(x) - \lambda \nabla g(x) = 0\f$ with
-\f$ \lambda g(x) = \mu\f$.
-Taking \f$\mu\to 0\f$, we obtain the standard Karush-Kuhn-Tucker conditions
-\f[ \framebox{$ \begin{gathered}  \nabla f(x) - \lambda \nabla g(x) = 0; \\ \lambda g(x) = 0; \\ \lambda,\ g(x) \geq 0. \end{gathered} $} \f]
+Take Lagrange multiplier \f$\lambda = \mu/g(x)\f$ to obtain the Lagrangian equation
+\f[ \framebox{$ \begin{gathered}  \nabla f(x) - \lambda \nabla g(x) = 0; \\ \lambda g(x) = \mu; \\ \lambda \geq 0,\ g(x) \geq 0. \end{gathered} $} \f]
+Taking \f$\mu\to 0\f$, we obtain the standard Karush-Kuhn-Tucker conditions.
 
-\subsection bounded_constraints Bounded Constraints
+Similarly, for the problem
+\f[ \max f(x) \mid g(x) \leq 0 \f]
+we have
+\f[ \framebox{$ \begin{gathered}  \nabla f(x) - \lambda \nabla g(x) = 0; \\ \lambda g(x) = \mu; \\ \lambda \leq0; \quad g(x) \leq 0. \end{gathered} $} \f]
+
+\subsection nonlinear_bounded_constraints Bounded Constraints
 
 Consider the problem
 \f[ \max f(x) \text{ s.t. } |g(x)| \leq \delta \f]
@@ -84,7 +103,6 @@ Differentiating gives
 In order to solve for \f${\Delta x}\f$ in terms of \f${\Delta\lambda}\f$, we require
 \f$ \mu -  g(x) \lambda \neq 0\f$.
 Since the optimal \f$x^*,\lambda^*\f$ satisfy \f$(\delta^2-g(x^*)^2) \lambda^* + 2 g(x^*) \mu = 0\f$, we have \f$\lambda^* g(x^*) \geq 0\f$.
-Hence we can impose the feasibility constraint \f[g(x)\lambda \geq -\mu\f]
 
 In the former case, we obtain the conditions
 \f[ \begin{gathered} \nabla f(x) - \lambda^+ \nabla g(x) + \lambda^- \nabla g(x) = 0; \\ \lambda^+ (\delta + g(x)) = \mu; \\ \lambda^- (\delta - g(x)) = \mu \end{gathered} \f]
@@ -94,10 +112,12 @@ Rearranging again gives
 \f[ (\delta^2-g(x)^2) \lambda + 2 g(x) \mu = 0\f]
 Note that \f$\lambda^+ + \lambda^- = 2\delta\mu/(\delta^2-g(x)^2) \geq \bigl|\lambda^+-\lambda^-\bigr| \f$
 
-\subsection state_constraints State constraints
+\subsection nonlinear_state_constraints State constraints
 
-Setting \f$g(x)=x\f$, we obtain the state constraints
-\f[ \nabla f(x) - \lambda = 0; \quad \lambda = \frac{-2x\mu}{\delta^2-x^2} \f]
+Setting \f$g(x)=x\f$ and taking \f$\underline{x}\leq x\leq\overline{x}\f$, we obtain the state constraints
+\f[ \framebox{$ \begin{gathered} \nabla f(x) - \lambda \nabla g(x) = 0; \\ (\overline{x}-x)(x-\underline{x})\lambda + (2x-\underline{x}-\overline{x}) \mu = 0 . \end{gathered} $} \f]
+If \f$\overline{x}=-\underline{x}=\delta\f$, this simplifies to
+\f[ (\delta^2-x^2) \lambda + 2 x \mu = 0 . \f]
 Differentiating yields
 \f[ {\Delta\lambda} = -2\mu \frac{\delta^2+x^2}{(\delta^2-x^2)^2} {\Delta x} \f]
 which can be used to eliminate these Lagrange multipliers entirely.
@@ -106,12 +126,147 @@ which can be used to eliminate these Lagrange multipliers entirely.
 
 \section nonlinear_optimisation_newton Solving the Karush conditions by Newton-like methods
 
-In the linear case \f$f(y)=b^Ty\f$, \f$g(y) = A^T y -c \f$ we have \f$\nabla^2 f = \nabla^2 g_i = 0\f$. Take \f$x=x_0\f$, \f$y_0=0\f$.
-Then the condition \f$\nabla f(y_0) - x_0\cdot\nabla g(y_0) = 0\f$ becomes \f$b^T - x^T A^T = 0\f$ so \f$Ax=b\f$, and then \f$f(y) = b^T y \leq c^T x\f$, the usual duality bounds.
+We now consider the general nonlinear programming problem
+\f[ \max f(x) \mid \underline{x}_i \leq x_i \leq \overline{x}_i \wedge \underline{w} \leq g_j(x) \leq \overline{w}_j \f]
+We assume a bounded domain with nonempty interior, so \f$-\infty < \underline{x}_i < \overline{x}_i \leq +\infty\f$, but allow for the other constraints to be equality constraints \f$\underline{w}_j=\overline{w}_j\f$ or unbounded \f$\underline{w}_j=-\infty\f$ or \f$\overline{w}_j=+\infty\f$.
+We set \f$w_j=g_j(x)\f$, so we can write \f$\underline{w} \leq w_j \leq \overline{w}_j\f$ and \f$g(x)-w=0\f$.
+However, we treat bounded, unbounded and equality constraints slightly differently.
 
-The first form suggests a solution method. We try to find \f$x_0\geq 0\f$ and \f$y_0\f$ (which need not be feasible) such that \f$x_0\cdot g(x_0)\f$ is small and \f$\nabla f(y_0) - x_0\cdot\nabla g(y_0) = 0\f$, and then the error only depends on \f$h(x_0,[y])- h(x_0,y_0)\f$ where \f$h(x,y) = \nabla f(y) - x\cdot \nabla g(y)\f$ and all derivatives are taken with respect to \f$y\f$. We subdivide as necessary to reduce the width of \f$h\f$.
+We can write the relaxed Karush conditions in the following form
+\f[ \begin{gathered} \nabla f(x) - \sum_{j=1}^{m} \lambda_j \nabla g(x) = 0\\ s_j(g_j(x),\lambda_j,\mu) = 0 \end{gathered} \f]
+where \f$s_j(w_j,\lambda_j,\mu)\f$ depends on the bounds \f$\underline{w}_j,\overline{w}_j\f$.
+Setting \f$y_j=g_j(x)\f$, the Jacobian matrix for the Karush conditions is given by
+\f[ \begin{pmatrix} \nabla^2 f + \sum_j \lambda_j \nabla^2 g_j & \nabla g ^T \\ \nabla_w s \nabla g & \nabla_\lambda s \end{pmatrix} \f]
+Writing \f$H=\nabla^2 f + \sum_j \lambda_j \nabla^2 g_j\f$, \f$A=\nabla g\f$, \f$W_{jj} = \partial s_j/\partial \lambda_j\f$, and \f$\Lambda_{jj} = \partial s_j/\partial w_j \f$, we have the system
+\f[ \begin{pmatrix} H & A^T \\ \Lambda A & W \end{pmatrix} \f]
+Premultiplying by \f$\Lambda^{-1}\f$ and setting \f$D=\Lambda^{-1}W\f$ yields the form
+\f[ \begin{pmatrix} H & A^T \\ A & D \end{pmatrix} \f]
+which is symmetric since \f$H\f$ is symmetric and \f$D\f$ is diagonal.
+This system can be solved for \f$\Delta x\f$ by inverting the matrix \f$H-A D^{-1} A^T = H-AW^{-1}\Lambda A\f$.
+In particular, the matrix can be formed as long as \f$\partial s_j/\partial \lambda_j \neq 0\f$ for all \f$j\f$.
+This is indeed the case for all the examples we have considered.
 
-For nonlinear systems, using a Newton method results in solving the equation
+The values of \f$\Lambda_{ii}=\partial s/\partial y\f$ \f$W=\partial s/\partial \lambda\f$ are given below for various constraints:
+ - \f$g(x)=0 : s(y,\lambda,\mu) = y-\lambda \mu; \ \partial s/\partial y = 1; \ \partial s/\partial\lambda = -\mu\f$
+ - \f$g(x)\geq0 : s(y,\lambda,\mu) = \lambda y - \mu; \ \partial s/\partial y = \lambda; \ \partial s/\partial\lambda = y\f$
+ - \f$g(x)\leq0 : s(y,\lambda,\mu) = \lambda y - \mu; \ \partial s/\partial y = \lambda; \ \partial s/\partial\lambda = y\f$
+ - \f$|g(x)|\leq\delta : s(y,\lambda,\mu) = (\delta^2-y^2)\lambda -2y\mu; \ \partial s/\partial y = -2\lambda y-2\mu; \ \partial s/\partial\lambda = (\delta^2-y^2) \f$
+ - \f$ a \leq g(x) \leq b: s(y,\lambda,\mu) = (b-y)(y-a)\lambda -(2y-a-b)\mu; \ \partial s/\partial y = -\lambda (2y-a-b)-2\mu; \ \partial s/\partial\lambda = (b-y)(y-a) \f$
+
+
+\subsection primaldualslack Primal-dual-slack methods
+
+In a primal-dual method, we introduce slack variables \f$s_i\f$ corresponding to each inequality constraint \f$g_i(x)\leq 0\f$ to form an equality constraint \f$g_i(x)+s_i=0\f$.
+However, these slack variables are temporaries, and are recomputed each step.
+
+In a primal-dual-slack method, we instead update the slack variables using a Newton-like step
+\f[ x'=x-\alpha \Delta x; \quad s'=s-\alpha\Delta s \f]
+with
+\f[ \nabla g_i(x) \Delta x + \Delta s_i = g_i(x)+s_i . \f]
+After the Newton-like step, the equality \f$g_i(x') + s_i'\f$ does not hold, unless \f$g_i\f$ is affine, in which case \f$g_i(x')+s'=0\f$ up to roundoff error.
+We call methods in which the slack is stored and updated by a Newton-like step <em>primal-dual-slack</em> methods, to distinguish them from ordinary primal-dual methods.
+
+In general, enforcing primal feasibility using a primal-dual-slack method may be harder than for an ordinary primal-dual method. We doubt these methods are advantageous in practise.
+
+\section nonlinear_optimisation_dual_bounds Bounds on the objective function.
+
+Consider the nonlinear programming problem without equality constraints,
+\f[ \max f(x) \text{ s.t. } g_j(x)\leq 0,\ j=1,\ldots,m;\ x\in[x] . \f]
+
+Suppose \f$x_0\f$ is any point in \f$[x]\f$ (not necessarily feasible) and \f$x_0\geq0\f$.
+Then
+\f[ \begin{aligned}
+    f(x) &= f(x_0) + \nabla f([x]) (x-x_0) \\
+         &= f(x_0) + \nabla f(x_0) (x-x_0) + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0) \\
+         &= f(x_0) + \bigl(\nabla f(x_0) - \lambda_0\cdot \nabla g(x_0)\bigr)(x-x_0) + \lambda_0\cdot\nabla g(x_0)(x-x_0) + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0)
+\end{aligned}\f]
+Now
+\f[ g(x) = g(x_0) + \nabla g(x_0) (x-x_0) + \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \f]
+which upon rearranging yields
+\f[  \nabla g(x_0) (x-x_0) = g(x)-g(x_0) - \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \f]
+Substituting into the equation for \f$f(x)\f$ yields
+\f[ \begin{aligned}
+    f(x) &= f(x_0) + \lambda_0\cdot\bigl(g(x)-g(x_0)\bigr) + \bigl(\nabla f(x_0) - \lambda_0\cdot\nabla g(x_0)\bigr)(x-x_0)
+              + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0) - \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \\
+         &= f(x_0) + \lambda_0\cdot\bigl(g(x)-g(x_0)\bigr) + \bigl(\nabla f(x_0) - \lambda_0\cdot\nabla g(x_0)\bigr)(x-x_0)
+              + \bigl( (\nabla f([x])-\lambda_0\cdot\nabla g([x])) - (\nabla f(x_0)-\lambda_0\cdot\nabla g(x_0)) \bigr) (x-x_0)
+\end{aligned}\f]
+Using the fact that \f$\lambda g(x)\leq 0\f$ for <em>any</em> feasible \f$x\f$ and \f$\lambda\f$, we obtain
+\f[ \framebox{$ f(x) \leq f(x_0) - \lambda_0\cdot g(x_0) + \bigl(\nabla f(x_0) - \lambda_0\cdot\nabla g(x_0)\bigr)(x-x_0)
+              + \bigl( (\nabla f([x])-\lambda_0\cdot\nabla g([x])) - (\nabla f(x_0)-\lambda_0\cdot\nabla g(x_0)) \bigr) (x-x_0)$}
+\f]
+This equation can also be written as
+\f[ \framebox{$ f(x) \leq f(x_0) - \lambda_0\cdot g(x_0) + \bigl( \nabla f(x_0)-\lambda_0\cdot\nabla g(x_0) \bigr) (x-x_0) + \bigl( \nabla^2 f([x])-\lambda_0\cdot\nabla^2 g([x]) \bigr) (x-x_0)^2$}
+\f]
+A particularly useful form is given below. Note that the function \f$\nabla f-\lambda_0\cdot\nabla g\f$ is <em>first</em> computed and simplified, and only then evaluated over the box \f$[x]\f$. Since we can choose \f$ \nabla f(x_0)-\lambda_0\cdot\nabla g(x_0) \approx 0 \f$, this can be used to obtain good bounds on \f$f(x)\f$.
+\f[ \framebox{$ f(x) \leq f(x_0) - \lambda_0\cdot g(x_0) + \bigl( \nabla f-\lambda_0\cdot\nabla g \bigr)[x] (x-x_0)$}
+\f]
+
+
+
+\section nonlinear_feasibility Feasibility problems
+
+Consider the feasibility problem
+\f[ g_j(y) \leq 0,\ j=1,\ldots,n;\ y\in[y] . \f]
+We can re-cast this as an optimisation problem by introducing an extra variable \f$t\f$ and taking
+\f[ \max t  \text{ s.t. } g_j(y)+t\leq 0,\ j=1,\ldots,n;\ y\in [y] . \f]
+The Karush-Kuhn-Tucker conditions for optimality are
+\f[ \mbox{$ \sum_{j=1}^{n} x_j \nabla g_j(y) = 0; \ \sum_{j=1}^{n} x_j =1; \ g_j(y) + t + z_j = 0; \ x_jz_j=0;\ x_j,z_j\geq 0,\ j=1,\ldots,n$}\f]
+The problem has no solution if there exists \f$x^*\f$ such that
+\f[ x^*_j \cdot g_j([y]) > 0 . \f]
+
+If lower and upper bounds are used, and the variable \f$y\f$ is bounded, we have
+\f[ c^l_j \leq g_j(y) \leq c^u_j,\ j=1,\ldots,n; \qquad d^l_i \leq y_i \leq d^u_i;\ i=1,\ldots,m . \f]
+Although we can always easily satisfy the constraints \f$d^l_i \leq y_i \leq d^u_i\f$ e.g. by taking \f$y=(d^u+d^l)/2\f$, we need to add slackness to these constraints to find a "most feasible" point.
+We make the constraints on \f$g\f$ into equality constraints by setting
+\f[ g_j(y) + t + z^u_j = c^u_j; \  -g_j(y) + t + z^l_j = -c^l_j; \ j=1,\ldots,n. \f]
+Taking extended variable \f$\hat{y}=(y,t)\f$, and letting \f$e^T\f$ denote a row vector all of whose elements are \f$1\f$
+ we have matrices
+\f[ \widehat{A} = \left(\begin{matrix} A(y)&-A(y)&I&-I \\ e^T&e^T&e^T&e^T \end{matrix}\right); \qquad
+    \widehat{H} = \left(\begin{matrix} H(x^{cu}-x^{cl},y)&0 \\ 0&0 \end{matrix}\right); \qquad
+    \widehat{D} = \left(\begin{matrix} D(x^{cu},z^{cu})&0&0&0 \\ 0&D(x^{cl},z^{cl})&0&0 \\ 0&0&D(x^{bu},z^{bu})&0 \\ 0&0&0&D(x^{bl},z^{bl}) \end{matrix}\right) .
+\f]
+yielding
+\f[ \widehat{A}\widehat{D}\widehat{A}^T =
+    \left(\begin{matrix} A(D^{cu}+D^{cl})A^T+(D^{bu}+D^{bl})&A(D^{cu}-D^{cl})e+(D^{bu}-D^{bl})e\\e^T(D^{cu}-D^{cl})A^T+e^T(D^{bu}-D^{bl})&e^T(D^{cu}+D^{cl}+D^{bu}+D^{bl})e \end{matrix}\right) . \f]
+Note that considering lower and upper bounds requires no extra matrix multiplications, and recasting the problem as an optimisation problem in \f$m+1\f$ variables involves a single extra matrix multiplication \f$A(D^u-D^l)e^T\f$ and one extra variable in the matrix inversion. In other words, the extra work is minimal.
+
+\remark
+If \f$c^u_j=\infty\f$, then \f$z^u_j=\infty\f$ so \f$x^u_j=0\f$ and \f$D^u_{jj}=0\f$, so the constraint drops out of consideration in the inverse matrix. However, when computing the residuals, we obtain, assuming \f$0<x^{cu}_j,z^{cu}_j<\infty\f$ that \f$rz^{cu}_j=\infty\f$, and this propagates through the computation of the step to give \f$\delta x=\delta y=\delta z=\infty\f$. If we take \f$0<x^{cu}_j\f$ and \f$z^{cu}_j=\infty\f$, then the residual \f$rz^{cu}_j\f$ is \f$\mathrm{nan}\f$ which again propagates through the computation.
+
+When some of the constraints \f$c^u\f$ or \f$c^l\f$ are infinite, then use of floating-point arithmetic will give nan in the corresponding constraints. In principle, we need to consider half-unbounded constraints directly, rather than as box constraints. However, since the result is bounded, we can take the unbounded part of these constraints large enough that they are automatically satisfied.
+
+\subsection proving_nonlinear_feasibility Proving feasibility of equality constraints
+
+Consider the problem of proving that the system of equality constraints \f$h(x)=0\f$ has a solution in a box \f$X\f$, where \f$h:\R^n\rightarrow\R^m\f$ and \f$m\leq n\f$.
+If \f$m=n\f$, then if \f$Dh\f$ is invertible, we can find a solution using an interval Newton method.
+If \f$m<n\f$, we wish to reformulate the problem in \f$m\f$ variables.
+
+Fix \f$x\f$ and let \f$A\f$ be an approximation to \f$Dh(x)\f$. If \f$Dh(x)\f$ has full (row) rank and \f$A\f$ is sufficiently accurate, then \f$AA^T\f$ is invertible; let \f$R\f$ be an approximate inverse. Let \f$S\f$ be a box in \f$\R^m\f$ containing \f$0\f$, and let \f$f(s) = h(x+A^Ts)\f$ for \f$s\in S\f$.
+Note \f$df(0) = Dh(x) A^T \approx AA^T\f$. We can use the interval Newton method to prove that \f$f\f$ has a zero in \f$B\f$. Then \f$h\f$ has a zero in \f$x+A^TS\f$.
+
+If \f$X\f$ is a box in \f$\R^n\f$, then \f$RA(X-x)\f$ is a suitable guess for a box in \f$V\f$.
+
+\section nonlinear_feasibility_algorithm Algorithms for Nonlinear Feasibility Problems
+
+In %Ariadne, we are interested in solving feasibility problems where the constraints gradually tighten. This means that a feasable point can be used as in initial seed for iterating a tighter subproblem, and bound on the feasibly set of \f$y\f$ can be used in a tighter subproblem, and a certificate of infeasibility means that no further subproblems need to be considered.
+
+A possible algorithm for solving feasibility problems is as follows:
+ - Use a non-rigorous iterative nonlinear programming solver (e.g. an interior point solver) to find \f$x_0,y_0\f$ giving a local solution to the related optimality problem.
+ - If \f$y_0\f$ is feasible, repeat for the tighter subproblems, using computed \f$(x_0,y_0)\f$ as a seed for the iterative solver.
+ - If \f$x_0\cdot g([y])>0\f$, the problem is infeasible.
+ - Reduce \f$[y]\f$ using the constraint \f$x_0\cdot g([y])\leq 0\f$ and hull/box reduce, possibly using the expansion \f$x_0\cdot g([y]) = x_0\cdot g(y_0)+\nabla g([y])(y-y_0)\f$.
+ - If \f$[y]\f$ is empty, the problem is infeasible.
+ - Apply the Krawczyk contractor to the Karush-Kuhn-Tucker optimality conditions \f$  x\cdot \nabla g(y) = 0; \ \sum x_i =1; \ g(y) + t + z = 0; \ x_iz_i=0; \ x_i,z_i\geq 0,\ i=1,\ldots,n\f$.
+ - Split domain in two and repeat. The splitting should be done to increase \em linearity of the \f$\nabla g\f$, since linear solvers are very effective. Note that we should repeat from the beginning in case the failure to prove disjointness was due to \f$(x_0,y_0)\f$ being a local maximum.
+
+ - It may be worth contracting \f$[y]\f$ from time to time to improve the iteration speed.
+ - The use of \f$x_0\cdot g([y])\leq 0\f$ rather than \f$g_i([y])\leq 0\f$ to perform the contraction is to focus attention on the possibly violated constraints.
+*/
+
+
+/*
+Newton method results in solving the equation
 \f[ \framebox{$\displaystyle
     \left(\begin{matrix} Z&0&X\\-A&H&0\\0&A^T&I\\ \end{matrix}\right)
       \left(\begin{matrix} \Delta x \\ \Delta y \\ \Delta z \end{matrix}\right)
@@ -166,89 +321,4 @@ If we have upper and lower bounds on the constraints \f$c^l\leq g(y) \leq c^u\f$
      \widehat{H} = H(x^u-x^l,y) .
 \f]
 
-
-\section nonlinear_optimisation_dual_bounds Bounds on the objective function.
-
-Consider the nonlinear programming problem without equality constraints,
-\f[ \max f(x) \text{ s.t. } g_j(x)\leq 0,\ j=1,\ldots,m;\ x\in[x] . \f]
-
-Suppose \f$x_0\f$ is any point in \f$[x]\f$ (not necessarily feasible) and \f$x_0\geq0\f$.
-Then
-\f[ \begin{aligned}
-    f(x) &= f(x_0) + \nabla f([x]) (x-x_0) \\
-         &= f(x_0) + \nabla f(x_0) (x-x_0) + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0) \\
-         &= f(x_0) + \bigl(\nabla f(x_0) - u_0\cdot \nabla g(x_0)\bigr)(x-x_0) + u_0\cdot\nabla g(x_0)(x-x_0) + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0)
-\end{aligned}\f]
-Now
-\f[ g(x) = g(x_0) + \nabla g(x_0) (x-x_0) + \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \f]
-which upon rearranging yields
-\f[  \nabla g(x_0) (x-x_0) = g(x)-g(x_0) - \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \f]
-Substituting into the equation for \f$f(x)\f$ yields
-\f[ \begin{aligned}
-    f(x) &= f(x_0) + u_0\cdot\bigl(g(x)-g(x_0)\bigr) + \bigl(\nabla f(x_0) - u_0\cdot\nabla g(x_0)\bigr)(x-x_0)
-              + \bigl(\nabla f([x])-\nabla f(x_0)\bigr)(x-x_0) - \bigl(\nabla g([x])-\nabla g(x_0)\bigr) (x-x_0) \\
-         &= f(x_0) + u_0\cdot\bigl(g(x)-g(x_0)\bigr) + \bigl(\nabla f(x_0) - u_0\cdot\nabla g(x_0)\bigr)(x-x_0)
-              + \bigl( (\nabla f([x])-u_0\cdot\nabla g([x])) - (\nabla f(x_0)-u_0\cdot\nabla g(x_0)) \bigr) (x-x_0)
-\end{aligned}\f]
-Using the fact that \f$g(x)\leq 0\f$, we obtain
-\f[ \framebox{$ f(x) \leq f(x_0) - u_0\cdot g(x_0) + \bigl(\nabla f(x_0) - u_0\cdot\nabla g(x_0)\bigr)(x-x_0)
-              + \bigl( (\nabla f([x])-u_0\cdot\nabla g([x])) - (\nabla f(x_0)-u_0\cdot\nabla g(x_0)) \bigr) (x-x_0)$}
-\f]
-This equation can also be written as
-\f[ \framebox{$ f(x) \leq f(x_0) - u_0\cdot g(x_0) + \bigl( \nabla f(x_0)-u_0\cdot\nabla g(x_0) \bigr) (x-x_0) + \bigl( \nabla^2 f([x])-u_0\cdot\nabla^2 g([x]) \bigr) (x-x_0)^2$}
-\f]
-or
-\f[ \mbox{$ f(x) \leq f(x_0) - u_0\cdot g(x_0) + \bigl( \nabla f([x])-u_0\cdot\nabla g([x]) \bigr) (x-x_0)$}
-\f]
-
-
-
-\section nonlinear_feasibility Feasibility problems
-
-Consider the feasibility problem
-\f[ g_j(y) \leq 0,\ j=1,\ldots,n;\ y\in[y] . \f]
-We can re-cast this as an optimisation problem by introducing an extra variable \f$t\f$ and taking
-\f[ \max t  \text{ s.t. } g_j(y)+t\leq 0,\ j=1,\ldots,n;\ y\in [y] . \f]
-The Karush-Kuhn-Tucker conditions for optimality are
-\f[ \mbox{$ \sum_{j=1}^{n} x_j \nabla g_j(y) = 0; \ \sum_{j=1}^{n} x_j =1; \ g_j(y) + t + z_j = 0; \ x_jz_j=0;\ x_j,z_j\geq 0,\ j=1,\ldots,n$}\f]
-The problem has no solution if there exists \f$x^*\f$ such that
-\f[ x^*_j \cdot g_j([y]) > 0 . \f]
-
-If lower and upper bounds are used, and the variable \f$y\f$ is bounded, we have
-\f[ c^l_j \leq g_j(y) \leq c^u_j,\ j=1,\ldots,n; \qquad d^l_i \leq y_i \leq d^u_i;\ i=1,\ldots,m . \f]
-Although we can always easily satisfy the constraints \f$d^l_i \leq y_i \leq d^u_i\f$ e.g. by taking \f$y=(d^u+d^l)/2\f$, we need to add slackness to these constraints to find a "most feasible" point.
-We make the constraints on \f$g\f$ into equality constraints by setting
-\f[ g_j(y) + t + z^u_j = c^u_j; \  -g_j(y) + t + z^l_j = -c^l_j; \ j=1,\ldots,n. \f]
-Taking extended variable \f$\hat{y}=(y,t)\f$, and letting \f$e^T\f$ denote a row vector all of whose elements are \f$1\f$
- we have matrices
-\f[ \widehat{A} = \left(\begin{matrix} A(y)&-A(y)&I&-I \\ e^T&e^T&e^T&e^T \end{matrix}\right); \qquad
-    \widehat{H} = \left(\begin{matrix} H(x^{cu}-x^{cl},y)&0 \\ 0&0 \end{matrix}\right); \qquad
-    \widehat{D} = \left(\begin{matrix} D(x^{cu},z^{cu})&0&0&0 \\ 0&D(x^{cl},z^{cl})&0&0 \\ 0&0&D(x^{bu},z^{bu})&0 \\ 0&0&0&D(x^{bl},z^{bl}) \end{matrix}\right) .
-\f]
-yielding
-\f[ \widehat{A}\widehat{D}\widehat{A}^T =
-    \left(\begin{matrix} A(D^{cu}+D^{cl})A^T+(D^{bu}+D^{bl})&A(D^{cu}-D^{cl})e+(D^{bu}-D^{bl})e\\e^T(D^{cu}-D^{cl})A^T+e^T(D^{bu}-D^{bl})&e^T(D^{cu}+D^{cl}+D^{bu}+D^{bl})e \end{matrix}\right) . \f]
-Note that considering lower and upper bounds requires no extra matrix multiplications, and recasting the problem as an optimisation problem in \f$m+1\f$ variables involves a single extra matrix multiplication \f$A(D^u-D^l)e^T\f$ and one extra variable in the matrix inversion. In other words, the extra work is minimal.
-
-\remark
-If \f$c^u_j=\infty\f$, then \f$z^u_j=\infty\f$ so \f$x^u_j=0\f$ and \f$D^u_{jj}=0\f$, so the constraint drops out of consideration in the inverse matrix. However, when computing the residuals, we obtain, assuming \f$0<x^{cu}_j,z^{cu}_j<\infty\f$ that \f$rz^{cu}_j=\infty\f$, and this propagates through the computation of the step to give \f$\delta x=\delta y=\delta z=\infty\f$. If we take \f$0<x^{cu}_j\f$ and \f$z^{cu}_j=\infty\f$, then the residual \f$rz^{cu}_j\f$ is \f$\mathrm{nan}\f$ which again propagates through the computation.
-
-When some of the constraints \f$c^u\f$ or \f$c^l\f$ are infinite, then use of floating-point arithmetic will give nan in the corresponding constraints. In principle, we need to consider half-unbounded constraints directly, rather than as box constraints. However, since the result is bounded, we can take the unbounded part of these constraints large enough that they are automatically satisfied.
-
-
-\section nonlinear_feasibility_algorithm Algorithms for Nonlinear Feasibility Problems
-
-In %Ariadne, we are interested in solving feasibility problems where the constraints gradually tighten. This means that a feasable point can be used as in initial seed for iterating a tighter subproblem, and bound on the feasibly set of \f$y\f$ can be used in a tighter subproblem, and a certificate of infeasibility means that no further subproblems need to be considered.
-
-A possible algorithm for solving feasibility problems is as follows:
- - Use a non-rigorous iterative nonlinear programming solver (e.g. an interior point solver) to find \f$x_0,y_0\f$ giving a local solution to the related optimality problem.
- - If \f$y_0\f$ is feasible, repeat for the tighter subproblems, using computed \f$(x_0,y_0)\f$ as a seed for the iterative solver.
- - If \f$x_0\cdot g([y])>0\f$, the problem is infeasible.
- - Reduce \f$[y]\f$ using the constraint \f$x_0\cdot g([y])\leq 0\f$ and hull/box reduce, possibly using the expansion \f$x_0\cdot g([y]) = x_0\cdot g(y_0)+\nabla g([y])(y-y_0)\f$.
- - If \f$[y]\f$ is empty, the problem is infeasible.
- - Apply the Krawczyk contractor to the Karush-Kuhn-Tucker optimality conditions \f$  x\cdot \nabla g(y) = 0; \ \sum x_i =1; \ g(y) + t + z = 0; \ x_iz_i=0; \ x_i,z_i\geq 0,\ i=1,\ldots,n\f$.
- - Split domain in two and repeat. The splitting should be done to increase \em linearity of the \f$\nabla g\f$, since linear solvers are very effective. Note that we should repeat from the beginning in case the failure to prove disjointness was due to \f$(x_0,y_0)\f$ being a local maximum.
-
- - It may be worth contracting \f$[y]\f$ from time to time to improve the iteration speed.
- - The use of \f$x_0\cdot g([y])\leq 0\f$ rather than \f$g_i([y])\leq 0\f$ to perform the contraction is to focus attention on the possibly violated constraints.
 */

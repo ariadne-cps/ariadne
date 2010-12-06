@@ -107,7 +107,6 @@ static inline double horner_opp(int n, double x, const long long int* c)
     return -y;
 }
 
-
 // Rounded power
 double pow_rnd(double x, uint m)
 {

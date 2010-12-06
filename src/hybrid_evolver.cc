@@ -768,6 +768,11 @@ _evolution_in_mode(EvolutionData& evolution_data,
                    HybridAutomatonInterface const& system,
                    HybridTime const& maximum_hybrid_time) const
 {
+    // Set to true if sets should simply be discarded if the maximum number of
+    // events has been reached; otherwise sets are put in list of final sets.
+    static const bool DISCARD_ON_MAXIMUM_NUMBER_OF_EVENTS = false;
+
+
     //  Select a working set and evolve this in the current location until either
     // all initial points have undergone a discrete transition (possibly to
     // the same location) or the final time is reached.
@@ -793,6 +798,8 @@ _evolution_in_mode(EvolutionData& evolution_data,
     // This is not done since the maximum_steps information is not passed to the _apply_evolution_step(...) method.
     if(initial_set.previous_events().size()>maximum_steps) {
         ARIADNE_LOG(4,"initial_set "<<initial_set<<" has undergone more than maximum number of events "<<maximum_steps<<"\n");
+        this->_process_initial_events(evolution_data, initial_set,transitions);
+        evolution_data.final_sets.adjoin(initial_set);
         return;
     }
 
@@ -915,10 +922,10 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
     // Compute the reach and evolve sets, without introducing bounds due to the final time.
     List<HybridEnclosure> reach_sets(starting_set);
-    List<HybridEnclosure> final_sets(starting_set);
+    List<HybridEnclosure> evolve_sets(starting_set);
 
     _apply_reach_step(reach_sets.front(),flow,timing_data);
-    _apply_evolve_step(final_sets.front(),flow,timing_data);
+    _apply_evolve_step(evolve_sets.front(),flow,timing_data);
 
 
     // Apply constraints on reach and evolve sets due to invariants and urgent guards
@@ -927,23 +934,48 @@ _apply_evolution_step(EvolutionData& evolution_data,
     {
         const TransitionData& transition_data=transitions[*event_iter];
         const CrossingData& crossing_data=crossings[*event_iter];
-        _apply_guard(reach_sets,starting_set,flow,reach_step_time,
-                     transition_data,crossing_data,semantics);
-        _apply_guard(final_sets,starting_set,flow,timing_data.evolution_time,
-                     transition_data,crossing_data,semantics);
+        this->_apply_guard(reach_sets,starting_set,flow,reach_step_time,
+                           transition_data,crossing_data,semantics);
+
+        switch(crossing_data.crossing_kind) {
+            case INCREASING_CROSSING: case TRANSVERSE_CROSSING:
+                // Delay applying guard until all splittings due to non-increasing crossings have been processed.
+                // We can then test emptiness on sets with crossings, but not actually apply crossing immediately,
+                // since it will be introduced at the next time step anyway; this avoids duplication
+                break;
+            default:
+                this->_apply_guard(evolve_sets,starting_set,flow,timing_data.evolution_time,
+                                   transition_data,crossing_data,semantics);
+        }
     }
 
+    // Apply non-degenerate constraints to copy of evolved sets which we can later test for emptiness
+    List<HybridEnclosure> final_sets = evolve_sets;
+    for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
+        event_iter!=blocking_events.end(); ++event_iter)
+    {
+        const TransitionData& transition_data=transitions[*event_iter];
+        const CrossingData& crossing_data=crossings[*event_iter];
+        switch (crossing_data.crossing_kind) {
+            case INCREASING_CROSSING: case TRANSVERSE_CROSSING:
+                this->_apply_guard(final_sets,starting_set,flow,timing_data.evolution_time,
+                                   transition_data,crossing_data,semantics);
+                break;
+            default:
+                break; // Constraint has already been handled
+        }
+    }
 
     // Compute final set depending on whether the finishing kind is exactly AT_FINAL_TIME.
     // Insert sets into evolution_data as appropriate
     if(timing_data.finishing_kind==AT_FINAL_TIME) {
-        for(List<HybridEnclosure>::const_iterator evolve_set_iter=final_sets.begin();
-            evolve_set_iter!=final_sets.end(); ++evolve_set_iter)
+        for(List<HybridEnclosure>::const_iterator final_set_iter=final_sets.begin();
+            final_set_iter!=final_sets.end(); ++final_set_iter)
         {
-            HybridEnclosure const& evolve_set=*evolve_set_iter;
-            if(!definitely(evolve_set.empty())) {
-                ARIADNE_LOG(4,"final_set="<<evolve_set<<"\n");
-                evolution_data.final_sets.append(evolve_set);
+            HybridEnclosure const& final_set=*final_set_iter;
+            if(!definitely(final_set.empty())) {
+                ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+                evolution_data.final_sets.append(final_set);
             }
         }
         for(List<HybridEnclosure>::const_iterator reach_set_iter=reach_sets.begin();
@@ -953,28 +985,31 @@ _apply_evolution_step(EvolutionData& evolution_data,
             evolution_data.reach_sets.append(reach_set);
         }
     } else { // (timing_data.finishing_kind!=AT_FINAL_TIME)
-        for(List<HybridEnclosure>::iterator evolve_set_iter=final_sets.begin();
-            evolve_set_iter!=final_sets.end(); ++evolve_set_iter)
+        ARIADNE_DEBUG_ASSERT(final_sets.size()==evolve_sets.size());
+        List<HybridEnclosure>::iterator final_set_iter=final_sets.begin();
+        for(List<HybridEnclosure>::iterator evolve_set_iter=evolve_sets.begin();
+            evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter, ++final_set_iter)
         {
             HybridEnclosure& evolve_set=*evolve_set_iter;
-            Interval evolve_set_time_range=evolve_set.time_range();
-            if(evolve_set_time_range.lower()>timing_data.final_time) {
+            HybridEnclosure& final_set=*final_set_iter;
+            Interval final_set_time_range=final_set.time_range();
+            if(final_set_time_range.lower()>timing_data.final_time) {
                 // Do nothing, since evolve set is definitely empty
-            } else if(evolve_set_time_range.upper()<=timing_data.final_time) {
+            } else if(final_set_time_range.upper()<=timing_data.final_time) {
                 // No need to introduce timing constraints
-                if(!definitely(evolve_set.empty())) {
+                if(!definitely(final_set.empty())) {
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
                     evolution_data.working_sets.append(evolve_set);
                     evolution_data.intermediate_sets.append(evolve_set);
                 }
             } else {
-                HybridEnclosure time_bounded_evolve_set=evolve_set;
-                time_bounded_evolve_set.bound_time(timing_data.final_time);
+                final_set.bound_time(timing_data.final_time);
                 // Only continue evolution if the time-bounded evolve set is nonempty;
                 // However, continue evolution without adding time constraint,
                 // since this will be introduced in the next step
-                if(!definitely(time_bounded_evolve_set.empty())) {
-                    ARIADNE_LOG(4,"time_bounded_evolve_set="<<time_bounded_evolve_set<<"\n");
+                if(!definitely(final_set.empty())) {
+                    ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+                    ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
                     evolution_data.working_sets.append(evolve_set);
                     evolution_data.intermediate_sets.append(evolve_set);
                 }

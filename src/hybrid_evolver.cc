@@ -793,22 +793,6 @@ _evolution_in_mode(EvolutionData& evolution_data,
     HybridEnclosure initial_set=evolution_data.initial_sets.back(); evolution_data.initial_sets.pop_back();
     ARIADNE_LOG(2,"initial_set="<<initial_set<<"\n\n");
 
-    // Test if maximum number of steps has been exceeded; if so, the set should be discarded.
-    // NOTE: We could also place a test for the maximum number of steps being reaches which computing jump sets
-    // This is not done since the maximum_steps information is not passed to the _apply_evolution_step(...) method.
-    if(initial_set.previous_events().size()>maximum_steps) {
-        ARIADNE_LOG(4,"initial_set "<<initial_set<<" has undergone more than maximum number of events "<<maximum_steps<<"\n");
-        this->_process_initial_events(evolution_data, initial_set,transitions);
-        evolution_data.final_sets.adjoin(initial_set);
-        return;
-    }
-
-    // NOTE: Uncomment the lines below to stop evolution immediately after the maximum event, without further flow
-    //if(initial_set.previous_events().size()>maximum_steps) {
-    //    evolution_data.final_sets.append(initial_set);
-    //    return;
-    //}
-
     if(initial_set.time_range().lower()>=final_time) {
         ARIADNE_WARN("initial_set.time_range()="<<initial_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
         return;
@@ -828,6 +812,21 @@ _evolution_in_mode(EvolutionData& evolution_data,
     // Process the initially active events; cut out active points to leave initial flowable set.
     this->_process_initial_events(evolution_data, initial_set,transitions);
     ARIADNE_ASSERT(evolution_data.working_sets.size()<=1);
+
+    // Test if maximum number of steps has been exceeded; if so, the set should be discarded.
+    // NOTE: We could also place a test for the maximum number of steps being reaches which computing jump sets
+    // This is not done since the maximum_steps information is not passed to the _apply_evolution_step(...) method.
+    if(initial_set.previous_events().size()>maximum_steps) {
+        ARIADNE_LOG(4,"initial_set "<<initial_set<<" has undergone more than maximum number of events "<<maximum_steps<<"\n");
+        evolution_data.final_sets.append(initial_set);
+        return;
+    }
+
+    // NOTE: Uncomment the lines below to stop evolution immediately after the maximum event, without further flow
+    //if(initial_set.previous_events().size()>maximum_steps) {
+    //    evolution_data.final_sets.append(initial_set);
+    //    return;
+    //}
 
     while(!evolution_data.working_sets.empty()) {
         this->_evolution_step(evolution_data,dynamic,transitions,final_time);
@@ -884,7 +883,7 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"crossings="<<crossings<<"\n");
 
     // Compute end conditions for flow
-    TimingData timing_data = this->_estimate_timing(active_events,Real(final_time),flow_model,crossings,starting_set);
+    TimingData timing_data = this->_estimate_timing(active_events,Real(final_time),flow_model,crossings,transitions,starting_set);
     ARIADNE_LOG(4,"timing_data="<<timing_data<<"\n");
 
     // Apply the time step
@@ -1112,6 +1111,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 Real final_time,
                 VectorIntervalFunction const& flow,
                 Map<DiscreteEvent,CrossingData>& crossings,
+                Map<DiscreteEvent,TransitionData> const& transitions,
                 HybridEnclosure const& initial_set) const
 {
     // Compute the evolution time for the given step.
@@ -1135,6 +1135,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 Real final_time,
                 VectorIntervalFunction const& flow,
                 Map<DiscreteEvent,CrossingData>& crossings,
+                Map<DiscreteEvent,TransitionData> const& transitions,
                 HybridEnclosure const& initial_set) const
 {
     // Compute the evolution time for the given step.
@@ -1217,14 +1218,14 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             if(crossing_iter->second.crossing_kind==TRANSVERSE_CROSSING) {
                 const ScalarIntervalFunction& crossing_time=crossing_iter->second.crossing_time;
                 Interval crossing_time_range=crossing_time.range();
-                if(crossing_time_range.upper()<=step_size) {
+                if(Ariadne::is_blocking(transitions[crossing_iter->first].event_kind) && crossing_time_range.upper()<=step_size) {
                     // This event ensures that the evolve set is empty after a full step, so use this.
                     creep=false;
-                    ARIADNE_LOG(6,"No creep; event "<<crossing_iter->first<<"completely taken\n");
+                    ARIADNE_LOG(6,"No creep; event "<<crossing_iter->first<<" completely taken\n");
                     break;
                 } else if(crossing_time_range.lower()<=0.0) {
                     // This event is already partially active, so carry on with a full step
-                    ARIADNE_LOG(6,"No creep; event "<<crossing_iter->first<<"alrealy partially active\n");
+                    ARIADNE_LOG(6,"No creep; event "<<crossing_iter->first<<" alrealy partially active\n");
                     creep=false;
                     break;
                 } else if(crossing_time_range.lower()>=step_size) {

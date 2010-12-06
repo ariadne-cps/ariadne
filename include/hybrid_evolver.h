@@ -281,6 +281,7 @@ class HybridEvolverBase
                      Real final_time,
                      VectorIntervalFunction const& flow,
                      Map<DiscreteEvent,CrossingData>& crossings,
+                     Map<DiscreteEvent,TransitionData> const& transitions,
                      HybridEnclosure const& initial_set) const;
 
 
@@ -592,6 +593,7 @@ class GeneralHybridEvolver
                      Real final_time,
                      VectorIntervalFunction const& flow,
                      Map<DiscreteEvent,CrossingData>& crossings,
+                     Map<DiscreteEvent,TransitionData> const& transitions,
                      HybridEnclosure const& initial_set) const;
 
 };

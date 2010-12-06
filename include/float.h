@@ -50,6 +50,7 @@ using std::min;
 using std::max;
 
 const double infty = std::numeric_limits<double>::infinity();
+const double nan = (1.0/0.0);
 
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
@@ -377,6 +378,9 @@ inline bool operator>=(const Rational& q, const Float& x) { return static_cast<m
 inline bool operator< (const Rational& q, const Float& x) { return static_cast<mpq_class>(q)< x.get_d(); }
 inline bool operator> (const Rational& q, const Float& x) { return static_cast<mpq_class>(q)> x.get_d(); }
 #endif // HAVE_GMPXX_H
+
+
+
 
 } // namespace Ariadne
 

@@ -26,8 +26,16 @@
 #include <sstream>
 #include <string>
 
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/string.hpp>
+
+#include "macros.h"
 #include "serialization.h"
 #include "array.h"
+#include "numeric.h"
+#include "float.h"
+#include "interval.h"
 #include "stlio.h"
 
 #include "test.h"
@@ -35,15 +43,20 @@
 using namespace Ariadne;
 using namespace std;
 
+namespace Ariadne {
+void serialize(boost::archive::text_oarchive& a, Float& flt, const unsigned int v);
+void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int v);
+}
+
 class TestSerialization
 {
   public:
-    int test() {
+    void test() {
         test_array();
-        return 0;
+        test_numeric();
     }
 
-    int test_array() {
+    void test_array() {
         double data[]={5,23,42,111,242};
         const array<double> oary1(data,data+5);
         const array<double> oary2(data,data+3);
@@ -56,17 +69,70 @@ class TestSerialization
         ifstream ifs("test_serialization-array.txt");
         text_iarchive txtia(ifs);
         txtia >> iary1 >> iary2;
-        ofs.close();
+        ifs.close();
 
         ARIADNE_TEST_EQUAL(oary1,iary1);
         ARIADNE_TEST_EQUAL(oary2,iary2);
+    }
 
-        return 0;
+    void test_numeric() {
+
+        const Float nan = 0.0/0.0;
+        const Float inf = 1.0/0.0;
+
+        ofstream ofs("test_serialization-numeric.txt");
+        text_oarchive txtoa(ofs);
+
+        double xary[] = { 0.0, 1.0, 4.2, 1e-72, 1.2e+72 };
+        const array<Float> oxary(xary,xary+5);
+        for(uint i=0; i!=oxary.size(); ++i) { txtoa << oxary[i]; }
+
+        // Test output of special values
+        ARIADNE_TEST_TRY( txtoa << inf );
+        txtoa << static_cast<const double&>(1.0);
+        ARIADNE_TEST_TRY( txtoa << nan );
+        ARIADNE_TEST_TRY( txtoa << static_cast<const Float&>(-inf) );
+
+        ofs.close();
+
+        array<Float> ixary(oxary.size());
+        ifstream ifs("test_serialization-numeric.txt");
+        text_iarchive txtia(ifs);
+
+        for(uint i=0; i!=ixary.size(); ++i) {
+            txtia >> ixary[i];
+            ARIADNE_TEST_EQUALS(ixary[i],oxary[i]);
+        }
+
+        Float input_nan, input_inf, input_one;
+        // Test input of constant "inf"
+        try {
+            txtia >> input_inf;
+            ARIADNE_TEST_EQUALS( input_inf, inf );
+        } catch(...) {
+            ARIADNE_TEST_WARN("Cannot input 'inf' floating-point value from archive.");
+        }
+        try {
+            txtia >> input_one;
+            ARIADNE_TEST_EQUALS( input_one, 1.0 );
+        } catch(...) {
+            ARIADNE_TEST_WARN("Error in archive read leaves archive in an invalid state.");
+        }
+
+        try {
+            txtia >> input_nan;
+        } catch(...) {
+        }
+        ARIADNE_TEST_ASSERT( isnan(input_nan.get_d()) );
+        ifs.close();
+
     }
 
 };
 
+#include <sstream>
 
 int main() {
-    return TestSerialization().test();
+    TestSerialization().test();
+    return ARIADNE_TEST_FAILURES;
 }

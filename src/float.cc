@@ -585,7 +585,30 @@ Float tan_rnd(Float x)
     return tan_rnd(x.v);
 }
 
+} // namespace Ariadne
 
+
+#ifdef HAVE_LIBBOOST_SERIALIZATION
+
+#include "serialization.h"
+
+namespace Ariadne {
+
+void serialize(boost::archive::text_oarchive& a, Float& flt, const unsigned int v) {
+    const double x=flt.get_d();
+    a << x;
+};
+
+void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int v) {
+    flt=std::numeric_limits<double>::quiet_NaN();
+    double x;
+    a >> x;
+    flt=x;
+}
 
 } // namespace Ariadne
+
+#endif /* HAVE_LIBBOOST_SERIALIZATION */
+
+
 

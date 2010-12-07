@@ -65,15 +65,20 @@ class OptimiserInterface {
     virtual ~OptimiserInterface() { }
     //! \brief Create a dynamically-allocated copy.
     virtual OptimiserInterface* clone() const = 0;
-    //! \brief Solve the nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const = 0;
-    //! \brief Solve the nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } h(x) = 0\f$.
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction h) const = 0;
-    //! \brief Solve the nonlinear programming problem \f$\min f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0\f$.
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const = 0;
 
+    //! \brief Solve the nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const = 0;
+    //! \brief Solve the nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } h(x) = 0\f$.
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction h) const = 0;
+    //! \brief Solve the nonlinear programming problem \f$\min f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0\f$.
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const = 0;
+
+    //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)=0\f$ is feasible.
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const = 0;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const = 0;
+    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } h(x) = 0\f$ is feasible.
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction h) const = 0;
 
     //! \brief Tests if the point \a y is feasible.
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
@@ -87,14 +92,20 @@ class OptimiserInterface {
 };
 
 //! \ingroup OptimisationModule
-//! Common routines for nonlinear optimisation
+//! Common routines for nonlinear minimisation
 class OptimiserBase
     : public OptimiserInterface
     , public Loggable
 {
   public:
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction h) const;
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const = 0;
+
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction h) const;
+
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const = 0;
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction h) const;
 
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                    FloatVector x) const;
@@ -115,7 +126,7 @@ class PenaltyFunctionOptimiser
     : public OptimiserBase
 {
     virtual PenaltyFunctionOptimiser* clone() const;
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
     virtual Void feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C, const FloatVectorFunction& h,
@@ -135,16 +146,15 @@ class NonlinearInteriorPointOptimiser
   public:
     virtual NonlinearInteriorPointOptimiser* clone() const { return new NonlinearInteriorPointOptimiser(*this); }
 
+    using OptimiserBase::minimise;
+    using OptimiserBase::feasible;
+
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
-    //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } h(x) = 0\f$.
-    //! \precondition The domain \f$D\f$ is bounded and has nonempty interior.
-    //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction h) const;
-    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
+    //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall constraint violation, primal and dual variables.
@@ -156,10 +166,8 @@ class NonlinearInteriorPointOptimiser
     Pair<Tribool,FloatVector> feasible_hotstarted(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                                   const FloatVector& x0, const FloatVector& lambda0) const;
 
-    Void optimisation_step(const FloatScalarFunction& f, const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
-                           FloatVector& x, FloatVector& lambda) const;
-    Void optimisation_step(const FloatScalarFunction& f, const IntervalVector& d, const FloatVectorFunction& h,
-                           FloatVector& x, FloatVector& lambda, Float& mu) const;
+    Void minimisation_step(const FloatScalarFunction& f, const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C, const FloatVectorFunction& h,
+                           FloatVector& x, FloatVector& w, FloatVector& kappa, FloatVector& lambda, const Float& mu) const;
     Void setup_feasibility(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
                            FloatVector& x, FloatVector& lambda) const;
     Void feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
@@ -187,6 +195,16 @@ class NonlinearInteriorPointOptimiser
 
 
 
+
+class IntervalOptimiser
+    : public NonlinearInteriorPointOptimiser
+{
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction h) const;
+    Void feasibility_step(const IntervalVector& D, const IntervalVectorFunction& h,
+                          IntervalVector& X, IntervalVector& Lambda, Interval& Mu) const;
+};
+
+
 /*//! \ingroup OptimisationModule
 //! Solver for linear programming problems using interior point methods.
 //! WARNING: This class currently does not work; maybe there is a problem with the algorithms.
@@ -198,18 +216,18 @@ class KrawczykOptimiser
     virtual KrawczykOptimiser* clone() const { return new KrawczykOptimiser(*this); }
 
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual IntervalVector optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
+    virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
 
   public:
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
-    tribool optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+    tribool minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                      const Interval& t0, const IntervalVector& x0, const IntervalVector& y0, const IntervalVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
-    void optimisation_step(const IntervalVector& D, const IntervalVectorFunction& g, const IntervalVector& C,
+    void minimisation_step(const IntervalVector& D, const IntervalVectorFunction& g, const IntervalVector& C,
                            IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const;
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
     void feasibility_step(const IntervalVector& D, const IntervalVectorFunction& g, const IntervalVector& C,
@@ -222,7 +240,7 @@ class KrawczykOptimiser
     void feasibility_step(const IntervalVectorFunction& g,
                           IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const;
     //! \brief An optimization step for the problem \f$\max f(y) \text{ s.t. } g(y)\leq 0\f$. \deprecated
-    void optimisation_step(const IntervalScalarFunction& f, const IntervalVectorFunction& g,
+    void minimisation_step(const IntervalScalarFunction& f, const IntervalVectorFunction& g,
                            IntervalVector& x, IntervalVector& y, IntervalVector& z) const;
   protected:
     void setup_feasibility(const IntervalVector& d, const IntervalVectorFunction& g, const IntervalVector& c,

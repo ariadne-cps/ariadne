@@ -436,6 +436,19 @@ class ConstrainedFeasibilityMatrix {
 
 
 
+enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
+
+inline ConstraintKind constraint_kind(Interval C) {
+    if(C.lower()==C.upper()) { return EQUALITY; }
+    else if(C.lower()==-infty) { return UPPER_BOUNDED; }
+    else if(C.upper()==+infty) { return LOWER_BOUNDED; }
+    else { return BOUNDED; }
+}
+
+
+
+
+
 Bool OptimiserBase::
 is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x) const
 {
@@ -553,101 +566,74 @@ is_infeasibility_certificate(IntervalVector d, IntervalVectorFunction g, Interva
     }
 }
 
-IntervalVector OptimiserBase::
-optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
-{
-    IntervalVectorFunction h(0u,RealScalarFunction::constant(D.size(),0));
-    return static_cast<const OptimiserInterface*>(this)->optimise(f,D,g,C,h);
-}
+
+
+
+
 
 IntervalVector OptimiserBase::
-optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction h) const
+minimise(IntervalScalarFunction f, IntervalVector d, IntervalVectorFunction h) const
 {
-    IntervalVectorFunction g(0u,RealScalarFunction::constant(D.size(),0));
-    IntervalVector C(0u,Interval(-infty,+infty));
-    return static_cast<const OptimiserInterface*>(this)->optimise(f,D,g,C,h);
+    RealVectorFunction g(0u,d.size());
+    IntervalVector c(0u);
+    return this->minimise(f,d,g,c,h);
 }
 
 
-
-enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
-
-inline ConstraintKind constraint_kind(Interval C) {
-    if(C.lower()==C.upper()) { return EQUALITY; }
-    else if(C.lower()==-infty) { return UPPER_BOUNDED; }
-    else if(C.upper()==+infty) { return LOWER_BOUNDED; }
-    else { return BOUNDED; }
-}
-
-
-Void NonlinearInteriorPointOptimiser::
-initialise_lagrange_multipliers(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
-                                const FloatVector& x, FloatVector& lambda) const
+IntervalVector OptimiserBase::
+minimise(IntervalScalarFunction f, IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
 {
-    lambda.resize(C.size());
-    for(uint i=0; i!=C.size(); ++i) {
-        if(C[i].lower()==C[i].upper()) { lambda[i]=0.0; }
-        else if(C[i].lower()==-infty) { lambda[i]=-1.0; }
-        else if(C[i].upper()==+infty) { lambda[i]=+1.0; }
-        else { lambda[i] = 0.0; }
-    }
+    RealVectorFunction h(0u,d.size());
+    return this->minimise(f,d,g,c,h);
 }
 
-Float NonlinearInteriorPointOptimiser::
-compute_mu(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
-           const FloatVector& x, const FloatVector& lambda) const
+
+Tribool OptimiserBase::
+feasible(IntervalVector d, IntervalVectorFunction h) const
 {
-    // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
-
-    Float mu = 0.0;
-
-    FloatVector gx = g(x);
-
-    for(uint i=0; i!=C.size(); ++i) {
-        if(C[i].lower()==C[i].upper()) { }
-        else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
-        else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
-        else { std::cerr<<"FIXME: Compute mu for bounded constraint\n";
-            if (lambda[i] <=0.0) { mu += lambda[i] * (gx[i] - C[i].upper()); }
-            else { mu += lambda[i] * (gx[i] - C[i].lower()); }
-        }
-    }
-
-    mu /= C.size();
-
-    return mu;
+    RealVectorFunction g(0u,d.size());
+    IntervalVector c(0u);
+    return this->feasible(d,g,c,h);
 }
+
+
+Tribool OptimiserBase::
+feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
+{
+    RealVectorFunction h(0u,d.size());
+    return this->feasible(d,g,c,h);
+}
+
+
+
+
 
 
 IntervalVector NonlinearInteriorPointOptimiser::
-optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const
+minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const
 {
-    assert(h.result_size()==0u);
-
     FloatVector x = midpoint(D);
+    FloatVector w = midpoint(intersection(g(x),C));
 
-    std::cerr<<"x="<<x<<" g(x)="<<g(IntervalVector(x))<<" C="<<C<<"\n";
-    // FIXME: Temporarily assume x is feasible
-    ARIADNE_ASSERT(subset(g(IntervalVector(x)),C));
+    FloatVector kappa(g.result_size(),0.0);
+    FloatVector lambda(h.result_size(),0.0);
+    Float mu = 1.0;
 
-    Vector<Float> lambda;
-    this->initialise_lagrange_multipliers(D,g,C,x,lambda);
-    std::cerr << "x="<<x<<" lambda="<<lambda<<"\n";
-
-    for(uint i=0; i!=10; ++i) {
-        this->optimisation_step(f,D,g,C,x,lambda);
+    for(uint i=0; i!=12; ++i) {
+        this->minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu);
+        if(i%3==0 && i<=10) { mu *= 0.25; }
     }
 
-    std::cerr << "x="<<x<<" lambda="<<lambda<<" mu="<<compute_mu(D,g,C,x,lambda)<<"\ng(x)="<<g(x)<<" C="<<C<<"\nf(x)="<<f(x)<<"\n";
     return IntervalVector(x);
 }
 
 
 Tribool NonlinearInteriorPointOptimiser::
-feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
+feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c, IntervalVectorFunction h) const
 {
-    ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c)\n");
-    ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
+    ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(D,g,C,h)\n");
+    ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<", h="<<h<<"\n");
+    assert(h.result_size()==0u);
 
     ARIADNE_ASSERT(g.argument_size()==d.size());
     ARIADNE_ASSERT(g.result_size()==c.size());
@@ -674,275 +660,171 @@ feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
     return indeterminate;
 }
 
+
 // See Hande Y. Benson, David F. Shanno, And Robert J. Vanderbei,
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
 
+// min f(x) | x\in D & w\in C | g(x) = w & h(x) = 0
+// Lagrange multipliers kappa d(g(x)-w); lambda dh(x)
 Void NonlinearInteriorPointOptimiser::
-optimisation_step(const FloatScalarFunction& f, const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
-                  FloatVector& x, FloatVector& lambda) const
+minimisation_step(const FloatScalarFunction& f, const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c, const FloatVectorFunction& h,
+                  FloatVector& x, FloatVector& w, FloatVector& kappa, FloatVector& lambda, const Float& mu) const
 {
-    const uint m=x.size();
-    const uint n=lambda.size();
+    const uint n=x.size();
+    const uint m=kappa.size();
+    const uint l=lambda.size();
 
-    ARIADNE_LOG(7,"x="<<x<<"\n");
+    ARIADNE_DEBUG_PRECONDITION(w.size()==kappa.size());
+    ARIADNE_DEBUG_PRECONDITION(f.argument_size()==n);
+    ARIADNE_DEBUG_PRECONDITION(g.argument_size()==n);
+    ARIADNE_DEBUG_PRECONDITION(h.argument_size()==n);
+    ARIADNE_DEBUG_PRECONDITION(g.result_size()==m);
+    ARIADNE_DEBUG_PRECONDITION(h.result_size()==l);
+    ARIADNE_DEBUG_PRECONDITION(contains(d,x));
+    ARIADNE_DEBUG_PRECONDITION(contains(c,w));
+    ARIADNE_DEBUG_PRECONDITION(mu>0);
+
+    ARIADNE_LOG(4,"NonlinearInteriorPointOptimiser::minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu)\n");
+    ARIADNE_LOG(5,"x="<<x<<"\n");
+    ARIADNE_LOG(7,"w="<<w<<"\n");
+    ARIADNE_LOG(7,"kappa="<<kappa<<"\n");
     ARIADNE_LOG(7,"lambda="<<lambda<<"\n");
+    ARIADNE_LOG(7,"mu="<<mu<<"\n");
 
     FloatVector slack(2*n);
     FloatVectorRange slackl(slack,range(0,n));
     FloatVectorRange slacku(slack,range(n,2*n));
 
-    Differential<Float> ddfx=f.evaluate(Differential<Float>::variables(2,x));
-    Vector< Differential<Float> > ddgx=g.evaluate(Differential<Float>::variables(2,x));
-
-    Float mu = this->compute_mu(d,g,c,x,lambda);
-    ARIADNE_LOG(9,"mu="<<mu<<"\n");
+    FloatDifferential ddfx=f.evaluate(FloatDifferential::variables(2,x));
+    Vector<FloatDifferential> ddgx=g.evaluate(FloatDifferential::variables(2,x));
+    Vector<FloatDifferential> ddhx=h.evaluate(FloatDifferential::variables(2,x));
 
     // G is the constraint value vector
+    Float fx = ddfx.value();
     FloatVector gx = ddgx.value();
-    ARIADNE_LOG(9,"g(x)="<<gx<<"\n");
+    FloatVector hx = ddhx.value();
+    ARIADNE_LOG(5,"f(x)="<<fx<<"\n");
+    ARIADNE_LOG(5,"g(x)="<<gx<<"\n");
+    ARIADNE_LOG(5,"h(x)="<<hx<<"\n");
+    ARIADNE_LOG(9,"g(x)-w="<<(gx-w)<<"\n");
 
-    // A is the derivative matrix aij=dgi/dxj
-    FloatVector gradfx = ddfx.gradient();
-    ARIADNE_LOG(9,"Df(x)="<<gradfx<<"\n");
-
-    // A is the derivative matrix aij=dgi/dxj
+    // A, B are the derivative matrices aij=dgi/dxj
+    // HACK: Need to explicitly set size of Jacobian if g or h have result_size of zero
+    FloatVector df = ddfx.gradient();
+    ARIADNE_LOG(9,"df(x)="<<df<<"\n");
     FloatMatrix A = ddgx.jacobian();
+    if(m==0) { A=FloatMatrix(m,n); }
     ARIADNE_LOG(9,"A="<<A<<"\n");
+    FloatMatrix B = ddhx.jacobian();
+    if(l==0) { B=FloatMatrix(l,n); }
+    ARIADNE_LOG(9,"B="<<B<<"\n");
 
-    // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j] lambda[j]*dg[j]/dx[i1]dx[i2]
+
+
+    // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j]kappa[j]*dg[j]/dx[i1]dx[i2] + Sum[k]lambda[k]*dh[k]/dx[i1]dx[i2]
     FloatMatrix H = ddfx.hessian();
-    for(uint j=0; j!=n; ++j) { H += lambda[j] * ddgx[j].hessian(); }
+    for(uint j=0; j!=m; ++j) { H += kappa[j] * ddgx[j].hessian(); }
+    for(uint k=0; k!=l; ++k) { H += lambda[k] * ddhx[k].hessian(); }
     ARIADNE_LOG(9,"H="<<H<<"\n");
-
 
     // Determines the weighting to give to the relaxation parameter mu
     // for equality constraints relative to other constraints
     static const double EQUALITY_RELAXATION_MULTIPLIER = 1.0;
 
-    FloatVector primal_residuals = gradfx + lambda * A; // The residuals df/dx[i] + Sum[j] dg[j]/dx[i] * l[j]
-    ARIADNE_LOG(9,"rx="<<primal_residuals<<"\n");
-
-    FloatVector dual_residuals(n);        // The residuals s(g(x),lambda,mu)
-    FloatVector dual_inverse_hessian(n);  // The matrix (ds/dw) / (ds/dl) where w[j]=g[j](x)
-    for(uint j=0; j!=n; ++j) {
-        if(c[j].lower()==c[j].upper()) {
-            // s(w,l,mu) = (w-c) + l * mu * erm
-            dual_residuals[j] = (gx[j]-c[j].midpoint()) + lambda[j] * (mu * EQUALITY_RELAXATION_MULTIPLIER);
-            dual_inverse_hessian[j] = 1.0 / (mu * EQUALITY_RELAXATION_MULTIPLIER);
-        } else if(c[j].lower()==-infty) {
-            // s(w,l,mu) = (w-cu) * l - mu
-            dual_residuals[j] = (gx[j]-c[j].upper()) * lambda[j] - mu;
-            dual_inverse_hessian[j] = lambda[j] / (c[j].upper() - gx[j]);
-        }
-        else if(c[j].upper()==+infty) {
-            // s(w,l,mu) = (w-cl) * l - mu
-            dual_residuals[j] = (gx[j]-c[j].lower()) * lambda[j] - mu;
-            dual_inverse_hessian[j] = lambda[j] / (c[j].lower() - gx[j]);
-        }
-        else {
-            // s(w,l,mu) = (w-cl) * (cu-w) * l - (2*w-cl-cu) * mu
-            Float zr = (gx[j]-c[j].lower()) * (c[j].upper()-gx[j]);
-            Float zm = 2 * gx[j] - ( c[j].lower() + c[j].upper() );
-            dual_residuals[j] = zr * lambda[j] + zm * mu;
-            dual_inverse_hessian[j] = ( -zm * lambda[j] + 2 * mu) / zr;
-        }
+    // Compute the residuals and contributions from slack in x and w
+    //   rx = df/dx[i] + Sum[j] dg[j]/dx[i] * kappa[j] + Sum[k] dh[k]/dx[i] * lambda[j] + mu *( 1/(xu[i]-x[i]) - 1/(x[i]-xl[i]) )
+    FloatVector rx = df + kappa * A + lambda * B;
+    FloatDiagonalMatrix D(n);
+    for(uint i=0; i!=n; ++i) {
+        Float nuu = rec(d[i].upper()-x[i]);
+        Float nul = rec(x[i]-d[i].lower());
+        rx[i] += mu * ( nuu - nul );
+        D[i] = mu * ( nuu*nuu + nul*nul );
     }
-    ARIADNE_LOG(9,"rl="<<dual_residuals<<"\n");
-    ARIADNE_LOG(9,"D="<<dual_inverse_hessian<<"\n");
 
-    // Add corrections to H due to state constraints
-    FloatVector xnu(m);
-    for(uint i=0; i!=m; ++i) {
-        // D = -2*mu*(r^2+(x-c)^2)/(r^2-(x-c)^2)^2
-        Float rsqr = sqr(d[i].radius());
-        Float xmincsqr = sqr(x[i] - d[i].midpoint());
-        xnu[i] = -2*mu*(rsqr+xmincsqr)/sqr(rsqr-xmincsqr);
-        H[i][i] += xnu[i];
+    //   rw = - kappa[j] + mu *( 1/(wu[i]-w[i]) - 1/(w[i]-wl[i]) )
+    FloatVector rw = -kappa;
+    FloatDiagonalMatrix C(m);
+    for(uint j=0; j!=m; ++j) {
+        Float nuu = rec(c[j].upper()-w[j]);
+        Float nul = rec(w[j]-c[j].lower());
+        rw[j] += (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu - nul );
+        C[j] = (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu*nuu + nul*nul );
     }
-    ARIADNE_LOG(9,"xnu="<<xnu<<"\n");
 
-    FloatMatrix S=H;
-    FloatVector D=-dual_inverse_hessian;
-    atda(S,A,D);
+    //   rkappa = g(x) - w
+    FloatVector rkappa = gx - w;
+
+    //   rlambda = h(x)
+    FloatVector const& rlambda = hx;
+
+    ARIADNE_LOG(9,"rx="<<rx<<"\n");
+    ARIADNE_LOG(9,"rw="<<rw<<"\n");
+    ARIADNE_LOG(9,"rkappa="<<rkappa<<"\n");
+    ARIADNE_LOG(9,"rlambda="<<rlambda<<"\n");
+
+    // Solve the equations
+    //   H+D dx        + AT dk + BT dl = rx
+    //            C dw -  I dk         = rw
+    //    A  dx - I dw                 = rk
+    //    B  dx                        = rl
+
+    // Eliminate dw, dk without fill-in to obtain
+    //   (H+D+ATCA) dx + BT dl = rx + AT rw + ATC rk
+    //         B    dx         = rl
+
+    // Set S=(H+D+ATCA); invert, and eliminate dx
+    //   dx = Sinv * (rx + AT rw + ATC rk - BT dl)
+    //   (B * Sinv * BT) dl = B * Sinv * (rx + AT rw + ATC rk) - rl
+    FloatMatrix& S=H;
+    S+=D;
+    S+=transpose(A)*C*A;
     ARIADNE_LOG(9,"S="<<S<<"\n");
+
     FloatMatrix Sinv=inverse(S);
-    ARIADNE_LOG(9,"Sinv="<<Sinv<<"\n");
+    ARIADNE_LOG(9,"R=Sinv="<<Sinv<<"\n");
 
-    FloatVector& rx=primal_residuals;
-    FloatVector& rlambda=dual_residuals;
+    FloatMatrix BSinvBT = (B*Sinv)*transpose(B);
+    ARIADNE_LOG(9,"B*inverse(S)*BT="<<BSinvBT<<"\n");
+    ARIADNE_LOG(9,"inverse(B*inverse(S)*BT)="<<inverse(BSinvBT)<<"\n");
 
-    // Compute directions to move primal and dual variables
-    FloatVector dx = Sinv * FloatVector( rx - ( rlambda * FloatDiagonalMatrix(D) ) * A );
-    FloatVector dlambda = FloatDiagonalMatrix(D) * FloatVector(rlambda - A * dx);
+    FloatVector rr = Sinv * (rx + (rkappa * C + rw) * A);
+    FloatVector dlambda = inverse(BSinvBT) * (B * rr - rlambda);
+    FloatVector dx = rr - dlambda * (B*Sinv);
+    FloatVector dw = A * dx - rkappa;
+    FloatVector dkappa = rw - C * dw;
+
+    static const Float ALPHA_SCALE_FACTOR = 0.75;
 
     // Compute distance to move variables preserving feasibility
-
-    FloatVector newx(m);
-    FloatVector newlambda(n);
-    FloatVector newgx(n);
-
+    // FIXME: Current implementation might fail due to getting too close to boundary!
+    FloatVector newx(n);
+    FloatVector neww(m);
     Float alpha = 1.0;
     bool success = false;
     do {
         newx = x - alpha * dx;
-        newlambda = lambda - alpha * dlambda;
-        if(egtr(newlambda,0.0)) {
-            newgx = g(newx);
-            if(!egtr(newgx-lower_bounds(c),0.0)) { success = true; }
-        }
-        if(!success) { alpha*=0.75; }
+        neww = w - alpha * dw;
+        if (contains(d,newx) && contains(c,neww)) { success = true; }
+        else { alpha *= ALPHA_SCALE_FACTOR; }
     } while(!success);
     ARIADNE_LOG(9,"alpha="<<alpha<<"\n");
 
-    x = newx;
-    lambda = newlambda;
-
-    ARIADNE_LOG(2,"\n");
-}
-
-
-IntervalVector NonlinearInteriorPointOptimiser::
-optimise(IntervalScalarFunction f, IntervalVector d, IntervalVectorFunction h) const
-{
-    ARIADNE_PRECONDITION(f.argument_size()==d.size());
-    ARIADNE_PRECONDITION(h.argument_size()==d.size());
-    ARIADNE_PRECONDITION(!empty(d));
-    FloatVector x = midpoint(d);
-    FloatVector lambda(h.result_size(),0.0);
-
-    ARIADNE_LOG(4,"NonlinearInteriorPointOptimiser::optimise(f,D,h)\n");
-    ARIADNE_LOG(4,"f="<<f<<"\n");
-    ARIADNE_LOG(4,"D="<<d<<"\n");
-    ARIADNE_LOG(4,"h="<<h<<"\n");
-
-    static const double MU_REDUCTION_FACTOR = 0.25;
-
-    Float mu=MU_REDUCTION_FACTOR;
-    for(uint i=0; i!=5; ++i) {
-        for(uint i=0; i!=2; ++i) {
-            this -> optimisation_step(f,d,h,x,lambda, mu);
-        }
-        mu *= MU_REDUCTION_FACTOR;
-    }
-
-    return x;
-}
-
-Void NonlinearInteriorPointOptimiser::
-optimisation_step(const FloatScalarFunction& f, const IntervalVector& d, const FloatVectorFunction& h,
-                  FloatVector& x, FloatVector& lambda, Float& mu) const
-{
-    ARIADNE_LOG(4,"NonlinearInteriorPointOptimiser::feasibility_step(...)\n");
-
-    ARIADNE_DEBUG_ASSERT(x.size()==d.size());
-    ARIADNE_DEBUG_ASSERT(f.argument_size()==x.size());
-    ARIADNE_DEBUG_ASSERT(h.argument_size()==x.size());
-    ARIADNE_DEBUG_ASSERT(h.result_size()==lambda.size());
-
-    static const Float ALPHA_SCALE_FACTOR = 0.75;
-
-    const uint n=x.size();
-    const uint m=lambda.size();
-
-    ARIADNE_LOG(7,"x="<<x<<"\n");
-    ARIADNE_LOG(7,"lambda="<<lambda<<"\n");
-
-    FloatDifferential ddfx=f.evaluate(FloatDifferential::variables(2,x));
-    Vector<FloatDifferential> ddhx=h.evaluate(FloatDifferential::variables(2,x));
-
-    FloatVector hx = ddhx.value();
-    ARIADNE_LOG(9,"h(x)="<<hx<<"\n");
-
-    FloatVector gradfx = ddfx.gradient();
-    ARIADNE_LOG(9,"Df(x)="<<gradfx<<"\n");
-
-    // B is the derivative matrix aij=dhi/dxj
-    FloatMatrix B = ddhx.jacobian();
-    ARIADNE_LOG(9,"B=Dh(x)="<<B<<"\n");
-
-    ARIADNE_LOG(9,"DDf(x)="<<ddfx.hessian()<<"\n");
-    ARIADNE_LOG(9,"DDh[0](x)="<<ddhx[0].hessian()<<"\n");
-    // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j] lambda[j]*dg[j]/dx[i1]dx[i2]
-    FloatMatrix H = ddfx.hessian();
-    for(uint j=0; j!=m; ++j) { H += lambda[j] * ddhx[j].hessian(); }
-    ARIADNE_LOG(9,"H="<<H<<"\n");
-
-    ARIADNE_LOG(7,"mu="<<mu<<"\n");
-
-    // Using a barriers log(x-xl)+log(xu-x) and penalties h(x)^2, we obtain the
-    // max f(x) + mu * sum_i log(x_i-xl_i)+log(xu_i-x_i) - sum_k h_k(x)^2 / 2nu
-    //
-    // Differentiating gives d_if(x) + mu/(x_i-xl_i) - mu/(xu_i-x_i) - sum_k dh_k/nu = 0
-    // Set lambda_k = -h_k/nu and then take nu->0
-    //
-    // The KKT conditions are
-    //    d_if(x) + sum_k kappa_k d_ih_k + mu s_i(x_i) = 0
-    //       h_k(x)   = 0
-    //   xl_i <= x_i <= xu_i
-    //
-    // The Jacobian of the KKT conditions is
-    //   ( H + ds(X)    dh^T )
-    //   (  dh           0   )
-
-    // Compute residual rx = df + lambda * dg + mu*(1/xu-x - 1/x-xl)
-    FloatMatrix& S=H;
-    const FloatVector& rlambda = hx;
-    FloatVector rx = gradfx + lambda * B;
-
-    ARIADNE_LOG(9,"df+lambda*dh="<<rx<<"\n");
-    for(uint i=0; i!=n; ++i) {
-        Float reczil = rec(x[i]-d[i].lower());
-        Float recziu = rec(d[i].upper() - x[i]);
-        rx[i] += mu * ( recziu - reczil);
-        S[i][i] += mu * (reczil*reczil + recziu*recziu);
-    }
-
-    ARIADNE_LOG(9,"S="<<S<<"\n");
-    ARIADNE_LOG(9,"B="<<B<<"\n");
-    ARIADNE_LOG(9,"rx="<<rx<<"\n");
-    ARIADNE_LOG(9,"rlambda="<<rlambda<<"\n");
-
-    FloatMatrix Sinv = inverse(S);
-    ARIADNE_LOG(9,"inverse(S)="<<Sinv<<"\n");
-    FloatMatrix BSinvBT = (B*Sinv)*transpose(B);
-    ARIADNE_LOG(9,"BSinvBT="<<BSinvBT<<"\n");
-    ARIADNE_LOG(9,"inverse(BSinvBT)="<<inverse(BSinvBT)<<"\n");
-
-    ARIADNE_LOG(9,"BSinvBT*(B*rx)="<<(BSinvBT*(B*rx))<<"\n");
-    FloatVector dlambda = inverse(BSinvBT) * (B*(Sinv*rx)-rlambda);
-    ARIADNE_LOG(9,"dlambda="<<dlambda<<"\n");
-    FloatVector dx = Sinv * (rx - dlambda*B);
-    ARIADNE_LOG(9,"dx="<<dx<<"\n");
-
-    ARIADNE_LOG(9,"S*dx+B^T*dlambda="<<S*dx+dlambda*B<<"; rx="<<rx<<"; ex="<<S*dx+dlambda*B-rx<<"\n");
-    ARIADNE_LOG(9,"B*dx="<<B*dx<<"; rlambda="<<rlambda<<"; elambda="<<B*dx-rlambda<<"\n");
-
-
-    Float alpha = 1.0;
-    FloatVector newx(x.size());
-    do {
-        newx = x - alpha * dx;
-        alpha *= ALPHA_SCALE_FACTOR;
-    } while(!contains(d,newx));
-    alpha /= ALPHA_SCALE_FACTOR;
-
-    newx = x - alpha * dx;
     FloatVector newlambda = lambda - alpha * dlambda;
+    FloatVector newkappa = kappa - alpha * dkappa;
 
-    ARIADNE_LOG(9,"alpha="<<alpha<<"\n");
-    ARIADNE_LOG(9,"new x="<<newx<<"\n");
-    ARIADNE_LOG(9,"new lambda="<<newlambda<<"\n\n");
+    ARIADNE_LOG(9,"newx="<<newx<<"\n");
+    ARIADNE_LOG(9,"neww="<<neww<<"\n");
+    ARIADNE_LOG(9,"newkappa="<<newkappa<<"\n");
+    ARIADNE_LOG(9,"newlambda="<<newlambda<<"\n");
 
-    ARIADNE_LOG(9,"old f(x)="<<f(x)<<"\n");
-    ARIADNE_LOG(9,"old h(x)="<<h(x)<<"\n");
-    ARIADNE_LOG(9,"new f(x)="<<f(newx)<<"\n");
-    ARIADNE_LOG(9,"new h(x)="<<h(newx)<<"\n\n");
+    x=newx; w=neww; kappa=newkappa; lambda=newlambda;
 
-    x = newx;
-    lambda = newlambda;
+    if(verbosity>=6) { std::clog << "\n"; }
 }
+
 
 
 void
@@ -974,7 +856,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     ARIADNE_ASSERT(x.size()==m);
     ARIADNE_ASSERT(y.size()==n);
 
-    Vector< Differential<Float> > ddgx=g.evaluate(Differential<Float>::variables(2,x));
+    Vector<FloatDifferential> ddgx=g.evaluate(FloatDifferential::variables(2,x));
     ARIADNE_LOG(9,"  ddgx="<<ddgx<<"\n");
 
     Vector<Float> gx = ddgx.value();
@@ -1118,7 +1000,7 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
 
     Float mu=dot(x,z)/o;
 
-    Vector< Differential<Float> > dg=g.evaluate(Differential<Float>::variables(1,y));
+    Vector<FloatDifferential> dg=g.evaluate(FloatDifferential::variables(1,y));
     ARIADNE_LOG(9,"  dg="<<dg<<"\n");
 
     // gy is the vector of values of g(y)
@@ -1212,6 +1094,29 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
 */
 
 
+
+Float NonlinearInteriorPointOptimiser::
+compute_mu(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
+           const FloatVector& x, const FloatVector& lambda) const
+{
+    // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
+    Float mu = 0.0;
+    FloatVector gx = g(x);
+
+    for(uint i=0; i!=C.size(); ++i) {
+        if(C[i].lower()==C[i].upper()) { }
+        else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
+        else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
+        else { // std::cerr<<"FIXME: Compute mu for bounded constraint\n";
+            if (lambda[i] <=0.0) { mu += lambda[i] * (gx[i] - C[i].upper()); }
+            else { mu += lambda[i] * (gx[i] - C[i].lower()); }
+        }
+    }
+    mu /= C.size();
+    return mu;
+}
+
+
 void NonlinearInteriorPointOptimiser::
 setup_feasibility(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
                   FloatVector& x, FloatVector& y) const
@@ -1230,7 +1135,7 @@ clone() const
 }
 
 IntervalVector PenaltyFunctionOptimiser::
-optimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const
+minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const
 {
     ARIADNE_NOT_IMPLEMENTED;
     return D;
@@ -1419,7 +1324,29 @@ void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const F
 
 
 
+Tribool IntervalOptimiser::
+feasible(IntervalVector D, IntervalVectorFunction h) const
+{
+    ARIADNE_PRECONDITION(D.size()==h.argument_size());
+    IntervalVector X=D;
+    IntervalVector Lambda(h.result_size(),Interval(-1,+1));
+    Interval Mu(0,1);
 
+    for(uint i=0; i!=10; ++i) {
+        this->feasibility_step(D,h,X,Lambda,Mu);
+    }
+
+    return indeterminate;
+}
+
+
+Void IntervalOptimiser::
+feasibility_step(const IntervalVector& D, const IntervalVectorFunction& h,
+                 IntervalVector& X, IntervalVector& Lambda, Interval& Mu) const
+{
+
+
+}
 
 
 /*
@@ -1555,7 +1482,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
 
 
 IntervalVector KrawczykOptimiser::
-optimise(IntervalScalarFunction f, IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
+minimise(IntervalScalarFunction f, IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -1695,7 +1622,7 @@ void KrawczykOptimiser::compute_tz(const IntervalVector& d, const IntervalVector
 
 
 void KrawczykOptimiser::
-optimisation_step(const IntervalScalarFunction& f, const IntervalVectorFunction& g,
+minimisation_step(const IntervalScalarFunction& f, const IntervalVectorFunction& g,
                   IntervalVector& x, IntervalVector& y, IntervalVector& z) const
 {
     const uint m=f.argument_size();

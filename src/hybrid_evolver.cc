@@ -246,7 +246,7 @@ _log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const
             <<" #c="<<std::setw(1)<<std::left<<starting_set.number_of_inequality_constraints()<<"+"<<std::setw(2)<<starting_set.number_of_equality_constraints()
             <<" t=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_time_range.lower()
             <<","<<std::setw(6)<<std::left<<std::fixed<<starting_time_range.upper()<<"]"<<std::flush
-            <<" dt=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_dwell_time_range.lower()
+            <<" dwt=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_dwell_time_range.lower()
             <<","<<std::setw(6)<<std::left<<std::fixed<<starting_dwell_time_range.upper()<<"]"<<std::flush
             <<" c="<<starting_bounding_box.centre()
             <<" r="<<std::setw(4)<<std::fixed<<std::setprecision(3)<<starting_bounding_box.radius()
@@ -401,7 +401,9 @@ _compute_active_events(RealVectorFunction const& dynamic,
     Set<DiscreteEvent> active_events;
     HybridEnclosure reach_set=starting_set;
     IntervalVector flow_bounds=flow.range();
+    ARIADNE_LOG(8,"flow_bounds="<<flow_bounds<<"\n");
     reach_set.apply_full_reach_step(flow);
+    ARIADNE_LOG(8,"reach_set="<<reach_set<<"\n");
     for(Set<DiscreteEvent>::iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
         const DiscreteEvent event=*event_iter;
         const RealScalarFunction& guard_function=guards[event];
@@ -870,6 +872,20 @@ _evolution_step(EvolutionData& evolution_data,
 
     if(verbosity==1) { _log_summary(evolution_data.initial_sets.size(),evolution_data.reach_sets.size(),starting_set); }
 
+    // Compute the bounding box of the enclosure
+    const Box starting_bounding_box=starting_set.space_bounding_box();
+    ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
+
+    // Test to see if set is too large
+    if(starting_bounding_box.radius()>this->_parameters->maximum_enclosure_radius) {
+        ARIADNE_LOG(1,"  splitting\n");
+        List<HybridEnclosure> split_sets = starting_set.split();
+        for(uint i=0; i!=split_sets.size(); ++i) {
+            if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
+        }
+        return;
+    }
+
     Map<DiscreteEvent,RealScalarFunction> guard_functions;
     for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
@@ -877,9 +893,6 @@ _evolution_step(EvolutionData& evolution_data,
         guard_functions.insert(transition_iter->first,transition_iter->second.guard_function);
     }
     ARIADNE_LOG(4,"guards="<<guard_functions<<"\n");
-
-    // Compute the bounding box of the enclosure
-    const Box starting_bounding_box=starting_set.space_bounding_box();
 
     // Compute flow and actual time step size used
     const FlowFunctionPatch flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->parameters().maximum_step_size);

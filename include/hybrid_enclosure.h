@@ -124,8 +124,8 @@ class HybridEnclosure
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
     TaylorConstrainedImageSet _set;
-    ScalarIntervalFunction _time;
-    ScalarIntervalFunction _dwell_time;
+    ScalarTaylorFunction _time;
+    ScalarTaylorFunction _dwell_time;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
@@ -133,6 +133,8 @@ class HybridEnclosure
     HybridEnclosure(const DiscreteLocation& q, const Box& s);
     //! \brief An enclosure constructed from a continuous state set and a location.
     HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>&);
+    //! \brief An enclosure constructed from a continuous state set, an evolution time and a location.
+    HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&, const ScalarTaylorFunction& time);
     ////! \brief A set in location \a q, constructed from a continuous state set.
     //HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
     //! \brief Destructor.
@@ -244,11 +246,15 @@ class HybridEnclosure
     tribool disjoint(const HybridBox& hbx) const;
     //! \brief Tests whether the set is a subset of the box \a hbx.
     tribool subset(const HybridBox& hbx) const;
+    //! \brief Restricts to a subdomain of the \em parameter domain.
+    void restrict(const IntervalVector& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
     void adjoin_outer_approximation_to(HybridGridTreeSet& paving, int depth) const;
-    //! \brief Splits into two smaller subsets.
+    //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(uint dim) const;
+    //! \brief Splits into smaller subsets.
+    List<HybridEnclosure> split() const;
 
     //! \brief Draws onto a canvas.
     virtual void draw(CanvasInterface&) const;

@@ -70,13 +70,11 @@ HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& bo
 {
 }
 
-/*
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set)
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set, const ScalarTaylorFunction& time)
     : _location(location), _events(), _set(set),
-      _time(ScalarIntervalFunction::constant(set.domain(),0.0))
+      _time(Ariadne::restrict(time,set.domain())), _dwell_time(set.domain())
 {
 }
-*/
 
 HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>& hpair)
     : _location(hpair.first), _events(), _set(hpair.second), _time(ScalarIntervalFunction::constant(_set._domain,0.0)), _dwell_time(_time)
@@ -411,6 +409,25 @@ tribool HybridEnclosure::satisfies(NonlinearConstraint c) const
 
 List<NonlinearConstraint> HybridEnclosure::constraints() const {
     return this->continuous_state_set().constraints();
+}
+
+void
+HybridEnclosure::restrict(const IntervalVector& subdomain)
+{
+    this->_set.restrict(subdomain);
+    this->_time.restrict(this->parameter_domain());
+    this->_dwell_time.restrict(this->parameter_domain());
+}
+
+List<HybridEnclosure>
+HybridEnclosure::split() const
+{
+    List<IntervalVector> subdomains = this->continuous_state_set().splitting_subdomains_zeroth_order();
+    List<HybridEnclosure> result(subdomains.size(),*this);
+    for(uint i=0; i!=result.size(); ++i) {
+        result[i].restrict(subdomains[i]);
+    }
+    return result;
 }
 
 

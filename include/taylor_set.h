@@ -245,6 +245,10 @@ class TaylorConstrainedImageSet
     //! approximation.
     AffineSet affine_over_approximation() const;
 
+    uint splitting_index_zeroth_order() const;
+    List<IntervalVector> splitting_subdomains_first_order() const;
+    List<IntervalVector> splitting_subdomains_zeroth_order() const;
+    List<TaylorConstrainedImageSet> split(const List<IntervalVector>& subdomains);
     //! \brief Split into two by splitting the parameter domain along
     //! the direction which reduces the size of the bounding box.
     Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split_zeroth_order() const;
@@ -261,6 +265,10 @@ class TaylorConstrainedImageSet
     //! \details May also restrict the domain of the defining function models,
     //! resulting in more accurate computations.
     TaylorConstrainedImageSet restriction(const Vector<Interval>& subdomain) const;
+    //! \brief Restrict the parameter domain to \a subdomain.
+    //! \details May also restrict the domain of the defining function models,
+    //! resulting in more accurate computations.
+    void restrict(const Vector<Interval>& subdomain);
 
     //! \brief Draw to a canvas.
     void draw(CanvasInterface&) const;

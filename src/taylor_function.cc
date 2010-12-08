@@ -358,6 +358,14 @@ ScalarTaylorFunction::operator()(const Vector<Interval>& x) const
 }
 
 
+void ScalarTaylorFunction::restrict(const Vector<Interval>& d) {
+    ARIADNE_ASSERT(subset(d,this->domain()));
+    const Vector<Interval>& od=this->domain();
+    for(uint j=0; j!=d.size(); ++j) {
+        if(od[j]!=d[j]) { *this=Ariadne::restrict(*this,j,d[j]); }
+    }
+}
+
 ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const Vector<Interval>& d) {
     ARIADNE_ASSERT(subset(d,tv.domain()));
     const Vector<Interval>& od=tv.domain();

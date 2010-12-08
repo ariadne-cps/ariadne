@@ -200,7 +200,7 @@ int main(int argc, const char* argv[])
     GeneralHybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=1./32;
-    evolver.parameters().maximum_enclosure_radius = 1./16;
+    evolver.parameters().maximum_enclosure_radius = 1./8;
 
     DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 1u;
 

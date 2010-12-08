@@ -244,6 +244,8 @@ bool has_nan(const Box& domain) {
 
 void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& constraints) const
 {
+    static const bool USE_BOX_REDUCE = false;
+
     const double MINIMUM_REDUCTION = 0.75;
 
     if(domain.empty()) { return; }
@@ -260,10 +262,12 @@ void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& cons
         }
         if(domain.empty()) { return; }
 
-        for(uint i=0; i!=constraints.size(); ++i) {
-            for(uint j=0; j!=domain.size(); ++j) {
-                this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
-                if(domain[j].empty()) { return; }
+        if(USE_BOX_REDUCE) {
+            for(uint i=0; i!=constraints.size(); ++i) {
+                for(uint j=0; j!=domain.size(); ++j) {
+                    this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
+                    if(domain[j].empty()) { return; }
+                }
             }
         }
 
@@ -378,7 +382,7 @@ void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
             imax = i; break;
         }
     }
-    
+
     // The set is proved to be empty
     if(imax==n) {
         domain[variable]=Interval(+inf<Float>(),-inf<Float>());

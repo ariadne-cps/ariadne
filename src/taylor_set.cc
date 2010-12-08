@@ -519,16 +519,8 @@ tribool TaylorConstrainedImageSet::empty() const
             return true;
         }
     }
-    ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(this->_reduced_domain,constraints);
-    for(uint i=0; i!=this->number_of_parameters(); ++i) {
-        double l=this->_reduced_domain[i].lower().get_d();
-        double u=this->_reduced_domain[i].upper().get_d();
-        if(isnan(l) || isnan(u)) {
-            ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
-            _reduced_domain[i]=_domain[i];
-        }
-    }
+    this->reduce();
+
     if(this->_reduced_domain.empty()) { return true; }
     else { return indeterminate; }
 }
@@ -588,6 +580,19 @@ void TaylorConstrainedImageSet::reduce() const
             _reduced_domain[i]=_domain[i];
         }
     }
+
+/*
+    // Remove redundant constraints
+    uint j=0;
+    List<ScalarTaylorFunction>& mutable_constraints=const_cast<List<ScalarTaylorFunction>&>(this->_constraints);
+    for(uint i=0; i!=mutable_constraints.size(); ++i) {
+        if(mutable_constraints[i](this->_reduced_domain).upper()<0.0) { redundant_constraints.append(i); }
+        else { if(i>j) { mutable_constraints[j]=mutable_constraints[j]; } ++j; }
+    }
+    mutable_constraints.resize(j);
+*/
+
+
 }
 
 
@@ -616,6 +621,24 @@ Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunctionInterfac
 Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
 TaylorConstrainedImageSet::split_zeroth_order() const
 {
+    return this->split(this->splitting_index_zeroth_order());
+}
+
+
+List<IntervalVector>
+TaylorConstrainedImageSet::splitting_subdomains_zeroth_order() const
+{
+    Pair<IntervalVector,IntervalVector> subdomains = this->_reduced_domain.split(this->splitting_index_zeroth_order());
+    List<IntervalVector> result;
+    result.append(subdomains.first);
+    result.append(subdomains.second);
+    return result;
+}
+
+
+uint
+TaylorConstrainedImageSet::splitting_index_zeroth_order() const
+{
     Matrix<Interval> jacobian=this->function().jacobian(this->reduced_domain());
 
     // Compute the column of the matrix which has the norm
@@ -633,7 +656,7 @@ TaylorConstrainedImageSet::split_zeroth_order() const
             jmax=j;
         }
     }
-    return this->split(jmax);
+    return jmax;
 }
 
 
@@ -1258,11 +1281,11 @@ void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet
 
 
 
-TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<Interval>& subdomain) const
+void TaylorConstrainedImageSet::restrict(const Vector<Interval>& subdomain)
 {
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
     ARIADNE_ASSERT_MSG(Ariadne::subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
-    TaylorConstrainedImageSet result(*this);
+    TaylorConstrainedImageSet& result(*this);
     result._domain=subdomain;
     result._reduced_domain=Ariadne::intersection(static_cast<const Vector<Interval>&>(result._reduced_domain),subdomain);
     result._function=Ariadne::restrict(result._function,subdomain);
@@ -1279,9 +1302,14 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
         ScalarTaylorFunction& equation=*iter;
         equation=Ariadne::restrict(equation,subdomain);
     }
-    return result;
 }
 
+TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<Interval>& subdomain) const
+{
+    TaylorConstrainedImageSet result(*this);
+    result.restrict(subdomain);
+    return result;
+}
 
 
 void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {

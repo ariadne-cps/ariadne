@@ -340,6 +340,8 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Non-arithmetic operations. */
+    //! \brief Restrict to a subdomain.
+    void restrict(const DomainType& d);
     //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
     friend bool refines(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
     //! \brief Test if the quantities are disjoint.

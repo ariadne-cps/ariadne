@@ -1562,7 +1562,6 @@ SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c
 template<class X> tribool
 SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt)
 {
-    verbosity=9;
     ARIADNE_LOG(4,"verify_constrained_feasibility(Matrix A, Vector b, Vector l, Vector u, VariableTypeArray vt)\n");
     ARIADNE_LOG(5," A="<<A<<"\n b="<<b<<"\n l="<<l<<"\n u="<<u<<"\n t="<<vt<<"\n");
 

@@ -360,44 +360,45 @@ void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
     Float l=interval.lower();
     Float u=interval.upper();
     Interval subinterval;
-    Interval new_interval(+inf<Float>(),-inf<Float>());
+    Interval new_interval(interval);
     Vector<Interval> slice=domain;
 
     static const uint MAX_SLICES=(1<<3);
     const uint n=MAX_SLICES;
 
     // Look for empty slices from below
-    uint imax=n; // The first nonempty interval
+    uint imax = n;
     for(uint i=0; i!=n; ++i) {
         subinterval=Interval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
         Interval slice_image=function(slice);
-        if(!intersection(slice_image,bounds).empty()) {
-            new_interval.set_lower(subinterval.lower());
-            imax=i;
-            break;
+        if(intersection(slice_image,bounds).empty()) {
+            new_interval.set_lower(subinterval.upper());
+        } else {
+            imax = i; break;
         }
     }
-
+    
     // The set is proved to be empty
     if(imax==n) {
-        domain[variable]=new_interval;
+        domain[variable]=Interval(+inf<Float>(),-inf<Float>());
         return;
     }
 
     // Look for empty slices from above; note that at least one nonempty slice has been found
     for(uint j=n-1; j!=imax; --j) {
         subinterval=Interval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
-        new_interval.set_upper(subinterval.upper());
         slice[variable]=subinterval;
         Interval slice_image=function(slice);
-        if(!intersection(slice_image,bounds).empty()) {
+        if(intersection(slice_image,bounds).empty()) {
+            new_interval.set_upper(subinterval.lower());
+        } else {
             break;
         }
     }
 
     // The set cannot be empty, since a nonempty slice has been found in the upper pass.
-    ARIADNE_ASSERT(new_interval.upper()!=-inf<Float>());
+    ARIADNE_ASSERT(new_interval.upper()!=new_interval.lower());
 
     domain[variable]=new_interval;
 }

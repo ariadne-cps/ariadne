@@ -337,6 +337,13 @@ class HybridEvolverBase
                       CrossingData const& crossing_data,
                       const Semantics semantics) const;
 
+    //! \brief Apply the invariants in \a transition_data to the set \a set.
+    //! \callgraph
+    virtual
+    void
+    _apply_invariants(HybridEnclosure& set,
+                      const Map<DiscreteEvent,TransitionData>& transition_data) const;
+
     //! \brief Apply \a guard_function for \a event to each set in \a sets, using the computed \a crossing_data.
     //! \callgraph
     //! \details The sets are updated with the extra constraints in-place for efficiency.

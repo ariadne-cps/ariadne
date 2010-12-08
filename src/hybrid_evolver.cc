@@ -286,13 +286,11 @@ _extract_transitions(DiscreteLocation const& location,
 
 void
 HybridEvolverBase::
-_process_initial_events(EvolutionData& evolution_data,
-                        HybridEnclosure const& initial_set,
-                        Map<DiscreteEvent,TransitionData> const& transitions) const
+_apply_invariants(HybridEnclosure& initial_set,
+                  Map<DiscreteEvent,TransitionData> const& transitions) const
 {
-    ARIADNE_LOG(2,"HybridEvolverBase::_process_initial_events(...)\n");
-    ARIADNE_ASSERT(evolution_data.working_sets.empty());
-    HybridEnclosure invariant_set=initial_set;
+    ARIADNE_LOG(2,"HybridEvolverBase::_apply_invariants(...)\n");
+    HybridEnclosure& invariant_set=initial_set;
 
     // Apply restrictions due to invariants
     for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
@@ -306,6 +304,20 @@ _process_initial_events(EvolutionData& evolution_data,
             }
         }
     }
+}
+
+void
+HybridEvolverBase::
+_process_initial_events(EvolutionData& evolution_data,
+                        HybridEnclosure const& initial_set,
+                        Map<DiscreteEvent,TransitionData> const& transitions) const
+{
+    ARIADNE_LOG(2,"HybridEvolverBase::_process_initial_events(...)\n");
+    ARIADNE_ASSERT(evolution_data.working_sets.empty());
+    HybridEnclosure invariant_set=initial_set;
+
+    // Apply restrictions due to invariants
+    this->_apply_invariants(invariant_set,transitions);
 
     // Set the flowable set, storing the invariant set as a base for jumps
     HybridEnclosure flowable_set = invariant_set;
@@ -809,18 +821,19 @@ _evolution_in_mode(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"\ndynamic="<<dynamic<<"\n");
     ARIADNE_LOG(4,"transitions="<<transitions<<"\n\n");
 
-    // Process the initially active events; cut out active points to leave initial flowable set.
-    this->_process_initial_events(evolution_data, initial_set,transitions);
-    ARIADNE_ASSERT(evolution_data.working_sets.size()<=1);
-
     // Test if maximum number of steps has been exceeded; if so, the set should be discarded.
     // NOTE: We could also place a test for the maximum number of steps being reaches which computing jump sets
     // This is not done since the maximum_steps information is not passed to the _apply_evolution_step(...) method.
-    if(initial_set.previous_events().size()>maximum_steps) {
+    if(initial_set.previous_events().size()>=maximum_steps) {
         ARIADNE_LOG(4,"initial_set "<<initial_set<<" has undergone more than maximum number of events "<<maximum_steps<<"\n");
+        this->_apply_invariants(initial_set,transitions);
         evolution_data.final_sets.append(initial_set);
         return;
     }
+
+    // Process the initially active events; cut out active points to leave initial flowable set.
+    this->_process_initial_events(evolution_data, initial_set,transitions);
+    ARIADNE_ASSERT(evolution_data.working_sets.size()<=1);
 
     // NOTE: Uncomment the lines below to stop evolution immediately after the maximum event, without further flow
     //if(initial_set.previous_events().size()>maximum_steps) {

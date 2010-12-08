@@ -103,18 +103,22 @@ void TestHybridEvolution::test_bouncing_ball() const {
     HybridTime time(4.5,3);
 
     Orbit<HybridEnclosure> orbit=evolver.orbit(bouncing_ball,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    ListSet<HybridEnclosure> const& orbit_final=orbit.final();
 
-    ARIADNE_TEST_PRINT(orbit);
-    if(orbit.final().size()!=1u) {
-        ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
+    //ARIADNE_TEST_PRINT(orbit);
+    if(orbit_final.size()!=1u) {
+        ARIADNE_TEST_WARN("orbit.final().size()="<<orbit_final.size()<<"; expected 1. "
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
 
-    HybridEnclosure orbit_final_set=*orbit.final().begin();
+
     HybridBox expected_orbit_final_bounding_box=HybridBox(q,Box(2, 0.12,0.13, -0.04,0.04));
-    ARIADNE_TEST_BINARY_PREDICATE(subset,orbit_final_set,expected_orbit_final_bounding_box);
+    for(ListSet<HybridEnclosure>::const_iterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
+        const HybridEnclosure& orbit_final_set=*iter;
+        ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
+        ARIADNE_TEST_BINARY_PREDICATE(subset,orbit_final_set,expected_orbit_final_bounding_box);
+    }
     ARIADNE_TEST_PRINT(orbit.final().size());
-    ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
     ARIADNE_TEST_PRINT(expected_orbit_final_bounding_box);
 
     Box bounding_box(2, -0.5,+2.5, -4.0, +4.0);
@@ -151,7 +155,7 @@ void TestHybridEvolution::test_water_tank() const {
     DiscreteEvent finished_closing("finished_closing");
 
     // Create the tank object
-    MonolithicHybridAutomaton watertank("Watertank");
+    MonolithicHybridAutomaton watertank;
 
     watertank.new_mode(open,(-lambda*height+rate*aperture,0));
     watertank.new_mode(closed,(-lambda*height+rate*aperture,0));
@@ -201,6 +205,7 @@ int main(int argc, const char* argv[])
     evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=1./32;
     evolver.parameters().maximum_enclosure_radius = 1./8;
+    evolver.parameters().maximum_enclosure_radius = 1./2;
 
     DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 1u;
 

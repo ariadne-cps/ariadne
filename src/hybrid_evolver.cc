@@ -231,13 +231,20 @@ _evolution(ListSet<HybridEnclosure>& final,
     intermediate=evolution_data.intermediate_sets;
 }
 
+struct EvolutionStepData {
+    EvolutionStepData() : progress(false), finishing(false), events() { }
+    bool progress;
+    bool finishing;
+    Set<DiscreteEvent> events;
+};
+
 void
 HybridEvolverBase::
 _log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const
 {
     Box starting_bounding_box=starting_set.space_bounding_box();
     Interval starting_time_range=starting_set.time_range();
-    Interval starting_dwell_time_range=starting_set.dwell_time_function().range();
+    Interval starting_dwell_time_range=starting_set.dwell_time_range();
     ARIADNE_LOG(1,"\r"
             <<"#w="<<std::setw(4)<<std::left<<ws+1u
             <<"#r="<<std::setw(4)<<std::left<<rs
@@ -343,7 +350,7 @@ _process_initial_events(EvolutionData& evolution_data,
                     immediate_jump_set.new_activation(event,transition.guard_function);
                     if(!definitely(immediate_jump_set.empty())) {
                         // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
-                        ARIADNE_LOG(1,"  "<<event<<": "<<transition.event_kind<<", immediate\n");
+                        ARIADNE_LOG(2,"  "<<event<<": "<<transition.event_kind<<", immediate\n");
                         evolution_data.reach_sets.append(immediate_jump_set);
                         immediate_jump_set.apply_reset(event,transition.target,transition.reset_function);
                         ARIADNE_LOG(4,"immediate_jump_set="<<immediate_jump_set<<"\n");
@@ -858,6 +865,7 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(3,"HybridEvolverBase::_evolution_step\n");
     HybridEnclosure starting_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
 
+
     ARIADNE_LOG(2,"starting_set="<<starting_set<<"\n");
     ARIADNE_LOG(2,"starting_time="<<starting_set.time_function().polynomial()<<"\n");
     if(definitely(starting_set.empty())) {
@@ -878,7 +886,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     // Test to see if set is too large
     if(starting_bounding_box.radius()>this->_parameters->maximum_enclosure_radius) {
-        ARIADNE_LOG(1,"  splitting\n");
+        ARIADNE_LOG(1,"\r  splitting\n");
         List<HybridEnclosure> split_sets = starting_set.split();
         for(uint i=0; i!=split_sets.size(); ++i) {
             if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
@@ -929,6 +937,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
 {
     ARIADNE_LOG(2,"GeneralHybridEvolver::_apply_evolution_step(...)\n");
     //ARIADNE_LOG(4,"evolution_time="<<evolution_time.range()<<" final_time="<<final_time<<"\n");
+
+    EvolutionStepData _step_data;
 
     ARIADNE_ASSERT(!definitely(starting_set.empty()));
 
@@ -1001,6 +1011,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
             if(!definitely(final_set.empty())) {
                 ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
                 evolution_data.final_sets.append(final_set);
+                _step_data.finishing = true;
             }
         }
         for(List<HybridEnclosure>::const_iterator reach_set_iter=reach_sets.begin();
@@ -1026,6 +1037,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
                     evolution_data.working_sets.append(evolve_set);
                     evolution_data.intermediate_sets.append(evolve_set);
+                    _step_data.progress = true;
                 }
             } else {
                 final_set.bound_time(timing_data.final_time);
@@ -1037,6 +1049,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
                     evolution_data.working_sets.append(evolve_set);
                     evolution_data.intermediate_sets.append(evolve_set);
+                    _step_data.progress = true;
                 }
             }
         }
@@ -1048,9 +1061,11 @@ _apply_evolution_step(EvolutionData& evolution_data,
             if(reach_set.time_range().upper()>timing_data.final_time) {
                 HybridEnclosure final_set=reach_set;
                 final_set.set_time(timing_data.final_time);
-                if(!definitely(final_set.empty())) {
+                if(timing_data.finishing_kind!=BEFORE_FINAL_TIME && !definitely(final_set.empty())) {
+                //if(!definitely(final_set.empty())) {
                     ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
                     evolution_data.final_sets.append(final_set);
+                    _step_data.finishing = true;
                 }
             }
             reach_set.bound_time(timing_data.final_time);
@@ -1113,16 +1128,21 @@ _apply_evolution_step(EvolutionData& evolution_data,
             }
         }
 
-        ARIADNE_LOG(1, "  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
+        ARIADNE_LOG(2, "  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         // Apply reset
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;
             if(!definitely(jump_set.empty())) {
                 jump_set.apply_reset(event,transitions[event].target,transitions[event].reset_function);
                 evolution_data.initial_sets.append(jump_set);
+                _step_data.events.insert(event);
                 ARIADNE_LOG(6, "jump_set="<<jump_set<<"\n");
             }
         }
+    }
+
+    if(verbosity==1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
+        ARIADNE_LOG(1,"\r  "<<(_step_data.finishing?"  finish":"")<<"  "<<_step_data.events<<(_step_data.progress?"":"  invariant")<<"\n");
     }
 
 }
@@ -1177,9 +1197,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // over part of the parameter domain.
     ScalarIntervalFunction const& starting_time=initial_set.time_function();
     Interval starting_time_range=initial_set.time_range();
-
     ScalarIntervalFunction remaining_time=Interval(final_time)-starting_time;
     Interval remaining_time_range=Interval(final_time)-starting_time_range;
+    ARIADNE_LOG(7,"remaining_time_range="<<std::fixed<<remaining_time_range<<" step_size="<<result.step_size<<"\n");
     if(remaining_time_range.upper()<=result.step_size) {
         // The rest of the evolution can be computed within a single time step.
         // The finishing kind is given as AT_FINAL_TIME so that the evolution algorithm
@@ -1192,7 +1212,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.finishing_kind=AT_FINAL_TIME;
         result.finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),Interval(final_time));
         result.evolution_time=Interval(final_time)-starting_time;
-    } else if(starting_time_range.upper()>final_time) {
+    } else if(remaining_time_range.lower()<0.0) {
         // Some of the points may already have reached the final time.
         // Don't try anything fancy, just to a simple full step.
         result.step_kind=CONSTANT_EVOLUTION_TIME;
@@ -1316,6 +1336,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.spacial_evolution_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),result.step_size);
         result.evolution_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),result.step_size);
     }
+    ARIADNE_LOG(7,"step_kind="<<result.step_kind<<", finishing_kind="<<result.finishing_kind<<"\n");
     return result;
 }
 

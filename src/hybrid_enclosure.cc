@@ -131,16 +131,16 @@ Interval
 HybridEnclosure::time_range() const
 {
     ARIADNE_LOG(8,"time_codomain="<<this->_time.codomain()<<" time_range="<<this->_time(this->_set._reduced_domain)<<"\n");
-    return this->_time.codomain();
-    //return this->_time(this->_set._reduced_domain);
+    //return this->_time.codomain();
+    return this->_time(this->_set._reduced_domain);
 }
 
 Interval
 HybridEnclosure::dwell_time_range() const
 {
     ARIADNE_LOG(8,"dwell_time_codomain="<<this->_dwell_time.codomain()<<" dwell_time_range="<<this->_dwell_time(this->_set._reduced_domain)<<"\n");
-    return this->_dwell_time.codomain();
-    //return this->_time(this->_set._reduced_domain);
+    //return this->_dwell_time.codomain();
+    return this->_dwell_time(this->_set._reduced_domain);
 }
 
 uint

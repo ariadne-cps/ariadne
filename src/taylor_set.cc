@@ -532,21 +532,10 @@ tribool TaylorConstrainedImageSet::inside(const Box& bx) const
 
 tribool TaylorConstrainedImageSet::subset(const Box& bx) const
 {
-    List<NonlinearConstraint> constraints=this->constraints();
-    ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(this->_reduced_domain,constraints);
+    this->reduce();
 
-    if(_reduced_domain.empty()) { return true; }
+    return Ariadne::subset(this->_function.evaluate(this->_reduced_domain),bx) || indeterminate;
 
-    for(uint i=0; i!=bx.dimension(); ++i) {
-        const Box test_domain=this->_reduced_domain;
-        constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].lower());
-        if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
-        constraints.back()=(ScalarTaylorFunction(this->_function[i]) >= bx[i].upper());
-        if(possibly(contractor.feasible(test_domain,constraints).first)) { return indeterminate; }
-        constraints.pop_back();
-    }
-    return true;
 }
 
 tribool TaylorConstrainedImageSet::disjoint(const Box& bx) const

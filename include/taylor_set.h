@@ -201,8 +201,16 @@ class TaylorConstrainedImageSet
     tribool subset(const Box& bx) const;
 
     //! \brief Reduces the size of the effective parameter domain
-    //! by pruning away infeasible points.
+    //! by pruning away infeasible points. Does not affect the set as a mathematical entity.
     void reduce() const;
+    //! \brief Reconditions the set to give an over-approximation with a simpler representation.
+    void recondition();
+    //! \brief Restrict the parameter domain to \a subdomain.
+    //! \details May also restrict the domain of the defining function models,
+    //! resulting in more accurate computations.
+    void restrict(const IntervalVector& subdomain);
+    //! \brief The set obtained by restricting to the \a subdomain.
+    TaylorConstrainedImageSet restriction(const Vector<Interval>& subdomain) const;
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreeSet outer_approximation(const Grid& grid, int depth) const;
@@ -245,10 +253,15 @@ class TaylorConstrainedImageSet
     //! approximation.
     AffineSet affine_over_approximation() const;
 
-    uint splitting_index_zeroth_order() const;
-    List<IntervalVector> splitting_subdomains_first_order() const;
+    //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
     List<IntervalVector> splitting_subdomains_zeroth_order() const;
+    //! \brief A collection of parameter subdomains chosen to make the set as close to affine as possible.
+    List<IntervalVector> splitting_subdomains_first_order() const;
+    //! \brief Split into subsets based on the given subdomains.
     List<TaylorConstrainedImageSet> split(const List<IntervalVector>& subdomains);
+
+    //! \brief The direction along which the set should be split to reduce the bounding box.
+    uint splitting_index_zeroth_order() const;
     //! \brief Split into two by splitting the parameter domain along
     //! the direction which reduces the size of the bounding box.
     Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split_zeroth_order() const;
@@ -261,14 +274,6 @@ class TaylorConstrainedImageSet
     //! \brief Split into two by splitting the parameter domain along
     //! the \a k<sup>th</sup> direction.
     Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split(uint k) const;
-    //! \brief Restrict the parameter domain to \a subdomain.
-    //! \details May also restrict the domain of the defining function models,
-    //! resulting in more accurate computations.
-    TaylorConstrainedImageSet restriction(const Vector<Interval>& subdomain) const;
-    //! \brief Restrict the parameter domain to \a subdomain.
-    //! \details May also restrict the domain of the defining function models,
-    //! resulting in more accurate computations.
-    void restrict(const Vector<Interval>& subdomain);
 
     //! \brief Draw to a canvas.
     void draw(CanvasInterface&) const;

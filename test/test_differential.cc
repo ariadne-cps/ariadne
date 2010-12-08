@@ -228,6 +228,7 @@ class TestDifferentialVector {
         ARIADNE_TEST_CALL(test_sub());
         ARIADNE_TEST_CALL(test_mul());
         ARIADNE_TEST_CALL(test_div());
+        ARIADNE_TEST_CALL(test_jacobian());
         ARIADNE_TEST_CALL(test_evaluate());
         ARIADNE_TEST_CALL(test_differentiate());
         ARIADNE_TEST_CALL(test_compose());
@@ -236,6 +237,10 @@ class TestDifferentialVector {
 
     void test_degree() {
         ARIADNE_TEST_ASSERT(x1.degree()==4);
+
+        // Regression test to check setting of degree for null vector
+        DifferentialVectorType dx(0u,2u,3u);
+        ARIADNE_TEST_EQUAL(dx.degree(),3u);
     }
 
     void test_add() {
@@ -268,6 +273,14 @@ class TestDifferentialVector {
         std::cout << "dv="<< dv << std::endl;
         std::cout << "v(c)" << evaluate(dv,c) << std::endl;
         std::cout << std::endl;
+    }
+
+    void test_jacobian() {
+        DifferentialVectorType dv(0u,2u,3u);
+        ARIADNE_TEST_ASSERT(dv.argument_size()==2u);
+        Matrix<Float> J=dv.jacobian();
+        ARIADNE_TEST_EQUALS(J.row_size(),dv.result_size());
+        ARIADNE_TEST_EQUALS(J.column_size(),dv.argument_size());
     }
 
     void test_differentiate() {

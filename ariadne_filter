@@ -6,6 +6,7 @@ s/\bunsigned long int\b/ulint/g
 s/\blong int\b/lint/g
 s/\bunsigned int\b/uint/g
 
+
 s/__gmp_expr<__gmpf_value, __gmpf_value>/MPFloat/g
 s/__gmp_expr<__gmpq_value, __gmpq_value>/Rational/g
 s/__gmp_expr<__gmpz_value, __gmpz_value>/Integer/g
@@ -39,10 +40,17 @@ s/ApproximateFloat<Float64>/ApproximateFloatMP/g
 s/Interval<Float64>/Interval64/g
 s/Interval<FloatMP>/IntervalMP/g
 
+s/__gmp_expr<__mpq_struct \[1\], __mpq_struct \[1\]>/Rational/g
+
+s/std::basic_string<char, std::char_traits<char>>/String/g
 s/std::basic_string<char, std::char_traits<char>, std::allocator<char>>/string/g
 s/std::basic_string<_CharT, _Traits, _Alloc>/string/g
 s/\[with _CharT = char, _Traits = std::char_traits<char>, _Alloc = std::allocator<char>\]//g
 s/_CharT/char/g
+
+s/Variable<String>/StringVariable/g
+s/Variable<Integer>/IntegerVariable/g
+s/Variable<Real>/RealVariable/g
 
 s/\/usr\/lib\/gcc\/.*\/include\/c++\/.\..\..\///g
 s/\.\.\/include\///g

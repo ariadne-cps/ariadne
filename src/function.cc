@@ -22,10 +22,10 @@
  */
 
 #include "numeric.h"
+#include "differential.h"
 #include "function.h"
 #include "affine.h"
 #include "polynomial.h"
-#include "differential.h"
 #include "taylor_model.h"
 #include "operators.h"
 #include "formula.h"
@@ -420,7 +420,8 @@ struct VectorAffineFunctionBody
     virtual SizeType result_size() const { return _A.row_size(); }
     virtual SizeType argument_size() const { return _A.column_size(); }
 
-    template<class X> void _compute(Vector<X>& r, const Vector<X>& x) const { r=prod(_A,x)+_b; }
+    template<class X> void _compute(Vector<X>& r, const Vector<X>& x) const {
+        for(uint i=0; i!=r.size(); ++i) { r[i]=_b[i]; for(uint j=0; j!=x.size(); ++j) { r[i]+=_A[i][j]*x[j]; } } }
 
     virtual Matrix<Real> jacobian(const Vector<Real>& x) const { return this->_A; }
 

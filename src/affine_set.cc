@@ -184,7 +184,7 @@ Box AffineSet::bounding_box() const {
 tribool AffineSet::disjoint(const Box& bx) const {
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
-    tribool feasible;
+    tribool feasible=indeterminate;
     try {
         feasible=SimplexSolver<Float>().constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }

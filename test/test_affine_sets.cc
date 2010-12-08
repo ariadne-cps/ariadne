@@ -137,7 +137,25 @@ class TestAffineSet
     }
 
 
+    void test_disjoint() {
+        Affine<Float> x0=Affine<Float>::variable(3,0);
+        Affine<Float> x1=Affine<Float>::variable(3,1);
+        Affine<Float> x2=Affine<Float>::variable(3,2);
+        AffineSet affine_set(Box::unit_box(3),(-0.9375+0.0625*x0+0.5*x1,0.87890625-0.1171875*x0+x1+0.00390625*x2));
+        affine_set.new_inequality_constraint(-1.1875+0.0625*x0+x1);
+        ARIADNE_TEST_PRINT(affine_set);
+        Box cell1(2, -1.0,-0.9375, 0.8125, 0.875); // subset
+        Box cell2(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
+        Box cell3(2, -1.1875,-1.125, 0.0625,0.125); // touches
+        Box cell4(2, -0.9999999,-0.9375, 0.4375,0.5); // almost touches
+        ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell1)));
+        ARIADNE_TEST_ASSERT(definitely(affine_set.disjoint(cell2)));
+        ARIADNE_TEST_ASSERT(!definitely(affine_set.disjoint(cell3)));
+        ARIADNE_TEST_ASSERT(possibly(affine_set.disjoint(cell4)));
+    }
+
     void test_outer_approximation() {
+
         G=Matrix<Float>(2,3, 2.0,3.0,1.0, 1.0,1.0,0.0);
         h=Vector<Float>(2, 0.05,2.051);
         set=AffineSet(G,h);
@@ -163,6 +181,8 @@ class TestAffineSet
         figure.draw(paving);
         figure.set_fill_colour(0.0,0.5,1.0);
         figure.draw(set);
+        figure.write("test_affine_set-outer_approximation-1");
+        figure.clear();
 
 
         // The following set has difficulties
@@ -183,8 +203,38 @@ class TestAffineSet
         figure.set_fill_colour(0.0,0.5,1.0);
         figure.draw(set);
 
-        figure.write("test_affine_set-outer_approximation");
+        figure.write("test_affine_set-outer_approximation-2");
+        figure.clear();
 
+        {
+            Affine<Float> x0=Affine<Float>::variable(3,0);
+            Affine<Float> x1=Affine<Float>::variable(3,1);
+            Affine<Float> x2=Affine<Float>::variable(3,2);
+            AffineSet affine_set(Box::unit_box(3),(-0.9375+0.0625*x0+0.5*x1,0.87890625-0.1171875*x0+x1+0.00390625*x2));
+            affine_set.new_inequality_constraint(-1.1875+0.0625*x0+x1);
+            GridTreeSet affine_set_paving = affine_set.outer_approximation(Grid(2),4);
+            affine_set_paving.recombine();
+            std::cout<<std::setprecision(17);
+            ARIADNE_TEST_PRINT(affine_set);
+            Box cell1(2, -1.0,-0.9375, 0.8125, 0.875); // subset
+            Box cell2(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
+            Box cell3(2, -1.1875,-1.125, 0.0625,0.125); // touches
+            Box cell4(2, -0.9999999,-0.9375, 0.4375,0.5); // almost touches
+            ARIADNE_TEST_ASSERT(affine_set_paving.superset(cell1));
+            ARIADNE_TEST_ASSERT(affine_set_paving.disjoint(cell2));
+            ARIADNE_TEST_ASSERT(affine_set_paving.overlaps(cell3));
+
+            figure.set_bounding_box(affine_set.bounding_box());
+            figure.set_fill_colour(1.0,0.0,0.0);
+            figure.draw(affine_set_paving);
+            figure.set_fill_colour(0.0,0.5,1.0);
+            figure.draw(affine_set);
+            figure.draw(cell1);
+            figure.draw(cell2);
+            //figure.draw(cell2);
+            //figure.draw(cell3);
+            figure.write("test_affine_set-outer_approximation-3");
+        }
     }
 
 
@@ -317,9 +367,11 @@ class TestAffineSet
 
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        ARIADNE_TEST_CALL(test_disjoint()); return;
         ARIADNE_TEST_CALL(test_empty());
         ARIADNE_TEST_CALL(test_pure_constraint());
         ARIADNE_TEST_CALL(test_constrained_image());
+        ARIADNE_TEST_CALL(test_disjoint());
         ARIADNE_TEST_CALL(test_outer_approximation());
         ARIADNE_TEST_CALL(test_draw());
     }

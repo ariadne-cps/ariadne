@@ -1433,7 +1433,10 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
     y=compute_y(c,p,B);
     ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
 
-    return fs;
+    tribool vfs = verify_constrained_feasibility(A,b,l,u,vt);
+    ARIADNE_ASSERT(indeterminate(vfs) || vfs==fs);
+
+    return vfs;
 }
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
@@ -1559,6 +1562,7 @@ SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c
 template<class X> tribool
 SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt)
 {
+    verbosity=9;
     ARIADNE_LOG(4,"verify_constrained_feasibility(Matrix A, Vector b, Vector l, Vector u, VariableTypeArray vt)\n");
     ARIADNE_LOG(5," A="<<A<<"\n b="<<b<<"\n l="<<l<<"\n u="<<u<<"\n t="<<vt<<"\n");
 
@@ -1584,8 +1588,8 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
     tribool fs=true;
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        //if(possibly(x[j]<=l[j]) || possibly(x[j]>=u[j])) {
-        if(possibly(x[j]<l[j]) || possibly(x[j]>u[j])) {
+        if(possibly(x[j]<=l[j]) || possibly(x[j]>=u[j])) {
+        //if(possibly(x[j]<l[j]) || possibly(x[j]>u[j])) { // Use this for non-strict feasibility
             ARIADNE_LOG(9," k="<<k<<" j="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<"\n");
             fs=indeterminate;
             break;

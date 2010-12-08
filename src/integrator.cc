@@ -63,13 +63,12 @@ IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& 
     const uint EXPANSION_STEPS=8;
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
-    const double LIPSCHITZ_CONSTANT_FRACTION=0.25;
 
     IntervalVector delta=(dx-midpoint(dx))*(BOX_RADIUS_MULTIPLIER-1);
 
     // Compute the Lipschitz constant over the initial box
     Float lip = norm(vf.jacobian(dx)).upper();
-    Float hlip = LIPSCHITZ_CONSTANT_FRACTION/lip;
+    Float hlip = this->_lipschitz_tolerance/lip;
 
     Float hmin=hmax/(1<<REDUCTION_STEPS);
     Float h=max(hmin,min(hmax,hlip));

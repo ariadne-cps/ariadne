@@ -47,9 +47,14 @@ class IntegratorBase
     , public Loggable
 {
   public:
-    IntegratorBase(uint to, double e) : _temporal_order(to), _maximum_error(e) { assert(e>0.0); }
+    IntegratorBase(uint to, double e) : _temporal_order(to), _maximum_error(e), _lipschitz_tolerance(0.5) { assert(e>0.0); }
+    //! \brief The order of the method in time.
     virtual void set_temporal_order(uint m) { this->_temporal_order=m; }
+    //! \brief A threshold for the error estimate of the approximation.
     virtual void set_maximum_error(double e) { assert(e>0.0); this->_maximum_error=e; }
+    //! \brief The fraction L(f)*h used for a time step.
+    //! The convergence of the Picard iteration is approximately Lf*h.
+    void set_lipschitz_tolerance(double lt) { _lipschitz_tolerance = lt; }
     uint temporal_order() const { return this->_temporal_order; }
     double maximum_error() const  { return this->_maximum_error; }
 
@@ -82,9 +87,11 @@ class IntegratorBase
   public:
     uint _temporal_order;
     double _maximum_error;
+    double _lipschitz_tolerance;
 };
 
 
+//! \brief An integrator which uses a validated Picard iteration on Taylor models.
 class TaylorIntegrator
     : public IntegratorBase
 {
@@ -93,6 +100,9 @@ class TaylorIntegrator
     TaylorIntegrator() : IntegratorBase(4,1e-4), _sweep_threshold(1e-8) { }
     TaylorIntegrator(uint to, double e, double sw=0.0) : IntegratorBase(to,e), _sweep_threshold(sw) {
         if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
+    // Set the sweep threshold of the Taylor model.
+    // Note: This method may be removed or modified in the future.
+    void set_sweep_threshold(double lt) { _sweep_threshold = lt; }
     virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }
 
     virtual VectorTaylorFunction

@@ -43,6 +43,7 @@ class TestHybridSet {
   private:
     void test_hybrid_image_set();
     void test_hybrid_list_set();
+    void test_hybrid_grid_set();
 };
 
 void
@@ -50,6 +51,7 @@ TestHybridSet::test()
 {
     ARIADNE_TEST_CALL(test_hybrid_image_set());
     ARIADNE_TEST_CALL(test_hybrid_list_set());
+    //ARIADNE_TEST_CALL(test_hybrid_grid_set());
 }
 
 
@@ -72,6 +74,24 @@ TestHybridSet::test_hybrid_image_set()
     ARIADNE_ASSERT_EQUAL(iter->second,ims2);
     ++iter;
     ARIADNE_ASSERT_EQUAL(iter->second,ims1);
+}
+
+void
+TestHybridSet::test_hybrid_grid_set()
+{
+    // Test compilation without correctness
+    Grid g;
+    GridTreeSet gts;
+    HybridGrid hg;
+    HybridGridTreeSet hgts;
+    DiscreteLocation loc;
+    hg.has_location(loc);
+    hg.insert(loc,g);
+    g=hg[loc];
+    
+    hgts.has_location(loc);
+    GridTreeSet const& gtscr = hgts[loc];
+    GridTreeSet& gtsr = hgts[loc]; 
 }
 
 

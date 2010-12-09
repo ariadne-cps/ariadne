@@ -30,9 +30,9 @@ HybridGrid::HybridGrid() : _grids(), _system_ptr(0) { }
 
 HybridGrid::HybridGrid(const HybridAutomatonInterface& ha) : _grids(),  _system_ptr(&ha) { }
 
-HybridGrid::HybridGrid(const HybridSpace& hs, double l) : _grids(), _system_ptr(0)  {
+HybridGrid::HybridGrid(const HybridSpace& hs) : _grids(), _system_ptr(0)  {
     for(HybridSpace::const_iterator iter=hs.begin(); iter!=hs.end(); ++iter) {
-        this->_grids.insert(iter->first,Grid(iter->second,l));
+        this->_grids.insert(iter->first,Grid(iter->second));
     }
 }
 
@@ -40,18 +40,20 @@ void HybridGrid::insert(DiscreteLocation q, const Grid& g) {
     this->_grids.insert(q,g);
 }
 
-Grid HybridGrid::operator[](const DiscreteLocation& loc) const {
-    if(_system_ptr!=0) { return _system_ptr->grid(loc); }
-    else { return this->_grids[loc]; }
+void HybridGrid::insert(const std::pair<DiscreteLocation,Grid>& qg) {
+    this->_grids.insert(qg);
 }
 
-Grid& HybridGrid::operator[](const DiscreteLocation& loc) {
-    if(_system_ptr!=0) { this->_grids[loc]=this->_system_ptr->grid(loc); return this->_grids[loc]; }
-    else { return this->_grids[loc]; }
+Grid HybridGrid::operator[](const DiscreteLocation& q) const {
+    if(this->_grids.has_key(q)) { return this->_grids[q]; }
+    if(_system_ptr!=0) { this->_grids.insert(q,_system_ptr->grid(q)); return this->_grids[q]; }
+
+    ARIADNE_THROW(std::runtime_error,"HybridGrid::operator[](DiscreteLocation)",
+                  "No location "<<q<<" in grid.");
 }
 
 bool HybridGrid::has_location(const DiscreteLocation& q) const {
-    return this->_grids.find(q) != this->_grids.end();
+    return this->_grids.has_key(q);
 }
 
 

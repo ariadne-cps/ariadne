@@ -23,6 +23,7 @@
 
 #include "discretiser.h"
 
+#include "stlio.h"
 #include "taylor_set.h"
 #include "orbit.h"
 #include "function_set.h"
@@ -48,7 +49,7 @@ outer_approximation(const ListSet<HybridBasicSet<ES> >& hls,
         {
             DiscreteLocation loc=iter->first;
             const ES& es=iter->second;
-            if(result.find(loc)==result.locations_end()) {
+            if(!result.has_location(loc)) {
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
             }
             GridTreeSet& gts=result[loc];

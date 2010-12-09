@@ -367,7 +367,6 @@ class TestAffineSet
 
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
-        ARIADNE_TEST_CALL(test_disjoint()); return;
         ARIADNE_TEST_CALL(test_empty());
         ARIADNE_TEST_CALL(test_pure_constraint());
         ARIADNE_TEST_CALL(test_constrained_image());

@@ -232,6 +232,14 @@ class SimplexSolver
     size_t lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s);
 
     //! \ingroup LinearProgrammingModule
+    //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
+    tribool validated_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
+
+    //! \ingroup LinearProgrammingModule
+    //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
+    bool validated_feasibility_step(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p);
+
+    //! \ingroup LinearProgrammingModule
     //! Compute the inverse of the matrix \a A<sub>B</sub> for basic variables given by the first m items of a p.
     template<class XX> Matrix<XX> compute_B(const Matrix<X>& A, const array<size_t>& p);
 

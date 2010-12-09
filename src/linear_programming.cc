@@ -826,13 +826,13 @@ compute_s_nocycling(const size_t m, const array<Slackness>& vt, const array<size
 
 // Compute the direction in which the basic variables move if non-basic variable is increased.
 // given by d=-B*A_s
-template<class X>
-Vector<X>
-compute_d(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B, const size_t ks)
+template<class X, class XX>
+Vector<XX>
+compute_d(const Matrix<X>& A, const array<size_t>& p, const Matrix<XX>& B, const size_t ks)
 {
     const size_t m=A.row_size();
     size_t js=p[ks];
-    Vector<X> d(m);
+    Vector<XX> d(m);
     for(size_t k=0; k!=m; ++k) {
         for(size_t i=0; i!=m; ++i) {
             d[k]-=B[k][i]*A[i][js];
@@ -841,6 +841,7 @@ compute_d(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B, const 
     return d;
 }
 
+template<> Interval inf<Interval>() { return Interval(inf<Float>()); }
 
 template<class X>
 pair<size_t,X>
@@ -887,6 +888,51 @@ compute_rt(const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, c
             //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
             if( tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
         } else if( d[k]*ds>CUTOFF_THRESHOLD && x[j]<=u[j] && u[j] != inf ) {
+            tk=(u[j]-x[j])/(ds*d[k]);
+            //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
+            if( tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
+        } else {
+            tk=inf;
+        }
+        ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
+    }
+    t*=ds;
+
+    if(r==n) {
+        // Problem is either highly degenerate or optimal do nothing.
+        ARIADNE_WARN("SimplexSolver<X>::compute_rt(...): "<<
+                     "Cannot find compute variable to exit basis\n"<<
+                     "  l="<<l<<" x="<<x<<" u="<<u<<" vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
+    }
+    return make_pair(r,t);
+}
+
+std::pair<size_t,Interval>
+compute_rt(const Vector<Float>& l, const Vector<Float>& u, const array<Slackness>& vt, const array<size_t>& p, const Vector<Interval>& x, const Vector<Interval>& d, const size_t s)
+{
+    typedef Float X;
+    typedef Interval XX;
+    const X inf=Ariadne::inf<X>();
+
+    // Choose variable to take out of basis
+    // If the problem is degenerate, choose the variable with smallest index
+    const size_t m=d.size();
+    const size_t n=x.size();
+    size_t r=n;
+    X ds=(vt[p[s]]==LOWER ? +1 : -1);
+    XX t=XX(u[p[s]])-XX(l[p[s]]);
+    if(definitely(t<inf)) { r=s; }
+    XX tk=0.0;
+    ARIADNE_LOG(7,"   l="<<l<<" x="<<x<<" u="<<u<<"\n");
+    ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
+    ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" l[p[s]]="<<l[p[s]]<<" u[p[s]]="<<u[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
+    for(size_t k=0; k!=m; ++k) {
+        size_t j=p[k];
+        if( definitely(d[k]*ds<0.0) && definitely(x[j]>=l[j]) && l[j] != -inf) {
+            tk=(l[j]-x[j])/(ds*d[k]);
+            //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
+            if( tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
+        } else if( definitely(d[k]*ds>0.0) && definitely(x[j]<=u[j]) && u[j] != inf ) {
             tk=(u[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
@@ -1060,6 +1106,117 @@ size_t lpenter(const Matrix<X>& A, const Vector<X>& c, const array<Slackness>& v
     ARIADNE_LOG(5,"  vt="<<vt<<" y="<<y<<" z="<<z<<" s="<<s<<" p[s]="<<p[s]<<"\n");
     return s;
 }
+
+
+template<class X>
+tribool
+SimplexSolver<X>::validated_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u)
+{
+    ARIADNE_LOG(4,"A="<<A<<" b="<<b<<"\n");
+    ARIADNE_LOG(4,"l="<<l<<" u="<<u<<"\n");
+
+    array<size_t> p(A.column_size());
+    array<Slackness> vt(A.column_size());
+    Matrix<X> B(A.row_size(),A.row_size());
+    make_lpair(p,B)=this->compute_basis(A);
+    vt=compute_vt(l,u,p,A.row_size());
+
+    bool done = false;
+    while(!done) {
+        done=this->validated_feasibility_step(A,b,l,u,vt,p);
+    }
+    return this->verify_constrained_feasibility(A,b,l,u,vt);
+}
+
+template<class X>
+bool
+SimplexSolver<X>::validated_feasibility_step(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p)
+{
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
+    static const X inf = Ariadne::inf<X>();
+
+    typedef Interval XX;
+
+    ARIADNE_LOG(9,"vt="<<vt<<" p="<<p<<"\n");
+    Matrix<XX> B=compute_B<XX>(A,p);
+    ARIADNE_LOG(9," B="<<B<<"\n");
+    Vector<XX> x=compute_x(A,b,l,u,vt,p,B);
+    ARIADNE_LOG(9," x="<<x<<"\n");
+
+    tribool feasible=true;
+
+    Vector<X> c(n);
+    Vector<X> ll(l);
+    Vector<X> uu(u);
+    for(uint i=0; i!=m; ++i) {
+        size_t j=p[i];
+        if(possibly(x[p[i]]<=l[p[i]])) { c[j]=-1; ll[j]=-inf; feasible=indeterminate; }
+        if(possibly(x[p[i]]>=u[p[i]])) { c[j]=+1; uu[j]=+inf; feasible=indeterminate; }
+    }
+    ARIADNE_LOG(9," c="<<c<<"\n");
+    if(definitely(feasible)) { return true; }
+
+    const Vector<XX> y=compute_y(c,p,B);
+    ARIADNE_LOG(9," y="<<y<<"\n");
+
+    const Vector<XX> z=compute_z(A,c,p,y);
+    ARIADNE_LOG(9," z="<<z<<"\n");
+
+    size_t s = n;
+    feasible=false;
+    for(size_t k=m; k!=n; ++k) {
+        size_t j=p[k];
+        if(vt[j]==LOWER) { if(possibly(z[j]<=0)) { feasible=indeterminate; if(definitely(z[j]<0)) { s=k; break; } } }
+        if(vt[j]==UPPER) { if(possibly(z[j]>=0)) { feasible=indeterminate; if(definitely(z[j]>0)) { s=k; break; } } }
+    }
+    ARIADNE_LOG(9," s="<<s<<"\n");
+    if(definitely(!feasible)) { return true; }
+    if(s==n) { ARIADNE_LOG(9," Cannot find variable to exit basis; no improvement can be made\n"); return true; }
+
+    Vector<XX> d=compute_d(A,p,B,s);
+    ARIADNE_LOG(9," d="<<d<<"\n");
+
+    // Compute distance t along d in which to move,
+    // and the variable p[r] to leave the basis
+    // The bounds on t are given by l <= x + t * d <= u
+    // Note that t is negative if an upper variable enters the basis
+    size_t r; XX t;
+    make_lpair(r,t)=compute_rt(l,u,vt,p,x,d,s);
+    if(r==n) {
+        ARIADNE_LOG(3,"   Cannot find variable to enter basis; no improvement can be made\n");
+        return true;
+    }
+
+    ARIADNE_LOG(5,"  s="<<s<<" p[s]="<<p[s]<<" r="<<r<<" p[r]="<<p[r]<<" d="<<d<<" t="<<t<<"\n");
+
+    if(r==s) {
+        // Update variable type
+        if(vt[p[s]]==LOWER) { vt[p[s]]=UPPER; }
+        else { vt[p[s]]=LOWER; }
+    } else {
+        // Variable p[r] should leave basis, and variable p[s] enter
+        ARIADNE_ASSERT(r<m);
+
+        // Update pivots and variable types
+        vt[p[s]] = BASIS;
+        if(d[r]*t>0) {
+            vt[p[r]] = UPPER;
+        } else if(d[r]*t<0) {
+            vt[p[r]] = LOWER;
+        } else {
+            size_t pr=p[r];
+            ARIADNE_ASSERT(x[pr]==l[pr] || x[pr]==u[pr]);
+            if(x[pr]==l[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
+        }
+
+        std::swap(p[r],p[s]);
+    }
+
+    return false;
+
+}
+
 
 
 template<class X>
@@ -1240,9 +1397,12 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
     Vector<X> ll(l);
     Vector<X> uu(u);
 
+    // It seems that using this threshold does not work...
+    static const double ROBUST_FEASIBILITY_THRESHOLD = std::numeric_limits<double>::epsilon() * 0;
+
     bool infeasible=false;
     for(size_t j=0; j!=n; ++j) {
-        // If x[j] is infeasible by way of being to low, relax constraint x[j]>=l[j] to x[j]>=-inf.
+        // If x[j] is (almost) infeasible by way of being to low, relax constraint x[j]>=l[j] to x[j]>=-inf.
         if(x[j]<l[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
         else if(x[j]>u[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
         else { cc[j]=0; }
@@ -1271,8 +1431,8 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
         for(size_t j=0; j!=n; ++j) {
             if(vt[j]==LOWER) { ARIADNE_ASSERT(x[j]==l[j]); }
             if(vt[j]==UPPER) { ARIADNE_ASSERT(x[j]==u[j]); }
-            if(x[j]<l[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
-            else if(x[j]>u[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
+            if(x[j]<l[j]+ROBUST_FEASIBILITY_THRESHOLD) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
+            else if(x[j]>u[j]-ROBUST_FEASIBILITY_THRESHOLD) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
             else { cc[j]=0; ll[j]=l[j]; uu[j]=u[j]; }
         }
         ARIADNE_LOG(9,"\n    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
@@ -1398,9 +1558,14 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
 
     tribool fs = _constrained_feasible(A,b,l,u,vt,p,B,x);
     tribool vfs = verify_constrained_feasibility(A,b,l,u,vt);
-    ARIADNE_ASSERT(indeterminate(vfs) || vfs==fs);
+    if(!indeterminate(vfs) && vfs!=fs) {
+        if(verbosity>0) {
+            ARIADNE_WARN("Approximate feasibility algorithm for\n  A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\nyielded basic variables "<<vt<<
+                         " and result "<<fs<<", but validation code gave "<<vfs<<".\n");
+        }
+    }
 
-    return vfs;
+    return fs;
 }
 
 
@@ -1434,9 +1599,14 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
     ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
 
     tribool vfs = verify_constrained_feasibility(A,b,l,u,vt);
-    ARIADNE_ASSERT(indeterminate(vfs) || vfs==fs);
+    if(!indeterminate(vfs) && vfs!=fs) {
+        if(verbosity>0) {
+            ARIADNE_WARN("Approximate feasibility algorithm for\n  A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\nyielded basic variables "<<vt<<
+                         " and result "<<fs<<", but validation code gave "<<vfs<<".\n");
+        }
+    }
 
-    return vfs;
+    return fs;
 }
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
@@ -1559,6 +1729,13 @@ SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c
     return false;
 }
 
+
+// A point x is strictly feasible for the basis B with lower variables L and upper variables U if
+//   x_B = A_B^{-1} (b - A_L x_L - A_U x_U) is definitely within (x_B), the open interval (x_BL,x_BU).
+// To prove infeasibility, choose a vector c (typically c_L=c_U=0, (c_B)_i = +1 if x_i>u_i and -1 if x_i<u_i)
+// and set dual vector y = c_B A_B^{-1} .
+//  y (b - A_L x_L - A_U x_U) > 0
+//  z = c - y A  satisfies z_U < 0 and z_L > 0; by construction z_B = 0.
 template<class X> tribool
 SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt)
 {
@@ -1573,12 +1750,17 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
     ARIADNE_ASSERT(u.size()==n);
     ARIADNE_ASSERT(vt.size()==n);
 
+    // Ensure singleton constraints for x are non-basic
+    for(size_t j=0; j!=n; ++j) {
+        if(l[j]==u[j]) { ARIADNE_ASSERT(!vt[j]==BASIS);}
+    }
+
     const array<size_t> p=compute_p(vt);
     ARIADNE_LOG(9," p="<<p<<"\n");
 
     const Matrix<XX> B=compute_B<XX>(A,p);
 
-    ARIADNE_LOG(9," B="<<midpoint(B)<<"\n   B*A="<<midpoint(prod(B,A))<<"\n");
+    ARIADNE_LOG(9," B="<<B<<"\n   B*A="<<midpoint(prod(B,A))<<"\n");
 
     const Vector<XX> x=compute_x(A,b,l,u,vt,p,B);
 
@@ -1602,18 +1784,28 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
     Vector<X> c(n);
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        //if(possibly(x[j]<=l[j])) { c[j]=-1; }
-        //if(possibly(x[j]>=u[j])) { c[j]=+1; }
-        if(possibly(x[j]<l[j])) { c[j]=-1; }
-        if(possibly(x[j]>u[j])) { c[j]=+1; }
+        if(possibly(x[j]<=l[j])) { c[j]=-1; }
+        else if(possibly(x[j]>=u[j])) { c[j]=+1; }
+        if(possibly(x[j]<l[j]) && possibly(x[j]>u[j])) {
+            ARIADNE_FAIL_MSG("Unhandled case in checking feasibility of linear program. Basic variable x["<<j<<"]="<<x[j]<<" may violate both lower bound "<<l[j]<<" and upper bound "<<u[j]<<".");
+        }
     }
-    ARIADNE_LOG(9," c="<<midpoint(c)<<"\n");
+    ARIADNE_LOG(9," c="<<c<<"\n");
 
     const Vector<XX> y=compute_y(c,p,B);
     ARIADNE_LOG(9," y="<<y<<"\n");
 
     const Vector<XX> z=compute_z(A,c,p,y);
     ARIADNE_LOG(9," z="<<z<<"\n");
+
+/*
+    // Check to see if a reduction can definitely be made
+    for(size_t k=m; k!=n; ++k) {
+        size_t j=p[k];
+        if(vt[j]==LOWER && definitely(z[j]<0)) { ARIADNE_FAIL_MSG("Nondegenerate point"); }
+        if(vt[j]==UPPER && definitely(z[j]>0)) { ARIADNE_FAIL_MSG("Nondegenerate point"); }
+    }
+*/
 
     for(size_t k=m; k!=n; ++k) {
         size_t j=p[k];

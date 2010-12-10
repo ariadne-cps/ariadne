@@ -261,9 +261,9 @@ class HybridEvolverBase
     //! final time which should be attained at the end of the evolution.
     //!
     //! \post
-    //! If the step_kind is SPACE_DEPENDENT_EVOLUTION_TIME, then the evolution_time must evaluate
+    //! If the step_kind is SPACETIME_DEPENDENT_EVOLUTION_TIME, then the evolution_time must evaluate
     //!   a value in [0,h] over the initial_set, where \f$h\f$ is
-    //!   the \a step_size. In other words, \f$\varepsilon(\xi(s))\in[0,h]\f$
+    //!   the \a step_size. In other words, \f$\varepsilon(\xi(s),\tau(s))\in[0,h]\f$
     //!   whenever \f$s\f$ is a valid parameter.
     //! If the step_kind is PARAMETER_DEPENDENT_FINISHING_TIME, then \f$(\omega(s)-\tau(s))\in[0,h]\f$
     //!   whenever \f$s\f$ is a valid parameter.
@@ -547,13 +547,18 @@ struct TimingData
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
     Float step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
-    ScalarIntervalFunction spacial_evolution_time; //!< The evolution time \f$\varepsilon(x)\f$ used in a \a SPACE_DEPENDENT_EVOLUTION_TIME step.
-    ScalarIntervalFunction finishing_time; //!< The time \f$\omega(s)\f$ reached after an \a PARAMETER_DEPENDENT_FINISHING_TIME as a function of the parameters.
-    ScalarIntervalFunction evolution_time; //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
+    ScalarIntervalFunction spacetime_dependent_evolution_time;
+        //!< The evolution time \f$\varepsilon(x,t)\f$ used in a \a SPACETIME_DEPENDENT_EVOLUTION_TIME step.
+    ScalarIntervalFunction spacetime_dependent_finishing_time;
+        //!< The final time \f$\omega(x,t)\f$ used in a \a SPACETIME_DEPENDENT_FINISHING_TIME step.
+    ScalarIntervalFunction parameter_dependent_finishing_time;
+        //!< The time \f$\omega(s)\f$ reached after an \a PARAMETER_DEPENDENT_FINISHING_TIME as a function of the parameters.
+    ScalarIntervalFunction parameter_dependent_evolution_time;
+        //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
         //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
         //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
-    Interval time_domain; //!< The time domain, equal to \f$[0,h]\f$.
-    ScalarIntervalFunction time_coordinate; //!< The time coordinate function, equal to the identity on \f$[0,h]\f$.
+    Interval evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
+    ScalarIntervalFunction evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.

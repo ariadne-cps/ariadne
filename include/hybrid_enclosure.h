@@ -181,6 +181,10 @@ class HybridEnclosure
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     void apply_reset(DiscreteEvent e, DiscreteLocation q, RealVectorFunction r);
+    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
+    void apply_spacetime_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
+    //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
+    void apply_spacetime_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     void apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)

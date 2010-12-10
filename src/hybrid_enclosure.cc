@@ -269,6 +269,28 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_dwell_time=0.0;
 }
 
+void HybridEnclosure::apply_spacetime_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+{
+    // xi'(s) = phi(xi(s),eps(s)) where range(eps) in [0,h]
+    // tau'(s) = tau(s)+eps(s)
+    ARIADNE_ASSERT(phi.result_size()==this->dimension());
+    ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
+    ARIADNE_ASSERT(elps.argument_size()==this->dimension()+1);
+    ScalarIntervalFunction delta = unchecked_compose(elps,join(this->_set._function,this->_time));
+    this->apply_evolve_step(phi,delta);
+}
+
+void HybridEnclosure::apply_spacetime_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+{
+    // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
+    // tau'(s) = tau(s)+t
+    ARIADNE_ASSERT(phi.result_size()==this->dimension());
+    ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
+    ARIADNE_ASSERT(elps.argument_size()==this->dimension()+1);
+    ScalarIntervalFunction delta = unchecked_compose(elps,join(this->_set._function,this->_time));
+    this->apply_reach_step(phi,delta);
+}
+
 void HybridEnclosure::apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
 {
     // xi'(s) = phi(xi(s),eps(s)) where range(eps) in [0,h]

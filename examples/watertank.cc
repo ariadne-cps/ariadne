@@ -146,19 +146,29 @@ int main(int argc, const char* argv[])
     EnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
-    //HybridTime evolution_time(90.0,6);
     HybridTime evolution_time(80.0,10);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final_size="<<orbit.final().size()<<std::endl;
     std::cout << "Orbit.reach_size="<<orbit.reach().size()<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
+
     std::cout << "Plotting orbit... "<<std::flush;
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
+
+    std::cout << "Discretising orbit" << std::flush;
+	HybridGridTreeSet hgts(watertank_system.grid());
+	for (ListSet<EnclosureType>::const_iterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
+	{
+		std::cout<<"."<<std::flush;
+		it->adjoin_outer_approximation_to(hgts,4);
+	}
+    std::cout << "done." << std::endl;
+
+	plot("watertank-reach",bounding_box, Colour(0.0,0.5,1.0), hgts);
 
 /*
     std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;

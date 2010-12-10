@@ -315,7 +315,7 @@ inline std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>
     return os << hls._list;
 }
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, uint d);
+HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, int d);
 void draw(FigureInterface& figure, const ListSet<HybridEnclosure>& he);
 
 

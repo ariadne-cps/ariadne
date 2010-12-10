@@ -51,6 +51,12 @@ extern DrawingMethod DRAWING_METHOD;
 //! HACK: May be replaced by more advanced functionality in the future.
 extern unsigned int DRAWING_ACCURACY;
 
+//! \related TaylorConstrainedImageSet \brief The possible types of method used to discretise a nonlinear set.
+enum DiscretisationMethod { SUBDIVISION_DISCRETISE, AFFINE_DISCRETISE, CONSTRAINT_DISCRETISE };
+//! \related TaylorConstrainedImageSet \brief The type of method currently used to discretise a nonlinear set.
+//! HACK: May be replaced by more advanced functionality in the future.
+extern DiscretisationMethod DISCRETISATION_METHOD;
+
 class Float;
 class Interval;
 template<class X> class Vector;

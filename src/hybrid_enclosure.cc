@@ -490,10 +490,16 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
 }
 
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, uint d) {
+void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, int depth) const {
+    const TaylorConstrainedImageSet& set = this->continuous_state_set();
+    GridTreeSet& paving = hgts[this->location()];
+    set.adjoin_outer_approximation_to(paving,depth);
+}
+
+HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, int depth) {
     HybridGridTreeSet result(g);
     for(ListSet<HybridEnclosure>::const_iterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result[iter->location()].adjoin_outer_approximation(iter->continuous_state_set(),d);
+        result[iter->location()].adjoin_outer_approximation(iter->continuous_state_set(),depth);
     }
     return result;
 }

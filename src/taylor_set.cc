@@ -66,6 +66,7 @@ namespace Ariadne {
 static const uint verbosity = 0u;
 
 DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
+DiscretisationMethod DISCRETISATION_METHOD=SUBDIVISION_DISCRETISE;
 unsigned int DRAWING_ACCURACY=1u;
 
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
@@ -1129,9 +1130,19 @@ void adjoin_outer_approximation(GridTreeSet&, const Box& domain, const IntervalV
 
 void TaylorConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
-    //this->affine_adjoin_outer_approximation_to(paving,depth);
-    this->constraint_adjoin_outer_approximation_to(paving,depth);
-    //this->this->_adjoin_outer_approximation_to(paving,this->bounding_box(),depth);
+    switch(DISCRETISATION_METHOD) {
+        case SUBDIVISION_DISCRETISE:
+            this->subdivision_adjoin_outer_approximation_to(paving,depth);
+            break;
+        case AFFINE_DISCRETISE:
+            this->affine_adjoin_outer_approximation_to(paving,depth);
+            break;
+        case CONSTRAINT_DISCRETISE:
+            this->constraint_adjoin_outer_approximation_to(paving,depth);
+            break;
+        default:
+            ARIADNE_FAIL_MSG("Unknown discretisation method\n");
+    }
 }
 
 void TaylorConstrainedImageSet::subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
@@ -1150,6 +1161,9 @@ IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f) {
 
 void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int acc) const
 {
+    uint verbosity=7;
+    ARIADNE_LOG(6,"TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(paving, depth)\n");
+    ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<acc<<"\n");
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
     const VectorTaylorFunction& f=this->function();

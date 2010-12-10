@@ -597,20 +597,6 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 
 
 std::ostream&
-ScalarTaylorFunction::repr(std::ostream& os) const
-{
-    ScalarTaylorFunction truncated_function=*this;
-    truncated_function.set_error(0.0);
-    truncated_function.sweep(TAYLOR_FUNCTION_WRITING_ACCURACY);
-
-    os << midpoint(truncated_function.polynomial());
-    if(truncated_function.error()>0.0) { os << "+/-" << truncated_function.error(); }
-    if(this->error()>0.0) { os << "+/-" << this->error(); }
-    // TODO: Use Unicode +/- literal when this becomes avaialable in C++0x
-    return os;
-}
-
-std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
     os << "ScalarTaylorFunction"<< this->domain()
@@ -624,6 +610,58 @@ std::ostream&
 operator<<(std::ostream& os, const ScalarTaylorFunction& tf)
 {
     return tf.write(os);
+}
+
+std::ostream& operator<<(std::ostream& os, const Representation<ScalarTaylorFunction>& frepr)
+{
+    ScalarTaylorFunction const& function=*frepr.pointer;
+    ScalarTaylorFunction truncated_function=function;
+    truncated_function.set_error(0.0);
+    truncated_function.sweep(TAYLOR_FUNCTION_WRITING_ACCURACY);
+
+    os << midpoint(truncated_function.polynomial());
+    if(truncated_function.error()>0.0) { os << "+/-" << truncated_function.error(); }
+    if(function.error()>0.0) { os << "+/-" << function.error(); }
+    // TODO: Use Unicode +/- literal when this becomes avaialable in C++0x
+    return os;
+}
+
+/*
+std::ostream& operator<<(std::ostream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
+{
+    ScalarTaylorFunction const& f=*frepr.pointer;
+    Float truncatation_error = 0.0;
+    os << "<"<<f.domain()<<"\n";
+    for(IntervalTaylorModel::const_iterator iter=f.begin(); iter!=f.end(); ++iter) {
+        if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
+        else { os << iter->key() << ":" << iter->data() << ","; }
+    }
+    os << "+/-" << truncatation_error << "+/-" << f.error();
+    return os;
+}
+*/
+
+std::ostream& operator<<(std::ostream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
+{
+    ScalarTaylorFunction const& f=*frepr.pointer;
+    ScalarTaylorFunction tf=f;
+    tf.clobber();
+    tf.sweep(frepr.threshold);
+    os << "("<<tf.model()<<"+/-"<<f.error();
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<ScalarTaylorFunction>& frepr)
+{
+    ScalarTaylorFunction const& function=*frepr.pointer;
+    ScalarTaylorFunction truncated_function = function;
+    truncated_function.clobber();
+    truncated_function.sweep(frepr.threshold);
+    Float truncatation_error = truncated_function.error();
+    truncated_function.clobber();
+    Polynomial<Float> polynomial_function = midpoint(polynomial(truncated_function));
+    os << polynomial_function << "+/-" << truncatation_error << "+/-" << function.error();
+    return os;
 }
 
 
@@ -1629,13 +1667,35 @@ VectorTaylorFunction::write(std::ostream& os) const
     return os << "VectorTaylorFunction(d=" << this->domain() << ", p~" << midpoint(this->polynomial()) << ", e=" << this->errors() << ", m=" << this->models() << ")";
 }
 
-std::ostream&
-VectorTaylorFunction::repr(std::ostream& os) const
+std::ostream& operator<<(std::ostream& os, const Representation<VectorTaylorFunction>& repr)
 {
+    const VectorTaylorFunction& function = *repr.pointer;
     os << "[";
-    for(uint i=0; i!=this->result_size(); ++i) {
+    for(uint i=0; i!=function.result_size(); ++i) {
         if(i!=0) { os << ","; }
-        (*this)[i].repr(os);
+        os << Ariadne::repr(function[i]);
+    }
+    return os << "]";
+}
+
+std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<VectorTaylorFunction>& repr)
+{
+    const VectorTaylorFunction& function = *repr.pointer;
+    os << "[";
+    for(uint i=0; i!=function.result_size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << polynomial_repr(function[i],repr.threshold);
+    }
+    return os << "]";
+}
+
+std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation< List<ScalarTaylorFunction> >& repr)
+{
+    const List<ScalarTaylorFunction>& functions = *repr.pointer;
+    os << "[";
+    for(uint i=0; i!=functions.size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << polynomial_repr(functions[i],repr.threshold);
     }
     return os << "]";
 }

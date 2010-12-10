@@ -56,11 +56,6 @@ class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorFunctionFactory;
 
-template<class T> struct Representation {
-    Representation(const T& v) : reference(v) { }
-    const T& reference;
-};
-template<class T> Representation<T> repr(const T& t) { return t; }
 
 template<class X> inline X unscale(const X& x, const Interval& d) {
     Real c(add_ivl(d.lower()/2,d.upper()/2));
@@ -437,8 +432,6 @@ class ScalarTaylorFunction
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
-    //! \brief Write a shortened representation as a polynomial to an output stream.
-    std::ostream& repr(std::ostream& os) const;
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const ScalarTaylorFunction& x);
     //@}
@@ -551,8 +544,6 @@ inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Vector<
     return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
 inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTaylorFunction& tv2) {
     return ScalarTaylorFunction(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
-
-inline std::ostream& operator<<(std::ostream& os, const Representation<ScalarTaylorFunction>& r) { return r.reference.repr(os); }
 
 
 
@@ -736,8 +727,6 @@ class VectorTaylorFunction
 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
-    //! \brief Write a shortened representation as a polynomial function to an output stream.
-    std::ostream& repr(std::ostream& os) const;
 
     /*! \brief Inplace addition. */
     friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
@@ -867,12 +856,27 @@ VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFu
 Float norm(const VectorTaylorFunction& f);
 
 std::ostream& operator<<(std::ostream&, const VectorTaylorFunction&);
-inline std::ostream& operator<<(std::ostream& os, const Representation<VectorTaylorFunction>& r) { return r.reference.repr(os); }
 
 // Conversion operatations
 Polynomial<Interval> polynomial(const ScalarTaylorFunction& tfn);
 Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn);
 List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns);
+
+// Sanitised output
+template<class T> struct Representation { const T* pointer; };
+template<class T> Representation<T> repr(const T& t) { Representation<T> r={&t}; return r; }
+std::ostream& operator<<(std::ostream&, const Representation<ScalarTaylorFunction>&);
+std::ostream& operator<<(std::ostream&, const Representation<VectorTaylorFunction>&);
+template<class F> struct ModelsRepresentation { const F* pointer; double threshold; };
+template<class F> ModelsRepresentation<F> model_repr(const F& f, double swpt) { ModelsRepresentation<F> r={&f,swpt}; return r; }
+std::ostream& operator<<(std::ostream&,const ModelsRepresentation<ScalarTaylorFunction>&);
+std::ostream& operator<<(std::ostream&,const ModelsRepresentation< List<ScalarTaylorFunction> >&);
+std::ostream& operator<<(std::ostream&,const ModelsRepresentation<VectorTaylorFunction>&);
+template<class F> struct PolynomialRepresentation { const F* pointer; double threshold; };
+template<class F> PolynomialRepresentation<F> polynomial_repr(const F& f, double swpt) { PolynomialRepresentation<F> r={&f,swpt}; return r; }
+std::ostream& operator<<(std::ostream&,const PolynomialRepresentation<ScalarTaylorFunction>&);
+std::ostream& operator<<(std::ostream&,const PolynomialRepresentation< List<ScalarTaylorFunction> >&);
+std::ostream& operator<<(std::ostream&,const PolynomialRepresentation<VectorTaylorFunction>&);
 
 
 template<class E> VectorTaylorFunction::VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve)            : _domain(), _models(ve().size())

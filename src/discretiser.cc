@@ -261,7 +261,8 @@ typename HybridDiscretiser<HES>::EnclosureType
 HybridDiscretiser<HES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-    return EnclosureType(initial_set.first,initial_set.second.box());
+    ContinuousEnclosureType continuous_enclosure(initial_set.second.box());
+    return EnclosureType(initial_set.first,continuous_enclosure);
 }
 
 template<class HES>

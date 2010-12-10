@@ -70,6 +70,11 @@ HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& bo
 {
 }
 
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set)
+    : _location(location), _events(), _set(set), _time(ScalarIntervalFunction::constant(_set._domain,0.0)), _dwell_time(_time)
+{
+}
+
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set, const ScalarTaylorFunction& time)
     : _location(location), _events(), _set(set),
       _time(Ariadne::restrict(time,set.domain())), _dwell_time(set.domain())
@@ -473,6 +478,13 @@ void HybridEnclosure::draw(CanvasInterface& canvas) const
     this->continuous_state_set().draw(canvas);
 }
 
+std::ostream& operator<<(std::ostream& os, const Representation< List<ScalarIntervalFunction> >& fns_repr)
+{
+    List<ScalarIntervalFunction> const& fns = *fns_repr.pointer;
+    os<<"<"<<fns.size()<<">[";
+    for(uint i=0; i!=fns.size(); ++i) { os << (i==0?"":",")<<(fns[i].range()); }
+    return os<<"]";
+}
 
 std::ostream& HybridEnclosure::write(std::ostream& os) const
 {
@@ -482,11 +494,25 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
               << ", range=" << this->_set._function(this->_set._domain)
               << ", domain=" << this->_set._domain
               << ", subdomain=" << this->_set._reduced_domain
-              << ", empty=" << this->empty()
-              << ", state=" << polynomial(this->_set._function)
-              << ", negative=" << polynomials(this->_set._constraints)
-              << ", zero=" << polynomials(this->_set._equations)
-              << ", time="<<polynomial(this->_time) << ")";
+              << ", empty=" << Ariadne::empty(this->_set._reduced_domain)
+              << ", state=" << Ariadne::repr(this->_set._function)
+              << ", negative=" << Ariadne::repr(this->_set._constraints)
+              << ", zero=" << Ariadne::polynomial_repr(this->_set._equations,1e-1)
+              << ", time="<< Ariadne::model_repr(this->_time,1e-1) << ")";
+}
+
+std::ostream& HybridEnclosure::repr(std::ostream& os) const
+{
+    return os << "HybridEnclosure"
+              << "( events=" << this->_events
+              << ", location=" << this->_location
+              << ", range=" << this->_set._function(this->_set._domain)
+              << ", domain=" << this->_set._domain
+              << ", subdomain=" << this->_set._reduced_domain
+              << ", subdomain=" << this->_set.reduced_domain()
+              << ", #negative=" << this->_set._constraints.size()
+              << ", #zero=" << this->_set._equations.size()
+              << ", time_range="<<this->time_range() << ")";
 }
 
 
@@ -511,7 +537,7 @@ draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
     }
 }
 
-ListSet<HybridEnclosure::ContinuousStateSetType> 
+ListSet<HybridEnclosure::ContinuousStateSetType>
 ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
 {
     ListSet<HybridEnclosure::ContinuousStateSetType> result;

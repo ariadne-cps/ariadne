@@ -132,6 +132,8 @@ class HybridEvolverBase
     //! \brief A constant reference to the parameters controlling the evolution.
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
+    bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
+    bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
     //@}
 
 
@@ -515,6 +517,8 @@ enum StepKind {
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\delta(s))\f$ and \f$\tau'(s)=\tau(s)+\delta(s)\f$.
     PARAMETER_DEPENDENT_FINISHING_TIME, //!< The step is taken up to a time \f$\omega(s)\f$ depending on the parameterisation of the starting set.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
+    SPACETIME_DEPENDENT_FINISHING_TIME, //!< The step is taken up to a time \f$\omega(x,t)\f$ depending only on the current state (space and time).
+      //! After the step, we have \f$\xi'(s) = \phi(\xi(s),\omega(\xi(s),\tau(s)-\tau(s)))\f$ and \f$\tau'(s)=\omega(\xi(s),\tau(s))\f$.
     CONSTANT_FINISHING_TIME, //!< The step is taken up to the specified evolution time \f$t_{\max}\f$. The actual step length depends on the parameterisation.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),t_{\max}-\tau(s))\f$ and \f$\tau'(s)=t_{\max}\f$.
 };

@@ -111,10 +111,10 @@ std::ostream& operator<<(std::ostream& os, const TimingData& timing) {
 std::ostream& operator<<(std::ostream& os, const CrossingData& crossing_data) {
     os << "kind="<<crossing_data.crossing_kind;
     if(crossing_data.crossing_kind==TRANSVERSE_CROSSING) {
-        os << ", crossing_time="<<crossing_data.crossing_time.polynomial();
+//        os << ", crossing_time="<<crossing_data.crossing_time.polynomial();
     }
     if(crossing_data.crossing_kind==GRAZING_CROSSING) {
-        os << ", critical_time="<<crossing_data.critical_time.polynomial();
+//        os << ", critical_time="<<crossing_data.critical_time.polynomial();
     }
     return os;
 }
@@ -258,10 +258,12 @@ _log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const
             <<" c="<<starting_bounding_box.centre()
             <<" r="<<std::setw(4)<<std::fixed<<std::setprecision(3)<<starting_bounding_box.radius()
             <<" te="<<std::setw(7)<<std::scientific<<std::setprecision(1)<<starting_set.time_function().error()<<std::flush
-            <<" se="<<std::setw(7)<<std::scientific<<std::setprecision(1)<<sup_norm(starting_set.space_function().errors())<<std::flush
+            <<" se="<<std::setw(7)<<std::scientific<<std::setprecision(1)<<sup_norm(starting_set.space_function().errors())<<std::fixed<<std::flush
             <<" l="<<std::left<<starting_set.location()
             <<" e="<<starting_set.previous_events()
             <<"                      \n");
+    ARIADNE_LOG(2,"\r    \r"<<starting_set<<"\n");
+
 }
 
 Map<DiscreteEvent,TransitionData>
@@ -682,6 +684,7 @@ _apply_guard(List<HybridEnclosure>& sets,
              const CrossingData crossing_data,
              const Semantics semantics) const
 {
+    uint verbosity=7;
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
     const RealScalarFunction& guard_function=transition_data.guard_function;
@@ -712,6 +715,14 @@ _apply_guard(List<HybridEnclosure>& sets,
                     = compose( guard_function, unchecked_compose( flow, join(starting_state, elapsed_time) ) );
                 ScalarIntervalFunction maximal_guard
                     = compose( guard_function, unchecked_compose( flow, join(starting_state, critical_time) ) );
+                ARIADNE_ASSERT_MSG(starting_state.argument_size()==set.parameter_domain().size(),
+                                   starting_state<<" "<<set);
+                ARIADNE_ASSERT_MSG(critical_time.argument_size()==set.parameter_domain().size(),
+                                   critical_time<<" "<<set);
+                ARIADNE_ASSERT_MSG(maximal_guard.argument_size()==set.parameter_domain().size(),
+                                   maximal_guard<<" "<<set);
+                ARIADNE_ASSERT_MSG(final_guard.argument_size()==set.parameter_domain().size(),
+                                   final_guard<<" "<<set);
                 // If no points in the set arise from trajectories which will later leave the progress set,
                 // then we only need to look at the maximum value of the guard.
                 HybridEnclosure eventually_hitting_set=set;
@@ -887,7 +898,9 @@ _evolution_step(EvolutionData& evolution_data,
     // Test to see if set is too large
     if(starting_bounding_box.radius()>this->_parameters->maximum_enclosure_radius) {
         ARIADNE_LOG(1,"\r  splitting\n");
-        List<HybridEnclosure> split_sets = starting_set.split();
+        HybridEnclosure reconditioned_set=starting_set;
+        reconditioned_set.recondition();
+        List<HybridEnclosure> split_sets = reconditioned_set.split();
         for(uint i=0; i!=split_sets.size(); ++i) {
             if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
         }
@@ -939,8 +952,18 @@ _apply_evolution_step(EvolutionData& evolution_data,
     //ARIADNE_LOG(4,"evolution_time="<<evolution_time.range()<<" final_time="<<final_time<<"\n");
 
     EvolutionStepData _step_data;
+    HybridEnclosure starting_set_copy=starting_set;
+    tribool starting_set_empty=starting_set_copy.empty();
 
-    ARIADNE_ASSERT(!definitely(starting_set.empty()));
+    if(definitely(starting_set_empty)) {
+        std::cerr<<"starting_set="<<repr(starting_set)<<"\ntested_starting_set="<<repr(starting_set_copy)<<"\n\n";
+        std::cerr<<"empty_domain="<<starting_set.continuous_state_set().reduced_domain()<<" "<<std::boolalpha<<empty(starting_set.continuous_state_set().reduced_domain())<<"\n";
+        IntervalVector reduced_domain=starting_set.continuous_state_set().reduced_domain();
+        std::cerr<<"reduced_domain="<<reduced_domain<<" empty(reduced_domain)="<<empty(reduced_domain)<<" reduced_domain.empty()="<<reduced_domain.empty()<<"\n";;
+        ARIADNE_WARN("empty starting_set "<<repr(starting_set)<<"\n");
+        return;
+    }
+    //ARIADNE_ASSERT_MSG(!definitely(starting_set.empty()),"starting_set="<<repr(starting_set)<<"\n");
 
     Semantics semantics = evolution_data.semantics;
 
@@ -952,7 +975,10 @@ _apply_evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(6,"activating_events="<<activating_events<<"\n");
     ARIADNE_LOG(6,"blocking_events="<<blocking_events<<"\n");
 
+    ScalarIntervalFunction const& evolve_step_time=timing_data.evolution_time;
     ScalarIntervalFunction reach_step_time=embed(starting_set.parameter_domain(),timing_data.time_coordinate);
+
+    ARIADNE_LOG(8,"evolve_step_time="<<evolve_step_time<<"\n")
     ARIADNE_LOG(8,"reach_step_time="<<reach_step_time<<"\n")
 
     // Compute the reach and evolve sets, without introducing bounds due to the final time.
@@ -962,16 +988,21 @@ _apply_evolution_step(EvolutionData& evolution_data,
     _apply_reach_step(reach_sets.front(),flow,timing_data);
     _apply_evolve_step(evolve_sets.front(),flow,timing_data);
 
-
     // Apply constraints on reach and evolve sets due to invariants and urgent guards
     for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
         event_iter!=blocking_events.end(); ++event_iter)
     {
         const TransitionData& transition_data=transitions[*event_iter];
         const CrossingData& crossing_data=crossings[*event_iter];
+
         this->_apply_guard(reach_sets,starting_set,flow,reach_step_time,
                            transition_data,crossing_data,semantics);
+        this->_apply_guard(evolve_sets,starting_set,flow,evolve_step_time,
+                           transition_data,crossing_data,semantics);
 
+    }
+
+/*
         switch(crossing_data.crossing_kind) {
             case INCREASING_CROSSING: case TRANSVERSE_CROSSING:
                 // Delay applying guard until all splittings due to non-increasing crossings have been processed.
@@ -982,10 +1013,10 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 this->_apply_guard(evolve_sets,starting_set,flow,timing_data.evolution_time,
                                    transition_data,crossing_data,semantics);
         }
-    }
 
-    // Apply non-degenerate constraints to copy of evolved sets which we can later test for emptiness
-    List<HybridEnclosure> final_sets = evolve_sets;
+    // Make copy of evolve sets without transverse and increasing crossings which can be used for future evolution
+    List<HybridEnclosure> next_working_sets = evolve_sets;
+
     for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
         event_iter!=blocking_events.end(); ++event_iter)
     {
@@ -993,24 +1024,28 @@ _apply_evolution_step(EvolutionData& evolution_data,
         const CrossingData& crossing_data=crossings[*event_iter];
         switch (crossing_data.crossing_kind) {
             case INCREASING_CROSSING: case TRANSVERSE_CROSSING:
-                this->_apply_guard(final_sets,starting_set,flow,timing_data.evolution_time,
+                this->_apply_guard(evolve_sets,starting_set,flow,timing_data.evolution_time,
+                                   transition_data,crossing_data,semantics);
+                // TODO: This introduces guards to potential next working sets
+                this->_apply_guard(working_sets,starting_set,flow,timing_data.evolution_time,
                                    transition_data,crossing_data,semantics);
                 break;
             default:
                 break; // Constraint has already been handled
         }
     }
+*/
 
     // Compute final set depending on whether the finishing kind is exactly AT_FINAL_TIME.
     // Insert sets into evolution_data as appropriate
     if(timing_data.finishing_kind==AT_FINAL_TIME) {
-        for(List<HybridEnclosure>::const_iterator final_set_iter=final_sets.begin();
-            final_set_iter!=final_sets.end(); ++final_set_iter)
+        for(List<HybridEnclosure>::const_iterator evolve_set_iter=evolve_sets.begin();
+            evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter)
         {
-            HybridEnclosure const& final_set=*final_set_iter;
-            if(!definitely(final_set.empty())) {
-                ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
-                evolution_data.final_sets.append(final_set);
+            HybridEnclosure const& evolve_set=*evolve_set_iter;
+            if(!definitely(evolve_set.empty())) {
+                ARIADNE_LOG(4,"final_set="<<evolve_set<<"\n");
+                evolution_data.final_sets.append(evolve_set);
                 _step_data.finishing = true;
             }
         }
@@ -1021,32 +1056,33 @@ _apply_evolution_step(EvolutionData& evolution_data,
             evolution_data.reach_sets.append(reach_set);
         }
     } else { // (timing_data.finishing_kind!=AT_FINAL_TIME)
-        ARIADNE_DEBUG_ASSERT(final_sets.size()==evolve_sets.size());
-        List<HybridEnclosure>::iterator final_set_iter=final_sets.begin();
         for(List<HybridEnclosure>::iterator evolve_set_iter=evolve_sets.begin();
-            evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter, ++final_set_iter)
+            evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter )
         {
             HybridEnclosure& evolve_set=*evolve_set_iter;
-            HybridEnclosure& final_set=*final_set_iter;
-            Interval final_set_time_range=final_set.time_range();
-            if(final_set_time_range.lower()>timing_data.final_time) {
-                // Do nothing, since evolve set is definitely empty
-            } else if(final_set_time_range.upper()<=timing_data.final_time) {
+            Interval evolve_set_time_range=evolve_set.time_range();
+            if(evolve_set_time_range.lower()>timing_data.final_time) {
+                // Do nothing, since evolve set past final time is definitely empty
+            } else if(evolve_set_time_range.upper()<=timing_data.final_time) {
                 // No need to introduce timing constraints
-                if(!definitely(final_set.empty())) {
+                if(!definitely(evolve_set.empty())) {
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
+                    ARIADNE_LOG(4,"new_working_set="<<evolve_set<<"\n");
                     evolution_data.working_sets.append(evolve_set);
                     evolution_data.intermediate_sets.append(evolve_set);
                     _step_data.progress = true;
                 }
             } else {
-                final_set.bound_time(timing_data.final_time);
+                // Bound time if necessary
+                if(evolve_set_time_range.upper()>timing_data.final_time) {
+                    evolve_set.bound_time(timing_data.final_time);
+                }
                 // Only continue evolution if the time-bounded evolve set is nonempty;
                 // However, continue evolution without adding time constraint,
                 // since this will be introduced in the next step
-                if(!definitely(final_set.empty())) {
-                    ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+                if(!definitely(evolve_set.empty())) {
                     ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
+                    ARIADNE_LOG(4,"new_working_set="<<evolve_set<<"\n");
                     evolution_data.working_sets.append(evolve_set);
                     evolution_data.intermediate_sets.append(evolve_set);
                     _step_data.progress = true;
@@ -1071,6 +1107,62 @@ _apply_evolution_step(EvolutionData& evolution_data,
             reach_set.bound_time(timing_data.final_time);
             evolution_data.reach_sets.append(reach_set);
         }
+/*
+        ARIADNE_DEBUG_ASSERT(working_sets.size()==evolve_sets.size());
+        List<HybridEnclosure>::iterator working_set_iter=working_sets.begin();
+        for(List<HybridEnclosure>::iterator evolve_set_iter=evolve_sets.begin();
+            evolve_set_iter!=evolve_sets.end(); (++evolve_set_iter, ++working_set_iter) )
+        {
+            HybridEnclosure& evolve_set=*evolve_set_iter;
+            HybridEnclosure& working_set=*working_set_iter;
+            Interval evolve_set_time_range=evolve_set.time_range();
+            if(evolve_set_time_range.lower()>timing_data.final_time) {
+                // Do nothing, since evolve set past final time is definitely empty
+            } else if(evolve_set_time_range.upper()<=timing_data.final_time) {
+                // No need to introduce timing constraints
+                if(!definitely(evolve_set.empty())) {
+                    ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
+                    ARIADNE_LOG(4,"new_working_set="<<working_set<<"\n");
+                    evolution_data.working_sets.append(working_set);
+                    evolution_data.intermediate_sets.append(evolve_set);
+                    _step_data.progress = true;
+                }
+            } else {
+                // Bound time if necessary
+                if(evolve_set_time_range.upper()>timing_data.final_time) {
+                    evolve_set.bound_time(timing_data.final_time);
+                }
+                // Only continue evolution if the time-bounded evolve set is nonempty;
+                // However, continue evolution without adding time constraint,
+                // since this will be introduced in the next step
+                if(!definitely(evolve_set.empty())) {
+                    ARIADNE_LOG(4,"evolve_set="<<evolve_set<<"\n");
+                    ARIADNE_LOG(4,"new_working_set="<<working_set<<"\n");
+                    evolution_data.working_sets.append(working_set);
+                    evolution_data.intermediate_sets.append(evolve_set);
+                    _step_data.progress = true;
+                }
+            }
+        }
+        for(List<HybridEnclosure>::iterator reach_set_iter=reach_sets.begin();
+            reach_set_iter!=reach_sets.end(); ++reach_set_iter)
+        {
+            HybridEnclosure& reach_set=*reach_set_iter;
+            //reach_set.continuous_state_set().reduce();
+            if(reach_set.time_range().upper()>timing_data.final_time) {
+                HybridEnclosure final_set=reach_set;
+                final_set.set_time(timing_data.final_time);
+                if(timing_data.finishing_kind!=BEFORE_FINAL_TIME && !definitely(final_set.empty())) {
+                //if(!definitely(final_set.empty())) {
+                    ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+                    evolution_data.final_sets.append(final_set);
+                    _step_data.finishing = true;
+                }
+            }
+            reach_set.bound_time(timing_data.final_time);
+            evolution_data.reach_sets.append(reach_set);
+        }
+*/
     }
 
 
@@ -1141,9 +1233,11 @@ _apply_evolution_step(EvolutionData& evolution_data,
         }
     }
 
-    if(verbosity==1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
-        ARIADNE_LOG(1,"\r  "<<(_step_data.finishing?"  finish":"")<<"  "<<_step_data.events<<(_step_data.progress?"":"  invariant")<<"\n");
-    }
+    //ARIADNE_LOG(1,"\r  "<<_step_data.finishing << _step_data._progress << step_data.events);
+
+//    if(verbosity==1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
+//        ARIADNE_LOG(1,"\r  "<<(_step_data.finishing?"  finish":"")<<"  "<<_step_data.events<<(_step_data.progress?"":"  invariant")<<"\n");
+//    }
 
 }
 
@@ -1336,6 +1430,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.spacial_evolution_time=ScalarIntervalFunction::constant(initial_set.space_bounding_box(),result.step_size);
         result.evolution_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),result.step_size);
     }
+//    ARIADNE_LOG(1,"\r  step_size="<<result.step_size<<", step_kind="<<result.step_kind<<", finishing_kind="<<result.finishing_kind<<" "<<crossings<<"\n");
+    ARIADNE_LOG(1,"\r  step_kind="<<result.step_kind<<", finishing_kind="<<result.finishing_kind<<" "<<crossings<<"\n");
     ARIADNE_LOG(7,"step_kind="<<result.step_kind<<", finishing_kind="<<result.finishing_kind<<"\n");
     return result;
 }

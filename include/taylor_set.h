@@ -95,19 +95,20 @@ class TaylorConstrainedImageSet
     List<ScalarTaylorFunction> _equations;
 
     mutable Box _reduced_domain;
+    mutable bool _is_fully_reduced;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
-    TaylorConstrainedImageSet();
+    explicit TaylorConstrainedImageSet();
     //! \brief Construct a representation of the box \a bx.
-    TaylorConstrainedImageSet(const Box& bx);
+    explicit TaylorConstrainedImageSet(const Box& bx);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<NonlinearConstraint>& c);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<NonlinearConstraint>& c);
     //! \brief Construct the set with domain \a d, image function \a f, negative constraints \a g and equality constraints \a h.
-    TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<RealScalarFunction>& g, List<RealScalarFunction>& h);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<RealScalarFunction>& g, List<RealScalarFunction>& h);
     //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
-    TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const NonlinearConstraint& c);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const NonlinearConstraint& c);
 
     //! \brief Construct the set with domain equal to the natural domain of \a f.
     explicit TaylorConstrainedImageSet(const VectorTaylorFunction& f);

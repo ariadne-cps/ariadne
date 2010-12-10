@@ -153,7 +153,7 @@ void TaylorConstrainedImageSet::_solve_zero_constraints() {
 
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet()
-    : _domain(), _function(), _reduced_domain()
+    : _domain(), _function(), _reduced_domain(), _is_fully_reduced(true)
 {
 }
 
@@ -196,6 +196,7 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
         }
     }
     this->_reduced_domain=this->_domain;
+    this->_is_fully_reduced=true;
 }
 
 
@@ -350,6 +351,7 @@ void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Interval t
 }
 
 void TaylorConstrainedImageSet::new_state_constraint(NonlinearConstraint constraint) {
+    this->_is_fully_reduced=false;
     Float infty=+inf<Float>();
     Interval interval=constraint.bounds();
     ScalarTaylorFunction composed_function=compose(constraint.function(),this->_function);
@@ -366,6 +368,7 @@ void TaylorConstrainedImageSet::new_state_constraint(NonlinearConstraint constra
 
 void TaylorConstrainedImageSet::new_parameter_constraint(NonlinearConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
+    this->_is_fully_reduced=false;
     Float infty=+inf<Float>();
     Interval interval=constraint.bounds();
     if(interval.lower()==0.0 && interval.upper()==0.0) {
@@ -382,26 +385,31 @@ void TaylorConstrainedImageSet::new_parameter_constraint(NonlinearConstraint con
 
 void TaylorConstrainedImageSet::new_negative_constraint(RealScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_is_fully_reduced=false;
     this->_constraints.append(ScalarTaylorFunction(this->domain(),constraint));
 }
 
 void TaylorConstrainedImageSet::new_negative_constraint(ScalarTaylorFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),std::setprecision(17)<<"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_is_fully_reduced=false;
     this->_constraints.append(constraint);
 }
 
 void TaylorConstrainedImageSet::new_equality_constraint(RealScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_is_fully_reduced=false;
     this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
 }
 
 void TaylorConstrainedImageSet::new_zero_constraint(RealScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_is_fully_reduced=false;
     this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
 }
 
 void TaylorConstrainedImageSet::new_zero_constraint(ScalarTaylorFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),std::setprecision(17)<<"domain="<<this->domain()<<", constraint="<<constraint);
+    this->_is_fully_reduced=false;
     this->_equations.append(constraint);
 }
 
@@ -513,17 +521,24 @@ tribool TaylorConstrainedImageSet::bounded() const
 
 tribool TaylorConstrainedImageSet::empty() const
 {
-    List<NonlinearConstraint> constraints=this->constraints();
-    if(constraints.empty()) { return this->domain().empty(); }
-    for(uint i=0; i!=constraints.size(); ++i) {
-        if(Ariadne::disjoint(constraints[i].function().evaluate(this->_reduced_domain),constraints[i].bounds())) {
+    if(definitely(Ariadne::empty(this->_reduced_domain))) { return true; }
+    if(this->_constraints.empty() && this->_equations.empty()) { return Ariadne::empty(this->domain()); }
+    if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
+
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        if(this->_constraints[i](this->_reduced_domain).lower()>0.0) {
+            this->_reduced_domain[0] = Interval(1,-1);
             return true;
         }
     }
-    this->reduce();
-
-    if(this->_reduced_domain.empty()) { return true; }
-    else { return indeterminate; }
+    for(uint i=0; i!=this->_equations.size(); ++i) {
+        if(!contains(this->_equations[i](this->_reduced_domain),0.0)) {
+            this->_reduced_domain[0] = Interval(1,-1);
+            return true;
+        }
+    }
+    if(Ariadne::empty(this->_reduced_domain)) { return true; }
+    return indeterminate;
 }
 
 tribool TaylorConstrainedImageSet::inside(const Box& bx) const
@@ -1046,7 +1061,8 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& do
 
     static const double ACCEPTABLE_REDUCTION_FACTOR = 0.75;
 
-/*
+
+    // Box reduction steps
     for(uint i=0; i!=nf; ++i) {
         for(uint j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
@@ -1065,7 +1081,6 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& do
         return;
     }
     ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
-*/
 
     // Hull reduction steps
     do {
@@ -1354,6 +1369,7 @@ void TaylorConstrainedImageSet::restrict(const Vector<Interval>& subdomain)
         ScalarTaylorFunction& equation=*iter;
         equation=Ariadne::restrict(equation,subdomain);
     }
+    this->reduce();
 }
 
 TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<Interval>& subdomain) const
@@ -1471,7 +1487,7 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 }
 
 template<class T> std::ostream& operator<<(std::ostream& os, const Representation< List<T> >& repr) {
-    const List<T>& lst=repr.reference; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
+    const List<T>& lst=*repr.pointer; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
 
 std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
     const bool LONG_FORMAT=false;

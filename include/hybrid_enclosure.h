@@ -133,6 +133,8 @@ class HybridEnclosure
     HybridEnclosure(const DiscreteLocation& q, const Box& s);
     //! \brief An enclosure constructed from a continuous state set and a location.
     HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>&);
+    //! \brief An enclosure constructed from a continuous state set and a location with evolution time equal to zero.
+    HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
     //! \brief An enclosure constructed from a continuous state set, an evolution time and a location.
     HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&, const ScalarTaylorFunction& time);
     ////! \brief A set in location \a q, constructed from a continuous state set.
@@ -262,6 +264,8 @@ class HybridEnclosure
     virtual void draw(CanvasInterface&) const;
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
+    //! \brief Write an abbreviated representation to an output stream.
+    std::ostream& repr(std::ostream&) const;
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
@@ -277,6 +281,7 @@ class HybridEnclosure
 };
 
 inline std::ostream& operator<<(std::ostream& os, const HybridEnclosure& s) { return s.write(os); }
+inline std::ostream& operator<<(std::ostream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
 
 inline tribool subset(const HybridEnclosure& e, const HybridBox& b) { return e.subset(b); }
 
@@ -305,7 +310,7 @@ class ListSet<HybridEnclosure>
     iterator end() { return _list.end(); }
     const_iterator begin() const { return _list.begin(); }
     const_iterator end() const { return _list.end(); }
-    
+
     friend std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls);
   private:
     List<HybridEnclosure> _list;

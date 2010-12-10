@@ -39,6 +39,7 @@
 #include "vector_field_evolver.h"
 #include "hybrid_evolver.h"
 #include "orbit.h"
+#include "hybrid_orbit.h"
 #include "discretiser.h"
 #include "graphics.h"
 

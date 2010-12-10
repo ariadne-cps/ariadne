@@ -39,7 +39,6 @@
 #include "graphics_interface.h"
 #include "function_set.h"
 #include "taylor_set.h"
-#include "hybrid_enclosure.h"
 
 
 
@@ -72,20 +71,6 @@ class InterpolatedCurve;
 class Grid;
 class GridCell;
 class GridTreeSet;
-class HybridGrid;
-class HybridGridCell;
-class HybridGridTreeSet;
-class HybridTime;
-
-class DiscreteLocation;
-template<class BS> class HybridBasicSet;
-
-typedef HybridBasicSet<Point> HybridPoint;
-typedef HybridBasicSet<Box> HybridBox;
-typedef HybridBasicSet<TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
-typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
-typedef ListSet<TaylorConstrainedImageSet> TaylorConstrainedImageSetList;
-typedef ListSet<HybridTaylorConstrainedImageSet> HybridTaylorConstrainedImageSetList;
 
 template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
 
@@ -98,19 +83,6 @@ class Orbit<Point>
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
     boost::shared_ptr< InterpolatedCurve > _curve;
-};
-
-template<>
-class Orbit<HybridPoint>
-{
-  public:
-    Orbit(const HybridPoint& hpt);
-    void insert(HybridTime ht, HybridPoint& hpt);
-    uint size() const;
-    const InterpolatedCurve& curve(uint m) const;
-    const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves; }
-  private:
-    boost::shared_ptr<std::vector<HybridInterpolatedCurve> > _curves;
 };
 
 template<>
@@ -130,27 +102,6 @@ class Orbit<GridCell>
     GridTreeSet const& reach() const;
     GridTreeSet const& intermediate() const;
     GridTreeSet const& final() const;
-  private:
-    boost::shared_ptr<Data> _data;
-};
-
-template<>
-class Orbit<HybridGridCell>
-{
-    class Data;
-  public:
-    typedef HybridGridCell EnclosureType;
-    typedef HybridGridTreeSet EnclosureListType;
-
-    Orbit(const HybridGrid&, const HybridGridCell&);
-    Orbit(const HybridGridTreeSet&);
-    Orbit(const HybridGridTreeSet&, const HybridGridTreeSet&,
-          const HybridGridTreeSet&, const HybridGridTreeSet&);
-    HybridGrid const& grid() const;
-    HybridGridTreeSet const& initial() const;
-    HybridGridTreeSet const& reach() const;
-    HybridGridTreeSet const& intermediate() const;
-    HybridGridTreeSet const& final() const;
   private:
     boost::shared_ptr<Data> _data;
 };
@@ -197,10 +148,6 @@ operator<<(std::ostream& os, const Orbit< ES >& orb)
        << ")\n";
     return os;
 }
-
-template<>
-std::ostream&
-operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
 
 template<class ES> void draw(FigureInterface& figure, const Orbit<ES>& orbit) {
     draw(figure,orbit.reach());

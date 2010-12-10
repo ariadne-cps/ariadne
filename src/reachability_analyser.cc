@@ -42,6 +42,7 @@
 #include "grid_set.h"
 
 #include "orbit.h"
+#include "hybrid_orbit.h"
 
 #include "hybrid_time.h"
 #include "hybrid_automaton_interface.h"

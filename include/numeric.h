@@ -58,6 +58,16 @@ template<class X> inline X convert_error(const Float& e);
 template<> inline Float convert_error<Float>(const Float& e) { return 0.0; }
 template<> inline Interval convert_error<Interval>(const Float& e) { return Interval(-e,+e); }
 
+// Use 'enable_if' style template to restrict allowable instances. See the Boost documentation
+// for enable_if to see how this works.
+template<class X, class T> struct enable_if_numeric { };
+template<class T> struct enable_if_numeric<unsigned int,T> { typedef T type; };
+template<class T> struct enable_if_numeric<int,T> { typedef T type; };
+template<class T> struct enable_if_numeric<double,T> { typedef T type; };
+template<class T> struct enable_if_numeric<Float,T> { typedef T type; };
+template<class T> struct enable_if_numeric<Interval,T> { typedef T type; };
+template<class T> struct enable_if_numeric<Real,T> { typedef T type; };
+
 
 } // namespace Ariadne
 

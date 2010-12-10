@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "orbit.h"
+#include "hybrid_orbit.h"
 
 #include "box.h"
 #include "point.h"
@@ -69,7 +70,7 @@ void
 Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
 {
     ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
-    if(this->size()==ht.discrete_time()) {
+    if(this->size()==(uint)ht.discrete_time()) {
         this->_curves->push_back(make_pair(hpt.location(),InterpolatedCurve(hpt.continuous_state_set())));
     } else {
         (*this->_curves)[ht.discrete_time()].second.insert(ht.continuous_time(),hpt.continuous_state_set());

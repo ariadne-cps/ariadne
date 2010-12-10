@@ -141,16 +141,6 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial
 }
 
 
-ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, double c)
-{
-    return ScalarTaylorFunction(d,IntervalTaylorModel::constant(d.size(),c));
-}
-
-ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, const Float& c)
-{
-    return ScalarTaylorFunction(d,IntervalTaylorModel::constant(d.size(),c));
-}
-
 ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, const Interval& c)
 {
     return ScalarTaylorFunction(d,IntervalTaylorModel::constant(d.size(),c));
@@ -276,6 +266,35 @@ ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunc
     if(x.domain()==y.domain()) { x._model-=y._model; }
     else { x._model-=restrict(y,x.domain())._model; }
     return x;
+}
+
+
+ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const Interval& c) {
+    f._model+=c;
+    return f;
+}
+
+ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const Interval& c) {
+    f._model-=c;
+    return f;
+}
+
+ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const Interval& c) {
+    f._model*=c;
+    return f;
+}
+
+ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const Interval& c) {
+    f._model/=c;
+    return f;
+}
+
+ScalarTaylorFunction operator+(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,x._model);
+}
+
+ScalarTaylorFunction operator-(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x._domain,-x._model);
 }
 
 

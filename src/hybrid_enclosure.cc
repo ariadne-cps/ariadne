@@ -419,6 +419,18 @@ HybridEnclosure::restrict(const IntervalVector& subdomain)
     this->_dwell_time.restrict(this->parameter_domain());
 }
 
+void
+HybridEnclosure::recondition()
+{
+    uint old_number_of_parameters = this->number_of_parameters();
+    this->_set.recondition();
+    IntervalVector new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+    this->_time = embed(this->_time,new_variables);
+    this->_dwell_time = embed(this->_dwell_time,new_variables);
+
+    this->_check();
+}
+
 List<HybridEnclosure>
 HybridEnclosure::split() const
 {
@@ -431,6 +443,31 @@ HybridEnclosure::split() const
 }
 
 
+void check_subset(const IntervalVector& dom1, const IntervalVector& dom2, const char* msg)
+{
+    if(dom1.size()!=dom2.size()) {
+        ARIADNE_FAIL_MSG(msg<<" size("<<dom1<<")!=size("<<dom2<<")");
+    } else if(!subset(dom1,dom2)) {
+        ARIADNE_FAIL_MSG(msg<<" !subset("<<dom1<<","<<dom2<<")");
+    }
+}
+
+void
+HybridEnclosure::_check() const
+{
+    const IntervalVector& reduced_domain = this->_set._reduced_domain;
+    check_subset(reduced_domain,this->_set._domain,"domain");
+    check_subset(reduced_domain,this->_set._function.domain(),"function domain");
+    for(uint i=0; i!=this->_set._constraints.size(); ++i) {
+        check_subset(reduced_domain,this->_set._constraints[i].domain(),"constraint");
+    }
+    for(uint i=0; i!=this->_set._equations.size(); ++i) {
+        check_subset(reduced_domain,this->_set._equations[i].domain(),"zero constraint");
+    }
+    check_subset(reduced_domain,this->_time.domain(),"time");
+    check_subset(reduced_domain,this->_dwell_time.domain(),"dwell time");
+}
+
 void HybridEnclosure::draw(CanvasInterface& canvas) const
 {
     this->continuous_state_set().draw(canvas);
@@ -441,10 +478,9 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
 {
     return os << "HybridEnclosure"
               << "( events=" << this->_events
-              << ", range=" << this->_set._function(this->_set._domain)
               << ", location=" << this->_location
-              << ", domain=" << this->_set._domain
               << ", range=" << this->_set._function(this->_set._domain)
+              << ", domain=" << this->_set._domain
               << ", subdomain=" << this->_set._reduced_domain
               << ", empty=" << this->empty()
               << ", state=" << polynomial(this->_set._function)
@@ -457,11 +493,29 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, uint d) {
     HybridGridTreeSet result(g);
     for(ListSet<HybridEnclosure>::const_iterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result[iter->first].adjoin_outer_approximation(iter->second,d);
+        result[iter->location()].adjoin_outer_approximation(iter->continuous_state_set(),d);
     }
     return result;
 }
 
+void
+draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
+    for(ListSet<HybridEnclosure>::const_iterator iter=hels.begin(); iter!=hels.end(); ++iter) {
+        draw(figure,iter->continuous_state_set());
+    }
+}
+
+ListSet<HybridEnclosure::ContinuousStateSetType> 
+ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
+{
+    ListSet<HybridEnclosure::ContinuousStateSetType> result;
+    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        if(iter->location()==loc) {
+            result.adjoin(iter->continuous_state_set());
+        }
+    }
+    return result;
+}
 
 
 

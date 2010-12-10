@@ -355,6 +355,9 @@ class TestTaylorConstrainedImageSet
 
         RealScalarFunction s=RealScalarFunction::coordinate(2,0);
         RealScalarFunction t=RealScalarFunction::coordinate(2,1);
+        RealScalarFunction x0=RealScalarFunction::coordinate(3,0);
+        RealScalarFunction x1=RealScalarFunction::coordinate(3,1);
+        RealScalarFunction x2=RealScalarFunction::coordinate(3,2);
         uint accuracy = 3u;
 
         // Draw a variety of shapes
@@ -371,6 +374,13 @@ class TestTaylorConstrainedImageSet
         ARIADNE_TEST_TRY( test_draw("empty",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(1.25+s+t*t<=0)),accuracy) );
         ARIADNE_TEST_TRY( test_draw("curve",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t),(s*s-t==0)),accuracy) );
 
+        // The following example is an enclosure from a hybrid evolution
+        TaylorConstrainedImageSet enclosure(
+            Box(3, -0.125,0.25, -0.125,0.125, 0.0,2.0),
+            ( 8*(x2+0.0645161*x1-0.0322581*x0+0.0645162), -8+8*(0.5*x2+1.03226*x1-0.516129*x0+1.03226)),
+            (0.0645161*x1-1.03226*x0+0.0645161<=0, 0.0645161*x1-1.03226*x0+0.0645161<=0, x2+0.0645161*x1-1.03226*x0+0.0645161==0));
+
+        ARIADNE_TEST_TRY( test_draw("enclosure",enclosure,accuracy) );
 
     }
 };

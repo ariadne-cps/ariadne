@@ -617,10 +617,15 @@ TaylorConstrainedImageSet::split_zeroth_order() const
 List<IntervalVector>
 TaylorConstrainedImageSet::splitting_subdomains_zeroth_order() const
 {
-    Pair<IntervalVector,IntervalVector> subdomains = this->_reduced_domain.split(this->splitting_index_zeroth_order());
     List<IntervalVector> result;
-    result.append(subdomains.first);
-    result.append(subdomains.second);
+    uint k=this->splitting_index_zeroth_order();
+    if(k==this->number_of_parameters()) {
+        result.append(this->_reduced_domain);
+    } else {
+        Pair<IntervalVector,IntervalVector> subdomains = this->_reduced_domain.split(this->splitting_index_zeroth_order());
+        result.append(subdomains.first);
+        result.append(subdomains.second);
+    }
     return result;
 }
 
@@ -645,6 +650,7 @@ TaylorConstrainedImageSet::splitting_index_zeroth_order() const
             jmax=j;
         }
     }
+
     return jmax;
 }
 
@@ -818,6 +824,7 @@ TaylorConstrainedImageSet::split() const
 Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
 TaylorConstrainedImageSet::split(uint d) const
 {
+    ARIADNE_PRECONDITION(d<this->number_of_parameters());
     Vector<Interval> subdomain1,subdomain2;
     make_lpair(subdomain1,subdomain2)=Ariadne::split(this->_function.domain(),d);
 
@@ -1270,6 +1277,48 @@ void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet
 
 
 
+void TaylorConstrainedImageSet::
+recondition()
+{
+    const double MAXIMUM_ERROR = this->_function[0].model().sweep_threshold() * 1024;
+
+    List<uint> large_error_indices;
+
+    for(uint i=0; i!=this->_function.result_size(); ++i) {
+        Float error=this->_function[i].model().error();
+        if(error > MAXIMUM_ERROR) {
+            large_error_indices.append(i);
+        }
+    }
+
+    IntervalVector error_domains(large_error_indices.size());
+    for(uint i=0; i!=large_error_indices.size(); ++i) {
+        Float error=this->_function[large_error_indices[i]].model().error();
+        error_domains[i]=Interval(-error,+error);
+    }
+
+    uint k=this->number_of_parameters();
+
+    this->_domain=join(this->_domain,error_domains);
+    this->_reduced_domain=join(this->_reduced_domain,error_domains);
+    this->_function=embed(this->_function,error_domains);
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        this->_constraints[i]=embed(this->_constraints[i],error_domains);
+    }
+    for(uint i=0; i!=this->_equations.size(); ++i) {
+        this->_equations[i]=embed(this->_equations[i],error_domains);
+    }
+
+    for(uint i=0; i!=large_error_indices.size(); ++i) {
+        Float error=this->_function[large_error_indices[i]].model().error();
+        if(error > MAXIMUM_ERROR) {
+            this->_function[i].set_error(0.0);
+            this->_function[i] = this->_function[i] + ScalarTaylorFunction::coordinate(this->_domain,k);
+            ++k;
+        }
+    }
+}
+
 void TaylorConstrainedImageSet::restrict(const Vector<Interval>& subdomain)
 {
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
@@ -1407,12 +1456,8 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
     return r;
 }
 
-template<class T> struct Repr { const T& ref; Repr(const T& r) : ref(r) { } };
-template<class T> Repr<T> repr(const T& t) { return Repr<T>(t); }
-template<class T> std::ostream& operator<<(std::ostream& os, const Repr<T>& repr) { repr.ref.repr(os); return os; }
-
-template<class T> std::ostream& operator<<(std::ostream& os, const Repr< List<T> >& repr) {
-    const List<T>& lst=repr.ref; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
+template<class T> std::ostream& operator<<(std::ostream& os, const Representation< List<T> >& repr) {
+    const List<T>& lst=repr.reference; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
 
 std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
     const bool LONG_FORMAT=false;

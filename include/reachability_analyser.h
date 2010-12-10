@@ -37,6 +37,7 @@
 #include "reachability_analyser_interface.h"
 
 #include "orbit.h"
+#include "hybrid_orbit.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
 

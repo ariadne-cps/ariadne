@@ -53,7 +53,6 @@ using std::ofstream; using std::ifstream;
 #include "function_set.h"
 #include "taylor_set.h"
 #include "grid_set.h"
-#include "hybrid_set.h"
 
 #include "point.h"
 #include "box.h"
@@ -62,6 +61,8 @@ using std::ofstream; using std::ifstream;
 
 #include "discrete_location.h"
 #include "discrete_event.h"
+#include "hybrid_set.h"
+#include "hybrid_orbit.h"
 #include "hybrid_time.h"
 #include "hybrid_automaton.h"
 

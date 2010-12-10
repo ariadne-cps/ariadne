@@ -325,22 +325,22 @@ class HybridGrid
     // involve changing the HybridReachabilityAnalyser or HybridDiscretiser code.
     const HybridAutomatonInterface* _system_ptr;
   public:
-    //! 
+    //!
     HybridGrid();
-    //! 
+    //!
     HybridGrid(const HybridAutomatonInterface& ha);
-    //! 
+    //!
     HybridGrid(const HybridSpace& hs);
-    //! 
+    //!
     void insert(DiscreteLocation q, const Grid& g);
-    //! 
+    //!
     void insert(const std::pair<DiscreteLocation,Grid>& qg);
-    //! 
+    //!
     Grid operator[](const DiscreteLocation& loc) const;
-    //! 
+    //!
     bool has_location(const DiscreteLocation& q) const;
 
-    //! 
+    //!
     friend inline std::ostream&
     operator<<(std::ostream& os, const HybridGrid& hgrid) {
         return os << "HybridGrid(" << hgrid._grids << ")"; }
@@ -395,17 +395,17 @@ class HybridGridTreeSet
     typedef Map<DiscreteLocation,GridTreeSet>::const_iterator locations_const_iterator;
     typedef HybridSetConstIterator<GridTreeSet,HybridGridCell> const_iterator;
   public:
-    //! 
+    //!
     locations_iterator locations_begin() { return this->_map.begin(); }
-    //! 
+    //!
     locations_iterator locations_end() { return this->_map.end(); }
-    //! 
+    //!
     locations_const_iterator locations_begin() const { return this->_map.begin(); }
-    //! 
+    //!
     locations_const_iterator locations_end() const { return this->_map.end(); }
-    //! 
+    //!
     const_iterator begin() const { return const_iterator(this->_map,false); }
-    //! 
+    //!
     const_iterator end() const { return const_iterator(this->_map,true); }
   public:
     //! Default constructor (Deprecated)
@@ -414,56 +414,61 @@ class HybridGridTreeSet
     //! Construct from a grid.
     HybridGridTreeSet(const HybridGrid& hgrid) : _hgrid(hgrid), _map() { }
 
-    //! 
+    //!
     HybridGrid grid() const { return this->_hgrid; }
 
-    //! 
+    //!
     bool has_location(DiscreteLocation q) const { return _map.has_key(q); }
 
-    //! 
+    //!
     void insert(DiscreteLocation q, const GridTreeSet& gts) {
         this->_map.insert(q,gts); }
     void insert(std::pair<DiscreteLocation,GridTreeSet>& qgts) {
         this->_map.insert(qgts); }
 
-    //! 
+    //!
     void adjoin(DiscreteLocation q, const GridCell& c) {
         this->_provide_location(q).adjoin(c); }
 
-    //! 
+    //!
     void adjoin(const HybridGridCell& hgc) {
         this->_provide_location(hgc.first).adjoin(hgc.second); }
 
-    //! 
+    //!
+    void adjoin(const ListSet<HybridGridCell>& hgcls) {
+        for(ListSet<HybridGridCell>::const_iterator iter=hgcls.begin(); iter!=hgcls.end(); ++iter) {
+            this ->adjoin(*iter); } }
+
+    //!
     void adjoin(const HybridGridTreeSet& hgts) {
         for(HybridGridTreeSet::locations_const_iterator loc_iter=hgts.locations_begin(); loc_iter!=hgts.locations_end(); ++loc_iter) {
             this->_provide_location(loc_iter->first).adjoin(loc_iter->second); } }
 
-    //! 
+    //!
     void remove(const HybridGridTreeSet& hgts) {
         for(HybridGridTreeSet::locations_const_iterator loc_iter=hgts.locations_begin(); loc_iter!=hgts.locations_end(); ++loc_iter) {
             if(this->has_location(loc_iter->first)) {
                 this->_map.find(loc_iter->first)->second.remove(loc_iter->second); } } }
 
-    //! 
+    //!
     void restrict(const HybridGridTreeSet& hgts) {
         for(HybridGridTreeSet::locations_const_iterator loc_iter=hgts.locations_begin(); loc_iter!=hgts.locations_end(); ++loc_iter) {
             if(this->has_location(loc_iter->first)) {
                 this->_map.find(loc_iter->first)->second.restrict(loc_iter->second); } } }
 
-    //! 
+    //!
     void restrict_to_height(uint h) {
         for(locations_iterator loc_iter=locations_begin(); loc_iter!=locations_end(); ++loc_iter) {
             loc_iter->second.restrict_to_height(h); } }
 
-    //! 
+    //!
     void adjoin_inner_approximation(const HybridBoxes& hbxs, const int depth) {
         for(HybridBoxes::const_iterator loc_iter=hbxs.begin();
                 loc_iter!=hbxs.end(); ++loc_iter) {
             DiscreteLocation loc=loc_iter->first;
             this->_provide_location(loc).adjoin_inner_approximation(loc_iter->second,loc_iter->second,depth); } }
 
-    //! 
+    //!
     void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const int height, const int depth) {
         HybridSpace hspc=hs.space();
         for(HybridSpace::const_iterator loc_iter=hspc.begin();
@@ -471,42 +476,42 @@ class HybridGridTreeSet
             DiscreteLocation loc=loc_iter->first;
             this->_provide_location(loc).adjoin_lower_approximation(hs[loc],height,depth); } }
 
-    //! 
+    //!
     void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const int depth) {
         HybridSpace hspc=hs.space();
         for(HybridSpace::const_iterator loc_iter=hspc.begin();
                 loc_iter!=hspc.end(); ++loc_iter) {
             this->_provide_location(loc_iter->first).adjoin_outer_approximation(hs[loc_iter->first],depth); } }
 
-    //! 
+    //!
     void adjoin_outer_approximation(const HybridBoxes& hbxs, const int depth) {
         for(HybridBoxes::const_iterator loc_iter=hbxs.begin();
                 loc_iter!=hbxs.end(); ++loc_iter) {
             this->_provide_location(loc_iter->first).adjoin_outer_approximation(loc_iter->second,depth); } }
 
-    //! 
+    //!
     template<class S> void adjoin_outer_approximation(DiscreteLocation q, const S& s) {
         this->_provide_location(q).adjoin_outer_approximation(s); }
 
-    //! 
+    //!
     GridTreeSet& operator[](DiscreteLocation q) {
         return this->_provide_location(q);
     }
 
-    //! 
+    //!
     const GridTreeSet& operator[](DiscreteLocation q) const {
         ARIADNE_ASSERT(this->has_location(q));
         return this->_map.find(q)->second;
     }
 
-    //! 
+    //!
     bool empty() const {
         for(locations_const_iterator loc_iter=this->locations_begin();
             loc_iter!=this->locations_end(); ++loc_iter) {
             if(!loc_iter->second.empty()) { return false; } }
         return true; }
 
-    //! 
+    //!
     size_t size() const {
         size_t result=0;
         for(locations_const_iterator loc_iter=this->locations_begin();
@@ -514,7 +519,7 @@ class HybridGridTreeSet
             result+=loc_iter->second.size(); }
         return result; }
 
-    //! 
+    //!
     HybridListSet<Box> boxes() const {
         HybridListSet<Box> result;
         for(const_iterator iter=this->begin();
@@ -522,45 +527,45 @@ class HybridGridTreeSet
             result[iter->first].adjoin(iter->second.box()); }
         return result; }
 
-    //! 
+    //!
     void mince(int depth) {
         for(locations_iterator loc_iter=this->locations_begin();
             loc_iter!=this->locations_end(); ++loc_iter) {
             loc_iter->second.mince(depth); } }
 
-    //! 
+    //!
     void recombine() {
         for(locations_iterator loc_iter=this->locations_begin();
             loc_iter!=this->locations_end(); ++loc_iter) {
             loc_iter->second.recombine(); } }
   public:
     //@{ \name HybridSetInterface methods
-    
-    //! 
+
+    //!
     HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
 
-    //! 
+    //!
     HybridSpace space() const { return HybridSpace(*this); }
 
-    //! 
+    //!
     bool disjoint(const HybridBox& hbx) const {
         locations_const_iterator loc_iter = this->_map.find( hbx.first );
         return loc_iter != this->locations_end() || loc_iter->second.disjoint( hbx.second );
     }
 
-    //! 
+    //!
     bool overlaps(const HybridBox& hbx) const {
         locations_const_iterator loc_iter = this->_map.find( hbx.first );
         return loc_iter != this->locations_end() && loc_iter->second.overlaps( hbx.second );
     }
 
-    //! 
+    //!
     bool superset(const HybridBox& hbx) const {
         locations_const_iterator loc_iter=this->_map.find(hbx.first);
         return loc_iter!=this->locations_end() && loc_iter->second.superset( hbx.second );
     }
 
-    //! 
+    //!
     bool subset(const HybridBoxes& hbx) const  {
         for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
             if( !loc_iter->second.empty() ) {
@@ -573,7 +578,7 @@ class HybridGridTreeSet
         return true;
     }
 
-    //! 
+    //!
     HybridBoxes bounding_box() const {
         HybridBoxes result;
         for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
@@ -584,12 +589,12 @@ class HybridGridTreeSet
         return result;
     }
 
-    //! 
+    //!
     std::ostream& write(std::ostream& os) const {
         return os << this->_map;
     }
 
-    //! 
+    //!
     friend inline std::ostream&
     operator<<(std::ostream& os, const HybridGridTreeSet& hgts) {
         return os << "HybridGridTreeSet(" << hgts._map << ")"; }
@@ -676,6 +681,15 @@ draw(FigureInterface& figure, const std::map<DiscreteLocation,DS>& hds) {
         draw(figure,loc_iter->second);
         //figure.draw(loc_iter->second);
         //figure << loc_iter->second;
+    }
+}
+
+inline
+void
+draw(FigureInterface& figure, const HybridGridTreeSet& hgts) {
+    for(HybridGridTreeSet::const_iterator iter=hgts.begin();
+            iter!=hgts.end(); ++iter) {
+        draw(figure,iter->second);
     }
 }
 

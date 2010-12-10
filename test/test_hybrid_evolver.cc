@@ -79,6 +79,7 @@ class TestSimpleHybridEvolver
     void test_exact_final_time() const;
     void test_maximum_steps() const;
     void test_urgent_event() const;
+    void test_empty_interior() const;
     void test_partial_event() const;
     void test_step_size_event() const;
     void test_initially_active_event() const;
@@ -106,6 +107,7 @@ void TestSimpleHybridEvolver::test_all() const {
     ARIADNE_TEST_CALL(test_maximum_steps());
     ARIADNE_TEST_CALL(test_urgent_event());
     ARIADNE_TEST_CALL(test_step_size_event());
+    ARIADNE_TEST_CALL(test_empty_interior());
     ARIADNE_TEST_CALL(test_partial_event());
     ARIADNE_TEST_CALL(test_initially_active_event());
     ARIADNE_TEST_CALL(test_initially_active_attracting_event());
@@ -131,6 +133,8 @@ void TestSimpleHybridEvolver::test_flow() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
     ARIADNE_TEST_CHECK_WARN(orbit.intermediate().size(),2u);
+
+    ARIADNE_TEST_PRINT(orbit);
 
     plot(cstr("test_"+evolver_name+"-flow"),Box(2, -0.5,+3.5, -1.0, +3.0),
          reach_set_colour,orbit.reach(),
@@ -220,12 +224,36 @@ void TestSimpleHybridEvolver::test_urgent_event() const {
 
 
 // A test to ensure that an event which is active at the final time does actually occur
+void TestSimpleHybridEvolver::test_empty_interior() const {
+    MonolithicHybridAutomaton automaton;
+    automaton.new_mode(q,(c,c/2));
+    automaton.new_transition(q,e,q,(x0-2,x1),x0-1,urgent);
+
+    HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
+    HybridTime time(2.0,3);
+
+    evolver_ptr->parameters().maximum_step_size=2.0;
+
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+
+    ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
+    ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
+
+    plot(cstr("test_"+evolver_name+"-empty_interior"),Box(2, -1.5,+2.5, -1.0, +3.0),
+         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+         reach_set_colour,orbit.reach(),
+         intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(),
+         initial_set_colour,orbit.initial());
+}
+
+// A test to ensure that an event which is active at the final time does actually occur
 void TestSimpleHybridEvolver::test_partial_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-    automaton.new_transition(q,e,q,(x0-2,x1),x0-x1/1024-2,urgent);
-    //FIXME: Need to allow domain of TaylorFunction to have empty interior
+    automaton.new_transition(q,e,q,(x0-2,x1),x0-x1/16-2,urgent);
     //automaton.new_transition(q,e,q,(x0-2,x1),x0-2,urgent);
+    //FIXME: Need to allow domain of TaylorFunction to have empty interior
 
     HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(2.0,3);
@@ -237,8 +265,9 @@ void TestSimpleHybridEvolver::test_partial_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
-    plot(cstr("test_"+evolver_name+"-partial_event"),Box(2, -1.5,+2.5, -1.0, +3.0),
-         guard_set_colour,Box(2,2.0,8.0,-8.0,+8.0),
+    Box bounding_box(2, -1.5,+2.5, -1.0, +3.0);
+    plot(cstr("test_"+evolver_name+"-partial_event"),bounding_box,
+         guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-2>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -312,7 +341,7 @@ void TestSimpleHybridEvolver::test_initially_active_attracting_event() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
 
     plot(cstr("test_"+evolver_name+"-initially_active_attracting"),Box(2, -1.0,+2.0, -1.0, +2.0),
-         Colour(0.75,0.75,0.75),Box(2,-1.0,0.0,-8.0,+8.0),
+         guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -332,7 +361,7 @@ void TestSimpleHybridEvolver::test_initially_active_repelling_event() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
 
     plot(cstr("test_"+evolver_name+"-initially_active_repelling"),Box(2, -1.0,+2.0, -1.0, +2.0),
-         Colour(0.75,0.75,0.75),Box(2,-1.0,0.0,-8.0,+8.0),
+         guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -378,20 +407,9 @@ void TestSimpleHybridEvolver::test_tangency() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
     ARIADNE_TEST_PRINT(orbit);
 
-/*
-    const uint depth = 2u;
-    GridTreeSet reach_paving(2);
-    for(uint i=0; i!=orbit.reach().size(); ++i) {
-        orbit.reach()[q][i].adjoin_outer_approximation_to(reach_paving,depth);
-    }
-    GridTreeSet final_paving(2);
-    for(uint i=0; i!=orbit.final().size(); ++i) {
-        orbit.final()[q][i].adjoin_outer_approximation_to(final_paving,depth);
-    }
-*/
-
-    plot(cstr("test_"+evolver_name+"-tangency"),Box(2, -2.0,+2.0, -2.0, +1.0),
-         //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+    Box bounding_box(2, -2.0,+2.0, -2.0, +1.0);
+    plot(cstr("test_"+evolver_name+"-tangency"),bounding_box,
+         guard_set_colour,BoundedConstraintSet(bounding_box,x1-x0*x0>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -469,7 +487,7 @@ void TestSimpleHybridEvolver::test_unwind() const {
 
     Box bounding_box(2, -2.5,+1.5, -0.5, +2.5);
     plot(cstr("test_"+evolver_name+"-unwind"),bounding_box,
-         Colour(0.75,0.75,0.75),BoundedConstraintSet(bounding_box,x0-x1/16-1>=0),
+         guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-1>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),

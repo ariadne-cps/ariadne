@@ -32,6 +32,7 @@
 
 #include "function_set.h"
 #include "hybrid_set.h"
+#include "graphics.h"
 
 using namespace std;
 using namespace Ariadne;
@@ -85,6 +86,7 @@ TestHybridSet::test_hybrid_grid_set()
     HybridGrid hg;
     HybridGridTreeSet hgts;
     DiscreteLocation loc;
+    Figure fig;
     hg.has_location(loc);
     hg.insert(loc,g);
     g=hg[loc];
@@ -92,6 +94,7 @@ TestHybridSet::test_hybrid_grid_set()
     hgts.has_location(loc);
     GridTreeSet const& gtscr = hgts[loc];
     GridTreeSet& gtsr = hgts[loc]; 
+    draw(fig,hgts);
 }
 
 

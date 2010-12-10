@@ -255,6 +255,8 @@ class HybridEnclosure
     Pair<HybridEnclosure,HybridEnclosure> split(uint dim) const;
     //! \brief Splits into smaller subsets.
     List<HybridEnclosure> split() const;
+    //! \brief Simplifies the representation.
+    void recondition();
 
     //! \brief Draws onto a canvas.
     virtual void draw(CanvasInterface&) const;
@@ -268,6 +270,7 @@ class HybridEnclosure
     void _apply_flow(VectorIntervalFunction phi, Float step, ScalarIntervalFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     void _apply_flow_step(VectorIntervalFunction phi, ScalarIntervalFunction elps);
+    void _check() const; // Check that set is well-formed.
     // Compute constraints of the set
     List<NonlinearConstraint> constraints() const;
 
@@ -278,32 +281,43 @@ inline std::ostream& operator<<(std::ostream& os, const HybridEnclosure& s) { re
 inline tribool subset(const HybridEnclosure& e, const HybridBox& b) { return e.subset(b); }
 
 
-}
-
-#include "hybrid_set.h"
-
-namespace Ariadne {
+class HybridGrid;
+class HybridGridTreeSet;
 
 template<>
 class ListSet<HybridEnclosure>
-    : public HybridListSet<HybridEnclosure::ContinuousStateSetType>
 {
+  public:
+    typedef List<HybridEnclosure>::iterator iterator;
+    typedef List<HybridEnclosure>::const_iterator const_iterator;
   public:
     ListSet() { }
     ListSet(const HybridEnclosure& hes) { this->adjoin(hes); }
-    ListSet(const List<HybridEnclosure>& hel) {
-        for(List<HybridEnclosure>::const_iterator iter=hel.begin(); iter!=hel.end(); ++iter) { this->adjoin(*iter); } }
-    using HybridListSet<HybridEnclosure::ContinuousStateSetType>::adjoin;
-    void adjoin(const HybridEnclosure& hes) { this->adjoin(hes.location(),hes.continuous_state_set()); }
-    void append(const HybridEnclosure& hes) { this->adjoin(hes.location(),hes.continuous_state_set()); }
-    operator List<HybridEnclosure> () { return List<HybridEnclosure>(this->begin(),this->end()); }
+    ListSet(const List<HybridEnclosure>& hel) : _list(hel) { }
+    void adjoin(const HybridEnclosure& hes) { this->_list.append(hes); }
+    void adjoin(const ListSet<HybridEnclosure>& hels) {
+        for(List<HybridEnclosure>::const_iterator iter=hels.begin(); iter!=hels.end(); ++iter) {
+            this->adjoin(*iter); } }
+    void append(const HybridEnclosure& hes) { this->_list.append(hes); }
+    size_t size() const { return _list.size(); }
+    ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
+    iterator begin() { return _list.begin(); }
+    iterator end() { return _list.end(); }
+    const_iterator begin() const { return _list.begin(); }
+    const_iterator end() const { return _list.end(); }
+    
+    friend std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls);
+  private:
+    List<HybridEnclosure> _list;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls) {
-    return os << static_cast<const HybridListSet<HybridEnclosure::ContinuousStateSetType>&>(hls);
+    return os << hls._list;
 }
 
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, uint d);
+void draw(FigureInterface& figure, const ListSet<HybridEnclosure>& he);
+
 
 } // namespace Ariadne
 

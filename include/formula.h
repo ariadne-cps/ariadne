@@ -147,16 +147,6 @@ template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formu
 template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(TAN,f); }
 template<class X> inline Formula<X> atan(const Formula<X>& f) { return make_formula(ATAN,f); }
 
-// Use 'enable_if' style template to restrict allowable instances. See the Boost documentation
-// for enable_if to see how this works.
-template<class X, class T> struct enable_if_numeric { };
-template<class T> struct enable_if_numeric<unsigned int,T> { typedef T type; };
-template<class T> struct enable_if_numeric<int,T> { typedef T type; };
-template<class T> struct enable_if_numeric<double,T> { typedef T type; };
-template<class T> struct enable_if_numeric<Float,T> { typedef T type; };
-template<class T> struct enable_if_numeric<Interval,T> { typedef T type; };
-template<class T> struct enable_if_numeric<Real,T> { typedef T type; };
-
 template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator+(Formula<X> f, R c) { return f + Formula<X>::constant(numeric_cast<X>(c)); }
 template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator-(Formula<X> f, R c) { return f - Formula<X>::constant(numeric_cast<X>(c)); }
 template<class X, class R> inline typename enable_if_numeric<R,Formula<X> >::type operator*(Formula<X> f, R c) { return f * Formula<X>::constant(numeric_cast<X>(c)); }

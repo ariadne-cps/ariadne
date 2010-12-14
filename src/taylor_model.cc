@@ -1846,7 +1846,9 @@ Interval _range3(const IntervalTaylorModel& tm) {
     // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
     const double NONDEGENERATE_QUADRATIC_TERM_FRACTION = std::max(tm.sweep_threshold(), double(std::numeric_limits<float>::epsilon()));
     for(uint j=0; j!=as; ++j) {
-        Interval ql=abs(quadratic_terms[j])*Interval(-1,1) + abs(linear_terms[j])*Interval(-1,+1);
+        const Float& a=quadratic_terms[j];
+        const Float& b=linear_terms[j];
+        Interval ql=abs(a)*Interval(-1,1) + abs(b)*Interval(-1,+1);
         Interval qf=a*(sqr(Interval(-1,+1)+Interval(b)/(2*a)))-sqr(Interval(b))/(4*a);
         r += intersection(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
     }

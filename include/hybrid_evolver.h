@@ -134,6 +134,8 @@ class HybridEvolverBase
 
     bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
+    bool ALLOW_SPLIT; //!< If true, working enclosure sets may be split to improve accuracy.
+    bool ALLOW_RECONDITION; //!< If true, working enclosure sets may be over-approximated by a set with a simpler representation.
     //@}
 
 
@@ -415,8 +417,10 @@ class HybridEvolverBase
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
     void
-    _log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const;
+    _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set) const;
 
+  protected:
+    void _create(EvolutionParametersType* parameters);
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;

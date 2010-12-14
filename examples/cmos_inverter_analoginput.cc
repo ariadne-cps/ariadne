@@ -302,7 +302,7 @@ int main()
 
     plot("cmos_inverter_analoginput_orbit_t_vi", 0, 1, 3, graphic_box_vi, Colour(0.0,0.5,1.0), orbit, -1);
     plot("cmos_inverter_analoginput_orbit_t_vo", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit, -1);
-    if (orbit.reach().find(nt_pl)!=orbit.reach().locations_end())
+    if (orbit.reach().has_key(nt_pl))
         plot("cmos_inverter_analoginput_orbit_t_vo_nsubplin", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nt_pl], -1);
     if (orbit.reach().find(nt_ps)!=orbit.reach().locations_end())
         plot("cmos_inverter_analoginput_orbit_t_vo_nsubpsat", 0, 2, 3, graphic_box_vo, Colour(0.0,0.5,1.0), orbit.reach()[nt_ps], -1);

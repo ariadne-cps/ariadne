@@ -1844,7 +1844,6 @@ Interval _range3(const IntervalTaylorModel& tm) {
     }
     // If the ratio b/a is very large, then roundoff error can cause a significant
     // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
-    const double NONDEGENERATE_QUADRATIC_TERM_FRACTION = std::max(tm.sweep_threshold(), double(std::numeric_limits<float>::epsilon()));
     for(uint j=0; j!=as; ++j) {
         const Float& a=quadratic_terms[j];
         const Float& b=linear_terms[j];

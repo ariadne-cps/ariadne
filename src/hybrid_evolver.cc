@@ -43,10 +43,6 @@ namespace {
 
 namespace Ariadne {
 
-bool ALLOW_FINAL = true;
-bool ALLOW_UNWIND = false;
-bool ALLOW_CREEP = true;
-
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
@@ -199,12 +195,24 @@ orbit(const HybridAutomatonInterface& system,
 
 
 HybridEvolverBase::HybridEvolverBase()
-    : _parameters(new EvolutionParametersType())
-{ }
+{
+    this->_create(new EvolutionParametersType());
+}
 
 HybridEvolverBase::HybridEvolverBase(const EvolutionParametersType& parameters)
-    : _parameters(new EvolutionParametersType(parameters))
-{ }
+{
+    this->_create(new EvolutionParametersType(parameters));
+}
+
+void
+HybridEvolverBase::_create(EvolutionParametersType* parameters)
+{
+    this->_parameters=shared_ptr<EvolutionParametersType>(parameters);
+    this->ALLOW_CREEP=true;
+    this->ALLOW_UNWIND=false;
+    this->ALLOW_SPLIT=false;
+    this->ALLOW_RECONDITION=false;
+}
 
 void
 HybridEvolverBase::
@@ -239,14 +247,15 @@ struct EvolutionStepData {
 
 void
 HybridEvolverBase::
-_log_summary(uint ws, uint rs, HybridEnclosure const& starting_set) const
+_log_summary(const EvolutionData& evolution_data, HybridEnclosure const& starting_set) const
 {
     Box starting_bounding_box=starting_set.space_bounding_box();
     Interval starting_time_range=starting_set.time_range();
     Interval starting_dwell_time_range=starting_set.dwell_time_range();
     ARIADNE_LOG(1,"\r"
-            <<"#w="<<std::setw(4)<<std::left<<ws+1u
-            <<"#r="<<std::setw(4)<<std::left<<rs
+            <<"#w="<<std::setw(4)<<std::left<<evolution_data.working_sets.size()+1u
+            <<"#r="<<std::setw(4)<<std::left<<evolution_data.reach_sets.size()
+            <<"#f="<<std::setw(4)<<std::left<<evolution_data.final_sets.size()
             <<"#e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
             <<" #p="<<std::setw(2)<<std::left<<starting_set.number_of_parameters()
             <<" #c="<<std::setw(1)<<std::left<<starting_set.number_of_inequality_constraints()<<"+"<<std::setw(2)<<starting_set.number_of_equality_constraints()
@@ -800,10 +809,6 @@ _evolution_in_mode(EvolutionData& evolution_data,
                    HybridAutomatonInterface const& system,
                    HybridTime const& maximum_hybrid_time) const
 {
-    // Set to true if sets should simply be discarded if the maximum number of
-    // events has been reached; otherwise sets are put in list of final sets.
-    static const bool DISCARD_ON_MAXIMUM_NUMBER_OF_EVENTS = false;
-
 
     //  Select a working set and evolve this in the current location until either
     // all initial points have undergone a discrete transition (possibly to
@@ -889,17 +894,19 @@ _evolution_step(EvolutionData& evolution_data,
         return;
     }
 
-    if(verbosity==1) { _log_summary(evolution_data.initial_sets.size(),evolution_data.reach_sets.size(),starting_set); }
+    if(verbosity==1) { _log_summary(evolution_data,starting_set); }
 
     // Compute the bounding box of the enclosure
     const Box starting_bounding_box=starting_set.space_bounding_box();
     ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
 
     // Test to see if set is too large
-    if(starting_bounding_box.radius()>this->_parameters->maximum_enclosure_radius) {
+    if(ALLOW_SPLIT && starting_bounding_box.radius()>this->_parameters->maximum_enclosure_radius) {
         ARIADNE_LOG(1,"\r  splitting\n");
         HybridEnclosure reconditioned_set=starting_set;
-        reconditioned_set.recondition();
+        if(ALLOW_RECONDITION) {
+            reconditioned_set.recondition();
+        }
         List<HybridEnclosure> split_sets = reconditioned_set.split();
         for(uint i=0; i!=split_sets.size(); ++i) {
             if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
@@ -956,10 +963,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     tribool starting_set_empty=starting_set_copy.empty();
 
     if(definitely(starting_set_empty)) {
-        std::cerr<<"starting_set="<<repr(starting_set)<<"\ntested_starting_set="<<repr(starting_set_copy)<<"\n\n";
-        std::cerr<<"empty_domain="<<starting_set.continuous_state_set().reduced_domain()<<" "<<std::boolalpha<<empty(starting_set.continuous_state_set().reduced_domain())<<"\n";
         IntervalVector reduced_domain=starting_set.continuous_state_set().reduced_domain();
-        std::cerr<<"reduced_domain="<<reduced_domain<<" empty(reduced_domain)="<<empty(reduced_domain)<<" reduced_domain.empty()="<<reduced_domain.empty()<<"\n";;
         ARIADNE_WARN("empty starting_set "<<repr(starting_set)<<"\n");
         return;
     }
@@ -1115,7 +1119,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         // Compute active set
         List<HybridEnclosure> jump_sets((starting_set));
         HybridEnclosure& jump_set=jump_sets.front();
-        ARIADNE_LOG(2,"  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
+        ARIADNE_LOG(1,"  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         _apply_guard_step(jump_set,dynamic,flow,timing_data,transitions[event],crossings[event],semantics);
 
         ScalarIntervalFunction jump_step_time;
@@ -1170,11 +1174,9 @@ _apply_evolution_step(EvolutionData& evolution_data,
         }
     }
 
-    //ARIADNE_LOG(1,"\r  "<<_step_data.finishing << _step_data._progress << step_data.events);
-
-//    if(verbosity==1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
-//        ARIADNE_LOG(1,"\r  "<<(_step_data.finishing?"  finish":"")<<"  "<<_step_data.events<<(_step_data.progress?"":"  invariant")<<"\n");
-//    }
+    if(verbosity==1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
+        ARIADNE_LOG(1,"\r  "<<(_step_data.finishing?"  finish":"")<<"  "<<_step_data.events<<(_step_data.progress?"":"  invariant")<<"\n");
+    }
 
 }
 

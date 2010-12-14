@@ -1842,14 +1842,13 @@ Interval _range3(const IntervalTaylorModel& tm) {
             r+=abs(iter->data())*Interval(-1,1);
         }
     }
+    // If the ratio b/a is very large, then roundoff error can cause a significant
+    // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
+    const double NONDEGENERATE_QUADRATIC_TERM_FRACTION = std::max(tm.sweep_threshold(), double(std::numeric_limits<float>::epsilon()));
     for(uint j=0; j!=as; ++j) {
-        if(quadratic_terms[j]==0.0) {
-            r+=abs(linear_terms[j])*Interval(-1,1);
-        } else {
-            const Float& a=quadratic_terms[j];
-            const Float& b=linear_terms[j];
-            r+=a*(sqr(Interval(-1,+1)+Interval(b)/(2*a)))-sqr(Interval(b))/(4*a);
-        }
+        Interval ql=abs(quadratic_terms[j])*Interval(-1,1) + abs(linear_terms[j])*Interval(-1,+1);
+        Interval qf=a*(sqr(Interval(-1,+1)+Interval(b)/(2*a)))-sqr(Interval(b))/(4*a);
+        r += intersection(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
     }
     return r;
 }
@@ -2112,7 +2111,7 @@ IntervalTaylorModel rec(const IntervalTaylorModel& x) {
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     if(r.upper()>=0 && r.lower()<=0) {
-        ARIADNE_THROW(DivideByZeroException,"rec(IntervalTaylorModel x)","x="<<x);
+        ARIADNE_THROW(DivideByZeroException,"rec(IntervalTaylorModel x)","x="<<x<<", x.range()="<<x.range());
     }
     Float a=(r.lower()+r.upper())/2;
     set_rounding_upward();
@@ -2928,7 +2927,7 @@ operator<<(std::ostream& os, const IntervalTaylorModel& tm) {
     //os << "IntervalTaylorModel";
     os << "TM["<<tm.argument_size()<<"](";
     Expansion<Float> e=tm.expansion();
-    e.graded_sort();
+    //e.graded_sort();
     e.write(os,variable_names);
     return os << "+/-" << tm.error() << ")";
 }

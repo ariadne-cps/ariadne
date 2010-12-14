@@ -33,6 +33,7 @@
 #include "models.h"
 
 #include "test.h"
+using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
 Vector<Float> v(uint n, uint i) { return Vector<Float>::unit(n,i); }
@@ -56,6 +57,7 @@ class TestTaylorModel
     void test_approximation();
     void test_evaluate();
     void test_arithmetic();
+    void test_range();
     void test_functions();
     void test_rescale();
     void test_restrict();
@@ -76,6 +78,7 @@ void TestTaylorModel::test()
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
     ARIADNE_TEST_CALL(test_arithmetic());
+    ARIADNE_TEST_CALL(test_range());
     ARIADNE_TEST_CALL(test_functions());
     ARIADNE_TEST_CALL(test_rescale());
     ARIADNE_TEST_CALL(test_restrict());
@@ -170,6 +173,22 @@ void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)-IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), IntervalTaylorModel(E(1,2, -2.0,-4.0,7.0), 1.25));
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 0.0,0.0,3.0), 0.75)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), IntervalTaylorModel(E(1,4, 0.0,0.0,9.0,6.0,-12.0), 8.625));
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), IntervalTaylorModel(E(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125));
+}
+
+void TestTaylorModel::test_range()
+{
+    IntervalTaylorModel x0 = IntervalTaylorModel::variable(2,0);
+    IntervalTaylorModel x1 = IntervalTaylorModel::variable(2,1);
+    
+    // Test range of cubic, which should be exact
+    IntervalTaylorModel t1 = x0*x0*x0+x0;
+    ARIADNE_TEST_ASSERT(t1.range()==Interval(-2,+2));
+    
+    // Test range of quadratic, which could be exact, but need not be
+    IntervalTaylorModel t2 = x0*x0+x0;
+    ARIADNE_TEST_BINARY_PREDICATE(subset,t2.range(),Interval(-2,+2));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,Interval(-0.25,+2),t2.range());
+    if(!subset(t2.range(),Interval(-0.2578125,2.0))) { ARIADNE_TEST_WARN("IntervalTaylorModel::range() not exact for quadratic functions."); }
 }
 
 void TestTaylorModel::test_functions()

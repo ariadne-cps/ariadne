@@ -18,7 +18,8 @@ bin_PROGRAMS= \
 	3bouncingballs \
 	rectifier \
 	cmos_inverter_analoginput \
-	grid-refinement
+	grid-refinement \
+	robotarm-verification
 
 #	multipleguards
 #	coconut_demo
@@ -37,6 +38,8 @@ rectifier_SOURCES=rectifier.cc
 cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc
 grid_refinement_SOURCES=grid-refinement.cc
 multipleguards_SOURCES=multipleguards.cc
+robotarm_verification_SOURCES=robotarm-verification.cc
+
 
 coconut_demo_SOURCES=coconut-demo.cc system.cc coconut-demo.h system.h
 

@@ -134,8 +134,6 @@ class HybridEvolverBase
 
     bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
-    bool ALLOW_SPLIT; //!< If true, working enclosure sets may be split to improve accuracy.
-    bool ALLOW_RECONDITION; //!< If true, working enclosure sets may be over-approximated by a set with a simpler representation.
     //@}
 
 
@@ -288,6 +286,12 @@ class HybridEvolverBase
                      Map<DiscreteEvent,TransitionData> const& transitions,
                      HybridEnclosure const& initial_set) const;
 
+
+    //! \brief Simplify the description of a set or allow for reconditioning
+    //! of numerical error.
+    virtual
+    void
+    _recondition(HybridEnclosure& set) const;
 
     //! \brief Process the \a initial_set to find any
     //!  <em>initially active</em> events, and compute the relevant \em jump sets

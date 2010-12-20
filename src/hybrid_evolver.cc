@@ -210,8 +210,6 @@ HybridEvolverBase::_create(EvolutionParametersType* parameters)
     this->_parameters=shared_ptr<EvolutionParametersType>(parameters);
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
-    this->ALLOW_SPLIT=false;
-    this->ALLOW_RECONDITION=false;
 }
 
 void
@@ -581,6 +579,13 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
 
 
 
+void
+HybridEvolverBase::
+_recondition(HybridEnclosure& set) const
+{
+    set.recondition();
+}
+
 
 
 void
@@ -900,14 +905,18 @@ _evolution_step(EvolutionData& evolution_data,
     const Box starting_bounding_box=starting_set.space_bounding_box();
     ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
 
-    // Test to see if set is too large
-    if(ALLOW_SPLIT && starting_bounding_box.radius()>this->_parameters->maximum_enclosure_radius) {
-        ARIADNE_LOG(1,"\r  splitting\n");
+    // Test to see if set requires reconditioning
+    if(this->_parameters->enable_reconditioning && norm(starting_set.space_function().errors()) > this->_parameters->maximum_spacial_error) {
         HybridEnclosure reconditioned_set=starting_set;
-        if(ALLOW_RECONDITION) {
-            reconditioned_set.recondition();
-        }
-        List<HybridEnclosure> split_sets = reconditioned_set.split();
+        reconditioned_set.recondition();
+        evolution_data.working_sets.append(reconditioned_set);
+        return;
+    }
+
+    // Test to see if set is too large
+    if(this->_parameters->enable_subdivisions && starting_bounding_box.radius() > this->_parameters->maximum_enclosure_radius) {
+        ARIADNE_LOG(1,"\r  splitting\n");
+        List<HybridEnclosure> split_sets = starting_set.split();
         for(uint i=0; i!=split_sets.size(); ++i) {
             if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
         }

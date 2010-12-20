@@ -70,6 +70,13 @@ class ContinuousEvolutionParameters {
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType maximum_enclosure_radius;
 
+    //! \brief The maximum allowable approximation error in the parameter-to-space mapping of an enclosure set.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    RealType maximum_spacial_error;
+
+    //! \brief Enable reconditioning of basic sets (false by default).
+    bool enable_reconditioning;
+
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
 
@@ -207,6 +214,8 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       maximum_step_size(1.0),
       minimum_enclosure_radius(0.0),
       maximum_enclosure_radius(100.0),
+      maximum_spacial_error(1e-2),
+      enable_reconditioning(false),
       enable_subdivisions(false),
       enable_premature_termination(true)
 { }

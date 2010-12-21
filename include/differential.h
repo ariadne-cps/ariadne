@@ -41,12 +41,18 @@
 
 namespace Ariadne {
 
+class Float;
+class Interval;
+
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
 
 template<class X> class Expansion;
 template<class X> class Differential;
+
+typedef Differential<Float> FloatDifferential;
+typedef Differential<Interval> IntervalDifferential;
 
 template<class X> Differential<X>& operator+=(Differential<X>& x, const Differential<X>& y);
 template<class X> Differential<X>& operator-=(Differential<X>& x, const Differential<X>& y);

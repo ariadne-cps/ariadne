@@ -84,9 +84,9 @@ void export_interior_point_solver()
 
     class_<InteriorPointSolver> interior_point_solver_class("InteriorPointSolver",init<>());
     interior_point_solver_class.def("optimize", &InteriorPointSolver::optimize);
-    interior_point_solver_class.def("feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&, const Vector<Float>&,const Matrix<Float>&,const Vector<Float>&,const Vector<Float>&,const Vector<Float>&)const) &InteriorPointSolver::feasible);
-    interior_point_solver_class.def("feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&, const Vector<Float>&,const Vector<Float>& ,const Vector<Float>& )const) &InteriorPointSolver::feasible);
-    interior_point_solver_class.def("optimize", &InteriorPointSolver::_optimize);
+    interior_point_solver_class.def("constrained_optimize", &InteriorPointSolver::constrained_optimize);
+    interior_point_solver_class.def("primal_feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&)const) &InteriorPointSolver::primal_feasible);
+    interior_point_solver_class.def("constrained_feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&, const Vector<Float>&,const Vector<Float>&)const) &InteriorPointSolver::constrained_feasible);
     interior_point_solver_class.def("validate", &InteriorPointSolver::validate);
 }
 

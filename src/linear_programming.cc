@@ -730,18 +730,20 @@ compute_y(const Vector<X>& c, const array<size_t>& p, const Matrix<XX>& B)
     return y;
 }
 
-template<class X,class XX>
+template<class X,class XX,class XXX>
 Vector<XX>
-compute_z(const Matrix<X>& A, const Vector<X>& c, const array<size_t>& p, const Vector<XX>& y)
+compute_z(const Matrix<X>& A, const Vector<XXX>& c, const array<size_t>& p, const Vector<XX>& y)
 {
     const double CUTOFF_THRESHOLD=1e-10;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     Vector<XX> z(n);
+
+    // Shortcut if we can assume c_B - y A_B = 0
     for(size_t k=0; k!=m; ++k) {
         z[p[k]]=0;
     }
-    for(size_t k=m; k!=n; ++k) {
+    for(size_t k=0; k!=n; ++k) { // Change to k=m,...,n if c_B - y A_B = 0
         size_t j=p[k];
         z[j]=c[j];
         for(size_t i=0; i!=m; ++i) {
@@ -1024,6 +1026,13 @@ update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<
 }
 
 
+template<class X>
+void
+update_y(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<X>& y, const size_t s, const Vector<X>& d, const X& t)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 
 
 template<class X>
@@ -1241,7 +1250,6 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
     make_lpair(r,t)=compute_rt(l,u,vt,p,x,d,s);
     if(r==n) {
         ARIADNE_LOG(3,"   Cannot find variable to enter basis; no improvement can be made\n");
-        char c; std::cin>>c;
         return r;
     }
 
@@ -1449,6 +1457,7 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
     }
 
     ARIADNE_LOG(9,"  Checking solution\n");
+
     // Check solution
     for(size_t i=0; i!=n; ++i) {
         ARIADNE_ASSERT_MSG(x[i]>=l[i]-BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" B="<<B<<" x="<<x );
@@ -1555,25 +1564,20 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
     ARIADNE_LOG(9,"    p="<<p<<" B="<<B<<"  (BA="<<Matrix<X>(prod(B,A))<<")\n");
 
     Vector<X> x=compute_x(A,b,l,u,vt,p,B);
+    Vector<X> y(m);
 
-    tribool fs = _constrained_feasible(A,b,l,u,vt,p,B,x);
-    tribool vfs = verify_constrained_feasibility(A,b,l,u,vt);
-    if(!indeterminate(vfs) && vfs!=fs) {
-        if(verbosity>0) {
-            ARIADNE_WARN("Approximate feasibility algorithm for\n  A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\nyielded basic variables "<<vt<<
-                         " and result "<<fs<<", but validation code gave "<<vfs<<".\n");
-        }
-    }
-
-    return fs;
+    return this->hotstarted_constrained_feasible(A,b,l,u,vt,p,B,x,y);
 }
 
 
 
 template<class X>
 tribool
-SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y)
+SimplexSolver<X>::hotstarted_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y)
 {
+    ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n");
+    ARIADNE_LOG(5,"vt="<<vt<<" p="<<p<<"\n");
+
     const size_t m=A.row_size();
     //const size_t n=A.column_size();
     if(vt.size()==0) {
@@ -1588,15 +1592,14 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
 
     x=compute_x(A,b,l,u,vt,p,B);
     consistency_check(A,b,l,u,vt,p,B,x);
-    ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<Vector<X>(prod(A,x))<<"\n");
 
     tribool fs = _constrained_feasible(A,b,l,u,vt,p,B,x);
 
+    ARIADNE_LOG(7,"vt="<<vt<<" p="<<p<<" fs="<<fs<<"\n");
     Vector<X> c=compute_c(l,u,p,x,m);
-    ARIADNE_LOG(9," c="<<midpoint(c)<<"\n");
-
     y=compute_y(c,p,B);
-    ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
+    Vector<X> z=compute_z(A,c,p,y);
+    ARIADNE_LOG(7,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
 
     tribool vfs = verify_constrained_feasibility(A,b,l,u,vt);
     if(!indeterminate(vfs) && vfs!=fs) {
@@ -1605,7 +1608,8 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
                          " and result "<<fs<<", but validation code gave "<<vfs<<".\n");
         }
     }
-
+    //FIXME: Return correct value
+    // return vfs;
     return fs;
 }
 
@@ -1729,6 +1733,32 @@ SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c
     return false;
 }
 
+template<class X, class XX> Vector<X> compute_c(const size_t m, const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const Vector<XX>& x) {
+    const size_t n=x.size();
+    Vector<X> c(n);
+    for(size_t k=0; k!=m; ++k) {
+        size_t j=p[k];
+        if((x[j]<=l[j])) { c[j]=-1; }
+        else if((x[j]>=u[j])) { c[j]=+1; }
+    }
+    return c;
+}
+
+template<> Vector<Float> compute_c(const size_t m, const Vector<Float>& l, const Vector<Float>& u, const array<size_t>& p, const Vector<Interval>& x) {
+    const size_t n=x.size();
+    Vector<Float> c(n);
+    for(size_t k=0; k!=m; ++k) {
+        size_t j=p[k];
+        if(possibly(x[j]<=l[j])) { c[j]=-1; }
+        else if(possibly(x[j]>=u[j])) { c[j]=+1; }
+        if(possibly(x[j]<l[j]) && possibly(x[j]>u[j])) {
+            ARIADNE_FAIL_MSG("Unhandled case in checking feasibility of linear program. Basic variable x["<<j<<"]="<<x[j]<<" may violate both lower bound "<<l[j]<<" and upper bound "<<u[j]<<".");
+        }
+    }
+    return c;
+}
+
+
 
 // A point x is strictly feasible for the basis B with lower variables L and upper variables U if
 //   x_B = A_B^{-1} (b - A_L x_L - A_U x_U) is definitely within (x_B), the open interval (x_BL,x_BU).
@@ -1740,7 +1770,8 @@ template<class X> tribool
 SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt)
 {
     ARIADNE_LOG(4,"verify_constrained_feasibility(Matrix A, Vector b, Vector l, Vector u, VariableTypeArray vt)\n");
-    ARIADNE_LOG(5," A="<<A<<"\n b="<<b<<"\n l="<<l<<"\n u="<<u<<"\n t="<<vt<<"\n");
+    ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<"\n");
+    const array<size_t> p=compute_p(vt);
 
     typedef Interval XX;
     const size_t m=A.row_size();
@@ -1755,41 +1786,24 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
         if(l[j]==u[j]) { ARIADNE_ASSERT(!vt[j]==BASIS);}
     }
 
-    const array<size_t> p=compute_p(vt);
-    ARIADNE_LOG(9," p="<<p<<"\n");
+    {
+        const Matrix<X> B=compute_B<X>(A,p);
+        const Vector<X> x=compute_x(A,b,l,u,vt,p,B);
+        const Vector<X> c=compute_c(m,l,u,p,x);
+        const Vector<X> y=compute_y(c,p,B);
+        const Vector<X> z=compute_z(A,c,p,y);
+        ARIADNE_LOG(7,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
+    }
+
 
     const Matrix<XX> B=compute_B<XX>(A,p);
-
-    ARIADNE_LOG(9," B="<<B<<"\n   B*A="<<midpoint(prod(B,A))<<"\n");
+    ARIADNE_LOG(9," B="<<B<<"; B*A="<<midpoint(prod(B,A))<<"\n");
 
     const Vector<XX> x=compute_x(A,b,l,u,vt,p,B);
+    ARIADNE_LOG(9," x="<<x<<"; A*x="<<Vector<XX>(prod(A,x))<<"\n");
 
-    ARIADNE_LOG(9," x="<<x<<"\n   A*x="<<Vector<XX>(prod(A,x))<<"\n");
 
-    tribool fs=true;
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=l[j]) || possibly(x[j]>=u[j])) {
-        //if(possibly(x[j]<l[j]) || possibly(x[j]>u[j])) { // Use this for non-strict feasibility
-            ARIADNE_LOG(9," k="<<k<<" j="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<"\n");
-            fs=indeterminate;
-            break;
-        }
-    }
-    if(fs==true) {
-        ARIADNE_LOG(9," true\n");
-        return true;
-    }
-
-    Vector<X> c(n);
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=l[j])) { c[j]=-1; }
-        else if(possibly(x[j]>=u[j])) { c[j]=+1; }
-        if(possibly(x[j]<l[j]) && possibly(x[j]>u[j])) {
-            ARIADNE_FAIL_MSG("Unhandled case in checking feasibility of linear program. Basic variable x["<<j<<"]="<<x[j]<<" may violate both lower bound "<<l[j]<<" and upper bound "<<u[j]<<".");
-        }
-    }
+    const Vector<X> c=compute_c(m,l,u,p,x);
     ARIADNE_LOG(9," c="<<c<<"\n");
 
     const Vector<XX> y=compute_y(c,p,B);
@@ -1798,23 +1812,46 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
     const Vector<XX> z=compute_z(A,c,p,y);
     ARIADNE_LOG(9," z="<<z<<"\n");
 
-/*
-    // Check to see if a reduction can definitely be made
-    for(size_t k=m; k!=n; ++k) {
+    ARIADNE_LOG(5,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
+
+    tribool fs=true;
+    for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        if(vt[j]==LOWER && definitely(z[j]<0)) { ARIADNE_FAIL_MSG("Nondegenerate point"); }
-        if(vt[j]==UPPER && definitely(z[j]>0)) { ARIADNE_FAIL_MSG("Nondegenerate point"); }
+        if(possibly(x[j]<=l[j]) || possibly(x[j]>=u[j])) {
+            ARIADNE_LOG(9," k="<<k<<" j="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<"\n");
+            fs=indeterminate;
+            if(definitely(x[j]<l[j]) || definitely(x[j]>u[j])) {
+                fs=false;
+                break;
+            }
+        }
     }
-*/
+
+    if(fs==true) {
+        return fs;
+    }
+
+    // The basis is optimal for min c x if z_L >=0  and z_U <= 0.
+    // We have definite infeasibility if z_L > 0  and z_U < 0
+    // If z_j < 0 for j lower, or z_j > 0 for j upper, then the simplex algorithm has not terminated correctly.
 
     for(size_t k=m; k!=n; ++k) {
         size_t j=p[k];
-        if(vt[j]==LOWER && possibly(z[j]<=0)) { ARIADNE_LOG(9," indeterminate\n"); return indeterminate; }
-        if(vt[j]==UPPER && possibly(z[j]>=0)) { ARIADNE_LOG(9," indeterminate\n"); return indeterminate; }
+        if(vt[j]==LOWER && possibly(z[j]<=0)) { fs=indeterminate; break; }
+        if(vt[j]==UPPER && possibly(z[j]>=0)) { fs=indeterminate; break; }
     }
 
-    ARIADNE_LOG(9," false\n");
-    return false;
+    if(fs==false) {
+        return fs;
+    }
+
+    // TODO: Code below is too enthusiastic about declaring an error.
+    // For some degenerate, there may be no strictly feasible basic solution,
+    // but it is easy to find a strictly feasible non-basic solution.
+    // Should make feasibility testing more robust by testing the possibility of
+    // obtaining strict feasibility by a partial step.
+
+    return fs;
 }
 
 
@@ -2043,6 +2080,15 @@ Vector<Float> emul(const Vector<Float>& x, const Vector<Float>& y) {
     return r;
 }
 
+// Set r[i]=x[i]*y[i]+z for i=1,...,n
+Vector<Float> efma(const Vector<Float>& x, const Vector<Float>& y, const Float& z) {
+    Vector<Float> r(x.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=x[i]*y[i]+z;
+    }
+    return r;
+}
+
 // Return r[i]=x[i]/z[i] for i=1,...,n
 void _ediv(Vector<Float>& r, const Vector<Float>& x, const Vector<Float>& z) {
     for(uint i=0; i!=r.size(); ++i) {
@@ -2060,7 +2106,7 @@ Vector<Float> ediv(const Vector<Float>& x, const Vector<Float>& z) {
 }
 
 // Return r[i]=1/y[i] for i=1,...,n
-Vector<Float> erev(const Vector<Float>& v) {
+Vector<Float> erec(const Vector<Float>& v) {
     Vector<Float> r(v.size());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=1.0/v[i];
@@ -2091,15 +2137,21 @@ bool all_greater(const Vector<Float>& x, const Float& e) {
     return true;
 }
 
-
-
-tuple<tribool,Vector<Float> >
-InteriorPointSolver::constrained_dual_feasible(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                                               const Vector<Float>& l, const Vector<Float>& u) const
-{
-    // Solve the constraint problem b<=Ax<=c; l<=x<=u.
-    ARIADNE_NOT_IMPLEMENTED;
+bool all_less(const Vector<Float>& x, const Float& e) {
+    for(uint i=0; i!=x.size(); ++i) {
+        if(x[i]>=e) { return false; }
+    }
+    return true;
 }
+
+bool all_greater(const Vector<Float>& x1, const Vector<Float>& x2) {
+    for(uint i=0; i!=x1.size(); ++i) {
+        if(x1[i]<=x2[i]) { return false; }
+    }
+    return true;
+}
+
+
 
 Interval dot(const Vector<Float>& c, const Vector<Interval>& x) {
     Interval r=0.0;
@@ -2108,197 +2160,6 @@ Interval dot(const Vector<Float>& c, const Vector<Interval>& x) {
     }
     return r;
 }
-
-Interval
-InteriorPointSolver::validate(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c, const Vector<Float>& x, const Vector<Float>& y) const
-{
-    // Find a primal-dual feasible point (x,y) suitable as an input
-    // to an optimization solver. The slack variables are A
-    ARIADNE_ASSERT(A.row_size()==b.size());
-    ARIADNE_ASSERT(A.column_size()==c.size());
-
-    Matrix<Interval> IA=A;
-    Matrix<Interval> IS=prod(transpose(IA),IA);
-    Matrix<Interval> ISinv=inverse(IS);
-    Vector<Interval> dx=IA*Vector<Interval>(x); dx=IS*dx; dx=dx*IA;
-    Vector<Interval> Ix=x-dx;
-    Vector<Interval> Iy(y);
-    Vector<Interval> Iz=prod(y,IA)-c;
-    for(uint i=0; i!=Ix.size(); ++i) {
-        ARIADNE_ASSERT(Ix[i].lower()>=0.0);
-    }
-    for(uint i=0; i!=Iz.size(); ++i) {
-        ARIADNE_ASSERT(Iz[i].lower()>=0.0);
-    }
-    return hull(dot(c,Ix),dot(b,Iy));
-}
-
-tribool
-slow_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-              const Vector<Float>& l, const Vector<Float>& u)
-{
-    const uint m=A.row_size();
-    const uint n=A.column_size();
-
-    ARIADNE_ASSERT(cl.size()==n && cu.size()==n && l.size()==m && u.size()==m);
-
-    const uint mm=m+1;
-    const uint nn=2*(m+n);
-
-    Matrix<Float> AA(mm,nn);
-    for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=n; ++j) {
-            AA[i][j]=-A[i][j];
-            AA[i][j+n]=A[i][j];
-        }
-        AA[i][2*n+i]=-1;
-        AA[i][2*n+m+i]=+1;
-    }
-    for(uint jj=0; jj!=nn; ++jj) {
-        AA[m][jj]=1.0;
-    }
-
-    ARIADNE_LOG(2,"AA="<<AA<<"\n");
-
-    Vector<Float> bb(mm);
-    bb[m]=1.0;
-
-    ARIADNE_LOG(2,"bb="<<bb<<"\n");
-
-    Vector<Float> cc(nn);
-    for(uint j=0; j!=n; ++j) {
-        cc[j]=-cl[j];
-        cc[n+j]=cu[j];
-    }
-    for(uint i=0; i!=m; ++i) {
-        cc[2*n+i]=-l[i];
-        cc[2*n+m+i]=u[i];
-    }
-
-    ARIADNE_LOG(2,"cc="<<cc<<"\n");
-
-    Vector<Float> xx(nn);
-    Vector<Float> yy(mm);
-    Vector<Float> zz(nn);
-
-    for(uint jj=0; jj!=nn; ++jj) {
-        xx[jj]=1.0/nn;
-    }
-
-    ARIADNE_LOG(2,"xx="<<xx<<"\n");
-
-    Vector<Float> y(m);
-    for(uint i=0; i!=m; ++i) {
-        y[i]=(l[i]+u[i])/2;
-        yy[i]=y[i];
-        zz[2*n+i]=y[i]-l[i];
-        zz[2*n+m+i]=u[i]-y[i];
-    }
-
-    Vector<Float> yA=prod(y,A);
-    ARIADNE_LOG(2,"yA="<<yA<<"\n");
-
-    Float t=+inf<Float>();
-    for(uint j=0; j!=n; ++j) {
-        zz[j]=yA[j]-cl[j];
-        t=min(t,zz[j]);
-        zz[n+j]=cu[j]-yA[j];
-        t=min(t,zz[n+j]);
-    }
-
-    t-=1.0/nn;
-    for(uint i=0; i!=nn; ++i) {
-        zz[i]-=t;
-    }
-    yy[m]=t;
-
-    ARIADNE_LOG(2,"yy="<<yy<<"\n");
-    ARIADNE_LOG(2,"zz="<<zz<<"\n");
-
-    InteriorPointSolver()._optimize(AA,bb,cc,xx,yy,zz);
-    ARIADNE_LOG(2," xx="<<xx<<" yy="<<yy<<" zz="<<zz<<"\n");
-
-    y=project(yy,range(0,m));
-    t=yy[m];
-    ARIADNE_LOG(2,"b="<<cl<<" yA="<<prod(y,A)<<" c="<<cu<<"\nl="<<l<<" y="<<y<<" u="<<u<<"\n");
-
-    if(t>0.0) { return true; }
-    else if (t<0.0) { return false; }
-    else { return indeterminate; }
-
-}
-
-
-tribool
-InteriorPointSolver::feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-                              const Vector<Float>& l, const Vector<Float>& u) const
-{
-    return slow_feasible(A,cl,cu,l,u);
-
-    // Find a primal-dual feasible point (x,y) suitable as an input
-    // to an optimization solver. The slack variables are A
-    static const uint m=A.row_size();
-    static const uint n=A.column_size();
-
-    ARIADNE_ASSERT(cl.size()==n);
-    ARIADNE_ASSERT(cu.size()==n);
-    ARIADNE_ASSERT(l.size()==m);
-    ARIADNE_ASSERT(u.size()==m);
-
-    // Find vectors y,t,zcl,zcu,zl,zu such that A^Ty+et+zc=c etc
-    Vector<Float> y(m);
-    Vector<Float> z(2*(m+n));
-    for(uint i=0; i!=m; ++i) {
-        y[i]=(l[i]+u[i])/2;
-        z[2*n+i]=y[i]-l[i];
-        z[2*n+m+i]=u[i]-y[i];
-    }
-
-    Vector<Float> yA=prod(y,A);
-    Float t=+inf<Float>();
-    for(uint j=0; j!=n; ++j) {
-        z[j]=yA[j]-cl[j];
-        z[n+j]=cu[j]-yA[j];
-        t=min(t,cu[j]-yA[j]);
-        t=min(t,yA[j]-cl[j]);
-    }
-    if(t>0) {
-        ARIADNE_LOG(2,"y="<<y<<" yA="<<yA<<" cl="<<cl<<" cu="<<cu<<"\n");
-        return true;
-    }
-    t-=1.0/(2*(m+n));
-    for(uint i=0; i!=2*(m+n); ++i) {
-        z[i]-=t;
-    }
-
-    // Find a vector x=(xcl,xcu,xl,xu) such that A(xcu-xcl)+(xu-xl) = 0 summing to 1
-    Vector<Float> x(2*(m+n));
-    for(uint i=0; i!=2*(m+n); ++i) {
-        x[i]=1.0/(2*(m+n));
-    }
-
-    Vector<Float> et(n,t);
-    Vector<Float> zcu=project(z,range(n,2*n));
-    Vector<Float> zcl=project(z,range(0,n));
-
-    ARIADNE_LOG(2,"A="<<A<<" cl="<<cl<<" cu="<<cu<<" l="<<l<<" u="<<u<<"\n");
-    ARIADNE_LOG(2,"x="<<x<<" t="<<t<<" y="<<y<<" z="<<z<<"\n");
-
-    ARIADNE_ASSERT(norm(Vector<Float>(yA-et-zcl-cl))<1e-10);
-    ARIADNE_ASSERT(norm(Vector<Float>(yA+et+zcu-cu))<1e-10);
-
-    return _feasible(A,cl,cu,l,u,t,x,y,z);
-}
-
-tuple< Vector<Float>, Vector<Float>, Vector<Float> >
-InteriorPointSolver::optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c) const
-{
-    Vector<Float> x,y,z;
-    //make_ltuple(x,y,z) = this->feasible(A,b,c);
-    return this->_optimize(A,b,c,x,y,z);
-}
-
-
 
 void _set_es_matrix(Matrix<Float>& S, const Matrix<Float>& A, const Vector<Float>& D) {
     // D=diag(Db,Dc,Dl,Du)
@@ -2382,290 +2243,199 @@ void _set_s_matrix(Matrix<Float>& S, const Matrix<Float>& A, const Vector<Float>
 
 
 
-/*
-// Consider feasibility of cl<=yA<=cu; l<=y<=u
-// Augment system by considering b<=yA-te; yA+te<=c; max(t)
+Float compute_mu(const Vector<Float>& xl, const Vector<Float>& xu,
+                 const Vector<Float>& x, const Vector<Float>& zl, const Vector<Float>& zu)
+{
+    const uint n=x.size();
+    Float mu = 0.0;
+    for(uint i=0; i!=n; ++i) {
+        if(xl[i]!=-infty) { mu += ((x[i]-xl[i])*zl[i]); }
+        if(xu[i]!=+infty) { mu += ((xu[i]-x[i])*zu[i]); }
+    }
+    mu /= (2.0*n);
+    return mu;
+}
+
+Float compute_mu(const Vector<Float>& x, const Vector<Float>& z)
+{
+    const uint n=x.size();
+    Float mu = 0.0;
+    for(uint i=0; i!=n; ++i) {
+        mu += x[i]*z[i];
+    }
+    mu /= n;
+    return mu;
+}
+
+
+Interval
+InteriorPointSolver::validate(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c, const Vector<Float>& x, const Vector<Float>& y) const
+{
+    // Find a primal-dual feasible point (x,y) suitable as an input
+    // to an optimization solver. The slack variables are A
+    ARIADNE_ASSERT(A.row_size()==b.size());
+    ARIADNE_ASSERT(A.column_size()==c.size());
+
+    Matrix<Interval> IA=A;
+    Matrix<Interval> IS=prod(transpose(IA),IA);
+    Matrix<Interval> ISinv=inverse(IS);
+    Vector<Interval> dx=IA*Vector<Interval>(x); dx=IS*dx; dx=dx*IA;
+    Vector<Interval> Ix=x-dx;
+    Vector<Interval> Iy(y);
+    Vector<Interval> Iz=prod(y,IA)-c;
+    for(uint i=0; i!=Ix.size(); ++i) {
+        ARIADNE_ASSERT(Ix[i].lower()>=0.0);
+    }
+    for(uint i=0; i!=Iz.size(); ++i) {
+        ARIADNE_ASSERT(Iz[i].lower()>=0.0);
+    }
+    return hull(dot(c,Ix),dot(b,Iy));
+}
+
+
 tribool
-InteriorPointSolver::_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-                               const Vector<Float>& yl, const Vector<Float>& yu,
-                               Float& v, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
+InteriorPointSolver::validate_feasibility(const Matrix<Float>& A, const Vector<Float>& b,
+                                          const Vector<Float>& x, const Vector<Float>& y) const
 {
     const uint m=A.row_size();
     const uint n=A.column_size();
 
-    Vector<Float> e(n,1.0);
-    Vector<Float> yA(n);
-    Vector<Float> Dc(n);
-    Vector<Float> Db(n);
+    ARIADNE_LOG(2,"InteriorPointSolver::validate_feasibility(A,b,x,y)\n");
+    ARIADNE_LOG(3,"A="<<A<<" b="<<b<<"\n");
+    ARIADNE_LOG(3,"x="<<x<<" y="<<y<<"\n");
+    ARIADNE_LOG(4,"Ax-b="<<Vector<Float>(A*x-b)<<" yA="<<y*A<<" yb="<<dot(y,b)<<"\n");
 
-    Matrix<Float> S(m,m), Sinv(m,m);
-    Vector<Float> yf(m);
+    // If yA < 0 and yb > 0, then problem is infeasible
+    tribool result = false;
 
-    FloatVector dy(m); dx(2*(m+n)); dz(2*(m+n));
-    FloatVector ny(m); nx(2*(m+n)); nz(2*(m+n));
-
-    FloatVectorRange zcl=project(z,range(0,n));
-    FloatVectorRange zcu=project(z,range(n,2*n));
-    FloatVectorRange zbl=project(z,range(2*n,2*n+m));
-    FloatVectorRange zbu=project(z,range(2*n+m,2*(n+m)));
-
-    FloatVectorRange xcl=project(x,range(0,n));
-    FloatVectorRange xcu=project(x,range(n,2*n));
-    FloatVectorRange xbl=project(x,range(2*n,2*n+m));
-    FloatVectorRange xbu=project(x,range(2*n+m,2*(n+m)));
-
-    FloatVectorRange dzcl=project(dz,range(0,n));
-    FloatVectorRange dzcu=project(dz,range(n,2*n));
-    FloatVectorRange dzbl=project(dz,range(2*n,2*n+m));
-    FloatVectorRange dzbu=project(dz,range(2*n+m,2*(n+m)));
-
-    FloatVectorRange dxcl=project(dx,range(0,n));
-    FloatVectorRange dxcu=project(dx,range(n,2*n));
-    FloatVectorRange dxbl=project(dx,range(2*n,2*n+m));
-    FloatVectorRange dxbu=project(dx,range(2*n+m,2*(n+m)));
-
-    for(uint i=0; i!=10; ++i) {
-        Float eps=0.01;
-
-        Vector<Float> res(2*(m+n));
-        for(uint i=0; i!=2*(m+n); ++i) {
-            res[i]=x[i]*z[i]-eps;
+    set_rounding_upward();
+    for(uint j=0; j!=x.size(); ++j) {
+        Float yAj=0.0;
+        for(uint i=0; i!=m; ++i) {
+            yAj += y[i]*A[i][j];
         }
-
-        Dc=ediv(xcu,zcu)-ediv(xcl,zcl);
-        Db=ediv(xbu,zbu)-ediv(xbl,zbl);
-        Drzc=erec(zcu)-erec(zcl);
-        Drzb=erec(zbu)-erec(zbl);
-
-        yf=prod(A,Drz)+Drzb;
-        _set_s_matrix(S,A,Dc,Db);
-        Sinv=inverse(S);
-        dy=prod(Sinv,yf);
-        dyA=prod(y,A);
-        dv=0.0;
-
-        dzcl=dyA-dv*e;
-        dzcu=-dv*e-dyA;
-        dzyl=dy;
-        dzyu=-dy;
-
-        dx=ediv(-res-emul(x,dz),z);
-
-        bool allpositive=false;
-        Float a=1/scale;
-        while(!allpositive) {
-            a=a*scale;
-            nx=midpoint(x+a*dx);
-            nz=midpoint(z+a*dz);
-            nxz=emul(nx,nz);
-            allpositive = all_greater(nx,0.0) && all_greater(nxz,eps);
-            ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" nt="<<nt<<" ny="<<ny<<" nz="<<nz<<"\n");
+        if(yAj>=0.0) { result=indeterminate; break; }
+    }
+    set_rounding_downward();
+    if(result==false) {
+        Float yb=0.0;
+        for(uint i=0; i!=y.size(); ++i) {
+            yb += b[i]*y[i];
         }
-        nt=midpoint(t+a*dt);
-        ny=midpoint(y+a*dy);
+        if(yb <= 0.0) { result=indeterminate; }
+    }
+    set_rounding_to_nearest();
+    if(definitely(!result)) { return result; }
 
-        t=nt; y=ny; x=nx; z=nz;
+    // x should be an approximate solution to Ax=b
+    // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
+    Vector<Interval> ivlx = x;
+    Vector<Interval> ivle = b-A*ivlx;
+
+    ARIADNE_LOG(4,"[e] = "<<ivle << "\n");
+    Matrix<Interval> ivlS(m,m);
+    for(uint i1=0; i1!=m; ++i1) {
+        for(uint i2=i1; i2!=m; ++i2) {
+            for(uint j=0; j!=n; ++j) {
+                ivlS[i1][i2] += mul_ivl(A[i1][j],A[i2][j]);
+            }
+        }
+    }
+    for(uint i1=0; i1!=m; ++i1) {
+        for(uint i2=0; i2!=i1; ++i2) {
+            ivlS[i1][i2]=ivlS[i2][i1];
+        }
     }
 
-    if(t>0.0) { return true; }
-    else if(cx<0.0) { return false; }
-    else { return indeterminate; }
-}
-*/
+    Vector<Interval> ivld = solve(ivlS,ivle) * A;
+    ARIADNE_LOG(4,"[d] = "<<ivld << "\n");
 
-// Consider feasibility of  bl<=yB<=bu; yC<=c; dl<=y<=du
-// Augment system by considering b<=yA-ve; yA+ve<=c; max(t)
+    ivlx = x + ivld;
+
+    ARIADNE_LOG(3,"[x] = "<<ivlx << " A[x]-b="<<Vector<Interval>(A*ivlx-b)<<"\n");
+    result=true;
+    for(uint i=0; i!=n; ++i) {
+        if(ivlx[i].lower()<=0.0) {
+            result = indeterminate; break;
+        }
+    }
+
+    return result;
+
+}
+
+
 tribool
-InteriorPointSolver::feasible(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-                              const Matrix<Float>& C, const Vector<Float>& c,
-                              const Vector<Float>& dl, const Vector<Float>& du) const
+InteriorPointSolver::validate_constrained_feasibility(const Matrix<Float>& A, const Vector<Float>& b,
+                                                      const Vector<Float>& xl, const Vector<Float>& xu,
+                                                      const Vector<Float>& x, const Vector<Float>& y) const
 {
-    StandardLinearProgram lp=feasibility_problem(B,bl,bu,C,c,dl,du);
+    const uint m=A.row_size();
+    const uint n=A.column_size();
 
-    Matrix<Float>& AA=lp.A;
-    Vector<Float>& bb=lp.b;
-    Vector<Float>& cc=lp.c;
-    Vector<Float>& xx=lp.x;
-    Vector<Float>& yy=lp.y;
-    Vector<Float>& zz=lp.z;
-
-    Float yb, cx;
-
-    const uint max_error=1e-8;
-    yb=dot(yy,bb); cx=dot(cc,xx);
-
-    while(yb<=0.0 && cx>=0.0 && (cx-yb)>max_error) {
-        this->_optimization_step(AA,bb,cc,xx,yy,zz);
-        yb=dot(yy,bb); cx=dot(cc,xx);
+    // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
+    // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
+    Vector<Interval> z=Vector<Interval>(y)*A;
+    Float mx = 0.0;
+    set_rounding_downward();
+    for(uint i=0; i!=y.size(); ++i) {
+        mx += b[i]*y[i];
     }
+    for(uint i=0; i!=x.size(); ++i) {
+        Float neg_xui = -xu[i];
+        if(z[i].upper()>0.0) { mx += z[i].upper() * neg_xui; }
+        if(z[i].lower()<0.0) { mx += z[i].lower() * xl[i]; }
+    }
+    set_rounding_to_nearest();
+    if(mx>0.0) { return false; }
 
-    ARIADNE_LOG(2,"cx="<<cx<<"\nyb="<<yb<<"\n");
-    Matrix<Interval> iAA(AA);
-    Vector<Interval> iyy(yy);
-    Vector<Interval> ixx(xx);
-    Vector<Interval> icc(cc);
-    Vector<Interval> ibb(bb);
-    ARIADNE_LOG(2,"c-yA="<<icc-iyy*iAA<<"\n");
+    // x should be an approximate solution to Ax=b
+    // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
+    Vector<Interval> ivlx = x;
+    Vector<Interval> ivle = b-A*ivlx;
 
-    Matrix<Interval> S=sprod(iAA);
-    Matrix<Interval> Sinv=inverse(S);
-    Vector<Interval> izz=ibb-iAA*ixx;
-    ixx=transpose(iAA)*(Sinv*(izz))+ixx;
-    ARIADNE_LOG(2,"Ax-b="<<prod(iAA,ixx)-bb<<"\n");
-    ARIADNE_LOG(2,"x="<<ixx<<"\n");
-
-    if(yb>0.0) { return true; }
-    else if(cx<0.0) { return false; }
-    else { return indeterminate; }
-}
-
-
-/*
-// Consider feasibility of  bl<=yB<=bu; yC<=c; dl<=y<=du
-// Augment system by considering b<=yA-ve; yA+ve<=c; max(t)
-tribool
-InteriorPointSolver::_feasible(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-                               const Matrix<Float>& C, const Vector<Float>& c,
-                               const Vector<Float>& dl, const Vector<Float>& du,
-                               Float& t, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
-{
-    // For the linear system Ax+by=s; b^Tx+cy=t, a solution is given by
-    // y=(t - b^T A^-1 s)/(c-b^T A^-1 b); x=A^-1 s - A^-1 b y
-
-    typedef boost::numeric::ublas::vector_range< Vector<Float> > FloatVectorRange;
-    typedef Vector<Float> FloatVector;
-
-    const uint nd=y.size();
-    const uint nc=C.column_size();
-    const uint nb=B.column_size();
-    const uint ns=2*nb+nc+2*nd;
-
-    ARIADNE_ASSERT(B.row_size()==nd);
-    ARIADNE_ASSERT(C.row_size()==nd);
-    ARIADNE_ASSERT(bl.size()==nb);
-    ARIADNE_ASSERT(bu.size()==nb);
-    ARIADNE_ASSERT(c.size()==nc);
-    ARIADNE_ASSERT(dl.size()==nd);
-    ARIADNE_ASSERT(du.size()==nd);
-    ARIADNE_ASSERT(x.size()==ns);
-    ARIADNE_ASSERT(z.size()==ns);
-
-    Float dt,nt;
-    Vector<Float> dx(2*(m+n)),dy(m),dz(2*(m+n));
-    Vector<Float> nx(2*(m+n)),ny(m),nz(2*(m+n)),nxz(2*(m+n));
-    const Vector<Float> em(m,1u);
-    const Vector<Float> en(n,1u);
-
-    Matrix<Float> S(m+1,m+1),Sinv(m+1,m+1);
-    Vector<Float> xdivz(2*(n+m));
-    Vector<Float> xmulz(2*(n+m));
-    Vector<Float> tau(2*(n+m));
-
-    Vector<Float> c(2*(m+n));
-    project(c,range(0,n))=cl;
-    project(c,range(n,n+n))=cu;
-    project(c,range(n+n,n+n+m))=l;
-    project(c,range(n+n+m,n+n+m+m))=u;
-
-    const Float scale=0.75;
-    const Float maxerror=1e-3;
-    const Float starterror=1.0/16;
-    const Float errorscale=1.0/2;
-    const Float startcentering=1.0/8;
-    const Float gamma=1.0/1024;
-
-    const uint maxsteps=10;
-    uint steps=0;
-
-    Float cx,yb;
-    cx=dot(c,x);
-    yb=t;
-    ARIADNE_ASSERT(yb<=cx);
-
-    ARIADNE_LOG(2,"A="<<A<<" cl="<<cl<<" cu="<<cu<<"\n");
-    ARIADNE_LOG(2," t="<<t<<" x="<<x<<" y="<<y<<" z="<<z<<"\n");
-
-    const Float centering=startcentering; // sigma
-    Float duality; // mu = dot(x,z)/n
-    Float neighbourhood; // gamma = sigma mu
-    while(steps<maxsteps && cx>=0.0 && yb<=0.0) {
-        duality=dot(x,z)/n; // mu
-        neighbourhood=gamma*duality;
-        _ediv(xdivz,x,z);
-        _ediv(xmulz,x,z);
-        _emul(tau,x,z);
-        for(uint i=0; i!=2*(m+n); ++i) { tau[i]-=centering*duality; }
-        for(uint i=0; i!=2*(m+n); ++i) { tau[i]/=z[i]; }
-        ARIADNE_LOG(2,"  x*z="<<xmulz<<"  x/z="<<xdivz<<" tau="<<tau<<"\n");
-        _set_es_matrix(S,A,xdivz);
-        Sinv=inverse(S);
-        ARIADNE_LOG(2,"  S="<<S<<"  inverse(S)="<<Sinv<<"\n");
-
-        //dy=Sinv*(rb-A*(iZ*(X*rc))-A*(iZ*t))
-        //dx=iZ*(X*(At*dy-rc)+t)
-        //dz=iX*(t-Z*dx)
-
-        // Compute the residuals on y
-        // The general formula is A*Zinv*tau, where tau is the residual for the slack variables
-
-        Vector<Float> rzx=tau;
-        Vector<Float> ryt(m+1,0.0);
-        project(ryt,range(0,m))=prod(A,(project(rzx,range(n,n+n))-project(rzx,range(0,n))))
-            +(project(rzx,range(n+n+m,n+n+m+m))-project(rzx,range(n+n,n+n+m)));
-        for(uint i=0; i!=2*(m+n); ++i) { ryt[m]+=rzx[i]; }
-        Vector<Float> dyt=Sinv*ryt;
-        dy=project(dyt,range(0,m));
-        dt=dyt[m];
-
-        FloatVector dyA(n);
-        FloatVectorRange dzb=project(dz,range(0,n));
-        FloatVectorRange dzc=project(dz,range(n,2*n));
-        FloatVectorRange dzl=project(dz,range(2*n,2*n+m));
-        FloatVectorRange dzu=project(dz,range(2*n+m,2*n+2*m));
-
-        dyA=dy*A;
-
-        dzb=dyA-dt*en;
-        dzc=-dyA-dt*en;
-        dzl=dy-dt*em;
-        dzu=-dy-dt*em;
-
-        dx=ediv(-tau-emul(x,dz),z);
-
-        ARIADNE_LOG(2,"  dx="<<dx<<" dy="<<dy<<" dz="<<dz<<"\n");
-        bool allpositive=false;
-        Float a=1/scale;
-        while(!allpositive) {
-            a=a*scale;
-            nt=midpoint(t+a*dt);
-            nx=midpoint(x+a*dx);
-            ny=midpoint(y+a*dy);
-            nz=midpoint(z+a*dz);
-            nxz=emul(nx,nz);
-            allpositive = all_greater(nx,0.0) && all_greater(nxz,neighbourhood);
-            ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" nt="<<nt<<" ny="<<ny<<" nz="<<nz<<"\n");
-           // ARIADNE_LOG(2,"    a="<<a<<" e="<<neighbourhood<<" nx="<<nx<<" ny="<<ny<<" nz="<<nz<<" nxz="<<nxz<<"\n");
+    Matrix<Interval> ivlS(m,m);
+    for(uint i1=0; i1!=m; ++i1) {
+        for(uint i2=i1; i2!=m; ++i2) {
+            for(uint j=0; j!=n; ++j) {
+                ivlS[i1][i2] += mul_ivl(A[i1][j],A[i2][j]);
+            }
         }
-        t=nt;
-        x=nx;
-        y=ny;
-        z=nz;
-        ARIADNE_LOG(2,"  cx="<<dot(c,x)<<" yb="<<t<<"\n");
-        ++steps;
+    }
+    for(uint i1=0; i1!=m; ++i1) {
+        for(uint i2=0; i2!=i1; ++i2) {
+            ivlS[i1][i2]=ivlS[i2][i1];
+        }
     }
 
+    Vector<Interval> ivld = solve(ivlS,ivle) * A;
 
-    if(yb>0.0) { return true; }
-    else if(cx<0.0) { return false; }
-    else { return indeterminate; }
+    ivlx += ivld;
+
+    ARIADNE_LOG(2,"[x] = "<<ivlx);
+    tribool result=true;
+    for(uint i=0; i!=n; ++i) {
+        if(ivlx[i].lower()<=xl[i] || ivlx[i].upper()>=xu[i]) {
+            result = indeterminate; break;
+        }
+    }
+
+    return result;
 
 }
-*/
 
 
 tuple< Vector<Float>, Vector<Float>, Vector<Float> >
-InteriorPointSolver::_optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                               Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
+InteriorPointSolver::optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c) const
+{
+    Vector<Float> x,y,z;
+    return this->hotstarted_optimize(A,b,c,x,y,z);
+}
+
+
+tuple< Vector<Float>, Vector<Float>, Vector<Float> >
+InteriorPointSolver::hotstarted_optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
+                                         Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
 {
     ARIADNE_ASSERT(A.row_size()==b.size());
     ARIADNE_ASSERT(A.column_size()==c.size());
@@ -2694,10 +2464,125 @@ InteriorPointSolver::_optimize(const Matrix<Float>& A, const Vector<Float>& b, c
 
 }
 
-void
+
+tuple<Float, Vector<Float>, Vector<Float> >
+InteriorPointSolver::constrained_optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
+                                          const Vector<Float>& xl, const Vector<Float>& xu) const
+{
+    ARIADNE_LOG(2,"InteriorPointSolver::constrained_optimize(A,b,c,xl,xu)\n");
+    ARIADNE_LOG(2,"A="<<A<<", b="<<b<<", c="<<c<<"\n");
+    ARIADNE_LOG(2,"xl="<<xl<<", xu="<<xu<<"\n");
+
+    const uint m = b.size();
+    const uint n = c.size();
+    Vector<Float> y(m, 0.0);
+    Vector<Float> x(n);
+    Vector<Float> zl(n);
+    Vector<Float> zu(n);
+    for(uint i=0; i!=n; ++i) {
+        if(xl[i]==-infty) {
+            if(xu[i]==+infty) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
+        } else {
+            if(xu[i]==+infty) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
+        }
+        if(xl[i]==-infty) { zl[i] = 0.0; } else { zl[i] = 1.0; }
+        if(xu[i]==+infty) { zu[i] = 0.0; } else { zu[i] = 1.0; }
+    }
+
+    bool done;
+    do {
+        done = this->_constrained_optimization_step(A,b,c,xl,xu, x,y,zl,zu);
+    } while(!done);
+
+    do {
+        this->_constrained_optimization_step(A,b,c,xl,xu, x,y,zl,zu);
+    } while(dot(c,x)-dot(y,b)>1e-4);
+
+    // Todo: check for optimality
+    return make_tuple(dot(c,x),x,y);
+}
+
+
+
+
+// Consider feasibility of  bl<=yB<=bu; yC<=c; dl<=y<=du
+// Augment system by considering b<=yA-ve; yA+ve<=c; max(t)
+tribool
+InteriorPointSolver::primal_feasible(const Matrix<Float>& A, const Vector<Float>& b) const
+{
+    ARIADNE_LOG(2,"InteriorPointSolver::primal_feasible(A,b)\n");
+    ARIADNE_LOG(3,"A="<<A<<" b="<<b<<"\n");
+    Vector<Float> x(A.column_size(),1.0);
+    Vector<Float> y(A.row_size(),0.0);
+    Vector<Float> z(A.column_size(),1.0);
+
+    const double THRESHOLD = 1e-6;
+
+    while(true) {
+        tribool result=this->_primal_feasibility_step(A,b,x,y,z);
+        if(!indeterminate(result)) { return result; }
+        if(compute_mu(x,z)<THRESHOLD) { return indeterminate; }
+    }
+
+}
+
+
+
+tribool
+InteriorPointSolver::constrained_feasible(const Matrix<Float>& A, const Vector<Float>& b,
+                                          const Vector<Float>& xl, const Vector<Float>& xu) const
+{
+    ARIADNE_LOG(2,"InteriorPointSolver::constrained_feasible(A,b,xl,xu)\n");
+    ARIADNE_LOG(2,"A="<<A<<", b="<<b<<"\n");
+    ARIADNE_LOG(2,"xl="<<xl<<", xu="<<xu<<"\n");
+
+    const uint m = A.row_size();
+    const uint n = A.column_size();
+    Vector<Float> c(n, 0.0);
+    Vector<Float> y(m, 0.0);
+    Vector<Float> x(n);
+    Vector<Float> zl(n);
+    Vector<Float> zu(n);
+    for(uint i=0; i!=n; ++i) {
+        if(xl[i]==-infty) {
+            if(xu[i]==+infty) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
+        } else {
+            if(xu[i]==+infty) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
+        }
+        if(xl[i]==-infty) { zl[i] = 0.0; } else { zl[i] = 1.0; }
+        if(xu[i]==+infty) { zu[i] = 0.0; } else { zu[i] = 1.0; }
+    }
+
+    const double THRESHOLD = 1e-6;
+    while(true) {
+        tribool result=this->_constrained_feasibility_step(A,b,xl,xu, x,y,zl,zu);
+        if(!indeterminate(result)) { return result; }
+        if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { return indeterminate; }
+    }
+
+}
+
+tribool
+InteriorPointSolver::constrained_dual_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
+                                               const Vector<Float>& l, const Vector<Float>& u) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+
+
+
+
+
+
+
+tribool
 InteriorPointSolver::_optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
                                         Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
 {
+    ARIADNE_LOG(4,"InteriorPointSolver::_optimization_step(A,b,c, x,y,z)\n");
+    ARIADNE_LOG(5,"x="<<x<<" y="<<y<<" z="<<z<<"\n");
     static const double gamma=1.0/1024;
     static const double sigma=1.0/8;
     static const double scale=0.75;
@@ -2707,44 +2592,312 @@ InteriorPointSolver::_optimization_step(const Matrix<Float>& A, const Vector<Flo
 
     Vector<Float> dx(n),dy(n),dz(n);
     Vector<Float> nx(n),ny(n),nz(n),nxz(n);
-    Vector<Float> rb(m),rc(n),rs(n),ry;
+    Vector<Float> rx(m),ry(n),rz(n),r(n);
     Matrix<Float> S(m,m),Sinv(m,m);
 
-    Float mu=dot(x,z)/n; // duality constant
+    Float mu=sigma*dot(x,z)/n; // duality constant
+    ARIADNE_LOG(5,"mu="<<mu<<"\n");
 
-    rb=A*x-b;
-    rc=y*A+z-c;
-    rs=esub(emul(x,z),sigma*mu);
+    // rx = Ax-b; ry=yA+z-c; rz=x.z-mu
+    rx=A*x-b;
+    ry=y*A+z-c;
+    rz=esub(emul(x,z),mu);
+    ARIADNE_LOG(5,"rx="<<rx<<" ry="<<ry<<" rz="<<rz<<"\n");
 
-    ry=A*(ediv(rs-emul(x,rc),z))-rb;
+    r=rx-A*(ediv(rz-emul(x,ry),z));
+
+    S=mdtmul(A,ediv(x,z));
+    Sinv=inverse(S);
+    ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<Sinv<<"\n");
+
+    // Adx = rx; ATdy + dz = ry; Zdx + X dz = rz
+    // dx = (rz - X dz)/Z
+    // dz = ry - AT dy
+    // A(X/Z)AT dy = rx - A Zinv (rz - X ry)
+    dy=Sinv*r;
+    dz=ry-dy*A;
+    dx=ediv(rz-emul(x,dz),z);
+    ARIADNE_LOG(5,"dx="<<dx<<" dy="<<dy<<" dz="<<dz<<"\n");
+
+    // Try to enforce feasibility or dual feasibility
+    Float alphax=1.0;
+    nx=x-dx;
+    while ( !all_greater(emul(nx,z),gamma*mu) ) {
+        alphax=alphax*scale;
+        nx=(x-alphax*dx);
+    }
+
+    Float alphaz=1.0;
+    nz=z-dz;
+    while ( !all_greater(emul(x,nz),gamma*mu) ) {
+        alphaz=alphaz*scale;
+        nz=(z-alphaz*dz);
+    }
+    ny=(y-alphaz*dy);
+    ARIADNE_LOG(6,"alphax="<<alphax<<" nx="<<nx<<" alphaz="<<alphaz<<" ny="<<ny<<" nz="<<nz<<"\n");
+
+    x=nx; y=ny; z=nz;
+    ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<Vector<Float>(prod(A,x)-b)<<" yA+z-c="<<Vector<Float>(y*A+z-c)<<"\n");
+
+    if(alphax==1.0) { return true; }
+    else if(alphaz==1.0 && dot(y,b) > 0.0) { return false; }
+    else { return indeterminate; }
+}
+
+
+tribool
+InteriorPointSolver::_constrained_optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
+                                                    const Vector<Float>& xl, const Vector<Float>& xu,
+                                                    Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const
+{
+    ARIADNE_LOG(4,"x="<<x<<", y="<<y<<", zl="<<zl<<", zu="<<zu<<"\n");
+
+    static const double gamma=1.0/256;
+    static const double sigma=1.0/8;
+    static const double scale=0.75;
+
+
+    const uint m=A.row_size();
+    const uint n=A.column_size();
+
+    Vector<Float> dx(n),dy(n),dzl(n),dzu(n);
+    Vector<Float> nx,ny,nzl,nzu;
+    Vector<Float> rx(m),ry(n),rzl(n),rzu(n);
+    Matrix<Float> S(m,m),Sinv(m,m);
+    DiagonalMatrix<Float> Xl(xl), Xu(xu), X(x), Zl(zl), Zu(zu);
+
+    Float mu = compute_mu(xl,xu, x,zl,zu) * sigma;
+    ARIADNE_LOG(4,"mu="<<mu<<"\n");
+
+    // rx = Ax-b; ry=yA+zl-zu-c; rzl=(x-xl).zl-mu; rzu=(xu-x).zu-mu.
+    rx=A*x-b;
+    ry=y*A+(zl-zu)-c;
+    for(uint i=0; i!=n; ++i) {
+        if(xl[i]!=-infty) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; }
+        if(xu[i]!=+infty) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; }
+    }
+    ARIADNE_LOG(5,"rx="<<rx<<", ry="<<ry<<", rzl="<<rzl<<", rzu="<<rzu<<"\n");
+
+    // A dx = rx;  AT dy + dzl - dzu = ry;  Zl dx + (X-Xl) dzl = rzl; -Zu dx + (Xu-X) dzu = rzu;
+
+    //   ryz = ( ry - rzl/(X-Xl) + rzu/(Xu-X) )
+    //   D = 1/(Zu/(Xu-X) + Zl/(X-Xl))
+    DiagonalMatrix<Float> D(erec(ediv(zu,xu-x)+ediv(zl,x-xl)));
+    Vector<Float> ryz = ry - ediv(rzl,Vector<Float>(x-xl)) + ediv(rzu,Vector<Float>(xu-x));
+    S=mdtmul(A,D.diagonal());
+    ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<Sinv<<"\n");
+
+    // dzl = (rzl - Zl dx) / (X-Xl)
+    // dzu = (rzu + Zu dx) / (Xu-X)
+    // dx = D (AT dy - ryz)
+    // (A D AT) dy = rx - A D ryz
+
+    dy = solve(S, Vector<Float>( rx - A * (D * ryz) ) );
+    dx = D * Vector<Float>(dy*A - ryz);
+    dzl = Vector<Float>(rzl-Zl*dx)/(X-Xl);
+    dzu = Vector<Float>(rzu+Zu*dx)/(Xu-X);
+    ARIADNE_LOG(5,"dx="<<dx<<" dy="<<dy<<" dzl="<<dzl<<" dzu="<<dzu<<"\n");
+
+    // Try to enforce feasibility or dual feasibility
+    Float alphax=1.0;
+    nx=x-dx;
+    while ( !all_greater(emul(nx-xl,zl),gamma*mu) || !all_greater(emul(xu-nx,zu),gamma*mu) ) {
+        alphax=alphax*scale;
+        nx=(x-alphax*dx);
+    }
+
+    Float alphaz=1.0;
+    nzl=zl-dzl; nzu=zu-dzu;
+    while ( !all_greater(emul(nx-xl,nzl),gamma*mu) || !all_greater(emul(xu-nx,nzu),gamma*mu) ) {
+        alphaz=alphaz*scale;
+        nzl=(zl-alphaz*dzl);
+        nzu=(zu-alphaz*dzu);
+    }
+    ny=(y-alphaz*dy);
+    ARIADNE_LOG(7,"alphax="<<alphax<<" nx="<<nx<<" alphaz="<<alphaz<<" ny="<<ny<<" nzl="<<nzl<<" nzu="<<nzu<<"\n");
+
+    x=nx; y=ny; zl=nzl; zu=nzu;
+    ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<Vector<Float>(prod(A,x)-b)<<" yA+(zl-zu)-c="<<Vector<Float>(y*A+(zl-zu)-c)<<"\n");
+
+    if(alphax==1.0) { return true; }
+    else if(alphaz==1.0 && dot(y,b)>dot(xl,zl)+dot(xu,zu)) { return false; }
+    else { return indeterminate; }
+}
+
+
+
+tribool
+InteriorPointSolver::_primal_feasibility_step(const Matrix<Float>& A, const Vector<Float>& b,
+                                              Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const
+{
+    Vector<Float> c(x.size(),0.0);
+    return this->_optimization_step(A,b,c, x,y,z);
+
+    ARIADNE_LOG(4,"primal_feasibility_step(A,b,x,y)\n");
+    ARIADNE_LOG(5,"x="<<x<<" y="<<y<<" z="<<z<<"\n");
+    static const double gamma=1.0/1024;
+    static const double sigma=1.0/8;
+    static const double scale=0.75;
+
+    const uint m=A.row_size();
+    const uint n=A.column_size();
+
+    Vector<Float> dx(n),dy(n),dz(n);
+    Vector<Float> nx(n),ny(n),nz(n);
+    Vector<Float> rx(m),ry(n),rz(n);
+    Matrix<Float> S(m,m),Sinv(m,m);
+
+    DiagonalMatrix<Float> Z(z);
+    DiagonalMatrix<Float> X(x);
+
+    Float mu = dot(x,z)/n * sigma;
+    ARIADNE_LOG(5,"mu="<<mu<<"\n");
+
+    rx = y*A+z;
+    ry = A*x-b;
+    rz = efma(x,z,-mu);
+    ARIADNE_LOG(5,"rx=yA+z="<<rx<<" ry=Ax-b="<<ry<<" rz=x.z-mu="<<rz<<"\n");
 
     S=mdtmul(A,ediv(x,z));
     Sinv=inverse(S);
 
-    ARIADNE_LOG(4,"  S="<<S<<"  inverse(S)="<<Sinv<<"\n");
+    ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<Sinv<<"\n");
 
-    dy=Sinv*ry;
-    dz=-rc-dy*A;
-    dx=-ediv((rs+emul(x,dz)),z);
-
+    // S dy = ry - A Zinv (rz - X rx)
+    // dz = rx - AT dy
+    // dx = Zinv * (rz - X dz)
+    dy = Sinv * Vector<Float>( ry - A * Vector<Float>(rz-X*rx)/Z );
+    dz = rx - dy * A;
+    dx = Vector<Float>(rz-X*dz)/Z;
     ARIADNE_LOG(4,"  dx="<<dx<<" dy="<<dy<<" dz="<<dz<<"\n");
-    bool allpositive=false;
-    Float a=1/scale;
-    while(!allpositive) {
-        a=a*scale;
-        nx=midpoint(x+a*dx);
-        nz=midpoint(z+a*dz);
-        allpositive = all_greater(nx,0.0) && all_greater(nz,0.0) && all_greater(emul(nx,nz),gamma*mu);
-        ARIADNE_LOG(6,"    a="<<a<<" e="<<eps<<" nx="<<nx<<" nz="<<nz<<"\n");
+
+    // Check for feasibility
+    nx=x-dx;
+    if(all_greater(nx,0.0)) {
+        ARIADNE_LOG(4,"nx="<<nx<<" Ax-b="<<Vector<Float>(A*nx-b)<<"\n");
+        x=nx; return true;
     }
-    ny=midpoint(y+a*dy);
+
+    // Check for infeasibility
+    nz=z-dz; ny=y-dy;
+    if(all_greater(nz,0.0) && dot(y,b)>0.0) {
+        ARIADNE_LOG(4,"ny="<<ny<<" nz="<<nz<<" yA="<<Vector<Float>(ny*A)<<" yb="<<dot(ny,b)<<" yA+z="<<Vector<Float>(ny*A+nz)<<"\n");
+        x=nx; y=ny; z=nz; return false;
+    }
+
+    Float alpha=1.0;
+    while ( !all_greater(nx,0.0) || !all_greater(emul(nx,nz),gamma*mu) ) {
+        alpha *= scale;
+        nx=(x-alpha*dx);
+        nz=(z-alpha*dz);
+        ARIADNE_LOG(6,"    alpha="<<alpha<<" nx="<<nx<<" nz="<<nz<<"\n");
+    }
+    ny=(y-alpha*dy);
 
     x=nx; y=ny; z=nz;
 
-    ARIADNE_LOG(2,"  cx="<<dot(c,x)<<" yb="<<dot(y,b)<<"\n");
-    ARIADNE_LOG(2,"  x="<<x<<" y="<<y<<" z="<<z<<"\n");
-    ARIADNE_LOG(2,"  Ax-b="<<prod(A,x)-b<<" c-yA="<<c-prod(y,A)<<"\n");
+    ARIADNE_LOG(4,"nx="<<x<<" ny="<<y<<" nz="<<z<<"\n");
+    ARIADNE_LOG(5,"yb="<<dot(y,b)<<" yA="<<y*A<<" Ax-b="<<Vector<Float>(A*x-b)<<" yA+z="<<Vector<Float>(y*A+z)<<" x.z="<<emul(x,z)<<"\n");
+
+    return indeterminate;
 }
+
+
+
+tribool
+InteriorPointSolver::_constrained_feasibility_step(const Matrix<Float>& A, const Vector<Float>& b,
+                                                   const Vector<Float>& xl, const Vector<Float>& xu,
+                                                   Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const
+{
+    Vector<Float> c(x.size(),0.0);
+    return this->_constrained_optimization_step(A,b,c,xl,xu,x,y,zl,zu);
+
+
+    ARIADNE_LOG(4,"InteriorPointSolver::constrained_feasibility_step(A,b,xl,xu, x,y,zl,zu)\n");
+    ARIADNE_LOG(5,"x="<<x<<" y="<<y<<" zl="<<zl<<" zu="<<zu<<"\n");
+    static const double gamma=1.0/1024;
+    static const double sigma=1.0/8;
+    static const double scale=0.75;
+
+    const uint m=A.row_size();
+    const uint n=A.column_size();
+
+    Vector<Float> wl(n),wu(n);
+    Vector<Float> dx(n),dy(n),dz(n),dzl(n),dzu(n);
+    Vector<Float> nx(n),ny(n),nzl(n),nzu(n);
+    Vector<Float> rx(m),ry(n),rzl(n),rzu(n);
+    Matrix<Float> S(m,m),Sinv(m,m);
+
+    DiagonalMatrix<Float> Xl(xl), Xu(xu), X(x), Zl(zl), Zu(zu);
+
+    // Compute central path parameter mu
+    Float mu = 0.0;
+    for(uint i=0; i!=n; ++i) {
+        if(xl[i]!=-infty) { mu += (x[i]-xl[i])*zl[i]; }
+        if(xu[i]!=+infty) { mu += (xu[i]-x[i])*zu[i]; }
+    }
+    mu *= ( sigma / (2*n) );
+    ARIADNE_LOG(5,"mu="<<mu<<"\n");
+
+    rx = y*A+(zl-zu);
+    ry = A*x-b;
+    rzl = efma(x-xl,zl,-mu);
+    rzu = efma(xu-x,zu,-mu);
+    //Vector<Float> ryz = ry - ediv(rzl,x-xl) + ediv(rzu,xu-x);
+    ARIADNE_LOG(5,"rx=yA+z="<<rx<<" ry=Ax-b="<<ry<<" rzl=(x-xl).zl-mu="<<rzl<<" rzu=(xu-x).zu-mu="<<rzu<<"\n");
+
+    DiagonalMatrix<Float> D(erec(ediv(wl,zl)+ediv(wu,zu)));
+    S=mdtmul(A,D.diagonal());
+    Sinv=inverse(S);
+
+    ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<Sinv<<"\n");
+
+    // Ax-b=rx=0; yA+zl-zu=ry=0; (x-xl).zl-mu=rzl=0; (xu-x).zu-mu=rzu=0
+    //
+    // dzl = (rzl - Zl dx) / (X-Xl)
+    // dzu = (rzu + Zu dx) / (Xu-X)
+    // (Zu/(Xu-X) + Zl/(X-Xl)) dx = AT dy - ( ry - rzl/(X-Xl) + rzu/(Xu-X) )
+    // (A D AT) dy = rx - A D ( ry - rzl/(X-Xl) + rzu/(Xu-X) )
+
+    //dy = Sinv * Vector<Float>( rx - A * (D * ryz) );
+    //dx = D * (dy*A - ryz);
+    //dzl = Vector<Float>(rzl-Zl*dx)/(X-Xl);
+    //dzu = Vector<Float>(rzu-Zu*dx)/(Xu-X);
+    ARIADNE_LOG(4,"  dx="<<dx<<" dy="<<dy<<" dzl="<<dzl<<" dzu="<<dzu<<"\n");
+
+    // Check for feasibility
+    nx=x-dx;
+    if(all_greater(nx,0.0)) {
+        ARIADNE_LOG(4,"nx="<<nx<<" Ax-b="<<Vector<Float>(A*nx-b)<<"\n");
+        x=nx; return true;
+    }
+
+    // Check for infeasibility
+    nzl=zl-dzl; nzu=zu-dzu; ny=y-dy;
+    if(all_greater(nzl,0.0) && all_greater(nzu,0.0) && dot(y,b)>0.0) {
+        ARIADNE_LOG(4,"ny="<<ny<<" nzl="<<nzl<<" nzu="<<nzu<<" yA="<<Vector<Float>(ny*A)<<" yb="<<dot(ny,b)<<" yA+zl-zu="<<Vector<Float>(ny*A+nzl-nzu)<<"\n");
+        x=nx; y=ny; zl=nzl; zu=nzu; return false;
+    }
+
+    Float alpha=1.0;
+    while ( !all_greater(nx,0.0) || !all_greater(emul(nx-xl,nzl),gamma*mu) || !all_greater(emul(xu-nx,nzu),gamma*mu) ) {
+        alpha *= scale;
+        nx=(x-alpha*dx);
+        nzl=(zl-alpha*dzl);
+        nzu=(zu-alpha*dzu);
+        ARIADNE_LOG(6,"    alpha="<<alpha<<" nx="<<nx<<" nzl="<<nzl<<" nzu="<<nzu<<"\n");
+    }
+    ny=(y-alpha*dy);
+
+    x=nx; y=ny; zl=nzl; zu=nzu;
+
+    ARIADNE_LOG(4,"nx="<<x<<" ny="<<y<<" nzl="<<zl<<" nzu="<<zu<<"\n");
+    ARIADNE_LOG(5,"yb="<<dot(y,b)<<" yA="<<y*A<<" Ax-b="<<Vector<Float>(A*x-b)<<" yA+zl-zu="<<Vector<Float>(y*A+zl-zu)<<
+                  " (x-xl).zl="<<emul(x-xl,zl)<<" (xu-x).zu"<<emul(xu-x,zu)<<"\n");
+
+    return indeterminate;
+}
+
 
 
 } // namespace Ariadne

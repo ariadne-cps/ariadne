@@ -126,6 +126,9 @@ class PenaltyFunctionOptimiser
     : public OptimiserBase
 {
     virtual PenaltyFunctionOptimiser* clone() const;
+    virtual Tribool check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
+    virtual Tribool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
+    virtual Tribool validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
     virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const;
@@ -133,6 +136,8 @@ class PenaltyFunctionOptimiser
                                   FloatVector& x, FloatVector& w, Float& mu) const;
     virtual Void feasibility_step(const IntervalVector& D, const IntervalVectorFunction& g, const IntervalVector& C, const IntervalVectorFunction& h,
                                   IntervalVector& x, IntervalVector& w) const;
+    virtual Void feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
+                                  FloatVector& x, FloatVector& y, FloatVector& z) const;
 };
 
 
@@ -199,9 +204,20 @@ class NonlinearInteriorPointOptimiser
 class IntervalOptimiser
     : public NonlinearInteriorPointOptimiser
 {
+    virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction h) const;
-    Void feasibility_step(const IntervalVector& D, const IntervalVectorFunction& h,
-                          IntervalVector& X, IntervalVector& Lambda, Interval& Mu) const;
+    Void feasibility_step(const FloatVector& xl, const FloatVector& xu, const IntervalVectorFunction& h,
+                          IntervalVector& x, IntervalVector& y, IntervalVector& zl, IntervalVector zu, Interval& mu) const;
+};
+
+
+class ApproximateOptimiser
+    : public NonlinearInteriorPointOptimiser
+{
+    virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
+    virtual Tribool feasible(IntervalVector D, IntervalVectorFunction h) const;
+    Void feasibility_step(const IntervalVector& D, const FloatVectorFunction& h,
+                          FloatVector& X, FloatVector& Lambda) const;
 };
 
 

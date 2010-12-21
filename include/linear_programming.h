@@ -70,51 +70,77 @@ class InteriorPointSolver
     : public Loggable
 {
   public:
-    //! \brief Test feasibility of the problem \f$b\leq A^Ty\leq c; l\leq y\leq u\f$.
-    //! Returns the pair (r,y) where r is the result, and y the (potential) feasible point.
-    //!
-    //! \internal We do not also allow constraints of the form Ay=b since these should be removed
-    //! before starting the problem.
-    tuple<tribool,Vector<Float> >
-    constrained_dual_feasible(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-                              const Vector<Float>& l, const Vector<Float>& u) const;
-
-
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the pair (x,y) where x is the optimal point, and y the corresponding dual feasible point.
     tuple< Vector<Float>, Vector<Float>, Vector<Float> >
     optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c) const;
 
-    //! \brief Determine whether the problem \f$c_l \leq A^Ty \leq c_u;\ l\leq y\leq u\f$ is feasible.
-    tribool
-    feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-             const Vector<Float>& l, const Vector<Float>& u) const;
+    //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
+    //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
+    tuple< Vector<Float>, Vector<Float>, Vector<Float> >
+    hotstarted_optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
+                        Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
 
-    //! \brief Determine whether the problem \f$b_l \leq B^Ty \leq b_u;\ C^Ty \leq c; \ d_l\leq y\leq d_u\f$ is feasible.
+    //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x_l \leq x\leq x_u\f$.
+    //! Returns the pair (v,x,y) where v is the value, x is the optimal point, and y the corresponding dual feasible point.
+    tuple< Float, Vector<Float>, Vector<Float> >
+    constrained_optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c, const Vector<Float>& xl, const Vector<Float>& xu) const;
+
+    //! \brief Determine whether the problem \f$Ax=b;\ x\geq0\f$ is feasible.
     tribool
-    feasible(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-             const Matrix<Float>& C, const Vector<Float>& c,
-             const Vector<Float>& dl, const Vector<Float>& du) const;
+    primal_feasible(const Matrix<Float>& A, const Vector<Float>& b) const;
+
+    //! \brief Test feasibility of the problem \f$Ax=b; x_l\leq x\leq x_u\f$.
+    //! Returns the pair (r,x) where r is the result, and x the (potential) feasible point.
+    tribool
+    constrained_feasible(const Matrix<Float>& A, const Vector<Float>& b,
+                         const Vector<Float>& xl, const Vector<Float>& xu) const;
+
+
+    //! \brief Test feasibility of the problem \f$c_l\leq A^Ty\leq c_u; y_l\leq y\leq y_u\f$.
+    //! Returns the pair (r,y) where r is the result, and y the (potential) feasible point.
+    //!
+    //! \internal We do not also allow constraints of the form Ay=b since these should be removed
+    //! before starting the problem.
+    tribool
+    constrained_dual_feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
+                              const Vector<Float>& yl, const Vector<Float>& yu) const;
 
     //! \brief Validate that \a x is (approximately) primal feasible and \a y is dual feasible.
     //! Returns the interval of possible optimal values.
     Interval validate(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c, const Vector<Float>& x, const Vector<Float>& y) const;
+    //! \brief Test whether x is close to a primal feasible point, or y is a certificate of infeasibility.
+    tribool validate_feasibility(const Matrix<Float>& A, const Vector<Float>& b,
+                                 const Vector<Float>& x, const Vector<Float>& y) const;
+    //! \brief Validate that \a x is primal feasible and \a y is dual feasible.
+    //! Returns the interval of possible optimal values.
+    tribool validate_constrained_feasibility(const Matrix<Float>& A, const Vector<Float>& b,
+                                             const Vector<Float>& xl, const Vector<Float>& xu,
+                                             const Vector<Float>& x, const Vector<Float>& y) const;
   public:
-    tribool
-    _feasible(const Matrix<Float>& A, const Vector<Float>& cl, const Vector<Float>& cu,
-              const Vector<Float>& l, const Vector<Float>& u,
-              Float& t, Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
-
-    //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
-    //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
-    tuple< Vector<Float>, Vector<Float>, Vector<Float> >
-    _optimize(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
-              Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
-
     //! \brief Perform a step of the optimization of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
-    void
+    tribool
     _optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
                        Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
+
+    //! \brief Perform a step of the optimization of \f$\min c^T x \text{ s.t. } Ax=b; x_l \leq x\leq x_u\f$.
+    //! Returns true if a full Newton step (alpha=1) is taken. In this case, the problem is feasible (up to roundoff error).
+    tribool
+    _constrained_optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
+                                   const Vector<Float>& xl, const Vector<Float>& xu,
+                                   Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const;
+
+    //! \brief Perform a step of the feasibility problem \f$Ax=b,\ x_l \leq x \leq x_u\f$.
+    tribool
+    _primal_feasibility_step(const Matrix<Float>& A, const Vector<Float>& b,
+                             Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
+
+    //! \brief Perform a step of the feasibility problem \f$Ax=b,\ x_l \leq x \leq x_u\f$.
+    tribool
+    _constrained_feasibility_step(const Matrix<Float>& A, const Vector<Float>& b,
+                                  const Vector<Float>& xl, const Vector<Float>& xu,
+                                  Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const;
+
 
 };
 
@@ -171,12 +197,12 @@ class SimplexSolver
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
     tribool
-    constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
+    constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu);
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
     Vector<X>
-    feasible_point(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B);
+    feasible_point(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B);
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
@@ -184,7 +210,7 @@ class SimplexSolver
     //! The values of \a p and \a B corresponding to \a vt may be given.
     //! The values of \a x and \a y are output parameters, giving access to the final primal and dual variables.
     tribool
-    constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y);
+    hotstarted_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y);
 
 
 
@@ -202,10 +228,11 @@ class SimplexSolver
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
     tribool
-    verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt);
+    verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, const array<Slackness>& vt);
 
+    // Test constrained feasibility by enumerating all basic solutions
     tribool
-    constrained_feasible_by_enumeration(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
+    constrained_feasible_by_enumeration(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu);
 
 
 
@@ -220,7 +247,7 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Perform a single step of the standard linear programming problem, updating the variable type array \a vt, the ordered variable array \a p, the inverse basis matrix \a B and the variables \a x.
-    bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
+    bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm, choosing basic variable \a s to exit the basis.
@@ -229,15 +256,15 @@ class SimplexSolver
     //! The variable which left the basis is the new p[s]
     //! Returns \a r where x[p[r]] was the variable entering the basis.
     //!  If r=m, then no step performed
-    size_t lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s);
+    size_t lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s);
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
-    tribool validated_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
+    tribool validated_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu);
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
-    bool validated_feasibility_step(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p);
+    bool validated_feasibility_step(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, array<size_t>& p);
 
     //! \ingroup LinearProgrammingModule
     //! Compute the inverse of the matrix \a A<sub>B</sub> for basic variables given by the first m items of a p.
@@ -248,7 +275,7 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Compute primal variables \a x for the constrained linear programming problem.
-    template<class XX> Vector<XX> compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B);
+    template<class XX> Vector<XX> compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, const array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B);
 
   public:
     //! \brief Check that the feasibility problem data is consistent.
@@ -258,7 +285,7 @@ class SimplexSolver
     //!   - B = inverse(A_B), where A_B is the mxm submatrix of A formed by columns for which vt[j]==BASIC
     //!   - x[j]=l[j] if j==LOWER and x[j]=u[j] if j==UPPER
     //!   - Ax=b
-    void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u,
+    void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu,
                            const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x);
 
     void consistency_check(const Matrix<X>& A, const Vector<X>& b, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x);
@@ -267,7 +294,7 @@ class SimplexSolver
   private:
     tribool _primal_feasible(const Matrix<X>& A, const Vector<X>& b, array<size_t>& p, Matrix<X>& B);
     tribool _dual_feasible(const Matrix<X>& A, const Vector<X>& c, array<size_t>& p, Matrix<X>& B);
-    tribool _constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
+    tribool _constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
 
 
 };

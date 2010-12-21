@@ -122,6 +122,10 @@ void export_differential(const char* name)
     differential_class.def(self/=X());
     differential_class.def(self_ns::str(self));
 
+    differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());
+    differential_class.def("gradient",(Vector<X>(D::*)()const)&D::gradient);
+    differential_class.def("hessian", &D::hessian);
+
     differential_class.def("constant",(D(*)(uint, ushort, const X&))&D::constant);
     differential_class.def("variable",(D(*)(uint, ushort, const X&, uint))&D::variable);
     differential_class.def("variables",&make_differential_variables<D>);

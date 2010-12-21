@@ -368,6 +368,9 @@ template<class R, class A1, class A2>
 R __rdiv__(const A1& a1, const A2& a2) { return static_cast<R>(a2/a1); }
 
 template<class R, class A1, class A2>
+R __rprod__(const A1& a1, const A2& a2) { return static_cast<R>(prod(a2,a1)); }
+
+template<class R, class A1, class A2>
 R __and__(const A1& a1, const A2& a2) { return static_cast<R>(a1 && a2); }
 
 template<class R, class A1, class A2>

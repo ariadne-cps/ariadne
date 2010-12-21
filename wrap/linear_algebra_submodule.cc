@@ -286,6 +286,7 @@ void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__div__", &__div__< Matrix<R>, Matrix<X>, Y >);
     matrix_class.def("__mul__", &__prod__< Vector<R>, Matrix<X>, Vector<Y> >);
     matrix_class.def("__mul__", &__prod__< Matrix<R>, Matrix<X>, Matrix<Y> >);
+    matrix_class.def("__rmul__", &__rprod__< Vector<R>, Matrix<X>, Vector<Y> >);
 }
 
 
@@ -334,12 +335,36 @@ template<> void export_matrix<Interval>()
 }
 
 
+template<class X> void export_diagonal_matrix()
+{
+    class_< DiagonalMatrix<X> > diagonal_matrix_class(python_name<X>("DiagonalMatrix"),no_init);
+    diagonal_matrix_class.def(init< uint >());
+    diagonal_matrix_class.def(init< Vector<X> >());
+    diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
+    diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get, return_value_policy<copy_const_reference>());
+    diagonal_matrix_class.def("__add__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator+ );
+    diagonal_matrix_class.def("__sub__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator- );
+    diagonal_matrix_class.def("__mul__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator* );
+    diagonal_matrix_class.def("__div__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator/ );
+    diagonal_matrix_class.def("__mul__", (Vector<X>(*)(const DiagonalMatrix<X>&,const Vector<X>&)) operator* );
+    diagonal_matrix_class.def("__mul__", (Matrix<X>(*)(const DiagonalMatrix<X>&,const Matrix<X>&)) operator* );
+    diagonal_matrix_class.def("__str__",&__cstr__< DiagonalMatrix<X> >);
+    //diagonal_matrix_class.def("__mul__", &__mul__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
+    //diagonal_matrix_class.def("__div__", &__div__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
+    //diagonal_matrix_class.def("__mul__", &__mul__< Vector<X>, DiagonalMatrix<X>, Vector<X> >);
+    //diagonal_matrix_class.def("__mul__", &__mul__< Matrix<X>, DiagonalMatrix<X>, Matrix<X> >);
+    //diagonal_matrix_class.def("__rmul__", &__prod__< Vector<X>, Vector<X>, DiagonalMatrix<X> >);
+    //diagonal_matrix_class.def("__rmul__", &__prod__< Matrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
+    //def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
+}
+
 
 template void export_vector<Float>();
 template void export_vector<Interval>();
 template void export_matrix<Float>();
 template void export_matrix<Interval>();
 
+template void export_diagonal_matrix<Float>();
 
 #ifdef HAVE_GMPXX_H
 template void export_vector<Rational>();
@@ -353,6 +378,9 @@ void linear_algebra_submodule() {
 
     export_matrix<Float>();
     export_matrix<Interval>();
+
+    export_diagonal_matrix<Float>();
+
 #ifdef HAVE_GMPXX_H
     export_vector<Rational>();
     export_matrix<Rational>();

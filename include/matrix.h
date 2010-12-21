@@ -48,6 +48,11 @@ namespace Ariadne {
 class SingularMatrixException {
 };
 
+template<class X> class Matrix;
+typedef Matrix<Float> FloatMatrix;
+typedef Matrix<Interval> IntervalMatrix;
+
+
 //! \brief A matrix over a field. See also \link Ariadne::Vector \c Vector<X> \endlink.
 //!
 //! \par Python interface
@@ -198,6 +203,22 @@ class Matrix
 
 };
 
+template<class X, class XX> Vector<XX> operator*(const Matrix<X>& A, const Vector<XX>& v) {
+    ARIADNE_ASSERT_MSG(A.column_size()==v.size(),"A*v: A="<<A<<" v="<<v);
+    return prod(A,v);
+    Vector<XX> r(A.row_size());
+    for(size_t i=0; i!=r.size(); ++i) { r[i]=0.0; for(size_t j=0; j!=v.size(); ++j) { r[i] += A[i][j]*v[j]; } }
+    return r;
+}
+
+template<class X, class XX> Vector<XX> operator*(const Vector<XX>& v, const Matrix<X>& A) {
+    ARIADNE_ASSERT_MSG(v.size()==A.row_size(),"v*A: v="<<v<<" A="<<A);
+    return prod(v,A);
+    Vector<XX> r(A.row_size());
+    for(size_t i=0; i!=r.size(); ++i) { r[i]=0.0; for(size_t j=0; j!=v.size(); ++j) { r[i] += A[i][j]*v[j]; } }
+    return r;
+}
+
 class PivotMatrix;
 template<class X> class PLUMatrix;
 template<class X> class QRMatrix;
@@ -233,13 +254,39 @@ class DiagonalMatrix {
     size_t size() const { return _x.size(); }
     const X& operator[](size_t i) const { return _x[i]; }
     X& operator[](size_t i) { return _x[i]; }
+    const X& get(size_t i) const { return _x[i]; }
     void set(size_t i, const X& x) { _x[i]=x; }
     const Vector<X>& diagonal() const { return _x; }
-    template<class XX> Vector<XX> operator*(const Vector<XX>& v) {
-        Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=_x[i]*v[i]; } return result; }
-    template<class XX> Vector<XX> solve(const Vector<XX>& v) {
+    template<class XX> Vector<XX> solve(const Vector<XX>& v) const {
         Vector<XX> result(_x.size()); for(uint i=0; i!=_x.size(); ++i) { result[i]=v[i]/_x[i]; } return result; }
 };
+template<class X> DiagonalMatrix<X> operator+(const DiagonalMatrix<X>& D1, const DiagonalMatrix<X>& D2) {
+    return DiagonalMatrix<X>(D1.diagonal()+D2.diagonal());
+}
+template<class X> DiagonalMatrix<X> operator-(const DiagonalMatrix<X>& D1, const DiagonalMatrix<X>& D2) {
+    return DiagonalMatrix<X>(D1.diagonal()-D2.diagonal());
+}
+template<class X> DiagonalMatrix<X> operator*(const DiagonalMatrix<X>& D1, const DiagonalMatrix<X>& D2) {
+    DiagonalMatrix<X> r(D1.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = D1[i]*D2[i]; } return r;
+}
+template<class X> DiagonalMatrix<X> operator/(const DiagonalMatrix<X>& D1, const DiagonalMatrix<X>& D2) {
+    DiagonalMatrix<X> r(D1.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = D1[i]/D2[i]; } return r;
+}
+template<class X, class XX> Vector<XX> operator/(const Vector<XX>& v, const DiagonalMatrix<X>& D) {
+    Vector<XX> r(v.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = v[i]/D[i]; } return r;
+}
+template<class X, class XX> Vector<XX> operator*(const DiagonalMatrix<X>& D, const Vector<XX>& v) {
+    Vector<XX> r(v.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = D[i]*v[i]; } return r;
+}
+template<class X, class XX> Matrix<XX> operator*(const DiagonalMatrix<X>& D, const Matrix<XX>& A) {
+    ARIADNE_ASSERT_MSG(D.size()==A.row_size(),"D*A: D="<<D<<" A="<<A);
+    Matrix<XX> R(A.row_size(),A.column_size());
+    for(size_t i=0; i!=R.row_size(); ++i) { for(size_t j=0; j!=R.column_size(); ++j) { R[i][j] = D[i]*A[i][j]; } }
+    return R;
+}
+template<class X> DiagonalMatrix<X> inverse(const DiagonalMatrix<X>& D) {
+    DiagonalMatrix<X> r(D.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = 1/D[i]; } return r;
+}
 template<class X> std::ostream& operator<<(std::ostream& os, const DiagonalMatrix<X>& D) {
     return os << D.diagonal();
 }

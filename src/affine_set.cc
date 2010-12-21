@@ -182,11 +182,16 @@ Box AffineSet::bounding_box() const {
 
 
 tribool AffineSet::disjoint(const Box& bx) const {
+    ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
+    for(uint i=0; i!=bx.size(); ++i) {
+        lp.l[i]=bx[i].lower();
+        lp.u[i]=bx[i].upper();
+    }
     tribool feasible=indeterminate;
     try {
-        feasible=SimplexSolver<Float>().constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+        feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
     catch(DegenerateFeasibilityProblemException e) {
         feasible=indeterminate;
@@ -232,7 +237,7 @@ void _adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& l
     int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    tribool feasible=SimplexSolver<Float>().constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    tribool feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     //feasible=verify_constrained_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     if(!feasible) { return; }
 
@@ -258,27 +263,28 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
 {
     // Set up linear programming problem.
     // We have parameter e and point x, which need to satisfy
-    //  x=Ge+h;  Ce+d>=0; lb<=x<=ub, -1<=e<=+1
-    // Add slack variables for the inequality constraints Ce+s=d; s>=0
+    //  x=Gp+h;  Cp+d<=0; Ep+f = 0; lb<=x<=ub, -1<=p<=+1
+    // Add slack variables for the inequality constraints Cp+s=d; s>=0
     // The standard form is then
-    //  x-Ge=h,  -Ce+s=d; -1<=e<=+1, lb<=x<=ub, 0<=s
+    //  -x+Gp=-h,  Cp+s=-d; Ep = -f; lb<=x<=ub, -1<=p<=+1, 0<=s
     // The only dependence on the cell is in the inequality constraints for x
 
-    // Set up linear program Ax=b; l<=x<=u.
-    // Order variables as x,e,s
-
+    // Set up linear program of form Ax=b; l<=x<=u.
+    //  Order variables as x,e,s
+    //  A=( -I G 0 )  b=( -h )  l=(xl -1 0) u=(xu +1 inf)
+    //    (  0 C I )    ( -d )
+    //    (  0 E 0 )    ( -f )
     // Spacial dimension nx; parameter dimension ne; number of constraints nc
     const uint nx=this->dimension();
-    const uint ne=this->number_of_parameters();
-    const uint nc=this->number_of_constraints();
+    const uint np=this->number_of_parameters();
+    const uint nc=this->_constraints.size();
+    const uint ne=this->_equations.size();
 
-    lp.A.resize(nx+nc,nx+ne+nc);
-    lp.b.resize(nx+nc);
-    lp.c.resize(nx+ne+nc);
-    lp.l.resize(nx+ne+nc);
-    lp.u.resize(nx+ne+nc);
-    lp.vt.resize(ne+nx+nc);
-    lp.p.resize(ne+nx+nc);
+    lp.A.resize(nx+nc+ne,nx+np+nc);
+    lp.b.resize(nx+nc+ne);
+    lp.c.resize(nx+np+nc);
+    lp.l.resize(nx+np+nc);
+    lp.u.resize(nx+np+nc);
 
     // Make part of linear program only dependent on set
     // Need to set all values since matrix is uninitialised
@@ -286,52 +292,49 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
         for(uint j=0; j!=nx; ++j) {
             lp.A[i][j]=0;
         }
-        lp.A[i][i]=+1;
-        for(uint j=0; j!=ne; ++j) {
-            lp.A[i][nx+j]=-this->_function[i].gradient(j);
+        lp.A[i][i] = -1;
+        for(uint j=0; j!=np; ++j) {
+            lp.A[i][nx+j] = +this->_function[i].gradient(j);
         }
         for(uint j=0; j!=nc; ++j) {
-            lp.A[i][nx+ne+j]=0;
+            lp.A[i][nx+np+j]=0;
         }
-        lp.b[i]=this->_function[i].value();
+        lp.b[i] = -this->_function[i].value();
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=nx; ++j) {
             lp.A[nx+i][j]=0;
         }
-        for(uint j=0; j!=ne; ++j) {
-            lp.A[nx+i][nx+j]=this->_constraints[i].gradient(j);
+        for(uint j=0; j!=np; ++j) {
+            lp.A[nx+i][nx+j] = +this->_constraints[i].gradient(j);
         }
         for(uint j=0; j!=nc; ++j) {
-            lp.A[nx+i][nx+ne+j]=0;
+            lp.A[nx+i][nx+np+j]=0;
         }
-        lp.A[nx+i][ne+nx+i]=+1;
-        lp.b[nx+i]=-this->_constraints[i].value();
+        lp.A[nx+i][nx+np+i] = +1;
+        lp.b[nx+i] = -this->_constraints[i].value();
     }
     for(uint i=0; i!=ne; ++i) {
+        for(uint j=0; j!=nx; ++j) {
+            lp.A[nx+nc+i][j]=0;
+        }
+        for(uint j=0; j!=np; ++j) {
+            lp.A[nx+nc+i][nx+j] = +this->_equations[i].gradient(j);
+        }
+        for(uint j=0; j!=ne; ++j) {
+            lp.A[nx+nc+i][nx+np+j]=0;
+        }
+        lp.b[nx+nc+i] = -this->_equations[i].value();
+    }
+
+    for(uint i=0; i!=np; ++i) {
         lp.l[nx+i]=this->_domain[i].lower();
         lp.u[nx+i]=this->_domain[i].upper();
     }
     for(uint i=0; i!=nc; ++i) {
-        lp.l[nx+ne+i]=0;
-        lp.u[nx+ne+i]=inf<Float>();
+        lp.l[nx+np+i]=0;
+        lp.u[nx+np+i]=inf<Float>();
     }
-
-    // Take x and s variables to be basic, so the initial basis matrix is the
-    // identity
-    for(uint i=0; i!=nx; ++i) {
-        lp.vt[i]=BASIS;
-        lp.p[i]=i;
-    }
-    for(uint i=0; i!=ne; ++i) {
-        lp.vt[nx+i]=LOWER;
-        lp.p[nx+nc+i]=nx+i;
-    }
-    for(uint i=0; i!=nc; ++i) {
-        lp.vt[nx+ne+i]=BASIS;
-        lp.p[nx+i]=nx+ne+i;
-    }
-    lp.B=Matrix<Float>::identity(nx+nc);
 
     // Make part of linear program dependent on cell be +/-infinity
     for(uint i=0; i!=nx; ++i) {
@@ -379,15 +382,15 @@ void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Fl
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=nx; ++i) {
-        lp.l[ne+i]=bx[i].lower();
-        lp.u[ne+i]=bx[i].upper();
+        lp.l[i]=bx[i].lower();
+        lp.u[i]=bx[i].upper();
     }
 
     int cell_tree_depth=(cell.depth()-cell.height());
     int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    tribool feasible=lpsolver.constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    tribool feasible=lpsolver.hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
 
     bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
@@ -525,7 +528,7 @@ AffineSet::robust_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) 
     lp.B=Matrix<Float>::identity(nx+nc);
 
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
-    tribool feasible=lpsolver.constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    tribool feasible=lpsolver.hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
     if(!feasible) { return; } // no intersection
 
@@ -604,7 +607,7 @@ AffineSet::boundary(uint xind, uint yind) const
     Vector<Float> x(nx+nc); Vector<Float> y(nc+ne);
 
     // Find an initial feasible point
-    tribool feasible = lpsolver.constrained_feasible(A,b,l,u, vt, p,B, x,y);
+    tribool feasible = lpsolver.hotstarted_constrained_feasible(A,b,l,u, vt, p,B, x,y);
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n  x="<<x<<" Ax="<< A*x <<"\n");
     lpsolver.consistency_check(A,b,l,u,vt,p,B,x);
 

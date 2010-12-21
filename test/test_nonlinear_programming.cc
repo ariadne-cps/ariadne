@@ -82,7 +82,7 @@ class TestOptimiser
 
         IntervalVector x_optimal=optimiser->minimise(f,D,h);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
-        ARIADNE_TEST_LESS(norm(h(x_optimal)),1e-8);
+        ARIADNE_TEST_LESS(norm(h(x_optimal)),1e-7);
     }
 
     void test_constrained_optimisation() {
@@ -148,6 +148,16 @@ class TestOptimiser
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
+    void test_nonlinear_equality_feasibility() {
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        RealVectorFunction h=RealVectorFunction(1u, 2*x[0]-x[1]+0.125*x[0]*x[1]);
+        ARIADNE_TEST_PRINT(h);
+        Box D(2, 0.0,2.0, 0.0,2.0);
+
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,h));
+    }
+
     void test_feasibility_check() {
         RealVectorFunction x=RealVectorFunction::identity(2);
         ARIADNE_TEST_CONSTRUCT( RealVectorFunction, g,(sqr(x[0])+2*sqr(x[1])-1) );
@@ -166,10 +176,19 @@ class TestOptimiser
 };
 
 int main(int argc, const char* argv[]) {
+    uint optimiser_verbosity = get_verbosity(argc,argv);
+
     NonlinearInteriorPointOptimiser nlo;
-    nlo.verbosity=get_verbosity(argc,argv);
+    nlo.verbosity=optimiser_verbosity;
     TestOptimiser(nlo).test();
 
+    ApproximateOptimiser appo;
+    appo.verbosity=optimiser_verbosity;
+    TestOptimiser(appo).test_nonlinear_equality_feasibility();
+
+    IntervalOptimiser ivlo;
+    ivlo.verbosity=optimiser_verbosity;
+    //TestOptimiser(ivlo).test_nonlinear_equality_feasibility();
     return ARIADNE_TEST_FAILURES;
 }
 

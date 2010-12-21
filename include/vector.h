@@ -334,6 +334,9 @@ Vector<Float> upper(const Vector<Interval>& v);
 Float radius(const Vector<Interval>& z);
 Float volume(const Vector<Interval>& z);
 
+inline Vector<Float> lower_bounds(const Vector<Interval>& v) { return Ariadne::lower(v); }
+inline Vector<Float> upper_bounds(const Vector<Interval>& v) { return Ariadne::upper(v); }
+
 inline Vector<Float> add_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1+v2; }
 inline Vector<Float> sub_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1-v2; }
 

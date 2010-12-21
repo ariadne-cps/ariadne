@@ -275,6 +275,8 @@ void export_scalar_function()
     scalar_function_class.def("polynomial", &RealScalarFunction::polynomial);
     scalar_function_class.def("__call__", (Interval(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::operator() );
     scalar_function_class.def("__call__", (Float(RealScalarFunction::*)(const Vector<Float>&)const)&RealScalarFunction::operator() );
+    scalar_function_class.def("__call__", (IntervalDifferential(RealScalarFunction::*)(const Vector<IntervalDifferential>&)const)&RealScalarFunction::evaluate );
+    scalar_function_class.def("__call__", (FloatDifferential(RealScalarFunction::*)(const Vector<FloatDifferential>&)const)&RealScalarFunction::evaluate );
     scalar_function_class.def("gradient", (Vector<Interval>(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::gradient );
     scalar_function_class.def("gradient", (Vector<Interval>(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::gradient );
     scalar_function_class.def("__pos__", &__pos__<RealScalarFunction,RealScalarFunction>);
@@ -334,6 +336,8 @@ void export_vector_function()
     vector_function_class.def("__setitem__", &RealVectorFunction::set);
     vector_function_class.def("__call__", (Vector<Interval>(RealVectorFunction::*)(const Vector<Interval>&)const)&RealVectorFunction::operator() );
     vector_function_class.def("__call__", (Vector<Float>(RealVectorFunction::*)(const Vector<Float>&)const)&RealVectorFunction::operator() );
+    vector_function_class.def("__call__", (Vector<IntervalDifferential>(RealVectorFunction::*)(const Vector<IntervalDifferential>&)const)&RealVectorFunction::evaluate );
+    vector_function_class.def("__call__", (Vector<FloatDifferential>(RealVectorFunction::*)(const Vector<FloatDifferential>&)const)&RealVectorFunction::evaluate );
     vector_function_class.def("jacobian", (Matrix<Interval>(RealVectorFunction::*)(const Vector<Interval>&)const) &RealVectorFunction::jacobian);
     vector_function_class.def("jacobian", (Matrix<Float>(RealVectorFunction::*)(const Vector<Float>&)const) &RealVectorFunction::jacobian);
     vector_function_class.def(self_ns::str(self));

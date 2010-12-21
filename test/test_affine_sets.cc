@@ -142,16 +142,29 @@ class TestAffineSet
         Affine<Float> x1=Affine<Float>::variable(3,1);
         Affine<Float> x2=Affine<Float>::variable(3,2);
         AffineSet affine_set(Box::unit_box(3),(-0.9375+0.0625*x0+0.5*x1,0.87890625-0.1171875*x0+x1+0.00390625*x2));
-        affine_set.new_inequality_constraint(-1.1875+0.0625*x0+x1);
+        //AffineSet affine_set(Box::unit_box(3),(x0+x2,x1+2*x2) );
+        //affine_set.new_inequality_constraint(-1.1875+0.0625*x0+x1);
         ARIADNE_TEST_PRINT(affine_set);
         Box cell1(2, -1.0,-0.9375, 0.8125, 0.875); // subset
         Box cell2(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
-        Box cell3(2, -1.1875,-1.125, 0.0625,0.125); // touches
-        Box cell4(2, -0.9999999,-0.9375, 0.4375,0.5); // almost touches
+        Box cell3(2, -0.875,-0.75, 0.625,0.7578125); // touches at (-0.875,0.7578125);
+        Box cell4(2, -1.1850,-1.125, 0.0625,0.125); // almost touches
+        Box cell5(2, -0.5625,-0.50, 1.4375,1.5); // overlaps
         ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell1)));
         ARIADNE_TEST_ASSERT(definitely(affine_set.disjoint(cell2)));
         ARIADNE_TEST_ASSERT(!definitely(affine_set.disjoint(cell3)));
         ARIADNE_TEST_ASSERT(possibly(affine_set.disjoint(cell4)));
+        ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell5)));
+
+        figure.clear(); figure.set_bounding_box(affine_set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+        figure << affine_set
+               << fill_colour(0,0,1) << cell1
+               << fill_colour(1,0,0) << cell2
+               << fill_colour(1,1,0) << cell3
+               << fill_colour(1,0,0) << cell4
+               << fill_colour(0,0,1) << cell5
+               ;
+        figure.write("test_affine_set-disjoint");
     }
 
     void test_outer_approximation() {

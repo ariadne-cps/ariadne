@@ -76,6 +76,8 @@ typedef Vector<Interval> IntervalVector;
 typedef ScalarTaylorFunction ScalarIntervalFunction;
 typedef VectorTaylorFunction VectorIntervalFunction;
 
+enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
+
 //! \brief A class representing an enclosure for a hybrid evolution.
 //! Handles progress, activation and guard constraints internally.
 //! The set is represented as the image of a box \f$D\f$ under a function model \f$\hat{f}(s)\f$, under the constraints
@@ -126,6 +128,7 @@ class HybridEnclosure
     TaylorConstrainedImageSet _set;
     ScalarTaylorFunction _time;
     ScalarTaylorFunction _dwell_time;
+    List<EnclosureVariableType> _variables;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
@@ -217,9 +220,9 @@ class HybridEnclosure
     void new_time_step_bound(DiscreteEvent e, ScalarIntervalFunction tau);
 
     //! \brief Introduces a new parameter with domain \a ivl.
-    void new_parameter(Interval ivl);
+    void new_parameter(Interval ivl, EnclosureVariableType);
     //! \brief Introduce a new independent variable with domain \a ivl.
-    void new_variable(Interval ivl);
+    void new_variable(Interval ivl, EnclosureVariableType);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
     void new_constraint(DiscreteEvent e, NonlinearConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
@@ -257,12 +260,18 @@ class HybridEnclosure
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
     void adjoin_outer_approximation_to(HybridGridTreeSet& paving, int depth) const;
+
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(uint dim) const;
     //! \brief Splits into smaller subsets.
     List<HybridEnclosure> split() const;
+
     //! \brief Simplifies the representation.
     void recondition();
+    //! \brief Simplifies the representation by changing all uniform errors into independent variables.
+    void uniform_error_recondition();
+    //! \brief Simplifies the representation by choosing most significant independent variables to keep, and merging the rest into a single error for each component.
+    void kuhn_recondition();
 
     //! \brief Draws onto a canvas.
     virtual void draw(CanvasInterface&) const;

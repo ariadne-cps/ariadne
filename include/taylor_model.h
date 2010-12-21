@@ -315,6 +315,7 @@ class TaylorModel<Interval>
 
     //@{
     /*! \name Inplace modifications. */
+    // TODO: Change these to return void
     //! \brief Scale so that the old codomain maps into the new codomain.
     TaylorModel<Interval>& rescale(const Interval& old_codomain, const Interval& new_codomain);
     //! \brief Restrict to a subdomain.
@@ -598,7 +599,9 @@ TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, I
 TaylorModel<Interval> substitute(const TaylorModel<Interval>& x, uint k, const TaylorModel<Interval>& y);
 
 //! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
-TaylorModel<Interval> embed(const TaylorModel<Interval>& tv, uint as);
+TaylorModel<Interval> embed(const TaylorModel<Interval>& tm, uint d);
+//! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension, placing the error in variable i.
+TaylorModel<Interval> embed_error(const TaylorModel<Interval>& tm, uint d, uint i);
 //! \relates TaylorModel<Interval> \brief Embed the model in a space of higher dimension
 TaylorModel<Interval> embed(uint as, const TaylorModel<Interval>& tv);
 
@@ -618,6 +621,16 @@ TaylorModel<Interval> preaffine(const TaylorModel<Interval>&, uint k, const Inte
 //! \relates TaylorModel<Interval> \brief Restricts the range of the variable x[k] to the interval d.
 //! \pre -1 <= d.lower() <= d.upper() <= 1 .
 TaylorModel<Interval> restrict(const TaylorModel<Interval>&, uint k, const Interval& d);
+
+//! \brief Abstract away the given variables.
+//! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
+TaylorModel<Interval>  discard(const TaylorModel<Interval>&, const array<uint>& variables);
+
+TaylorModel<Interval> recondition(const TaylorModel<Interval>& tm, array<uint>& discarded_variables,
+                                  uint number_of_error_variables);
+
+TaylorModel<Interval> recondition(const TaylorModel<Interval>& tm, array<uint>& discarded_variables,
+                                  uint number_of_error_variables, uint index_of_error);
 
 //! \relates TaylorModel<Interval>
 //! An over-approximation to the intersection of two Taylor models.

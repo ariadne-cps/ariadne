@@ -660,7 +660,9 @@ std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<Scalar
     Float truncatation_error = truncated_function.error();
     truncated_function.clobber();
     Polynomial<Float> polynomial_function = midpoint(polynomial(truncated_function));
-    os << polynomial_function << "+/-" << truncatation_error << "+/-" << function.error();
+    if(frepr.names.empty()) { os << polynomial_function; }
+    else { os << named_argument_repr(polynomial_function,frepr.names); }
+    os << "+/-" << truncatation_error << "+/-" << function.error();
     return os;
 }
 
@@ -1684,7 +1686,7 @@ std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<Vector
     os << "[";
     for(uint i=0; i!=function.result_size(); ++i) {
         if(i!=0) { os << ","; }
-        os << polynomial_repr(function[i],repr.threshold);
+        os << polynomial_repr(function[i],repr.threshold,repr.names);
     }
     return os << "]";
 }

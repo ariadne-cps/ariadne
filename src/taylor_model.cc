@@ -2376,6 +2376,76 @@ IntervalTaylorModel preaffine(const IntervalTaylorModel& tm, uint k, const Inter
 }
 
 
+IntervalTaylorModel discard(const IntervalTaylorModel& tm, array<uint>& discarded_variables) {
+    return recondition(tm,discarded_variables,0u,0u);
+}
+
+IntervalTaylorModel recondition(const IntervalTaylorModel& tm, array<uint>& discarded_variables, uint number_of_error_variables) {
+    return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
+}
+
+IntervalTaylorModel recondition(const IntervalTaylorModel& tm, array<uint>& discarded_variables, uint number_of_error_variables, uint index_of_error)
+{
+    for(uint i=0; i!=discarded_variables.size()-1; ++i) {
+        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
+    }
+    ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1]<tm.argument_size());
+    ARIADNE_PRECONDITION(index_of_error<=number_of_error_variables);
+
+    const uint number_of_discarded_variables = discarded_variables.size();
+    const uint number_of_kept_variables = tm.argument_size() - discarded_variables.size();
+
+    // Make an array of the variables to be kept
+    array<uint> kept_variables(number_of_kept_variables);
+    uint kd=0; uint kk=0;
+    for(uint j=0; j!=tm.argument_size(); ++j) {
+        if(kd==number_of_discarded_variables || j!=discarded_variables[kd]) {
+            kept_variables[kk]=j; ++kk;
+        } else {
+            ++kd;
+        }
+    }
+
+    // Construct result and reserve memory
+    IntervalTaylorModel r(number_of_kept_variables+number_of_error_variables);
+    r.expansion().reserve(tm.number_of_nonzeros()+1u);
+    MultiIndex a(number_of_kept_variables+number_of_error_variables);
+
+    // Set the uniform error of the original model
+    // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
+    Float* error_ptr;
+    if(number_of_error_variables==index_of_error) {
+        error_ptr = &r.error();
+    } else {
+        a[number_of_kept_variables+index_of_error]=1;
+        r.expansion().append(a,tm.error());
+        a[number_of_kept_variables+index_of_error]=0;
+        error_ptr = &r.begin()->data();
+    }
+
+    set_rounding_upward();
+    for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        bool keep=true;
+        for(uint k=0; k!=number_of_discarded_variables; ++k) {
+            if(iter->key()[discarded_variables[k]]!=0) {
+                *error_ptr = add_rnd(*error_ptr,abs(iter->data()));
+                keep=false;
+                break;
+            }
+        }
+        if(keep) {
+            for(uint k=0; k!=number_of_kept_variables; ++k) {
+                a[k]=iter->key()[kept_variables[k]];
+            }
+            r.expansion().append(a,iter->data());
+        }
+    }
+    set_rounding_to_nearest();
+
+    return r;
+}
+
+
 IntervalTaylorModel restrict(const IntervalTaylorModel& tm, uint k, const Interval& nd) {
     ARIADNE_ASSERT(k<tm.argument_size());
     ARIADNE_ASSERT(nd.lower()>=-1 && nd.upper()<=+1);

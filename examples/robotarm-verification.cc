@@ -32,6 +32,9 @@ typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
 
 int main(int argc, char** argv)
 {
+    uint verbosity = 0;
+    if(argc>1) { verbosity=atoi(argv[1]); }
+
     // Set up the evolution parameters and grid
     double time(2.0);
     Real rtime(time);
@@ -111,7 +114,7 @@ int main(int argc, char** argv)
 
     // Set up the evaluators
     GeneralHybridEvolver evolver;
-    evolver.verbosity = 1;
+    evolver.verbosity = verbosity;
     evolver.parameters().maximum_enclosure_radius = 10.0;
     evolver.parameters().maximum_step_size = 2.5;
     evolver.parameters().enable_reconditioning = true;
@@ -134,6 +137,7 @@ int main(int argc, char** argv)
     Orbit<HybridEnclosureType> orbit = evolver.orbit(robotarm,initial_set,HybridTime(time,steps),semantics);
     cout << std::endl;
 
+    cout << "\norbit.final=\n" << orbit.final() << endl << endl;
     // cout << "\norbit=\n" << orbit << endl << endl;
 
     // Print the intial, evolve and reach sets

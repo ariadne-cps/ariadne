@@ -1325,7 +1325,7 @@ recondition()
         Float error=this->_function[large_error_indices[i]].model().error();
         error_domains[i]=Interval(-error,+error);
     }
-
+    error_domains=IntervalVector(large_error_indices.size(),Interval(-1,+1));
     uint k=this->number_of_parameters();
 
     this->_domain=join(this->_domain,error_domains);
@@ -1342,11 +1342,15 @@ recondition()
         Float error=this->_function[large_error_indices[i]].model().error();
         if(error > MAXIMUM_ERROR) {
             this->_function[i].set_error(0.0);
-            this->_function[i] = this->_function[i] + ScalarTaylorFunction::coordinate(this->_domain,k);
+            this->_function[i] = this->_function[i] + ScalarTaylorFunction::coordinate(this->_domain,k)*error;
             ++k;
         }
     }
 }
+
+
+
+
 
 void TaylorConstrainedImageSet::restrict(const Vector<Interval>& subdomain)
 {

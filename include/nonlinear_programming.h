@@ -52,7 +52,7 @@ typedef VectorFunction<Float> FloatVectorFunction;
 class NonlinearConstraint;
 
 class InfeasibleProblemException : public std::exception { };
-class DegenerateFeasibilityProblemException : public std::exception { };
+class DegenerateNonlinearFeasibilityProblemException : public std::exception { };
 class NearBoundaryOfFeasibleDomainException : public std::exception { };
 
 //! \ingroup OptimisationModule EvaluationModule

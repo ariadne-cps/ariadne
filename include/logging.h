@@ -35,7 +35,7 @@
 #define ARIADNE_LOG(level,msg) \
     if(verbosity >= level) { \
         std::clog << "[" << level << "]"; \
-        for(uint i=0; i!=level; ++i) { std::clog<<' '; } \
+        for(uint _i=0; _i!=level; ++_i) { std::clog<<' '; } \
         std::clog << msg << std::flush; \
     }
 

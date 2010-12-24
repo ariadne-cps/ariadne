@@ -200,13 +200,13 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
 }
 
 
-void ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const
+bool ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const
 {
     const double MINIMUM_REDUCTION = 0.75;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
     ARIADNE_ASSERT(function.result_size()==codomain.size());
 
-    if(domain.empty()) { return; }
+    if(domain.empty()) { return true; }
 
     Float domain_magnitude=0.0;
     for(uint j=0; j!=domain.size(); ++j) {
@@ -216,14 +216,14 @@ void ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& functio
 
     do {
         this->hull_reduce(domain,function,codomain);
-        if(domain.empty()) { return; }
+        if(domain.empty()) { return true; }
 
         for(uint i=0; i!=codomain.size(); ++i) {
             for(uint j=0; j!=domain.size(); ++j) {
                 this->box_reduce(domain,function[i],codomain[i],j);
             }
         }
-        if(domain.empty()) { return; }
+        if(domain.empty()) { return true; }
 
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0.0;
@@ -231,6 +231,8 @@ void ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& functio
             domain_magnitude+=domain[j].width();
         }
     } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
+
+    return false;
 }
 
 inline bool is_nan(const Float& x) { return isnan(x.get_d()); }
@@ -242,13 +244,13 @@ bool has_nan(const Box& domain) {
     return false;
 }
 
-void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& constraints) const
+bool ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& constraints) const
 {
     static const bool USE_BOX_REDUCE = false;
 
     const double MINIMUM_REDUCTION = 0.75;
 
-    if(domain.empty()) { return; }
+    if(domain.empty()) { return true; }
 
     Float domain_magnitude=0.0;
     for(uint j=0; j!=domain.size(); ++j) {
@@ -260,13 +262,13 @@ void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& cons
         for(uint i=0; i!=constraints.size(); ++i) {
             this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
         }
-        if(domain.empty()) { return; }
+        if(domain.empty()) { return true; }
 
         if(USE_BOX_REDUCE) {
             for(uint i=0; i!=constraints.size(); ++i) {
                 for(uint j=0; j!=domain.size(); ++j) {
                     this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
-                    if(domain[j].empty()) { return; }
+                    if(domain[j].empty()) { return true; }
                 }
             }
         }
@@ -277,46 +279,50 @@ void ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& cons
             domain_magnitude+=domain[j].width();
         }
     } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
+
+    return false;
 }
 
 
-void ConstraintSolver::hull_reduce(Box& domain, const IntervalProcedure& procedure, const Interval& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const IntervalProcedure& procedure, const Interval& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalProcedure procedure, Interval bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
+    return domain.empty();
 }
 
-void ConstraintSolver::hull_reduce(Box& domain, const Vector<IntervalProcedure>& procedure, const IntervalVector& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const Vector<IntervalProcedure>& procedure, const IntervalVector& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, Vector<IntervalProcedure> procedure, Box bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
+    return domain.empty();
 }
 
-void ConstraintSolver::hull_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Formula<Interval> formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
     Procedure<Interval> procedure(formula);
-    this->hull_reduce(domain,procedure,bounds);
+    return this->hull_reduce(domain,procedure,bounds);
 }
 
-void ConstraintSolver::hull_reduce(Box& domain, const IntervalVectorFunctionInterface& function, const IntervalVector& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const IntervalVectorFunctionInterface& function, const IntervalVector& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Vector< Formula<Interval> > formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
     Vector< Procedure<Interval> > procedure(formula);
-    this->hull_reduce(domain,procedure,bounds);
+    return this->hull_reduce(domain,procedure,bounds);
 }
 
-void ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
+bool ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
     IntervalScalarFunction derivative=function.derivative(variable);
 
@@ -348,15 +354,19 @@ void ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunction
         subdomain[variable]=Interval(lower.lower(),upper.upper());
     } while(lower.radius()>size && upper.radius()>size);
     domain=subdomain;
+
+    return domain.empty();
 }
 
 
 
 
 
-void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
+bool ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
+
+    if(domain[variable].lower() == domain[variable].upper()) { return false; }
 
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
@@ -386,7 +396,7 @@ void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
     // The set is proved to be empty
     if(imax==n) {
         domain[variable]=Interval(+inf<Float>(),-inf<Float>());
-        return;
+        return true;
     }
 
     // Look for empty slices from above; note that at least one nonempty slice has been found
@@ -405,6 +415,8 @@ void ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
     ARIADNE_ASSERT(new_interval.upper()!=new_interval.lower());
 
     domain[variable]=new_interval;
+
+    return false;
 }
 
 

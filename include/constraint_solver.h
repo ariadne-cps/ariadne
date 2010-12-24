@@ -72,8 +72,8 @@ class ConstraintSolverInterface {
     virtual Pair<Tribool,Point> feasible(const Box& domain, const IntervalVectorFunction& function, const Box& codomain) const = 0;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
     virtual Tribool check_feasibility(const Box& domain, const IntervalVectorFunction& function, const Box& codomain, const Point& point) const = 0;
-    //! \brief Try to reduce the size of the domain by propagating interval constraints.
-    virtual void reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const = 0;
+    //! \brief Try to reduce the size of the domain by propagating interval constraints. Returns \c true if the reduced domain is empty.
+    virtual bool reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const = 0;
 
 };
 
@@ -92,39 +92,39 @@ class ConstraintSolver
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
     virtual Tribool check_feasibility(const Box& domain, const IntervalVectorFunction& function, const Box& codomain, const Point& point) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
-    virtual void reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const;
+    virtual bool reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const;
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
     virtual Pair<Tribool,Point> feasible(const Box& domain, const List<NonlinearConstraint>& constraints) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. (Deprecated)
-    virtual void reduce(Box& domain, const List<NonlinearConstraint>& constraints) const;
+    virtual bool reduce(Box& domain, const List<NonlinearConstraint>& constraints) const;
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    void hull_reduce(Box& bx, const IntervalVectorFunctionInterface& function, const IntervalVector& codomain) const;
-    void hull_reduce(Box& bx, const Vector<IntervalProcedure>& procedure, const IntervalVector& codomain) const;
+    bool hull_reduce(Box& bx, const IntervalVectorFunctionInterface& function, const IntervalVector& codomain) const;
+    bool hull_reduce(Box& bx, const Vector<IntervalProcedure>& procedure, const IntervalVector& codomain) const;
     //! \brief Try to enforce hull consistency by propagating an interval constraint.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    void hull_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval& codomain) const;
-    void hull_reduce(Box& bx, const IntervalProcedure& procedure, const Interval& codomain) const;
+    bool hull_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval& codomain) const;
+    bool hull_reduce(Box& bx, const IntervalProcedure& procedure, const Interval& codomain) const;
 
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
-    void box_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval&, uint j) const;
+    bool box_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval&, uint j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    void monotone_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval&, uint j) const;
+    bool monotone_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval&, uint j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
     Pair<Box,Box> split(const Box& domain, const IntervalVectorFunction& function, const IntervalVector& codomain) const;
 
     // Deprecated functions.
-    void hull_reduce(Box& bx, const NonlinearConstraint& constraint) const { 
-        this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
-    void box_reduce(Box& bx, const NonlinearConstraint& constraint, uint j) const { 
-        this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
-    void monotone_reduce(Box& bx, const NonlinearConstraint& constraint, uint j) const { 
-        this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
+    bool hull_reduce(Box& bx, const NonlinearConstraint& constraint) const {
+        return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
+    bool box_reduce(Box& bx, const NonlinearConstraint& constraint, uint j) const {
+        return this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
+    bool monotone_reduce(Box& bx, const NonlinearConstraint& constraint, uint j) const {
+        return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
 };
 

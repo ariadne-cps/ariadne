@@ -892,8 +892,6 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
     static const double TERR = -1.0/((1<<e)*1024.0);
     static const Float inf = Ariadne::inf<Float>();
 
-    uint verbosity=0u;
-
     const uint m=fg.argument_size();
     const uint n=fg.result_size();
     ARIADNE_LOG(2,"\nadjoin_outer_approximation(...)\n");
@@ -1025,8 +1023,6 @@ typedef Procedure<Interval> IntervalProcedure;
 // Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
 void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& domain, const VectorTaylorFunction& f, const VectorTaylorFunction& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<IntervalProcedure>& procedures)
 {
-    uint verbosity=0u;
-
     const uint m=domain.size();
     const uint nf=f.result_size();
     const uint ng=g.result_size();
@@ -1066,41 +1062,36 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& do
     for(uint i=0; i!=nf; ++i) {
         for(uint j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
     }
     for(uint i=0; i!=ng; ++i) {
         for(uint j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,g[i],codomain[i],j);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
     }
     newdomwdth=average_width(new_domain);
     ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce\n");
-
-    if(new_domain.empty()) {
-        ARIADNE_LOG(4,"  Proved disjointness using box reduce\n");
-        return;
-    }
-    ARIADNE_LOG(8,"  dom="<<new_domain<<"\n");
 
     // Hull reduction steps
     do {
         olddomwdth=newdomwdth;
         for(uint i=0; i!=nf; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[i],cell_box[i]);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
             //constraint_solver.hull_reduce(new_domain,f[i],cell_box[i]);
         }
         for(uint i=0; i!=ng; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[nf+i],codomain[i]);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
             //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
         }
         newdomwdth=average_width(new_domain);
         ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" dom="<<new_domain<<"\n");
     } while( !new_domain.empty() && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
 
-    if(new_domain.empty()) {
-        ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
-        return;
-    }
+    ARIADNE_LOG(6,"new_domain="<<new_domain);
 
 
     domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0));
@@ -1176,7 +1167,6 @@ IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f) {
 
 void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int acc) const
 {
-    uint verbosity=7;
     ARIADNE_LOG(6,"TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(paving, depth)\n");
     ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<acc<<"\n");
     ARIADNE_ASSERT(p.dimension()==this->dimension());

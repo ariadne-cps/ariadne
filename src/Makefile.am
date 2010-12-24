@@ -27,6 +27,7 @@ ARIADNE_SRC = \
 	solver.cc \
 	integrator.cc \
 	constraint_solver.cc \
+	simplex_algorithm.cc \
 	linear_programming.cc \
 	nonlinear_programming.cc \
 	point.cc \

@@ -38,11 +38,10 @@
 
 namespace Ariadne {
 
-class DegenerateFeasibilityProblemException : public std::exception { };
-
-
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
+
+
 
 
 template<class X>
@@ -57,6 +56,7 @@ struct LinearProgram {
     Matrix<X> B;
     Vector<X> x;
     Vector<X> y;
+    Vector<X> z;
 };
 
 
@@ -191,7 +191,9 @@ tribool AffineSet::disjoint(const Box& bx) const {
     }
     tribool feasible=indeterminate;
     try {
-        feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+        InteriorPointSolver optimiser;
+        feasible=optimiser.constrained_feasible(lp.A,lp.b,lp.l,lp.u);
+        //feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
     catch(DegenerateFeasibilityProblemException e) {
         feasible=indeterminate;
@@ -216,7 +218,7 @@ AffineSet::outer_approximation(const Grid& g, int d) const {
 }
 
 
-void _adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void AffineSet::_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
 {
 
     // No need to check if cell is already part of the set
@@ -237,9 +239,11 @@ void _adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& l
     int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    tribool feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    //tribool feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    InteriorPointSolver optimiser;
+    tribool feasible=optimiser.constrained_feasible(lp.A,lp.b,lp.l,lp.u);
     //feasible=verify_constrained_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
-    if(!feasible) { return; }
+    if(definitely(!feasible)) { return; }
 
     // If not disjoint, and we are at maximum depth, adjoin the set.
     // Otherwise, split and continue.
@@ -363,7 +367,7 @@ AffineSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 
 
 
-void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void AffineSet::_robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
 {
     SimplexSolver<Float> lpsolver;
 
@@ -412,8 +416,8 @@ void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Fl
     } else {
         GridCell subcell1 = cell.split(0);
         GridCell subcell2 = cell.split(1);
-        _adjoin_outer_approximation_to(paving,lp,subcell1,depth);
-        _adjoin_outer_approximation_to(paving,lp,subcell2,depth);
+        AffineSet::_adjoin_outer_approximation_to(paving,lp,subcell1,depth);
+        AffineSet::_adjoin_outer_approximation_to(paving,lp,subcell2,depth);
     }
 
 }

@@ -99,9 +99,9 @@ void export_constraint_solver()
 
 
     class_<ConstraintSolver> constraint_solver_class("ConstraintSolver", init<>());
-    constraint_solver_class.def("hull_reduce", (void(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&)const) &ConstraintSolver::hull_reduce);
-    constraint_solver_class.def("box_reduce", (void(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::box_reduce);
-    constraint_solver_class.def("monotone_reduce", (void(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::monotone_reduce);
+    constraint_solver_class.def("hull_reduce", (bool(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&)const) &ConstraintSolver::hull_reduce);
+    constraint_solver_class.def("box_reduce", (bool(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::box_reduce);
+    constraint_solver_class.def("monotone_reduce", (bool(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::monotone_reduce);
 }
 
 

@@ -146,25 +146,31 @@ class TestAffineSet
         //affine_set.new_inequality_constraint(-1.1875+0.0625*x0+x1);
         ARIADNE_TEST_PRINT(affine_set);
         Box cell1(2, -1.0,-0.9375, 0.8125, 0.875); // subset
-        Box cell2(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
+        Box cell2(2, -0.5625,-0.50, 1.4375,1.5); // overlaps
         Box cell3(2, -0.875,-0.75, 0.625,0.7578125); // touches at (-0.875,0.7578125);
         Box cell4(2, -1.1850,-1.125, 0.0625,0.125); // almost touches
-        Box cell5(2, -0.5625,-0.50, 1.4375,1.5); // overlaps
+        Box cell5(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
+        Box cell6(2, -1.5,-1.375, 0.5,0.625); // regression test
+
         ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell1)));
-        ARIADNE_TEST_ASSERT(definitely(affine_set.disjoint(cell2)));
+        ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell2)));
         ARIADNE_TEST_ASSERT(!definitely(affine_set.disjoint(cell3)));
         ARIADNE_TEST_ASSERT(possibly(affine_set.disjoint(cell4)));
-        ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell5)));
+        ARIADNE_TEST_ASSERT(definitely(affine_set.disjoint(cell5)));
+        ARIADNE_TEST_ASSERT(definitely(affine_set.disjoint(cell6)));
 
-        figure.clear(); figure.set_bounding_box(affine_set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+        figure.clear();
+        figure.set_bounding_box(affine_set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
         figure << affine_set
                << fill_colour(0,0,1) << cell1
-               << fill_colour(1,0,0) << cell2
+               << fill_colour(0,1,0) << cell2
                << fill_colour(1,1,0) << cell3
                << fill_colour(1,0,0) << cell4
-               << fill_colour(0,0,1) << cell5
+               << fill_colour(1,0,0) << cell5
+               << fill_colour(1,0,0) << cell6
                ;
         figure.write("test_affine_set-disjoint");
+
     }
 
     void test_outer_approximation() {
@@ -229,23 +235,12 @@ class TestAffineSet
             affine_set_paving.recombine();
             std::cout<<std::setprecision(17);
             ARIADNE_TEST_PRINT(affine_set);
-            Box cell1(2, -1.0,-0.9375, 0.8125, 0.875); // subset
-            Box cell2(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
-            Box cell3(2, -1.1875,-1.125, 0.0625,0.125); // touches
-            Box cell4(2, -0.9999999,-0.9375, 0.4375,0.5); // almost touches
-            ARIADNE_TEST_ASSERT(affine_set_paving.superset(cell1));
-            ARIADNE_TEST_ASSERT(affine_set_paving.disjoint(cell2));
-            ARIADNE_TEST_ASSERT(affine_set_paving.overlaps(cell3));
 
-            figure.set_bounding_box(affine_set.bounding_box());
+            figure.set_bounding_box(affine_set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(affine_set_paving);
             figure.set_fill_colour(0.0,0.5,1.0);
             figure.draw(affine_set);
-            figure.draw(cell1);
-            figure.draw(cell2);
-            //figure.draw(cell2);
-            //figure.draw(cell3);
             figure.write("test_affine_set-outer_approximation-3");
         }
     }

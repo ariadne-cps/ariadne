@@ -42,25 +42,29 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Affine;
 
-struct StandardLinearProgram {
-    StandardLinearProgram(uint m, uint n);
-    Matrix<Float> A;
-    Vector<Float> b;
-    Vector<Float> c;
-    Vector<Float> x;
-    Vector<Float> y;
-    Vector<Float> z;
+enum LinearProgramStatus { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
+
+class DegenerateFeasibilityProblemException : public std::runtime_error {
+  public:
+    DegenerateFeasibilityProblemException() : std::runtime_error("") { }
+    DegenerateFeasibilityProblemException(const std::string& what) : std::runtime_error(what) { }
 };
 
-StandardLinearProgram
-feasibility_problem(const Matrix<Float>& B, const Vector<Float>& bl, const Vector<Float>& bu,
-                    const Matrix<Float>& C, const Vector<Float>& c,
-                    const Vector<Float>& dl, const Vector<Float>& du);
+struct SingularLinearProgram : std::runtime_error {
+    SingularLinearProgram(const std::string& what)
+        : std::runtime_error(what) { };
+};
 
-StandardLinearProgram
-feasibility_problem(const Vector< Affine<Float> >& f, const Vector<Interval>& b,
-                    const Vector< Affine<Float> >& g, const Vector<Float>& c,
-                    const Vector<Interval>& d);
+struct UnboundedLinearProgram : std::runtime_error {
+    UnboundedLinearProgram(const std::string& what)
+        : std::runtime_error(what) { }
+};
+
+struct InfeasibleLinearProgram : std::runtime_error {
+    InfeasibleLinearProgram(const std::string& what)
+        : std::runtime_error(what) { }
+};
+
 
 
 
@@ -119,24 +123,24 @@ class InteriorPointSolver
                                              const Vector<Float>& x, const Vector<Float>& y) const;
   public:
     //! \brief Perform a step of the optimization of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
-    tribool
+    LinearProgramStatus
     _optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
                        Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
 
     //! \brief Perform a step of the optimization of \f$\min c^T x \text{ s.t. } Ax=b; x_l \leq x\leq x_u\f$.
     //! Returns true if a full Newton step (alpha=1) is taken. In this case, the problem is feasible (up to roundoff error).
-    tribool
+    LinearProgramStatus
     _constrained_optimization_step(const Matrix<Float>& A, const Vector<Float>& b, const Vector<Float>& c,
                                    const Vector<Float>& xl, const Vector<Float>& xu,
                                    Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const;
 
     //! \brief Perform a step of the feasibility problem \f$Ax=b,\ x_l \leq x \leq x_u\f$.
-    tribool
+    LinearProgramStatus
     _primal_feasibility_step(const Matrix<Float>& A, const Vector<Float>& b,
                              Vector<Float>& x, Vector<Float>& y, Vector<Float>& z) const;
 
     //! \brief Perform a step of the feasibility problem \f$Ax=b,\ x_l \leq x \leq x_u\f$.
-    tribool
+    LinearProgramStatus
     _constrained_feasibility_step(const Matrix<Float>& A, const Vector<Float>& b,
                                   const Vector<Float>& xl, const Vector<Float>& xu,
                                   Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const;

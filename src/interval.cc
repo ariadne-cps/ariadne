@@ -292,12 +292,14 @@ Interval pow(Interval i, int n)
 
 Interval pow(Interval i, uint m)
 {
+    rounding_mode_t rnd = get_rounding_mode();
     const Interval& nvi=i;
     if(m%2==0) { i=abs(nvi); }
     set_rounding_mode(downward);
     Float rl=pow_rnd(i.lower(),m);
     set_rounding_mode(upward);
     Float ru=pow_rnd(i.upper(),m);
+    set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
 

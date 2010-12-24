@@ -602,7 +602,7 @@ orthogonal_over_approximation(const Zonotope& z)
     const uint m=J.row_size();
     const uint n=J.column_size();
 
-    Matrix<Float> R(J.row_size(),J.row_size());
+    Matrix<Float> R(m,n);
 
     array<Float> column_norm_squares(n);
 

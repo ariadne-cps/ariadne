@@ -485,9 +485,6 @@ void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving,
 void ConstrainedImageSet::
 subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
-    // How small an over-approximating box needs to be relative to the cell size
-    static const double RELATIVE_SMALLNESS=0.5;
-
     IntervalVector subdomain=this->_domain;
 
     FloatVector errors(paving.dimension());

@@ -394,12 +394,12 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     const int drawing_width = drawing_size.nx;
     const int drawing_height = drawing_size.ny;
 
-    const int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
-    const int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
+    //const int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
+    //const int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
 
     const int left_margin = LEFT_MARGIN;
-    const int right_margin = RIGHT_MARGIN;
-    const int bottom_margin = BOTTOM_MARGIN;
+    //const int right_margin = RIGHT_MARGIN;
+    //const int bottom_margin = BOTTOM_MARGIN;
     const int top_margin = TOP_MARGIN;
 
     // clear background
@@ -519,9 +519,7 @@ Figure::write(const char* cfilename, uint drawing_width, uint drawing_height) co
     const int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
     const int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
 
-    const Box& bounding_box=this->_data->bounding_box;
     const PlanarProjectionMap& projection=this->_data->projection;
-    const std::vector<GraphicsObject>& objects=this->_data->objects;
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
@@ -552,8 +550,8 @@ paint (GtkWidget      *widget,
     Figure* figure=static_cast<Figure*>(gdata);
     PlanarProjectionMap projection=figure->get_projection_map();
 
-    gint canvas_width  = widget->allocation.width;
-    gint canvas_height = widget->allocation.height;
+    //gint canvas_width  = widget->allocation.width;
+    //gint canvas_height = widget->allocation.height;
 
     // Get Cairo drawing context
     cr = gdk_cairo_create (widget->window);

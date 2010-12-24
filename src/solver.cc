@@ -455,13 +455,12 @@ SolverBase::implicit(const RealVectorFunction& f,
 
     VectorTaylorFunction result;
 
-    const uint np=ip.size();
     const uint nx=ix.size();
     const double err=this->maximum_error();
 
     VectorTaylorFunction p(VectorTaylorFunction::identity(ip));
     VectorTaylorFunction x(VectorTaylorFunction::constant(ip,ix));
-    VectorTaylorFunction nwx(x.size());
+    VectorTaylorFunction nwx(nx);
     VectorTaylorFunction fnwx(f.result_size());
 
     uint steps_remaining=this->maximum_number_of_steps();

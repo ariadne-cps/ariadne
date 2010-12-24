@@ -121,7 +121,7 @@ void TextPlot::_draw(const std::vector<Point>& pts) {
 }
 
 void TextPlot::draw(const Point& pt) {
-    for(int i = 0; i < pt.dimension(); i++) {
+    for(uint i = 0; i < pt.dimension(); i++) {
         this->_fstream << approx_cast<double>(pt[i]) << " ";
     }
     this->_fstream << std::endl;

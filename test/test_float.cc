@@ -376,6 +376,8 @@ TestFloat::test_arithmetic()
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
+    static const double eps = std::numeric_limits<double>::epsilon();
+
     // Set up some variables
     Float f1(1.25); Float f2(2.25); Float f3(-3.25); Float f4; Float f5;
 
@@ -428,11 +430,15 @@ TestFloat::test_arithmetic()
     cout << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<=3.5); ARIADNE_TEST_ASSERT(f4>=3.5);
     // Addition
-    Float one_add_down_epsilon=add_down(Float(1.0),Float(1e-18));
-    ARIADNE_TEST_COMPARE(add_up(Float(1.0),Float(1e-18)),>,1.0);
-    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(1e-18)),==,Float(1.0));
-    ARIADNE_TEST_COMPARE(one_add_down_epsilon,==,Float(1.0));
-    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(1e-36)),==,Float(1.0));
+    ARIADNE_TEST_COMPARE(add_up(Float(1.0),Float(eps/2)),>,1.0);
+    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(eps)),>,1.0);
+    if(add_down(Float(1.0),Float(eps/2)) != Float(1.0)) {
+        ARIADNE_TEST_WARN("Results of floating-point operations stored to higher-precision in registers than memory.");
+        ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(eps/(1<<11))),>,Float(1.0));
+    }
+    ARIADNE_TEST_COMPARE(add_down(Float(1.0),Float(eps/(1<<12))),==,Float(1.0));
+    Float one_add_down_half_epsilon=add_down(Float(1.0),Float(eps/2));
+    ARIADNE_TEST_COMPARE(one_add_down_half_epsilon,==,Float(1.0));
     ARIADNE_TEST_EQUAL(Float(1.0),1.0);
     ARIADNE_TEST_COMPARE(Float(1.0),==,1.0);
 
@@ -454,15 +460,22 @@ TestFloat::test_arithmetic()
     f4=div_up(f1,f2);
     f5=div_approx(f1,f2);
     cout << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
-    ARIADNE_TEST_ASSERT(f3<f4); ARIADNE_TEST_ASSERT(f3<=f5); ARIADNE_TEST_ASSERT(f4>=f5);
-    ARIADNE_TEST_ASSERT(div_down(f1,f2)<div_up(f1,f2)); // Regression test for non-assignment to variable
-    //ARIADNE_TEST_ASSERT(Rational(f3)<=Rational(5,9));
-    //ARIADNE_TEST_ASSERT(Rational(f4)>=Rational(5,9));
+    Float five = 5;
+    Float nine = 9;
 
-    // Check division my multipyling back
-    cout << mul_down(f3,f2) << " <= (" << f1 << "/" << f2 << ")*" << f2 << " <= " << mul_up(f4,f2) << endl;
-    ARIADNE_TEST_ASSERT(mul_down(f3,f2)<f1);
-    ARIADNE_TEST_ASSERT(mul_up(f4,f2)>f1);
+    set_rounding_downward();
+    ARIADNE_TEST_COMPARE(five/nine,<,0.55555555555555558023);
+    set_rounding_to_nearest();
+
+    ARIADNE_TEST_COMPARE(div_down(Float(5.0),Float(9.0)),<,div_up(Float(5.0),Float(9.0)));
+    ARIADNE_TEST_COMPARE(div_down(Float(5),Float(9)),<,div_up(Float(5),Float(9)));
+    ARIADNE_TEST_COMPARE(div_down(five,nine),<,div_up(five,nine));
+    Float five_ninths_down = div_down(five,nine);
+    Float five_ninths_up = div_up(five,nine);
+    ARIADNE_TEST_COMPARE(five_ninths_down, < , five_ninths_up);
+    ARIADNE_TEST_COMPARE(mul_down(five_ninths_down,nine), < , five);
+    ARIADNE_TEST_COMPARE(mul_up(five_ninths_up,nine), > , five);
+
 
     // Power (not exact; should catch errors here)
     f3=pow_down(f1,3);

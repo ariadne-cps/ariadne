@@ -73,7 +73,7 @@ const double nan = (1.0/0.0);
 //! \sa Interval, Real
 class Float {
   public:
-    volatile double v;
+    double v;
   public:
     typedef Float NumericType;
   public:
@@ -198,25 +198,27 @@ inline Float atan(Float x) { return std::atan(x.v); }
 
 
 // Correctly rounded arithmetic
-inline Float pos_rnd(const Float& x) { return +x.v; }
-inline Float neg_rnd(const Float& x) { return -x.v; }
-inline Float sqr_rnd(const Float& x) { return x.v*x.v; }
-inline Float rec_rnd(const Float& x) { return 1.0/x.v; }
-inline Float add_rnd(const Float& x, const Float& y) { return x.v+y.v; }
-inline Float sub_rnd(const Float& x, const Float& y) { return x.v-y.v; }
-inline Float mul_rnd(const Float& x, const Float& y) { return x.v*y.v; }
-inline Float div_rnd(const Float& x, const Float& y) { return x.v/y.v; }
+inline Float pos_rnd(const Float& x) { return +(volatile double&)x.v; }
+inline Float neg_rnd(const Float& x) { return -(volatile double&)x.v; }
+inline Float sqr_rnd(const Float& x) { volatile double r = (volatile double&)x.v*(volatile double&)x.v; return r; }
+inline Float rec_rnd(const Float& x) { volatile double r = 1.0/(volatile double&)x.v; return r; }
+inline Float add_rnd(const Float& x, const Float& y) { volatile double r = (volatile double&)x.v+(volatile double&)y.v; return r; }
+inline Float sub_rnd(const Float& x, const Float& y) { volatile double r = (volatile double&)x.v-(volatile double&)y.v; return r; }
+inline Float mul_rnd(const Float& x, const Float& y) { volatile double r = (volatile double&)x.v*(volatile double&)y.v; return r; }
+inline Float div_rnd(const Float& x, const Float& y) { volatile double r = (volatile double&)x.v/(volatile double&)y.v; return r; }
+
+
 Float pow_rnd(Float x, int n);
 
 // Opposite rounded arithmetic
-inline Float pos_opp(const Float& x) { volatile double t=-x.v; return -t; }
-inline Float neg_opp(const Float& x) { volatile double t=x.v; return -t; }
-inline Float sqr_opp(const Float& x) { volatile double t=(-x.v)*x.v; return -t; }
-inline Float rec_opp(const Float& x) { volatile double t=-1.0/x.v; return -t; }
-inline Float add_opp(Float x, Float y) { volatile double t=(-x.v)-y.v; return -t; }
-inline Float sub_opp(Float x, Float y) { volatile double t=(-x.v)+y.v; return -t; }
-inline Float mul_opp(Float x, Float y) { volatile double t=(-x.v)*y.v; return -t; }
-inline Float div_opp(Float x, Float y) { volatile double t=(-x.v)/y.v; return -t; }
+inline Float pos_opp(const Float& x) { volatile double t=-(volatile double&)x.v; return -t; }
+inline Float neg_opp(const Float& x) { volatile double t=(volatile double&)x.v; return -t; }
+inline Float sqr_opp(const Float& x) { volatile double t=(-(volatile double&)x.v)*(volatile double&)x.v; return -t; }
+inline Float rec_opp(const Float& x) { volatile double t=-1.0/(volatile double&)x.v; return -t; }
+inline Float add_opp(Float x, Float y) { volatile double t=(-(volatile double&)x.v)-(volatile double&)y.v; return -t; }
+inline Float sub_opp(Float x, Float y) { volatile double t=(-(volatile double&)x.v)+(volatile double&)y.v; return -t; }
+inline Float mul_opp(Float x, Float y) { volatile double t=(-(volatile double&)x.v)*(volatile double&)y.v; return -t; }
+inline Float div_opp(Float x, Float y) { volatile double t=(-(volatile double&)x.v)/(volatile double&)y.v; return -t; }
 Float pow_opp(Float x, int n);
 
 // Correctly rounded algebraic and transcendental functions

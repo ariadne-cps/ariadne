@@ -51,26 +51,30 @@ class TestInteriorPointSolver
 
     void test_validate_feasibility() {
         // A feasible instance
+        FloatVector xl(3, 0.0);
+        FloatVector xu(3, infty);
         FloatMatrix A(2,3, 1.0,0.0,1.0, 0.0,1.0,2.0);
         FloatVector b(2, 1.0,1.0);
         FloatVector x(3, 0.81,0.51,0.21);
         FloatVector y(2, -1.0,-0.5);
-        ARIADNE_ASSERT(definitely(optimiser->validate_feasibility(A,b,x,y)));
+        ARIADNE_ASSERT(definitely(optimiser->validate_feasibility(xl,xu,A,b,x,y)));
 
         b=FloatVector(2, 1.0, -1.0);
         y=FloatVector(2, -0.5, -1.0);
-        ARIADNE_ASSERT(definitely(!optimiser->validate_feasibility(A,b,x,y)));
+        ARIADNE_ASSERT(definitely(!optimiser->validate_feasibility(xl,xu,A,b,x,y)));
     }
 
 
     void test_feasibility() {
         // A feasible instance
+        FloatVector xl(3, 0.0);
+        FloatVector xu(3, infty);
         FloatMatrix A(2,3, 1.0,0.0,1.0, 0.0,1.0,2.0);
         FloatVector b(2, 1.0,1.0);
-        ARIADNE_ASSERT(definitely(optimiser->primal_feasible(A,b)));
+        ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
         b=FloatVector(2, 1.0, -1.0);
-        ARIADNE_ASSERT(definitely(!optimiser->primal_feasible(A,b)));
+        ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
     }
 
 
@@ -80,10 +84,10 @@ class TestInteriorPointSolver
         FloatVector xl(3, 0.0,0.0,0.0);
         FloatVector xu(3, 4.0,2.0,3.0);
 
-        ARIADNE_ASSERT(definitely(optimiser->constrained_feasible(A,b,xl,xu)));
+        ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
         b=FloatVector(2, 1.0, -1.0);
-        ARIADNE_ASSERT(definitely(!optimiser->constrained_feasible(A,b,xl,xu)));
+        ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
 
         xu=FloatVector(3, +infty,+infty,3.0);
     }
@@ -96,7 +100,7 @@ class TestInteriorPointSolver
         FloatVector xl(3, 0.0,0.0,0.0);
         FloatVector xu(3, +infty,+infty,3.0);
 
-        ARIADNE_TEST_PRINT(optimiser->constrained_optimize(A,b,c,xl,xu));
+        ARIADNE_TEST_PRINT(optimiser->minimise(c,xl,xu,A,b));
     }
 
 };

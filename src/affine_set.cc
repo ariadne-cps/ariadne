@@ -192,8 +192,8 @@ tribool AffineSet::disjoint(const Box& bx) const {
     tribool feasible=indeterminate;
     try {
         InteriorPointSolver optimiser;
-        feasible=optimiser.constrained_feasible(lp.A,lp.b,lp.l,lp.u);
-        //feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+        feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
+        //feasible=SimplexSolver<Float>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
     catch(DegenerateFeasibilityProblemException e) {
         feasible=indeterminate;
@@ -239,10 +239,10 @@ void AffineSet::_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgra
     int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    //tribool feasible=SimplexSolver<Float>().hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    //tribool feasible=SimplexSolver<Float>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     InteriorPointSolver optimiser;
-    tribool feasible=optimiser.constrained_feasible(lp.A,lp.b,lp.l,lp.u);
-    //feasible=verify_constrained_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
+    tribool feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
+    //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     if(definitely(!feasible)) { return; }
 
     // If not disjoint, and we are at maximum depth, adjoin the set.
@@ -394,17 +394,16 @@ void AffineSet::_robust_adjoin_outer_approximation_to(GridTreeSet& paving, Linea
     int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    tribool feasible=lpsolver.hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
 
     bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
-        done=lpsolver.lpstep(lp.A,lp.b,lp.c,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x);
+        done=lpsolver.lpstep(lp.c,lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x);
     }
-    Matrix<Interval> B=lpsolver.compute_B<Interval>(lp.A,lp.p);
-    Vector<Interval> x=lpsolver.compute_x(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,B);
+    Vector<Interval> x=lpsolver.compute_x(lp.l,lp.u,lp.A,lp.b,lp.vt);
     if(x[ne+nx+nc].upper()<0.0) { return; } // No feasible solution
 
-    //feasible=verify_constrained_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
+    //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     //if(!feasible) { return; }
 
     // If not disjoint, and we are at maximum depth, adjoin the set.
@@ -532,7 +531,7 @@ AffineSet::robust_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) 
     lp.B=Matrix<Float>::identity(nx+nc);
 
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
-    tribool feasible=lpsolver.hotstarted_constrained_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
     if(!feasible) { return; } // no intersection
 
@@ -611,9 +610,9 @@ AffineSet::boundary(uint xind, uint yind) const
     Vector<Float> x(nx+nc); Vector<Float> y(nc+ne);
 
     // Find an initial feasible point
-    tribool feasible = lpsolver.hotstarted_constrained_feasible(A,b,l,u, vt, p,B, x,y);
+    tribool feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n  x="<<x<<" Ax="<< A*x <<"\n");
-    lpsolver.consistency_check(A,b,l,u,vt,p,B,x);
+    lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 
     // If problem not feasible, then set is empty; return empty list
     if(!possibly(feasible)) { return vertices; }
@@ -622,11 +621,11 @@ AffineSet::boundary(uint xind, uint yind) const
     for(uint j=0; j!=nx; ++j) { c[j]=xa[j]; }
 
     // Find a point on the boundary; choost the point minimising the spacial x-coordinate
-    x=lpsolver.optimize(A,b,c,l,u,vt,p,B);
+    x=lpsolver.hotstarted_minimise(c,l,u,A,b, vt,p,B);
     ARIADNE_LOG(3,"\nA="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n")
     ARIADNE_LOG(3,"  x="<<x<<" Ax="<<prod(A,x)<<" c="<<c<<" cx="<<dot(c,x)<<" pt="<<G*x+h<<"\n\n");
 
-    lpsolver.consistency_check(A,b,l,u,vt,p,B,x);
+    lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 
     // We always want to turn left, so we need to choose a direction d such that
     // (v0*d0+v1*d1) is positive and the ratio (v0*d1-v1*d0)/(v0*d0+v1*d1) is maximised.
@@ -707,7 +706,7 @@ AffineSet::boundary(uint xind, uint yind) const
         ARIADNE_ASSERT_MSG(s<nc+nx,"Could not find direction to move along boundary of AffineSet.");
         ARIADNE_DEBUG_ASSERT(vt[p[s]]!=BASIS);
         ARIADNE_LOG(3,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
-        lpsolver.lpstep(A,b,l,u,vt,p,B,x,s);
+        lpsolver.lpstep(l,u,A,b, vt,p,B,x,s);
         last_exiting_variable=p[s];
         pt=prod(G,x)+h;
         last_vec=best_next_vec;

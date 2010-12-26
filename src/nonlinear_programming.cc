@@ -143,19 +143,6 @@ void atda(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
     }
 }
 
-// Compute L=DA^T, where D is diagonal and S is symmetric.
-template<class X>
-Matrix<X> dat(const Matrix<X>& A, const Vector<X>& D)
-{
-    Matrix<X> S(A.column_size(),A.row_size());
-    for(uint i=0; i!=S.row_size(); ++i) {
-        for(uint j=0; j!=S.column_size(); ++j) {
-            S[i][j] = D[i]*A[j][i];
-        }
-    }
-    return S;
-}
-
 // Compute S=ADA^T, where D is diagonal.
 template<class X>
 Matrix<X> adat(const Matrix<X>& A, const Vector<X>& D)
@@ -504,7 +491,7 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
     FloatMatrix fltA=midpoint(ivlA);
     ARIADNE_LOG(7,"A="<<fltA<<"\n");
     ARIADNE_LOG(7,"D="<<fltD<<"\n");
-    FloatMatrix fltL = dat(fltA,fltD);
+    FloatMatrix fltL = FloatDiagonalMatrix(fltD)*transpose(fltA);
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
     IntervalMatrix ivlS = ivlA * fltL;

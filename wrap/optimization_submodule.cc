@@ -83,11 +83,9 @@ void export_interior_point_solver()
     to_python< Ariadne::tuple< Vector<Float>, Vector<Float>, Vector<Float> > >();
 
     class_<InteriorPointSolver> interior_point_solver_class("InteriorPointSolver",init<>());
-    interior_point_solver_class.def("optimize", &InteriorPointSolver::optimize);
-    interior_point_solver_class.def("constrained_optimize", &InteriorPointSolver::constrained_optimize);
-    interior_point_solver_class.def("primal_feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&)const) &InteriorPointSolver::primal_feasible);
-    interior_point_solver_class.def("constrained_feasible", (tribool(InteriorPointSolver::*)(const Matrix<Float>&,const Vector<Float>&, const Vector<Float>&,const Vector<Float>&)const) &InteriorPointSolver::constrained_feasible);
-    interior_point_solver_class.def("validate", &InteriorPointSolver::validate);
+    interior_point_solver_class.def("minimise", &InteriorPointSolver::minimise);
+    interior_point_solver_class.def("feasible", (tribool(InteriorPointSolver::*)(const Vector<Float>&,const Vector<Float>&, const Matrix<Float>&,const Vector<Float>&)const) &InteriorPointSolver::feasible);
+    interior_point_solver_class.def("validate_feasibility", &InteriorPointSolver::validate_feasibility);
 }
 
 
@@ -114,21 +112,15 @@ void export_simplex_solver()
     to_python< std::pair< array<size_t>, Matrix<X> > >();
 
     class_< SimplexSolver<X> > simplex_solver_class("SimplexSolver", init<>());
-    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,SizeArray&,Matrix<X>&,Vector<X>&)) &SimplexSolver<X>::lpstep);
-    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,array<Slackness>&,array<size_t>&,Matrix<X>&,Vector<X>&)) &SimplexSolver<X>::lpstep);
+    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
 
 
-    simplex_solver_class.def("primal_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&)) &SimplexSolver<X>::primal_feasible);
-    simplex_solver_class.def("dual_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&)) &SimplexSolver<X>::dual_feasible);
-    simplex_solver_class.def("constrained_feasible",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &SimplexSolver<X>::constrained_feasible);
+    simplex_solver_class.def("feasible",(tribool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&)const) &SimplexSolver<X>::feasible);
 
-    simplex_solver_class.def("verify_primal_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<Slackness>&)) &SimplexSolver<X>::verify_primal_feasibility);
-    simplex_solver_class.def("verify_dual_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const array<Slackness>&)) &SimplexSolver<X>::verify_dual_feasibility);
-    simplex_solver_class.def("verify_constrained_feasibility",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const array<Slackness>&)) &SimplexSolver<X>::verify_constrained_feasibility);
+    simplex_solver_class.def("verify_feasibility",(tribool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
 
-    simplex_solver_class.def("compute_basis",(std::pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)) &SimplexSolver<X>::compute_basis);
+    simplex_solver_class.def("compute_basis",(std::pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
 
-    simplex_solver_class.def("constrained_feasible_by_enumeration",(tribool(SimplexSolver<X>::*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &SimplexSolver<X>::constrained_feasible_by_enumeration);
 }
 
 

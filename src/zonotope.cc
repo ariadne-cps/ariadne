@@ -772,22 +772,22 @@ disjoint(const Zonotope& z, const Box& bx)
     const Matrix<Float>& zG=z.generators();
     Matrix<Float> A(d,d+ng);
     Vector<Float> b(d);
-    Vector<Float> l(d+ng);
-    Vector<Float> u(d+ng);
+    Vector<Float> xl(d+ng);
+    Vector<Float> xu(d+ng);
 
     project(A,range(0,d),range(0,d))=Matrix<Float>::identity(d);
     project(A,range(0,d),range(d,d+ng))=zG;
     b=zc;
     for(size_t j=0; j!=d; ++j) {
-        l[j]=ebx[j].lower();
-        u[j]=ebx[j].upper();
+        xl[j]=ebx[j].lower();
+        xu[j]=ebx[j].upper();
     }
     for(size_t j=0; j!=ng; ++j) {
-        l[d+j]=-1;
-        u[d+j]=+1;
+        xl[d+j]=-1;
+        xu[d+j]=+1;
     }
 
-    return ! SimplexSolver<Float>().constrained_feasible(A,b,l,u);
+    return ! SimplexSolver<Float>().feasible(xl,xu,A,b);
 }
 
 
@@ -810,13 +810,13 @@ disjoint(const Zonotope& z1, const Zonotope& z2)
 
     Matrix<Float> A(d,ng1+ng2);
     Vector<Float> b(c1-c2);
-    Vector<Float> l(ng1+ng2,-1.0);
-    Vector<Float> u(ng1+ng2,+1.0);
+    Vector<Float> xl(ng1+ng2,-1.0);
+    Vector<Float> xu(ng1+ng2,+1.0);
 
     project(A,range(0,d),range(0,ng1))=G1;
     project(A,range(0,d),range(ng1,ng1+ng2))=G2;
 
-    return ! SimplexSolver<Float>().constrained_feasible(A,b,l,u);
+    return ! SimplexSolver<Float>().feasible(xl,xu,A,b);
 }
 
 
@@ -831,10 +831,10 @@ contains(const Zonotope& z, const Point& pt)
 
     const Matrix<Float>& A=z.generators();
     Vector<Float> b=pt-z.centre();
-    Vector<Float> l(m,-1.0);
-    Vector<Float> u(m,1.0);
+    Vector<Float> xl(m,-1.0);
+    Vector<Float> xu(m,1.0);
 
-    tribool result=SimplexSolver<Float>().constrained_feasible(A,b,l,u);
+    tribool result=SimplexSolver<Float>().feasible(xl,xu,A,b);
     return result;
 }
 

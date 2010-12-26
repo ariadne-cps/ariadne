@@ -152,14 +152,15 @@ consistency_check(const array<Slackness>& vt, const array<size_t>& p)
 
 template<class X>
 size_t
-SimplexSolver<X>::consistency_check(const array<Slackness>& vt, const array<size_t>& p) {
+SimplexSolver<X>::consistency_check(const array<Slackness>& vt, const array<size_t>& p) const
+{
     return Ariadne::consistency_check(vt,p);
 }
 
 // Check that the matrix B is the inverse of the matrix A_B with columns p[0],...,p[m-1] of A.
 template<class X>
 void
-SimplexSolver<X>::consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B)
+SimplexSolver<X>::consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B) const
 {
     static const X MAXIMUM_ERROR=1e-8;
     const size_t m=A.row_size();
@@ -180,30 +181,13 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const array<size_t>& p, 
 }
 
 
-// Check that the matrix B is the inverse of the matrix A_B with columns p[0],...,p[m-1] of A and that Ax=b.
+// Check that Ax=b.
 template<class X>
 void
-SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,
-                                    const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x)
+SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,const Vector<X>& x) const
 {
     static const X MAXIMUM_ERROR=1e-8;
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-    Matrix<X> A_B(m,m);
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            A_B[i][k]=A[i][j];
-        }
-    }
-
-    Matrix<X> Z=prod(B,A_B);
-    ARIADNE_LOG(9,"        B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
-    for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
-    ARIADNE_ASSERT_MSG(norm(Z)<MAXIMUM_ERROR, "A="<<A<<"p="<<p<<"\nB*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
-
-    Vector<X> z=prod(A,b);
-    for(size_t j=0; j!=n; ++j) { z[j]-=x[j]; }
+    Vector<X> z=prod(A,b)-x;
     ARIADNE_ASSERT(norm(z)<MAXIMUM_ERROR);
 }
 
@@ -212,8 +196,8 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,
 // the vector x is given by x_L=l_L, x_U=x_U and x_B=B^{-1} A_N x_N.
 template<class X>
 void
-SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u,
-                                    const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x)
+SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                                    const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) const
 {
     ARIADNE_LOG(9,"        Checking consistency of B and x\n");
     const size_t m=A.row_size();
@@ -241,12 +225,12 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b, cons
     for(size_t k=m; k!=n; ++k) {
         size_t j=p[k];
         ARIADNE_ASSERT_MSG(vt[j]==LOWER || vt[j]==UPPER,
-                           "vt["<<j<<"]="<<vt[j]<<"\n  A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
-        X xj = (vt[j]==LOWER ? l[j] : u[j]);
-        ARIADNE_ASSERT_MSG(x[j]==xj,"x["<<j<<"]="<<x[j]<<" xj="<<xj<<"\n  A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+                           "vt["<<j<<"]="<<vt[j]<<"\n  A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+        X xj = (vt[j]==LOWER ? xl[j] : xu[j]);
+        ARIADNE_ASSERT_MSG(x[j]==xj,"x["<<j<<"]="<<x[j]<<" xj="<<xj<<"\n  A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     }
     Vector<X> Axmb = Ax-b;
-    ARIADNE_ASSERT_MSG(norm(Axmb)<1e-5,"A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+    ARIADNE_ASSERT_MSG(norm(Axmb)<1e-5,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
 }
 
 
@@ -255,13 +239,13 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b, cons
 // Compute the cost function for a feasibility step given lower and upper bounds and the values of x.
 template<class X>
 Vector<X>
-compute_c(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const Vector<X>& x, size_t m) {
+compute_c(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, const Vector<X>& x, size_t m) {
     const size_t n=x.size();
     Vector<X> c(n);
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        if(possibly(x[j]<=l[j])) { c[j]=-1; }
-        if(possibly(x[j]>=u[j])) { c[j]=+1; }
+        if(possibly(x[j]<=xl[j])) { c[j]=-1; }
+        if(possibly(x[j]>=xu[j])) { c[j]=+1; }
     }
     return c;
 }
@@ -269,7 +253,7 @@ compute_c(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const 
 // Compute the variable types from the permutation, taking m basic variables and all non-basic variables lower.
 template<class X>
 array<Slackness>
-compute_vt(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const size_t m)
+compute_vt(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, const size_t m)
 {
     const size_t n=p.size();
     array<Slackness> vt(n);
@@ -277,7 +261,7 @@ compute_vt(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const
         vt[p[k]]=BASIS;
     }
     for(size_t k=m; k!=n; ++k) {
-        if(l[p[k]]==-inf<X>()) {
+        if(xl[p[k]]==-inf<X>()) {
             vt[p[k]] = UPPER;
         } else {
             vt[p[k]] = LOWER;
@@ -307,7 +291,7 @@ compute_p(const array<Slackness>& tv)
 // Throws an error if the matrix A has full row rank
 template<class X>
 pair< array<size_t>, Matrix<X> >
-SimplexSolver<X>::compute_basis(const Matrix<X>& A)
+SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
 {
     ARIADNE_LOG(9,"compute_basis(A) with A="<<A<<"\n");
     const size_t m=A.row_size();
@@ -404,9 +388,9 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A)
 }
 
 
-template<class X> template<class XX>
+template<class XX, class X>
 Matrix<XX>
-SimplexSolver<X>::compute_B(const Matrix<X>& A, const array<size_t>& p)
+compute_B(const Matrix<X>& A, const array<size_t>& p)
 {
     const size_t m=A.row_size();
     Matrix<XX> A_B(m,m);
@@ -436,30 +420,42 @@ compute_c(const Matrix<X>& A, const array<size_t>& p, const Vector<X>& x)
 }
 
 
-template<class X> template<class XX>
-Vector<XX>
-SimplexSolver<X>::compute_x(const Matrix<X>& A, const Vector<X>& b, const array<size_t>& p, const Matrix<XX>& B)
+template<class X, class XX> Vector<X>
+compute_c(const size_t m, const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, const Vector<XX>& x)
 {
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-
-    Vector<XX> x(n);
-
+    const size_t n=x.size();
+    Vector<X> c(n);
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        x[j]=0;
-        for(size_t i=0; i!=m; ++i) {
-            x[j]+=B[k][i]*b[i];
+        if((x[j]<=xl[j])) { c[j]=-1; }
+        else if((x[j]>=xu[j])) { c[j]=+1; }
+    }
+    return c;
+}
+
+template<> Vector<Float>
+compute_c(const size_t m, const Vector<Float>& xl, const Vector<Float>& xu, const array<size_t>& p, const Vector<Interval>& x)
+{
+    const size_t n=x.size();
+    Vector<Float> c(n);
+    for(size_t k=0; k!=m; ++k) {
+        size_t j=p[k];
+        if(possibly(x[j]<=xl[j])) { c[j]=-1; }
+        else if(possibly(x[j]>=xu[j])) { c[j]=+1; }
+        if(possibly(x[j]<xl[j]) && possibly(x[j]>xu[j])) {
+            ARIADNE_FAIL_MSG("Unhandled case in checking feasibility of linear program. Basic variable x["<<j<<"]="<<x[j]<<" may violate both lower bound "<<xl[j]<<" and upper bound "<<xu[j]<<".");
         }
     }
-
-    return x;
+    return c;
 }
 
 
-template<class X> template<class XX>
+
+
+template<class X, class XX>
 Vector<XX>
-SimplexSolver<X>::compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B)
+compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+          const array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -470,11 +466,10 @@ SimplexSolver<X>::compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector
 
     // Compute x_N
     for(size_t j=0; j!=n; ++j) {
-        if(vt[j]==LOWER) { x[j]=l[j]; }
-        else if(vt[j]==UPPER) { x[j]=u[j]; }
+        if(vt[j]==LOWER) { x[j]=xl[j]; }
+        else if(vt[j]==UPPER) { x[j]=xu[j]; }
         else { x[j]=0; }
     }
-    ARIADNE_LOG(9,"  x_N="<<x);
 
     // Compute w=b-A_N x_N
     for(size_t i=0; i!=m; ++i) {
@@ -484,7 +479,6 @@ SimplexSolver<X>::compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector
             w[i]-=A[i][j]*x[j];
         }
     }
-    ARIADNE_LOG(9," w="<<w);
 
     // Compute x_B=B w
     for(size_t k=0; k!=m; ++k) {
@@ -495,18 +489,16 @@ SimplexSolver<X>::compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector
         }
     }
 
-    ARIADNE_LOG(9," x="<<x<<"\n");
-
     Vector<XX> Ax=prod(A,x);
     Vector<XX> Axmb=Ax-b;
-    ARIADNE_ASSERT_MSG(norm(Axmb)<0.00001,"A="<<A<<", b="<<b<<", l="<<l<<", u="<<u<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+    ARIADNE_ASSERT_MSG(norm(Axmb)<0.00001,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     return x;
 }
 
 
 template<class X,class XX>
 std::pair<Vector<XX>,Vector<XX> >
-compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B)
+compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -516,8 +508,8 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vec
 
     // Compute x_N
     for(size_t j=0; j!=n; ++j) {
-        if(vt[j]==LOWER) { x[j]=l[j]; }
-        else if(vt[j]==UPPER) { x[j]=u[j]; }
+        if(vt[j]==LOWER) { x[j]=xl[j]; }
+        else if(vt[j]==UPPER) { x[j]=xu[j]; }
         else { x[j]=0; }
     }
     ARIADNE_LOG(9,"  x_N="<<x);
@@ -701,7 +693,7 @@ compute_rt(const array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
 
 template<class X>
 std::pair<size_t,X>
-compute_rt(const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, const array<size_t>& p, const Vector<X>& x, const Vector<X>& d, const size_t s)
+compute_rt(const Vector<X>& xl, const Vector<X>& xu, const array<Slackness>& vt, const array<size_t>& p, const Vector<X>& x, const Vector<X>& d, const size_t s)
 {
     const X inf=Ariadne::inf<X>();
 
@@ -711,26 +703,26 @@ compute_rt(const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, c
     const size_t n=x.size();
     size_t r=n;
     X ds=(vt[p[s]]==LOWER ? +1 : -1);
-    X t=u[p[s]]-l[p[s]];
+    X t=xu[p[s]]-xl[p[s]];
     if(t<inf) { r=s; }
     X tk=0.0;
-    ARIADNE_LOG(7,"   l="<<l<<" x="<<x<<" u="<<u<<"\n");
+    ARIADNE_LOG(7,"   xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
     ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
-    ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" l[p[s]]="<<l[p[s]]<<" u[p[s]]="<<u[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
+    ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        if( d[k]*ds<-CUTOFF_THRESHOLD && x[j]>=l[j] && l[j] != -inf) {
-            tk=(l[j]-x[j])/(ds*d[k]);
+        if( d[k]*ds<-CUTOFF_THRESHOLD && x[j]>=xl[j] && xl[j] != -inf) {
+            tk=(xl[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
             if( tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
-        } else if( d[k]*ds>CUTOFF_THRESHOLD && x[j]<=u[j] && u[j] != inf ) {
-            tk=(u[j]-x[j])/(ds*d[k]);
+        } else if( d[k]*ds>CUTOFF_THRESHOLD && x[j]<=xu[j] && xu[j] != inf ) {
+            tk=(xu[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
         } else {
             tk=inf;
         }
-        ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
+        ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
     }
     t*=ds;
 
@@ -738,13 +730,13 @@ compute_rt(const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt, c
         // Problem is either highly degenerate or optimal do nothing.
         ARIADNE_WARN("SimplexSolver<X>::compute_rt(...): "<<
                      "Cannot find compute variable to exit basis\n"<<
-                     "  l="<<l<<" x="<<x<<" u="<<u<<" vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
+                     "  xl="<<xl<<" x="<<x<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     }
     return make_pair(r,t);
 }
 
 std::pair<size_t,Interval>
-compute_rt(const Vector<Float>& l, const Vector<Float>& u, const array<Slackness>& vt, const array<size_t>& p, const Vector<Interval>& x, const Vector<Interval>& d, const size_t s)
+compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const array<Slackness>& vt, const array<size_t>& p, const Vector<Interval>& x, const Vector<Interval>& d, const size_t s)
 {
     typedef Float X;
     typedef Interval XX;
@@ -756,26 +748,26 @@ compute_rt(const Vector<Float>& l, const Vector<Float>& u, const array<Slackness
     const size_t n=x.size();
     size_t r=n;
     X ds=(vt[p[s]]==LOWER ? +1 : -1);
-    XX t=XX(u[p[s]])-XX(l[p[s]]);
+    XX t=XX(xu[p[s]])-XX(xl[p[s]]);
     if(definitely(t<inf)) { r=s; }
     XX tk=0.0;
-    ARIADNE_LOG(7,"   l="<<l<<" x="<<x<<" u="<<u<<"\n");
+    ARIADNE_LOG(7,"   xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
     ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
-    ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" l[p[s]]="<<l[p[s]]<<" u[p[s]]="<<u[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
+    ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        if( definitely(d[k]*ds<0.0) && definitely(x[j]>=l[j]) && l[j] != -inf) {
-            tk=(l[j]-x[j])/(ds*d[k]);
+        if( definitely(d[k]*ds<0.0) && definitely(x[j]>=xl[j]) && xl[j] != -inf) {
+            tk=(xl[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
             if( tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
-        } else if( definitely(d[k]*ds>0.0) && definitely(x[j]<=u[j]) && u[j] != inf ) {
-            tk=(u[j]-x[j])/(ds*d[k]);
+        } else if( definitely(d[k]*ds>0.0) && definitely(x[j]<=xu[j]) && xu[j] != inf ) {
+            tk=(xu[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
         } else {
             tk=inf;
         }
-        ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
+        ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
     }
     t*=ds;
 
@@ -783,7 +775,7 @@ compute_rt(const Vector<Float>& l, const Vector<Float>& u, const array<Slackness
         // Problem is either highly degenerate or optimal do nothing.
         ARIADNE_WARN("SimplexSolver<X>::compute_rt(...): "<<
                      "Cannot find compute variable to exit basis\n"<<
-                     "  l="<<l<<" x="<<x<<" u="<<u<<" vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
+                     "  xl="<<xl<<" x="<<x<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     }
     return make_pair(r,t);
 }
@@ -823,7 +815,7 @@ update_x(const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& 
 
 template<class X>
 void
-update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const size_t r, const X& t)
+update_x(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const size_t r, const X& t)
 {
     // Update x when variable p[s] becomes basic and variable p[r] becomes non-basic
     // The variable p[s] moves by t; the variables p[i] i<m by t*d[i]
@@ -837,14 +829,14 @@ update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<
         x[p[i]]+=t*d[i];
     }
     x[p[s]] += t;
-    if(t*d[r]<0) { x[p[r]]=l[p[r]]; }
-    else if(t*d[r]>0) { x[p[r]]=u[p[r]]; }
+    if(t*d[r]<0) { x[p[r]]=xl[p[r]]; }
+    else if(t*d[r]>0) { x[p[r]]=xu[p[r]]; }
     return;
 }
 
 template<class X>
 void
-update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const X& t)
+update_x(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const X& t)
 {
     // Update basis when a variable changes between lower and upper
     // The constant t determines how much the variable p[s] moves
@@ -855,84 +847,18 @@ update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<
         x[p[i]]+=t*d[i];
     }
 
-    if(t>0) { x[p[s]]=u[p[s]]; }
-    else if(t<0) { x[p[s]]=l[p[s]]; }
+    if(t>0) { x[p[s]]=xu[p[s]]; }
+    else if(t<0) { x[p[s]]=xl[p[s]]; }
 }
 
 
 template<class X>
 void
-update_y(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<X>& y, const size_t s, const Vector<X>& d, const X& t)
+update_y(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vector<X>& y, const size_t s, const Vector<X>& d, const X& t)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-
-
-template<class X>
-bool
-SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, array<size_t>& p, Matrix<X>& B, Vector<X>& x)
-{
-    ARIADNE_LOG(6,"  lpstep(A,b,c,p,B,x)\n      A="<<A<<"\n      b="<<b<<"\n      c="<<c<<"\n      p="<<p<<"\n      B="<<B<<"\n      x="<<x<<"\n");
-
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-    Vector<X> y=compute_y(c,p,B);
-    Vector<X> z=compute_z(A,c,p,y);
-    ARIADNE_LOG(7,"      y="<<y<<"\n      z="<<z<<"\n");
-
-    // Compute variable p[s] to enter the basis
-    // If z is positive, we are done
-    size_t s=compute_s(m,p,z);
-
-    if(s==n) {
-        ARIADNE_LOG(5,"  No improvement possible.\n");
-        return true;
-    }
-    ARIADNE_LOG(9,"  s="<<s<<" p[s]="<<p[s]<<"\n");
-
-
-    // Compute the vector d in which the current basic variables move
-    // if the non-basic variable s increases by 1
-    // d is given by d=-B*As where As is the s-th column of A
-    Vector<X> d=compute_d(A,p,B,s);
-
-    // Compute distance t along d in which to move,
-    // and the variable p[r] to leave the basis
-    // If any variables are infeasible, we leave them infeasible
-    // and do not allow them to leave the basis
-    size_t r; X t;
-    make_lpair(r,t)=compute_rt(p,x,d);
-
-    ARIADNE_LOG(7,"      r="<<r<<" s="<<s<<" t="<<t<<" d="<<d<<"\n");
-
-    if(r==m) {
-        ARIADNE_LOG(5,"  Unbounded linear program.\n");
-        ARIADNE_THROW(UnboundedLinearProgram,"feasible","");
-    }
-
-
-    ARIADNE_LOG(5,"  Swapping basic variable "<<p[r]<<" in position "<<r<<" with non-basic variable "<<p[s]<<" in position "<<s<<"\n");
-
-
-    // Compute new value v of x[p[s]] and make sure that it's still feasible
-    // Update matrix of inverses
-    update_B(B,d,r);
-
-    // Update state vector x
-    update_x(p,x,s,d,r,t);
-
-    // Update pivots
-    std::swap(p[r],p[s]);
-
-    ARIADNE_LOG(7,"      p ="<<p<<"\n");
-    ARIADNE_LOG(7,"      B ="<<B<<"\n");
-    ARIADNE_LOG(7,"      x ="<<x<<"\n");
-
-    consistency_check(A,b,p,B,x);
-
-    return false;
-}
 
 
 
@@ -953,27 +879,28 @@ size_t lpenter(const Matrix<X>& A, const Vector<X>& c, const array<Slackness>& v
 
 template<class X>
 tribool
-SimplexSolver<X>::validated_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u)
+SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
     ARIADNE_LOG(4,"A="<<A<<" b="<<b<<"\n");
-    ARIADNE_LOG(4,"l="<<l<<" u="<<u<<"\n");
+    ARIADNE_LOG(4,"xl="<<xl<<" xu="<<xu<<"\n");
 
     array<size_t> p(A.column_size());
     array<Slackness> vt(A.column_size());
     Matrix<X> B(A.row_size(),A.row_size());
     make_lpair(p,B)=this->compute_basis(A);
-    vt=compute_vt(l,u,p,A.row_size());
+    vt=compute_vt(xl,xu,p,A.row_size());
 
     bool done = false;
     while(!done) {
-        done=this->validated_feasibility_step(A,b,l,u,vt,p);
+        done=this->validated_feasibility_step(xl,xu,A,b,vt,p);
     }
-    return this->verify_constrained_feasibility(A,b,l,u,vt);
+    return this->verify_feasibility(xl,xu,A,b,vt);
 }
 
 template<class X>
 bool
-SimplexSolver<X>::validated_feasibility_step(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p)
+SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                                             array<Slackness>& vt, array<size_t>& p) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -984,18 +911,18 @@ SimplexSolver<X>::validated_feasibility_step(const Matrix<X>& A, const Vector<X>
     ARIADNE_LOG(9,"vt="<<vt<<" p="<<p<<"\n");
     Matrix<XX> B=compute_B<XX>(A,p);
     ARIADNE_LOG(9," B="<<B<<"\n");
-    Vector<XX> x=compute_x(A,b,l,u,vt,p,B);
+    Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     ARIADNE_LOG(9," x="<<x<<"\n");
 
     tribool feasible=true;
 
     Vector<X> c(n);
-    Vector<X> ll(l);
-    Vector<X> uu(u);
+    Vector<X> relaxed_xl(xl);
+    Vector<X> relaxed_xu(xu);
     for(uint i=0; i!=m; ++i) {
         size_t j=p[i];
-        if(possibly(x[p[i]]<=l[p[i]])) { c[j]=-1; ll[j]=-inf; feasible=indeterminate; }
-        if(possibly(x[p[i]]>=u[p[i]])) { c[j]=+1; uu[j]=+inf; feasible=indeterminate; }
+        if(possibly(x[p[i]]<=xl[p[i]])) { c[j]=-1; relaxed_xl[j]=-inf; feasible=indeterminate; }
+        if(possibly(x[p[i]]>=xu[p[i]])) { c[j]=+1; relaxed_xu[j]=+inf; feasible=indeterminate; }
     }
     ARIADNE_LOG(9," c="<<c<<"\n");
     if(definitely(feasible)) { return true; }
@@ -1022,10 +949,10 @@ SimplexSolver<X>::validated_feasibility_step(const Matrix<X>& A, const Vector<X>
 
     // Compute distance t along d in which to move,
     // and the variable p[r] to leave the basis
-    // The bounds on t are given by l <= x + t * d <= u
+    // The bounds on t are given by xl <= x + t * d <= xu
     // Note that t is negative if an upper variable enters the basis
     size_t r; XX t;
-    make_lpair(r,t)=compute_rt(l,u,vt,p,x,d,s);
+    make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
         ARIADNE_LOG(3,"   Cannot find variable to enter basis; no improvement can be made\n");
         return true;
@@ -1049,8 +976,8 @@ SimplexSolver<X>::validated_feasibility_step(const Matrix<X>& A, const Vector<X>
             vt[p[r]] = LOWER;
         } else {
             size_t pr=p[r];
-            ARIADNE_ASSERT(x[pr]==l[pr] || x[pr]==u[pr]);
-            if(x[pr]==l[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
+            ARIADNE_ASSERT(x[pr]==xl[pr] || x[pr]==xu[pr]);
+            if(x[pr]==xl[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
         }
 
         std::swap(p[r],p[s]);
@@ -1064,7 +991,8 @@ SimplexSolver<X>::validated_feasibility_step(const Matrix<X>& A, const Vector<X>
 
 template<class X>
 size_t
-SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s)
+SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                         array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -1078,10 +1006,10 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
 
     // Compute distance t along d in which to move,
     // and the variable p[r] to leave the basis
-    // The bounds on t are given by l <= x + t * d <= u
+    // The bounds on t are given by xl <= x + t * d <= xu
     // Note that t is negative if an upper variable enters the basis
     size_t r; X t;
-    make_lpair(r,t)=compute_rt(l,u,vt,p,x,d,s);
+    make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
         ARIADNE_LOG(3,"   Cannot find variable to enter basis; no improvement can be made\n");
         return r;
@@ -1099,7 +1027,7 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
     if(r==s) {
         // Constraint is due to bounds on x_s
         // No change in basic variables or inverse basis matrix
-        update_x(l,u,p,x,s,d,t);
+        update_x(xl,xu,p,x,s,d,t);
 
         // Update variable type
         if(vt[p[s]]==LOWER) { vt[p[s]]=UPPER; }
@@ -1109,7 +1037,7 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
         ARIADNE_ASSERT(r<m);
 
         update_B(B,d,r);
-        update_x(l,u,p,x,s,d,r,t);
+        update_x(xl,xu,p,x,s,d,r,t);
 
         // Update pivots and variable types
         vt[p[s]] = BASIS;
@@ -1119,8 +1047,8 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
             vt[p[r]] = LOWER;
         } else {
             size_t pr=p[r];
-            ARIADNE_ASSERT(x[pr]==l[pr] || x[pr]==u[pr]);
-            if(x[pr]==l[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
+            ARIADNE_ASSERT(x[pr]==xl[pr] || x[pr]==xu[pr]);
+            if(x[pr]==xl[pr]) { vt[pr]=LOWER; } else { vt[pr]=UPPER; }
         }
 
         std::swap(p[r],p[s]);
@@ -1131,122 +1059,81 @@ SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>
     // Recompute B and x if it appears that there are problems with numerical degeneracy
     bool possible_degeneracy=false;
     for(uint i=0; i!=m; ++i) {
-        if(l[p[i]]>x[p[i]] || x[p[i]]>u[p[i]]) {
+        if(xl[p[i]]>x[p[i]] || x[p[i]]>xu[p[i]]) {
             possible_degeneracy=true;
             break;
         }
     }
     B=compute_B<X>(A,p);
-    x=compute_x<X>(A,b,l,u, vt,p,B);
+    x=Ariadne::compute_x<X>(xl,xu,A,b, vt,p,B);
     for(uint i=0; i!=m; ++i) {
-        if(x[p[i]]<l[p[i]]) {
-            ARIADNE_ASSERT(x[p[i]]>l[p[i]]-ERROR_TOLERANCE);
-            x[p[i]]=l[p[i]];
-        } else if(x[p[i]]>u[p[i]]) {
-            ARIADNE_ASSERT(x[p[i]]<u[p[i]]+ERROR_TOLERANCE);
-            x[p[i]]=u[p[i]];
+        if(x[p[i]]<xl[p[i]]) {
+            ARIADNE_ASSERT(x[p[i]]>xl[p[i]]-ERROR_TOLERANCE);
+            x[p[i]]=xl[p[i]];
+        } else if(x[p[i]]>xu[p[i]]) {
+            ARIADNE_ASSERT(x[p[i]]<xu[p[i]]+ERROR_TOLERANCE);
+            x[p[i]]=xu[p[i]];
         }
     }
 
     ARIADNE_LOG(7,"      vt="<<vt<<"\n      p="<<p<<"\n");
     ARIADNE_LOG(7,"      B="<<B<<"\n      x="<<x<<"\n");
 
-    consistency_check(A,b,l,u,vt,p,B,x);
+    this->consistency_check(xl,xu,A,b, vt,p,B,x);
 
     return r;
 }
 
 template<class X>
 bool
-SimplexSolver<X>::lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x)
+SimplexSolver<X>::lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                         array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x) const
 {
-    ARIADNE_LOG(9,"  lpstep(A,b,c,l,u,vt,p,V,x)\n    A="<<A<<" b="<<b<<" c="<<c<<"\n    p="<<p<<" B="<<B<<"\n    vt="<<vt<<" l="<<l<<" x="<<x<<" u="<<u<<"\n");
+    ARIADNE_LOG(9,"  lpstep(A,b,c,xl,xu,vt,p,V,x)\n    A="<<A<<" b="<<b<<" c="<<c<<"\n    p="<<p<<" B="<<B<<"\n    vt="<<vt<<" xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
 
     const size_t n=A.column_size();
     size_t s=lpenter(A,c,vt,p,B);
     if(s==n) { return true; }
-    lpstep(A,b,l,u,vt,p,B,x,s);
+    lpstep(xl,xu,A,b,vt,p,B,x,s);
     return false;
 }
 
 
 
-
-
 template<class X>
-tribool
-SimplexSolver<X>::_primal_feasible(const Matrix<X>& A, const Vector<X>& b, array<size_t>& p, Matrix<X>& B)
+Vector<X>
+SimplexSolver<X>::compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                            const array<Slackness>& vt) const
 {
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-
-    Vector<X> x=compute_x(A,b,p,B);
-    Vector<X> c(n);
-    bool infeasible=false;
-    for(size_t j=0; j!=n; ++j) {
-        if(x[j]<0) { c[j]=-1; infeasible=true; }
-        else { c[j]=0; }
-    }
-
-    ARIADNE_LOG(5,"    x="<<x<<"\n    c="<<c<<"\n");
-
-    while(infeasible) {
-        infeasible=false;
-
-        bool done=lpstep(A,b,c,p,B,x);
-        ARIADNE_LOG(5,"    p="<<p<<"\n    B="<<B<<"\n");
-
-        if(done) {
-            return false;
-        }
-
-        for(size_t j=0; j!=n; ++j) {
-            if(x[j]<0) { c[j]=-1; infeasible=true; }
-            else { c[j]=0; }
-        }
-        ARIADNE_LOG(5,"    x="<<x<<"\n    c="<<c<<"\n");
-    }
-
-    // Check solution
-    for(size_t i=0; i!=n; ++i) {
-        ARIADNE_ASSERT(x[i]>=0.0);
-    }
-    Vector<X> Ax=prod(A,x);
-    for(size_t i=0; i!=m; ++i) {
-         ARIADNE_ASSERT(Ax[i]==b[i]);
-    }
-
-    ARIADNE_LOG(9,"\nFeasible point x="<<x<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b<<"\n");
-
-    return true;
+    array<uint> p=compute_p(vt);
+    Matrix<X> B = Ariadne::compute_B<X>(A,p);
+    return Ariadne::compute_x(xl,xu,A,b, vt,p,B);
 }
 
 
 
-
-
-
 template<class X>
 tribool
-SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x)
+SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                            array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x) const
 {
-    ARIADNE_LOG(5,"\nInitial A="<<A<<" b="<<b<<"; l="<<l<<" u="<<u<<"\n  vt="<<vt<<"\n");
+    ARIADNE_LOG(5,"\nInitial A="<<A<<" b="<<b<<"; xl="<<xl<<" xu="<<xu<<"\n  vt="<<vt<<"\n");
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     static const X inf = Ariadne::inf<X>();
 
     Vector<X> cc(n);
-    Vector<X> ll(l);
-    Vector<X> uu(u);
+    Vector<X> ll(xl);
+    Vector<X> uu(xu);
 
     // It seems that using this threshold does not work...
     static const double ROBUST_FEASIBILITY_THRESHOLD = std::numeric_limits<double>::epsilon() * 0;
 
     bool infeasible=false;
     for(size_t j=0; j!=n; ++j) {
-        // If x[j] is (almost) infeasible by way of being to low, relax constraint x[j]>=l[j] to x[j]>=-inf.
-        if(x[j]<l[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
-        else if(x[j]>u[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
+        // If x[j] is (almost) infeasible by way of being to low, relax constraint x[j]>=xl[j] to x[j]>=-inf.
+        if(x[j]<xl[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
+        else if(x[j]>xu[j]) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
         else { cc[j]=0; }
     }
     ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
@@ -1255,7 +1142,7 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
     int steps=0;
     while(infeasible) {
 
-        bool done=lpstep(A,b,cc,ll,uu,vt,p,B,x);
+        bool done=lpstep(cc,ll,uu,A,b, vt,p,B,x);
         ARIADNE_LOG(9,"  Done changing basis\n");
         ARIADNE_LOG(9,"    p="<<p<<" B="<<B<<"\n");
         ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<"\n");
@@ -1271,11 +1158,11 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
 
         infeasible=false;
         for(size_t j=0; j!=n; ++j) {
-            if(vt[j]==LOWER) { ARIADNE_ASSERT(x[j]==l[j]); }
-            if(vt[j]==UPPER) { ARIADNE_ASSERT(x[j]==u[j]); }
-            if(x[j]<l[j]+ROBUST_FEASIBILITY_THRESHOLD) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
-            else if(x[j]>u[j]-ROBUST_FEASIBILITY_THRESHOLD) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
-            else { cc[j]=0; ll[j]=l[j]; uu[j]=u[j]; }
+            if(vt[j]==LOWER) { ARIADNE_ASSERT(x[j]==xl[j]); }
+            if(vt[j]==UPPER) { ARIADNE_ASSERT(x[j]==xu[j]); }
+            if(x[j]<xl[j]+ROBUST_FEASIBILITY_THRESHOLD) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
+            else if(x[j]>xu[j]-ROBUST_FEASIBILITY_THRESHOLD) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
+            else { cc[j]=0; ll[j]=xl[j]; uu[j]=xu[j]; }
         }
         ARIADNE_LOG(9,"\n    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
 
@@ -1283,7 +1170,7 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
         if(steps>=MAX_STEPS) {
             if(verbosity>0) {
                 ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
-                             <<"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
+                             <<"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
                              <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<Vector<X>(prod(compute_y(cc,p,B),A))<<"\n");
             }
             throw DegenerateFeasibilityProblemException();
@@ -1294,98 +1181,31 @@ SimplexSolver<X>::_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, 
 
     // Check solution
     for(size_t i=0; i!=n; ++i) {
-        ARIADNE_ASSERT_MSG(x[i]>=l[i]-BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" B="<<B<<" x="<<x );
-        ARIADNE_ASSERT_MSG(x[i]<=u[i]+BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" B="<<B<<" x="<<x );
+        ARIADNE_ASSERT_MSG(x[i]>=xl[i]-BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
+        ARIADNE_ASSERT_MSG(x[i]<=xu[i]+BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
     }
     Vector<X> Ax=prod(A,x);
     for(size_t i=0; i!=m; ++i) {
         ARIADNE_ASSERT(abs(Ax[i]-b[i])<0.0001);
     }
 
-    ARIADNE_LOG(5,"\nFeasible point x="<<x<<"; l="<<l<<" u="<<u<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b<<"\n");
+    ARIADNE_LOG(5,"\nFeasible point x="<<x<<"; xl="<<xl<<" xu="<<xu<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b<<"\n");
 
     return true;
 }
 
 
 
-// Check for feasibility of yA<=c. The solution is infeasible if there exists x with cx<0, Ax=0 and x>=0
+// Check for feasibility of Ax=b xl<=b<=xu
 template<class X>
 tribool
-SimplexSolver<X>::_dual_feasible(const Matrix<X>& A, const Vector<X>& c, array<size_t>& p, Matrix<X>& B)
+SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-    Vector<X> b(m);
-    Vector<X> x(n);
-    Vector<X> y(m);
-    Vector<X> z(n);
-
-    bool done;
-    do {
-        lpstep(A,b,c,p,B,x);
-        y=compute_y(c,p,B);
-        z=compute_z(A,c,p,y);
-
-        done=true;
-        for(size_t i=0; i!=n; ++i) {
-            if(z[i]<0) { done=false; }
-        }
-        if(done) { return true; }
-    } while(true);
-    return false;
-}
-
-
-// Check for feasibility of Ax=b x>=0
-template<class X>
-tribool
-SimplexSolver<X>::primal_feasible(const Matrix<X>& A, const Vector<X>& b)
-{
-    ARIADNE_LOG(2,"primal_feasible(A,b)\n");
-    ARIADNE_LOG(3,"    A="<<A<<"\n    b="<<b<<"\n");
-
+    ARIADNE_LOG(2,"feasible(xl,xu,A,b)\n");
+    ARIADNE_LOG(3,"    A="<<A<<"\n    b="<<b<<"\n    xl="<<xl<<"\n    xu="<<xu<<"\n");
     ARIADNE_ASSERT(b.size()==A.row_size());
-
-    array<size_t> p;
-    Matrix<X> B;
-    make_lpair(p,B)=compute_basis(A);
-
-    return _primal_feasible(A,b,p,B);
-}
-
-
-// Check for feasibility of yA<=c. The solution is infeasible if there exists x with cx<0, Ax=0 and x>=0.
-template<class X>
-tribool
-SimplexSolver<X>::dual_feasible(const Matrix<X>& A, const Vector<X>& c)
-{
-    ARIADNE_LOG(2,"dual_feasible(Matrix A, Vector c)\n");
-    ARIADNE_LOG(3,"  A="<<A<<" c="<<c<<"\n");
-
-    ARIADNE_ASSERT(c.size()==A.column_size());
-
-    array<size_t> p;
-    Matrix<X> B;
-    make_lpair(p,B)=compute_basis(A);
-
-    return _dual_feasible(A,c,p,B);
-}
-
-
-
-
-
-// Check for feasibility of Ax=b l<=b<=u
-template<class X>
-tribool
-SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u)
-{
-    ARIADNE_LOG(2,"constrained_feasible(A,b,l,u)\n");
-    ARIADNE_LOG(3,"    A="<<A<<"\n    b="<<b<<"\n    l="<<l<<"\n    u="<<u<<"\n");
-    ARIADNE_ASSERT(b.size()==A.row_size());
-    ARIADNE_ASSERT(l.size()==A.column_size());
-    ARIADNE_ASSERT(u.size()==A.column_size());
+    ARIADNE_ASSERT(xl.size()==A.column_size());
+    ARIADNE_ASSERT(xu.size()==A.column_size());
 
     const size_t m=A.row_size();
 
@@ -1393,30 +1213,31 @@ SimplexSolver<X>::constrained_feasible(const Matrix<X>& A, const Vector<X>& b, c
     Matrix<X> B;
     make_lpair(p,B)=compute_basis(A);
 
-    array<Slackness> vt=compute_vt(l,u,p,m);
+    array<Slackness> vt=compute_vt(xl,xu,p,m);
 
     ARIADNE_LOG(9,"    p="<<p<<" B="<<B<<"  (BA="<<Matrix<X>(prod(B,A))<<")\n");
 
-    Vector<X> x=compute_x(A,b,l,u,vt,p,B);
+    Vector<X> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     Vector<X> y(m);
 
-    return this->hotstarted_constrained_feasible(A,b,l,u,vt,p,B,x,y);
+    return this->hotstarted_feasible(xl,xu,A,b,vt,p,B,x,y);
 }
 
 
 
 template<class X>
 tribool
-SimplexSolver<X>::hotstarted_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y)
+SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                                      array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const
 {
-    ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n");
+    ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<"\n");
     ARIADNE_LOG(5,"vt="<<vt<<" p="<<p<<"\n");
 
     const size_t m=A.row_size();
     //const size_t n=A.column_size();
     if(vt.size()==0) {
         make_lpair(p,B)=compute_basis(A);
-        vt=compute_vt(l,u,p,m);
+        vt=compute_vt(xl,xu,p,m);
     }
     if(p.size()==0) {
         p=compute_p(vt);
@@ -1424,21 +1245,21 @@ SimplexSolver<X>::hotstarted_constrained_feasible(const Matrix<X>& A, const Vect
     }
     consistency_check(A,p,B);
 
-    x=compute_x(A,b,l,u,vt,p,B);
-    consistency_check(A,b,l,u,vt,p,B,x);
+    x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
+    this->consistency_check(xl,xu,A,b,vt,p,B,x);
 
-    tribool fs = _constrained_feasible(A,b,l,u,vt,p,B,x);
+    tribool fs = this->_feasible(xl,xu,A,b,vt,p,B,x);
 
     ARIADNE_LOG(7,"vt="<<vt<<" p="<<p<<" fs="<<fs<<"\n");
-    Vector<X> c=compute_c(l,u,p,x,m);
+    Vector<X> c=compute_c(xl,xu,p,x,m);
     y=compute_y(c,p,B);
     Vector<X> z=compute_z(A,c,p,y);
     ARIADNE_LOG(7,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
 
-    tribool vfs = verify_constrained_feasibility(A,b,l,u,vt);
+    tribool vfs = this->verify_feasibility(xl,xu,A,b,vt);
     if(!indeterminate(vfs) && vfs!=fs) {
         if(verbosity>0) {
-            ARIADNE_WARN("Approximate feasibility algorithm for\n  A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\nyielded basic variables "<<vt<<
+            ARIADNE_WARN("Approximate feasibility algorithm for\n  A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<"\nyielded basic variables "<<vt<<
                          " and result "<<fs<<", but validation code gave "<<vfs<<".\n");
         }
     }
@@ -1450,150 +1271,6 @@ SimplexSolver<X>::hotstarted_constrained_feasible(const Matrix<X>& A, const Vect
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
 template<> struct RigorousNumericsTraits<Float> { typedef Interval Type; };
 
-template<class X> tribool
-SimplexSolver<X>::verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const array<Slackness>& vt)
-{
-    typedef typename RigorousNumericsTraits<X>::Type XX;
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-
-    ARIADNE_ASSERT(b.size()==m);
-    ARIADNE_ASSERT(vt.size()==n);
-
-    const array<size_t> p=compute_p(vt);
-    ARIADNE_LOG(9," p="<<p<<"\n");
-
-    const Matrix<XX> B=compute_B<XX>(A,p);
-    ARIADNE_LOG(9," B="<<midpoint(B)<<"\n   B*A="<<midpoint(prod(B,A))<<"\n");
-
-    const Vector<XX> x=compute_x(A,b,p,B);
-    ARIADNE_LOG(9," x="<<midpoint(x)<<"\n");
-
-    tribool fs=true;
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(!(0<x[j])) {
-            fs=indeterminate;
-            break;
-        }
-    }
-    if(fs==true) {
-        return true;
-    }
-
-    Vector<X> c(n);
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=0)) { c[j]=-1; }
-    }
-    ARIADNE_LOG(9," c="<<midpoint(c)<<"\n");
-
-    const Vector<XX> y=compute_y(c,p,B);
-    ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
-
-    const Vector<XX> z=compute_z(A,c,p,y);
-    ARIADNE_LOG(9," z="<<midpoint(z)<<"\n");
-
-    for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        if(not(z[j]<0)) { return indeterminate; }
-    }
-
-    return false;
-}
-
-
-
-
-template<class X> tribool
-SimplexSolver<X>::verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<Slackness>& vt)
-{
-    ARIADNE_LOG(9,"verify_dual_feasibility(Matrix A, Vector c, VariableTypeArray vt):\n");
-    typedef typename RigorousNumericsTraits<X>::Type XX;
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-    ARIADNE_ASSERT(c.size()==n);
-    ARIADNE_ASSERT(vt.size()==n);
-    array<size_t> p=compute_p(vt);
-    ARIADNE_LOG(9," p="<<p<<"\n");
-    Matrix<XX> B=compute_B<XX>(A,p);
-    ARIADNE_LOG(9," B="<<midpoint(B)<<"\n");
-    Vector<XX> y=compute_y(c,p,B);
-    ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
-
-    // Compute z=c-yA
-    Vector<XX> z=compute_z(A,c,p,y);
-    ARIADNE_LOG(9," z="<<midpoint(z)<<"\n");
-
-    // Check feasibility of y
-    tribool fs=true;
-    for(size_t k=m; k!=n; ++k) {
-        if(possibly(z[k]<=0)) { fs=false; break; }
-    }
-    if(fs==true) { return fs; }
-
-    // Compute x_N
-    Vector<XX> x(n);
-    for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        if(definitely(z[j]<0)) { x[j]=+1; }
-    }
-    // Compute w=-A_Nx_N
-    Vector<XX> w(m);
-    for(size_t k=m; k!=n; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            w[i]-=A[i][j]*x[j];
-        }
-    }
-    ARIADNE_LOG(9," w="<<midpoint(w)<<"\n");
-
-    // Compute x_B=A_B^{-1}*w
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        for(size_t i=0; i!=m; ++i) {
-            x[j]-=B[j][i]*w[i];
-        }
-    }
-
-    ARIADNE_LOG(9," x="<<x<<"\n");
-    ARIADNE_LOG(9," cx="<<dot(Vector<XX>(c),x)<<"\n");
-
-    if(possibly(dot(Vector<XX>(c),x)>=0)) { return indeterminate; }
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=0)) { return indeterminate; }
-    }
-    return false;
-}
-
-template<class X, class XX> Vector<X> compute_c(const size_t m, const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, const Vector<XX>& x) {
-    const size_t n=x.size();
-    Vector<X> c(n);
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if((x[j]<=l[j])) { c[j]=-1; }
-        else if((x[j]>=u[j])) { c[j]=+1; }
-    }
-    return c;
-}
-
-template<> Vector<Float> compute_c(const size_t m, const Vector<Float>& l, const Vector<Float>& u, const array<size_t>& p, const Vector<Interval>& x) {
-    const size_t n=x.size();
-    Vector<Float> c(n);
-    for(size_t k=0; k!=m; ++k) {
-        size_t j=p[k];
-        if(possibly(x[j]<=l[j])) { c[j]=-1; }
-        else if(possibly(x[j]>=u[j])) { c[j]=+1; }
-        if(possibly(x[j]<l[j]) && possibly(x[j]>u[j])) {
-            ARIADNE_FAIL_MSG("Unhandled case in checking feasibility of linear program. Basic variable x["<<j<<"]="<<x[j]<<" may violate both lower bound "<<l[j]<<" and upper bound "<<u[j]<<".");
-        }
-    }
-    return c;
-}
-
-
-
 // A point x is strictly feasible for the basis B with lower variables L and upper variables U if
 //   x_B = A_B^{-1} (b - A_L x_L - A_U x_U) is definitely within (x_B), the open interval (x_BL,x_BU).
 // To prove infeasibility, choose a vector c (typically c_L=c_U=0, (c_B)_i = +1 if x_i>u_i and -1 if x_i<u_i)
@@ -1601,29 +1278,29 @@ template<> Vector<Float> compute_c(const size_t m, const Vector<Float>& l, const
 //  y (b - A_L x_L - A_U x_U) > 0
 //  z = c - y A  satisfies z_U < 0 and z_L > 0; by construction z_B = 0.
 template<class X> tribool
-SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<Slackness>& vt)
+SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const array<Slackness>& vt) const
 {
-    ARIADNE_LOG(4,"verify_constrained_feasibility(Matrix A, Vector b, Vector l, Vector u, VariableTypeArray vt)\n");
-    ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<"\n");
+    ARIADNE_LOG(4,"verify_feasibility(Vector xl, Vector xu, Matrix A, Vector b, VariableTypeArray vt)\n");
+    ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<"\n");
     const array<size_t> p=compute_p(vt);
 
     typedef Interval XX;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     ARIADNE_ASSERT(b.size()==m);
-    ARIADNE_ASSERT(l.size()==n);
-    ARIADNE_ASSERT(u.size()==n);
+    ARIADNE_ASSERT(xl.size()==n);
+    ARIADNE_ASSERT(xu.size()==n);
     ARIADNE_ASSERT(vt.size()==n);
 
     // Ensure singleton constraints for x are non-basic
     for(size_t j=0; j!=n; ++j) {
-        if(l[j]==u[j]) { ARIADNE_ASSERT(!vt[j]==BASIS);}
+        if(xl[j]==xu[j]) { ARIADNE_ASSERT(!vt[j]==BASIS);}
     }
 
     {
         const Matrix<X> B=compute_B<X>(A,p);
-        const Vector<X> x=compute_x(A,b,l,u,vt,p,B);
-        const Vector<X> c=compute_c(m,l,u,p,x);
+        const Vector<X> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
+        const Vector<X> c=compute_c(m,xl,xu,p,x);
         const Vector<X> y=compute_y(c,p,B);
         const Vector<X> z=compute_z(A,c,p,y);
         ARIADNE_LOG(7,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
@@ -1633,11 +1310,11 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
     const Matrix<XX> B=compute_B<XX>(A,p);
     ARIADNE_LOG(9," B="<<B<<"; B*A="<<midpoint(prod(B,A))<<"\n");
 
-    const Vector<XX> x=compute_x(A,b,l,u,vt,p,B);
+    const Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     ARIADNE_LOG(9," x="<<x<<"; A*x="<<Vector<XX>(prod(A,x))<<"\n");
 
 
-    const Vector<X> c=compute_c(m,l,u,p,x);
+    const Vector<X> c=compute_c(m,xl,xu,p,x);
     ARIADNE_LOG(9," c="<<c<<"\n");
 
     const Vector<XX> y=compute_y(c,p,B);
@@ -1651,10 +1328,10 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
     tribool fs=true;
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
-        if(possibly(x[j]<=l[j]) || possibly(x[j]>=u[j])) {
-            ARIADNE_LOG(9," k="<<k<<" j="<<j<<" l[j]="<<l[j]<<" x[j]="<<x[j]<<" u[j]="<<u[j]<<"\n");
+        if(possibly(x[j]<=xl[j]) || possibly(x[j]>=xu[j])) {
+            ARIADNE_LOG(9," k="<<k<<" j="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<"\n");
             fs=indeterminate;
-            if(definitely(x[j]<l[j]) || definitely(x[j]>u[j])) {
+            if(definitely(x[j]<xl[j]) || definitely(x[j]>xu[j])) {
                 fs=false;
                 break;
             }
@@ -1694,14 +1371,14 @@ SimplexSolver<X>::verify_constrained_feasibility(const Matrix<X>& A, const Vecto
 
 template<class X>
 Vector<X>
-SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u)
+SimplexSolver<X>::minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     ARIADNE_ASSERT(b.size()==m);
     ARIADNE_ASSERT(c.size()==n);
-    ARIADNE_ASSERT(l.size()==n);
-    ARIADNE_ASSERT(u.size()==n);
+    ARIADNE_ASSERT(xl.size()==n);
+    ARIADNE_ASSERT(xu.size()==n);
 
     array<Slackness> vt(n);
     array<size_t> p(n);
@@ -1712,33 +1389,35 @@ SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<
     for(size_t k=0; k!=m; ++k) { vt[p[k]]=BASIS; }
     for(size_t k=m; k!=n; ++k) { vt[p[k]]=LOWER; }
 
-    return optimize(A,b,c,l,u,vt,p,B);
+    return hotstarted_minimise(c,xl,xu,A,b,vt,p,B);
 
 }
 
 template<class X>
 Vector<X>
-SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt)
+SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                                      array<Slackness>& vt) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     ARIADNE_ASSERT(b.size()==m);
     ARIADNE_ASSERT(c.size()==n);
-    ARIADNE_ASSERT(l.size()==n);
-    ARIADNE_ASSERT(u.size()==n);
+    ARIADNE_ASSERT(xl.size()==n);
+    ARIADNE_ASSERT(xu.size()==n);
     ARIADNE_ASSERT(vt.size()==n);
     ARIADNE_ASSERT(static_cast<size_t>(std::count(vt.begin(),vt.end(),BASIS))==m);
 
     array<size_t> p=compute_p(vt);
     Matrix<X> B=compute_B<X>(A,p);
 
-    return optimize(A,b,c,l,u,vt,p,B);
+    return hotstarted_minimise(c,xl,xu,A,b,vt,p,B);
 
 }
 
 template<class X>
 Vector<X>
-SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<Slackness>& vt, array<size_t>& p, Matrix<X>& B)
+SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                                      array<Slackness>& vt, array<size_t>& p, Matrix<X>& B) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -1747,8 +1426,8 @@ SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<
 
     ARIADNE_ASSERT(b.size()==m);
     ARIADNE_ASSERT(c.size()==n);
-    ARIADNE_ASSERT(l.size()==n);
-    ARIADNE_ASSERT(u.size()==n);
+    ARIADNE_ASSERT(xl.size()==n);
+    ARIADNE_ASSERT(xu.size()==n);
     ARIADNE_ASSERT(vt.size()==n);
     ARIADNE_ASSERT(p.size()==n);
     ARIADNE_ASSERT(B.row_size()==m);
@@ -1758,97 +1437,27 @@ SimplexSolver<X>::optimize(const Matrix<X>& A, const Vector<X>& b, const Vector<
     this->consistency_check(A,p,B);
 
     Vector<X> x(n);
-    x=compute_x(A,b,l,u,vt,p,B);
-    ARIADNE_LOG(3,"Initial A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<"\n");
+    x=Ariadne::compute_x(xl,xu,A,b, vt,p,B);
+    ARIADNE_LOG(3,"Initial A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<"\n");
 
-    _constrained_feasible(A,b,l,u,vt,p,B,x);
-    ARIADNE_LOG(3,"Feasible A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<"\n");
+    this->_feasible(xl,xu,A,b, vt,p,B,x);
+    ARIADNE_LOG(3,"Feasible A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<"\n");
 
     bool done=false;
     const int MAX_STEPS=1024;
     int steps=0;
     while(not done) {
-        done=lpstep(A,b,c,l,u,vt,p,B,x);
+        done=lpstep(c,xl,xu,A,b, vt,p,B,x);
         ++steps;
         ARIADNE_ASSERT_MSG(steps<MAX_STEPS,"Maximum number of steps reached for linear programming problem.");
     }
-    ARIADNE_LOG(3,"Optimal A="<<A<<" b="<<b<<" c="<<c<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" cx="<<dot(x,x)<<"\n");
+    ARIADNE_LOG(3,"Optimal A="<<A<<" b="<<b<<" c="<<c<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" cx="<<dot(x,x)<<"\n");
 
     return x;
 }
 
 
 
-
-
-template<class X>
-tribool
-SimplexSolver<X>::constrained_feasible_by_enumeration(const Matrix<X>& A, const Vector<X>& b,
-                                                      const Vector<X>& l, const Vector<X>& u)
-{
-    bool fs=false;
-    size_t m=A.row_size();
-    size_t n=A.column_size();
-    array<size_t> pb(m);
-    for(size_t i=0; i!=m; ++i) { pb[i]=i; }
-    do {
-        array<size_t> p=extend_p(pb,n);
-        ARIADNE_LOG(9,"pb="<<pb<<" p="<<p<<"\n");
-        Matrix<X> B=compute_B<X>(A,p);
-        array<Slackness> vt(n);
-        for(size_t k=0; k!=m; ++k) { vt[p[k]]=BASIS; }
-        for(size_t k=m; k!=n; ++k) { vt[p[k]]=LOWER; }
-        for(size_t cnt=0; cnt!=1u<<(n-m); ++cnt) {
-            for(size_t k=m; k!=n; ++k) {
-                if(vt[p[k]]==LOWER) { vt[p[k]]=UPPER; break; }
-                else { vt[p[k]]=LOWER; }
-            }
-            ARIADNE_LOG(9," vt="<<vt);
-            // Compute position x
-            Vector<X> x(n);
-            for(size_t k=m; k!=n; ++k) {
-                x[p[k]]=(vt[p[k]]==LOWER ? l[p[k]] : u[p[k]]);
-            }
-            Vector<X> w(m);
-            for(size_t k=m; k!=n; ++k) {
-                for(size_t i=0; i!=m; ++i) {
-                    w[i]+=A[i][p[k]]*x[p[k]];
-                }
-            }
-            for(size_t k=0; k!=m; ++k) {
-                for(size_t i=0; i!=m; ++i) {
-                    x[p[k]]+=B[k][i]*w[i];
-                }
-            }
-            ARIADNE_LOG(9," x="<<x);
-            bool fsb=true;
-            for(size_t i=0; i!=n; ++i) {
-                if(l[i]>x[i] || x[i]>u[i]) {
-                    fsb=false;
-                    break;
-                }
-            }
-            fs = fs|fsb;
-            ARIADNE_LOG(9," fsb="<<std::boolalpha<<fsb<<"\n");
-        }
-
-        // Increment basis elements
-        if(pb[m-1]+1<n) {
-            ++pb[m-1];
-        } else {
-            for(size_t i=1; i!=m; ++i) {
-                if(pb[m-i-1]+1<pb[m-i]) {
-                    ++pb[m-i-1];
-                    for(size_t j=m-i; j!=m; ++j) {
-                        pb[m-j]=pb[m-j-1]+1;
-                    }
-                }
-            }
-        }
-    } while(pb[0]!=(n-m));
-    ARIADNE_LOG(9,"fs="<<std::boolalpha<<fs<<"\n");
-    return fs;
-}
 
 
 

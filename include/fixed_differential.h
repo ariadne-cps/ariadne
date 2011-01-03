@@ -1,0 +1,988 @@
+/***************************************************************************
+ *            first_differential.h
+ *
+ *  Copyright 2011  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+/*! \file first_differential.h
+ *  \brief First-order multivariate differentials.
+ */
+
+#ifndef ARIADNE_FIRST_DIFFERENTIAL_H
+#define ARIADNE_FIRST_DIFFERENTIAL_H
+
+#include <map>
+
+#include "macros.h"
+#include "array.h"
+#include "vector.h"
+#include "matrix.h"
+#include "series.h"
+#include "expansion.h"
+#include <boost/concept_check.hpp>
+
+namespace Ariadne {
+
+class Float;
+class Interval;
+
+template<class X> class Vector;
+template<class X> class Matrix;
+template<class X> class Series;
+
+template<class X, class T> struct enable_if_scalar { typedef T Type; };
+template<class X, class T> struct enable_if_scalar<Vector<X>,T> { };
+template<class X, class T> struct enable_if_scalar<Matrix<X>,T> { };
+template<class X, class T> struct enable_if_vector { };
+template<class X, class T> struct enable_if_vector<Vector<X>,T> { typedef T Type; };
+template<class X, class T> struct enable_if_matrix { };
+template<class X, class T> struct enable_if_matrix<Matrix<X>,T> { typedef T Type; };
+
+template<class X> class SecondDifferential;
+
+template<class V1, class V2>
+struct SymmetricOuterProduct
+    : public boost::numeric::ublas::matrix_expression< SymmetricOuterProduct<V1,V2> >
+{
+    typedef typename V1::value_type value_type;
+    const V1& _v1; const V2& _v2;
+    SymmetricOuterProduct<V1,V2>(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
+    value_type operator() (uint i, uint j) { return _v1[i]*_v2[j]+_v1[j]*_v2[i]; }
+};
+template<class V1, class V2> inline
+SymmetricOuterProduct<V1,V2>
+symmetric_outer_product(const V1& v1, const V2& v2) {
+    return SymmetricOuterProduct<V1,V2>(v1,v2);
+}
+
+template<class V1, class V2>
+struct OuterProduct
+    : public boost::numeric::ublas::matrix_expression< OuterProduct<V1,V2> >
+{
+    typedef typename V1::value_type value_type;
+    const V1& _v1; const V2& _v2;
+    OuterProduct<V1,V2>(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
+    value_type operator() (uint i, uint j) { return _v1[i]*_v2[j]; }
+};
+template<class V1, class V2> inline
+OuterProduct<V1,V2>
+outer_product(const V1& v1, const V2& v2) {
+    return OuterProduct<V1,V2>(v1,v2);
+}
+
+template<class X>
+Matrix<X> outer(const Vector<X>& v1, const Vector<X>& v2) {
+    Matrix<X> r(v1.size(),v2.size());
+    for(uint i1=0; i1!=v1.size(); ++i1) {
+        for(uint i2=0; i2!=v2.size(); ++i2) {
+            r[i1][i2]=v1[i1]*v2[i2];
+        }
+    }
+}
+
+template<class X>
+Matrix<X> outer(const Vector<X>& v) {
+    Matrix<X> r(v.size(),v.size());
+    for(uint i1=0; i1!=v.size(); ++i1) {
+        for(uint i2=0; i2!=v.size(); ++i2) {
+            r[i1][i2]=v[i1]*v[i2];
+        }
+    }
+}
+
+//! \ingroup CalculusModule
+//! \brief A class representing the partial derivatives of a scalar quantity
+//! depending on multiple arguments.
+//!
+//! Based on a power series Expansion, centred on the point at which the partial derivatives are
+//! being evaluated.
+//!
+//! \invariant The expansion is sorted using graded_sort(). In particular, the
+//! total degree of the terms is increasing, and the linear terms appear in coordinate order.
+template<class X>
+class FirstDifferential
+{
+  public:
+    X _value;
+    Vector<X> _gradient;
+    static const X _zero;
+  public:
+    //! \brief The type of used to represent numbers in the coefficient.
+    typedef typename X::NumericType NumericType;
+    //! \brief The type of used to represent the coefficients.
+    typedef X ValueType;
+
+    //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
+    explicit FirstDifferential(uint as) : _value(_zero), _gradient(as,_zero) { }
+
+    //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
+    explicit FirstDifferential(const X& v, const Vector<X>& g) : _value(v), _gradient(g) { }
+
+    //! \brief Conversion constructor from a different numerical type.
+    template<class XX> FirstDifferential(const FirstDifferential<XX>& x)
+        : _value(x._value), _gradient(x._gradient) { }
+
+    //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
+    FirstDifferential<X>& operator=(const X& c) { _value=c; for(uint i=0; i!=_gradient.size(); ++i) { _gradient[i]=_zero; } return *this; }
+
+    //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
+    static FirstDifferential<X> constant(uint as, const X& c) {
+        FirstDifferential<X> r(as); r._value=c; return r; }
+    //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
+    static FirstDifferential<X> variable(uint as, const X& v, uint j) {
+        FirstDifferential<X> r(as); r._value=v; r._gradient[j]=1; return r; }
+    //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$.
+    static Vector< FirstDifferential<X> > variables(const Vector<X>& x) {
+        Vector< FirstDifferential<X> > result(x.size(),FirstDifferential<X>(x.size()));
+        for(uint j=0; j!=x.size(); ++j) { result[j]._value=x[j]; result[j]._gradient[j]=1; }
+        return result; }
+
+    //! \brief Equality operator.
+    bool operator==(const FirstDifferential<X>& other) const {
+        return this->_value==other._value && this->_gradient==other._gradient; }
+
+    //! \brief Inequality operator.
+    bool operator!=(const FirstDifferential<X>& other) const {
+        return !(*this==other); }
+
+    //! \brief The number of independent variables.
+    uint argument_size() const { return this->_gradient.size(); }
+    //! \brief The maximum degree of the stored terms.
+    uint degree() const { return 1u; }
+    //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
+    const X& value() const { return this->_value; }
+    //! \brief The vector of coefficients of \f$x_j\f$.
+    const Vector<X>& gradient() const { return this->_gradient; }
+
+
+    //! \brief A reference to the coefficient of \f$x_j\f$.
+    X& operator[](const uint& j) { return this->_gradient[j]; }
+    //! \brief The coefficient of \f$x_j\f$.
+    const X& operator[](const uint& j) const { return this->_gradient[j]; }
+    //! \brief The coefficient of \f$x^a\f$ i.e. \f$\prod x_j^{a_j}\f$.
+    const X& operator[](const MultiIndex& a) const {
+        ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
+        if(a.degree()==0) { return this->_value; }
+        else if(a.degree()==1) { for(uint j=0; j!=this->argument_size(); ++j) { if(a[j]==1) { return this->_gradient[j]; } } }
+        else { return _zero; } }
+
+    //! \brief Set the coefficient of the constant term to \a c.
+    void set_value(const X& c) { this->_value=c; }
+
+    //! \brief Set all coefficients to zero.
+    void clear() { *this=_zero; }
+
+};
+
+template<class X>
+const X FirstDifferential<X>::_zero=X(0);
+
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+operator+=(FirstDifferential<X>& x, const R& c)
+{
+    x._value+=static_cast<X>(c);
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+operator-=(FirstDifferential<X>& x, const R& c)
+{
+    x._value+=static_cast<X>(c);
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+operator*=(FirstDifferential<X>& x, const R& c)
+{
+    x._value*=static_cast<X>(c);
+    x._gradient*=static_cast<X>(c);
+}
+
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+operator/=(FirstDifferential<X>& x, const R& c)
+{
+    x._value/=static_cast<X>(c);
+    x._gradient/=static_cast<X>(c);
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator+(const FirstDifferential<X>& x, const R& c)
+{
+    FirstDifferential<X> r(x); r+=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator+(const R& c, const FirstDifferential<X>& x)
+{
+    FirstDifferential<X> r(x); r+=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator-(const FirstDifferential<X>& x, const R& c)
+{
+    FirstDifferential<X> r(x); r-=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator-(const R& c, const FirstDifferential<X>& x)
+{
+    FirstDifferential<X> r(-x); r+=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator*(const FirstDifferential<X>& x, const R& c)
+{
+    FirstDifferential<X> r(x); r*=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator*(const R& c, const FirstDifferential<X>& x)
+{
+    FirstDifferential<X> r(x); r*=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator/(const FirstDifferential<X>& x, const R& c)
+{
+    FirstDifferential<X> r(x); r/=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,FirstDifferential<X> >::Type
+operator/(const R& c, const FirstDifferential<X>& x)
+{
+    FirstDifferential<X> r(rec(x)); r*=X(c); return r;
+}
+
+
+template<class X>
+FirstDifferential<X>& operator+=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    x._value += y._value;
+    x._gradient += y._gradient;
+    return x;
+}
+
+template<class X>
+FirstDifferential<X>& operator-=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    x._value -= y._value;
+    x._gradient -= y._gradient;
+    return x;
+}
+
+template<class X>
+FirstDifferential<X>& operator*=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    x._gradient *= y._value;
+    x._gradient += x._value * y._gradient;
+    x._value *= y._value;
+    return x;
+}
+
+
+template<class X>
+FirstDifferential<X> operator+(const FirstDifferential<X>& x)
+{
+    return FirstDifferential<X>(+x._value,+x._gradient);
+}
+
+template<class X>
+FirstDifferential<X> operator-(const FirstDifferential<X>& x)
+{
+    return FirstDifferential<X>(-x._value,-x._gradient);
+}
+
+
+template<class X>
+FirstDifferential<X> operator+(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    return FirstDifferential<X>(x._value+y._value,x._gradient+y._gradient);
+}
+
+template<class X>
+FirstDifferential<X> operator-(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    return FirstDifferential<X>(x._value-y._value,x._gradient-y._gradient);
+}
+
+template<class X>
+FirstDifferential<X> operator*(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    return FirstDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient);
+}
+
+template<class X>
+FirstDifferential<X> operator/(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    return FirstDifferential<X>(x._value/y._value,((x._value/y._value)*y._gradient+x._gradient)/y._value);
+}
+
+
+
+
+
+
+
+
+
+template<class X>
+FirstDifferential<X>
+min(const FirstDifferential<X>& x1, const FirstDifferential<X>& x2)
+{
+    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
+    if(x1.value()==x2.value()) {
+        ARIADNE_THROW(std::runtime_error,"min(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]");
+    }
+    return x1.value()<x2.value() ? x1 : x2;
+}
+
+
+template<class X>
+FirstDifferential<X>
+max(const FirstDifferential<X>& x1,const FirstDifferential<X>& x2)
+{
+    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
+    if(x1.value()==x2.value()) {
+        ARIADNE_THROW(std::runtime_error,"max(FirstDifferential<X> x1, FirstDifferential<X> x2)","x1[0]==x2[0]");
+    }
+    return x1.value()>x2.value() ? x1 : x2;
+}
+
+template<class X>
+FirstDifferential<X>
+abs(const FirstDifferential<X>& x)
+{
+    if(x.value()==0) {
+        ARIADNE_THROW(std::runtime_error,"abs(FirstDifferential<X> x)","x[0]==0");
+    }
+    return x.value()>0 ? pos(x) : neg(x);
+}
+
+
+template<class X>
+FirstDifferential<X>
+pos(const FirstDifferential<X>& x)
+{
+    return x;
+}
+
+template<class X>
+FirstDifferential<X>
+neg(const FirstDifferential<X>& x)
+{
+    return -x;
+}
+
+template<class X>
+FirstDifferential<X> rec(const FirstDifferential<X>& x)
+{
+    return FirstDifferential<X>( rec(x._value), x._gradient * (neg(sqr(rec(x._value)))) );
+}
+
+template<class X>
+FirstDifferential<X> sqr(const FirstDifferential<X>& x)
+{
+    return FirstDifferential<X>( sqr(x._value), (2*x._value)*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> pow(const FirstDifferential<X>& x, int n)
+{
+    return FirstDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> sqrt(const FirstDifferential<X>& x)
+{
+    X sqrt_val = sqrt(x._value);
+    return FirstDifferential<X>( sqrt_val, rec(2*sqrt_val)*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> exp(const FirstDifferential<X>& x)
+{
+    X exp_val = exp(x._value);
+    return FirstDifferential<X>( exp_val, exp_val*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> log(const FirstDifferential<X>& x)
+{
+    X log_val = log(x._value);
+    X rec_val = rec(x._value);
+    return FirstDifferential<X>( log_val, rec_val*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> sin(const FirstDifferential<X>& x)
+{
+    X sin_val = sin(x._value);
+    X cos_val = cos(x._value);
+    return FirstDifferential<X>( sin_val, cos_val*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> cos(const FirstDifferential<X>& x)
+{
+    X cos_val = cos(x._value);
+    X neg_sin_val = neg(sin(x._value));
+    return FirstDifferential<X>( cos_val, neg_sin_val*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> tan(const FirstDifferential<X>& x)
+{
+    X tan_val = tan(x._value);
+    X sqr_sec_val = sqr(rec(cos(x._value)));
+    return FirstDifferential<X>( tan_val, sqr_sec_val*x._gradient );
+}
+
+
+
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const FirstDifferential<X>& x)
+{
+    os << "D("<<x.argument_size()<<","<<x.degree()<<"){";
+    os << x._value;
+    for(uint j=0; j!=x.argument_size(); ++j) {
+        os << "," << j << ":" << x[j];
+    }
+    return os << " }";
+}
+
+
+
+
+
+
+/*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
+template<class X>
+class Vector< FirstDifferential<X> >
+    : public ublas::vector< FirstDifferential<X> >
+{
+    //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
+  public:
+    // The type of the class
+    typedef Vector< FirstDifferential<X> > SelfType;
+    // The type used for accessing elements
+    typedef uint IndexType;
+    // The value stored in the vector.
+    typedef FirstDifferential<X> ValueType;
+    // The type used for scalars.
+    typedef X ScalarType;
+
+    Vector(uint rs, uint as) : ublas::vector< FirstDifferential<X> >(rs, FirstDifferential<X>(as)) { }
+    Vector(uint rs, const FirstDifferential<X>& d) : ublas::vector< FirstDifferential<X> >(rs,d) {
+        for(uint i=0; i!=rs; ++i) { (*this)[i]=d; } }
+    Vector(uint rs, const FirstDifferential<X>* p) : ublas::vector< FirstDifferential<X> >(rs,FirstDifferential<X>(p[0].argument_size())) {
+        for(uint i=0; i!=rs; ++i) { (*this)[i]=p[i]; } }
+    template<class E> Vector(const ublas::vector_expression<E>& ve)
+        : ublas::vector< FirstDifferential<X> >(ve) { }
+    template<class E> Vector< FirstDifferential<X> >& operator=(const ublas::vector_expression<E>& ve) {
+        ublas::vector< FirstDifferential<X> >::operator=(ve); return *this; }
+
+
+    uint result_size() const { return this->size(); }
+    uint argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
+    uint degree() const { return 1u; }
+
+    Vector<X> value() const {
+        Vector<X> r(this->result_size());
+        for(uint i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
+    Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size());
+        for(uint i=0; i!=r.row_size(); ++i) { for(uint j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i][j]; } } return r; }
+
+};
+
+
+
+
+
+//! \ingroup CalculusModule
+//! \brief A class representing the partial derivatives of a scalar quantity
+//! depending on multiple arguments.
+//!
+//! Based on a power series Expansion, centred on the point at which the partial derivatives are
+//! being evaluated.
+//!
+//! \invariant The expansion is sorted using graded_sort(). In particular, the
+//! total degree of the terms is increasing, and the linear terms appear in coordinate order.
+template<class X>
+class SecondDifferential
+{
+  public:
+    X _value;
+    Vector<X> _gradient;
+    Matrix<X> _hessian;
+    static const X _zero;
+  public:
+    //! \brief The type of used to represent numbers in the coefficient.
+    typedef typename X::NumericType NumericType;
+    //! \brief The type of used to represent the coefficients.
+    typedef X ValueType;
+
+    //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
+    explicit SecondDifferential(uint as) : _value(_zero), _gradient(as), _hessian(as,as) { }
+
+    //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
+    explicit SecondDifferential(const X& v, const Vector<X>& g, const Matrix<X>& h) : _value(v), _gradient(g), _hessian(h) {
+        ARIADNE_ASSERT_MSG(h.row_size()==g.size() && h.column_size()==g.size(), "SecondDifferential(v,g,h): v="<<v<<", g="<<g<<", h="<<h<<"\n"); }
+
+    //! \brief Conversion constructor from a different numerical type.
+    template<class XX> SecondDifferential(const SecondDifferential<XX>& x)
+        : _value(x._value), _gradient(x._gradient), _hessian(x._hessian) { }
+
+    //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
+    SecondDifferential<X>& operator=(const X& c) {
+        _value=c; for(uint j=0; j!=this->argument_size(); ++j) { _gradient[j]=_zero;
+            for(uint k=0; k!=this->argument_size(); ++k) { _hessian[j][k]=_zero; } } return *this; }
+
+    //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
+    static SecondDifferential<X> constant(uint as, const X& c) {
+        SecondDifferential<X> r(as); r._value=c; return r; }
+    //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
+    static SecondDifferential<X> variable(uint as, const X& v, uint j) {
+        SecondDifferential<X> r(as); r._value=v; r._gradient[j]=1; return r; }
+    //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$.
+    static Vector< SecondDifferential<X> > variables(const Vector<X>& x) {
+        Vector< SecondDifferential<X> > result(x.size(),SecondDifferential<X>(x.size()));
+        for(uint j=0; j!=x.size(); ++j) { result[j]._value=x[j]; result[j]._gradient[j]=1; }
+        return result; }
+
+    //! \brief Equality operator.
+    bool operator==(const SecondDifferential<X>& other) const {
+        return this->_value==other._value && this->_gradient==other._gradient  && this->_hessian==other._hessian; }
+
+    //! \brief Inequality operator.
+    bool operator!=(const SecondDifferential<X>& other) const {
+        return !(*this==other); }
+
+    //! \brief The number of independent variables.
+    uint argument_size() const { return this->_gradient.size(); }
+    //! \brief The maximum degree of the stored terms.
+    uint degree() const { return 2u; }
+    //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
+    const X& value() const { return this->_value; }
+    //! \brief The vector of coefficients of \f$x_j\f$.
+    const Vector<X>& gradient() const { return this->_gradient; }
+    //! \brief The Hessian matrix.
+    //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
+    //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.
+    Matrix<X> hessian() const { return this->_hessian; }
+
+
+    //! \brief A reference to the coefficient of \f$x_j\f$.
+    X& operator[](const uint& j) { return this->_gradient[j]; }
+    //! \brief The coefficient of \f$x_j\f$.
+    const X& operator[](const uint& j) const { return this->_gradient[j]; }
+    //! \brief The coefficient of \f$x^a\f$ i.e. \f$\prod x_j^{a_j}\f$.
+    const X& operator[](const MultiIndex& a) const {
+        ARIADNE_NOT_IMPLEMENTED; }
+    //! \brief Set the coefficient of the constant term to \a c.
+    void set_value(const X& c) { this->_value=c; }
+
+    //! \brief Set all coefficients to zero.
+    void clear() { *this=_zero; }
+
+};
+
+template<class X>
+const X SecondDifferential<X>::_zero=X(0);
+
+
+
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+operator+=(SecondDifferential<X>& x, const R& c)
+{
+    x._value+=static_cast<X>(c);
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+operator-=(SecondDifferential<X>& x, const R& c)
+{
+    x._value+=static_cast<X>(c);
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+operator*=(SecondDifferential<X>& x, const R& c)
+{
+    x._value*=static_cast<X>(c);
+    x._gradient*=static_cast<X>(c);
+    x._hessian*=static_cast<X>(c);
+}
+
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+operator/=(SecondDifferential<X>& x, const R& c)
+{
+    x._value/=static_cast<X>(c);
+    x._gradient/=static_cast<X>(c);
+    x._hessian/=static_cast<X>(c);
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator+(const SecondDifferential<X>& x, const R& c)
+{
+    SecondDifferential<X> r(x); r+=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator+(const R& c, const SecondDifferential<X>& x)
+{
+    SecondDifferential<X> r(x); r+=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator-(const SecondDifferential<X>& x, const R& c)
+{
+    SecondDifferential<X> r(x); r-=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator-(const R& c, const SecondDifferential<X>& x)
+{
+    SecondDifferential<X> r(-x); r+=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator*(const SecondDifferential<X>& x, const R& c)
+{
+    SecondDifferential<X> r(x); r*=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator*(const R& c, const SecondDifferential<X>& x)
+{
+    SecondDifferential<X> r(x); r*=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator/(const SecondDifferential<X>& x, const R& c)
+{
+    SecondDifferential<X> r(x); r/=X(c); return r;
+}
+
+template<class X, class R>
+typename enable_if_scalar<R,SecondDifferential<X> >::Type
+operator/(const R& c, const SecondDifferential<X>& x)
+{
+    SecondDifferential<X> r(rec(x)); r*=X(c); return r;
+}
+
+
+
+template<class X>
+SecondDifferential<X>& operator+=(SecondDifferential<X>& x, const SecondDifferential<X>& y)
+{
+    x._value += y._value;
+    x._gradient += y._gradient;
+    x._hessian += y._hessian;
+    return x;
+}
+
+template<class X>
+SecondDifferential<X>& operator-=(SecondDifferential<X>& x, const SecondDifferential<X>& y)
+{
+    x._value -= y._value;
+    x._gradient -= y._gradient;
+    x._hessian -= y._hessian;
+    return x;
+}
+
+template<class X>
+SecondDifferential<X>& operator*=(SecondDifferential<X>& x, const SecondDifferential<X>& y)
+{
+    x._hessian *= y._value;
+    x._hessian += x._value * y._hessian;
+    for(uint j=0; j!=x.argument_size(); ++j) { for(uint k=0; k!=x.argument_size(); ++k) {
+            x._hessian[j][k]+=(x._gradient[j]*y._gradient[k]+x._gradient[k]*y._gradient[j])/2;
+    } }
+    x._gradient *= y._value;
+    x._gradient += x._value * y._gradient;
+    x._value *= y._value;
+    return x;
+}
+
+
+template<class X>
+SecondDifferential<X> operator+(const SecondDifferential<X>& x)
+{
+    return SecondDifferential<X>(+x._value,+x._gradient,+x._hessian);
+}
+
+template<class X>
+SecondDifferential<X> operator-(const SecondDifferential<X>& x)
+{
+    return SecondDifferential<X>(-x._value,-x._gradient,-x._hessian);
+}
+
+
+template<class X>
+SecondDifferential<X> operator+(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
+{
+    return SecondDifferential<X>(x._value+y._value,x._gradient+y._gradient,x._hessian+y._hessian);
+}
+
+template<class X>
+SecondDifferential<X> operator-(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
+{
+    return SecondDifferential<X>(x._value-y._value,x._gradient-y._gradient,x._hessian-y._hessian);
+}
+
+template<class X>
+SecondDifferential<X> operator*(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
+{
+    Matrix<X> hessian(x.argument_size(),y.argument_size());
+    for(uint j=0; j!=x.argument_size(); ++j) { for(uint k=0; k!=x.argument_size(); ++k) {
+        hessian[j][k]=(x._gradient[j]*y._gradient[k]+x._gradient[k]*y._gradient[j])/2;
+    } }
+    hessian+=x._value*y._hessian;
+    hessian+=y._value*x._hessian;
+    return SecondDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient,hessian);
+}
+
+template<class X>
+SecondDifferential<X> operator/(const SecondDifferential<X>& x, const SecondDifferential<X>& y)
+{
+    return x*rec(y);
+}
+
+
+
+
+
+
+
+template<class X>
+SecondDifferential<X>
+min(const SecondDifferential<X>& x1, const SecondDifferential<X>& x2)
+{
+    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
+    if(x1.value()==x2.value()) {
+        ARIADNE_THROW(std::runtime_error,"min(SecondDifferential<X> x1, SecondDifferential<X> x2)","x1[0]==x2[0]");
+    }
+    return x1.value()<x2.value() ? x1 : x2;
+}
+
+
+template<class X>
+SecondDifferential<X>
+max(const SecondDifferential<X>& x1,const SecondDifferential<X>& x2)
+{
+    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
+    if(x1.value()==x2.value()) {
+        ARIADNE_THROW(std::runtime_error,"max(SecondDifferential<X> x1, SecondDifferential<X> x2)","x1[0]==x2[0]");
+    }
+    return x1.value()>x2.value() ? x1 : x2;
+}
+
+template<class X>
+SecondDifferential<X>
+abs(const SecondDifferential<X>& x)
+{
+    if(x.value()==0) {
+        ARIADNE_THROW(std::runtime_error,"abs(SecondDifferential<X> x)","x[0]==0");
+    }
+    return x.value()>0 ? pos(x) : neg(x);
+}
+
+template<class X>
+SecondDifferential<X>
+pos(const SecondDifferential<X>& x)
+{
+    return x;
+}
+
+template<class X>
+SecondDifferential<X>
+neg(const SecondDifferential<X>& x)
+{
+    return -x;
+}
+
+template<class X>
+SecondDifferential<X> rec(const SecondDifferential<X>& x)
+{
+    //return SecondDifferential<X>( rec(x._value), x._gradient * (neg(sqr(rec(x._value)))) );
+}
+
+template<class X>
+SecondDifferential<X> sqr(const SecondDifferential<X>& x)
+{
+    return SecondDifferential<X>( sqr(x._value), (2*x._value)*x._gradient, (2*x._value)*x._hessian + outer(x._gradient) );
+}
+
+template<class X>
+SecondDifferential<X> pow(const SecondDifferential<X>& x, int n)
+{
+    return SecondDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient, n*(n-1)*pow(x._value,n-2)*x._hessian );
+}
+
+//ddf(y)/dxdx = d/dx ( f'(y) dy/dx) = f''(y) dy/dx dy/dx + f'(y) ddy/dxdx
+
+template<class X>
+SecondDifferential<X> sqrt(const SecondDifferential<X>& x)
+{
+    X sqrt_val = sqrt(x._value);
+    X rec_dbl_sqrt_val = rec(2*sqrt_val);
+    X neg_rec_quad_pow_val = neg(rec(4*sqrt_val*x._value));
+    return SecondDifferential<X>( sqrt_val, rec_dbl_sqrt_val*x._gradient, rec_dbl_sqrt_val*x._hessian + neg_rec_quad_pow_val * outer(x._gradient) );
+}
+
+template<class X>
+SecondDifferential<X> exp(const SecondDifferential<X>& x)
+{
+    X exp_val = exp(x._value);
+    return SecondDifferential<X>( exp_val, exp_val*x._gradient, exp_val*x._hessian+exp_val*outer(x._gradient) );
+}
+
+template<class X>
+SecondDifferential<X> log(const SecondDifferential<X>& x)
+{
+    X log_val = log(x._value);
+    X rec_val = rec(x._value);
+    X neg_sqr_rec_val = neg(sqr(rec_val));
+    return SecondDifferential<X>( log_val, rec_val*x._gradient, rec_val*x._hessian+neg_sqr_rec_val*outer(x._gradient) );
+}
+
+template<class X>
+SecondDifferential<X> sin(const SecondDifferential<X>& x)
+{
+    X sin_val = sin(x._value);
+    X cos_val = cos(x._value);
+    X neg_sin_val = neg(sin_val);
+    return SecondDifferential<X>( sin_val, cos_val*x._gradient, cos_val*x._hessian+neg_sin_val*outer(x._gradient) );
+}
+
+template<class X>
+SecondDifferential<X> cos(const SecondDifferential<X>& x)
+{
+    X cos_val = cos(x._value);
+    X neg_sin_val = neg(sin(x._value));
+    X neg_cos_val = neg(cos_val);
+    return SecondDifferential<X>( cos_val, neg_sin_val*x._gradient, neg_sin_val*x._hessian+neg_cos_val*outer(x._gradient) );
+}
+
+template<class X>
+SecondDifferential<X> tan(const SecondDifferential<X>& x)
+{
+    X tan_val = tan(x._value);
+    X sqr_sec_val = sqr(rec(cos(x._value)));
+    X dbl_tan_sqr_sec_val = 2*tan_val*sqr_sec_val;
+    return SecondDifferential<X>( tan_val, sqr_sec_val*x._gradient, sqr_sec_val*x._hessian+dbl_tan_sqr_sec_val*outer(x._gradient) );
+}
+
+
+
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const SecondDifferential<X>& x)
+{
+    Expansion<X> e=x.expansion();
+    //e.graded_sort();
+    os << "D("<<x.argument_size()<<","<<x.degree()<<"){";
+    os << x._value;
+    for(uint j=0; j!=x.argument_size(); ++j) {
+        os << "," << j << ":" << x[j];
+    }
+    for(uint j=0; j!=x.argument_size(); ++j) {
+        for(uint k=0; k!=x.argument_size(); ++k) {
+            os << "," << j << "," << k << ":" << x._hessian[j][k];
+        }
+    }
+    return os << " }";
+}
+
+
+
+
+
+
+/*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
+template<class X>
+class Vector< SecondDifferential<X> >
+    : public ublas::vector< SecondDifferential<X> >
+{
+    //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
+  public:
+    // The type of the class
+    typedef Vector< SecondDifferential<X> > SelfType;
+    // The type used for accessing elements
+    typedef uint IndexType;
+    // The value stored in the vector.
+    typedef SecondDifferential<X> ValueType;
+    // The type used for scalars.
+    typedef X ScalarType;
+
+    Vector(uint rs, uint as) : ublas::vector< SecondDifferential<X> >(rs, SecondDifferential<X>(as)) { }
+    Vector(uint rs, const SecondDifferential<X>& d) : ublas::vector< SecondDifferential<X> >(rs) {
+        for(uint i=0; i!=rs; ++i) { (*this)[i]=d; } }
+    Vector(uint rs, const SecondDifferential<X>* p) : ublas::vector< SecondDifferential<X> >(rs) {
+        for(uint i=0; i!=rs; ++i) { (*this)[i]=p[i]; } }
+    template<class E> Vector(const ublas::vector_expression<E>& ve)
+        : ublas::vector< SecondDifferential<X> >(ve) { }
+    template<class E> Vector< SecondDifferential<X> >& operator=(const ublas::vector_expression<E>& ve) {
+        ublas::vector< SecondDifferential<X> >::operator=(ve); return *this; }
+
+
+    uint result_size() const { return this->size(); }
+    uint argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
+    uint degree() const { return 1u; }
+
+    Vector<X> value() const {
+        Vector<X> r(this->result_size());
+        for(uint i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
+    Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size());
+        for(uint i=0; i!=r.row_size(); ++i) { for(uint j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
+
+};
+
+
+
+
+
+} //namespace Ariadne
+
+#endif // ARIADNE_DIFFERENTIAL_H

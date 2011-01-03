@@ -22,9 +22,7 @@
  */
 
 #include "differential.h"
-#include "fixed_differential.h"
 
 namespace Ariadne {
-template class FirstDifferential<Float>;
 
 }

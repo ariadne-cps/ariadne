@@ -42,7 +42,7 @@ namespace Ariadne {
 using std::pair;
 
 
-template<class T> class array;
+template<class T> class Array;
 
 class Interval;
 class VectorFunction;
@@ -241,7 +241,7 @@ class CalculusBase
     //! \brief A box containing the set \a s.
     virtual BoxType bounding_box(const SetModelType& s) const = 0;
     //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces.
-    virtual array<SetModelType> subdivide(const SetModelType& s) const = 0;
+    virtual Array<SetModelType> subdivide(const SetModelType& s) const = 0;
     //! \brief An over-approximation to the set \a s with a simplified description.
     virtual SetModelType simplify(const SetModelType& s) const = 0;
     //@}

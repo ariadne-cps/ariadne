@@ -511,11 +511,11 @@ class ProjectionFunction
     //! \brief Construct the projection functions \f$f_i(x)=x_{i+k}\f$ for \f$i=0,\ldots,m-1\f$. Precondition: \f$m+k\leq n\f$.
     ProjectionFunction(uint m, uint n, uint k);
     //! \brief Construct the projection function  with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,m-1\f$.
-    ProjectionFunction(uint m, uint n, const array<uint>& p);
+    ProjectionFunction(uint m, uint n, const Array<uint>& p);
     //! \brief Construct the projection function with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,|p|-1\f$.
-    ProjectionFunction(const array<uint>& p, uint n);
+    ProjectionFunction(const Array<uint>& p, uint n);
 
-    const array<uint>& p() const;
+    const Array<uint>& p() const;
     const uint p(uint i) const;
   protected:
     virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;

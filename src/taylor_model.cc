@@ -1823,8 +1823,8 @@ Interval _range2(const IntervalTaylorModel& tm) {
 // The range of ax^2+bx+c is a([-1,1]+b/2a)^2+(c-b^2/4a)
 Interval _range3(const IntervalTaylorModel& tm) {
     const uint as=tm.argument_size();
-    array<Float> linear_terms(as,0.0);
-    array<Float> quadratic_terms(as,0.0);
+    Array<Float> linear_terms(as,0.0);
+    Array<Float> quadratic_terms(as,0.0);
     Interval r(-tm.error(),+tm.error());
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
@@ -2354,7 +2354,7 @@ IntervalTaylorModel preaffine(const IntervalTaylorModel& tm, uint k, const Inter
     r.set_error(tm.error());
 
     // Create a temporary TaylorModels containing just terms x[k]^i
-    array<IntervalTaylorModel> atm(d+1,IntervalTaylorModel(as));
+    Array<IntervalTaylorModel> atm(d+1,IntervalTaylorModel(as));
     for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex a=iter->key();
         const Float& c=iter->data();
@@ -2376,15 +2376,15 @@ IntervalTaylorModel preaffine(const IntervalTaylorModel& tm, uint k, const Inter
 }
 
 
-IntervalTaylorModel discard(const IntervalTaylorModel& tm, array<uint>& discarded_variables) {
+IntervalTaylorModel discard(const IntervalTaylorModel& tm, Array<uint>& discarded_variables) {
     return recondition(tm,discarded_variables,0u,0u);
 }
 
-IntervalTaylorModel recondition(const IntervalTaylorModel& tm, array<uint>& discarded_variables, uint number_of_error_variables) {
+IntervalTaylorModel recondition(const IntervalTaylorModel& tm, Array<uint>& discarded_variables, uint number_of_error_variables) {
     return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
 }
 
-IntervalTaylorModel recondition(const IntervalTaylorModel& tm, array<uint>& discarded_variables, uint number_of_error_variables, uint index_of_error)
+IntervalTaylorModel recondition(const IntervalTaylorModel& tm, Array<uint>& discarded_variables, uint number_of_error_variables, uint index_of_error)
 {
     for(uint i=0; i!=discarded_variables.size()-1; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
@@ -2395,8 +2395,8 @@ IntervalTaylorModel recondition(const IntervalTaylorModel& tm, array<uint>& disc
     const uint number_of_discarded_variables = discarded_variables.size();
     const uint number_of_kept_variables = tm.argument_size() - discarded_variables.size();
 
-    // Make an array of the variables to be kept
-    array<uint> kept_variables(number_of_kept_variables);
+    // Make an Array of the variables to be kept
+    Array<uint> kept_variables(number_of_kept_variables);
     uint kd=0; uint kk=0;
     for(uint j=0; j!=tm.argument_size(); ++j) {
         if(kd==number_of_discarded_variables || j!=discarded_variables[kd]) {
@@ -2473,7 +2473,7 @@ IntervalTaylorModel& IntervalTaylorModel::restrict(const Vector<Interval>& nd)
     const uint d=x.expansion().degree();
     if(d==0) { return x; }
 
-    array< array<Interval> > sf(as,array<Interval>(d+1u));
+    Array< Array<Interval> > sf(as,Array<Interval>(d+1u));
     for(uint j=0; j!=as; ++j) {
         sf[j][0]=1.0;
         sf[j][1]=rad_ivl(nd[j]);
@@ -2725,7 +2725,7 @@ partial_evaluate(const IntervalTaylorModel& x, uint k, Interval c)
         r.set_error(x.error());
     } else if(c==1) {
         IntervalTaylorModel s(x.argument_size()-1,x.accuracy_ptr());
-        array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
+        Array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
 
         for(IntervalTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
@@ -2746,7 +2746,7 @@ partial_evaluate(const IntervalTaylorModel& x, uint k, Interval c)
         }
     } else {
         IntervalTaylorModel s(x.argument_size()-1,x.accuracy_ptr());
-        array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
+        Array<IntervalTaylorModel> p(x.degree()+1,IntervalTaylorModel(x.argument_size()-1,x.accuracy_ptr()));
 
         Powers<Interval> cpowers(c);
 
@@ -2839,7 +2839,7 @@ _split1(const IntervalTaylorModel& tm, uint k, tribool b)
     // Replace x[k] with x[k]+tr
 
     // Split variables by degree in x[k]
-    array<IntervalTaylorModel> ary(deg+1,IntervalTaylorModel(as));
+    Array<IntervalTaylorModel> ary(deg+1,IntervalTaylorModel(as));
     for(IntervalTaylorModel::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->key();
         const Float& c=iter->data();
@@ -2988,7 +2988,7 @@ IntervalTaylorModel embed(uint as, const IntervalTaylorModel& x)
 std::ostream&
 operator<<(std::ostream& os, const IntervalTaylorModel& tm) {
     // Set the variable names to be 'parameter' s0,s1,..
-    array<std::string> variable_names(tm.argument_size());
+    Array<std::string> variable_names(tm.argument_size());
     for(uint j=0; j!=tm.argument_size(); ++j) {
         std::stringstream sstr;
         sstr << 's' << j;
@@ -3545,7 +3545,7 @@ _compose2(const Vector<IntervalTaylorModel>& x,
     uint as=ys[0].argument_size();
     shared_ptr<IntervalTaylorModel::Accuracy> accuracy_ptr=ys[0].accuracy_ptr();
 
-    array<uchar> max_power(ys.size());
+    Array<uchar> max_power(ys.size());
     for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
 
     for(uint i=0; i!=x.size(); ++i) {
@@ -3557,7 +3557,7 @@ _compose2(const Vector<IntervalTaylorModel>& x,
         }
     }
 
-    array< array< IntervalTaylorModel > > powers(yrs);
+    Array< Array< IntervalTaylorModel > > powers(yrs);
     for(uint j=0; j!=yrs; ++j) {
         powers[j].resize(max_power[j]+1);
         powers[j][0]=ys[j]*0;

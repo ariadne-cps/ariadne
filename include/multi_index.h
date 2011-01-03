@@ -54,11 +54,11 @@ template<> class Reference<const MultiIndex>;
 
 //struct MultiIndexData { unsigned int _n; unsigned int* _p; };
 
-//! \brief An array of non-negative integers, suitable for storing the
+//! \brief An Array of non-negative integers, suitable for storing the
 //! powers of a term in some polynomial expansion, ordered by degree.
 //!
 //! \par Python interface
-//! In the Python interface, multi-indices can be constructed and automatically converted from Python tuple literals \c (a1,...,am)
+//! In the Python interface, multi-indices can be constructed and automatically converted from Python Tuple literals \c (a1,...,am)
 //!
 //! \b Rationale: The reason why tuples are used for multi-index literals is that they can be used as keys in Python \c dict objects.
 class MultiIndex {
@@ -79,9 +79,9 @@ class MultiIndex {
     explicit MultiIndex();
     //! \brief Construct a multi index of degree \a 0 with \a nv variables.
     explicit MultiIndex(size_type nv);
-    //! \brief Construct a multi index with \a nv variables from the array \a ary.
+    //! \brief Construct a multi index with \a nv variables from the Array \a ary.
     explicit MultiIndex(size_type nv, const int* ary);
-    //! \brief Construct a multi index with \a nv variables from the array \a ary.
+    //! \brief Construct a multi index with \a nv variables from the Array \a ary.
     explicit MultiIndex(size_type nv, const unsigned char* ary);
     //! \brief Construct a multi index with \a nv variables from variable arguments.
     explicit MultiIndex(size_type nv, int a1, ...);
@@ -147,7 +147,7 @@ class MultiIndex {
     //! \brief Scalar product.
     friend MultiIndex operator*(index_type s, const MultiIndex& a); // inline
 
-    //! \brief The position of the element in the array of tensor values.
+    //! \brief The position of the element in the Array of tensor values.
     unsigned int position() const;
 
     //! \brief The product of the factorials of the indices.
@@ -598,8 +598,8 @@ class MultiIndexBound {
     size_type size() const { return _groups.size(); }
     friend bool operator<=(const MultiIndex& a, const MultiIndexBound& b);
   private:
-    array<size_type> _groups;
-    array<size_type> _max_degrees;
+    Array<size_type> _groups;
+    Array<size_type> _max_degrees;
 };
 
 inline MultiIndexBound::MultiIndexBound(size_type as, size_type d)
@@ -644,7 +644,7 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1
 
 inline bool operator<=(const MultiIndex& a, const MultiIndexBound& b) {
     typedef MultiIndex::size_type size_type;
-    array<size_type> degrees(b._max_degrees.size());
+    Array<size_type> degrees(b._max_degrees.size());
     for(size_type j=0; j!=a.size(); ++j) {
         degrees[b._groups[j]]+=a[j];
     }

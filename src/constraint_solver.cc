@@ -428,7 +428,7 @@ void compute_monotonicity(Box& domain, const NonlinearConstraint& constraint) {
     static const uint n = domain.size();
 
     // Compute monotone formulae
-    boost::array<Sign,0> monotonicity(n);
+    boost::Array<Sign,0> monotonicity(n);
     Vector<Interval> grad=constraint.function().gradient(domain);
     for(uint j=0; j!=n; ++j) {
         monotonicity[j]=sign(grad[j]);

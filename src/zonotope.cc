@@ -409,7 +409,7 @@ split(const Zonotope& z)
     Matrix<Float> const& G=z.generators();
     Vector<Float> const& e=z.error();
 
-    array<Float> norms(m,0);
+    Array<Float> norms(m,0);
     for(uint j=0; j!=m; ++j) {
         norms[j]=norm(Vector<Float>(column(G,j)));
     }
@@ -563,7 +563,7 @@ cascade_over_approximation(const Zonotope& z, uint cs)
 
 
     const Matrix<Float>& G=z.generators();
-    array<Float> norms(nb);
+    Array<Float> norms(nb);
     for(uint i=0; i!=nb; ++i) {
         norms[i]=Ariadne::norm(Matrix<Float>(project(G,range(0,d),range(i*d,(i+1)*d))));
     }
@@ -604,7 +604,7 @@ orthogonal_over_approximation(const Zonotope& z)
 
     Matrix<Float> R(m,n);
 
-    array<Float> column_norm_squares(n);
+    Array<Float> column_norm_squares(n);
 
     for(uint j=0; j!=n; ++j) { }
 

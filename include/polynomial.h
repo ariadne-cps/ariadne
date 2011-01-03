@@ -94,7 +94,7 @@ class Polynomial
     //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
     static Polynomial<X> variable(unsigned int as, unsigned int j) {
         ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
-    //! \brief Create an array of polynomials in \a as variables,
+    //! \brief Create an Array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
     static Vector< Polynomial<X> > variables(unsigned int as) {
         Vector< Polynomial<X> > r(as); for(unsigned int i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
@@ -435,7 +435,7 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
         }
     } else if(c==1) {
         Polynomial<X> s(x.argument_size()-1);
-        array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+        Array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
 
         for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
@@ -453,9 +453,9 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
         }
     } else {
         Polynomial<X> s(x.argument_size()-1);
-        array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+        Array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
 
-        array<X> cpowers(x.degree()+1);
+        Array<X> cpowers(x.degree()+1);
         cpowers[0]=static_cast<X>(1); cpowers[1]=c;
         if(x.degree()>=2) { cpowers[2]=sqr(c); }
         for(uint j=3; j<=x.degree(); ++j) {

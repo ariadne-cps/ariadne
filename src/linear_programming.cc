@@ -217,7 +217,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 }
 
 
-tuple< Float, Vector<Float>, Vector<Float> >
+Tuple< Float, Vector<Float>, Vector<Float> >
 InteriorPointSolver::minimise(const Vector<Float>& c,
                               const Vector<Float>& xl, const Vector<Float>& xu,
                               const Matrix<Float>& A, const Vector<Float>& b) const
@@ -257,7 +257,7 @@ InteriorPointSolver::minimise(const Vector<Float>& c,
 
 
 
-tuple< Float, Vector<Float>, Vector<Float> >
+Tuple< Float, Vector<Float>, Vector<Float> >
 InteriorPointSolver::
 hotstarted_minimise(const Vector<Float>& c,
                     const Vector<Float>& xl, const Vector<Float>& xu,

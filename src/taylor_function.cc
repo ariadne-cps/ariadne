@@ -1769,7 +1769,7 @@ operator<<(Output::latexstream& texs, const VectorTaylorFunction& p)
     using namespace Function;
     texs << "%VectorTaylorFunction\n";
     texs << "\\ensuremath{\n";
-    texs << "\\left( \\begin{array}{c}\n";
+    texs << "\\left( \\begin{Array}{c}\n";
     char var='x';
     for(uint i=0; i!=p.result_size(); ++i) {
         bool first = true;
@@ -1795,7 +1795,7 @@ operator<<(Output::latexstream& texs, const VectorTaylorFunction& p)
         }
         texs << "\n";
     }
-    texs << "\\end{array}\\right)\n}\n";
+    texs << "\\end{Array}\\right)\n}\n";
     return texs;
 }
 */

@@ -36,7 +36,7 @@
 namespace Ariadne {
 
 template<class T>
-class array {
+class Array {
   private:
     static T* uninitialized_new(size_t n) { return static_cast<T*>(::operator new(n*sizeof(T))); }
     static void uninitialized_delete(T* p) { ::operator delete(p); }
@@ -52,96 +52,96 @@ class array {
     typedef ptrdiff_t difference_type;
 
     /*! \brief Destructor */
-    ~array() { this->_destroy_elements(); uninitialized_delete(_ptr); }
+    ~Array() { this->_destroy_elements(); uninitialized_delete(_ptr); }
 
-    /*! \brief Default constructor. Constructs an empty array. */
-    array() : _size(0), _ptr(0) { }
-    /*! \brief Constructs an array of size \a n with uninitialised elements. */
-    explicit array(const size_type n) : _size(n), _ptr(uninitialized_new(n)) { for(size_type i=0; i!=n; ++i) { new (_ptr+i) T(); } }
-    /*! \brief Constructs an array of size \a n with elements initialised to \a x. */
-    array(const size_type n, const value_type& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }
-    /*! \brief Constructs an array of size \a n with elements initialised by the variable argument list x0,x1,... . */
-    array(const size_type n, const value_type& x0, const value_type& x1, ...)
+    /*! \brief Default constructor. Constructs an empty Array. */
+    Array() : _size(0), _ptr(0) { }
+    /*! \brief Constructs an Array of size \a n with uninitialised elements. */
+    explicit Array(const size_type n) : _size(n), _ptr(uninitialized_new(n)) { for(size_type i=0; i!=n; ++i) { new (_ptr+i) T(); } }
+    /*! \brief Constructs an Array of size \a n with elements initialised to \a x. */
+    Array(const size_type n, const value_type& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }
+    /*! \brief Constructs an Array of size \a n with elements initialised by the variable argument list x0,x1,... . */
+    Array(const size_type n, const value_type& x0, const value_type& x1, ...)
         : _size(n), _ptr(uninitialized_new(n))
     {
-        if(n<2) { throw std::out_of_range("array: size is less than number of arguments"); }
+        if(n<2) { throw std::out_of_range("Array: size is less than number of arguments"); }
         va_list args; va_start(args,x1); new (_ptr) T(x0); new (_ptr+1u) T(x1);
         for(size_t i=2; i!=n; ++i) { new (_ptr+i) T(va_arg(args,T)); } va_end(args); }
-    /*! \brief Constructs an array from the range \a first to \a last. */
-    template<class ForwardIterator> array(ForwardIterator first, ForwardIterator last)
+    /*! \brief Constructs an Array from the range \a first to \a last. */
+    template<class ForwardIterator> Array(ForwardIterator first, ForwardIterator last)
         : _size(std::distance(first,last)), _ptr(uninitialized_new(_size))
     {
         this->_uninitialized_fill(first);
     }
     /*! \brief Conversion constructor. */
-    template<class T1> array(const array<T1>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
+    template<class T1> Array(const Array<T1>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin()); }
     /*! \brief Copy constructor. */
-    array(const array<T>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
+    Array(const Array<T>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin()); }
     /*! \brief Copy assignment. */
-    array<T>& operator=(const array<T>& a) {
+    Array<T>& operator=(const Array<T>& a) {
         if(this->size()==a.size()) { fill(a.begin()); }
         else { this->_destroy_elements(); uninitialized_delete(_ptr); _size=a.size(); _ptr=uninitialized_new(_size); this->_uninitialized_fill(a.begin()); }
         return *this; }
 
-    /*! \brief True if the array's size is 0. */
+    /*! \brief True if the Array's size is 0. */
     bool empty() const { return _size==0u; }
-    /*! \brief The size of the array. */
+    /*! \brief The size of the Array. */
     size_type size() const { return _size; }
-    /*! \brief The maximum possible size of the array. */
+    /*! \brief The maximum possible size of the Array. */
     size_type max_size() const { return (size_type) (-1); }
-    /*! \brief Resizes the array to hold \a n elements. If \a n is larger than the current size, the extra elements are default initialised. */
+    /*! \brief Resizes the Array to hold \a n elements. If \a n is larger than the current size, the extra elements are default initialised. */
     void resize(size_type n) {
         if(size()!=n) {
             pointer _new_ptr=uninitialized_new(n);
             for(size_type i=0; i!=n; ++i) { if(i<_size) { new (_new_ptr+i) T(_ptr[i]); } else { new (_new_ptr+i) T(); } }
             this->_destroy_elements(); uninitialized_delete(_ptr); _size=n; _ptr=_new_ptr; } }
-    /*! \brief Reallocates the array to hold \a n elements. The new elements are default-constructed. */
+    /*! \brief Reallocates the Array to hold \a n elements. The new elements are default-constructed. */
     void reallocate(size_type n) { if(size()!=n) { this->_destroy_elements(); uninitialized_delete(_ptr);
         _size=n; _ptr=uninitialized_new(_size); for(size_type i=0; i!=_size; ++i) { new (_ptr+i) T(); } } }
     /*! \brief Efficiently swap two arrays.  */
-    void swap(array<T>& a) { std::swap(_size,a._size); std::swap(_ptr,a._ptr); }
+    void swap(Array<T>& a) { std::swap(_size,a._size); std::swap(_ptr,a._ptr); }
 
     /*! \brief The \a n th element. */
     reference operator[](size_type i) { return _ptr[i]; }
     /*! \brief The \a n th element. */
     const_reference operator[](size_type i) const { return _ptr[i]; }
     /*! \brief Checked access to the \a n th element. */
-    reference at(size_type i) { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array: index out-of-range"); } }
+    reference at(size_type i) { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("Array: index out-of-range"); } }
     /*! \brief Checked access to the \a n th element. */
-    const_reference at(size_type i) const { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array: index out-of-range"); } }
+    const_reference at(size_type i) const { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("Array: index out-of-range"); } }
 
-    /*! \brief A reference to the first element of the array. */
+    /*! \brief A reference to the first element of the Array. */
     reference front() { return _ptr[0]; }
-    /*! \brief A constant reference to the first element of the array. */
+    /*! \brief A constant reference to the first element of the Array. */
     const_reference front() const { return _ptr[0]; }
-    /*! \brief A reference to the last element of the array. */
+    /*! \brief A reference to the last element of the Array. */
     reference back() { return _ptr[_size-1]; }
-    /*! \brief A constantreference  to the last element of the array. */
+    /*! \brief A constantreference  to the last element of the Array. */
     const_reference back() const { return _ptr[_size-1]; }
 
-    /*! \brief An iterator pointing to the beginning of the array. */
+    /*! \brief An iterator pointing to the beginning of the Array. */
     iterator begin() { return _ptr; }
-    /*! \brief A constant iterator pointing to the beginning of the array. */
+    /*! \brief A constant iterator pointing to the beginning of the Array. */
     const_iterator begin() const { return _ptr; }
-    /*! \brief An iterator pointing to the end of the array. */
+    /*! \brief An iterator pointing to the end of the Array. */
     iterator end() { return _ptr+_size; }
-    /*! \brief A constant iterator pointing to the end of the array. */
+    /*! \brief A constant iterator pointing to the end of the Array. */
     const_iterator end() const { return _ptr+_size; }
 
     /*! \brief Tests two arrays for equality */
-    bool operator==(const array& other) const {
+    bool operator==(const Array& other) const {
         if(size()!=other.size()) return false;
         const_iterator first=begin(); const_iterator last=end(); const_iterator curr=other.begin();
         while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; } return true; }
     /*! \brief Tests two arrays for inequality */
-    bool operator!=(const array& other) const { return !((*this)==other); }
+    bool operator!=(const Array& other) const { return !((*this)==other); }
 
-    /*! \brief Fills the array with copies of \a x. */
+    /*! \brief Fills the Array with copies of \a x. */
     void fill(const value_type& x) {
         iterator curr=begin(); iterator end=this->end(); while(curr!=end) { *curr=x; ++curr; } }
-    /*! \brief Fills the array from the sequence starting at \a first. */
+    /*! \brief Fills the Array from the sequence starting at \a first. */
     template<class InputIterator> void fill(InputIterator first) {
         iterator curr=begin(); iterator end=this->end(); while(curr!=end) { *curr=*first; ++curr; ++first; } }
     /*! \brief Assigns the sequence from \a first to \a last. */
@@ -160,7 +160,7 @@ class array {
 };
 
 
-template<class A, class X> void serialize(A& a, array<X>& ary, const unsigned int v) {
+template<class A, class X> void serialize(A& a, Array<X>& ary, const unsigned int v) {
     // We can't use separate save/load unless serialize is a member (I think).
     // We therefore need the same code to read and write.
     // We use a trick by which we first store the current value in a temporary

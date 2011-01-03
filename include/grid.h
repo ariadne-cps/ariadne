@@ -101,13 +101,13 @@ class Grid {
     int subdivision_lower_index(uint d, const Float& x) const; 
     int subdivision_upper_index(uint d, const Float& x) const; 
 
-    array<double> index(const Vector<Float>& pt) const;
-    array<double> lower_index(const Vector<Interval>& bx) const;
-    array<double> upper_index(const Vector<Interval>& bx) const;
+    Array<double> index(const Vector<Float>& pt) const;
+    Array<double> lower_index(const Vector<Interval>& bx) const;
+    Array<double> upper_index(const Vector<Interval>& bx) const;
 
-    Vector<Float> point(const array<int>& a) const;
-    Vector<Float> point(const array<double>& a) const;
-    Vector<Interval> box(const array<double>& l, const array<double>& u) const;
+    Vector<Float> point(const Array<int>& a) const;
+    Vector<Float> point(const Array<double>& a) const;
+    Vector<Interval> box(const Array<double>& l, const Array<double>& u) const;
     Vector<Interval> box(const GridCell& cell) const;
   private:
     // Create new data

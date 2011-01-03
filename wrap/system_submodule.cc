@@ -101,7 +101,7 @@ RealExpression operator/(const RealExpression& e, const RealVariable& v) { retur
 } // namespace Ariadne
 
 
-namespace Ariadne { int length(const array<std::string>& a) { return a.size(); } }
+namespace Ariadne { int length(const Array<std::string>& a) { return a.size(); } }
 
 void export_formula()
 {

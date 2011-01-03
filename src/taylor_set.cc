@@ -767,7 +767,7 @@ Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface&
 Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const IntervalVector domain) {
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
-    // Compute the row of the nonlinearities array which has the highest norm
+    // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     uint imax=nonlinearities.row_size();
     uint jmax_in_row_imax=nonlinearities.column_size();
@@ -799,7 +799,7 @@ TaylorConstrainedImageSet::split_first_order() const
 {
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_function,this->_reduced_domain);
 
-    // Compute the row of the nonlinearities array which has the highest norm
+    // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     uint imax=nonlinearities.row_size();
     uint jmax_in_row_imax=nonlinearities.column_size();

@@ -868,7 +868,7 @@ evaluate(const Differential<X>& y, const Vector<Y>& x)
     Y one = zero; one+=1;
 
     // Use inefficient brute-force approach with lots of storage...
-    array< array< Y > > val(ms, array< Y >(d+1));
+    Array< Array< Y > > val(ms, Array< Y >(d+1));
     for(uint j=0; j!=ms; ++j) {
         val[j][0]=one;
         val[j][1]=x[j];

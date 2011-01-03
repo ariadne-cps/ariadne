@@ -144,7 +144,7 @@ class PythonHybridEvolver
         return intermediate; }
 
   protected:
-    typedef tuple<DiscreteLocation, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef Tuple<DiscreteLocation, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     // This is the only method which is called in Python
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
@@ -187,7 +187,7 @@ make_hybrid_list_set(const boost::python::list& pylst)
     ListSet< std::pair<DiscreteLocation,SET> >* result=new ListSet< std::pair<DiscreteLocation,SET> >();
     //boost::python::list pylst=boost::python::extract<boost::python::list>(pyobj);
     for(int i=0; i!=len(pylst); ++i) {
-        boost::python::tuple pytup=boost::python::extract<boost::python::tuple>(pylst[i]);
+        boost::python::Tuple pytup=boost::python::extract<boost::python::Tuple>(pylst[i]);
         Ariadne::DiscreteLocation q(boost::python::extract<int>(pytup[0]));
         SET s(boost::python::extract<SET>(pytup[1]));
         //std::pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);

@@ -76,12 +76,12 @@ class InteriorPointSolver
   public:
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the pair (x,y) where x is the optimal point, and y the corresponding dual feasible point.
-    tuple< Float, Vector<Float>, Vector<Float> >
+    Tuple< Float, Vector<Float>, Vector<Float> >
     minimise(const FloatVector& c, const FloatVector& xl, const FloatVector& xu, const Matrix<Float>& A, const Vector<Float>& b) const;
 
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
-    tuple< Float, Vector<Float>, Vector<Float> >
+    Tuple< Float, Vector<Float>, Vector<Float> >
     hotstarted_minimise(const FloatVector& c, const FloatVector& xl, const FloatVector& xu, const Matrix<Float>& A, const Vector<Float>& b,
                         Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const;
 
@@ -140,7 +140,7 @@ class SimplexSolver
     //! Uses starting variable types \a vt.
     Vector<X>
     hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                        array<Slackness>& vt) const;
+                        Array<Slackness>& vt) const;
 
     //! \ingroup LinearProgrammingModule
     //! Solve the linear programming problem \f$\min cx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
@@ -148,7 +148,7 @@ class SimplexSolver
     //! Uses starting variable types vt, permutation p and inverse basic matrix B.
     Vector<X>
     hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                        array<Slackness>& vt, array<size_t>& p, Matrix<X>& B) const;
+                        Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B) const;
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$0 \leq x\f$ and \f$Ax=b\f$.
@@ -167,12 +167,19 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
-    //! If the initial array \a vt has size zero, then an initial basis is computed, otherwise the given variable types are assumed.
+    //! The initial Array \a vt is used to define the initial basic point.
+    tribool
+    hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                        Array<Slackness>& vt) const;
+
+    //! \ingroup LinearProgrammingModule
+    //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
+    //! If the initial Array \a vt has size zero, then an initial basis is computed, otherwise the given variable types are assumed.
     //! The values of \a p and \a B corresponding to \a vt may be given.
     //! The values of \a x and \a y are output parameters, giving access to the final primal and dual variables.
     tribool
     hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                        array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const;
+                        Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const;
 
 
 
@@ -180,35 +187,35 @@ class SimplexSolver
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
     tribool
-    verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const array<Slackness>& vt) const;
+    verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const Array<Slackness>& vt) const;
 
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
     tribool
-    verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<Slackness>& vt) const;
+    verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const Array<Slackness>& vt) const;
 
     //! \ingroup LinearProgrammingModule
     //! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
     tribool
     verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                       const array<Slackness>& vt) const;
+                       const Array<Slackness>& vt) const;
 
   public:
 
     //! \ingroup LinearProgrammingModule
     //! Compute a permutation \f$p\f$ such that \f$p_{0},\ldots,p_{m-1}\f$ are the basis variables of \f$A\f$, and the inverse matrix \f$A_B^{-1}\f$.
-    pair< array<size_t>, Matrix<X> >
+    pair< Array<size_t>, Matrix<X> >
     compute_basis(const Matrix<X>& A) const;
 
     //! \ingroup LinearProgrammingModule
-    //! Compute the point corresponding to the given array of variable types.
+    //! Compute the point corresponding to the given Array of variable types.
     Vector<X>
-    compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const array<Slackness>& vt) const;
+    compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const Array<Slackness>& vt) const;
 
     //! \ingroup LinearProgrammingModule
-    //! Perform a single step of the standard linear programming problem, updating the variable type array \a vt, the ordered variable array \a p, the inverse basis matrix \a B and the variables \a x.
+    //! Perform a single step of the standard linear programming problem, updating the variable type Array \a vt, the ordered variable Array \a p, the inverse basis matrix \a B and the variables \a x.
     bool lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x) const;
+                Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm, choosing basic variable \a s to exit the basis.
@@ -218,7 +225,7 @@ class SimplexSolver
     //! Returns \a r where x[p[r]] was the variable entering the basis.
     //!  If r=m, then no step performed
     size_t lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                  array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s) const;
+                  Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
@@ -227,7 +234,7 @@ class SimplexSolver
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
     bool validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                                    array<Slackness>& vt, array<size_t>& p) const;
+                                    Array<Slackness>& vt, Array<size_t>& p) const;
 
   public:
     //! \brief Check that the feasibility problem data is consistent.
@@ -238,18 +245,18 @@ class SimplexSolver
     //!   - x[j]=l[j] if j==LOWER and x[j]=u[j] if j==UPPER
     //!   - Ax=b
     void consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                           const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) const;
+                           const Array<Slackness>& vt, const Array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) const;
 
     //! \brief Check that B is the inverse of the matrix with columns A[p[0],...,A[p[m-1]].
-    void consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B) const;
+    void consistency_check(const Matrix<X>& A, const Array<size_t>& p, const Matrix<X>& B) const;
     //! \brief Check that Ax=b
     void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& x) const;
-    //! \brief Check that the basic variable array p is consistent with the variable type array vt.
+    //! \brief Check that the basic variable Array p is consistent with the variable type Array vt.
     //! Returns the number of basic variables.
-    size_t consistency_check(const array<Slackness>& vt, const array<size_t>& p) const;
+    size_t consistency_check(const Array<Slackness>& vt, const Array<size_t>& p) const;
   private:
     tribool _feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                      array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x) const;
+                      Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x) const;
 
 
 };

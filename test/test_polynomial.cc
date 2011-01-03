@@ -283,7 +283,7 @@ void TestPolynomial::test_arithmetic()
 void TestPolynomial::test_variables()
 {
     Vector< Polynomial<Float> > x=Polynomial<Float>::variables(3);
-    array< Vector<Float> > e=Vector<Float>::basis(2);
+    Array< Vector<Float> > e=Vector<Float>::basis(2);
 
     Polynomial<Float> p1=x[1]*3.0;
     Polynomial<Float> p2=p1+x[0]; p2=x[1]*3,0+x[0];

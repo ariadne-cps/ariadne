@@ -70,7 +70,7 @@ class Vector
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     Vector(size_t n, const X& t)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
-    //! \brief Construct a vector of size \a n, with values initialised from the C-style array beginning at \a ptr.
+    //! \brief Construct a vector of size \a n, with values initialised from the C-style Array beginning at \a ptr.
     template<class XX> Vector(size_t n, const XX* ptr)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
     //! \brief Construct a list.
@@ -107,8 +107,8 @@ class Vector
     static Vector<X> unit_box(size_t n) {
         Vector<X> result(n,Interval(-1,1)); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static array< Vector<X> > basis(size_t n) {
-        array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
+    static Array< Vector<X> > basis(size_t n) {
+        Array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
     //@}
 
     //@{

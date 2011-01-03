@@ -55,11 +55,11 @@ struct from_python<Point> {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<Point>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        extract<boost::python::tuple> xtup(obj_ptr);
+        extract<boost::python::Tuple> xtup(obj_ptr);
         extract<boost::python::list> xlst(obj_ptr);
         Point pt;
         if(xtup.check()) {
-            boost::python::tuple tup=xtup(); pt=Point(len(tup));
+            boost::python::Tuple tup=xtup(); pt=Point(len(tup));
             for(int i=0; i!=len(tup); ++i) { pt[i]=extract<double>(tup[i]); }
         } else if(xlst.check()) {
             boost::python::list lst=xlst(); pt=Point(len(lst));

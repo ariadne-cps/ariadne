@@ -77,10 +77,14 @@ class OptimiserInterface {
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVectorFunction h) const = 0;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const = 0;
-    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } h(x) = 0\f$ is feasible.
+    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } h(x) = 0\f$ is feasible. Assumes \fD\f$ is bounded with nonempty interior.
+    //! \internal This is one of the simplest nonlinear programming problems, and is a good test case for new algorithms.
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction h) const = 0;
 
-    //! \brief Tests if the point \a y is feasible.
+    //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
+    virtual Bool almost_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                       FloatVector x, Float error) const = 0;
+    //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                    FloatVector x) const = 0;
     //! \brief Tests if the interval box \a X definitely contains a feasible point.
@@ -107,6 +111,8 @@ class OptimiserBase
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction h) const;
 
+    virtual Bool almost_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                       FloatVector x, Float error) const;
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                    FloatVector x) const;
     virtual Tribool contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,

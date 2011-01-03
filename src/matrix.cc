@@ -63,7 +63,7 @@ lu_inverse(const Matrix<X>& M)
 
     // Array of row pivots. The value p[i] gives the row
     // swapped with the ith row in the ith stage.
-    array<size_t> p(m);
+    Array<size_t> p(m);
     for(size_t k=0; k!=m; ++k) { p[k]=k; }
 
 
@@ -344,7 +344,7 @@ normalise_rows(const Matrix<Float>& A)
 
     Matrix<Float> R=A;
 
-    array<Float> row_asums(m);
+    Array<Float> row_asums(m);
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
     for(size_t i=0; i!=m; ++i) {
@@ -367,7 +367,7 @@ normalise_rows(const Matrix<Float>& A)
 
 // Returns a pivot P and matrices L and U such that L is unit lower-triangular,
 // U is upper-trianguler and A=PLU.
-tuple< PivotMatrix, Matrix<Float>, Matrix<Float> >
+Tuple< PivotMatrix, Matrix<Float>, Matrix<Float> >
 triangular_decomposition(const Matrix<Float>& A)
 {
     typedef Float RealType;
@@ -434,7 +434,7 @@ triangular_decomposition(const Matrix<Float>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-tuple< Matrix<Float>, PivotMatrix>
+Tuple< Matrix<Float>, PivotMatrix>
 triangular_factor(const Matrix<Float>& A)
 {
     const size_t m=A.row_size();
@@ -444,7 +444,7 @@ triangular_factor(const Matrix<Float>& A)
     PivotMatrix P(n); for(uint i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
-    array<Float> cns(n);
+    Array<Float> cns(n);
 
     Vector<Float> u(m);
 
@@ -584,10 +584,10 @@ triangular_multiplier(const Matrix<Float>& A)
 
 
 
-Matrix<Float> pivot_matrix(const array<size_t>& pv)
+Matrix<Float> pivot_matrix(const Array<size_t>& pv)
 {
     const size_t n=pv.size();
-    array<size_t> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
+    Array<size_t> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
     for(size_t i=0; i!=n; ++i) {
         std::swap(perm[i],perm[pv[i]]);
     }
@@ -602,7 +602,7 @@ Matrix<Float> pivot_matrix(const array<size_t>& pv)
 // matrix Q is built up as a composition of elementary Householder
 // transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
 // chosen to be a multiple of the first working column of A.
-tuple< Matrix<Float>, Matrix<Float>, PivotMatrix >
+Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix >
 orthogonal_decomposition(const Matrix<Float>& A)
 {
     typedef Float X;
@@ -613,7 +613,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
     Matrix<X> R(A);
     PivotMatrix P(n);
 
-    array<X> p(n);
+    Array<X> p(n);
     Vector<X> u(m);
 
     for(size_t i=0; i!=m; ++i) {
@@ -718,7 +718,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
 }
 
 /*
-tuple< Matrix<Float>, Matrix<Float> >
+Tuple< Matrix<Float>, Matrix<Float> >
 orthogonal_decomposition(const Matrix<Float>& A)
 {
     typedef Float X;
@@ -728,7 +728,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
     Matrix<X> O(m,m,0.0);
     Matrix<X> R(A);
 
-    array<X> p(n);
+    Array<X> p(n);
 
     for(size_t c=0; c!=min(m,n); ++c) {
 

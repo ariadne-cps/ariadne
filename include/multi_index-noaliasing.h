@@ -135,7 +135,7 @@ class MultiIndexReference {
     //! \brief Scalar product.
     friend MultiIndexReference operator*(index_type s, const MultiIndexReference& a); // inline
 
-    //! \brief The position of the element in the array of tensor values.
+    //! \brief The position of the element in the Array of tensor values.
     unsigned int position() const;
     //! \brief The product of the factorials of the indices.
     unsigned int factorial() const;
@@ -171,7 +171,7 @@ class MultiIndex : public MultiIndexReference {
     explicit MultiIndex();
     //! \brief Construct a multi index of degree \a 0 with \a nv variables.
     explicit MultiIndex(size_type nv);
-    //! \brief Construct a multi index with \a nv variables from the array \a ary.
+    //! \brief Construct a multi index with \a nv variables from the Array \a ary.
     explicit MultiIndex(size_type nv, const int* ary);
     //! \brief Construct a multi index with \a nv variables from variable arguments.
     explicit MultiIndex(size_type nv, int a1, ...);
@@ -582,8 +582,8 @@ class MultiIndexBound {
     size_type size() const { return _groups.size(); }
     friend bool operator<=(const MultiIndexReference& a, const MultiIndexBound& b);
   private:
-    array<size_type> _groups;
-    array<size_type> _max_degrees;
+    Array<size_type> _groups;
+    Array<size_type> _max_degrees;
 };
 
 inline MultiIndexBound::MultiIndexBound(size_type as, size_type d)
@@ -628,7 +628,7 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1
 
 inline bool operator<=(const MultiIndexReference& a, const MultiIndexBound& b) {
     typedef MultiIndexReference::size_type size_type;
-    array<size_type> degrees(b._max_degrees.size());
+    Array<size_type> degrees(b._max_degrees.size());
     for(size_type j=0; j!=a.size(); ++j) {
         degrees[b._groups[j]]+=a[j];
     }

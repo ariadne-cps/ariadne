@@ -43,9 +43,9 @@ using namespace Ariadne;
 
 
 template<class X>
-boost::python::tuple
+boost::python::Tuple
 python_compute_basis(const Matrix<X>& A) {
-    array<size_t> p;
+    Array<size_t> p;
     Matrix<X> B;
     make_lpair(p,B)=compute_basis(A);
     boost::python::list l;
@@ -55,14 +55,14 @@ python_compute_basis(const Matrix<X>& A) {
     return boost::python::make_tuple(l,B);
 }
 
-template<class T> T get(const array<T>& ary, size_t i) { return ary[i]; }
-template<class T> void set(array<T>& ary, size_t i, const T& t) { ary[i]=t; }
+template<class T> T get(const Array<T>& ary, size_t i) { return ary[i]; }
+template<class T> void set(Array<T>& ary, size_t i, const T& t) { ary[i]=t; }
 
 template<class T>
 void export_internal_array(const char* name)
 {
-    class_< array<T> > array_class(name,no_init);
-    array_class.def("__len__", &array<T>::size);
+    class_< Array<T> > array_class(name,no_init);
+    array_class.def("__len__", &Array<T>::size);
     array_class.def("__getitem__",&get<T>);
     array_class.def(boost::python::self_ns::str(self));
 }
@@ -70,7 +70,7 @@ void export_internal_array(const char* name)
 
 void export_variable_type()
 {
-    typedef array<Slackness> SlacknessArray;
+    typedef Array<Slackness> SlacknessArray;
 
     enum_<Slackness> variable_enum("Slackness");
     variable_enum.value("BASIS", BASIS);
@@ -80,7 +80,7 @@ void export_variable_type()
 
 void export_interior_point_solver()
 {
-    to_python< Ariadne::tuple< Vector<Float>, Vector<Float>, Vector<Float> > >();
+    to_python< Ariadne::Tuple< Vector<Float>, Vector<Float>, Vector<Float> > >();
 
     class_<InteriorPointSolver> interior_point_solver_class("InteriorPointSolver",init<>());
     interior_point_solver_class.def("minimise", &InteriorPointSolver::minimise);
@@ -107,17 +107,17 @@ void export_constraint_solver()
 template<class X>
 void export_simplex_solver()
 {
-    typedef array<size_t> SizeArray;
+    typedef Array<size_t> SizeArray;
 
-    to_python< std::pair< array<size_t>, Matrix<X> > >();
+    to_python< std::pair< Array<size_t>, Matrix<X> > >();
 
     class_< SimplexSolver<X> > simplex_solver_class("SimplexSolver", init<>());
-    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
+    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,Array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
 
 
     simplex_solver_class.def("feasible",(tribool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&)const) &SimplexSolver<X>::feasible);
 
-    simplex_solver_class.def("verify_feasibility",(tribool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
+    simplex_solver_class.def("verify_feasibility",(tribool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const Array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
 
     simplex_solver_class.def("compute_basis",(std::pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
 

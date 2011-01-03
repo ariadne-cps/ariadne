@@ -49,7 +49,7 @@ class TaylorSeries {
                  const Float& centre, const Interval& domain);
     uint degree() const { return expansion.size()-1; }
     Float& operator[](uint i) { return expansion[i]; }
-    array<Float> expansion;
+    Array<Float> expansion;
     Interval error;
     void sweep(Float e) {
         for(uint i=0; i<=degree(); ++i) {

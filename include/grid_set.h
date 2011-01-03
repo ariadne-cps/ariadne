@@ -61,8 +61,8 @@ namespace Ariadne {
 
 /*Some type definitions*/
 typedef std::vector<bool> BooleanArray;
-typedef array<int> IndexArray;
-typedef array<unsigned int> SizeArray;
+typedef Array<int> IndexArray;
+typedef Array<unsigned int> SizeArray;
 
 typedef unsigned short dimension_type;
 
@@ -191,7 +191,7 @@ class BinaryTreeNode {
      *          1      The \a theTree contains Depth first search lay out of the tree,
      *         / \     where 1 stands for the non-leaf node and 0 for a leaf node, we
      *        /   \    always visit the left su-node first, e.g. the tree on the left
-     *       2     5   is encodes the array:     [1, 1, 0, 0, 0]
+     *       2     5   is encodes the Array:     [1, 1, 0, 0, 0]
      *      / \        where the corresponding    ^  ^  ^  ^  ^
      *     /   \       tree nodes are:            1  2  3  4  5
      *    3     4      \a theEnabledCells contains true/false values for the leaf nodes
@@ -1107,13 +1107,13 @@ class GridTreeSet : public GridTreeSubset {
     /*! \brief Construct the paving based on the block's coordinates, defined by: \a theLeftLowerPoint
      *  and \a theRightUpperPoint. These are the coordinates in the lattice defined by theGrid.
      *  The primary cell, enclosing the given block of cells is computed automatically and the
-     *  binary tree is rooted to that cell. The \a theEnabledCells array defines the enabled/disabled
+     *  binary tree is rooted to that cell. The \a theEnabledCells Array defines the enabled/disabled
      *  0-level cells of the block (lexicographic order).
      */
     explicit GridTreeSet( const Grid& theGrid, const IndexArray theLeftLowerPoint,
                           const IndexArray theRightUpperPoint, const BooleanArray& theEnabledCells );
 
-    /*! \brief Creates a new paving from the user data. \a theTree is an array representation of the binary
+    /*! \brief Creates a new paving from the user data. \a theTree is an Array representation of the binary
      * tree structure, \a theEnabledCells tells whether a node is or is not a leaf, \a theHeight gives the
      * height of the primary cell which is assumed to correspond to the root node of \a theTree.
      */
@@ -1259,13 +1259,13 @@ class GridTreeCursor {
     //The size with which the stack size will be incremented
     static const uint STACK_SIZE_INCREMENT = 256;
 
-    //The index of the top stack element (within the stack array)
+    //The index of the top stack element (within the stack Array)
     //WARNING: the initial value should be -1 to indicate that
     //there are no elements in the stack
     int _currentStackIndex;
 
     /* The nodes traversed to the current location. */
-    array<BinaryTreeNode*> _theStack;
+    Array<BinaryTreeNode*> _theStack;
 
     /* The subpaving to cursor on */
     const GridTreeSubset * _pSubPaving;
@@ -1653,7 +1653,7 @@ inline GridTreeCursor::~GridTreeCursor() {
 }
 
 inline void GridTreeCursor::push( BinaryTreeNode* pLatestNode ){
-    //If we are out of free space, increase the array's capacity
+    //If we are out of free space, increase the Array's capacity
     if( static_cast<uint>(_currentStackIndex +1) == ( _theStack.size()  ) ){
         _theStack.resize( _theStack.size() + STACK_SIZE_INCREMENT );
     }
@@ -1680,7 +1680,7 @@ inline BinaryTreeNode* GridTreeCursor::pop( ){
 }
 
 inline bool GridTreeCursor::is_at_the_root() const {
-    //If we are pointing at the zero cell of the array then it
+    //If we are pointing at the zero cell of the Array then it
     //means that we are in the root of the tree
     return (_currentStackIndex == 0);
 }

@@ -212,7 +212,7 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
     // Iterate h'=h(g(x,h(x)))
     Vector<IntervalTaylorModel> h_new;
     uint number_non_contracting=rs;
-    array<bool> contracting(rs,false);
+    Array<bool> contracting(rs,false);
     for(uint k=0; k!=n; ++k) {
         h_new=compose(g,join(id,h));
         for(uint i=0; i!=rs; ++i) {
@@ -465,7 +465,7 @@ SolverBase::implicit(const RealVectorFunction& f,
 
     uint steps_remaining=this->maximum_number_of_steps();
     uint number_unrefined=nx;
-    array<bool> refinement(nx,false);
+    Array<bool> refinement(nx,false);
 
     while(steps_remaining>0) {
         nwx=this->implicit_step(f,p,x);

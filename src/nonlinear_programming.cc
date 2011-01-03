@@ -389,7 +389,7 @@ class ConstrainedFeasibilityMatrix {
     ConstrainedFeasibilityMatrix(const Vector<R>& x, const Vector<R>& z, const Matrix<R>& a, const Matrix<R>& h)
         : X(x), Z(z), D(ediv(x,z)), A(a), H(h) { }
 
-    template<class RR> tuple< Vector<RR>,Vector<RR>,Vector<RR> >
+    template<class RR> Tuple< Vector<RR>,Vector<RR>,Vector<RR> >
     mul(const Vector<RR>& x, const Vector<RR>& yt, const Vector<RR>& z) const {
         Vector<RR> nx=Z*x+X*x;
         Vector<RR> nyt=H*yt-A*x;
@@ -397,7 +397,7 @@ class ConstrainedFeasibilityMatrix {
         return make_tuple(nx,nyt,nz);
     }
 
-    template<class RR> tuple< Vector<RR>,Vector<RR>,Vector<RR> >
+    template<class RR> Tuple< Vector<RR>,Vector<RR>,Vector<RR> >
     solve(const Vector<RR>& x, const Vector<RR>& yt, const Vector<RR>& z) const {
         Sinv=inverse(feasibility_adat(H,A,D));
         Vector<RR> rx=Z.solve(x);
@@ -430,6 +430,15 @@ inline ConstraintKind constraint_kind(Interval C) {
 
 
 
+
+
+Bool OptimiserBase::
+almost_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, Float error) const
+{
+    if(!contains(D,x)) { return false; }
+    IntervalVector gx=g(IntervalVector(x));
+    return subset(gx,C+Vector<Interval>(C.size(),Interval(-error,+error)));
+}
 
 
 Bool OptimiserBase::

@@ -73,7 +73,7 @@ void __vsetitem__(Vector<X>& v, int i, const X& x)
 
 
 template<class X>
-X __mgetitem__(const Matrix<X>& A, const boost::python::tuple& tup)
+X __mgetitem__(const Matrix<X>& A, const boost::python::Tuple& tup)
 {
     uint i=boost::python::extract<uint>(tup[0]);
     uint j=boost::python::extract<uint>(tup[1]);
@@ -81,7 +81,7 @@ X __mgetitem__(const Matrix<X>& A, const boost::python::tuple& tup)
 }
 
 template<class X>
-void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const X& x)
+void __msetitem__(Matrix<X>& A, const boost::python::Tuple& tup, const X& x)
 {
     uint i=boost::python::extract<uint>(tup[0]);
     uint j=boost::python::extract<uint>(tup[1]);
@@ -172,7 +172,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     def("join",(Vector<X>(*)(const X&,const X&)) &join);
 
     from_python< Vector<X> >();
-    to_python< array< Vector<X> > >();
+    to_python< Array< Vector<X> > >();
 
 
 }
@@ -264,6 +264,10 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve);
     def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve);
 
+    matrix_class.def("identity",(Matrix<X>(*)(size_t)) &Matrix<X>::identity);
+    matrix_class.staticmethod("identity");
+    
+        
     from_python< Matrix<X> >();
 
 }

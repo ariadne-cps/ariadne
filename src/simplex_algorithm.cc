@@ -87,14 +87,14 @@ template<class Mx, class X> bool operator==(const boost::numeric::ublas::matrix_
 
 
 
-// Extend an array of size m to an array of size n
+// Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,
-// and the new array contains the elements [0,n)
-array<size_t>
-extend_p(const array<size_t>& p, const size_t n)
+// and the new Array contains the elements [0,n)
+Array<size_t>
+extend_p(const Array<size_t>& p, const size_t n)
 {
     const size_t m=p.size();
-    array<size_t> q(n);
+    Array<size_t> q(n);
     for(size_t j=0; j!=n; ++j) {
         q[j]=n;
     }
@@ -107,7 +107,7 @@ extend_p(const array<size_t>& p, const size_t n)
     for(size_t j=0; j!=n; ++j) {
         if(q[j]==n) { q[j]=k; ++k; }
     }
-    array<size_t> r(n);
+    Array<size_t> r(n);
     for(size_t j=0; j!=n; ++j) {
         r[q[j]]=j;
     }
@@ -121,11 +121,11 @@ extend_p(const array<size_t>& p, const size_t n)
 
 
 
-// Check that the basic variable array p is consistent with the variable type array vt.
+// Check that the basic variable Array p is consistent with the variable type Array vt.
 // There are two cases; p just lists the basic variables, or p lists all variables
 // Returns the number of basic variables
 size_t
-consistency_check(const array<Slackness>& vt, const array<size_t>& p)
+consistency_check(const Array<Slackness>& vt, const Array<size_t>& p)
 {
     if(p.size()!=vt.size()) {
         const size_t m=p.size();
@@ -152,7 +152,7 @@ consistency_check(const array<Slackness>& vt, const array<size_t>& p)
 
 template<class X>
 size_t
-SimplexSolver<X>::consistency_check(const array<Slackness>& vt, const array<size_t>& p) const
+SimplexSolver<X>::consistency_check(const Array<Slackness>& vt, const Array<size_t>& p) const
 {
     return Ariadne::consistency_check(vt,p);
 }
@@ -160,7 +160,7 @@ SimplexSolver<X>::consistency_check(const array<Slackness>& vt, const array<size
 // Check that the matrix B is the inverse of the matrix A_B with columns p[0],...,p[m-1] of A.
 template<class X>
 void
-SimplexSolver<X>::consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B) const
+SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<size_t>& p, const Matrix<X>& B) const
 {
     static const X MAXIMUM_ERROR=1e-8;
     const size_t m=A.row_size();
@@ -172,7 +172,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const array<size_t>& p, 
         }
     }
 
-    array<size_t> p_B(p.begin(),p.begin()+m);
+    Array<size_t> p_B(p.begin(),p.begin()+m);
 
     Matrix<X> Z=prod(B,A_B);
     ARIADNE_LOG(9,"        p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
@@ -197,7 +197,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,const
 template<class X>
 void
 SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                                    const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) const
+                                    const Array<Slackness>& vt, const Array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) const
 {
     ARIADNE_LOG(9,"        Checking consistency of B and x\n");
     const size_t m=A.row_size();
@@ -211,7 +211,7 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
         }
     }
 
-    array<size_t> p_B(p.begin(),p.begin()+m);
+    Array<size_t> p_B(p.begin(),p.begin()+m);
 
     Matrix<X> I=prod(B,A_B);
     ARIADNE_LOG(9,"          p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
@@ -239,7 +239,7 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
 // Compute the cost function for a feasibility step given lower and upper bounds and the values of x.
 template<class X>
 Vector<X>
-compute_c(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, const Vector<X>& x, size_t m) {
+compute_c(const Vector<X>& xl, const Vector<X>& xu, const Array<size_t>& p, const Vector<X>& x, size_t m) {
     const size_t n=x.size();
     Vector<X> c(n);
     for(size_t k=0; k!=m; ++k) {
@@ -252,11 +252,11 @@ compute_c(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, cons
 
 // Compute the variable types from the permutation, taking m basic variables and all non-basic variables lower.
 template<class X>
-array<Slackness>
-compute_vt(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, const size_t m)
+Array<Slackness>
+compute_vt(const Vector<X>& xl, const Vector<X>& xu, const Array<size_t>& p, const size_t m)
 {
     const size_t n=p.size();
-    array<Slackness> vt(n);
+    Array<Slackness> vt(n);
     for(size_t k=0; k!=m; ++k) {
         vt[p[k]]=BASIS;
     }
@@ -271,11 +271,11 @@ compute_vt(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, con
 }
 
 
-array<size_t>
-compute_p(const array<Slackness>& tv)
+Array<size_t>
+compute_p(const Array<Slackness>& tv)
 {
     const size_t n=tv.size();
-    array<size_t> p(n);
+    Array<size_t> p(n);
     size_t k=0;
     for(size_t j=0; j!=n; ++j) {
         if(tv[j]==BASIS) { p[k]=j; ++k; }
@@ -290,7 +290,7 @@ compute_p(const array<Slackness>& tv)
 // Compute a basis (p_1,\ldots,p_m) for the matrix A
 // Throws an error if the matrix A has full row rank
 template<class X>
-pair< array<size_t>, Matrix<X> >
+pair< Array<size_t>, Matrix<X> >
 SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
 {
     ARIADNE_LOG(9,"compute_basis(A) with A="<<A<<"\n");
@@ -298,7 +298,7 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
     const size_t n=A.column_size();
     ARIADNE_DEBUG_ASSERT(n>=m);
 
-    array<size_t> p(n);
+    Array<size_t> p(n);
     for(size_t j=0; j!=n; ++j) { p[j]=j; }
 
     // Factorise into lower and upper triangular matrices L and U
@@ -390,7 +390,7 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
 
 template<class XX, class X>
 Matrix<XX>
-compute_B(const Matrix<X>& A, const array<size_t>& p)
+compute_B(const Matrix<X>& A, const Array<size_t>& p)
 {
     const size_t m=A.row_size();
     Matrix<XX> A_B(m,m);
@@ -408,7 +408,7 @@ compute_B(const Matrix<X>& A, const array<size_t>& p)
 
 template<class X>
 Vector<X>
-compute_c(const Matrix<X>& A, const array<size_t>& p, const Vector<X>& x)
+compute_c(const Matrix<X>& A, const Array<size_t>& p, const Vector<X>& x)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -421,7 +421,7 @@ compute_c(const Matrix<X>& A, const array<size_t>& p, const Vector<X>& x)
 
 
 template<class X, class XX> Vector<X>
-compute_c(const size_t m, const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, const Vector<XX>& x)
+compute_c(const size_t m, const Vector<X>& xl, const Vector<X>& xu, const Array<size_t>& p, const Vector<XX>& x)
 {
     const size_t n=x.size();
     Vector<X> c(n);
@@ -434,7 +434,7 @@ compute_c(const size_t m, const Vector<X>& xl, const Vector<X>& xu, const array<
 }
 
 template<> Vector<Float>
-compute_c(const size_t m, const Vector<Float>& xl, const Vector<Float>& xu, const array<size_t>& p, const Vector<Interval>& x)
+compute_c(const size_t m, const Vector<Float>& xl, const Vector<Float>& xu, const Array<size_t>& p, const Vector<Interval>& x)
 {
     const size_t n=x.size();
     Vector<Float> c(n);
@@ -455,7 +455,7 @@ compute_c(const size_t m, const Vector<Float>& xl, const Vector<Float>& xu, cons
 template<class X, class XX>
 Vector<XX>
 compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-          const array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B)
+          const Array<Slackness>& vt, const Array<size_t>& p, const Matrix<XX>& B)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -498,7 +498,7 @@ compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Ve
 
 template<class X,class XX>
 std::pair<Vector<XX>,Vector<XX> >
-compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, array<Slackness>& vt, const array<size_t>& p, const Matrix<XX>& B)
+compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, Array<Slackness>& vt, const Array<size_t>& p, const Matrix<XX>& B)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -543,7 +543,7 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Ve
 
 template<class X,class XX>
 Vector<XX>
-compute_y(const Vector<X>& c, const array<size_t>& p, const Matrix<XX>& B)
+compute_y(const Vector<X>& c, const Array<size_t>& p, const Matrix<XX>& B)
 {
     const size_t m=B.row_size();
     Vector<XX> y(m);
@@ -558,7 +558,7 @@ compute_y(const Vector<X>& c, const array<size_t>& p, const Matrix<XX>& B)
 
 template<class X,class XX,class XXX>
 Vector<XX>
-compute_z(const Matrix<X>& A, const Vector<XXX>& c, const array<size_t>& p, const Vector<XX>& y)
+compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<size_t>& p, const Vector<XX>& y)
 {
     const double CUTOFF_THRESHOLD=1e-10;
     const size_t m=A.row_size();
@@ -584,7 +584,7 @@ compute_z(const Matrix<X>& A, const Vector<XXX>& c, const array<size_t>& p, cons
 
 template<class X>
 size_t
-compute_s(const size_t m, const array<size_t>& p, const Vector<X>& z)
+compute_s(const size_t m, const Array<size_t>& p, const Vector<X>& z)
 {
     const size_t n=z.size();
     for(size_t k=0; k!=n; ++k) {
@@ -597,7 +597,7 @@ compute_s(const size_t m, const array<size_t>& p, const Vector<X>& z)
 
 template<class X>
 size_t
-compute_s(const size_t m, const array<Slackness>& vt, const array<size_t>& p, const Vector<X>& z)
+compute_s(const size_t m, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<X>& z)
 {
     return compute_s_nocycling(m,vt,p,z);
 }
@@ -605,7 +605,7 @@ compute_s(const size_t m, const array<Slackness>& vt, const array<size_t>& p, co
 // Compute the variable to enter the basis by finding the first which can increase the value function
 template<class X>
 size_t
-compute_s_fast(const size_t m, const array<Slackness>& vt, const array<size_t>& p, const Vector<X>& z)
+compute_s_fast(const size_t m, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<X>& z)
 {
     const size_t n=z.size();
     for(size_t k=m; k!=n; ++k) {
@@ -618,7 +618,7 @@ compute_s_fast(const size_t m, const array<Slackness>& vt, const array<size_t>& 
 // Compute the variable to enter the basis by giving the one with the highest rate of increase.
 template<class X>
 size_t
-compute_s_best(const size_t m, const array<Slackness>& vt, const array<size_t>& p, const Vector<X>& z)
+compute_s_best(const size_t m, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<X>& z)
 {
     const size_t n=z.size();
     size_t kmax=n;
@@ -637,7 +637,7 @@ compute_s_best(const size_t m, const array<Slackness>& vt, const array<size_t>& 
 // Compute the variable to enter the basis by using Bland's rule to avoid cycling.
 template<class X>
 size_t
-compute_s_nocycling(const size_t m, const array<Slackness>& vt, const array<size_t>& p, const Vector<X>& z)
+compute_s_nocycling(const size_t m, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<X>& z)
 {
     const size_t n=z.size();
     for(size_t j=0; j!=n; ++j) {
@@ -656,7 +656,7 @@ compute_s_nocycling(const size_t m, const array<Slackness>& vt, const array<size
 // given by d=-B*A_s
 template<class X, class XX>
 Vector<XX>
-compute_d(const Matrix<X>& A, const array<size_t>& p, const Matrix<XX>& B, const size_t ks)
+compute_d(const Matrix<X>& A, const Array<size_t>& p, const Matrix<XX>& B, const size_t ks)
 {
     const size_t m=A.row_size();
     size_t js=p[ks];
@@ -673,7 +673,7 @@ template<> Interval inf<Interval>() { return Interval(inf<Float>()); }
 
 template<class X>
 pair<size_t,X>
-compute_rt(const array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
+compute_rt(const Array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
 {
     const size_t m=d.size();
     X t=inf<X>();
@@ -693,7 +693,7 @@ compute_rt(const array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
 
 template<class X>
 std::pair<size_t,X>
-compute_rt(const Vector<X>& xl, const Vector<X>& xu, const array<Slackness>& vt, const array<size_t>& p, const Vector<X>& x, const Vector<X>& d, const size_t s)
+compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<X>& x, const Vector<X>& d, const size_t s)
 {
     const X inf=Ariadne::inf<X>();
 
@@ -736,7 +736,7 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const array<Slackness>& vt,
 }
 
 std::pair<size_t,Interval>
-compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const array<Slackness>& vt, const array<size_t>& p, const Vector<Interval>& x, const Vector<Interval>& d, const size_t s)
+compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<Interval>& x, const Vector<Interval>& d, const size_t s)
 {
     typedef Float X;
     typedef Interval XX;
@@ -801,7 +801,7 @@ update_B(Matrix<X>& B, const Vector<X>& d, const size_t r)
 
 template<class X>
 void
-update_x(const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const size_t r, const X& t)
+update_x(const Array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const size_t r, const X& t)
 {
     const size_t m=d.size();
     for(size_t i=0; i!=m; ++i) {
@@ -815,7 +815,7 @@ update_x(const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& 
 
 template<class X>
 void
-update_x(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const size_t r, const X& t)
+update_x(const Vector<X>& xl, const Vector<X>& xu, const Array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const size_t r, const X& t)
 {
     // Update x when variable p[s] becomes basic and variable p[r] becomes non-basic
     // The variable p[s] moves by t; the variables p[i] i<m by t*d[i]
@@ -836,7 +836,7 @@ update_x(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vecto
 
 template<class X>
 void
-update_x(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const X& t)
+update_x(const Vector<X>& xl, const Vector<X>& xu, const Array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const X& t)
 {
     // Update basis when a variable changes between lower and upper
     // The constant t determines how much the variable p[s] moves
@@ -854,7 +854,7 @@ update_x(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vecto
 
 template<class X>
 void
-update_y(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vector<X>& y, const size_t s, const Vector<X>& d, const X& t)
+update_y(const Vector<X>& xl, const Vector<X>& xu, const Array<size_t>& p, Vector<X>& y, const size_t s, const Vector<X>& d, const X& t)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -864,7 +864,7 @@ update_y(const Vector<X>& xl, const Vector<X>& xu, const array<size_t>& p, Vecto
 
 
 template<class X>
-size_t lpenter(const Matrix<X>& A, const Vector<X>& c, const array<Slackness>& vt, const array<size_t>& p, const Matrix<X>& B)
+size_t lpenter(const Matrix<X>& A, const Vector<X>& c, const Array<Slackness>& vt, const Array<size_t>& p, const Matrix<X>& B)
 {
     const size_t m=A.row_size();
 
@@ -884,8 +884,8 @@ SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, c
     ARIADNE_LOG(4,"A="<<A<<" b="<<b<<"\n");
     ARIADNE_LOG(4,"xl="<<xl<<" xu="<<xu<<"\n");
 
-    array<size_t> p(A.column_size());
-    array<Slackness> vt(A.column_size());
+    Array<size_t> p(A.column_size());
+    Array<Slackness> vt(A.column_size());
     Matrix<X> B(A.row_size(),A.row_size());
     make_lpair(p,B)=this->compute_basis(A);
     vt=compute_vt(xl,xu,p,A.row_size());
@@ -900,7 +900,7 @@ SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, c
 template<class X>
 bool
 SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                                             array<Slackness>& vt, array<size_t>& p) const
+                                             Array<Slackness>& vt, Array<size_t>& p) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -992,7 +992,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
 template<class X>
 size_t
 SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                         array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s) const
+                         Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -1087,7 +1087,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
 template<class X>
 bool
 SimplexSolver<X>::lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                         array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x) const
+                         Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x) const
 {
     ARIADNE_LOG(9,"  lpstep(A,b,c,xl,xu,vt,p,V,x)\n    A="<<A<<" b="<<b<<" c="<<c<<"\n    p="<<p<<" B="<<B<<"\n    vt="<<vt<<" xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
 
@@ -1103,9 +1103,9 @@ SimplexSolver<X>::lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X
 template<class X>
 Vector<X>
 SimplexSolver<X>::compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                            const array<Slackness>& vt) const
+                            const Array<Slackness>& vt) const
 {
-    array<uint> p=compute_p(vt);
+    Array<uint> p=compute_p(vt);
     Matrix<X> B = Ariadne::compute_B<X>(A,p);
     return Ariadne::compute_x(xl,xu,A,b, vt,p,B);
 }
@@ -1115,7 +1115,7 @@ SimplexSolver<X>::compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matr
 template<class X>
 tribool
 SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                            array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x) const
+                            Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x) const
 {
     ARIADNE_LOG(5,"\nInitial A="<<A<<" b="<<b<<"; xl="<<xl<<" xu="<<xu<<"\n  vt="<<vt<<"\n");
     const size_t m=A.row_size();
@@ -1202,20 +1202,21 @@ tribool
 SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
     ARIADNE_LOG(2,"feasible(xl,xu,A,b)\n");
-    ARIADNE_LOG(3,"    A="<<A<<"\n    b="<<b<<"\n    xl="<<xl<<"\n    xu="<<xu<<"\n");
+    ARIADNE_LOG(3,"A="<<A<<" b="<<b<<"\n");
+    ARIADNE_LOG(3,"xl="<<xl<<" xu="<<xu<<"\n");
     ARIADNE_ASSERT(b.size()==A.row_size());
     ARIADNE_ASSERT(xl.size()==A.column_size());
     ARIADNE_ASSERT(xu.size()==A.column_size());
 
     const size_t m=A.row_size();
 
-    array<size_t> p;
+    Array<size_t> p;
     Matrix<X> B;
     make_lpair(p,B)=compute_basis(A);
 
-    array<Slackness> vt=compute_vt(xl,xu,p,m);
+    Array<Slackness> vt=compute_vt(xl,xu,p,m);
 
-    ARIADNE_LOG(9,"    p="<<p<<" B="<<B<<"  (BA="<<Matrix<X>(prod(B,A))<<")\n");
+    ARIADNE_LOG(9,"p="<<p<<" B="<<B<<"  (BA="<<Matrix<X>(prod(B,A))<<")\n");
 
     Vector<X> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     Vector<X> y(m);
@@ -1228,7 +1229,35 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
 template<class X>
 tribool
 SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                                      array<Slackness>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const
+                                      Array<Slackness>& vt) const
+{
+    ARIADNE_LOG(2,"hotstarted_feasible(xl,xu,A,b, vt)\n");
+    ARIADNE_LOG(3,"A="<<A<<" b="<<b<<"\n");
+    ARIADNE_LOG(3,"xl="<<xl<<" xu="<<xu<<"\n");
+    ARIADNE_LOG(3,"vt="<<vt<<"\n");
+    ARIADNE_ASSERT(b.size()==A.row_size());
+    ARIADNE_ASSERT(xl.size()==A.column_size());
+    ARIADNE_ASSERT(xu.size()==A.column_size());
+
+    const size_t m=A.row_size();
+
+    Array<size_t> p = Ariadne::compute_p(vt);
+    Matrix<X> B = Ariadne::compute_B<X>(A,p);
+
+    ARIADNE_LOG(9,"p="<<p<<" B="<<B<<"  (BA="<<Matrix<X>(prod(B,A))<<")\n");
+
+    Vector<X> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
+    Vector<X> y(m);
+
+    return this->hotstarted_feasible(xl,xu,A,b,vt,p,B,x,y);
+}
+
+
+
+template<class X>
+tribool
+SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                                      Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const
 {
     ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<"\n");
     ARIADNE_LOG(5,"vt="<<vt<<" p="<<p<<"\n");
@@ -1236,14 +1265,14 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     const size_t m=A.row_size();
     //const size_t n=A.column_size();
     if(vt.size()==0) {
-        make_lpair(p,B)=compute_basis(A);
-        vt=compute_vt(xl,xu,p,m);
+        make_lpair(p,B)=this->compute_basis(A);
+        vt=Ariadne::compute_vt(xl,xu,p,m);
     }
     if(p.size()==0) {
-        p=compute_p(vt);
-        B=compute_B<X>(A,p);
+        p=Ariadne::compute_p(vt);
+        B=Ariadne::compute_B<X>(A,p);
     }
-    consistency_check(A,p,B);
+    this->consistency_check(A,p,B);
 
     x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     this->consistency_check(xl,xu,A,b,vt,p,B,x);
@@ -1251,9 +1280,9 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     tribool fs = this->_feasible(xl,xu,A,b,vt,p,B,x);
 
     ARIADNE_LOG(7,"vt="<<vt<<" p="<<p<<" fs="<<fs<<"\n");
-    Vector<X> c=compute_c(xl,xu,p,x,m);
-    y=compute_y(c,p,B);
-    Vector<X> z=compute_z(A,c,p,y);
+    Vector<X> c=Ariadne::compute_c(xl,xu,p,x,m);
+    y=Ariadne::compute_y(c,p,B);
+    Vector<X> z=Ariadne::compute_z(A,c,p,y);
     ARIADNE_LOG(7,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
 
     tribool vfs = this->verify_feasibility(xl,xu,A,b,vt);
@@ -1278,11 +1307,11 @@ template<> struct RigorousNumericsTraits<Float> { typedef Interval Type; };
 //  y (b - A_L x_L - A_U x_U) > 0
 //  z = c - y A  satisfies z_U < 0 and z_L > 0; by construction z_B = 0.
 template<class X> tribool
-SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const array<Slackness>& vt) const
+SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const Array<Slackness>& vt) const
 {
     ARIADNE_LOG(4,"verify_feasibility(Vector xl, Vector xu, Matrix A, Vector b, VariableTypeArray vt)\n");
     ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<"\n");
-    const array<size_t> p=compute_p(vt);
+    const Array<size_t> p=compute_p(vt);
 
     typedef Interval XX;
     const size_t m=A.row_size();
@@ -1380,8 +1409,8 @@ SimplexSolver<X>::minimise(const Vector<X>& c, const Vector<X>& xl, const Vector
     ARIADNE_ASSERT(xl.size()==n);
     ARIADNE_ASSERT(xu.size()==n);
 
-    array<Slackness> vt(n);
-    array<size_t> p(n);
+    Array<Slackness> vt(n);
+    Array<size_t> p(n);
     Matrix<X> B(m,m);
     Vector<X> x(n);
 
@@ -1396,7 +1425,7 @@ SimplexSolver<X>::minimise(const Vector<X>& c, const Vector<X>& xl, const Vector
 template<class X>
 Vector<X>
 SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                                      array<Slackness>& vt) const
+                                      Array<Slackness>& vt) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -1407,7 +1436,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
     ARIADNE_ASSERT(vt.size()==n);
     ARIADNE_ASSERT(static_cast<size_t>(std::count(vt.begin(),vt.end(),BASIS))==m);
 
-    array<size_t> p=compute_p(vt);
+    Array<size_t> p=compute_p(vt);
     Matrix<X> B=compute_B<X>(A,p);
 
     return hotstarted_minimise(c,xl,xu,A,b,vt,p,B);
@@ -1417,7 +1446,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 template<class X>
 Vector<X>
 SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                                      array<Slackness>& vt, array<size_t>& p, Matrix<X>& B) const
+                                      Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B) const
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();

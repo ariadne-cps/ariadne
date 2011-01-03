@@ -69,7 +69,7 @@ class Polyhedron
     explicit Polyhedron(uint n=0u);
 
     //! \brief Construct a polyhedron of dimension \a d with \a nc constraints from the data in the
-    //! array beginning at \a data. The jth element of the ith constraint is stored in position i*(d+1)+j,
+    //! Array beginning at \a data. The jth element of the ith constraint is stored in position i*(d+1)+j,
     //! and the ith inhomogeneous term is stored in position i*(d+1)+d.
     template<class XX> Polyhedron(uint d, uint nc, const XX* data);
 

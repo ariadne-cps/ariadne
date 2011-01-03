@@ -62,7 +62,7 @@ class Series
     static Series<X> acos(uint d, const X& x);
     static Series<X> atan(uint d, const X& x);
   private:
-    array<X> _data;
+    Array<X> _data;
 };
 
 template<class X> Series<X> operator+(X c, const Series<X>& x) {

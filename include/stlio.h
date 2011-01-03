@@ -186,24 +186,24 @@ read_sequence(std::istream& is, Container& v,
 
 
 template<class T> inline
-std::ostream& operator<<(std::ostream& os, const array<T>& ary) {
+std::ostream& operator<<(std::ostream& os, const Array<T>& ary) {
     return Ariadne::write_sequence(os,ary.begin(),ary.end(),'[',']');
 }
 
 
 template<class T> inline
 std::istream&
-operator>>(std::istream& is, array<T>& a) {
+operator>>(std::istream& is, Array<T>& a) {
     std::vector<T> v;
     read_sequence(is,v);
-    a=array<T>(v.begin(),v.end());
+    a=Array<T>(v.begin(),v.end());
     return is;
 }
 
 template<class T1>
 inline
 std::ostream&
-operator<<(std::ostream &os, const tuple<T1>& t)
+operator<<(std::ostream &os, const Tuple<T1>& t)
 {
     return os << '(' << t.first << ',' << ')';
 }
@@ -211,7 +211,7 @@ operator<<(std::ostream &os, const tuple<T1>& t)
 template<class T1, class T2>
 inline
 std::ostream&
-operator<<(std::ostream &os, const tuple<T1,T2>& t)
+operator<<(std::ostream &os, const Tuple<T1,T2>& t)
 {
     return os << '(' << t.first << ',' << t.second << ')';
 }
@@ -219,7 +219,7 @@ operator<<(std::ostream &os, const tuple<T1,T2>& t)
 template<class T1, class T2, class T3>
 inline
 std::ostream&
-operator<<(std::ostream &os, const tuple<T1,T2,T3>& t)
+operator<<(std::ostream &os, const Tuple<T1,T2,T3>& t)
 {
     return os << '(' << t.first << ',' << t.second << ',' << t.third << ')';
 }
@@ -227,7 +227,7 @@ operator<<(std::ostream &os, const tuple<T1,T2,T3>& t)
 template<class T1, class T2, class T3, class T4>
 inline
 std::ostream&
-operator<<(std::ostream &os, const tuple<T1,T2,T3,T4>& t)
+operator<<(std::ostream &os, const Tuple<T1,T2,T3,T4>& t)
 {
     return os << '(' << t.first << ',' << t.second << ',' << t.third << ',' << t.fourth << ')';
 }

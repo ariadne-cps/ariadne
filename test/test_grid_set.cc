@@ -599,7 +599,7 @@ void test_grid_sub_paving_one(){
     expected_result_arr[3] =  new GridCell( theTwoDimGrid, theHeight, make_binary_word("0111") );
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPTwoDim, 4 );
-    //Do not clean the array yet, the result well be reused
+    //Do not clean the Array yet, the result well be reused
 
     ARIADNE_PRINT_TEST_COMMENT("Recombine and Subdivide the sub-paving to cell width 0.5, this should give us four sub cells");
     //At this moment the coordinate cell widths are: for x -- 0.25 and for y -- 0.5

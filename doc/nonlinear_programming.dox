@@ -36,9 +36,11 @@
 Consider the nonlinear programming problem
 \f[ \framebox{$\max f(x) \text{ s.t. } g_j(x)\leq 0,\ j=1,\ldots,k; \ h_j(x)\leq 0,\ j=1,\ldots,l . $} \f]
 The standard Karush-Kuhn-Tucker conditions for optimality are
-\f[ \framebox{ $\begin{gathered} \nabla f(x) - \sum_{j=1}^{l} \lambda_j \nabla g_j(x) - \sum_{j=1}^{m} \kappa_j \nabla h_j(x) = 0; \\ \lambda_j g_j(x)=0; \\ h_j(x)=0; \\ \lambda_j \geq 0; \ g_j(x) \leq 0 \end{gathered}$ } \f]
+\f[ \framebox{ $\begin{gathered} \nabla f(x) - \sum_{j=1}^{l} \lambda_j \nabla g_j(x) - \sum_{k=1}^{m} \kappa_k \nabla h_k(x) = 0; \\ \lambda_j g_k(x)=0; \\ h_k(x)=0; \\ \lambda_j \geq 0; \ g_j(x) \leq 0 \end{gathered}$ } \f]
+The standard (Fritz) John conditions for optimality are
+\f[ \framebox{ $\begin{gathered} \mu \nabla f(x) - \sum_{j=1}^{l} \lambda_j \nabla g_j(x) - \sum_{k=1}^{m} \kappa_k \nabla h_k(x) = 0; \\ \lambda_j g_j(x)=0; \\ h_k(x)=0; \\ \sum_j \lambda_j + \sum_k \kappa_k^2 = \mu; \\ \lambda_j \geq 0; \ g_j(x) \leq 0 \end{gathered}$ } \f]
 The <em>central path</em> is defined by relaxation of the optimality conditions using
-\f[ \framebox{ $\begin{gathered} \ \lambda_j g_j(x)+\mu = 0; \\ h_j(x) + \kappa_j \mu = 0 . \end{gathered}$ } \f]
+\f[ \framebox{ $\begin{gathered} \ \lambda_j g_j(x)+\mu = 0; \\ h_k(x) + \kappa_k \mu = 0 . \end{gathered}$ } \f]
 
 \note Taking \f$f(x) = -cx\f$, \f$g(x)=-x\f$ and \f$h(x)=Ax-b\f$ yields the primal linear programming problem \f$\min cx \mid Ax=b,\ x\geq 0\f$.
 Taking \f$f(y)=yb\f$, \f$g(y) = yA-c\f$ yields the dual linear programming problem \f$\max yb \mid yA\leq c\f$.
@@ -53,6 +55,54 @@ We henceforth consider the generalised problem:
 \f[ \framebox{$\max f(x) \text{ s.t. } \underline{w}_j \leq g_j(x)\leq  \overline{w}_j, \ j=1,\ldots,m; \  \underline{x}_i \leq x_i\leq  \overline{x}_i;\ i=1,\ldots,n. $} \f]
 The <em>Lagrangian</em> function is defined as
 \f[ L(x,\lambda) = f(x) - \sum_{j=1}^{m} \lambda_j g_j(x) = f(x) - \lambda \cdot g(x) \f]
+
+\section general_nonlinear_optimisation General feasibility problem
+
+Consider the generalised feasibility problem:
+\f[ \framebox{$\underline{w}_j \leq g_j(x)\leq  \overline{w}_j, \ j=1,\ldots,m; \  \underline{x}_i \leq x_i\leq  \overline{x}_i;\ i=1,\ldots,n. $} \f]
+where \f$-\infty < \underline{x}_i < \overline{x}_i < +\infty\f$.
+The <em>Lagrangian</em> function is defined as
+\f[ L(x,\lambda) = \sum_{i=1}^{n} \log(x_i-\underline{x}_i)+\log(\overline{x}_i-x_i) + \sum_{j=1}^{m} \log(w_j-\underline{w}_j)+\log(\overline{w}_j-w_j) + \sum_{j=1}^{m} y_j (g_j(x)-w_j) = L(w,x,y) \f]
+Setting \f$w=g(x)\f$, a strictly feasible solution is obtained by solving the Karush-Kuhn-Tucker conditions
+\f[ \framebox{$\begin{gathered} g(x) - w = 0. \\
+       \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} - \sum_{j=1}^{m} y_j \nabla g(x_j) = 0 \\
+       \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} - y_j = 0 \end{gathered} $} \f]
+Setting
+\f$ z_i = 1/(x_i-\underline{x}_i) - 1/(\overline{x}_i-x_i), \f$
+we obtain the equations
+\f[ \framebox{$\begin{gathered}
+       g(x) - w = 0. \\
+       z_i - \sum_{j=1}^{m} y_j \nabla_i g(x_j) = 0 \\
+       \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} - z_i = 0 \\
+       \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} - y_j = 0 \end{gathered} $} \f]
+
+We can multiply out the fractional terms to obtain
+\f[ \framebox{$\begin{gathered}
+       g(x) - w = 0. \\
+       z_i - \sum_{j=1}^{m} y_j \nabla_i g(x_j) = 0 \\
+       z_i(x_i-\underline{x}_i)(\overline{x}_i-x_i) - (\underline{x}_i+\overline{x}_i-2x_i) = 0 \\
+       y_i(w_j-\underline{w}_j)(\overline{w}_j-w_j) - (\underline{w}_j+\overline{w}_j-2w_j) = 0 \end{gathered} $} \f]
+
+We can separate out the lower and upper terms to obtain
+\f[ \framebox{$\begin{gathered}
+       g(x) - w = 0. \\
+       (\underline{z}_i - \overline{z}_i) - \sum_{j=1}^{m} (\underline{y}_j - \overline{y}_j) \nabla_i g(x_j) = 0 \\
+       \underline{z}_i(x_i-\underline{x}_i) = 0; \quad
+       \overline{z}_i(\overline{x}_i-x_i) = 0 \\
+       \underline{y}_j(w_i-\underline{w}_i) = 0 ; \quad
+       \overline{y}_j(\overline{w}_j-w_j) = 0 \end{gathered} $} \f]
+
+We can eliminate \f$w\f$ to obtain
+\f[ \framebox{$\begin{gathered}
+       \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} - \sum_{j=1}^{m} y_j \nabla g(x_j) = 0 \\
+       \frac{1}{g_j(x)-\underline{w}_j} - \frac{1}{\overline{w}_j-g_j(x)} - y_j = 0 \text{ or } g_j(x)=\underline{\overline{w}}_j \end{gathered} $} \f]
+
+\remark
+If there are no equality constraints, we can eliminate \f$y\f$ to yield
+\f[ \displaystyle \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} - \sum_{j=1}^{m} \Biggl( \frac{1}{g_j(x)-\underline{w}_j} - \frac{1}{\overline{w}_j-g_j(x)} \Biggr) \, \nabla_i g_j(x) = 0  \f]
+If there are equality constraints, which we write \f$h_k(x) = 0\f$, then
+\f[ \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} - \sum_{j=1}^{m}  \Biggl( \frac{1}{g_j(x)-\underline{w}_j} - \frac{1}{\overline{w}_j-g_j(x)} \Biggr) \, \nabla_i g_j(x) + \sum_{k=1}^{l} y_k \, h_k(x) = 0 ; \qquad   h_k(x) = 0.  \f]
+However, since our general case includes both inequality and equality constraints, it is more straightforward to use Lagrange multipliers for both kinds of constraint.
 
 \section constraints Handling constraints
 
@@ -167,6 +217,20 @@ After the Newton-like step, the equality \f$g_i(x') + s_i'\f$ does not hold, unl
 We call methods in which the slack is stored and updated by a Newton-like step <em>primal-dual-slack</em> methods, to distinguish them from ordinary primal-dual methods.
 
 In general, enforcing primal feasibility using a primal-dual-slack method may be harder than for an ordinary primal-dual method. We doubt these methods are advantageous in practise.
+
+
+\section nonlinear_optimisation_feasibility_interval_methods Interval methods for solving the John conditions
+
+Introduce variables \f$w,y,z\f$ and use the following form of the John conditions
+\f[ \framebox{$\begin{gathered}
+       g(x) - w = 0. \\
+       z_i - \sum_{j=1}^{m} y_j \nabla_i g(x_j) = 0 \\
+       z_i (x_i-\underline{x}_i) (\overline{x}_i-x_i) - \mu (\underline{x}_i+\overline{x}_i-2x_i) = 0 \\
+       y_j (w_j-\underline{w}_j) (\overline{w}_j-w_j) - \mu (\underline{w}_j+\overline{w}_j-2w_j) = 0 \\
+       \sum_{j=1}^{m} y_j^2 + \sum_{i=1}^{n} z_i^2 = \mu^2 \end{gathered} $} \f]
+
+
+
 
 \section nonlinear_optimisation_dual_bounds Bounds on the objective function.
 

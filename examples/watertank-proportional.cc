@@ -174,7 +174,7 @@ int main(int argc,char *argv[])
     HybridTime evolution_time(skip_time,6);
 
     Box graphic_box(2, 18.0,skip_time, 5.0,6.0);
-    array<uint> tx(2,4,0);
+    Array<uint> tx(2,4,0);
 
     Vector<Float> lengths(5, 0.25, 1.0, 1.0, 1.0, 1.0);
     Grid grid(lengths);
@@ -235,7 +235,7 @@ int main(int argc,char *argv[])
 //    Box graphic_box(2, 18.0,32.0 , 5.0,6.0);
     Box graphic_box(2, skip_time,total_time , 5.0,7.0);
     Figure g1;
-    array<uint> tx(2,4,0);
+    Array<uint> tx(2,4,0);
     g1.set_bounding_box(graphic_box);
     g1.set_projection_map(ProjectionFunction(tx,5));
     g1 << Box(2, 18,32, hmax - Delta, hmax + Delta);
@@ -335,7 +335,7 @@ int main(int argc,char *argv[])
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
     Figure g;
     g.set_bounding_box(bounding_box);
-    array<uint> p(2,0,1);
+    Array<uint> p(2,0,1);
     g.set_projection_map(ProjectionFunction(p,4));
 
     g << fill_colour(Colour(0.0,0.5,1.0));

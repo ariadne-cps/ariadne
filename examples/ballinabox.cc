@@ -116,7 +116,7 @@ int main(int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final()="<<orbit.final()<<std::endl;
-    array<uint> xy(4,0,2);
+    Array<uint> xy(4,0,2);
     plot("ballinabox-orbit",PlanarProjectionMap(4,0,2),bounding_box, Colour(0.0,0.5,1.0), orbit);
 
 }

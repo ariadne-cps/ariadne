@@ -803,7 +803,7 @@ class VectorTaylorFunction
     // For compatibility wit Vector.
     uint size() const { return this->result_size(); }
   private:
-    array< array<Interval> > _powers(const Vector<Interval>&) const;
+    Array< Array<Interval> > _powers(const Vector<Interval>&) const;
     void _compute_jacobian() const;
     void _set_argument_size(uint n);
     uint _compute_maximum_component_size() const;

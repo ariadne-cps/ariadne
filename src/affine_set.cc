@@ -51,8 +51,8 @@ struct LinearProgram {
     Vector<X> c;
     Vector<X> l;
     Vector<X> u;
-    array<Slackness> vt;
-    array<size_t> p;
+    Array<Slackness> vt;
+    Array<size_t> p;
     Matrix<X> B;
     Vector<X> x;
     Vector<X> y;
@@ -606,7 +606,7 @@ AffineSet::boundary(uint xind, uint yind) const
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n");
 
     // Set up simplex algorithm working variables
-    array<Slackness> vt(0); array<size_t> p(nc+ne); Matrix<Float> B(nx+nc,nx+nc);
+    Array<Slackness> vt(0); Array<size_t> p(nc+ne); Matrix<Float> B(nx+nc,nx+nc);
     Vector<Float> x(nx+nc); Vector<Float> y(nc+ne);
 
     // Find an initial feasible point
@@ -632,7 +632,7 @@ AffineSet::boundary(uint xind, uint yind) const
     // Note that in in all cases, v0*d1-v1*d0 must be positive.
 
     int STEPS=0;
-    array<Slackness> initial_variable_type=vt;
+    Array<Slackness> initial_variable_type=vt;
 
     Vector<Float> pt=prod(G,x)+h; // The current point in space
     Vector<Float> last_vec(2,0.0,-1.0); // The direction in space of the last step along the boundary

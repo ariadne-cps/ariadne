@@ -76,11 +76,11 @@ class Matrix
     Matrix(size_t r, size_t c)
         : ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=0; } } }
 
-    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
+    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     template<class XX> Matrix(size_t r, size_t c, const XX* ptr)
         : ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
 
-    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr. The C-style array stores a matrix with row increment \a ri and column increment \a ci.
+    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr. The C-style Array stores a matrix with row increment \a ri and column increment \a ci.
     template<class XX> Matrix(size_t r, size_t c, const XX* ptr, int ri, int ci)
         : ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*ri+j*ci]; } } }
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
@@ -291,8 +291,8 @@ template<class X> std::ostream& operator<<(std::ostream& os, const DiagonalMatri
     return os << D.diagonal();
 }
 
-struct PivotMatrix : public array<size_t> {
-    PivotMatrix(size_t n=0u) : array<size_t>(n) {
+struct PivotMatrix : public Array<size_t> {
+    PivotMatrix(size_t n=0u) : Array<size_t>(n) {
         for(uint i=0; i!=n; ++i) { (*this)[i]=i; } }
 };
 
@@ -306,17 +306,17 @@ template<class X> struct QRMatrix {
 };
 
 
-tuple< PivotMatrix, Matrix<Float>, Matrix<Float> > triangular_decomposition(const Matrix<Float>& A);
+Tuple< PivotMatrix, Matrix<Float>, Matrix<Float> > triangular_decomposition(const Matrix<Float>& A);
 
 Vector<Float> row_norms(const Matrix<Float>& A);
-tuple< Matrix<Float>, PivotMatrix> triangular_factor(const Matrix<Float>& A);
+Tuple< Matrix<Float>, PivotMatrix> triangular_factor(const Matrix<Float>& A);
 Matrix<Float> triangular_multiplier(const Matrix<Float>& A);
-tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>&);
+Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>&);
 Matrix<Float> normalise_rows(const Matrix<Float>& A);
 
 Matrix<Float> midpoint(const Matrix<Interval>&);
 
-Matrix<Float> pivot_matrix(const array<size_t>& p);
+Matrix<Float> pivot_matrix(const Array<size_t>& p);
 
 
 template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x00, const double& x01, ...)

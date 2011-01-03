@@ -61,9 +61,9 @@ class DenseDifferential
     DenseDifferential();
     /// The constant zero of degree \a d in \a a arguments.
     DenseDifferential(uint a, uint d);
-    /// A taylor variable of degree \a d in \a arguments, with values given by the array based at \a ptr.
+    /// A taylor variable of degree \a d in \a arguments, with values given by the Array based at \a ptr.
     template<class XX> DenseDifferential(uint a, uint d, const XX* ptr);
-    /// A taylor variable of degree \a d in \a arguments, with values given by the array based at \a ptr.
+    /// A taylor variable of degree \a d in \a arguments, with values given by the Array based at \a ptr.
     template<class XX> DenseDifferential(const DenseDifferential<XX>& x);
   
     /// Assign from a constant.
@@ -87,9 +87,9 @@ class DenseDifferential
     /// The variation of the quantity with respect to the \a j<sup>th</sup> argument.
     const X& gradient(uint j) const;
     void set_gradient(uint j, const X&);
-    /// The array of derivative values.
+    /// The Array of derivative values.
     const Vector<X>& data() const;
-    /// A reference to the array of derivative values.
+    /// A reference to the Array of derivative values.
     Vector<X>& data();
     /// A reference to the \a i<sup>th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$.
     X& operator[](const MultiIndex& a); 
@@ -286,7 +286,7 @@ evaluate(const DenseDifferential<X>& y, const Vector<X>& x)
     X one = zero; one+=1;
 
     // Use inefficient brute-force approach with lots of storage...
-    array< array< X > > val(ms, array< X >(d+1));
+    Array< Array< X > > val(ms, Array< X >(d+1));
     for(uint j=0; j!=ms; ++j) {
         val[j][0]=one;
         val[j][1]=x[j];
@@ -324,7 +324,7 @@ evaluate(const DenseDifferential<X>& y, const Vector<Y>& x)
     Y one = zero; one+=1;
 
     // Use inefficient brute-force approach with lots of storage...
-    array< array< Y > > val(ms, array< Y >(d+1));
+    Array< Array< Y > > val(ms, Array< Y >(d+1));
     for(uint j=0; j!=ms; ++j) {
         val[j][0]=one;
         val[j][1]=x[j];

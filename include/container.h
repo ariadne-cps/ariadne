@@ -98,16 +98,6 @@ template<class T1, class T2> class Pair
 };
 
 
-template<class T> class Array
-    : public Ariadne::array<T>
-{
-  public:
-    Array() : Ariadne::array<T>() { }
-    Array(unsigned int n) : Ariadne::array<T>(n) { }
-    Array(const array<T>& l) : Ariadne::array<T>(l) { }
-    template<class I> Array(const I& b, const I& e) : Ariadne::array<T>(b,e) { }
-};
-
 template<class T> class List
     : public std::vector<T>
 {
@@ -226,15 +216,11 @@ template<class K,class V> inline Map<K,V> join(const Map<K,V>& m1, const Map<K,V
 
 
 template<class T> inline Array<T> make_array(const T& t) { return Array<T>(1u,t); }
-template<class T> inline Array<T> make_array(const List<T>& lst) { return Array<T>(lst.begin(),lst.end()); }
 template<class T> inline Array<T> make_array(const std::vector<T>& vec) { return Array<T>(vec.begin(),vec.end()); }
-template<class T> inline Array<T> make_array(const array<T>& ary) { return Array<T>(ary); }
 template<class T> inline Array<T> make_array(const Array<T>& ary) { return Array<T>(ary); }
 
 template<class T> inline List<T> make_list(const T& t) { return List<T>(1u,t); }
-template<class T> inline List<T> make_list(const List<T>& lst) { return lst; }
 template<class T> inline List<T> make_list(const std::vector<T>& vec) { return List<T>(vec); }
-template<class T> inline List<T> make_list(const array<T>& ary) { return List<T>(ary); }
 template<class T> inline List<T> make_list(const Array<T>& ary) { return List<T>(ary); }
 
 

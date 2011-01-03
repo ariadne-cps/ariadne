@@ -58,15 +58,15 @@ class TestSerialization
 
     void test_array() {
         double data[]={5,23,42,111,242};
-        const array<double> oary1(data,data+5);
-        const array<double> oary2(data,data+3);
-        ofstream ofs("test_serialization-array.txt");
+        const Array<double> oary1(data,data+5);
+        const Array<double> oary2(data,data+3);
+        ofstream ofs("test_serialization-Array.txt");
         text_oarchive txtoa(ofs);
         txtoa << oary1 << oary2;
         ofs.close();
 
-        array<double> iary1(100),iary2(1);
-        ifstream ifs("test_serialization-array.txt");
+        Array<double> iary1(100),iary2(1);
+        ifstream ifs("test_serialization-Array.txt");
         text_iarchive txtia(ifs);
         txtia >> iary1 >> iary2;
         ifs.close();
@@ -84,7 +84,7 @@ class TestSerialization
         text_oarchive txtoa(ofs);
 
         double xary[] = { 0.0, 1.0, 4.2, 1e-72, 1.2e+72 };
-        const array<Float> oxary(xary,xary+5);
+        const Array<Float> oxary(xary,xary+5);
         for(uint i=0; i!=oxary.size(); ++i) { txtoa << oxary[i]; }
 
         // Test output of special values
@@ -95,7 +95,7 @@ class TestSerialization
 
         ofs.close();
 
-        array<Float> ixary(oxary.size());
+        Array<Float> ixary(oxary.size());
         ifstream ifs("test_serialization-numeric.txt");
         text_iarchive txtia(ifs);
 

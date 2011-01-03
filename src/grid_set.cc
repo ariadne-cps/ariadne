@@ -177,32 +177,32 @@ bool Grid::operator!=(const Grid& g) const
     return !(*this==g);
 }
 
-array<double> Grid::index(const Vector<Float>& pt) const
+Array<double> Grid::index(const Vector<Float>& pt) const
 {
-    array<double> res(pt.size());
+    Array<double> res(pt.size());
     for(size_t i=0; i!=res.size(); ++i) {
         res[i]=subdivision_index(i,pt[i]);
     }
     return res;
 }
 
-array<double> Grid::lower_index(const Vector<Interval>& bx) const {
-    array<double> res(bx.size());
+Array<double> Grid::lower_index(const Vector<Interval>& bx) const {
+    Array<double> res(bx.size());
     for(size_t i=0; i!=res.size(); ++i) {
         res[i]=subdivision_lower_index(i,bx[i].lower());
     }
     return res;
 }
 
-array<double> Grid::upper_index(const Vector<Interval>& bx) const {
-    array<double> res(bx.size());
+Array<double> Grid::upper_index(const Vector<Interval>& bx) const {
+    Array<double> res(bx.size());
     for(size_type i=0; i!=res.size(); ++i) {
         res[i]=subdivision_upper_index(i,bx[i].upper());
     }
     return res;
 }
 
-Vector<Float> Grid::point(const array<int>& a) const
+Vector<Float> Grid::point(const Array<int>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -211,7 +211,7 @@ Vector<Float> Grid::point(const array<int>& a) const
     return res;
 }
 
-Vector<Float> Grid::point(const array<double>& a) const
+Vector<Float> Grid::point(const Array<double>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -220,7 +220,7 @@ Vector<Float> Grid::point(const array<double>& a) const
     return res;
 }
 
-Vector<Interval> Grid::box(const array<double>& lower, const array<double>& upper) const
+Vector<Interval> Grid::box(const Array<double>& lower, const Array<double>& upper) const
 {
     Vector<Interval> res(lower.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -1125,12 +1125,12 @@ void GridOpenCell::neighboring_cells( const uint theHeight, const BinaryWord& th
 GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeight,
                                          const BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) {
     const uint num_dimensions = theGrid.dimension();
-    //01. Allocate the array of size _theGrid.dimensions() in which we will store
+    //01. Allocate the Array of size _theGrid.dimensions() in which we will store
     //    the position in the path theBaseCellWord, for each dimension, from which on
     //    we need to inverse the path to get the proper neighboring cell.
     int invert_position[ num_dimensions ];
     const int NO_INVERSE_POSITION = theBaseCellWord.size();
-    //Initialize the array with NO_INVERSE_POSITION to make sure that the inversion positions
+    //Initialize the Array with NO_INVERSE_POSITION to make sure that the inversion positions
     //for the dimensions that are not set to one in cellPosition will be undefined. Also,
     //count the required number of iverse dimensions
     int inverseDimensionsNumber = 0;

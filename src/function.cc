@@ -491,10 +491,10 @@ struct ProjectionFunctionBody
     ProjectionFunctionBody(uint m, uint n, uint k) : _as(n), _p(m) {
         ARIADNE_ASSERT(m+k<=n); for(uint j=0; j!=m; ++j) { _p[j]=k+j; } }
     // \brief Construct the projection function  with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,m-1\f$.
-    ProjectionFunctionBody(uint m, uint n, const array<uint>& p) : _as(n), _p(p) {
+    ProjectionFunctionBody(uint m, uint n, const Array<uint>& p) : _as(n), _p(p) {
         ARIADNE_ASSERT(p.size()==m); for(uint i=0; i!=_p.size(); ++i) { ARIADNE_ASSERT(p[i]<n); } }
     // \brief Construct the projection function with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,|p|-1\f$.
-    ProjectionFunctionBody(const array<uint>& p, uint n) : _as(n), _p(p) {
+    ProjectionFunctionBody(const Array<uint>& p, uint n) : _as(n), _p(p) {
         for(uint i=0; i!=_p.size(); ++i) { ARIADNE_ASSERT(p[i]<n); } }
     ProjectionFunctionBody(const Range& rng, uint as) : _as(as), _p(rng.size()) {
         ARIADNE_ASSERT(rng.start()+rng.size()<=as);
@@ -510,7 +510,7 @@ struct ProjectionFunctionBody
         for(uint i=0; i!=result_size(); ++i) { r[i]=x[_p[i]]; } }
 
     uint _as;
-    array<uint> _p;
+    Array<uint> _p;
 };
 
 
@@ -1210,12 +1210,12 @@ ProjectionFunction::ProjectionFunction(uint m, uint n, uint k)
 {
 }
 
-ProjectionFunction::ProjectionFunction(const array<uint>& p, uint n)
+ProjectionFunction::ProjectionFunction(const Array<uint>& p, uint n)
     : RealVectorFunction(new ProjectionFunctionBody(p,n))
 {
 }
 
-ProjectionFunction::ProjectionFunction(uint m, uint n, const array<uint>& p)
+ProjectionFunction::ProjectionFunction(uint m, uint n, const Array<uint>& p)
     : RealVectorFunction(new ProjectionFunctionBody(m,n,p))
 {
 }

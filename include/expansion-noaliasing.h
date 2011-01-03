@@ -185,7 +185,7 @@ inline bool operator<(const KeyDataValue<K,D>& dv1, const KeyDataReference<KP,DP
 }
 
 template<class K, class D>
-std::ostream& operator<<(std::ostream& os, const boost::tuple<K,D>& tup) {
+std::ostream& operator<<(std::ostream& os, const boost::Tuple<K,D>& tup) {
     //return os << "(" << v.get<0>() << ":" << v.get<1>() << ")";
     return os << "(" << "??" << ")";
 }
@@ -382,7 +382,7 @@ class Expansion
         this->resize(this->size()+1u);
         this->back().key()=a1; this->back().key()+=a2; this->back().data()=x; }
   public:
-    std::ostream& write(std::ostream& os, const array<std::string>& variables) const;
+    std::ostream& write(std::ostream& os, const Array<std::string>& variables) const;
   private:
   public:
     MultiIndexList _indices;
@@ -538,7 +538,7 @@ inline Expansion<Float> midpoint(const Expansion<Interval>& pse) {
 
 
 template<class X>
-std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& variable_names) const
+std::ostream& Expansion<X>::write(std::ostream& os, const Array<std::string>& variable_names) const
 {
     ARIADNE_ASSERT(this->argument_size()==variable_names.size());
     const Expansion<X>& p=*this;
@@ -570,7 +570,7 @@ std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& va
 
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
-    array<std::string> variable_names(p.argument_size());
+    Array<std::string> variable_names(p.argument_size());
     for(uint j=0; j!=p.argument_size(); ++j) {
         std::stringstream sstr;
         sstr << 'x' << j;

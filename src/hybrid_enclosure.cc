@@ -515,7 +515,7 @@ HybridEnclosure::kuhn_recondition()
         }
     }
     std::cerr<<"dependencies="<<dependencies<<"\n";
-    array< Pair<Float,Nat> > column_max_dependencies(this->number_of_parameters());
+    Array< Pair<Float,Nat> > column_max_dependencies(this->number_of_parameters());
     for(uint j=0; j!=dependencies.column_size(); ++j) {
         column_max_dependencies[j] = make_pair(Float(0.0),Nat(j));
         for(uint i=0; i!=dependencies.row_size(); ++i) {

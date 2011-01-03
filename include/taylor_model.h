@@ -587,11 +587,11 @@ TaylorModel<Interval> unscale(const TaylorModel<Interval>& x, const Interval& iv
 //! \relates TaylorModel<Interval> \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
 TaylorModel<Interval> rescale(const TaylorModel<Interval>& x, const Interval& ivl1, const Interval& ivl2);
 
-//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+//! \relates TaylorModel<Interval> \brief Evaluate an Array of Taylor variables on a vector.
 Interval evaluate(const TaylorModel<Interval>& x, const Vector<Interval>& sy);
-//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+//! \relates TaylorModel<Interval> \brief Evaluate an Array of Taylor variables on a vector.
 TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Float c);
-//! \relates TaylorModel<Interval> \brief Evaluate an array of Taylor variables on a vector.
+//! \relates TaylorModel<Interval> \brief Evaluate an Array of Taylor variables on a vector.
 TaylorModel<Interval> partial_evaluate(const TaylorModel<Interval>& x, uint k, Interval c);
 //! \relates TaylorModel<Interval>
 //! Substitute the TaylorModel<Interval> y in the  kth variable of \a x.
@@ -624,12 +624,12 @@ TaylorModel<Interval> restrict(const TaylorModel<Interval>&, uint k, const Inter
 
 //! \brief Abstract away the given variables.
 //! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
-TaylorModel<Interval>  discard(const TaylorModel<Interval>&, const array<uint>& variables);
+TaylorModel<Interval>  discard(const TaylorModel<Interval>&, const Array<uint>& variables);
 
-TaylorModel<Interval> recondition(const TaylorModel<Interval>& tm, array<uint>& discarded_variables,
+TaylorModel<Interval> recondition(const TaylorModel<Interval>& tm, Array<uint>& discarded_variables,
                                   uint number_of_error_variables);
 
-TaylorModel<Interval> recondition(const TaylorModel<Interval>& tm, array<uint>& discarded_variables,
+TaylorModel<Interval> recondition(const TaylorModel<Interval>& tm, Array<uint>& discarded_variables,
                                   uint number_of_error_variables, uint index_of_error);
 
 //! \relates TaylorModel<Interval>
@@ -640,10 +640,10 @@ TaylorModel<Interval> recondition(const TaylorModel<Interval>& tm, array<uint>& 
 //! and is guaranteed to contain any function contained in both arguments.
 TaylorModel<Interval> intersection(const TaylorModel<Interval>& x1, const TaylorModel<Interval>& x2);
 
-// Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain
+// Compose an Array of Taylor variables with another, assuming that y has been scaled to have unit codomain
 TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector< TaylorModel<Interval> >& y);
 
-// Compose an array of Taylor variables with another, after scaling by the interval vectors
+// Compose an Array of Taylor variables with another, after scaling by the interval vectors
 TaylorModel<Interval> compose(const TaylorModel<Interval>& x, const Vector<Interval>& bx, const Vector< TaylorModel<Interval> >& y);
 
 Float norm(const Vector< TaylorModel<Interval> >& tv);

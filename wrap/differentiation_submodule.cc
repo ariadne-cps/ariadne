@@ -28,10 +28,12 @@
 #include "taylor_model.h"
 #include "differential.h"
 
+#include "utilities.h"
+
 using namespace boost::python;
 using namespace Ariadne;
 
-template<class X> void read_array(array<X>&, const boost::python::object& obj) { }
+template<class X> void read_array(Array<X>&, const boost::python::object& obj) { }
 inline uint compute_polynomial_data_size(uint rs, uint as, uint d) { return rs*Ariadne::bin(d+as,as); }
 
 template<class DIFF>
@@ -40,7 +42,7 @@ make_differential(const uint& as, const uint& d, const boost::python::object& ob
 {
     typedef typename DIFF::ValueType X;
     DIFF* result=new DIFF(as,d);
-    array<X> data;
+    Array<X> data;
     read_array(data,obj);
     assert(data.size()==compute_polynomial_data_size(1u,as,d));
     MultiIndex i(as);
@@ -69,7 +71,7 @@ Vector<DIFF>*
 make_differential_vector(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj)
 {
     typedef typename DIFF::ValueType X;
-    array<X> data;
+    Array<X> data;
     read_array(data,obj);
     ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
     Vector<DIFF>* result=new Vector<DIFF>(rs,DIFF(as,d,data.begin()));
@@ -116,6 +118,14 @@ void export_differential(const char* name)
     differential_class.def(self/self);
     differential_class.def(self+X());
     differential_class.def(self-X());
+    differential_class.def(self*X());
+    differential_class.def(self/X());
+    differential_class.def(X()+self);
+    differential_class.def(X()-self);
+    differential_class.def(X()*self);
+    differential_class.def(self+=self);
+    differential_class.def(self-=self);
+    //differential_class.def(self*=self);
     differential_class.def(self+=X());
     differential_class.def(self-=X());
     differential_class.def(self*=X());
@@ -173,9 +183,9 @@ export_differential_vector(const char* name)
     differential_vector_class.def("__getitem__", &get_item<DV,int,D>);
     differential_vector_class.def("__setitem__",&set_item<DV,int,X>);
     differential_vector_class.def("__setitem__",&set_item<DV,int,D>);
-    differential_vector_class.def(-self);
-    differential_vector_class.def(self+self);
-    differential_vector_class.def(self-self);
+    differential_vector_class.def("__neg__",&__neg__<DV,DV>);
+    differential_vector_class.def("__add__",&__add__<DV,DV,DV>);
+    differential_vector_class.def("__sub__",&__sub__<DV,DV,DV>);
     differential_vector_class.def(self+V());
     differential_vector_class.def(self-V());
     differential_vector_class.def(self*X());
@@ -200,11 +210,11 @@ template void export_differential_vector< Differential<Interval> >(const char*);
 
 void differentiation_submodule()
 {
-    export_differential< Differential<Float> >("Differential");
+    export_differential< Differential<Float> >("FloatDifferential");
     export_differential< Differential<Interval> >("IntervalDifferential");
     //export_differential< Differential<IntervalTaylorModel> >("TaylorModelDifferential");
 
-    export_differential_vector< Differential<Float> >("DifferentialVector");
+    export_differential_vector< Differential<Float> >("FloatDifferentialVector");
     export_differential_vector< Differential<Interval> >("IntervalDifferentialVector");
     //export_differential_vector< Differential<IntervalTaylorModel> >("TaylorModelDifferentialVector");
 }

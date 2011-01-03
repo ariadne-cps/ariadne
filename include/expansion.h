@@ -465,7 +465,7 @@ class Expansion
         for(unsigned int j=0; j!=_index_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
         data_type* xp=reinterpret_cast<data_type*>(this->_end_ptr())-1; *xp=x; }
   public:
-    std::ostream& write(std::ostream& os, const array<std::string>& variables) const;
+    std::ostream& write(std::ostream& os, const Array<std::string>& variables) const;
   private:
     size_type _argument_size;
     std::vector<word_type> _coefficients;
@@ -578,7 +578,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
 
     const uint n=e.argument_size();
     const Y z=x[0]*0; // The zero element of the ring Y
-    array< Y > r(e.argument_size(),z); // An array of "registers" containing working p(x[0],...,x[k])
+    Array< Y > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
     const_iterator iter=e.begin();
     const_iterator end=e.end();
     uint k=n;   // The current working register
@@ -709,7 +709,7 @@ inline Expansion<Float> midpoint(const Expansion<Interval>& pse) {
 
 
 template<class X>
-std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& variable_names) const
+std::ostream& Expansion<X>::write(std::ostream& os, const Array<std::string>& variable_names) const
 {
     ARIADNE_ASSERT(this->argument_size()==variable_names.size());
     const Expansion<X>& p=*this;
@@ -739,7 +739,7 @@ std::ostream& Expansion<X>::write(std::ostream& os, const array<std::string>& va
 
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
-    array<std::string> variable_names(p.argument_size());
+    Array<std::string> variable_names(p.argument_size());
     for(uint j=0; j!=p.argument_size(); ++j) {
         std::stringstream sstr;
         sstr << 'x' << j;

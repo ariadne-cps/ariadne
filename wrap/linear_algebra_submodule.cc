@@ -73,7 +73,7 @@ void __vsetitem__(Vector<X>& v, int i, const X& x)
 
 
 template<class X>
-X __mgetitem__(const Matrix<X>& A, const boost::python::Tuple& tup)
+X __mgetitem__(const Matrix<X>& A, const boost::python::tuple& tup)
 {
     uint i=boost::python::extract<uint>(tup[0]);
     uint j=boost::python::extract<uint>(tup[1]);
@@ -81,7 +81,7 @@ X __mgetitem__(const Matrix<X>& A, const boost::python::Tuple& tup)
 }
 
 template<class X>
-void __msetitem__(Matrix<X>& A, const boost::python::Tuple& tup, const X& x)
+void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const X& x)
 {
     uint i=boost::python::extract<uint>(tup[0]);
     uint j=boost::python::extract<uint>(tup[1]);

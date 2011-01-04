@@ -43,7 +43,7 @@ using namespace Ariadne;
 
 
 template<class X>
-boost::python::Tuple
+boost::python::tuple
 python_compute_basis(const Matrix<X>& A) {
     Array<size_t> p;
     Matrix<X> B;

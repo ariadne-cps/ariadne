@@ -66,7 +66,7 @@ struct from_python<MultiIndex> {
         if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
         void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
-        boost::python::extract<boost::python::Tuple> xtup(obj_ptr);
+        boost::python::extract<boost::python::tuple> xtup(obj_ptr);
         boost::python::extract<boost::python::list> xlst(obj_ptr);
         if(xlst.check()) {
             MultiIndex a(len(xlst)); for(uint i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<uint>(xlst()[i]); }
@@ -92,7 +92,7 @@ struct from_python< Expansion<T> > {
         boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.values();
         for(int i=0; i!=len(lst); ++i) {
-            boost::python::Tuple tup=boost::python::extract<boost::python::Tuple>(lst[i]);
+            boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[i]);
             MultiIndex a=boost::python::extract<MultiIndex>(tup[0]);
             T c=extract<T>(tup[1]);
             r.append(a,c);

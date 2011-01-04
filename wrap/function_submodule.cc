@@ -60,7 +60,7 @@ struct from_python< MultiIndex >
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<MultiIndex>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        boost::python::Tuple tup=extract<boost::python::Tuple>(obj_ptr);
+        boost::python::tuple tup=extract<boost::python::tuple>(obj_ptr);
         void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
         MultiIndex res(len(tup));
         for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<uint>(tup[i])); }

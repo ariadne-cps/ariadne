@@ -28,6 +28,7 @@
 #define ARIADNE_FLOAT_H
 
 #include <iostream> // For std::floor std::ceil etc
+#include <iomanip> // For std::setprecision
 #include <cmath> // For std::floor std::ceil etc
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>

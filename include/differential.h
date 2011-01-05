@@ -53,6 +53,8 @@ template<class X> class Differential;
 
 typedef Differential<Float> FloatDifferential;
 typedef Differential<Interval> IntervalDifferential;
+typedef Vector< Differential<Float> > FloatDifferentialVector;
+typedef Vector< Differential<Interval> > IntervalDifferentialVector;
 
 template<class X> Differential<X>& operator+=(Differential<X>& x, const Differential<X>& y);
 template<class X> Differential<X>& operator-=(Differential<X>& x, const Differential<X>& y);
@@ -1142,6 +1144,30 @@ compose(const Vector< Differential<X> >& x,
     Vector< Differential<X> > r=evaluate(x,ync);
     //std::cerr<<"r="<<r<<"\n"<<std::endl;
     ync+=yv;
+    return r;
+}
+
+template<class X>
+Vector< Differential<X> >
+lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg)
+{
+    Vector< Differential<X> > r(df.result_size(),df.argument_size(),df.degree()-1);
+    Differential<X> t(df.argument_size(), df.degree()-1);
+    for(uint i=0; i!=df.result_size(); ++i) {
+        Expansion<X> const& dfi_expansion = df[i].expansion();
+        Expansion<X>& t_expansion = t.expansion();
+        for(uint j=0; j!=df.argument_size(); ++j) {
+            for(typename Expansion<X>::const_iterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
+                if(iter->key()[j]!=0) {
+                    t_expansion.append(iter->key(),iter->data());
+                    t_expansion.back().data()*=t_expansion.back().key()[j];
+                    t_expansion.back().key()[j]-=1;
+                }
+            }
+            r[i]+=t*dg[j];
+            t.clear();
+        }
+    }
     return r;
 }
 

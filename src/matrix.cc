@@ -583,7 +583,6 @@ triangular_multiplier(const Matrix<Float>& A)
 }
 
 
-
 Matrix<Float> pivot_matrix(const Array<size_t>& pv)
 {
     const size_t n=pv.size();
@@ -598,12 +597,20 @@ Matrix<Float> pivot_matrix(const Array<size_t>& pv)
     return P;
 }
 
-// Compute the orthogonal decomposition A=QR without column pivoting. The
+PivotMatrix::operator Matrix<Float> () const {
+    return pivot_matrix(*this);
+}
+
+std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv) {
+    return os << static_cast< Matrix<Float> >(pv);
+}
+
+// Compute the orthogonal decomposition A=QR with or without column pivoting. The
 // matrix Q is built up as a composition of elementary Householder
 // transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
 // chosen to be a multiple of the first working column of A.
 Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix >
-orthogonal_decomposition(const Matrix<Float>& A)
+orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting)
 {
     typedef Float X;
 
@@ -626,8 +633,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
     for(size_t k=0; k!=min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" Q="<<Q<<" R="<<R<<std::flush;
 
-        bool pivoting=true;
-        if(pivoting) {
+        if(allow_pivoting) {
             // Find a pivot column
             size_t pivot_column=k;
             X max_column_norm=0.0;

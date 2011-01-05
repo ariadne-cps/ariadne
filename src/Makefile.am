@@ -51,6 +51,7 @@ ARIADNE_SRC = \
 	graphics.cc
 
 EXTRAS_SRC = \
+	runge_kutta_integrator.cc \
 	geometry.cc \
 	zonotope.cc \
 	polytope.cc \

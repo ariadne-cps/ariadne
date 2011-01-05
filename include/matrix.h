@@ -294,7 +294,9 @@ template<class X> std::ostream& operator<<(std::ostream& os, const DiagonalMatri
 struct PivotMatrix : public Array<size_t> {
     PivotMatrix(size_t n=0u) : Array<size_t>(n) {
         for(uint i=0; i!=n; ++i) { (*this)[i]=i; } }
+    operator Matrix<Float> () const;
 };
+std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv);
 
 template<class X> struct PLUMatrix {
     PivotMatrix P; Matrix<X> LU;
@@ -311,7 +313,7 @@ Tuple< PivotMatrix, Matrix<Float>, Matrix<Float> > triangular_decomposition(cons
 Vector<Float> row_norms(const Matrix<Float>& A);
 Tuple< Matrix<Float>, PivotMatrix> triangular_factor(const Matrix<Float>& A);
 Matrix<Float> triangular_multiplier(const Matrix<Float>& A);
-Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>&);
+Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>&, bool allow_pivoting=true);
 Matrix<Float> normalise_rows(const Matrix<Float>& A);
 
 Matrix<Float> midpoint(const Matrix<Interval>&);

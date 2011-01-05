@@ -38,19 +38,11 @@
 
 namespace Ariadne {
 
-template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
-    Vector<X> r(v1.size()+v2.size()+1u);
-    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
-    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
-    r[v1.size()+v2.size()]=s3;
-    return r;
-}
-
 
 Pair<Float,IntervalVector>
 IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
 {
-
+    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(RealVectorFunction vf, IntervalVector dx, Float hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
@@ -131,33 +123,37 @@ IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& 
 VectorTaylorFunction
 IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
 {
+    ARIADNE_LOG(1,"IntegratorBase::flow(RealVectorFunction vf, IntervalVector dx0, Real tmax)\n");
+    ARIADNE_LOG(2,"vf="<<vf<<"\n");
+    ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
-    VectorTaylorFunction flow=VectorTaylorFunction::identity(dx0);
+    VectorTaylorFunction flow_function=VectorTaylorFunction::identity(dx0);
     Float t=0.0;
     while(t<tmax) {
-        IntervalVector dx=flow.range();
+        IntervalVector dx=flow_function.range();
         Float h=tmax-t;
         IntervalVector bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
-        VectorTaylorFunction step=this->flow_step(vf,dx,h,bx);
-        step=partial_evaluate(step,n,h);
-        flow=compose(step,flow);
+        VectorTaylorFunction step_function=this->flow_step(vf,dx,h,bx);
+        step_function=partial_evaluate(step_function,n,h);
+        flow_function=compose(step_function,flow_function);
         t=t+h;
     }
-    return flow;
+    return flow_function;
 }
 
 
 VectorTaylorFunction
 IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, const Interval& dt) const
 {
+    ARIADNE_LOG(1,"IntegratorBase::flow(RealVectorFunction vf, IntervalVector dx0, Interval dt)\n");
     Real dtl=Real(dt.lower());
     VectorTaylorFunction evolve=this->flow(vf,dx0,dtl);
     Float dtw=dt.upper()-dt.lower();
     IntervalVector dx=evolve.range();
     Float h;
     IntervalVector bx;
-    make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
+    make_lpair(h,bx) = this->flow_bounds(vf,dx,dtw);
     ARIADNE_ASSERT_MSG(dtw==h,"Width of time interval "<<dt<<" cannot be covered in a single flow step; maximum flow step "<<h<<" over domain "<<dx);
     VectorTaylorFunction step=this->flow_step(vf,dx,h,bx);
     ScalarTaylorFunction time=ScalarTaylorFunction::identity(dt)-dt.lower();
@@ -170,6 +166,7 @@ IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, co
 VectorTaylorFunction
 IntegratorBase::flow_step(const RealVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
 {
+    ARIADNE_LOG(3,"IntegratorBase::flow_step(RealVectorFunction vf, IntervalVector dx, Float hmax)\n");
     Float h;
     IntervalVector bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
@@ -179,55 +176,44 @@ IntegratorBase::flow_step(const RealVectorFunction& vf, const IntervalVector& dx
 VectorTaylorFunction
 TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
 {
-    ARIADNE_LOG(2,"f="<<f<<" dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
+    ARIADNE_LOG(3,"PicardIntegrator::flow_step(RealVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
+    ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
     const double sw=this->_sweep_threshold;
 
     IntervalVector dom=join(dx,Interval(-h,h));
-    ARIADNE_LOG(3,"dom="<<dom<<"\n");
+    ARIADNE_LOG(7,"dom="<<dom<<"\n");
 
-/*
-    VectorTaylorFunction phi0(VectorTaylorFunction(nx,ScalarTaylorFunction(dom)));
-    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::coordinate(dom,i); }
-    ARIADNE_LOG(0,"phi0="<<phi0<<"\n");
-*/
     VectorTaylorFunction phi0(nx,ScalarTaylorFunction(dom));
     for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::coordinate(dom,i); phi0[i].set_sweep_threshold(sw); }
-    ARIADNE_LOG(3,"phi0="<<phi0<<"\n");
+    ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
 
     VectorTaylorFunction phi(nx,ScalarTaylorFunction(dom));
     for(uint i=0; i!=nx; ++i) { phi[i]=ScalarTaylorFunction::constant(dom,bx[i]); phi0[i].set_sweep_threshold(sw); }
 
-    /*
-    for(uint k=0; k!=this->_temporal_order; ++k) {
-        for(uint i=0; i!=nx; ++i) {
-            phi[np+i]=antiderivative(compose(vf[i],phi),np+nx)+phi0[i];
-        }
-    }
-    */
-
-    ARIADNE_LOG(4,"phi="<<phi<<"\n");
-    for(uint k=0; k!=this->temporal_order(); ++k) {
+    ARIADNE_LOG(5,"phi="<<phi<<"\n");
+    for(uint k=0; k!=this->_maximum_temporal_order; ++k) {
         bool last_step=(phi.error()<this->maximum_error());
         VectorTaylorFunction fphi=compose(f,phi);
-        ARIADNE_LOG(4,"fphi="<<fphi<<"\n");
+        ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         for(uint i=0; i!=nx; ++i) {
             phi[i]=antiderivative(fphi[i],nx)+phi0[i];
         }
-        ARIADNE_LOG(3,"phi="<<phi<<"\n");
+        ARIADNE_LOG(4,"phi="<<phi<<"\n");
         if(last_step) { break; }
     }
 
     if(phi.error()>this->maximum_error()) {
-        ARIADNE_WARN("Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->temporal_order()<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
+        ARIADNE_WARN("Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
     VectorTaylorFunction res(nx,ScalarTaylorFunction(dom));
     for(uint i=0; i!=nx; ++i) { res[i]=phi[i]; res[i].set_sweep_threshold(sw); res[i].sweep(); }
-    ARIADNE_LOG(3,"res="<<res<<"\n");
+    ARIADNE_LOG(4,"res="<<res<<"\n");
     return res;
 
 }
+
 
 
 } // namespace Ariadne

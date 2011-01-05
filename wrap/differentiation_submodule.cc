@@ -56,11 +56,11 @@ make_differential(const uint& as, const uint& d, const boost::python::object& ob
 
 template<class DIFF>
 boost::python::list
-make_differential_variables(const uint& d, const Vector<Interval>& x)
+make_differential_variables(const uint& d, const Vector<typename DIFF::NumericType>& x)
 {
     boost::python::list result;
     for(uint i=0; i!=x.size(); ++i) {
-        result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::ValueType>(x[i]),i));
+        result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::NumericType>(x[i]),i));
     }
     return result;
 }
@@ -107,9 +107,7 @@ void export_differential(const char* name)
     class_<D> differential_class(name);
     //differential_class.def("__init__", make_constructor(&make_differential<X>) );
     differential_class.def( init< uint, uint >());
-    differential_class.def("value", (const X&(D::*)()const) &D::value, return_value_policy<copy_const_reference>());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
-    differential_class.def("__setitem__",&set_item<D,MultiIndex,double>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,X>);
     differential_class.def(-self);
     differential_class.def(self+self);
@@ -134,11 +132,11 @@ void export_differential(const char* name)
 
     differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());
     differential_class.def("gradient",(Vector<X>(D::*)()const)&D::gradient);
-    differential_class.def("hessian", &D::hessian);
+    differential_class.def("hessian", (Matrix<X>(D::*)()const)&D::hessian);
 
-    differential_class.def("constant",(D(*)(uint, ushort, const X&))&D::constant);
-    differential_class.def("variable",(D(*)(uint, ushort, const X&, uint))&D::variable);
-    differential_class.def("variables",&make_differential_variables<D>);
+    differential_class.def("constant",(D(*)(uint, uint, const X&))&D::constant);
+    differential_class.def("variable",(D(*)(uint, uint, const X&, uint))&D::variable);
+    differential_class.def("variables",(Vector<D>(*)(uint, const Vector<X>&))&D::variables);
 
     differential_class.staticmethod("constant");
     differential_class.staticmethod("variable");
@@ -179,25 +177,27 @@ export_differential_vector(const char* name)
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
     differential_vector_class.def( init< uint, uint, uint >());
     differential_vector_class.def("__getitem__", &matrix_get_item<DV,int,MultiIndex,X>);
-    differential_vector_class.def("__setitem__",&matrix_set_item<DV,int,MultiIndex,double>);
     differential_vector_class.def("__getitem__", &get_item<DV,int,D>);
     differential_vector_class.def("__setitem__",&set_item<DV,int,X>);
     differential_vector_class.def("__setitem__",&set_item<DV,int,D>);
     differential_vector_class.def("__neg__",&__neg__<DV,DV>);
     differential_vector_class.def("__add__",&__add__<DV,DV,DV>);
     differential_vector_class.def("__sub__",&__sub__<DV,DV,DV>);
-    differential_vector_class.def(self+V());
-    differential_vector_class.def(self-V());
-    differential_vector_class.def(self*X());
-    differential_vector_class.def(self+=V());
-    differential_vector_class.def(self-=V());
-    differential_vector_class.def(self*=X());
+    differential_vector_class.def("__add__",&__add__<DV,DV,V>);
+    differential_vector_class.def("__sub__",&__sub__<DV,DV,V>);
+    //differential_vector_class.def("__mul__",&__mul__<DV,DV,D>);
+    //differential_vector_class.def("__div__",&__div__<DV,DV,D>);
+    differential_vector_class.def("__rmul__",&__rmul__<DV,DV,X>);
+    differential_vector_class.def("__mul__",&__mul__<DV,DV,X>);
+    differential_vector_class.def("__div__",&__div__<DV,DV,X>);
     differential_vector_class.def("value", &DV::value);
     differential_vector_class.def("jacobian", &DV::jacobian);
     differential_vector_class.def(self_ns::str(self));
 
     def("compose",(D(*)(const D&,const DV&))&compose);
     def("compose",(DV(*)(const DV&,const DV&))&compose);
+    
+    def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
 template void export_differential< Differential<Float> >(const char*);

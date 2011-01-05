@@ -254,6 +254,14 @@ Vector<X> join(const X& s1, const X& s2)
     return r;
 }
 
+template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
+    Vector<X> r(v1.size()+v2.size()+1u);
+    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
+    r[v1.size()+v2.size()]=s3;
+    return r;
+}
+
 
 
 template<class X1, class X2>

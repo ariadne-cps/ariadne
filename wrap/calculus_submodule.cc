@@ -169,6 +169,8 @@ void export_taylor_model()
     typedef Polynomial<Interval> IP;
     typedef RealScalarFunction FI;
 
+    def("set_default_sweep_threshold",&TaylorModelAccuracy::set_default_sweep_threshold);
+    
     class_< ExpansionValue<Float> > expansion_value_class("ExpansionValue", init<MultiIndex,Float>());
     // TODO: Add get/set for data
     // TODO: Use property for key
@@ -293,6 +295,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("centre", &ScalarTaylorFunction::centre);
     scalar_taylor_function_class.def("range", &ScalarTaylorFunction::range);
     scalar_taylor_function_class.def("model", (const IntervalTaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
+    scalar_taylor_function_class.def("number_of_nonzeros", (uint(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::number_of_nonzeros);
     scalar_taylor_function_class.def("__getitem__", &__getitem__<ScalarTaylorFunction,MultiIndex,Float>);
     scalar_taylor_function_class.def("__setitem__",&__setitem__<ScalarTaylorFunction,MultiIndex,Float>);
     scalar_taylor_function_class.def(+self);

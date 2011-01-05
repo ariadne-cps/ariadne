@@ -221,7 +221,7 @@ template<class Op> struct BinaryFunctionBody
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << _arg1.raw_pointer() << symbol(_op.code()) << _arg2.raw_pointer(); }
+        return os << '(' << _arg1.raw_pointer() << symbol(_op.code()) << _arg2.raw_pointer() << ')'; }
     virtual std::ostream& write(std::ostream& os) const {
         return os << "F["<<this->argument_size()<<"]("<< this <<")"; }
 
@@ -680,6 +680,7 @@ RealScalarFunction RealScalarFunction::constant(Nat n, Real c)
 RealScalarFunction RealScalarFunction::coordinate(Nat n, Nat j)
 {
     return RealScalarFunction(new ScalarCoordinateFunctionBody(n,j));
+    //return RealScalarFunction(new RealScalarFormulaFunction(n,RealFormula::coordinate(j)));
 
     Polynomial<Interval> p(n);
     p[MultiIndex::unit(n,j)]=1.0;

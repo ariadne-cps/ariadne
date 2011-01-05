@@ -30,6 +30,7 @@
 
 #include "integrator_interface.h"
 #include "integrator.h"
+#include "runge_kutta_integrator.h"
 
 #include "utilities.h"
 
@@ -110,12 +111,15 @@ void export_solver()
 void export_integrator()
 {
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
-    integrator_wrapper_class.def("flow",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Real&)const)&IntegratorInterface::flow);
     integrator_wrapper_class.def("flow",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Interval&)const)&IntegratorInterface::flow);
+    integrator_wrapper_class.def("flow",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Real&)const)&IntegratorInterface::flow);
     integrator_wrapper_class.def("flow_bounds",(Pair<Float,IntervalVector>(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Float&)const)&IntegratorInterface::flow_bounds);
     integrator_wrapper_class.def("flow_step",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Float&)const)&IntegratorInterface::flow_step);
     integrator_wrapper_class.def("flow_step",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&)const)&IntegratorInterface::flow_step);
-    class_<TaylorIntegrator, bases<IntegratorInterface> > taylor_integrator_class("TaylorIntegrator",init<unsigned int,double>());
+
+    class_<RungeKutta4Integrator > runge_kutta_4_integrator_class("RungeKutta4Integrator",init<double>());
+    runge_kutta_4_integrator_class.def("step", &RungeKutta4Integrator::step);
+    runge_kutta_4_integrator_class.def("evolve", &RungeKutta4Integrator::evolve);
 }
 
 

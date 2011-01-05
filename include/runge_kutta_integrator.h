@@ -40,7 +40,8 @@ template<class T> class List;
 class Float;
 template<class X> class Vector;
 typedef Vector<Float> FloatVector;
-class VectorFunction;
+template<class X> class VectorFunctionInterface;
+typedef VectorFunctionInterface<Float> FloatVectorFunctionInterface;
 
 class RungeKutta4Integrator
 {
@@ -48,10 +49,10 @@ class RungeKutta4Integrator
     RungeKutta4Integrator(double step_size);
 
     FloatVector
-    step(const VectorFunctionInterface& f, const FloatVector& x, const Float& h) const;
+    step(const FloatVectorFunctionInterface& f, const FloatVector& x, const Float& h) const;
 
     List< Pair<Float,FloatVector> >
-    evolve(const VectorFunctionInterface& f, const FloatVector& x0, const Float& tmax) const;
+    evolve(const FloatVectorFunctionInterface& f, const FloatVector& x0, const Float& tmax) const;
   private:
     double _step_size;
 };

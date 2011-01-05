@@ -380,6 +380,11 @@ class Expansion
     const_iterator find(const MultiIndex& a) const {
         const_iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end(); }
 
+    reference front() { return *(this->begin()); }
+    reference back() { return *(--this->end()); }
+    const_reference front() const { return *(this->begin()); }
+    const_reference back() const { return *(--this->end()); }
+
     void erase(iterator iter) { iter->data()=0.0; }
     void clear() { _coefficients.clear(); }
 

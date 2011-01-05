@@ -136,12 +136,19 @@ void export_tribool() {
 
 }
 
+std::string __repr__(Float x) { 
+    std::stringstream ss; ss<<std::setprecision(17)<<x.v; return ss.str(); 
+}
+
+
 void export_float()
 {
     class_< Float > float_class("Float");
     float_class.def(init<double>());
     float_class.def(init<Float>());
+    float_class.def(init<Real>());
     float_class.def(boost::python::self_ns::str(self));
+    float_class.def("__repr__", (std::string(*)(Float))&__repr__);
 
     float_class.def(+self);
     float_class.def(-self);
@@ -157,6 +164,14 @@ void export_float()
     float_class.def(double() - self);
     float_class.def(double() * self);
     float_class.def(double() / self);
+    float_class.def(self + Real());
+    float_class.def(self - Real());
+    float_class.def(self * Real());
+    float_class.def(self / Real());
+    float_class.def(Real() + self);
+    float_class.def(Real() - self);
+    float_class.def(Real() * self);
+    float_class.def(Real() / self);
 
     implicitly_convertible<double,Float>();
 
@@ -183,7 +198,7 @@ void export_integer()
 {
     class_<Integer> integer_class("Integer",init<int>());
     integer_class.def(boost::python::self_ns::str(self));
-    //integer_class.def(boost::python::self_ns::repr(self));
+    integer_class.def(boost::python::self_ns::repr(self));
     integer_class.def("__less__",(bool(*)(const mpz_class&, const mpz_class&)) &operator<);
 
     implicitly_convertible<int,Integer>();
@@ -197,11 +212,10 @@ void export_rational()
     class_<Rational> rational_class("Rational",init<int,int>());
     rational_class.def(init<int>());
     rational_class.def(boost::python::self_ns::str(self));
-    //rational_class.def(boost::python::self_ns::repr(self));
+    rational_class.def(boost::python::self_ns::repr(self));
     rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
 
     implicitly_convertible<int,Rational>();
-    implicitly_convertible<double,Rational>();
     implicitly_convertible<Integer,Rational>();
 
 }
@@ -210,17 +224,28 @@ void export_rational()
 void export_real()
 {
     class_<Real> real_class("Real",init<Real>());
+    real_class.def(init<double>());
     real_class.def(init<Float>());
     real_class.def(init<Interval>());
     real_class.def(init<std::string>());
     real_class.def("radius", &Interval::radius);
     real_class.def(boost::python::self_ns::str(self));
+    real_class.def(boost::python::self_ns::repr(self));
 
+    real_class.def(+self);
+    real_class.def(-self);
+    real_class.def(self + self);
+    real_class.def(self - self);
+    real_class.def(self * self);
+    real_class.def(self / self);
+    
     implicitly_convertible<int,Real>();
     implicitly_convertible<double,Real>();
-    implicitly_convertible<Real,Interval>();
 }
 
+std::string __repr__(Interval ivl) {
+    std::stringstream ss; ss<<std::setprecision(17)<<"{"<<ivl.lower().v<<":"<<ivl.upper().v<<"}"; return ss.str(); 
+}
 
 void export_interval()
 {
@@ -282,10 +307,11 @@ void export_interval()
     interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
     interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
     interval_class.def(boost::python::self_ns::str(self));
-    //interval_class.def(boost::python::self_ns::repr(self));
+    interval_class.def("__repr__", (std::string(*)(Interval))&__repr__);
 
     implicitly_convertible<int,Interval>();
     implicitly_convertible<double,Interval>();
+    implicitly_convertible<Real,Interval>();
 #ifdef HAVE_GMPXX_H
     implicitly_convertible<Rational,Interval>();
 #endif

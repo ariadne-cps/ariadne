@@ -167,6 +167,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.staticmethod("basis");
 
     def("norm",(X(*)(const Vector<X>&)) &norm);
+    def("dot",(X(*)(const Vector<X>&,const Vector<X>&)) &dot);
     def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &join);
     def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &join);
     def("join",(Vector<X>(*)(const X&,const X&)) &join);
@@ -215,6 +216,9 @@ template<> void export_vector<Float>()
     export_vector_conversion<Float,Float>(float_vector_class);
     export_vector_arithmetic<Float,Float,Float>(float_vector_class);
     export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
+    float_vector_class.def("__rmul__",__rmul__< Vector<Float>, Vector<Float>, double >);
+    float_vector_class.def("__mul__",__mul__< Vector<Float>, Vector<Float>, double >);
+    float_vector_class.def("__div__",__div__< Vector<Float>, Vector<Float>, double >);
 }
 
 template<> void export_vector<Interval>()
@@ -308,6 +312,7 @@ template<class X> void export_matrix()
 template<> void export_matrix<Float>()
 {
     class_< Matrix<Float> > matrix_class(python_name<Float>("Matrix"),no_init);
+    matrix_class.def(init<PivotMatrix>());
     export_matrix_class<Float>(matrix_class);
     export_matrix_conversion<Float,Float>(matrix_class);
     export_matrix_arithmetic<Float,Float,Float>(matrix_class);
@@ -319,6 +324,8 @@ template<> void export_matrix<Float>()
     def("triangular_multiplier", &triangular_multiplier);
     def("row_norms",(Vector<Float>(*)(const Matrix<Float>&)) &row_norms);
     def("normalise_rows",(Matrix<Float>(*)(const Matrix<Float>&)) &normalise_rows);
+    
+    to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }
 
 template<> void export_matrix<Interval>()
@@ -362,6 +369,16 @@ template<class X> void export_diagonal_matrix()
     //def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
 }
 
+void export_pivot_matrix() 
+{
+    
+    implicitly_convertible< PivotMatrix, Matrix<Float> >();
+    
+    class_<PivotMatrix> pivot_matrix_class("PivotMatrix",no_init);
+    pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
+    pivot_matrix_class.def("__repr__",&__cstr__<PivotMatrix>);
+}
+
 
 template void export_vector<Float>();
 template void export_vector<Interval>();
@@ -383,6 +400,7 @@ void linear_algebra_submodule() {
     export_matrix<Float>();
     export_matrix<Interval>();
 
+    export_pivot_matrix();
     export_diagonal_matrix<Float>();
 
 #ifdef HAVE_GMPXX_H

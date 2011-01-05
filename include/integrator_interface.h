@@ -61,9 +61,6 @@ class IntegratorInterface
     /*! \brief Set the maximum allowable error in the flow. */
     virtual void set_maximum_error(double) = 0;
 
-    /*! \brief Set the temporal order (if appropriate). */
-    virtual void set_temporal_order(unsigned int) = 0;
-
     //! \brief Compute a pair \a (h,B) consisting of a bound \a B for the flow
     //! starting in the \a state_domain for time step \a h.
     virtual Pair<Float,IntervalVector>

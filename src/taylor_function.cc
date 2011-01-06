@@ -32,6 +32,7 @@
 #include "multi_index.h"
 #include "polynomial.h"
 #include "differential.h"
+#include "taylor_model.h"
 
 #include "function.h"
 #include "taylor_function.h"
@@ -562,7 +563,8 @@ prod(const Matrix<Interval>& A,
     Vector<ScalarTaylorFunction> r(A.row_size(),ScalarTaylorFunction(x[0].domain()));
     for(uint i=0; i!=A.row_size(); ++i) {
         for(uint j=0; j!=A.column_size(); ++j) {
-            r[i]+=A[i][j]*x[j];
+            //r[i]+=A[i][j]*x[j];
+            const Interval& Aij=A[i][j]; const ScalarTaylorFunction& xj=x[j]; ScalarTaylorFunction& ri=r[i]; ri+=Aij*xj;
         }
     }
     return r;
@@ -1439,7 +1441,7 @@ operator/=(VectorTaylorFunction& f, const Float& c)
 VectorTaylorFunction
 operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 {
-    ARIADNE_ASSERT_MSG(!intersection(f1.domain(),f2.domain()).empty(),
+    ARIADNE_ASSERT_MSG(!empty(intersection(f1.domain(),f2.domain())),
                        "operator+(VectorTaylorFunction f1, VectorTaylorFunction f2) with f1="<<f1<<" f2="<<f2<<
                        ": domains are disjoint");
     if(f1.domain()==f2.domain()) {
@@ -1454,7 +1456,7 @@ operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 VectorTaylorFunction
 operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 {
-    ARIADNE_ASSERT(!intersection(f1.domain(),f2.domain()).empty());
+    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
     if(f1.domain()==f2.domain()) {
         return VectorTaylorFunction(f1.domain(),Vector<IntervalTaylorModel>(f1.models()-f2.models()));
     } else {
@@ -1516,13 +1518,13 @@ operator-(const VectorTaylorFunction& f, const Vector<Interval>& c)
 VectorTaylorFunction
 operator*(const Matrix<Float>& A, const VectorTaylorFunction& f)
 {
-    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(prod(A,f.models())));
+    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(A*f.models()));
 }
 
 VectorTaylorFunction
 operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f)
 {
-    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(boost::numeric::ublas::prod(A,f.models())));
+    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(A*f.models()));
 }
 
 

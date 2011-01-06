@@ -205,10 +205,6 @@ tribool AffineSet::empty() const {
     return this->disjoint(this->bounding_box());
 }
 
-template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& x) {
-    return prod(A,x);
-}
-
 
 GridTreeSet
 AffineSet::outer_approximation(const Grid& g, int d) const {
@@ -623,7 +619,7 @@ AffineSet::boundary(uint xind, uint yind) const
     // Find a point on the boundary; choost the point minimising the spacial x-coordinate
     x=lpsolver.hotstarted_minimise(c,l,u,A,b, vt,p,B);
     ARIADNE_LOG(3,"\nA="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n")
-    ARIADNE_LOG(3,"  x="<<x<<" Ax="<<prod(A,x)<<" c="<<c<<" cx="<<dot(c,x)<<" pt="<<G*x+h<<"\n\n");
+    ARIADNE_LOG(3,"  x="<<x<<" Ax="<<(A*x)<<" c="<<c<<" cx="<<dot(c,x)<<" pt="<<G*x+h<<"\n\n");
 
     lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 
@@ -634,7 +630,7 @@ AffineSet::boundary(uint xind, uint yind) const
     int STEPS=0;
     Array<Slackness> initial_variable_type=vt;
 
-    Vector<Float> pt=prod(G,x)+h; // The current point in space
+    Vector<Float> pt=G*x+h; // The current point in space
     Vector<Float> last_vec(2,0.0,-1.0); // The direction in space of the last step along the boundary
                                         // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
     Vector<Float> best_next_vec(2);
@@ -660,7 +656,7 @@ AffineSet::boundary(uint xind, uint yind) const
             if(j!=last_exiting_variable || true) {
                 uint j=p[k];
                 Aj=column(A,j);
-                BAj=prod(B,Aj);
+                BAj=B*Aj;
 
                 // Compute the direction the point in space moves for x[j] entering the basis
                 Vector<Float> d(nx+nc,0.0); // The direction x moves in in changing the basis
@@ -668,7 +664,7 @@ AffineSet::boundary(uint xind, uint yind) const
                 for(uint i=0; i!=nc+ne; ++i) {
                     d[p[i]]=-BAj[i]*d[j];
                 }
-                trial_vec=prod(G,d);
+                trial_vec=G*d;
 
                 // Compare the direction moved in this step with the last step.
                 // dot compares the direction of the two steps;
@@ -708,7 +704,7 @@ AffineSet::boundary(uint xind, uint yind) const
         ARIADNE_LOG(3,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
         lpsolver.lpstep(l,u,A,b, vt,p,B,x,s);
         last_exiting_variable=p[s];
-        pt=prod(G,x)+h;
+        pt=G*x+h;
         last_vec=best_next_vec;
         ARIADNE_LOG(5,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt<<"\n");
         ARIADNE_LOG(3,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec<<"\n");

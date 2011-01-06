@@ -35,6 +35,12 @@
 
 namespace Ariadne {
 
+template<bool,class> struct EnableIf;
+template<class T> struct EnableIf<false,T> { };
+template<class T> struct EnableIf<true,T> { typedef T Type; };
+
+template<class X, class T> struct EnableIfDefined { typedef T Type; };
+
 template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
 template<> inline Real numeric_cast(const Float& a) { return Real(a); }
@@ -60,14 +66,46 @@ template<> inline Interval convert_error<Interval>(const Float& e) { return Inte
 
 // Use 'enable_if' style template to restrict allowable instances. See the Boost documentation
 // for enable_if to see how this works.
-template<class X, class T> struct enable_if_numeric { };
-template<class T> struct enable_if_numeric<unsigned int,T> { typedef T type; };
-template<class T> struct enable_if_numeric<int,T> { typedef T type; };
-template<class T> struct enable_if_numeric<double,T> { typedef T type; };
-template<class T> struct enable_if_numeric<Float,T> { typedef T type; };
-template<class T> struct enable_if_numeric<Interval,T> { typedef T type; };
-template<class T> struct enable_if_numeric<Real,T> { typedef T type; };
+template<class X> struct IsNumeric { static const bool value = false; };
+template<> struct IsNumeric<unsigned int> { static const bool value = true; };
+template<> struct IsNumeric<int> { static const bool value = true; };
+template<> struct IsNumeric<double> { static const bool value = true; };
+template<> struct IsNumeric<Float> { static const bool value = true; };
+template<> struct IsNumeric<Interval> { static const bool value = true; };
+template<> struct IsNumeric<Real> { static const bool value = true; };
 
+#ifdef HAVE_GMPXX_H
+template<> struct IsNumeric<Integer> { static const bool value = true; };
+template<> struct IsNumeric<Rational> { static const bool value = true; };
+#endif // HAVE_GMPXX_H
+
+template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>::value,T> { };
+
+
+// Type deduction for numerical arithmetic
+template<class X1, class X2> struct Arithmetic { };
+template<> struct Arithmetic<double,Real> { typedef Real ResultType; };
+template<> struct Arithmetic<double,Float> { typedef Float ResultType; };
+template<> struct Arithmetic<double,Interval> { typedef Interval ResultType; };
+template<> struct Arithmetic<Real,double> { typedef Real ResultType; };
+template<> struct Arithmetic<Float,double> { typedef Float ResultType; };
+template<> struct Arithmetic<Interval,double> { typedef Interval ResultType; };
+template<> struct Arithmetic<Real,Real> { typedef Real ResultType; };
+template<> struct Arithmetic<Interval,Real> { typedef Interval ResultType; };
+template<> struct Arithmetic<Real,Interval> { typedef Interval ResultType; };
+template<> struct Arithmetic<Interval,Interval> { typedef Interval ResultType; };
+template<> struct Arithmetic<Float,Interval> { typedef Interval ResultType; };
+template<> struct Arithmetic<Interval,Float> { typedef Interval ResultType; };
+template<> struct Arithmetic<Float,Float> { typedef Float ResultType; };
+template<> struct Arithmetic<Float,Real> { typedef Float ResultType; };
+template<> struct Arithmetic<Real,Float> { typedef Float ResultType; };
+#ifdef HAVE_GMPXX_H
+template<> struct Arithmetic<Rational,Rational> { typedef Rational ResultType; };
+template<> struct Arithmetic<Rational,double> { typedef Rational ResultType; };
+template<> struct Arithmetic<double,Rational> { typedef Rational ResultType; };
+template<> struct Arithmetic<Rational,Interval> { typedef Interval ResultType; };
+template<> struct Arithmetic<Interval,Rational> { typedef Interval ResultType; };
+#endif // HAVE_GMPXX_H
 
 } // namespace Ariadne
 

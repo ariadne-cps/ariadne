@@ -64,11 +64,11 @@ Sign sign(const Interval& ivl) {
 
 typedef Vector<Float> FloatVector;
 typedef Matrix<Float> FloatMatrix;
-typedef boost::numeric::ublas::vector_range<FloatVector> FloatVectorRange;
+typedef VectorRange<FloatVector> FloatVectorRange;
 
 typedef Vector<Interval> IntervalVector;
 typedef Matrix<Interval> IntervalMatrix;
-typedef boost::numeric::ublas::vector_range<IntervalVector> IntervalVectorRange;
+typedef VectorRange<IntervalVector> IntervalVectorRange;
 
 
 std::ostream& operator<<(std::ostream& os, const NonlinearConstraint& c) {

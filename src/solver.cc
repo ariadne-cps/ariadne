@@ -204,7 +204,7 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
         }
     }
     Matrix<Float> J=inverse(D2f);
-    g=prod(J,g);
+    g=J*g;
     for(uint i=0; i!=rs; ++i) {
         g[i].clean();
     }
@@ -275,7 +275,7 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
         D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
         clobber(h);
         Vector<IntervalTaylorModel> fidh=compose(f,join(id,h));
-        Vector<IntervalTaylorModel> dh=prod(D2finv,fidh);
+        Vector<IntervalTaylorModel> dh=D2finv * fidh;
         h-=dh;
     }
 
@@ -608,7 +608,7 @@ IntervalNewtonSolver::step(const RealVectorFunction& f,
     ARIADNE_LOG(5,"  Df(r)="<<A<<"\n");
     Matrix<Interval> Ainv=inverse(A);
     ARIADNE_LOG(5,"  inverse(Df(r))="<<Ainv<<"\n");
-    Vector<Interval> dx=prod(Ainv, w);
+    Vector<Interval> dx=Ainv*w;
     ARIADNE_LOG(5,"  dx="<<dx<<"\n");
     Vector<Interval> nx= m - dx;
     ARIADNE_LOG(5,"  nx="<<nx<<"\n");
@@ -631,7 +631,7 @@ KrawczykSolver::step(const RealVectorFunction& f,
     ARIADNE_LOG(5,"  Df(r)="<<J<<"\n");
     Matrix<Interval> M=inverse(midpoint(J));
     ARIADNE_LOG(5,"  inverse(Df(m))="<<M<<"\n");
-    Vector<Interval> dx=prod(M,fm)-prod(Matrix<Interval>(I-prod(M,J)),Vector<Interval>(x-m));
+    Vector<Interval> dx=M*fm-(I-M*J)*(x-m);
     ARIADNE_LOG(5,"  dx="<<dx<<"\n");
     Vector<Interval> nx= m - dx;
     ARIADNE_LOG(5,"  nx="<<nx<<"\n");
@@ -658,7 +658,7 @@ FactoredKrawczykSolver::step(const RealVectorFunction& f,
     Matrix<Float> mJ=midpoint(J);
     Matrix<Interval> M=inverse(mJ);
     ARIADNE_LOG(5,"  inverse(Df(m))="<<M<<"\n");
-    Vector<Interval> dx=prod(M,fm+prod(Matrix<Interval>(J-mJ),Vector<Interval>(x-m)));
+    Vector<Interval> dx=M*(fm+(J-mJ)*(x-m));
     ARIADNE_LOG(5,"  dx="<<dx<<"\n");
     Vector<Interval> nx= m - dx;
     ARIADNE_LOG(5,"  nx="<<nx<<"\n");
@@ -702,7 +702,7 @@ KrawczykSolver::implicit_step(const RealVectorFunction& f,
     ARIADNE_LOG(5,"    D2f(r)="<<J<<"\n");
     Matrix<Interval> M=inverse(midpoint(J));
     ARIADNE_LOG(5,"    inverse(D2f(m))="<<M<<"\n");
-    VectorTaylorFunction dx=product(M,fm) - Vector<Interval>( prod(Matrix<Interval>(I-prod(M,J)),ex*Interval(-1,+1)) );
+    VectorTaylorFunction dx= M*fm - (I-M*J) * (ex*Interval(-1,+1));
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
     VectorTaylorFunction nwx= mx - dx;
     ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");

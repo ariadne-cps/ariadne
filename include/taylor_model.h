@@ -55,6 +55,15 @@ template<class X> class TaylorModel;
 typedef TaylorModel<Float> FloatTaylorModel;
 typedef TaylorModel<Interval> IntervalTaylorModel;
 
+template<> struct Arithmetic< TaylorModel<Float>,Float > { typedef TaylorModel<Float> ResultType; };
+template<> struct Arithmetic< Float,TaylorModel<Float> > { typedef TaylorModel<Float> ResultType; };
+template<> struct Arithmetic< TaylorModel<Float>,TaylorModel<Float> > { typedef TaylorModel<Float> ResultType; };
+template<> struct Arithmetic< Float,TaylorModel<Interval> > { typedef TaylorModel<Interval> ResultType; };
+template<> struct Arithmetic< TaylorModel<Interval>,Float > { typedef TaylorModel<Interval> ResultType; };
+template<> struct Arithmetic< TaylorModel<Interval>,Interval > { typedef TaylorModel<Interval> ResultType; };
+template<> struct Arithmetic< Interval,TaylorModel<Interval> > { typedef TaylorModel<Interval> ResultType; };
+template<> struct Arithmetic< TaylorModel<Interval>,TaylorModel<Interval> > { typedef TaylorModel<Interval> ResultType; };
+
 class IntersectionException;
 
 struct IntersectionException : public std::runtime_error {
@@ -574,7 +583,7 @@ Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
 //! \relates TaylorModel<Interval> \brief The magnitude of the variable
 Float mag(const TaylorModel<Interval>& tm);
 //! \relates TaylorModel<Interval> \brief Split the variable over two domains, subdividing along the independent variable j.
-pair< TaylorModel<Interval>, TaylorModel<Interval> > split(const TaylorModel<Interval>& x, uint j);
+std::pair< TaylorModel<Interval>, TaylorModel<Interval> > split(const TaylorModel<Interval>& x, uint j);
 //! \relates TaylorModel<Interval>
 //!\brief Split the variable, subdividing along the independent variable j
 //! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
@@ -672,7 +681,7 @@ std::ostream& operator<<(std::ostream&, const TaylorModel<Interval>::Accuracy&);
 // Vector operations which can be evaluated componentwise
 bool refines(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
 bool disjoint(const Vector< TaylorModel<Interval> >&,const Vector< TaylorModel<Interval> >&);
-pair< Vector< TaylorModel<Interval> >, Vector< TaylorModel<Interval> > > split(const Vector< TaylorModel<Interval> >& x, uint j);
+std::pair< Vector< TaylorModel<Interval> >, Vector< TaylorModel<Interval> > > split(const Vector< TaylorModel<Interval> >& x, uint j);
 Vector< TaylorModel<Interval> > split(const Vector< TaylorModel<Interval> >& x, uint j, bool half);
 Vector< TaylorModel<Interval> > unscale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);
 Vector< TaylorModel<Interval> > scale(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& bx);

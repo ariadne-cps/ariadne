@@ -71,24 +71,6 @@ template<class X> Differential<X> operator-(const Differential<X>& x, const Diff
 template<class X> Differential<X> operator*(const Differential<X>& x, const Differential<X>& y);
 template<class X> Differential<X> operator/(const Differential<X>& x, const Differential<X>& y);
 
-template<class X, class R> Differential<X> operator+(const Differential<X>& x, const R& c);
-template<class X, class R> Differential<X> operator-(const Differential<X>& x, const R& c);
-template<class X, class R> Differential<X> operator*(const Differential<X>& x, const R& c);
-template<class X, class R> Differential<X> operator/(const Differential<X>& x, const R& c);
-template<class X, class R> Differential<X> operator+(const R& c, const Differential<X>& x);
-template<class X, class R> Differential<X> operator-(const R& c, const Differential<X>& x);
-template<class X, class R> Differential<X> operator*(const R& c, const Differential<X>& x);
-template<class X, class R> Differential<X> operator/(const R& c, const Differential<X>& x);
-
-template<class X> Differential<X> operator+(const Differential<X>& x, const X& c);
-template<class X> Differential<X> operator-(const Differential<X>& x, const X& c);
-template<class X> Differential<X> operator*(const Differential<X>& x, const X& c);
-template<class X> Differential<X> operator/(const Differential<X>& x, const X& c);
-template<class X> Differential<X> operator+(const X& c, const Differential<X>& x);
-template<class X> Differential<X> operator-(const X& c, const Differential<X>& x);
-template<class X> Differential<X> operator*(const X& c, const Differential<X>& x);
-template<class X> Differential<X> operator/(const X& c, const Differential<X>& x);
-
 template<class X> Differential<X> neg(const Differential<X>& x);
 template<class X> Differential<X> rec(const Differential<X>& x);
 template<class X> Differential<X> pow(const Differential<X>& x, int n);
@@ -328,6 +310,13 @@ class Differential
     //BOOST_CONCEPT_ASSERT((DifferentialConcept< Differential<X> >));
 };
 
+template<class X1, class X2> struct Arithmetic< X1,Differential<X2> > {
+    typedef Differential<typename Arithmetic<X1,X2>::ResultType> ResultType; };
+template<class X1, class X2> struct Arithmetic< Differential<X1>,X2 > {
+    typedef Differential<typename Arithmetic<X1,X2>::ResultType> ResultType; };
+template<class X1, class X2> struct Arithmetic< Differential<X1>,Differential<X2> > {
+    typedef Differential<typename Arithmetic<X1,X2>::ResultType> ResultType; };
+
 template<class X>
 const X Differential<X>::_zero=X(0);
 
@@ -539,7 +528,6 @@ Differential<X>& operator/=(Differential<X>& x, const R& c)
 }
 
 
-
 template<class X>
 Differential<X> operator-(const Differential<X>& x)
 {
@@ -553,102 +541,63 @@ Differential<X> operator-(const Differential<X>& x)
 
 
 template<class X, class R>
-Differential<X> operator+(const Differential<X>& x, const R& c)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator+(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r+=X(c); return r;
 }
 
 
 template<class X, class R>
-Differential<X> operator+(const R& c, const Differential<X>& x)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator+(const R& c, const Differential<X>& x)
 {
     Differential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-Differential<X> operator-(const Differential<X>& x, const R& c)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator-(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-Differential<X> operator-(const R& c, const Differential<X>& x)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator-(const R& c, const Differential<X>& x)
 {
     Differential<X> r(-x); r+=X(c); return r;
 }
 
 template<class X, class R>
-Differential<X> operator*(const Differential<X>& x, const R& c)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator*(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-Differential<X> operator*(const R& c, const Differential<X>& x)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator*(const R& c, const Differential<X>& x)
 {
     Differential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-Differential<X> operator/(const Differential<X>& x, const R& c)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator/(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-Differential<X> operator/(const R& c, const Differential<X>& x)
+typename EnableIfNumeric<R,Differential<X> >::Type
+operator/(const R& c, const Differential<X>& x)
 {
     Differential<X> r(rec(x)); r*=X(c); return r;
 }
 
 
-template<class X>
-Differential<X> operator+(const Differential<X>& x, const X& c)
-{
-    Differential<X> r(x); r+=c; return r;
-}
-
-template<class X>
-Differential<X> operator+(const X& c, const Differential<X>& x)
-{
-    Differential<X> r(x); r+=c; return r;
-}
-
-template<class X>
-Differential<X> operator-(const Differential<X>& x, const X& c)
-{
-    Differential<X> r(x); r-=c; return r;
-}
-
-template<class X>
-Differential<X> operator-(const X& c, const Differential<X>& x)
-{
-    Differential<X> r(-x); r+=c; return r;
-}
-
-template<class X>
-Differential<X> operator*(const Differential<X>& x, const X& c)
-{
-    Differential<X> r(x); r*=c; return r;
-}
-
-template<class X>
-Differential<X> operator*(const X& c, const Differential<X>& x)
-{
-    Differential<X> r(x); r*=c; return r;
-}
-
-template<class X>
-Differential<X> operator/(const Differential<X>& x, const X& c)
-{
-    Differential<X> r(x); r/=c; return r;
-}
-
-template<class X>
-Differential<X> operator/(const X& c, const Differential<X>& x)
-{
-    Differential<X> r=rec(x); r*=c; return r;
-}
 
 
 
@@ -996,13 +945,28 @@ embed(uint before_size, const Differential<X>& x,
 
 
 
+template<class X>
+struct NonAssignableDifferential
+    : public Differential<X>
+{
+    NonAssignableDifferential<X>& operator=(const Differential<X>& other) {
+        //ARIADNE_PRECONDITION(this->degree()==other.degree());
+        //ARIADNE_PRECONDITION(this->argument_size()==other.argument_size());
+        this->Differential<X>::operator=(other); return *this;
+    }
+    NonAssignableDifferential<X>& operator=(const X& c) {
+        this->Differential<X>::operator=(c); return *this;
+    }
+};
 
 /*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
 template<class X>
 class Vector< Differential<X> >
-    : public ublas::vector< Differential<X> >
+    : public VectorExpression< Vector< Differential<X> > >
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
+  public:
+    Array< NonAssignableDifferential<X> > _ary;
   public:
     // The type of the class
     typedef Vector< Differential<X> > SelfType;
@@ -1013,23 +977,35 @@ class Vector< Differential<X> >
     // The type used for scalars.
     typedef X ScalarType;
 
-    Vector() : ublas::vector< Differential<X> >(0) { }
-    Vector(uint rs) : ublas::vector< Differential<X> >(rs) { }
-    Vector(uint rs, uint as, uint d) : ublas::vector< Differential<X> >(rs) {
+    Vector() : _ary(0) { }
+    Vector(uint rs) : _ary(rs) { }
+    Vector(uint rs, uint as, uint d) : _ary(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=Differential<X>(as,d); } }
-    Vector(uint rs, const Differential<X>& sd) : ublas::vector< Differential<X> >(rs) {
+    Vector(uint rs, const Differential<X>& sd) : _ary(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=sd; } }
-    Vector(uint rs, const Differential<X>* p) : ublas::vector< Differential<X> >(rs) {
+    Vector(uint rs, const Differential<X>* p) : _ary(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=p[i]; } }
-    template<class XX> Vector(const Vector< Differential<XX> > dv) : ublas::vector< Differential<X> >(dv) { }
+    template<class XX> Vector(const Vector< Differential<XX> > dv) : _ary(dv._ary) { }
     template<class XX> Vector(uint rs, uint as, uint d, const XX* ptr);
     Vector(uint rs, uint as, uint d,const Vector<X>& v, const Matrix<X>& A);
-    template<class E> Vector(const ublas::vector_expression<E>& ve)
-        : ublas::vector< Differential<X> >(ve) { }
-    template<class E> Vector< Differential<X> >& operator=(const ublas::vector_expression<E>& ve) {
-        ublas::vector< Differential<X> >::operator=(ve); return *this; }
+    template<class E> Vector(const VectorExpression<E>& ve) : _ary(ve().size()) {
+        for(uint i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; } }
+    template<class E> Vector< Differential<X> >& operator=(const VectorExpression<E>& ve) {
+        _ary.resize(ve().size()); for(uint i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; } return *this; }
 
 
+    const Differential<X>& operator[](size_t i) const { return this->_ary[i]; }
+    NonAssignableDifferential<X>& operator[](size_t i) { return _ary[i]; }
+
+    Differential<X>& at(size_t i) { return this->_ary[i]; }
+    const Differential<X>& get(size_t i) const { return this->_ary[i]; }
+    void set(size_t i, const Differential<X>& x) {
+        ARIADNE_PRECONDITION(i<this->size());
+        ARIADNE_PRECONDITION(this->argument_size()==x.argument_size());
+        this->_ary[i]=x;
+    }
+
+    uint size() const { return this->_ary.size(); }
     uint result_size() const { return this->size(); }
     uint argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
     uint degree() const { return (this->size()==0) ? 0 : (*this)[0].degree(); }
@@ -1077,7 +1053,7 @@ class Vector< Differential<X> >
 
 template<class X> template<class XX>
 Vector< Differential<X> >::Vector(uint rs, uint as, uint d, const XX* ptr)
-    : ublas::vector< Differential<X> >(rs)
+    : _ary(rs)
 {
     for(uint i=0; i!=rs; ++i) {
     (*this)[i]=Differential<X>(as,d);
@@ -1088,7 +1064,7 @@ Vector< Differential<X> >::Vector(uint rs, uint as, uint d, const XX* ptr)
 template<class X>
 Vector< Differential<X> >::Vector(uint rs, uint as, uint d,
                                   const Vector<X>& v, const Matrix<X>& A)
-    :  ublas::vector< Differential<X> >(rs,Differential<X>())
+    :  _ary(rs,Differential<X>())
 {
     ARIADNE_ASSERT(rs==v.size());
     ARIADNE_ASSERT(rs==A.row_size());

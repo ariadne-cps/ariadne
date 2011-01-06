@@ -22,6 +22,7 @@
  */
 
 #include "geometry.h"
+#include "tuple.h"
 
 namespace Ariadne {
 

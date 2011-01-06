@@ -88,6 +88,8 @@ void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const X& x)
     A[i][j]=x;
 }
 
+template<class X> Matrix<X> transpose(const Matrix<X>& A) { return MatrixTranspose< Matrix<X> >(A); }
+
 
 template<class X>
 struct from_python< Vector<X> >
@@ -270,8 +272,8 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
 
     matrix_class.def("identity",(Matrix<X>(*)(size_t)) &Matrix<X>::identity);
     matrix_class.staticmethod("identity");
-    
-        
+
+
     from_python< Matrix<X> >();
 
 }
@@ -292,9 +294,9 @@ void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__mul__", &__mul__< Matrix<R>, Matrix<X>, Y >);
     matrix_class.def("__rmul__", &__rmul__< Matrix<R>, Matrix<X>, Y >);
     matrix_class.def("__div__", &__div__< Matrix<R>, Matrix<X>, Y >);
-    matrix_class.def("__mul__", &__prod__< Vector<R>, Matrix<X>, Vector<Y> >);
-    matrix_class.def("__mul__", &__prod__< Matrix<R>, Matrix<X>, Matrix<Y> >);
-    matrix_class.def("__rmul__", &__rprod__< Vector<R>, Matrix<X>, Vector<Y> >);
+    matrix_class.def("__mul__", &__mul__< Vector<R>, Matrix<X>, Vector<Y> >);
+    matrix_class.def("__mul__", &__mul__< Matrix<R>, Matrix<X>, Matrix<Y> >);
+    matrix_class.def("__rmul__", &__rmul__< Vector<R>, Matrix<X>, Vector<Y> >);
 }
 
 
@@ -324,7 +326,7 @@ template<> void export_matrix<Float>()
     def("triangular_multiplier", &triangular_multiplier);
     def("row_norms",(Vector<Float>(*)(const Matrix<Float>&)) &row_norms);
     def("normalise_rows",(Matrix<Float>(*)(const Matrix<Float>&)) &normalise_rows);
-    
+
     to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }
 
@@ -369,11 +371,11 @@ template<class X> void export_diagonal_matrix()
     //def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
 }
 
-void export_pivot_matrix() 
+void export_pivot_matrix()
 {
-    
+
     implicitly_convertible< PivotMatrix, Matrix<Float> >();
-    
+
     class_<PivotMatrix> pivot_matrix_class("PivotMatrix",no_init);
     pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
     pivot_matrix_class.def("__repr__",&__cstr__<PivotMatrix>);

@@ -30,8 +30,10 @@
 
 #include <iosfwd>
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+
 #include "macros.h"
+#include "container.h"
 #include "numeric.h"
 #include "vector.h"
 #include "set_interface.h"

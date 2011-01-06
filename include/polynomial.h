@@ -186,6 +186,14 @@ class Polynomial
     Expansion<X> _expansion;
 };
 
+template<class X1, class X2> struct Arithmetic< X1,Polynomial<X2> > {
+    typedef Polynomial<typename Arithmetic<X1,X2>::ResultType> ResultType; };
+template<class X1, class X2> struct Arithmetic< Polynomial<X1>,X2 > {
+    typedef Polynomial<typename Arithmetic<X1,X2>::ResultType> ResultType; };
+template<class X1, class X2> struct Arithmetic< Polynomial<X1>,Polynomial<X2> > {
+    typedef Polynomial<typename Arithmetic<X1,X2>::ResultType> ResultType; };
+
+
 template<class X>
 Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, double c0, ...)
     : _expansion(as)

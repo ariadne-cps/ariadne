@@ -59,7 +59,7 @@ template<class X> class SecondDifferential;
 
 template<class V1, class V2>
 struct SymmetricOuterProduct
-    : public boost::numeric::ublas::matrix_expression< SymmetricOuterProduct<V1,V2> >
+    : public MatrixExpression< SymmetricOuterProduct<V1,V2> >
 {
     typedef typename V1::value_type value_type;
     const V1& _v1; const V2& _v2;
@@ -74,7 +74,7 @@ symmetric_outer_product(const V1& v1, const V2& v2) {
 
 template<class V1, class V2>
 struct OuterProduct
-    : public boost::numeric::ublas::matrix_expression< OuterProduct<V1,V2> >
+    : public MatrixExpression< OuterProduct<V1,V2> >
 {
     typedef typename V1::value_type value_type;
     const V1& _v1; const V2& _v2;
@@ -488,9 +488,10 @@ std::ostream& operator<<(std::ostream& os, const FirstDifferential<X>& x)
 /*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
 template<class X>
 class Vector< FirstDifferential<X> >
-    : public ublas::vector< FirstDifferential<X> >
+    : public VectorExpression< Vector<FirstDifferential<X> > >
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
+    Array< FirstDifferential<X> > _ary;
   public:
     // The type of the class
     typedef Vector< FirstDifferential<X> > SelfType;
@@ -501,20 +502,23 @@ class Vector< FirstDifferential<X> >
     // The type used for scalars.
     typedef X ScalarType;
 
-    Vector(uint rs, uint as) : ublas::vector< FirstDifferential<X> >(rs, FirstDifferential<X>(as)) { }
-    Vector(uint rs, const FirstDifferential<X>& d) : ublas::vector< FirstDifferential<X> >(rs,d) {
+    Vector(uint rs, uint as) : _ary(rs, FirstDifferential<X>(as)) { }
+    Vector(uint rs, const FirstDifferential<X>& d) : _ary(rs,d) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=d; } }
-    Vector(uint rs, const FirstDifferential<X>* p) : ublas::vector< FirstDifferential<X> >(rs,FirstDifferential<X>(p[0].argument_size())) {
+    Vector(uint rs, const FirstDifferential<X>* p) : _ary(rs,FirstDifferential<X>(p[0].argument_size())) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=p[i]; } }
-    template<class E> Vector(const ublas::vector_expression<E>& ve)
-        : ublas::vector< FirstDifferential<X> >(ve) { }
-    template<class E> Vector< FirstDifferential<X> >& operator=(const ublas::vector_expression<E>& ve) {
-        ublas::vector< FirstDifferential<X> >::operator=(ve); return *this; }
-
+    template<class E> Vector(const VectorExpression<E>& ve);
+    template<class E> Vector< FirstDifferential<X> >& operator=(const VectorExpression<E>& ve);
 
     uint result_size() const { return this->size(); }
     uint argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
     uint degree() const { return 1u; }
+
+    const FirstDifferential<X>& get(uint i) const { return _ary[i]; }
+    FirstDifferential<X>& at(uint i) { return _ary[i]; }
+    void set(uint i, const FirstDifferential<X>& d) const { _ary[i]=d; }
+    const FirstDifferential<X>& operator[](uint i) const { return _ary[i]; }
+    FirstDifferential<X>& operator[](uint i) { return _ary[i]; }
 
     Vector<X> value() const {
         Vector<X> r(this->result_size());
@@ -943,9 +947,9 @@ std::ostream& operator<<(std::ostream& os, const SecondDifferential<X>& x)
 /*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
 template<class X>
 class Vector< SecondDifferential<X> >
-    : public ublas::vector< SecondDifferential<X> >
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
+    Array< SecondDifferential<X> > _ary;
   public:
     // The type of the class
     typedef Vector< SecondDifferential<X> > SelfType;
@@ -956,20 +960,24 @@ class Vector< SecondDifferential<X> >
     // The type used for scalars.
     typedef X ScalarType;
 
-    Vector(uint rs, uint as) : ublas::vector< SecondDifferential<X> >(rs, SecondDifferential<X>(as)) { }
-    Vector(uint rs, const SecondDifferential<X>& d) : ublas::vector< SecondDifferential<X> >(rs) {
+    Vector(uint rs, uint as) : _ary(rs, SecondDifferential<X>(as)) { }
+    Vector(uint rs, const SecondDifferential<X>& d) : _ary(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=d; } }
-    Vector(uint rs, const SecondDifferential<X>* p) : ublas::vector< SecondDifferential<X> >(rs) {
+    Vector(uint rs, const SecondDifferential<X>* p) : _ary(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=p[i]; } }
-    template<class E> Vector(const ublas::vector_expression<E>& ve)
-        : ublas::vector< SecondDifferential<X> >(ve) { }
-    template<class E> Vector< SecondDifferential<X> >& operator=(const ublas::vector_expression<E>& ve) {
-        ublas::vector< SecondDifferential<X> >::operator=(ve); return *this; }
+    template<class E> Vector(const VectorExpression<E>& ve);
+    template<class E> Vector< SecondDifferential<X> >& operator=(const VectorExpression<E>& ve);
 
 
     uint result_size() const { return this->size(); }
     uint argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
     uint degree() const { return 1u; }
+
+    const FirstDifferential<X>& get(uint i) const { return _ary[i]; }
+    FirstDifferential<X>& at(uint i) { return _ary[i]; }
+    void set(uint i, const FirstDifferential<X>& d) const { _ary[i]=d; }
+    const FirstDifferential<X>& operator[](uint i) const { return _ary[i]; }
+    FirstDifferential<X>& operator[](uint i) { return _ary[i]; }
 
     Vector<X> value() const {
         Vector<X> r(this->result_size());

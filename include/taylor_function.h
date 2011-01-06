@@ -453,6 +453,13 @@ class ScalarTaylorFunction
     ScalarTaylorFunction* _create() const;
 };
 
+template<> struct Arithmetic<Float,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<Interval,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<Real,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,Float> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,Interval> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,Real> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 
 inline tribool operator>(const ScalarTaylorFunction& x, const Float& c) {
     Interval r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }
@@ -473,30 +480,30 @@ ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const ScalarTaylor
 ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type&
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
 operator+=(ScalarTaylorFunction& f, const X& c) { f.model()+=Interval(c); return f; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type&
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
 operator-=(ScalarTaylorFunction& f, const X& c) { f.model()-=Interval(c); return f; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type&
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
 operator*=(ScalarTaylorFunction& f, const X& c) { f.model()*=Interval(c); return f; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type&
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
 operator/=(ScalarTaylorFunction& f, const X& c) { f.model()/=Interval(c); return f; }
 
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator+(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=Interval(c); return r; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator-(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=neg(Interval(c)); return r; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator*(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=Interval(c); return r; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator/(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=(rec(Interval(c))); return r; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator+(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r+=Interval(c); return r; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator-(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(neg(f)); r+=Interval(c); return r; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator*(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r*=Interval(c); return r; }
-template<class X> inline typename enable_if_numeric<X,ScalarTaylorFunction>::type
+template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
 operator/(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(rec(f)); r*=Interval(c); return r; }
 
 inline ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
@@ -635,7 +642,7 @@ class VectorTaylorFunction
     explicit VectorTaylorFunction(const List<ScalarTaylorFunction>& components);
 
     /*! \brief Construct from a vector expression. */
-    template<class E> explicit VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve);
+    template<class E> explicit VectorTaylorFunction(const VectorExpression<E>& ve);
 
     /*! \brief Equality operator. */
     bool operator==(const VectorTaylorFunction& p) const;
@@ -883,7 +890,7 @@ std::ostream& operator<<(std::ostream&,const PolynomialRepresentation< List<Scal
 std::ostream& operator<<(std::ostream&,const PolynomialRepresentation<VectorTaylorFunction>&);
 
 
-template<class E> VectorTaylorFunction::VectorTaylorFunction(const boost::numeric::ublas::vector_expression<E>& ve)            : _domain(), _models(ve().size())
+template<class E> VectorTaylorFunction::VectorTaylorFunction(const VectorExpression<E>& ve) : _domain(), _models(ve().size())
 {
     if(ve().size()!=0) { this->_domain=ve()[0].domain(); }
     for(uint i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }

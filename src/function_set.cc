@@ -82,7 +82,7 @@ ImageSet::dimension() const
 tribool
 ImageSet::empty() const
 {
-    return this->_domain.empty();
+    return Ariadne::empty(this->_domain);
 }
 
 
@@ -309,8 +309,6 @@ Box ConstrainedImageSet::bounding_box() const
 {
     return this->_function(this->_domain);
 }
-
-template<class X> Vector<X> operator*(const Matrix<X>& A, const Vector<X>& b) { return prod(A,b); }
 
 AffineSet
 ConstrainedImageSet::affine_approximation() const

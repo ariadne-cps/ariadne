@@ -39,6 +39,7 @@
 #include <set>
 #include <map>
 #include "array.h"
+#include "stlio.h"
 
 namespace Ariadne {
 

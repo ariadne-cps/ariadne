@@ -42,6 +42,9 @@
 
 namespace Ariadne {
 
+inline Vector<Float> add_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1+v2; }
+inline Vector<Float> sub_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1-v2; }
+
 template<class X> class LinearProgram {
   public:
     LinearProgram(const Matrix<X>& A) { ARIADNE_NOT_IMPLEMENTED; }
@@ -87,7 +90,7 @@ row_norms(const Matrix<Interval>& A)
     Vector<Float> e(m);
     for(uint i=0; i!=m; ++i) {
         for(uint j=0; j!=n; ++j) {
-            e[i]=add_up(e[i],mag(A(i,j)));
+            e[i]=add_up(e[i],mag(A[i][j]));
         }
     }
     return e;
@@ -101,7 +104,7 @@ row_errors(const Matrix<Interval>& A)
     Vector<Float> e(m);
     for(uint i=0; i!=m; ++i) {
         for(uint j=0; j!=n; ++j) {
-            e[i]=add_up(e[i],A(i,j).radius());
+            e[i]=add_up(e[i],A[i][j].radius());
         }
     }
     return e;
@@ -126,7 +129,7 @@ row_errors(const Vector<Interval>& pt, const Matrix<Interval>& A)
     for(uint i=0; i!=A.row_size(); ++i) {
         result[i]=pt[i].radius();
         for(uint j=0; j!=A.column_size(); ++j) {
-            result[i]=add_up(result[i],A(i,j).radius());
+            result[i]=add_up(result[i],A[i][j].radius());
         }
     }
     return result;
@@ -311,7 +314,7 @@ Box
 Zonotope::bounding_box() const
 {
     const Zonotope& z=*this;
-    Box b=z.centre()+prod(z.generators(),z.domain())+z.error()*Interval(-1,1);
+    Box b=z.centre()+(z.generators()*z.domain())+z.error()*Interval(-1,1);
     return b;
 }
 
@@ -374,7 +377,7 @@ bounded(const Zonotope& z)
 Float
 radius(const Zonotope& z)
 {
-    return Ariadne::radius(z.centre()+prod(z.generators(),z.domain())+z.error()*Interval(-1,1));
+    return Ariadne::radius(z.centre()+(z.generators()*z.domain())+z.error()*Interval(-1,1));
 }
 
 
@@ -433,7 +436,7 @@ split(const Zonotope& z)
         Matrix<Float> new_generators=z.generators();
         uint j=longest_generator;
         for(uint i=0; i!=d; ++i) {
-            new_generators(i,j)=div_up(new_generators(i,j),2);
+            new_generators[i][j]=div_up(new_generators[i][j],2);
         }
 
         Vector<Float> v=column(new_generators,j);
@@ -469,10 +472,10 @@ Zonotope::Zonotope(const Box& r)
     for(uint i=0; i!=d; ++i) {
         c[i]=med_approx(r[i].lower(),r[i].upper());
         for(uint j=0; j!=d; ++j) {
-            G(i,j)=0;
+            G[i][j]=0;
         }
-        G(i,i)=rad_up(r[i].lower(),r[i].upper());
-        e(i)=0;
+        G[i][i]=rad_up(r[i].lower(),r[i].upper());
+        e[i]=0;
     }
 }
 
@@ -513,7 +516,7 @@ error_free_over_approximation(const Zonotope& z)
     uint j=m;
     for(uint i=0; i!=d; ++i) {
         if(z.error()[i]!=0) {
-            nG(i,j)=z.error()[i];
+            nG[i][j]=z.error()[i];
             ++j;
         }
     }
@@ -582,9 +585,9 @@ cascade_over_approximation(const Zonotope& z, uint cs)
     Matrix<Float> rG(d,d*nnb);
     project(rG,range(0,d),range(0,d*(nnb-1)))=project(G,range(0,d),range(0,d*(nnb-1)));
     for(uint i=0; i!=d; ++i) {
-        Float& err=rG(i,d*(nnb-1)+i);
+        Float& err=rG[i][d*(nnb-1)+i];
         for(uint j=d*(nnb-1); j!=G.column_size(); ++j) {
-            err=add_up(err,abs(G(i,j)));
+            err=add_up(err,abs(G[i][j]));
         }
     }
     return Zonotope(z.centre(),rG);
@@ -635,7 +638,7 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
     for(uint i=0; i!=z.size();++i) {
         Interval a=0;
         for(uint j=i; j!=z.number_of_generators(); ++j) {
-            a+=r(i,j);
+            a+=r[i][j];
         }
         for(uint k=0; k!=z.size(); ++k) {
             Interval b=q(k,i)*a;
@@ -661,7 +664,7 @@ orthogonal_over_approximation(const Zonotope<Interval,R>& z)
     for(uint i=0; i!=z.size();++i) {
         Interval a=0;
         for(uint j=i; j!=z.number_of_generators(); ++j) {
-            a+=r(i,j);
+            a+=r[i][j];
         }
         for(uint k=0; k!=z.size(); ++k) {
             Interval b=q(k,i)*a;
@@ -687,7 +690,7 @@ orthogonal_over_approximation(const Zonotope< Interval >& z)
     for(uint i=0; i!=z.size();++i) {
         Interval a=0;
         for(uint j=i; j!=z.number_of_generators(); ++j) {
-            a+=r(i,j);
+            a+=r[i][j];
         }
         for(uint k=0; k!=z.size(); ++k) {
             Interval b=q(k,i)*a;

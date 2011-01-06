@@ -34,8 +34,6 @@
 #include "numeric.h"
 #include "tuple.h"
 
-using namespace boost::numeric;
-
 namespace Ariadne {
 
 template<class X> class Vector;

@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include "tuple.h"
+#include "stlio.h"
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
@@ -33,18 +34,9 @@
 #include "macros.h"
 #include "logging.h"
 
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-
 static const int verbosity=0;
 
 namespace Ariadne {
-
-template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& x) {
-    return prod(A,x); }
-template<class X> inline Vector<X> operator*(const Vector<X>& y, const Matrix<X>& A) {
-    return prod(y,A); }
-template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const Matrix<X>& B) {
-    return prod(A,B); }
 
 // Threshold for matrix diagonal elements below which it may be considered singular
 static const double SINGULARITY_THRESHOLD = std::numeric_limits<double>::epsilon();
@@ -62,26 +54,6 @@ const double BOUNDS_TOLERANCE=std::numeric_limits<double>::epsilon() * 4098;
 
 std::ostream& operator<<(std::ostream& os, Slackness t) {
     return os << (t==BASIS ? 'B' : t==LOWER ? 'L' : t==UPPER ? 'U' : t==FIXED ? 'E' : '?');
-}
-
-
-// Compare a matrix with a projection
-// Used for checking whether a projection is the identity
-template<class Mx, class X> bool operator==(const boost::numeric::ublas::matrix_range<Mx>& A, const boost::numeric::ublas::matrix<X>& B)
-{
-    if(A.size1()!=B.size1() || A.size2()!=B.size2()) {
-        return false;
-    }
-
-
-    for(size_t i=0; i!=A.size1(); ++i) {
-        for(size_t j=0; j!=A.size1(); ++j) {
-            if(A(i,j)!=B(i,j)) {
-                return false;
-            }
-        }
-    }
-    return true;
 }
 
 
@@ -174,7 +146,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<size_t>& p, 
 
     Array<size_t> p_B(p.begin(),p.begin()+m);
 
-    Matrix<X> Z=prod(B,A_B);
+    Matrix<X> Z=B*A_B;
     ARIADNE_LOG(9,"        p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
     ARIADNE_ASSERT_MSG(norm(Z)<MAXIMUM_ERROR, "A="<<A<<"\np="<<p<<"\nB="<<B<<"\nZ=B*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
@@ -187,7 +159,7 @@ void
 SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,const Vector<X>& x) const
 {
     static const X MAXIMUM_ERROR=1e-8;
-    Vector<X> z=prod(A,b)-x;
+    Vector<X> z=A*b-x;
     ARIADNE_ASSERT(norm(z)<MAXIMUM_ERROR);
 }
 
@@ -213,13 +185,13 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
 
     Array<size_t> p_B(p.begin(),p.begin()+m);
 
-    Matrix<X> I=prod(B,A_B);
+    Matrix<X> I=B*A_B;
     ARIADNE_LOG(9,"          p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
     Matrix<X> Z=I;
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
     ARIADNE_ASSERT_MSG(norm(Z)<=1e-5,"vt="<<vt<<" p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
 
-    Vector<X> Ax=prod(A,x);
+    Vector<X> Ax=A*x;
     ARIADNE_LOG(9,"          A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<Ax<<"\n");
 
     for(size_t k=m; k!=n; ++k) {
@@ -489,7 +461,7 @@ compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Ve
         }
     }
 
-    Vector<XX> Ax=prod(A,x);
+    Vector<XX> Ax=A*x;
     Vector<XX> Axmb=Ax-b;
     ARIADNE_ASSERT_MSG(norm(Axmb)<0.00001,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     return x;
@@ -535,7 +507,7 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Ve
 
     ARIADNE_LOG(9," x="<<x<<"\n");
 
-    Vector<X> Axmb=prod(A,x)-b;
+    Vector<X> Axmb=A*x-b;
     ARIADNE_ASSERT(norm(Axmb)<0.00001);
     return make_pair(w,x);
 }
@@ -1150,7 +1122,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
         if(done) {
             ARIADNE_LOG(9,"  Cannot put infeasible variables into basis.");
             Vector<X> y=compute_y(cc,p,B);
-            Vector<X> yA=prod(y,A);
+            Vector<X> yA=y*A;
             X yb=dot(y,b);
             ARIADNE_LOG(5,"\nCertificate of infeasibility:\n y="<<y<<"\n yA="<<yA<<" yb="<<yb<<"\n");
             return false;
@@ -1171,7 +1143,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
             if(verbosity>0) {
                 ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
                              <<"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
-                             <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<Vector<X>(prod(compute_y(cc,p,B),A))<<"\n");
+                             <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<(compute_y(cc,p,B)*A)<<"\n");
             }
             throw DegenerateFeasibilityProblemException();
         }
@@ -1184,12 +1156,12 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
         ARIADNE_ASSERT_MSG(x[i]>=xl[i]-BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
         ARIADNE_ASSERT_MSG(x[i]<=xu[i]+BOUNDS_TOLERANCE, "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
     }
-    Vector<X> Ax=prod(A,x);
+    Vector<X> Ax=A*x;
     for(size_t i=0; i!=m; ++i) {
         ARIADNE_ASSERT(abs(Ax[i]-b[i])<0.0001);
     }
 
-    ARIADNE_LOG(5,"\nFeasible point x="<<x<<"; xl="<<xl<<" xu="<<xu<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b<<"\n");
+    ARIADNE_LOG(5,"\nFeasible point x="<<x<<"; xl="<<xl<<" xu="<<xu<<"\n Ax="<<(A*x)<<" b="<<b<<"\n");
 
     return true;
 }
@@ -1216,7 +1188,7 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
 
     Array<Slackness> vt=compute_vt(xl,xu,p,m);
 
-    ARIADNE_LOG(9,"p="<<p<<" B="<<B<<"  (BA="<<Matrix<X>(prod(B,A))<<")\n");
+    ARIADNE_LOG(9,"p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")\n");
 
     Vector<X> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     Vector<X> y(m);
@@ -1244,7 +1216,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     Array<size_t> p = Ariadne::compute_p(vt);
     Matrix<X> B = Ariadne::compute_B<X>(A,p);
 
-    ARIADNE_LOG(9,"p="<<p<<" B="<<B<<"  (BA="<<Matrix<X>(prod(B,A))<<")\n");
+    ARIADNE_LOG(9,"p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")\n");
 
     Vector<X> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     Vector<X> y(m);
@@ -1335,12 +1307,11 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
         ARIADNE_LOG(7,"x="<<x<<" c="<<c<<" y="<<y<<" z="<<z<<"\n");
     }
 
-
     const Matrix<XX> B=compute_B<XX>(A,p);
-    ARIADNE_LOG(9," B="<<B<<"; B*A="<<midpoint(prod(B,A))<<"\n");
+    ARIADNE_LOG(9," B="<<B<<"; B*A="<<midpoint(B*A)<<"\n");
 
     const Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
-    ARIADNE_LOG(9," x="<<x<<"; A*x="<<Vector<XX>(prod(A,x))<<"\n");
+    ARIADNE_LOG(9," x="<<x<<"; A*x="<<(A*x)<<"\n");
 
 
     const Vector<X> c=compute_c(m,xl,xu,p,x);

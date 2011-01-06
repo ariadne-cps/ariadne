@@ -33,19 +33,10 @@
 #include "macros.h"
 #include "logging.h"
 
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-
 static const int verbosity=0;
 
 namespace Ariadne {
 
-
-template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& x) {
-    return prod(A,x); }
-template<class X> inline Vector<X> operator*(const Vector<X>& y, const Matrix<X>& A) {
-    return prod(y,A); }
-template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const Matrix<X>& B) {
-    return prod(A,B); }
 
 
 // Return r[i]=x[i]-c for i=1,...,n
@@ -438,7 +429,7 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     ARIADNE_LOG(5,"alphax="<<alphax<<" nx="<<nx<<" alphaz="<<alphaz<<" ny="<<ny<<" nzl="<<nzl<<" nzu="<<nzu<<"\n");
 
     x=nx; y=ny; zl=nzl; zu=nzu;
-    ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<Vector<Float>(prod(A,x)-b)<<" yA+(zl-zu)-c="<<Vector<Float>(y*A+(zl-zu)-c)<<"\n");
+    ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<(A*x-b)<<" yA+(zl-zu)-c="<<(y*A+(zl-zu)-c)<<"\n");
 
     if(alphax==1.0 && alphaz==1.0) { return PRIMAL_DUAL_FEASIBLE; }
     if(alphax==1.0) { return PRIMAL_FEASIBLE; }

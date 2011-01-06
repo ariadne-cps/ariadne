@@ -32,8 +32,6 @@
 #include "numeric.h"
 #include "tuple.h"
 
-using namespace boost::numeric;
-
 namespace Ariadne {
 
 typedef void Void;

@@ -23,11 +23,6 @@
 
 #include <limits>
 
-#include "boost/multi_array.hpp"
-#include "boost/array.hpp"
-#include "boost/numeric/ublas/storage.hpp"
-#include "boost/numeric/ublas/vector.hpp"
-
 #include "macros.h"
 #include "logging.h"
 #include "tuple.h"
@@ -49,12 +44,12 @@ static const double error =  1e-2;
 
 typedef Vector<Float> FloatVector;
 typedef Matrix<Float> FloatMatrix;
-typedef boost::numeric::ublas::vector_range<FloatVector> FloatVectorRange;
+typedef VectorRange<FloatVector> FloatVectorRange;
 typedef DiagonalMatrix<Float> FloatDiagonalMatrix;
 
 typedef Vector<Interval> IntervalVector;
 typedef Matrix<Interval> IntervalMatrix;
-typedef boost::numeric::ublas::vector_range<IntervalVector> IntervalVectorRange;
+typedef VectorRange<IntervalVector> IntervalVectorRange;
 typedef DiagonalMatrix<Interval> IntervalDiagonalMatrix;
 
 template<class X, class XX> inline
@@ -179,51 +174,21 @@ template<class X> inline bool all_greater(const Vector<X>& x, const X& e) {
     for(uint i=0; i!=x.size(); ++i) { if(x[i]<=e) { return false; } } return true;
 }
 
-template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& b) {
-    return prod(A,b);
-}
-
-template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const Matrix<X>& B) {
-    return prod(A,B);
-}
-
 template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const DiagonalMatrix<X>& B) {
     Matrix<X> R(A.row_size(),A.column_size());
     for(uint i=0; i!=A.row_size(); ++i) { for(uint j=0; j!=A.column_size(); ++j) { R[i][j]=A[i][j]*B.diagonal()[j]; } }
     return R;
 }
 
-template<class X> inline Vector<X> prod(const Vector<X>& v, const DiagonalMatrix<X>& D) {
-    Vector<X> r(v.size()); for(uint i=0; i!=r.size(); ++i) { r[i] = v[i] * D[i]; } return r;
+template<class X> inline Vector<X> operator*(const Vector<X>& v1, const DiagonalMatrix<X>& D2) {
+    Vector<X> r(v1.size()); for(uint i=0; i!=r.size(); ++i) { r[i] = v1[i] * D2[i]; } return r;
 }
-
-inline Vector<Float> operator*(const Vector<Float>& v1, const DiagonalMatrix<Float>& D2) { return prod(v1,D2); }
-
-inline Matrix<Float> operator*(const Matrix<Float>& A1, const Matrix<Float>& A2) { return prod(A1,A2); }
-inline Vector<Float> operator*(const Matrix<Float>& A1, const Vector<Float>& v2) { return prod(A1,v2); }
-inline Vector<Float> operator*(const Vector<Float>& v1, const Matrix<Float>& A2) { return prod(v1,A2); }
-inline Matrix<Interval> operator*(const Matrix<Float>& A1, const Matrix<Interval>& A2) { return prod(A1,A2); }
-inline Vector<Interval> operator*(const Matrix<Float>& A1, const Vector<Interval>& v2) { return prod(A1,v2); }
-inline Vector<Interval> operator*(const Vector<Float>& v1, const Matrix<Interval>& A2) { return prod(v1,A2); }
-inline Matrix<Interval> operator*(const Matrix<Interval>& A1, const Matrix<Float>& A2) { return prod(A1,A2); }
-inline Vector<Interval> operator*(const Matrix<Interval>& A1, const Vector<Float>& v2) { return prod(A1,v2); }
-inline Vector<Interval> operator*(const Vector<Interval>& v1, const Matrix<Float>& A2) { return prod(v1,A2); }
-inline Matrix<Interval> operator*(const Matrix<Interval>& A1, const Matrix<Interval>& A2) { return prod(A1,A2); }
-inline Vector<Interval> operator*(const Matrix<Interval>& A1, const Vector<Interval>& v2) { return prod(A1,v2); }
-inline Vector<Interval> operator*(const Vector<Interval>& v1, const Matrix<Interval>& A2) { return prod(v1,A2); }
 
 template<class X> inline Matrix<X>& operator+=(Matrix<X>& A, const DiagonalMatrix<X>& D) {
     for(uint i=0; i!=D.size(); ++i) { A[i][i]+=D[i]; } return A;
 }
 
 
-template<class X> inline Vector<X> operator+(const Vector<X>& x, const Vector<X>& y) {
-    Vector<X> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]+y[i]; } return r;
-}
-
-template<class X> inline Vector<X> operator-(const Vector<X>& x, const Vector<X>& y) {
-    Vector<X> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]-y[i]; } return r;
-}
 
 template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3) {
     Vector<X> r(v1.size()+v2.size()+v3.size());
@@ -500,7 +465,7 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
     FloatMatrix fltA=midpoint(ivlA);
     ARIADNE_LOG(7,"A="<<fltA<<"\n");
     ARIADNE_LOG(7,"D="<<fltD<<"\n");
-    FloatMatrix fltL = FloatDiagonalMatrix(fltD)*transpose(fltA);
+    FloatMatrix fltL = FloatDiagonalMatrix(fltD)*FloatMatrix(transpose(fltA));
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
     IntervalMatrix ivlS = ivlA * fltL;
@@ -773,7 +738,7 @@ minimisation_step(const FloatScalarFunction& f, const IntervalVector& d, const F
     //   (B * Sinv * BT) dl = B * Sinv * (rx + AT rw + ATC rk) - rl
     FloatMatrix& S=H;
     S+=D;
-    S+=transpose(A)*C*A;
+    S+=FloatMatrix(transpose(A))*C*A;
     ARIADNE_LOG(9,"S="<<S<<"\n");
 
     FloatMatrix Sinv=inverse(S);
@@ -931,11 +896,11 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     ARIADNE_LOG(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz<<"\n");
 
     //FloatVector rr=prod(AE,ediv(FloatVector(rx-emul(x,rz)),z))-ryt;
-    FloatVector rr=ryt+prod(AE,ediv(FloatVector(rx-emul(x,rz)),z))-ryt;
+    FloatVector rr=ryt + AE*ediv(FloatVector(rx-emul(x,rz)),z) - ryt;
 
 
     // Compute the differences
-    FloatVector dyt=prod(Sinv,rr);
+    FloatVector dyt=Sinv*rr;
     //FloatVector dz=-rz-prod(AET,dyt);
     FloatVector dz=-rz-feasibility_trmul(A,dyt);
     FloatVector dx=-ediv(FloatVector(rx+emul(x,dz)),z);
@@ -1461,7 +1426,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
         ARIADNE_LOG(5,"B="<<B<<"\n");
 
         // Perform an interval Newton step to try to attain feasibility
-        IntervalVector nW = inverse(IntervalMatrix(prod(IA,AT))) * IntervalVector( IntervalVector(h(x)-c) );
+        IntervalVector nW = inverse(IA*AT) * IntervalVector(h(x)-c);
         ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
         if(subset(B,D) && subset(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
         else { result=indeterminate; }
@@ -1541,7 +1506,7 @@ validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector 
     ARIADNE_LOG(5,"AT="<<AT<<" IA="<<IA<<"\n");
     ARIADNE_LOG(5,"B="<<B<<"\n");
 
-    IntervalVector nW = inverse(IntervalMatrix(prod(IA,AT))) * IntervalVector( IntervalVector(h(x)-c) );
+    IntervalVector nW = inverse(IA*AT) * IntervalVector(h(x)-c);
     ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
     if(subset(B,D) && subset(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
     else { return indeterminate; }
@@ -1730,8 +1695,8 @@ feasible(IntervalVector D, IntervalVectorFunction h) const
     const uint n=D.size();
 
     IntervalVector zl(n), zu(n);
-    FloatVector xl = Ariadne::lower(D);
-    FloatVector xu = Ariadne::upper(D);
+    FloatVector xl = Ariadne::lower_bounds(D);
+    FloatVector xu = Ariadne::upper_bounds(D);
 
     IntervalVector x=D;
     IntervalVector y(h.result_size(),Interval(-1,+1));

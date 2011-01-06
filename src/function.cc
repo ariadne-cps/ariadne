@@ -549,7 +549,13 @@ struct LieDerivativeFunctionBody
     std::ostream& write(std::ostream& os) const { return os << "LieDerivative( g="<<_g<<", f="<<_f<<" )"; }
 
     template<class R, class A> void _compute(R& r, const A& x) const {
-        Vector<R> fx=_f.evaluate(x); r=0; for(uint i=0; i!=_dg.size(); ++i) { r+=fx[i]+_dg[i].evaluate(x); } }
+        //const Vector<R> fx=_f.evaluate(x); r=0; for(uint i=0; i!=_dg.size(); ++i) { r+=fx[i]+_dg[i].evaluate(x); } }
+        Vector<R> fx=_f.evaluate(x);
+        r=0;
+        for(uint i=0; i!=_dg.size(); ++i) {
+            r+=fx[i]+_dg[i].evaluate(x);
+        }
+    }
 
     RealScalarFunction _g;
     List<RealScalarFunction> _dg;

@@ -25,14 +25,11 @@
 #include "numeric.h"
 #include "vector.h"
 
-template class boost::numeric::ublas::vector<Ariadne::Float>;
-template class boost::numeric::ublas::vector<Ariadne::Interval>;
-
 namespace Ariadne {
 
 
 template<> Vector<Float>::Vector(size_t n, const double& t0, const double& t1, ...)
-    : ublas::vector<Float>(n)
+    : _ary(n)
 {
     assert(n>=2); va_list args; va_start(args,t1);
     (*this)[0]=t0; (*this)[1]=t1;
@@ -41,7 +38,7 @@ template<> Vector<Float>::Vector(size_t n, const double& t0, const double& t1, .
 }
 
 template<> Vector<Real>::Vector(size_t n, const double& t0, const double& t1, ...)
-    : ublas::vector<Real>(n)
+    : _ary(n)
 {
     assert(n>=2); va_list args; va_start(args,t1);
     (*this)[0]=t0; (*this)[1]=t1;
@@ -50,7 +47,7 @@ template<> Vector<Real>::Vector(size_t n, const double& t0, const double& t1, ..
 }
 
 template<> Vector<Interval>::Vector(size_t n, const double& t0, const double& t1, ...)
-    : ublas::vector<Interval>(n)
+    : _ary(n)
 {
     assert(n>=1); va_list args; va_start(args,t1);
     (*this)[0]=Interval(t0,t1);
@@ -191,7 +188,7 @@ Vector<Float> midpoint(const Vector<Interval>& v)
     return r;
 }
 
-Vector<Float> lower(const Vector<Interval>& v)
+Vector<Float> lower_bounds(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -200,7 +197,7 @@ Vector<Float> lower(const Vector<Interval>& v)
     return r;
 }
 
-Vector<Float> upper(const Vector<Interval>& v)
+Vector<Float> upper_bounds(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -246,8 +243,5 @@ Float volume(const Vector<Interval>& v)
     }
     return r;
 }
-
-Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);
-Vector<Float> midpoint(const Vector<Interval>& v);
 
 } // namespace Ariadne

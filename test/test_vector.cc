@@ -52,8 +52,8 @@ TestVector::test()
 void
 TestVector::test_concept()
 {
-    Float fx;
-    Interval ix;
+    Float fx(1);
+    Interval ix(1);
     Vector<Float> fv;
     Vector<Interval> iv;
 
@@ -129,8 +129,8 @@ TestVector::test_misc()
     cout << "iv1=" << iv1 << endl;
     cout << endl;
 
-    Interval ix2=iv2(0);
-    Interval ix3=iv3(0);
+    Interval ix2=iv2[0];
+    Interval ix3=iv3[0];
     Interval ix1=ix2+ix3;
     ix1=ix2+ix3;
 

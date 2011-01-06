@@ -28,13 +28,6 @@
 #include "vector.h"
 #include "matrix.h"
 
-template class boost::numeric::ublas::matrix<Ariadne::Float>;
-template class boost::numeric::ublas::matrix<Ariadne::Interval>;
-
-#ifdef HAVE_GMPXX_H
-template class boost::numeric::ublas::matrix<Ariadne::Rational>;
-#endif // HAVE_GMPXX_H
-
 
 namespace Ariadne {
 
@@ -137,7 +130,7 @@ template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
 template<class X> Matrix<X> dd_solve(const Matrix<X>& A, const Matrix<X>& B);
 
 template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B) {
-    return prod(lu_inverse(A),B);
+    return lu_inverse(A)*B;
 }
 
 // Find a starting solution for a diagonally dominant system
@@ -189,8 +182,8 @@ template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Int
 
     // Precondition A and B
     Matrix<Float> J=inverse(midpoint(A));
-    Matrix<Interval> JA=prod(J,A);
-    Matrix<Interval> JB=prod(J,B);
+    Matrix<Interval> JA=J*A;
+    Matrix<Interval> JB=J*B;
     //std::cerr<<"J="<<J<<"\nJA="<<JA<<"\nJB="<<JB<<"\n";
 
     //Matrix<Interval> R=dd_solve(JA,JB);
@@ -239,7 +232,8 @@ template<> Matrix<Interval> inverse<Interval>(const Matrix<Interval>& A) {
 
 
 template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B) {
-    return prod(inverse(A),B);
+    //return inverse(A)*B;
+    Matrix<X> Ainv=inverse(A); return Ainv*B;
 }
 
 template<> Matrix<Interval> solve(const Matrix<Interval>& A, const Matrix<Interval>& B) {
@@ -247,7 +241,7 @@ template<> Matrix<Interval> solve(const Matrix<Interval>& A, const Matrix<Interv
 }
 
 template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& b) {
-    return prod(lu_inverse(A),b);
+    return lu_inverse(A)*b;
 }
 
 
@@ -598,7 +592,7 @@ Matrix<Float> pivot_matrix(const Array<size_t>& pv)
 }
 
 PivotMatrix::operator Matrix<Float> () const {
-    return pivot_matrix(*this);
+    return pivot_matrix(this->_ary);
 }
 
 std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv) {

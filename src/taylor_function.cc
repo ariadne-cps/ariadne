@@ -499,6 +499,19 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, uint k, const Inte
     return partial_restrict(tv,k,new_ivl);
 }
 
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, uint k, Float c)
+{
+    ARIADNE_ASSERT(k<f.argument_size());
+    ARIADNE_ASSERT(contains(f.domain()[k],c));
+
+    ScalarTaylorFunction g = antiderivative(f,k);
+    VectorTaylorFunction h = VectorTaylorFunction::identity(g.domain());
+    h[k] = ScalarTaylorFunction::constant(g.domain(),c);
+
+    return g-compose(g,h);
+}
+
+
 
 
 
@@ -1626,6 +1639,18 @@ antiderivative(const VectorTaylorFunction& f, uint k)
     for(uint i=0; i!=g.size(); ++i) {
         g._models[i].antidifferentiate(k);
         g._models[i]*=fdomkrad;
+    }
+    return g;
+}
+
+VectorTaylorFunction
+antiderivative(const VectorTaylorFunction& f, uint k, Float c)
+{
+    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+    Interval fdomkrad=rad_ivl(f.domain()[k].lower(),f.domain()[k].upper());
+    VectorTaylorFunction g=f;
+    for(uint i=0; i!=g.size(); ++i) {
+        g[i]=antiderivative(f[i],k,c);
     }
     return g;
 }

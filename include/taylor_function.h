@@ -110,6 +110,7 @@ ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& d2);
 ScalarTaylorFunction embed(const Vector<Interval>& d1, const ScalarTaylorFunction& tv2);
 
 // Antidifferentiation operator
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k, Float c);
 ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k);
 ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k);
 
@@ -571,6 +572,7 @@ VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunc
 VectorTaylorFunction compose(const IntervalVectorFunctionInterface&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const RealVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
+VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint, Float);
 Float norm(const ScalarTaylorFunction& f);
 Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
 Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2);

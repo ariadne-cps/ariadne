@@ -206,6 +206,21 @@ void TestScalarTaylorFunction::test_antiderivative()
 {
     ScalarTaylorFunction tm=ScalarTaylorFunction::constant(d(2),1.0);
     ScalarTaylorFunction atm=antiderivative(tm,1u);
+
+    IntervalVector dom(2, 1.0, 4.0, 0.0, 2.0);
+    VectorTaylorFunction x = VectorTaylorFunction::identity(dom);
+    ScalarTaylorFunction f = 1.0 + 2.0*x[0]+3.0*x[1]+5.0*x[0]*x[0]+4.0*x[0]*x[1];
+
+    ARIADNE_TEST_PRINT(f);
+    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction, g, (antiderivative(f,0,2.0)) );
+    ARIADNE_ASSERT(norm(derivative(g,0)-f)<1e-8);
+
+    // We should have f(c,s)=0 for all x1
+    ScalarTaylorFunction s = ScalarTaylorFunction::identity(dom[1]);
+    ScalarTaylorFunction c = ScalarTaylorFunction::constant(s.domain(),2.0);
+    ScalarTaylorFunction h=compose(g,VectorTaylorFunction((c,s)));
+    ARIADNE_ASSERT(mag(h(h.domain()))<1e-8);
+
 }
 
 void TestScalarTaylorFunction::test_substitute()

@@ -109,6 +109,11 @@ class ConstraintSolver
     bool hull_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval& codomain) const;
     bool hull_reduce(Box& bx, const IntervalProcedure& procedure, const Interval& codomain) const;
 
+    //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
+    //! with \a multipliers innner product \a codomain, centering at \a centre.
+    //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
+    bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const IntervalVector& codomain,
+                         FloatVector centre, FloatVector multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
     bool box_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval&, uint j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.

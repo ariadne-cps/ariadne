@@ -360,7 +360,38 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunction
 
 
 
+bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const IntervalVector& bounds,
+                                       FloatVector centre, FloatVector multipliers) const
+{
+    ScalarTaylorFunction g(function.domain());
+    Interval C(0);
+    for(uint i=0; i!=function.result_size(); ++i) {
+        g += multipliers[i] * function[i];
+        C += multipliers[i] * bounds[i];
+    }
+    IntervalDifferentialVector dx = IntervalDifferential::variables(1u,domain);
+    IntervalVector dg = g.evaluate(dx).gradient();
+    C -= g(IntervalVector(centre));
 
+    Box new_domain(domain);
+    IntervalVector ranges(domain.size());
+    for(uint j=0; j!=domain.size(); ++j) {
+        ranges[j] = dg[j]*(domain[j]-centre[j]);
+    }
+
+    // We now have sum dg(xi)[j] * (x[j]-x0[j]) in C, so we can reduce each component
+    for(uint j=0; j!=domain.size(); ++j) {
+        Interval E = C;
+        for(uint k=0; k!=domain.size(); ++k) {
+            if(j!=k) { E-=ranges[k]; }
+        }
+        Interval estimated_domain = E/dg[j]+centre[j];
+        new_domain[j] = intersection(domain[j],estimated_domain);
+    }
+
+    domain=new_domain;
+    return domain.empty();
+}
 
 bool ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {

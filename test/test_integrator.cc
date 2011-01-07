@@ -111,7 +111,7 @@ class TestIntegrator
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
         VectorTaylorFunction expected_flow( flow.domain(), (exp(-0.5*t)*(x0*cos(t)-y0*sin(t)),exp(-0.5*t)*(x0*sin(t)+y0*cos(t))) );
-        expected_flow.truncate(4);
+        expected_flow.truncate(6);
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -138,9 +138,14 @@ class TestIntegrator
 
 int main(int argc, const char **argv) {
     int verbosity=get_verbosity(argc,argv);
+    ARIADNE_TEST_PRINT("Testing TaylorIntegrator");
     TaylorIntegrator taylor_integrator(16,1e-6,1e-16);
     taylor_integrator.verbosity=verbosity;
     TestIntegrator(taylor_integrator).test();
+    ARIADNE_TEST_PRINT("Testing AffineIntegrator");
+    AffineIntegrator affine_integrator(1e-6, 6);
+    affine_integrator.verbosity=verbosity;
+    TestIntegrator(affine_integrator).test();
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;
 }

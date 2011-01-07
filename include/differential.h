@@ -1148,6 +1148,14 @@ lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> 
 }
 
 template<class X>
+Vector< Differential<X> >
+antiderivative(const Vector< Differential<X> >& x, uint k) {
+    Vector< Differential<X> > r(x.size(), Differential<X>(x.argument_size(),x.degree()+1));
+    for(uint i=0; i!=r.size(); ++i) { r[i]=antiderivative(x[i],k); }
+    return r;
+}
+
+template<class X>
 Vector<X>
 value(const Vector< Differential<X> >& x)
 {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            first_differential.h
+ *            fixed_differential.h
  *
  *  Copyright 2011  Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file first_differential.h
- *  \brief First-order multivariate differentials.
+/*! \file fixed_differential.h
+ *  \brief First- and second-order multivariate differentials.
  */
 
-#ifndef ARIADNE_FIRST_DIFFERENTIAL_H
-#define ARIADNE_FIRST_DIFFERENTIAL_H
+#ifndef ARIADNE_FIXED_DIFFERENTIAL_H
+#define ARIADNE_FIXED_DIFFERENTIAL_H
 
 #include <map>
 
@@ -129,8 +129,11 @@ class FirstDifferential
     //! \brief The type of used to represent the coefficients.
     typedef X ValueType;
 
-    //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
+    //! \brief Constructs a differential in \a as variables.
     explicit FirstDifferential(uint as) : _value(_zero), _gradient(as,_zero) { }
+
+    //! \brief Constructs a differential with degree zero in \a as variables, initialising to the zero value z.
+    explicit FirstDifferential(uint as, const X& z) : _value(z), _gradient(as,z) { }
 
     //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
     explicit FirstDifferential(const X& v, const Vector<X>& g) : _value(v), _gradient(g) { }
@@ -170,6 +173,8 @@ class FirstDifferential
     const X& value() const { return this->_value; }
     //! \brief The vector of coefficients of \f$x_j\f$.
     const Vector<X>& gradient() const { return this->_gradient; }
+    //! \brief The vector of coefficients of \f$x_j\f$.
+    const X& gradient(uint j) const { return this->_gradient[j]; }
 
 
     //! \brief A reference to the coefficient of \f$x_j\f$.
@@ -261,6 +266,13 @@ operator*(const FirstDifferential<X>& x, const R& c)
     FirstDifferential<X> r(x); r*=X(c); return r;
 }
 
+template<class X>
+FirstDifferential<X>
+operator*(const FirstDifferential<X>& x, const int& c)
+{
+    FirstDifferential<X> r(x); r*=X(0); return r;
+}
+
 template<class X, class R>
 typename enable_if_scalar<R,FirstDifferential<X> >::Type
 operator*(const R& c, const FirstDifferential<X>& x)
@@ -346,6 +358,8 @@ FirstDifferential<X> operator/(const FirstDifferential<X>& x, const FirstDiffere
     return FirstDifferential<X>(x._value/y._value,((x._value/y._value)*y._gradient+x._gradient)/y._value);
 }
 
+template<class X> FirstDifferential<X> create_zero(const FirstDifferential<X>& c) {
+    return FirstDifferential<X>(c.argument_size(),create_zero(c.value())); }
 
 
 
@@ -472,10 +486,10 @@ FirstDifferential<X> tan(const FirstDifferential<X>& x)
 template<class X>
 std::ostream& operator<<(std::ostream& os, const FirstDifferential<X>& x)
 {
-    os << "D("<<x.argument_size()<<","<<x.degree()<<"){";
+    os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{ ";
     os << x._value;
     for(uint j=0; j!=x.argument_size(); ++j) {
-        os << "," << j << ":" << x[j];
+        os << (j==0?"; ":",") << j << ":" << x[j];
     }
     return os << " }";
 }
@@ -926,7 +940,7 @@ std::ostream& operator<<(std::ostream& os, const SecondDifferential<X>& x)
 {
     Expansion<X> e=x.expansion();
     //e.graded_sort();
-    os << "D("<<x.argument_size()<<","<<x.degree()<<"){";
+    os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{";
     os << x._value;
     for(uint j=0; j!=x.argument_size(); ++j) {
         os << "," << j << ":" << x[j];
@@ -993,4 +1007,4 @@ class Vector< SecondDifferential<X> >
 
 } //namespace Ariadne
 
-#endif // ARIADNE_DIFFERENTIAL_H
+#endif // ARIADNE_FIXED_DIFFERENTIAL_H

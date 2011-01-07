@@ -40,6 +40,10 @@
 
 namespace Ariadne {
 
+class Interval;
+template<class X> class Vector;
+template<class X> class Differential;
+typedef Vector< Differential<Interval> > IntervalDifferentialVector;
 
 
 class IntegratorBase
@@ -114,6 +118,40 @@ class TaylorIntegrator
     using IntegratorBase::flow_step;
 };
 
+
+//! \brief An integrator computes a approximation to the flow which is affine in space.
+//! \internal This code is written to allow higher-spacial order approximations.
+class AffineIntegrator
+    : public IntegratorBase
+{
+    uint _spacial_order;
+    uint _temporal_order;
+  public:
+    AffineIntegrator(double e)
+        : IntegratorBase(e), _spacial_order(1u), _temporal_order(4u) { }
+    AffineIntegrator(double e, uint temporal_order)
+        : IntegratorBase(e), _spacial_order(1u), _temporal_order(temporal_order) { }
+    AffineIntegrator(double e, uint spacial_order, uint temporal_order)
+        : IntegratorBase(e), _spacial_order(spacial_order), _temporal_order(temporal_order) { }
+    //! \brief The order of the method in space.
+    uint spacial_order() const { return this->_spacial_order; }
+    //! \brief The order of the method in time.
+    uint temporal_order() const { return this->_temporal_order; }
+    virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
+
+    virtual VectorTaylorFunction
+    flow_step(const RealVectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& time_step,
+              const IntervalVector& bounding_box) const;
+
+    using IntegratorBase::flow_step;
+
+    //! \brief Compute the derivative of the flow of f at time zero within \a dom.
+    IntervalDifferentialVector
+    flow_derivative(const IntervalVectorFunction& f,
+                    const IntervalVector& dom) const;
+};
 
 
 } // namespace Ariadne

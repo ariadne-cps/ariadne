@@ -22,6 +22,7 @@
  */
 
 #include "differential.h"
+#include "univariate_differential.h"
 
 namespace Ariadne {
 

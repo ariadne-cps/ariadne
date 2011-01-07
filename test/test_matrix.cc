@@ -125,25 +125,9 @@ TestMatrix::test_misc()
     ARIADNE_TEST_EQUALS(+FloatMatrix(2,2,1.,2.,3.,4.),FloatMatrix(2,2,1.,2.,3.,4.));
     ARIADNE_TEST_EQUALS(-FloatMatrix(2,2,1.,2.,3.,4.),FloatMatrix(2,2,-1.,-2.,-3.,-4.));
     ARIADNE_TEST_EQUALS(FloatMatrix(2,2,1.,2.,3.,4.)+FloatMatrix(2,2,5.,7.,8.,6.),FloatMatrix(2,2,6.,9.,11.,10.));
+    ARIADNE_TEST_EQUALS(FloatMatrix(2,2,1.,2.,3.,4.)-FloatMatrix(2,2,5.,7.,8.,6.),FloatMatrix(2,2,-4.,-5.,-5.,-2.));
+    ARIADNE_TEST_EQUALS(FloatMatrix(2,2,1.,2.,3.,4.)*FloatMatrix(2,2,5.,7.,8.,6.),FloatMatrix(2,2,21.,19.,47.,45.));
 
-    Matrix<Interval> iA0;
-    cout << "iA1= " << iA0 << endl;
-    Matrix<Interval> iA1(3,2);
-    cout << "iA2= " << iA1 << endl;
-    Matrix<Interval> iA2(2,2,iAptr,3,1);
-    cout << "iA3= " << iA2 << endl;
-    Matrix<Interval> iA3(A1);
-    cout << "iA4= " << iA3 << endl;
-    Matrix<Interval> iA4=Matrix<Interval>("[[1.875,2.125],[0.75,1.25];[-1.25,-0.875],[0.5,1.75]]");
-    cout << "iA5= " << iA4 << endl;
-
-    iA0=Matrix<Interval>::zero(2,3);
-    cout << "iA0= " << iA0 << endl;
-    iA1=Matrix<Interval>::identity(4);
-    cout << "iA1= " << iA1 << endl;
-
-    cout << "norm(iA4)=" << norm(iA4) << endl;
-    cout << "norm(iA4).upper()=" << norm(iA4).upper() << endl;
 }
 
 int main() {

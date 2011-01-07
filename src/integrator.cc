@@ -216,4 +216,89 @@ TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& d
 
 
 
+
+template<class X> void truncate(Differential<X>& x, uint spacial_order, uint temporal_order) {
+    uint n=x.argument_size()-1;
+    typename Differential<X>::iterator write_iter=x.begin();
+    typename Differential<X>::const_iterator read_iter=x.begin();
+    while(read_iter!=x.end()) {
+        const MultiIndex& index = read_iter->key();
+        if(index[n]>temporal_order || index[n]+spacial_order<index.degree()) {
+        } else {
+            *write_iter=*read_iter;
+            ++write_iter;
+        }
+        ++read_iter;
+    }
+    x.expansion().resize(write_iter-x.begin());
+}
+
+template<class X> void truncate(Vector< Differential<X> >& x, uint spacial_order, uint temporal_order) {
+    for(uint i=0; i!=x.size(); ++i) { truncate(x[i],spacial_order,temporal_order); }
+}
+
+
+IntervalDifferentialVector
+AffineIntegrator::flow_derivative(const IntervalVectorFunction& f, const IntervalVector& dom) const
+{
+    IntervalDifferentialVector dx=IntervalDifferential::variables(this->_spacial_order+this->_temporal_order,join(dom,Interval(0.0)));
+    dx[dom.size()]=0.0;
+    IntervalDifferentialVector dphi = dx;
+    for(uint i=0; i!=_temporal_order; ++i) {
+        dphi = antiderivative(f.evaluate(dphi),dom.size())+dx;
+    }
+    truncate(dphi,this->_spacial_order,this->_temporal_order);
+    return dphi;
+}
+
+VectorTaylorFunction
+AffineIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& dom, const Float& h, const IntervalVector& bbox) const
+{
+    IntervalVector mid = IntervalVector(midpoint(dom));
+
+    IntervalDifferentialVector mdphi = this->flow_derivative(f,mid);
+    IntervalDifferentialVector bdphi = this->flow_derivative(f,bbox);
+
+    ARIADNE_WARN("AffineIntegrator may compute overly optimistic error bounds.");
+
+    const uint n=dom.size();
+    Vector<Float> err(n);
+
+    set_rounding_upward();
+    Vector<Float> rad(n+1);
+    for(uint i=0; i!=n; ++i) {
+        rad[i] = max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower());
+    }
+    rad[n] = h;
+
+    for(uint i=0; i!=n; ++i) {
+        for(Expansion<Interval>::const_iterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
+            const MultiIndex& a=iter->key();
+            if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
+                const Interval& rng = iter->data();
+                const Interval& mid = mdphi[i][a];
+                ARIADNE_ASSERT(rng.lower()<=mid.lower() && mid.upper()<=rng.upper());
+                Float mag = max(rng.upper()-mid.upper(),mid.lower()-rng.lower());
+                for(uint j=0; j!=n+1; ++j) { mag *= pow(rad[j],a[j]); }
+                err[i] += mag;
+            }
+        }
+    }
+    set_rounding_to_nearest();
+
+    IntervalVector flow_domain = join(dom,Interval(0,h));
+
+    Vector<IntervalTaylorModel> id = VectorTaylorFunction::identity(flow_domain).models();
+    VectorTaylorFunction res(n,flow_domain);
+    for(uint i=0; i!=n; ++i) {
+        IntervalTaylorModel res_model = evaluate(mdphi[i].expansion(),id);
+        res_model += Interval(-err[i],+err[i]);
+        res[i]=ScalarTaylorFunction(flow_domain,res_model);
+    }
+    return res;
+}
+
+
+
+
 } // namespace Ariadne

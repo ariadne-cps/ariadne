@@ -75,22 +75,21 @@ class Vector
     Vector()
         : _ary() { }
     //! \brief Construct a vector of size \a n, with elements initialised to zero.
-    explicit Vector(size_t n)
-        : _ary(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
+    explicit Vector(size_t n) : _ary(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
-    Vector(size_t n, const X& t)
-        : _ary(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
+    Vector(size_t n, const X& t) : _ary(n,t) {  }
     //! \brief Construct a vector of size \a n, with values initialised from the C-style Array beginning at \a ptr.
-    template<class XX> Vector(size_t n, const XX* ptr)
-        : _ary(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
+    template<class XX> Vector(size_t n, const XX* ptr) : _ary(ptr,ptr+n) { }
     //! \brief Construct a list.
-    template<class XX> explicit Vector(const std::vector<XX>& lst)
-        : _ary(lst.size()) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=lst[i]; } }
+    template<class XX> explicit Vector(const std::vector<XX>& lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
     Vector(size_t n, const double& t0, const double& t1, ...);
     //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
     explicit Vector(const std::string& str)
         : _ary() { std::stringstream ss(str); ss >> *this; }
+    //! \brief Copy assignment.
+    Vector<X>& operator=(const Vector<X>& v) {
+        if(this!=&v) { this->_ary = v._ary; } return *this; }
     //! \brief Copy constructor allows conversion from a vector using another numerical type.
     template<class XX> Vector(const Vector<XX>& v)
         : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }

@@ -594,6 +594,8 @@ class VectorTaylorFunction
     typedef Float R;
     typedef Interval I;
   public:
+    typedef Vector<Interval> DomainType;
+
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
     VectorTaylorFunction();
 

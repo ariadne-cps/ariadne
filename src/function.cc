@@ -29,6 +29,7 @@
 #include "taylor_model.h"
 #include "operators.h"
 #include "formula.h"
+#include "algebra.h"
 
 #include "function_mixin.h"
 #include "function_mixin.tcc"

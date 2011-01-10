@@ -1,7 +1,7 @@
 /***************************************************************************
- *            differential.cc
+ *            algebra_mixin.tcc
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2011  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,10 +21,3 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "differential.h"
-
-#include "algebra_mixin.tcc"
-
-namespace Ariadne {
-
-}

@@ -52,6 +52,7 @@ template<class X> class Matrix;
 
 template<class X> class Polynomial;
 template<class X> class Formula;
+template<class X> class Algebra;
 
 template<class X> class ScalarFunction;
 typedef ScalarFunction<Float> FloatScalarFunction;

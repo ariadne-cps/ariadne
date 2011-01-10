@@ -42,6 +42,8 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
 
+template<class X> class Series;
+
 template<class X> class AlgebraInterface;
 template<class X> class Algebra;
 
@@ -62,17 +64,22 @@ template<class X> class AlgebraInterface
     typedef X NumericType;
 
     //! \brief Create a dynamically-allocated copy.
-    virtual AlgebraInterface<X>* clone() const = 0;
+    virtual AlgebraInterface<X>* _clone() const = 0;
     //! \brief Create the zero element in the same algebra as the current object.
-    virtual AlgebraInterface<X>* create() const = 0;
+    virtual AlgebraInterface<X>* _create() const = 0;
   public:
-    //! \brief Add a constant numerical scalar.
-    virtual void iadd(const X& c) = 0;
-    //! \brief Multiply by a numerical scalar.
-    virtual void imul(const X& c) = 0;
-    virtual void isma(const X& c, const AlgebraInterface<X>& x) = 0;
-    virtual void ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) = 0;
-    virtual AlgebraInterface<X>* _sma(const X& c, const AlgebraInterface<X>& x) const = 0;
+    //! \brief Add a constant numerical scalar \c r+=c .
+    virtual void _iadd(const X& c) = 0;
+    //! \brief Multiply by a numerical scalar \c r*=c .
+    virtual void _imul(const X& c) = 0;
+    //! \brief Scalar multiply and add \c r+=c*x .
+    virtual void _isma(const X& c, const AlgebraInterface<X>& x) = 0;
+    //! \brief Fused multiply and add \c r+=x1*x2 .
+    virtual void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) = 0;
+    //! \brief Add another element of the same algebra.
+    virtual AlgebraInterface<X>* _add(const AlgebraInterface<X>& x) const = 0;
+    //! \brief Multiply by another element of the same algebra.
+    virtual AlgebraInterface<X>* _mul(const AlgebraInterface<X>& x) const = 0;
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.
@@ -81,8 +88,8 @@ template<class X> class NormedAlgebraInterface
 {
   public:
     // Overrides for AlgebraInterface operations
-    virtual NormedAlgebraInterface<X>* clone() const = 0;
-    virtual NormedAlgebraInterface<X>* create() const = 0;
+    virtual NormedAlgebraInterface<X>* _clone() const = 0;
+    virtual NormedAlgebraInterface<X>* _create() const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
     virtual Float tolerance() const = 0;
@@ -91,6 +98,31 @@ template<class X> class NormedAlgebraInterface
     //! \brief An over-approximation to the norm.
     virtual Float norm() const = 0;
 };
+
+//! \brief Interface for a unital algebra over a field with support for composition with a power series.
+template<class X> class GradedAlgebraInterface
+    : public virtual AlgebraInterface<X>
+{
+  public:
+    // Overrides for AlgebraInterface operations
+    virtual GradedAlgebraInterface<X>* _clone() const = 0;
+    virtual GradedAlgebraInterface<X>* _create() const = 0;
+
+    virtual GradedAlgebraInterface<X>* _apply(const Series<X>&) = 0;
+};
+
+//! \brief Interface for a unital algebra over a field \a X.
+template<class X> class SymbolicAlgebraInterface
+    : public virtual AlgebraInterface<X>
+{
+  public:
+    // Overrides for AlgebraInterface operations
+    virtual SymbolicAlgebraInterface<X>* _clone() const = 0;
+    virtual SymbolicAlgebraInterface<X>* _create() const = 0;
+
+    // virtual SymbolicAlgebraInterface<X>* _apply(Operator op) = 0;
+};
+
 
 template<class X> class VectorAlgebraInterface
     : public virtual WritableInterface

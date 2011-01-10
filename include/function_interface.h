@@ -45,6 +45,7 @@ template<class X> class Matrix;
 template<class X> class Differential;
 template<class X> class TaylorModel;
 template<class X> class Formula;
+template<class X> class Algebra;
 
 static const int SMOOTH=255;
 
@@ -108,6 +109,8 @@ class ScalarFunctionInterface<Float>
     virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
     virtual Formula<Float> evaluate(const Vector< Formula<Float> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of elements of an algebra.
+    virtual Algebra<Float> evaluate(const Vector< Algebra<Float> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<Float> derivative(uint i) const;
@@ -142,6 +145,8 @@ class ScalarFunctionInterface<Interval>
 
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
     virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const = 0;
+    //! \brief Apply the function to an algebra.
+    virtual Algebra<Interval> evaluate(const Vector< Algebra<Interval> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<Interval> derivative(uint i) const;
@@ -169,6 +174,8 @@ class ScalarFunctionInterface<Real>
     inline Real operator() (const Vector<Real>& x) const;
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
     virtual Formula<Real> evaluate(const Vector< Formula<Real> >& x) const = 0;
+    //! \brief Apply the function to an algebra.
+    virtual Algebra<Real> evaluate(const Vector< Algebra<Real> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<Real> derivative(uint i) const;
@@ -226,6 +233,8 @@ class VectorFunctionInterface<Float>
     virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
     virtual Vector< Formula<Float> > evaluate(const Vector< Formula<Float> >& x) const = 0;
+    //! \brief Apply the function to an algebra.
+    virtual Vector< Algebra<Float> > evaluate(const Vector< Algebra<Float> >& x) const = 0;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<Float> operator[](uint i) const;
@@ -253,6 +262,8 @@ class VectorFunctionInterface<Interval>
 
     //! \brief Evaluate the function over a vector of formulae.
     virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const = 0;
+    //! \brief Apply the function to an algebra.
+    virtual Vector< Algebra<Interval> > evaluate(const Vector< Algebra<Interval> >& x) const = 0;
 
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
@@ -278,8 +289,10 @@ class VectorFunctionInterface<Real>
     virtual Vector<Real> evaluate(const Vector<Real>& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae.
     virtual Vector< Formula<Real> > evaluate(const Vector< Formula<Real> >& x) const = 0;
-    //! \brief Get the \a i<sup>th</sup> component function.
+    //! \brief Apply the function to an algebra.
+    virtual Vector< Algebra<Real> > evaluate(const Vector< Algebra<Real> >& x) const = 0;
 
+    //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<Real> operator[](uint i) const;
   public:
     virtual ScalarFunctionInterface<Real>* _get(uint i) const = 0;

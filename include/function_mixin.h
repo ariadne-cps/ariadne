@@ -37,6 +37,9 @@ typedef TaylorModel<Interval> IntervalTaylorModel;
 typedef Formula<Float> FloatFormula;
 typedef Formula<Interval> IntervalFormula;
 typedef Formula<Real> RealFormula;
+typedef Algebra<Float> FloatAlgebra;
+typedef Algebra<Interval> IntervalAlgebra;
+typedef Algebra<Real> RealAlgebra;
 
 template<class T, class X> class ScalarFunctionMixin { };
 template<class T, class X> class VectorFunctionMixin { };
@@ -55,6 +58,7 @@ class ScalarFunctionMixin<F,Float>
     virtual FloatDifferential evaluate(const Vector<FloatDifferential>& x) const;
     virtual FloatFormula evaluate(const Vector<FloatFormula>& x) const;
     virtual FloatTaylorModel evaluate(const Vector<FloatTaylorModel>& x) const;
+    virtual FloatAlgebra evaluate(const Vector<FloatAlgebra>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
     virtual ScalarFunctionInterface<Float>* _clone() const;
@@ -76,9 +80,11 @@ class ScalarFunctionMixin<F,Interval>
     virtual FloatDifferential evaluate(const Vector<FloatDifferential>& x) const;
     virtual IntervalDifferential evaluate(const Vector<IntervalDifferential>& x) const;
     virtual FloatFormula evaluate(const Vector<FloatFormula>& x) const;
+    virtual FloatAlgebra evaluate(const Vector<FloatAlgebra>& x) const;
     virtual IntervalFormula evaluate(const Vector<IntervalFormula>& x) const;
     virtual FloatTaylorModel evaluate(const Vector<FloatTaylorModel>& x) const;
     virtual IntervalTaylorModel evaluate(const Vector<IntervalTaylorModel>& x) const;
+    virtual IntervalAlgebra evaluate(const Vector<IntervalAlgebra>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
     virtual ScalarFunctionInterface<Interval>* _clone() const;
@@ -105,6 +111,9 @@ class ScalarFunctionMixin<F,Real>
     virtual RealFormula evaluate(const Vector<RealFormula>& x) const;
     virtual FloatTaylorModel evaluate(const Vector<FloatTaylorModel>& x) const;
     virtual IntervalTaylorModel evaluate(const Vector<IntervalTaylorModel>& x) const;
+    virtual FloatAlgebra evaluate(const Vector<FloatAlgebra>& x) const;
+    virtual IntervalAlgebra evaluate(const Vector<IntervalAlgebra>& x) const;
+    virtual RealAlgebra evaluate(const Vector<RealAlgebra>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
     virtual ScalarFunctionInterface<Real>* _clone() const;
@@ -128,6 +137,7 @@ class VectorFunctionMixin<F,Float>
     virtual Vector<FloatDifferential> evaluate(const Vector<FloatDifferential>& x) const;
     virtual Vector<FloatTaylorModel> evaluate(const Vector<FloatTaylorModel>& x) const;
     virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
+    virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
     virtual VectorFunctionInterface<Float>* _clone() const;
 };
 
@@ -149,6 +159,8 @@ class VectorFunctionMixin<F,Interval>
     virtual Vector<IntervalTaylorModel> evaluate(const Vector<IntervalTaylorModel>& x) const;
     virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
     virtual Vector<IntervalFormula> evaluate(const Vector<IntervalFormula>& x) const;
+    virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
+    virtual Vector<IntervalAlgebra> evaluate(const Vector<IntervalAlgebra>& x) const;
     virtual VectorFunctionInterface<Interval>* _clone() const;
 };
 
@@ -173,6 +185,9 @@ class VectorFunctionMixin<F,Real>
     virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
     virtual Vector<IntervalFormula> evaluate(const Vector<IntervalFormula>& x) const;
     virtual Vector<RealFormula> evaluate(const Vector<RealFormula>& x) const;
+    virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
+    virtual Vector<IntervalAlgebra> evaluate(const Vector<IntervalAlgebra>& x) const;
+    virtual Vector<RealAlgebra> evaluate(const Vector<RealAlgebra>& x) const;
     virtual VectorFunctionInterface<Real>* _clone() const;
 };
 

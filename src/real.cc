@@ -62,6 +62,8 @@ Real operator-(const Real& x, const Real& y) { return Real(static_cast<Interval>
 Real operator*(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)*static_cast<Interval>(y)); }
 Real operator/(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)/static_cast<Interval>(y)); }
 
+Float mag(const Real& x) { return mag(static_cast<Interval>(x)); }
+
 Real abs(const Real& x) { return Real(abs(static_cast<Interval>(x))); }
 Real pos(const Real& x) { return Real(pos(static_cast<Interval>(x))); }
 Real neg(const Real& x) { return Real(neg(static_cast<Interval>(x))); }
@@ -71,6 +73,7 @@ Real add(const Real& x, const Real& y) { return Real(add(static_cast<Interval>(x
 Real sub(const Real& x, const Real& y) { return Real(sub(static_cast<Interval>(x),static_cast<Interval>(y))); }
 Real mul(const Real& x, const Real& y) { return Real(mul(static_cast<Interval>(x),static_cast<Interval>(y))); }
 Real div(const Real& x, const Real& y) { return Real(div(static_cast<Interval>(x),static_cast<Interval>(y))); }
+Real pow(const Real& x, uint m) { return Real(pow(static_cast<Interval>(x),m)); }
 Real pow(const Real& x, int n) { return Real(pow(static_cast<Interval>(x),n)); }
 Real sqrt(const Real& x) { return Real(sqrt(static_cast<Interval>(x))); }
 Real exp(const Real& x) { return Real(exp(static_cast<Interval>(x))); }

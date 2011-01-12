@@ -22,6 +22,7 @@ ARIADNE_SRC = \
 	polynomial.cc \
 	expression.cc \
 	function.cc \
+	algebra.cc \
 	taylor_model.cc  \
 	taylor_function.cc  \
 	solver.cc \

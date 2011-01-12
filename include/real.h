@@ -199,6 +199,9 @@ inline tribool operator< (const Real& x, double y) { return static_cast<Interval
 //@{
 //! \related Real \name Arithmetical, algebraic and transcendental functions
 
+//!  \brief A floating-point bound for |x|.
+Float mag(const Real& x);
+
 //!  \brief The absolute value function \c |x|.
 Real abs(const Real& x);
 //!  \brief The unary plus function \c +x.
@@ -217,6 +220,8 @@ Real sub(const Real& x, const Real& y);
 Real mul(const Real& x, const Real& y);
 //!  \brief The division function \c x/y.
 Real div(const Real& x, const Real& y);
+//!  \brief The positive integer power function \c x^m.
+Real pow(const Real& x, uint m);
 //!  \brief The integer power function \c x^n.
 Real pow(const Real& x, int n);
 //!  \brief The square-root function.

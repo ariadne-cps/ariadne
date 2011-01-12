@@ -59,6 +59,7 @@ class TaylorSeries {
                 expansion[i]=0; } } }
 };
 
+inline
 TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
                            const Float& c, const Interval& r)
     : expansion(d+1), error(0)
@@ -80,6 +81,7 @@ TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
     //std::cerr<<"expansion="<<this->expansion<<"\nerror="<<this->error<<"\n";
 }
 
+inline
 std::ostream&
 operator<<(std::ostream& os, const TaylorSeries& ts) {
     return os<<"TS("<<ts.expansion<<","<<ts.error<<")";

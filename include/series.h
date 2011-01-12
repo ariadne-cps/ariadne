@@ -30,6 +30,7 @@
 
 #include "array.h"
 #include "integer.h"
+#include "operators.h"
 
 namespace Ariadne {
 
@@ -66,6 +67,14 @@ class Series
   private:
     Array<X> _data;
 };
+
+template<class X> inline Series<X> make_series(Rec, uint d, const X& x) { return Series<X>::rec(d,x); }
+template<class X> inline Series<X> make_series(Sqrt, uint d, const X& x) { return Series<X>::sqrt(d,x); }
+template<class X> inline Series<X> make_series(Exp, uint d, const X& x) { return Series<X>::exp(d,x); }
+template<class X> inline Series<X> make_series(Log, uint d, const X& x) { return Series<X>::log(d,x); }
+template<class X> inline Series<X> make_series(Sin, uint d, const X& x) { return Series<X>::sin(d,x); }
+template<class X> inline Series<X> make_series(Cos, uint d, const X& x) { return Series<X>::cos(d,x); }
+template<class X> inline Series<X> make_series(Tan, uint d, const X& x) { return Series<X>::tan(d,x); }
 
 template<class X> Series<X> operator+(X c, const Series<X>& x) {
     Series<X> r(x); r+=c; return r; }

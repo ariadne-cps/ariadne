@@ -239,6 +239,8 @@ class Differential
     //! \brief A constant iterator to past-the-end structural nonzero.
     const_iterator end() const { return this->_expansion.end(); }
 
+    //! \brief The zero element of the differential algebra.
+    Differential<X> create() const { return Differential<X>(this->argument_size(),this->degree()); }
     //! \brief Set all coefficients to zero.
     void clear() { this->_expansion.clear(); }
     //! \brief Remove all terms with coefficient \f$0\f$.

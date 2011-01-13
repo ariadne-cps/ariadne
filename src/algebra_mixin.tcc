@@ -30,7 +30,8 @@
 
 namespace Ariadne {
 
-template<class A> typename EnableIfGradedAlgebra<A>::Type compose(const Series<typename A::NumericType>& x, const A& y)
+template<class A> typename EnableIfGradedAlgebra<A>::Type 
+compose(const Series<typename A::NumericType>& x, const A& y)
 {
     uint d=y.degree();
 
@@ -241,7 +242,6 @@ sqrt(const A& x)
     z+=sqrt_series[d-1];
     for(uint i=0; i!=d; ++i) {
         z=sqrt_series[d-i-1] + z * y;
-        z=0;
         //std::cerr<<"z="<<z<<std::endl;
     }
     Float trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
@@ -316,7 +316,6 @@ log(const A& x)
     z+=Float(d%2?-1:+1)/d;
     for(uint i=1; i!=d; ++i) {
         z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
-        z = 0;
     }
     z=z*y;
     Float trunc_err=pow(eps,d)/(1-eps)/d;
@@ -454,28 +453,43 @@ tan(const A& x)
 template<class A> typename EnableIfNormedAlgebra<A>::Type
 asin(const A& x)
 {
+    ARIADNE_NOT_IMPLEMENTED;
+/*
     static const uint DEG=18;
     typedef typename A::NumericType X;
-    return compose(TaylorSeries(DEG,&Series<X>::asin,
-                                x.value(),x.range()),x);
+    Float xavg = x.average();
+    Float xrad = x.radius();
+    Interval xrng = xavg + Interval(-xrad,+xrad);
+    return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
+*/
 }
 
 template<class A> typename EnableIfNormedAlgebra<A>::Type
 acos(const A& x)
 {
+    ARIADNE_NOT_IMPLEMENTED;
+/*
     static const uint DEG=18;
     typedef typename A::NumericType X;
-    return compose(TaylorSeries(DEG,&Series<X>::acos,
-                                x.value(),x.range()),x);
+    Float xavg = x.average();
+    Float xrad = x.radius();
+    Interval xrng = xavg + Interval(-xrad,+xrad);
+    return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
+*/
 }
 
 template<class A> typename EnableIfNormedAlgebra<A>::Type
 atan(const A& x)
 {
+    ARIADNE_NOT_IMPLEMENTED;
+/*
     static const uint DEG=18;
     typedef typename A::NumericType X;
-    return compose(TaylorSeries(DEG,&Series<X>::atan,
-                                x.value(),x.range()),x);
+    Float xavg = x.average();
+    Float xrad = x.radius();
+    Interval xrng = xavg + Interval(-xrad,+xrad);
+    return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
+*/
 }
 
 

@@ -82,6 +82,9 @@ template<> Real pi<>() { return Real(pi<Interval>()); }
 Real sin(const Real& x) { return Real(sin(static_cast<Interval>(x))); }
 Real cos(const Real& x) { return Real(cos(static_cast<Interval>(x))); }
 Real tan(const Real& x) { return Real(tan(static_cast<Interval>(x))); }
+Real asin(const Real& x) { return Real(asin(static_cast<Interval>(x))); }
+Real acos(const Real& x) { return Real(acos(static_cast<Interval>(x))); }
+Real atan(const Real& x) { return Real(atan(static_cast<Interval>(x))); }
 
 
 

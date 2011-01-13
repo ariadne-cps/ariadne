@@ -57,4 +57,18 @@ template NormedAlgebra<Float> tan(const NormedAlgebra<Float>&);
 template NormedAlgebra<Interval> tan(const NormedAlgebra<Interval>&);
 template NormedAlgebra<Real> tan(const NormedAlgebra<Real>&);
 
+/*
+template NormedAlgebra<Float> asin(const NormedAlgebra<Float>&);
+template NormedAlgebra<Interval> asin(const NormedAlgebra<Interval>&);
+template NormedAlgebra<Real> asin(const NormedAlgebra<Real>&);
+
+template NormedAlgebra<Float> acos(const NormedAlgebra<Float>&);
+template NormedAlgebra<Interval> acos(const NormedAlgebra<Interval>&);
+template NormedAlgebra<Real> acos(const NormedAlgebra<Real>&);
+
+template NormedAlgebra<Float> atan(const NormedAlgebra<Float>&);
+template NormedAlgebra<Interval> atan(const NormedAlgebra<Interval>&);
+template NormedAlgebra<Real> atan(const NormedAlgebra<Real>&);
+*/
+
 } // namespace Ariadne

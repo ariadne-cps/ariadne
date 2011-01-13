@@ -242,7 +242,7 @@ void export_taylor_model()
     taylor_model_class.def("restrict", (IntervalTaylorModel(*)(const IntervalTaylorModel&,uint,const Interval&))&restrict);
     taylor_model_class.def("preaffine", (IntervalTaylorModel(*)(const IntervalTaylorModel&,uint,const Interval&,const Interval&))&preaffine);
 
-    taylor_model_class.def("evaluate", (Interval(IntervalTaylorModel::*)(const Vector<Interval>&)const)&IntervalTaylorModel::evaluate);
+    taylor_model_class.def("evaluate", (Interval(*)(const IntervalTaylorModel&, const Vector<Interval>&))&evaluate);
     taylor_model_class.def("set",(IntervalTaylorModel(*)(const IntervalTaylorModel&,uint,Interval))&partial_evaluate);
 
     def("max",(IntervalTaylorModel(*)(const IntervalTaylorModel&,const IntervalTaylorModel&))&max);

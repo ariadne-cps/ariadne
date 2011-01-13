@@ -267,10 +267,6 @@ class ScalarTaylorFunction
     iterator end() { return this->_model.end(); }
     //! \brief A constant iterator to the end of the expansion expansion.
     const_iterator end() const { return this->_model.end(); }
-    //! \brief An iterator to the term with index \a a.
-    iterator find(const MultiIndex& a) { return this->_model.find(a); }
-    //! \brief A constant iterator to the term with index \a a.
-    const_iterator find(const MultiIndex& a) const { return this->_model.find(a); }
 
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_model.argument_size(); }

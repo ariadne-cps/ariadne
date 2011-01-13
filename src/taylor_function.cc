@@ -1254,7 +1254,7 @@ VectorTaylorFunction::evaluate(const Vector<Interval>& x) const
     if(!subset(x,f.domain())) {
         ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
-    Vector<Interval> sx=Ariadne::evaluate(IntervalTaylorModel::unscalings(f._domain),x);
+    Vector<Interval> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);
 }
 

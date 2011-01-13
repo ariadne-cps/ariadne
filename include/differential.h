@@ -297,6 +297,7 @@ class Differential
     //! \brief Tangent function.
     friend Differential<X> tan<>(const Differential<X>& x);
 
+#ifdef DOXYGEN
     //! \brief Compose by a power series in one variable.
     friend Differential<X> compose<>(const Series<X>& x, const Differential<X>& y);
     //! \brief Compose differentials at a point.
@@ -305,6 +306,7 @@ class Differential
     friend Differential<X> derivative<>(const Differential<X>& x, uint i);
     //! \brief Compute an antiderivative with respect to the variable \a i.
     friend Differential<X> antiderivative<>(const Differential<X>& x, uint i);
+#endif
   private:
     Expansion<X> _expansion;
     uint _degree;

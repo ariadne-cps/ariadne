@@ -126,6 +126,9 @@ inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 template<> inline Float pi<Float>() { return 3.1415926535897931; }
 template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
 
+// Checking whether a Float is not-a-number
+inline bool isnan(const Float& x) { return std::isnan(x.v); }
+
 // Operations for finding nearest representable values
 inline Float down(Float x) { return x.v>0 ? x.v*(1-2e-16) : x.v*(1+2e-16); } // Deprecated
 inline Float up(Float x) { return x.v>0 ? x.v*(1+2e-16) : x.v*(1-2e-16); } // Deprecated

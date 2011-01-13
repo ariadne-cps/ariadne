@@ -75,6 +75,8 @@ template<class X> class AlgebraInterface
     Algebra<X> create() const;
     Algebra<X> clone() const;
   public:
+    //! \brief Virtual destructor.
+    virtual ~AlgebraInterface<X>() { }
     //! \brief Create a dynamically-allocated copy.
     virtual AlgebraInterface<X>* _clone() const = 0;
     //! \brief Create the zero element in the same algebra as the current object.
@@ -107,8 +109,10 @@ template<class X> class NormedAlgebraInterface
     virtual Float tolerance() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
     virtual Float average() const = 0;
-    //! \brief A value \c r such that \c |a-c1|<=r.
+    //! \brief A value \c c such that \c |a-c1| is approximately minimised.
     virtual Float radius() const = 0;
+    //! \brief The interval \c [c-r,c+r] where \c |a-c1|<=r.
+    virtual Interval range() const = 0;
     //! \brief An over-approximation to the norm.
     virtual Float norm() const = 0;
 };

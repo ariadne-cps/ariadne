@@ -238,6 +238,12 @@ Real sin(const Real& x);
 Real cos(const Real& x);
 //!  \brief The tangent function.
 Real tan(const Real& x);
+//!  \brief The inverse sine function.
+Real asin(const Real& x);
+//!  \brief The inverse cosine function.
+Real acos(const Real& x);
+//!  \brief The inverse tangent function.
+Real atan(const Real& x);
 
 //@}
 

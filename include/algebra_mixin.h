@@ -107,7 +107,7 @@ template<class A> inline typename EnableIfAlgebra<A>::Type& operator*=(A& a1, co
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type&
 operator+=(A& a, const X& c) { a.iadd(numeric_cast<typename A::NumericType>(c)); return a; }
 template<class A, class X> typename EnableIfAlgebraOverX<A,X>::Type&
-operator-=(A& a, const X& c) { a.iadd(rec(numeric_cast<typename A::NumericType>(c))); return a; }
+operator-=(A& a, const X& c) { a.iadd(neg(numeric_cast<typename A::NumericType>(c))); return a; }
 template<class A, class X> typename EnableIfAlgebraOverX<A,X>::Type&
 operator*=(A& a, const X& c) { a.imul(numeric_cast<typename A::NumericType>(c)); return a; }
 template<class A, class X> typename EnableIfAlgebraOverX<A,X>::Type&
@@ -116,11 +116,11 @@ operator/=(A& a, const X& c) { a.imul(rec(numeric_cast<typename A::NumericType>(
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator+(const A& a, const X& c) {
     A r=a; r+=c; return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator-(const A& a, const X& c) {
-    A r=a; r+=neg(c); return r; }
+    A r=a; r+=neg(static_cast<typename A::NumericType>(c)); return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator*(const A& a, const X& c) {
     A r=a; r*=c; return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator/(const A& a, const X& c) {
-    A r=a; r+=rec(c); return r; }
+    A r=a; r*=rec(static_cast<typename A::NumericType>(c)); return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator+(const X& c, const A& a) {
     A r=a; r+=c; return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator-(const X& c, const A& a) {
@@ -128,6 +128,8 @@ template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type opera
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator*(const X& c, const A& a) {
     A r=a; r*=c; return r; }
 
+template<class A> inline typename EnableIfAlgebra<A>::Type add(const A& a1, const A& a2) { return a1+a2; }
+template<class A> inline typename EnableIfAlgebra<A>::Type mul(const A& a1, const A& a2) { return a1*a2; }
 template<class A> inline typename EnableIfAlgebra<A>::Type neg(const A& a) { return -a; }
 template<class A> inline typename EnableIfAlgebra<A>::Type sqr(const A& a) { return a*a; }
 
@@ -139,16 +141,20 @@ template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type opera
 
 template<class A> struct IsNormedAlgebra { static const bool value = false; };
 template<class X> struct IsNormedAlgebra< NormedAlgebra<X> > { static const bool value = true; };
-template<class X> struct IsNormedAlgebra< TaylorModel<X> > { static const bool value = true; };
 template<class A> struct EnableIfNormedAlgebra : public EnableIf<IsNormedAlgebra<A>::value,A> { };
 
 template<class A> typename EnableIfNormedAlgebra<A>::Type rec(const A& a);
+template<class A> typename EnableIfNormedAlgebra<A>::Type pow(const A& a, int n) { return n<0 ? rec(pow(a,uint(-n))) : pow(a,uint(n)); }
 template<class A> typename EnableIfNormedAlgebra<A>::Type sqrt(const A& a);
 template<class A> typename EnableIfNormedAlgebra<A>::Type exp(const A& a);
 template<class A> typename EnableIfNormedAlgebra<A>::Type log(const A& a);
 template<class A> typename EnableIfNormedAlgebra<A>::Type sin(const A& a);
 template<class A> typename EnableIfNormedAlgebra<A>::Type cos(const A& a);
 template<class A> typename EnableIfNormedAlgebra<A>::Type tan(const A& a);
+
+template<class A> typename EnableIfNormedAlgebra<A>::Type asin(const A& a);
+template<class A> typename EnableIfNormedAlgebra<A>::Type acos(const A& a);
+template<class A> typename EnableIfNormedAlgebra<A>::Type atan(const A& a);
 
 template<class A> struct IsGradedAlgebra { static const bool value = false; };
 template<class X> struct IsGradedAlgebra< GradedAlgebra<X> > { static const bool value = true; };

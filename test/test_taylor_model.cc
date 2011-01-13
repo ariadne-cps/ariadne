@@ -55,6 +55,7 @@ class TestTaylorModel
     void test_constructors();
     void test_predicates();
     void test_approximation();
+    void test_unscale();
     void test_evaluate();
     void test_arithmetic();
     void test_range();
@@ -77,6 +78,7 @@ void TestTaylorModel::test()
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
+    ARIADNE_TEST_CALL(test_unscale());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_range());
     ARIADNE_TEST_CALL(test_functions());
@@ -114,7 +116,7 @@ void TestTaylorModel::test_concept()
 
     tr.sweep(); tr.truncate(); tr.clean();
 
-    t.evaluate(vi); evaluate(t,vi);
+    evaluate(t,vi);
     t.domain(); t.range(); t.expansion(); t.error();
 
 }
@@ -149,6 +151,13 @@ void TestTaylorModel::test_approximation()
     ARIADNE_TEST_CONSTRUCT(IntervalTaylorModel,tv2,(E(1,2,1.0,2.0,3.0),0.25));
 }
 
+void TestTaylorModel::test_unscale()
+{
+    if(unscale(IntervalTaylorModel(E(1,0, 3.0)),Interval(1.0)).range()!=Interval(1.0)) {
+        ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
+    }
+}
+
 void TestTaylorModel::test_evaluate()
 {
     Vector<Interval> iv(2, 0.25,0.5, -0.75,-0.5);
@@ -173,6 +182,15 @@ void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)-IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), IntervalTaylorModel(E(1,2, -2.0,-4.0,7.0), 1.25));
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 0.0,0.0,3.0), 0.75)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), IntervalTaylorModel(E(1,4, 0.0,0.0,9.0,6.0,-12.0), 8.625));
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), IntervalTaylorModel(E(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125));
+
+    IntervalTaylorModel tm_inf(E(2),+infty);
+    if(isnan(numeric_cast<double>((tm_inf * 0.0).error()))) {
+        ARIADNE_TEST_WARN("Multiplying 0+/-infty by 0 yields 0+/-NaN");
+    } else if((tm_inf * 0.0).error()==+infty) {
+        ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
+    } else if((tm_inf * 0.0).error()==0.0) {
+        ARIADNE_TEST_PRINT("Multiplying 0+/-inf by 0 yields 0+/-0");
+    }
 }
 
 void TestTaylorModel::test_range()
@@ -246,6 +264,7 @@ void TestTaylorModel::test_intersection()
 void TestTaylorModel::test_split()
 {
     IntervalTaylorModel x=tm(2,0); IntervalTaylorModel y=tm(2,1);
+    IntervalTaylorModel z=IntervalTaylorModel(2);
     IntervalTaylorModel t=1+3*x+2*y-5*x*x-7*x*y+11*y*y;
     IntervalTaylorModel es1=-1.75+4*x+5.5*y-1.25*x*x-3.5*x*y+11*y*y;
     IntervalTaylorModel es2=1.25-1*x-1.5*y-1.25*x*x-3.5*x*y+11*y*y;
@@ -257,6 +276,10 @@ void TestTaylorModel::test_split()
     ARIADNE_TEST_EQUAL(split(t,0,false),es1);
     ARIADNE_TEST_EQUAL(split(t,0,true),es2);
     ARIADNE_TEST_EQUAL(split(t,0,indeterminate),es3);
+
+    // Test to make sure split(tm,k) and split(tm,k,lr) use same code
+    ARIADNE_TEST_EQUAL(split(t,0).first,split(t,0,false));
+    ARIADNE_TEST_EQUAL(split(t,0).second,split(t,0,true));
 }
 
 

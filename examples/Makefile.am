@@ -5,8 +5,9 @@ LIBS +=  $(BOOST_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 AM_LDFLAGS = $(EXEC_LDFLAGS)
 LDADD = ../src/libariadne.la $(LIBS)
 
-bin_PROGRAMS= watertank-aasap \
-			  pss-revised watertank-verify \
+bin_PROGRAMS= watertank watertank-verify watertank-monolithic-hysteresis-verify watertank-monolithic-proportional-verify \
+              watertank-aasap watertank-verify watertank \
+			  pss-revised watertank-verify test-transition \
 			  tutorial \
               boost_power_converter \
               watertank bouncingball ecoli \
@@ -36,7 +37,10 @@ watertank_nonlinear_verify_SOURCES=watertank-nonlinear-verify.cc
 pss_revised_SOURCES = pss-revised.cc
 coconut_final_demo_SOURCES=coconut-final-demo.cc
 coconut_demo_SOURCES=coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
+test_transition_SOURCES = test-transition.cc
 watertank_aasap_SOURCES = watertank-aasap.cc
+watertank_monolithic_proportional_verify_SOURCES = watertank-monolithic-proportional-verify.cc
+watertank_monolithic_hysteresis_verify_SOURCES = watertank-monolithic-hysteresis-verify.cc
 
 examples: $(bin_PROGRAMS)
 

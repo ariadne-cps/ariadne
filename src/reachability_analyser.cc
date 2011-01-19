@@ -1148,7 +1148,7 @@ HybridFloatVector
 HybridReachabilityAnalyser::
 _getHybridMaximumAbsoluteDerivatives(const HybridAutomaton& system) const
 {
-	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
+	// Get the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = system.state_space().locations_begin()->second;
 
 	// The variable for the bounding box of the derivatives
@@ -1156,7 +1156,7 @@ _getHybridMaximumAbsoluteDerivatives(const HybridAutomaton& system) const
     // The variable for the result
 	HybridFloatVector hmad;
 
-	// Get the HybridGridTreeSet
+	// Get the reach set
 	HybridGridTreeSet& hybridreach = _statistics->upper().reach;
 
 	// For each mode
@@ -1196,6 +1196,66 @@ _getHybridMaximumAbsoluteDerivatives(const HybridAutomaton& system) const
 	return hmad;
 }
 
+void
+HybridReachabilityAnalyser::
+_setLockToGridTime(const HybridAutomaton& system) const
+{
+	// Get the size of the continuous space (NOTE: taken as equal for all locations)
+	const uint css = system.state_space().locations_begin()->second;
+
+	// The variable for the bounding box of the derivatives
+	Vector<Interval> der;
+    // The variable for the result
+	Float result = 0;
+
+	// Get the reach set
+	HybridGridTreeSet& hybridreach = _statistics->upper().reach;
+
+	// For each mode
+	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
+	{
+		// Gets the location
+		const DiscreteState& loc = modes_it->location();
+
+		// Gets the domain for this mode
+		const Box& domain = _parameters->bounding_domain.find(loc)->second;
+
+		// If the reached region for the location exists and is not empty, check its cells, otherwise use the whole domain
+		if (hybridreach.has_location(loc) && !hybridreach[loc].empty()) {
+			// Get the GridTreeSet
+			GridTreeSet& reach = hybridreach[loc];
+			// For each of its hybrid cells
+			for (GridTreeSet::const_iterator cells_it = reach.begin(); cells_it != reach.end(); cells_it++)
+			{
+				// Gets the derivative bounds
+				der = modes_it->dynamic()(cells_it->box());
+
+				// Updates the lock time
+				for (uint i=0;i<css;i++)
+				{
+					Float maxAbsDer = abs(der[i]).upper();
+					if (maxAbsDer > 0)
+						result = max(result,domain[i].width()/maxAbsDer);
+				}
+
+			}
+		} else {
+			// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
+			der = modes_it->dynamic()(domain);
+
+			// Updates the lock time
+			for (uint i=0;i<css;i++)
+			{
+				Float maxAbsDer = abs(der[i]).upper();
+				if (maxAbsDer > 0)
+					result = max(result,domain[i].width()/maxAbsDer);
+			}
+		}
+	}
+
+	_parameters->lock_to_grid_time = result;
+}
+
 
 void
 HybridReachabilityAnalyser::
@@ -1217,7 +1277,9 @@ _setMaximumEnclosureCell(const HybridGrid& hgrid)
 	for (uint i=0;i<css;i++)
 		mec[i] /= (1<<_parameters->maximum_grid_depth);
 
-	// Assigns (NOTE: it is preferable to have the multiplier slightly lesser than an integer multiple of the grid cell)
+	// Assigns the cell
+	// NOTE: it is preferable to have the multiplier slightly lesser than an integer multiple of the grid cell, so that
+	// the overapproximation error due to discretization is minimized
 	_discretiser->parameters().maximum_enclosure_cell = 1.9*mec;
 }
 
@@ -1373,19 +1435,16 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 	// Get the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = hmad.begin()->second.size();
 
-	// Initialize the hybrid grid
 	HybridGrid hg;
 
-	// Initialize the hybrid grid lengths
+	// The lengths of the grid cell
 	std::map<DiscreteState,Vector<Float> > hybridgridlengths;
 
 	// Get the minimum domain length for each variable
 	Vector<Float> minDomainLengths(css);
-	// Initialize the values to infinity
 	for (uint i=0;i<css;i++) {
 		minDomainLengths[i] = std::numeric_limits<double>::infinity();
 	}
-	// Get the actual values
 	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) {
 		for (uint i=0;i<css;i++) {
 			minDomainLengths[i] = min(minDomainLengths[i], _parameters->bounding_domain.find(hfv_it->first)->second[i].width());
@@ -1446,7 +1505,6 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 		hg[loc] = Grid(centre,hybridgridlengths[loc]);
 	}
 
-	// Return
 	return hg;
 }
 
@@ -1504,6 +1562,8 @@ _setInitialParameters(SystemType& system, const HybridBoxes& domain, const Hybri
 	_parameters->bounding_domain = domain;
 	// Set the safe region
 	_parameters->safe_region = safe_region;
+	// Set the lock to grid time
+	_setLockToGridTime(system);
 }
 
 
@@ -1533,6 +1593,9 @@ _tuneParameters(SystemType& system)
 	// Maximum step size
 	_setHybridMaximumStepSize(hmad,system.grid());
 	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
+	// Lock to grid time
+	_setLockToGridTime(system);
+	ARIADNE_LOG(3, "Lock to grid time: " << _parameters->lock_to_grid_time << "\n");
 }
 
 
@@ -1638,7 +1701,7 @@ safety_parametric(SystemType& system,
 	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else { ARIADNE_LOG(1,"Not safe.\n"); }
 
-	// Analyse the results
+	// Analyze the results
 
 	// The source of update
 	bool updateFromBottom;

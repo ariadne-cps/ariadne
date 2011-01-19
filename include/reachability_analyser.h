@@ -311,6 +311,12 @@ class HybridReachabilityAnalyser
 		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
 	HybridFloatVector _getHybridMaximumAbsoluteDerivatives(const SystemType& system) const;
 
+	/*! \brief Set the lock to grid time of \system given a previously computed chain reach statistics.
+		\details The value is taken as the maximum over the times required by any variable on any location to cover a distance equal to
+		the domain width of the location, moving at the maximum absolute derivative.
+		ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
+	void _setLockToGridTime(const SystemType& system) const;
+
 	/*! \brief Set the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
 		all variables in a step must cover a length greater than a length determined by the \a hgrid. */
 	void _setHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid);
@@ -324,11 +330,11 @@ class HybridReachabilityAnalyser
 	void _setMaximumEnclosureCell(const HybridGrid& hgrid);
 
 	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.
-	 * \details The grid is chosen to that each cell is included into the domain corresponding to its location. */
+	 * \details The grid is chosen so that each cell is included into the domain corresponding to its location. */
 	HybridGrid _getLooselyConstrainedHybridGrid(const HybridFloatVector& hmad) const;
 
 	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.
-	 * \details The grid is chosen to that each cell is included into the domains for all locations. */
+	 * \details The grid is chosen so that each cell is included into the domains for all locations. */
 	HybridGrid _getHybridGrid(const HybridFloatVector& hmad) const;
 
 	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen equally for all locations.*/

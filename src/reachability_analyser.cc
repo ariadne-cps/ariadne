@@ -1208,9 +1208,6 @@ _setLockToGridTime(const HybridAutomaton& system) const
     // The variable for the result
 	Float result = 0;
 
-	// Get the reach set
-	HybridGridTreeSet& hybridreach = _statistics->upper().reach;
-
 	// For each mode
 	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
 	{
@@ -1220,36 +1217,15 @@ _setLockToGridTime(const HybridAutomaton& system) const
 		// Gets the domain for this mode
 		const Box& domain = _parameters->bounding_domain.find(loc)->second;
 
-		// If the reached region for the location exists and is not empty, check its cells, otherwise use the whole domain
-		if (hybridreach.has_location(loc) && !hybridreach[loc].empty()) {
-			// Get the GridTreeSet
-			GridTreeSet& reach = hybridreach[loc];
-			// For each of its hybrid cells
-			for (GridTreeSet::const_iterator cells_it = reach.begin(); cells_it != reach.end(); cells_it++)
-			{
-				// Gets the derivative bounds
-				der = modes_it->dynamic()(cells_it->box());
+		// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
+		der = modes_it->dynamic()(domain);
 
-				// Updates the lock time
-				for (uint i=0;i<css;i++)
-				{
-					Float maxAbsDer = abs(der[i]).upper();
-					if (maxAbsDer > 0)
-						result = max(result,domain[i].width()/maxAbsDer);
-				}
-
-			}
-		} else {
-			// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
-			der = modes_it->dynamic()(domain);
-
-			// Updates the lock time
-			for (uint i=0;i<css;i++)
-			{
-				Float maxAbsDer = abs(der[i]).upper();
-				if (maxAbsDer > 0)
-					result = max(result,domain[i].width()/maxAbsDer);
-			}
+		// Updates the lock time
+		for (uint i=0;i<css;i++)
+		{
+			Float maxAbsDer = abs(der[i]).upper();
+			if (maxAbsDer > 0)
+				result = max(result,domain[i].width()/maxAbsDer);
 		}
 	}
 
@@ -1593,9 +1569,6 @@ _tuneParameters(SystemType& system)
 	// Maximum step size
 	_setHybridMaximumStepSize(hmad,system.grid());
 	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
-	// Lock to grid time
-	_setLockToGridTime(system);
-	ARIADNE_LOG(3, "Lock to grid time: " << _parameters->lock_to_grid_time << "\n");
 }
 
 
@@ -1623,6 +1596,10 @@ verify_iterative(SystemType& system,
 		foldername = foldername+"/"+timestring;
 		mkdir(foldername.c_str(),0777);
 	}
+
+	// Reset the reach statistics
+	_statistics->upper().reach = HybridGridTreeSet();
+	_statistics->lower().reach = HybridGridTreeSet();
 
 	// Set the initial parameters
 	_setInitialParameters(system, domain, safe);

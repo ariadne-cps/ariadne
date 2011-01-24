@@ -31,22 +31,24 @@ typedef ImageSetHybridEvolver::EnclosureListType EnclosureListType;
 
 int main(int argc,char *argv[]) 
 {
-	int analyzerVerbosity = 1;
+	int analyserVerbosity = 1;
 	if (argc > 1)
-		analyzerVerbosity = atoi(argv[1]);
+		analyserVerbosity = atoi(argv[1]);
 
     /// Set the system parameters
 	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
 	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
-	RealConstant bfp("bfp",Interval(0.125,0.125)); // The product beta*f(p) Interval(0.3,0.32863)
+	RealConstant bfp("bfp",Interval(0.0,0.125)); // The product beta*f(p) Interval(0.3,0.32863)
 	RealConstant Kp("Kp",5); // The gain of the proportional controller
 	RealConstant delta("delta",Interval(-0.0,0.0)); // An indeterminacy in guards evaluation
 
-	// The parameter to modify, its interval and the tolerance
+	// The parameter to modify and the tolerance
 	RealConstant parameter = bfp;
-	Interval parameter_interval(0.10,0.125);
-	Float tolerance = 1e-2;
+	Float tolerance = 1e-1;
+
+    /// Create a HybridAutomaton object
+    HybridAutomaton system;
 
     // System variables
 	RealVariable x("x"); // water level
@@ -55,14 +57,15 @@ int main(int argc,char *argv[])
     varlist.append(x);
     varlist.append(y);
 
+    // Accessible constants
+    system.register_accessible_constant(delta);
+    system.register_accessible_constant(bfp);
+
     // Constants
     ScalarFunction one=ScalarFunction::constant(2,1.0);
     ScalarFunction zero=ScalarFunction::constant(2,0.0);
 
     /// Build the Hybrid System
-
-    /// Create a HybridAutomaton object
-    HybridAutomaton system;
 
     /// Create four discrete states
     DiscreteState l1(1);      // Zero saturated
@@ -155,7 +158,7 @@ int main(int argc,char *argv[])
 	HybridEvolver evolver;
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = analyzerVerbosity;
+	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
@@ -172,12 +175,12 @@ int main(int argc,char *argv[])
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 	// Perform the analysis
-	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, parameter_interval, tolerance);
+	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 
 	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
 
 	// Show the result
-
+	Interval parameter_interval = Interval(parameter.value());
 	if (safe_int == parameter_interval)
 		cout << "\nAll the values are safe.\n\n";
 	else if (safe_int.empty())

@@ -1645,18 +1645,23 @@ safety_parametric(SystemType& system,
 				  const HybridBoxes& safe,
 				  const HybridBoxes& domain,
 				  const RealConstant& parameter,
-				  const Interval& parameter_interval,
 				  const Float& tolerance)	
 {
-	// Copy the parameter and interval for local operations
-	RealConstant param = parameter;
-	Interval param_int = parameter_interval;
+	// Get the original value of the parameter
+	const Real& original_value = system.accessible_constant_value(parameter.name());
+
+	// Copy the parameter for local operations
+	RealConstant param(parameter.name(),parameter.value());
+	Interval parameter_range = Interval(parameter.value());
+	Interval param_int = parameter_range;
+
+	ARIADNE_LOG(1,"\nChecking parameter " << parameter.name() << " in interval " << parameter_range << " with tolerance " << tolerance*100 << "%\n");
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
 
 	// Set the parameter
-	param.set_value(parameter_interval.lower());
+	param.set_value(parameter_range.lower());
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
@@ -1669,7 +1674,7 @@ safety_parametric(SystemType& system,
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
 
 	// Set the parameter
-	param.set_value(parameter_interval.upper());
+	param.set_value(parameter_range.upper());
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
@@ -1689,7 +1694,7 @@ safety_parametric(SystemType& system,
 
 	// If both extremes are definitely safe, no more verification is involved
 	if (definitely(lower_result) && definitely(upper_result)) {
-		return parameter_interval;
+		return parameter_range;
 	}
 	// If both extremes are not definitely safe, no more verification is involved
 	else if (!definitely(lower_result) && !definitely(upper_result)) {
@@ -1699,14 +1704,15 @@ safety_parametric(SystemType& system,
 	else updateFromBottom = definitely(lower_result);		
 
 	// While the tolerance bound has not been hit
-	while (param_int.width() > tolerance*parameter_interval.width())
+	while (param_int.width() > tolerance*parameter_range.width())
 	{
 		// Set the parameter as the midpoint of the interval
 		param.set_value(param_int.midpoint());
 		// Substitute the value
 		system.substitute(param);
 
-		ARIADNE_LOG(1,"Checking " << param_int << " (midpoint: " << param_int.midpoint() << ", width: " << param_int.width() << ") ... ");
+		ARIADNE_LOG(1,"Checking " << param_int << " (midpoint: " << param_int.midpoint() <<
+				      ", tolerance: " << param_int.width()/parameter_range.width()*100 << "%) ... ");
 
 		// Perform the verification
 		tribool result = verify_iterative(system,initial_set,safe,domain);
@@ -1730,12 +1736,12 @@ safety_parametric(SystemType& system,
 	}
 
 	// Returns the system to its original parameter value
-	system.substitute(parameter);
+	system.substitute(parameter,original_value);
 
 	if (updateFromBottom)
-		return Interval(parameter_interval.lower(),param_int.lower());
+		return Interval(parameter_range.lower(),param_int.lower());
 	else
-		return Interval(param_int.upper(),parameter_interval.upper());
+		return Interval(param_int.upper(),parameter_range.upper());
 }
 
 std::pair<Interval,Interval>
@@ -1745,22 +1751,30 @@ safety_unsafety_parametric(SystemType& system,
 						   const HybridBoxes& safe,
 						   const HybridBoxes& domain,
 						   const RealConstant& parameter,
-						   const Interval& parameter_interval,
 						   const Float& tolerance)	
 {
+	// Get the original value of the parameter
+	Real original_value = system.accessible_constant_value(parameter.name());
+
 	// Copy the parameter for local operations
-	RealConstant param = parameter;
+	RealConstant param(parameter.name(),parameter.value());
+
+	Interval parameter_range(parameter.value());
 	// Create the safety and unsafety intervals: they represent the search intervals, not the intervals where the system is proved safe or unsafe
-	Interval safety_int = parameter_interval;
-	Interval unsafety_int = parameter_interval;
+	Interval safety_int = parameter_range;
+	Interval unsafety_int = parameter_range;
+
+	ARIADNE_LOG(1,"\nChecking parameter " << parameter.name() << " in interval " << parameter_range << " with tolerance " << tolerance*100 << "%\n");
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
 
 	// Set the parameter
-	param.set_value(parameter_interval.lower());
+	param.set_value(parameter_range.lower());
+
 	// Substitute the value
 	system.substitute(param);
+
 	// Perform the verification
 	tribool lower_result = verify_iterative(system,initial_set,safe,domain);
 
@@ -1772,7 +1786,7 @@ safety_unsafety_parametric(SystemType& system,
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
 
 	// Set the parameter
-	param.set_value(parameter_interval.upper());
+	param.set_value(parameter_range.upper());
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
@@ -1793,10 +1807,10 @@ safety_unsafety_parametric(SystemType& system,
 
 	// If both extremes are safe, no more verification is involved
 	if (definitely(lower_result) && definitely(upper_result)) {
-		return make_pair<Interval,Interval>(parameter_interval,empty_int); }
+		return make_pair<Interval,Interval>(parameter_range,empty_int); }
 	// If both extremes are unsafe, no more verification is involved
 	else if (!possibly(lower_result) && !possibly(upper_result)) {
-		return make_pair<Interval,Interval>(empty_int,parameter_interval); }
+		return make_pair<Interval,Interval>(empty_int,parameter_range); }
 	// If both extremes are indeterminate, no verification is possible
 	else if (indeterminate(lower_result) && indeterminate(upper_result)) {
 		return make_pair<Interval,Interval>(empty_int,empty_int); }
@@ -1827,7 +1841,8 @@ safety_unsafety_parametric(SystemType& system,
 			// Substitute the value
 			system.substitute(param);
 
-			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() << ", width: " << safety_int.width() << ") ... ");
+			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() <<
+					      ", tolerance: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			// Perform the verification
 			result = verify_iterative(system,initial_set,safe,domain);
@@ -1878,8 +1893,8 @@ safety_unsafety_parametric(SystemType& system,
 			{
 				// Breaks if the minimum distance between the safe and unsafe values is lesser than the tolerance
 				// (which is a more relaxed condition than the ones on the interval width)
-				if ((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance*parameter_interval.width())) ||
-					(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance*parameter_interval.width())))
+				if ((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance*parameter_range.width())) ||
+					(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance*parameter_range.width())))
 						break;
 			}
 		}
@@ -1892,8 +1907,8 @@ safety_unsafety_parametric(SystemType& system,
 			// Substitute the value
 			system.substitute(param);
 
-			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() << ", width: " << unsafety_int.width() << ") ... ");
-
+			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() <<
+						  ", tolerance: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
 			// Perform the verification
 			result = verify_iterative(system,initial_set,safe,domain);
 
@@ -1943,33 +1958,33 @@ safety_unsafety_parametric(SystemType& system,
 			{
 				// Breaks if the minimum distance between the safe and unsafe values is lesser than the tolerance
 				// (which is a more relaxed condition than the ones on the interval width)
-				if ((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance*parameter_interval.width())) ||
-					(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance*parameter_interval.width())))
+				if ((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance*parameter_range.width())) ||
+					(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance*parameter_range.width())))
 						break;
 			}
 		}
 
 		// Breaks if the safety interval is not empty and the safety interval width is lesser than the tolerance
-		if (!safety_int.empty() && safety_int.width() <= tolerance*parameter_interval.width())
+		if (!safety_int.empty() && safety_int.width() <= tolerance*parameter_range.width())
 			break;
 		// Breaks if the unsafety interval is not empty and the unsafety interval width is lesser than the tolerance
-		if (!unsafety_int.empty() && unsafety_int.width() <= tolerance*parameter_interval.width())
+		if (!unsafety_int.empty() && unsafety_int.width() <= tolerance*parameter_range.width())
 			break;
 	}
 
 	// Returns the system to its original parameter value
-	system.substitute(parameter);
+	system.substitute(parameter,original_value);
 
 	// The result intervals for safe and unsafe values
 	Interval safe_result, unsafe_result;
 
 	// Get the safe and unsafe intervals
 	if (safeOnBottom) {
-		safe_result = (safety_int.empty() ? safety_int : Interval(parameter_interval.lower(),safety_int.lower()));
-		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(unsafety_int.upper(),parameter_interval.upper())); }	
+		safe_result = (safety_int.empty() ? safety_int : Interval(parameter_range.lower(),safety_int.lower()));
+		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(unsafety_int.upper(),parameter_range.upper())); }	
 	else {
-		safe_result = (safety_int.empty() ? safety_int : Interval(safety_int.upper(),parameter_interval.upper()));	
-		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(parameter_interval.lower(),unsafety_int.lower())); }
+		safe_result = (safety_int.empty() ? safety_int : Interval(safety_int.upper(),parameter_range.upper()));	
+		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(parameter_range.lower(),unsafety_int.lower())); }
 
 	return make_pair<Interval,Interval>(safe_result,unsafe_result);
 }
@@ -1980,13 +1995,18 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 											   const HybridBoxes& domain,
 											   const RealConstant& xParam,
 											   const RealConstant& yParam,
-											   const Interval& xBounds,
-											   const Interval& yBounds,
-											   const unsigned& numPointsPerAxis,
-											   const Float& tolerance)
+											   const Float& tolerance,
+											   const unsigned& numPointsPerAxis)
 {
+	// Get the original values of the parameters
+	const Real& original_xValue = system.accessible_constant_value(xParam.name());
+	const Real& original_yValue = system.accessible_constant_value(yParam.name());
+
 	// FIXME: in the end, the system will be modified with the upper values of the
 	// XY bounds. We must be able to recover (or pass) the initial values in order to restore them.
+
+	Interval xBounds = Interval(xParam.value());
+	Interval yBounds = Interval(yParam.value());
 
 	// Generates the file name
 	std::string filename = system.name();
@@ -2012,7 +2032,7 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 		ARIADNE_LOG(1,"\nAnalysis with " << xParam.name() << " = " << xConstant.value().lower() << "...\n");
 
 		// Performs the analysis on Y and adds to the results of X
-		std::pair<Interval,Interval> result = safety_unsafety_parametric(system,initial_set,safe,domain,yParam,yBounds,tolerance);
+		std::pair<Interval,Interval> result = safety_unsafety_parametric(system,initial_set,safe,domain,yParam,tolerance);
 		results.insertXValue(result);
 
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
@@ -2031,15 +2051,15 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 		ARIADNE_LOG(1,"\nAnalysis with " << yParam.name() << " = " << yConstant.value().lower() << "...\n");
 
 		// Performs the analysis on X and adds to the results of Y
-		std::pair<Interval,Interval> result = safety_unsafety_parametric(system,initial_set,safe,domain,xParam,xBounds,tolerance);
+		std::pair<Interval,Interval> result = safety_unsafety_parametric(system,initial_set,safe,domain,xParam,tolerance);
 		results.insertYValue(result);
 
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
 	}
 
 	// Modifies the system to return to its original parameter values
-	system.substitute(xParam);
-	system.substitute(yParam);
+	system.substitute(xParam,original_xValue);
+	system.substitute(yParam,original_yValue);
 
 	// Dumps the results into a file
 	results.dump();

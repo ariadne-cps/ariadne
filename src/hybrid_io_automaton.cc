@@ -785,6 +785,11 @@ HybridIOAutomaton::transitions() const
 }
 
 
+const std::list< RealConstant >&
+HybridIOAutomaton::accessible_constants() const
+{
+    return this->_accessible_constants;
+}
 
 std::list< DiscreteIOTransition >
 HybridIOAutomaton::transitions(DiscreteState source) const
@@ -968,6 +973,13 @@ std::pair< HybridAutomaton, RealSpace > make_monolithic_automaton(const HybridIO
                           res, ScalarFunction(triter->activation(), spc), triter->forced());
     }
     
+    // Add the accessible variables
+    const std::list<RealConstant>& accessible_constants = hioa.accessible_constants();
+    for (std::list<RealConstant>::const_iterator constant_it = accessible_constants.begin();
+    											 constant_it != accessible_constants.end();
+    											 ++constant_it)
+    	ha.register_accessible_constant(*constant_it);
+
     // Set the grid
     Vector<Float> lengths(spc.size());
     for(uint i = 0 ; i < spc.size() ; i++) {
@@ -1241,6 +1253,16 @@ HybridIOAutomaton compose(const std::string& name,
                          input_vars, output_vars, internal_vars,
                          input_events, output_events, internal_events);
     
+    // Add the accessible constants from the first automaton
+    const std::list<RealConstant> constants1 = ha1.accessible_constants();
+    for (std::list<RealConstant>::const_iterator constant_it = constants1.begin(); constant_it != constants1.end(); ++constant_it)
+    	ha.register_accessible_constant(*constant_it);
+    // Add the remaining constants from the second automaton
+    const std::list<RealConstant> constants2 = ha2.accessible_constants();
+    for (std::list<RealConstant>::const_iterator constant_it = constants2.begin(); constant_it != constants2.end(); ++constant_it)
+    	if (!ha.has_accessible_constant(*constant_it))
+    		ha.register_accessible_constant(*constant_it);
+
     // Set the grid as the union of the grids of the two components
     std::map< RealVariable, Float > grid = ha1.grid();
     grid.insert(ha2.grid().begin(), ha2.grid().end());
@@ -1551,6 +1573,7 @@ operator<<(std::ostream& os, const HybridIOAutomaton& ha)
         ", internal vars=" << ha.internal_vars() <<
         ", input events=" << ha.input_events() << ", output events=" << ha.output_events() <<
         ", internal events=" << ha.internal_events() <<        
+        ", accessible constants=" << ha.accessible_constants() <<
         ", modes=" << ha.modes() << ", transitions=" << ha.transitions() <<
         ", grid=" << ha.grid() << ")";
 }
@@ -1558,11 +1581,55 @@ operator<<(std::ostream& os, const HybridIOAutomaton& ha)
 void 
 HybridIOAutomaton::substitute(const Constant<Real>& con, const Real& c)
 {
+	// Substitutes on the accessible constants
+	bool found = false;
+	for (std::list<RealConstant>::iterator constants_it=this->_accessible_constants.begin(); constants_it!=this->_accessible_constants.end(); constants_it++)
+		if (*constants_it == con)
+		{
+			constants_it->set_value(c);
+			found = true;
+			break;
+		}
+
+	ARIADNE_ASSERT_MSG(found,"The constant is not registered as accessible.");
+
+	// Substitutes on the modes and transitions
 	for (std::list<DiscreteIOMode>::iterator modes_it=this->_modes.begin();modes_it!=this->_modes.end();modes_it++)
 		modes_it->substitute(con,c);
 	for (std::list<DiscreteIOTransition>::iterator trans_it=this->_transitions.begin();trans_it!=this->_transitions.end();trans_it++)
 		trans_it->substitute(con,c);
 }
 
+bool
+HybridIOAutomaton::has_accessible_constant(const RealConstant& con) const
+{
+    for(std::list<RealConstant>::const_iterator constants_iter=this->_accessible_constants.begin();
+        constants_iter!=this->_accessible_constants.end(); ++constants_iter)
+        {
+            if(*constants_iter == con) {
+                return true;
+            }
+        }
+    return false;
+}
+
+
+void
+HybridIOAutomaton::register_accessible_constant(RealConstant con)
+{
+	// Silently accepts duplicated constant registrations
+	if (!this->has_accessible_constant(con))
+		this->_accessible_constants.push_back(con);
+}
+
+const Real&
+HybridIOAutomaton::accessible_constant_value(const String& name) const
+{
+	for (std::list<RealConstant>::const_iterator constants_it=this->_accessible_constants.begin(); constants_it!=this->_accessible_constants.end(); constants_it++)
+		if (constants_it->name() == name)
+			return constants_it->value();
+
+	ARIADNE_FAIL_MSG("The constant is not registered as accessible.");
+}
 
 }   // namespace Ariadne

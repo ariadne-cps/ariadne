@@ -303,6 +303,10 @@ class HybridAutomaton
     //! \brief The hybrid automaton's transitions.
     std::list< DiscreteTransition > _transitions;
 
+    //! \brief The accessible constants.
+    //! \details This set does not necessarily reflect the whole set of constants in all functions.
+    std::list< RealConstant > _accessible_constants;
+
   public:
     //@{
     //! \name Constructors and destructors
@@ -527,6 +531,10 @@ class HybridAutomaton
                                                       const VectorFunction& reset,
                                                       const VectorFunction& activation);
 
+    //! \brief Registers a constant into the list of accessible constants.
+    //! \details If the constant is already registered, no action is performed.
+    void register_accessible_constant(RealConstant c);
+
     //! \brief Set the grid controlling relative scaling in the mode.
     void set_grid(DiscreteState location, const Grid& grid);
 
@@ -556,6 +564,9 @@ class HybridAutomaton
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
     bool has_transition(DiscreteEvent event, DiscreteState source) const;
 
+    //! \brief Test if the hybrid automaton has a constant with the same label.
+    bool has_accessible_constant(const RealConstant& con) const;
+
     //! \brief The discrete mode with given discrete state.
     const DiscreteMode& mode(DiscreteState state) const;
 
@@ -579,6 +590,12 @@ class HybridAutomaton
 
     //! \brief The state space of the system.
     HybridSpace state_space() const;
+
+    //! \brief The set of accessible constants.
+    const std::list< RealConstant >& accessible_constants() const;
+
+    //! \brief Get the value of an accessible constant.
+    const Real& accessible_constant_value(const String& name) const;
 
     //! \brief The hybrid set giving the invariants for each discrete location.
     HybridSet invariant() const;

@@ -27,21 +27,23 @@
 using namespace Ariadne;
 
 
-int main() 
+int main(int argc,char *argv[])
 {
+	int analyserVerbosity = 1;
+	if (argc > 1)
+		analyserVerbosity = atoi(argv[1]);
+
     /// Set the system parameters
 	RealConstant a("a",0.02);
 	RealConstant b("b",0.3);
-	RealConstant T("T",4.0);
+	RealConstant T("T",Interval(4.0,10.0));
 	RealConstant hmin("hmin",5.5);
 	RealConstant hmax("hmax",8.0);
-	RealConstant Delta("Delta",0.2);
+	RealConstant Delta("Delta",Interval(0.0,0.2));
 
 	/// Analysis parameters
 	RealConstant xParam = Delta;
 	RealConstant yParam = T;
-	Interval xBounds(0.0,0.2);
-	Interval yBounds(4.0,10.0);
 	float tolerance = 1e-2;
 	unsigned numPointsPerAxis = 26;
 
@@ -67,6 +69,10 @@ int main()
     varlist.append(x);
     varlist.append(y);
     
+    // Accessible constants
+    system.register_accessible_constant(Delta);
+    system.register_accessible_constant(T);
+
     // Water level dynamics
     RealExpression x_opening_closing = -a*x + b*y;
     RealExpression x_opened = -a*x + b;
@@ -161,7 +167,7 @@ int main()
 	HybridEvolver evolver;
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 1;
+	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
@@ -175,6 +181,6 @@ int main()
 	analyser.free_cores = 0;
 	analyser.chain_reach_dumping = false;
 
-	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, xBounds, yBounds, numPointsPerAxis, tolerance);
+	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
 }

@@ -25,23 +25,26 @@
 
 using namespace Ariadne;
 
-int main() 
+int main(int argc,char *argv[])
 {
+	int analyserVerbosity = 1;
+	if (argc > 1)
+		analyserVerbosity = atoi(argv[1]);
+
     /// Set the system parameters
-	RealConstant a("a",0.02);
-	RealConstant b("b",0.3);
-	RealConstant T("T",4.0);
-	RealConstant hmin("hmin",5.5);
-	RealConstant hmax("hmax",8.0);
-	RealConstant delta("Delta",0.05);
+	const RealConstant a("a",0.02);
+	const RealConstant b("b",0.3);
+	const RealConstant T("T",4.0);
+	const RealConstant hmin("hmin",5.5);
+	const RealConstant hmax("hmax",8.0);
+	const RealConstant delta("Delta",Interval(0.0,0.1));
 
     // System variables
     RealVariable x("x");    // water level
     RealVariable y("y");    // valve aperture
 
-	// The parameter to modify, its interval and the tolerance
+	// The parameter to modify and the tolerance
 	RealConstant parameter = delta;
-	Interval parameter_interval(0.0,0.0);
 	Float tolerance = 1e-2;
 
     // Create the tank automaton
@@ -99,7 +102,7 @@ int main()
 		//valve.new_invariant(closing, y-1.0);
 		RealExpression dynclosing = -1.0/T;
 		valve.set_dynamics(closing, y, dynclosing);
-		
+
 		// Transitions
 
 		// the identity y' = y.
@@ -139,6 +142,9 @@ int main()
 		controller.add_output_event(e_open); 
 		controller.add_output_event(e_close);
 		
+		// Accessible constants
+		controller.register_accessible_constant(delta);
+
 		// Two states:
 		// Rising (water level is increasing)
 		controller.new_mode(rising);
@@ -164,10 +170,14 @@ int main()
 	HybridIOAutomaton tank_valve = compose("tank,valve",tank,valve,flow,idle);
 	HybridIOAutomaton system_io = compose("watertank-io",tank_valve,controller,DiscreteState("flow,idle"),rising);
 
+	cout << system_io << "\n\n";
+
 	/// Create the monolithic automaton
 	HybridAutomaton system("watertank");
 	RealSpace space;
 	make_lpair<HybridAutomaton,RealSpace>(system,space) = make_monolithic_automaton(system_io);
+
+	cout << system << "\n\n";
 
 	// Verification information
 
@@ -193,12 +203,12 @@ int main()
 	HybridEvolver evolver;
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 6;
+	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = false;
 	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().lowest_maximum_grid_depth = 4;
-	analyser.parameters().highest_maximum_grid_depth = 8;
+	analyser.parameters().lowest_maximum_grid_depth = 0;
+	analyser.parameters().highest_maximum_grid_depth = 7;
 	analyser.parameters().transient_time = 1e10;
 	analyser.parameters().transient_steps = 1;
 	analyser.parameters().lock_to_grid_time = 1e10;		
@@ -210,46 +220,18 @@ int main()
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
-/*
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,opening,rising")] = 0.25;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,closing,falling")] = 0.25;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,falling")] = 0.961538;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,rising")] = 0.961538;
-	evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,5.0);
-
-    Box initial_box(2, 6.0,6.00, 1.0,1.0);
-    HybridEnclosureType initial_enclosure(DiscreteState("flow,idle,rising"),initial_box);
-    Box bounding_box(2, 5.35,8.25, 0.0,1.0);
-    HybridTime evolution_time(1e10,8);
-
-    std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
-    std::cout << "done." << std::endl;
-
-    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    std::cout << "Plotting orbit... "<<std::flush;
-    plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-    std::cout << "done." << std::endl;
-*/
-
-	analyser.verify_iterative(system, initial_set, safe_box, domain);
-
-	/*
 	// Perform the analysis
-	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, parameter_interval, tolerance);
+	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 
 	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
 
 	// Show the result
-	if (unsafe_int.empty() && !safe_int.empty())
-		cout << "\nAll values are safe.\n\n";
-	else if (safe_int.empty() && !unsafe_int.empty())
+	Interval parameter_interval(parameter.value());
+	if (safe_int == parameter_interval)
+		cout << "\nAll the values are safe.\n\n";
+	else if (safe_int.empty())
 		cout << "\nNo safe value was found.\n\n";
-	else if (!safe_int.empty() && safe_int.lower() == parameter_interval.lower())
+	else if (safe_int.lower() == parameter_interval.lower())
 	{
 		cout << "\nThe parameter must be <= " << safe_int.upper() << " ( inaccuracy ";
 		if (!unsafe_int.empty())
@@ -257,7 +239,7 @@ int main()
 		else
 			cout << "not available).\n\n";
 	}
-	else if (!safe_int.empty() && safe_int.upper() == parameter_interval.upper())
+	else if (safe_int.upper() == parameter_interval.upper())
 	{
 		cout << "\nThe parameter must be >= " << safe_int.lower() << " ( inaccuracy ";
 		if (!unsafe_int.empty())
@@ -267,5 +249,4 @@ int main()
 	}	
 	else
 		cout << "\nError: the interval could not be verified.\n\n";
-	*/
 }

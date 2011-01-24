@@ -73,10 +73,21 @@ template<class T> class Constant
 	void set_value(const T& c) { *_value_ptr = c; }
     bool operator==(const Constant<T>& other) const {
         if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
+    virtual std::ostream& write(std::ostream&) const;
   private:
     shared_ptr<String> _name_ptr;
     shared_ptr<T> _value_ptr;
 };
+
+template<class T> inline std::ostream& Constant<T>::write(std::ostream& os) const {
+    os << "{" << this->name() << "@" << this->value() << "}";
+    //os << ":" << name(this->_type);
+    return os;
+}
+
+template<class T> inline std::ostream& operator<<(std::ostream& os, const Constant<T>& con) {
+    return con.write(os); }
+
 
 enum VariableType { type_bool, type_tribool, type_enumerated, type_string, type_integer, type_real };
 enum VariableCategory { simple, dotted, primed };
@@ -131,8 +142,6 @@ inline std::ostream& UntypedVariable::write(std::ostream& os) const {
 
 inline std::ostream& operator<<(std::ostream& os, const UntypedVariable& var) {
     return var.write(os); }
-
-
 
 template<class T> class ExtendedVariable
     : public UntypedVariable

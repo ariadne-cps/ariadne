@@ -25,8 +25,12 @@
 
 using namespace Ariadne;
 
-int main() 
+int main(int argc,char *argv[])
 {
+	int analyserVerbosity = 1;
+	if (argc > 1)
+		analyserVerbosity = atoi(argv[1]);
+
     /// Set the system parameters
 	RealConstant a("a",0.02);
 	RealConstant b("b",0.3);
@@ -41,9 +45,8 @@ int main()
     RealVariable t_out("t_out");    // valve aperture
 
 	// The parameter to modify, its interval and the tolerance
-    RealConstant Delta("Delta",0.00);
+    RealConstant Delta("Delta",Interval(0.0,0.0));
     RealConstant parameter = Delta;
-	Interval parameter_interval(0.0,0.0);
 	Float tolerance = 1e-2;
 
     // Create the tank automaton
@@ -212,6 +215,9 @@ int main()
 	RealSpace space;
 	make_lpair<HybridAutomaton,RealSpace>(system,space) = make_monolithic_automaton(system_io);
 
+	/// Add access to the Delta constant
+	//system.register_accessible_constant(Delta);
+
 	// Verification information
 
 	// The initial values
@@ -225,38 +231,38 @@ int main()
 
 
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(3,-0.1,0.2,4.0,10.0,-0.5,1.5));
-
 /*
+
 	// The domain
 	HybridBoxes domain;
 
 	// The level is rising
-	domain[DiscreteState("flow,idle,shallow,nothing")] = Box(3, -0.1,0.2, 4.5,8.0, 0.9,1.1);
+	domain[DiscreteState("flow,idle,shallow,nothing")] = Box(3, -0.1,0.2, 4.5,8.5, 0.9,1.1);
 	// A CLOSE command will be issued
-	domain[DiscreteState("flow,idle,deep,decrease")] = Box(3, -0.1,0.2, 7.5,8.5, 0.9,1.1);
+	domain[DiscreteState("flow,idle,deep,decrease")] = Box(3, -0.1,0.2, 7.5,9.0, 0.1,1.1);
 	// The valve is closing
-	domain[DiscreteState("flow,closing,deep,nothing")] = Box(3, -0.1,0.2, 7.5,9.0, -0.1,1.1);
+	domain[DiscreteState("flow,closing,deep,nothing")] = Box(3, -0.1,0.2, 7.5,9.5, -0.1,1.1);
 	// The level is falling
 	domain[DiscreteState("flow,idle,deep,nothing")] = Box(3, -0.1,0.2, 5.0,8.5, -0.1,0.1);
 	// An OPEN command will be issued
-	domain[DiscreteState("flow,idle,shallow,increase")] = Box(3, -0.1,0.2, 5.0,6.0, -0.1,0.1);
+	domain[DiscreteState("flow,idle,shallow,increase")] = Box(3, -0.1,0.2, 4.5,6.0, -0.1,0.1);
 	// The valve is opening
-	domain[DiscreteState("flow,opening,shallow,nothing")] = Box(3, -0.1,0.2, 4.5,6.0, -0.1,1.1);
+	domain[DiscreteState("flow,opening,shallow,nothing")] = Box(3, -0.1,0.2, 4.0,6.5, -0.1,1.1);
 
 	// Spurious: the valve is closing but an OPEN command will be issued
 	domain[DiscreteState("flow,closing,shallow,increase")] = Box(3, -0.1,0.2, 7.5,9.0, -0.1,1.1);
 	// Spurious: the valve is opening but a CLOSE command will be issued
 	domain[DiscreteState("flow,opening,deep,decrease")] = Box(3, -0.1,0.2, 4.5,6.0, -0.1,1.1);
+
+
 */
-
-
 	/// Verification
 
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 6;
+	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = false;
 	analyser.parameters().enable_lower_pruning = true;
@@ -266,7 +272,6 @@ int main()
 	analyser.parameters().transient_steps = 1;
 	analyser.parameters().lock_to_grid_time = 1e10;		
 	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.parameters().skip_if_unprovable = true;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
 	analyser.chain_reach_dumping = false;
@@ -276,7 +281,7 @@ int main()
 
     analyser.verify_iterative(system, initial_set, safe_box, domain);
 
-    /*
+    
     HybridGridTreeSet reach = analyser.statistics().upper().reach;
 
 	// Assigns local variables
@@ -293,7 +298,7 @@ int main()
 	draw(fig,Box(3,0.0,0.0,3.5,5.25,-0.2,1.2));
 	draw(fig,Box(3,0.0,0.0,8.25,10.0,-0.2,1.2));
 	fig.write("watertank-aasap.png");
-	*/
+	
 /*
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
     typedef HybridEvolver::OrbitType OrbitType;

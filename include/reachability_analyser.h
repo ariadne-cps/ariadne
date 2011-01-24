@@ -200,7 +200,7 @@ class HybridReachabilityAnalyser
 							 const HybridBoxes& safe,
 							 const HybridBoxes& domain);
 
-	/*! \brief Compute an underapproximation of the safety interval of \a parameter inside the \a parameter_interval for the automaton 
+	/*! \brief Compute an underapproximation of the safety interval of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
         \details The procedure returns the interval of safety. */
 	Interval safety_parametric(SystemType& system, 
@@ -208,12 +208,11 @@ class HybridReachabilityAnalyser
 							   const HybridBoxes& safe,
 			 				   const HybridBoxes& domain,
 							   const RealConstant& parameter,
-							   const Interval& parameter_interval,
 							   const Float& tolerance);
 
-	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter inside the \a parameter_interval for the automaton 
+	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
-        \details The tolerance in [0 1] is a percentage of the \a parameter_interval width and is used to provide a termination condition for the
+        \details The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
 		bisection search beneath.
         \return The intervals of safety and unsafety. */
 	std::pair<Interval,Interval> safety_unsafety_parametric(SystemType& system, 
@@ -221,11 +220,10 @@ class HybridReachabilityAnalyser
 										 					const HybridBoxes& safe,
 			 							 					const HybridBoxes& domain,
 										 					const RealConstant& parameter,
-										 					const Interval& parameter_interval,
 										 					const Float& tolerance);
 
 	/**
-	 * \brief Performs a parametric analysis on two parameters \a xParam, \a yParam, with bounds \a xBounds and \a yBounds,
+	 * \brief Performs a parametric analysis on two parameters \a xParam, \a yParam,
 	 * discretizing with \a numPointsPerAxis points for each axis.
 	 * \details Saves the results in a file called "<systemName>-<xName>-<yName>" and
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
@@ -237,10 +235,8 @@ class HybridReachabilityAnalyser
 					   const HybridBoxes& domain,
 					   const RealConstant& xParam,
 					   const RealConstant& yParam,
-					   const Interval& xBounds,
-					   const Interval& yBounds,
-					   const unsigned& numPointsPerAxis,
-					   const Float& tolerance);
+					   const Float& tolerance,
+					   const unsigned& numPointsPerAxis);
 
     //@}
 

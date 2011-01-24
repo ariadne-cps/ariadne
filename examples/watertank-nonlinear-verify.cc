@@ -25,19 +25,22 @@
 
 using namespace Ariadne;
 
-int main() 
+int main(int argc,char *argv[])
 {
+	int analyserVerbosity = 1;
+	if (argc > 1)
+		analyserVerbosity = atoi(argv[1]);
+
     /// Set the system parameters
 	RealConstant a("a",0.065);
 	RealConstant b("b",0.3);
 	RealConstant T("T",4.0);
 	RealConstant hmin("hmin",5.5);
 	RealConstant hmax("hmax",8.0);
-	RealConstant Delta("Delta",0.05);	
+	RealConstant Delta("Delta",Interval(0.0,0.0));
 
-	// The parameter to modify, its interval and the tolerance
+	// The parameter to modify and the tolerance
 	RealConstant parameter = Delta;
-	Interval parameter_interval(0.0,0.0);
 	double tolerance = 1e-2;
 
     /// Create a HybridAutomaton object
@@ -62,6 +65,9 @@ int main()
     varlist.append(x);
     varlist.append(y);
     
+    // Accessible constants
+    system.register_accessible_constant(Delta);
+
     // Water level dynamics
     RealExpression x_opening_closing = -a*sqrt(x) + b*y;
     RealExpression x_opened = -a*sqrt(x) + b;
@@ -143,7 +149,7 @@ int main()
 	HybridEvolver evolver;
 	evolver.verbosity = 0;		
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 2; 
+	analyser.verbosity = analyserVerbosity;
 	analyser.parameters().lowest_maximum_grid_depth = 3;
 	analyser.parameters().enable_lower_pruning = true;
 
@@ -161,16 +167,17 @@ int main()
 	Interval safe_int, unsafe_int;
 
 	// Perform the analysis
-	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, parameter_interval, tolerance);
+	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 
 	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
 
 	// Show the result
-	if (unsafe_int.empty() && !safe_int.empty())
-		cout << "\nAll values are safe.\n\n";
-	else if (safe_int.empty() && !unsafe_int.empty())
+	Interval parameter_interval = Interval(parameter.value());
+	if (safe_int == parameter_interval)
+		cout << "\nAll the values are safe.\n\n";
+	else if (safe_int.empty())
 		cout << "\nNo safe value was found.\n\n";
-	else if (!safe_int.empty() && safe_int.lower() == parameter_interval.lower())
+	else if (safe_int.lower() == parameter_interval.lower())
 	{
 		cout << "\nThe parameter must be <= " << safe_int.upper() << " ( inaccuracy ";
 		if (!unsafe_int.empty())
@@ -178,7 +185,7 @@ int main()
 		else
 			cout << "not available).\n\n";
 	}
-	else if (!safe_int.empty() && safe_int.upper() == parameter_interval.upper())
+	else if (safe_int.upper() == parameter_interval.upper())
 	{
 		cout << "\nThe parameter must be >= " << safe_int.lower() << " ( inaccuracy ";
 		if (!unsafe_int.empty())

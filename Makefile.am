@@ -2,7 +2,7 @@ SUBDIRS = include src test wrap examples cifparser
 
 EXTRA_DIST = Doxyfile
 
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = -Wall -fno-strict-aliasing
 
 .PHONY: shiny doc all lib wrap examples profiles check-lib check-python
 

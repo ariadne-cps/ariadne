@@ -299,6 +299,10 @@ class HybridIOAutomaton
     //! \brief The hybrid automaton's transitions.
     std::list< DiscreteIOTransition > _transitions;
     
+    //! \brief The accessible constants.
+    //! \details This set does not necessarily reflect the whole set of constants in all functions.
+    std::list< RealConstant > _accessible_constants;
+
     //! \brief The grid for the controlled variables of the automaton.
     std::map< RealVariable, Float > _grid;
     
@@ -360,6 +364,10 @@ class HybridIOAutomaton
     //! \brief Adds an internal event \param e to the automaton.
     const std::set< DiscreteEvent >& add_internal_event(const DiscreteEvent& e);
     
+    //! \brief Registers a constant into the list of accessible constants.
+    //! \details If the constant is already registered, no action is performed.
+    void register_accessible_constant(RealConstant c);
+
     //! \brief Adds a discrete mode to the automaton.
     //!
     //!   \param state is the mode's discrete state.
@@ -591,6 +599,12 @@ class HybridIOAutomaton
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
     bool has_transition(DiscreteEvent event, DiscreteState source) const;
 
+    //! \brief Test if the hybrid automaton has a constant with the same label.
+    bool has_accessible_constant(const RealConstant& con) const;
+
+    //! \brief Get the value of an accessible constant.
+    const Real& accessible_constant_value(const String& name) const;
+
     //! \brief The discrete mode with given discrete state.
     const DiscreteIOMode& mode(DiscreteState state) const;
 
@@ -602,6 +616,9 @@ class HybridIOAutomaton
 
     //! \brief The set of discrete transitions. 
     const std::list< DiscreteIOTransition >& transitions() const;
+
+    //! \brief The set of accessible constants.
+    const std::list< RealConstant >& accessible_constants() const;
 
     //! \brief The discrete transitions from location \a source.
     std::list< DiscreteIOTransition > transitions(DiscreteState source) const;

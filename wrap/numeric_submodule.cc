@@ -172,6 +172,12 @@ void export_float()
     float_class.def(Real() - self);
     float_class.def(Real() * self);
     float_class.def(Real() / self);
+    float_class.def(self == self);
+    float_class.def(self != self);
+    float_class.def(self >= self);
+    float_class.def(self <= self);
+    float_class.def(self > self);
+    float_class.def(self < self);
 
     implicitly_convertible<double,Float>();
 
@@ -238,6 +244,12 @@ void export_real()
     real_class.def(self - self);
     real_class.def(self * self);
     real_class.def(self / self);
+    real_class.def(self == self);
+    real_class.def(self != self);
+    real_class.def(self >= self);
+    real_class.def(self <= self);
+    real_class.def(self > self);
+    real_class.def(self < self);
     
     implicitly_convertible<int,Real>();
     implicitly_convertible<double,Real>();
@@ -299,6 +311,12 @@ void export_interval()
     interval_class.def(Float() - self);
     interval_class.def(Float() * self);
     interval_class.def(Float() / self);
+    interval_class.def(self == self);
+    interval_class.def(self != self);
+    interval_class.def(self >= self);
+    interval_class.def(self <= self);
+    interval_class.def(self > self);
+    interval_class.def(self < self);
     interval_class.def("lower", &Interval::lower, return_value_policy<copy_const_reference>());
     interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
     interval_class.def("midpoint", &Interval::midpoint);

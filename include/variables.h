@@ -66,8 +66,6 @@ template<class T> class Constant
   public:
     template<class X> explicit Constant(const String& str, const X& value)
         : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
-    //explicit Constant(const String& str, const T& value)
-    //    : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
     const String& name() const { return *_name_ptr; }
     const T& value() const { return *_value_ptr; }
 	void set_value(const T& c) { *_value_ptr = c; }

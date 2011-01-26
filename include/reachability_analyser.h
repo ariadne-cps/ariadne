@@ -190,7 +190,7 @@ class HybridReachabilityAnalyser
                                         const HybridImageSet& bounding_set) const;
   
     /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box. */
-    virtual tribool verify(const SystemType& system, 
+    virtual tribool verify(SystemType& system,
                            const HybridImageSet& initial_set);
 
 	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe inside \a domain,
@@ -289,6 +289,22 @@ class HybridReachabilityAnalyser
 							    const Vector<Float>& minTargetCellWidths,
 							    const Box& target_bounding) const;
 
+    /*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
+     *
+     * @param system The system to get the accessible constants from.
+     *
+     * @return A split factor for each non-singleton accessible constant of the \a system.
+     */
+    std::list<std::pair<RealConstant,int> > _getSplitFactorsOfConstants(HybridAutomaton& system) const;
+
+    /*! \brief Helper function to get the maximum value of the derivative width ratio \f$ (w-w^m)/w \f$, where the \f$ w^m \f$ values
+     * are stored in \a midpointMaxWidths and the \f$ w \f$ values are obtained from the \a system.
+     */
+    Float _getMaxDerivativeWidthRatio(const HybridAutomaton& system, const HybridFloatVector& midpointMaxWidths) const;
+
+    /*! \brief Helper function to get the widths of the derivatives from the \a system */
+    HybridFloatVector _getDerivativeWidths(const HybridAutomaton& system) const;
+
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
@@ -296,11 +312,11 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
 
 	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool _prove(const SystemType& system,
+	bool _prove(SystemType& system,
 			    const HybridImageSet& initial_set);
 
 	/*! \brief Disprove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool _disprove(const SystemType& system,
+	bool _disprove(SystemType& system,
 			 	   const HybridImageSet& initial_set);
 
 	/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach statistics. 
@@ -313,9 +329,9 @@ class HybridReachabilityAnalyser
 		ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
 	void _setLockToGridTime(const SystemType& system) const;
 
-	/*! \brief Set the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
+	/*! \brief Get the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
 		all variables in a step must cover a length greater than a length determined by the \a hgrid. */
-	void _setHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid);
+	std::map<DiscreteState,Float> _getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid);
 
 	/*! \brief Set the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
 		all variables in a step must cover a length greater than a length determined by the \a hgrid. The value is equal for all

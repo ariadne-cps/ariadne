@@ -77,6 +77,13 @@ template<class T> class Constant
     shared_ptr<T> _value_ptr;
 };
 
+template<class T> struct ConstantComparator
+{
+  bool operator()(const Constant<T>& first, const Constant<T>& second) const
+    {  return ((first.name() < second.name()) || ((first.name() == second.name()) && bool(first.value() < second.value())));
+    }
+};
+
 template<class T> inline std::ostream& Constant<T>::write(std::ostream& os) const {
     os << "{" << this->name() << "@" << this->value() << "}";
     //os << ":" << name(this->_type);

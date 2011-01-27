@@ -221,7 +221,7 @@ _splitTargetEnclosures(bool& isValid,
 }
 
 
-std::list<std::pair<RealConstant,int> >
+RealConstantIntMap
 HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system) const
 {
 	/*! Procedure:
@@ -235,20 +235,22 @@ HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system) cons
  	 *	 b) Increase the factor of the constant having the best ratio and update the system accordingly by halving the range of the constant
 	 */
 
-	std::list<std::pair<RealConstant,int> > result;
+	RealConstantIntMap result;
 
 	// Copies the non-singleton accessible constants and
 	// sets the system with the midpoints of the corresponding intervals
 	const std::list<RealConstant>& constants = system.accessible_constants();
 	std::list<RealConstant> original_nonsingleton_constants;
-	size_t constant_idx=0;
+
 	for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
 												 constant_it != constants.end();
 												 ++constant_it)
 	{
 		if (!constant_it->value().singleton())
 		{
-			original_nonsingleton_constants.push_back(RealConstant(constant_it->name(),constant_it->value()));
+			RealConstant original_copy(constant_it->name(),constant_it->value());
+			original_nonsingleton_constants.push_back(original_copy);
+			result.insert(std::pair<RealConstant,int>(original_copy,1));
 			system.substitute(*constant_it,constant_it->value().midpoint());
 		}
 	}
@@ -256,9 +258,6 @@ HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system) cons
 	// Skips if no non-singleton constant is present
 	if (original_nonsingleton_constants.empty())
 		return result;
-
-	// Keeps a vector of the values (set to one) since it is not possible to create a map with RealConstant keys
-	Vector<int> factors(original_nonsingleton_constants.size(),1);
 
 	// Gets the derivative widths corresponding to all accessible constants having midpoint value
 	HybridFloatVector mid_der_widths = _getDerivativeWidths(system);
@@ -275,12 +274,10 @@ HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system) cons
 	Float tolerance = 0.0625; // We choose 1/16 of the maximum ratio
 	while (ratio > tolerance*maxRatio)
 	{
-		int bestConstantIndex = -1;
 		String bestConstantName;
 		Interval bestConstantInterval;
 		Float bestLocalRatio = std::numeric_limits<Float>::infinity();
 
-		int i=0;
 		for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
 													 constant_it != constants.end();
 													 ++constant_it)
@@ -296,33 +293,30 @@ HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system) cons
 			if (localRatio < bestLocalRatio)
 			{
 				bestLocalRatio = localRatio;
-				bestConstantIndex = i;
 				bestConstantName = constant_it->name();
 				bestConstantInterval = halvedInterval;
 			}
 
 			// Restores the related constant to its original value
 			system.substitute(*constant_it,originalValue);
-
-			i++;
 		}
 
+		RealConstant bestConstant(bestConstantName,bestConstantInterval);
+
 		// Increases the factor of the corresponding index
-		factors[bestConstantIndex]++;
+		result[bestConstant]++;
 		// Updates the ratio
 		ratio = bestLocalRatio;
 		// Updates the system
-		system.substitute(RealConstant(bestConstantName,bestConstantInterval));
+		system.substitute(bestConstant);
 	}
 
-	// Restores the original non-singleton constants and converts the factors into the result list
-	constant_idx=0;
+	// Restores the original non-singleton constants
 	for (std::list<RealConstant>::const_iterator constant_it = original_nonsingleton_constants.begin();
 												 constant_it != original_nonsingleton_constants.end();
 												 ++constant_it)
 	{
 		system.substitute(*constant_it);
-		result.push_back(std::pair<RealConstant,int>(*constant_it,factors[constant_idx++]));
 	}
 
 	return result;
@@ -373,6 +367,85 @@ HybridReachabilityAnalyser::_getMaxDerivativeWidthRatio(const HybridAutomaton& s
 			if (der[i].width() != 0)
 				result = max(result,(der[i].width()-midpointMaxWidths.find(loc)->second[i])/der[i].width());
 	}
+
+	return result;
+}
+
+/*! \brief Splits a RealConstant \a con into \a numParts parts.
+ * \details Orders the subintervals by putting the second leftmost subinterval up to the rightmost, followed by the leftmost. */
+std::vector<RealConstant>
+split(const RealConstant& con, uint numParts)
+{
+	Interval bounds;
+	Float lower, upper;
+
+	std::vector<RealConstant> result(numParts,con);
+
+	String name = con.name();
+	Float intervalWidth = con.value().width();
+
+	// Puts the first element
+	lower = con.value().lower();
+	upper = con.value().lower() + intervalWidth/numParts;
+	result[numParts-1] = RealConstant(name,Interval(lower,upper));
+	// Puts the last to the second element, in inverse order
+	for (uint i=numParts;i>1;--i)
+	{
+		lower = con.value().lower() + intervalWidth*(i-1)/numParts;
+		upper = con.value().lower() + intervalWidth*i/numParts;
+		result[i-2] = RealConstant(name,Interval(lower,upper));
+	}
+
+	return result;
+}
+
+void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
+				   std::vector<std::vector<RealConstant> >::iterator col_it,
+				   std::vector<RealConstant>::iterator row_it,
+				   std::list<RealConstant> s,
+				   std::list<std::list<RealConstant> >& dest)
+{
+	if (col_it != src.end() && row_it != col_it->end())
+	{
+		row_it++;
+		_fillSplitSet(src,col_it,row_it,s,dest);
+		row_it--;
+
+		s.push_back(*row_it);
+
+		col_it++;
+		row_it = col_it->begin();
+
+		if (col_it != src.end())
+			_fillSplitSet(src,col_it,row_it,s,dest);
+		else
+		{
+			dest.push_back(s);
+		}
+	}
+}
+
+std::list<std::list<RealConstant> >
+HybridReachabilityAnalyser::_getSplitSet() const
+{
+	std::list<std::list<RealConstant> > result;
+
+	if (_parameters->split_factors.empty())
+		return result;
+
+	// Creates a vector for all the interval splits (i.e. a jagged matrix)
+	std::vector<std::vector<RealConstant> > split_intervals_set(_parameters->split_factors.size());
+	uint i=0;
+	for (RealConstantIntMap::const_iterator factor_it = _parameters->split_factors.begin();
+											factor_it != _parameters->split_factors.end();
+											++factor_it)
+		split_intervals_set[i++] = split(factor_it->first, factor_it->second);
+
+	// Generates all the possible split combinations
+	std::list<RealConstant> initial_combination;
+	std::vector<std::vector<RealConstant> >::iterator initial_col_it = split_intervals_set.begin();
+	std::vector<RealConstant>::iterator initial_row_it = initial_col_it->begin();
+	_fillSplitSet(split_intervals_set,initial_col_it,initial_row_it,initial_combination,result);
 
 	return result;
 }
@@ -1227,19 +1300,66 @@ HybridReachabilityAnalyser::
 _prove(SystemType& system,
 	   const HybridImageSet& initial_set)
 {
-	ARIADNE_LOG(4,"Proving...\n");
-
 	// The reachable set
 	HybridGridTreeSet reach;
-	// The flag that informs whether the region is valid for proving
-	bool isValid;
+	// The flag that informs whether the region is valid for proving (assumed true for the case of a splitted system)
+	bool isValid = true;
 
-	// Get the split factors
-	std::list<std::pair<RealConstant,int> > split_factors = _getSplitFactorsOfConstants(system);
+	std::list<std::list<RealConstant> > split_set = _getSplitSet();
 
-	ARIADNE_LOG(4, "Split factors: " << split_factors << "\n");
+	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
+	if (split_set.empty())
+	{
+		ARIADNE_LOG(4,"Proving...\n");
 
-	make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set); // Perform the chain reachability analysis
+		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set);
+	}
+	else
+	{
+		ARIADNE_LOG(4,"Proving over " << split_set.size() << " constants sets...\n");
+
+		// Gets the original constants
+		const std::list<RealConstant>& constants = system.accessible_constants();
+		std::list<RealConstant> original_constants;
+		for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
+													 constant_it != constants.end();
+													 ++constant_it)
+		{
+			if (!constant_it->value().singleton())
+			{
+				RealConstant original_copy(constant_it->name(),constant_it->value());
+				original_constants.push_back(original_copy);
+			}
+		}
+
+		uint i = 0;
+		// Progressively adds the results for each subsystem
+		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
+		{
+			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
+
+			// Modifies the system
+			for (std::list<RealConstant>::const_iterator const_it = set_it->begin(); const_it != set_it->end(); ++const_it)
+				system.substitute(*const_it);
+
+			HybridGridTreeSet localReach;
+			bool localIsValid;
+
+			make_lpair<HybridGridTreeSet,bool>(localReach,localIsValid) = upper_chain_reach(system,initial_set);
+
+			ARIADNE_LOG(5,"(The result is " << (localIsValid ? "":"not ") << "valid)\n");
+
+			reach.adjoin(localReach);
+			isValid = isValid && localIsValid;
+
+			if (!isValid && _parameters->skip_if_unprovable)
+				break;
+		}
+
+		// Restores the system
+		for (std::list<RealConstant>::const_iterator const_it = original_constants.begin(); const_it != original_constants.end(); ++const_it)
+			system.substitute(*const_it);
+	}
 
 	// If the reached region is valid (i.e. it has not been restricted), perform checking, otherwise return false
 	if (isValid) {
@@ -1259,18 +1379,67 @@ HybridReachabilityAnalyser::
 _disprove(SystemType& system,
 		  const HybridImageSet& initial_set)
 {
-	ARIADNE_LOG(4,"Disproving...\n");
-
 	// The reach
 	HybridGridTreeSet reach;
-	// The flag which notifies if the system has been disproved
-	bool isDisproved;
+	// The flag which notifies if the system has been disproved (initially false for the split case)
+	bool isDisproved = false;
 
-	// Get the split factors
-	std::list<std::pair<RealConstant,int> > split_factors = _getSplitFactorsOfConstants(system);
+	std::list<std::list<RealConstant> > split_set = _getSplitSet();
 
-	// Get the result
-	make_lpair<HybridGridTreeSet,bool>(reach,isDisproved) = lower_chain_reach(system,initial_set);
+	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
+	if (split_set.empty())
+	{
+		ARIADNE_LOG(4,"Disproving...\n");
+
+		// Get the result
+		make_lpair<HybridGridTreeSet,bool>(reach,isDisproved) = lower_chain_reach(system,initial_set);
+	}
+	else
+	{
+		ARIADNE_LOG(4,"Disproving over " << split_set.size() << " constants sets...\n");
+
+		// Gets the original constants
+		const std::list<RealConstant>& constants = system.accessible_constants();
+		std::list<RealConstant> original_constants;
+		for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
+													 constant_it != constants.end();
+													 ++constant_it)
+		{
+			if (!constant_it->value().singleton())
+			{
+				RealConstant original_copy(constant_it->name(),constant_it->value());
+				original_constants.push_back(original_copy);
+			}
+		}
+
+		uint i = 0;
+		// Progressively adds the results for each subsystem
+		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
+		{
+			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
+
+			// Modifies the system
+			for (std::list<RealConstant>::const_iterator const_it = set_it->begin(); const_it != set_it->end(); ++const_it)
+				system.substitute(*const_it);
+
+			HybridGridTreeSet localReach;
+			bool localIsDisproved;
+
+			make_lpair<HybridGridTreeSet,bool>(reach,localIsDisproved) = lower_chain_reach(system,initial_set);
+
+			ARIADNE_LOG(5,"(The result is " << (localIsDisproved ? "":"not ") << "disproved)\n");
+
+			reach.adjoin(localReach);
+			isDisproved = isDisproved || localIsDisproved;
+
+			if (isDisproved && _parameters->skip_if_disproved)
+				break;
+		}
+
+		// Restores the system
+		for (std::list<RealConstant>::const_iterator const_it = original_constants.begin(); const_it != original_constants.end(); ++const_it)
+			system.substitute(*const_it);
+	}
 
 	// Notify
 	ARIADNE_LOG(4, (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
@@ -1698,10 +1867,16 @@ _setInitialParameters(SystemType& system, const HybridBoxes& domain, const Hybri
 {
 	// Set the domain
 	_parameters->bounding_domain = domain;
+	ARIADNE_LOG(3, "Domain: " << _parameters->bounding_domain << "\n");
 	// Set the safe region
 	_parameters->safe_region = safe_region;
+	ARIADNE_LOG(3, "Safe region: " << _parameters->safe_region << "\n");
 	// Set the lock to grid time
 	_setLockToGridTime(system);
+	ARIADNE_LOG(3, "Lock to grid time: " << _parameters->lock_to_grid_time << "\n");
+	// Set the split factors
+	_parameters->split_factors = _getSplitFactorsOfConstants(system);
+	ARIADNE_LOG(3, "Split factors: " << _parameters->split_factors << "\n");
 }
 
 

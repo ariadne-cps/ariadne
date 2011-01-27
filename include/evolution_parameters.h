@@ -33,6 +33,9 @@
 
 #include "grid_set.h"
 #include "hybrid_set.h"
+#include "variables.h"
+
+typedef std::map<RealConstant,int,ConstantComparator<Real> > RealConstantIntMap;
 
 namespace Ariadne {
 
@@ -216,6 +219,9 @@ class DiscreteEvolutionParameters {
 	//! This parameters is only used in the chain_reach() routines.
     HybridBoxes safe_region;
 
+    //! \brief The split factors for constants.
+    RealConstantIntMap split_factors;
+
 	//! \brief Enable the pruning of the trajectories when too large (false by default).
     //! \details The pruning is done probabilistically.
 	//! <br>
@@ -265,6 +271,7 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
 	  lowest_maximum_grid_depth(0),
 	  highest_maximum_grid_depth(9),
       maximum_grid_height(16),
+      split_factors(RealConstantIntMap()),
 	  enable_lower_pruning(false),
 	  skip_if_unprovable(true),
 	  skip_if_disproved(true)
@@ -310,6 +317,7 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  safe_region=" << p.safe_region
+       << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  skip_if_unprovable=" << p.skip_if_unprovable
        << ",\n  skip_if_disproved=" << p.skip_if_disproved
@@ -345,6 +353,7 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  safe_region=" << p.safe_region
+       << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  skip_if_unprovable=" << p.skip_if_unprovable
        << ",\n  skip_if_disproved=" << p.skip_if_disproved

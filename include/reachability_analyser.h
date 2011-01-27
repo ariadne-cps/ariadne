@@ -57,6 +57,7 @@ class DiscreteState;
 template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;
 typedef std::map<DiscreteState,Vector<Float> > HybridFloatVector;
+typedef std::map<RealConstant,int,ConstantComparator<Real> > RealConstantIntMap;
 
 class HybridGrid;
 class HybridGridCell;
@@ -262,6 +263,7 @@ class HybridReachabilityAnalyser
     typedef HybridOpenSetInterface OpSI;
     typedef HybridOvertSetInterface OvSI;
     typedef HybridCompactSetInterface CoSI;
+    typedef std::map<RealConstant,int,ConstantComparator<Real> > RealConstantMap;
 
   private:
 
@@ -295,7 +297,13 @@ class HybridReachabilityAnalyser
      *
      * @return A split factor for each non-singleton accessible constant of the \a system.
      */
-    std::list<std::pair<RealConstant,int> > _getSplitFactorsOfConstants(HybridAutomaton& system) const;
+    RealConstantIntMap _getSplitFactorsOfConstants(HybridAutomaton& system) const;
+
+    /*! \brief Gets the set of all the split intervals from the stored split factors.
+     *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
+     *  all the remaining from right to left.
+     */
+    std::list<std::list<RealConstant> > _getSplitSet() const;
 
     /*! \brief Helper function to get the maximum value of the derivative width ratio \f$ (w-w^m)/w \f$, where the \f$ w^m \f$ values
      * are stored in \a midpointMaxWidths and the \f$ w \f$ values are obtained from the \a system.

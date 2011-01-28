@@ -356,7 +356,7 @@ HybridReachabilityAnalyser::_getMaxDerivativeWidthRatio(const HybridAutomaton& s
 	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = system.state_space().locations_begin()->second;
 
-	// For each location and dimension, updates the result with the (w - wm)/w derivative width ratio, excluding the undefined w = 0 case
+	// For each location and dimension, updates the result with the (w - wm)/wm derivative width ratio, excluding the undefined wm = 0 case
 	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
 	{
 		const DiscreteState& loc = modes_it->location();
@@ -364,8 +364,12 @@ HybridReachabilityAnalyser::_getMaxDerivativeWidthRatio(const HybridAutomaton& s
 		Vector<Interval> der = modes_it->dynamic()(_parameters->bounding_domain[loc]);
 
 		for (uint i=0; i<css; ++i)
-			if (der[i].width() != 0)
-				result = max(result,(der[i].width()-midpointMaxWidths.find(loc)->second[i])/der[i].width());
+		{
+			Float midpointMaxWidth = midpointMaxWidths.find(loc)->second[i];
+			if (midpointMaxWidth != 0)
+				result = max(result,(der[i].width()-midpointMaxWidth)/midpointMaxWidth);
+		}
+
 	}
 
 	return result;
@@ -1302,7 +1306,7 @@ _prove(SystemType& system,
 {
 	// The reachable set
 	HybridGridTreeSet reach;
-	// The flag that informs whether the region is valid for proving (assumed true for the case of a splitted system)
+	// The flag that informs whether the region is valid for proving (assumed initially true for the case of a splitted system)
 	bool isValid = true;
 
 	std::list<std::list<RealConstant> > split_set = _getSplitSet();

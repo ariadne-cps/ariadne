@@ -23,11 +23,11 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include "prova.h"
 
 using namespace Ariadne;
 
 typedef ImageSetHybridEvolver::EnclosureListType EnclosureListType;
-
 
 int main(int argc,char *argv[]) 
 {
@@ -39,13 +39,13 @@ int main(int argc,char *argv[])
 	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
 	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
-	RealConstant bfp("bfp",Interval(0.0,0.125)); // The product beta*f(p) Interval(0.3,0.32863)
-	RealConstant Kp("Kp",5); // The gain of the proportional controller
-	RealConstant delta("delta",Interval(-0.0,0.0)); // An indeterminacy in guards evaluation
+	RealConstant bfp("bfp",Interval(0.30,0.32863)); // The product beta*f(p) Interval(0.3,0.32863)
+	RealConstant Kp("Kp",1); // The gain of the proportional controller
+	RealConstant delta("delta",Interval(-0.1,0.1)); // An indeterminacy in guards evaluation
 
 	// The parameter to modify and the tolerance
 	RealConstant parameter = bfp;
-	Float tolerance = 1e-1;
+	Float tolerance = 7e-2;
 
     /// Create a HybridAutomaton object
     HybridAutomaton system;
@@ -144,14 +144,6 @@ int main(int argc,char *argv[])
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
 
-	/*
-	HybridBoxes domain;
-	domain[DiscreteState("flow,opening,rising")] = Box(2,4.5,6.5,-0.1,1.1);
-	domain[DiscreteState("flow,closing,falling")] = Box(2,7.0,9.0,-0.1,1.1);
-	domain[DiscreteState("flow,idle,falling")] = Box(2,5.0,9.0,-0.1,0.1);
-	domain[DiscreteState("flow,idle,rising")] = Box(2,5.0,9.0,0.9,1.1);
-	*/
-
 	/// Verification
 
 	// Create an evolver and analyser objects, then set their verbosity
@@ -163,24 +155,21 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 3;
-	analyser.parameters().transient_time = 1e10;
-	analyser.parameters().transient_steps = 1;
-	analyser.parameters().lock_to_grid_time = 10;
-	analyser.parameters().lock_to_grid_steps = 1;
+	analyser.parameters().highest_maximum_grid_depth = 8;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
-	analyser.chain_reach_dumping = false;
+
+	analyser.verify_iterative(system, initial_set, safe_box, domain);
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 	// Perform the analysis
-	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
+	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 
 	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
 
 	// Show the result
-	Interval parameter_interval = Interval(parameter.value());
+	Interval parameter_interval = parameter.value();
 	if (safe_int == parameter_interval)
 		cout << "\nAll the values are safe.\n\n";
 	else if (safe_int.empty())

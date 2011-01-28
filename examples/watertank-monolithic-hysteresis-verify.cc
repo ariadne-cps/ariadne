@@ -35,11 +35,11 @@ int main(int argc,char *argv[])
 
     /// Set the system parameters
 	RealConstant a("a",0.02);
-	RealConstant b("b",0.3);
-	RealConstant T("T",Interval(4.0,10.0));
+	RealConstant b("b",Interval(0.3,0.32863));
+	RealConstant T("T",4.0);
 	RealConstant hmin("hmin",5.5);
 	RealConstant hmax("hmax",8.0);
-	RealConstant Delta("Delta",Interval(0.0,0.2));
+	RealConstant Delta("Delta",0.1);
 
 	/// Analysis parameters
 	RealConstant xParam = Delta;
@@ -72,6 +72,7 @@ int main(int argc,char *argv[])
     // Accessible constants
     system.register_accessible_constant(Delta);
     system.register_accessible_constant(T);
+    system.register_accessible_constant(b);
 
     // Water level dynamics
     RealExpression x_opening_closing = -a*x + b*y;
@@ -153,14 +154,6 @@ int main(int argc,char *argv[])
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
 
-	/*
-	HybridBoxes domain;
-	domain[DiscreteState("flow,opening,rising")] = Box(2,4.5,6.5,-0.1,1.1);
-	domain[DiscreteState("flow,closing,falling")] = Box(2,7.0,9.0,-0.1,1.1);
-	domain[DiscreteState("flow,idle,falling")] = Box(2,5.0,9.0,-0.1,0.1);
-	domain[DiscreteState("flow,idle,rising")] = Box(2,5.0,9.0,0.9,1.1);
-	*/
-
 	/// Verification
 
 	// Create an evolver and analyser objects, then set their verbosity
@@ -172,15 +165,13 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 7;
-	analyser.parameters().transient_time = 1e10;
-	analyser.parameters().transient_steps = 1;
-	analyser.parameters().lock_to_grid_time = 1e10;
-	analyser.parameters().lock_to_grid_steps = 1;
+	analyser.parameters().highest_maximum_grid_depth = 11;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
 	analyser.chain_reach_dumping = false;
 
-	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	analyser.verify_iterative(system, initial_set, safe_box, domain);
+
+	//analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
 }

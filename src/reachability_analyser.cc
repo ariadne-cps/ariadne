@@ -1352,8 +1352,19 @@ _prove(SystemType& system,
 			reach.adjoin(localReach);
 			isValid = isValid && localIsValid;
 
+			// If we can skip and either the partial result is not valid or outside the safe region, then we can conclude proving
 			if (!isValid && _parameters->skip_if_unprovable)
 				break;
+			else if (isValid && _parameters->skip_if_unprovable)
+			{
+				if (definitely(!localReach.subset(_parameters->safe_region)))
+				{
+					ARIADNE_LOG(4, "Not proved.\n");
+					return false;
+				}
+				else
+					ARIADNE_LOG(5,"(The result is still inside the safe region)\n");
+			}
 		}
 
 		// Restores the system

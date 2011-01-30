@@ -179,17 +179,19 @@ TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& d
     ARIADNE_LOG(3,"PicardIntegrator::flow_step(RealVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
-    const double sw=this->_sweep_threshold;
+    Sweeper sweeper(new ThresholdSweeper(this->_sweep_threshold));
 
     IntervalVector dom=join(dx,Interval(-h,h));
     ARIADNE_LOG(7,"dom="<<dom<<"\n");
 
     VectorTaylorFunction phi0(nx,ScalarTaylorFunction(dom));
-    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::coordinate(dom,i); phi0[i].set_sweep_threshold(sw); }
+    for(uint i=0; i!=nx; ++i) { phi0[i]=ScalarTaylorFunction::coordinate(dom,i); }
+    phi0.set_sweeper(sweeper);
     ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
 
     VectorTaylorFunction phi(nx,ScalarTaylorFunction(dom));
-    for(uint i=0; i!=nx; ++i) { phi[i]=ScalarTaylorFunction::constant(dom,bx[i]); phi0[i].set_sweep_threshold(sw); }
+    for(uint i=0; i!=nx; ++i) { phi[i]=ScalarTaylorFunction::constant(dom,bx[i]); }
+    phi.set_sweeper(sweeper);
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(uint k=0; k!=this->_maximum_temporal_order; ++k) {
@@ -208,7 +210,9 @@ TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& d
     }
 
     VectorTaylorFunction res(nx,ScalarTaylorFunction(dom));
-    for(uint i=0; i!=nx; ++i) { res[i]=phi[i]; res[i].set_sweep_threshold(sw); res[i].sweep(); }
+    for(uint i=0; i!=nx; ++i) { res[i]=phi[i]; }
+    res.set_sweeper(sweeper); 
+    res.sweep();
     ARIADNE_LOG(4,"res="<<res<<"\n");
     return res;
 

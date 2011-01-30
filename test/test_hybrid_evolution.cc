@@ -90,8 +90,6 @@ void TestHybridEvolution::test_bouncing_ball() const {
     RealScalarFunction x=RealScalarFunction::coordinate(2,0);
     RealScalarFunction v=RealScalarFunction::coordinate(2,1);
 
-    TaylorModelAccuracy::set_default_maximum_degree(4);
-
     Real lambda=0.5;
     bouncing_ball.new_mode(q,(v,-c));
     bouncing_ball.new_transition(q,e,q,(x,-lambda*v),-x,impact);
@@ -200,7 +198,6 @@ void TestHybridEvolution::test_water_tank() const {
 int main(int argc, const char* argv[])
 {
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
-    TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
     GeneralHybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=1./32;

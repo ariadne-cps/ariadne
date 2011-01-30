@@ -90,8 +90,8 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, shared_ptr<TaylorModelAccuracy> acc_ptr)
-    : _domain(d), _model(d.size(),acc_ptr)
+ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, Sweeper swp)
+    : _domain(d), _model(d.size(),swp)
 {
 }
 
@@ -112,7 +112,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const RealScalar
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
     Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
     this->_model=f.evaluate(x);
-    this->_model.clean();
+    this->_model.sweep();
 }
 
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f)
@@ -121,7 +121,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalSc
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
     Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
     this->_model=f.evaluate(x);
-    this->_model.clean();
+    this->_model.sweep();
 }
 
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p)
@@ -130,7 +130,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial
     ARIADNE_ASSERT_MSG(d.size()==p.argument_size(),"d="<<d<<" p="<<p);
     Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
     this->_model=Ariadne::evaluate(p,x);
-    this->_model.clean();
+    this->_model.sweep();
 }
 
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial<Interval>& p)
@@ -204,14 +204,14 @@ ScalarTaylorFunction* ScalarTaylorFunction::_clone() const
 
 ScalarTaylorFunction* ScalarTaylorFunction::_create() const
 {
-    return new ScalarTaylorFunction(this->domain(),this->_model.accuracy_ptr());
+    return new ScalarTaylorFunction(this->domain(),this->_model.sweeper());
 }
 
 
 
-shared_ptr<TaylorModelAccuracy> ScalarTaylorFunction::accuracy_ptr() const
+Sweeper ScalarTaylorFunction::sweeper() const
 {
-    return this->_model.accuracy_ptr();
+    return this->_model.sweeper();
 }
 
 
@@ -632,7 +632,7 @@ std::ostream& operator<<(std::ostream& os, const Representation<ScalarTaylorFunc
     ScalarTaylorFunction const& function=*frepr.pointer;
     ScalarTaylorFunction truncated_function=function;
     truncated_function.set_error(0.0);
-    truncated_function.sweep(TAYLOR_FUNCTION_WRITING_ACCURACY);
+    truncated_function.sweep(ThresholdSweeper(TAYLOR_FUNCTION_WRITING_ACCURACY));
 
     os << midpoint(truncated_function.polynomial());
     if(truncated_function.error()>0.0) { os << "+/-" << truncated_function.error(); }
@@ -661,7 +661,7 @@ std::ostream& operator<<(std::ostream& os, const ModelsRepresentation<ScalarTayl
     ScalarTaylorFunction const& f=*frepr.pointer;
     ScalarTaylorFunction tf=f;
     tf.clobber();
-    tf.sweep(frepr.threshold);
+    tf.sweep(ThresholdSweeper(frepr.threshold));
     os << "("<<tf.model()<<"+/-"<<f.error();
     return os;
 }
@@ -671,7 +671,7 @@ std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<Scalar
     ScalarTaylorFunction const& function=*frepr.pointer;
     ScalarTaylorFunction truncated_function = function;
     truncated_function.clobber();
-    truncated_function.sweep(frepr.threshold);
+    truncated_function.sweep(ThresholdSweeper(frepr.threshold));
     Float truncatation_error = truncated_function.error();
     truncated_function.clobber();
     Polynomial<Float> polynomial_function = midpoint(polynomial(truncated_function));
@@ -807,7 +807,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
     : _domain(d), _models(f)
 {
     for(uint i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT_MSG(d.size()==f[i].argument_size(),"d="<<d<<"f="<<f);
+        ARIADNE_ASSERT_MSG(d.size()==f[i].argument_size(),"d="<<d<<", f="<<f);
     }
 }
 
@@ -859,13 +859,13 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
                                const RealVectorFunction& f,
-                               const shared_ptr<IntervalTaylorModel::Accuracy> accuracy_ptr)
+                               const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
     ARIADNE_ASSERT(f.result_size()>0);
     ARIADNE_ASSERT(d.size()==f.argument_size());
     Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
-    for(uint i=0; i!=x.size(); ++i) { x[i].accuracy_ptr()=accuracy_ptr; }
+    for(uint i=0; i!=x.size(); ++i) { x[i].set_sweeper(swp); }
     this->_models=f.evaluate(x);
     this->sweep();
 }
@@ -922,7 +922,7 @@ VectorTaylorFunction* VectorTaylorFunction::_clone() const
 
 VectorTaylorFunction* VectorTaylorFunction::_create() const
 {
-    return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->_models[0].accuracy_ptr()));
+    return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->_models[0].sweeper()));
 }
 
 
@@ -1019,18 +1019,18 @@ VectorTaylorFunction::operator!=(const VectorTaylorFunction& p2) const
 
 
 
-shared_ptr<IntervalTaylorModel::Accuracy>
-VectorTaylorFunction::accuracy_ptr() const
+Sweeper
+VectorTaylorFunction::sweeper() const
 {
-    return this->_models[0].accuracy_ptr();
+    return this->_models[0].sweeper();
 }
 
 
 void
-VectorTaylorFunction::set_accuracy(shared_ptr<IntervalTaylorModel::Accuracy> acc_ptr)
+VectorTaylorFunction::set_sweeper(Sweeper swp)
 {
     for(uint i=0; i!=this->result_size(); ++i) {
-        this->_models[i].set_accuracy(acc_ptr);
+        this->_models[i].set_sweeper(swp);
     }
 }
 
@@ -1178,47 +1178,14 @@ VectorTaylorFunction::sweep()
 }
 
 VectorTaylorFunction&
-VectorTaylorFunction::truncate()
+VectorTaylorFunction::sweep(const SweeperInterface& sweeper)
 {
     for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].truncate();
+        this->_models[i].sweep(sweeper);
     }
     return *this;
 }
 
-VectorTaylorFunction&
-VectorTaylorFunction::sweep(double threshold)
-{
-    for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].sweep(threshold);
-    }
-    return *this;
-}
-
-VectorTaylorFunction&
-VectorTaylorFunction::truncate(uint degree)
-{
-    for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].truncate(degree);
-    }
-    return *this;
-}
-
-void
-VectorTaylorFunction::set_sweep_threshold(double threshold)
-{
-    for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].set_sweep_threshold(threshold);
-    }
-}
-
-void
-VectorTaylorFunction::set_maximum_degree(uint degree)
-{
-    for(uint i=0; i!=this->size(); ++i) {
-        this->_models[i].set_maximum_degree(degree);
-    }
-}
 
 VectorTaylorFunction&
 VectorTaylorFunction::clobber()
@@ -1358,7 +1325,7 @@ restrict(const VectorTaylorFunction& f, const Vector<Interval>& d)
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,restrict(f[i],d));
     }
-    r.set_accuracy(f.accuracy_ptr());
+    r.set_sweeper(f.sweeper());
     return r;
 }
 
@@ -1749,13 +1716,13 @@ List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns)
 ScalarTaylorFunction
 TaylorFunctionFactory::create_zero(const IntervalVector& domain) const
 {
-    return ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_acc_ptr));
+    return ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_sweeper));
 }
 
 ScalarTaylorFunction*
 TaylorFunctionFactory::_create_zero(const IntervalVector& domain) const
 {
-    return new ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_acc_ptr));
+    return new ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_sweeper));
 }
 
 VectorTaylorFunction
@@ -1764,7 +1731,7 @@ TaylorFunctionFactory::create_identity(const IntervalVector& domain) const
     VectorTaylorFunction result(domain.size(),domain);
     for(uint i=0; i!=domain.size(); ++i) {
         result._models[i]=ScalarTaylorFunction::coordinate(domain,i)._model;
-        result._models[i].set_accuracy(this->_acc_ptr);
+        result._models[i].set_sweeper(this->_sweeper);
     }
     return result;
 }
@@ -1775,7 +1742,7 @@ TaylorFunctionFactory::_create_identity(const IntervalVector& domain) const
     VectorTaylorFunction* result=new VectorTaylorFunction(domain.size(),domain);
     for(uint i=0; i!=domain.size(); ++i) {
         result->_models[i]=ScalarTaylorFunction::coordinate(domain,i)._model;
-        result->_models[i].set_accuracy(this->_acc_ptr);
+        result->_models[i].set_sweeper(this->_sweeper);
     }
     return result;
 }

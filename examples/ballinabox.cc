@@ -90,7 +90,6 @@ int main(int argc, const char* argv[])
     GeneralHybridEvolverType evolver;
     evolver.verbosity=evolver_verbosity;
 
-    TaylorModelAccuracy::set_default_maximum_degree(5);
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 1.0;
     evolver.parameters().maximum_step_size = 16.0;

@@ -33,7 +33,6 @@ int main(int argc, const char* argv[])
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
-    TaylorModelAccuracy::set_default_sweep_threshold(1e-10);
 
     DRAWING_METHOD = AFFINE_DRAW;
     DRAWING_ACCURACY = 0;

@@ -102,8 +102,8 @@ IntervalTaylorModel copy(const IntervalTaylorModel& x) {
     return x;
 }
 
-IntervalTaylorModel& iclean(IntervalTaylorModel& x) {
-    x.clean(); return x;
+IntervalTaylorModel& isweep(IntervalTaylorModel& x) {
+    x.sweep(); return x;
 }
 
 IntervalTaylorModel& ivladd(IntervalTaylorModel& x, const Interval& ivl) {
@@ -131,11 +131,11 @@ IntervalTaylorModel prod(const IntervalTaylorModel x1, const IntervalTaylorModel
 }
 
 IntervalTaylorModel prod_full(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
-    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r;
+    IntervalTaylorModel r(x2.argument_size(),x2.sweeper()); _mul_full(r,x1,x2); return r;
 }
 
 IntervalTaylorModel prod_clear(const IntervalTaylorModel x1, const IntervalTaylorModel& x2) {
-    IntervalTaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_clear(r,x1,x2); return r;
+    IntervalTaylorModel r(x2.argument_size(),x2.sweeper()); _mul_clear(r,x1,x2); return r;
 }
 
 
@@ -195,8 +195,8 @@ int main(int argc, const char* argv[]) {
         else if(i%7<4) { w.expansion().append(a,1/(1.0+i)); }
         ++i;
     }
-    w.set_maximum_degree(7);
-    w.set_sweep_threshold(1e-5);
+    //w.set_maximum_degree(7);
+    w.set_sweeper(new ThresholdSweeper(1e-5));
 
 
     Interval ivl(0.33,0.49);
@@ -213,8 +213,8 @@ int main(int argc, const char* argv[]) {
         if(i%3<2) { y.expansion().append(a,1/(2.0+i)); }
         ++i;
     }
-    y.set_maximum_degree(9);
-    y.set_sweep_threshold(1e-3);
+    //y.set_maximum_degree(9);
+    y.set_sweeper(new ThresholdSweeper(1e-3));
 
     IntervalTaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0);
 
@@ -228,7 +228,7 @@ int main(int argc, const char* argv[]) {
     //std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
     //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";
 
-    profile(ntries*10000,"iclean-02",inplace_bind(&iclean,w));
+    profile(ntries*10000,"isweep-02",inplace_bind(&isweep,w));
     profile(ntries*10000,"copy-02",bind(&copy,w));
     profile(ntries*10000,"iadd-noinsert-02",inplace_bind(&ivladd,x,ivl));
     profile(ntries*10000,"iadd-insert-02",inplace_bind(&ivladd,x,ivl));

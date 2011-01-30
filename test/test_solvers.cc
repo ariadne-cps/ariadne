@@ -59,7 +59,7 @@ class TestSolver
     }
 
     void test_implicit() {
-        TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
+        //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
         RealScalarFunction aa=RealScalarFunction::coordinate(1,0);
         RealScalarFunction a=RealScalarFunction::coordinate(2,0);
@@ -103,7 +103,7 @@ int main() {
     KrawczykSolver krawczyk_solver(1e-5,12);
     krawczyk_solver.verbosity=0;
     TestSolver(krawczyk_solver).test();
-
+    return 0;
     FactoredKrawczykSolver factored_krawczyk_solver(1e-5,12);
     factored_krawczyk_solver.verbosity=0;
     TestSolver(factored_krawczyk_solver).test();

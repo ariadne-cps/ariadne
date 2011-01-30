@@ -75,33 +75,70 @@ struct IntersectionException : public std::runtime_error {
     IntersectionException(const std::string& what) : std::runtime_error(what) { }
 };
 
-class TaylorModelAccuracy
-{
-    friend class TaylorModel<Interval>;
-    friend class TaylorModel<Float>;
 
-    TaylorModelAccuracy();
 
-    friend TaylorModelAccuracy max(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
-    friend TaylorModelAccuracy min(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
-    friend bool operator==(const TaylorModelAccuracy& acc1, const TaylorModelAccuracy& acc2);
-    friend std::ostream& operator<<(std::ostream& os, const TaylorModelAccuracy& acc);
+class SweeperInterface {
   public:
-    TaylorModelAccuracy(double st, uint md);
-  public:
-    static void set_default_sweep_threshold(double dst) { ARIADNE_ASSERT(dst>=0.0); _default_sweep_threshold=dst; }
-    static void set_default_maximum_degree(int dmd) { ARIADNE_ASSERT(dmd>=0); _default_maximum_degree=dmd; }
-  public:
-    bool discard(const Float& x) const;
-    bool discard(const MultiIndex& a) const;
-    bool discard(const MultiIndex& a, const Float& x) const;
+    virtual void sweep(Expansion<Float>& p, Float& e) const;
+    virtual bool discard(const MultiIndex& a, const Float& x) const = 0;
   private:
-    static double _default_sweep_threshold;
-    static uint _default_maximum_degree;
-  private:
-    double _sweep_threshold;
-    uint _maximum_degree;
+    virtual void write(std::ostream& os) const;
+    friend std::ostream& operator<<(std::ostream& os, const SweeperInterface& swp) { swp.write(os); return os; }
 };
+
+class Sweeper {
+  public:
+    Sweeper();
+    inline Sweeper(shared_ptr<const SweeperInterface> p) : _ptr(p) { }
+    inline Sweeper(const SweeperInterface* p) : _ptr(p) { }
+    inline void sweep(Expansion<Float>& p, Float& e) const { this->_ptr->sweep(p,e); }
+    inline bool discard(const MultiIndex& a, const Float& x) const { return this->_ptr->discard(a,x); }
+    inline operator const SweeperInterface& () const { return *_ptr; }
+    inline shared_ptr<const SweeperInterface> operator& () { return _ptr; }
+  private:
+    shared_ptr<const SweeperInterface> _ptr;
+};
+
+class ThresholdSweeper : public SweeperInterface {
+    double _sweep_threshold;
+  public:
+    ThresholdSweeper(double sweep_threshold) : _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0.0); }
+    Float sweep_threshold() const { return _sweep_threshold; }
+    virtual void sweep(Expansion<Float>& p, Float& e) const;
+    virtual bool discard(const MultiIndex& a, const Float& x) const;
+  private:
+    virtual void write(std::ostream& os) const;
+  private:
+    inline bool _discard(const MultiIndex& a, const Float& x) const;
+};
+
+class TrivialSweeper : public SweeperInterface {
+  public:
+    virtual void sweep(Expansion<Float>& p, Float& e) const { }
+    virtual bool discard(const MultiIndex& a, const Float& x) const { return true; }
+  private:
+    virtual void write(std::ostream& os) const { os << "TrivialSweeper"; }
+};
+
+class AffineSweeper : public SweeperInterface {
+  public:
+    virtual bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>1; }
+  private:
+    virtual void write(std::ostream& os) const { os << "AffineSweeper"; }
+};
+
+class GradedSweeper : public SweeperInterface {
+  public:
+    GradedSweeper(uint degree) : _degree(degree) { }
+    uint degree() const { return this->_degree; }
+    virtual bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>this->_degree; }
+  private:
+    virtual void write(std::ostream& os) const { os << "GradedSweeper( degree="<<this->_degree<<" )"; }
+  private:
+    uint _degree;
+};
+
+
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
@@ -116,17 +153,12 @@ class TaylorModel<Interval>
     typedef Expansion<Float> ExpansionType;
     typedef ReverseLexicographicKeyLess ComparisonType;
   public:
-    typedef TaylorModelAccuracy Accuracy;
     typedef Interval NumericType;
   private:
     ExpansionType _expansion;
     Float _error;
-    mutable shared_ptr<Accuracy> _accuracy_ptr;
+    mutable Sweeper _sweeper;
   public:
-    const Accuracy& accuracy() const { return *this->_accuracy_ptr; }
-    shared_ptr<Accuracy> accuracy_ptr() const { return this->_accuracy_ptr; }
-    void set_accuracy(shared_ptr<Accuracy> acc) { this->_accuracy_ptr=acc; }
-
     //! \brief The type used for the coefficients.
     typedef Float ScalarType;
     //! \brief The type used to index the coefficients.
@@ -146,13 +178,13 @@ class TaylorModel<Interval>
     //! \brief Construct a TaylorModel<Interval> in \a as arguments.
     TaylorModel<Interval>(uint as);
     //! \brief Construct a TaylorModel<Interval> in \a as arguments with the given accuracy control.
-    TaylorModel<Interval>(uint as, shared_ptr<Accuracy> acc);
+    TaylorModel<Interval>(uint as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
     TaylorModel<Interval>(const std::map<MultiIndex,Float>& d, const Float& e);
     //! \brief Construct from a map giving the expansion, and a constant giving the error.
     TaylorModel<Interval>(const Expansion<Float>& f, const Float& e=0.0);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<Interval>(const Expansion<Float>& f, const Float& e, shared_ptr<Accuracy> a);
+    TaylorModel<Interval>(const Expansion<Float>& f, const Float& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<Interval>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -263,7 +295,7 @@ class TaylorModel<Interval>
     //! \brief An over-approximation to the supremum norm.
     Float norm() const;
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
-    Float tolerance() const { return this->sweep_threshold(); }
+    Float tolerance() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) {
@@ -341,50 +373,24 @@ class TaylorModel<Interval>
 
     //@{
     /*! \name Simplification operations. */
-    //! \brief Truncate to the default maximum degree of the quantity.
-    TaylorModel<Interval>& truncate();
-    //! \brief Truncate to degree \a deg.
-    TaylorModel<Interval>& truncate(uint deg);
-    //! \brief Truncate all terms with any coefficient higher than \a a.
-    TaylorModel<Interval>& truncate(const MultiIndex& a);
-    //! \brief Truncate all terms with any coefficient higher than those given by \a a.
-    TaylorModel<Interval>& truncate(const MultiIndexBound& a);
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     TaylorModel<Interval>& sweep();
     //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
-    TaylorModel<Interval>& sweep(double eps);
-    //! \brief Remove all terms whose degree is higher than \a deg or
-    //! whose coefficient has magnitude less than \a eps.
-    TaylorModel<Interval>& clean(const Accuracy& accuracy);
-    //! \brief Remove all terms which have high degree or small magnitude, putting them into the uniform error.
-    TaylorModel<Interval>& clean();
-    //! \brief Discard all terms which have high degree or small magnitude, without putting them into the uniform error.
+    TaylorModel<Interval>& sweep(const SweeperInterface& accuracy);
+    //! \brief Set the error to zero.
     //! WARNING: This method does not preserve rigour of the model approximation.
     TaylorModel<Interval>& clobber();
-    TaylorModel<Interval>& clobber(uint o);
-    TaylorModel<Interval>& clobber(uint so, uint to);
     //! \brief Sort the terms in index order and combine terms with the same index.
     TaylorModel<Interval>& unique_sort();
     //@}
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \brief Specify a bound on the terms which may be present in the expansion.
-    void set_maximum_index(MultiIndexBound ma);
-    //! \brief Specify the maximum degree \a md for terms which may be present in the expansion.
-    void set_maximum_degree(uint md);
-    //! \brief Specify the minimum absolute value \a me for coefficients of terms which may be present in the expansion.
-    void set_sweep_threshold(double me);
-    //! \brief The maximum index of terms which may be present in the expansion.
-    //! Any term with index \f$a\not\leq a_{\max}\f$ will be assimilated into the error term when truncate() or clean() are called.
-    MultiIndexBound maximum_index() const;
-    //! \brief The maximum degree for terms which may be present in the expansion.
-    //! Any term with degree \f$d>d_{\max}\f$ will be assimilated into the error term when truncate() or clean() are called.
-    uint maximum_degree() const;
-    //! \brief The minimum absolute value for coefficients of terms which may be present in the expansion.
-    //! Any term with coefficient \f$c\f$ with \f$|c|<e_{\max}\f$ will be assimilated into the error term when sweep() or clean() are called.
-    double sweep_threshold() const;
+    //! \brief Specify a policy to use to remove low-impact terms.
+    void set_sweeper(Sweeper swp) { this->_sweeper=swp; }
+    //! \brief A shared pointer to an object using for removing low-impact terms.
+    Sweeper sweeper() const { return this->_sweeper; }
     //@}
 
     //@{
@@ -496,8 +502,6 @@ TaylorModel<Interval> max(const TaylorModel<Interval>& x, const TaylorModel<Inte
 TaylorModel<Interval> min(const TaylorModel<Interval>& x, const TaylorModel<Interval>& y);
 TaylorModel<Interval> abs(const TaylorModel<Interval>& x);
 
-std::ostream& operator<<(std::ostream&, const TaylorModel<Interval>::Accuracy&);
-
 
 
 // Vector operations which can be evaluated componentwise
@@ -528,7 +532,8 @@ TaylorModel<Interval> unchecked_compose(const TaylorModel<Interval>& x, const Ve
 Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y);
 Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& y);
 
-
+Vector< TaylorModel<Interval> > operator*(const Matrix<Float>& A, const Vector< TaylorModel<Interval> >& x);
+Vector< TaylorModel<Interval> > operator*(const Matrix<Interval>& A, const Vector< TaylorModel<Interval> >& x);
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
@@ -539,11 +544,10 @@ template<>
 class TaylorModel<Float>
     : public NormedAlgebraMixin<TaylorModel<Float>,Float>
 {
-    typedef TaylorModelAccuracy Accuracy;
     typedef Expansion<Float> ExpansionType;
   private:
     ExpansionType _expansion;
-    mutable shared_ptr<Accuracy> _accuracy_ptr;
+    mutable Sweeper _sweeper;
   private:
     static const Float _zero;
 
@@ -565,10 +569,10 @@ class TaylorModel<Float>
     /*! \name Constructors and destructors. */
     //! \brief Construct a IntervalTaylorModel in \a as arguments.
     TaylorModel<Float>(uint as = 0u);
-    TaylorModel<Float>(uint as, shared_ptr<Accuracy> acc);
+    TaylorModel<Float>(uint as, Sweeper swp);
 
-    TaylorModel<Float> create() const { return TaylorModel<Float>(this->argument_size(),this->_accuracy_ptr); }
-    TaylorModel<Float> create_ball(Float r) const { return TaylorModel<Float>(this->argument_size(),this->_accuracy_ptr); }
+    TaylorModel<Float> create() const { return TaylorModel<Float>(this->argument_size(),this->_sweeper); }
+    TaylorModel<Float> create_ball(Float r) const { return TaylorModel<Float>(this->argument_size(),this->_sweeper); }
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<Float>& other) { this->_expansion.swap(other._expansion); }
     //! \brief Set to zero.
@@ -603,7 +607,6 @@ class TaylorModel<Float>
 
     //@{
     /*! \name Data access */
-    shared_ptr<Accuracy> accuracy_ptr() const { return this->_accuracy_ptr; }
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The coefficient of the term in $x^a$.
@@ -633,14 +636,18 @@ class TaylorModel<Float>
     //@}
 
     //@{
+    /*! \name Accuracy parameters. */
+    //! \brief Specify a policy to use to remove low-impact terms.
+    void set_sweeper(Sweeper swp) { this->_sweeper=swp; }
+    //! \brief A shared pointer to an object using for removing low-impact terms.
+    Sweeper sweeper() const { return this->_sweeper; }
+    //@}
+
+    //@{
     /*! \name Simplification operations. */
-    //! \brief Truncate to the default maximum degree of the quantity.
-    TaylorModel<Float>& truncate();
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     TaylorModel<Float>& sweep();
-    //! \brief Remove all terms which have high degree or small magnitude.
-    TaylorModel<Float>& clean();
     //! \brief Sort the terms in index order and combine terms with the same index.
     TaylorModel<Float>& unique_sort();
     //@}
@@ -685,6 +692,8 @@ inline std::ostream& operator<<(std::ostream& os, const TaylorModel<Float>& x) {
 
 inline Vector<Interval> codomain(const Vector< TaylorModel<Float> >& t) {
     Vector<Interval> r(t.size()); for(uint i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
+
+Vector< TaylorModel<Float> > operator*(const Matrix<Float>& A, const Vector< TaylorModel<Float> >& x);
 
 
 

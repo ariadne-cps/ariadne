@@ -206,7 +206,7 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
     Matrix<Float> J=inverse(D2f);
     g=J*g;
     for(uint i=0; i!=rs; ++i) {
-        g[i].clean();
+        g[i].sweep();
     }
 
     // Iterate h'=h(g(x,h(x)))
@@ -680,7 +680,7 @@ VectorTaylorFunction
 KrawczykSolver::implicit_step(const RealVectorFunction& f,
                               const VectorTaylorFunction& p,
                               const VectorTaylorFunction& x) const
-{
+{   
     const uint np=p.size();
     const uint nx=x.size();
     Matrix<Interval> I=Matrix<Interval>::identity(nx);

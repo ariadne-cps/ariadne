@@ -113,7 +113,7 @@ void TestScalarTaylorFunction::test_concept()
     tr=sin(t); tr=cos(t); tr=tan(t);
     //tr=asin(t); tr=acos(t); tr=atan(t);
 
-    tr.sweep(); tr.truncate(); tr.clean();
+    tr.sweep(); tr.clobber();
 
     t.evaluate(vi); evaluate(t,vi);
     t.domain(); t.range(); t.expansion(); t.error();
@@ -534,14 +534,14 @@ void TestTaylorFunctionFactory::test()
 
 void TestTaylorFunctionFactory::test_create()
 {
-    TaylorModelAccuracy accuracy(1e-4,3u);
-    TaylorFunctionFactory factory(accuracy);
+    Sweeper sweeper(new ThresholdSweeper(1e-4));
+    TaylorFunctionFactory factory(sweeper);
 
     IntervalVector dom(2, -1,+1, 0.5,3.5);
 
     ScalarTaylorFunction stf=factory.create_zero(dom);
     ARIADNE_TEST_PRINT(stf);
-    ARIADNE_TEST_EQUALS(*stf.accuracy_ptr(),accuracy);
+    ARIADNE_TEST_EQUALS(&stf.sweeper(),&sweeper);
     ARIADNE_TEST_EQUALS(stf.evaluate(dom),Interval(0.0));
 
     VectorTaylorFunction vtf=factory.create_identity(dom);

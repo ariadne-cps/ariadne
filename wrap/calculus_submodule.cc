@@ -169,8 +169,6 @@ void export_taylor_model()
     typedef Polynomial<Interval> IP;
     typedef RealScalarFunction FI;
 
-    def("set_default_sweep_threshold",&TaylorModelAccuracy::set_default_sweep_threshold);
-
     class_< ExpansionValue<Float> > expansion_value_class("ExpansionValue", init<MultiIndex,Float>());
     // TODO: Add get/set for data
     // TODO: Use property for key
@@ -178,6 +176,7 @@ void export_taylor_model()
     expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key, return_value_policy<copy_const_reference>());
     expansion_value_class.def(self_ns::str(self));
 
+    
     class_<IntervalTaylorModel> taylor_model_class("IntervalTaylorModel", init<IntervalTaylorModel>());
     taylor_model_class.def( init< N >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const IntervalTaylorModel&))&keys);
@@ -186,10 +185,8 @@ void export_taylor_model()
     taylor_model_class.def("argument_size", &IntervalTaylorModel::argument_size);
     taylor_model_class.def("domain", &IntervalTaylorModel::domain);
     taylor_model_class.def("range", &IntervalTaylorModel::range);
-    taylor_model_class.def("set_sweep_threshold", &IntervalTaylorModel::set_sweep_threshold);
-    taylor_model_class.def("get_sweep_threshold", &IntervalTaylorModel::sweep_threshold);
-    taylor_model_class.def("set_maximum_degree", &IntervalTaylorModel::set_maximum_degree);
-    taylor_model_class.def("get_maximum_degree", &IntervalTaylorModel::maximum_degree);
+    taylor_model_class.def("set_sweeper", &IntervalTaylorModel::set_sweeper);
+    taylor_model_class.def("sweeper", &IntervalTaylorModel::sweeper);
     taylor_model_class.def("__getitem__", &__getitem__<IntervalTaylorModel,MultiIndex,Float>);
     taylor_model_class.def("__setitem__",&__setitem__<IntervalTaylorModel,MultiIndex,Float>);
     taylor_model_class.def("__setitem__",&__setitem__<IntervalTaylorModel,MultiIndex,double>);
@@ -340,15 +337,10 @@ void export_scalar_taylor_function()
     //scalar_taylor_function_class.def("__cstr__",(std::string(*)(const ScalarTaylorFunction&)) &__cstr__);
     //scalar_taylor_function_class.def("__repr__",(std::string(*)(const ScalarTaylorFunction&)) &__repr__);
     scalar_taylor_function_class.def("value", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::value,return_value_policy<copy_const_reference>());
-    scalar_taylor_function_class.def("truncate", (ScalarTaylorFunction&(ScalarTaylorFunction::*)(uint)) &ScalarTaylorFunction::truncate,return_value_policy<reference_existing_object>());
-    scalar_taylor_function_class.def("sweep", (ScalarTaylorFunction&(ScalarTaylorFunction::*)(double))&ScalarTaylorFunction::sweep,return_value_policy<reference_existing_object>());
-    scalar_taylor_function_class.def("truncate", (ScalarTaylorFunction&(ScalarTaylorFunction::*)()) &ScalarTaylorFunction::truncate,return_value_policy<reference_existing_object>());
     scalar_taylor_function_class.def("sweep", (ScalarTaylorFunction&(ScalarTaylorFunction::*)())&ScalarTaylorFunction::sweep,return_value_policy<reference_existing_object>());
     scalar_taylor_function_class.def("clobber", (ScalarTaylorFunction&(ScalarTaylorFunction::*)()) &ScalarTaylorFunction::clobber,return_value_policy<reference_existing_object>());
-    scalar_taylor_function_class.def("set_maximum_degree",&ScalarTaylorFunction::set_maximum_degree);
-    scalar_taylor_function_class.def("set_sweep_threshold",&ScalarTaylorFunction::set_sweep_threshold);
-    scalar_taylor_function_class.def("maximum_degree",&ScalarTaylorFunction::maximum_degree);
-    scalar_taylor_function_class.def("sweep_threshold",&ScalarTaylorFunction::sweep_threshold);
+    scalar_taylor_function_class.def("set_sweeper",&ScalarTaylorFunction::set_sweeper);
+    scalar_taylor_function_class.def("sweeper",&ScalarTaylorFunction::sweeper);
     //scalar_taylor_function_class.def("set_default_maximum_degree",&ScalarTaylorFunction::set_default_maximum_degree);
     //scalar_taylor_function_class.def("set_default_sweep_threshold",&ScalarTaylorFunction::set_default_sweep_threshold);
     //scalar_taylor_function_class.def("default_maximum_degree",&ScalarTaylorFunction::default_maximum_degree);
@@ -447,15 +439,10 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("codomain", &VectorTaylorFunction::codomain);
     vector_taylor_function_class.def("centre", &VectorTaylorFunction::centre);
     vector_taylor_function_class.def("range", &VectorTaylorFunction::range);
-    vector_taylor_function_class.def("truncate", (VectorTaylorFunction&(VectorTaylorFunction::*)(uint)) &VectorTaylorFunction::truncate,return_value_policy<reference_existing_object>());
-    vector_taylor_function_class.def("sweep", (VectorTaylorFunction&(VectorTaylorFunction::*)(double))&VectorTaylorFunction::sweep,return_value_policy<reference_existing_object>());
-    vector_taylor_function_class.def("truncate", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::truncate,return_value_policy<reference_existing_object>());
     vector_taylor_function_class.def("sweep", (VectorTaylorFunction&(VectorTaylorFunction::*)())&VectorTaylorFunction::sweep,return_value_policy<reference_existing_object>());
     vector_taylor_function_class.def("clobber", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::clobber,return_value_policy<reference_existing_object>());
-    vector_taylor_function_class.def("set_maximum_degree",&VectorTaylorFunction::set_maximum_degree);
-    vector_taylor_function_class.def("set_sweep_threshold",&VectorTaylorFunction::set_sweep_threshold);
-//    vector_taylor_function_class.def("maximum_degree",&VectorTaylorFunction::maximum_degree);
-//    vector_taylor_function_class.def("sweep_threshold",&VectorTaylorFunction::sweep_threshold);
+    vector_taylor_function_class.def("set_sweeper",&VectorTaylorFunction::set_sweeper);
+    vector_taylor_function_class.def("sweeper",&VectorTaylorFunction::sweeper);
     //vector_taylor_function_class.def("__getslice__", &__getslice__<VectorTaylorFunction,Nat,Nat,ScalarTaylorFunction>);
     vector_taylor_function_class.def("__getslice__", (VectorTaylorFunction(*)(const VectorTaylorFunction&,int,int))&__getslice__);
     vector_taylor_function_class.def("__getitem__", &__getitem__<VectorTaylorFunction,uint,ScalarTaylorFunction>);

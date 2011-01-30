@@ -162,7 +162,7 @@ class ScalarTaylorFunction
     //! \brief Construct a ScalarTaylorFunction over the domain \a d.
     explicit ScalarTaylorFunction(const DomainType& d);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d.
-    explicit ScalarTaylorFunction(const DomainType& d, shared_ptr<TaylorModelAccuracy> acc_ptr);
+    explicit ScalarTaylorFunction(const DomainType& d, Sweeper swp);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<Interval>& m);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, with scaled power series expansion \a f and error \a e.
@@ -219,7 +219,7 @@ class ScalarTaylorFunction
     //@{
     /*! \name Data access */
     /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
-    shared_ptr<TaylorModelAccuracy> accuracy_ptr() const;
+    Sweeper sweeper() const;
     //! \brief The domain of the quantity.
     const DomainType& domain() const { return this->_domain; }
     //! \brief An over-approximation to the range of the quantity; not necessarily tight.
@@ -300,40 +300,18 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Simplification operations. */
-    //! \brief Truncate to the default maximum degree of the quantity.
-    ScalarTaylorFunction& truncate() { this->_model.truncate(); return *this; }
-    //! \brief Truncate to degree \a deg.
-    ScalarTaylorFunction& truncate(uint deg) { this->_model.truncate(deg); return *this; }
-    //! \brief Truncate all terms with any coefficient higher than \a a.
-    ScalarTaylorFunction& truncate(const MultiIndex& a) { this->_model.truncate(a); return *this; }
-    //! \brief Truncate all terms with any coefficient higher than those given by \a b.
-    ScalarTaylorFunction& truncate(const MultiIndexBound& b) { this->_model.truncate(b); return *this; }
-    //! \brief Remove all terms whose coefficient has magnitude
+   //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     ScalarTaylorFunction& sweep() { this->_model.sweep(); return *this; }
-    //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
-    ScalarTaylorFunction& sweep(double eps) { this->_model.sweep(eps); return *this; }
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    ScalarTaylorFunction& clean(const TaylorModel<Interval>::Accuracy& acc) { this->_model.clean(acc); return *this; }
-    //! \brief Remove all terms which have high degree or small magnitude.
-    ScalarTaylorFunction& clean() { this->_model.clean(); return *this; }
+    ScalarTaylorFunction& sweep(const SweeperInterface& swp) { this->_model.sweep(swp); return *this; }
     //@}
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \brief Specify a bound on the terms which may be present in the expansion.
-    void set_maximum_index(MultiIndexBound md) { this->_model.set_maximum_index(md); }
-    //! \brief Specify the maximum degree \a md for terms which may be present in the expansion.
-    void set_maximum_degree(uint md) { this->_model.set_maximum_degree(md); }
-    //! \brief Specify the minimum absolute value \a me for coefficients of terms which may be present in the expansion.
-    void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_model.set_sweep_threshold(me); }
-    //! \copydoc TaylorModel<Interval>::maximum_index()
-    MultiIndexBound maximum_index() const { return this->_model.maximum_index(); }
-    //! \copydoc TaylorModel<Interval>::maximum_degree()
-    uint maximum_degree() const { return this->_model.maximum_degree(); }
-    //! \copydoc TaylorModel<Interval>::sweep_threshold()
-    double sweep_threshold() const { return this->_model.sweep_threshold(); }
+    //! \copydoc TaylorModel<Interval>::set_sweeper()
+    void set_sweeper(const Sweeper& swp) { this->_model.set_sweeper(swp); }
     //@}
 
     //@{
@@ -435,8 +413,6 @@ class ScalarTaylorFunction
 
   public:
     ScalarTaylorFunction& clobber() { this->_model.clobber(); return *this; }
-    ScalarTaylorFunction& clobber(uint o) { this->_model.clobber(o); return *this; }
-    ScalarTaylorFunction& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
   private:
     friend class TaylorFunctionFactory;
     friend class ScalarFunctionMixin<ScalarTaylorFunction, Interval>;
@@ -622,10 +598,10 @@ class VectorTaylorFunction
     VectorTaylorFunction(const Vector<Interval>& domain, const RealVectorFunction& function);
     VectorTaylorFunction(const Vector<Interval>& domain, const IntervalVectorFunction& function);
 
-    /*! \brief Construct from a domain, a function, and accuracy paramters. */
+    /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const RealVectorFunction& function,
-                   shared_ptr<TaylorModel<Interval>::Accuracy> accuracy_ptr);
+                         const RealVectorFunction& function,
+                         const Sweeper& sweeper);
 
     /*! \brief Construct from a domain and a polynomial. */
     VectorTaylorFunction(const Vector<Interval>& domain,
@@ -650,10 +626,10 @@ class VectorTaylorFunction
     bool operator!=(const VectorTaylorFunction& p) const;
 
     // Data access
-    /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
-    shared_ptr<TaylorModel<Interval>::Accuracy> accuracy_ptr() const;
-    /*! \brief Set the accuracy parameter used to control approximation of the Taylor function. */
-    void set_accuracy(shared_ptr<TaylorModel<Interval>::Accuracy> acc);
+    /*! \brief The sweeper used to control approximation of the Taylor function. */
+    Sweeper sweeper() const;
+    /*! \brief Set the sweeper used to control approximation of the Taylor function. */
+    void set_sweeper(Sweeper swp);
     /*! \brief The data used to define the domain of the Taylor model. */
     const Vector<Interval>& domain() const;
     /*! \brief A rough bound for the range of the function. */
@@ -698,16 +674,8 @@ class VectorTaylorFunction
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     VectorTaylorFunction& sweep();
-    //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
-    VectorTaylorFunction& sweep(double eps);
-    //! \brief Truncate to the default maximum degree of the quantity.
-    VectorTaylorFunction& truncate();
-    /*! \brief Truncate to a model of lower order and/or smoothness. */
-    VectorTaylorFunction& truncate(uint degree);
-    //! \brief Specify the maximum degree \a md for terms which may be present in the expansion.
-    void set_maximum_degree(uint md);
-    //! \brief Specify the minimum absolute value \a me for coefficients of terms which may be present in the expansion.
-    void set_sweep_threshold(double me);
+    //! \brief Remove all terms as specified by \a sweeper.
+    VectorTaylorFunction& sweep(const SweeperInterface& sweeper);
     /*! \brief Set the error to zero. */
     VectorTaylorFunction& clobber();
 
@@ -908,8 +876,6 @@ class VectorTaylorFunctionElementReference
     const TaylorModel<Interval>& model() const { return this->_c->_models[this->_i]; }
     void set_error(const Float& e) { this->_c->_models[this->_i].set_error(e); }
     void sweep() { this->_c->_models[this->_i].sweep(); }
-    void set_sweep_threshold(double sw) { this->_c->_models[this->_i].set_sweep_threshold(sw); }
-    double sweep_threshold() { return this->_c->_models[this->_i].sweep_threshold(); }
     template<class X> X evaluate(const Vector<X>& x) const { return this->_c->get(this->_i).evaluate(x); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
     friend std::ostream& operator<<(std::ostream& os, const VectorTaylorFunctionElementReference& t) { return os<<ScalarTaylorFunction(t); }
@@ -921,11 +887,10 @@ class VectorTaylorFunctionElementReference
 class TaylorFunctionFactory
     : public FunctionFactoryInterface<Interval>
 {
-    shared_ptr<TaylorModelAccuracy> _acc_ptr;
+    Sweeper _sweeper;
   public:
-    TaylorFunctionFactory(const TaylorModelAccuracy& accuracy)
-        : _acc_ptr(new TaylorModelAccuracy(accuracy)) { }
-    TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(*this->_acc_ptr); }
+    TaylorFunctionFactory(Sweeper sweeper) : _sweeper(sweeper) { }
+    TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
     ScalarTaylorFunction create_zero(const IntervalVector& domain) const;
     VectorTaylorFunction create_identity(const IntervalVector& domain) const;
   private:

@@ -114,7 +114,7 @@ void TestTaylorModel::test_concept()
     tr=sin(t); tr=cos(t); tr=tan(t);
     //tr=asin(t); tr=acos(t); tr=atan(t);
 
-    tr.sweep(); tr.truncate(); tr.clean();
+    tr.sweep(); tr.clobber();
 
     evaluate(t,vi);
     t.domain(); t.range(); t.expansion(); t.error();

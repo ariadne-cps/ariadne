@@ -1299,7 +1299,7 @@ void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet
 void TaylorConstrainedImageSet::
 recondition()
 {
-    const double MAXIMUM_ERROR = this->_function[0].model().sweep_threshold() * 1024;
+    const double MAXIMUM_ERROR = std::numeric_limits<double>::epsilon() * 1024;
 
     List<uint> large_error_indices;
 
@@ -1630,15 +1630,16 @@ TaylorConstrainedImageSet::affine_over_approximation() const
     const uint neq=this->_equations.size();
     const uint np=this->number_of_parameters();
 
+    AffineSweeper affine_sweeper;
     TaylorConstrainedImageSet set(*this);
     for(uint i=0; i!=nx; ++i) {
-        const_cast<IntervalTaylorModel&>(set._function.models()[i]).truncate(1u);
+        const_cast<IntervalTaylorModel&>(set._function.models()[i]).sweep(affine_sweeper);
     }
     for(uint i=0; i!=nc; ++i) {
-        const_cast<IntervalTaylorModel&>(set._constraints[i].model()).truncate(1u);
+        const_cast<IntervalTaylorModel&>(set._constraints[i].model()).sweep(affine_sweeper);
     }
     for(uint i=0; i!=neq; ++i) {
-        const_cast<IntervalTaylorModel&>(set._equations[i].model()).truncate(1u);
+        const_cast<IntervalTaylorModel&>(set._equations[i].model()).sweep(affine_sweeper);
         // Code below introduces artificial error into equality constraints to make them inequality constraints
         //const_cast<IntervalTaylorModel&>(set._equations[i].model()).error()+=std::numeric_limits<float>::epsilon();
     }

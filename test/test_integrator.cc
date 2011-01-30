@@ -111,7 +111,7 @@ class TestIntegrator
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
         VectorTaylorFunction expected_flow( flow.domain(), (exp(-0.5*t)*(x0*cos(t)-y0*sin(t)),exp(-0.5*t)*(x0*sin(t)+y0*cos(t))) );
-        expected_flow.truncate(6);
+        expected_flow.sweep(GradedSweeper(6));
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -130,7 +130,7 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_PRINT(flow-expected_flow);
-        ARIADNE_TEST_PRINT((flow-expected_flow).truncate(3));
+        ARIADNE_TEST_PRINT((flow-expected_flow).sweep(GradedSweeper(3)));
         ARIADNE_TEST_BINARY_PREDICATE(operator<,flow.error(),0.01);
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),0.01+0.004);
     };

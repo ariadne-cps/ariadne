@@ -37,15 +37,17 @@ int main(int argc,char *argv[])
 
     /// Set the system parameters
 	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
-	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
+	RealConstant tau("tau",Interval(1.0,2.0)); // The characteristic time for the opening/closing of the valve tau("tau",1.25);
 	RealConstant ref("ref",6.75); // A reference tank level
 	RealConstant bfp("bfp",Interval(0.30,0.32863)); // The product beta*f(p) Interval(0.3,0.32863)
-	RealConstant Kp("Kp",1); // The gain of the proportional controller
+	RealConstant Kp("Kp",Interval(1.0,2.0)); // The gain of the proportional controller Kp("Kp",1);
 	RealConstant delta("delta",Interval(-0.1,0.1)); // An indeterminacy in guards evaluation
 
-	// The parameter to modify and the tolerance
-	RealConstant parameter = bfp;
-	Float tolerance = 7e-2;
+	/// Analysis parameters
+	RealConstant xParam = tau;
+	RealConstant yParam = Kp;
+	float tolerance = 1e-1;
+	unsigned numPointsPerAxis = 16;
 
     /// Create a HybridAutomaton object
     HybridAutomaton system;
@@ -60,6 +62,8 @@ int main(int argc,char *argv[])
     // Accessible constants
     system.register_accessible_constant(delta);
     system.register_accessible_constant(bfp);
+    system.register_accessible_constant(tau);
+    system.register_accessible_constant(Kp);
 
     // Constants
     ScalarFunction one=ScalarFunction::constant(2,1.0);
@@ -139,7 +143,7 @@ int main(int argc,char *argv[])
 	initial_set[l3] = Box(2, 5.5,5.5, 1.0,1.0);
 
 	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.2, 8.3, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
@@ -155,17 +159,20 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 8;
+	analyser.parameters().highest_maximum_grid_depth = 6;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
 
-	analyser.verify_iterative(system, initial_set, safe_box, domain);
+	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 	// Perform the analysis
 	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 
+	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+
+	/*
 	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
 
 	// Show the result
@@ -192,4 +199,5 @@ int main(int argc,char *argv[])
 	}	
 	else
 		cout << "\nError: the interval could not be verified.\n\n";
+		*/
 }

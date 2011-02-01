@@ -37,19 +37,26 @@ int main(int argc,char *argv[])
 	RealConstant a("a",0.02);
 	RealConstant b("b",Interval(0.3,0.32863));
 	RealConstant T("T",4.0);
-	RealConstant hmin("hmin",5.5);
-	RealConstant hmax("hmax",8.0);
+	RealConstant hmin("hmin",Interval(5.0,6.0)); // 5.5;
+	RealConstant hmax("hmax",Interval(7.5,8.5)); // 8.0;
 	RealConstant Delta("Delta",0.1);
 
 	/// Analysis parameters
-	RealConstant xParam = Delta;
-	RealConstant yParam = T;
-	float tolerance = 1e-2;
-	unsigned numPointsPerAxis = 26;
+	RealConstant xParam = hmin;
+	RealConstant yParam = hmax;
+	float tolerance = 1e-1;
+	unsigned numPointsPerAxis = 11;
 
     /// Create a HybridAutomton object
     HybridAutomaton system("Watertank");
   
+    // Accessible constants
+    system.register_accessible_constant(Delta);
+    system.register_accessible_constant(T);
+    system.register_accessible_constant(b);
+    system.register_accessible_constant(hmin);
+    system.register_accessible_constant(hmax);
+
     /// Create four discrete states
     DiscreteState opened("opened");
     DiscreteState closed("closed");
@@ -68,11 +75,6 @@ int main(int argc,char *argv[])
     List<RealVariable> varlist;
     varlist.append(x);
     varlist.append(y);
-    
-    // Accessible constants
-    system.register_accessible_constant(Delta);
-    system.register_accessible_constant(T);
-    system.register_accessible_constant(b);
 
     // Water level dynamics
     RealExpression x_opening_closing = -a*x + b*y;
@@ -146,10 +148,10 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState("opened")] = Box(2, 6.5,6.5, 1.0,1.0);
+	initial_set[DiscreteState("opened")] = Box(2, 5.5,5.5, 1.0,1.0);
 
 	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.2, 8.3, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
@@ -165,13 +167,13 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 11;
+	analyser.parameters().highest_maximum_grid_depth = 6;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
 	analyser.chain_reach_dumping = false;
 
-	analyser.verify_iterative(system, initial_set, safe_box, domain);
+	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 
-	//analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
 }

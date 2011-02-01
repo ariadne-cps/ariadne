@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank-verify.cc
+ *            watertank-compositional-hysteresis.cc
  *
  *  Copyright  2010  Luca Geretti
  *
@@ -45,7 +45,7 @@ int main(int argc,char *argv[])
 
 	// The parameter to modify and the tolerance
 	RealConstant parameter = delta;
-	Float tolerance = 1e-2;
+	Float tolerance = 1e-1;
 
     // Create the tank automaton
 
@@ -205,48 +205,21 @@ int main(int argc,char *argv[])
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_subdivisions = false;
-	evolver.parameters().enable_set_model_reduction = false;
+	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 7;
+	analyser.parameters().highest_maximum_grid_depth = 1;
 	analyser.parameters().transient_time = 1e10;
 	analyser.parameters().transient_steps = 1;
 	analyser.parameters().lock_to_grid_time = 1e10;		
 	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.plot_verify_results = true;
+	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
 	analyser.chain_reach_dumping = false;
 
-	// The resulting safe and unsafe intervals
-	Interval safe_int, unsafe_int;
 
 	// Perform the analysis
+	Interval safe_int, unsafe_int;
 	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
-
-	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
-
-	// Show the result
-	Interval parameter_interval(parameter.value());
-	if (safe_int == parameter_interval)
-		cout << "\nAll the values are safe.\n\n";
-	else if (safe_int.empty())
-		cout << "\nNo safe value was found.\n\n";
-	else if (safe_int.lower() == parameter_interval.lower())
-	{
-		cout << "\nThe parameter must be <= " << safe_int.upper() << " ( inaccuracy ";
-		if (!unsafe_int.empty())
-			cout << "<= " << unsafe_int.lower()-safe_int.upper() << ").\n\n";
-		else
-			cout << "not available).\n\n";
-	}
-	else if (safe_int.upper() == parameter_interval.upper())
-	{
-		cout << "\nThe parameter must be >= " << safe_int.lower() << " ( inaccuracy ";
-		if (!unsafe_int.empty())
-			cout << "<= " << safe_int.lower()-unsafe_int.upper() << ").\n\n";			
-		else
-			cout << "not available).\n\n";
-	}	
-	else
-		cout << "\nError: the interval could not be verified.\n\n";
+	analyser.log_parametric_results(safe_int,unsafe_int,parameter.value());
 }

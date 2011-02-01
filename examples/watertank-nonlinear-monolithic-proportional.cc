@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank-monolithic-proportional-verify.cc
+ *            watertank-nonlinear-monolithic-proportional-verify.cc
  *
  *  Copyright  2011  Luca Geretti
  *
@@ -35,7 +35,7 @@ int main(int argc,char *argv[])
 		analyserVerbosity = atoi(argv[1]);
 
     /// Set the system parameters
-	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
+	RealConstant a("a",0.065); // The constant defining the decrease rate of the tank level
 	RealConstant tau("tau",Interval(1.0,2.0)); // The characteristic time for the opening/closing of the valve tau("tau",1.25);
 	RealConstant ref("ref",6.75); // A reference tank level
 	RealConstant bfp("bfp",Interval(0.30,0.32863)); // The product beta*f(p) Interval(0.3,0.32863)
@@ -83,7 +83,7 @@ int main(int argc,char *argv[])
 
     /// Create the dynamics
 
-    RealExpression x_d = -a*x+bfp*y;
+    RealExpression x_d = -a*sqrt(x)+bfp*y;
     RealExpression y_towardszero_d = -y/tau;
     RealExpression y_controlled_d = (Kp*(ref-x-delta)-y)/tau;
     RealExpression y_towardsone_d = (1-y)/tau;

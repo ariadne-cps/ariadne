@@ -176,14 +176,14 @@ class HybridReachabilityAnalyser
      * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
      * \return The reach set and a flag notifying if the result is valid for verification (i.e. has not been restricted due to
      * the bounding domain). */
-    virtual std::pair<SetApproximationType,bool> upper_chain_reach(const SystemType& system,
+    virtual std::pair<SetApproximationType,bool> upper_chain_reach(SystemType& system,
 																   const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
          * lower semantics; the method performs periodical discretisations and checks the new reached region for inclusion
          * The resulting set is a subset of the outer-approximation of the whole evolution set.
          * \return The reach set and the disproving result (true if disproved, false otherwise). */
-        virtual std::pair<SetApproximationType,bool> lower_chain_reach(const SystemType& system,
+    virtual std::pair<SetApproximationType,bool> lower_chain_reach(SystemType& system,
 																	   const HybridImageSet& initial_set) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
@@ -323,14 +323,13 @@ class HybridReachabilityAnalyser
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
+    std::pair<SetApproximationType,bool> _upper_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
+    std::pair<SetApproximationType,bool> _lower_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
 
 	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool _prove(SystemType& system,
-			    const HybridImageSet& initial_set);
-
+	bool _prove(SystemType& system, const HybridImageSet& initial_set);
 	/*! \brief Disprove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool _disprove(SystemType& system,
-			 	   const HybridImageSet& initial_set);
+	bool _disprove(SystemType& system, const HybridImageSet& initial_set);
 
 	/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach statistics. 
 		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */

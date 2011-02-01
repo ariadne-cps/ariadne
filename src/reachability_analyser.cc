@@ -828,7 +828,7 @@ chain_reach(const SystemType& system,
 
 std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
 HybridReachabilityAnalyser::
-upper_chain_reach(const SystemType& system,
+_upper_chain_reach(const SystemType& system,
             const HybridImageSet& initial_set) const
 {
 	/* General procedure:
@@ -1160,7 +1160,58 @@ upper_chain_reach(const SystemType& system,
 
 std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
 HybridReachabilityAnalyser::
-lower_chain_reach(const SystemType& system,
+upper_chain_reach(SystemType& system,
+				  const HybridImageSet& initial_set) const
+{
+	// The reachable set
+	HybridGridTreeSet reach;
+	// The flag that informs whether the region is valid for proving
+	bool isValid;
+
+	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
+
+	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
+	if (split_set.empty()) {
+		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = _upper_chain_reach(system,initial_set);
+	} else {
+		isValid = true;
+		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
+
+		uint i = 0;
+		// Progressively adds the results for each subsystem
+		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it) {
+			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
+
+			system.substitute(*set_it);
+
+			HybridGridTreeSet localReach;
+			bool localIsValid;
+
+			make_lpair<HybridGridTreeSet,bool>(localReach,localIsValid) = _upper_chain_reach(system,initial_set);
+
+			reach.adjoin(localReach);
+			_statistics->upper().reach = reach;
+
+			isValid = isValid && localIsValid;
+
+			// We skip if allowed and if either the partial result is not valid or outside the safe region
+			if (_parameters->skip_if_unprovable) {
+				if (!isValid || (isValid && definitely(!localReach.subset(_parameters->safe_region)))) {
+					isValid = false;
+					break;
+				}
+			}
+		}
+
+		system.substitute(original_constants);
+	}
+
+	return std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>(reach,isValid);
+}
+
+std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+HybridReachabilityAnalyser::
+_lower_chain_reach(const SystemType& system,
 				  const HybridImageSet& initial_set) const
 {
 	typedef std::list<EnclosureType> EL;
@@ -1289,6 +1340,50 @@ lower_chain_reach(const SystemType& system,
 	return make_pair<GTS,bool>(reach,isDisproved);
 }
 
+std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+HybridReachabilityAnalyser::
+lower_chain_reach(SystemType& system,
+				  const HybridImageSet& initial_set) const
+{
+	bool isDisproved;
+	HybridGridTreeSet reach;
+
+	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
+
+	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
+	if (split_set.empty()) {
+		make_lpair<HybridGridTreeSet,bool>(reach,isDisproved) = _lower_chain_reach(system,initial_set);
+	} else {
+		isDisproved = false;
+
+		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
+
+		uint i = 0;
+		// Progressively adds the results for each subsystem
+		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
+		{
+			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
+
+			system.substitute(*set_it);
+
+			HybridGridTreeSet localReach;
+			bool localIsDisproved;
+
+			make_lpair<HybridGridTreeSet,bool>(localReach,localIsDisproved) = _lower_chain_reach(system,initial_set);
+
+			reach.adjoin(localReach);
+			_statistics->lower().reach = reach;
+			isDisproved = isDisproved || localIsDisproved;
+
+			if (_parameters->skip_if_disproved && isDisproved)
+				break;
+		}
+		system.substitute(original_constants);
+	}
+
+	return std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>(reach,isDisproved);
+}
+
 
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
@@ -1304,72 +1399,22 @@ HybridReachabilityAnalyser::
 _prove(SystemType& system,
 	   const HybridImageSet& initial_set)
 {
+	bool result;
 	// The reachable set
 	HybridGridTreeSet reach;
 	// The flag that informs whether the region is valid for proving
 	bool isValid;
 
-	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
+	ARIADNE_LOG(4,"Proving... " << (verbosity == 4 ? "" : "\n"));
 
-	ARIADNE_LOG(4,"Proving...\n");
+	make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set);
 
-	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
-	if (split_set.empty())
-	{
-		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set);
-	}
-	else
-	{
-		isValid = true;
-		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
+	// Proved iff the reached region is valid (i.e. it has not been restricted) and is inside the safe region
+	result = (isValid && definitely(reach.subset(_parameters->safe_region)));
 
-		uint i = 0;
-		// Progressively adds the results for each subsystem
-		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
-		{
-			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
+	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (result ? "Proved.\n" : "Not proved.\n") );
 
-			system.substitute(*set_it);
-
-			HybridGridTreeSet localReach;
-			bool localIsValid;
-
-			make_lpair<HybridGridTreeSet,bool>(localReach,localIsValid) = upper_chain_reach(system,initial_set);
-
-			ARIADNE_LOG(5,"(The result is " << (localIsValid ? "":"not ") << "valid)\n");
-
-			reach.adjoin(localReach);
-			_statistics->upper().reach = reach;
-
-			isValid = isValid && localIsValid;
-
-			// If we can skip and either the partial result is not valid or outside the safe region, then we can conclude proving
-			if (!isValid && _parameters->skip_if_unprovable)
-			{
-				ARIADNE_LOG(4, "The partial reached region is outside the domain.\n");
-				break;
-			}
-			else if (isValid && _parameters->skip_if_unprovable && definitely(!localReach.subset(_parameters->safe_region)))
-			{
-				isValid = false;
-				ARIADNE_LOG(4, "The partial reached region is outside the safe region.\n");
-				break;
-			}
-		}
-
-		system.substitute(original_constants);
-	}
-
-	// If the reached region is valid (i.e. it has not been restricted), perform checking, otherwise return false
-	if (isValid) {
-		// If the reached region is definitely inside the hybrid safe region, the safety property is proved
-		bool result = definitely(reach.subset(_parameters->safe_region));
-		ARIADNE_LOG(4, (result ? "Proved.\n" : "The overall reached region is outside the safe region.\n") );
-		return result;
-	} else {
-		ARIADNE_LOG(4,"Not proved.\n");
-		return false;
-	}
+	return result;
 }
 
 bool 
@@ -1380,48 +1425,11 @@ _disprove(SystemType& system,
 	bool result;
 	HybridGridTreeSet reach;
 
-	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
+	ARIADNE_LOG(4,"Disproving... " << (verbosity == 4 ? "" : "\n"));
 
-	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
-	if (split_set.empty())
-	{
-		ARIADNE_LOG(4,"Disproving...\n");
-		make_lpair<HybridGridTreeSet,bool>(reach,result) = lower_chain_reach(system,initial_set);
-	}
-	else
-	{
-		ARIADNE_LOG(4,"Disproving over " << split_set.size() << " constants sets...\n");
+	make_lpair<HybridGridTreeSet,bool>(reach,result) = lower_chain_reach(system,initial_set);
 
-		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
-
-		uint i = 0;
-		// Progressively adds the results for each subsystem
-		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
-		{
-			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
-
-			system.substitute(*set_it);
-
-			HybridGridTreeSet localReach;
-			bool localIsDisproved;
-
-			make_lpair<HybridGridTreeSet,bool>(reach,localIsDisproved) = lower_chain_reach(system,initial_set);
-
-			ARIADNE_LOG(5,"(The result is " << (localIsDisproved ? "":"not ") << "disproved)\n");
-
-			reach.adjoin(localReach);
-			_statistics->lower().reach = reach;
-			result = result || localIsDisproved;
-
-			if (result && _parameters->skip_if_disproved)
-				break;
-		}
-
-		system.substitute(original_constants);
-	}
-
-	// Notify
-	ARIADNE_LOG(4, (result ? "Disproved.\n" : "Not disproved.\n") );
+	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (result ? "Disproved.\n" : "Not disproved.\n") );
 
 	return result;
 }

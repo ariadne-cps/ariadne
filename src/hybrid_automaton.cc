@@ -648,6 +648,14 @@ HybridAutomaton::substitute(const Constant<Real>& con, const Real& c)
 		trans_it->substitute(con,c);
 }
 
+void
+HybridAutomaton::substitute(const std::list<RealConstant>& cons)
+{
+	// Restores the system
+	for (std::list<RealConstant>::const_iterator const_it = cons.begin(); const_it != cons.end(); ++const_it)
+		substitute(*const_it);
+}
+
 
 void
 HybridAutomaton::register_accessible_constant(RealConstant con)
@@ -666,5 +674,27 @@ HybridAutomaton::accessible_constant_value(const String& name) const
 
 	ARIADNE_FAIL_MSG("The constant is not registered as accessible.");
 }
+
+std::list< RealConstant >
+HybridAutomaton::nonsingleton_accessible_constants() const
+{
+	std::list<RealConstant> result;
+
+	const std::list<RealConstant>& constants = accessible_constants();
+
+	for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
+												 constant_it != constants.end();
+												 ++constant_it)
+	{
+		if (!constant_it->value().singleton())
+		{
+			RealConstant original_copy(constant_it->name(),constant_it->value());
+			result.push_back(original_copy);
+		}
+	}
+
+	return result;
+}
+
 
 }

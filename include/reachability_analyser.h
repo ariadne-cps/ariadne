@@ -239,6 +239,11 @@ class HybridReachabilityAnalyser
 					   const Float& tolerance,
 					   const unsigned& numPointsPerAxis);
 
+	/** \brief Provides textual comment on parametric results over one variable */
+	void log_parametric_results(const Interval& safe_int,
+									const Interval& unsafe_int,
+									const Interval& search_int) const;
+
     //@}
 
   public:
@@ -303,7 +308,7 @@ class HybridReachabilityAnalyser
      *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
      *  all the remaining from right to left.
      */
-    std::list<std::list<RealConstant> > _getSplitSet() const;
+    std::list<std::list<RealConstant> > _getSplitConstantsSet() const;
 
     /*! \brief Helper function to get the maximum value of the derivative width ratio \f$ (w-w^m)/w \f$, where the \f$ w^m \f$ values
      * are stored in \a midpointMaxWidths and the \f$ w \f$ values are obtained from the \a system.

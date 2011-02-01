@@ -551,6 +551,9 @@ class HybridIOAutomaton
 	//! \brief Substitute the value of the Constant \a con into the corresponding Constant on all the functions of modes and transitions.
 	void substitute(const Constant<Real>& con) { this->substitute(con,con.value()); }
 
+	/*! \brief Substitute constants values from a list \a cons. */
+	void substitute(const std::list<RealConstant>& cons);
+
 	//@}
 
     //@{
@@ -619,6 +622,9 @@ class HybridIOAutomaton
 
     //! \brief The set of accessible constants.
     const std::list< RealConstant >& accessible_constants() const;
+
+    //! \brief A copy of the set of non-singleton accessible constants.
+    std::list< RealConstant > nonsingleton_accessible_constants() const;
 
     //! \brief The discrete transitions from location \a source.
     std::list< DiscreteIOTransition > transitions(DiscreteState source) const;

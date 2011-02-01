@@ -430,7 +430,7 @@ void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
 }
 
 std::list<std::list<RealConstant> >
-HybridReachabilityAnalyser::_getSplitSet() const
+HybridReachabilityAnalyser::_getSplitConstantsSet() const
 {
 	std::list<std::list<RealConstant> > result;
 
@@ -1306,35 +1306,22 @@ _prove(SystemType& system,
 {
 	// The reachable set
 	HybridGridTreeSet reach;
-	// The flag that informs whether the region is valid for proving (assumed initially true for the case of a splitted system)
-	bool isValid = true;
+	// The flag that informs whether the region is valid for proving
+	bool isValid;
 
-	std::list<std::list<RealConstant> > split_set = _getSplitSet();
+	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
+
+	ARIADNE_LOG(4,"Proving...\n");
 
 	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
 	if (split_set.empty())
 	{
-		ARIADNE_LOG(4,"Proving...\n");
-
 		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set);
 	}
 	else
 	{
-		ARIADNE_LOG(4,"Proving over " << split_set.size() << " constants sets...\n");
-
-		// Gets the original constants
-		const std::list<RealConstant>& constants = system.accessible_constants();
-		std::list<RealConstant> original_constants;
-		for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
-													 constant_it != constants.end();
-													 ++constant_it)
-		{
-			if (!constant_it->value().singleton())
-			{
-				RealConstant original_copy(constant_it->name(),constant_it->value());
-				original_constants.push_back(original_copy);
-			}
-		}
+		isValid = true;
+		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
 
 		uint i = 0;
 		// Progressively adds the results for each subsystem
@@ -1342,9 +1329,7 @@ _prove(SystemType& system,
 		{
 			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
 
-			// Modifies the system
-			for (std::list<RealConstant>::const_iterator const_it = set_it->begin(); const_it != set_it->end(); ++const_it)
-				system.substitute(*const_it);
+			system.substitute(*set_it);
 
 			HybridGridTreeSet localReach;
 			bool localIsValid;
@@ -1354,78 +1339,60 @@ _prove(SystemType& system,
 			ARIADNE_LOG(5,"(The result is " << (localIsValid ? "":"not ") << "valid)\n");
 
 			reach.adjoin(localReach);
+			_statistics->upper().reach = reach;
+
 			isValid = isValid && localIsValid;
 
 			// If we can skip and either the partial result is not valid or outside the safe region, then we can conclude proving
 			if (!isValid && _parameters->skip_if_unprovable)
-				break;
-			else if (isValid && _parameters->skip_if_unprovable)
 			{
-				if (definitely(!localReach.subset(_parameters->safe_region)))
-				{
-					ARIADNE_LOG(4, "Not proved.\n");
-					return false;
-				}
-				else
-					ARIADNE_LOG(5,"(The result is still inside the safe region)\n");
+				ARIADNE_LOG(4, "The partial reached region is outside the domain.\n");
+				break;
+			}
+			else if (isValid && _parameters->skip_if_unprovable && definitely(!localReach.subset(_parameters->safe_region)))
+			{
+				isValid = false;
+				ARIADNE_LOG(4, "The partial reached region is outside the safe region.\n");
+				break;
 			}
 		}
 
-		// Restores the system
-		for (std::list<RealConstant>::const_iterator const_it = original_constants.begin(); const_it != original_constants.end(); ++const_it)
-			system.substitute(*const_it);
+		system.substitute(original_constants);
 	}
 
 	// If the reached region is valid (i.e. it has not been restricted), perform checking, otherwise return false
 	if (isValid) {
 		// If the reached region is definitely inside the hybrid safe region, the safety property is proved
 		bool result = definitely(reach.subset(_parameters->safe_region));
-		ARIADNE_LOG(4, (result ? "Proved.\n" : "Not proved.\n") );
+		ARIADNE_LOG(4, (result ? "Proved.\n" : "The overall reached region is outside the safe region.\n") );
 		return result;
 	} else {
-		ARIADNE_LOG(4,"Not checked due to restriction inside the domain.\n");
+		ARIADNE_LOG(4,"Not proved.\n");
 		return false;
 	}
 }
-
 
 bool 
 HybridReachabilityAnalyser::
 _disprove(SystemType& system,
 		  const HybridImageSet& initial_set)
 {
-	// The reach
+	bool result;
 	HybridGridTreeSet reach;
-	// The flag which notifies if the system has been disproved (initially false for the split case)
-	bool isDisproved = false;
 
-	std::list<std::list<RealConstant> > split_set = _getSplitSet();
+	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
 
 	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
 	if (split_set.empty())
 	{
 		ARIADNE_LOG(4,"Disproving...\n");
-
-		// Get the result
-		make_lpair<HybridGridTreeSet,bool>(reach,isDisproved) = lower_chain_reach(system,initial_set);
+		make_lpair<HybridGridTreeSet,bool>(reach,result) = lower_chain_reach(system,initial_set);
 	}
 	else
 	{
 		ARIADNE_LOG(4,"Disproving over " << split_set.size() << " constants sets...\n");
 
-		// Gets the original constants
-		const std::list<RealConstant>& constants = system.accessible_constants();
-		std::list<RealConstant> original_constants;
-		for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
-													 constant_it != constants.end();
-													 ++constant_it)
-		{
-			if (!constant_it->value().singleton())
-			{
-				RealConstant original_copy(constant_it->name(),constant_it->value());
-				original_constants.push_back(original_copy);
-			}
-		}
+		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
 
 		uint i = 0;
 		// Progressively adds the results for each subsystem
@@ -1433,9 +1400,7 @@ _disprove(SystemType& system,
 		{
 			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
 
-			// Modifies the system
-			for (std::list<RealConstant>::const_iterator const_it = set_it->begin(); const_it != set_it->end(); ++const_it)
-				system.substitute(*const_it);
+			system.substitute(*set_it);
 
 			HybridGridTreeSet localReach;
 			bool localIsDisproved;
@@ -1445,21 +1410,20 @@ _disprove(SystemType& system,
 			ARIADNE_LOG(5,"(The result is " << (localIsDisproved ? "":"not ") << "disproved)\n");
 
 			reach.adjoin(localReach);
-			isDisproved = isDisproved || localIsDisproved;
+			_statistics->lower().reach = reach;
+			result = result || localIsDisproved;
 
-			if (isDisproved && _parameters->skip_if_disproved)
+			if (result && _parameters->skip_if_disproved)
 				break;
 		}
 
-		// Restores the system
-		for (std::list<RealConstant>::const_iterator const_it = original_constants.begin(); const_it != original_constants.end(); ++const_it)
-			system.substitute(*const_it);
+		system.substitute(original_constants);
 	}
 
 	// Notify
-	ARIADNE_LOG(4, (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
+	ARIADNE_LOG(4, (result ? "Disproved.\n" : "Not disproved.\n") );
 
-	return isDisproved;
+	return result;
 }
 
 
@@ -1470,23 +1434,20 @@ verify(SystemType& system,
 {
 		ARIADNE_LOG(3, "Verification...\n");
 
-		// Perform the proving
-		if (_prove(system,initial_set))
-		{
+		// Return true if proved
+		if (_prove(system,initial_set)) {
 			ARIADNE_LOG(3, "Safe.\n");
 			return true;
 		}
 
-		// Perform the disproving
-		if (_disprove(system,initial_set))
-		{
+		// Return false if disproved
+		if (_disprove(system,initial_set)) {
 			ARIADNE_LOG(3, "Unsafe.\n");
 			return false;
 		}
 
+		// Return indeterminate otherwise
 		ARIADNE_LOG(3, "Indeterminate.\n");
-
-		// Return indeterminate if both failed
 		return indeterminate;
 }
 
@@ -1495,39 +1456,36 @@ HybridFloatVector
 HybridReachabilityAnalyser::
 _getHybridMaximumAbsoluteDerivatives(const HybridAutomaton& system) const
 {
+	HybridFloatVector result;
+
 	// Get the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = system.state_space().locations_begin()->second;
 
 	// The variable for the bounding box of the derivatives
 	Vector<Interval> der;
-    // The variable for the result
-	HybridFloatVector hmad;
 
-	// Get the reach set
 	HybridGridTreeSet& hybridreach = _statistics->upper().reach;
 
 	// For each mode
-	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
-	{
-		// Get the location
+	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++) {
+
 		const DiscreteState& loc = modes_it->location();
 
 		// Insert the corresponding hmad pair, initialized with zero maximum absolute derivatives
-		hmad.insert(pair<DiscreteState,Vector<Float> >(loc,Vector<Float>(css)));
+		result.insert(pair<DiscreteState,Vector<Float> >(loc,Vector<Float>(css)));
 
 		// If the reached region for the location exists and is not empty, check its cells, otherwise use the whole domain
 		if (hybridreach.has_location(loc) && !hybridreach[loc].empty()) {
 			// Get the GridTreeSet
 			GridTreeSet& reach = hybridreach[loc];
 			// For each of its hybrid cells
-			for (GridTreeSet::const_iterator cells_it = reach.begin(); cells_it != reach.end(); cells_it++)
-			{
+			for (GridTreeSet::const_iterator cells_it = reach.begin(); cells_it != reach.end(); cells_it++) {
 				// Gets the derivative bounds
 				der = modes_it->dynamic()(cells_it->box());
 
 				// For each variable, sets the maximum value
 				for (uint i=0;i<css;i++)
-					hmad[loc][i] = max(hmad[loc][i], abs(der[i]).upper());
+					result[loc][i] = max(result[loc][i], abs(der[i]).upper());
 			}
 		} else {
 			// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
@@ -1535,12 +1493,12 @@ _getHybridMaximumAbsoluteDerivatives(const HybridAutomaton& system) const
 
 			// Gets the maximum absolute derivatives
 			for (uint i=0;i<css;i++)
-				hmad[loc][i] = abs(der[i]).upper();
+				result[loc][i] = abs(der[i]).upper();
 		}
 	}
 
 	// Returns
-	return hmad;
+	return result;
 }
 
 void
@@ -2046,10 +2004,12 @@ safety_parametric(SystemType& system,
 
 	// If both extremes are definitely safe, no more verification is involved
 	if (definitely(lower_result) && definitely(upper_result)) {
+		system.substitute(parameter,original_value);
 		return parameter_range;
 	}
 	// If both extremes are not definitely safe, no more verification is involved
 	else if (!definitely(lower_result) && !definitely(upper_result)) {
+		system.substitute(parameter,original_value);
 		return empty_int;
 	}
 	// Otherwise it updates from the bottom or the top depending on the lower_result being safe or not
@@ -2064,7 +2024,7 @@ safety_parametric(SystemType& system,
 		system.substitute(param);
 
 		ARIADNE_LOG(1,"Checking " << param_int << " (midpoint: " << param_int.midpoint() <<
-				      ", tolerance: " << param_int.width()/parameter_range.width()*100 << "%) ... ");
+				      ", width ratio: " << param_int.width()/parameter_range.width()*100 << "%) ... ");
 
 		// Perform the verification
 		tribool result = verify_iterative(system,initial_set,safe,domain);
@@ -2116,6 +2076,8 @@ safety_unsafety_parametric(SystemType& system,
 	Interval safety_int = parameter_range;
 	Interval unsafety_int = parameter_range;
 
+	ARIADNE_ASSERT(parameter_range.width() > 0);
+
 	ARIADNE_LOG(1,"\nChecking parameter " << parameter.name() << " in " << parameter_range << " with " << tolerance*100 << "% tolerance\n");
 
 	// Check the lower bound
@@ -2159,12 +2121,15 @@ safety_unsafety_parametric(SystemType& system,
 
 	// If both extremes are safe, no more verification is involved
 	if (definitely(lower_result) && definitely(upper_result)) {
+		system.substitute(parameter,original_value);
 		return make_pair<Interval,Interval>(parameter_range,empty_int); }
 	// If both extremes are unsafe, no more verification is involved
 	else if (!possibly(lower_result) && !possibly(upper_result)) {
+		system.substitute(parameter,original_value);
 		return make_pair<Interval,Interval>(empty_int,parameter_range); }
 	// If both extremes are indeterminate, no verification is possible
 	else if (indeterminate(lower_result) && indeterminate(upper_result)) {
+		system.substitute(parameter,original_value);
 		return make_pair<Interval,Interval>(empty_int,empty_int); }
 	// If the lower extreme is safe or the upper extreme is unsafe, the safe values are on the bottom
 	else if (definitely(lower_result) || !possibly(upper_result)) {
@@ -2194,7 +2159,7 @@ safety_unsafety_parametric(SystemType& system,
 			system.substitute(param);
 
 			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() <<
-					      ", tolerance: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
+					      ", width ratio: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			// Perform the verification
 			result = verify_iterative(system,initial_set,safe,domain);
@@ -2260,7 +2225,7 @@ safety_unsafety_parametric(SystemType& system,
 			system.substitute(param);
 
 			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() <<
-						  ", tolerance: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
+						  ", width ratio: " << unsafety_int.width()/parameter_range.width()*100 << "%) ... ");
 			// Perform the verification
 			result = verify_iterative(system,initial_set,safe,domain);
 
@@ -2341,6 +2306,37 @@ safety_unsafety_parametric(SystemType& system,
 	return make_pair<Interval,Interval>(safe_result,unsafe_result);
 }
 
+void
+HybridReachabilityAnalyser::log_parametric_results(const Interval& safe_int,
+													   const Interval& unsafe_int,
+													   const Interval& search_int) const
+{
+	if (safe_int == search_int) {
+		ARIADNE_LOG(1, "\nAll the values are safe.\n\n");
+	} else if (safe_int.empty()) {
+		ARIADNE_LOG(1,"\nNo safe value was found.\n\n");
+	} else if (safe_int.lower() == search_int.lower()) {
+		ARIADNE_LOG(1,"\nThe parameter must be <= " << safe_int.upper() << " ( inaccuracy ");
+		if (!unsafe_int.empty()) {
+			ARIADNE_LOG(1,"<= " << unsafe_int.lower()-safe_int.upper() << ").\n\n");
+		} else {
+			ARIADNE_LOG(1,"not available).\n\n");
+		}
+	}
+	else if (safe_int.upper() == search_int.upper())
+	{
+		ARIADNE_LOG(1,"\nThe parameter must be >= " << safe_int.lower() << " ( inaccuracy ");
+		if (!unsafe_int.empty()) {
+			ARIADNE_LOG(1,"<= " << safe_int.lower()-unsafe_int.upper() << ").\n\n");
+		} else {
+			ARIADNE_LOG(1,"not available).\n\n");
+		}
+	}
+	else {
+		ARIADNE_LOG(1,"\nError: the interval could not be verified.\n\n");
+	}
+}
+
 void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 											   const HybridImageSet& initial_set,
 											   const HybridBoxes& safe,
@@ -2351,8 +2347,8 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 											   const unsigned& numPointsPerAxis)
 {
 	// Get the original values of the parameters
-	const Real& original_xValue = system.accessible_constant_value(xParam.name());
-	const Real& original_yValue = system.accessible_constant_value(yParam.name());
+	Real original_xValue = system.accessible_constant_value(xParam.name());
+	Real original_yValue = system.accessible_constant_value(yParam.name());
 
 	// FIXME: in the end, the system will be modified with the upper values of the
 	// XY bounds. We must be able to recover (or pass) the initial values in order to restore them.
@@ -2376,6 +2372,8 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 	// Sweeps in the X direction
 	for (unsigned i=0; i<numPointsPerAxis; i++)
 	{
+		ARIADNE_LOG(1,"\nConstants: " << system.accessible_constants() << "\n");
+
 		// Changes the value of X
 		xConstant.set_value(xBounds.lower()+i*xBounds.width()/(numPointsPerAxis-1));
 		// Modifies the system with the new X
@@ -2389,6 +2387,9 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
 	}
+
+	// Restores the original value
+	system.substitute(xParam,original_xValue);
 
 	ARIADNE_LOG(1,"\nSweeping on " << yParam.name() << " in " << yBounds << ":\n");
 
@@ -2409,8 +2410,7 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
 	}
 
-	// Modifies the system to return to its original parameter values
-	system.substitute(xParam,original_xValue);
+	// Restores the original value
 	system.substitute(yParam,original_yValue);
 
 	// Dumps the results into a file

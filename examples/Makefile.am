@@ -9,7 +9,7 @@ bin_PROGRAMS= tutorial \
 			  watertank-monolithic-hysteresis watertank-monolithic-proportional \
 			  watertank-nonlinear-monolithic-hysteresis watertank-nonlinear-monolithic-proportional \
               watertank-compositional-hysteresis watertank-aasap watertank-time \
-			  pss-revised test-transition \
+			  pss-revised \
               boost_power_converter \
               bouncingball 3bouncingballs ecoli sinusoid-sin \
               rectifier rectifier_oneloc springs cmos_inverter_analoginput \
@@ -30,7 +30,6 @@ robotarm_SOURCES= robotarm.cc
 pss_revised_SOURCES= pss-revised.cc
 coconut_final_demo_SOURCES= coconut-final-demo.cc
 coconut_demo_SOURCES= coconut-demo.cc powermanagement.cc coconut-demo.h coconut-system.h
-test_transition_SOURCES= test-transition.cc
 watertank_aasap_SOURCES= watertank-aasap.cc
 watertank_time_SOURCES= watertank-time.cc
 watertank_compositional_hysteresis_SOURCES= watertank-compositional-hysteresis.cc

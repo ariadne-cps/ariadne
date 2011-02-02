@@ -2366,7 +2366,7 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 
 	// Generates the file name
 	std::string filename = system.name();
-	filename = filename + "-" + xParam.name() + "-" + yParam.name();
+	filename = filename + "-" + xParam.name() + "-" + yParam.name() + ".dump";
 
 	// Copies the parameters into constants
 	RealConstant xConstant = xParam;

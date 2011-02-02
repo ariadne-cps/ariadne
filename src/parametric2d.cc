@@ -26,7 +26,7 @@
 namespace Ariadne {
 
 
-Parametric2DAnalysisResults::Parametric2DAnalysisResults(const char* filename,
+Parametric2DAnalysisResults::Parametric2DAnalysisResults(const std::string& filename,
 							const Interval& xBounds, const Interval& yBounds,
 							const unsigned& numPointsPerAxis)
 {
@@ -42,7 +42,8 @@ void Parametric2DAnalysisResults::dump() const
 {
 	// Opens a file for writing
 	fstream outStream;
-	outStream.open(filename, ios::out | ios::trunc);
+	std::string extfilename = filename + ".dump";
+	outStream.open(extfilename.c_str(), ios::out | ios::trunc);
 
 	// For each element in the xResults
 	outStream << "Varying X:\n";
@@ -189,7 +190,7 @@ void Parametric2DAnalysisResults::draw() const
 	}
 
 	// Draws
-	fig.write(filename);
+	fig.write(filename.c_str());
 }
 
 

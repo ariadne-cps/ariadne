@@ -42,7 +42,7 @@ private:
 	/**
 	 * The file name used for dumping and plotting.
 	 */
-	const char* filename;
+	std::string filename;
 
 	/**
 	 * The bounds for the X coordinate.
@@ -79,7 +79,7 @@ public:
 	 * @param yBounds The Y bounds.
 	 * @param numPointsPerAxis The number of points per axis used.
 	 */
-	Parametric2DAnalysisResults(const char* filename,
+	Parametric2DAnalysisResults(const std::string& filename,
 								const Interval& xBounds, const Interval& yBounds,
 								const unsigned& numPointsPerAxis);
 

@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
 	unsigned numPointsPerAxis = 11;
 
     /// Create a HybridAutomton object
-    HybridAutomaton system("Watertank");
+    HybridAutomaton system("watertank-nl-mono-hy");
   
     // Accessible constants
     system.register_accessible_constant(Delta);
@@ -163,14 +163,10 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 1;
 	analyser.parameters().highest_maximum_grid_depth = 6;
-	analyser.plot_verify_results = false;
-	analyser.free_cores = 0;
-	analyser.chain_reach_dumping = false;
 
 	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 

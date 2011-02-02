@@ -49,7 +49,7 @@ int main(int argc,char *argv[])
 	unsigned numPointsPerAxis = 16;
 
     /// Create a HybridAutomaton object
-    HybridAutomaton system;
+    HybridAutomaton system("watertank-mono-pr");
 
     // System variables
 	RealVariable x("x"); // water level
@@ -154,13 +154,10 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
-	analyser.plot_verify_results = false;
-	analyser.free_cores = 0;
 
 	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 
@@ -170,33 +167,4 @@ int main(int argc,char *argv[])
 	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 
 	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
-
-	/*
-	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
-
-	// Show the result
-	Interval parameter_interval = parameter.value();
-	if (safe_int == parameter_interval)
-		cout << "\nAll the values are safe.\n\n";
-	else if (safe_int.empty())
-		cout << "\nNo safe value was found.\n\n";
-	else if (safe_int.lower() == parameter_interval.lower())
-	{
-		cout << "\nThe parameter must be <= " << safe_int.upper() << " ( inaccuracy ";
-		if (!unsafe_int.empty())
-			cout << "<= " << unsafe_int.lower()-safe_int.upper() << ").\n\n";
-		else
-			cout << "not available).\n\n";
-	}
-	else if (safe_int.upper() == parameter_interval.upper())
-	{
-		cout << "\nThe parameter must be >= " << safe_int.lower() << " ( inaccuracy ";
-		if (!unsafe_int.empty())
-			cout << "<= " << safe_int.lower()-unsafe_int.upper() << ").\n\n";			
-		else
-			cout << "not available).\n\n";
-	}	
-	else
-		cout << "\nError: the interval could not be verified.\n\n";
-		*/
 }

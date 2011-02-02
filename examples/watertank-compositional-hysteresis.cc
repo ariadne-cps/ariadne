@@ -173,7 +173,7 @@ int main(int argc,char *argv[])
 	cout << system_io << "\n\n";
 
 	/// Create the monolithic automaton
-	HybridAutomaton system("watertank");
+	HybridAutomaton system("watertank-comp-hy");
 	RealSpace space;
 	make_lpair<HybridAutomaton,RealSpace>(system,space) = make_monolithic_automaton(system_io);
 
@@ -186,7 +186,7 @@ int main(int argc,char *argv[])
 	initial_set[DiscreteState("flow,idle,rising")] = Box(2, 6.0,6.0, 1.0,1.0);
 
 	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.2, 8.3, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
 	// The domain
 	//HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
@@ -204,19 +204,10 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 1;
-	analyser.parameters().transient_time = 1e10;
-	analyser.parameters().transient_steps = 1;
-	analyser.parameters().lock_to_grid_time = 1e10;		
-	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.plot_verify_results = false;
-	analyser.free_cores = 0;
-	analyser.chain_reach_dumping = false;
-
+	analyser.parameters().highest_maximum_grid_depth = 7;
 
 	// Perform the analysis
 	Interval safe_int, unsafe_int;

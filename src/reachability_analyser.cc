@@ -2366,14 +2366,14 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 
 	// Generates the file name
 	std::string filename = system.name();
-	filename = filename + "-" + xParam.name() + "-" + yParam.name() + ".dump";
+	filename = filename + "-" + xParam.name() + "-" + yParam.name();
 
 	// Copies the parameters into constants
 	RealConstant xConstant = xParam;
 	RealConstant yConstant = yParam;
 
 	// Initializes the results
-	Parametric2DAnalysisResults results(filename.c_str(),xBounds,yBounds,numPointsPerAxis);
+	Parametric2DAnalysisResults results(filename,xBounds,yBounds,numPointsPerAxis);
 
 	ARIADNE_LOG(1,"\nSweeping on " << xParam.name() << " in " << xBounds << ":\n");
 

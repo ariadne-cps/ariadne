@@ -44,6 +44,8 @@ namespace Ariadne {
 
 class HybridAutomaton;
 
+typedef std::set<RealConstant,ConstantNameComparator<Real> > RealConstantSet;
+
 /*! \brief A discrete mode of a hybrid I/O automaton, comprising continuous evolution given by a vector field
  * within and invariant constraint set.
  *
@@ -301,7 +303,7 @@ class HybridIOAutomaton
     
     //! \brief The accessible constants.
     //! \details This set does not necessarily reflect the whole set of constants in all functions.
-    std::list< RealConstant > _accessible_constants;
+    RealConstantSet _accessible_constants;
 
     //! \brief The grid for the controlled variables of the automaton.
     std::map< RealVariable, Float > _grid;
@@ -546,13 +548,13 @@ class HybridIOAutomaton
     void set_grid(const RealVariable& var, Float scaling);
 
 	//! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all the functions of modes and transitions.
-	void substitute(const Constant<Real>& con, const Real& c);
+	void substitute(Constant<Real> con, const Real& c);
 
 	//! \brief Substitute the value of the Constant \a con into the corresponding Constant on all the functions of modes and transitions.
-	void substitute(const Constant<Real>& con) { this->substitute(con,con.value()); }
+	void substitute(Constant<Real> con) { this->substitute(con,con.value()); }
 
-	/*! \brief Substitute constants values from a list \a cons. */
-	void substitute(const std::list<RealConstant>& cons);
+	/*! \brief Substitute constants values from a set \a cons. */
+	void substitute(const RealConstantSet& cons);
 
 	//@}
 
@@ -621,10 +623,10 @@ class HybridIOAutomaton
     const std::list< DiscreteIOTransition >& transitions() const;
 
     //! \brief The set of accessible constants.
-    const std::list< RealConstant >& accessible_constants() const;
+    const RealConstantSet& accessible_constants() const;
 
     //! \brief A copy of the set of non-singleton accessible constants.
-    std::list< RealConstant > nonsingleton_accessible_constants() const;
+    RealConstantSet nonsingleton_accessible_constants() const;
 
     //! \brief The discrete transitions from location \a source.
     std::list< DiscreteIOTransition > transitions(DiscreteState source) const;

@@ -433,14 +433,7 @@ HybridAutomaton::has_transition(DiscreteEvent event, DiscreteState source) const
 bool
 HybridAutomaton::has_accessible_constant(const RealConstant& con) const
 {
-    for(list<RealConstant>::const_iterator constants_iter=this->_accessible_constants.begin();
-        constants_iter!=this->_accessible_constants.end(); ++constants_iter)
-        {
-            if(*constants_iter == con) {
-                return true;
-            }
-        }
-    return false;
+    return _accessible_constants.find(con) != _accessible_constants.end();
 }
 
 
@@ -495,7 +488,7 @@ HybridAutomaton::transitions() const
 }
 
 
-const std::list< RealConstant >&
+const RealConstantSet&
 HybridAutomaton::accessible_constants() const
 {
     return this->_accessible_constants;
@@ -627,19 +620,16 @@ operator<<(std::ostream& os, const HybridAutomaton& ha)
 }
 
 void 
-HybridAutomaton::substitute(const Constant<Real>& con, const Real& c)
+HybridAutomaton::substitute(Constant<Real> con, const Real& c)
 {
-	// Substitutes on the accessible constants
-	bool found = false;
-	for (std::list<RealConstant>::iterator constants_it=this->_accessible_constants.begin(); constants_it!=this->_accessible_constants.end(); constants_it++)
-		if (constants_it->name() == con.name())
-		{
-			constants_it->set_value(c);
-			found = true;
-			break;
-		}
-
-	ARIADNE_ASSERT_MSG(found,"The constant is not registered as accessible.");
+	RealConstantSet::iterator constant_it = _accessible_constants.find(con);
+	if (constant_it != _accessible_constants.end()) {
+		_accessible_constants.erase(*constant_it);
+		_accessible_constants.insert(RealConstant(con.name(),c));
+	}
+	else {
+		ARIADNE_FAIL_MSG("The constant to substitute is not registered as accessible.");
+	}
 
 	// Substitutes on the modes and transitions
 	for (std::list<DiscreteMode>::iterator modes_it=this->_modes.begin();modes_it!=this->_modes.end();modes_it++)
@@ -649,10 +639,10 @@ HybridAutomaton::substitute(const Constant<Real>& con, const Real& c)
 }
 
 void
-HybridAutomaton::substitute(const std::list<RealConstant>& cons)
+HybridAutomaton::substitute(const RealConstantSet& cons)
 {
 	// Restores the system
-	for (std::list<RealConstant>::const_iterator const_it = cons.begin(); const_it != cons.end(); ++const_it)
+	for (RealConstantSet::const_iterator const_it = cons.begin(); const_it != cons.end(); ++const_it)
 		substitute(*const_it);
 }
 
@@ -662,35 +652,31 @@ HybridAutomaton::register_accessible_constant(RealConstant con)
 {
 	// Silently accepts duplicated constant registrations
 	if (!this->has_accessible_constant(con))
-		this->_accessible_constants.push_back(con);
+		this->_accessible_constants.insert(con);
 }
 
 const Real&
 HybridAutomaton::accessible_constant_value(const String& name) const
 {
-	for (std::list<RealConstant>::const_iterator constants_it=this->_accessible_constants.begin(); constants_it!=this->_accessible_constants.end(); constants_it++)
+	for (RealConstantSet::const_iterator constants_it=this->_accessible_constants.begin(); constants_it!=this->_accessible_constants.end(); constants_it++)
 		if (constants_it->name() == name)
 			return constants_it->value();
 
 	ARIADNE_FAIL_MSG("The constant is not registered as accessible.");
 }
 
-std::list< RealConstant >
+RealConstantSet
 HybridAutomaton::nonsingleton_accessible_constants() const
 {
-	std::list<RealConstant> result;
+	RealConstantSet result;
 
-	const std::list<RealConstant>& constants = accessible_constants();
+	const RealConstantSet& constants = accessible_constants();
 
-	for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
+	for (RealConstantSet::const_iterator constant_it = constants.begin();
 												 constant_it != constants.end();
-												 ++constant_it)
-	{
+												 ++constant_it) {
 		if (!constant_it->value().singleton())
-		{
-			RealConstant original_copy(constant_it->name(),constant_it->value());
-			result.push_back(original_copy);
-		}
+			result.insert(*constant_it);
 	}
 
 	return result;

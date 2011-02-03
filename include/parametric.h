@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parametric2d.h
+ *            parametric.h
  *
  *  Copyright 2010  Luca Geretti
  *
@@ -27,15 +27,75 @@
 
 #include "ariadne.h"
 
-#ifndef ARIADNE_PARAMETRIC2D_H
-#define ARIADNE_PARAMETRIC2D_H
+#ifndef ARIADNE_PARAMETRIC_H
+#define ARIADNE_PARAMETRIC_H
 
 namespace Ariadne {
 
+typedef std::set<RealConstant,ConstantNameComparator<Real> > RealConstantSet;
+
 /**
- * \brief Provides a data structure for the results on a parametric 2D analysis.
+ * \brief The data structure for the verification outcome over a configuration of parameters (i.e. constants of a system)
  */
-struct Parametric2DAnalysisResults
+struct ParametricVerificationOutcome
+{
+private:
+
+	RealConstantSet _params;
+
+	tribool _value;
+
+public:
+
+	ParametricVerificationOutcome(const RealConstantSet params, const tribool value);
+	ParametricVerificationOutcome(const ParametricVerificationOutcome& other);
+
+	ParametricVerificationOutcome& operator=(const ParametricVerificationOutcome& other);
+
+	virtual std::ostream& write(std::ostream&) const;
+
+	/** The parameters */
+	const RealConstantSet& getParams() const;
+	/** The value of the verification */
+	const tribool& getValue() const;
+
+};
+
+inline std::ostream& operator<<(std::ostream& os, const ParametricVerificationOutcome& outcome) {
+    return outcome.write(os); }
+
+/**
+ * \brief The list of parametric verification outcomes
+ */
+struct ParametricVerificationOutcomeList
+{
+private:
+
+	RealConstantSet _params;
+
+	std::list<ParametricVerificationOutcome> _outcomes;
+
+public:
+
+	ParametricVerificationOutcomeList(const RealConstantSet& params);
+
+	virtual std::ostream& write(std::ostream&) const;
+
+	/** Inserts a result */
+	void push_back(const ParametricVerificationOutcome& result);
+
+	/** The current outcomes */
+	const std::list<ParametricVerificationOutcome>& getOutcomes() const;
+
+};
+
+inline std::ostream& operator<<(std::ostream& os, const ParametricVerificationOutcomeList& outcomeList) {
+    return outcomeList.write(os); }
+
+/**
+ * \brief A data structure for the results on a parametric 2D analysis using bisection.
+ */
+struct Parametric2DBisectionResults
 {
 private:
 
@@ -79,7 +139,7 @@ public:
 	 * @param yBounds The Y bounds.
 	 * @param numPointsPerAxis The number of points per axis used.
 	 */
-	Parametric2DAnalysisResults(const std::string& filename,
+	Parametric2DBisectionResults(const std::string& filename,
 								const Interval& xBounds, const Interval& yBounds,
 								const unsigned& numPointsPerAxis);
 
@@ -118,4 +178,4 @@ public:
 
 } // namespace Ariadne
 
-#endif // ARIADNE_PARAMETRIC2D_H
+#endif // ARIADNE_PARAMETRIC_H

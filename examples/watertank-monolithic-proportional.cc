@@ -36,17 +36,17 @@ int main(int argc,char *argv[])
 
     /// Set the system parameters
 	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
-	RealConstant tau("tau",Interval(1.0,2.0)); // The characteristic time for the opening/closing of the valve tau("tau",1.25);
+	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
-	RealConstant bfp("bfp",Interval(0.30,0.32863)); // The product beta*f(p) Interval(0.3,0.32863)
-	RealConstant Kp("Kp",Interval(1.0,2.0)); // The gain of the proportional controller Kp("Kp",1);
+	RealConstant bfp("bfp",Interval(0.01,0.6)); // The product beta*f(p) Interval(0.3,0.32863)
+	RealConstant Kp("Kp",Interval(0.01,0.6)); // The gain of the proportional controller
 	RealConstant delta("delta",Interval(-0.1,0.1)); // An indeterminacy in guards evaluation
 
 	/// Analysis parameters
-	RealConstant xParam = tau;
-	RealConstant yParam = Kp;
+	RealConstant xParam = Kp;
+	RealConstant yParam = bfp;
 	float tolerance = 1e-1;
-	unsigned numPointsPerAxis = 16;
+	unsigned numPointsPerAxis = 11;
 
     /// Create a HybridAutomaton object
     HybridAutomaton system("watertank-mono-pr");
@@ -60,6 +60,7 @@ int main(int argc,char *argv[])
 
     // Accessible constants
     system.register_accessible_constant(delta);
+    system.register_accessible_constant(a);
     system.register_accessible_constant(bfp);
     system.register_accessible_constant(tau);
     system.register_accessible_constant(Kp);
@@ -161,10 +162,9 @@ int main(int argc,char *argv[])
 
 	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 
-	// The resulting safe and unsafe intervals
-	Interval safe_int, unsafe_int;
-	// Perform the analysis
+	//Interval safe_int, unsafe_int;
 	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
+	//analyser.log_parametric_results(safe_int,unsafe_int,parameter.value());
 
-	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 }

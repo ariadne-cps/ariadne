@@ -211,6 +211,6 @@ int main(int argc,char *argv[])
 
 	// Perform the analysis
 	Interval safe_int, unsafe_int;
-	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
-	analyser.log_parametric_results(safe_int,unsafe_int,parameter.value());
+	make_lpair(safe_int,unsafe_int) = analyser.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
+	analyser.log_parametric_1d_bisection_results(safe_int,unsafe_int,parameter.value());
 }

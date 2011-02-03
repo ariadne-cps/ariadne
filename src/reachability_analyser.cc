@@ -222,7 +222,9 @@ _splitTargetEnclosures(bool& isValid,
 
 
 RealConstantIntMap
-HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system) const
+HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system,
+													   const RealConstantSet& locked_constants,
+													   const Float& targetRatioPerc) const
 {
 	/*! Procedure:
 	 * 1) Get the derivatives bounds for the system with constants set as their intervals
@@ -237,101 +239,95 @@ HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system) cons
 
 	RealConstantIntMap result;
 
-	// Copies the non-singleton accessible constants and
-	// sets the system with the midpoints of the corresponding intervals
-	const std::list<RealConstant>& constants = system.accessible_constants();
-	std::list<RealConstant> original_nonsingleton_constants;
+	RealConstantSet working_constants = system.nonsingleton_accessible_constants();
 
-	for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
-												 constant_it != constants.end();
-												 ++constant_it)
-	{
-		if (!constant_it->value().singleton())
-		{
-			RealConstant original_copy(constant_it->name(),constant_it->value());
-			original_nonsingleton_constants.push_back(original_copy);
-			result.insert(std::pair<RealConstant,int>(original_copy,1));
-			system.substitute(*constant_it,constant_it->value().midpoint());
-		}
+	// Remove the locked constants
+	for (RealConstantSet::const_iterator locked_constant_it = locked_constants.begin();
+										 locked_constant_it != locked_constants.end();
+										 ++locked_constant_it) {
+		RealConstantSet::iterator original_constant_it = working_constants.find(*locked_constant_it);
+
+		if (original_constant_it != working_constants.end())
+			working_constants.erase(*original_constant_it);
 	}
 
-	// Skips if no non-singleton constant is present
-	if (original_nonsingleton_constants.empty())
+	if (working_constants.empty())
 		return result;
+
+	// Initializes the result and sets the system with the midpoints of the corresponding intervals
+	for (RealConstantSet::const_iterator constant_it = working_constants.begin();
+												 constant_it != working_constants.end();
+												 ++constant_it) {
+			result.insert(std::pair<RealConstant,int>(*constant_it,1));
+			system.substitute(*constant_it,constant_it->value().midpoint());
+	}
 
 	// Gets the derivative widths corresponding to all accessible constants having midpoint value
 	HybridFloatVector mid_der_widths = _getDerivativeWidths(system);
+	// Restores the system to the original values
+	system.substitute(working_constants);
 
-	// Restores the original non-singleton constants
-	for (std::list<RealConstant>::const_iterator constant_it = original_nonsingleton_constants.begin();
-												 constant_it != original_nonsingleton_constants.end();
-												 ++constant_it)
-		system.substitute(*constant_it);
-
-	Float maxRatio = _getMaxDerivativeWidthRatio(system,mid_der_widths);
-
+	// While the ratio is sufficiently high, gets the best constant and substitutes half its interval into the system
+	Float maxRatio = _getMaxDerivativeWidthRatio(system, mid_der_widths);
 	Float ratio = maxRatio;
-	Float tolerance = 0.0625; // We choose 1/16 of the maximum ratio
-	while (ratio > tolerance*maxRatio)
-	{
-		String bestConstantName;
-		Interval bestConstantInterval;
-		Float bestLocalRatio = std::numeric_limits<Float>::infinity();
-
-		for (std::list<RealConstant>::const_iterator constant_it = constants.begin();
-													 constant_it != constants.end();
-													 ++constant_it)
-		{
-			// Modifies the system in order to have the range of the given constant halved
-			Real originalValue = constant_it->value();
-			Float quarterIntervalWidth = originalValue.width()/4;
-			Interval halvedInterval = Interval(constant_it->value().midpoint()-quarterIntervalWidth,
-											   constant_it->value().midpoint()+quarterIntervalWidth);
-			system.substitute(*constant_it,Real(halvedInterval));
-
-			Float localRatio = _getMaxDerivativeWidthRatio(system,mid_der_widths);
-			if (localRatio < bestLocalRatio)
-			{
-				bestLocalRatio = localRatio;
-				bestConstantName = constant_it->name();
-				bestConstantInterval = halvedInterval;
-			}
-
-			// Restores the related constant to its original value
-			system.substitute(*constant_it,originalValue);
-		}
-
-		RealConstant bestConstant(bestConstantName,bestConstantInterval);
-
-		// Increases the factor of the corresponding index
+	while (ratio > targetRatioPerc*maxRatio) {
+		RealConstant bestConstant = _getBestConstantToSplit(system, working_constants, mid_der_widths);
+		Interval originalInterval = bestConstant.value();
+		Float quarterIntervalWidth = originalInterval.width()/4;
+		Interval halvedInterval = Interval(originalInterval.midpoint()-quarterIntervalWidth,
+										   originalInterval.midpoint()+quarterIntervalWidth);
+		system.substitute(bestConstant,Real(halvedInterval));
 		result[bestConstant]++;
-		// Updates the ratio
-		ratio = bestLocalRatio;
-		// Updates the system
-		system.substitute(bestConstant);
+		ratio = _getMaxDerivativeWidthRatio(system, mid_der_widths);
 	}
 
-	// Restores the original non-singleton constants
-	for (std::list<RealConstant>::const_iterator constant_it = original_nonsingleton_constants.begin();
-												 constant_it != original_nonsingleton_constants.end();
-												 ++constant_it)
-	{
-		system.substitute(*constant_it);
-	}
+	system.substitute(working_constants);
 
 	return result;
+}
+
+RealConstant
+HybridReachabilityAnalyser::_getBestConstantToSplit(SystemType& system, const RealConstantSet& working_constants,
+													const HybridFloatVector& referenceWidths) const
+{
+	RealConstant bestConstant = *working_constants.begin();
+
+	Float bestLocalRatio = std::numeric_limits<Float>::infinity();
+
+	for (RealConstantSet::const_iterator constant_it = working_constants.begin();
+												 constant_it != working_constants.end();
+												 ++constant_it) {
+		// Modifies the system in order to have the range of the original given constant halved
+		Real originalValue = system.accessible_constant_value(constant_it->name());
+		Float quarterIntervalWidth = originalValue.width()/4;
+		Interval halvedInterval = Interval(constant_it->value().midpoint()-quarterIntervalWidth,
+										   constant_it->value().midpoint()+quarterIntervalWidth);
+		system.substitute(*constant_it,Real(halvedInterval));
+
+		Float localRatio = _getMaxDerivativeWidthRatio(system,referenceWidths);
+		if (localRatio < bestLocalRatio) {
+			bestLocalRatio = localRatio;
+			bestConstant = RealConstant(constant_it->name(),originalValue);
+		}
+
+		// Restores the related constant to its original value
+		system.substitute(*constant_it,originalValue);
+	}
+
+	return bestConstant;
 }
 
 HybridFloatVector
 HybridReachabilityAnalyser::_getDerivativeWidths(const HybridAutomaton& system) const
 {
+	ARIADNE_ASSERT_MSG(_parameters->bounding_domain.size() == system.state_space().size(), "The bounding domain must be defined");
+
 	HybridFloatVector result;
 
 	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = system.state_space().locations_begin()->second;
 
-	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
-	{
+	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++) {
 		const DiscreteState& loc = modes_it->location();
 
 		// Gets the first order derivatives in respect to the dynamic of the mode, applied to the domain of the corresponding location
@@ -349,25 +345,25 @@ HybridReachabilityAnalyser::_getDerivativeWidths(const HybridAutomaton& system) 
 
 Float
 HybridReachabilityAnalyser::_getMaxDerivativeWidthRatio(const HybridAutomaton& system,
-														const HybridFloatVector& midpointMaxWidths) const
+														const HybridFloatVector& referenceWidths) const
 {
+	ARIADNE_ASSERT_MSG(_parameters->bounding_domain.size() == system.state_space().size(), "The bounding domain must be defined");
+
 	Float result = 0;
 
 	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = system.state_space().locations_begin()->second;
 
 	// For each location and dimension, updates the result with the (w - wm)/wm derivative width ratio, excluding the undefined wm = 0 case
-	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++)
-	{
+	for (list<DiscreteMode>::const_iterator modes_it = system.modes().begin(); modes_it != system.modes().end(); modes_it++) {
 		const DiscreteState& loc = modes_it->location();
 
 		Vector<Interval> der = modes_it->dynamic()(_parameters->bounding_domain[loc]);
 
-		for (uint i=0; i<css; ++i)
-		{
-			Float midpointMaxWidth = midpointMaxWidths.find(loc)->second[i];
-			if (midpointMaxWidth != 0)
-				result = max(result,(der[i].width()-midpointMaxWidth)/midpointMaxWidth);
+		for (uint i=0; i<css; ++i) {
+			Float referenceWidth = referenceWidths.find(loc)->second[i];
+			if (referenceWidth != 0)
+				result = max(result,(der[i].width()-referenceWidth)/referenceWidth);
 		}
 
 	}
@@ -393,8 +389,7 @@ split(const RealConstant& con, uint numParts)
 	upper = con.value().lower() + intervalWidth/numParts;
 	result[numParts-1] = RealConstant(name,Interval(lower,upper));
 	// Puts the last to the second element, in inverse order
-	for (uint i=numParts;i>1;--i)
-	{
+	for (uint i=numParts;i>1;--i) {
 		lower = con.value().lower() + intervalWidth*(i-1)/numParts;
 		upper = con.value().lower() + intervalWidth*i/numParts;
 		result[i-2] = RealConstant(name,Interval(lower,upper));
@@ -406,16 +401,15 @@ split(const RealConstant& con, uint numParts)
 void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
 				   std::vector<std::vector<RealConstant> >::iterator col_it,
 				   std::vector<RealConstant>::iterator row_it,
-				   std::list<RealConstant> s,
-				   std::list<std::list<RealConstant> >& dest)
+				   RealConstantSet s,
+				   std::list<RealConstantSet>& dest)
 {
-	if (col_it != src.end() && row_it != col_it->end())
-	{
+	if (col_it != src.end() && row_it != col_it->end()) {
 		row_it++;
 		_fillSplitSet(src,col_it,row_it,s,dest);
 		row_it--;
 
-		s.push_back(*row_it);
+		s.insert(*row_it);
 
 		col_it++;
 		row_it = col_it->begin();
@@ -423,16 +417,14 @@ void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
 		if (col_it != src.end())
 			_fillSplitSet(src,col_it,row_it,s,dest);
 		else
-		{
 			dest.push_back(s);
-		}
 	}
 }
 
-std::list<std::list<RealConstant> >
+std::list<RealConstantSet>
 HybridReachabilityAnalyser::_getSplitConstantsSet() const
 {
-	std::list<std::list<RealConstant> > result;
+	std::list<RealConstantSet> result;
 
 	if (_parameters->split_factors.empty())
 		return result;
@@ -446,7 +438,7 @@ HybridReachabilityAnalyser::_getSplitConstantsSet() const
 		split_intervals_set[i++] = split(factor_it->first, factor_it->second);
 
 	// Generates all the possible split combinations
-	std::list<RealConstant> initial_combination;
+	RealConstantSet initial_combination;
 	std::vector<std::vector<RealConstant> >::iterator initial_col_it = split_intervals_set.begin();
 	std::vector<RealConstant>::iterator initial_row_it = initial_col_it->begin();
 	_fillSplitSet(split_intervals_set,initial_col_it,initial_row_it,initial_combination,result);
@@ -1168,18 +1160,18 @@ upper_chain_reach(SystemType& system,
 	// The flag that informs whether the region is valid for proving
 	bool isValid;
 
-	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
+	std::list<RealConstantSet> split_set = _getSplitConstantsSet();
 
 	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
 	if (split_set.empty()) {
 		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = _upper_chain_reach(system,initial_set);
 	} else {
 		isValid = true;
-		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
+		RealConstantSet original_constants = system.nonsingleton_accessible_constants();
 
 		uint i = 0;
 		// Progressively adds the results for each subsystem
-		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it) {
+		for (std::list<RealConstantSet>::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it) {
 			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
 
 			system.substitute(*set_it);
@@ -1348,7 +1340,7 @@ lower_chain_reach(SystemType& system,
 	bool isDisproved;
 	HybridGridTreeSet reach;
 
-	std::list<std::list<RealConstant> > split_set = _getSplitConstantsSet();
+	std::list<RealConstantSet> split_set = _getSplitConstantsSet();
 
 	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
 	if (split_set.empty()) {
@@ -1356,11 +1348,11 @@ lower_chain_reach(SystemType& system,
 	} else {
 		isDisproved = false;
 
-		std::list<RealConstant> original_constants = system.nonsingleton_accessible_constants();
+		RealConstantSet original_constants = system.nonsingleton_accessible_constants();
 
 		uint i = 0;
 		// Progressively adds the results for each subsystem
-		for (std::list<std::list<RealConstant> >::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
+		for (std::list<RealConstantSet>::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
 		{
 			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
 
@@ -1844,7 +1836,10 @@ _getEqualizedHybridGrid(const HybridFloatVector& hmad) const
 
 void
 HybridReachabilityAnalyser::
-_setInitialParameters(SystemType& system, const HybridBoxes& domain, const HybridBoxes& safe_region)
+_setInitialParameters(SystemType& system,
+					  const HybridBoxes& domain,
+					  const HybridBoxes& safe_region,
+					  const RealConstantSet& locked_constants)
 {
 	// Set the domain
 	_parameters->bounding_domain = domain;
@@ -1856,7 +1851,7 @@ _setInitialParameters(SystemType& system, const HybridBoxes& domain, const Hybri
 	_setLockToGridTime(system);
 	ARIADNE_LOG(3, "Lock to grid time: " << _parameters->lock_to_grid_time << "\n");
 	// Set the split factors
-	_parameters->split_factors = _getSplitFactorsOfConstants(system);
+	_parameters->split_factors = _getSplitFactorsOfConstants(system,locked_constants,0.01);
 	ARIADNE_LOG(3, "Split factors: " << _parameters->split_factors << "\n");
 }
 
@@ -1889,13 +1884,25 @@ _tuneParameters(SystemType& system)
 	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
 }
 
+tribool
+HybridReachabilityAnalyser::
+verify_iterative(SystemType& system,
+				 const HybridImageSet& initial_set,
+				 const HybridBoxes& safe,
+				 const HybridBoxes& domain)
+{
+	RealConstantSet locked_constants;
+
+	return _verify_iterative(system,initial_set,safe,domain,locked_constants);
+}
 
 tribool 
 HybridReachabilityAnalyser::
-verify_iterative(SystemType& system, 
-				 const HybridImageSet& initial_set, 
+_verify_iterative(SystemType& system,
+				 const HybridImageSet& initial_set,
 				 const HybridBoxes& safe,
-				 const HybridBoxes& domain)
+				 const HybridBoxes& domain,
+				 const RealConstantSet& locked_constants)
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
 
@@ -1920,7 +1927,7 @@ verify_iterative(SystemType& system,
 	_statistics->lower().reach = HybridGridTreeSet();
 
 	// Set the initial parameters
-	_setInitialParameters(system, domain, safe);
+	_setInitialParameters(system, domain, safe, locked_constants);
 
     for(_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth;
     	_parameters->maximum_grid_depth <= _parameters->highest_maximum_grid_depth;
@@ -1958,7 +1965,7 @@ verify_iterative(SystemType& system,
 
 Interval
 HybridReachabilityAnalyser::
-safety_parametric(SystemType& system, 
+safetyonly_parametric_1d_bisection(SystemType& system, 
 				  const HybridImageSet& initial_set, 
 				  const HybridBoxes& safe,
 				  const HybridBoxes& domain,
@@ -2066,7 +2073,7 @@ safety_parametric(SystemType& system,
 
 std::pair<Interval,Interval>
 HybridReachabilityAnalyser::
-safety_unsafety_parametric(SystemType& system, 
+parametric_1d_bisection(SystemType& system, 
 						   const HybridImageSet& initial_set, 
 						   const HybridBoxes& safe,
 						   const HybridBoxes& domain,
@@ -2315,7 +2322,7 @@ safety_unsafety_parametric(SystemType& system,
 }
 
 void
-HybridReachabilityAnalyser::log_parametric_results(const Interval& safe_int,
+HybridReachabilityAnalyser::log_parametric_1d_bisection_results(const Interval& safe_int,
 													   const Interval& unsafe_int,
 													   const Interval& search_int) const
 {
@@ -2345,7 +2352,8 @@ HybridReachabilityAnalyser::log_parametric_results(const Interval& safe_int,
 	}
 }
 
-void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
+void
+HybridReachabilityAnalyser::parametric_2d_bisection(SystemType& system,
 											   const HybridImageSet& initial_set,
 											   const HybridBoxes& safe,
 											   const HybridBoxes& domain,
@@ -2373,15 +2381,13 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 	RealConstant yConstant = yParam;
 
 	// Initializes the results
-	Parametric2DAnalysisResults results(filename,xBounds,yBounds,numPointsPerAxis);
+	Parametric2DBisectionResults results(filename,xBounds,yBounds,numPointsPerAxis);
 
 	ARIADNE_LOG(1,"\nSweeping on " << xParam.name() << " in " << xBounds << ":\n");
 
 	// Sweeps in the X direction
 	for (unsigned i=0; i<numPointsPerAxis; i++)
 	{
-		ARIADNE_LOG(1,"\nConstants: " << system.accessible_constants() << "\n");
-
 		// Changes the value of X
 		xConstant.set_value(xBounds.lower()+i*xBounds.width()/(numPointsPerAxis-1));
 		// Modifies the system with the new X
@@ -2390,7 +2396,7 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 		ARIADNE_LOG(1,"\nAnalysis with " << xParam.name() << " = " << xConstant.value().lower() << "...\n");
 
 		// Performs the analysis on Y and adds to the results of X
-		std::pair<Interval,Interval> result = safety_unsafety_parametric(system,initial_set,safe,domain,yParam,tolerance);
+		std::pair<Interval,Interval> result = parametric_1d_bisection(system,initial_set,safe,domain,yParam,tolerance);
 		results.insertXValue(result);
 
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
@@ -2412,7 +2418,7 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 		ARIADNE_LOG(1,"\nAnalysis with " << yParam.name() << " = " << yConstant.value().lower() << "...\n");
 
 		// Performs the analysis on X and adds to the results of Y
-		std::pair<Interval,Interval> result = safety_unsafety_parametric(system,initial_set,safe,domain,xParam,tolerance);
+		std::pair<Interval,Interval> result = parametric_1d_bisection(system,initial_set,safe,domain,xParam,tolerance);
 		results.insertYValue(result);
 
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
@@ -2425,6 +2431,74 @@ void HybridReachabilityAnalyser::parametric_2d(SystemType& system,
 	results.dump();
 	// Draws the result
 	results.draw();
+}
+
+ParametricVerificationOutcomeList
+HybridReachabilityAnalyser::parametric_verify(SystemType& system,
+											  const HybridImageSet& initial_set,
+											  const HybridBoxes& safe,
+											  const HybridBoxes& domain,
+											  const RealConstantSet& params,
+											  const Float& tolerance)
+{
+	ParametricVerificationOutcomeList result(params);
+
+	std::list<RealConstantSet> working_list;
+	working_list.push_back(params);
+	while (!working_list.empty())
+	{
+		RealConstantSet configuration = working_list.back();
+		working_list.pop_back();
+
+		ARIADNE_LOG(1,"Parameter values: " << configuration << "\n");
+
+		system.substitute(configuration);
+		tribool verification = _verify_iterative(system,initial_set,safe,domain,params);
+
+		ARIADNE_LOG(1,"Outcome: " << verification << "\n");
+
+		if (!definitely(verification))
+		{
+			RealConstant bestConstantToSplit = *configuration.begin();
+
+			Float bestRatio = 0.0;
+			for (RealConstantSet::const_iterator const_it = configuration.begin();
+												 const_it != configuration.end();
+												 ++const_it)
+			{
+				Float currentWidth = const_it->value().width();
+				Float initialWidth = params.find(*const_it)->value().width();
+
+				if (currentWidth/initialWidth > bestRatio)
+				{
+					bestConstantToSplit = *const_it;
+					bestRatio = currentWidth/initialWidth;
+				}
+			}
+
+			if (bestRatio > tolerance)
+			{
+				configuration.erase(bestConstantToSplit);
+				RealConstantSet newConfigurationLeft = configuration;
+				RealConstantSet newConfigurationRight = configuration;
+
+				const Real& currentInterval = bestConstantToSplit.value();
+				newConfigurationLeft.insert(RealConstant(bestConstantToSplit.name(),
+													  Interval(currentInterval.lower(),currentInterval.midpoint())));
+				newConfigurationRight.insert(RealConstant(bestConstantToSplit.name(),
+													  Interval(currentInterval.midpoint(),currentInterval.upper())));
+
+				working_list.push_back(newConfigurationLeft);
+				working_list.push_back(newConfigurationRight);
+			}
+			else
+				result.push_back(ParametricVerificationOutcome(configuration,verification));
+		}
+		else
+			result.push_back(ParametricVerificationOutcome(configuration,verification));
+	}
+
+	return result;
 }
 
 } // namespace Ariadne

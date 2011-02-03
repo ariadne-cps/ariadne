@@ -36,17 +36,25 @@ int main(int argc,char *argv[])
 
     /// Set the system parameters
 	RealConstant a("a",0.065); // The constant defining the decrease rate of the tank level
-	RealConstant tau("tau",Interval(1.0,2.0)); // The characteristic time for the opening/closing of the valve tau("tau",1.25);
+	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
-	RealConstant bfp("bfp",Interval(0.30,0.32863)); // The product beta*f(p) Interval(0.3,0.32863)
-	RealConstant Kp("Kp",Interval(1.0,2.0)); // The gain of the proportional controller Kp("Kp",1);
+	RealConstant bfp("bfp",Interval(0.01,0.6)); // The product beta*f(p) Interval(0.3,0.32863)
+	RealConstant Kp("Kp",Interval(0.01,0.6)); // The gain of the proportional controller Kp("Kp",1);
 	RealConstant delta("delta",Interval(-0.1,0.1)); // An indeterminacy in guards evaluation
 
+	// Verification parameters
+	RealConstantSet parameters;
+	parameters.insert(Kp);
+	parameters.insert(bfp);
+	Float tolerance = 1e-1;
+
+	/*
 	/// Analysis parameters
-	RealConstant xParam = tau;
-	RealConstant yParam = Kp;
+	RealConstant xParam = Kp;
+	RealConstant yParam = bfp;
 	float tolerance = 1e-1;
-	unsigned numPointsPerAxis = 16;
+	unsigned numPointsPerAxis = 11;
+	*/
 
     /// Create a HybridAutomaton object
     HybridAutomaton system("watertank-nl-mono-pr");
@@ -156,8 +164,11 @@ int main(int argc,char *argv[])
 	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().lowest_maximum_grid_depth = 0;
+	analyser.parameters().lowest_maximum_grid_depth = 2;
 	analyser.parameters().highest_maximum_grid_depth = 6;
+
+	//analyser.parameters().bounding_domain = domain;
+	//analyser.parameters().split_factors = analyser.getSplitFactorsOfConstants(system,0.01);
 
 	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 
@@ -166,5 +177,7 @@ int main(int argc,char *argv[])
 	// Perform the analysis
 	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 
-	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	//analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+
+	analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
 }

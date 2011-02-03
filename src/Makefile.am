@@ -51,7 +51,7 @@ SRC = \
 	logging.cc \
 	graphics.cc \
 	textplot.cc \
-	parametric2d.cc 
+	parametric.cc 
 
 CALCULUS_SRC = \
 	numeric.cc \

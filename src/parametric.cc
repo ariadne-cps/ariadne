@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parametric2d.cc
+ *            parametric.cc
  *
  *  Copyright 2010  Luca Geretti
  * 
@@ -21,12 +21,90 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "parametric2d.h"
+#include "parametric.h"
 
 namespace Ariadne {
 
 
-Parametric2DAnalysisResults::Parametric2DAnalysisResults(const std::string& filename,
+
+ParametricVerificationOutcome::ParametricVerificationOutcome(const RealConstantSet params, const tribool value)
+{
+	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it)
+		_params.insert(*const_it);
+
+	_value = value;
+}
+
+ParametricVerificationOutcome::ParametricVerificationOutcome(const ParametricVerificationOutcome& other)
+{
+	for (RealConstantSet::const_iterator const_it = other.getParams().begin(); const_it != other.getParams().end(); ++const_it)
+		_params.insert(*const_it);
+
+	_value = other.getValue();
+}
+
+ParametricVerificationOutcome&
+ParametricVerificationOutcome::operator=(const ParametricVerificationOutcome& other)
+{
+	for (RealConstantSet::const_iterator const_it = other.getParams().begin(); const_it != other.getParams().end(); ++const_it)
+		_params.insert(*const_it);
+
+	_value = other.getValue();
+
+	return *this;
+}
+
+const RealConstantSet&
+ParametricVerificationOutcome::getParams() const
+{
+	return _params;
+}
+
+const tribool&
+ParametricVerificationOutcome::getValue() const
+{
+	return _value;
+}
+
+std::ostream&
+ParametricVerificationOutcome::write(std::ostream& os) const
+{
+	os << "(" << _params << "->" << _value << ")";
+	return os;
+}
+
+ParametricVerificationOutcomeList::ParametricVerificationOutcomeList(const RealConstantSet& params)
+{
+	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it)
+		_params.insert(*const_it);
+}
+
+
+void
+ParametricVerificationOutcomeList::push_back(const ParametricVerificationOutcome& element)
+{
+	ARIADNE_ASSERT_MSG(element.getParams().size() == _params.size(), "The inserted outcome has a different number of parameters.");
+	for (RealConstantSet::const_iterator input_it = element.getParams().begin(); input_it != element.getParams().end(); ++input_it)
+			ARIADNE_ASSERT_MSG(_params.find(*input_it) != _params.end(), "The inserted outcome has different parameters identifiers.");
+
+	_outcomes.push_back(element);
+}
+
+
+const std::list<ParametricVerificationOutcome>&
+ParametricVerificationOutcomeList::getOutcomes() const
+{
+	return _outcomes;
+}
+
+std::ostream&
+ParametricVerificationOutcomeList::write(std::ostream& os) const
+{
+	os << _outcomes;
+	return os;
+}
+
+Parametric2DBisectionResults::Parametric2DBisectionResults(const std::string& filename,
 							const Interval& xBounds, const Interval& yBounds,
 							const unsigned& numPointsPerAxis)
 {
@@ -38,7 +116,7 @@ Parametric2DAnalysisResults::Parametric2DAnalysisResults(const std::string& file
 }
 
 
-void Parametric2DAnalysisResults::dump() const
+void Parametric2DBisectionResults::dump() const
 {
 	// Opens a file for writing
 	fstream outStream;
@@ -60,7 +138,7 @@ void Parametric2DAnalysisResults::dump() const
 }
 
 
-void Parametric2DAnalysisResults::insertXValue(const std::pair<Interval,Interval>& result)
+void Parametric2DBisectionResults::insertXValue(const std::pair<Interval,Interval>& result)
 {
 	// Checks that the maximum size has not been reached
 	assert(this->xResults.size() < numPointsPerAxis);
@@ -69,7 +147,7 @@ void Parametric2DAnalysisResults::insertXValue(const std::pair<Interval,Interval
 }
 
 
-void Parametric2DAnalysisResults::insertYValue(const std::pair<Interval,Interval>& result)
+void Parametric2DBisectionResults::insertYValue(const std::pair<Interval,Interval>& result)
 {
 	// Checks that the maximum size has not been reached
 	assert(this->yResults.size() < numPointsPerAxis);
@@ -78,7 +156,7 @@ void Parametric2DAnalysisResults::insertYValue(const std::pair<Interval,Interval
 }
 
 
-void Parametric2DAnalysisResults::draw() const
+void Parametric2DBisectionResults::draw() const
 {
 	assert(this->areAllResultsAvailable());
 
@@ -194,7 +272,7 @@ void Parametric2DAnalysisResults::draw() const
 }
 
 
-bool Parametric2DAnalysisResults::areAllResultsAvailable() const
+bool Parametric2DBisectionResults::areAllResultsAvailable() const
 {
 	return ((this->xResults.size() == numPointsPerAxis) && (this->yResults.size() == numPointsPerAxis));
 }

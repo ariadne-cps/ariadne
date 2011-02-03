@@ -170,6 +170,6 @@ int main(int argc,char *argv[])
 
 	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 
-	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
 }

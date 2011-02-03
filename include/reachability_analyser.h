@@ -46,7 +46,7 @@
 #include "hybrid_evolver.h"
 
 #include "logging.h"
-#include "parametric2d.h"
+#include "parametric.h"
 
 namespace Ariadne {
  
@@ -196,15 +196,18 @@ class HybridReachabilityAnalyser
 
 	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe inside \a domain,
 		in an iterative way by tuning the evolution/analysis parameters. */
-	tribool verify_iterative(SystemType& system, 
+	tribool verify_iterative(SystemType& system,
 							 const HybridImageSet& initial_set, 
 							 const HybridBoxes& safe,
 							 const HybridBoxes& domain);
 
 	/*! \brief Compute an underapproximation of the safety interval of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
-        \details The procedure returns the interval of safety. */
-	Interval safety_parametric(SystemType& system, 
+        \details The procedure uses the bisection method. The parameter is assumed as having separable safe and unsafe intervals in its range.
+        The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
+		bisection search.
+        \return The interval of safety. */
+	Interval safetyonly_parametric_1d_bisection(SystemType& system, 
 							   const HybridImageSet& initial_set, 
 							   const HybridBoxes& safe,
 			 				   const HybridBoxes& domain,
@@ -213,10 +216,11 @@ class HybridReachabilityAnalyser
 
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
-        \details The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
-		bisection search beneath.
+        \details The procedure uses the bisection method. Each parameter is assumed as having separable safe and unsafe intervals in its range.
+        The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
+		bisection search.
         \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> safety_unsafety_parametric(SystemType& system, 
+	std::pair<Interval,Interval> parametric_1d_bisection(SystemType& system, 
 										 					const HybridImageSet& initial_set, 
 										 					const HybridBoxes& safe,
 			 							 					const HybridBoxes& domain,
@@ -226,23 +230,35 @@ class HybridReachabilityAnalyser
 	/**
 	 * \brief Performs a parametric analysis on two parameters \a xParam, \a yParam,
 	 * discretizing with \a numPointsPerAxis points for each axis.
-	 * \details Saves the results in a file called "<systemName>-<xName>-<yName>" and
+	 * \details The procedure uses the bisection method. Saves the results in a file called "<systemName>-<xName>-<yName>" and
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	void parametric_2d(SystemType& system,
-					   const HybridImageSet& initial_set,
-					   const HybridBoxes& safe,
-					   const HybridBoxes& domain,
-					   const RealConstant& xParam,
-					   const RealConstant& yParam,
-					   const Float& tolerance,
-					   const unsigned& numPointsPerAxis);
+	void parametric_2d_bisection(SystemType& system,
+								 const HybridImageSet& initial_set,
+								 const HybridBoxes& safe,
+								 const HybridBoxes& domain,
+								 const RealConstant& xParam,
+								 const RealConstant& yParam,
+								 const Float& tolerance,
+								 const unsigned& numPointsPerAxis);
 
-	/** \brief Provides textual comment on parametric results over one variable */
-	void log_parametric_results(const Interval& safe_int,
-									const Interval& unsafe_int,
-									const Interval& search_int) const;
+	/** \brief Provides textual comment on parametric bisection verification results over one variable */
+	void log_parametric_1d_bisection_results(const Interval& safe_int,
+											 const Interval& unsafe_int,
+											 const Interval& search_int) const;
+
+	/**
+	 * \brief Performs a parametric analysis on a set of parameters \a params.
+	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
+	 * percentage in respect to the range of a given parameter)
+	 */
+	ParametricVerificationOutcomeList parametric_verify(SystemType& system,
+													   const HybridImageSet& initial_set,
+													   const HybridBoxes& safe,
+													   const HybridBoxes& domain,
+													   const RealConstantSet& params,
+													   const Float& tolerance);
 
     //@}
 
@@ -298,22 +314,33 @@ class HybridReachabilityAnalyser
 
     /*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
      *
+     * \details Splits until the deviation of the derivatives is reasonably low in respect to the deviation calculated at the midpoint. This
+     * limit value is expressed as a percentage using \a tolerance.
+     *
      * @param system The system to get the accessible constants from.
+     * @param targetRatioPerc The derivative widths ratio percentage to reach before termination.
      *
      * @return A split factor for each non-singleton accessible constant of the \a system.
      */
-    RealConstantIntMap _getSplitFactorsOfConstants(HybridAutomaton& system) const;
+    RealConstantIntMap _getSplitFactorsOfConstants(HybridAutomaton& system, const RealConstantSet& locked_constants,
+												  const Float& targetRatioPerc) const;
 
     /*! \brief Gets the set of all the split intervals from the stored split factors.
      *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
      *  all the remaining from right to left.
      */
-    std::list<std::list<RealConstant> > _getSplitConstantsSet() const;
+    std::list<RealConstantSet> _getSplitConstantsSet() const;
 
-    /*! \brief Helper function to get the maximum value of the derivative width ratio \f$ (w-w^m)/w \f$, where the \f$ w^m \f$ values
-     * are stored in \a midpointMaxWidths and the \f$ w \f$ values are obtained from the \a system.
+    /*! \brief Gets the best constant among the \a working_constants of the \a system to split, in terms of
+     * relative reduction of derivative widths compared to some \a referenceWidths.
      */
-    Float _getMaxDerivativeWidthRatio(const HybridAutomaton& system, const HybridFloatVector& midpointMaxWidths) const;
+    RealConstant _getBestConstantToSplit(SystemType& system, const RealConstantSet& working_constants,
+    							         const HybridFloatVector& referenceWidths) const;
+
+    /*! \brief Helper function to get the maximum value of the derivative width ratio \f$ (w-w^r)/w_r \f$, where the \f$ w^r \f$ values
+     * are stored in \a referenceWidths and the \f$ w \f$ values are obtained from the \a system.
+     */
+    Float _getMaxDerivativeWidthRatio(const HybridAutomaton& system, const HybridFloatVector& referenceWidths) const;
 
     /*! \brief Helper function to get the widths of the derivatives from the \a system */
     HybridFloatVector _getDerivativeWidths(const HybridAutomaton& system) const;
@@ -325,6 +352,15 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
     std::pair<SetApproximationType,bool> _upper_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
     std::pair<SetApproximationType,bool> _lower_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
+
+	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe inside \a domain,
+		in an iterative way by tuning the evolution/analysis parameters. In addition, the \a locked_constants set is not allowed to
+		be split */
+	tribool _verify_iterative(SystemType& system,
+							 const HybridImageSet& initial_set,
+							 const HybridBoxes& safe,
+							 const HybridBoxes& domain,
+							 const RealConstantSet& locked_constants);
 
 	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
 	bool _prove(SystemType& system, const HybridImageSet& initial_set);
@@ -367,7 +403,8 @@ class HybridReachabilityAnalyser
 	/*! \brief Set the initial evolution parameters and the grid given the automaton \a system, the bounding domain \a domain and the safe region \a safe.*/
 	void _setInitialParameters(SystemType& system, 
 							   const HybridBoxes& domain,
-							   const HybridBoxes& safe);
+							   const HybridBoxes& safe,
+							   const RealConstantSet& locked_constants);
 
 	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
 	void _tuneParameters(SystemType& system);

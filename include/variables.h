@@ -66,6 +66,11 @@ template<class T> class Constant
   public:
     template<class X> explicit Constant(const String& str, const X& value)
         : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
+    Constant(const Constant<T>& other) : _name_ptr(new String(other.name())), _value_ptr(new T(other.value())) { }
+    Constant<T>& operator=(const Constant<T>& other) {
+    	_name_ptr = shared_ptr<String>(new String(other.name()));
+    	_value_ptr = shared_ptr<T>(new T(other.value()));
+    	return *this; }
     const String& name() const { return *_name_ptr; }
     const T& value() const { return *_value_ptr; }
 	void set_value(const T& c) { *_value_ptr = c; }
@@ -84,9 +89,15 @@ template<class T> struct ConstantComparator
     }
 };
 
+template<class T> struct ConstantNameComparator
+{
+  bool operator()(const Constant<T>& first, const Constant<T>& second) const
+    {  return first.name() < second.name();
+    }
+};
+
 template<class T> inline std::ostream& Constant<T>::write(std::ostream& os) const {
     os << "{" << this->name() << "@" << this->value() << "}";
-    //os << ":" << name(this->_type);
     return os;
 }
 

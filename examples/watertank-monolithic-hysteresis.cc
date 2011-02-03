@@ -41,11 +41,10 @@ int main(int argc,char *argv[])
 	RealConstant hmax("hmax",Interval(7.5,8.5)); // 8.0;
 	RealConstant Delta("Delta",0.1);
 
-	/// Analysis parameters
-	RealConstant xParam = hmin;
-	RealConstant yParam = hmax;
-	float tolerance = 1e-1;
-	unsigned numPointsPerAxis = 11;
+	RealConstantSet parameters;
+	parameters.insert(hmin);
+	parameters.insert(hmax);
+	Float tolerance = 0.25;
 
     /// Create a HybridAutomton object
     HybridAutomaton system("watertank-mono-hy");
@@ -168,8 +167,9 @@ int main(int argc,char *argv[])
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
 
-	//analyser.verify_iterative(system, initial_set, safe_box, domain);
+	//cout << analyser.verify_iterative(system, initial_set, safe_box, domain);
 
-	analyser.parametric_2d(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
 
+	cout << "Outcomes: " << outcomes << "\n";
 }

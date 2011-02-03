@@ -77,6 +77,7 @@ using std::ofstream; using std::ifstream;
 #include "vector_field_evolver.h"
 #include "hybrid_evolver.h"
 #include "discretiser.h"
+#include "parametric.h"
 #include "reachability_analyser.h"
 
 #include "serialization.h"

@@ -44,7 +44,7 @@ int main(int argc,char *argv[])
 	RealConstantSet parameters;
 	parameters.insert(hmin);
 	parameters.insert(hmax);
-	Float tolerance = 0.25;
+	Float tolerance = 0.1;
 
     /// Create a HybridAutomton object
     HybridAutomaton system("watertank-mono-hy");
@@ -165,11 +165,13 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 6;
+	analyser.parameters().highest_maximum_grid_depth = 7;
 
 	//cout << analyser.verify_iterative(system, initial_set, safe_box, domain);
 
 	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
 
 	cout << "Outcomes: " << outcomes << "\n";
+
+	outcomes.draw(system.name());
 }

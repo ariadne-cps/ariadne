@@ -75,8 +75,10 @@ ParametricVerificationOutcome::write(std::ostream& os) const
 
 ParametricVerificationOutcomeList::ParametricVerificationOutcomeList(const RealConstantSet& params)
 {
-	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it)
+	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it) {
+		ARIADNE_ASSERT_MSG(const_it->value().width() > 0, "The parameter for verification must have non-zero width.");
 		_params.insert(*const_it);
+	}
 }
 
 
@@ -102,6 +104,55 @@ ParametricVerificationOutcomeList::write(std::ostream& os) const
 {
 	os << _outcomes;
 	return os;
+}
+
+
+void
+ParametricVerificationOutcomeList::draw(const std::string& basename) const
+{
+	ARIADNE_ASSERT_MSG(_params.size() > 1, "At least two parameters are required for drawing.");
+	ARIADNE_ASSERT_MSG(_outcomes.size() > 0, "The outcomes list is empty.");
+
+	// Plots for each couple of parameters
+	for (RealConstantSet::const_iterator xparam_it = _params.begin(); xparam_it != _params.end(); ++xparam_it) {
+		RealConstantSet::const_iterator yparam_it = xparam_it;
+		for (++yparam_it; yparam_it != _params.end(); ++yparam_it)
+		{
+			// Sets up the figure
+			Figure fig;
+			Box graphics_box(2);
+			graphics_box[0] = xparam_it->value();
+			graphics_box[1] = yparam_it->value();
+			array<uint> xy(2,0,1);
+			fig.set_projection_map(ProjectionFunction(xy,2));
+			fig.set_bounding_box(graphics_box);
+
+			// Adds each outcome with a dedicated fill colour
+			for (std::list<ParametricVerificationOutcome>::const_iterator outcome_it = _outcomes.begin();
+																		  outcome_it != _outcomes.end();
+																		  ++outcome_it) {
+				// Chooses the fill color
+				tribool outcome = outcome_it->getValue();
+				if (definitely(outcome))
+					fig.set_fill_colour(Colour(0.0,0.83,0.0));
+				else if (indeterminate(outcome))
+					fig.set_fill_colour(Colour(1.0,1.0,0.0));
+				else
+					fig.set_fill_colour(Colour(1.0,0.34,0.34));
+
+				// Draws the related box to the figure
+				Box outcome_box(2);
+				outcome_box[0] = outcome_it->getParams().find(*xparam_it)->value();
+				outcome_box[1] = outcome_it->getParams().find(*yparam_it)->value();
+				array<uint> xy(2,0,1);
+				fig.draw(outcome_box);
+			}
+
+			// Writes the figure file
+			std::string filename = basename + "[" + xparam_it->name() + "," + yparam_it->name() + "]";
+			fig.write(filename.c_str());
+		}
+	}
 }
 
 Parametric2DBisectionResults::Parametric2DBisectionResults(const std::string& filename,
@@ -141,7 +192,7 @@ void Parametric2DBisectionResults::dump() const
 void Parametric2DBisectionResults::insertXValue(const std::pair<Interval,Interval>& result)
 {
 	// Checks that the maximum size has not been reached
-	assert(this->xResults.size() < numPointsPerAxis);
+	ARIADNE_ASSERT(this->xResults.size() < numPointsPerAxis);
 	// Adds the value
 	this->xResults.push_back(result);
 }
@@ -150,7 +201,7 @@ void Parametric2DBisectionResults::insertXValue(const std::pair<Interval,Interva
 void Parametric2DBisectionResults::insertYValue(const std::pair<Interval,Interval>& result)
 {
 	// Checks that the maximum size has not been reached
-	assert(this->yResults.size() < numPointsPerAxis);
+	ARIADNE_ASSERT(this->yResults.size() < numPointsPerAxis);
 	// Adds the value
 	this->yResults.push_back(result);
 }
@@ -158,7 +209,7 @@ void Parametric2DBisectionResults::insertYValue(const std::pair<Interval,Interva
 
 void Parametric2DBisectionResults::draw() const
 {
-	assert(this->areAllResultsAvailable());
+	ARIADNE_ASSERT(this->areAllResultsAvailable());
 
 	// Initializes the figure
 	Figure fig;

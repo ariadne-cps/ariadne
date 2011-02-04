@@ -32,20 +32,21 @@ int main(int argc,char *argv[])
 		analyserVerbosity = atoi(argv[1]);
 
     /// Set the system parameters
-	const RealConstant a("a",0.02);
-	const RealConstant b("b",0.3);
-	const RealConstant T("T",4.0);
-	const RealConstant hmin("hmin",5.5);
-	const RealConstant hmax("hmax",8.0);
-	const RealConstant delta("Delta",Interval(0.0,0.1));
+	RealConstant a("a",0.02);
+	RealConstant b("b",Interval(0.3,0.32863));
+	RealConstant T("T",4.0);
+	RealConstant hmin("hmin",Interval(5.0,6.0)); // 5.5;
+	RealConstant hmax("hmax",Interval(7.5,8.5)); // 8.0;
+	RealConstant delta("Delta",0.1);
+
+	RealConstantSet parameters;
+	parameters.insert(hmin);
+	parameters.insert(hmax);
+	Float tolerance = 0.1;
 
     // System variables
     RealVariable x("x");    // water level
     RealVariable y("y");    // valve aperture
-
-	// The parameter to modify and the tolerance
-	RealConstant parameter = delta;
-	Float tolerance = 1e-1;
 
     // Create the tank automaton
 
@@ -144,6 +145,8 @@ int main(int argc,char *argv[])
 		
 		// Accessible constants
 		controller.register_accessible_constant(delta);
+		controller.register_accessible_constant(hmin);
+		controller.register_accessible_constant(hmax);
 
 		// Two states:
 		// Rising (water level is increasing)
@@ -207,10 +210,13 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 7;
+	analyser.parameters().highest_maximum_grid_depth = 6;
 
 	// Perform the analysis
-	Interval safe_int, unsafe_int;
-	make_lpair(safe_int,unsafe_int) = analyser.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
-	analyser.log_parametric_1d_bisection_results(safe_int,unsafe_int,parameter.value());
+	//Interval safe_int, unsafe_int;
+	//make_lpair(safe_int,unsafe_int) = analyser.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
+	//analyser.log_parametric_1d_bisection_results(safe_int,unsafe_int,parameter.value());
+
+	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
+	cout << "Outcomes: " << outcomes << "\n";
 }

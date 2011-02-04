@@ -81,10 +81,13 @@ public:
 
 	virtual std::ostream& write(std::ostream&) const;
 
-	/** Inserts a result */
+	/** Draws the result in the current folder, with filename starting with \a basename. */
+	void draw(const std::string& basename) const;
+
+	/** Inserts a result. */
 	void push_back(const ParametricVerificationOutcome& result);
 
-	/** The current outcomes */
+	/** The current outcomes. */
 	const std::list<ParametricVerificationOutcome>& getOutcomes() const;
 
 };

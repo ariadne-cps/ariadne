@@ -268,20 +268,24 @@ HybridReachabilityAnalyser::_getSplitFactorsOfConstants(SystemType& system,
 	system.substitute(working_constants);
 
 	// While the ratio is sufficiently high, gets the best constant and substitutes half its interval into the system
+	// If the maximum ratio is zero, then no constant affects the derivatives and splitting them would neither be necessary nor correct
+	// given the current unfair implementation of _getBestConstantToSplit
 	Float maxRatio = _getMaxDerivativeWidthRatio(system, mid_der_widths);
-	Float ratio = maxRatio;
-	while (ratio > targetRatioPerc*maxRatio) {
-		RealConstant bestConstant = _getBestConstantToSplit(system, working_constants, mid_der_widths);
-		Interval originalInterval = bestConstant.value();
-		Float quarterIntervalWidth = originalInterval.width()/4;
-		Interval halvedInterval = Interval(originalInterval.midpoint()-quarterIntervalWidth,
-										   originalInterval.midpoint()+quarterIntervalWidth);
-		system.substitute(bestConstant,Real(halvedInterval));
-		result[bestConstant]++;
-		ratio = _getMaxDerivativeWidthRatio(system, mid_der_widths);
-	}
+	if (maxRatio > 0) {
+		Float ratio = maxRatio;
+		while (ratio > targetRatioPerc*maxRatio) {
+			RealConstant bestConstant = _getBestConstantToSplit(system, working_constants, mid_der_widths);
+			Interval originalInterval = bestConstant.value();
+			Float quarterIntervalWidth = originalInterval.width()/4;
+			Interval halvedInterval = Interval(originalInterval.midpoint()-quarterIntervalWidth,
+											   originalInterval.midpoint()+quarterIntervalWidth);
+			system.substitute(bestConstant,Real(halvedInterval));
+			result[bestConstant]++;
+			ratio = _getMaxDerivativeWidthRatio(system, mid_der_widths);
+		}
 
-	system.substitute(working_constants);
+		system.substitute(working_constants);
+	}
 
 	return result;
 }
@@ -291,7 +295,6 @@ HybridReachabilityAnalyser::_getBestConstantToSplit(SystemType& system, const Re
 													const HybridFloatVector& referenceWidths) const
 {
 	RealConstant bestConstant = *working_constants.begin();
-
 	Float bestLocalRatio = std::numeric_limits<Float>::infinity();
 
 	for (RealConstantSet::const_iterator constant_it = working_constants.begin();
@@ -347,7 +350,7 @@ Float
 HybridReachabilityAnalyser::_getMaxDerivativeWidthRatio(const HybridAutomaton& system,
 														const HybridFloatVector& referenceWidths) const
 {
-	ARIADNE_ASSERT_MSG(_parameters->bounding_domain.size() == system.state_space().size(), "The bounding domain must be defined");
+	ARIADNE_ASSERT_MSG(_parameters->bounding_domain.size() == system.state_space().size(), "The bounding domain must be defined.");
 
 	Float result = 0;
 
@@ -2441,6 +2444,8 @@ HybridReachabilityAnalyser::parametric_verify(SystemType& system,
 											  const RealConstantSet& params,
 											  const Float& tolerance)
 {
+	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter for verification.");
+
 	ParametricVerificationOutcomeList result(params);
 
 	std::list<RealConstantSet> working_list;

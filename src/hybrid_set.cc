@@ -25,5 +25,20 @@
 
 namespace Ariadne {
 
+HybridBoxes
+hull(const HybridBoxes& box1, const HybridBoxes& box2)
+{
+	ARIADNE_ASSERT_MSG(box1.size() == box2.size(),"The two hybrid boxes must have the same number of locations.");
+
+	HybridBoxes result;
+	for (HybridBoxes::const_iterator box1_it = box1.begin(); box1_it != box2.end(); ++box1_it) {
+		HybridBoxes::const_iterator box2_it = box2.find(box1_it->first);
+		ARIADNE_ASSERT_MSG(box2_it != box2.end(),"The location " << box1_it->first.name() << " is not present in both hybrid boxes.");
+		result.insert(std::pair<DiscreteState,Box>(box1_it->first,hull(box1_it->second,box2_it->second)));
+	}
+
+	return result;
+}
+
 
 } // namespace Ariadne

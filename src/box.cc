@@ -139,4 +139,16 @@ Box make_box(const std::string& str)
     return Box(vec.size(),&vec[0]);
 }
 
+Box hull(const Box& box1, const Box& box2)
+{
+	ARIADNE_ASSERT(box1.dimension() == box2.dimension());
+
+	std::vector<Interval> vec(box1.dimension());
+
+	for (uint i=0; i<box1.dimension(); ++i)
+		vec[i] = hull(box1[i],box2[i]);
+
+	return Box(vec.size(),&vec[0]);
+}
+
 } //namespace Ariadne

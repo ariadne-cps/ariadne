@@ -640,7 +640,8 @@ class HybridGridTreeSet
     */
 };
 
-
+HybridBoxes
+hull(const HybridBoxes& box1, const HybridBoxes& box2);
 
 template<class DS, class HBS> inline
 HybridSetConstIterator<DS,HBS>::

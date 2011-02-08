@@ -43,10 +43,10 @@ int main(int argc,char *argv[])
 	RealConstant delta("delta",Interval(-0.1,0.1)); // An indeterminacy in guards evaluation
 
 	/// Analysis parameters
-	RealConstant xParam = Kp;
-	RealConstant yParam = bfp;
-	float tolerance = 1e-1;
-	unsigned numPointsPerAxis = 11;
+	RealConstantSet parameters;
+	parameters.insert(Kp);
+	parameters.insert(bfp);
+	Float tolerance = 0.1;
 
     /// Create a HybridAutomaton object
     HybridAutomaton system("watertank-mono-pr");
@@ -166,5 +166,8 @@ int main(int argc,char *argv[])
 	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
 	//analyser.log_parametric_results(safe_int,unsafe_int,parameter.value());
 
-	analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	//analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+
+	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
+	outcomes.draw(system.name());
 }

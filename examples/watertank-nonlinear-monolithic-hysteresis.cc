@@ -42,10 +42,10 @@ int main(int argc,char *argv[])
 	RealConstant Delta("Delta",0.1);
 
 	/// Analysis parameters
-	RealConstant xParam = hmin;
-	RealConstant yParam = hmax;
-	float tolerance = 1e-1;
-	unsigned numPointsPerAxis = 11;
+	RealConstantSet parameters;
+	parameters.insert(hmin);
+	parameters.insert(hmax);
+	Float tolerance = 0.1;
 
     /// Create a HybridAutomton object
     HybridAutomaton system("watertank-nl-mono-hy");
@@ -170,6 +170,8 @@ int main(int argc,char *argv[])
 
 	//analyser.verify_iterative(system, initial_set, safe_box, domain);
 
-	analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+	//analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
+	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
+	outcomes.draw(system.name());
 }

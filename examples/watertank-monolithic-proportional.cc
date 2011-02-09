@@ -23,6 +23,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include "examples.h"
 
 using namespace Ariadne;
 
@@ -38,8 +39,8 @@ int main(int argc,char *argv[])
 	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
 	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
-	RealConstant bfp("bfp",Interval(0.01,0.6)); // The product beta*f(p) Interval(0.3,0.32863)
-	RealConstant Kp("Kp",Interval(0.01,0.6)); // The gain of the proportional controller
+	RealConstant bfp("bfp",Interval(0.3,0.32863)); // The product beta*f(p) Interval(0.3,0.32863)
+	RealConstant Kp("Kp",0.6); // The gain of the proportional controller
 	RealConstant delta("delta",Interval(-0.1,0.1)); // An indeterminacy in guards evaluation
 
 	/// Analysis parameters
@@ -160,7 +161,7 @@ int main(int argc,char *argv[])
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
 
-	//analyser.verify_iterative(system, initial_set, safe_box, domain);
+	analyser.verify_iterative(system, initial_set, safe_box, domain);
 
 	//Interval safe_int, unsafe_int;
 	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
@@ -168,6 +169,6 @@ int main(int argc,char *argv[])
 
 	//analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
-	outcomes.draw(system.name());
+	//ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
+	//outcomes.draw(system.name());
 }

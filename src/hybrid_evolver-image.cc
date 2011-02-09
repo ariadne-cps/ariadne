@@ -317,7 +317,7 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
     }
 }
 
-bool
+DisproveData
 ImageSetHybridEvolver::
 _lower_evolution_disprove(EnclosureListType& final_sets,
 						  EnclosureListType& reach_sets,
@@ -337,8 +337,8 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
     const Float maximum_time=maximum_hybrid_time.continuous_time();
 
-    // Flag to notify the disproving
-    bool isDisproved = false;
+    // The disprovement information for the result
+    DisproveData disproveData(system.state_space());
 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
 
@@ -443,16 +443,15 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
         } else {
             // Compute evolution and get the result for this working set
-            bool current_isDisproved = this->_lower_evolution_disprove_step(working_sets,
+            DisproveData localDisproveData = this->_lower_evolution_disprove_step(working_sets,
 																		    final_sets,reach_sets,intermediate_sets,
 																			system,current_set,maximum_hybrid_time,
 																			reach,disprove_bounds);
-
-            // Updates the global isDisproved
-            isDisproved = isDisproved || current_isDisproved;
-            // If we desire to skip the remaining evolution after disproving, and we have disproved, then we return true
-            if (skip_if_disproved && current_isDisproved)
-				return true;
+            // Updates the global falsification info
+            disproveData.updateWith(localDisproveData);
+            // If we desire to skip the remaining evolution after disproving, and we have disproved, then we return
+            if (skip_if_disproved && disproveData.getIsDisproved())
+				return disproveData;
         }
 
 
@@ -469,7 +468,7 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
         }
     }
 
-    return isDisproved;
+    return disproveData;
 }
 
 void
@@ -1175,8 +1174,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 }
 
 
-// Old evolution step using detection data
-bool
+DisproveData
 ImageSetHybridEvolver::
 _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
                 EnclosureListType& final_sets,
@@ -1275,8 +1273,8 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
 
     const double SMALL_RELATIVE_TIME=1./16;
 
-    // The flag notifying if we have disproved
-    bool isDisproved = false;
+    // The falsification info result
+    DisproveData disproveData(system.state_space());
 
     // Extract information about the working set
     DiscreteState location(0);
@@ -1367,13 +1365,17 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
         }
 
         // No need for further work this step
-        return false;
+        return disproveData;
 
     } else if(possibly(initially_active_events[blocking_event])) {
         ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition.");
         reach_sets.insert(make_pair(location,set_model));
         intermediate_sets.insert(make_pair(location,set_model));
-        return false;
+
+        disproveData.updateReachBounds(location,set_model.bounding_box());
+        disproveData.updateEpsilon(location,set_model.bounding_box().halfWidths());
+
+        return disproveData;
     }
 
     // Compute continuous evolution
@@ -1484,8 +1486,13 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     uint numDivisions = 10;
     HybridBoxes::const_iterator bounds_it = disprove_bounds.find(location);
     ARIADNE_LOG(2,"Disproving reachable set against box " << bounds_it->second << " ... \n");
-    isDisproved = definitely(_check_bounds(numDivisions,reachable_set,bounds_it->second));
+    bool isDisproved = definitely(_check_bounds(numDivisions,reachable_set,bounds_it->second));
     ARIADNE_LOG(2,"Result: " << isDisproved << "\n");
+
+    // Updates all the fields of the falsification info
+    disproveData.updateIsDisproved(isDisproved);
+    disproveData.updateReachBounds(location,reachable_set.bounding_box());
+    disproveData.updateEpsilon(location,reachable_set.bounding_box().halfWidths());
 
     if(blocking_events.size()!=1) {
         // No further evolution
@@ -1537,7 +1544,7 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
         }
     }
 
-    return isDisproved;
+    return disproveData;
 }
 
 

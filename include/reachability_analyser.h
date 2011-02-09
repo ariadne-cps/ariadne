@@ -75,6 +75,24 @@ template<class ES> class HybridDiscretiser;
 	<br>	5: Remaining analysis methods implemented from reachability_analyser_interface.h;
 	<br>	6: Internal methods for the remaining analysis methods.
  */
+
+struct DominanceSystemBundle
+{
+public:
+	HybridAutomaton& _system;
+	HybridImageSet& _initial_set;
+	HybridBoxes& _domain;
+	std::vector<uint>& _projection;
+
+	HybridAutomaton& getSystem() { return _system; }
+	HybridImageSet& getInitialSet() { return _initial_set; }
+	HybridBoxes& getDomain() { return _domain; }
+	std::vector<uint>& getProjection() { return _projection; }
+
+	DominanceSystemBundle(HybridAutomaton& system, HybridImageSet& initial_set, HybridBoxes& domain, std::vector<uint>& projection) :
+							_system(system), _initial_set(initial_set), _domain(domain), _projection(projection) { }
+};
+
 class HybridReachabilityAnalyser
     : public Loggable
 {
@@ -182,8 +200,8 @@ class HybridReachabilityAnalyser
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
          * lower semantics; the method performs periodical discretisations and checks the new reached region for inclusion
          * The resulting set is a subset of the outer-approximation of the whole evolution set.
-         * \return The reach set and the disproving result (true if disproved, false otherwise). */
-    virtual std::pair<SetApproximationType,bool> lower_chain_reach(SystemType& system,
+         * \return The reach set and the falsification information. */
+    virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(SystemType& system,
 																	   const HybridImageSet& initial_set) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
@@ -259,6 +277,12 @@ class HybridReachabilityAnalyser
 													   const HybridBoxes& domain,
 													   const RealConstantSet& params,
 													   const Float& tolerance);
+
+	/**
+	 * \brief Performs dominance checking.
+	 * \details Verifies if the \a dominating system dominates the \a dominated system.
+	 */
+	tribool dominance(DominanceSystemBundle& dominating, DominanceSystemBundle& dominated);
 
     //@}
 
@@ -351,7 +375,7 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
     std::pair<SetApproximationType,bool> _upper_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
-    std::pair<SetApproximationType,bool> _lower_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
+    std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
 
 	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe inside \a domain,
 		in an iterative way by tuning the evolution/analysis parameters. In addition, the \a locked_constants set is not allowed to
@@ -407,7 +431,19 @@ class HybridReachabilityAnalyser
 							   const RealConstantSet& locked_constants);
 
 	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
-	void _tuneParameters(SystemType& system);
+	void _tuneVerificationParameters(SystemType& system);
+
+	/*! \brief Tune the parameters for the next dominance iteration, given a bundle of information around a system. */
+	void _tuneDominanceParameters(DominanceSystemBundle& systemBundle);
+
+	/*! \brief Performs the positive part of dominance checking. */
+	bool _dominance_positive(DominanceSystemBundle& dominating, DominanceSystemBundle& dominated);
+
+	/*! \brief Performs the negative part of dominance checking. */
+	bool _dominance_negative(DominanceSystemBundle& dominating, DominanceSystemBundle& dominated);
+
+	/*! \brief Enlarges the \a box of \a epsilon. */
+	HybridBoxes _enlarge_of_epsilon(const HybridBoxes& box, const HybridFloatVector& epsilon);
 };
 
 template<class HybridEnclosureType>

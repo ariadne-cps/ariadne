@@ -1,7 +1,7 @@
 /***************************************************************************
- *            watertank-monolithic-hysteresis-verify.cc
+ *            watertank-monolithic-hysteresis.h
  *
- *  Copyright  2010  Luca Geretti
+ *  Copyright  2011  Luca Geretti
  *
  ****************************************************************************/
 
@@ -21,34 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef WATERTANK_MONOLITHIC_HYSTERESIS_H_
+#define WATERTANK_MONOLITHIC_HYSTERESIS_H_
+
 #include <cstdarg>
 #include "ariadne.h"
 
-using namespace Ariadne;
+namespace Ariadne {
 
-
-int main(int argc,char *argv[])
+HybridAutomaton getWatertankMonolithicHysteresis()
 {
-	int analyserVerbosity = 1;
-	if (argc > 1)
-		analyserVerbosity = atoi(argv[1]);
+	HybridAutomaton system("watertank-mono-hy");
 
     /// Set the system parameters
 	RealConstant a("a",0.02);
 	RealConstant b("b",Interval(0.3,0.32863));
 	RealConstant T("T",4.0);
-	RealConstant hmin("hmin",Interval(5.0,6.0)); // 5.5;
-	RealConstant hmax("hmax",Interval(7.5,8.5)); // 8.0;
+	RealConstant hmin("hmin",5.5);
+	RealConstant hmax("hmax",8.0);
 	RealConstant Delta("Delta",0.1);
 
-	RealConstantSet parameters;
-	parameters.insert(hmin);
-	parameters.insert(hmax);
-	Float tolerance = 0.25;
-
-    /// Create a HybridAutomton object
-    HybridAutomaton system("watertank-mono-hy");
-  
     // Accessible constants
     system.register_accessible_constant(Delta);
     system.register_accessible_constant(T);
@@ -61,15 +53,15 @@ int main(int argc,char *argv[])
     DiscreteState closed("closed");
     DiscreteState opening("opening");
     DiscreteState closing("closing");
-  
+
     /// Create the discrete events
     DiscreteEvent b_opening("b_opening");
     DiscreteEvent e_opening("e_opening");
     DiscreteEvent b_closing("b_closing");
     DiscreteEvent e_closing("e_closing");
-    
+
     // System variables
-    RealVariable x("x");            // water level
+    RealVariable x("x");    // water level
     RealVariable y("y");    // valve aperture
     List<RealVariable> varlist;
     varlist.append(x);
@@ -79,12 +71,12 @@ int main(int argc,char *argv[])
     RealExpression x_opening_closing = -a*x + b*y;
     RealExpression x_opened = -a*x + b;
     RealExpression x_closed = -a*x;
-    
+
     // Valve Aperture dynamics
     RealExpression y_opening = 1.0/T;
     RealExpression y_closing = -1.0/T;
     RealExpression y_opened_closed = 0.0;
-    
+
     // Dynamics at the different modes
     List<RealExpression> exprlist;
     exprlist.append(x_opened);
@@ -96,8 +88,8 @@ int main(int argc,char *argv[])
     exprlist[1] = y_opening;
     VectorFunction dyn_opening(exprlist, varlist);
     exprlist[1] = y_closing;
-    VectorFunction dyn_closing(exprlist, varlist);    
-      
+    VectorFunction dyn_closing(exprlist, varlist);
+
     // Reset functions
     RealExpression idx = x;
     RealExpression zero = 0.0;
@@ -121,13 +113,13 @@ int main(int argc,char *argv[])
 
     // Create the invariants.
     // Invariants are true when f(x) = Ax + b < 0
-    // forced transitions do not need an explicit invariant, 
+    // forced transitions do not need an explicit invariant,
     // we need only the invariants for location open and closed
     RealExpression x_leq_max = x - hmax - Delta;    // x <= hmax + Delta
     ScalarFunction inv_opened(x_leq_max, varlist);
     RealExpression x_geq_min = -x + hmin - Delta;   // x >= hmin - Delta
     ScalarFunction inv_closed(x_geq_min, varlist);
-  
+
     /// Build the automaton
     system.new_mode(opened,dyn_opened);
     system.new_mode(closing,dyn_closing);
@@ -142,36 +134,10 @@ int main(int argc,char *argv[])
     system.new_unforced_transition(b_opening,closed,opening,reset_y_zero,guard_b_opening);
     system.new_forced_transition(e_opening,opening,opened,reset_y_one,guard_e_opening);
 
-
-	// Verification information
-
-	// The initial values
-	HybridImageSet initial_set;
-	initial_set[DiscreteState("opened")] = Box(2, 5.5,5.5, 1.0,1.0);
-
-	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
-
-	// The domain
-	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
-
-	/// Verification
-
-	// Create an evolver and analyser objects, then set their verbosity
-	HybridEvolver evolver;
-	evolver.verbosity = 0;
-	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_set_model_reduction = true;
-	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 6;
-
-	//cout << analyser.verify_iterative(system, initial_set, safe_box, domain);
-
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
-
-	cout << "Outcomes: " << outcomes << "\n";
-
-	outcomes.draw(system.name());
+	return system;
 }
+
+
+}
+
+#endif /* WATERTANK_MONOLITHIC_HYSTERESIS_H_ */

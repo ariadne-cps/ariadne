@@ -354,6 +354,7 @@ inline Interval intersection(Interval i1, Interval i2) {
 }
 
 inline Interval hull(Interval i1, Interval i2) {
+	if (i1.empty() && i2.empty()) { return i1; }
     return Interval(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
 }
 
@@ -524,6 +525,46 @@ inline Interval sub(Float x1, Interval i2)
     volatile double ru=x1v-i2l;
     set_rounding_mode(rnd);
     return Interval(rl,ru);
+}
+
+inline Interval shrink_in(Interval i1, Float x2)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& x2v=x2;
+    set_rounding_mode(upward);
+    volatile double rl=i1l+x2v;
+    set_rounding_mode(downward);
+    volatile double ru=i1u-x2v;
+    set_rounding_mode(rnd);
+    if (rl > ru) {
+    	Interval result;
+    	result.make_empty();
+    	return result;
+    }
+    else
+    	return Interval(rl,ru);
+}
+
+inline Interval shrink_out(Interval i1, Float x2)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double& i1l=const_cast<volatile double&>(i1.lower());
+    volatile double& i1u=const_cast<volatile double&>(i1.upper());
+    volatile double& x2v=x2;
+    set_rounding_mode(downward);
+    volatile double rl=i1l+x2v;
+    set_rounding_mode(upward);
+    volatile double ru=i1u-x2v;
+    set_rounding_mode(rnd);
+    if (rl > ru) {
+    	Interval result;
+    	result.make_empty();
+    	return result;
+    }
+    else
+    	return Interval(rl,ru);
 }
 
 inline Interval sub_ivl(Float x1, Float x2)

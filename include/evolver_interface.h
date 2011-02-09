@@ -30,6 +30,7 @@
 
 #include "evolution_parameters.h"
 #include "evolution_statistics.h"
+#include "disprove_data.h"
 
 namespace Ariadne {
 
@@ -117,7 +118,7 @@ class EvolverInterface
     //! \brief Compute an approximation to the evolved and reachable sets under lower semantics for chain reachability,
     //! where the disproving result is provided.
     virtual
-    tuple<EnclosureListType,EnclosureListType,bool>
+    tuple<EnclosureListType,EnclosureListType,DisproveData>
     lower_chain_reach_evolve_disprove(const SystemType& system,
 									  const EnclosureType& initial_set,
 									  const TimeType& time, const HybridBoxes& disprove_bounds,

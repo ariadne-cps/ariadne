@@ -9,6 +9,7 @@ bin_PROGRAMS= tutorial \
 			  watertank-monolithic-hysteresis watertank-monolithic-proportional \
 			  watertank-nonlinear-monolithic-hysteresis watertank-nonlinear-monolithic-proportional \
               watertank-compositional-hysteresis watertank-aasap watertank-time \
+              watertank-monolithic-dominance \
 			  pss-revised \
               boost_power_converter \
               bouncingball 3bouncingballs ecoli sinusoid-sin \
@@ -37,7 +38,7 @@ watertank_monolithic_proportional_SOURCES= watertank-monolithic-proportional.cc
 watertank_monolithic_hysteresis_SOURCES= watertank-monolithic-hysteresis.cc
 watertank_nonlinear_monolithic_proportional_SOURCES= watertank-nonlinear-monolithic-proportional.cc
 watertank_nonlinear_monolithic_hysteresis_SOURCES= watertank-nonlinear-monolithic-hysteresis.cc
-
+watertank_monolithic_dominance_SOURCES = watertank-monolithic-dominance.cc examples.h
 
 examples: $(bin_PROGRAMS)
 

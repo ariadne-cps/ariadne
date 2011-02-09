@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file parametric2d.h
- *  \brief Data structures for handling parametric analysis in 2D.
+/*! \file parametric.h
+ *  \brief Data structures for handling parametric analysis.
  */
 
 #include "ariadne.h"

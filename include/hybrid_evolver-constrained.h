@@ -211,7 +211,7 @@ class ConstrainedImageSetHybridEvolver
 
     //! \brief Compute an approximation to the evolution set under the given semantics, returning the reached and final sets, and the information
 	//! on having disproved.
-	tuple<EnclosureListType,EnclosureListType,bool> lower_chain_reach_evolve_disprove(const SystemType& system, const EnclosureType& initial_set,
+	tuple<EnclosureListType,EnclosureListType,DisproveData> lower_chain_reach_evolve_disprove(const SystemType& system, const EnclosureType& initial_set,
     																					  const TimeType& time, const HybridBoxes& disprove_bounds,
     																					  const bool& skip_if_disproved) const {
             ARIADNE_NOT_IMPLEMENTED; }

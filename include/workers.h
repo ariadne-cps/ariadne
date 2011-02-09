@@ -303,11 +303,11 @@ public:
 	  _accuracy(accuracy),
 	  _concurrency(concurrency),
 	  _disprove_bounds(disprove_bounds),
-	  _skip_if_disproved(skip_if_disproved)
+	  _skip_if_disproved(skip_if_disproved),
+	  _falsInfo(DisproveData(sys.state_space()))
     {
     	_reach = HGTS(sys.grid());
 		_evolve_global = HGTS(sys.grid());
-		_isDisproved = false;
     }
  
     ~LowerChainReachWorker()
@@ -315,7 +315,7 @@ public:
     }
 
     // Create the threads and produce the required results
-    tuple<std::pair<HUM,HUM>,EL,HGTS,bool> get_result()
+    tuple<std::pair<HUM,HUM>,EL,HGTS,DisproveData> get_result()
     {
 		// Create and start the threads
 		_start();
@@ -328,7 +328,7 @@ public:
 			_adjoined_evolve_sizes[evolve_global_it->first] = evolve_global_it->second.size();
 
 		// Get the result
-		return make_tuple<std::pair<HUM,HUM>,EL,HGTS,bool>(make_pair<HUM,HUM>(_adjoined_evolve_sizes,_superposed_evolve_sizes),_final_enclosures,_reach,_isDisproved);
+		return make_tuple<std::pair<HUM,HUM>,EL,HGTS,DisproveData>(make_pair<HUM,HUM>(_adjoined_evolve_sizes,_superposed_evolve_sizes),_final_enclosures,_reach,_falsInfo);
     }
  
 private:
@@ -348,12 +348,12 @@ private:
 	EL _final_enclosures;
 	// The reached region
 	HGTS _reach;
-	// The information whether we have disproved
-	bool _isDisproved;
 	// The disprove bounds for verification
 	const HybridBoxes& _disprove_bounds;
 	// Whether to skip the evolution as soon as a disproving is obtained
 	const bool& _skip_if_disproved;
+	// The falsification info
+	DisproveData _falsInfo;
 
 	// The various threads
     std::list<boost::shared_ptr<boost::thread> > _m_threads;
@@ -377,7 +377,7 @@ private:
 			_inp_mutex.lock();
 
 			// If all initial enclosures have been picked or if we have disproved and we must skip
-			if (_initial_enclosures.empty() || (_skip_if_disproved && _isDisproved))
+			if (_initial_enclosures.empty() || (_skip_if_disproved && _falsInfo.getIsDisproved()))
 			{
 				// Release the lock for input
 				_inp_mutex.unlock();					
@@ -393,14 +393,14 @@ private:
 				// Release the lock for input
 				_inp_mutex.unlock();
 
-				// The current information on the disproving
-				bool current_isDisproved;
+				// The current falsification info
+				DisproveData current_falsInfo(_sys.state_space());
 
 				HGTS current_reach, current_evolve;
 				ELS current_reach_enclosures, current_evolve_enclosures;
 
 				// Get the enclosures from the initial enclosure, in a lock_time flight
-				make_ltuple<ELS,ELS,bool>(current_reach_enclosures,current_evolve_enclosures,current_isDisproved) =
+				make_ltuple<ELS,ELS,DisproveData>(current_reach_enclosures,current_evolve_enclosures,current_falsInfo) =
 										_discretiser->evolver()->lower_chain_reach_evolve_disprove(_sys,current_initial_enclosure,_time,
 																						  _disprove_bounds, _skip_if_disproved);
 
@@ -420,14 +420,13 @@ private:
 
 				// Adjoin the current reach to the final reach
 			    _reach.adjoin(current_reach);
+			    // Update the falsification info
+			    _falsInfo.updateWith(current_falsInfo);
 		
 				// Add the current_enclosures to the final enclosures
 				for (ELS::locations_const_iterator loc_it = current_evolve_enclosures.locations_begin(); loc_it != current_evolve_enclosures.locations_end(); loc_it++)
 					for (ListSet<CE>::const_iterator list_it = loc_it->second.begin(); list_it != loc_it->second.end(); list_it++)
 						_final_enclosures.push_back(EnclosureType(loc_it->first,*list_it));
-
-				// Update the global disproving
-				_isDisproved = _isDisproved || current_isDisproved;
 
 				// Release the lock for output
 				_out_mutex.unlock();

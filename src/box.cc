@@ -101,6 +101,33 @@ std::vector<Point> Box::vertices() const {
     return v;
 }
 
+Box Box::project(const std::vector<uint>& dimensions) const {
+	ARIADNE_ASSERT(dimensions.size() <= this->size());
+	Vector<Interval> vec(dimensions.size());
+	for (uint i=0; i<dimensions.size();++i) {
+		ARIADNE_ASSERT(dimensions[i] < this->size());
+		vec[i] = (*this)[dimensions[i]];
+	}
+	return Box(vec);
+}
+
+Box Box::shrink_in(const Vector<Float>& epsilon) const {
+	ARIADNE_ASSERT(this->size() == epsilon.size());
+	Vector<Interval> vec(this->size());
+	for (uint i=0; i<this->size();++i)
+		vec[i] = Ariadne::shrink_in((*this)[i],epsilon[i]);
+
+	return Box(vec);
+}
+
+Box Box::shrink_out(const Vector<Float>& epsilon) const {
+	ARIADNE_ASSERT(this->size() == epsilon.size());
+	Vector<Interval> vec(this->size());
+	for (uint i=0; i<this->size();++i)
+		vec[i] = Ariadne::shrink_out((*this)[i],epsilon[i]);
+
+	return Box(vec);
+}
 
 void Box::draw(CanvasInterface& c) const
 {
@@ -139,16 +166,25 @@ Box make_box(const std::string& str)
     return Box(vec.size(),&vec[0]);
 }
 
+Box unbounded_box(const int& n)
+{
+	static const Interval unbounded_int(-std::numeric_limits<Float>::infinity(),std::numeric_limits<Float>::infinity());
+
+	Vector<Interval> vec(n,unbounded_int);
+
+	return Box(vec);
+}
+
 Box hull(const Box& box1, const Box& box2)
 {
 	ARIADNE_ASSERT(box1.dimension() == box2.dimension());
 
-	std::vector<Interval> vec(box1.dimension());
+	Vector<Interval> vec(box1.dimension());
 
 	for (uint i=0; i<box1.dimension(); ++i)
-		vec[i] = hull(box1[i],box2[i]);
+		vec[i] = (box2[i].empty() ? box1[i] : hull(box1[i],box2[i]));
 
-	return Box(vec.size(),&vec[0]);
+	return Box(vec);
 }
 
 } //namespace Ariadne

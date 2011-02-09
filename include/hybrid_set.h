@@ -59,6 +59,8 @@ class HybridGridTreeSet;
 class HybridImageSet;
 class HybridConstraintSet;
 
+typedef std::map<DiscreteState,Vector<Float> > HybridFloatVector;
+
 
 template<class HBS> class HybridBasicSetExpression { };
 template<class HDS> class HybridDenotableSetExpression { };
@@ -105,6 +107,21 @@ class HybridSpace
     locations_const_iterator locations_end() const {
         return this->std::map<DiscreteState,uint>::end(); }
 };
+
+HybridBoxes
+hull(const HybridBoxes& box1, const HybridBoxes& box2);
+
+HybridBoxes
+shrink_in(const HybridBoxes& box, const HybridFloatVector& epsilon);
+
+HybridBoxes
+shrink_out(const HybridBoxes& box, const HybridFloatVector& epsilon);
+
+Box
+project(const HybridBoxes& box, const std::vector<uint>& dimensions);
+
+HybridBoxes
+unbounded_hybrid_box(const HybridSpace& hspace);
 
 inline
 HybridBoxes
@@ -639,9 +656,6 @@ class HybridGridTreeSet
       ar & static_cast<std::map<int,GridTreeSet>&>(*this); }
     */
 };
-
-HybridBoxes
-hull(const HybridBoxes& box1, const HybridBoxes& box2);
 
 template<class DS, class HBS> inline
 HybridSetConstIterator<DS,HBS>::

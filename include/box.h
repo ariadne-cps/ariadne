@@ -66,6 +66,13 @@ class Box
         return Box(n,Interval(-1,1));
     }
 
+    //! The empty box \f$[+\infty,-\infty]^n\f% in \a n dimensions.
+    static Box empty_box(uint n) {
+    	Interval empty(0,0);
+    	empty.make_empty();
+    	return Box(n,empty);
+    }
+
     //! The upper quadrant box \f$[0,infty]^n\f$ in \a n dimensions.
     static Box upper_quadrant(uint n) {
         return Box(n,Interval(0,inf<Float>()));
@@ -89,6 +96,22 @@ class Box
             dmax = max( dmax, (*this)[i].width() );
         }
         return up(dmax/2);
+    }
+
+    /** The widths of the box on each dimension */
+    Vector<Float> widths() const {
+    	Vector<Float> vec(this->size());
+    	for (uint i=0; i!=this->size(); ++i)
+    		vec[i] = (*this)[i].width();
+    	return vec;
+    }
+
+    /** Half the widths of the box on each dimension */
+    Vector<Float> halfWidths() const {
+    	Vector<Float> vec(this->size());
+    	for (uint i=0; i!=this->size(); ++i)
+    		vec[i] = (*this)[i].width()/2;
+    	return vec;
     }
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
@@ -190,12 +213,20 @@ class Box
         static_cast<Vector<Interval>&>(*this) += Vector<Interval>(this->dimension(),eps);
     }
 
+    //! \brief Creates a box with only the dimensions given by \a dimensions. */
+    Box project(const std::vector<uint>& dimensions) const;
+
+    //! \brief Creates a box shrinked of \a epsilon[i] on both bounds of each dimension i, with inner approximation. */
+    Box shrink_in(const Vector<Float>& epsilon) const;
+
+    //! \brief Creates a box shrinked of \a epsilon[i] on both bounds of each dimension i, with outer approximation. */
+    Box shrink_out(const Vector<Float>& epsilon) const;
+
     //! \brief Split into two along the largest side.
     std::pair<Box,Box> split() const { return Ariadne::split(*this); }
 
     //! \brief Split into two along side with index \a i.
     std::pair<Box,Box> split(uint i) const { return Ariadne::split(*this,i); };
-
 
     //! \brief Draw on a canvas.
     virtual void draw(CanvasInterface& c) const;
@@ -207,6 +238,9 @@ class Box
 };
 
 Box make_box(const std::string& str);
+
+/** \brief Creates an unbounded box of dimension \a n */
+Box unbounded_box(const int& n);
 
 /** \brief Provides a closed box that includes both \a box1 and \a box2.
  * \details The box is not enlarged to include the boxes in its interior. */

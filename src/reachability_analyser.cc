@@ -1204,7 +1204,7 @@ upper_chain_reach(SystemType& system,
 	return std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>(reach,isValid);
 }
 
-std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+std::pair<HybridReachabilityAnalyser::SetApproximationType,DisproveData>
 HybridReachabilityAnalyser::
 _lower_chain_reach(const SystemType& system,
 				  const HybridImageSet& initial_set) const
@@ -1233,8 +1233,7 @@ _lower_chain_reach(const SystemType& system,
 		disprove_bounds.insert(make_pair<DiscreteState,Box>(loc_it->first,bx));
 	}
 
-    // The disproving result
-    bool isDisproved = false;
+    DisproveData globalFalsInfo(system.state_space());
 
     // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
     EL initial_enclosures = _split_initial_set(initial_set,system.grid());
@@ -1260,8 +1259,8 @@ _lower_chain_reach(const SystemType& system,
 		GTS evolve;
 		// The new reach
 		GTS new_reach;
-		// The new disproving result
-		bool new_isDisproved = false;
+		// The falsification info
+		DisproveData newFalsInfo(system.state_space());
 
 		ARIADNE_LOG(6,"Initial enclosures size = " << initial_enclosures.size() << "\n");
 
@@ -1272,13 +1271,14 @@ _lower_chain_reach(const SystemType& system,
 		ARIADNE_LOG(6,"Evolving and discretising...\n");
 
 		// Compute and get the result
-		make_ltuple<std::pair<HUM,HUM>,EL,GTS,bool>(evolve_sizes,final_enclosures,
-																new_reach,new_isDisproved) = worker.get_result();
+		make_ltuple<std::pair<HUM,HUM>,EL,GTS,DisproveData>(evolve_sizes,final_enclosures,
+																new_reach,newFalsInfo) = worker.get_result();
 
-		// Update the disproving result flag
-		isDisproved = isDisproved || new_isDisproved;
 
 		ARIADNE_LOG(6,"Reach size before removal = " << new_reach.size() << "\n");
+
+		// Update the falsification info
+		globalFalsInfo.updateWith(newFalsInfo);
 
 		// Remove from the partial reached region the global reached region
 		new_reach.remove(reach);
@@ -1332,25 +1332,23 @@ _lower_chain_reach(const SystemType& system,
 	// Copies the reached region
 	_statistics->lower().reach = reach;
 
-	return make_pair<GTS,bool>(reach,isDisproved);
+	return make_pair<GTS,DisproveData>(reach,globalFalsInfo);
 }
 
-std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+std::pair<HybridReachabilityAnalyser::SetApproximationType,DisproveData>
 HybridReachabilityAnalyser::
 lower_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set) const
 {
-	bool isDisproved;
 	HybridGridTreeSet reach;
+	DisproveData disproveData(system.state_space());
 
 	std::list<RealConstantSet> split_set = _getSplitConstantsSet();
 
 	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
 	if (split_set.empty()) {
-		make_lpair<HybridGridTreeSet,bool>(reach,isDisproved) = _lower_chain_reach(system,initial_set);
+		make_lpair<HybridGridTreeSet,DisproveData>(reach,disproveData) = _lower_chain_reach(system,initial_set);
 	} else {
-		isDisproved = false;
-
 		RealConstantSet original_constants = system.nonsingleton_accessible_constants();
 
 		uint i = 0;
@@ -1362,21 +1360,23 @@ lower_chain_reach(SystemType& system,
 			system.substitute(*set_it);
 
 			HybridGridTreeSet localReach;
-			bool localIsDisproved;
 
-			make_lpair<HybridGridTreeSet,bool>(localReach,localIsDisproved) = _lower_chain_reach(system,initial_set);
+			DisproveData localFalsInfo(system.state_space());
+
+			make_lpair<HybridGridTreeSet,DisproveData>(localReach,localFalsInfo) = _lower_chain_reach(system,initial_set);
 
 			reach.adjoin(localReach);
-			_statistics->lower().reach = reach;
-			isDisproved = isDisproved || localIsDisproved;
+			disproveData.updateWith(localFalsInfo);
 
-			if (_parameters->skip_if_disproved && isDisproved)
+			_statistics->lower().reach = reach;
+
+			if (_parameters->skip_if_disproved && disproveData.getIsDisproved())
 				break;
 		}
 		system.substitute(original_constants);
 	}
 
-	return std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>(reach,isDisproved);
+	return std::pair<HybridReachabilityAnalyser::SetApproximationType,DisproveData>(reach,disproveData);
 }
 
 
@@ -1417,16 +1417,16 @@ HybridReachabilityAnalyser::
 _disprove(SystemType& system,
 		  const HybridImageSet& initial_set)
 {
-	bool result;
+	DisproveData disproveData(system.state_space());
 	HybridGridTreeSet reach;
 
 	ARIADNE_LOG(4,"Disproving... " << (verbosity == 4 ? "" : "\n"));
 
-	make_lpair<HybridGridTreeSet,bool>(reach,result) = lower_chain_reach(system,initial_set);
+	make_lpair<HybridGridTreeSet,DisproveData>(reach,disproveData) = lower_chain_reach(system,initial_set);
 
-	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (result ? "Disproved.\n" : "Not disproved.\n") );
+	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (disproveData.getIsDisproved() ? "Disproved.\n" : "Not disproved.\n") );
 
-	return result;
+	return disproveData.getIsDisproved();
 }
 
 
@@ -1861,7 +1861,7 @@ _setInitialParameters(SystemType& system,
 
 void 
 HybridReachabilityAnalyser::
-_tuneParameters(SystemType& system)
+_tuneVerificationParameters(SystemType& system)
 {
 	/* Tune the parameters:
 	 * a) evaluate the derivatives from the domain or the latest upper reached region;
@@ -1885,6 +1885,26 @@ _tuneParameters(SystemType& system)
 	// Maximum step size
 	_discretiser->parameters().hybrid_maximum_step_size = _getHybridMaximumStepSize(hmad,system.grid());
 	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
+}
+
+void
+HybridReachabilityAnalyser::
+_tuneDominanceParameters(DominanceSystemBundle& systemBundle)
+{
+	// Clears the previously reached regions
+	this->_statistics->upper().reach = HybridGridTreeSet();
+	this->_statistics->lower().reach = HybridGridTreeSet();
+	// Domain
+	_parameters->bounding_domain = systemBundle.getDomain();
+	// Dummy safe region
+	_parameters->safe_region = unbounded_hybrid_box(systemBundle.getSystem().state_space());
+	// General parameters
+	_tuneVerificationParameters(systemBundle.getSystem());
+	// Lock to grid time
+	_setLockToGridTime(systemBundle.getSystem());
+	// Split factors
+	RealConstantSet emptyLockedConstants;
+	_parameters->split_factors = _getSplitFactorsOfConstants(systemBundle.getSystem(),emptyLockedConstants,0.01);
 }
 
 tribool
@@ -1940,7 +1960,7 @@ _verify_iterative(SystemType& system,
 		ARIADNE_LOG(2, "DEPTH " << _parameters->maximum_grid_depth << "\n");
 
 		// Tune the parameters for the current iteration
-		_tuneParameters(system);
+		_tuneVerificationParameters(system);
 
 		// Perform the verification
 		tribool result = verify(system,initial_set);
@@ -2501,6 +2521,129 @@ HybridReachabilityAnalyser::parametric_verify(SystemType& system,
 		}
 		else
 			result.push_back(ParametricVerificationOutcome(configuration,verification));
+	}
+
+	return result;
+}
+
+tribool
+HybridReachabilityAnalyser::dominance(DominanceSystemBundle& dominating,
+									  DominanceSystemBundle& dominated)
+{
+	ARIADNE_LOG(1, "Dominance checking...\n");
+
+	// We are not required to skip if disproved, since we are not disproving safety
+	// We are however allowed to skip if unprovable, since we could not determine dominance anyway
+	_parameters->skip_if_disproved = false;
+	_parameters->skip_if_unprovable = true;
+
+    for(_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth;
+    	_parameters->maximum_grid_depth <= _parameters->highest_maximum_grid_depth;
+    	_parameters->maximum_grid_depth++)
+	{
+		ARIADNE_LOG(2, "DEPTH " << _parameters->maximum_grid_depth << "\n");
+
+		if (_dominance_positive(dominating, dominated)) {
+			ARIADNE_LOG(3, "Dominates.\n");
+			return true;
+		}
+
+		if (_dominance_negative(dominating, dominated)) {
+			ARIADNE_LOG(3, "Does not dominate.\n");
+			return false;
+		}
+    }
+
+	// Return indeterminate otherwise
+	ARIADNE_LOG(3, "Indeterminate.\n");
+	return indeterminate;
+}
+
+bool
+HybridReachabilityAnalyser::_dominance_positive(DominanceSystemBundle& dominating,
+		  	  	  	  	  	  	  	  	  	  	DominanceSystemBundle& dominated)
+{
+	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
+
+	ARIADNE_LOG(3,"Looking for a positive answer...\n");
+
+	bool result;
+
+	HybridGridTreeSet dominating_reach, dominated_reach;
+	bool isValid;
+	DisproveData disproveData(dominated.getSystem().state_space());
+
+	ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
+
+	_tuneDominanceParameters(dominating);
+	make_lpair<HybridGridTreeSet,bool>(dominating_reach,isValid) = upper_chain_reach(dominating.getSystem(),dominating.getInitialSet());
+
+	if (!isValid) {
+		ARIADNE_LOG(3,"The reached region is unbounded.\n");
+		result = false;
+	}
+	else
+	{
+		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
+
+		_tuneDominanceParameters(dominated);
+		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) = lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
+
+		HybridBoxes shrinked_dominated_bounds = Ariadne::shrink_in(disproveData.getReachBounds(),disproveData.getEpsilon());
+
+		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
+		Box projected_shrinked_dominated_bounds = Ariadne::project(shrinked_dominated_bounds,dominated.getProjection());
+
+		ARIADNE_LOG(4,"Epsilon: " << disproveData.getEpsilon() << "\n");
+		ARIADNE_LOG(4,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
+		ARIADNE_LOG(4,"Projected shrinked dominated bounds: " << projected_shrinked_dominated_bounds << "\n");
+
+		result = inside(projected_dominating_bounds,projected_shrinked_dominated_bounds);
+	}
+
+	return result;
+}
+
+bool
+HybridReachabilityAnalyser::_dominance_negative(DominanceSystemBundle& dominating,
+	  	  	  	  								DominanceSystemBundle& dominated)
+{
+	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
+
+	ARIADNE_LOG(3,"Looking for a negative answer...\n");
+
+	bool result;
+
+	HybridGridTreeSet dominating_reach, dominated_reach;
+	bool isValid;
+	DisproveData disproveData(dominating.getSystem().state_space());
+
+	ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
+
+	_tuneDominanceParameters(dominated);
+	make_lpair<HybridGridTreeSet,bool>(dominated_reach,isValid) = upper_chain_reach(dominated.getSystem(),dominated.getInitialSet());
+
+	if (!isValid) {
+		ARIADNE_LOG(3,"The reached region is unbounded.\n");
+		result = false;
+	}
+	else
+	{
+		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
+
+		_tuneDominanceParameters(dominating);
+		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) = lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
+
+		HybridBoxes shrinked_dominating_bounds = Ariadne::shrink_out(disproveData.getReachBounds(),disproveData.getEpsilon());
+
+		Box projected_shrinked_dominating_bounds = Ariadne::project(shrinked_dominating_bounds,dominating.getProjection());
+		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
+
+		ARIADNE_LOG(4,"Epsilon: " << disproveData.getEpsilon() << "\n");
+		ARIADNE_LOG(4,"Projected shrinked dominating bounds: " << projected_shrinked_dominating_bounds << "\n");
+		ARIADNE_LOG(4,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
+
+		result = !inside(projected_shrinked_dominating_bounds,projected_dominated_bounds);
 	}
 
 	return result;

@@ -35,12 +35,6 @@ int main(int argc,char *argv[])
 	// The system
 	HybridAutomaton system = Ariadne::getWatertankMonolithicHysteresis();
 
-	// The parameters
-	RealConstantSet parameters;
-	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
-	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
-	Float tolerance = 0.45;
-
 	// The initial values
 	HybridImageSet initial_set;
 	initial_set[DiscreteState("opened")] = Box(2, 5.5,5.5, 1.0,1.0);
@@ -61,9 +55,26 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 6;
+	analyser.parameters().highest_maximum_grid_depth = 5;
+
+	/*
+	// The parameters
+	RealConstantSet parameters;
+	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
+	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
+	Float tolerance = 0.45;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(verInfo, parameters, tolerance);
 	outcomes.draw(system.name());
+	*/
+
+	// The parameters
+	RealConstant xParam("hmin",Interval(5.0,6.0));
+	RealConstant yParam("hmax",Interval(7.5,8.5));
+	Float tolerance = 0.3;
+	uint numPointsPerAxis = 3;
+
+	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+	analyser.parametric_verification_2d_bisection(verInfo,xParam,yParam,tolerance,numPointsPerAxis);
 }

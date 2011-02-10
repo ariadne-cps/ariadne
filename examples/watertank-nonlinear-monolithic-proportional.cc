@@ -80,6 +80,6 @@ int main(int argc,char *argv[])
 	//analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(verInfo, parameters, tolerance);
+	ParametricVerificationOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
 	outcomes.draw(system.name());
 }

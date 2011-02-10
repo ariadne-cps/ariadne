@@ -72,6 +72,6 @@ int main(int argc,char *argv[])
 	//analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(verInfo, parameters, tolerance);
+	ParametricVerificationOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
 	outcomes.draw(system.name());
 }

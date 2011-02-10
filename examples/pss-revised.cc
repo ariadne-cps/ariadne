@@ -390,6 +390,7 @@ int main()
 	Interval safe_int, unsafe_int;
 
 	// Perform the analysis
-	cout << analyser.verify_iterative(system, initial_set, safe_box, domain);
+	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
+	cout << analyser.verify_iterative(verInfo);
 
 }

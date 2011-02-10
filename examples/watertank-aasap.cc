@@ -279,7 +279,8 @@ int main(int argc,char *argv[])
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
-    analyser.verify_iterative(system, initial_set, safe_box, domain);
+	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+    analyser.verify_iterative(verInfo);
 
     
     HybridGridTreeSet reach = analyser.statistics().upper().reach;
@@ -298,73 +299,6 @@ int main(int argc,char *argv[])
 	draw(fig,Box(3,0.0,0.0,3.5,5.25,-0.2,1.2));
 	draw(fig,Box(3,0.0,0.0,8.25,10.0,-0.2,1.2));
 	fig.write("watertank-aasap.png");
-	
-/*
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,closing,deep,nothing")] = 0.5;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,closing,shallow,increase")] = 0.00125;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,deep,decrease")] = 0.00125;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,deep,nothing")] = 2.34375;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,shallow,increase")] = 0.00125;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,idle,shallow,nothing")] = 2.1875;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,opening,deep,decrease")] = 0.00125;
-	evolver.parameters().hybrid_maximum_step_size[DiscreteState("flow,opening,shallow,nothing")] = 0.5;
-
-	evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,0.0011875,0.415625,0.11875);
-
-    Box initial_box(3, 0.0,0.0, 6.0,6.00, 1.0,1.0);
-    HybridEnclosureType initial_enclosure(DiscreteState("flow,idle,shallow,nothing"),initial_box);
-    Box bounding_box(2, -2.0,15, -1.0,2.0);
-    HybridTime evolution_time(30.0,7);
-
-    std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
-    std::cout << "done." << std::endl;
-
-    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    std::cout << "Plotting orbit... "<<std::flush;
-    Figure fig;
-	array<uint> xy(2,1,2);
-	fig.set_projection_map(ProjectionFunction(xy,3));
-	fig.set_bounding_box(bounding_box);
-    // Draws and creates file
-    fig.set_fill_colour(Colour(0.0,0.5,1.0));
-    draw(fig,orbit);
-    fig.write("watertank-aasap-orbit");
 
 
-*/
-	/*
-	// Perform the analysis
-	make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, parameter_interval, tolerance);
-
-	cout << "\nResults: " << safe_int << "," << unsafe_int << "\n";
-
-	// Show the result
-	if (unsafe_int.empty() && !safe_int.empty())
-		cout << "\nAll values are safe.\n\n";
-	else if (safe_int.empty() && !unsafe_int.empty())
-		cout << "\nNo safe value was found.\n\n";
-	else if (!safe_int.empty() && safe_int.lower() == parameter_interval.lower())
-	{
-		cout << "\nThe parameter must be <= " << safe_int.upper() << " ( inaccuracy ";
-		if (!unsafe_int.empty())
-			cout << "<= " << unsafe_int.lower()-safe_int.upper() << ").\n\n";
-		else
-			cout << "not available).\n\n";
-	}
-	else if (!safe_int.empty() && safe_int.upper() == parameter_interval.upper())
-	{
-		cout << "\nThe parameter must be >= " << safe_int.lower() << " ( inaccuracy ";
-		if (!unsafe_int.empty())
-			cout << "<= " << safe_int.lower()-unsafe_int.upper() << ").\n\n";			
-		else
-			cout << "not available).\n\n";
-	}	
-	else
-		cout << "\nError: the interval could not be verified.\n\n";
-	*/
 }

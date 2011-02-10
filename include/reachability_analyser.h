@@ -66,16 +66,7 @@ class HybridGridTreeSet;
 template<class ES> class HybridListSet;
 template<class ES> class HybridDiscretiser;
 
-/*! \brief A class for performing reachability analysis on a hybrid system.
-	\details Log levels and the methods that are allowed to log output at such a level.
-	<br>	1: Methods using the verify_iterative() method; 
-	<br>	2: The verify_iterative() method;								
-	<br>	3: The verify() and viable() methods;
-	<br>	4: Internal methods for verify() and viable();
-	<br>	5: Remaining analysis methods implemented from reachability_analyser_interface.h;
-	<br>	6: Internal methods for the remaining analysis methods.
- */
-
+/** Provides a convenient structure for systems and their relative info for verification. */
 struct SystemVerificationInfo
 {
 public:
@@ -94,29 +85,28 @@ public:
 	SystemVerificationInfo(HybridAutomaton& system,
 						   HybridImageSet& initial_set,
 						   HybridBoxes& domain,
-						   HybridBoxes& safe_region) :
-							_system(system), _initial_set(initial_set),
-							_domain(domain), _safe_region(safe_region),
-							_projection(std::vector<uint>(0)) { }
+						   HybridBoxes& safe_region);
 
 	SystemVerificationInfo(HybridAutomaton& system,
 						   HybridImageSet& initial_set,
 						   HybridBoxes& domain,
-						   std::vector<uint>& projection) :
-							_system(system), _initial_set(initial_set),
-							 _domain(domain), _safe_region(unbounded_hybrid_box(system.state_space())),
-							 _projection(projection) {  }
+						   std::vector<uint>& projection);
 
 	SystemVerificationInfo(HybridAutomaton& system,
 						   HybridImageSet& initial_set,
 						   HybridBoxes& domain,
 						   HybridBoxes& safe_region,
-						   std::vector<uint>& projection) :
-							_system(system), _initial_set(initial_set),
-							_domain(domain), _safe_region(safe_region),
-							_projection(projection) { }
+						   std::vector<uint>& projection);
+
+private:
+
+	/** \brief Checks fields consistency */
+	void _check_fields() const;
+
 };
 
+/*! \brief A class for performing reachability analysis on a hybrid system-
+ */
 class HybridReachabilityAnalyser
     : public Loggable
 {
@@ -248,9 +238,9 @@ class HybridReachabilityAnalyser
         The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
 		bisection search.
         \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> parametric_1d_bisection(SystemVerificationInfo& verInfo,
-										 					const RealConstant& parameter,
-										 					const Float& tolerance);
+	std::pair<Interval,Interval> parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
+										 							  const RealConstant& parameter,
+										 							  const Float& tolerance);
 
 	/**
 	 * \brief Performs a parametric analysis on two parameters \a xParam, \a yParam,
@@ -259,19 +249,19 @@ class HybridReachabilityAnalyser
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	void parametric_2d_bisection(SystemVerificationInfo& verInfo,
+	void parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 								 const RealConstant& xParam,
 								 const RealConstant& yParam,
 								 const Float& tolerance,
 								 const unsigned& numPointsPerAxis);
 
 	/**
-	 * \brief Performs a parametric verification on a set of parameters \a params.
+	 * \brief Performs a parametric verification on a set of parameters \a params, by partitioning the parameters space.
 	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
 	 * percentage in respect to the range of a given parameter). The values in \a params are substituted into the system, the latter
 	 * being restored to its initial conditions by the end of the method.
 	 */
-	ParametricVerificationOutcomeList parametric_verify(SystemVerificationInfo& verInfo,
+	ParametricVerificationOutcomeList parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 													   const RealConstantSet& params,
 													   const Float& tolerance);
 
@@ -283,12 +273,13 @@ class HybridReachabilityAnalyser
 					  SystemVerificationInfo& dominated);
 
 	/**
-	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system.
+	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
+	 * the parameters space.
 	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
 	 * percentage in respect to the range of a given parameter). The values in \a dominating_params are substituted into the \a dominating
 	 * system alone, the latter being restored to its initial conditions by the end of the method.
 	 */
-	ParametricVerificationOutcomeList parametric_dominance(SystemVerificationInfo& dominating,
+	ParametricVerificationOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 													 	   SystemVerificationInfo& dominated,
 													 	   const RealConstantSet& dominating_params,
 													 	   const Float& tolerance);
@@ -439,9 +430,18 @@ class HybridReachabilityAnalyser
 	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
 	void _tuneIterativeStepParameters(SystemType& system);
 
-	/*! \brief Tune the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
+	/*! \brief Performs one sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
+	void _parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
+						  	  	  	    SystemVerificationInfo& verInfo,
+						  	  	  	    RealConstant xParam,
+						  	  	  	    RealConstant yParam,
+						  	  	  	    const uint& numPointsPerAxis,
+						  	  	  	    const Float& tolerance,
+						  	  	  	    bool sweepOnX);
+
+	/*! \brief Set the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
 	 * that must be ignore when choosing the splitting factors of the system. */
-	void _tuneDominanceParameters(SystemVerificationInfo& systemBundle, const RealConstantSet& lockedConstants);
+	void _setDominanceParameters(SystemVerificationInfo& systemBundle, const RealConstantSet& lockedConstants);
 
 	/*! \brief Helper function to perform dominance in the more general case when some \a dominatingLockedConstants are enforced. */
 	tribool _dominance(SystemVerificationInfo& dominating,

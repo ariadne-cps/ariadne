@@ -295,7 +295,8 @@ int main(int argc, char** argv)
 	Interval safe_int, unsafe_int;
 
 	// Perform the analysis
-	tribool result = analyser.verify_iterative(system, initial_set, safe_box, domain);
+	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
+	tribool result = analyser.verify_iterative(verInfo);
 	
 	std::cout << "Done." << std::endl;
 	

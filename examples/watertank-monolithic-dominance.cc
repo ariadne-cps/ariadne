@@ -67,8 +67,8 @@ int main(int argc,char *argv[])
 	// The parametric dominance parameters
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("Kp",Interval(0.01,0.6)));
-	Float tolerance = 0.25;
+	Float tolerance = 0.125;
 
-	ParametricVerificationOutcomeList outcomeList = analyser.parametric_dominance(proportional,hysteresis,parameters,tolerance);
+	ParametricVerificationOutcomeList outcomeList = analyser.parametric_dominance_partitioning(proportional,hysteresis,parameters,tolerance);
 	cout << outcomeList << "\n";
 }

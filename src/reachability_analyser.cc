@@ -65,6 +65,64 @@
 
 namespace Ariadne {
 
+SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
+						   HybridImageSet& initial_set,
+						   HybridBoxes& domain,
+						   HybridBoxes& safe_region) :
+							_system(system), _initial_set(initial_set),
+							_domain(domain), _safe_region(safe_region),
+							_projection(std::vector<uint>(0))
+{
+	_check_fields();
+}
+
+SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
+						   HybridImageSet& initial_set,
+						   HybridBoxes& domain,
+						   std::vector<uint>& projection) :
+							_system(system), _initial_set(initial_set),
+							 _domain(domain), _safe_region(unbounded_hybrid_box(system.state_space())),
+							 _projection(projection)
+{
+	_check_fields();
+}
+
+SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
+						   HybridImageSet& initial_set,
+						   HybridBoxes& domain,
+						   HybridBoxes& safe_region,
+						   std::vector<uint>& projection) :
+							_system(system), _initial_set(initial_set),
+							_domain(domain), _safe_region(safe_region),
+							_projection(projection)
+{
+	_check_fields();
+}
+
+void SystemVerificationInfo::_check_fields() const
+{
+	HybridSpace hspace = _system.state_space();
+	for (HybridImageSet::const_iterator it = _initial_set.begin(); it != _initial_set.end(); ++it) {
+		HybridSpace::const_iterator hspace_it = hspace.find(it->first);
+		ARIADNE_ASSERT_MSG(hspace_it != hspace.end(),
+						   "The location " << it->first.name() << "is not present into the system.");
+		ARIADNE_ASSERT_MSG(hspace_it->second == it->second.dimension(),
+						   "The dimension of the continuous space in the initial set for location " << it->first.name() << " does not match the system space");
+	}
+	for (HybridSpace::const_iterator hspace_it = hspace.begin(); hspace_it != hspace.end(); ++hspace_it) {
+		HybridBoxes::const_iterator domain_it = _domain.find(hspace_it->first);
+		ARIADNE_ASSERT_MSG(domain_it != _domain.end(),
+						   "The location " << hspace_it->first.name() << "is not present into the domain.");
+		ARIADNE_ASSERT_MSG(hspace_it->second == domain_it->second.dimension(),
+						   "The dimension of the continuous space in the domain for location " << hspace_it->first.name() << " does not match the system space");
+		HybridBoxes::const_iterator safe_it = _safe_region.find(hspace_it->first);
+		ARIADNE_ASSERT_MSG(safe_it != _safe_region.end(),
+						   "The location " << hspace_it->first.name() << "is not present into the safe region.");
+		ARIADNE_ASSERT_MSG(hspace_it->second == safe_it->second.dimension(),
+						   "The dimension of the continuous space in the safe region for location " << hspace_it->first.name() << " does not match the system space");
+	}
+}
+
 HybridReachabilityAnalyser::
 ~HybridReachabilityAnalyser()
 {
@@ -1889,7 +1947,7 @@ _tuneIterativeStepParameters(SystemType& system)
 
 void
 HybridReachabilityAnalyser::
-_tuneDominanceParameters(SystemVerificationInfo& verInfo, const RealConstantSet& lockedConstants)
+_setDominanceParameters(SystemVerificationInfo& verInfo, const RealConstantSet& lockedConstants)
 {
 	// Clears the previously reached regions
 	this->_statistics->upper().reach = HybridGridTreeSet();
@@ -1973,7 +2031,6 @@ _verify_iterative(SystemVerificationInfo& verInfo,
 
 		// Return the result, if it is not indeterminate
 		if (!indeterminate(result)) return result;
-
     }
 
 	// Return indeterminate
@@ -1983,35 +2040,35 @@ _verify_iterative(SystemVerificationInfo& verInfo,
 
 std::pair<Interval,Interval>
 HybridReachabilityAnalyser::
-parametric_1d_bisection(SystemVerificationInfo& verInfo,
-						   const RealConstant& parameter,
-						   const Float& tolerance)	
+parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
+						   	   	   	 const RealConstant& parameter,
+						   	   	   	 const Float& tolerance)
 {
 	HybridAutomaton& system = verInfo.getSystem();
 
-	// Get the original value of the parameter
-	Real original_value = system.accessible_constant_value(parameter.name());
+	RealConstant local_parameter = parameter;
 
-	// Copy the parameter for local operations
-	RealConstant param(parameter.name(),parameter.value());
-
-	Interval parameter_range(parameter.value());
-	// Create the safety and unsafety intervals: they represent the search intervals, not the intervals where the system is proved safe or unsafe
-	Interval safety_int = parameter_range;
-	Interval unsafety_int = parameter_range;
+	// Get the original value of the parameter and the related range
+	Real original_value = system.accessible_constant_value(local_parameter.name());
+	Interval parameter_range(local_parameter.value());
 
 	ARIADNE_ASSERT(parameter_range.width() > 0);
 
-	ARIADNE_LOG(1,"\nChecking parameter " << parameter.name() << " in " << parameter_range << " with " << tolerance*100 << "% tolerance\n");
+	// Create the safety and unsafety intervals: they represent the search intervals,
+	// NOT the intervals where the system is proved safe or unsafe
+	Interval safety_int = parameter_range;
+	Interval unsafety_int = parameter_range;
+
+	ARIADNE_LOG(1,"\nChecking parameter " << local_parameter.name() << " in " << parameter_range << " with " << tolerance*100 << "% tolerance\n");
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
 
 	// Set the parameter
-	param.set_value(parameter_range.lower());
+	local_parameter.set_value(parameter_range.lower());
 
 	// Substitute the value
-	system.substitute(param);
+	system.substitute(local_parameter);
 
 	// Perform the verification
 	tribool lower_result = verify_iterative(verInfo);
@@ -2024,9 +2081,9 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
 
 	// Set the parameter
-	param.set_value(parameter_range.upper());
+	local_parameter.set_value(parameter_range.upper());
 	// Substitute the value
-	system.substitute(param);
+	system.substitute(local_parameter);
 	// Perform the verification
 	tribool upper_result = verify_iterative(verInfo);
 
@@ -2045,15 +2102,15 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 
 	// If both extremes are safe, no more verification is involved
 	if (definitely(lower_result) && definitely(upper_result)) {
-		system.substitute(parameter,original_value);
+		system.substitute(local_parameter,original_value);
 		return make_pair<Interval,Interval>(parameter_range,empty_int); }
 	// If both extremes are unsafe, no more verification is involved
 	else if (!possibly(lower_result) && !possibly(upper_result)) {
-		system.substitute(parameter,original_value);
+		system.substitute(local_parameter,original_value);
 		return make_pair<Interval,Interval>(empty_int,parameter_range); }
 	// If both extremes are indeterminate, no verification is possible
 	else if (indeterminate(lower_result) && indeterminate(upper_result)) {
-		system.substitute(parameter,original_value);
+		system.substitute(local_parameter,original_value);
 		return make_pair<Interval,Interval>(empty_int,empty_int); }
 	// If the lower extreme is safe or the upper extreme is unsafe, the safe values are on the bottom
 	else if (definitely(lower_result) || !possibly(upper_result)) {
@@ -2078,9 +2135,9 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 		if (!safety_int.empty()) 
 		{
 			// Set the parameter as the midpoint of the interval
-			param.set_value(safety_int.midpoint());
+			local_parameter.set_value(safety_int.midpoint());
 			// Substitute the value
-			system.substitute(param);
+			system.substitute(local_parameter);
 
 			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() <<
 					      ", width ratio: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
@@ -2092,24 +2149,24 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 			if (definitely(result)) {
 				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(param.value());
+					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(local_parameter.value());
 
 					ARIADNE_LOG(1,"Safe, refining upwards.\n");
-					safety_int.set_lower(param.value()); }
+					safety_int.set_lower(local_parameter.value()); }
 				else {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) unsafety_int.set_upper(param.value());
+					if (equal(unsafety_int,safety_int)) unsafety_int.set_upper(local_parameter.value());
 
 					ARIADNE_LOG(1,"Safe, refining downwards.\n");
-					safety_int.set_upper(param.value()); }}
+					safety_int.set_upper(local_parameter.value()); }}
 			// If unsafe
 			else if (!possibly(result)) {
 				if (safeOnBottom) {
 					ARIADNE_LOG(1,"Unsafe, refining downwards and resetting the unsafety.\n");
-					safety_int.set_upper(param.value()); }
+					safety_int.set_upper(local_parameter.value()); }
 				else {
 					ARIADNE_LOG(1,"Unsafe, refining upwards and resetting the unsafety.\n");
-					safety_int.set_lower(param.value()); }
+					safety_int.set_lower(local_parameter.value()); }
 
 				// The unsafety interval now becomes the same as the safety interval
 				unsafety_int = safety_int; }
@@ -2117,16 +2174,16 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 			else {
 				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(param.value());
+					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(local_parameter.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
-					safety_int.set_upper(param.value()); }
+					safety_int.set_upper(local_parameter.value()); }
 				else {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int))	unsafety_int.set_upper(param.value());
+					if (equal(unsafety_int,safety_int))	unsafety_int.set_upper(local_parameter.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
-					safety_int.set_lower(param.value()); }
+					safety_int.set_lower(local_parameter.value()); }
 			}
 
 			// If both intervals are not empty
@@ -2144,9 +2201,9 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 		if (!unsafety_int.empty())
 		{
 			// Set the parameter as the midpoint of the interval
-			param.set_value(unsafety_int.midpoint());
+			local_parameter.set_value(unsafety_int.midpoint());
 			// Substitute the value
-			system.substitute(param);
+			system.substitute(local_parameter);
 
 			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() <<
 						  ", width ratio: " << unsafety_int.width()/parameter_range.width()*100 << "%) ... ");
@@ -2157,10 +2214,10 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 			if (definitely(result)) {
 				if (safeOnBottom) {
 					ARIADNE_LOG(1,"Safe, refining upwards and resetting the safety.\n");
-					unsafety_int.set_lower(param.value()); }
+					unsafety_int.set_lower(local_parameter.value()); }
 				else {
 					ARIADNE_LOG(1,"Safe, refining downwards and resetting the safety.\n");
-					unsafety_int.set_upper(param.value()); }
+					unsafety_int.set_upper(local_parameter.value()); }
 
 				// The safety interval now becomes the same as the unsafety interval
 				safety_int = unsafety_int; }
@@ -2168,30 +2225,30 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 			else if (!possibly(result)) {
 				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_upper(param.value());
+					if (equal(unsafety_int,safety_int)) safety_int.set_upper(local_parameter.value());
 
 					ARIADNE_LOG(1,"Unsafe, refining downwards.\n");
-					unsafety_int.set_upper(param.value()); }
+					unsafety_int.set_upper(local_parameter.value()); }
 				else {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_lower(param.value());
+					if (equal(unsafety_int,safety_int)) safety_int.set_lower(local_parameter.value());
 
 					ARIADNE_LOG(1,"Unsafe, refining upwards.\n");
-					unsafety_int.set_lower(param.value()); }}
+					unsafety_int.set_lower(local_parameter.value()); }}
 			// If indeterminate
 			else {
 				if (safeOnBottom) {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_upper(param.value());
+					if (equal(unsafety_int,safety_int)) safety_int.set_upper(local_parameter.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
-					unsafety_int.set_lower(param.value()); }
+					unsafety_int.set_lower(local_parameter.value()); }
 				else {
 					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_lower(param.value());
+					if (equal(unsafety_int,safety_int)) safety_int.set_lower(local_parameter.value());
 
 					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
-					unsafety_int.set_upper(param.value()); }
+					unsafety_int.set_upper(local_parameter.value()); }
 			}
 
 			// If both intervals are not empty
@@ -2214,7 +2271,7 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 	}
 
 	// Returns the system to its original parameter value
-	system.substitute(parameter,original_value);
+	system.substitute(local_parameter,original_value);
 
 	// The result intervals for safe and unsafe values
 	Interval safe_result, unsafe_result;
@@ -2231,78 +2288,22 @@ parametric_1d_bisection(SystemVerificationInfo& verInfo,
 }
 
 void
-HybridReachabilityAnalyser::parametric_2d_bisection(SystemVerificationInfo& verInfo,
+HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 											   const RealConstant& xParam,
 											   const RealConstant& yParam,
 											   const Float& tolerance,
 											   const unsigned& numPointsPerAxis)
 {
-	HybridAutomaton& system = verInfo.getSystem();
-
-	// Get the original values of the parameters
-	Real original_xValue = system.accessible_constant_value(xParam.name());
-	Real original_yValue = system.accessible_constant_value(yParam.name());
-
-	// FIXME: in the end, the system will be modified with the upper values of the
-	// XY bounds. We must be able to recover (or pass) the initial values in order to restore them.
-
-	Interval xBounds = xParam.value();
-	Interval yBounds = yParam.value();
-
 	// Generates the file name
-	std::string filename = system.name();
+	std::string filename = verInfo.getSystem().name();
 	filename = filename + "-" + xParam.name() + "-" + yParam.name();
 
-	// Copies the parameters into constants
-	RealConstant xConstant = xParam;
-	RealConstant yConstant = yParam;
-
 	// Initializes the results
-	Parametric2DBisectionResults results(filename,xBounds,yBounds,numPointsPerAxis);
+	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
 
-	ARIADNE_LOG(1,"\nSweeping on " << xParam.name() << " in " << xBounds << ":\n");
-
-	// Sweeps in the X direction
-	for (unsigned i=0; i<numPointsPerAxis; i++)
-	{
-		// Changes the value of X
-		xConstant.set_value(xBounds.lower()+i*xBounds.width()/(numPointsPerAxis-1));
-		// Modifies the system with the new X
-		system.substitute(xConstant);
-
-		ARIADNE_LOG(1,"\nAnalysis with " << xParam.name() << " = " << xConstant.value().lower() << "...\n");
-
-		// Performs the analysis on Y and adds to the results of X
-		std::pair<Interval,Interval> result = parametric_1d_bisection(verInfo,yParam,tolerance);
-		results.insertXValue(result);
-
-		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
-	}
-
-	// Restores the original value
-	system.substitute(xParam,original_xValue);
-
-	ARIADNE_LOG(1,"\nSweeping on " << yParam.name() << " in " << yBounds << ":\n");
-
-	// Sweeps in the Y direction
-	for (unsigned i=0; i<numPointsPerAxis; i++)
-	{
-		// Changes the value of Y
-		yConstant.set_value(yBounds.lower()+i*yBounds.width()/(numPointsPerAxis-1));
-		// Modifies the system with the new Y
-		system.substitute(yConstant);
-
-		ARIADNE_LOG(1,"\nAnalysis with " << yParam.name() << " = " << yConstant.value().lower() << "...\n");
-
-		// Performs the analysis on X and adds to the results of Y
-		std::pair<Interval,Interval> result = parametric_1d_bisection(verInfo,xParam,tolerance);
-		results.insertYValue(result);
-
-		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
-	}
-
-	// Restores the original value
-	system.substitute(yParam,original_yValue);
+	// Sweeps on both axes
+	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, numPointsPerAxis, tolerance, true);
+	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, numPointsPerAxis, tolerance, false);
 
 	// Dumps the results into a file
 	results.dump();
@@ -2310,8 +2311,52 @@ HybridReachabilityAnalyser::parametric_2d_bisection(SystemVerificationInfo& verI
 	results.draw();
 }
 
+void HybridReachabilityAnalyser::_parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
+					  	  	  	    							SystemVerificationInfo& verInfo,
+					  	  	  	    							RealConstant xParam,
+					  	  	  	    							RealConstant yParam,
+					  	  	  	    							const uint& numPointsPerAxis,
+					  	  	  	    							const Float& tolerance,
+					  	  	  	    							bool sweepOnX)
+{
+	HybridAutomaton& system = verInfo.getSystem();
+
+	RealConstant& sweepParam = (sweepOnX ? xParam : yParam);
+	RealConstant& otherParam = (sweepOnX ? yParam : xParam);
+
+	// Get the original value of the sweep parameter
+	Real originalSweepValue = system.accessible_constant_value(sweepParam.name());
+
+	Interval sweepBounds = sweepParam.value();
+
+	ARIADNE_LOG(1,"\nSweeping on " << sweepParam.name() << " in " << sweepBounds << ":\n");
+
+	// Sweeps in the given direction
+	for (uint i=0; i<numPointsPerAxis; ++i)
+	{
+		// Changes the value
+		sweepParam.set_value(sweepBounds.lower()+i*sweepBounds.width()/(numPointsPerAxis-1));
+		// Modifies the system with the new value
+		system.substitute(sweepParam);
+
+		ARIADNE_LOG(1,"\nAnalysis with " << sweepParam.name() << " = " << sweepParam.value().lower() << "...\n");
+
+		// Performs the analysis on the other axis and adds to the results of the sweep variable
+		std::pair<Interval,Interval> result = parametric_verification_1d_bisection(verInfo,otherParam,tolerance);
+		if (sweepOnX)
+			results.insertXValue(result);
+		else
+			results.insertYValue(result);
+
+		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
+	}
+
+	// Restores the original value
+	system.substitute(sweepParam,originalSweepValue);
+}
+
 ParametricVerificationOutcomeList
-HybridReachabilityAnalyser::parametric_verify(SystemVerificationInfo& verInfo,
+HybridReachabilityAnalyser::parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 											  const RealConstantSet& params,
 											  const Float& tolerance)
 {
@@ -2402,7 +2447,7 @@ HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominati
 
 	ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
 
-	_tuneDominanceParameters(dominating,dominatingLockedConstants);
+	_setDominanceParameters(dominating,dominatingLockedConstants);
 	make_lpair<HybridGridTreeSet,bool>(dominating_reach,isValid) = upper_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
 	if (!isValid) {
@@ -2414,7 +2459,7 @@ HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominati
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
-		_tuneDominanceParameters(dominated,emptyLockedConstants);
+		_setDominanceParameters(dominated,emptyLockedConstants);
 		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) = lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
 		// We must shrink the lower approximation of the the dominated system, but underapproximating in terms of rounding
@@ -2449,7 +2494,7 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 	ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
 
 	RealConstantSet emptyLockedConstants;
-	_tuneDominanceParameters(dominated,emptyLockedConstants);
+	_setDominanceParameters(dominated,emptyLockedConstants);
 	make_lpair<HybridGridTreeSet,bool>(dominated_reach,isValid) = upper_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
 	if (!isValid) {
@@ -2460,7 +2505,7 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 	{
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
 
-		_tuneDominanceParameters(dominating,dominatingLockedConstants);
+		_setDominanceParameters(dominating,dominatingLockedConstants);
 		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) = lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
 		// We must shrink the lower approximation of the the dominating system, but overapproximating in terms of rounding
@@ -2480,7 +2525,7 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 }
 
 ParametricVerificationOutcomeList
-HybridReachabilityAnalyser::parametric_dominance(SystemVerificationInfo& dominating,
+HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 												 SystemVerificationInfo& dominated,
 											  	 const RealConstantSet& dominating_params,
 											  	 const Float& tolerance)

@@ -24,7 +24,6 @@
 #ifndef WATERTANK_MONOLITHIC_PROPORTIONAL_H_
 #define WATERTANK_MONOLITHIC_PROPORTIONAL_H_
 
-#include <cstdarg>
 #include "ariadne.h"
 
 namespace Ariadne {

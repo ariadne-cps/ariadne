@@ -76,21 +76,45 @@ template<class ES> class HybridDiscretiser;
 	<br>	6: Internal methods for the remaining analysis methods.
  */
 
-struct DominanceSystemBundle
+struct SystemVerificationInfo
 {
 public:
 	HybridAutomaton& _system;
 	HybridImageSet& _initial_set;
 	HybridBoxes& _domain;
-	std::vector<uint>& _projection;
+	HybridBoxes _safe_region;
+	std::vector<uint> _projection;
 
 	HybridAutomaton& getSystem() { return _system; }
 	HybridImageSet& getInitialSet() { return _initial_set; }
 	HybridBoxes& getDomain() { return _domain; }
+	HybridBoxes& getSafeRegion() { return _safe_region; }
 	std::vector<uint>& getProjection() { return _projection; }
 
-	DominanceSystemBundle(HybridAutomaton& system, HybridImageSet& initial_set, HybridBoxes& domain, std::vector<uint>& projection) :
-							_system(system), _initial_set(initial_set), _domain(domain), _projection(projection) { }
+	SystemVerificationInfo(HybridAutomaton& system,
+						   HybridImageSet& initial_set,
+						   HybridBoxes& domain,
+						   HybridBoxes& safe_region) :
+							_system(system), _initial_set(initial_set),
+							_domain(domain), _safe_region(safe_region),
+							_projection(std::vector<uint>(0)) { }
+
+	SystemVerificationInfo(HybridAutomaton& system,
+						   HybridImageSet& initial_set,
+						   HybridBoxes& domain,
+						   std::vector<uint>& projection) :
+							_system(system), _initial_set(initial_set),
+							 _domain(domain), _safe_region(unbounded_hybrid_box(system.state_space())),
+							 _projection(projection) {  }
+
+	SystemVerificationInfo(HybridAutomaton& system,
+						   HybridImageSet& initial_set,
+						   HybridBoxes& domain,
+						   HybridBoxes& safe_region,
+						   std::vector<uint>& projection) :
+							_system(system), _initial_set(initial_set),
+							_domain(domain), _safe_region(safe_region),
+							_projection(projection) { }
 };
 
 class HybridReachabilityAnalyser
@@ -219,19 +243,6 @@ class HybridReachabilityAnalyser
 							 const HybridBoxes& safe,
 							 const HybridBoxes& domain);
 
-	/*! \brief Compute an underapproximation of the safety interval of \a parameter (defined as an interval) for the automaton
-		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
-        \details The procedure uses the bisection method. The parameter is assumed as having separable safe and unsafe intervals in its range.
-        The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
-		bisection search.
-        \return The interval of safety. */
-	Interval safetyonly_parametric_1d_bisection(SystemType& system, 
-							   const HybridImageSet& initial_set, 
-							   const HybridBoxes& safe,
-			 				   const HybridBoxes& domain,
-							   const RealConstant& parameter,
-							   const Float& tolerance);
-
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
         \details The procedure uses the bisection method. Each parameter is assumed as having separable safe and unsafe intervals in its range.
@@ -261,20 +272,12 @@ class HybridReachabilityAnalyser
 								 const Float& tolerance,
 								 const unsigned& numPointsPerAxis);
 
-	/** \brief Provides textual comment on parametric bisection verification results over one variable */
-	void log_parametric_1d_bisection_results(const Interval& safe_int,
-											 const Interval& unsafe_int,
-											 const Interval& search_int) const;
-
 	/**
 	 * \brief Performs a parametric analysis on a set of parameters \a params.
 	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
 	 * percentage in respect to the range of a given parameter)
 	 */
-	ParametricVerificationOutcomeList parametric_verify(SystemType& system,
-													   const HybridImageSet& initial_set,
-													   const HybridBoxes& safe,
-													   const HybridBoxes& domain,
+	ParametricVerificationOutcomeList parametric_verify(SystemVerificationInfo& verInfo,
 													   const RealConstantSet& params,
 													   const Float& tolerance);
 
@@ -282,7 +285,7 @@ class HybridReachabilityAnalyser
 	 * \brief Performs dominance checking.
 	 * \details Verifies if the \a dominating system dominates the \a dominated system.
 	 */
-	tribool dominance(DominanceSystemBundle& dominating, DominanceSystemBundle& dominated);
+	tribool dominance(SystemVerificationInfo& dominating, SystemVerificationInfo& dominated);
 
     //@}
 
@@ -434,13 +437,13 @@ class HybridReachabilityAnalyser
 	void _tuneVerificationParameters(SystemType& system);
 
 	/*! \brief Tune the parameters for the next dominance iteration, given a bundle of information around a system. */
-	void _tuneDominanceParameters(DominanceSystemBundle& systemBundle);
+	void _tuneDominanceParameters(SystemVerificationInfo& systemBundle);
 
 	/*! \brief Performs the positive part of dominance checking. */
-	bool _dominance_positive(DominanceSystemBundle& dominating, DominanceSystemBundle& dominated);
+	bool _dominance_positive(SystemVerificationInfo& dominating, SystemVerificationInfo& dominated);
 
 	/*! \brief Performs the negative part of dominance checking. */
-	bool _dominance_negative(DominanceSystemBundle& dominating, DominanceSystemBundle& dominated);
+	bool _dominance_negative(SystemVerificationInfo& dominating, SystemVerificationInfo& dominated);
 
 	/*! \brief Enlarges the \a box of \a epsilon. */
 	HybridBoxes _enlarge_of_epsilon(const HybridBoxes& box, const HybridFloatVector& epsilon);

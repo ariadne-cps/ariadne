@@ -38,7 +38,7 @@ watertank_monolithic_proportional_SOURCES= watertank-monolithic-proportional.cc
 watertank_monolithic_hysteresis_SOURCES= watertank-monolithic-hysteresis.cc
 watertank_nonlinear_monolithic_proportional_SOURCES= watertank-nonlinear-monolithic-proportional.cc
 watertank_nonlinear_monolithic_hysteresis_SOURCES= watertank-nonlinear-monolithic-hysteresis.cc
-watertank_monolithic_dominance_SOURCES = watertank-monolithic-dominance.cc examples.h
+watertank_monolithic_dominance_SOURCES = watertank-monolithic-dominance.cc
 
 examples: $(bin_PROGRAMS)
 

@@ -1889,22 +1889,22 @@ _tuneVerificationParameters(SystemType& system)
 
 void
 HybridReachabilityAnalyser::
-_tuneDominanceParameters(DominanceSystemBundle& systemBundle)
+_tuneDominanceParameters(SystemVerificationInfo& verInfo)
 {
 	// Clears the previously reached regions
 	this->_statistics->upper().reach = HybridGridTreeSet();
 	this->_statistics->lower().reach = HybridGridTreeSet();
 	// Domain
-	_parameters->bounding_domain = systemBundle.getDomain();
+	_parameters->bounding_domain = verInfo.getDomain();
 	// Dummy safe region
-	_parameters->safe_region = unbounded_hybrid_box(systemBundle.getSystem().state_space());
+	_parameters->safe_region = verInfo.getSafeRegion();
 	// General parameters
-	_tuneVerificationParameters(systemBundle.getSystem());
+	_tuneVerificationParameters(verInfo.getSystem());
 	// Lock to grid time
-	_setLockToGridTime(systemBundle.getSystem());
+	_setLockToGridTime(verInfo.getSystem());
 	// Split factors
 	RealConstantSet emptyLockedConstants;
-	_parameters->split_factors = _getSplitFactorsOfConstants(systemBundle.getSystem(),emptyLockedConstants,0.01);
+	_parameters->split_factors = _getSplitFactorsOfConstants(verInfo.getSystem(),emptyLockedConstants,0.01);
 }
 
 tribool
@@ -1986,113 +1986,6 @@ _verify_iterative(SystemType& system,
 	return indeterminate;
 }
 
-Interval
-HybridReachabilityAnalyser::
-safetyonly_parametric_1d_bisection(SystemType& system, 
-				  const HybridImageSet& initial_set, 
-				  const HybridBoxes& safe,
-				  const HybridBoxes& domain,
-				  const RealConstant& parameter,
-				  const Float& tolerance)	
-{
-	// Get the original value of the parameter
-	const Real& original_value = system.accessible_constant_value(parameter.name());
-
-	// Copy the parameter for local operations
-	RealConstant param(parameter.name(),parameter.value());
-	Interval parameter_range = parameter.value();
-	Interval param_int = parameter_range;
-
-	ARIADNE_LOG(1,"\nChecking parameter " << parameter.name() << " in " << parameter_range << " with " << tolerance*100 << "% tolerance\n");
-
-	// Check the lower bound
-	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
-
-	// Set the parameter
-	param.set_value(parameter_range.lower());
-	// Substitute the value
-	system.substitute(param);
-	// Perform the verification
-	tribool lower_result = verify_iterative(system,initial_set,safe,domain);
-
-	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
-	else { ARIADNE_LOG(1,"Not safe.\n"); }
-
-	// Check the upper bound
-	ARIADNE_LOG(1,"Checking upper interval bound... ");
-
-	// Set the parameter
-	param.set_value(parameter_range.upper());
-	// Substitute the value
-	system.substitute(param);
-	// Perform the verification
-	tribool upper_result = verify_iterative(system,initial_set,safe,domain);
-
-	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
-	else { ARIADNE_LOG(1,"Not safe.\n"); }
-
-	// Analyze the results
-
-	// The source of update
-	bool updateFromBottom;
-
-	// Create an empty interval
-	Interval empty_int;
-	empty_int.make_empty();
-
-	// If both extremes are definitely safe, no more verification is involved
-	if (definitely(lower_result) && definitely(upper_result)) {
-		system.substitute(parameter,original_value);
-		return parameter_range;
-	}
-	// If both extremes are not definitely safe, no more verification is involved
-	else if (!definitely(lower_result) && !definitely(upper_result)) {
-		system.substitute(parameter,original_value);
-		return empty_int;
-	}
-	// Otherwise it updates from the bottom or the top depending on the lower_result being safe or not
-	else updateFromBottom = definitely(lower_result);		
-
-	// While the tolerance bound has not been hit
-	while (param_int.width() > tolerance*parameter_range.width())
-	{
-		// Set the parameter as the midpoint of the interval
-		param.set_value(param_int.midpoint());
-		// Substitute the value
-		system.substitute(param);
-
-		ARIADNE_LOG(1,"Checking " << param_int << " (midpoint: " << param_int.midpoint() <<
-				      ", width ratio: " << param_int.width()/parameter_range.width()*100 << "%) ... ");
-
-		// Perform the verification
-		tribool result = verify_iterative(system,initial_set,safe,domain);
-
-		if (definitely(result)) {
-			if (updateFromBottom) {
-				ARIADNE_LOG(1,"Safe, refining upwards.\n");
-				param_int.set_lower(param.value()); }
-			else {
-				ARIADNE_LOG(1,"Safe, refining downwards.\n");
-				param_int.set_upper(param.value()); }}
-		else {
-			if (updateFromBottom) {
-				ARIADNE_LOG(1,"Not safe, refining downwards.\n");
-				param_int.set_upper(param.value()); }
-			else {
-				ARIADNE_LOG(1,"Not safe, refining upwards.\n");
-				param_int.set_lower(param.value()); 
-				 }
-		}
-	}
-
-	// Returns the system to its original parameter value
-	system.substitute(parameter,original_value);
-
-	if (updateFromBottom)
-		return Interval(parameter_range.lower(),param_int.lower());
-	else
-		return Interval(param_int.upper(),parameter_range.upper());
-}
 
 std::pair<Interval,Interval>
 HybridReachabilityAnalyser::
@@ -2345,37 +2238,6 @@ parametric_1d_bisection(SystemType& system,
 }
 
 void
-HybridReachabilityAnalyser::log_parametric_1d_bisection_results(const Interval& safe_int,
-													   const Interval& unsafe_int,
-													   const Interval& search_int) const
-{
-	if (safe_int == search_int) {
-		ARIADNE_LOG(1, "\nAll the values are safe.\n\n");
-	} else if (safe_int.empty()) {
-		ARIADNE_LOG(1,"\nNo safe value was found.\n\n");
-	} else if (safe_int.lower() == search_int.lower()) {
-		ARIADNE_LOG(1,"\nThe parameter must be <= " << safe_int.upper() << " ( inaccuracy ");
-		if (!unsafe_int.empty()) {
-			ARIADNE_LOG(1,"<= " << unsafe_int.lower()-safe_int.upper() << ").\n\n");
-		} else {
-			ARIADNE_LOG(1,"not available).\n\n");
-		}
-	}
-	else if (safe_int.upper() == search_int.upper())
-	{
-		ARIADNE_LOG(1,"\nThe parameter must be >= " << safe_int.lower() << " ( inaccuracy ");
-		if (!unsafe_int.empty()) {
-			ARIADNE_LOG(1,"<= " << safe_int.lower()-unsafe_int.upper() << ").\n\n");
-		} else {
-			ARIADNE_LOG(1,"not available).\n\n");
-		}
-	}
-	else {
-		ARIADNE_LOG(1,"\nError: the interval could not be verified.\n\n");
-	}
-}
-
-void
 HybridReachabilityAnalyser::parametric_2d_bisection(SystemType& system,
 											   const HybridImageSet& initial_set,
 											   const HybridBoxes& safe,
@@ -2457,16 +2319,15 @@ HybridReachabilityAnalyser::parametric_2d_bisection(SystemType& system,
 }
 
 ParametricVerificationOutcomeList
-HybridReachabilityAnalyser::parametric_verify(SystemType& system,
-											  const HybridImageSet& initial_set,
-											  const HybridBoxes& safe,
-											  const HybridBoxes& domain,
+HybridReachabilityAnalyser::parametric_verify(SystemVerificationInfo& verInfo,
 											  const RealConstantSet& params,
 											  const Float& tolerance)
 {
 	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter for verification.");
 
 	ParametricVerificationOutcomeList result(params);
+
+	RealConstantSet original_constants = verInfo.getSystem().nonsingleton_accessible_constants();
 
 	std::list<RealConstantSet> working_list;
 	working_list.push_back(params);
@@ -2477,8 +2338,8 @@ HybridReachabilityAnalyser::parametric_verify(SystemType& system,
 
 		ARIADNE_LOG(1,"Parameter values: " << configuration << "\n");
 
-		system.substitute(configuration);
-		tribool verification = _verify_iterative(system,initial_set,safe,domain,params);
+		verInfo.getSystem().substitute(configuration);
+		tribool verification = _verify_iterative(verInfo.getSystem(),verInfo.getInitialSet(),verInfo.getSafeRegion(),verInfo.getDomain(),params);
 
 		ARIADNE_LOG(1,"Outcome: " << verification << "\n");
 
@@ -2523,16 +2384,18 @@ HybridReachabilityAnalyser::parametric_verify(SystemType& system,
 			result.push_back(ParametricVerificationOutcome(configuration,verification));
 	}
 
+	verInfo.getSystem().substitute(original_constants);
+
 	return result;
 }
 
 tribool
-HybridReachabilityAnalyser::dominance(DominanceSystemBundle& dominating,
-									  DominanceSystemBundle& dominated)
+HybridReachabilityAnalyser::dominance(SystemVerificationInfo& dominating,
+									  SystemVerificationInfo& dominated)
 {
 	ARIADNE_LOG(1, "Dominance checking...\n");
 
-	// We are not required to skip if disproved, since we are not disproving safety
+	// We are not allowed to skip if disproved, since we need as much reached region as possible
 	// We are however allowed to skip if unprovable, since we could not determine dominance anyway
 	_parameters->skip_if_disproved = false;
 	_parameters->skip_if_unprovable = true;
@@ -2560,8 +2423,8 @@ HybridReachabilityAnalyser::dominance(DominanceSystemBundle& dominating,
 }
 
 bool
-HybridReachabilityAnalyser::_dominance_positive(DominanceSystemBundle& dominating,
-		  	  	  	  	  	  	  	  	  	  	DominanceSystemBundle& dominated)
+HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominating,
+		  	  	  	  	  	  	  	  	  	  	SystemVerificationInfo& dominated)
 {
 	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
 
@@ -2605,8 +2468,8 @@ HybridReachabilityAnalyser::_dominance_positive(DominanceSystemBundle& dominatin
 }
 
 bool
-HybridReachabilityAnalyser::_dominance_negative(DominanceSystemBundle& dominating,
-	  	  	  	  								DominanceSystemBundle& dominated)
+HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominating,
+	  	  	  	  								SystemVerificationInfo& dominated)
 {
 	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
 

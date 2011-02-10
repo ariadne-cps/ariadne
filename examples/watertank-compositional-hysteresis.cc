@@ -40,8 +40,8 @@ int main(int argc,char *argv[])
 	RealConstant delta("Delta",0.1);
 
 	RealConstantSet parameters;
-	parameters.insert(hmin);
-	parameters.insert(hmax);
+	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
+	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
 	Float tolerance = 0.1;
 
     // System variables
@@ -188,17 +188,14 @@ int main(int argc,char *argv[])
 	HybridImageSet initial_set;
 	initial_set[DiscreteState("flow,idle,rising")] = Box(2, 6.0,6.0, 1.0,1.0);
 
-	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
-
-	// The domain
-	//HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
-
 	HybridBoxes domain;
 	domain[DiscreteState("flow,opening,rising")] = Box(2,4.5,6.5,-0.1,1.1);
 	domain[DiscreteState("flow,closing,falling")] = Box(2,7.0,9.0,-0.1,1.1);
 	domain[DiscreteState("flow,idle,falling")] = Box(2,5.0,9.0,-0.1,0.1);
 	domain[DiscreteState("flow,idle,rising")] = Box(2,5.0,9.0,0.9,1.1);
+
+	// The safe region
+	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
 	/// Verification
 
@@ -217,6 +214,7 @@ int main(int argc,char *argv[])
 	//make_lpair(safe_int,unsafe_int) = analyser.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
 	//analyser.log_parametric_1d_bisection_results(safe_int,unsafe_int,parameter.value());
 
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
-	cout << "Outcomes: " << outcomes << "\n";
+	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(verInfo, parameters, tolerance);
+	outcomes.draw(system.name());
 }

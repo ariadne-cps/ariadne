@@ -21,12 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cstdarg>
 #include "ariadne.h"
 #include "examples.h"
 
 using namespace Ariadne;
-
 
 int main(int argc,char *argv[])
 {
@@ -53,8 +51,8 @@ int main(int argc,char *argv[])
 	std::vector<uint> projection_pr(1,0);
 
 	// Construct the bundles
-	DominanceSystemBundle hysteresis(system_hy,initial_hy,domain_hy,projection_hy);
-	DominanceSystemBundle proportional(system_pr,initial_pr,domain_pr,projection_pr);
+	SystemVerificationInfo hysteresis(system_hy,initial_hy,domain_hy,projection_hy);
+	SystemVerificationInfo proportional(system_pr,initial_pr,domain_pr,projection_pr);
 
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;

@@ -71,6 +71,8 @@ shrink_out(const HybridBoxes& box, const HybridFloatVector& epsilon)
 Box
 project(const HybridBoxes& box, const std::vector<uint>& dimensions)
 {
+	ARIADNE_ASSERT_MSG(dimensions.size()>0, "Provide at least one dimension to project to.");
+
 	Box result = Box::empty_box(dimensions.size());
 
 	for (HybridBoxes::const_iterator loc_it = box.begin(); loc_it != box.end(); ++loc_it)

@@ -622,8 +622,8 @@ class HybridIOAutomaton
     //! \brief The set of discrete transitions. 
     const std::list< DiscreteIOTransition >& transitions() const;
 
-    //! \brief The set of accessible constants.
-    const RealConstantSet& accessible_constants() const;
+    //! \brief A copy of the set of accessible constants.
+    RealConstantSet accessible_constants() const;
 
     //! \brief A copy of the set of non-singleton accessible constants.
     RealConstantSet nonsingleton_accessible_constants() const;

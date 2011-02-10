@@ -36,8 +36,8 @@ HybridAutomaton getWatertankMonolithicHysteresis()
 	RealConstant a("a",0.02);
 	RealConstant b("b",Interval(0.3,0.32863));
 	RealConstant T("T",4.0);
-	RealConstant hmin("hmin",6.0);
-	RealConstant hmax("hmax",7.5);
+	RealConstant hmin("hmin",5.5);
+	RealConstant hmax("hmax",8.0);
 	RealConstant Delta("Delta",0.1);
 
     // Accessible constants

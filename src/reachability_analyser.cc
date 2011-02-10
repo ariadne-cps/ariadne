@@ -75,8 +75,8 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const HybridDiscretiser<HybridEvolver::ContinuousEnclosureType>& discretiser)
     : _parameters(new EvolutionParametersType())
     , _discretiser(discretiser.clone())
+	, plot_verify_results(false)
 {
-	plot_verify_results = false;
 }
 
 list<HybridBasicSet<TaylorSet> >
@@ -1861,7 +1861,7 @@ _setInitialParameters(SystemType& system,
 
 void 
 HybridReachabilityAnalyser::
-_tuneVerificationParameters(SystemType& system)
+_tuneIterativeStepParameters(SystemType& system)
 {
 	/* Tune the parameters:
 	 * a) evaluate the derivatives from the domain or the latest upper reached region;
@@ -1889,7 +1889,7 @@ _tuneVerificationParameters(SystemType& system)
 
 void
 HybridReachabilityAnalyser::
-_tuneDominanceParameters(SystemVerificationInfo& verInfo)
+_tuneDominanceParameters(SystemVerificationInfo& verInfo, const RealConstantSet& lockedConstants)
 {
 	// Clears the previously reached regions
 	this->_statistics->upper().reach = HybridGridTreeSet();
@@ -1899,35 +1899,30 @@ _tuneDominanceParameters(SystemVerificationInfo& verInfo)
 	// Dummy safe region
 	_parameters->safe_region = verInfo.getSafeRegion();
 	// General parameters
-	_tuneVerificationParameters(verInfo.getSystem());
+	_tuneIterativeStepParameters(verInfo.getSystem());
 	// Lock to grid time
 	_setLockToGridTime(verInfo.getSystem());
 	// Split factors
-	RealConstantSet emptyLockedConstants;
-	_parameters->split_factors = _getSplitFactorsOfConstants(verInfo.getSystem(),emptyLockedConstants,0.01);
+	_parameters->split_factors = _getSplitFactorsOfConstants(verInfo.getSystem(),lockedConstants,0.01);
 }
 
 tribool
 HybridReachabilityAnalyser::
-verify_iterative(SystemType& system,
-				 const HybridImageSet& initial_set,
-				 const HybridBoxes& safe,
-				 const HybridBoxes& domain)
+verify_iterative(SystemVerificationInfo& verInfo)
 {
 	RealConstantSet locked_constants;
 
-	return _verify_iterative(system,initial_set,safe,domain,locked_constants);
+	return _verify_iterative(verInfo,locked_constants);
 }
 
 tribool 
 HybridReachabilityAnalyser::
-_verify_iterative(SystemType& system,
-				 const HybridImageSet& initial_set,
-				 const HybridBoxes& safe,
-				 const HybridBoxes& domain,
+_verify_iterative(SystemVerificationInfo& verInfo,
 				 const RealConstantSet& locked_constants)
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
+
+	HybridAutomaton& system = verInfo.getSystem();
 
 	time_t mytime;
 	time(&mytime);
@@ -1950,20 +1945,19 @@ _verify_iterative(SystemType& system,
 	_statistics->lower().reach = HybridGridTreeSet();
 
 	// Set the initial parameters
-	_setInitialParameters(system, domain, safe, locked_constants);
+	_setInitialParameters(system, verInfo.getDomain(), verInfo.getSafeRegion(), locked_constants);
 
-    for(_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth;
-    	_parameters->maximum_grid_depth <= _parameters->highest_maximum_grid_depth;
-    	_parameters->maximum_grid_depth++)
+	int& depth = _parameters->maximum_grid_depth;
+    for(depth = _parameters->lowest_maximum_grid_depth; depth <= _parameters->highest_maximum_grid_depth; ++depth)
 	{ 
-    	sprintf(mgd_char,"%i", _parameters->maximum_grid_depth);
-		ARIADNE_LOG(2, "DEPTH " << _parameters->maximum_grid_depth << "\n");
+    	sprintf(mgd_char,"%i", depth);
+		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
 
 		// Tune the parameters for the current iteration
-		_tuneVerificationParameters(system);
+		_tuneIterativeStepParameters(system);
 
 		// Perform the verification
-		tribool result = verify(system,initial_set);
+		tribool result = verify(system,verInfo.getInitialSet());
 
 		// Plot the results, if desired
 		if (plot_verify_results)
@@ -1989,13 +1983,12 @@ _verify_iterative(SystemType& system,
 
 std::pair<Interval,Interval>
 HybridReachabilityAnalyser::
-parametric_1d_bisection(SystemType& system, 
-						   const HybridImageSet& initial_set, 
-						   const HybridBoxes& safe,
-						   const HybridBoxes& domain,
+parametric_1d_bisection(SystemVerificationInfo& verInfo,
 						   const RealConstant& parameter,
 						   const Float& tolerance)	
 {
+	HybridAutomaton& system = verInfo.getSystem();
+
 	// Get the original value of the parameter
 	Real original_value = system.accessible_constant_value(parameter.name());
 
@@ -2021,7 +2014,7 @@ parametric_1d_bisection(SystemType& system,
 	system.substitute(param);
 
 	// Perform the verification
-	tribool lower_result = verify_iterative(system,initial_set,safe,domain);
+	tribool lower_result = verify_iterative(verInfo);
 
 	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(lower_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
@@ -2035,7 +2028,7 @@ parametric_1d_bisection(SystemType& system,
 	// Substitute the value
 	system.substitute(param);
 	// Perform the verification
-	tribool upper_result = verify_iterative(system,initial_set,safe,domain);
+	tribool upper_result = verify_iterative(verInfo);
 
 	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(upper_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
@@ -2093,7 +2086,7 @@ parametric_1d_bisection(SystemType& system,
 					      ", width ratio: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			// Perform the verification
-			result = verify_iterative(system,initial_set,safe,domain);
+			result = verify_iterative(verInfo);
 
 			// If safe
 			if (definitely(result)) {
@@ -2158,7 +2151,7 @@ parametric_1d_bisection(SystemType& system,
 			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() <<
 						  ", width ratio: " << unsafety_int.width()/parameter_range.width()*100 << "%) ... ");
 			// Perform the verification
-			result = verify_iterative(system,initial_set,safe,domain);
+			result = verify_iterative(verInfo);
 
 			// If safe
 			if (definitely(result)) {
@@ -2238,15 +2231,14 @@ parametric_1d_bisection(SystemType& system,
 }
 
 void
-HybridReachabilityAnalyser::parametric_2d_bisection(SystemType& system,
-											   const HybridImageSet& initial_set,
-											   const HybridBoxes& safe,
-											   const HybridBoxes& domain,
+HybridReachabilityAnalyser::parametric_2d_bisection(SystemVerificationInfo& verInfo,
 											   const RealConstant& xParam,
 											   const RealConstant& yParam,
 											   const Float& tolerance,
 											   const unsigned& numPointsPerAxis)
 {
+	HybridAutomaton& system = verInfo.getSystem();
+
 	// Get the original values of the parameters
 	Real original_xValue = system.accessible_constant_value(xParam.name());
 	Real original_yValue = system.accessible_constant_value(yParam.name());
@@ -2281,7 +2273,7 @@ HybridReachabilityAnalyser::parametric_2d_bisection(SystemType& system,
 		ARIADNE_LOG(1,"\nAnalysis with " << xParam.name() << " = " << xConstant.value().lower() << "...\n");
 
 		// Performs the analysis on Y and adds to the results of X
-		std::pair<Interval,Interval> result = parametric_1d_bisection(system,initial_set,safe,domain,yParam,tolerance);
+		std::pair<Interval,Interval> result = parametric_1d_bisection(verInfo,yParam,tolerance);
 		results.insertXValue(result);
 
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
@@ -2303,7 +2295,7 @@ HybridReachabilityAnalyser::parametric_2d_bisection(SystemType& system,
 		ARIADNE_LOG(1,"\nAnalysis with " << yParam.name() << " = " << yConstant.value().lower() << "...\n");
 
 		// Performs the analysis on X and adds to the results of Y
-		std::pair<Interval,Interval> result = parametric_1d_bisection(system,initial_set,safe,domain,xParam,tolerance);
+		std::pair<Interval,Interval> result = parametric_1d_bisection(verInfo,xParam,tolerance);
 		results.insertYValue(result);
 
 		ARIADNE_LOG(1,"Obtained safety in " << result.first << " and unsafety in " << result.second << ".\n");
@@ -2323,65 +2315,28 @@ HybridReachabilityAnalyser::parametric_verify(SystemVerificationInfo& verInfo,
 											  const RealConstantSet& params,
 											  const Float& tolerance)
 {
-	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter for verification.");
+	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter.");
+	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
 
 	ParametricVerificationOutcomeList result(params);
 
-	RealConstantSet original_constants = verInfo.getSystem().nonsingleton_accessible_constants();
+	RealConstantSet original_constants = verInfo.getSystem().accessible_constants();
 
 	std::list<RealConstantSet> working_list;
 	working_list.push_back(params);
 	while (!working_list.empty())
 	{
-		RealConstantSet configuration = working_list.back();
+		RealConstantSet current_params = working_list.back();
 		working_list.pop_back();
 
-		ARIADNE_LOG(1,"Parameter values: " << configuration << "\n");
+		ARIADNE_LOG(1,"Parameter values: " << current_params << "\n");
 
-		verInfo.getSystem().substitute(configuration);
-		tribool verification = _verify_iterative(verInfo.getSystem(),verInfo.getInitialSet(),verInfo.getSafeRegion(),verInfo.getDomain(),params);
+		verInfo.getSystem().substitute(current_params);
+		tribool outcome = _verify_iterative(verInfo,params);
 
-		ARIADNE_LOG(1,"Outcome: " << verification << "\n");
+		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
 
-		if (!definitely(verification))
-		{
-			RealConstant bestConstantToSplit = *configuration.begin();
-
-			Float bestRatio = 0.0;
-			for (RealConstantSet::const_iterator const_it = configuration.begin();
-												 const_it != configuration.end();
-												 ++const_it)
-			{
-				Float currentWidth = const_it->value().width();
-				Float initialWidth = params.find(*const_it)->value().width();
-
-				if (currentWidth/initialWidth > bestRatio)
-				{
-					bestConstantToSplit = *const_it;
-					bestRatio = currentWidth/initialWidth;
-				}
-			}
-
-			if (bestRatio > tolerance)
-			{
-				configuration.erase(bestConstantToSplit);
-				RealConstantSet newConfigurationLeft = configuration;
-				RealConstantSet newConfigurationRight = configuration;
-
-				const Real& currentInterval = bestConstantToSplit.value();
-				newConfigurationLeft.insert(RealConstant(bestConstantToSplit.name(),
-													  Interval(currentInterval.lower(),currentInterval.midpoint())));
-				newConfigurationRight.insert(RealConstant(bestConstantToSplit.name(),
-													  Interval(currentInterval.midpoint(),currentInterval.upper())));
-
-				working_list.push_back(newConfigurationLeft);
-				working_list.push_back(newConfigurationRight);
-			}
-			else
-				result.push_back(ParametricVerificationOutcome(configuration,verification));
-		}
-		else
-			result.push_back(ParametricVerificationOutcome(configuration,verification));
+		_split_parameters_set(outcome, working_list, result, current_params, params, tolerance);
 	}
 
 	verInfo.getSystem().substitute(original_constants);
@@ -2391,8 +2346,19 @@ HybridReachabilityAnalyser::parametric_verify(SystemVerificationInfo& verInfo,
 
 tribool
 HybridReachabilityAnalyser::dominance(SystemVerificationInfo& dominating,
-									  SystemVerificationInfo& dominated)
+		  	  	  	  	  	  	  	  SystemVerificationInfo& dominated)
 {
+	const RealConstantSet dominatingLockedConstants;
+	return _dominance(dominating,dominated,dominatingLockedConstants);
+}
+
+tribool
+HybridReachabilityAnalyser::_dominance(SystemVerificationInfo& dominating,
+									  SystemVerificationInfo& dominated,
+									  const RealConstantSet& dominatingLockedConstants)
+{
+	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
+
 	ARIADNE_LOG(1, "Dominance checking...\n");
 
 	// We are not allowed to skip if disproved, since we need as much reached region as possible
@@ -2400,18 +2366,17 @@ HybridReachabilityAnalyser::dominance(SystemVerificationInfo& dominating,
 	_parameters->skip_if_disproved = false;
 	_parameters->skip_if_unprovable = true;
 
-    for(_parameters->maximum_grid_depth = _parameters->lowest_maximum_grid_depth;
-    	_parameters->maximum_grid_depth <= _parameters->highest_maximum_grid_depth;
-    	_parameters->maximum_grid_depth++)
+	int& depth = _parameters->maximum_grid_depth;
+    for(depth = _parameters->lowest_maximum_grid_depth; depth <= _parameters->highest_maximum_grid_depth; ++depth)
 	{
-		ARIADNE_LOG(2, "DEPTH " << _parameters->maximum_grid_depth << "\n");
+		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
 
-		if (_dominance_positive(dominating, dominated)) {
+		if (_dominance_positive(dominating, dominated, dominatingLockedConstants)) {
 			ARIADNE_LOG(3, "Dominates.\n");
 			return true;
 		}
 
-		if (_dominance_negative(dominating, dominated)) {
+		if (_dominance_negative(dominating, dominated, dominatingLockedConstants)) {
 			ARIADNE_LOG(3, "Does not dominate.\n");
 			return false;
 		}
@@ -2424,10 +2389,9 @@ HybridReachabilityAnalyser::dominance(SystemVerificationInfo& dominating,
 
 bool
 HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominating,
-		  	  	  	  	  	  	  	  	  	  	SystemVerificationInfo& dominated)
+		  	  	  	  	  	  	  	  	  	  	SystemVerificationInfo& dominated,
+		  	  	  	  	  	  	  	  	  	  	const RealConstantSet& dominatingLockedConstants)
 {
-	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
-
 	ARIADNE_LOG(3,"Looking for a positive answer...\n");
 
 	bool result;
@@ -2438,7 +2402,7 @@ HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominati
 
 	ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
 
-	_tuneDominanceParameters(dominating);
+	_tuneDominanceParameters(dominating,dominatingLockedConstants);
 	make_lpair<HybridGridTreeSet,bool>(dominating_reach,isValid) = upper_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
 	if (!isValid) {
@@ -2449,9 +2413,11 @@ HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominati
 	{
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
 
-		_tuneDominanceParameters(dominated);
+		RealConstantSet emptyLockedConstants;
+		_tuneDominanceParameters(dominated,emptyLockedConstants);
 		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) = lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
+		// We must shrink the lower approximation of the the dominated system, but underapproximating in terms of rounding
 		HybridBoxes shrinked_dominated_bounds = Ariadne::shrink_in(disproveData.getReachBounds(),disproveData.getEpsilon());
 
 		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
@@ -2469,10 +2435,9 @@ HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominati
 
 bool
 HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominating,
-	  	  	  	  								SystemVerificationInfo& dominated)
+	  	  	  	  								SystemVerificationInfo& dominated,
+	  	  	  	  								const RealConstantSet& dominatingLockedConstants)
 {
-	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
-
 	ARIADNE_LOG(3,"Looking for a negative answer...\n");
 
 	bool result;
@@ -2483,7 +2448,8 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 
 	ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
 
-	_tuneDominanceParameters(dominated);
+	RealConstantSet emptyLockedConstants;
+	_tuneDominanceParameters(dominated,emptyLockedConstants);
 	make_lpair<HybridGridTreeSet,bool>(dominated_reach,isValid) = upper_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
 	if (!isValid) {
@@ -2494,9 +2460,10 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 	{
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
 
-		_tuneDominanceParameters(dominating);
+		_tuneDominanceParameters(dominating,dominatingLockedConstants);
 		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) = lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
+		// We must shrink the lower approximation of the the dominating system, but overapproximating in terms of rounding
 		HybridBoxes shrinked_dominating_bounds = Ariadne::shrink_out(disproveData.getReachBounds(),disproveData.getEpsilon());
 
 		Box projected_shrinked_dominating_bounds = Ariadne::project(shrinked_dominating_bounds,dominating.getProjection());
@@ -2511,5 +2478,90 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 
 	return result;
 }
+
+ParametricVerificationOutcomeList
+HybridReachabilityAnalyser::parametric_dominance(SystemVerificationInfo& dominating,
+												 SystemVerificationInfo& dominated,
+											  	 const RealConstantSet& dominating_params,
+											  	 const Float& tolerance)
+{
+	ARIADNE_ASSERT_MSG(dominating_params.size() > 0, "Provide at least one parameter.");
+	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
+
+	ParametricVerificationOutcomeList result(dominating_params);
+
+	RealConstantSet original_constants = dominating.getSystem().accessible_constants();
+
+	std::list<RealConstantSet> working_list;
+	working_list.push_back(dominating_params);
+	while (!working_list.empty())
+	{
+		RealConstantSet current_params = working_list.back();
+		working_list.pop_back();
+
+		ARIADNE_LOG(1,"Parameter values: " << current_params << "\n");
+
+		dominating.getSystem().substitute(current_params);
+		tribool outcome = _dominance(dominating,dominated,dominating_params);
+
+		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
+
+		_split_parameters_set(outcome, working_list, result, current_params, dominating_params, tolerance);
+	}
+
+	dominating.getSystem().substitute(original_constants);
+
+	return result;
+}
+
+void
+HybridReachabilityAnalyser::_split_parameters_set(const tribool& outcome,
+										    	  std::list<RealConstantSet>& working_list,
+										    	  ParametricVerificationOutcomeList& output_list,
+												  RealConstantSet& current_params,
+												  const RealConstantSet& working_params,
+												  const Float& tolerance) const
+{
+	if (!definitely(outcome))
+	{
+		RealConstant bestConstantToSplit = *current_params.begin();
+
+		Float bestRatio = 0.0;
+		for (RealConstantSet::const_iterator const_it = current_params.begin();
+											 const_it != current_params.end();
+											 ++const_it)
+		{
+			Float currentWidth = const_it->value().width();
+			Float initialWidth = working_params.find(*const_it)->value().width();
+
+			if (currentWidth/initialWidth > bestRatio)
+			{
+				bestConstantToSplit = *const_it;
+				bestRatio = currentWidth/initialWidth;
+			}
+		}
+
+		if (bestRatio > tolerance)
+		{
+			current_params.erase(bestConstantToSplit);
+			RealConstantSet newConfigurationLeft = current_params;
+			RealConstantSet newConfigurationRight = current_params;
+
+			const Real& currentInterval = bestConstantToSplit.value();
+			newConfigurationLeft.insert(RealConstant(bestConstantToSplit.name(),
+												  Interval(currentInterval.lower(),currentInterval.midpoint())));
+			newConfigurationRight.insert(RealConstant(bestConstantToSplit.name(),
+												  Interval(currentInterval.midpoint(),currentInterval.upper())));
+
+			working_list.push_back(newConfigurationLeft);
+			working_list.push_back(newConfigurationRight);
+		}
+		else
+			output_list.push_back(ParametricVerificationOutcome(current_params,outcome));
+	}
+	else
+		output_list.push_back(ParametricVerificationOutcome(current_params,outcome));
+}
+
 
 } // namespace Ariadne

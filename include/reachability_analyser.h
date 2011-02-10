@@ -236,12 +236,11 @@ class HybridReachabilityAnalyser
     virtual tribool verify(SystemType& system,
                            const HybridImageSet& initial_set);
 
-	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe inside \a domain,
-		in an iterative way by tuning the evolution/analysis parameters. */
-	tribool verify_iterative(SystemType& system,
-							 const HybridImageSet& initial_set, 
-							 const HybridBoxes& safe,
-							 const HybridBoxes& domain);
+	/*! \brief Attempt to verify that the reachable set of a system starting in an initial_set remains in a safe region inside a domain.
+	 * \details This is done in an iterative way by tuning the evolution/analysis parameters. The \a verInfo contains all the information
+	 * necessary for verification.
+	 */
+	tribool verify_iterative(SystemVerificationInfo& verInfo);
 
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
@@ -249,10 +248,7 @@ class HybridReachabilityAnalyser
         The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
 		bisection search.
         \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> parametric_1d_bisection(SystemType& system, 
-										 					const HybridImageSet& initial_set, 
-										 					const HybridBoxes& safe,
-			 							 					const HybridBoxes& domain,
+	std::pair<Interval,Interval> parametric_1d_bisection(SystemVerificationInfo& verInfo,
 										 					const RealConstant& parameter,
 										 					const Float& tolerance);
 
@@ -263,19 +259,17 @@ class HybridReachabilityAnalyser
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	void parametric_2d_bisection(SystemType& system,
-								 const HybridImageSet& initial_set,
-								 const HybridBoxes& safe,
-								 const HybridBoxes& domain,
+	void parametric_2d_bisection(SystemVerificationInfo& verInfo,
 								 const RealConstant& xParam,
 								 const RealConstant& yParam,
 								 const Float& tolerance,
 								 const unsigned& numPointsPerAxis);
 
 	/**
-	 * \brief Performs a parametric analysis on a set of parameters \a params.
+	 * \brief Performs a parametric verification on a set of parameters \a params.
 	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
-	 * percentage in respect to the range of a given parameter)
+	 * percentage in respect to the range of a given parameter). The values in \a params are substituted into the system, the latter
+	 * being restored to its initial conditions by the end of the method.
 	 */
 	ParametricVerificationOutcomeList parametric_verify(SystemVerificationInfo& verInfo,
 													   const RealConstantSet& params,
@@ -285,7 +279,19 @@ class HybridReachabilityAnalyser
 	 * \brief Performs dominance checking.
 	 * \details Verifies if the \a dominating system dominates the \a dominated system.
 	 */
-	tribool dominance(SystemVerificationInfo& dominating, SystemVerificationInfo& dominated);
+	tribool dominance(SystemVerificationInfo& dominating,
+					  SystemVerificationInfo& dominated);
+
+	/**
+	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system.
+	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
+	 * percentage in respect to the range of a given parameter). The values in \a dominating_params are substituted into the \a dominating
+	 * system alone, the latter being restored to its initial conditions by the end of the method.
+	 */
+	ParametricVerificationOutcomeList parametric_dominance(SystemVerificationInfo& dominating,
+													 	   SystemVerificationInfo& dominated,
+													 	   const RealConstantSet& dominating_params,
+													 	   const Float& tolerance);
 
     //@}
 
@@ -294,7 +300,7 @@ class HybridReachabilityAnalyser
 	// Determine if the upper/lower reached regions of verify_iterative (and of all the functions using it) must be saved into figures (false by default)
 	bool plot_verify_results;
 	// Determine if the reached region (resulting from the chain_reach_grid() procedure) is to be dumped into disk for those locations not involved in
-	// the evolution, and reloaded when required again.
+	// the evolution, and reloaded when required again. Only partially implemented at the moment.
 	bool chain_reach_dumping;
 	// The reduction in the number of logical cores used in multithreading (down from the maximum concurrency of the machine) (zero by default)
 	uint free_cores;
@@ -380,13 +386,10 @@ class HybridReachabilityAnalyser
     std::pair<SetApproximationType,bool> _upper_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
 
-	/*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe inside \a domain,
-		in an iterative way by tuning the evolution/analysis parameters. In addition, the \a locked_constants set is not allowed to
-		be split */
-	tribool _verify_iterative(SystemType& system,
-							 const HybridImageSet& initial_set,
-							 const HybridBoxes& safe,
-							 const HybridBoxes& domain,
+	/*! \brief Attempt to verify that the reachable set of a system starting in an initial set remains in a safe region inside a domain,
+		in an iterative way by tuning the evolution/analysis parameters. In addition, the constants in the \a locked_constants set
+		are not allowed to be split */
+	tribool _verify_iterative(SystemVerificationInfo& verInfo,
 							 const RealConstantSet& locked_constants);
 
 	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
@@ -434,19 +437,36 @@ class HybridReachabilityAnalyser
 							   const RealConstantSet& locked_constants);
 
 	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
-	void _tuneVerificationParameters(SystemType& system);
+	void _tuneIterativeStepParameters(SystemType& system);
 
-	/*! \brief Tune the parameters for the next dominance iteration, given a bundle of information around a system. */
-	void _tuneDominanceParameters(SystemVerificationInfo& systemBundle);
+	/*! \brief Tune the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
+	 * that must be ignore when choosing the splitting factors of the system. */
+	void _tuneDominanceParameters(SystemVerificationInfo& systemBundle, const RealConstantSet& lockedConstants);
+
+	/*! \brief Helper function to perform dominance in the more general case when some \a dominatingLockedConstants are enforced. */
+	tribool _dominance(SystemVerificationInfo& dominating,
+					   SystemVerificationInfo& dominated,
+					   const RealConstantSet& dominatingLockedConstants);
 
 	/*! \brief Performs the positive part of dominance checking. */
-	bool _dominance_positive(SystemVerificationInfo& dominating, SystemVerificationInfo& dominated);
+	bool _dominance_positive(SystemVerificationInfo& dominating,
+							 SystemVerificationInfo& dominated,
+							 const RealConstantSet& dominatingLockedConstants);
 
 	/*! \brief Performs the negative part of dominance checking. */
-	bool _dominance_negative(SystemVerificationInfo& dominating, SystemVerificationInfo& dominated);
+	bool _dominance_negative(SystemVerificationInfo& dominating,
+							 SystemVerificationInfo& dominated,
+							 const RealConstantSet& dominatingLockedConstants);
 
-	/*! \brief Enlarges the \a box of \a epsilon. */
-	HybridBoxes _enlarge_of_epsilon(const HybridBoxes& box, const HybridFloatVector& epsilon);
+	/*! \brief Handles splitting the parameters \a current_params, if this is allowed by the given \a tolerance and by a given
+	 * verification \a outcome.
+	 * \details Additionally saves the un-splittable results into \a output_list. */
+	void _split_parameters_set(const tribool& outcome,
+							   std::list<RealConstantSet>& working_list,
+							   ParametricVerificationOutcomeList& output_list,
+							   RealConstantSet& current_params,
+							   const RealConstantSet& working_params,
+							   const Float& tolerance) const;
 };
 
 template<class HybridEnclosureType>

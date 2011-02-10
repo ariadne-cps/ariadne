@@ -784,13 +784,6 @@ HybridIOAutomaton::transitions() const
     return this->_transitions;
 }
 
-
-const RealConstantSet&
-HybridIOAutomaton::accessible_constants() const
-{
-    return this->_accessible_constants;
-}
-
 std::list< DiscreteIOTransition >
 HybridIOAutomaton::transitions(DiscreteState source) const
 {
@@ -1631,15 +1624,26 @@ HybridIOAutomaton::accessible_constant_value(const String& name) const
 }
 
 RealConstantSet
+HybridIOAutomaton::accessible_constants() const
+{
+	RealConstantSet result;
+
+	for (RealConstantSet::const_iterator constant_it = _accessible_constants.begin();
+										 constant_it != _accessible_constants.end();
+									   ++constant_it)
+		result.insert(*constant_it);
+
+	return result;
+}
+
+RealConstantSet
 HybridIOAutomaton::nonsingleton_accessible_constants() const
 {
 	RealConstantSet result;
 
-	const RealConstantSet& constants = accessible_constants();
-
-	for (RealConstantSet::const_iterator constant_it = constants.begin();
-												 constant_it != constants.end();
-												 ++constant_it) {
+	for (RealConstantSet::const_iterator constant_it = _accessible_constants.begin();
+										 constant_it != _accessible_constants.end();
+									   ++constant_it) {
 		if (!constant_it->value().singleton())
 			result.insert(*constant_it);
 	}

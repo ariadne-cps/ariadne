@@ -597,8 +597,8 @@ class HybridAutomaton
     //! \brief The state space of the system.
     HybridSpace state_space() const;
 
-    //! \brief The set of accessible constants.
-    const RealConstantSet& accessible_constants() const;
+    //! \brief A copy of the set of accessible constants.
+    RealConstantSet accessible_constants() const;
 
     //! \brief A copy of the set of non-singleton accessible constants.
     RealConstantSet nonsingleton_accessible_constants() const;

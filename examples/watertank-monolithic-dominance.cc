@@ -64,5 +64,11 @@ int main(int argc,char *argv[])
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
 
-	cout << analyser.dominance(proportional,hysteresis) << "\n";
+	// The parametric dominance parameters
+	RealConstantSet parameters;
+	parameters.insert(RealConstant("Kp",Interval(0.01,0.6)));
+	Float tolerance = 0.25;
+
+	ParametricVerificationOutcomeList outcomeList = analyser.parametric_dominance(proportional,hysteresis,parameters,tolerance);
+	cout << outcomeList << "\n";
 }

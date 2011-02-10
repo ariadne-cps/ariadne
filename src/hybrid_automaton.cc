@@ -488,10 +488,17 @@ HybridAutomaton::transitions() const
 }
 
 
-const RealConstantSet&
+RealConstantSet
 HybridAutomaton::accessible_constants() const
 {
-    return this->_accessible_constants;
+	RealConstantSet result;
+
+	for (RealConstantSet::const_iterator constant_it = _accessible_constants.begin();
+										 constant_it != _accessible_constants.end();
+									   ++constant_it)
+			result.insert(*constant_it);
+
+	return result;
 }
 
 
@@ -670,7 +677,7 @@ HybridAutomaton::nonsingleton_accessible_constants() const
 {
 	RealConstantSet result;
 
-	const RealConstantSet& constants = accessible_constants();
+	const RealConstantSet& constants = _accessible_constants;
 
 	for (RealConstantSet::const_iterator constant_it = constants.begin();
 												 constant_it != constants.end();

@@ -39,7 +39,7 @@ int main(int argc,char *argv[])
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
 	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
-	Float tolerance = 0.1;
+	Float tolerance = 0.45;
 
 	// The initial values
 	HybridImageSet initial_set;

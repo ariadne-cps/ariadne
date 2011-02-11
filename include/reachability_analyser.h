@@ -232,6 +232,14 @@ class HybridReachabilityAnalyser
 	 */
 	tribool verify_iterative(SystemVerificationInfo& verInfo);
 
+	/*! \brief Performs iterative verification where \a parameter is substituted into the system.
+	 */
+	tribool verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter);
+
+	/*! \brief Performs iterative verification where the singleton \a value is substituted into the system for the given \a parameter.
+	 */
+	tribool verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Float& value);
+
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
         \details The procedure uses the bisection method. Each parameter is assumed as having separable safe and unsafe intervals in its range.
@@ -243,7 +251,7 @@ class HybridReachabilityAnalyser
 										 							  const Float& tolerance);
 
 	/**
-	 * \brief Performs a parametric analysis on two parameters \a xParam, \a yParam,
+	 * \brief Performs a parametric verification on two parameters \a xParam, \a yParam,
 	 * discretizing with \a numPointsPerAxis points for each axis.
 	 * \details The procedure uses the bisection method. Saves the results in a file called "<systemName>-<xName>-<yName>" and
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
@@ -256,14 +264,22 @@ class HybridReachabilityAnalyser
 								 const unsigned& numPointsPerAxis);
 
 	/**
+	 * \brief Performs a parametric verification on a set of two parameters \a params, by using bisection.
+	 */
+	void parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+												   const RealConstantSet& params,
+												   const Float& tolerance,
+												   const unsigned& numPointsPerAxis);
+
+	/**
 	 * \brief Performs a parametric verification on a set of parameters \a params, by partitioning the parameters space.
-	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
+	 * \details The \a minPartitioningRatio variable determines the minimum granularity for partitioning any parameter (expressed as a
 	 * percentage in respect to the range of a given parameter). The values in \a params are substituted into the system, the latter
 	 * being restored to its initial conditions by the end of the method.
 	 */
 	ParametricVerificationOutcomeList parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 													   const RealConstantSet& params,
-													   const Float& tolerance);
+													   const Float& minPartitioningRatio);
 
 	/**
 	 * \brief Performs dominance checking.
@@ -275,14 +291,14 @@ class HybridReachabilityAnalyser
 	/**
 	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
 	 * the parameters space.
-	 * \details The \a tolerance variable determines the minimum granularity for splitting any parameter (expressed as a
+	 * \details The \a minPartitioningRatio variable determines the minimum granularity for partitioning any parameter (expressed as a
 	 * percentage in respect to the range of a given parameter). The values in \a dominating_params are substituted into the \a dominating
 	 * system alone, the latter being restored to its initial conditions by the end of the method.
 	 */
 	ParametricVerificationOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 													 	   SystemVerificationInfo& dominated,
 													 	   const RealConstantSet& dominating_params,
-													 	   const Float& tolerance);
+													 	   const Float& minPartitioningRatio);
 
     //@}
 
@@ -430,13 +446,45 @@ class HybridReachabilityAnalyser
 	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
 	void _tuneIterativeStepParameters(SystemType& system);
 
+	/* \brief Processes the \a positive_int and \a negative_int initial intervals based on the lower and upper results.
+	 * \return A variable determining if we must proceed further with bisection refining, and another variable determining
+	 * the bound where positive values are present.
+	 */
+	std::pair<bool,bool> _process_initial_bisection_results(Interval& positive_int,
+														    Interval& negative_int,
+														    const Interval& parameter_range,
+														    const tribool& lower_result,
+														    const tribool& upper_result) const;
+
+	/* \brief Processes the \a result in order to update the \a positive_int interval, possibly updating \a negative_int too. */
+	void _process_positive_bisection_result(const tribool& result,
+											Interval& positive_int,
+										    Interval& negative_int,
+											const Float& current_value,
+											const bool& safeOnBottom) const;
+
+	/* \brief Processes the \a result in order to update the \a negative_int interval, possibly updating \a positive_int too. */
+	void _process_negative_bisection_result(const tribool& result,
+											Interval& positive_int,
+										    Interval& negative_int,
+											const Float& current_value,
+											const bool& safeOnBottom) const;
+
+	/*! \brief Converts the positive/negative search intervals into positive/negative bounds.
+	 * \details The result is obtained by knowing the range of the parameter \a parameter_range and the side where
+	 * positive values hold, deduced from \a positiveOnBottom. */
+	std::pair<Interval,Interval> _pos_neg_bounds_from_search_intervals(const Interval& positive_int,
+												 	 	 	 	 	 	 	  const Interval& negative_int,
+												 	 	 	 	 	 	 	  const Interval& parameter_range,
+												 	 	 	 	 	 	 	  const bool& positiveOnBottom) const;
+
 	/*! \brief Performs one sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
 	void _parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
 						  	  	  	    SystemVerificationInfo& verInfo,
 						  	  	  	    RealConstant xParam,
 						  	  	  	    RealConstant yParam,
-						  	  	  	    const uint& numPointsPerAxis,
 						  	  	  	    const Float& tolerance,
+						  	  	  	    const uint& numPointsPerAxis,
 						  	  	  	    bool sweepOnX);
 
 	/*! \brief Set the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants

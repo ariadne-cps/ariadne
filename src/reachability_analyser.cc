@@ -1973,6 +1973,30 @@ verify_iterative(SystemVerificationInfo& verInfo)
 	return _verify_iterative(verInfo,locked_constants);
 }
 
+tribool
+HybridReachabilityAnalyser::
+verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter)
+{
+	HybridAutomaton& system = verInfo.getSystem();
+
+	Real original_value = system.accessible_constant_value(parameter.name());
+
+	system.substitute(parameter);
+	tribool result = verify_iterative(verInfo);
+	system.substitute(parameter,original_value);
+
+	return result;
+}
+
+tribool
+HybridReachabilityAnalyser::
+verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Float& value)
+{
+	const RealConstant modifiedParameter(parameter.name(),Interval(value));
+
+	return verify_iterative(verInfo, modifiedParameter);
+}
+
 tribool 
 HybridReachabilityAnalyser::
 _verify_iterative(SystemVerificationInfo& verInfo,
@@ -2044,13 +2068,13 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 						   	   	   	 const RealConstant& parameter,
 						   	   	   	 const Float& tolerance)
 {
+	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
+
 	HybridAutomaton& system = verInfo.getSystem();
 
-	RealConstant local_parameter = parameter;
-
 	// Get the original value of the parameter and the related range
-	Real original_value = system.accessible_constant_value(local_parameter.name());
-	Interval parameter_range(local_parameter.value());
+	Real original_value = system.accessible_constant_value(parameter.name());
+	Interval parameter_range(parameter.value());
 
 	ARIADNE_ASSERT(parameter_range.width() > 0);
 
@@ -2059,19 +2083,12 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 	Interval safety_int = parameter_range;
 	Interval unsafety_int = parameter_range;
 
-	ARIADNE_LOG(1,"\nChecking parameter " << local_parameter.name() << " in " << parameter_range << " with " << tolerance*100 << "% tolerance\n");
+	ARIADNE_LOG(1,"\nChecking parameter " << parameter.name() << " in " << parameter_range << " with " << tolerance*100 << "% tolerance\n");
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
 
-	// Set the parameter
-	local_parameter.set_value(parameter_range.lower());
-
-	// Substitute the value
-	system.substitute(local_parameter);
-
-	// Perform the verification
-	tribool lower_result = verify_iterative(verInfo);
+	tribool lower_result = verify_iterative(verInfo,parameter,parameter_range.lower());
 
 	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(lower_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
@@ -2080,211 +2097,243 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 	// Check the upper bound
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
 
-	// Set the parameter
-	local_parameter.set_value(parameter_range.upper());
-	// Substitute the value
-	system.substitute(local_parameter);
-	// Perform the verification
-	tribool upper_result = verify_iterative(verInfo);
+	tribool upper_result = verify_iterative(verInfo,parameter,parameter_range.upper());
 
 	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
 	else if (!possibly(upper_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
 	else ARIADNE_LOG(1,"Indeterminate.\n");
 
-	// Analyze the results
-
-	// Where the safe value is found
+	// If we must proceed with bisection refining
+	bool proceed;
+	// If the safe value is found on the lower extreme of the parameter interval
 	bool safeOnBottom;
 
-	// Create an empty interval
-	Interval empty_int;
-	empty_int.make_empty();
+	// Updates the initial values for the safety/unsafety intervals, and decides whether to proceed and the eventual ordering
+	make_lpair<bool,bool>(proceed,safeOnBottom) = this->_process_initial_bisection_results(safety_int,unsafety_int,parameter_range,
+																						 lower_result,upper_result);
+	// Verification loop
+	bool proceedSafety = proceed;
+	bool proceedUnsafety = proceed;
+	while (proceedSafety || proceedUnsafety)
+	{
+		// Safety interval check
+		if (!safety_int.empty() && safety_int.width() > tolerance*parameter_range.width())
+		{
+			ARIADNE_LOG(1,"Checking safety (positive) interval " << safety_int << " (midpoint: " << safety_int.midpoint() <<
+					      ", width ratio: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
+
+			const Float current_value = safety_int.midpoint();
+			tribool result = verify_iterative(verInfo,parameter,current_value);
+
+			_process_positive_bisection_result(result,safety_int,unsafety_int,current_value,safeOnBottom);
+		}
+		else
+			proceedSafety = false;
+
+		// Unsafety interval check
+		if (!unsafety_int.empty() && unsafety_int.width() > tolerance*parameter_range.width())
+		{
+			ARIADNE_LOG(1,"Checking unsafety (negative) interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() <<
+						  ", width ratio: " << unsafety_int.width()/parameter_range.width()*100 << "%) ... ");
+
+			const Float current_value = unsafety_int.midpoint();
+			tribool result = verify_iterative(verInfo,parameter,current_value);
+
+			_process_negative_bisection_result(result,safety_int,unsafety_int,current_value,safeOnBottom);
+		}
+		else
+			proceedUnsafety = false;
+	}
+
+	system.substitute(parameter,original_value);
+
+	return _pos_neg_bounds_from_search_intervals(safety_int,unsafety_int,parameter_range,safeOnBottom);
+}
+
+std::pair<bool,bool>
+HybridReachabilityAnalyser::_process_initial_bisection_results(Interval& positive_int,
+															 Interval& negative_int,
+															 const Interval& parameter_range,
+															 const tribool& lower_result,
+															 const tribool& upper_result) const
+{
+	bool proceed;
+	bool positiveOnBottom;
 
 	// If both extremes are safe, no more verification is involved
 	if (definitely(lower_result) && definitely(upper_result)) {
-		system.substitute(local_parameter,original_value);
-		return make_pair<Interval,Interval>(parameter_range,empty_int); }
+		proceed = false;
+		positiveOnBottom = false;
+		positive_int = parameter_range;
+		negative_int.make_empty();
+	}
 	// If both extremes are unsafe, no more verification is involved
 	else if (!possibly(lower_result) && !possibly(upper_result)) {
-		system.substitute(local_parameter,original_value);
-		return make_pair<Interval,Interval>(empty_int,parameter_range); }
+		proceed = false;
+		positiveOnBottom = false;
+		positive_int.make_empty();
+		negative_int = parameter_range;
+	}
 	// If both extremes are indeterminate, no verification is possible
 	else if (indeterminate(lower_result) && indeterminate(upper_result)) {
-		system.substitute(local_parameter,original_value);
-		return make_pair<Interval,Interval>(empty_int,empty_int); }
+		proceed = false;
+		positiveOnBottom = false;
+		positive_int.make_empty();
+		negative_int.make_empty();
+	}
 	// If the lower extreme is safe or the upper extreme is unsafe, the safe values are on the bottom
 	else if (definitely(lower_result) || !possibly(upper_result)) {
-		safeOnBottom = true;		
+		proceed = true;
+		positiveOnBottom = true;
 		// If there are indeterminate values, reset the corresponding intervals as empty
-		if (indeterminate(lower_result)) safety_int = empty_int;
-		if (indeterminate(upper_result)) unsafety_int = empty_int; }		
+		if (indeterminate(lower_result)) positive_int.make_empty();
+		if (indeterminate(upper_result)) negative_int.make_empty();
+	}
 	// If the upper extreme is safe or the lower extreme is unsafe, the safe values are on the top
 	else {
-		safeOnBottom = false;		
+		proceed = true;
+		positiveOnBottom = false;
 		// If there are indeterminate values, reset the corresponding intervals as empty
-		if (indeterminate(lower_result)) unsafety_int = empty_int;
-		if (indeterminate(upper_result)) safety_int = empty_int; }
-
-	// Verification loop
-	while (true) 
-	{
-		// The verification result
-		tribool result;
-
-		// Safety interval check
-		if (!safety_int.empty()) 
-		{
-			// Set the parameter as the midpoint of the interval
-			local_parameter.set_value(safety_int.midpoint());
-			// Substitute the value
-			system.substitute(local_parameter);
-
-			ARIADNE_LOG(1,"Checking safety interval " << safety_int << " (midpoint: " << safety_int.midpoint() <<
-					      ", width ratio: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
-
-			// Perform the verification
-			result = verify_iterative(verInfo);
-
-			// If safe
-			if (definitely(result)) {
-				if (safeOnBottom) {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(local_parameter.value());
-
-					ARIADNE_LOG(1,"Safe, refining upwards.\n");
-					safety_int.set_lower(local_parameter.value()); }
-				else {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) unsafety_int.set_upper(local_parameter.value());
-
-					ARIADNE_LOG(1,"Safe, refining downwards.\n");
-					safety_int.set_upper(local_parameter.value()); }}
-			// If unsafe
-			else if (!possibly(result)) {
-				if (safeOnBottom) {
-					ARIADNE_LOG(1,"Unsafe, refining downwards and resetting the unsafety.\n");
-					safety_int.set_upper(local_parameter.value()); }
-				else {
-					ARIADNE_LOG(1,"Unsafe, refining upwards and resetting the unsafety.\n");
-					safety_int.set_lower(local_parameter.value()); }
-
-				// The unsafety interval now becomes the same as the safety interval
-				unsafety_int = safety_int; }
-			// If indeterminate
-			else {
-				if (safeOnBottom) {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) unsafety_int.set_lower(local_parameter.value());
-
-					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
-					safety_int.set_upper(local_parameter.value()); }
-				else {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int))	unsafety_int.set_upper(local_parameter.value());
-
-					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
-					safety_int.set_lower(local_parameter.value()); }
-			}
-
-			// If both intervals are not empty
-			if (!safety_int.empty() && !unsafety_int.empty())
-			{
-				// Breaks if the minimum distance between the safe and unsafe values is lesser than the tolerance
-				// (which is a more relaxed condition than the ones on the interval width)
-				if ((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance*parameter_range.width())) ||
-					(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance*parameter_range.width())))
-						break;
-			}
-		}
-
-		// Unsafety interval check
-		if (!unsafety_int.empty())
-		{
-			// Set the parameter as the midpoint of the interval
-			local_parameter.set_value(unsafety_int.midpoint());
-			// Substitute the value
-			system.substitute(local_parameter);
-
-			ARIADNE_LOG(1,"Checking unsafety interval " << unsafety_int << " (midpoint: " << unsafety_int.midpoint() <<
-						  ", width ratio: " << unsafety_int.width()/parameter_range.width()*100 << "%) ... ");
-			// Perform the verification
-			result = verify_iterative(verInfo);
-
-			// If safe
-			if (definitely(result)) {
-				if (safeOnBottom) {
-					ARIADNE_LOG(1,"Safe, refining upwards and resetting the safety.\n");
-					unsafety_int.set_lower(local_parameter.value()); }
-				else {
-					ARIADNE_LOG(1,"Safe, refining downwards and resetting the safety.\n");
-					unsafety_int.set_upper(local_parameter.value()); }
-
-				// The safety interval now becomes the same as the unsafety interval
-				safety_int = unsafety_int; }
-			// If unsafe
-			else if (!possibly(result)) {
-				if (safeOnBottom) {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_upper(local_parameter.value());
-
-					ARIADNE_LOG(1,"Unsafe, refining downwards.\n");
-					unsafety_int.set_upper(local_parameter.value()); }
-				else {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_lower(local_parameter.value());
-
-					ARIADNE_LOG(1,"Unsafe, refining upwards.\n");
-					unsafety_int.set_lower(local_parameter.value()); }}
-			// If indeterminate
-			else {
-				if (safeOnBottom) {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_upper(local_parameter.value());
-
-					ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
-					unsafety_int.set_lower(local_parameter.value()); }
-				else {
-					// If the unsafety interval is the same as the safety interval, update it too
-					if (equal(unsafety_int,safety_int)) safety_int.set_lower(local_parameter.value());
-
-					ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
-					unsafety_int.set_upper(local_parameter.value()); }
-			}
-
-			// If both intervals are not empty
-			if (!safety_int.empty() && !unsafety_int.empty())
-			{
-				// Breaks if the minimum distance between the safe and unsafe values is lesser than the tolerance
-				// (which is a more relaxed condition than the ones on the interval width)
-				if ((safeOnBottom && (unsafety_int.upper() - safety_int.lower() <= tolerance*parameter_range.width())) ||
-					(!safeOnBottom && (safety_int.upper() - unsafety_int.lower() <= tolerance*parameter_range.width())))
-						break;
-			}
-		}
-
-		// Breaks if the safety interval is not empty and the safety interval width is lesser than the tolerance
-		if (!safety_int.empty() && safety_int.width() <= tolerance*parameter_range.width())
-			break;
-		// Breaks if the unsafety interval is not empty and the unsafety interval width is lesser than the tolerance
-		if (!unsafety_int.empty() && unsafety_int.width() <= tolerance*parameter_range.width())
-			break;
+		if (indeterminate(lower_result)) positive_int.make_empty();
+		if (indeterminate(upper_result)) negative_int.make_empty();
 	}
 
-	// Returns the system to its original parameter value
-	system.substitute(local_parameter,original_value);
+	return std::pair<bool,bool>(proceed,positiveOnBottom);
+}
 
-	// The result intervals for safe and unsafe values
-	Interval safe_result, unsafe_result;
+void
+HybridReachabilityAnalyser::_process_positive_bisection_result(const tribool& result,
+															   Interval& positive_int,
+															   Interval& negative_int,
+															   const Float& current_value,
+															   const bool& positiveOnBottom) const
+{
+	if (definitely(result)) {
+		if (positiveOnBottom) {
+			// If the negative interval is the same as the positive one, update it too
+			if (equal(negative_int,positive_int)) negative_int.set_lower(current_value);
 
-	// Get the safe and unsafe intervals
-	if (safeOnBottom) {
-		safe_result = (safety_int.empty() ? safety_int : Interval(parameter_range.lower(),safety_int.lower()));
-		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(unsafety_int.upper(),parameter_range.upper())); }	
+			ARIADNE_LOG(1,"Positive, refining upwards.\n");
+			positive_int.set_lower(current_value);
+		} else {
+			// If the negative interval is the same as the positive one, update it too
+			if (equal(negative_int,positive_int)) negative_int.set_upper(current_value);
+
+			ARIADNE_LOG(1,"Positive, refining downwards.\n");
+			positive_int.set_upper(current_value);
+		}
+	}
+	else if (!possibly(result)) {
+		if (positiveOnBottom) {
+			ARIADNE_LOG(1,"Negative, refining downwards and resetting the unsafety.\n");
+			positive_int.set_upper(current_value);
+		}
+		else {
+			ARIADNE_LOG(1,"Negative, refining upwards and resetting the unsafety.\n");
+			positive_int.set_lower(current_value);
+		}
+
+		negative_int = positive_int;
+	}
 	else {
-		safe_result = (safety_int.empty() ? safety_int : Interval(safety_int.upper(),parameter_range.upper()));	
-		unsafe_result = (unsafety_int.empty() ? unsafety_int : Interval(parameter_range.lower(),unsafety_int.lower())); }
+		if (positiveOnBottom) {
+			// If the negative interval is the same as the positive interval, update it too
+			if (equal(negative_int,positive_int)) negative_int.set_lower(current_value);
 
-	return make_pair<Interval,Interval>(safe_result,unsafe_result);
+			ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
+			positive_int.set_upper(current_value); }
+		else {
+			// If the negative interval is the same as the positive interval, update it too
+			if (equal(negative_int,positive_int)) negative_int.set_upper(current_value);
+
+			ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
+			positive_int.set_lower(current_value); }
+	}
+}
+
+void
+HybridReachabilityAnalyser::_process_negative_bisection_result(const tribool& result,
+															   Interval& positive_int,
+															   Interval& negative_int,
+															   const Float& current_value,
+															   const bool& positiveOnBottom) const
+{
+	if (definitely(result)) {
+		if (positiveOnBottom) {
+			ARIADNE_LOG(1,"Positive, refining upwards and resetting the safety.\n");
+			negative_int.set_lower(current_value);
+		} else {
+			ARIADNE_LOG(1,"Positive, refining downwards and resetting the safety.\n");
+			negative_int.set_upper(current_value);
+		}
+
+		positive_int = negative_int;
+	}
+
+	else if (!possibly(result)) {
+		if (positiveOnBottom) {
+			// If the negative interval is the same as the positive interval, update it too
+			if (equal(negative_int,positive_int)) positive_int.set_upper(current_value);
+
+			ARIADNE_LOG(1,"Negative, refining downwards.\n");
+			negative_int.set_upper(current_value);
+		} else {
+			// If the negative interval is the same as the positive interval, update it too
+			if (equal(negative_int,positive_int)) positive_int.set_lower(current_value);
+
+			ARIADNE_LOG(1,"Negative, refining upwards.\n");
+			negative_int.set_lower(current_value);
+		}
+	} else {
+		if (positiveOnBottom) {
+			// If the negative interval is the same as the positive interval, update it too
+			if (equal(negative_int,positive_int)) positive_int.set_upper(current_value);
+
+			ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
+			negative_int.set_lower(current_value);
+		} else {
+			// If the negative interval is the same as the positive interval, update it too
+			if (equal(negative_int,positive_int)) positive_int.set_lower(current_value);
+
+			ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
+			negative_int.set_upper(current_value);
+		}
+	}
+}
+
+
+std::pair<Interval,Interval>
+HybridReachabilityAnalyser::_pos_neg_bounds_from_search_intervals(const Interval& positive_int,
+																	  const Interval& negative_int,
+																	  const Interval& parameter_range,
+																	  const bool& positiveOnBottom) const
+{
+	Interval positive_result, negative_result;
+
+	if (positiveOnBottom) {
+		positive_result = (positive_int.empty() ? positive_int : Interval(parameter_range.lower(),positive_int.lower()));
+		negative_result = (negative_int.empty() ? negative_int : Interval(negative_int.upper(),parameter_range.upper())); }
+	else {
+		positive_result = (positive_int.empty() ? positive_int : Interval(positive_int.upper(),parameter_range.upper()));
+		negative_result = (negative_int.empty() ? negative_int : Interval(parameter_range.lower(),negative_int.lower())); }
+
+	return make_pair<Interval,Interval>(positive_result,negative_result);
+}
+
+void
+HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+											   const RealConstantSet& params,
+											   const Float& tolerance,
+											   const unsigned& numPointsPerAxis)
+{
+	ARIADNE_ASSERT_MSG(params.size() == 2,"Provide exactly two parameters.");
+
+	RealConstantSet::const_iterator param_it = params.begin();
+
+	const RealConstant& xParam = *param_it;
+	const RealConstant& yParam = *(++param_it);
+
+	parametric_verification_2d_bisection(verInfo,xParam,yParam,tolerance,numPointsPerAxis);
 }
 
 void
@@ -2301,9 +2350,9 @@ HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificat
 	// Initializes the results
 	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
 
-	// Sweeps on both axes
-	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, numPointsPerAxis, tolerance, true);
-	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, numPointsPerAxis, tolerance, false);
+	// Sweeps on each axis
+	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, true);
+	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, false);
 
 	// Dumps the results into a file
 	results.dump();
@@ -2315,18 +2364,15 @@ void HybridReachabilityAnalyser::_parametric_verification_2d_bisection_sweep(Par
 					  	  	  	    							SystemVerificationInfo& verInfo,
 					  	  	  	    							RealConstant xParam,
 					  	  	  	    							RealConstant yParam,
-					  	  	  	    							const uint& numPointsPerAxis,
 					  	  	  	    							const Float& tolerance,
+					  	  	  	    							const uint& numPointsPerAxis,
 					  	  	  	    							bool sweepOnX)
 {
 	HybridAutomaton& system = verInfo.getSystem();
 
 	RealConstant& sweepParam = (sweepOnX ? xParam : yParam);
 	RealConstant& otherParam = (sweepOnX ? yParam : xParam);
-
-	// Get the original value of the sweep parameter
 	Real originalSweepValue = system.accessible_constant_value(sweepParam.name());
-
 	Interval sweepBounds = sweepParam.value();
 
 	ARIADNE_LOG(1,"\nSweeping on " << sweepParam.name() << " in " << sweepBounds << ":\n");
@@ -2358,10 +2404,10 @@ void HybridReachabilityAnalyser::_parametric_verification_2d_bisection_sweep(Par
 ParametricVerificationOutcomeList
 HybridReachabilityAnalyser::parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 											  const RealConstantSet& params,
-											  const Float& tolerance)
+											  const Float& minPartitioningRatio)
 {
 	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter.");
-	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
+	ARIADNE_ASSERT(minPartitioningRatio > 0 && minPartitioningRatio < 1);
 
 	ParametricVerificationOutcomeList result(params);
 
@@ -2381,7 +2427,7 @@ HybridReachabilityAnalyser::parametric_verification_partitioning(SystemVerificat
 
 		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
 
-		_split_parameters_set(outcome, working_list, result, current_params, params, tolerance);
+		_split_parameters_set(outcome, working_list, result, current_params, params, minPartitioningRatio);
 	}
 
 	verInfo.getSystem().substitute(original_constants);
@@ -2528,10 +2574,10 @@ ParametricVerificationOutcomeList
 HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 												 SystemVerificationInfo& dominated,
 											  	 const RealConstantSet& dominating_params,
-											  	 const Float& tolerance)
+											  	 const Float& minPartitioningRatio)
 {
 	ARIADNE_ASSERT_MSG(dominating_params.size() > 0, "Provide at least one parameter.");
-	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
+	ARIADNE_ASSERT(minPartitioningRatio > 0 && minPartitioningRatio < 1);
 
 	ParametricVerificationOutcomeList result(dominating_params);
 
@@ -2551,7 +2597,7 @@ HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerification
 
 		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
 
-		_split_parameters_set(outcome, working_list, result, current_params, dominating_params, tolerance);
+		_split_parameters_set(outcome, working_list, result, current_params, dominating_params, minPartitioningRatio);
 	}
 
 	dominating.getSystem().substitute(original_constants);

@@ -249,8 +249,8 @@ void Parametric2DBisectionResults::draw() const
 		make_lpair<Interval,Interval>(leftVerified,leftFalsified) = xResults[i];
 		make_lpair<Interval,Interval>(rightVerified,rightFalsified) = xResults[i+1];
 
-		// Draws the verified box (if neither the left or right intervals are empty)
-		if (!leftVerified.empty() && !rightVerified.empty())
+		// Draws the verified box if the intervals intersect
+		if (!intersection(leftVerified,rightVerified).empty())
 		{
 			// Gets the Y span as ranging from the maximum of the lower values to
 			// the minimum of the upper values
@@ -262,9 +262,10 @@ void Parametric2DBisectionResults::draw() const
 			fig.draw(Box(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper()));
 		}
 
-		// Draws the falsified box (if neither the left or right intervals are empty)
-		if (!leftFalsified.empty() && !rightFalsified.empty())
+		// Draws the falsified box if the intervals intersect
+		if (!intersection(leftFalsified,rightFalsified).empty())
 		{
+
 			// Gets the Y span as ranging from the maximum of the lower values to
 			// the minimum of the upper values
 			boxYSpan = Interval(max(leftFalsified.lower(),rightFalsified.lower()),
@@ -291,8 +292,8 @@ void Parametric2DBisectionResults::draw() const
 		make_lpair<Interval,Interval>(leftVerified,leftFalsified) = yResults[i];
 		make_lpair<Interval,Interval>(rightVerified,rightFalsified) = yResults[i+1];
 
-		// Draws the verified box (if neither the left or right intervals are empty)
-		if (!leftVerified.empty() && !rightVerified.empty())
+		// Draws the verified box if the intervals intersect
+		if (!intersection(leftVerified,rightVerified).empty())
 		{
 			// Gets the X span as ranging from the maximum of the lower values to
 			// the minimum of the upper values
@@ -304,8 +305,8 @@ void Parametric2DBisectionResults::draw() const
 			fig.draw(Box(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper()));
 		}
 
-		// Draws the falsified box (if neither the left or right intervals are empty)
-		if (!leftFalsified.empty() && !rightFalsified.empty())
+		// Draws the falsified box if the intervals intersect
+		if (!intersection(leftFalsified,rightFalsified).empty())
 		{
 			// Gets the X span as ranging from the maximum of the lower values to
 			// the minimum of the upper values

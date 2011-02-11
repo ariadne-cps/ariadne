@@ -349,7 +349,7 @@ inline bool bounded(Interval i) {
 }
 
 inline Interval intersection(Interval i1, Interval i2) {
-    if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { return Interval(1,-1); }
+    if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { Interval empty_int; empty_int.make_empty(); return empty_int; }
     return Interval(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
 }
 

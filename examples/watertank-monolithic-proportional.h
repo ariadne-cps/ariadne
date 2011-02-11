@@ -34,7 +34,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 
     // Set the system parameters
 	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
-	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
+	RealConstant tau("tau",1.0); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
 	RealConstant bfp("bfp",Interval(0.3,0.32863)); // The product beta*f(p)
 	RealConstant Kp("Kp",3.0); // The gain of the proportional controller

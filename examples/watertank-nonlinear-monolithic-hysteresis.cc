@@ -35,12 +35,6 @@ int main(int argc,char *argv[])
 	// The system
 	HybridAutomaton system = getWatertankNonlinearMonolithicHysteresis();
 
-	/// Analysis parameters
-	RealConstantSet parameters;
-	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
-	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
-	Float tolerance = 0.1;
-
 	// The initial values
 	HybridImageSet initial_set;
 	initial_set[DiscreteState("opened")] = Box(2, 5.5,5.5, 1.0,1.0);
@@ -64,8 +58,14 @@ int main(int argc,char *argv[])
 	analyser.parameters().highest_maximum_grid_depth = 6;
 
 	//analyser.verify_iterative(system, initial_set, safe_box, domain);
-
 	//analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
+
+	/// Analysis parameters
+	RealConstantSet parameters;
+	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
+	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
+	Float tolerance = 0.1;
+
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 	ParametricVerificationOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
 	outcomes.draw(system.name());

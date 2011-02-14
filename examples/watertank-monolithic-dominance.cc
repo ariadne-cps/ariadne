@@ -44,7 +44,7 @@ int main(int argc,char *argv[])
 
 	// The domains
 	HybridBoxes domain_hy = bounding_boxes(system_hy.state_space(),Box(2,4.5,9.0,-0.1,1.1));
-	HybridBoxes domain_pr = bounding_boxes(system_pr.state_space(),Box(2,4.5,9.0,-0.1,1.1));
+	HybridBoxes domain_pr = bounding_boxes(system_pr.state_space(),Box(2,0.0,9.0,-0.1,1.1));
 
 	// The projections
 	std::vector<uint> projection_hy(1,0);
@@ -67,8 +67,14 @@ int main(int argc,char *argv[])
 	// The parametric dominance parameters
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("Kp",Interval(0.01,0.6)));
+	parameters.insert(RealConstant("tau",Interval(1.0,16.0)));
 	Float tolerance = 0.125;
+	uint numPointsPerAxis = 11;
 
+/*
 	ParametricVerificationOutcomeList outcomeList = analyser.parametric_dominance_partitioning(proportional,hysteresis,parameters,tolerance);
+	outcomeList.draw("watertank-monolithic-dominance");
 	cout << outcomeList << "\n";
+*/
+	analyser.parametric_dominance_2d_bisection(proportional,hysteresis,parameters,tolerance,numPointsPerAxis);
 }

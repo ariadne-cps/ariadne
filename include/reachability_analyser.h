@@ -98,12 +98,17 @@ public:
 						   HybridBoxes& safe_region,
 						   std::vector<uint>& projection);
 
+	virtual std::ostream& write(std::ostream&) const;
+
 private:
 
 	/** \brief Checks fields consistency */
 	void _check_fields() const;
 
 };
+
+inline std::ostream& operator<<(std::ostream& os, const SystemVerificationInfo& verInfo) {
+    return verInfo.write(os); }
 
 /*! \brief A class for performing reachability analysis on a hybrid system-
  */
@@ -242,7 +247,7 @@ class HybridReachabilityAnalyser
 
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
-        \details The procedure uses the bisection method. Each parameter is assumed as having separable safe and unsafe intervals in its range.
+        \details The procedure uses the bisection method. The parameter is assumed as having separable safe and unsafe intervals in its range.
         The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
 		bisection search.
         \return The intervals of safety and unsafety. */
@@ -287,6 +292,55 @@ class HybridReachabilityAnalyser
 	 */
 	tribool dominance(SystemVerificationInfo& dominating,
 					  SystemVerificationInfo& dominated);
+
+	/**
+	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system.
+	 * \details Verifies if the \a dominating system dominates the \a dominated system.
+	 */
+	tribool dominance(SystemVerificationInfo& dominating,
+					  SystemVerificationInfo& dominated,
+					  const RealConstant& parameter);
+
+	/**
+	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system with a value of \a value.
+	 * \details Verifies if the \a dominating system dominates the \a dominated system.
+	 */
+	tribool dominance(SystemVerificationInfo& dominating,
+					  SystemVerificationInfo& dominated,
+					  const RealConstant& parameter,
+					  const Float& value);
+
+	/*! \brief Compute an underapproximation of the dominating/non-dominating intervals of \a parameter for the dominance problem.
+        \details The parameter is varied on the \a dominating system alone. The procedure uses the bisection method. The parameter is assumed as having separable dominating and non-dominating intervals in its range.
+        The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
+		bisection search.
+        \return The intervals of safety and unsafety. */
+	std::pair<Interval,Interval> parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
+			  	  	  	  	  	  	  	  	  	  	  	  	  	   SystemVerificationInfo& dominated,
+										 							  const RealConstant& parameter,
+										 							  const Float& tolerance);
+	/**
+	 * \brief Performs a parametric dominance checking on two parameters \a xParam, \a yParam,
+	 * discretizing with \a numPointsPerAxis points for each axis.
+	 * \details The procedure uses the bisection method. Saves the results in a file called "<dominatingName>&<dominatedName>-<xName>-<yName>" and
+	 * generates a "<dominatingName>&<dominatedName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
+	 * <xName> is the name of xParam and <yName> is the name of yParam.
+	 */
+	void parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
+ 	  	  	  	  	  	   	   	   	   	   SystemVerificationInfo& dominated,
+								 const RealConstant& xParam,
+								 const RealConstant& yParam,
+								 const Float& tolerance,
+								 const unsigned& numPointsPerAxis);
+
+	/**
+	 * \brief Performs a parametric dominance checking on a set of two parameters \a params, by using bisection.
+	 */
+	void parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
+ 	  	  	  	  	  	   	   	   	   	   SystemVerificationInfo& dominated,
+												   const RealConstantSet& params,
+												   const Float& tolerance,
+												   const unsigned& numPointsPerAxis);
 
 	/**
 	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
@@ -456,6 +510,9 @@ class HybridReachabilityAnalyser
 														    const tribool& lower_result,
 														    const tribool& upper_result) const;
 
+	/*! \brief Shows the verification \a result into the standard output. */
+	void _log_verification_result(const tribool& result) const;
+
 	/* \brief Processes the \a result in order to update the \a positive_int interval, possibly updating \a negative_int too. */
 	void _process_positive_bisection_result(const tribool& result,
 											Interval& positive_int,
@@ -463,7 +520,7 @@ class HybridReachabilityAnalyser
 											const Float& current_value,
 											const bool& safeOnBottom) const;
 
-	/* \brief Processes the \a result in order to update the \a negative_int interval, possibly updating \a positive_int too. */
+	/*! \brief Processes the \a result in order to update the \a negative_int interval, possibly updating \a positive_int too. */
 	void _process_negative_bisection_result(const tribool& result,
 											Interval& positive_int,
 										    Interval& negative_int,
@@ -478,7 +535,7 @@ class HybridReachabilityAnalyser
 												 	 	 	 	 	 	 	  const Interval& parameter_range,
 												 	 	 	 	 	 	 	  const bool& positiveOnBottom) const;
 
-	/*! \brief Performs one sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
+	/*! \brief Performs one verification sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
 	void _parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
 						  	  	  	    SystemVerificationInfo& verInfo,
 						  	  	  	    RealConstant xParam,
@@ -486,6 +543,16 @@ class HybridReachabilityAnalyser
 						  	  	  	    const Float& tolerance,
 						  	  	  	    const uint& numPointsPerAxis,
 						  	  	  	    bool sweepOnX);
+
+	/*! \brief Performs one dominance sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
+	void _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
+						  	  	  	    		  SystemVerificationInfo& dominating,
+						  	  	  	    		  SystemVerificationInfo& dominated,
+						  	  	  	    		  RealConstant xParam,
+						  	  	  	    		  RealConstant yParam,
+						  	  	  	    		  const Float& tolerance,
+						  	  	  	    		  const uint& numPointsPerAxis,
+						  	  	  	    		  bool sweepOnX);
 
 	/*! \brief Set the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
 	 * that must be ignore when choosing the splitting factors of the system. */

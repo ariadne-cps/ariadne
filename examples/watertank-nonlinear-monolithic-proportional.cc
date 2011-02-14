@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
 	initial_set[DiscreteState(3)] = Box(2, 5.5,5.5, 1.0,1.0);
 
 	// The domain
-	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
+	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.0,9.5,-0.1,1.1));
 
 	// The safe region
 	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));

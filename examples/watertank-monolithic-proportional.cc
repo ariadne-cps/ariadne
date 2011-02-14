@@ -46,7 +46,7 @@ int main(int argc,char *argv[])
 	initial_set[DiscreteState(3)] = Box(2, 5.5,5.5, 1.0,1.0);
 
 	// The domain
-	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
+	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,0.0,9.0,-0.1,1.1));
 
 	// The safe region
 	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
@@ -62,14 +62,6 @@ int main(int argc,char *argv[])
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
-
-	//analyser.verify_iterative(system, initial_set, safe_box, domain);
-
-	//Interval safe_int, unsafe_int;
-	//make_lpair(safe_int,unsafe_int) = analyser.safety_unsafety_parametric(system, initial_set, safe_box, domain, parameter, tolerance);
-	//analyser.log_parametric_results(safe_int,unsafe_int,parameter.value());
-
-	//analyser.parametric_2d_bisection(system, initial_set, safe_box, domain, xParam, yParam, tolerance, numPointsPerAxis);
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 	ParametricVerificationOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);

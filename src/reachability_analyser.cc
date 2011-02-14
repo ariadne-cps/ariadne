@@ -123,6 +123,15 @@ void SystemVerificationInfo::_check_fields() const
 	}
 }
 
+
+std::ostream&
+SystemVerificationInfo::write(std::ostream& os) const
+{
+	os << "(System: " << _system << "; Initial set: " << _initial_set << "; Domain: " <<
+			_domain << "; Safe region: " << _safe_region << "; Projection: " << _projection << ")";
+	return os;
+}
+
 HybridReachabilityAnalyser::
 ~HybridReachabilityAnalyser()
 {
@@ -2087,21 +2096,13 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
-
 	tribool lower_result = verify_iterative(verInfo,parameter,parameter_range.lower());
-
-	if (definitely(lower_result)) { ARIADNE_LOG(1,"Safe.\n"); }
-	else if (!possibly(lower_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
-	else ARIADNE_LOG(1,"Indeterminate.\n");
+	_log_verification_result(lower_result);
 
 	// Check the upper bound
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
-
 	tribool upper_result = verify_iterative(verInfo,parameter,parameter_range.upper());
-
-	if (definitely(upper_result)) { ARIADNE_LOG(1,"Safe.\n"); }
-	else if (!possibly(upper_result)) { ARIADNE_LOG(1,"Unsafe.\n"); }
-	else ARIADNE_LOG(1,"Indeterminate.\n");
+	_log_verification_result(upper_result);
 
 	// If we must proceed with bisection refining
 	bool proceed;
@@ -2148,6 +2149,180 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 	system.substitute(parameter,original_value);
 
 	return _pos_neg_bounds_from_search_intervals(safety_int,unsafety_int,parameter_range,safeOnBottom);
+}
+
+
+std::pair<Interval,Interval>
+HybridReachabilityAnalyser::
+parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
+								  SystemVerificationInfo& dominated,
+						   	   	  const RealConstant& parameter,
+						   	   	  const Float& tolerance)
+{
+	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
+
+	HybridAutomaton& system = dominating.getSystem();
+
+	// Get the original value of the parameter and the related range
+	Real original_value = system.accessible_constant_value(parameter.name());
+	Interval parameter_range(parameter.value());
+
+	ARIADNE_ASSERT(parameter_range.width() > 0);
+
+	// Create the safety and unsafety intervals: they represent the search intervals,
+	// NOT the intervals where the system is proved dominating or nondominating
+	Interval dominating_int = parameter_range;
+	Interval nondominating_int = parameter_range;
+
+	ARIADNE_LOG(1,"\nChecking parameter " << parameter.name() << " in " << parameter_range << " with " << tolerance*100 << "% tolerance\n");
+
+	// Check the lower bound
+	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
+	tribool lower_result = dominance(dominating,dominated,parameter,parameter_range.lower());
+	_log_verification_result(lower_result);
+
+	// Check the upper bound
+	ARIADNE_LOG(1,"Checking upper interval bound... ");
+	tribool upper_result = dominance(dominating,dominated,parameter,parameter_range.upper());
+	_log_verification_result(upper_result);
+
+	// If we must proceed with bisection refining
+	bool proceed;
+	// If the dominating value is found on the lower extreme of the parameter interval
+	bool dominatingOnBottom;
+
+	// Updates the initial values for the dominating/nondominating intervals, and decides whether to proceed and the eventual ordering
+	make_lpair<bool,bool>(proceed,dominatingOnBottom) = this->_process_initial_bisection_results(dominating_int,nondominating_int,parameter_range,
+																						 lower_result,upper_result);
+	// Verification loop
+	bool proceedDominating = proceed;
+	bool proceedNondominating = proceed;
+	while (proceedDominating || proceedNondominating)
+	{
+		// Dominating interval check
+		if (!dominating_int.empty() && dominating_int.width() > tolerance*parameter_range.width())
+		{
+			ARIADNE_LOG(1,"Checking dominating (positive) interval " << dominating_int << " (midpoint: " << dominating_int.midpoint() <<
+					      ", width ratio: " << dominating_int.width()/parameter_range.width()*100 << "%) ... ");
+
+			const Float current_value = dominating_int.midpoint();
+			tribool result = dominance(dominating,dominated,parameter,current_value);
+
+			_process_positive_bisection_result(result,dominating_int,nondominating_int,current_value,dominatingOnBottom);
+		}
+		else
+			proceedDominating = false;
+
+		// Nondominating interval check
+		if (!nondominating_int.empty() && nondominating_int.width() > tolerance*parameter_range.width())
+		{
+			ARIADNE_LOG(1,"Checking nondominating (negative) interval " << nondominating_int << " (midpoint: " << nondominating_int.midpoint() <<
+						  ", width ratio: " << nondominating_int.width()/parameter_range.width()*100 << "%) ... ");
+
+			const Float current_value = nondominating_int.midpoint();
+			tribool result = dominance(dominating,dominated,parameter,current_value);
+
+			_process_negative_bisection_result(result,dominating_int,nondominating_int,current_value,dominatingOnBottom);
+		}
+		else
+			proceedNondominating = false;
+	}
+
+	system.substitute(parameter,original_value);
+
+	return _pos_neg_bounds_from_search_intervals(dominating_int,nondominating_int,parameter_range,dominatingOnBottom);
+}
+
+void
+HybridReachabilityAnalyser::parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
+															  SystemVerificationInfo& dominated,
+											   const RealConstantSet& params,
+											   const Float& tolerance,
+											   const unsigned& numPointsPerAxis)
+{
+	ARIADNE_ASSERT_MSG(params.size() == 2,"Provide exactly two parameters.");
+
+	RealConstantSet::const_iterator param_it = params.begin();
+
+	const RealConstant& xParam = *param_it;
+	const RealConstant& yParam = *(++param_it);
+
+	parametric_dominance_2d_bisection(dominating,dominated,xParam,yParam,tolerance,numPointsPerAxis);
+}
+
+void
+HybridReachabilityAnalyser::parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
+															  SystemVerificationInfo& dominated,
+											   const RealConstant& xParam,
+											   const RealConstant& yParam,
+											   const Float& tolerance,
+											   const unsigned& numPointsPerAxis)
+{
+	// Generates the file name
+	std::string filename = dominating.getSystem().name() + "&" + dominated.getSystem().name();
+	filename = filename + "[" + xParam.name() + "," + yParam.name() + "]";
+
+	// Initializes the results
+	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
+
+	// Sweeps on each axis
+	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, tolerance, numPointsPerAxis, true);
+	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, tolerance, numPointsPerAxis, false);
+
+	// Dumps the results into a file
+	results.dump();
+	// Draws the result
+	results.draw();
+}
+
+void HybridReachabilityAnalyser::_parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
+					  	  	  	    							SystemVerificationInfo& dominating,
+					  	  	  	    							SystemVerificationInfo& dominated,
+					  	  	  	    							RealConstant xParam,
+					  	  	  	    							RealConstant yParam,
+					  	  	  	    							const Float& tolerance,
+					  	  	  	    							const uint& numPointsPerAxis,
+					  	  	  	    							bool sweepOnX)
+{
+	HybridAutomaton& system = dominating.getSystem();
+
+	RealConstant& sweepParam = (sweepOnX ? xParam : yParam);
+	RealConstant& otherParam = (sweepOnX ? yParam : xParam);
+	Real originalSweepValue = system.accessible_constant_value(sweepParam.name());
+	Interval sweepBounds = sweepParam.value();
+
+	ARIADNE_LOG(1,"\nSweeping on " << sweepParam.name() << " in " << sweepBounds << ":\n");
+
+	// Sweeps in the given direction
+	for (uint i=0; i<numPointsPerAxis; ++i)
+	{
+		// Changes the value
+		sweepParam.set_value(sweepBounds.lower()+i*sweepBounds.width()/(numPointsPerAxis-1));
+		// Modifies the system with the new value
+		system.substitute(sweepParam);
+
+		ARIADNE_LOG(1,"\nAnalysis with " << sweepParam.name() << " = " << sweepParam.value().lower() << "...\n");
+
+		// Performs the analysis on the other axis and adds to the results of the sweep variable
+		std::pair<Interval,Interval> result = parametric_dominance_1d_bisection(dominating,dominated,otherParam,tolerance);
+		if (sweepOnX)
+			results.insertXValue(result);
+		else
+			results.insertYValue(result);
+
+		ARIADNE_LOG(1,"Obtained dominance in " << result.first << " and nondominance in " << result.second << ".\n");
+	}
+
+	// Restores the original value
+	system.substitute(sweepParam,originalSweepValue);
+}
+
+void
+HybridReachabilityAnalyser::_log_verification_result(const tribool& result) const
+{
+	if (definitely(result)) { ARIADNE_LOG(1,"True.\n"); }
+	else if (!possibly(result)) { ARIADNE_LOG(1,"False.\n"); }
+	else ARIADNE_LOG(1,"Indeterminate.\n");
 }
 
 std::pair<bool,bool>
@@ -2345,7 +2520,7 @@ HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificat
 {
 	// Generates the file name
 	std::string filename = verInfo.getSystem().name();
-	filename = filename + "-" + xParam.name() + "-" + yParam.name();
+	filename = filename + "[" + xParam.name() + "," + yParam.name() + "]";
 
 	// Initializes the results
 	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
@@ -2441,6 +2616,33 @@ HybridReachabilityAnalyser::dominance(SystemVerificationInfo& dominating,
 {
 	const RealConstantSet dominatingLockedConstants;
 	return _dominance(dominating,dominated,dominatingLockedConstants);
+}
+
+tribool
+HybridReachabilityAnalyser::dominance(SystemVerificationInfo& dominating,
+		  	  	  	  	  	  	  	  SystemVerificationInfo& dominated,
+		  	  	  	  	  	  	  	  const RealConstant& parameter)
+{
+	HybridAutomaton& system = dominating.getSystem();
+
+	Real original_value = system.accessible_constant_value(parameter.name());
+
+	system.substitute(parameter);
+	tribool result = dominance(dominating,dominated);
+	system.substitute(parameter,original_value);
+
+	return result;
+}
+
+tribool
+HybridReachabilityAnalyser::dominance(SystemVerificationInfo& dominating,
+		  	  	  	  	  	  	  	  SystemVerificationInfo& dominated,
+		  	  	  	  	  	  	  	  const RealConstant& parameter,
+		  	  	  	  	  	  	  	  const Float& value)
+{
+	const RealConstant modifiedParameter(parameter.name(),Interval(value));
+
+	return dominance(dominating,dominated,modifiedParameter);
 }
 
 tribool
@@ -2552,6 +2754,7 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
 
 		_setDominanceParameters(dominating,dominatingLockedConstants);
+
 		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) = lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
 		// We must shrink the lower approximation of the the dominating system, but overapproximating in terms of rounding

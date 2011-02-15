@@ -61,7 +61,7 @@ int main(int argc,char *argv[])
 
 	/// Analysis parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("tau",Interval(1.0,32.0)));
+	parameters.insert(RealConstant("tau",Interval(1.0,16.0)));
 	parameters.insert(RealConstant("Kp",Interval(0.2,0.6)));
 	Float tolerance = 0.1;
 	uint numPointsPerAxis = 11;

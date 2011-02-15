@@ -2180,6 +2180,7 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 	// Updates the initial values for the dominating/nondominating intervals, and decides whether to proceed and the eventual ordering
 	make_lpair<bool,bool>(proceed,dominatingOnBottom) = this->_process_initial_bisection_results(dominating_int,nondominating_int,parameter_range,
 																						 lower_result,upper_result);
+
 	// Verification loop
 	bool proceedDominating = proceed;
 	bool proceedNondominating = proceed;
@@ -2325,7 +2326,7 @@ HybridReachabilityAnalyser::_process_initial_bisection_results(Interval& positiv
 	if (definitely(lower_result) && definitely(upper_result)) {
 		proceed = false;
 		positiveOnBottom = false;
-		positive_int = parameter_range;
+		positive_int = Interval(parameter_range.lower());
 		negative_int.make_empty();
 	}
 	// If both extremes are unsafe, no more verification is involved
@@ -2333,7 +2334,7 @@ HybridReachabilityAnalyser::_process_initial_bisection_results(Interval& positiv
 		proceed = false;
 		positiveOnBottom = false;
 		positive_int.make_empty();
-		negative_int = parameter_range;
+		negative_int = Interval(parameter_range.upper());
 	}
 	// If both extremes are indeterminate, no verification is possible
 	else if (indeterminate(lower_result) && indeterminate(upper_result)) {

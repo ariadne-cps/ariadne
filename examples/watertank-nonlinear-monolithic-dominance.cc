@@ -1,5 +1,5 @@
 /***************************************************************************
- *            watertank-nonlinear-monolithic-proportional.cc
+ *            watertank-nonlinear-monolithic-dominance.cc
  *
  *  Copyright  2011  Luca Geretti
  *
@@ -26,28 +26,33 @@
 
 using namespace Ariadne;
 
-typedef ImageSetHybridEvolver::EnclosureListType EnclosureListType;
-
-int main(int argc,char *argv[]) 
+int main(int argc,char *argv[])
 {
 	int analyserVerbosity = 1;
 	if (argc > 1)
 		analyserVerbosity = atoi(argv[1]);
 
-	// The system
-	HybridAutomaton system = getWatertankNonlinearMonolithicProportional();
+	// The systems
+	HybridAutomaton system_hy = Ariadne::getWatertankNonlinearMonolithicHysteresis();
+	HybridAutomaton system_pr = Ariadne::getWatertankNonlinearMonolithicProportional();
 
 	// The initial values
-	HybridImageSet initial_set;
-	initial_set[DiscreteState(3)] = Box(2, 5.5,5.5, 1.0,1.0);
+	HybridImageSet initial_hy;
+	initial_hy[DiscreteState("opened")] = Box(2, 5.5,5.5, 1.0,1.0);
+	HybridImageSet initial_pr;
+	initial_pr[DiscreteState(3)] = Box(2, 5.5,5.5, 1.0,1.0);
 
-	// The domain
-	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,1.0,10.0,-0.1,1.1));
+	// The domains
+	HybridBoxes domain_hy = bounding_boxes(system_hy.state_space(),Box(2,1.0,10.0,-0.1,1.1));
+	HybridBoxes domain_pr = bounding_boxes(system_pr.state_space(),Box(2,1.0,10.0,-0.1,1.1));
 
-	// The safe region
-	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+	// The projections
+	std::vector<uint> projection_hy(1,0);
+	std::vector<uint> projection_pr(1,0);
 
-	/// Verification
+	// Construct the bundles
+	SystemVerificationInfo hysteresis(system_hy,initial_hy,domain_hy,projection_hy);
+	SystemVerificationInfo proportional(system_pr,initial_pr,domain_pr,projection_pr);
 
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
@@ -59,21 +64,20 @@ int main(int argc,char *argv[])
 	analyser.parameters().lowest_maximum_grid_depth = 2;
 	analyser.parameters().highest_maximum_grid_depth = 6;
 
-	//analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
-
-	// Verification parameters
+	// The parametric dominance parameters
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("Kp",Interval(0.2,0.6)));
-	parameters.insert(RealConstant("tau",Interval(1.0,32.0)));
-	Float tolerance = 0.1;
+	//parameters.insert(RealConstant("tau",Interval(1.0,8.0)));
+	Float tolerance = 0.125;
 	uint numPointsPerAxis = 11;
 
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	analyser.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);
+	RealConstant parameter("Kp",Interval(0.2,0.6));
 
-	/*
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
-	outcomes.draw(system.name());
-	*/
+/*
+	ParametricVerificationOutcomeList outcomeList = analyser.parametric_dominance_partitioning(proportional,hysteresis,parameters,tolerance);
+	outcomeList.draw("watertank-monolithic-dominance");
+	cout << outcomeList << "\n";
+*/
+	//analyser.parametric_dominance_2d_bisection(proportional,hysteresis,parameters,tolerance,numPointsPerAxis);
+	analyser.parametric_dominance_1d_bisection(proportional,hysteresis,parameter,tolerance);
 }

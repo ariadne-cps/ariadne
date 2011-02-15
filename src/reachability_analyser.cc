@@ -880,10 +880,8 @@ chain_reach(const SystemType& system,
             const HybridImageSet& initial_set,
             const HybridBoxes& bounding_set) const
 {
-	// Assigns the input bounding_set to the bounding domain
 	_parameters->bounding_domain = bounding_set;
 
-	// Returns the result of chain_reach with implicit bounding set
 	return chain_reach(system,initial_set);
 }
 
@@ -923,10 +921,9 @@ _upper_chain_reach(const SystemType& system,
 	// Helper class for operations on Taylor sets
 	TaylorCalculus tc;
 
-	// Assign local variables
-    Float lock_to_grid_time = _parameters->lock_to_grid_time;
-    int lock_to_grid_steps = _parameters->lock_to_grid_steps;
-    int maximum_grid_depth = _parameters->maximum_grid_depth;
+    const Float& lock_to_grid_time = _parameters->lock_to_grid_time;
+    const int& lock_to_grid_steps = _parameters->lock_to_grid_steps;
+    const int& maximum_grid_depth = _parameters->maximum_grid_depth;
 
     // The number of divisions to a cell
     long numCellDivisions = (1<<maximum_grid_depth);
@@ -1098,13 +1095,6 @@ _upper_chain_reach(const SystemType& system,
 					// (if otherwise the transition is not active, do nothing)
 
 					if (guard_time_model.range().lower()>0) {
-
-						time_t t1,t2;
-						time(&t1);
-
-						// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the original enclosure
-						//_splitAndCreateTargetEnclosures(isValid,initial_enclosures,encl,minTargetCellWidths,target_bounding,*trans_it,tc);
-
 						// Get the target continuous enclosure
 						ContinuousEnclosureType target_encl = tc.reset_step(trans_it->reset(),encl);
 						// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the target enclosure
@@ -1114,8 +1104,6 @@ _upper_chain_reach(const SystemType& system,
 						if (!isValid && _parameters->skip_if_unprovable)
 							return make_pair<GTS,bool>(HybridGridTreeSet(),false);
 
-						time(&t2);
-						ARIADNE_LOG(7,"Time required for splitting and creating: " << difftime(t2,t1) << ".\n");
 						// Set the in-use value for the target location as true
 						currentLocationsInUse[trans_it->target()] = true;
 
@@ -1169,9 +1157,8 @@ _upper_chain_reach(const SystemType& system,
 		new_final.mince(maximum_grid_depth);
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
 		for (GTS::const_iterator cell_it = new_final.begin(); cell_it != new_final.end(); cell_it++) {
-			// Get the location
 			const DiscreteState& loc = cell_it->first;
-			// If inside the domain
+
 			if (cell_it->second.box().inside(_parameters->bounding_domain[loc])) {
 				initial_enclosures.push_back(_discretiser->enclosure(*cell_it));
 			} else if (!cell_it->second.box().disjoint(_parameters->bounding_domain[loc])) {
@@ -1212,7 +1199,6 @@ _upper_chain_reach(const SystemType& system,
 		}
     }
 
-    // Save the reached region
 	_statistics->upper().reach = reach;
 
 	ARIADNE_LOG(5,"Found a total of " << reach.size() << " reached cells.\n");
@@ -2388,23 +2374,23 @@ HybridReachabilityAnalyser::_process_positive_bisection_result(const tribool& re
 			// If the negative interval is the same as the positive one, update it too
 			if (equal(negative_int,positive_int)) negative_int.set_lower(current_value);
 
-			ARIADNE_LOG(1,"Positive, refining upwards.\n");
+			ARIADNE_LOG(1,"True, refining upwards.\n");
 			positive_int.set_lower(current_value);
 		} else {
 			// If the negative interval is the same as the positive one, update it too
 			if (equal(negative_int,positive_int)) negative_int.set_upper(current_value);
 
-			ARIADNE_LOG(1,"Positive, refining downwards.\n");
+			ARIADNE_LOG(1,"True, refining downwards.\n");
 			positive_int.set_upper(current_value);
 		}
 	}
 	else if (!possibly(result)) {
 		if (positiveOnBottom) {
-			ARIADNE_LOG(1,"Negative, refining downwards and resetting the unsafety.\n");
+			ARIADNE_LOG(1,"False, refining downwards and resetting the unsafety.\n");
 			positive_int.set_upper(current_value);
 		}
 		else {
-			ARIADNE_LOG(1,"Negative, refining upwards and resetting the unsafety.\n");
+			ARIADNE_LOG(1,"False, refining upwards and resetting the unsafety.\n");
 			positive_int.set_lower(current_value);
 		}
 
@@ -2435,10 +2421,10 @@ HybridReachabilityAnalyser::_process_negative_bisection_result(const tribool& re
 {
 	if (definitely(result)) {
 		if (positiveOnBottom) {
-			ARIADNE_LOG(1,"Positive, refining upwards and resetting the safety.\n");
+			ARIADNE_LOG(1,"True, refining upwards and resetting the safety.\n");
 			negative_int.set_lower(current_value);
 		} else {
-			ARIADNE_LOG(1,"Positive, refining downwards and resetting the safety.\n");
+			ARIADNE_LOG(1,"True, refining downwards and resetting the safety.\n");
 			negative_int.set_upper(current_value);
 		}
 
@@ -2450,13 +2436,13 @@ HybridReachabilityAnalyser::_process_negative_bisection_result(const tribool& re
 			// If the negative interval is the same as the positive interval, update it too
 			if (equal(negative_int,positive_int)) positive_int.set_upper(current_value);
 
-			ARIADNE_LOG(1,"Negative, refining downwards.\n");
+			ARIADNE_LOG(1,"False, refining downwards.\n");
 			negative_int.set_upper(current_value);
 		} else {
 			// If the negative interval is the same as the positive interval, update it too
 			if (equal(negative_int,positive_int)) positive_int.set_lower(current_value);
 
-			ARIADNE_LOG(1,"Negative, refining upwards.\n");
+			ARIADNE_LOG(1,"False, refining upwards.\n");
 			negative_int.set_lower(current_value);
 		}
 	} else {

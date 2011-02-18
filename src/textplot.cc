@@ -106,6 +106,7 @@ void TextPlot::draw(const std::vector<Point>& pts) {
     for(std::vector<Point>::const_iterator iter = pts.begin() ; iter != pts.end() ; iter++) {
         this->draw(*iter);
     }
+    this->draw(*pts.begin()); // Adds the initial point again, in order to provide a closed curve
     this->_fstream << std::endl;
 }    
 

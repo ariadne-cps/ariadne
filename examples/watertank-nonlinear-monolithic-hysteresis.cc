@@ -67,6 +67,6 @@ int main(int argc,char *argv[])
 	Float tolerance = 0.1;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
+	ParametricPartitioningOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
 	outcomes.draw(system.name());
 }

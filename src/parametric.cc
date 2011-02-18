@@ -27,7 +27,7 @@ namespace Ariadne {
 
 
 
-ParametricVerificationOutcome::ParametricVerificationOutcome(const RealConstantSet params, const tribool value)
+ParametricPartitioningOutcome::ParametricPartitioningOutcome(const RealConstantSet params, const tribool value)
 {
 	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it)
 		_params.insert(*const_it);
@@ -35,7 +35,7 @@ ParametricVerificationOutcome::ParametricVerificationOutcome(const RealConstantS
 	_value = value;
 }
 
-ParametricVerificationOutcome::ParametricVerificationOutcome(const ParametricVerificationOutcome& other)
+ParametricPartitioningOutcome::ParametricPartitioningOutcome(const ParametricPartitioningOutcome& other)
 {
 	for (RealConstantSet::const_iterator const_it = other.getParams().begin(); const_it != other.getParams().end(); ++const_it)
 		_params.insert(*const_it);
@@ -43,8 +43,8 @@ ParametricVerificationOutcome::ParametricVerificationOutcome(const ParametricVer
 	_value = other.getValue();
 }
 
-ParametricVerificationOutcome&
-ParametricVerificationOutcome::operator=(const ParametricVerificationOutcome& other)
+ParametricPartitioningOutcome&
+ParametricPartitioningOutcome::operator=(const ParametricPartitioningOutcome& other)
 {
 	for (RealConstantSet::const_iterator const_it = other.getParams().begin(); const_it != other.getParams().end(); ++const_it)
 		_params.insert(*const_it);
@@ -55,25 +55,26 @@ ParametricVerificationOutcome::operator=(const ParametricVerificationOutcome& ot
 }
 
 const RealConstantSet&
-ParametricVerificationOutcome::getParams() const
+ParametricPartitioningOutcome::getParams() const
 {
 	return _params;
 }
 
 const tribool&
-ParametricVerificationOutcome::getValue() const
+ParametricPartitioningOutcome::getValue() const
 {
 	return _value;
 }
 
 std::ostream&
-ParametricVerificationOutcome::write(std::ostream& os) const
+ParametricPartitioningOutcome::write(std::ostream& os) const
 {
 	os << "(" << _params << "->" << _value << ")";
 	return os;
 }
 
-ParametricVerificationOutcomeList::ParametricVerificationOutcomeList(const RealConstantSet& params)
+ParametricPartitioningOutcomeList::ParametricPartitioningOutcomeList(const std::string& name,
+																	 const RealConstantSet& params) : basename(name)
 {
 	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it) {
 		ARIADNE_ASSERT_MSG(const_it->value().width() > 0, "The parameter for verification must have non-zero width.");
@@ -83,7 +84,7 @@ ParametricVerificationOutcomeList::ParametricVerificationOutcomeList(const RealC
 
 
 void
-ParametricVerificationOutcomeList::push_back(const ParametricVerificationOutcome& element)
+ParametricPartitioningOutcomeList::push_back(const ParametricPartitioningOutcome& element)
 {
 	ARIADNE_ASSERT_MSG(element.getParams().size() == _params.size(), "The inserted outcome has a different number of parameters.");
 	for (RealConstantSet::const_iterator input_it = element.getParams().begin(); input_it != element.getParams().end(); ++input_it)
@@ -93,14 +94,14 @@ ParametricVerificationOutcomeList::push_back(const ParametricVerificationOutcome
 }
 
 
-const std::list<ParametricVerificationOutcome>&
-ParametricVerificationOutcomeList::getOutcomes() const
+const std::list<ParametricPartitioningOutcome>&
+ParametricPartitioningOutcomeList::getOutcomes() const
 {
 	return _outcomes;
 }
 
 std::ostream&
-ParametricVerificationOutcomeList::write(std::ostream& os) const
+ParametricPartitioningOutcomeList::write(std::ostream& os) const
 {
 	os << _outcomes;
 	return os;
@@ -108,16 +109,24 @@ ParametricVerificationOutcomeList::write(std::ostream& os) const
 
 
 void
-ParametricVerificationOutcomeList::draw(const std::string& basename) const
+ParametricPartitioningOutcomeList::draw() const
 {
 	ARIADNE_ASSERT_MSG(_params.size() > 1, "At least two parameters are required for drawing.");
 	ARIADNE_ASSERT_MSG(_outcomes.size() > 0, "The outcomes list is empty.");
 
 	// Plots for each couple of parameters
 	for (RealConstantSet::const_iterator xparam_it = _params.begin(); xparam_it != _params.end(); ++xparam_it) {
+
 		RealConstantSet::const_iterator yparam_it = xparam_it;
 		for (++yparam_it; yparam_it != _params.end(); ++yparam_it)
 		{
+			std::string currentname = basename + "[" + xparam_it->name() + ","
+													 + yparam_it->name() + "]";
+
+			TextPlot trueTxt((currentname + "-par.true.dump").c_str());
+			TextPlot falseTxt((currentname + "-par.false.dump").c_str());
+			TextPlot indeterminateTxt((currentname + "-par.indeterminate.dump").c_str());
+
 			// Sets up the figure
 			Figure fig;
 			Box graphics_box(2);
@@ -128,29 +137,37 @@ ParametricVerificationOutcomeList::draw(const std::string& basename) const
 			fig.set_bounding_box(graphics_box);
 
 			// Adds each outcome with a dedicated fill colour
-			for (std::list<ParametricVerificationOutcome>::const_iterator outcome_it = _outcomes.begin();
+			for (std::list<ParametricPartitioningOutcome>::const_iterator outcome_it = _outcomes.begin();
 																		  outcome_it != _outcomes.end();
 																		  ++outcome_it) {
-				// Chooses the fill color
-				tribool outcome = outcome_it->getValue();
-				if (definitely(outcome))
-					fig.set_fill_colour(Colour(0.0,0.83,0.0));
-				else if (indeterminate(outcome))
-					fig.set_fill_colour(Colour(1.0,1.0,0.0));
-				else
-					fig.set_fill_colour(Colour(1.0,0.34,0.34));
-
-				// Draws the related box to the figure
 				Box outcome_box(2);
 				outcome_box[0] = outcome_it->getParams().find(*xparam_it)->value();
 				outcome_box[1] = outcome_it->getParams().find(*yparam_it)->value();
+
+				// Chooses the fill color and dumps the box
+				tribool outcome = outcome_it->getValue();
+				if (definitely(outcome)) {
+					trueTxt.draw(outcome_box);
+					fig.set_fill_colour(Colour(0.0,0.83,0.0));
+				}
+				else if (indeterminate(outcome)) {
+					indeterminateTxt.draw(outcome_box);
+					fig.set_fill_colour(Colour(1.0,1.0,0.0));
+				}
+				else {
+					falseTxt.draw(outcome_box);
+					fig.set_fill_colour(Colour(1.0,0.34,0.34));
+				}
+
 				array<uint> xy(2,0,1);
 				fig.draw(outcome_box);
 			}
 
-			// Writes the figure file
-			std::string filename = basename + "[" + xparam_it->name() + "," + yparam_it->name() + "]";
-			fig.write(filename.c_str());
+			fig.write(currentname.c_str());
+
+			trueTxt.close();
+			indeterminateTxt.close();
+			falseTxt.close();
 		}
 	}
 }
@@ -218,6 +235,12 @@ void Parametric2DBisectionResults::draw() const
 	Box bounding_box(2,xBounds.lower(),xBounds.upper(),yBounds.lower(),yBounds.upper());
 	fig.set_bounding_box(bounding_box);
 
+	TextPlot trueTxt((filename + "-bis.true.dump").c_str());
+	TextPlot falseTxt((filename + "-bis.false.dump").c_str());
+	TextPlot indeterminateTxt((filename + "-bis.indeterminate.dump").c_str());
+	indeterminateTxt.draw(bounding_box);
+	indeterminateTxt.close();
+
 	// Draws the bounding box in yellow
 	fig.set_fill_colour(Colour(1.0,1.0,0.0));
 	fig.draw(bounding_box);
@@ -259,7 +282,11 @@ void Parametric2DBisectionResults::draw() const
 
 			// Appends the set, with the desired fill color
 			fig.set_fill_colour(Colour(0.0,0.83,0.0));
-			fig.draw(Box(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper()));
+
+			Box trueBox(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper());
+
+			fig.draw(trueBox);
+			trueTxt.draw(trueBox);
 		}
 
 		// Draws the falsified box if the intervals intersect
@@ -273,7 +300,11 @@ void Parametric2DBisectionResults::draw() const
 
 			// Appends the set, with the desired fill color
 			fig.set_fill_colour(Colour(1.0,0.34,0.34));
-			fig.draw(Box(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper()));
+
+			Box falseBox(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper());
+
+			fig.draw(falseBox);
+			falseTxt.draw(falseBox);
 		}
 	}
 
@@ -302,7 +333,11 @@ void Parametric2DBisectionResults::draw() const
 
 			// Appends the set, with the desired fill color
 			fig.set_fill_colour(Colour(0.0,0.83,0.0));
-			fig.draw(Box(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper()));
+
+			Box trueBox(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper());
+
+			fig.draw(trueBox);
+			trueTxt.draw(trueBox);
 		}
 
 		// Draws the falsified box if the intervals intersect
@@ -315,12 +350,18 @@ void Parametric2DBisectionResults::draw() const
 
 			// Appends the set, with the desired fill color
 			fig.set_fill_colour(Colour(1.0,0.34,0.34));
-			fig.draw(Box(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper()));
+
+			Box falseBox(2,boxXSpan.lower(),boxXSpan.upper(),boxYSpan.lower(),boxYSpan.upper());
+
+			fig.draw(falseBox);
+			falseTxt.draw(falseBox);
 		}
 	}
 
 	// Draws
 	fig.write(filename.c_str());
+	trueTxt.close();
+	falseTxt.close();
 }
 
 

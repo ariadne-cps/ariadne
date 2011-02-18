@@ -23,6 +23,7 @@
 
 #include "ariadne.h"
 #include "examples.h"
+#include "taylor_calculus.h"
 
 using namespace Ariadne;
 

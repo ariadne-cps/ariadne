@@ -55,23 +55,20 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 5;
+	analyser.parameters().highest_maximum_grid_depth = 6;
 
 
 	// The parameters
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
 	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
-	Float tolerance = 0.3;
-	uint numPointsPerAxis = 5;
-	Float minPartitioningRatio = 0.4;
-
-	/*
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verify(verInfo, parameters, minPartitioningRatio);
-	outcomes.draw(system.name());
-	*/
+	Float tolerance = 0.1;
+	uint numPointsPerAxis = 11;
+	Float minPartitioningRatio = 0.1;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
+	ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, minPartitioningRatio);
+	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
+	results.draw();
+
 }

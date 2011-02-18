@@ -35,9 +35,9 @@ namespace Ariadne {
 typedef std::set<RealConstant,ConstantNameComparator<Real> > RealConstantSet;
 
 /**
- * \brief The data structure for the verification outcome over a configuration of parameters (i.e. constants of a system)
+ * \brief The data structure for the outcome of a partitioning method over a configuration of parameters (i.e. constants of a system)
  */
-struct ParametricVerificationOutcome
+struct ParametricPartitioningOutcome
 {
 private:
 
@@ -47,10 +47,10 @@ private:
 
 public:
 
-	ParametricVerificationOutcome(const RealConstantSet params, const tribool value);
-	ParametricVerificationOutcome(const ParametricVerificationOutcome& other);
+	ParametricPartitioningOutcome(const RealConstantSet params, const tribool value);
+	ParametricPartitioningOutcome(const ParametricPartitioningOutcome& other);
 
-	ParametricVerificationOutcome& operator=(const ParametricVerificationOutcome& other);
+	ParametricPartitioningOutcome& operator=(const ParametricPartitioningOutcome& other);
 
 	virtual std::ostream& write(std::ostream&) const;
 
@@ -61,38 +61,40 @@ public:
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ParametricVerificationOutcome& outcome) {
+inline std::ostream& operator<<(std::ostream& os, const ParametricPartitioningOutcome& outcome) {
     return outcome.write(os); }
 
 /**
- * \brief The list of parametric verification outcomes
+ * \brief The list of parametric outcomes
  */
-struct ParametricVerificationOutcomeList
+struct ParametricPartitioningOutcomeList
 {
 private:
 
 	RealConstantSet _params;
 
-	std::list<ParametricVerificationOutcome> _outcomes;
+	std::list<ParametricPartitioningOutcome> _outcomes;
+
+	std::string basename;
 
 public:
 
-	ParametricVerificationOutcomeList(const RealConstantSet& params);
+	ParametricPartitioningOutcomeList(const std::string& name, const RealConstantSet& params);
 
 	virtual std::ostream& write(std::ostream&) const;
 
-	/** Draws the result in the current folder, with filename starting with \a basename. */
-	void draw(const std::string& basename) const;
+	/** Draws the result in the current folder */
+	void draw() const;
 
 	/** Inserts a result. */
-	void push_back(const ParametricVerificationOutcome& result);
+	void push_back(const ParametricPartitioningOutcome& result);
 
 	/** The current outcomes. */
-	const std::list<ParametricVerificationOutcome>& getOutcomes() const;
+	const std::list<ParametricPartitioningOutcome>& getOutcomes() const;
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ParametricVerificationOutcomeList& outcomeList) {
+inline std::ostream& operator<<(std::ostream& os, const ParametricPartitioningOutcomeList& outcomeList) {
     return outcomeList.write(os); }
 
 /**
@@ -147,7 +149,7 @@ public:
 								const unsigned& numPointsPerAxis);
 
 	/**
-	 * \brief Dumps the data of the results into a file.
+	 * \brief Dumps the data of the results into a compact file.
 	 */
 	void dump() const;
 
@@ -166,7 +168,7 @@ public:
 	void insertYValue(const std::pair<Interval,Interval>& result);
 
 	/**
-	 * \brief Draws the result in the current folder.
+	 * \brief Draws the result in the current folder. Also saves the true/false boxes into two files.
 	 */
 	void draw() const;
 

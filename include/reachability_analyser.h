@@ -262,7 +262,7 @@ class HybridReachabilityAnalyser
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	void parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+	Parametric2DBisectionResults parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 								 const RealConstant& xParam,
 								 const RealConstant& yParam,
 								 const Float& tolerance,
@@ -271,7 +271,7 @@ class HybridReachabilityAnalyser
 	/**
 	 * \brief Performs a parametric verification on a set of two parameters \a params, by using bisection.
 	 */
-	void parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+	Parametric2DBisectionResults parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 												   const RealConstantSet& params,
 												   const Float& tolerance,
 												   const unsigned& numPointsPerAxis);
@@ -282,7 +282,7 @@ class HybridReachabilityAnalyser
 	 * percentage in respect to the range of a given parameter). The values in \a params are substituted into the system, the latter
 	 * being restored to its initial conditions by the end of the method.
 	 */
-	ParametricVerificationOutcomeList parametric_verification_partitioning(SystemVerificationInfo& verInfo,
+	ParametricPartitioningOutcomeList parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 													   const RealConstantSet& params,
 													   const Float& minPartitioningRatio);
 
@@ -326,7 +326,7 @@ class HybridReachabilityAnalyser
 	 * generates a "<dominatingName>&<dominatedName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	void parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
+	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
  	  	  	  	  	  	   	   	   	   	   SystemVerificationInfo& dominated,
 								 const RealConstant& xParam,
 								 const RealConstant& yParam,
@@ -336,7 +336,7 @@ class HybridReachabilityAnalyser
 	/**
 	 * \brief Performs a parametric dominance checking on a set of two parameters \a params, by using bisection.
 	 */
-	void parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
+	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
  	  	  	  	  	  	   	   	   	   	   SystemVerificationInfo& dominated,
 												   const RealConstantSet& params,
 												   const Float& tolerance,
@@ -349,7 +349,7 @@ class HybridReachabilityAnalyser
 	 * percentage in respect to the range of a given parameter). The values in \a dominating_params are substituted into the \a dominating
 	 * system alone, the latter being restored to its initial conditions by the end of the method.
 	 */
-	ParametricVerificationOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
+	ParametricPartitioningOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 													 	   SystemVerificationInfo& dominated,
 													 	   const RealConstantSet& dominating_params,
 													 	   const Float& minPartitioningRatio);
@@ -578,7 +578,7 @@ class HybridReachabilityAnalyser
 	 * \details Additionally saves the un-splittable results into \a output_list. */
 	void _split_parameters_set(const tribool& outcome,
 							   std::list<RealConstantSet>& working_list,
-							   ParametricVerificationOutcomeList& output_list,
+							   ParametricPartitioningOutcomeList& output_list,
 							   RealConstantSet& current_params,
 							   const RealConstantSet& working_params,
 							   const Float& tolerance) const;

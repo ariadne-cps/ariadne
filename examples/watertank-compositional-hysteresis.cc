@@ -215,6 +215,6 @@ int main(int argc,char *argv[])
 	//analyser.log_parametric_1d_bisection_results(safe_int,unsafe_int,parameter.value());
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricVerificationOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
+	ParametricPartitioningOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
 	outcomes.draw(system.name());
 }

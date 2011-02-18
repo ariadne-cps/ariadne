@@ -475,12 +475,8 @@ void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
 				   std::list<RealConstantSet>& dest)
 {
 	if (col_it != src.end() && row_it != col_it->end()) {
-		row_it++;
-		_fillSplitSet(src,col_it,row_it,s,dest);
-		row_it--;
-
+		_fillSplitSet(src,col_it,row_it+1,s,dest);
 		s.insert(*row_it);
-
 		col_it++;
 		row_it = col_it->begin();
 
@@ -2155,7 +2151,7 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 
 	ARIADNE_ASSERT(parameter_range.width() > 0);
 
-	// Create the safety and unsafety intervals: they represent the search intervals,
+	// Create the dominating and nondominating intervals: they represent the search intervals,
 	// NOT the intervals where the system is proved dominating or nondominating
 	Interval dominating_int = parameter_range;
 	Interval nondominating_int = parameter_range;
@@ -2220,7 +2216,7 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 	return _pos_neg_bounds_from_search_intervals(dominating_int,nondominating_int,parameter_range,dominatingOnBottom);
 }
 
-void
+Parametric2DBisectionResults
 HybridReachabilityAnalyser::parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 															  SystemVerificationInfo& dominated,
 											   const RealConstantSet& params,
@@ -2234,10 +2230,10 @@ HybridReachabilityAnalyser::parametric_dominance_2d_bisection(SystemVerification
 	const RealConstant& xParam = *param_it;
 	const RealConstant& yParam = *(++param_it);
 
-	parametric_dominance_2d_bisection(dominating,dominated,xParam,yParam,tolerance,numPointsPerAxis);
+	return parametric_dominance_2d_bisection(dominating,dominated,xParam,yParam,tolerance,numPointsPerAxis);
 }
 
-void
+Parametric2DBisectionResults
 HybridReachabilityAnalyser::parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 															  SystemVerificationInfo& dominated,
 											   const RealConstant& xParam,
@@ -2256,10 +2252,7 @@ HybridReachabilityAnalyser::parametric_dominance_2d_bisection(SystemVerification
 	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, tolerance, numPointsPerAxis, true);
 	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, tolerance, numPointsPerAxis, false);
 
-	// Dumps the results into a file
-	results.dump();
-	// Draws the result
-	results.draw();
+	return results;
 }
 
 void HybridReachabilityAnalyser::_parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
@@ -2482,7 +2475,7 @@ HybridReachabilityAnalyser::_pos_neg_bounds_from_search_intervals(const Interval
 	return make_pair<Interval,Interval>(positive_result,negative_result);
 }
 
-void
+Parametric2DBisectionResults
 HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 											   const RealConstantSet& params,
 											   const Float& tolerance,
@@ -2495,10 +2488,10 @@ HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificat
 	const RealConstant& xParam = *param_it;
 	const RealConstant& yParam = *(++param_it);
 
-	parametric_verification_2d_bisection(verInfo,xParam,yParam,tolerance,numPointsPerAxis);
+	return parametric_verification_2d_bisection(verInfo,xParam,yParam,tolerance,numPointsPerAxis);
 }
 
-void
+Parametric2DBisectionResults
 HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 											   const RealConstant& xParam,
 											   const RealConstant& yParam,
@@ -2516,10 +2509,7 @@ HybridReachabilityAnalyser::parametric_verification_2d_bisection(SystemVerificat
 	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, true);
 	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, false);
 
-	// Dumps the results into a file
-	results.dump();
-	// Draws the result
-	results.draw();
+	return results;
 }
 
 void HybridReachabilityAnalyser::_parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
@@ -2563,7 +2553,7 @@ void HybridReachabilityAnalyser::_parametric_verification_2d_bisection_sweep(Par
 	system.substitute(sweepParam,originalSweepValue);
 }
 
-ParametricVerificationOutcomeList
+ParametricPartitioningOutcomeList
 HybridReachabilityAnalyser::parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 											  const RealConstantSet& params,
 											  const Float& minPartitioningRatio)
@@ -2571,7 +2561,7 @@ HybridReachabilityAnalyser::parametric_verification_partitioning(SystemVerificat
 	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter.");
 	ARIADNE_ASSERT(minPartitioningRatio > 0 && minPartitioningRatio < 1);
 
-	ParametricVerificationOutcomeList result(params);
+	ParametricPartitioningOutcomeList result(verInfo.getSystem().name(),params);
 
 	RealConstantSet original_constants = verInfo.getSystem().accessible_constants();
 
@@ -2760,7 +2750,7 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 	return result;
 }
 
-ParametricVerificationOutcomeList
+ParametricPartitioningOutcomeList
 HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 												 SystemVerificationInfo& dominated,
 											  	 const RealConstantSet& dominating_params,
@@ -2769,7 +2759,8 @@ HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerification
 	ARIADNE_ASSERT_MSG(dominating_params.size() > 0, "Provide at least one parameter.");
 	ARIADNE_ASSERT(minPartitioningRatio > 0 && minPartitioningRatio < 1);
 
-	ParametricVerificationOutcomeList result(dominating_params);
+	std::string name = dominating.getSystem().name() + "&" + dominated.getSystem().name();
+	ParametricPartitioningOutcomeList result(name,dominating_params);
 
 	RealConstantSet original_constants = dominating.getSystem().accessible_constants();
 
@@ -2798,7 +2789,7 @@ HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerification
 void
 HybridReachabilityAnalyser::_split_parameters_set(const tribool& outcome,
 										    	  std::list<RealConstantSet>& working_list,
-										    	  ParametricVerificationOutcomeList& output_list,
+										    	  ParametricPartitioningOutcomeList& output_list,
 												  RealConstantSet& current_params,
 												  const RealConstantSet& working_params,
 												  const Float& tolerance) const
@@ -2838,10 +2829,10 @@ HybridReachabilityAnalyser::_split_parameters_set(const tribool& outcome,
 			working_list.push_back(newConfigurationRight);
 		}
 		else
-			output_list.push_back(ParametricVerificationOutcome(current_params,outcome));
+			output_list.push_back(ParametricPartitioningOutcome(current_params,outcome));
 	}
 	else
-		output_list.push_back(ParametricVerificationOutcome(current_params,outcome));
+		output_list.push_back(ParametricPartitioningOutcome(current_params,outcome));
 }
 
 

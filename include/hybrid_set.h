@@ -500,7 +500,7 @@ class HybridGridTreeSet
 
     //!
     const GridTreeSet& operator[](DiscreteLocation q) const {
-        ARIADNE_ASSERT(this->has_location(q));
+        ARIADNE_ASSERT_MSG(this->has_location(q),"q="<<q);
         return this->_map.find(q)->second;
     }
 

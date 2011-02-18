@@ -1,7 +1,7 @@
 /***************************************************************************
- *            reachability_analyser.cc
+ *            hybrid_reachability_analyser.cc
  *
- *  Copyright  2006-9  Alberto Casagrande, Pieter Collins, Davide Bresolin
+ *  Copyright  2006-11  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *
  ****************************************************************************/
 
@@ -50,8 +50,8 @@
 #include "evolution_parameters.h"
 #include "evolver_interface.h"
 
-#include "discretiser.h"
-#include "reachability_analyser.h"
+#include "hybrid_discretiser.h"
+#include "hybrid_reachability_analyser.h"
 #include "logging.h"
 
 #include "graphics.h"

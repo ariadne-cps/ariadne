@@ -68,8 +68,8 @@ using std::ofstream; using std::ifstream;
 
 #include "vector_field_evolver.h"
 #include "hybrid_evolver.h"
-#include "discretiser.h"
-#include "reachability_analyser.h"
+#include "hybrid_discretiser.h"
+#include "hybrid_reachability_analyser.h"
 
 #include "serialization.h"
 #include "graphics.h"

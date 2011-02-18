@@ -37,8 +37,6 @@ check_PROGRAMS = \
 	test_affine_sets \
 	test_taylor_sets \
 	test_grid_set \
-	test_hybrid_set \
-	test_hybrid_automaton \
 	test_linear_programming \
 	test_nonlinear_programming \
 	test_integrator \
@@ -46,12 +44,15 @@ check_PROGRAMS = \
 	test_solvers \
 	test_discrete_evolution \
 	test_continuous_evolution \
+	test_discretiser \
+	test_graphics \
+	test_serialization \
+	test_hybrid_set \
+	test_hybrid_automaton \
 	test_hybrid_evolver \
 	test_hybrid_evolution \
-	test_discretised_evolution \
-	test_reachability_analysis \
-	test_graphics \
-	test_serialization
+	test_hybrid_discretiser \
+	test_hybrid_reachability_analyser
 
 EXTRA_TESTS = \
 	test_textplot \
@@ -84,18 +85,19 @@ test_taylor_sets_SOURCES=test_taylor_sets.cc
 test_expression_SOURCES=test_expression.cc
 test_function_SOURCES=test_function.cc
 test_grid_set_SOURCES=test_grid_set.cc
-test_hybrid_set_SOURCES=test_hybrid_set.cc
-test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 test_nonlinear_programming_SOURCES=test_nonlinear_programming.cc
 test_integrator_SOURCES=test_integrator.cc
 test_constraint_solver_SOURCES=test_constraint_solver.cc
 test_solvers_SOURCES=test_solvers.cc
 test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
+test_discretiser_SOURCES=test_discretiser.cc
+test_hybrid_set_SOURCES=test_hybrid_set.cc
+test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
-test_discretised_evolution_SOURCES=test_discretised_evolution.cc
-test_reachability_analysis_SOURCES=test_reachability_analysis.cc
+test_hybrid_discretiser_SOURCES=test_hybrid_discretiser.cc
+test_hybrid_reachability_analyser_SOURCES=test_hybrid_reachability_analyser.cc
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc
 test_textplot_SOURCES=test_textplot.cc
@@ -105,5 +107,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_discretised_evolution test_reachability_analysis
+XFAIL_TESTS = test_integrator test_discretiser test_hybrid_discretiser test_hybrid_reachability_analyser
 testsubdir = ./

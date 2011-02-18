@@ -1,7 +1,7 @@
 /***************************************************************************
- *            reachability_analyser.h
+ *            hybrid_reachability_analyser.h
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-11  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file reachability_analyser.h
- *  \brief Methods for computing abstract reachable sets.
+/*! \file hybrid_reachability_analyser.h
+ *  \brief Methods for computing reachable sets of hybrid systems.
  */
 
-#ifndef ARIADNE_REACHABILITY_ANALYSER_H
-#define ARIADNE_REACHABILITY_ANALYSER_H
+#ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_H
+#define ARIADNE_HYBRID_REACHABILITY_ANALYSER_H
 
 #include <boost/smart_ptr.hpp>
 
@@ -41,7 +41,7 @@
 #include "grid_set.h"
 #include "hybrid_set.h"
 
-#include "discretiser.h"
+#include "hybrid_discretiser.h"
 
 #include "logging.h"
 

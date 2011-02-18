@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_reachability_analysis.cc
+ *            test_hybrid_reachability_analysis.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -32,8 +32,8 @@
 #include "hybrid_automaton.h"
 #include "evolution_parameters.h"
 #include "hybrid_evolver.h"
-#include "discretiser.h"
-#include "reachability_analyser.h"
+#include "hybrid_discretiser.h"
+#include "hybrid_reachability_analyser.h"
 #include "graphics.h"
 #include "logging.h"
 
@@ -47,7 +47,7 @@ using Ariadne::Models::Henon;
 
 
 
-class TestReachabilityAnalysis
+class TestHybridReachabilityAnalyser
 {
 
     typedef GeneralHybridEvolver HybridEvolverType;
@@ -79,7 +79,7 @@ class TestReachabilityAnalysis
         return analyser;
     }
 
-    TestReachabilityAnalysis()
+    TestHybridReachabilityAnalyser()
         : analyser(build_analyser()),
           system(),
           grid(2),
@@ -207,7 +207,7 @@ class TestReachabilityAnalysis
 int main(int nargs, const char* args[])
 {
     std::cerr<<"SKIPPED "; return 1u;
-    TestReachabilityAnalysis().test();
+    TestHybridReachabilityAnalyser().test();
     if(ARIADNE_TEST_SKIPPED) { cerr << "INCOMPLETE "; }
     return ARIADNE_TEST_FAILURES;
 }

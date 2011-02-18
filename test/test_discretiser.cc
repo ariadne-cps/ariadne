@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_discretised_evolution.cc
+ *            test_discretiser.cc
  *
- *  Copyright  2006-8  Pieter Collins
+ *  Copyright  2006-11  Pieter Collins
  *
  ****************************************************************************/
 
@@ -31,15 +31,10 @@
 #include "zonotope.h"
 #include "list_set.h"
 #include "grid_set.h"
-#include "hybrid_time.h"
-#include "hybrid_set.h"
-#include "hybrid_automaton.h"
 #include "integrator.h"
 #include "map_evolver.h"
 #include "vector_field_evolver.h"
-#include "hybrid_evolver.h"
 #include "orbit.h"
-#include "hybrid_orbit.h"
 #include "discretiser.h"
 #include "graphics.h"
 
@@ -53,32 +48,30 @@ using namespace Ariadne;
 using namespace std;
 using Models::VanDerPol;
 
-class TestDiscretisedEvolution
+class TestDiscretiser
 {
   public:
     void test() const;
   private:
     void test_discrete_time() const;
     void test_continuous_time() const;
-    void test_hybrid_time() const;
 };
 
 int main()
 {
     std::cerr<<"SKIPPED "; return 1u;
-    TestDiscretisedEvolution().test();
+    TestDiscretiser().test();
     return ARIADNE_TEST_FAILURES;
 }
 
-void TestDiscretisedEvolution::test() const
+void TestDiscretiser::test() const
 {
-    //ARIADNE_TEST_CALL(test_discrete_time());
-    //ARIADNE_TEST_CALL(test_continuous_time());
-    ARIADNE_TEST_CALL(test_hybrid_time());
+    ARIADNE_TEST_CALL(test_discrete_time());
+    ARIADNE_TEST_CALL(test_continuous_time());
 }
 
 
-void TestDiscretisedEvolution::test_discrete_time() const
+void TestDiscretiser::test_discrete_time() const
 {
     typedef MapEvolver::EnclosureType EnclosureType;
 
@@ -161,7 +154,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
         fig << fill_colour(cyan) << reach_cells;
         fig << fill_colour(yellow) << initial_cell;
         fig << fill_colour(green) << final_cells;
-        fig.write("test_discretised_evolution-henon-cells");
+        fig.write("test_discretiser-henon-cells");
     }
 
     // Plot the intial, evolve and reach sets
@@ -172,11 +165,11 @@ void TestDiscretisedEvolution::test_discrete_time() const
         fig << fill_colour(cyan) << reach_set;
         fig << fill_colour(yellow) << initial_set;
         fig << fill_colour(green) << final_set;
-        fig.write("test_discretised_evolution-henon-sets");
+        fig.write("test_discretiser-henon-sets");
     }
 }
 
-void TestDiscretisedEvolution::test_continuous_time() const
+void TestDiscretiser::test_continuous_time() const
 {
     typedef TaylorConstrainedImageSet EnclosureType;
 
@@ -249,7 +242,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
         fig << fill_colour(magenta) << intermediate_cells;
         fig << fill_colour(blue) << initial_cell;
         fig << fill_colour(blue) << final_cells;
-        fig.write("test_discretised_evolution-vdp-cells");
+        fig.write("test_discretiser-vdp-cells");
     }
 
     // Plot the intial, evolve and reach sets
@@ -261,132 +254,10 @@ void TestDiscretisedEvolution::test_continuous_time() const
         fig << fill_colour(magenta) << intermediate_set;
         fig << fill_colour(blue) << initial_set;
         fig << fill_colour(blue) << final_set;
-        fig.write("test_discretised_evolution-vdp-sets");
+        fig.write("test_discretiser-vdp-sets");
     }
 
 
 }
 
-
-void TestDiscretisedEvolution::test_hybrid_time() const
-{
-    typedef GeneralHybridEvolver EvolverType;
-    typedef EvolverType::EnclosureType EnclosureType;
-    typedef EnclosureType::ContinuousStateSetType ContinuousEnclosureType;
-
-    cout << __PRETTY_FUNCTION__ << endl;
-
-    // Set up the evolution parameters and grid
-    Real time(1.0);
-    uint steps(6);
-    double maximum_step_size(0.125);
-    int depth=8;
-    DiscreteLocation location(1);
-    DiscreteEvent event(1);
-
-    EvolutionParameters parameters;
-    parameters.maximum_step_size=maximum_step_size;
-    Grid grid(2);
-
-    // Set up the evaluators
-    EvolverType evolver(parameters);
-    HybridDiscretiser< EnclosureType > discrete_evolver(evolver);
-
-
-    // Set up the vector field
-    Real a=1.5; Real b=0.375;
-    RealScalarFunction zero=RealScalarFunction::constant(2,0.0);
-    RealScalarFunction one=RealScalarFunction::constant(2,1.0);
-    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
-    RealScalarFunction y=RealScalarFunction::coordinate(2,1);
-
-    MonolithicHybridAutomaton ha("Decay");
-    ha.new_mode(location,(one,-y));
-    ha.new_transition(location,event,location,(x-1,y),(x-1),urgent);
-
-    // Define a bounding box for the evolution
-    std::cout<<"making bounding_box"<<std::endl;
-    Box bounding_box=make_box("[-4,4]x[-4,4]") ;
-    std::cout<<"bounding_box="<<bounding_box<<"\n"<<std::endl;
-    //Box eps_bounding_box=bounding_box.neighbourhood(0.1);
-
-    // Define the initial cell
-    Box initial_box=make_box("[1.0001,1.0002]x[0.5001,0.5002]");
-    ARIADNE_TEST_PRINT(initial_box);
-    GridTreeSet approx_tree_set=outer_approximation(initial_box,grid,depth);
-    GridCell initial_cell=*approx_tree_set.begin();
-    HybridGridCell hybrid_initial_cell(location,initial_cell);
-    ARIADNE_TEST_PRINT(hybrid_initial_cell);
-    HybridBox hybrid_initial_set=hybrid_initial_cell.box();
-    ARIADNE_TEST_PRINT(hybrid_initial_set);
-    //[1.00098:1.00122],
-    HybridTime htime(time,steps);
-    ARIADNE_TEST_PRINT(htime);
-
-    // Compute the reachable sets
-    cout << "Computing evolution... " << flush;
-    // evolver.verbosity=1;
-    Orbit<EnclosureType> evolve_orbit
-        = evolver.orbit(ha,EnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
-    cout << "done." << endl;
-
-    ARIADNE_TEST_PRINT(evolve_orbit);
-
-    cout << "Extracting grid... " << flush;
-    HybridGrid hagrid=ha.grid();
-    cout << "done." << endl;
-
-    // Compute the reachable sets
-    cout << "Computing discretised evolution... " << flush;
-    Orbit<HybridGridCell> discrete_orbit
-        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
-    cout << "done." << endl;
-
-    ContinuousEnclosureType const& initial_set=evolve_orbit.initial().continuous_state_set();
-    ListSet<ContinuousEnclosureType> const& reach_set=evolve_orbit.reach()[location];
-    ListSet<ContinuousEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
-    ListSet<ContinuousEnclosureType> const& final_set=evolve_orbit.final()[location];
-
-    GridTreeSet const& reach_cells=discrete_orbit.reach()[location];
-    GridTreeSet const& intermediate_cells=discrete_orbit.intermediate()[location];
-    GridTreeSet const& final_cells=discrete_orbit.final()[location];
-
-
-    ARIADNE_TEST_PRINT(initial_set);
-    ARIADNE_TEST_PRINT(initial_cell);
-    ARIADNE_TEST_PRINT(reach_set);
-    ARIADNE_TEST_PRINT(reach_cells);
-    ARIADNE_TEST_PRINT(intermediate_set);
-    ARIADNE_TEST_PRINT(intermediate_cells);
-    ARIADNE_TEST_PRINT(final_set);
-    ARIADNE_TEST_PRINT(final_cells);
-
-
-
-    // Plot the intial, evolve and reach sets
-    {
-        Figure fig;
-        fig.set_bounding_box(Box(2,Interval(-3,3)));
-        fig << line_style(true);
-        fig << line_style(true);
-        fig << fill_colour(cyan) << reach_cells;
-        fig << fill_colour(magenta) << intermediate_cells;
-        fig << fill_colour(yellow) << initial_cell;
-        fig << fill_colour(green) << final_cells;
-        fig.write("test_discrete_evolver-hybrid-cells");
-    }
-
-    // Plot the intial, evolve and reach sets
-    {
-        Figure fig;
-        fig.set_bounding_box(Box(2,Interval(-3,3)));
-        fig << line_style(true);
-        fig << fill_colour(cyan) << reach_set;
-        fig << fill_colour(magenta) << intermediate_set;
-        fig << fill_colour(yellow) << initial_set;
-        fig << fill_colour(green) << final_set;
-        fig.write("test_discrete_evolver-hybrid-sets");
-    }
-
-}
 

@@ -39,17 +39,18 @@ ARIADNE_SRC = \
 	taylor_set.cc \
 	grid_set.cc \
 	affine_set.cc \
+	map_evolver.cc \
+	vector_field_evolver.cc \
+	discretiser.cc \
+	logging.cc \
+	graphics.cc \
 	hybrid_set.cc \
 	hybrid_enclosure.cc \
 	hybrid_automaton-monolithic.cc \
 	hybrid_automaton-composite.cc \
-	map_evolver.cc \
-	vector_field_evolver.cc \
 	hybrid_evolver.cc \
-	discretiser.cc \
-	reachability_analyser.cc \
-	logging.cc \
-	graphics.cc
+	hybrid_discretiser.cc \
+	hybrid_reachability_analyser.cc
 
 EXTRAS_SRC = \
 	runge_kutta_integrator.cc \

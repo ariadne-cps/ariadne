@@ -216,5 +216,5 @@ int main(int argc,char *argv[])
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 	ParametricPartitioningOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
-	outcomes.draw(system.name());
+	outcomes.draw();
 }

@@ -64,7 +64,7 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
 	Float tolerance = 0.1;
 	uint numPointsPerAxis = 11;
-	Float minPartitioningRatio = 0.1;
+	Float minPartitioningRatio = 0.25;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 	ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, minPartitioningRatio);

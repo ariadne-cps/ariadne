@@ -445,6 +445,55 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
     std::pair<SetApproximationType,bool> _upper_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
+
+    /*! \brief Checks if a break is to be issued.
+     * \details Read the \a flagToCheck for validity: if false, sets \a flagToUpdate to false and returns true ("do break"), otherwise
+     * just returns false.
+     */
+    bool _upper_chain_reach_break(const bool& flagToCheck, bool& flagToUpdate) const;
+
+    /*! \brief Pushes the enclosures from \a reachCells into \a destination.
+     * \details Ignores enclosures that lie outside the domain.
+     * \return True iff any enclosure has been ignored due to lying outside the domain.
+     */
+    bool _upper_chain_reach_pushReachCells(const HybridGridTreeSet& reachCells,
+    									   const SystemType& system,
+    									   const TaylorCalculus& tc,
+    									   std::list<EnclosureType>& destination) const;
+
+    /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list, for all \a transitions.
+     * \return True iff any enclosure has been ignored due to lying outside the domain.
+     */
+    bool _upper_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
+												 const ContinuousEnclosureType& source,
+												 const TaylorCalculus& tc,
+												 const HybridGrid& grid,
+												 std::list<EnclosureType>& destination) const;
+
+    /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
+     * \details Splits the \a source until the enclosure is definitely active for \a trans or the minimum allowed target cell widths \a minTargetCellWidths has been reached.
+     * \return True iff any enclosure has been ignored due to lying outside the domain.
+     */
+    bool _upper_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
+    															const ContinuousEnclosureType& source,
+    													        const TaylorCalculus& tc,
+    															const Vector<Float>& minTargetCellWidths,
+    															std::list<EnclosureType>& destination) const;
+
+    /*! \brief Pushes the target enclosure from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
+     * \return True iff the target enclosure lies outside the domain.
+     */
+    bool _upper_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
+    												   const ContinuousEnclosureType& source,
+    												   const TaylorCalculus& tc,
+    												   std::list<EnclosureType>& destination) const;
+
+    /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
+     * \return True iff any cell enclosure has been ignored due to lying outside the domain.
+     */
+    bool _upper_chain_reach_pushFinalCells(const HybridGridTreeSet& finalCells,
+    									   std::list<EnclosureType>& destination) const;
+
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
 
 	/*! \brief Attempt to verify that the reachable set of a system starting in an initial set remains in a safe region inside a domain,

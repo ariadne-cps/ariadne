@@ -1743,6 +1743,25 @@ TaylorConstrainedImageSet apply(const IntervalVectorFunctionInterface& function,
     return result;
 }
 
+TaylorConstrainedImageSet apply(const RealVectorFunction& function, const TaylorConstrainedImageSet& set) {
+    TaylorConstrainedImageSet result(set);
+    result.apply_map(function);
+    return result;
+}
+
+TaylorConstrainedImageSet apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set) {
+    TaylorConstrainedImageSet result(set);
+    result.apply_map(function);
+    return result;
+}
+
+TaylorConstrainedImageSet unchecked_apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set) {
+    TaylorConstrainedImageSet result(set);
+    const VectorTaylorFunction& space_function=result.function();
+    const_cast<VectorTaylorFunction&>(space_function)=Ariadne::unchecked_compose(function,set.function());
+    return result;
+}
+
 } // namespace Ariadne
 
 

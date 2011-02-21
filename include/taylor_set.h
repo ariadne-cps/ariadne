@@ -317,6 +317,10 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const T
 
 //! \related TaylorConstrainedImageSet \brief The image of the \a set under the \a function.
 TaylorConstrainedImageSet apply(const IntervalVectorFunctionInterface& function, const TaylorConstrainedImageSet& set);
+TaylorConstrainedImageSet apply(const RealVectorFunction& function, const TaylorConstrainedImageSet& set);
+TaylorConstrainedImageSet apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set);
+//! \related TaylorConstrainedImageSet \brief The image of the \a set under the \a function. Does not perform domain-checking.
+TaylorConstrainedImageSet unchecked_apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set);
 
 } //namespace Ariadne
 

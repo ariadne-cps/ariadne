@@ -32,7 +32,6 @@
 #include <boost/smart_ptr.hpp>
 
 #include "grid_set.h"
-#include "hybrid_set.h"
 
 namespace Ariadne {
 

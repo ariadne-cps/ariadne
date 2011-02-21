@@ -37,14 +37,28 @@
 #include "graphics.h"
 #include "logging.h"
 
-#include "models.h"
-
 #include "test.h"
 
 using namespace std;
 using namespace Ariadne;
-using Ariadne::Models::Henon;
 
+
+namespace Ariadne {
+
+HybridBoxes
+bounding_boxes(const HybridSpaceInterface& space, Interval bound)
+{
+    HybridBoxes result;
+    Set<DiscreteLocation> locations = dynamic_cast<const MonolithicHybridSpace&>(space).locations();
+    for(Set<DiscreteLocation>::const_iterator loc_iter=locations.begin();
+        loc_iter!=locations.end(); ++loc_iter)
+        {
+            result.insert(make_pair(*loc_iter,Box(space[*loc_iter].dimension(), bound)));
+        }
+    return result;
+}
+
+}
 
 
 class TestHybridReachabilityAnalyser
@@ -92,17 +106,6 @@ class TestHybridReachabilityAnalyser
         std::clog<<std::setprecision(20);
         DiscreteLocation location(1);
 
-        /*
-          VectorUserFunction<Henon> henon(make_point("(1.5,-0.375)"));
-          system.new_mode(location,ConstantFunction(Vector<Float>(2,0.0),2));
-          system.new_forced_transition(DiscreteEvent(1),DiscreteLocation(1),DiscreteLocation(1),henon,ConstantFunction(Vector<Float>(1,1.0),2));
-          ImageSet initial_box(Box("[0.99,1.01]x[-0.01,0.01]"));
-        */
-        /*
-          VectorUserFunction<VanDerPol> vdp(make_point("(0.75)"));
-          system.new_mode(location,vdp);
-          ImageSet initial_box(Box("[0.99,1.01]x[-0.01,0.01]"));
-        */
         Matrix<Float> A=Matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
         Vector<Float> b=Vector<Float>("[0.0,0.0]");
         VectorAffineFunction aff(A,b);

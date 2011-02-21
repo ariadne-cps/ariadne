@@ -33,26 +33,19 @@
 #include "numeric.h"
 #include "evolver_interface.h"
 #include "discretiser_interface.h"
-#include "hybrid_automaton_interface.h"
-#include "vector_field.h"
 
 #include "logging.h"
 
 
 namespace Ariadne {
 
+class IteratedMap;
 class VectorField;
+
 class Grid;
 class GridCell;
 class GridTreeSet;
 
-class HybridAutomatonInterface;
-class DiscreteLocation;
-template<class BS> class HybridBasicSet;
-
-class HybridGrid;
-class HybridGridCell;
-class HybridGridTreeSet;
 
 
 

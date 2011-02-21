@@ -41,9 +41,8 @@ class HybridGrid;
 class DiscreteEvent;
 class DiscreteLocation;
 
-class Grid;
-
-template<class T> class Set;
+template<class T> class Space;
+typedef Space<Real> RealSpace;
 
 enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline std::ostream& operator<<(std::ostream&, const EventKind& evk);
@@ -101,12 +100,11 @@ class HybridAutomatonInterface {
     //! \brief The dynamic valid in the mode \a location.
     virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
-    //! \brief The natural grid to use in the \a location.
-    virtual Grid grid(DiscreteLocation location) const = 0;
+    //! \brief The hybrid state space.
+    virtual HybridSpace state_space() const = 0;
 
-    //! \brief A hybrid grid, comprising a Grid for each (reachable) location of the automaton. (Deprecated)
-    //! \deprecated Only used to support current reachability analysis routines.
-    virtual HybridGrid grid() const = 0;
+    //! \brief The continuous state space in the \a location.
+    virtual RealSpace continuous_state_space(DiscreteLocation location) const = 0;
 
     //@}
 

@@ -145,6 +145,9 @@ class HybridDiscretiser
                                  const BasicSetType& initial_set,
                                  const HybridGrid& system_grid,
                                  const AccuracyType accuracy) const;
+
+
+    HybridGrid _hybrid_grid(const SystemType& system) const;
 };
 
 } // namespace Ariadne

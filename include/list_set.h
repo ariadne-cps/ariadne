@@ -174,9 +174,9 @@ template<class BS>
 std::ostream&
 operator<<(std::ostream& os, const ListSet<BS>& ls)
 {
-    os << "ListSet";
-    if(!ls.empty()) { for(uint i=0; i!=ls.size(); ++i) { os << (i==0?'(':',') << ls[i]; } }
-    return os << ")";
+    os << "ListSet(";
+    if(!ls.empty()) { for(uint i=0; i!=ls.size(); ++i) { os << (i==0?" ":", ") << ls[i]; } }
+    return os << " )";
 }
 
 

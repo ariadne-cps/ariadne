@@ -68,12 +68,11 @@ template<class T> struct Space
     //! \brief The dimension of the space.
     SizeType dimension() const { return _variables.size(); }
     //! \brief The \a i<sup>th</sup> named variable.
-    const VariableType& operator[](SizeType i) const { return _variables.at(i); }
-    const VariableType& variable(SizeType i) const { return _variables.at(i); }
+    const VariableType operator[](SizeType i) const { return VariableType(_variables.at(i)); }
+    const VariableType variable(SizeType i) const { return VariableType(_variables.at(i)); }
 
     //! \brief A list giving ordered variables.
-    List<String> variable_names() const {
-        List<String> res; for(uint i=0; i!=this->_variables.size(); ++i) { res.append(this->_variables[i].name()); } return res; }
+    List<String> variable_names() const { return this->_variables; }
     //! \brief A list giving ordered variables.
     List<VariableType> variables() const { return this->_variables; }
     //! \brief A map giving the index of a given variable.
@@ -93,7 +92,7 @@ template<class T> struct Space
     //! \brief The index of the named variable \a v.
     SizeType index(const VariableType& v) const {
         for(uint i=0; i!=_variables.size(); ++i) {
-            if(v==_variables[i]) { return i; } }
+            if(v.name()==_variables[i]) { return i; } }
         ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
         return _variables.size(); }
     //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
@@ -107,13 +106,13 @@ template<class T> struct Space
     //! \brief Append the named variable \a v to the variables defining the space.
     Space<T>& append(const VariableType& v) {
         for(uint i=0; i!=_variables.size(); ++i) {
-            ARIADNE_ASSERT_MSG(_variables[i]!=v,"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
+            ARIADNE_ASSERT_MSG(_variables[i]!=v.name(),"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
         }
-        _variables.push_back(v); return *this; }
+        _variables.push_back(v.name()); return *this; }
     //! \brief Append the named variable \a v to the variables defining the space.
-    Space<T>& operator,(const String& v) { return this->append(VariableType(v)); }
+    Space<T>& operator,(const String& v) { return this->append(v); }
   private:
-    List<VariableType> _variables;
+    List<String> _variables;
 };
 
 template<class T> inline std::ostream& operator<<(std::ostream& os, const Space<T>& spc) { return os << spc.variables(); }

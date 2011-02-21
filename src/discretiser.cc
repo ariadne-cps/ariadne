@@ -28,11 +28,8 @@
 #include "orbit.h"
 #include "function_set.h"
 #include "grid_set.h"
-#include "hybrid_set.h"
 #include "map.h"
 #include "vector_field.h"
-#include "hybrid_automaton_interface.h"
-#include "hybrid_orbit.h"
 
 namespace Ariadne {
 

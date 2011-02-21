@@ -25,14 +25,13 @@
 
 #include "stlio.h"
 #include "taylor_set.h"
-#include "orbit.h"
 #include "function_set.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
-#include "map.h"
-#include "vector_field.h"
-#include "hybrid_automaton_interface.h"
 #include "hybrid_orbit.h"
+#include "hybrid_space.h"
+
+#include "hybrid_automaton_interface.h"
 
 namespace Ariadne {
 
@@ -104,7 +103,7 @@ evolution(const SystemType& system,
     Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,semantics);
     ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\n");
-    HybridGrid hgrid=system.grid();
+    HybridGrid hgrid=this->_hybrid_grid(system);
     ARIADNE_LOG(5,"hybrid_grid="<<hgrid<<"\n");
     Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,hgrid,accuracy);
     ARIADNE_LOG(5,"discrete_orbit reach size="<<discrete_orbit.reach().size()<<"\n");
@@ -123,7 +122,7 @@ reach(const SystemType& system,
             const Semantics semantics) const
 {
     return this->_discretise(this->_evolver->reach(system,this->_enclosure(initial_set),time,semantics),
-                             initial_set,system.grid(),accuracy);
+                             initial_set,this->_hybrid_grid(system),accuracy);
 }
 
 template<class HES>
@@ -137,7 +136,7 @@ evolve(const SystemType& system,
 {
     EnclosureType initial_enclosure=this->_enclosure(initial_set);
     ListSet<EnclosureType> final_enclosures=this->_evolver->evolve(system,initial_enclosure,time,semantics);
-    HybridGrid grid=system.grid();
+    HybridGrid grid=this->_hybrid_grid(system);
     return this->_discretise(final_enclosures,initial_set,grid,accuracy);
 }
 
@@ -221,6 +220,16 @@ _discretise(const ListSet<EnclosureType>& enclosure_list_set,
     ARIADNE_LOG(4,"discretised_set="<<discretised_set<<"\n");
     return discretised_set;
 }
+
+
+template<class HES>
+HybridGrid
+HybridDiscretiser<HES>::
+_hybrid_grid(const SystemType& system) const
+{
+    return HybridGrid(system.state_space(),HybridScaling());
+}
+
 
 
 template class HybridDiscretiser<HybridTaylorConstrainedImageSet>;

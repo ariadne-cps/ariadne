@@ -68,6 +68,7 @@ class HybridBoundedSetInterface
   public:
     virtual HybridBoundedSetInterface* clone() const = 0;
     virtual tribool inside(const HybridBoxes& bx) const = 0;
+    virtual Set<DiscreteLocation> locations() const = 0;
     virtual HybridBoxes bounding_box() const = 0;
     virtual BoundedSetInterface const& operator[](DiscreteLocation) const = 0;
 };

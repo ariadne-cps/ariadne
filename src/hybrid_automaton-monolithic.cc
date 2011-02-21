@@ -27,9 +27,8 @@
 #include "stlio.h"
 #include "function.h"
 #include "hybrid_time.h"
-#include "hybrid_set.h"
+#include "hybrid_space.h"
 #include "hybrid_automaton-monolithic.h"
-#include "grid_set.h"
 
 namespace Ariadne {
 
@@ -41,7 +40,7 @@ class HybridSet {};
 
 
 MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealVectorFunction f)
-    : _location(q), _dynamic(f), _grid_ptr(new Grid(f.result_size()))
+    : _location(q), _dynamic(f)
 {
 }
 
@@ -127,56 +126,6 @@ MonolithicHybridAutomaton::new_transition(DiscreteLocation source,
     }
 
     this->_modes.value(source)._transitions.insert(event,Transition(source,event,target,reset,guard,kind));
-}
-
-
-
-void
-MonolithicHybridAutomaton::set_grid(DiscreteLocation location,
-                                    const Grid& grid)
-{
-    if(!this->has_mode(location)) {
-        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(location,grid)",
-                      "The automaton does not contain a mode with location label "<<location<<"\n");
-    }
-    Mode& mode=this->_modes.value(location);
-    if(grid.dimension()!=mode.dimension()) {
-            ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(location,grid)",
-                          "Mode "<<location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
-    }
-    mode._grid_ptr=shared_ptr<Grid>(new Grid(grid));
-}
-
-void
-MonolithicHybridAutomaton::set_grid(const Grid& grid)
-{
-    for(Map<DiscreteLocation,Mode>::iterator mode_iter=this->_modes.begin();
-        mode_iter!=this->_modes.end(); ++mode_iter)
-    {
-        Mode& mode=mode_iter->second;
-        if(grid.dimension()!=mode.dimension()) {
-            ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(grid)",
-                          "Mode "<<mode._location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
-        }
-        mode._grid_ptr=shared_ptr<Grid>(new Grid(grid));
-    }
-}
-
-void
-MonolithicHybridAutomaton::set_grid(const HybridGrid& hgrid)
-{
-    for(Map<DiscreteLocation,Mode>::iterator mode_iter=this->_modes.begin();
-        mode_iter!=this->_modes.end(); ++mode_iter)
-    {
-        DiscreteLocation location=mode_iter->first;
-        Mode& mode=mode_iter->second;
-        const Grid grid=hgrid[location];
-        if(grid.dimension()!=mode.dimension()) {
-            ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::set_grid(hybrid_grid)",
-                          "Mode "<<mode._location<<" has dimension "<<mode.dimension()<<" which differs from the dimension of "<<grid<<"\n");
-        }
-        mode._grid_ptr=shared_ptr<Grid>(new Grid(hgrid[mode._location]));
-    }
 }
 
 
@@ -298,34 +247,29 @@ MonolithicHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent
 
 
 
-Grid
-MonolithicHybridAutomaton::grid(DiscreteLocation location) const
+RealSpace
+MonolithicHybridAutomaton::continuous_state_space(DiscreteLocation location) const
 {
-    ARIADNE_ASSERT(this->has_mode(location));
-    const Mode& mode=this->mode(location);
-    return Grid(mode.dimension());
+    List<String> names;
+    uint dimension = this->mode(location).dimension();
+    for(uint i=0; i!=dimension; ++i) {
+        std::stringstream ss;
+        ss << "x" << i;
+        String name = ss.str();
+        names.append(name);
+    }
+    return RealSpace(names);
 }
 
-HybridGrid
-MonolithicHybridAutomaton::grid() const
-{
-    HybridGrid result;
-    for(Map<DiscreteLocation,Mode>::const_iterator mode_iter=this->_modes.begin();
-        mode_iter!=this->_modes.end(); ++mode_iter)
-    {
-        result.insert(mode_iter->first,*mode_iter->second._grid_ptr);
-    }
-    return result;
-}
 
 HybridSpace
 MonolithicHybridAutomaton::state_space() const
 {
-    HybridSpace result;
+    MonolithicHybridSpace result;
     for(Map<DiscreteLocation,Mode>::const_iterator mode_iter=this->_modes.begin();
         mode_iter!=this->_modes.end(); ++mode_iter)
     {
-        result.insert(mode_iter->first,mode_iter->second.dimension());
+        result.new_location(mode_iter->first,continuous_state_space(mode_iter->first));
     }
     return result;
 }

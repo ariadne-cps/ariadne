@@ -83,12 +83,12 @@ TestHybridSet::test_hybrid_grid_set()
     // Test compilation without correctness
     Grid g;
     GridTreeSet gts;
-    HybridGrid hg;
-    HybridGridTreeSet hgts;
+    MonolithicHybridSpace hspc;
     DiscreteLocation loc;
+    HybridGrid hg(hspc);
+    HybridGridTreeSet hgts(hg);
     Figure fig;
     hg.has_location(loc);
-    hg.insert(loc,g);
     g=hg[loc];
     
     hgts.has_location(loc);

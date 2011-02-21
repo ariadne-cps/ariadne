@@ -22,6 +22,7 @@
  */
 
 #include <map>
+#include <boost/weak_ptr.hpp>
 
 #include "macros.h"
 #include "stlio.h"
@@ -30,8 +31,7 @@
 #include "space.h"
 #include "function.h"
 #include "hybrid_time.h"
-#include "hybrid_set.h"
-#include "grid_set.h"
+#include "hybrid_space.h"
 
 #include "hybrid_automaton-composite.h"
 
@@ -331,28 +331,6 @@ AtomicHybridAutomaton::new_transition(AtomicDiscreteLocation source,
 
 
 
-void
-AtomicHybridAutomaton::set_grid(AtomicDiscreteLocation location,
-                                const Grid& grid)
-{
-    ARIADNE_DEPRECATED("AtomicHybridAutomaton::set_grid(...)","Use RealVariable::set_resolution(...) instead.");
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-void
-AtomicHybridAutomaton::set_grid(const Grid& grid)
-{
-    ARIADNE_DEPRECATED("AtomicHybridAutomaton::set_grid(...)","Use RealVariable::set_resolution(...) instead.");
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-void
-AtomicHybridAutomaton::set_grid(const HybridGrid& hgrid)
-{
-    ARIADNE_DEPRECATED("AtomicHybridAutomaton::set_grid(...)","Use RealVariable::set_resolution(...) instead.");
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
 
 
 
@@ -648,6 +626,20 @@ AtomicHybridAutomaton::guard_predicate(AtomicDiscreteLocation source, DiscreteEv
 
 
 
+class CompositeHybridSpace
+    : public HybridSpaceInterface
+{
+  public:
+    ~CompositeHybridSpace() { _system_ptr = 0; }
+    CompositeHybridSpace(const CompositeHybridAutomaton& ha) : _system_ptr(&ha) { }
+    virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
+    virtual bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
+    virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
+    virtual std::ostream& write(std::ostream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+  private:
+    const CompositeHybridAutomaton* _system_ptr;
+};
+
 
 CompositeHybridAutomaton::CompositeHybridAutomaton()
     : _components() { }
@@ -772,6 +764,16 @@ CompositeHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) c
 uint
 CompositeHybridAutomaton::dimension(DiscreteLocation location) const {
     return this->state_variables(location).size();
+}
+
+HybridSpace
+CompositeHybridAutomaton::state_space() const {
+    return new CompositeHybridSpace(*this);
+}
+
+RealSpace
+CompositeHybridAutomaton::continuous_state_space(DiscreteLocation location) const {
+    return RealSpace(this->state_variables(location));
 }
 
 List<RealVariable>
@@ -956,18 +958,6 @@ CompositeHybridAutomaton::permissive_events(DiscreteLocation location) const
     return result;
 }
 
-
-Grid
-CompositeHybridAutomaton::grid(DiscreteLocation location) const
-{
-    return Grid(this->state_variables(location).size());
-}
-
-HybridGrid
-CompositeHybridAutomaton::grid() const
-{
-    return HybridGrid(*this);
-}
 
 std::ostream&
 CompositeHybridAutomaton::write(std::ostream& os) const

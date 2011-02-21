@@ -88,7 +88,7 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomatonInterface& sys,
                                          const HybridTime& time,
                                          const int accuracy) const
 {
-    HybridGrid grid=sys.grid();
+    HybridGrid grid=set.grid();
     HybridGridTreeSet result(grid);
     HybridGridTreeSet cells=set;
     cells.mince(accuracy);
@@ -105,7 +105,7 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomatonInterface& sys,
                                           const HybridTime& time,
                                           const int accuracy) const
 {
-    HybridGrid grid=sys.grid();
+    HybridGrid grid=set.grid();
     HybridGridTreeSet result(grid); HybridGridTreeSet cells=set; cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
         ARIADNE_LOG(5,"Evolving cell = "<<*iter<<"\n");
@@ -123,7 +123,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomatonInterface& 
                                                 const int accuracy) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::_upper_reach_evolve(...)\n");
-    HybridGrid grid=sys.grid();
+    HybridGrid grid=set.grid();
     std::pair<HybridGridTreeSet,HybridGridTreeSet> result=make_pair(HybridGridTreeSet(grid),HybridGridTreeSet(grid));
     HybridGridTreeSet& reach=result.first; HybridGridTreeSet& evolve=result.second;
     HybridGridTreeSet cells=set; cells.mince(accuracy);
@@ -151,6 +151,12 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomatonInterface& 
     return result;
 }
 
+HybridGrid
+HybridReachabilityAnalyser::
+_hybrid_grid(const Sys& sys) const
+{
+    return HybridGrid(sys.state_space(),HybridScaling());
+}
 
 
 
@@ -163,8 +169,8 @@ lower_evolve(const SystemType& system,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_evolve(...)\n");
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
-    HybridGrid grid=system.grid();
-    HybridGridTreeSet initial(system.grid()); HybridGridTreeSet final(system.grid());
+    HybridGrid grid=this->_hybrid_grid(system);
+    HybridGridTreeSet initial(grid); HybridGridTreeSet final(grid);
 
     // Improve accuracy of initial set for lower computations
     initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
@@ -191,8 +197,8 @@ lower_reach(const SystemType& system,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach(...)\n");
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
-    HybridGrid grid=system.grid();
-    HybridGridTreeSet initial(system.grid()); HybridGridTreeSet reach(system.grid());
+    HybridGrid grid=this->_hybrid_grid(system);
+    HybridGridTreeSet initial(grid); HybridGridTreeSet reach(grid);
 
     ARIADNE_LOG(3,"Adjoining initial set to the grid...\n");
     // Improve accuracy of initial set for lower computations
@@ -222,7 +228,7 @@ lower_reach_evolve(const SystemType& system,
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
 
-    HybridGrid grid=system.grid();
+    HybridGrid grid=this->_hybrid_grid(system);
 
     HybridGridTreeSet initial(grid);
 
@@ -250,7 +256,7 @@ upper_evolve(const SystemType& system,
              const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
-    HybridGrid grid=system.grid();
+    HybridGrid grid=this->_hybrid_grid(system);
     HybridGridTreeSet evolve = *new HybridGridTreeSet(grid);
     int grid_depth = this->_parameters->maximum_grid_depth;
     evolve.adjoin_outer_approximation(initial_set,grid_depth);
@@ -288,7 +294,7 @@ upper_reach(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
-    HybridGrid grid=system.grid();
+    HybridGrid grid=this->_hybrid_grid(system);
     HybridGridTreeSet evolve(grid);
     int grid_depth = this->_parameters->maximum_grid_depth;
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
@@ -341,7 +347,7 @@ upper_reach_evolve(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
-    HybridGrid grid=system.grid();
+    HybridGrid grid=this->_hybrid_grid(system);
     HybridGridTreeSet evolve(grid);
     int grid_depth = this->_parameters->maximum_grid_depth;
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
@@ -404,8 +410,7 @@ chain_reach(const SystemType& system,
 
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
-    HybridGrid grid=system.grid();
-
+    HybridGrid grid=this->_hybrid_grid(system);
     HybridGridTreeSet evolve(grid);
     evolve.adjoin_outer_approximation(initial_set,maximum_grid_depth);
     ARIADNE_LOG(5,"initial_size="<<evolve.size()<<"\n");
@@ -458,7 +463,7 @@ chain_reach(const SystemType& system,
     ARIADNE_LOG(5,"bounding_domain="<<bounding_domain<<"\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
-    HybridGrid grid=system.grid();
+    HybridGrid grid=this->_hybrid_grid(system);
     //HybridGridTreeSet bounding; bounding.adjoin_inner_approximation(bounding_domain,maximum_grid_depth);
     HybridGridTreeSet bounding(grid);
     bounding.adjoin_outer_approximation(bounding_domain,maximum_grid_depth); bounding.recombine();

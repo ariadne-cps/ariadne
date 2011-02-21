@@ -227,7 +227,7 @@ void export_formula()
 
     class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
-    real_space_class.def("variable", &RealSpace::variable, return_value_policy<reference_existing_object>());
+    real_space_class.def("variable", &RealSpace::variable);
     real_space_class.def("index", &RealSpace::index);
     real_space_class.def(self_ns::str(self));
 

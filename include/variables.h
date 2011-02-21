@@ -36,6 +36,7 @@
 #include "macros.h"
 #include "pointer.h"
 #include "container.h"
+#include "tribool.h"
 
 namespace Ariadne {
 
@@ -126,8 +127,8 @@ class UntypedVariable {
 };
 
 template<class T> inline VariableType variable_type() { ARIADNE_FAIL_MSG("Unknown variable type"); }
-template<> inline VariableType variable_type<bool>() { return type_bool; }
-template<> inline VariableType variable_type<tribool>() { return type_tribool; }
+template<> inline VariableType variable_type<Boolean>() { return type_bool; }
+template<> inline VariableType variable_type<Tribool>() { return type_tribool; }
 template<> inline VariableType variable_type<String>() { return type_string; }
 template<> inline VariableType variable_type<Integer>() { return type_integer; }
 template<> inline VariableType variable_type<Real>() { return type_real; }
@@ -176,15 +177,12 @@ template<> class Variable<Real>
     : public ExtendedVariable<Real>
 {
     typedef Real T;
-    double _resolution;
   public:
-    explicit Variable(const String& nm) : ExtendedVariable<T>(nm), _resolution(1.0) { }
+    explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
     inline Assignment< Variable<T>, Expression<T> > operator=(const double& e) const;
     inline Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
     inline Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
     inline Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
-    void set_resolution(double dx) { assert(dx>0.0); this->_resolution=dx; }
-    double resolution() const { return this->_resolution; }
 };
 
 

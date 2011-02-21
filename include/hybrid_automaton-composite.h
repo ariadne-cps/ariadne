@@ -48,13 +48,10 @@ namespace Ariadne {
 class HybridTime;
 class HybridSpace;
 class HybridSet;
-class HybridGrid;
 
 class AtomicDiscreteMode;
 class AtomicDiscreteTransition;
 class AtomicHybridAutomaton;
-
-class Grid;
 
 
 //! \related AtomicHybridAutomaton
@@ -341,16 +338,6 @@ class AtomicHybridAutomaton
                         AtomicDiscreteLocation target,
                         const ContinuousPredicate& guard);
 
-
-    //! \brief Set the grid controlling relative scaling in the mode. \deprecated
-    void set_grid(AtomicDiscreteLocation location, const Grid& grid);
-
-    //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode. \deprecated
-    void set_grid(const Grid& grid);
-
-    //! \brief Set the hybrid grid controlling relative scaling. \deprecated
-    void set_grid(const HybridGrid& hgrid);
-
     //@}
 
     //@{
@@ -492,7 +479,11 @@ class CompositeHybridAutomaton
     //! \brief Tests if the automaton has a transition corresponding to the given location and event.
     bool has_transition(DiscreteLocation, DiscreteEvent) const;
 
-    //! \brief The dimension of the state spacec in the given \a location.
+    //! \brief The hybrid state space.
+    HybridSpace state_space() const;
+    //! \brief The continuous state space in the given \a location.
+    RealSpace continuous_state_space(DiscreteLocation location) const;
+    //! \brief The dimension of the state space in the given \a location.
     uint dimension(DiscreteLocation location) const;
 
     //! \brief The set of all events possible in the given \a location.
@@ -547,9 +538,6 @@ class CompositeHybridAutomaton
     RealScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
     RealScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
     RealScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
-
-    Grid grid(DiscreteLocation) const;
-    HybridGrid grid() const;
 
     //@{
     //! \name Methods for checking the validity of the automaton.

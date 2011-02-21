@@ -24,7 +24,6 @@
 #include <utility>
 
 #include "orbit.h"
-#include "hybrid_orbit.h"
 
 #include "box.h"
 #include "point.h"
@@ -32,9 +31,7 @@
 #include "taylor_set.h"
 #include "function_set.h"
 #include "list_set.h"
-#include "hybrid_set.h"
-
-#include "hybrid_time.h"
+#include "grid_set.h"
 
 namespace Ariadne {
 
@@ -47,42 +44,6 @@ void
 Orbit<Point>::insert(Time t, const Point& pt)
 {
     this->_curve->insert(t,pt);
-}
-
-
-Orbit<HybridPoint>::Orbit(const HybridPoint& pt)
-    : _curves(new std::vector<HybridInterpolatedCurve>(1u,make_pair(pt.first,InterpolatedCurve(pt.second))))
-{ }
-
-uint
-Orbit<HybridPoint>::size() const
-{
-    return this->_curves->size();
-}
-
-const InterpolatedCurve&
-Orbit<HybridPoint>::curve(uint m) const
-{
-    return (*this->_curves)[m].second;
-}
-
-void
-Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
-{
-    ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
-    if(this->size()==(uint)ht.discrete_time()) {
-        this->_curves->push_back(make_pair(hpt.location(),InterpolatedCurve(hpt.continuous_state_set())));
-    } else {
-        (*this->_curves)[ht.discrete_time()].second.insert(ht.continuous_time(),hpt.continuous_state_set());
-    }
-}
-
-
-template<>
-std::ostream&
-operator<<(std::ostream& os, const Orbit< HybridPoint >& orb)
-{
-    return os << orb.curves();
 }
 
 
@@ -148,72 +109,6 @@ final() const
 
 
 
-struct Orbit<HybridGridCell>::Data {
-    Data(const HybridGrid& grid)
-        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    HybridGridTreeSet initial;
-    HybridGridTreeSet reach;
-    HybridGridTreeSet intermediate;
-    HybridGridTreeSet final;
-};
-
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreeSet& initial_set)
-    : _data(new Data(initial_set.grid()))
-{
-    this->_data->initial=initial_set;
-}
-
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreeSet& initial_set,
-      const HybridGridTreeSet& reach_set,
-      const HybridGridTreeSet& intermediate_set,
-      const HybridGridTreeSet& final_set)
-    : _data(new Data(initial_set.grid()))
-{
-    this->_data->initial=initial_set;
-    this->_data->reach=reach_set;
-    this->_data->intermediate=intermediate_set;
-    this->_data->final=final_set;
-}
-
-HybridGridTreeSet const&
-Orbit<HybridGridCell>::
-initial() const
-{
-    return this->_data->initial;
-}
-
-HybridGridTreeSet const&
-Orbit<HybridGridCell>::
-reach() const
-{
-    return this->_data->reach;
-}
-
-HybridGridTreeSet const&
-Orbit<HybridGridCell>::
-intermediate() const
-{
-    return this->_data->intermediate;
-}
-
-HybridGridTreeSet const&
-Orbit<HybridGridCell>::
-final() const
-{
-    return this->_data->final;
-}
-
-
-
-
-void draw(CanvasInterface& graphic, const Orbit<HybridPoint>& orbit)
-{
-    for(uint i=0; i<=orbit.size(); ++i) {
-        orbit.curve(i).draw(graphic);
-    }
-}
 
 
 } // namespace Ariadne

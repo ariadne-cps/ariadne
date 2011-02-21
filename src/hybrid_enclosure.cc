@@ -64,7 +64,7 @@ std::string str(const EnclosureVariableType& evt) {
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
 List<String> variable_names(const List<EnclosureVariableType>& vt) {
-    Map<EnclosureVariableType,uint> counts;
+    std::map<EnclosureVariableType,uint> counts;
     List<String> result;
     for(uint i=0; i!=vt.size(); ++i) {
         result.append( str(vt[i]) + str(counts[vt[i]]++) );
@@ -672,6 +672,7 @@ draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
 ListSet<HybridEnclosure::ContinuousStateSetType>
 ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
 {
+    std::cerr<<"ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc)\n";
     ListSet<HybridEnclosure::ContinuousStateSetType> result;
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->location()==loc) {

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_discretised_evolution.cc
+ *            test_hybrid_discretiser.cc
  *
- *  Copyright  2006-8  Pieter Collins
+ *  Copyright  2006-11  Pieter Collins
  *
  ****************************************************************************/
 
@@ -32,26 +32,21 @@
 #include "list_set.h"
 #include "grid_set.h"
 #include "integrator.h"
-#include "map_evolver.h"
-#include "vector_field_evolver.h"
 #include "hybrid_evolver.h"
-#include "orbit.h"
 #include "hybrid_time.h"
+#include "hybrid_space.h"
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
 #include "hybrid_orbit.h"
 #include "hybrid_discretiser.h"
+
 #include "graphics.h"
-
-#include "models.h"
-
 #include "logging.h"
 
 #include "test.h"
 
 using namespace Ariadne;
 using namespace std;
-using Models::VanDerPol;
 
 class TestHybridDiscretiser
 {
@@ -138,6 +133,7 @@ void TestHybridDiscretiser::test_hybrid_time() const
 
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
+    std::cerr<<HybridEnclosure(hybrid_initial_set)<<"\n\n";
     // evolver.verbosity=1;
     Orbit<EnclosureType> evolve_orbit
         = evolver.orbit(ha,EnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
@@ -146,7 +142,7 @@ void TestHybridDiscretiser::test_hybrid_time() const
     ARIADNE_TEST_PRINT(evolve_orbit);
 
     cout << "Extracting grid... " << flush;
-    HybridGrid hagrid=ha.grid();
+    HybridGrid hagrid(ha.state_space());
     cout << "done." << endl;
 
     // Compute the reachable sets
@@ -196,11 +192,9 @@ void TestHybridDiscretiser::test_hybrid_time() const
         fig.write("test_hybrid_discretiser");
     }
 
-    ARIADNE_TEST_PRINT(evolve_orbit.reach()[location4]);
-    ARIADNE_TEST_PRINT(discrete_orbit.reach()[location4]);
-    
-
     cout << "done." << endl;
 
+    ARIADNE_TEST_PRINT(evolve_orbit.reach()[location4]);
+    ARIADNE_TEST_PRINT(discrete_orbit.reach()[location4]);
 }
 

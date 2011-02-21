@@ -46,12 +46,9 @@ namespace Ariadne {
 
 class HybridTime;
 class HybridSpace;
-class HybridSet;
-class HybridGrid;
 
 class MonolithicHybridAutomaton;
 
-class Grid;
 
 
 /*
@@ -75,8 +72,6 @@ class DiscreteMode {
     // The discrete mode's invariants.
     Map< DiscreteEvent, Pair<EventKind,RealScalarFunction> _invariants;
 
-    // The discrete mode's grid for reachability analysis.
-    boost::shared_ptr< const Grid > _grid;
   public:
     //! \brief The mode's discrete state.
     DiscreteLocation location() const {
@@ -92,10 +87,6 @@ class DiscreteMode {
 
     const RealScalarFunction& invariant(const DiscreteEvent& event) const {
         return this->_invariants.find(event)->second; }
-
-    //! \brief The discrete mode's default spacial grid.
-    const Grid& grid() const {
-        return *this->_grid; }
 
     //! \brief The dimension of the discrete mode.
     uint dimension() const;
@@ -179,7 +170,6 @@ class MonolithicHybridAutomaton
         RealVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;
         Map< DiscreteEvent, Transition >  _transitions;
-        boost::shared_ptr< const Grid > _grid_ptr;
         uint dimension() const { return _dynamic.result_size(); }
     };
     friend std::ostream& operator<<(std::ostream&, const MonolithicHybridAutomaton&);
@@ -246,14 +236,6 @@ class MonolithicHybridAutomaton
                         RealScalarFunction guard,
                         EventKind kind);
 
-    //! \brief Set the grid controlling relative scaling in the mode.
-    void set_grid(DiscreteLocation location, const Grid& grid);
-
-    //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode.
-    void set_grid(const Grid& grid);
-
-    //! \brief Set the hybrid grid controlling relative scaling.
-    void set_grid(const HybridGrid& hgrid);
     //@}
 
     //@{
@@ -292,20 +274,6 @@ class MonolithicHybridAutomaton
     //! \brief The dynamic valid in the mode \a location.
     virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
-    //! \brief The natural grid to use in the \a location.
-    virtual Grid grid(DiscreteLocation location) const;
-
-    //! \brief A hybrid grid, comprising a Grid for each (reachable) location of the automaton. (Deprecated)
-    //! \deprecated Only used to support current reachability analysis routines.
-    virtual HybridGrid grid() const;
-
-    //! \brief A hybrid space, comprising a dimension for each (reachable) location of the automaton. (Deprecated)
-    //! \deprecated Only used to support current reachability analysis routines.
-    HybridSpace state_space() const;
-
-    //! \brief The set of all locations.
-    Set<DiscreteLocation> locations() const;
-
     //! \brief The discrete mode for the given \a location.
     const Mode& mode(DiscreteLocation source) const;
 
@@ -314,6 +282,17 @@ class MonolithicHybridAutomaton
 
     //! \brief The discrete transition with given \a source location and \a event.
     const Transition& transition(DiscreteLocation source, DiscreteEvent event) const;
+
+    //! \brief The set of all locations.
+    Set<DiscreteLocation> locations() const;
+
+    //! \brief A hybrid space, comprising a continuous space for each (reachable) location of the automaton.
+    virtual HybridSpace state_space() const;
+
+    //! \brief The continuous state space in the given \a location.
+    virtual RealSpace continuous_state_space(DiscreteLocation location) const;
+
+
     //@}
 
 };

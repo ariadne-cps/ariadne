@@ -21,40 +21,117 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "hybrid_space.h"
+#include "hybrid_time.h"
 #include "hybrid_set.h"
+#include "hybrid_orbit.h"
 #include "hybrid_automaton_interface.h"
 
 namespace Ariadne {
 
-HybridGrid::HybridGrid() : _grids(), _system_ptr(0) { }
 
-HybridGrid::HybridGrid(const HybridAutomatonInterface& ha) : _grids(),  _system_ptr(&ha) { }
 
-HybridGrid::HybridGrid(const HybridSpace& hs) : _grids(), _system_ptr(0)  {
-    for(HybridSpace::const_iterator iter=hs.begin(); iter!=hs.end(); ++iter) {
-        this->_grids.insert(iter->first,Grid(iter->second));
+Orbit<HybridPoint>::Orbit(const HybridPoint& pt)
+    : _curves(new std::vector<HybridInterpolatedCurve>(1u,make_pair(pt.first,InterpolatedCurve(pt.second))))
+{ }
+
+uint
+Orbit<HybridPoint>::size() const
+{
+    return this->_curves->size();
+}
+
+const InterpolatedCurve&
+Orbit<HybridPoint>::curve(uint m) const
+{
+    return (*this->_curves)[m].second;
+}
+
+void
+Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
+{
+    ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
+    if(this->size()==(uint)ht.discrete_time()) {
+        this->_curves->push_back(make_pair(hpt.location(),InterpolatedCurve(hpt.continuous_state_set())));
+    } else {
+        (*this->_curves)[ht.discrete_time()].second.insert(ht.continuous_time(),hpt.continuous_state_set());
     }
 }
 
-void HybridGrid::insert(DiscreteLocation q, const Grid& g) {
-    this->_grids.insert(q,g);
+
+template<>
+std::ostream&
+operator<<(std::ostream& os, const Orbit< HybridPoint >& orb)
+{
+    return os << orb.curves();
 }
 
-void HybridGrid::insert(const std::pair<DiscreteLocation,Grid>& qg) {
-    this->_grids.insert(qg);
+
+struct Orbit<HybridGridCell>::Data {
+    Data(const HybridGrid& grid)
+        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    HybridGridTreeSet initial;
+    HybridGridTreeSet reach;
+    HybridGridTreeSet intermediate;
+    HybridGridTreeSet final;
+};
+
+Orbit<HybridGridCell>::
+Orbit(const HybridGridTreeSet& initial_set)
+    : _data(new Data(initial_set.grid()))
+{
+    this->_data->initial=initial_set;
 }
 
-Grid HybridGrid::operator[](const DiscreteLocation& q) const {
-    if(this->_grids.has_key(q)) { return this->_grids[q]; }
-    if(_system_ptr!=0) { this->_grids.insert(q,_system_ptr->grid(q)); return this->_grids[q]; }
-
-    ARIADNE_THROW(std::runtime_error,"HybridGrid::operator[](DiscreteLocation)",
-                  "No location "<<q<<" in grid.");
+Orbit<HybridGridCell>::
+Orbit(const HybridGridTreeSet& initial_set,
+      const HybridGridTreeSet& reach_set,
+      const HybridGridTreeSet& intermediate_set,
+      const HybridGridTreeSet& final_set)
+    : _data(new Data(initial_set.grid()))
+{
+    this->_data->initial=initial_set;
+    this->_data->reach=reach_set;
+    this->_data->intermediate=intermediate_set;
+    this->_data->final=final_set;
 }
 
-bool HybridGrid::has_location(const DiscreteLocation& q) const {
-    return this->_grids.has_key(q);
+HybridGridTreeSet const&
+Orbit<HybridGridCell>::
+initial() const
+{
+    return this->_data->initial;
 }
 
+HybridGridTreeSet const&
+Orbit<HybridGridCell>::
+reach() const
+{
+    return this->_data->reach;
+}
+
+HybridGridTreeSet const&
+Orbit<HybridGridCell>::
+intermediate() const
+{
+    return this->_data->intermediate;
+}
+
+HybridGridTreeSet const&
+Orbit<HybridGridCell>::
+final() const
+{
+    return this->_data->final;
+}
+
+
+
+
+void draw(CanvasInterface& graphic, const Orbit<HybridPoint>& orbit)
+{
+    for(uint i=0; i<=orbit.size(); ++i) {
+        orbit.curve(i).draw(graphic);
+    }
+}
 
 } // namespace Ariadne

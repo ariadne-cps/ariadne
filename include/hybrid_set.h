@@ -44,6 +44,8 @@
 #include "curve.h"
 
 #include "hybrid_set_interface.h"
+#include "hybrid_space.h"
+#include "hybrid_grid.h"
 #include "point.h"
 #include "box.h"
 
@@ -61,65 +63,9 @@ class HybridConstraintSet;
 template<class HBS> class HybridBasicSetExpression { };
 template<class HDS> class HybridDenotableSetExpression { };
 
-//! \ingroup HybridModule
-//! \brief A hybrid space \f$\bigsqcup_{q\in Q} \R^{d_q}\f$ with discrete states \f$Q\f$.
-class HybridSpace
-    : public Map<DiscreteLocation,uint>
-{
-  public:
-    //! \brief The interface satisified by bounded sets in the space.
-    typedef HybridBoundedSetInterface BoundedSetInterfaceType;
-    //! \brief The interface satisified by overt sets in the space.
-    typedef HybridOvertSetInterface OvertSetInterfaceType;
-    //! \brief The interface satisified by over sets in the space.
-    typedef HybridOpenSetInterface OpenSetInterfaceType;
-    //! \brief The interface satisified by closed sets in the space.
-    typedef HybridClosedSetInterface ClosedSetInterfaceType;
-    //! \brief The interface satisified by compact sets in the space.
-    typedef HybridCompactSetInterface CompactSetInterfaceType;
-    //! \brief The interface satisified by regular sets in the space.
-    typedef HybridRegularSetInterface RegularSetInterfaceType;
-    //! \brief The interface satisified by located sets in the space.
-    typedef HybridLocatedSetInterface LocatedSetInterfaceType;
-    //! \brief The type of approximations to sets in the space.
-    typedef HybridGridTreeSet SetApproximationType;
-
-    typedef Map<DiscreteLocation,uint>::const_iterator
-    locations_const_iterator;
-
-    HybridSpace() : Map<DiscreteLocation,uint>() { }
-    template<class SET> HybridSpace(const Map<DiscreteLocation,SET>& qsmap) {
-        for(typename std::map<DiscreteLocation,SET>::const_iterator loc_iter
-                =qsmap.begin(); loc_iter!=qsmap.end(); ++loc_iter) {
-            this->insert(make_pair(loc_iter->first,loc_iter->second.dimension())); }
-    }
-    template<class HSET> HybridSpace(const HSET& set) {
-        for(typename HSET::locations_const_iterator loc_iter
-                =set.locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
-            this->insert(make_pair(loc_iter->first,loc_iter->second.dimension())); }
-    }
-
-    locations_const_iterator locations_begin() const {
-        return this->Map<DiscreteLocation,uint>::begin(); }
-    locations_const_iterator locations_end() const {
-        return this->Map<DiscreteLocation,uint>::end(); }
-};
 
 template<class SET> struct is_basic_set { };
 
-
-inline
-HybridBoxes
-bounding_boxes(const std::map<DiscreteLocation,uint> space, Interval bound)
-{
-    HybridBoxes result;
-    for(std::map<DiscreteLocation,uint>::const_iterator loc_iter=space.begin();
-        loc_iter!=space.end(); ++loc_iter)
-        {
-            result.insert(make_pair(loc_iter->first,Box(loc_iter->second, bound)));
-        }
-    return result;
-}
 
 
 template<class BS>
@@ -163,7 +109,7 @@ class HybridSetConstIterator
 
 //! A set comprising an ImageSet in each location.
 class HybridImageSet
-    : public std::map<DiscreteLocation,ImageSet>
+    : public Map<DiscreteLocation,ImageSet>
     , public HybridLocatedSetInterface
 {
   public:
@@ -180,8 +126,9 @@ class HybridImageSet
 
     using std::map<DiscreteLocation,ImageSet>::insert;
 
+    virtual Set<DiscreteLocation> locations() const { return this->Map<DiscreteLocation,ImageSet>::keys(); }
     virtual HybridImageSet* clone() const { return new HybridImageSet(*this); }
-    virtual HybridSpace space() const { return HybridSpace(*this); }
+    virtual HybridSpace space() const { ARIADNE_NOT_IMPLEMENTED; }
     virtual ImageSet& operator[](DiscreteLocation q) {
         return this->std::map<DiscreteLocation,ImageSet>::operator[](q); }
     virtual ImageSet const& operator[](DiscreteLocation q) const {
@@ -225,7 +172,7 @@ class HybridConstraintSet
 //! A set comprising a %ListSet in each location.
 template<class ES>
 class HybridListSet
-    : public std::map<DiscreteLocation,ListSet<ES> >
+    : public Map<DiscreteLocation,ListSet<ES> >
 {
   public:
     typedef typename std::map< DiscreteLocation,ListSet<ES> >::iterator locations_iterator;
@@ -313,40 +260,6 @@ operator<<(std::ostream& os,
 
 class HybridAutomatonInterface;
 
-//! \ingroup HybridModule
-//! \brief A grid in a hybrid space
-class HybridGrid
-{
-    mutable Map<DiscreteLocation,Grid> _grids;
-    // NOTE: The use of the system is to allow the "Grid" of a compositional
-    // hybrid automaton to be computed on-the-fly since it might not be
-    // feasible to compute the reachable states.
-    // TODO: There should be a better way of doing this, but this might
-    // involve changing the HybridReachabilityAnalyser or HybridDiscretiser code.
-    const HybridAutomatonInterface* _system_ptr;
-  public:
-    //!
-    HybridGrid();
-    //!
-    HybridGrid(const HybridAutomatonInterface& ha);
-    //!
-    HybridGrid(const HybridSpace& hs);
-    //!
-    void insert(DiscreteLocation q, const Grid& g);
-    //!
-    void insert(const std::pair<DiscreteLocation,Grid>& qg);
-    //!
-    Grid operator[](const DiscreteLocation& loc) const;
-    //!
-    bool has_location(const DiscreteLocation& q) const;
-
-    //!
-    friend inline std::ostream&
-    operator<<(std::ostream& os, const HybridGrid& hgrid) {
-        return os << "HybridGrid(" << hgrid._grids << ")"; }
-};
-
-
 
 
 class HybridGridCell
@@ -388,6 +301,7 @@ void adjoin_denotable_set(HDS1& hds1, const HDS2 hds2) {
 //! A set comprising a %GridTreeSet in each location.
 class HybridGridTreeSet
 {
+  public:
     HybridGrid _hgrid;
     Map<DiscreteLocation,GridTreeSet> _map;
   public:
@@ -408,17 +322,16 @@ class HybridGridTreeSet
     //!
     const_iterator end() const { return const_iterator(this->_map,true); }
   public:
-    //! Default constructor (Deprecated)
-    HybridGridTreeSet() { }
-
     //! Construct from a grid.
     HybridGridTreeSet(const HybridGrid& hgrid) : _hgrid(hgrid), _map() { }
 
     //!
     HybridGrid grid() const { return this->_hgrid; }
 
-    //!
-    bool has_location(DiscreteLocation q) const { return _map.has_key(q); }
+    //! Test if \a q is a location of the set i.e. corresponds to a valid location of the underlying hybrid space.
+    bool has_location(DiscreteLocation q) const { return _hgrid.has_location(q); }
+    //! Test if \a q is a nontrivial location of the set i.e. contained in the map of <DiscreteLocation,GridTreeSet> pairs.
+    bool nontrivial_location(DiscreteLocation q) const { return _map.has_key(q); }
 
     //!
     void insert(DiscreteLocation q, const GridTreeSet& gts) {
@@ -470,18 +383,19 @@ class HybridGridTreeSet
 
     //!
     void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const int height, const int depth) {
-        HybridSpace hspc=hs.space();
-        for(HybridSpace::const_iterator loc_iter=hspc.begin();
-                loc_iter!=hspc.end(); ++loc_iter) {
-            DiscreteLocation loc=loc_iter->first;
+        Set<DiscreteLocation> hlocs=dynamic_cast<const HybridBoundedSetInterface&>(hs).locations();
+        for(Set<DiscreteLocation>::const_iterator loc_iter=hlocs.begin();
+                loc_iter!=hlocs.end(); ++loc_iter) {
+            DiscreteLocation loc=*loc_iter;
             this->_provide_location(loc).adjoin_lower_approximation(hs[loc],height,depth); } }
 
     //!
     void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const int depth) {
-        HybridSpace hspc=hs.space();
-        for(HybridSpace::const_iterator loc_iter=hspc.begin();
-                loc_iter!=hspc.end(); ++loc_iter) {
-            this->_provide_location(loc_iter->first).adjoin_outer_approximation(hs[loc_iter->first],depth); } }
+        Set<DiscreteLocation> hlocs=hs.locations();
+        for(Set<DiscreteLocation>::const_iterator loc_iter=hlocs.begin();
+                loc_iter!=hlocs.end(); ++loc_iter) {
+            DiscreteLocation loc=*loc_iter;
+            this->_provide_location(loc).adjoin_outer_approximation(hs[loc],depth); } }
 
     //!
     void adjoin_outer_approximation(const HybridBoxes& hbxs, const int depth) {
@@ -501,7 +415,7 @@ class HybridGridTreeSet
     //!
     const GridTreeSet& operator[](DiscreteLocation q) const {
         ARIADNE_ASSERT_MSG(this->has_location(q),"q="<<q);
-        return this->_map.find(q)->second;
+        return const_cast<HybridGridTreeSet*>(this)->_provide_location(q);
     }
 
     //!
@@ -545,7 +459,7 @@ class HybridGridTreeSet
     HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
 
     //!
-    HybridSpace space() const { return HybridSpace(*this); }
+    HybridSpace space() const { return this->grid().space(); }
 
     //!
     bool disjoint(const HybridBox& hbx) const {

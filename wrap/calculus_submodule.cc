@@ -146,10 +146,21 @@ Interval _range1(const IntervalTaylorModel&);
 Interval _range2(const IntervalTaylorModel&);
 Interval _range3(const IntervalTaylorModel&);
 
+std::ostream& operator<<(std::ostream& os, const Sweeper& swp) { return os << static_cast<const SweeperInterface&>(swp); }
 
 } // namespace Ariadne
 
+Sweeper make_threshold_sweeper(double x) { return new ThresholdSweeper(x); }
+Sweeper make_graded_sweeper(uint n) { return new GradedSweeper(n); }
 
+void export_sweeper()
+{
+    class_<Sweeper> sweeper_class("Sweeper", init<Sweeper>());
+    def("ThresholdSweeper", &make_threshold_sweeper );
+    def("GradedSweeper", &make_graded_sweeper );
+    sweeper_class.def(self_ns::str(self));
+
+}
 
 void export_taylor_model()
 {
@@ -169,6 +180,8 @@ void export_taylor_model()
     typedef Polynomial<Interval> IP;
     typedef RealScalarFunction FI;
 
+
+
     class_< ExpansionValue<Float> > expansion_value_class("ExpansionValue", init<MultiIndex,Float>());
     // TODO: Add get/set for data
     // TODO: Use property for key
@@ -187,6 +200,7 @@ void export_taylor_model()
     taylor_model_class.def("range", &IntervalTaylorModel::range);
     taylor_model_class.def("set_sweeper", &IntervalTaylorModel::set_sweeper);
     taylor_model_class.def("sweeper", &IntervalTaylorModel::sweeper);
+    taylor_model_class.def("sweep", (IntervalTaylorModel&(IntervalTaylorModel::*)()) &IntervalTaylorModel::sweep, return_value_policy<reference_existing_object>());
     taylor_model_class.def("__getitem__", &__getitem__<IntervalTaylorModel,MultiIndex,Float>);
     taylor_model_class.def("__setitem__",&__setitem__<IntervalTaylorModel,MultiIndex,Float>);
     taylor_model_class.def("__setitem__",&__setitem__<IntervalTaylorModel,MultiIndex,double>);
@@ -293,6 +307,9 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("range", &ScalarTaylorFunction::range);
     scalar_taylor_function_class.def("model", (const IntervalTaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("number_of_nonzeros", (uint(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::number_of_nonzeros);
+    scalar_taylor_function_class.def("set_sweeper", &ScalarTaylorFunction::set_sweeper);
+    scalar_taylor_function_class.def("sweeper", &ScalarTaylorFunction::sweeper);
+    scalar_taylor_function_class.def("sweep", (ScalarTaylorFunction&(ScalarTaylorFunction::*)()) &ScalarTaylorFunction::sweep, return_value_policy<reference_existing_object>());
     scalar_taylor_function_class.def("__getitem__", &__getitem__<ScalarTaylorFunction,MultiIndex,Float>);
     scalar_taylor_function_class.def("__setitem__",&__setitem__<ScalarTaylorFunction,MultiIndex,Float>);
     scalar_taylor_function_class.def(+self);
@@ -443,6 +460,7 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("clobber", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::clobber,return_value_policy<reference_existing_object>());
     vector_taylor_function_class.def("set_sweeper",&VectorTaylorFunction::set_sweeper);
     vector_taylor_function_class.def("sweeper",&VectorTaylorFunction::sweeper);
+    vector_taylor_function_class.def("sweep", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::sweep, return_value_policy<reference_existing_object>());
     //vector_taylor_function_class.def("__getslice__", &__getslice__<VectorTaylorFunction,Nat,Nat,ScalarTaylorFunction>);
     vector_taylor_function_class.def("__getslice__", (VectorTaylorFunction(*)(const VectorTaylorFunction&,int,int))&__getslice__);
     vector_taylor_function_class.def("__getitem__", &__getitem__<VectorTaylorFunction,uint,ScalarTaylorFunction>);
@@ -519,6 +537,7 @@ void export_vector_taylor_function()
 
 void calculus_submodule()
 {
+    export_sweeper();
     export_taylor_model();
     export_scalar_taylor_function();
     export_vector_taylor_function();

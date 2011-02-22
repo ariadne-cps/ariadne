@@ -36,6 +36,7 @@
 #include "vector.h"
 #include "multi_index.h"
 #include "expansion.h"
+#include "sweeper.h"
 #include "algebra_mixin.h"
 
 namespace Ariadne {
@@ -76,67 +77,6 @@ struct IntersectionException : public std::runtime_error {
 };
 
 
-
-class SweeperInterface {
-  public:
-    virtual void sweep(Expansion<Float>& p, Float& e) const;
-    virtual bool discard(const MultiIndex& a, const Float& x) const = 0;
-  private:
-    virtual void write(std::ostream& os) const;
-    friend std::ostream& operator<<(std::ostream& os, const SweeperInterface& swp) { swp.write(os); return os; }
-};
-
-class Sweeper {
-  public:
-    Sweeper();
-    inline Sweeper(shared_ptr<const SweeperInterface> p) : _ptr(p) { }
-    inline Sweeper(const SweeperInterface* p) : _ptr(p) { }
-    inline void sweep(Expansion<Float>& p, Float& e) const { this->_ptr->sweep(p,e); }
-    inline bool discard(const MultiIndex& a, const Float& x) const { return this->_ptr->discard(a,x); }
-    inline operator const SweeperInterface& () const { return *_ptr; }
-    inline shared_ptr<const SweeperInterface> operator& () { return _ptr; }
-  private:
-    shared_ptr<const SweeperInterface> _ptr;
-};
-
-class ThresholdSweeper : public SweeperInterface {
-    double _sweep_threshold;
-  public:
-    ThresholdSweeper(double sweep_threshold) : _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0.0); }
-    Float sweep_threshold() const { return _sweep_threshold; }
-    virtual void sweep(Expansion<Float>& p, Float& e) const;
-    virtual bool discard(const MultiIndex& a, const Float& x) const;
-  private:
-    virtual void write(std::ostream& os) const;
-  private:
-    inline bool _discard(const MultiIndex& a, const Float& x) const;
-};
-
-class TrivialSweeper : public SweeperInterface {
-  public:
-    virtual void sweep(Expansion<Float>& p, Float& e) const { }
-    virtual bool discard(const MultiIndex& a, const Float& x) const { return true; }
-  private:
-    virtual void write(std::ostream& os) const { os << "TrivialSweeper"; }
-};
-
-class AffineSweeper : public SweeperInterface {
-  public:
-    virtual bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>1; }
-  private:
-    virtual void write(std::ostream& os) const { os << "AffineSweeper"; }
-};
-
-class GradedSweeper : public SweeperInterface {
-  public:
-    GradedSweeper(uint degree) : _degree(degree) { }
-    uint degree() const { return this->_degree; }
-    virtual bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>this->_degree; }
-  private:
-    virtual void write(std::ostream& os) const { os << "GradedSweeper( degree="<<this->_degree<<" )"; }
-  private:
-    uint _degree;
-};
 
 
 

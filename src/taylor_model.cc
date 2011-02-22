@@ -59,63 +59,6 @@ const double ec=em/2;
 
 static boost::shared_ptr<const SweeperInterface> default_sweeper(new ThresholdSweeper(std::numeric_limits<float>::epsilon()));
 
-inline bool ThresholdSweeper::_discard(const MultiIndex& a, const Float& x) const { return abs(x)<this->_sweep_threshold; }
-bool ThresholdSweeper::discard(const MultiIndex& a, const Float& x) const { return this->_discard(a,x); }
-
-Sweeper::Sweeper() : _ptr(new ThresholdSweeper(std::numeric_limits<float>::epsilon())) { }
-
-void SweeperInterface::sweep(Expansion<Float>& p, Float& e) const
-{
-    Expansion<Float>::const_iterator end=p.end();
-    Expansion<Float>::const_iterator adv=p.begin();
-    Expansion<Float>::iterator curr=p.begin();
-    set_rounding_upward();
-    Float te=0.0;
-    while(adv!=end) {
-        if(this->discard(adv->key(),adv->data())) {
-            te+=abs(adv->data());
-        } else {
-            *curr=*adv;
-            ++curr;
-        }
-        ++adv;
-    }
-    e+=te;
-    p.resize(curr-p.begin());
-    set_rounding_to_nearest();
-}
-
-void SweeperInterface::write(std::ostream& os) const
-{
-    os << "UnknownSweeper( )";
-}
-
-void ThresholdSweeper::sweep(Expansion<Float>& p, Float& e) const
-{
-    Expansion<Float>::const_iterator end=p.end();
-    Expansion<Float>::const_iterator adv=p.begin();
-    Expansion<Float>::iterator curr=p.begin();
-    set_rounding_upward();
-    Float te=0.0;
-    while(adv!=end) {
-        if(this->_discard(adv->key(),adv->data())) {
-            te+=abs(adv->data());
-        } else {
-            *curr=*adv;
-            ++curr;
-        }
-        ++adv;
-    }
-    e+=te;
-    p.resize(curr-p.begin());
-    set_rounding_to_nearest();
-}
-
-void ThresholdSweeper::write(std::ostream& os) const
-{
-    os << "ThresholdSweeper( tolerance=" << this->_sweep_threshold << " )";
-}
-
 
 /*
 

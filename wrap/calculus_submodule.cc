@@ -146,8 +146,6 @@ Interval _range1(const IntervalTaylorModel&);
 Interval _range2(const IntervalTaylorModel&);
 Interval _range3(const IntervalTaylorModel&);
 
-std::ostream& operator<<(std::ostream& os, const Sweeper& swp) { return os << static_cast<const SweeperInterface&>(swp); }
-
 } // namespace Ariadne
 
 Sweeper make_threshold_sweeper(double x) { return new ThresholdSweeper(x); }

@@ -117,7 +117,6 @@ class MonolithicHybridSpace
         return iter->second; }
 
     Set<DiscreteLocation> locations() const { return this->_locations.keys(); }
-
     const_iterator begin() const { return this->_locations.begin(); }
     const_iterator end() const { return this->_locations.end(); }
 

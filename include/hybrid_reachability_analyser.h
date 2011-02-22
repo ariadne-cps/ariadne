@@ -39,6 +39,7 @@
 #include "orbit.h"
 #include "hybrid_orbit.h"
 #include "grid_set.h"
+#include "hybrid_grid.h"
 #include "hybrid_set.h"
 
 #include "hybrid_discretiser.h"
@@ -75,6 +76,7 @@ class HybridReachabilityAnalyser
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
     boost::shared_ptr< DiscretiserInterface<HybridAutomatonInterface,HybridGridCell> > _discretiser;
+    boost::shared_ptr< HybridScalingInterface > _scaling;
   public:
     typedef DiscreteEvolutionParameters EvolutionParametersType;
     typedef HybridAutomatonInterface SystemType;
@@ -113,6 +115,8 @@ class HybridReachabilityAnalyser
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
     /*! \brief A reference to the parameters controlling the accuracy. */
     EvolutionParametersType& parameters() { return *this->_parameters; }
+    //! \brief Set the length scales for the variables in each locations.
+    void set_scaling(const HybridScalingInterface& hsc);
     //@}
 
 
@@ -197,6 +201,7 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType())
     , _discretiser(new HybridDiscretiser<HybridEnclosureType>(evolver))
+    , _scaling(new HybridScaling)
 {
 }
 
@@ -207,6 +212,7 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
                            const EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType(parameters))
     , _discretiser(new HybridDiscretiser<HybridEnclosureType>(evolver))
+    , _scaling(new HybridScaling)
 {
 }
 
@@ -214,4 +220,4 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
 } // namespace Ariadne
 
 
-#endif // ARIADNE_REACHABILITY_ANALYSER_H
+#endif // ARIADNE_HYBRID_REACHABILITY_ANALYSER_H

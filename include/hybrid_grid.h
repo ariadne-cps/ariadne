@@ -48,7 +48,8 @@ class HybridScalingInterface
 {
   public:
     //!
-    virtual Grid grid(const DiscreteLocation& loc, const RealSpace& spc) const = 0;
+    virtual HybridScalingInterface* clone() const = 0;
+    virtual Float scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
     virtual std::ostream& write(std::ostream& os) const = 0;
     friend std::ostream& operator<<(std::ostream& os, const HybridScalingInterface& hsc) { return hsc.write(os); }
 };
@@ -59,22 +60,13 @@ class HybridScaling
     Map<String,Float> _scalings;
   public:
     HybridScaling() : _scalings() { }
-    virtual Grid grid(const DiscreteLocation& loc, const RealSpace& spc) const;
+    HybridScaling(const HybridScalingInterface& hsc) : _scalings(dynamic_cast<const HybridScaling&>(hsc)._scalings) { }
+    void set_scaling(const RealVariable& var, Float res) { ARIADNE_ASSERT(res>0.0); _scalings[var.name()]=res; }
+    virtual HybridScaling* clone() const { return new HybridScaling(*this); }
+    virtual Float scaling(const DiscreteLocation& loc, const RealVariable& var) const {
+        return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : Float(1.0); }
     virtual std::ostream& write(std::ostream& os) const { return os << "HybridScaling( " << this->_scalings << " )"; }
 };
-
-inline Grid
-HybridScaling::grid(const DiscreteLocation& loc, const RealSpace& spc) const
-{
-    FloatVector lengths(spc.dimension(),1.0);
-    for(uint i=0; i!=lengths.size(); ++i) {
-        if(this->_scalings.has_key(spc[i].name())) {
-            lengths[i] = this->_scalings[spc[i].name()];
-        }
-    }
-    return Grid(lengths);
-}
-
 
 
 
@@ -85,33 +77,39 @@ class HybridGrid
     // NOTE: The use of the system is to allow the "Grid" of a compositional
     // hybrid automaton to be computed on-the-fly since it might not be
     // feasible to compute the reachable states.
-    // TODO: There should be a better way of doing this, but this might
-    // involve changing the HybridReachabilityAnalyser or HybridDiscretiser code.
     HybridSpace _space;
-    shared_ptr<const HybridScalingInterface> _scaling_ptr;
+    HybridScaling _scaling;
   public:
     //! Test whether the grid has location \a q.
     bool has_location(const DiscreteLocation& q) const {
         return this->_space.has_location(q); }
     //! The grid in location \a loc.
-    Grid operator[](const DiscreteLocation& loc) const {
-        return this->_scaling_ptr->grid(loc,this->_space.operator[](loc)); }
+    Grid operator[](const DiscreteLocation& loc) const;
+    //! The underlying hybrid space.
     const HybridSpace& space() const { return this->_space; }
   public:
     //! The grid corresponding to unit resolution on each dimension.
-    HybridGrid(const HybridSpace& hsp) : _space(hsp), _scaling_ptr(new HybridScaling()) { }
-    //!
+    HybridGrid(const HybridSpace& hsp) : _space(hsp), _scaling(HybridScaling()) { }
+    //! The grid corresponding to scaling each variable in each location according to the policy \a hsc.
     HybridGrid(const HybridSpace& hsp, const HybridScaling& hsc)
-        : _space(hsp)
-        , _scaling_ptr(new HybridScaling(hsc)) { }
+        : _space(hsp), _scaling(hsc) { }
 
     //!
     friend inline std::ostream&
     operator<<(std::ostream& os, const HybridGrid& hgrid) {
-        return os << "HybridGrid( space="<<hgrid._space << ", scalings=" << *hgrid._scaling_ptr << " )"; }
+        return os << "HybridGrid( space="<<hgrid._space << ", scalings=" << hgrid._scaling << " )"; }
 };
 
-
+inline
+Grid HybridGrid::operator[](const DiscreteLocation& loc) const
+{
+    RealSpace continuous_space = this->_space[loc];
+    FloatVector lengths(continuous_space.size());
+    for(uint i=0; i!=continuous_space.size(); ++i) {
+        lengths[i] = this->_scaling.scaling(loc,continuous_space.variable(i));
+    }
+    return Grid(lengths);
+}
 
 
 }

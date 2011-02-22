@@ -86,6 +86,20 @@ outer_approximation(const ListSet< HybridBasicSet<TaylorConstrainedImageSet> >& 
 }
 
 
+template<class HES>
+HybridDiscretiser<HES>::
+HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
+    : _evolver_ptr(evolver.clone()), _scaling_ptr(new HybridScaling)
+{
+}
+
+template<class HES>
+void
+HybridDiscretiser<HES>::
+set_scaling(const HybridScalingInterface& scaling)
+{
+    this->_scaling_ptr=shared_ptr<HybridScalingInterface>(scaling.clone());
+}
 
 
 template<class HES>
@@ -100,7 +114,7 @@ evolution(const SystemType& system,
     ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
     EnclosureType enclosure=this->_enclosure(initial_set);
     ARIADNE_LOG(4,"enclosure"<<enclosure<<"\n");
-    Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,semantics);
+    Orbit<EnclosureType> continuous_orbit=this->_evolver_ptr->orbit(system,enclosure,time,semantics);
     ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\n");
     HybridGrid hgrid=this->_hybrid_grid(system);
@@ -121,7 +135,7 @@ reach(const SystemType& system,
             const AccuracyType accuracy,
             const Semantics semantics) const
 {
-    return this->_discretise(this->_evolver->reach(system,this->_enclosure(initial_set),time,semantics),
+    return this->_discretise(this->_evolver_ptr->reach(system,this->_enclosure(initial_set),time,semantics),
                              initial_set,this->_hybrid_grid(system),accuracy);
 }
 
@@ -135,7 +149,7 @@ evolve(const SystemType& system,
              const Semantics semantics) const
 {
     EnclosureType initial_enclosure=this->_enclosure(initial_set);
-    ListSet<EnclosureType> final_enclosures=this->_evolver->evolve(system,initial_enclosure,time,semantics);
+    ListSet<EnclosureType> final_enclosures=this->_evolver_ptr->evolve(system,initial_enclosure,time,semantics);
     HybridGrid grid=this->_hybrid_grid(system);
     return this->_discretise(final_enclosures,initial_set,grid,accuracy);
 }
@@ -227,7 +241,7 @@ HybridGrid
 HybridDiscretiser<HES>::
 _hybrid_grid(const SystemType& system) const
 {
-    return HybridGrid(system.state_space(),HybridScaling());
+    return HybridGrid(system.state_space(),*this->_scaling_ptr);
 }
 
 

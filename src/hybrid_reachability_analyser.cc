@@ -73,7 +73,21 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const DiscretiserInterface<HybridAutomatonInterface,HybridGridCell>& discretiser)
     : _parameters(new EvolutionParametersType())
     , _discretiser(discretiser.clone())
+    , _scaling(new HybridScaling())
 {
+}
+
+
+
+void
+HybridReachabilityAnalyser::
+set_scaling(const HybridScalingInterface& scaling)
+{
+    HybridDiscretiser<HybridEnclosure>* _discretiser_ptr = dynamic_cast<HybridDiscretiser<HybridEnclosure>*>(this->_discretiser.operator->());
+    if(_discretiser_ptr) {
+        _discretiser_ptr->set_scaling(scaling);
+    }
+    this->_scaling=shared_ptr<HybridScalingInterface>(scaling.clone());
 }
 
 

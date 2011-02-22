@@ -34,6 +34,7 @@
 #include "evolver_interface.h"
 #include "discretiser_interface.h"
 #include "hybrid_automaton_interface.h"
+#include "hybrid_grid.h"
 #include "vector_field.h"
 
 #include "logging.h"
@@ -50,6 +51,7 @@ class HybridAutomatonInterface;
 class DiscreteLocation;
 template<class BS> class HybridBasicSet;
 
+class HybridScalingInterface;
 class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
@@ -74,19 +76,21 @@ class HybridDiscretiser
     typedef ES ContinuousEnclosureType;
     typedef HES EnclosureType;
   private:
-    boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver;
+    boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver_ptr;
+    boost::shared_ptr< HybridScalingInterface > _scaling_ptr;
   public:
     //@{
     //! \name Constructors and destructors
 
     //! \brief Construct from evolution parameters and a method for evolving basic sets,
     //!  and a scheme for approximating sets.
-    HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
-        : _evolver(evolver.clone()) { }
+    HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver);
 
     //! \brief Make a dynamically-allocated copy.
     HybridDiscretiser<HES>* clone() const { return new HybridDiscretiser<HES>(*this); }
 
+    //! \brief Set the length scales for the variables in each locations.
+    void set_scaling(const HybridScalingInterface& hsc);
     //@}
 
     //@{

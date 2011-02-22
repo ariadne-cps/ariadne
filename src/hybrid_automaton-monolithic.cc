@@ -39,8 +39,8 @@ class HybridSet {};
 
 
 
-MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealVectorFunction f)
-    : _location(q), _dynamic(f)
+MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealSpace s, RealVectorFunction f)
+    : _location(q), _variable_names(s.variable_names()), _dynamic(f)
 {
 }
 
@@ -66,6 +66,21 @@ void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                                     RealVectorFunction dynamic)
 {
+    List<String> names;
+    for(uint i=0; i!=dynamic.result_size(); ++i) {
+        std::stringstream ss;
+        ss << "x" << i;
+        names.append(ss.str());
+    }
+    this->new_mode(location,RealSpace(names),dynamic);
+}
+
+
+void
+MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
+                                    RealSpace space,
+                                    RealVectorFunction dynamic)
+{
     if(this->has_mode(location)) {
         ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
                       "The hybrid automaton already has a mode with location label "<<location<<"\n");
@@ -73,9 +88,13 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
     if(dynamic.result_size()!=dynamic.argument_size()) {
         ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
             "The dynamic has argument size " << dynamic.argument_size()
-                << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
+                << " and result size "<<dynamic.result_size()<<", so does not define a vector field.");
     }
-    this->_modes.insert(location,Mode(location,dynamic));
+    if(space.size()!=dynamic.result_size()) {
+        ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,space,dynamic)",
+                      "The number of variables in the state space "<<space<<" does not match the number of variables defined by the dynamic "<<dynamic<<"\n");
+    }
+    this->_modes.insert(location,Mode(location,space,dynamic));
 }
 
 
@@ -250,15 +269,7 @@ MonolithicHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent
 RealSpace
 MonolithicHybridAutomaton::continuous_state_space(DiscreteLocation location) const
 {
-    List<String> names;
-    uint dimension = this->mode(location).dimension();
-    for(uint i=0; i!=dimension; ++i) {
-        std::stringstream ss;
-        ss << "x" << i;
-        String name = ss.str();
-        names.append(name);
-    }
-    return RealSpace(names);
+    return this->mode(location)._variable_names;
 }
 
 

@@ -165,8 +165,9 @@ class MonolithicHybridAutomaton
         EventKind _kind;
     };
     struct Mode {
-        Mode(DiscreteLocation q, RealVectorFunction f);
+        Mode(DiscreteLocation q, RealSpace s, RealVectorFunction f);
         DiscreteLocation _location;
+        List<String> _variable_names;
         RealVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;
         Map< DiscreteEvent, Transition >  _transitions;
@@ -204,6 +205,15 @@ class MonolithicHybridAutomaton
     //!   \param state is the mode's discrete state.
     //!   \param dynamic is the mode's vector field.
     void new_mode(DiscreteLocation state,
+                  RealVectorFunction dynamic);
+
+    //! \brief Adds a discrete mode to the automaton.
+    //!
+    //!   \param state is the mode's discrete state.
+    //!   \param space is a list of state variables.
+    //!   \param dynamic is the mode's vector field.
+    void new_mode(DiscreteLocation state,
+                  RealSpace space,
                   RealVectorFunction dynamic);
 
     //! \brief Adds an invariant to a mode of the automaton.

@@ -85,10 +85,8 @@ class TestHybridReachabilityAnalyser
 
         Grid grid(2);
         HybridEvolverType evolver(parameters);
-        EvolverInterface<HybridAutomatonInterface,HybridEnclosureType>& evolver_interface
-            =evolver;
         //HybridDiscretiser<EnclosureType> discretiser(evolver);
-        HybridReachabilityAnalyser analyser(parameters,evolver_interface);
+        HybridReachabilityAnalyser analyser(parameters,evolver);
         cout << "Done building analyser\n";
         return analyser;
     }
@@ -98,7 +96,7 @@ class TestHybridReachabilityAnalyser
           system(),
           grid(2),
           bound(-4,4),
-          reach_time(4.0,3)
+          reach_time(3.0,4)
     {
         cout << "Done initialising variables\n";
         std::cout<<std::setprecision(20);
@@ -112,7 +110,8 @@ class TestHybridReachabilityAnalyser
         system.new_mode(location,aff);
         cout << "Done building system\n";
 
-        ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
+        //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
+        ImageSet initial_box(make_box("[2.01,2.02]x[0.01,0.02]"));
         initial_set[location]=initial_box;
         cout << "Done creating initial set\n" << endl;
 
@@ -125,6 +124,7 @@ class TestHybridReachabilityAnalyser
 
     template<class S> void plot(const char* name, const Box& bounding_box, const S& set) {
         Figure g;
+        g.set_bounding_box(bounding_box);
         g << fill_colour(white) << bounding_box << line_style(true);
         g << fill_colour(blue) << set;
         g.write(name);
@@ -132,6 +132,7 @@ class TestHybridReachabilityAnalyser
 
     template<class S, class IS> void plot(const char* name, const Box& bounding_box, const S& set, const IS& initial_set) {
         Figure g;
+        g.set_bounding_box(bounding_box);
         g << fill_colour(white) << bounding_box;
         g << line_style(true);
         g << fill_colour(red) << set;
@@ -143,6 +144,7 @@ class TestHybridReachabilityAnalyser
     template<class ES, class RS, class IS> void plot(const char* name, const Box& bounding_box,
                                                      const ES& evolve_set, const RS& reach_set, const IS& initial_set) {
         Figure g;
+        g.set_bounding_box(bounding_box);
         g << fill_colour(white) << bounding_box;
         g << line_style(true);
         g << fill_colour(green) << reach_set;
@@ -209,9 +211,7 @@ class TestHybridReachabilityAnalyser
 
 int main(int nargs, const char* args[])
 {
-    std::cerr<<"SKIPPED "; return 1u;
     TestHybridReachabilityAnalyser().test();
-    if(ARIADNE_TEST_SKIPPED) { cerr << "INCOMPLETE "; }
     return ARIADNE_TEST_FAILURES;
 }
 

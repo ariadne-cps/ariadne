@@ -38,15 +38,12 @@
 #include "discretiser.h"
 #include "graphics.h"
 
-#include "models.h"
-
 #include "logging.h"
 
 #include "test.h"
 
 using namespace Ariadne;
 using namespace std;
-using Models::VanDerPol;
 
 class TestDiscretiser
 {
@@ -191,8 +188,9 @@ void TestDiscretiser::test_continuous_time() const
 
 
     // Set up the vector field
-    Float mu=0.865;
-    VectorUserFunction<VanDerPol> vdp(Vector<Float>(1,&mu));
+    Real mu=0.865; Vector<Real> p(1); p[0]=mu;
+    RealVectorFunction x=RealVectorFunction::identity(2);
+    RealVectorFunction vdp = ( x[1]+Real(0), p[0]*(1-x[0]*x[0])*x[1]-x[0] );
     cout << "vdp=" << vdp << endl;
     VectorField system(vdp);
 

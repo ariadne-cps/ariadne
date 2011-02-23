@@ -33,7 +33,6 @@
 #include "differential.h"
 #include "polynomial.h"
 #include "function.h"
-#include "models.h"
 
 #include "test.h"
 
@@ -47,7 +46,6 @@ ScalarTaylorFunction t(Vector<Interval> d, uint j,Sweeper swp) { return ScalarTa
 
 namespace Ariadne {
 std::pair<Float, Vector<Interval> > flow_bounds(RealVectorFunction const&,Vector<Interval> const&,Float const&);
-typedef VectorUserFunction<Henon> HenonFunction;
 }
 
 
@@ -325,7 +323,8 @@ void TestVectorTaylorFunction::test_constructors()
     expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
 
     Vector<Interval> domain(2,0.25,1.25,0.5,1.0);
-    HenonFunction henon_function(Vector<Float>(2,1.5,0.25));
+    RealVectorFunction x=RealVectorFunction::identity(2);
+    RealVectorFunction henon_function( (1.5-x[0]*x[0]+0.25*x[1], x[0]*1) );
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,henon_model,(domain,henon_function,swp));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
@@ -364,7 +363,8 @@ void TestVectorTaylorFunction::test_restrict()
 
 void TestVectorTaylorFunction::test_jacobian()
 {
-    HenonFunction henon(Vector<Float>(2,1.5,-0.25));
+    RealVectorFunction x=RealVectorFunction::identity(2);
+    RealVectorFunction henon( (1.5-x[0]*x[0]+0.25*x[1], x[0]*1) );
     Vector<Interval> domain1(2, -1.0,+1.0, -1.0,+1.0);
     Vector<Interval> domain2(2, -0.5,+0.5, -0.25,+0.25);
     Vector<Interval> domain3(2, -0.25,+0.75, 0.0,+0.50);

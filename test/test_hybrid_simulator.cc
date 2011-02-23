@@ -37,8 +37,6 @@
 #include "graphics.h"
 #include "logging.h"
 
-#include "models.h"
-
 #include "test.h"
 
 using namespace Ariadne;

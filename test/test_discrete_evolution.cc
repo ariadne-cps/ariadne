@@ -41,13 +41,10 @@
 #include "graphics.h"
 #include "logging.h"
 
-#include "models.h"
-
 #include "test.h"
 
 using namespace Ariadne;
 using namespace std;
-using Models::Henon;
 
 class TestMapEvolver
 {
@@ -84,13 +81,19 @@ void TestMapEvolver::test() const
 
     cout << "initial_box=" << initial_box << endl;
 
-    // Set up the vector field
-    Vector<Float> p(2); p[0]=1.5; p[1]=0.375;
-    VectorUserFunction<Henon> henon(p);
+    // Set up the map field
+    // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
+    Real a=1.5; Real b=0.375;
+    RealVectorFunction henon;
+    {
+        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
+        henon = ( a-x*x+b*y, x );
+    }
     cout << "henon_function=" << henon << endl;
-    cout << "henon_function.parameters()=" << henon.parameters() << endl;
 
     //VectorUserFunction evaluation sanity check
+    Vector<Float> p(2); p[0]=a; p[1]=b;
     Vector<Float> x(2); x[0]=0.5; x[1]=0.25;
     Vector<Float> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);

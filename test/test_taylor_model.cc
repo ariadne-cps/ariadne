@@ -30,7 +30,6 @@
 #include "taylor_model.h"
 #include "differential.h"
 #include "function.h"
-#include "models.h"
 
 #include "test.h"
 using std::cout; using std::cerr; using std::endl;

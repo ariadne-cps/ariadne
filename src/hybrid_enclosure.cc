@@ -47,6 +47,8 @@
 
 namespace Ariadne {
 
+inline Sweeper default_sweeper() { return Sweeper(); }
+
 std::string str(const EnclosureVariableType& evt) {
     switch (evt) {
         case INITIAL: return "x";
@@ -79,32 +81,32 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location(""), _events(), _set(), _time(ScalarIntervalFunction::constant(_set._domain,0.0)), _dwell_time(_time), _variables()
+    : _location(""), _events(), _set(), _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time), _variables()
 {
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box)
     : _location(location), _events(), _set(box),
-      _time(ScalarIntervalFunction::constant(_set._domain,0.0)), _dwell_time(_time),
+      _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time),
       _variables(box.dimension(),INITIAL)
 {
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set)
-    : _location(location), _events(), _set(set), _time(ScalarIntervalFunction::constant(_set._domain,0.0)), _dwell_time(_time),
+    : _location(location), _events(), _set(set), _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time),
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
 {
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set, const ScalarTaylorFunction& time)
     : _location(location), _events(), _set(set),
-      _time(Ariadne::restrict(time,set.domain())), _dwell_time(set.domain()),
+      _time(Ariadne::restrict(time,set.domain())), _dwell_time(set.domain(),time.sweeper()),
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
 {
 }
 
 HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>& hpair)
-    : _location(hpair.first), _events(), _set(hpair.second), _time(ScalarIntervalFunction::constant(_set._domain,0.0)), _dwell_time(_time),
+    : _location(hpair.first), _events(), _set(hpair.second), _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time),
       _variables(catenate(List<EnclosureVariableType>(_set.dimension(),INITIAL),List<EnclosureVariableType>(_set.number_of_parameters()-_set.dimension(),UNKNOWN)))
 {
 }
@@ -260,7 +262,7 @@ void HybridEnclosure::new_guard(DiscreteEvent event, RealScalarFunction constrai
 void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==parameter_domain().size(),
                        "constraint "<<constraint<<" is incompatible with parameter domain "<<parameter_domain());
-    ScalarIntervalFunction function(this->_set._domain,constraint.function());
+    ScalarIntervalFunction function(this->_set._domain,constraint.function(),this->space_function().sweeper());
     const Interval bounds=constraint.bounds();
     if(bounds.singleton()) {
         this->_set._equations.append(function-bounds.upper());
@@ -350,7 +352,7 @@ void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const 
     Interval time_domain=phi.domain()[phi.domain().size()-1];
     this->new_parameter(time_domain,TEMPORAL);
     const IntervalVector& new_domain=this->parameter_domain();
-    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u);
+    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u,default_sweeper());
     this->_time=this->_time+time_step_function;
     this->_dwell_time=this->_dwell_time+time_step_function;
     this->_set._function=unchecked_compose(phi,join(this->_set._function,time_step_function));
@@ -368,7 +370,7 @@ void HybridEnclosure::apply_full_reach_step(const VectorIntervalFunction& phi)
     Interval time_domain=phi.domain()[phi.domain().size()-1];
     this->new_parameter(time_domain,TEMPORAL);
     const IntervalVector& new_domain=this->parameter_domain();
-    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u);
+    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u,default_sweeper());
     this->_time=this->_time+time_step_function;
     this->_dwell_time=this->_dwell_time+time_step_function;
     this->_set._function=unchecked_compose(phi,join(this->_set._function,time_step_function));
@@ -383,7 +385,7 @@ void HybridEnclosure::bound_time(Real tmax) {
 }
 
 void HybridEnclosure::bound_time(RealScalarFunction tmax) {
-    this->_set._constraints.append(this->_time-ScalarIntervalFunction(this->_set._domain,tmax));
+    this->_set._constraints.append(this->_time-ScalarIntervalFunction(this->_set._domain,tmax,this->_time.sweeper()));
 }
 
 void HybridEnclosure::bound_time(ScalarIntervalFunction tmax) {
@@ -397,7 +399,7 @@ void HybridEnclosure::set_time(Real time)
 
 void HybridEnclosure::set_time(RealScalarFunction time)
 {
-    this->_set._equations.append(this->_time-ScalarIntervalFunction(this->_set._domain,time));
+    this->_set._equations.append(this->_time-ScalarIntervalFunction(this->_set._domain,time,this->_time.sweeper()));
 }
 
 
@@ -534,7 +536,7 @@ HybridEnclosure::kuhn_recondition()
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
     std::cerr<<"kept_parameters="<<kept_parameters<<"\n";
 
-    Vector<IntervalTaylorModel> new_models(models.size(),number_of_kept_parameters+number_of_error_parameters);
+    Vector<IntervalTaylorModel> new_models(models.size(),IntervalTaylorModel(number_of_kept_parameters+number_of_error_parameters,default_sweeper()));
     for(uint i=0; i!=this->dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }

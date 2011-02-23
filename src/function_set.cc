@@ -592,7 +592,7 @@ void constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, cons
         xg = Real(cnst) + xg;
 
         ARIADNE_LOG(6,"    xg="<<xg<<"\n");
-        ScalarTaylorFunction txg(d,xg);
+        ScalarTaylorFunction txg(d,xg,TrivialSweeper());
         ARIADNE_LOG(6,"    txg="<<txg.polynomial()<<"\n");
 
         xg=RealScalarFunction(txg.polynomial());

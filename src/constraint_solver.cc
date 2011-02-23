@@ -45,6 +45,7 @@
 
 namespace Ariadne {
 
+inline Sweeper default_sweeper() { return Sweeper(); }
 
 static const double error =  1e-2;
 
@@ -155,14 +156,14 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarTaylorFunction txg=ScalarTaylorFunction::constant(d,0);
+        ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
             txg = txg - Interval(x[j]-x[n+j])*tfn[j];
             cnst += (c[j].upper()*x[j]-c[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            txg = txg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i);
+            txg = txg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,default_sweeper());
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         txg = cnst + txg;
@@ -363,7 +364,7 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunction
 bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const IntervalVector& bounds,
                                        FloatVector centre, FloatVector multipliers) const
 {
-    ScalarTaylorFunction g(function.domain());
+    ScalarTaylorFunction g(function.domain(),default_sweeper());
     Interval C(0);
     for(uint i=0; i!=function.result_size(); ++i) {
         g += multipliers[i] * function[i];

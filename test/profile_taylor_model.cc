@@ -183,12 +183,13 @@ int main(int argc, const char* argv[]) {
     Vector<Float> c(2, 1.0,2.0);
     int i;
 
-    Vector<IntervalTaylorModel> v(2,IntervalTaylorModel(2));
-    v[0]=IntervalTaylorModel::variable(2,0);
-    v[1]=IntervalTaylorModel::constant(2,1.0);
+    TrivialSweeper trivial_sweeper;
+    Vector<IntervalTaylorModel> v(2,IntervalTaylorModel(2,trivial_sweeper));
+    v[0]=IntervalTaylorModel::variable(2,0,trivial_sweeper);
+    v[1]=IntervalTaylorModel::constant(2,1.0,trivial_sweeper);
 
     // Use in clean()
-    IntervalTaylorModel w(3);
+    IntervalTaylorModel w(3,trivial_sweeper);
     i=0;
     for(MultiIndex a(3); a.degree()<=9; ++a) {
         if(i%7<3) { w.expansion().append(a,1/(1.0+i*i*i*i*i)); }
@@ -196,13 +197,14 @@ int main(int argc, const char* argv[]) {
         ++i;
     }
     //w.set_maximum_degree(7);
-    w.set_sweeper(new ThresholdSweeper(1e-5));
+    ThresholdSweeper threshold_sweeper=ThresholdSweeper(1e-5);
+    w.set_sweeper(threshold_sweeper);
 
 
     Interval ivl(0.33,0.49);
     Float cnst=0.41;
-    IntervalTaylorModel x(3);
-    IntervalTaylorModel y(3);
+    IntervalTaylorModel x(3,threshold_sweeper);
+    IntervalTaylorModel y(3,threshold_sweeper);
 
     for(MultiIndex a(3); a.degree()<=7; ++a) {
         if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
@@ -214,9 +216,10 @@ int main(int argc, const char* argv[]) {
         ++i;
     }
     //y.set_maximum_degree(9);
-    y.set_sweeper(new ThresholdSweeper(1e-3));
+    threshold_sweeper = ThresholdSweeper(1e-3);
+    y.set_sweeper(threshold_sweeper);
 
-    IntervalTaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0);
+    IntervalTaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0,threshold_sweeper);
 
     std::cout << std::setw(20) << std::left << "name" << std::right
               << std::setw(11) << "time(us)"

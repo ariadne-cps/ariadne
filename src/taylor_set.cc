@@ -63,6 +63,8 @@
 
 namespace Ariadne {
 
+inline Sweeper default_sweeper() { return Sweeper(); }
+
 static const uint verbosity = 0u;
 
 DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
@@ -102,6 +104,10 @@ void TaylorConstrainedImageSet::_check() const {
     }
 }
 
+Sweeper TaylorConstrainedImageSet::sweeper() const {
+    return this->_function.sweeper();
+}
+
 // FIXME: What if solving for constraint leaves domain?
 void TaylorConstrainedImageSet::_solve_zero_constraints() {
     this->_check();
@@ -109,8 +115,8 @@ void TaylorConstrainedImageSet::_solve_zero_constraints() {
         const Vector<Interval>& domain=this->domain();
         const IntervalTaylorModel& model=iter->model();
         const uint k=model.argument_size()-1u;
-        IntervalTaylorModel zeroth_order(k);
-        IntervalTaylorModel first_order(k);
+        IntervalTaylorModel zeroth_order(k,this->sweeper());
+        IntervalTaylorModel first_order(k,this->sweeper());
         bool is_zeroth_order=true;
         bool is_first_order=true;
         MultiIndex r(k);
@@ -184,15 +190,15 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
     if(proper_coordinates.size()==0) { this->_domain=IntervalVector(1u,Interval(-1,+1)); }
 
 
-    this->_function=VectorTaylorFunction(box.dimension(),this->_domain);
+    this->_function=VectorTaylorFunction(box.dimension(),this->_domain,default_sweeper());
     uint j=0;
     proper_coordinates.append(box.dimension());
     for(uint i=0; i!=box.dimension(); ++i) {
         if(proper_coordinates[j]==i) {
-            this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j);
+            this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j,this->sweeper());
             ++j;
         } else {
-            this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i]);
+            this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i],this->sweeper());
         }
     }
     this->_reduced_domain=this->_domain;
@@ -320,7 +326,7 @@ void TaylorConstrainedImageSet::apply_map(VectorTaylorFunction map)
 void TaylorConstrainedImageSet::apply_flow(RealVectorFunction flow, Interval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time))));
+    this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time),this->sweeper())));
     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
@@ -333,14 +339,14 @@ void TaylorConstrainedImageSet::apply_flow(RealVectorFunction flow, Interval tim
 void TaylorConstrainedImageSet::apply_flow_step(VectorTaylorFunction flow, Float time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_function=compose(flow,join(this->_function,ScalarTaylorFunction::constant(this->_function.domain(),time)));
+    this->_function=compose(flow,join(this->_function,ScalarTaylorFunction::constant(this->_function.domain(),time,this->sweeper())));
     this->_check();
 }
 
 void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Interval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_function=compose(flow,combine(this->_function,ScalarTaylorFunction::identity(time)));
+    this->_function=compose(flow,combine(this->_function,ScalarTaylorFunction::identity(time,this->sweeper())));
     for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
@@ -386,7 +392,7 @@ void TaylorConstrainedImageSet::new_parameter_constraint(NonlinearConstraint con
 void TaylorConstrainedImageSet::new_negative_constraint(RealScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
-    this->_constraints.append(ScalarTaylorFunction(this->domain(),constraint));
+    this->_constraints.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
 }
 
 void TaylorConstrainedImageSet::new_negative_constraint(ScalarTaylorFunction constraint) {
@@ -398,13 +404,13 @@ void TaylorConstrainedImageSet::new_negative_constraint(ScalarTaylorFunction con
 void TaylorConstrainedImageSet::new_equality_constraint(RealScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
-    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
+    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
 }
 
 void TaylorConstrainedImageSet::new_zero_constraint(RealScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
-    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint));
+    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
 }
 
 void TaylorConstrainedImageSet::new_zero_constraint(ScalarTaylorFunction constraint) {
@@ -923,14 +929,14 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarTaylorFunction xg=ScalarTaylorFunction::constant(d,0);
+        ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,default_sweeper());
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j]);
+            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],default_sweeper());
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i);
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,default_sweeper());
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = (cnst) + xg;
@@ -1173,7 +1179,7 @@ void TaylorConstrainedImageSet::constraint_adjoin_outer_approximation_to(GridTre
     const Box& d=this->domain();
     const VectorTaylorFunction& f=this->function();
 
-    VectorTaylorFunction g(this->_constraints.size()+this->_equations.size(),d);
+    VectorTaylorFunction g(this->_constraints.size()+this->_equations.size(),d,this->sweeper());
     uint i=0;
     for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
         g.set(i,*citer);
@@ -1254,7 +1260,7 @@ void TaylorConstrainedImageSet::affine_adjoin_outer_approximation_to(GridTreeSet
 
     const double max_error=BASIC_ERROR/(1<<depth);
 
-    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain());
+    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain(),this->sweeper());
     for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_function[i]; }
     for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()]=this->_constraints[i]; }
     for(uint i=0; i!=this->_equations.size(); ++i) { fg[i+this->dimension()+this->_constraints.size()]=this->_equations[i]; }
@@ -1332,7 +1338,7 @@ recondition()
         Float error=this->_function[large_error_indices[i]].model().error();
         if(error > MAXIMUM_ERROR) {
             this->_function[i].set_error(0.0);
-            this->_function[i] = this->_function[i] + ScalarTaylorFunction::coordinate(this->_domain,k)*error;
+            this->_function[i] = this->_function[i] + ScalarTaylorFunction::coordinate(this->_domain,k,this->sweeper())*error;
             ++k;
         }
     }
@@ -1413,7 +1419,7 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
         return;
     }
 
-    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain());
+    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain(),this->sweeper());
     for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_function[i]; }
     for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()]=this->_constraints[i]; }
     for(uint i=0; i!=this->_equations.size(); ++i) { fg[i+this->dimension()+this->_constraints.size()]=this->_equations[i]; }
@@ -1698,7 +1704,7 @@ TaylorConstrainedImageSet::affine_over_approximation() const
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Interval& ivl) {
     typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
 
-    VectorTaylorFunction new_function=combine(set.taylor_function(),ScalarTaylorFunction::identity(ivl));
+    VectorTaylorFunction new_function=combine(set.taylor_function(),ScalarTaylorFunction::identity(ivl,default_sweeper()));
 
     TaylorConstrainedImageSet result(new_function);
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {

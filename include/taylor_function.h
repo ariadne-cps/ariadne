@@ -160,21 +160,15 @@ class ScalarTaylorFunction
     //! \brief Default constructor.
     explicit ScalarTaylorFunction();
     //! \brief Construct a ScalarTaylorFunction over the domain \a d.
-    explicit ScalarTaylorFunction(const DomainType& d);
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d.
+    //explicit ScalarTaylorFunction(const DomainType& d);
     explicit ScalarTaylorFunction(const DomainType& d, Sweeper swp);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<Interval>& m);
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d, with scaled power series expansion \a f and error \a e.
-    explicit ScalarTaylorFunction(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
+    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp);
 
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the expression \a f.
-    explicit ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f);
-    explicit ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f);
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the polynomial \a p.
-    explicit ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p);
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the interval polynomial \a p.
-    explicit ScalarTaylorFunction(const DomainType& d, const Polynomial<Interval>& p);
+    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.
+    explicit ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f, Sweeper swp);
+    explicit ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f, Sweeper swp);
     //@}
 
     //@{
@@ -191,29 +185,31 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Named constructors. */
-    //! \brief Construct the quantity \f$x_0\f$ over the one-dimensional domain \a d.
-    static ScalarTaylorFunction identity(const Interval& d);
+    //! \brief Construct the identity function over the one-dimensional domain \a d.
+    static ScalarTaylorFunction identity(const Interval& d, Sweeper swp);
+    //! \brief Construct a zero function over domain \a d.
+    static ScalarTaylorFunction zero(const DomainType& d, Sweeper swp);
     //! \brief Construct a constant quantity in \a as independent variables.
-    static ScalarTaylorFunction constant(const DomainType& d, const Interval& c);
-    template<class X> static ScalarTaylorFunction constant(const DomainType& d, const X& c) {
-        return constant(d,numeric_cast<Interval>(c)); }
+    static ScalarTaylorFunction constant(const DomainType& d, const Interval& c, Sweeper swp);
+    template<class X> static ScalarTaylorFunction constant(const DomainType& d, const X& c, Sweeper swp) {
+        return constant(d,numeric_cast<Interval>(c),swp); }
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static ScalarTaylorFunction coordinate(const DomainType& d, unsigned int j);
+    static ScalarTaylorFunction coordinate(const DomainType& d, unsigned int j, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d (Deprecated).
-    static ScalarTaylorFunction variable(const DomainType& d, unsigned int j);
+    static ScalarTaylorFunction variable(const DomainType& d, unsigned int j, Sweeper swp);
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
-    static ScalarTaylorFunction affine(const DomainType& d, const Float& c, const Vector<Float>& g);
+    static ScalarTaylorFunction affine(const DomainType& d, const Float& c, const Vector<Float>& g, Sweeper swp);
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d.
-    static ScalarTaylorFunction affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e) ;
+    static ScalarTaylorFunction affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e, Sweeper swp) ;
 
     //! \brief Return the vector of constants with values \a c over domain \a d.
-    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Float>& c);
+    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Float>& c, Sweeper swp);
     //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Interval>& c);
+    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Interval>& c, Sweeper swp);
     //! \brief Return the vector of variables with values \a x over domain \a d.
-    static Vector<ScalarTaylorFunction> variables(const DomainType& d);
+    static Vector<ScalarTaylorFunction> variables(const DomainType& d, Sweeper swp);
     //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
-    static Vector<ScalarTaylorFunction> variables(const DomainType& d, uint imin, uint imax);
+    static Vector<ScalarTaylorFunction> variables(const DomainType& d, uint imin, uint imax, Sweeper swp);
     //@}
 
     //@{
@@ -577,19 +573,21 @@ class VectorTaylorFunction
     explicit VectorTaylorFunction(unsigned int result_size);
 
     /*! \brief Construct from a result size and a domain. */
-    VectorTaylorFunction(unsigned int result_size, const Vector<Interval>& domain);
+    VectorTaylorFunction(unsigned int result_size, const Vector<Interval>& domain, Sweeper swp);
 
     /*! \brief Construct a vector function all of whose components are the same. */
     VectorTaylorFunction(unsigned int result_size, const ScalarTaylorFunction& scalar_function);
 
     /*! \brief Construct from a domain and the expansion. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Expansion<Float> >& expansion);
+                         const Vector< Expansion<Float> >& expansion,
+                         Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Expansion<Float> >& expansion,
-                   const Vector<Float>& error);
+                         const Vector< Expansion<Float> >& expansion,
+                         const Vector<Float>& error,
+                         Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
     explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector< TaylorModel<Interval> >& variables);
@@ -605,11 +603,11 @@ class VectorTaylorFunction
 
     /*! \brief Construct from a domain and a polynomial. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Polynomial<Float> >& polynomial);
+                         const Vector< Polynomial<Float> >& polynomial);
 
     /*! \brief Construct from a domain and a n interval polynomial. */
     VectorTaylorFunction(const Vector<Interval>& domain,
-                   const Vector< Polynomial<Interval> >& polynomial);
+                         const Vector< Polynomial<Interval> >& polynomial);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */
     explicit VectorTaylorFunction(const Vector<ScalarTaylorFunction>& components);
@@ -680,13 +678,13 @@ class VectorTaylorFunction
     VectorTaylorFunction& clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
-    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r);
+    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r, Sweeper swp);
     /*! \brief The constant Taylor model with result \a c and argument domain \a d. */
-    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c);
+    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c, Sweeper swp);
     /*! \brief The identity Taylor model on domain \a d. */
-    static VectorTaylorFunction identity(const Vector<Interval>& d);
+    static VectorTaylorFunction identity(const Vector<Interval>& d, Sweeper swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorTaylorFunction projection(const Vector<Interval>& d, uint imin, uint imax);
+    static VectorTaylorFunction projection(const Vector<Interval>& d, uint imin, uint imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<Interval> > polynomial() const;

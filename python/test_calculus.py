@@ -28,10 +28,12 @@ i=Interval(1.5,1.75)
 
 bx=Box([{1:3},{-1:2},{-3:3}])
 
-c=ScalarTaylorFunction.constant(bx,1.5)
-x=ScalarTaylorFunction.coordinate(bx,0)
-y=ScalarTaylorFunction.coordinate(bx,1)
-v=VectorTaylorFunction.identity(bx)
+swp = ThresholdSweeper(1e-8);
+
+c=ScalarTaylorFunction.constant(bx,1.5,swp)
+x=ScalarTaylorFunction.coordinate(bx,0,swp)
+y=ScalarTaylorFunction.coordinate(bx,1,swp)
+v=VectorTaylorFunction.identity(bx,swp)
 y=v[1]
 t=5+2*x+y
 

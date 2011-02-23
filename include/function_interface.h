@@ -47,6 +47,9 @@ template<class X> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 
+typedef Vector<Float> FloatVector;
+typedef Vector<Interval> IntervalVector;
+
 static const int SMOOTH=255;
 
 template<class X> class ScalarFunctionInterface;
@@ -321,9 +324,9 @@ template<class X> class FunctionFactoryInterface
     typedef Vector<Interval> DomainType;
   public:
     //! \brief Create a function which is identically zero on the given domain.
-    ScalarFunction<X> create_zero(const DomainType& domain) const { return this->_create_zero(domain); }
+    inline ScalarFunction<X> create_zero(const DomainType& domain) const;
     //! \brief Create a function which is the identity on the given domain.
-    VectorFunction<X> create_identity(const DomainType& domain) const { return this->_create_identity(domain); }
+    inline VectorFunction<X> create_identity(const DomainType& domain) const;
   private:
     //! \brief A dynamically-allocated pointer to the zero function in some function class.
     virtual ScalarFunctionInterface<X>* _create_zero(const DomainType& domain) const = 0;
@@ -335,8 +338,8 @@ template<> class FunctionFactoryInterface<Interval>
 {
     typedef Vector<Interval> DomainType;
   public:
-    //inline ScalarFunction<Interval> create_zero(const IntervalVector& domain) const { return this->_create_zero(domain); }
-    //inline VectorFunction<Interval> create_identity(const IntervalVector& domain) const { return this->_create_identity(domain); }
+    inline ScalarFunction<Interval> create_zero(const IntervalVector& domain) const;
+    inline VectorFunction<Interval> create_identity(const IntervalVector& domain) const;
   private:
     virtual ScalarFunctionInterface<Interval>* _create_zero(const DomainType& domain) const = 0;
     virtual VectorFunctionInterface<Interval>* _create_identity(const DomainType& domain) const = 0;
@@ -345,8 +348,8 @@ template<> class FunctionFactoryInterface<Interval>
 template<> class FunctionFactoryInterface<Real>
 {
   public:
-    //inline ScalarFunction<Interval> create_zero(const IntervalVector& domain) const { return this->_create_zero(domain); }
-    //inline VectorFunction<Interval> create_identity(const IntervalVector& domain) const { return this->_create_identity(domain); }
+    inline ScalarFunction<Real> create_zero(uint argument_size) const;
+    inline VectorFunction<Real> create_identity(uint argument_size) const;
   private:
     virtual ScalarFunctionInterface<Real>* _create_zero(uint argument_size) const = 0;
     virtual VectorFunctionInterface<Real>* _create_identity(uint argument_size) const = 0;

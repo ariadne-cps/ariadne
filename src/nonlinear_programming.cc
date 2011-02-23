@@ -40,6 +40,8 @@
 
 namespace Ariadne {
 
+inline Sweeper default_sweeper() { return Sweeper(); }
+
 static const double error =  1e-2;
 
 typedef Vector<Float> FloatVector;
@@ -506,8 +508,8 @@ is_infeasibility_certificate(IntervalVector d, IntervalVectorFunction g, Interva
     const uint m=d.size();
     const uint n=c.size();
     VectorTaylorFunction tg(d,g);
-    VectorTaylorFunction ti=VectorTaylorFunction::identity(d);
-    ScalarTaylorFunction ts(d);
+    VectorTaylorFunction ti=VectorTaylorFunction::identity(d,default_sweeper());
+    ScalarTaylorFunction ts(d,default_sweeper());
     for(uint i=0; i!=n; ++i) {
         ts+=lambda[i]*(tg[i]-c[i].upper())+lambda[i+n]*(c[i].lower()-tg[i]);
     }
@@ -1441,7 +1443,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
 
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g);
-    ScalarTaylorFunction tyg(D);
+    ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     Interval tygD = tyg(D);
 
@@ -1528,7 +1530,7 @@ validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVecto
 
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g);
-    ScalarTaylorFunction tyg(D);
+    ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     Interval tygD = tyg(D);
 

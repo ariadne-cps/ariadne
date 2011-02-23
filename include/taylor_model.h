@@ -115,14 +115,8 @@ class TaylorModel<Interval>
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
     TaylorModel<Interval>();
-    //! \brief Construct a TaylorModel<Interval> in \a as arguments.
-    TaylorModel<Interval>(uint as);
     //! \brief Construct a TaylorModel<Interval> in \a as arguments with the given accuracy control.
     TaylorModel<Interval>(uint as, Sweeper swp);
-    //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<Interval>(const std::map<MultiIndex,Float>& d, const Float& e);
-    //! \brief Construct from a map giving the expansion, and a constant giving the error.
-    TaylorModel<Interval>(const Expansion<Float>& f, const Float& e=0.0);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
     TaylorModel<Interval>(const Expansion<Float>& f, const Float& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
@@ -151,39 +145,42 @@ class TaylorModel<Interval>
     //@{
     /*! \name Named constructors. */
     //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorModel<Interval> zero(uint as) {
-        TaylorModel<Interval> r(as); return r; }
+    static TaylorModel<Interval> zero(uint as, Sweeper swp) {
+        TaylorModel<Interval> r(as,swp); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<Interval> constant(uint as, double c) {
-        return TaylorModel<Interval>::constant(as,Float(c)); }
+    static TaylorModel<Interval> constant(uint as, double c, Sweeper swp) {
+        return TaylorModel<Interval>::constant(as,Float(c),swp); }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<Interval> constant(uint as, const Float& c) {
-        TaylorModel<Interval> r(as); r.set_value(c); return r; }
+    static TaylorModel<Interval> constant(uint as, const Float& c, Sweeper swp) {
+        TaylorModel<Interval> r(as,swp); r.set_value(c); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<Interval> constant(uint as, const Interval& d) {
-        TaylorModel<Interval> r(as); r.set_value(1.0); r*=d; return r; }
+    static TaylorModel<Interval> constant(uint as, const Interval& d, Sweeper swp) {
+        TaylorModel<Interval> r(as,swp); r.set_value(1.0); r*=d; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel<Interval> variable(uint as, uint j) {
-        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); return r; }
+    static TaylorModel<Interval> variable(uint as, uint j, Sweeper swp) {
+        TaylorModel<Interval> r(as,swp); r.set_gradient(j,1.0); return r; }
     //! \brief Construct the quantity which scales the unit interval into the domain \a d.
-    static TaylorModel<Interval> scaling(uint as, uint j, const Interval& d) {
-        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
+    static TaylorModel<Interval> scaling(uint as, uint j, const Interval& d, Sweeper swp) {
+        TaylorModel<Interval> r(as,swp); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
     //! \brief Construct the quantity which scales the codomain \a cd into the unit interval.
-    static TaylorModel<Interval> unscaling(uint as, uint j, const Interval& d) {
-        TaylorModel<Interval> r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
+    static TaylorModel<Interval> unscaling(uint as, uint j, const Interval& d, Sweeper swp) {
+        TaylorModel<Interval> r(as,swp); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
+    //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
+    static TaylorModel<Interval> error(uint as, Float e, Sweeper swp) {
+        TaylorModel<Interval> r(as,swp); r.set_error(e); return r; }
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
-    static Vector< TaylorModel<Interval> > zeros(uint rs, uint as);
+    static Vector< TaylorModel<Interval> > zeros(uint rs, uint as, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector< TaylorModel<Interval> > constants(uint as, const Vector<Float>& c);
+    static Vector< TaylorModel<Interval> > constants(uint as, const Vector<Float>& c, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector< TaylorModel<Interval> > constants(uint as, const Vector<Interval>& c);
+    static Vector< TaylorModel<Interval> > constants(uint as, const Vector<Interval>& c, Sweeper swp);
     //! \brief Return the vector of variables on the unit domain.
-    static Vector< TaylorModel<Interval> > variables(uint as);
+    static Vector< TaylorModel<Interval> > variables(uint as, Sweeper swp);
     //! \brief Return the vector scaling the unit interval onto the domain \a d.
-    static Vector< TaylorModel<Interval> > scalings(const Vector<Interval>& d);
+    static Vector< TaylorModel<Interval> > scalings(const Vector<Interval>& d, Sweeper swp);
     //! \brief Return the vector scaling the unit interval onto the codomain \a cd.
-    static Vector< TaylorModel<Interval> > unscalings(const Vector<Interval>& d);
+    static Vector< TaylorModel<Interval> > unscalings(const Vector<Interval>& d, Sweeper swp);
     //@}
 
     //@{

@@ -42,7 +42,12 @@ class TestTaylorConstrainedImageSet
 {
   private:
     Figure figure;
+    Sweeper swp;
   public:
+    TestTaylorConstrainedImageSet()
+        : swp(ThresholdSweeper(std::numeric_limits<float>::epsilon()))
+    { }
+
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
         ARIADNE_TEST_CALL(test_outer_approximation()); return;
@@ -60,10 +65,10 @@ class TestTaylorConstrainedImageSet
     {
         Interval e(-1.0,+1.0);
         IntervalVector d1=IntervalVector::unit_box(2);
-        VectorTaylorFunction x=VectorTaylorFunction::identity(d1);
+        VectorTaylorFunction x=VectorTaylorFunction::identity(d1,swp);
         VectorTaylorFunction f1( ( x[0]+0.5*x[1]+0.25*e , 0.5*x[0]+x[1]+x[0]*x[0]+0.375*e ) );
         IntervalVector d2=IntervalVector::unit_box(4);
-        VectorTaylorFunction y=VectorTaylorFunction::identity(d2);
+        VectorTaylorFunction y=VectorTaylorFunction::identity(d2,swp);
         VectorTaylorFunction f2( ( y[0]+0.5*y[1]+0.25*y[2] , 0.5*y[0]+y[1]+y[0]*y[0]+0.375*y[3] ) );
         TaylorConstrainedImageSet ts1=TaylorConstrainedImageSet(f1);
         TaylorConstrainedImageSet cts1=TaylorConstrainedImageSet(f2);
@@ -71,7 +76,7 @@ class TestTaylorConstrainedImageSet
 
         f1=VectorTaylorFunction( ( x[0]+0.5*x[1] , 0.5*x[0]+x[1]+x[0]*x[0]+0.375*e ) );
         d2=IntervalVector::unit_box(3);
-        y=VectorTaylorFunction::identity(d2);
+        y=VectorTaylorFunction::identity(d2,swp);
         f2=VectorTaylorFunction( ( y[0]+0.5*y[1] , 0.5*y[0]+y[1]+y[0]*y[0]+0.375*y[2] ) );
         TaylorConstrainedImageSet ts2=TaylorConstrainedImageSet(f1);
         TaylorConstrainedImageSet cts2=TaylorConstrainedImageSet(f2);
@@ -87,7 +92,7 @@ class TestTaylorConstrainedImageSet
         uint depth(4);
 
         Interval e(-1.0,+1.0);
-        VectorTaylorFunction x=VectorTaylorFunction::identity(IntervalVector::unit_box(2));
+        VectorTaylorFunction x=VectorTaylorFunction::identity(IntervalVector::unit_box(2),swp);
 
         TaylorConstrainedImageSet ts( VectorTaylorFunction(( x[0]+0.25*x[1]+0.015625*e , 0.5*x[0]+x[1]+x[0]*x[0]+0.015625*e )) );
         TaylorConstrainedImageSet tsz( VectorTaylorFunction(( x[0]+0.25*x[1]+0.031251*e, 0.5*x[0]+x[1]+x[0]*x[0]+0.00001*e )) );
@@ -120,7 +125,7 @@ class TestTaylorConstrainedImageSet
     void test_split()
     {
         Interval e(-1.0,+1.0);
-        Vector<IntervalTaylorModel> s=IntervalTaylorModel::variables(2);
+        Vector<IntervalTaylorModel> s=IntervalTaylorModel::variables(2,TrivialSweeper());
 /*
 
         IntervalVector dom=IntervalVector(2, -1.0,+1.0, -1.0,1.0);

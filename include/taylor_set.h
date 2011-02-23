@@ -115,6 +115,8 @@ class TaylorConstrainedImageSet
     //! \brief Create a dynamically-allocated copy.
     TaylorConstrainedImageSet* clone() const;
 
+    //! \brief The sweeper used to control the accuracy.
+    Sweeper sweeper() const;
     //! \brief The parameter domain \f$D\f$.
     Vector<Interval> domain() const;
     //! \brief A subset of the parameter domain containing all feasible points.

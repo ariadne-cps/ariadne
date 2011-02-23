@@ -43,6 +43,8 @@ namespace {
 
 namespace Ariadne {
 
+inline Sweeper default_sweeper() { return Sweeper(); }
+
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
@@ -785,7 +787,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                         break;
                     case LOWER_SEMANTICS:
                         // Can't continue the evolution, so set a trivially-falsified constraint
-                        set.new_parameter_constraint(event, ScalarIntervalFunction::constant(set.parameter_domain(),1.0) <= 0.0);
+                        set.new_parameter_constraint(event, ScalarIntervalFunction::constant(set.parameter_domain(),1.0,default_sweeper()) <= 0.0);
                         break;
                 }
                 break;
@@ -1211,8 +1213,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.step_size=step_size;
     result.final_time=final_time;
     result.evolution_time_domain=Interval(0.0,step_size);
-    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain);
-    result.parameter_dependent_evolution_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),result.step_size);
+    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain,default_sweeper());
+    result.parameter_dependent_evolution_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),result.step_size,default_sweeper());
     return result;
 }
 
@@ -1242,11 +1244,11 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     IntervalVector spacetime_domain = join(space_domain,time_domain);
 
     //VectorIntervalFunction space_coordinates=ScalarIntervalFunction::identity(space_domain);
-    ScalarIntervalFunction time_coordinate=ScalarIntervalFunction::coordinate(spacetime_domain,n);
-    ScalarIntervalFunction time_identity=ScalarIntervalFunction::identity(time_domain);
+    ScalarIntervalFunction time_coordinate=ScalarIntervalFunction::coordinate(spacetime_domain,n,default_sweeper());
+    ScalarIntervalFunction time_identity=ScalarIntervalFunction::identity(time_domain,default_sweeper());
 
     result.evolution_time_domain=Interval(0.0,step_size);
-    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain);
+    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain,default_sweeper());
 
     IntervalVector flow_space_domain = project(flow.domain(),range(0,n));
     if(!subset(space_domain,flow_space_domain)) {
@@ -1265,7 +1267,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
 
     // The time-dependent part of the evolution time
-    ScalarIntervalFunction temporal_evolution_time(IntervalVector(1u,time_domain));
+    ScalarIntervalFunction temporal_evolution_time(IntervalVector(1u,time_domain),default_sweeper());
 
     if(remaining_time_range.lower()<0.0) {
         // Some of the points may already have reached the final time.
@@ -1319,7 +1321,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ARIADNE_LOG(7,"temporal_evolution_time="<<temporal_evolution_time<<"\n");
 
 
-    ScalarIntervalFunction spacial_evolution_time=ScalarIntervalFunction::constant(space_domain,step_size);
+    ScalarIntervalFunction spacial_evolution_time=ScalarIntervalFunction::constant(space_domain,step_size,default_sweeper());
 
     if(ALLOW_CREEP && !crossings.empty() && (result.finishing_kind == BEFORE_FINAL_TIME || result.finishing_kind == STRADDLE_FINAL_TIME) ) {
         // If an event is possible, but only some points reach the guard set
@@ -1416,7 +1418,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=PARAMETER_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=BEFORE_FINAL_TIME;
         if(starting_time_range.width()<step_size/2) {
-            result.parameter_dependent_finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),starting_time_range.lower()+step_size);
+            result.parameter_dependent_finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),starting_time_range.lower()+step_size,default_sweeper());
         } else {
             // Try to reduce the time interval by half the step size
             // Corresponds to setting omega(smin)=tau(smin)+h, omega(smax)=tau(smax)+h/2

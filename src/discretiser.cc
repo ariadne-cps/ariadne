@@ -33,6 +33,7 @@
 
 namespace Ariadne {
 
+inline Sweeper default_sweeper() { return Sweeper(); }
 
 
 template<class Sys,class ES>
@@ -84,7 +85,7 @@ typename Discretiser<Sys,ES>::EnclosureType
 Discretiser<Sys,ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-    return EnclosureType(initial_set.box());
+    return EnclosureType(initial_set.box(),default_sweeper());
 }
 
 template<class Sys, class ES>

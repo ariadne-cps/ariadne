@@ -127,7 +127,7 @@ void TestSimpleHybridEvolver::test_flow() const {
 
     evolver_ptr->parameters().maximum_step_size=1.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
@@ -152,7 +152,7 @@ void TestSimpleHybridEvolver::test_exact_final_time() const {
 
     evolver_ptr->parameters().maximum_step_size=1.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
@@ -178,7 +178,7 @@ void TestSimpleHybridEvolver::test_maximum_steps() const {
 
     evolver_ptr->parameters().maximum_step_size=1.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_PRINT(orbit);
 
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
@@ -206,7 +206,7 @@ void TestSimpleHybridEvolver::test_urgent_event() const {
 
     evolver_ptr->parameters().maximum_step_size=1.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_PRINT(orbit);
 
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
@@ -233,7 +233,7 @@ void TestSimpleHybridEvolver::test_empty_interior() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
@@ -259,7 +259,7 @@ void TestSimpleHybridEvolver::test_partial_event() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
@@ -287,7 +287,7 @@ void TestSimpleHybridEvolver::test_step_size_event() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),1u);
@@ -311,7 +311,7 @@ void TestSimpleHybridEvolver::test_initially_active_event() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
 
     // There should be two components of the reachable set which come from initially active events, and one from flowing
@@ -337,7 +337,7 @@ void TestSimpleHybridEvolver::test_initially_active_attracting_event() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
     plot(cstr("test_"+evolver_name+"-initially_active_attracting"),Box(2, -1.0,+2.0, -1.0, +2.0),
          guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
@@ -357,7 +357,7 @@ void TestSimpleHybridEvolver::test_initially_active_repelling_event() const {
     HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(1.0,2);
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
     plot(cstr("test_"+evolver_name+"-initially_active_repelling"),Box(2, -1.0,+2.0, -1.0, +2.0),
          guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
@@ -380,7 +380,7 @@ void TestSimpleHybridEvolver::test_impact() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     //ARIADNE_TEST_CHECK(orbit.final().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-impact"),Box(2, -3.0,+2.0, -4.0, +2.0),
@@ -401,7 +401,7 @@ void TestSimpleHybridEvolver::test_tangency() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
     ARIADNE_TEST_PRINT(orbit);
@@ -430,7 +430,7 @@ void TestSimpleHybridEvolver::test_simultaneous_events() const {
 
     evolver_ptr->parameters().maximum_step_size=4.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
 
     plot(cstr("test_"+evolver_name+"-simultaneous_events"),Box(2, -3.0,+2.0, -3.0, +2.0),
@@ -454,7 +454,7 @@ void TestSimpleHybridEvolver::test_creep() const {
 
     evolver_ptr->parameters().maximum_step_size=1.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_PRINT(*orbit.reach().begin());
     ARIADNE_TEST_PRINT(HybridEnclosure(*orbit.final().begin()).bounding_box());
@@ -481,7 +481,7 @@ void TestSimpleHybridEvolver::test_unwind() const {
 
     evolver_ptr->parameters().maximum_step_size=2.0;
 
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
 
     Box bounding_box(2, -2.5,+1.5, -0.5, +2.5);
@@ -565,7 +565,7 @@ TestContraintHybridEvolver::test_flow_only() const
     DiscreteLocation initial_location(upwards);
     const double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
-    HybridEnclosure initial_enclosure(initial_location,initial_box);
+    HybridEnclosure initial_enclosure(initial_location,initial_box,Sweeper());
 
     HybridTime evolution_time=HybridTime(1.5,2);
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(system,initial_enclosure,evolution_time);
@@ -588,7 +588,7 @@ TestContraintHybridEvolver::test_splitting_on_urgent_event() const
     DiscreteLocation initial_location(upwards);
     const double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
-    HybridEnclosure initial_enclosure(initial_location,initial_box);
+    HybridEnclosure initial_enclosure(initial_location,initial_box,Sweeper());
 
     HybridTime evolution_time=HybridTime(4.0,2);
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(system,initial_enclosure,evolution_time);
@@ -614,7 +614,7 @@ TestContraintHybridEvolver::test_affine_flow_system() const
     DiscreteLocation initial_location(upwards);
     double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
-    HybridEnclosure initial_enclosure(initial_location,initial_box);
+    HybridEnclosure initial_enclosure(initial_location,initial_box,Sweeper());
     ARIADNE_TEST_PRINT(initial_enclosure);
 
     HybridTime evolution_time(0.0,0u);

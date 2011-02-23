@@ -58,7 +58,7 @@ void export_evolver(const char* name)
     typedef typename Ev::OrbitType Orb;
 
     class_<Ev> evolver_class(name,Init());
-    evolver_class.def("orbit",(Orb(Ev::*)(const Sys&,const ES&,const Tm&)) &Ev::orbit);
+    evolver_class.def("orbit",(Orb(Ev::*)(const Sys&,const ES&,const Tm&,Semantics)const) &Ev::orbit);
     evolver_class.def(self_ns::str(self));
 }
 

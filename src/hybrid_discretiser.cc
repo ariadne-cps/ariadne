@@ -35,6 +35,7 @@
 
 namespace Ariadne {
 
+inline Sweeper default_sweeper() { return Sweeper(); }
 
 template<class ES>
 HybridGridTreeSet
@@ -182,7 +183,7 @@ typename HybridDiscretiser<HES>::EnclosureType
 HybridDiscretiser<HES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-    ContinuousEnclosureType continuous_enclosure(initial_set.second.box());
+    ContinuousEnclosureType continuous_enclosure(initial_set.second.box(),default_sweeper());
     return EnclosureType(initial_set.first,continuous_enclosure);
 }
 

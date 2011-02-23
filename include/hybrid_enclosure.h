@@ -133,7 +133,8 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to a box \a s in location \a q.
-    HybridEnclosure(const DiscreteLocation& q, const Box& s);
+    HybridEnclosure(const DiscreteLocation& q, const Box& bx, const Sweeper& swp);
+    HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbx, const Sweeper& swp);
     //! \brief An enclosure constructed from a continuous state set and a location.
     HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>&);
     //! \brief An enclosure constructed from a continuous state set and a location with evolution time equal to zero.

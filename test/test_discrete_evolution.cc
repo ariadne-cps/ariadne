@@ -105,7 +105,7 @@ void TestMapEvolver::test() const
 
 
     // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box);
+    EnclosureType initial_set(initial_box,Sweeper());
     cout << "initial_set=" << initial_set << endl << endl << endl;
 
 

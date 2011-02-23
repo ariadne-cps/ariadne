@@ -71,7 +71,7 @@ class TestIntegrator
         IntervalVector d=(Interval(0.0,1.0),Interval(-0.5,1.5));
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
-        VectorTaylorFunction expected_flow(flow.domain(),(x0+2*t,y0+3*t),TrivialSweeper());
+        RealVectorFunction expected_flow( (x0+2*t,y0+3*t) );
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -84,7 +84,7 @@ class TestIntegrator
         IntervalVector d=(Interval(0.0,1.0),Interval(-0.5,1.5));
         Float h=0.25;
         VectorTaylorFunction flow=integrator->flow_step(f,d,h);
-        VectorTaylorFunction expected_flow(flow.domain(),(x0+t,y0+x0*t+t*t/2),TrivialSweeper());
+        RealVectorFunction expected_flow( (x0+t,y0+x0*t+t*t/2) );
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);

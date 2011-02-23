@@ -290,9 +290,9 @@ void export_taylor_constrained_image_set()
 {
 
     class_<TaylorConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> > taylor_set_class("TaylorConstrainedImageSet",init<TaylorConstrainedImageSet>());
-    taylor_set_class.def(init<uint>());
-    taylor_set_class.def(init<Box>());
-    taylor_set_class.def(init<IntervalVector,RealVectorFunction>());
+    taylor_set_class.def(init<uint,Sweeper>());
+    taylor_set_class.def(init<Box,Sweeper>());
+    taylor_set_class.def(init<IntervalVector,RealVectorFunction,Sweeper>());
     //taylor_set_class.def(init<IntervalVector,VectorTaylorFunction>());
     taylor_set_class.def(init<VectorTaylorFunction>());
 

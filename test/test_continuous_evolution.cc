@@ -120,7 +120,7 @@ void TestContinuousEvolution::test() const
 
 
     // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box);
+    EnclosureType initial_set(initial_box,Sweeper());
     // cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
@@ -176,7 +176,7 @@ void TestContinuousEvolution::failure_test() const
     VectorUserFunction<FailOne> failone(p);
     VectorField failone_vf(failone);
 
-    EnclosureType initial_set(initial_box);
+    EnclosureType initial_set(initial_box,Sweeper());
     // cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
@@ -207,7 +207,7 @@ void TestContinuousEvolution::failure_test() const
     VectorField failtwo_vf(failtwo);
 
     Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);
-    initial_set = EnclosureType(initial_box2);
+    initial_set = EnclosureType(initial_box2,Sweeper());
 
     time = 1.5;
 

@@ -100,7 +100,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     HybridBox initial(q,Box(2, height-radius,height+radius, -radius,+radius));
     HybridTime time(4.5,3);
 
-    Orbit<HybridEnclosure> orbit=evolver.orbit(bouncing_ball,HybridEnclosure(initial),time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver.orbit(bouncing_ball,initial,time,UPPER_SEMANTICS);
     ListSet<HybridEnclosure> const& orbit_final=orbit.final();
 
     //ARIADNE_TEST_PRINT(orbit);
@@ -169,14 +169,14 @@ void TestHybridEvolution::test_water_tank() const {
 
     DiscreteLocation initial_location=opening;
     Box initial_box(2, 0.0,0.05, 0.0,0.01);
-    HybridEnclosure initial_enclosure(initial_location,initial_box);
+    HybridBox initial(initial_location,initial_box);
 
     //HybridTime evolution_time(80.0,5);
     HybridTime evolution_time(80.0,8);
 
     dynamic_cast<HybridEvolverBase&>(evolver).parameters().maximum_step_size=1.0;
 
-    Orbit<HybridEnclosure> orbit = evolver.orbit(watertank,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit = evolver.orbit(watertank,initial,evolution_time,UPPER_SEMANTICS);
     if(orbit.final().size()!=1u) {
         ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");

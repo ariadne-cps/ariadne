@@ -68,8 +68,12 @@ class HybridEvolverInterface
     : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
 {
   public:
-    /*! \brief Make a dynamically-allocated copy. */
+    //! \brief Make a dynamically-allocated copy.
     virtual HybridEvolverInterface* clone() const = 0;
+    //! \brief Evolution starting in a box.
+    //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise. 
+    virtual Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
 };
 
 struct TransitionData;
@@ -142,6 +146,7 @@ class HybridEvolverBase
 
     //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
     //! \brief Compute an approximation to the evolution set using the given semantics.

@@ -47,8 +47,6 @@
 
 namespace Ariadne {
 
-inline Sweeper default_sweeper() { return Sweeper(); }
-
 std::string str(const EnclosureVariableType& evt) {
     switch (evt) {
         case INITIAL: return "x";
@@ -81,19 +79,26 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location(""), _events(), _set(), _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time), _variables()
+    : _location(""), _events(), _set(), _time(), _dwell_time(), _variables()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box)
-    : _location(location), _events(), _set(box),
-      _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time),
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box, const Sweeper& sweeper)
+    : _location(location), _events(), _set(box,sweeper),
+      _time(_set._domain,sweeper), _dwell_time(_time),
       _variables(box.dimension(),INITIAL)
 {
 }
 
+HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbox, const Sweeper& sweeper)
+    : _location(hbox.first), _events(), _set(hbox.second,sweeper),
+      _time(_set._domain,sweeper), _dwell_time(_time),
+      _variables(hbox.second.dimension(),INITIAL)
+{
+}
+
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set)
-    : _location(location), _events(), _set(set), _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time),
+    : _location(location), _events(), _set(set), _time(ScalarIntervalFunction::zero(_set._domain,_set.sweeper())), _dwell_time(_time),
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
 {
 }
@@ -106,7 +111,7 @@ HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Continu
 }
 
 HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>& hpair)
-    : _location(hpair.first), _events(), _set(hpair.second), _time(ScalarIntervalFunction::zero(_set._domain,default_sweeper())), _dwell_time(_time),
+    : _location(hpair.first), _events(), _set(hpair.second), _time(ScalarIntervalFunction::zero(_set._domain,_set.sweeper())), _dwell_time(_time),
       _variables(catenate(List<EnclosureVariableType>(_set.dimension(),INITIAL),List<EnclosureVariableType>(_set.number_of_parameters()-_set.dimension(),UNKNOWN)))
 {
 }
@@ -352,7 +357,7 @@ void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const 
     Interval time_domain=phi.domain()[phi.domain().size()-1];
     this->new_parameter(time_domain,TEMPORAL);
     const IntervalVector& new_domain=this->parameter_domain();
-    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u,default_sweeper());
+    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u,this->_set.sweeper());
     this->_time=this->_time+time_step_function;
     this->_dwell_time=this->_dwell_time+time_step_function;
     this->_set._function=unchecked_compose(phi,join(this->_set._function,time_step_function));
@@ -370,7 +375,7 @@ void HybridEnclosure::apply_full_reach_step(const VectorIntervalFunction& phi)
     Interval time_domain=phi.domain()[phi.domain().size()-1];
     this->new_parameter(time_domain,TEMPORAL);
     const IntervalVector& new_domain=this->parameter_domain();
-    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u,default_sweeper());
+    ScalarIntervalFunction time_step_function=ScalarIntervalFunction::coordinate(new_domain,new_domain.size()-1u,this->_set.sweeper());
     this->_time=this->_time+time_step_function;
     this->_dwell_time=this->_dwell_time+time_step_function;
     this->_set._function=unchecked_compose(phi,join(this->_set._function,time_step_function));
@@ -536,7 +541,7 @@ HybridEnclosure::kuhn_recondition()
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
     std::cerr<<"kept_parameters="<<kept_parameters<<"\n";
 
-    Vector<IntervalTaylorModel> new_models(models.size(),IntervalTaylorModel(number_of_kept_parameters+number_of_error_parameters,default_sweeper()));
+    Vector<IntervalTaylorModel> new_models(models.size(),IntervalTaylorModel(number_of_kept_parameters+number_of_error_parameters,this->_set.sweeper()));
     for(uint i=0; i!=this->dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }

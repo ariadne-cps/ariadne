@@ -168,7 +168,7 @@ TaylorConstrainedImageSet* TaylorConstrainedImageSet::clone() const
     return new TaylorConstrainedImageSet(*this);
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box, Sweeper sweeper)
 {
     // Ensure domain elements have nonempty radius
     const float min_float=std::numeric_limits<float>::min();
@@ -190,15 +190,15 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
     if(proper_coordinates.size()==0) { this->_domain=IntervalVector(1u,Interval(-1,+1)); }
 
 
-    this->_function=VectorTaylorFunction(box.dimension(),this->_domain,default_sweeper());
+    this->_function=VectorTaylorFunction(box.dimension(),this->_domain,sweeper);
     uint j=0;
     proper_coordinates.append(box.dimension());
     for(uint i=0; i!=box.dimension(); ++i) {
         if(proper_coordinates[j]==i) {
-            this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j,this->sweeper());
+            this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j,sweeper);
             ++j;
         } else {
-            this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i],this->sweeper());
+            this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i],sweeper);
         }
     }
     this->_reduced_domain=this->_domain;
@@ -206,17 +206,16 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box)
 }
 
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, Sweeper sweeper)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     this->_domain=domain;
-    this->_function=VectorTaylorFunction(this->_domain,function,default_sweeper());
+    this->_function=VectorTaylorFunction(this->_domain,function,sweeper);
     this->_reduced_domain=this->_domain;
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, const List<NonlinearConstraint>& constraints)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, const List<NonlinearConstraint>& constraints, Sweeper sweeper)
 {
-    Sweeper sweeper = default_sweeper();
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
@@ -247,9 +246,9 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domai
 
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, const NonlinearConstraint& constraint)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, const NonlinearConstraint& constraint, Sweeper sweeper)
 {
-    *this=TaylorConstrainedImageSet(domain,function,make_list(constraint));
+    *this=TaylorConstrainedImageSet(domain,function,make_list(constraint),sweeper);
 }
 
 
@@ -893,6 +892,8 @@ RealScalarFunction make_function(const ScalarTaylorFunction& stf) {
 
 void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const RealVectorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
 {
+    Sweeper sweeper = default_sweeper();
+
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
     static const double XSIGMA = 0.125;
@@ -930,14 +931,14 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,default_sweeper());
+        ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,sweeper);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],default_sweeper());
+            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,default_sweeper());
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,sweeper);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = (cnst) + xg;
@@ -1705,7 +1706,7 @@ TaylorConstrainedImageSet::affine_over_approximation() const
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Interval& ivl) {
     typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
 
-    VectorTaylorFunction new_function=combine(set.taylor_function(),ScalarTaylorFunction::identity(ivl,default_sweeper()));
+    VectorTaylorFunction new_function=combine(set.taylor_function(),ScalarTaylorFunction::identity(ivl,set.sweeper()));
 
     TaylorConstrainedImageSet result(new_function);
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
@@ -1719,7 +1720,7 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const In
 }
 
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Box& bx) {
-    return product(set,TaylorConstrainedImageSet(bx));
+    return product(set,TaylorConstrainedImageSet(bx,set.sweeper()));
 }
 
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const TaylorConstrainedImageSet& set2) {

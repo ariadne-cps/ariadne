@@ -125,7 +125,7 @@ class TestTaylorConstrainedImageSet
     void test_split()
     {
         Interval e(-1.0,+1.0);
-        Vector<IntervalTaylorModel> s=IntervalTaylorModel::variables(2,TrivialSweeper());
+        Vector<IntervalTaylorModel> s=IntervalTaylorModel::variables(2,swp);
 /*
 
         IntervalVector dom=IntervalVector(2, -1.0,+1.0, -1.0,1.0);
@@ -186,7 +186,7 @@ class TestTaylorConstrainedImageSet
         //TaylorConstrainedImageSet set(domain,(s+0.5*t+(1.0/256)*s*t+t*t,t+0.375*sqr(s)+0.25*e),(0.625*s*s+t-1<=0, 0.25*s+0.5*t==0, -0.25*s+0.5*t+0.125*e==0));
 
         //TaylorConstrainedImageSet set(domain,(s+0.5*t,t),(s+t<=1.0,t*t-s<=1.0,t+u+0.0625*e==0)); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
-        TaylorConstrainedImageSet set(domain,(s+t+0.25*s*s-0.25*s*t+0.125*t*t,-s+t),(u<=2,-s+t+u-1+0*e/16==0)); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
+        TaylorConstrainedImageSet set(domain,(s+t+0.25*s*s-0.25*s*t+0.125*t*t,-s+t),(u<=2,-s+t+u-1+0*e/16==0),swp); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
 
         ARIADNE_TEST_PRINT(set);
         AffineSet affine_set=set.affine_over_approximation();
@@ -236,7 +236,7 @@ class TestTaylorConstrainedImageSet
         RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         Box domain(2, -0.5,1.5, -0.5,0.5);
 
-        TaylorConstrainedImageSet set(domain,(s,t+sqr(s)));
+        TaylorConstrainedImageSet set(domain,(s,t+sqr(s)),swp);
         set.new_negative_constraint(s+t);
         ARIADNE_TEST_PRINT(set);
         Box bx1(2, 1.0,2.0, 0.0,1.0);
@@ -253,7 +253,7 @@ class TestTaylorConstrainedImageSet
         Box domain(2, -1.0,+1.0, -1.0,+1.0);
         uint accuracy = 4u;
 
-        TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)));
+        TaylorConstrainedImageSet set(domain,(s+0.5*t,t+sqr(s)),swp);
         set.new_negative_constraint(s+t-0.25);
         ARIADNE_TEST_PRINT(set);
 
@@ -369,22 +369,23 @@ class TestTaylorConstrainedImageSet
         // Draw a variety of shapes
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
 
-        ARIADNE_TEST_TRY( test_draw("box",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t)),accuracy) );
-        ARIADNE_TEST_TRY( test_draw("polytope",TaylorConstrainedImageSet(Box(2,-2.05,2.05,-1.05,1.05),(s,t),(s+t<=1.5)),accuracy ));
-        ARIADNE_TEST_TRY( test_draw("dome",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t<=0.251)),accuracy) );
-        ARIADNE_TEST_TRY( test_draw("disc",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t*t<=0.751)),accuracy) );
-        ARIADNE_TEST_TRY( test_draw("parallelotope",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t)),accuracy) );
-        ARIADNE_TEST_TRY( test_draw("ellipse",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),accuracy) );
-        ARIADNE_TEST_TRY( test_draw("concave",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(2*s+0.25*s*s+t-0.5<=0)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("box",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t),swp),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("polytope",TaylorConstrainedImageSet(Box(2,-2.05,2.05,-1.05,1.05),(s,t),(s+t<=1.5),swp),accuracy ));
+        ARIADNE_TEST_TRY( test_draw("dome",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t<=0.251),swp),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("disc",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(s,t),(s*s+t*t<=0.751),swp),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("parallelotope",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),swp),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("ellipse",TaylorConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75),swp),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("concave",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(2*s+0.25*s*s+t-0.5<=0),swp),accuracy) );
 
-        ARIADNE_TEST_TRY( test_draw("empty",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(1.25+s+t*t<=0)),accuracy) );
-        ARIADNE_TEST_TRY( test_draw("curve",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t),(s*s-t==0)),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("empty",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,0.25*s*s+t),(1.25+s+t*t<=0),swp),accuracy) );
+        ARIADNE_TEST_TRY( test_draw("curve",TaylorConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,t),(s*s-t==0),swp),accuracy) );
 
         // The following example is an enclosure from a hybrid evolution
         TaylorConstrainedImageSet enclosure(
             Box(3, -0.125,0.25, -0.125,0.125, 0.0,2.0),
             ( 8*(x2+0.0645161*x1-0.0322581*x0+0.0645162), -8+8*(0.5*x2+1.03226*x1-0.516129*x0+1.03226)),
-            (0.0645161*x1-1.03226*x0+0.0645161<=0, 0.0645161*x1-1.03226*x0+0.0645161<=0, x2+0.0645161*x1-1.03226*x0+0.0645161==0));
+            (0.0645161*x1-1.03226*x0+0.0645161<=0, 0.0645161*x1-1.03226*x0+0.0645161<=0, x2+0.0645161*x1-1.03226*x0+0.0645161==0),
+            swp);
 
         ARIADNE_TEST_TRY( test_draw("enclosure",enclosure,accuracy) );
 

@@ -133,10 +133,9 @@ void TestHybridDiscretiser::test_hybrid_time() const
 
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
-    std::cerr<<HybridEnclosure(hybrid_initial_set)<<"\n\n";
     // evolver.verbosity=1;
     Orbit<EnclosureType> evolve_orbit
-        = evolver.orbit(ha,EnclosureType(hybrid_initial_set),htime,UPPER_SEMANTICS);
+        = evolver.orbit(ha,hybrid_initial_set,htime,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     ARIADNE_TEST_PRINT(evolve_orbit);

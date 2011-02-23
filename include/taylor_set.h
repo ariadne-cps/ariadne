@@ -100,15 +100,15 @@ class TaylorConstrainedImageSet
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit TaylorConstrainedImageSet();
     //! \brief Construct a representation of the box \a bx.
-    explicit TaylorConstrainedImageSet(const Box& bx);
+    explicit TaylorConstrainedImageSet(const Box& bx, Sweeper swp);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, Sweeper swp);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<NonlinearConstraint>& c);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<NonlinearConstraint>& c, Sweeper swp);
     //! \brief Construct the set with domain \a d, image function \a f, negative constraints \a g and equality constraints \a h.
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<RealScalarFunction>& g, List<RealScalarFunction>& h);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<RealScalarFunction>& g, List<RealScalarFunction>& h, Sweeper swp);
     //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const NonlinearConstraint& c);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const NonlinearConstraint& c, Sweeper swp);
 
     //! \brief Construct the set with domain equal to the natural domain of \a f.
     explicit TaylorConstrainedImageSet(const VectorTaylorFunction& f);

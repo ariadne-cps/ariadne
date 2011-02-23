@@ -118,7 +118,7 @@ void TestDiscretiser::test_discrete_time() const
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
     Orbit<EnclosureType> evolve_orbit
-        = evolver.orbit(system,EnclosureType(initial_box),steps,UPPER_SEMANTICS);
+        = evolver.orbit(system,EnclosureType(initial_box,Sweeper()),steps,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     EnclosureType const& initial_set=evolve_orbit.initial();
@@ -211,7 +211,7 @@ void TestDiscretiser::test_continuous_time() const
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
     Orbit<EnclosureType> evolve_orbit
-        = evolver.orbit(system,EnclosureType(initial_box),time,UPPER_SEMANTICS);
+        = evolver.orbit(system,EnclosureType(initial_box,Sweeper()),time,UPPER_SEMANTICS);
     cout << "done." << endl;
     EnclosureType const& initial_set=evolve_orbit.initial();
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach();

@@ -173,6 +173,17 @@ Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& tr
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridAutomatonInterface& system,
+      const HybridBox& initial,
+      const HybridTime& time,
+      Semantics semantics) const
+{
+    return this->orbit(system,HybridEnclosure(initial,default_sweeper()),time,semantics);
+}
+
+
+Orbit<HybridEnclosure>
+HybridEvolverBase::
+orbit(const HybridAutomatonInterface& system,
       const HybridEnclosure& initial,
       const HybridTime& time,
       Semantics semantics) const

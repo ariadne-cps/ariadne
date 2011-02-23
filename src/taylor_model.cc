@@ -58,8 +58,6 @@ bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
 const double em=2.2204460492503131e-16;
 const double ec=em/2;
 
-static boost::shared_ptr<const SweeperInterface> default_sweeper(new ThresholdSweeper(std::numeric_limits<float>::epsilon()));
-
 
 /*
 

@@ -67,14 +67,15 @@ class TestSolver
         RealScalarFunction bb;
         IntervalVector p,r;
         RealVectorFunction f;
-        VectorTaylorFunction h,e;
+        VectorTaylorFunction h;
+        RealVectorFunction e;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=IntervalVector(1, Interval(-0.25,0.25));
         r=IntervalVector(1, Interval(-2.0,2.0));
         f=RealVectorFunction(1u,x-a);
         h=solver->implicit(f,p,r);
-        e=VectorTaylorFunction(p,RealVectorFunction(1u,aa));
+        e=RealVectorFunction(1u,aa);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
@@ -83,7 +84,7 @@ class TestSolver
         f=RealVectorFunction(1u,(x*x+1)*x-a);
         h=solver->implicit(f,p,r);
         bb=RealScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
-        e=VectorTaylorFunction( p, RealVectorFunction( 1u, 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) ) );
+        e=RealVectorFunction( 1u, 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) );
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
         // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
@@ -92,7 +93,7 @@ class TestSolver
         f=RealVectorFunction(1u,4*x+x*x-a-4);
         h=solver->implicit(f,p,r);
         bb=RealScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
-        e=VectorTaylorFunction( p, RealVectorFunction( 1u, 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) ) );
+        e=RealVectorFunction( 1u, 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) );
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
     }
 

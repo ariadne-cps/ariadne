@@ -127,7 +127,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
 
     Float& t=violation; Point& x=multipliers; Point& y=point; Point& z=slack; // Aliases for the main quantities used
     const Box& d=domain; const IntervalVectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
-    VectorTaylorFunction tfn(d,fn);
+    VectorTaylorFunction tfn(d,fn,default_sweeper());
 
     point=midpoint(d);
     for(uint k=0; k!=l; ++k) { multipliers[k]=1.0/l; }

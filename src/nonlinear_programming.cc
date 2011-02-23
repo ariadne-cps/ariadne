@@ -507,7 +507,7 @@ is_infeasibility_certificate(IntervalVector d, IntervalVectorFunction g, Interva
     // Try to prove lambda.g(y) > 0
     const uint m=d.size();
     const uint n=c.size();
-    VectorTaylorFunction tg(d,g);
+    VectorTaylorFunction tg(d,g,default_sweeper());
     VectorTaylorFunction ti=VectorTaylorFunction::identity(d,default_sweeper());
     ScalarTaylorFunction ts(d,default_sweeper());
     for(uint i=0; i!=n; ++i) {
@@ -1442,7 +1442,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
     Interval yC = dot(y,C);
 
     // Compute Taylor estimate of y g(X)
-    VectorTaylorFunction tg(D,g);
+    VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     Interval tygD = tyg(D);
@@ -1529,7 +1529,7 @@ validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVecto
     Interval yC = dot(IntervalVector(y),C);
 
     // Compute Taylor estimate of y g(X)
-    VectorTaylorFunction tg(D,g);
+    VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     Interval tygD = tyg(D);

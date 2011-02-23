@@ -210,12 +210,13 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domai
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     this->_domain=domain;
-    this->_function=VectorTaylorFunction(this->_domain,function);
+    this->_function=VectorTaylorFunction(this->_domain,function,default_sweeper());
     this->_reduced_domain=this->_domain;
 }
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, const List<NonlinearConstraint>& constraints)
 {
+    Sweeper sweeper = default_sweeper();
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
@@ -225,7 +226,7 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domai
         }
     }
 
-    this->_function=VectorTaylorFunction(this->_domain,function);
+    this->_function=VectorTaylorFunction(this->_domain,function,sweeper);
 
     for(uint i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);

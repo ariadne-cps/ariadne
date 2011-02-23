@@ -331,10 +331,6 @@ void TestVectorTaylorFunction::test_constructors()
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
 
     Vector<Float> e0=e(2,0); Vector<Float> e1=e(2,1);
-    Polynomial<Float> x=p(2,0); Polynomial<Float> y=p(2,1);
-    Vector< Polynomial<Float> > polynomial=(1.5-x*x+0.25*y)*e0+x*e1;
-    ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,polynomial_model,(domain,polynomial));
-    ARIADNE_TEST_EQUAL(polynomial_model,VectorTaylorFunction(domain,expansion,swp))
 
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain,swp);
     //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
@@ -384,20 +380,20 @@ void TestVectorTaylorFunction::test_jacobian()
 
 void TestVectorTaylorFunction::test_compose()
 {
-    Float a=1.5; Float b=0.25;
-    Polynomial<Float> x=p(2,0);
-    Polynomial<Float> y=p(2,1);
-    Vector< Polynomial<Float> > henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
-    Vector< Polynomial<Float> > henon_square_polynomial=
+    Real a=1.5; Real b=0.25;
+    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
+    RealScalarFunction y=RealScalarFunction::coordinate(2,1);
+    RealVectorFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
+    RealVectorFunction henon_square_polynomial=
         (a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x)*e(2,0)
             + (a-x*x+b*y)*e(2,1);
     //    compose(henon_polynomial,henon_polynomial);
     Vector<Interval> domain1(2,0.25,1.25,0.5,1.0);
-    VectorTaylorFunction function1(domain1,henon_polynomial);
+    VectorTaylorFunction function1(domain1,henon_polynomial,swp);
     Vector<Interval> domain2(2, -1.5,2.5, 0.25,1.25);
-    VectorTaylorFunction function2(domain2,henon_polynomial);
+    VectorTaylorFunction function2(domain2,henon_polynomial,swp);
 
-    VectorTaylorFunction composition1(domain1,henon_square_polynomial);
+    VectorTaylorFunction composition1(domain1,henon_square_polynomial,swp);
     ARIADNE_TEST_EQUAL(compose(function2,function1),composition1);
 }
 
@@ -437,14 +433,15 @@ void TestVectorTaylorFunction::test_antiderivative()
 void TestVectorTaylorFunction::test_join()
 {
     Vector<Interval> domain(2, -0.25,+0.25, -0.5,+0.5);
-    Vector< Polynomial<Float> > polynomial1 = (p(2,0)*p(2,0)+2.0*p(2,0)*p(2,1)+3.0*p(2,1)*p(2,1))*e(1,0);
-    Vector< Polynomial<Float> > polynomial2 = (4.0*p(2,0)*p(2,0)+5.0*p(2,0)*p(2,1)+6.0*p(2,1)*p(2,1))*e(2,1);
-    Vector< Polynomial<Float> > polynomial3 = (p(2,0)*p(2,0)+2.0*p(2,0)*p(2,1)+3.0*p(2,1)*p(2,1))*e(3,0)
-        + (4.0*p(2,0)*p(2,0)+5.0*p(2,0)*p(2,1)+6.0*p(2,1)*p(2,1))*e(3,2);
-    VectorTaylorFunction function1(domain,polynomial1);
-    VectorTaylorFunction function2(domain,polynomial2);
-    VectorTaylorFunction function3(domain,polynomial3);
-    ARIADNE_TEST_EQUAL(join(function1,function2),function3);
+    RealVectorFunction x=RealVectorFunction::identity(2);
+    RealVectorFunction function1 = (x[0]*x[0]+2.0*x[0]*x[1]+3.0*x[1]*x[1])*e(1,0);
+    RealVectorFunction function2 = (4.0*x[0]*x[0]+5.0*x[0]*x[1]+6.0*x[1]*x[1])*e(2,1);
+    RealVectorFunction function3 = (x[0]*x[0]+2.0*x[0]*x[1]+3.0*x[1]*x[1])*e(3,0)
+        + (4.0*x[0]*x[0]+5.0*x[0]*x[1]+6.0*x[1]*x[1])*e(3,2);
+    VectorTaylorFunction taylorfunction1(domain,function1,swp);
+    VectorTaylorFunction taylorfunction2(domain,function2,swp);
+    VectorTaylorFunction taylorfunction3(domain,function3,swp);
+    ARIADNE_TEST_EQUAL(join(taylorfunction1,taylorfunction2),taylorfunction3);
 
 }
 
@@ -454,14 +451,18 @@ void TestVectorTaylorFunction::test_combine()
     Vector<Interval> domain1(2, -0.25,+0.25, -0.5,+0.5);
     Vector<Interval> domain2(3, -0.75,+0.75, -1.0,+1.0, -1.25,+1.25);
     Vector<Interval> domain3(5, -0.25,+0.25, -0.5,+0.5, -0.75,+0.75, -1.0,+1.0, -1.25,+1.25);
-    Vector< Polynomial<Float> > polynomial1 = (p(2,0)*p(2,0)+2.0*p(2,0)*p(2,1)+3.0*p(2,1)*p(2,1))*e(1,0);
-    Vector< Polynomial<Float> > polynomial2 = (4.0*p(3,0)*p(3,0)+5.0*p(3,0)*p(3,1)+6.0*p(3,1)*p(3,2))*e(2,1);
-    Vector< Polynomial<Float> > polynomial3 = (p(5,0)*p(5,0)+2.0*p(5,0)*p(5,1)+3.0*p(5,1)*p(5,1))*e(3,0)
-        + (4.0*p(5,2)*p(5,2)+5.0*p(5,2)*p(5,3)+6.0*p(5,3)*p(5,4))*e(3,2);
-    VectorTaylorFunction function1(domain1,polynomial1);
-    VectorTaylorFunction function2(domain2,polynomial2);
-    VectorTaylorFunction function3(domain3,polynomial3);
-    ARIADNE_TEST_EQUAL(combine(function1,function2),function3);
+    RealVectorFunction x;
+    x=RealVectorFunction::identity(2);
+    RealVectorFunction function1 = (x[0]*x[0]+2.0*x[0]*x[1]+3.0*x[1]*x[1])*e(1,0);
+    x=RealVectorFunction::identity(3);
+    RealVectorFunction function2 = (4.0*x[0]*x[0]+5.0*x[0]*x[1]+6.0*x[1]*x[2])*e(2,1);
+    x=RealVectorFunction::identity(5);
+    RealVectorFunction function3 = (x[0]*x[0]+2.0*x[0]*x[1]+3.0*x[1]*x[1])*e(3,0)
+        + (4.0*x[2]*x[2]+5.0*x[2]*x[3]+6.0*x[3]*x[4])*e(3,2);
+    VectorTaylorFunction taylorfunction1(domain1,function1,swp);
+    VectorTaylorFunction taylorfunction2(domain2,function2,swp);
+    VectorTaylorFunction taylorfunction3(domain3,function3,swp);
+    ARIADNE_TEST_EQUAL(combine(taylorfunction1,taylorfunction2),taylorfunction3);
 
 }
 
@@ -474,7 +475,7 @@ void TestVectorTaylorFunction::test_conversion()
     RealVectorFunction x=RealVectorFunction::identity(2);
 
     RealVectorFunction h=RealVectorFunction((1-x[0]*x[0]-0.5*x[1],x[0]+Real(0)));
-    VectorTaylorFunction th(D,h);
+    VectorTaylorFunction th(D,h,swp);
 
     ARIADNE_TEST_PRINT(h);
     ARIADNE_TEST_PRINT(th);
@@ -496,7 +497,7 @@ void TestVectorTaylorFunction::test_domain()
     RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 
     Vector<Interval> D1(2, -1.0,1.0, -1.0,1.0);
-    VectorTaylorFunction t1(D1, (o,x0+x1));
+    VectorTaylorFunction t1(D1, (o,x0+x1), swp);
     ARIADNE_TEST_PRINT(t1);
     ARIADNE_TEST_PRINT(t1.codomain());
     Vector<Interval> D2(2, 1.0,1.0, -2.0,2.0);

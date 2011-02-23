@@ -438,6 +438,8 @@ inline tribool operator<(const ScalarTaylorFunction& x, const Float& c) {
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
 
+ScalarTaylorFunction operator-(const ScalarTaylorFunction& f1, const RealScalarFunction& f2);
+
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const Interval& c);
 ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const Interval& c);
 ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const Interval& c);
@@ -592,22 +594,15 @@ class VectorTaylorFunction
     /*! \brief Construct from a domain and the models. */
     explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector< TaylorModel<Interval> >& variables);
 
-    /*! \brief Construct from a domain and a function. */
-    VectorTaylorFunction(const Vector<Interval>& domain, const RealVectorFunction& function);
-    VectorTaylorFunction(const Vector<Interval>& domain, const IntervalVectorFunction& function);
+    /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
+    VectorTaylorFunction(const Vector<Interval>& domain,
+                         const IntervalVectorFunction& function,
+                         const Sweeper& sweeper);
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorTaylorFunction(const Vector<Interval>& domain,
                          const RealVectorFunction& function,
                          const Sweeper& sweeper);
-
-    /*! \brief Construct from a domain and a polynomial. */
-    VectorTaylorFunction(const Vector<Interval>& domain,
-                         const Vector< Polynomial<Float> >& polynomial);
-
-    /*! \brief Construct from a domain and a n interval polynomial. */
-    VectorTaylorFunction(const Vector<Interval>& domain,
-                         const Vector< Polynomial<Interval> >& polynomial);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */
     explicit VectorTaylorFunction(const Vector<ScalarTaylorFunction>& components);
@@ -793,6 +788,8 @@ class VectorTaylorFunction
     Vector<Interval> _domain;
     Vector< TaylorModel<Interval> > _models;
 };
+
+VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const RealVectorFunction& f2);
 
 // Set the value of the \a kth variable to c
 VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);

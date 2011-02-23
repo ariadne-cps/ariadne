@@ -48,8 +48,6 @@ typedef unsigned int uint;
 typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
-inline Sweeper default_sweeper() { return Sweeper(); }
-
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
 void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
@@ -265,7 +263,7 @@ ScalarTaylorFunction::polynomial() const
             ARIADNE_ASSERT(this->domain()[j].radius()==0);
             s[j]=Polynomial<Interval>::constant(this->argument_size(),this->domain()[j]);
         } else {
-            s[j]=Ariadne::polynomial(IntervalTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],default_sweeper()));
+            s[j]=Ariadne::polynomial(IntervalTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
         }
     }
 
@@ -365,6 +363,10 @@ ScalarTaylorFunction operator/(const ScalarTaylorFunction& x1, const ScalarTaylo
     else {
         ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
+}
+
+ScalarTaylorFunction operator-(const ScalarTaylorFunction& f1, const RealScalarFunction& f2) {
+    return f1 - ScalarTaylorFunction(f1.domain(),f2,f1.sweeper());
 }
 
 
@@ -874,61 +876,30 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                                           const IntervalVectorFunction& f)
+                                           const IntervalVectorFunction& f,
+                                           const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
     ARIADNE_ASSERT(f.result_size()>0);
     ARIADNE_ASSERT(d.size()==f.argument_size());
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,default_sweeper());
+    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,swp);
     this->_models=f.evaluate(x);
     this->sweep();
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const RealVectorFunction& f)
+                                           const RealVectorFunction& f,
+                                           const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
     ARIADNE_ASSERT(f.result_size()>0);
     ARIADNE_ASSERT(d.size()==f.argument_size());
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,default_sweeper());
-    this->_models=f.evaluate(x);
-    this->sweep();
-}
-
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const RealVectorFunction& f,
-                               const Sweeper& swp)
-    : _domain(d), _models(f.result_size())
-{
-    ARIADNE_ASSERT(f.result_size()>0);
-    ARIADNE_ASSERT(d.size()==f.argument_size());
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,default_sweeper());
+    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,swp);
     for(uint i=0; i!=x.size(); ++i) { x[i].set_sweeper(swp); }
     this->_models=f.evaluate(x);
     this->sweep();
 }
 
-
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const Vector< Polynomial<Float> >& p)
-    : _domain(d), _models(p.size())
-{
-    for(uint i=0; i!=p.size(); ++i) { ARIADNE_ASSERT(d.size()==p[i].argument_size()); }
-
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,default_sweeper());
-    this->_models=Ariadne::evaluate(p,x);
-    this->sweep();
-}
-
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
-                               const Vector< Polynomial<Interval> >& p)
-    : _domain(d), _models(p.size())
-{
-    for(uint i=0; i!=p.size(); ++i) { ARIADNE_ASSERT(d.size()==p[i].argument_size()); }
-
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,default_sweeper());
-    this->_models=Ariadne::evaluate(p,x);
-}
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v)
     : _domain(), _models(v.size())
@@ -1544,6 +1515,11 @@ operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f)
     return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(A*f.models()));
 }
 
+VectorTaylorFunction
+operator-(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {
+    return f1 - VectorTaylorFunction(f1.domain(),f2,f1.sweeper());
+}
+
 
 
 
@@ -1677,7 +1653,7 @@ Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
 }
 
 Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {
-    return distance(f1,VectorTaylorFunction(f1.domain(),f2));
+    return distance(f1,VectorTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 
 

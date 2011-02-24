@@ -915,9 +915,6 @@ _upper_chain_reach(const SystemType& system,
 	// Initialize the validity flag (will be invalidated if any restriction of the reached region is performed)
 	bool isValid = true;
 
-	// Helper class for operations on Taylor sets
-	TaylorCalculus tc;
-
     const Float& lock_to_grid_time = _parameters->lock_to_grid_time;
     const int& lock_to_grid_steps = _parameters->lock_to_grid_steps;
     const int& maximum_grid_depth = _parameters->maximum_grid_depth;
@@ -926,22 +923,22 @@ _upper_chain_reach(const SystemType& system,
     HybridGridTreeSet new_final(grid), new_reach(grid), reach(grid), intermediate(grid);
 
     // Split the initial set into enclosures that are smaller than the minimum cell, given the grid
-    list<EnclosureType> initial_enclosures = _split_initial_set(initial_set,grid);
+    list<EnclosureType> working_enclosures = _split_initial_set(initial_set,grid);
 
     ARIADNE_LOG(5,"Computing recurrent evolution...\n");
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
 
-	// While the final set has new cells in respect to the previous reach set, process them and increase the number of locks
-    for (uint i=0; !initial_enclosures.empty(); i++)
+	// While the final set has new cells in respect to the previous reach set, process them
+    for (uint i=0; !working_enclosures.empty(); i++)
 	{
     	ARIADNE_LOG(5,"Iteration " << i << "\n");
 
-        ARIADNE_LOG(6,"Initial enclosures size = " << initial_enclosures.size() << "\n");
+        ARIADNE_LOG(6,"Initial enclosures size = " << working_enclosures.size() << "\n");
 
 		// Evolve the initial enclosures
-        make_lpair(new_reach,new_final)=_upper_reach_evolve_continuous(system,initial_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
+        make_lpair(new_reach,new_final)=_upper_reach_evolve_continuous(system,working_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
 		// Clear the initial enclosures
-		initial_enclosures.clear();
+		working_enclosures.clear();
 
 		// Remove from the result those cells that have already been evolved from or checked for activations
         new_final.remove(intermediate);
@@ -953,18 +950,18 @@ _upper_chain_reach(const SystemType& system,
 	    // Recombines in order to start performing activations-checking on the largest possible enclosures
 		new_reach.recombine();
 		ARIADNE_LOG(6,"Reach size after recombining = "<<new_reach.size()<<"\n");
-		bool reachValid = _upper_chain_reach_pushReachCells(new_reach,system,tc,initial_enclosures);
+		bool reachValid = _upper_chain_reach_pushReachCells(new_reach,system,working_enclosures);
 		if (_upper_chain_reach_break(reachValid,isValid))
 			break;
 
 		// Minces in order to identify possible enclosures lying outside the domain
 		new_final.mince(maximum_grid_depth);
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
-		bool finalValid = _upper_chain_reach_pushFinalCells(new_final,initial_enclosures);
+		bool finalValid = _upper_chain_reach_pushFinalCells(new_final,working_enclosures);
 		if (_upper_chain_reach_break(finalValid,isValid))
 			break;
 
-		ARIADNE_LOG(6,"Final enclosures size = " << initial_enclosures.size() << "\n");
+		ARIADNE_LOG(6,"Final enclosures size = " << working_enclosures.size() << "\n");
 
         reach.adjoin(new_reach);
 		intermediate.adjoin(new_final);
@@ -996,7 +993,6 @@ HybridReachabilityAnalyser::_upper_chain_reach_break(const bool& flagToCheck, bo
 bool
 HybridReachabilityAnalyser::_upper_chain_reach_pushReachCells(const HybridGridTreeSet& reachCells,
 															  const SystemType& system,
-															  const TaylorCalculus& tc,
 															  std::list<EnclosureType>& destination) const
 {
 	bool reachIsValid = true;
@@ -1024,7 +1020,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushReachCells(const HybridGridTr
 		}
 
 		ARIADNE_LOG(7,"Checking transitions for box "<< bx <<" in location " << loc.name() << "\n");
-		bool transitionsEnclosuresAreValid = _upper_chain_reach_pushTargetEnclosures(system.transitions(loc),ContinuousEnclosureType(bx),tc,grid,destination);
+		bool transitionsEnclosuresAreValid = _upper_chain_reach_pushTargetEnclosures(system.transitions(loc),ContinuousEnclosureType(bx),grid,destination);
 		if (_upper_chain_reach_break(transitionsEnclosuresAreValid,reachIsValid))
 			break;
 	}
@@ -1035,7 +1031,6 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushReachCells(const HybridGridTr
 bool
 HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
 																	const ContinuousEnclosureType& source,
-																	const TaylorCalculus& tc,
 																	const HybridGrid& grid,
 																	std::list<EnclosureType>& destination) const
 {
@@ -1050,7 +1045,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosures(const std::l
 
 		Vector<Float> minTargetCellWidths = grid[trans_it->target()].lengths()/numCellDivisions;
 
-		bool currentTransitionEnclosuresAreValid = _upper_chain_reach_pushTargetEnclosuresOfTransition(*trans_it,source,tc,minTargetCellWidths,destination);
+		bool currentTransitionEnclosuresAreValid = _upper_chain_reach_pushTargetEnclosuresOfTransition(*trans_it,source,minTargetCellWidths,destination);
 		if (_upper_chain_reach_break(currentTransitionEnclosuresAreValid,enclosuresAreValid))
 			break;
 	}
@@ -1061,13 +1056,15 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosures(const std::l
 bool
 HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
 																				const ContinuousEnclosureType& source,
-																				const TaylorCalculus& tc,
 																				const Vector<Float>& minTargetCellWidths,
 																				std::list<EnclosureType>& destination) const
 {
 	bool enclosuresAreValid = true;
 
 	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
+
+	// Helper class for operations on Taylor sets
+	TaylorCalculus tc;
 
 	std::list<ContinuousEnclosureType> split_list;
 	split_list.push_front(source);
@@ -1202,19 +1199,18 @@ upper_chain_reach(SystemType& system,
 
 			system.substitute(*set_it);
 
-			HybridGridTreeSet localReach;
-			bool localIsValid;
+			std::pair<HybridGridTreeSet,bool> reachAndValidity = _upper_chain_reach(system,initial_set);
+			const HybridGridTreeSet& local_reach = reachAndValidity.first;
+			const bool& local_isValid = reachAndValidity.second;
 
-			make_lpair<HybridGridTreeSet,bool>(localReach,localIsValid) = _upper_chain_reach(system,initial_set);
-
-			reach.adjoin(localReach);
+			reach.adjoin(local_reach);
 			_statistics->upper().reach = reach;
 
-			isValid = isValid && localIsValid;
+			isValid = isValid && local_isValid;
 
 			// We skip if allowed and if either the partial result is not valid or outside the safe region
 			if (_parameters->skip_if_unprovable) {
-				if (!isValid || (isValid && definitely(!localReach.subset(_parameters->safe_region)))) {
+				if (!isValid || (isValid && definitely(!local_reach.subset(_parameters->safe_region)))) {
 					isValid = false;
 					break;
 				}
@@ -1303,16 +1299,11 @@ _lower_chain_reach(const SystemType& system,
 		// Update the falsification info
 		globalFalsInfo.updateWith(newFalsInfo);
 
-		// Remove from the partial reached region the global reached region
 		new_reach.remove(reach);
-
 		ARIADNE_LOG(6,"Reach size after removal  = " << new_reach.size() << "\n");
-
-		// Check for inclusion: if no new cells are found, terminate
 		if (new_reach.empty())
 			break;
 
-		// Otherwise proceed and adjoin the new reach
 		reach.adjoin(new_reach);
 
 		ARIADNE_LOG(6,"Final enclosures size = " << final_enclosures.size() << "\n");
@@ -1352,7 +1343,6 @@ _lower_chain_reach(const SystemType& system,
 		}
 	}
 
-	// Copies the reached region
 	_statistics->lower().reach = reach;
 
 	return make_pair<GTS,DisproveData>(reach,globalFalsInfo);
@@ -1382,24 +1372,20 @@ lower_chain_reach(SystemType& system,
 
 			system.substitute(*set_it);
 
-			HybridGridTreeSet localReach;
+			std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData = _lower_chain_reach(system,initial_set);
 
-			DisproveData localFalsInfo(system.state_space());
-
-			make_lpair<HybridGridTreeSet,DisproveData>(localReach,localFalsInfo) = _lower_chain_reach(system,initial_set);
-
-			reach.adjoin(localReach);
-			disproveData.updateWith(localFalsInfo);
+			reach.adjoin(reachAndDisproveData.first);
+			disproveData.updateWith(reachAndDisproveData.second);
 
 			_statistics->lower().reach = reach;
 
-			if (_parameters->skip_if_disproved && disproveData.getIsDisproved())
+			if (_parameters->skip_if_disproved && reachAndDisproveData.second.getIsDisproved())
 				break;
 		}
 		system.substitute(original_constants);
 	}
 
-	return std::pair<HybridReachabilityAnalyser::SetApproximationType,DisproveData>(reach,disproveData);
+	return std::pair<HybridGridTreeSet,DisproveData>(reach,disproveData);
 }
 
 
@@ -1418,17 +1404,13 @@ _prove(SystemType& system,
 	   const HybridImageSet& initial_set)
 {
 	bool result;
-	// The reachable set
-	HybridGridTreeSet reach;
-	// The flag that informs whether the region is valid for proving
-	bool isValid;
 
 	ARIADNE_LOG(4,"Proving... " << (verbosity == 4 ? "" : "\n"));
 
-	make_lpair<HybridGridTreeSet,bool>(reach,isValid) = upper_chain_reach(system,initial_set);
+	std::pair<HybridGridTreeSet,bool> reachAndIsValid = upper_chain_reach(system,initial_set);
 
 	// Proved iff the reached region is valid (i.e. it has not been restricted) and is inside the safe region
-	result = (isValid && definitely(reach.subset(_parameters->safe_region)));
+	result = (reachAndIsValid.second && definitely(reachAndIsValid.first.subset(_parameters->safe_region)));
 
 	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (result ? "Proved.\n" : "Not proved.\n") );
 
@@ -1440,16 +1422,14 @@ HybridReachabilityAnalyser::
 _disprove(SystemType& system,
 		  const HybridImageSet& initial_set)
 {
-	DisproveData disproveData(system.state_space());
-	HybridGridTreeSet reach;
-
 	ARIADNE_LOG(4,"Disproving... " << (verbosity == 4 ? "" : "\n"));
 
-	make_lpair<HybridGridTreeSet,DisproveData>(reach,disproveData) = lower_chain_reach(system,initial_set);
+	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData = lower_chain_reach(system,initial_set);
+	const bool& isDisproved = reachAndDisproveData.second.getIsDisproved();
 
-	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (disproveData.getIsDisproved() ? "Disproved.\n" : "Not disproved.\n") );
+	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
 
-	return disproveData.getIsDisproved();
+	return isDisproved;
 }
 
 

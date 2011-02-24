@@ -226,39 +226,12 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
            			  		const TimeType& maximum_hybrid_time,
            			  		bool reach) const
 {
-    typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
-
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n"); 
-
-    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
-    const Float maximum_time=maximum_hybrid_time.continuous_time();
-
-    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
+    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_hybrid_time.continuous_time()<<" time units and "<<maximum_hybrid_time.discrete_time()<<" steps.\n");
 
 	// The working sets, pushed back and popped front
     std::list<HybridTimedSetType> working_sets;
-
-    {
-        // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        DiscreteState initial_location;
-        ContinuousEnclosureType initial_continuous_set;
-        make_lpair(initial_location,initial_continuous_set)=initial_set;
-        ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
-        SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
-        ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
-        ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
-        TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
-        ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
-        working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
-
-		// Check for match between the enclosure cell size and the set size
-		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
-		// Check for non-zero maximum step size
-		ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
-    }
+    _evolution_add_initialSet(working_sets,initial_set);
 
 	// While there exists a working set, process it and increment the total
 	while(!working_sets.empty()) {
@@ -267,53 +240,29 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 		HybridTimedSetType current_set = working_sets.front(); 
 		working_sets.pop_front();
 
-		// Get the members of the current set
+		// Possibly simplifies the current set
+		_set_model_reduction(current_set);
+
         DiscreteState initial_location=current_set.first;
         EventListType initial_events=current_set.second;  	
 		SetModelType initial_set_model=current_set.third;
 		TimeModelType initial_time_model=current_set.fourth;		
 
-		// Get the range of the set model
-		Vector<Interval> initial_set_model_range=initial_set_model.range();
+		bool isEnclosureTooLarge = _isEnclosureTooLarge(initial_set_model);
 
-		// Check whether the range widths can be included into the maximum_enclosure_cell
-		bool has_max_enclosure_been_reached = false;
-		for (uint i=0;i<initial_set_model_range.size();++i) 
-		{
-			Float rangewidth = initial_set_model_range[i].width(); // Store the width
-			// If larger than the maximum allowed
-			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
-				has_max_enclosure_been_reached = true;
-				break; 
-			}
-		}
-
-        if(initial_time_model.range().lower()>=maximum_time) {
-            ARIADNE_LOG(3,"  Final time reached, adjoining the initial set to the final sets.\n");
+        if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time()) {
+            ARIADNE_LOG(3,"\n\nFinal time reached: adjoining the initial set to the final sets.\n\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if(has_max_enclosure_been_reached) {
+        } else if(isEnclosureTooLarge) {
             ARIADNE_LOG(1,"\n\nTerminating evolution at time " << initial_time_model.value()
-                        << " and set centre " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded, adjoining the initial set to the final sets.\n\n");
+                        << " and set centre " << initial_set_model.centre() << " due to the enclosure being too large: adjoining the initial set to the final sets.\n\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else {
-            // Compute evolution
-            this->_upper_evolution_continuous_step(working_sets,
-                                  				   final_sets,reach_sets,intermediate_sets,
+            this->_upper_evolution_continuous_step(working_sets,final_sets,reach_sets,intermediate_sets,
                                   				   system,current_set,maximum_hybrid_time,reach);
         }
 
-
-        if(verbosity==1) {
-            ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
-                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                        <<" s="<<std::setw(3)<<std::left<<initial_events.size()
-                        <<" t="<<std::fixed<<initial_time_model.value()
-                        <<" r="<<std::setw(7)<<initial_set_model.radius()
-                        <<" l="<<std::setw(3)<<std::left<<initial_location
-                        <<" c="<<initial_set_model.centre()
-                        <<" e="<<initial_events
-                        <<"\n");
-        }
+        _logStepAtVerbosity1(working_sets,reach_sets,initial_events,initial_time_model,initial_set_model,initial_location);
     }
 }
 
@@ -329,42 +278,15 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 						  const HybridBoxes& disprove_bounds,
 						  bool skip_if_disproved) const
 {
-    typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
-
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
-
-    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
-    const Float maximum_time=maximum_hybrid_time.continuous_time();
+    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_hybrid_time.continuous_time()<<" time units and "<<maximum_hybrid_time.discrete_time()<<" steps.\n");
 
     // The disprovement information for the result
     DisproveData disproveData(system.state_space());
 
-    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
-
 	// The working sets, pushed back and popped front
     std::list< HybridTimedSetType > working_sets;
-
-    {
-        // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        DiscreteState initial_location;
-        ContinuousEnclosureType initial_continuous_set;
-        make_lpair(initial_location,initial_continuous_set)=initial_set;
-        ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
-        SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
-        ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
-        ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
-        TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
-        ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
-        working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
-
-		// Check for match between the enclosure cell size and the set size
-		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
-		// Check for non-zero maximum step size
-		ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
-    }
+    _evolution_add_initialSet(working_sets,initial_set);
 
 	// While there exists a working set, process it and increment the total
 	while(!working_sets.empty()) {
@@ -373,72 +295,27 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 		HybridTimedSetType current_set = working_sets.front();
 		working_sets.pop_front();
 
-		// New set and time models, if set model reduction is to be performed
-		SetModelType new_set_model;
-		TimeModelType new_time_model;
+		// Possibly simplifies the current set
+		_set_model_reduction(current_set);
 
-		// Perform set model reduction if enabled and if the interleaving distance is met
-		if (this->_parameters->enable_set_model_reduction && !((current_set.second.size()+1) % (this->_parameters->set_model_events_size_interleaving+1)))
-		{
-			new_set_model = this->_toolbox->set_model(ContinuousEnclosureType(current_set.third.range()));
-			new_time_model = this->_toolbox->time_model(current_set.fourth.range(),Box(new_set_model.argument_size()));
-			current_set = make_tuple(current_set.first,current_set.second, new_set_model, new_time_model);
-		}
-
-		// Get the members of the current set
         DiscreteState initial_location=current_set.first;
         EventListType initial_events=current_set.second;
 		SetModelType initial_set_model=current_set.third;
 		TimeModelType initial_time_model=current_set.fourth;
 
-		// Get the range of the set model
-		Vector<Interval> initial_set_model_range=initial_set_model.range();
+		bool isEnclosureTooLarge = _isEnclosureTooLarge(initial_set_model);
 
-		// Check whether the range can be included into the maximum_enclosure_cell
-		bool has_max_enclosure_been_reached = false;
-		Float maxratio = 0.0; // Hold the maximum ratio between the set width and the largest enclosure cell width
-		uint maxratio_dimension = -1; // Hold the dimension corresponding to the maximum ratio
-		for (uint i=0;i<initial_set_model_range.size();++i)
-		{
-			Float rangewidth = initial_set_model_range[i].width(); // Store the width
-			// If larger than the maximum allowed
-			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
-				// If a ratio greater than the current maximum is detected, update the maximum ratio information
-				if (rangewidth/this->_parameters->maximum_enclosure_cell[i] > maxratio)
-				{
-					maxratio = rangewidth/this->_parameters->maximum_enclosure_cell[i];
-					maxratio_dimension = i;
-				}
-				has_max_enclosure_been_reached = true;
-				break;
-			}
-		}
-
-		// If the time model range width is greater than half the maximum step size, we will divide the timed model in respect to time
 		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
 
-		if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
+		if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time() ||
+		   initial_events.size()>=uint(maximum_hybrid_time.discrete_time())) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
-            // Subdivide over time
             ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
-            uint nd=initial_set_model.dimension();
-            SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
-            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,nd);
-            ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
-            for(uint i=0; i!=subdivisions.size(); ++i) {
-                TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
-                ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
-                SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
-                TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
-                ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
-                ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
-                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
-                working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
-            }
+            _add_models_subdivisions_time(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
 		} else if(!this->_parameters->enable_subdivisions &&
-                  this->_parameters->enable_premature_termination && has_max_enclosure_been_reached) {
+                  this->_parameters->enable_premature_termination && isEnclosureTooLarge) {
             ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
         } else {
@@ -447,25 +324,12 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 																		    final_sets,reach_sets,intermediate_sets,
 																			system,current_set,maximum_hybrid_time,
 																			reach,disprove_bounds);
-            // Updates the global falsification info
             disproveData.updateWith(localDisproveData);
-            // If we desire to skip the remaining evolution after disproving, and we have disproved, then we return
             if (skip_if_disproved && disproveData.getIsDisproved())
 				return disproveData;
         }
 
-
-        if(verbosity==1) {
-            ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
-                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                        <<" s="<<std::setw(3)<<std::left<<initial_events.size()
-                        <<" t="<<std::fixed<<initial_time_model.value()
-                        <<" r="<<std::setw(7)<<initial_set_model.radius()
-                        <<" l="<<std::setw(3)<<std::left<<initial_location
-                        <<" c="<<initial_set_model.centre()
-                        <<" e="<<initial_events
-                        <<"\n");
-        }
+		_logStepAtVerbosity1(working_sets,reach_sets,initial_events,initial_time_model,initial_set_model,initial_location);
     }
 
     return disproveData;
@@ -482,39 +346,12 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    typedef boost::shared_ptr< const VectorFunction > FunctionConstPointer;
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
-
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
-
-    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time();
-    const Float maximum_time=maximum_hybrid_time.continuous_time();
-
-    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_time<<" time units and "<<maximum_steps<<" steps.\n");
+    ARIADNE_LOG(1,"Computing evolution up to "<<maximum_hybrid_time.continuous_time()<<" time units and "<<maximum_hybrid_time.discrete_time()<<" steps.\n");
 
 	// The working sets, pushed back and popped front
     std::list< HybridTimedSetType > working_sets;
-
-    {
-        // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        DiscreteState initial_location;
-        ContinuousEnclosureType initial_continuous_set;
-        make_lpair(initial_location,initial_continuous_set)=initial_set;
-        ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
-        SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
-        ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
-        ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
-        TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
-        ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
-        working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
-
-		// Check for match between the enclosure cell size and the set size
-		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
-		// Check for non-zero maximum step size
-		ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
-    }
+    _evolution_add_initialSet(working_sets,initial_set);
 
 	// While there exists a working set, process it and increment the total
 	while(!working_sets.empty()) {
@@ -523,17 +360,8 @@ _evolution(EnclosureListType& final_sets,
 		HybridTimedSetType current_set = working_sets.front();
 		working_sets.pop_front();
 
-		// New set and time models, if set model reduction is to be performed
-		SetModelType new_set_model;
-		TimeModelType new_time_model;
-
-		// Perform set model reduction if enabled and if the interleaving distance is met
-		if (this->_parameters->enable_set_model_reduction && !((current_set.second.size()+1) % (this->_parameters->set_model_events_size_interleaving+1)))
-		{
-			new_set_model = this->_toolbox->set_model(ContinuousEnclosureType(current_set.third.range()));
-			new_time_model = this->_toolbox->time_model(current_set.fourth.range(),Box(new_set_model.argument_size()));
-			current_set = make_tuple(current_set.first,current_set.second, new_set_model, new_time_model);
-		}
+		// Possibly simplifies the current set
+		_set_model_reduction(current_set);
 
 		// Get the members of the current set
         DiscreteState initial_location=current_set.first;
@@ -541,97 +369,34 @@ _evolution(EnclosureListType& final_sets,
 		SetModelType initial_set_model=current_set.third;
 		TimeModelType initial_time_model=current_set.fourth;
 
-		// Get the range of the set model
-		Vector<Interval> initial_set_model_range=initial_set_model.range();
+		bool isEnclosureTooLarge = _isEnclosureTooLarge(initial_set_model);
 
-		// Check whether the range can be included into the maximum_enclosure_cell
-		bool has_max_enclosure_been_reached = false;
-		Float maxratio = 0.0; // Hold the maximum ratio between the set width and the largest enclosure cell width
-		uint maxratio_dimension = -1; // Hold the dimension corresponding to the maximum ratio
-		for (uint i=0;i<initial_set_model_range.size();++i)
-		{
-			Float rangewidth = initial_set_model_range[i].width(); // Store the width
-			// If larger than the maximum allowed
-			if (rangewidth > this->_parameters->maximum_enclosure_cell[i]) {
-				// If a ratio greater than the current maximum is detected, update the maximum ratio information
-				if (rangewidth/this->_parameters->maximum_enclosure_cell[i] > maxratio)
-				{
-					maxratio = rangewidth/this->_parameters->maximum_enclosure_cell[i];
-					maxratio_dimension = i;
-				}
-				has_max_enclosure_been_reached = true;
-				break;
-			}
-		}
-
-		// If the time model range width is greater than half the maximum step size, we will divide the timed model in respect to time
 		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
 
-		if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
+		if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time() ||
+		   initial_events.size()>=uint(maximum_hybrid_time.discrete_time())) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
-            // Subdivide over time
             ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
-            uint nd=initial_set_model.dimension();
-            SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
-            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,nd);
-            ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
-            for(uint i=0; i!=subdivisions.size(); ++i) {
-                TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
-                ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
-                SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
-                TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
-                ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
-                ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
-                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
-                working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
-            }
-		} else if (semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && has_max_enclosure_been_reached) {
-            // Subdivide over space
-            ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model_range << " widths larger than maximum_enclosure_cell " << this->_parameters->maximum_enclosure_cell << ", subdividing.\n");
-            uint nd=initial_set_model.dimension();
-            SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
-            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);//,maxratio_dimension);
-            ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
-            for(uint i=0; i!=subdivisions.size(); ++i) {
-                TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
-                ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
-                SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
-                TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
-                ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
-                ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
-                ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
-                working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
-            }
+            _add_models_subdivisions_time(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
+		} else if (semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && isEnclosureTooLarge) {
+            ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model.range() << " widths larger than maximum_enclosure_cell " << this->_parameters->maximum_enclosure_cell << ", subdividing.\n");
+            _add_models_subdivisions_autoselect(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
         } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
-                  this->_parameters->enable_premature_termination && has_max_enclosure_been_reached) {
+                  this->_parameters->enable_premature_termination && isEnclosureTooLarge) {
             ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
-            if(semantics == UPPER_SEMANTICS) {
-                // adjoin to the final sets
+            if(semantics == UPPER_SEMANTICS)
                 final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-            }
         } else {
-            // Compute evolution
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   system,current_set,maximum_hybrid_time,
                                   semantics,reach);
         }
 
-
-        if(verbosity==1) {
-            ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
-                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                        <<" s="<<std::setw(3)<<std::left<<initial_events.size()
-                        <<" t="<<std::fixed<<initial_time_model.value()
-                        <<" r="<<std::setw(7)<<initial_set_model.radius()
-                        <<" l="<<std::setw(3)<<std::left<<initial_location
-                        <<" c="<<initial_set_model.centre()
-                        <<" e="<<initial_events
-                        <<"\n");
-        }
+		_logStepAtVerbosity1(working_sets,reach_sets,initial_events,initial_time_model,initial_set_model,initial_location);
     }
 }
 
@@ -759,20 +524,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_ASSERT(set_model.argument_size()==time_model.argument_size());
     ARIADNE_ASSERT_MSG(set_model.result_size()==mode.dimension(),"set_model="<<set_model<<", mode="<<mode);
 
-    ARIADNE_LOG(2,"\n\nHybridEvolver::_evolution_step(...)\n");
-    ARIADNE_LOG(2,"events = "<<events<<" ");
-    ARIADNE_LOG(2,"time_range = "<<time_model.range()<<" ");
-    ARIADNE_LOG(2,"time_model generators = "<<time_model.argument_size()<<" ");
-    ARIADNE_LOG(2,"location = "<<location<<" ");
-    ARIADNE_LOG(2,"box = "<<set_model.range()<<" ");
-    ARIADNE_LOG(2,"generators = "<<set_model.argument_size()<<" ");
-    ARIADNE_LOG(2,"radius = "<<radius(set_model.range())<<"\n\n");
-
-    ARIADNE_LOG(2,"dynamic = "<<dynamic<<"\n");
-    ARIADNE_LOG(2,"invariants = "<<mode.invariants()<<"\n");
-    ARIADNE_LOG(2,"transitions = "<<transitions<<"\n\n");
-    ARIADNE_LOG(2,"guards = "<<guards<<"\n\n");
-    ARIADNE_LOG(2,"activations = "<<activations<<"\n\n");
+    _logEvolutionStepInitialState(events,time_model,location,set_model,dynamic,invariants,transitions,guards,activations);
 
     // Compute initially active guards
     std::map<DiscreteEvent,tribool> initially_active_events;
@@ -781,51 +533,8 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 
     // Test for initially active events, and process these as required
     if(definitely(initially_active_events[blocking_event])) {
-
-    	// Flag to hold the information of an invariant being definitely active for this set model
-    	bool has_active_invariant = false;
-
-        // Check if at least one invariant is definitely active in this mode
-        for(std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); inv_it++) {
-            tribool active=this->_toolbox->active(inv_it->second,set_model);
-            if(definitely(active)) {
-				has_active_invariant = true;
-				break;
-            }
-        }
-
-		// The set model is added only if there is no definitely active invariant
-        if (!has_active_invariant) {
-            reach_sets.insert(make_pair(location,set_model));
-            intermediate_sets.insert(make_pair(location,set_model));
-        }
-        else
-        {
-        	// If the invariant is definitely initially active, the discrete events should not be evaluated
-        	ARIADNE_LOG(2,"An invariant is initially active: discarding the set.\n");
-        }
-
-        ARIADNE_LOG(2,"A blocking event is initially active, no continuous evolution, just apply discrete events.\n");
-
-        // No continuous evolution; just apply discrete events
-        for(std::list<DiscreteTransition>::const_iterator iter=transitions.begin();
-            iter!=transitions.end(); ++iter)
-        {
-            ARIADNE_LOG(3,"Testing transition "<<iter->event()<<".\n");
-            tribool active=this->_toolbox->active(iter->activation(),set_model);
-            if(definitely(active) || (possibly(active) && UPPER_SEMANTICS)) {
-                ARIADNE_LOG(3,"Transition "<<iter->event()<<" should be activated.\n");
-                SetModelType jump_set_model=this->_toolbox->reset_step(iter->reset(),set_model);
-                TimeModelType jump_time_model=time_model;
-                DiscreteState jump_location=iter->target();
-                std::vector<DiscreteEvent> jump_events=events;
-                jump_events.push_back(iter->event());
-                ARIADNE_LOG(2,"Pushing back "<<jump_set_model<<" into working_sets\n");
-                working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
-            }
-        }
-
-        // No need for further work this step
+		_processInitiallyActiveBlockingEvents(working_sets,reach_sets,intermediate_sets,location,events,
+	        		   	   	   	   	   	  set_model,time_model,invariants,transitions);
         return;
 
     } else if(possibly(initially_active_events[blocking_event]) && semantics==LOWER_SEMANTICS) {
@@ -839,15 +548,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     FlowSetModelType flow_set_model; BoxType flow_bounds; 
     Float time_step = this->_parameters->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
-
-    ARIADNE_LOG(2,"Computing flow model.\n");
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
-
-    for(uint i=0; i!=flow_set_model.size(); ++i) {
-        if(flow_set_model[i].error()<0) {
-            std::cerr<<flow_set_model<<std::endl;
-        }
-    }
 
     ARIADNE_LOG(2,"flow_bounds = "<<flow_bounds<<"\n")
     ARIADNE_LOG(2,"time_step = "<<time_step<<"\n")
@@ -861,135 +562,23 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     TimeModelType zero_time_model = this->_toolbox->time_model(0.0,Box(time_model.argument_size()));
     TimeModelType time_step_model = this->_toolbox->time_model(1.0,Box(time_model.argument_size()));
 
-    // Compute event blocking times
-    std::map<DiscreteEvent, TimeModelType> event_blocking_times;
-    std::set<DiscreteEvent> non_transverse_events;
-
-
-    event_blocking_times[finishing_event]=time_step_model;
-    compute_blocking_events(event_blocking_times,non_transverse_events,guards,flow_set_model);
-    ARIADNE_LOG(3,"event_blocking_times="<<event_blocking_times<<"\n");
-
-    std::map<DiscreteEvent,Interval> event_blocking_time_intervals;
-    for(std::map<DiscreteEvent, TimeModelType>::const_iterator iter=event_blocking_times.begin();
-        iter!=event_blocking_times.end(); ++iter) { event_blocking_time_intervals[iter->first]=iter->second.range(); }
-
-    ARIADNE_LOG(2,"event_blocking_times="<<event_blocking_time_intervals<<"\n");
-    ARIADNE_LOG(2,"non_transverse_events="<<non_transverse_events<<"\n\n");
-
-    // Compute blocking events
     std::set<DiscreteEvent> blocking_events;
     TimeModelType blocking_time_model;
-    compute_blocking_time(blocking_events,blocking_time_model,event_blocking_times);
-    ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
-    ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
+    std::set<DiscreteEvent> non_transverse_events;
+    _compute_blocking_info(non_transverse_events,blocking_events,blocking_time_model,
+    				  time_step_model,flow_set_model,guards,SMALL_RELATIVE_TIME);
 
-    // If multiple blocking events and flow time is large, move closer to blocking time
-    if(blocking_events.size()!=1 && blocking_time_model.range().upper()>SMALL_RELATIVE_TIME) {
-        blocking_events.clear();
-        blocking_events.insert(finishing_event);
-        if(blocking_time_model.range().lower()>0) {
-            blocking_time_model-=blocking_time_model.error();
-            blocking_time_model.set_error(0.0);
-        }
-        blocking_time_model*=(1-SMALL_RELATIVE_TIME);
-    }
-    ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
-    ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
-/*
-    // If blocking time is smaller than the time step, recompute the flow up to blocking time
-    if(blocking_time_model.range().upper()<1.0) {
-        time_step *= blocking_time_model.range().upper();
-        ARIADNE_LOG(2,"Blocking time is smaller than time step, recomputing flow model.\n");
-        compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
-        ARIADNE_LOG(2,"  new time step = " << time_step << "\n");        
-    }       
-*/
-    // Treat non-transverse urgent events as non-urgent in upper semantics
-    for(std::set<DiscreteEvent>::const_iterator iter=non_transverse_events.begin(); iter!=non_transverse_events.end(); ++iter) {
-        if(iter->is_transition()) {     // If the event is a transition
-            activations[*iter]=guards.find(*iter)->second;
-       }
-    }
+    ActivationTimesType activation_times;
+    _compute_activation_info(activations,activation_times,non_transverse_events,flow_set_model,
+    						 blocking_time_model,guards,semantics);
 
-    // Compute activation times
-    std::map< DiscreteEvent,tuple<TimeModelType,TimeModelType> > activation_times;
-    this->compute_activation_times(activation_times,activations,flow_set_model,blocking_time_model,semantics);
+    SetModelType reachable_set;
+    _computeAndAdjoin_reachable_set(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
 
-    // Display activation time ranges
-    std::map< DiscreteEvent,tuple<Interval> > activation_time_intervals;
-    for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator
-            iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
-    {
-        activation_time_intervals.insert(make_pair(iter->first,make_tuple(iter->second.second.range())));
-    }
-    ARIADNE_LOG(2,"activation_times="<<activation_time_intervals<<"\n\n");
+    if(semantics!=LOWER_SEMANTICS || blocking_events.size()==1)
+    	_computeEvolutionForEvents(working_sets,intermediate_sets,system,location,blocking_events,events,
+    								activation_times,flow_set_model,time_model,blocking_time_model,time_step);
 
-
-
-    // Compute sets
-    // TODO: Make this a function;
-
-    ARIADNE_LOG(4,"flow_set_model="<<flow_set_model<<"\n");
-    ARIADNE_LOG(4,"zero_time_model="<<zero_time_model<<"\n");
-    ARIADNE_LOG(4,"blocking_time_model="<<blocking_time_model<<"\n");
-    SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,zero_time_model,blocking_time_model);
-    reach_sets.adjoin(make_pair(location,reachable_set));
-
-	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
-    ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
-    ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
-    if(semantics==LOWER_SEMANTICS && blocking_events.size()!=1) {
-        // No further evolution
-    } else {
-        TimeModelType final_time_model=time_model+blocking_time_model*time_step;
-        ARIADNE_LOG(2,"final_time_range="<<final_time_model.range()<<"\n");
-        SetModelType evolved_set_model=this->_toolbox->integration_step(flow_set_model,blocking_time_model);
-        ARIADNE_LOG(2,"evolved_set_model.argument_size()="<<evolved_set_model.argument_size()<<"\n");
-        ARIADNE_LOG(2,"evolved_set_range="<<evolved_set_model.range()<<"\n");
-        // Compute evolution for blocking events
-        for(std::set<DiscreteEvent>::const_iterator iter=blocking_events.begin(); iter!=blocking_events.end(); ++iter) {
-            const DiscreteEvent event=*iter;
-            if(event==finishing_event) {
-                // TODO: Better estimate to use smaller blocking time
-                intermediate_sets.adjoin(make_pair(location,evolved_set_model));
-                working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
-            } else if(event.is_transition()) { // not an invariant
-                intermediate_sets.adjoin(make_pair(location,evolved_set_model));
-                const DiscreteTransition& transition=system.transition(event,location);
-                SetModelType jump_set_model=apply(transition.reset(),evolved_set_model);
-                DiscreteState jump_location=transition.target();
-                std::vector<DiscreteEvent> jump_events=events;
-                jump_events.push_back(event);
-                working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,final_time_model));
-            }
-        }
-        // Compute evolution for non-blocking events
-        for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator
-            iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
-        {
-            const DiscreteEvent event=iter->first;
-            const TimeModelType lower_active_time_model=iter->second.first;
-            const TimeModelType upper_active_time_model=iter->second.second;
-            ARIADNE_LOG(3,"Non blocking event "<<event<<":\n");
-            ARIADNE_LOG(3,"  lower_active_time_model="<<lower_active_time_model.range()<<";\n");
-            ARIADNE_LOG(3,"  upper_active_time_model="<<upper_active_time_model.range()<<";\n");
-            SetModelType active_set_model=this->_toolbox->reachability_step(flow_set_model,lower_active_time_model,upper_active_time_model);
-            ARIADNE_LOG(3,"  active_set="<<active_set_model.range()<<";\n");
-            const DiscreteTransition& transition=system.transition(event,location);
-            SetModelType jump_set_model=apply(transition.reset(),active_set_model);
-            ARIADNE_LOG(3,"  jump_set_model="<<active_set_model.range()<<";\n");
-            const TimeModelType active_time_model = this->_toolbox->reachability_time(time_model+lower_active_time_model*time_step,time_model+upper_active_time_model*time_step);
-            ARIADNE_LOG(3,"  active_time_model="<<active_time_model.range()<<".\n");
-
-            DiscreteState jump_location=transition.target();
-            std::vector<DiscreteEvent> jump_events=events;
-            jump_events.push_back(event);
-            working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,active_time_model));
-        }
-    }
-
-    wait_for_keypress();
 }
 
 
@@ -1029,51 +618,15 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_ASSERT(set_model.argument_size()==time_model.argument_size());
     ARIADNE_ASSERT_MSG(set_model.result_size()==mode.dimension(),"set_model="<<set_model<<", mode="<<mode);
 
-    ARIADNE_LOG(2,"\n\nHybridEvolver::_evolution_step(...)\n");
-    ARIADNE_LOG(2,"events = "<<events<<" ");
-    ARIADNE_LOG(2,"time_range = "<<time_model.range()<<" ");
-    ARIADNE_LOG(2,"time_model generators = "<<time_model.argument_size()<<" ");
-    ARIADNE_LOG(2,"location = "<<location<<" ");
-    ARIADNE_LOG(2,"box = "<<set_model.range()<<" ");
-    ARIADNE_LOG(2,"generators = "<<set_model.argument_size()<<" ");
-    ARIADNE_LOG(2,"radius = "<<radius(set_model.range())<<"\n\n");
+    _logEvolutionStepInitialState(events,time_model,location,set_model,dynamic,invariants,transitions,guards,activations);
 
-    ARIADNE_LOG(2,"dynamic = "<<dynamic<<"\n");
-    ARIADNE_LOG(2,"invariants = "<<mode.invariants()<<"\n");
-    ARIADNE_LOG(2,"transitions = "<<transitions<<"\n\n");
-    ARIADNE_LOG(2,"guards = "<<guards<<"\n\n");
-    ARIADNE_LOG(2,"activations = "<<activations<<"\n\n");
-
-
-    // Compute initially active guards
+    // Compute initially active events
     std::map<DiscreteEvent,tribool> initially_active_events;
     this->compute_initially_active_events(initially_active_events, guards, set_model);
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
 
-    // Test for initially active events, and process these as required
     if(definitely(initially_active_events[blocking_event])) {
-
-    	// Flag to hold the information of an invariant being definitely active for this set model
-    	bool has_active_invariant = false;
-
-        // Check if at least one invariant is definitely active in this mode
-        for(std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); inv_it++) {
-            tribool active=this->_toolbox->active(inv_it->second,set_model);
-            if(definitely(active)) {
-				has_active_invariant = true;
-				break;
-            }
-        }
-
-		// The set model is added only if there is no definitely active invariant
-        if (!has_active_invariant) {
-        	ARIADNE_LOG(2,"A forced transition is initially active: no continuous evolution, adjoining reach set.\n");
-            reach_sets.insert(make_pair(location,set_model));
-            intermediate_sets.insert(make_pair(location,set_model));
-        }
-        else
-        	ARIADNE_LOG(2,"An invariant is initially active: no continuous evolution, discarding the set.\n");
-
+    	_processInitiallyActiveBlockingEvents_continuous(reach_sets,intermediate_sets,invariants,set_model,location);
         return;
     }
 
@@ -1081,15 +634,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     FlowSetModelType flow_set_model; BoxType flow_bounds; 
     Float time_step = this->_parameters->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
-
-    ARIADNE_LOG(2,"Computing flow model.\n");
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
-
-    for(uint i=0; i!=flow_set_model.size(); ++i) {
-        if(flow_set_model[i].error()<0) {
-            std::cerr<<flow_set_model<<std::endl;
-        }
-    }
 
     ARIADNE_LOG(2,"flow_bounds = "<<flow_bounds<<"\n")
     ARIADNE_LOG(2,"time_step = "<<time_step<<"\n")
@@ -1103,55 +648,15 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     TimeModelType zero_time_model = this->_toolbox->time_model(0.0,Box(time_model.argument_size()));
     TimeModelType time_step_model = this->_toolbox->time_model(1.0,Box(time_model.argument_size()));
 
-    // Compute event blocking times
-    std::map<DiscreteEvent, TimeModelType> event_blocking_times;
-    std::set<DiscreteEvent> non_transverse_events;
-
-
-    event_blocking_times[finishing_event]=time_step_model;
-    compute_blocking_events(event_blocking_times,non_transverse_events,guards,flow_set_model);
-    ARIADNE_LOG(3,"event_blocking_times="<<event_blocking_times<<"\n");
-
-    std::map<DiscreteEvent,Interval> event_blocking_time_intervals;
-    for(std::map<DiscreteEvent, TimeModelType>::const_iterator iter=event_blocking_times.begin();
-        iter!=event_blocking_times.end(); ++iter) { event_blocking_time_intervals[iter->first]=iter->second.range(); }
-
-    ARIADNE_LOG(2,"event_blocking_times="<<event_blocking_time_intervals<<"\n");
-    ARIADNE_LOG(2,"non_transverse_events="<<non_transverse_events<<"\n\n");
-
-    // Compute blocking events
+    // Compute blocking information
     std::set<DiscreteEvent> blocking_events;
     TimeModelType blocking_time_model;
-    compute_blocking_time(blocking_events,blocking_time_model,event_blocking_times);
-    ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
-    ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
+    std::set<DiscreteEvent> non_transverse_events;
+    _compute_blocking_info(non_transverse_events,blocking_events,blocking_time_model,
+    				  time_step_model,flow_set_model,guards,SMALL_RELATIVE_TIME);
 
-    // If multiple blocking events and flow time is large, move closer to blocking time
-    if(blocking_events.size()!=1 && blocking_time_model.range().upper()>SMALL_RELATIVE_TIME) {
-        blocking_events.clear();
-        blocking_events.insert(finishing_event);
-        if(blocking_time_model.range().lower()>0) {
-            blocking_time_model-=blocking_time_model.error();
-            blocking_time_model.set_error(0.0);
-        }
-        blocking_time_model*=(1-SMALL_RELATIVE_TIME);
-    }
-    ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
-    ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
-
-    // Compute sets
-
-    ARIADNE_LOG(4,"flow_set_model="<<flow_set_model<<"\n");
-    ARIADNE_LOG(4,"zero_time_model="<<zero_time_model<<"\n");
-    ARIADNE_LOG(4,"blocking_time_model="<<blocking_time_model<<"\n");
-    SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,zero_time_model,blocking_time_model);
-    reach_sets.adjoin(make_pair(location,reachable_set));
-	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
-    ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
-    ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
-
-    // Update the maximum enclosure cell from the reachable set
-    //_update_largest_enclosure_cell(location,reachable_set,UPPER_SEMANTICS);
+    SetModelType reachable_set;
+    _computeAndAdjoin_reachable_set(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
 
     TimeModelType final_time_model=time_model+blocking_time_model*time_step;
     ARIADNE_LOG(2,"final_time_range="<<final_time_model.range()<<"\n");
@@ -1163,14 +668,12 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     for(std::set<DiscreteEvent>::const_iterator iter=blocking_events.begin(); iter!=blocking_events.end(); ++iter) {
         const DiscreteEvent event=*iter;
         if(event==finishing_event) {
-            // TODO: Better estimate to use smaller blocking time
             intermediate_sets.adjoin(make_pair(location,evolved_set_model));
             working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
         } else if(event.is_transition()) { // not an invariant
             intermediate_sets.adjoin(make_pair(location,evolved_set_model));
         }
     }
-
 }
 
 
@@ -1185,92 +688,6 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
                 const TimeType& maximum_hybrid_time,
                 bool reach, const HybridBoxes& disprove_bounds) const
 {
-    // Use the following basic algorithm for computing an evolution step
-    //
-    // 1) Extract data about working set and location
-    //
-    // 2) Find all blocking events (invariants and urgent transitions) which are
-    //    active at the starting time. If any events are definitely active,
-    //    the corresponding reset occurs, and there is no continuous evolution.
-    //    If there are possibly active events, these occur along with continuous
-    //    evolution for upper semantics, and evolution terminates with lower
-    //    semantics.
-    //
-    //    Input: Set: starting_set, map<Event,Expression> guards
-    //    Output: map<Event,Tribool> initially_active
-    //         (includes special "blocking event")
-    //
-    // 3) Compute the continuous evolution for a fixed step size h, over the
-    //    time interval [-h,+h]
-    //
-    //    Input: Function: dynamic,
-    //           Box: domain OR SetModel initial_set,
-    //           Time: maximum_step_size
-    //    Output: FunctionModel: flow_model
-    //               OR SetModel: flow_set_model
-    //            Box: flow_bounds
-    //
-    // 4) For each blocking event, compute the crossing time with the guard set.
-    //    The computed crossing time may lie outside the flow time interval;
-    //    any such crossings will be ignored. Non-transverse crossings may have
-    //    large crossing time intervals.
-    //
-    //    If the transition is definitely not initially active and the crossing
-    //    is transverse, then there are no problems. If the transition is
-    //    possibly initially active, then the crossing may be in the "wrong"
-    //    direction, i.e. the transition may become inactive. In this case, we
-    //    have upper semantics (otherwise we would already have terminated the
-    //    evolution) and the transition is considered inactive for evolution
-    //    purposes.
-    //
-    //    If the crossing is not transverse, then lower evolution is blocking
-    //    and upper evolution considers the transition as non-urgent. However,
-    //    we should probably evolve close to the transition, and maybe split
-    //    the evolution across the transversality boundary.
-    //
-    //    Input: map<Event,Expression>: resets,
-    //           Box: flow_bounds OR FunctionModel: flow_model
-    //             OR SetModel: flow_set_model
-    //    Output: map<Event,ExpressionModel> crossing_times,
-    //            set<Event> tangential_events
-    //
-    // 5) Compute the blocking time and blocking events. The blocking time is
-    //    the minimum of the computed crossing times.
-    //
-    //    If there is a single  blocking event, the crossing is tranverse, and
-    //    occurs between the starting and finishing times, then evolution
-    //    proceeds according to this event.
-    //
-    //    If there are multiple blocking events, and the upper bound of the
-    //    crossing time range is large, then we set the finishing time to
-    //    just below the crossing time. This means that in the next step
-    //    we may be better able to resolve the crossing.
-    //
-    //    If there are multiple blocking events and the upper bound of the
-    //    blocking time range is small, then lower evolution terminates, and
-    //    upper evolution proceeds according to the crossing time of each
-    //    blocking event.
-    //
-    //    Input: map<Event,ExpressionModel>: crossing_times
-    //    Output: set<Event> blocking_events, ExpressionModel: blocking_time
-    //
-    // 6) Compute the initial and final activation times of the non-blocking
-    //    events. Tangential crossings are included in this computation,
-    //    as they are treated as non-urgent.
-    //
-    //    Compute the maximum of the initial activation time and starting time,
-    //    and the minimum of the final activation time and finishing/blocking
-    //    time.
-    //
-    //    Input: map<Event,Expression>: guards,
-    //           Box: domain OR FunctionModel: flow_model
-    //               OR SetModel: flow_set_model
-    //    Output: map<Event,(ExpressionModel,ExpressionModel)>: initial/final times
-    //
-    // 7) Apply the flows, guards and resets according to the computed
-    //    event times.
-
-
     const double SMALL_RELATIVE_TIME=1./16;
 
     // The falsification info result
@@ -1298,82 +715,26 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_ASSERT(set_model.argument_size()==time_model.argument_size());
     ARIADNE_ASSERT_MSG(set_model.result_size()==mode.dimension(),"set_model="<<set_model<<", mode="<<mode);
 
-    ARIADNE_LOG(2,"\n\nHybridEvolver::_evolution_step(...)\n");
-    ARIADNE_LOG(2,"events = "<<events<<" ");
-    ARIADNE_LOG(2,"time_range = "<<time_model.range()<<" ");
-    ARIADNE_LOG(2,"time_model generators = "<<time_model.argument_size()<<" ");
-    ARIADNE_LOG(2,"location = "<<location<<" ");
-    ARIADNE_LOG(2,"box = "<<set_model.range()<<" ");
-    ARIADNE_LOG(2,"generators = "<<set_model.argument_size()<<" ");
-    ARIADNE_LOG(2,"radius = "<<radius(set_model.range())<<"\n\n");
-
-    ARIADNE_LOG(2,"dynamic = "<<dynamic<<"\n");
-    ARIADNE_LOG(2,"invariants = "<<mode.invariants()<<"\n");
-    ARIADNE_LOG(2,"transitions = "<<transitions<<"\n\n");
-    ARIADNE_LOG(2,"guards = "<<guards<<"\n\n");
-    ARIADNE_LOG(2,"activations = "<<activations<<"\n\n");
+    _logEvolutionStepInitialState(events,time_model,location,set_model,dynamic,invariants,transitions,guards,activations);
 
     // Compute initially active guards
     std::map<DiscreteEvent,tribool> initially_active_events;
     this->compute_initially_active_events(initially_active_events, guards, set_model);
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
 
-    // Test for initially active events, and process these as required
-    if(definitely(initially_active_events[blocking_event])) {
-
-    	// Flag to hold the information of an invariant being definitely active for this set model
-    	bool has_active_invariant = false;
-
-        // Check if at least one invariant is definitely active in this mode
-        for(std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); inv_it++) {
-            tribool active=this->_toolbox->active(inv_it->second,set_model);
-            if(definitely(active)) {
-				has_active_invariant = true;
-				break;
-            }
-        }
-
-		// The set model is added only if there is no definitely active invariant
-        if (!has_active_invariant) {
+    // If there is any possibly (thus including definitely) active blocking event, lower evolution must be stopped
+    if (possibly(initially_active_events[blocking_event])) {
+    	if(definitely(initially_active_events[blocking_event])) {
+    		_processInitiallyActiveBlockingEvents(working_sets,reach_sets,intermediate_sets,location,events,
+    	        		   	   	   	   	   	  set_model,time_model,invariants,transitions);
+    	} else {
+    		ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition.");
             reach_sets.insert(make_pair(location,set_model));
             intermediate_sets.insert(make_pair(location,set_model));
-        }
-        else
-        {
-        	// If the invariant is definitely initially active, the discrete events should not be evaluated
-        	ARIADNE_LOG(2,"An invariant is initially active: discarding the set.\n");
-        }
 
-        ARIADNE_LOG(2,"A blocking event is initially active, no continuous evolution, just apply discrete events.\n");
-
-        // No continuous evolution; just apply discrete events
-        for(std::list<DiscreteTransition>::const_iterator iter=transitions.begin();
-            iter!=transitions.end(); ++iter)
-        {
-            ARIADNE_LOG(3,"Testing transition "<<iter->event()<<".\n");
-            tribool active=this->_toolbox->active(iter->activation(),set_model);
-            if(definitely(active)) {
-                ARIADNE_LOG(3,"Transition "<<iter->event()<<" should be activated.\n");
-                SetModelType jump_set_model=this->_toolbox->reset_step(iter->reset(),set_model);
-                TimeModelType jump_time_model=time_model;
-                DiscreteState jump_location=iter->target();
-                std::vector<DiscreteEvent> jump_events=events;
-                jump_events.push_back(iter->event());
-                ARIADNE_LOG(2,"Pushing back "<<jump_set_model<<" into working_sets\n");
-                working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
-            }
-        }
-
-        // No need for further work this step
-        return disproveData;
-
-    } else if(possibly(initially_active_events[blocking_event])) {
-        ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition.");
-        reach_sets.insert(make_pair(location,set_model));
-        intermediate_sets.insert(make_pair(location,set_model));
-
-        disproveData.updateReachBounds(location,set_model.bounding_box());
-        disproveData.updateEpsilon(location,set_model.bounding_box().halfWidths());
+            disproveData.updateReachBounds(location,set_model.bounding_box());
+            disproveData.updateEpsilon(location,set_model.bounding_box().halfWidths());
+    	}
 
         return disproveData;
     }
@@ -1382,15 +743,7 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     FlowSetModelType flow_set_model; BoxType flow_bounds;
     Float time_step = this->_parameters->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
-
-    ARIADNE_LOG(2,"Computing flow model.\n");
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
-
-    for(uint i=0; i!=flow_set_model.size(); ++i) {
-        if(flow_set_model[i].error()<0) {
-            std::cerr<<flow_set_model<<std::endl;
-        }
-    }
 
     ARIADNE_LOG(2,"flow_bounds = "<<flow_bounds<<"\n")
     ARIADNE_LOG(2,"time_step = "<<time_step<<"\n")
@@ -1404,89 +757,24 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     TimeModelType zero_time_model = this->_toolbox->time_model(0.0,Box(time_model.argument_size()));
     TimeModelType time_step_model = this->_toolbox->time_model(1.0,Box(time_model.argument_size()));
 
-    // Compute event blocking times
-    std::map<DiscreteEvent, TimeModelType> event_blocking_times;
-    std::set<DiscreteEvent> non_transverse_events;
-
-
-    event_blocking_times[finishing_event]=time_step_model;
-    compute_blocking_events(event_blocking_times,non_transverse_events,guards,flow_set_model);
-    ARIADNE_LOG(3,"event_blocking_times="<<event_blocking_times<<"\n");
-
-    std::map<DiscreteEvent,Interval> event_blocking_time_intervals;
-    for(std::map<DiscreteEvent, TimeModelType>::const_iterator iter=event_blocking_times.begin();
-        iter!=event_blocking_times.end(); ++iter) { event_blocking_time_intervals[iter->first]=iter->second.range(); }
-
-    ARIADNE_LOG(2,"event_blocking_times="<<event_blocking_time_intervals<<"\n");
-    ARIADNE_LOG(2,"non_transverse_events="<<non_transverse_events<<"\n\n");
-
-    // Compute blocking events
     std::set<DiscreteEvent> blocking_events;
     TimeModelType blocking_time_model;
-    compute_blocking_time(blocking_events,blocking_time_model,event_blocking_times);
-    ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
-    ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
+    std::set<DiscreteEvent> non_transverse_events;
+    _compute_blocking_info(non_transverse_events,blocking_events,blocking_time_model,
+    				  time_step_model,flow_set_model,guards,SMALL_RELATIVE_TIME);
 
-    // If multiple blocking events and flow time is large, move closer to blocking time
-    if(blocking_events.size()!=1 && blocking_time_model.range().upper()>SMALL_RELATIVE_TIME) {
-        blocking_events.clear();
-        blocking_events.insert(finishing_event);
-        if(blocking_time_model.range().lower()>0) {
-            blocking_time_model-=blocking_time_model.error();
-            blocking_time_model.set_error(0.0);
-        }
-        blocking_time_model*=(1-SMALL_RELATIVE_TIME);
-    }
-    ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
-    ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
-/*
-    // If blocking time is smaller than the time step, recompute the flow up to blocking time
-    if(blocking_time_model.range().upper()<1.0) {
-        time_step *= blocking_time_model.range().upper();
-        ARIADNE_LOG(2,"Blocking time is smaller than time step, recomputing flow model.\n");
-        compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
-        ARIADNE_LOG(2,"  new time step = " << time_step << "\n");
-    }
-*/
-    // Treat non-transverse urgent events as non-urgent in upper semantics
-    for(std::set<DiscreteEvent>::const_iterator iter=non_transverse_events.begin(); iter!=non_transverse_events.end(); ++iter) {
-        if(iter->is_transition()) {     // If the event is a transition
-            activations[*iter]=guards.find(*iter)->second;
-       }
-    }
+    ActivationTimesType activation_times;
+    _compute_activation_info(activations,activation_times,non_transverse_events,flow_set_model,
+    						 blocking_time_model,guards,LOWER_SEMANTICS);
 
-    // Compute activation times
-    std::map< DiscreteEvent,tuple<TimeModelType,TimeModelType> > activation_times;
-    this->compute_activation_times(activation_times,activations,flow_set_model,blocking_time_model,LOWER_SEMANTICS);
-
-    // Display activation time ranges
-    std::map< DiscreteEvent,tuple<Interval> > activation_time_intervals;
-    for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator
-            iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
-    {
-        activation_time_intervals.insert(make_pair(iter->first,make_tuple(iter->second.second.range())));
-    }
-    ARIADNE_LOG(2,"activation_times="<<activation_time_intervals<<"\n\n");
-
-
-    // Compute sets
-    // TODO: Make this a function;
-
-    ARIADNE_LOG(4,"flow_set_model="<<flow_set_model<<"\n");
-    ARIADNE_LOG(4,"zero_time_model="<<zero_time_model<<"\n");
-    ARIADNE_LOG(4,"blocking_time_model="<<blocking_time_model<<"\n");
-    SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,zero_time_model,blocking_time_model);
-    reach_sets.adjoin(make_pair(location,reachable_set));
-
-	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
-    ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
-    ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
+    SetModelType reachable_set;
+    _computeAndAdjoin_reachable_set(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
 
     // Check the reachable set against the disprove_bounds (up to numDivisions times)
-    uint numDivisions = 10;
+    const uint numDivisions = 10;
     HybridBoxes::const_iterator bounds_it = disprove_bounds.find(location);
     ARIADNE_LOG(2,"Disproving reachable set against box " << bounds_it->second << " ... \n");
-    bool isDisproved = definitely(_check_bounds(numDivisions,reachable_set,bounds_it->second));
+    const bool isDisproved = definitely(_is_reachableSet_outside_disproveBounds(numDivisions,reachable_set,bounds_it->second));
     ARIADNE_LOG(2,"Result: " << isDisproved << "\n");
 
     // Updates all the fields of the falsification info
@@ -1494,55 +782,9 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     disproveData.updateReachBounds(location,reachable_set.bounding_box());
     disproveData.updateEpsilon(location,reachable_set.bounding_box().halfWidths());
 
-    if(blocking_events.size()!=1) {
-        // No further evolution
-    } else {
-        TimeModelType final_time_model=time_model+blocking_time_model*time_step;
-        ARIADNE_LOG(2,"final_time_range="<<final_time_model.range()<<"\n");
-        SetModelType evolved_set_model=this->_toolbox->integration_step(flow_set_model,blocking_time_model);
-        ARIADNE_LOG(2,"evolved_set_model.argument_size()="<<evolved_set_model.argument_size()<<"\n");
-        ARIADNE_LOG(2,"evolved_set_range="<<evolved_set_model.range()<<"\n");
-        // Compute evolution for blocking events
-        for(std::set<DiscreteEvent>::const_iterator iter=blocking_events.begin(); iter!=blocking_events.end(); ++iter) {
-            const DiscreteEvent event=*iter;
-            if(event==finishing_event) {
-                // TODO: Better estimate to use smaller blocking time
-                intermediate_sets.adjoin(make_pair(location,evolved_set_model));
-                working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
-            } else if(event.is_transition()) { // not an invariant
-                intermediate_sets.adjoin(make_pair(location,evolved_set_model));
-                const DiscreteTransition& transition=system.transition(event,location);
-                SetModelType jump_set_model=apply(transition.reset(),evolved_set_model);
-                DiscreteState jump_location=transition.target();
-                std::vector<DiscreteEvent> jump_events=events;
-                jump_events.push_back(event);
-                working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,final_time_model));
-            }
-        }
-        // Compute evolution for non-blocking events
-        for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator
-            iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
-        {
-            const DiscreteEvent event=iter->first;
-            const TimeModelType lower_active_time_model=iter->second.first;
-            const TimeModelType upper_active_time_model=iter->second.second;
-            ARIADNE_LOG(3,"Non blocking event "<<event<<":\n");
-            ARIADNE_LOG(3,"  lower_active_time_model="<<lower_active_time_model.range()<<";\n");
-            ARIADNE_LOG(3,"  upper_active_time_model="<<upper_active_time_model.range()<<";\n");
-            SetModelType active_set_model=this->_toolbox->reachability_step(flow_set_model,lower_active_time_model,upper_active_time_model);
-            ARIADNE_LOG(3,"  active_set="<<active_set_model.range()<<";\n");
-            const DiscreteTransition& transition=system.transition(event,location);
-            SetModelType jump_set_model=apply(transition.reset(),active_set_model);
-            ARIADNE_LOG(3,"  jump_set_model="<<active_set_model.range()<<";\n");
-            const TimeModelType active_time_model = this->_toolbox->reachability_time(time_model+lower_active_time_model*time_step,time_model+upper_active_time_model*time_step);
-            ARIADNE_LOG(3,"  active_time_model="<<active_time_model.range()<<".\n");
-
-            DiscreteState jump_location=transition.target();
-            std::vector<DiscreteEvent> jump_events=events;
-            jump_events.push_back(event);
-            working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,active_time_model));
-        }
-    }
+    if(blocking_events.size()==1)
+    	_computeEvolutionForEvents(working_sets,intermediate_sets,system,location,blocking_events,events,
+    								activation_times,flow_set_model,time_model,blocking_time_model,time_step);
 
     return disproveData;
 }
@@ -1847,36 +1089,416 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
     }
 }
 
+
+void
+ImageSetHybridEvolver::
+_logStepAtVerbosity1(const std::list<HybridTimedSetType>& working_sets,
+					 const EnclosureListType& reach_sets,
+					 const EventListType& initial_events,
+					 const TimeModelType& initial_time_model,
+					 const SetModelType& initial_set_model,
+					 const DiscreteState& initial_location) const
+{
+    if(verbosity==1) {
+        ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
+                    <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                    <<" s="<<std::setw(3)<<std::left<<initial_events.size()
+                    <<" t="<<std::fixed<<initial_time_model.value()
+                    <<" r="<<std::setw(7)<<initial_set_model.radius()
+                    <<" l="<<std::setw(3)<<std::left<<initial_location
+                    <<" c="<<initial_set_model.centre()
+                    <<" e="<<initial_events
+                    <<"\n");
+    }
+}
+
 bool ImageSetHybridEvolver::
-_check_bounds(const uint& numDivisions,
+_is_reachableSet_outside_disproveBounds(const uint numDivisions,
 			  const TaylorSet& reachable_set,
 			  const Box& disprove_bounds) const
 {
-	// If the reachable set is inside the bounds, directly return true
 	if (definitely(reachable_set.inside(disprove_bounds)))
 		return false;
 
 	// Otherwise, if we are allowed to split further
 	if (numDivisions>0) {
-
 		// Split on the time variable (ASSUMED TO BE THE LAST)
 		std::pair<TaylorSet,TaylorSet> split_sets = reachable_set.split(reachable_set.generators_size()-1);
-		// Check the first one
-		if (_check_bounds(numDivisions-1,split_sets.first,disprove_bounds))
+
+		if (_is_reachableSet_outside_disproveBounds(numDivisions-1,split_sets.first,disprove_bounds))
 			return true;
-		// Check the second one
-		if (_check_bounds(numDivisions-1,split_sets.second,disprove_bounds))
+		if (_is_reachableSet_outside_disproveBounds(numDivisions-1,split_sets.second,disprove_bounds))
 			return true;
-		// Otherwise return false
+
 		return false;
 	}
-
-	//cout << "box: " << reachable_set.bounding_box() << "\n";
 
 	// If we cannot split further, we check for the set being outside (possibly not inside and definitely disjoint)
 	return possibly(!reachable_set.inside(disprove_bounds)) && definitely(reachable_set.disjoint(disprove_bounds));
 }
 
+void ImageSetHybridEvolver::
+_computeEvolutionForEvents(std::list< HybridTimedSetType >& working_sets,
+						   EnclosureListType& intermediate_sets,
+						   const SystemType& system,
+						   const DiscreteState& location,
+						   const std::set<DiscreteEvent>& blocking_events,
+						   const EventListType& events,
+						   const ActivationTimesType& activation_times,
+						   const SetModelType& flow_set_model,
+						   const TimeModelType& time_model,
+						   const TimeModelType& blocking_time_model,
+						   const Float& time_step) const
+{
+    TimeModelType final_time_model=time_model+blocking_time_model*time_step;
+    ARIADNE_LOG(2,"final_time_range="<<final_time_model.range()<<"\n");
+    SetModelType evolved_set_model=this->_toolbox->integration_step(flow_set_model,blocking_time_model);
+    ARIADNE_LOG(2,"evolved_set_model.argument_size()="<<evolved_set_model.argument_size()<<"\n");
+    ARIADNE_LOG(2,"evolved_set_range="<<evolved_set_model.range()<<"\n");
+    // Compute evolution for blocking events
+    for(std::set<DiscreteEvent>::const_iterator iter=blocking_events.begin(); iter!=blocking_events.end(); ++iter) {
+        const DiscreteEvent event=*iter;
+        if(event==finishing_event) {
+            // TODO: Better estimate to use smaller blocking time
+            intermediate_sets.adjoin(make_pair(location,evolved_set_model));
+            working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
+        } else if(event.is_transition()) { // not an invariant
+            intermediate_sets.adjoin(make_pair(location,evolved_set_model));
+            const DiscreteTransition& transition=system.transition(event,location);
+            SetModelType jump_set_model=apply(transition.reset(),evolved_set_model);
+            DiscreteState jump_location=transition.target();
+            std::vector<DiscreteEvent> jump_events=events;
+            jump_events.push_back(event);
+            working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,final_time_model));
+        }
+    }
+    // Compute evolution for non-blocking events
+    for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator
+        iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
+    {
+        const DiscreteEvent event=iter->first;
+        const TimeModelType lower_active_time_model=iter->second.first;
+        const TimeModelType upper_active_time_model=iter->second.second;
+        ARIADNE_LOG(3,"Non blocking event "<<event<<":\n");
+        ARIADNE_LOG(3,"  lower_active_time_model="<<lower_active_time_model.range()<<";\n");
+        ARIADNE_LOG(3,"  upper_active_time_model="<<upper_active_time_model.range()<<";\n");
+        SetModelType active_set_model=this->_toolbox->reachability_step(flow_set_model,lower_active_time_model,upper_active_time_model);
+        ARIADNE_LOG(3,"  active_set="<<active_set_model.range()<<";\n");
+        const DiscreteTransition& transition=system.transition(event,location);
+        SetModelType jump_set_model=apply(transition.reset(),active_set_model);
+        ARIADNE_LOG(3,"  jump_set_model="<<active_set_model.range()<<";\n");
+        const TimeModelType active_time_model = this->_toolbox->reachability_time(time_model+lower_active_time_model*time_step,time_model+upper_active_time_model*time_step);
+        ARIADNE_LOG(3,"  active_time_model="<<active_time_model.range()<<".\n");
+
+        DiscreteState jump_location=transition.target();
+        std::vector<DiscreteEvent> jump_events=events;
+        jump_events.push_back(event);
+        working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,active_time_model));
+    }
+}
+
+void
+ImageSetHybridEvolver::
+_processInitiallyActiveBlockingEvents_continuous(EnclosureListType& reach_sets,
+												   EnclosureListType& intermediate_sets,
+												   const std::map<DiscreteEvent,VectorFunction>& invariants,
+												   const SetModelType& set_model,
+												   const DiscreteState& location) const
+{
+	bool has_active_invariant = false;
+
+    for(std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); inv_it++) {
+        tribool active=this->_toolbox->active(inv_it->second,set_model);
+        if(definitely(active)) {
+			has_active_invariant = true;
+			break;
+        }
+    }
+
+    if (!has_active_invariant) {
+    	ARIADNE_LOG(2,"A forced transition is initially active: no continuous evolution, adjoining reach set.\n");
+        reach_sets.insert(make_pair(location,set_model));
+        intermediate_sets.insert(make_pair(location,set_model));
+    }
+    else
+    	ARIADNE_LOG(2,"An invariant is initially active: no continuous evolution, discarding the set.\n");
+}
+
+void
+ImageSetHybridEvolver::
+_compute_blocking_info(std::set<DiscreteEvent>& non_transverse_events,
+				  std::set<DiscreteEvent>& blocking_events,
+				  TimeModelType& blocking_time_model,
+				  const TimeModelType& time_step_model,
+				  const SetModelType& flow_set_model,
+				  const std::map<DiscreteEvent,VectorFunction>& guards,
+				  double SMALL_RELATIVE_TIME) const
+{
+    // Compute event blocking times
+    std::map<DiscreteEvent, TimeModelType> event_blocking_times;
+
+    event_blocking_times[finishing_event]=time_step_model;
+    compute_blocking_events(event_blocking_times,non_transverse_events,guards,flow_set_model);
+    ARIADNE_LOG(3,"event_blocking_times="<<event_blocking_times<<"\n");
+
+    std::map<DiscreteEvent,Interval> event_blocking_time_intervals;
+    for(std::map<DiscreteEvent, TimeModelType>::const_iterator iter=event_blocking_times.begin();
+        iter!=event_blocking_times.end(); ++iter) { event_blocking_time_intervals[iter->first]=iter->second.range(); }
+
+    ARIADNE_LOG(2,"event_blocking_time_intervals="<<event_blocking_time_intervals<<"\n");
+    ARIADNE_LOG(2,"non_transverse_events="<<non_transverse_events<<"\n\n");
+
+    // Compute blocking events
+    compute_blocking_time(blocking_events,blocking_time_model,event_blocking_times);
+    ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
+    ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
+
+    // If multiple blocking events and flow time is large, move closer to blocking time
+    if(blocking_events.size()!=1 && blocking_time_model.range().upper()>SMALL_RELATIVE_TIME) {
+        blocking_events.clear();
+        blocking_events.insert(finishing_event);
+        if(blocking_time_model.range().lower()>0) {
+            blocking_time_model-=blocking_time_model.error();
+            blocking_time_model.set_error(0.0);
+        }
+        blocking_time_model*=(1-SMALL_RELATIVE_TIME);
+    }
+    ARIADNE_LOG(2,"(adjusted)blocking_events="<<blocking_events<<"\n");
+    ARIADNE_LOG(2,"(adjusted)blocking_time="<<blocking_time_model.range()<<"\n\n");
+}
+
+
+void
+ImageSetHybridEvolver::
+_compute_activation_info(std::map<DiscreteEvent,VectorFunction>& activations,
+						 ActivationTimesType& activation_times,
+						 const std::set<DiscreteEvent>& non_transverse_events,
+						 const SetModelType& flow_set_model,
+						 const TimeModelType& blocking_time_model,
+						 const std::map<DiscreteEvent,VectorFunction>& guards,
+						 const Semantics semantics) const
+{
+    // Treat non-transverse urgent events as non-urgent in upper semantics
+    for(std::set<DiscreteEvent>::const_iterator iter=non_transverse_events.begin(); iter!=non_transverse_events.end(); ++iter) {
+        if(iter->is_transition()) {     // If the event is a transition
+            activations[*iter]=guards.find(*iter)->second;
+       }
+    }
+
+    this->compute_activation_times(activation_times,activations,flow_set_model,blocking_time_model,semantics);
+
+    // Display activation time ranges
+    std::map< DiscreteEvent,tuple<Interval> > activation_time_intervals;
+    for(ActivationTimesType::const_iterator iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
+        activation_time_intervals.insert(make_pair(iter->first,make_tuple(iter->second.second.range())));
+    ARIADNE_LOG(2,"activation_time_intervals="<<activation_time_intervals<<"\n\n");
+}
+
+
+void
+ImageSetHybridEvolver::
+_computeAndAdjoin_reachable_set(EnclosureListType& reach_sets,
+								SetModelType& reachable_set,
+								const DiscreteState& location,
+							    const SetModelType& flow_set_model,
+							    const TimeModelType& zero_time_model,
+		 	 	 	 	 	 	const TimeModelType& blocking_time_model) const
+{
+    ARIADNE_LOG(4,"flow_set_model="<<flow_set_model<<"\n");
+    ARIADNE_LOG(4,"zero_time_model="<<zero_time_model<<"\n");
+    ARIADNE_LOG(4,"blocking_time_model="<<blocking_time_model<<"\n");
+    reachable_set=this->_toolbox->reachability_step(flow_set_model,zero_time_model,blocking_time_model);
+    reach_sets.adjoin(make_pair(location,reachable_set));
+
+	ARIADNE_LOG(2,"reachable_set="<<reachable_set<<"\n");
+    ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
+    ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
+}
+
+void
+ImageSetHybridEvolver::
+_logEvolutionStepInitialState(const EventListType& events,
+							  const TimeModelType& time_model,
+							  const DiscreteState& location,
+							  const SetModelType& set_model,
+							  const VectorFunction& dynamic,
+							  const std::map<DiscreteEvent,VectorFunction>& invariants,
+							  const std::list<DiscreteTransition>& transitions,
+							  const std::map<DiscreteEvent,VectorFunction>& guards,
+							  const std::map<DiscreteEvent,VectorFunction>& activations) const
+{
+    ARIADNE_LOG(2,"events = "<<events<<" ");
+    ARIADNE_LOG(2,"time_range = "<<time_model.range()<<" ");
+    ARIADNE_LOG(2,"time_model generators = "<<time_model.argument_size()<<" ");
+    ARIADNE_LOG(2,"location = "<<location<<" ");
+    ARIADNE_LOG(2,"box = "<<set_model.range()<<" ");
+    ARIADNE_LOG(2,"generators = "<<set_model.argument_size()<<" ");
+    ARIADNE_LOG(2,"radius = "<<radius(set_model.range())<<"\n\n");
+
+    ARIADNE_LOG(2,"dynamic = "<<dynamic<<"\n");
+    ARIADNE_LOG(2,"invariants = "<<invariants<<"\n");
+    ARIADNE_LOG(2,"transitions = "<<transitions<<"\n\n");
+    ARIADNE_LOG(2,"guards = "<<guards<<"\n\n");
+    ARIADNE_LOG(2,"activations = "<<activations<<"\n\n");
+}
+
+void
+ImageSetHybridEvolver::
+_processInitiallyActiveBlockingEvents(std::list< HybridTimedSetType >& working_sets,
+									  EnclosureListType& reach_sets,
+		   	   	   	   	   	   	   	  EnclosureListType& intermediate_sets,
+		   	   	   	   	   	   	   	  const DiscreteState& location,
+		   	   	   	   	   	   	   	  const EventListType& events,
+		   	   	   	   	   	   	   	  const SetModelType& set_model,
+		   	   	   	   	   	   	   	  const TimeModelType& time_model,
+		   	   	   	   	   	   	   	  const std::map<DiscreteEvent,VectorFunction>& invariants,
+		   	   	   	   	   	   	   	  const std::list<DiscreteTransition>& transitions) const
+{
+    // Check if at least one invariant is definitely active in this mode
+	bool has_active_invariant = false;
+    for(std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); inv_it++) {
+        tribool active=this->_toolbox->active(inv_it->second,set_model);
+        if(definitely(active)) {
+			has_active_invariant = true;
+			break;
+        }
+    }
+
+	// The set model is added, and the transitions checked, only if there is no definitely active invariant
+    if (!has_active_invariant) {
+
+        reach_sets.insert(make_pair(location,set_model));
+        intermediate_sets.insert(make_pair(location,set_model));
+
+        ARIADNE_LOG(2,"A blocking event (not an invariant) is initially active: no continuous evolution, just apply discrete events.\n");
+
+        // No continuous evolution; just apply discrete events
+        for(std::list<DiscreteTransition>::const_iterator iter=transitions.begin();
+            iter!=transitions.end(); ++iter)
+        {
+            ARIADNE_LOG(3,"Testing transition "<<iter->event()<<".\n");
+            tribool active=this->_toolbox->active(iter->activation(),set_model);
+            if(definitely(active)) {
+                ARIADNE_LOG(3,"Transition "<<iter->event()<<" should be activated.\n");
+                SetModelType jump_set_model=this->_toolbox->reset_step(iter->reset(),set_model);
+                TimeModelType jump_time_model=time_model;
+                DiscreteState jump_location=iter->target();
+                std::vector<DiscreteEvent> jump_events=events;
+                jump_events.push_back(iter->event());
+                ARIADNE_LOG(2,"Pushing back "<<jump_set_model<<" into working_sets\n");
+                working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
+            }
+        }
+    }
+    else
+    {
+    	ARIADNE_LOG(2,"An invariant is definitely initially active: discarding the set.\n");
+    }
+
+}
+
+
+void
+ImageSetHybridEvolver::
+_evolution_add_initialSet(std::list< HybridTimedSetType >& working_sets,
+								  const EnclosureType& initial_set) const
+{
+    ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
+    DiscreteState initial_location;
+    ContinuousEnclosureType initial_continuous_set;
+    make_lpair(initial_location,initial_continuous_set)=initial_set;
+    ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
+    SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
+
+	// Check for non-zero maximum step size
+	ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
+	// Check for match between the enclosure cell size and the set size
+	ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+
+    ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
+    TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
+    ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
+    TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
+    ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
+    working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
+}
+
+bool
+ImageSetHybridEvolver::
+_isEnclosureTooLarge(const SetModelType& initial_set_model) const
+{
+	const Vector<Interval> initial_set_model_range = initial_set_model.range();
+
+	for (uint i=0;i<initial_set_model_range.size();++i)
+		if (initial_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i])
+			return true;
+
+	return false;
+}
+
+
+void
+ImageSetHybridEvolver::
+_set_model_reduction(HybridTimedSetType& timed_set) const
+{
+	if (this->_parameters->enable_set_model_reduction &&
+		!((timed_set.second.size()+1) % (this->_parameters->set_model_events_size_interleaving+1)))
+	{
+		SetModelType new_set_model = this->_toolbox->set_model(ContinuousEnclosureType(timed_set.third.range()));
+		TimeModelType new_time_model = this->_toolbox->time_model(timed_set.fourth.range(),Box(new_set_model.argument_size()));
+		timed_set = make_tuple(timed_set.first,timed_set.second, new_set_model, new_time_model);
+	}
+}
+
+void
+ImageSetHybridEvolver::
+_add_subdivisions(std::list< HybridTimedSetType >& working_sets,
+				  const array< TimedSetModelType >& subdivisions,
+				  const DiscreteState& initial_location,
+				  const EventListType& initial_events,
+				  const uint dimension) const
+{
+    ARIADNE_LOG(3,"subdivisions.size()="<<subdivisions.size()<<"\n");
+    for(uint i=0; i!=subdivisions.size(); ++i) {
+        TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
+        ARIADNE_LOG(3,"subdivided_timed_set_model.range()="<<subdivided_timed_set_model.range()<<"\n");
+        SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,dimension)));
+        TimeModelType subdivided_time_model=subdivided_timed_set_model[dimension];
+        ARIADNE_LOG(3,"subdivided_set_model.range()="<<subdivided_set_model.range()<<"\n");
+        ARIADNE_LOG(3,"subdivided_set_model.radius()*10000="<<radius(subdivided_set_model.range())*10000<<"\n");
+        ARIADNE_LOG(3,"subdivided_time_model.range()="<<subdivided_time_model.range()<<"\n");
+        working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
+    }
+}
+
+void
+ImageSetHybridEvolver::
+_add_models_subdivisions_autoselect(std::list< HybridTimedSetType >& working_sets,
+		  	  	  	  	  	  	  	const SetModelType& initial_set_model,
+		  	  	  	  	  	  	  	const TimeModelType& initial_time_model,
+		  	  	  	  	  	  	  	const DiscreteState& initial_location,
+		  	  	  	  	  	  	  	const EventListType& initial_events) const
+{
+    uint nd=initial_set_model.dimension();
+    SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
+    array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
+    _add_subdivisions(working_sets,subdivisions,initial_location,initial_events,nd);
+}
+
+
+void
+ImageSetHybridEvolver::
+_add_models_subdivisions_time(std::list< HybridTimedSetType >& working_sets,
+		  	  	  	  	  	  const SetModelType& initial_set_model,
+		  	  	  	  	  	  const TimeModelType& initial_time_model,
+		  	  	  	  	  	  const DiscreteState& initial_location,
+		  	  	  	  	  	  const EventListType& initial_events) const
+{
+    uint nd=initial_set_model.dimension();
+    SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
+    array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model,nd);
+    _add_subdivisions(working_sets,subdivisions,initial_location,initial_events,nd);
+}
 
 
 }  // namespace Ariadne

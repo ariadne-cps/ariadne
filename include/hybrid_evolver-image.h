@@ -81,7 +81,6 @@ class ImageSetHybridEvolver
     typedef TaylorModel TimeModelType;
     typedef TaylorSet FlowSetModelType;
     typedef TaylorSet SetModelType;
-    typedef TaylorSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef HybridAutomaton::TimeType TimeType;
@@ -90,11 +89,14 @@ class ImageSetHybridEvolver
     typedef std::vector<DiscreteEvent> EventListType;
     typedef HybridAutomaton SystemType;
     typedef TaylorSet ContinuousEnclosureType;
+    typedef TaylorSet TimedSetModelType;
     typedef HybridBasicSet<TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
     typedef Float ContinuousTimeType;
+    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef std::map< DiscreteEvent,tuple<TaylorModel,TaylorModel> > ActivationTimesType;
   public:
 
     //! \brief Default constructor.
@@ -169,7 +171,6 @@ class ImageSetHybridEvolver
     virtual void _upper_evolution_continuous(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, bool reach) const;
 
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::list< HybridTimedSetType >& working_sets,
                                   EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                   const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
@@ -215,13 +216,107 @@ class ImageSetHybridEvolver
                                   const std::map<DiscreteEvent,VectorFunction>& activations,
                                   const FlowSetModelType& flow_set_model,
                                   const TimeModelType& blocking_time_model,
-                                  const Semantics sematics) const;
+                                  const Semantics semantics) const;
 
   private:
 
-    bool _check_bounds(const uint& numDivisions,
+    bool _is_reachableSet_outside_disproveBounds(const uint numDivisions,
 					   const TaylorSet& reachable_set,
 					   const Box& disprove_bounds) const;
+
+    bool _isEnclosureTooLarge(const SetModelType& initial_set_model) const;
+
+    void _set_model_reduction(HybridTimedSetType& timed_set) const;
+
+    void _evolution_add_initialSet(std::list< HybridTimedSetType >& working_sets,
+    							   const EnclosureType& initial_set) const;
+
+    void _add_models_subdivisions_autoselect(std::list< HybridTimedSetType >& working_sets,
+    		  	  	  	  	  	  	  		 const SetModelType& initial_set_model,
+    		  	  	  	  	  	  	  		 const TimeModelType& initial_time_model,
+    		  	  	  	  	  	  	  		 const DiscreteState& initial_location,
+    		  	  	  	  	  	  	  		 const EventListType& initial_events) const;
+
+    void _add_models_subdivisions_time(std::list< HybridTimedSetType >& working_sets,
+    		  	  	  	  	  	  	   const SetModelType& initial_set_model,
+    		  	  	  	  	  	  	   const TimeModelType& initial_time_model,
+    		  	  	  	  	  	  	   const DiscreteState& initial_location,
+    		  	  	  	  	  	  	   const EventListType& initial_events) const;
+
+    void _add_subdivisions(std::list< HybridTimedSetType >& working_sets,
+    					   const array< TimedSetModelType >& subdivisions,
+    					   const DiscreteState& initial_location,
+    					   const EventListType& initial_events,
+    					   const uint dimension) const;
+
+    void _logStepAtVerbosity1(const std::list<HybridTimedSetType>& working_sets,
+    					 const EnclosureListType& reach_sets,
+    					 const EventListType& initial_events,
+    					 const TimeModelType& initial_time_model,
+    					 const SetModelType& initial_set_model,
+    					 const DiscreteState& initial_location) const;
+
+    void _computeEvolutionForEvents(std::list< HybridTimedSetType >& working_sets,
+			   	   	   	   	   	    EnclosureListType& intermediate_sets,
+			   	   	   	   	   	    const SystemType& system,
+			   	   	   	   	   	    const DiscreteState& location,
+			   	   	   	   	   	    const std::set<DiscreteEvent>& blocking_events,
+			   	   	   	   	   	    const EventListType& events,
+			   	   	   	   	   	    const ActivationTimesType& activation_times,
+			   	   	   	   	   	    const SetModelType& flow_set_model,
+			   	   	   	   	   	    const TimeModelType& time_model,
+			   	   	   	   	   	    const TimeModelType& blocking_time_model,
+			   	   	   	   	   	    const Float& time_step) const;
+
+    void _processInitiallyActiveBlockingEvents_continuous(EnclosureListType& reach_sets,
+    												   	    EnclosureListType& intermediate_sets,
+    												   	    const std::map<DiscreteEvent,VectorFunction>& invariants,
+    												   	    const SetModelType& set_model,
+    												   	    const DiscreteState& location) const;
+
+    void _processInitiallyActiveBlockingEvents(std::list< HybridTimedSetType >& working_sets,
+			  	  	  	  	  	  	  	  	  EnclosureListType& reach_sets,
+        		   	   	   	   	   	   	   	  EnclosureListType& intermediate_sets,
+        		   	   	   	   	   	   	   	  const DiscreteState& location,
+        		   	   	   	   	   	   	   	  const EventListType& events,
+        		   	   	   	   	   	   	   	  const SetModelType& set_model,
+        		   	   	   	   	   	   	   	  const TimeModelType& time_model,
+        		   	   	   	   	   	   	   	  const std::map<DiscreteEvent,VectorFunction>& invariants,
+        		   	   	   	   	   	   	   	  const std::list<DiscreteTransition>& transitions) const;
+
+    void _compute_blocking_info(std::set<DiscreteEvent>& non_transverse_events,
+    				  	   std::set<DiscreteEvent>& blocking_events,
+    				  	   TimeModelType& blocking_time_model,
+    				  	   const TimeModelType& time_step_model,
+    				  	   const SetModelType& flow_set_model,
+    				  	   const std::map<DiscreteEvent,VectorFunction>& guards,
+    				  	   double SMALL_RELATIVE_TIME) const;
+
+    void _compute_activation_info(std::map<DiscreteEvent,VectorFunction>& activations,
+    						 	  ActivationTimesType& activation_times,
+    						 	  const std::set<DiscreteEvent>& non_transverse_events,
+    						 	  const SetModelType& flow_set_model,
+    						 	  const TimeModelType& blocking_time_model,
+    						 	  const std::map<DiscreteEvent,VectorFunction>& guards,
+    						 	  const Semantics semantics) const;
+
+    void _computeAndAdjoin_reachable_set(EnclosureListType& reach_sets,
+    									 SetModelType& reachable_set,
+    									 const DiscreteState& location,
+    									 const SetModelType& flow_set_model,
+    									 const TimeModelType& zero_time_model,
+    									 const TimeModelType& blocking_time_model) const;
+
+    void _logEvolutionStepInitialState(const EventListType& events,
+    							  	   const TimeModelType& time_model,
+    							  	   const DiscreteState& location,
+    							  	   const SetModelType& set_model,
+    							  	   const VectorFunction& dynamic,
+    							  	   const std::map<DiscreteEvent,VectorFunction>& invariants,
+    							  	   const std::list<DiscreteTransition>& transitions,
+    							  	   const std::map<DiscreteEvent,VectorFunction>& guards,
+    							  	   const std::map<DiscreteEvent,VectorFunction>& activations) const;
+
 
   protected:
     // Special events

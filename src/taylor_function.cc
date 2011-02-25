@@ -69,49 +69,8 @@ void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
     set_rounding_mode(rounding_mode);
 }
 
-/*
-Interval _unscale(const Interval& d, const Interval& x) {
-    if(d.lower()==d.upper()) { return Interval(0.0); }
-    return ( 2*x - add_ivl(d.lower(),d.upper()) ) / sub_ivl(d.upper(),d.lower());
-}
 
-IntervalTaylorModel _unscale(const Interval& d, const IntervalTaylorModel& x) {
-    if(d.lower()==d.upper()) { return IntervalTaylorModel(x.argument_size()); }
-    return ( 2*x - add_ivl(d.lower(),d.upper()) ) / sub_ivl(d.upper(),d.lower());
-}
-*/
 
-/*
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d)
-    : _domain(d), _model(d.size(),default_sweeper())
-{
-}
-
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const ExpansionType& f, const ErrorType& e)
-    : _domain(d), _model(f,e,default_sweeper())
-{
-    ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
-}
-
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f)
-    : _domain(d), _model(f.argument_size(),default_sweeper())
-{
-    ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,default_sweeper());
-    this->_model=f.evaluate(x);
-    this->_model.sweep();
-}
-
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f)
-    : _domain(d), _model(f.argument_size(),default_sweeper())
-{
-    ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,default_sweeper());
-    this->_model=f.evaluate(x);
-    this->_model.sweep();
-}
-
-*/
 
 
 ScalarTaylorFunction::ScalarTaylorFunction()
@@ -133,15 +92,6 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalTa
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f, Sweeper swp)
-    : _domain(d), _model(f.argument_size(),swp)
-{
-    ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,swp);
-    this->_model=f.evaluate(x);
-    this->_model.sweep();
-}
-
 ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f, Sweeper swp)
     : _domain(d), _model(f.argument_size(),swp)
 {
@@ -151,24 +101,6 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalSc
     this->_model.sweep();
 }
 
-/*
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial<Float>& p)
-    : _domain(d), _model(p.argument_size())
-{
-    ARIADNE_ASSERT_MSG(d.size()==p.argument_size(),"d="<<d<<" p="<<p);
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
-    this->_model=Ariadne::evaluate(p,x);
-    this->_model.sweep();
-}
-
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Polynomial<Interval>& p)
-    : _domain(d), _model(p.argument_size())
-{
-    ARIADNE_ASSERT_MSG(d.size()==p.argument_size(),"d="<<d<<" p="<<p);
-    Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d);
-    this->_model=Ariadne::evaluate(p,x);
-}
-*/
 
 
 ScalarTaylorFunction ScalarTaylorFunction::zero(const Vector<Interval>& d, Sweeper swp)
@@ -887,6 +819,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
     this->sweep();
 }
 
+/*
 VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
                                            const RealVectorFunction& f,
                                            const Sweeper& swp)
@@ -899,7 +832,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
     this->_models=f.evaluate(x);
     this->sweep();
 }
-
+*/
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v)
     : _domain(), _models(v.size())

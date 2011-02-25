@@ -64,9 +64,9 @@ typedef Vector<Interval> IntervalVector;
 template<class X> class Matrix;
 
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Real> RealScalarFunction;
+typedef ScalarFunction<Interval> IntervalScalarFunction;
 template<class X> class VectorFunction;
-typedef VectorFunction<Real> RealVectorFunction;
+typedef VectorFunction<Interval> IntervalVectorFunction;
 
 class NonlinearConstraint;
 template<class X> class TaylorModel;
@@ -102,16 +102,14 @@ class TaylorConstrainedImageSet
     //! \brief Construct a representation of the box \a bx.
     explicit TaylorConstrainedImageSet(const Box& bx, Sweeper swp);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, Sweeper swp);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, Sweeper swp);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<NonlinearConstraint>& c, Sweeper swp);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const List<NonlinearConstraint>& c, Sweeper swp);
     //! \brief Construct the set with domain \a d, image function \a f, negative constraints \a g and equality constraints \a h.
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const List<RealScalarFunction>& g, List<RealScalarFunction>& h, Sweeper swp);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalVectorFunction& g, const IntervalVectorFunction& h, Sweeper swp);
     //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const RealVectorFunction& f, const NonlinearConstraint& c, Sweeper swp);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const NonlinearConstraint& c, Sweeper swp);
 
-    //! \brief Construct the set with domain equal to the natural domain of \a f.
-    explicit TaylorConstrainedImageSet(const VectorTaylorFunction& f);
     //! \brief Create a dynamically-allocated copy.
     TaylorConstrainedImageSet* clone() const;
 
@@ -126,7 +124,6 @@ class TaylorConstrainedImageSet
     //! \brief The image function \f$f\f$.
     VectorTaylorFunction const& function() const;
     VectorTaylorFunction taylor_function() const;
-    RealVectorFunction real_function() const;
 
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
@@ -134,17 +131,11 @@ class TaylorConstrainedImageSet
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
     void substitute(uint j, Float c);
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
-    void apply_map(RealVectorFunction r);
-    //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
-    void apply_map(const IntervalVectorFunctionInterface& r);
-    //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
-    void apply_map(VectorTaylorFunction r);
+    void apply_map(IntervalVectorFunction r);
     //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
-    void apply_flow(RealVectorFunction phi, Interval time);
-    //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
-    void apply_flow(VectorTaylorFunction phi, Interval time);
+    void apply_flow(IntervalVectorFunction phi, Interval time);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
-    void apply_flow_step(VectorTaylorFunction phi, Float h);
+    void apply_flow_step(IntervalVectorFunction phi, Float h);
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
     void new_state_constraint(NonlinearConstraint c);
@@ -152,13 +143,11 @@ class TaylorConstrainedImageSet
     void new_parameter_constraint(NonlinearConstraint c);
 
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
-    void new_negative_constraint(RealScalarFunction g);
-    void new_negative_constraint(ScalarTaylorFunction g);
+    void new_negative_constraint(IntervalScalarFunction g);
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
-    void new_zero_constraint(RealScalarFunction h);
-    void new_zero_constraint(ScalarTaylorFunction h);
+    void new_zero_constraint(IntervalScalarFunction h);
     //! \brief Introduces the constraint \f$h(s) = 0\f$. \deprecated
-    void new_equality_constraint(RealScalarFunction h);
+    void new_equality_constraint(IntervalScalarFunction h);
 
     //! \brief The functions \f$g\f$ defining the inequality constraints \f$g(x) \leq 0\f$.
     const List<ScalarTaylorFunction>& negative_constraints() const;
@@ -182,7 +171,7 @@ class TaylorConstrainedImageSet
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
-    tribool satisfies(RealScalarFunction g) const;
+    tribool satisfies(IntervalScalarFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
     virtual tribool satisfies(NonlinearConstraint c) const;
@@ -301,6 +290,7 @@ class TaylorConstrainedImageSet
     void _check() const;
     void _subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth, const Vector<Float>& errors) const;
     void _solve_zero_constraints();
+    RealVectorFunction real_function() const;
   private:
     friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const Interval&);
     friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const Box&);
@@ -319,8 +309,6 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const T
 
 //! \related TaylorConstrainedImageSet \brief The image of the \a set under the \a function.
 TaylorConstrainedImageSet apply(const IntervalVectorFunctionInterface& function, const TaylorConstrainedImageSet& set);
-TaylorConstrainedImageSet apply(const RealVectorFunction& function, const TaylorConstrainedImageSet& set);
-TaylorConstrainedImageSet apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set);
 //! \related TaylorConstrainedImageSet \brief The image of the \a set under the \a function. Does not perform domain-checking.
 TaylorConstrainedImageSet unchecked_apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set);
 

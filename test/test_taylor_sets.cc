@@ -70,16 +70,16 @@ class TestTaylorConstrainedImageSet
         IntervalVector d2=IntervalVector::unit_box(4);
         VectorTaylorFunction y=VectorTaylorFunction::identity(d2,swp);
         VectorTaylorFunction f2( ( y[0]+0.5*y[1]+0.25*y[2] , 0.5*y[0]+y[1]+y[0]*y[0]+0.375*y[3] ) );
-        TaylorConstrainedImageSet ts1=TaylorConstrainedImageSet(f1);
-        TaylorConstrainedImageSet cts1=TaylorConstrainedImageSet(f2);
+        TaylorConstrainedImageSet ts1=TaylorConstrainedImageSet(f1.domain(),f1,f1.sweeper());
+        TaylorConstrainedImageSet cts1=TaylorConstrainedImageSet(f2.domain(),f2,f2.sweeper());
         //ARIADNE_TEST_EQUAL(ts1.subsume(),cts1);
 
         f1=VectorTaylorFunction( ( x[0]+0.5*x[1] , 0.5*x[0]+x[1]+x[0]*x[0]+0.375*e ) );
         d2=IntervalVector::unit_box(3);
         y=VectorTaylorFunction::identity(d2,swp);
         f2=VectorTaylorFunction( ( y[0]+0.5*y[1] , 0.5*y[0]+y[1]+y[0]*y[0]+0.375*y[2] ) );
-        TaylorConstrainedImageSet ts2=TaylorConstrainedImageSet(f1);
-        TaylorConstrainedImageSet cts2=TaylorConstrainedImageSet(f2);
+        TaylorConstrainedImageSet ts2=TaylorConstrainedImageSet(f1.domain(),f1,f1.sweeper());
+        TaylorConstrainedImageSet cts2=TaylorConstrainedImageSet(f2.domain(),f2,f2.sweeper());
         //ARIADNE_TEST_EQUAL(ts2.subsume(),cts2);
     }
 
@@ -94,8 +94,8 @@ class TestTaylorConstrainedImageSet
         Interval e(-1.0,+1.0);
         VectorTaylorFunction x=VectorTaylorFunction::identity(IntervalVector::unit_box(2),swp);
 
-        TaylorConstrainedImageSet ts( VectorTaylorFunction(( x[0]+0.25*x[1]+0.015625*e , 0.5*x[0]+x[1]+x[0]*x[0]+0.015625*e )) );
-        TaylorConstrainedImageSet tsz( VectorTaylorFunction(( x[0]+0.25*x[1]+0.031251*e, 0.5*x[0]+x[1]+x[0]*x[0]+0.00001*e )) );
+        TaylorConstrainedImageSet ts( x.domain(), VectorTaylorFunction( ( x[0]+0.25*x[1]+0.015625*e , 0.5*x[0]+x[1]+x[0]*x[0]+0.015625*e ) ), swp );
+        TaylorConstrainedImageSet tsz( x.domain(), VectorTaylorFunction( ( x[0]+0.25*x[1]+0.031251*e, 0.5*x[0]+x[1]+x[0]*x[0]+0.00001*e ) ), swp );
 
         GridTreeSet box_discretisation=outer_approximation(ts.bounding_box(),grid,depth-3);
         ARIADNE_TEST_PRINT(box_discretisation);

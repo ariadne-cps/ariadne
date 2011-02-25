@@ -167,7 +167,6 @@ class ScalarTaylorFunction
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.
-    explicit ScalarTaylorFunction(const DomainType& d, const RealScalarFunction& f, Sweeper swp);
     explicit ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f, Sweeper swp);
     //@}
 
@@ -597,11 +596,6 @@ class VectorTaylorFunction
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorTaylorFunction(const Vector<Interval>& domain,
                          const IntervalVectorFunction& function,
-                         const Sweeper& sweeper);
-
-    /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
-    VectorTaylorFunction(const Vector<Interval>& domain,
-                         const RealVectorFunction& function,
                          const Sweeper& sweeper);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */

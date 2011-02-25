@@ -206,7 +206,7 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box, Sweeper swe
 }
 
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, Sweeper sweeper)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const IntervalVectorFunction& function, Sweeper sweeper)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     this->_domain=domain;
@@ -214,7 +214,7 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domai
     this->_reduced_domain=this->_domain;
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, const List<NonlinearConstraint>& constraints, Sweeper sweeper)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const IntervalVectorFunction& function, const List<NonlinearConstraint>& constraints, Sweeper sweeper)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     const double min=std::numeric_limits<double>::min();
@@ -246,24 +246,17 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domai
 
 }
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const RealVectorFunction& function, const NonlinearConstraint& constraint, Sweeper sweeper)
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const IntervalVectorFunction& function, const NonlinearConstraint& constraint, Sweeper sweeper)
 {
     *this=TaylorConstrainedImageSet(domain,function,make_list(constraint),sweeper);
 }
 
 
 
-TaylorConstrainedImageSet::TaylorConstrainedImageSet(const VectorTaylorFunction& function)
-{
-    this->_domain=function.domain();
-    this->_function=function;
-    this->_reduced_domain=this->_domain;
-}
-
 
 
 // Returns true if the entire set is positive; false if entire set is negative
-tribool TaylorConstrainedImageSet::satisfies(RealScalarFunction constraint) const
+tribool TaylorConstrainedImageSet::satisfies(IntervalScalarFunction constraint) const
 {
     Interval constraint_range=constraint(this->codomain());
     if(constraint_range.upper()<0.0) { return false; }
@@ -299,7 +292,7 @@ void TaylorConstrainedImageSet::substitute(uint j, Float c)
     this->_check();
 }
 
-void TaylorConstrainedImageSet::apply_map(const IntervalVectorFunctionInterface& map)
+void TaylorConstrainedImageSet::apply_map(IntervalVectorFunction map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
     VectorTaylorFunction& function=this->_function;
@@ -307,23 +300,7 @@ void TaylorConstrainedImageSet::apply_map(const IntervalVectorFunctionInterface&
     this->_check();
 }
 
-void TaylorConstrainedImageSet::apply_map(RealVectorFunction map)
-{
-    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
-    VectorTaylorFunction& function=this->_function;
-    function=compose(map,function);
-    this->_check();
-}
-
-void TaylorConstrainedImageSet::apply_map(VectorTaylorFunction map)
-{
-    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
-    VectorTaylorFunction& function=this->_function;
-    function=compose(map,function);
-    this->_check();
-}
-
-void TaylorConstrainedImageSet::apply_flow(RealVectorFunction flow, Interval time)
+void TaylorConstrainedImageSet::apply_flow(IntervalVectorFunction flow, Interval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time),this->sweeper())));
@@ -336,25 +313,13 @@ void TaylorConstrainedImageSet::apply_flow(RealVectorFunction flow, Interval tim
     this->_check();
 }
 
-void TaylorConstrainedImageSet::apply_flow_step(VectorTaylorFunction flow, Float time)
+void TaylorConstrainedImageSet::apply_flow_step(IntervalVectorFunction flow, Float time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_function=compose(flow,join(this->_function,ScalarTaylorFunction::constant(this->_function.domain(),time,this->sweeper())));
     this->_check();
 }
 
-void TaylorConstrainedImageSet::apply_flow(VectorTaylorFunction flow, Interval time)
-{
-    ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_function=compose(flow,combine(this->_function,ScalarTaylorFunction::identity(time,this->sweeper())));
-    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        *iter=embed(*iter,time);
-    }
-    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-        *iter=embed(*iter,time);
-    }
-    this->_check();
-}
 
 void TaylorConstrainedImageSet::new_state_constraint(NonlinearConstraint constraint) {
     this->_is_fully_reduced=false;
@@ -389,35 +354,24 @@ void TaylorConstrainedImageSet::new_parameter_constraint(NonlinearConstraint con
 }
 
 
-void TaylorConstrainedImageSet::new_negative_constraint(RealScalarFunction constraint) {
+void TaylorConstrainedImageSet::new_negative_constraint(IntervalScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
     this->_constraints.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
 }
 
-void TaylorConstrainedImageSet::new_negative_constraint(ScalarTaylorFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),std::setprecision(17)<<"domain="<<this->domain()<<", constraint="<<constraint);
-    this->_is_fully_reduced=false;
-    this->_constraints.append(constraint);
-}
-
-void TaylorConstrainedImageSet::new_equality_constraint(RealScalarFunction constraint) {
+void TaylorConstrainedImageSet::new_equality_constraint(IntervalScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
     this->_equations.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
 }
 
-void TaylorConstrainedImageSet::new_zero_constraint(RealScalarFunction constraint) {
+void TaylorConstrainedImageSet::new_zero_constraint(IntervalScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
     this->_equations.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
 }
 
-void TaylorConstrainedImageSet::new_zero_constraint(ScalarTaylorFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.domain()==this->domain(),std::setprecision(17)<<"domain="<<this->domain()<<", constraint="<<constraint);
-    this->_is_fully_reduced=false;
-    this->_equations.append(constraint);
-}
 
 
 List<ScalarTaylorFunction> const&
@@ -854,7 +808,8 @@ TaylorConstrainedImageSet::split(uint d) const
     make_lpair(function1,function2)=Ariadne::split(this->_function,d);
 
     Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>
-    result=make_pair(TaylorConstrainedImageSet(function1),TaylorConstrainedImageSet(function2));
+    result=make_pair(TaylorConstrainedImageSet(function1.domain(),function1,function1.sweeper()),
+                     TaylorConstrainedImageSet(function2.domain(),function2,function2.sweeper()));
     TaylorConstrainedImageSet& result1=result.first;
     TaylorConstrainedImageSet& result2=result.second;
 
@@ -1708,7 +1663,7 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const In
 
     VectorTaylorFunction new_function=combine(set.taylor_function(),ScalarTaylorFunction::identity(ivl,set.sweeper()));
 
-    TaylorConstrainedImageSet result(new_function);
+    TaylorConstrainedImageSet result(new_function.domain(),new_function,new_function.sweeper());
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
         result._constraints.append(embed(*iter,ivl));
     }
@@ -1728,7 +1683,7 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const T
 
     VectorTaylorFunction new_function=combine(set1.taylor_function(),set2.taylor_function());
 
-    TaylorConstrainedImageSet result(new_function);
+    TaylorConstrainedImageSet result(new_function.domain(),new_function,new_function.sweeper());
     for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
         result._constraints.append(embed(*iter,set2.domain()));
     }
@@ -1746,18 +1701,6 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const T
 }
 
 TaylorConstrainedImageSet apply(const IntervalVectorFunctionInterface& function, const TaylorConstrainedImageSet& set) {
-    TaylorConstrainedImageSet result(set);
-    result.apply_map(function);
-    return result;
-}
-
-TaylorConstrainedImageSet apply(const RealVectorFunction& function, const TaylorConstrainedImageSet& set) {
-    TaylorConstrainedImageSet result(set);
-    result.apply_map(function);
-    return result;
-}
-
-TaylorConstrainedImageSet apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set) {
     TaylorConstrainedImageSet result(set);
     result.apply_map(function);
     return result;

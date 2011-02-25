@@ -968,12 +968,24 @@ RealScalarFunction embed(const RealScalarFunction& f, uint k) {
 
 //------------------------ Vector Function ----------------------------------//
 
+typedef VectorOfScalarFunctionBody<Real> VectorOfRealScalarFunction;
+typedef VectorOfScalarFunctionBody<Interval> VectorOfIntervalScalarFunction;
+
 IntervalVectorFunction::VectorFunction(Nat rs, const IntervalScalarFunction& sf)
     : _ptr(new VectorOfScalarFunctionBody<Interval>(rs,sf))
 {
 }
 
-typedef VectorOfScalarFunctionBody<Real> VectorOfRealScalarFunction;
+IntervalVectorFunction::VectorFunction(const List<RealScalarFunction>& lsf)
+{
+    ARIADNE_ASSERT(lsf.size()>0);
+    this->_ptr=shared_ptr<IntervalVectorFunctionInterface>(new VectorOfIntervalScalarFunction(lsf.size(),lsf[0].argument_size()));
+    VectorOfIntervalScalarFunction* vec = static_cast<VectorOfIntervalScalarFunction*>(this->_ptr.operator->());
+    for(uint i=0; i!=lsf.size(); ++i) {
+        vec->set(i,lsf[i]);
+    }
+}
+
 
 RealVectorFunction::VectorFunction(VectorFunctionInterface<Real>* fptr)
     : _ptr(fptr)

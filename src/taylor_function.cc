@@ -1727,35 +1727,39 @@ List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns)
 
 
 ScalarTaylorFunction
-TaylorFunctionFactory::create_zero(const IntervalVector& domain) const
+TaylorFunctionFactory::create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const
 {
-    return ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_sweeper));
+    return ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
 ScalarTaylorFunction*
-TaylorFunctionFactory::_create_zero(const IntervalVector& domain) const
+TaylorFunctionFactory::_create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const
 {
-    return new ScalarTaylorFunction(domain,IntervalTaylorModel(domain.size(),this->_sweeper));
+    return new ScalarTaylorFunction(domain,function,this->_sweeper);
+}
+
+VectorTaylorFunction
+TaylorFunctionFactory::create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const
+{
+    return VectorTaylorFunction(domain,function,this->_sweeper);
+}
+
+VectorTaylorFunction*
+TaylorFunctionFactory::_create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const
+{
+    return new VectorTaylorFunction(domain,function,this->_sweeper);
+}
+
+ScalarTaylorFunction
+TaylorFunctionFactory::create_zero(const IntervalVector& domain) const
+{
+    return ScalarTaylorFunction::zero(domain,this->_sweeper);
 }
 
 VectorTaylorFunction
 TaylorFunctionFactory::create_identity(const IntervalVector& domain) const
 {
-    VectorTaylorFunction result(domain.size(),domain,this->_sweeper);
-    for(uint i=0; i!=domain.size(); ++i) {
-        result._models[i]=ScalarTaylorFunction::coordinate(domain,i,result.sweeper())._model;
-    }
-    return result;
-}
-
-VectorTaylorFunction*
-TaylorFunctionFactory::_create_identity(const IntervalVector& domain) const
-{
-    VectorTaylorFunction* result=new VectorTaylorFunction(domain.size(),domain,this->_sweeper);
-    for(uint i=0; i!=domain.size(); ++i) {
-        result->_models[i]=ScalarTaylorFunction::coordinate(domain,i,result->sweeper())._model;
-    }
-    return result;
+    return VectorTaylorFunction::identity(domain,this->_sweeper);
 }
 
 

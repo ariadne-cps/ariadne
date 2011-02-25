@@ -886,11 +886,13 @@ class TaylorFunctionFactory
   public:
     TaylorFunctionFactory(Sweeper sweeper) : _sweeper(sweeper) { }
     TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
+    ScalarTaylorFunction create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;
+    VectorTaylorFunction create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const IntervalVector& domain) const;
     VectorTaylorFunction create_identity(const IntervalVector& domain) const;
   private:
-    ScalarTaylorFunction* _create_zero(const IntervalVector& domain) const;
-    VectorTaylorFunction* _create_identity(const IntervalVector& domain) const;
+    ScalarTaylorFunction* _create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;
+    VectorTaylorFunction* _create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const;
 };
 
 

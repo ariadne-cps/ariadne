@@ -37,7 +37,6 @@ using namespace Ariadne;
 
 typedef unsigned int uint;
 
-inline Sweeper default_sweeper() { return Sweeper(); }
 
 void
 solve_all(Set< Vector<Interval> >& r,
@@ -190,9 +189,10 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
     //std::cerr<<__FUNCTION__<<std::endl;
     uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
 
+    Sweeper sweeper = f[0].sweeper();
     Vector<Interval> domain_h(rs,Interval(-1,+1));
-    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,default_sweeper());
-    Vector<IntervalTaylorModel> h=IntervalTaylorModel::constants(has,domain_h,default_sweeper());
+    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,sweeper);
+    Vector<IntervalTaylorModel> h=IntervalTaylorModel::constants(has,domain_h,sweeper);
     Vector<IntervalTaylorModel> idh=join(id,h);
 
     // Compute the Jacobian of f with respect to the second arguments at the centre of the domain
@@ -268,7 +268,7 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
     }
 
     uint number_of_steps=6;
-    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,default_sweeper());
+    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,f[0].sweeper());
     Vector<IntervalTaylorModel> h=_implicit5(f,number_of_steps);
 
     // Perform proper Newton step improvements
@@ -308,6 +308,16 @@ newton_implicit(const VectorTaylorFunction& f)
 
 
 namespace Ariadne {
+
+inline Vector<Interval> operator*(const Matrix<Interval>& A, const Vector<Interval>& v) {
+    ARIADNE_PRECONDITION(A.column_size()==v.size());
+    Vector<Interval> r(A.row_size());
+    for(size_t j=0; j!=v.size(); ++j) { for(size_t i=0; i!=r.size(); ++i) { r[i] += A.get(i,j) * v.get(j); } }
+    return r;
+}
+
+inline Vector<Interval> operator*(const Matrix<Interval>& A, const VectorSum< Vector<Interval>, Vector<Interval> >& v) {
+    return A*Vector<Interval>(v); }
 
 VectorTaylorFunction evaluate(const RealVectorFunction& f,const VectorTaylorFunction& x) {
     for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
@@ -371,8 +381,20 @@ class DifferenceFunction
 
 
 SolverBase::SolverBase(double max_error, uint max_steps)
-  : _max_error(max_error), _max_steps(max_steps)
+  : _max_error(max_error), _max_steps(max_steps), _function_factory_ptr(new TaylorFunctionFactory(Sweeper()))
 {
+}
+
+void
+SolverBase::set_function_factory(const TaylorFunctionFactory& factory)
+{
+    this->_function_factory_ptr=FunctionFactoryPointer(factory.clone());
+}
+
+const TaylorFunctionFactory&
+SolverBase::function_factory() const
+{
+    return *this->_function_factory_ptr;
 }
 
 
@@ -455,13 +477,11 @@ SolverBase::implicit(const RealVectorFunction& f,
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
-    VectorTaylorFunction result;
-
     const uint nx=ix.size();
     const double err=this->maximum_error();
 
-    VectorTaylorFunction p(VectorTaylorFunction::identity(ip,default_sweeper()));
-    VectorTaylorFunction x(VectorTaylorFunction::constant(ip,ix,default_sweeper()));
+    VectorTaylorFunction p(this->function_factory().create(ip,IdentityFunction(ip.size())));
+    VectorTaylorFunction x(this->function_factory().create(ip,VectorConstantFunction(RealVector(ix),ip.size())));
     VectorTaylorFunction nwx(nx);
     VectorTaylorFunction fnwx(f.result_size());
 
@@ -520,7 +540,7 @@ SolverBase::implicit(const IntervalScalarFunction& f,
                       const Vector<Interval>& ip,
                       const Interval& ix) const
 {
-    ScalarTaylorFunction tf(join(ip,ix),f,default_sweeper());
+    ScalarTaylorFunction tf=this->function_factory().create(join(ip,ix),f);
     return Ariadne::implicit(tf);
 }
 
@@ -565,9 +585,9 @@ implicit(const IntervalTaylorModel& f) {
     }
 
     uint number_of_steps=10;
-    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,default_sweeper());
+    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,f.sweeper());
     //IntervalTaylorModel h=IntervalTaylorModel::constant(has,Interval(-1,+1));
-    IntervalTaylorModel h=IntervalTaylorModel::constant(has,Interval(0),default_sweeper());
+    IntervalTaylorModel h=IntervalTaylorModel::constant(has,Interval(0),f.sweeper());
     Vector<IntervalTaylorModel> idh=join(id,h);
     // Perform proper Newton step improvements
     //std::cerr<<"\nf="<<f<<"\n";
@@ -745,8 +765,8 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
         }
     }
 
-    ScalarTaylorFunction h=ScalarTaylorFunction::constant(ip,midpoint(x),default_sweeper());
-    VectorTaylorFunction id=VectorTaylorFunction::identity(ip,default_sweeper());
+    ScalarTaylorFunction h=this->function_factory().create(ip,ScalarConstantFunction(ip.size(),Real(midpoint(x))));
+    VectorTaylorFunction id=this->function_factory().create(ip,IdentityFunction(ip.size()));
     ScalarTaylorFunction dh;
 
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {

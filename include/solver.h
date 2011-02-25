@@ -45,6 +45,8 @@ namespace Ariadne {
 template<class X> class Vector;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
+class TaylorFunctionFactory;
+typedef shared_ptr<const TaylorFunctionFactory> FunctionFactoryPointer;
 
 /*! \ingroup \ingroup Solvers
  *  \brief %Common functionality for solving (nonlinear) equations.
@@ -65,6 +67,11 @@ class SolverBase
     uint maximum_number_of_steps() const { return this->_max_steps; }
     /*! \brief Set the maximum number of steps. */
     void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; };
+
+    /*! \brief The class which constructs functions for the implicit function solver. */
+    const TaylorFunctionFactory& function_factory() const;
+    /*! \brief Set the class which constructs functions for the implicit function solver. */
+    void set_function_factory(const TaylorFunctionFactory& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
     virtual Vector<Interval> zero(const RealVectorFunction& f,const Vector<Interval>& pt) const;
@@ -92,6 +99,7 @@ class SolverBase
   private:
     double _max_error;
     uint _max_steps;
+    FunctionFactoryPointer _function_factory_ptr;
 };
 
 

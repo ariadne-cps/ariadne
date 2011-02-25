@@ -316,44 +316,22 @@ class ScalarModelInterface {
     virtual Interval evaluate(const Vector<Interval>&) const = 0;
 };
 
-
-//! \ingroup FunctionModule
-//! \brief An interface for classes which dynamically create functions.
-template<class X> class FunctionFactoryInterface
-{
-    typedef Vector<Interval> DomainType;
-  public:
-    //! \brief Create a function which is identically zero on the given domain.
-    inline ScalarFunction<X> create_zero(const DomainType& domain) const;
-    //! \brief Create a function which is the identity on the given domain.
-    inline VectorFunction<X> create_identity(const DomainType& domain) const;
-  private:
-    //! \brief A dynamically-allocated pointer to the zero function in some function class.
-    virtual ScalarFunctionInterface<X>* _create_zero(const DomainType& domain) const = 0;
-    //! \brief A dynamically-allocated pointer to the identity function in some function class.
-    virtual VectorFunctionInterface<X>* _create_identity(const DomainType& domain) const = 0;
-};
+template<class X> class FunctionFactoryInterface;
 
 template<> class FunctionFactoryInterface<Interval>
 {
-    typedef Vector<Interval> DomainType;
+    typedef IntervalVector DomainType;
   public:
+    FunctionFactoryInterface<Interval>* clone() const;
+    inline ScalarFunction<Interval> create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const;
+    inline VectorFunction<Interval> create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const;
     inline ScalarFunction<Interval> create_zero(const IntervalVector& domain) const;
     inline VectorFunction<Interval> create_identity(const IntervalVector& domain) const;
   private:
-    virtual ScalarFunctionInterface<Interval>* _create_zero(const DomainType& domain) const = 0;
-    virtual VectorFunctionInterface<Interval>* _create_identity(const DomainType& domain) const = 0;
+    virtual ScalarFunctionInterface<Interval>* _create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const = 0;
+    virtual VectorFunctionInterface<Interval>* _create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const = 0;
 };
 
-template<> class FunctionFactoryInterface<Real>
-{
-  public:
-    inline ScalarFunction<Real> create_zero(uint argument_size) const;
-    inline VectorFunction<Real> create_identity(uint argument_size) const;
-  private:
-    virtual ScalarFunctionInterface<Real>* _create_zero(uint argument_size) const = 0;
-    virtual VectorFunctionInterface<Real>* _create_identity(uint argument_size) const = 0;
-};
 
 } // namespace Ariadne
 

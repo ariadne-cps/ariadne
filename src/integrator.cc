@@ -35,10 +35,30 @@
 #include "taylor_function.h"
 
 #include "polynomial.h"
+#include <include/function.h>
 
 namespace Ariadne {
 
 inline Sweeper default_sweeper() { return Sweeper(); }
+
+IntegratorBase::IntegratorBase(double e)
+    :  _maximum_error(e), _lipschitz_tolerance(0.5), _function_factory_ptr(new TaylorFunctionFactory(Sweeper()))
+{
+    assert(e>0.0);
+}
+
+void
+IntegratorBase::set_function_factory(const TaylorFunctionFactory& factory)
+{
+    this->_function_factory_ptr=FunctionFactoryPointer(factory.clone());
+}
+
+const TaylorFunctionFactory&
+IntegratorBase::function_factory() const
+{
+    return *this->_function_factory_ptr;
+}
+
 
 Pair<Float,IntervalVector>
 IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
@@ -128,7 +148,7 @@ IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, co
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
-    VectorTaylorFunction flow_function=VectorTaylorFunction::identity(dx0,default_sweeper());
+    VectorTaylorFunction flow_function=this->function_factory().create(dx0,IdentityFunction(dx0.size()));
     Float t=0.0;
     while(t<tmax) {
         IntervalVector dx=flow_function.range();
@@ -158,7 +178,7 @@ IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, co
     make_lpair(h,bx) = this->flow_bounds(vf,dx,dtw);
     ARIADNE_ASSERT_MSG(dtw==h,"Width of time interval "<<dt<<" cannot be covered in a single flow step; maximum flow step "<<h<<" over domain "<<dx);
     VectorTaylorFunction step=this->flow_step(vf,dx,h,bx);
-    ScalarTaylorFunction time=ScalarTaylorFunction::identity(dt,sweeper)-dt.lower();
+    ScalarTaylorFunction time=this->function_factory().create(IntervalVector(1u,dt),CoordinateFunction(1,0))-dt.lower();
     VectorTaylorFunction flow=compose(step,combine(evolve,time));
     return flow;
 }
@@ -294,8 +314,8 @@ AffineIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& d
 
     IntervalVector flow_domain = join(dom,Interval(0,h));
 
-    Vector<IntervalTaylorModel> id = VectorTaylorFunction::identity(flow_domain,default_sweeper()).models();
-    VectorTaylorFunction res(n,flow_domain,default_sweeper());
+    Vector<IntervalTaylorModel> id = this->function_factory().create(flow_domain,IdentityFunction(flow_domain.size())).models();
+    VectorTaylorFunction res = this->function_factory().create(flow_domain,VectorConstantFunction(RealVector(n,Real(0)),flow_domain.size()));
     for(uint i=0; i!=n; ++i) {
         IntervalTaylorModel res_model = evaluate(mdphi[i].expansion(),id);
         res_model += Interval(-err[i],+err[i]);

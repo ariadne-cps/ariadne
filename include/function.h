@@ -42,6 +42,7 @@
 #include "vector.h"
 #include "matrix.h"
 
+class D;
 namespace Ariadne {
 
 typedef uint Nat;
@@ -133,6 +134,7 @@ class ScalarFunction<Real>
     typedef uint SizeType;
     typedef std::ostream OStream;
   public:
+    static ScalarFunction<Real> zero(Nat n);
     static ScalarFunction<Real> constant(Nat n, Real c);
     static ScalarFunction<Real> coordinate(Nat n, uint i);
     static List< ScalarFunction<Real> > coordinates(Nat n);
@@ -442,6 +444,18 @@ class ScalarConstantFunction
 };
 
 //! \ingroup FunctionModule
+//! \brief A scalar function of the form \f$f(x)=c\f$.
+class CoordinateFunction
+    : public ScalarFunction<Real>
+{
+  public:
+    //! \brief Construct the constant function \f$f(x)=\sum a_ix_i+b\f$.
+    CoordinateFunction(uint n, uint j);
+  protected:
+    virtual void _check_type(const ScalarFunctionInterface<Real>* ptr) const;
+};
+
+//! \ingroup FunctionModule
 //! \brief A scalar function of the form \f$f(x)=\sum_{i=1}^{n}a_ix_i+b\f$.
 class ScalarAffineFunction
     : public ScalarFunction<Real>
@@ -513,7 +527,7 @@ class ProjectionFunction
     ProjectionFunction(uint m, uint n, uint k);
     //! \brief Construct the projection function  with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,m-1\f$.
     ProjectionFunction(uint m, uint n, const Array<uint>& p);
-    //! \brief Construct the projection function with \f$f_i(x)=x_{p_i}\f$ for \f$i=0,\ldots,|p|-1\f$.
+    //! \brief Construct the projection function with \f$f_i(x)=x_{p_i}\f$ Ffor \f$i=0,\ldots,|p|-1\f$.
     ProjectionFunction(const Array<uint>& p, uint n);
 
     const Array<uint>& p() const;
@@ -522,6 +536,30 @@ class ProjectionFunction
     virtual void _check_type(const VectorFunctionInterface<Real>* ptr) const;
 };
 
+template<class X> class FunctionFactory;
+typedef FunctionFactory<Interval> IntervalFunctionFactory;
+
+template<>
+class FunctionFactory<Interval>
+{
+    shared_ptr< const FunctionFactoryInterface<Interval> > _ptr;
+  public:
+    FunctionFactory(const FunctionFactoryInterface<Interval>& ref) : _ptr(ref.clone()) { }
+    FunctionFactory(const FunctionFactoryInterface<Interval>* ptr) : _ptr(ptr) { }
+    FunctionFactory(shared_ptr< const FunctionFactoryInterface<Interval> > ptr) : _ptr(ptr) { }
+    inline ScalarFunction<Interval> create(const IntervalVector& d, const ScalarFunctionInterface<Interval>& f) const;
+    inline VectorFunction<Interval> create(const IntervalVector& d, const VectorFunctionInterface<Interval>& f) const;
+};
+
+inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const {
+    return this->_create(domain,function); }
+inline VectorFunction<Interval> FunctionFactoryInterface<Interval>::create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const {
+    return this->_create(domain,function); }
+
+inline ScalarFunction<Interval> FunctionFactory<Interval>::create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const {
+    return this->_ptr->create(domain,function); }
+inline VectorFunction<Interval> FunctionFactory<Interval>::create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const {
+    return this->_ptr->create(domain,function); }
 
 } // namespace Ariadne
 

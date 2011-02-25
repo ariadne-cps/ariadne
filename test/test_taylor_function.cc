@@ -551,12 +551,12 @@ void TestTaylorFunctionFactory::test_create()
 
     IntervalVector dom(2, -1,+1, 0.5,3.5);
 
-    ScalarTaylorFunction stf=factory.create_zero(dom);
+    ScalarTaylorFunction stf=factory.create(dom, RealScalarFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
     ARIADNE_TEST_EQUALS(&stf.sweeper(),&sweeper);
     ARIADNE_TEST_EQUALS(stf.evaluate(dom),Interval(0.0));
 
-    VectorTaylorFunction vtf=factory.create_identity(dom);
+    VectorTaylorFunction vtf=factory.create(dom, RealVectorFunction::identity(dom.size()) );
     ARIADNE_TEST_PRINT(vtf);
 
     // Test evaluation gives a superset with small additional error

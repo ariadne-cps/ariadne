@@ -44,14 +44,15 @@ class Interval;
 template<class X> class Vector;
 template<class X> class Differential;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
-
+class TaylorFunctionFactory;
+typedef shared_ptr<const TaylorFunctionFactory> FunctionFactoryPointer;
 
 class IntegratorBase
     : public IntegratorInterface
     , public Loggable
 {
   public:
-    IntegratorBase(double e) :  _maximum_error(e), _lipschitz_tolerance(0.5) { assert(e>0.0); }
+    IntegratorBase(double e);
     //! \brief A threshold for the error estimate of the approximation.
     virtual void set_maximum_error(double e) { assert(e>0.0); this->_maximum_error=e; }
     //! \brief The fraction L(f)*h used for a time step.
@@ -59,6 +60,12 @@ class IntegratorBase
     void set_lipschitz_tolerance(double lt) { _lipschitz_tolerance = lt; }
     double maximum_error() const  { return this->_maximum_error; }
 
+    //! \brief The class which constructs functions for representing the flow.
+    const TaylorFunctionFactory& function_factory() const;
+    //! \brief Set the class which constructs functions for representing the flow.
+    void set_function_factory(const TaylorFunctionFactory& factory);
+
+    
     virtual Pair<Float,IntervalVector>
     flow_bounds(const RealVectorFunction& vector_field,
                 const IntervalVector& state_domain,
@@ -88,6 +95,7 @@ class IntegratorBase
   public:
     double _maximum_error;
     double _lipschitz_tolerance;
+    FunctionFactoryPointer _function_factory_ptr;
 };
 
 

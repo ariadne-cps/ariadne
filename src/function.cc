@@ -273,6 +273,7 @@ template<> struct BinaryFunctionBody<Pow>
 
 
 
+
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
 struct ScalarAffineFunctionBody
     : ScalarFunctionMixin<ScalarAffineFunctionBody,Real>
@@ -673,6 +674,11 @@ FloatScalarFunction::ScalarFunction(Nat n)
 IntervalScalarFunction::ScalarFunction(Nat n)
     : _ptr(new ScalarPolynomialFunctionBody(Polynomial<Interval>::constant(n,Interval(0.0))))
 {
+}
+
+RealScalarFunction RealScalarFunction::zero(Nat n)
+{
+    return RealScalarFunction(new ScalarConstantFunctionBody(n,Real(0)));
 }
 
 RealScalarFunction RealScalarFunction::constant(Nat n, Real c)
@@ -1164,13 +1170,23 @@ RealScalarFunction lie_derivative(const RealScalarFunction& g, const RealVectorF
 
 //------------------------ Special functions --------------------------------//
 
+ScalarConstantFunction::ScalarConstantFunction(uint as, const Real& c)
+    : RealScalarFunction(new ScalarConstantFunctionBody(as,c))
+{
+}
+
+void ScalarConstantFunction::_check_type(const RealScalarFunctionInterface* pointer) const {
+    ARIADNE_ASSERT(dynamic_cast<const ScalarConstantFunctionBody*>(pointer));
+}
+
 ScalarAffineFunction::ScalarAffineFunction(const Vector<Real>& a, const Real& b)
     : RealScalarFunction(new ScalarAffineFunctionBody(a,b))
 {
 }
 
 void ScalarAffineFunction::_check_type(const RealScalarFunctionInterface* pointer) const {
-    ARIADNE_ASSERT(dynamic_cast<const ScalarAffineFunctionBody*>(pointer)); }
+    ARIADNE_ASSERT(dynamic_cast<const ScalarAffineFunctionBody*>(pointer));
+}
 
 
 
@@ -1201,6 +1217,15 @@ const Vector<Real> VectorAffineFunction::b() const
 }
 
 
+
+CoordinateFunction::CoordinateFunction(uint as, uint j)
+    : RealScalarFunction(RealScalarFunction::coordinate(as,j))
+{
+}
+
+void CoordinateFunction::_check_type(const RealScalarFunctionInterface* pointer) const
+{
+}
 
 IdentityFunction::IdentityFunction(uint n)
     : RealVectorFunction(new IdentityFunctionBody(n))

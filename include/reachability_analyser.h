@@ -128,6 +128,7 @@ class HybridReachabilityAnalyser
     typedef HybridGridTreeSet SetApproximationType;
     typedef HybridEvolver::EnclosureType EnclosureType;
     typedef HybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
+    typedef std::pair<SetApproximationType,bool> (HybridReachabilityAnalyser::*UpperChainReachFuncPtr)(const SystemType&, const HybridImageSet&) const;
   public:
     //@{
     //! \name Constructors and destructors
@@ -444,7 +445,8 @@ class HybridReachabilityAnalyser
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
-    std::pair<SetApproximationType,bool> _upper_chain_reach(const SystemType& system, const HybridImageSet& initial_set) const;
+    std::pair<SetApproximationType,bool> _upper_chain_reach(SystemType& system, const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const;
+    std::pair<SetApproximationType,bool> _upper_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
 
     /*! \brief Checks if a break is to be issued.
      * \details Read the \a flagToCheck for validity: if false, sets \a flagToUpdate to false and returns true ("do break"), otherwise

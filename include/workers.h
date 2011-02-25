@@ -38,7 +38,12 @@ public:
 	typedef HybridEvolver::ContinuousEnclosureType CE;
 
 	// Constructor
-    UpperReachEvolveWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser, const HybridAutomaton& sys, const HGTS& initial_set, const HybridTime& time, const int& accuracy, const uint& concurrency) 
+    UpperReachEvolveWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser,
+    					   const HybridAutomaton& sys,
+    					   const HGTS& initial_set,
+    					   const HybridTime& time,
+    					   const int& accuracy,
+    					   const uint& concurrency)
 	: _discretiser(discretiser),
 	  _sys(sys), 
 	  _initial_set(initial_set),
@@ -103,40 +108,26 @@ private:
 		// Execution loop
         while (true)
         {
-			// Get the lock for input
 			_inp_mutex.lock();
 
 			// If all cells have been picked
 			if (_cells_it == _initial_set.end())
 			{
-				// Release the lock for input
-				_inp_mutex.unlock();					
-				// End processing
+				_inp_mutex.unlock();
 				break;
 			}
             else
 			{
-				// Get the enclosure of the cell
 		        EnclosureType enclosure=_discretiser->enclosure(*_cells_it);
-				// Increase the iterator
-				_cells_it++;
-
-				// Release the lock for input
+				++_cells_it;
 				_inp_mutex.unlock();		
 
-				// The reach and evolve regions
         		HGTS reach, evolve;
-				// Process and assign the regions
 		        make_lpair(reach,evolve)=_discretiser->evolution(_sys,enclosure,_time,_accuracy,UPPER_SEMANTICS);
 				
-				// Get the lock for output
 				_out_mutex.lock();
-
-				// Adjoin to the global reach and evolve
 		        _reach.adjoin(reach);
         		_evolve.adjoin(evolve);
-
-				// Release the lock for output
 				_out_mutex.unlock();
 			}
         }
@@ -160,7 +151,12 @@ public:
 	typedef HybridEvolver::ContinuousEnclosureType CE;
 
 	// Constructor
-    UpperReachEvolveContinuousWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser, const HybridAutomaton& sys, const list<EnclosureType>& initial_enclosures, const HybridTime& time, const int& accuracy, const uint& concurrency)
+    UpperReachEvolveContinuousWorker(const boost::shared_ptr<HybridDiscretiser<CE> >& discretiser,
+    								 const HybridAutomaton& sys,
+    								 const list<EnclosureType>& initial_enclosures,
+    								 const HybridTime& time,
+    								 const int& accuracy,
+    								 const uint& concurrency)
 	: _discretiser(discretiser),
 	  _sys(sys), 
 	  _initial_enclosures(initial_enclosures),
@@ -225,41 +221,26 @@ private:
 		// Execution loop
         while (true)
         {
-			// Get the lock for input
 			_inp_mutex.lock();
 
 			// If all enclosures have been picked
 			if (_enclosures_it == _initial_enclosures.end())
 			{
-				// Release the lock for input
 				_inp_mutex.unlock();					
-				// End processing
 				break;
 			}
             else
 			{
-            	// Assign the enclosure
 				EnclosureType enclosure = *_enclosures_it;
-
-				// Increase the iterator
-				_enclosures_it++;
-
-				// Release the lock for input
+				++_enclosures_it;
 				_inp_mutex.unlock();		
 
-				// The reach and evolve regions
         		HGTS reach, evolve;
-				// Process and assign the regions
 		        make_lpair(reach,evolve)=_discretiser->upper_evolution_continuous(_sys,enclosure,_time,_accuracy);
 
-				// Get the lock for output
 				_out_mutex.lock();
-
-				// Adjoin to the global reach and evolve
 		        _reach.adjoin(reach);
         		_evolve.adjoin(evolve);
-
-				// Release the lock for output
 				_out_mutex.unlock();
 			}
         }
@@ -373,24 +354,18 @@ private:
 		// Execution loop
         while (true)
         {
-			// Get the lock for input
 			_inp_mutex.lock();
 
 			// If all initial enclosures have been picked or if we have disproved and we must skip
 			if (_initial_enclosures.empty() || (_skip_if_disproved && _falsInfo.getIsDisproved()))
 			{
-				// Release the lock for input
 				_inp_mutex.unlock();					
-				// End processing
 				break;
 			}
             else
 			{
-				// Get the least recent element and remove it
 				HybridBasicSet<CE> current_initial_enclosure = _initial_enclosures.front();
 				_initial_enclosures.pop_front();
-
-				// Release the lock for input
 				_inp_mutex.unlock();
 
 				// The current falsification info
@@ -408,27 +383,19 @@ private:
 				current_reach = _discretiser->_discretise(current_reach_enclosures,_sys.grid(),_accuracy);
 				current_evolve = _discretiser->_discretise(current_evolve_enclosures,_sys.grid(),_accuracy);
 
-				// Get the lock for output
 				_out_mutex.lock();
-
-				// Adjoin the current evolve to the set of the evolve at the end of the step
+				_reach.adjoin(current_reach);
 				_evolve_global.adjoin(current_evolve);
+			    _falsInfo.updateWith(current_falsInfo);
 
 				// Add the number of cells of the current evolve to the superposed total at the end of the step, for each location
 				for (HGTS::locations_const_iterator evolve_it = current_evolve.locations_begin(); evolve_it != current_evolve.locations_end(); evolve_it++)
 					_superposed_evolve_sizes[evolve_it->first] += current_evolve[evolve_it->first].size();
-
-				// Adjoin the current reach to the final reach
-			    _reach.adjoin(current_reach);
-			    // Update the falsification info
-			    _falsInfo.updateWith(current_falsInfo);
-		
 				// Add the current_enclosures to the final enclosures
 				for (ELS::locations_const_iterator loc_it = current_evolve_enclosures.locations_begin(); loc_it != current_evolve_enclosures.locations_end(); loc_it++)
 					for (ListSet<CE>::const_iterator list_it = loc_it->second.begin(); list_it != loc_it->second.end(); list_it++)
 						_final_enclosures.push_back(EnclosureType(loc_it->first,*list_it));
 
-				// Release the lock for output
 				_out_mutex.unlock();
 			}
         }

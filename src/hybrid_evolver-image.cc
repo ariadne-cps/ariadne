@@ -112,7 +112,7 @@ orbit(const SystemType& system,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false);
+                     system,initial_set,time,semantics);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -131,7 +131,7 @@ upper_orbit_continuous(const SystemType& system,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_upper_evolution_continuous(final,reachable,intermediate,
-                     				  system,initial_set,time,false);
+                     				  system,initial_set,time);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -223,8 +223,7 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 				            EnclosureListType& intermediate_sets,
            			  	 	const SystemType& system,
            			  		const EnclosureType& initial_set,
-           			  		const TimeType& maximum_hybrid_time,
-           			  		bool reach) const
+           			  		const TimeType& maximum_hybrid_time) const
 {
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n"); 
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_hybrid_time.continuous_time()<<" time units and "<<maximum_hybrid_time.discrete_time()<<" steps.\n");
@@ -258,8 +257,8 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
                         << " and set centre " << initial_set_model.centre() << " due to the enclosure being too large: adjoining the initial set to the final sets.\n\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else {
-            this->_upper_evolution_continuous_step(working_sets,final_sets,reach_sets,intermediate_sets,
-                                  				   system,current_set,maximum_hybrid_time,reach);
+            this->_upper_evolution_continuous_step(working_sets,reach_sets,intermediate_sets,
+                                  				   system,current_set,maximum_hybrid_time);
         }
 
         _logStepAtVerbosity1(working_sets,reach_sets,initial_events,initial_time_model,initial_set_model,initial_location);
@@ -274,7 +273,6 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 						  const SystemType& system,
 						  const EnclosureType& initial_set,
 						  const TimeType& maximum_hybrid_time,
-						  bool reach,
 						  const HybridBoxes& disprove_bounds,
 						  bool skip_if_disproved) const
 {
@@ -304,14 +302,13 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 		TimeModelType initial_time_model=current_set.fourth;
 
 		bool isEnclosureTooLarge = _isEnclosureTooLarge(initial_set_model);
-
-		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
+		bool subdivideOverTime = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
 
 		if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time() ||
 		   initial_events.size()>=uint(maximum_hybrid_time.discrete_time())) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
+        } else if (subdivideOverTime && this->_parameters->enable_subdivisions) {
             ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
             _add_models_subdivisions_time(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
 		} else if(!this->_parameters->enable_subdivisions &&
@@ -320,10 +317,9 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
         } else {
             // Compute evolution and get the result for this working set
-            DisproveData localDisproveData = this->_lower_evolution_disprove_step(working_sets,
-																		    final_sets,reach_sets,intermediate_sets,
+            DisproveData localDisproveData = this->_lower_evolution_disprove_step(working_sets,reach_sets,intermediate_sets,
 																			system,current_set,maximum_hybrid_time,
-																			reach,disprove_bounds);
+																			disprove_bounds);
             disproveData.updateWith(localDisproveData);
             if (skip_if_disproved && disproveData.getIsDisproved())
 				return disproveData;
@@ -343,8 +339,7 @@ _evolution(EnclosureListType& final_sets,
            const SystemType& system,
            const EnclosureType& initial_set,
            const TimeType& maximum_hybrid_time,
-           Semantics semantics,
-           bool reach) const
+           Semantics semantics) const
 {
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_hybrid_time.continuous_time()<<" time units and "<<maximum_hybrid_time.discrete_time()<<" steps.\n");
@@ -370,14 +365,13 @@ _evolution(EnclosureListType& final_sets,
 		TimeModelType initial_time_model=current_set.fourth;
 
 		bool isEnclosureTooLarge = _isEnclosureTooLarge(initial_set_model);
-
-		bool subdivide_over_time = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
+		bool subdivideOverTime = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
 
 		if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time() ||
 		   initial_events.size()>=uint(maximum_hybrid_time.discrete_time())) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if (subdivide_over_time && this->_parameters->enable_subdivisions) {
+        } else if (subdivideOverTime && this->_parameters->enable_subdivisions) {
             ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
             _add_models_subdivisions_time(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
 		} else if (semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && isEnclosureTooLarge) {
@@ -390,10 +384,7 @@ _evolution(EnclosureListType& final_sets,
             if(semantics == UPPER_SEMANTICS)
                 final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else {
-            this->_evolution_step(working_sets,
-                                  final_sets,reach_sets,intermediate_sets,
-                                  system,current_set,maximum_hybrid_time,
-                                  semantics,reach);
+            this->_evolution_step(working_sets,reach_sets,intermediate_sets,system,current_set,maximum_hybrid_time,semantics);
         }
 
 		_logStepAtVerbosity1(working_sets,reach_sets,initial_events,initial_time_model,initial_set_model,initial_location);
@@ -405,14 +396,12 @@ _evolution(EnclosureListType& final_sets,
 void
 ImageSetHybridEvolver::
 _evolution_step(std::list< HybridTimedSetType >& working_sets,
-                EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
                 const SystemType& system,
                 const HybridTimedSetType& working_set,
                 const TimeType& maximum_hybrid_time,
-                Semantics semantics,
-                bool reach) const
+                Semantics semantics) const
 {
     // Use the following basic algorithm for computing an evolution step
     //
@@ -586,13 +575,11 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 void
 ImageSetHybridEvolver::
 _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
-				                 EnclosureListType& final_sets,
                 				 EnclosureListType& reach_sets,
                 				 EnclosureListType& intermediate_sets,
                 				 const SystemType& system,
                 				 const HybridTimedSetType& working_set,
-                				 const TimeType& maximum_hybrid_time,
-				                 bool reach) const
+                				 const TimeType& maximum_hybrid_time) const
 {
     const double SMALL_RELATIVE_TIME=1./16;
 
@@ -680,13 +667,12 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 DisproveData
 ImageSetHybridEvolver::
 _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
-                EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
                 const SystemType& system,
                 const HybridTimedSetType& working_set,
                 const TimeType& maximum_hybrid_time,
-                bool reach, const HybridBoxes& disprove_bounds) const
+                const HybridBoxes& disprove_bounds) const
 {
     const double SMALL_RELATIVE_TIME=1./16;
 

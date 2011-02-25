@@ -28,9 +28,7 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_H
 #define ARIADNE_HYBRID_EVOLVER_H
 
-#include "hybrid_evolver-stable.h"
 #include "hybrid_evolver-image.h"
-#include "hybrid_evolver-constrained.h"
 
 namespace Ariadne {
 

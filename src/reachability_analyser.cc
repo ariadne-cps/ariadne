@@ -884,7 +884,7 @@ chain_reach(const SystemType& system,
 
 std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
 HybridReachabilityAnalyser::
-_upper_chain_reach(const SystemType& system,
+_upper_chain_reach_forward(const SystemType& system,
             const HybridImageSet& initial_set) const
 {
 	/* Complete procedure:
@@ -1178,6 +1178,15 @@ HybridReachabilityAnalyser::
 upper_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set) const
 {
+	UpperChainReachFuncPtr func = &Ariadne::HybridReachabilityAnalyser::_upper_chain_reach_forward;
+	return _upper_chain_reach(system,initial_set,func);
+}
+
+std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+HybridReachabilityAnalyser::
+_upper_chain_reach(SystemType& system,
+				   const HybridImageSet& initial_set,UpperChainReachFuncPtr funct) const
+{
 	// The reachable set
 	HybridGridTreeSet reach;
 	// The flag that informs whether the region is valid for proving
@@ -1187,7 +1196,7 @@ upper_chain_reach(SystemType& system,
 
 	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
 	if (split_set.empty()) {
-		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = _upper_chain_reach(system,initial_set);
+		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = _upper_chain_reach_forward(system,initial_set);
 	} else {
 		isValid = true;
 		RealConstantSet original_constants = system.nonsingleton_accessible_constants();
@@ -1199,7 +1208,7 @@ upper_chain_reach(SystemType& system,
 
 			system.substitute(*set_it);
 
-			std::pair<HybridGridTreeSet,bool> reachAndValidity = _upper_chain_reach(system,initial_set);
+			std::pair<HybridGridTreeSet,bool> reachAndValidity = (this->*funct)(system,initial_set);
 			const HybridGridTreeSet& local_reach = reachAndValidity.first;
 			const bool& local_isValid = reachAndValidity.second;
 

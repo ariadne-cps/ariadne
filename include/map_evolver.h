@@ -110,13 +110,13 @@ class MapEvolver
     //! \brief Compute an approximation to the evolution set using upper semantics. 
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics. 
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS);
         return intermediate; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics, returning the reached and final sets, and the information
@@ -129,13 +129,13 @@ class MapEvolver
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, 
-                            Semantics semantics, bool reach) const;
+                            Semantics semantics) const;
 
     typedef tuple<TimeType, SetModelType> TimedSetType;
     virtual void _evolution_step(std::vector< TimedSetType >& working_sets, 
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
                                  const SystemType& system, const TimedSetType& current_set, const TimeType& time, 
-                                 Semantics semantics, bool reach) const;
+                                 Semantics semantics) const;
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;

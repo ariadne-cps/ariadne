@@ -34,7 +34,6 @@
 #include "hybrid_set.h"
 #include "map.h"
 #include "hybrid_automaton.h"
-#include "hybrid_evolver-constrained.h"
 
 namespace Ariadne {
 
@@ -80,54 +79,6 @@ outer_approximation(const HybridBasicSet<ES>& hs,
 
     return result;
 }
-
-template<>
-HybridGridTreeSet 
-outer_approximation(const HybridBasicSet<ConstrainedImageSet>& hs,
-                    const HybridGrid& hgr,
-                    const int accuracy)
-{
-    HybridGridTreeSet result(hgr);
-    DiscreteState loc=hs.location();
-    const ConstrainedImageSet& es=hs.continuous_state_set();
-    if(result.find(loc)==result.locations_end()) {
-        result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
-    }
-    GridTreeSet& gts=result[loc];
-    gts.adjoin(es.outer_approximation(gts.grid(),accuracy));
-    return result;
-}
-
-template<>
-HybridGridTreeSet 
-outer_approximation(const ListSet< HybridBasicSet<ConstrainedImageSet> >& hls,
-                    const HybridGrid& hgr,
-                    const int accuracy)
-{
-    typedef ConstrainedImageSet ES;
-    HybridGridTreeSet result;
-    //for(typename HybridListSet<ES>::const_iterator 
-    for(ListSet< HybridBasicSet<ES> >::const_iterator
-            iter=hls.begin(); iter!=hls.end(); ++iter)
-        {
-            HybridBasicSet<ConstrainedImageSet> hes(*iter);
-            DiscreteState loc=hes.location();
-            const ES& es=hes.continuous_state_set();
-            if(result.find(loc)==result.locations_end()) {
-                Grid grid=hgr[loc];
-                result.insert(make_pair(loc,GridTreeSet(grid)));
-            }
-            GridTreeSet& gts=result[loc];
-            gts.adjoin(es.outer_approximation(gts.grid(),accuracy));
-            //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
-        }
-    return result;
-}
-
-
-//typedef ApproximateTaylorModel DefaultModelType;
-//typedef ApproximateTaylorModel DefaultEnclosureType;
-//typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 template<class Sys,class ES>
 Orbit<typename Discretiser<Sys,ES>::BasicSetType> 
@@ -342,7 +293,6 @@ _discretise(const ListSet<EnclosureType>& enclosure_list_set,
 
 
 template class HybridDiscretiser<TaylorSet>;
-template class HybridDiscretiser<ConstrainedImageSet>;
 
 } // namespace Ariadne
 

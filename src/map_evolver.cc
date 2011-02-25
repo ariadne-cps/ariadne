@@ -103,8 +103,7 @@ orbit(const SystemType& system,
     EnclosureListType final;
     EnclosureListType reachable;
     EnclosureListType intermediate;
-    this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false);
+    this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -127,8 +126,7 @@ _evolution(EnclosureListType& final_sets,
            const SystemType& system,
            const EnclosureType& initial_set,
            const TimeType& maximum_time,
-           Semantics semantics,
-           bool reach) const
+           Semantics semantics) const
 {
     verbosity=0;
 
@@ -190,7 +188,7 @@ _evolution(EnclosureListType& final_sets,
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   system,current_set,maximum_time,
-                                  semantics,reach);
+                                  semantics);
         }
     }
 
@@ -209,8 +207,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
                 const SystemType& system,
                 const TimedSetType& current_set,
                 const TimeType& maximum_time,
-                Semantics semantics,
-                bool reach) const
+                Semantics semantics) const
 {
     SetModelType initial_set_model;
     TimeType initial_time;
@@ -240,10 +237,6 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
 
     intermediate_sets.adjoin(final_set_model);
     working_sets.push_back(make_tuple(final_time,final_set_model));
-
-
-
-
 
     ARIADNE_LOG(2,"Done evolution_step.\n\n");
 

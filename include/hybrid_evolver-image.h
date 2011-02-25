@@ -130,20 +130,20 @@ class ImageSetHybridEvolver
     //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false);
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics);
         reachable.adjoin(final);
         return reachable; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics, returning the reached and final sets.
     std::pair<EnclosureListType,EnclosureListType> reach_evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=LOWER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics);
         reachable.adjoin(final);
         return make_pair<EnclosureListType,EnclosureListType>(reachable,final); }
 
@@ -154,37 +154,36 @@ class ImageSetHybridEvolver
 																					  const bool& skip_if_disproved) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         DisproveData falsInfo = this->_lower_evolution_disprove(final,reachable,intermediate,system,initial_set,time,
-														   true,disprove_bounds,skip_if_disproved);
+														   	    disprove_bounds,skip_if_disproved);
         reachable.adjoin(final);
         return make_tuple<EnclosureListType,EnclosureListType,DisproveData>(reachable,final,falsInfo); }
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics, bool reach) const;
+                            Semantics semantics) const;
 
     virtual DisproveData _lower_evolution_disprove(EnclosureListType& final, EnclosureListType& reachable,
 										   EnclosureListType& intermediate, const SystemType& system,
-										   const EnclosureType& initial, const TimeType& time, bool reach,
+										   const EnclosureType& initial, const TimeType& time,
 										   const HybridBoxes& disprove_bounds, bool skip_if_disproved) const;
 
     virtual void _upper_evolution_continuous(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time, bool reach) const;
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time) const;
 
     virtual void _evolution_step(std::list< HybridTimedSetType >& working_sets,
-                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                                  EnclosureListType& reachable, EnclosureListType& intermediate,
                                   const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
-                                  Semantics semantics, bool reach) const;
+                                  Semantics semantics) const;
 
     virtual void _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
-                                  				  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                                  				  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
-												  bool reach) const;
+                                  				  EnclosureListType& reachable, EnclosureListType& intermediate,
+                                  				  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time) const;
 
     virtual DisproveData _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
-												EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+												EnclosureListType& reachable, EnclosureListType& intermediate,
 												const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
-												bool reach, const HybridBoxes& disprove_bounds) const;
+												const HybridBoxes& disprove_bounds) const;
 
   protected:
     TimeModelType crossing_time(VectorFunction guard, const FlowSetModelType& flow_set) const;

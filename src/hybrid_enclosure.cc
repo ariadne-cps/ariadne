@@ -83,16 +83,23 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box, const Sweeper& sweeper)
-    : _location(location), _events(), _set(box,sweeper),
-      _time(_set._domain,sweeper), _dwell_time(_time),
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box, const TaylorFunctionFactory& factory)
+    : _location(location), _events(), _set(box,factory.sweeper()),
+      _time(_set._domain,factory.sweeper()), _dwell_time(_time),
       _variables(box.dimension(),INITIAL)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbox, const Sweeper& sweeper)
-    : _location(hbox.first), _events(), _set(hbox.second,sweeper),
-      _time(_set._domain,sweeper), _dwell_time(_time),
+HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbox, const TaylorFunctionFactory& factory)
+    : _location(hbox.first), _events(), _set(hbox.second,factory.sweeper()),
+      _time(_set._domain,factory.sweeper()), _dwell_time(_time),
+      _variables(hbox.second.dimension(),INITIAL)
+{
+}
+
+HybridEnclosure::HybridEnclosure(const HybridBox& hbox, const TaylorFunctionFactory& factory)
+    : _location(hbox.first), _events(), _set(hbox.second,factory),
+      _time(_set._domain,factory.sweeper()), _dwell_time(_time),
       _variables(hbox.second.dimension(),INITIAL)
 {
 }
@@ -110,7 +117,7 @@ HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Continu
 {
 }
 
-HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>& hpair)
+HybridEnclosure::HybridEnclosure(const Pair<DiscreteLocation,ContinuousStateSetType>& hpair)
     : _location(hpair.first), _events(), _set(hpair.second), _time(ScalarIntervalFunction::zero(_set._domain,_set.sweeper())), _dwell_time(_time),
       _variables(catenate(List<EnclosureVariableType>(_set.dimension(),INITIAL),List<EnclosureVariableType>(_set.number_of_parameters()-_set.dimension(),UNKNOWN)))
 {

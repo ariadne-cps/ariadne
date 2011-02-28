@@ -63,8 +63,6 @@
 
 namespace Ariadne {
 
-inline Sweeper default_sweeper() { return Sweeper(); }
-
 static const uint verbosity = 0u;
 
 DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
@@ -205,6 +203,11 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box, Sweeper swe
     this->_is_fully_reduced=true;
 }
 
+
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const Box& box, const TaylorFunctionFactory& factory)
+{
+    *this = TaylorConstrainedImageSet(box,factory.sweeper());
+}
 
 TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domain, const IntervalVectorFunction& function, Sweeper sweeper)
 {
@@ -845,9 +848,9 @@ RealScalarFunction make_function(const ScalarTaylorFunction& stf) {
     return RealScalarFunction(stf.polynomial())+Real(Interval(-stf.error(),+stf.error()));
 }
 
-void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const RealVectorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
+void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
 {
-    Sweeper sweeper = default_sweeper();
+    Sweeper sweeper = fg.sweeper();
 
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
@@ -1168,12 +1171,12 @@ void TaylorConstrainedImageSet::optimal_constraint_adjoin_outer_approximation_to
 {
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
-    RealVectorFunction f=this->real_function();
+    VectorTaylorFunction f=this->function();
 
-    RealVectorFunction g(this->_constraints.size(),d.size());
+    VectorTaylorFunction g(this->_constraints.size(),d,this->sweeper());
     uint i=0;
     for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
-        g.set(i,make_function(*citer));
+        g.set(i,*citer);
         ++i;
     }
 
@@ -1184,7 +1187,7 @@ void TaylorConstrainedImageSet::optimal_constraint_adjoin_outer_approximation_to
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
     Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
 
-    RealVectorFunction fg=join(f,g);
+    VectorTaylorFunction fg=join(f,g);
 
     Ariadne::optimal_constraint_adjoin_outer_approximation_to(p,d,fg,c,b,x,y,e);
 

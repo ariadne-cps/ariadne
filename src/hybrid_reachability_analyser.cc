@@ -59,8 +59,6 @@
 
 namespace Ariadne {
 
-inline Sweeper default_sweeper() { return Sweeper(); }
-
 static const double DEFAULT_MAXIMUM_ENCLOSURE_RADIUS=0.25;
 static const double DEFAULT_GRID_LENGTH=0.125;
 
@@ -120,7 +118,8 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomatonInterface& sys,
     HybridGridTreeSet cells=set;
     cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator cell_iter=cells.begin(); cell_iter!=cells.end(); ++cell_iter) {
-        HybridEnclosure initial_enclosure(cell_iter->box(),default_sweeper());
+        //HybridEnclosure initial_enclosure(cell_iter->box(),this->_evolver->function_factory());
+        HybridEnclosure initial_enclosure=this->_evolver->enclosure(cell_iter->box());
         ListSet<HybridEnclosure> reach = this->_evolver->reach(sys,initial_enclosure,time,UPPER_SEMANTICS);
         for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=reach.begin(); enclosure_iter!=reach.end(); ++enclosure_iter) {
             enclosure_iter->adjoin_outer_approximation_to(result,accuracy);
@@ -141,7 +140,7 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomatonInterface& sys,
     HybridGridTreeSet result(grid); HybridGridTreeSet cells=set; cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator cell_iter=cells.begin(); cell_iter!=cells.end(); ++cell_iter) {
         ARIADNE_LOG(5,"Evolving cell = "<<*cell_iter<<"\n");
-        HybridEnclosure initial_enclosure(cell_iter->box(),default_sweeper());
+        HybridEnclosure initial_enclosure=this->_evolver->enclosure(cell_iter->box());
         ListSet<HybridEnclosure> final = this->_evolver->evolve(sys,initial_enclosure,time,UPPER_SEMANTICS);
         for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=final.begin(); enclosure_iter!=final.end(); ++enclosure_iter) {
             enclosure_iter->adjoin_outer_approximation_to(result,accuracy);
@@ -177,7 +176,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomatonInterface& 
 
     for(HybridGridTreeSet::const_iterator cell_iter=cells.begin(); cell_iter!=cells.end(); ++cell_iter) {
         ARIADNE_LOG(5,"Evolving cell = "<<*cell_iter<<"\n");
-        HybridEnclosure initial_enclosure(cell_iter->box(),default_sweeper());
+        HybridEnclosure initial_enclosure=this->_evolver->enclosure(cell_iter->box());
         Orbit<HybridEnclosure> orbit = this->_evolver->orbit(sys,initial_enclosure,time,UPPER_SEMANTICS);
         ListSet<HybridEnclosure> const& reach_enclosures=orbit.reach();
         ListSet<HybridEnclosure> const& final_enclosures=orbit.final();
@@ -223,7 +222,7 @@ lower_evolve(const SystemType& system,
     for(HybridGridTreeSet::const_iterator cell_iter=initial_cells.begin(); cell_iter!=initial_cells.end(); ++cell_iter) {
         ARIADNE_LOG(3,".");
         HybridGridCell cell=*cell_iter;
-        HybridEnclosure initial_enclosure(cell.box(),default_sweeper());
+        HybridEnclosure initial_enclosure=this->_evolver->enclosure(cell_iter->box());
         ListSet<HybridEnclosure> final_enclosures=this->_evolver->evolve(system,initial_enclosure,time,LOWER_SEMANTICS);
         for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=final_enclosures.begin(); enclosure_iter!=final_enclosures.end(); ++enclosure_iter) {
             enclosure_iter->adjoin_outer_approximation_to(final_cells,grid_depth);
@@ -255,7 +254,7 @@ lower_reach(const SystemType& system,
     for(HybridGridTreeSet::const_iterator cell_iter=initial_cells.begin(); cell_iter!=initial_cells.end(); ++cell_iter) {
         ARIADNE_LOG(3,".");
         HybridGridCell cell=*cell_iter;
-        HybridEnclosure initial_enclosure(cell.box(),default_sweeper());
+        HybridEnclosure initial_enclosure=this->_evolver->enclosure(cell_iter->box());
         ListSet<HybridEnclosure> reach_enclosures=this->_evolver->reach(system,initial_enclosure,time,LOWER_SEMANTICS);
         for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=reach_enclosures.begin(); enclosure_iter!=reach_enclosures.end(); ++enclosure_iter) {
             enclosure_iter->adjoin_outer_approximation_to(reach_cells,grid_depth);
@@ -289,7 +288,7 @@ lower_reach_evolve(const SystemType& system,
     ARIADNE_LOG(3,"computing lower evolution.");
     for(HybridGridTreeSet::const_iterator cell_iter=initial_cells.begin(); cell_iter!=initial_cells.end(); ++cell_iter) {
         ARIADNE_LOG(3,".");
-        HybridEnclosure initial_enclosure(cell_iter->box(),default_sweeper());
+        HybridEnclosure initial_enclosure=this->_evolver->enclosure(cell_iter->box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
         //make_lpair(reach_enclosures,final_enclosures) = this->_evolver->reach_evolve(system,initial_enclosure,time,LOWER_SEMANTICS);

@@ -39,8 +39,6 @@
 
 namespace Ariadne {
 
-inline Sweeper default_sweeper() { return Sweeper(); }
-
 IntegratorBase::IntegratorBase(double e)
     :  _maximum_error(e), _lipschitz_tolerance(0.5), _function_factory_ptr(new TaylorFunctionFactory(Sweeper()))
 {
@@ -168,7 +166,7 @@ VectorTaylorFunction
 IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, const Interval& dt) const
 {
     ARIADNE_LOG(1,"IntegratorBase::flow(RealVectorFunction vf, IntervalVector dx0, Interval dt)\n");
-    Sweeper sweeper = default_sweeper();
+    Sweeper sweeper = this->_function_factory_ptr->sweeper();
     Real dtl=Real(dt.lower());
     VectorTaylorFunction evolve=this->flow(vf,dx0,dtl);
     Float dtw=dt.upper()-dt.lower();

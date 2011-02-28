@@ -74,6 +74,7 @@ class HybridEvolverInterface
     //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise. 
     virtual Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
     virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
+    virtual EnclosureType enclosure(const HybridBox& initial_box) const = 0;
 };
 
 struct TransitionData;
@@ -104,6 +105,7 @@ class HybridEvolverBase
 {
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef TaylorFunctionFactory FunctionFactoryType;
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::TimeType TimeType;
     typedef TimeType::ContinuousTimeType ContinuousTimeType;
@@ -121,7 +123,8 @@ class HybridEvolverBase
     HybridEvolverBase();
 
     //! \brief Construct from parameters using a default integrator.
-    HybridEvolverBase(const EvolutionParametersType& parameters);
+    HybridEvolverBase(const EvolutionParametersType& parameters,
+                      const FunctionFactoryType& factory);
 
     /*! \brief Make a dynamically-allocated copy. */
     HybridEvolverBase* clone() const = 0;
@@ -132,9 +135,18 @@ class HybridEvolverBase
     //! \name Parameters controlling the evolution.
 
     //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParametersType& parameters() { return *this->_parameters; }
+    EvolutionParametersType& parameters();
     //! \brief A constant reference to the parameters controlling the evolution.
-    const EvolutionParametersType& parameters() const { return *this->_parameters; }
+    const EvolutionParametersType& parameters() const;
+    /*! \brief Set the parameters controlling the evolution. */
+    void set_parameters(const EvolutionParametersType& parameters);
+
+    /*! \brief The class which constructs functions for the enclosures. */
+    const FunctionFactoryType& function_factory() const;
+    /*! \brief Set the class which constructs functions for the enclosures. */
+    void set_function_factory(const FunctionFactoryType& factory);
+
+    virtual EnclosureType enclosure(const HybridBox& initial_box) const;
 
     bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
@@ -429,9 +441,10 @@ class HybridEvolverBase
     _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set) const;
 
   protected:
-    void _create(EvolutionParametersType* parameters);
+    void _create(EvolutionParametersType* parameters, FunctionFactoryType* factory);
   private:
-    boost::shared_ptr< EvolutionParametersType > _parameters;
+    boost::shared_ptr< EvolutionParametersType > _parameters_ptr;
+    boost::shared_ptr< FunctionFactoryType > _function_factory_ptr;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
@@ -612,7 +625,8 @@ class GeneralHybridEvolver
   public:
 
     GeneralHybridEvolver() : HybridEvolverBase() { }
-    GeneralHybridEvolver(const EvolutionParametersType& parameters) : HybridEvolverBase(parameters) { }
+    GeneralHybridEvolver(const EvolutionParametersType& parameters,
+                         const TaylorFunctionFactory& factory) : HybridEvolverBase(parameters,factory) { }
     GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
 
   protected:

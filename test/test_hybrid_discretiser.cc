@@ -89,10 +89,11 @@ void TestHybridDiscretiser::test_hybrid_time() const
 
     EvolutionParameters parameters;
     parameters.maximum_step_size=maximum_step_size;
+    TaylorFunctionFactory factory(ThresholdSweeper(1e-8));
     Grid grid(2);
 
     // Set up the evaluators
-    EvolverType evolver(parameters);
+    EvolverType evolver(parameters,factory);
     HybridDiscretiser< EnclosureType > discrete_evolver(evolver);
 
 

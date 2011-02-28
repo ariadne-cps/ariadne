@@ -101,6 +101,7 @@ class TaylorConstrainedImageSet
     explicit TaylorConstrainedImageSet();
     //! \brief Construct a representation of the box \a bx.
     explicit TaylorConstrainedImageSet(const Box& bx, Sweeper swp);
+    explicit TaylorConstrainedImageSet(const Box& bx, const TaylorFunctionFactory& fac);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
     explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, Sweeper swp);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.

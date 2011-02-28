@@ -82,9 +82,10 @@ class TestHybridReachabilityAnalyser
         parameters.maximum_grid_depth=4;
         parameters.maximum_step_size=0.25;
         parameters.lock_to_grid_time=1.0;
+        TaylorFunctionFactory factory(ThresholdSweeper(1e-8));
 
         Grid grid(2);
-        HybridEvolverType evolver(parameters);
+        HybridEvolverType evolver(parameters,factory);
         //HybridDiscretiser<EnclosureType> discretiser(evolver);
         HybridReachabilityAnalyser analyser(parameters,evolver);
         cout << "Done building analyser\n";

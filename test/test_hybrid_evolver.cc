@@ -564,7 +564,7 @@ TestContraintHybridEvolver::test_flow_only() const
     DiscreteLocation initial_location(upwards);
     const double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
-    HybridEnclosure initial_enclosure(initial_location,initial_box,Sweeper());
+    HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridBox(initial_location,initial_box));
 
     HybridTime evolution_time=HybridTime(1.5,2);
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(system,initial_enclosure,evolution_time);
@@ -587,8 +587,7 @@ TestContraintHybridEvolver::test_splitting_on_urgent_event() const
     DiscreteLocation initial_location(upwards);
     const double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
-    HybridEnclosure initial_enclosure(initial_location,initial_box,Sweeper());
-
+    HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridBox(initial_location,initial_box));
     HybridTime evolution_time=HybridTime(4.0,2);
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(system,initial_enclosure,evolution_time);
     ARIADNE_TEST_PRINT(orbit);
@@ -613,7 +612,7 @@ TestContraintHybridEvolver::test_affine_flow_system() const
     DiscreteLocation initial_location(upwards);
     double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
-    HybridEnclosure initial_enclosure(initial_location,initial_box,Sweeper());
+    HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridBox(initial_location,initial_box));
     ARIADNE_TEST_PRINT(initial_enclosure);
 
     HybridTime evolution_time(0.0,0u);

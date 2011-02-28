@@ -133,10 +133,11 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to a box \a s in location \a q.
-    HybridEnclosure(const DiscreteLocation& q, const Box& bx, const Sweeper& swp);
-    HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbx, const Sweeper& swp);
+    HybridEnclosure(const DiscreteLocation& q, const Box& bx, const TaylorFunctionFactory& fac);
+    HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbx, const TaylorFunctionFactory& fac);
+    HybridEnclosure(const HybridBox& hbx, const TaylorFunctionFactory& fac);
     //! \brief An enclosure constructed from a continuous state set and a location.
-    HybridEnclosure(const std::pair<DiscreteLocation,ContinuousStateSetType>&);
+    HybridEnclosure(const Pair<DiscreteLocation,ContinuousStateSetType>&);
     //! \brief An enclosure constructed from a continuous state set and a location with evolution time equal to zero.
     HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
     //! \brief An enclosure constructed from a continuous state set, an evolution time and a location.

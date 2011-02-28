@@ -27,6 +27,7 @@
 #include "taylor_set.h"
 #include "function_set.h"
 #include "grid_set.h"
+#include "hybrid_evolver.h"
 #include "hybrid_set.h"
 #include "hybrid_orbit.h"
 #include "hybrid_space.h"
@@ -89,7 +90,7 @@ outer_approximation(const ListSet< HybridBasicSet<TaylorConstrainedImageSet> >& 
 
 template<class HES>
 HybridDiscretiser<HES>::
-HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
+HybridDiscretiser(const HybridEvolverInterface& evolver)
     : _evolver_ptr(evolver.clone()), _scaling_ptr(new HybridScaling)
 {
 }
@@ -183,6 +184,7 @@ typename HybridDiscretiser<HES>::EnclosureType
 HybridDiscretiser<HES>::
 _enclosure(const BasicSetType& initial_set) const
 {
+    return this->_evolver_ptr->enclosure(initial_set.box());
     ContinuousEnclosureType continuous_enclosure(initial_set.second.box(),default_sweeper());
     return EnclosureType(initial_set.first,continuous_enclosure);
 }
@@ -247,7 +249,6 @@ _hybrid_grid(const SystemType& system) const
 
 
 
-template class HybridDiscretiser<HybridTaylorConstrainedImageSet>;
 template class HybridDiscretiser<HybridEnclosure>;
 
 } // namespace Ariadne

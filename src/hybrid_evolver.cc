@@ -43,8 +43,6 @@ namespace {
 
 namespace Ariadne {
 
-inline Sweeper default_sweeper() { return Sweeper(); }
-
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
@@ -177,7 +175,7 @@ orbit(const HybridAutomatonInterface& system,
       const HybridTime& time,
       Semantics semantics) const
 {
-    return this->orbit(system,HybridEnclosure(initial,default_sweeper()),time,semantics);
+    return this->orbit(system,HybridEnclosure(initial,this->function_factory()),time,semantics);
 }
 
 
@@ -209,21 +207,60 @@ orbit(const HybridAutomatonInterface& system,
 
 HybridEvolverBase::HybridEvolverBase()
 {
-    this->_create(new EvolutionParametersType());
+    this->_create(new EvolutionParametersType(),new FunctionFactoryType(Sweeper()));
 }
 
-HybridEvolverBase::HybridEvolverBase(const EvolutionParametersType& parameters)
+HybridEvolverBase::HybridEvolverBase(const EvolutionParametersType& parameters,
+                                     const FunctionFactoryType& factory)
 {
-    this->_create(new EvolutionParametersType(parameters));
+    this->_create(new EvolutionParametersType(parameters),factory.clone());
 }
 
 void
-HybridEvolverBase::_create(EvolutionParametersType* parameters)
+HybridEvolverBase::_create(EvolutionParametersType* parameters, FunctionFactoryType* factory)
 {
-    this->_parameters=shared_ptr<EvolutionParametersType>(parameters);
+    this->_parameters_ptr=shared_ptr<EvolutionParametersType>(parameters);
+    this->_function_factory_ptr=shared_ptr<FunctionFactoryType>(factory);
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
 }
+
+HybridEvolverBase::EvolutionParametersType&
+HybridEvolverBase::parameters()
+{
+    return *this->_parameters_ptr;
+}
+
+const HybridEvolverBase::EvolutionParametersType&
+HybridEvolverBase::parameters() const
+{
+    return *this->_parameters_ptr;
+}
+
+void
+HybridEvolverBase::set_parameters(const EvolutionParametersType& parameters)
+{
+    this->_parameters_ptr=shared_ptr<EvolutionParametersType>(new EvolutionParametersType(parameters));
+}
+
+void
+HybridEvolverBase::set_function_factory(const FunctionFactoryType& factory)
+{
+    this->_function_factory_ptr=shared_ptr<FunctionFactoryType>(factory.clone());
+}
+
+const HybridEvolverBase::FunctionFactoryType&
+HybridEvolverBase::function_factory() const
+{
+    return *this->_function_factory_ptr;
+}
+
+HybridEvolverBase::EnclosureType
+HybridEvolverBase::enclosure(const HybridBox& initial_box) const
+{
+    return HybridEnclosure(initial_box,this->function_factory());
+}
+
 
 void
 HybridEvolverBase::
@@ -798,7 +835,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                         break;
                     case LOWER_SEMANTICS:
                         // Can't continue the evolution, so set a trivially-falsified constraint
-                        set.new_parameter_constraint(event, ScalarIntervalFunction::constant(set.parameter_domain(),1.0,default_sweeper()) <= 0.0);
+                        set.new_parameter_constraint(event, ScalarIntervalFunction::constant(set.parameter_domain(),1.0,this->function_factory().sweeper()) <= 0.0);
                         break;
                 }
                 break;
@@ -919,7 +956,7 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
 
     // Test to see if set requires reconditioning
-    if(this->_parameters->enable_reconditioning && norm(starting_set.space_function().errors()) > this->_parameters->maximum_spacial_error) {
+    if(this->_parameters_ptr->enable_reconditioning && norm(starting_set.space_function().errors()) > this->_parameters_ptr->maximum_spacial_error) {
         HybridEnclosure reconditioned_set=starting_set;
         reconditioned_set.recondition();
         evolution_data.working_sets.append(reconditioned_set);
@@ -927,7 +964,7 @@ _evolution_step(EvolutionData& evolution_data,
     }
 
     // Test to see if set is too large
-    if(this->_parameters->enable_subdivisions && starting_bounding_box.radius() > this->_parameters->maximum_enclosure_radius) {
+    if(this->_parameters_ptr->enable_subdivisions && starting_bounding_box.radius() > this->_parameters_ptr->maximum_enclosure_radius) {
         ARIADNE_LOG(1,"\r  splitting\n");
         List<HybridEnclosure> split_sets = starting_set.split();
         for(uint i=0; i!=split_sets.size(); ++i) {
@@ -1224,8 +1261,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.step_size=step_size;
     result.final_time=final_time;
     result.evolution_time_domain=Interval(0.0,step_size);
-    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain,default_sweeper());
-    result.parameter_dependent_evolution_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),result.step_size,default_sweeper());
+    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain,this->function_factory().sweeper());
+    result.parameter_dependent_evolution_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),result.step_size,this->function_factory().sweeper());
     return result;
 }
 
@@ -1255,11 +1292,11 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     IntervalVector spacetime_domain = join(space_domain,time_domain);
 
     //VectorIntervalFunction space_coordinates=ScalarIntervalFunction::identity(space_domain);
-    ScalarIntervalFunction time_coordinate=ScalarIntervalFunction::coordinate(spacetime_domain,n,default_sweeper());
-    ScalarIntervalFunction time_identity=ScalarIntervalFunction::identity(time_domain,default_sweeper());
+    ScalarIntervalFunction time_coordinate=ScalarIntervalFunction::coordinate(spacetime_domain,n,this->function_factory().sweeper());
+    ScalarIntervalFunction time_identity=ScalarIntervalFunction::identity(time_domain,function_factory().sweeper());
 
     result.evolution_time_domain=Interval(0.0,step_size);
-    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain,default_sweeper());
+    result.evolution_time_coordinate=ScalarIntervalFunction::identity(result.evolution_time_domain,this->function_factory().sweeper());
 
     IntervalVector flow_space_domain = project(flow.domain(),range(0,n));
     if(!subset(space_domain,flow_space_domain)) {
@@ -1278,7 +1315,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
 
     // The time-dependent part of the evolution time
-    ScalarIntervalFunction temporal_evolution_time(IntervalVector(1u,time_domain),default_sweeper());
+    ScalarIntervalFunction temporal_evolution_time(IntervalVector(1u,time_domain),this->function_factory().sweeper());
 
     if(remaining_time_range.lower()<0.0) {
         // Some of the points may already have reached the final time.
@@ -1332,7 +1369,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ARIADNE_LOG(7,"temporal_evolution_time="<<temporal_evolution_time<<"\n");
 
 
-    ScalarIntervalFunction spacial_evolution_time=ScalarIntervalFunction::constant(space_domain,step_size,default_sweeper());
+    ScalarIntervalFunction spacial_evolution_time=ScalarIntervalFunction::constant(space_domain,step_size,this->function_factory().sweeper());
 
     if(ALLOW_CREEP && !crossings.empty() && (result.finishing_kind == BEFORE_FINAL_TIME || result.finishing_kind == STRADDLE_FINAL_TIME) ) {
         // If an event is possible, but only some points reach the guard set
@@ -1429,7 +1466,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=PARAMETER_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=BEFORE_FINAL_TIME;
         if(starting_time_range.width()<step_size/2) {
-            result.parameter_dependent_finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),starting_time_range.lower()+step_size,default_sweeper());
+            result.parameter_dependent_finishing_time=ScalarIntervalFunction::constant(initial_set.parameter_domain(),starting_time_range.lower()+step_size,this->function_factory().sweeper());
         } else {
             // Try to reduce the time interval by half the step size
             // Corresponds to setting omega(smin)=tau(smin)+h, omega(smax)=tau(smax)+h/2

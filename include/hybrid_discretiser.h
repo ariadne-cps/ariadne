@@ -47,6 +47,7 @@ class Grid;
 class GridCell;
 class GridTreeSet;
 
+class HybridEvolverInterface;
 class HybridAutomatonInterface;
 class DiscreteLocation;
 template<class BS> class HybridBasicSet;
@@ -76,7 +77,7 @@ class HybridDiscretiser
     typedef ES ContinuousEnclosureType;
     typedef HES EnclosureType;
   private:
-    boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver_ptr;
+    boost::shared_ptr< HybridEvolverInterface > _evolver_ptr;
     boost::shared_ptr< HybridScalingInterface > _scaling_ptr;
   public:
     //@{
@@ -84,7 +85,7 @@ class HybridDiscretiser
 
     //! \brief Construct from evolution parameters and a method for evolving basic sets,
     //!  and a scheme for approximating sets.
-    HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver);
+    HybridDiscretiser(const HybridEvolverInterface& evolver);
 
     //! \brief Make a dynamically-allocated copy.
     HybridDiscretiser<HES>* clone() const { return new HybridDiscretiser<HES>(*this); }

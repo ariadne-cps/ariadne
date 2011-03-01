@@ -85,9 +85,15 @@ template<class SYS, class ES> class EvolverBase
         for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,system,*iter,time,semantics); } }
   protected:
     virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, const SYS& system, const ES& initial, const T& time, Semantics semantics) const = 0;
-
 };
 
+inline
+VectorFunction
+get_directed_dynamic(const VectorFunction& dynamic, EvolutionDirection direction)
+{
+	const ScalarFunction minus_one = ScalarFunction::constant(dynamic.result_size(),-1);
+	return (direction == FORWARD ? dynamic : dynamic*minus_one);
+}
   
 } // namespace Ariadne
 

@@ -33,12 +33,12 @@ int main()
     /// Set the system parameters
     double a = -0.02;
     double b = 0.3;
-    double T = 1.5;
-    double hmin = 5.55;
+    double T = 4.0;
+    double hmin = 5.5;
     double Delta = 0.05;
-    double hmax = 5.70;
+    double hmax = 8.0;
     double tmax = 20.0;
-    double dmax = 15.0;
+    double dmax = 4.0;
     
     double A1[9]={a,b,0,
                   0,0,0,
@@ -77,7 +77,11 @@ int main()
     DiscreteEvent e23(23);
     DiscreteEvent e34(34);
     DiscreteEvent e31(31);
+    DiscreteEvent e14(14);
     DiscreteEvent e41(41);
+    DiscreteEvent e21(21);
+    DiscreteEvent e32(32);
+    DiscreteEvent e43(43);
   
     /// Create the dynamics
     VectorAffineFunction dynamic1(Matrix<Float>(3,3,A1),Vector<Float>(3,b1));
@@ -116,6 +120,16 @@ int main()
     VectorAffineFunction guard41(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1,hmin + Delta));
     cout << "guard41=" << guard41 << endl << endl;
 
+    VectorAffineFunction guard21(Matrix<Float>(1,3,0.0,-1.0,0.0),Vector<Float>(1,1.0));
+    cout << "guard21=" << guard21 << endl << endl;
+    VectorAffineFunction guard32(Matrix<Float>(1,3,-1.0,0.0,0.0),Vector<Float>(1, hmax - Delta));
+    cout << "guard32=" << guard32 << endl << endl;
+    VectorAffineFunction guard43(Matrix<Float>(1,3,0.0,1.0,0.0),Vector<Float>(1,0.0));
+    cout << "guard43=" << guard43 << endl << endl;
+    VectorAffineFunction guard14(Matrix<Float>(1,3,1.0,0.0,0.0),Vector<Float>(1,-hmin - Delta));
+    cout << "guard14=" << guard14 << endl << endl;
+
+
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
     /// forced transitions do not need an explicit invariant
@@ -144,6 +158,10 @@ int main()
     watertank_system.new_unforced_transition(e31,l3,l1,reset_id,guard41);
     watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
 
+    watertank_system.new_forced_transition(e21,l2,l1,reset_y_one,guard21);
+    watertank_system.new_unforced_transition(e32,l3,l2,reset_y_one,guard32);
+    watertank_system.new_forced_transition(e43,l4,l3,reset_y_zero,guard43);
+    watertank_system.new_unforced_transition(e14,l1,l4,reset_y_zero,guard14);
 
     /// Finished building the automaton
 
@@ -160,6 +178,7 @@ int main()
     evolver.parameters().hybrid_maximum_step_size[l2] = 0.1;
     evolver.parameters().hybrid_maximum_step_size[l3] = 0.1;
     evolver.parameters().hybrid_maximum_step_size[l4] = 0.1;
+    //evolver.parameters().direction = BACKWARD;
     evolver.verbosity=1;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -170,27 +189,27 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 5.0, y = 1.0, t = 0.0" << std::endl;
 
-    Box initial_box(3, 5.0,5.001, 1.0,1.001, 0.0,0.001);
-    HybridEnclosureType initial_enclosure(l2,initial_box);
-    Box bounding_box(3, -0.1,9.1, -0.1,1.1, -0.1,tmax+0.1);
+    Box initial_box(3, 6.0,6.001, 1.0,1.001, 0.0,0.001);
+    HybridEnclosureType initial_enclosure(l1,initial_box);
+    Box bounding_box(3, 4.1,9.1, -0.1,1.1, -0.1,1.1);
   
     HybridTime evolution_time(tmax,dmax);
-/*  
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit="<<orbit<<std::endl;
     Figure g;
-    Box graphic_box(2, -0.1,tmax+0.1, 4.1,6.1);
+    Box graphic_box(2, 0.0,9.0, -0.1,1.1);
     g.set_bounding_box(graphic_box);
-    array<uint> p(2,2,0);
+    array<uint> p(2,0,1);
     g.set_projection_map(ProjectionFunction(p,3));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;
     g.write("watertank-time-orbit");
-
+/*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
@@ -199,7 +218,7 @@ int main()
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
 */
-
+/*
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 10.0;
@@ -227,6 +246,6 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << lower_reach_set;
     g.write("watertank-time-lower");
-
+*/
 
 }

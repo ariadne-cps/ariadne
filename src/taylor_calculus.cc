@@ -613,7 +613,9 @@ TaylorCalculus::flow_model(VectorFunction const& vf, Vector<Interval> const& ibx
 {
     Vector<Interval> bx=ibx;
 
-    ARIADNE_ASSERT(subset(bx+Interval(0,h)*vf.evaluate(bb),bb));
+    const Interval time_interval(0,h);
+
+    ARIADNE_ASSERT(subset(bx+time_interval*vf.evaluate(bb),bb));
 
     // We need the initial box to have nonempty interior to be a valid domain for a function model,
     // so we expand slightly if one of the components fails this test
@@ -624,7 +626,7 @@ TaylorCalculus::flow_model(VectorFunction const& vf, Vector<Interval> const& ibx
             bx[i]+=Interval(-EPS,+EPS); }
     }
 
-    ARIADNE_ASSERT(subset(bx+Interval(0,h)*vf.evaluate(bb),bb));
+    ARIADNE_ASSERT(subset(bx+time_interval*vf.evaluate(bb),bb));
 
     TaylorModel::Accuracy* accuracy_raw_ptr=new TaylorModel::Accuracy;
     boost::shared_ptr<TaylorModel::Accuracy> accuracy(accuracy_raw_ptr);
@@ -638,7 +640,7 @@ TaylorCalculus::flow_model(VectorFunction const& vf, Vector<Interval> const& ibx
 
     const uint temporal_order=this->_temporal_order;
     // Use flow function on model type
-    FlowModelType flow_model=Ariadne::unchecked_flow(vector_field_model,bx,Interval(0,h),temporal_order);
+    FlowModelType flow_model=Ariadne::unchecked_flow(vector_field_model,bx,time_interval,temporal_order);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
     return flow_model;

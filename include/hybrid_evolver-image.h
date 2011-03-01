@@ -316,7 +316,6 @@ class ImageSetHybridEvolver
     							  	   const std::map<DiscreteEvent,VectorFunction>& guards,
     							  	   const std::map<DiscreteEvent,VectorFunction>& activations) const;
 
-
   protected:
     // Special events
     static const DiscreteEvent starting_event;

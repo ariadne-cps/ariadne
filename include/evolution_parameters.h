@@ -39,6 +39,8 @@ typedef std::map<RealConstant,int,ConstantComparator<Real> > RealConstantIntMap;
 
 namespace Ariadne {
 
+enum EvolutionDirection { FORWARD, BACKWARD };
+
 //! \brief Parameters for controlling the accuracy of continuous evolution methods.
 class ContinuousEvolutionParameters {
   public:
@@ -47,6 +49,9 @@ class ContinuousEvolutionParameters {
 
     //! \brief Default constructer gives reasonable values. 
     ContinuousEvolutionParameters();
+
+	//! \brief The direction of continuous evolution. */
+	EvolutionDirection direction;
 
     //! \brief A suggested order for the representation of enclosure sets.
     UnsignedIntType spacial_order;
@@ -247,7 +252,8 @@ class EvolutionParameters
 
 inline
 ContinuousEvolutionParameters::ContinuousEvolutionParameters() 
-    : spacial_order(1),
+    : direction(FORWARD),
+      spacial_order(1),
       temporal_order(4),
       minimum_step_size(0.0),
       hybrid_maximum_step_size(std::map<DiscreteState,RealType>()),
@@ -283,7 +289,8 @@ std::ostream&
 operator<<(std::ostream& os, const ContinuousEvolutionParameters& p) 
 {
     os << "ContinuousEvolutionParameters"
-       << "(\n  spacial_order=" << p.spacial_order
+       << "(\n  direction=" << p.direction
+       << ",\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
        << ",\n  minimum_step_size=" << p.minimum_step_size
        << ",\n  hybrid_maximum_step_size=" << p.hybrid_maximum_step_size
@@ -331,7 +338,8 @@ std::ostream&
 operator<<(std::ostream& os, const EvolutionParameters& p) 
 {
     os << "EvolutionParameters"
-       << "(\n  spacial_order=" << p.spacial_order
+       << "(\n  direction=" << p.direction
+       << ",\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
        << ",\n  minimum_step_size=" << p.minimum_step_size
        << ",\n  hybrid_maximum_step_size=" << p.hybrid_maximum_step_size

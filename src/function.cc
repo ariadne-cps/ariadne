@@ -1171,6 +1171,18 @@ ScalarFunction VectorFunction::operator[](Nat i) const
     return this->get(i);
 }
 
+VectorFunction operator*(const VectorFunction& vf, const ScalarFunction& sf) {
+    VectorFunction r(vf.result_size(),vf.argument_size());
+    for(uint i=0; i!=vf.result_size(); ++i) {
+        r.set(i,vf.get(i)*sf);
+    }
+    return r;
+}
+
+VectorFunction operator*(const ScalarFunction& sf, const VectorFunction& vf) {
+    return vf*sf;
+}
+
 VectorFunction operator*(const ScalarFunction& f, const Vector<Real>& e) {
     for(uint i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(e[i]==Real(0) || e[i]==Real(1)); }
     VectorFunction r(e.size(),f.argument_size());

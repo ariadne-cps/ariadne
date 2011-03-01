@@ -503,7 +503,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
-    const VectorFunction dynamic=mode.dynamic();
+    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_parameters->direction);
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
     const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();
@@ -595,7 +595,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
-    const VectorFunction dynamic=mode.dynamic();
+    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_parameters->direction);
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
     const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();
@@ -691,7 +691,7 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
-    const VectorFunction dynamic=mode.dynamic();
+    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_parameters->direction);
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
     const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();

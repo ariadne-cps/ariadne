@@ -247,7 +247,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
 
 
     /////////////// Main Evolution ////////////////////////////////
-    const FunctionType& dynamic=system.function();
+    const FunctionType& dynamic=get_directed_dynamic(system.function(),_parameters->direction);
 
     // Set evolution parameters
     const Float maximum_step_size=this->_parameters->hybrid_maximum_step_size.begin()->second;

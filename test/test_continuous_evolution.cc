@@ -73,8 +73,10 @@ struct FailTwo : VectorFunctionData<3,3,1> {
 class TestContinuousEvolution
 {
   public:
-    void test() const;
+    void test_forward_vdp() const;
+    void test_vdp() const;
     void simple_test() const;
+    void simple_backwards_test() const;
     void failure_test() const;
 };
 
@@ -82,7 +84,7 @@ int main()
 {
     //std::cerr<<"SKIPPED "; return 1;
     TestContinuousEvolution().simple_test();
-    TestContinuousEvolution().test();
+    TestContinuousEvolution().test_vdp();
     TestContinuousEvolution().failure_test();
     return ARIADNE_TEST_FAILURES;
 }
@@ -116,12 +118,8 @@ void TestContinuousEvolution::simple_test() const
     //std::cout <<"="<<<<std::endl;
 }
 
-
-
-void TestContinuousEvolution::test() const
+void TestContinuousEvolution::test_vdp() const
 {
-    // cout << __PRETTY_FUNCTION__ << endl;
-
     typedef TaylorSet EnclosureType;
 
     // Set up the evolution parameters and grid
@@ -147,24 +145,14 @@ void TestContinuousEvolution::test() const
     Float mu=0.5;
     Vector<Float> p(1); p[0]=mu;
     VectorUserFunction<VanDerPol> vdp(p);
-    // cout << "van_der_pol_function=" << vdp << endl;
-    // cout << "van_der_pol_function.parameters()=" << vdp.parameters() << endl;
 
-    //VectorUserFunction evaluation sanity check
-    // cout << "vdp.evaluate(" << initial_box << ") " << flush; // cout << " = " << vdp.evaluate(initial_box) << endl;
-    // cout << "vdp.jacobian(" << initial_box << ") = " << vdp.jacobian(initial_box) << endl;
-    // cout << endl;
-
-    VectorAffineFunction aff(Matrix<Float>(2,2,0.,0.,1.,0.),Vector<Float>(2,1.,0.0));
-
-    // Make a hybrid automaton for the Van der Pol equation
-    //VectorField vanderpol(aff);
     VectorField vanderpol(vdp);
 
+    parameters.direction = FORWARD;
 
     // Over-approximate the initial set by a grid cell
     EnclosureType initial_set(initial_box);
-    // cout << "initial_set=" << initial_set << endl << endl;
+    cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
 
@@ -178,13 +166,15 @@ void TestContinuousEvolution::test() const
     // cout << "Plotting sets" << endl;
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
+    cout << "Final set bbox: " << orbit.final().bounding_box() << "\n";
     std::cout << "Plotting...";
     Figure fig;
+    fig.set_bounding_box(Box(2,-2.0,2.0,-2.0,2.0));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
-    fig.write("test_continuous_evolution-vdp");
+    fig.write("test_continuous_evolution-vdp-forward");
 
 }
 

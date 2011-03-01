@@ -95,6 +95,21 @@ struct VanDerPol : VectorFunctionData<2,2,1> {
     }
 };
 
+/*! \brief The Van der Pol equation \f$\ddot{x}+\mu(x^2-1)\dot{x}+x=0\f$ with backwards behavior.
+ *
+ *     Variables:  x, v
+ *     Parameters: mu
+ *     System:     dotx=v
+ *                 dotv=mu*(1-x*x)*v-x
+ */
+struct VanDerPolBackwards : VectorFunctionData<2,2,1> {
+    template<class R, class A, class P>
+    static void compute(R& r, const A& x, const P& p) {
+        r[0]=-x[1];
+        r[1]=-p[0]*(1-x[0]*x[0])*x[1]+x[0];
+    }
+};
+
 
 /*! \brief The forced Van der Pol equation \f$\ddot{x}+\mu(x^2-1)\dot{x}+x=A\sin(\omega t)\f$.
  *

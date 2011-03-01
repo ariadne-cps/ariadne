@@ -58,6 +58,9 @@ template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;
 typedef std::map<DiscreteState,Vector<Float> > HybridFloatVector;
 typedef std::map<RealConstant,int,ConstantComparator<Real> > RealConstantIntMap;
+typedef HybridAutomaton SystemType;
+typedef HybridEvolver::EnclosureType EnclosureType;
+typedef HybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
 
 class HybridGrid;
 class HybridGridCell;
@@ -214,7 +217,7 @@ class HybridReachabilityAnalyser
      * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
      * \return The reach set and a flag notifying if the result is valid (i.e. it has not been restricted due to
      * the bounding domain and it is safe). */
-    virtual std::pair<SetApproximationType,bool> upper_chain_reach(SystemType& system,
+    virtual std::pair<SetApproximationType,bool> upper_chain_reach_forward(SystemType& system,
 																   const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
@@ -400,45 +403,11 @@ class HybridReachabilityAnalyser
     									 const DiscreteTransition& trans_it,
     									 const TaylorCalculus& tc) const;
 
-    void _splitTargetEnclosures(bool& isValid,
-							    std::list<EnclosureType>& initial_enclosures,
-							    const DiscreteState& target_loc,
-							    const ContinuousEnclosureType& target_encl,
-							    const Vector<Float>& minTargetCellWidths,
-							    const Box& target_bounding) const;
-
-    /*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
-     *
-     * \details Splits until the deviation of the derivatives is reasonably low in respect to the deviation calculated at the midpoint. This
-     * limit value is expressed as a percentage using \a tolerance.
-     *
-     * @param system The system to get the accessible constants from.
-     * @param targetRatioPerc The derivative widths ratio percentage to reach before termination.
-     *
-     * @return A split factor for each non-singleton accessible constant of the \a system.
-     */
-    RealConstantIntMap _getSplitFactorsOfConstants(HybridAutomaton& system, const RealConstantSet& locked_constants,
-												  const Float& targetRatioPerc) const;
-
     /*! \brief Gets the set of all the split intervals from the stored split factors.
      *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
      *  all the remaining from right to left.
      */
     std::list<RealConstantSet> _getSplitConstantsSet() const;
-
-    /*! \brief Gets the best constant among the \a working_constants of the \a system to split, in terms of
-     * relative reduction of derivative widths compared to some \a referenceWidths.
-     */
-    RealConstant _getBestConstantToSplit(SystemType& system, const RealConstantSet& working_constants,
-    							         const HybridFloatVector& referenceWidths) const;
-
-    /*! \brief Helper function to get the maximum value of the derivative width ratio \f$ (w-w^r)/w_r \f$, where the \f$ w^r \f$ values
-     * are stored in \a referenceWidths and the \f$ w \f$ values are obtained from the \a system.
-     */
-    Float _getMaxDerivativeWidthRatio(const HybridAutomaton& system, const HybridFloatVector& referenceWidths) const;
-
-    /*! \brief Helper function to get the widths of the derivatives from the \a system */
-    HybridFloatVector _getDerivativeWidths(const HybridAutomaton& system) const;
 
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
@@ -446,7 +415,8 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
     std::pair<SetApproximationType,bool> _upper_chain_reach(SystemType& system, const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const;
-    std::pair<SetApproximationType,bool> _upper_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
+    std::pair<SetApproximationType,bool> _upper_chain_reach_forward_domainCheck(const SystemType& system, const HybridImageSet& initial_set) const;
+    std::pair<SetApproximationType,bool> _upper_chain_reach_forwardbackward(const SystemType& system, const HybridImageSet& initial_set) const;
 
     /*! \brief Checks if a break is to be issued.
      * \details Read the \a flagToCheck for validity: if false, sets \a flagToUpdate to false and returns true ("do break"), otherwise
@@ -492,6 +462,12 @@ class HybridReachabilityAnalyser
      */
     bool _upper_chain_reach_pushFinalCells(const HybridGridTreeSet& finalCells,
     									   std::list<EnclosureType>& destination) const;
+
+    /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
+     *  \detail Does not check for inclusion into the domain.
+     */
+    void _upper_chain_reach_pushFinalCells_noDomainCheck(const HybridGridTreeSet& finalCells,
+    									   	   	   	     std::list<EnclosureType>& destination) const;
 
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system,
     																const HybridImageSet& initial_set) const;
@@ -658,6 +634,48 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
 	this->chain_reach_dumping = false;
 	this->free_cores = 0;
 }
+
+/*! \brief Splits \a target_encl for location \a target_loc, storing the result in \a initial_enclosures.
+ * \detail The function is recursive.
+ */
+void splitTargetEnclosures(bool& isValid,
+						    std::list<EnclosureType>& initial_enclosures,
+						    const DiscreteState& target_loc,
+						    const ContinuousEnclosureType& target_encl,
+						    const Vector<Float>& minTargetCellWidths,
+						    const Box& target_bounding);
+
+/*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
+ *
+ * \details Splits until the deviation of the derivatives is reasonably low in respect to the deviation calculated at the midpoint. This
+ * limit value is expressed as a percentage using \a tolerance.
+ *
+ * @param system The system to get the accessible constants from.
+ * @param targetRatioPerc The derivative widths ratio percentage to reach before termination.
+ *
+ * @return A split factor for each non-singleton accessible constant of the \a system.
+ */
+RealConstantIntMap getSplitFactorsOfConstants(HybridAutomaton& system, const RealConstantSet& locked_constants,
+											  const Float& targetRatioPerc, const HybridBoxes& bounding_domain);
+
+/*! \brief Gets the best constant among the \a working_constants of the \a system to split, in terms of
+ * relative reduction of derivative widths compared to some \a referenceWidths.
+ */
+RealConstant getBestConstantToSplit(SystemType& system,
+								    const RealConstantSet& working_constants,
+							        const HybridFloatVector& referenceWidths,
+							        const HybridBoxes& bounding_domain);
+
+/*! \brief Helper function to get the maximum value of the derivative width ratio \f$ (w-w^r)/w_r \f$, where the \f$ w^r \f$ values
+ * are stored in \a referenceWidths and the \f$ w \f$ values are obtained from the \a system.
+ */
+Float getMaxDerivativeWidthRatio(const HybridAutomaton& system,
+								 const HybridFloatVector& referenceWidths,
+								 const HybridBoxes& bounding_domain);
+
+/*! \brief Helper function to get the widths of the derivatives from the \a system */
+HybridFloatVector getDerivativeWidths(const HybridAutomaton& system,
+									  const HybridBoxes& bounding_domain);
 
 } // namespace Ariadne
 

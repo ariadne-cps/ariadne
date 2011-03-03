@@ -35,7 +35,7 @@
 #define ARIADNE_LOG(level,msg)                                  \
     if(verbosity >= level) { \
 		std::string tabulation; \
-		for (uint ariadne_log=0;ariadne_log<level-1;ariadne_log++) \
+		for (uint ariadne_log=0;ariadne_log<level-1;++ariadne_log) \
 			tabulation += "\t"; \
 		std::clog << tabulation + msg << std::flush; }
 

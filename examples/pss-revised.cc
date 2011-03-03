@@ -384,7 +384,6 @@ int main()
 	analyser.parameters().lock_to_grid_steps = 1;
 	analyser.plot_verify_results = true;
 	analyser.free_cores = 0;
-	analyser.chain_reach_dumping = true;
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;

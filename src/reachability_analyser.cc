@@ -890,27 +890,15 @@ _upper_chain_reach_forward_domainCheck(const SystemType& system,
 {
 	/* Complete procedure:
 		1) Build the working sets from the initial enclosures
-		2) While a working set exists, evolve the current working set for a step, where the following exceptions are handled:
+		2) While a working set exists, evolve the current working set, with the following termination conditions:
 			a) If the evolution time limit is reached, adjoin both the reached set and the final set
 			b) If the enclosure of the initial set is larger than the maximum enclosure allowed, skip the evolution and adjoin the final set
 			c) If a blocking event is definitely initially active, or definitely finally active due to flow, adjoin the reached set only and discard the final set
-			d) If the bounding box of the final set is not a subset of the domain box, adjoin the reached set only and discard the final set (would be plausible to discard the reached set also)
 		3) Discretise the reached and final sets into cells
 		4) Remove the previous intermediate cells from the final cells and remove the previous reached cells from the reached cells
-		5) Mince the resulting final cells and put their enclosures into the new initial enclosures
-		6) Check activations of transitions for each cell (NOTE: the maximum allowed depth is related to the cells of the target location):
-			a) If a transition is definitely active for a cell: mince the cell, then for each resulting cell
-				i) enclose it
-				ii) apply the transition
-				iii) put the resulting enclosure into the new initial enclosures
-			b) If a transition is possibly active at the maximum allowed depth:
-				i) enclose it
-				ii) apply the transition
-				iii) put the resulting enclosure into the new initial enclosures
-			c) If a transition is possibly active at a depth lesser than the maximum allowed: split the cell and repeat a) for each of the two cells
-		7) Adjoin the reached cells into the previous reached cells, adjoin the final cells into the intermediate cells, then recombine both the resulting cells sets
-		8) If new initial enclosures exist, restart from 1), otherwise terminate.
-
+		5) Put the enclosures of the transitioned reach cells into the new initial enclosures, removing those outside the domain in either the source or destination location
+		6) Put the enclosures of the final cells into the new initial enclosures, removing those outside the domain
+		7) If new initial enclosures exist, restart from 1), otherwise terminate.
 	*/
 
 	// Initialize the validity flag (will be invalidated if any restriction of the reached region is performed)
@@ -947,17 +935,17 @@ _upper_chain_reach_forward_domainCheck(const SystemType& system,
 	    ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
 	    ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
 
-	    // Recombines in order to start performing activations-checking on the largest possible enclosures
+	    // Recombines in order to start checking activations on the largest possible enclosures
 		new_reach.recombine();
 		ARIADNE_LOG(6,"Reach size after recombining = "<<new_reach.size()<<"\n");
-		bool reachValid = _upper_chain_reach_pushReachCells(new_reach,system,working_enclosures);
+		bool reachValid = _upper_chain_reach_forward_pushTargetCells(new_reach,system,working_enclosures);
 		if (_upper_chain_reach_break(reachValid,isValid))
 			break;
 
 		// Minces in order to identify possible enclosures lying outside the domain
 		new_final.mince(maximum_grid_depth);
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
-		bool finalValid = _upper_chain_reach_pushFinalCells(new_final,working_enclosures);
+		bool finalValid = _upper_chain_reach_pushLocalFinalCells(new_final,working_enclosures);
 		if (_upper_chain_reach_break(finalValid,isValid))
 			break;
 
@@ -969,8 +957,6 @@ _upper_chain_reach_forward_domainCheck(const SystemType& system,
 		reach.recombine();
 		intermediate.recombine();
     }
-
-	_statistics->upper().reach = reach;
 
 	ARIADNE_LOG(5,"Found a total of " << reach.size() << " reached cells.\n");
 
@@ -991,7 +977,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_break(const bool& flagToCheck, bo
 }
 
 bool
-HybridReachabilityAnalyser::_upper_chain_reach_pushReachCells(const HybridGridTreeSet& reachCells,
+HybridReachabilityAnalyser::_upper_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
 															  const SystemType& system,
 															  std::list<EnclosureType>& destination) const
 {
@@ -1149,7 +1135,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTransitioningEnclosure(const 
 
 
 bool
-HybridReachabilityAnalyser::_upper_chain_reach_pushFinalCells(const HybridGridTreeSet& finalCells,
+HybridReachabilityAnalyser::_upper_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
 																		    std::list<EnclosureType>& destination) const
 {
 	bool isValid = true;
@@ -1195,7 +1181,7 @@ upper_chain_reach_forward(SystemType& system,
 std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
 HybridReachabilityAnalyser::
 _upper_chain_reach(SystemType& system,
-				   const HybridImageSet& initial_set,UpperChainReachFuncPtr funct) const
+				   const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const
 {
 	// The reachable set
 	HybridGridTreeSet reach;
@@ -1218,12 +1204,11 @@ _upper_chain_reach(SystemType& system,
 
 			system.substitute(*set_it);
 
-			std::pair<HybridGridTreeSet,bool> reachAndValidity = (this->*funct)(system,initial_set);
+			std::pair<HybridGridTreeSet,bool> reachAndValidity = (this->*func)(system,initial_set);
 			const HybridGridTreeSet& local_reach = reachAndValidity.first;
 			const bool& local_isValid = reachAndValidity.second;
 
 			reach.adjoin(local_reach);
-			_statistics->upper().reach = reach;
 
 			isValid = isValid && local_isValid;
 
@@ -1362,8 +1347,6 @@ _lower_chain_reach(const SystemType& system,
 		}
 	}
 
-	_statistics->lower().reach = reach;
-
 	return make_pair<GTS,DisproveData>(reach,globalFalsInfo);
 }
 
@@ -1396,26 +1379,16 @@ lower_chain_reach(SystemType& system,
 			reach.adjoin(reachAndDisproveData.first);
 			disproveData.updateWith(reachAndDisproveData.second);
 
-			_statistics->lower().reach = reach;
-
 			if (_parameters->skip_if_disproved && reachAndDisproveData.second.getIsDisproved())
 				break;
 		}
 		system.substitute(original_constants);
 	}
 
+	_statistics->lower().reach = reach;
+
 	return std::pair<HybridGridTreeSet,DisproveData>(reach,disproveData);
 }
-
-
-HybridReachabilityAnalyser::SetApproximationType
-HybridReachabilityAnalyser::
-viable(const SystemType& system,
-       const HybridImageSet& bounding_set) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
 
 bool 
 HybridReachabilityAnalyser::
@@ -1590,37 +1563,6 @@ _setMaximumEnclosureCell(const HybridGrid& hgrid)
 }
 
 
-void 
-HybridReachabilityAnalyser::
-_setEqualizedHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid)
-{
-	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
-	const uint css = hmad.begin()->second.size();
-
-	// Initialize the hybrid maximum step size
-	std::map<DiscreteState,Float> hmss;
-
-	// Initializes the maximum step size
-	Float mss = 0.0;
-	// For each couple DiscreteState,Vector<Float>
-	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) 
-	{
-		// For each dimension of the space, if the derivative is not zero,
-		// evaluates the ratio between the minimum cell length and the derivative itself
-		for (uint i=0;i<css;i++)
-			if (hfv_it->second[i] > 0)
-				mss = max(mss,hgrid[hfv_it->first].lengths()[i]/(1 << _parameters->maximum_grid_depth)/hfv_it->second[i]);
-	}
-
-	// Populates the map (twice the values since the maximum enclosure is set as ~2 times the grid cell)
-	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-		hmss.insert(std::pair<DiscreteState,Float>(hfv_it->first,2*mss));
-
-	// Assigns
-	_discretiser->parameters().hybrid_maximum_step_size = hmss;
-}
-
-
 std::map<DiscreteState,Float>
 HybridReachabilityAnalyser::
 _getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid)
@@ -1648,90 +1590,6 @@ _getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid
 
 	return hmss;
 }
-
-
-HybridGrid 
-HybridReachabilityAnalyser::
-_getLooselyConstrainedHybridGrid(const HybridFloatVector& hmad) const
-{
-	// Get the size of the continuous space (NOTE: taken as equal for all locations)
-	const uint css = hmad.begin()->second.size();
-
-	// Initialize the hybrid grid
-	HybridGrid hg;	
-
-	// Initialize the hybrid grid lengths
-	std::map<DiscreteState,Vector<Float> > hybridgridlengths;
-
-	// Keep the minimum non-zero length for each variable
-	Vector<Float> minNonZeroLengths(css);
-	// Initialize the values to infinity
-	for (uint i=0;i<css;i++)
-		minNonZeroLengths[i] = std::numeric_limits<double>::infinity();
-
-	// Get the grid lengths from the derivatives
-	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-	{
-		// Keep the location
-		const DiscreteState& loc = hfv_it->first;
-		// Keep the domain box
-		const Box& domain_box = _parameters->bounding_domain.find(loc)->second;
-
-		// Initialize the lengths
-		Vector<Float> gridlengths(css);
-
-		// Initialize the maximum derivative/domain_width ratio among variables
-		Float maxratio = 0.0;
-
-		// For each dimension of the continuous space
-		for (uint i=0;i<css;i++)
-			maxratio = max(maxratio,hfv_it->second[i]/domain_box[i].width()); // Get the largest ratio
-
-		// Assign the lengths and check the minimum length to be assigned
-		for (uint i=0;i<css;i++)
-		{
-			// Update the minimum in respect to the domain width
-			minNonZeroLengths[i] = min(minNonZeroLengths[i],domain_box[i].width());
-			// If the derivative is greater than zero, get the grid length and update the minimum in respect to the grid length
-			if (hfv_it->second[i] > 0) {
-				gridlengths[i] = hfv_it->second[i]/maxratio;
-				minNonZeroLengths[i] = min(minNonZeroLengths[i],hfv_it->second[i]/maxratio);
-			}
-		}
-
-		// Add the pair to the hybrid lengths
-		hybridgridlengths.insert(make_pair<DiscreteState,Vector<Float> >(loc,gridlengths));
-	}
-
-	// Now that the minimum lengths have been evaluated, we can assign the lengths in those cases where the variables
-	// have zero derivative, then complete the construction of the hybrid grid
-	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++) {
-
-		// Keep the location
-		const DiscreteState& loc = hfv_it->first;
-
-		/* Choose the center for the grid: the center of the reached region, if a non-empty reached region exists,
-		 * otherwise the center of the domain box */
-		Vector<Float> centre(css);
-		if (_statistics->upper().reach.has_location(loc) && !_statistics->upper().reach[loc].empty()) {
-			centre = _statistics->upper().reach[loc].bounding_box().centre();
-		} else {
-			centre = _parameters->bounding_domain.find(loc)->second.centre();
-		}
-
-		// For each variable having zero length, assign the minimum value
-		for (uint i=0;i<css;i++)
-			if (hybridgridlengths[loc][i] == 0)
-				hybridgridlengths[loc][i] = minNonZeroLengths[i];
-
-		// Add the related grid
-		hg[loc] = Grid(centre,hybridgridlengths[loc]);
-	}
-
-	// Return
-	return hg;
-}
-
 
 HybridGrid 
 HybridReachabilityAnalyser::
@@ -1799,51 +1657,6 @@ _getHybridGrid(const HybridFloatVector& hmad) const
 
 	return hg;
 }
-
-
-HybridGrid
-HybridReachabilityAnalyser::
-_getEqualizedHybridGrid(const HybridFloatVector& hmad) const
-{
-	// Get the size of the space (NOTE: taken as equal for all locations)
-	const uint css = hmad.begin()->second.size();
-
-	// Initialize the maximum derivative/domain_width ratio
-	Float maxratio = 0.0;
-	// Initialize the minimum length to use for zero-derivative variables
-	Vector<Float> minlengths(css,std::numeric_limits<double>::infinity());
-	// Initialize the gridlengths
-	Vector<Float> gridlengths(css);		
-	// Initialize the maximum absolute derivatives
-	Vector<Float> mad(css);
-
-	// Get the maximum absolute derivatives
-	for (uint i=0;i<css;i++)
-		for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-			mad[i] = max(mad[i],hfv_it->second[i]);
-
-	// For each dimension
-	for (uint i=0;i<css;i++)
-		// For each couple DiscreteState,Vector<Float>
-		for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-		{
-			maxratio = max(maxratio,mad[i]/_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Check for maximum ratio
-			minlengths[i] = min(minlengths[i],_parameters->bounding_domain.find(hfv_it->first)->second[i].width()); // Get the minimum domain length
-		}
-
-	// Assign the lengths
-	for (uint i=0;i<css;i++)
-		gridlengths[i] = (mad[i] > 0) ? mad[i]/maxratio : minlengths[i];
-
-	// Populate the grid, centered on the centre of the domain
-	HybridGrid hg;
-	for (HybridFloatVector::const_iterator hfv_it = hmad.begin(); hfv_it != hmad.end(); hfv_it++)
-		hg[hfv_it->first] = Grid(_parameters->bounding_domain.find(hfv_it->first)->second.centre(),gridlengths);
-	
-	// Return
-	return hg;
-} 
-
 
 void
 HybridReachabilityAnalyser::
@@ -2053,6 +1866,7 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 	// Updates the initial values for the safety/unsafety intervals, and decides whether to proceed and the eventual ordering
 	make_lpair<bool,bool>(proceed,safeOnBottom) = this->_process_initial_bisection_results(safety_int,unsafety_int,parameter_range,
 																						 lower_result,upper_result);
+
 	// Verification loop
 	bool proceedSafety = proceed;
 	bool proceedUnsafety = proceed;
@@ -2308,8 +2122,8 @@ HybridReachabilityAnalyser::_process_initial_bisection_results(Interval& positiv
 		proceed = true;
 		positiveOnBottom = false;
 		// If there are indeterminate values, reset the corresponding intervals as empty
-		if (indeterminate(lower_result)) positive_int.make_empty();
-		if (indeterminate(upper_result)) negative_int.make_empty();
+		if (indeterminate(lower_result)) negative_int.make_empty();
+		if (indeterminate(upper_result)) positive_int.make_empty();
 	}
 
 	return std::pair<bool,bool>(proceed,positiveOnBottom);
@@ -2524,21 +2338,19 @@ HybridReachabilityAnalyser::parametric_verification_partitioning(SystemVerificat
 
 	RealConstantSet original_constants = verInfo.getSystem().accessible_constants();
 
-	std::list<RealConstantSet> working_list;
-	working_list.push_back(params);
-	while (!working_list.empty())
+	std::list<RealConstantSet> splittings = maximally_split_parameters_onTolerance(params,minPartitioningRatio);
+	uint i=0;
+	for (std::list<RealConstantSet>::const_iterator splitting_it = splittings.begin();
+													 splitting_it != splittings.end();
+													 ++splitting_it)
 	{
-		RealConstantSet current_params = working_list.back();
-		working_list.pop_back();
-
+		ARIADNE_LOG(1,"<Split parameters set #" << ++i << "/" << splittings.size() << ">\n");
+		RealConstantSet current_params = *splitting_it;
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
-
 		verInfo.getSystem().substitute(current_params);
 		tribool outcome = _verify_iterative(verInfo,params);
-
 		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
-
-		_split_parameters_set(outcome, working_list, result, current_params, params, minPartitioningRatio);
+		result.push_back(ParametricPartitioningOutcome(current_params,outcome));
 	}
 
 	verInfo.getSystem().substitute(original_constants);
@@ -2723,21 +2535,19 @@ HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerification
 
 	RealConstantSet original_constants = dominating.getSystem().accessible_constants();
 
-	std::list<RealConstantSet> working_list;
-	working_list.push_back(dominating_params);
-	while (!working_list.empty())
+	std::list<RealConstantSet> splittings = maximally_split_parameters_onTolerance(dominating_params,minPartitioningRatio);
+	uint i=0;
+	for (std::list<RealConstantSet>::const_iterator splitting_it = splittings.begin();
+													 splitting_it != splittings.end();
+													 ++splitting_it)
 	{
-		RealConstantSet current_params = working_list.back();
-		working_list.pop_back();
-
+		ARIADNE_LOG(1,"<Split parameters set #" << ++i << "/" << splittings.size() << ">\n");
+		RealConstantSet current_params = *splitting_it;
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
-
 		dominating.getSystem().substitute(current_params);
 		tribool outcome = _dominance(dominating,dominated,dominating_params);
-
 		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
-
-		_split_parameters_set(outcome, working_list, result, current_params, dominating_params, minPartitioningRatio);
+		result.push_back(ParametricPartitioningOutcome(current_params,outcome));
 	}
 
 	dominating.getSystem().substitute(original_constants);
@@ -2745,54 +2555,51 @@ HybridReachabilityAnalyser::parametric_dominance_partitioning(SystemVerification
 	return result;
 }
 
-void
-HybridReachabilityAnalyser::_split_parameters_set(const tribool& outcome,
-										    	  std::list<RealConstantSet>& working_list,
-										    	  ParametricPartitioningOutcomeList& output_list,
-												  RealConstantSet& current_params,
-												  const RealConstantSet& working_params,
-												  const Float& tolerance) const
+std::list<RealConstantSet>
+maximally_split_parameters_onTolerance(const RealConstantSet& params,
+									   const Float& tolerance)
 {
-	if (!definitely(outcome))
-	{
-		RealConstant bestConstantToSplit = *current_params.begin();
+	std::list<RealConstantSet> result;
 
-		Float bestRatio = 0.0;
-		for (RealConstantSet::const_iterator const_it = current_params.begin();
-											 const_it != current_params.end();
-											 ++const_it)
+	std::list<RealConstantSet> working;
+	working.push_back(params);
+
+	while(!working.empty()) {
+		RealConstantSet currentParams = working.back();
+		working.pop_back();
+
+		bool hasSplit = false;
+		for (RealConstantSet::const_iterator param_it = currentParams.begin();
+											 param_it != currentParams.end();
+											 ++param_it)
 		{
-			Float currentWidth = const_it->value().width();
-			Float initialWidth = working_params.find(*const_it)->value().width();
+			Float currentWidth = param_it->value().width();
+			Float initialWidth = params.find(*param_it)->value().width();
 
-			if (currentWidth/initialWidth > bestRatio)
+			if (currentWidth/initialWidth > tolerance)
 			{
-				bestConstantToSplit = *const_it;
-				bestRatio = currentWidth/initialWidth;
+				hasSplit = true;
+				currentParams.erase(*param_it);
+				RealConstantSet newConfigurationLeft = currentParams;
+				RealConstantSet newConfigurationRight = currentParams;
+
+				const Real& currentInterval = param_it->value();
+				newConfigurationLeft.insert(RealConstant(param_it->name(),
+													  Interval(currentInterval.lower(),currentInterval.midpoint())));
+				newConfigurationRight.insert(RealConstant(param_it->name(),
+													  Interval(currentInterval.midpoint(),currentInterval.upper())));
+
+				working.push_back(newConfigurationLeft);
+				working.push_back(newConfigurationRight);
+				break;
 			}
 		}
 
-		if (bestRatio > tolerance)
-		{
-			current_params.erase(bestConstantToSplit);
-			RealConstantSet newConfigurationLeft = current_params;
-			RealConstantSet newConfigurationRight = current_params;
-
-			const Real& currentInterval = bestConstantToSplit.value();
-			newConfigurationLeft.insert(RealConstant(bestConstantToSplit.name(),
-												  Interval(currentInterval.lower(),currentInterval.midpoint())));
-			newConfigurationRight.insert(RealConstant(bestConstantToSplit.name(),
-												  Interval(currentInterval.midpoint(),currentInterval.upper())));
-
-			working_list.push_back(newConfigurationLeft);
-			working_list.push_back(newConfigurationRight);
-		}
-		else
-			output_list.push_back(ParametricPartitioningOutcome(current_params,outcome));
+		if (!hasSplit)
+			result.push_back(currentParams);
 	}
-	else
-		output_list.push_back(ParametricPartitioningOutcome(current_params,outcome));
-}
 
+	return result;
+}
 
 } // namespace Ariadne

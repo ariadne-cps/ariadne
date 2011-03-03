@@ -227,13 +227,9 @@ class HybridReachabilityAnalyser
     virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(SystemType& system,
 																	   const HybridImageSet& initial_set) const;
   
-    /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
-    virtual SetApproximationType viable(const SystemType& system,
-                                        const HybridImageSet& bounding_set) const;
-  
     /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box. */
-    virtual tribool verify(SystemType& system,
-                           const HybridImageSet& initial_set);
+    tribool verify(SystemType& system,
+                   const HybridImageSet& initial_set);
 
 	/*! \brief Attempt to verify that the reachable set of a system starting in an initial_set remains in a safe region inside a domain.
 	 * \details This is done in an iterative way by tuning the evolution/analysis parameters. The \a verInfo contains all the information
@@ -364,9 +360,6 @@ class HybridReachabilityAnalyser
 
 	// Determine if the upper/lower reached regions of verify_iterative (and of all the functions using it) must be saved into figures (false by default)
 	bool plot_verify_results;
-	// Determine if the reached region (resulting from the chain_reach_grid() procedure) is to be dumped into disk for those locations not involved in
-	// the evolution, and reloaded when required again. Only partially implemented at the moment.
-	bool chain_reach_dumping;
 	// The reduction in the number of logical cores used in multithreading (down from the maximum concurrency of the machine) (zero by default)
 	uint free_cores;
   
@@ -416,7 +409,6 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
     std::pair<SetApproximationType,bool> _upper_chain_reach(SystemType& system, const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const;
     std::pair<SetApproximationType,bool> _upper_chain_reach_forward_domainCheck(const SystemType& system, const HybridImageSet& initial_set) const;
-    std::pair<SetApproximationType,bool> _upper_chain_reach_forwardbackward(const SystemType& system, const HybridImageSet& initial_set) const;
 
     /*! \brief Checks if a break is to be issued.
      * \details Read the \a flagToCheck for validity: if false, sets \a flagToUpdate to false and returns true ("do break"), otherwise
@@ -428,7 +420,7 @@ class HybridReachabilityAnalyser
      * \details Ignores enclosures that lie outside the domain.
      * \return True iff any enclosure has been ignored due to lying outside the domain.
      */
-    bool _upper_chain_reach_pushReachCells(const HybridGridTreeSet& reachCells,
+    bool _upper_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
     									   const SystemType& system,
     									   std::list<EnclosureType>& destination) const;
 
@@ -460,7 +452,7 @@ class HybridReachabilityAnalyser
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
      * \return True iff any cell enclosure has been ignored due to lying outside the domain.
      */
-    bool _upper_chain_reach_pushFinalCells(const HybridGridTreeSet& finalCells,
+    bool _upper_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
     									   std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
@@ -506,15 +498,8 @@ class HybridReachabilityAnalyser
 	void _setMaximumEnclosureCell(const HybridGrid& hgrid);
 
 	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.
-	 * \details The grid is chosen so that each cell is included into the domain corresponding to its location. */
-	HybridGrid _getLooselyConstrainedHybridGrid(const HybridFloatVector& hmad) const;
-
-	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.
 	 * \details The grid is chosen so that each cell is included into the domains for all locations. */
 	HybridGrid _getHybridGrid(const HybridFloatVector& hmad) const;
-
-	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen equally for all locations.*/
-	HybridGrid _getEqualizedHybridGrid(const HybridFloatVector& hmad) const;
 
 	/*! \brief Set the initial evolution parameters and the grid given the automaton \a system, the bounding domain \a domain and the safe region \a safe.*/
 	void _setInitialParameters(SystemType& system, 
@@ -597,16 +582,6 @@ class HybridReachabilityAnalyser
 	bool _dominance_negative(SystemVerificationInfo& dominating,
 							 SystemVerificationInfo& dominated,
 							 const RealConstantSet& dominatingLockedConstants);
-
-	/*! \brief Handles splitting the parameters \a current_params, if this is allowed by the given \a tolerance and by a given
-	 * verification \a outcome.
-	 * \details Additionally saves the un-splittable results into \a output_list. */
-	void _split_parameters_set(const tribool& outcome,
-							   std::list<RealConstantSet>& working_list,
-							   ParametricPartitioningOutcomeList& output_list,
-							   RealConstantSet& current_params,
-							   const RealConstantSet& working_params,
-							   const Float& tolerance) const;
 };
 
 template<class HybridEnclosureType>
@@ -617,7 +592,6 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosur
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 	this->plot_verify_results = false;
-	this->chain_reach_dumping = false;
 	this->free_cores = 0;
 }
 
@@ -631,7 +605,6 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
     , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 {
 	this->plot_verify_results = false;
-	this->chain_reach_dumping = false;
 	this->free_cores = 0;
 }
 
@@ -676,6 +649,13 @@ Float getMaxDerivativeWidthRatio(const HybridAutomaton& system,
 /*! \brief Helper function to get the widths of the derivatives from the \a system */
 HybridFloatVector getDerivativeWidths(const HybridAutomaton& system,
 									  const HybridBoxes& bounding_domain);
+
+/*! \brief Splits the parameters to the maximum based on the \a tolerance
+ * \details The \a tolerance is the minimum ratio between a split parameter width and its original width.
+ * \return The resulting split parameters sets.
+ */
+std::list<RealConstantSet> maximally_split_parameters_onTolerance(const RealConstantSet& params,
+									   	   	   	   	   	   	      const Float& tolerance);
 
 } // namespace Ariadne
 

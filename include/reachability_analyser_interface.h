@@ -100,19 +100,6 @@ template<class SYS> class ReachabilityAnalyserInterface {
     virtual SetApproximationType
     chain_reach(const SystemType& system, 
                 const CompactSetInterfaceType& initial_set) const = 0;
-    
-    //! \brief Compute an outer-approximation to the viability kernel 
-    //! of \a system within \a bounding_set.
-    virtual SetApproximationType
-    viable(const SystemType& system, 
-           const CompactSetInterfaceType& bounding_set) const = 0;
-    
-    //! \brief Attempt to verify that the reachable set 
-    //! of \a system starting in \a initial_set remains in \a safe_set.
-    virtual tribool 
-    verify(const SystemType& system, 
-           const LocatedSetInterfaceType& initial_set, 
-           const RegularSetInterfaceType& safe_set) const = 0;
     //@}
     
 };

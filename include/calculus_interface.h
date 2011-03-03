@@ -83,8 +83,6 @@ class CalculusInterface
   private:
     ushort _spacial_order;
     ushort _temporal_order;
-    ushort _order;
-    ushort _smoothness;
   public:
     //!
     //!

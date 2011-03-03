@@ -40,6 +40,8 @@ int main(int argc,char *argv[])
 	HybridImageSet initial_set;
 	initial_set[DiscreteState("opened")] = Box(2, 5.5,8.0, 1.0,1.0);
 	initial_set[DiscreteState("closed")] = Box(2, 5.5,8.0, 0.0,0.0);
+	//initial_set[DiscreteState("opening")] = Box(2, 5.5,8.0, 0.0,1.0);
+	//initial_set[DiscreteState("closing")] = Box(2, 5.5,8.0, 0.0,1.0);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
@@ -57,7 +59,7 @@ int main(int argc,char *argv[])
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 5;
+	analyser.parameters().highest_maximum_grid_depth = 4;
 
 	// The parameters
 	RealConstantSet parameters;

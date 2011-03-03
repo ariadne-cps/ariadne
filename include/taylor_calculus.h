@@ -62,9 +62,6 @@ class TaylorCalculus
     ushort _spacial_order;
     ushort _temporal_order;
     double _sweep_threshold;
-    ushort _order;
-    ushort _smoothness;
-    double _maximum_step_size;
 
     shared_ptr<TaylorModel::Accuracy> _spacial_accuracy_ptr;
   public:

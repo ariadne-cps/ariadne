@@ -143,23 +143,28 @@ flow_bounds(VectorFunction const& vf,
 }
 
 
-
-
-
+// "Default"
 TaylorCalculus::
 TaylorCalculus()
     : _spacial_order(4),
       _temporal_order(6),
       _sweep_threshold(1e-10),
-      _order(8),
-      _smoothness(1),
-      _maximum_step_size(1.0),
       _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
 
 
-
+/*
+// Good for watertank-monolithic-hysteresis (lin or non-lin)
+TaylorCalculus::
+TaylorCalculus()
+    : _spacial_order(2),
+      _temporal_order(2),
+      _sweep_threshold(1e-4),
+      _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
+{
+}
+*/
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
@@ -631,7 +636,7 @@ TaylorCalculus::flow_model(VectorFunction const& vf, Vector<Interval> const& ibx
     TaylorModel::Accuracy* accuracy_raw_ptr=new TaylorModel::Accuracy;
     boost::shared_ptr<TaylorModel::Accuracy> accuracy(accuracy_raw_ptr);
     accuracy->_maximum_degree=this->_temporal_order;
-    accuracy->_sweep_threshold=1e-10;
+    accuracy->_sweep_threshold=this->_sweep_threshold;
     FunctionModelType vector_field_model(bb,vf,accuracy);
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
     for(uint i=0; i!=vector_field_model.size(); ++i) {
@@ -777,10 +782,8 @@ TaylorCalculus::subdivide(SetModelType const& set, const uint& d) const
 {
 	// Initialize the least-width pair by creating a split over the error component
 	std::pair<SetModelType,SetModelType> least_width_pair = make_pair(set,set);
-	// Refer to the first and second models of the pair
     TaylorModel& model1=least_width_pair.first[d];
     TaylorModel& model2=least_width_pair.second[d];
-	// Get the error of the model
 	Float error = model1.error();
 	// Split the error
     model1.set_error(error/2);
@@ -791,15 +794,12 @@ TaylorCalculus::subdivide(SetModelType const& set, const uint& d) const
 	// Analyse the split over each generator
 	for (uint i=0; i<set.generators_size(); i++)
 	{
-		// Get the current pair
 		std::pair<SetModelType,SetModelType> current_pair = set.split(i);
-
 		// If the current pair has lesser width than the least_width_pair, save it as the new least-width one
 		if (current_pair.first[d].range().width() + current_pair.second[d].range().width() < least_width_pair.first[d].range().width() + least_width_pair.second[d].range().width())
 			least_width_pair = current_pair;
 	}
 
-	// Prepare the output result in array format
     array<SetModelType> result(2);
     result[0]=least_width_pair.first;
     result[1]=least_width_pair.second;

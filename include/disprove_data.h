@@ -25,8 +25,8 @@
  *  \brief Data structure for holding and manipulating disprovement results.
  */
 
-#ifndef FALSIFICATION_INFO_H_
-#define FALSIFICATION_INFO_H_
+#ifndef DISPROVE_DATA_H_
+#define DISPROVE_DATA_H_
 
 #include "discrete_state.h"
 #include "box.h"
@@ -38,7 +38,7 @@ namespace Ariadne {
 typedef std::map<DiscreteState,Vector<Float> > HybridFloatVector;
 
 /**
- * This is a structure for keeping data obtained during lower chain reach, in order to get info for falsification.
+ * \brief This is a structure for keeping data obtained during lower chain reach, in order to get info for falsification.
  */
 struct DisproveData
 {
@@ -97,4 +97,4 @@ inline std::ostream& operator<<(std::ostream& os, const DisproveData& falsInfo) 
 
 }
 
-#endif /* FALSIFICATION_INFO_H_ */
+#endif /* DISPROVE_DATA_H_ */

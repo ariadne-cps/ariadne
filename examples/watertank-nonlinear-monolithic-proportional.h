@@ -132,7 +132,7 @@ HybridAutomaton getWatertankNonlinearMonolithicProportional()
 	system.new_forced_transition(e23,l2,l3,reset_id,guard23);
 	system.new_forced_transition(e32,l3,l2,reset_id,guard32);
 	system.new_forced_transition(e14,l1,l4,reset_id,guard14);
-	system.new_forced_transition(e41,l1,l4,reset_id,guard41);
+	system.new_forced_transition(e41,l4,l1,reset_id,guard41);
 
 	return system;
 }

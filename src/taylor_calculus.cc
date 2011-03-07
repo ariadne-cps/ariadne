@@ -142,7 +142,7 @@ flow_bounds(VectorFunction const& vf,
     return std::make_pair(h,b);
 }
 
-
+/*
 // "Default"
 TaylorCalculus::
 TaylorCalculus()
@@ -153,8 +153,8 @@ TaylorCalculus()
 {
 }
 
+*/
 
-/*
 // Good for watertank-monolithic-hysteresis (lin or non-lin)
 TaylorCalculus::
 TaylorCalculus()
@@ -164,7 +164,7 @@ TaylorCalculus()
       _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
-*/
+
 
 TaylorCalculus::SetModelType
 TaylorCalculus::

@@ -1385,8 +1385,6 @@ lower_chain_reach(SystemType& system,
 		system.substitute(original_constants);
 	}
 
-	_statistics->lower().reach = reach;
-
 	return std::pair<HybridGridTreeSet,DisproveData>(reach,disproveData);
 }
 
@@ -1400,6 +1398,8 @@ _prove(SystemType& system,
 	ARIADNE_LOG(4,"Proving... " << (verbosity == 4 ? "" : "\n"));
 
 	std::pair<HybridGridTreeSet,bool> reachAndIsValid = upper_chain_reach_forward(system,initial_set);
+
+	_statistics->upper().reach = reachAndIsValid.first;
 
 	// Proved iff the reached region is valid (i.e. it has not been restricted) and is inside the safe region
 	result = (reachAndIsValid.second && definitely(reachAndIsValid.first.subset(_parameters->safe_region)));
@@ -1418,6 +1418,8 @@ _disprove(SystemType& system,
 
 	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData = lower_chain_reach(system,initial_set);
 	const bool& isDisproved = reachAndDisproveData.second.getIsDisproved();
+
+	_statistics->lower().reach = reachAndDisproveData.first;
 
 	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
 
@@ -1675,7 +1677,7 @@ _setInitialParameters(SystemType& system,
 	_setLockToGridTime(system);
 	ARIADNE_LOG(3, "Lock to grid time: " << _parameters->lock_to_grid_time << "\n");
 	// Set the split factors
-	_parameters->split_factors = getSplitFactorsOfConstants(system,locked_constants,0.01,_parameters->bounding_domain);
+	_parameters->split_factors = getSplitFactorsOfConstants(system,locked_constants,0.1,_parameters->bounding_domain);
 	ARIADNE_LOG(3, "Split factors: " << _parameters->split_factors << "\n");
 }
 
@@ -1724,7 +1726,7 @@ _setDominanceParameters(SystemVerificationInfo& verInfo, const RealConstantSet& 
 	// Lock to grid time
 	_setLockToGridTime(verInfo.getSystem());
 	// Split factors
-	_parameters->split_factors = getSplitFactorsOfConstants(verInfo.getSystem(),lockedConstants,0.01,_parameters->bounding_domain);
+	_parameters->split_factors = getSplitFactorsOfConstants(verInfo.getSystem(),lockedConstants,0.1,_parameters->bounding_domain);
 }
 
 tribool

@@ -41,6 +41,12 @@ namespace Ariadne {
 
 enum EvolutionDirection { FORWARD, BACKWARD };
 
+/** \brief The domain enforcing policy.
+ * \details NONE: The \a bounding_domain parameter is ignored. ONLINE: The domain is taken into account and
+ * results into aborting the reachability analysis for both outer and lower chain reachability. OFFLINE: The domain
+ * is checked at the end of a proving/disproving routine, in order to rule out infeasible cases */
+enum DomainEnforcingPolicy { NEVER, ONLINE, OFFLINE};
+
 //! \brief Parameters for controlling the accuracy of continuous evolution methods.
 class ContinuousEvolutionParameters {
   public:
@@ -219,6 +225,9 @@ class DiscreteEvolutionParameters {
 	//! This parameters is only used in the chain_reach() routines.
     HybridBoxes bounding_domain;
 
+    //! \brief The reached region for constraining a chain outer reach.
+    HybridGridTreeSet constraint_reach;
+
     //! \brief The safe region that synthesizes a reachability property.
 	//! <br>
 	//! This parameters is only used in the chain_reach() routines.
@@ -233,15 +242,21 @@ class DiscreteEvolutionParameters {
     //! This parameter is used only under lower semantics.
 	bool enable_lower_pruning;
 
-	//! \brief Skip further proving for the current iteration is the outer approximation lies outside the domain
-	//! <br>
-	//! This parameter is used only for upper_chain_reach.
-	bool skip_if_unprovable;
+	//! \brief Skip if any subset of an outer reached region is outside the safe region (i.e. the region is not provable).
+	//! \details This parameter is used only for outer chain reachability analysis.
+	bool enable_quick_proving;
 
-	//! \brief Skip further evolution if the system is disproved.
-	//! <br>
-	//! This parameter is used only for lower_chain_reach and underlying evolution routines.
-	bool skip_if_disproved;
+	//! \brief Skip if any subset of a lower reached region is proved outside the safe region.
+	//! \details This parameter is used only for lower chain reachability analysis.
+	bool enable_quick_disproving;
+
+	//! \brief Whether to constrain the outer reached region in respect to the constrain_reach parameter.
+	//! \details The resulting constrained reached region is provable regardless of a constraining being performed or not.
+	bool enable_constrain_outer_reach;
+
+	//! \brief The policy for enforcing the checking of the domain for outer and lower reachability.
+	DomainEnforcingPolicy domain_enforcing_policy;
+
 };
 
 //! \brief Parameters for controlling the accuracy of evolution methods and reachability analysis.
@@ -256,7 +271,6 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       spacial_order(1),
       temporal_order(4),
       minimum_step_size(0.0),
-      hybrid_maximum_step_size(std::map<DiscreteState,RealType>()),
       minimum_enclosure_cell(Vector<RealType>(0)),
       maximum_enclosure_cell(Vector<RealType>(0)),
 	  set_model_events_size_interleaving(0),
@@ -277,10 +291,11 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
 	  lowest_maximum_grid_depth(0),
 	  highest_maximum_grid_depth(9),
       maximum_grid_height(16),
-      split_factors(RealConstantIntMap()),
 	  enable_lower_pruning(false),
-	  skip_if_unprovable(true),
-	  skip_if_disproved(true)
+	  enable_quick_proving(true),
+	  enable_quick_disproving(true),
+	  enable_constrain_outer_reach(false),
+	  domain_enforcing_policy(ONLINE)
 { }
 
 
@@ -323,11 +338,14 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
+       << ",\n  constraint_reach=" << p.constraint_reach
        << ",\n  safe_region=" << p.safe_region
        << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
-       << ",\n  skip_if_unprovable=" << p.skip_if_unprovable
-       << ",\n  skip_if_disproved=" << p.skip_if_disproved
+       << ",\n  enable_quick_proving=" << p.enable_quick_proving
+       << ",\n  enable_quick_disproving=" << p.enable_quick_disproving
+       << ",\n  enable_constrain_outer_reach=" << p.enable_constrain_outer_reach
+       << ",\n  domain_enforcing_policy=" << p.domain_enforcing_policy
        << "\n)\n";
     return os;
 }
@@ -360,12 +378,14 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
+       << ",\n  constraint_reach=" << p.constraint_reach
        << ",\n  safe_region=" << p.safe_region
        << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
-       << ",\n  skip_if_unprovable=" << p.skip_if_unprovable
-       << ",\n  skip_if_disproved=" << p.skip_if_disproved
-
+       << ",\n  enable_quick_proving=" << p.enable_quick_proving
+       << ",\n  enable_quick_disproving=" << p.enable_quick_disproving
+       << ",\n  enable_constrain_outer_reach=" << p.enable_constrain_outer_reach
+       << ",\n  domain_enforcing_policy=" << p.domain_enforcing_policy
        << "\n)\n";
     return os;
 }

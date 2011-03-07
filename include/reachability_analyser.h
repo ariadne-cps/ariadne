@@ -131,7 +131,7 @@ class HybridReachabilityAnalyser
     typedef HybridGridTreeSet SetApproximationType;
     typedef HybridEvolver::EnclosureType EnclosureType;
     typedef HybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
-    typedef std::pair<SetApproximationType,bool> (HybridReachabilityAnalyser::*UpperChainReachFuncPtr)(const SystemType&, const HybridImageSet&) const;
+    typedef SetApproximationType (HybridReachabilityAnalyser::*UpperChainReachFuncPtr)(const SystemType&, const HybridImageSet&) const;
   public:
     //@{
     //! \name Constructors and destructors
@@ -215,10 +215,9 @@ class HybridReachabilityAnalyser
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
-     * \return The reach set and a flag notifying if the result is valid (i.e. it has not been restricted due to
-     * the bounding domain and it is safe). */
-    virtual std::pair<SetApproximationType,bool> upper_chain_reach_forward(SystemType& system,
-																   const HybridImageSet& initial_set) const;
+     * \return The reach set */
+    virtual SetApproximationType upper_chain_reach_forward(SystemType& system,
+														   const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
          * lower semantics; the method performs periodical discretisations and checks the new reached region for inclusion
@@ -407,53 +406,52 @@ class HybridReachabilityAnalyser
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
-    std::pair<SetApproximationType,bool> _upper_chain_reach(SystemType& system, const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const;
-    std::pair<SetApproximationType,bool> _upper_chain_reach_forward_domainCheck(const SystemType& system, const HybridImageSet& initial_set) const;
+    SetApproximationType _upper_chain_reach_quick_proving(SystemType& system, const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const;
+    SetApproximationType _upper_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
 
-    /*! \brief Checks if a break is to be issued.
-     * \details Read the \a flagToCheck for validity: if false, sets \a flagToUpdate to false and returns true ("do break"), otherwise
-     * just returns false.
-     */
-    bool _upper_chain_reach_break(const bool& flagToCheck, bool& flagToUpdate) const;
 
     /*! \brief Pushes the enclosures from \a reachCells into \a destination.
      * \details Ignores enclosures that lie outside the domain.
-     * \return True iff any enclosure has been ignored due to lying outside the domain.
      */
-    bool _upper_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
+    void _upper_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
     									   const SystemType& system,
     									   std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list, for all \a transitions.
-     * \return True iff any enclosure has been ignored due to lying outside the domain.
      */
-    bool _upper_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
+    void _upper_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
 												 const ContinuousEnclosureType& source,
 												 const HybridGrid& grid,
 												 std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
      * \details Splits the \a source until the enclosure is definitely active for \a trans or the minimum allowed target cell widths \a minTargetCellWidths has been reached.
-     * \return True iff any enclosure has been ignored due to lying outside the domain.
      */
-    bool _upper_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
+    void _upper_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
     														 const ContinuousEnclosureType& source,
     														 const Vector<Float>& minTargetCellWidths,
     														 std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the target enclosure from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
-     * \return True iff the target enclosure lies outside the domain.
      */
-    bool _upper_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
+    void _upper_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
     												   const ContinuousEnclosureType& source,
     												   const TaylorCalculus& tc,
     												   std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
-     * \return True iff any cell enclosure has been ignored due to lying outside the domain.
      */
-    bool _upper_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
+    void _upper_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
     									   std::list<EnclosureType>& destination) const;
+
+    /*! \brief Splits \a target_encl for location \a target_loc, storing the result in \a initial_enclosures.
+     * \detail The function is recursive.
+     */
+    void _splitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
+    						    const DiscreteState& target_loc,
+    						    const ContinuousEnclosureType& target_encl,
+    						    const Vector<Float>& minTargetCellWidths,
+    						    const Box& target_bounding) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
      *  \detail Does not check for inclusion into the domain.
@@ -607,16 +605,6 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
 	this->plot_verify_results = false;
 	this->free_cores = 0;
 }
-
-/*! \brief Splits \a target_encl for location \a target_loc, storing the result in \a initial_enclosures.
- * \detail The function is recursive.
- */
-void splitTargetEnclosures(bool& isValid,
-						    std::list<EnclosureType>& initial_enclosures,
-						    const DiscreteState& target_loc,
-						    const ContinuousEnclosureType& target_encl,
-						    const Vector<Float>& minTargetCellWidths,
-						    const Box& target_bounding);
 
 /*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
  *

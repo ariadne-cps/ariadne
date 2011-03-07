@@ -152,7 +152,6 @@ TaylorCalculus()
       _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
-
 */
 
 // Good for watertank-monolithic-hysteresis (lin or non-lin)
@@ -164,7 +163,6 @@ TaylorCalculus()
       _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
-
 
 TaylorCalculus::SetModelType
 TaylorCalculus::

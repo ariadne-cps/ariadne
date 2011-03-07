@@ -65,6 +65,11 @@
 
 namespace Ariadne {
 
+class ReachOutOfDomainException : public std::runtime_error {
+  public:
+	ReachOutOfDomainException(const char* msg) : std::runtime_error(msg) { }
+};
+
 SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
 						   HybridImageSet& initial_set,
 						   HybridBoxes& domain,
@@ -248,22 +253,21 @@ _splitAndCreateTargetEnclosures(bool& isValid,
 }
 
 void
-splitTargetEnclosures(bool& isValid,
-					   std::list<EnclosureType>& initial_enclosures,
-					   const DiscreteState& target_loc,
-					   const ContinuousEnclosureType& target_encl,
-					   const Vector<Float>& minTargetCellWidths,
-					   const Box& target_bounding)
+HybridReachabilityAnalyser::_splitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
+					  	  	  	  	  	  	  	   const DiscreteState& target_loc,
+					  	  	  	  	  	  	  	   const ContinuousEnclosureType& target_encl,
+					  	  	  	  	  	  	  	   const Vector<Float>& minTargetCellWidths,
+					  	  	  	  	  	  	  	   const Box& target_bounding) const
 {
 	// Get the target enclosure box
 	const Box& target_encl_box = target_encl.bounding_box();
 
 	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
 	// of the target location, ignore it and notify
-	if (!target_encl_box.inside(target_bounding) &&
+	if (_parameters->domain_enforcing_policy == ONLINE &&
+		!target_encl_box.inside(target_bounding) &&
 		target_encl_box.disjoint(target_bounding)) {
-		isValid = false;
-		return;
+		throw ReachOutOfDomainException("A split target enclosure is out of the domain.");
 	}
 
 	// Otherwise try splitting the enclosure
@@ -274,8 +278,8 @@ splitTargetEnclosures(bool& isValid,
 			hasSplit = true;
 			std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = target_encl.split(i);
 			// Call recursively on the two enclosures
-			splitTargetEnclosures(isValid,initial_enclosures,target_loc,split_sets.first,minTargetCellWidths,target_bounding);
-			splitTargetEnclosures(isValid,initial_enclosures,target_loc,split_sets.second,minTargetCellWidths,target_bounding);
+			_splitTargetEnclosures(initial_enclosures,target_loc,split_sets.first,minTargetCellWidths,target_bounding);
+			_splitTargetEnclosures(initial_enclosures,target_loc,split_sets.second,minTargetCellWidths,target_bounding);
 		}
 	}
 
@@ -883,9 +887,9 @@ chain_reach(const SystemType& system,
 }
 
 
-std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
-_upper_chain_reach_forward_domainCheck(const SystemType& system,
+_upper_chain_reach_forward(const SystemType& system,
             const HybridImageSet& initial_set) const
 {
 	/* Complete procedure:
@@ -900,9 +904,6 @@ _upper_chain_reach_forward_domainCheck(const SystemType& system,
 		6) Put the enclosures of the final cells into the new initial enclosures, removing those outside the domain
 		7) If new initial enclosures exist, restart from 1), otherwise terminate.
 	*/
-
-	// Initialize the validity flag (will be invalidated if any restriction of the reached region is performed)
-	bool isValid = true;
 
     const Float& lock_to_grid_time = _parameters->lock_to_grid_time;
     const int& lock_to_grid_steps = _parameters->lock_to_grid_steps;
@@ -938,16 +939,12 @@ _upper_chain_reach_forward_domainCheck(const SystemType& system,
 	    // Recombines in order to start checking activations on the largest possible enclosures
 		new_reach.recombine();
 		ARIADNE_LOG(6,"Reach size after recombining = "<<new_reach.size()<<"\n");
-		bool reachValid = _upper_chain_reach_forward_pushTargetCells(new_reach,system,working_enclosures);
-		if (_upper_chain_reach_break(reachValid,isValid))
-			break;
-
 		// Minces in order to identify possible enclosures lying outside the domain
 		new_final.mince(maximum_grid_depth);
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
-		bool finalValid = _upper_chain_reach_pushLocalFinalCells(new_final,working_enclosures);
-		if (_upper_chain_reach_break(finalValid,isValid))
-			break;
+
+		_upper_chain_reach_forward_pushTargetCells(new_reach,system,working_enclosures);
+		_upper_chain_reach_pushLocalFinalCells(new_final,working_enclosures);
 
 		ARIADNE_LOG(6,"Final enclosures size = " << working_enclosures.size() << "\n");
 
@@ -960,68 +957,38 @@ _upper_chain_reach_forward_domainCheck(const SystemType& system,
 
 	ARIADNE_LOG(5,"Found a total of " << reach.size() << " reached cells.\n");
 
-    return make_pair<GTS,bool>(reach,isValid);
+    return reach;
 }
 
-bool
-HybridReachabilityAnalyser::_upper_chain_reach_break(const bool& flagToCheck, bool& flagToUpdate) const
-{
-	bool hasToBreak = false;
-
-	if (_parameters->skip_if_unprovable && !flagToCheck) {
-		flagToUpdate = false;
-		hasToBreak = true;
-	}
-
-	return hasToBreak;
-}
-
-bool
+void
 HybridReachabilityAnalyser::_upper_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
 															  const SystemType& system,
 															  std::list<EnclosureType>& destination) const
 {
-	bool reachIsValid = true;
-
 	HybridGrid grid = system.grid();
 
 	for (GTS::const_iterator cell_it = reachCells.begin(); cell_it != reachCells.end(); cell_it++)
 	{
-		// Get the location
 		const DiscreteState& loc = cell_it->first;
-		// Get the box
 		const Box& bx = cell_it->second.box();
 
-		// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
-		// of the target location, notify
-		if (!bx.inside(_parameters->bounding_domain[loc]) &&
-			bx.disjoint(_parameters->bounding_domain[loc])) {
-			ARIADNE_LOG(7,"Discarding reach enclosure " << bx <<
-						  " being outside the domain in location " << loc.name() << ".\n");
-			reachIsValid = false;
-
-			// Return false if we skip when the system is unprovable
-			if (_parameters->skip_if_unprovable)
-				break;
+		if (_parameters->domain_enforcing_policy == ONLINE) {
+			if (!bx.inside(_parameters->bounding_domain[loc]) && bx.disjoint(_parameters->bounding_domain[loc])) {
+				throw ReachOutOfDomainException("A reach enclosure is outside the domain.");
+			}
 		}
 
 		ARIADNE_LOG(7,"Checking transitions for box "<< bx <<" in location " << loc.name() << "\n");
-		bool transitionsEnclosuresAreValid = _upper_chain_reach_pushTargetEnclosures(system.transitions(loc),ContinuousEnclosureType(bx),grid,destination);
-		if (_upper_chain_reach_break(transitionsEnclosuresAreValid,reachIsValid))
-			break;
+		_upper_chain_reach_pushTargetEnclosures(system.transitions(loc),ContinuousEnclosureType(bx),grid,destination);
 	}
-
-	return reachIsValid;
 }
 
-bool
+void
 HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
 																	const ContinuousEnclosureType& source,
 																	const HybridGrid& grid,
 																	std::list<EnclosureType>& destination) const
 {
-	bool enclosuresAreValid = true;
-
     long numCellDivisions = (1<<_parameters->maximum_grid_depth);
 
 	// For each transition
@@ -1031,22 +998,16 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosures(const std::l
 
 		Vector<Float> minTargetCellWidths = grid[trans_it->target()].lengths()/numCellDivisions;
 
-		bool currentTransitionEnclosuresAreValid = _upper_chain_reach_pushTargetEnclosuresOfTransition(*trans_it,source,minTargetCellWidths,destination);
-		if (_upper_chain_reach_break(currentTransitionEnclosuresAreValid,enclosuresAreValid))
-			break;
+		_upper_chain_reach_pushTargetEnclosuresOfTransition(*trans_it,source,minTargetCellWidths,destination);
 	}
-
-	return enclosuresAreValid;
 }
 
-bool
+void
 HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
 																				const ContinuousEnclosureType& source,
 																				const Vector<Float>& minTargetCellWidths,
 																				std::list<EnclosureType>& destination) const
 {
-	bool enclosuresAreValid = true;
-
 	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
 
 	// Helper class for operations on Taylor sets
@@ -1072,11 +1033,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(
 			// Get the target continuous enclosure
 			ContinuousEnclosureType target_encl = tc.reset_step(trans.reset(),current_encl);
 			// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the target enclosure
-			bool currentEnclosuresAreValid = true;
-			splitTargetEnclosures(currentEnclosuresAreValid,destination,trans.target(),target_encl,minTargetCellWidths,target_bounding);
-
-			if (_upper_chain_reach_break(currentEnclosuresAreValid,enclosuresAreValid))
-				break;
+			_splitTargetEnclosures(destination,trans.target(),target_encl,minTargetCellWidths,target_bounding);
 		} else if (!(guard_time_model.range().upper()<0)) {
 			// Try splitting the enclosure
 			bool hasSplit = false;
@@ -1093,9 +1050,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(
 			// If we could not split
 			if (!hasSplit) {
 				ARIADNE_LOG(10,"Possibly active but minimum enclosure size reached, adding the splittings of the target enclosure to the destination list.\n");
-				bool transitionedEnclosureIsValid = _upper_chain_reach_pushTransitioningEnclosure(trans,current_encl,tc,destination);
-				if (_upper_chain_reach_break(transitionedEnclosureIsValid,enclosuresAreValid))
-					break;
+				_upper_chain_reach_pushTransitioningEnclosure(trans,current_encl,tc,destination);
 			}
 			else {
 				ARIADNE_LOG(10,"Possibly active, adding the splittings of the current enclosure to the evaluation list.\n");
@@ -1104,127 +1059,92 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(
 			ARIADNE_LOG(10,"Inactive, discarding.\n");
 		}
 	}
-
-	return enclosuresAreValid;
 }
 
-bool
+void
 HybridReachabilityAnalyser::_upper_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
 																	      const ContinuousEnclosureType& encl,
 																		  const TaylorCalculus& tc,
 																		  std::list<EnclosureType>& destination) const
 {
-	bool isValid = true;
-
 	ContinuousEnclosureType target_encl = tc.reset_step(trans.reset(),encl);
 	const Box& target_encl_box = target_encl.bounding_box();
 	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
 
-	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
-	// of the target location, notify, otherwise add it
-	if (!target_encl_box.inside(target_bounding) && target_encl_box.disjoint(target_bounding)) {
-		ARIADNE_LOG(10,"Discarding target enclosure " << target_encl_box <<
-					  " being outside the domain in location " << trans.target().name() << ".\n");
-		isValid = false;
+	if (_parameters->domain_enforcing_policy == ONLINE &&
+		!target_encl_box.inside(target_bounding) &&
+		target_encl_box.disjoint(target_bounding)) {
+		throw ReachOutOfDomainException("A target enclosure is outside the domain.");
 	} else {
 		destination.push_back(EnclosureType(trans.target(),target_encl));
 	}
-
-	return isValid;
-}
-
-
-bool
-HybridReachabilityAnalyser::_upper_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
-																		    std::list<EnclosureType>& destination) const
-{
-	bool isValid = true;
-
-	for (GTS::const_iterator cell_it = finalCells.begin(); cell_it != finalCells.end(); ++cell_it) {
-		const DiscreteState& loc = cell_it->first;
-		const Box& bounding = _parameters->bounding_domain[loc];
-
-		if (!cell_it->second.box().inside(bounding) && cell_it->second.box().disjoint(bounding)) {
-			ARIADNE_LOG(7,"Discarding enclosure " << cell_it->second.box() <<
-						" from final cell outside the domain in location " << loc.name() <<".\n");
-			isValid = false;
-
-			if (_parameters->skip_if_unprovable)
-				break;
-		} else {
-			destination.push_back(_discretiser->enclosure(*cell_it));
-		}
-	}
-
-	return isValid;
 }
 
 
 void
-HybridReachabilityAnalyser::_upper_chain_reach_pushFinalCells_noDomainCheck(const HybridGridTreeSet& finalCells,
+HybridReachabilityAnalyser::_upper_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
 																		    std::list<EnclosureType>& destination) const
 {
-	for (GTS::const_iterator cell_it = finalCells.begin(); cell_it != finalCells.end(); ++cell_it)
+	for (GTS::const_iterator cell_it = finalCells.begin(); cell_it != finalCells.end(); ++cell_it) {
+		const DiscreteState& loc = cell_it->first;
+		const Box& bounding = _parameters->bounding_domain[loc];
+
+		if (_parameters->domain_enforcing_policy == ONLINE &&
+			!cell_it->second.box().inside(bounding) &&
+			cell_it->second.box().disjoint(bounding)) {
+			ARIADNE_LOG(7,"Discarding enclosure " << cell_it->second.box() <<
+						" from final cell outside the domain in location " << loc.name() <<".\n");
+			throw ReachOutOfDomainException("A final cell is outside the domain.");
+		} else {
 			destination.push_back(_discretiser->enclosure(*cell_it));
+		}
+	}
 }
 
 
-std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 upper_chain_reach_forward(SystemType& system,
 				  const HybridImageSet& initial_set) const
 {
-	UpperChainReachFuncPtr func = &Ariadne::HybridReachabilityAnalyser::_upper_chain_reach_forward_domainCheck;
-	return _upper_chain_reach(system,initial_set,func);
+	UpperChainReachFuncPtr func = &Ariadne::HybridReachabilityAnalyser::_upper_chain_reach_forward;
+	return _upper_chain_reach_quick_proving(system,initial_set,func);
 }
 
-std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
-_upper_chain_reach(SystemType& system,
+_upper_chain_reach_quick_proving(SystemType& system,
 				   const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const
 {
 	// The reachable set
 	HybridGridTreeSet reach;
-	// The flag that informs whether the region is valid for proving
-	bool isValid;
+
+	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
 
 	std::list<RealConstantSet> split_set = _getSplitConstantsSet();
 
-	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
-	if (split_set.empty()) {
-		make_lpair<HybridGridTreeSet,bool>(reach,isValid) = _upper_chain_reach_forward_domainCheck(system,initial_set);
-	} else {
-		isValid = true;
-		RealConstantSet original_constants = system.nonsingleton_accessible_constants();
+	if (split_set.empty())
+		split_set.push_back(original_constants);
 
-		uint i = 0;
-		// Progressively adds the results for each subsystem
-		for (std::list<RealConstantSet>::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it) {
-			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
+	uint i = 0;
+	// Progressively adds the results for each subsystem
+	for (std::list<RealConstantSet>::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it) {
+		ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
 
-			system.substitute(*set_it);
+		system.substitute(*set_it);
 
-			std::pair<HybridGridTreeSet,bool> reachAndValidity = (this->*func)(system,initial_set);
-			const HybridGridTreeSet& local_reach = reachAndValidity.first;
-			const bool& local_isValid = reachAndValidity.second;
+		HybridGridTreeSet local_reach = (this->*func)(system,initial_set);
 
-			reach.adjoin(local_reach);
+		reach.adjoin(local_reach);
 
-			isValid = isValid && local_isValid;
-
-			// We skip if allowed and if either the partial result is not valid or outside the safe region
-			if (_parameters->skip_if_unprovable) {
-				if (!isValid || (isValid && definitely(!local_reach.subset(_parameters->safe_region)))) {
-					isValid = false;
-					break;
-				}
-			}
-		}
-
-		system.substitute(original_constants);
+		if (_parameters->enable_quick_proving &&
+			definitely(!local_reach.subset(_parameters->safe_region)))
+			break;
 	}
 
-	return std::pair<HybridReachabilityAnalyser::SetApproximationType,bool>(reach,isValid);
+	system.substitute(original_constants);
+
+	return reach;
 }
 
 std::pair<HybridReachabilityAnalyser::SetApproximationType,DisproveData>
@@ -1289,7 +1209,7 @@ _lower_chain_reach(const SystemType& system,
 
 		// Create the worker
 		LowerChainReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
-									 _parameters->maximum_grid_depth,concurrency, disprove_bounds, _parameters->skip_if_disproved);
+									 _parameters->maximum_grid_depth,concurrency, disprove_bounds, _parameters->enable_quick_disproving);
 
 		ARIADNE_LOG(6,"Evolving and discretising...\n");
 
@@ -1319,13 +1239,14 @@ _lower_chain_reach(const SystemType& system,
 			EnclosureType encl = final_enclosures.front();
 			final_enclosures.pop_front();
 
-			// Get the location
 			const DiscreteState& loc = encl.location();
+			const Box& encl_box = encl.continuous_state_set().bounding_box();
 
 			/* If the enclosure lies outside the bounding domain (i.e. not inside and disjoint), then the
 			 * domain is not proper and an error should be thrown. */
-			if (!encl.continuous_state_set().bounding_box().inside(_parameters->bounding_domain[loc]) &&
-				encl.continuous_state_set().bounding_box().disjoint(_parameters->bounding_domain[loc])) {
+			if (_parameters->domain_enforcing_policy != NEVER &&
+				!encl_box.inside(_parameters->bounding_domain[loc]) &&
+				encl_box.disjoint(_parameters->bounding_domain[loc])) {
 				ARIADNE_FAIL_MSG("Found an enclosure in location " << loc.name() << " with bounding box " << encl.continuous_state_set().bounding_box() <<
 								 " lying outside the domain in lower semantics: the domain is incorrect.\n");
 			}
@@ -1355,35 +1276,32 @@ HybridReachabilityAnalyser::
 lower_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set) const
 {
-	HybridGridTreeSet reach;
+	HybridGridTreeSet reach(system.grid());
 	DisproveData disproveData(system.state_space());
 
+	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
+
 	std::list<RealConstantSet> split_set = _getSplitConstantsSet();
+	if (split_set.empty())
+		split_set.push_back(original_constants);
 
-	// If no split set exists, performs the reachability analysis on the system, otherwise checks each element in the set
-	if (split_set.empty()) {
-		make_lpair<HybridGridTreeSet,DisproveData>(reach,disproveData) = _lower_chain_reach(system,initial_set);
-	} else {
-		RealConstantSet original_constants = system.nonsingleton_accessible_constants();
+	uint i = 0;
+	// Progressively adds the results for each subsystem
+	for (std::list<RealConstantSet>::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
+	{
+		ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
 
-		uint i = 0;
-		// Progressively adds the results for each subsystem
-		for (std::list<RealConstantSet>::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it)
-		{
-			ARIADNE_LOG(5,"<Constants set #" << i++ << " : " << *set_it << " >\n");
+		system.substitute(*set_it);
 
-			system.substitute(*set_it);
+		std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData = _lower_chain_reach(system,initial_set);
 
-			std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData = _lower_chain_reach(system,initial_set);
+		reach.adjoin(reachAndDisproveData.first);
+		disproveData.updateWith(reachAndDisproveData.second);
 
-			reach.adjoin(reachAndDisproveData.first);
-			disproveData.updateWith(reachAndDisproveData.second);
-
-			if (_parameters->skip_if_disproved && reachAndDisproveData.second.getIsDisproved())
-				break;
-		}
-		system.substitute(original_constants);
+		if (_parameters->enable_quick_disproving && reachAndDisproveData.second.getIsDisproved())
+			break;
 	}
+	system.substitute(original_constants);
 
 	return std::pair<HybridGridTreeSet,DisproveData>(reach,disproveData);
 }
@@ -1397,12 +1315,25 @@ _prove(SystemType& system,
 
 	ARIADNE_LOG(4,"Proving... " << (verbosity == 4 ? "" : "\n"));
 
-	std::pair<HybridGridTreeSet,bool> reachAndIsValid = upper_chain_reach_forward(system,initial_set);
+	HybridGridTreeSet reach;
 
-	_statistics->upper().reach = reachAndIsValid.first;
+	try
+	{
+		reach = upper_chain_reach_forward(system,initial_set);
 
-	// Proved iff the reached region is valid (i.e. it has not been restricted) and is inside the safe region
-	result = (reachAndIsValid.second && definitely(reachAndIsValid.first.subset(_parameters->safe_region)));
+		if (_parameters->domain_enforcing_policy == OFFLINE &&
+			definitely(!reach.subset(_parameters->bounding_domain)))
+			result = false;
+		else
+			result = definitely(reach.subset(_parameters->safe_region));
+	}
+	catch (ReachOutOfDomainException ex)
+	{
+		ARIADNE_LOG(5, "The reached set could not be bounded (" << ex.what() << ").\n");
+		result = false;
+	}
+
+	_statistics->upper().reach = reach;
 
 	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (result ? "Proved.\n" : "Not proved.\n") );
 
@@ -2404,10 +2335,10 @@ HybridReachabilityAnalyser::_dominance(SystemVerificationInfo& dominating,
 
 	ARIADNE_LOG(1, "Dominance checking...\n");
 
-	// We are not allowed to skip if disproved, since we need as much reached region as possible
-	// We are however allowed to skip if unprovable, since we could not determine dominance anyway
-	_parameters->skip_if_disproved = false;
-	_parameters->skip_if_unprovable = true;
+	// We are not allowed to skip as soon as disproved, since we need as much reached region as possible
+	// We are however allowed to perform quick proving, since we could not determine dominance anyway
+	_parameters->enable_quick_disproving = false;
+	_parameters->enable_quick_proving = true;
 
 	int& depth = _parameters->maximum_grid_depth;
     for(depth = _parameters->lowest_maximum_grid_depth; depth <= _parameters->highest_maximum_grid_depth; ++depth)
@@ -2439,24 +2370,17 @@ HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominati
 
 	bool result;
 
-	HybridGridTreeSet dominating_reach, dominated_reach;
-	bool isValid;
-	DisproveData disproveData(dominated.getSystem().state_space());
+	try {
+		ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
 
-	ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
+		_setDominanceParameters(dominating,dominatingLockedConstants);
+		HybridGridTreeSet dominating_reach = upper_chain_reach_forward(dominating.getSystem(),dominating.getInitialSet());
 
-	_setDominanceParameters(dominating,dominatingLockedConstants);
-	make_lpair<HybridGridTreeSet,bool>(dominating_reach,isValid) = upper_chain_reach_forward(dominating.getSystem(),dominating.getInitialSet());
-
-	if (!isValid) {
-		ARIADNE_LOG(3,"The reached region is unbounded.\n");
-		result = false;
-	}
-	else
-	{
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
 
+		HybridGridTreeSet dominated_reach;
 		RealConstantSet emptyLockedConstants;
+		DisproveData disproveData(dominated.getSystem().state_space());
 		_setDominanceParameters(dominated,emptyLockedConstants);
 		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) = lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
@@ -2472,6 +2396,10 @@ HybridReachabilityAnalyser::_dominance_positive(SystemVerificationInfo& dominati
 
 		result = inside(projected_dominating_bounds,projected_shrinked_dominated_bounds);
 	}
+	catch (ReachOutOfDomainException ex) {
+		ARIADNE_LOG(3,"The outer reached region of the dominating system is unbounded.\n");
+		result = false;
+	}
 
 	return result;
 }
@@ -2485,26 +2413,21 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 
 	bool result;
 
-	HybridGridTreeSet dominating_reach, dominated_reach;
-	bool isValid;
-	DisproveData disproveData(dominating.getSystem().state_space());
 
-	ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
 
-	RealConstantSet emptyLockedConstants;
-	_setDominanceParameters(dominated,emptyLockedConstants);
-	make_lpair<HybridGridTreeSet,bool>(dominated_reach,isValid) = upper_chain_reach_forward(dominated.getSystem(),dominated.getInitialSet());
 
-	if (!isValid) {
-		ARIADNE_LOG(3,"The reached region is unbounded.\n");
-		result = false;
-	}
-	else
-	{
+	try {
+		ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
+
+		RealConstantSet emptyLockedConstants;
+		_setDominanceParameters(dominated,emptyLockedConstants);
+		HybridGridTreeSet dominated_reach = upper_chain_reach_forward(dominated.getSystem(),dominated.getInitialSet());
+
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
 
+		HybridGridTreeSet dominating_reach;
+		DisproveData disproveData(dominating.getSystem().state_space());
 		_setDominanceParameters(dominating,dominatingLockedConstants);
-
 		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) = lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
 		// We must shrink the lower approximation of the the dominating system, but overapproximating in terms of rounding
@@ -2518,6 +2441,10 @@ HybridReachabilityAnalyser::_dominance_negative(SystemVerificationInfo& dominati
 		ARIADNE_LOG(4,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
 
 		result = !inside(projected_shrinked_dominating_bounds,projected_dominated_bounds);
+	}
+	catch (ReachOutOfDomainException ex) {
+		ARIADNE_LOG(3,"The outer reached region of the dominated system is unbounded.\n");
+		result = false;
 	}
 
 	return result;

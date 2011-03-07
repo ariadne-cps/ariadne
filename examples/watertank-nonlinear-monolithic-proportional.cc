@@ -39,7 +39,7 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState(2)] = Box(2, 5.5,8.0, 0.0,1.0);
+	initial_set[DiscreteState(2)] = Box(2, 6.75,6.75, 0.7,0.7);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,1.0,10.0,-0.1,1.1));
@@ -56,10 +56,11 @@ int main(int argc,char *argv[])
 	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_set_model_reduction = false;
 	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().skip_if_unprovable = true;
+	analyser.parameters().enable_quick_proving = true;
+	analyser.parameters().domain_enforcing_policy = ONLINE;
 	analyser.parameters().lowest_maximum_grid_depth = 2;
 	analyser.parameters().highest_maximum_grid_depth = 6;
-	analyser.free_cores = 2;
+	analyser.free_cores = 0;
 	analyser.plot_verify_results = false;
 
 	//analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);

@@ -121,11 +121,26 @@ HybridAutomaton getWatertankNonlinearMonolithicProportional()
 	RealExpression x_greater_ref_kp_minus_delta = x-ref+1.0/Kp+delta;
 	ScalarFunction guard32(x_greater_ref_kp_minus_delta,varlist);
 
+	// Invariants
+    RealExpression y_geq_zero = -y;   // y >= 0
+    ScalarFunction inv_y_geq_zero(y_geq_zero, varlist);
+    RealExpression y_leq_one = y-1.0;   // y <= 1
+    ScalarFunction inv_y_leq_one(y_leq_one, varlist);
+
 	/// Build the automaton
 	system.new_mode(l1,zerosaturated_d);
 	system.new_mode(l2,controlled_d);
 	system.new_mode(l3,onesaturated_d);
 	system.new_mode(l4,overflow_d);
+
+	system.new_invariant(l1,inv_y_geq_zero);
+	system.new_invariant(l2,inv_y_geq_zero);
+	system.new_invariant(l3,inv_y_geq_zero);
+	system.new_invariant(l4,inv_y_geq_zero);
+	system.new_invariant(l1,inv_y_leq_one);
+	system.new_invariant(l2,inv_y_leq_one);
+	system.new_invariant(l3,inv_y_leq_one);
+	system.new_invariant(l4,inv_y_leq_one);
 
 	system.new_forced_transition(e12,l1,l2,reset_id,guard12);
 	system.new_forced_transition(e21,l2,l1,reset_id,guard21);

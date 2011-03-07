@@ -274,7 +274,7 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 						  const EnclosureType& initial_set,
 						  const TimeType& maximum_hybrid_time,
 						  const HybridBoxes& disprove_bounds,
-						  bool skip_if_disproved) const
+						  bool enable_quick_disproving) const
 {
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
     ARIADNE_LOG(1,"Computing evolution up to "<<maximum_hybrid_time.continuous_time()<<" time units and "<<maximum_hybrid_time.discrete_time()<<" steps.\n");
@@ -321,7 +321,7 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 																			system,current_set,maximum_hybrid_time,
 																			disprove_bounds);
             disproveData.updateWith(localDisproveData);
-            if (skip_if_disproved && disproveData.getIsDisproved())
+            if (enable_quick_disproving && disproveData.getIsDisproved())
 				return disproveData;
         }
 

@@ -124,14 +124,16 @@ Orbit<ImageSetHybridEvolver::EnclosureType>
 ImageSetHybridEvolver::
 upper_orbit_continuous(const SystemType& system,
 				       const EnclosureType& initial_set,
-				       const TimeType& time) const
+				       const TimeType& time)
 {
     Orbit<EnclosureType> orbit(initial_set);
     EnclosureListType final;
     EnclosureListType reachable;
     EnclosureListType intermediate;
+
     this->_upper_evolution_continuous(final,reachable,intermediate,
                      				  system,initial_set,time);
+
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -233,7 +235,11 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
     _evolution_add_initialSet(working_sets,initial_set);
 
 	// While there exists a working set, process it and increment the total
+    uint i=0;
 	while(!working_sets.empty()) {
+
+		ARIADNE_LOG(2,"\n");
+		ARIADNE_LOG(2,"Processed sets: " << i++ << ", remaining sets: " << working_sets.size() << "\n\n");
 
 		// Get the least recent working set and pop it
 		HybridTimedSetType current_set = working_sets.front(); 
@@ -263,6 +269,7 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 
         _logStepAtVerbosity1(working_sets,reach_sets,initial_events,initial_time_model,initial_set_model,initial_location);
     }
+
 }
 
 DisproveData
@@ -287,7 +294,11 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
     _evolution_add_initialSet(working_sets,initial_set);
 
 	// While there exists a working set, process it and increment the total
+    uint i=0;
 	while(!working_sets.empty()) {
+
+		ARIADNE_LOG(2,"\n");
+		ARIADNE_LOG(2,"Processed sets: " << i++ << ", remaining sets: " << working_sets.size() << "\n\n");
 
 		// Get the least recent working set, pop it and update the corresponding size
 		HybridTimedSetType current_set = working_sets.front();
@@ -349,7 +360,11 @@ _evolution(EnclosureListType& final_sets,
     _evolution_add_initialSet(working_sets,initial_set);
 
 	// While there exists a working set, process it and increment the total
+    uint i=0;
 	while(!working_sets.empty()) {
+
+		ARIADNE_LOG(2,"\n");
+		ARIADNE_LOG(2,"Processed sets: " << i++ << ", remaining sets: " << working_sets.size() << "\n\n");
 
 		// Get the least recent working set, pop it and update the corresponding size
 		HybridTimedSetType current_set = working_sets.front();
@@ -369,7 +384,7 @@ _evolution(EnclosureListType& final_sets,
 
 		if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time() ||
 		   initial_events.size()>=uint(maximum_hybrid_time.discrete_time())) {
-            ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
+            ARIADNE_LOG(3,"Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if (subdivideOverTime && this->_parameters->enable_subdivisions) {
             ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
@@ -562,7 +577,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
     						 blocking_time_model,guards,semantics);
 
     SetModelType reachable_set;
-    _computeAndAdjoin_reachable_set(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
+    _compute_and_adjoin_reachableSet(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
 
     if(semantics!=LOWER_SEMANTICS || blocking_events.size()==1)
     	_computeEvolutionForEvents(working_sets,intermediate_sets,system,location,blocking_events,events,
@@ -643,7 +658,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     				  time_step_model,flow_set_model,guards,SMALL_RELATIVE_TIME);
 
     SetModelType reachable_set;
-    _computeAndAdjoin_reachable_set(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
+    _compute_and_adjoin_reachableSet(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
 
     TimeModelType final_time_model=time_model+blocking_time_model*time_step;
     ARIADNE_LOG(2,"final_time_range="<<final_time_model.range()<<"\n");
@@ -754,7 +769,7 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     						 blocking_time_model,guards,LOWER_SEMANTICS);
 
     SetModelType reachable_set;
-    _computeAndAdjoin_reachable_set(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
+    _compute_and_adjoin_reachableSet(reach_sets,reachable_set,location,flow_set_model,zero_time_model,blocking_time_model);
 
     // Check the reachable set against the disprove_bounds (up to numDivisions times)
     const uint numDivisions = 10;
@@ -850,7 +865,7 @@ compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float
 
 
 void ImageSetHybridEvolver::
-compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_times,
+compute_eventBlockingTimes_and_nonTransverseEvents(std::map<DiscreteEvent,TimeModelType>& event_blocking_times,
                         std::set<DiscreteEvent>& non_transverse_events,
                         const std::map<DiscreteEvent,VectorFunction>& guards,
                         const FlowSetModelType& flow_set_model) const
@@ -925,7 +940,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
 
 
 void ImageSetHybridEvolver::
-compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
+compute_blockingTime_and_relatedEvents(std::set<DiscreteEvent>& blocking_events,
                       TimeModelType& blocking_time,
                       const std::map<DiscreteEvent,TimeModelType>& event_blocking_times) const
 {
@@ -965,7 +980,7 @@ compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
 
 
 void ImageSetHybridEvolver::
-compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >& activation_events,
+compute_activationEvents(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >& activation_events,
                           const std::map<DiscreteEvent,VectorFunction>& activations, const FlowSetModelType& flow_set_model) const
 {
     SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,0.0);
@@ -986,7 +1001,7 @@ compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tri
 
 
 void ImageSetHybridEvolver::
-compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >& activation_times,
+compute_activationTimes(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >& activation_times,
                          const std::map<DiscreteEvent,VectorFunction>& activations,
                          const FlowSetModelType& flow_set_model,
                          const TimeModelType& blocking_time_model,
@@ -1224,8 +1239,8 @@ _compute_blocking_info(std::set<DiscreteEvent>& non_transverse_events,
     std::map<DiscreteEvent, TimeModelType> event_blocking_times;
 
     event_blocking_times[finishing_event]=time_step_model;
-    compute_blocking_events(event_blocking_times,non_transverse_events,guards,flow_set_model);
-    ARIADNE_LOG(3,"event_blocking_times="<<event_blocking_times<<"\n");
+    compute_eventBlockingTimes_and_nonTransverseEvents(event_blocking_times,non_transverse_events,guards,flow_set_model);
+    ARIADNE_LOG(2,"event_blocking_times="<<event_blocking_times<<"\n");
 
     std::map<DiscreteEvent,Interval> event_blocking_time_intervals;
     for(std::map<DiscreteEvent, TimeModelType>::const_iterator iter=event_blocking_times.begin();
@@ -1235,7 +1250,7 @@ _compute_blocking_info(std::set<DiscreteEvent>& non_transverse_events,
     ARIADNE_LOG(2,"non_transverse_events="<<non_transverse_events<<"\n\n");
 
     // Compute blocking events
-    compute_blocking_time(blocking_events,blocking_time_model,event_blocking_times);
+    compute_blockingTime_and_relatedEvents(blocking_events,blocking_time_model,event_blocking_times);
     ARIADNE_LOG(2,"blocking_events="<<blocking_events<<"\n");
     ARIADNE_LOG(2,"blocking_time="<<blocking_time_model.range()<<"\n\n");
 
@@ -1271,7 +1286,7 @@ _compute_activation_info(std::map<DiscreteEvent,VectorFunction>& activations,
        }
     }
 
-    this->compute_activation_times(activation_times,activations,flow_set_model,blocking_time_model,semantics);
+    this->compute_activationTimes(activation_times,activations,flow_set_model,blocking_time_model,semantics);
 
     // Display activation time ranges
     std::map< DiscreteEvent,tuple<Interval> > activation_time_intervals;
@@ -1283,7 +1298,7 @@ _compute_activation_info(std::map<DiscreteEvent,VectorFunction>& activations,
 
 void
 ImageSetHybridEvolver::
-_computeAndAdjoin_reachable_set(EnclosureListType& reach_sets,
+_compute_and_adjoin_reachableSet(EnclosureListType& reach_sets,
 								SetModelType& reachable_set,
 								const DiscreteState& location,
 							    const SetModelType& flow_set_model,

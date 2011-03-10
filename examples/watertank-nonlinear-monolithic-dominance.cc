@@ -39,9 +39,12 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_hy;
-	initial_hy[DiscreteState("opened")] = Box(2, 5.5,5.5, 1.0,1.0);
+	initial_hy[DiscreteState("opened")] = Box(2, 6.25,7.25, 1.0,1.0);
+	initial_hy[DiscreteState("opened")] = Box(2, 6.25,7.25, 0.0,0.0);
 	HybridImageSet initial_pr;
-	initial_pr[DiscreteState(3)] = Box(2, 5.5,5.5, 1.0,1.0);
+	initial_pr[DiscreteState(1)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_pr[DiscreteState(2)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_pr[DiscreteState(3)] = Box(2, 6.75,6.75, 0.0,1.0);
 
 	// The domains
 	HybridBoxes domain_hy = bounding_boxes(system_hy.state_space(),Box(2,1.0,10.0,-0.1,1.1));
@@ -60,7 +63,7 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_set_model_reduction = true;
+
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 2;
 	analyser.parameters().highest_maximum_grid_depth = 6;

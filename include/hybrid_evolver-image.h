@@ -125,7 +125,7 @@ class ImageSetHybridEvolver
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
     //! \brief Compute an approximation to the orbit set for upper semantics, with continuous evolution only.
-    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const;
+    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time);
 
     //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
@@ -200,18 +200,18 @@ class ImageSetHybridEvolver
     void compute_crossing_time_and_direction(TimeModelType&, Interval&,
                                              VectorFunction guard, const FlowSetModelType& flow_set) const;
 
-    void compute_blocking_events(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
+    void compute_eventBlockingTimes_and_nonTransverseEvents(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
                                  const std::map<DiscreteEvent,VectorFunction>& guards,
                                  const FlowSetModelType& flow_set_model) const;
 
-    void compute_blocking_time(std::set<DiscreteEvent>&, TimeModelType&,
+    void compute_blockingTime_and_relatedEvents(std::set<DiscreteEvent>&, TimeModelType&,
                                const std::map<DiscreteEvent,TimeModelType>&) const;
 
-    void compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
+    void compute_activationEvents(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
                                   const std::map<DiscreteEvent,VectorFunction>& activations,
                                   const FlowSetModelType& flow_set_model) const;
 
-    void compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
+    void compute_activationTimes(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
                                   const std::map<DiscreteEvent,VectorFunction>& activations,
                                   const FlowSetModelType& flow_set_model,
                                   const TimeModelType& blocking_time_model,
@@ -299,7 +299,7 @@ class ImageSetHybridEvolver
     						 	  const std::map<DiscreteEvent,VectorFunction>& guards,
     						 	  const Semantics semantics) const;
 
-    void _computeAndAdjoin_reachable_set(EnclosureListType& reach_sets,
+    void _compute_and_adjoin_reachableSet(EnclosureListType& reach_sets,
     									 SetModelType& reachable_set,
     									 const DiscreteState& location,
     									 const SetModelType& flow_set_model,

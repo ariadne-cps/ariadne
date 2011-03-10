@@ -1,6 +1,6 @@
 example = "watertank-nl-mono-hy[hmax,hmin]-par"
-set xrange [7.5:8.5]
-set yrange [5:6]
+set xrange [7.25:8.25]
+set yrange [5.25:6.25]
 set size 1.5, 1
 set xlabel 'h_{max}'
 set ylabel 'h_{min}'

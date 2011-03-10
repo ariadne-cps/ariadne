@@ -43,8 +43,8 @@ enum EvolutionDirection { FORWARD, BACKWARD };
 
 /** \brief The domain enforcing policy.
  * \details NONE: The \a bounding_domain parameter is ignored. ONLINE: The domain is taken into account and
- * results into aborting the reachability analysis for both outer and lower chain reachability. OFFLINE: The domain
- * is checked at the end of a proving/disproving routine, in order to rule out infeasible cases */
+ * results into preemptively aborting the reachability analysis for both outer and lower chain reachability. OFFLINE: The domain
+ * is checked at the end of a proving/disproving routine, when the reachability has been fully computed (useful for debugging) */
 enum DomainEnforcingPolicy { NEVER, ONLINE, OFFLINE};
 
 //! \brief Parameters for controlling the accuracy of continuous evolution methods.

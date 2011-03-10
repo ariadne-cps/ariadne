@@ -1,9 +1,9 @@
-example = "watertank-nl-mono-pr[hmax,hmin]-par"
-set xrange [7.5:8.5]
-set yrange [5:6]
+example = "watertank-nl-mono-pr[Kp,ref]-par"
+set xrange [0.2:0.5]
+set yrange [5.5:8]
 set size 1.5, 1
-set xlabel 'h_{max}'
-set ylabel 'h_{min}'
+set xlabel 'K_p'
+set ylabel 'ref'
 set terminal postscript portrait enhanced colour dashed lw 1 "Helvetica" 24
 set output example.".eps"
 set style fill solid 1.0 border lt -1

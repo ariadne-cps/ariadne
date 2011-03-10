@@ -37,8 +37,8 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState("opened")] = Box(2, 5.5,8.0, 1.0,1.0);
-	initial_set[DiscreteState("closed")] = Box(2, 5.5,8.0, 0.0,0.0);
+	initial_set[DiscreteState("opened")] = Box(2, 6.25,7.25, 1.0,1.0);
+	initial_set[DiscreteState("closed")] = Box(2, 6.25,7.25, 0.0,0.0);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
@@ -53,21 +53,20 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 1;
 	analyser.parameters().highest_maximum_grid_depth = 5;
 
 	// The parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
-	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
+	parameters.insert(RealConstant("hmin",Interval(5.25,6.25)));
+	parameters.insert(RealConstant("hmax",Interval(7.25,8.25)));
 	Float tolerance = 0.25;
 	uint numPointsPerAxis = 11;
-	Float minPartitioningRatio = 0.25;
+	uint logNumIntervalsPerParam = 3;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, minPartitioningRatio);
-	Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
+	ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerParam);
+	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
 	results.draw();
 }

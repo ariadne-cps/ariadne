@@ -277,13 +277,13 @@ class HybridReachabilityAnalyser
 
 	/**
 	 * \brief Performs a parametric verification on a set of parameters \a params, by partitioning the parameters space.
-	 * \details The \a minPartitioningRatio variable determines the minimum granularity for partitioning any parameter (expressed as a
-	 * percentage in respect to the range of a given parameter). The values in \a params are substituted into the system, the latter
+	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
+	 * The values in \a params are substituted into the system, the latter
 	 * being restored to its initial conditions by the end of the method.
 	 */
 	ParametricPartitioningOutcomeList parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 													   const RealConstantSet& params,
-													   const Float& minPartitioningRatio);
+													   const uint& logNumIntervalsPerParam);
 
 	/**
 	 * \brief Performs dominance checking.
@@ -344,14 +344,14 @@ class HybridReachabilityAnalyser
 	/**
 	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
 	 * the parameters space.
-	 * \details The \a minPartitioningRatio variable determines the minimum granularity for partitioning any parameter (expressed as a
-	 * percentage in respect to the range of a given parameter). The values in \a dominating_params are substituted into the \a dominating
+	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
+     * The values in \a dominating_params are substituted into the \a dominating
 	 * system alone, the latter being restored to its initial conditions by the end of the method.
 	 */
 	ParametricPartitioningOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 													 	   SystemVerificationInfo& dominated,
 													 	   const RealConstantSet& dominating_params,
-													 	   const Float& minPartitioningRatio);
+													 	   const uint& logNumIntervalsPerParam);
 
     //@}
 
@@ -381,7 +381,8 @@ class HybridReachabilityAnalyser
     /*! \brief Generates a list of hybrid enclosures from the \a initial_set, depending on the minimum cell size
      * given by the \a grid. */
     list<HybridBasicSet<TaylorSet> > _split_initial_set(const HybridImageSet initial_set,
-										   const HybridGrid grid) const;
+										   	   	   	    const HybridGrid grid,
+										   	   	   	    Semantics semantics) const;
 
     /*! \brief Generates the target hybrid enclosures given an enclosure \a encl and a transition \a trans,
      * eventually splitting if the original enclosure has any width larger than the values in \a minTargetCellWidths.
@@ -394,12 +395,6 @@ class HybridReachabilityAnalyser
     									 const Box& target_bounding,
     									 const DiscreteTransition& trans_it,
     									 const TaylorCalculus& tc) const;
-
-    /*! \brief Gets the set of all the split intervals from the stored split factors.
-     *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
-     *  all the remaining from right to left.
-     */
-    std::list<RealConstantSet> _getSplitConstantsSet() const;
 
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
@@ -639,11 +634,21 @@ HybridFloatVector getDerivativeWidths(const HybridAutomaton& system,
 									  const HybridBoxes& bounding_domain);
 
 /*! \brief Splits the parameters to the maximum based on the \a tolerance
- * \details The \a tolerance is the minimum ratio between a split parameter width and its original width.
+ * \details The \a numIntervalsPerParam is the number of intervals to split for each parameter.
  * \return The resulting split parameters sets.
  */
-std::list<RealConstantSet> maximally_split_parameters_onTolerance(const RealConstantSet& params,
-									   	   	   	   	   	   	      const Float& tolerance);
+std::list<RealConstantSet> maximally_split_parameters(const RealConstantSet& params,
+									   	   	   	   	  const uint& numIntervalsPerParam);
+
+/*! \brief Gets the set of all the split intervals from the stored split factors.
+ *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
+ *  all the remaining from right to left.
+ */
+std::list<RealConstantSet> getSplitConstantsIntervalsSet(const RealConstantIntMap& split_factors);
+
+/*! \brief Gets the set of all the midpoints of the split intervals in \a intervals_set. */
+std::list<RealConstantSet> getSplitConstantsMidpointsSet(const std::list<RealConstantSet>& intervals_set);
+
 
 } // namespace Ariadne
 

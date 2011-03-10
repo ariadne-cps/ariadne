@@ -37,7 +37,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 	RealConstant tau("tau",1.0); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
 	RealConstant bfp("bfp",Interval(0.3,0.32863)); // The product beta*f(p)
-	RealConstant Kp("Kp",3.0); // The gain of the proportional controller
+	RealConstant Kp("Kp",0.6); // The gain of the proportional controller
 	RealConstant delta("delta",Interval(-0.1,0.1)); // An indeterminacy in guards evaluation
 	RealConstant H("H",9.0); // The height of the tank, over which overflow occurs
 
@@ -54,6 +54,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 	system.register_accessible_constant(bfp);
 	system.register_accessible_constant(tau);
 	system.register_accessible_constant(Kp);
+	system.register_accessible_constant(ref);
 
 	// Constants
 	ScalarFunction one=ScalarFunction::constant(2,1.0);

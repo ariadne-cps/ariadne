@@ -37,7 +37,7 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState(3)] = Box(2, 5.5,5.5, 1.0,1.0);
+	initial_set[DiscreteState(2)] = Box(2, 7.5,7.5, 0.5,0.5);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,-0.1,10.0,-0.1,1.1));
@@ -52,22 +52,26 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
+	analyser.parameters().enable_quick_proving = true;
+	analyser.parameters().domain_enforcing_policy = ONLINE;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
+	analyser.plot_verify_results = true;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 
 	/// Analysis parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("bfp",Interval(0.01,0.6)));
+	parameters.insert(RealConstant("ref",Interval(5,0.6)));
 	parameters.insert(RealConstant("Kp",Interval(0.01,0.6)));
 	Float tolerance = 0.1;
 	uint numPointsPerAxis = 11;
+	uint logNumIntervalsPerAxis = 2;
 
-	Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);
-	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
-	results.draw();
+	cout << analyser.verify_iterative(verInfo);
+	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);
+	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
+	//results.draw();
 
 }

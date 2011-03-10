@@ -274,7 +274,6 @@ int main(int argc,char *argv[])
 	analyser.parameters().lock_to_grid_steps = 1;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
-	analyser.chain_reach_dumping = false;
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;

@@ -101,7 +101,7 @@ class VectorFieldEvolver
 
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics, with only the continuous part. 
-    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    Orbit<EnclosureType> upper_orbit_continuous(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) {
 		ARIADNE_NOT_IMPLEMENTED;
 	}
 

@@ -39,7 +39,9 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState(2)] = Box(2, 6.75,6.75, 0.7,0.7);
+	//initial_set[DiscreteState(1)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_set[DiscreteState(2)] = Box(2, 6.75,6.75, 0.0,1.0);
+	//initial_set[DiscreteState(3)] = Box(2, 6.75,6.75, 0.0,1.0);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,1.0,10.0,-0.1,1.1));
@@ -54,29 +56,59 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_set_model_reduction = false;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().enable_quick_proving = true;
 	analyser.parameters().domain_enforcing_policy = ONLINE;
 	analyser.parameters().lowest_maximum_grid_depth = 2;
 	analyser.parameters().highest_maximum_grid_depth = 6;
+	analyser.plot_verify_results = true;
 	analyser.free_cores = 0;
-	analyser.plot_verify_results = false;
 
 	//analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
 
 	// Verification parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("Kp",Interval(0.2,0.5)));
-	parameters.insert(RealConstant("tau",Interval(1.0,6.0)));
+	parameters.insert(RealConstant("Kp",Interval(0.2,1.0)));
+	parameters.insert(RealConstant("ref",Interval(5.5,8.0)));
 	Float tolerance = 0.25;
 	uint numPointsPerAxis = 4;
+	uint logNumIntervalsPerAxis = 4;
+
+	system.substitute(RealConstant("ref",5.0));
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 
 	cout << analyser.verify_iterative(verInfo);
-	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
-	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
+	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointPerAxis);
+	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
 	//results.draw();
+/*
 
+	system.substitute(RealConstant("bfp",0.3));
+	system.substitute(RealConstant("delta",0.0));
+	system.substitute(RealConstant("ref",6.0));
+
+	std::map<DiscreteState,Float> hmss;
+	Vector<Float> mec(2);
+	mec[0] = 1.0;
+	mec[1] = 1.0;
+	Float mss = 0.2;
+	hmss.insert(std::pair<DiscreteState,Float>(DiscreteState(1),mss));
+	hmss.insert(std::pair<DiscreteState,Float>(DiscreteState(2),mss));
+	hmss.insert(std::pair<DiscreteState,Float>(DiscreteState(3),mss));
+	evolver.parameters().hybrid_maximum_step_size = hmss;
+	evolver.parameters().maximum_enclosure_cell = mec;
+    HybridTime evolution_time(10.0,5);
+    HybridTaylorSet initial_enclosure(DiscreteState(2),Box(2,6.5,6.5,0.5,0.5));
+
+	typedef HybridEvolver::OrbitType OrbitType;
+    OrbitType orbit = evolver.orbit(system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
+
+    Figure fig;
+    array<uint> xy(2,0,1);
+    fig.set_projection_map(ProjectionFunction(xy,2));
+    fig.set_bounding_box(Box(2,4.0,8.0,-0.1,1.1));
+    draw(fig,orbit);
+    fig.write("watertank-nl-mono-pr_test");
+*/
 }

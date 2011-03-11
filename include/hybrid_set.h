@@ -66,6 +66,10 @@ template<class HDS> class HybridDenotableSetExpression { };
 
 template<class SET> struct is_basic_set { };
 
+// Declare template specialisation for hybrid list set
+template<class ES> class HybridBasicSet;
+template<class ES> class ListSet< HybridBasicSet<ES> >;
+
 
 
 template<class BS>

@@ -81,14 +81,11 @@ class Grid;
 class GridTreeSet;
 
 
-class HybridEnclosure;
-
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class TaylorConstrainedImageSet
     : public DrawableInterface
     , public CompactSetInterface
 {
-    friend class HybridEnclosure;
     Box _domain;
     VectorTaylorFunction _function;
     List<ScalarTaylorFunction> _constraints;
@@ -116,6 +113,8 @@ class TaylorConstrainedImageSet
 
     //! \brief The sweeper used to control the accuracy.
     Sweeper sweeper() const;
+    //! \brief The class used to create new function instances.
+    TaylorFunctionFactory function_factory() const;
     //! \brief The parameter domain \f$D\f$.
     Vector<Interval> domain() const;
     //! \brief A subset of the parameter domain containing all feasible points.
@@ -126,6 +125,11 @@ class TaylorConstrainedImageSet
     VectorTaylorFunction const& function() const;
     VectorTaylorFunction taylor_function() const;
 
+    //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
+    void new_parameter(Interval ivl);
+    //! \brief Introduces a new independent variable with values in the interval \a ivl.
+    //! Equivalent to constructing the set \f$S\times I\f$.
+    void new_variable(Interval ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     void substitute(uint j, ScalarTaylorFunction v);
@@ -137,6 +141,16 @@ class TaylorConstrainedImageSet
     void apply_flow(IntervalVectorFunction phi, Interval time);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
     void apply_flow_step(IntervalVectorFunction phi, Float h);
+    //! \brief Apply the flow \f$\phi(x,\epsilon(x))\f$ to the map \f$f\f$.
+    void apply_state_flow_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    //! \brief Set \f$\xi'(s)=\phi(\xi(s),\tau(s))\f$.
+    void apply_parameter_flow_step(IntervalVectorFunction phi, IntervalScalarFunction tau);
+/*
+    //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
+    void apply_reach_step(IntervalVectorFunction phi, Float h);
+    //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
+    void apply_reach_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+*/
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
     void new_state_constraint(NonlinearConstraint c);

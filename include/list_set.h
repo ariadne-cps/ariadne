@@ -46,10 +46,6 @@ class Box;
 template<class ES> class ListSet;
 class DiscreteLocation;
 
-// Declare template specialisation for hybrid list set
-template<class ES> class HybridBasicSet;
-template<class ES> class ListSet< HybridBasicSet<ES> >;
-
 struct ListSetSummary { uint size, dimension; };
 
 template<class BS>

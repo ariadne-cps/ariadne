@@ -162,7 +162,7 @@ class HybridEnclosure
     //! \brief The number of constraints.
     uint number_of_equality_constraints() const;
     //! \brief The continuous state set.
-    const IntervalVector& parameter_domain() const;
+    const IntervalVector parameter_domain() const;
     //! \brief The function related to space.
     const VectorIntervalFunction& space_function() const;
     //! \brief The function related to time.

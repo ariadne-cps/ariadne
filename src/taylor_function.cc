@@ -396,6 +396,12 @@ compose(const RealScalarFunction& g, const VectorTaylorFunction& f)
 }
 
 ScalarTaylorFunction
+compose(const IntervalScalarFunction& g, const VectorTaylorFunction& f)
+{
+    return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
+}
+
+ScalarTaylorFunction
 compose(const IntervalScalarFunctionInterface& g, const VectorTaylorFunction& f)
 {
     return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
@@ -1190,7 +1196,7 @@ VectorTaylorFunction::jacobian(const Vector<Interval>& x) const
 VectorTaylorFunction
 join(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
 {
-    ARIADNE_ASSERT(f1.domain()==f2.domain());
+    ARIADNE_ASSERT_MSG(f1.domain()==f2.domain(),"f1="<<f1<<", f2="<<f2);
     return VectorTaylorFunction(f1.domain(),join(f1.models(),f2.model()));
 }
 
@@ -1687,6 +1693,12 @@ ScalarTaylorFunction
 TaylorFunctionFactory::create_zero(const IntervalVector& domain) const
 {
     return ScalarTaylorFunction::zero(domain,this->_sweeper);
+}
+
+ScalarTaylorFunction
+TaylorFunctionFactory::create_coordinate(const IntervalVector& domain, uint k) const
+{
+    return ScalarTaylorFunction::coordinate(domain,k,this->_sweeper);
 }
 
 VectorTaylorFunction

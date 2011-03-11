@@ -106,6 +106,10 @@ Sweeper TaylorConstrainedImageSet::sweeper() const {
     return this->_function.sweeper();
 }
 
+TaylorFunctionFactory TaylorConstrainedImageSet::function_factory() const {
+    return TaylorFunctionFactory(this->sweeper());
+}
+
 // FIXME: What if solving for constraint leaves domain?
 void TaylorConstrainedImageSet::_solve_zero_constraints() {
     this->_check();
@@ -295,6 +299,35 @@ void TaylorConstrainedImageSet::substitute(uint j, Float c)
     this->_check();
 }
 
+void TaylorConstrainedImageSet::new_parameter(Interval ivl)
+{
+    this->_domain=join(this->_domain,ivl);
+    this->_reduced_domain=join(this->_reduced_domain,ivl);
+    this->_function=embed(this->_function,ivl);
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        this->_constraints[i]=embed(this->_constraints[i],ivl);
+    }
+    for(uint i=0; i!=this->_equations.size(); ++i) {
+        this->_equations[i]=embed(this->_equations[i],ivl);
+    }
+    this->_check();
+}
+
+void TaylorConstrainedImageSet::new_variable(Interval ivl)
+{
+    ScalarTaylorFunction variable_function = ScalarTaylorFunction::identity(ivl,this->sweeper());
+    this->_domain=join(this->_domain,ivl);
+    this->_reduced_domain=join(this->_reduced_domain,ivl);
+    this->_function=combine(this->_function,variable_function);
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        this->_constraints[i]=embed(this->_constraints[i],ivl);
+    }
+    for(uint i=0; i!=this->_equations.size(); ++i) {
+        this->_equations[i]=embed(this->_equations[i],ivl);
+    }
+    this->_check();
+}
+
 void TaylorConstrainedImageSet::apply_map(IntervalVectorFunction map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
@@ -323,6 +356,21 @@ void TaylorConstrainedImageSet::apply_flow_step(IntervalVectorFunction flow, Flo
     this->_check();
 }
 
+void TaylorConstrainedImageSet::apply_state_flow_step(IntervalVectorFunction flow, IntervalScalarFunction time)
+{
+    ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
+    ARIADNE_ASSERT_MSG(time.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", time="<<time);
+    this->_function=compose(flow,join(this->_function,compose(time,this->_function)));
+    this->_check();
+}
+
+void TaylorConstrainedImageSet::apply_parameter_flow_step(IntervalVectorFunction flow, IntervalScalarFunction time)
+{
+    ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
+    ARIADNE_ASSERT_MSG(time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", time="<<time);
+    this->_function=compose(flow,join(this->_function,ScalarTaylorFunction(this->_function.domain(),time,this->sweeper())));
+    this->_check();
+}
 
 void TaylorConstrainedImageSet::new_state_constraint(NonlinearConstraint constraint) {
     this->_is_fully_reduced=false;

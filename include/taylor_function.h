@@ -884,6 +884,7 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;
     VectorTaylorFunction create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const IntervalVector& domain) const;
+    ScalarTaylorFunction create_coordinate(const IntervalVector& domain, uint k) const;
     VectorTaylorFunction create_identity(const IntervalVector& domain) const;
   private:
     ScalarTaylorFunction* _create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;

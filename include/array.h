@@ -97,6 +97,12 @@ class Array {
             pointer _new_ptr=uninitialized_new(n);
             for(size_type i=0; i!=n; ++i) { if(i<_size) { new (_new_ptr+i) T(_ptr[i]); } else { new (_new_ptr+i) T(); } }
             this->_destroy_elements(); uninitialized_delete(_ptr); _size=n; _ptr=_new_ptr; } }
+    /*! \brief Resizes the Array to hold \a n elements. If \a n is larger than the current size, the extra elements are initialised with value \a t. */
+    void resize(size_type n, const T& t) {
+        if(size()!=n) {
+            pointer _new_ptr=uninitialized_new(n);
+            for(size_type i=0; i!=n; ++i) { if(i<_size) { new (_new_ptr+i) T(_ptr[i]); } else { new (_new_ptr+i) T(t); } }
+            this->_destroy_elements(); uninitialized_delete(_ptr); _size=n; _ptr=_new_ptr; } }
     /*! \brief Reallocates the Array to hold \a n elements. The new elements are default-constructed. */
     void reallocate(size_type n) { if(size()!=n) { this->_destroy_elements(); uninitialized_delete(_ptr);
         _size=n; _ptr=uninitialized_new(_size); for(size_type i=0; i!=_size; ++i) { new (_ptr+i) T(); } } }

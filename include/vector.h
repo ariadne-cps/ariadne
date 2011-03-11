@@ -371,9 +371,11 @@ X dot(const Vector<X>& v1, const Vector<X>& v2)
 template<class X>
 Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
 {
+    if(v1.size()==0) { return v2; }
+    if(v2.size()==0) { return v1; }
     size_t n1=v1.size();
     size_t n2=v2.size();
-    Vector<X> r(n1+n2);
+    Vector<X> r(n1+n2,v1[0]);
     project(r,range(0,n1))=v1;
     project(r,range(n1,n1+n2))=v2;
     return r;
@@ -383,9 +385,8 @@ template<class X>
 Vector<X> join(const Vector<X>& v1, const X& s2)
 {
     size_t n1=v1.size();
-    Vector<X> r(n1+1);
+    Vector<X> r(n1+1,s2);
     project(r,range(0,n1))=v1;
-    r[n1]=s2;
     return r;
 }
 
@@ -393,8 +394,7 @@ template<class X>
 Vector<X> join(const X& s1, const Vector<X>& v2)
 {
     size_t n2=v2.size();
-    Vector<X> r(1+n2);
-    r[0]=s1;
+    Vector<X> r(1+n2,s1);
     project(r,range(1,n2+1))=v2;
     return r;
 }
@@ -402,17 +402,15 @@ Vector<X> join(const X& s1, const Vector<X>& v2)
 template<class X>
 Vector<X> join(const X& s1, const X& s2)
 {
-    Vector<X> r(2);
-    r[0]=s1;
+    Vector<X> r(2,s1);
     r[1]=s2;
     return r;
 }
 
 template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
-    Vector<X> r(v1.size()+v2.size()+1u);
+    Vector<X> r(v1.size()+v2.size()+1u,s3);
     for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
-    r[v1.size()+v2.size()]=s3;
     return r;
 }
 

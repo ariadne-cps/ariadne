@@ -39,9 +39,9 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	//initial_set[DiscreteState(1)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_set[DiscreteState(1)] = Box(2, 6.75,6.75, 0.0,1.0);
 	initial_set[DiscreteState(2)] = Box(2, 6.75,6.75, 0.0,1.0);
-	//initial_set[DiscreteState(3)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_set[DiscreteState(3)] = Box(2, 6.75,6.75, 0.0,1.0);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,1.0,10.0,-0.1,1.1));
@@ -74,7 +74,7 @@ int main(int argc,char *argv[])
 	uint numPointsPerAxis = 4;
 	uint logNumIntervalsPerAxis = 4;
 
-	system.substitute(RealConstant("ref",5.0));
+	system.substitute(RealConstant("ref",6.0));
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 
@@ -82,8 +82,8 @@ int main(int argc,char *argv[])
 	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointPerAxis);
 	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
 	//results.draw();
-/*
 
+	/*
 	system.substitute(RealConstant("bfp",0.3));
 	system.substitute(RealConstant("delta",0.0));
 	system.substitute(RealConstant("ref",6.0));
@@ -110,5 +110,5 @@ int main(int argc,char *argv[])
     fig.set_bounding_box(Box(2,4.0,8.0,-0.1,1.1));
     draw(fig,orbit);
     fig.write("watertank-nl-mono-pr_test");
-*/
+	*/
 }

@@ -70,7 +70,7 @@ namespace Ariadne {
 
 void wait_for_keypress() {
     std::string str;
-    //getline(std::cin,str);
+    getline(std::cin,str);
 }
 
 
@@ -537,8 +537,9 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 
     // Test for initially active events, and process these as required
     if(definitely(initially_active_events[blocking_event])) {
+    	const std::map<DiscreteEvent,VectorFunction> invariants_superset = (semantics == UPPER_SEMANTICS ? guards : invariants);
 		_processInitiallyActiveBlockingEvents(working_sets,reach_sets,intermediate_sets,location,events,
-	        		   	   	   	   	   	  set_model,time_model,invariants,transitions);
+	        		   	   	   	   	   	  set_model,time_model,invariants_superset,transitions);
         return;
 
     } else if(possibly(initially_active_events[blocking_event]) && semantics==LOWER_SEMANTICS) {
@@ -628,7 +629,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
 
     if(definitely(initially_active_events[blocking_event])) {
-    	_processInitiallyActiveBlockingEvents_continuous(reach_sets,intermediate_sets,invariants,set_model,location);
+    	_processInitiallyActiveBlockingEvents_continuous(reach_sets,intermediate_sets,guards,set_model,location);
         return;
     }
 

@@ -378,23 +378,14 @@ class HybridReachabilityAnalyser
 
   private:
 
+    /*! \brief Gets the calculus interface from the hybrid evolver. */
+    const CalculusInterface<TaylorModel>& _getCalculusInterface() const;
+
     /*! \brief Generates a list of hybrid enclosures from the \a initial_set, depending on the minimum cell size
      * given by the \a grid. */
     list<HybridBasicSet<TaylorSet> > _split_initial_set(const HybridImageSet initial_set,
 										   	   	   	    const HybridGrid grid,
 										   	   	   	    Semantics semantics) const;
-
-    /*! \brief Generates the target hybrid enclosures given an enclosure \a encl and a transition \a trans,
-     * eventually splitting if the original enclosure has any width larger than the values in \a minTargetCellWidths.
-     * Also, removes target enclosures lying outside the \a target_bounding, consequently invalidating the verification by setting
-     * \a isValid to false. */
-    void _splitAndCreateTargetEnclosures(bool& isValid,
-										 std::list<EnclosureType>& initial_enclosures,
-    									 const ContinuousEnclosureType& encl,
-    									 const Vector<Float>& minTargetCellWidths,
-    									 const Box& target_bounding,
-    									 const DiscreteTransition& trans_it,
-    									 const TaylorCalculus& tc) const;
 
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
@@ -431,7 +422,6 @@ class HybridReachabilityAnalyser
      */
     void _upper_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
     												   const ContinuousEnclosureType& source,
-    												   const TaylorCalculus& tc,
     												   std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.

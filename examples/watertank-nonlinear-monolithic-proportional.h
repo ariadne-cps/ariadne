@@ -82,7 +82,7 @@ HybridAutomaton getWatertankNonlinearMonolithicProportional()
 	RealExpression x_normal_d = -a*sqrt(x)+bfp*y;
 	RealExpression x_overflow_d = 0.0;
 	RealExpression y_towardszero_d = -y/tau;
-	RealExpression y_controlled_d = (Kp*(ref-x-delta)-y)/tau;
+	RealExpression y_controlled_d = (Kp*(ref-x)-y)/tau;
 	RealExpression y_towardsone_d = (1-y)/tau;
 
 	// Dynamics at the different modes
@@ -106,8 +106,8 @@ HybridAutomaton getWatertankNonlinearMonolithicProportional()
 	/// x <= ref - Delta
 	RealExpression x_lesser_ref_minus_delta = -x-delta+ref;
 	ScalarFunction guard12(x_lesser_ref_minus_delta,varlist);
-	/// x >= ref - Delta
-	RealExpression x_greater_ref_minus_delta = x+delta-ref;
+	/// x >= ref + Delta
+	RealExpression x_greater_ref_minus_delta = x-delta-ref;
 	ScalarFunction guard21(x_greater_ref_minus_delta,varlist);
 	/// x >= H
 	RealExpression x_greater_height = x-H;
@@ -118,8 +118,8 @@ HybridAutomaton getWatertankNonlinearMonolithicProportional()
 	/// x <= ref - 1/Kp - Delta
 	RealExpression x_lesser_ref_kp_minus_delta = -x+ref-1.0/Kp-delta;
 	ScalarFunction guard23(x_lesser_ref_kp_minus_delta,varlist);
-	/// x >= ref - 1/Kp - Delta
-	RealExpression x_greater_ref_kp_minus_delta = x-ref+1.0/Kp+delta;
+	/// x >= ref - 1/Kp + Delta
+	RealExpression x_greater_ref_kp_minus_delta = x-ref+1.0/Kp-delta;
 	ScalarFunction guard32(x_greater_ref_kp_minus_delta,varlist);
 
 	// Invariants
@@ -134,7 +134,6 @@ HybridAutomaton getWatertankNonlinearMonolithicProportional()
 	system.new_mode(l3,onesaturated_d);
 	system.new_mode(l4,overflow_d);
 
-	/*
 	system.new_invariant(l1,inv_y_geq_zero);
 	system.new_invariant(l2,inv_y_geq_zero);
 	system.new_invariant(l3,inv_y_geq_zero);
@@ -143,7 +142,6 @@ HybridAutomaton getWatertankNonlinearMonolithicProportional()
 	system.new_invariant(l2,inv_y_leq_one);
 	system.new_invariant(l3,inv_y_leq_one);
 	system.new_invariant(l4,inv_y_leq_one);
-	*/
 
 	system.new_forced_transition(e12,l1,l2,reset_id,guard12);
 	system.new_forced_transition(e21,l2,l1,reset_id,guard21);

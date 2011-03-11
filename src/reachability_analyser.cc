@@ -151,6 +151,13 @@ HybridReachabilityAnalyser(const HybridDiscretiser<HybridEvolver::ContinuousEncl
 {
 }
 
+const CalculusInterface<TaylorModel>&
+HybridReachabilityAnalyser::_getCalculusInterface() const
+{
+	ImageSetHybridEvolver& evolver = dynamic_cast<ImageSetHybridEvolver&>(*this->_discretiser->evolver());
+	return evolver.getCalculusInterface();
+}
+
 list<HybridBasicSet<TaylorSet> >
 HybridReachabilityAnalyser::
 _split_initial_set(const HybridImageSet initial_set,
@@ -195,6 +202,7 @@ _split_initial_set(const HybridImageSet initial_set,
 			// If it has not been split, put the hybrid enclosure into the initial enclosures
 			if (!hasBeenSplit)
 			{
+				// For the case of lower semantics, we want to reduce the enclosure to its centre in order to minimize the radius
 				if (semantics == LOWER_SEMANTICS)
 					enclosure = ContinuousEnclosureType(Vector<Interval>(enclosure.centre()));
 				result.push_back(EnclosureType(loc_iter->first,enclosure));
@@ -206,50 +214,6 @@ _split_initial_set(const HybridImageSet initial_set,
 
 	// Returns
 	return result;
-}
-
-
-void
-HybridReachabilityAnalyser::
-_splitAndCreateTargetEnclosures(bool& isValid,
-								std::list<EnclosureType>& initial_enclosures,
-								const ContinuousEnclosureType& encl,
-								const Vector<Float>& minTargetCellWidths,
-								const Box& target_bounding,
-								const DiscreteTransition& trans,
-								const TaylorCalculus& tc) const
-{
-	// Get the target enclosure
-	ContinuousEnclosureType target_encl = tc.reset_step(trans.reset(),encl);
-	// Get its box
-	const Box& target_encl_box = target_encl.bounding_box();
-
-	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
-	// of the target location, ignore it and notify
-	if (!target_encl_box.inside(target_bounding) &&
-		target_encl_box.disjoint(target_bounding)) {
-		ARIADNE_LOG(7,"Discarding target enclosure " << target_encl_box <<
-					  " being outside the domain in location " << trans.target().name() << ".\n");
-		isValid = false;
-		return;
-	}
-
-	// Otherwise try splitting the enclosure
-	bool hasSplit = false;
-	for (uint i=0; i < minTargetCellWidths.size(); i++) {
-		// If the enclosure has width larger than that of the minimum cell, split on that dimension
-		if (encl.bounding_box()[i].width() > minTargetCellWidths[i]) {
-			hasSplit = true;
-			std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = encl.split(i);
-			// Call recursively on the two enclosures
-			_splitAndCreateTargetEnclosures(isValid,initial_enclosures,split_sets.first,minTargetCellWidths,target_bounding,trans,tc);
-			_splitAndCreateTargetEnclosures(isValid,initial_enclosures,split_sets.second,minTargetCellWidths,target_bounding,trans,tc);
-		}
-	}
-
-	// If we could not split, we put the hybrid enclosure into the new initial_enclosures
-	if (!hasSplit)
-		initial_enclosures.push_back(EnclosureType(trans.target(),target_encl));
 }
 
 void
@@ -782,9 +746,6 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(
 {
 	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
 
-	// Helper class for operations on Taylor sets, set with coarse parameters in respect to the default ones
-	TaylorCalculus tc(2,2,1e-4);
-
 	std::list<ContinuousEnclosureType> split_list;
 	split_list.push_front(source);
 
@@ -803,7 +764,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(
 		if (guard_time_model.range().lower()>0) {
 			ARIADNE_LOG(10,"Definitely active, adding the splittings of the target enclosure to the destination list.\n");
 			// Get the target continuous enclosure
-			ContinuousEnclosureType target_encl = tc.reset_step(trans.reset(),current_encl);
+			ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),current_encl);
 			// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the target enclosure
 			_splitTargetEnclosures(destination,trans.target(),target_encl,minTargetCellWidths,target_bounding);
 		} else if (!(guard_time_model.range().upper()<0)) {
@@ -822,7 +783,7 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(
 			// If we could not split
 			if (!hasSplit) {
 				ARIADNE_LOG(10,"Possibly active but minimum enclosure size reached, adding the splittings of the target enclosure to the destination list.\n");
-				_upper_chain_reach_pushTransitioningEnclosure(trans,current_encl,tc,destination);
+				_upper_chain_reach_pushTransitioningEnclosure(trans,current_encl,destination);
 			}
 			else {
 				ARIADNE_LOG(10,"Possibly active, adding the splittings of the current enclosure to the evaluation list.\n");
@@ -836,10 +797,9 @@ HybridReachabilityAnalyser::_upper_chain_reach_pushTargetEnclosuresOfTransition(
 void
 HybridReachabilityAnalyser::_upper_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
 																	      const ContinuousEnclosureType& encl,
-																		  const TaylorCalculus& tc,
 																		  std::list<EnclosureType>& destination) const
 {
-	ContinuousEnclosureType target_encl = tc.reset_step(trans.reset(),encl);
+	ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),encl);
 	const Box& target_encl_box = target_encl.bounding_box();
 	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
 

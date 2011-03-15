@@ -49,7 +49,8 @@ SRC = \
 	logging.cc \
 	graphics.cc \
 	textplot.cc \
-	parametric.cc 
+	parametric.cc \
+	verifier.cc
 
 CALCULUS_SRC = \
 	numeric.cc \
@@ -62,11 +63,6 @@ CALCULUS_SRC = \
 	taylor_set.cc  \
 	taylor_function.cc  \
 	taylor_calculus.cc
-
-#	hybrid_simulator.cc
-
-#	taylor_model.cc
-#	taylor_set.cc
 
 lib_LTLIBRARIES = libariadne.la libcalculus.la
 libariadne_la_SOURCES = $(SRC)

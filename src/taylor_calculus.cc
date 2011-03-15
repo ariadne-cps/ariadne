@@ -162,13 +162,23 @@ TaylorCalculus()
 {
 }
 
-// Good for watertank-monolithic-hysteresis (lin or non-lin)
+
 TaylorCalculus::
 TaylorCalculus(ushort spacial_order, ushort temporal_order, double sweep_threshold)
     : _spacial_order(spacial_order),
       _temporal_order(temporal_order),
       _sweep_threshold(sweep_threshold),
       _spacial_accuracy_ptr(new AccuracyType(sweep_threshold,spacial_order))
+{
+}
+
+
+TaylorCalculus::
+TaylorCalculus(const TaylorCalculus& tc)
+    : _spacial_order(tc._spacial_order),
+      _temporal_order(tc._temporal_order),
+      _sweep_threshold(tc._sweep_threshold),
+      _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
 

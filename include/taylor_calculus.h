@@ -96,6 +96,9 @@ class TaylorCalculus
     //! \brief Constructor from fields.
     TaylorCalculus(ushort spacial_order, ushort temporal_order, double sweep_threshold);
 
+    //! \brief Copy contructor.
+    TaylorCalculus(const TaylorCalculus& tc);
+
     //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all
     //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint,
     //! and indeterminate otherwise.

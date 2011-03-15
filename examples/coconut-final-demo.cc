@@ -290,13 +290,14 @@ int main(int argc, char** argv)
 	analyser.parameters().lock_to_grid_steps = 1;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
+	Verifier verifier(analyser);
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
 	// Perform the analysis
 	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
-	tribool result = analyser.verify_iterative(verInfo);
+	tribool result = verifier.verify_iterative(verInfo);
 	
 	std::cout << "Done." << std::endl;
 	

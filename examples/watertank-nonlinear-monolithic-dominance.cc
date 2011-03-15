@@ -63,10 +63,10 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 2;
 	analyser.parameters().highest_maximum_grid_depth = 6;
+	Verifier verifier(analyser);
 
 	// The parametric dominance parameters
 	RealConstantSet parameters;
@@ -78,10 +78,10 @@ int main(int argc,char *argv[])
 	RealConstant parameter("Kp",Interval(0.2,0.6));
 
 /*
-	ParametricVerificationOutcomeList outcomeList = analyser.parametric_dominance_partitioning(proportional,hysteresis,parameters,tolerance);
+	ParametricVerificationOutcomeList outcomeList = verifier.parametric_dominance_partitioning(proportional,hysteresis,parameters,tolerance);
 	outcomeList.draw("watertank-monolithic-dominance");
 	cout << outcomeList << "\n";
 */
-	//analyser.parametric_dominance_2d_bisection(proportional,hysteresis,parameters,tolerance,numPointsPerAxis);
-	analyser.parametric_dominance_1d_bisection(proportional,hysteresis,parameter,tolerance);
+	//verifier.parametric_dominance_2d_bisection(proportional,hysteresis,parameters,tolerance,numPointsPerAxis);
+	verifier.parametric_dominance_1d_bisection(proportional,hysteresis,parameter,tolerance);
 }

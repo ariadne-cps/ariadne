@@ -56,6 +56,7 @@ int main(int argc,char *argv[])
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 1;
 	analyser.parameters().highest_maximum_grid_depth = 5;
+	Verifier verifier(analyser);
 
 	// The parameters
 	RealConstantSet parameters;
@@ -66,7 +67,7 @@ int main(int argc,char *argv[])
 	uint logNumIntervalsPerParam = 3;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerParam);
-	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
+	ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerParam);
+	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
 	results.draw();
 }

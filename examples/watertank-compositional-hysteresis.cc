@@ -208,13 +208,13 @@ int main(int argc,char *argv[])
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
+	Verifier verifier(analyser);
 
 	// Perform the analysis
 	//Interval safe_int, unsafe_int;
-	//make_lpair(safe_int,unsafe_int) = analyser.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
-	//analyser.log_parametric_1d_bisection_results(safe_int,unsafe_int,parameter.value());
+	//make_lpair(safe_int,unsafe_int) = verifier.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricPartitioningOutcomeList outcomes = analyser.parametric_verification_partitioning(verInfo, parameters, tolerance);
+	ParametricPartitioningOutcomeList outcomes = verifier.parametric_verification_partitioning(verInfo, parameters, tolerance);
 	outcomes.draw();
 }

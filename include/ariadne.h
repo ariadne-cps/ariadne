@@ -79,6 +79,7 @@ using std::ofstream; using std::ifstream;
 #include "discretiser.h"
 #include "parametric.h"
 #include "reachability_analyser.h"
+#include "verifier.h"
 
 #include "serialization.h"
 #include "graphics.h"

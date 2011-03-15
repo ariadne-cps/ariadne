@@ -22,6 +22,7 @@
  */
 
 #include "ariadne.h"
+#include "taylor_calculus.h"
 #include "examples.h"
 
 using namespace Ariadne;
@@ -30,9 +31,9 @@ typedef ImageSetHybridEvolver::EnclosureListType EnclosureListType;
 
 int main(int argc,char *argv[]) 
 {
-	int analyserVerbosity = 1;
+	int verifierVerbosity = 1;
 	if (argc > 1)
-		analyserVerbosity = atoi(argv[1]);
+		verifierVerbosity = atoi(argv[1]);
 
 	// The system
 	HybridAutomaton system = getWatertankNonlinearMonolithicProportional();
@@ -52,19 +53,21 @@ int main(int argc,char *argv[])
 	/// Verification
 
 	// Create an evolver and analyser objects, then set their verbosity
-	HybridEvolver evolver;
-	evolver.verbosity = 0;
+
+	ContinuousEvolutionParameters continuousParameters;
+	TaylorCalculus tc(2,2,1e-4);
+	ImageSetHybridEvolver evolver(continuousParameters,tc);
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = analyserVerbosity;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().enable_quick_proving = true;
 	analyser.parameters().domain_enforcing_policy = ONLINE;
 	analyser.parameters().lowest_maximum_grid_depth = 2;
 	analyser.parameters().highest_maximum_grid_depth = 6;
-	analyser.plot_verify_results = true;
 	analyser.free_cores = 0;
+	Verifier verifier(analyser);
+	verifier.verbosity = verifierVerbosity;
 
-	//analyser.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
+	//verifier.parametric_verify(system, initial_set, safe_box, domain, parameters, tolerance);
 
 	// Verification parameters
 	RealConstantSet parameters;
@@ -78,9 +81,9 @@ int main(int argc,char *argv[])
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 
-	cout << analyser.verify_iterative(verInfo);
-	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointPerAxis);
-	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
+	cout << verifier.verify_iterative(verInfo);
+	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointPerAxis);
+	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
 	//results.draw();
 
 	/*

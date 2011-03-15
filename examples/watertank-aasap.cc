@@ -274,12 +274,13 @@ int main(int argc,char *argv[])
 	analyser.parameters().lock_to_grid_steps = 1;
 	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
+	Verifier verifier(analyser);
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-    analyser.verify_iterative(verInfo);
+    verifier.verify_iterative(verInfo);
 
     
     HybridGridTreeSet reach = analyser.statistics().upper().reach;

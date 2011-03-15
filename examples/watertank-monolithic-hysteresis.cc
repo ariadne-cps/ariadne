@@ -29,9 +29,9 @@ using namespace Ariadne;
 
 int main(int argc,char *argv[])
 {
-	int analyserVerbosity = 1;
+	int verifierVerbosity = 1;
 	if (argc > 1)
-		analyserVerbosity = atoi(argv[1]);
+		verifierVerbosity = atoi(argv[1]);
 
 	// The system
 	HybridAutomaton system = Ariadne::getWatertankMonolithicHysteresis();
@@ -53,13 +53,13 @@ int main(int argc,char *argv[])
 
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
-	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 4;
+	Verifier verifier(analyser);
+	verifier.verbosity = verifierVerbosity;
 
 	// The parameters
 	RealConstantSet parameters;
@@ -70,8 +70,8 @@ int main(int argc,char *argv[])
     uint logNumIntervalsPerParam = 2;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
-	Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
+	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
+	Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
 	results.draw();
 
 }

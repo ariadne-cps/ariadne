@@ -69,50 +69,6 @@ class HybridGridTreeSet;
 template<class ES> class HybridListSet;
 template<class ES> class HybridDiscretiser;
 
-/** Provides a convenient structure for systems and their relative info for verification. */
-struct SystemVerificationInfo
-{
-public:
-	HybridAutomaton& _system;
-	HybridImageSet& _initial_set;
-	HybridBoxes& _domain;
-	HybridBoxes _safe_region;
-	std::vector<uint> _projection;
-
-	HybridAutomaton& getSystem() { return _system; }
-	HybridImageSet& getInitialSet() { return _initial_set; }
-	HybridBoxes& getDomain() { return _domain; }
-	HybridBoxes& getSafeRegion() { return _safe_region; }
-	std::vector<uint>& getProjection() { return _projection; }
-
-	SystemVerificationInfo(HybridAutomaton& system,
-						   HybridImageSet& initial_set,
-						   HybridBoxes& domain,
-						   HybridBoxes& safe_region);
-
-	SystemVerificationInfo(HybridAutomaton& system,
-						   HybridImageSet& initial_set,
-						   HybridBoxes& domain,
-						   std::vector<uint>& projection);
-
-	SystemVerificationInfo(HybridAutomaton& system,
-						   HybridImageSet& initial_set,
-						   HybridBoxes& domain,
-						   HybridBoxes& safe_region,
-						   std::vector<uint>& projection);
-
-	virtual std::ostream& write(std::ostream&) const;
-
-private:
-
-	/** \brief Checks fields consistency */
-	void _check_fields() const;
-
-};
-
-inline std::ostream& operator<<(std::ostream& os, const SystemVerificationInfo& verInfo) {
-    return verInfo.write(os); }
-
 /*! \brief A class for performing reachability analysis on a hybrid system-
  */
 class HybridReachabilityAnalyser
@@ -170,6 +126,10 @@ class HybridReachabilityAnalyser
     //@}
   
     //@{
+
+    //! \brief Resets the statistics
+    void resetStatistics();
+
     //! \name Evaluation of systems on abstract sets
     /*! \brief Compute a lower-approximation to the set obtained by evolving \a system for \a time starting in \a initial_set. */
     virtual SetApproximationType lower_evolve(const SystemType& system,
@@ -226,132 +186,8 @@ class HybridReachabilityAnalyser
     virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(SystemType& system,
 																	   const HybridImageSet& initial_set) const;
   
-    /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box. */
-    tribool verify(SystemType& system,
-                   const HybridImageSet& initial_set);
-
-	/*! \brief Attempt to verify that the reachable set of a system starting in an initial_set remains in a safe region inside a domain.
-	 * \details This is done in an iterative way by tuning the evolution/analysis parameters. The \a verInfo contains all the information
-	 * necessary for verification.
-	 */
-	tribool verify_iterative(SystemVerificationInfo& verInfo);
-
-	/*! \brief Performs iterative verification where \a parameter is substituted into the system.
-	 */
-	tribool verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter);
-
-	/*! \brief Performs iterative verification where the singleton \a value is substituted into the system for the given \a parameter.
-	 */
-	tribool verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Float& value);
-
-	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
-		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain. 
-        \details The procedure uses the bisection method. The parameter is assumed as having separable safe and unsafe intervals in its range.
-        The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
-		bisection search.
-        \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
-										 							  const RealConstant& parameter,
-										 							  const Float& tolerance);
-
-	/**
-	 * \brief Performs a parametric verification on two parameters \a xParam, \a yParam,
-	 * discretizing with \a numPointsPerAxis points for each axis.
-	 * \details The procedure uses the bisection method. Saves the results in a file called "<systemName>-<xName>-<yName>" and
-	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
-	 * <xName> is the name of xParam and <yName> is the name of yParam.
-	 */
-	Parametric2DBisectionResults parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
-								 const RealConstant& xParam,
-								 const RealConstant& yParam,
-								 const Float& tolerance,
-								 const unsigned& numPointsPerAxis);
-
-	/**
-	 * \brief Performs a parametric verification on a set of two parameters \a params, by using bisection.
-	 */
-	Parametric2DBisectionResults parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
-												   const RealConstantSet& params,
-												   const Float& tolerance,
-												   const unsigned& numPointsPerAxis);
-
-	/**
-	 * \brief Performs a parametric verification on a set of parameters \a params, by partitioning the parameters space.
-	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
-	 * The values in \a params are substituted into the system, the latter
-	 * being restored to its initial conditions by the end of the method.
-	 */
-	ParametricPartitioningOutcomeList parametric_verification_partitioning(SystemVerificationInfo& verInfo,
-													   const RealConstantSet& params,
-													   const uint& logNumIntervalsPerParam);
-
-	/**
-	 * \brief Performs dominance checking.
-	 * \details Verifies if the \a dominating system dominates the \a dominated system.
-	 */
-	tribool dominance(SystemVerificationInfo& dominating,
-					  SystemVerificationInfo& dominated);
-
-	/**
-	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system.
-	 * \details Verifies if the \a dominating system dominates the \a dominated system.
-	 */
-	tribool dominance(SystemVerificationInfo& dominating,
-					  SystemVerificationInfo& dominated,
-					  const RealConstant& parameter);
-
-	/**
-	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system with a value of \a value.
-	 * \details Verifies if the \a dominating system dominates the \a dominated system.
-	 */
-	tribool dominance(SystemVerificationInfo& dominating,
-					  SystemVerificationInfo& dominated,
-					  const RealConstant& parameter,
-					  const Float& value);
-
-	/*! \brief Compute an underapproximation of the dominating/non-dominating intervals of \a parameter for the dominance problem.
-        \details The parameter is varied on the \a dominating system alone. The procedure uses the bisection method. The parameter is assumed as having separable dominating and non-dominating intervals in its range.
-        The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
-		bisection search.
-        \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
-			  	  	  	  	  	  	  	  	  	  	  	  	  	   SystemVerificationInfo& dominated,
-										 							  const RealConstant& parameter,
-										 							  const Float& tolerance);
-	/**
-	 * \brief Performs a parametric dominance checking on two parameters \a xParam, \a yParam,
-	 * discretizing with \a numPointsPerAxis points for each axis.
-	 * \details The procedure uses the bisection method. Saves the results in a file called "<dominatingName>&<dominatedName>-<xName>-<yName>" and
-	 * generates a "<dominatingName>&<dominatedName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
-	 * <xName> is the name of xParam and <yName> is the name of yParam.
-	 */
-	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
- 	  	  	  	  	  	   	   	   	   	   SystemVerificationInfo& dominated,
-								 const RealConstant& xParam,
-								 const RealConstant& yParam,
-								 const Float& tolerance,
-								 const unsigned& numPointsPerAxis);
-
-	/**
-	 * \brief Performs a parametric dominance checking on a set of two parameters \a params, by using bisection.
-	 */
-	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
- 	  	  	  	  	  	   	   	   	   	   SystemVerificationInfo& dominated,
-												   const RealConstantSet& params,
-												   const Float& tolerance,
-												   const unsigned& numPointsPerAxis);
-
-	/**
-	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
-	 * the parameters space.
-	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
-     * The values in \a dominating_params are substituted into the \a dominating
-	 * system alone, the latter being restored to its initial conditions by the end of the method.
-	 */
-	ParametricPartitioningOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
-													 	   SystemVerificationInfo& dominated,
-													 	   const RealConstantSet& dominating_params,
-													 	   const uint& logNumIntervalsPerParam);
+	/*! \brief Tune the parameters for the next verification iteration, given a \a bounding_reach. */
+	void tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach);
 
     //@}
 
@@ -446,149 +282,30 @@ class HybridReachabilityAnalyser
 
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system,
     																const HybridImageSet& initial_set) const;
-
-	/*! \brief Attempt to verify that the reachable set of a system starting in an initial set remains in a safe region inside a domain,
-		in an iterative way by tuning the evolution/analysis parameters. In addition, the constants in the \a locked_constants set
-		are not allowed to be split */
-	tribool _verify_iterative(SystemVerificationInfo& verInfo,
-							 const RealConstantSet& locked_constants);
-
-	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool _prove(SystemType& system, const HybridImageSet& initial_set);
-	/*! \brief Disprove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool _disprove(SystemType& system, const HybridImageSet& initial_set);
-
-	/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach statistics. 
-		\details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
-	HybridFloatVector _getHybridMaximumAbsoluteDerivatives(const SystemType& system) const;
-
-	/*! \brief Set the lock to grid time of \system given a previously computed chain reach statistics.
-		\details The value is taken as the maximum over the times required by any variable on any location to cover a distance equal to
-		the domain width of the location, moving at the maximum absolute derivative.
-		ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
-	void _setLockToGridTime(const SystemType& system) const;
-
-	/*! \brief Get the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
-		all variables in a step must cover a length greater than a length determined by the \a hgrid. */
-	std::map<DiscreteState,Float> _getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid);
-
-	/*! \brief Set the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
-		all variables in a step must cover a length greater than a length determined by the \a hgrid. The value is equal for all
-		locations and corresponds to the largest integration step among the locations. */
-	void _setEqualizedHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid);
-
-	/*! \brief Set the maximum enclosure cell from the hybrid grid \a hgrid. */
-	void _setMaximumEnclosureCell(const HybridGrid& hgrid);
-
-	/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the bounding domain parameter, where the grid is chosen differently for each location.
-	 * \details The grid is chosen so that each cell is included into the domains for all locations. */
-	HybridGrid _getHybridGrid(const HybridFloatVector& hmad) const;
-
-	/*! \brief Set the initial evolution parameters and the grid given the automaton \a system, the bounding domain \a domain and the safe region \a safe.*/
-	void _setInitialParameters(SystemType& system, 
-							   const HybridBoxes& domain,
-							   const HybridBoxes& safe,
-							   const RealConstantSet& locked_constants);
-
-	/*! \brief Tune the parameters for the next verification iteration, given previous statistics. */
-	void _tuneIterativeStepParameters(SystemType& system);
-
-	/* \brief Processes the \a positive_int and \a negative_int initial intervals based on the lower and upper results.
-	 * \return A variable determining if we must proceed further with bisection refining, and another variable determining
-	 * the bound where positive values are present.
-	 */
-	std::pair<bool,bool> _process_initial_bisection_results(Interval& positive_int,
-														    Interval& negative_int,
-														    const Interval& parameter_range,
-														    const tribool& lower_result,
-														    const tribool& upper_result) const;
-
-	/*! \brief Shows the verification \a result into the standard output. */
-	void _log_verification_result(const tribool& result) const;
-
-	/* \brief Processes the \a result in order to update the \a positive_int interval, possibly updating \a negative_int too. */
-	void _process_positive_bisection_result(const tribool& result,
-											Interval& positive_int,
-										    Interval& negative_int,
-											const Float& current_value,
-											const bool& safeOnBottom) const;
-
-	/*! \brief Processes the \a result in order to update the \a negative_int interval, possibly updating \a positive_int too. */
-	void _process_negative_bisection_result(const tribool& result,
-											Interval& positive_int,
-										    Interval& negative_int,
-											const Float& current_value,
-											const bool& safeOnBottom) const;
-
-	/*! \brief Converts the positive/negative search intervals into positive/negative bounds.
-	 * \details The result is obtained by knowing the range of the parameter \a parameter_range and the side where
-	 * positive values hold, deduced from \a positiveOnBottom. */
-	std::pair<Interval,Interval> _pos_neg_bounds_from_search_intervals(const Interval& positive_int,
-												 	 	 	 	 	 	 	  const Interval& negative_int,
-												 	 	 	 	 	 	 	  const Interval& parameter_range,
-												 	 	 	 	 	 	 	  const bool& positiveOnBottom) const;
-
-	/*! \brief Performs one verification sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
-	void _parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
-						  	  	  	    SystemVerificationInfo& verInfo,
-						  	  	  	    RealConstant xParam,
-						  	  	  	    RealConstant yParam,
-						  	  	  	    const Float& tolerance,
-						  	  	  	    const uint& numPointsPerAxis,
-						  	  	  	    bool sweepOnX);
-
-	/*! \brief Performs one dominance sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
-	void _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
-						  	  	  	    		  SystemVerificationInfo& dominating,
-						  	  	  	    		  SystemVerificationInfo& dominated,
-						  	  	  	    		  RealConstant xParam,
-						  	  	  	    		  RealConstant yParam,
-						  	  	  	    		  const Float& tolerance,
-						  	  	  	    		  const uint& numPointsPerAxis,
-						  	  	  	    		  bool sweepOnX);
-
-	/*! \brief Set the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
-	 * that must be ignore when choosing the splitting factors of the system. */
-	void _setDominanceParameters(SystemVerificationInfo& systemBundle, const RealConstantSet& lockedConstants);
-
-	/*! \brief Helper function to perform dominance in the more general case when some \a dominatingLockedConstants are enforced. */
-	tribool _dominance(SystemVerificationInfo& dominating,
-					   SystemVerificationInfo& dominated,
-					   const RealConstantSet& dominatingLockedConstants);
-
-	/*! \brief Performs the positive part of dominance checking. */
-	bool _dominance_positive(SystemVerificationInfo& dominating,
-							 SystemVerificationInfo& dominated,
-							 const RealConstantSet& dominatingLockedConstants);
-
-	/*! \brief Performs the negative part of dominance checking. */
-	bool _dominance_negative(SystemVerificationInfo& dominating,
-							 SystemVerificationInfo& dominated,
-							 const RealConstantSet& dominatingLockedConstants);
 };
 
 template<class HybridEnclosureType>
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
-    : _parameters(new EvolutionParametersType())
+	: _parameters(new EvolutionParametersType())
 	, _statistics(new EvolutionStatisticsType())
-    , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
+	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
+	, plot_verify_results(false)
+	, free_cores(0)
 {
-	this->plot_verify_results = false;
-	this->free_cores = 0;
 }
 
 
 template<class HybridEnclosureType>
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
-                           const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
-    : _parameters(new EvolutionParametersType(parameters))
+						   const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
+	: _parameters(new EvolutionParametersType(parameters))
 	, _statistics(new EvolutionStatisticsType())
-    , _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
+	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
+	, plot_verify_results(false)
+	, free_cores(0)
 {
-	this->plot_verify_results = false;
-	this->free_cores = 0;
 }
 
 /*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
@@ -639,6 +356,30 @@ std::list<RealConstantSet> getSplitConstantsIntervalsSet(const RealConstantIntMa
 /*! \brief Gets the set of all the midpoints of the split intervals in \a intervals_set. */
 std::list<RealConstantSet> getSplitConstantsMidpointsSet(const std::list<RealConstantSet>& intervals_set);
 
+/*! \brief Get the hybrid grid given the maximum derivative \a hmad and the \a bounding_domain parameter, where the grid is chosen differently for each location.
+ * \details The grid is chosen so that each cell is included into the domains for all locations. */
+HybridGrid getHybridGrid(const HybridFloatVector& hmad,
+						 const HybridBoxes& bounding_domain);
+
+/*! \brief Set the maximum enclosure cell from the hybrid grid \a hgrid and the \a maximum_grid_depth. */
+Vector<Float> getMaximumEnclosureCell(const HybridGrid& hgrid, int maximum_grid_depth);
+
+/*! \brief Get the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
+	all variables in a step must cover a length greater than a length determined by the \a hgrid with a given \a maximum_grid_depth. */
+std::map<DiscreteState,Float> getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid, int maximum_grid_depth);
+
+/*! \brief Set the lock to grid time of \system.
+	\details The value is taken as the maximum over the times required by any variable on any location to cover a distance equal to
+	the domain width of the location, moving at the maximum absolute derivative.
+	ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
+Float getLockToGridTime(const SystemType& system, const HybridBoxes& bounding_domain);
+
+/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed chain reach \a bounding_reach and
+ * a domain \a bounding_domain.
+ * \details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
+HybridFloatVector getHybridMaximumAbsoluteDerivatives(const SystemType& system,
+													  const HybridGridTreeSet& bounding_reach,
+													  const HybridBoxes& bounding_domain);
 
 } // namespace Ariadne
 

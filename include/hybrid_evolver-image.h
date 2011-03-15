@@ -105,6 +105,10 @@ class ImageSetHybridEvolver
     //! \brief Construct from parameters using a default integrator.
     ImageSetHybridEvolver(const EvolutionParametersType& parameters);
 
+    //! \brief Construct from parameters and integrator.
+    ImageSetHybridEvolver(const EvolutionParametersType& p,
+   						  const TaylorCalculus& tc);
+
     /*! \brief Make a dynamically-allocated copy. */
     ImageSetHybridEvolver* clone() const { return new ImageSetHybridEvolver(*this); }
 

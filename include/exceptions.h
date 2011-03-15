@@ -67,4 +67,9 @@ class InvalidInput : public std::runtime_error {
     InvalidInput(const std::string& str) : std::runtime_error(str) { }
 };
 
+class ReachOutOfDomainException : public std::runtime_error {
+  public:
+	ReachOutOfDomainException(const std::string& str) : std::runtime_error(str) { }
+};
+
 #endif

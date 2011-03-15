@@ -58,6 +58,7 @@ int main(int argc,char *argv[])
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
 	analyser.plot_verify_results = true;
+	Verifier verifier(analyser);
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 
@@ -69,9 +70,9 @@ int main(int argc,char *argv[])
 	uint numPointsPerAxis = 11;
 	uint logNumIntervalsPerAxis = 2;
 
-	cout << analyser.verify_iterative(verInfo);
-	//Parametric2DBisectionResults results = analyser.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);
-	//ParametricPartitioningOutcomeList results = analyser.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
+	cout << verifier.verify_iterative(verInfo);
+	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);
+	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
 	//results.draw();
 
 }

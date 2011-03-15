@@ -108,6 +108,8 @@ class TaylorConstrainedImageSet
     //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
     explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const NonlinearConstraint& c, Sweeper swp);
 
+    explicit TaylorConstrainedImageSet(const VectorTaylorFunction& tf);
+
     //! \brief Create a dynamically-allocated copy.
     TaylorConstrainedImageSet* clone() const;
 
@@ -323,7 +325,7 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set, const Bo
 TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const TaylorConstrainedImageSet& set2);
 
 //! \related TaylorConstrainedImageSet \brief The image of the \a set under the \a function.
-TaylorConstrainedImageSet apply(const IntervalVectorFunctionInterface& function, const TaylorConstrainedImageSet& set);
+TaylorConstrainedImageSet apply(const IntervalVectorFunction& function, const TaylorConstrainedImageSet& set);
 //! \related TaylorConstrainedImageSet \brief The image of the \a set under the \a function. Does not perform domain-checking.
 TaylorConstrainedImageSet unchecked_apply(const VectorTaylorFunction& function, const TaylorConstrainedImageSet& set);
 

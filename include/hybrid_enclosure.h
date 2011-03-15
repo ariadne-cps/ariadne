@@ -136,14 +136,14 @@ class HybridEnclosure
     HybridEnclosure(const DiscreteLocation& q, const Box& bx, const TaylorFunctionFactory& fac);
     HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbx, const TaylorFunctionFactory& fac);
     HybridEnclosure(const HybridBox& hbx, const TaylorFunctionFactory& fac);
+    //! \brief An enclosure corresponding to a box \a s in location \a q, using a default function factory class.
+    HybridEnclosure(const DiscreteLocation& q, const Box& bx);
     //! \brief An enclosure constructed from a continuous state set and a location.
     HybridEnclosure(const Pair<DiscreteLocation,ContinuousStateSetType>&);
     //! \brief An enclosure constructed from a continuous state set and a location with evolution time equal to zero.
     HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
     //! \brief An enclosure constructed from a continuous state set, an evolution time and a location.
     HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&, const ScalarTaylorFunction& time);
-    ////! \brief A set in location \a q, constructed from a continuous state set.
-    //HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
     //! \brief Destructor.
     ~HybridEnclosure();
     //! \brief Create a dynamically-allocated copy.

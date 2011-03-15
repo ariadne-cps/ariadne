@@ -258,6 +258,11 @@ TaylorConstrainedImageSet::TaylorConstrainedImageSet(const IntervalVector& domai
     *this=TaylorConstrainedImageSet(domain,function,make_list(constraint),sweeper);
 }
 
+TaylorConstrainedImageSet::TaylorConstrainedImageSet(const VectorTaylorFunction& taylor_function)
+    : _domain(taylor_function.domain()), _function(taylor_function), _reduced_domain(_domain), _is_fully_reduced(true)
+{
+}
+
 
 
 
@@ -1751,7 +1756,7 @@ TaylorConstrainedImageSet product(const TaylorConstrainedImageSet& set1, const T
     return result;
 }
 
-TaylorConstrainedImageSet apply(const IntervalVectorFunctionInterface& function, const TaylorConstrainedImageSet& set) {
+TaylorConstrainedImageSet apply(const IntervalVectorFunction& function, const TaylorConstrainedImageSet& set) {
     TaylorConstrainedImageSet result(set);
     result.apply_map(function);
     return result;

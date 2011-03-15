@@ -323,8 +323,7 @@ void export_taylor_constrained_image_set()
     def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const Box&)) &product);
     def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const TaylorConstrainedImageSet&)) &product);
 
-    def("apply", (TaylorConstrainedImageSet(*)(const RealVectorFunction&, const TaylorConstrainedImageSet&)) &apply);
-    def("apply", (TaylorConstrainedImageSet(*)(const VectorTaylorFunction&, const TaylorConstrainedImageSet&)) &apply);
+    def("apply", (TaylorConstrainedImageSet(*)(const IntervalVectorFunction&, const TaylorConstrainedImageSet&)) &apply);
     def("unchecked_apply", (TaylorConstrainedImageSet(*)(const VectorTaylorFunction&, const TaylorConstrainedImageSet&)) &unchecked_apply);
 
     to_python< std::pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> >();

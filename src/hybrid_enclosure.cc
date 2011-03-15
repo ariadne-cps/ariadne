@@ -104,6 +104,13 @@ HybridEnclosure::HybridEnclosure(const HybridBox& hbox, const TaylorFunctionFact
 {
 }
 
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box)
+    : _location(location), _events(), _set(box,ThresholdSweeper(std::numeric_limits<float>::epsilon())),
+      _time(_set.domain(),ThresholdSweeper(std::numeric_limits<float>::epsilon())), _dwell_time(_time),
+      _variables(box.dimension(),INITIAL)
+{
+}
+
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set)
     : _location(location), _events(), _set(set), _time(ScalarIntervalFunction::zero(_set.domain(),_set.sweeper())), _dwell_time(_time),
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))

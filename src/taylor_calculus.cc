@@ -142,7 +142,7 @@ flow_bounds(VectorFunction const& vf,
     return std::make_pair(h,b);
 }
 
-/*
+
 TaylorCalculus::
 TaylorCalculus()
     : _spacial_order(4),
@@ -151,17 +151,6 @@ TaylorCalculus()
       _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
-*/
-
-TaylorCalculus::
-TaylorCalculus()
-    : _spacial_order(2),
-      _temporal_order(2),
-      _sweep_threshold(1e-4),
-      _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
-{
-}
-
 
 TaylorCalculus::
 TaylorCalculus(ushort spacial_order, ushort temporal_order, double sweep_threshold)

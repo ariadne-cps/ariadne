@@ -99,6 +99,12 @@ ImageSetHybridEvolver::ImageSetHybridEvolver(const EvolutionParametersType& p)
 {
 }
 
+ImageSetHybridEvolver::ImageSetHybridEvolver(const TaylorCalculus& tc)
+    : _parameters(new EvolutionParametersType()),
+      _toolbox(new TaylorCalculus(tc))
+{
+}
+
 ImageSetHybridEvolver::ImageSetHybridEvolver(const EvolutionParametersType& p,
 											 const TaylorCalculus& tc)
     : _parameters(new EvolutionParametersType(p)),

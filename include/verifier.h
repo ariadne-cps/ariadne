@@ -88,6 +88,7 @@ class Verifier
     mutable boost::shared_ptr< HybridReachabilityAnalyser > _outer_analyser, _lower_analyser;
   public:
 	bool plot_results;
+	HybridBoxes safe_region;
   public:
 
     //@{
@@ -102,51 +103,20 @@ class Verifier
 			 const HybridReachabilityAnalyser& lower_analyser);
 
     /*! \brief Construct from one generic analyser.
-     *  \details The analyser will be copied to both the outer and lower internal analysers. */
+     *  \details The analyser will be copied to both the outer and lower internal analysers. The outer and lower analysers
+     *  are still independently modifiable afterwards. */
     Verifier(const HybridReachabilityAnalyser& analyser);
 
     //@}
 
     //@{
-    //! \name Basic verification methods
-
-	/*! \brief Prove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool verify_positive(HybridAutomaton& system,
-						 const HybridImageSet& initial_set) const;
-	/*! \brief Disprove that the automaton \a system starting in \a initial_set definitely remains in the safe region. */
-	bool verify_negative(HybridAutomaton& system,
-						 const HybridImageSet& initial_set) const;
-
-    /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_box. */
-    tribool verify(HybridAutomaton& system,
-                   const HybridImageSet& initial_set) const;
+    //! \name Safety methods
 
 	/*! \brief Attempt to verify that the reachable set of a system starting in an initial_set remains in a safe region inside a domain.
 	 * \details This is done in an iterative way by tuning the evolution/analysis parameters. The \a verInfo contains all the information
 	 * necessary for verification.
 	 */
-	tribool verify_iterative(SystemVerificationInfo& verInfo) const;
-
-	/*! \brief Attempt to verify that the reachable set of a system starting in an initial set remains in a safe region inside a domain,
-		in an iterative way by tuning the evolution/analysis parameters. In addition, the constants in the \a locked_constants set
-		are not allowed to be split */
-	tribool verify_iterative_nosplitting(SystemVerificationInfo& verInfo,
-							 const RealConstantSet& locked_constants) const;
-
-	/*! \brief Performs iterative verification where \a parameter is substituted into the system.
-	 */
-	tribool verify_iterative(SystemVerificationInfo& verInfo,
-							 const RealConstant& parameter) const;
-
-	/*! \brief Performs iterative verification where the singleton \a value is substituted into the system for the given \a parameter.
-	 */
-	tribool verify_iterative(SystemVerificationInfo& verInfo,
-						     const RealConstant& parameter, const Float& value) const;
-
-    //@}
-
-	//@{
-	//! \name Parametric verification methods
+	tribool safety(SystemVerificationInfo& verInfo) const;
 
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
@@ -154,7 +124,7 @@ class Verifier
         The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
 		bisection search.
         \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
+	std::pair<Interval,Interval> parametric_safety_1d_bisection(SystemVerificationInfo& verInfo,
 										 							  const RealConstant& parameter,
 										 							  const Float& tolerance) const;
 
@@ -165,7 +135,7 @@ class Verifier
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	Parametric2DBisectionResults parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+	Parametric2DBisectionResults parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 								 const RealConstant& xParam,
 								 const RealConstant& yParam,
 								 const Float& tolerance,
@@ -174,7 +144,7 @@ class Verifier
 	/**
 	 * \brief Performs a parametric verification on a set of two parameters \a params, by using bisection.
 	 */
-	Parametric2DBisectionResults parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+	Parametric2DBisectionResults parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 												   const RealConstantSet& params,
 												   const Float& tolerance,
 												   const unsigned& numPointsPerAxis) const;
@@ -185,43 +155,23 @@ class Verifier
 	 * The values in \a params are substituted into the system, the latter
 	 * being restored to its initial conditions by the end of the method.
 	 */
-	ParametricPartitioningOutcomeList parametric_verification_partitioning(SystemVerificationInfo& verInfo,
+	ParametricPartitioningOutcomeList parametric_safety_partitioning(SystemVerificationInfo& verInfo,
 													   const RealConstantSet& params,
 													   const uint& logNumIntervalsPerParam) const;
 
 	//@}
 
 	//@{
-	//! \name Basic dominance methods
+	//! \name Dominance methods
 
 	/**
 	 * \brief Performs dominance checking.
-	 * \details Verifies if the \a dominating system dominates the \a dominated system.
+	 * \details Verifies if the \a dominating system dominates the \a dominated system. Dominance is intended in terms of
+	 * the outer reachability of a dominating system being inside the BOUNDING BOX of the lower reachability of a dominated
+	 * system minus its epsilon.
 	 */
 	tribool dominance(SystemVerificationInfo& dominating,
 					  SystemVerificationInfo& dominated) const;
-
-	/**
-	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system.
-	 * \details Verifies if the \a dominating system dominates the \a dominated system.
-	 */
-	tribool dominance(SystemVerificationInfo& dominating,
-					  SystemVerificationInfo& dominated,
-					  const RealConstant& parameter) const;
-
-	/**
-	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system with a value of \a value.
-	 * \details Verifies if the \a dominating system dominates the \a dominated system.
-	 */
-	tribool dominance(SystemVerificationInfo& dominating,
-					  SystemVerificationInfo& dominated,
-					  const RealConstant& parameter,
-					  const Float& value) const;
-
-	//@}
-
-	//@{
-	//! \name Parametric dominance methods
 
 	/*! \brief Compute an underapproximation of the dominating/non-dominating intervals of \a parameter for the dominance problem.
         \details The parameter is varied on the \a dominating system alone. The procedure uses the bisection method. The parameter is assumed as having separable dominating and non-dominating intervals in its range.
@@ -268,8 +218,45 @@ class Verifier
 																	    const uint& logNumIntervalsPerParam) const;
 
 	//@}
+
   private:
 
+	//@{
+	//! \name Basic verification methods
+
+	/*! \brief Prove (once, i.e. for a given grid depth) that the the reachable set of \a system starting in \a initial_set
+	 * definitely remains in the \a safe region. */
+	bool _safety_positive_once(HybridAutomaton& system,
+							   const HybridImageSet& initial_set,
+							   const HybridBoxes& safe_region) const;
+	/*! \brief Prove (once, i.e. for a given grid depth) that the reachable set of \a system starting in \a initial_set
+	 * does definitely NOT remain in the \a safe region. */
+	bool _safety_negative_once(HybridAutomaton& system,
+							   const HybridImageSet& initial_set,
+							   const HybridBoxes& safe_region) const;
+
+    /*! \brief Attempt (once, i.e. for a given grid depth) to verify that the reachable set of \a system starting in \a initial_set
+     * remains in a safe_box. */
+    tribool _safety_once(HybridAutomaton& system,
+						 const HybridImageSet& initial_set,
+						 const HybridBoxes& safe_region) const;
+
+	/*! \brief Performs iterative safety verification where \a parameter is substituted into the system.
+	 */
+	tribool _safety(SystemVerificationInfo& verInfo,
+							 const RealConstant& parameter) const;
+
+	/*! \brief Performs iterative safety verification where the singleton \a value is substituted into the system for the given \a parameter.
+	 */
+	tribool _safety(SystemVerificationInfo& verInfo,
+						     const RealConstant& parameter, const Float& value) const;
+
+	/*! \brief Performs iterative safety verification.
+	 * \details The constants in the \a locked_constants set are not allowed to be split */
+	tribool _safety_nosplitting(SystemVerificationInfo& verInfo,
+							 const RealConstantSet& locked_constants) const;
+
+	//@}
 
 	/*! \brief Shows the verification \a result into the standard output. */
 	void _log_verification_result(const tribool& result) const;
@@ -297,7 +284,7 @@ class Verifier
 												 	 	 	 	 	 	 	  const bool& positiveOnBottom) const;
 
 	/*! \brief Performs one verification sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
-	void _parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
+	void _parametric_safety_2d_bisection_sweep(Parametric2DBisectionResults& results,
 						  	  	  	    SystemVerificationInfo& verInfo,
 						  	  	  	    RealConstant xParam,
 						  	  	  	    RealConstant yParam,
@@ -320,6 +307,23 @@ class Verifier
 	void _setDominanceParameters(HybridReachabilityAnalyser& analyser,
 								 SystemVerificationInfo& systemBundle,
 								 const RealConstantSet& lockedConstants) const;
+
+	/**
+	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system.
+	 * \details Verifies if the \a dominating system dominates the \a dominated system.
+	 */
+	tribool _dominance(SystemVerificationInfo& dominating,
+					  SystemVerificationInfo& dominated,
+					  const RealConstant& parameter) const;
+
+	/**
+	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system with a value of \a value.
+	 * \details Verifies if the \a dominating system dominates the \a dominated system.
+	 */
+	tribool _dominance(SystemVerificationInfo& dominating,
+					  SystemVerificationInfo& dominated,
+					  const RealConstant& parameter,
+					  const Float& value) const;
 
 	/*! \brief Helper function to perform dominance in the more general case when some \a dominatingLockedConstants are enforced. */
 	tribool _dominance(SystemVerificationInfo& dominating,
@@ -354,6 +358,13 @@ std::pair<bool,bool> process_initial_bisection_results(Interval& positive_int,
 														const Interval& parameter_range,
 														const tribool& lower_result,
 														const tribool& upper_result);
+
+/*! \brief Splits the parameters to the maximum based on the \a tolerance
+ * \details The \a numIntervalsPerParam is the number of intervals to split for each parameter.
+ * \return The resulting split parameters sets.
+ */
+std::list<RealConstantSet> maximally_split_parameters(const RealConstantSet& params,
+									   	   	   	   	  const uint& numIntervalsPerParam);
 
 }
 

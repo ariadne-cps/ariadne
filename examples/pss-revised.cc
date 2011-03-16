@@ -370,28 +370,14 @@ int main()
 
 	// Create an evolver and analyser objects, then set their verbosity
 	ImageSetHybridEvolver evolver;
-	evolver.verbosity = 0;		
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 6;
-	evolver.parameters().enable_subdivisions = false;
-	evolver.parameters().enable_set_model_reduction = false;
-	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 4;
 	analyser.parameters().highest_maximum_grid_depth = 4;
-	analyser.parameters().transient_time = 1e10;
-	analyser.parameters().transient_steps = 1;
-	analyser.parameters().lock_to_grid_time = 1e10;		
-	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.plot_verify_results = true;
-	analyser.free_cores = 0;
 	Verifier verifier(analyser);
-
-
-	// The resulting safe and unsafe intervals
-	Interval safe_int, unsafe_int;
+	verifier.verbosity = 2;
 
 	// Perform the analysis
 	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
-	cout << verifier.verify_iterative(verInfo);
+	cout << verifier.safety(verInfo);
 
 }

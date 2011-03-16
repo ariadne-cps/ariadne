@@ -276,28 +276,15 @@ int main(int argc, char** argv)
 
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
-	evolver.verbosity = 0;		
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = 3;
-	evolver.parameters().enable_subdivisions = false;
-	evolver.parameters().enable_set_model_reduction = false;
-	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 5;
 	analyser.parameters().highest_maximum_grid_depth = 10;
-	analyser.parameters().transient_time = 1e10;
-	analyser.parameters().transient_steps = 8;
-	analyser.parameters().lock_to_grid_time = 1e10;		
-	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.plot_verify_results = false;
-	analyser.free_cores = 0;
 	Verifier verifier(analyser);
-
-	// The resulting safe and unsafe intervals
-	Interval safe_int, unsafe_int;
+	verifier.verbosity = 3;
 
 	// Perform the analysis
 	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
-	tribool result = verifier.verify_iterative(verInfo);
+	tribool result = verifier.safety(verInfo);
 	
 	std::cout << "Done." << std::endl;
 	

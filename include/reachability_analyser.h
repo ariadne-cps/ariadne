@@ -87,7 +87,7 @@ class HybridReachabilityAnalyser
     typedef HybridGridTreeSet SetApproximationType;
     typedef HybridEvolver::EnclosureType EnclosureType;
     typedef HybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
-    typedef SetApproximationType (HybridReachabilityAnalyser::*UpperChainReachFuncPtr)(const SystemType&, const HybridImageSet&) const;
+    typedef SetApproximationType (HybridReachabilityAnalyser::*OuterChainReachFuncPtr)(const SystemType&, const HybridImageSet&) const;
   public:
     //@{
     //! \name Constructors and destructors
@@ -176,15 +176,32 @@ class HybridReachabilityAnalyser
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
      * \return The reach set */
-    virtual SetApproximationType upper_chain_reach_forward(SystemType& system,
-														   const HybridImageSet& initial_set) const;
+    virtual SetApproximationType outer_chain_reach(SystemType& system,
+												   const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
-         * lower semantics; the method performs periodical discretisations and checks the new reached region for inclusion
-         * The resulting set is a subset of the outer-approximation of the whole evolution set.
-         * \return The reach set and the falsification information. */
+     * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
+     * It also
+     * \return The reach set */
+    virtual SetApproximationType outer_chain_reach_quick_proving(SystemType& system,
+														   const HybridImageSet& initial_set,
+														   const HybridBoxes& safe_region) const;
+
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
+     * lower semantics.
+     * \details The resulting set is a subset of the outer-approximation of the whole evolution set.
+     * \return The reach set and the falsification information (namely, only the reach bounds and the epsilon). */
     virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(SystemType& system,
-																	   const HybridImageSet& initial_set) const;
+																		   const HybridImageSet& initial_set) const;
+
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
+     * lower semantics, checking for inclusion into a \a safe_region.
+     * \details the method performs periodical discretisations and checks the new reached region for inclusion
+     * The resulting set is a subset of the outer-approximation of the whole evolution set.
+     * \return The reach set and the falsification information. */
+    virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(SystemType& system,
+																	   const HybridImageSet& initial_set,
+																	   const HybridBoxes& safe_region) const;
   
 	/*! \brief Tune the parameters for the next verification iteration, given a \a bounding_reach. */
 	void tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach);
@@ -193,8 +210,6 @@ class HybridReachabilityAnalyser
 
   public:
 
-	// Determine if the upper/lower reached regions of verify_iterative (and of all the functions using it) must be saved into figures (false by default)
-	bool plot_verify_results;
 	// The reduction in the number of logical cores used in multithreading (down from the maximum concurrency of the machine) (zero by default)
 	uint free_cores;
   
@@ -217,31 +232,27 @@ class HybridReachabilityAnalyser
     /*! \brief Gets the calculus interface from the hybrid evolver. */
     const CalculusInterface<TaylorModel>& _getCalculusInterface() const;
 
-    /*! \brief Generates a list of hybrid enclosures from the \a initial_set, depending on the minimum cell size
-     * given by the \a grid. */
-    list<HybridBasicSet<TaylorSet> > _split_initial_set(const HybridImageSet initial_set,
-										   	   	   	    const HybridGrid grid,
-										   	   	   	    Semantics semantics) const;
-
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
-    SetApproximationType _upper_chain_reach_quick_proving(SystemType& system, const HybridImageSet& initial_set,UpperChainReachFuncPtr func) const;
-    SetApproximationType _upper_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
+    SetApproximationType _outer_chain_reach_quick_proving(SystemType& system,
+														  const HybridImageSet& initial_set,
+														  const HybridBoxes& safe_region) const;
+    SetApproximationType _outer_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
 
 
     /*! \brief Pushes the enclosures from \a reachCells into \a destination.
      * \details Ignores enclosures that lie outside the domain.
      */
-    void _upper_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
+    void _outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
     									   const SystemType& system,
     									   std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list, for all \a transitions.
      */
-    void _upper_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
+    void _outer_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
 												 const ContinuousEnclosureType& source,
 												 const HybridGrid& grid,
 												 std::list<EnclosureType>& destination) const;
@@ -249,39 +260,31 @@ class HybridReachabilityAnalyser
     /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
      * \details Splits the \a source until the enclosure is definitely active for \a trans or the minimum allowed target cell widths \a minTargetCellWidths has been reached.
      */
-    void _upper_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
+    void _outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
     														 const ContinuousEnclosureType& source,
     														 const Vector<Float>& minTargetCellWidths,
     														 std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the target enclosure from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
      */
-    void _upper_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
+    void _outer_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
     												   const ContinuousEnclosureType& source,
     												   std::list<EnclosureType>& destination) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
      */
-    void _upper_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
+    void _outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
     									   std::list<EnclosureType>& destination) const;
-
-    /*! \brief Splits \a target_encl for location \a target_loc, storing the result in \a initial_enclosures.
-     * \detail The function is recursive.
-     */
-    void _splitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
-    						    const DiscreteState& target_loc,
-    						    const ContinuousEnclosureType& target_encl,
-    						    const Vector<Float>& minTargetCellWidths,
-    						    const Box& target_bounding) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
      *  \detail Does not check for inclusion into the domain.
      */
-    void _upper_chain_reach_pushFinalCells_noDomainCheck(const HybridGridTreeSet& finalCells,
+    void _outer_chain_reach_pushFinalCells_noDomainCheck(const HybridGridTreeSet& finalCells,
     									   	   	   	     std::list<EnclosureType>& destination) const;
 
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system,
-    																const HybridImageSet& initial_set) const;
+    																const HybridImageSet& initial_set,
+    																const HybridBoxes& safe_region) const;
 };
 
 template<class HybridEnclosureType>
@@ -290,7 +293,6 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosur
 	: _parameters(new EvolutionParametersType())
 	, _statistics(new EvolutionStatisticsType())
 	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
-	, plot_verify_results(false)
 	, free_cores(0)
 {
 }
@@ -303,10 +305,17 @@ HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
 	: _parameters(new EvolutionParametersType(parameters))
 	, _statistics(new EvolutionStatisticsType())
 	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
-	, plot_verify_results(false)
 	, free_cores(0)
 {
 }
+
+
+/*! \brief Generates a list of hybrid enclosures from the \a initial_set, depending on the minimum cell size
+ * given by the \a grid. */
+list<HybridBasicSet<TaylorSet> > split_initial_set(const HybridImageSet initial_set,
+									   	   	   	    const HybridGrid grid,
+									   	   	   	    int maximum_grid_depth,
+									   	   	   	    Semantics semantics);
 
 /*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
  *
@@ -340,13 +349,6 @@ Float getMaxDerivativeWidthRatio(const HybridAutomaton& system,
 HybridFloatVector getDerivativeWidths(const HybridAutomaton& system,
 									  const HybridBoxes& bounding_domain);
 
-/*! \brief Splits the parameters to the maximum based on the \a tolerance
- * \details The \a numIntervalsPerParam is the number of intervals to split for each parameter.
- * \return The resulting split parameters sets.
- */
-std::list<RealConstantSet> maximally_split_parameters(const RealConstantSet& params,
-									   	   	   	   	  const uint& numIntervalsPerParam);
-
 /*! \brief Gets the set of all the split intervals from the stored split factors.
  *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
  *  all the remaining from right to left.
@@ -355,6 +357,16 @@ std::list<RealConstantSet> getSplitConstantsIntervalsSet(const RealConstantIntMa
 
 /*! \brief Gets the set of all the midpoints of the split intervals in \a intervals_set. */
 std::list<RealConstantSet> getSplitConstantsMidpointsSet(const std::list<RealConstantSet>& intervals_set);
+
+/*! \brief Splits \a target_encl for location \a target_loc, storing the result in \a initial_enclosures.
+ * \details The function is recursive.
+ */
+void splitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
+						    const DiscreteState& target_loc,
+						    const ContinuousEnclosureType& target_encl,
+						    const Vector<Float>& minTargetCellWidths,
+						    const Box& target_bounding,
+						    DomainEnforcingPolicy policy);
 
 /*! \brief Get the hybrid grid given the maximum derivative \a hmad and the \a bounding_domain parameter, where the grid is chosen differently for each location.
  * \details The grid is chosen so that each cell is included into the domains for all locations. */

@@ -121,7 +121,7 @@ Box
 project(const HybridBoxes& box, const std::vector<uint>& dimensions);
 
 HybridBoxes
-unbounded_hybrid_box(const HybridSpace& hspace);
+unbounded_hybrid_boxes(const HybridSpace& hspace);
 
 inline
 HybridBoxes

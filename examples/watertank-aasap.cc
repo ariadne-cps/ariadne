@@ -27,9 +27,9 @@ using namespace Ariadne;
 
 int main(int argc,char *argv[])
 {
-	int analyserVerbosity = 1;
+	int verifierVerbosity = 1;
 	if (argc > 1)
-		analyserVerbosity = atoi(argv[1]);
+		verifierVerbosity = atoi(argv[1]);
 
     /// Set the system parameters
 	RealConstant a("a",0.02);
@@ -260,9 +260,7 @@ int main(int argc,char *argv[])
 
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
-	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = analyserVerbosity;
 	evolver.parameters().enable_subdivisions = false;
 	evolver.parameters().enable_set_model_reduction = false;
 	analyser.parameters().enable_lower_pruning = true;
@@ -272,16 +270,15 @@ int main(int argc,char *argv[])
 	analyser.parameters().transient_steps = 1;
 	analyser.parameters().lock_to_grid_time = 1e10;		
 	analyser.parameters().lock_to_grid_steps = 1;
-	analyser.plot_verify_results = false;
 	analyser.free_cores = 0;
 	Verifier verifier(analyser);
+	verifier.verbosity = verifierVerbosity;
 
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-    verifier.verify_iterative(verInfo);
-
+    verifier.safety(verInfo);
     
     HybridGridTreeSet reach = analyser.statistics().upper().reach;
 

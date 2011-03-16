@@ -22,15 +22,16 @@
  */
 
 #include "ariadne.h"
+#include "taylor_calculus.h"
 #include "examples.h"
 
 using namespace Ariadne;
 
 int main(int argc,char *argv[])
 {
-	int analyserVerbosity = 1;
+	int verifierVerbosity = 1;
 	if (argc > 1)
-		analyserVerbosity = atoi(argv[1]);
+		verifierVerbosity = atoi(argv[1]);
 
 	// The system
 	HybridAutomaton system = getWatertankNonlinearMonolithicHysteresis();
@@ -48,15 +49,18 @@ int main(int argc,char *argv[])
 
 	/// Verification
 
-	// Create an evolver and analyser objects, then set their verbosity
-	HybridEvolver evolver;
-	evolver.verbosity = 0;
-	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = analyserVerbosity;
-	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().lowest_maximum_grid_depth = 1;
-	analyser.parameters().highest_maximum_grid_depth = 5;
-	Verifier verifier(analyser);
+	TaylorCalculus outer_integrator(2,2,1e-4);
+	TaylorCalculus lower_integrator(6,8,1e-10);
+	ImageSetHybridEvolver outer_evolver(outer_integrator);
+	ImageSetHybridEvolver lower_evolver(lower_integrator);
+	HybridReachabilityAnalyser outer_analyser(outer_evolver);
+	HybridReachabilityAnalyser lower_analyser(lower_evolver);
+	outer_analyser.parameters().lowest_maximum_grid_depth = 1;
+	outer_analyser.parameters().highest_maximum_grid_depth = 5;
+	lower_analyser.parameters().lowest_maximum_grid_depth = 1;
+	lower_analyser.parameters().highest_maximum_grid_depth = 5;
+	Verifier verifier(outer_analyser,lower_analyser);
+	verifier.verbosity = verifierVerbosity;
 
 	// The parameters
 	RealConstantSet parameters;
@@ -67,7 +71,8 @@ int main(int argc,char *argv[])
 	uint logNumIntervalsPerParam = 3;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerParam);
+	cout << verifier.safety(verInfo);
+	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerParam);
 	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
-	results.draw();
+	//results.draw();
 }

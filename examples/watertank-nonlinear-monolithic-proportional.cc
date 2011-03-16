@@ -81,7 +81,7 @@ int main(int argc,char *argv[])
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 
-	cout << verifier.verify_iterative(verInfo);
+	cout << verifier.safety(verInfo);
 	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointPerAxis);
 	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
 	//results.draw();

@@ -215,6 +215,6 @@ int main(int argc,char *argv[])
 	//make_lpair(safe_int,unsafe_int) = verifier.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricPartitioningOutcomeList outcomes = verifier.parametric_verification_partitioning(verInfo, parameters, tolerance);
+	ParametricPartitioningOutcomeList outcomes = verifier.parametric_safety_partitioning(verInfo, parameters, tolerance);
 	outcomes.draw();
 }

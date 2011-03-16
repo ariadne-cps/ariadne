@@ -46,7 +46,7 @@ SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
 						   HybridBoxes& domain,
 						   std::vector<uint>& projection) :
 							_system(system), _initial_set(initial_set),
-							 _domain(domain), _safe_region(unbounded_hybrid_box(system.state_space())),
+							 _domain(domain), _safe_region(unbounded_hybrid_boxes(system.state_space())),
 							 _projection(projection)
 {
 	_check_fields();
@@ -119,8 +119,9 @@ Verifier::~Verifier()
 
 bool
 Verifier::
-verify_positive(SystemType& system,
-	  const HybridImageSet& initial_set) const
+_safety_positive_once(SystemType& system,
+	  const HybridImageSet& initial_set,
+	  const HybridBoxes& safe_region) const
 {
 	bool result;
 
@@ -130,13 +131,13 @@ verify_positive(SystemType& system,
 
 	try
 	{
-		reach = _outer_analyser->upper_chain_reach_forward(system,initial_set);
+		reach = _outer_analyser->outer_chain_reach_quick_proving(system,initial_set,safe_region);
 
 		if (_outer_analyser->parameters().domain_enforcing_policy == OFFLINE &&
 			definitely(!reach.subset(_outer_analyser->parameters().bounding_domain)))
 			result = false;
 		else
-			result = definitely(reach.subset(_outer_analyser->parameters().safe_region));
+			result = definitely(reach.subset(safe_region));
 	}
 	catch (ReachOutOfDomainException ex)
 	{
@@ -154,12 +155,14 @@ verify_positive(SystemType& system,
 
 bool
 Verifier::
-verify_negative(SystemType& system,
-		 const HybridImageSet& initial_set) const
+_safety_negative_once(SystemType& system,
+		 const HybridImageSet& initial_set,
+		 const HybridBoxes& safe_region) const
 {
 	ARIADNE_LOG(4,"Disproving... " << (verbosity == 4 ? "" : "\n"));
 
-	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData = _lower_analyser->lower_chain_reach(system,initial_set);
+	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData =
+			_lower_analyser->lower_chain_reach(system,initial_set,safe_region);
 	const bool& isDisproved = reachAndDisproveData.second.getIsDisproved();
 
 	_lower_analyser->statistics().lower().reach = reachAndDisproveData.first;
@@ -174,17 +177,18 @@ verify_negative(SystemType& system,
 
 tribool
 Verifier::
-verify(SystemType& system,
-       const HybridImageSet& initial_set) const
+_safety_once(SystemType& system,
+			 const HybridImageSet& initial_set,
+			 const HybridBoxes& safe_region) const
 {
 		ARIADNE_LOG(3, "Verification...\n");
 
-		if (verify_positive(system,initial_set)) {
+		if (_safety_positive_once(system,initial_set,safe_region)) {
 			ARIADNE_LOG(3, "Safe.\n");
 			return true;
 		}
 
-		if (verify_negative(system,initial_set)) {
+		if (_safety_negative_once(system,initial_set,safe_region)) {
 			ARIADNE_LOG(3, "Unsafe.\n");
 			return false;
 		}
@@ -195,24 +199,24 @@ verify(SystemType& system,
 
 tribool
 Verifier::
-verify_iterative(SystemVerificationInfo& verInfo) const
+safety(SystemVerificationInfo& verInfo) const
 {
 	RealConstantSet locked_constants;
 
-	return verify_iterative_nosplitting(verInfo,locked_constants);
+	return _safety_nosplitting(verInfo,locked_constants);
 }
 
 
 tribool
 Verifier::
-verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter) const
+_safety(SystemVerificationInfo& verInfo, const RealConstant& parameter) const
 {
 	HybridAutomaton& system = verInfo.getSystem();
 
 	Real original_value = system.accessible_constant_value(parameter.name());
 
 	system.substitute(parameter);
-	tribool result = verify_iterative(verInfo);
+	tribool result = safety(verInfo);
 	system.substitute(parameter,original_value);
 
 	return result;
@@ -220,17 +224,17 @@ verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter)
 
 tribool
 Verifier::
-verify_iterative(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Float& value) const
+_safety(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Float& value) const
 {
 	const RealConstant modifiedParameter(parameter.name(),Interval(value));
 
-	return verify_iterative(verInfo, modifiedParameter);
+	return _safety(verInfo, modifiedParameter);
 }
 
 
 tribool
 Verifier::
-verify_iterative_nosplitting(SystemVerificationInfo& verInfo,
+_safety_nosplitting(SystemVerificationInfo& verInfo,
 				 const RealConstantSet& locked_constants) const
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
@@ -276,7 +280,7 @@ verify_iterative_nosplitting(SystemVerificationInfo& verInfo,
 		_lower_analyser->tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach);
 
 		// Perform the verification
-		tribool result = verify(system,verInfo.getInitialSet());
+		tribool result = _safety_once(system,verInfo.getInitialSet(),verInfo.getSafeRegion());
 
 		// Plot the results, if desired
 		if (plot_results)
@@ -300,7 +304,7 @@ verify_iterative_nosplitting(SystemVerificationInfo& verInfo,
 
 std::pair<Interval,Interval>
 Verifier::
-parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
+parametric_safety_1d_bisection(SystemVerificationInfo& verInfo,
 						   	   	   	 const RealConstant& parameter,
 						   	   	   	 const Float& tolerance) const
 {
@@ -323,12 +327,12 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
-	tribool lower_result = verify_iterative(verInfo,parameter,parameter_range.lower());
+	tribool lower_result = _safety(verInfo,parameter,parameter_range.lower());
 	_log_verification_result(lower_result);
 
 	// Check the upper bound
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
-	tribool upper_result = verify_iterative(verInfo,parameter,parameter_range.upper());
+	tribool upper_result = _safety(verInfo,parameter,parameter_range.upper());
 	_log_verification_result(upper_result);
 
 	// If we must proceed with bisection refining
@@ -352,7 +356,7 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 					      ", width ratio: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			const Float current_value = safety_int.midpoint();
-			tribool result = verify_iterative(verInfo,parameter,current_value);
+			tribool result = _safety(verInfo,parameter,current_value);
 
 			_process_positive_bisection_result(result,safety_int,unsafety_int,current_value,safeOnBottom);
 		}
@@ -366,7 +370,7 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 						  ", width ratio: " << unsafety_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			const Float current_value = unsafety_int.midpoint();
-			tribool result = verify_iterative(verInfo,parameter,current_value);
+			tribool result = _safety(verInfo,parameter,current_value);
 
 			_process_negative_bisection_result(result,safety_int,unsafety_int,current_value,safeOnBottom);
 		}
@@ -381,7 +385,7 @@ parametric_verification_1d_bisection(SystemVerificationInfo& verInfo,
 
 Parametric2DBisectionResults
 Verifier::
-parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 									 const RealConstantSet& params,
 									 const Float& tolerance,
 									 const unsigned& numPointsPerAxis) const
@@ -393,12 +397,12 @@ parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 	const RealConstant& xParam = *param_it;
 	const RealConstant& yParam = *(++param_it);
 
-	return parametric_verification_2d_bisection(verInfo,xParam,yParam,tolerance,numPointsPerAxis);
+	return parametric_safety_2d_bisection(verInfo,xParam,yParam,tolerance,numPointsPerAxis);
 }
 
 Parametric2DBisectionResults
 Verifier::
-parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
+parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 									 const RealConstant& xParam,
 									 const RealConstant& yParam,
 									 const Float& tolerance,
@@ -412,15 +416,15 @@ parametric_verification_2d_bisection(SystemVerificationInfo& verInfo,
 	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
 
 	// Sweeps on each axis
-	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, true);
-	_parametric_verification_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, false);
+	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, true);
+	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, false);
 
 	return results;
 }
 
 ParametricPartitioningOutcomeList
 Verifier::
-parametric_verification_partitioning(SystemVerificationInfo& verInfo,
+parametric_safety_partitioning(SystemVerificationInfo& verInfo,
 									 const RealConstantSet& params,
 									 const uint& numIntervalsPerParam) const
 {
@@ -440,7 +444,7 @@ parametric_verification_partitioning(SystemVerificationInfo& verInfo,
 		RealConstantSet current_params = *splitting_it;
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
 		verInfo.getSystem().substitute(current_params);
-		tribool outcome = verify_iterative_nosplitting(verInfo,params);
+		tribool outcome = _safety_nosplitting(verInfo,params);
 		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
 		result.push_back(ParametricPartitioningOutcome(current_params,outcome));
 	}
@@ -461,7 +465,7 @@ dominance(SystemVerificationInfo& dominating,
 
 tribool
 Verifier::
-dominance(SystemVerificationInfo& dominating,
+_dominance(SystemVerificationInfo& dominating,
 		  	SystemVerificationInfo& dominated,
 		  	const RealConstant& parameter) const
 {
@@ -478,14 +482,14 @@ dominance(SystemVerificationInfo& dominating,
 
 tribool
 Verifier::
-dominance(SystemVerificationInfo& dominating,
+_dominance(SystemVerificationInfo& dominating,
 		  SystemVerificationInfo& dominated,
 		  const RealConstant& parameter,
 		  const Float& value) const
 {
 	const RealConstant modifiedParameter(parameter.name(),Interval(value));
 
-	return dominance(dominating,dominated,modifiedParameter);
+	return _dominance(dominating,dominated,modifiedParameter);
 }
 
 std::pair<Interval,Interval>
@@ -514,12 +518,12 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
-	tribool lower_result = dominance(dominating,dominated,parameter,parameter_range.lower());
+	tribool lower_result = _dominance(dominating,dominated,parameter,parameter_range.lower());
 	_log_verification_result(lower_result);
 
 	// Check the upper bound
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
-	tribool upper_result = dominance(dominating,dominated,parameter,parameter_range.upper());
+	tribool upper_result = _dominance(dominating,dominated,parameter,parameter_range.upper());
 	_log_verification_result(upper_result);
 
 	// If we must proceed with bisection refining
@@ -543,7 +547,7 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 					      ", width ratio: " << dominating_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			const Float current_value = dominating_int.midpoint();
-			tribool result = dominance(dominating,dominated,parameter,current_value);
+			tribool result = _dominance(dominating,dominated,parameter,current_value);
 
 			_process_positive_bisection_result(result,dominating_int,nondominating_int,current_value,dominatingOnBottom);
 		}
@@ -557,7 +561,7 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 						  ", width ratio: " << nondominating_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			const Float current_value = nondominating_int.midpoint();
-			tribool result = dominance(dominating,dominated,parameter,current_value);
+			tribool result = _dominance(dominating,dominated,parameter,current_value);
 
 			_process_negative_bisection_result(result,dominating_int,nondominating_int,current_value,dominatingOnBottom);
 		}
@@ -775,7 +779,7 @@ Verifier::_pos_neg_bounds_from_search_intervals(const Interval& positive_int,
 	return make_pair<Interval,Interval>(positive_result,negative_result);
 }
 
-void Verifier::_parametric_verification_2d_bisection_sweep(Parametric2DBisectionResults& results,
+void Verifier::_parametric_safety_2d_bisection_sweep(Parametric2DBisectionResults& results,
 					  	  	  	    					   SystemVerificationInfo& verInfo,
 					  	  	  	    					   RealConstant xParam,
 					  	  	  	    					   RealConstant yParam,
@@ -803,7 +807,7 @@ void Verifier::_parametric_verification_2d_bisection_sweep(Parametric2DBisection
 		ARIADNE_LOG(1,"\nAnalysis with " << sweepParam.name() << " = " << sweepParam.value().lower() << "...\n");
 
 		// Performs the analysis on the other axis and adds to the results of the sweep variable
-		std::pair<Interval,Interval> result = parametric_verification_1d_bisection(verInfo,otherParam,tolerance);
+		std::pair<Interval,Interval> result = parametric_safety_1d_bisection(verInfo,otherParam,tolerance);
 		if (sweepOnX)
 			results.insertXValue(result);
 		else
@@ -870,8 +874,6 @@ _setDominanceParameters(HybridReachabilityAnalyser& analyser,
 	_lower_analyser->resetStatistics();
 	// Domain
 	analyser.parameters().bounding_domain = verInfo.getDomain();
-	// Dummy safe region
-	analyser.parameters().safe_region = verInfo.getSafeRegion();
 	// General parameters
 	analyser.tuneIterativeStepParameters(verInfo.getSystem(),_outer_analyser->statistics().upper().reach);
 	// Lock to grid time
@@ -932,7 +934,7 @@ Verifier::_dominance_positive(SystemVerificationInfo& dominating,
 		ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
 
 		_setDominanceParameters(*_outer_analyser,dominating,dominatingLockedConstants);
-		HybridGridTreeSet dominating_reach = _outer_analyser->upper_chain_reach_forward(dominating.getSystem(),dominating.getInitialSet());
+		HybridGridTreeSet dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
 
@@ -940,7 +942,8 @@ Verifier::_dominance_positive(SystemVerificationInfo& dominating,
 		RealConstantSet emptyLockedConstants;
 		DisproveData disproveData(dominated.getSystem().state_space());
 		_setDominanceParameters(*_lower_analyser,dominated,emptyLockedConstants);
-		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) = _lower_analyser->lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
+		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) =
+				_lower_analyser->lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
 		// We must shrink the lower approximation of the the dominated system, but underapproximating in terms of rounding
 		HybridBoxes shrinked_dominated_bounds = Ariadne::shrink_in(disproveData.getReachBounds(),disproveData.getEpsilon());
@@ -976,14 +979,15 @@ Verifier::_dominance_negative(SystemVerificationInfo& dominating,
 
 		RealConstantSet emptyLockedConstants;
 		_setDominanceParameters(*_outer_analyser,dominated,emptyLockedConstants);
-		HybridGridTreeSet dominated_reach = _outer_analyser->upper_chain_reach_forward(dominated.getSystem(),dominated.getInitialSet());
+		HybridGridTreeSet dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
 
 		HybridGridTreeSet dominating_reach;
 		DisproveData disproveData(dominating.getSystem().state_space());
 		_setDominanceParameters(*_lower_analyser,dominating,dominatingLockedConstants);
-		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) = _lower_analyser->lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
+		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) =
+				_lower_analyser->lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
 		// We must shrink the lower approximation of the the dominating system, but overapproximating in terms of rounding
 		HybridBoxes shrinked_dominating_bounds = Ariadne::shrink_out(disproveData.getReachBounds(),disproveData.getEpsilon());
@@ -1015,9 +1019,6 @@ setInitialParameters(HybridReachabilityAnalyser& analyser,
 	// Set the domain
 	analyser.parameters().bounding_domain = domain;
 	//ARIADNE_LOG(3, "Domain: " << domain << "\n");
-	// Set the safe region
-	analyser.parameters().safe_region = safe_region;
-	//ARIADNE_LOG(3, "Safe region: " << safe_region << "\n");
 	// Set the lock to grid time
 	analyser.parameters().lock_to_grid_time = getLockToGridTime(system,domain);
 	//ARIADNE_LOG(3, "Lock to grid time: " << analyser.parameters().lock_to_grid_time << "\n");
@@ -1076,6 +1077,47 @@ process_initial_bisection_results(Interval& positive_int,
 	}
 
 	return std::pair<bool,bool>(proceed,positiveOnBottom);
+}
+
+std::list<RealConstantSet>
+maximally_split_parameters(const RealConstantSet& params,
+						   const uint& logNumIntervalsPerParam)
+{
+	std::list<RealConstantSet> source;
+	std::list<RealConstantSet> destination;
+	destination.push_back(params);
+
+	for (RealConstantSet::const_iterator param_it = params.begin();
+										 param_it != params.end();
+										 ++param_it)
+	{
+		for (uint i=0; i<logNumIntervalsPerParam; i++) {
+			source.clear();
+			source.insert<std::list<RealConstantSet>::const_iterator>(source.begin(),destination.begin(),destination.end());
+			destination.clear();
+
+			while (!source.empty()) {
+				RealConstantSet currentParams = source.back();
+				source.pop_back();
+
+				RealConstantSet newConfigurationLeft = currentParams;
+				RealConstantSet newConfigurationRight = currentParams;
+				newConfigurationLeft.erase(*param_it);
+				newConfigurationRight.erase(*param_it);
+
+				const Real& currentInterval = currentParams.find(*param_it)->value();
+				newConfigurationLeft.insert(RealConstant(param_it->name(),
+													  Interval(currentInterval.lower(),currentInterval.midpoint())));
+				newConfigurationRight.insert(RealConstant(param_it->name(),
+													  Interval(currentInterval.midpoint(),currentInterval.upper())));
+
+				destination.push_back(newConfigurationLeft);
+				destination.push_back(newConfigurationRight);
+			}
+		}
+	}
+
+	return destination;
 }
 
 }

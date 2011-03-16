@@ -105,6 +105,9 @@ class ImageSetHybridEvolver
     //! \brief Construct from parameters using a default integrator.
     ImageSetHybridEvolver(const EvolutionParametersType& parameters);
 
+    //! \brief Construct from integrator with default parameters.
+    ImageSetHybridEvolver(const TaylorCalculus& tc);
+
     //! \brief Construct from parameters and integrator.
     ImageSetHybridEvolver(const EvolutionParametersType& p,
    						  const TaylorCalculus& tc);

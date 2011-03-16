@@ -228,11 +228,6 @@ class DiscreteEvolutionParameters {
     //! \brief The reached region for constraining a chain outer reach.
     HybridGridTreeSet constraint_reach;
 
-    //! \brief The safe region that synthesizes a reachability property.
-	//! <br>
-	//! This parameters is only used in the chain_reach() routines.
-    HybridBoxes safe_region;
-
     //! \brief The split factors for constants.
     RealConstantIntMap split_factors;
 
@@ -291,7 +286,7 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
 	  lowest_maximum_grid_depth(0),
 	  highest_maximum_grid_depth(9),
       maximum_grid_height(16),
-	  enable_lower_pruning(false),
+	  enable_lower_pruning(true),
 	  enable_quick_proving(true),
 	  enable_quick_disproving(true),
 	  enable_constrain_outer_reach(false),
@@ -339,7 +334,6 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  constraint_reach=" << p.constraint_reach
-       << ",\n  safe_region=" << p.safe_region
        << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  enable_quick_proving=" << p.enable_quick_proving
@@ -379,7 +373,6 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  constraint_reach=" << p.constraint_reach
-       << ",\n  safe_region=" << p.safe_region
        << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  enable_quick_proving=" << p.enable_quick_proving

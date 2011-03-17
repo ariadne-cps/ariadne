@@ -234,8 +234,6 @@ class ImageSetHybridEvolver
 
     bool _isEnclosureTooLarge(const SetModelType& initial_set_model) const;
 
-    void _set_model_reduction(HybridTimedSetType& timed_set) const;
-
     void _evolution_add_initialSet(std::list< HybridTimedSetType >& working_sets,
     							   const EnclosureType& initial_set) const;
 

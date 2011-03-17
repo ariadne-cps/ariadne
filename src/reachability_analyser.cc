@@ -81,15 +81,16 @@ HybridReachabilityAnalyser(const HybridDiscretiser<HybridEvolver::ContinuousEncl
 
 
 void
-HybridReachabilityAnalyser::resetStatistics()
+HybridReachabilityAnalyser::
+resetStatistics()
 {
     _statistics->upper().reach = HybridGridTreeSet();
-    _statistics->lower().reach = HybridGridTreeSet();
 }
 
 
 const CalculusInterface<TaylorModel>&
-HybridReachabilityAnalyser::_getCalculusInterface() const
+HybridReachabilityAnalyser::
+_getCalculusInterface() const
 {
 	ImageSetHybridEvolver& evolver = dynamic_cast<ImageSetHybridEvolver&>(*this->_discretiser->evolver());
 	return evolver.getCalculusInterface();
@@ -231,9 +232,6 @@ lower_reach(const SystemType& system,
         reach.adjoin(_discretiser->reach(system,*encl_it,time,_parameters->maximum_grid_depth,LOWER_SEMANTICS));
     }
 
-	// Copies the reached region into the statistics
-	_statistics->lower().reach = reach;
-
 	return reach;
 }
 
@@ -260,9 +258,6 @@ lower_reach_evolve(const SystemType& system,
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
-
-	// Copies the reached region
-	_statistics->lower().reach = reach;
 
     return make_pair(reach,evolve);
 }
@@ -356,7 +351,6 @@ upper_reach_evolve(const SystemType& system,
     }
 
     reach.recombine();
-	_statistics->upper().reach = reach;
     ARIADNE_LOG(5,"reach="<<reach<<"\n");
     evolve.recombine();
     ARIADNE_LOG(5,"evolve="<<evolve<<"\n");
@@ -448,7 +442,6 @@ chain_reach(const SystemType& system,
     reach.recombine();
 
     reach.restrict(bounding);
-	_statistics->upper().reach = reach;
 
     return reach;
 }
@@ -468,7 +461,7 @@ chain_reach(const SystemType& system,
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 _outer_chain_reach_forward(const SystemType& system,
-            const HybridImageSet& initial_set) const
+						   const HybridImageSet& initial_set) const
 {
 	/* Complete procedure:
 		1) Build the working sets from the initial enclosures
@@ -539,9 +532,10 @@ _outer_chain_reach_forward(const SystemType& system,
 }
 
 void
-HybridReachabilityAnalyser::_outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
-															  const SystemType& system,
-															  std::list<EnclosureType>& destination) const
+HybridReachabilityAnalyser::
+_outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
+										   const SystemType& system,
+										   std::list<EnclosureType>& destination) const
 {
 	HybridGrid grid = system.grid();
 
@@ -562,10 +556,11 @@ HybridReachabilityAnalyser::_outer_chain_reach_forward_pushTargetCells(const Hyb
 }
 
 void
-HybridReachabilityAnalyser::_outer_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
-																	const ContinuousEnclosureType& source,
-																	const HybridGrid& grid,
-																	std::list<EnclosureType>& destination) const
+HybridReachabilityAnalyser::
+_outer_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
+										const ContinuousEnclosureType& source,
+										const HybridGrid& grid,
+										std::list<EnclosureType>& destination) const
 {
     long numCellDivisions = (1<<_parameters->maximum_grid_depth);
 
@@ -581,10 +576,11 @@ HybridReachabilityAnalyser::_outer_chain_reach_pushTargetEnclosures(const std::l
 }
 
 void
-HybridReachabilityAnalyser::_outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
-																				const ContinuousEnclosureType& source,
-																				const Vector<Float>& minTargetCellWidths,
-																				std::list<EnclosureType>& destination) const
+HybridReachabilityAnalyser::
+_outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
+													const ContinuousEnclosureType& source,
+													const Vector<Float>& minTargetCellWidths,
+													std::list<EnclosureType>& destination) const
 {
 	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
 
@@ -637,9 +633,10 @@ HybridReachabilityAnalyser::_outer_chain_reach_pushTargetEnclosuresOfTransition(
 }
 
 void
-HybridReachabilityAnalyser::_outer_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
-																	      const ContinuousEnclosureType& encl,
-																		  std::list<EnclosureType>& destination) const
+HybridReachabilityAnalyser::
+_outer_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
+											  const ContinuousEnclosureType& encl,
+											  std::list<EnclosureType>& destination) const
 {
 	ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),encl);
 	const Box& target_encl_box = target_encl.bounding_box();
@@ -656,8 +653,9 @@ HybridReachabilityAnalyser::_outer_chain_reach_pushTransitioningEnclosure(const 
 
 
 void
-HybridReachabilityAnalyser::_outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
-																		    std::list<EnclosureType>& destination) const
+HybridReachabilityAnalyser::
+_outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
+									   std::list<EnclosureType>& destination) const
 {
 	for (GTS::const_iterator cell_it = finalCells.begin(); cell_it != finalCells.end(); ++cell_it) {
 		const DiscreteState& loc = cell_it->first;
@@ -692,7 +690,7 @@ outer_chain_reach_quick_proving(SystemType& system,
 							    const HybridImageSet& initial_set,
 							    const HybridBoxes& safe_region) const
 {
-	HybridGridTreeSet result;
+	HybridGridTreeSet reach;
 
 	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
 
@@ -710,7 +708,7 @@ outer_chain_reach_quick_proving(SystemType& system,
 
 		HybridGridTreeSet local_reach = _outer_chain_reach_forward(system,initial_set);
 
-		result.adjoin(local_reach);
+		reach.adjoin(local_reach);
 
 		if (_parameters->enable_quick_proving &&
 			definitely(!local_reach.subset(safe_region)))
@@ -719,7 +717,9 @@ outer_chain_reach_quick_proving(SystemType& system,
 
 	system.substitute(original_constants);
 
-	return result;
+	ARIADNE_ASSERT_MSG(!reach.empty(),"The outer chain reachability of " << system.name() << " is empty: check the initial set.");
+
+	return reach;
 }
 
 std::pair<HybridReachabilityAnalyser::SetApproximationType,DisproveData>
@@ -899,31 +899,18 @@ lower_chain_reach(SystemType& system,
 }
 
 
-void 
+void
 HybridReachabilityAnalyser::
-tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach)
+tuneEvolverParameters(SystemType& system,
+				        const HybridFloatVector& hmad,
+						uint maximum_grid_depth,
+						Semantics semantics)
 {
-	/* Tune the parameters:
-	 * a) evaluate the derivatives from the domain or the latest upper reached region;
-	 * b) get the grid with lengths proportional to the derivatives,
-	 * 	  and scale such that the grid cell can be included into the domain;
-	 * c) get the maximum enclosure cell as a multiple of the minimum cell;
-	 * d) get the maximum step size as the step size which makes a variable evolve a distance equal
-	 * 	  to twice the minimum cell length (for each dimension),
-	 *    under the assumption of moving at speed equal to the maximum derivative.
-	 */
-
-	// Evaluate the maximum absolute derivatives
-	HybridFloatVector hmad = getHybridMaximumAbsoluteDerivatives(system,bounding_reach,_parameters->bounding_domain);
-	ARIADNE_LOG(3, "Maximum absolute derivatives: " << hmad << "\n");
-	// Grid
-	system.set_grid(getHybridGrid(hmad,_parameters->bounding_domain));
-	ARIADNE_LOG(3, "Grid: " << system.grid() << "\n");
 	// Maximum enclosure cell
-	_discretiser->parameters().maximum_enclosure_cell = getMaximumEnclosureCell(system.grid(),_parameters->maximum_grid_depth);
+	_discretiser->parameters().maximum_enclosure_cell = getMaximumEnclosureCell(system.grid(),maximum_grid_depth);
 	ARIADNE_LOG(3, "Maximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
 	// Maximum step size
-	_discretiser->parameters().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,system.grid(),_parameters->maximum_grid_depth);
+	_discretiser->parameters().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,system.grid(),maximum_grid_depth);
 	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
 }
 

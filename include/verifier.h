@@ -86,9 +86,10 @@ class Verifier
 {
   private:
     mutable boost::shared_ptr< HybridReachabilityAnalyser > _outer_analyser, _lower_analyser;
+    mutable std::string _plot_dirpath;
   public:
 	bool plot_results;
-	HybridBoxes safe_region;
+	uint maximum_parameter_depth;
   public:
 
     //@{
@@ -121,33 +122,25 @@ class Verifier
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
         \details The procedure uses the bisection method. The parameter is assumed as having separable safe and unsafe intervals in its range.
-        The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
-		bisection search.
         \return The intervals of safety and unsafety. */
 	std::pair<Interval,Interval> parametric_safety_1d_bisection(SystemVerificationInfo& verInfo,
-										 							  const RealConstant& parameter,
-										 							  const Float& tolerance) const;
+										 					    const RealConstant& parameter) const;
 
 	/**
-	 * \brief Performs a parametric verification on two parameters \a xParam, \a yParam,
-	 * discretizing with \a numPointsPerAxis points for each axis.
+	 * \brief Performs a parametric verification on two parameters \a xParam, \a yParam.
 	 * \details The procedure uses the bisection method. Saves the results in a file called "<systemName>-<xName>-<yName>" and
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
 	Parametric2DBisectionResults parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
-								 const RealConstant& xParam,
-								 const RealConstant& yParam,
-								 const Float& tolerance,
-								 const unsigned& numPointsPerAxis) const;
+																const RealConstant& xParam,
+																const RealConstant& yParam) const;
 
 	/**
 	 * \brief Performs a parametric verification on a set of two parameters \a params, by using bisection.
 	 */
 	Parametric2DBisectionResults parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
-												   const RealConstantSet& params,
-												   const Float& tolerance,
-												   const unsigned& numPointsPerAxis) const;
+																const RealConstantSet& params) const;
 
 	/**
 	 * \brief Performs a parametric verification on a set of parameters \a params, by partitioning the parameters space.
@@ -156,8 +149,7 @@ class Verifier
 	 * being restored to its initial conditions by the end of the method.
 	 */
 	ParametricPartitioningOutcomeList parametric_safety_partitioning(SystemVerificationInfo& verInfo,
-													   const RealConstantSet& params,
-													   const uint& logNumIntervalsPerParam) const;
+													   const RealConstantSet& params) const;
 
 	//@}
 
@@ -180,8 +172,7 @@ class Verifier
         \return The intervals of safety and unsafety. */
 	std::pair<Interval,Interval> parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 			  	  	  	  	  	  	  	  	  	  	  	  	  	   SystemVerificationInfo& dominated,
-										 						   const RealConstant& parameter,
-										 						   const Float& tolerance) const;
+										 						   const RealConstant& parameter) const;
 	/**
 	 * \brief Performs a parametric dominance checking on two parameters \a xParam, \a yParam,
 	 * discretizing with \a numPointsPerAxis points for each axis.
@@ -192,18 +183,14 @@ class Verifier
 	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 																   SystemVerificationInfo& dominated,
 																   const RealConstant& xParam,
-																   const RealConstant& yParam,
-																   const Float& tolerance,
-																   const unsigned& numPointsPerAxis) const;
+																   const RealConstant& yParam) const;
 
 	/**
 	 * \brief Performs a parametric dominance checking on a set of two parameters \a params, by using bisection.
 	 */
 	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 																   SystemVerificationInfo& dominated,
-																   const RealConstantSet& params,
-																   const Float& tolerance,
-																   const unsigned& numPointsPerAxis) const;
+																   const RealConstantSet& params) const;
 
 	/**
 	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
@@ -214,15 +201,14 @@ class Verifier
 	 */
 	ParametricPartitioningOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 																	    SystemVerificationInfo& dominated,
-																	    const RealConstantSet& dominating_params,
-																	    const uint& logNumIntervalsPerParam) const;
+																	    const RealConstantSet& dominating_params) const;
 
 	//@}
 
   private:
 
 	//@{
-	//! \name Basic verification methods
+	//! \name Safety methods
 
 	/*! \brief Prove (once, i.e. for a given grid depth) that the the reachable set of \a system starting in \a initial_set
 	 * definitely remains in the \a safe region. */
@@ -256,57 +242,23 @@ class Verifier
 	tribool _safety_nosplitting(SystemVerificationInfo& verInfo,
 							 const RealConstantSet& locked_constants) const;
 
-	//@}
-
-	/*! \brief Shows the verification \a result into the standard output. */
-	void _log_verification_result(const tribool& result) const;
-
-	/* \brief Processes the \a result in order to update the \a positive_int interval, possibly updating \a negative_int too. */
-	void _process_positive_bisection_result(const tribool& result,
-											Interval& positive_int,
-										    Interval& negative_int,
-											const Float& current_value,
-											const bool& safeOnBottom) const;
-
-	/*! \brief Processes the \a result in order to update the \a negative_int interval, possibly updating \a positive_int too. */
-	void _process_negative_bisection_result(const tribool& result,
-											Interval& positive_int,
-										    Interval& negative_int,
-											const Float& current_value,
-											const bool& safeOnBottom) const;
-
-	/*! \brief Converts the positive/negative search intervals into positive/negative bounds.
-	 * \details The result is obtained by knowing the range of the parameter \a parameter_range and the side where
-	 * positive values hold, deduced from \a positiveOnBottom. */
-	std::pair<Interval,Interval> _pos_neg_bounds_from_search_intervals(const Interval& positive_int,
-												 	 	 	 	 	 	 	  const Interval& negative_int,
-												 	 	 	 	 	 	 	  const Interval& parameter_range,
-												 	 	 	 	 	 	 	  const bool& positiveOnBottom) const;
-
 	/*! \brief Performs one verification sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
 	void _parametric_safety_2d_bisection_sweep(Parametric2DBisectionResults& results,
 						  	  	  	    SystemVerificationInfo& verInfo,
 						  	  	  	    RealConstant xParam,
 						  	  	  	    RealConstant yParam,
-						  	  	  	    const Float& tolerance,
-						  	  	  	    const uint& numPointsPerAxis,
 						  	  	  	    bool sweepOnX) const;
 
-	/*! \brief Performs one dominance sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
-	void _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
-						  	  	  	    		  SystemVerificationInfo& dominating,
-						  	  	  	    		  SystemVerificationInfo& dominated,
-						  	  	  	    		  RealConstant xParam,
-						  	  	  	    		  RealConstant yParam,
-						  	  	  	    		  const Float& tolerance,
-						  	  	  	    		  const uint& numPointsPerAxis,
-						  	  	  	    		  bool sweepOnX) const;
+	//@}
+
+	//@{
+	//! \name Dominance methods
 
 	/*! \brief Set the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
 	 * that must be ignore when choosing the splitting factors of the system. */
-	void _setDominanceParameters(HybridReachabilityAnalyser& analyser,
-								 SystemVerificationInfo& systemBundle,
-								 const RealConstantSet& lockedConstants) const;
+	void _setDominanceParameters(SystemVerificationInfo& systemBundle,
+								 const RealConstantSet& lockedConstants,
+								 Semantics semantics) const;
 
 	/**
 	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system.
@@ -340,18 +292,64 @@ class Verifier
 							 SystemVerificationInfo& dominated,
 							 const RealConstantSet& dominatingLockedConstants) const;
 
+	/*! \brief Performs one dominance sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
+	void _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
+						  	  	  	    		  SystemVerificationInfo& dominating,
+						  	  	  	    		  SystemVerificationInfo& dominated,
+						  	  	  	    		  RealConstant xParam,
+						  	  	  	    		  RealConstant yParam,
+						  	  	  	    		  bool sweepOnX) const;
+
+	//@}
+
+	//@{
+	//! \name Other helper methods
+
+	/* \brief Processes the \a result in order to update the \a positive_int interval, possibly updating \a negative_int too. */
+	void _process_positive_bisection_result(const tribool& result,
+											Interval& positive_int,
+										    Interval& negative_int,
+											const Float& current_value,
+											const bool& safeOnBottom) const;
+
+	/*! \brief Processes the \a result in order to update the \a negative_int interval, possibly updating \a positive_int too. */
+	void _process_negative_bisection_result(const tribool& result,
+											Interval& positive_int,
+										    Interval& negative_int,
+											const Float& current_value,
+											const bool& safeOnBottom) const;
+
+	/*! \brief Set the initial evolution parameters of the proper analyser, given the \a semantics.*/
+	void _setInitialParameters(HybridAutomaton& system,
+							   const HybridBoxes& domain,
+							   const HybridBoxes& safe,
+							   const RealConstantSet& locked_constants,
+							   Semantics semantics) const;
+
+	/*! \brief Set the parameters for the next iterative verification step. */
+	void _tuneIterativeStepParameters(HybridAutomaton& system,
+									  const HybridGridTreeSet& bounding_reach,
+									  Semantics semantics) const;
+
+	/*! \brief Checks whether a grid depth value is allowed for use.
+	 *  \details The \a parameters include the actual value and the bounds, while \a msg integrates the internal message
+	 *  "Skipped <msg> since the depth is lower(higher) than the lowest(highest) allowed." */
+	bool _is_grid_depth_within_bounds(std::string msg, const DiscreteEvolutionParameters& parameters) const;
+
+	// Reached region plotting methods
+	void _plot_dirpath_init(const HybridAutomaton& system) const;
+	void _plot(const HybridGridTreeSet& reach, Semantics semantics) const;
+
+	//@}
+
 };
 
-/*! \brief Set the initial evolution parameters of the \a analyser and the grid of the automaton \a system, given the bounding domain \a domain and the safe region \a safe.*/
-void setInitialParameters(HybridReachabilityAnalyser& analyser,
-						  HybridAutomaton& system,
-						  const HybridBoxes& domain,
-						  const HybridBoxes& safe,
-						  const RealConstantSet& locked_constants);
+/* \brief Provides a better printing of a tribool verification result */
+std::string pretty_print(tribool value);
 
-/* \brief Processes the \a positive_int and \a negative_int initial intervals based on the lower and upper results.
- * \return A variable determining if we must proceed further with bisection refining, and another variable determining
- * the bound where positive values are present.
+/*! \brief Processes the \a positive_int and \a negative_int initial intervals based on the lower and upper results.
+ *  \return A variable determining if we must proceed further with bisection refining, and another variable determining
+ *  the bound where positive values are present.
  */
 std::pair<bool,bool> process_initial_bisection_results(Interval& positive_int,
 														Interval& negative_int,
@@ -359,12 +357,20 @@ std::pair<bool,bool> process_initial_bisection_results(Interval& positive_int,
 														const tribool& lower_result,
 														const tribool& upper_result);
 
+/*! \brief Converts the positive/negative search intervals into positive/negative bounds.
+ * \details The result is obtained by knowing the range of the parameter \a parameter_range and the side where
+ * positive values hold, deduced from \a positiveOnBottom. */
+std::pair<Interval,Interval> pos_neg_bounds_from_search_intervals(const Interval& positive_int,
+											 	 	 	 	 	  const Interval& negative_int,
+											 	 	 	 	 	  const Interval& parameter_range,
+											 	 	 	 	 	  bool positiveOnBottom);
+
 /*! \brief Splits the parameters to the maximum based on the \a tolerance
- * \details The \a numIntervalsPerParam is the number of intervals to split for each parameter.
- * \return The resulting split parameters sets.
+ *  \details The \a numIntervalsPerParam is the number of intervals to split for each parameter.
+ *  \return The resulting split parameters sets.
  */
 std::list<RealConstantSet> maximally_split_parameters(const RealConstantSet& params,
-									   	   	   	   	  const uint& numIntervalsPerParam);
+									   	   	   	   	  const uint& maximum_parameter_depth);
 
 }
 

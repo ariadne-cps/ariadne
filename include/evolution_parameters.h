@@ -79,11 +79,6 @@ class ContinuousEvolutionParameters {
     //! \brief The maximum allowable cell of a basic set during integration. 
     //! Decreasing the volume of the cell increases the accuracy of the computation of an over-approximation. 
     Vector<RealType> maximum_enclosure_cell;
-
-	//! \brief The interleaving of events before set model reduction.
-    //! \details The value represents the number of events between two set model reductions: a value of zero implies that a set model is always reduced.
-	//! Used in conjunction with enable_set_model_reduction. 
-	UnsignedIntType set_model_events_size_interleaving;
     
     //! \brief Enable subdivision of basic sets (false by default).
     bool enable_subdivisions;
@@ -91,10 +86,6 @@ class ContinuousEvolutionParameters {
     //! \brief Terminate evolution if basic sets became too large (true by default).
 	//! \details In the case of upper semantics, if true and no subdivisions are present, the set is put into the final sets. In the case of lower semantics, the set is discarded.
     bool enable_premature_termination;
-
-	//! \brief Reduce a set model to the equivalent of its bounding box, every set_model_events_size_interleaving events (false by default).
-	bool enable_set_model_reduction;
-
 };
 
 
@@ -268,10 +259,8 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       minimum_step_size(0.0),
       minimum_enclosure_cell(Vector<RealType>(0)),
       maximum_enclosure_cell(Vector<RealType>(0)),
-	  set_model_events_size_interleaving(0),
       enable_subdivisions(false),
-      enable_premature_termination(true),
-	  enable_set_model_reduction(false)
+      enable_premature_termination(true)
 { }
 
 inline
@@ -306,10 +295,8 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
        << ",\n  hybrid_maximum_step_size=" << p.hybrid_maximum_step_size
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
-       << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
        << ",\n  enable_subdivisions=" << p.enable_subdivisions
        << ",\n  enable_premature_termination=" << p.enable_premature_termination
-       << ",\n  enable_set_model_reduction=" << p.enable_set_model_reduction
        << "\n)\n";
     return os;
 }
@@ -357,7 +344,6 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  hybrid_maximum_step_size=" << p.hybrid_maximum_step_size
        << ",\n  minimum_enclosure_cell=" << p.minimum_enclosure_cell
        << ",\n  maximum_enclosure_cell=" << p.maximum_enclosure_cell
-       << ",\n  set_model_events_size_interleaving=" << p.set_model_events_size_interleaving
 
        << ",\n\n  lock_to_grid_steps=" << p.lock_to_grid_steps
        << ",\n  lock_to_grid_time=" << p.lock_to_grid_time

@@ -258,9 +258,6 @@ _upper_evolution_continuous(EnclosureListType& final_sets,
 		HybridTimedSetType current_set = working_sets.front(); 
 		working_sets.pop_front();
 
-		// Possibly simplifies the current set
-		_set_model_reduction(current_set);
-
         DiscreteState initial_location=current_set.first;
         EventListType initial_events=current_set.second;  	
 		SetModelType initial_set_model=current_set.third;
@@ -316,9 +313,6 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 		// Get the least recent working set, pop it and update the corresponding size
 		HybridTimedSetType current_set = working_sets.front();
 		working_sets.pop_front();
-
-		// Possibly simplifies the current set
-		_set_model_reduction(current_set);
 
         DiscreteState initial_location=current_set.first;
         EventListType initial_events=current_set.second;
@@ -382,9 +376,6 @@ _evolution(EnclosureListType& final_sets,
 		// Get the least recent working set, pop it and update the corresponding size
 		HybridTimedSetType current_set = working_sets.front();
 		working_sets.pop_front();
-
-		// Possibly simplifies the current set
-		_set_model_reduction(current_set);
 
 		// Get the members of the current set
         DiscreteState initial_location=current_set.first;
@@ -1449,20 +1440,6 @@ _isEnclosureTooLarge(const SetModelType& initial_set_model) const
 			return true;
 
 	return false;
-}
-
-
-void
-ImageSetHybridEvolver::
-_set_model_reduction(HybridTimedSetType& timed_set) const
-{
-	if (this->_parameters->enable_set_model_reduction &&
-		!((timed_set.second.size()+1) % (this->_parameters->set_model_events_size_interleaving+1)))
-	{
-		SetModelType new_set_model = this->_toolbox->set_model(ContinuousEnclosureType(timed_set.third.range()));
-		TimeModelType new_time_model = this->_toolbox->time_model(timed_set.fourth.range(),Box(new_set_model.argument_size()));
-		timed_set = make_tuple(timed_set.first,timed_set.second, new_set_model, new_time_model);
-	}
 }
 
 void

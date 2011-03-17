@@ -36,21 +36,6 @@
 
 namespace Ariadne {
 
-//! \brief Statistics on the execution of the evolution methods and the reachability analyses using lower semantics.
-//! \details The statistics are reset at the beginning of any public HybridReachabilityAnalyser analysis method using lower semantics.
-class LowerDiscreteEvolutionStatistics {
-  public:
-  
-    //! \brief Default constructor gives "empty" values. 
-    LowerDiscreteEvolutionStatistics();
-	//! \brief Constructs the lower discrete evolution statistics from existing statistics.
-	LowerDiscreteEvolutionStatistics(const LowerDiscreteEvolutionStatistics& statistics);
-
-	//! \brief The reached region.
-	HybridGridTreeSet reach;
-
-};
-
 //! \brief Statistics on the execution of the evolution methods and the reachability analyses using upper semantics.
 //! \details The statistics are reset at the beginning of any public HybridReachabilityAnalyser analysis method using upper semantics.
 class UpperDiscreteEvolutionStatistics {
@@ -70,8 +55,6 @@ class UpperDiscreteEvolutionStatistics {
 //! \details The statistics are reset at the beginning of any public HybridReachabilityAnalyser analysis method, depending on the semantics.
 class DiscreteEvolutionStatistics {
   public:
-	//! \brief The type of the lower statistics
-	typedef LowerDiscreteEvolutionStatistics LowerDiscreteEvolutionStatisticsType;
 	//! \brief The type of the upper statistics
 	typedef UpperDiscreteEvolutionStatistics UpperDiscreteEvolutionStatisticsType;
 	
@@ -80,32 +63,14 @@ class DiscreteEvolutionStatistics {
 	//! \brief Constructor from existing statistics.
 	DiscreteEvolutionStatistics(const DiscreteEvolutionStatistics& statistics);
 
-    //! \brief A reference to the statistics for lower semantics.
-    LowerDiscreteEvolutionStatisticsType& lower() { return *this->_lower; }
-	//! \brief A constant reference to the statistics for lower semantics.
-    const LowerDiscreteEvolutionStatisticsType& lower() const { return *this->_lower; }
-
     //! \brief A reference to the statistics for upper semantics.
     UpperDiscreteEvolutionStatisticsType& upper() { return *this->_upper; }
 	//! \brief A constant reference to the statistics for upper semantics.
     const UpperDiscreteEvolutionStatisticsType& upper() const { return *this->_upper; }
 
   protected:
-	boost::shared_ptr< LowerDiscreteEvolutionStatisticsType > _lower;
 	boost::shared_ptr< UpperDiscreteEvolutionStatisticsType > _upper;
 };
-
-//! \brief Constructs the default lower discrete evolution statistics.
-inline
-LowerDiscreteEvolutionStatistics::LowerDiscreteEvolutionStatistics() { 
-	reach = HybridGridTreeSet();
-}
-
-//! \brief Constructs the lower discrete evolution statistics from existing statistics.
-inline
-LowerDiscreteEvolutionStatistics::LowerDiscreteEvolutionStatistics(const LowerDiscreteEvolutionStatistics& statistics) : 
-	reach(statistics.reach)
-{ }
 
 //! \brief Constructs the default upper discrete evolution statistics.
 inline
@@ -121,14 +86,12 @@ UpperDiscreteEvolutionStatistics::UpperDiscreteEvolutionStatistics(const UpperDi
 
 //! \brief Constructs the default discrete evolution statistics.
 inline
-DiscreteEvolutionStatistics::DiscreteEvolutionStatistics(): _lower(new LowerDiscreteEvolutionStatisticsType()), 
-															_upper(new UpperDiscreteEvolutionStatisticsType())
+DiscreteEvolutionStatistics::DiscreteEvolutionStatistics(): _upper(new UpperDiscreteEvolutionStatisticsType())
 { }
 
 //! \brief Constructor from existing statistics.
 inline 
-DiscreteEvolutionStatistics::DiscreteEvolutionStatistics(const DiscreteEvolutionStatistics& statistics): _lower(new LowerDiscreteEvolutionStatisticsType(statistics.lower())),
-																								   		 _upper(new UpperDiscreteEvolutionStatisticsType(statistics.upper()))
+DiscreteEvolutionStatistics::DiscreteEvolutionStatistics(const DiscreteEvolutionStatistics& statistics): _upper(new UpperDiscreteEvolutionStatisticsType(statistics.upper()))
 { }
 
 } //!namespace Ariadne

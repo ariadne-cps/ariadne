@@ -22,6 +22,7 @@
  */
 
 #include "ariadne.h"
+#include "taylor_calculus.h"
 #include "examples.h"
 
 using namespace Ariadne;
@@ -37,7 +38,7 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState(2)] = Box(2, 7.5,7.5, 0.5,0.5);
+	initial_set[DiscreteState(2)] = Box(2, 5.5,7.0, 0.5,0.5);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,-0.1,10.0,-0.1,1.1));
@@ -47,22 +48,28 @@ int main(int argc,char *argv[])
 
 	/// Verification
 
-	HybridEvolver evolver;
-	HybridReachabilityAnalyser analyser(evolver);
-	analyser.parameters().highest_maximum_grid_depth = 6;
-	Verifier verifier(analyser);
+	TaylorCalculus outer_integrator(2,2,1e-4);
+	//TaylorCalculus lower_integrator(4,6,1e-10);
+	TaylorCalculus lower_integrator(2,2,1e-4);
+	ImageSetHybridEvolver outer_evolver(outer_integrator);
+	outer_evolver.verbosity = 0;
+	ImageSetHybridEvolver lower_evolver(lower_integrator);
+	HybridReachabilityAnalyser outer_analyser(outer_evolver);
+	outer_analyser.verbosity = 0;
+	HybridReachabilityAnalyser lower_analyser(lower_evolver);
+	outer_analyser.parameters().lowest_maximum_grid_depth = 6;
+	lower_analyser.parameters().lowest_maximum_grid_depth = 6;
+	outer_analyser.parameters().highest_maximum_grid_depth = 7;
+	lower_analyser.parameters().highest_maximum_grid_depth = 7;
+	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.plot_results = true;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 
 	/// Analysis parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("ref",Interval(5,0.6)));
+	parameters.insert(RealConstant("ref",Interval(5.5,6.0)));
 	parameters.insert(RealConstant("Kp",Interval(0.01,0.6)));
-	Float tolerance = 0.1;
-	uint numPointsPerAxis = 11;
-	uint logNumIntervalsPerAxis = 2;
 
 	cout << verifier.safety(verInfo);
 	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);

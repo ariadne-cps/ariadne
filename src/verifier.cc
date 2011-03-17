@@ -101,14 +101,16 @@ Verifier::Verifier(const HybridReachabilityAnalyser& outer_analyser,
 				   const HybridReachabilityAnalyser& lower_analyser) :
 				   _outer_analyser(outer_analyser.clone()),
 				   _lower_analyser(lower_analyser.clone()),
-				   plot_results(false)
+				   plot_results(false),
+				   maximum_parameter_depth(3)
 {
 }
 
 Verifier::Verifier(const HybridReachabilityAnalyser& analyser) :
 				   _outer_analyser(analyser.clone()),
 				   _lower_analyser(analyser.clone()),
-				   plot_results(false)
+				   plot_results(false),
+				   maximum_parameter_depth(3)
 {
 }
 
@@ -125,7 +127,14 @@ _safety_positive_once(SystemType& system,
 {
 	bool result;
 
-	ARIADNE_LOG(4,"Proving... " << (verbosity == 4 ? "" : "\n"));
+	ARIADNE_LOG(4,"Proving...\n");
+
+	DiscreteEvolutionParameters& params = _outer_analyser->parameters();
+
+	if (!_is_grid_depth_within_bounds("proving",params))
+		return false;
+
+	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
 
 	HybridGridTreeSet reach;
 
@@ -133,8 +142,7 @@ _safety_positive_once(SystemType& system,
 	{
 		reach = _outer_analyser->outer_chain_reach_quick_proving(system,initial_set,safe_region);
 
-		if (_outer_analyser->parameters().domain_enforcing_policy == OFFLINE &&
-			definitely(!reach.subset(_outer_analyser->parameters().bounding_domain)))
+		if (params.domain_enforcing_policy == OFFLINE && definitely(!reach.subset(params.bounding_domain)))
 			result = false;
 		else
 			result = definitely(reach.subset(safe_region));
@@ -147,7 +155,10 @@ _safety_positive_once(SystemType& system,
 
 	_outer_analyser->statistics().upper().reach = reach;
 
-	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (result ? "Proved.\n" : "Not proved.\n") );
+	if (plot_results)
+		_plot(reach,UPPER_SEMANTICS);
+
+	ARIADNE_LOG(4, (result ? "Proved.\n" : "Not proved.\n") );
 
 	return result;
 }
@@ -159,17 +170,25 @@ _safety_negative_once(SystemType& system,
 		 const HybridImageSet& initial_set,
 		 const HybridBoxes& safe_region) const
 {
-	ARIADNE_LOG(4,"Disproving... " << (verbosity == 4 ? "" : "\n"));
+	ARIADNE_LOG(4,"Disproving...\n");
+
+	if (!_is_grid_depth_within_bounds("disproving",_lower_analyser->parameters()))
+		return false;
+
+	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
 
 	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData =
 			_lower_analyser->lower_chain_reach(system,initial_set,safe_region);
-	const bool& isDisproved = reachAndDisproveData.second.getIsDisproved();
+	const HybridGridTreeSet& reach = reachAndDisproveData.first;
+	const DisproveData& disproveData = reachAndDisproveData.second;
+	const bool& isDisproved = disproveData.getIsDisproved();
 
-	_lower_analyser->statistics().lower().reach = reachAndDisproveData.first;
+	if (plot_results)
+		_plot(reach,LOWER_SEMANTICS);
 
-	ARIADNE_LOG(4,"Disprove data: " << reachAndDisproveData.second << "\n");
+	ARIADNE_LOG(5,"Disprove data: " << disproveData << "\n");
 
-	ARIADNE_LOG((verbosity == 4 ? 1 : 4), (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
+	ARIADNE_LOG(4, (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
 
 	return isDisproved;
 }
@@ -213,11 +232,11 @@ _safety(SystemVerificationInfo& verInfo, const RealConstant& parameter) const
 {
 	HybridAutomaton& system = verInfo.getSystem();
 
-	Real original_value = system.accessible_constant_value(parameter.name());
+	Real originalParameterValue = system.accessible_constant_value(parameter.name());
 
 	system.substitute(parameter);
 	tribool result = safety(verInfo);
-	system.substitute(parameter,original_value);
+	system.substitute(parameter,originalParameterValue);
 
 	return result;
 }
@@ -235,80 +254,67 @@ _safety(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Fl
 tribool
 Verifier::
 _safety_nosplitting(SystemVerificationInfo& verInfo,
-				 const RealConstantSet& locked_constants) const
+				    const RealConstantSet& locked_constants) const
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
 
 	HybridAutomaton& system = verInfo.getSystem();
 
-	time_t mytime;
-	time(&mytime);
-	string foldername = system.name()+"-png";
-	char mgd_char[10];
-	string filename;
-
-	// Save the folder name as a function of the automaton name and of the current timestamp, then create the main folder and the verification run folder
 	if (plot_results)
-	{
-		mkdir(foldername.c_str(),0777);
-		string timestring = asctime(localtime(&mytime));
-		timestring.erase(std::remove(timestring.begin(), timestring.end(), '\n'), timestring.end());
-		foldername = foldername+"/"+timestring;
-		mkdir(foldername.c_str(),0777);
-	}
+		_plot_dirpath_init(system);
 
-	// Reset the reach statistics
 	_outer_analyser->resetStatistics();
-	_lower_analyser->resetStatistics();
 
 	// Set the initial parameters
-	setInitialParameters(*_outer_analyser,system, verInfo.getDomain(), verInfo.getSafeRegion(), locked_constants);
-	setInitialParameters(*_lower_analyser,system, verInfo.getDomain(), verInfo.getSafeRegion(), locked_constants);
+	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),locked_constants,UPPER_SEMANTICS);
+	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),locked_constants,LOWER_SEMANTICS);
 
-    for(int depth = _outer_analyser->parameters().lowest_maximum_grid_depth;
-    	depth <= _outer_analyser->parameters().highest_maximum_grid_depth;
-    	++depth)
+	int initial_depth = min(_outer_analyser->parameters().lowest_maximum_grid_depth,
+							_lower_analyser->parameters().lowest_maximum_grid_depth);
+	int final_depth = max(_outer_analyser->parameters().highest_maximum_grid_depth,
+						  _lower_analyser->parameters().highest_maximum_grid_depth);
+    for (int depth = initial_depth; depth <= final_depth; ++depth)
 	{
     	_outer_analyser->parameters().maximum_grid_depth = depth;
     	_lower_analyser->parameters().maximum_grid_depth = depth;
 
-    	sprintf(mgd_char,"%i", depth);
 		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
 
-		// Tune the parameters for the current iteration
-		_outer_analyser->tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach);
-		_lower_analyser->tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach);
+		_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
+		_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
 
-		// Perform the verification
 		tribool result = _safety_once(system,verInfo.getInitialSet(),verInfo.getSafeRegion());
 
-		// Plot the results, if desired
-		if (plot_results)
-		{
-			// Plot the upper region
-			filename = "upper-";
-			plot(foldername,filename + mgd_char, _outer_analyser->statistics().upper().reach);
-			// Plot the lower region, if the result is not true (otherwise the lower region has not been computed on this iteration)
-			filename = "lower-";
-			if (!definitely(result))
-				plot(foldername,filename + mgd_char, _lower_analyser->statistics().lower().reach);
-		}
-
-		// Return the result, if it is not indeterminate
-		if (!indeterminate(result)) return result;
+		if (!indeterminate(result))
+			return result;
     }
 
 	// Return indeterminate
 	return indeterminate;
 }
 
+bool
+Verifier::
+_is_grid_depth_within_bounds(std::string msg, const DiscreteEvolutionParameters& parameters) const
+{
+	if (parameters.maximum_grid_depth < parameters.lowest_maximum_grid_depth) {
+		ARIADNE_LOG(4,"Skipped " << msg << " since the depth is lower than the lowest allowed.\n");
+		return false;
+	}
+	if (parameters.maximum_grid_depth > parameters.highest_maximum_grid_depth) {
+		ARIADNE_LOG(4,"Skipped " << msg << " since the depth is higher than the highest allowed.\n");
+		return false;
+	}
+
+	return true;
+}
+
 std::pair<Interval,Interval>
 Verifier::
 parametric_safety_1d_bisection(SystemVerificationInfo& verInfo,
-						   	   	   	 const RealConstant& parameter,
-						   	   	   	 const Float& tolerance) const
+						   	   	   	 const RealConstant& parameter) const
 {
-	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
+	float tolerance = 1.0/(1 << this->maximum_parameter_depth);
 
 	HybridAutomaton& system = verInfo.getSystem();
 
@@ -328,12 +334,12 @@ parametric_safety_1d_bisection(SystemVerificationInfo& verInfo,
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
 	tribool lower_result = _safety(verInfo,parameter,parameter_range.lower());
-	_log_verification_result(lower_result);
+	ARIADNE_LOG(1,pretty_print(lower_result) << ".\n");
 
 	// Check the upper bound
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
 	tribool upper_result = _safety(verInfo,parameter,parameter_range.upper());
-	_log_verification_result(upper_result);
+	ARIADNE_LOG(1,pretty_print(upper_result) << ".\n");
 
 	// If we must proceed with bisection refining
 	bool proceed;
@@ -380,15 +386,13 @@ parametric_safety_1d_bisection(SystemVerificationInfo& verInfo,
 
 	system.substitute(parameter,original_value);
 
-	return _pos_neg_bounds_from_search_intervals(safety_int,unsafety_int,parameter_range,safeOnBottom);
+	return pos_neg_bounds_from_search_intervals(safety_int,unsafety_int,parameter_range,safeOnBottom);
 }
 
 Parametric2DBisectionResults
 Verifier::
 parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
-									 const RealConstantSet& params,
-									 const Float& tolerance,
-									 const unsigned& numPointsPerAxis) const
+									 const RealConstantSet& params) const
 {
 	ARIADNE_ASSERT_MSG(params.size() == 2,"Provide exactly two parameters.");
 
@@ -397,27 +401,26 @@ parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 	const RealConstant& xParam = *param_it;
 	const RealConstant& yParam = *(++param_it);
 
-	return parametric_safety_2d_bisection(verInfo,xParam,yParam,tolerance,numPointsPerAxis);
+	return parametric_safety_2d_bisection(verInfo,xParam,yParam);
 }
 
 Parametric2DBisectionResults
 Verifier::
 parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 									 const RealConstant& xParam,
-									 const RealConstant& yParam,
-									 const Float& tolerance,
-									 const unsigned& numPointsPerAxis) const
+									 const RealConstant& yParam) const
 {
 	// Generates the file name
 	std::string filename = verInfo.getSystem().name();
 	filename = filename + "[" + xParam.name() + "," + yParam.name() + "]";
 
 	// Initializes the results
+	uint numPointsPerAxis = 1+(1<<this->maximum_parameter_depth);
 	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
 
 	// Sweeps on each axis
-	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, true);
-	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, tolerance, numPointsPerAxis, false);
+	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, true);
+	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, false);
 
 	return results;
 }
@@ -425,8 +428,7 @@ parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 ParametricPartitioningOutcomeList
 Verifier::
 parametric_safety_partitioning(SystemVerificationInfo& verInfo,
-									 const RealConstantSet& params,
-									 const uint& numIntervalsPerParam) const
+									 const RealConstantSet& params) const
 {
 	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter.");
 
@@ -434,7 +436,7 @@ parametric_safety_partitioning(SystemVerificationInfo& verInfo,
 
 	RealConstantSet original_constants = verInfo.getSystem().accessible_constants();
 
-	std::list<RealConstantSet> splittings = maximally_split_parameters(params,numIntervalsPerParam);
+	std::list<RealConstantSet> splittings = maximally_split_parameters(params,this->maximum_parameter_depth);
 	uint i=0;
 	for (std::list<RealConstantSet>::const_iterator splitting_it = splittings.begin();
 													 splitting_it != splittings.end();
@@ -445,7 +447,7 @@ parametric_safety_partitioning(SystemVerificationInfo& verInfo,
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
 		verInfo.getSystem().substitute(current_params);
 		tribool outcome = _safety_nosplitting(verInfo,params);
-		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
+		ARIADNE_LOG(1,"Outcome: " << pretty_print(outcome) << "\n");
 		result.push_back(ParametricPartitioningOutcome(current_params,outcome));
 	}
 
@@ -496,10 +498,9 @@ std::pair<Interval,Interval>
 Verifier::
 parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 								  SystemVerificationInfo& dominated,
-						   	   	  const RealConstant& parameter,
-						   	   	  const Float& tolerance) const
+						   	   	  const RealConstant& parameter) const
 {
-	ARIADNE_ASSERT(tolerance > 0 && tolerance < 1);
+	float tolerance = 1.0/(1 << this->maximum_parameter_depth);
 
 	HybridAutomaton& system = dominating.getSystem();
 
@@ -519,12 +520,12 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
 	tribool lower_result = _dominance(dominating,dominated,parameter,parameter_range.lower());
-	_log_verification_result(lower_result);
+	ARIADNE_LOG(1,pretty_print(lower_result) << ".\n");
 
 	// Check the upper bound
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
 	tribool upper_result = _dominance(dominating,dominated,parameter,parameter_range.upper());
-	_log_verification_result(upper_result);
+	ARIADNE_LOG(1,pretty_print(upper_result) << ".\n");
 
 	// If we must proceed with bisection refining
 	bool proceed;
@@ -571,16 +572,14 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 
 	system.substitute(parameter,original_value);
 
-	return _pos_neg_bounds_from_search_intervals(dominating_int,nondominating_int,parameter_range,dominatingOnBottom);
+	return pos_neg_bounds_from_search_intervals(dominating_int,nondominating_int,parameter_range,dominatingOnBottom);
 }
 
 Parametric2DBisectionResults
 Verifier::
 parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 								  SystemVerificationInfo& dominated,
-								  const RealConstantSet& params,
-								  const Float& tolerance,
-								  const unsigned& numPointsPerAxis) const
+								  const RealConstantSet& params) const
 {
 	ARIADNE_ASSERT_MSG(params.size() == 2,"Provide exactly two parameters.");
 
@@ -589,7 +588,7 @@ parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 	const RealConstant& xParam = *param_it;
 	const RealConstant& yParam = *(++param_it);
 
-	return parametric_dominance_2d_bisection(dominating,dominated,xParam,yParam,tolerance,numPointsPerAxis);
+	return parametric_dominance_2d_bisection(dominating,dominated,xParam,yParam);
 }
 
 Parametric2DBisectionResults
@@ -597,20 +596,19 @@ Verifier::
 parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 								  SystemVerificationInfo& dominated,
 								  const RealConstant& xParam,
-								  const RealConstant& yParam,
-								  const Float& tolerance,
-								  const unsigned& numPointsPerAxis) const
+								  const RealConstant& yParam) const
 {
 	// Generates the file name
 	std::string filename = dominating.getSystem().name() + "&" + dominated.getSystem().name();
 	filename = filename + "[" + xParam.name() + "," + yParam.name() + "]";
 
 	// Initializes the results
+	uint numPointsPerAxis = (1 << this->maximum_parameter_depth);
 	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
 
 	// Sweeps on each axis
-	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, tolerance, numPointsPerAxis, true);
-	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, tolerance, numPointsPerAxis, false);
+	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, true);
+	_parametric_dominance_2d_bisection_sweep(results, dominating, dominated, xParam, yParam, false);
 
 	return results;
 }
@@ -620,8 +618,7 @@ ParametricPartitioningOutcomeList
 Verifier::
 parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 								  SystemVerificationInfo& dominated,
-								  const RealConstantSet& dominating_params,
-								  const uint& numIntervalsPerParam) const
+								  const RealConstantSet& dominating_params) const
 {
 	ARIADNE_ASSERT_MSG(dominating_params.size() > 0, "Provide at least one parameter.");
 
@@ -630,7 +627,7 @@ parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 
 	RealConstantSet original_constants = dominating.getSystem().accessible_constants();
 
-	std::list<RealConstantSet> splittings = maximally_split_parameters(dominating_params,numIntervalsPerParam);
+	std::list<RealConstantSet> splittings = maximally_split_parameters(dominating_params,this->maximum_parameter_depth);
 	uint i=0;
 	for (std::list<RealConstantSet>::const_iterator splitting_it = splittings.begin();
 													 splitting_it != splittings.end();
@@ -641,22 +638,13 @@ parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
 		dominating.getSystem().substitute(current_params);
 		tribool outcome = _dominance(dominating,dominated,dominating_params);
-		ARIADNE_LOG(1,"Outcome: " << outcome << "\n");
+		ARIADNE_LOG(1,"Outcome: " << pretty_print(outcome) << "\n");
 		result.push_back(ParametricPartitioningOutcome(current_params,outcome));
 	}
 
 	dominating.getSystem().substitute(original_constants);
 
 	return result;
-}
-
-void
-Verifier::
-_log_verification_result(const tribool& result) const
-{
-	if (definitely(result)) { ARIADNE_LOG(1,"True.\n"); }
-	else if (!possibly(result)) { ARIADNE_LOG(1,"False.\n"); }
-	else ARIADNE_LOG(1,"Indeterminate.\n");
 }
 
 void
@@ -761,33 +749,15 @@ Verifier::_process_negative_bisection_result(const tribool& result,
 }
 
 
-std::pair<Interval,Interval>
-Verifier::_pos_neg_bounds_from_search_intervals(const Interval& positive_int,
-												const Interval& negative_int,
-												const Interval& parameter_range,
-												const bool& positiveOnBottom) const
-{
-	Interval positive_result, negative_result;
-
-	if (positiveOnBottom) {
-		positive_result = (positive_int.empty() ? positive_int : Interval(parameter_range.lower(),positive_int.lower()));
-		negative_result = (negative_int.empty() ? negative_int : Interval(negative_int.upper(),parameter_range.upper())); }
-	else {
-		positive_result = (positive_int.empty() ? positive_int : Interval(positive_int.upper(),parameter_range.upper()));
-		negative_result = (negative_int.empty() ? negative_int : Interval(parameter_range.lower(),negative_int.lower())); }
-
-	return make_pair<Interval,Interval>(positive_result,negative_result);
-}
-
 void Verifier::_parametric_safety_2d_bisection_sweep(Parametric2DBisectionResults& results,
 					  	  	  	    					   SystemVerificationInfo& verInfo,
 					  	  	  	    					   RealConstant xParam,
 					  	  	  	    					   RealConstant yParam,
-					  	  	  	    					   const Float& tolerance,
-					  	  	  	    					   const uint& numPointsPerAxis,
 					  	  	  	    					   bool sweepOnX) const
 {
 	HybridAutomaton& system = verInfo.getSystem();
+
+	uint numPointsPerAxis = 1+(1 << this->maximum_parameter_depth);
 
 	RealConstant& sweepParam = (sweepOnX ? xParam : yParam);
 	RealConstant& otherParam = (sweepOnX ? yParam : xParam);
@@ -807,7 +777,7 @@ void Verifier::_parametric_safety_2d_bisection_sweep(Parametric2DBisectionResult
 		ARIADNE_LOG(1,"\nAnalysis with " << sweepParam.name() << " = " << sweepParam.value().lower() << "...\n");
 
 		// Performs the analysis on the other axis and adds to the results of the sweep variable
-		std::pair<Interval,Interval> result = parametric_safety_1d_bisection(verInfo,otherParam,tolerance);
+		std::pair<Interval,Interval> result = parametric_safety_1d_bisection(verInfo,otherParam);
 		if (sweepOnX)
 			results.insertXValue(result);
 		else
@@ -827,11 +797,11 @@ _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
 					  	  	  	    	 SystemVerificationInfo& dominated,
 					  	  	  	    	 RealConstant xParam,
 					  	  	  	    	 RealConstant yParam,
-					  	  	  	    	 const Float& tolerance,
-					  	  	  	    	 const uint& numPointsPerAxis,
 					  	  	  	    	 bool sweepOnX) const
 {
 	HybridAutomaton& system = dominating.getSystem();
+
+	uint numPointsPerAxis = (1 << this->maximum_parameter_depth);
 
 	RealConstant& sweepParam = (sweepOnX ? xParam : yParam);
 	RealConstant& otherParam = (sweepOnX ? yParam : xParam);
@@ -851,7 +821,7 @@ _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
 		ARIADNE_LOG(1,"\nAnalysis with " << sweepParam.name() << " = " << sweepParam.value().lower() << "...\n");
 
 		// Performs the analysis on the other axis and adds to the results of the sweep variable
-		std::pair<Interval,Interval> result = parametric_dominance_1d_bisection(dominating,dominated,otherParam,tolerance);
+		std::pair<Interval,Interval> result = parametric_dominance_1d_bisection(dominating,dominated,otherParam);
 		if (sweepOnX)
 			results.insertXValue(result);
 		else
@@ -862,24 +832,6 @@ _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
 
 	// Restores the original value
 	system.substitute(sweepParam,originalSweepValue);
-}
-
-void
-Verifier::
-_setDominanceParameters(HybridReachabilityAnalyser& analyser,
-						SystemVerificationInfo& verInfo,
-						const RealConstantSet& lockedConstants) const
-{
-	_outer_analyser->resetStatistics();
-	_lower_analyser->resetStatistics();
-	// Domain
-	analyser.parameters().bounding_domain = verInfo.getDomain();
-	// General parameters
-	analyser.tuneIterativeStepParameters(verInfo.getSystem(),_outer_analyser->statistics().upper().reach);
-	// Lock to grid time
-	analyser.parameters().lock_to_grid_time = getLockToGridTime(verInfo.getSystem(),analyser.parameters().bounding_domain);
-	// Split factors
-	analyser.parameters().split_factors = getSplitFactorsOfConstants(verInfo.getSystem(),lockedConstants,0.1,analyser.parameters().bounding_domain);
 }
 
 tribool
@@ -896,9 +848,11 @@ Verifier::_dominance(SystemVerificationInfo& dominating,
 	_lower_analyser->parameters().enable_quick_disproving = false;
 	_outer_analyser->parameters().enable_quick_proving = true;
 
-    for(int depth = _outer_analyser->parameters().lowest_maximum_grid_depth;
-	    depth <= _outer_analyser->parameters().highest_maximum_grid_depth;
-	    ++depth)
+	int initial_depth = max(_outer_analyser->parameters().lowest_maximum_grid_depth,
+							_lower_analyser->parameters().lowest_maximum_grid_depth);
+	int final_depth = min(_outer_analyser->parameters().highest_maximum_grid_depth,
+						  _lower_analyser->parameters().highest_maximum_grid_depth);
+    for (int depth = initial_depth; depth <= final_depth; ++depth)
 	{
     	_outer_analyser->parameters().maximum_grid_depth = depth;
     	_lower_analyser->parameters().maximum_grid_depth = depth;
@@ -933,26 +887,29 @@ Verifier::_dominance_positive(SystemVerificationInfo& dominating,
 	try {
 		ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
 
-		_setDominanceParameters(*_outer_analyser,dominating,dominatingLockedConstants);
+		_setDominanceParameters(dominating,dominatingLockedConstants,UPPER_SEMANTICS);
+
 		HybridGridTreeSet dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet());
+		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
+
+		ARIADNE_LOG(4,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
 
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
 
 		HybridGridTreeSet dominated_reach;
 		RealConstantSet emptyLockedConstants;
 		DisproveData disproveData(dominated.getSystem().state_space());
-		_setDominanceParameters(*_lower_analyser,dominated,emptyLockedConstants);
+		_setDominanceParameters(dominated,emptyLockedConstants,LOWER_SEMANTICS);
 		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) =
 				_lower_analyser->lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
 		// We must shrink the lower approximation of the the dominated system, but underapproximating in terms of rounding
 		HybridBoxes shrinked_dominated_bounds = Ariadne::shrink_in(disproveData.getReachBounds(),disproveData.getEpsilon());
 
-		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
 		Box projected_shrinked_dominated_bounds = Ariadne::project(shrinked_dominated_bounds,dominated.getProjection());
 
 		ARIADNE_LOG(4,"Epsilon: " << disproveData.getEpsilon() << "\n");
-		ARIADNE_LOG(4,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
+
 		ARIADNE_LOG(4,"Projected shrinked dominated bounds: " << projected_shrinked_dominated_bounds << "\n");
 
 		result = inside(projected_dominating_bounds,projected_shrinked_dominated_bounds);
@@ -978,14 +935,17 @@ Verifier::_dominance_negative(SystemVerificationInfo& dominating,
 		ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
-		_setDominanceParameters(*_outer_analyser,dominated,emptyLockedConstants);
+		_setDominanceParameters(dominated,emptyLockedConstants,UPPER_SEMANTICS);
 		HybridGridTreeSet dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet());
+		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
+
+		ARIADNE_LOG(4,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
 
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
 
 		HybridGridTreeSet dominating_reach;
 		DisproveData disproveData(dominating.getSystem().state_space());
-		_setDominanceParameters(*_lower_analyser,dominating,dominatingLockedConstants);
+		_setDominanceParameters(dominating,dominatingLockedConstants,LOWER_SEMANTICS);
 		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) =
 				_lower_analyser->lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
@@ -993,11 +953,10 @@ Verifier::_dominance_negative(SystemVerificationInfo& dominating,
 		HybridBoxes shrinked_dominating_bounds = Ariadne::shrink_out(disproveData.getReachBounds(),disproveData.getEpsilon());
 
 		Box projected_shrinked_dominating_bounds = Ariadne::project(shrinked_dominating_bounds,dominating.getProjection());
-		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
+
 
 		ARIADNE_LOG(4,"Epsilon: " << disproveData.getEpsilon() << "\n");
 		ARIADNE_LOG(4,"Projected shrinked dominating bounds: " << projected_shrinked_dominating_bounds << "\n");
-		ARIADNE_LOG(4,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
 
 		result = !inside(projected_shrinked_dominating_bounds,projected_dominated_bounds);
 	}
@@ -1010,23 +969,99 @@ Verifier::_dominance_negative(SystemVerificationInfo& dominating,
 }
 
 void
-setInitialParameters(HybridReachabilityAnalyser& analyser,
-					 HybridAutomaton& system,
-					 const HybridBoxes& domain,
-					 const HybridBoxes& safe_region,
-					 const RealConstantSet& locked_constants)
+Verifier::
+_setInitialParameters(HybridAutomaton& system,
+					  const HybridBoxes& domain,
+					  const HybridBoxes& safe_region,
+					  const RealConstantSet& locked_constants,
+					  Semantics semantics) const
 {
-	// Set the domain
-	analyser.parameters().bounding_domain = domain;
-	//ARIADNE_LOG(3, "Domain: " << domain << "\n");
-	// Set the lock to grid time
-	analyser.parameters().lock_to_grid_time = getLockToGridTime(system,domain);
-	//ARIADNE_LOG(3, "Lock to grid time: " << analyser.parameters().lock_to_grid_time << "\n");
-	// Set the split factors
-	analyser.parameters().split_factors = getSplitFactorsOfConstants(system,locked_constants,0.1,domain);
-	//ARIADNE_LOG(3, "Split factors: " << analyser.parameters().split_factors << "\n");
+	ARIADNE_LOG(3,"Setting initial parameters of the " << (semantics == UPPER_SEMANTICS ? "outer " : "lower ") << "analyser...\n");
+	DiscreteEvolutionParameters& parameters = (semantics == UPPER_SEMANTICS ?
+											   _outer_analyser->parameters() : _lower_analyser->parameters());
+	parameters.bounding_domain = domain;
+	ARIADNE_LOG(4, "Domain: " << domain << "\n");
+	parameters.lock_to_grid_time = getLockToGridTime(system,domain);
+	ARIADNE_LOG(4, "Lock to grid time: " << parameters.lock_to_grid_time << "\n");
+	parameters.split_factors = getSplitFactorsOfConstants(system,locked_constants,0.1,domain);
+	ARIADNE_LOG(4, "Split factors: " << parameters.split_factors << "\n");
 }
 
+
+void
+Verifier::
+_tuneIterativeStepParameters(HybridAutomaton& system,
+							 const HybridGridTreeSet& bounding_reach,
+							 Semantics semantics) const
+{
+	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
+	HybridFloatVector hmad = getHybridMaximumAbsoluteDerivatives(system,bounding_reach,analyser.parameters().bounding_domain);
+	ARIADNE_LOG(4, "Derivative bounds: " << hmad << "\n");
+	system.set_grid(getHybridGrid(hmad,analyser.parameters().bounding_domain));
+	ARIADNE_LOG(4, "Grid: " << system.grid() << "\n");
+	analyser.tuneEvolverParameters(system,hmad,analyser.parameters().maximum_grid_depth,semantics);
+}
+
+void
+Verifier::
+_setDominanceParameters(SystemVerificationInfo& verInfo,
+						const RealConstantSet& lockedConstants,
+						Semantics semantics) const
+{
+	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
+
+	_outer_analyser->resetStatistics();
+
+	analyser.parameters().bounding_domain = verInfo.getDomain();
+	ARIADNE_LOG(4, "Domain: " << analyser.parameters().bounding_domain << "\n");
+	// TODO: exploit actual upper reach results for grid refinement
+	_tuneIterativeStepParameters(verInfo.getSystem(),_outer_analyser->statistics().upper().reach,semantics);
+	analyser.parameters().lock_to_grid_time = getLockToGridTime(verInfo.getSystem(),analyser.parameters().bounding_domain);
+	ARIADNE_LOG(4, "Lock to grid time: " << analyser.parameters().lock_to_grid_time << "\n");
+	analyser.parameters().split_factors = getSplitFactorsOfConstants(verInfo.getSystem(),lockedConstants,0.1,analyser.parameters().bounding_domain);
+	ARIADNE_LOG(4, "Split factors: " << analyser.parameters().split_factors << "\n");
+}
+
+void
+Verifier::
+_plot_dirpath_init(const HybridAutomaton& system) const
+{
+	time_t mytime;
+	time(&mytime);
+	string foldername = system.name()+"-png";
+
+	mkdir(foldername.c_str(),0777);
+	string timestring = asctime(localtime(&mytime));
+	timestring.erase(std::remove(timestring.begin(), timestring.end(), '\n'), timestring.end());
+	foldername = foldername+"/"+timestring;
+	mkdir(foldername.c_str(),0777);
+
+	_plot_dirpath = foldername;
+}
+
+void
+Verifier::
+_plot(const HybridGridTreeSet& reach,
+	  Semantics semantics) const
+{
+	int maximum_grid_depth = (semantics == UPPER_SEMANTICS ?
+							   _outer_analyser->parameters().maximum_grid_depth : _lower_analyser->parameters().maximum_grid_depth);
+	char mgd_char[10];
+	sprintf(mgd_char,"%i",maximum_grid_depth);
+	string filename = (semantics == UPPER_SEMANTICS ? "outer-" : "lower-");
+	filename.append(mgd_char);
+	plot(_plot_dirpath,filename,reach);
+}
+
+std::string
+pretty_print(tribool value)
+{
+	if (definitely(value))
+		return "True";
+	if (!possibly(value))
+		return "False";
+	return "Indeterminate";
+}
 
 std::pair<bool,bool>
 process_initial_bisection_results(Interval& positive_int,
@@ -1079,9 +1114,27 @@ process_initial_bisection_results(Interval& positive_int,
 	return std::pair<bool,bool>(proceed,positiveOnBottom);
 }
 
+std::pair<Interval,Interval>
+pos_neg_bounds_from_search_intervals(const Interval& positive_int,
+									 const Interval& negative_int,
+									 const Interval& parameter_range,
+									 bool positiveOnBottom)
+{
+	Interval positive_result, negative_result;
+
+	if (positiveOnBottom) {
+		positive_result = (positive_int.empty() ? positive_int : Interval(parameter_range.lower(),positive_int.lower()));
+		negative_result = (negative_int.empty() ? negative_int : Interval(negative_int.upper(),parameter_range.upper())); }
+	else {
+		positive_result = (positive_int.empty() ? positive_int : Interval(positive_int.upper(),parameter_range.upper()));
+		negative_result = (negative_int.empty() ? negative_int : Interval(parameter_range.lower(),negative_int.lower())); }
+
+	return make_pair<Interval,Interval>(positive_result,negative_result);
+}
+
 std::list<RealConstantSet>
 maximally_split_parameters(const RealConstantSet& params,
-						   const uint& logNumIntervalsPerParam)
+						   const uint& maximum_parameter_depth)
 {
 	std::list<RealConstantSet> source;
 	std::list<RealConstantSet> destination;
@@ -1091,7 +1144,7 @@ maximally_split_parameters(const RealConstantSet& params,
 										 param_it != params.end();
 										 ++param_it)
 	{
-		for (uint i=0; i<logNumIntervalsPerParam; i++) {
+		for (uint i=0; i<maximum_parameter_depth; i++) {
 			source.clear();
 			source.insert<std::list<RealConstantSet>::const_iterator>(source.begin(),destination.begin(),destination.end());
 			destination.clear();

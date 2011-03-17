@@ -285,9 +285,9 @@ void plot(const string& foldername, const string& filename, const SET& set)
 						// If there are more than two variables, prints the variable numbers
 						char num_char[6] = "";
 						if (numvar>2)
-							sprintf(num_char,"[%u,%u]",x,y);
+							sprintf(num_char,"-[%u,%u]",x,y);
 						// Writes the figure file
-						fig.write((foldername+"/"+filename+"-"+loc_it->first.name()+"-"+num_char).c_str());
+						fig.write((foldername+"/"+filename+"-"+loc_it->first.name()+num_char).c_str());
 					}
 				}
 

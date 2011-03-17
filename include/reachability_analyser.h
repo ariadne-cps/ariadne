@@ -203,8 +203,14 @@ class HybridReachabilityAnalyser
 																	   const HybridImageSet& initial_set,
 																	   const HybridBoxes& safe_region) const;
   
+    /*! \brief Tunes the parameters of the internal evolver. */
+    void tuneEvolverParameters(SystemType& system,
+								 const HybridFloatVector& hmad,
+								 uint maximum_grid_depth,
+								 Semantics semantics);
+
 	/*! \brief Tune the parameters for the next verification iteration, given a \a bounding_reach. */
-	void tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach);
+	void tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach, Semantics semantics);
 
     //@}
 

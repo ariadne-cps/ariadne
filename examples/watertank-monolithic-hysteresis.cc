@@ -41,8 +41,6 @@ int main(int argc,char *argv[])
 	HybridImageSet initial_set;
 	initial_set[DiscreteState("opened")] = Box(2, 5.5,8.0, 1.0,1.0);
 	initial_set[DiscreteState("closed")] = Box(2, 5.5,8.0, 0.0,0.0);
-	//initial_set[DiscreteState("opening")] = Box(2, 5.5,8.0, 0.0,1.0);
-	//initial_set[DiscreteState("closing")] = Box(2, 5.5,8.0, 0.0,1.0);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));
@@ -53,30 +51,29 @@ int main(int argc,char *argv[])
 	/// Verification
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
-	TaylorCalculus lower_integrator(6,8,1e-10);
+	//TaylorCalculus lower_integrator(4,6,1e-10);
+	TaylorCalculus lower_integrator(2,2,1e-4);
 	ImageSetHybridEvolver outer_evolver(outer_integrator);
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
-	outer_analyser.parameters().lowest_maximum_grid_depth = 0;
-	outer_analyser.parameters().highest_maximum_grid_depth = 5;
-	lower_analyser.parameters().lowest_maximum_grid_depth = 0;
-	lower_analyser.parameters().highest_maximum_grid_depth = 5;
+	outer_analyser.parameters().lowest_maximum_grid_depth = 1;
+	lower_analyser.parameters().lowest_maximum_grid_depth = 2;
+	outer_analyser.parameters().highest_maximum_grid_depth = 3;
+	lower_analyser.parameters().highest_maximum_grid_depth = 4;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
+	verifier.maximum_parameter_depth = 2;
 	verifier.plot_results = false;
 
 	// The parameters
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
 	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
-	Float tolerance = 0.25;
-	uint numPointsPerAxis = 11;
-    uint logNumIntervalsPerParam = 2;
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
-	Parametric2DBisectionResults results = verifier.parametric_safety_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
+	//ParametricPartitioningOutcomeList results = verifier.parametric_safety_partitioning(verInfo, parameters);
+	Parametric2DBisectionResults results = verifier.parametric_safety_2d_bisection(verInfo,parameters);
 	results.draw();
 
 }

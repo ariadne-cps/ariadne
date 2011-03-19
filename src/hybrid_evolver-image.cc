@@ -411,7 +411,6 @@ _evolution(EnclosureListType& final_sets,
 }
 
 
-// Old evolution step using detection data
 void
 ImageSetHybridEvolver::
 _evolution_step(std::list< HybridTimedSetType >& working_sets,
@@ -541,16 +540,17 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 
     // Test for initially active events, and process these as required
     if(definitely(initially_active_events[blocking_event])) {
-    	const std::map<DiscreteEvent,VectorFunction> invariants_superset = (semantics == UPPER_SEMANTICS ? guards : invariants);
-		_processInitiallyActiveBlockingEvents(working_sets,reach_sets,intermediate_sets,location,events,
-	        		   	   	   	   	   	  set_model,time_model,invariants_superset,transitions);
+    	ARIADNE_LOG(2,"An invariant is initially active: discarding the set.\n");
         return;
-
     } else if(possibly(initially_active_events[blocking_event]) && semantics==LOWER_SEMANTICS) {
-        ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition.");
-        reach_sets.insert(make_pair(location,set_model));
-        intermediate_sets.insert(make_pair(location,set_model));
-        return;
+    	ARIADNE_LOG(2,"Checking whether any crossing is possibly positive.\n");
+    	bool has_nonneg_crossing = has_nonnegative_crossing(guards,dynamic,set_model);
+    	if (has_nonneg_crossing) {
+			ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition with nonnegative crossing.\n");
+			reach_sets.insert(make_pair(location,set_model));
+			intermediate_sets.insert(make_pair(location,set_model));
+			return;
+    	}
     }
 
     // Compute continuous evolution
@@ -633,7 +633,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
 
     if(definitely(initially_active_events[blocking_event])) {
-    	_processInitiallyActiveBlockingEvents_continuous(reach_sets,intermediate_sets,guards,set_model,location);
+    	ARIADNE_LOG(2,"An invariant is initially active: discarding the set.\n");
         return;
     }
 
@@ -731,18 +731,15 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     // If there is any possibly (thus including definitely) active blocking event, lower evolution must be stopped
     if (possibly(initially_active_events[blocking_event])) {
     	if(definitely(initially_active_events[blocking_event])) {
-    		_processInitiallyActiveBlockingEvents(working_sets,reach_sets,intermediate_sets,location,events,
-    	        		   	   	   	   	   	  set_model,time_model,invariants,transitions);
-    	} else {
-    		ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition.");
-            reach_sets.insert(make_pair(location,set_model));
-            intermediate_sets.insert(make_pair(location,set_model));
+    		ARIADNE_LOG(2,"An invariant is initially active: discarding the set.\n");
+    		return disproveData;
+    	} else if (has_nonnegative_crossing(guards,dynamic,set_model)) {
+			ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition with nonnegative crossing.\n");
 
-            disproveData.updateReachBounds(location,set_model.bounding_box());
-            disproveData.updateEpsilon(location,set_model.bounding_box().halfWidths());
+			disproveData.updateReachBounds(location,set_model.bounding_box());
+			disproveData.updateEpsilon(location,set_model.bounding_box().halfWidths());
+			return disproveData;
     	}
-
-        return disproveData;
     }
 
     // Compute continuous evolution
@@ -829,7 +826,6 @@ compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_activ
                                 const std::map<DiscreteEvent,VectorFunction>& guards,
                                 const ContinuousEnclosureType& initial_set) const
 {
-    typedef TimeModelType GuardValueModelType;
     tribool blocking_event_initially_active=false;
     for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=guards.begin(); iter!=guards.end(); ++iter) {
         VectorFunction activation=iter->second;
@@ -841,6 +837,30 @@ compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_activ
     }
     initially_active_events.insert(std::make_pair(blocking_event,blocking_event_initially_active));
     return;
+}
+
+bool
+ImageSetHybridEvolver::
+has_nonnegative_crossing(const std::map<DiscreteEvent,VectorFunction>& guards,
+								 const VectorFunction dynamic,
+								 const ContinuousEnclosureType& initial_set) const
+{
+    for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=guards.begin(); iter!=guards.end(); ++iter) {
+        VectorFunction activation=iter->second;
+        tribool initially_active=this->_toolbox->active(activation,initial_set);
+        if(possibly(initially_active) && possibly(positively_crossing(initial_set,dynamic,activation)))
+			return true;
+    }
+    return false;
+}
+
+tribool
+ImageSetHybridEvolver::
+positively_crossing(const SetModelType& set_model,
+					   const VectorFunction& dynamic,
+					   const VectorFunction& activation) const
+{
+	return this->_toolbox->active(activation,dynamic.evaluate(set_model.bounding_box()));
 }
 
 // Compute the flow, parameterising space with the set parameters

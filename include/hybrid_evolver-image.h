@@ -199,9 +199,21 @@ class ImageSetHybridEvolver
 
     Interval normal_derivative(VectorFunction guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
 
+    /*! \brief Computes the initially active events
+     * \details Produces one entry for each possibly initially active event. Adds a convenience summary entry for the generic blocking_event,
+     * which has activity FALSE iff no other entry exists, INDETERMINATE if other entries exist but no definitely active event exists, TRUE otherwise.
+     */
     void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
                                          const std::map<DiscreteEvent,VectorFunction>&,
                                          const ContinuousEnclosureType&) const;
+
+    bool has_nonnegative_crossing(const std::map<DiscreteEvent,VectorFunction>& guards,
+								  const VectorFunction dynamic,
+								  const ContinuousEnclosureType& initial_set) const;
+
+    tribool positively_crossing(const SetModelType& set_model,
+								const VectorFunction& dynamic,
+								const VectorFunction& activation) const;
 
     void compute_flow_model(FlowSetModelType&, BoxType&, Float&, VectorFunction, 
                             const SetModelType&, const TimeModelType&, Float) const;

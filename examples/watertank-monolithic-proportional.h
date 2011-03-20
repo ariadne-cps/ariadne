@@ -131,8 +131,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 	system.new_mode(l2,controlled_d);
 	system.new_mode(l3,onesaturated_d);
 	system.new_mode(l4,overflow_d);
-
-	/*
+/*
 	system.new_invariant(l1,inv_y_geq_zero);
 	system.new_invariant(l2,inv_y_geq_zero);
 	system.new_invariant(l3,inv_y_geq_zero);
@@ -141,8 +140,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 	system.new_invariant(l2,inv_y_leq_one);
 	system.new_invariant(l3,inv_y_leq_one);
 	system.new_invariant(l4,inv_y_leq_one);
-	*/
-
+*/
 	system.new_forced_transition(e12,l1,l2,reset_id,guard12);
 	system.new_forced_transition(e21,l2,l1,reset_id,guard21);
 	system.new_forced_transition(e23,l2,l3,reset_id,guard23);

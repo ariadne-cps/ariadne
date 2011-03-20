@@ -207,13 +207,18 @@ class ImageSetHybridEvolver
                                          const std::map<DiscreteEvent,VectorFunction>&,
                                          const ContinuousEnclosureType&) const;
 
-    bool has_nonnegative_crossing(const std::map<DiscreteEvent,VectorFunction>& guards,
+    bool has_nonnegative_crossing(const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
 								  const VectorFunction dynamic,
 								  const ContinuousEnclosureType& initial_set) const;
 
     tribool positively_crossing(const SetModelType& set_model,
 								const VectorFunction& dynamic,
 								const VectorFunction& activation) const;
+
+    bool is_enclosure_to_be_discarded(const ContinuousEnclosureType& enclosure,
+            					 	  const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
+            					 	  const VectorFunction& dynamic,
+            					 	  Semantics semantics) const;
 
     void compute_flow_model(FlowSetModelType&, BoxType&, Float&, VectorFunction, 
                             const SetModelType&, const TimeModelType&, Float) const;
@@ -222,17 +227,13 @@ class ImageSetHybridEvolver
                                              VectorFunction guard, const FlowSetModelType& flow_set) const;
 
     void compute_eventBlockingTimes_and_nonTransverseEvents(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
-                                 const std::map<DiscreteEvent,VectorFunction>& guards,
+                                 const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
                                  const FlowSetModelType& flow_set_model) const;
 
     void compute_blockingTime_and_relatedEvents(std::set<DiscreteEvent>&, TimeModelType&,
                                const std::map<DiscreteEvent,TimeModelType>&) const;
 
-    void compute_activationEvents(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
-                                  const std::map<DiscreteEvent,VectorFunction>& activations,
-                                  const FlowSetModelType& flow_set_model) const;
-
-    void compute_activationTimes(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
+    void compute_activationTimes(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >& activation_times,
                                   const std::map<DiscreteEvent,VectorFunction>& activations,
                                   const FlowSetModelType& flow_set_model,
                                   const TimeModelType& blocking_time_model,
@@ -307,7 +308,7 @@ class ImageSetHybridEvolver
     				  	   TimeModelType& blocking_time_model,
     				  	   const TimeModelType& time_step_model,
     				  	   const SetModelType& flow_set_model,
-    				  	   const std::map<DiscreteEvent,VectorFunction>& guards,
+    				  	   const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
     				  	   double SMALL_RELATIVE_TIME) const;
 
     void _compute_activation_info(std::map<DiscreteEvent,VectorFunction>& activations,
@@ -315,7 +316,7 @@ class ImageSetHybridEvolver
     						 	  const std::set<DiscreteEvent>& non_transverse_events,
     						 	  const SetModelType& flow_set_model,
     						 	  const TimeModelType& blocking_time_model,
-    						 	  const std::map<DiscreteEvent,VectorFunction>& guards,
+    						 	  const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
     						 	  const Semantics semantics) const;
 
     void _compute_and_adjoin_reachableSet(EnclosureListType& reach_sets,
@@ -332,8 +333,8 @@ class ImageSetHybridEvolver
     							  	   const VectorFunction& dynamic,
     							  	   const std::map<DiscreteEvent,VectorFunction>& invariants,
     							  	   const std::list<DiscreteTransition>& transitions,
-    							  	   const std::map<DiscreteEvent,VectorFunction>& guards,
-    							  	   const std::map<DiscreteEvent,VectorFunction>& activations) const;
+    							  	   const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
+    							  	   const std::map<DiscreteEvent,VectorFunction>& permissive_guards) const;
 
   protected:
     // Special events

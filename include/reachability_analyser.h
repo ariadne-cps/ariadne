@@ -249,44 +249,44 @@ class HybridReachabilityAnalyser
     SetApproximationType _outer_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
 
 
-    /*! \brief Pushes the enclosures from \a reachCells into \a destination.
+    /*! \brief Pushes the enclosures from \a reachCells into \a result_enclosures.
      * \details Ignores enclosures that lie outside the domain.
      */
     void _outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
     									   const SystemType& system,
-    									   std::list<EnclosureType>& destination) const;
+    									   std::list<EnclosureType>& result_enclosures) const;
+
+    /*! \brief Checks whether a box \a bx is outside any invariant from \a invariants. */
+    bool _outer_chain_reach_isOutsideInvariants(const Box& bx,
+    									   	    const std::map<DiscreteEvent,VectorFunction>& invariants) const;
 
     /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list, for all \a transitions.
      */
     void _outer_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
 												 const ContinuousEnclosureType& source,
+												 const VectorFunction& dynamic,
 												 const HybridGrid& grid,
-												 std::list<EnclosureType>& destination) const;
+												 std::list<EnclosureType>& result_enclosures) const;
 
     /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
      * \details Splits the \a source until the enclosure is definitely active for \a trans or the minimum allowed target cell widths \a minTargetCellWidths has been reached.
      */
     void _outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
+    														 const VectorFunction& dynamic,
     														 const ContinuousEnclosureType& source,
     														 const Vector<Float>& minTargetCellWidths,
-    														 std::list<EnclosureType>& destination) const;
-
-    /*! \brief Pushes the target enclosure from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
-     */
-    void _outer_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
-    												   const ContinuousEnclosureType& source,
-    												   std::list<EnclosureType>& destination) const;
+    														 std::list<EnclosureType>& result_enclosures) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
      */
     void _outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
-    									   std::list<EnclosureType>& destination) const;
+    									   std::list<EnclosureType>& result_enclosures) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
      *  \detail Does not check for inclusion into the domain.
      */
     void _outer_chain_reach_pushFinalCells_noDomainCheck(const HybridGridTreeSet& finalCells,
-    									   	   	   	     std::list<EnclosureType>& destination) const;
+    									   	   	   	     std::list<EnclosureType>& result_enclosures) const;
 
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system,
     																const HybridImageSet& initial_set,
@@ -367,7 +367,7 @@ std::list<RealConstantSet> getSplitConstantsMidpointsSet(const std::list<RealCon
 /*! \brief Splits \a target_encl for location \a target_loc, storing the result in \a initial_enclosures.
  * \details The function is recursive.
  */
-void splitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
+void pushSplitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 						    const DiscreteState& target_loc,
 						    const ContinuousEnclosureType& target_encl,
 						    const Vector<Float>& minTargetCellWidths,

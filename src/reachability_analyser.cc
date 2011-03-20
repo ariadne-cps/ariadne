@@ -507,11 +507,9 @@ _outer_chain_reach_forward(const SystemType& system,
 	    ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
 	    ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
 
-	    // Recombines in order to start checking activations on the largest possible enclosures
-		new_reach.recombine();
-		ARIADNE_LOG(6,"Reach size after recombining = "<<new_reach.size()<<"\n");
-		// Minces in order to identify possible enclosures lying outside the domain
+		new_reach.mince(maximum_grid_depth);
 		new_final.mince(maximum_grid_depth);
+		ARIADNE_LOG(6,"Reach size after mincing = "<<new_reach.size()<<"\n");
 		ARIADNE_LOG(6,"Final size after mincing = "<<new_final.size()<<"\n");
 
 		_outer_chain_reach_forward_pushTargetCells(new_reach,system,working_enclosures);
@@ -535,7 +533,7 @@ void
 HybridReachabilityAnalyser::
 _outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
 										   const SystemType& system,
-										   std::list<EnclosureType>& destination) const
+										   std::list<EnclosureType>& result_enclosures) const
 {
 	HybridGrid grid = system.grid();
 
@@ -544,118 +542,112 @@ _outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
 		const DiscreteState& loc = cell_it->first;
 		const Box& bx = cell_it->second.box();
 
+		ARIADNE_LOG(7,"Checking box "<< bx <<" in location " << loc.name() << "\n");
+
 		if (_parameters->domain_enforcing_policy == ONLINE) {
 			if (!bx.inside(_parameters->bounding_domain[loc]) && bx.disjoint(_parameters->bounding_domain[loc])) {
-				throw ReachOutOfDomainException("A reach enclosure is outside the domain.");
+				throw ReachOutOfDomainException("a reach enclosure is outside the domain");
 			}
 		}
 
-		ARIADNE_LOG(7,"Checking transitions for box "<< bx <<" in location " << loc.name() << "\n");
-		_outer_chain_reach_pushTargetEnclosures(system.transitions(loc),ContinuousEnclosureType(bx),grid,destination);
+		if (!_outer_chain_reach_isOutsideInvariants(bx,system.mode(loc).invariants()))
+			_outer_chain_reach_pushTargetEnclosures(system.transitions(loc),ContinuousEnclosureType(bx),system.mode(loc).dynamic(),grid,result_enclosures);
 	}
+}
+
+bool
+HybridReachabilityAnalyser::
+_outer_chain_reach_isOutsideInvariants(const Box& bx,
+									   const std::map<DiscreteEvent,VectorFunction>& invariants) const
+{
+	ARIADNE_LOG(8,"Checking invariants...\n");
+
+	for (std::map<DiscreteEvent,VectorFunction>::const_iterator inv_it = invariants.begin(); inv_it != invariants.end(); ++inv_it) {
+		const VectorFunction& activation = inv_it->second;
+		tribool is_active = _getCalculusInterface().active(activation,bx);
+		if (definitely(is_active)) {
+			ARIADNE_LOG(8,"Invariant " << *inv_it << " is definitely active: transitions will not be checked.\n");
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void
 HybridReachabilityAnalyser::
 _outer_chain_reach_pushTargetEnclosures(const std::list<DiscreteTransition>& transitions,
 										const ContinuousEnclosureType& source,
+										const VectorFunction& dynamic,
 										const HybridGrid& grid,
-										std::list<EnclosureType>& destination) const
+										std::list<EnclosureType>& result_enclosures) const
 {
     long numCellDivisions = (1<<_parameters->maximum_grid_depth);
+
+	ARIADNE_LOG(8,"Checking transitions...\n");
 
 	// For each transition
 	for (list<DiscreteTransition>::const_iterator trans_it = transitions.begin(); trans_it != transitions.end(); trans_it++)
 	{
-		ARIADNE_LOG(8,"Target: "<<trans_it->target()<<"\n");
+		ARIADNE_LOG(9,"Target: "<<trans_it->target()<<", Forced?: " << trans_it->forced() << "\n");
 
 		Vector<Float> minTargetCellWidths = grid[trans_it->target()].lengths()/numCellDivisions;
 
-		_outer_chain_reach_pushTargetEnclosuresOfTransition(*trans_it,source,minTargetCellWidths,destination);
+		_outer_chain_reach_pushTargetEnclosuresOfTransition(*trans_it,dynamic,source,minTargetCellWidths,result_enclosures);
 	}
 }
 
 void
 HybridReachabilityAnalyser::
 _outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& trans,
+													const VectorFunction& dynamic,
 													const ContinuousEnclosureType& source,
 													const Vector<Float>& minTargetCellWidths,
-													std::list<EnclosureType>& destination) const
+													std::list<EnclosureType>& result_enclosures) const
 {
-	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
+	const DiscreteState& target_loc = trans.target();
+	const VectorFunction& activation = trans.activation();
+	bool is_forced = trans.forced();
+	const Box& target_bounding = _parameters->bounding_domain[target_loc];
 
-	std::list<ContinuousEnclosureType> split_list;
-	split_list.push_front(source);
+	tribool is_guard_active = _getCalculusInterface().active(activation,source);
 
-	while (!split_list.empty()) {
+	ARIADNE_LOG(10,"Guard activity: " << is_guard_active << "\n");
 
-		ContinuousEnclosureType current_encl = split_list.back();
-		split_list.pop_back();
+	/*
+	 * a) If the guard is definitely active and the transition is forced, then we are definitely outside the related invariant
+	 * b) If the transition is not forced, it suffices to have a possibly active guard: we then must perform the transition
+	 * c) If the transition is forced and the guard is only possibly active, we check the crossing:
+	 *    i) If it is negative, then no transition is possible
+	 *	 ii) If it is possibly positive, then we must take the transition
+	 */
 
-		TaylorModel guard_time_model = apply(trans.activation(),current_encl)[0];
-		ARIADNE_LOG(9,"Guard time model = "<<guard_time_model<<" (range: " << guard_time_model.range() << ")\n");
-
-		// If definitely active, add the target enclosure on the splittings of the enclosure
-		// If possibly active, split the enclosure if possible, otherwise create the target enclosure
-		// (if otherwise the transition is not active, do nothing)
-
-		if (guard_time_model.range().lower()>0) {
-			ARIADNE_LOG(10,"Definitely active, adding the splittings of the target enclosure to the destination list.\n");
-			// Get the target continuous enclosure
-			ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),current_encl);
-			// Populate the initial enclosures with the hybrid enclosures derived from the splittings of the target enclosure
-			splitTargetEnclosures(destination,trans.target(),target_encl,minTargetCellWidths,target_bounding,_parameters->domain_enforcing_policy);
-		} else if (!(guard_time_model.range().upper()<0)) {
-			// Try splitting the enclosure
-			bool hasSplit = false;
-			for (uint i=0; i < minTargetCellWidths.size(); i++) {
-				// If the enclosure has width larger than that of the minimum cell, split on that dimension
-				if (current_encl.bounding_box()[i].width() > minTargetCellWidths[i]) {
-					hasSplit = true;
-					std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = current_encl.split(i);
-					split_list.push_front(split_sets.first);
-					split_list.push_front(split_sets.second);
-					break;
-				}
-			}
-			// If we could not split
-			if (!hasSplit) {
-				ARIADNE_LOG(10,"Possibly active but minimum enclosure size reached, adding the splittings of the target enclosure to the destination list.\n");
-				_outer_chain_reach_pushTransitioningEnclosure(trans,current_encl,destination);
-			}
-			else {
-				ARIADNE_LOG(10,"Possibly active, adding the splittings of the current enclosure to the evaluation list.\n");
-			}
-		} else {
-			ARIADNE_LOG(10,"Inactive, discarding.\n");
+	if (definitely(is_guard_active) && is_forced) {
+		ARIADNE_LOG(10,"Definitely active and forced: the set is outside the implicit invariant of the transition: ignoring the target enclosure.\n");
+	} else if (possibly(is_guard_active) && !is_forced) {
+		ARIADNE_LOG(10,"Possibly active and permissive: adding the splittings of the target enclosure to the destination list.\n");
+		ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),source);
+		pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,_parameters->domain_enforcing_policy);
+	} else if (possibly(is_guard_active) && is_forced) {
+		ARIADNE_LOG(10,"Possibly active and forced: checking whether the crossing is nonnegative...\n");
+		tribool positive_crossing = _getCalculusInterface().active(activation,apply(dynamic,source));
+		if (possibly(positive_crossing)) {
+			ARIADNE_LOG(10,"Possibly positive, adding the splittings of the target enclosure to the destination list.\n");
+			ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),source);
+			pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,_parameters->domain_enforcing_policy);
 		}
-	}
-}
-
-void
-HybridReachabilityAnalyser::
-_outer_chain_reach_pushTransitioningEnclosure(const DiscreteTransition& trans,
-											  const ContinuousEnclosureType& encl,
-											  std::list<EnclosureType>& destination) const
-{
-	ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),encl);
-	const Box& target_encl_box = target_encl.bounding_box();
-	const Box& target_bounding = _parameters->bounding_domain[trans.target()];
-
-	if (_parameters->domain_enforcing_policy == ONLINE &&
-		!target_encl_box.inside(target_bounding) &&
-		target_encl_box.disjoint(target_bounding)) {
-		throw ReachOutOfDomainException("A target enclosure is outside the domain.");
+		else {
+			ARIADNE_LOG(10,"Negative, ignoring the target enclosure.\n");
+		}
 	} else {
-		destination.push_back(EnclosureType(trans.target(),target_encl));
+		ARIADNE_LOG(10,"Inactive, ignoring the target enclosure.\n");
 	}
 }
-
 
 void
 HybridReachabilityAnalyser::
 _outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
-									   std::list<EnclosureType>& destination) const
+									   std::list<EnclosureType>& result_enclosures) const
 {
 	for (GTS::const_iterator cell_it = finalCells.begin(); cell_it != finalCells.end(); ++cell_it) {
 		const DiscreteState& loc = cell_it->first;
@@ -666,9 +658,9 @@ _outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
 			cell_it->second.box().disjoint(bounding)) {
 			ARIADNE_LOG(7,"Discarding enclosure " << cell_it->second.box() <<
 						" from final cell outside the domain in location " << loc.name() <<".\n");
-			throw ReachOutOfDomainException("A final cell is outside the domain.");
+			throw ReachOutOfDomainException("a final cell is outside the domain");
 		} else {
-			destination.push_back(_discretiser->enclosure(*cell_it));
+			result_enclosures.push_back(_discretiser->enclosure(*cell_it));
 		}
 	}
 }
@@ -1080,7 +1072,7 @@ getBestConstantToSplit(SystemType& system,
 }
 
 void
-splitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
+pushSplitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 					  const DiscreteState& target_loc,
 					  const ContinuousEnclosureType& target_encl,
 					  const Vector<Float>& minTargetCellWidths,
@@ -1104,8 +1096,8 @@ splitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 			hasSplit = true;
 			std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = target_encl.split(i);
 			// Call recursively on the two enclosures
-			splitTargetEnclosures(initial_enclosures,target_loc,split_sets.first,minTargetCellWidths,target_bounding,policy);
-			splitTargetEnclosures(initial_enclosures,target_loc,split_sets.second,minTargetCellWidths,target_bounding,policy);
+			pushSplitTargetEnclosures(initial_enclosures,target_loc,split_sets.first,minTargetCellWidths,target_bounding,policy);
+			pushSplitTargetEnclosures(initial_enclosures,target_loc,split_sets.second,minTargetCellWidths,target_bounding,policy);
 		}
 	}
 

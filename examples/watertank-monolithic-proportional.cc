@@ -38,7 +38,9 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState(2)] = Box(2, 5.5,7.0, 0.5,0.5);
+	initial_set[DiscreteState(1)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_set[DiscreteState(2)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_set[DiscreteState(3)] = Box(2, 6.75,6.75, 0.0,1.0);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,-0.1,10.0,-0.1,1.1));
@@ -49,16 +51,16 @@ int main(int argc,char *argv[])
 	/// Verification
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
-	TaylorCalculus lower_integrator(4,6,1e-10);
-	//TaylorCalculus lower_integrator(2,2,1e-4);
+	//TaylorCalculus lower_integrator(4,6,1e-10);
+	TaylorCalculus lower_integrator(2,2,1e-4);
 	ImageSetHybridEvolver outer_evolver(outer_integrator);
 	outer_evolver.verbosity = 0;
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
 	outer_analyser.verbosity = 0;
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
-	outer_analyser.parameters().highest_maximum_grid_depth = 5;
-	lower_analyser.parameters().highest_maximum_grid_depth = 5;
+	outer_analyser.parameters().highest_maximum_grid_depth = 6;
+	lower_analyser.parameters().highest_maximum_grid_depth = 0;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
 	verifier.plot_results = true;
@@ -70,14 +72,14 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("ref",Interval(5.5,6.0)));
 	parameters.insert(RealConstant("Kp",Interval(0.01,0.6)));
 
-	system.substitute(RealConstant("ref",6.0));
+	system.substitute(RealConstant("ref",6.5));
 
-	//cout << verifier.safety(verInfo);
+	cout << verifier.safety(verInfo);
 	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);
 	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
 	//results.draw();
 
-
+/*
 	system.substitute(RealConstant("bfp",0.3));
 	system.substitute(RealConstant("delta",0.0));
 	system.substitute(RealConstant("ref",6.0));
@@ -108,5 +110,5 @@ int main(int argc,char *argv[])
     fig.set_bounding_box(Box(2,4.0,8.0,-0.1,1.1));
     draw(fig,orbit);
     fig.write("watertank-mono-pr_test");
-
+*/
 }

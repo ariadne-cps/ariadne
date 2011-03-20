@@ -56,12 +56,12 @@ int main(int argc,char *argv[])
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
-	outer_analyser.parameters().highest_maximum_grid_depth = 5;
-	lower_analyser.parameters().highest_maximum_grid_depth = 5;
+	outer_analyser.parameters().highest_maximum_grid_depth = 7;
+	lower_analyser.parameters().highest_maximum_grid_depth = 0;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
 	verifier.maximum_parameter_depth = 2;
-	verifier.plot_results = false;
+	verifier.plot_results = true;
 
 	// The parameters
 	RealConstantSet parameters;
@@ -69,10 +69,12 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+	cout << verifier.safety(verInfo);
 	//ParametricPartitioningOutcomeList results = verifier.parametric_safety_partitioning(verInfo, parameters);
 	//Parametric2DBisectionResults results = verifier.parametric_safety_2d_bisection(verInfo,parameters);
 	//results.draw();
 
+	/*
 	std::map<DiscreteState,Float> hmss;
 	Vector<Float> mec(2);
 	mec[0] = 1.0;
@@ -97,5 +99,5 @@ int main(int argc,char *argv[])
     fig.set_bounding_box(Box(2,4.0,8.0,-0.1,1.1));
     draw(fig,orbit);
     fig.write("watertank-mono-hy_test");
-
+	*/
 }

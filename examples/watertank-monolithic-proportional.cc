@@ -51,8 +51,7 @@ int main(int argc,char *argv[])
 	/// Verification
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
-	//TaylorCalculus lower_integrator(4,6,1e-10);
-	TaylorCalculus lower_integrator(2,2,1e-4);
+	TaylorCalculus lower_integrator(4,6,1e-10);
 	ImageSetHybridEvolver outer_evolver(outer_integrator);
 	outer_evolver.verbosity = 0;
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
@@ -60,7 +59,7 @@ int main(int argc,char *argv[])
 	outer_analyser.verbosity = 0;
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
 	outer_analyser.parameters().highest_maximum_grid_depth = 6;
-	lower_analyser.parameters().highest_maximum_grid_depth = 0;
+	lower_analyser.parameters().highest_maximum_grid_depth = 6;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
 	verifier.plot_results = true;
@@ -69,13 +68,13 @@ int main(int argc,char *argv[])
 
 	/// Analysis parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("ref",Interval(5.5,6.0)));
-	parameters.insert(RealConstant("Kp",Interval(0.01,0.6)));
+	parameters.insert(RealConstant("ref",Interval(5.5,8.0)));
+	parameters.insert(RealConstant("Kp",Interval(0.2,0.9)));
 
-	system.substitute(RealConstant("ref",6.5));
+	system.substitute(RealConstant("ref",6.75));
 
 	cout << verifier.safety(verInfo);
-	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo, parameters, tolerance, numPointsPerAxis);
+	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo, parameters);
 	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
 	//results.draw();
 

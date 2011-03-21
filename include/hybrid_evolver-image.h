@@ -209,11 +209,7 @@ class ImageSetHybridEvolver
 
     bool has_nonnegative_crossing(const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
 								  const VectorFunction dynamic,
-								  const ContinuousEnclosureType& initial_set) const;
-
-    tribool positively_crossing(const SetModelType& set_model,
-								const VectorFunction& dynamic,
-								const VectorFunction& activation) const;
+								  const Box& set_bounds) const;
 
     bool is_enclosure_to_be_discarded(const ContinuousEnclosureType& enclosure,
             					 	  const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
@@ -347,6 +343,10 @@ class ImageSetHybridEvolver
     boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
 };
 
+/*! \brief Whether a box \a set_bounds under a given \a dynamic positively crosses an \a activation. */
+tribool positively_crossing(const Box& set_bounds,
+							const VectorFunction& dynamic,
+							const ScalarFunction& activation);
 
 
 } // namespace Ariadne

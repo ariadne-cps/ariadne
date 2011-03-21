@@ -716,7 +716,7 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
     	if(definitely(initially_active_events[blocking_event])) {
     		ARIADNE_LOG(2,"An invariant is initially active: discarding the set.\n");
     		return disproveData;
-    	} else if (has_nonnegative_crossing(guards,dynamic,set_model)) {
+    	} else if (has_nonnegative_crossing(guards,dynamic,set_model.bounding_box())) {
 			ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition with nonnegative crossing.\n");
 
 			disproveData.updateReachBounds(location,set_model.bounding_box());
@@ -826,12 +826,17 @@ bool
 ImageSetHybridEvolver::
 has_nonnegative_crossing(const std::map<DiscreteEvent,VectorFunction>& blocking_guards,
 								 const VectorFunction dynamic,
-								 const ContinuousEnclosureType& initial_set) const
+								 const Box& set_bounds) const
 {
+	ARIADNE_LOG(3,"Checking nonnegative crossings...\n");
     for(std::map<DiscreteEvent,VectorFunction>::const_iterator iter=blocking_guards.begin(); iter!=blocking_guards.end(); ++iter) {
-        VectorFunction activation=iter->second;
-        tribool initially_active=this->_toolbox->active(activation,initial_set);
-        if(possibly(initially_active) && possibly(positively_crossing(initial_set,dynamic,activation)))
+        ScalarFunction activation=iter->second[0];
+        ARIADNE_LOG(3,"Guard: " << activation << "\n");
+        tribool is_active = this->_toolbox->active(activation,set_bounds);
+        ARIADNE_LOG(3,"Active: " << is_active);
+        tribool is_positively_crossing = positively_crossing(set_bounds,dynamic,activation);
+        ARIADNE_LOG(3,"; positively crossing: " << is_positively_crossing << "\n");
+        if(possibly(is_active) && possibly(is_positively_crossing))
 			return true;
     }
     return false;
@@ -840,14 +845,19 @@ has_nonnegative_crossing(const std::map<DiscreteEvent,VectorFunction>& blocking_
 
 
 tribool
-ImageSetHybridEvolver::
-positively_crossing(const SetModelType& set_model,
-					   const VectorFunction& dynamic,
-					   const VectorFunction& activation) const
+positively_crossing(const Box& set_bounds,
+					const VectorFunction& dynamic,
+					const ScalarFunction& activation)
 {
-	return this->_toolbox->active(activation,apply(dynamic,set_model));
-}
+    ScalarFunction derivative=lie_derivative(activation,dynamic);
+    Interval derivative_range = derivative.evaluate(set_bounds);
 
+    if (derivative_range.lower() > 0)
+    	return true;
+    else if (derivative_range.upper() < 0)
+    	return false;
+    else return indeterminate;
+}
 
 bool
 ImageSetHybridEvolver::
@@ -870,7 +880,7 @@ is_enclosure_to_be_discarded(const ContinuousEnclosureType& enclosure,
 		result = true;
 	} else if(possibly(has_any_initially_active_blocking_event) && semantics==LOWER_SEMANTICS) {
 		ARIADNE_LOG(2,"A blocking event is possibly active: checking whether there is a possibly positive crossing.\n");
-		bool has_nonneg_crossing = has_nonnegative_crossing(blocking_guards,dynamic,enclosure);
+		bool has_nonneg_crossing = has_nonnegative_crossing(blocking_guards,dynamic,enclosure.bounding_box());
 		if (has_nonneg_crossing) {
 			ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant with nonnegative crossing.\n");
 			result = true;

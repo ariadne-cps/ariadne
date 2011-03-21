@@ -630,7 +630,7 @@ _outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& tr
 		pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,_parameters->domain_enforcing_policy);
 	} else if (possibly(is_guard_active) && is_forced) {
 		ARIADNE_LOG(10,"Possibly active and forced: checking whether the crossing is nonnegative...\n");
-		tribool positive_crossing = _getCalculusInterface().active(activation,apply(dynamic,source));
+		tribool positive_crossing = positively_crossing(source.bounding_box(),dynamic,activation[0]);
 		if (possibly(positive_crossing)) {
 			ARIADNE_LOG(10,"Possibly positive, adding the splittings of the target enclosure to the destination list.\n");
 			ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),source);

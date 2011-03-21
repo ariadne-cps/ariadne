@@ -1272,19 +1272,20 @@ ScalarFunction lie_derivative(const ScalarFunction& g, const VectorFunction& f) 
     ARIADNE_ASSERT(f.result_size()==f.argument_size());
     ARIADNE_ASSERT(f.result_size()>0);
 
+    /*
     std::cerr<<"\n  d="<<g<<"\n";
     for(uint i=0; i!=g.argument_size(); ++i) {
         std::cerr<<"  dg("<<i<<")="<<g.derivative(i)<<"\n"; 
         std::cerr<<"  f["<<i<<"]="<<f[i]<<"\n"; 
         std::cerr<<"  dg("<<i<<") * f["<<i<<"="<<g.derivative(i)*f[i]<<"\n";
     }
-
+    */
     try {
         ScalarFunction r=g.derivative(0)*f[0];
         for(uint i=1; i!=g.argument_size(); ++i) {
             r=r+g.derivative(i)*f[i];
         }
-        std::cerr<<"r="<<r<<"\n";
+        //std::cerr<<"r="<<r<<"\n";
         return r;
     }
     catch(...) {

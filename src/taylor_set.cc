@@ -347,7 +347,9 @@ TaylorSet apply(const VectorFunction& f, const TaylorSet& ts)
 TaylorModel apply(const ScalarTaylorFunction& tf, const TaylorSet& ts)
 {
     ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),"tf="<<tf<<" ts="<<ts);
-    return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
+    TaylorModel mdl = tf.model();
+    Vector<TaylorModel> vmdl = unscale(ts.models(),tf.domain());
+    return unchecked_compose(mdl,vmdl);
 }
 
 TaylorSet apply(const VectorTaylorFunction& tf, const TaylorSet& ts)

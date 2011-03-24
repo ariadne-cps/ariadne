@@ -132,28 +132,26 @@ _safety_positive_once(SystemType& system,
 {
 	bool result;
 
-	ARIADNE_LOG(4,"Proving...\n");
-
 	if (!_is_grid_depth_within_bounds(UPPER_SEMANTICS))
 		return false;
 
 	RealConstantSet original_constants = system.accessible_constants();
-	for (RealConstantSet::const_iterator const_it = constants.begin(); const_it != constants.end(); ++const_it) {
-		if (use_param_midpoints_for_proving)
-			system.substitute(*const_it,const_it->value().midpoint());
-		else
-			system.substitute(*const_it);
-	}
+
+	system.substitute(constants,use_param_midpoints_for_proving);
 
 	DiscreteEvolutionParameters& analyser_params = _outer_analyser->parameters();
 
+	ARIADNE_LOG(4,"Setting parameters for this proving iteration...\n");
+
 	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
+
+	ARIADNE_LOG(4,"Proving...\n");
 
 	HybridGridTreeSet reach;
 
 	try
 	{
-		reach = _outer_analyser->outer_chain_reach_quick_proving(system,initial_set,safe_region);
+		reach = _outer_analyser->outer_chain_reach(system,initial_set,safe_region);
 
 		if (analyser_params.domain_enforcing_policy == OFFLINE && definitely(!reach.subset(analyser_params.bounding_domain)))
 			result = false;
@@ -186,23 +184,20 @@ _safety_negative_once(SystemType& system,
 		 const HybridBoxes& safe_region,
 		 const RealConstantSet& constants) const
 {
-	ARIADNE_LOG(4,"Disproving...\n");
-
 	if (!_is_grid_depth_within_bounds(LOWER_SEMANTICS))
 		return false;
 
 	RealConstantSet original_constants = system.accessible_constants();
-	for (RealConstantSet::const_iterator const_it = constants.begin(); const_it != constants.end(); ++const_it) {
-		if (use_param_midpoints_for_disproving)
-			system.substitute(*const_it,const_it->value().midpoint());
-		else
-			system.substitute(*const_it);
-	}
+
+	system.substitute(constants,use_param_midpoints_for_disproving);
+
+	ARIADNE_LOG(4,"Setting parameters for this disproving iteration...\n");
 
 	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
 
-	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData =
-			_lower_analyser->lower_chain_reach(system,initial_set,safe_region);
+	ARIADNE_LOG(4,"Disproving...\n");
+
+	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData = _lower_analyser->lower_chain_reach(system,initial_set,safe_region);
 	const HybridGridTreeSet& reach = reachAndDisproveData.first;
 	const DisproveData& disproveData = reachAndDisproveData.second;
 	const bool& isDisproved = disproveData.getIsDisproved();
@@ -247,9 +242,9 @@ tribool
 Verifier::
 safety(SystemVerificationInfo& verInfo) const
 {
-	RealConstantSet locked_constants;
+	RealConstantSet constants;
 
-	return _safety_nosplitting(verInfo,locked_constants);
+	return _safety_nosplitting(verInfo,constants);
 }
 
 
@@ -281,7 +276,7 @@ _safety(SystemVerificationInfo& verInfo, const RealConstant& constant, const Flo
 tribool
 Verifier::
 _safety_nosplitting(SystemVerificationInfo& verInfo,
-				    const RealConstantSet& constants_to_substitute) const
+				    const RealConstantSet& constants) const
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
 
@@ -293,8 +288,8 @@ _safety_nosplitting(SystemVerificationInfo& verInfo,
 	_outer_analyser->resetStatistics();
 
 	// Set the initial parameters
-	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants_to_substitute,UPPER_SEMANTICS);
-	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants_to_substitute,LOWER_SEMANTICS);
+	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants,UPPER_SEMANTICS);
+	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants,LOWER_SEMANTICS);
 
 	int initial_depth = min(_outer_analyser->parameters().lowest_maximum_grid_depth,
 							_lower_analyser->parameters().lowest_maximum_grid_depth);
@@ -307,10 +302,7 @@ _safety_nosplitting(SystemVerificationInfo& verInfo,
 
 		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
 
-		_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
-		_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
-
-		tribool result = _safety_once(system,verInfo.getInitialSet(),verInfo.getSafeRegion(),constants_to_substitute);
+		tribool result = _safety_once(system,verInfo.getInitialSet(),verInfo.getSafeRegion(),constants);
 
 		if (!indeterminate(result))
 			return result;
@@ -457,13 +449,11 @@ parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 std::list<ParametricOutcome>
 Verifier::
 parametric_safety(SystemVerificationInfo& verInfo,
-									 const RealConstantSet& params) const
+				  const RealConstantSet& params) const
 {
 	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter.");
 
 	std::list<ParametricOutcome> result;
-
-	RealConstantSet original_constants = verInfo.getSystem().accessible_constants();
 
 	std::list<RealConstantSet> splittings = maximally_split_parameters(params,this->maximum_parameter_depth);
 	uint i=0;
@@ -479,8 +469,6 @@ parametric_safety(SystemVerificationInfo& verInfo,
 		result.push_back(ParametricOutcome(current_params,outcome));
 	}
 
-	verInfo.getSystem().substitute(original_constants);
-
 	return result;
 }
 
@@ -489,23 +477,23 @@ Verifier::
 dominance(SystemVerificationInfo& dominating,
 		  SystemVerificationInfo& dominated) const
 {
-	const RealConstantSet dominatingLockedConstants;
-	return _dominance(dominating,dominated,dominatingLockedConstants);
+	const RealConstantSet dominatingConstants;
+	return _dominance(dominating,dominated,dominatingConstants);
 }
 
 tribool
 Verifier::
 _dominance(SystemVerificationInfo& dominating,
 		  	SystemVerificationInfo& dominated,
-		  	const RealConstant& parameter) const
+		  	const RealConstant& constant) const
 {
 	HybridAutomaton& system = dominating.getSystem();
 
-	Real original_value = system.accessible_constant_value(parameter.name());
+	Real original_value = system.accessible_constant_value(constant.name());
 
-	system.substitute(parameter);
+	system.substitute(constant);
 	tribool result = dominance(dominating,dominated);
-	system.substitute(parameter,original_value);
+	system.substitute(constant,original_value);
 
 	return result;
 }
@@ -514,12 +502,12 @@ tribool
 Verifier::
 _dominance(SystemVerificationInfo& dominating,
 		  SystemVerificationInfo& dominated,
-		  const RealConstant& parameter,
+		  const RealConstant& constant,
 		  const Float& value) const
 {
-	const RealConstant modifiedParameter(parameter.name(),Interval(value));
+	const RealConstant modifiedConstant(constant.name(),Interval(value));
 
-	return _dominance(dominating,dominated,modifiedParameter);
+	return _dominance(dominating,dominated,modifiedConstant);
 }
 
 std::pair<Interval,Interval>
@@ -652,8 +640,6 @@ parametric_dominance(SystemVerificationInfo& dominating,
 
 	std::list<ParametricOutcome> result;
 
-	RealConstantSet original_constants = dominating.getSystem().accessible_constants();
-
 	std::list<RealConstantSet> splittings = maximally_split_parameters(dominating_params,this->maximum_parameter_depth);
 	uint i=0;
 	for (std::list<RealConstantSet>::const_iterator splitting_it = splittings.begin();
@@ -663,13 +649,10 @@ parametric_dominance(SystemVerificationInfo& dominating,
 		ARIADNE_LOG(1,"<Split parameters set #" << ++i << "/" << splittings.size() << ">\n");
 		RealConstantSet current_params = *splitting_it;
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
-		dominating.getSystem().substitute(current_params);
-		tribool outcome = _dominance(dominating,dominated,dominating_params);
+		tribool outcome = _dominance(dominating,dominated,current_params);
 		ARIADNE_LOG(1,"Outcome: " << pretty_print(outcome) << "\n");
 		result.push_back(ParametricOutcome(current_params,outcome));
 	}
-
-	dominating.getSystem().substitute(original_constants);
 
 	return result;
 }
@@ -864,7 +847,7 @@ _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,
 tribool
 Verifier::_dominance(SystemVerificationInfo& dominating,
 					 SystemVerificationInfo& dominated,
-					 const RealConstantSet& dominatingLockedConstants) const
+					 const RealConstantSet& constants) const
 {
 	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
 
@@ -886,12 +869,12 @@ Verifier::_dominance(SystemVerificationInfo& dominating,
 
 		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
 
-		if (_dominance_positive(dominating, dominated, dominatingLockedConstants)) {
+		if (_dominance_positive(dominating, dominated, constants)) {
 			ARIADNE_LOG(3, "Dominates.\n");
 			return true;
 		}
 
-		if (_dominance_negative(dominating, dominated, dominatingLockedConstants)) {
+		if (_dominance_negative(dominating, dominated, constants)) {
 			ARIADNE_LOG(3, "Does not dominate.\n");
 			return false;
 		}
@@ -905,28 +888,38 @@ Verifier::_dominance(SystemVerificationInfo& dominating,
 bool
 Verifier::_dominance_positive(SystemVerificationInfo& dominating,
 		  	  	  	  	  	  SystemVerificationInfo& dominated,
-		  	  	  	  	  	  const RealConstantSet& dominatingLockedConstants) const
+		  	  	  	  	  	  const RealConstantSet& constants) const
 {
 	ARIADNE_LOG(3,"Looking for a positive answer...\n");
 
 	bool result;
 
-	try {
-		ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
+	const RealConstantSet& original_constants = dominating.getSystem().accessible_constants();
 
-		_setDominanceParameters(dominating,dominatingLockedConstants,UPPER_SEMANTICS);
+	dominating.getSystem().substitute(constants,use_param_midpoints_for_proving);
+
+	try {
+
+		ARIADNE_LOG(3,"Setting the parameters for the outer approximation of the dominating system...\n");
+
+		_setDominanceParameters(dominating,constants,UPPER_SEMANTICS);
+
+		ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
 
 		HybridGridTreeSet dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
 
 		ARIADNE_LOG(4,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
 
-		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
+		ARIADNE_LOG(3,"Setting the parameters for the lower approximation of the dominated system...\n");
 
 		HybridGridTreeSet dominated_reach;
 		RealConstantSet emptyLockedConstants;
 		DisproveData disproveData(dominated.getSystem().state_space());
 		_setDominanceParameters(dominated,emptyLockedConstants,LOWER_SEMANTICS);
+
+		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
+
 		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) =
 				_lower_analyser->lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
@@ -946,33 +939,46 @@ Verifier::_dominance_positive(SystemVerificationInfo& dominating,
 		result = false;
 	}
 
+	dominating.getSystem().substitute(original_constants);
+
 	return result;
 }
 
 bool
 Verifier::_dominance_negative(SystemVerificationInfo& dominating,
 	  	  	  	  			  SystemVerificationInfo& dominated,
-	  	  	  	  			  const RealConstantSet& dominatingLockedConstants) const
+	  	  	  	  			  const RealConstantSet& constants) const
 {
 	ARIADNE_LOG(3,"Looking for a negative answer...\n");
 
 	bool result;
 
+	const RealConstantSet& original_constants = dominating.getSystem().accessible_constants();
+
+	dominating.getSystem().substitute(constants,use_param_midpoints_for_disproving);
+
 	try {
-		ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
+
+		ARIADNE_LOG(3,"Setting the parameters for the outer approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
 		_setDominanceParameters(dominated,emptyLockedConstants,UPPER_SEMANTICS);
+
+		ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
+
 		HybridGridTreeSet dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
 
 		ARIADNE_LOG(4,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
 
-		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
+		ARIADNE_LOG(3,"Setting the parameters for the lower approximation of the dominating system...\n");
 
 		HybridGridTreeSet dominating_reach;
 		DisproveData disproveData(dominating.getSystem().state_space());
-		_setDominanceParameters(dominating,dominatingLockedConstants,LOWER_SEMANTICS);
+		_setDominanceParameters(dominating,constants,LOWER_SEMANTICS);
+
+		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
+
 		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) =
 				_lower_analyser->lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
@@ -992,6 +998,8 @@ Verifier::_dominance_negative(SystemVerificationInfo& dominating,
 		result = false;
 	}
 
+	dominating.getSystem().substitute(original_constants);
+
 	return result;
 }
 
@@ -1010,8 +1018,8 @@ _setInitialParameters(HybridAutomaton& system,
 	ARIADNE_LOG(4, "Domain: " << domain << "\n");
 	parameters.lock_to_grid_time = getLockToGridTime(system,domain);
 	ARIADNE_LOG(4, "Lock to grid time: " << parameters.lock_to_grid_time << "\n");
-	parameters.split_factors = getSplitFactorsOfConstants(system,locked_constants,0.1,domain);
-	ARIADNE_LOG(4, "Split factors: " << parameters.split_factors << "\n");
+	parameters.locked_constants = locked_constants;
+	ARIADNE_LOG(4, "Locked constants: " << locked_constants << "\n");
 }
 
 
@@ -1032,7 +1040,7 @@ _tuneIterativeStepParameters(HybridAutomaton& system,
 void
 Verifier::
 _setDominanceParameters(SystemVerificationInfo& verInfo,
-						const RealConstantSet& lockedConstants,
+						const RealConstantSet& locked_constants,
 						Semantics semantics) const
 {
 	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
@@ -1045,8 +1053,8 @@ _setDominanceParameters(SystemVerificationInfo& verInfo,
 	_tuneIterativeStepParameters(verInfo.getSystem(),_outer_analyser->statistics().upper().reach,semantics);
 	analyser.parameters().lock_to_grid_time = getLockToGridTime(verInfo.getSystem(),analyser.parameters().bounding_domain);
 	ARIADNE_LOG(4, "Lock to grid time: " << analyser.parameters().lock_to_grid_time << "\n");
-	analyser.parameters().split_factors = getSplitFactorsOfConstants(verInfo.getSystem(),lockedConstants,0.1,analyser.parameters().bounding_domain);
-	ARIADNE_LOG(4, "Split factors: " << analyser.parameters().split_factors << "\n");
+	analyser.parameters().locked_constants = locked_constants;
+	ARIADNE_LOG(4, "Locked constants: " << analyser.parameters().locked_constants << "\n");
 }
 
 void

@@ -275,40 +275,40 @@ class Verifier
 	/*! \brief Set the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
 	 * that must be ignore when choosing the splitting factors of the system. */
 	void _setDominanceParameters(SystemVerificationInfo& systemBundle,
-								 const RealConstantSet& lockedConstants,
+								 const RealConstantSet& locked_constants,
 								 Semantics semantics) const;
 
 	/**
-	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system.
+	 * \brief Performs dominance checking with \a constants substituted into the \a dominating system.
 	 * \details Verifies if the \a dominating system dominates the \a dominated system.
 	 */
 	tribool _dominance(SystemVerificationInfo& dominating,
 					  SystemVerificationInfo& dominated,
-					  const RealConstant& parameter) const;
+					  const RealConstant& constants) const;
 
 	/**
-	 * \brief Performs dominance checking with \a parameter substituted into the \a dominating system with a value of \a value.
+	 * \brief Performs dominance checking with \a constant substituted into the \a dominating system with a value of \a value.
 	 * \details Verifies if the \a dominating system dominates the \a dominated system.
 	 */
 	tribool _dominance(SystemVerificationInfo& dominating,
 					  SystemVerificationInfo& dominated,
-					  const RealConstant& parameter,
+					  const RealConstant& constant,
 					  const Float& value) const;
 
-	/*! \brief Helper function to perform dominance in the more general case when some \a dominatingLockedConstants are enforced. */
+	/*! \brief Helper function to perform dominance in the more general case when some \a constants are substituted into the dominating system. */
 	tribool _dominance(SystemVerificationInfo& dominating,
 					   SystemVerificationInfo& dominated,
-					   const RealConstantSet& dominatingLockedConstants) const;
+					   const RealConstantSet& constants) const;
 
 	/*! \brief Performs the positive part of dominance checking. */
 	bool _dominance_positive(SystemVerificationInfo& dominating,
 							 SystemVerificationInfo& dominated,
-							 const RealConstantSet& dominatingLockedConstants) const;
+							 const RealConstantSet& constants) const;
 
 	/*! \brief Performs the negative part of dominance checking. */
 	bool _dominance_negative(SystemVerificationInfo& dominating,
 							 SystemVerificationInfo& dominated,
-							 const RealConstantSet& dominatingLockedConstants) const;
+							 const RealConstantSet& constants) const;
 
 	/*! \brief Performs one dominance sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
 	void _parametric_dominance_2d_bisection_sweep(Parametric2DBisectionResults& results,

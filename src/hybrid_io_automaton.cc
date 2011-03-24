@@ -1598,6 +1598,17 @@ HybridIOAutomaton::substitute(const RealConstantSet& cons)
 		substitute(*const_it);
 }
 
+void
+HybridIOAutomaton::substitute(const RealConstantSet& cons, bool use_midpoint)
+{
+	for (RealConstantSet::const_iterator cons_it = cons.begin(); cons_it != cons.end(); ++cons_it) {
+		if (use_midpoint)
+			substitute(*cons_it,cons_it->value().midpoint());
+		else
+			substitute(*cons_it);
+	}
+}
+
 bool
 HybridIOAutomaton::has_accessible_constant(const RealConstant& con) const
 {

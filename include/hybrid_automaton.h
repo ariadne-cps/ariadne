@@ -555,6 +555,9 @@ class HybridAutomaton
 	/*! \brief Substitute constants values from a set \a cons. */
 	void substitute(const RealConstantSet& cons);
 
+	/*! \brief Substitute constants values from a set \a cons, using the midpoint if \a use_midpoint is set. */
+	void substitute(const RealConstantSet& cons, bool use_midpoint);
+
 
 	//@}
 

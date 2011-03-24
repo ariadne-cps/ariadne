@@ -180,12 +180,12 @@ class HybridReachabilityAnalyser
 												   const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
-     * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
-     * It also
-     * \return The reach set */
-    virtual SetApproximationType outer_chain_reach_quick_proving(SystemType& system,
-														   const HybridImageSet& initial_set,
-														   const HybridBoxes& safe_region) const;
+     * upper semantics.
+     * \details The method performs discretisation before transitions, then checks activations on the discretised cells.
+     * \return The reach set. */
+    virtual SetApproximationType outer_chain_reach(SystemType& system,
+												   const HybridImageSet& initial_set,
+												   const HybridBoxes& safe_region) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * lower semantics.
@@ -291,6 +291,15 @@ class HybridReachabilityAnalyser
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system,
     																const HybridImageSet& initial_set,
     																const HybridBoxes& safe_region) const;
+
+    /*! \brief Gets the set of all the split intervals from the \a system with a given \a tolerance.
+     *  \details The calculation is performed over the domain with a splitting limit controlled by the \a tolerance, excluding
+     *  those constants present in the locked_constants.
+     *  Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
+     *  all the remaining from right to left. If no constants to split are available, returns the original constants.
+     */
+    std::list<RealConstantSet> _getSplitConstantsIntervalsSet(HybridAutomaton system,
+    							  	  	  	  	  	  	  	  float tolerance) const;
 };
 
 template<class HybridEnclosureType>
@@ -326,7 +335,7 @@ list<HybridBasicSet<TaylorSet> > split_initial_set(const HybridImageSet initial_
 /*! \brief Gets for each non-singleton constant the factor determining the number of chunks its interval should be split into.
  *
  * \details Splits until the deviation of the derivatives is reasonably low in respect to the deviation calculated at the midpoint. This
- * limit value is expressed as a percentage using \a tolerance.
+ * limit value is expressed as a percentage using \a targetRatioPerc.
  *
  * @param system The system to get the accessible constants from.
  * @param targetRatioPerc The derivative widths ratio percentage to reach before termination.
@@ -334,7 +343,7 @@ list<HybridBasicSet<TaylorSet> > split_initial_set(const HybridImageSet initial_
  * @return A split factor for each non-singleton accessible constant of the \a system.
  */
 RealConstantIntMap getSplitFactorsOfConstants(HybridAutomaton& system, const RealConstantSet& locked_constants,
-											  const Float& targetRatioPerc, const HybridBoxes& bounding_domain);
+											   const Float& targetRatioPerc, const HybridBoxes& bounding_domain);
 
 /*! \brief Gets the best constant among the \a working_constants of the \a system to split, in terms of
  * relative reduction of derivative widths compared to some \a referenceWidths.
@@ -354,12 +363,6 @@ Float getMaxDerivativeWidthRatio(const HybridAutomaton& system,
 /*! \brief Helper function to get the widths of the derivatives from the \a system */
 HybridFloatVector getDerivativeWidths(const HybridAutomaton& system,
 									  const HybridBoxes& bounding_domain);
-
-/*! \brief Gets the set of all the split intervals from the stored split factors.
- *  \details Orders the list elements by first picking the leftmost subintervals, followed by the rightmost and then
- *  all the remaining from right to left.
- */
-std::list<RealConstantSet> getSplitConstantsIntervalsSet(const RealConstantIntMap& split_factors);
 
 /*! \brief Gets the set of all the midpoints of the split intervals in \a intervals_set. */
 std::list<RealConstantSet> getSplitConstantsMidpointsSet(const std::list<RealConstantSet>& intervals_set);

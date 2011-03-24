@@ -672,29 +672,26 @@ outer_chain_reach(SystemType& system,
 {
 	HybridBoxes safe_region = unbounded_hybrid_boxes(system.state_space());
 
-	return outer_chain_reach_quick_proving(system,initial_set,safe_region);
+	return outer_chain_reach(system,initial_set,safe_region);
 }
 
 
 HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
-outer_chain_reach_quick_proving(SystemType& system,
-							    const HybridImageSet& initial_set,
-							    const HybridBoxes& safe_region) const
+outer_chain_reach(SystemType& system,
+				  const HybridImageSet& initial_set,
+				  const HybridBoxes& safe_region) const
 {
 	HybridGridTreeSet reach;
 
 	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
 
-	std::list<RealConstantSet> split_set = getSplitConstantsIntervalsSet(_parameters->split_factors);
-
-	if (split_set.empty())
-		split_set.push_back(original_constants);
+	std::list<RealConstantSet> split_intervals_set = _getSplitConstantsIntervalsSet(system,0.1);
 
 	uint i = 0;
 	// Progressively adds the results for each subsystem
-	for (std::list<RealConstantSet>::const_iterator set_it = split_set.begin(); set_it != split_set.end(); ++set_it) {
-		ARIADNE_LOG(5,"<Constants set #" << ++i << " : " << *set_it << " >\n");
+	for (std::list<RealConstantSet>::const_iterator set_it = split_intervals_set.begin(); set_it != split_intervals_set.end(); ++set_it) {
+		ARIADNE_LOG(5,"<Split constants set #" << ++i << " : " << *set_it << " >\n");
 
 		system.substitute(*set_it);
 
@@ -860,9 +857,7 @@ lower_chain_reach(SystemType& system,
 
 	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
 
-	std::list<RealConstantSet> split_intervals_set = getSplitConstantsIntervalsSet(_parameters->split_factors);
-	if (split_intervals_set.empty())
-		split_intervals_set.push_back(original_constants);
+	std::list<RealConstantSet> split_intervals_set = _getSplitConstantsIntervalsSet(system,0.1);
 	std::list<RealConstantSet> split_midpoints_set = getSplitConstantsMidpointsSet(split_intervals_set);
 
 	uint i = 0;
@@ -871,7 +866,7 @@ lower_chain_reach(SystemType& system,
 												    set_it != split_midpoints_set.end();
 												    ++set_it)
 	{
-		ARIADNE_LOG(5,"<Constants set #" << ++i << " : " << *set_it << " >\n");
+		ARIADNE_LOG(5,"<Split constants set #" << ++i << " : " << *set_it << " >\n");
 
 		system.substitute(*set_it);
 
@@ -899,9 +894,9 @@ tuneEvolverParameters(SystemType& system,
 						Semantics semantics)
 {
 	_discretiser->parameters().maximum_enclosure_cell = getMaximumEnclosureCell(system.grid(),maximum_grid_depth);
-	ARIADNE_LOG(3, "Maximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
+	ARIADNE_LOG(4, "Maximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
 	_discretiser->parameters().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,system.grid(),maximum_grid_depth);
-	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
+	ARIADNE_LOG(4, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
 }
 
 list<HybridBasicSet<TaylorSet> >
@@ -1208,12 +1203,21 @@ void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
 }
 
 std::list<RealConstantSet>
-getSplitConstantsIntervalsSet(const RealConstantIntMap& split_factors)
+HybridReachabilityAnalyser::
+_getSplitConstantsIntervalsSet(HybridAutomaton system,
+							   float tolerance) const
 {
+	const RealConstantSet& locked_constants = _parameters->locked_constants;
+	const HybridBoxes& domain = _parameters->bounding_domain;
+
+	const RealConstantSet original_constants = system.accessible_constants();
+
+	const RealConstantIntMap split_factors = getSplitFactorsOfConstants(system,locked_constants,tolerance,domain);
+
 	std::list<RealConstantSet> result;
 
 	if (split_factors.empty())
-		return result;
+		result.push_back(original_constants);
 
 	// Creates a vector for all the interval splits (i.e. a jagged matrix)
 	std::vector<std::vector<RealConstant> > split_intervals_set(split_factors.size());
@@ -1228,6 +1232,8 @@ getSplitConstantsIntervalsSet(const RealConstantIntMap& split_factors)
 	std::vector<std::vector<RealConstant> >::iterator initial_col_it = split_intervals_set.begin();
 	std::vector<RealConstant>::iterator initial_row_it = initial_col_it->begin();
 	_fillSplitSet(split_intervals_set,initial_col_it,initial_row_it,initial_combination,result);
+
+	ARIADNE_LOG(5,"<Split factors: " << split_factors << ", size: " << result.size() << ">\n");
 
 	return result;
 }

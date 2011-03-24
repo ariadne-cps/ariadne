@@ -58,13 +58,12 @@ int main(int argc,char *argv[])
 	outer_evolver.verbosity = 0;
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
-	outer_analyser.verbosity = 0;
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
 	outer_analyser.parameters().highest_maximum_grid_depth = 6;
 	lower_analyser.parameters().highest_maximum_grid_depth = 6;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.plot_results = true;
+	verifier.plot_results = false;
 
 	/// Analysis parameters
 	RealConstantSet parameters;

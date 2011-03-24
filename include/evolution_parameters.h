@@ -34,6 +34,7 @@
 #include "grid_set.h"
 #include "hybrid_set.h"
 #include "variables.h"
+#include "hybrid_automaton.h"
 
 typedef std::map<RealConstant,int,ConstantComparator<Real> > RealConstantIntMap;
 
@@ -219,8 +220,9 @@ class DiscreteEvolutionParameters {
     //! \brief The reached region for constraining a chain outer reach.
     HybridGridTreeSet constraint_reach;
 
-    //! \brief The split factors for constants.
-    RealConstantIntMap split_factors;
+    //! \brief The constants that must not be automatically split inside a system.
+    //! \details The actual intervals values of the constants are irrelevant.
+    RealConstantSet locked_constants;
 
 	//! \brief Enable the pruning of the trajectories when too large (false by default).
     //! \details The pruning is done probabilistically.
@@ -321,7 +323,6 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  constraint_reach=" << p.constraint_reach
-       << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  enable_quick_proving=" << p.enable_quick_proving
        << ",\n  enable_quick_disproving=" << p.enable_quick_disproving
@@ -359,7 +360,6 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  constraint_reach=" << p.constraint_reach
-       << ",\n  split_factors=" << p.split_factors
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  enable_quick_proving=" << p.enable_quick_proving
        << ",\n  enable_quick_disproving=" << p.enable_quick_disproving

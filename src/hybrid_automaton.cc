@@ -655,6 +655,17 @@ HybridAutomaton::substitute(const RealConstantSet& cons)
 
 
 void
+HybridAutomaton::substitute(const RealConstantSet& cons, bool use_midpoint)
+{
+	for (RealConstantSet::const_iterator cons_it = cons.begin(); cons_it != cons.end(); ++cons_it) {
+		if (use_midpoint)
+			substitute(*cons_it,cons_it->value().midpoint());
+		else
+			substitute(*cons_it);
+	}
+}
+
+void
 HybridAutomaton::register_accessible_constant(RealConstant con)
 {
 	// Silently accepts duplicated constant registrations

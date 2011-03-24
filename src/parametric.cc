@@ -69,7 +69,7 @@ ParametricOutcome::getOutcome() const
 std::ostream&
 ParametricOutcome::write(std::ostream& os) const
 {
-	os << "(" << _params << "->" << _value << ")";
+	os << "(" << _params << "->" << pretty_print(_value) << ")";
 	return os;
 }
 

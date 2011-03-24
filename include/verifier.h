@@ -88,8 +88,20 @@ class Verifier
     mutable boost::shared_ptr< HybridReachabilityAnalyser > _outer_analyser, _lower_analyser;
     mutable std::string _plot_dirpath;
   public:
+    /*! \brief Whether the analysis results must be plotted. */
 	bool plot_results;
+	/*! \brief The maximum depth of parameter range splitting.
+	 * \details A value of zero means that the parameter space is not splitted at all. */
 	uint maximum_parameter_depth;
+	/*! \brief Whether to substitute midpoints of parameter boxes when proving.
+	 * \details Defaults to false. A value of true would not yield a formal result for the parameter box
+	 * but would be useful for quick pre-analysis. */
+	bool use_param_midpoints_for_proving;
+	/*! \brief Whether to substitute midpoints of parameter boxes when disproving.
+	 * \details Defaults to true. Indeed, if we use a value of false and successfully disprove, we gain no additional insight.
+	 * Choosing false has the benefit of exploring the whole parameter box, but the drawback of possibly be unable to successfully disprove at all
+	 * due to error radii. */
+	bool use_param_midpoints_for_disproving;
   public:
 
     //@{
@@ -211,36 +223,42 @@ class Verifier
 	//! \name Safety methods
 
 	/*! \brief Prove (once, i.e. for a given grid depth) that the the reachable set of \a system starting in \a initial_set
-	 * definitely remains in the \a safe region. */
+	 * definitely remains in the \a safe region.
+	 * \details The \a constants are substituted into the system. */
 	bool _safety_positive_once(HybridAutomaton& system,
 							   const HybridImageSet& initial_set,
-							   const HybridBoxes& safe_region) const;
+							   const HybridBoxes& safe_region,
+							   const RealConstantSet& constants) const;
 	/*! \brief Prove (once, i.e. for a given grid depth) that the reachable set of \a system starting in \a initial_set
-	 * does definitely NOT remain in the \a safe region. */
+	 * does definitely NOT remain in the \a safe region.
+	 * \details The \a constants are substituted into the system. */
 	bool _safety_negative_once(HybridAutomaton& system,
 							   const HybridImageSet& initial_set,
-							   const HybridBoxes& safe_region) const;
+							   const HybridBoxes& safe_region,
+							   const RealConstantSet& constants) const;
 
     /*! \brief Attempt (once, i.e. for a given grid depth) to verify that the reachable set of \a system starting in \a initial_set
-     * remains in a safe_box. */
+     * remains in a safe_box.
+     * \details The \a constants are substituted into the system. */
     tribool _safety_once(HybridAutomaton& system,
 						 const HybridImageSet& initial_set,
-						 const HybridBoxes& safe_region) const;
+						 const HybridBoxes& safe_region,
+						 const RealConstantSet& constants) const;
 
-	/*! \brief Performs iterative safety verification where \a parameter is substituted into the system.
+	/*! \brief Performs iterative safety verification where \a constant is substituted into the system.
 	 */
 	tribool _safety(SystemVerificationInfo& verInfo,
-							 const RealConstant& parameter) const;
+					const RealConstant& constant) const;
 
-	/*! \brief Performs iterative safety verification where the singleton \a value is substituted into the system for the given \a parameter.
+	/*! \brief Performs iterative safety verification where the singleton \a value is substituted into the system for the given \a constant.
 	 */
 	tribool _safety(SystemVerificationInfo& verInfo,
-						     const RealConstant& parameter, const Float& value) const;
+					const RealConstant& constant, const Float& value) const;
 
-	/*! \brief Performs iterative safety verification.
-	 * \details The constants in the \a locked_constants set are not allowed to be split */
+	/*! \brief Performs iterative safety verification, with \a params_to_substitute substituted into the system.
+	 * \details The \a constants are substituted in the system and are not allowed to be split */
 	tribool _safety_nosplitting(SystemVerificationInfo& verInfo,
-							 const RealConstantSet& locked_constants) const;
+							 const RealConstantSet& constants) const;
 
 	/*! \brief Performs one verification sweep along the X axis if \a sweepOnX is true, the Y axis otherwise. */
 	void _parametric_safety_2d_bisection_sweep(Parametric2DBisectionResults& results,

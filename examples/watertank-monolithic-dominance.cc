@@ -63,10 +63,7 @@ int main(int argc,char *argv[])
 	ImageSetHybridEvolver outer_evolver(outer_integrator);
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
-	outer_analyser.verbosity = verifierVerbosity;
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
-	outer_analyser.parameters().lowest_maximum_grid_depth = 0;
-	lower_analyser.parameters().lowest_maximum_grid_depth = 0;
 	outer_analyser.parameters().highest_maximum_grid_depth = 5;
 	lower_analyser.parameters().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);

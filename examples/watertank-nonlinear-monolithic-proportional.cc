@@ -71,8 +71,9 @@ int main(int argc,char *argv[])
 	lower_analyser.parameters().highest_maximum_grid_depth = 6;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.maximum_parameter_depth = 5;
+	verifier.maximum_parameter_depth = 2;
 	verifier.plot_results = false;
+	verifier.use_param_midpoints_for_proving = true;
 
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));

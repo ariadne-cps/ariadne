@@ -102,7 +102,9 @@ Verifier::Verifier(const HybridReachabilityAnalyser& outer_analyser,
 				   _outer_analyser(outer_analyser.clone()),
 				   _lower_analyser(lower_analyser.clone()),
 				   plot_results(false),
-				   maximum_parameter_depth(3)
+				   maximum_parameter_depth(3),
+				   use_param_midpoints_for_proving(false),
+				   use_param_midpoints_for_disproving(true)
 {
 }
 
@@ -110,7 +112,9 @@ Verifier::Verifier(const HybridReachabilityAnalyser& analyser) :
 				   _outer_analyser(analyser.clone()),
 				   _lower_analyser(analyser.clone()),
 				   plot_results(false),
-				   maximum_parameter_depth(3)
+				   maximum_parameter_depth(3),
+				   use_param_midpoints_for_proving(false),
+				   use_param_midpoints_for_disproving(true)
 {
 }
 
@@ -123,16 +127,25 @@ bool
 Verifier::
 _safety_positive_once(SystemType& system,
 	  const HybridImageSet& initial_set,
-	  const HybridBoxes& safe_region) const
+	  const HybridBoxes& safe_region,
+	  const RealConstantSet& constants) const
 {
 	bool result;
 
 	ARIADNE_LOG(4,"Proving...\n");
 
-	DiscreteEvolutionParameters& params = _outer_analyser->parameters();
-
 	if (!_is_grid_depth_within_bounds(UPPER_SEMANTICS))
 		return false;
+
+	RealConstantSet original_constants = system.accessible_constants();
+	for (RealConstantSet::const_iterator const_it = constants.begin(); const_it != constants.end(); ++const_it) {
+		if (use_param_midpoints_for_proving)
+			system.substitute(*const_it,const_it->value().midpoint());
+		else
+			system.substitute(*const_it);
+	}
+
+	DiscreteEvolutionParameters& analyser_params = _outer_analyser->parameters();
 
 	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
 
@@ -142,7 +155,7 @@ _safety_positive_once(SystemType& system,
 	{
 		reach = _outer_analyser->outer_chain_reach_quick_proving(system,initial_set,safe_region);
 
-		if (params.domain_enforcing_policy == OFFLINE && definitely(!reach.subset(params.bounding_domain)))
+		if (analyser_params.domain_enforcing_policy == OFFLINE && definitely(!reach.subset(analyser_params.bounding_domain)))
 			result = false;
 		else
 			result = definitely(reach.subset(safe_region));
@@ -160,6 +173,8 @@ _safety_positive_once(SystemType& system,
 
 	ARIADNE_LOG(4, (result ? "Proved.\n" : "Not proved.\n") );
 
+	system.substitute(original_constants);
+
 	return result;
 }
 
@@ -168,12 +183,21 @@ bool
 Verifier::
 _safety_negative_once(SystemType& system,
 		 const HybridImageSet& initial_set,
-		 const HybridBoxes& safe_region) const
+		 const HybridBoxes& safe_region,
+		 const RealConstantSet& constants) const
 {
 	ARIADNE_LOG(4,"Disproving...\n");
 
 	if (!_is_grid_depth_within_bounds(LOWER_SEMANTICS))
 		return false;
+
+	RealConstantSet original_constants = system.accessible_constants();
+	for (RealConstantSet::const_iterator const_it = constants.begin(); const_it != constants.end(); ++const_it) {
+		if (use_param_midpoints_for_disproving)
+			system.substitute(*const_it,const_it->value().midpoint());
+		else
+			system.substitute(*const_it);
+	}
 
 	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
 
@@ -190,6 +214,8 @@ _safety_negative_once(SystemType& system,
 
 	ARIADNE_LOG(4, (isDisproved ? "Disproved.\n" : "Not disproved.\n") );
 
+	system.substitute(original_constants);
+
 	return isDisproved;
 }
 
@@ -198,16 +224,17 @@ tribool
 Verifier::
 _safety_once(SystemType& system,
 			 const HybridImageSet& initial_set,
-			 const HybridBoxes& safe_region) const
+			 const HybridBoxes& safe_region,
+			 const RealConstantSet& constants) const
 {
 		ARIADNE_LOG(3, "Verification...\n");
 
-		if (_safety_positive_once(system,initial_set,safe_region)) {
+		if (_safety_positive_once(system,initial_set,safe_region,constants)) {
 			ARIADNE_LOG(3, "Safe.\n");
 			return true;
 		}
 
-		if (_safety_negative_once(system,initial_set,safe_region)) {
+		if (_safety_negative_once(system,initial_set,safe_region,constants)) {
 			ARIADNE_LOG(3, "Unsafe.\n");
 			return false;
 		}
@@ -228,24 +255,24 @@ safety(SystemVerificationInfo& verInfo) const
 
 tribool
 Verifier::
-_safety(SystemVerificationInfo& verInfo, const RealConstant& parameter) const
+_safety(SystemVerificationInfo& verInfo, const RealConstant& constant) const
 {
 	HybridAutomaton& system = verInfo.getSystem();
 
-	Real originalParameterValue = system.accessible_constant_value(parameter.name());
+	Real originalParameterValue = system.accessible_constant_value(constant.name());
 
-	system.substitute(parameter);
+	system.substitute(constant);
 	tribool result = safety(verInfo);
-	system.substitute(parameter,originalParameterValue);
+	system.substitute(constant,originalParameterValue);
 
 	return result;
 }
 
 tribool
 Verifier::
-_safety(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Float& value) const
+_safety(SystemVerificationInfo& verInfo, const RealConstant& constant, const Float& value) const
 {
-	const RealConstant modifiedParameter(parameter.name(),Interval(value));
+	const RealConstant modifiedParameter(constant.name(),Interval(value));
 
 	return _safety(verInfo, modifiedParameter);
 }
@@ -254,7 +281,7 @@ _safety(SystemVerificationInfo& verInfo, const RealConstant& parameter, const Fl
 tribool
 Verifier::
 _safety_nosplitting(SystemVerificationInfo& verInfo,
-				    const RealConstantSet& locked_constants) const
+				    const RealConstantSet& constants_to_substitute) const
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
 
@@ -266,8 +293,8 @@ _safety_nosplitting(SystemVerificationInfo& verInfo,
 	_outer_analyser->resetStatistics();
 
 	// Set the initial parameters
-	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),locked_constants,UPPER_SEMANTICS);
-	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),locked_constants,LOWER_SEMANTICS);
+	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants_to_substitute,UPPER_SEMANTICS);
+	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants_to_substitute,LOWER_SEMANTICS);
 
 	int initial_depth = min(_outer_analyser->parameters().lowest_maximum_grid_depth,
 							_lower_analyser->parameters().lowest_maximum_grid_depth);
@@ -283,7 +310,7 @@ _safety_nosplitting(SystemVerificationInfo& verInfo,
 		_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
 		_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
 
-		tribool result = _safety_once(system,verInfo.getInitialSet(),verInfo.getSafeRegion());
+		tribool result = _safety_once(system,verInfo.getInitialSet(),verInfo.getSafeRegion(),constants_to_substitute);
 
 		if (!indeterminate(result))
 			return result;
@@ -447,8 +474,7 @@ parametric_safety(SystemVerificationInfo& verInfo,
 		ARIADNE_LOG(1,"<Split parameters set #" << ++i << "/" << splittings.size() << ">\n");
 		RealConstantSet current_params = *splitting_it;
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
-		verInfo.getSystem().substitute(current_params);
-		tribool outcome = _safety_nosplitting(verInfo,params);
+		tribool outcome = _safety_nosplitting(verInfo,current_params);
 		ARIADNE_LOG(1,"Outcome: " << pretty_print(outcome) << "\n");
 		result.push_back(ParametricOutcome(current_params,outcome));
 	}

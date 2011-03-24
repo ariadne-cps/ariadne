@@ -70,7 +70,7 @@ int main(int argc,char *argv[])
 	lower_analyser.parameters().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.maximum_parameter_depth = 4;
+	verifier.maximum_parameter_depth = 5;
 
 	// The parametric dominance parameters
 	RealConstantSet parameters;

@@ -38,8 +38,8 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_set;
-	initial_set[DiscreteState("opened")] = Box(2, 6.25,7.25, 1.0,1.0);
-	initial_set[DiscreteState("closed")] = Box(2, 6.25,7.25, 0.0,0.0);
+	initial_set[DiscreteState("opened")] = Box(2, 6.00,7.5, 1.0,1.0);
+	initial_set[DiscreteState("closed")] = Box(2, 6.00,7.5, 0.0,0.0);
 
 	// The domain
 	HybridBoxes domain = bounding_boxes(system.state_space(),Box(2,4.5,9.0,-0.1,1.1));

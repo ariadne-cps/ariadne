@@ -859,6 +859,8 @@ lower_chain_reach(SystemType& system,
 	DisproveData disproveData(system.state_space());
 
 	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
+	for (RealConstantSet::const_iterator const_it = original_constants.begin(); const_it != original_constants.end(); ++const_it)
+		system.substitute(*const_it,const_it->value().midpoint());
 
 	std::list<RealConstantSet> split_intervals_set = getSplitConstantsIntervalsSet(_parameters->split_factors);
 	if (split_intervals_set.empty())
@@ -898,10 +900,8 @@ tuneEvolverParameters(SystemType& system,
 						uint maximum_grid_depth,
 						Semantics semantics)
 {
-	// Maximum enclosure cell
 	_discretiser->parameters().maximum_enclosure_cell = getMaximumEnclosureCell(system.grid(),maximum_grid_depth);
 	ARIADNE_LOG(3, "Maximum enclosure cell: " << _discretiser->parameters().maximum_enclosure_cell << "\n");
-	// Maximum step size
 	_discretiser->parameters().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,system.grid(),maximum_grid_depth);
 	ARIADNE_LOG(3, "Maximum step size: " << _discretiser->parameters().hybrid_maximum_step_size << "\n");
 }

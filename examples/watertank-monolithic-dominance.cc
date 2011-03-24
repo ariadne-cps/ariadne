@@ -39,11 +39,12 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_hy;
-	initial_hy[DiscreteState("opened")] = Box(2, 5.5,7.0, 1.0,1.0);
+	initial_hy[DiscreteState("opened")] = Box(2, 6.0,7.5, 1.0,1.0);
+	initial_hy[DiscreteState("closed")] = Box(2, 6.0,7.5, 0.0,0.0);
 	HybridImageSet initial_pr;
-	initial_pr[DiscreteState(3)] = Box(2, 5.5,7.0, 0.5,0.5);
-	initial_pr[DiscreteState(2)] = Box(2, 5.5,7.0, 0.5,0.5);
-	initial_pr[DiscreteState(1)] = Box(2, 5.5,7.0, 0.5,0.5);
+	initial_pr[DiscreteState(3)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_pr[DiscreteState(2)] = Box(2, 6.75,6.75, 0.0,1.0);
+	initial_pr[DiscreteState(1)] = Box(2, 6.75,6.75, 0.0,1.0);
 
 	// The domains
 	HybridBoxes domain_hy = bounding_boxes(system_hy.state_space(),Box(2,4.0,9.0,-0.1,1.1));
@@ -58,26 +59,30 @@ int main(int argc,char *argv[])
 	SystemVerificationInfo proportional(system_pr,initial_pr,domain_pr,projection_pr);
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
-	//TaylorCalculus lower_integrator(4,6,1e-10);
-	TaylorCalculus lower_integrator(2,2,1e-4);
+	TaylorCalculus lower_integrator(4,6,1e-10);
 	ImageSetHybridEvolver outer_evolver(outer_integrator);
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
+	outer_analyser.verbosity = verifierVerbosity;
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
 	outer_analyser.parameters().lowest_maximum_grid_depth = 0;
 	lower_analyser.parameters().lowest_maximum_grid_depth = 0;
-	outer_analyser.parameters().highest_maximum_grid_depth = 7;
-	lower_analyser.parameters().highest_maximum_grid_depth = 7;
+	outer_analyser.parameters().highest_maximum_grid_depth = 5;
+	lower_analyser.parameters().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
+	verifier.maximum_parameter_depth = 4;
 
 	// The parametric dominance parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("Kp",Interval(0.2,0.6)));
-	parameters.insert(RealConstant("tau",Interval(1.0,16.0)));
+	parameters.insert(RealConstant("Kp",Interval(0.2,0.8)));
+	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
 
-	RealConstant parameter("Kp",Interval(0.2,0.6));
+	RealConstant parameter("Kp",Interval(0.2,0.8));
+	//RealConstant parameter("ref",Interval(5.25,8.25));
 
-	//verifier.parametric_dominance_2d_bisection(proportional,hysteresis,parameters);
-	cout << verifier.parametric_dominance_1d_bisection(proportional,hysteresis,parameter);
+	//cout << verifier.parametric_dominance_1d_bisection(proportional,hysteresis,parameter);
+    ParametricPartitioningOutcomeList results = verifier.parametric_dominance_partitioning(proportional,hysteresis,parameters);
+	//Parametric2DBisectionResults results = verifier.parametric_dominance_2d_bisection(proportional,hysteresis,parameters);
+    results.draw();
 }

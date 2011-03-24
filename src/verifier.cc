@@ -131,7 +131,7 @@ _safety_positive_once(SystemType& system,
 
 	DiscreteEvolutionParameters& params = _outer_analyser->parameters();
 
-	if (!_is_grid_depth_within_bounds("proving",params))
+	if (!_is_grid_depth_within_bounds(UPPER_SEMANTICS))
 		return false;
 
 	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
@@ -172,7 +172,7 @@ _safety_negative_once(SystemType& system,
 {
 	ARIADNE_LOG(4,"Disproving...\n");
 
-	if (!_is_grid_depth_within_bounds("disproving",_lower_analyser->parameters()))
+	if (!_is_grid_depth_within_bounds(LOWER_SEMANTICS))
 		return false;
 
 	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
@@ -295,14 +295,16 @@ _safety_nosplitting(SystemVerificationInfo& verInfo,
 
 bool
 Verifier::
-_is_grid_depth_within_bounds(std::string msg, const DiscreteEvolutionParameters& parameters) const
+_is_grid_depth_within_bounds(Semantics semantics) const
 {
+	const DiscreteEvolutionParameters& parameters = (semantics == UPPER_SEMANTICS ? _outer_analyser->parameters() : _lower_analyser->parameters());
+
 	if (parameters.maximum_grid_depth < parameters.lowest_maximum_grid_depth) {
-		ARIADNE_LOG(4,"Skipped " << msg << " since the depth is lower than the lowest allowed.\n");
+		ARIADNE_LOG(4,"Skipped verification since the depth is lower than the lowest allowed.\n");
 		return false;
 	}
 	if (parameters.maximum_grid_depth > parameters.highest_maximum_grid_depth) {
-		ARIADNE_LOG(4,"Skipped " << msg << " since the depth is higher than the highest allowed.\n");
+		ARIADNE_LOG(4,"Skipped verification since the depth is higher than the highest allowed.\n");
 		return false;
 	}
 

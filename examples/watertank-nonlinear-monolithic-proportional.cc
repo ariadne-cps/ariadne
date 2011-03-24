@@ -69,18 +69,22 @@ int main(int argc,char *argv[])
 	lower_analyser.parameters().highest_maximum_grid_depth = 6;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.maximum_parameter_depth = 4;
-	verifier.plot_results = true;
+	verifier.maximum_parameter_depth = 5;
+	verifier.plot_results = false;
 
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("ref",Interval(5.5,8.0)));
+	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
 	parameters.insert(RealConstant("Kp",Interval(0.2,0.8)));
 
-	system.substitute(RealConstant("ref",6.3));
+	//system.substitute(RealConstant("ref",5.4375));
+	//system.substitute(RealConstant("Kp",0.40625));
+
+	//system.substitute(RealConstant("ref",Interval(5.23,5.6)));
+	//system.substitute(RealConstant("Kp",Interval(0.5,0.575)));
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	cout << verifier.safety(verInfo);
+	//cout << verifier.safety(verInfo);
 	//Parametric2DBisectionResults results = verifier.parametric_safety_2d_bisection(verInfo,parameters);
-	//ParametricPartitioningOutcomeList results = verifier.parametric_safety_partitioning(verInfo, parameters);
-	//results.draw();
+	ParametricPartitioningOutcomeList results = verifier.parametric_safety_partitioning(verInfo, parameters);
+	results.draw();
 }

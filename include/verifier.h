@@ -331,10 +331,8 @@ class Verifier
 									  const HybridGridTreeSet& bounding_reach,
 									  Semantics semantics) const;
 
-	/*! \brief Checks whether a grid depth value is allowed for use.
-	 *  \details The \a parameters include the actual value and the bounds, while \a msg integrates the internal message
-	 *  "Skipped <msg> since the depth is lower(higher) than the lowest(highest) allowed." */
-	bool _is_grid_depth_within_bounds(std::string msg, const DiscreteEvolutionParameters& parameters) const;
+	/*! \brief Checks whether a grid depth value is allowed for use, based on the \a semantics. */
+	bool _is_grid_depth_within_bounds(Semantics semantics) const;
 
 	// Reached region plotting methods
 	void _plot_dirpath_init(const HybridAutomaton& system) const;

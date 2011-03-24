@@ -1,4 +1,4 @@
-example = "watertank-nl-mono-pr[Kp,ref]-par"
+example = "watertank-nl-mono-pr&watertank-nl-mono-hy[Kp,ref]-par"
 set xrange [0.2:0.8]
 set yrange [5.25:8.25]
 set size 1.5, 1

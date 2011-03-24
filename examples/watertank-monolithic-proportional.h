@@ -32,9 +32,9 @@ HybridAutomaton getWatertankMonolithicProportional()
 {
 	HybridAutomaton system("watertank-mono-pr");
 
-    // Set the system parameters
-	RealConstant a("a",0.02); // The constant defining the decrease rate of the tank level
-	RealConstant tau("tau",1.0); // The characteristic time for the opening/closing of the valve
+    /// Set the system parameters
+	RealConstant a("a",0.065); // The constant defining the decrease rate of the tank level
+	RealConstant tau("tau",1.25); // The characteristic time for the opening/closing of the valve
 	RealConstant ref("ref",6.75); // A reference tank level
 	RealConstant bfp("bfp",Interval(0.3,0.32863)); // The product beta*f(p)
 	RealConstant Kp("Kp",0.6); // The gain of the proportional controller
@@ -53,8 +53,8 @@ HybridAutomaton getWatertankMonolithicProportional()
 	system.register_accessible_constant(a);
 	system.register_accessible_constant(bfp);
 	system.register_accessible_constant(tau);
-	system.register_accessible_constant(Kp);
 	system.register_accessible_constant(ref);
+	system.register_accessible_constant(Kp);
 
 	// Constants
 	ScalarFunction one=ScalarFunction::constant(2,1.0);
@@ -81,7 +81,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 	RealExpression x_normal_d = -a*x+bfp*y;
 	RealExpression x_overflow_d = 0.0;
 	RealExpression y_towardszero_d = -y/tau;
-	RealExpression y_controlled_d = (Kp*(ref-x-delta)-y)/tau;
+	RealExpression y_controlled_d = (Kp*(ref-x)-y)/tau;
 	RealExpression y_towardsone_d = (1-y)/tau;
 
 	// Dynamics at the different modes
@@ -105,8 +105,8 @@ HybridAutomaton getWatertankMonolithicProportional()
 	/// x <= ref - Delta
 	RealExpression x_lesser_ref_minus_delta = -x-delta+ref;
 	ScalarFunction guard12(x_lesser_ref_minus_delta,varlist);
-	/// x >= ref - Delta
-	RealExpression x_greater_ref_minus_delta = x+delta-ref;
+	/// x >= ref + Delta
+	RealExpression x_greater_ref_minus_delta = x-delta-ref;
 	ScalarFunction guard21(x_greater_ref_minus_delta,varlist);
 	/// x >= H
 	RealExpression x_greater_height = x-H;
@@ -117,10 +117,11 @@ HybridAutomaton getWatertankMonolithicProportional()
 	/// x <= ref - 1/Kp - Delta
 	RealExpression x_lesser_ref_kp_minus_delta = -x+ref-1.0/Kp-delta;
 	ScalarFunction guard23(x_lesser_ref_kp_minus_delta,varlist);
-	/// x >= ref - 1/Kp - Delta
-	RealExpression x_greater_ref_kp_minus_delta = x-ref+1.0/Kp+delta;
+	/// x >= ref - 1/Kp + Delta
+	RealExpression x_greater_ref_kp_minus_delta = x-ref+1.0/Kp-delta;
 	ScalarFunction guard32(x_greater_ref_kp_minus_delta,varlist);
 
+	// Invariants
     RealExpression y_geq_zero = -y;   // y >= 0
     ScalarFunction inv_y_geq_zero(y_geq_zero, varlist);
     RealExpression y_leq_one = y-1.0;   // y <= 1
@@ -131,7 +132,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 	system.new_mode(l2,controlled_d);
 	system.new_mode(l3,onesaturated_d);
 	system.new_mode(l4,overflow_d);
-/*
+
 	system.new_invariant(l1,inv_y_geq_zero);
 	system.new_invariant(l2,inv_y_geq_zero);
 	system.new_invariant(l3,inv_y_geq_zero);
@@ -140,7 +141,7 @@ HybridAutomaton getWatertankMonolithicProportional()
 	system.new_invariant(l2,inv_y_leq_one);
 	system.new_invariant(l3,inv_y_leq_one);
 	system.new_invariant(l4,inv_y_leq_one);
-*/
+
 	system.new_forced_transition(e12,l1,l2,reset_id,guard12);
 	system.new_forced_transition(e21,l2,l1,reset_id,guard21);
 	system.new_forced_transition(e23,l2,l3,reset_id,guard23);

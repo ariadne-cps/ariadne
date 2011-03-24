@@ -29,9 +29,9 @@ using namespace Ariadne;
 
 int main(int argc,char *argv[])
 {
-	int analyserVerbosity = 1;
+	int verifierVerbosity = 1;
 	if (argc > 1)
-		analyserVerbosity = atoi(argv[1]);
+		verifierVerbosity = atoi(argv[1]);
 
 	// The systems
 	HybridAutomaton system_hy = Ariadne::getWatertankNonlinearMonolithicHysteresis();
@@ -39,8 +39,8 @@ int main(int argc,char *argv[])
 
 	// The initial values
 	HybridImageSet initial_hy;
-	initial_hy[DiscreteState("opened")] = Box(2, 6.25,7.25, 1.0,1.0);
-	initial_hy[DiscreteState("opened")] = Box(2, 6.25,7.25, 0.0,0.0);
+	initial_hy[DiscreteState("opened")] = Box(2, 6.0,7.5, 1.0,1.0);
+	initial_hy[DiscreteState("closed")] = Box(2, 6.0,7.5, 0.0,0.0);
 	HybridImageSet initial_pr;
 	initial_pr[DiscreteState(1)] = Box(2, 6.75,6.75, 0.0,1.0);
 	initial_pr[DiscreteState(2)] = Box(2, 6.75,6.75, 0.0,1.0);
@@ -58,30 +58,30 @@ int main(int argc,char *argv[])
 	SystemVerificationInfo hysteresis(system_hy,initial_hy,domain_hy,projection_hy);
 	SystemVerificationInfo proportional(system_pr,initial_pr,domain_pr,projection_pr);
 
-	// Create an evolver and analyser objects, then set their verbosity
-	HybridEvolver evolver;
-	evolver.verbosity = 0;
-	HybridReachabilityAnalyser analyser(evolver);
-	analyser.verbosity = analyserVerbosity;
-	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().lowest_maximum_grid_depth = 2;
-	analyser.parameters().highest_maximum_grid_depth = 6;
-	Verifier verifier(analyser);
+	TaylorCalculus outer_integrator(2,2,1e-4);
+	TaylorCalculus lower_integrator(4,6,1e-10);
+	ImageSetHybridEvolver outer_evolver(outer_integrator);
+	ImageSetHybridEvolver lower_evolver(lower_integrator);
+	HybridReachabilityAnalyser outer_analyser(outer_evolver);
+	HybridReachabilityAnalyser lower_analyser(lower_evolver);
+	outer_analyser.parameters().lowest_maximum_grid_depth = 2;
+	lower_analyser.parameters().lowest_maximum_grid_depth = 1;
+	outer_analyser.parameters().highest_maximum_grid_depth = 5;
+	lower_analyser.parameters().highest_maximum_grid_depth = 5;
+	Verifier verifier(outer_analyser,lower_analyser);
+	verifier.verbosity = verifierVerbosity;
+	verifier.maximum_parameter_depth = 4;
 
 	// The parametric dominance parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("Kp",Interval(0.2,0.6)));
-	//parameters.insert(RealConstant("tau",Interval(1.0,8.0)));
-	Float tolerance = 0.125;
-	uint numPointsPerAxis = 11;
+	parameters.insert(RealConstant("Kp",Interval(0.2,0.8)));
+	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
 
-	RealConstant parameter("Kp",Interval(0.2,0.6));
+	RealConstant parameter("Kp",Interval(0.2,0.8));
+	//RealConstant parameter("ref",Interval(5.25,8.25));
 
-/*
-	ParametricVerificationOutcomeList outcomeList = verifier.parametric_dominance_partitioning(proportional,hysteresis,parameters,tolerance);
-	outcomeList.draw("watertank-monolithic-dominance");
-	cout << outcomeList << "\n";
-*/
-	//verifier.parametric_dominance_2d_bisection(proportional,hysteresis,parameters,tolerance,numPointsPerAxis);
-	verifier.parametric_dominance_1d_bisection(proportional,hysteresis,parameter,tolerance);
+	//cout << verifier.parametric_dominance_1d_bisection(proportional,hysteresis,parameter);
+    ParametricPartitioningOutcomeList results = verifier.parametric_dominance_partitioning(proportional,hysteresis,parameters);
+	//Parametric2DBisectionResults results = verifier.parametric_dominance_2d_bisection(proportional,hysteresis,parameters);
+    results.draw();
 }

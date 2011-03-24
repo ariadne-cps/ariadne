@@ -48,6 +48,8 @@ int main(int argc,char *argv[])
 	// The safe region
 	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
+	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+
 	/// Verification
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
@@ -64,19 +66,13 @@ int main(int argc,char *argv[])
 	verifier.verbosity = verifierVerbosity;
 	verifier.plot_results = true;
 
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-
 	/// Analysis parameters
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("ref",Interval(5.5,8.0)));
 	parameters.insert(RealConstant("Kp",Interval(0.2,0.9)));
 
-	system.substitute(RealConstant("ref",6.75));
-
-	cout << verifier.safety(verInfo);
-	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo, parameters);
-	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerAxis);
-	//results.draw();
+	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
+	draw(system.name(),results);
 
 /*
 	system.substitute(RealConstant("bfp",0.3));

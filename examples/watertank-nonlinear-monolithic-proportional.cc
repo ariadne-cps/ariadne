@@ -50,6 +50,8 @@ int main(int argc,char *argv[])
 	// The safe region
 	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
+	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+
 	/// Verification
 
 	// Create an evolver and analyser objects, then set their verbosity
@@ -76,15 +78,6 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
 	parameters.insert(RealConstant("Kp",Interval(0.2,0.8)));
 
-	//system.substitute(RealConstant("ref",5.4375));
-	//system.substitute(RealConstant("Kp",0.40625));
-
-	//system.substitute(RealConstant("ref",Interval(5.23,5.6)));
-	//system.substitute(RealConstant("Kp",Interval(0.5,0.575)));
-
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	//cout << verifier.safety(verInfo);
-	//Parametric2DBisectionResults results = verifier.parametric_safety_2d_bisection(verInfo,parameters);
-	ParametricPartitioningOutcomeList results = verifier.parametric_safety_partitioning(verInfo, parameters);
-	results.draw();
+	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
+	draw(system.name(),results);
 }

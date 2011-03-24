@@ -35,67 +35,36 @@ namespace Ariadne {
 typedef std::set<RealConstant,ConstantNameComparator<Real> > RealConstantSet;
 
 /**
- * \brief The data structure for the outcome of a partitioning method over a configuration of parameters (i.e. constants of a system)
+ * \brief The data structure for the outcome over a configuration of parameters (i.e. constants of a system)
  */
-struct ParametricPartitioningOutcome
+struct ParametricOutcome
 {
 private:
 
 	RealConstantSet _params;
-
 	tribool _value;
 
 public:
 
-	ParametricPartitioningOutcome(const RealConstantSet params, const tribool value);
-	ParametricPartitioningOutcome(const ParametricPartitioningOutcome& other);
+	ParametricOutcome(const RealConstantSet params, const tribool value);
+	ParametricOutcome(const ParametricOutcome& other);
 
-	ParametricPartitioningOutcome& operator=(const ParametricPartitioningOutcome& other);
+	ParametricOutcome& operator=(const ParametricOutcome& other);
 
 	virtual std::ostream& write(std::ostream&) const;
 
 	/** The parameters */
 	const RealConstantSet& getParams() const;
-	/** The value of the verification */
-	const tribool& getValue() const;
+	/** The outcome of the verification */
+	const tribool& getOutcome() const;
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ParametricPartitioningOutcome& outcome) {
+inline std::ostream& operator<<(std::ostream& os, const ParametricOutcome& outcome) {
     return outcome.write(os); }
 
-/**
- * \brief The list of parametric outcomes
- */
-struct ParametricPartitioningOutcomeList
-{
-private:
-
-	RealConstantSet _params;
-
-	std::list<ParametricPartitioningOutcome> _outcomes;
-
-	std::string basename;
-
-public:
-
-	ParametricPartitioningOutcomeList(const std::string& name, const RealConstantSet& params);
-
-	virtual std::ostream& write(std::ostream&) const;
-
-	/** Draws the result in the current folder */
-	void draw() const;
-
-	/** Inserts a result. */
-	void push_back(const ParametricPartitioningOutcome& result);
-
-	/** The current outcomes. */
-	const std::list<ParametricPartitioningOutcome>& getOutcomes() const;
-
-};
-
-inline std::ostream& operator<<(std::ostream& os, const ParametricPartitioningOutcomeList& outcomeList) {
-    return outcomeList.write(os); }
+/*! \brief Draws the \a outcomeList in the current folder */
+void draw(std::string basename, const std::list<ParametricOutcome>& outcomes);
 
 /**
  * \brief A data structure for the results on a parametric 2D analysis using bisection.

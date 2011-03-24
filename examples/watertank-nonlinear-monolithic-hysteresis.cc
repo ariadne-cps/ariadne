@@ -47,6 +47,8 @@ int main(int argc,char *argv[])
 	// The safe region
 	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
+	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+
 	/// Verification
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
@@ -66,13 +68,7 @@ int main(int argc,char *argv[])
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("hmin",Interval(5.25,6.25)));
 	parameters.insert(RealConstant("hmax",Interval(7.25,8.25)));
-	Float tolerance = 0.25;
-	uint numPointsPerAxis = 11;
-	uint logNumIntervalsPerParam = 3;
 
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	cout << verifier.safety(verInfo);
-	//ParametricPartitioningOutcomeList results = verifier.parametric_verification_partitioning(verInfo, parameters, logNumIntervalsPerParam);
-	//Parametric2DBisectionResults results = verifier.parametric_verification_2d_bisection(verInfo,parameters,tolerance,numPointsPerAxis);
-	//results.draw();
+	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
+	draw(system.name(),results);
 }

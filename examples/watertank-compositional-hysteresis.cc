@@ -39,11 +39,6 @@ int main(int argc,char *argv[])
 	RealConstant hmax("hmax",Interval(7.5,8.5)); // 8.0;
 	RealConstant delta("Delta",0.1);
 
-	RealConstantSet parameters;
-	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
-	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
-	Float tolerance = 0.1;
-
     // System variables
     RealVariable x("x");    // water level
     RealVariable y("y");    // valve aperture
@@ -204,17 +199,17 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	evolver.parameters().enable_set_model_reduction = true;
 	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 6;
 	Verifier verifier(analyser);
 
-	// Perform the analysis
-	//Interval safe_int, unsafe_int;
-	//make_lpair(safe_int,unsafe_int) = verifier.parametric_1d_bisection(system, initial_set, safe_box, domain, parameter, tolerance);
+	RealConstantSet parameters;
+	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
+	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	ParametricPartitioningOutcomeList outcomes = verifier.parametric_safety_partitioning(verInfo, parameters, tolerance);
-	outcomes.draw();
+
+	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
+	draw(system.name(),results);
 }

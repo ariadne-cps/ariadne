@@ -27,7 +27,7 @@ namespace Ariadne {
 
 
 
-ParametricPartitioningOutcome::ParametricPartitioningOutcome(const RealConstantSet params, const tribool value)
+ParametricOutcome::ParametricOutcome(const RealConstantSet params, const tribool value)
 {
 	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it)
 		_params.insert(*const_it);
@@ -35,84 +35,52 @@ ParametricPartitioningOutcome::ParametricPartitioningOutcome(const RealConstantS
 	_value = value;
 }
 
-ParametricPartitioningOutcome::ParametricPartitioningOutcome(const ParametricPartitioningOutcome& other)
+ParametricOutcome::ParametricOutcome(const ParametricOutcome& other)
 {
 	for (RealConstantSet::const_iterator const_it = other.getParams().begin(); const_it != other.getParams().end(); ++const_it)
 		_params.insert(*const_it);
 
-	_value = other.getValue();
+	_value = other.getOutcome();
 }
 
-ParametricPartitioningOutcome&
-ParametricPartitioningOutcome::operator=(const ParametricPartitioningOutcome& other)
+ParametricOutcome&
+ParametricOutcome::operator=(const ParametricOutcome& other)
 {
 	for (RealConstantSet::const_iterator const_it = other.getParams().begin(); const_it != other.getParams().end(); ++const_it)
 		_params.insert(*const_it);
 
-	_value = other.getValue();
+	_value = other.getOutcome();
 
 	return *this;
 }
 
 const RealConstantSet&
-ParametricPartitioningOutcome::getParams() const
+ParametricOutcome::getParams() const
 {
 	return _params;
 }
 
 const tribool&
-ParametricPartitioningOutcome::getValue() const
+ParametricOutcome::getOutcome() const
 {
 	return _value;
 }
 
 std::ostream&
-ParametricPartitioningOutcome::write(std::ostream& os) const
+ParametricOutcome::write(std::ostream& os) const
 {
 	os << "(" << _params << "->" << _value << ")";
 	return os;
 }
 
-ParametricPartitioningOutcomeList::ParametricPartitioningOutcomeList(const std::string& name,
-																	 const RealConstantSet& params) : basename(name)
-{
-	for (RealConstantSet::const_iterator const_it = params.begin(); const_it != params.end(); ++const_it) {
-		ARIADNE_ASSERT_MSG(const_it->value().width() > 0, "The parameter for verification must have non-zero width.");
-		_params.insert(*const_it);
-	}
-}
-
 
 void
-ParametricPartitioningOutcomeList::push_back(const ParametricPartitioningOutcome& element)
+draw(std::string basename, const std::list<ParametricOutcome>& outcomes)
 {
-	ARIADNE_ASSERT_MSG(element.getParams().size() == _params.size(), "The inserted outcome has a different number of parameters.");
-	for (RealConstantSet::const_iterator input_it = element.getParams().begin(); input_it != element.getParams().end(); ++input_it)
-			ARIADNE_ASSERT_MSG(_params.find(*input_it) != _params.end(), "The inserted outcome has different parameters identifiers.");
+	RealConstantSet _params = outcomes.back().getParams();
 
-	_outcomes.push_back(element);
-}
-
-
-const std::list<ParametricPartitioningOutcome>&
-ParametricPartitioningOutcomeList::getOutcomes() const
-{
-	return _outcomes;
-}
-
-std::ostream&
-ParametricPartitioningOutcomeList::write(std::ostream& os) const
-{
-	os << _outcomes;
-	return os;
-}
-
-
-void
-ParametricPartitioningOutcomeList::draw() const
-{
+	ARIADNE_ASSERT_MSG(outcomes.size() > 0, "The outcomes list is empty.");
 	ARIADNE_ASSERT_MSG(_params.size() > 1, "At least two parameters are required for drawing.");
-	ARIADNE_ASSERT_MSG(_outcomes.size() > 0, "The outcomes list is empty.");
 
 	// Plots for each couple of parameters
 	for (RealConstantSet::const_iterator xparam_it = _params.begin(); xparam_it != _params.end(); ++xparam_it) {
@@ -123,9 +91,9 @@ ParametricPartitioningOutcomeList::draw() const
 			std::string currentname = basename + "[" + xparam_it->name() + ","
 													 + yparam_it->name() + "]";
 
-			TextPlot trueTxt((currentname + "-par.true.dump").c_str());
-			TextPlot falseTxt((currentname + "-par.false.dump").c_str());
-			TextPlot indeterminateTxt((currentname + "-par.indeterminate.dump").c_str());
+			TextPlot trueTxt((currentname + ".true.dump").c_str());
+			TextPlot falseTxt((currentname + ".false.dump").c_str());
+			TextPlot indeterminateTxt((currentname + ".indeterminate.dump").c_str());
 
 			// Sets up the figure
 			Figure fig;
@@ -137,15 +105,15 @@ ParametricPartitioningOutcomeList::draw() const
 			fig.set_bounding_box(graphics_box);
 
 			// Adds each outcome with a dedicated fill colour
-			for (std::list<ParametricPartitioningOutcome>::const_iterator outcome_it = _outcomes.begin();
-																		  outcome_it != _outcomes.end();
+			for (std::list<ParametricOutcome>::const_iterator outcome_it = outcomes.begin();
+																		  outcome_it != outcomes.end();
 																		  ++outcome_it) {
 				Box outcome_box(2);
 				outcome_box[0] = outcome_it->getParams().find(*xparam_it)->value();
 				outcome_box[1] = outcome_it->getParams().find(*yparam_it)->value();
 
 				// Chooses the fill color and dumps the box
-				tribool outcome = outcome_it->getValue();
+				tribool outcome = outcome_it->getOutcome();
 				if (definitely(outcome)) {
 					trueTxt.draw(outcome_box);
 					fig.set_fill_colour(Colour(0.0,0.83,0.0));

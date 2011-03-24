@@ -69,10 +69,8 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
-	cout << verifier.safety(verInfo);
-	//ParametricPartitioningOutcomeList results = verifier.parametric_safety_partitioning(verInfo, parameters);
-	//Parametric2DBisectionResults results = verifier.parametric_safety_2d_bisection(verInfo,parameters);
-	//results.draw();
+	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
+	draw(system.name(),results);
 
 	/*
 	std::map<DiscreteState,Float> hmss;

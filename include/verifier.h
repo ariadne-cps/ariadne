@@ -119,6 +119,15 @@ class Verifier
 	 */
 	tribool safety(SystemVerificationInfo& verInfo) const;
 
+	/**
+	 * \brief Performs a parametric verification on a set of parameters \a params, by partitioning the parameters space.
+	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
+	 * The values in \a params are substituted into the system, the latter
+	 * being restored to its initial conditions by the end of the method.
+	 */
+	std::list<ParametricOutcome> parametric_safety(SystemVerificationInfo& verInfo,
+												   const RealConstantSet& params) const;
+
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
         \details The procedure uses the bisection method. The parameter is assumed as having separable safe and unsafe intervals in its range.
@@ -142,15 +151,6 @@ class Verifier
 	Parametric2DBisectionResults parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 																const RealConstantSet& params) const;
 
-	/**
-	 * \brief Performs a parametric verification on a set of parameters \a params, by partitioning the parameters space.
-	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
-	 * The values in \a params are substituted into the system, the latter
-	 * being restored to its initial conditions by the end of the method.
-	 */
-	ParametricPartitioningOutcomeList parametric_safety_partitioning(SystemVerificationInfo& verInfo,
-													   const RealConstantSet& params) const;
-
 	//@}
 
 	//@{
@@ -164,6 +164,17 @@ class Verifier
 	 */
 	tribool dominance(SystemVerificationInfo& dominating,
 					  SystemVerificationInfo& dominated) const;
+
+	/**
+	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
+	 * the parameters space.
+	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
+     * The values in \a dominating_params are substituted into the \a dominating
+	 * system alone, the latter being restored to its initial conditions by the end of the method.
+	 */
+	std::list<ParametricOutcome> parametric_dominance(SystemVerificationInfo& dominating,
+														   SystemVerificationInfo& dominated,
+														   const RealConstantSet& dominating_params) const;
 
 	/*! \brief Compute an underapproximation of the dominating/non-dominating intervals of \a parameter for the dominance problem.
         \details The parameter is varied on the \a dominating system alone. The procedure uses the bisection method. The parameter is assumed as having separable dominating and non-dominating intervals in its range.
@@ -191,17 +202,6 @@ class Verifier
 	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 																   SystemVerificationInfo& dominated,
 																   const RealConstantSet& params) const;
-
-	/**
-	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
-	 * the parameters space.
-	 * \details The \a logNumIntervalsPerParam variable determines how many times any parameter is split in two.
-     * The values in \a dominating_params are substituted into the \a dominating
-	 * system alone, the latter being restored to its initial conditions by the end of the method.
-	 */
-	ParametricPartitioningOutcomeList parametric_dominance_partitioning(SystemVerificationInfo& dominating,
-																	    SystemVerificationInfo& dominated,
-																	    const RealConstantSet& dominating_params) const;
 
 	//@}
 

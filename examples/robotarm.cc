@@ -379,7 +379,6 @@ int main(int argc, char** argv)
     HybridSpace hspace = system.state_space();
     for (HybridSpace::locations_const_iterator loc_it = hspace.locations_begin(); loc_it != hspace.locations_end(); loc_it++)
     	parameters.hybrid_maximum_step_size[loc_it->first]=step_size;
-    parameters.enable_set_model_reduction=true;
     parameters.enable_premature_termination=true;
 
     std::cout << "Evolution parameters:" << parameters << std::endl;

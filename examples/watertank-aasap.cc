@@ -47,7 +47,6 @@ int main(int argc,char *argv[])
 	// The parameter to modify, its interval and the tolerance
     RealConstant Delta("Delta",Interval(0.0,0.0));
     RealConstant parameter = Delta;
-	Float tolerance = 1e-2;
 
     // Create the tank automaton
 
@@ -261,15 +260,8 @@ int main(int argc,char *argv[])
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
 	HybridReachabilityAnalyser analyser(evolver);
-	evolver.parameters().enable_subdivisions = false;
-	evolver.parameters().enable_set_model_reduction = false;
-	analyser.parameters().enable_lower_pruning = true;
 	analyser.parameters().lowest_maximum_grid_depth = 0;
 	analyser.parameters().highest_maximum_grid_depth = 8;
-	analyser.parameters().transient_time = 1e10;
-	analyser.parameters().transient_steps = 1;
-	analyser.parameters().lock_to_grid_time = 1e10;		
-	analyser.parameters().lock_to_grid_steps = 1;
 	analyser.free_cores = 0;
 	Verifier verifier(analyser);
 	verifier.verbosity = verifierVerbosity;

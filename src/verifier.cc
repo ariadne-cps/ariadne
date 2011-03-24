@@ -427,14 +427,14 @@ parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
 	return results;
 }
 
-ParametricPartitioningOutcomeList
+std::list<ParametricOutcome>
 Verifier::
-parametric_safety_partitioning(SystemVerificationInfo& verInfo,
+parametric_safety(SystemVerificationInfo& verInfo,
 									 const RealConstantSet& params) const
 {
 	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter.");
 
-	ParametricPartitioningOutcomeList result(verInfo.getSystem().name(),params);
+	std::list<ParametricOutcome> result;
 
 	RealConstantSet original_constants = verInfo.getSystem().accessible_constants();
 
@@ -450,7 +450,7 @@ parametric_safety_partitioning(SystemVerificationInfo& verInfo,
 		verInfo.getSystem().substitute(current_params);
 		tribool outcome = _safety_nosplitting(verInfo,params);
 		ARIADNE_LOG(1,"Outcome: " << pretty_print(outcome) << "\n");
-		result.push_back(ParametricPartitioningOutcome(current_params,outcome));
+		result.push_back(ParametricOutcome(current_params,outcome));
 	}
 
 	verInfo.getSystem().substitute(original_constants);
@@ -616,16 +616,15 @@ parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 }
 
 
-ParametricPartitioningOutcomeList
+std::list<ParametricOutcome>
 Verifier::
-parametric_dominance_partitioning(SystemVerificationInfo& dominating,
+parametric_dominance(SystemVerificationInfo& dominating,
 								  SystemVerificationInfo& dominated,
 								  const RealConstantSet& dominating_params) const
 {
 	ARIADNE_ASSERT_MSG(dominating_params.size() > 0, "Provide at least one parameter.");
 
-	std::string name = dominating.getSystem().name() + "&" + dominated.getSystem().name();
-	ParametricPartitioningOutcomeList result(name,dominating_params);
+	std::list<ParametricOutcome> result;
 
 	RealConstantSet original_constants = dominating.getSystem().accessible_constants();
 
@@ -641,7 +640,7 @@ parametric_dominance_partitioning(SystemVerificationInfo& dominating,
 		dominating.getSystem().substitute(current_params);
 		tribool outcome = _dominance(dominating,dominated,dominating_params);
 		ARIADNE_LOG(1,"Outcome: " << pretty_print(outcome) << "\n");
-		result.push_back(ParametricPartitioningOutcome(current_params,outcome));
+		result.push_back(ParametricOutcome(current_params,outcome));
 	}
 
 	dominating.getSystem().substitute(original_constants);

@@ -78,11 +78,6 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("Kp",Interval(0.2,0.8)));
 	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
 
-	RealConstant parameter("Kp",Interval(0.2,0.8));
-	//RealConstant parameter("ref",Interval(5.25,8.25));
-
-	//cout << verifier.parametric_dominance_1d_bisection(proportional,hysteresis,parameter);
-    ParametricPartitioningOutcomeList results = verifier.parametric_dominance_partitioning(proportional,hysteresis,parameters);
-	//Parametric2DBisectionResults results = verifier.parametric_dominance_2d_bisection(proportional,hysteresis,parameters);
-    results.draw();
+	std::list<ParametricOutcome> results = verifier.parametric_dominance(proportional, hysteresis, parameters);
+	draw("watertank-nl-mono-dominance",results);
 }

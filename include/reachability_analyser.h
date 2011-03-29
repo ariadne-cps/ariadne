@@ -76,11 +76,9 @@ class HybridReachabilityAnalyser
 {
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
-	boost::shared_ptr< DiscreteEvolutionStatistics > _statistics;
     boost::shared_ptr< HybridDiscretiser<HybridEvolver::ContinuousEnclosureType> > _discretiser;
   public:
     typedef DiscreteEvolutionParameters EvolutionParametersType;
-	typedef DiscreteEvolutionStatistics	EvolutionStatisticsType;
     typedef HybridAutomaton SystemType;
     typedef SystemType::StateSpaceType StateSpaceType;
     typedef SystemType::TimeType TimeType;
@@ -115,14 +113,6 @@ class HybridReachabilityAnalyser
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
     /*! \brief A reference to the parameters controlling the accuracy. */
     EvolutionParametersType& parameters() { return *this->_parameters; }
-    //@}
-
-    //@{ 
-    //! \name Methods to set and get the statistics related to the analyses
-    /*! \brief The statistics stemming from the analyses. */
-    const EvolutionStatisticsType& statistics() const { return *this->_statistics; }
-    /*! \brief A reference to the statistics stemming from the analyses. */
-    EvolutionStatisticsType& statistics() { return *this->_statistics; }
     //@}
   
     //@{
@@ -277,16 +267,10 @@ class HybridReachabilityAnalyser
     														 const Vector<Float>& minTargetCellWidths,
     														 std::list<EnclosureType>& result_enclosures) const;
 
-    /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
+    /*! \brief Pushes the enclosures from the \a intermediateCells tree set into the \a destination enclosure list.
      */
-    void _outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
+    void _outer_chain_reach_pushLocalIntermediateCells(const HybridGridTreeSet& intermediateCells,
     									   std::list<EnclosureType>& result_enclosures) const;
-
-    /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a destination enclosure list.
-     *  \detail Does not check for inclusion into the domain.
-     */
-    void _outer_chain_reach_pushFinalCells_noDomainCheck(const HybridGridTreeSet& finalCells,
-    									   	   	   	     std::list<EnclosureType>& result_enclosures) const;
 
     std::pair<SetApproximationType,DisproveData> _lower_chain_reach(const SystemType& system,
     																const HybridImageSet& initial_set,
@@ -306,7 +290,6 @@ template<class HybridEnclosureType>
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
 	: _parameters(new EvolutionParametersType())
-	, _statistics(new EvolutionStatisticsType())
 	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 	, free_cores(0)
 {
@@ -318,7 +301,6 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolutionParametersType& parameters,
 						   const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
 	: _parameters(new EvolutionParametersType(parameters))
-	, _statistics(new EvolutionStatisticsType())
 	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 	, free_cores(0)
 {

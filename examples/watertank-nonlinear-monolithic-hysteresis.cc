@@ -52,7 +52,7 @@ int main(int argc,char *argv[])
 	/// Verification
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
-	TaylorCalculus lower_integrator(6,8,1e-10);
+	TaylorCalculus lower_integrator(2,2,1e-4);
 	ImageSetHybridEvolver outer_evolver(outer_integrator);
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
@@ -63,6 +63,8 @@ int main(int argc,char *argv[])
 	lower_analyser.parameters().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
+	verifier.plot_results = false;
+	verifier.maximum_parameter_depth = 4;
 
 	// The parameters
 	RealConstantSet parameters;

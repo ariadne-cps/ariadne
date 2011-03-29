@@ -36,7 +36,6 @@
 #include "hybrid_automaton.h"
 #include "vector_field.h"
 #include "evolution_parameters.h"
-#include "evolution_statistics.h"
 
 #include "logging.h"
 

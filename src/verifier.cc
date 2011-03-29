@@ -143,7 +143,7 @@ _safety_positive_once(SystemType& system,
 
 	ARIADNE_LOG(4,"Setting parameters for this proving iteration...\n");
 
-	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,UPPER_SEMANTICS);
+	_tuneIterativeStepParameters(system,_safety_outer_reach,UPPER_SEMANTICS);
 
 	ARIADNE_LOG(4,"Proving...\n");
 
@@ -164,7 +164,7 @@ _safety_positive_once(SystemType& system,
 		result = false;
 	}
 
-	_outer_analyser->statistics().upper().reach = reach;
+	_safety_outer_reach = reach;
 
 	if (plot_results)
 		_plot(reach,UPPER_SEMANTICS);
@@ -193,7 +193,7 @@ _safety_negative_once(SystemType& system,
 
 	ARIADNE_LOG(4,"Setting parameters for this disproving iteration...\n");
 
-	_tuneIterativeStepParameters(system,_outer_analyser->statistics().upper().reach,LOWER_SEMANTICS);
+	_tuneIterativeStepParameters(system,_safety_outer_reach,LOWER_SEMANTICS);
 
 	ARIADNE_LOG(4,"Disproving...\n");
 
@@ -285,7 +285,7 @@ _safety_nosplitting(SystemVerificationInfo& verInfo,
 	if (plot_results)
 		_plot_dirpath_init(system);
 
-	_outer_analyser->resetStatistics();
+	_safety_outer_reach = HybridGridTreeSet();
 
 	// Set the initial parameters
 	_setInitialParameters(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants,UPPER_SEMANTICS);
@@ -853,6 +853,9 @@ Verifier::_dominance(SystemVerificationInfo& dominating,
 
 	ARIADNE_LOG(1, "Dominance checking...\n");
 
+	_dominating_outer_reach = HybridGridTreeSet();
+	_dominated_outer_reach = HybridGridTreeSet();
+
 	// We are not allowed to skip as soon as disproved, since we need as much reached region as possible
 	// We are however allowed to perform quick proving, since we could not determine dominance anyway
 	_lower_analyser->parameters().enable_quick_disproving = false;
@@ -902,24 +905,25 @@ Verifier::_dominance_positive(SystemVerificationInfo& dominating,
 
 		ARIADNE_LOG(3,"Setting the parameters for the outer approximation of the dominating system...\n");
 
-		_setDominanceParameters(dominating,constants,UPPER_SEMANTICS);
+		_setDominanceParameters(dominating,constants,_dominating_outer_reach,UPPER_SEMANTICS);
 
 		ARIADNE_LOG(3,"Getting the outer approximation of the dominating system...\n");
 
 		HybridGridTreeSet dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet());
+		_dominating_outer_reach = dominating_reach;
 		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
 
 		ARIADNE_LOG(4,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
 
 		ARIADNE_LOG(3,"Setting the parameters for the lower approximation of the dominated system...\n");
 
-		HybridGridTreeSet dominated_reach;
 		RealConstantSet emptyLockedConstants;
-		DisproveData disproveData(dominated.getSystem().state_space());
-		_setDominanceParameters(dominated,emptyLockedConstants,LOWER_SEMANTICS);
+		_setDominanceParameters(dominated,emptyLockedConstants,_dominated_outer_reach,LOWER_SEMANTICS);
 
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominated system...\n");
 
+		HybridGridTreeSet dominated_reach;
+		DisproveData disproveData(dominated.getSystem().state_space());
 		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) =
 				_lower_analyser->lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
 
@@ -962,23 +966,24 @@ Verifier::_dominance_negative(SystemVerificationInfo& dominating,
 		ARIADNE_LOG(3,"Setting the parameters for the outer approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
-		_setDominanceParameters(dominated,emptyLockedConstants,UPPER_SEMANTICS);
+		_setDominanceParameters(dominated,emptyLockedConstants,_dominated_outer_reach,UPPER_SEMANTICS);
 
 		ARIADNE_LOG(3,"Getting the outer approximation of the dominated system...\n");
 
 		HybridGridTreeSet dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet());
+		_dominated_outer_reach = dominated_reach;
 		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
 
 		ARIADNE_LOG(4,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
 
 		ARIADNE_LOG(3,"Setting the parameters for the lower approximation of the dominating system...\n");
 
-		HybridGridTreeSet dominating_reach;
-		DisproveData disproveData(dominating.getSystem().state_space());
-		_setDominanceParameters(dominating,constants,LOWER_SEMANTICS);
+		_setDominanceParameters(dominating,constants,_dominating_outer_reach,LOWER_SEMANTICS);
 
 		ARIADNE_LOG(3,"Getting the lower approximation of the dominating system...\n");
 
+		HybridGridTreeSet dominating_reach;
+		DisproveData disproveData(dominating.getSystem().state_space());
 		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) =
 				_lower_analyser->lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
 
@@ -1041,16 +1046,14 @@ void
 Verifier::
 _setDominanceParameters(SystemVerificationInfo& verInfo,
 						const RealConstantSet& locked_constants,
+						const HybridGridTreeSet& outer_reach,
 						Semantics semantics) const
 {
 	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
 
-	_outer_analyser->resetStatistics();
-
 	analyser.parameters().bounding_domain = verInfo.getDomain();
 	ARIADNE_LOG(4, "Domain: " << analyser.parameters().bounding_domain << "\n");
-	// TODO: exploit actual upper reach results for grid refinement
-	_tuneIterativeStepParameters(verInfo.getSystem(),_outer_analyser->statistics().upper().reach,semantics);
+	_tuneIterativeStepParameters(verInfo.getSystem(),outer_reach,semantics);
 	analyser.parameters().lock_to_grid_time = getLockToGridTime(verInfo.getSystem(),analyser.parameters().bounding_domain);
 	ARIADNE_LOG(4, "Lock to grid time: " << analyser.parameters().lock_to_grid_time << "\n");
 	analyser.parameters().locked_constants = locked_constants;

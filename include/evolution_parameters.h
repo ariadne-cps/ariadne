@@ -224,6 +224,9 @@ class DiscreteEvolutionParameters {
     //! \details The actual intervals values of the constants are irrelevant.
     RealConstantSet locked_constants;
 
+    //! \brief The target ratio of derivatives width to obtain when splitting constants.
+    RealType splitting_constants_target_ratio;
+
 	//! \brief Enable the pruning of the trajectories when too large (false by default).
     //! \details The pruning is done probabilistically.
 	//! <br>
@@ -277,6 +280,7 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
 	  lowest_maximum_grid_depth(0),
 	  highest_maximum_grid_depth(9),
       maximum_grid_height(16),
+      splitting_constants_target_ratio(0.1),
 	  enable_lower_pruning(true),
 	  enable_quick_proving(true),
 	  enable_quick_disproving(true),
@@ -323,6 +327,7 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  constraint_reach=" << p.constraint_reach
+       << ",\n  splitting_constants_target_ratio=" << p.splitting_constants_target_ratio
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  enable_quick_proving=" << p.enable_quick_proving
        << ",\n  enable_quick_disproving=" << p.enable_quick_disproving
@@ -360,6 +365,7 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
        << ",\n  bounding_domain=" << p.bounding_domain
        << ",\n  constraint_reach=" << p.constraint_reach
+       << ",\n  splitting_constants_target_ratio=" << p.splitting_constants_target_ratio
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
        << ",\n  enable_quick_proving=" << p.enable_quick_proving
        << ",\n  enable_quick_disproving=" << p.enable_quick_disproving

@@ -98,11 +98,10 @@ draw(std::string basename, const std::list<ParametricOutcome>& outcomes)
 			// Sets up the figure
 			Figure fig;
 			Box graphics_box(2);
-			graphics_box[0] = xparam_it->value();
-			graphics_box[1] = yparam_it->value();
+			graphics_box[0] = outcomes.begin()->getParams().find(*xparam_it)->value();
+			graphics_box[1] = outcomes.begin()->getParams().find(*yparam_it)->value();
 			array<uint> xy(2,0,1);
 			fig.set_projection_map(ProjectionFunction(xy,2));
-			fig.set_bounding_box(graphics_box);
 
 			// Adds each outcome with a dedicated fill colour
 			for (std::list<ParametricOutcome>::const_iterator outcome_it = outcomes.begin();
@@ -111,6 +110,11 @@ draw(std::string basename, const std::list<ParametricOutcome>& outcomes)
 				Box outcome_box(2);
 				outcome_box[0] = outcome_it->getParams().find(*xparam_it)->value();
 				outcome_box[1] = outcome_it->getParams().find(*yparam_it)->value();
+
+				graphics_box[0].set_lower(min(graphics_box[0].lower(),outcome_box[0].lower()));
+				graphics_box[0].set_upper(max(graphics_box[0].upper(),outcome_box[0].upper()));
+				graphics_box[1].set_lower(min(graphics_box[1].lower(),outcome_box[1].lower()));
+				graphics_box[1].set_upper(max(graphics_box[1].upper(),outcome_box[1].upper()));
 
 				// Chooses the fill color and dumps the box
 				tribool outcome = outcome_it->getOutcome();
@@ -127,10 +131,10 @@ draw(std::string basename, const std::list<ParametricOutcome>& outcomes)
 					fig.set_fill_colour(Colour(1.0,0.34,0.34));
 				}
 
-				array<uint> xy(2,0,1);
 				fig.draw(outcome_box);
 			}
 
+			fig.set_bounding_box(graphics_box);
 			fig.write(currentname.c_str());
 
 			trueTxt.close();

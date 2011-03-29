@@ -102,6 +102,15 @@ class Verifier
 	 * Choosing false has the benefit of exploring the whole parameter box, but the drawback of possibly be unable to successfully disprove at all
 	 * due to error radii. */
 	bool use_param_midpoints_for_disproving;
+  private:
+
+	/*! \brief Fields for holding reach sets obtained during safety or dominance methods.
+	 * \details Their presence is useful to refine the grid on successive iterations. Set to mutable since their value is
+	 * valid only transitively during one (iterative) verification method, therefore they do not add external state to the verifier. */
+	mutable HybridGridTreeSet _safety_outer_reach;
+	mutable HybridGridTreeSet _dominating_outer_reach;
+	mutable HybridGridTreeSet _dominated_outer_reach;
+
   public:
 
     //@{
@@ -276,6 +285,7 @@ class Verifier
 	 * that must be ignore when choosing the splitting factors of the system. */
 	void _setDominanceParameters(SystemVerificationInfo& systemBundle,
 								 const RealConstantSet& locked_constants,
+								 const HybridGridTreeSet& outer_reach,
 								 Semantics semantics) const;
 
 	/**
@@ -294,12 +304,12 @@ class Verifier
 					  SystemVerificationInfo& dominated,
 					  const RealConstant& constant,
 					  const Float& value) const;
-
+public:
 	/*! \brief Helper function to perform dominance in the more general case when some \a constants are substituted into the dominating system. */
 	tribool _dominance(SystemVerificationInfo& dominating,
 					   SystemVerificationInfo& dominated,
 					   const RealConstantSet& constants) const;
-
+private:
 	/*! \brief Performs the positive part of dominance checking. */
 	bool _dominance_positive(SystemVerificationInfo& dominating,
 							 SystemVerificationInfo& dominated,
@@ -349,7 +359,7 @@ class Verifier
 									  const HybridGridTreeSet& bounding_reach,
 									  Semantics semantics) const;
 
-	/*! \brief Checks whether a grid depth value is allowed for use, based on the \a semantics. */
+	/*! \brief Checks whether a grid depth value is allowed for use in iterative verification, based on the \a semantics. */
 	bool _is_grid_depth_within_bounds(Semantics semantics) const;
 
 	// Reached region plotting methods
@@ -365,7 +375,8 @@ std::string pretty_print(tribool value);
 
 /*! \brief Processes the \a positive_int and \a negative_int initial intervals based on the lower and upper results.
  *  \return A variable determining if we must proceed further with bisection refining, and another variable determining
- *  the bound where positive values are present.
+ *  if positive values are found on the lower bound of \a positive_int (and consequently, negative values are found on the upper
+ *  bound of \a negative_int ).
  */
 std::pair<bool,bool> process_initial_bisection_results(Interval& positive_int,
 														Interval& negative_int,

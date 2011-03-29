@@ -29,7 +29,6 @@
 #define ARIADNE_EVOLVER_INTERFACE_H
 
 #include "evolution_parameters.h"
-#include "evolution_statistics.h"
 #include "disprove_data.h"
 
 namespace Ariadne {

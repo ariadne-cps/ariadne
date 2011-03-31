@@ -151,7 +151,7 @@ class TestReachabilityAnalysis
         DiscreteState loc(1);
         Box bounding_box(2,bound);
         analyser.verbosity=0;
-        analyser.settings().domain_constraint[loc] = bounding_box;
+        analyser.settings().domain_bounds[loc] = bounding_box;
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(system,initial_set,reach_time);
         cout << "Computing timed reachable set" << endl;

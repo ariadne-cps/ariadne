@@ -109,14 +109,15 @@ class Verifier
     mutable std::string _plot_dirpath;
 
 	/*! \brief Fields for caching outer approximations obtained during safety or dominance methods.
-	 * \details Their presence is useful to refine the domain and consequently the grid on successive iterations. Set to mutable since their value is
+	 * \details Their presence is useful to refine the derivatives and consequently the grid on successive iterations. Set to mutable since their value is
 	 * valid only transitively during one (iterative) verification method, therefore they do not add external state to the verifier. */
-	mutable boost::shared_ptr< OuterApproximationCache > _safety_hgts_domain;
-	mutable boost::shared_ptr< OuterApproximationCache > _dominating_hgts_domain;
-	mutable boost::shared_ptr< OuterApproximationCache > _dominated_hgts_domain;
+	mutable boost::shared_ptr< OuterApproximationCache > _safety_coarse_outer_approximation;
+	mutable boost::shared_ptr< OuterApproximationCache > _dominating_coarse_outer_approximation;
+	mutable boost::shared_ptr< OuterApproximationCache > _dominated_coarse_outer_approximation;
 
-	/*! \brief Fields for holding the constraints for the dominance methods,
-	 * \details These are need since the outer analyser alternatively works on the dominating and dominated systems. */
+	/*! \brief Fields for holding the constraints for outer reachability analyses.
+	 * \details The latter two are mandatory since the outer analyser alternatively works on the dominating and dominated systems. */
+	mutable HybridGridTreeSet _safety_constraint;
 	mutable HybridGridTreeSet _dominating_constraint;
 	mutable HybridGridTreeSet _dominated_constraint;
 
@@ -162,15 +163,17 @@ class Verifier
 	 * The values in \a params are substituted into the system, the latter
 	 * being restored to its initial conditions by the end of the method.
 	 */
-	std::list<ParametricOutcome> parametric_safety(SystemVerificationInfo& verInfo,
-												   const RealConstantSet& params) const;
+	std::list<ParametricOutcome> parametric_safety(
+			SystemVerificationInfo& verInfo,
+			const RealConstantSet& params) const;
 
 	/*! \brief Compute an underapproximation of the safety/unsafety intervals of \a parameter (defined as an interval) for the automaton
 		\a system starting in \a initial_set, where the safe region is \a safe inside \a domain.
         \details The procedure uses the bisection method. The parameter is assumed as having separable safe and unsafe intervals in its range.
         \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> parametric_safety_1d_bisection(SystemVerificationInfo& verInfo,
-										 					    const RealConstant& parameter) const;
+	std::pair<Interval,Interval> parametric_safety_1d_bisection(
+			SystemVerificationInfo& verInfo,
+			const RealConstant& parameter) const;
 
 	/**
 	 * \brief Performs a parametric verification on two parameters \a xParam, \a yParam.
@@ -178,15 +181,17 @@ class Verifier
 	 * generates a "<systemName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	Parametric2DBisectionResults parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
-																const RealConstant& xParam,
-																const RealConstant& yParam) const;
+	Parametric2DBisectionResults parametric_safety_2d_bisection(
+			SystemVerificationInfo& verInfo,
+			const RealConstant& xParam,
+			const RealConstant& yParam) const;
 
 	/**
 	 * \brief Performs a parametric verification on a set of two parameters \a params, by using bisection.
 	 */
-	Parametric2DBisectionResults parametric_safety_2d_bisection(SystemVerificationInfo& verInfo,
-																const RealConstantSet& params) const;
+	Parametric2DBisectionResults parametric_safety_2d_bisection(
+			SystemVerificationInfo& verInfo,
+			const RealConstantSet& params) const;
 
 	//@}
 
@@ -199,8 +204,9 @@ class Verifier
 	 * the outer reachability of a dominating system being inside the BOUNDING BOX of the lower reachability of a dominated
 	 * system minus its epsilon.
 	 */
-	tribool dominance(SystemVerificationInfo& dominating,
-					  SystemVerificationInfo& dominated) const;
+	tribool dominance(
+			SystemVerificationInfo& dominating,
+			SystemVerificationInfo& dominated) const;
 
 	/**
 	 * \brief Performs a parametric dominance checking on a set of parameters \a dominating_params of the \a dominating system, by partitioning
@@ -209,18 +215,20 @@ class Verifier
      * The values in \a dominating_params are substituted into the \a dominating
 	 * system alone, the latter being restored to its initial conditions by the end of the method.
 	 */
-	std::list<ParametricOutcome> parametric_dominance(SystemVerificationInfo& dominating,
-														   SystemVerificationInfo& dominated,
-														   const RealConstantSet& dominating_params) const;
+	std::list<ParametricOutcome> parametric_dominance(
+			SystemVerificationInfo& dominating,
+			SystemVerificationInfo& dominated,
+			const RealConstantSet& dominating_params) const;
 
 	/*! \brief Compute an underapproximation of the dominating/non-dominating intervals of \a parameter for the dominance problem.
         \details The parameter is varied on the \a dominating system alone. The procedure uses the bisection method. The parameter is assumed as having separable dominating and non-dominating intervals in its range.
         The tolerance in [0 1] is a percentage of the parameter interval width and is used to provide a termination condition for the
 		bisection search.
         \return The intervals of safety and unsafety. */
-	std::pair<Interval,Interval> parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
-			  	  	  	  	  	  	  	  	  	  	  	  	  	   SystemVerificationInfo& dominated,
-										 						   const RealConstant& parameter) const;
+	std::pair<Interval,Interval> parametric_dominance_1d_bisection(
+			SystemVerificationInfo& dominating,
+			SystemVerificationInfo& dominated,
+			const RealConstant& parameter) const;
 	/**
 	 * \brief Performs a parametric dominance checking on two parameters \a xParam, \a yParam,
 	 * discretizing with \a numPointsPerAxis points for each axis.
@@ -228,17 +236,19 @@ class Verifier
 	 * generates a "<dominatingName>&<dominatedName>-<xName>-<yName>.png" plot, where <systemName> is the name of the system,
 	 * <xName> is the name of xParam and <yName> is the name of yParam.
 	 */
-	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
-																   SystemVerificationInfo& dominated,
-																   const RealConstant& xParam,
-																   const RealConstant& yParam) const;
+	Parametric2DBisectionResults parametric_dominance_2d_bisection(
+			SystemVerificationInfo& dominating,
+			SystemVerificationInfo& dominated,
+			const RealConstant& xParam,
+			const RealConstant& yParam) const;
 
 	/**
 	 * \brief Performs a parametric dominance checking on a set of two parameters \a params, by using bisection.
 	 */
-	Parametric2DBisectionResults parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
-																   SystemVerificationInfo& dominated,
-																   const RealConstantSet& params) const;
+	Parametric2DBisectionResults parametric_dominance_2d_bisection(
+			SystemVerificationInfo& dominating,
+			SystemVerificationInfo& dominated,
+			const RealConstantSet& params) const;
 
 	//@}
 
@@ -395,10 +405,9 @@ private:
 	bool _is_grid_depth_within_bounds(Semantics semantics) const;
 
 	/*! \brief Updates the constraining information.
-	 * \details It reads \a analyser_settings for the constraining policy, followed by \a outer_approximation_cache for emptiness;
-	 * then possibly sets \a outer_approximation_cache with \a new_outer_approximation, and changes some settings in \a analyser_settings. */
-	void _update_constraining(
-			DiscreteEvolutionSettings& analyser_settings,
+	 * \details It reads \a outer_approximation_cache for emptiness;
+	 * then possibly sets \a outer_approximation_cache with \a new_outer_approximation. */
+	void _update_safety_constraining(
 			OuterApproximationCache& outer_approximation_cache,
 			const HybridGridTreeSet& new_outer_approximation) const;
 

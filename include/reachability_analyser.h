@@ -205,6 +205,12 @@ class HybridReachabilityAnalyser
 	/*! \brief Tune the parameters for the next verification iteration, given a \a bounding_reach. */
 	void tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach, Semantics semantics);
 
+	/*! \brief Whether to use constraining. */
+	bool use_constraining() const;
+
+	/*! \brief Whether to check the domain. */
+	bool use_domain_checking() const;
+
     //@}
 
   public:
@@ -365,7 +371,7 @@ void pushSplitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 						    const ContinuousEnclosureType& target_encl,
 						    const Vector<Float>& minTargetCellWidths,
 						    const Box& target_domain_constraint,
-						    ConstrainingPolicy policy);
+						    bool use_constraining);
 
 /*! \brief Get the hybrid grid given the maximum derivative \a hmad and the \a bounding_domain parameter, where the grid is chosen differently for each location.
  * \details The grid is chosen so that each cell is included into the domains for all locations. */

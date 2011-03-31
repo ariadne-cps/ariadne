@@ -42,11 +42,6 @@ namespace Ariadne {
 
 enum EvolutionDirection { FORWARD, BACKWARD };
 
-/** \brief The domain enforcing policy.
- * \details OUTER_APPROX: A constraint outer approximation reach will be used. BOUNDING_DOMAIN: The domain is taken into account and
- * results into preemptively aborting the reachability analysis for both outer and lower chain reachability. */
-enum ConstrainingPolicy { CONSTRAIN_NO, CONSTRAIN_YES };
-
 //! \brief Settings for controlling the accuracy of continuous evolution methods.
 class ContinuousEvolutionSettings {
   public:
@@ -214,7 +209,7 @@ class DiscreteEvolutionSettings {
     //! \brief Set the allowed bounding domain for chain reachability computations.
     //! <br>
 	//! This parameters is only used in the chain_reach() routines.
-    HybridBoxes domain_constraint;
+    HybridBoxes domain_bounds;
 
     //! \brief The reached region for constraining a chain outer reach.
     HybridGridTreeSet outer_approx_constraint;
@@ -231,9 +226,6 @@ class DiscreteEvolutionSettings {
 	//! <br>
     //! This parameter is used only under lower semantics.
 	bool enable_lower_pruning;
-
-	//! \brief The policy for enforcing the checking of the domain for outer and lower reachability.
-	ConstrainingPolicy constraining_policy;
 
 };
 
@@ -297,8 +289,7 @@ DiscreteEvolutionSettings::DiscreteEvolutionSettings()
 	  highest_maximum_grid_depth(9),
       maximum_grid_height(16),
       splitting_constants_target_ratio(0.1),
-	  enable_lower_pruning(true),
-	  constraining_policy(CONSTRAIN_NO)
+	  enable_lower_pruning(true)
 { }
 
 inline
@@ -348,11 +339,10 @@ operator<<(std::ostream& os, const DiscreteEvolutionSettings& p)
        << ",\n  lowest_maximum_grid_depth=" << p.lowest_maximum_grid_depth
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
-       << ",\n  bounding_domain=" << p.domain_constraint
+       << ",\n  bounding_domain=" << p.domain_bounds
        << ",\n  constraint_reach=" << p.outer_approx_constraint
        << ",\n  splitting_constants_target_ratio=" << p.splitting_constants_target_ratio
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
-       << ",\n  constraining_policy=" << p.constraining_policy
        << "\n)\n";
     return os;
 }
@@ -383,11 +373,10 @@ operator<<(std::ostream& os, const EvolutionSettings& p)
        << ",\n  lowest_maximum_grid_depth=" << p.lowest_maximum_grid_depth
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
-       << ",\n  bounding_domain=" << p.domain_constraint
+       << ",\n  bounding_domain=" << p.domain_bounds
        << ",\n  constraint_reach=" << p.outer_approx_constraint
        << ",\n  splitting_constants_target_ratio=" << p.splitting_constants_target_ratio
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
-       << ",\n  constraining_policy=" << p.constraining_policy
        << "\n)\n";
     return os;
 }

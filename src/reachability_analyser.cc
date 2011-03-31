@@ -357,7 +357,7 @@ chain_reach(const SystemType& system,
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::chain_reach(system,initial_set)\n");
 
-    HybridBoxes domain = _settings->domain_constraint;
+    HybridBoxes domain = _settings->domain_bounds;
     Float transient_time = _settings->transient_time;
     int transient_steps = _settings->transient_steps;
     Float lock_to_grid_time = _settings->lock_to_grid_time;
@@ -440,7 +440,7 @@ chain_reach(const SystemType& system,
             const HybridImageSet& initial_set,
             const HybridBoxes& bounding_set) const
 {
-	_settings->domain_constraint = bounding_set;
+	_settings->domain_bounds = bounding_set;
 
 	return chain_reach(system,initial_set);
 }
@@ -494,8 +494,7 @@ _outer_chain_reach_forward(const SystemType& system,
 	    ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
 	    ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
 
-	    if (!_settings->outer_approx_constraint.empty()) {
-	    	ARIADNE_ASSERT(_settings->constraining_policy == CONSTRAIN_YES);
+	    if (use_constraining()) {
 	    	new_final.restrict(_settings->outer_approx_constraint);
 	    	new_reach.restrict(_settings->outer_approx_constraint);
 		    ARIADNE_LOG(6,"Reach size after constraining = "<<new_reach.size()<<"\n");
@@ -526,9 +525,23 @@ _outer_chain_reach_forward(const SystemType& system,
 
 bool
 HybridReachabilityAnalyser::
+use_constraining() const
+{
+	return !_settings->outer_approx_constraint.empty();
+}
+
+bool
+HybridReachabilityAnalyser::
+use_domain_checking() const
+{
+	return !use_constraining();
+}
+
+bool
+HybridReachabilityAnalyser::
 _fails_domain_check(const Box& enclosure_bounds, const Box& domain) const
 {
-	if (_settings->constraining_policy == CONSTRAIN_NO &&
+	if (use_domain_checking() &&
 		!enclosure_bounds.inside(domain) &&
 		enclosure_bounds.disjoint(domain))
 		return true;
@@ -548,7 +561,7 @@ _outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
 	{
 		const DiscreteState& loc = cell_it->first;
 		const Box& bx = cell_it->second.box();
-		const Box& domain = _settings->domain_constraint[loc];
+		const Box& domain = _settings->domain_bounds[loc];
 
 		ARIADNE_LOG(7,"Checking box "<< bx <<" in location " << loc.name() << "\n");
 
@@ -612,7 +625,7 @@ _outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& tr
 	const DiscreteState& target_loc = trans.target();
 	const VectorFunction& activation = trans.activation();
 	const bool is_forced = trans.forced();
-	const Box& target_bounding = _settings->domain_constraint[target_loc];
+	const Box& target_bounding = _settings->domain_bounds[target_loc];
 
 	tribool is_guard_active = _getCalculusInterface().active(activation,source);
 
@@ -631,14 +644,14 @@ _outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& tr
 	} else if (possibly(is_guard_active) && !is_forced) {
 		ARIADNE_LOG(10,"Possibly active and permissive: adding the splittings of the target enclosure to the destination list.\n");
 		ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),source);
-		pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,_settings->constraining_policy);
+		pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,use_constraining());
 	} else if (possibly(is_guard_active) && is_forced) {
 		ARIADNE_LOG(10,"Possibly active and forced: checking whether the crossing is nonnegative...\n");
 		tribool positive_crossing = positively_crossing(source.bounding_box(),dynamic,activation[0]);
 		if (possibly(positive_crossing)) {
 			ARIADNE_LOG(10,"Possibly positive, adding the splittings of the target enclosure to the destination list.\n");
 			ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),source);
-			pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,_settings->constraining_policy);
+			pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,use_constraining());
 		}
 		else {
 			ARIADNE_LOG(10,"Negative, ignoring the target enclosure.\n");
@@ -655,7 +668,7 @@ _outer_chain_reach_pushLocalFinalCells(const HybridGridTreeSet& finalCells,
 {
 	for (GTS::const_iterator cell_it = finalCells.begin(); cell_it != finalCells.end(); ++cell_it) {
 		const DiscreteState& loc = cell_it->first;
-		const Box& domain = _settings->domain_constraint[loc];
+		const Box& domain = _settings->domain_bounds[loc];
 		const Box& bx = cell_it->second.box();
 
 		if (_fails_domain_check(bx,domain)) {
@@ -794,9 +807,9 @@ _lower_chain_reach(const SystemType& system,
 
 			/* If the enclosure lies outside the bounding domain (i.e. not inside and disjoint), then the
 			 * domain is not proper and an error should be thrown. */
-			if (_settings->constraining_policy == CONSTRAIN_NO &&
-				!encl_box.inside(_settings->domain_constraint[loc]) &&
-				encl_box.disjoint(_settings->domain_constraint[loc])) {
+			if (use_domain_checking() &&
+				!encl_box.inside(_settings->domain_bounds[loc]) &&
+				encl_box.disjoint(_settings->domain_bounds[loc])) {
 				ARIADNE_FAIL_MSG("Found an enclosure in location " << loc.name() << " with bounding box " << encl.continuous_state_set().bounding_box() <<
 								 " lying outside the domain in lower semantics: the domain is incorrect.\n");
 			}
@@ -1055,7 +1068,7 @@ pushSplitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 					  const ContinuousEnclosureType& target_encl,
 					  const Vector<Float>& minTargetCellWidths,
 					  const Box& target_domain_constraint,
-					  ConstrainingPolicy policy)
+					  bool use_constraining)
 {
 	// Get the target enclosure box
 	const Box& target_encl_box = target_encl.bounding_box();
@@ -1063,7 +1076,7 @@ pushSplitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 
 	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
 	// of the target location, ignore it and notify
-	if (policy == CONSTRAIN_NO &&
+	if (!use_constraining &&
 		!target_encl_box.inside(target_domain_constraint) &&
 		target_encl_box.disjoint(target_domain_constraint)) {
 		throw ReachOutOfDomainException("A split target enclosure is out of the domain.");
@@ -1077,8 +1090,8 @@ pushSplitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 			hasSplit = true;
 			std::pair<ContinuousEnclosureType,ContinuousEnclosureType> split_sets = target_encl.split(i);
 			// Call recursively on the two enclosures
-			pushSplitTargetEnclosures(initial_enclosures,target_loc,split_sets.first,minTargetCellWidths,target_domain_constraint,policy);
-			pushSplitTargetEnclosures(initial_enclosures,target_loc,split_sets.second,minTargetCellWidths,target_domain_constraint,policy);
+			pushSplitTargetEnclosures(initial_enclosures,target_loc,split_sets.first,minTargetCellWidths,target_domain_constraint,use_constraining);
+			pushSplitTargetEnclosures(initial_enclosures,target_loc,split_sets.second,minTargetCellWidths,target_domain_constraint,use_constraining);
 		}
 	}
 
@@ -1196,7 +1209,7 @@ _getSplitConstantsIntervalsSet(HybridAutomaton system,
 							   float tolerance) const
 {
 	const RealConstantSet& locked_constants = _settings->locked_constants;
-	const HybridBoxes& domain = _settings->domain_constraint;
+	const HybridBoxes& domain = _settings->domain_bounds;
 
 	const RealConstantSet original_constants = system.accessible_constants();
 

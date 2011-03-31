@@ -272,6 +272,7 @@ int main(int argc, char** argv)
 								 -0.01,0.11,
 								-0.2,0.2));
 
+	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
 
 
 	// Create an evolver and analyser objects, then set their verbosity
@@ -282,8 +283,8 @@ int main(int argc, char** argv)
 	Verifier verifier(analyser);
 	verifier.verbosity = 3;
 
-	// Perform the analysis
-	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
+	std::cout << "Perform the analysis...\n";
+
 	tribool result = verifier.safety(verInfo);
 	
 	std::cout << "Done." << std::endl;

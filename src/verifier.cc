@@ -103,9 +103,9 @@ Verifier::Verifier(
 			_outer_analyser(outer_analyser.clone()),
 			_lower_analyser(lower_analyser.clone()),
 			_settings(new VerificationSettings()),
-			_safety_outer_approximation(new OuterApproximationCache()),
-			_dominating_outer_approximation(new OuterApproximationCache()),
-			_dominated_outer_approximation(new OuterApproximationCache())
+			_safety_hgts_domain(new OuterApproximationCache()),
+			_dominating_hgts_domain(new OuterApproximationCache()),
+			_dominated_hgts_domain(new OuterApproximationCache())
 {
 }
 
@@ -113,9 +113,9 @@ Verifier::Verifier(const HybridReachabilityAnalyser& analyser) :
 			_outer_analyser(analyser.clone()),
 			_lower_analyser(analyser.clone()),
 			_settings(new VerificationSettings()),
-			_safety_outer_approximation(new OuterApproximationCache()),
-			_dominating_outer_approximation(new OuterApproximationCache()),
-			_dominated_outer_approximation(new OuterApproximationCache())
+			_safety_hgts_domain(new OuterApproximationCache()),
+			_dominating_hgts_domain(new OuterApproximationCache()),
+			_dominated_hgts_domain(new OuterApproximationCache())
 {
 }
 
@@ -148,7 +148,7 @@ _safety_positive_once(
 
 	ARIADNE_LOG(4,"Setting parameters for this proving iteration...\n");
 
-	_tuneIterativeStepSettings(system,_safety_outer_approximation->get(),UPPER_SEMANTICS);
+	_tuneIterativeStepSettings(system,_safety_hgts_domain->get(),_outer_analyser->settings().outer_approx_constraint,UPPER_SEMANTICS);
 
 	ARIADNE_LOG(4,"Performing outer reachability analysis...\n");
 
@@ -171,10 +171,10 @@ _safety_positive_once(
 	system.substitute(original_constants);
 
 	if (obtained_outer_approximation)
-		_update_constraining(analyser_params,*_safety_outer_approximation,reach);
+		_update_constraining(analyser_params,*_safety_hgts_domain,reach);
 
 	if (_settings->plot_results)
-		_plot(reach,UPPER_SEMANTICS);
+		_plot_reach(reach,UPPER_SEMANTICS);
 
 	ARIADNE_LOG(4, (result ? "Proved.\n" : "Not proved.\n") );
 
@@ -202,7 +202,7 @@ _safety_negative_once(
 
 	ARIADNE_LOG(4,"Setting parameters for this disproving iteration...\n");
 
-	_tuneIterativeStepSettings(system,_safety_outer_approximation->get(),LOWER_SEMANTICS);
+	_tuneIterativeStepSettings(system,_safety_hgts_domain->get(),_outer_analyser->settings().outer_approx_constraint,LOWER_SEMANTICS);
 
 	ARIADNE_LOG(4,"Performing lower reachability analysis and getting disprove data...\n");
 
@@ -213,7 +213,7 @@ _safety_negative_once(
 	const bool& isDisproved = disproveData.getIsDisproved();
 
 	if (_settings->plot_results)
-		_plot(reach,LOWER_SEMANTICS);
+		_plot_reach(reach,LOWER_SEMANTICS);
 
 	ARIADNE_LOG(5,"Disprove data: " << disproveData << "\n");
 
@@ -301,7 +301,7 @@ _safety_nosplitting(
 	HybridAutomaton& system = verInfo.getSystem();
 
 	if (_settings->plot_results)
-		_plot_dirpath_init(system);
+		_plot_dirpath_init(system.name());
 
 	_chooseInitialSafetySettings(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants);
 
@@ -351,17 +351,14 @@ _update_constraining(
 		OuterApproximationCache& outer_approximation_cache,
 		const HybridGridTreeSet& new_outer_approximation) const
 {
-	/* If there was already one outer approximation stored, then we have already tuned the grid based on an outer approximation.
-	 * Consequently, we keep the grid and use new_outer_approximation as a constraint, while no domain enforcing is needed anymore.
-	 * (on subsequent visits of this code path, we are guaranteed to refine the constraint_reach)
+	/* If there is one outer approximation stored, then we have already tuned the grid based on an outer approximation.
+	 * Consequently, we maintain the grid and use new_outer_approximation as a constraint.
+	 * (on subsequent visits of this code path, we are guaranteed to refine outer_approx_constraint)
 	 * Differently, we just save the new_outer_approximation for the subsequent tuning of the grid */
-	if (outer_approximation_cache.is_set()) {
-		analyser_settings.constraining_policy = OUTER_APPROX;
+	if (outer_approximation_cache.is_set())
 		analyser_settings.outer_approx_constraint = new_outer_approximation;
-	}
-	else {
+	else
 		outer_approximation_cache.set(new_outer_approximation);
-	}
 }
 
 std::pair<Interval,Interval>
@@ -900,6 +897,9 @@ Verifier::_dominance(
 
 	ARIADNE_LOG(1, "Dominance checking...\n");
 
+	if (_settings->plot_results)
+		_plot_dirpath_init(dominating.getSystem().name() + "&" + dominated.getSystem().name());
+
 	_chooseInitialDominanceSettings();
 
 	int initial_depth = max(_outer_analyser->settings().lowest_maximum_grid_depth,
@@ -950,11 +950,17 @@ Verifier::_dominance_positive(
 
 		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominating system...\n");
 
-		_chooseDominanceSettings(dominating,constants,_dominating_outer_approximation->get(),UPPER_SEMANTICS);
+		_chooseDominanceSettings(dominating,constants,_dominating_hgts_domain->get(),_dominating_constraint,UPPER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the outer approximation of the dominating system...\n");
 
 		dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet());
+
+		if (!_dominating_hgts_domain->is_set()) {
+			_dominating_hgts_domain->set(dominating_reach);
+		} else {
+			_dominating_constraint = dominating_reach;
+		}
 
 		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
 
@@ -963,7 +969,7 @@ Verifier::_dominance_positive(
 		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
-		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_outer_approximation->get(),LOWER_SEMANTICS);
+		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_hgts_domain->get(),_dominated_constraint,LOWER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the lower approximation of the dominated system...\n");
 
@@ -977,8 +983,12 @@ Verifier::_dominance_positive(
 
 		Box projected_shrinked_dominated_bounds = Ariadne::project(shrinked_dominated_bounds,dominated.getProjection());
 
-		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
+		if (_settings->plot_results) {
+			_plot_dominance(dominating_reach,UPPER_SEMANTICS,DOMINANCE_POSITIVE);
+			_plot_dominance(dominated_reach,LOWER_SEMANTICS,DOMINANCE_POSITIVE);
+		}
 
+		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
 		ARIADNE_LOG(5,"Projected shrinked dominated bounds: " << projected_shrinked_dominated_bounds << "\n");
 
 		result = inside(projected_dominating_bounds,projected_shrinked_dominated_bounds);
@@ -989,9 +999,6 @@ Verifier::_dominance_positive(
 		result = false;
 		obtained_outer_approximation = false;
 	}
-
-	if (obtained_outer_approximation)
-		_update_constraining(_outer_analyser->settings(),*_dominating_outer_approximation,dominating_reach);
 
 	dominating.getSystem().substitute(original_constants);
 
@@ -1020,11 +1027,17 @@ Verifier::_dominance_negative(
 		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
-		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_outer_approximation->get(),UPPER_SEMANTICS);
+		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_hgts_domain->get(),_dominated_constraint,UPPER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the outer approximation of the dominated system...\n");
 
 		dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet());
+
+		if (!_dominated_hgts_domain->is_set()) {
+			_dominated_hgts_domain->set(dominated_reach);
+		} else {
+			_dominated_constraint = dominated_reach;
+		}
 
 		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
 
@@ -1032,7 +1045,7 @@ Verifier::_dominance_negative(
 
 		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominating system...\n");
 
-		_chooseDominanceSettings(dominating,constants,_dominating_outer_approximation->get(),LOWER_SEMANTICS);
+		_chooseDominanceSettings(dominating,constants,_dominating_hgts_domain->get(),_dominating_constraint,LOWER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the lower approximation of the dominating system...\n");
 
@@ -1046,6 +1059,10 @@ Verifier::_dominance_negative(
 
 		Box projected_shrinked_dominating_bounds = Ariadne::project(shrinked_dominating_bounds,dominating.getProjection());
 
+		if (_settings->plot_results) {
+			_plot_dominance(dominated_reach,UPPER_SEMANTICS,DOMINANCE_NEGATIVE);
+			_plot_dominance(dominating_reach,LOWER_SEMANTICS,DOMINANCE_NEGATIVE);
+		}
 
 		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
 		ARIADNE_LOG(5,"Projected shrinked dominating bounds: " << projected_shrinked_dominating_bounds << "\n");
@@ -1058,9 +1075,6 @@ Verifier::_dominance_negative(
 		result = false;
 		obtained_outer_approximation = false;
 	}
-
-	if (obtained_outer_approximation)
-		_update_constraining(_outer_analyser->settings(),*_dominated_outer_approximation,dominated_reach);
 
 	dominating.getSystem().substitute(original_constants);
 
@@ -1075,7 +1089,7 @@ _chooseInitialSafetySettings(
 		const HybridBoxes& safe_region,
 		const RealConstantSet& locked_constants) const
 {
-	_safety_outer_approximation->reset();
+	_safety_hgts_domain->reset();
 
 	_chooseInitialSafetySettings(system,domain,safe_region,locked_constants,UPPER_SEMANTICS);
 	_chooseInitialSafetySettings(system,domain,safe_region,locked_constants,LOWER_SEMANTICS);
@@ -1094,7 +1108,6 @@ _chooseInitialSafetySettings(
 	ARIADNE_LOG(3,"Choosing the initial settings of the " << (semantics == UPPER_SEMANTICS ? "outer " : "lower ") << "analyser...\n");
 	DiscreteEvolutionSettings& settings = (semantics == UPPER_SEMANTICS ?
 											   _outer_analyser->settings() : _lower_analyser->settings());
-	settings.constraining_policy = BOUNDING_DOMAIN;
 	settings.domain_constraint = domain;
 	ARIADNE_LOG(4, "Domain: " << domain << "\n");
 	settings.lock_to_grid_time = getLockToGridTime(system,domain);
@@ -1108,11 +1121,17 @@ void
 Verifier::
 _tuneIterativeStepSettings(
 		HybridAutomaton& system,
-		const HybridGridTreeSet& bounding_reach,
+		const HybridGridTreeSet& hgts_domain,
+		const HybridGridTreeSet& constraint_reach,
 		Semantics semantics) const
 {
 	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
-	HybridFloatVector hmad = getHybridMaximumAbsoluteDerivatives(system,bounding_reach,analyser.settings().domain_constraint);
+
+	ARIADNE_LOG(5, "Bounding policy: " << (hgts_domain.empty() ? "Domain box" : "Outer approximation") << "\n");
+	analyser.settings().constraining_policy = (constraint_reach.empty() ? CONSTRAIN_NO : CONSTRAIN_YES);
+	ARIADNE_LOG(5, "Constraining policy: " << (analyser.settings().constraining_policy == CONSTRAIN_NO ? "No": "Yes") << "\n");
+
+	HybridFloatVector hmad = getHybridMaximumAbsoluteDerivatives(system,hgts_domain,analyser.settings().domain_constraint);
 	ARIADNE_LOG(5, "Derivative bounds: " << hmad << "\n");
 	system.set_grid(getHybridGrid(hmad,analyser.settings().domain_constraint));
 	ARIADNE_LOG(5, "Grid: " << system.grid() << "\n");
@@ -1123,8 +1142,11 @@ void
 Verifier::
 _chooseInitialDominanceSettings() const
 {
-	_dominating_outer_approximation->reset();
-	_dominated_outer_approximation->reset();
+	_dominating_hgts_domain->reset();
+	_dominated_hgts_domain->reset();
+
+	_dominating_constraint = HybridGridTreeSet();
+	_dominated_constraint = HybridGridTreeSet();
 }
 
 void
@@ -1133,13 +1155,16 @@ _chooseDominanceSettings(
 		SystemVerificationInfo& verInfo,
 		const RealConstantSet& locked_constants,
 		const HybridGridTreeSet& outer_reach,
+		const HybridGridTreeSet& outer_approx_constraint,
 		Semantics semantics) const
 {
 	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
 
 	analyser.settings().domain_constraint = verInfo.getDomain();
 	ARIADNE_LOG(5, "Domain: " << analyser.settings().domain_constraint << "\n");
-	_tuneIterativeStepSettings(verInfo.getSystem(),outer_reach,semantics);
+
+	_tuneIterativeStepSettings(verInfo.getSystem(),outer_reach,outer_approx_constraint,semantics);
+
 	analyser.settings().lock_to_grid_time = getLockToGridTime(verInfo.getSystem(),analyser.settings().domain_constraint);
 	ARIADNE_LOG(5, "Lock to grid time: " << analyser.settings().lock_to_grid_time << "\n");
 	analyser.settings().locked_constants = locked_constants;
@@ -1148,11 +1173,11 @@ _chooseDominanceSettings(
 
 void
 Verifier::
-_plot_dirpath_init(const HybridAutomaton& system) const
+_plot_dirpath_init(std::string basename) const
 {
 	time_t mytime;
 	time(&mytime);
-	string foldername = system.name()+"-png";
+	string foldername = basename+"-png";
 
 	mkdir(foldername.c_str(),0777);
 	string timestring = asctime(localtime(&mytime));
@@ -1163,9 +1188,10 @@ _plot_dirpath_init(const HybridAutomaton& system) const
 	_plot_dirpath = foldername;
 }
 
+
 void
 Verifier::
-_plot(
+_plot_reach(
 		const HybridGridTreeSet& reach,
 		Semantics semantics) const
 {
@@ -1179,6 +1205,33 @@ _plot(
 	filename.append(mgd_char);
 	plot(_plot_dirpath,filename,reach);
 }
+
+
+void
+Verifier::
+_plot_dominance(
+		const HybridGridTreeSet& reach,
+		Semantics semantics,
+		DominanceChecking dominance_checking) const
+{
+	int maximum_grid_depth = _outer_analyser->settings().maximum_grid_depth;
+
+	char mgd_char[10];
+	sprintf(mgd_char,"%i",maximum_grid_depth);
+	string filename;
+	if (semantics == UPPER_SEMANTICS && dominance_checking == DOMINANCE_POSITIVE)
+		filename = "dominating-pos-";
+	else if (semantics == UPPER_SEMANTICS && dominance_checking == DOMINANCE_NEGATIVE)
+		filename = "dominated-neg-";
+	else if (semantics == LOWER_SEMANTICS && dominance_checking == DOMINANCE_POSITIVE)
+		filename = "dominated-pos-";
+	else
+		filename = "dominating-neg-";
+
+	filename.append(mgd_char);
+	plot(_plot_dirpath,filename,reach);
+}
+
 
 std::string
 pretty_print(tribool value)

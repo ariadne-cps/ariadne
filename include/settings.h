@@ -45,7 +45,7 @@ enum EvolutionDirection { FORWARD, BACKWARD };
 /** \brief The domain enforcing policy.
  * \details OUTER_APPROX: A constraint outer approximation reach will be used. BOUNDING_DOMAIN: The domain is taken into account and
  * results into preemptively aborting the reachability analysis for both outer and lower chain reachability. */
-enum ConstrainingPolicy { OUTER_APPROX, BOUNDING_DOMAIN };
+enum ConstrainingPolicy { CONSTRAIN_NO, CONSTRAIN_YES };
 
 //! \brief Settings for controlling the accuracy of continuous evolution methods.
 class ContinuousEvolutionSettings {
@@ -298,7 +298,7 @@ DiscreteEvolutionSettings::DiscreteEvolutionSettings()
       maximum_grid_height(16),
       splitting_constants_target_ratio(0.1),
 	  enable_lower_pruning(true),
-	  constraining_policy(BOUNDING_DOMAIN)
+	  constraining_policy(CONSTRAIN_NO)
 { }
 
 inline

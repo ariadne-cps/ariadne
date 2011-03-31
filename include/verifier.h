@@ -35,6 +35,8 @@ namespace Ariadne {
 
 class HybridReachabilityAnalyser;
 
+enum DominanceChecking { DOMINANCE_POSITIVE, DOMINANCE_NEGATIVE };
+
 /** Provides a convenient structure for systems and their relative info for verification. */
 struct SystemVerificationInfo
 {
@@ -107,11 +109,16 @@ class Verifier
     mutable std::string _plot_dirpath;
 
 	/*! \brief Fields for caching outer approximations obtained during safety or dominance methods.
-	 * \details Their presence is useful to refine the grid on successive iterations. Set to mutable since their value is
+	 * \details Their presence is useful to refine the domain and consequently the grid on successive iterations. Set to mutable since their value is
 	 * valid only transitively during one (iterative) verification method, therefore they do not add external state to the verifier. */
-	mutable boost::shared_ptr< OuterApproximationCache > _safety_outer_approximation;
-	mutable boost::shared_ptr< OuterApproximationCache > _dominating_outer_approximation;
-	mutable boost::shared_ptr< OuterApproximationCache > _dominated_outer_approximation;
+	mutable boost::shared_ptr< OuterApproximationCache > _safety_hgts_domain;
+	mutable boost::shared_ptr< OuterApproximationCache > _dominating_hgts_domain;
+	mutable boost::shared_ptr< OuterApproximationCache > _dominated_hgts_domain;
+
+	/*! \brief Fields for holding the constraints for the dominance methods,
+	 * \details These are need since the outer analyser alternatively works on the dominating and dominated systems. */
+	mutable HybridGridTreeSet _dominating_constraint;
+	mutable HybridGridTreeSet _dominated_constraint;
 
   public:
 
@@ -295,7 +302,8 @@ class Verifier
 	 * that must be ignore when choosing the splitting factors of the system. */
 	void _chooseDominanceSettings(SystemVerificationInfo& systemBundle,
 								 const RealConstantSet& locked_constants,
-								 const HybridGridTreeSet& outer_reach,
+								 const HybridGridTreeSet& domain_reach,
+								 const HybridGridTreeSet& constraint_reach,
 								 Semantics semantics) const;
 
 	/**
@@ -379,7 +387,8 @@ private:
 	/*! \brief Tune the settings for the next iterative verification step. */
 	void _tuneIterativeStepSettings(
 			HybridAutomaton& system,
-			const HybridGridTreeSet& bounding_reach,
+			const HybridGridTreeSet& hgts_domain,
+			const HybridGridTreeSet& constraint_reach,
 			Semantics semantics) const;
 
 	/*! \brief Checks whether a grid depth value is allowed for use in iterative verification, based on the \a semantics. */
@@ -387,15 +396,21 @@ private:
 
 	/*! \brief Updates the constraining information.
 	 * \details It reads \a analyser_settings for the constraining policy, followed by \a outer_approximation_cache for emptiness;
-	 * then possibly sets \a outer_approximation_cache with \a reach, and changes some settings in \a analyser_settings. */
+	 * then possibly sets \a outer_approximation_cache with \a new_outer_approximation, and changes some settings in \a analyser_settings. */
 	void _update_constraining(
 			DiscreteEvolutionSettings& analyser_settings,
 			OuterApproximationCache& outer_approximation_cache,
 			const HybridGridTreeSet& new_outer_approximation) const;
 
 	// Reached region plotting methods
-	void _plot_dirpath_init(const HybridAutomaton& system) const;
-	void _plot(const HybridGridTreeSet& reach, Semantics semantics) const;
+	void _plot_dirpath_init(std::string basename) const;
+	void _plot_reach(
+			const HybridGridTreeSet& reach,
+			Semantics semantics) const;
+	void _plot_dominance(
+			const HybridGridTreeSet& reach,
+			Semantics semantics,
+			DominanceChecking dominance_checking) const;
 
 	//@}
 

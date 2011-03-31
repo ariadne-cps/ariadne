@@ -494,8 +494,8 @@ _outer_chain_reach_forward(const SystemType& system,
 	    ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
 	    ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
 
-	    if (_settings->constraining_policy == OUTER_APPROX) {
-	    	ARIADNE_ASSERT(!_settings->outer_approx_constraint.empty());
+	    if (!_settings->outer_approx_constraint.empty()) {
+	    	ARIADNE_ASSERT(_settings->constraining_policy == CONSTRAIN_YES);
 	    	new_final.restrict(_settings->outer_approx_constraint);
 	    	new_reach.restrict(_settings->outer_approx_constraint);
 		    ARIADNE_LOG(6,"Reach size after constraining = "<<new_reach.size()<<"\n");
@@ -528,7 +528,7 @@ bool
 HybridReachabilityAnalyser::
 _fails_domain_check(const Box& enclosure_bounds, const Box& domain) const
 {
-	if (_settings->constraining_policy == BOUNDING_DOMAIN &&
+	if (_settings->constraining_policy == CONSTRAIN_NO &&
 		!enclosure_bounds.inside(domain) &&
 		enclosure_bounds.disjoint(domain))
 		return true;
@@ -794,7 +794,7 @@ _lower_chain_reach(const SystemType& system,
 
 			/* If the enclosure lies outside the bounding domain (i.e. not inside and disjoint), then the
 			 * domain is not proper and an error should be thrown. */
-			if (_settings->constraining_policy != OUTER_APPROX &&
+			if (_settings->constraining_policy == CONSTRAIN_NO &&
 				!encl_box.inside(_settings->domain_constraint[loc]) &&
 				encl_box.disjoint(_settings->domain_constraint[loc])) {
 				ARIADNE_FAIL_MSG("Found an enclosure in location " << loc.name() << " with bounding box " << encl.continuous_state_set().bounding_box() <<
@@ -1063,7 +1063,7 @@ pushSplitTargetEnclosures(std::list<EnclosureType>& initial_enclosures,
 
 	// If the cell box lies outside the bounding domain (i.e. not inside and disjoint)
 	// of the target location, ignore it and notify
-	if (policy == BOUNDING_DOMAIN &&
+	if (policy == CONSTRAIN_NO &&
 		!target_encl_box.inside(target_domain_constraint) &&
 		target_encl_box.disjoint(target_domain_constraint)) {
 		throw ReachOutOfDomainException("A split target enclosure is out of the domain.");

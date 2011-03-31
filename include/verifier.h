@@ -88,8 +88,8 @@ class Verifier
 {
   private:
 
-    /*! \brief Holds ONCE the cached result of an outer approximation of a system. */
-    class OuterApproximationCache
+    /*! \brief Holds the cached result of an outer approximation of a system. */
+    struct OuterApproximationCache
     {
       private:
     	bool _is_set;

@@ -382,8 +382,13 @@ HybridGrid getHybridGrid(const HybridFloatVector& hmad,
 Vector<Float> getMaximumEnclosureCell(const HybridGrid& hgrid, int maximum_grid_depth);
 
 /*! \brief Get the hybrid maximum integration step size, under the assumption that given the maximum derivatives \a hmad,
-	all variables in a step must cover a length greater than a length determined by the \a hgrid with a given \a maximum_grid_depth. */
-std::map<DiscreteState,Float> getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid, int maximum_grid_depth);
+	all variables in a step must cover a length greater than a length determined by the \a hgrid with a given \a maximum_grid_depth.
+	\details The actual result is scaled based on the \a semantics. */
+std::map<DiscreteState,Float> getHybridMaximumStepSize(
+		const HybridFloatVector& hmad,
+		const HybridGrid& hgrid,
+		int maximum_grid_depth,
+		Semantics semantics);
 
 /*! \brief Set the lock to grid time of \system.
 	\details The value is taken as the maximum over the times required by any variable on any location to cover a distance equal to

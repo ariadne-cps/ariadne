@@ -893,8 +893,44 @@ tuneEvolverParameters(SystemType& system,
 {
 	_discretiser->settings().maximum_enclosure_cell = getMaximumEnclosureCell(system.grid(),maximum_grid_depth);
 	ARIADNE_LOG(4, "Maximum enclosure cell: " << _discretiser->settings().maximum_enclosure_cell << "\n");
-	_discretiser->settings().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,system.grid(),maximum_grid_depth);
+	_discretiser->settings().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,system.grid(),maximum_grid_depth,semantics);
 	ARIADNE_LOG(4, "Maximum step size: " << _discretiser->settings().hybrid_maximum_step_size << "\n");
+}
+
+std::list<RealConstantSet>
+HybridReachabilityAnalyser::
+_getSplitConstantsIntervalsSet(HybridAutomaton system,
+							   float tolerance) const
+{
+	const RealConstantSet& locked_constants = _settings->locked_constants;
+	const HybridBoxes& domain = _settings->domain_bounds;
+
+	const RealConstantSet original_constants = system.accessible_constants();
+
+	const RealConstantIntMap split_factors = getSplitFactorsOfConstants(system,locked_constants,tolerance,domain);
+
+	std::list<RealConstantSet> result;
+
+	if (split_factors.empty())
+		result.push_back(original_constants);
+
+	// Creates a vector for all the interval splits (i.e. a jagged matrix)
+	std::vector<std::vector<RealConstant> > split_intervals_set(split_factors.size());
+	uint i=0;
+	for (RealConstantIntMap::const_iterator factor_it = split_factors.begin();
+											factor_it != split_factors.end();
+											++factor_it)
+		split_intervals_set[i++] = split(factor_it->first, factor_it->second);
+
+	// Generates all the possible split combinations
+	RealConstantSet initial_combination;
+	std::vector<std::vector<RealConstant> >::iterator initial_col_it = split_intervals_set.begin();
+	std::vector<RealConstant>::iterator initial_row_it = initial_col_it->begin();
+	_fillSplitSet(split_intervals_set,initial_col_it,initial_row_it,initial_combination,result);
+
+	ARIADNE_LOG(5,"<Split factors: " << split_factors << ", size: " << result.size() << ">\n");
+
+	return result;
 }
 
 list<HybridBasicSet<TaylorSet> >
@@ -1204,42 +1240,6 @@ void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
 }
 
 std::list<RealConstantSet>
-HybridReachabilityAnalyser::
-_getSplitConstantsIntervalsSet(HybridAutomaton system,
-							   float tolerance) const
-{
-	const RealConstantSet& locked_constants = _settings->locked_constants;
-	const HybridBoxes& domain = _settings->domain_bounds;
-
-	const RealConstantSet original_constants = system.accessible_constants();
-
-	const RealConstantIntMap split_factors = getSplitFactorsOfConstants(system,locked_constants,tolerance,domain);
-
-	std::list<RealConstantSet> result;
-
-	if (split_factors.empty())
-		result.push_back(original_constants);
-
-	// Creates a vector for all the interval splits (i.e. a jagged matrix)
-	std::vector<std::vector<RealConstant> > split_intervals_set(split_factors.size());
-	uint i=0;
-	for (RealConstantIntMap::const_iterator factor_it = split_factors.begin();
-											factor_it != split_factors.end();
-											++factor_it)
-		split_intervals_set[i++] = split(factor_it->first, factor_it->second);
-
-	// Generates all the possible split combinations
-	RealConstantSet initial_combination;
-	std::vector<std::vector<RealConstant> >::iterator initial_col_it = split_intervals_set.begin();
-	std::vector<RealConstant>::iterator initial_row_it = initial_col_it->begin();
-	_fillSplitSet(split_intervals_set,initial_col_it,initial_row_it,initial_combination,result);
-
-	ARIADNE_LOG(5,"<Split factors: " << split_factors << ", size: " << result.size() << ">\n");
-
-	return result;
-}
-
-std::list<RealConstantSet>
 getSplitConstantsMidpointsSet(const std::list<RealConstantSet>& intervals_set)
 {
 	std::list<RealConstantSet> result;
@@ -1435,8 +1435,16 @@ getHybridMaximumAbsoluteDerivatives(const HybridAutomaton& system,
 
 
 std::map<DiscreteState,Float>
-getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid, int maximum_grid_depth)
+getHybridMaximumStepSize(
+		const HybridFloatVector& hmad,
+		const HybridGrid& hgrid,
+		int maximum_grid_depth,
+		Semantics semantics)
 {
+	// We choose a coefficient for upper semantics such that an enclosure at maximum size is able to cross
+	// urgent transitions in one step. For lower semantics we prefer to have a finer result.
+	Float coefficient = (semantics == UPPER_SEMANTICS ? 2.0 : 1.0);
+
 	// Gets the size of the continuous space (NOTE: taken as equal for all locations)
 	const uint css = hmad.begin()->second.size();
 
@@ -1455,7 +1463,7 @@ getHybridMaximumStepSize(const HybridFloatVector& hmad, const HybridGrid& hgrid,
 				mss = max(mss,hgrid[hfv_it->first].lengths()[i]/(1 << maximum_grid_depth)/hfv_it->second[i]);
 
 		// Inserts the value (twice the value since the maximum enclosure is set as ~2 the grid cell)
-		hmss.insert(std::pair<DiscreteState,Float>(hfv_it->first,2*mss));
+		hmss.insert(std::pair<DiscreteState,Float>(hfv_it->first,coefficient*mss));
 	}
 
 	return hmss;

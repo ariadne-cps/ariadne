@@ -158,10 +158,10 @@ HybridEvolver create_evolver()
     HybridEvolver evolver;
 
     // Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.25);
-    evolver.parameters().hybrid_maximum_step_size[1] = 0.0625;
-    evolver.parameters().hybrid_maximum_step_size[2] = 0.0625;
-    cout <<  evolver.parameters() << endl;
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(2,0.25);
+    evolver.settings().hybrid_maximum_step_size[1] = 0.0625;
+    evolver.settings().hybrid_maximum_step_size[2] = 0.0625;
+    cout <<  evolver.settings() << endl;
 
     return evolver;
 }
@@ -218,9 +218,9 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
 {
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().initial_grid_density=10;
-    analyser.parameters().initial_grid_depth=12;
-    analyser.parameters().maximum_grid_depth=12;
+    analyser.settings().initial_grid_density=10;
+    analyser.settings().initial_grid_depth=12;
+    analyser.settings().maximum_grid_depth=12;
 
 
     // Define the initial set

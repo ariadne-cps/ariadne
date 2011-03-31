@@ -40,7 +40,7 @@
 #include "map.h"
 #include "function_interface.h"
 #include "evolver_base.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 
 #include "logging.h"
 
@@ -52,7 +52,7 @@ class TaylorSet;
 class IteratedMap;
 template<class ES> class Orbit;
 
-class EvolutionParameters;
+class EvolutionSettings;
 class TaylorModel;
 template<class Var> class CalculusInterface;
 
@@ -69,7 +69,7 @@ class MapEvolver
 {
     typedef TaylorModel VariableType;
   public:
-    typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef ContinuousEvolutionSettings EvolutionSettingsType;
     typedef IteratedMap::TimeType TimeType;
     typedef IteratedMap SystemType;
     typedef TaylorSet SetModelType;
@@ -82,16 +82,16 @@ class MapEvolver
     MapEvolver();
   
     //! \brief Construct from parameters using a default integrator.
-    MapEvolver(const EvolutionParametersType& parameters);
+    MapEvolver(const EvolutionSettingsType& parameters);
   
     /*! \brief Make a dynamically-allocated copy. */
     MapEvolver* clone() const { return new MapEvolver(*this); }
 
     //@{
-    //! \name Parameters controlling the evolution.
-    //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParametersType& parameters() { return *this->_parameters; }
-    const EvolutionParametersType& parameters() const { return *this->_parameters; }
+    //! \name Settings controlling the evolution.
+
+    EvolutionSettingsType& settings() { return *this->_settings; }
+    const EvolutionSettingsType& settings() const { return *this->_settings; }
 
     //@}
   
@@ -138,7 +138,7 @@ class MapEvolver
                                  Semantics semantics) const;
 
   private:
-    boost::shared_ptr< EvolutionParametersType > _parameters;
+    boost::shared_ptr< EvolutionSettingsType > _settings;
     boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };

@@ -65,7 +65,7 @@ typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 class HybridAutomaton;
 template<class ES> class Orbit;
 
-class EvolutionParameters;
+class EvolutionSettings;
 class TaylorModel;
 template<class MDL> class CalculusInterface;
 
@@ -93,7 +93,7 @@ class PythonHybridEvolver
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;
   public:
-    typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef ContinuousEvolutionSettings EvolutionSettingsType;
     typedef HybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
@@ -108,10 +108,10 @@ class PythonHybridEvolver
   public:
 
     //! \brief Default constructor.
-    PythonHybridEvolver() : _parameters() { this->initialise_python(); }
+    PythonHybridEvolver() : _settings() { this->initialise_python(); }
 
     //! \brief Construct from parameters using a default integrator.
-    PythonHybridEvolver(const EvolutionParametersType& parameters) : _parameters(parameters) { this->initialise_python(); }
+    PythonHybridEvolver(const EvolutionSettingsType& settings) : _settings(settings) { this->initialise_python(); }
 
     /*! \brief Make a dynamically-allocated copy. */
     PythonHybridEvolver* clone() const { return new PythonHybridEvolver(*this); }
@@ -119,8 +119,8 @@ class PythonHybridEvolver
     //@{
     //! \name Parameters controlling the evolution.
     //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParametersType& parameters() { return this->_parameters; }
-    const EvolutionParametersType& parameters() const { return this->_parameters; }
+    EvolutionSettingsType& settings() { return this->_settings; }
+    const EvolutionSettingsType& settings() const { return this->_settings; }
 
     //@}
 
@@ -154,7 +154,7 @@ class PythonHybridEvolver
     void initialise_python();
 
   private:
-    EvolutionParametersType _parameters;
+    EvolutionSettingsType _settings;
 };
 
 

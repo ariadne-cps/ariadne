@@ -33,7 +33,7 @@
 #include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 #include "orbit.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"
@@ -123,7 +123,7 @@ void TestHybridEvolution::test_constant_derivative_system() const
 
     HybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
-	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+	evolver.settings().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ARIADNE_TEST_PRINT(automaton);
     ARIADNE_TEST_PRINT(initial_set);
@@ -190,9 +190,9 @@ void TestHybridEvolution::test_bouncing_ball() const
 
     HybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
-    evolver.parameters().hybrid_maximum_step_size[1]=0.125;
-    evolver.parameters().hybrid_maximum_step_size[2]=0.125;
-	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+    evolver.settings().hybrid_maximum_step_size[1]=0.125;
+    evolver.settings().hybrid_maximum_step_size[2]=0.125;
+	evolver.settings().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ARIADNE_TEST_PRINT(automaton);
     ARIADNE_TEST_PRINT(initial_set);
@@ -228,7 +228,7 @@ void TestHybridEvolution::test_affine_system() const
     Float step_size(0.5);
     Float max_enclosure_width(0.5);
 
-    EvolutionParameters parameters;
+    EvolutionSettings parameters;
     parameters.maximum_enclosure_cell=Vector<Float>(2,max_enclosure_width);
     parameters.hybrid_maximum_step_size[1]=step_size;
     parameters.hybrid_maximum_step_size[2]=step_size;
@@ -238,7 +238,7 @@ void TestHybridEvolution::test_affine_system() const
     // Set up the evaluators
     HybridEvolver evolver(parameters);
     evolver.verbosity = evolver_verbosity;
-	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+	evolver.settings().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     // Make a hybrid automaton for the Van der Pol equation
     HybridAutomaton automaton=system();
@@ -354,10 +354,10 @@ void TestHybridEvolver::test_transverse_linear_crossing()
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
-	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+	evolver.settings().maximum_enclosure_cell=Vector<Float>(2,0.5);
 	HybridSpace hspace = system.state_space();
 	for (HybridSpace::locations_const_iterator loc_it = hspace.locations_begin(); loc_it != hspace.locations_end(); loc_it++)
-		evolver.parameters().hybrid_maximum_step_size[loc_it->first] = 1.0;
+		evolver.settings().hybrid_maximum_step_size[loc_it->first] = 1.0;
 
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
@@ -385,7 +385,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
-	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+	evolver.settings().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
@@ -413,7 +413,7 @@ void TestHybridEvolver::test_transverse_cube_root_crossing()
     HybridTaylorSet initial_set(q1,initial_box);
     HybridTime evolution_time(2.0,3);
 
-	evolver.parameters().maximum_enclosure_cell=Vector<Float>(2,0.5);
+	evolver.settings().maximum_enclosure_cell=Vector<Float>(2,0.5);
 
     ScalarFunction ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
     VectorFunction f=join(x+ct,y+2-ct);

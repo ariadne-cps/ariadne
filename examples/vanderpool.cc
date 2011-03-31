@@ -54,8 +54,8 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.4);
-    evolver.parameters().hybrid_maximum_step_size[one] = 0.02;
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(2,0.4);
+    evolver.settings().hybrid_maximum_step_size[one] = 0.02;
     evolver.verbosity=1;
 
     // Declare the type to be used for the system evolution
@@ -81,7 +81,7 @@ int main()
     g << orbit;
     g.write("vanderpool-orbit-forward");
 
-    evolver.parameters().direction = BACKWARD;
+    evolver.settings().direction = BACKWARD;
 
     initial_enclosure = HybridEnclosureType(one,orbit.final().bounding_box());
 

@@ -371,8 +371,8 @@ int main()
 	// Create an evolver and analyser objects, then set their verbosity
 	ImageSetHybridEvolver evolver;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.parameters().lowest_maximum_grid_depth = 4;
-	analyser.parameters().highest_maximum_grid_depth = 4;
+	analyser.settings().lowest_maximum_grid_depth = 4;
+	analyser.settings().highest_maximum_grid_depth = 4;
 	Verifier verifier(analyser);
 	verifier.verbosity = 2;
 

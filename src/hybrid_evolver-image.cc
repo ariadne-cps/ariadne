@@ -33,7 +33,7 @@
 #include "taylor_model.h"
 #include "orbit.h"
 #include "taylor_calculus.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 
 #include "logging.h"
 
@@ -86,28 +86,28 @@ const DiscreteEvent ImageSetHybridEvolver::finishing_event = -2;
 const DiscreteEvent ImageSetHybridEvolver::blocking_event = -3;
 
 ImageSetHybridEvolver::ImageSetHybridEvolver()
-    : _parameters(new EvolutionParametersType()),
+    : _settings(new EvolutionSettingsType()),
       _toolbox(new TaylorCalculus())
 {
 	
 }
 
 
-ImageSetHybridEvolver::ImageSetHybridEvolver(const EvolutionParametersType& p)
-    : _parameters(new EvolutionParametersType(p)),
+ImageSetHybridEvolver::ImageSetHybridEvolver(const EvolutionSettingsType& p)
+    : _settings(new EvolutionSettingsType(p)),
       _toolbox(new TaylorCalculus())
 {
 }
 
 ImageSetHybridEvolver::ImageSetHybridEvolver(const TaylorCalculus& tc)
-    : _parameters(new EvolutionParametersType()),
+    : _settings(new EvolutionSettingsType()),
       _toolbox(new TaylorCalculus(tc))
 {
 }
 
-ImageSetHybridEvolver::ImageSetHybridEvolver(const EvolutionParametersType& p,
+ImageSetHybridEvolver::ImageSetHybridEvolver(const EvolutionSettingsType& p,
 											 const TaylorCalculus& tc)
-    : _parameters(new EvolutionParametersType(p)),
+    : _settings(new EvolutionSettingsType(p)),
       _toolbox(new TaylorCalculus(tc))
 {
 }
@@ -320,17 +320,17 @@ _lower_evolution_disprove(EnclosureListType& final_sets,
 		TimeModelType initial_time_model=current_set.fourth;
 
 		bool isEnclosureTooLarge = _isEnclosureTooLarge(initial_set_model);
-		bool subdivideOverTime = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
+		bool subdivideOverTime = (initial_time_model.range().width() > this->_settings->hybrid_maximum_step_size[initial_location]/2);
 
 		if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time() ||
 		   initial_events.size()>=uint(maximum_hybrid_time.discrete_time())) {
             ARIADNE_LOG(3,"  Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if (subdivideOverTime && this->_parameters->enable_subdivisions) {
-            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
+        } else if (subdivideOverTime && this->_settings->enable_subdivisions) {
+            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_settings->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
             _add_models_subdivisions_time(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
-		} else if(!this->_parameters->enable_subdivisions &&
-                  this->_parameters->enable_premature_termination && isEnclosureTooLarge) {
+		} else if(!this->_settings->enable_subdivisions &&
+                  this->_settings->enable_premature_termination && isEnclosureTooLarge) {
             ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
         } else {
@@ -384,20 +384,20 @@ _evolution(EnclosureListType& final_sets,
 		TimeModelType initial_time_model=current_set.fourth;
 
 		bool isEnclosureTooLarge = _isEnclosureTooLarge(initial_set_model);
-		bool subdivideOverTime = (initial_time_model.range().width() > this->_parameters->hybrid_maximum_step_size[initial_location]/2);
+		bool subdivideOverTime = (initial_time_model.range().width() > this->_settings->hybrid_maximum_step_size[initial_location]/2);
 
 		if(initial_time_model.range().lower()>=maximum_hybrid_time.continuous_time() ||
 		   initial_events.size()>=uint(maximum_hybrid_time.discrete_time())) {
             ARIADNE_LOG(3,"Final time reached, adjoining result to final sets.\n");
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if (subdivideOverTime && this->_parameters->enable_subdivisions) {
-            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_parameters->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
+        } else if (subdivideOverTime && this->_settings->enable_subdivisions) {
+            ARIADNE_LOG(1,"WARNING: computed time range " << initial_time_model.range() << " width larger than half the maximum step size " << this->_settings->hybrid_maximum_step_size[initial_location] << ", subdividing over time.\n");
             _add_models_subdivisions_time(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
-		} else if (semantics == UPPER_SEMANTICS && this->_parameters->enable_subdivisions && isEnclosureTooLarge) {
-            ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model.range() << " widths larger than maximum_enclosure_cell " << this->_parameters->maximum_enclosure_cell << ", subdividing.\n");
+		} else if (semantics == UPPER_SEMANTICS && this->_settings->enable_subdivisions && isEnclosureTooLarge) {
+            ARIADNE_LOG(1,"WARNING: computed set range " << initial_set_model.range() << " widths larger than maximum_enclosure_cell " << this->_settings->maximum_enclosure_cell << ", subdividing.\n");
             _add_models_subdivisions_autoselect(working_sets,initial_set_model,initial_time_model,initial_location,initial_events);
-        } else if((semantics == LOWER_SEMANTICS || !this->_parameters->enable_subdivisions) &&
-                  this->_parameters->enable_premature_termination && isEnclosureTooLarge) {
+        } else if((semantics == LOWER_SEMANTICS || !this->_settings->enable_subdivisions) &&
+                  this->_settings->enable_premature_termination && isEnclosureTooLarge) {
             ARIADNE_LOG(1,"\n\nWARNING: Terminating evolution at time " << initial_time_model.value()
                         << " and set " << initial_set_model.centre() << " due to maximum enclosure bounds being exceeded.\n\n");
             if(semantics == UPPER_SEMANTICS)
@@ -521,7 +521,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
-    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_parameters->direction);
+    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_settings->direction);
     const std::map<DiscreteEvent,VectorFunction> blocking_guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> permissive_guards=system.permissive_guards(location);
     const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();
@@ -538,7 +538,7 @@ _evolution_step(std::list< HybridTimedSetType >& working_sets,
 
     // Compute continuous evolution
     FlowSetModelType flow_set_model; BoxType flow_bounds; 
-    Float time_step = this->_parameters->hybrid_maximum_step_size[location];
+    Float time_step = this->_settings->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
 
@@ -598,7 +598,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
-    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_parameters->direction);
+    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_settings->direction);
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
     const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();
@@ -622,7 +622,7 @@ _upper_evolution_continuous_step(std::list< HybridTimedSetType >& working_sets,
 
     // Compute continuous evolution
     FlowSetModelType flow_set_model; BoxType flow_bounds; 
-    Float time_step = this->_parameters->hybrid_maximum_step_size[location];
+    Float time_step = this->_settings->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
 
@@ -694,7 +694,7 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
 
     // Extract information about the current location
     const DiscreteMode& mode=system.mode(location);
-    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_parameters->direction);
+    const VectorFunction dynamic=get_directed_dynamic(mode.dynamic(),_settings->direction);
     const std::map<DiscreteEvent,VectorFunction> guards=system.blocking_guards(location);
     std::map<DiscreteEvent,VectorFunction> activations=system.permissive_guards(location);
     const std::map<DiscreteEvent,VectorFunction> invariants=mode.invariants();
@@ -727,7 +727,7 @@ _lower_evolution_disprove_step(std::list< HybridTimedSetType >& working_sets,
 
     // Compute continuous evolution
     FlowSetModelType flow_set_model; BoxType flow_bounds;
-    Float time_step = this->_parameters->hybrid_maximum_step_size[location];
+    Float time_step = this->_settings->hybrid_maximum_step_size[location];
     const Float maximum_time=maximum_hybrid_time.continuous_time();
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic,set_model,time_model,maximum_time);
 
@@ -900,7 +900,7 @@ compute_flow_model(FlowSetModelType& flow_set_model, BoxType& flow_bounds, Float
     const int MAXIMUM_BOUNDS_DIAMETER_FACTOR = 8;
     float remaining_time = finishing_time - starting_time_model.range().lower();
     const Float maximum_step_size=min(time_step, remaining_time);
-    const Float maximum_bounds_diameter=max(this->_parameters->maximum_enclosure_cell)*MAXIMUM_BOUNDS_DIAMETER_FACTOR;
+    const Float maximum_bounds_diameter=max(this->_settings->maximum_enclosure_cell)*MAXIMUM_BOUNDS_DIAMETER_FACTOR;
 
     BoxType starting_set_bounding_box=starting_set_model.range();
     ARIADNE_LOG(3,"starting_set_bounding_box="<<starting_set_bounding_box<<"\n");
@@ -1443,9 +1443,9 @@ _evolution_add_initialSet(std::list< HybridTimedSetType >& working_sets,
     SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
 
 	// Check for non-zero maximum step size
-	ARIADNE_ASSERT_MSG(this->_parameters->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
+	ARIADNE_ASSERT_MSG(this->_settings->hybrid_maximum_step_size[initial_location] > 0, "Error: the maximum step size for location " << initial_location.name() << " is zero.");
 	// Check for match between the enclosure cell size and the set size
-	ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+	ARIADNE_ASSERT_MSG(this->_settings->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
 
     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
     TimeModelType initial_time_model=this->_toolbox->time_model(0.0,Box(initial_set_model.argument_size()));
@@ -1462,7 +1462,7 @@ _isEnclosureTooLarge(const SetModelType& initial_set_model) const
 	const Vector<Interval> initial_set_model_range = initial_set_model.range();
 
 	for (uint i=0;i<initial_set_model_range.size();++i)
-		if (initial_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i])
+		if (initial_set_model_range[i].width() > this->_settings->maximum_enclosure_cell[i])
 			return true;
 
 	return false;

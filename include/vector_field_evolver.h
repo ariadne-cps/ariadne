@@ -40,7 +40,7 @@
 #include "vector_field.h"
 #include "function_interface.h"
 #include "evolver_base.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 
 #include "logging.h"
 
@@ -51,7 +51,7 @@ template<class Sys, class BS> class Evolver;
 class VectorField;
 template<class ES> class Orbit;
 
-class EvolutionParameters;
+class EvolutionSettings;
 class TaylorModel;
 class TaylorSet;
 template<class Var> class CalculusInterface;
@@ -68,7 +68,7 @@ class VectorFieldEvolver
     , public Loggable
 {
   public:
-    typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef ContinuousEvolutionSettings EvolutionSettingsType;
     typedef VectorField::TimeType TimeType;
     typedef VectorField SystemType;
     typedef TaylorSet EnclosureType;
@@ -80,16 +80,16 @@ class VectorFieldEvolver
     VectorFieldEvolver();
   
     //! \brief Construct from parameters using a default integrator.
-    VectorFieldEvolver(const EvolutionParametersType& parameters);
+    VectorFieldEvolver(const EvolutionSettingsType& parameters);
   
     /*! \brief Make a dynamically-allocated copy. */
     VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
     //@{
-    //! \name Parameters controlling the evolution.
-    //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParametersType& parameters() { return *this->_parameters; }
-    const EvolutionParametersType& parameters() const { return *this->_parameters; }
+    //! \name Settings controlling the evolution.
+
+    EvolutionSettingsType& settings() { return *this->_settings; }
+    const EvolutionSettingsType& settings() const { return *this->_settings; }
 
     //@}
   
@@ -139,7 +139,7 @@ class VectorFieldEvolver
                                  Semantics semantics) const;
 
   private:
-    boost::shared_ptr< EvolutionParametersType > _parameters;
+    boost::shared_ptr< EvolutionSettingsType > _settings;
     boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };

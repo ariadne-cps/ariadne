@@ -277,8 +277,8 @@ int main(int argc, char** argv)
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.parameters().lowest_maximum_grid_depth = 5;
-	analyser.parameters().highest_maximum_grid_depth = 10;
+	analyser.settings().lowest_maximum_grid_depth = 5;
+	analyser.settings().highest_maximum_grid_depth = 10;
 	Verifier verifier(analyser);
 	verifier.verbosity = 3;
 
@@ -287,32 +287,6 @@ int main(int argc, char** argv)
 	tribool result = verifier.safety(verInfo);
 	
 	std::cout << "Done." << std::endl;
-	
-	std::cout << std::endl << "Plotting results...";
-
-    HybridGridTreeSet reach = analyser.statistics().upper().reach;
-    HybridGridTreeSet limits(reach.grid());
-    limits.adjoin_outer_approximation(bounding_boxes(system.state_space(),Box(3,
-								 -0.01,0.11,
-								 -0.0,0.11,
-								-0.2,0.2)), 7);
-    reach.restrict(limits);
-    
-    Figure fig; 
-    array<uint> xy(2,1,2);
-    fig.set_projection_map(ProjectionFunction(xy,3)); 
-    fig.set_x_axis_label("t_out");
-    fig.set_y_axis_label("vd");
-    fig.set_line_colour(Colour(0,0,0));
-    fig.set_bounding_box(Box(2, -0.001,0.015, -0.15,0.15)); 
-    fig.set_fill_colour(Colour(0.95,0.3,0.3));
-    draw(fig, Box(3, 0.0,0.0, -0.1,0.1, -0.3, -0.1));
-    draw(fig, Box(3, 0.0,0.0, -0.1,0.1, 0.1, 0.3));
-    fig.set_fill_colour(Colour(0.0,0.5,1.0));
-    draw(fig,reach); 
-    fig.write("automaton_reach.png");	
-	
-	std::cout << " done." << std::endl;
 	
 	std::cout << std::endl << "Safety property Always(-2.0*C2 <= vd <= 2.0*C2) is " << result << "."  << std::endl;
 	

@@ -120,11 +120,11 @@ int main(int argc, char** argv)
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(4,MAX_ENCL_WIDTH);
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(4,MAX_ENCL_WIDTH);
     HybridSpace hspace = automaton.state_space();
     for (HybridSpace::locations_const_iterator loc_it = hspace.locations_begin(); loc_it != hspace.locations_end(); loc_it++)
-    	evolver.parameters().hybrid_maximum_step_size[loc_it->first]=MAX_STEP_SIZE;
-    std::cout <<  evolver.parameters() << std::endl;
+    	evolver.settings().hybrid_maximum_step_size[loc_it->first]=MAX_STEP_SIZE;
+    std::cout <<  evolver.settings() << std::endl;
 
     // Declare the type to be used for the automaton evolution
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
@@ -133,12 +133,12 @@ int main(int argc, char** argv)
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
-    analyser.parameters().lock_to_grid_steps = LOCK_TOGRID_STEPS;
-    analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
+    analyser.settings().lock_to_grid_time = LOCK_TOGRID_TIME;
+    analyser.settings().lock_to_grid_steps = LOCK_TOGRID_STEPS;
+    analyser.settings().maximum_grid_depth= MAX_GRID_DEPTH;
     analyser.verbosity = 3;
     automaton.set_grid(grid); 
-    std::cout <<  analyser.parameters() << std::endl;
+    std::cout <<  analyser.settings() << std::endl;
 
     HybridImageSet initial_set;
     if(command == C_SYNTH) initial_box[pvar] = Interval(pmin,pmax);

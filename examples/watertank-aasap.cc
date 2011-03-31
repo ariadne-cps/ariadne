@@ -260,8 +260,8 @@ int main(int argc,char *argv[])
 	// Create an evolver and analyser objects, then set their verbosity
 	HybridEvolver evolver;
 	HybridReachabilityAnalyser analyser(evolver);
-	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 8;
+	analyser.settings().lowest_maximum_grid_depth = 0;
+	analyser.settings().highest_maximum_grid_depth = 8;
 	analyser.free_cores = 0;
 	Verifier verifier(analyser);
 	verifier.verbosity = verifierVerbosity;
@@ -271,23 +271,5 @@ int main(int argc,char *argv[])
 
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
     verifier.safety(verInfo);
-    
-    HybridGridTreeSet reach = analyser.statistics().upper().reach;
-
-	// Assigns local variables
-	Figure fig;
-	array<uint> xy(2,1,2);
-
-	fig.set_projection_map(ProjectionFunction(xy,3));
-	fig.set_bounding_box(Box(2,4.0,9.5,-0.05,1.05));
-
-	// Appends the set, with the desired fill color
-	fig.set_fill_colour(Colour(0.9,0.9,0.9));
-	draw(fig,reach);
-	fig.set_fill_colour(Colour(0.6,0.6,0.6));
-	draw(fig,Box(3,0.0,0.0,3.5,5.25,-0.2,1.2));
-	draw(fig,Box(3,0.0,0.0,8.25,10.0,-0.2,1.2));
-	fig.write("watertank-aasap.png");
-
 
 }

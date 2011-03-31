@@ -35,7 +35,7 @@
 #include "discretiser_interface.h"
 #include "hybrid_automaton.h"
 #include "vector_field.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 
 #include "logging.h"
 
@@ -174,13 +174,13 @@ class HybridDiscretiser
     //@}
 
     //@{
-    //! \name Gets and sets the continuous evolution parameters
+    //! \name Gets and sets the continuous evolution settings
 
-	//! \brief Gets the evolution parameters from the evolver
-	const ContinuousEvolutionParameters& parameters() const { return this->_evolver->parameters(); }
+	//! \brief Gets the evolution settings from the evolver
+	const ContinuousEvolutionSettings& settings() const { return this->_evolver->settings(); }
 
-	//! \brief Gets a reference for setting the evolution parameters from the evolver
-	ContinuousEvolutionParameters& parameters() { return this->_evolver->parameters(); }
+	//! \brief Gets a reference for setting the evolution settings from the evolver
+	ContinuousEvolutionSettings& settings() { return this->_evolver->settings(); }
 
 	//@}
 

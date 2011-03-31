@@ -37,7 +37,7 @@ class HybridEvolver
 {
   public:
     HybridEvolver() : ImageSetHybridEvolver() { }
-    HybridEvolver(const EvolutionParameters& p) : ImageSetHybridEvolver(p) { }
+    HybridEvolver(const EvolutionSettings& p) : ImageSetHybridEvolver(p) { }
 };
 
 } // namespace Ariadne

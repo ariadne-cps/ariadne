@@ -32,7 +32,7 @@
 #include "taylor_function.h"
 #include "orbit.h"
 #include "taylor_calculus.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 
 #include "logging.h"
 
@@ -78,15 +78,15 @@ class DegenerateCrossingException { };
 
 
 VectorFieldEvolver::VectorFieldEvolver()
-    : _parameters(new EvolutionParametersType()),
+    : _settings(new EvolutionSettingsType()),
       _toolbox(new TaylorCalculus())
 {
 }
 
 
 
-VectorFieldEvolver::VectorFieldEvolver(const EvolutionParametersType& p)
-    : _parameters(new EvolutionParametersType(p)),
+VectorFieldEvolver::VectorFieldEvolver(const EvolutionSettingsType& p)
+    : _settings(new EvolutionSettingsType(p)),
       _toolbox(new TaylorCalculus())
 {
 }
@@ -157,7 +157,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.push_back(make_tuple(initial_time,initial_set_model));
 
 		// Checks for match between the enclosure cell size and the set size
-		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+		ARIADNE_ASSERT_MSG(this->_settings->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
     }
 
     while(!working_sets.empty()) {
@@ -171,7 +171,7 @@ _evolution(EnclosureListType& final_sets,
 		// Checks whether the range can be included into the maximum_enclosure_cell
 		bool maximum_enclosure_reached = false;
 		for (uint i=0;i<current_set_model_range.size();++i) {
-			if (current_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i]) {
+			if (current_set_model_range[i].width() > this->_settings->maximum_enclosure_cell[i]) {
 				maximum_enclosure_reached = true;
 				break; 
 			}
@@ -247,11 +247,11 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
 
 
     /////////////// Main Evolution ////////////////////////////////
-    const FunctionType& dynamic=get_directed_dynamic(system.function(),_parameters->direction);
+    const FunctionType& dynamic=get_directed_dynamic(system.function(),_settings->direction);
 
     // Set evolution parameters
-    const Float maximum_step_size=this->_parameters->hybrid_maximum_step_size.begin()->second;
-    const Float maximum_bounds_diameter=max(this->_parameters->maximum_enclosure_cell);
+    const Float maximum_step_size=this->_settings->hybrid_maximum_step_size.begin()->second;
+    const Float maximum_bounds_diameter=max(this->_settings->maximum_enclosure_cell);
     const Float zero_time=0.0;
 
     // Get bounding boxes for time and space range

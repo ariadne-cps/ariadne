@@ -66,14 +66,14 @@ int main(int argc,char *argv[])
 	outer_analyser.verbosity = verifierVerbosity;
 	lower_analyser.verbosity = verifierVerbosity;
 	lower_analyser.free_cores = 0;
-	outer_analyser.parameters().lowest_maximum_grid_depth = 2;
-	lower_analyser.parameters().lowest_maximum_grid_depth = 1;
-	outer_analyser.parameters().highest_maximum_grid_depth = 6;
-	lower_analyser.parameters().highest_maximum_grid_depth = 6;
+	outer_analyser.settings().lowest_maximum_grid_depth = 2;
+	lower_analyser.settings().lowest_maximum_grid_depth = 1;
+	outer_analyser.settings().highest_maximum_grid_depth = 6;
+	lower_analyser.settings().highest_maximum_grid_depth = 6;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.maximum_parameter_depth = 5;
-	verifier.plot_results = false;
+	verifier.settings().maximum_parameter_depth = 5;
+	verifier.settings().plot_results = false;
 
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));

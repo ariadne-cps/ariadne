@@ -1,7 +1,7 @@
 /***************************************************************************
- *            evolution_parameters.h
+ *            settings.h
  *
- *  Copyright  2007-8  Davide Bresolim, Alberto Casagrande, Pieter Collins
+ *  Copyright  2007-8  Davide Bresolin, Alberto Casagrande, Pieter Collins, Luca Geretti
  *
  ****************************************************************************/
 
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file evolution_parameters.h
- *  \brief Parameters for controlling the accuracy of evaluation methods.
+/*! \file settings.h
+ *  \brief Settings for controlling the accuracy of evaluation methods.
  */
 
-#ifndef ARIADNE_EVOLUTION_PARAMETERS_H
-#define ARIADNE_EVOLUTION_PARAMETERS_H
+#ifndef ARIADNE_SETTINGS_H
+#define ARIADNE_SETTINGS_H
 
 #include <cstddef>
 #include <boost/smart_ptr.hpp>
@@ -43,19 +43,18 @@ namespace Ariadne {
 enum EvolutionDirection { FORWARD, BACKWARD };
 
 /** \brief The domain enforcing policy.
- * \details NONE: The \a bounding_domain parameter is ignored. ONLINE: The domain is taken into account and
- * results into preemptively aborting the reachability analysis for both outer and lower chain reachability. OFFLINE: The domain
- * is checked at the end of a proving/disproving routine, when the reachability has been fully computed (useful for debugging) */
-enum DomainEnforcingPolicy { NEVER, ONLINE, OFFLINE};
+ * \details OUTER_APPROX: A constraint outer approximation reach will be used. BOUNDING_DOMAIN: The domain is taken into account and
+ * results into preemptively aborting the reachability analysis for both outer and lower chain reachability. */
+enum ConstrainingPolicy { OUTER_APPROX, BOUNDING_DOMAIN };
 
-//! \brief Parameters for controlling the accuracy of continuous evolution methods.
-class ContinuousEvolutionParameters {
+//! \brief Settings for controlling the accuracy of continuous evolution methods.
+class ContinuousEvolutionSettings {
   public:
     typedef uint UnsignedIntType;
     typedef double RealType;
 
     //! \brief Default constructer gives reasonable values. 
-    ContinuousEvolutionParameters();
+    ContinuousEvolutionSettings();
 
 	//! \brief The direction of continuous evolution. */
 	EvolutionDirection direction;
@@ -90,8 +89,8 @@ class ContinuousEvolutionParameters {
 };
 
 
-//! \brief Parameters for controlling the accuracy of discretised evolution methods and reachability analysis.
-class DiscreteEvolutionParameters {
+//! \brief Settings for controlling the accuracy of discretised evolution methods and reachability analysis.
+class DiscreteEvolutionSettings {
   public:
     //! \brief The integer type.
     typedef int IntType;
@@ -101,7 +100,7 @@ class DiscreteEvolutionParameters {
     typedef double RealType;
   
     //! \brief Default constructer gives reasonable values. 
-    DiscreteEvolutionParameters();
+    DiscreteEvolutionSettings();
 
     //! \brief The time after which infinite-time upper-evolution routines
     //! may approximate computed sets on a grid. 
@@ -215,10 +214,10 @@ class DiscreteEvolutionParameters {
     //! \brief Set the allowed bounding domain for chain reachability computations.
     //! <br>
 	//! This parameters is only used in the chain_reach() routines.
-    HybridBoxes bounding_domain;
+    HybridBoxes domain_constraint;
 
     //! \brief The reached region for constraining a chain outer reach.
-    HybridGridTreeSet constraint_reach;
+    HybridGridTreeSet outer_approx_constraint;
 
     //! \brief The constants that must not be automatically split inside a system.
     //! \details The actual intervals values of the constants are irrelevant.
@@ -233,31 +232,48 @@ class DiscreteEvolutionParameters {
     //! This parameter is used only under lower semantics.
 	bool enable_lower_pruning;
 
-	//! \brief Skip if any subset of an outer reached region is outside the safe region (i.e. the region is not provable).
-	//! \details This parameter is used only for outer chain reachability analysis.
-	bool enable_quick_proving;
-
-	//! \brief Skip if any subset of a lower reached region is proved outside the safe region.
-	//! \details This parameter is used only for lower chain reachability analysis.
-	bool enable_quick_disproving;
-
-	//! \brief Whether to constrain the outer reached region in respect to the constrain_reach parameter.
-	//! \details The resulting constrained reached region is provable regardless of a constraining being performed or not.
-	bool enable_constrain_outer_reach;
-
 	//! \brief The policy for enforcing the checking of the domain for outer and lower reachability.
-	DomainEnforcingPolicy domain_enforcing_policy;
+	ConstrainingPolicy constraining_policy;
 
 };
 
-//! \brief Parameters for controlling the accuracy of evolution methods and reachability analysis.
-class EvolutionParameters
-    : public ContinuousEvolutionParameters, public DiscreteEvolutionParameters 
+//! \brief Settings for controlling the accuracy of evolution methods and reachability analysis.
+class EvolutionSettings
+    : public ContinuousEvolutionSettings, public DiscreteEvolutionSettings 
 { };
 
 
+//! \brief Settings for controlling the accuracy of continuous evolution methods.
+class VerificationSettings {
+  public:
+	typedef uint UnsignedIntType;
+	typedef double RealType;
+
+	//! \brief Default constructor gives reasonable values.
+	VerificationSettings();
+
+    /*! \brief Whether the analysis results must be plotted. */
+	bool plot_results;
+	/*! \brief The maximum depth of parameter range splitting.
+	 * \details A value of zero means that the parameter space is not splitted at all. */
+	uint maximum_parameter_depth;
+	/*! \brief Whether we allow to skip further outer reach calculation as soon as proving has failed. */
+	bool enable_quick_safety_proving;
+	/*! \brief Whether we allow to skip further disproving as soon as a counterexample is found. */
+	bool enable_quick_safety_disproving;
+	/*! \brief Whether to substitute midpoints of parameter boxes when proving.
+	 * \details Defaults to false. A value of true would not yield a formal result for the parameter box
+	 * but would be useful for quick pre-analysis. */
+	bool use_param_midpoints_for_proving;
+	/*! \brief Whether to substitute midpoints of parameter boxes when disproving.
+	 * \details Defaults to true. Indeed, if we use a value of false and successfully disprove, we gain no additional insight.
+	 * Choosing false has the benefit of exploring the whole parameter box, but the drawback of possibly be unable to successfully disprove at all
+	 * due to error radii. */
+	bool use_param_midpoints_for_disproving;
+};
+
 inline
-ContinuousEvolutionParameters::ContinuousEvolutionParameters() 
+ContinuousEvolutionSettings::ContinuousEvolutionSettings() 
     : direction(FORWARD),
       spacial_order(1),
       temporal_order(4),
@@ -269,7 +285,7 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
 { }
 
 inline
-DiscreteEvolutionParameters::DiscreteEvolutionParameters() 
+DiscreteEvolutionSettings::DiscreteEvolutionSettings() 
     : transient_time(0.0),
       transient_steps(0),
       lock_to_grid_time(1.0),
@@ -282,18 +298,25 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
       maximum_grid_height(16),
       splitting_constants_target_ratio(0.1),
 	  enable_lower_pruning(true),
-	  enable_quick_proving(true),
-	  enable_quick_disproving(true),
-	  enable_constrain_outer_reach(false),
-	  domain_enforcing_policy(ONLINE)
+	  constraining_policy(BOUNDING_DOMAIN)
+{ }
+
+inline
+VerificationSettings::VerificationSettings() :
+		plot_results(false),
+    	maximum_parameter_depth(3),
+    	enable_quick_safety_proving(true),
+    	enable_quick_safety_disproving(true),
+    	use_param_midpoints_for_proving(false),
+    	use_param_midpoints_for_disproving(true)
 { }
 
 
 inline
 std::ostream& 
-operator<<(std::ostream& os, const ContinuousEvolutionParameters& p) 
+operator<<(std::ostream& os, const ContinuousEvolutionSettings& p) 
 {
-    os << "ContinuousEvolutionParameters"
+    os << "ContinuousEvolutionSettings"
        << "(\n  direction=" << p.direction
        << ",\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
@@ -310,9 +333,9 @@ operator<<(std::ostream& os, const ContinuousEvolutionParameters& p)
 
 inline
 std::ostream& 
-operator<<(std::ostream& os, const DiscreteEvolutionParameters& p) 
+operator<<(std::ostream& os, const DiscreteEvolutionSettings& p) 
 {
-    os << "DiscreteEvolutionParameters"
+    os << "DiscreteEvolutionSettings"
        << "(\n  lock_to_grid_steps=" << p.lock_to_grid_steps
        << ",\n  lock_to_grid_time=" << p.lock_to_grid_time
 
@@ -325,14 +348,11 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  lowest_maximum_grid_depth=" << p.lowest_maximum_grid_depth
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
-       << ",\n  bounding_domain=" << p.bounding_domain
-       << ",\n  constraint_reach=" << p.constraint_reach
+       << ",\n  bounding_domain=" << p.domain_constraint
+       << ",\n  constraint_reach=" << p.outer_approx_constraint
        << ",\n  splitting_constants_target_ratio=" << p.splitting_constants_target_ratio
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
-       << ",\n  enable_quick_proving=" << p.enable_quick_proving
-       << ",\n  enable_quick_disproving=" << p.enable_quick_disproving
-       << ",\n  enable_constrain_outer_reach=" << p.enable_constrain_outer_reach
-       << ",\n  domain_enforcing_policy=" << p.domain_enforcing_policy
+       << ",\n  constraining_policy=" << p.constraining_policy
        << "\n)\n";
     return os;
 }
@@ -340,9 +360,9 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
 
 inline
 std::ostream& 
-operator<<(std::ostream& os, const EvolutionParameters& p) 
+operator<<(std::ostream& os, const EvolutionSettings& p) 
 {
-    os << "EvolutionParameters"
+    os << "EvolutionSettings"
        << "(\n  direction=" << p.direction
        << ",\n  spacial_order=" << p.spacial_order
        << ",\n  temporal_order=" << p.temporal_order
@@ -363,18 +383,31 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  lowest_maximum_grid_depth=" << p.lowest_maximum_grid_depth
        << ",\n  highest_maximum_grid_depth=" << p.highest_maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
-       << ",\n  bounding_domain=" << p.bounding_domain
-       << ",\n  constraint_reach=" << p.constraint_reach
+       << ",\n  bounding_domain=" << p.domain_constraint
+       << ",\n  constraint_reach=" << p.outer_approx_constraint
        << ",\n  splitting_constants_target_ratio=" << p.splitting_constants_target_ratio
        << ",\n  enable_lower_pruning=" << p.enable_lower_pruning
-       << ",\n  enable_quick_proving=" << p.enable_quick_proving
-       << ",\n  enable_quick_disproving=" << p.enable_quick_disproving
-       << ",\n  enable_constrain_outer_reach=" << p.enable_constrain_outer_reach
-       << ",\n  domain_enforcing_policy=" << p.domain_enforcing_policy
+       << ",\n  constraining_policy=" << p.constraining_policy
+       << "\n)\n";
+    return os;
+}
+
+
+inline
+std::ostream&
+operator<<(std::ostream& os, const VerificationSettings& p)
+{
+    os << "VerificationSettings"
+       << "(\n  plot_results=" << p.plot_results
+       << ",\n  maximum_parameter_depth=" << p.maximum_parameter_depth
+       << ",\n  enable_quick_safety_proving=" << p.enable_quick_safety_proving
+       << ",\n  enable_quick_safety_disproving=" << p.enable_quick_safety_disproving
+       << ",\n  use_param_midpoints_for_proving=" << p.use_param_midpoints_for_proving
+       << ",\n  use_param_midpoints_for_disproving=" << p.use_param_midpoints_for_disproving
        << "\n)\n";
     return os;
 }
 
 } //!namespace Ariadne
 
-#endif //!ARIADNE_EVOLUTION_PARAMETERS_H
+#endif //!ARIADNE_SETTINGS_H

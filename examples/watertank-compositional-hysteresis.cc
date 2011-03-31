@@ -199,9 +199,9 @@ int main(int argc,char *argv[])
 	evolver.verbosity = 0;
 	HybridReachabilityAnalyser analyser(evolver);
 	analyser.verbosity = analyserVerbosity;
-	analyser.parameters().enable_lower_pruning = true;
-	analyser.parameters().lowest_maximum_grid_depth = 0;
-	analyser.parameters().highest_maximum_grid_depth = 6;
+	analyser.settings().enable_lower_pruning = true;
+	analyser.settings().lowest_maximum_grid_depth = 0;
+	analyser.settings().highest_maximum_grid_depth = 6;
 	Verifier verifier(analyser);
 
 	RealConstantSet parameters;

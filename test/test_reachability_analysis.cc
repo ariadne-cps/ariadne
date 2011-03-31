@@ -30,7 +30,7 @@
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 #include "hybrid_evolver.h"
 #include "discretiser.h"
 #include "reachability_analyser.h"
@@ -63,7 +63,7 @@ class TestReachabilityAnalysis
   public:
     static HybridReachabilityAnalyser build_analyser()
     {
-        EvolutionParameters parameters;
+        EvolutionSettings parameters;
         parameters.maximum_grid_depth=2;
         parameters.hybrid_maximum_step_size[1]=0.25;
 		parameters.maximum_enclosure_cell=Vector<Float>(2,0.5);
@@ -151,7 +151,7 @@ class TestReachabilityAnalysis
         DiscreteState loc(1);
         Box bounding_box(2,bound);
         analyser.verbosity=0;
-        analyser.parameters().bounding_domain[loc] = bounding_box;
+        analyser.settings().domain_constraint[loc] = bounding_box;
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(system,initial_set,reach_time);
         cout << "Computing timed reachable set" << endl;
@@ -188,9 +188,9 @@ class TestReachabilityAnalysis
         Box bounding_box=bounding_boxes[loc];
 
         analyser.verbosity=0;
-        analyser.parameters().transient_time=4.0;
-        analyser.parameters().lock_to_grid_time=1.0;
-        cout << analyser.parameters();
+        analyser.settings().transient_time=4.0;
+        analyser.settings().lock_to_grid_time=1.0;
+        cout << analyser.settings();
         HybridGridTreeSet chain_reach_set=analyser.chain_reach(system,initial_set,bounding_boxes);
         plot("test_reachability_analyser-map_chain_reach.png",bounding_box,chain_reach_set[loc],initial_set[loc]);
     }

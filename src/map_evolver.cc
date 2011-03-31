@@ -32,7 +32,7 @@
 #include "taylor_set.h"
 #include "orbit.h"
 #include "taylor_calculus.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 
 #include "logging.h"
 
@@ -78,15 +78,15 @@ class DegenerateCrossingException { };
 
 
 MapEvolver::MapEvolver()
-    : _parameters(new EvolutionParametersType()),
+    : _settings(new EvolutionSettingsType()),
       _toolbox(new TaylorCalculus())
 {
 }
 
 
 
-MapEvolver::MapEvolver(const EvolutionParametersType& p)
-    : _parameters(new EvolutionParametersType(p)),
+MapEvolver::MapEvolver(const EvolutionSettingsType& p)
+    : _settings(new EvolutionSettingsType(p)),
       _toolbox(new TaylorCalculus())
 {
 }
@@ -152,7 +152,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.push_back(make_tuple(initial_time,initial_set_model));
 
 		// Checks for match between the enclosure cell size and the set size
-		ARIADNE_ASSERT_MSG(this->_parameters->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
+		ARIADNE_ASSERT_MSG(this->_settings->maximum_enclosure_cell.size() == initial_set_model.size(), "Error: mismatch between the maximum_enclosure_cell size and the set size.");
     }
 
     while(!working_sets.empty()) {
@@ -165,7 +165,7 @@ _evolution(EnclosureListType& final_sets,
 		// Checks whether the range can be included into the maximum_enclosure_cell
 		bool maximum_enclosure_reached = false;
 		for (uint i=0;i<initial_set_model_range.size();++i) {
-			if (initial_set_model_range[i].width() > this->_parameters->maximum_enclosure_cell[i]) {
+			if (initial_set_model_range[i].width() > this->_settings->maximum_enclosure_cell[i]) {
 				maximum_enclosure_reached = true;
 				break; 
 			}

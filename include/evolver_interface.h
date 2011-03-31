@@ -28,7 +28,7 @@
 #ifndef ARIADNE_EVOLVER_INTERFACE_H
 #define ARIADNE_EVOLVER_INTERFACE_H
 
-#include "evolution_parameters.h"
+#include "settings.h"
 #include "disprove_data.h"
 
 namespace Ariadne {
@@ -55,7 +55,7 @@ class EvolverInterface
     typedef ES EnclosureType;
     typedef typename SystemType::TimeType TimeType;
     typedef ListSet<EnclosureType> EnclosureListType;
-	typedef ContinuousEvolutionParameters EvolutionParametersType;
+	typedef ContinuousEvolutionSettings EvolutionSettingsType;
 
 
     //! \brief Virtual destructor. 
@@ -67,11 +67,11 @@ class EvolverInterface
     //! \brief Write to an output stream. 
     virtual std::ostream& write(std::ostream& os) const = 0;
 
-	//! \brief Set the parameters of the evolution.
-	virtual EvolutionParametersType& parameters() = 0;
+	//! \brief Set the settings of the evolution.
+	virtual EvolutionSettingsType& settings() = 0;
 
-	//! \brief Get the parameters of the evolution.
-    virtual const EvolutionParametersType& parameters() const = 0;
+	//! \brief Get the settings of the evolution.
+    virtual const EvolutionSettingsType& settings() const = 0;
 
 
   public:

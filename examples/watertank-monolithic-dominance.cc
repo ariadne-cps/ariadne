@@ -64,11 +64,11 @@ int main(int argc,char *argv[])
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
-	outer_analyser.parameters().highest_maximum_grid_depth = 5;
-	lower_analyser.parameters().highest_maximum_grid_depth = 5;
+	outer_analyser.settings().highest_maximum_grid_depth = 5;
+	lower_analyser.settings().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.maximum_parameter_depth = 4;
+	verifier.settings().maximum_parameter_depth = 4;
 
 	// The parametric dominance parameters
 	RealConstantSet parameters;
@@ -76,5 +76,5 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
 
 	std::list<ParametricOutcome> results = verifier.parametric_dominance(proportional, hysteresis, parameters);
-	draw("watertank-nl-mono-dominance",results);
+	draw("watertank-mono-dominance",results);
 }

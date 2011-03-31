@@ -85,31 +85,33 @@ class Verifier
     : public Loggable
 {
   private:
-    mutable boost::shared_ptr< HybridReachabilityAnalyser > _outer_analyser, _lower_analyser;
-    mutable std::string _plot_dirpath;
-  public:
-    /*! \brief Whether the analysis results must be plotted. */
-	bool plot_results;
-	/*! \brief The maximum depth of parameter range splitting.
-	 * \details A value of zero means that the parameter space is not splitted at all. */
-	uint maximum_parameter_depth;
-	/*! \brief Whether to substitute midpoints of parameter boxes when proving.
-	 * \details Defaults to false. A value of true would not yield a formal result for the parameter box
-	 * but would be useful for quick pre-analysis. */
-	bool use_param_midpoints_for_proving;
-	/*! \brief Whether to substitute midpoints of parameter boxes when disproving.
-	 * \details Defaults to true. Indeed, if we use a value of false and successfully disprove, we gain no additional insight.
-	 * Choosing false has the benefit of exploring the whole parameter box, but the drawback of possibly be unable to successfully disprove at all
-	 * due to error radii. */
-	bool use_param_midpoints_for_disproving;
-  private:
 
-	/*! \brief Fields for holding reach sets obtained during safety or dominance methods.
+    /*! \brief Holds ONCE the cached result of an outer approximation of a system. */
+    class OuterApproximationCache
+    {
+      private:
+    	bool _is_set;
+    	HybridGridTreeSet _value;
+      public:
+    	OuterApproximationCache() : _is_set(false), _value(HybridGridTreeSet()) {}
+    	virtual ~OuterApproximationCache() {}
+    	bool is_set() const { return _is_set; }
+    	HybridGridTreeSet get() const { return _value; }
+    	void set(const HybridGridTreeSet& hgts) { ARIADNE_ASSERT(!_is_set); _is_set = true; _value = hgts; }
+    	void reset() { _is_set = false; _value = HybridGridTreeSet(); }
+    };
+
+  private:
+    mutable boost::shared_ptr< HybridReachabilityAnalyser > _outer_analyser, _lower_analyser;
+    boost::shared_ptr< VerificationSettings > _settings;
+    mutable std::string _plot_dirpath;
+
+	/*! \brief Fields for caching outer approximations obtained during safety or dominance methods.
 	 * \details Their presence is useful to refine the grid on successive iterations. Set to mutable since their value is
 	 * valid only transitively during one (iterative) verification method, therefore they do not add external state to the verifier. */
-	mutable HybridGridTreeSet _safety_outer_reach;
-	mutable HybridGridTreeSet _dominating_outer_reach;
-	mutable HybridGridTreeSet _dominated_outer_reach;
+	mutable boost::shared_ptr< OuterApproximationCache > _safety_outer_approximation;
+	mutable boost::shared_ptr< OuterApproximationCache > _dominating_outer_approximation;
+	mutable boost::shared_ptr< OuterApproximationCache > _dominated_outer_approximation;
 
   public:
 
@@ -129,6 +131,13 @@ class Verifier
      *  are still independently modifiable afterwards. */
     Verifier(const HybridReachabilityAnalyser& analyser);
 
+    //@}
+
+    //@{
+    //! \name Methods to set and get the settings controlling the verification
+
+    const VerificationSettings& settings() const { return *this->_settings; }
+    VerificationSettings& settings() { return *this->_settings; }
     //@}
 
     //@{
@@ -262,7 +271,8 @@ class Verifier
 	/*! \brief Performs iterative safety verification where the singleton \a value is substituted into the system for the given \a constant.
 	 */
 	tribool _safety(SystemVerificationInfo& verInfo,
-					const RealConstant& constant, const Float& value) const;
+					const RealConstant& constant,
+					const Float& value) const;
 
 	/*! \brief Performs iterative safety verification, with \a params_to_substitute substituted into the system.
 	 * \details The \a constants are substituted in the system and are not allowed to be split */
@@ -281,9 +291,9 @@ class Verifier
 	//@{
 	//! \name Dominance methods
 
-	/*! \brief Set the parameters for the next dominance iteration, given a bundle of information around a system and a set of constants
+	/*! \brief Choose the settings for the next dominance iteration, given a bundle of information around a system and a set of constants
 	 * that must be ignore when choosing the splitting factors of the system. */
-	void _setDominanceParameters(SystemVerificationInfo& systemBundle,
+	void _chooseDominanceSettings(SystemVerificationInfo& systemBundle,
 								 const RealConstantSet& locked_constants,
 								 const HybridGridTreeSet& outer_reach,
 								 Semantics semantics) const;
@@ -347,20 +357,41 @@ private:
 											const Float& current_value,
 											const bool& safeOnBottom) const;
 
-	/*! \brief Set the initial evolution parameters of the proper analyser, given the \a semantics.*/
-	void _setInitialParameters(HybridAutomaton& system,
-							   const HybridBoxes& domain,
-							   const HybridBoxes& safe,
-							   const RealConstantSet& locked_constants,
-							   Semantics semantics) const;
+	/*! \brief Choose the initial evolution settings for safety verification of the proper analyser. */
+	void _chooseInitialSafetySettings(
+			HybridAutomaton& system,
+			const HybridBoxes& domain,
+			const HybridBoxes& safe,
+			const RealConstantSet& locked_constants) const;
 
-	/*! \brief Set the parameters for the next iterative verification step. */
-	void _tuneIterativeStepParameters(HybridAutomaton& system,
-									  const HybridGridTreeSet& bounding_reach,
-									  Semantics semantics) const;
+	/*! \brief Choose the initial evolution settings for safety verification of the proper analyser, given the \a semantics.*/
+	void _chooseInitialSafetySettings(
+			HybridAutomaton& system,
+			const HybridBoxes& domain,
+			const HybridBoxes& safe,
+			const RealConstantSet& locked_constants,
+			Semantics semantics) const;
+	/*! \brief Choose the initial settings for dominance verification.
+	 * \details Cannot set the analysers since they are used on different systems on each iteration.
+	 */
+	void _chooseInitialDominanceSettings() const;
+
+	/*! \brief Tune the settings for the next iterative verification step. */
+	void _tuneIterativeStepSettings(
+			HybridAutomaton& system,
+			const HybridGridTreeSet& bounding_reach,
+			Semantics semantics) const;
 
 	/*! \brief Checks whether a grid depth value is allowed for use in iterative verification, based on the \a semantics. */
 	bool _is_grid_depth_within_bounds(Semantics semantics) const;
+
+	/*! \brief Updates the constraining information.
+	 * \details It reads \a analyser_settings for the constraining policy, followed by \a outer_approximation_cache for emptiness;
+	 * then possibly sets \a outer_approximation_cache with \a reach, and changes some settings in \a analyser_settings. */
+	void _update_constraining(
+			DiscreteEvolutionSettings& analyser_settings,
+			OuterApproximationCache& outer_approximation_cache,
+			const HybridGridTreeSet& new_outer_approximation) const;
 
 	// Reached region plotting methods
 	void _plot_dirpath_init(const HybridAutomaton& system) const;
@@ -378,19 +409,21 @@ std::string pretty_print(tribool value);
  *  if positive values are found on the lower bound of \a positive_int (and consequently, negative values are found on the upper
  *  bound of \a negative_int ).
  */
-std::pair<bool,bool> process_initial_bisection_results(Interval& positive_int,
-														Interval& negative_int,
-														const Interval& parameter_range,
-														const tribool& lower_result,
-														const tribool& upper_result);
+std::pair<bool,bool> process_initial_bisection_results(
+		Interval& positive_int,
+		Interval& negative_int,
+		const Interval& parameter_range,
+		const tribool& lower_result,
+		const tribool& upper_result);
 
 /*! \brief Converts the positive/negative search intervals into positive/negative bounds.
  * \details The result is obtained by knowing the range of the parameter \a parameter_range and the side where
  * positive values hold, deduced from \a positiveOnBottom. */
-std::pair<Interval,Interval> pos_neg_bounds_from_search_intervals(const Interval& positive_int,
-											 	 	 	 	 	  const Interval& negative_int,
-											 	 	 	 	 	  const Interval& parameter_range,
-											 	 	 	 	 	  bool positiveOnBottom);
+std::pair<Interval,Interval> pos_neg_bounds_from_search_intervals(
+		const Interval& positive_int,
+		const Interval& negative_int,
+		const Interval& parameter_range,
+		bool positiveOnBottom);
 
 /*! \brief Splits the parameters to the maximum based on the \a tolerance
  *  \details The \a numIntervalsPerParam is the number of intervals to split for each parameter.

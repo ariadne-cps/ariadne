@@ -374,7 +374,7 @@ int main(int argc, char** argv)
         step_size = atof(argv[3]);  // read step size from the arguments        
     Vector<Float> enclosure_cell(spc.dimension(),1.0);
 
-    EvolutionParameters parameters;
+    EvolutionSettings parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
     HybridSpace hspace = system.state_space();
     for (HybridSpace::locations_const_iterator loc_it = hspace.locations_begin(); loc_it != hspace.locations_end(); loc_it++)

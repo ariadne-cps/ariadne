@@ -57,14 +57,14 @@ int main(int argc,char *argv[])
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
-	outer_analyser.parameters().lowest_maximum_grid_depth = 1;
-	outer_analyser.parameters().highest_maximum_grid_depth = 5;
-	lower_analyser.parameters().lowest_maximum_grid_depth = 1;
-	lower_analyser.parameters().highest_maximum_grid_depth = 5;
+	outer_analyser.settings().lowest_maximum_grid_depth = 1;
+	outer_analyser.settings().highest_maximum_grid_depth = 5;
+	lower_analyser.settings().lowest_maximum_grid_depth = 1;
+	lower_analyser.settings().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.plot_results = false;
-	verifier.maximum_parameter_depth = 4;
+	verifier.settings().plot_results = false;
+	verifier.settings().maximum_parameter_depth = 4;
 
 	// The parameters
 	RealConstantSet parameters;

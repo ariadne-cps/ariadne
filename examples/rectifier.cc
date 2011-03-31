@@ -221,13 +221,13 @@ int main()
     evolver.verbosity = 0;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_WIDTH);
-    evolver.parameters().hybrid_maximum_step_size[1] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[2] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[3] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[4] = MAX_STEP_SIZE;
-    evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(3,MAX_ENCL_WIDTH);
+    evolver.settings().hybrid_maximum_step_size[1] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[2] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[3] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[4] = MAX_STEP_SIZE;
+    evolver.settings().enable_subdivisions = ENABLE_SUBDIV;
+    std::cout <<  evolver.settings() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
@@ -268,10 +268,10 @@ int main()
 */
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
-    analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
+    analyser.settings().lock_to_grid_time = LOCK_TOGRID_TIME;
+    analyser.settings().maximum_grid_depth= MAX_GRID_DEPTH;
     rectifier.set_grid(Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5)));
-    std::cout <<  analyser.parameters() << std::endl;
+    std::cout <<  analyser.settings() << std::endl;
 
     analyser.verbosity=VERBOSITY;
 

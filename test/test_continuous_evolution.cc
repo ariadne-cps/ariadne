@@ -34,7 +34,7 @@
 #include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 #include "taylor_calculus.h"
 #include "vector_field_evolver.h"
 #include "orbit.h"
@@ -127,7 +127,7 @@ void TestContinuousEvolution::test_vdp() const
     Float step_size(0.125);
     Vector<Float> enclosure_cell(2,0.5);
 
-    EvolutionParameters parameters;
+    EvolutionSettings parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
     parameters.hybrid_maximum_step_size[0] = step_size;
 
@@ -191,7 +191,7 @@ void TestContinuousEvolution::failure_test() const
     Float step_size(0.01);
     Vector<Float> enclosure_cell(2,0.5);
 
-    EvolutionParameters parameters;
+    EvolutionSettings parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
     parameters.hybrid_maximum_step_size[0] = step_size;
 
@@ -239,7 +239,7 @@ void TestContinuousEvolution::failure_test() const
     VectorField failtwo_vf(failtwo);
 
 	Vector<Float> enclosure_cell2(3,0.5);
-	evolver.parameters().maximum_enclosure_cell=enclosure_cell2;
+	evolver.settings().maximum_enclosure_cell=enclosure_cell2;
     Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);
     initial_set = EnclosureType(initial_box2);
 

@@ -162,10 +162,10 @@ int main()
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(5,MAX_ENCLOSURE_WIDTH);
-    evolver.parameters().hybrid_maximum_step_size[1] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[2] = MAX_STEP_SIZE;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(5,MAX_ENCLOSURE_WIDTH);
+    evolver.settings().hybrid_maximum_step_size[1] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[2] = MAX_STEP_SIZE;
+    std::cout <<  evolver.settings() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef HybridEvolver::EnclosureType HybridEnclosureType;

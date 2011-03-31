@@ -35,7 +35,7 @@
 #include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
-#include "evolution_parameters.h"
+#include "settings.h"
 #include "map.h"
 #include "map_evolver.h"
 #include "graphics.h"
@@ -71,7 +71,7 @@ void TestMapEvolver::test() const
     IteratedMap::TimeType time(3);
     Vector<Float> enclosure_cell(2,0.25,0.25);
 
-    EvolutionParameters parameters;
+    EvolutionSettings parameters;
     parameters.maximum_enclosure_cell=enclosure_cell;
 
     // Set up the evaluators

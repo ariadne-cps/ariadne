@@ -109,10 +109,10 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(2,0.5);
-    evolver.parameters().hybrid_maximum_step_size[l1] = 0.1*pi<Float>();
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(2,0.5);
+    evolver.settings().hybrid_maximum_step_size[l1] = 0.1*pi<Float>();
 
-    std::cout <<  evolver.parameters() << std::endl;
+    std::cout <<  evolver.settings() << std::endl;
     evolver.verbosity=1;
 
     // Declare the type to be used for the system evolution

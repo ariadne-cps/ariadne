@@ -56,12 +56,12 @@ int main(int argc,char *argv[])
 	ImageSetHybridEvolver lower_evolver(lower_integrator);
 	HybridReachabilityAnalyser outer_analyser(outer_evolver);
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
-	outer_analyser.parameters().highest_maximum_grid_depth = 7;
-	lower_analyser.parameters().highest_maximum_grid_depth = 0;
+	outer_analyser.settings().highest_maximum_grid_depth = 7;
+	lower_analyser.settings().highest_maximum_grid_depth = 7;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.maximum_parameter_depth = 2;
-	verifier.plot_results = true;
+	verifier.settings().maximum_parameter_depth = 2;
+	verifier.settings().plot_results = false;
 
 	// The parameters
 	RealConstantSet parameters;
@@ -71,31 +71,4 @@ int main(int argc,char *argv[])
 	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
 	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
 	draw(system.name(),results);
-
-	/*
-	std::map<DiscreteState,Float> hmss;
-	Vector<Float> mec(2);
-	mec[0] = 1.0;
-	mec[1] = 1.0;
-	Float mss = 0.01;
-	hmss.insert(std::pair<DiscreteState,Float>(DiscreteState("opened"),mss));
-	hmss.insert(std::pair<DiscreteState,Float>(DiscreteState("closed"),mss));
-	hmss.insert(std::pair<DiscreteState,Float>(DiscreteState("opening"),mss));
-	hmss.insert(std::pair<DiscreteState,Float>(DiscreteState("closing"),mss));
-	lower_evolver.parameters().hybrid_maximum_step_size = hmss;
-	lower_evolver.parameters().maximum_enclosure_cell = mec;
-	lower_evolver.verbosity = verifierVerbosity;
-    HybridTime evolution_time(3.0,1);
-    HybridTaylorSet initial_enclosure(DiscreteState("opened"),Box(2,6.5,6.5,1.0,1.0));
-
-	typedef HybridEvolver::OrbitType OrbitType;
-    OrbitType orbit = lower_evolver.orbit(system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
-
-    Figure fig;
-    array<uint> xy(2,0,1);
-    fig.set_projection_map(ProjectionFunction(xy,2));
-    fig.set_bounding_box(Box(2,4.0,8.0,-0.1,1.1));
-    draw(fig,orbit);
-    fig.write("watertank-mono-hy_test");
-	*/
 }

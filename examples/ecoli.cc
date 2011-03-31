@@ -110,9 +110,9 @@ int main()
     /// Create a HybridEvolver object
     /// Set the evolution parameters
     HybridEvolver evolver;
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(4,0.25);
-    evolver.parameters().hybrid_maximum_step_size[starvation_mode] = 0.25;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(4,0.25);
+    evolver.settings().hybrid_maximum_step_size[starvation_mode] = 0.25;
+    std::cout <<  evolver.settings() << std::endl;
 
     // Declare the types to be used for the system evolution
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
@@ -135,10 +135,10 @@ int main()
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time=lock_to_grid_time;
-    analyser.parameters().initial_grid_depth=18;
-    analyser.parameters().maximum_grid_depth=18;
-    std::cout<<"Discrete evolution parameters="<<analyser.parameters()<<"\n";
+    analyser.settings().lock_to_grid_time=lock_to_grid_time;
+    analyser.settings().initial_grid_depth=18;
+    analyser.settings().maximum_grid_depth=18;
+    std::cout<<"Discrete evolution parameters="<<analyser.settings()<<"\n";
 
     HybridImageSet initial_set;
     initial_box=Vector<Float>(initial_state)+Vector<Interval>(4,Interval(-1,1)*0.025);

@@ -110,7 +110,7 @@ void TestHybridSimulator::test() const
     Float step_size(0.125);
     Vector<Float> enclosure_cell(2,0.25);
     
-    EvolutionParameters parameters;
+    EvolutionSettings parameters;
     parameters.maximum_step_size=step_size;
 	parameters.maximum_enclosure_cell=enclosure_cell;
 

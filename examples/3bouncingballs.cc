@@ -335,14 +335,14 @@ int main()
     evolver.verbosity = VERBOSITY;
 
     /// Sets the evolution parameters
-    evolver.parameters().maximum_enclosure_cell = Vector<Float>(12,MAX_ENCLOSURE_RADIUS);
-    evolver.parameters().hybrid_maximum_step_size[1] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[2] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[3] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[4] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[5] = MAX_STEP_SIZE;
-    evolver.parameters().hybrid_maximum_step_size[6] = MAX_STEP_SIZE;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.settings().maximum_enclosure_cell = Vector<Float>(12,MAX_ENCLOSURE_RADIUS);
+    evolver.settings().hybrid_maximum_step_size[1] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[2] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[3] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[4] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[5] = MAX_STEP_SIZE;
+    evolver.settings().hybrid_maximum_step_size[6] = MAX_STEP_SIZE;
+    std::cout <<  evolver.settings() << std::endl;
   
     HybridTime evol_limits(EVOL_TIME,EVOL_TRANS);
  

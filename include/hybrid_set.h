@@ -117,11 +117,14 @@ shrink_in(const HybridBoxes& box, const HybridFloatVector& epsilon);
 HybridBoxes
 shrink_out(const HybridBoxes& box, const HybridFloatVector& epsilon);
 
+HybridBoxes
+unbounded_hybrid_boxes(const HybridSpace& hspace);
+
 Box
 project(const HybridBoxes& box, const std::vector<uint>& dimensions);
 
 HybridBoxes
-unbounded_hybrid_boxes(const HybridSpace& hspace);
+project(const Box& box, const std::vector<uint>& dimensions, const HybridSpace& target_space);
 
 inline
 HybridBoxes

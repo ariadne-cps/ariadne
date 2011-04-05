@@ -959,18 +959,6 @@ Verifier::_dominance_proving(
 
 	try {
 
-		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominating system...\n");
-
-		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_constraint,UPPER_SEMANTICS);
-
-		ARIADNE_LOG(4,"Getting the outer approximation of the dominating system...\n");
-
-		dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet());
-
-		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
-
-		ARIADNE_LOG(5,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
-
 		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
@@ -988,13 +976,29 @@ Verifier::_dominance_proving(
 
 		Box projected_shrinked_dominated_bounds = Ariadne::project(shrinked_dominated_bounds,dominated.getProjection());
 
+		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
+		ARIADNE_LOG(5,"Projected shrinked dominated bounds: " << projected_shrinked_dominated_bounds << "\n");
+
+		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominating system...\n");
+
+		HybridBoxes shrinked_dominated_bounds_on_dominating_space = Ariadne::project(projected_shrinked_dominated_bounds,
+				dominating.getProjection(),dominating.getSystem().state_space());
+
+		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_constraint,UPPER_SEMANTICS);
+
+		ARIADNE_LOG(4,"Getting the outer approximation of the dominating system...\n");
+
+		dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet(),
+				shrinked_dominated_bounds_on_dominating_space,_settings->allow_quick_dominance_proving);
+
+		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
+
+		ARIADNE_LOG(5,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
+
 		if (_settings->plot_results) {
 			_plot_dominance(dominating_reach,UPPER_SEMANTICS,DOMINANCE_POSITIVE);
 			_plot_dominance(dominated_reach,LOWER_SEMANTICS,DOMINANCE_POSITIVE);
 		}
-
-		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
-		ARIADNE_LOG(5,"Projected shrinked dominated bounds: " << projected_shrinked_dominated_bounds << "\n");
 
 		result = inside(projected_dominating_bounds,projected_shrinked_dominated_bounds);
 		obtained_outer_approximation = true;
@@ -1004,7 +1008,7 @@ Verifier::_dominance_proving(
 		result = false;
 		obtained_outer_approximation = false;
 	} catch (ReachOutOfTargetException ex) {
-		ARIADNE_LOG(4,"The projected outer reached region of the dominating system is partially " +
+		ARIADNE_LOG(4,"The outer reached region of the dominating system is partially " +
 				"out of the projected shrinked lower reached region of the dominated system.\n");
 		result = false;
 		obtained_outer_approximation = false;
@@ -1044,25 +1048,6 @@ Verifier::_dominance_disproving(
 
 	try {
 
-		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominated system...\n");
-
-		RealConstantSet emptyLockedConstants;
-		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_constraint,UPPER_SEMANTICS);
-
-		ARIADNE_LOG(4,"Getting the outer approximation of the dominated system...\n");
-
-		dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet());
-
-		if (!_dominated_coarse_outer_approximation->is_set()) {
-			_dominated_coarse_outer_approximation->set(dominated_reach);
-		} else {
-			_dominated_constraint = dominated_reach;
-		}
-
-		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
-
-		ARIADNE_LOG(5,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
-
 		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominating system...\n");
 
 		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_constraint,LOWER_SEMANTICS);
@@ -1079,13 +1064,30 @@ Verifier::_dominance_disproving(
 
 		Box projected_shrinked_dominating_bounds = Ariadne::project(shrinked_dominating_bounds,dominating.getProjection());
 
+		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
+		ARIADNE_LOG(5,"Projected shrinked dominating bounds: " << projected_shrinked_dominating_bounds << "\n");
+
+		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominated system...\n");
+
+		HybridBoxes shrinked_dominating_bounds_on_dominated_space = Ariadne::project(projected_shrinked_dominating_bounds,
+				dominated.getProjection(),dominated.getSystem().state_space());
+
+		RealConstantSet emptyLockedConstants;
+		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_constraint,UPPER_SEMANTICS);
+
+		ARIADNE_LOG(4,"Getting the outer approximation of the dominated system...\n");
+
+		dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet(),
+				shrinked_dominating_bounds_on_dominated_space,_settings->allow_quick_dominance_disproving);
+
+		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
+
+		ARIADNE_LOG(5,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
+
 		if (_settings->plot_results) {
 			_plot_dominance(dominated_reach,UPPER_SEMANTICS,DOMINANCE_NEGATIVE);
 			_plot_dominance(dominating_reach,LOWER_SEMANTICS,DOMINANCE_NEGATIVE);
 		}
-
-		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
-		ARIADNE_LOG(5,"Projected shrinked dominating bounds: " << projected_shrinked_dominating_bounds << "\n");
 
 		result = !inside(projected_shrinked_dominating_bounds,projected_dominated_bounds);
 		obtained_outer_approximation = true;
@@ -1094,10 +1096,18 @@ Verifier::_dominance_disproving(
 		result = false;
 		obtained_outer_approximation = false;
 	} catch (ReachOutOfTargetException ex) {
-		ARIADNE_LOG(4,"The projected outer reached region of the dominated system is partially out of " +
+		ARIADNE_LOG(4,"The outer reached region of the dominated system is partially out of " +
 				"the projected shrinked lower reached region of the dominated system.\n");
 		result = false;
 		obtained_outer_approximation = false;
+	}
+
+	if (obtained_outer_approximation) {
+		if (!_dominated_coarse_outer_approximation->is_set()) {
+			_dominated_coarse_outer_approximation->set(dominated_reach);
+		} else {
+			_dominated_constraint = dominated_reach;
+		}
 	}
 
 	ARIADNE_LOG(3, (result ? "Disproved.\n" : "Not disproved.\n") );

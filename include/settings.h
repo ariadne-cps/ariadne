@@ -249,10 +249,14 @@ class VerificationSettings {
 	/*! \brief The maximum depth of parameter range splitting.
 	 * \details A value of zero means that the parameter space is not splitted at all. */
 	uint maximum_parameter_depth;
-	/*! \brief Whether we allow to skip further outer reach calculation as soon as proving has failed. */
+	/*! \brief Whether we allow to skip further outer reach calculation in safety as soon as proving has failed. */
 	bool allow_quick_safety_proving;
-	/*! \brief Whether we allow to skip further disproving as soon as a counterexample is found. */
+	/*! \brief Whether we allow to skip further disproving in safety as soon as a counterexample is found. */
 	bool allow_quick_safety_disproving;
+	/*! \brief Whether we allow to skip further outer reach calculation in dominance as soon as proving has failed. */
+	bool allow_quick_dominance_proving;
+	/*! \brief Whether we allow to skip further outer reach calculation in dominance as soon as disproving has failed. */
+	bool allow_quick_dominance_disproving;
 	/*! \brief Whether to substitute midpoints of parameter boxes when proving.
 	 * \details Defaults to false. A value of true would not yield a formal result for the parameter box
 	 * but would be useful for quick pre-analysis. */
@@ -298,6 +302,8 @@ VerificationSettings::VerificationSettings() :
     	maximum_parameter_depth(3),
     	allow_quick_safety_proving(true),
     	allow_quick_safety_disproving(true),
+    	allow_quick_dominance_proving(true),
+    	allow_quick_dominance_disproving(true),
     	use_param_midpoints_for_proving(false),
     	use_param_midpoints_for_disproving(true)
 { }
@@ -389,8 +395,10 @@ operator<<(std::ostream& os, const VerificationSettings& p)
     os << "VerificationSettings"
        << "(\n  plot_results=" << p.plot_results
        << ",\n  maximum_parameter_depth=" << p.maximum_parameter_depth
-       << ",\n  enable_quick_safety_proving=" << p.allow_quick_safety_proving
-       << ",\n  enable_quick_safety_disproving=" << p.allow_quick_safety_disproving
+       << ",\n  allow_quick_safety_proving=" << p.allow_quick_safety_proving
+       << ",\n  allow_quick_safety_disproving=" << p.allow_quick_safety_disproving
+       << ",\n  allow_quick_dominance_proving=" << p.allow_quick_dominance_proving
+       << ",\n  allow_quick_dominance_disproving=" << p.allow_quick_dominance_disproving
        << ",\n  use_param_midpoints_for_proving=" << p.use_param_midpoints_for_proving
        << ",\n  use_param_midpoints_for_disproving=" << p.use_param_midpoints_for_disproving
        << "\n)\n";

@@ -68,6 +68,19 @@ shrink_out(const HybridBoxes& box, const HybridFloatVector& epsilon)
 	return result;
 }
 
+
+HybridBoxes
+unbounded_hybrid_boxes(const HybridSpace& hspace)
+{
+	HybridBoxes result;
+
+	for (HybridSpace::const_iterator space_it = hspace.begin(); space_it != hspace.end(); ++space_it)
+		result.insert(std::pair<DiscreteState,Box>(space_it->first,unbounded_box(space_it->second)));
+
+	return result;
+}
+
+
 Box
 project(const HybridBoxes& box, const std::vector<uint>& dimensions)
 {
@@ -81,13 +94,18 @@ project(const HybridBoxes& box, const std::vector<uint>& dimensions)
 	return result;
 }
 
-HybridBoxes
-unbounded_hybrid_boxes(const HybridSpace& hspace)
-{
-	HybridBoxes result;
 
-	for (HybridSpace::const_iterator space_it = hspace.begin(); space_it != hspace.end(); ++space_it)
-		result.insert(std::pair<DiscreteState,Box>(space_it->first,unbounded_box(space_it->second)));
+HybridBoxes
+project(const Box& box, const std::vector<uint>& dimensions, const HybridSpace& target_space)
+{
+	ARIADNE_ASSERT_MSG(dimensions.size() != box.size(),
+			"The original box and the projection sizes do not match.");
+
+	HybridBoxes result = unbounded_hybrid_boxes(target_space);
+
+	for (HybridBoxes::iterator loc_it = result.begin(); loc_it != result.end(); ++loc_it)
+		for (uint i=0; i<dimensions.size();i++)
+			loc_it->second[dimensions[i]] = box[i];
 
 	return result;
 }

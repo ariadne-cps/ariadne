@@ -74,9 +74,13 @@ int main(int argc,char *argv[])
 
 	// The parametric dominance parameters
 	RealConstantSet parameters;
-	parameters.insert(RealConstant("Kp",Interval(0.2,0.8)));
-	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
+	//parameters.insert(RealConstant("Kp",Interval(0.2,0.8)));
+	//parameters.insert(RealConstant("ref",Interval(5.25,8.25)));
 
-	std::list<ParametricOutcome> results = verifier.parametric_dominance(proportional, hysteresis, parameters);
-	draw("watertank-nl-mono-dominance",results);
+	parameters.insert(RealConstant("Kp",Interval(0.78125,0.8)));
+	parameters.insert(RealConstant("ref",Interval(8.1562,8.25)));
+
+	cout << verifier._dominance(proportional,hysteresis,parameters);
+	//std::list<ParametricOutcome> results = verifier.parametric_dominance(proportional, hysteresis, parameters);
+	//draw("watertank-nl-mono-dominance",results);
 }

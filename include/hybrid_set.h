@@ -111,6 +111,9 @@ class HybridSpace
 HybridBoxes
 hull(const HybridBoxes& box1, const HybridBoxes& box2);
 
+bool
+superset(const HybridBoxes& box1, const HybridBoxes& box2);
+
 HybridBoxes
 shrink_in(const HybridBoxes& box, const HybridFloatVector& epsilon);
 
@@ -403,6 +406,7 @@ class HybridGrid
         return this->find(q)->second; }
     Grid& operator[](DiscreteState q) {
         return this->std::map<DiscreteState,Grid>::operator[](q); }
+    std::map<DiscreteState,Vector<Float> > lengths() const;
 };
 
 

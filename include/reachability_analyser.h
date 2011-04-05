@@ -175,7 +175,8 @@ class HybridReachabilityAnalyser
     virtual SetApproximationType outer_chain_reach(SystemType& system,
 												   const HybridImageSet& initial_set,
 												   const HybridBoxes& target_region,
-												   bool skipIfOutOfTargetRegion) const;
+												   bool skipIfOutOfTargetRegion,
+												   bool skipIfEnclosingTargetRegion) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * lower semantics.
@@ -205,8 +206,8 @@ class HybridReachabilityAnalyser
 	/*! \brief Tune the parameters for the next verification iteration, given a \a bounding_reach. */
 	void tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach, Semantics semantics);
 
-	/*! \brief Whether to use constraining. */
-	bool use_constraining() const;
+	/*! \brief Whether to use a reachability restricting. */
+	bool use_reachability_restricting() const;
 
 	/*! \brief Whether to check the domain. */
 	bool use_domain_checking() const;

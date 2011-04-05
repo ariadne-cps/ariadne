@@ -115,11 +115,11 @@ class Verifier
 	mutable boost::shared_ptr< OuterApproximationCache > _dominating_coarse_outer_approximation;
 	mutable boost::shared_ptr< OuterApproximationCache > _dominated_coarse_outer_approximation;
 
-	/*! \brief Fields for holding the constraints for outer reachability analyses.
-	 * \details The latter two are mandatory since the outer analyser alternatively works on the dominating and dominated systems. */
-	mutable HybridGridTreeSet _safety_constraint;
-	mutable HybridGridTreeSet _dominating_constraint;
-	mutable HybridGridTreeSet _dominated_constraint;
+	/*! \brief Fields for holding the reachability restriction for reachability analyses.
+	 * \details The latter two are mandatory since an analyser alternatively works on the dominating and dominated systems. */
+	mutable HybridGridTreeSet _safety_reachability_restriction;
+	mutable HybridGridTreeSet _dominating_reachability_restriction;
+	mutable HybridGridTreeSet _dominated_reachability_restriction;
 
   public:
 

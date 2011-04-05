@@ -25,6 +25,19 @@
 
 namespace Ariadne {
 
+std::map<DiscreteState,Vector<Float> >
+HybridGrid::
+lengths() const
+{
+	std::map<DiscreteState,Vector<Float> > result;
+
+	for (HybridGrid::const_iterator it = this->begin(); it != this->end(); ++it)
+		result.insert(std::pair<DiscreteState,Vector<Float> >(it->first,it->second.lengths()));
+
+	return result;
+}
+
+
 HybridBoxes
 hull(const HybridBoxes& box1, const HybridBoxes& box2)
 {
@@ -40,6 +53,21 @@ hull(const HybridBoxes& box1, const HybridBoxes& box2)
 	return result;
 }
 
+
+bool
+superset(const HybridBoxes& box1, const HybridBoxes& box2)
+{
+	for (HybridBoxes::const_iterator box1_it = box1.begin(); box1_it != box1.end(); ++box1_it) {
+		HybridBoxes::const_iterator box2_it = box2.find(box1_it->first);
+		ARIADNE_ASSERT_MSG(box2_it != box2.end(),"The location " << box1_it->first.name() << " is not present in both hybrid boxes.");
+		if (!box1_it->second.superset(box2_it->second))
+			return false;
+	}
+
+	return true;
+}
+
+
 HybridBoxes
 shrink_in(const HybridBoxes& box, const HybridFloatVector& epsilon)
 {
@@ -53,6 +81,7 @@ shrink_in(const HybridBoxes& box, const HybridFloatVector& epsilon)
 
 	return result;
 }
+
 
 HybridBoxes
 shrink_out(const HybridBoxes& box, const HybridFloatVector& epsilon)
@@ -98,8 +127,7 @@ project(const HybridBoxes& box, const std::vector<uint>& dimensions)
 HybridBoxes
 project(const Box& box, const std::vector<uint>& dimensions, const HybridSpace& target_space)
 {
-	ARIADNE_ASSERT_MSG(dimensions.size() != box.size(),
-			"The original box and the projection sizes do not match.");
+	ARIADNE_ASSERT_MSG(dimensions.size() == box.size(), "The original box and the projection sizes do not match.");
 
 	HybridBoxes result = unbounded_hybrid_boxes(target_space);
 

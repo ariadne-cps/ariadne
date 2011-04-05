@@ -146,7 +146,7 @@ _safety_proving_once(
 
 	ARIADNE_LOG(4,"Setting parameters for this proving iteration...\n");
 
-	_tuneIterativeStepSettings(system,_safety_coarse_outer_approximation->get(),_safety_constraint,UPPER_SEMANTICS);
+	_tuneIterativeStepSettings(system,_safety_coarse_outer_approximation->get(),_safety_reachability_restriction,UPPER_SEMANTICS);
 
 	ARIADNE_LOG(4,"Performing outer reachability analysis...\n");
 
@@ -156,9 +156,9 @@ _safety_proving_once(
 	{
 		// We quicken the outer reachability calculation only if we already have a constraint available,
 		// otherwise we would never obtain an outer approximation for tuning the grid and constraining the reachability.
-		bool terminate_as_soon_as_unprovable = _settings->allow_quick_safety_proving && !_safety_constraint.empty();
+		bool terminate_as_soon_as_unprovable = _settings->allow_quick_safety_proving && !_safety_reachability_restriction.empty();
 
-		reach = _outer_analyser->outer_chain_reach(system,initial_set,safe_region,terminate_as_soon_as_unprovable);
+		reach = _outer_analyser->outer_chain_reach(system,initial_set,safe_region,terminate_as_soon_as_unprovable,false);
 
 		result = definitely(reach.subset(safe_region));
 		obtained_outer_approximation = true;
@@ -210,7 +210,7 @@ _safety_disproving_once(
 
 	ARIADNE_LOG(4,"Setting parameters for this disproving iteration...\n");
 
-	_tuneIterativeStepSettings(system,_safety_coarse_outer_approximation->get(),_safety_constraint,LOWER_SEMANTICS);
+	_tuneIterativeStepSettings(system,_safety_coarse_outer_approximation->get(),_safety_reachability_restriction,LOWER_SEMANTICS);
 
 	ARIADNE_LOG(4,"Performing lower reachability analysis and getting disprove data...\n");
 
@@ -367,7 +367,7 @@ _update_safety_constraining(
 	 * (on subsequent visits of this code path, we are guaranteed to refine outer_approx_constraint)
 	 * Differently, we just save the new_outer_approximation for the subsequent tuning of the grid */
 	if (outer_approximation_cache.is_set())
-		_safety_constraint = new_outer_approximation;
+		_safety_reachability_restriction = new_outer_approximation;
 	else
 		outer_approximation_cache.set(new_outer_approximation);
 }
@@ -962,7 +962,7 @@ Verifier::_dominance_proving(
 		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominated system...\n");
 
 		RealConstantSet emptyLockedConstants;
-		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_constraint,LOWER_SEMANTICS);
+		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_reachability_restriction,LOWER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the lower approximation of the dominated system...\n");
 
@@ -984,12 +984,14 @@ Verifier::_dominance_proving(
 		HybridBoxes shrinked_dominated_bounds_on_dominating_space = Ariadne::project(projected_shrinked_dominated_bounds,
 				dominating.getProjection(),dominating.getSystem().state_space());
 
-		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_constraint,UPPER_SEMANTICS);
+		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_reachability_restriction,UPPER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the outer approximation of the dominating system...\n");
 
+		bool terminate_as_soon_as_unprovable = _settings->allow_quick_dominance_proving && !_dominating_reachability_restriction.empty();
+
 		dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet(),
-				shrinked_dominated_bounds_on_dominating_space,_settings->allow_quick_dominance_proving);
+				shrinked_dominated_bounds_on_dominating_space,terminate_as_soon_as_unprovable,false);
 
 		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
 
@@ -1018,7 +1020,7 @@ Verifier::_dominance_proving(
 		if (!_dominating_coarse_outer_approximation->is_set()) {
 			_dominating_coarse_outer_approximation->set(dominating_reach);
 		} else {
-			_dominating_constraint = dominating_reach;
+			_dominating_reachability_restriction = dominating_reach;
 		}
 	}
 
@@ -1050,7 +1052,7 @@ Verifier::_dominance_disproving(
 
 		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominating system...\n");
 
-		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_constraint,LOWER_SEMANTICS);
+		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_reachability_restriction,LOWER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the lower approximation of the dominating system...\n");
 
@@ -1073,12 +1075,14 @@ Verifier::_dominance_disproving(
 				dominated.getProjection(),dominated.getSystem().state_space());
 
 		RealConstantSet emptyLockedConstants;
-		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_constraint,UPPER_SEMANTICS);
+		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_reachability_restriction,UPPER_SEMANTICS);
 
 		ARIADNE_LOG(4,"Getting the outer approximation of the dominated system...\n");
 
+		bool terminate_as_soon_as_disproved = _settings->allow_quick_dominance_disproving && !_dominated_reachability_restriction.empty();
+
 		dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet(),
-				shrinked_dominating_bounds_on_dominated_space,_settings->allow_quick_dominance_disproving);
+				shrinked_dominating_bounds_on_dominated_space,false,terminate_as_soon_as_disproved);
 
 		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
 
@@ -1095,10 +1099,10 @@ Verifier::_dominance_disproving(
 		ARIADNE_LOG(4,"The outer reached region of the dominated system is partially out of the domain.\n");
 		result = false;
 		obtained_outer_approximation = false;
-	} catch (ReachOutOfTargetException ex) {
-		ARIADNE_LOG(4,"The outer reached region of the dominated system is partially out of " +
+	} catch (ReachEnclosesTargetException ex) {
+		ARIADNE_LOG(4,"The outer reached region of the dominated system encloses " +
 				"the projected shrinked lower reached region of the dominated system.\n");
-		result = false;
+		result = true;
 		obtained_outer_approximation = false;
 	}
 
@@ -1106,7 +1110,7 @@ Verifier::_dominance_disproving(
 		if (!_dominated_coarse_outer_approximation->is_set()) {
 			_dominated_coarse_outer_approximation->set(dominated_reach);
 		} else {
-			_dominated_constraint = dominated_reach;
+			_dominated_reachability_restriction = dominated_reach;
 		}
 	}
 
@@ -1127,7 +1131,7 @@ _chooseInitialSafetySettings(
 {
 	_safety_coarse_outer_approximation->reset();
 
-	_safety_constraint = HybridGridTreeSet();
+	_safety_reachability_restriction = HybridGridTreeSet();
 
 	_chooseInitialSafetySettings(system,domain,safe_region,locked_constants,UPPER_SEMANTICS);
 	_chooseInitialSafetySettings(system,domain,safe_region,locked_constants,LOWER_SEMANTICS);
@@ -1166,16 +1170,18 @@ _tuneIterativeStepSettings(
 {
 	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
 
-	analyser.settings().outer_approx_constraint = outer_approx_constraint;
+	// Passes through the correct outer approximation constraint to the analyser (used in practice for dominance,
+	// where the outer analyser must deal with either the dominating or dominated system)
+	analyser.settings().reachability_restriction = outer_approx_constraint;
 
 	ARIADNE_LOG(5, "Derivatives evaluation policy: " << (hgts_domain.empty() ? "Domain box" : "Outer approximation") << "\n");
 
 	HybridFloatVector hmad = getHybridMaximumAbsoluteDerivatives(system,hgts_domain,analyser.settings().domain_bounds);
 	ARIADNE_LOG(5, "Derivatives bounds: " << hmad << "\n");
 	system.set_grid(getHybridGrid(hmad,analyser.settings().domain_bounds));
-	ARIADNE_LOG(5, "Grid: " << system.grid() << "\n");
+	ARIADNE_LOG(5, "Grid lengths: " << system.grid().lengths() << "\n");
 
-	ARIADNE_LOG(5, "Use constraining: " << pretty_print(analyser.use_constraining()) << "\n");
+	ARIADNE_LOG(5, "Use restriction: " << pretty_print(analyser.use_reachability_restricting()) << "\n");
 
 	analyser.tuneEvolverParameters(system,hmad,analyser.settings().maximum_grid_depth,semantics);
 }
@@ -1187,8 +1193,8 @@ _chooseInitialDominanceSettings() const
 	_dominating_coarse_outer_approximation->reset();
 	_dominated_coarse_outer_approximation->reset();
 
-	_dominating_constraint = HybridGridTreeSet();
-	_dominated_constraint = HybridGridTreeSet();
+	_dominating_reachability_restriction = HybridGridTreeSet();
+	_dominated_reachability_restriction = HybridGridTreeSet();
 }
 
 void

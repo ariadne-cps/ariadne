@@ -480,9 +480,9 @@ _outer_chain_reach_forward(const SystemType& system,
 	    ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
 	    ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
 
-	    if (use_constraining()) {
-	    	new_final.restrict(_settings->outer_approx_constraint);
-	    	new_reach.restrict(_settings->outer_approx_constraint);
+	    if (use_reachability_restricting()) {
+	    	new_final.restrict(_settings->reachability_restriction);
+	    	new_reach.restrict(_settings->reachability_restriction);
 		    ARIADNE_LOG(6,"Reach size after constraining = "<<new_reach.size()<<"\n");
 		    ARIADNE_LOG(6,"Final size after constraining = "<<new_final.size()<<"\n");
 	    }
@@ -509,16 +509,16 @@ _outer_chain_reach_forward(const SystemType& system,
 
 bool
 HybridReachabilityAnalyser::
-use_constraining() const
+use_reachability_restricting() const
 {
-	return !_settings->outer_approx_constraint.empty();
+	return !_settings->reachability_restriction.empty();
 }
 
 bool
 HybridReachabilityAnalyser::
 use_domain_checking() const
 {
-	return !use_constraining();
+	return !use_reachability_restricting();
 }
 
 bool
@@ -628,14 +628,14 @@ _outer_chain_reach_pushTargetEnclosuresOfTransition(const DiscreteTransition& tr
 	} else if (possibly(is_guard_active) && !is_forced) {
 		ARIADNE_LOG(10,"Possibly active and permissive: adding the splittings of the target enclosure to the destination list.\n");
 		ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),source);
-		pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,use_constraining());
+		pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,use_reachability_restricting());
 	} else if (possibly(is_guard_active) && is_forced) {
 		ARIADNE_LOG(10,"Possibly active and forced: checking whether the crossing is nonnegative...\n");
 		tribool positive_crossing = positively_crossing(source.bounding_box(),dynamic,activation[0]);
 		if (possibly(positive_crossing)) {
 			ARIADNE_LOG(10,"Possibly positive, adding the splittings of the target enclosure to the destination list.\n");
 			ContinuousEnclosureType target_encl = _getCalculusInterface().reset_step(trans.reset(),source);
-			pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,use_constraining());
+			pushSplitTargetEnclosures(result_enclosures,target_loc,target_encl,minTargetCellWidths,target_bounding,use_reachability_restricting());
 		}
 		else {
 			ARIADNE_LOG(10,"Negative, ignoring the target enclosure.\n");
@@ -671,7 +671,7 @@ outer_chain_reach(SystemType& system,
 {
 	HybridBoxes feasible_region = unbounded_hybrid_boxes(system.state_space());
 
-	return outer_chain_reach(system,initial_set,feasible_region,false);
+	return outer_chain_reach(system,initial_set,feasible_region,false,false);
 }
 
 
@@ -680,8 +680,11 @@ HybridReachabilityAnalyser::
 outer_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set,
 				  const HybridBoxes& target_region,
-				  bool skipIfOutOfTargetRegion) const
+				  bool skipIfOutOfTargetRegion,
+				  bool skipIfEnclosingTargetRegion) const
 {
+	ARIADNE_ASSERT_MSG(!(skipIfOutOfTargetRegion && skipIfEnclosingTargetRegion),"Select only one skipping policy.");
+
 	HybridGridTreeSet reach;
 
 	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
@@ -702,6 +705,9 @@ outer_chain_reach(SystemType& system,
 			if (skipIfOutOfTargetRegion && definitely(!local_reach.subset(target_region))) {
 				system.substitute(original_constants);
 				throw ReachOutOfTargetException("The reached set is not inside the target region.");
+			} else if (skipIfEnclosingTargetRegion && definitely(superset(local_reach.bounding_box(),target_region))) {
+				system.substitute(original_constants);
+				throw ReachEnclosesTargetException("The reached set encloses the target region.");
 			}
 		}
 	}

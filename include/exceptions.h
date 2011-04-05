@@ -82,4 +82,10 @@ class ReachOutOfTargetException : public ReachOutOfRegionException {
 	ReachOutOfTargetException(const std::string& str) : ReachOutOfRegionException(str) { }
 };
 
+class ReachEnclosesTargetException : public std::runtime_error {
+  public:
+	ReachEnclosesTargetException(const std::string& str) : std::runtime_error(str) { }
+};
+
+
 #endif

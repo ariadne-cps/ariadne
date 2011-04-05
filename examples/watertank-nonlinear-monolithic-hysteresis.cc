@@ -64,7 +64,7 @@ int main(int argc,char *argv[])
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
 	verifier.settings().plot_results = false;
-	verifier.settings().maximum_parameter_depth = 4;
+	verifier.settings().maximum_parameter_depth = 5;
 
 	// The parameters
 	RealConstantSet parameters;

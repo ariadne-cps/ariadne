@@ -125,7 +125,7 @@ Verifier::~Verifier()
 
 bool
 Verifier::
-_safety_positive_once(
+_safety_proving_once(
 		SystemType& system,
 		const HybridImageSet& initial_set,
 		const HybridBoxes& safe_region,
@@ -154,7 +154,11 @@ _safety_positive_once(
 
 	try
 	{
-		reach = _outer_analyser->outer_chain_reach(system,initial_set,safe_region,_settings->enable_quick_safety_proving);
+		// We quicken the outer reachability calculation only if we already have a constraint available,
+		// otherwise we would never obtain an outer approximation for tuning the grid and constraining the reachability.
+		bool terminate_as_soon_as_unprovable = _settings->allow_quick_safety_proving && !_safety_constraint.empty();
+
+		reach = _outer_analyser->outer_chain_reach(system,initial_set,safe_region,terminate_as_soon_as_unprovable);
 
 		result = definitely(reach.subset(safe_region));
 		obtained_outer_approximation = true;
@@ -162,6 +166,12 @@ _safety_positive_once(
 	catch (ReachOutOfDomainException ex)
 	{
 		ARIADNE_LOG(5, "The outer reached region is partially out of the domain (" << ex.what() << ").\n");
+		result = false;
+		obtained_outer_approximation = false;
+	}
+	catch (ReachOutOfTargetException ex)
+	{
+		ARIADNE_LOG(5, "The outer reached region is partially out of the safe region (" << ex.what() << ").\n");
 		result = false;
 		obtained_outer_approximation = false;
 	}
@@ -182,7 +192,7 @@ _safety_positive_once(
 
 bool
 Verifier::
-_safety_negative_once(
+_safety_disproving_once(
 		SystemType& system,
 		const HybridImageSet& initial_set,
 		const HybridBoxes& safe_region,
@@ -204,8 +214,12 @@ _safety_negative_once(
 
 	ARIADNE_LOG(4,"Performing lower reachability analysis and getting disprove data...\n");
 
+	// We have no use in getting the "whole" lower chain reachability, if we already have disproved:
+	// hence we can safely quicken the termination
+	bool terminate_as_soon_as_disproved = _settings->allow_quick_safety_disproving && true;
+
 	std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData =
-			_lower_analyser->lower_chain_reach(system,initial_set,safe_region,_settings->enable_quick_safety_disproving);
+			_lower_analyser->lower_chain_reach(system,initial_set,safe_region,terminate_as_soon_as_disproved);
 	const HybridGridTreeSet& reach = reachAndDisproveData.first;
 	const DisproveData& disproveData = reachAndDisproveData.second;
 	const bool& isDisproved = disproveData.getIsDisproved();
@@ -233,12 +247,12 @@ _safety_once(
 {
 		ARIADNE_LOG(3, "Verification...\n");
 
-		if (_safety_positive_once(system,initial_set,safe_region,constants)) {
+		if (_safety_proving_once(system,initial_set,safe_region,constants)) {
 			ARIADNE_LOG(3, "Safe.\n");
 			return true;
 		}
 
-		if (_safety_negative_once(system,initial_set,safe_region,constants)) {
+		if (_safety_disproving_once(system,initial_set,safe_region,constants)) {
 			ARIADNE_LOG(3, "Unsafe.\n");
 			return false;
 		}
@@ -910,12 +924,12 @@ Verifier::_dominance(
 
 		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
 
-		if (_dominance_positive(dominating, dominated, constants)) {
+		if (_dominance_proving(dominating, dominated, constants)) {
 			ARIADNE_LOG(3, "Dominates.\n");
 			return true;
 		}
 
-		if (_dominance_negative(dominating, dominated, constants)) {
+		if (_dominance_disproving(dominating, dominated, constants)) {
 			ARIADNE_LOG(3, "Does not dominate.\n");
 			return false;
 		}
@@ -927,7 +941,7 @@ Verifier::_dominance(
 }
 
 bool
-Verifier::_dominance_positive(
+Verifier::_dominance_proving(
 		SystemVerificationInfo& dominating,
 		SystemVerificationInfo& dominated,
 		const RealConstantSet& constants) const
@@ -952,12 +966,6 @@ Verifier::_dominance_positive(
 		ARIADNE_LOG(4,"Getting the outer approximation of the dominating system...\n");
 
 		dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet());
-
-		if (!_dominating_coarse_outer_approximation->is_set()) {
-			_dominating_coarse_outer_approximation->set(dominating_reach);
-		} else {
-			_dominating_constraint = dominating_reach;
-		}
 
 		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
 
@@ -991,11 +999,23 @@ Verifier::_dominance_positive(
 		result = inside(projected_dominating_bounds,projected_shrinked_dominated_bounds);
 		obtained_outer_approximation = true;
 
-	}
-	catch (ReachOutOfDomainException ex) {
+	} catch (ReachOutOfDomainException ex) {
 		ARIADNE_LOG(4,"The outer reached region of the dominating system is partially out of the domain.\n");
 		result = false;
 		obtained_outer_approximation = false;
+	} catch (ReachOutOfTargetException ex) {
+		ARIADNE_LOG(4,"The projected outer reached region of the dominating system is partially " +
+				"out of the projected shrinked lower reached region of the dominated system.\n");
+		result = false;
+		obtained_outer_approximation = false;
+	}
+
+	if (obtained_outer_approximation) {
+		if (!_dominating_coarse_outer_approximation->is_set()) {
+			_dominating_coarse_outer_approximation->set(dominating_reach);
+		} else {
+			_dominating_constraint = dominating_reach;
+		}
 	}
 
 	ARIADNE_LOG(3, (result ? "Proved.\n" : "Not proved.\n") );
@@ -1006,7 +1026,7 @@ Verifier::_dominance_positive(
 }
 
 bool
-Verifier::_dominance_negative(
+Verifier::_dominance_disproving(
 		SystemVerificationInfo& dominating,
 	  	SystemVerificationInfo& dominated,
 	  	const RealConstantSet& constants) const
@@ -1069,9 +1089,13 @@ Verifier::_dominance_negative(
 
 		result = !inside(projected_shrinked_dominating_bounds,projected_dominated_bounds);
 		obtained_outer_approximation = true;
-	}
-	catch (ReachOutOfDomainException ex) {
+	} catch (ReachOutOfDomainException ex) {
 		ARIADNE_LOG(4,"The outer reached region of the dominated system is partially out of the domain.\n");
+		result = false;
+		obtained_outer_approximation = false;
+	} catch (ReachOutOfTargetException ex) {
+		ARIADNE_LOG(4,"The projected outer reached region of the dominated system is partially out of " +
+				"the projected shrinked lower reached region of the dominated system.\n");
 		result = false;
 		obtained_outer_approximation = false;
 	}

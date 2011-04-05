@@ -250,9 +250,9 @@ class VerificationSettings {
 	 * \details A value of zero means that the parameter space is not splitted at all. */
 	uint maximum_parameter_depth;
 	/*! \brief Whether we allow to skip further outer reach calculation as soon as proving has failed. */
-	bool enable_quick_safety_proving;
+	bool allow_quick_safety_proving;
 	/*! \brief Whether we allow to skip further disproving as soon as a counterexample is found. */
-	bool enable_quick_safety_disproving;
+	bool allow_quick_safety_disproving;
 	/*! \brief Whether to substitute midpoints of parameter boxes when proving.
 	 * \details Defaults to false. A value of true would not yield a formal result for the parameter box
 	 * but would be useful for quick pre-analysis. */
@@ -296,8 +296,8 @@ inline
 VerificationSettings::VerificationSettings() :
 		plot_results(false),
     	maximum_parameter_depth(3),
-    	enable_quick_safety_proving(true),
-    	enable_quick_safety_disproving(true),
+    	allow_quick_safety_proving(true),
+    	allow_quick_safety_disproving(true),
     	use_param_midpoints_for_proving(false),
     	use_param_midpoints_for_disproving(true)
 { }
@@ -389,8 +389,8 @@ operator<<(std::ostream& os, const VerificationSettings& p)
     os << "VerificationSettings"
        << "(\n  plot_results=" << p.plot_results
        << ",\n  maximum_parameter_depth=" << p.maximum_parameter_depth
-       << ",\n  enable_quick_safety_proving=" << p.enable_quick_safety_proving
-       << ",\n  enable_quick_safety_disproving=" << p.enable_quick_safety_disproving
+       << ",\n  enable_quick_safety_proving=" << p.allow_quick_safety_proving
+       << ",\n  enable_quick_safety_disproving=" << p.allow_quick_safety_disproving
        << ",\n  use_param_midpoints_for_proving=" << p.use_param_midpoints_for_proving
        << ",\n  use_param_midpoints_for_disproving=" << p.use_param_midpoints_for_disproving
        << "\n)\n";

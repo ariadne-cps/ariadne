@@ -260,14 +260,14 @@ class Verifier
 	/*! \brief Prove (once, i.e. for a given grid depth) that the the reachable set of \a system starting in \a initial_set
 	 * definitely remains in the \a safe region.
 	 * \details The \a constants are substituted into the system. */
-	bool _safety_positive_once(HybridAutomaton& system,
+	bool _safety_proving_once(HybridAutomaton& system,
 							   const HybridImageSet& initial_set,
 							   const HybridBoxes& safe_region,
 							   const RealConstantSet& constants) const;
 	/*! \brief Prove (once, i.e. for a given grid depth) that the reachable set of \a system starting in \a initial_set
 	 * does definitely NOT remain in the \a safe region.
 	 * \details The \a constants are substituted into the system. */
-	bool _safety_negative_once(HybridAutomaton& system,
+	bool _safety_disproving_once(HybridAutomaton& system,
 							   const HybridImageSet& initial_set,
 							   const HybridBoxes& safe_region,
 							   const RealConstantSet& constants) const;
@@ -339,12 +339,12 @@ public:
 					   const RealConstantSet& constants) const;
 private:
 	/*! \brief Performs the positive part of dominance checking. */
-	bool _dominance_positive(SystemVerificationInfo& dominating,
+	bool _dominance_proving(SystemVerificationInfo& dominating,
 							 SystemVerificationInfo& dominated,
 							 const RealConstantSet& constants) const;
 
 	/*! \brief Performs the negative part of dominance checking. */
-	bool _dominance_negative(SystemVerificationInfo& dominating,
+	bool _dominance_disproving(SystemVerificationInfo& dominating,
 							 SystemVerificationInfo& dominated,
 							 const RealConstantSet& constants) const;
 

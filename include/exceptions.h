@@ -67,9 +67,19 @@ class InvalidInput : public std::runtime_error {
     InvalidInput(const std::string& str) : std::runtime_error(str) { }
 };
 
-class ReachOutOfDomainException : public std::runtime_error {
+class ReachOutOfRegionException : public std::runtime_error {
   public:
-	ReachOutOfDomainException(const std::string& str) : std::runtime_error(str) { }
+	ReachOutOfRegionException(const std::string& str) : std::runtime_error(str) { }
+};
+
+class ReachOutOfDomainException : public ReachOutOfRegionException {
+  public:
+	ReachOutOfDomainException(const std::string& str) : ReachOutOfRegionException(str) { }
+};
+
+class ReachOutOfTargetException : public ReachOutOfRegionException {
+  public:
+	ReachOutOfTargetException(const std::string& str) : ReachOutOfRegionException(str) { }
 };
 
 #endif

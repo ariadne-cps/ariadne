@@ -451,19 +451,6 @@ HybridReachabilityAnalyser::
 _outer_chain_reach_forward(const SystemType& system,
 						   const HybridImageSet& initial_set) const
 {
-	/* Complete procedure:
-		1) Build the working sets from the initial enclosures
-		2) While a working set exists, evolve the current working set, with the following termination conditions:
-			a) If the evolution time limit is reached, adjoin both the reached set and the final set
-			b) If the enclosure of the initial set is larger than the maximum enclosure allowed, skip the evolution and adjoin the final set
-			c) If a blocking event is definitely initially active, or definitely finally active due to flow, adjoin the reached set only and discard the final set
-		3) Discretise the reached and final sets into cells
-		4) Remove the previous intermediate cells from the final cells and remove the previous reached cells from the reached cells
-		5) Put the enclosures of the transitioned reach cells into the new initial enclosures, removing those outside the domain in either the source or destination location
-		6) Put the enclosures of the final cells into the new initial enclosures, removing those outside the domain
-		7) If new initial enclosures exist, restart from 1), otherwise terminate.
-	*/
-
     const Float& lock_to_grid_time = _settings->lock_to_grid_time;
     const int& lock_to_grid_steps = _settings->lock_to_grid_steps;
     const int& maximum_grid_depth = _settings->maximum_grid_depth;
@@ -490,7 +477,6 @@ _outer_chain_reach_forward(const SystemType& system,
 
         new_final.remove(final);
 		new_reach.remove(reach);
-
 	    ARIADNE_LOG(6,"Reach size after removal = "<<new_reach.size()<<"\n");
 	    ARIADNE_LOG(6,"Final size after removal = "<<new_final.size()<<"\n");
 
@@ -508,8 +494,6 @@ _outer_chain_reach_forward(const SystemType& system,
 
 		_outer_chain_reach_forward_pushTargetCells(new_reach,system,working_enclosures);
 		_outer_chain_reach_pushLocalFinalCells(new_final,working_enclosures);
-
-		ARIADNE_LOG(6,"New working enclosures size = " << working_enclosures.size() << "\n");
 
         reach.adjoin(new_reach);
 		final.adjoin(new_final);
@@ -685,9 +669,9 @@ HybridReachabilityAnalyser::
 outer_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set) const
 {
-	HybridBoxes safe_region = unbounded_hybrid_boxes(system.state_space());
+	HybridBoxes feasible_region = unbounded_hybrid_boxes(system.state_space());
 
-	return outer_chain_reach(system,initial_set,safe_region,false);
+	return outer_chain_reach(system,initial_set,feasible_region,false);
 }
 
 
@@ -695,8 +679,8 @@ HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 outer_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set,
-				  const HybridBoxes& safe_region,
-				  bool enable_quick_safety_proving) const
+				  const HybridBoxes& target_region,
+				  bool skipIfOutOfTargetRegion) const
 {
 	HybridGridTreeSet reach;
 
@@ -704,19 +688,26 @@ outer_chain_reach(SystemType& system,
 
 	std::list<RealConstantSet> split_intervals_set = _getSplitConstantsIntervalsSet(system,_settings->splitting_constants_target_ratio);
 
-	// Progressively adjoins the results for each subsystem
-	uint i = 0;
-	for (std::list<RealConstantSet>::const_iterator set_it = split_intervals_set.begin(); set_it != split_intervals_set.end(); ++set_it) {
-		ARIADNE_LOG(5,"<Split constants set #" << ++i << " : " << *set_it << " >\n");
+	try {
+		uint i = 0;
+		for (std::list<RealConstantSet>::const_iterator set_it = split_intervals_set.begin(); set_it != split_intervals_set.end(); ++set_it) {
+			ARIADNE_LOG(5,"<Split constants set #" << ++i << " : " << *set_it << " >\n");
 
-		system.substitute(*set_it);
+			system.substitute(*set_it);
 
-		HybridGridTreeSet local_reach = _outer_chain_reach_forward(system,initial_set);
+			HybridGridTreeSet local_reach = _outer_chain_reach_forward(system,initial_set);
 
-		reach.adjoin(local_reach);
+			reach.adjoin(local_reach);
 
-		if (enable_quick_safety_proving && definitely(!local_reach.subset(safe_region)))
-			break;
+			if (skipIfOutOfTargetRegion && definitely(!local_reach.subset(target_region))) {
+				system.substitute(original_constants);
+				throw ReachOutOfTargetException("The reached set is not inside the target region.");
+			}
+		}
+	}
+	catch (ReachOutOfDomainException ex) {
+		system.substitute(original_constants);
+		throw ReachOutOfDomainException(ex.what());
 	}
 
 	system.substitute(original_constants);
@@ -847,7 +838,7 @@ HybridReachabilityAnalyser::
 lower_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set,
 				  const HybridBoxes& safe_region,
-				  bool enable_quick_safety_disproving) const
+				  bool terminate_as_soon_as_disproved) const
 {
 	HybridGridTreeSet reach(system.grid());
 	DisproveData disproveData(system.state_space());
@@ -868,14 +859,14 @@ lower_chain_reach(SystemType& system,
 		system.substitute(*set_it);
 
 		std::pair<HybridGridTreeSet,DisproveData> reachAndDisproveData =
-				_lower_chain_reach(system,initial_set,safe_region,enable_quick_safety_disproving);
+				_lower_chain_reach(system,initial_set,safe_region,terminate_as_soon_as_disproved);
 
 		reach.adjoin(reachAndDisproveData.first);
 		disproveData.updateWith(reachAndDisproveData.second);
 
 		ARIADNE_LOG(5,"Disprove data: " << reachAndDisproveData.second << "\n");
 
-		if (enable_quick_safety_disproving && reachAndDisproveData.second.getIsDisproved())
+		if (terminate_as_soon_as_disproved && reachAndDisproveData.second.getIsDisproved())
 			break;
 	}
 	system.substitute(original_constants);
@@ -926,7 +917,7 @@ _getSplitConstantsIntervalsSet(HybridAutomaton system,
 	RealConstantSet initial_combination;
 	std::vector<std::vector<RealConstant> >::iterator initial_col_it = split_intervals_set.begin();
 	std::vector<RealConstant>::iterator initial_row_it = initial_col_it->begin();
-	_fillSplitSet(split_intervals_set,initial_col_it,initial_row_it,initial_combination,result);
+	fillSplitSet(split_intervals_set,initial_col_it,initial_row_it,initial_combination,result);
 
 	ARIADNE_LOG(5,"<Split factors: " << split_factors << ", size: " << result.size() << ">\n");
 
@@ -1220,20 +1211,20 @@ split(const RealConstant& con, uint numParts)
 	return result;
 }
 
-void _fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
+void fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
 				   std::vector<std::vector<RealConstant> >::iterator col_it,
 				   std::vector<RealConstant>::iterator row_it,
 				   RealConstantSet s,
 				   std::list<RealConstantSet>& dest)
 {
 	if (col_it != src.end() && row_it != col_it->end()) {
-		_fillSplitSet(src,col_it,row_it+1,s,dest);
+		fillSplitSet(src,col_it,row_it+1,s,dest);
 		s.insert(*row_it);
 		col_it++;
 		row_it = col_it->begin();
 
 		if (col_it != src.end())
-			_fillSplitSet(src,col_it,row_it,s,dest);
+			fillSplitSet(src,col_it,row_it,s,dest);
 		else
 			dest.push_back(s);
 	}

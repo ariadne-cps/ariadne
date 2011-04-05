@@ -169,13 +169,13 @@ class HybridReachabilityAnalyser
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * upper semantics.
      * \details The method performs discretisation before transitions, then checks activations on the discretised cells.
-     * If \a enable_quick_safety_proving is set, it checks online whether the reachable area is inside the \a safe_region, skipping
+     * If \a skipIfOutOfTargetRegion is set, it checks online whether the reachable area is inside the \a target_region, skipping
      * further calculations in that case (useful for safety proving).
      * \return The reach set. */
     virtual SetApproximationType outer_chain_reach(SystemType& system,
 												   const HybridImageSet& initial_set,
-												   const HybridBoxes& safe_region,
-												   bool enable_quick_safey_proving) const;
+												   const HybridBoxes& target_region,
+												   bool skipIfOutOfTargetRegion) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * lower semantics.
@@ -242,9 +242,6 @@ class HybridReachabilityAnalyser
     GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
-    SetApproximationType _outer_chain_reach_quick_safety_proving(SystemType& system,
-														  const HybridImageSet& initial_set,
-														  const HybridBoxes& safe_region) const;
     SetApproximationType _outer_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
 
     /*! \brief Verifies whether the \a enclosure_bounds box fails the domain check in respect to \a domain.
@@ -362,6 +359,16 @@ HybridFloatVector getDerivativeWidths(const HybridAutomaton& system,
 
 /*! \brief Gets the set of all the midpoints of the split intervals in \a intervals_set. */
 std::list<RealConstantSet> getSplitConstantsMidpointsSet(const std::list<RealConstantSet>& intervals_set);
+
+/*! \brief Splits the constant \a con into \a numParts parts. */
+std::vector<RealConstant> split(const RealConstant& con, uint numParts);
+
+/*! \brief Creates a set \a dest of all the possible combinations of split values from \a src. */
+void fillSplitSet(const std::vector<std::vector<RealConstant> >& src,
+				   std::vector<std::vector<RealConstant> >::iterator col_it,
+				   std::vector<RealConstant>::iterator row_it,
+				   RealConstantSet s,
+				   std::list<RealConstantSet>& dest);
 
 /*! \brief Splits \a target_encl for location \a target_loc, storing the result in \a initial_enclosures.
  * \details The function is recursive.

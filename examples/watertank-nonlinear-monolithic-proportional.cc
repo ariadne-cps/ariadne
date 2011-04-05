@@ -64,12 +64,12 @@ int main(int argc,char *argv[])
 	HybridReachabilityAnalyser lower_analyser(lower_evolver);
 	outer_analyser.settings().lowest_maximum_grid_depth = 2;
 	lower_analyser.settings().lowest_maximum_grid_depth = 1;
-	outer_analyser.settings().highest_maximum_grid_depth = 1;
-	lower_analyser.settings().highest_maximum_grid_depth = 6;
+	outer_analyser.settings().highest_maximum_grid_depth = 5;
+	lower_analyser.settings().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.settings().maximum_parameter_depth = 4;
-	verifier.settings().plot_results = true;
+	verifier.settings().maximum_parameter_depth = 5;
+	verifier.settings().plot_results = false;
 
 	RealConstantSet parameters;
 	parameters.insert(RealConstant("ref",Interval(5.25,8.25)));

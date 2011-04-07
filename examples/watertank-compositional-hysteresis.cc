@@ -208,7 +208,7 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("hmin",Interval(5.0,6.0)));
 	parameters.insert(RealConstant("hmax",Interval(7.5,8.5)));
 
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+	SafetyVerificationInput verInfo(system, initial_set, domain, safe_box);
 
 	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
 	draw(system.name(),results);

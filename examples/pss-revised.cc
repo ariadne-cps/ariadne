@@ -377,7 +377,7 @@ int main()
 	verifier.verbosity = 2;
 
 	// Perform the analysis
-	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
+	SafetyVerificationInput verInfo(system,initial_set,domain,safe_box);
 	cout << verifier.safety(verInfo);
 
 }

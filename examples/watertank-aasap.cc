@@ -269,7 +269,7 @@ int main(int argc,char *argv[])
 	// The resulting safe and unsafe intervals
 	Interval safe_int, unsafe_int;
 
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+	SafetyVerificationInput verInfo(system, initial_set, domain, safe_box);
     verifier.safety(verInfo);
 
 }

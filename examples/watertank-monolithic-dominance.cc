@@ -55,8 +55,8 @@ int main(int argc,char *argv[])
 	std::vector<uint> projection_pr(1,0);
 
 	// Construct the bundles
-	SystemVerificationInfo hysteresis(system_hy,initial_hy,domain_hy,projection_hy);
-	SystemVerificationInfo proportional(system_pr,initial_pr,domain_pr,projection_pr);
+	DominanceVerificationInput hysteresis(system_hy,initial_hy,domain_hy,projection_hy);
+	DominanceVerificationInput proportional(system_pr,initial_pr,domain_pr,projection_pr);
 
 	TaylorCalculus outer_integrator(2,2,1e-4);
 	TaylorCalculus lower_integrator(4,6,1e-10);

@@ -272,7 +272,7 @@ int main(int argc, char** argv)
 								 -0.01,0.11,
 								-0.2,0.2));
 
-	SystemVerificationInfo verInfo(system,initial_set,domain,safe_box);
+	SafetyVerificationInput verInfo(system,initial_set,domain,safe_box);
 
 
 	// Create an evolver and analyser objects, then set their verbosity

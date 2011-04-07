@@ -47,7 +47,7 @@ int main(int argc,char *argv[])
 	// The safe region
 	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
-	SystemVerificationInfo verInfo(system, initial_set, domain, safe_box);
+	SafetyVerificationInput verInfo(system, initial_set, domain, safe_box);
 
 	/// Verification
 

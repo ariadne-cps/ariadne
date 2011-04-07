@@ -69,6 +69,8 @@ class HybridGridTreeSet;
 template<class ES> class HybridListSet;
 template<class ES> class HybridDiscretiser;
 
+enum OuterReachabilitySkippingPolicy { NOT_INSIDE_TARGET, SUPERSET_OF_TARGET };
+
 /*! \brief A class for performing reachability analysis on a hybrid system-
  */
 class HybridReachabilityAnalyser
@@ -174,9 +176,9 @@ class HybridReachabilityAnalyser
      * \return The reach set. */
     virtual SetApproximationType outer_chain_reach(SystemType& system,
 												   const HybridImageSet& initial_set,
-												   const HybridBoxes& target_region,
-												   bool skipIfOutOfTargetRegion,
-												   bool skipIfEnclosingTargetRegion) const;
+												   bool check_target_bounds_for_skipping,
+												   const HybridBoxes& target_bounds,
+												   OuterReachabilitySkippingPolicy skippingPolicy) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * lower semantics.

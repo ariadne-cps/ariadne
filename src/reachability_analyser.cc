@@ -671,7 +671,8 @@ outer_chain_reach(SystemType& system,
 {
 	HybridBoxes feasible_region = unbounded_hybrid_boxes(system.state_space());
 
-	return outer_chain_reach(system,initial_set,feasible_region,false,false);
+	// Uses dummy parameters
+	return outer_chain_reach(system,initial_set,false,feasible_region,NOT_INSIDE_TARGET);
 }
 
 
@@ -679,12 +680,10 @@ HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 outer_chain_reach(SystemType& system,
 				  const HybridImageSet& initial_set,
-				  const HybridBoxes& target_region,
-				  bool skipIfOutOfTargetRegion,
-				  bool skipIfEnclosingTargetRegion) const
+				  bool check_target_bounds_for_skipping,
+				  const HybridBoxes& target_bounds,
+				  OuterReachabilitySkippingPolicy skippingPolicy) const
 {
-	ARIADNE_ASSERT_MSG(!(skipIfOutOfTargetRegion && skipIfEnclosingTargetRegion),"Select only one skipping policy.");
-
 	HybridGridTreeSet reach;
 
 	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
@@ -702,12 +701,14 @@ outer_chain_reach(SystemType& system,
 
 			reach.adjoin(local_reach);
 
-			if (skipIfOutOfTargetRegion && definitely(!local_reach.subset(target_region))) {
-				system.substitute(original_constants);
-				throw ReachOutOfTargetException("The reached set is not inside the target region.");
-			} else if (skipIfEnclosingTargetRegion && definitely(superset(local_reach.bounding_box(),target_region))) {
-				system.substitute(original_constants);
-				throw ReachEnclosesTargetException("The reached set encloses the target region.");
+			if (check_target_bounds_for_skipping) {
+				if (skippingPolicy == NOT_INSIDE_TARGET && definitely(!local_reach.subset(target_bounds))) {
+					system.substitute(original_constants);
+					throw ReachOutOfTargetException("The reached set is not inside the target region.");
+				} else if (skippingPolicy == SUPERSET_OF_TARGET && definitely(superset(local_reach.bounding_box(),target_bounds))) {
+					system.substitute(original_constants);
+					throw ReachEnclosesTargetException("The reached set encloses the target region.");
+				}
 			}
 		}
 	}

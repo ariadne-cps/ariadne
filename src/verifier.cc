@@ -30,73 +30,6 @@
 
 namespace Ariadne {
 
-SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
-						   HybridImageSet& initial_set,
-						   HybridBoxes& domain,
-						   HybridBoxes& safe_region) :
-							_system(system), _initial_set(initial_set),
-							_domain(domain), _safe_region(safe_region),
-							_projection(std::vector<uint>(0))
-{
-	_check_fields();
-}
-
-SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
-						   HybridImageSet& initial_set,
-						   HybridBoxes& domain,
-						   std::vector<uint>& projection) :
-							_system(system), _initial_set(initial_set),
-							 _domain(domain), _safe_region(unbounded_hybrid_boxes(system.state_space())),
-							 _projection(projection)
-{
-	_check_fields();
-}
-
-SystemVerificationInfo::SystemVerificationInfo(HybridAutomaton& system,
-						   HybridImageSet& initial_set,
-						   HybridBoxes& domain,
-						   HybridBoxes& safe_region,
-						   std::vector<uint>& projection) :
-							_system(system), _initial_set(initial_set),
-							_domain(domain), _safe_region(safe_region),
-							_projection(projection)
-{
-	_check_fields();
-}
-
-void SystemVerificationInfo::_check_fields() const
-{
-	HybridSpace hspace = _system.state_space();
-	for (HybridImageSet::const_iterator it = _initial_set.begin(); it != _initial_set.end(); ++it) {
-		HybridSpace::const_iterator hspace_it = hspace.find(it->first);
-		ARIADNE_ASSERT_MSG(hspace_it != hspace.end(),
-						   "The location " << it->first.name() << "is not present into the system.");
-		ARIADNE_ASSERT_MSG(hspace_it->second == it->second.dimension(),
-						   "The dimension of the continuous space in the initial set for location " << it->first.name() << " does not match the system space");
-	}
-	for (HybridSpace::const_iterator hspace_it = hspace.begin(); hspace_it != hspace.end(); ++hspace_it) {
-		HybridBoxes::const_iterator domain_it = _domain.find(hspace_it->first);
-		ARIADNE_ASSERT_MSG(domain_it != _domain.end(),
-						   "The location " << hspace_it->first.name() << "is not present into the domain.");
-		ARIADNE_ASSERT_MSG(hspace_it->second == domain_it->second.dimension(),
-						   "The dimension of the continuous space in the domain for location " << hspace_it->first.name() << " does not match the system space");
-		HybridBoxes::const_iterator safe_it = _safe_region.find(hspace_it->first);
-		ARIADNE_ASSERT_MSG(safe_it != _safe_region.end(),
-						   "The location " << hspace_it->first.name() << "is not present into the safe region.");
-		ARIADNE_ASSERT_MSG(hspace_it->second == safe_it->second.dimension(),
-						   "The dimension of the continuous space in the safe region for location " << hspace_it->first.name() << " does not match the system space");
-	}
-}
-
-
-std::ostream&
-SystemVerificationInfo::write(std::ostream& os) const
-{
-	os << "(System: " << _system << "; Initial set: " << _initial_set << "; Domain: " <<
-			_domain << "; Safe region: " << _safe_region << "; Projection: " << _projection << ")";
-	return os;
-}
-
 Verifier::Verifier(
 		const HybridReachabilityAnalyser& outer_analyser,
 		const HybridReachabilityAnalyser& lower_analyser) :
@@ -158,7 +91,7 @@ _safety_proving_once(
 		// otherwise we would never obtain an outer approximation for tuning the grid and constraining the reachability.
 		bool terminate_as_soon_as_unprovable = _settings->allow_quick_safety_proving && !_safety_reachability_restriction.empty();
 
-		reach = _outer_analyser->outer_chain_reach(system,initial_set,safe_region,terminate_as_soon_as_unprovable,false);
+		reach = _outer_analyser->outer_chain_reach(system,initial_set,terminate_as_soon_as_unprovable,safe_region,NOT_INSIDE_TARGET);
 
 		result = definitely(reach.subset(safe_region));
 		obtained_outer_approximation = true;
@@ -263,26 +196,26 @@ _safety_once(
 
 tribool
 Verifier::
-safety(SystemVerificationInfo& verInfo) const
+safety(SafetyVerificationInput& verInput) const
 {
 	RealConstantSet constants;
 
-	return _safety_nosplitting(verInfo,constants);
+	return _safety_nosplitting(verInput,constants);
 }
 
 
 tribool
 Verifier::
 _safety(
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		const RealConstant& constant) const
 {
-	HybridAutomaton& system = verInfo.getSystem();
+	HybridAutomaton& system = verInput.getSystem();
 
 	Real originalParameterValue = system.accessible_constant_value(constant.name());
 
 	system.substitute(constant);
-	tribool result = safety(verInfo);
+	tribool result = safety(verInput);
 	system.substitute(constant,originalParameterValue);
 
 	return result;
@@ -291,31 +224,31 @@ _safety(
 tribool
 Verifier::
 _safety(
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		const RealConstant& constant,
 		const Float& value) const
 {
 	const RealConstant modifiedParameter(constant.name(),Interval(value));
 
-	return _safety(verInfo, modifiedParameter);
+	return _safety(verInput, modifiedParameter);
 }
 
 
 tribool
 Verifier::
 _safety_nosplitting(
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		const RealConstantSet& constants
 		) const
 {
 	ARIADNE_LOG(2,"\nIterative verification...\n");
 
-	HybridAutomaton& system = verInfo.getSystem();
+	HybridAutomaton& system = verInput.getSystem();
 
 	if (_settings->plot_results)
 		_plot_dirpath_init(system.name());
 
-	_chooseInitialSafetySettings(system,verInfo.getDomain(),verInfo.getSafeRegion(),constants);
+	_chooseInitialSafetySettings(system,verInput.getDomain(),verInput.getSafeRegion(),constants);
 
 	int initial_depth = min(_outer_analyser->settings().lowest_maximum_grid_depth,
 							_lower_analyser->settings().lowest_maximum_grid_depth);
@@ -328,7 +261,7 @@ _safety_nosplitting(
 
 		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
 
-		tribool result = _safety_once(system,verInfo.getInitialSet(),verInfo.getSafeRegion(),constants);
+		tribool result = _safety_once(system,verInput.getInitialSet(),verInput.getSafeRegion(),constants);
 
 		if (!indeterminate(result))
 			return result;
@@ -375,12 +308,12 @@ _update_safety_constraining(
 std::pair<Interval,Interval>
 Verifier::
 parametric_safety_1d_bisection(
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		const RealConstant& parameter) const
 {
 	float tolerance = 1.0/(1 << _settings->maximum_parameter_depth);
 
-	HybridAutomaton& system = verInfo.getSystem();
+	HybridAutomaton& system = verInput.getSystem();
 
 	// Get the original value of the parameter and the related range
 	Real original_value = system.accessible_constant_value(parameter.name());
@@ -397,12 +330,12 @@ parametric_safety_1d_bisection(
 
 	// Check the lower bound
 	ARIADNE_LOG(1,"\nChecking lower interval bound... ");
-	tribool lower_result = _safety(verInfo,parameter,parameter_range.lower());
+	tribool lower_result = _safety(verInput,parameter,parameter_range.lower());
 	ARIADNE_LOG(1,pretty_print(lower_result) << ".\n");
 
 	// Check the upper bound
 	ARIADNE_LOG(1,"Checking upper interval bound... ");
-	tribool upper_result = _safety(verInfo,parameter,parameter_range.upper());
+	tribool upper_result = _safety(verInput,parameter,parameter_range.upper());
 	ARIADNE_LOG(1,pretty_print(upper_result) << ".\n");
 
 	// If we must proceed with bisection refining
@@ -426,7 +359,7 @@ parametric_safety_1d_bisection(
 					      ", width ratio: " << safety_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			const Float current_value = safety_int.midpoint();
-			tribool result = _safety(verInfo,parameter,current_value);
+			tribool result = _safety(verInput,parameter,current_value);
 
 			_process_positive_bisection_result(result,safety_int,unsafety_int,current_value,safeOnBottom);
 		}
@@ -440,7 +373,7 @@ parametric_safety_1d_bisection(
 						  ", width ratio: " << unsafety_int.width()/parameter_range.width()*100 << "%) ... ");
 
 			const Float current_value = unsafety_int.midpoint();
-			tribool result = _safety(verInfo,parameter,current_value);
+			tribool result = _safety(verInput,parameter,current_value);
 
 			_process_negative_bisection_result(result,safety_int,unsafety_int,current_value,safeOnBottom);
 		}
@@ -456,7 +389,7 @@ parametric_safety_1d_bisection(
 Parametric2DBisectionResults
 Verifier::
 parametric_safety_2d_bisection(
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		const RealConstantSet& params) const
 {
 	ARIADNE_ASSERT_MSG(params.size() == 2,"Provide exactly two parameters.");
@@ -466,18 +399,18 @@ parametric_safety_2d_bisection(
 	const RealConstant& xParam = *param_it;
 	const RealConstant& yParam = *(++param_it);
 
-	return parametric_safety_2d_bisection(verInfo,xParam,yParam);
+	return parametric_safety_2d_bisection(verInput,xParam,yParam);
 }
 
 Parametric2DBisectionResults
 Verifier::
 parametric_safety_2d_bisection(
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		const RealConstant& xParam,
 		const RealConstant& yParam) const
 {
 	// Generates the file name
-	std::string filename = verInfo.getSystem().name();
+	std::string filename = verInput.getSystem().name();
 	filename = filename + "[" + xParam.name() + "," + yParam.name() + "]";
 
 	// Initializes the results
@@ -485,8 +418,8 @@ parametric_safety_2d_bisection(
 	Parametric2DBisectionResults results(filename,xParam.value(),yParam.value(),numPointsPerAxis);
 
 	// Sweeps on each axis
-	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, true);
-	_parametric_safety_2d_bisection_sweep(results, verInfo, xParam, yParam, false);
+	_parametric_safety_2d_bisection_sweep(results, verInput, xParam, yParam, true);
+	_parametric_safety_2d_bisection_sweep(results, verInput, xParam, yParam, false);
 
 	return results;
 }
@@ -494,7 +427,7 @@ parametric_safety_2d_bisection(
 std::list<ParametricOutcome>
 Verifier::
 parametric_safety(
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		const RealConstantSet& params) const
 {
 	ARIADNE_ASSERT_MSG(params.size() > 0, "Provide at least one parameter.");
@@ -510,7 +443,7 @@ parametric_safety(
 		ARIADNE_LOG(1,"<Split parameters set #" << ++i << "/" << splittings.size() << ">\n");
 		RealConstantSet current_params = *splitting_it;
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
-		tribool outcome = _safety_nosplitting(verInfo,current_params);
+		tribool outcome = _safety_nosplitting(verInput,current_params);
 		ARIADNE_LOG(1,"Outcome: " << pretty_print(outcome) << "\n");
 		result.push_back(ParametricOutcome(current_params,outcome));
 	}
@@ -521,8 +454,9 @@ parametric_safety(
 tribool
 Verifier::
 dominance(
-		SystemVerificationInfo& dominating,
-		SystemVerificationInfo& dominated) const
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated
+		) const
 {
 	const RealConstantSet dominatingConstants;
 	return _dominance(dominating,dominated,dominatingConstants);
@@ -531,9 +465,10 @@ dominance(
 tribool
 Verifier::
 _dominance(
-		SystemVerificationInfo& dominating,
-		SystemVerificationInfo& dominated,
-		const RealConstant& constant) const
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+		const RealConstant& constant
+		) const
 {
 	HybridAutomaton& system = dominating.getSystem();
 
@@ -549,10 +484,11 @@ _dominance(
 tribool
 Verifier::
 _dominance(
-		SystemVerificationInfo& dominating,
-		SystemVerificationInfo& dominated,
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
 		const RealConstant& constant,
-		const Float& value) const
+		const Float& value
+		) const
 {
 	const RealConstant modifiedConstant(constant.name(),Interval(value));
 
@@ -561,9 +497,11 @@ _dominance(
 
 std::pair<Interval,Interval>
 Verifier::
-parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
-								  SystemVerificationInfo& dominated,
-						   	   	  const RealConstant& parameter) const
+parametric_dominance_1d_bisection(
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+		const RealConstant& parameter
+		) const
 {
 	float tolerance = 1.0/(1 << _settings->maximum_parameter_depth);
 
@@ -642,9 +580,11 @@ parametric_dominance_1d_bisection(SystemVerificationInfo& dominating,
 
 Parametric2DBisectionResults
 Verifier::
-parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
-								  SystemVerificationInfo& dominated,
-								  const RealConstantSet& params) const
+parametric_dominance_2d_bisection(
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+		const RealConstantSet& params
+		) const
 {
 	ARIADNE_ASSERT_MSG(params.size() == 2,"Provide exactly two parameters.");
 
@@ -658,10 +598,12 @@ parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 
 Parametric2DBisectionResults
 Verifier::
-parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
-								  SystemVerificationInfo& dominated,
-								  const RealConstant& xParam,
-								  const RealConstant& yParam) const
+parametric_dominance_2d_bisection(
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+		const RealConstant& xParam,
+		const RealConstant& yParam
+		) const
 {
 	// Generates the file name
 	std::string filename = dominating.getSystem().name() + "&" + dominated.getSystem().name();
@@ -682,9 +624,10 @@ parametric_dominance_2d_bisection(SystemVerificationInfo& dominating,
 std::list<ParametricOutcome>
 Verifier::
 parametric_dominance(
-		SystemVerificationInfo& dominating,
-		SystemVerificationInfo& dominated,
-		const RealConstantSet& dominating_params) const
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+		const RealConstantSet& dominating_params
+		) const
 {
 	ARIADNE_ASSERT_MSG(dominating_params.size() > 0, "Provide at least one parameter.");
 
@@ -813,12 +756,12 @@ Verifier::_process_negative_bisection_result(
 
 void Verifier::_parametric_safety_2d_bisection_sweep(
 		Parametric2DBisectionResults& results,
-		SystemVerificationInfo& verInfo,
+		SafetyVerificationInput& verInput,
 		RealConstant xParam,
 		RealConstant yParam,
 		bool sweepOnX) const
 {
-	HybridAutomaton& system = verInfo.getSystem();
+	HybridAutomaton& system = verInput.getSystem();
 
 	uint numPointsPerAxis = 1+(1 << _settings->maximum_parameter_depth);
 
@@ -840,7 +783,7 @@ void Verifier::_parametric_safety_2d_bisection_sweep(
 		ARIADNE_LOG(1,"\nAnalysis with " << sweepParam.name() << " = " << sweepParam.value().lower() << "...\n");
 
 		// Performs the analysis on the other axis and adds to the results of the sweep variable
-		std::pair<Interval,Interval> result = parametric_safety_1d_bisection(verInfo,otherParam);
+		std::pair<Interval,Interval> result = parametric_safety_1d_bisection(verInput,otherParam);
 		if (sweepOnX)
 			results.insertXValue(result);
 		else
@@ -857,11 +800,12 @@ void
 Verifier::
 _parametric_dominance_2d_bisection_sweep(
 		Parametric2DBisectionResults& results,
-		SystemVerificationInfo& dominating,
-		SystemVerificationInfo& dominated,
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
 		RealConstant xParam,
 		RealConstant yParam,
-		bool sweepOnX) const
+		bool sweepOnX
+		) const
 {
 	HybridAutomaton& system = dominating.getSystem();
 
@@ -900,9 +844,10 @@ _parametric_dominance_2d_bisection_sweep(
 
 tribool
 Verifier::_dominance(
-		SystemVerificationInfo& dominating,
-		SystemVerificationInfo& dominated,
-		const RealConstantSet& constants) const
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+		const RealConstantSet& constants
+		) const
 {
 	ARIADNE_ASSERT(dominating.getProjection().size() == dominated.getProjection().size());
 
@@ -942,9 +887,10 @@ Verifier::_dominance(
 
 bool
 Verifier::_dominance_proving(
-		SystemVerificationInfo& dominating,
-		SystemVerificationInfo& dominated,
-		const RealConstantSet& constants) const
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+		const RealConstantSet& constants
+		) const
 {
 	ARIADNE_LOG(3,"Proving...\n");
 
@@ -991,7 +937,7 @@ Verifier::_dominance_proving(
 		bool terminate_as_soon_as_unprovable = _settings->allow_quick_dominance_proving && !_dominating_reachability_restriction.empty();
 
 		dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet(),
-				shrinked_dominated_bounds_on_dominating_space,terminate_as_soon_as_unprovable,false);
+				terminate_as_soon_as_unprovable,shrinked_dominated_bounds_on_dominating_space,NOT_INSIDE_TARGET);
 
 		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
 
@@ -1010,8 +956,8 @@ Verifier::_dominance_proving(
 		result = false;
 		obtained_outer_approximation = false;
 	} catch (ReachOutOfTargetException ex) {
-		ARIADNE_LOG(4,"The outer reached region of the dominating system is partially " +
-				"out of the projected shrinked lower reached region of the dominated system.\n");
+		ARIADNE_LOG(4,"The outer reached region of the dominating system is not inside " +
+				"the projected shrinked lower reached region of the dominated system.\n");
 		result = false;
 		obtained_outer_approximation = false;
 	}
@@ -1033,9 +979,10 @@ Verifier::_dominance_proving(
 
 bool
 Verifier::_dominance_disproving(
-		SystemVerificationInfo& dominating,
-	  	SystemVerificationInfo& dominated,
-	  	const RealConstantSet& constants) const
+		DominanceVerificationInput& dominating,
+		DominanceVerificationInput& dominated,
+	  	const RealConstantSet& constants
+	  	) const
 {
 	ARIADNE_LOG(3,"Disproving...\n");
 
@@ -1082,7 +1029,7 @@ Verifier::_dominance_disproving(
 		bool terminate_as_soon_as_disproved = _settings->allow_quick_dominance_disproving && !_dominated_reachability_restriction.empty();
 
 		dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet(),
-				shrinked_dominating_bounds_on_dominated_space,false,terminate_as_soon_as_disproved);
+				terminate_as_soon_as_disproved,shrinked_dominating_bounds_on_dominated_space,SUPERSET_OF_TARGET);
 
 		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
 
@@ -1200,20 +1147,21 @@ _chooseInitialDominanceSettings() const
 void
 Verifier::
 _chooseDominanceSettings(
-		SystemVerificationInfo& verInfo,
+		DominanceVerificationInput& verInput,
 		const RealConstantSet& locked_constants,
 		const HybridGridTreeSet& outer_reach,
 		const HybridGridTreeSet& outer_approx_constraint,
-		Semantics semantics) const
+		Semantics semantics
+		) const
 {
 	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
 
-	analyser.settings().domain_bounds = verInfo.getDomain();
+	analyser.settings().domain_bounds = verInput.getDomain();
 	ARIADNE_LOG(5, "Domain: " << analyser.settings().domain_bounds << "\n");
 
-	_tuneIterativeStepSettings(verInfo.getSystem(),outer_reach,outer_approx_constraint,semantics);
+	_tuneIterativeStepSettings(verInput.getSystem(),outer_reach,outer_approx_constraint,semantics);
 
-	analyser.settings().lock_to_grid_time = getLockToGridTime(verInfo.getSystem(),analyser.settings().domain_bounds);
+	analyser.settings().lock_to_grid_time = getLockToGridTime(verInput.getSystem(),analyser.settings().domain_bounds);
 	ARIADNE_LOG(5, "Lock to grid time: " << analyser.settings().lock_to_grid_time << "\n");
 	analyser.settings().locked_constants = locked_constants;
 	ARIADNE_LOG(5, "Locked constants: " << analyser.settings().locked_constants << "\n");

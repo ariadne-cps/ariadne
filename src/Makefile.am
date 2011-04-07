@@ -50,7 +50,8 @@ SRC = \
 	graphics.cc \
 	textplot.cc \
 	parametric.cc \
-	verifier.cc
+	verifier.cc \
+	verification_input.cc
 
 CALCULUS_SRC = \
 	numeric.cc \

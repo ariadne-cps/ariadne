@@ -116,11 +116,6 @@ class DominanceVerificationInput : public VerificationInput
 
 	virtual std::ostream& write(std::ostream&) const;
 
-protected:
-
-	/** \brief Checks fields consistency */
-	void _check_fields() const;
-
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DominanceVerificationInput& verInput) {

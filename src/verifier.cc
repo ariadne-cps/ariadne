@@ -895,79 +895,30 @@ Verifier::_dominance_proving(
 	ARIADNE_LOG(3,"Proving...\n");
 
 	bool result;
-	bool obtained_outer_approximation;
 
 	const RealConstantSet& original_constants = dominating.getSystem().accessible_constants();
 
 	dominating.getSystem().substitute(constants,_settings->use_param_midpoints_for_proving);
 
-	HybridGridTreeSet dominating_reach;
-
 	try {
 
-		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominated system...\n");
+		Box shrinked_dominated_bounds = _dominance_shrinked_lower_bounds(dominated,constants,DOMINATED);
 
-		RealConstantSet emptyLockedConstants;
-		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_reachability_restriction,LOWER_SEMANTICS);
-
-		ARIADNE_LOG(4,"Getting the lower approximation of the dominated system...\n");
-
-		HybridGridTreeSet dominated_reach;
-		DisproveData disproveData(dominated.getSystem().state_space());
-		make_lpair<HybridGridTreeSet,DisproveData>(dominated_reach,disproveData) =
-				_lower_analyser->lower_chain_reach(dominated.getSystem(),dominated.getInitialSet());
-
-		// We must shrink the lower approximation of the the dominated system, but underapproximating in terms of rounding
-		HybridBoxes shrinked_dominated_bounds = Ariadne::shrink_in(disproveData.getReachBounds(),disproveData.getEpsilon());
-
-		Box projected_shrinked_dominated_bounds = Ariadne::project(shrinked_dominated_bounds,dominated.getProjection());
-
-		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
-		ARIADNE_LOG(5,"Projected shrinked dominated bounds: " << projected_shrinked_dominated_bounds << "\n");
-
-		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominating system...\n");
-
-		HybridBoxes shrinked_dominated_bounds_on_dominating_space = Ariadne::project(projected_shrinked_dominated_bounds,
+		HybridBoxes shrinked_dominated_bounds_on_dominating_space = Ariadne::project(shrinked_dominated_bounds,
 				dominating.getProjection(),dominating.getSystem().state_space());
 
-		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_reachability_restriction,UPPER_SEMANTICS);
+		Box dominating_bounds = _dominance_outer_bounds(
+				dominating,shrinked_dominated_bounds_on_dominating_space,constants,DOMINATING);
 
-		ARIADNE_LOG(4,"Getting the outer approximation of the dominating system...\n");
-
-		bool terminate_as_soon_as_unprovable = _settings->allow_quick_dominance_proving && !_dominating_reachability_restriction.empty();
-
-		dominating_reach = _outer_analyser->outer_chain_reach(dominating.getSystem(),dominating.getInitialSet(),
-				terminate_as_soon_as_unprovable,shrinked_dominated_bounds_on_dominating_space,NOT_INSIDE_TARGET);
-
-		Box projected_dominating_bounds = Ariadne::project(dominating_reach.bounding_box(),dominating.getProjection());
-
-		ARIADNE_LOG(5,"Projected dominating bounds: " << projected_dominating_bounds << "\n");
-
-		if (_settings->plot_results) {
-			_plot_dominance(dominating_reach,UPPER_SEMANTICS,DOMINANCE_POSITIVE);
-			_plot_dominance(dominated_reach,LOWER_SEMANTICS,DOMINANCE_POSITIVE);
-		}
-
-		result = inside(projected_dominating_bounds,projected_shrinked_dominated_bounds);
-		obtained_outer_approximation = true;
+		result = inside(dominating_bounds,shrinked_dominated_bounds);
 
 	} catch (ReachOutOfDomainException ex) {
 		ARIADNE_LOG(4,"The outer reached region of the dominating system is partially out of the domain.\n");
 		result = false;
-		obtained_outer_approximation = false;
 	} catch (ReachOutOfTargetException ex) {
 		ARIADNE_LOG(4,"The outer reached region of the dominating system is not inside " +
 				"the projected shrinked lower reached region of the dominated system.\n");
 		result = false;
-		obtained_outer_approximation = false;
-	}
-
-	if (obtained_outer_approximation) {
-		if (!_dominating_coarse_outer_approximation->is_set()) {
-			_dominating_coarse_outer_approximation->set(dominating_reach);
-		} else {
-			_dominating_reachability_restriction = dominating_reach;
-		}
 	}
 
 	ARIADNE_LOG(3, (result ? "Proved.\n" : "Not proved.\n") );
@@ -987,78 +938,30 @@ Verifier::_dominance_disproving(
 	ARIADNE_LOG(3,"Disproving...\n");
 
 	bool result;
-	bool obtained_outer_approximation;
 
 	const RealConstantSet& original_constants = dominating.getSystem().accessible_constants();
-
-	HybridGridTreeSet dominated_reach;
 
 	dominating.getSystem().substitute(constants,_settings->use_param_midpoints_for_disproving);
 
 	try {
 
-		ARIADNE_LOG(4,"Choosing the settings for the lower approximation of the dominating system...\n");
+		Box shrinked_dominating_bounds = _dominance_shrinked_lower_bounds(dominating,constants,DOMINATING);
 
-		_chooseDominanceSettings(dominating,constants,_dominating_coarse_outer_approximation->get(),_dominating_reachability_restriction,LOWER_SEMANTICS);
-
-		ARIADNE_LOG(4,"Getting the lower approximation of the dominating system...\n");
-
-		HybridGridTreeSet dominating_reach;
-		DisproveData disproveData(dominating.getSystem().state_space());
-		make_lpair<HybridGridTreeSet,DisproveData>(dominating_reach,disproveData) =
-				_lower_analyser->lower_chain_reach(dominating.getSystem(),dominating.getInitialSet());
-
-		// We must shrink the lower approximation of the the dominating system, but overapproximating in terms of rounding
-		HybridBoxes shrinked_dominating_bounds = Ariadne::shrink_out(disproveData.getReachBounds(),disproveData.getEpsilon());
-
-		Box projected_shrinked_dominating_bounds = Ariadne::project(shrinked_dominating_bounds,dominating.getProjection());
-
-		ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
-		ARIADNE_LOG(5,"Projected shrinked dominating bounds: " << projected_shrinked_dominating_bounds << "\n");
-
-		ARIADNE_LOG(4,"Choosing the settings for the outer approximation of the dominated system...\n");
-
-		HybridBoxes shrinked_dominating_bounds_on_dominated_space = Ariadne::project(projected_shrinked_dominating_bounds,
+		HybridBoxes shrinked_dominating_bounds_on_dominated_space = Ariadne::project(shrinked_dominating_bounds,
 				dominated.getProjection(),dominated.getSystem().state_space());
 
-		RealConstantSet emptyLockedConstants;
-		_chooseDominanceSettings(dominated,emptyLockedConstants,_dominated_coarse_outer_approximation->get(),_dominated_reachability_restriction,UPPER_SEMANTICS);
+		Box dominated_bounds = _dominance_outer_bounds(
+				dominated,shrinked_dominating_bounds_on_dominated_space,constants,DOMINATED);
 
-		ARIADNE_LOG(4,"Getting the outer approximation of the dominated system...\n");
+		result = !inside(shrinked_dominating_bounds,dominated_bounds);
 
-		bool terminate_as_soon_as_disproved = _settings->allow_quick_dominance_disproving && !_dominated_reachability_restriction.empty();
-
-		dominated_reach = _outer_analyser->outer_chain_reach(dominated.getSystem(),dominated.getInitialSet(),
-				terminate_as_soon_as_disproved,shrinked_dominating_bounds_on_dominated_space,SUPERSET_OF_TARGET);
-
-		Box projected_dominated_bounds = Ariadne::project(dominated_reach.bounding_box(),dominated.getProjection());
-
-		ARIADNE_LOG(5,"Projected dominated bounds: " << projected_dominated_bounds << "\n");
-
-		if (_settings->plot_results) {
-			_plot_dominance(dominated_reach,UPPER_SEMANTICS,DOMINANCE_NEGATIVE);
-			_plot_dominance(dominating_reach,LOWER_SEMANTICS,DOMINANCE_NEGATIVE);
-		}
-
-		result = !inside(projected_shrinked_dominating_bounds,projected_dominated_bounds);
-		obtained_outer_approximation = true;
 	} catch (ReachOutOfDomainException ex) {
 		ARIADNE_LOG(4,"The outer reached region of the dominated system is partially out of the domain.\n");
 		result = false;
-		obtained_outer_approximation = false;
 	} catch (ReachEnclosesTargetException ex) {
 		ARIADNE_LOG(4,"The outer reached region of the dominated system encloses " +
 				"the projected shrinked lower reached region of the dominated system.\n");
 		result = true;
-		obtained_outer_approximation = false;
-	}
-
-	if (obtained_outer_approximation) {
-		if (!_dominated_coarse_outer_approximation->is_set()) {
-			_dominated_coarse_outer_approximation->set(dominated_reach);
-		} else {
-			_dominated_reachability_restriction = dominated_reach;
-		}
 	}
 
 	ARIADNE_LOG(3, (result ? "Disproved.\n" : "Not disproved.\n") );
@@ -1067,6 +970,89 @@ Verifier::_dominance_disproving(
 
 	return result;
 }
+
+
+Box
+Verifier::
+_dominance_shrinked_lower_bounds(
+		DominanceVerificationInput& verInfo,
+		const RealConstantSet& constants,
+		DominanceSystem dominanceSystem) const
+{
+	string descriptor = (dominanceSystem == DOMINATING ? "dominating" : "dominated");
+	HybridGridTreeSet outer_approximation = (dominanceSystem == DOMINATING ?
+			_dominating_coarse_outer_approximation->get() : _dominated_coarse_outer_approximation->get());
+	HybridGridTreeSet reachability_restriction = (dominanceSystem == DOMINATING ?
+			_dominating_reachability_restriction : _dominated_reachability_restriction);
+
+	ARIADNE_LOG(4,"Choosing the settings for the lower reached region of the " << descriptor << " system...\n");
+
+	RealConstantSet emptyLockedConstants;
+	_chooseDominanceSettings(verInfo,emptyLockedConstants,outer_approximation,reachability_restriction,LOWER_SEMANTICS);
+
+	ARIADNE_LOG(4,"Getting the lower reached region of the " << descriptor << " system...\n");
+
+	HybridGridTreeSet reach;
+	DisproveData disproveData(verInfo.getSystem().state_space());
+	make_lpair<HybridGridTreeSet,DisproveData>(reach,disproveData) =
+			_lower_analyser->lower_chain_reach(verInfo.getSystem(),verInfo.getInitialSet());
+
+	// We must shrink the lower approximation of the system, but underapproximating in terms of rounding
+	HybridBoxes shrinked_bounds = Ariadne::shrink_in(disproveData.getReachBounds(),disproveData.getEpsilon());
+
+	Box projected_shrinked_bounds = Ariadne::project(shrinked_bounds,verInfo.getProjection());
+
+	ARIADNE_LOG(5,"Epsilon: " << disproveData.getEpsilon() << "\n");
+	ARIADNE_LOG(5,"Projected shrinked " << descriptor << " bounds: " << projected_shrinked_bounds << "\n");
+
+	if (_settings->plot_results)
+		_plot_dominance(reach,dominanceSystem,LOWER_SEMANTICS);
+
+	return projected_shrinked_bounds;
+}
+
+
+Box
+Verifier::
+_dominance_outer_bounds(
+		DominanceVerificationInput& verInput,
+		HybridBoxes& lower_bounds_on_this_space,
+		const RealConstantSet& constants,
+		DominanceSystem dominanceSystem) const
+{
+	string descriptor = (dominanceSystem == DOMINATING ? "dominating" : "dominated");
+	OuterApproximationCache& outer_approximation_cache = (dominanceSystem == DOMINATING ?
+			*_dominating_coarse_outer_approximation : *_dominated_coarse_outer_approximation);
+	HybridGridTreeSet& reachability_restriction = (dominanceSystem == DOMINATING ?
+			_dominating_reachability_restriction : _dominated_reachability_restriction);
+
+	ARIADNE_LOG(4,"Choosing the settings for the outer reached region of the " << descriptor << " system...\n");
+
+	_chooseDominanceSettings(verInput,constants,outer_approximation_cache.get(),reachability_restriction,UPPER_SEMANTICS);
+
+	ARIADNE_LOG(4,"Getting the outer reached region of the " << descriptor << " system...\n");
+
+	bool terminate_as_soon_as_unprovable = _settings->allow_quick_dominance_proving && !reachability_restriction.empty();
+
+	HybridGridTreeSet reach = _outer_analyser->outer_chain_reach(verInput.getSystem(),verInput.getInitialSet(),
+			terminate_as_soon_as_unprovable,lower_bounds_on_this_space,NOT_INSIDE_TARGET);
+
+	Box projected_bounds = Ariadne::project(reach.bounding_box(),verInput.getProjection());
+
+	ARIADNE_LOG(5,"Projected " << descriptor << " bounds: " << projected_bounds << "\n");
+
+	if (!outer_approximation_cache.is_set()) {
+		outer_approximation_cache.set(reach);
+	} else {
+		reachability_restriction = reach;
+	}
+
+	if (_settings->plot_results)
+		_plot_dominance(reach,dominanceSystem,UPPER_SEMANTICS);
+
+	return projected_bounds;
+}
+
 
 void
 Verifier::
@@ -1207,23 +1193,17 @@ void
 Verifier::
 _plot_dominance(
 		const HybridGridTreeSet& reach,
-		Semantics semantics,
-		DominanceChecking dominance_checking) const
+		DominanceSystem dominanceSystem,
+		Semantics semantics) const
 {
 	int maximum_grid_depth = _outer_analyser->settings().maximum_grid_depth;
 
+	string system_descr = (dominanceSystem == DOMINATING ? "dominating" : "dominated");
+	string verification_descr = (semantics == UPPER_SEMANTICS ? "pos" : "neg");
+
 	char mgd_char[10];
 	sprintf(mgd_char,"%i",maximum_grid_depth);
-	string filename;
-	if (semantics == UPPER_SEMANTICS && dominance_checking == DOMINANCE_POSITIVE)
-		filename = "dominating-pos-";
-	else if (semantics == UPPER_SEMANTICS && dominance_checking == DOMINANCE_NEGATIVE)
-		filename = "dominated-neg-";
-	else if (semantics == LOWER_SEMANTICS && dominance_checking == DOMINANCE_POSITIVE)
-		filename = "dominated-pos-";
-	else
-		filename = "dominating-neg-";
-
+	string filename = system_descr + "-" + verification_descr + "-";
 	filename.append(mgd_char);
 	plot(_plot_dirpath,filename,reach);
 }

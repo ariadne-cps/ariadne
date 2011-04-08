@@ -275,16 +275,16 @@ public:
 					 const HybridTime& time, 
 					 const int& accuracy, 
 					 const uint& concurrency,
-					 const HybridBoxes& disprove_bounds,
-					 const bool& skip_if_disproved)
+					 const HybridBoxes& feasible_bounds,
+					 const bool& terminate_as_soon_as_infeasible)
 	: _discretiser(discretiser),
 	  _initial_enclosures(initial_enclosures),
 	  _sys(sys), 
 	  _time(time),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency),
-	  _disprove_bounds(disprove_bounds),
-	  _skip_if_disproved(skip_if_disproved),
+	  _disprove_bounds(feasible_bounds),
+	  _skip_if_disproved(terminate_as_soon_as_infeasible),
 	  _falsInfo(DisproveData(sys.state_space()))
     {
     	_reach = HGTS(sys.grid());

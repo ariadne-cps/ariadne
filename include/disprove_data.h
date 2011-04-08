@@ -35,8 +35,6 @@
 
 namespace Ariadne {
 
-typedef std::map<DiscreteState,Vector<Float> > HybridFloatVector;
-
 /**
  * \brief This is a structure for keeping data obtained during lower chain reach, in order to get info for falsification.
  */

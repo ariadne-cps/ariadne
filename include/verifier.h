@@ -36,7 +36,7 @@ namespace Ariadne {
 
 class HybridReachabilityAnalyser;
 
-enum DominanceSystem { DOMINATING, DOMINATED };
+enum DominanceSystem { DOMINATING_SYSTEM, DOMINATED_SYSTEM };
 
 /** \brief Performs verification over reachable sets information. */
 class Verifier
@@ -309,14 +309,16 @@ class Verifier
 			DominanceVerificationInput& dominated,
 			const RealConstantSet& constants) const;
 
-	/*! \brief Performs the positive part of dominance checking. */
-	bool _dominance_proving(
+	/*! \brief Performs the proving part of dominance checking.
+	 * \details Tries proving only once, in respect to the current grid depth. */
+	bool _dominance_proving_once(
 			DominanceVerificationInput& dominating,
 			DominanceVerificationInput& dominated,
 			const RealConstantSet& constants) const;
 
-	/*! \brief Performs the negative part of dominance checking. */
-	bool _dominance_disproving(
+	/*! \brief Performs the disproving part of dominance checking.
+	 * \details Tries disproving only once, in respect to the current grid depth. */
+	bool _dominance_disproving_once(
 			DominanceVerificationInput& dominating,
 			DominanceVerificationInput& dominated,
 			const RealConstantSet& constants) const;
@@ -393,13 +395,6 @@ class Verifier
 
 	/*! \brief Checks whether a grid depth value is allowed for use in iterative verification, based on the \a semantics. */
 	bool _is_grid_depth_within_bounds(Semantics semantics) const;
-
-	/*! \brief Updates the constraining information.
-	 * \details It reads \a outer_approximation_cache for emptiness;
-	 * then possibly sets \a outer_approximation_cache with \a new_outer_approximation. */
-	void _update_safety_constraining(
-			OuterApproximationCache& outer_approximation_cache,
-			const HybridGridTreeSet& new_outer_approximation) const;
 
 	// Reached region plotting methods
 	void _plot_dirpath_init(std::string basename) const;

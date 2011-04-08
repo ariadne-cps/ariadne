@@ -99,6 +99,20 @@ shrink_out(const HybridBoxes& box, const HybridFloatVector& epsilon)
 
 
 HybridBoxes
+widen(const HybridBoxes& box)
+{
+	HybridBoxes result;
+	for (HybridBoxes::const_iterator loc_it = box.begin(); loc_it != box.end(); loc_it++) {
+		Box bx = loc_it->second;
+		bx.widen();
+		result.insert(make_pair<DiscreteState,Box>(loc_it->first,bx));
+	}
+
+	return result;
+}
+
+
+HybridBoxes
 unbounded_hybrid_boxes(const HybridSpace& hspace)
 {
 	HybridBoxes result;

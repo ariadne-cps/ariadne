@@ -61,7 +61,6 @@ class HybridConstraintSet;
 
 typedef std::map<DiscreteState,Vector<Float> > HybridFloatVector;
 
-
 template<class HBS> class HybridBasicSetExpression { };
 template<class HDS> class HybridDenotableSetExpression { };
 
@@ -119,6 +118,9 @@ shrink_in(const HybridBoxes& box, const HybridFloatVector& epsilon);
 
 HybridBoxes
 shrink_out(const HybridBoxes& box, const HybridFloatVector& epsilon);
+
+HybridBoxes
+widen(const HybridBoxes& box);
 
 HybridBoxes
 unbounded_hybrid_boxes(const HybridSpace& hspace);

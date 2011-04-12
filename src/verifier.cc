@@ -995,7 +995,7 @@ _dominance_outer_bounds(
 	bool terminate_as_soon_as_unprovable = _settings->allow_quick_dominance_proving && !reachability_restriction.empty();
 
 	HybridGridTreeSet reach = _outer_analyser->outer_chain_reach(verInput.getSystem(),verInput.getInitialSet(),
-			terminate_as_soon_as_unprovable,lower_bounds_on_this_space,NOT_INSIDE_TARGET);
+			terminate_as_soon_as_unprovable,lower_bounds_on_this_space,SUPERSET_OF_TARGET);
 
 	Box projected_bounds = Ariadne::project(reach.bounding_box(),verInput.getProjection());
 

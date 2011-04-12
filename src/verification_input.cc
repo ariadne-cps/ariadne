@@ -113,7 +113,7 @@ DominanceVerificationInput::DominanceVerificationInput(
 		HybridBoxes& domain,
 		std::vector<uint>& projection) :
 		VerificationInput(system,initial_set,domain),
-		_projection(std::vector<uint>(0))
+		_projection(projection)
 {
 }
 

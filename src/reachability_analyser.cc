@@ -445,7 +445,7 @@ _outer_chain_reach_forward(const SystemType& system,
 
         ARIADNE_LOG(6,"Initial enclosures size = " << working_enclosures.size() << "\n");
 
-        make_lpair(new_reach,new_final)=_upper_reach_evolve_continuous(system,working_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
+        make_lpair(new_reach,new_final) = _upper_reach_evolve_continuous(system,working_enclosures,hybrid_lock_to_grid_time,maximum_grid_depth);
 
         new_final.remove(final);
 		new_reach.remove(reach);

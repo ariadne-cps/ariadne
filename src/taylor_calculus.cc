@@ -55,7 +55,8 @@ class NonInvertibleFunctionException  : public std::runtime_error {
 std::pair<Float, Vector<Interval> >
 flow_bounds(VectorFunction const& vf,
             Vector<Interval> const& d,
-            Float const& hmax)
+            Float const& hmax,
+            bool use_lipschitz)
 {
 
     ARIADNE_ASSERT(vf.argument_size()==d.size());
@@ -68,11 +69,16 @@ flow_bounds(VectorFunction const& vf,
     const uint EXPANSION_STEPS=8;
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
+    const double LIPSCHITZ_TOLERANCE = 0.5;
 
     Vector<Interval> delta=(d-midpoint(d))*(BOX_RADIUS_MULTIPLIER-1);
 
-    Float h=hmax;
+    Float lip = norm(vf.jacobian(d)).upper();
+    Float hlip = LIPSCHITZ_TOLERANCE/lip;
+
     Float hmin=hmax/(1<<REDUCTION_STEPS);
+    Float h=max(hmin,min(hmax,hlip));
+
     bool success=false;
     Vector<Interval> b,nb,df;
     Interval ih(0,h);
@@ -148,7 +154,9 @@ TaylorCalculus()
     : _spacial_order(4),
       _temporal_order(6),
       _sweep_threshold(1e-10),
+      _use_lipschitz(false),
       _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
+
 {
 }
 
@@ -157,7 +165,20 @@ TaylorCalculus(ushort spacial_order, ushort temporal_order, double sweep_thresho
     : _spacial_order(spacial_order),
       _temporal_order(temporal_order),
       _sweep_threshold(sweep_threshold),
+      _use_lipschitz(false),
       _spacial_accuracy_ptr(new AccuracyType(sweep_threshold,spacial_order))
+
+{
+}
+
+TaylorCalculus::
+TaylorCalculus(ushort spacial_order, ushort temporal_order, double sweep_threshold, bool use_lipschitz)
+    : _spacial_order(spacial_order),
+      _temporal_order(temporal_order),
+      _sweep_threshold(sweep_threshold),
+      _use_lipschitz(use_lipschitz),
+      _spacial_accuracy_ptr(new AccuracyType(sweep_threshold,spacial_order))
+
 {
 }
 
@@ -167,6 +188,7 @@ TaylorCalculus(const TaylorCalculus& tc)
     : _spacial_order(tc._spacial_order),
       _temporal_order(tc._temporal_order),
       _sweep_threshold(tc._sweep_threshold),
+      _use_lipschitz(false),
       _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
@@ -588,7 +610,7 @@ TaylorCalculus::flow_bounds(VectorFunction const& vf,
     Vector<Interval> bx=r;
     for(uint i=0; i!=bx.size(); ++i) { if(bx[i].lower()==bx[i].upper()) { bx[i]+=Interval(-EPS,+EPS); } }
 
-    return Ariadne::flow_bounds(vf,bx,hmax);
+    return Ariadne::flow_bounds(vf,bx,hmax,this->_use_lipschitz);
 }
 
 

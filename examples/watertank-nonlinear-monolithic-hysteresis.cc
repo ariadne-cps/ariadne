@@ -47,7 +47,7 @@ int main(int argc,char *argv[])
 	// The safe region
 	HybridBoxes safe_box = bounding_boxes(system.state_space(),Box(2, 5.25, 8.25, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
-	SafetyVerificationInput verInfo(system, initial_set, domain, safe_box);
+	SafetyVerificationInput verInput(system, initial_set, domain, safe_box);
 
 	/// Verification
 
@@ -63,7 +63,7 @@ int main(int argc,char *argv[])
 	lower_analyser.settings().highest_maximum_grid_depth = 5;
 	Verifier verifier(outer_analyser,lower_analyser);
 	verifier.verbosity = verifierVerbosity;
-	verifier.settings().plot_results = false;
+	verifier.settings().plot_results = true;
 	verifier.settings().maximum_parameter_depth = 5;
 
 	// The parameters
@@ -71,6 +71,7 @@ int main(int argc,char *argv[])
 	parameters.insert(RealConstant("hmin",Interval(5.25,6.25)));
 	parameters.insert(RealConstant("hmax",Interval(7.25,8.25)));
 
-	std::list<ParametricOutcome> results = verifier.parametric_safety(verInfo, parameters);
+	//cout << verifier.safety(verInput) << "\n";
+	std::list<ParametricOutcome> results = verifier.parametric_safety(verInput, parameters);
 	draw(system.name(),results);
 }

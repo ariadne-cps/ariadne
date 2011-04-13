@@ -537,15 +537,6 @@ class HybridAutomaton
     //! \details If the constant is already registered, no action is performed.
     void register_accessible_constant(RealConstant c);
 
-    //! \brief Set the grid controlling relative scaling in the mode.
-    void set_grid(DiscreteState location, const Grid& grid);
-
-    //! \brief Set the grid controlling relative scaling. This method sets the same grid for every mode.
-    void set_grid(const Grid& grid);
-
-    //! \brief Set the hybrid grid controlling relative scaling.
-    void set_grid(const HybridGrid& hgrid);
-
 	/*! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all the functions of modes and transitions. */
 	void substitute(Constant<Real> con, const Real& c);
 
@@ -611,12 +602,6 @@ class HybridAutomaton
 
     //! \brief The hybrid set giving the invariants for each discrete location.
     HybridSet invariant() const;
-
-    //! \brief The natural grid to use in the specified location.
-    Grid grid(DiscreteState location) const;
-
-    //! \brief The natural grid to use in the over all locations.
-    HybridGrid grid() const;
 
     //@}
     

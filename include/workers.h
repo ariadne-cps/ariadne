@@ -42,18 +42,20 @@ public:
     					   const HybridAutomaton& sys,
     					   const HGTS& initial_set,
     					   const HybridTime& time,
+    					   const HybridGrid& grid,
     					   const int& accuracy,
     					   const uint& concurrency)
 	: _discretiser(discretiser),
 	  _sys(sys), 
 	  _initial_set(initial_set),
 	  _time(time),
+	  _grid(grid),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency),
 	  _cells_it(_initial_set.begin())
     {
-		_reach = HGTS(sys.grid());
-		_evolve = HGTS(sys.grid());
+		_reach = HGTS(grid);
+		_evolve = HGTS(grid);
 		_cells_it = _initial_set.begin();
     }
  
@@ -81,6 +83,7 @@ private:
 	const HybridAutomaton& _sys;
 	const HGTS& _initial_set;
 	const HybridTime& _time;
+	const HybridGrid& _grid;
 	const int& _accuracy;
 	const uint& _concurrency;
 	// The sets in which the _compute function adjoins results
@@ -123,7 +126,7 @@ private:
 				_inp_mutex.unlock();		
 
         		HGTS reach, evolve;
-		        make_lpair(reach,evolve)=_discretiser->evolution(_sys,enclosure,_time,_accuracy,UPPER_SEMANTICS);
+		        make_lpair(reach,evolve)=_discretiser->evolution(_sys,enclosure,_time,_grid,_accuracy,UPPER_SEMANTICS);
 				
 				_out_mutex.lock();
 		        _reach.adjoin(reach);
@@ -155,18 +158,20 @@ public:
     								 const HybridAutomaton& sys,
     								 const list<EnclosureType>& initial_enclosures,
     								 const HybridTime& time,
+    								 const HybridGrid& grid,
     								 const int& accuracy,
     								 const uint& concurrency)
 	: _discretiser(discretiser),
 	  _sys(sys), 
 	  _initial_enclosures(initial_enclosures),
 	  _time(time),
+	  _grid(grid),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency),
 	  _enclosures_it(_initial_enclosures.begin())
     {
-		_reach = HGTS(sys.grid());
-		_evolve = HGTS(sys.grid());
+		_reach = HGTS(grid);
+		_evolve = HGTS(grid);
 		_enclosures_it = _initial_enclosures.begin();
     }
  
@@ -194,6 +199,7 @@ private:
 	const HybridAutomaton& _sys;
 	const list<EnclosureType>& _initial_enclosures;
 	const HybridTime& _time;
+	const HybridGrid& _grid;
 	const int& _accuracy;
 	const uint& _concurrency;
 	// The sets in which the _compute function adjoins results
@@ -236,7 +242,7 @@ private:
 				_inp_mutex.unlock();		
 
         		HGTS reach, evolve;
-		        make_lpair(reach,evolve)=_discretiser->upper_evolution_continuous(_sys,enclosure,_time,_accuracy);
+		        make_lpair(reach,evolve)=_discretiser->upper_evolution_continuous(_sys,enclosure,_time,_grid,_accuracy);
 
 				_out_mutex.lock();
 		        _reach.adjoin(reach);
@@ -273,7 +279,8 @@ public:
 					 EL& initial_enclosures,
 					 const HybridAutomaton& sys, 
 					 const HybridTime& time, 
-					 const int& accuracy, 
+					 const HybridGrid& grid,
+					 const int& accuracy,
 					 const uint& concurrency,
 					 const HybridBoxes& feasible_bounds,
 					 const bool& terminate_as_soon_as_infeasible)
@@ -281,14 +288,15 @@ public:
 	  _initial_enclosures(initial_enclosures),
 	  _sys(sys), 
 	  _time(time),
+	  _grid(grid),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency),
 	  _disprove_bounds(feasible_bounds),
 	  _skip_if_disproved(terminate_as_soon_as_infeasible),
 	  _falsInfo(DisproveData(sys.state_space()))
     {
-    	_reach = HGTS(sys.grid());
-		_evolve_global = HGTS(sys.grid());
+    	_reach = HGTS(grid);
+		_evolve_global = HGTS(grid);
     }
  
     ~LowerChainReachWorker()
@@ -319,6 +327,7 @@ private:
 	EL& _initial_enclosures;
 	const HybridAutomaton& _sys;
 	const HybridTime& _time;
+	const HybridGrid& _grid;
 	const int& _accuracy;
 	const uint& _concurrency;
 	// The adjoined evolve common to all threads
@@ -380,8 +389,8 @@ private:
 																						  _disprove_bounds, _skip_if_disproved);
 
 				// Get the discretisation
-				current_reach = _discretiser->_discretise(current_reach_enclosures,_sys.grid(),_accuracy);
-				current_evolve = _discretiser->_discretise(current_evolve_enclosures,_sys.grid(),_accuracy);
+				current_reach = _discretiser->_discretise(current_reach_enclosures,_grid,_accuracy);
+				current_evolve = _discretiser->_discretise(current_evolve_enclosures,_grid,_accuracy);
 
 				_out_mutex.lock();
 				_reach.adjoin(current_reach);

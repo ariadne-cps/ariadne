@@ -176,6 +176,7 @@ HybridDiscretiser<ES>::
 evolution(const SystemType& system, 
           const EnclosureType& initial_set, 
           const TimeType& time,
+          const HybridGrid& grid,
           const AccuracyType accuracy,
           const Semantics semantics) const
 {
@@ -183,8 +184,8 @@ evolution(const SystemType& system,
     Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,initial_set,time,semantics);
     ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\nOK\n");
-    HybridGridTreeSet reach=this->_discretise(continuous_orbit.reach(),system.grid(),accuracy);
-    HybridGridTreeSet final=this->_discretise(continuous_orbit.final(),system.grid(),accuracy);
+    HybridGridTreeSet reach=this->_discretise(continuous_orbit.reach(),grid,accuracy);
+    HybridGridTreeSet final=this->_discretise(continuous_orbit.final(),grid,accuracy);
 	reach.adjoin(final); // Always adjoin the reached region with the final region (preferable for consistency with _evolver.reach() )
     ARIADNE_LOG(5,"discretised reach size="<<reach.size()<<"\n");
     ARIADNE_LOG(5,"discretised final size="<<final.size()<<"\n");
@@ -199,14 +200,15 @@ HybridDiscretiser<ES>::
 upper_evolution_continuous(const SystemType& system,
           				   const EnclosureType& initial_set, 
 				           const TimeType& time,
-          				   const AccuracyType accuracy) const
+				           const HybridGrid& grid,
+				           const AccuracyType accuracy) const
 {
     ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
     Orbit<EnclosureType> continuous_orbit=this->_evolver->upper_orbit_continuous(system,initial_set,time);
     ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
     ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\nOK\n");
-    HybridGridTreeSet reach=this->_discretise(continuous_orbit.reach(),system.grid(),accuracy);
-    HybridGridTreeSet final=this->_discretise(continuous_orbit.final(),system.grid(),accuracy);
+    HybridGridTreeSet reach=this->_discretise(continuous_orbit.reach(),grid,accuracy);
+    HybridGridTreeSet final=this->_discretise(continuous_orbit.final(),grid,accuracy);
 	reach.adjoin(final); // Always adjoin the reached region with the final region (preferable for consistency with _evolver.reach() )
     ARIADNE_LOG(5,"discretised reach size="<<reach.size()<<"\n");
     ARIADNE_LOG(5,"discretised final size="<<final.size()<<"\n");
@@ -221,11 +223,12 @@ HybridDiscretiser<ES>::
 reach(const SystemType& system, 
             const EnclosureType& initial_set, 
             const TimeType& time,
+            const HybridGrid& grid,
             const AccuracyType accuracy,
             const Semantics semantics) const
 {
     return this->_discretise(this->_evolver->reach(system,initial_set,time,semantics),
-                             system.grid(),accuracy);
+                             grid,accuracy);
 }
 
 
@@ -235,11 +238,11 @@ HybridDiscretiser<ES>::
 evolve(const SystemType& system, 
              const EnclosureType& initial_set, 
              const TimeType& time,
+             const HybridGrid& grid,
              const AccuracyType accuracy,
              const Semantics semantics) const
 {
     ListSet<EnclosureType> final_enclosures=this->_evolver->evolve(system,initial_set,time,semantics);
-    HybridGrid grid=system.grid();
     return this->_discretise(final_enclosures,grid,accuracy);
 }
 
@@ -249,9 +252,10 @@ HybridDiscretiser<ES>::
 lower_evolution(const SystemType& system, 
                 const EnclosureType& initial_set, 
                 const TimeType& time,
-                const AccuracyType accuracy) const 
+                const HybridGrid& grid,
+                const AccuracyType accuracy) const
 { 
-    return this->evolution(system, initial_set, time, accuracy, LOWER_SEMANTICS);
+    return this->evolution(system, initial_set, time, grid, accuracy, LOWER_SEMANTICS);
 }
 
 template<class ES>
@@ -260,9 +264,10 @@ HybridDiscretiser<ES>::
 upper_evolution(const SystemType& system, 
                 const EnclosureType& initial_set, 
                 const TimeType& time,
-                const AccuracyType accuracy) const 
+                const HybridGrid& grid,
+                const AccuracyType accuracy) const
 { 
-    return this->evolution(system, initial_set, time, accuracy, UPPER_SEMANTICS);
+    return this->evolution(system, initial_set, time, grid, accuracy, UPPER_SEMANTICS);
 }
 
 

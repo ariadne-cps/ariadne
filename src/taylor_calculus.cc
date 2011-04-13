@@ -77,7 +77,7 @@ flow_bounds(VectorFunction const& vf,
     Float hlip = LIPSCHITZ_TOLERANCE/lip;
 
     Float hmin=hmax/(1<<REDUCTION_STEPS);
-    Float h=max(hmin,min(hmax,hlip));
+    Float h=(use_lipschitz ? max(hmin,min(hmax,hlip)) : hmax);
 
     bool success=false;
     Vector<Interval> b,nb,df;

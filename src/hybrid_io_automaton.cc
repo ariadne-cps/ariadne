@@ -30,7 +30,6 @@
 #include "assignment.h"
 #include "operators.h"
 #include "space.h"
-#include "grid.h"
 
 
 namespace Ariadne {
@@ -269,8 +268,7 @@ HybridIOAutomaton::
 HybridIOAutomaton()
     : _name(""), 
       _input_vars(), _output_vars(), _internal_vars(),
-      _input_events(), _output_events(), _internal_events(),
-      _grid()
+      _input_events(), _output_events(), _internal_events()
 {
 }
 
@@ -278,8 +276,7 @@ HybridIOAutomaton::
 HybridIOAutomaton(const std::string& name)
     : _name(name), 
       _input_vars(), _output_vars(), _internal_vars(),
-      _input_events(), _output_events(), _internal_events(),
-      _grid()
+      _input_events(), _output_events(), _internal_events()
 {
 }
 
@@ -290,8 +287,7 @@ HybridIOAutomaton(const std::string& name,
                   const std::set< RealVariable >& internal_vars)
     : _name(name), 
       _input_vars(input_vars), _output_vars(output_vars), _internal_vars(internal_vars),
-      _input_events(), _output_events(), _internal_events(),
-      _grid()
+      _input_events(), _output_events(), _internal_events()
 {
     // Input, output, and internal events and variables must be disjoint
     ARIADNE_ASSERT_MSG(disjoint<RealVariable>(input_vars, output_vars), 
@@ -313,8 +309,7 @@ HybridIOAutomaton(const std::string& name,
                   const std::set< DiscreteEvent >& internal_events)
     : _name(name), 
       _input_vars(input_vars), _output_vars(output_vars), _internal_vars(internal_vars),
-      _input_events(input_events), _output_events(output_events), _internal_events(internal_events),
-      _grid()
+      _input_events(input_events), _output_events(output_events), _internal_events(internal_events)
 {
     // Input, output, and internal events and variables must be disjoint
     ARIADNE_ASSERT_MSG(disjoint<RealVariable>(input_vars, output_vars), 
@@ -628,50 +623,7 @@ HybridIOAutomaton::set_activation(DiscreteEvent event,
     return trans;
 }
 
-void 
-HybridIOAutomaton::set_grid(const std::map< RealVariable, Float>& grid) 
-{
-    // Check if grid is consistent with the variables of the automaton
-    // grid spacing of input variables cannot be specified 
-    ARIADNE_ASSERT_MSG(disjoint(this->_input_vars, grid),
-        "Grid " << grid << " is not disjoint from the set of input variables of automaton " << this->name());
-    // check if all variables of the grid are controlled by the automaton
-    ARIADNE_ASSERT_MSG(subset(grid, this->controlled_vars()),
-        "Grid " << grid << " contains variables that do not belongs to automaton " << this->name());
-    
-    this->_grid = grid;
-}
 
-void 
-HybridIOAutomaton::set_grid(const RealVariable& var, Float scaling)
-{
-    // Variable var should be a controlled variable of the automaton.
-    ARIADNE_ASSERT_MSG(!contains(this->_input_vars, var),
-        "Variable " << var << " is an input variable for automaton " << this->name() <<
-        ": grid scaling cannot be specified.");
-    ARIADNE_ASSERT_MSG(contains(this->controlled_vars(), var),
-        "Variable " << var << " does not belong to automaton " << this->name() <<
-        ": grid scaling cannot be specified.");
-    
-    this->_grid[var] = scaling;
-}
-
-const std::map< RealVariable, Float >&
-HybridIOAutomaton::grid() const 
-{
-    return this->_grid;
-}
-    
-Float 
-HybridIOAutomaton::grid(const RealVariable& var) const
-{
-    std::map< RealVariable, Float >::const_iterator iter = this->_grid.find(var);
-    
-    if(iter == this->_grid.end())   // If spacing is not specified, return the default value of 1.0
-        return 1.0;
-        
-    return iter->second;
-}
 
 bool 
 HybridIOAutomaton::has_input_var(const RealVariable& u) const
@@ -972,14 +924,6 @@ std::pair< HybridAutomaton, RealSpace > make_monolithic_automaton(const HybridIO
     											 constant_it != accessible_constants.end();
     											 ++constant_it)
     	ha.register_accessible_constant(*constant_it);
-
-    // Set the grid
-    Vector<Float> lengths(spc.size());
-    for(uint i = 0 ; i < spc.size() ; i++) {
-        lengths[i] = hioa.grid(spc[i]);
-    }
-    Grid grid(lengths);
-    ha.set_grid(grid);
     
     return make_pair(ha, spc);
 }
@@ -1255,11 +1199,6 @@ HybridIOAutomaton compose(const std::string& name,
     for (RealConstantSet::const_iterator constant_it = constants2.begin(); constant_it != constants2.end(); ++constant_it)
     	if (!ha.has_accessible_constant(*constant_it))
     		ha.register_accessible_constant(*constant_it);
-
-    // Set the grid as the union of the grids of the two components
-    std::map< RealVariable, Float > grid = ha1.grid();
-    grid.insert(ha2.grid().begin(), ha2.grid().end());
-    ha.set_grid(grid);
     
     // Start the recursive composition from the initial states init1 and init2.
     _recursive_composition(ha, ha1, ha2, init1, init2);
@@ -1567,8 +1506,7 @@ operator<<(std::ostream& os, const HybridIOAutomaton& ha)
         ", input events=" << ha.input_events() << ", output events=" << ha.output_events() <<
         ", internal events=" << ha.internal_events() <<        
         ", accessible constants=" << ha.accessible_constants() <<
-        ", modes=" << ha.modes() << ", transitions=" << ha.transitions() <<
-        ", grid=" << ha.grid() << ")";
+        ", modes=" << ha.modes() << ", transitions=" << ha.transitions() << ")";
 }
 
 void 

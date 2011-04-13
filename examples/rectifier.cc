@@ -270,7 +270,8 @@ int main()
     HybridReachabilityAnalyser analyser(evolver);
     analyser.settings().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.settings().maximum_grid_depth= MAX_GRID_DEPTH;
-    rectifier.set_grid(Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5)));
+    Grid grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5));
+    analyser.settings().grid = boost::shared_ptr<HybridGrid>(new HybridGrid(rectifier.state_space(),grid));
     std::cout <<  analyser.settings() << std::endl;
 
     analyser.verbosity=VERBOSITY;

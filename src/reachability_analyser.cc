@@ -93,13 +93,13 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
                                          const HybridTime& time,
                                          const int accuracy) const
 {
-    Gr grid=sys.grid();
+    HybridGrid grid=*_settings->grid;
     HybridGridTreeSet result(grid);
     HybridGridTreeSet cells=set;
     cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
         EnclosureType enclosure=_discretiser->enclosure(*iter);
-        result.adjoin(_discretiser->reach(sys,enclosure,time,accuracy,UPPER_SEMANTICS));
+        result.adjoin(_discretiser->reach(sys,enclosure,time,grid,accuracy,UPPER_SEMANTICS));
     }
     return result;
 }
@@ -111,12 +111,12 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
                                           const HybridTime& time,
                                           const int accuracy) const
 {
-    Gr grid=sys.grid();
+    HybridGrid grid=*_settings->grid;
     GTS result(grid); GTS cells=set; cells.mince(accuracy);
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
         ARIADNE_LOG(6,"Evolving cell = "<<*iter<<"\n");
         EnclosureType enclosure=_discretiser->enclosure(*iter);
-        result.adjoin(_discretiser->evolve(sys,enclosure,time,accuracy,UPPER_SEMANTICS));
+        result.adjoin(_discretiser->evolve(sys,enclosure,time,grid,accuracy,UPPER_SEMANTICS));
     }
     ARIADNE_LOG(5,"_upper_evolve result size = "<<result.size()<<"\n");
     return result;
@@ -131,6 +131,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
 {
     ARIADNE_LOG(6,"HybridReachabilityAnalyser::_upper_reach_evolve(...)\n");
 
+    HybridGrid grid=*_settings->grid;
 	GTS initial_set = set;
 	initial_set.mince(accuracy);
 
@@ -138,7 +139,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
 
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
-	UpperReachEvolveWorker worker(_discretiser,sys,set,time,accuracy,concurrency);
+	UpperReachEvolveWorker worker(_discretiser,sys,set,time,grid,accuracy,concurrency);
 
 	std::pair<GTS,GTS> result = worker.get_result();
 
@@ -157,7 +158,8 @@ HybridReachabilityAnalyser::_upper_reach_evolve_continuous(const HybridAutomaton
 
 	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
 
-	UpperReachEvolveContinuousWorker worker(_discretiser,sys,initial_enclosures,time,accuracy,concurrency);
+    HybridGrid grid=*_settings->grid;
+	UpperReachEvolveContinuousWorker worker(_discretiser,sys,initial_enclosures,time,grid,accuracy,concurrency);
 
 	ARIADNE_LOG(6,"Evolving and discretising...\n");
 	std::pair<GTS,GTS> result = worker.get_result();
@@ -176,13 +178,14 @@ lower_evolve(const SystemType& system,
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::lower_evolve(...)\n");
 
+    HybridGrid grid=*_settings->grid;
     GTS evolve;
 
-    list<EnclosureType> initial_enclosures = split_initial_set(initial_set,system.grid(),_settings->maximum_grid_depth,LOWER_SEMANTICS);
+    list<EnclosureType> initial_enclosures = split_initial_set(initial_set,grid,_settings->maximum_grid_depth,LOWER_SEMANTICS);
 
 	ARIADNE_LOG(5,"Computing evolution...\n");
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
-        GTS cell_final=_discretiser->evolve(system,*encl_it,time,_settings->maximum_grid_depth,LOWER_SEMANTICS);
+        GTS cell_final=_discretiser->evolve(system,*encl_it,time,grid,_settings->maximum_grid_depth,LOWER_SEMANTICS);
         evolve.adjoin(cell_final);
     }
 
@@ -198,14 +201,15 @@ lower_reach(const SystemType& system,
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::lower_reach(...)\n");
 
-    GTS reach(system.grid());
+    HybridGrid grid=*_settings->grid;
+    GTS reach(grid);
 
-    list<EnclosureType> initial_enclosures = split_initial_set(initial_set,system.grid(),_settings->maximum_grid_depth,LOWER_SEMANTICS);
+    list<EnclosureType> initial_enclosures = split_initial_set(initial_set,grid,_settings->maximum_grid_depth,LOWER_SEMANTICS);
 
     ARIADNE_LOG(6,"Evolving and discretising...\n");
 
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
-        reach.adjoin(_discretiser->reach(system,*encl_it,time,_settings->maximum_grid_depth,LOWER_SEMANTICS));
+        reach.adjoin(_discretiser->reach(system,*encl_it,time,grid,_settings->maximum_grid_depth,LOWER_SEMANTICS));
     }
 
 	return reach;
@@ -220,14 +224,15 @@ lower_reach_evolve(const SystemType& system,
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::lower_reach_evolve(...)\n");
 
+    HybridGrid grid=*_settings->grid;
     GTS reach; GTS evolve;
 
-    list<EnclosureType> initial_enclosures = split_initial_set(initial_set,system.grid(),_settings->maximum_grid_depth,LOWER_SEMANTICS);
+    list<EnclosureType> initial_enclosures = split_initial_set(initial_set,grid,_settings->maximum_grid_depth,LOWER_SEMANTICS);
 
 	ARIADNE_LOG(5,"Computing evolution...\n");
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
         GTS cell_reach,cell_final;
-        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,time,_settings->maximum_grid_depth,LOWER_SEMANTICS);
+        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,time,grid,_settings->maximum_grid_depth,LOWER_SEMANTICS);
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
@@ -276,7 +281,7 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
-    Gr grid=system.grid();
+    HybridGrid grid=*_settings->grid;
     GTS found(grid),evolve(grid),reach(grid);
     int maximum_grid_depth = _settings->maximum_grid_depth;
     Float real_time=time.continuous_time();
@@ -299,7 +304,7 @@ upper_reach_evolve(const SystemType& system,
 	ARIADNE_LOG(5,"Computing initial evolution...\n");
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
         GTS cell_reach,cell_final;
-        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,hybrid_lock_to_grid_time,maximum_grid_depth,UPPER_SEMANTICS);
+        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,hybrid_lock_to_grid_time,grid,maximum_grid_depth,UPPER_SEMANTICS);
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
@@ -353,7 +358,7 @@ chain_reach(const SystemType& system,
 		else if (hs_it->second != domain[hs_it->first].size()) {
 			ARIADNE_FAIL_MSG("Error: the system state space and the bounding domain space do not match on the continuous space."); }}
 
-    Gr grid=system.grid();
+    HybridGrid grid=*_settings->grid;
     GTS bounding(grid), evolve(grid), reach(grid), found(grid), intermediate(grid);
 
     bounding.adjoin_outer_approximation(domain,0u); 
@@ -374,7 +379,7 @@ chain_reach(const SystemType& system,
 	ARIADNE_LOG(5,"Computing transient evolution...\n");
     for (list<EnclosureType>::const_iterator encl_it = initial_enclosures.begin(); encl_it != initial_enclosures.end(); encl_it++) {
         GTS cell_reach,cell_final;
-        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,hybrid_transient_time,maximum_grid_depth,UPPER_SEMANTICS);
+        make_lpair(cell_reach,cell_final)=_discretiser->evolution(system,*encl_it,hybrid_transient_time,grid,maximum_grid_depth,UPPER_SEMANTICS);
         reach.adjoin(cell_reach);
         evolve.adjoin(cell_final);
     }
@@ -430,7 +435,7 @@ _outer_chain_reach_forward(const SystemType& system,
     const int& lock_to_grid_steps = _settings->lock_to_grid_steps;
     const int& maximum_grid_depth = _settings->maximum_grid_depth;
 
-    HybridGrid grid=system.grid();
+    HybridGrid grid=*_settings->grid;
     HybridGridTreeSet new_final(grid), new_reach(grid), reach(grid), final(grid);
 
     list<EnclosureType> working_enclosures = split_initial_set(initial_set,grid,maximum_grid_depth,UPPER_SEMANTICS);
@@ -512,7 +517,7 @@ _outer_chain_reach_forward_pushTargetCells(const HybridGridTreeSet& reachCells,
 										   const SystemType& system,
 										   std::list<EnclosureType>& result_enclosures) const
 {
-	HybridGrid grid = system.grid();
+	HybridGrid grid = *_settings->grid;
 
 	for (GTS::const_iterator cell_it = reachCells.begin(); cell_it != reachCells.end(); cell_it++)
 	{
@@ -708,13 +713,14 @@ _lower_chain_reach(const SystemType& system,
 	const uint available_concurrency = boost::thread::hardware_concurrency() - free_cores;
 	ARIADNE_ASSERT_MSG(available_concurrency>0, "Error: available concurrency must be at least 1.");
 
-    GTS reach(system.grid());
+	HybridGrid grid = *_settings->grid;
+    GTS reach(grid);
 
 	TimeType lock_time(_settings->lock_to_grid_time,_settings->lock_to_grid_steps);
 
     DisproveData globalFalsInfo(system.state_space());
 
-    EL initial_enclosures = split_initial_set(initial_set,system.grid(),_settings->maximum_grid_depth,LOWER_SEMANTICS);
+    EL initial_enclosures = split_initial_set(initial_set,grid,_settings->maximum_grid_depth,LOWER_SEMANTICS);
 
     ARIADNE_LOG(5,"Computing recurrent evolution...\n");
 
@@ -732,7 +738,7 @@ _lower_chain_reach(const SystemType& system,
 
 		ARIADNE_LOG(6,"Initial enclosures size = " << initial_enclosures.size() << "\n");
 
-		LowerChainReachWorker worker(_discretiser,initial_enclosures,system,lock_time,
+		LowerChainReachWorker worker(_discretiser,initial_enclosures,system,lock_time,grid,
 									 _settings->maximum_grid_depth,available_concurrency, feasibility_region, terminate_as_soon_as_infeasible);
 
 		ARIADNE_LOG(6,"Evolving and discretising...\n");
@@ -815,7 +821,7 @@ lower_chain_reach(
 		const HybridBoxes& safe_region,
 		bool terminate_as_soon_as_disproved) const
 {
-	HybridGridTreeSet reach(system.grid());
+	HybridGridTreeSet reach(*_settings->grid);
 	DisproveData disproveData(system.state_space());
 
 	RealConstantSet original_constants = system.nonsingleton_accessible_constants();
@@ -857,9 +863,10 @@ tuneEvolverParameters(
 		uint maximum_grid_depth,
 		Semantics semantics)
 {
-	_discretiser->settings().maximum_enclosure_cell = getMaximumEnclosureCell(system.grid(),maximum_grid_depth);
+	HybridGrid grid = *_settings->grid;
+	_discretiser->settings().maximum_enclosure_cell = getMaximumEnclosureCell(grid,maximum_grid_depth);
 	ARIADNE_LOG(4, "Maximum enclosure cell: " << _discretiser->settings().maximum_enclosure_cell << "\n");
-	_discretiser->settings().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,system.grid(),maximum_grid_depth,semantics);
+	_discretiser->settings().hybrid_maximum_step_size = getHybridMaximumStepSize(hmad,grid,maximum_grid_depth,semantics);
 	ARIADNE_LOG(4, "Maximum step size: " << _discretiser->settings().hybrid_maximum_step_size << "\n");
 }
 

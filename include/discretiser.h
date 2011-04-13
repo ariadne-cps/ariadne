@@ -193,6 +193,7 @@ class HybridDiscretiser
     evolution(const SystemType& system, 
               const EnclosureType& initial_set, 
               const TimeType& time,
+              const HybridGrid& grid,
               const AccuracyType accuracy,
               const Semantics semantics) const;
 
@@ -203,7 +204,8 @@ class HybridDiscretiser
     upper_evolution_continuous(const SystemType& system, 
               			 	   const EnclosureType& initial_set, 
               			 	   const TimeType& time,
-              			       const AccuracyType accuracy) const;
+              			 	   const HybridGrid& grid,
+              			 	   const AccuracyType accuracy) const;
 
     //! \brief Compute approximations to the reachable set 
     //! of \a system starting in \a initial_set over \a time. */
@@ -211,6 +213,7 @@ class HybridDiscretiser
     reach(const SystemType& system, 
                 const EnclosureType& initial_set, 
                 const TimeType& time,
+                const HybridGrid& grid,
                 const AccuracyType accuracy,
                 const Semantics semantics) const;
 
@@ -220,6 +223,7 @@ class HybridDiscretiser
     evolve(const SystemType& system, 
                  const EnclosureType& initial_set, 
                  const TimeType& time,
+                 const HybridGrid& grid,
                  const AccuracyType accuracy,
                  const Semantics semantics) const;
 
@@ -228,6 +232,7 @@ class HybridDiscretiser
     lower_evolution(const SystemType& system, 
                     const EnclosureType& initial_set, 
                     const TimeType& time,
+                    const HybridGrid& grid,
                     const AccuracyType accuracy) const;
   
     /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
@@ -235,14 +240,15 @@ class HybridDiscretiser
     upper_evolution(const SystemType& system, 
                     const EnclosureType& initial_set, 
                     const TimeType& time,
-                    const AccuracyType accuracy) const; 
+                    const HybridGrid& grid,
+                    const AccuracyType accuracy) const;
 
     /*! \brief Convert a cell of the grid into an enclosure set for computing evolution. */
     EnclosureType enclosure(const BasicSetType& bs) const;
     
   public:
     DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
-                                const HybridGrid& system_grid,
+                                const HybridGrid& grid,
                                 const AccuracyType accuracy) const; 
 };
 

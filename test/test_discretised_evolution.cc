@@ -342,7 +342,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     HybridEnclosureType hybrid_initial_enclosure = discrete_evolver.enclosure(hybrid_initial_cell);
     HybridGridTreeSet reach,final;
     make_lpair(reach,final)
-        = discrete_evolver.evolution(ha,hybrid_initial_enclosure,htime,depth,UPPER_SEMANTICS);
+        = discrete_evolver.evolution(ha,hybrid_initial_enclosure,htime,hagrid,depth,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     GridTreeSet const& reach_cells=reach[location];

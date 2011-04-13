@@ -353,54 +353,6 @@ new_unforced_transition(DiscreteEvent event,
 
 
 
-void
-HybridAutomaton::set_grid(DiscreteState location,
-                          const Grid& grid)
-{
-    if(!this->has_mode(location)) {
-        throw std::runtime_error("The automaton does not contain a mode with ths given location id");
-    }
-    DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
-    if(grid.dimension()!=mode.dimension()) {
-        throw std::runtime_error("The mode of the automaton has a different dimension to the grid.");
-    }
-    mode._grid=shared_ptr<Grid>(new Grid(grid));
-}
-
-void
-HybridAutomaton::set_grid(const Grid& grid)
-{
-    for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
-        mode_iter!=this->_modes.end(); ++mode_iter)
-    {
-        DiscreteMode& mode=const_cast<DiscreteMode&>(*mode_iter);
-        if(grid.dimension()!=mode.dimension()) {
-            throw std::runtime_error("The automaton has a different dimension to the grid.");
-        }
-        mode._grid=shared_ptr<Grid>(new Grid(grid));
-    }
-}
-
-void
-HybridAutomaton::set_grid(const HybridGrid& hgrid)
-{
-    for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
-        mode_iter!=this->_modes.end(); ++mode_iter)
-    {
-        DiscreteMode& mode=const_cast<DiscreteMode&>(*mode_iter);
-        DiscreteState loc = mode.location();
-        if(hgrid.find(loc) == hgrid.end()) {
-            throw std::runtime_error("The automaton does not contain a mode with this given location id");
-        }
-        if(hgrid[loc].dimension()!=mode.dimension()) {
-            throw std::runtime_error("The mode of the automaton has a different dimension to the grid.");
-        }
-        mode._grid=shared_ptr<Grid>(new Grid(hgrid[loc]));
-    }
-}
-
-
-
 bool
 HybridAutomaton::has_mode(DiscreteState state) const
 {
@@ -581,26 +533,6 @@ const std::string&
 HybridAutomaton::name() const
 {
     return this->_name;
-}
-
-Grid
-HybridAutomaton::grid(DiscreteState location) const
-{
-    ARIADNE_ASSERT(this->has_mode(location));
-    const DiscreteMode& mode=this->mode(location);
-    return Grid(mode.dimension());
-}
-
-HybridGrid
-HybridAutomaton::grid() const
-{
-    HybridGrid result;
-    for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
-        mode_iter!=this->_modes.end(); ++mode_iter)
-    {
-        result[mode_iter->location()]=mode_iter->grid();
-    }
-    return result;
 }
 
 HybridAutomaton& 

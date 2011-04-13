@@ -1071,8 +1071,9 @@ _tuneIterativeStepSettings(
 
 	HybridFloatVector hmad = getHybridMaximumAbsoluteDerivatives(system,hgts_domain,analyser.settings().domain_bounds);
 	ARIADNE_LOG(5, "Derivatives bounds: " << hmad << "\n");
-	system.set_grid(getHybridGrid(hmad,analyser.settings().domain_bounds));
-	ARIADNE_LOG(5, "Grid lengths: " << system.grid().lengths() << "\n");
+	analyser.settings().grid = boost::shared_ptr<HybridGrid>(
+			new HybridGrid(getHybridGrid(hmad,analyser.settings().domain_bounds)));
+	ARIADNE_LOG(5, "Grid lengths: " << analyser.settings().grid->lengths() << "\n");
 
 	ARIADNE_LOG(5, "Use restriction: " << pretty_print(analyser.use_reachability_restricting()) << "\n");
 

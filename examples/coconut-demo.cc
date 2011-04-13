@@ -137,7 +137,7 @@ int main(int argc, char** argv)
     analyser.settings().lock_to_grid_steps = LOCK_TOGRID_STEPS;
     analyser.settings().maximum_grid_depth= MAX_GRID_DEPTH;
     analyser.verbosity = 3;
-    automaton.set_grid(grid); 
+    analyser.settings().grid = boost::shared_ptr<HybridGrid>(new HybridGrid(automaton.state_space(),grid));
     std::cout <<  analyser.settings() << std::endl;
 
     HybridImageSet initial_set;

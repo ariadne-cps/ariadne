@@ -304,9 +304,6 @@ class HybridIOAutomaton
     //! \brief The accessible constants.
     //! \details This set does not necessarily reflect the whole set of constants in all functions.
     RealConstantSet _accessible_constants;
-
-    //! \brief The grid for the controlled variables of the automaton.
-    std::map< RealVariable, Float > _grid;
     
     //! \brief Access to a discrete mode (for internal use only)
     DiscreteIOMode& _mode(DiscreteState state);
@@ -540,12 +537,6 @@ class HybridIOAutomaton
     const DiscreteIOTransition& set_activation(DiscreteEvent event,
                                                DiscreteState source,
                                                const RealExpression& activation);                                              
-                                              
-    //! \brief Set the grid controlling relative scaling. This method sets the same grid for all controlled variables.
-    void set_grid(const std::map< RealVariable, Float>& grid);
-
-    //! \brief Set the grid controlling relative scaling for a given variable.
-    void set_grid(const RealVariable& var, Float scaling);
 
 	//! \brief Substitute the constant \a c into the corresponding Constant \a con, if present, on all the functions of modes and transitions.
 	void substitute(Constant<Real> con, const Real& c);
@@ -633,12 +624,6 @@ class HybridIOAutomaton
 
     //! \brief The discrete transitions from location \a source.
     std::list< DiscreteIOTransition > transitions(DiscreteState source) const;
-
-    //! \brief The natural grid to use over all variables.
-    const std::map< RealVariable, Float >& grid() const;
-    
-    //! \brief The grid scaling for a given variable.
-    Float grid(const RealVariable& var) const;
 
     //@}
 

@@ -61,5 +61,8 @@ add_library(ariadne-extra
 )
 
 target_link_libraries(ariadne gmpxx)
+#FIXME: Make Cairo and Boost Serialization optional dependencies
+target_link_libraries(ariadne cairo)
+target_link_libraries (ariadne boost_serialization)
 target_link_libraries(ariadne-extra ariadne)
 

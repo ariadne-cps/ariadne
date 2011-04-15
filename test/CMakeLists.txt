@@ -25,7 +25,7 @@ set(UNIT_TESTS
 	test_continuous_evolution
 	test_discretiser
 	test_graphics
-	#test_serialization
+	test_serialization
 	test_hybrid_set
 	test_hybrid_automaton
 	test_hybrid_evolver
@@ -39,5 +39,4 @@ foreach(test ${UNIT_TESTS})
     target_link_libraries(${test} ariadne)
     add_test(${test} ${test})
 endforeach()
-
 

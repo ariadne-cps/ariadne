@@ -1,3 +1,5 @@
+find_package(Boost ${Boost_REQUIRED_VERSION} COMPONENTS python)
+
 find_package(PythonLibs 2.4)
 message("  PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}") 
 message("  PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}") 
@@ -7,25 +9,6 @@ IF(PYTHONLIBS_FOUND)
 ELSE()
   message(FATAL_ERROR "Unable to find Python headers")
 ENDIF()
-
-find_package(Boost 1.36.0) 
-message("Boost information:") 
-message("  Boost_VERSION: ${Boost_VERSION}") 
-message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}") 
-message("  Boost_LIBRARIES: ${Boost_LIBRARIES}") 
-message("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}") 
-
-IF(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS} "/usr/include/python2.6")
-  link_directories(${Boost_LIBRARY_DIRS})
-  set(Boost_USE_STATIC_LIBS OFF)
-  set(Boost_USE_MULTITHREADED ON)
-  set(Boost_USE_STATIC_RUNTIME OFF)
-  find_package(Boost 1.36.0 COMPONENTS python)
-ELSEIF(NOT Boost_FOUND)
-  message(FATAL_ERROR "Unable to find correct Boost version. Did you set BOOST_ROOT?")
-ENDIF()
-
 
 
 add_library(pyinterval 

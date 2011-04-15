@@ -1,0 +1,61 @@
+find_package(PythonLibs 2.4)
+message("  PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}") 
+message("  PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}") 
+
+IF(PYTHONLIBS_FOUND)
+  include_directories(${PYTHON_INCLUDE_DIRS})
+ELSE()
+  message(FATAL_ERROR "Unable to find Python headers")
+ENDIF()
+
+find_package(Boost 1.36.0) 
+message("Boost information:") 
+message("  Boost_VERSION: ${Boost_VERSION}") 
+message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}") 
+message("  Boost_LIBRARIES: ${Boost_LIBRARIES}") 
+message("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}") 
+
+IF(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS} "/usr/include/python2.6")
+  link_directories(${Boost_LIBRARY_DIRS})
+  set(Boost_USE_STATIC_LIBS OFF)
+  set(Boost_USE_MULTITHREADED ON)
+  set(Boost_USE_STATIC_RUNTIME OFF)
+  find_package(Boost 1.36.0 COMPONENTS python)
+ELSEIF(NOT Boost_FOUND)
+  message(FATAL_ERROR "Unable to find correct Boost version. Did you set BOOST_ROOT?")
+ENDIF()
+
+
+
+add_library(pyinterval 
+    interval_module.cc numeric_submodule.cc linear_algebra_submodule.cc
+)
+set_target_properties(pyinterval PROPERTIES PREFIX "" OUTPUT_NAME "interval")
+target_link_libraries (pyinterval ariadne boost_python)
+
+add_library(pydifferentiation
+    differentiation_module.cc differentiation_submodule.cc
+)
+set_target_properties(pydifferentiation PROPERTIES PREFIX "" OUTPUT_NAME "differentiation")
+target_link_libraries (pydifferentiation ariadne boost_python)
+
+add_library(pyariadne 
+    utilities.cc
+	ariadne_module.cc 
+	numeric_submodule.cc 
+	linear_algebra_submodule.cc 
+	optimization_submodule.cc 
+	differentiation_submodule.cc 
+	function_submodule.cc 
+	calculus_submodule.cc 
+	geometry_submodule.cc 
+	solver_submodule.cc 
+	storage_submodule.cc 
+	system_submodule.cc 
+	evolution_submodule.cc 
+	graphics_submodule.cc
+)
+set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
+target_link_libraries (pyariadne ariadne-extra ariadne boost_python)
+

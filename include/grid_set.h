@@ -53,6 +53,9 @@
 #include "taylor_set.h"
 #include "graphics_interface.h"
 
+#include "hybrid_automaton.h"
+#include "calculus_interface.h"
+
 using namespace std;
 using namespace Ariadne;
 
@@ -1195,6 +1198,12 @@ class GridTreeSet : public GridTreeSubset {
 
     /*! \brief Restrict to cells rooted to the primary cell with the height (at most) \a theHeight. */
     void restrict_to_height( const uint theHeight );
+
+    /*! \brief Restrict to cells being an overapproximation of the preimage of \a image_set in respect to the provided \a transitions. */
+    void restrict_to_preimage_of(
+    		const std::map<DiscreteState,GridTreeSet> image_set,
+    		const std::list<DiscreteTransition>& transitions,
+    		const CalculusInterface<TaylorModel>& calc);
 
     //@}
 

@@ -63,14 +63,20 @@ public:
     {
     }
 
-    // Create the threads and produce the required results
     std::pair<HGTS,HGTS> get_result() 
     {
-		// Create and start the threads
-		_start();
-
-		// Wait for the completion of all threads
-		_wait_completion();
+    	if (_concurrency == 1) {
+			for (HGTS::const_iterator cells_it = _initial_set.begin(); cells_it != _initial_set.end(); ++cells_it) {
+				EnclosureType enclosure=_discretiser->enclosure(*_cells_it);
+				HGTS partial_reach, partial_evolve;
+				make_lpair<HGTS,HGTS>(partial_reach,partial_evolve) = _discretiser->evolution(_sys,enclosure,_time,_grid,_accuracy,UPPER_SEMANTICS);
+				_reach.adjoin(partial_reach);
+				_evolve.adjoin(partial_evolve);
+			}
+    	} else {
+    		_start();
+    		_wait_completion();
+    	}
 
 		// Get the result
 		return make_pair<HGTS,HGTS>(_reach,_evolve);
@@ -179,14 +185,19 @@ public:
     {
     }
 
-    // Create the threads and produce the required results
     std::pair<HGTS,HGTS> get_result() 
     {
-		// Create and start the threads
-		_start();
-
-		// Wait for the completion of all threads
-		_wait_completion();
+    	if (_concurrency == 1) {
+			for (list<EnclosureType>::const_iterator encl_it = _initial_enclosures.begin(); encl_it != _initial_enclosures.end(); ++encl_it) {
+				HGTS partial_reach, partial_evolve;
+				make_lpair<HGTS,HGTS>(partial_reach,partial_evolve) = _discretiser->upper_evolution_continuous(_sys,*encl_it,_time,_grid,_accuracy);
+				_reach.adjoin(partial_reach);
+				_evolve.adjoin(partial_evolve);
+			}
+    	} else {
+    		_start();
+    		_wait_completion();
+    	}
 
 		// Get the result
 		return make_pair<HGTS,HGTS>(_reach,_evolve);
@@ -306,11 +317,40 @@ public:
     // Create the threads and produce the required results
     tuple<std::pair<HUM,HUM>,EL,HGTS,DisproveData> get_result()
     {
-		// Create and start the threads
-		_start();
+    	if (_concurrency == 1) {
+    		for (EL::const_iterator encl_it = _initial_enclosures.begin(); encl_it != _initial_enclosures.end(); ++encl_it) {
+				if (_skip_if_disproved && _falsInfo.getIsDisproved())
+					break;
 
-		// Wait for the completion of all threads
-		_wait_completion();
+				HybridBasicSet<CE> current_initial_enclosure = *encl_it;
+				DisproveData current_falsInfo(_sys.state_space());
+				HGTS current_reach, current_evolve;
+				ELS current_reach_enclosures, current_evolve_enclosures;
+
+				// Get the enclosures from the initial enclosure, in a lock_time flight
+				make_ltuple<ELS,ELS,DisproveData>(current_reach_enclosures,current_evolve_enclosures,current_falsInfo) =
+										_discretiser->evolver()->lower_chain_reach_evolve_disprove(_sys,current_initial_enclosure,_time,
+																						  _disprove_bounds, _skip_if_disproved);
+
+				current_reach = _discretiser->_discretise(current_reach_enclosures,_grid,_accuracy);
+				current_evolve = _discretiser->_discretise(current_evolve_enclosures,_grid,_accuracy);
+
+				_reach.adjoin(current_reach);
+				_evolve_global.adjoin(current_evolve);
+				_falsInfo.updateWith(current_falsInfo);
+
+				// Add the number of cells of the current evolve to the superposed total at the end of the step, for each location
+				for (HGTS::locations_const_iterator evolve_it = current_evolve.locations_begin(); evolve_it != current_evolve.locations_end(); evolve_it++)
+					_superposed_evolve_sizes[evolve_it->first] += current_evolve[evolve_it->first].size();
+				// Add the current_enclosures to the final enclosures
+				for (ELS::locations_const_iterator loc_it = current_evolve_enclosures.locations_begin(); loc_it != current_evolve_enclosures.locations_end(); loc_it++)
+					for (ListSet<CE>::const_iterator list_it = loc_it->second.begin(); list_it != loc_it->second.end(); list_it++)
+						_final_enclosures.push_back(EnclosureType(loc_it->first,*list_it));
+    		}
+    	} else {
+    		_start();
+    		_wait_completion();
+    	}
 
 		// Calculate the adjoined evolve sizes
 		for (HGTS::locations_const_iterator evolve_global_it = _evolve_global.locations_begin(); evolve_global_it != _evolve_global.locations_end(); evolve_global_it++)

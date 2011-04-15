@@ -200,13 +200,17 @@ class HybridReachabilityAnalyser
 																	   bool enable_quick_safety_disproving) const;
   
     /*! \brief Tunes the parameters of the internal evolver. */
-    void tuneEvolverParameters(SystemType& system,
-								 const HybridFloatVector& hmad,
-								 uint maximum_grid_depth,
-								 Semantics semantics);
+    void tuneEvolverParameters(
+    		const SystemType& system,
+    		const HybridFloatVector& hmad,
+			uint maximum_grid_depth,
+			Semantics semantics);
 
 	/*! \brief Tune the parameters for the next verification iteration, given a \a bounding_reach. */
-	void tuneIterativeStepParameters(SystemType& system, const HybridGridTreeSet& bounding_reach, Semantics semantics);
+	void tuneIterativeStepParameters(
+			const SystemType& system,
+			const HybridGridTreeSet& bounding_reach,
+			Semantics semantics);
 
 	/*! \brief Whether to use a reachability restricting. */
 	bool use_reachability_restricting() const;
@@ -327,6 +331,7 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosur
 	: _settings(new EvolutionSettingsType())
 	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 	, free_cores(0)
+
 {
 }
 

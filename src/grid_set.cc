@@ -2531,6 +2531,18 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
     }
 }
 
+
+void GridTreeSet::restrict_to_preimage_of(
+		const std::map<DiscreteState,GridTreeSet> image_set,
+		const std::list<DiscreteTransition>& transitions,
+		const CalculusInterface<TaylorModel>& calc)
+{
+
+
+
+}
+
+
 void GridTreeSet::import_from_file(const char*& filename)
 {
 	// Open the file in read mode

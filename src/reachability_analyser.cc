@@ -75,6 +75,7 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const HybridDiscretiser<HybridEvolver::ContinuousEnclosureType>& discretiser)
     : _settings(new EvolutionSettingsType())
     , _discretiser(discretiser.clone())
+	, free_cores(0)
 {
 }
 
@@ -137,7 +138,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
 
 	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
 
-	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
+	ARIADNE_ASSERT_MSG(concurrency>0 && concurrency <= boost::thread::hardware_concurrency(),"Error: concurrency must be positive and less than the maximum allowed.");
 
 	UpperReachEvolveWorker worker(_discretiser,sys,set,time,grid,accuracy,concurrency);
 
@@ -154,18 +155,22 @@ HybridReachabilityAnalyser::_upper_reach_evolve_continuous(const HybridAutomaton
                                                 		   const HybridTime& time,
                                                 		   const int accuracy) const
 {
-	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
-
-	ARIADNE_ASSERT_MSG(concurrency>0,"Error: concurrency must be at least 1.");
-
-    HybridGrid grid=*_settings->grid;
-	UpperReachEvolveContinuousWorker worker(_discretiser,sys,initial_enclosures,time,grid,accuracy,concurrency);
+	std::pair<GTS,GTS> result;
+	GTS& reach = result.first;
+	GTS& evolve = result.second;
 
 	ARIADNE_LOG(6,"Evolving and discretising...\n");
-	std::pair<GTS,GTS> result = worker.get_result();
 
-    ARIADNE_LOG(6,"Reach size = "<<result.first.size()<<"\n");
-    ARIADNE_LOG(6,"Final size = "<<result.second.size()<<"\n");
+	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
+	ARIADNE_ASSERT_MSG(concurrency>0 && concurrency <= boost::thread::hardware_concurrency(),"Error: concurrency must be positive and less than the maximum allowed.");
+
+	HybridGrid grid=*_settings->grid;
+
+	UpperReachEvolveContinuousWorker worker(_discretiser,sys,initial_enclosures,time,grid,accuracy,concurrency);
+	result = worker.get_result();
+
+    ARIADNE_LOG(6,"Reach size = "<<reach.size()<<"\n");
+    ARIADNE_LOG(6,"Final size = "<<evolve.size()<<"\n");
     return result;
 }
 
@@ -710,8 +715,8 @@ _lower_chain_reach(const SystemType& system,
 	typedef std::list<EnclosureType> EL;
 	typedef std::map<DiscreteState,uint> HUM;
 
-	const uint available_concurrency = boost::thread::hardware_concurrency() - free_cores;
-	ARIADNE_ASSERT_MSG(available_concurrency>0, "Error: available concurrency must be at least 1.");
+	const uint concurrency = boost::thread::hardware_concurrency() - free_cores;
+	ARIADNE_ASSERT_MSG(concurrency>0 && concurrency <= boost::thread::hardware_concurrency(),"Error: concurrency must be positive and less than the maximum allowed.");
 
 	HybridGrid grid = *_settings->grid;
     GTS reach(grid);
@@ -739,7 +744,7 @@ _lower_chain_reach(const SystemType& system,
 		ARIADNE_LOG(6,"Initial enclosures size = " << initial_enclosures.size() << "\n");
 
 		LowerChainReachWorker worker(_discretiser,initial_enclosures,system,lock_time,grid,
-									 _settings->maximum_grid_depth,available_concurrency, feasibility_region, terminate_as_soon_as_infeasible);
+									 _settings->maximum_grid_depth,concurrency, feasibility_region, terminate_as_soon_as_infeasible);
 
 		ARIADNE_LOG(6,"Evolving and discretising...\n");
 
@@ -858,7 +863,7 @@ lower_chain_reach(
 void
 HybridReachabilityAnalyser::
 tuneEvolverParameters(
-		SystemType& system,
+		const SystemType& system,
 		const HybridFloatVector& hmad,
 		uint maximum_grid_depth,
 		Semantics semantics)

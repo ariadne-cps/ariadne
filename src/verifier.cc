@@ -599,10 +599,7 @@ parametric_dominance(
 
 	std::list<RealConstantSet> splittings = maximally_split_parameters(dominating_params,_settings->maximum_parameter_depth);
 	uint i=0;
-	for (std::list<RealConstantSet>::const_iterator splitting_it = splittings.begin();
-													 splitting_it != splittings.end();
-													 ++splitting_it)
-	{
+	for (std::list<RealConstantSet>::const_iterator splitting_it = splittings.begin(); splitting_it != splittings.end(); ++splitting_it) {
 		ARIADNE_LOG(1,"<Split parameters set #" << ++i << "/" << splittings.size() << ">\n");
 		RealConstantSet current_params = *splitting_it;
 		ARIADNE_LOG(1,"Parameter values: " << current_params << " ");
@@ -626,13 +623,15 @@ _process_positive_bisection_result(
 	if (definitely(result)) {
 		if (positiveOnBottom) {
 			// If the negative interval is the same as the positive one, update it too
-			if (equal(negative_int,positive_int)) negative_int.set_lower(current_value);
+			if (equal(negative_int,positive_int))
+				negative_int.set_lower(current_value);
 
 			ARIADNE_LOG(1,"True, refining upwards.\n");
 			positive_int.set_lower(current_value);
 		} else {
 			// If the negative interval is the same as the positive one, update it too
-			if (equal(negative_int,positive_int)) negative_int.set_upper(current_value);
+			if (equal(negative_int,positive_int))
+				negative_int.set_upper(current_value);
 
 			ARIADNE_LOG(1,"True, refining downwards.\n");
 			positive_int.set_upper(current_value);
@@ -653,13 +652,15 @@ _process_positive_bisection_result(
 	else {
 		if (positiveOnBottom) {
 			// If the negative interval is the same as the positive interval, update it too
-			if (equal(negative_int,positive_int)) negative_int.set_lower(current_value);
+			if (equal(negative_int,positive_int))
+				negative_int.set_lower(current_value);
 
 			ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
 			positive_int.set_upper(current_value); }
 		else {
 			// If the negative interval is the same as the positive interval, update it too
-			if (equal(negative_int,positive_int)) negative_int.set_upper(current_value);
+			if (equal(negative_int,positive_int))
+				negative_int.set_upper(current_value);
 
 			ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
 			positive_int.set_lower(current_value); }
@@ -689,13 +690,15 @@ Verifier::_process_negative_bisection_result(
 	else if (!possibly(result)) {
 		if (positiveOnBottom) {
 			// If the negative interval is the same as the positive interval, update it too
-			if (equal(negative_int,positive_int)) positive_int.set_upper(current_value);
+			if (equal(negative_int,positive_int))
+				positive_int.set_upper(current_value);
 
 			ARIADNE_LOG(1,"False, refining downwards.\n");
 			negative_int.set_upper(current_value);
 		} else {
 			// If the negative interval is the same as the positive interval, update it too
-			if (equal(negative_int,positive_int)) positive_int.set_lower(current_value);
+			if (equal(negative_int,positive_int))
+				positive_int.set_lower(current_value);
 
 			ARIADNE_LOG(1,"False, refining upwards.\n");
 			negative_int.set_lower(current_value);
@@ -703,13 +706,15 @@ Verifier::_process_negative_bisection_result(
 	} else {
 		if (positiveOnBottom) {
 			// If the negative interval is the same as the positive interval, update it too
-			if (equal(negative_int,positive_int)) positive_int.set_upper(current_value);
+			if (equal(negative_int,positive_int))
+				positive_int.set_upper(current_value);
 
 			ARIADNE_LOG(1,"Indeterminate, refining upwards.\n");
 			negative_int.set_lower(current_value);
 		} else {
 			// If the negative interval is the same as the positive interval, update it too
-			if (equal(negative_int,positive_int)) positive_int.set_lower(current_value);
+			if (equal(negative_int,positive_int))
+				positive_int.set_lower(current_value);
 
 			ARIADNE_LOG(1,"Indeterminate, refining downwards.\n");
 			negative_int.set_upper(current_value);
@@ -892,8 +897,7 @@ bool
 Verifier::_dominance_disproving_once(
 		DominanceVerificationInput& dominating,
 		DominanceVerificationInput& dominated,
-	  	const RealConstantSet& constants
-	  	) const
+	  	const RealConstantSet& constants) const
 {
 	ARIADNE_LOG(3,"Disproving...\n");
 
@@ -1017,7 +1021,7 @@ _dominance_outer_bounds(
 void
 Verifier::
 _chooseInitialSafetySettings(
-		HybridAutomaton& system,
+		const HybridAutomaton& system,
 		const HybridBoxes& domain,
 		const HybridBoxes& safe_region,
 		const RealConstantSet& locked_constants) const
@@ -1034,7 +1038,7 @@ _chooseInitialSafetySettings(
 void
 Verifier::
 _chooseInitialSafetySettings(
-		HybridAutomaton& system,
+		const HybridAutomaton& system,
 		const HybridBoxes& domain,
 		const HybridBoxes& safe_region,
 		const RealConstantSet& locked_constants,
@@ -1056,7 +1060,7 @@ _chooseInitialSafetySettings(
 void
 Verifier::
 _tuneIterativeStepSettings(
-		HybridAutomaton& system,
+		const HybridAutomaton& system,
 		const HybridGridTreeSet& hgts_domain,
 		const HybridGridTreeSet& outer_approx_constraint,
 		Semantics semantics) const
@@ -1094,7 +1098,7 @@ _chooseInitialDominanceSettings() const
 void
 Verifier::
 _chooseDominanceSettings(
-		DominanceVerificationInput& verInput,
+		const DominanceVerificationInput& verInput,
 		const RealConstantSet& locked_constants,
 		const HybridGridTreeSet& outer_reach,
 		const HybridGridTreeSet& outer_approx_constraint,

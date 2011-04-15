@@ -278,7 +278,7 @@ class Verifier
 	/*! \brief Choose the settings for the next dominance iteration, given a bundle of information around a system and a set of constants
 	 * that must be ignore when choosing the splitting factors of the system. */
 	void _chooseDominanceSettings(
-			DominanceVerificationInput& systemBundle,
+			const DominanceVerificationInput& systemBundle,
 			const RealConstantSet& locked_constants,
 			const HybridGridTreeSet& domain_reach,
 			const HybridGridTreeSet& constraint_reach,
@@ -368,14 +368,14 @@ class Verifier
 
 	/*! \brief Choose the initial evolution settings for safety verification of the proper analyser. */
 	void _chooseInitialSafetySettings(
-			HybridAutomaton& system,
+			const HybridAutomaton& system,
 			const HybridBoxes& domain,
 			const HybridBoxes& safe,
 			const RealConstantSet& locked_constants) const;
 
 	/*! \brief Choose the initial evolution settings for safety verification of the proper analyser, given the \a semantics.*/
 	void _chooseInitialSafetySettings(
-			HybridAutomaton& system,
+			const HybridAutomaton& system,
 			const HybridBoxes& domain,
 			const HybridBoxes& safe,
 			const RealConstantSet& locked_constants,
@@ -388,7 +388,7 @@ class Verifier
 
 	/*! \brief Tune the settings for the next iterative verification step. */
 	void _tuneIterativeStepSettings(
-			HybridAutomaton& system,
+			const HybridAutomaton& system,
 			const HybridGridTreeSet& hgts_domain,
 			const HybridGridTreeSet& constraint_reach,
 			Semantics semantics) const;

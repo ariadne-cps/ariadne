@@ -187,6 +187,7 @@ struct Equal {
     template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 == a2; }
 };
 
+/*
 struct And {
     template<class T> T operator()(const T& a1, const T& a2) const { return a1 && a2; }
     Operator code() const { return AND; } };
@@ -196,6 +197,7 @@ struct Or {
 struct Not {
     template<class T> T operator()(const T& a) const { return !a; }
     Operator code() const { return NOT; } };
+*/
 
 struct Add {
     template<class T> T operator()(const T& a1, const T& a2) const { return a1+a2; }
@@ -256,9 +258,11 @@ inline std::ostream& operator<<(std::ostream& os, const Less& v) { return os << 
 inline std::ostream& operator<<(std::ostream& os, const Gtr& v) { return os << ">="; }
 inline std::ostream& operator<<(std::ostream& os, const Equal& v) { return os << "=="; }
 
+/*
 inline std::ostream& operator<<(std::ostream& os, const And& v) { return os << "&&"; }
 inline std::ostream& operator<<(std::ostream& os, const Or& v) { return os << "||"; }
 inline std::ostream& operator<<(std::ostream& os, const Not& v) { return os << "!"; }
+*/
 
 inline std::ostream& operator<<(std::ostream& os, const Add& v) { return os << "+"; }
 inline std::ostream& operator<<(std::ostream& os, const Sub& v) { return os << "-"; }

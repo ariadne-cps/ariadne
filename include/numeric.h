@@ -27,6 +27,8 @@
 #ifndef ARIADNE_NUMERIC_H
 #define ARIADNE_NUMERIC_H
 
+#include "metaprogramming.h"
+
 #include "integer.h"
 #include "rational.h"
 #include "float.h"
@@ -34,12 +36,6 @@
 #include "real.h"
 
 namespace Ariadne {
-
-template<bool,class> struct EnableIf;
-template<class T> struct EnableIf<false,T> { };
-template<class T> struct EnableIf<true,T> { typedef T Type; };
-
-template<class X, class T> struct EnableIfDefined { typedef T Type; };
 
 template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
@@ -79,7 +75,7 @@ template<> struct IsNumeric<Integer> { static const bool value = true; };
 template<> struct IsNumeric<Rational> { static const bool value = true; };
 #endif // HAVE_GMPXX_H
 
-template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>::value,T> { };
+template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>,T> { };
 
 
 // Type deduction for numerical arithmetic

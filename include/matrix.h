@@ -384,15 +384,15 @@ typename EnableIfDefined< typename Arithmetic<typename M1::ValueType,typename M2
 operator-(const MatrixExpression<M1>& A1e, const MatrixExpression<M2>& A2e) { return MatrixDifference<M1,M2>(A1e(),A2e()); }
 
 template<class X1, class M2> inline
-typename EnableIfDefined< typename Arithmetic<X1,typename M2::ValueType>::ResultType, MatrixScalarProduct< M2, X1 > >::Type
+typename EnableIf< And< IsScalar<X1>, IsDefined<typename Arithmetic<X1,typename M2::ValueType>::ResultType> >, MatrixScalarProduct< M2, X1 > >::Type
 operator*(const X1& x1, const MatrixExpression<M2>& A2e) { return MatrixScalarProduct<M2,X1>(A2e(),x1); }
 
 template<class M1, class X2> inline
-typename EnableIfDefined< typename Arithmetic<typename M1::ValueType,X2>::ResultType, MatrixScalarProduct< M1, X2 > >::Type
+typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType> >, MatrixScalarProduct< M1, X2 > >::Type
 operator*(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarProduct<M1,X2>(A1e(),x2); }
 
 template<class M1, class X2> inline
-typename EnableIfDefined< typename Arithmetic<typename M1::ValueType,X2>::ResultType, MatrixScalarProduct< M1, X2 > >::Type
+typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType> >, MatrixScalarProduct< M1, X2 > >::Type
 operator/(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarProduct<M1,X2>(A1e(),1/x2); }
 
 

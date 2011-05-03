@@ -35,6 +35,7 @@
 
 #include "macros.h"
 #include "stlio.h"
+#include "metaprogramming.h"
 #include "numeric.h"
 #include "array.h"
 
@@ -45,6 +46,7 @@ template<class V> struct VectorExpression {
 };
 
 template<class V> struct VectorContainer : public VectorExpression<V> { };
+
 
 //! \brief A vector over a field. See also \link Ariadne::Matrix \c Matrix<X> \endlink.
 //!
@@ -187,6 +189,13 @@ template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v);
 
 template<class V> std::ostream& operator<<(std::ostream& os, const VectorExpression<V>& ve);
 
+
+template<class T> class IsVector : public False { };
+template<class T> class IsMatrix : public False { };
+template<class T> class IsScalar : public Not< Or< IsVector<T>, IsMatrix<T> > > { };
+
+template<class X> class IsVector< Vector<X> > : public True { };
+
 class Range {
     size_t _start; size_t _stop;
   public:
@@ -275,6 +284,13 @@ template<class V1, class X2> struct VectorScalarProduct
     ValueType operator[](size_t i) const { return _v1[i]*_x2; }
 };
 
+template<class V> class IsVector< VectorRange<V> > : public True { };
+template<class V> class IsVector< VectorContainerRange<V> > : public True { };
+template<class V> class IsVector< VectorNegation<V> > : public True { };
+template<class V1,class V2> class IsVector< VectorSum<V1,V2> > : public True { };
+template<class V1,class V2> class IsVector< VectorDifference<V1,V2> > : public True { };
+template<class V1,class X2> class IsVector< VectorScalarProduct<V1,X2> > : public True { };
+
 template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Range rng) { return VectorRange<V>(v(),rng); }
 template<class X> inline VectorContainerRange< Vector<X> > project(Vector<X>& v, Range rng) { return VectorContainerRange< Vector<X> >(v,rng); }
 
@@ -291,24 +307,32 @@ operator-(const VectorExpression<V>& ve) { return VectorNegation<V>(ve()); }
 // VectorSum< V1, V2 >
 // operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }
 
-template<class V1, class V2> inline
-typename EnableIfDefined< typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType, VectorSum< V1, V2 > >::Type
-operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }
+
+// The code below does not require the use of VectorExpression.
+//template<class V1, class V2> inline
+//typename EnableIf< And< IsVector<V1>, IsVector<V2>, IsDefined<typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType> >,
+//                   VectorSum< V1, V2 > >::Type
+//operator+(const V1& v1, const V2& v2) { return VectorSum<V1,V2>(v1,v2); }
+
 
 template<class V1, class V2> inline
-typename EnableIfDefined< typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType, VectorDifference< V1, V2 > >::Type
+typename EnableIfDefined< typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType, VectorSum< V1, V2 > >::Type
+operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }   
+
+template<class V1, class V2> inline
+typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType>, VectorDifference< V1, V2 > >::Type
 operator-(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorDifference<V1,V2>(v1(),v2()); }
 
 template<class X1, class V2> inline
-typename EnableIfDefined< typename Arithmetic<X1,typename V2::ValueType>::ResultType, VectorScalarProduct< V2, X1 > >::Type
+typename EnableIf< And< IsScalar<X1>, IsDefined<typename Arithmetic<X1,typename V2::ValueType>::ResultType> >, VectorScalarProduct< V2, X1 > >::Type
 operator*(const X1& x1, const VectorExpression<V2>& v2) { return VectorScalarProduct<V2,X1>(v2(),x1); }
 
 template<class V1, class X2> inline
-typename EnableIfDefined< typename Arithmetic<typename V1::ValueType,X2>::ResultType, VectorScalarProduct< V1, X2 > >::Type
+typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType> >, VectorScalarProduct< V1, X2 > >::Type
 operator*(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarProduct<V1,X2>(v1(),x2); }
 
 template<class V1, class X2> inline
-typename EnableIfDefined< typename Arithmetic<typename V1::ValueType,X2>::ResultType, VectorScalarProduct< V1, X2 > >::Type
+typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType> >, VectorScalarProduct< V1, X2 > >::Type
 operator/(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarProduct<V1,X2>(v1(),1/x2); }
 
 template<class X, class V> inline Vector<X>& operator+=(Vector<X>& r, const VectorExpression<V>& ve) {

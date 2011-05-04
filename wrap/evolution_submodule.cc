@@ -72,7 +72,7 @@ void evolution_submodule()
     export_orbit< Orbit<HybridTaylorSet> >("HybridOrbit");
     export_evolver<VectorFieldEvolver>("VectorFieldEvolver");
     export_evolver<HybridEvolver>("HybridEvolver");
-    export_evolver<StableHybridEvolver>("StableHybridEvolver");
+    //export_evolver<StableHybridEvolver>("StableHybridEvolver");
     export_evolver<ImageSetHybridEvolver>("ImageSetHybridEvolver");
-    export_evolver<ConstrainedImageSetHybridEvolver>("ConstrainedImageSetHybridEvolver");
+    //export_evolver<ConstrainedImageSetHybridEvolver>("ConstrainedImageSetHybridEvolver");
 }

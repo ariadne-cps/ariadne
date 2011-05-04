@@ -1,7 +1,7 @@
 /***************************************************************************
  *            taylor_function.cc
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-11  Pieter Collins, Alberto Casagrande
  *
  ****************************************************************************/
 
@@ -1202,9 +1202,126 @@ operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f)
     return VectorTaylorFunction(f.domain(),Vector<TaylorModel>(boost::numeric::ublas::prod(A,f.models())));
 }
 
+Vector<ScalarTaylorFunction> 
+operator+(const ScalarTaylorFunction& tm, const Vector<Float>& v) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm+v[i];
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator-(const ScalarTaylorFunction& tm, const Vector<Float>& v) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm-v[i];
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator*(const ScalarTaylorFunction& tm, const Vector<Float>& v) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm*v[i];
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator/(const ScalarTaylorFunction& tm, const Vector<Float>& v) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm/v[i];
+
+  return vtm;
+}
 
 
+Vector<ScalarTaylorFunction> 
+operator+(const Vector<Interval>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
 
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]+tm;
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator-(const Vector<Interval>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]-tm;
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator*(const Vector<Interval>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]*tm;
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator/(const Vector<Interval>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]/tm;
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator+(const Vector<Float>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]+tm;
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator-(const Vector<Float>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]-tm;
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator*(const Vector<Float>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]*tm;
+
+  return vtm;
+}
+
+Vector<ScalarTaylorFunction> 
+operator/(const Vector<Float>& v, const ScalarTaylorFunction& tm) {
+  Vector<ScalarTaylorFunction> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]/tm;
+
+  return vtm;
+}
 
 VectorTaylorFunction
 partial_evaluate(const VectorTaylorFunction& tf, uint k, const Interval& c)

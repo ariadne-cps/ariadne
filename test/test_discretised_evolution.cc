@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_discretised_evolution.cc
  *
- *  Copyright  2006-8  Pieter Collins
+ *  Copyright  2006-11  Pieter Collins, Alberto Casagrande
  *
  ****************************************************************************/
 
@@ -298,7 +298,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     cout << "henon=" << henon << endl;
     HybridAutomaton ha("Henon");
     ha.new_mode(location,IdentityFunction(2));
-    ha.new_transition(event,location,location,henon,VectorConstantFunction(Vector<Float>(1,1.0),2),true);
+    ha.new_transition(event,location,location,henon,VectorConstantFunction(Vector<Float>(1,1.0),2),false);
 
     // Define a bounding box for the evolution
     std::cout<<"making bounding_box"<<std::endl;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            taylor_model.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-11  Pieter Collins, Alberto Casagrande
  *
  ****************************************************************************/
 
@@ -601,6 +601,26 @@ class TaylorModel
     TaylorModel& clobber(uint o);
     TaylorModel& clobber(uint so, uint to);
 };
+
+Vector<TaylorModel> operator+(const TaylorModel& tm, const Vector<Float>& v);
+Vector<TaylorModel> operator-(const TaylorModel& tm, const Vector<Float>& v);
+Vector<TaylorModel> operator*(const TaylorModel& tm, const Vector<Float>& v);
+Vector<TaylorModel> operator/(const TaylorModel& tm, const Vector<Float>& v);
+
+Vector<TaylorModel> operator+(const Vector<Float>& v, const TaylorModel& tm);
+Vector<TaylorModel> operator-(const Vector<Float>& v, const TaylorModel& tm);
+Vector<TaylorModel> operator*(const Vector<Float>& v, const TaylorModel& tm);
+Vector<TaylorModel> operator/(const Vector<Float>& v, const TaylorModel& tm);
+
+Vector<TaylorModel> operator+(const TaylorModel& tm, const Vector<Interval>& v);
+Vector<TaylorModel> operator-(const TaylorModel& tm, const Vector<Interval>& v);
+Vector<TaylorModel> operator*(const TaylorModel& tm, const Vector<Interval>& v);
+Vector<TaylorModel> operator/(const TaylorModel& tm, const Vector<Interval>& v);
+
+Vector<TaylorModel> operator+(const Vector<Interval>& v, const TaylorModel& tm);
+Vector<TaylorModel> operator-(const Vector<Interval>& v, const TaylorModel& tm);
+Vector<TaylorModel> operator*(const Vector<Interval>& v, const TaylorModel& tm);
+Vector<TaylorModel> operator/(const Vector<Interval>& v, const TaylorModel& tm);
 
 TaylorModel max(const TaylorModel& x, const TaylorModel& y);
 TaylorModel min(const TaylorModel& x, const TaylorModel& y);

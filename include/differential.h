@@ -1,7 +1,7 @@
 /***************************************************************************
  *            differential.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-11  Pieter Collins, Alberto Casagrande
  * 
  ****************************************************************************/
 
@@ -994,7 +994,23 @@ jacobian(const Vector< Differential<X> >& x)
 }
 
 
+template<class X, class Y>
+Vector<Differential<Y> >
+prod(const Matrix<X>& A,const Vector< Differential<Y> >& x)
+{
+   ARIADNE_ASSERT(A.size2()==x.size());
+   
+   Vector<Differential<Y> > r(A.size1(),x[0].argument_size(),x[0].degree());
 
+   for (size_t j=0; j<A.size1(); j++) {
+     for (size_t i=0; i<A.size2(); i++) {
+       ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size());
+       r[j]+=A(j,i)*x[i];
+     }
+   }
+
+   return r;
+}
 
 } //namespace Ariadne
 

@@ -650,7 +650,6 @@ orthogonal_over_approximation(const Zonotope& z)
     Zonotope r=error_free_over_approximation(z);
     Matrix<Float> J=r.generators();
 
-    const uint m=J.row_size();
     const uint n=J.column_size();
 
     Matrix<Float> R(J.row_size(),J.row_size());

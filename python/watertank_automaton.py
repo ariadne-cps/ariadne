@@ -3,7 +3,7 @@
 ##############################################################################
 #            watertank-automaton.py
 #
-#  Copyright 2008-9  Davide Bresolin, Pieter Collins
+#  Copyright 2008-11  Davide Bresolin, Pieter Collins, Alberto Casagrande
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -22,132 +22,68 @@
 
 from ariadne import *
 
-def bounding_box_str(self):
-    return str(self.bounding_box())
+def build_watertank(T=4.0,hmin=5.5,hmax=8.0,delta=0.05,lamb=0.02,b=0.3)
+   # System parameter are given as building function parameters. 
+   # Note that system parameters should be given as variables.
 
-DiscreteState.__repr__=DiscreteState.__str__
-TaylorSet.__repr__=bounding_box_str
+   # Create the system object
+   watertank=HybridAutomaton();
+   
+   # Declare the system variables
+   x=ScalarFunction.variable(2,0);
+   alpha=ScalarFunction.variable(2,1);
+   
+   # Declare useful constant functions
+   zero=ScalarFunction.constant(2,0.0);
+   recT=ScalarFunction.constant(2,1.0/T);
+   
+   open=DiscreteState("open");
+   closed=DiscreteState("closed");
+   opening=DiscreteState("opening");
+   closing=DiscreteState("closing");
+   
+   # Declare the events we use
+   start_opening=DiscreteEvent("start_opening");
+   start_closing=DiscreteEvent("start_closing");
+   finished_opening=DiscreteEvent("finished_opening");
+   finished_closing=DiscreteEvent("finished_closing");
+   
+   identity=VectorFunction.identity(2)
+   
+   # The water level is always given by the same dynamic.
+   # When alpha is 1, the valve is open and water flows in
+   # When alpha is 0, the valve is open and no water flows in
+   # The valve opens and closes at rate 1/T
+   watertank.new_mode(open,[-lamb*x+b*alpha,zero]);
+   watertank.new_mode(closed,[-lamb*x+b*alpha,zero]);
+   watertank.new_mode(opening,[-lamb*x+b*alpha,recT]);
+   watertank.new_mode(closing,[-lamb*x+b*alpha,-recT]);
+   
+   # Specify the condition that the valve starts closing when hmax <= x <= hmax+delta
+   # using an invariant and guard.
+   watertank.new_transition(start_closing,open,closing,identity,x-hmax,True)
+   watertank.new_transition(start_closing,opening,closing,identity,x-hmax,True)
+   
+   # Specify the condition that the valve starts opening when hmin <= x <= hmin+delta
+   # using a combined 'invariant and activation'. The event may occur when x<=hmin, and
+   # must occur while x>=hmin-delta.
+   watertank.new_transition(start_opening,closed,opening,identity,hmin-x,True)
+   watertank.new_transition(start_opening,closing,opening,identity,hmin-x,True)
+   
+   watertank.new_transition(finished_opening,opening,open,identity,alpha-1,True)
+   watertank.new_transition(finished_closing,closing,closed,identity,-alpha,True)
 
-
-# Create the system object
-watertank=HybridAutomaton();
-
-# Declare some constants. Note that system parameters should be given as variables.
-T=4.0;
-hmin=5.5;
-hmax=8.0;
-delta=0.05;
-lamb=0.02;
-b=0.3;
-
-# Declare the system variables
-x=ScalarFunction.variable(2,0);
-alpha=ScalarFunction.variable(2,1);
-
-# Declare useful constant functions
-zero=ScalarFunction.constant(2,0.0);
-recT=ScalarFunction.constant(2,1.0/T);
-
-open=DiscreteState("open");
-closed=DiscreteState("closed");
-opening=DiscreteState("opening");
-closing=DiscreteState("closing");
-
-# Declare the events we use
-start_opening=DiscreteEvent("start_opening");
-start_closing=DiscreteEvent("start_closing");
-finished_opening=DiscreteEvent("finished_opening");
-finished_closing=DiscreteEvent("finished_closing");
-
-identity=VectorFunction.identity(2)
-
-# The water level is always given by the same dynamic.
-# When alpha is 1, the valve is open and water flows in
-# When alpha is 0, the valve is open and no water flows in
-# The valve opens and closes at rate 1/T
-watertank.new_mode(open,[-lamb*x+b*alpha,zero]);
-watertank.new_mode(closed,[-lamb*x+b*alpha,zero]);
-watertank.new_mode(opening,[-lamb*x+b*alpha,recT]);
-watertank.new_mode(closing,[-lamb*x+b*alpha,-recT]);
-
-# Specify the condition that the valve starts closing when hmax <= x <= hmax+delta
-# using an invariant and guard.
-#watertank.new_invariant(open, x-(hmax+delta));
-#watertank.new_transition(start_closing,open,closing,identity,x-hmax,False)
-#watertank.new_transition(start_closing,opening,closing,identity,x-hmax,False)
-watertank.new_transition(start_closing,open,closing,identity,x-hmax,True)
-watertank.new_transition(start_closing,opening,closing,identity,x-hmax,True)
-
-# Specify the condition that the valve starts opening when hmin <= x <= hmin+delta
-# using a combined 'invariant and activation'. The event may occur when x<=hmin, and
-# must occur while x>=hmin-delta.
-watertank.new_transition(start_opening,closed,opening,identity,hmin-x,True)
-watertank.new_transition(start_opening,closing,opening,identity,hmin-x,True)
-
-watertank.new_transition(finished_opening,opening,open,identity,alpha-1,True)
-watertank.new_transition(finished_closing,closing,closed,identity,-alpha,True)
+   # Finished building the automaton
+   return watertank
 
 if __name__=='__main__':
 
-    # Create the system object
-    watertank=HybridAutomaton();
+    # TO BE FIXED???
+    #DiscreteState.__repr__=DiscreteState.__str__
+    #TaylorSet.__repr__=str(self.bounding_box())
 
-    # Declare some constants. Note that system parameters should be given as variables.
-    T=4.0;
-    hmin=5.5;
-    hmax=8.0;
-    delta=0.05;
-    lamb=0.02;
-    b=0.3;
-
-    # Declare the system variables
-    x=ScalarFunction.variable(2,0);
-    alpha=ScalarFunction.variable(2,1);
-
-    # Declare useful constant functions
-    zero=ScalarFunction.constant(2,0.0);
-    recT=ScalarFunction.constant(2,1.0/T);
-
-    open=DiscreteState(1);
-    closed=DiscreteState(2);
-    opening=DiscreteState(3);
-    closing=DiscreteState(4);
-    
-    # Declare the events we use
-    start_opening=DiscreteEvent(3);
-    start_closing=DiscreteEvent(4);
-    finished_opening=DiscreteEvent(1);
-    finished_closing=DiscreteEvent(2);
-
-    identity=VectorFunction.identity(2)
-    
-    # The water level is always given by the same dynamic.
-    # When alpha is 1, the valve is open and water flows in
-    # When alpha is 0, the valve is open and no water flows in
-    # The valve opens and closes at rate 1/T
-    watertank.new_mode(open,[-lamb*x+b*alpha,zero]);
-    watertank.new_mode(closed,[-lamb*x+b*alpha,zero]);
-    watertank.new_mode(opening,[-lamb*x+b*alpha,recT]);
-    watertank.new_mode(closing,[-lamb*x+b*alpha,-recT]);
-
-    # Specify the condition that the valve starts closing when hmax <= x <= hmax+delta
-    # using an invariant and guard.
-    #watertank.new_invariant(open, x-(hmax+delta));
-    #watertank.new_transition(start_closing,open,closing,identity,x-hmax,False)
-    #watertank.new_transition(start_closing,opening,closing,identity,x-hmax,False)
-    watertank.new_transition(start_closing,open,closing,identity,x-hmax,True)
-    watertank.new_transition(start_closing,opening,closing,identity,x-hmax,True)
-
-    # Specify the condition that the valve starts opening when hmin <= x <= hmin+delta
-    # using a combined 'invariant and activation'. The event may occur when x<=hmin, and
-    # must occur while x>=hmin-delta.
-    watertank.new_transition(start_opening,closed,opening,identity,hmin-x,True)
-    watertank.new_transition(start_opening,closing,opening,identity,hmin-x,True)
-
-    watertank.new_transition(finished_opening,opening,open,identity,alpha-1,True)
-    watertank.new_transition(finished_closing,closing,closed,identity,-alpha,True)
-
-    # Finished building the automaton
+    # building watertank with default parameters 
+    watertank=build_watertank()
 
     print "Watertank: \n", watertank
 

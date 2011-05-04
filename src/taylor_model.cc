@@ -1,7 +1,7 @@
 /***************************************************************************
  *            taylor_model.cc
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-11  Pieter Collins, Alberto Casagrande
  *
  ****************************************************************************/
 
@@ -1249,7 +1249,6 @@ operator-(const TaylorModel& x) {
     return neg(x);
 }
 
-
 TaylorModel
 operator+(const TaylorModel& x, const TaylorModel& y) {
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
@@ -1264,7 +1263,6 @@ operator-(const TaylorModel& x, const TaylorModel& y) {
 
 TaylorModel
 operator*(const TaylorModel& x, const TaylorModel& y) {
-    if(x.argument_size()!=y.argument_size()) { std::cerr<<"operator*(TaylorModel x, TaylorModel y)\n  x="<<x<<" y="<<y<<"\n"; }
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     TaylorModel r(y.argument_size(),y.accuracy_ptr()); _mul(r,x,y); return r;
 }
@@ -1359,6 +1357,125 @@ operator/(const Interval& c, const TaylorModel& x) {
     TaylorModel r=rec(x); _scal(r,c); return r;
 }
 
+Vector<TaylorModel> 
+operator+(const TaylorModel& tm, const Vector<Float>& v) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm+v[i];
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator-(const TaylorModel& tm, const Vector<Float>& v) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm-v[i];
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator*(const TaylorModel& tm, const Vector<Float>& v) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm*v[i];
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator/(const TaylorModel& tm, const Vector<Float>& v) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=tm/v[i];
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator+(const Vector<Interval>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]+tm;
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator-(const Vector<Interval>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]-tm;
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator*(const Vector<Interval>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]*tm;
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator/(const Vector<Interval>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]/tm;
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator+(const Vector<Float>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]+tm;
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator-(const Vector<Float>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]-tm;
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator*(const Vector<Float>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]*tm;
+
+  return vtm;
+}
+
+Vector<TaylorModel> 
+operator/(const Vector<Float>& v, const TaylorModel& tm) {
+  Vector<TaylorModel> vtm(v.size());
+
+  for (size_t i=0; i<vtm.size(); i++)
+    vtm[i]=v[i]/tm;
+
+  return vtm;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3559,8 +3676,6 @@ implicit(const ScalarFunction& f, const Vector<TaylorModel>& g)
     }
 
     // Set some useful size constants
-    const uint rs=1u;
-    const uint fas=f.argument_size();
     const uint gas=g[0].argument_size();
     const uint grs=g.size();
 

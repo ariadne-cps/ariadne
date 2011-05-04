@@ -4,10 +4,10 @@ AM_LDFLAGS = -module
 INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
 LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
 
-pythondir=${prefix}/lib/ariadne/python
+pythondir=${prefix}/lib/python$(PYTHON_VERSION)
 libdir=${pyexecdir}
 
-pythoninstalldir=${prefix}/lib/ariadne/python
+pythoninstalldir=${prefix}/lib/python$(PYTHON_VERSION)/dist-packages/ariadne
 
 python_DATA = __init__.py
 python_LIBS = ariadne.la interval.la differentiation.la

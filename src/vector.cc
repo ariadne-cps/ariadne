@@ -1,7 +1,7 @@
 /***************************************************************************
  *            vector.cc
  *
- *  Copyright 2008  Alberto Casagrande, Pieter Collins
+ *  Copyright 2008-11  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -75,7 +75,30 @@ template<> Vector<Rational>::Vector(size_t n, const double& t0, const double& t1
 }
 #endif // HAVE_RATIONAL
 
+Vector<Interval> operator*(const Vector<Interval>& v, const Float& s)
+{
+  return v*Interval(s);
+}
 
+Vector<Interval> operator*(const Float& s, const Vector<Interval>& v)
+{
+  return v*s;
+}
+
+Vector<Interval> operator*(const Vector<Float>& v, const Interval& s)
+{
+  Vector<Interval> result(v.size());
+
+  for (size_t i=0; i<result.size(); i++)
+    result[i]=v[i]*s;
+
+  return result;
+}
+
+Vector<Interval> operator*(const Interval& s, const Vector<Float>& v)
+{
+  return v*s;
+}
 
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
 {

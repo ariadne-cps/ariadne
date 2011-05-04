@@ -47,7 +47,7 @@ typedef std::string String;
 
 // Functionality for building arrays or std::vector from comma-separated lists
 class ArrayBuilderTag {};
-static ArrayBuilderTag build_array;
+//static ArrayBuilderTag build_array;
 
 template<class T>
 inline std::vector<T> operator,(ArrayBuilderTag, const T& t) {

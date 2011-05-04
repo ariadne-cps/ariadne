@@ -37,7 +37,9 @@
 #include "discrete_event.h"
 
 #include "hybrid_set.h"
-#include "hybrid_evolver-constrained.h"
+//#include "hybrid_evolver-constrained.h"
+#include "hybrid_evolver-image.h"
+#include "hybrid_evolver.h"
 
 #include "utilities.h"
 
@@ -329,7 +331,7 @@ void export_taylor_constrained_flow_set()
     //def("apply",(TaylorSet(*)(const VectorTaylorFunction&,const TaylorSet&)) &apply);
 }
 
-
+/*
 void export_constrained_image_set()
 {
     class_<ConstrainedImageSet>
@@ -337,7 +339,7 @@ void export_constrained_image_set()
     constrained_image_set_class.def(init<Box>());
     constrained_image_set_class.def(self_ns::str(self));
 }
-
+*/
 
 void export_hybrid_box()
 {
@@ -358,6 +360,7 @@ void export_hybrid_taylor_set()
     implicitly_convertible<HybridBox,HybridTaylorSet>();
 }
 
+/*
 void export_hybrid_constrained_image_set()
 {
     class_<HybridConstrainedImageSet>
@@ -369,7 +372,7 @@ void export_hybrid_constrained_image_set()
     implicitly_convertible<HybridBox,HybridConstrainedImageSet>();
 }
 
-
+*/
 
 
 void geometry_submodule() {
@@ -381,11 +384,11 @@ void geometry_submodule() {
     export_taylor_set();
     export_curve();
 
-    export_constrained_image_set();
+    //export_constrained_image_set();
 
     export_hybrid_box();
     export_hybrid_taylor_set();
-    export_hybrid_constrained_image_set();
+    //export_hybrid_constrained_image_set();
 
     to_python< ListSet<TaylorSet> >();
     to_python< ListSet<HybridTaylorSet> >();

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_float.cc
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-11  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -233,8 +233,9 @@ TestFloat::test_stream()
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    stringstream ss("1.25 -2.25 42:2 375e1 2.35e1");
+    stringstream ss("1.25 -2.25 42 375e1 2.35e1");
     Float f1,f2,f3,f4,f5;
+
     ss >> f1;
     cout << f1 << endl;
     ARIADNE_TEST_ASSERT(f1==1.25);
@@ -243,29 +244,13 @@ TestFloat::test_stream()
     ARIADNE_TEST_ASSERT(f2==-2.25);
     ss >> f3;
     cout << f3 << endl;
-    ARIADNE_TEST_ASSERT(f3==42.0);
-    try {
-        ss >> f4;
-        cout << f4 << endl;
-        if(f4!=23.75) {
-            throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.375e1");
-        }
-    } 
-    catch(std::exception& e) {
-        cerr << e.what() << endl;;
-    }
-  
-    try {
-        ss >> f5;
-        cout << f5 << endl;
-        if(f4!=23.5) {
-            throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.35e1");
-        }
-    } 
-    catch(std::exception& e) {
-        cerr << e.what() << endl;
-    }
-  
+    ARIADNE_TEST_ASSERT(f3==42);
+    ss >> f4;
+    cout << f4 << endl;
+    ARIADNE_TEST_ASSERT(f4==3750);
+    ss >> f5;
+    cout << f5 << endl;
+    ARIADNE_TEST_ASSERT(f5==23.5);
 }
 
 

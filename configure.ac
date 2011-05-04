@@ -1,6 +1,6 @@
 # Declare versions
 AC_PREREQ(2.57)
-AC_INIT(ariadne, 0.4)
+AC_INIT(ariadne, 0.5.1)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADER([config.h])
@@ -27,6 +27,8 @@ if test "x$enable_debug" = "xyes"; then
 else
     AC_MSG_RESULT(no)
 fi
+
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for libraries.
 AC_LANG(C++)
@@ -96,8 +98,10 @@ AC_CHECK_LIB([boost_serialization-mt],[main],,[AC_MSG_ERROR([Boost serialization
 # Check for Boost Thread library (required)
 AC_CHECK_LIB([boost_thread-mt],[main],,[AC_MSG_ERROR([Boost thread library is missing. You must install the Boost C++ libraries.])])
 
+BOOST_PYTHON=$( echo boost_python-mt-py${PYTHON_VERSION} | awk '{ sub("\.","");print }' )
+
 # Check for Boost Python library (optional)
-AC_CHECK_LIB([boost_python-mt],[main],[BOOST_PYTHON_LIB="-lboost_python-mt " AC_DEFINE([HAVE_LIBBOOST_PYTHON],[1],[Define to 1 if you have the `boost_python` library.]) HAVE_LIBBOOST_PYTHON=true],AC_MSG_WARN([Boost Python library is missing. You cannot use the Python interface.]),[$PYTHON_LIB])
+AC_CHECK_LIB([${BOOST_PYTHON}],[main],[BOOST_PYTHON_LIB="-l${BOOST_PYTHON} " AC_DEFINE([HAVE_LIBBOOST_PYTHON],[1],[Define to 1 if you have the `boost_python` library.]) HAVE_LIBBOOST_PYTHON=true],AC_MSG_WARN([Boost Python library is missing. You cannot use the Python interface.]),[$PYTHON_LIB])
 
 AM_CONDITIONAL([WANT_PYTHON_INTERFACE], [test x$HAVE_BOOST_PYTHON_HPP = xtrue && test x$HAVE_LIBBOOST_PYTHON = xtrue])
 

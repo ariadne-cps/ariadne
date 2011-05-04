@@ -1,7 +1,7 @@
 /***************************************************************************
  *            polynomial.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-11  Pieter Collins, Alberto Casagrande
  *
  ****************************************************************************/
 
@@ -606,7 +606,10 @@ template<class X> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, cons
     return r;
 }
 
-
+template<class X> 
+inline Vector< Polynomial<X> > operator*(const Vector<Float> e, const Polynomial<X>& p) {
+  return p*e;
+}
 
 inline Polynomial<Interval> operator+(const Polynomial<Interval>& p, const Float& c) {
     return p+Interval(c); }

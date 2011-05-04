@@ -128,8 +128,6 @@ _evolution(EnclosureListType& final_sets,
            const TimeType& maximum_time,
            Semantics semantics) const
 {
-    verbosity=0;
-
     typedef VectorFunction FunctionType;
     typedef EnclosureType SetModelType;
 

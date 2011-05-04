@@ -1,7 +1,7 @@
 /***************************************************************************
  *            matrix.h
  *
- *  Copyright 2005-8  Alberto Casagrande, Pieter Collins
+ *  Copyright 2005-11  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -308,6 +308,27 @@ template<class X> Matrix<X> operator+(const Matrix<X>& A)
 {
     return A;
 }
+
+template<class X>
+inline
+Matrix<Interval> operator*(const Matrix<Interval>& m, const X& s)
+{
+  Matrix<Interval> result(m.row_size(),m.column_size());
+
+  for (size_t y=0; y<m.row_size(); y++)
+    for (size_t x=0; x<m.column_size(); x++)
+      result[y][x]=m[y][x]*s;
+
+  return result;
+}
+
+template<class X>
+inline
+Matrix<Interval> operator*(const X& s, const Matrix<Interval>& m)
+{
+  return m*s;
+}
+
 
 template<class X> X norm(const Matrix<X>& A)
 {

@@ -1,7 +1,8 @@
 /***************************************************************************
  *            settings.h
  *
- *  Copyright  2007-8  Davide Bresolin, Alberto Casagrande, Pieter Collins, Luca Geretti
+ *  Copyright  2007-11  Davide Bresolin, Alberto Casagrande, Pieter Collins, 
+ *                      Luca Geretti
  *
  ****************************************************************************/
 
@@ -232,6 +233,30 @@ class DiscreteEvolutionSettings {
 	bool enable_lower_pruning;
 
 };
+
+/** 
+ * Returns an appropriated grid for the system specified.
+ *
+ * This method returns a hybrid grid for the specified system. 
+ * If *settings.grid is not empty, the method returns it, 
+ * otherwise, it returns a hybrid grid for the state space 
+ * of the provided system.
+ *
+ * @param system 
+ *    the system for which we want a hybrid grid.
+ * @param settings 
+ *    the settings provided for the computation.
+ * @return 
+ *    an appropriate hybrid grid for the specified system. 
+ */
+inline
+HybridGrid grid_for(const HybridAutomaton& system, 
+                    const DiscreteEvolutionSettings& settings)
+{
+  return ((settings.grid)->empty()?
+            HybridGrid(system.state_space()):
+            *(settings.grid));
+}
 
 //! \brief Settings for controlling the accuracy of evolution methods and reachability analysis.
 class EvolutionSettings

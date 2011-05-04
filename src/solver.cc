@@ -449,7 +449,6 @@ SolverBase::implicit(const VectorFunction& f,
 
     List<VectorTaylorFunction> result;
 
-    const uint np=ip.size();
     const uint nx=ix.size();
     const double err=this->maximum_error();
 

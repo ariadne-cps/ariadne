@@ -222,6 +222,7 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
     analyser.settings().initial_grid_depth=12;
     analyser.settings().maximum_grid_depth=12;
 
+    //*(analyser.settings().grid)=HybridGrid(heating_system.state_space());
 
     // Define the initial set
     HybridImageSet initial_set;
@@ -231,7 +232,6 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
 
     // Set the maximum evolution time
     HybridTime reach_time(1.5,4);
-
 
     // Compute lower-approximation to finite-time evolved set using lower-semantics.
     std::cout << "Computing lower evolve set... " << std::flush;

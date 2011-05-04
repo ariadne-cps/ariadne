@@ -115,15 +115,12 @@ void TestPolynomial::test_iterator_concept()
     citer=p.begin(); citer=cp.end(); citer=cp.find(a);
 
     Polynomial<Float>::value_type val=*iter;
-    Polynomial<Float>::reference ref=*iter;
     //Polynomial<Float>::pointer ptr=iter.operator->();
-    Polynomial<Float>::const_reference ncref=*iter;
 
     // WARNING: Cannot convert non-constant pointer to constant pointer
     //Polynomial<Float>::const_pointer ncptr=iter.operator->();
 
     Polynomial<Float>::value_type cval=*citer;
-    Polynomial<Float>::const_reference cref=*citer;
     //Polynomial<Float>::const_pointer cptr=citer.operator->();
 
     ++iter; --iter;

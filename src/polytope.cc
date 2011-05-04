@@ -72,11 +72,6 @@ operator<<(std::ostream& os, const Polytope& p)
     return os << "Polytope( vertices=" << p.vertices() << " )";
 }
 
-
-
-
-
-
 Float 
 slope2d(const Point& pt1, const Point& pt2) 
 {
@@ -94,7 +89,6 @@ Polytope polytope(const Box& bx)
 
 Polytope polytope(const Zonotope& z) 
 {
-    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     Polytope res;
     size_t ng=z.generators().column_size();
     size_t nv=1<<ng;
@@ -109,6 +103,7 @@ Polytope polytope(const Zonotope& z)
         }
         res.new_vertex(pt);
     }
+
     if(res.dimension()==2) {
         return reduce2d(res);
     } else {

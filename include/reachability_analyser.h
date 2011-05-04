@@ -441,7 +441,7 @@ std::map<DiscreteState,Float> getHybridMaximumStepSize(
 		int maximum_grid_depth,
 		Semantics semantics);
 
-/*! \brief Set the lock to grid time of \system.
+      /*! \brief Set the lock to grid time of system.
 	\details The value is taken as the maximum over the times required by any variable on any location to cover a distance equal to
 	the domain width of the location, moving at the maximum absolute derivative.
 	ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
@@ -449,7 +449,7 @@ Float getLockToGridTime(
 		const SystemType& system,
 		const HybridBoxes& domain);
 
-/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed outer approximation
+/*! \brief Get the hybrid maximum absolute derivatives of system given a previously computed outer approximation
  *  \a outer_approx_constraint and a domain \a domain_constraint.
  * \details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
 HybridFloatVector getHybridMaximumAbsoluteDerivatives(

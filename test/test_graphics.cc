@@ -62,10 +62,12 @@ int main(int argc, char **argv)
     Matrix<Float> z1g(2,3,z1gdata);
     Zonotope z1(z1c,z1g);
     Polytope p1=polytope(z1);
+cerr << polytope(z1) << endl << flush;
     Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
     Matrix<Float> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
     TaylorSet ts1(afn1,Box::unit_box(3));
+cerr << p1 << endl;
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
@@ -85,6 +87,8 @@ int main(int argc, char **argv)
     //g.display();
     g.clear();
 
+cerr << p1 << endl;
+
     g.set_fill_colour(1.0,0.5,1.0);
     g.draw(bx1);
     g.draw(bx2);
@@ -92,7 +96,6 @@ int main(int argc, char **argv)
     g.draw(bx5);
     g.write("test_graphics-bx2");
     g.clear();
-
 
     Box bx2d(2); bx2d[0]=Interval(0.2,0.4); bx2d[1]=Interval(0.2,0.5);
     Box bx3d(3); bx3d[0]=Interval(0.2,0.4); bx3d[1]=Interval(0.2,0.5); bx3d[2]=Interval(0.2,0.7);
@@ -119,7 +122,8 @@ int main(int argc, char **argv)
 
     ARIADNE_TEST_WARN("Skipping output of polytope\n");
 /*
-    std::cerr<<"p1="<<p1<<"\n";
+    ARIADNE_TEST_PRINT(p1);
+    g.set_bounding_box(p1.bounding_box());
     g << fill_colour(0.0,0.5,0.5)
       << p1;
     g.write("test_graphics-pltp");

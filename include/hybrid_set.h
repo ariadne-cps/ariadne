@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_set.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-11  Pieter Collins, Alberto Casagrande
  *
  ****************************************************************************/
 
@@ -252,7 +252,15 @@ class HybridImageSet
         for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {
             if(!loc_iter->second.empty()) { result.insert(std::make_pair(loc_iter->first,loc_iter->second.bounding_box())); } }
         return result; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "HybridImageSet(...)"; }
+    virtual std::ostream& write(std::ostream& os) const { 
+        os << "HybridImageSet(";
+        for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {
+          if (loc_iter!=this->begin()) os << ", ";
+          os << loc_iter->first << ":" << loc_iter->second;
+        }
+        os << ")";
+        return os;
+    }
 };
 
 

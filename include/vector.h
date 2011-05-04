@@ -1,7 +1,7 @@
 /***************************************************************************
  *            vector.h
  *
- *  Copyright 2008  Alberto Casagrande, Pieter Collins
+ *  Copyright 2008-11  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -191,6 +191,31 @@ typedef ublas::range Range;
 inline Range range(uint start, uint stop) { return Range(start,stop); }
 inline Slice slice(uint size, uint start, uint stride) { return Slice(size,start,stride); }
 
+
+Vector<Interval> operator*(const Vector<Interval>& v, const Float& s);
+Vector<Interval> operator*(const Float& s, const Vector<Interval>& v);
+
+Vector<Interval> operator*(const Vector<Float>& v, const Interval& s);
+Vector<Interval> operator*(const Interval& s, const Vector<Float>& v);
+
+/*
+template<class X>
+Vector<X> operator*(const Vector<Float>& v, const X& s)
+{
+  Vector<X> result(v.size());
+
+  for (size_t i=0; i<result.size(); i++)
+    result[i]=v[i]*s;
+
+  return result;
+}
+
+template <class X>
+Vector<X> operator*(const X& s, const Vector<Float>& v)
+{
+  return v*s;
+}
+*/
 
 template<class X>
 Vector<X> operator+(const Vector<X>& v)

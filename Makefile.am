@@ -4,6 +4,8 @@ EXTRA_DIST = Doxyfile
 
 AM_CXXFLAGS = -Wall -fno-strict-aliasing
 
+ACLOCAL_AMFLAGS = -I m4
+
 .PHONY: shiny doc all lib wrap examples profiles check-lib check-python
 
 all: lib wrap tests examples profiles

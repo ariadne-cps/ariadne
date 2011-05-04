@@ -955,7 +955,6 @@ tribool TaylorConstrainedFlowSet::empty() const
 tribool TaylorConstrainedFlowSet::_empty(const Vector<Interval>& subdomain, uint depth) const 
 {
     typedef std::map<DiscreteEvent,TaylorModel>::const_iterator iterator;
-    double max_error=1.0/(1<<depth);
     const uint ds=this->_domain.size();
     for(iterator iter=this->_activations.begin(); iter!=this->_activations.end(); ++iter) {
         Interval constraint_range=iter->second.evaluate(subdomain);

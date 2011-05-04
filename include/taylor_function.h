@@ -1,7 +1,7 @@
 /***************************************************************************
  *            taylor_function.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-11  Pieter Collins, Alberto Casagrande
  *
  ****************************************************************************/
 
@@ -436,6 +436,25 @@ class ScalarTaylorFunction
     ScalarTaylorFunction& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
 };
 
+Vector<ScalarTaylorFunction> operator+(const ScalarTaylorFunction& stf, const Vector<Float>& v);
+Vector<ScalarTaylorFunction> operator-(const ScalarTaylorFunction& stf, const Vector<Float>& v);
+Vector<ScalarTaylorFunction> operator*(const ScalarTaylorFunction& stf, const Vector<Float>& v);
+Vector<ScalarTaylorFunction> operator/(const ScalarTaylorFunction& stf, const Vector<Float>& v);
+
+Vector<ScalarTaylorFunction> operator+(const Vector<Float>& v, const ScalarTaylorFunction& stf);
+Vector<ScalarTaylorFunction> operator-(const Vector<Float>& v, const ScalarTaylorFunction& stf);
+Vector<ScalarTaylorFunction> operator*(const Vector<Float>& v, const ScalarTaylorFunction& stf);
+Vector<ScalarTaylorFunction> operator/(const Vector<Float>& v, const ScalarTaylorFunction& stf);
+
+Vector<ScalarTaylorFunction> operator+(const ScalarTaylorFunction& stf, const Vector<Interval>& v);
+Vector<ScalarTaylorFunction> operator-(const ScalarTaylorFunction& stf, const Vector<Interval>& v);
+Vector<ScalarTaylorFunction> operator*(const ScalarTaylorFunction& stf, const Vector<Interval>& v);
+Vector<ScalarTaylorFunction> operator/(const ScalarTaylorFunction& stf, const Vector<Interval>& v);
+
+Vector<ScalarTaylorFunction> operator+(const Vector<Interval>& v, const ScalarTaylorFunction& stf);
+Vector<ScalarTaylorFunction> operator-(const Vector<Interval>& v, const ScalarTaylorFunction& stf);
+Vector<ScalarTaylorFunction> operator*(const Vector<Interval>& v, const ScalarTaylorFunction& stf);
+Vector<ScalarTaylorFunction> operator/(const Vector<Interval>& v, const ScalarTaylorFunction& stf);
 
 inline tribool operator>(const ScalarTaylorFunction& x, const Float& c) {
     Interval r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }

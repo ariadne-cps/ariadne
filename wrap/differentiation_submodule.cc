@@ -174,7 +174,7 @@ export_differential_vector(const char* name)
     differential_vector_class.def(self-self);
     differential_vector_class.def(self+V());
     differential_vector_class.def(self-V());
-    differential_vector_class.def(self*X());
+    //differential_vector_class.def(self*X());
     differential_vector_class.def(self+=V());
     differential_vector_class.def(self-=V());
     differential_vector_class.def(self*=X());

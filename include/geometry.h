@@ -103,7 +103,7 @@ disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
         return indeterminate;
     } else {
         uint i=irmax(d);
-        return disjoint(split(d,i,left),f,b,eps) || disjoint(split(d,i,left),f,b,eps);
+        return disjoint(split(d,i,left),f,b,eps) && disjoint(split(d,i,right),f,b,eps);
     }
 }
 

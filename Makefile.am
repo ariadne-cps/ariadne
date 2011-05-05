@@ -8,7 +8,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 .PHONY: shiny doc all lib wrap examples profiles check-lib check-python
 
-all: lib wrap tests examples profiles
+all: lib wrap tests examples profiles doc 
 
 # Show the values of the environment variables
 evn:
@@ -18,7 +18,7 @@ evn:
 shiny: maintainer-clean
 	-rm -rf *~ */*~
 	-rm -f *.log */*.log */*.eps
-	-rm -rf html latexb
+	-rm -rf docs 
 	-rm -rf */.deps */.libs
 	-rm -f aclocal.m4 config.* configure depcomp install-sh libtool ltmain.sh missing mkinstalldirs stamp-h* .tm_project.cache
 	-rm -rf autom4te.cache
@@ -26,9 +26,17 @@ shiny: maintainer-clean
 	-rm -f */Makefile
 	-rm -f Makefile
 
-doc:
+doc: docs/refman.pdf docs/html
+
+docs/refman.pdf: docs/latex
+	(cd docs/latex; make)
+	cp docs/latex/refman.pdf docs/refman.pdf 
+
+docs/latex:
 	doxygen
-	(cd latex; make)
+
+docs/html:
+	doxygen
 
 lib:
 	(cd src; make lib)
@@ -59,3 +67,16 @@ profile-lib: lib profiles
 
 install-lib: lib
 	(cd src; make install)
+
+install-doc: doc
+	install -d $(DESTDIR)/usr/share/doc/libariadne-doc/
+	cp -rp docs/refman.pdf $(DESTDIR)/usr/share/doc/libariadne-doc/ariadne-manual.pdf
+	cp -rp docs/html $(DESTDIR)/usr/share/doc/libariadne-doc/
+
+install-examples:
+	install -d $(DESTDIR)/usr/share/doc/libariadne-doc/
+	install -d $(DESTDIR)/usr/share/doc/libariadne-doc/examples
+	cp -rp examples/*.cc $(DESTDIR)/usr/share/doc/libariadne-doc/examples/
+	cp -rp examples/*.plt $(DESTDIR)/usr/share/doc/libariadne-doc/examples/
+
+install-am: install-doc 

@@ -363,6 +363,7 @@ list<HybridBasicSet<TaylorSet> > split_initial_set(
  *
  * @param system The system to get the accessible constants from.
  * @param targetRatioPerc The derivative widths ratio percentage to reach before termination.
+ * @param bounding_domain The bouding domain.
  *
  * @return A split factor for each non-singleton accessible constant of the \a system.
  */

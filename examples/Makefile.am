@@ -5,17 +5,20 @@ LIBS +=  $(BOOST_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 AM_LDFLAGS = $(EXEC_LDFLAGS)
 LDADD = ../src/libariadne.la $(LIBS)
 
-bin_PROGRAMS= tutorial \
-			  watertank-monolithic-hysteresis watertank-monolithic-proportional \
-			  watertank-nonlinear-monolithic-hysteresis watertank-nonlinear-monolithic-proportional \
-              watertank-compositional-hysteresis watertank-aasap watertank-time \
-              watertank-monolithic-dominance watertank-nonlinear-monolithic-dominance \
-			  pss-revised \
-              boost_power_converter \
-              bouncingball 3bouncingballs ecoli sinusoid-sin \
-              rectifier rectifier_oneloc springs cmos_inverter_analoginput \
-			  robotarm \
-			  coconut-demo coconut-final-demo vanderpool
+bin_PROGRAMS= 	tutorial \
+		watertank-monolithic-hysteresis \
+		watertank-monolithic-proportional \
+		watertank-nonlinear-monolithic-hysteresis \
+		watertank-nonlinear-monolithic-proportional \
+		watertank-compositional-hysteresis \
+		watertank-aasap watertank-time \
+		watertank-monolithic-dominance \
+		watertank-nonlinear-monolithic-dominance \
+		pss-revised boost_power_converter \
+		bouncingball 3bouncingballs ecoli sinusoid-sin \
+		rectifier rectifier_oneloc springs \
+		cmos_inverter_analoginput robotarm \
+		coconut-demo coconut-final-demo vanderpool
 
 tutorial_SOURCES= tutorial.cc verify.py
 boost_power_converter_SOURCES= boost_power_converter.cc

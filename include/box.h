@@ -66,7 +66,7 @@ class Box
         return Box(n,Interval(-1,1));
     }
 
-    //! The empty box \f$[+\infty,-\infty]^n\f% in \a n dimensions.
+    //! The empty box \f$[+\infty,-\infty]^n\f$ in \a n dimensions.
     static Box empty_box(uint n) {
     	Interval empty(0,0);
     	empty.make_empty();

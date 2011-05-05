@@ -149,11 +149,11 @@ class Polynomial
     //@{
     //! \name Modifying operations
 
-    //! \brief Append the term \f$c x^{a_1+a_2}\f$ to the list of terms.\f$
+    //! \brief Append the term \f$c x^{a_1+a_2}\f$ to the list of terms.
     void append(const MultiIndex& a1, const MultiIndex& a2, const X& c) { this->_expansion.append(a1,a2,c); }
-    //! \brief Append the term \f$c x^{a_1}\f$ to the list of terms.\f$
+    //! \brief Append the term \f$c x^{a_1}\f$ to the list of terms.
     void append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
-    //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.\f$
+    //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
     void insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
     //! \brief Reserve space for a total of \a n terms.
     void reserve(size_type n) { this->_expansion.reserve(n); }

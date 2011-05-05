@@ -1,5 +1,9 @@
 #! /bin/sh
 
+if [ ! -d m4 ]; then
+  mkdir m4 
+fi
+
 #echo "autoreconf -i -f"
 autoreconf -i -f
 

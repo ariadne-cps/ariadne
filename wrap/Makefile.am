@@ -1,36 +1,40 @@
 AM_CXXFLAGS = -Wall -fpic
-AM_LDFLAGS = -module
+AM_LDFLAGS = -avoid-version -module
 
 INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
 LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
 
-pythondir=${prefix}/lib/python$(PYTHON_VERSION)
-libdir=${pyexecdir}
+#pythondir=${prefix}/lib/python$(PYTHON_VERSION)
+#libdir=${pyexecdir}
 
-pythoninstalldir=${prefix}/lib/python$(PYTHON_VERSION)/dist-packages/ariadne
+#pythoninstalldir=${pythondir}/ariadne
 
-python_DATA = __init__.py
+pkgpyexecdir = $(pyexecdir)/ariadne
+pkgpyexec_PYTHON = __init__.py
+pkgpyexec_LTLIBRARIES =
+
 python_LIBS = ariadne.la interval.la differentiation.la
-python_MODULES = .libs/ariadne.so .libs/interval.so .libs/differentiation.so
+#python_MODULES = .libs/ariadne.so .libs/interval.so .libs/differentiation.so
 
-python_LTLIBRARIES =
+#pyexec_LTLIBRARIES =
 if WANT_PYTHON_INTERFACE
-  python_LTLIBRARIES += $(python_LIBS)
+  pkgpyexec_LTLIBRARIES += $(python_LIBS)
 endif
 
 wrap: python
 
 python: $(python_LTLIBRARIES)
 
-install-exec-local:
-	echo "Using the installer " $(INSTALL)
-	echo $(pyexecdir)
-	echo $(pythoninstalldir)
-	echo $(python_MODULES)
-	echo $(python_LIBS)
-	mkdir -p $(pythoninstalldir)
-	$(INSTALL) $(python_MODULES) $(pythoninstalldir)/
-	$(INSTALL) $(python_DATA) $(pythoninstalldir)/
+#install-exec-local:
+#	echo "Using the installer " $(INSTALL)
+#	echo $(pyexecdir)
+#	echo $(pythondir)
+#	echo $(pythoninstalldir)
+#	echo $(python_MODULES)
+#	echo $(python_LIBS)
+#	mkdir -p $(pythoninstalldir)
+#	$(INSTALL) $(python_MODULES) $(pythoninstalldir)/
+#	$(INSTALL) $(python_DATA) $(pythoninstalldir)/
 
 
 interval_la_SOURCES=$(INTERVAL_SRC)

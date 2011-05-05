@@ -62,12 +62,10 @@ int main(int argc, char **argv)
     Matrix<Float> z1g(2,3,z1gdata);
     Zonotope z1(z1c,z1g);
     Polytope p1=polytope(z1);
-cerr << polytope(z1) << endl << flush;
     Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
     Matrix<Float> ts1g=z1g;
     VectorAffineFunction afn1(ts1g,ts1c);
     TaylorSet ts1(afn1,Box::unit_box(3));
-cerr << p1 << endl;
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
@@ -86,8 +84,6 @@ cerr << p1 << endl;
     g.write("test_graphics-bx1");
     //g.display();
     g.clear();
-
-cerr << p1 << endl;
 
     g.set_fill_colour(1.0,0.5,1.0);
     g.draw(bx1);

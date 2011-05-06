@@ -40,6 +40,8 @@ Verifier::Verifier(
 			_dominating_coarse_outer_approximation(new OuterApproximationCache()),
 			_dominated_coarse_outer_approximation(new OuterApproximationCache())
 {
+	_outer_analyser->verb_tab_prefix = verb_tab_prefix + verifier_max_verbosity_level_used;
+	_lower_analyser->verb_tab_prefix = verb_tab_prefix + verifier_max_verbosity_level_used;
 }
 
 Verifier::Verifier(const HybridReachabilityAnalyser& analyser) :
@@ -50,6 +52,8 @@ Verifier::Verifier(const HybridReachabilityAnalyser& analyser) :
 			_dominating_coarse_outer_approximation(new OuterApproximationCache()),
 			_dominated_coarse_outer_approximation(new OuterApproximationCache())
 {
+	_outer_analyser->verb_tab_prefix = verb_tab_prefix + verifier_max_verbosity_level_used;
+	_lower_analyser->verb_tab_prefix = verb_tab_prefix + verifier_max_verbosity_level_used;
 }
 
 Verifier::~Verifier()
@@ -83,11 +87,24 @@ _safety_proving_once(
 	ARIADNE_LOG(4,"Performing outer reachability analysis...\n");
 
 	try {
+
 		// We quicken the outer reachability calculation only if we already have a constraint available,
 		// otherwise we would never obtain an outer approximation for tuning the grid and restricting the reachability.
 		bool terminate_as_soon_as_unprovable = _settings->allow_quick_safety_proving && !_safety_reachability_restriction.empty();
 
-		HybridGridTreeSet reach = _outer_analyser->outer_chain_reach(system,initial_set,terminate_as_soon_as_unprovable,safe_region,NOT_INSIDE_TARGET);
+		HybridGridTreeSet reach = _outer_analyser->outer_chain_reach(system,initial_set,DIRECTION_FORWARD,terminate_as_soon_as_unprovable,safe_region,NOT_INSIDE_TARGET);
+
+		result = definitely(reach.subset(safe_region));
+
+		ARIADNE_LOG(5, "The reachable set is " << (!result ? "not ":"") << "inside the safe region.\n");
+
+		// We refine only if we have no result from the initial reach set and the grid has already been set using a coarse
+		// outer approximation
+		if (!result && _safety_coarse_outer_approximation->is_set() && _settings->enable_fb_refinement_for_safety_proving) {
+			ARIADNE_LOG(5, "Performing forward-backward refinement...\n");
+			if (_outer_analyser->fb_refinement_check(system,initial_set,safe_region,reach))
+				result = true;
+		}
 
 		if (_safety_coarse_outer_approximation->is_set())
 			_safety_reachability_restriction = reach;
@@ -97,7 +114,6 @@ _safety_proving_once(
 		if (_settings->plot_results)
 			_plot_reach(reach,UPPER_SEMANTICS);
 
-		result = definitely(reach.subset(safe_region));
 	} catch (ReachOutOfDomainException ex) {
 		ARIADNE_LOG(5, "The outer reached region is partially out of the domain (" << ex.what() << ").\n");
 		result = false;
@@ -234,7 +250,8 @@ _safety_nosplitting(
 		SafetyVerificationInput& verInput,
 		const RealConstantSet& constants) const
 {
-	ARIADNE_LOG(2,"\nIterative verification...\n");
+	ARIADNE_LOG(2,"\n");
+	ARIADNE_LOG(2,"Iterative verification...\n");
 
 	HybridAutomaton& system = verInput.getSystem();
 
@@ -251,7 +268,7 @@ _safety_nosplitting(
     	_outer_analyser->settings().maximum_grid_depth = depth;
     	_lower_analyser->settings().maximum_grid_depth = depth;
 
-		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
+		ARIADNE_LOG(2, "Depth " << depth << "\n");
 
 		tribool result = _safety_once(system,verInput.getInitialSet(),verInput.getSafeRegion(),constants);
 
@@ -834,7 +851,7 @@ Verifier::_dominance(
     	_outer_analyser->settings().maximum_grid_depth = depth;
     	_lower_analyser->settings().maximum_grid_depth = depth;
 
-		ARIADNE_LOG(2, "DEPTH " << depth << "\n");
+		ARIADNE_LOG(2, "Depth " << depth << "\n");
 
 		if (_dominance_proving_once(dominating, dominated, constants)) {
 			ARIADNE_LOG(3, "Dominates.\n");
@@ -999,7 +1016,7 @@ _dominance_outer_bounds(
 	bool terminate_as_soon_as_unprovable = _settings->allow_quick_dominance_proving && !reachability_restriction.empty();
 
 	HybridGridTreeSet reach = _outer_analyser->outer_chain_reach(verInput.getSystem(),verInput.getInitialSet(),
-			terminate_as_soon_as_unprovable,lower_bounds_on_this_space,SUPERSET_OF_TARGET);
+			DIRECTION_FORWARD,terminate_as_soon_as_unprovable,lower_bounds_on_this_space,SUPERSET_OF_TARGET);
 
 	Box projected_bounds = Ariadne::project(reach.bounding_box(),verInput.getProjection());
 
@@ -1062,14 +1079,14 @@ Verifier::
 _tuneIterativeStepSettings(
 		const HybridAutomaton& system,
 		const HybridGridTreeSet& hgts_domain,
-		const HybridGridTreeSet& outer_approx_constraint,
+		const HybridGridTreeSet& reachability_restriction,
 		Semantics semantics) const
 {
 	HybridReachabilityAnalyser& analyser = (semantics == UPPER_SEMANTICS ? *_outer_analyser : *_lower_analyser);
 
 	// Passes through the correct outer approximation constraint to the analyser (used in practice for dominance,
 	// where the outer analyser must deal with either the dominating or dominated system)
-	analyser.settings().reachability_restriction = outer_approx_constraint;
+	analyser.settings().reachability_restriction = reachability_restriction;
 
 	ARIADNE_LOG(5, "Derivatives evaluation policy: " << (hgts_domain.empty() ? "Domain box" : "Outer approximation") << "\n");
 
@@ -1079,9 +1096,9 @@ _tuneIterativeStepSettings(
 			new HybridGrid(getHybridGrid(hmad,analyser.settings().domain_bounds)));
 	ARIADNE_LOG(5, "Grid lengths: " << analyser.settings().grid->lengths() << "\n");
 
-	ARIADNE_LOG(5, "Use restriction: " << pretty_print(analyser.use_reachability_restricting()) << "\n");
+	ARIADNE_LOG(5, "Use restriction: " << pretty_print(!reachability_restriction.empty()) << "\n");
 
-	analyser.tuneEvolverParameters(system,hmad,analyser.settings().maximum_grid_depth,semantics);
+	analyser.tuneEvolverSettings(system,hmad,analyser.settings().maximum_grid_depth,semantics);
 }
 
 void

@@ -41,7 +41,7 @@ typedef std::map<RealConstant,int,ConstantComparator<Real> > RealConstantIntMap;
 
 namespace Ariadne {
 
-enum EvolutionDirection { FORWARD, BACKWARD };
+enum EvolutionDirection { DIRECTION_FORWARD, DIRECTION_BACKWARD };
 
 //! \brief Settings for controlling the accuracy of continuous evolution methods.
 class ContinuousEvolutionSettings {
@@ -238,16 +238,16 @@ class DiscreteEvolutionSettings {
  * Returns an appropriated grid for the system specified.
  *
  * This method returns a hybrid grid for the specified system. 
- * If *settings.grid is not empty, the method returns it, 
+ * If \a *settings.grid is not empty, the method returns it, 
  * otherwise, it returns a hybrid grid for the state space 
  * of the provided system.
  *
  * @param system 
- *    the system for which we want a hybrid grid.
+ *    The system for which we want a hybrid grid.
  * @param settings 
- *    the settings provided for the computation.
+ *    The settings provided for the computation.
  * @return 
- *    an appropriate hybrid grid for the specified system. 
+ *    An appropriate hybrid grid for the specified system. 
  */
 inline
 HybridGrid grid_for(const HybridAutomaton& system, 
@@ -295,11 +295,16 @@ class VerificationSettings {
 	 * Choosing false has the benefit of exploring the whole parameter box, but the drawback of possibly be unable to successfully disprove at all
 	 * due to error radii. */
 	bool use_param_midpoints_for_disproving;
+
+        //! \brief Enable forward/backward refinement for safety proving.
+ 	//! \details The refinement itself is done only if an outer approximation is obtained as a
+ 	//! result of the first forward phase.
+ 	bool enable_fb_refinement_for_safety_proving;
 };
 
 inline
 ContinuousEvolutionSettings::ContinuousEvolutionSettings() 
-    : direction(FORWARD),
+    : direction(DIRECTION_FORWARD),
       spacial_order(1),
       temporal_order(4),
       minimum_step_size(0.0),
@@ -335,7 +340,8 @@ VerificationSettings::VerificationSettings() :
     	allow_quick_dominance_proving(true),
     	allow_quick_dominance_disproving(true),
     	use_param_midpoints_for_proving(false),
-    	use_param_midpoints_for_disproving(true)
+    	use_param_midpoints_for_disproving(true),
+	enable_fb_refinement_for_safety_proving(false)
 { }
 
 
@@ -433,6 +439,7 @@ operator<<(std::ostream& os, const VerificationSettings& p)
        << ",\n  allow_quick_dominance_disproving=" << p.allow_quick_dominance_disproving
        << ",\n  use_param_midpoints_for_proving=" << p.use_param_midpoints_for_proving
        << ",\n  use_param_midpoints_for_disproving=" << p.use_param_midpoints_for_disproving
+       << ",\n  enable_fb_refinement_for_safety_proving=" << p.enable_fb_refinement_for_safety_proving
        << "\n)\n";
     return os;
 }

@@ -18,7 +18,8 @@ bin_PROGRAMS= 	tutorial \
 		bouncingball 3bouncingballs ecoli sinusoid-sin \
 		rectifier rectifier_oneloc springs \
 		cmos_inverter_analoginput robotarm \
-		coconut-demo coconut-final-demo vanderpool
+		coconut-demo coconut-final-demo vanderpool \
+		fb_refinement
 
 tutorial_SOURCES= tutorial.cc verify.py
 boost_power_converter_SOURCES= boost_power_converter.cc
@@ -44,6 +45,7 @@ watertank_nonlinear_monolithic_hysteresis_SOURCES= watertank-nonlinear-monolithi
 watertank_monolithic_dominance_SOURCES = watertank-monolithic-dominance.cc
 watertank_nonlinear_monolithic_dominance_SOURCES = watertank-nonlinear-monolithic-dominance.cc
 vanderpool_SOURCES = vanderpool.cc
+fb_refinement_SOURCES = fb_refinement.cc
 
 examples: $(bin_PROGRAMS)
 

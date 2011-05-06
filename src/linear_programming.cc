@@ -32,8 +32,6 @@
 #include "macros.h"
 #include "logging.h"
 
-static const int verbosity=0;
-
 namespace Ariadne {
 
 struct SingularLinearProgram : std::runtime_error { 

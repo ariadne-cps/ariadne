@@ -34,6 +34,9 @@
 
 namespace Ariadne {
 
+// Keep this value in sync with the maximum verbosity level on the Verifier methods
+const unsigned verifier_max_verbosity_level_used = 4;
+
 class HybridReachabilityAnalyser;
 
 enum DominanceSystem { DOMINATING_SYSTEM, DOMINATED_SYSTEM };
@@ -390,7 +393,7 @@ class Verifier
 	void _tuneIterativeStepSettings(
 			const HybridAutomaton& system,
 			const HybridGridTreeSet& hgts_domain,
-			const HybridGridTreeSet& constraint_reach,
+			const HybridGridTreeSet& reachability_restriction,
 			Semantics semantics) const;
 
 	/*! \brief Checks whether a grid depth value is allowed for use in iterative verification, based on the \a semantics. */

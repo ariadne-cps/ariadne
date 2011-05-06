@@ -31,20 +31,24 @@
 #include <iostream>
 #include <fstream>
 
+static const int verbosity=0;
+static const unsigned verb_tab_prefix=0;
+
 //! Send a message to the global logging stream. 
 #define ARIADNE_LOG(level,msg)                                  \
     if(verbosity >= level) { \
 		std::string tabulation; \
-		for (uint ariadne_log=0;ariadne_log<level-1;++ariadne_log) \
-			tabulation += "\t"; \
+		for (uint ariadne_log=0;ariadne_log<level-1+verb_tab_prefix;++ariadne_log) \
+			tabulation += "  "; \
 		std::clog << tabulation + msg << std::flush; }
 
 namespace Ariadne {
   
 struct Loggable {
   public:
-    Loggable() : verbosity(0) { }
+    Loggable() : verbosity(0),verb_tab_prefix(0) { }
     mutable int verbosity;
+    mutable unsigned verb_tab_prefix;
 };
 
 // Global log output file
@@ -52,8 +56,6 @@ extern std::ofstream log_file_stream;
   
 //! \brief Redirect logging output to file \a filename.
 void redirect_log(const char* filename);
-
-extern int global_verbosity;
    
 
 } // namespace Ariadne

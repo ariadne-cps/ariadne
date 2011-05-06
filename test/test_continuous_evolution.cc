@@ -148,7 +148,7 @@ void TestContinuousEvolution::test_vdp() const
 
     VectorField vanderpol(vdp);
 
-    parameters.direction = FORWARD;
+    parameters.direction = DIRECTION_FORWARD;
 
     // Over-approximate the initial set by a grid cell
     EnclosureType initial_set(initial_box);

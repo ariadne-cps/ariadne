@@ -164,6 +164,7 @@ public:
     								 const HybridAutomaton& sys,
     								 const list<EnclosureType>& initial_enclosures,
     								 const HybridTime& time,
+    								 EvolutionDirection direction,
     								 const HybridGrid& grid,
     								 const int& accuracy,
     								 const uint& concurrency)
@@ -171,6 +172,7 @@ public:
 	  _sys(sys), 
 	  _initial_enclosures(initial_enclosures),
 	  _time(time),
+	  _direction(direction),
 	  _grid(grid),
 	  _accuracy(accuracy),
 	  _concurrency(concurrency),
@@ -187,6 +189,9 @@ public:
 
     std::pair<HGTS,HGTS> get_result() 
     {
+    	EvolutionDirection saved_direction = _discretiser->evolver()->settings().direction;
+    	_discretiser->evolver()->settings().direction = _direction;
+
     	if (_concurrency == 1) {
 			for (list<EnclosureType>::const_iterator encl_it = _initial_enclosures.begin(); encl_it != _initial_enclosures.end(); ++encl_it) {
 				HGTS partial_reach, partial_evolve;
@@ -199,6 +204,8 @@ public:
     		_wait_completion();
     	}
 
+    	_discretiser->evolver()->settings().direction = saved_direction;
+
 		// Get the result
 		return make_pair<HGTS,HGTS>(_reach,_evolve);
     }
@@ -210,6 +217,7 @@ private:
 	const HybridAutomaton& _sys;
 	const list<EnclosureType>& _initial_enclosures;
 	const HybridTime& _time;
+	const EvolutionDirection& _direction;
 	const HybridGrid& _grid;
 	const int& _accuracy;
 	const uint& _concurrency;

@@ -71,6 +71,9 @@ template<class ES> class HybridDiscretiser;
 
 enum OuterReachabilitySkippingPolicy { NOT_INSIDE_TARGET, SUPERSET_OF_TARGET };
 
+// Keep this value in sync with the maximum verbosity level on the Analyser methods
+const unsigned analyser_max_verbosity_level_used = 7;
+
 /*! \brief A class for performing reachability analysis on a hybrid system-
  */
 class HybridReachabilityAnalyser
@@ -121,52 +124,59 @@ class HybridReachabilityAnalyser
 
     //! \name Evaluation of systems on abstract sets
     /*! \brief Compute a lower-approximation to the set obtained by evolving \a system for \a time starting in \a initial_set. */
-    virtual SetApproximationType lower_evolve(const SystemType& system,
-                                              const HybridImageSet& initial_set, 
-                                              const TimeType& time) const;
+    virtual SetApproximationType lower_evolve(
+    		const SystemType& system,
+            const HybridImageSet& initial_set,
+            const TimeType& time) const;
   
     /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time (discrete part only). */
-    virtual SetApproximationType
-    lower_reach(const SystemType& system, 
-                const HybridImageSet& initial_set, 
-                const TimeType& time) const;
+    virtual SetApproximationType lower_reach(
+    		const SystemType& system,
+            const HybridImageSet& initial_set,
+            const TimeType& time) const;
   
     /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. */
-    virtual std::pair<SetApproximationType,SetApproximationType>
-    lower_reach_evolve(const SystemType& system, 
-                       const HybridImageSet& initial_set, 
-                       const TimeType& time) const;
+    virtual std::pair<SetApproximationType,SetApproximationType> lower_reach_evolve(
+    		const SystemType& system,
+            const HybridImageSet& initial_set,
+            const TimeType& time) const;
   
     /*! \brief Compute an approximation to the set obtained by iterating \a time times \a system starting in \a initial_set. */
-    virtual SetApproximationType upper_evolve(const SystemType& system,
-                                              const HybridImageSet& initial_set, 
-                                              const TimeType& time) const;
+    virtual SetApproximationType upper_evolve(
+    		const SystemType& system,
+            const HybridImageSet& initial_set,
+            const TimeType& time) const;
   
     /*! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a time times. */
-    virtual SetApproximationType upper_reach(const SystemType& system,
-                                             const HybridImageSet& initial_set, 
-                                             const TimeType& timeType) const;
+    virtual SetApproximationType upper_reach(
+    		const SystemType& system,
+            const HybridImageSet& initial_set,
+            const TimeType& timeType) const;
   
     /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. */
-    virtual std::pair<SetApproximationType,SetApproximationType>
-    upper_reach_evolve(const SystemType& system, 
-                       const HybridImageSet& initial_set, 
-                       const TimeType& time) const;
+    virtual std::pair<SetApproximationType,SetApproximationType> upper_reach_evolve(
+    		const SystemType& system,
+            const HybridImageSet& initial_set,
+            const TimeType& time) const;
   
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
-    virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const HybridImageSet& initial_set) const;
+    virtual SetApproximationType chain_reach(
+    		const SystemType& system,
+            const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
-    virtual SetApproximationType chain_reach(const SystemType& system,
-                                             const HybridImageSet& initial_set,
-                                             const HybridBoxes& bounding_domain) const;
+    virtual SetApproximationType chain_reach(
+    		const SystemType& system,
+            const HybridImageSet& initial_set,
+            const HybridBoxes& bounding_domain) const;
 
-    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
+    /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set with a given \a direction, using
      * upper semantics; the method performs discretisation before transitions, then checks activations on the discretised cells.
      * \return The reach set */
-    virtual SetApproximationType outer_chain_reach(SystemType& system,
-												   const HybridImageSet& initial_set) const;
+    virtual SetApproximationType outer_chain_reach(
+    		SystemType& system,
+			const HybridImageSet& initial_set,
+			EvolutionDirection direction) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * upper semantics.
@@ -174,18 +184,29 @@ class HybridReachabilityAnalyser
      * If \a skipIfOutOfTargetRegion is set, it checks online whether the reachable area is inside the \a target_region, skipping
      * further calculations in that case (useful for safety proving).
      * \return The reach set. */
-    virtual SetApproximationType outer_chain_reach(SystemType& system,
-												   const HybridImageSet& initial_set,
-												   bool check_target_bounds_for_skipping,
-												   const HybridBoxes& target_bounds,
-												   OuterReachabilitySkippingPolicy skippingPolicy) const;
+    virtual SetApproximationType outer_chain_reach(
+    		SystemType& system,
+			const HybridImageSet& initial_set,
+			EvolutionDirection direction,
+			bool check_target_bounds_for_skipping,
+			const HybridBoxes& target_bounds,
+			OuterReachabilitySkippingPolicy skippingPolicy) const;
+
+	/*! \brief Checks by means of forward/backward refinement if \a reachability of \a system (starting from
+	 * \a initial_set) is inside \a target_bounds */
+	bool fb_refinement_check(
+			SystemType& system,
+			const HybridImageSet& initial_set,
+			const HybridBoxes& target_bounds,
+			const HybridGridTreeSet& reachability);
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * lower semantics.
      * \details The resulting set is a subset of the outer-approximation of the whole evolution set.
      * \return The reach set and the falsification information (namely, only the reach bounds and the epsilon). */
-    virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(SystemType& system,
-																		   const HybridImageSet& initial_set) const;
+    virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(
+    		SystemType& system,
+			const HybridImageSet& initial_set) const;
 
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set, with
      * lower semantics, checking for inclusion into a \a safe_region.
@@ -194,29 +215,18 @@ class HybridReachabilityAnalyser
      * If \a enable_quick_safety_disproving is set, it checks online whether the reachable area is outside the \a safe_region, skipping
      * further calculations in that case (useful for safety disproving).
      * \return The reach set and the falsification information. */
-    virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(SystemType& system,
-																	   const HybridImageSet& initial_set,
-																	   const HybridBoxes& safe_region,
-																	   bool enable_quick_safety_disproving) const;
+    virtual std::pair<SetApproximationType,DisproveData> lower_chain_reach(
+    		SystemType& system,
+			const HybridImageSet& initial_set,
+			const HybridBoxes& safe_region,
+			bool enable_quick_safety_disproving) const;
   
-    /*! \brief Tunes the parameters of the internal evolver. */
-    void tuneEvolverParameters(
+    /*! \brief Tunes the settings of the internal evolver. */
+    void tuneEvolverSettings(
     		const SystemType& system,
     		const HybridFloatVector& hmad,
 			uint maximum_grid_depth,
 			Semantics semantics);
-
-	/*! \brief Tune the parameters for the next verification iteration, given a \a bounding_reach. */
-	void tuneIterativeStepParameters(
-			const SystemType& system,
-			const HybridGridTreeSet& bounding_reach,
-			Semantics semantics);
-
-	/*! \brief Whether to use a reachability restricting. */
-	bool use_reachability_restricting() const;
-
-	/*! \brief Whether to check the domain. */
-	bool use_domain_checking() const;
 
     //@}
 
@@ -244,25 +254,57 @@ class HybridReachabilityAnalyser
     /*! \brief Gets the calculus interface from the hybrid evolver. */
     const CalculusInterface<TaylorModel>& _getCalculusInterface() const;
 
+    /*! \brief Plots \a reach in \a plot_dirpath directory, where \a name_prefix as a prefix to the filename */
+    void _plot_reach(
+    		const HybridGridTreeSet& reach,
+    		string plot_dirpath,
+    		string name_prefix) const;
+
     // Helper functions for operators on lists of sets.
     GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
-    GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
-    std::pair<GTS,GTS> _upper_reach_evolve_continuous(const Sys& sys, const list<EnclosureType>& initial_enclosures, const T& time, const int accuracy) const;
-    SetApproximationType _outer_chain_reach_forward(const SystemType& system, const HybridImageSet& initial_set) const;
+    std::pair<GTS,GTS> _upper_reach_evolve_continuous(
+    		const Sys& sys,
+    		const list<EnclosureType>& initial_enclosures,
+    		const T& time,
+    		EvolutionDirection direction,
+    		int accuracy) const;
 
-    /*! \brief Verifies whether the \a enclosure_bounds box fails the domain check in respect to \a domain.
-     * \details Hides the fact that the check could not be performed at all in certain conditions.
-     */
-    bool _fails_domain_check(
-    		const Box& enclosure_bounds,
-    		const Box& domain) const;
+    SetApproximationType _outer_chain_reach(
+    		SystemType& system,
+    		const std::list<EnclosureType>& initial_enclosures,
+    		EvolutionDirection direction,
+    		const HybridGridTreeSet& reachability_restriction) const;
 
-    /*! \brief Pushes the enclosures from \a reachCells into \a result_enclosures.
+    SetApproximationType _outer_chain_reach(
+    		SystemType& system,
+			const std::list<EnclosureType>& initial_enclosures,
+    		EvolutionDirection direction,
+    		const HybridGridTreeSet& reachability_restriction,
+    		bool check_target_bounds_for_skipping,
+    		const HybridBoxes& target_bounds,
+    		OuterReachabilitySkippingPolicy skippingPolicy) const;
+
+    /*! \brief Performs outer chain reach calculation, where the constants of the \a system are assumed to be already splitted */
+    SetApproximationType _outer_chain_reach_splitted(
+    		const SystemType& system,
+    		const std::list<EnclosureType>& initial_enclosures,
+    		EvolutionDirection direction,
+    		const HybridGridTreeSet& restriction) const;
+
+    /*! \brief Pushes into \a result_enclosures the enclosures from \a reachCells.
      * \details Ignores enclosures that lie outside the domain.
      */
     void _outer_chain_reach_forward_pushTargetCells(
     		const HybridGridTreeSet& reachCells,
+    		const SystemType& system,
+    		std::list<EnclosureType>& result_enclosures,
+    		bool use_domain_checking) const;
+
+    /*! \brief Pushes into \a result_enclosures the source enclosures from \a sourceCellsOverapprox that reach \a reachCells. */
+    void _outer_chain_reach_backward_pushSourceCells(
+    		const HybridGridTreeSet& reachCells,
+    		HybridGridTreeSet sourceCellsOverapprox,
     		const SystemType& system,
     		std::list<EnclosureType>& result_enclosures) const;
 
@@ -271,30 +313,39 @@ class HybridReachabilityAnalyser
     		const Box& bx,
     		const std::map<DiscreteEvent,VectorFunction>& invariants) const;
 
+    /*! \brief Checks whether the transition \a trans for enclosure \a source under dynamic \a dynamic is feasible.
+     * \details By feasibility we mean that, under upper semantics, it would be taken by \a source.
+     */
+    bool _is_transition_feasible(
+    		const DiscreteTransition& trans,
+    		const VectorFunction& dynamic,
+    		const ContinuousEnclosureType& source) const;
+
     /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list, for all \a transitions.
      */
-    void _outer_chain_reach_pushTargetEnclosures(
+    void _outer_chain_reach_forward_pushTargetEnclosures(
     		const std::list<DiscreteTransition>& transitions,
 			const ContinuousEnclosureType& source,
 			const VectorFunction& dynamic,
 			const HybridGrid& grid,
-			std::list<EnclosureType>& result_enclosures) const;
+			std::list<EnclosureType>& result_enclosures,
+			bool use_domain_checking) const;
 
-    /*! \brief Pushes the enclosures from the \a source enclosure into the \a destination enclosure list for a specific transition \a trans.
-     * \details Splits the \a source until the enclosure is definitely active for \a trans or the minimum allowed target cell widths \a minTargetCellWidths has been reached.
-     */
-    void _outer_chain_reach_pushTargetEnclosuresOfTransition(
-    		const DiscreteTransition& trans,
-    		const VectorFunction& dynamic,
-    		const ContinuousEnclosureType& source,
-    		const Vector<Float>& minTargetCellWidths,
-    		std::list<EnclosureType>& result_enclosures) const;
+    void _outer_chain_reach_backward_pushSourceEnclosures(
+    		const std::list<DiscreteTransition>& transitions,
+    		const DiscreteState& sourceLocation,
+			const Box& sourceBox,
+			const HybridGridTreeSet& targetCells,
+			const VectorFunction& dynamic,
+			const HybridGrid& grid,
+			std::list<EnclosureType>& result_enclosures) const;
 
     /*! \brief Pushes the enclosures from the \a finalCells tree set into the \a result_enclosures list.
      */
     void _outer_chain_reach_pushLocalFinalCells(
     		const HybridGridTreeSet& finalCells,
-    		std::list<EnclosureType>& result_enclosures) const;
+    		std::list<EnclosureType>& result_enclosures,
+    		bool use_domain_checking) const;
 
     /*! \brief Performs the lower chain reachability of \a system.
      * \details If \a terminate_as_soon_as_infeasible is set, the \a feasibility_region is checked: if an enclosure definitely lies
@@ -312,7 +363,8 @@ class HybridReachabilityAnalyser
     		std::list<EnclosureType>& final_enclosures,
     		std::list<EnclosureType>& initial_enclosures,
     		const std::map<DiscreteState,uint>& adjoined_evolve_sizes,
-    		const std::map<DiscreteState,uint>& superposed_evolve_sizes) const;
+    		const std::map<DiscreteState,uint>& superposed_evolve_sizes,
+    		bool use_domain_checking) const;
 
     /*! \brief Gets the set of all the split intervals from the \a system with a given \a tolerance.
      *  \details The calculation is performed over the domain with a splitting limit controlled by the \a tolerance, excluding
@@ -333,6 +385,8 @@ HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosur
 	, free_cores(0)
 
 {
+	ImageSetHybridEvolver& internal_evolver = dynamic_cast<ImageSetHybridEvolver&>(*this->_discretiser->evolver());
+	internal_evolver.verb_tab_prefix = verb_tab_prefix + analyser_max_verbosity_level_used;
 }
 
 
@@ -345,6 +399,8 @@ HybridReachabilityAnalyser(
 	, _discretiser(new HybridDiscretiser<typename HybridEnclosureType::ContinuousStateSetType>(evolver))
 	, free_cores(0)
 {
+	ImageSetHybridEvolver& internal_evolver = dynamic_cast<ImageSetHybridEvolver&>(*this->_discretiser->evolver());
+	internal_evolver.verb_tab_prefix = verb_tab_prefix + analyser_max_verbosity_level_used;
 }
 
 
@@ -363,7 +419,6 @@ list<HybridBasicSet<TaylorSet> > split_initial_set(
  *
  * @param system The system to get the accessible constants from.
  * @param targetRatioPerc The derivative widths ratio percentage to reach before termination.
- * @param bounding_domain The bouding domain.
  *
  * @return A split factor for each non-singleton accessible constant of the \a system.
  */
@@ -420,7 +475,7 @@ void pushSplitTargetEnclosures(
 		const ContinuousEnclosureType& target_encl,
 	    const Vector<Float>& minTargetCellWidths,
 		const Box& target_domain_constraint,
-		bool use_constraining);
+		bool use_domain_checking);
 
 /*! \brief Get the hybrid grid given the maximum derivative \a hmad and the \a bounding_domain parameter, where the grid is chosen differently for each location.
  * \details The grid is chosen so that each cell is included into the domains for all locations. */
@@ -442,7 +497,7 @@ std::map<DiscreteState,Float> getHybridMaximumStepSize(
 		int maximum_grid_depth,
 		Semantics semantics);
 
-      /*! \brief Set the lock to grid time of system.
+/*! \brief Set the lock to grid time of \system.
 	\details The value is taken as the maximum over the times required by any variable on any location to cover a distance equal to
 	the domain width of the location, moving at the maximum absolute derivative.
 	ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
@@ -450,7 +505,7 @@ Float getLockToGridTime(
 		const SystemType& system,
 		const HybridBoxes& domain);
 
-/*! \brief Get the hybrid maximum absolute derivatives of system given a previously computed outer approximation
+/*! \brief Get the hybrid maximum absolute derivatives of \system given a previously computed outer approximation
  *  \a outer_approx_constraint and a domain \a domain_constraint.
  * \details ASSUMPTION: the continuous variables are preserved in order and quantity between discrete states. */
 HybridFloatVector getHybridMaximumAbsoluteDerivatives(

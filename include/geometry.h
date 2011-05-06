@@ -95,7 +95,8 @@ disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
 {
     Box fd=f.evaluate(d);
     Box fc=f.evaluate(Box(midpoint(d)));
-    if(disjoint(fd,b)) { 
+
+    if(disjoint(fd,b)) {
         return true;
     } else if(inside(fc,b)) {
         return false;
@@ -103,7 +104,7 @@ disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
         return indeterminate;
     } else {
         uint i=irmax(d);
-        return disjoint(split(d,i,left),f,b,eps) || disjoint(split(d,i,left),f,b,eps);
+        return disjoint(split(d,i,left),f,b,eps) && disjoint(split(d,i,right),f,b,eps);
     }
 }
 

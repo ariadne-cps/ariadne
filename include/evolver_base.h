@@ -92,7 +92,7 @@ VectorFunction
 get_directed_dynamic(const VectorFunction& dynamic, EvolutionDirection direction)
 {
 	const ScalarFunction minus_one = ScalarFunction::constant(dynamic.result_size(),-1);
-	return (direction == FORWARD ? dynamic : dynamic*minus_one);
+	return (direction == DIRECTION_FORWARD ? dynamic : dynamic*minus_one);
 }
   
 } // namespace Ariadne

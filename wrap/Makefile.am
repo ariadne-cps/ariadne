@@ -4,11 +4,6 @@ AM_LDFLAGS = -avoid-version -module
 INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
 LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
 
-#pythondir=${prefix}/lib/python$(PYTHON_VERSION)
-#libdir=${pyexecdir}
-
-#pythoninstalldir=${pythondir}/ariadne
-
 pkgpyexecdir = $(pyexecdir)/ariadne
 pkgpyexec_PYTHON = __init__.py
 pkgpyexec_LTLIBRARIES =

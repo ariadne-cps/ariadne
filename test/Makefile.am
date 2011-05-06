@@ -20,8 +20,6 @@ bin_PROGRAMS = \
 	profile_taylor_set \
 	profile_taylor_calculus
 
-#test_misc_LDADD = $(LDADD) -lboost_python -lpython2.5
-
 check_PROGRAMS = \
 	test_float \
 	test_interval \

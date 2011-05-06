@@ -52,12 +52,8 @@ AC_CHECK_SIZEOF([long int])
 AC_STDC_HEADERS
 
 
-
 # Check for standard fenv.h (optional)
 AC_CHECK_HEADER([fenv.h],[AC_DEFINE([HAVE_FENV_H],[1],[Define to 1 if you have the <fenv.h> header file.])],[AC_MSG_WARN([Standard C header file fenv.h is missing. Only assembly-language rounding is supported.])])
-
-# Check for Boost library (required)
-AC_CHECK_HEADER([boost/version.hpp],,[AC_MSG_ERROR([Boost library development files are missing. You must install them.])])
 
 # Check for GMP (optional)
 AC_CHECK_HEADER([gmpxx.h],[AC_DEFINE([HAVE_GMPXX_H],[1],[Define to 1 if you have the <gmpxx.h> header file.])],[AC_MSG_WARN([GNU Multiple Precision (GMP) library development files are missing. You cannot use Integer or Rational numbers.])])
@@ -65,43 +61,88 @@ AC_CHECK_HEADER([gmpxx.h],[AC_DEFINE([HAVE_GMPXX_H],[1],[Define to 1 if you have
 # Check for MPFR (optional)
 AC_CHECK_HEADER([mpfr.h],[AC_DEFINE([HAVE_MPFR_H],[1],[Define to 1 if you have the <mpfr.h> header file.])],[AC_MSG_WARN([MPFR library development files are missing. You cannot use multiple-precision floating-point numbers.])])
 
+## Taken from Cairo: Begin
+PKG_PROG_PKG_CONFIG()
+if test "x$PKG_CONFIG" = x; then
+	AC_MSG_ERROR([pkg-config >= $PKGCONFIG_REQUIRED required but not found (http://pkgconfig.freedesktop.org/)])
+fi
+
+dnl Check for recent pkg-config which supports Requires.private
+case `$PKG_CONFIG --version` in
+[0.?|0.?.?|0.1[0-7]|0.1[0-7].?]) PKGCONFIG_REQUIRES="Requires"; ;;
+*) PKGCONFIG_REQUIRES="Requires.private"; ;;
+esac
+
+AC_SUBST(PKGCONFIG_REQUIRES)
+## Taken from Cairo: End
+
+AC_SUBST(ARIADNE_REQUIRES)
+
 # Check for GTK (optional)
-PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.2, [AC_DEFINE([HAVE_GTK_H],[1],[Define to 1 if you have the <gtk.h> header file.])],[AC_MSG_WARN([GTK+-2.0 library development files are missing. You cannot use graphics windows.])])
+ARIADNE_REQUIRES_MODULE="gtk+-2.0 >= 2.2"
+PKG_CHECK_MODULES(GTK, 
+  [$ARIADNE_REQUIRES_MODULE], 
+  [AC_DEFINE([HAVE_GTK_H],[1],
+       [Define to 1 if you have the <gtk.h> header file.])
+    [ARIADNE_REQUIRES="$ARIADNE_REQUIRES $ARIADNE_REQUIRES_MODULE"]
+  ],
+  [AC_MSG_WARN([GTK+-2.0 library development files are missing. You cannot use graphics windows.])
+  ]
+)
 
 # Check for Cairo (optional)
-PKG_CHECK_MODULES(CAIRO, cairo, [AC_DEFINE([HAVE_CAIRO_H],[1],[Define to 1 if you have the <cairo.h> header file.])],[AC_MSG_WARN([Cairo library development files are missing. You cannot use graphics facilities.])])
+ARIADNE_REQUIRES_MODULE="cairo"
+PKG_CHECK_MODULES(CAIRO, 
+  [$ARIADNE_REQUIRES_MODULE], 
+  [AC_DEFINE([HAVE_CAIRO_H],[1],
+       [Define to 1 if you have the <cairo.h> header file.])
+    [ARIADNE_REQUIRES="$ARIADNE_REQUIRES $ARIADNE_REQUIRES_MODULE"]
+  ],
+  [AC_MSG_WARN([Cairo library development files are missing. You cannot use graphics facilities.])
+  ]
+)
+
+AC_SUBST(ARIADNE_NONPKGCONFIG_LIBS)
+
+
+# Check for GMP, GMPXX, and MPFR libraries (optional)
+for lib in gmp gmpxx mpfr; do
+  AC_CHECK_LIB([$lib],[main],[ARIADNE_NONPKGCONFIG_LIBS="$ARIADNE_NONPKGCONFIG_LIBS -l$lib"])
+done
+
+# Check for Boost library (required)
+AC_CHECK_HEADER([boost/version.hpp],,[AC_MSG_ERROR([Boost library development files are missing. You must install them.])])
+
+# Check for Boost Serialization library (required)
+lib=boost_serialization-mt
+AC_CHECK_LIB([$lib],[main],[ARIADNE_NONPKGCONFIG_LIBS="$ARIADNE_NONPKGCONFIG_LIBS -l$lib"],[AC_MSG_ERROR([Boost serialization library is missing. You must install the Boost C++ libraries.])])
+
+# Check for Boost Thread library (required)
+lib=boost_thread-mt
+AC_CHECK_LIB([$lib],[main],[ARIADNE_NONPKGCONFIG_LIBS="$ARIADNE_NONPKGCONFIG_LIBS -l$lib"],[AC_MSG_ERROR([Boost thread library is missing. You must install the Boost C++ libraries.])])
 
 # Find Python paths (optional)
 AM_PATH_PYTHON(2.5,, :)
 AC_MSG_NOTICE([PYTHON_VERSION=$PYTHON_VERSION])
-AM_CHECK_PYTHON_HEADERS([PYTHON_LIB=-lpython$PYTHON_VERSION ],[AC_MSG_WARN([could not find Python headers. You cannot compile the Python interface.])])
+AM_CHECK_PYTHON_HEADERS([PYTHON_LIB="-lpython$PYTHON_VERSION"], 
+         [AC_MSG_WARN([could not find Python headers. You cannot compile the Python binding.])])
 AC_SUBST(PYTHON_LIB)
 
 # Add Python include directory to include path since otherwise check for Boost Python fails
 CPPFLAGS+=" $PYTHON_INCLUDES "
 
 # Check for Boost python library (optional)
-AC_CHECK_HEADER([boost/python.hpp],[AC_DEFINE([HAVE_BOOST_PYTHON_HPP],[1],[Define to 1 if you have the <boost/python.hpp> header file.]) HAVE_BOOST_PYTHON_HPP=true],[AC_MSG_WARN([Boost Python library development files are missing. You cannot compile the Python interface.])])
-
-
-# Check for GMP library (optional)
-AC_CHECK_LIB([gmp],[main])
-
-# Check for GMPXX library (optional)
-AC_CHECK_LIB([gmpxx],[main])
-
-# Check for MPFR library (optional)
-AC_CHECK_LIB([mpfr],[main])
-
-# Check for Boost Serialization library (required)
-AC_CHECK_LIB([boost_serialization-mt],[main],,[AC_MSG_ERROR([Boost serialization library is missing. You must install the Boost C++ libraries.])])
-# Check for Boost Thread library (required)
-AC_CHECK_LIB([boost_thread-mt],[main],,[AC_MSG_ERROR([Boost thread library is missing. You must install the Boost C++ libraries.])])
+AC_CHECK_HEADER([boost/python.hpp],[AC_DEFINE([HAVE_BOOST_PYTHON_HPP],[1],[Define to 1 if you have the <boost/python.hpp> header file.]) HAVE_BOOST_PYTHON_HPP=true],[AC_MSG_WARN([Boost Python library development files are missing. You cannot compile the Python binding.])])
 
 BOOST_PYTHON=$( echo boost_python-mt-py${PYTHON_VERSION} | awk '{ sub("\.","");print }' )
 
 # Check for Boost Python library (optional)
-AC_CHECK_LIB([${BOOST_PYTHON}],[main],[BOOST_PYTHON_LIB="-l${BOOST_PYTHON} " AC_DEFINE([HAVE_LIBBOOST_PYTHON],[1],[Define to 1 if you have the `boost_python` library.]) HAVE_LIBBOOST_PYTHON=true],AC_MSG_WARN([Boost Python library is missing. You cannot use the Python interface.]),[$PYTHON_LIB])
+AC_CHECK_LIB([${BOOST_PYTHON}],[main],[
+     [BOOST_PYTHON_LIB="-l${BOOST_PYTHON}"] 
+     AC_DEFINE([HAVE_LIBBOOST_PYTHON],[1],
+       [Define to 1 if you have the `boost_python` library.])
+     [HAVE_LIBBOOST_PYTHON=true]],
+   AC_MSG_WARN([Boost Python library is missing. You cannot compile the Python binding.]),[$PYTHON_LIB])
 
 AM_CONDITIONAL([WANT_PYTHON_INTERFACE], [test x$HAVE_BOOST_PYTHON_HPP = xtrue && test x$HAVE_LIBBOOST_PYTHON = xtrue])
 
@@ -118,7 +159,8 @@ fi
 # Check whether to use multiple-precision floating-point (default no)
 AC_MSG_CHECKING(whether to use multiple-precision floating-point numbers)
 AC_ARG_ENABLE(mp,[AS_HELP_STRING([--enable-mp],[enable compilation of FloatMP types (default is disabled)])],
-              [AC_DEFINE([ENABLE_MULTIPLE_PRECISION],[1],[Define to 1 if you want to use multiple-precision floating-point numbers.])],
+              [AC_DEFINE([ENABLE_MULTIPLE_PRECISION],[1],[Define to 1 if you want to use multiple-precision floating-point numbers.]),
+              [ARIADNE_NONPKGCONFIG_LIBS="$ARIADNE_NONPKGCONFIG_LIBS -lmp"]],
               [AC_MSG_RESULT([no])],[AC_MSG_RESULT([yes])])
 
 # this macro is used to get the arguments supplied
@@ -137,7 +179,7 @@ else
     AC_MSG_RESULT(no)
 fi
 
-AC_MSG_NOTICE([LIBS=$LIBS])
+AC_MSG_NOTICE([LIBS="$LIBS $ARIADNE_NONPKGCONFIG_LIBS"])
 AC_MSG_NOTICE([GTK_LIBS=$GTK_LIBS])
 AC_MSG_NOTICE([CAIRO_LIBS=$CAIRO_LIBS])
 AC_MSG_NOTICE([PYTHON_LIB=$PYTHON_LIB])
@@ -151,7 +193,7 @@ AC_SUBST(BOOST_PYTHON_LIB)
 AC_SUBST(EXEC_LDFLAGS)
 
 # Declare which Makefiles need to be built
-AC_CONFIG_FILES([Makefile include/Makefile src/Makefile wrap/Makefile python/Makefile test/Makefile examples/Makefile cifparser/Makefile])
+AC_CONFIG_FILES([Makefile include/Makefile src/Makefile wrap/Makefile python/Makefile test/Makefile examples/Makefile cifparser/Makefile src/ariadne.pc])
 
 # Output results of autoconf tests
 AC_OUTPUT

@@ -26,18 +26,16 @@ shiny: maintainer-clean
 	-rm -f */Makefile
 	-rm -f Makefile
 
-doc: docs/refman.pdf docs/html
+doc: docs docs/refman.pdf docs/html
 
-docs/refman.pdf: docs/latex
+docs: 
+	doxygen
+
+docs/html: docs
+
+docs/refman.pdf: docs
 	(cd docs/latex; make)
 	cp docs/latex/refman.pdf docs/refman.pdf 
-
-docs/latex:
-	doxygen
-
-docs/html:
-	doxygen
-
 lib:
 	(cd src; make lib)
 
@@ -73,10 +71,18 @@ install-doc: doc
 	cp -rp docs/refman.pdf $(DESTDIR)/usr/share/doc/libariadne-doc/ariadne-manual.pdf
 	cp -rp docs/html $(DESTDIR)/usr/share/doc/libariadne-doc/
 
-install-examples:
-	install -d $(DESTDIR)/usr/share/doc/libariadne-doc/
-	install -d $(DESTDIR)/usr/share/doc/libariadne-doc/examples
-	cp -rp examples/*.cc $(DESTDIR)/usr/share/doc/libariadne-doc/examples/
-	cp -rp examples/*.plt $(DESTDIR)/usr/share/doc/libariadne-doc/examples/
+install-examples: install-cxx-examples install-python-examples
+
+install-cxx-examples:
+	install -d $(DESTDIR)/usr/share/doc/libariadne-doc/examples/cxx
+	cp -rp examples/*.h $(DESTDIR)/usr/share/doc/libariadne-doc/cxx/examples/
+	cp -rp examples/*.cc $(DESTDIR)/usr/share/doc/libariadne-doc/cxx/examples/
+	cp -rp examples/*.plt $(DESTDIR)/usr/share/doc/libariadne-doc/cxx/examples/
+
+install-python-examples:
+	install -d $(DESTDIR)/usr/share/doc/libariadne-doc/examples/python
+	cp -rp python/*.py $(DESTDIR)/usr/share/doc/libariadne-doc/python/examples/
+
 
 install-am: install-doc 
+

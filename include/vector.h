@@ -39,6 +39,9 @@
 #include "numeric.h"
 #include "array.h"
 
+#include <boost/type_traits/is_convertible.hpp>
+#include <boost/utility/enable_if.hpp>
+
 namespace Ariadne {
 
 template<class V> struct VectorExpression {
@@ -89,14 +92,17 @@ class Vector
     //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
     explicit Vector(const std::string& str)
         : _ary() { std::stringstream ss(str); ss >> *this; }
+     //! \brief Copy constructor.
+    Vector(const Vector<X>& v)
+        : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }
     //! \brief Copy assignment.
     Vector<X>& operator=(const Vector<X>& v) {
         if(this!=&v) { this->_ary = v._ary; } return *this; }
-    //! \brief Copy constructor allows conversion from a vector using another numerical type.
+#ifdef DOXYGEN
+     //! \brief Copy constructor allows conversion from a vector using another numerical type.
     template<class XX> Vector(const Vector<XX>& v)
         : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }
-#ifdef DOXYGEN
-    //! \brief Copy assignement allows conversion from a vector using another numerical type.
+   //! \brief Copy assignement allows conversion from a vector using another numerical type.
     template<class XX> Vector<X>& operator=(const Vector<XX> &v);
 #endif
     template<class E> Vector(const VectorExpression<E>& ve) : _ary(ve().size()) {

@@ -2899,33 +2899,6 @@ Float norm(const Vector<IntervalTaylorModel>& h) {
     return norm(norms(h));
 }
 
-Vector<IntervalTaylorModel> operator*(const Matrix<Interval>& A, const Vector<IntervalTaylorModel>& x)
-{
-    ARIADNE_ASSERT(A.column_size()==x.size());
-    if(x.size()==0) { return Vector<IntervalTaylorModel>(A.row_size()); }
-    Vector<IntervalTaylorModel> r(A.row_size(),x[0]*0);
-    for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint j=0; j!=A.column_size(); ++j) {
-            r[i]+=A[i][j]*x[j];
-        }
-    }
-    return r;
-}
-    
-Vector<IntervalTaylorModel> operator*(const Matrix<Float>& A, const Vector<IntervalTaylorModel>& x)
-{
-    ARIADNE_ASSERT(A.column_size()==x.size());
-    if(x.size()==0) { return Vector<IntervalTaylorModel>(A.row_size()); }
-    Vector<IntervalTaylorModel> r(A.row_size(),x[0]*0);
-    for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint j=0; j!=A.column_size(); ++j) {
-            r[i]+=A[i][j]*x[j];
-        }
-    }
-    return r;
-}
-    
-
 ///////////////////////////////////////////////////////////////////////////////
 
 // Jacobian matrices
@@ -3414,19 +3387,7 @@ Float FloatTaylorModel::tolerance() const {
     return dynamic_cast<const ThresholdSweeper&>(static_cast<const SweeperInterface&>(this->_sweeper)).sweep_threshold();
 }
 
-Vector<FloatTaylorModel> operator*(const Matrix<Float>& A, const Vector<FloatTaylorModel>& x)
-{
-    ARIADNE_ASSERT(A.column_size()==x.size());
-    if(x.size()==0) { return Vector<FloatTaylorModel>(A.row_size()); }
-    Vector<FloatTaylorModel> r(A.row_size(),x[0]*0);
-    for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint j=0; j!=A.column_size(); ++j) {
-            r[i]+=A[i][j]*x[j];
-        }
-    }
-    return r;
-}
-    
+
 std::ostream& FloatTaylorModel::write(std::ostream& os) const {
     return os << "TM["<<this->argument_size()<<"](" << this->_expansion << ")";
 }

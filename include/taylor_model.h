@@ -469,8 +469,6 @@ TaylorModel<Interval> unchecked_compose(const TaylorModel<Interval>& x, const Ve
 Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector< TaylorModel<Interval> >& y);
 Vector< TaylorModel<Interval> > unchecked_compose(const Vector< TaylorModel<Interval> >& x, const Vector<Interval>& d, const Vector< TaylorModel<Interval> >& y);
 
-Vector< TaylorModel<Interval> > operator*(const Matrix<Float>& A, const Vector< TaylorModel<Interval> >& x);
-Vector< TaylorModel<Interval> > operator*(const Matrix<Interval>& A, const Vector< TaylorModel<Interval> >& x);
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
@@ -629,8 +627,6 @@ inline std::ostream& operator<<(std::ostream& os, const TaylorModel<Float>& x) {
 
 inline Vector<Interval> codomain(const Vector< TaylorModel<Float> >& t) {
     Vector<Interval> r(t.size()); for(uint i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
-
-Vector< TaylorModel<Float> > operator*(const Matrix<Float>& A, const Vector< TaylorModel<Float> >& x);
 
 
 

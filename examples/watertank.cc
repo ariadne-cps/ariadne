@@ -158,9 +158,10 @@ int main(int argc, const char* argv[])
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
-/*
+
     std::cout << "Discretising orbit" << std::flush;
-    HybridGridTreeSet hgts(watertank_system.grid());
+    HybridGrid grid(watertank_system.state_space());
+    HybridGridTreeSet hgts(grid);
     for (ListSet<EnclosureType>::const_iterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
     {
         std::cout<<"."<<std::flush;
@@ -169,7 +170,7 @@ int main(int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
     plot("watertank-reach",bounding_box, Colour(0.0,0.5,1.0), hgts);
-*/
+
 
 /*
     std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
